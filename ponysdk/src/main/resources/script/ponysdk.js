@@ -136,9 +136,9 @@ function notifyConnectionLostListeners() {
 var textDecoder = null;
 if ('TextDecoder' in window) textDecoder = new TextDecoder('utf-8');
 
-function decode(buffer) {
-    if(textDecoder != null) return textDecoder.decode(buffer);
-    else return UTF8.getStringFromBytes(new Uint8Array(buffer));
+function decode(arrayBufferView) {
+    if(textDecoder != null) return textDecoder.decode(arrayBufferView);
+    else return UTF8.getStringFromBytes(arrayBufferView);
 }
 if (typeof module !== 'undefined' && module.hasOwnProperty('exports')) module.exports.decode = decode;
 else window['decode'] = decode;

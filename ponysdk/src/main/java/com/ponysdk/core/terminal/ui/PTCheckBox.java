@@ -51,8 +51,9 @@ public class PTCheckBox extends PTButtonBase<CheckBox> {
         if (ServerToClientModel.VALUE_CHECKBOX.equals(binaryModel.getModel())) {
             uiObject.setValue(binaryModel.getBooleanValue());
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
 
     protected void addValueChangeHandler(final UIBuilder uiService) {

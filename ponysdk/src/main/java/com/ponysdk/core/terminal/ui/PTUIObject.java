@@ -57,72 +57,61 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
         if (ServerToClientModel.WIDGET_WIDTH.equals(binaryModel.getModel())) {
             uiObject.setWidth(binaryModel.getStringValue());
             return true;
-        }
-        if (ServerToClientModel.WIDGET_HEIGHT.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.WIDGET_HEIGHT.equals(binaryModel.getModel())) {
             uiObject.setHeight(binaryModel.getStringValue());
             return true;
-        }
-        if (ServerToClientModel.PUT_PROPERTY_KEY.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.PUT_PROPERTY_KEY.equals(binaryModel.getModel())) {
+            final String value = binaryModel.getStringValue();
             // ServerToClientModel.PROPERTY_VALUE
-            uiObject.getElement().setPropertyString(binaryModel.getStringValue(), buffer.readBinaryModel().getStringValue());
+            uiObject.getElement().setPropertyString(value, buffer.readBinaryModel().getStringValue());
             return true;
-        }
-        if (ServerToClientModel.PUT_ATTRIBUTE_KEY.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.PUT_ATTRIBUTE_KEY.equals(binaryModel.getModel())) {
+            final String value = binaryModel.getStringValue();
             // ServerToClientModel.ATTRIBUTE_VALUE
-            uiObject.getElement().setAttribute(binaryModel.getStringValue(), buffer.readBinaryModel().getStringValue());
+            uiObject.getElement().setAttribute(value, buffer.readBinaryModel().getStringValue());
             return true;
-        }
-        if (ServerToClientModel.REMOVE_ATTRIBUTE_KEY.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.REMOVE_ATTRIBUTE_KEY.equals(binaryModel.getModel())) {
             uiObject.getElement().removeAttribute(binaryModel.getStringValue());
             return true;
-        }
-        if (ServerToClientModel.STYLE_NAME.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.STYLE_NAME.equals(binaryModel.getModel())) {
             uiObject.setStyleName(binaryModel.getStringValue());
             return true;
-        }
-        if (ServerToClientModel.STYLE_PRIMARY_NAME.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.STYLE_PRIMARY_NAME.equals(binaryModel.getModel())) {
             uiObject.setStylePrimaryName(binaryModel.getStringValue());
             return true;
-        }
-        if (ServerToClientModel.ADD_STYLE_NAME.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.ADD_STYLE_NAME.equals(binaryModel.getModel())) {
             uiObject.addStyleName(binaryModel.getStringValue());
             return true;
-        }
-        if (ServerToClientModel.REMOVE_STYLE_NAME.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.REMOVE_STYLE_NAME.equals(binaryModel.getModel())) {
             uiObject.removeStyleName(binaryModel.getStringValue());
             return true;
-        }
-        if (ServerToClientModel.WIDGET_VISIBLE.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.WIDGET_VISIBLE.equals(binaryModel.getModel())) {
             uiObject.setVisible(binaryModel.getBooleanValue());
             return true;
-        }
-        if (ServerToClientModel.ENSURE_DEBUG_ID.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.ENSURE_DEBUG_ID.equals(binaryModel.getModel())) {
             uiObject.ensureDebugId(binaryModel.getStringValue());
             return true;
-        }
-        if (ServerToClientModel.WIDGET_TITLE.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.WIDGET_TITLE.equals(binaryModel.getModel())) {
             uiObject.setTitle(binaryModel.getStringValue());
             return true;
-        }
-        if (ServerToClientModel.PUT_STYLE_KEY.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.PUT_STYLE_KEY.equals(binaryModel.getModel())) {
+            final String value = binaryModel.getStringValue();
             // ServerToClientModel.STYLE_VALUE
-            uiObject.getElement().getStyle().setProperty(binaryModel.getStringValue(), buffer.readBinaryModel().getStringValue());
+            uiObject.getElement().getStyle().setProperty(value, buffer.readBinaryModel().getStringValue());
             return true;
-        }
-        if (ServerToClientModel.REMOVE_STYLE_KEY.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.REMOVE_STYLE_KEY.equals(binaryModel.getModel())) {
             uiObject.getElement().getStyle().clearProperty(binaryModel.getStringValue());
             return true;
-        }
-        if (ServerToClientModel.BIND.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.BIND.equals(binaryModel.getModel())) {
             nativeObject = bind(binaryModel.getStringValue(), objectID, uiObject.getElement());
             return true;
-        }
-        if (ServerToClientModel.NATIVE.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.NATIVE.equals(binaryModel.getModel())) {
             final JSONObject object = JSONParser.parseStrict(binaryModel.getStringValue()).isObject();
             sendToNative(objectID, nativeObject, object.getJavaScriptObject());
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
 
     public UIObject asWidget(final int objectID, final UIBuilder uiService) {

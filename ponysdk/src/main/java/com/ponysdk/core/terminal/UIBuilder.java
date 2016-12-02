@@ -146,7 +146,8 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
                 if (codeException.getStatusCode() == 0) return;
             }
             log.log(Level.SEVERE, "Cannot initialize the application : " + exception.getMessage() + "\n" + exception
-                    + "\nPlease reload your application", exception);
+                    + "\nPlease reload your application",
+                exception);
         }
 
         if (exception instanceof StatusCodeException) {
@@ -161,7 +162,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
                 communicationErrorHandler.onCommunicationError(500, exception.getMessage());
             } else {
                 log.log(Level.SEVERE, "An unexcepted error occured: " + exception.getMessage() + ". Please check the server logs.",
-                        exception);
+                    exception);
             }
         }
     }
@@ -201,7 +202,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
 
                     final int endPosition = buffer.getIndex();
 
-                    window.postMessage(new ReaderBuffer(buffer.getMessage().slice(startPosition, endPosition)));
+                    window.postMessage(buffer.slice(startPosition, endPosition));
                 } else {
                     log.log(Level.SEVERE, "The requested window " + requestedWindowId + " doesn't exist or not ready");
 
@@ -248,7 +249,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
 
     private void update(final ReaderBuffer buffer) {
         final BinaryModel binaryModel = buffer.readBinaryModel();
-        if (BinaryModel.NULL.equals(binaryModel)) return;
+        if (binaryModel.getModel() == null) return;
 
         if (ServerToClientModel.TYPE_CREATE.equals(binaryModel.getModel())) {
             final PTObject ptObject = processCreate(buffer, binaryModel.getIntValue());
@@ -312,7 +313,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
             boolean result = false;
             do {
                 binaryModel = buffer.readBinaryModel();
-                if (!BinaryModel.NULL.equals(binaryModel)) {
+                if (binaryModel.getModel() != null) {
                     if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Update : " + binaryModel + " on " + ptObject);
                     result = ptObject.update(buffer, binaryModel);
                 }
@@ -453,7 +454,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
 
         if (caught.getStatusCode() == ServerException.INVALID_SESSION) {
             content.add(new HTML(
-                    "Server connection failed <br/>Code : " + caught.getStatusCode() + "<br/>" + "Cause : " + caught.getMessage()));
+                "Server connection failed <br/>Code : " + caught.getStatusCode() + "<br/>" + "Cause : " + caught.getMessage()));
 
             final Anchor reloadAnchor = new Anchor("reload");
             reloadAnchor.addClickHandler(new ClickHandler() {
@@ -470,7 +471,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
             actionPanel.setCellVerticalAlignment(reloadAnchor, HasVerticalAlignment.ALIGN_MIDDLE);
         } else {
             content.add(new HTML(
-                    "An unexpected error occured <br/>Code : " + caught.getStatusCode() + "<br/>" + "Cause : " + caught.getMessage()));
+                "An unexpected error occured <br/>Code : " + caught.getStatusCode() + "<br/>" + "Cause : " + caught.getMessage()));
         }
 
         final Anchor closeAnchor = new Anchor("close");
@@ -493,7 +494,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
             @Override
             public void setPosition(final int offsetWidth, final int offsetHeight) {
                 communicationErrorMessagePanel.setPopupPosition((Window.getClientWidth() - offsetWidth) / 2,
-                        (Window.getClientHeight() - offsetHeight) / 2);
+                    (Window.getClientHeight() - offsetHeight) / 2);
             }
         });
     }

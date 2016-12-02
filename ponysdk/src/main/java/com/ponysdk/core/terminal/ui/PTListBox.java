@@ -82,8 +82,7 @@ public class PTListBox extends PTFocusWidget<ListBox> {
         if (ServerToClientModel.CLEAR.equals(binaryModel.getModel())) {
             uiObject.clear();
             return true;
-        }
-        if (ServerToClientModel.ITEM_INSERTED.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.ITEM_INSERTED.equals(binaryModel.getModel())) {
             final String item = binaryModel.getStringValue() != null ? binaryModel.getStringValue() : "";
             final BinaryModel indexModel = buffer.readBinaryModel();
             if (ServerToClientModel.INDEX.equals(indexModel.getModel())) {
@@ -93,8 +92,7 @@ public class PTListBox extends PTFocusWidget<ListBox> {
                 uiObject.addItem(item);
             }
             return true;
-        }
-        if (ServerToClientModel.ITEM_ADD.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.ITEM_ADD.equals(binaryModel.getModel())) {
             final String items = binaryModel.getStringValue();
             // ServerToClientModel.ITEM_GROUP
             final String groupName = buffer.readBinaryModel().getStringValue();
@@ -112,37 +110,30 @@ public class PTListBox extends PTFocusWidget<ListBox> {
             }
             select.appendChild(groupElement);
             return true;
-        }
-        if (ServerToClientModel.ITEM_UPDATED.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.ITEM_UPDATED.equals(binaryModel.getModel())) {
             final String item = binaryModel.getStringValue() != null ? binaryModel.getStringValue() : "";
             // ServerToClientModel.INDEX
             final int index = buffer.readBinaryModel().getIntValue();
             uiObject.setItemText(index, item);
             return true;
-        }
-        if (ServerToClientModel.ITEM_REMOVED.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.ITEM_REMOVED.equals(binaryModel.getModel())) {
             uiObject.removeItem(binaryModel.getIntValue());
             return true;
-        }
-        if (ServerToClientModel.SELECTED.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.SELECTED.equals(binaryModel.getModel())) {
             final boolean selected = binaryModel.getBooleanValue();
             // ServerToClientModel.INDEX
             final int index = buffer.readBinaryModel().getIntValue();
-            if (index == -1)
-                uiObject.setSelectedIndex(index);
-            else
-                uiObject.setItemSelected(index, selected);
+            if (index == -1) uiObject.setSelectedIndex(index);
+            else uiObject.setItemSelected(index, selected);
             return true;
-        }
-        if (ServerToClientModel.VISIBLE_ITEM_COUNT.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.VISIBLE_ITEM_COUNT.equals(binaryModel.getModel())) {
             uiObject.setVisibleItemCount(binaryModel.getIntValue());
             return true;
-        }
-        if (ServerToClientModel.MULTISELECT.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.MULTISELECT.equals(binaryModel.getModel())) {
             uiObject.setMultipleSelect(binaryModel.getBooleanValue());
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
-
     }
 }

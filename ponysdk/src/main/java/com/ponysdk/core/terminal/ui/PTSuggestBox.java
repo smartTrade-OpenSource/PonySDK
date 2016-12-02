@@ -71,8 +71,9 @@ public class PTSuggestBox extends PTWidget<SuggestBox> {
         if (ServerToClientModel.LIMIT.equals(binaryModel.getModel())) {
             uiObject.setLimit(binaryModel.getIntValue());
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
 
     @Override
@@ -123,15 +124,14 @@ public class PTSuggestBox extends PTWidget<SuggestBox> {
                 return true;
             }
             /*
-             * FIXME if (Model.SUGGESTIONS.equals(binaryModel.getModel())) {
+             * FIXME else if (Model.SUGGESTIONS.equals(binaryModel.getModel())) {
              * final JSONArray jsonArray = binaryModel.get().isArray(); for (int
              * i = 0; i < jsonArray.size(); i++) {
              * oracle.add(jsonArray.get(i).isString().stringValue()); } return
              * true; }
              */
             /*
-             * FIXME if
-             * (Model.DEFAULT_SUGGESTIONS.equals(binaryModel.getModel())) {
+             * FIXME else if (Model.DEFAULT_SUGGESTIONS.equals(binaryModel.getModel())) {
              * final List<String> defaultSuggestions = new ArrayList<>(); final
              * JSONArray jsonArray = binaryModel.get().isArray(); for (int i =
              * 0; i < jsonArray.size(); i++) {
@@ -139,11 +139,12 @@ public class PTSuggestBox extends PTWidget<SuggestBox> {
              * ; } oracle.setDefaultSuggestionsFromText(defaultSuggestions);
              * return true; }
              */
-            if (ServerToClientModel.CLEAR.equals(binaryModel.getModel())) {
+            else if (ServerToClientModel.CLEAR.equals(binaryModel.getModel())) {
                 oracle.clear();
                 return true;
+            } else {
+                return super.update(buffer, binaryModel);
             }
-            return super.update(buffer, binaryModel);
         }
 
     }

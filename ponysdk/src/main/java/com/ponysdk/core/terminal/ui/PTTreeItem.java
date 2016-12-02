@@ -72,8 +72,8 @@ public class PTTreeItem extends PTUIObject<TreeItem> {
             if (ServerToClientModel.WIDGET.equals(binaryModel.getModel())) {
                 uiObject.setWidget((Widget) widget);
             } else if (ServerToClientModel.INDEX.equals(binaryModel.getModel())) {
-                final TreeItem w = (TreeItem) widget;
                 final int index = binaryModel.getIntValue();
+                final TreeItem w = (TreeItem) widget;
                 if (isRoot) tree.insertItem(index, w);
                 else uiObject.insertItem(index, w);
             } else {
@@ -90,12 +90,12 @@ public class PTTreeItem extends PTUIObject<TreeItem> {
         if (ServerToClientModel.SELECTED.equals(binaryModel.getModel())) {
             uiObject.setSelected(binaryModel.getBooleanValue());
             return true;
-        }
-        if (ServerToClientModel.STATE.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.STATE.equals(binaryModel.getModel())) {
             uiObject.setState(binaryModel.getBooleanValue());
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
 
 }

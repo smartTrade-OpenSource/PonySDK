@@ -96,18 +96,15 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
             uiObject.setWidth(HUNDRED_PERCENT);
             uiObject.setHeight(HUNDRED_PERCENT);
             return true;
-        }
-        if (ServerToClientModel.PREVENT_EVENT.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.PREVENT_EVENT.equals(binaryModel.getModel())) {
             if (preventedEvents == null) preventedEvents = new HashSet<>();
             preventedEvents.add(binaryModel.getIntValue());
             return true;
-        }
-        if (ServerToClientModel.STOP_EVENT.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.STOP_EVENT.equals(binaryModel.getModel())) {
             if (stoppedEvents == null) stoppedEvents = new HashSet<>();
             stoppedEvents.add(binaryModel.getIntValue());
             return true;
-        }
-        return super.update(buffer, binaryModel);
+        } else return super.update(buffer, binaryModel);
     }
 
     @Override
@@ -159,16 +156,14 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
     public Widget asWidget(final PTObject ptObject) {
         if (ptObject != null) {
             final PTWidget<?> ptWidget = ptObject.isPTWidget();
-            if (ptWidget != null)
-                return ptWidget.asWidget();
+            if (ptWidget != null) return ptWidget.asWidget();
         } else {
             log.severe("No widget found for object #" + objectID);
         }
         return null;
     }
 
-    protected void triggerMouseEvent(final DomHandlerType domHandlerType,
-            final UIBuilder uiService, final MouseEvent<?> event) {
+    protected void triggerMouseEvent(final DomHandlerType domHandlerType, final UIBuilder uiService, final MouseEvent<?> event) {
         final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
         final JSONArray eventInfo = new JSONArray();
         eventInfo.set(0, new JSONNumber(event.getClientX()));
@@ -305,7 +300,7 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
 
                         if (keyFilter != null) {
                             final JSONArray jsonArray = keyFilter.getJsonObject().get(ClientToServerModel.KEY_FILTER.toStringValue())
-                                    .isArray();
+                                .isArray();
                             for (int i = 0; i < jsonArray.size(); i++) {
                                 final JSONNumber keyCode = jsonArray.get(i).isNumber();
                                 if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
@@ -346,8 +341,7 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
 
                             if (keyUpFilter != null) {
                                 final JSONArray jsonArray = keyUpFilter.getJsonObject()
-                                        .get(ClientToServerModel.KEY_FILTER.toStringValue())
-                                        .isArray();
+                                    .get(ClientToServerModel.KEY_FILTER.toStringValue()).isArray();
                                 for (int i = 0; i < jsonArray.size(); i++) {
                                     final JSONNumber keyCode = jsonArray.get(i).isNumber();
                                     if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
@@ -373,8 +367,7 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
 
                             if (keyUpFilter != null) {
                                 final JSONArray jsonArray = keyUpFilter.getJsonObject()
-                                        .get(ClientToServerModel.KEY_FILTER.toStringValue())
-                                        .isArray();
+                                    .get(ClientToServerModel.KEY_FILTER.toStringValue()).isArray();
                                 for (int i = 0; i < jsonArray.size(); i++) {
                                     final JSONNumber keyCode = jsonArray.get(i).isNumber();
                                     if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
@@ -448,8 +441,7 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
                         event.preventDefault();
                         final String dragWidgetID = event.getData("text");
                         final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
-                        if (dragWidgetID != null)
-                            eventInstruction.put(ClientToServerModel.DRAG_SRC, Long.parseLong(dragWidgetID));
+                        if (dragWidgetID != null) eventInstruction.put(ClientToServerModel.DRAG_SRC, Long.parseLong(dragWidgetID));
                         uiService.sendDataToServer(widget, eventInstruction);
                     }
                 }, DropEvent.getType());

@@ -40,16 +40,15 @@ public class PTAnchor extends PTFocusWidget<Anchor> {
         if (ServerToClientModel.TEXT.equals(binaryModel.getModel())) {
             uiObject.setText(binaryModel.getStringValue());
             return true;
-        }
-        if (ServerToClientModel.HTML.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.HTML.equals(binaryModel.getModel())) {
             uiObject.setHTML(binaryModel.getStringValue());
             return true;
-        }
-        if (ServerToClientModel.HREF.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.HREF.equals(binaryModel.getModel())) {
             uiObject.setHref(binaryModel.getStringValue());
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
 
 }

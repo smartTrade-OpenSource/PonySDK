@@ -55,8 +55,7 @@ public abstract class PTCellPanel<W extends CellPanel> extends PTComplexPanel<W>
                     break;
             }
             return true;
-        }
-        if (ServerToClientModel.WIDGET_VERTICAL_ALIGNMENT.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.WIDGET_VERTICAL_ALIGNMENT.equals(binaryModel.getModel())) {
             final PVerticalAlignment verticalAlignment = PVerticalAlignment.values()[binaryModel.getByteValue()];
             // ServerToClientModel.WIDGET_ID
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
@@ -74,21 +73,19 @@ public abstract class PTCellPanel<W extends CellPanel> extends PTComplexPanel<W>
                     break;
             }
             return true;
-        }
-        if (ServerToClientModel.CELL_WIDTH.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.CELL_WIDTH.equals(binaryModel.getModel())) {
+            final String value = binaryModel.getStringValue();
             // ServerToClientModel.WIDGET_ID
-            uiObject.setCellWidth(asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder),
-                    binaryModel.getStringValue());
+            uiObject.setCellWidth(asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder), value);
             return true;
-        }
-        if (ServerToClientModel.CELL_HEIGHT.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.CELL_HEIGHT.equals(binaryModel.getModel())) {
+            final String value = binaryModel.getStringValue();
             // ServerToClientModel.WIDGET_ID
-            uiObject.setCellHeight(asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder),
-                    binaryModel.getStringValue());
+            uiObject.setCellHeight(asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder), value);
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-
-        return super.update(buffer, binaryModel);
     }
 
 }

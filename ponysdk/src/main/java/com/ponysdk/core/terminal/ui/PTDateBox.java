@@ -64,21 +64,19 @@ public class PTDateBox extends PTWidget<MyDateBox> {
         if (ServerToClientModel.VALUE.equals(binaryModel.getModel())) {
             dateBox.getTextBox().setValue(binaryModel.getStringValue());
             return true;
-        }
-        if (ServerToClientModel.DATE_FORMAT_PATTERN.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.DATE_FORMAT_PATTERN.equals(binaryModel.getModel())) {
             defaultFormat = new DefaultFormat(DateTimeFormat.getFormat(binaryModel.getStringValue()));
             dateBox.setFormat(defaultFormat);
             return true;
-        }
-        if (ServerToClientModel.ENABLED.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.ENABLED.equals(binaryModel.getModel())) {
             dateBox.setEnabled(binaryModel.getBooleanValue());
             return true;
-        }
-        if (ServerToClientModel.TIME.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.TIME.equals(binaryModel.getModel())) {
             dateBox.setDefaultMonth(binaryModel.getLongValue());
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
 
     private void addValueChangeHandler(final UIBuilder uiService) {

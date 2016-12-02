@@ -55,10 +55,16 @@ public class WebSocketClient implements MessageSender {
     private final WebSocket webSocket;
     private final UIBuilder uiBuilder;
 
+    private final Window window;
+
+    private final ReaderBuffer readerBuffer;
+
     public WebSocketClient(final String url, final UIBuilder uiBuilder, final WebSocketDataType webSocketDataType) {
         this.uiBuilder = uiBuilder;
 
-        final Window window = Browser.getWindow();
+        readerBuffer = new ReaderBuffer();
+
+        window = Browser.getWindow();
         webSocket = window.newWebSocket(url);
         webSocket.setBinaryType(webSocketDataType.getName());
 
@@ -125,9 +131,9 @@ public class WebSocketClient implements MessageSender {
     @Override
     public void read(final ArrayBuffer arrayBuffer) {
         try {
-            final ReaderBuffer buffer = new ReaderBuffer(arrayBuffer);
+            readerBuffer.init(window.newUint8Array(arrayBuffer, 0, arrayBuffer.getByteLength()));
             // Get the first element on the message, always a key of element of the Model enum
-            final BinaryModel type = buffer.readBinaryModel();
+            final BinaryModel type = readerBuffer.readBinaryModel();
 
             if (type.getModel() == ServerToClientModel.PING_SERVER) {
                 if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Ping received");
@@ -136,17 +142,16 @@ public class WebSocketClient implements MessageSender {
                 send(requestData.toString());
             } else if (type.getModel() == ServerToClientModel.HEARTBEAT) {
                 if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Heart beat received");
-            } else if (type.getModel() == ServerToClientModel.BEGIN_OBJECT) {
-                try {
-                    uiBuilder.updateMainTerminal(buffer);
-                } catch (final Exception e) {
-                    log.log(Level.SEVERE, "Error while processing the " + buffer, e);
-                }
             } else if (type.getModel() == ServerToClientModel.UI_CONTEXT_ID) {
                 PonySDK.uiContextId = type.getIntValue();
                 uiBuilder.init(new WebSocketRequestBuilder(WebSocketClient.this));
             } else {
-                log.severe("Unknown model : " + type.getModel());
+                try {
+                    readerBuffer.rewind(type);
+                    uiBuilder.updateMainTerminal(readerBuffer);
+                } catch (final Exception e) {
+                    log.log(Level.SEVERE, "Error while processing the " + readerBuffer, e);
+                }
             }
         } catch (final Exception e) {
             log.log(Level.SEVERE, "Cannot parse " + arrayBuffer, e);
@@ -176,9 +181,6 @@ public class WebSocketClient implements MessageSender {
             this.name = name;
         }
 
-        /**
-         * @return the name
-         */
         public String getName() {
             return name;
         }

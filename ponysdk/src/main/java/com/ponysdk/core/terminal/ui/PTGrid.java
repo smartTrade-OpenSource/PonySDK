@@ -60,12 +60,12 @@ public class PTGrid extends PTHTMLTable {
         if (ServerToClientModel.CLEAR_ROW.equals(binaryModel.getModel())) {
             cast().removeRow(binaryModel.getIntValue());
             return true;
-        }
-        if (ServerToClientModel.INSERT_ROW.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.INSERT_ROW.equals(binaryModel.getModel())) {
             cast().insertRow(binaryModel.getIntValue());
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
 
     @Override

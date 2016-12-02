@@ -36,6 +36,7 @@ import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public class PTDisclosurePanel extends PTWidget<DisclosurePanel> {
+
     private static final String OPENNED = "images/disclosure_openned.png";
     private static final String CLOSED = "images/disclosure_closed.png";
 
@@ -91,12 +92,12 @@ public class PTDisclosurePanel extends PTWidget<DisclosurePanel> {
         if (ServerToClientModel.OPEN_CLOSE.equals(binaryModel.getModel())) {
             uiObject.setOpen(binaryModel.getBooleanValue());
             return true;
-        }
-        if (ServerToClientModel.ANIMATION.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.ANIMATION.equals(binaryModel.getModel())) {
             uiObject.setAnimationEnabled(binaryModel.getBooleanValue());
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
 
 }

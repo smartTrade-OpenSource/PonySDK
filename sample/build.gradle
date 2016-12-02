@@ -36,7 +36,7 @@ task runCodeServer(type: JavaExec) {
   classpath += sourceSets.main.runtimeClasspath
   main = 'com.google.gwt.dev.codeserver.CodeServer'
   args = ['-src', '../ponysdk/src/main/java', 'com.ponysdk.core' +
-          '.PonyTerminal']
+          '.PonyTerminalDebug']
   jvmArgs = ['-server', '-Xmx1024m']
 }
 

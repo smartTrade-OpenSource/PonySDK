@@ -118,12 +118,10 @@ public class PTDatePicker extends PTWidget<DatePicker> {
         if (ServerToClientModel.DATE.equals(binaryModel.getModel())) {
             picker.setValue(asDate(binaryModel.getLongValue()));
             return true;
-        }
-        if (ServerToClientModel.TIME.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.TIME.equals(binaryModel.getModel())) {
             picker.setCurrentMonth(asDate(binaryModel.getLongValue()));
             return true;
-        }
-        if (ServerToClientModel.DATE_ENABLED.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.DATE_ENABLED.equals(binaryModel.getModel())) {
             final String[] dates = binaryModel.getStringValue().split(DATE_SEPARATOR);
             // ServerToClientModel.ENABLED
             final boolean enabled = buffer.readBinaryModel().getBooleanValue();
@@ -131,8 +129,7 @@ public class PTDatePicker extends PTWidget<DatePicker> {
                 picker.setTransientEnabledOnDates(enabled, asDate(date));
             }
             return true;
-        }
-        if (ServerToClientModel.ADD_DATE_STYLE.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.ADD_DATE_STYLE.equals(binaryModel.getModel())) {
             final String[] dates = binaryModel.getStringValue().split(DATE_SEPARATOR);
             // ServerToClientModel.STYLE_NAME
             final String style = buffer.readBinaryModel().getStringValue();
@@ -140,8 +137,7 @@ public class PTDatePicker extends PTWidget<DatePicker> {
                 picker.addStyleToDates(style, asDate(date));
             }
             return true;
-        }
-        if (ServerToClientModel.REMOVE_DATE_STYLE.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.REMOVE_DATE_STYLE.equals(binaryModel.getModel())) {
             final String[] dates = binaryModel.getStringValue().split(DATE_SEPARATOR);
             // ServerToClientModel.STYLE_NAME
             final String style = buffer.readBinaryModel().getStringValue();
@@ -149,8 +145,9 @@ public class PTDatePicker extends PTWidget<DatePicker> {
                 picker.removeStyleFromDates(style, asDate(date));
             }
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
 
 }

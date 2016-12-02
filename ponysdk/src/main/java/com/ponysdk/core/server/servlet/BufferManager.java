@@ -23,7 +23,6 @@
 
 package com.ponysdk.core.server.servlet;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,26 +43,26 @@ public class BufferManager {
     private static final int MAX_BUFFERS = 500;
     private static final int DEFAULT_BUFFER_SIZE = 512000;
 
-    private final BlockingQueue<Buffer> bufferPool = new LinkedBlockingQueue<>();
-    private final List<Buffer> buffers = new ArrayList<>(MAX_BUFFERS);
+    private final BlockingQueue<ByteBuffer> bufferPool = new LinkedBlockingQueue<>();
+    private final List<ByteBuffer> buffers = new ArrayList<>(MAX_BUFFERS);
 
     public BufferManager() {
         log.info("Initializing Buffer allocation ...");
 
         for (int i = 0; i < NUMBER_OF_BUFFERS; i++) {
-            bufferPool.add(new Buffer());
+            bufferPool.add(createBuffer());
         }
         buffers.addAll(bufferPool);
 
         log.info("Buffer allocation initialized {}", DEFAULT_BUFFER_SIZE * bufferPool.size());
     }
 
-    public Buffer allocate() {
-        Buffer buffer = bufferPool.poll();
+    public ByteBuffer allocate() {
+        ByteBuffer buffer = bufferPool.poll();
         if (buffer == null) {
             if (buffers.size() < MAX_BUFFERS) {
                 log.info("No more available buffer (size : {}), allocating a new one", buffers.size());
-                buffer = new Buffer();
+                buffer = createBuffer();
                 buffers.add(buffer);
             } else {
                 log.info("No more available buffer, max allocation reached ({}), waiting an available one", MAX_BUFFERS);
@@ -78,8 +77,8 @@ public class BufferManager {
         return buffer;
     }
 
-    public void send(final RemoteEndpoint remote, final Buffer buffer) {
-        remote.sendBytes(buffer.getRawBuffer(), new WriteCallback() {
+    public void send(final RemoteEndpoint remote, final ByteBuffer buffer) {
+        remote.sendBytes(buffer, new WriteCallback() {
 
             @Override
             public void writeSuccess() {
@@ -94,79 +93,13 @@ public class BufferManager {
         });
     }
 
-    public void release(final Buffer buffer) {
+    private void release(final ByteBuffer buffer) {
         buffer.clear();
         bufferPool.offer(buffer);
     }
 
-    public static final class Buffer {
-
-        private static final byte TRUE = 1;
-        private static final byte FALSE = 0;
-
-        private static final String ENCODING_CHARSET = "UTF-8";
-
-        private final ByteBuffer socketBuffer;
-
-        Buffer() {
-            socketBuffer = ByteBuffer.allocateDirect(DEFAULT_BUFFER_SIZE);
-        }
-
-        public int position() {
-            return socketBuffer.position();
-        }
-
-        public void put(final byte value) {
-            socketBuffer.put(value);
-        }
-
-        public void put(final boolean value) {
-            put(value ? TRUE : FALSE);
-        }
-
-        public void put(final short value) {
-            socketBuffer.putShort(value);
-        }
-
-        public void put(final int value) {
-            socketBuffer.putInt(value);
-        }
-
-        public void put(final long value) {
-            // TODO For now, we write String
-            //socketBuffer.putLong(value);
-            put(String.valueOf(value));
-        }
-
-        public void put(final double value) {
-            // TODO For now, we write String
-            //socketBuffer.putDouble(value);
-            put(String.valueOf(value));
-        }
-
-        public void put(final String value) {
-            try {
-                if (value != null) {
-                    final byte[] bytes = value.getBytes(ENCODING_CHARSET);
-                    put(bytes.length);
-                    for (final byte b : bytes) {
-                        put(b);
-                    }
-                } else {
-                    put(0);
-                }
-            } catch (final UnsupportedEncodingException e) {
-                log.error("Cannot convert string");
-            }
-        }
-
-        public void clear() {
-            socketBuffer.clear();
-        }
-
-        ByteBuffer getRawBuffer() {
-            return socketBuffer;
-        }
+    private static final ByteBuffer createBuffer() {
+        return ByteBuffer.allocateDirect(DEFAULT_BUFFER_SIZE);
     }
 
 }

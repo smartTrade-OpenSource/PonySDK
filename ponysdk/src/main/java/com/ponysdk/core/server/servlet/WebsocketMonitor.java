@@ -1,11 +1,11 @@
 package com.ponysdk.core.server.servlet;
 
 public interface WebsocketMonitor {
-    void onMessageReceived(WebSocketServlet.WebSocket webSocket, String text);
+    void onMessageReceived(WebSocket webSocket, String text);
 
-    void onMessageProcessed(WebSocketServlet.WebSocket webSocket);
+    void onMessageProcessed(WebSocket webSocket);
 
-    void onBeforeFlush(WebSocketServlet.WebSocket webSocket, int position);
+    void onBeforeFlush(WebSocket webSocket, int position);
 
-    void onAfterFlush(WebSocketServlet.WebSocket webSocket);
+    void onAfterFlush(WebSocket webSocket);
 }
