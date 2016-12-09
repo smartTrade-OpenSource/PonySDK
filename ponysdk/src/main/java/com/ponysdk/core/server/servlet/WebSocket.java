@@ -91,9 +91,7 @@ public class WebSocket implements WebSocketListener {
     @Override
     public void onWebSocketClose(final int statusCode, final String reason) {
         log.info("WebSoket closed {}, reason : {}", NiceStatusCode.getMessage(statusCode), reason != null ? reason : "");
-        if (context != null && context.getUIContext() != null && context.getUIContext().isLiving()) {
-            context.getUIContext().onDestroy();
-        }
+        if (isLiving()) context.getUIContext().onDestroy();
     }
 
     /**
@@ -101,7 +99,7 @@ public class WebSocket implements WebSocketListener {
      */
     @Override
     public void onWebSocketText(final String text) {
-        if (context.getUIContext().isLiving()) {
+        if (isLiving()) {
             if (monitor != null) monitor.onMessageReceived(WebSocket.this, text);
             try {
                 context.getUIContext().notifyMessageReceived();
@@ -113,7 +111,7 @@ public class WebSocket implements WebSocketListener {
                     if (jsonObject.containsKey(ClientToServerModel.PING_SERVER.toStringValue())) {
                         final long start = jsonObject.getJsonNumber(ClientToServerModel.PING_SERVER.toStringValue()).longValue();
                         final long end = System.currentTimeMillis();
-                        if (log.isInfoEnabled()) log.info("Ping measurement : " + (end - start) + " ms");
+                        if (log.isDebugEnabled()) log.debug("Ping measurement : " + (end - start) + " ms");
                     } else if (jsonObject.containsKey(ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue())) {
                         if (log.isInfoEnabled()) log.info("Message received from terminal : " + text);
                         applicationManager.fireInstructions(jsonObject, context);
@@ -147,7 +145,7 @@ public class WebSocket implements WebSocketListener {
      * Send to the terminal
      */
     public void flush(final ByteBuffer buffer) {
-        if (context.getUIContext().isLiving() && isSessionOpen()) {
+        if (isLiving() && isSessionOpen()) {
             if (buffer.position() != 0) {
                 if (monitor != null) monitor.onBeforeFlush(WebSocket.this, buffer.position());
                 buffer.flip();
@@ -166,7 +164,7 @@ public class WebSocket implements WebSocketListener {
      * Send heart beat to the client
      */
     public void sendHeartBeat() {
-        if (isSessionOpen()) {
+        if (isLiving() && isSessionOpen()) {
             final ByteBuffer buffer = getBuffer();
             Parser.encode(buffer, ServerToClientModel.HEARTBEAT);
             flush(buffer);
@@ -177,7 +175,7 @@ public class WebSocket implements WebSocketListener {
      * Send round trip to the client
      */
     public void sendRoundTrip() {
-        if (isSessionOpen()) {
+        if (isLiving() && isSessionOpen()) {
             final ByteBuffer buffer = getBuffer();
             Parser.encode(buffer, ServerToClientModel.PING_SERVER, System.currentTimeMillis());
             flush(buffer);
@@ -191,7 +189,11 @@ public class WebSocket implements WebSocketListener {
         }
     }
 
-    final boolean isSessionOpen() {
+    private boolean isLiving() {
+        return context != null && context.getUIContext() != null && context.getUIContext().isLiving();
+    }
+
+    private final boolean isSessionOpen() {
         return session != null && session.isOpen();
     }
 
