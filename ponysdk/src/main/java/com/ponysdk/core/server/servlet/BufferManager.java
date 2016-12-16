@@ -39,11 +39,11 @@ public class BufferManager {
 
     private static final Logger log = LoggerFactory.getLogger(BufferManager.class);
 
-    private static final int NUMBER_OF_BUFFERS = 5;
+    private static final int NUMBER_OF_BUFFERS = 50;
     private static final int MAX_BUFFERS = 500;
     private static final int DEFAULT_BUFFER_SIZE = 512000;
 
-    private final BlockingQueue<ByteBuffer> bufferPool = new LinkedBlockingQueue<>();
+    private final BlockingQueue<ByteBuffer> bufferPool = new LinkedBlockingQueue<>(MAX_BUFFERS);
     private final List<ByteBuffer> buffers = new ArrayList<>(MAX_BUFFERS);
 
     public BufferManager() {
@@ -59,6 +59,7 @@ public class BufferManager {
 
     public ByteBuffer allocate() {
         ByteBuffer buffer = bufferPool.poll();
+
         if (buffer == null) {
             if (buffers.size() < MAX_BUFFERS) {
                 log.info("No more available buffer (size : {}), allocating a new one", buffers.size());
@@ -95,7 +96,12 @@ public class BufferManager {
 
     private void release(final ByteBuffer buffer) {
         buffer.clear();
-        bufferPool.offer(buffer);
+        try {
+            bufferPool.put(buffer);
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException(e);
+        }
     }
 
     private static final ByteBuffer createBuffer() {

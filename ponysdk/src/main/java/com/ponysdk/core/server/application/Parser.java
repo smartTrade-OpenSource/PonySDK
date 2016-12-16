@@ -59,7 +59,7 @@ public class Parser {
 
     public void endObject() {
         if (buffer == null) return;
-        if (buffer.position() >= 4096) flush();
+        if (buffer.position() >= 1024) flush();
     }
 
     public void flush() {

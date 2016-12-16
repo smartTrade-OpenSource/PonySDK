@@ -74,15 +74,22 @@ public class PWindow extends PObject {
             mainWindow = new PWindow() {
 
                 @Override
-                public boolean isOpened() {
-                    return true;
+                public void open() {
+                    // Already open
                 }
 
                 @Override
                 public void close() {
+                    // Never be close
+                }
+
+                @Override
+                public void print() {
+                    PScript.execute(this, "window.print()");
                 }
 
             };
+            mainWindow.opened = true;
             uiContext.setAttribute(PWindow.class.getCanonicalName(), mainWindow);
         }
     }

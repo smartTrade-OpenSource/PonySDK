@@ -301,7 +301,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
             if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Add " + ptObject + " on " + parentObject);
             parentObject.add(buffer, ptObject);
         } else {
-            log.warning("Cannot add object " + ptObject + " to an garbaged parent object #" + parentId
+            log.warning("Cannot add " + ptObject + " to an garbaged parent object #" + parentId
                     + ", so we will consume all the buffer of this object");
             buffer.avoidBlock();
         }
