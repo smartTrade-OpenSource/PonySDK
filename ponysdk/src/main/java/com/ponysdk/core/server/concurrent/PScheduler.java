@@ -71,47 +71,79 @@ public class PScheduler implements UIContextListener {
     }
 
     public static UIRunnable schedule(final Runnable runnable) {
-        return schedule(runnable, Duration.ZERO);
+        return schedule(UIContext.get(), runnable, Duration.ZERO);
+    }
+
+    public static UIRunnable schedule(final UIContext context, final Runnable runnable) {
+        return schedule(context, runnable, Duration.ZERO);
     }
 
     public static UIRunnable schedule(final Runnable runnable, final Duration duration) {
-        return INSTANCE.schedule0(runnable, duration);
+        return INSTANCE.schedule0(UIContext.get(), runnable, duration);
+    }
+
+    public static UIRunnable schedule(final UIContext context, final Runnable runnable, final Duration duration) {
+        return INSTANCE.schedule0(context, runnable, duration);
     }
 
     public static UIRunnable scheduleAtFixedRate(final Runnable runnable, final Duration period) {
-        return scheduleAtFixedRate(runnable, Duration.ZERO, period);
+        return scheduleAtFixedRate(UIContext.get(), runnable, period);
+    }
+
+    public static UIRunnable scheduleAtFixedRate(final UIContext context, final Runnable runnable, final Duration period) {
+        return scheduleAtFixedRate(context, runnable, Duration.ZERO, period);
     }
 
     public static UIRunnable scheduleAtFixedRate(final Runnable runnable, final Duration delay, final Duration period) {
-        return INSTANCE.scheduleAtFixedRate0(runnable, delay, period);
+        return scheduleAtFixedRate(UIContext.get(), runnable, delay, period);
+    }
+
+    public static UIRunnable scheduleAtFixedRate(final UIContext context, final Runnable runnable, final Duration delay,
+                                                 final Duration period) {
+        return INSTANCE.scheduleAtFixedRate0(context, runnable, delay, period);
     }
 
     public static UIRunnable scheduleWithFixedDelay(final Runnable runnable, final Duration delay, final Duration period) {
-        return INSTANCE.scheduleWithFixedDelay0(runnable, delay.toMillis(), period.toMillis());
+        return INSTANCE.scheduleWithFixedDelay0(UIContext.get(), runnable, delay.toMillis(), period.toMillis());
     }
 
-    private UIRunnable schedule0(final Runnable runnable, final Duration duration) {
-        final UIRunnable uiRunnable = new UIRunnable(this, runnable, false);
+    public static UIRunnable scheduleWithFixedDelay(final UIContext context, final Runnable runnable, final Duration delay,
+                                                    final Duration period) {
+        return INSTANCE.scheduleWithFixedDelay0(context, runnable, delay.toMillis(), period.toMillis());
+    }
+
+    private UIRunnable schedule0(final UIContext context, final Runnable runnable, final Duration duration) {
+        final UIRunnable uiRunnable = new UIRunnable(context, this, runnable, false);
         uiRunnable.setFuture(executor.schedule(uiRunnable, duration.toMillis(), TimeUnit.MILLISECONDS));
         registerTask(uiRunnable);
         return uiRunnable;
     }
 
-    private UIRunnable scheduleAtFixedRate0(final Runnable runnable, final Duration delay, final Duration period) {
-        final UIRunnable uiRunnable = new UIRunnable(this, runnable, true);
+    private UIRunnable scheduleAtFixedRate0(final UIContext context, final Runnable runnable, final Duration delay,
+                                            final Duration period) {
+        final UIRunnable uiRunnable = new UIRunnable(context, this, runnable, true);
         uiRunnable.setFuture(executor.scheduleAtFixedRate(uiRunnable, delay.toMillis(), period.toMillis(), TimeUnit.MILLISECONDS));
         registerTask(uiRunnable);
         return uiRunnable;
     }
 
-    private UIRunnable scheduleWithFixedDelay0(final Runnable runnable, final long delayMillis, final long periodMillis) {
-        final UIRunnable uiRunnable = new UIRunnable(this, runnable, true);
+    private UIRunnable scheduleWithFixedDelay0(final UIContext context, final Runnable runnable, final long delayMillis,
+                                               final long periodMillis) {
+        final UIRunnable uiRunnable = new UIRunnable(context, this, runnable, true);
         final ScheduledFuture<?> future = executor.scheduleWithFixedDelay(uiRunnable, delayMillis, periodMillis,
             TimeUnit.MILLISECONDS);
         uiRunnable.setFuture(future);
         registerTask(uiRunnable);
 
         return uiRunnable;
+    }
+
+    public static <R> UIDelegator<R> delegate(final Callback<R> callable) {
+        return INSTANCE.delegade0(callable);
+    }
+
+    private <R> UIDelegator<R> delegade0(final Callback<R> callback) {
+        return new UIDelegator<>(callback);
     }
 
     private void purge(final UIRunnable uiRunnable) {
@@ -148,8 +180,8 @@ public class PScheduler implements UIContextListener {
         private boolean cancelled;
         private ScheduledFuture<?> future;
 
-        UIRunnable(final PScheduler scheduler, final Runnable runnable, final boolean repeated) {
-            this.uiContext = UIContext.get();
+        UIRunnable(final UIContext context, final PScheduler scheduler, final Runnable runnable, final boolean repeated) {
+            this.uiContext = context;
             this.runnable = runnable;
             this.repeated = repeated;
             this.scheduler = scheduler;
@@ -216,6 +248,37 @@ public class PScheduler implements UIContextListener {
             return uiContext;
         }
 
+    }
+
+    public static class UIDelegator<R> {
+
+        private final Callback<R> callback;
+        private final UIContext uiContext;
+
+        UIDelegator(final Callback<R> callback) {
+            this.uiContext = UIContext.get();
+            this.callback = callback;
+        }
+
+        public void onError(final R result, final Exception exception) {
+            PScheduler.schedule(uiContext, () -> callback.onError(result, exception));
+        }
+
+        public void onSuccess(final R result) {
+            PScheduler.schedule(uiContext, () -> callback.onSuccess(result));
+        }
+
+        public UIContext getUiContext() {
+            return uiContext;
+        }
+
+    }
+
+    public static interface Callback<R> {
+
+        public void onSuccess(R result);
+
+        public void onError(R result, Exception exception);
     }
 
 }
