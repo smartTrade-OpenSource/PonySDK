@@ -77,6 +77,7 @@ public class DefaultPageView implements PageView {
 
     protected void buildTitle() {
         title = new PLabel(pageTitle);
+        title.ensureDebugId("page_title_" + pageTitle.replace(" ", "_"));
         title.setText(pageTitle);
         title.addStyleName("pony-Page-Header-Caption");
         header.add(title);
