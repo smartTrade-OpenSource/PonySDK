@@ -62,11 +62,11 @@ public class BufferManager {
 
         if (buffer == null) {
             if (buffers.size() < MAX_BUFFERS) {
-                log.info("No more available buffer (size : {}), allocating a new one", buffers.size());
+                log.debug("No more available buffer (size : {}), allocating a new one", buffers.size());
                 buffer = createBuffer();
                 buffers.add(buffer);
             } else {
-                log.info("No more available buffer, max allocation reached ({}), waiting an available one", MAX_BUFFERS);
+                log.debug("No more available buffer, max allocation reached ({}), waiting an available one", MAX_BUFFERS);
                 try {
                     return bufferPool.poll(25, TimeUnit.SECONDS);
                 } catch (final InterruptedException e) {
