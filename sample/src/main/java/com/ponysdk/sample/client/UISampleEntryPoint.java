@@ -26,12 +26,15 @@ package com.ponysdk.sample.client;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.Date;
+import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.PScheduler;
 import com.ponysdk.core.server.concurrent.PScheduler.UIRunnable;
+import com.ponysdk.core.server.concurrent.UIDelegator;
+import com.ponysdk.core.server.concurrent.UIDelegator.Callback;
 import com.ponysdk.core.ui.basic.PAbsolutePanel;
 import com.ponysdk.core.ui.basic.PAnchor;
 import com.ponysdk.core.ui.basic.PButton;
@@ -106,6 +109,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PWindow a = new PWindow(null, "Window 2",
                 "resizable=yes,location=0,status=0,scrollbars=0");
         a.open();
+
+        testUIDelegator();
 
         if (true) return;
 
@@ -338,6 +343,64 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         // uiContext.getHistory().newItem("", false);
     }
 
+    private void testUIDelegator() {
+        final PLabel a = new PLabel();
+        PWindow.getMain().add(a);
+        final AtomicInteger ai = new AtomicInteger();
+        PScheduler.scheduleAtFixedRate(() -> {
+            a.setText("a " + ai.incrementAndGet());
+        } , Duration.ofMillis(0), Duration.ofMillis(10));
+
+        final PLabel p = new PLabel();
+        PWindow.getMain().add(p);
+
+        final boolean delegatorMode = true;
+
+        if (delegatorMode) {
+            final UIDelegator<String> delegator = new UIDelegator<>();
+            try {
+                delegator.delegate(new Callable<String>() {
+
+                    @Override
+                    public String call() throws Exception {
+                        for (int i = 0; i < 100; i++) {
+                            try {
+                                Thread.sleep(30);
+                            } catch (final Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        return "Done UI Delegator";
+                    }
+                }, new Callback<String>() {
+
+                    @Override
+                    public void onSuccess(final String result) {
+                        p.setText(result);
+                    }
+
+                    @Override
+                    public void onError(final String result, final Exception exception) {
+                    }
+                });
+            } catch (final Exception e1) {
+                e1.printStackTrace();
+            }
+        } else {
+            PScheduler.schedule(() -> {
+                for (int i = 0; i < 100; i++) {
+                    try {
+                        Thread.sleep(30);
+                    } catch (final Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                p.setText("Done PScheduler");
+            });
+        }
+    }
+
     public PWindow createWindow3() {
         final PWindow w3 = new PWindow(null, "Window 3", "resizable=yes,location=0,status=0,scrollbars=0");
         final PFlowPanel windowContainer = new PFlowPanel();
@@ -519,9 +582,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
             @Override
             public PKeyCodes[] getFilteredKeys() {
-                return new PKeyCodes[] {
-                        PKeyCodes.ENTER
-                };
+                return new PKeyCodes[] { PKeyCodes.ENTER };
             }
         });
         return pTextBox;

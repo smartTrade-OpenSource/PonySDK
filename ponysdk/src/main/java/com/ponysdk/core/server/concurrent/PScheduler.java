@@ -1,17 +1,44 @@
+/*
+ * Copyright (c) 2011 PonySDK
+ *  Owners:
+ *  Luciano Broussal  <luciano.broussal AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *
+ *  WebSite:
+ *  http://code.google.com/p/pony-sdk/
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 
 package com.ponysdk.core.server.concurrent;
-
-import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.server.application.UIContextListener;
-import com.ponysdk.core.server.stm.Txn;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.application.UIContextListener;
+import com.ponysdk.core.server.stm.Txn;
 
 public class PScheduler implements UIContextListener {
 
@@ -21,18 +48,18 @@ public class PScheduler implements UIContextListener {
 
     static {
         final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(Runtime.getRuntime().availableProcessors(),
-                new ThreadFactory() {
+            new ThreadFactory() {
 
-                    private int i = 0;
+                private int i = 0;
 
-                    @Override
-                    public Thread newThread(final Runnable r) {
-                        final Thread t = new Thread(r);
-                        t.setName(PScheduler.class.getName() + "-" + i++);
-                        t.setDaemon(true);
-                        return t;
-                    }
-                });
+                @Override
+                public Thread newThread(final Runnable r) {
+                    final Thread t = new Thread(r);
+                    t.setName(PScheduler.class.getName() + "-" + i++);
+                    t.setDaemon(true);
+                    return t;
+                }
+            });
         INSTANCE = new PScheduler(executor);
     }
 
@@ -80,14 +107,14 @@ public class PScheduler implements UIContextListener {
     private UIRunnable scheduleWithFixedDelay0(final Runnable runnable, final long delayMillis, final long periodMillis) {
         final UIRunnable uiRunnable = new UIRunnable(this, runnable, true);
         final ScheduledFuture<?> future = executor.scheduleWithFixedDelay(uiRunnable, delayMillis, periodMillis,
-                TimeUnit.MILLISECONDS);
+            TimeUnit.MILLISECONDS);
         uiRunnable.setFuture(future);
         registerTask(uiRunnable);
 
         return uiRunnable;
     }
 
-    private void purge(UIRunnable uiRunnable) {
+    private void purge(final UIRunnable uiRunnable) {
         executor.purge();
         final Set<UIRunnable> set = runnablesByUIContexts.get(uiRunnable.getUiContext());
         if (set != null) set.remove(uiRunnable);
@@ -117,11 +144,11 @@ public class PScheduler implements UIContextListener {
         private final Runnable runnable;
         private final UIContext uiContext;
         private final boolean repeated;
-        private PScheduler scheduler;
+        private final PScheduler scheduler;
         private boolean cancelled;
         private ScheduledFuture<?> future;
 
-        UIRunnable(PScheduler scheduler, final Runnable runnable, final boolean repeated) {
+        UIRunnable(final PScheduler scheduler, final Runnable runnable, final boolean repeated) {
             this.uiContext = UIContext.get();
             this.runnable = runnable;
             this.repeated = repeated;
