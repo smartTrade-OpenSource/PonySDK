@@ -80,7 +80,7 @@ public class PTWindow extends AbstractPTObject {
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         if (ServerToClientModel.OPEN.equals(binaryModel.getModel())) {
             window = Browser.getWindow().open(url, name, features);
-            window.setOnbeforeunload(new EventListener() {
+            window.setOnunload(new EventListener() {
 
                 @Override
                 public void handleEvent(final Event event) {
