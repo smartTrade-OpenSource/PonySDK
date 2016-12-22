@@ -29,6 +29,9 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Objects;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -61,9 +64,10 @@ import com.ponysdk.core.ui.model.ServerBinaryModel;
  * <dd>applied to each child widget
  * </dl>
  */
-public class PStackLayoutPanel extends PWidget implements HasPWidgets,
-        HasPSelectionHandlers<Integer>, HasPBeforeSelectionHandlers<Integer>,
-        PAnimatedLayout {
+public class PStackLayoutPanel extends PWidget
+        implements HasPWidgets, HasPSelectionHandlers<Integer>, HasPBeforeSelectionHandlers<Integer>, PAnimatedLayout {
+
+    private static final Logger log = LoggerFactory.getLogger(PStackLayoutPanel.class);
 
     private final PWidgetCollection children = new PWidgetCollection(this);
 
@@ -89,15 +93,13 @@ public class PStackLayoutPanel extends PWidget implements HasPWidgets,
         return WidgetType.STACKLAYOUT_PANEL;
     }
 
-    public void add(final PWidget child, final String header,
-            final boolean asHtml, final double headerSize) {
+    public void add(final PWidget child, final String header, final boolean asHtml, final double headerSize) {
         child.removeFromParent();
         children.add(child);
         adopt(child);
 
-        child.saveAdd(child.getID(), ID, new ServerBinaryModel(
-                ServerToClientModel.HTML, header), new ServerBinaryModel(
-                        ServerToClientModel.SIZE, headerSize));
+        child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.HTML, header),
+            new ServerBinaryModel(ServerToClientModel.SIZE, headerSize));
         child.attach(windowID);
     }
 
@@ -119,7 +121,9 @@ public class PStackLayoutPanel extends PWidget implements HasPWidgets,
 
     @Override
     public void add(final PWidget w) {
-        assert false : "Single-argument add() is not supported for this widget";
+        log.error("Use #add(final PWidget child, final String header, final boolean asHtml, final double headerSize) instead");
+        throw new UnsupportedOperationException(
+            "Use #add(final PWidget child, final String header, final boolean asHtml, final double headerSize) instead");
     }
 
     @Override
@@ -137,25 +141,23 @@ public class PStackLayoutPanel extends PWidget implements HasPWidgets,
     }
 
     private void adopt(final PWidget child) {
-        assert child.getParent() == null;
-        child.setParent(this);
+        if (child.getParent() == null) child.setParent(this);
+        else throw new IllegalStateException("Can't adopt an already widget attached to a parent");
     }
 
     private void orphan(final PWidget child) {
-        assert child.getParent() == this;
-        child.setParent(null);
+        if (child.getParent() == this) child.setParent(null);
+        else throw new IllegalStateException("Can't adopt an widget attached to another parent");
     }
 
     @Override
-    public void addBeforeSelectionHandler(
-            final PBeforeSelectionHandler<Integer> handler) {
+    public void addBeforeSelectionHandler(final PBeforeSelectionHandler<Integer> handler) {
         beforeSelectionHandlers.add(handler);
         saveAddHandler(HandlerModel.HANDLER_BEFORE_SELECTION);
     }
 
     @Override
-    public void removeBeforeSelectionHandler(
-            final PBeforeSelectionHandler<Integer> handler) {
+    public void removeBeforeSelectionHandler(final PBeforeSelectionHandler<Integer> handler) {
         beforeSelectionHandlers.remove(handler);
     }
 
@@ -171,14 +173,12 @@ public class PStackLayoutPanel extends PWidget implements HasPWidgets,
     }
 
     public void showWidget(final PWidget widget) {
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.WIDGET_ID,
-                widget.getID()));
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.WIDGET_ID, widget.getID()));
     }
 
     @Override
     public void animate(final Duration duration) {
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ANIMATE,
-                duration.toMillis()));
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ANIMATE, duration.toMillis()));
     }
 
     public Duration getAnimationDuration() {
@@ -189,12 +189,9 @@ public class PStackLayoutPanel extends PWidget implements HasPWidgets,
      * Set the duration of the animated transition between children.
      */
     public void setAnimationDuration(final Duration duration) {
-        if (Objects.equals(animationDuration, duration))
-            return;
+        if (Objects.equals(animationDuration, duration)) return;
         animationDuration = duration;
-        saveUpdate((writer) -> writer.writeModel(
-                ServerToClientModel.ANIMATION_DURATION,
-                (int) duration.toMillis()));
+        saveUpdate((writer) -> writer.writeModel(ServerToClientModel.ANIMATION_DURATION, (int) duration.toMillis()));
     }
 
 }

@@ -117,16 +117,22 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
         return root.getChildCount();
     }
 
-    void orphan(final PWidget widget) {
-        assert widget.getParent() == this;
-        widget.setParent(null);
-        childWidgets.remove(widget);
+    void orphan(final PWidget child) {
+        if (child.getParent() == this) {
+            child.setParent(null);
+            childWidgets.remove(child);
+        } else {
+            throw new IllegalStateException("Can't adopt an widget attached to another parent");
+        }
     }
 
     void adopt(final PWidget widget, final PTreeItem item) {
-        assert !childWidgets.containsKey(widget);
-        childWidgets.put(widget, item);
-        widget.setParent(this);
+        if (!childWidgets.containsKey(widget)) {
+            childWidgets.put(widget, item);
+            widget.setParent(this);
+        } else {
+            throw new IllegalStateException("Can't adopt an already widget attached to a parent");
+        }
     }
 
     @Override
