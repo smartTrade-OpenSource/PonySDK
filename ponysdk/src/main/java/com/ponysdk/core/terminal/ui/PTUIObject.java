@@ -89,7 +89,7 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
             uiObject.setVisible(binaryModel.getBooleanValue());
             return true;
         } else if (ServerToClientModel.ENSURE_DEBUG_ID.equals(binaryModel.getModel())) {
-            uiObject.ensureDebugId(binaryModel.getStringValue());
+            uiObject.getElement().setAttribute("pid", binaryModel.getStringValue());
             return true;
         } else if (ServerToClientModel.WIDGET_TITLE.equals(binaryModel.getModel())) {
             uiObject.setTitle(binaryModel.getStringValue());
