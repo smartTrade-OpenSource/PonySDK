@@ -64,6 +64,8 @@ import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
+import com.google.gwt.event.dom.client.MouseWheelEvent;
+import com.google.gwt.event.dom.client.MouseWheelHandler;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.user.client.Event;
@@ -256,6 +258,16 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
                     }
 
                 }, MouseUpEvent.getType());
+                break;
+            case MOUSE_WHELL:
+                widget.addDomHandler(new MouseWheelHandler() {
+
+                    @Override
+                    public void onMouseWheel(final MouseWheelEvent event) {
+                        triggerMouseEvent(domHandlerType, uiService, event);
+                    }
+
+                }, MouseWheelEvent.getType());
                 break;
             case BLUR:
                 widget.addDomHandler(new BlurHandler() {

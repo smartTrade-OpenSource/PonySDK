@@ -68,6 +68,7 @@ import com.ponysdk.core.ui.basic.event.PMouseEvent;
 import com.ponysdk.core.ui.basic.event.PMouseOutEvent;
 import com.ponysdk.core.ui.basic.event.PMouseOverEvent;
 import com.ponysdk.core.ui.basic.event.PMouseUpEvent;
+import com.ponysdk.core.ui.basic.event.PMouseWhellEvent;
 import com.ponysdk.core.ui.eventbus.Event;
 import com.ponysdk.core.ui.eventbus.EventBus;
 import com.ponysdk.core.ui.eventbus.EventHandler;
@@ -418,6 +419,9 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
                     break;
                 case MOUSE_UP:
                     fireMouseEvent(instruction, new PMouseUpEvent(this));
+                    break;
+                case MOUSE_WHELL:
+                    fireMouseEvent(instruction, new PMouseWhellEvent.Event(this));
                     break;
                 case FOCUS:
                     fireEvent(new PFocusEvent(this));
