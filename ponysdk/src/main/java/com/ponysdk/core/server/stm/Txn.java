@@ -68,20 +68,13 @@ public class Txn {
     public void rollback() {
         final Txn txn = transactions.get();
         if (txn.txnContext == null) throw new RuntimeException("Call begin() before rollback() a transaction.");
+        txn.txnContext.release();
         fireBeforeRollback();
         transactions.remove();
     }
 
     public void flush() {
-        try {
-            txnContext.flush();
-        } catch (final Exception e) {
-            // final String msg = "Cannot send instructions to the browser,
-            // Session ID #" +
-            // uiContext.getSession().getId();
-            // throw new RuntimeException(msg);
-            // throw new RuntimeException("TMP", e);
-        }
+        txnContext.flush();
     }
 
     private ModelWriter getWriter0() {

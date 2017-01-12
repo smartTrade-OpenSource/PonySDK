@@ -75,8 +75,12 @@ public class WebSocket implements WebSocketListener {
             application.registerUIContext(uiContext);
 
             final ByteBuffer buffer = getBuffer();
-            Parser.encode(buffer, ServerToClientModel.UI_CONTEXT_ID, uiContext.getID());
-            flush(buffer);
+            try {
+                Parser.encode(buffer, ServerToClientModel.UI_CONTEXT_ID, uiContext.getID());
+                flush(buffer);
+            } catch (final Throwable t) {
+                release(buffer);
+            }
             applicationManager.startApplication(context);
         } catch (final Exception e) {
             log.error("Cannot process WebSocket instructions", e);
@@ -85,12 +89,12 @@ public class WebSocket implements WebSocketListener {
 
     @Override
     public void onWebSocketError(final Throwable throwable) {
-        log.error("WebSoket Error", throwable);
+        log.error("WebSocket Error", throwable);
     }
 
     @Override
     public void onWebSocketClose(final int statusCode, final String reason) {
-        log.info("WebSoket closed {}, reason : {}", NiceStatusCode.getMessage(statusCode), reason != null ? reason : "");
+        log.info("WebSocket closed {}, reason : {}", NiceStatusCode.getMessage(statusCode), reason != null ? reason : "");
         if (isLiving()) context.getUIContext().onDestroy();
     }
 
@@ -154,8 +158,12 @@ public class WebSocket implements WebSocketListener {
                 } finally {
                     if (monitor != null) monitor.onAfterFlush(WebSocket.this);
                 }
+            } else {
+                release(buffer);
+                log.debug("Empty buffer, no need to write on the websocket");
             }
         } else {
+            release(buffer);
             throw new IllegalStateException("UI Context has been destroyed");
         }
     }
@@ -166,9 +174,17 @@ public class WebSocket implements WebSocketListener {
     public void sendHeartBeat() {
         if (isLiving() && isSessionOpen()) {
             final ByteBuffer buffer = getBuffer();
-            Parser.encode(buffer, ServerToClientModel.HEARTBEAT);
-            flush(buffer);
+            try {
+                Parser.encode(buffer, ServerToClientModel.HEARTBEAT);
+                flush(buffer);
+            } catch (final Throwable t) {
+                release(buffer);
+            }
         }
+    }
+
+    public void release(final ByteBuffer buffer) {
+        bufferManager.release(buffer);
     }
 
     /**
@@ -177,8 +193,12 @@ public class WebSocket implements WebSocketListener {
     public void sendRoundTrip() {
         if (isLiving() && isSessionOpen()) {
             final ByteBuffer buffer = getBuffer();
-            Parser.encode(buffer, ServerToClientModel.PING_SERVER, System.currentTimeMillis());
-            flush(buffer);
+            try {
+                Parser.encode(buffer, ServerToClientModel.PING_SERVER, System.currentTimeMillis());
+                flush(buffer);
+            } catch (final Throwable t) {
+                release(buffer);
+            }
         }
     }
 
