@@ -60,7 +60,7 @@ public enum ServerToClientModel {
     HTML(ValueTypeModel.STRING),
     WIDGET_ID(ValueTypeModel.INTEGER),
     WIDGET(ValueTypeModel.NULL),
-    VALUE_CHECKBOX(ValueTypeModel.BOOLEAN),
+    VALUE_CHECKBOX(ValueTypeModel.BYTE),
     WORD_WRAP(ValueTypeModel.BOOLEAN),
     CLEAR(ValueTypeModel.NULL),
     CLEAR_ROW(ValueTypeModel.INTEGER),
