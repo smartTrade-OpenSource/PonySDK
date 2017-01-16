@@ -43,8 +43,9 @@ task runCodeServer(type: JavaExec) {
 task runSampleSpring(type: JavaExec) {
   classpath = sourceSets.main.runtimeClasspath
   classpath += files(buildDir.getAbsolutePath() + '/gwt')
+  classpath += files(buildDir.getAbsolutePath() + '/resources')
   main = 'com.ponysdk.impl.main.MainSpring'
-  jvmArgs = ['-server', '-Xmx128m']
+  jvmArgs = ['-server', '-Xmx128m','-Dlogback.configurationFile=etc/logback.xml']
 }
 
 task runSampleTrading(type: JavaExec) {
