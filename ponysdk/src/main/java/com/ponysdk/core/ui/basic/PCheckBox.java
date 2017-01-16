@@ -32,6 +32,7 @@ import java.util.Objects;
 import javax.json.JsonObject;
 
 import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.PCheckBoxState;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.Parser;
@@ -53,7 +54,7 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
 
     private List<PValueChangeHandler<Boolean>> handlers;
 
-    private Boolean value = Boolean.FALSE;
+    private PCheckBoxState state = PCheckBoxState.UNCHECKED;
 
     /**
      * Creates a check box with no label.
@@ -74,7 +75,7 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
     @Override
     protected void enrichOnInit(final Parser parser) {
         super.enrichOnInit(parser);
-        if (this.value != Boolean.FALSE) parser.parse(ServerToClientModel.VALUE_CHECKBOX, this.value);
+        if (PCheckBoxState.UNCHECKED.equals(this.state)) parser.parse(ServerToClientModel.VALUE_CHECKBOX, this.state.getValue());
     }
 
     @Override
@@ -98,15 +99,27 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
         return handlers != null ? Collections.unmodifiableCollection(handlers) : Collections.emptyList();
     }
 
+    public void setState(final PCheckBoxState state) {
+        if (Objects.equals(this.state, state)) return;
+        this.state = state;
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.VALUE_CHECKBOX, state.getValue()));
+    }
+
+    public PCheckBoxState getState() {
+        return state;
+    }
+
     /**
      * Determines whether this check box is currently checked.
      *
      * @return <code>true</code> if the check box is checked, false otherwise.
      *         Will not return null
+     * @deprecated Use {@link #getState()} instead
      */
+    @Deprecated
     @Override
     public Boolean getValue() {
-        return value;
+        return PCheckBoxState.CHECKED.equals(state);
     }
 
     /**
@@ -114,17 +127,17 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
      *
      * @param value
      *            true to check, false to uncheck; null value implies false
+     * @deprecated Use {@link #setState(PCheckBoxState)} instead
      */
+    @Deprecated
     @Override
     public void setValue(final Boolean value) {
-        if (Objects.equals(this.value, value)) return;
-        this.value = Boolean.TRUE.equals(value);
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.VALUE_CHECKBOX, this.value));
+        setState(Boolean.TRUE.equals(value) ? PCheckBoxState.CHECKED : PCheckBoxState.UNCHECKED);
     }
 
     @Override
     public void onValueChange(final PValueChangeEvent<Boolean> event) {
-        this.value = event.getValue();
+        this.state = Boolean.TRUE.equals(event.getValue()) ? PCheckBoxState.CHECKED : PCheckBoxState.UNCHECKED;
         if (handlers == null) return;
         for (final PValueChangeHandler<Boolean> handler : handlers) {
             handler.onValueChange(event);
@@ -135,7 +148,7 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
     public void onClientData(final JsonObject jsonObject) {
         if (jsonObject.containsKey(ClientToServerModel.HANDLER_BOOLEAN_VALUE_CHANGE.toStringValue())) {
             onValueChange(new PValueChangeEvent<>(this,
-                    jsonObject.getBoolean(ClientToServerModel.HANDLER_BOOLEAN_VALUE_CHANGE.toStringValue())));
+                jsonObject.getBoolean(ClientToServerModel.HANDLER_BOOLEAN_VALUE_CHANGE.toStringValue())));
         } else {
             super.onClientData(jsonObject);
         }
