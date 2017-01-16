@@ -66,9 +66,10 @@ public class BufferManager {
                 buffer = createBuffer();
                 buffers.add(buffer);
             } else {
-                log.debug("No more available buffer, max allocation reached ({}), waiting an available one", MAX_BUFFERS);
+                log.warn("No more available buffer, max allocation reached ({}), waiting an available one", MAX_BUFFERS);
                 try {
-                    return bufferPool.poll(25, TimeUnit.SECONDS);
+                    buffer = bufferPool.poll(25, TimeUnit.SECONDS);
+                    if (buffer == null) throw new IllegalStateException("No more buffer available");
                 } catch (final InterruptedException e) {
                     Thread.currentThread().interrupt();
                     throw new IllegalStateException(e);
@@ -94,7 +95,7 @@ public class BufferManager {
         });
     }
 
-    private void release(final ByteBuffer buffer) {
+    public void release(final ByteBuffer buffer) {
         buffer.clear();
         try {
             bufferPool.put(buffer);

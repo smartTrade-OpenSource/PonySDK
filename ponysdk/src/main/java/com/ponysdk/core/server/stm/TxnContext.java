@@ -38,7 +38,7 @@ public class TxnContext implements TxnListener {
     private final Parser parser;
     private final ModelWriter modelWriter;
     private final Map<String, Object> parameters = new HashMap<>();
-    
+
     private boolean flushNow = false;
     private Application application;
 
@@ -121,6 +121,10 @@ public class TxnContext implements TxnListener {
 
     public void close() {
         socket.close();
+    }
+
+    public void release() {
+        parser.release();
     }
 
 }
