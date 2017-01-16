@@ -60,7 +60,7 @@ public class PTWindow extends AbstractPTObject {
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder builder) {
         super.create(buffer, objectId, builder);
 
-        if (log.isLoggable(Level.INFO)) log.log(Level.INFO, "PTWindowID created : " + objectID);
+        if (log.isLoggable(Level.INFO)) log.log(Level.INFO, "Create PTWindow #" + objectID);
 
         uiService = builder;
 
@@ -84,10 +84,16 @@ public class PTWindow extends AbstractPTObject {
 
                 @Override
                 public void handleEvent(final Event event) {
-                    final PTInstruction instruction = new PTInstruction(objectID);
-                    instruction.put(ClientToServerModel.HANDLER_CLOSE);
-                    uiService.sendDataToServer(instruction);
-                    PTWindowManager.get().unregister(PTWindow.this);
+                    if (ponySDKStarted) {
+                        final PTInstruction instruction = new PTInstruction(objectID);
+                        instruction.put(ClientToServerModel.HANDLER_CLOSE);
+                        uiService.sendDataToServer(instruction);
+                        PTWindowManager.get().unregister(PTWindow.this);
+                    } else {
+                        // WORKAROUND : This case happens for unknown reasons in Chronium, the unload event is sent at loading time ?!
+                        log.log(Level.WARNING,
+                            "Unload event received on a window not fully loaded, so ignored, Window #" + getObjectID());
+                    }
                 }
             });
             return true;
