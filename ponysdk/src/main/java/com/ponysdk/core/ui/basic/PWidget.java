@@ -142,9 +142,11 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     }
 
     public void ensureDebugId(final String debugID) {
-        if (Objects.equals(this.debugID, debugID)) return;
-        this.debugID = debugID;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ENSURE_DEBUG_ID, debugID));
+        if (UIContext.get().getApplication().getOptions().isDebugMode()) {
+            if (Objects.equals(this.debugID, debugID)) return;
+            this.debugID = debugID;
+            saveUpdate(writer -> writer.writeModel(ServerToClientModel.ENSURE_DEBUG_ID, debugID));
+        }
     }
 
     public String getTitle() {

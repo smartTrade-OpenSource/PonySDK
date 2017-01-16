@@ -21,9 +21,6 @@
     <set-configuration-property name="compiler.emulatedStack.recordLineNumbers" value="true"/>
     <set-configuration-property name="compiler.emulatedStack.recordFileNames" value="true"/>
 
-    <inherits name="com.google.gwt.user.Debug" />
-    <set-property name="gwt.enableDebugId" value="true" />
-
 <!-- 	<script src="ponysdk.js" /> -->
 
 </module>
