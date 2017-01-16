@@ -145,6 +145,9 @@ public class PTDatePicker extends PTWidget<DatePicker> {
                 picker.removeStyleFromDates(style, asDate(date));
             }
             return true;
+        } else if (ServerToClientModel.YEAR_ARROWS_VISIBLE.equals(binaryModel.getModel())) {
+            picker.setYearArrowsVisible(binaryModel.getBooleanValue());
+            return true;
         } else {
             return super.update(buffer, binaryModel);
         }

@@ -123,6 +123,7 @@ public enum ServerToClientModel {
     ADD_DATE_STYLE(ValueTypeModel.STRING),
     STYLE_NAME(ValueTypeModel.STRING),
     REMOVE_DATE_STYLE(ValueTypeModel.STRING),
+    YEAR_ARROWS_VISIBLE(ValueTypeModel.BOOLEAN),
     POPUP_CAPTION(ValueTypeModel.STRING),
     WIDGET_VISIBLE(ValueTypeModel.BOOLEAN),
     IMAGE_WIDTH(ValueTypeModel.INTEGER),
