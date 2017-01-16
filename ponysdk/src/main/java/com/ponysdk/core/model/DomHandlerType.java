@@ -32,6 +32,7 @@ public enum DomHandlerType {
     MOUSE_OUT,
     MOUSE_DOWN,
     MOUSE_UP,
+    MOUSE_WHELL,
     FOCUS,
     BLUR,
     DRAG_ENTER,

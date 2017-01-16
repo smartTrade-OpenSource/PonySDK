@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.ui.basic.event;
 
+@FunctionalInterface
 public interface HasPChangeHandlers {
 
     void addChangeHandler(PChangeHandler handler);
