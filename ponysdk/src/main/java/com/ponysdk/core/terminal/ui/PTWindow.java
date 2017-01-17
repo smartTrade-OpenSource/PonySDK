@@ -54,7 +54,7 @@ public class PTWindow extends AbstractPTObject {
 
     private UIBuilder uiService;
 
-    private boolean ponySDKStarted = false;
+    private boolean ready = false;
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder builder) {
@@ -84,16 +84,7 @@ public class PTWindow extends AbstractPTObject {
 
                 @Override
                 public void handleEvent(final Event event) {
-                    if (ponySDKStarted) {
-                        final PTInstruction instruction = new PTInstruction(objectID);
-                        instruction.put(ClientToServerModel.HANDLER_CLOSE);
-                        uiService.sendDataToServer(instruction);
-                        PTWindowManager.get().unregister(PTWindow.this);
-                    } else {
-                        // WORKAROUND : This case happens for unknown reasons in Chronium, the unload event is sent at loading time ?!
-                        log.log(Level.WARNING,
-                            "Unload event received on a window not fully loaded, so ignored, Window #" + getObjectID());
-                    }
+                    onClose();
                 }
             });
             return true;
@@ -115,11 +106,13 @@ public class PTWindow extends AbstractPTObject {
     }
 
     public void postMessage(final Uint8Array buffer) {
-        window.postMessage(buffer, "*");
+        if (ready && window.isClosed()) onClose();
+
+        if (ready) window.postMessage(buffer, "*");
     }
 
     public void setReady() {
-        ponySDKStarted = true;
+        ready = true;
         setTitle(name, window); // WORKAROUND : Set title for Google Chrome
 
         final PTInstruction instruction = new PTInstruction(objectID);
@@ -128,11 +121,29 @@ public class PTWindow extends AbstractPTObject {
     }
 
     public boolean isReady() {
-        return ponySDKStarted;
+        return ready;
     }
 
     public final native void setTitle(String title, Window window) /*-{
                                                                    window.document.title = title;
                                                                    }-*/;
+
+    protected void onClose() {
+        if (ready && window != null) {
+            ready = false;
+            window = null;
+            PTWindowManager.get().unregister(PTWindow.this);
+
+            final PTInstruction instruction = new PTInstruction(objectID);
+            instruction.put(ClientToServerModel.HANDLER_CLOSE);
+            uiService.sendDataToServer(instruction);
+
+            if (log.isLoggable(Level.INFO)) log.log(Level.INFO, "Close PTWindow #" + objectID);
+        }
+    }
+
+    public boolean isClosed() {
+        return window.isClosed();
+    }
 
 }
