@@ -30,6 +30,9 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.RepeatingCommand;
+
 public class PTWindowManager {
 
     private static final Logger log = Logger.getLogger(PTWindowManager.class.getName());
@@ -39,6 +42,7 @@ public class PTWindowManager {
     private final Map<Integer, PTWindow> windows = new HashMap<>();
 
     private PTWindowManager() {
+        checkWindowsAlive();
     }
 
     public static final PTWindowManager get() {
@@ -63,5 +67,22 @@ public class PTWindowManager {
 
     void unregister(final PTWindow window) {
         windows.remove(window.getObjectID());
+    }
+
+    private void checkWindowsAlive() {
+        Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
+
+            @Override
+            public boolean execute() {
+                try {
+                    for (final PTWindow window : windows.values()) {
+                        if (window.isClosed()) window.onClose();
+                    }
+                } catch (final Throwable t) {
+                    log.log(Level.SEVERE, "Can't checking windows status", t);
+                }
+                return true;
+            }
+        }, 2000);
     }
 }
