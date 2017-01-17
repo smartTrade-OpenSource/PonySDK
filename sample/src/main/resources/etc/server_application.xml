@@ -16,6 +16,7 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 		<property name="applicationName" value="sample" />
 		<property name="applicationDescription" value="sample" />
 		<property name="applicationContextName" value="sample" />
+        <property name="debugMode" value="true" />
 		<property name="clientConfigFile" value="etc/client_application.xml" />
 		<property name="sessionTimeout" value="20" />
 		<property name="entryPointClass" value="com.ponysdk.sample.client.UISampleEntryPoint" />

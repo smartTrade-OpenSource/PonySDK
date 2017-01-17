@@ -51,7 +51,7 @@ public class SimpleEventBus extends AbstractEventBus {
         if (handlers == null) return;
 
         final boolean removed = handlers.remove(handler);
-        if (!removed && log.isInfoEnabled()) log.info("redundant remove call : {}", handler);
+        if (!removed) log.warn("Useless remove call : {}", handler);
 
         if (removed && handlers.isEmpty()) prune(type, source);
     }

@@ -69,7 +69,7 @@ public abstract class PObject {
             return true;
         } else if (this.windowID != windowID) {
             throw new IllegalAccessError(
-                    "Widget already attached to an other window, current window : #" + this.windowID + ", new window : #" + windowID);
+                "Widget already attached to an other window, current window : #" + this.windowID + ", new window : #" + windowID);
         }
 
         return false;
@@ -125,8 +125,7 @@ public abstract class PObject {
     }
 
     public void sendToNative(final JsonObject data) {
-        if (nativeBindingFunction == null)
-            throw new IllegalAccessError("Object not bind to a native function");
+        if (nativeBindingFunction == null) throw new IllegalAccessError("Object not bind to a native function");
 
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.NATIVE, data));
     }
@@ -151,12 +150,9 @@ public abstract class PObject {
 
     @Override
     public boolean equals(final Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
         final PObject other = (PObject) obj;
         return ID == other.ID;
     }
@@ -166,99 +162,84 @@ public abstract class PObject {
     }
 
     protected void saveAdd(final int objectID, final int parentObjectID, final ServerBinaryModel... binaryModels) {
-        if (windowID != PWindow.EMPTY_WINDOW_ID)
-            executeAdd(objectID, parentObjectID, binaryModels);
-        else
-            stackedInstructions.add(() -> executeAdd(objectID, parentObjectID, binaryModels));
+        if (windowID != PWindow.EMPTY_WINDOW_ID) executeAdd(objectID, parentObjectID, binaryModels);
+        else stackedInstructions.add(() -> executeAdd(objectID, parentObjectID, binaryModels));
     }
 
     private void executeAdd(final int objectID, final int parentObjectID, final ServerBinaryModel... binaryModels) {
         if (PWindowManager.getWindow(windowID) != null) {
             final Parser parser = Txn.get().getParser();
             parser.beginObject();
-            if (windowID != PWindow.getMain().getID())
-                parser.parse(ServerToClientModel.WINDOW_ID, windowID);
+            if (windowID != PWindow.getMain().getID()) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
             parser.parse(ServerToClientModel.TYPE_ADD, objectID);
             parser.parse(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
             if (binaryModels != null) {
                 for (final ServerBinaryModel binaryModel : binaryModels) {
-                    if (binaryModel != null)
-                        parser.parse(binaryModel.getKey(), binaryModel.getValue());
+                    if (binaryModel != null) parser.parse(binaryModel.getKey(), binaryModel.getValue());
                 }
             }
             parser.endObject();
         } else {
-            if (log.isWarnEnabled()) log.warn("Add : The attached window #" + windowID + " doesn't exist", toString());
+            if (log.isWarnEnabled()) log.warn("Add : The attached window #" + windowID + " doesn't exist");
         }
     }
 
     protected void saveAddHandler(final HandlerModel type) {
-        if (windowID != PWindow.EMPTY_WINDOW_ID)
-            executeAddHandler(type);
-        else
-            stackedInstructions.add(() -> executeAddHandler(type));
+        if (windowID != PWindow.EMPTY_WINDOW_ID) executeAddHandler(type);
+        else stackedInstructions.add(() -> executeAddHandler(type));
     }
 
     private void executeAddHandler(final HandlerModel type) {
         if (PWindowManager.getWindow(windowID) != null) {
             final Parser parser = Txn.get().getParser();
             parser.beginObject();
-            if (windowID != PWindow.getMain().getID())
-                parser.parse(ServerToClientModel.WINDOW_ID, windowID);
+            if (windowID != PWindow.getMain().getID()) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
             parser.parse(ServerToClientModel.TYPE_ADD_HANDLER, type.getValue());
             parser.parse(ServerToClientModel.OBJECT_ID, ID);
             parser.endObject();
         } else {
-            if (log.isWarnEnabled()) log.warn("AddHandler : The attached window #" + windowID + " doesn't exist", toString());
+            if (log.isWarnEnabled()) log.warn("AddHandler : The attached window #" + windowID + " doesn't exist");
         }
     }
 
     protected void saveRemoveHandler(final HandlerModel type) {
-        if (windowID != PWindow.EMPTY_WINDOW_ID)
-            executeRemoveHandler();
-        else
-            stackedInstructions.add(this::executeRemoveHandler);
+        if (windowID != PWindow.EMPTY_WINDOW_ID) executeRemoveHandler();
+        else stackedInstructions.add(this::executeRemoveHandler);
     }
 
     private void executeRemoveHandler() {
         if (PWindowManager.getWindow(windowID) != null) {
             final Parser parser = Txn.get().getParser();
             parser.beginObject();
-            if (windowID != PWindow.getMain().getID())
-                parser.parse(ServerToClientModel.WINDOW_ID, windowID);
+            if (windowID != PWindow.getMain().getID()) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
             parser.parse(ServerToClientModel.TYPE_REMOVE_HANDLER, ID);
             parser.endObject();
         } else {
-            if (log.isWarnEnabled()) log.warn("RemoveHandler : The attached window #" + windowID + " doesn't exist", toString());
+            if (log.isWarnEnabled()) log.warn("RemoveHandler : The attached window #" + windowID + " doesn't exist");
         }
     }
 
     void saveRemove(final int objectID, final int parentObjectID) {
-        if (windowID != PWindow.EMPTY_WINDOW_ID)
-            executeRemove(objectID, parentObjectID);
-        else
-            stackedInstructions.add(() -> executeRemove(objectID, parentObjectID));
+        if (windowID != PWindow.EMPTY_WINDOW_ID) executeRemove(objectID, parentObjectID);
+        else stackedInstructions.add(() -> executeRemove(objectID, parentObjectID));
     }
 
     private void executeRemove(final int objectID, final int parentObjectID) {
         if (PWindowManager.getWindow(windowID) != null) {
             final Parser parser = Txn.get().getParser();
             parser.beginObject();
-            if (windowID != PWindow.getMain().getID())
-                parser.parse(ServerToClientModel.WINDOW_ID, windowID);
+            if (windowID != PWindow.getMain().getID()) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
             parser.parse(ServerToClientModel.TYPE_REMOVE, objectID);
             parser.parse(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
             parser.endObject();
         } else {
-            if (log.isWarnEnabled()) log.warn("Remove : The attached window #" + windowID + " doesn't exist", toString());
+            if (log.isWarnEnabled()) log.warn("Remove : The attached window #" + windowID + " doesn't exist");
         }
     }
 
     protected void saveUpdate(final ModelWriterCallback callback) {
-        if (windowID != PWindow.EMPTY_WINDOW_ID)
-            writeUpdate(callback);
-        else
-            stackedInstructions.add(() -> writeUpdate(callback));
+        if (windowID != PWindow.EMPTY_WINDOW_ID) writeUpdate(callback);
+        else stackedInstructions.add(() -> writeUpdate(callback));
     }
 
     private void writeUpdate(final ModelWriterCallback callback) {
@@ -273,7 +254,7 @@ public abstract class PObject {
             callback.doWrite(writer);
             writer.endObject();
         } else {
-            if (log.isWarnEnabled()) log.warn("Update : The attached window #" + windowID + " doesn't exist", toString());
+            if (log.isWarnEnabled()) log.warn("Update : The attached window #" + windowID + " doesn't exist");
         }
     }
 
