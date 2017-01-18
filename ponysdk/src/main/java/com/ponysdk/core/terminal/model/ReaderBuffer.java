@@ -198,12 +198,12 @@ public class ReaderBuffer {
      * Go directly to the next block
      */
     public void avoidBlock() {
-        boolean result = false;
-        while (!result && hasRemaining()) {
+        while (hasRemaining()) {
             final BinaryModel binaryModel = readBinaryModel();
-            log.warning("Consume " + binaryModel + " on null PTObject");
-            result = ServerToClientModel.WINDOW_ID.equals(binaryModel.getModel()) || binaryModel.isBeginKey();
-            if (result) rewind(binaryModel);
+            if (binaryModel.isBeginKey()) {
+                rewind(binaryModel);
+                break;
+            }
         }
     }
 
