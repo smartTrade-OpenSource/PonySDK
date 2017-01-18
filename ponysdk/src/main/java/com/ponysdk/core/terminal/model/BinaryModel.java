@@ -156,11 +156,11 @@ public class BinaryModel {
     }
 
     public boolean isBeginKey() {
-        return ServerToClientModel.TYPE_ADD.equals(model) || ServerToClientModel.TYPE_ADD_HANDLER.equals(model)
-                || ServerToClientModel.TYPE_CLOSE.equals(model) || ServerToClientModel.TYPE_CREATE.equals(model)
-                || ServerToClientModel.TYPE_GC.equals(model) || ServerToClientModel.TYPE_HISTORY.equals(model)
-                || ServerToClientModel.TYPE_REMOVE.equals(model) || ServerToClientModel.TYPE_REMOVE_HANDLER.equals(model)
-                || ServerToClientModel.TYPE_UPDATE.equals(model);
+        return ServerToClientModel.WINDOW_ID.equals(model) || ServerToClientModel.TYPE_ADD.equals(model)
+                || ServerToClientModel.TYPE_ADD_HANDLER.equals(model) || ServerToClientModel.TYPE_CLOSE.equals(model)
+                || ServerToClientModel.TYPE_CREATE.equals(model) || ServerToClientModel.TYPE_GC.equals(model)
+                || ServerToClientModel.TYPE_HISTORY.equals(model) || ServerToClientModel.TYPE_REMOVE.equals(model)
+                || ServerToClientModel.TYPE_REMOVE_HANDLER.equals(model) || ServerToClientModel.TYPE_UPDATE.equals(model);
     }
 
 }
