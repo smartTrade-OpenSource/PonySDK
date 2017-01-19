@@ -27,7 +27,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.server.servlet.WebsocketEncoder;
 import com.ponysdk.core.writer.ModelWriter;
 
 public class Txn {
@@ -81,8 +81,8 @@ public class Txn {
         return txnContext.getWriter();
     }
 
-    public Parser getParser() {
-        return txnContext.getParser();
+    public WebsocketEncoder getEncoder() {
+        return txnContext.getEncoder();
     }
 
     public void addTxnListener(final TxnListener txnListener) {

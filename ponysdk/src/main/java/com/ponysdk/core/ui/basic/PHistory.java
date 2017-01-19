@@ -26,9 +26,9 @@ package com.ponysdk.core.ui.basic;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import com.ponysdk.core.server.application.Parser;
-import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.servlet.WebsocketEncoder;
+import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 
@@ -75,11 +75,11 @@ public class PHistory {
     public void newItem(final String token, final boolean fireEvents) {
         this.token = token;
 
-        final Parser parser = Txn.get().getParser();
-        parser.beginObject();
-        parser.parse(ServerToClientModel.TYPE_HISTORY, token);
-        parser.parse(ServerToClientModel.HISTORY_FIRE_EVENTS, fireEvents);
-        parser.endObject();
+        final WebsocketEncoder encoder = Txn.get().getEncoder();
+        encoder.beginObject();
+        encoder.encode(ServerToClientModel.TYPE_HISTORY, token);
+        encoder.encode(ServerToClientModel.HISTORY_FIRE_EVENTS, fireEvents);
+        encoder.endObject();
     }
 
     public void fireHistoryChanged(final String token) {
@@ -88,7 +88,6 @@ public class PHistory {
         for (final PValueChangeHandler<String> handler : handlers) {
             handler.onValueChange(event);
         }
-
     }
 
     public String getToken() {

@@ -31,7 +31,7 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.server.servlet.WebsocketEncoder;
 import com.ponysdk.core.ui.basic.event.PHasHTML;
 
 /**
@@ -87,10 +87,10 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
     }
 
     @Override
-    protected void enrichOnInit(final Parser parser) {
+    protected void enrichOnInit(final WebsocketEncoder parser) {
         super.enrichOnInit(parser);
-        if (html != null) parser.parse(ServerToClientModel.HTML, html);
-        else parser.parse(ServerToClientModel.TEXT, text);
+        if (html != null) parser.encode(ServerToClientModel.HTML, html);
+        else parser.encode(ServerToClientModel.TEXT, text);
     }
 
     @Override

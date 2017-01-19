@@ -28,8 +28,8 @@ import java.util.Map;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.servlet.WebsocketEncoder;
 import com.ponysdk.core.ui.main.EntryPoint;
 
 /**
@@ -81,9 +81,9 @@ public class PRootPanel extends PAbsolutePanel {
     }
 
     @Override
-    protected void enrichOnInit(final Parser parser) {
+    protected void enrichOnInit(final WebsocketEncoder parser) {
         super.enrichOnInit(parser);
-        if (id != null) parser.parse(ServerToClientModel.ROOT_ID, id);
+        if (id != null) parser.encode(ServerToClientModel.ROOT_ID, id);
     }
 
     @Override

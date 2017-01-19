@@ -37,7 +37,7 @@ import javax.json.JsonObject;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.server.servlet.WebsocketEncoder;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.ui.basic.event.HasPChangeHandlers;
 import com.ponysdk.core.ui.basic.event.PChangeEvent;
@@ -113,14 +113,14 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
         items.forEach((item) -> this.items.add(new ListItem(item, item)));
 
-        final Parser parser = Txn.get().getParser();
-        parser.beginObject();
-        if (windowID != PWindow.getMain().getID()) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-        parser.parse(ServerToClientModel.TYPE_ADD, ID);
+        final WebsocketEncoder encoder = Txn.get().getEncoder();
+        encoder.beginObject();
+        if (windowID != PWindow.getMain().getID()) encoder.encode(ServerToClientModel.WINDOW_ID, windowID);
+        encoder.encode(ServerToClientModel.TYPE_ADD, ID);
         final String s = items.toString();
-        parser.parse(ServerToClientModel.ITEM_ADD, s.substring(1, s.length() - 1).replaceAll(",", ";").replaceAll(" ", EMPTY));
-        parser.parse(ServerToClientModel.ITEM_GROUP, group);
-        parser.endObject();
+        encoder.encode(ServerToClientModel.ITEM_ADD, s.substring(1, s.length() - 1).replaceAll(",", ";").replaceAll(" ", EMPTY));
+        encoder.encode(ServerToClientModel.ITEM_GROUP, group);
+        encoder.endObject();
     }
 
     public void addItem(final String item) {
@@ -238,10 +238,8 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         checkIndex(index);
         this.selectedIndex = index;
 
-        if (isMultipleSelect && selected)
-            selectedIndexes.add(index);
-        else
-            selectedIndexes.remove(index);
+        if (isMultipleSelect && selected) selectedIndexes.add(index);
+        else selectedIndexes.remove(index);
 
         saveUpdate((writer) -> {
             writer.writeModel(ServerToClientModel.SELECTED, selected);

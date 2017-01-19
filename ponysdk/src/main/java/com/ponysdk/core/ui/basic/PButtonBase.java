@@ -26,7 +26,7 @@ package com.ponysdk.core.ui.basic;
 import java.util.Objects;
 
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.server.servlet.WebsocketEncoder;
 import com.ponysdk.core.ui.basic.event.PHasHTML;
 
 /**
@@ -50,10 +50,10 @@ abstract class PButtonBase extends PFocusWidget implements PHasHTML {
     }
 
     @Override
-    protected void enrichOnInit(final Parser parser) {
+    protected void enrichOnInit(final WebsocketEncoder parser) {
         super.enrichOnInit(parser);
-        if (text != null) parser.parse(ServerToClientModel.TEXT, text);
-        if (html != null) parser.parse(ServerToClientModel.HTML, html);
+        if (text != null) parser.encode(ServerToClientModel.TEXT, text);
+        if (html != null) parser.encode(ServerToClientModel.HTML, html);
     }
 
     @Override

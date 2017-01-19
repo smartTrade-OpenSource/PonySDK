@@ -24,14 +24,18 @@
 package com.ponysdk.core.writer;
 
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.server.servlet.WebsocketEncoder;
 
 public class ModelWriter {
 
-    private final Parser parser;
+    private final WebsocketEncoder encoder;
 
-    public ModelWriter(final Parser parser) {
-        this.parser = parser;
+    public ModelWriter(final WebsocketEncoder Encoder) {
+        this.encoder = Encoder;
+    }
+
+    public void beginObject() {
+        encoder.beginObject();
     }
 
     public void writeModel(final ServerToClientModel model) {
@@ -39,14 +43,11 @@ public class ModelWriter {
     }
 
     public void writeModel(final ServerToClientModel model, final Object value) {
-        parser.parse(model, value);
-    }
-
-    public void beginObject() {
-        parser.beginObject();
+        encoder.encode(model, value);
     }
 
     public void endObject() {
-        parser.endObject();
+        encoder.endObject();
     }
+
 }

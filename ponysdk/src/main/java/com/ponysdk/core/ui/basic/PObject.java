@@ -35,8 +35,8 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.servlet.WebsocketEncoder;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.ui.basic.event.PTerminalEvent;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
@@ -77,11 +77,11 @@ public abstract class PObject {
 
     void init() {
         if (initialized) return;
-        final Parser parser = Txn.get().getParser();
+        final WebsocketEncoder parser = Txn.get().getEncoder();
         parser.beginObject();
-        if (windowID != PWindow.getMain().getID()) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-        parser.parse(ServerToClientModel.TYPE_CREATE, ID);
-        parser.parse(ServerToClientModel.WIDGET_TYPE, getWidgetType().getValue());
+        if (windowID != PWindow.getMain().getID()) parser.encode(ServerToClientModel.WINDOW_ID, windowID);
+        parser.encode(ServerToClientModel.TYPE_CREATE, ID);
+        parser.encode(ServerToClientModel.WIDGET_TYPE, getWidgetType().getValue());
         enrichOnInit(parser);
         parser.endObject();
 
@@ -95,7 +95,7 @@ public abstract class PObject {
         initialized = true;
     }
 
-    protected void enrichOnInit(final Parser parser) {
+    protected void enrichOnInit(final WebsocketEncoder encoder) {
     }
 
     protected void init0() {
@@ -168,17 +168,17 @@ public abstract class PObject {
 
     private void executeAdd(final int objectID, final int parentObjectID, final ServerBinaryModel... binaryModels) {
         if (PWindowManager.getWindow(windowID) != null) {
-            final Parser parser = Txn.get().getParser();
-            parser.beginObject();
-            if (windowID != PWindow.getMain().getID()) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-            parser.parse(ServerToClientModel.TYPE_ADD, objectID);
-            parser.parse(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
+            final WebsocketEncoder encoder = Txn.get().getEncoder();
+            encoder.beginObject();
+            if (windowID != PWindow.getMain().getID()) encoder.encode(ServerToClientModel.WINDOW_ID, windowID);
+            encoder.encode(ServerToClientModel.TYPE_ADD, objectID);
+            encoder.encode(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
             if (binaryModels != null) {
                 for (final ServerBinaryModel binaryModel : binaryModels) {
-                    if (binaryModel != null) parser.parse(binaryModel.getKey(), binaryModel.getValue());
+                    if (binaryModel != null) encoder.encode(binaryModel.getKey(), binaryModel.getValue());
                 }
             }
-            parser.endObject();
+            encoder.endObject();
         } else {
             if (log.isWarnEnabled()) log.warn("Add : The attached window #" + windowID + " doesn't exist");
         }
@@ -191,11 +191,11 @@ public abstract class PObject {
 
     private void executeAddHandler(final HandlerModel type) {
         if (PWindowManager.getWindow(windowID) != null) {
-            final Parser parser = Txn.get().getParser();
+            final WebsocketEncoder parser = Txn.get().getEncoder();
             parser.beginObject();
-            if (windowID != PWindow.getMain().getID()) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-            parser.parse(ServerToClientModel.TYPE_ADD_HANDLER, type.getValue());
-            parser.parse(ServerToClientModel.OBJECT_ID, ID);
+            if (windowID != PWindow.getMain().getID()) parser.encode(ServerToClientModel.WINDOW_ID, windowID);
+            parser.encode(ServerToClientModel.TYPE_ADD_HANDLER, type.getValue());
+            parser.encode(ServerToClientModel.OBJECT_ID, ID);
             parser.endObject();
         } else {
             if (log.isWarnEnabled()) log.warn("AddHandler : The attached window #" + windowID + " doesn't exist");
@@ -209,10 +209,10 @@ public abstract class PObject {
 
     private void executeRemoveHandler() {
         if (PWindowManager.getWindow(windowID) != null) {
-            final Parser parser = Txn.get().getParser();
+            final WebsocketEncoder parser = Txn.get().getEncoder();
             parser.beginObject();
-            if (windowID != PWindow.getMain().getID()) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-            parser.parse(ServerToClientModel.TYPE_REMOVE_HANDLER, ID);
+            if (windowID != PWindow.getMain().getID()) parser.encode(ServerToClientModel.WINDOW_ID, windowID);
+            parser.encode(ServerToClientModel.TYPE_REMOVE_HANDLER, ID);
             parser.endObject();
         } else {
             if (log.isWarnEnabled()) log.warn("RemoveHandler : The attached window #" + windowID + " doesn't exist");
@@ -226,11 +226,11 @@ public abstract class PObject {
 
     private void executeRemove(final int objectID, final int parentObjectID) {
         if (PWindowManager.getWindow(windowID) != null) {
-            final Parser parser = Txn.get().getParser();
+            final WebsocketEncoder parser = Txn.get().getEncoder();
             parser.beginObject();
-            if (windowID != PWindow.getMain().getID()) parser.parse(ServerToClientModel.WINDOW_ID, windowID);
-            parser.parse(ServerToClientModel.TYPE_REMOVE, objectID);
-            parser.parse(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
+            if (windowID != PWindow.getMain().getID()) parser.encode(ServerToClientModel.WINDOW_ID, windowID);
+            parser.encode(ServerToClientModel.TYPE_REMOVE, objectID);
+            parser.encode(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
             parser.endObject();
         } else {
             if (log.isWarnEnabled()) log.warn("Remove : The attached window #" + windowID + " doesn't exist");

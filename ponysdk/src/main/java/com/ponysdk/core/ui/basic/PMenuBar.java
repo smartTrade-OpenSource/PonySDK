@@ -28,7 +28,7 @@ import java.util.List;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.server.servlet.WebsocketEncoder;
 import com.ponysdk.core.ui.basic.event.HasPAnimation;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
 
@@ -119,9 +119,9 @@ public class PMenuBar extends PWidget implements HasPAnimation {
     }
 
     @Override
-    protected void enrichOnInit(final Parser parser) {
+    protected void enrichOnInit(final WebsocketEncoder parser) {
         super.enrichOnInit(parser);
-        parser.parse(ServerToClientModel.MENU_BAR_IS_VERTICAL, vertical);
+        parser.encode(ServerToClientModel.MENU_BAR_IS_VERTICAL, vertical);
     }
 
     @Override

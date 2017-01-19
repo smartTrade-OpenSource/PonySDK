@@ -27,15 +27,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.ponysdk.core.server.application.Application;
-import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.servlet.WebsocketEncoder;
 import com.ponysdk.core.server.servlet.WebSocket;
 import com.ponysdk.core.writer.ModelWriter;
 
 public class TxnContext implements TxnListener {
 
     private final WebSocket socket;
-    private final Parser parser;
     private final ModelWriter modelWriter;
     private final Map<String, Object> parameters = new HashMap<>();
 
@@ -46,12 +45,11 @@ public class TxnContext implements TxnListener {
 
     public TxnContext(final WebSocket socket) {
         this.socket = socket;
-        this.parser = new Parser(socket);
-        this.modelWriter = new ModelWriter(parser);
+        this.modelWriter = new ModelWriter(socket);
     }
 
     void flush() {
-        parser.flush();
+        socket.flush();
     }
 
     @Override
@@ -75,8 +73,8 @@ public class TxnContext implements TxnListener {
         return modelWriter;
     }
 
-    public Parser getParser() {
-        return parser;
+    public WebsocketEncoder getEncoder() {
+        return socket;
     }
 
     public Application getApplication() {
@@ -124,7 +122,7 @@ public class TxnContext implements TxnListener {
     }
 
     public void release() {
-        parser.release();
+        socket.release();
     }
 
 }

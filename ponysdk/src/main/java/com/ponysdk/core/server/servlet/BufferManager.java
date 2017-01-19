@@ -76,7 +76,17 @@ public class BufferManager {
                 }
             }
         }
-        return buffer;
+
+        // Verify the buffer is good to be used
+        if (buffer.position() == 0 && buffer.limit() == DEFAULT_BUFFER_SIZE) {
+            return buffer;
+        } else {
+            // Discard this buffer, let it be gc
+            log.warn("A zombie buffer has been detected, it will be eliminated",
+                new IllegalStateException("Zombie buffer detected : " + buffer.toString()));
+            buffers.remove(buffer);
+            return allocate();
+        }
     }
 
     public void send(final RemoteEndpoint remote, final ByteBuffer buffer) {

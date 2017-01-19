@@ -23,13 +23,13 @@
 
 package com.ponysdk.core.ui.basic;
 
-import com.ponysdk.core.server.application.Parser;
+import java.time.Duration;
+
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.model.WidgetType;
-
-import java.time.Duration;
+import com.ponysdk.core.server.servlet.WebsocketEncoder;
+import com.ponysdk.core.ui.model.ServerBinaryModel;
 
 /**
  * A panel that lays its child widgets out "docked" at its outer edges, and
@@ -64,9 +64,9 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
     }
 
     @Override
-    protected void enrichOnInit(final Parser parser) {
+    protected void enrichOnInit(final WebsocketEncoder parser) {
         super.enrichOnInit(parser);
-        parser.parse(ServerToClientModel.UNIT, unit.getByteValue());
+        parser.encode(ServerToClientModel.UNIT, unit.getByteValue());
     }
 
     @Override
@@ -126,7 +126,7 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
         adopt(child);
 
         child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.DIRECTION, direction.getValue()),
-                new ServerBinaryModel(ServerToClientModel.SIZE, size));
+            new ServerBinaryModel(ServerToClientModel.SIZE, size));
         child.attach(windowID);
     }
 

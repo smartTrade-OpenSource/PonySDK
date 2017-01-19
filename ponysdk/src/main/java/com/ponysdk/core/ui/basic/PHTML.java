@@ -27,7 +27,7 @@ import java.util.Objects;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.server.servlet.WebsocketEncoder;
 import com.ponysdk.core.ui.basic.event.PHasHTML;
 
 /**
@@ -63,10 +63,10 @@ public class PHTML extends PLabel implements PHasHTML {
     }
 
     @Override
-    protected void enrichOnInit(final Parser parser) {
+    protected void enrichOnInit(final WebsocketEncoder parser) {
         super.enrichOnInit(parser);
-        if (html != null) parser.parse(ServerToClientModel.HTML, html);
-        if (wordWrap) parser.parse(ServerToClientModel.WORD_WRAP, wordWrap);
+        if (html != null) parser.encode(ServerToClientModel.HTML, html);
+        if (wordWrap) parser.encode(ServerToClientModel.WORD_WRAP, wordWrap);
     }
 
     @Override
