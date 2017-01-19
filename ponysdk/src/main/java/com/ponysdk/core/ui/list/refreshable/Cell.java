@@ -29,7 +29,6 @@ public class Cell<D, W extends IsPWidget> {
 
     private W widget;
     private D data;
-    private Object value;
     private int row;
     private int col;
 
@@ -47,14 +46,6 @@ public class Cell<D, W extends IsPWidget> {
 
     public void setData(final D data) {
         this.data = data;
-    }
-
-    public Object getValue() {
-        return value;
-    }
-
-    public void setValue(final Object value) {
-        this.value = value;
     }
 
     public int getRow() {

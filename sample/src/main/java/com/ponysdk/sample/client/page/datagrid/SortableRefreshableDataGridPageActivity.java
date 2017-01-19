@@ -32,7 +32,7 @@ import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
-import com.ponysdk.core.ui.celltable.SimpleTableView;
+import com.ponysdk.core.ui.grid.GridTableWidget;
 import com.ponysdk.core.ui.list.refreshable.RefreshableDataGrid;
 import com.ponysdk.sample.client.datamodel.PonyStock;
 
@@ -87,7 +87,7 @@ public class SortableRefreshableDataGridPageActivity extends RefreshableDataGrid
 
     @Override
     protected void onPonyStock(final PonyStock data) {
-        dataGrid.setData(data.getId(), data);
+        //        dataGrid.setData(data.getId(), data);
     }
 
     private class SortableRefreshableDataGrid<K, D> extends RefreshableDataGrid<K, D> {
@@ -97,36 +97,35 @@ public class SortableRefreshableDataGridPageActivity extends RefreshableDataGrid
         private final Comparator<D> comparator;
 
         public SortableRefreshableDataGrid(final Comparator<D> comparator) {
-            super(new SimpleTableView());
+            super(new GridTableWidget());
             this.comparator = comparator;
         }
 
         @Override
-        public SimpleTableView getListView() {
-            return (SimpleTableView) super.getListView();
+        public GridTableWidget getListView() {
+            return (GridTableWidget) super.getListView();
         }
 
-        @Override
         public void setData(final K key, final D data) {
 
             if (added) {
                 removeColspanRow();
             }
 
-            final int previousRow = getRow(key);
-            if (previousRow == -1) {
-                // add new row
-                datas.add(data);
-            }
+            //            final int previousRow = getViewRowIndex(key);
+            //            if (previousRow == -1) {
+            //                // add new row
+            //                datas.add(data);
+            //            }
 
-            super.setData(key, data);
+            //            super.setData(key, data);
 
             Collections.sort(datas, comparator);
 
             final int newRow = datas.indexOf(data);
-            if (previousRow != newRow) {
-                moveRow(key, newRow);
-            }
+            //            if (previousRow != newRow) {
+            //                moveRow(key, newRow);
+            //            }
 
             if (added) {
                 insertColspanRow();

@@ -107,7 +107,7 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
             @Override
             public void onClick(final PClickEvent event) {
                 final Integer i = Integer.parseInt(line.getText());
-                final Pony father = dataGrid.getVisibleItem(i);
+                final Pony father = dataGrid.getRow(i);
                 final List<Pony> copy = new ArrayList<>();
                 for (int j = 0; j < 3; j++) {
                     final Pony p = new Pony(father.getId(), "Copy-" + father.getName(), father.getAge(),
@@ -124,7 +124,7 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
             @Override
             public void onClick(final PClickEvent event) {
                 final Integer i = Integer.parseInt(line.getText());
-                final Pony father = dataGrid.getVisibleItem(i);
+                final Pony father = dataGrid.getRow(i);
                 dataGrid.removeSubList(father);
             }
         });

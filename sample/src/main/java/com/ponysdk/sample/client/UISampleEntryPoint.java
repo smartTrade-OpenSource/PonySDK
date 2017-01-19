@@ -34,6 +34,7 @@ import com.ponysdk.core.server.concurrent.PScheduler;
 import com.ponysdk.core.server.concurrent.PScheduler.Callback;
 import com.ponysdk.core.server.concurrent.PScheduler.UIDelegator;
 import com.ponysdk.core.server.concurrent.PScheduler.UIRunnable;
+import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PAbsolutePanel;
 import com.ponysdk.core.ui.basic.PAnchor;
 import com.ponysdk.core.ui.basic.PButton;
@@ -86,6 +87,14 @@ import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
 import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
+import com.ponysdk.core.ui.grid.AbstractGridWidget;
+import com.ponysdk.core.ui.grid.GridTableWidget;
+import com.ponysdk.core.ui.list.DataGridColumnDescriptor;
+import com.ponysdk.core.ui.list.refreshable.Cell;
+import com.ponysdk.core.ui.list.refreshable.RefreshableDataGrid;
+import com.ponysdk.core.ui.list.renderer.cell.CellRenderer;
+import com.ponysdk.core.ui.list.renderer.header.HeaderCellRenderer;
+import com.ponysdk.core.ui.list.valueprovider.IdentityValueProvider;
 import com.ponysdk.core.ui.main.EntryPoint;
 import com.ponysdk.core.ui.model.PKeyCodes;
 import com.ponysdk.core.ui.rich.PToolbar;
@@ -108,7 +117,17 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PWindow a = new PWindow(null, "Window 2", "resizable=yes,location=0,status=0,scrollbars=0");
         a.open();
 
+        final PLabel b = new PLabel();
+        a.add(b);
+
+        final AtomicInteger i = new AtomicInteger();
+        PScheduler.scheduleWithFixedDelay(() -> {
+            b.setText(i.incrementAndGet() + "");
+        } , Duration.ofSeconds(1), Duration.ofSeconds(1));
+
         testUIDelegator();
+
+        //createGrid();
 
         if (true) return;
 
@@ -341,13 +360,98 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         // uiContext.getHistory().newItem("", false);
     }
 
+    private class Data {
+
+        protected Integer key;
+        protected String value;
+
+        public Data(final Integer key, final String value) {
+            this.key = key;
+            this.value = value;
+        }
+    }
+
+    private void createGrid() {
+        final AbstractGridWidget listView = new GridTableWidget();
+        listView.setStyleProperty("table-layout", "fixed");
+        final RefreshableDataGrid<Integer, Data> grid = new RefreshableDataGrid<Integer, UISampleEntryPoint.Data>(listView);
+        PWindow.getMain().add(grid);
+
+        final DataGridColumnDescriptor<Data, Data> columnDescriptor1 = new DataGridColumnDescriptor<>();
+        columnDescriptor1.setCellRenderer(new CellRenderer<UISampleEntryPoint.Data, PLabel>() {
+
+            @Override
+            public void update(final Data value, final Cell<Data, PLabel> current) {
+                current.getWidget().setText(value.key + "");
+            }
+
+            @Override
+            public PLabel render(final int row, final Data value) {
+                return new PLabel(value.key + "");
+            }
+        });
+        columnDescriptor1.setHeaderCellRenderer(new HeaderCellRenderer() {
+
+            @Override
+            public IsPWidget render() {
+                return new PLabel("A");
+            }
+        });
+        columnDescriptor1.setValueProvider(new IdentityValueProvider<>());
+        grid.addDataGridColumnDescriptor(columnDescriptor1);
+        grid.addDataGridColumnDescriptor(columnDescriptor1);
+        grid.addDataGridColumnDescriptor(columnDescriptor1);
+        grid.addDataGridColumnDescriptor(columnDescriptor1);
+        grid.addDataGridColumnDescriptor(columnDescriptor1);
+        grid.addDataGridColumnDescriptor(columnDescriptor1);
+        grid.addDataGridColumnDescriptor(columnDescriptor1);
+
+        for (int i = 0; i < 40; i++) {
+
+            final DataGridColumnDescriptor<Data, Data> columnDescriptor3 = new DataGridColumnDescriptor<>();
+            columnDescriptor3.setCellRenderer(new CellRenderer<UISampleEntryPoint.Data, PLabel>() {
+
+                @Override
+                public void update(final Data value, final Cell<Data, PLabel> current) {
+                    current.getWidget().setText(value.value);
+                }
+
+                @Override
+                public PLabel render(final int row, final Data value) {
+                    return new PLabel(value.value);
+                }
+            });
+            columnDescriptor3.setHeaderCellRenderer(new HeaderCellRenderer() {
+
+                @Override
+                public IsPWidget render() {
+                    return new PLabel("B");
+                }
+            });
+            columnDescriptor3.setValueProvider(new IdentityValueProvider<>());
+            grid.addDataGridColumnDescriptor(columnDescriptor3);
+        }
+
+        grid.setData(0, 1, new Data(1, "AA"));
+        grid.setData(1, 2, new Data(2, "BB"));
+        final Data data = new Data(3, "CC");
+        grid.setData(2, 3, data);
+
+        final AtomicInteger i = new AtomicInteger();
+        PScheduler.scheduleWithFixedDelay(() -> {
+            for (int key = 1; key < 50; key++) {
+                grid.setData(key - 1, key, new Data(key, "" + i.incrementAndGet()));
+            }
+        } , Duration.ofSeconds(1), Duration.ofMillis(100));
+    }
+
     private void testUIDelegator() {
         final PLabel a = new PLabel();
         PWindow.getMain().add(a);
         final AtomicInteger ai = new AtomicInteger();
         PScheduler.scheduleAtFixedRate(() -> {
             a.setText("a " + ai.incrementAndGet());
-        }, Duration.ofMillis(0), Duration.ofMillis(10));
+        } , Duration.ofMillis(0), Duration.ofMillis(10));
 
         final PLabel p = new PLabel();
         PWindow.getMain().add(p);
@@ -398,7 +502,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             windowContainer.add(label);
             label.setText("Window 3 " + i.incrementAndGet());
             windowContainer.add(new PCheckBox("Checkbox"));
-        }, Duration.ofSeconds(5), Duration.ofSeconds(5));
+        } , Duration.ofSeconds(5), Duration.ofSeconds(5));
 
         w3.open();
 
@@ -422,7 +526,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             windowContainer.add(label);
             label.setText("Window 2 " + i.incrementAndGet());
             windowContainer.add(new PCheckBox("Checkbox"));
-        }, Duration.ofSeconds(5), Duration.ofSeconds(5));
+        } , Duration.ofSeconds(5), Duration.ofSeconds(5));
         return w2;
     }
 
@@ -455,7 +559,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             label.setText("Window 1 " + i.incrementAndGet());
             windowContainer.add(label);
             windowContainer.add(new PCheckBox("Checkbox"));
-        }, Duration.ofSeconds(10), Duration.ofSeconds(10));
+        } , Duration.ofSeconds(10), Duration.ofSeconds(10));
         return w;
     }
 

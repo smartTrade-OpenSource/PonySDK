@@ -42,6 +42,6 @@ public interface CellRenderer<D, W extends IsPWidget> {
 
     W render(final int row, final D value);
 
-    void update(final D value, Cell<D, W> previous);
+    void update(final D value, Cell<D, W> current);
 
 }
