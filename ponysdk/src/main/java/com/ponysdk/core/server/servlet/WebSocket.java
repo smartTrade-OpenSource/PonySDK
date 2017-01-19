@@ -152,20 +152,17 @@ public class WebSocket implements WebSocketListener {
         if (isLiving() && isSessionOpen()) {
             if (buffer.position() != 0) {
                 if (monitor != null) monitor.onBeforeFlush(WebSocket.this, buffer.position());
-                buffer.flip();
                 try {
                     bufferManager.send(session.getRemote(), buffer);
                 } finally {
                     if (monitor != null) monitor.onAfterFlush(WebSocket.this);
                 }
-            } else {
-                release(buffer);
-                log.debug("Empty buffer, no need to write on the websocket");
+
+                return;
             }
-        } else {
-            release(buffer);
-            throw new IllegalStateException("UI Context has been destroyed");
         }
+
+        release(buffer);
     }
 
     /**

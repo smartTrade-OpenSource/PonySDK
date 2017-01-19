@@ -80,6 +80,7 @@ public class BufferManager {
     }
 
     public void send(final RemoteEndpoint remote, final ByteBuffer buffer) {
+        buffer.flip();
         remote.sendBytes(buffer, new WriteCallback() {
 
             @Override
@@ -96,6 +97,7 @@ public class BufferManager {
     }
 
     public void release(final ByteBuffer buffer) {
+        if (bufferPool.contains(buffer)) return;
         buffer.clear();
         try {
             bufferPool.put(buffer);
