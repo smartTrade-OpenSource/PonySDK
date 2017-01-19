@@ -139,11 +139,15 @@ public class PScheduler implements UIContextListener {
     }
 
     public static <R> UIDelegator<R> delegate(final Callback<R> callable) {
-        return INSTANCE.delegade0(callable);
+        return delegate(callable, UIContext.get());
     }
 
-    private <R> UIDelegator<R> delegade0(final Callback<R> callback) {
-        return new UIDelegator<>(callback);
+    public static <R> UIDelegator<R> delegate(final Callback<R> callable, final UIContext uiContext) {
+        return INSTANCE.delegate0(callable, uiContext);
+    }
+
+    private <R> UIDelegator<R> delegate0(final Callback<R> callback, final UIContext uiContext) {
+        return new UIDelegator<>(callback, uiContext);
     }
 
     private void purge(final UIRunnable uiRunnable) {
@@ -171,7 +175,7 @@ public class PScheduler implements UIContextListener {
         }
     }
 
-    public static class UIRunnable implements Runnable {
+    public static final class UIRunnable implements Runnable {
 
         private final Runnable runnable;
         private final UIContext uiContext;
@@ -250,22 +254,22 @@ public class PScheduler implements UIContextListener {
 
     }
 
-    public static class UIDelegator<R> {
+    public static final class UIDelegator<R> {
 
         private final Callback<R> callback;
         private final UIContext uiContext;
 
-        UIDelegator(final Callback<R> callback) {
-            this.uiContext = UIContext.get();
+        UIDelegator(final Callback<R> callback, final UIContext uiContext) {
+            this.uiContext = uiContext;
             this.callback = callback;
         }
 
-        public void onError(final R result, final Exception exception) {
-            PScheduler.schedule(uiContext, () -> callback.onError(result, exception));
+        public UIRunnable onError(final R result, final Exception exception) {
+            return PScheduler.schedule(uiContext, () -> callback.onError(result, exception));
         }
 
-        public void onSuccess(final R result) {
-            PScheduler.schedule(uiContext, () -> callback.onSuccess(result));
+        public UIRunnable onSuccess(final R result) {
+            return PScheduler.schedule(uiContext, () -> callback.onSuccess(result));
         }
 
         public UIContext getUiContext() {
