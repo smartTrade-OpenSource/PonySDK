@@ -43,7 +43,6 @@ import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.stm.Txn;
-import com.ponysdk.core.ui.basic.event.HasPHandlers;
 import com.ponysdk.core.ui.basic.event.HasPKeyPressHandlers;
 import com.ponysdk.core.ui.basic.event.HasPKeyUpHandlers;
 import com.ponysdk.core.ui.basic.event.HasPWidgets;
@@ -79,11 +78,10 @@ import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.writer.ModelWriter;
 
 /**
- * The base class for the majority of user-interface objects. Widget adds
- * support for receiving events from the browser and being added directly to
- * {@link PPanel panels}.
+ * The base class for the majority of user-interface objects. Widget adds support for receiving
+ * events from the browser and being added directly to {@link com.ponysdk.core.ui.basic.PPanel}.
  */
-public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers, HasPKeyPressHandlers, HasPKeyUpHandlers {
+public abstract class PWidget extends PObject implements IsPWidget, HasPKeyPressHandlers, HasPKeyUpHandlers {
 
     private static final Logger log = LoggerFactory.getLogger(PWidget.class);
 
@@ -477,7 +475,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         return ensureDomHandler().getHandlers(type, null);
     }
 
-    public void fireMouseEvent(final JsonObject instruction, final PMouseEvent<?> event) {
+    private void fireMouseEvent(final JsonObject instruction, final PMouseEvent<?> event) {
         final String eventInfoKey = ClientToServerModel.EVENT_INFO.toStringValue();
         if (instruction.containsKey(eventInfoKey)) {
             final JsonArray eventInfo = instruction.getJsonArray(eventInfoKey);
@@ -502,10 +500,8 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         fireEvent(event);
     }
 
-    @Override
-    public void fireEvent(final Event<?> event) {
-        if (domHandler == null) return;
-        domHandler.fireEvent(event);
+    private void fireEvent(final Event<?> event) {
+        if (domHandler != null) domHandler.fireEvent(event);
     }
 
     public void removeFromParent() {
