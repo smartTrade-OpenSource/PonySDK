@@ -48,8 +48,6 @@ import com.ponysdk.core.terminal.socket.WebSocketClient;
 import com.ponysdk.core.terminal.socket.WebSocketClient.WebSocketDataType;
 import com.ponysdk.core.terminal.ui.PTWindowManager;
 
-import elemental.client.Browser;
-
 @ExportPackage(value = "")
 @Export(value = "ponysdk")
 public class PonySDK implements Exportable, UncaughtExceptionHandler {
@@ -82,13 +80,11 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler {
     @Export
     public void start() {
         if (started) return;
-
         try {
-            if (log.isLoggable(Level.INFO)) log.info("Starting PonySDK instance");
-            final elemental.html.Window window = Browser.getWindow();
-            final elemental.html.Window opener = window.getOpener();
+            final String windowId = Window.Location.getParameter(ClientToServerModel.WINDOW_ID.toStringValue());
 
-            if (opener == null) {
+            if (log.isLoggable(Level.INFO)) log.info("Starting PonySDK instance");
+            if (windowId == null) {
                 Window.addCloseHandler(new CloseHandler<Window>() {
 
                     @Override
@@ -97,14 +93,12 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler {
                     }
                 });
 
-                final String builder = GWT.getHostPageBaseURL().replaceFirst("http", "ws") + "ws?" +
-                        ClientToServerModel.TYPE_HISTORY.toStringValue() + "=" + History.getToken();
+                final String builder = GWT.getHostPageBaseURL().replaceFirst("http", "ws") + "ws?"
+                        + ClientToServerModel.TYPE_HISTORY.toStringValue() + "=" + History.getToken();
 
                 socketClient = new WebSocketClient(builder, uiBuilder, WebSocketDataType.ARRAYBUFFER);
             } else {
                 uiContextId = Integer.parseInt(Window.Location.getParameter(ClientToServerModel.UI_CONTEXT_ID.toStringValue()));
-
-                final String windowId = Window.Location.getParameter(ClientToServerModel.WINDOW_ID.toStringValue());
                 uiBuilder.init(new ParentWindowRequest(windowId, new RequestCallback() {
 
                     /**
@@ -117,12 +111,10 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler {
 
                 }));
             }
-
+            started = true;
         } catch (final Throwable e) {
             log.log(Level.SEVERE, "Loading application has failed #" + e.getMessage(), e);
         }
-
-        started = true;
     }
 
     /**
