@@ -169,10 +169,10 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
     public void updateMainTerminal(final ReaderBuffer buffer) {
         while (buffer.hasRemaining()) {
             // Detect if the message is not for the main terminal but for a specific window
-            final BinaryModel windowIdModel = buffer.readBinaryModel();
-            if (ServerToClientModel.WINDOW_ID.equals(windowIdModel.getModel())) {
+            final BinaryModel binaryModel = buffer.readBinaryModel();
+            if (ServerToClientModel.WINDOW_ID.equals(binaryModel.getModel())) {
                 // Event on a specific window
-                final int requestedWindowId = windowIdModel.getIntValue();
+                final int requestedWindowId = binaryModel.getIntValue();
                 // Main terminal, we need to dispatch the eventbus
                 final PTWindow window = PTWindowManager.getWindow(requestedWindowId);
                 if (window != null && window.isReady()) {
@@ -182,26 +182,10 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
 
                     // Type
                     final BinaryModel type = buffer.readBinaryModel();
-
-                    while (buffer.hasRemaining()) {
-                        final BinaryModel model = buffer.readBinaryModel();
-                        if (ServerToClientModel.WINDOW_ID.equals(model.getModel())) {
-                            if (model.getIntValue() != requestedWindowId) {
-                                buffer.rewind(model);
-                                break;
-                            } else {
-                                // Type
-                                buffer.readBinaryModel();
-                            }
-                        } else if (model.isBeginKey()) {
-                            buffer.rewind(model);
-                            break;
-                        }
-                    }
-
+                    buffer.avoidBlock();
                     final int endPosition = buffer.getIndex();
 
-                    window.postMessage(new ReaderBuffer(buffer.getMessage().slice(startPosition, endPosition)));
+                    window.postMessage(buffer.slice(startPosition, endPosition));
                 } else {
                     log.log(Level.SEVERE, "The requested window " + requestedWindowId + " doesn't exist or not ready");
 
@@ -227,28 +211,17 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
                     }
                 }
             } else {
-                buffer.rewind(windowIdModel);
-                update(buffer);
+                update(binaryModel, buffer);
             }
         }
     }
 
     public void updatWindowTerminal(final ReaderBuffer buffer) {
-        while (buffer.hasRemaining()) {
-            // Remove useless WINDOW_ID binary model
-            final BinaryModel windowIdModel = buffer.readBinaryModel();
-            if (ServerToClientModel.WINDOW_ID.equals(windowIdModel.getModel())) {
-                update(buffer);
-            } else {
-                buffer.rewind(windowIdModel);
-                update(buffer);
-            }
-        }
+        update(buffer.readBinaryModel(), buffer);
     }
 
-    private void update(final ReaderBuffer buffer) {
-        final BinaryModel binaryModel = buffer.readBinaryModel();
-        if (BinaryModel.NULL.equals(binaryModel)) return;
+    private void update(final BinaryModel binaryModel, final ReaderBuffer buffer) {
+        if (binaryModel.getModel() == null) return;
 
         if (ServerToClientModel.TYPE_CREATE.equals(binaryModel.getModel())) {
             final PTObject ptObject = processCreate(buffer, binaryModel.getIntValue());
@@ -281,8 +254,6 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
 
         final PTObject ptObject = uiFactory.newUIObject(widgetType);
         if (ptObject != null) {
-            if (log.isLoggable(Level.FINE))
-                log.log(Level.FINE, "Create " + ptObject.getClass().getSimpleName() + " #" + objectIdValue);
             ptObject.create(buffer, objectIdValue, this);
             objectByID.put(objectIdValue, ptObject);
         } else {
@@ -297,10 +268,9 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         final int parentId = buffer.readBinaryModel().getIntValue();
         final PTObject parentObject = getPTObject(parentId);
         if (parentObject != null) {
-            if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Add " + ptObject + " on " + parentObject);
             parentObject.add(buffer, ptObject);
         } else {
-            log.warning("Cannot add object " + ptObject + " to an garbaged parent object #" + parentId
+            log.warning("Cannot add " + ptObject + " to an garbaged parent object #" + parentId
                     + ", so we will consume all the buffer of this object");
             buffer.avoidBlock();
         }
@@ -312,10 +282,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
             boolean result = false;
             do {
                 binaryModel = buffer.readBinaryModel();
-                if (!BinaryModel.NULL.equals(binaryModel)) {
-                    if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Update : " + binaryModel + " on " + ptObject);
-                    result = ptObject.update(buffer, binaryModel);
-                }
+                if (binaryModel.getModel() != null) result = ptObject.update(buffer, binaryModel);
             } while (result && buffer.hasRemaining());
 
             if (!result) buffer.rewind(binaryModel);
@@ -332,7 +299,6 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
             final PTObject parentObject = parentId != -1 ? getPTObject(parentId) : ptObject;
 
             if (parentObject != null) {
-                if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Remove : " + ptObject);
                 parentObject.remove(buffer, ptObject, this);
             } else log.warning("Cannot remove PTObject " + ptObject + " on a garbaged object #" + parentId);
         } else {
@@ -342,7 +308,6 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
     }
 
     private void processAddHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
-        if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Add handler " + handlerModel);
         if (HandlerModel.HANDLER_STREAM_REQUEST.equals(handlerModel)) {
             new PTStreamResource().addHandler(buffer, handlerModel, this);
         } else {
@@ -356,13 +321,11 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
 
     private void processRemoveHandler(final ReaderBuffer buffer, final PTObject ptObject) {
         if (ptObject != null) {
-            if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Remove handler : " + ptObject);
             ptObject.removeHandler(buffer, this);
         }
     }
 
     private void processHistory(final ReaderBuffer buffer, final String token) {
-        if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "History instruction : " + token);
         final String oldToken = History.getToken();
 
         // ServerToClientModel.HISTORY_FIRE_EVENTS
@@ -519,7 +482,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         return null;
     }
 
-    public void registerUIObject(final int ID, final UIObject uiObject) {
+    public void registerUIObject(final Integer ID, final UIObject uiObject) {
         objectIDByWidget.put(uiObject, ID);
         widgetIDByObjectID.put(ID, uiObject);
     }

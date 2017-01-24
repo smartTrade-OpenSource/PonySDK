@@ -28,10 +28,8 @@ import com.ponysdk.core.model.ServerToClientModel;
 
 public class BinaryModel {
 
-    public static final BinaryModel NULL = new BinaryModel(null, 0);
-
-    private final ServerToClientModel model;
-    private final int size;
+    private ServerToClientModel model;
+    private int size;
 
     private boolean booleanValue;
     private byte byteValue;
@@ -42,47 +40,50 @@ public class BinaryModel {
     private String stringValue;
     private JSONObject jsonObject;
 
-    public BinaryModel(final ServerToClientModel key, final boolean value, final int size) {
-        this(key, size);
+    protected BinaryModel() {
+    }
+
+    public void init(final ServerToClientModel key, final boolean value, final int size) {
+        init(key, size);
         this.booleanValue = value;
     }
 
-    public BinaryModel(final ServerToClientModel key, final byte value, final int size) {
-        this(key, size);
+    public void init(final ServerToClientModel key, final byte value, final int size) {
+        init(key, size);
         this.byteValue = value;
     }
 
-    public BinaryModel(final ServerToClientModel key, final short value, final int size) {
-        this(key, size);
+    public void init(final ServerToClientModel key, final short value, final int size) {
+        init(key, size);
         this.shortValue = value;
     }
 
-    public BinaryModel(final ServerToClientModel key, final int value, final int size) {
-        this(key, size);
+    public void init(final ServerToClientModel key, final int value, final int size) {
+        init(key, size);
         this.intValue = value;
     }
 
-    public BinaryModel(final ServerToClientModel key, final long value, final int size) {
-        this(key, size);
+    public void init(final ServerToClientModel key, final long value, final int size) {
+        init(key, size);
         this.longValue = value;
     }
 
-    public BinaryModel(final ServerToClientModel key, final double value, final int size) {
-        this(key, size);
+    public void init(final ServerToClientModel key, final double value, final int size) {
+        init(key, size);
         this.doubleValue = value;
     }
 
-    public BinaryModel(final ServerToClientModel key, final String value, final int size) {
-        this(key, size);
+    public void init(final ServerToClientModel key, final String value, final int size) {
+        init(key, size);
         this.stringValue = value;
     }
 
-    public BinaryModel(final ServerToClientModel key, final JSONObject value, final int size) {
-        this(key, size);
+    public void init(final ServerToClientModel key, final JSONObject value, final int size) {
+        init(key, size);
         this.jsonObject = value;
     }
 
-    public BinaryModel(final ServerToClientModel key, final int value) {
+    public void init(final ServerToClientModel key, final int value) {
         this.model = key;
         this.size = value;
     }
@@ -91,20 +92,20 @@ public class BinaryModel {
         return model;
     }
 
-    public short getShortValue() {
-        return shortValue;
-    }
-
-    public int getIntValue() {
-        return intValue;
-    }
-
     public boolean getBooleanValue() {
         return booleanValue;
     }
 
     public byte getByteValue() {
         return byteValue;
+    }
+
+    public short getShortValue() {
+        return shortValue;
+    }
+
+    public int getIntValue() {
+        return intValue;
     }
 
     public long getLongValue() {
@@ -155,11 +156,11 @@ public class BinaryModel {
     }
 
     public boolean isBeginKey() {
-        return ServerToClientModel.TYPE_ADD.equals(model) || ServerToClientModel.TYPE_ADD_HANDLER.equals(model)
-                || ServerToClientModel.TYPE_CLOSE.equals(model) || ServerToClientModel.TYPE_CREATE.equals(model)
-                || ServerToClientModel.TYPE_GC.equals(model) || ServerToClientModel.TYPE_HISTORY.equals(model)
-                || ServerToClientModel.TYPE_REMOVE.equals(model) || ServerToClientModel.TYPE_REMOVE_HANDLER.equals(model)
-                || ServerToClientModel.TYPE_UPDATE.equals(model);
+        return ServerToClientModel.WINDOW_ID.equals(model) || ServerToClientModel.TYPE_ADD.equals(model)
+                || ServerToClientModel.TYPE_ADD_HANDLER.equals(model) || ServerToClientModel.TYPE_CLOSE.equals(model)
+                || ServerToClientModel.TYPE_CREATE.equals(model) || ServerToClientModel.TYPE_GC.equals(model)
+                || ServerToClientModel.TYPE_HISTORY.equals(model) || ServerToClientModel.TYPE_REMOVE.equals(model)
+                || ServerToClientModel.TYPE_REMOVE_HANDLER.equals(model) || ServerToClientModel.TYPE_UPDATE.equals(model);
     }
 
 }

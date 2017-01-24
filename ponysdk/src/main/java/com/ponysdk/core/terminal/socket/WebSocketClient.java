@@ -26,11 +26,14 @@ package com.ponysdk.core.terminal.socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.user.client.rpc.StatusCodeException;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.PonySDK;
 import com.ponysdk.core.terminal.UIBuilder;
+import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 import com.ponysdk.core.terminal.request.WebSocketRequestBuilder;
@@ -43,6 +46,7 @@ import elemental.events.MessageEvent;
 import elemental.html.ArrayBuffer;
 import elemental.html.WebSocket;
 import elemental.html.Window;
+import elemental.html.Worker;
 
 public class WebSocketClient implements MessageSender {
 
@@ -51,10 +55,16 @@ public class WebSocketClient implements MessageSender {
     private final WebSocket webSocket;
     private final UIBuilder uiBuilder;
 
+    private final Window window;
+
+    private final ReaderBuffer readerBuffer;
+
     public WebSocketClient(final String url, final UIBuilder uiBuilder, final WebSocketDataType webSocketDataType) {
         this.uiBuilder = uiBuilder;
 
-        final Window window = Browser.getWindow();
+        readerBuffer = new ReaderBuffer();
+
+        window = Browser.getWindow();
         webSocket = window.newWebSocket(url);
         webSocket.setBinaryType(webSocketDataType.getName());
 
@@ -72,6 +82,16 @@ public class WebSocketClient implements MessageSender {
             @Override
             public void handleEvent(final Event event) {
                 if (log.isLoggable(Level.INFO)) log.info("WebSoket connected");
+
+                Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
+
+                    @Override
+                    public boolean execute() {
+                        if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Heart beat sent");
+                        send(ClientToServerModel.HEARTBEAT.toStringValue());
+                        return true;
+                    }
+                }, 1000);
             }
         });
         webSocket.setOnclose(new EventListener() {
@@ -111,24 +131,27 @@ public class WebSocketClient implements MessageSender {
     @Override
     public void read(final ArrayBuffer arrayBuffer) {
         try {
-            final ReaderBuffer buffer = new ReaderBuffer(arrayBuffer);
+            readerBuffer.init(window.newUint8Array(arrayBuffer, 0, arrayBuffer.getByteLength()));
             // Get the first element on the message, always a key of element of the Model enum
-            final BinaryModel type = buffer.readBinaryModel();
+            final BinaryModel type = readerBuffer.readBinaryModel();
 
-            if (type.getModel() == ServerToClientModel.HEARTBEAT) {
-                if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Heart beat");
-                send(ClientToServerModel.HEARTBEAT.toStringValue());
+            if (type.getModel() == ServerToClientModel.PING_SERVER) {
+                if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Ping received");
+                final PTInstruction requestData = new PTInstruction();
+                requestData.put(ClientToServerModel.PING_SERVER, type.getLongValue());
+                send(requestData.toString());
+            } else if (type.getModel() == ServerToClientModel.HEARTBEAT) {
+                if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Heart beat received");
             } else if (type.getModel() == ServerToClientModel.UI_CONTEXT_ID) {
                 PonySDK.uiContextId = type.getIntValue();
                 uiBuilder.init(new WebSocketRequestBuilder(WebSocketClient.this));
-            } else if (type.getModel() == ServerToClientModel.BEGIN_OBJECT) {
-                try {
-                    uiBuilder.updateMainTerminal(buffer);
-                } catch (final Exception e) {
-                    log.log(Level.SEVERE, "Error while processing the " + buffer, e);
-                }
             } else {
-                log.severe("Unknown model : " + type.getModel());
+                try {
+                    readerBuffer.rewind(type);
+                    uiBuilder.updateMainTerminal(readerBuffer);
+                } catch (final Exception e) {
+                    log.log(Level.SEVERE, "Error while processing the " + readerBuffer, e);
+                }
             }
         } catch (final Exception e) {
             log.log(Level.SEVERE, "Cannot parse " + arrayBuffer, e);
@@ -143,6 +166,10 @@ public class WebSocketClient implements MessageSender {
         webSocket.close();
     }
 
+    public final native void setWebsocket(Worker w, Window window, WebSocket webSocket) /*-{
+                                                                                        window.webSocket = webSocket;
+                                                                                        }-*/;
+
     public enum WebSocketDataType {
 
         ARRAYBUFFER("arraybuffer"),
@@ -154,9 +181,6 @@ public class WebSocketClient implements MessageSender {
             this.name = name;
         }
 
-        /**
-         * @return the name
-         */
         public String getName() {
             return name;
         }

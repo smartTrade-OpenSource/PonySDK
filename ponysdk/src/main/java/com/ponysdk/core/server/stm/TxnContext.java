@@ -23,39 +23,35 @@
 
 package com.ponysdk.core.server.stm;
 
-import com.ponysdk.core.server.application.Application;
-import com.ponysdk.core.server.application.Parser;
-import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.server.servlet.PRequest;
-import com.ponysdk.core.server.servlet.WebSocketServlet;
-import com.ponysdk.core.writer.ModelWriter;
-
-import javax.json.Json;
-import javax.json.JsonObject;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.ponysdk.core.server.application.Application;
+import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.servlet.WebSocket;
+import com.ponysdk.core.writer.ModelWriter;
+
 public class TxnContext implements TxnListener {
 
+    private final WebSocket socket;
+    private final Parser parser;
+    private final ModelWriter modelWriter;
     private final Map<String, Object> parameters = new HashMap<>();
-    private WebSocketServlet.WebSocket socket;
+
     private boolean flushNow = false;
-    private Parser parser;
     private Application application;
-    private PRequest request;
 
     private UIContext uiContext;
 
-    private ModelWriter modelWriter;
-
-    public void setSocket(final WebSocketServlet.WebSocket socket) {
+    public TxnContext(final WebSocket socket) {
         this.socket = socket;
         this.parser = new Parser(socket);
         this.modelWriter = new ModelWriter(parser);
     }
 
     void flush() {
-        parser.reset();
+        parser.flush();
     }
 
     @Override
@@ -81,14 +77,6 @@ public class TxnContext implements TxnListener {
 
     public Parser getParser() {
         return parser;
-    }
-
-    public void setRequest(final PRequest request) {
-        this.request = request;
-    }
-
-    public JsonObject getJsonObject() {
-        return Json.createReader(request.getReader()).readObject();
     }
 
     public Application getApplication() {
@@ -127,8 +115,16 @@ public class TxnContext implements TxnListener {
         socket.sendHeartBeat();
     }
 
+    public void sendRoundTrip() {
+        socket.sendRoundTrip();
+    }
+
     public void close() {
         socket.close();
+    }
+
+    public void release() {
+        parser.release();
     }
 
 }

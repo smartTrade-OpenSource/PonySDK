@@ -23,7 +23,6 @@
 
 package com.ponysdk.core.server.application;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -314,11 +313,11 @@ public class UIContext {
     public void stackStreamRequest(final StreamHandler streamListener) {
         final int streamRequestID = UIContext.get().nextStreamRequestID();
 
-        try (ModelWriter writer = Txn.getWriter()) {
-            writer.writeModel(ServerToClientModel.TYPE_ADD_HANDLER, HandlerModel.HANDLER_STREAM_REQUEST.getValue());
-            writer.writeModel(ServerToClientModel.STREAM_REQUEST_ID, streamRequestID);
-        } catch (final IOException e) {
-        }
+        final ModelWriter writer = Txn.getWriter();
+        writer.beginObject();
+        writer.writeModel(ServerToClientModel.TYPE_ADD_HANDLER, HandlerModel.HANDLER_STREAM_REQUEST.getValue());
+        writer.writeModel(ServerToClientModel.STREAM_REQUEST_ID, streamRequestID);
+        writer.endObject();
 
         streamListenerByID.put(streamRequestID, streamListener);
     }
@@ -326,12 +325,12 @@ public class UIContext {
     public void stackEmbededStreamRequest(final StreamHandler streamListener, final int objectID) {
         final int streamRequestID = UIContext.get().nextStreamRequestID();
 
-        try (ModelWriter writer = Txn.getWriter()) {
-            writer.writeModel(ServerToClientModel.TYPE_ADD_HANDLER, HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST.getValue());
-            writer.writeModel(ServerToClientModel.OBJECT_ID, objectID);
-            writer.writeModel(ServerToClientModel.STREAM_REQUEST_ID, streamRequestID);
-        } catch (final IOException e) {
-        }
+        final ModelWriter writer = Txn.getWriter();
+        writer.beginObject();
+        writer.writeModel(ServerToClientModel.TYPE_ADD_HANDLER, HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST.getValue());
+        writer.writeModel(ServerToClientModel.OBJECT_ID, objectID);
+        writer.writeModel(ServerToClientModel.STREAM_REQUEST_ID, streamRequestID);
+        writer.endObject();
 
         streamListenerByID.put(streamRequestID, streamListener);
     }
@@ -349,10 +348,10 @@ public class UIContext {
     }
 
     public void close() {
-        try (ModelWriter writer = Txn.getWriter()) {
-            writer.writeModel(ServerToClientModel.TYPE_CLOSE, null);
-        } catch (final IOException e) {
-        }
+        final ModelWriter writer = Txn.getWriter();
+        writer.beginObject();
+        writer.writeModel(ServerToClientModel.TYPE_CLOSE, null);
+        writer.endObject();
     }
 
     private boolean hasPermission0(final String permissionKey) {
@@ -499,7 +498,6 @@ public class UIContext {
         }
         // log.info("UIContext destroyed ViewID #{} from the Session #{}",
         // uiContextID, application.getSession().getId());
-
     }
 
     public void sendHeartBeat() {
@@ -507,7 +505,18 @@ public class UIContext {
         try {
             context.sendHeartBeat();
         } catch (final Throwable e) {
-            log.error("Cannot send server heartbeat to client", e);
+            log.error("Cannot send server heart beat to client", e);
+        } finally {
+            end();
+        }
+    }
+
+    public void sendRoundTrip() {
+        begin();
+        try {
+            context.sendRoundTrip();
+        } catch (final Throwable e) {
+            log.error("Cannot send server round trip to client", e);
         } finally {
             end();
         }

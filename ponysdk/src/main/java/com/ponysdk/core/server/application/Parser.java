@@ -24,6 +24,7 @@
 package com.ponysdk.core.server.application;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
 
 import javax.json.JsonObject;
 
@@ -31,8 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.servlet.WebSocketServlet;
-import com.ponysdk.core.server.servlet.WebSocketServlet.Buffer;
+import com.ponysdk.core.server.servlet.WebSocket;
 
 public class Parser {
 
@@ -43,17 +43,26 @@ public class Parser {
 
     private static final Logger log = LoggerFactory.getLogger(Parser.class);
 
-    private final WebSocketServlet.WebSocket socket;
+    private final WebSocket socket;
 
-    private Buffer buffer;
+    private ByteBuffer buffer;
 
     private int lastUpdatedID = -1;
 
-    public Parser(final WebSocketServlet.WebSocket socket) {
+    public Parser(final WebSocket socket) {
         this.socket = socket;
     }
 
-    public void reset() {
+    public void beginObject() {
+        if (buffer == null) buffer = socket.getBuffer();
+    }
+
+    public void endObject() {
+        if (buffer == null) return;
+        if (buffer.position() >= 4096) flush();
+    }
+
+    public void flush() {
         if (buffer != null) {
             socket.flush(buffer);
             buffer = null;
@@ -61,32 +70,18 @@ public class Parser {
         }
     }
 
-    public int getPosition() {
-        if (buffer == null) buffer = socket.getBuffer();
-        if (buffer == null) return -1;
-        return buffer.position();
-    }
-
-    public void beginObject() {
-        if (buffer == null) buffer = socket.getBuffer();
-        if (buffer == null) return;
-
-        if (buffer.position() == 0) {
-            buffer.putShort(ServerToClientModel.BEGIN_OBJECT.getValue());
+    public void release() {
+        if (buffer != null) {
+            socket.release(buffer);
         }
-    }
-
-    public void endObject() {
-        if (buffer == null) return;
-        if (buffer.position() >= 4096) reset();
     }
 
     public void parse(final ServerToClientModel model, final Object value) {
         if (ServerToClientModel.TYPE_UPDATE.equals(model)) {
             final int newUpdatedID = (int) value;
             if (lastUpdatedID == newUpdatedID) {
-                if (log.isDebugEnabled()) log.debug("A consecutive update on the same id " + lastUpdatedID
-                        + ", so we concatenate the instructions");
+                if (log.isDebugEnabled())
+                    log.debug("A consecutive update on the same id " + lastUpdatedID + ", so we concatenate the instructions");
                 return;
             } else {
                 lastUpdatedID = newUpdatedID;
@@ -101,73 +96,79 @@ public class Parser {
 
         switch (model.getTypeModel()) {
             case NULL:
-                parse(model);
+                encode(buffer, model);
                 break;
             case BOOLEAN:
-                parse(model, (boolean) value);
+                encode(buffer, model, (boolean) value);
                 break;
             case BYTE:
-                parse(model, (byte) value);
+                encode(buffer, model, (byte) value);
                 break;
             case SHORT:
-                parse(model, (short) value);
+                encode(buffer, model, (short) value);
                 break;
             case INTEGER:
-                parse(model, (int) value);
+                encode(buffer, model, (int) value);
                 break;
             case LONG:
-                // TODO For now, we write String
-                // parse(model, (long) value);
-                parse(model, String.valueOf(value));
+                encode(buffer, model, (long) value);
                 break;
             case DOUBLE:
-                // TODO For now, we write String
-                // parse(model, (double) value);
-                parse(model, String.valueOf(value));
+                encode(buffer, model, (double) value);
                 break;
             case STRING:
-                parse(model, (String) value);
+                encode(buffer, model, (String) value);
                 break;
             case JSON_OBJECT:
-                parse(model, (JsonObject) value);
+                encode(buffer, model, (JsonObject) value);
                 break;
             default:
                 break;
         }
     }
 
-    private void parse(final ServerToClientModel model) {
+    public static final void encode(final ByteBuffer buffer, final ServerToClientModel model) {
         if (log.isDebugEnabled()) log.debug("Writing in the buffer : " + model + " (position : " + buffer.position() + ")");
         buffer.putShort(model.getValue());
     }
 
-    private void parse(final ServerToClientModel model, final boolean value) {
-        parse(model, value ? TRUE : FALSE);
+    public static final void encode(final ByteBuffer buffer, final ServerToClientModel model, final boolean value) {
+        encode(buffer, model, value ? TRUE : FALSE);
     }
 
-    private void parse(final ServerToClientModel model, final byte value) {
-        if (log.isDebugEnabled()) log.debug("Writing in the buffer : " + model + " => " + value + " (position : " + buffer.position() + ")");
+    public static final void encode(final ByteBuffer buffer, final ServerToClientModel model, final byte value) {
+        if (log.isDebugEnabled())
+            log.debug("Writing in the buffer : " + model + " => " + value + " (position : " + buffer.position() + ")");
         buffer.putShort(model.getValue());
         buffer.put(value);
     }
 
-    private void parse(final ServerToClientModel model, final short value) {
+    public static final void encode(final ByteBuffer buffer, final ServerToClientModel model, final short value) {
         log.error("Writing in the buffer : " + model + " => " + value + " (position : " + buffer.position() + ")");
         buffer.putShort(model.getValue());
         buffer.putShort(value);
     }
 
-    private void parse(final ServerToClientModel model, final int value) {
-        if (log.isDebugEnabled()) log.debug("Writing in the buffer : " + model + " => " + value + " (position : " + buffer.position() + ")");
+    public static final void encode(final ByteBuffer buffer, final ServerToClientModel model, final int value) {
+        if (log.isDebugEnabled())
+            log.debug("Writing in the buffer : " + model + " => " + value + " (position : " + buffer.position() + ")");
         buffer.putShort(model.getValue());
         buffer.putInt(value);
     }
 
-    private void parse(final ServerToClientModel model, final JsonObject jsonObject) {
-        parse(model, jsonObject.toString());
+    public static final void encode(final ByteBuffer buffer, final ServerToClientModel model, final long value) {
+        encode(buffer, model, String.valueOf(value));
     }
 
-    private void parse(final ServerToClientModel model, final String value) {
+    public static final void encode(final ByteBuffer buffer, final ServerToClientModel model, final double value) {
+        encode(buffer, model, String.valueOf(value));
+    }
+
+    public static final void encode(final ByteBuffer buffer, final ServerToClientModel model, final JsonObject jsonObject) {
+        encode(buffer, model, jsonObject.toString());
+    }
+
+    public static final void encode(final ByteBuffer buffer, final ServerToClientModel model, final String value) {
         if (log.isDebugEnabled()) log.debug("Writing in the buffer : " + model + " => " + value + " (size : "
                 + (value != null ? value.length() : 0) + ")" + " (position : " + buffer.position() + ")");
         buffer.putShort(model.getValue());
@@ -176,9 +177,7 @@ public class Parser {
             if (value != null) {
                 final byte[] bytes = value.getBytes(ENCODING_CHARSET);
                 buffer.putInt(bytes.length);
-                for (final byte b : bytes) {
-                    buffer.put(b);
-                }
+                buffer.put(bytes);
             } else {
                 buffer.putInt(0);
             }

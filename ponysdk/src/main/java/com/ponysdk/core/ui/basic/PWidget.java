@@ -23,7 +23,6 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -370,17 +369,17 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     }
 
     private <H extends EventHandler> void executeAddDomHandler(final ServerBinaryModel... binaryModels) {
-        try (final ModelWriter writer = Txn.getWriter()) {
-            if (windowID != PWindow.getMain().getID()) writer.writeModel(ServerToClientModel.WINDOW_ID, windowID);
-            writer.writeModel(ServerToClientModel.TYPE_ADD_HANDLER, HandlerModel.HANDLER_DOM.getValue());
-            writer.writeModel(ServerToClientModel.OBJECT_ID, ID);
-            if (binaryModels != null) {
-                for (final ServerBinaryModel binaryModel : binaryModels) {
-                    if (binaryModel != null) writer.writeModel(binaryModel.getKey(), binaryModel.getValue());
-                }
+        final ModelWriter writer = Txn.getWriter();
+        writer.beginObject();
+        if (windowID != PWindow.getMain().getID()) writer.writeModel(ServerToClientModel.WINDOW_ID, windowID);
+        writer.writeModel(ServerToClientModel.TYPE_ADD_HANDLER, HandlerModel.HANDLER_DOM.getValue());
+        writer.writeModel(ServerToClientModel.OBJECT_ID, ID);
+        if (binaryModels != null) {
+            for (final ServerBinaryModel binaryModel : binaryModels) {
+                if (binaryModel != null) writer.writeModel(binaryModel.getKey(), binaryModel.getValue());
             }
-        } catch (final IOException e) {
         }
+        writer.endObject();
     }
 
     @Override
