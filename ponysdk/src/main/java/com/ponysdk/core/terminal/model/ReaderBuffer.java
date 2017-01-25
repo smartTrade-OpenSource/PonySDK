@@ -48,6 +48,8 @@ public class ReaderBuffer {
 
     private int position;
 
+    private int size;
+
     public ReaderBuffer() {
         currentBinaryModel = new BinaryModel();
     }
@@ -55,6 +57,7 @@ public class ReaderBuffer {
     public void init(final Uint8Array buffer) {
         this.buffer = buffer;
         this.position = 0;
+        this.size = buffer.getByteLength();
     }
 
     private static native String fromCharCode(ArrayBufferView buffer) /*-{return $wnd.decode(buffer);}-*/;
@@ -191,7 +194,7 @@ public class ReaderBuffer {
     }
 
     public boolean hasRemaining() {
-        return position < buffer.getByteLength();
+        return position < size;
     }
 
     /**

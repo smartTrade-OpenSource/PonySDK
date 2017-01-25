@@ -37,13 +37,14 @@ public class PTAnchor extends PTFocusWidget<Anchor> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.TEXT.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.TEXT.ordinal() == modelOrdinal) {
             uiObject.setText(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.HTML.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.HTML.ordinal() == modelOrdinal) {
             uiObject.setHTML(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.HREF.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.HREF.ordinal() == modelOrdinal) {
             uiObject.setHref(binaryModel.getStringValue());
             return true;
         } else {

@@ -98,13 +98,14 @@ public class PTStackLayoutPanel extends PTWidget<StackLayoutPanel> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.WIDGET_ID.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.WIDGET_ID.ordinal() == modelOrdinal) {
             uiObject.showWidget(asWidget(binaryModel.getIntValue(), uiBuilder));
             return true;
-        } else if (ServerToClientModel.ANIMATE.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.ANIMATE.ordinal() == modelOrdinal) {
             uiObject.animate(binaryModel.getIntValue());
             return true;
-        } else if (ServerToClientModel.ANIMATION_DURATION.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.ANIMATION_DURATION.ordinal() == modelOrdinal) {
             uiObject.setAnimationDuration(binaryModel.getIntValue());
             return true;
         } else {

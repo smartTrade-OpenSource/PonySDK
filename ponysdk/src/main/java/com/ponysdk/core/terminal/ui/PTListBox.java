@@ -79,10 +79,11 @@ public class PTListBox extends PTFocusWidget<ListBox> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.CLEAR.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.CLEAR.ordinal() == modelOrdinal) {
             uiObject.clear();
             return true;
-        } else if (ServerToClientModel.ITEM_INSERTED.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.ITEM_INSERTED.ordinal() == modelOrdinal) {
             final String item = binaryModel.getStringValue() != null ? binaryModel.getStringValue() : "";
             final BinaryModel indexModel = buffer.readBinaryModel();
             if (ServerToClientModel.INDEX.equals(indexModel.getModel())) {
@@ -92,7 +93,7 @@ public class PTListBox extends PTFocusWidget<ListBox> {
                 uiObject.addItem(item);
             }
             return true;
-        } else if (ServerToClientModel.ITEM_ADD.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.ITEM_ADD.ordinal() == modelOrdinal) {
             final String items = binaryModel.getStringValue();
             // ServerToClientModel.ITEM_GROUP
             final String groupName = buffer.readBinaryModel().getStringValue();
@@ -110,26 +111,26 @@ public class PTListBox extends PTFocusWidget<ListBox> {
             }
             select.appendChild(groupElement);
             return true;
-        } else if (ServerToClientModel.ITEM_UPDATED.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.ITEM_UPDATED.ordinal() == modelOrdinal) {
             final String item = binaryModel.getStringValue() != null ? binaryModel.getStringValue() : "";
             // ServerToClientModel.INDEX
             final int index = buffer.readBinaryModel().getIntValue();
             uiObject.setItemText(index, item);
             return true;
-        } else if (ServerToClientModel.ITEM_REMOVED.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.ITEM_REMOVED.ordinal() == modelOrdinal) {
             uiObject.removeItem(binaryModel.getIntValue());
             return true;
-        } else if (ServerToClientModel.SELECTED.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.SELECTED.ordinal() == modelOrdinal) {
             final boolean selected = binaryModel.getBooleanValue();
             // ServerToClientModel.INDEX
             final int index = buffer.readBinaryModel().getIntValue();
             if (index == -1) uiObject.setSelectedIndex(index);
             else uiObject.setItemSelected(index, selected);
             return true;
-        } else if (ServerToClientModel.VISIBLE_ITEM_COUNT.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.VISIBLE_ITEM_COUNT.ordinal() == modelOrdinal) {
             uiObject.setVisibleItemCount(binaryModel.getIntValue());
             return true;
-        } else if (ServerToClientModel.MULTISELECT.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.MULTISELECT.ordinal() == modelOrdinal) {
             uiObject.setMultipleSelect(binaryModel.getBooleanValue());
             return true;
         } else {

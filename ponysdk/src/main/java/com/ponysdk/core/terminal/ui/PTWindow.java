@@ -78,7 +78,8 @@ public class PTWindow extends AbstractPTObject {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.OPEN.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.OPEN.ordinal() == modelOrdinal) {
             window = Browser.getWindow().open(url, name, features);
             window.setOnunload(new EventListener() {
 
@@ -88,17 +89,18 @@ public class PTWindow extends AbstractPTObject {
                 }
             });
             return true;
-        } else if (ServerToClientModel.PRINT.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.PRINT.ordinal() == modelOrdinal) {
             window.print();
             return true;
-        } else if (ServerToClientModel.WINDOW_TITLE.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.WINDOW_TITLE.ordinal() == modelOrdinal) {
             setTitle(binaryModel.getStringValue(), window);
             return true;
-        } else if (ServerToClientModel.CLOSE.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.CLOSE.ordinal() == modelOrdinal) {
             close(false);
             return true;
+        } else {
+            return false;
         }
-        return false;
     }
 
     public void close(final boolean forced) {
@@ -143,7 +145,7 @@ public class PTWindow extends AbstractPTObject {
     }
 
     public boolean isClosed() {
-        return window.isClosed();
+        return window == null || window.isClosed();
     }
 
 }

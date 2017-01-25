@@ -87,10 +87,11 @@ public class PTMenuBar extends PTWidget<MenuBar> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.CLEAR.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.CLEAR.ordinal() == modelOrdinal) {
             uiObject.clearItems();
             return true;
-        } else if (ServerToClientModel.ANIMATION.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.ANIMATION.ordinal() == modelOrdinal) {
             uiObject.setAnimationEnabled(binaryModel.getBooleanValue());
             return true;
         } else {

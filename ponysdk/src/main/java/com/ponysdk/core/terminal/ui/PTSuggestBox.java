@@ -68,7 +68,8 @@ public class PTSuggestBox extends PTWidget<SuggestBox> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.LIMIT.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.LIMIT.ordinal() == modelOrdinal) {
             uiObject.setLimit(binaryModel.getIntValue());
             return true;
         } else {

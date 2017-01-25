@@ -55,10 +55,11 @@ public abstract class PTTextBoxBase<T extends TextBoxBase> extends PTValueBoxBas
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.TEXT.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.TEXT.ordinal() == modelOrdinal) {
             uiObject.setText(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.PLACEHOLDER.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.PLACEHOLDER.ordinal() == modelOrdinal) {
             uiObject.getElement().setAttribute("placeholder", binaryModel.getStringValue());
             return true;
         } else {

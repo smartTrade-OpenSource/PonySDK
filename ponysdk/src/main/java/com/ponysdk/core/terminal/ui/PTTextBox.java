@@ -49,19 +49,20 @@ public class PTTextBox extends PTTextBoxBase<TextBox> implements KeyPressHandler
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.TEXT.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.TEXT.ordinal() == modelOrdinal) {
             uiObject.setText(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.VALUE.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.VALUE.ordinal() == modelOrdinal) {
             uiObject.setValue(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.VISIBLE_LENGTH.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.VISIBLE_LENGTH.ordinal() == modelOrdinal) {
             uiObject.setVisibleLength(binaryModel.getIntValue());
             return true;
-        } else if (ServerToClientModel.MAX_LENGTH.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.MAX_LENGTH.ordinal() == modelOrdinal) {
             uiObject.setMaxLength(binaryModel.getIntValue());
             return true;
-        } else if (ServerToClientModel.MASK.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.MASK.ordinal() == modelOrdinal) {
             final String mask = binaryModel.getStringValue();
             // ServerToClientModel.VISIBILITY
             final boolean showMask = buffer.readBinaryModel().getBooleanValue();
@@ -70,7 +71,7 @@ public class PTTextBox extends PTTextBoxBase<TextBox> implements KeyPressHandler
             if (maskDecorator == null) maskDecorator = new TextBoxMaskedDecorator(cast());
             maskDecorator.setMask(mask, showMask, replace.charAt(0));
             return true;
-        } else if (ServerToClientModel.REGEX_FILTER.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.REGEX_FILTER.ordinal() == modelOrdinal) {
             regExp = RegExp.compile(binaryModel.getStringValue());
             uiObject.addKeyPressHandler(this);
             uiObject.addDropHandler(this);

@@ -57,10 +57,11 @@ public class PTGrid extends PTHTMLTable {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.CLEAR_ROW.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.CLEAR_ROW.ordinal() == modelOrdinal) {
             cast().removeRow(binaryModel.getIntValue());
             return true;
-        } else if (ServerToClientModel.INSERT_ROW.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.INSERT_ROW.ordinal() == modelOrdinal) {
             cast().insertRow(binaryModel.getIntValue());
             return true;
         } else {

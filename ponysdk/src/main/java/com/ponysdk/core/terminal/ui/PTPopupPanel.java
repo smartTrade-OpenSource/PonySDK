@@ -126,35 +126,36 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         final PopupPanel popup = cast();
-        if (ServerToClientModel.ANIMATION.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.ANIMATION.ordinal() == modelOrdinal) {
             popup.setAnimationEnabled(binaryModel.getBooleanValue());
             return true;
-        } else if (ServerToClientModel.POPUP_CENTER.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.POPUP_CENTER.ordinal() == modelOrdinal) {
             popup.show();
             popup.center();
             return true;
-        } else if (ServerToClientModel.POPUP_SHOW.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.POPUP_SHOW.ordinal() == modelOrdinal) {
             popup.show();
             return true;
-        } else if (ServerToClientModel.POPUP_POSITION_AND_SHOW.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.POPUP_POSITION_AND_SHOW.ordinal() == modelOrdinal) {
             popup.setVisible(true);
             return true;
-        } else if (ServerToClientModel.POPUP_HIDE.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.POPUP_HIDE.ordinal() == modelOrdinal) {
             popup.hide();
             return true;
-        } else if (ServerToClientModel.POPUP_GLASS_ENABLED.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.POPUP_GLASS_ENABLED.ordinal() == modelOrdinal) {
             popup.setGlassEnabled(binaryModel.getBooleanValue());
             return true;
-        } else if (ServerToClientModel.POPUP_MODAL.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.POPUP_MODAL.ordinal() == modelOrdinal) {
             popup.setModal(binaryModel.getBooleanValue());
             return true;
-        } else if (ServerToClientModel.POPUP_POSITION_LEFT.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.POPUP_POSITION_LEFT.ordinal() == modelOrdinal) {
             final int left = binaryModel.getIntValue();
             // ServerToClientModel.POPUP_POSITION_TOP
             final int top = buffer.readBinaryModel().getIntValue();
             popup.setPopupPosition(left, top);
             return true;
-        } else if (ServerToClientModel.POPUP_DRAGGABLE.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.POPUP_DRAGGABLE.ordinal() == modelOrdinal) {
             popup.addDomHandler(this, MouseDownEvent.getType());
             popup.addDomHandler(this, MouseUpEvent.getType());
             popup.addDomHandler(this, MouseMoveEvent.getType());

@@ -54,58 +54,59 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.WIDGET_WIDTH.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.WIDGET_WIDTH.ordinal() == modelOrdinal) {
             uiObject.setWidth(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.WIDGET_HEIGHT.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.WIDGET_HEIGHT.ordinal() == modelOrdinal) {
             uiObject.setHeight(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.PUT_PROPERTY_KEY.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.PUT_PROPERTY_KEY.ordinal() == modelOrdinal) {
             final String value = binaryModel.getStringValue();
             // ServerToClientModel.PROPERTY_VALUE
             uiObject.getElement().setPropertyString(value, buffer.readBinaryModel().getStringValue());
             return true;
-        } else if (ServerToClientModel.PUT_ATTRIBUTE_KEY.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.PUT_ATTRIBUTE_KEY.ordinal() == modelOrdinal) {
             final String value = binaryModel.getStringValue();
             // ServerToClientModel.ATTRIBUTE_VALUE
             uiObject.getElement().setAttribute(value, buffer.readBinaryModel().getStringValue());
             return true;
-        } else if (ServerToClientModel.REMOVE_ATTRIBUTE_KEY.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.REMOVE_ATTRIBUTE_KEY.ordinal() == modelOrdinal) {
             uiObject.getElement().removeAttribute(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.STYLE_NAME.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.STYLE_NAME.ordinal() == modelOrdinal) {
             uiObject.setStyleName(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.STYLE_PRIMARY_NAME.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.STYLE_PRIMARY_NAME.ordinal() == modelOrdinal) {
             uiObject.setStylePrimaryName(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.ADD_STYLE_NAME.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.ADD_STYLE_NAME.ordinal() == modelOrdinal) {
             uiObject.addStyleName(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.REMOVE_STYLE_NAME.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.REMOVE_STYLE_NAME.ordinal() == modelOrdinal) {
             uiObject.removeStyleName(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.WIDGET_VISIBLE.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.WIDGET_VISIBLE.ordinal() == modelOrdinal) {
             uiObject.setVisible(binaryModel.getBooleanValue());
             return true;
-        } else if (ServerToClientModel.ENSURE_DEBUG_ID.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.ENSURE_DEBUG_ID.ordinal() == modelOrdinal) {
             uiObject.getElement().setAttribute("pid", binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.WIDGET_TITLE.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.WIDGET_TITLE.ordinal() == modelOrdinal) {
             uiObject.setTitle(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.PUT_STYLE_KEY.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.PUT_STYLE_KEY.ordinal() == modelOrdinal) {
             final String value = binaryModel.getStringValue();
             // ServerToClientModel.STYLE_VALUE
             uiObject.getElement().getStyle().setProperty(value, buffer.readBinaryModel().getStringValue());
             return true;
-        } else if (ServerToClientModel.REMOVE_STYLE_KEY.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.REMOVE_STYLE_KEY.ordinal() == modelOrdinal) {
             uiObject.getElement().getStyle().clearProperty(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.BIND.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.BIND.ordinal() == modelOrdinal) {
             nativeObject = bind(binaryModel.getStringValue(), objectID, uiObject.getElement());
             return true;
-        } else if (ServerToClientModel.NATIVE.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.NATIVE.ordinal() == modelOrdinal) {
             final JSONObject object = JSONParser.parseStrict(binaryModel.getStringValue()).isObject();
             sendToNative(objectID, nativeObject, object.getJavaScriptObject());
             return true;

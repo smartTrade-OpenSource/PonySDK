@@ -48,13 +48,14 @@ public class PTFlexTable extends PTHTMLTable {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.CLEAR_ROW.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.CLEAR_ROW.ordinal() == modelOrdinal) {
             cast().removeRow(binaryModel.getIntValue());
             return true;
-        } else if (ServerToClientModel.INSERT_ROW.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.INSERT_ROW.ordinal() == modelOrdinal) {
             cast().insertRow(binaryModel.getIntValue());
             return true;
-        } else if (ServerToClientModel.SET_COL_SPAN.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.SET_COL_SPAN.ordinal() == modelOrdinal) {
             final int value = binaryModel.getIntValue();
             // ServerToClientModel.ROW
             final int cellFormatterRow = buffer.readBinaryModel().getIntValue();
@@ -62,7 +63,7 @@ public class PTFlexTable extends PTHTMLTable {
             final int cellFormatterColumn = buffer.readBinaryModel().getIntValue();
             cast().getFlexCellFormatter().setColSpan(cellFormatterRow, cellFormatterColumn, value);
             return true;
-        } else if (ServerToClientModel.SET_ROW_SPAN.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.SET_ROW_SPAN.ordinal() == modelOrdinal) {
             final int value = binaryModel.getIntValue();
             // ServerToClientModel.ROW
             final int cellFormatterRow = buffer.readBinaryModel().getIntValue();
