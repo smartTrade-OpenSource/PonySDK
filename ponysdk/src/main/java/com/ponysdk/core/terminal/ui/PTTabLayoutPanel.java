@@ -51,7 +51,8 @@ public class PTTabLayoutPanel extends PTWidget<TabLayoutPanel> {
         final TabLayoutPanel tabPanel = uiObject;
 
         final BinaryModel binaryModel = buffer.readBinaryModel();
-        if (ServerToClientModel.TAB_TEXT.equals(binaryModel.getModel())) {
+        ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.TAB_TEXT.equals(model)) {
             final String value = binaryModel.getStringValue();
             final BinaryModel beforeIndexModel = buffer.readBinaryModel();
             if (ServerToClientModel.BEFORE_INDEX.equals(beforeIndexModel.getModel())) {
@@ -60,7 +61,7 @@ public class PTTabLayoutPanel extends PTWidget<TabLayoutPanel> {
                 buffer.rewind(beforeIndexModel);
                 tabPanel.add(w, value);
             }
-        } else if (ServerToClientModel.TAB_WIDGET.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.TAB_WIDGET.equals(model)) {
             final PTWidget<?> ptWidget = (PTWidget<?>) uiBuilder.getPTObject(binaryModel.getIntValue());
             final BinaryModel beforeIndexModel = buffer.readBinaryModel();
             if (ServerToClientModel.BEFORE_INDEX.equals(beforeIndexModel.getModel())) {
@@ -106,16 +107,17 @@ public class PTTabLayoutPanel extends PTWidget<TabLayoutPanel> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.ANIMATE.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.ANIMATE.ordinal() == modelOrdinal) {
             uiObject.animate(binaryModel.getIntValue());
             return true;
-        } else if (ServerToClientModel.VERTICAL.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.VERTICAL.ordinal() == modelOrdinal) {
             uiObject.setAnimationVertical(binaryModel.getBooleanValue());
             return true;
-        } else if (ServerToClientModel.ANIMATION_DURATION.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.ANIMATION_DURATION.ordinal() == modelOrdinal) {
             uiObject.setAnimationDuration(binaryModel.getIntValue());
             return true;
-        } else if (ServerToClientModel.SELECTED_INDEX.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.SELECTED_INDEX.ordinal() == modelOrdinal) {
             uiObject.selectTab(binaryModel.getIntValue());
             return true;
         } else {

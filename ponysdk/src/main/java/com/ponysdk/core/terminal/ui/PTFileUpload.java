@@ -98,10 +98,11 @@ public class PTFileUpload extends PTWidget<FormPanel> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.NAME.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.NAME.ordinal() == modelOrdinal) {
             fileUpload.setName(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.ENABLED.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.ENABLED.ordinal() == modelOrdinal) {
             fileUpload.setEnabled(binaryModel.getBooleanValue());
             return true;
         } else {

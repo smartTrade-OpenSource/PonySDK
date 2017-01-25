@@ -42,19 +42,20 @@ public class PTLayoutPanel extends PTComplexPanel<LayoutPanel> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.WIDGET_HORIZONTAL_ALIGNMENT.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.WIDGET_HORIZONTAL_ALIGNMENT.ordinal() == modelOrdinal) {
             final Alignment alignment = AlignmentConverter.asAlignment(binaryModel.getByteValue());
             // ServerToClientModel.WIDGET_ID
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
             uiObject.setWidgetHorizontalPosition(w, alignment);
             return true;
-        } else if (ServerToClientModel.WIDGET_VERTICAL_ALIGNMENT.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.WIDGET_VERTICAL_ALIGNMENT.ordinal() == modelOrdinal) {
             final Alignment alignment = AlignmentConverter.asAlignment(binaryModel.getByteValue());
             // ServerToClientModel.WIDGET_ID
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
             uiObject.setWidgetVerticalPosition(w, alignment);
             return true;
-        } else if (ServerToClientModel.UNIT.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.UNIT.ordinal() == modelOrdinal) {
             final Unit unit = getUnit(PUnit.values()[binaryModel.getByteValue()]);
             // ServerToClientModel.WIDGET_ID
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
@@ -102,11 +103,12 @@ public class PTLayoutPanel extends PTComplexPanel<LayoutPanel> {
         }
 
         // FIXME
-        if (ServerToClientModel.ANIMATE.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.ANIMATE.ordinal() == modelOrdinal) {
             uiObject.animate(binaryModel.getIntValue());
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
 
     private static final Unit getUnit(final PUnit u) {

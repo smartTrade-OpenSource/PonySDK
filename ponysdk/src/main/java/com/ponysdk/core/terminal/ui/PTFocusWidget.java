@@ -41,24 +41,25 @@ public abstract class PTFocusWidget<T extends FocusWidget> extends PTWidget<T> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.LOADING_ON_REQUEST.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.LOADING_ON_REQUEST.ordinal() == modelOrdinal) {
             showLoadingOnRequest = binaryModel.getBooleanValue();
             return true;
-        } else if (ServerToClientModel.ENABLED_ON_REQUEST.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.ENABLED_ON_REQUEST.ordinal() == modelOrdinal) {
             enabledOnRequest = binaryModel.getBooleanValue();
             return true;
-        } else if (ServerToClientModel.END_OF_PROCESSING.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.END_OF_PROCESSING.ordinal() == modelOrdinal) {
             if (showLoadingOnRequest) uiObject.removeStyleName("pony-Loading");
             if (!enabledOnRequest) uiObject.setEnabled(enabled);
             return true;
-        } else if (ServerToClientModel.ENABLED.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.ENABLED.ordinal() == modelOrdinal) {
             this.enabled = binaryModel.getBooleanValue();
             uiObject.setEnabled(enabled);
             return true;
-        } else if (ServerToClientModel.TABINDEX.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.TABINDEX.ordinal() == modelOrdinal) {
             uiObject.setTabIndex(binaryModel.getIntValue());
             return true;
-        } else if (ServerToClientModel.FOCUSED.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.FOCUSED.ordinal() == modelOrdinal) {
             uiObject.setFocus(binaryModel.getBooleanValue());
             return true;
         } else {

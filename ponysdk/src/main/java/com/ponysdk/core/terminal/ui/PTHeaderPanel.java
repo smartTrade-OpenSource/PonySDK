@@ -66,11 +66,13 @@ public class PTHeaderPanel extends PTPanel<HeaderPanel> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.RESIZE.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.RESIZE.ordinal() == modelOrdinal) {
             uiObject.onResize();
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
 
     @Override

@@ -37,7 +37,8 @@ public class PTLabel extends PTWidget<Label> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.TEXT.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.TEXT.ordinal() == modelOrdinal) {
             uiObject.setText(binaryModel.getStringValue());
             return true;
         } else {

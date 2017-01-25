@@ -115,13 +115,14 @@ public class PTDatePicker extends PTWidget<DatePicker> {
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         final DatePicker picker = cast();
-        if (ServerToClientModel.DATE.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.DATE.ordinal() == modelOrdinal) {
             picker.setValue(asDate(binaryModel.getLongValue()));
             return true;
-        } else if (ServerToClientModel.TIME.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.TIME.ordinal() == modelOrdinal) {
             picker.setCurrentMonth(asDate(binaryModel.getLongValue()));
             return true;
-        } else if (ServerToClientModel.DATE_ENABLED.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.DATE_ENABLED.ordinal() == modelOrdinal) {
             final String[] dates = binaryModel.getStringValue().split(DATE_SEPARATOR);
             // ServerToClientModel.ENABLED
             final boolean enabled = buffer.readBinaryModel().getBooleanValue();
@@ -129,7 +130,7 @@ public class PTDatePicker extends PTWidget<DatePicker> {
                 picker.setTransientEnabledOnDates(enabled, asDate(date));
             }
             return true;
-        } else if (ServerToClientModel.ADD_DATE_STYLE.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.ADD_DATE_STYLE.ordinal() == modelOrdinal) {
             final String[] dates = binaryModel.getStringValue().split(DATE_SEPARATOR);
             // ServerToClientModel.STYLE_NAME
             final String style = buffer.readBinaryModel().getStringValue();
@@ -137,7 +138,7 @@ public class PTDatePicker extends PTWidget<DatePicker> {
                 picker.addStyleToDates(style, asDate(date));
             }
             return true;
-        } else if (ServerToClientModel.REMOVE_DATE_STYLE.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.REMOVE_DATE_STYLE.ordinal() == modelOrdinal) {
             final String[] dates = binaryModel.getStringValue().split(DATE_SEPARATOR);
             // ServerToClientModel.STYLE_NAME
             final String style = buffer.readBinaryModel().getStringValue();
@@ -145,7 +146,7 @@ public class PTDatePicker extends PTWidget<DatePicker> {
                 picker.removeStyleFromDates(style, asDate(date));
             }
             return true;
-        } else if (ServerToClientModel.YEAR_ARROWS_VISIBLE.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.YEAR_ARROWS_VISIBLE.ordinal() == modelOrdinal) {
             picker.setYearArrowsVisible(binaryModel.getBooleanValue());
             return true;
         } else {

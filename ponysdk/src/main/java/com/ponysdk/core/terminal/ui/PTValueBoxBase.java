@@ -38,11 +38,13 @@ public abstract class PTValueBoxBase<T extends ValueBoxBase<W>, W> extends PTFoc
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.SELECT_ALL.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.SELECT_ALL.ordinal() == modelOrdinal) {
             uiObject.selectAll();
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
 
     @Override

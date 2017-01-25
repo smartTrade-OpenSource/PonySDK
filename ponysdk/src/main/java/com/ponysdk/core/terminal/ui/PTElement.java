@@ -61,10 +61,11 @@ public class PTElement extends PTComplexPanel<MyWidget> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.INNER_HTML.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.INNER_HTML.ordinal() == modelOrdinal) {
             uiObject.getElement().setInnerHTML(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.INNER_TEXT.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.INNER_TEXT.ordinal() == modelOrdinal) {
             uiObject.getElement().setInnerText(binaryModel.getStringValue());
             return true;
         } else {

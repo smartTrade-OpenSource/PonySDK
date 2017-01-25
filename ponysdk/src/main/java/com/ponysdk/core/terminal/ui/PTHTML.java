@@ -37,10 +37,11 @@ public class PTHTML extends PTLabel {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.HTML.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.HTML.ordinal() == modelOrdinal) {
             cast().setHTML(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.WORD_WRAP.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.WORD_WRAP.ordinal() == modelOrdinal) {
             cast().setWordWrap(binaryModel.getBooleanValue());
             return true;
         } else {

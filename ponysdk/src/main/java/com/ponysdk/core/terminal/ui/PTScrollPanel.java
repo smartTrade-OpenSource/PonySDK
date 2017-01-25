@@ -62,13 +62,14 @@ public class PTScrollPanel extends PTSimplePanel {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.HORIZONTAL_SCROLL_POSITION.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.HORIZONTAL_SCROLL_POSITION.ordinal() == modelOrdinal) {
             cast().setHorizontalScrollPosition(binaryModel.getIntValue());
             return true;
-        } else if (ServerToClientModel.VERTICAL_SCROLL_POSITION.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.VERTICAL_SCROLL_POSITION.ordinal() == modelOrdinal) {
             cast().setVerticalScrollPosition(binaryModel.getIntValue());
             return true;
-        } else if (ServerToClientModel.SCROLL_TO.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.SCROLL_TO.ordinal() == modelOrdinal) {
             final long scrollTo = binaryModel.getLongValue();
             if (scrollTo == 0) cast().scrollToBottom();
             else if (scrollTo == 1) cast().scrollToLeft();
