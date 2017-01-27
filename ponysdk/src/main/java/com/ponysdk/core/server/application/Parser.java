@@ -73,6 +73,8 @@ public class Parser {
     public void release() {
         if (buffer != null) {
             socket.release(buffer);
+            buffer = null;
+            lastUpdatedID = -1;
         }
     }
 
