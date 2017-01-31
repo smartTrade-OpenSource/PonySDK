@@ -27,9 +27,9 @@ import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
-import com.ponysdk.core.ui.celltable.SimpleTableView;
 import com.ponysdk.core.ui.form.formfield.IntegerTextBoxFormField;
 import com.ponysdk.core.ui.form.formfield.LongTextBoxFormField;
+import com.ponysdk.core.ui.grid.GridTableWidget;
 import com.ponysdk.core.ui.list.refreshable.RefreshableDataGrid;
 import com.ponysdk.sample.client.datamodel.PonyStock;
 
@@ -48,7 +48,7 @@ public class SimpleRefreshableDataGridPageActivity extends RefreshableDataGridPa
 
         addForm();
 
-        dataGrid = new RefreshableDataGrid<>(new SimpleTableView());
+        dataGrid = new RefreshableDataGrid<>(new GridTableWidget());
 
         dataGrid.addDataGridColumnDescriptor(newIDDescriptor());
         dataGrid.addDataGridColumnDescriptor(newRaceDescriptor());
@@ -121,7 +121,7 @@ public class SimpleRefreshableDataGridPageActivity extends RefreshableDataGridPa
                 final Long k = keyRowFormField.getValue();
                 final Integer v = toRowFormField.getValue();
                 if (v != null && k != null) {
-                    dataGrid.moveRow(k, v);
+                    //dataGrid.moveRow(k, v);
                 }
             }
         });
@@ -140,7 +140,7 @@ public class SimpleRefreshableDataGridPageActivity extends RefreshableDataGridPa
 
     @Override
     protected void onPonyStock(final PonyStock data) {
-        dataGrid.setData(data.getId(), data);
+        //        dataGrid.setData(data.getId(), data);
     }
 
 }

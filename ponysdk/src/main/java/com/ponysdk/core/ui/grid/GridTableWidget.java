@@ -21,12 +21,39 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.list;
+package com.ponysdk.core.ui.grid;
 
-public interface PSelectionModel<T> {
+import com.ponysdk.core.ui.basic.PComplexPanel;
+import com.ponysdk.core.ui.basic.PElement;
 
-    boolean isSelected(T object);
+public class GridTableWidget extends AbstractGridWidget {
 
-    void setSelected(T object, boolean selected);
+    public GridTableWidget() {
+        super("table");
+    }
 
+    @Override
+    protected PComplexPanel createTableHeader() {
+        return new PElement("thead");
+    }
+
+    @Override
+    protected PComplexPanel createTableBody() {
+        return new PElement("tbody");
+    }
+
+    @Override
+    public PComplexPanel createTableRow() {
+        return new PElement("tr");
+    }
+
+    @Override
+    protected PComplexPanel createTableCell() {
+        return new PElement("td");
+    }
+
+    @Override
+    protected PComplexPanel createTableHeaderCell() {
+        return new PElement("th");
+    }
 }
