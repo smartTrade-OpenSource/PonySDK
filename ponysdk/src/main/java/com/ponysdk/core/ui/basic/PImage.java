@@ -33,8 +33,8 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.servlet.WebsocketEncoder;
 import com.ponysdk.core.ui.basic.event.HasPClickHandlers;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
@@ -100,15 +100,15 @@ public class PImage extends PWidget implements HasPClickHandlers {
     }
 
     @Override
-    protected void enrichOnInit(final Parser parser) {
+    protected void enrichOnInit(final WebsocketEncoder parser) {
         super.enrichOnInit(parser);
         if (url != null) {
-            parser.parse(ServerToClientModel.IMAGE_URL, url);
+            parser.encode(ServerToClientModel.IMAGE_URL, url);
             if (top != -1 && left != -1 && imageHeight != -1 && imageWidth != -1) {
-                parser.parse(ServerToClientModel.IMAGE_LEFT, left);
-                parser.parse(ServerToClientModel.IMAGE_TOP, top);
-                parser.parse(ServerToClientModel.IMAGE_HEIGHT, imageHeight);
-                parser.parse(ServerToClientModel.IMAGE_WIDTH, imageWidth);
+                parser.encode(ServerToClientModel.IMAGE_LEFT, left);
+                parser.encode(ServerToClientModel.IMAGE_TOP, top);
+                parser.encode(ServerToClientModel.IMAGE_HEIGHT, imageHeight);
+                parser.encode(ServerToClientModel.IMAGE_WIDTH, imageWidth);
             }
         }
     }
@@ -159,8 +159,7 @@ public class PImage extends PWidget implements HasPClickHandlers {
                 log.error("Cannot load resource from " + this, e);
             }
 
-            final String extension = url.getFile()
-                    .substring(url.getFile().lastIndexOf('.') + 1);
+            final String extension = url.getFile().substring(url.getFile().lastIndexOf('.') + 1);
 
             return "data:image/" + extension + ";base64," + imageToBase64;
         }

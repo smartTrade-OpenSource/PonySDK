@@ -33,7 +33,7 @@ import javax.json.JsonObject;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.server.servlet.WebsocketEncoder;
 import com.ponysdk.core.server.stm.Txn;
 
 public class PCookies {
@@ -56,11 +56,11 @@ public class PCookies {
     }
 
     public String removeCookie(final String name) {
-        final Parser parser = Txn.get().getParser();
-        parser.beginObject();
-        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        parser.parse(ServerToClientModel.REMOVE_COOKIE, name);
-        parser.endObject();
+        final WebsocketEncoder encoder = Txn.get().getEncoder();
+        encoder.beginObject();
+        encoder.encode(ServerToClientModel.TYPE_UPDATE, ID);
+        encoder.encode(ServerToClientModel.REMOVE_COOKIE, name);
+        encoder.endObject();
 
         return cachedCookies.remove(name);
     }
@@ -72,13 +72,13 @@ public class PCookies {
     public void setCookie(final String name, final String value, final Date expires) {
         cachedCookies.put(name, value);
 
-        final Parser parser = Txn.get().getParser();
-        parser.beginObject();
-        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        parser.parse(ServerToClientModel.ADD_COOKIE, name);
-        parser.parse(ServerToClientModel.VALUE, value);
-        if (expires != null) parser.parse(ServerToClientModel.COOKIE_EXPIRE, expires.getTime());
-        parser.endObject();
+        final WebsocketEncoder encoder = Txn.get().getEncoder();
+        encoder.beginObject();
+        encoder.encode(ServerToClientModel.TYPE_UPDATE, ID);
+        encoder.encode(ServerToClientModel.ADD_COOKIE, name);
+        encoder.encode(ServerToClientModel.VALUE, value);
+        if (expires != null) encoder.encode(ServerToClientModel.COOKIE_EXPIRE, expires.getTime());
+        encoder.endObject();
     }
 
     public void onClientData(final JsonObject event) {

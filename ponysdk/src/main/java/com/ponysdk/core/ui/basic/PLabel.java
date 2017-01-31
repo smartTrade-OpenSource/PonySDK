@@ -27,7 +27,7 @@ import java.util.Objects;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.server.servlet.WebsocketEncoder;
 import com.ponysdk.core.ui.basic.event.HasPClickHandlers;
 import com.ponysdk.core.ui.basic.event.HasPDoubleClickHandlers;
 import com.ponysdk.core.ui.basic.event.HasPDragEndHandlers;
@@ -77,9 +77,9 @@ public class PLabel extends PWidget implements PHasText, HasPClickHandlers, HasP
     }
 
     @Override
-    protected void enrichOnInit(final Parser parser) {
+    protected void enrichOnInit(final WebsocketEncoder parser) {
         super.enrichOnInit(parser);
-        if (this.text != null) parser.parse(ServerToClientModel.TEXT, this.text);
+        if (this.text != null) parser.encode(ServerToClientModel.TEXT, this.text);
     }
 
     @Override

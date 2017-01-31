@@ -27,7 +27,7 @@ import javax.json.JsonObject;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.server.servlet.WebsocketEncoder;
 
 /**
  * AddOn are used to bind server side object with javascript object
@@ -63,9 +63,9 @@ public abstract class PAddOnComposite<T extends PWidget> extends PAddOn implemen
     }
 
     @Override
-    protected void enrichOnInit(final Parser parser) {
+    protected void enrichOnInit(final WebsocketEncoder parser) {
         super.enrichOnInit(parser);
-        parser.parse(ServerToClientModel.WIDGET_ID, widget.asWidget().getID());
+        parser.encode(ServerToClientModel.WIDGET_ID, widget.asWidget().getID());
     }
 
     @Override

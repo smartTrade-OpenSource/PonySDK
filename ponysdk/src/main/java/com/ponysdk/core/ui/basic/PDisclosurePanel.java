@@ -33,7 +33,7 @@ import javax.json.JsonObject;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.server.servlet.WebsocketEncoder;
 import com.ponysdk.core.ui.basic.event.HasPAnimation;
 import com.ponysdk.core.ui.basic.event.HasPWidgets;
 import com.ponysdk.core.ui.basic.event.PCloseEvent;
@@ -73,9 +73,9 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
     }
 
     @Override
-    protected void enrichOnInit(final Parser parser) {
+    protected void enrichOnInit(final WebsocketEncoder parser) {
         super.enrichOnInit(parser);
-        parser.parse(ServerToClientModel.TEXT, headerText);
+        parser.encode(ServerToClientModel.TEXT, headerText);
 
         // TODO add ImageResources parametters ..
         // parser.parse(ServerToClientModel.DISCLOSURE_PANEL_OPEN_IMG,

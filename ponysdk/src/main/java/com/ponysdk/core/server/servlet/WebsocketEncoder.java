@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 PonySDK
+ * Copyright (c) 2017 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
@@ -21,33 +21,20 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.basic;
+package com.ponysdk.core.server.servlet;
 
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.servlet.WebsocketEncoder;
 
-public class PRichTextToolbar extends PWidget {
+public interface WebsocketEncoder {
 
-    private final PRichTextArea richTextArea;
+    public void beginObject();
 
-    public PRichTextToolbar(final PRichTextArea richTextArea) {
-        this.richTextArea = richTextArea;
-    }
+    public void encode(final ServerToClientModel model, final Object value);
 
-    @Override
-    protected void enrichOnInit(final WebsocketEncoder parser) {
-        super.enrichOnInit(parser);
-        parser.encode(ServerToClientModel.WIDGET_ID, richTextArea.getID());
-    }
+    public void endObject();
 
-    @Override
-    protected WidgetType getWidgetType() {
-        return WidgetType.RICH_TEXT_TOOLBAR;
-    }
+    public void flush();
 
-    public PRichTextArea getRichTextArea() {
-        return richTextArea;
-    }
+    public void release();
 
 }

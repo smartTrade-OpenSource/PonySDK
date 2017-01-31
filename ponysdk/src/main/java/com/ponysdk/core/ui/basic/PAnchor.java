@@ -27,11 +27,12 @@ import java.util.Objects;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.server.servlet.WebsocketEncoder;
 import com.ponysdk.core.ui.basic.event.PHasHTML;
 
 /**
- * A widget that represents a simple &lt;a&gt; element. <h3>CSS Style Rules</h3>
+ * A widget that represents a simple &lt;a&gt; element.
+ * <h3>CSS Style Rules</h3>
  * <ul class='css'>
  * <li>.gwt-Anchor { }</li>
  * </ul>
@@ -69,11 +70,11 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
     }
 
     @Override
-    protected void enrichOnInit(final Parser parser) {
+    protected void enrichOnInit(final WebsocketEncoder parser) {
         super.enrichOnInit(parser);
-        if (text != null) parser.parse(ServerToClientModel.TEXT, text);
-        if (href != null) parser.parse(ServerToClientModel.HREF, href);
-        if (html != null) parser.parse(ServerToClientModel.HTML, html);
+        if (text != null) parser.encode(ServerToClientModel.TEXT, text);
+        if (href != null) parser.encode(ServerToClientModel.HREF, href);
+        if (html != null) parser.encode(ServerToClientModel.HTML, html);
     }
 
     @Override

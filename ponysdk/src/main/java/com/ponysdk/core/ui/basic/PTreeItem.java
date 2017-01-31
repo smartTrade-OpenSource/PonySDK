@@ -29,7 +29,7 @@ import java.util.Objects;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.server.servlet.WebsocketEncoder;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
 
 /**
@@ -72,10 +72,10 @@ public class PTreeItem extends PObject {
     }
 
     @Override
-    protected void enrichOnInit(final Parser parser) {
+    protected void enrichOnInit(final WebsocketEncoder parser) {
         super.enrichOnInit(parser);
-        parser.parse(ServerToClientModel.TEXT, html);
-        if (isRoot) parser.parse(ServerToClientModel.ROOT, isRoot);
+        parser.encode(ServerToClientModel.TEXT, html);
+        if (isRoot) parser.encode(ServerToClientModel.ROOT, isRoot);
     }
 
     private void setWidget() {

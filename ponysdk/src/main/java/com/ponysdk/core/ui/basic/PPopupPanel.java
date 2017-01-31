@@ -37,7 +37,7 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.server.servlet.WebsocketEncoder;
 import com.ponysdk.core.ui.basic.event.HasPAnimation;
 import com.ponysdk.core.ui.basic.event.PCloseEvent;
 import com.ponysdk.core.ui.basic.event.PCloseHandler;
@@ -110,8 +110,8 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
     }
 
     @Override
-    protected void enrichOnInit(final Parser parser) {
-        if (autoHide) parser.parse(ServerToClientModel.POPUP_AUTO_HIDE, autoHide);
+    protected void enrichOnInit(final WebsocketEncoder parser) {
+        if (autoHide) parser.encode(ServerToClientModel.POPUP_AUTO_HIDE, autoHide);
     }
 
     @Override

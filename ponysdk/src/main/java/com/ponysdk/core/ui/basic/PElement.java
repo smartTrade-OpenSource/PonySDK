@@ -27,7 +27,7 @@ import java.util.Objects;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.server.servlet.WebsocketEncoder;
 
 /**
  * All HTML element interfaces derive from this class.Useful to create native
@@ -46,9 +46,9 @@ public class PElement extends PComplexPanel {
     }
 
     @Override
-    protected void enrichOnInit(final Parser parser) {
+    protected void enrichOnInit(final WebsocketEncoder parser) {
         super.enrichOnInit(parser);
-        parser.parse(ServerToClientModel.TAG, tagName);
+        parser.encode(ServerToClientModel.TAG, tagName);
     }
 
     @Override

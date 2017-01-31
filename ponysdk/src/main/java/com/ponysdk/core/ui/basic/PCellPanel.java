@@ -28,7 +28,7 @@ import java.util.Objects;
 import com.ponysdk.core.model.PHorizontalAlignment;
 import com.ponysdk.core.model.PVerticalAlignment;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.server.servlet.WebsocketEncoder;
 
 /**
  * A panel whose child widgets are contained within the cells of a table. Each
@@ -41,10 +41,10 @@ public abstract class PCellPanel extends PComplexPanel {
     private Integer spacing;
 
     @Override
-    protected void enrichOnInit(final Parser parser) {
+    protected void enrichOnInit(final WebsocketEncoder parser) {
         super.enrichOnInit(parser);
-        if (this.borderWidth != null) parser.parse(ServerToClientModel.BORDER_WIDTH, this.borderWidth);
-        if (this.spacing != null) parser.parse(ServerToClientModel.SPACING, this.spacing);
+        if (this.borderWidth != null) parser.encode(ServerToClientModel.BORDER_WIDTH, this.borderWidth);
+        if (this.spacing != null) parser.encode(ServerToClientModel.SPACING, this.spacing);
     }
 
     public void setCellHorizontalAlignment(final PWidget widget, final PHorizontalAlignment align) {

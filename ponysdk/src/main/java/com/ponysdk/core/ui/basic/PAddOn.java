@@ -16,7 +16,7 @@ import javax.json.JsonValue;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.server.servlet.WebsocketEncoder;
 
 public abstract class PAddOn extends PObject {
 
@@ -73,17 +73,17 @@ public abstract class PAddOn extends PObject {
             return true;
         } else if (this.windowID != windowID) {
             throw new IllegalAccessError(
-                    "Widget already attached to an other window, current window : #" + this.windowID + ", new window : #" + windowID);
+                "Widget already attached to an other window, current window : #" + this.windowID + ", new window : #" + windowID);
         }
         return false;
     }
 
     @Override
-    protected void enrichOnInit(final Parser parser) {
+    protected void enrichOnInit(final WebsocketEncoder parser) {
         super.enrichOnInit(parser);
-        parser.parse(ServerToClientModel.FACTORY, getSignature());
+        parser.encode(ServerToClientModel.FACTORY, getSignature());
         if (args != null) {
-            parser.parse(ServerToClientModel.NATIVE, args);
+            parser.encode(ServerToClientModel.NATIVE, args);
             args = null;//free memory
         }
     }
@@ -121,16 +121,11 @@ public abstract class PAddOn extends PObject {
                         final Number number = (Number) object;
                         if (object instanceof Byte || object instanceof Short || object instanceof Integer)
                             arrayBuilder.add(number.intValue());
-                        else if (object instanceof Long)
-                            arrayBuilder.add(number.longValue());
-                        else if (object instanceof Float || object instanceof Double)
-                            arrayBuilder.add(number.doubleValue());
-                        else if (object instanceof BigInteger)
-                            arrayBuilder.add((BigInteger) object);
-                        else if (object instanceof BigDecimal)
-                            arrayBuilder.add((BigDecimal) object);
-                        else
-                            arrayBuilder.add(number.doubleValue());
+                        else if (object instanceof Long) arrayBuilder.add(number.longValue());
+                        else if (object instanceof Float || object instanceof Double) arrayBuilder.add(number.doubleValue());
+                        else if (object instanceof BigInteger) arrayBuilder.add((BigInteger) object);
+                        else if (object instanceof BigDecimal) arrayBuilder.add((BigDecimal) object);
+                        else arrayBuilder.add(number.doubleValue());
                     } else if (object instanceof Boolean) {
                         arrayBuilder.add((Boolean) object);
                     } else if (object instanceof JsonArrayBuilder) {
@@ -139,7 +134,7 @@ public abstract class PAddOn extends PObject {
                         arrayBuilder.add(((JsonObjectBuilder) object).build());
                     } else if (object instanceof Collection) {
                         throw new IllegalArgumentException(
-                                "Collections are not supported for PAddOn, you need to convert it to JsonArray on primitive array");
+                            "Collections are not supported for PAddOn, you need to convert it to JsonArray on primitive array");
                     } else {
                         arrayBuilder.add(object.toString());
                     }

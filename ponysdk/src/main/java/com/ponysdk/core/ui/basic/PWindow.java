@@ -33,8 +33,8 @@ import javax.json.JsonObject;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.servlet.WebsocketEncoder;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.ui.basic.event.PCloseEvent;
 import com.ponysdk.core.ui.basic.event.PCloseHandler;
@@ -104,11 +104,11 @@ public class PWindow extends PObject {
     }
 
     @Override
-    protected void enrichOnInit(final Parser parser) {
+    protected void enrichOnInit(final WebsocketEncoder parser) {
         super.enrichOnInit(parser);
-        parser.parse(ServerToClientModel.URL, url);
-        parser.parse(ServerToClientModel.NAME, name);
-        parser.parse(ServerToClientModel.FEATURES, features);
+        parser.encode(ServerToClientModel.URL, url);
+        parser.encode(ServerToClientModel.NAME, name);
+        parser.encode(ServerToClientModel.FEATURES, features);
     }
 
     public void open() {

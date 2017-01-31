@@ -36,7 +36,7 @@ import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.server.servlet.WebsocketEncoder;
 import com.ponysdk.core.ui.basic.event.HasPBeforeSelectionHandlers;
 import com.ponysdk.core.ui.basic.event.HasPSelectionHandlers;
 import com.ponysdk.core.ui.basic.event.HasPWidgets;
@@ -83,9 +83,9 @@ public class PStackLayoutPanel extends PWidget
     }
 
     @Override
-    protected void enrichOnInit(final Parser parser) {
+    protected void enrichOnInit(final WebsocketEncoder parser) {
         super.enrichOnInit(parser);
-        parser.parse(ServerToClientModel.UNIT, unit.getByteValue());
+        parser.encode(ServerToClientModel.UNIT, unit.getByteValue());
     }
 
     @Override

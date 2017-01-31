@@ -35,7 +35,7 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.PCheckBoxState;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.server.servlet.WebsocketEncoder;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 
@@ -73,9 +73,9 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
     }
 
     @Override
-    protected void enrichOnInit(final Parser parser) {
+    protected void enrichOnInit(final WebsocketEncoder parser) {
         super.enrichOnInit(parser);
-        if (PCheckBoxState.UNCHECKED.equals(this.state)) parser.parse(ServerToClientModel.VALUE_CHECKBOX, this.state.getValue());
+        if (PCheckBoxState.UNCHECKED.equals(this.state)) parser.encode(ServerToClientModel.VALUE_CHECKBOX, this.state.getValue());
     }
 
     @Override
