@@ -49,7 +49,8 @@ public class PTTabPanel extends PTWidget<TabPanel> {
         final Widget w = asWidget(ptObject);
 
         final BinaryModel binaryModel = buffer.readBinaryModel();
-        if (ServerToClientModel.TAB_TEXT.equals(binaryModel.getModel())) {
+        ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.TAB_TEXT.equals(model)) {
             final String value = binaryModel.getStringValue();
             final BinaryModel beforeIndexModel = buffer.readBinaryModel();
             if (ServerToClientModel.BEFORE_INDEX.equals(beforeIndexModel.getModel())) {
@@ -58,7 +59,7 @@ public class PTTabPanel extends PTWidget<TabPanel> {
                 buffer.rewind(beforeIndexModel);
                 uiObject.add(w, value);
             }
-        } else if (ServerToClientModel.TAB_WIDGET.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.TAB_WIDGET.equals(model)) {
             final PTWidget<?> ptWidget = (PTWidget<?>) uiBuilder.getPTObject(binaryModel.getIntValue());
             final BinaryModel beforeIndexModel = buffer.readBinaryModel();
             if (ServerToClientModel.BEFORE_INDEX.equals(beforeIndexModel.getModel())) {
@@ -109,10 +110,11 @@ public class PTTabPanel extends PTWidget<TabPanel> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.SELECTED_INDEX.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.SELECTED_INDEX.ordinal() == modelOrdinal) {
             uiObject.selectTab(binaryModel.getIntValue());
             return true;
-        } else if (ServerToClientModel.ANIMATION.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.ANIMATION.ordinal() == modelOrdinal) {
             uiObject.setAnimationEnabled(binaryModel.getBooleanValue());
             return true;
         } else {

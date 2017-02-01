@@ -94,19 +94,22 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.WIDGET_FULL_SIZE.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.WIDGET_FULL_SIZE.ordinal() == modelOrdinal) {
             uiObject.setWidth(HUNDRED_PERCENT);
             uiObject.setHeight(HUNDRED_PERCENT);
             return true;
-        } else if (ServerToClientModel.PREVENT_EVENT.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.PREVENT_EVENT.ordinal() == modelOrdinal) {
             if (preventedEvents == null) preventedEvents = new HashSet<>();
             preventedEvents.add(binaryModel.getIntValue());
             return true;
-        } else if (ServerToClientModel.STOP_EVENT.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.STOP_EVENT.ordinal() == modelOrdinal) {
             if (stoppedEvents == null) stoppedEvents = new HashSet<>();
             stoppedEvents.add(binaryModel.getIntValue());
             return true;
-        } else return super.update(buffer, binaryModel);
+        } else {
+            return super.update(buffer, binaryModel);
+        }
     }
 
     @Override

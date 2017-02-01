@@ -59,7 +59,8 @@ public class PTCookies extends AbstractPTObject {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.ADD_COOKIE.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.ADD_COOKIE.ordinal() == modelOrdinal) {
             final String name = binaryModel.getStringValue();
             // ServerToClientModel.VALUE
             final String value = buffer.readBinaryModel().getStringValue();
@@ -73,12 +74,12 @@ public class PTCookies extends AbstractPTObject {
                 Cookies.setCookie(name, value);
             }
             return true;
-        }
-        if (ServerToClientModel.REMOVE_COOKIE.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.REMOVE_COOKIE.ordinal() == modelOrdinal) {
             Cookies.removeCookie(binaryModel.getStringValue());
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
 
 }

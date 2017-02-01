@@ -222,26 +222,28 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
     }
 
     private void update(final BinaryModel binaryModel, final ReaderBuffer buffer) {
-        if (binaryModel.getModel() == null) return;
+        final ServerToClientModel model = binaryModel.getModel();
+        if (model == null) return;
 
-        if (ServerToClientModel.TYPE_CREATE.equals(binaryModel.getModel())) {
+        final int modelOrdinal = model.ordinal();
+        if (ServerToClientModel.TYPE_CREATE.ordinal() == modelOrdinal) {
             final PTObject ptObject = processCreate(buffer, binaryModel.getIntValue());
             processUpdate(buffer, ptObject);
-        } else if (ServerToClientModel.TYPE_UPDATE.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.TYPE_UPDATE.ordinal() == modelOrdinal) {
             processUpdate(buffer, getPTObject(binaryModel.getIntValue()));
-        } else if (ServerToClientModel.TYPE_ADD.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.TYPE_ADD.ordinal() == modelOrdinal) {
             processAdd(buffer, getPTObject(binaryModel.getIntValue()));
-        } else if (ServerToClientModel.TYPE_GC.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.TYPE_GC.ordinal() == modelOrdinal) {
             processGC(binaryModel.getIntValue());
-        } else if (ServerToClientModel.TYPE_REMOVE.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.TYPE_REMOVE.ordinal() == modelOrdinal) {
             processRemove(buffer, binaryModel.getIntValue());
-        } else if (ServerToClientModel.TYPE_ADD_HANDLER.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.TYPE_ADD_HANDLER.ordinal() == modelOrdinal) {
             processAddHandler(buffer, HandlerModel.values()[binaryModel.getByteValue()]);
-        } else if (ServerToClientModel.TYPE_REMOVE_HANDLER.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.TYPE_REMOVE_HANDLER.ordinal() == modelOrdinal) {
             processRemoveHandler(buffer, getPTObject(binaryModel.getIntValue()));
-        } else if (ServerToClientModel.TYPE_HISTORY.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.TYPE_HISTORY.ordinal() == modelOrdinal) {
             processHistory(buffer, binaryModel.getStringValue());
-        } else if (ServerToClientModel.TYPE_CLOSE.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.TYPE_CLOSE.ordinal() == modelOrdinal) {
             processClose();
         } else {
             log.log(Level.WARNING, "Unknown instruction type : " + binaryModel);

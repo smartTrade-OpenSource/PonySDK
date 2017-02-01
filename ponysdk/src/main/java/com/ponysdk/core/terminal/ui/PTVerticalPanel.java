@@ -49,16 +49,17 @@ public class PTVerticalPanel extends PTCellPanel<VerticalPanel> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.BORDER_WIDTH.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.BORDER_WIDTH.ordinal() == modelOrdinal) {
             uiObject.setBorderWidth(binaryModel.getIntValue());
             return true;
-        } else if (ServerToClientModel.SPACING.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.SPACING.ordinal() == modelOrdinal) {
             uiObject.setSpacing(binaryModel.getIntValue());
             return true;
-        } else if (ServerToClientModel.HORIZONTAL_ALIGNMENT.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.HORIZONTAL_ALIGNMENT.ordinal() == modelOrdinal) {
             uiObject.setHorizontalAlignment(AlignmentConverter.asHorizontalAlignmentConstant(binaryModel.getByteValue()));
             return true;
-        } else if (ServerToClientModel.VERTICAL_ALIGNMENT.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.VERTICAL_ALIGNMENT.ordinal() == modelOrdinal) {
             uiObject.setVerticalAlignment(AlignmentConverter.asVerticalAlignmentConstant(binaryModel.getByteValue()));
             return true;
         } else {

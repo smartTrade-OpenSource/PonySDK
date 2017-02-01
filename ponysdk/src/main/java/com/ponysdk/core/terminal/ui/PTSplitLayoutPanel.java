@@ -45,17 +45,18 @@ public class PTSplitLayoutPanel extends PTDockLayoutPanel {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.MIN_SIZE.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.MIN_SIZE.ordinal() == modelOrdinal) {
             final int minSize = binaryModel.getIntValue();
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
             cast().setWidgetMinSize(w, minSize);
             return true;
-        } else if (ServerToClientModel.SNAP_CLOSED_SIZE.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.SNAP_CLOSED_SIZE.ordinal() == modelOrdinal) {
             final int snapClosedSize = binaryModel.getIntValue();
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
             cast().setWidgetSnapClosedSize(w, snapClosedSize);
             return true;
-        } else if (ServerToClientModel.TOGGLE_DISPLAY_ALLOWED.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.TOGGLE_DISPLAY_ALLOWED.ordinal() == modelOrdinal) {
             final boolean enable = binaryModel.getBooleanValue();
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
             cast().setWidgetToggleDisplayAllowed(w, enable);

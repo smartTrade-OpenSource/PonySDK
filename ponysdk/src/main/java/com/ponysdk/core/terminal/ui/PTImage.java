@@ -86,7 +86,8 @@ public class PTImage extends PTWidget<Image> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.IMAGE_URL.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.IMAGE_URL.ordinal() == modelOrdinal) {
             cast().setUrl(binaryModel.getStringValue());
             return true;
         } else {
