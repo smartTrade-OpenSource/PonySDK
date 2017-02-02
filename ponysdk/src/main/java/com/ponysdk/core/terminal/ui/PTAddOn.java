@@ -41,6 +41,8 @@ public class PTAddOn extends AbstractPTObject {
 
     private final static Logger log = Logger.getLogger(PTAddOn.class.getName());
 
+    protected boolean destroyed;
+
     JavascriptAddOn addOn;
 
     @Override
@@ -78,6 +80,9 @@ public class PTAddOn extends AbstractPTObject {
         if (ServerToClientModel.NATIVE.ordinal() == modelOrdinal) {
             doUpdate(binaryModel.getJsonObject());
             return true;
+        } else if (ServerToClientModel.DESTROY.ordinal() == modelOrdinal) {
+            destroy();
+            return true;
         } else {
             return super.update(buffer, binaryModel);
         }
@@ -85,9 +90,17 @@ public class PTAddOn extends AbstractPTObject {
 
     protected void doUpdate(final JSONObject data) {
         try {
-            addOn.update(data.getJavaScriptObject());
+            if (!destroyed) addOn.update(data.getJavaScriptObject());
+            else log.warning("PTAddOn #" + getObjectID() + " destroyed, so updates will be discarded : " + data.toString());
         } catch (final JavaScriptException e) {
             log.log(Level.SEVERE, e.getMessage(), e);
+        }
+    }
+
+    protected void destroy() {
+        if (!destroyed) {
+            addOn.destroy();
+            destroyed = true;
         }
     }
 }

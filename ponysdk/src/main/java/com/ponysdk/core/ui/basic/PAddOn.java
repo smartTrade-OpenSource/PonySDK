@@ -92,19 +92,9 @@ public abstract class PAddOn extends PObject {
         return getClass().getCanonicalName();
     }
 
-    public void update(final JsonObject jsonObject) {
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.NATIVE, jsonObject));
-    }
-
     @Override
     protected WidgetType getWidgetType() {
         return WidgetType.ADDON;
-    }
-
-    public void update(final String key, final JsonObject object) {
-        final JsonObjectBuilder objectBuilder = Json.createObjectBuilder();
-        objectBuilder.add(key, object);
-        update(objectBuilder.build());
     }
 
     protected void callTerminalMethod(final String methodName, final Object... args) {
@@ -145,11 +135,15 @@ public abstract class PAddOn extends PObject {
             builder.add(ARGUMENTS_PROPERTY_NAME, arrayBuilder);
         }
 
-        update(builder.build());
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.NATIVE, builder.build()));
     }
 
     public void setLogLevel(final Level logLevel) {
         callTerminalMethod("setLogLevel", LOG_LEVEL.get(logLevel));
+    }
+
+    public void destroy() {
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.DESTROY));
     }
 
 }

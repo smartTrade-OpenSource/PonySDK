@@ -50,15 +50,16 @@ public class PTAddOnComposite extends PTAddOn {
 
     private Widget widget;
 
+    private boolean initialized;
+
     @Override
     protected void doCreate(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
         // ServerToClientModel.FACTORY
         final String signature = buffer.readBinaryModel().getStringValue();
         final Map<String, JavascriptAddOnFactory> factories = uiService.getJavascriptAddOnFactory();
         final JavascriptAddOnFactory factory = factories.get(signature);
-        if (factory == null)
-            throw new IllegalArgumentException("AddOn factory not found for signature: " + signature + ". Addons registered: "
-                    + factories.keySet());
+        if (factory == null) throw new IllegalArgumentException(
+            "AddOn factory not found for signature: " + signature + ". Addons registered: " + factories.keySet());
 
         final JSONObject params = new JSONObject();
         params.put("id", new JSONNumber(objectId));
@@ -81,9 +82,12 @@ public class PTAddOnComposite extends PTAddOn {
             @Override
             public void onAttachOrDetach(final AttachEvent event) {
                 try {
-                    if (event.isAttached()) addOn.onAttached();
-                    else addOn.onDetached();
-                    flushPendingUpdates();
+                    if (event.isAttached()) {
+                        addOn.onAttached();
+                        flushPendingUpdates();
+                    } else {
+                        addOn.onDetached();
+                    }
                 } catch (final JavaScriptException e) {
                     log.log(Level.SEVERE, e.getMessage(), e);
                 }
@@ -94,6 +98,7 @@ public class PTAddOnComposite extends PTAddOn {
             addOn = factory.newAddOn(params.getJavaScriptObject());
             addOn.onInit();
             if (widget.isAttached()) addOn.onAttached();
+            initialized = true;
         } catch (final JavaScriptException e) {
             log.log(Level.SEVERE, e.getMessage(), e);
         }
@@ -101,11 +106,15 @@ public class PTAddOnComposite extends PTAddOn {
 
     @Override
     protected void doUpdate(final JSONObject data) {
-        if (widget.isAttached()) {
-            flushPendingUpdates();
-            super.doUpdate(data);
+        if (!destroyed) {
+            if (initialized && widget.isAttached()) {
+                flushPendingUpdates();
+                super.doUpdate(data);
+            } else {
+                pendingUpdates.add(data);
+            }
         } else {
-            pendingUpdates.add(data);
+            log.warning("PTAddOnComposite #" + getObjectID() + " destroyed, so updates will be discarded : " + data.toString());
         }
     }
 
@@ -115,6 +124,14 @@ public class PTAddOnComposite extends PTAddOn {
                 super.doUpdate(update);
             }
             pendingUpdates.clear();
+        }
+    }
+
+    @Override
+    protected void destroy() {
+        if (!destroyed) {
+            pendingUpdates.clear();
+            super.destroy();
         }
     }
 }
