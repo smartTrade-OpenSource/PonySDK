@@ -37,4 +37,7 @@ public class JavascriptAddOn extends JavaScriptObject {
     public final native void onAttached() /*-{ this.onAttached(); }-*/;
 
     public final native void onDetached() /*-{ this.onDetached(); }-*/;
+
+    public final native void destroy() /*-{ this.destroy(); }-*/;
+
 }
