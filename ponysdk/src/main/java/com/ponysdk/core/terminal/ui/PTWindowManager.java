@@ -49,6 +49,10 @@ public class PTWindowManager {
         return instance;
     }
 
+    public static final Collection<PTWindow> getWindows() {
+        return new ArrayList<>(get().windows.values());
+    }
+
     public static final PTWindow getWindow(final int windowID) {
         return get().windows.get(windowID);
     }

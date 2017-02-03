@@ -67,7 +67,7 @@ abstract class AbstractPTObject implements PTObject {
     }
 
     @Override
-    public void gc(final UIBuilder uiService) {
+    public void destroy() {
     }
 
     @Override
