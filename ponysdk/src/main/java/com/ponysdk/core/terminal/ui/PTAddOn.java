@@ -97,7 +97,8 @@ public class PTAddOn extends AbstractPTObject {
         }
     }
 
-    protected void destroy() {
+    @Override
+    public void destroy() {
         if (!destroyed) {
             addOn.destroy();
             destroyed = true;
