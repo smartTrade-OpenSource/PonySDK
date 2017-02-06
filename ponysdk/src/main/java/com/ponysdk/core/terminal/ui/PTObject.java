@@ -42,7 +42,7 @@ public interface PTObject {
 
     void removeHandler(final ReaderBuffer buffer, final UIBuilder uiService);
 
-    void gc(final UIBuilder uiService);
+    void destroy();
 
     int getObjectID();
 

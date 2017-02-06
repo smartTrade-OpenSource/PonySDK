@@ -106,7 +106,7 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler {
                      */
                     @Override
                     public void onDataReceived(final ReaderBuffer buffer) {
-                        uiBuilder.updatWindowTerminal(buffer);
+                        uiBuilder.updateWindowTerminal(buffer);
                     }
 
                 }));

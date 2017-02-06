@@ -128,7 +128,7 @@ public class PTAddOnComposite extends PTAddOn {
     }
 
     @Override
-    protected void destroy() {
+    public void destroy() {
         if (!destroyed) {
             pendingUpdates.clear();
             super.destroy();
