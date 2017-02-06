@@ -128,8 +128,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         selectizeAddon.text("test");
         PWindow.getMain().add(selectizeAddon);
 
-        final PRadioButton buy = Element.newPRadioButton("side", "Buy");
-        final PRadioButton sell = Element.newPRadioButton("side", "Sell");
+        final PRadioButton buy = Element.newPRadioButton("Buy");
+        final PRadioButton sell = Element.newPRadioButton("Sell");
         buy.addValueChangeHandler((event) -> selectizeAddon.selectBuy(event.getValue()));
         sell.addValueChangeHandler((event) -> selectizeAddon.selectSell(event.getValue()));
 
@@ -280,7 +280,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         // image
 
         boxContainer.add(Element.newPRadioButton("RadioLabel"));
-        boxContainer.add(Element.newPRadioButton("RadioName", "RadioLabel"));
+        boxContainer.add(Element.newPRadioButton("RadioLabel"));
         final PRichTextArea richTextArea = Element.newPRichTextArea();
         boxContainer.add(richTextArea);
         boxContainer.add(Element.newPRichTextToolbar(richTextArea));
