@@ -67,11 +67,11 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     private boolean isMultipleSelect;
     private int visibleItemCount;
 
-    public PListBox() {
+    protected PListBox() {
         this(false);
     }
 
-    public PListBox(final boolean containsEmptyItem) {
+    protected PListBox(final boolean containsEmptyItem) {
         this.containsEmptyItem = containsEmptyItem;
         if (this.containsEmptyItem) addItem(EMPTY, null);
     }

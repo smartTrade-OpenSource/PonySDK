@@ -36,7 +36,7 @@ public abstract class PAddOnComposite<T extends PWidget> extends PAddOn implemen
 
     protected T widget;
 
-    public PAddOnComposite(final T widget, final JsonObject args) {
+    protected PAddOnComposite(final T widget, final JsonObject args) {
         super(args);
         this.widget = widget;
 
@@ -53,7 +53,7 @@ public abstract class PAddOnComposite<T extends PWidget> extends PAddOn implemen
         }
     }
 
-    public PAddOnComposite(final T widget) {
+    protected PAddOnComposite(final T widget) {
         this(widget, null);
     }
 

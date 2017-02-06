@@ -40,6 +40,9 @@ public abstract class PCellPanel extends PComplexPanel {
     private Integer borderWidth;
     private Integer spacing;
 
+    protected PCellPanel() {
+    }
+
     @Override
     protected void enrichOnInit(final WebsocketEncoder parser) {
         super.enrichOnInit(parser);

@@ -102,11 +102,11 @@ public class PMenuBar extends PWidget implements HasPAnimation {
     private final boolean vertical;
     private boolean animationEnabled = false;
 
-    public PMenuBar() {
+    protected PMenuBar() {
         this(false);
     }
 
-    public PMenuBar(final boolean vertical) {
+    protected PMenuBar(final boolean vertical) {
         this.vertical = vertical;
     }
 

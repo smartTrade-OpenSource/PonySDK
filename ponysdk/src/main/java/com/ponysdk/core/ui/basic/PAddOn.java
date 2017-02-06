@@ -40,10 +40,10 @@ public abstract class PAddOn extends PObject {
 
     private JsonObject args;
 
-    public PAddOn() {
+    protected PAddOn() {
     }
 
-    public PAddOn(final JsonObject args) {
+    protected PAddOn(final JsonObject args) {
         this.args = args;
     }
 

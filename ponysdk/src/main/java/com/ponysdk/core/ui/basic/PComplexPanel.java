@@ -35,6 +35,9 @@ public abstract class PComplexPanel extends PPanel {
 
     protected PWidgetCollection children = new PWidgetCollection(this);
 
+    protected PComplexPanel() {
+    }
+
     public void add(final PWidget... widgets) {
         for (final PWidget w : widgets) {
             add(w);

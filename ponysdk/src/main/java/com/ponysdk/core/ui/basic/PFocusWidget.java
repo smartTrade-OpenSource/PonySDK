@@ -55,6 +55,9 @@ public abstract class PFocusWidget extends PWidget
     private boolean showLoadingOnRequest;
     private int tabindex = Integer.MIN_VALUE;
 
+    protected PFocusWidget() {
+    }
+
     @Override
     public HandlerRegistration addMouseOverHandler(final PMouseOverHandler handler) {
         return addDomHandler(handler, PMouseOverEvent.TYPE);

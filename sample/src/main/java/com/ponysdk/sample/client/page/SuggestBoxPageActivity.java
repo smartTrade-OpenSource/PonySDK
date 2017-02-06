@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -25,9 +25,7 @@ package com.ponysdk.sample.client.page;
 
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.service.query.Query;
-import com.ponysdk.sample.client.event.DemoBusinessEvent;
-import com.ponysdk.core.ui.basic.PHTML;
-import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PListBox;
 import com.ponysdk.core.ui.basic.PSuggestBox;
 import com.ponysdk.core.ui.basic.PSuggestBox.PMultiWordSuggestOracle;
@@ -37,6 +35,7 @@ import com.ponysdk.core.ui.basic.event.PChangeEvent;
 import com.ponysdk.core.ui.basic.event.PChangeHandler;
 import com.ponysdk.core.ui.basic.event.PSelectionEvent;
 import com.ponysdk.core.ui.basic.event.PSelectionHandler;
+import com.ponysdk.sample.client.event.DemoBusinessEvent;
 
 public class SuggestBoxPageActivity extends SamplePageActivity {
 
@@ -50,11 +49,11 @@ public class SuggestBoxPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PVerticalPanel panel = new PVerticalPanel();
+        final PVerticalPanel panel = Element.newPVerticalPanel();
 
-        panel.add(new PLabel("Choose a word:"));
+        panel.add(Element.newPLabel("Choose a word:"));
 
-        final PSuggestBox suggestBox = new PSuggestBox();
+        final PSuggestBox suggestBox = Element.newPSuggestBox();
         suggestBox.setLimit(10);
 
         final PMultiWordSuggestOracle suggestOracle = (PMultiWordSuggestOracle) suggestBox.getSuggestOracle();
@@ -80,10 +79,10 @@ public class SuggestBoxPageActivity extends SamplePageActivity {
 
         panel.add(suggestBox);
 
-        panel.add(new PHTML("<br><br>"));
+        panel.add(Element.newPHTML("<br><br>"));
 
-        panel.add(new PLabel("Manipulate the suggest box:"));
-        final PListBox operation = new PListBox(true);
+        panel.add(Element.newPLabel("Manipulate the suggest box:"));
+        final PListBox operation = Element.newPListBox(true);
         operation.addItem("Select \"Friesian horse\"", 0);
         operation.addItem("Get textbox value", 1);
         operation.addItem("Enable/Disable textbox", 2);

@@ -37,11 +37,11 @@ public class PGrid extends PHTMLTable<PCellFormatter> {
     private final int columns;
     private final int rows;
 
-    public PGrid() {
+    protected PGrid() {
         this(0, 0);
     }
 
-    public PGrid(final int rows, final int columns) {
+    protected PGrid(final int rows, final int columns) {
         super();
         this.rows = rows;
         this.columns = columns;

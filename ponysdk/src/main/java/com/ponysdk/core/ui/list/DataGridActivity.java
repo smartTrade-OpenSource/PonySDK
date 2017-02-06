@@ -29,8 +29,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
-import com.ponysdk.core.ui.basic.PSimplePanel;
 import com.ponysdk.core.ui.basic.PWidget;
 
 /***
@@ -63,7 +63,7 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
             final IsPWidget renderCell = field.renderCell(row, data);
             view.addWidget(renderCell, col++, row + 1, 1);
         }
-        view.addWidget(new PSimplePanel(), col, row + 1, 1);
+        view.addWidget(Element.newPSimplePanel(), col, row + 1, 1);
     }
 
     public void insertSubList(final D fatherData, final List<D> datas) {
@@ -84,7 +84,7 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
             for (final DataGridColumnDescriptor<D, ?> field : this.columnDescriptors) {
                 this.view.addWidget(field.renderSubCell(subRow + 1, data), col++, subRow + 1, 1);
             }
-            this.view.addWidget(new PSimplePanel(), col, subRow + 1, 1);
+            this.view.addWidget(Element.newPSimplePanel(), col, subRow + 1, 1);
             subRow++;
         }
     }

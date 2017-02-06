@@ -39,6 +39,7 @@ import com.ponysdk.core.ui.model.ServerBinaryModel;
 public class PTreeItem extends PObject {
 
     private final List<PTreeItem> children = new ArrayList<>();
+
     private PTree tree;
     private boolean isRoot = false;
     private String html = null;
@@ -48,14 +49,14 @@ public class PTreeItem extends PObject {
 
     private PWidget widget;
 
-    public PTreeItem() {
+    protected PTreeItem() {
     }
 
-    public PTreeItem(final PWidget widget) {
+    protected PTreeItem(final PWidget widget) {
         this.widget = widget;
     }
 
-    public PTreeItem(final String html) {
+    protected PTreeItem(final String html) {
         this.html = html;
     }
 

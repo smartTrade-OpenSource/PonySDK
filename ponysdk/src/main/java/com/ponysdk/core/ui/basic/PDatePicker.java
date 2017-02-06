@@ -51,7 +51,10 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     private int month = -1;
     private int day = -1;
 
-    private static String dateToString(final Collection<Date> dates) {
+    protected PDatePicker() {
+    }
+
+    private static final String dateToString(final Collection<Date> dates) {
         final StringBuilder asString = new StringBuilder();
         final Iterator<Date> it = dates.iterator();
         while (it.hasNext()) {

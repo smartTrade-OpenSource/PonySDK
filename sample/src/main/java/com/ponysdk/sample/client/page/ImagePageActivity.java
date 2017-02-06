@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,8 +23,8 @@
 
 package com.ponysdk.sample.client.page;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PFlowPanel;
-import com.ponysdk.core.ui.basic.PImage;
 
 public class ImagePageActivity extends SamplePageActivity {
 
@@ -36,8 +36,8 @@ public class ImagePageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PFlowPanel panel = new PFlowPanel();
-        panel.add(new PImage("images/pony.png"));
+        final PFlowPanel panel = Element.newPFlowPanel();
+        panel.add(Element.newPImage("images/pony.png"));
 
         examplePanel.setWidget(panel);
     }

@@ -33,6 +33,9 @@ import com.ponysdk.core.ui.basic.event.HasPWidgets;
  */
 public abstract class PPanel extends PWidget implements HasPWidgets {
 
+    PPanel() {
+    }
+
     @Override
     public abstract boolean remove(PWidget child);
 

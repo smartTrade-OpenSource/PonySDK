@@ -48,11 +48,11 @@ public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, Ha
     private String text = EMPTY;
     private String placeholder = EMPTY;
 
-    public PTextBoxBase() {
+    protected PTextBoxBase() {
         this(EMPTY);
     }
 
-    public PTextBoxBase(final String text) {
+    protected PTextBoxBase(final String text) {
         super();
         this.text = text != null ? text : EMPTY;
     }

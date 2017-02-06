@@ -43,7 +43,7 @@ public class PWidgetCollection implements Iterable<PWidget> {
     private PWidget[] array;
     private int size;
 
-    public PWidgetCollection(final HasPWidgets parent) {
+    protected PWidgetCollection(final HasPWidgets parent) {
         this.parent = parent;
         array = new PWidget[INITIAL_SIZE];
     }

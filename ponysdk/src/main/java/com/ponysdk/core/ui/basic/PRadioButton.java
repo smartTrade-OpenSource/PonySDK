@@ -29,8 +29,10 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 
 /**
- * A mutually-exclusive selection radio button widget. Fires {@link com.ponysdk.core.ui.basic.event.PClickEvent}s when the radio
- * button is clicked, and {@link com.ponysdk.core.ui.basic.event.PValueChangeEvent}s when the button becomes checked. Note, however,
+ * A mutually-exclusive selection radio button widget. Fires
+ * {@link com.ponysdk.core.ui.basic.event.PClickEvent}s when the radio
+ * button is clicked, and {@link com.ponysdk.core.ui.basic.event.PValueChangeEvent}s when the button
+ * becomes checked. Note, however,
  * that browser limitations prevent PValueChangeEvents from being sent when the radio button is
  * cleared as a side effect of another in the group being clicked.
  * <h3>CSS Style Rules</h3>
@@ -43,12 +45,12 @@ public class PRadioButton extends PCheckBox {
 
     private String name;
 
-    public PRadioButton(final String name, final String label) {
+    protected PRadioButton(final String name, final String label) {
         this(label);
         setName(name);
     }
 
-    public PRadioButton(final String label) {
+    protected PRadioButton(final String label) {
         super(label);
     }
 

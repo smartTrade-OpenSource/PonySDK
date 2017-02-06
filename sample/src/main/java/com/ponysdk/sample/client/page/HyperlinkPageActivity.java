@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,12 +23,12 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.impl.webapplication.page.place.PagePlace;
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PAnchor;
-import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.impl.webapplication.page.place.PagePlace;
 
 public class HyperlinkPageActivity extends SamplePageActivity {
 
@@ -40,12 +40,12 @@ public class HyperlinkPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PVerticalPanel panel = new PVerticalPanel();
+        final PVerticalPanel panel = Element.newPVerticalPanel();
         panel.setSpacing(10);
 
-        panel.add(new PLabel("Choose a section:"));
+        panel.add(Element.newPLabel("Choose a section:"));
 
-        final PAnchor checkBoxAnchor = new PAnchor("CheckBox");
+        final PAnchor checkBoxAnchor = Element.newPAnchor("CheckBox");
         checkBoxAnchor.addClickHandler(new PClickHandler() {
 
             @Override
@@ -55,7 +55,7 @@ public class HyperlinkPageActivity extends SamplePageActivity {
         });
         panel.add(checkBoxAnchor);
 
-        final PAnchor radioButtonAnchor = new PAnchor("RadioButton");
+        final PAnchor radioButtonAnchor = Element.newPAnchor("RadioButton");
         radioButtonAnchor.addClickHandler(new PClickHandler() {
 
             @Override
@@ -65,7 +65,7 @@ public class HyperlinkPageActivity extends SamplePageActivity {
         });
         panel.add(radioButtonAnchor);
 
-        final PAnchor basicButtonAnchor = new PAnchor("BasicButton");
+        final PAnchor basicButtonAnchor = Element.newPAnchor("BasicButton");
         basicButtonAnchor.addClickHandler(new PClickHandler() {
 
             @Override
@@ -75,7 +75,7 @@ public class HyperlinkPageActivity extends SamplePageActivity {
         });
         panel.add(basicButtonAnchor);
 
-        final PAnchor customButtonAnchor = new PAnchor("CustomButton");
+        final PAnchor customButtonAnchor = Element.newPAnchor("CustomButton");
         customButtonAnchor.addClickHandler(new PClickHandler() {
 
             @Override
@@ -85,7 +85,7 @@ public class HyperlinkPageActivity extends SamplePageActivity {
         });
         panel.add(customButtonAnchor);
 
-        final PAnchor fileUpload = new PAnchor("FileUpload");
+        final PAnchor fileUpload = Element.newPAnchor("FileUpload");
         fileUpload.addClickHandler(new PClickHandler() {
 
             @Override

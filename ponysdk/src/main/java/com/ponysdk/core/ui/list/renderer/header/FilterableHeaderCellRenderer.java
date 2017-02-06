@@ -23,7 +23,7 @@
 
 package com.ponysdk.core.ui.list.renderer.header;
 
-import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.form.formfield.FormField;
 import com.ponysdk.core.ui.list.FilterListener;
 import com.ponysdk.core.ui.list.Sortable;
@@ -41,7 +41,7 @@ public class FilterableHeaderCellRenderer extends ComplexHeaderCellRenderer {
 
     @Override
     protected void buildCaption(final String s) {
-        caption = new PLabel(s);
+        caption = Element.newPLabel(s);
         panel.setWidget(0, 0, caption);
     }
 

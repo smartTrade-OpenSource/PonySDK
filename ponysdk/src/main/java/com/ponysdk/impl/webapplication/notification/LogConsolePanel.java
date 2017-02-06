@@ -26,6 +26,7 @@ package com.ponysdk.impl.webapplication.notification;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PAnchor;
 import com.ponysdk.core.ui.basic.PHorizontalPanel;
 import com.ponysdk.core.ui.basic.PScrollPanel;
@@ -35,11 +36,11 @@ public class LogConsolePanel extends PScrollPanel {
 
     protected static final DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 
-    protected PVerticalPanel content = new PVerticalPanel();
+    protected PVerticalPanel content = Element.newPVerticalPanel();
 
-    protected PVerticalPanel logsPanel = new PVerticalPanel();
+    protected PVerticalPanel logsPanel = Element.newPVerticalPanel();
 
-    protected PHorizontalPanel actionPanel = new PHorizontalPanel();
+    protected PHorizontalPanel actionPanel = Element.newPHorizontalPanel();
 
     public LogConsolePanel(final String caption) {
         setSizeFull();
@@ -54,8 +55,8 @@ public class LogConsolePanel extends PScrollPanel {
     }
 
     private void initActionPanel() {
-        actionPanel = new PHorizontalPanel();
-        final PAnchor clearLogs = new PAnchor("Clear logs");
+        actionPanel = Element.newPHorizontalPanel();
+        final PAnchor clearLogs = Element.newPAnchor("Clear logs");
         clearLogs.addClickHandler(event -> logsPanel.clear());
         actionPanel.add(clearLogs);
     }

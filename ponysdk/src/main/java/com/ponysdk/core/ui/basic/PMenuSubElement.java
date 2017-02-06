@@ -25,4 +25,7 @@ package com.ponysdk.core.ui.basic;
 
 public abstract class PMenuSubElement extends PWidget {
 
+    protected PMenuSubElement() {
+    }
+
 }

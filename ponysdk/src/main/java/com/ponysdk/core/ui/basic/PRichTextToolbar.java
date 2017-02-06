@@ -31,7 +31,7 @@ public class PRichTextToolbar extends PWidget {
 
     private final PRichTextArea richTextArea;
 
-    public PRichTextToolbar(final PRichTextArea richTextArea) {
+    protected PRichTextToolbar(final PRichTextArea richTextArea) {
         this.richTextArea = richTextArea;
     }
 

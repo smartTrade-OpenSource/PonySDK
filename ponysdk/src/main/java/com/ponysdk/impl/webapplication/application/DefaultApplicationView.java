@@ -24,7 +24,12 @@
 package com.ponysdk.impl.webapplication.application;
 
 import com.ponysdk.core.model.PUnit;
-import com.ponysdk.core.ui.basic.*;
+import com.ponysdk.core.ui.basic.Element;
+import com.ponysdk.core.ui.basic.PDockLayoutPanel;
+import com.ponysdk.core.ui.basic.PSimpleLayoutPanel;
+import com.ponysdk.core.ui.basic.PSimplePanel;
+import com.ponysdk.core.ui.basic.PSplitLayoutPanel;
+import com.ponysdk.core.ui.basic.PWidget;
 
 public class DefaultApplicationView implements ApplicationView {
 
@@ -52,7 +57,7 @@ public class DefaultApplicationView implements ApplicationView {
     }
 
     private void buildUI() {
-        panel = new PDockLayoutPanel(unit);
+        panel = Element.newPDockLayoutPanel(unit);
 
         buildHeader();
         buildFooter();
@@ -62,34 +67,34 @@ public class DefaultApplicationView implements ApplicationView {
     }
 
     protected void buildFooter() {
-        footer = new PSimpleLayoutPanel();
+        footer = Element.newPSimpleLayoutPanel();
         panel.addSouth(footer, footerHeight);
     }
 
     protected void buildHeader() {
-        header = new PSimpleLayoutPanel();
+        header = Element.newPSimpleLayoutPanel();
         panel.addNorth(header, headerHeight);
     }
 
     protected void buildCenter() {
-        center = new PSplitLayoutPanel();
+        center = Element.newPSplitLayoutPanel();
         buildLogs();
         buildMenu();
         buildBody();
     }
 
     protected void buildBody() {
-        body = new PSimpleLayoutPanel();
+        body = Element.newPSimpleLayoutPanel();
         center.add(body);
     }
 
     protected void buildMenu() {
-        menu = new PSimpleLayoutPanel();
+        menu = Element.newPSimpleLayoutPanel();
         center.addWest(menu, menuWidth);
     }
 
     protected void buildLogs() {
-        logs = new PSimpleLayoutPanel();
+        logs = Element.newPSimpleLayoutPanel();
         center.addSouth(logs, logsHeight);
     }
 

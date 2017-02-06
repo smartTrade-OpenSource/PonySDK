@@ -68,7 +68,7 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
     private PWidget content;
     private boolean isOpen;
 
-    public PDisclosurePanel(final String headerText) {
+    protected PDisclosurePanel(final String headerText) {
         this.headerText = headerText;
     }
 

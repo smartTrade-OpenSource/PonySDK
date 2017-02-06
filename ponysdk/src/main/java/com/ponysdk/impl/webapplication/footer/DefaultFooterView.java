@@ -25,6 +25,7 @@ package com.ponysdk.impl.webapplication.footer;
 
 import com.ponysdk.core.model.PHorizontalAlignment;
 import com.ponysdk.core.model.PVerticalAlignment;
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PSimplePanel;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
@@ -33,11 +34,11 @@ public class DefaultFooterView extends PSimplePanel implements FooterView {
 
     public DefaultFooterView(final String copyright) {
         setSizeFull();
-        final PVerticalPanel content = new PVerticalPanel();
+        final PVerticalPanel content = Element.newPVerticalPanel();
         content.setSizeFull();
         addStyleName("pony-Footer");
 
-        final PLabel label = new PLabel(copyright);
+        final PLabel label = Element.newPLabel(copyright);
         content.add(label);
         content.setCellHorizontalAlignment(label, PHorizontalAlignment.ALIGN_CENTER);
         content.setCellVerticalAlignment(label, PVerticalAlignment.ALIGN_MIDDLE);

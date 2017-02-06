@@ -77,19 +77,19 @@ public class PImage extends PWidget implements HasPClickHandlers {
     private final int imageHeight;
     private String url;
 
-    public PImage() {
+    protected PImage() {
         this((String) null);
     }
 
-    public PImage(final ClassPathURL classpathURL) {
+    protected PImage(final ClassPathURL classpathURL) {
         this(classpathURL.toUrl());
     }
 
-    public PImage(final String url) {
+    protected PImage(final String url) {
         this(url, -1, -1, -1, -1);
     }
 
-    public PImage(final String url, final int left, final int top, final int width, final int height) {
+    protected PImage(final String url, final int left, final int top, final int width, final int height) {
         super();
         this.url = url;
         this.left = left;

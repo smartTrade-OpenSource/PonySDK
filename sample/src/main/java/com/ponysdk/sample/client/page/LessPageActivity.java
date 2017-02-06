@@ -28,11 +28,10 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PFlexTable;
 import com.ponysdk.core.ui.basic.PFlowPanel;
-import com.ponysdk.core.ui.basic.PHTML;
-import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PListBox;
 import com.ponysdk.core.ui.basic.PScript;
 import com.ponysdk.core.ui.basic.PScript.ExecutionCallback;
@@ -83,26 +82,26 @@ public class LessPageActivity extends SamplePageActivity {
 
         PScript.execute(PWindow.getMain(), "window.colors = {};");
 
-        final PFlowPanel layout = new PFlowPanel();
-        layout.add(new PLabel(
-                "Pony SDK styling use Less CSS. It's really easy to customize your styling with the use of a few variable."));
-        layout.add(new PLabel("Customize the sample by changing this variables :"));
+        final PFlowPanel layout = Element.newPFlowPanel();
+        layout.add(Element
+            .newPLabel("Pony SDK styling use Less CSS. It's really easy to customize your styling with the use of a few variable."));
+        layout.add(Element.newPLabel("Customize the sample by changing this variables :"));
 
         final Form form = new Form();
 
-        final PSimplePanel headerPreview = new PSimplePanel();
-        final PSimplePanel headerTextColorPreview = new PSimplePanel();
-        final PSimplePanel footerPreview = new PSimplePanel();
-        final PSimplePanel footerTextColorPreview = new PSimplePanel();
-        final PSimplePanel highlightPreview = new PSimplePanel();
+        final PSimplePanel headerPreview = Element.newPSimplePanel();
+        final PSimplePanel headerTextColorPreview = Element.newPSimplePanel();
+        final PSimplePanel footerPreview = Element.newPSimplePanel();
+        final PSimplePanel footerTextColorPreview = Element.newPSimplePanel();
+        final PSimplePanel highlightPreview = Element.newPSimplePanel();
 
-        final PSimplePanel blackPreview = new PSimplePanel();
-        final PSimplePanel grayDarkerPreview = new PSimplePanel();
-        final PSimplePanel grayDarkPreview = new PSimplePanel();
-        final PSimplePanel grayPreview = new PSimplePanel();
-        final PSimplePanel grayLightPreview = new PSimplePanel();
-        final PSimplePanel grayLighterPreview = new PSimplePanel();
-        final PSimplePanel whitePreview = new PSimplePanel();
+        final PSimplePanel blackPreview = Element.newPSimplePanel();
+        final PSimplePanel grayDarkerPreview = Element.newPSimplePanel();
+        final PSimplePanel grayDarkPreview = Element.newPSimplePanel();
+        final PSimplePanel grayPreview = Element.newPSimplePanel();
+        final PSimplePanel grayLightPreview = Element.newPSimplePanel();
+        final PSimplePanel grayLighterPreview = Element.newPSimplePanel();
+        final PSimplePanel whitePreview = Element.newPSimplePanel();
 
         header = buildColorFormField("498BF4", headerPreview);
         headerTextColor = buildColorFormField("EDEDED", headerTextColorPreview);
@@ -132,7 +131,7 @@ public class LessPageActivity extends SamplePageActivity {
         form.addFormField(grayLighter.formField);
         form.addFormField(white.formField);
 
-        final PFlexTable formLayout = new PFlexTable();
+        final PFlexTable formLayout = Element.newPFlexTable();
         formLayout.setWidget(0, 0, new FormFieldComponent("header", header.formField));
         formLayout.setWidget(1, 0, new FormFieldComponent("headerTextColor", headerTextColor.formField));
         formLayout.setWidget(2, 0, new FormFieldComponent("footer", footer.formField));
@@ -161,7 +160,7 @@ public class LessPageActivity extends SamplePageActivity {
         formLayout.setWidget(5, 3, grayLighterPreview);
         formLayout.setWidget(6, 3, whitePreview);
 
-        final PButton validateButton = new PButton("Validate");
+        final PButton validateButton = Element.newPButton("Validate");
         validateButton.setStyleName("pony-PButton accent");
         validateButton.addClickHandler(new PClickHandler() {
 
@@ -178,7 +177,7 @@ public class LessPageActivity extends SamplePageActivity {
         layout.add(formLayout);
         layout.add(validateButton);
 
-        final PListBox themesSelector = new PListBox();
+        final PListBox themesSelector = Element.newPListBox();
         themesSelector.addItem(STANDARD);
         themesSelector.addItem(DARK);
         themesSelector.addChangeHandler(new PChangeHandler() {
@@ -190,9 +189,9 @@ public class LessPageActivity extends SamplePageActivity {
             }
         });
 
-        layout.add(new PHTML("<br><br><br>"));
-        layout.add(new PLabel("You can easily compile many themes"));
-        layout.add(new PLabel("Try some of it: "));
+        layout.add(Element.newPHTML("<br><br><br>"));
+        layout.add(Element.newPLabel("You can easily compile many themes"));
+        layout.add(Element.newPLabel("Try some of it: "));
         layout.add(themesSelector);
 
         examplePanel.setWidget(layout);

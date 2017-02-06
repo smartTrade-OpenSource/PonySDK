@@ -23,13 +23,14 @@
 
 package com.ponysdk.core.ui.form.formfield;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.form.dataconverter.DoubleConverter;
 
 public class DoubleTextBoxFormField extends TextBoxFormField<Double> {
 
     public DoubleTextBoxFormField() {
-        this(new PTextBox());
+        this(Element.newPTextBox());
     }
 
     public DoubleTextBoxFormField(final PTextBox textBox) {

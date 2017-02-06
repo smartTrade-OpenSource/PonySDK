@@ -42,11 +42,11 @@ public class PTextArea extends PTextBoxBase {
     private int visibleLines = 5;
     private int characterWidth = 25;
 
-    public PTextArea() {
+    protected PTextArea() {
         super();
     }
 
-    public PTextArea(final String text) {
+    protected PTextArea(final String text) {
         super(text);
     }
 

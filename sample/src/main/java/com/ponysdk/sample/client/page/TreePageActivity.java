@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -25,10 +25,8 @@ package com.ponysdk.sample.client.page;
 
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.service.query.Query;
-import com.ponysdk.sample.client.event.DemoBusinessEvent;
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PAnchor;
-import com.ponysdk.core.ui.basic.PImage;
-import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PTree;
 import com.ponysdk.core.ui.basic.PTreeItem;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
@@ -36,6 +34,7 @@ import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.basic.event.PSelectionEvent;
 import com.ponysdk.core.ui.basic.event.PSelectionHandler;
+import com.ponysdk.sample.client.event.DemoBusinessEvent;
 
 public class TreePageActivity extends SamplePageActivity {
 
@@ -47,11 +46,11 @@ public class TreePageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PVerticalPanel panel = new PVerticalPanel();
+        final PVerticalPanel panel = Element.newPVerticalPanel();
 
-        panel.add(new PLabel("Static Tree:"));
+        panel.add(Element.newPLabel("Static Tree:"));
 
-        final PTree tree = new PTree();
+        final PTree tree = Element.newPTree();
         tree.setAnimationEnabled(false);
         tree.setWidth("300px");
 
@@ -64,10 +63,10 @@ public class TreePageActivity extends SamplePageActivity {
             }
         });
 
-        final PTreeItem firstItem = new PTreeItem("First item");
+        final PTreeItem firstItem = Element.newPTreeItem("First item");
 
-        final PAnchor anchor = new PAnchor("Second item");
-        final PTreeItem secondItem = new PTreeItem(anchor);
+        final PAnchor anchor = Element.newPAnchor("Second item");
+        final PTreeItem secondItem = Element.newPTreeItem(anchor);
         anchor.addClickHandler(new PClickHandler() {
 
             @Override
@@ -76,7 +75,7 @@ public class TreePageActivity extends SamplePageActivity {
             }
         });
 
-        final PTreeItem thirdItem = new PTreeItem(new PImage("images/pony.png"));
+        final PTreeItem thirdItem = Element.newPTreeItem(Element.newPImage("images/pony.png"));
 
         tree.addItem(firstItem);
         tree.addItem(secondItem);

@@ -25,7 +25,15 @@ package com.ponysdk.core.ui.list;
 
 import com.ponysdk.core.model.PHorizontalAlignment;
 import com.ponysdk.core.model.PVerticalAlignment;
-import com.ponysdk.core.ui.basic.*;
+import com.ponysdk.core.ui.basic.Element;
+import com.ponysdk.core.ui.basic.IsPWidget;
+import com.ponysdk.core.ui.basic.PAcceptsOneWidget;
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PHorizontalPanel;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PScrollPanel;
+import com.ponysdk.core.ui.basic.PSimplePanel;
+import com.ponysdk.core.ui.basic.PVerticalPanel;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.rich.PToolbar;
 
@@ -33,26 +41,26 @@ public class DefaultComplexListView extends PVerticalPanel implements ComplexLis
 
     private final SimpleListView simpleListView = new DefaultSimpleListView();
 
-    private final PSimplePanel inputLayout = new PSimplePanel();
+    private final PSimplePanel inputLayout = Element.newPSimplePanel();
 
     private final PToolbar toolbarLayout = new PToolbar();
 
-    private final PSimplePanel pagingLayout = new PSimplePanel();
+    private final PSimplePanel pagingLayout = Element.newPSimplePanel();
 
-    private final PSimplePanel topListLayout = new PSimplePanel();
+    private final PSimplePanel topListLayout = Element.newPSimplePanel();
 
-    private final PSimplePanel bottomListLayout = new PSimplePanel();
+    private final PSimplePanel bottomListLayout = Element.newPSimplePanel();
 
-    private final PVerticalPanel bottomListCustomInformationLayout = new PVerticalPanel();
+    private final PVerticalPanel bottomListCustomInformationLayout = Element.newPVerticalPanel();
 
-    private final PSimplePanel preferencesLayout = new PSimplePanel();
+    private final PSimplePanel preferencesLayout = Element.newPSimplePanel();
 
-    private final PLabel searchResultTimeLabel = new PLabel();
+    private final PLabel searchResultTimeLabel = Element.newPLabel();
 
     public DefaultComplexListView() {
         setSizeFull();
 
-        final PHorizontalPanel toolbarGroupPanel = new PHorizontalPanel();
+        final PHorizontalPanel toolbarGroupPanel = Element.newPHorizontalPanel();
         toolbarGroupPanel.setVerticalAlignment(PVerticalAlignment.ALIGN_MIDDLE);
         toolbarGroupPanel.setWidth("100%");
         toolbarGroupPanel.add(toolbarLayout.asWidget());
@@ -61,7 +69,7 @@ public class DefaultComplexListView extends PVerticalPanel implements ComplexLis
         toolbarGroupPanel.setCellHorizontalAlignment(pagingLayout.asWidget(), PHorizontalAlignment.ALIGN_RIGHT);
         topListLayout.setSizeFull();
 
-        final PVerticalPanel headerPanel = new PVerticalPanel();
+        final PVerticalPanel headerPanel = Element.newPVerticalPanel();
         headerPanel.setVerticalAlignment(PVerticalAlignment.ALIGN_MIDDLE);
         headerPanel.setSizeFull();
         headerPanel.setStyleProperty("paddingLeft", "1em");
@@ -71,7 +79,7 @@ public class DefaultComplexListView extends PVerticalPanel implements ComplexLis
         headerPanel.add(topListLayout);
         headerPanel.setWidth("100%");
 
-        PSimplePanel positionPanel = new PSimplePanel();
+        final PSimplePanel positionPanel = Element.newPSimplePanel();
         positionPanel.setWidget(headerPanel);
 
         bottomListLayout.setWidget(searchResultTimeLabel);
@@ -86,7 +94,7 @@ public class DefaultComplexListView extends PVerticalPanel implements ComplexLis
 
     @Override
     public void addAction(final String caption, final PClickHandler clickHandler) {
-        final PButton button = new PButton(caption);
+        final PButton button = Element.newPButton(caption);
         button.addClickHandler(clickHandler);
         toolbarLayout.add(button);
     }
@@ -189,7 +197,7 @@ public class DefaultComplexListView extends PVerticalPanel implements ComplexLis
 
     @Override
     public void addCustomInformation(final String text) {
-        bottomListCustomInformationLayout.add(new PLabel(text));
+        bottomListCustomInformationLayout.add(Element.newPLabel(text));
     }
 
     @Override

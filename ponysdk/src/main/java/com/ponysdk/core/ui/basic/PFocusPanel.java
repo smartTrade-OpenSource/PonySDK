@@ -69,10 +69,12 @@ import com.ponysdk.core.ui.eventbus.HandlerRegistration;
  * A simple panel that makes its contents focusable, and adds the ability to catch mouse and
  * keyboard events.
  */
-public class PFocusPanel extends PSimplePanel
-        implements HasPDragEndHandlers, HasPDragEnterHandlers, HasPDragStartHandlers, HasPDragLeaveHandlers, HasPDragOverHandlers,
-        HasPDropHandlers, HasPMouseOverHandlers, HasPMouseOutHandlers, HasPMouseDownHandlers, HasPMouseUpHandlers, HasPClickHandlers,
-        HasPFocusHandlers, HasPBlurHandlers {
+public class PFocusPanel extends PSimplePanel implements HasPDragEndHandlers, HasPDragEnterHandlers, HasPDragStartHandlers,
+        HasPDragLeaveHandlers, HasPDragOverHandlers, HasPDropHandlers, HasPMouseOverHandlers, HasPMouseOutHandlers,
+        HasPMouseDownHandlers, HasPMouseUpHandlers, HasPClickHandlers, HasPFocusHandlers, HasPBlurHandlers {
+
+    protected PFocusPanel() {
+    }
 
     @Override
     protected WidgetType getWidgetType() {

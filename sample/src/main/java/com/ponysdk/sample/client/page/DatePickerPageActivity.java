@@ -29,9 +29,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PDateBox;
 import com.ponysdk.core.ui.basic.PDatePicker;
-import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
 import com.ponysdk.core.ui.basic.event.PShowRangeEvent;
 import com.ponysdk.core.ui.basic.event.PShowRangeHandler;
@@ -56,10 +56,10 @@ public class DatePickerPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PVerticalPanel panel = new PVerticalPanel();
+        final PVerticalPanel panel = Element.newPVerticalPanel();
         panel.setSpacing(10);
 
-        datePicker = new PDatePicker();
+        datePicker = Element.newPDatePicker();
         datePicker.addStyleToDates("off", dates("12/25/2013", "01/01/2014", "04/26/2014"));
         datePicker.addValueChangeHandler(new PValueChangeHandler<Date>() {
 
@@ -76,14 +76,14 @@ public class DatePickerPageActivity extends SamplePageActivity {
             @Override
             public void onShowRange(final PShowRangeEvent<Date> event) {
                 PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
-                        "Range <" + event.getStart() + "," + event.getEnd() + ">");
+                    "Range <" + event.getStart() + "," + event.getEnd() + ">");
                 if (middecember.after(event.getStart()) && middecember.before(event.getEnd())) {
                     datePicker.setTransientEnabledOnDates(false, dates("12/21/2013", "12/22/2013", "12/23/2013", "12/24/2013"));
                 }
             }
         });
 
-        dateBox = new PDateBox();
+        dateBox = Element.newPDateBox();
         dateBox.addValueChangeHandler(new PValueChangeHandler<Date>() {
 
             @Override
@@ -92,9 +92,9 @@ public class DatePickerPageActivity extends SamplePageActivity {
             }
         });
 
-        panel.add(new PLabel("Permanent DatePicker:"));
+        panel.add(Element.newPLabel("Permanent DatePicker:"));
         panel.add(datePicker);
-        panel.add(new PLabel("DateBox with popup DatePicker:"));
+        panel.add(Element.newPLabel("DateBox with popup DatePicker:"));
         panel.add(dateBox);
 
         examplePanel.setWidget(panel);

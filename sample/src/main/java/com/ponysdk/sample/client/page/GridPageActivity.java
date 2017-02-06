@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,6 +23,7 @@
 
 package com.ponysdk.sample.client.page;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PGrid;
@@ -49,22 +50,22 @@ public class GridPageActivity extends SamplePageActivity implements PClickHandle
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PFlowPanel container = new PFlowPanel();
+        final PFlowPanel container = Element.newPFlowPanel();
 
-        table = new PGrid(10, 10);
+        table = Element.newPGrid(10, 10);
         table.setCellPadding(0);
         table.setCellSpacing(0);
         table.setSizeFull();
 
         for (int r = 0; r < 10; r++) {
             for (int c = 0; c < 10; c++) {
-                table.setWidget(r, c, new PLabel(r + "_" + c));
+                table.setWidget(r, c, Element.newPLabel(r + "_" + c));
             }
         }
 
         container.add(table);
 
-        final PLabel test = new PLabel("Test style:");
+        final PLabel test = Element.newPLabel("Test style:");
         test.setStyleProperty("padding-top", "15px");
         container.add(test);
 
@@ -72,7 +73,7 @@ public class GridPageActivity extends SamplePageActivity implements PClickHandle
         cellListBox = buildIntListBox();
         actionListBox = buildActionListBox();
         styleListBox = buildStyleListBox();
-        update = new PButton("update");
+        update = Element.newPButton("update");
         update.addClickHandler(this);
 
         container.add(rowListBox);
@@ -81,7 +82,7 @@ public class GridPageActivity extends SamplePageActivity implements PClickHandle
         container.add(styleListBox);
         container.add(update);
 
-        final PScrollPanel scrollPanel = new PScrollPanel();
+        final PScrollPanel scrollPanel = Element.newPScrollPanel();
         scrollPanel.setWidget(container);
         scrollPanel.setSizeFull();
 
@@ -89,7 +90,7 @@ public class GridPageActivity extends SamplePageActivity implements PClickHandle
     }
 
     private PListBox buildIntListBox() {
-        final PListBox r = new PListBox(false);
+        final PListBox r = Element.newPListBox(false);
         for (int i = 0; i < 10; i++) {
             r.addItem("" + i, i);
         }
@@ -98,7 +99,7 @@ public class GridPageActivity extends SamplePageActivity implements PClickHandle
     }
 
     private PListBox buildActionListBox() {
-        final PListBox r = new PListBox(false);
+        final PListBox r = Element.newPListBox(false);
         r.addItem("add row style", 1);
         r.addItem("remove row style", 2);
         r.addItem("set row style", 3);
@@ -113,7 +114,7 @@ public class GridPageActivity extends SamplePageActivity implements PClickHandle
     }
 
     private PListBox buildStyleListBox() {
-        final PListBox r = new PListBox(false);
+        final PListBox r = Element.newPListBox(false);
         r.addItem("orange", "orange");
         r.addItem("yellow", "yellow");
         r.addItem("bold", "bold");

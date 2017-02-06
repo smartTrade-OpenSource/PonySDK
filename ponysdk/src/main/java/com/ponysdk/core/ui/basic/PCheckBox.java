@@ -59,7 +59,7 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
     /**
      * Creates a check box with no label.
      */
-    public PCheckBox() {
+    protected PCheckBox() {
     }
 
     /**
@@ -68,7 +68,7 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
      * @param label
      *            the check box's label
      */
-    public PCheckBox(final String label) {
+    protected PCheckBox(final String label) {
         super(label);
     }
 

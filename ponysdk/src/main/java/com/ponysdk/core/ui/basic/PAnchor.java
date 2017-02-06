@@ -43,7 +43,7 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
     private String html;
     private String href;
 
-    public PAnchor() {
+    protected PAnchor() {
     }
 
     /**
@@ -52,7 +52,7 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
      * @param text
      *            the anchor's text
      */
-    public PAnchor(final String text) {
+    protected PAnchor(final String text) {
         this(text, null);
     }
 
@@ -64,7 +64,7 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
      * @param href
      *            the url to which it will link
      */
-    public PAnchor(final String text, final String href) {
+    protected PAnchor(final String text, final String href) {
         this.text = text;
         this.href = href;
     }

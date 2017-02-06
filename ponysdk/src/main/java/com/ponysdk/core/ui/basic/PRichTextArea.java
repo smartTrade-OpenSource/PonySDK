@@ -44,7 +44,8 @@ import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
  * formatter interface, accessed via {@link #getFormatter()}. A browser that
  * does not support rich text editing at all will return <code>null</code> for
  * both of these, while one that supports only the basic functionality will
- * return <code>null</code> for the latter. <h3>CSS Style Rules</h3>
+ * return <code>null</code> for the latter.
+ * <h3>CSS Style Rules</h3>
  * <dl>
  * <dt>.gwt-RichTextArea</dt>
  * <dd>Applied to the rich text element.</dd>
@@ -55,6 +56,9 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
     private final List<PValueChangeHandler<String>> handlers = new ArrayList<>();
     private final Formatter formatter = new Formatter();
     private String html;
+
+    protected PRichTextArea() {
+    }
 
     @Override
     protected WidgetType getWidgetType() {
@@ -91,8 +95,8 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
     @Override
     public void onClientData(final JsonObject instruction) {
         if (instruction.containsKey(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE.toStringValue())) {
-            fireOnValueChange(new PValueChangeEvent<>(this,
-                    instruction.getString(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE.toStringValue())));
+            fireOnValueChange(
+                new PValueChangeEvent<>(this, instruction.getString(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE.toStringValue())));
         } else {
             super.onClientData(instruction);
         }

@@ -64,6 +64,9 @@ public class PHistory {
 
     private String token;
 
+    public PHistory() {
+    }
+
     public void addValueChangeHandler(final PValueChangeHandler<String> handler) {
         handlers.add(handler);
     }

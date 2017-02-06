@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.ui.grid;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PComplexPanel;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 
@@ -35,35 +36,35 @@ public class GridDivWidget extends AbstractGridWidget {
 
     @Override
     protected PComplexPanel createTableHeader() {
-        final PFlowPanel thead = new PFlowPanel();
+        final PFlowPanel thead = Element.newPFlowPanel();
         thead.setStyleProperty("display", "table-header-group");
         return thead;
     }
 
     @Override
     protected PComplexPanel createTableBody() {
-        final PFlowPanel tbody = new PFlowPanel();
+        final PFlowPanel tbody = Element.newPFlowPanel();
         tbody.setStyleProperty("display", "table-row-group");
         return tbody;
     }
 
     @Override
     public PComplexPanel createTableRow() {
-        final PComplexPanel newRow = new PFlowPanel();
+        final PComplexPanel newRow = Element.newPFlowPanel();
         newRow.setStyleProperty("display", "table-row");
         return newRow;
     }
 
     @Override
     protected PComplexPanel createTableCell() {
-        final PComplexPanel newCell = new PFlowPanel();
+        final PComplexPanel newCell = Element.newPFlowPanel();
         newCell.setStyleProperty("display", "table-cell");
         return newCell;
     }
 
     @Override
     protected PComplexPanel createTableHeaderCell() {
-        final PComplexPanel newCell = new PFlowPanel();
+        final PComplexPanel newCell = Element.newPFlowPanel();
         newCell.setStyleProperty("display", "table-cell");
         return createTableCell();
     }

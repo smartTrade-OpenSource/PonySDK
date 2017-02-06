@@ -40,6 +40,9 @@ import com.ponysdk.core.model.WidgetType;
  */
 public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
+    protected PLayoutPanel() {
+    }
+
     @Override
     protected WidgetType getWidgetType() {
         return WidgetType.LAYOUT_PANEL;
@@ -103,7 +106,7 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
     }
 
     private void sendUpdate(final PWidget child, final ServerToClientModel key1, final double v1, final ServerToClientModel key2,
-            final double v2, final PUnit unit) {
+                            final double v2, final PUnit unit) {
         saveUpdate((writer) -> {
             writer.writeModel(ServerToClientModel.UNIT, unit.getByteValue());
             writer.writeModel(ServerToClientModel.WIDGET_ID, child.getID());

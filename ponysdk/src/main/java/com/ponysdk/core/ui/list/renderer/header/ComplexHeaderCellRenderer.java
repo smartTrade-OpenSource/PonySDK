@@ -30,6 +30,7 @@ import java.util.List;
 import com.ponysdk.core.server.service.query.Criterion;
 import com.ponysdk.core.server.service.query.SortingType;
 import com.ponysdk.core.tools.ListenerCollection;
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.HasPValue;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PGrid;
@@ -83,9 +84,7 @@ public class ComplexHeaderCellRenderer
 
             @Override
             public PKeyCodes[] getFilteredKeys() {
-                return new PKeyCodes[] {
-                        PKeyCodes.ENTER
-                };
+                return new PKeyCodes[] { PKeyCodes.ENTER };
             }
         });
 
@@ -93,13 +92,13 @@ public class ComplexHeaderCellRenderer
     }
 
     protected void buildGrid() {
-        panel = new PGrid(2, 1);
+        panel = Element.newPGrid(2, 1);
         panel.addStyleName("pony-ComplexList-ComplexHeader");
         panel.setWidget(1, 0, formField.asWidget());
     }
 
     protected void buildCaption(final String s) {
-        caption = new PLabel(s);
+        caption = Element.newPLabel(s);
         caption.addStyleName("sortable");
         caption.addClickHandler((PClickEvent) -> {
             caption.addStyleName(HeaderSortingHelper.getAssociatedStyleName(sortingType));

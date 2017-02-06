@@ -26,6 +26,7 @@ package com.ponysdk.core.ui.form.formfield;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PListBox;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 import com.ponysdk.core.ui.form.dataconverter.DataConverter;
@@ -33,11 +34,11 @@ import com.ponysdk.core.ui.form.dataconverter.DataConverter;
 public class ListBoxFormField<T> extends AbstractFormField<T, PListBox> {
 
     public ListBoxFormField() {
-        this(new PListBox(), null);
+        this(Element.newPListBox(), null);
     }
 
     public ListBoxFormField(final DataConverter<String, T> dataProvider) {
-        this(new PListBox(), dataProvider);
+        this(Element.newPListBox(), dataProvider);
     }
 
     public ListBoxFormField(final PListBox widget) {
@@ -45,7 +46,7 @@ public class ListBoxFormField<T> extends AbstractFormField<T, PListBox> {
     }
 
     public ListBoxFormField(final Map<String, T> datas) {
-        this(new PListBox(), null);
+        this(Element.newPListBox(), null);
         for (final Entry<String, T> entry : datas.entrySet()) {
             widget.addItem(entry.getKey(), entry.getValue());
         }

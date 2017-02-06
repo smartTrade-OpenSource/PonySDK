@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ponysdk.core.model.PUnit;
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PDockLayoutPanel;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PLabel;
@@ -56,17 +57,17 @@ public class JavascriptPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        inputTextBox = new PTextBox();
-        scroll = new PScrollPanel();
-        history = new PFlowPanel();
+        inputTextBox = Element.newPTextBox();
+        scroll = Element.newPScrollPanel();
+        history = Element.newPFlowPanel();
         scroll.setWidget(history);
 
-        final PDockLayoutPanel dock = new PDockLayoutPanel(PUnit.PX);
+        final PDockLayoutPanel dock = Element.newPDockLayoutPanel(PUnit.PX);
         dock.addSouth(inputTextBox, 30);
         dock.add(scroll);
 
-        history.add(new PLabel("> With PonySDK, you can also execute native javascript"));
-        history.add(new PLabel("> Try it out.. "));
+        history.add(Element.newPLabel("> With PonySDK, you can also execute native javascript"));
+        history.add(Element.newPLabel("> Try it out.. "));
 
         inputTextBox.addKeyUpHandler(new PKeyUpHandler() {
 
@@ -90,9 +91,7 @@ public class JavascriptPageActivity extends SamplePageActivity {
 
             @Override
             public PKeyCodes[] getFilteredKeys() {
-                return new PKeyCodes[] {
-                        PKeyCodes.ENTER, PKeyCodes.DOWN, PKeyCodes.UP
-                };
+                return new PKeyCodes[] { PKeyCodes.ENTER, PKeyCodes.DOWN, PKeyCodes.UP };
             }
         });
 
@@ -101,19 +100,19 @@ public class JavascriptPageActivity extends SamplePageActivity {
 
     protected void executeJS(final String js) {
         commands.add(js);
-        history.add(new PLabel("> " + js));
+        history.add(Element.newPLabel("> " + js));
         inputTextBox.setText("");
         PScript.execute(PWindow.getMain(), js, new ExecutionCallback() {
 
             @Override
             public void onSuccess(final String msg) {
-                history.add(new PLabel(msg));
+                history.add(Element.newPLabel(msg));
                 scroll.scrollToBottom();
             }
 
             @Override
             public void onFailure(final String msg) {
-                final PLabel lbl = new PLabel(msg);
+                final PLabel lbl = Element.newPLabel(msg);
                 lbl.setStyleProperty("color", "red");
                 history.add(lbl);
                 scroll.scrollToBottom();

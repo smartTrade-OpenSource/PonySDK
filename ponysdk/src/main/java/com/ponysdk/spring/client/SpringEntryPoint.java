@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,8 +23,11 @@
 
 package com.ponysdk.spring.client;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.ponysdk.core.ui.activity.ActivityManager;
 import com.ponysdk.core.ui.activity.ActivityMapper;
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PHistory;
 import com.ponysdk.core.ui.basic.PRootLayoutPanel;
 import com.ponysdk.core.ui.basic.PSimpleLayoutPanel;
@@ -35,7 +38,6 @@ import com.ponysdk.core.ui.place.Place;
 import com.ponysdk.core.ui.place.PlaceController;
 import com.ponysdk.core.ui.place.PlaceHistoryHandler;
 import com.ponysdk.core.ui.place.PlaceHistoryMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class SpringEntryPoint implements EntryPoint {
 
@@ -55,7 +57,7 @@ public abstract class SpringEntryPoint implements EntryPoint {
     protected PlaceHistoryMapper historyMapper;
 
     protected void start(final Place place) {
-        final PSimpleLayoutPanel panel = new PSimpleLayoutPanel();
+        final PSimpleLayoutPanel panel = Element.newPSimpleLayoutPanel();
         PRootLayoutPanel.get(PWindow.getMain().getID()).add(panel);
 
         final ActivityManager activityManager = new ActivityManager(mapper);

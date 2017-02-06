@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,6 +23,7 @@
 
 package com.ponysdk.sample.client.page;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 
 public class FlowPanelPageActivity extends SamplePageActivity {
@@ -35,13 +36,13 @@ public class FlowPanelPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PFlowPanel flowPanel = new PFlowPanel();
+        final PFlowPanel flowPanel = Element.newPFlowPanel();
 
         // FindPonysCommand command = new FindPonysCommand(new Query());
         // List<Pony> ponyList = command.execute().getData();
 
         // for (final Pony pony : ponyList) {
-        // flowPanel.add(new PCheckBox(pony.getName()));
+        // flowPanel.add(Element.newPCheckBox(pony.getName()));
         // }
 
         examplePanel.setWidget(flowPanel);

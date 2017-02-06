@@ -23,6 +23,7 @@
 
 package com.ponysdk.sample.client.page;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PDialogBox;
 import com.ponysdk.core.ui.basic.PFlexTable;
@@ -55,7 +56,7 @@ public class DialogBoxPageActivity extends SamplePageActivity {
         super.onFirstShowPage();
 
         row = 0;
-        layout = new PFlexTable();
+        layout = Element.newPFlexTable();
 
         addLabel("Show a basic popup");
         final PButton anchor2 = addButton("Open");
@@ -63,9 +64,9 @@ public class DialogBoxPageActivity extends SamplePageActivity {
 
             @Override
             public void onClick(final PClickEvent clickEvent) {
-                final PPopupPanel popupPanel = new PPopupPanel(getView().asWidget().getWindowID());
-                final PVerticalPanel content = new PVerticalPanel();
-                final PButton closeButton = new PButton("Close");
+                final PPopupPanel popupPanel = Element.newPPopupPanel(getView().asWidget().getWindowID());
+                final PVerticalPanel content = Element.newPVerticalPanel();
+                final PButton closeButton = Element.newPButton("Close");
                 closeButton.addClickHandler(new PClickHandler() {
 
                     @Override
@@ -73,7 +74,7 @@ public class DialogBoxPageActivity extends SamplePageActivity {
                         popupPanel.hide();
                     }
                 });
-                content.add(new PLabel("A popup displayed relatively to the mouse click"));
+                content.add(Element.newPLabel("A popup displayed relatively to the mouse click"));
                 content.add(closeButton);
                 content.setWidth("200px");
                 content.setHeight("200px");
@@ -91,7 +92,7 @@ public class DialogBoxPageActivity extends SamplePageActivity {
             public void onClick(final PClickEvent clickEvent) {
                 final PClosableDialogBox dialogBox = new PClosableDialogBox(getView().asWidget().getWindowID(), "Custom caption");
                 dialogBox.setDraggable(true);
-                dialogBox.setContent(new PLabel("Content of a popup"));
+                dialogBox.setContent(Element.newPLabel("Content of a popup"));
                 dialogBox.center();
             }
         });
@@ -147,7 +148,8 @@ public class DialogBoxPageActivity extends SamplePageActivity {
 
             @Override
             public void onClick(final PClickEvent clickEvent) {
-                PConfirmDialog.show(getView().asWidget().getWindowID(), "Question ?", new PLabel("This is a confirm dialog box"));
+                PConfirmDialog.show(getView().asWidget().getWindowID(), "Question ?",
+                    Element.newPLabel("This is a confirm dialog box"));
             }
         });
 
@@ -155,13 +157,13 @@ public class DialogBoxPageActivity extends SamplePageActivity {
     }
 
     private PLabel addLabel(final String text) {
-        final PLabel label = new PLabel(text);
+        final PLabel label = Element.newPLabel(text);
         layout.setWidget(row, 0, label);
         return label;
     }
 
     private PButton addButton(final String text) {
-        final PButton button = new PButton(text);
+        final PButton button = Element.newPButton(text);
         layout.setWidget(row++, 1, button);
         return button;
     }

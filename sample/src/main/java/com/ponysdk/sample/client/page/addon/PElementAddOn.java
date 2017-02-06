@@ -23,13 +23,14 @@
 
 package com.ponysdk.sample.client.page.addon;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PAddOnComposite;
 import com.ponysdk.core.ui.basic.PElement;
 
 public class PElementAddOn extends PAddOnComposite<PElement> {
 
     public PElementAddOn() {
-        super(new PElement("div"));
+        super(Element.newPElement("div"));
     }
 
     public void setInnerText(final String text) {

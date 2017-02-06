@@ -51,31 +51,31 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
 
     private boolean enabled;
 
-    public PMenuItem(final String text, final boolean asHTML, final Runnable cmd) {
+    protected PMenuItem(final String text, final boolean asHTML, final Runnable cmd) {
         this(text, asHTML);
         setCommand(cmd);
     }
 
-    public PMenuItem(final String text, final boolean asHTML, final PMenuBar subMenu) {
+    protected PMenuItem(final String text, final boolean asHTML, final PMenuBar subMenu) {
         this(text, asHTML);
         setSubMenu(subMenu);
     }
 
-    public PMenuItem(final String text, final Runnable cmd) {
+    protected PMenuItem(final String text, final Runnable cmd) {
         this(text, false);
         setCommand(cmd);
     }
 
-    public PMenuItem(final String text) {
+    protected PMenuItem(final String text) {
         this(text, false);
     }
 
-    public PMenuItem(final String text, final PMenuBar subMenu) {
+    protected PMenuItem(final String text, final PMenuBar subMenu) {
         this(text, false);
         setSubMenu(subMenu);
     }
 
-    public PMenuItem(final String text, final boolean asHTML) {
+    protected PMenuItem(final String text, final boolean asHTML) {
         if (asHTML) this.html = text;
         else this.text = text;
     }

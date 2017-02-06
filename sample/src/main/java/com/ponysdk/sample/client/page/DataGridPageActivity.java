@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ponysdk.core.server.service.query.Query;
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PConfirmDialogHandler;
 import com.ponysdk.core.ui.basic.PDialogBox;
@@ -84,7 +85,7 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
     private TextBoxFormField<String> nameFormField;
     private TextBoxFormField<Integer> ageFormField;
 
-    final PTextBox line = new PTextBox();
+    final PTextBox line = Element.newPTextBox();
 
     public DataGridPageActivity() {
         super("Data Grid", "Rich UI Components");
@@ -95,13 +96,13 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
 
         super.onFirstShowPage();
 
-        final PScrollPanel scroll = new PScrollPanel();
-        final PFlowPanel layout = new PFlowPanel();
-        final PFlexTable formContainer = new PFlexTable();
-        final PSimplePanel listContainer = new PSimplePanel();
+        final PScrollPanel scroll = Element.newPScrollPanel();
+        final PFlowPanel layout = Element.newPFlowPanel();
+        final PFlexTable formContainer = Element.newPFlexTable();
+        final PSimplePanel listContainer = Element.newPSimplePanel();
         layout.add(formContainer);
 
-        final PButton add = new PButton("Add");
+        final PButton add = Element.newPButton("Add");
         add.addClickHandler(new PClickHandler() {
 
             @Override
@@ -110,15 +111,14 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
                 final Pony father = dataGrid.getRow(i);
                 final List<Pony> copy = new ArrayList<>();
                 for (int j = 0; j < 3; j++) {
-                    final Pony p = new Pony(father.getId(), "Copy-" + father.getName(), father.getAge(),
-                            father.getRace());
+                    final Pony p = new Pony(father.getId(), "Copy-" + father.getName(), father.getAge(), father.getRace());
                     copy.add(p);
                 }
                 dataGrid.insertSubList(father, copy);
             }
         });
 
-        final PButton remove = new PButton("Remove");
+        final PButton remove = Element.newPButton("Remove");
         remove.addClickHandler(new PClickHandler() {
 
             @Override
@@ -213,13 +213,13 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
 
             @Override
             public PLabel render() {
-                return new PLabel();
+                return Element.newPLabel();
             }
         });
 
         final DataGridColumnDescriptor<Pony, String> nameColumnDescriptor = new DataGridColumnDescriptor<>();
         final ComplexHeaderCellRenderer nameHeaderCellRender = new FilterableHeaderCellRenderer("Name", new StringTextBoxFormField(),
-                "name");
+            "name");
         nameHeaderCellRender.addFilterListener(dataProvider);
         nameColumnDescriptor.setHeaderCellRenderer(nameHeaderCellRender);
         nameColumnDescriptor.setValueProvider(new BeanValueProvider<Pony, String>("name"));
@@ -228,14 +228,14 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
 
         nameColumnDescriptor.setSubCellRenderer(new LabelCellRenderer<String>());
 
-        final PListBox ageListBox = new PListBox(true);
+        final PListBox ageListBox = Element.newPListBox(true);
         for (int i = 0; i < 30; i++)
             ageListBox.addItem(i + " year", i);
 
         final DataGridColumnDescriptor<Pony, String> ageColumnDescriptor = new DataGridColumnDescriptor<>();
         ageColumnDescriptor.setValueProvider(new BeanValueProvider<Pony, String>("age"));
         final ComplexHeaderCellRenderer ageHeaderCellRender = new ComplexHeaderCellRenderer("Age",
-                new ListBoxFormField<Integer>(ageListBox), "age");
+            new ListBoxFormField<Integer>(ageListBox), "age");
         ageHeaderCellRender.addFilterListener(dataProvider);
         ageColumnDescriptor.setHeaderCellRenderer(ageHeaderCellRender);
         ageColumnDescriptor.setCellRenderer(new LabelCellRenderer<String>());
@@ -244,7 +244,7 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
         final DataGridColumnDescriptor<Pony, String> raceColumnDescriptor = new DataGridColumnDescriptor<>();
         raceColumnDescriptor.setValueProvider(new BeanValueProvider<Pony, String>("race"));
         final ComplexHeaderCellRenderer raceHeaderCellRender = new ComplexHeaderCellRenderer("Race", new StringTextBoxFormField(),
-                "race");
+            "race");
         raceHeaderCellRender.addFilterListener(dataProvider);
         raceColumnDescriptor.setHeaderCellRenderer(raceHeaderCellRender);
         raceColumnDescriptor.setCellRenderer(new LabelCellRenderer<String>());
@@ -261,7 +261,7 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
 
         formContainer.setWidget(0, 0, actionSelectorView);
 
-        final PButton refresh = new PButton("Refresh");
+        final PButton refresh = Element.newPButton("Refresh");
         refresh.addClickHandler(new PClickHandler() {
 
             @Override
@@ -271,7 +271,7 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
         });
         formContainer.setWidget(0, 1, refresh);
 
-        final PButton addPonyButton = new PButton("Create new pony");
+        final PButton addPonyButton = Element.newPButton("Create new pony");
         addPonyButton.addClickHandler(new PClickHandler() {
 
             @Override
@@ -304,17 +304,17 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
 
     protected void showCreatePonyPopup() {
         final PDialogBox dialogBox = PConfirmDialog.show(getView().asWidget().getWindowID(), "Create pony", createPonyActivityPanel,
-                "Create", "Cancel", new PConfirmDialogHandler() {
+            "Create", "Cancel", new PConfirmDialogHandler() {
 
-                    @Override
-                    public void onCancel() {
-                    }
+                @Override
+                public void onCancel() {
+                }
 
-                    @Override
-                    public boolean onOK(final PDialogBox p) {
-                        return createPony.isValid();
-                    }
-                });
+                @Override
+                public boolean onOK(final PDialogBox p) {
+                    return createPony.isValid();
+                }
+            });
 
         dialogBox.center();
     }
@@ -335,8 +335,8 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
         createPony.addFormField(raceFormField);
         createPony.addFormField(ageFormField);
 
-        createPonyActivityPanel = new PFlexTable();
-        createPonyActivityPanel.setWidget(0, 0, new PLabel("Add a pony"));
+        createPonyActivityPanel = Element.newPFlexTable();
+        createPonyActivityPanel.setWidget(0, 0, Element.newPLabel("Add a pony"));
         createPonyActivityPanel.getCellFormatter().setColSpan(0, 0, 3);
         createPonyActivityPanel.setWidget(1, 0, new FormFieldComponent("Name", nameFormField));
         createPonyActivityPanel.setWidget(1, 1, new FormFieldComponent("Race", raceFormField));

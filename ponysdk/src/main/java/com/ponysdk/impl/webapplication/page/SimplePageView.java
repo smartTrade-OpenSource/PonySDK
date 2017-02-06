@@ -23,6 +23,7 @@
 
 package com.ponysdk.impl.webapplication.page;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PSimpleLayoutPanel;
 import com.ponysdk.core.ui.basic.PSimplePanel;
 
@@ -45,7 +46,7 @@ public class SimplePageView extends PSimpleLayoutPanel implements PageView {
     }
 
     protected PSimplePanel buildBody() {
-        final PSimplePanel panel = new PSimpleLayoutPanel();
+        final PSimplePanel panel = Element.newPSimpleLayoutPanel();
         panel.addStyleName("pony-Page-Body");
         return panel;
     }

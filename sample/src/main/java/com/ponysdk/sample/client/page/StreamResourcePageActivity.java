@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
@@ -47,9 +48,9 @@ public class StreamResourcePageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PFlowPanel panel = new PFlowPanel();
+        final PFlowPanel panel = Element.newPFlowPanel();
 
-        final PButton downloadImageButton = new PButton("Download Pony image");
+        final PButton downloadImageButton = Element.newPButton("Download Pony image");
 
         downloadImageButton.addClickHandler(new PClickHandler() {
 

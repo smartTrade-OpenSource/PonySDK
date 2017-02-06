@@ -28,6 +28,7 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PFileUpload;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
@@ -47,17 +48,17 @@ public class FileUploadPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PVerticalPanel panel = new PVerticalPanel();
+        final PVerticalPanel panel = Element.newPVerticalPanel();
         panel.setSpacing(10);
 
-        final PFileUpload fileUpload = new PFileUpload();
+        final PFileUpload fileUpload = Element.newPFileUpload();
         fileUpload.setName("my_file");
         fileUpload.addSubmitCompleteHandler(new PSubmitCompleteHandler() {
 
             @Override
             public void onSubmitComplete() {
                 PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
-                        "File uploaded, submit file '" + fileUpload.getFileName() + "'");
+                    "File uploaded, submit file '" + fileUpload.getFileName() + "'");
             }
         });
 
@@ -75,7 +76,7 @@ public class FileUploadPageActivity extends SamplePageActivity {
             }
         });
 
-        final PButton submitButton = new PButton("Upload File");
+        final PButton submitButton = Element.newPButton("Upload File");
         submitButton.showLoadingOnRequest(true);
         submitButton.setEnabledOnRequest(false);
 

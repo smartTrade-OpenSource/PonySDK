@@ -62,11 +62,11 @@ public class PDialogBox extends PDecoratedPopupPanel {
 
     private String caption;
 
-    public PDialogBox(final int windowID) {
+    protected PDialogBox(final int windowID) {
         this(windowID, false);
     }
 
-    public PDialogBox(final int windowID, final boolean autoHide) {
+    protected PDialogBox(final int windowID, final boolean autoHide) {
         super(windowID, autoHide);
     }
 

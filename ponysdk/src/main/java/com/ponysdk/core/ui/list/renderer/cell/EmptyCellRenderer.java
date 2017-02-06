@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.ui.list.renderer.cell;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.list.refreshable.Cell;
 
@@ -32,7 +33,7 @@ public class EmptyCellRenderer<V> implements CellRenderer<V, PLabel> {
 
     @Override
     public PLabel render(final int row, final V value) {
-        return new PLabel(EMPTY_VALUE);
+        return Element.newPLabel(EMPTY_VALUE);
     }
 
     @Override
