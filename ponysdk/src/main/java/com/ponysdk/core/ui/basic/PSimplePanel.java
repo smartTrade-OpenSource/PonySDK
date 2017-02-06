@@ -40,6 +40,9 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
 
     private PWidget widget;
 
+    protected PSimplePanel() {
+    }
+
     @Override
     protected WidgetType getWidgetType() {
         return WidgetType.SIMPLE_PANEL;

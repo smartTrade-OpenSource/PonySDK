@@ -23,8 +23,8 @@
 
 package com.ponysdk.sample.client.page.datagrid;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
-import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.form.formfield.IntegerTextBoxFormField;
@@ -77,19 +77,19 @@ public class SimpleRefreshableDataGridPageActivity extends RefreshableDataGridPa
         keyRowFormField.getWidget().setPlaceholder("Row key (move)");
         toRowFormField.getWidget().setPlaceholder("Row index (move)");
 
-        final PButton addButton = new PButton("Add a row");
+        final PButton addButton = Element.newPButton("Add a row");
         addButton.addClickHandler(new PClickHandler() {
 
             @Override
             public void onClick(final PClickEvent event) {
                 final Integer index = addRowFormField.getValue();
                 if (index != null) {
-                    dataGrid.insertRow(index, 0, 4, new PLabel("Colspan 1 inserted"));
+                    dataGrid.insertRow(index, 0, 4, Element.newPLabel("Colspan 1 inserted"));
                 }
             }
         });
 
-        final PButton removeByKeyButton = new PButton("Remove a row (by key)");
+        final PButton removeByKeyButton = Element.newPButton("Remove a row (by key)");
         removeByKeyButton.addClickHandler(new PClickHandler() {
 
             @Override
@@ -101,7 +101,7 @@ public class SimpleRefreshableDataGridPageActivity extends RefreshableDataGridPa
             }
         });
 
-        final PButton removeButton = new PButton("Remove a row (by index)");
+        final PButton removeButton = Element.newPButton("Remove a row (by index)");
         removeButton.addClickHandler(new PClickHandler() {
 
             @Override
@@ -113,7 +113,7 @@ public class SimpleRefreshableDataGridPageActivity extends RefreshableDataGridPa
             }
         });
 
-        final PButton moveButton = new PButton("Move a row");
+        final PButton moveButton = Element.newPButton("Move a row");
         moveButton.addClickHandler(new PClickHandler() {
 
             @Override

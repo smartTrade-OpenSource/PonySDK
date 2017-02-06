@@ -58,8 +58,7 @@ public class PFileUpload extends PWidget
 
     private boolean enabled = true;
 
-    public PFileUpload() {
-        super();
+    protected PFileUpload() {
     }
 
     @Override

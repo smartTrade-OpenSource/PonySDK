@@ -27,6 +27,9 @@ import java.util.Collection;
 
 public abstract class PSuggestOracle extends PObject {
 
+    PSuggestOracle() {
+    }
+
     public abstract void add(final String suggestion);
 
     public abstract void addAll(final Collection<String> collection);

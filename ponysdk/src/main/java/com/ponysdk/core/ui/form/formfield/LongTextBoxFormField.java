@@ -23,13 +23,14 @@
 
 package com.ponysdk.core.ui.form.formfield;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.form.dataconverter.LongConverter;
 
 public class LongTextBoxFormField extends TextBoxFormField<Long> {
 
     public LongTextBoxFormField() {
-        this(new PTextBox());
+        this(Element.newPTextBox());
     }
 
     public LongTextBoxFormField(final PTextBox textBox) {

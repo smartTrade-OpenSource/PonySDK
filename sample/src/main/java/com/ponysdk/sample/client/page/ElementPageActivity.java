@@ -23,9 +23,9 @@
 
 package com.ponysdk.sample.client.page;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PAnchor;
 import com.ponysdk.core.ui.basic.PElement;
-import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
@@ -41,10 +41,10 @@ public class ElementPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PVerticalPanel verticalPanel = new PVerticalPanel();
+        final PVerticalPanel verticalPanel = Element.newPVerticalPanel();
         verticalPanel.setSpacing(10);
 
-        final PAnchor anchor = new PAnchor("And a link");
+        final PAnchor anchor = Element.newPAnchor("And a link");
         anchor.addClickHandler(new PClickHandler() {
 
             @Override
@@ -53,11 +53,11 @@ public class ElementPageActivity extends SamplePageActivity {
             }
         });
 
-        final PElement ul = new PElement("ul");
-        final PElement li1 = new PElement("li");
-        final PElement li2 = new PElement("li");
-        final PElement li3 = new PElement("li");
-        final PElement li4 = new PElement("li");
+        final PElement ul = Element.newPElement("ul");
+        final PElement li1 = Element.newPElement("li");
+        final PElement li2 = Element.newPElement("li");
+        final PElement li3 = Element.newPElement("li");
+        final PElement li4 = Element.newPElement("li");
         li1.setInnerText("Item 1");
         li2.setInnerText("Item 2");
         li3.setInnerText("Item 3");
@@ -69,7 +69,7 @@ public class ElementPageActivity extends SamplePageActivity {
         ul.add(li4);
         ul.addStyleName("customList");
 
-        verticalPanel.add(new PLabel("Example of the use of PElement to create an unordered list"));
+        verticalPanel.add(Element.newPLabel("Example of the use of PElement to create an unordered list"));
         verticalPanel.add(ul);
 
         examplePanel.setWidget(verticalPanel);

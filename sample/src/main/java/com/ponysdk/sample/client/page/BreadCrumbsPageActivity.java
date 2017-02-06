@@ -23,6 +23,7 @@
 
 package com.ponysdk.sample.client.page;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PTextBox;
@@ -46,7 +47,7 @@ public class BreadCrumbsPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PFlowPanel panel = new PFlowPanel();
+        final PFlowPanel panel = Element.newPFlowPanel();
 
         final PBreadCrumbs breadCrumbs = new PBreadCrumbs();
 
@@ -66,17 +67,15 @@ public class BreadCrumbsPageActivity extends SamplePageActivity {
             }
         });
 
-        final PFlowPanel inputPanel = new PFlowPanel();
-        final PTextBox input = new PTextBox();
-        final PButton add = new PButton("Add Level");
+        final PFlowPanel inputPanel = Element.newPFlowPanel();
+        final PTextBox input = Element.newPTextBox();
+        final PButton add = Element.newPButton("Add Level");
         add.addClickHandler(new PClickHandler() {
 
             @Override
             public void onClick(final PClickEvent event) {
-                if (input.getText().isEmpty())
-                    breadCrumbs.addItem("level " + ++level);
-                else
-                    breadCrumbs.addItem(input.getText());
+                if (input.getText().isEmpty()) breadCrumbs.addItem("level " + ++level);
+                else breadCrumbs.addItem(input.getText());
                 input.setText("");
             }
         });

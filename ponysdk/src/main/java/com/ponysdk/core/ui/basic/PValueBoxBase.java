@@ -27,6 +27,9 @@ import com.ponysdk.core.model.ServerToClientModel;
 
 public abstract class PValueBoxBase extends PFocusWidget {
 
+    protected PValueBoxBase() {
+    }
+
     /**
      * Selects all of the text in the box. This will only work when the widget is attached to the
      * document and not hidden.

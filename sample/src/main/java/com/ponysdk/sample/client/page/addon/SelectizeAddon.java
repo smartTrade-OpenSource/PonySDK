@@ -25,7 +25,6 @@ package com.ponysdk.sample.client.page.addon;
 
 import java.io.IOException;
 import java.util.Objects;
-import java.util.regex.Pattern;
 
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
@@ -49,6 +48,7 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PAddOnComposite;
 import com.ponysdk.core.ui.basic.PElement;
 import com.ponysdk.core.ui.basic.event.PTerminalEvent;
@@ -60,11 +60,15 @@ public class SelectizeAddon extends PAddOnComposite<PElement> implements PTermin
     String selectedSide;
 
     enum Type {
-        CLIENT, CLASS, SECURITY, TENOR, SIDE
+        CLIENT,
+        CLASS,
+        SECURITY,
+        TENOR,
+        SIDE
     }
 
     public SelectizeAddon() {
-        super(new PElement("input"));
+        super(Element.newPElement("input"));
         setTerminalHandler(this);
 
         //
@@ -228,9 +232,9 @@ public class SelectizeAddon extends PAddOnComposite<PElement> implements PTermin
     public void onTerminalEvent(final PTerminalEvent event) {
         final String requestType = event.getJsonObject().getString("type");
 
-        if("remove".equals(requestType)){
+        if ("remove".equals(requestType)) {
 
-        }else if("add".equals(requestType)){
+        } else if ("add".equals(requestType)) {
             final String tag = event.getJsonObject().getString("tag").toLowerCase();
             final String tagID = event.getJsonObject().getString("id");
             System.err.println(tag);
@@ -270,7 +274,6 @@ public class SelectizeAddon extends PAddOnComposite<PElement> implements PTermin
 
                     final Type type = Type.valueOf(hitDoc.getField("fieldname").stringValue());
 
-
                     System.err.println("Found document" + stringValue);
                     System.err.println("Custom Data" + hitDoc.getField("id").stringValue());
 
@@ -284,11 +287,11 @@ public class SelectizeAddon extends PAddOnComposite<PElement> implements PTermin
                         return;
                     }
 
-                    switch (type){
+                    switch (type) {
                         case SIDE:
-                            if(selectedSide == null){
+                            if (selectedSide == null) {
                                 selectedSide = stringValue;
-                            }else{
+                            } else {
                                 final JsonObjectBuilder builder = Json.createObjectBuilder();
                                 builder.add("id", tagID);
                                 builder.add("oldTag", tag);
@@ -324,27 +327,26 @@ public class SelectizeAddon extends PAddOnComposite<PElement> implements PTermin
             callTerminalMethod("updateTag", builder);
         }
 
-
     }
 
     public void selectBuy(final Boolean selected) {
-        if(selected){
-            if(selectedSide == null) {
+        if (selected) {
+            if (selectedSide == null) {
                 final JsonObjectBuilder builder = Json.createObjectBuilder();
                 builder.add("found", "yes");
                 builder.add("tag", "Buy");
                 builder.add("desc", "side");
                 callTerminalMethod("addTag", builder);
             }
-        }else{
+        } else {
 
         }
     }
 
     public void selectSell(final Boolean selected) {
-        if(selected){
+        if (selected) {
 
-        }else{
+        } else {
 
         }
     }

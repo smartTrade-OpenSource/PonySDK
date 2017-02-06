@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,9 +23,8 @@
 
 package com.ponysdk.sample.client.page;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PDisclosurePanel;
-import com.ponysdk.core.ui.basic.PLabel;
-import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
 import com.ponysdk.core.ui.basic.PWidget;
 
@@ -39,9 +38,9 @@ public class DisclosurePanelPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        PVerticalPanel panel = new PVerticalPanel();
+        final PVerticalPanel panel = Element.newPVerticalPanel();
 
-        final PDisclosurePanel disclosurePanel = new PDisclosurePanel("View details");
+        final PDisclosurePanel disclosurePanel = Element.newPDisclosurePanel("View details");
         disclosurePanel.setContent(getDisclosurePanelContent());
         disclosurePanel.setWidth("200px");
 
@@ -52,11 +51,11 @@ public class DisclosurePanelPageActivity extends SamplePageActivity {
     }
 
     private PWidget getDisclosurePanelContent() {
-        final PVerticalPanel verticalPanel = new PVerticalPanel();
-        verticalPanel.add(new PLabel("First Name: "));
-        verticalPanel.add(new PTextBox());
-        verticalPanel.add(new PLabel("Last Name: "));
-        verticalPanel.add(new PTextBox());
+        final PVerticalPanel verticalPanel = Element.newPVerticalPanel();
+        verticalPanel.add(Element.newPLabel("First Name: "));
+        verticalPanel.add(Element.newPTextBox());
+        verticalPanel.add(Element.newPLabel("Last Name: "));
+        verticalPanel.add(Element.newPTextBox());
         return verticalPanel;
     }
 

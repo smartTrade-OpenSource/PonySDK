@@ -43,11 +43,11 @@ public class PTextBox extends PTextBoxBase {
     private int maxLength;
     private int visibleLength;
 
-    public PTextBox() {
+    protected PTextBox() {
         this(null);
     }
 
-    public PTextBox(final String text) {
+    protected PTextBox(final String text) {
         super(text);
     }
 

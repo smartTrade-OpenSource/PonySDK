@@ -30,7 +30,7 @@ import com.ponysdk.core.model.WidgetType;
  */
 public class PMenuItemSeparator extends PMenuSubElement {
 
-    public PMenuItemSeparator() {
+    protected PMenuItemSeparator() {
     }
 
     @Override

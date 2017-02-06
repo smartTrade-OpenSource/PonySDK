@@ -23,6 +23,7 @@
 
 package com.ponysdk.sample.client.page;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PListBox;
 import com.ponysdk.core.ui.basic.event.PChangeEvent;
@@ -39,9 +40,9 @@ public class ListBoxContainsEmptyItemPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PFlowPanel panel = new PFlowPanel();
+        final PFlowPanel panel = Element.newPFlowPanel();
 
-        final PListBox listBox = new PListBox(true);
+        final PListBox listBox = Element.newPListBox(true);
         listBox.addItem("Altai horseBengin");
         listBox.addItem("American Warmblood");
         listBox.addItem("Falabella");
@@ -55,12 +56,12 @@ public class ListBoxContainsEmptyItemPageActivity extends SamplePageActivity {
             public void onChange(final PChangeEvent event) {
                 if (listBox.getSelectedIndex() != -1) {
                     PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
-                            "Item selected : " + listBox.getSelectedItem());
+                        "Item selected : " + listBox.getSelectedItem());
                 }
             }
         });
 
-        final PListBox multiListBox = new PListBox(true);
+        final PListBox multiListBox = Element.newPListBox(true);
         multiListBox.setMultipleSelect(true);
         multiListBox.setVisibleItemCount(10);
         multiListBox.addItem("Altai horseBengin");
@@ -75,7 +76,7 @@ public class ListBoxContainsEmptyItemPageActivity extends SamplePageActivity {
             @Override
             public void onChange(final PChangeEvent event) {
                 PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
-                        "Item selected : " + multiListBox.getSelectedItems());
+                    "Item selected : " + multiListBox.getSelectedItems());
             }
         });
 

@@ -69,10 +69,10 @@ public class PLabel extends PWidget implements PHasText, HasPClickHandlers, HasP
 
     protected String text;
 
-    public PLabel() {
+    protected PLabel() {
     }
 
-    public PLabel(final String text) {
+    protected PLabel(final String text) {
         this.text = text;
     }
 

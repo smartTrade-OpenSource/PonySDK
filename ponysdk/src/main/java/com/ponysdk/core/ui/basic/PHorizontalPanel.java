@@ -38,6 +38,9 @@ public class PHorizontalPanel extends PCellPanel implements HasPAlignment {
     private PHorizontalAlignment horizontalAlignment = PHorizontalAlignment.ALIGN_LEFT;
     private PVerticalAlignment verticalAlignment = PVerticalAlignment.ALIGN_TOP;
 
+    protected PHorizontalPanel() {
+    }
+
     @Override
     protected WidgetType getWidgetType() {
         return WidgetType.HORIZONTAL_PANEL;

@@ -58,7 +58,7 @@ public class PWindow extends PObject {
         PWindowManager.registerWindow(this);
     }
 
-    public PWindow(final String url, final String name, final String features) {
+    protected PWindow(final String url, final String name, final String features) {
         this.windowID = getMain().getID();
         this.url = url;
         this.name = name;

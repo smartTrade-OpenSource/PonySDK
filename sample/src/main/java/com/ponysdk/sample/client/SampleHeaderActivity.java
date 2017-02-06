@@ -23,6 +23,7 @@
 
 package com.ponysdk.sample.client;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PAnchor;
 import com.ponysdk.core.ui.basic.PDialogBox;
 import com.ponysdk.core.ui.basic.PLabel;
@@ -52,23 +53,23 @@ public class SampleHeaderActivity extends HeaderActivity implements PClickHandle
     }
 
     private PWidget createUserAccountMenu(final User userLogged) {
-        final PAnchor optionsAnchor = new PAnchor(userLogged.getLogin());
+        final PAnchor optionsAnchor = Element.newPAnchor(userLogged.getLogin());
         optionsAnchor.ensureDebugId("options_anchor");
         // optionsAnchor.addStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU);
 
-        popup = new PPopupPanel(getView().asWidget().getWindowID());
+        popup = Element.newPPopupPanel(getView().asWidget().getWindowID());
         // popup.addStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_POPUP);
 
-        final PVerticalPanel panel = new PVerticalPanel();
-        final PLabel userName = new PLabel(userLogged.getName());
+        final PVerticalPanel panel = Element.newPVerticalPanel();
+        final PLabel userName = Element.newPLabel(userLogged.getName());
         // userName.addStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_POPUP_USER_NAME);
         panel.add(userName);
 
-        final PLabel userLogin = new PLabel(userLogged.getLogin());
+        final PLabel userLogin = Element.newPLabel(userLogged.getLogin());
         // userLogin.addStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_POPUP_USER_LOGIN);
         panel.add(userLogin);
 
-        final PAnchor signOutAnchor = new PAnchor("Sign out");
+        final PAnchor signOutAnchor = Element.newPAnchor("Sign out");
 
         panel.add(signOutAnchor);
         popup.setWidget(panel);
@@ -111,7 +112,7 @@ public class SampleHeaderActivity extends HeaderActivity implements PClickHandle
 
                         @Override
                         public void setPosition(final int offsetWidth, final int offsetHeight, final int windowWidth,
-                                final int windowHeight) {
+                                                final int windowHeight) {
                             final int left = windowWidth - 250;
                             popup.setPopupPosition(left, 26);
 
@@ -140,7 +141,6 @@ public class SampleHeaderActivity extends HeaderActivity implements PClickHandle
 
     @Override
     public void onClick(final PClickEvent event) {
-        if (popup.isShowing())
-            popup.hide();
+        if (popup.isShowing()) popup.hide();
     }
 }

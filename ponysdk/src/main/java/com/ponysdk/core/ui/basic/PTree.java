@@ -57,13 +57,13 @@ import com.ponysdk.core.ui.basic.event.PSelectionHandler;
 public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, HasPAnimation {
 
     private final List<PSelectionHandler<PTreeItem>> selectionHandlers = new ArrayList<>();
-
     private final Map<PWidget, PTreeItem> childWidgets = new HashMap<>();
+
     private final PTreeItem root;
     private boolean animationEnabled = false;
     private PTreeItem curSelection;
 
-    public PTree() {
+    protected PTree() {
         root = new PTreeItem(true);
         root.saveAdd(root.getID(), ID);
     }

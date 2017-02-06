@@ -23,8 +23,8 @@
 
 package com.ponysdk.core.ui.list.renderer.cell;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PAnchor;
-import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.list.refreshable.Cell;
 import com.ponysdk.core.ui.place.Place;
@@ -51,11 +51,11 @@ public class PlaceChangeCellRenderer implements CellRenderer<String, PWidget> {
     public PWidget render(final int row, final String rawValue) {
         final String value = getValue(rawValue);
         if (value != null) {
-            final PAnchor anchor = new PAnchor(rawValue);
+            final PAnchor anchor = Element.newPAnchor(rawValue);
             anchor.addClickHandler((event) -> PlaceChangeRequest.fire(this, place));
             return anchor;
         } else {
-            return new PLabel(nullDisplay);
+            return Element.newPLabel(nullDisplay);
         }
     }
 

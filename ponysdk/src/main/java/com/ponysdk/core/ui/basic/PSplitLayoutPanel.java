@@ -30,14 +30,14 @@ import java.util.Map;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 
-import com.ponysdk.core.tools.ListenerCollection;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.tools.ListenerCollection;
 import com.ponysdk.core.ui.basic.event.PLayoutResizeEvent;
 import com.ponysdk.core.ui.basic.event.PLayoutResizeHandler;
-import com.ponysdk.core.model.WidgetType;
 
 /**
  * A panel that adds user-positioned splitters between each of its child
@@ -65,7 +65,8 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
 
     private final ListenerCollection<PLayoutResizeHandler> handlers = new ListenerCollection<>();
     private final Map<PWidget, SplitInfoHolder> splitInfoByWidget = new HashMap<>();
-    public PSplitLayoutPanel() {
+
+    protected PSplitLayoutPanel() {
         super(PUnit.PX);
     }
 

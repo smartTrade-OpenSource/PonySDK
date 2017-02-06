@@ -23,8 +23,8 @@
 
 package com.ponysdk.core.ui.grid;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PComplexPanel;
-import com.ponysdk.core.ui.basic.PElement;
 
 public class GridTableWidget extends AbstractGridWidget {
 
@@ -34,26 +34,26 @@ public class GridTableWidget extends AbstractGridWidget {
 
     @Override
     protected PComplexPanel createTableHeader() {
-        return new PElement("thead");
+        return Element.newThead();
     }
 
     @Override
     protected PComplexPanel createTableBody() {
-        return new PElement("tbody");
+        return Element.newTbody();
     }
 
     @Override
     public PComplexPanel createTableRow() {
-        return new PElement("tr");
+        return Element.newTr();
     }
 
     @Override
     protected PComplexPanel createTableCell() {
-        return new PElement("td");
+        return Element.newTd();
     }
 
     @Override
     protected PComplexPanel createTableHeaderCell() {
-        return new PElement("th");
+        return Element.newTh();
     }
 }

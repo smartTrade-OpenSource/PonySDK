@@ -27,6 +27,7 @@ import java.util.Arrays;
 
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.model.PVerticalAlignment;
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PDockLayoutPanel;
 import com.ponysdk.core.ui.basic.PHorizontalPanel;
@@ -54,10 +55,10 @@ public class TabPanelPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PDockLayoutPanel dockLayoutPanel = new PDockLayoutPanel(PUnit.PX);
+        final PDockLayoutPanel dockLayoutPanel = Element.newPDockLayoutPanel(PUnit.PX);
         dockLayoutPanel.setSizeFull();
 
-        final PTabPanel tabPanel = new PTabPanel();
+        final PTabPanel tabPanel = Element.newPTabPanel();
         tabPanel.setSizeFull();
 
         tabPanel.addBeforeSelectionHandler(new PBeforeSelectionHandler<Integer>() {
@@ -65,7 +66,7 @@ public class TabPanelPageActivity extends SamplePageActivity {
             @Override
             public void onBeforeSelection(final PBeforeSelectionEvent<Integer> event) {
                 PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
-                        "onBeforeSelection, tab index : " + event.getSelectedItem());
+                    "onBeforeSelection, tab index : " + event.getSelectedItem());
             }
         });
         tabPanel.addSelectionHandler(new PSelectionHandler<Integer>() {
@@ -73,11 +74,11 @@ public class TabPanelPageActivity extends SamplePageActivity {
             @Override
             public void onSelection(final PSelectionEvent<Integer> event) {
                 PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
-                        "onSelection, tab index : " + event.getSelectedItem());
+                    "onSelection, tab index : " + event.getSelectedItem());
             }
         });
 
-        final PButton button = new PButton("Add Tab");
+        final PButton button = Element.newPButton("Add Tab");
         button.setStyleProperty("margin", "10px");
         button.addClickHandler(new PClickHandler() {
 
@@ -87,7 +88,7 @@ public class TabPanelPageActivity extends SamplePageActivity {
             }
         });
 
-        final PButton addCustomTabButton = new PButton("Add Tab (custom tab)");
+        final PButton addCustomTabButton = Element.newPButton("Add Tab (custom tab)");
         addCustomTabButton.setStyleProperty("margin", "10px");
         addCustomTabButton.addClickHandler(new PClickHandler() {
 
@@ -97,8 +98,8 @@ public class TabPanelPageActivity extends SamplePageActivity {
             }
         });
 
-        final PTextBox indexTextBox = new PTextBox();
-        final PButton selectButton = new PButton("Select Tab");
+        final PTextBox indexTextBox = Element.newPTextBox();
+        final PButton selectButton = Element.newPButton("Select Tab");
         selectButton.setStyleProperty("margin", "10px");
         selectButton.addClickHandler(new PClickHandler() {
 
@@ -109,14 +110,14 @@ public class TabPanelPageActivity extends SamplePageActivity {
             }
         });
 
-        final PHorizontalPanel horizontalPanel = new PHorizontalPanel();
+        final PHorizontalPanel horizontalPanel = Element.newPHorizontalPanel();
         horizontalPanel.setVerticalAlignment(PVerticalAlignment.ALIGN_MIDDLE);
         horizontalPanel.add(button);
         horizontalPanel.add(addCustomTabButton);
         horizontalPanel.add(indexTextBox);
         horizontalPanel.add(selectButton);
 
-        final PHorizontalPanel tabPanelContainer = new PHorizontalPanel();
+        final PHorizontalPanel tabPanelContainer = Element.newPHorizontalPanel();
         tabPanelContainer.add(tabPanel);
 
         dockLayoutPanel.addNorth(horizontalPanel, 50);
@@ -128,23 +129,23 @@ public class TabPanelPageActivity extends SamplePageActivity {
     }
 
     protected void addTabContent(final PTabPanel tabPanel) {
-        final PSimplePanel tabContent = new PSimplePanel();
+        final PSimplePanel tabContent = Element.newPSimplePanel();
 
         final int tabIndex = tabCount;
-        final PLabel label = new PLabel("content-" + tabIndex);
+        final PLabel label = Element.newPLabel("content-" + tabIndex);
         tabContent.setWidget(label);
         tabPanel.add(tabContent, "Tab-" + tabIndex);
         tabCount++;
     }
 
     protected void addCustomTabContent(final PTabPanel tabPanel) {
-        final PSimplePanel tabContent = new PSimplePanel();
+        final PSimplePanel tabContent = Element.newPSimplePanel();
 
         final int tabIndex = tabCount;
-        final PLabel tabLabel = new PLabel("CustomTab-" + tabIndex);
+        final PLabel tabLabel = Element.newPLabel("CustomTab-" + tabIndex);
         tabLabel.setStyleProperty("color", "blue");
         tabLabel.setStyleProperty("whiteSpace", "nowrap");
-        final PLabel label = new PLabel("content-" + tabIndex);
+        final PLabel label = Element.newPLabel("content-" + tabIndex);
         tabContent.setWidget(label);
         tabPanel.add(tabContent, tabLabel);
         tabCount++;

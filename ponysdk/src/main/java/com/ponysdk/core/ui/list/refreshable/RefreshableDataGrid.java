@@ -28,8 +28,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
-import com.ponysdk.core.ui.basic.PSimplePanel;
 import com.ponysdk.core.ui.list.DataGridActivity;
 import com.ponysdk.core.ui.list.DataGridColumnDescriptor;
 import com.ponysdk.core.ui.list.SimpleListView;
@@ -76,7 +76,7 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
             map.put(descriptor, cell);
             view.addWidget(cell.getWidget(), col++, rowIndex + 1, 1);
         }
-        view.addWidget(new PSimplePanel(), col, rowIndex + 1, 1);
+        view.addWidget(Element.newPSimplePanel(), col, rowIndex + 1, 1);
     }
 
     private void updateData(final int rowIndex, final K key, final D data) {

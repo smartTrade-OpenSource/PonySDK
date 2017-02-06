@@ -87,11 +87,11 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
 
     private int limit;
 
-    public PSuggestBox() {
+    protected PSuggestBox() {
         this(new PMultiWordSuggestOracle());
     }
 
-    public PSuggestBox(final PSuggestOracle suggestOracle) {
+    protected PSuggestBox(final PSuggestOracle suggestOracle) {
         this.suggestOracle = suggestOracle;
     }
 

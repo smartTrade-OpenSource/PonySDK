@@ -35,15 +35,15 @@ import com.ponysdk.core.model.WidgetType;
  */
 public class PButton extends PButtonBase {
 
-    public PButton() {
+    protected PButton() {
         super();
     }
 
-    public PButton(final String text) {
+    protected PButton(final String text) {
         super(text);
     }
 
-    public PButton(final String text, final String html) {
+    protected PButton(final String text, final String html) {
         super(text, html);
     }
 

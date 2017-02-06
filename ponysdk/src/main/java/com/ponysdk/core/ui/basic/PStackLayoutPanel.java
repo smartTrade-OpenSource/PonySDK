@@ -25,8 +25,8 @@ package com.ponysdk.core.ui.basic;
 
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 
 import org.slf4j.Logger;
@@ -71,13 +71,14 @@ public class PStackLayoutPanel extends PWidget
 
     private final PWidgetCollection children = new PWidgetCollection(this);
 
-    private final Collection<PBeforeSelectionHandler<Integer>> beforeSelectionHandlers = new ArrayList<>();
+    private final List<PBeforeSelectionHandler<Integer>> beforeSelectionHandlers = new ArrayList<>();
+    private final List<PSelectionHandler<Integer>> selectionHandlers = new ArrayList<>();
 
-    private final Collection<PSelectionHandler<Integer>> selectionHandlers = new ArrayList<>();
     private final PUnit unit;
+
     private Duration animationDuration;
 
-    public PStackLayoutPanel(final PUnit unit) {
+    protected PStackLayoutPanel(final PUnit unit) {
         super();
         this.unit = unit;
     }

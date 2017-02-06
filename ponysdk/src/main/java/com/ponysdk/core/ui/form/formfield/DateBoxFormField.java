@@ -26,6 +26,7 @@ package com.ponysdk.core.ui.form.formfield;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PDateBox;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 import com.ponysdk.core.ui.form.dataconverter.DataConverter;
@@ -34,15 +35,15 @@ import com.ponysdk.core.ui.form.dataconverter.DateConverter;
 public class DateBoxFormField extends AbstractFormField<Date, PDateBox> {
 
     public DateBoxFormField() {
-        this(new PDateBox(), new DateConverter());
+        this(Element.newPDateBox(), new DateConverter());
     }
 
     public DateBoxFormField(final String dateFormat) {
-        this(new PDateBox(new SimpleDateFormat(dateFormat)), new DateConverter(new SimpleDateFormat(dateFormat)));
+        this(Element.newPDateBox(new SimpleDateFormat(dateFormat)), new DateConverter(new SimpleDateFormat(dateFormat)));
     }
 
     public DateBoxFormField(final SimpleDateFormat dateFormat) {
-        this(new PDateBox(dateFormat), new DateConverter(dateFormat));
+        this(Element.newPDateBox(dateFormat), new DateConverter(dateFormat));
     }
 
     public DateBoxFormField(final PDateBox dateBox) {

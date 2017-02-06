@@ -108,6 +108,9 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
 
     private PAddOn addon;
 
+    protected PWidget() {
+    }
+
     static PWidget asWidgetOrNull(final IsPWidget w) {
         return w == null ? null : w.asWidget();
     }

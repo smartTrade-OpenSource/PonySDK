@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -24,9 +24,9 @@
 package com.ponysdk.sample.client.page;
 
 import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PHorizontalPanel;
-import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
@@ -42,11 +42,11 @@ public class CookiesPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PTextBox name = new PTextBox();
+        final PTextBox name = Element.newPTextBox();
         name.setPlaceholder("Cookie name");
-        final PTextBox value = new PTextBox();
+        final PTextBox value = Element.newPTextBox();
         name.setPlaceholder("Cookie value");
-        final PButton add = new PButton("Add");
+        final PButton add = Element.newPButton("Add");
         add.addClickHandler(new PClickHandler() {
 
             @Override
@@ -55,9 +55,9 @@ public class CookiesPageActivity extends SamplePageActivity {
             }
         });
 
-        final PTextBox name2 = new PTextBox();
+        final PTextBox name2 = Element.newPTextBox();
         name2.setPlaceholder("Cookie name");
-        final PButton remove = new PButton("Remove");
+        final PButton remove = Element.newPButton("Remove");
         remove.addClickHandler(new PClickHandler() {
 
             @Override
@@ -66,21 +66,21 @@ public class CookiesPageActivity extends SamplePageActivity {
             }
         });
 
-        final PHorizontalPanel addPanel = new PHorizontalPanel();
+        final PHorizontalPanel addPanel = Element.newPHorizontalPanel();
         addPanel.add(name);
         addPanel.add(value);
         addPanel.add(add);
 
-        final PHorizontalPanel removePanel = new PHorizontalPanel();
+        final PHorizontalPanel removePanel = Element.newPHorizontalPanel();
         removePanel.add(name2);
         removePanel.add(remove);
 
-        final PVerticalPanel panel = new PVerticalPanel();
+        final PVerticalPanel panel = Element.newPVerticalPanel();
         panel.setSpacing(10);
 
-        panel.add(new PLabel("Add a cookie:"));
+        panel.add(Element.newPLabel("Add a cookie:"));
         panel.add(addPanel);
-        panel.add(new PLabel("Remove a cookie:"));
+        panel.add(Element.newPLabel("Remove a cookie:"));
         panel.add(removePanel);
 
         examplePanel.setWidget(panel);

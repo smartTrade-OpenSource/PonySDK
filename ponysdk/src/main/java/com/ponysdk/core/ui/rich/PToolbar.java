@@ -24,6 +24,7 @@
 package com.ponysdk.core.ui.rich;
 
 import com.ponysdk.core.model.PVerticalAlignment;
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PHorizontalPanel;
 import com.ponysdk.core.ui.basic.PSimplePanel;
 import com.ponysdk.core.ui.basic.PWidget;
@@ -44,7 +45,7 @@ public class PToolbar extends PHorizontalPanel {
     }
 
     public void addSepararator() {
-        final PSimplePanel separator = new PSimplePanel();
+        final PSimplePanel separator = Element.newPSimplePanel();
         separator.addStyleName("pony-Toolbar-Separator");
         add(separator);
     }

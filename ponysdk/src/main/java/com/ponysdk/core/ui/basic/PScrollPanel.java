@@ -43,6 +43,9 @@ public class PScrollPanel extends PSimplePanel implements HasPScrollHandlers {
 
     private final List<PScrollHandler> scrollHandlers = new ArrayList<>();
 
+    protected PScrollPanel() {
+    }
+
     @Override
     protected WidgetType getWidgetType() {
         return WidgetType.SCROLL_PANEL;

@@ -25,7 +25,7 @@ package com.ponysdk.core.ui.basic;
 
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 import javax.json.JsonObject;
@@ -73,13 +73,13 @@ import com.ponysdk.core.ui.model.ServerBinaryModel;
 public class PTabLayoutPanel extends PComplexPanel
         implements HasPBeforeSelectionHandlers<Integer>, HasPSelectionHandlers<Integer>, PSelectionHandler<Integer>, PAnimatedLayout {
 
-    private final Collection<PBeforeSelectionHandler<Integer>> beforeSelectionHandlers = new ArrayList<>();
-    private final Collection<PSelectionHandler<Integer>> selectionHandlers = new ArrayList<>();
+    private final List<PBeforeSelectionHandler<Integer>> beforeSelectionHandlers = new ArrayList<>();
+    private final List<PSelectionHandler<Integer>> selectionHandlers = new ArrayList<>();
 
     private Integer selectedItemIndex;
     private Duration animationDuration;
 
-    public PTabLayoutPanel() {
+    protected PTabLayoutPanel() {
     }
 
     @Override
@@ -111,7 +111,7 @@ public class PTabLayoutPanel extends PComplexPanel
             adopt(child);
 
             child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.TAB_WIDGET, tabWidget.getID()),
-                    new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex));
+                new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex));
             tabWidget.attach(windowID);
             child.attach(windowID);
         } else {
@@ -128,7 +128,7 @@ public class PTabLayoutPanel extends PComplexPanel
             adopt(child);
 
             child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.TAB_TEXT, tabText),
-                    new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex));
+                new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex));
             child.attach(windowID);
         } else {
             throw new IllegalAccessError("Widget " + child + " already attached to an other window, current window : "
@@ -189,12 +189,12 @@ public class PTabLayoutPanel extends PComplexPanel
         if (instruction.containsKey(ClientToServerModel.HANDLER_SELECTION.toStringValue())) {
             for (final PSelectionHandler<Integer> handler : selectionHandlers) {
                 handler.onSelection(
-                        new PSelectionEvent<>(this, instruction.getInt(ClientToServerModel.HANDLER_SELECTION.toStringValue())));
+                    new PSelectionEvent<>(this, instruction.getInt(ClientToServerModel.HANDLER_SELECTION.toStringValue())));
             }
         } else if (instruction.containsKey(ClientToServerModel.HANDLER_BEFORE_SELECTION.toStringValue())) {
             for (final PBeforeSelectionHandler<Integer> handler : beforeSelectionHandlers) {
                 handler.onBeforeSelection(new PBeforeSelectionEvent<>(this,
-                        instruction.getInt(ClientToServerModel.HANDLER_BEFORE_SELECTION.toStringValue())));
+                    instruction.getInt(ClientToServerModel.HANDLER_BEFORE_SELECTION.toStringValue())));
             }
         } else {
             super.onClientData(instruction);

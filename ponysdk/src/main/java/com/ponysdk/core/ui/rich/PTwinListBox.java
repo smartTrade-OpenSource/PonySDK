@@ -27,9 +27,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ponysdk.core.model.PHorizontalAlignment;
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PFlexTable;
-import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PListBox;
 import com.ponysdk.core.ui.basic.PListBox.ListItem;
 import com.ponysdk.core.ui.basic.event.HasPChangeHandlers;
@@ -65,27 +65,27 @@ public class PTwinListBox<T> extends PFlexTable implements HasPChangeHandlers {
 
     private void init(final boolean containsEmptyItem) {
         if (leftCaption != null) {
-            setWidget(0, 0, new PLabel(leftCaption));
+            setWidget(0, 0, Element.newPLabel(leftCaption));
             getCellFormatter().setHorizontalAlignment(0, 0, PHorizontalAlignment.ALIGN_CENTER);
         }
 
         if (rightCaption != null) {
-            setWidget(0, 2, new PLabel(rightCaption));
+            setWidget(0, 2, Element.newPLabel(rightCaption));
             getCellFormatter().setHorizontalAlignment(0, 2, PHorizontalAlignment.ALIGN_CENTER);
         }
 
-        leftListBox = new PListBox(containsEmptyItem);
+        leftListBox = Element.newPListBox(containsEmptyItem);
         leftListBox.setMultipleSelect(true);
         leftListBox.addStyleName("pony-TwinListBox-Left-ListBox");
 
-        rightListBox = new PListBox(containsEmptyItem);
+        rightListBox = Element.newPListBox(containsEmptyItem);
         rightListBox.setMultipleSelect(true);
         rightListBox.addStyleName("pony-TwinListBox-Right-ListBox");
 
         setWidget(1, 0, leftListBox);
         setWidget(1, 2, rightListBox);
 
-        switchButton = new PButton("<>");
+        switchButton = Element.newPButton("<>");
         switchButton.addStyleName("pony-TwinListBox-Switch-ListBox");
         switchButton.addClickHandler(new PClickHandler() {
 

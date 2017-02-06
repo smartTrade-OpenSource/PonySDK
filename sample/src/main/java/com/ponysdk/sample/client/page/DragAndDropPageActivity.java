@@ -23,6 +23,7 @@
 
 package com.ponysdk.sample.client.page;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
@@ -38,7 +39,7 @@ import com.ponysdk.core.ui.basic.event.PDropHandler;
 
 public class DragAndDropPageActivity extends SamplePageActivity {
 
-    private final PFlowPanel boxContainer = new PFlowPanel();
+    private final PFlowPanel boxContainer = Element.newPFlowPanel();
 
     public DragAndDropPageActivity() {
         super("Drag and Drop", "Extra");
@@ -48,7 +49,7 @@ public class DragAndDropPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PVerticalPanel verticalPanel = new PVerticalPanel();
+        final PVerticalPanel verticalPanel = Element.newPVerticalPanel();
 
         final PWidget box1 = buildBox("Box 1");
         final PWidget box2 = buildBox("Box 2");
@@ -65,10 +66,10 @@ public class DragAndDropPageActivity extends SamplePageActivity {
     }
 
     private PWidget buildBox(final String label) {
-        final PLabel lbl = new PLabel(label);
+        final PLabel lbl = Element.newPLabel(label);
         lbl.addStyleName("label");
 
-        final PFlowPanel box = new PFlowPanel();
+        final PFlowPanel box = Element.newPFlowPanel();
         box.addStyleName("ddbox");
         box.add(lbl);
 

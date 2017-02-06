@@ -25,7 +25,10 @@ package com.ponysdk.sample.client;
 
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.activity.ActivityManager;
-import com.ponysdk.core.ui.basic.*;
+import com.ponysdk.core.ui.basic.Element;
+import com.ponysdk.core.ui.basic.PElement;
+import com.ponysdk.core.ui.basic.PSimpleLayoutPanel;
+import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.eventbus.EventBus;
 import com.ponysdk.core.ui.main.EntryPoint;
 import com.ponysdk.core.ui.place.DefaultPlaceHistoryMapper;
@@ -42,7 +45,7 @@ public class TradingSampleEntryPoint implements EntryPoint {
     @Override
     public void start(final UIContext uiContext) {
         if (uiContext.getApplication().getAttribute(USER) == null) uiContext.getHistory().newItem("", false);
-        final PSimpleLayoutPanel panel = new PSimpleLayoutPanel();
+        final PSimpleLayoutPanel panel = Element.newPSimpleLayoutPanel();
         PWindow.getMain().getPRootLayoutPanel().add(panel);
 
         final EventBus eventBus = UIContext.getRootEventBus();
@@ -55,7 +58,7 @@ public class TradingSampleEntryPoint implements EntryPoint {
         activityManager.setDisplay(panel);
 
         final PlaceHistoryHandler historyHandler = new PlaceHistoryHandler(uiContext.getHistory(), historyMapper, placeController,
-                eventBus);
+            eventBus);
         historyHandler.setDefaultPlace(new LoginPlace());
         historyHandler.handleCurrentHistory();
 
@@ -63,7 +66,7 @@ public class TradingSampleEntryPoint implements EntryPoint {
     }
 
     private PElement createReconnectionPanel() {
-        final PElement pElement = new PElement("div");
+        final PElement pElement = Element.newPElement("div");
         pElement.setAttribute("id", "reconnection");
         return pElement;
     }

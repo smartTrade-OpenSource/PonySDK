@@ -31,7 +31,7 @@ public class PCellFormatter {
 
     protected final PHTMLTable<? extends PCellFormatter> table;
 
-    public PCellFormatter(final PHTMLTable<? extends PCellFormatter> table) {
+    protected PCellFormatter(final PHTMLTable<? extends PCellFormatter> table) {
         this.table = table;
     }
 

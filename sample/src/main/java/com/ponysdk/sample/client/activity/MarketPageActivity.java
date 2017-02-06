@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.DataListener;
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PAnchor;
 import com.ponysdk.core.ui.basic.PElement;
 import com.ponysdk.core.ui.basic.PFlowPanel;
@@ -56,7 +57,7 @@ public class MarketPageActivity extends PageActivity {
 
     protected PFlowPanel currentDrag;
 
-    protected final PFlowPanel boxContainer = new PFlowPanel();
+    protected final PFlowPanel boxContainer = Element.newPFlowPanel();
 
     public MarketPageActivity() {
         super("Markets", "Trading");
@@ -77,7 +78,7 @@ public class MarketPageActivity extends PageActivity {
         // boxContainer.add(buildFXBox(md.currency));
         // }
 
-        final PScrollPanel scrollPanel = new PScrollPanel();
+        final PScrollPanel scrollPanel = Element.newPScrollPanel();
         scrollPanel.setWidget(boxContainer);
         scrollPanel.setSizeFull();
 
@@ -86,7 +87,7 @@ public class MarketPageActivity extends PageActivity {
         final List<String> asList = Arrays.asList("EURUSD", "USDEUR", "EURAUD");
         for (int i = 0; i < 1; i++) {
             for (final String currency : asList) {
-                final PFlowPanel box = new PFlowPanel();
+                final PFlowPanel box = Element.newPFlowPanel();
                 box.addStyleName("widget");
                 boxContainer.add(box);
 
@@ -107,96 +108,96 @@ public class MarketPageActivity extends PageActivity {
     }
 
     private PWidget buildFXBox(final PFlowPanel box, final String currency) {
-        final PFlowPanel background = new PFlowPanel();
+        final PFlowPanel background = Element.newPFlowPanel();
         background.addStyleName("background");
         box.add(background);
 
-        final PFlowPanel headInline = new PFlowPanel();
+        final PFlowPanel headInline = Element.newPFlowPanel();
         headInline.addStyleName("head_inline");
 
-        final PFlowPanel icon = new PFlowPanel();
+        final PFlowPanel icon = Element.newPFlowPanel();
         icon.addStyleName("icon");
         headInline.add(icon);
 
-        final PLabel header = new PLabel(currency);
+        final PLabel header = Element.newPLabel(currency);
         header.addStyleName("header");
         headInline.add(header);
 
-        final PAnchor close = new PAnchor();
+        final PAnchor close = Element.newPAnchor();
         close.addStyleName("close");
         headInline.add(close);
 
         box.add(headInline);
 
-        final PHTML buy = new PHTML("<div></div>");
+        final PHTML buy = Element.newPHTML("<div></div>");
         buy.addStyleName("buy");
         buy.addClickHandler(clickEvent -> {
             PNotificationManager.showHumanizedNotification(getView().asWidget().getWindowID(), "Buy clicked!");
         });
         box.add(buy);
 
-        final PLabel buyPipHead = new PLabel("buy");
+        final PLabel buyPipHead = Element.newPLabel("buy");
         buyPipHead.addStyleName("buy_pip_head");
         box.add(buyPipHead);
 
-        final PLabel buyNum = new PLabel("1.22");
+        final PLabel buyNum = Element.newPLabel("1.22");
         buyNum.addStyleName("buy_num");
         box.add(buyNum);
 
-        final PFlowPanel buyPipNum = new PFlowPanel();
+        final PFlowPanel buyPipNum = Element.newPFlowPanel();
         buyPipNum.addStyleName("buy_pip_num");
 
-        final PElement buyPipNumStrong = new PElement("strong");
+        final PElement buyPipNumStrong = Element.newPElement("strong");
         buyPipNum.add(buyPipNumStrong);
 
         box.add(buyPipNum);
 
-        final PFlowPanel buyDirection = new PFlowPanel();
+        final PFlowPanel buyDirection = Element.newPFlowPanel();
         buyDirection.addStyleName("buy_direction");
         box.add(buyDirection);
 
-        final PHTML sell = new PHTML("<div></div>");
+        final PHTML sell = Element.newPHTML("<div></div>");
         sell.addStyleName("sell");
         sell.addClickHandler(
-                (clickEvent) -> PNotificationManager.showHumanizedNotification(getView().asWidget().getWindowID(), "Sell clicked!"));
+            (clickEvent) -> PNotificationManager.showHumanizedNotification(getView().asWidget().getWindowID(), "Sell clicked!"));
         box.add(sell);
 
-        final PLabel sellPipHead = new PLabel("offer");
+        final PLabel sellPipHead = Element.newPLabel("offer");
         sellPipHead.addStyleName("sell_pip_head");
         box.add(sellPipHead);
 
-        final PLabel sellNum = new PLabel("1.45");
+        final PLabel sellNum = Element.newPLabel("1.45");
         sellNum.addStyleName("sell_num");
         box.add(sellNum);
 
-        final PFlowPanel sellPipNum = new PFlowPanel();
+        final PFlowPanel sellPipNum = Element.newPFlowPanel();
         sellPipNum.addStyleName("sell_pip_num");
 
-        final PElement sellPipNumStrong = new PElement("strong");
+        final PElement sellPipNumStrong = Element.newPElement("strong");
         sellPipNum.add(sellPipNumStrong);
 
         box.add(sellPipNum);
 
-        final PLabel amtLabel = new PLabel("EUR");
+        final PLabel amtLabel = Element.newPLabel("EUR");
         amtLabel.addStyleName("amtlabel");
         box.add(amtLabel);
 
-        final PFlowPanel sellDirection = new PFlowPanel();
+        final PFlowPanel sellDirection = Element.newPFlowPanel();
         sellDirection.addStyleName("sell_direction");
         box.add(sellDirection);
 
-        final PLabel spread = new PLabel();
+        final PLabel spread = Element.newPLabel();
         spread.addStyleName("spread");
         box.add(spread);
 
-        final PTextBox textBox = new PTextBox();
+        final PTextBox textBox = Element.newPTextBox();
         textBox.setStyleName("input");
 
-        final PAnchor selector = new PAnchor();
+        final PAnchor selector = Element.newPAnchor();
         selector.addStyleName("selector");
 
         box.addDomHandler(event -> {
-        } , PDragStartEvent.TYPE);
+        }, PDragStartEvent.TYPE);
 
         box.addDomHandler(event -> {
             box.removeStyleName("dragenter");
@@ -206,22 +207,21 @@ public class MarketPageActivity extends PageActivity {
                 boxContainer.remove(source);
                 boxContainer.insert(source, dropIndex);
             }
-        } , PDropEvent.TYPE);
+        }, PDropEvent.TYPE);
 
         box.addDomHandler(event -> {
             if (currentDrag == null || !currentDrag.equals(box)) {
                 box.addStyleName("dragenter");
-                if (currentDrag != null)
-                    currentDrag.removeStyleName("dragenter");
+                if (currentDrag != null) currentDrag.removeStyleName("dragenter");
                 currentDrag = box;
             }
-        } , PDragEnterEvent.TYPE);
+        }, PDragEnterEvent.TYPE);
 
         box.addDomHandler(event -> {
             if (!currentDrag.equals(box)) {
                 box.removeStyleName("dragenter");
             }
-        } , PDragLeaveEvent.TYPE);
+        }, PDragLeaveEvent.TYPE);
 
         UIContext.get().addDataListener(new DataListener() {
 

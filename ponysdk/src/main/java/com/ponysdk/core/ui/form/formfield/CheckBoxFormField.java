@@ -23,13 +23,14 @@
 
 package com.ponysdk.core.ui.form.formfield;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PCheckBox;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 
 public class CheckBoxFormField extends AbstractFormField<Boolean, PCheckBox> {
 
     public CheckBoxFormField() {
-        this(new PCheckBox());
+        this(Element.newPCheckBox());
     }
 
     public CheckBoxFormField(final PCheckBox widget) {

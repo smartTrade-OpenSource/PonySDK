@@ -39,7 +39,7 @@ public class PPushButton extends PButton {
 
     private final PImage image;
 
-    public PPushButton(final PImage image) {
+    protected PPushButton(final PImage image) {
         super();
         this.image = image;
     }

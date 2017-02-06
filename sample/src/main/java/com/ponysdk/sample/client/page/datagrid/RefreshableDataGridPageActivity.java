@@ -27,6 +27,7 @@ import java.util.Arrays;
 
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.DataListener;
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PFlexTable;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PScrollPanel;
@@ -53,10 +54,10 @@ public class RefreshableDataGridPageActivity extends SamplePageActivity implemen
 
         super.onFirstShowPage();
 
-        scroll = new PScrollPanel();
-        layout = new PFlowPanel();
-        actions = new PFlexTable();
-        listContainer = new PSimplePanel();
+        scroll = Element.newPScrollPanel();
+        layout = Element.newPFlowPanel();
+        actions = Element.newPFlexTable();
+        listContainer = Element.newPSimplePanel();
 
         scroll.setWidget(layout);
         layout.add(actions);

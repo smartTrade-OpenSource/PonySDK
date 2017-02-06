@@ -24,6 +24,7 @@
 package com.ponysdk.impl.webapplication.login;
 
 import com.ponysdk.core.internalization.PString;
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PCheckBox;
 import com.ponysdk.core.ui.basic.PFlowPanel;
@@ -40,41 +41,41 @@ public class DefaultLoginPageView extends PSimplePanel implements LoginPageView 
     private final PButton loginButton;
     private final PCheckBox rememberMe;
 
-    private final PTextBox loginTextBox = new PTextBox();
+    private final PTextBox loginTextBox = Element.newPTextBox();
 
-    private final PPasswordTextBox passwordTextBox = new PPasswordTextBox();
+    private final PPasswordTextBox passwordTextBox = Element.newPPasswordTextBox();
 
-    private final PFlowPanel messagePanel = new PFlowPanel();
+    private final PFlowPanel messagePanel = Element.newPFlowPanel();
 
-    private final PLabel versionInformation = new PLabel();
+    private final PLabel versionInformation = Element.newPLabel();
 
     private int messageIndex = 1;
 
     public DefaultLoginPageView(final String title) {
 
-        loginButton = new PButton(PString.get("activity.login.signin"));
-        rememberMe = new PCheckBox(PString.get("activity.login.rememberme"));
+        loginButton = Element.newPButton(PString.get("activity.login.signin"));
+        rememberMe = Element.newPCheckBox(PString.get("activity.login.rememberme"));
 
         loginTextBox.setStyleName("pony-LoginPage-LoginTextBox");
         passwordTextBox.setStyleName("pony-LoginPage-PasswordTextBox");
         loginButton.addStyleName("pony-LoginPage-SubmitButton");
         versionInformation.addStyleName("pony-LoginPage-VersionInformation");
 
-        final PFlowPanel panel = new PFlowPanel();
+        final PFlowPanel panel = Element.newPFlowPanel();
         panel.setStyleName("pony-LoginPage");
 
         // logo
-        final PLabel logo = new PLabel(title);
+        final PLabel logo = Element.newPLabel(title);
         logo.addStyleName("pony-LoginPage-Logo");
         panel.add(logo);
 
         // input
-        final PFlowPanel inputPanel = new PFlowPanel();
+        final PFlowPanel inputPanel = Element.newPFlowPanel();
         inputPanel.add(buildLoginInput());
         inputPanel.add(buildPasswordInput());
         panel.add(inputPanel);
 
-        final PFlowPanel buttonAndCheckbox = new PFlowPanel();
+        final PFlowPanel buttonAndCheckbox = Element.newPFlowPanel();
         panel.add(buttonAndCheckbox);
         buttonAndCheckbox.add(loginButton);
         buttonAndCheckbox.add(rememberMe);
@@ -87,15 +88,15 @@ public class DefaultLoginPageView extends PSimplePanel implements LoginPageView 
     }
 
     private PWidget buildLoginInput() {
-        final PFlowPanel panel = new PFlowPanel();
-        panel.add(new PLabel(PString.get("activity.login.login")));
+        final PFlowPanel panel = Element.newPFlowPanel();
+        panel.add(Element.newPLabel(PString.get("activity.login.login")));
         panel.add(loginTextBox);
         return panel;
     }
 
     private PWidget buildPasswordInput() {
-        final PFlowPanel panel = new PFlowPanel();
-        panel.add(new PLabel(PString.get("activity.login.password")));
+        final PFlowPanel panel = Element.newPFlowPanel();
+        panel.add(Element.newPLabel(PString.get("activity.login.password")));
         panel.add(passwordTextBox);
         return panel;
     }
@@ -122,7 +123,7 @@ public class DefaultLoginPageView extends PSimplePanel implements LoginPageView 
 
     @Override
     public void addMessage(final String message) {
-        final PLabel messageLabel = new PLabel(message);
+        final PLabel messageLabel = Element.newPLabel(message);
         messageLabel.ensureDebugId("login_page_message_" + messageIndex);
         messageIndex++;
         messagePanel.add(messageLabel);

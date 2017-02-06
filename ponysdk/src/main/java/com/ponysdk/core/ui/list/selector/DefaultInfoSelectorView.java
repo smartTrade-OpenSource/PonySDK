@@ -26,6 +26,7 @@ package com.ponysdk.core.ui.list.selector;
 import com.ponysdk.core.internalization.PString;
 import com.ponysdk.core.model.PHorizontalAlignment;
 import com.ponysdk.core.tools.ListenerCollection;
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PAnchor;
 import com.ponysdk.core.ui.basic.PHorizontalPanel;
 import com.ponysdk.core.ui.basic.PLabel;
@@ -33,9 +34,9 @@ import com.ponysdk.core.ui.basic.PWidget;
 
 public class DefaultInfoSelectorView extends PHorizontalPanel implements SelectorView {
 
-    final PLabel numberOfSelectedMessage = new PLabel();
-    final PAnchor selectAllAnchor = new PAnchor();
-    final PAnchor selectNoneAnchor = new PAnchor();
+    final PLabel numberOfSelectedMessage = Element.newPLabel();
+    final PAnchor selectAllAnchor = Element.newPAnchor();
+    final PAnchor selectNoneAnchor = Element.newPAnchor();
     private final ListenerCollection<SelectorViewListener> selectorViewListeners = new ListenerCollection<>();
 
     public DefaultInfoSelectorView() {

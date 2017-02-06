@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -27,35 +27,43 @@ import com.ponysdk.core.model.WidgetType;
 
 /**
  * <p>
- * A {@link PSimplePanel} that wraps its contents in stylized boxes, which can be used to add rounded corners
+ * A {@link PSimplePanel} that wraps its contents in stylized boxes, which can be used to add
+ * rounded corners
  * to a {@link PWidget}.
  * </p>
  * <p>
- * This widget will <em>only</em> work in quirks mode in most cases. Specifically, setting the height or width
+ * This widget will <em>only</em> work in quirks mode in most cases. Specifically, setting the
+ * height or width
  * of the DecoratorPanel will result in rendering issues.
  * </p>
  * <p>
- * Wrapping a {@link PWidget} in a "9-box" allows users to specify images in each of the corners and along the
+ * Wrapping a {@link PWidget} in a "9-box" allows users to specify images in each of the corners and
+ * along the
  * four borders. This method allows the content within the {@link PDecoratorPanel} to resize without
- * disrupting the look of the border. In addition, rounded corners can generally be combined into a single
- * image file, which reduces the number of downloaded files at startup. This class also simplifies the process
- * of using AlphaImageLoaders to support 8-bit transparencies (anti-aliasing and shadows) in ie6, which does
+ * disrupting the look of the border. In addition, rounded corners can generally be combined into a
+ * single
+ * image file, which reduces the number of downloaded files at startup. This class also simplifies
+ * the process
+ * of using AlphaImageLoaders to support 8-bit transparencies (anti-aliasing and shadows) in ie6,
+ * which does
  * not support them normally.
  * </p>
  * <h3>Setting the Size:</h3>
  * <p>
- * If you set the width or height of the {@link PDecoratorPanel}, you need to set the height and width of the
- * middleCenter cell to 100% so that the middleCenter cell takes up all of the available space. If you do not
+ * If you set the width or height of the {@link PDecoratorPanel}, you need to set the height and
+ * width of the
+ * middleCenter cell to 100% so that the middleCenter cell takes up all of the available space. If
+ * you do not
  * set the width and height of the {@link PDecoratorPanel}, it will wrap its contents tightly.
  * </p>
- * 
+ *
  * <pre>
  * .gwt-DecoratorPanel .middleCenter {
  *   height: 100%;
  *   width: 100%;
  * }
  * </pre>
- * 
+ *
  * <h3>CSS Style Rules</h3>
  * <ul class='css'>
  * <li>.gwt-DecoratorPanel { the panel }</li>
@@ -84,8 +92,7 @@ import com.ponysdk.core.model.WidgetType;
  */
 public class PDecoratorPanel extends PSimplePanel {
 
-    public PDecoratorPanel() {
-        super();
+    protected PDecoratorPanel() {
     }
 
     @Override

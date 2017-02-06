@@ -23,17 +23,18 @@
 
 package com.ponysdk.core.ui.form.formfield;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PPasswordTextBox;
 import com.ponysdk.core.ui.form.dataconverter.DataConverter;
 
 public class PasswordTextBoxFormField<T> extends TextBoxFormField<T> {
 
     public PasswordTextBoxFormField() {
-        this(new PPasswordTextBox(), null);
+        this(Element.newPPasswordTextBox(), null);
     }
 
     public PasswordTextBoxFormField(final DataConverter<String, T> dataProvider) {
-        this(new PPasswordTextBox(), dataProvider);
+        this(Element.newPPasswordTextBox(), dataProvider);
     }
 
     public PasswordTextBoxFormField(final PPasswordTextBox textBox, final DataConverter<String, T> dataProvider) {

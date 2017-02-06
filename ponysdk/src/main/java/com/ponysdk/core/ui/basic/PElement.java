@@ -40,7 +40,7 @@ public class PElement extends PComplexPanel {
     private String innerText;
     private String innerHTML;
 
-    public PElement(final String tagName) {
+    protected PElement(final String tagName) {
         super();
         this.tagName = tagName;
     }

@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.ponysdk.core.model.PUnit;
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PAnchor;
 import com.ponysdk.core.ui.basic.PComplexPanel;
 import com.ponysdk.core.ui.basic.PSimpleLayoutPanel;
@@ -54,7 +55,7 @@ public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView 
     private PAnchor selectedItem;
 
     public StackLayoutMenuView() {
-        layoutPanel = new PStackLayoutPanel(PUnit.EM);
+        layoutPanel = Element.newPStackLayoutPanel(PUnit.EM);
         setWidget(layoutPanel);
         setSizeFull();
         layoutPanel.setSizeFull();
@@ -84,7 +85,7 @@ public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView 
 
         if (categoryNode.level == 1) {
             // Main category
-            final PVerticalPanel categoryPanel = new PVerticalPanel();
+            final PVerticalPanel categoryPanel = Element.newPVerticalPanel();
             categoryPanel.setHeight("1px");
             categoryPanel.setWidth("100%");
             categoryPanel.ensureDebugId("category_" + categoryNode.name.replace(" ", "_"));
@@ -101,7 +102,7 @@ public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView 
             if (categoryPanel == null)
                 throw new IllegalArgumentException("Category '" + categoryNode.name + "' not assigned to a parent category");
 
-            final PAnchor category = new PAnchor(categoryNode.name);
+            final PAnchor category = Element.newPAnchor(categoryNode.name);
             applyPadding(categoryNode, category);
             applyExpandableStyle(categoryNode, category);
             category.addClickHandler(clickEvent -> {
@@ -141,7 +142,7 @@ public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView 
         final Node itemNode = new Node(categoryNode, menuItem.getName());
 
         final PComplexPanel categoryPanel = categoriesByNode.get(categoryNode);
-        final PAnchor item = new PAnchor(menuItem.getName());
+        final PAnchor item = Element.newPAnchor(menuItem.getName());
         item.ensureDebugId("page_" + menuItem.getName().replace(" ", "_"));
         applyPadding(itemNode, item);
         item.addClickHandler(new PClickHandler() {

@@ -48,15 +48,15 @@ public class PHTML extends PLabel implements PHasHTML {
     private String html;
     private boolean wordWrap = false;
 
-    public PHTML() {
+    protected PHTML() {
         super();
     }
 
-    public PHTML(final String html) {
+    protected PHTML(final String html) {
         this(html, false);
     }
 
-    public PHTML(final String html, final boolean wordWrap) {
+    protected PHTML(final String html, final boolean wordWrap) {
         super();
         this.html = html;
         this.wordWrap = wordWrap;

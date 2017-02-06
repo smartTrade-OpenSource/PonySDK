@@ -28,8 +28,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
-import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.grid.GridTableWidget;
@@ -50,7 +50,7 @@ public class SortableRefreshableDataGridPageActivity extends RefreshableDataGrid
 
         super.onFirstShowPage();
 
-        final PButton addRow = new PButton("Insert row");
+        final PButton addRow = Element.newPButton("Insert row");
         addRow.addClickHandler(new PClickHandler() {
 
             @Override
@@ -138,7 +138,7 @@ public class SortableRefreshableDataGridPageActivity extends RefreshableDataGrid
     }
 
     protected void insertColspanRow() {
-        dataGrid.insertRow(5, 0, 4, new PLabel("Hello " + System.currentTimeMillis()));
+        dataGrid.insertRow(5, 0, 4, Element.newPLabel("Hello " + System.currentTimeMillis()));
     }
 
 }

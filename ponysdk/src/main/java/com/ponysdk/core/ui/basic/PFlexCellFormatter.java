@@ -27,7 +27,7 @@ import com.ponysdk.core.model.ServerToClientModel;
 
 public class PFlexCellFormatter extends PCellFormatter {
 
-    public PFlexCellFormatter(final PHTMLTable<PFlexCellFormatter> table) {
+    protected PFlexCellFormatter(final PHTMLTable<PFlexCellFormatter> table) {
         super(table);
     }
 

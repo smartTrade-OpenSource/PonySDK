@@ -24,6 +24,7 @@
 package com.ponysdk.impl.webapplication.page;
 
 import com.ponysdk.core.model.PUnit;
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PDockLayoutPanel;
 import com.ponysdk.core.ui.basic.PFlowPanel;
@@ -56,27 +57,27 @@ public class DefaultPageView implements PageView {
     }
 
     private void buildUI() {
-        panel = new PSimpleLayoutPanel();
+        panel = Element.newPSimpleLayoutPanel();
         buildHeader();
         buildBody();
         buildLayout();
     }
 
     protected void buildLayout() {
-        final PDockLayoutPanel dockLayoutPanel = new PDockLayoutPanel(PUnit.PX);
+        final PDockLayoutPanel dockLayoutPanel = Element.newPDockLayoutPanel(PUnit.PX);
         dockLayoutPanel.addNorth(header, headerHeight);
         dockLayoutPanel.add(body);
         panel.setWidget(dockLayoutPanel);
     }
 
     protected void buildHeader() {
-        header = new PFlowPanel();
+        header = Element.newPFlowPanel();
         header.addStyleName("pony-Page-Header");
         buildTitle();
     }
 
     protected void buildTitle() {
-        title = new PLabel(pageTitle);
+        title = Element.newPLabel(pageTitle);
         title.ensureDebugId("page_title_" + pageTitle.replace(" ", "_"));
         title.setText(pageTitle);
         title.addStyleName("pony-Page-Header-Caption");
@@ -84,7 +85,7 @@ public class DefaultPageView implements PageView {
     }
 
     protected void buildBody() {
-        body = new PSimpleLayoutPanel();
+        body = Element.newPSimpleLayoutPanel();
         body.addStyleName("pony-Page-Body");
     }
 

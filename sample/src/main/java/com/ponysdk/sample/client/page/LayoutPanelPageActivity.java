@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,9 +23,12 @@
 
 package com.ponysdk.sample.client.page;
 
+import java.time.Duration;
+
 import com.ponysdk.core.model.PHorizontalAlignment;
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.model.PVerticalAlignment;
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PHorizontalPanel;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PLayoutPanel;
@@ -33,11 +36,9 @@ import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 
-import java.time.Duration;
-
 public class LayoutPanelPageActivity extends SamplePageActivity {
 
-    final PLayoutPanel layoutPanel = new PLayoutPanel();
+    final PLayoutPanel layoutPanel = Element.newPLayoutPanel();
 
     public LayoutPanelPageActivity() {
         super("Layout Panel", "Panels");
@@ -95,10 +96,10 @@ public class LayoutPanelPageActivity extends SamplePageActivity {
     }
 
     private PWidget buildComponent(final String name, final String color) {
-        final PHorizontalPanel panel = new PHorizontalPanel();
+        final PHorizontalPanel panel = Element.newPHorizontalPanel();
         panel.setSizeFull();
         panel.setStyleProperty("backgroundColor", color);
-        final PLabel label = new PLabel(name);
+        final PLabel label = Element.newPLabel(name);
         panel.add(label);
         panel.setCellHorizontalAlignment(label, PHorizontalAlignment.ALIGN_CENTER);
         panel.setCellVerticalAlignment(label, PVerticalAlignment.ALIGN_MIDDLE);

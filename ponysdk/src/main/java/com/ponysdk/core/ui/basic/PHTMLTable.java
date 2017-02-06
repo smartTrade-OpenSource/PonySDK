@@ -52,6 +52,9 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
     private int cellSpacing;
     private int borderWidth;
 
+    protected PHTMLTable() {
+    }
+
     @Override
     protected void init0() {
         super.init0();
@@ -212,7 +215,7 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
 
             // Physical attach.
             widget.saveAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.ROW, row),
-                    new ServerBinaryModel(ServerToClientModel.COLUMN, column));
+                new ServerBinaryModel(ServerToClientModel.COLUMN, column));
             widget.attach(windowID);
 
             adopt(widget);
@@ -355,8 +358,7 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
             for (final Entry<Integer, Set<String>> entry : styleNames.entrySet()) {
                 if (entry.getKey() >= row) {
                     temp.put(entry.getKey() + 1, entry.getValue());
-                } else
-                    temp.put(entry.getKey(), entry.getValue());
+                } else temp.put(entry.getKey(), entry.getValue());
             }
             temp.put(row, new HashSet<>());
             styleNames = temp;
@@ -368,8 +370,7 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
             for (final Entry<Integer, Set<String>> entry : styleNames.entrySet()) {
                 if (entry.getKey() > row) {
                     temp.put(entry.getKey() - 1, entry.getValue());
-                } else
-                    temp.put(entry.getKey(), entry.getValue());
+                } else temp.put(entry.getKey(), entry.getValue());
             }
             styleNames = temp;
         }

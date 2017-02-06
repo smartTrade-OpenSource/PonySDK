@@ -23,13 +23,13 @@
 
 package com.ponysdk.impl.webapplication.page;
 
-import com.ponysdk.core.ui.basic.PScrollPanel;
+import com.ponysdk.core.ui.basic.Element;
 
 public class DefaultScrollablePageView extends DefaultPageView {
 
     @Override
     protected void buildBody() {
-        body = new PScrollPanel();
+        body = Element.newPScrollPanel();
         body.addStyleName("pony-Page-Body");
     }
 }

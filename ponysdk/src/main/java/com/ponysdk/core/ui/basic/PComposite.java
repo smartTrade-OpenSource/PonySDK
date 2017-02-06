@@ -38,6 +38,9 @@ public abstract class PComposite<T extends PWidget> extends PWidget {
 
     protected T widget;
 
+    protected PComposite() {
+    }
+
     @Override
     protected WidgetType getWidgetType() {
         return WidgetType.COMPOSITE;

@@ -23,7 +23,7 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PRadioButton;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
@@ -40,10 +40,10 @@ public class RadioButtonPageActivity extends SamplePageActivity implements PValu
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PVerticalPanel panelTop = new PVerticalPanel();
+        final PVerticalPanel panelTop = Element.newPVerticalPanel();
         panelTop.setSpacing(10);
 
-        panelTop.add(new PLabel("Select your favorite color:"));
+        panelTop.add(Element.newPLabel("Select your favorite color:"));
 
         panelTop.add(newPRadioButton("color", "blue"));
         panelTop.add(newPRadioButton("color", "red"));
@@ -54,10 +54,10 @@ public class RadioButtonPageActivity extends SamplePageActivity implements PValu
 
         panelTop.add(newPRadioButton("color", "green"));
 
-        final PVerticalPanel panelBottom = new PVerticalPanel();
+        final PVerticalPanel panelBottom = Element.newPVerticalPanel();
         panelBottom.setSpacing(10);
 
-        panelBottom.add(new PLabel("Select your favorite sport:"));
+        panelBottom.add(Element.newPLabel("Select your favorite sport:"));
         panelBottom.add(newPRadioButton("sport", "Polo"));
         panelBottom.add(newPRadioButton("sport", "Rodeo"));
         panelBottom.add(newPRadioButton("sport", "Horse racing"));
@@ -71,7 +71,7 @@ public class RadioButtonPageActivity extends SamplePageActivity implements PValu
 
         panelTop.add(panelBottom);
 
-        final PVerticalPanel panel = new PVerticalPanel();
+        final PVerticalPanel panel = Element.newPVerticalPanel();
         panel.add(panelTop);
         panel.add(panelBottom);
 
@@ -79,7 +79,7 @@ public class RadioButtonPageActivity extends SamplePageActivity implements PValu
     }
 
     private PRadioButton newPRadioButton(final String name, final String label) {
-        final PRadioButton radioButton = new PRadioButton(name, label);
+        final PRadioButton radioButton = Element.newPRadioButton(name, label);
         radioButton.addValueChangeHandler(this);
         return radioButton;
     }
@@ -88,6 +88,6 @@ public class RadioButtonPageActivity extends SamplePageActivity implements PValu
     public void onValueChange(final PValueChangeEvent<Boolean> event) {
         final PRadioButton radioButton = (PRadioButton) event.getSource();
         PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
-                "Name = " + radioButton.getName() + " Text = " + radioButton.getText() + " Value = " + radioButton.getValue());
+            "Name = " + radioButton.getName() + " Text = " + radioButton.getText() + " Value = " + radioButton.getValue());
     }
 }

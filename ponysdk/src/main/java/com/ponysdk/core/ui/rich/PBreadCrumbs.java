@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PAnchor;
 import com.ponysdk.core.ui.basic.PElement;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
@@ -121,7 +122,7 @@ public class PBreadCrumbs extends PElement {
         void unselect() {
             setInnerText(null);
 
-            anchor = new PAnchor(item);
+            anchor = Element.newPAnchor(item);
             anchor.addClickHandler(this);
 
             add(anchor);
