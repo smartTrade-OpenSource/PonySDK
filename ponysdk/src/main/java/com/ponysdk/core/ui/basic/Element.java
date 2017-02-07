@@ -64,7 +64,7 @@ public class Element {
     public static final String E_SCRIPT = "script";
     public static final String E_STYLE = "style";
 
-    public static ElementFactory f = new GwtElementFactory();
+    public static ElementFactory f = new DefaultElementFactory();
 
     public static final void setElementFactory(final ElementFactory ef) {
         f = ef;

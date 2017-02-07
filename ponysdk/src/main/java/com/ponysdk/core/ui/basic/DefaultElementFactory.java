@@ -27,7 +27,7 @@ import java.text.SimpleDateFormat;
 
 import com.ponysdk.core.model.PUnit;
 
-public class GwtElementFactory implements ElementFactory {
+public class DefaultElementFactory implements ElementFactory {
 
     @Override
     public PAbsolutePanel newPAbsolutePanel() {
