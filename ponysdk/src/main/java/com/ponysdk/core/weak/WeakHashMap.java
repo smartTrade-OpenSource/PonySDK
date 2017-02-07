@@ -37,8 +37,6 @@ import org.slf4j.LoggerFactory;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.ui.basic.PObject;
-import com.ponysdk.core.ui.basic.PWindow;
-import com.ponysdk.core.ui.basic.PWindowManager;
 import com.ponysdk.core.writer.ModelWriter;
 
 public class WeakHashMap implements Map<Integer, PObject> {
@@ -47,7 +45,7 @@ public class WeakHashMap implements Map<Integer, PObject> {
 
     private final ReferenceQueue<PObject> queue = new ReferenceQueue<>();
 
-    private final Map<Integer, Reference<PObject>> referenceByObjectID = new ConcurrentHashMap<>();
+    private final Map<Integer, WeakReference<PObject>> referenceByObjectID = new ConcurrentHashMap<>();
 
     private final Map<WeakReference<PObject>, Integer> objectIDByReferences = new ConcurrentHashMap<>();
 
@@ -140,25 +138,13 @@ public class WeakHashMap implements Map<Integer, PObject> {
         Reference<? extends PObject> reference;
         while ((reference = queue.poll()) != null) {
             final Integer objectID = objectIDByReferences.remove(reference);
-            final Reference<PObject> removedObject = referenceByObjectID.remove(objectID);
+            referenceByObjectID.remove(objectID);
             if (log.isDebugEnabled()) log.debug("Removing reference on object #{}", objectID);
 
-            final PObject pObject = removedObject.get();
-            if (pObject == null) continue;
-            final int windowID = pObject.getWindowID();
-
-            if (PWindowManager.getWindow(windowID) != null) {
-
-                final ModelWriter writer = Txn.getWriter();
-                writer.beginObject();
-                if (windowID != PWindow.getMain().getID()) {
-                    if (PWindowManager.getWindow(windowID) == null) {
-                        writer.writeModel(ServerToClientModel.WINDOW_ID, windowID);
-                    }
-                }
-                writer.writeModel(ServerToClientModel.TYPE_GC, objectID);
-                writer.endObject();
-            }
+            final ModelWriter writer = Txn.getWriter();
+            writer.beginObject();
+            writer.writeModel(ServerToClientModel.TYPE_GC, objectID);
+            writer.endObject();
         }
     }
 

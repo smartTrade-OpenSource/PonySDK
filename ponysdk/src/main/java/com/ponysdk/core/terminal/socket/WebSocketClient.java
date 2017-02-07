@@ -62,6 +62,8 @@ public class WebSocketClient implements MessageSender {
     public WebSocketClient(final String url, final UIBuilder uiBuilder, final WebSocketDataType webSocketDataType) {
         this.uiBuilder = uiBuilder;
 
+        createSetElementsMethodOnUint8Array();
+
         readerBuffer = new ReaderBuffer();
 
         window = Browser.getWindow();
@@ -127,6 +129,11 @@ public class WebSocketClient implements MessageSender {
             }
         });
     }
+
+    // WORKAROUND : No setElements on Uint8Array but Elemental need it, create a passthrough
+    private final native void createSetElementsMethodOnUint8Array() /*-{
+                                                                    Uint8Array.prototype.setElements = function(array, offset) { this.set(array, offset) };
+                                                                    }-*/;
 
     @Override
     public void read(final ArrayBuffer arrayBuffer) {

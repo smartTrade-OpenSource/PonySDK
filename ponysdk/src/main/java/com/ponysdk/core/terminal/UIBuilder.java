@@ -24,6 +24,7 @@
 package com.ponysdk.core.terminal;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,6 +75,9 @@ import com.ponysdk.core.terminal.ui.PTObject;
 import com.ponysdk.core.terminal.ui.PTStreamResource;
 import com.ponysdk.core.terminal.ui.PTWindow;
 import com.ponysdk.core.terminal.ui.PTWindowManager;
+
+import elemental.client.Browser;
+import elemental.html.Uint8Array;
 
 public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceivedEvent.Handler, HttpRequestSendEvent.Handler {
 
@@ -320,9 +324,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
     }
 
     private void processRemoveHandler(final ReaderBuffer buffer, final PTObject ptObject) {
-        if (ptObject != null) {
-            ptObject.removeHandler(buffer, this);
-        }
+        if (ptObject != null) ptObject.removeHandler(buffer, this);
     }
 
     private void processHistory(final ReaderBuffer buffer, final String token) {
@@ -345,8 +347,24 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
 
     private void processGC(final int objectId) {
         final PTObject ptObject = unregisterObject(objectId);
-        if (ptObject != null) ptObject.gc(this);
-        else log.warning("Cannot GC a garbaged object #" + objectId);
+        if (ptObject != null) {
+            ptObject.gc(this);
+        } else {
+            final Collection<PTWindow> windows = PTWindowManager.get().getWindows();
+            if (!windows.isEmpty()) {
+                final short model = ServerToClientModel.TYPE_GC.getValue();
+                final Object[] array = { (byte) (model >>> 8), (byte) model, (byte) (objectId >>> 24), (byte) (objectId >>> 16),
+                        (byte) (objectId >>> 8), (byte) objectId };
+                final elemental.html.Window browserWindow = Browser.getWindow();
+                for (final PTWindow window : windows) {
+                    final Uint8Array newUint8Array = browserWindow.newUint8Array(6);
+                    newUint8Array.setElements(array);
+                    window.postMessage(newUint8Array);
+                }
+            } else {
+                log.warning("Cannot GC a garbaged object #" + objectId);
+            }
+        }
     }
 
     private PTObject unregisterObject(final Integer objectId) {
