@@ -30,7 +30,7 @@ import com.ponysdk.core.ui.basic.PElement;
 public class HighChartsStackedColumnAddOn extends PAddOnComposite<PElement> {
 
     public HighChartsStackedColumnAddOn() {
-        super(Element.newPElement("div"));
+        super(Element.newDiv());
     }
 
     public void setSeries(final String text) {

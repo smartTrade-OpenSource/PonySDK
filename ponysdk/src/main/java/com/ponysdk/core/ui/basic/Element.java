@@ -54,6 +54,7 @@ public class Element {
     public static final String E_INPUT = "input";
     public static final String E_LABEL = "label";
     public static final String E_BUTTON = "button";
+    public static final String E_SELECT = "select";
     public static final String E_IFRAME = "iframe";
     public static final String E_SVG = "svg";
     public static final String E_LINE = "line";
@@ -468,6 +469,10 @@ public class Element {
 
     public static final PElement newInput() {
         return newPElement(E_INPUT);
+    }
+
+    public static final PElement newSelect() {
+        return newPElement(E_SELECT);
     }
 
     public static final PElement newLabel() {

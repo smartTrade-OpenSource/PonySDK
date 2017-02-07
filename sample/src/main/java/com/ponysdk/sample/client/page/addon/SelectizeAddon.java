@@ -68,7 +68,7 @@ public class SelectizeAddon extends PAddOnComposite<PElement> implements PTermin
     }
 
     public SelectizeAddon() {
-        super(Element.newPElement("input"));
+        super(Element.newInput());
         setTerminalHandler(this);
 
         //

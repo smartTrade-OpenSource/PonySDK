@@ -53,11 +53,11 @@ public class ElementPageActivity extends SamplePageActivity {
             }
         });
 
-        final PElement ul = Element.newPElement("ul");
-        final PElement li1 = Element.newPElement("li");
-        final PElement li2 = Element.newPElement("li");
-        final PElement li3 = Element.newPElement("li");
-        final PElement li4 = Element.newPElement("li");
+        final PElement ul = Element.newUl();
+        final PElement li1 = Element.newLi();
+        final PElement li2 = Element.newLi();
+        final PElement li3 = Element.newLi();
+        final PElement li4 = Element.newLi();
         li1.setInnerText("Item 1");
         li2.setInnerText("Item 2");
         li3.setInnerText("Item 3");

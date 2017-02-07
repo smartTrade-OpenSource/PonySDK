@@ -66,7 +66,7 @@ public class TradingSampleEntryPoint implements EntryPoint {
     }
 
     private PElement createReconnectionPanel() {
-        final PElement pElement = Element.newPElement("div");
+        final PElement pElement = Element.newDiv();
         pElement.setAttribute("id", "reconnection");
         return pElement;
     }

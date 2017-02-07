@@ -136,26 +136,26 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         PWindow.getMain().add(buy);
         PWindow.getMain().add(sell);
 
-        final PElement label1 = Element.newPElement("div");
-        final PElement label2 = Element.newPElement("div");
-        final PElement label3 = Element.newPElement("div");
-        final PElement label4 = Element.newPElement("div");
-        final PElement label5 = Element.newPElement("div");
-        final PElement label6 = Element.newPElement("div");
-        final PElement label7 = Element.newPElement("div");
-        final PElement label8 = Element.newPElement("div");
-        final PElement label9 = Element.newPElement("div");
-        final PElement label10 = Element.newPElement("div");
-        final PElement label11 = Element.newPElement("div");
-        final PElement label12 = Element.newPElement("div");
-        final PElement label13 = Element.newPElement("div");
-        final PElement label14 = Element.newPElement("div");
-        final PElement label15 = Element.newPElement("div");
-        final PElement label16 = Element.newPElement("div");
-        final PElement label17 = Element.newPElement("div");
-        final PElement label18 = Element.newPElement("div");
-        final PElement label19 = Element.newPElement("div");
-        final PElement label20 = Element.newPElement("div");
+        final PElement label1 = Element.newDiv();
+        final PElement label2 = Element.newDiv();
+        final PElement label3 = Element.newDiv();
+        final PElement label4 = Element.newDiv();
+        final PElement label5 = Element.newDiv();
+        final PElement label6 = Element.newDiv();
+        final PElement label7 = Element.newDiv();
+        final PElement label8 = Element.newDiv();
+        final PElement label9 = Element.newDiv();
+        final PElement label10 = Element.newDiv();
+        final PElement label11 = Element.newDiv();
+        final PElement label12 = Element.newDiv();
+        final PElement label13 = Element.newDiv();
+        final PElement label14 = Element.newDiv();
+        final PElement label15 = Element.newDiv();
+        final PElement label16 = Element.newDiv();
+        final PElement label17 = Element.newDiv();
+        final PElement label18 = Element.newDiv();
+        final PElement label19 = Element.newDiv();
+        final PElement label20 = Element.newDiv();
 
         // flowPanel.add(label1);
         // flowPanel.add(label2);
@@ -248,7 +248,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         boxContainer.add(Element.newPDialogBox(PWindow.getMain().getID(), true));
         boxContainer.add(Element.newPDisclosurePanel("Disclosure"));
         boxContainer.add(createDockLayoutPanel());
-        boxContainer.add(Element.newPElement("a"));
+        boxContainer.add(Element.newA());
         boxContainer.add(Element.newPFileUpload());
         boxContainer.add(Element.newPFlexTable());
         boxContainer.add(createPFlowPanel());
@@ -657,8 +657,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     private static final PAbsolutePanel createAbsolutePanel() {
         final PAbsolutePanel pAbsolutePanel = Element.newPAbsolutePanel();
-        pAbsolutePanel.add(Element.newPElement("div"));
-        pAbsolutePanel.add(Element.newPElement("p"));
+        pAbsolutePanel.add(Element.newDiv());
+        pAbsolutePanel.add(Element.newP());
         return pAbsolutePanel;
     }
 
