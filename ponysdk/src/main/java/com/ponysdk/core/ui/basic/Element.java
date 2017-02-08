@@ -287,12 +287,16 @@ public class Element {
         return f.newPPushButton(image);
     }
 
-    public static final PRadioButton newPRadioButton(final String name, final String label) {
-        return f.newPRadioButton(name, label);
+    public static final PRadioButton newPRadioButton() {
+        return f.newPRadioButton();
     }
 
     public static final PRadioButton newPRadioButton(final String label) {
         return f.newPRadioButton(label);
+    }
+
+    public static final PRadioButtonGroup newPRadioButtonGroup(final String name) {
+        return f.newPRadioButtonGroup(name);
     }
 
     public static final PRichTextArea newPRichTextArea() {

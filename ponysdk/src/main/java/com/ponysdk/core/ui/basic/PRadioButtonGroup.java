@@ -50,7 +50,7 @@ public class PRadioButtonGroup {
 
     private String name;
 
-    public PRadioButtonGroup(final String name) {
+    protected PRadioButtonGroup(final String name) {
         this.name = name;
     }
 
@@ -73,8 +73,10 @@ public class PRadioButtonGroup {
                 for (final PRadioButton button : buttons) {
                     if (button != radioButton) button.setState(event.getData() ? PCheckBoxState.UNCHECKED : PCheckBoxState.CHECKED);
                 }
-                for (final PValueChangeHandler<Boolean> handler : handlers) {
-                    handler.onValueChange(event);
+                if (handlers != null) {
+                    for (final PValueChangeHandler<Boolean> handler : handlers) {
+                        handler.onValueChange(event);
+                    }
                 }
             }
         });

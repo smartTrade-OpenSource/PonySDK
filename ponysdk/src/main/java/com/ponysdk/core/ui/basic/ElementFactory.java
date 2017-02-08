@@ -137,9 +137,11 @@ public interface ElementFactory {
 
     public PPushButton newPPushButton(final PImage image);
 
-    public PRadioButton newPRadioButton(final String name, final String label);
+    public PRadioButton newPRadioButton();
 
     public PRadioButton newPRadioButton(final String label);
+
+    public PRadioButtonGroup newPRadioButtonGroup(final String name);
 
     public PRichTextArea newPRichTextArea();
 

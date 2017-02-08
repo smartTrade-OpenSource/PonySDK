@@ -300,13 +300,18 @@ public class DefaultElementFactory implements ElementFactory {
     }
 
     @Override
-    public PRadioButton newPRadioButton(final String name, final String label) {
-        return new PRadioButton(name, label);
+    public PRadioButton newPRadioButton() {
+        return new PRadioButton();
     }
 
     @Override
     public PRadioButton newPRadioButton(final String label) {
         return new PRadioButton(label);
+    }
+
+    @Override
+    public PRadioButtonGroup newPRadioButtonGroup(final String name) {
+        return new PRadioButtonGroup(name);
     }
 
     @Override

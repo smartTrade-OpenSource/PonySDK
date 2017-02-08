@@ -112,7 +112,7 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
     @Deprecated
     @Override
     public Boolean getValue() {
-        return PCheckBoxState.CHECKED.equals(state);
+        return isChecked();
     }
 
     /**
