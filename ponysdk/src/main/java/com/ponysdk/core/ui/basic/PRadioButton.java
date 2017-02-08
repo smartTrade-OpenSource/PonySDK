@@ -25,6 +25,7 @@ package com.ponysdk.core.ui.basic;
 
 import java.util.Objects;
 
+import com.ponysdk.core.model.PCheckBoxState;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 
@@ -45,9 +46,8 @@ public class PRadioButton extends PCheckBox {
 
     private String name;
 
-    protected PRadioButton(final String name, final String label) {
-        this(label);
-        setName(name);
+    protected PRadioButton() {
+        super();
     }
 
     protected PRadioButton(final String label) {
@@ -55,18 +55,24 @@ public class PRadioButton extends PCheckBox {
     }
 
     @Override
-    protected WidgetType getWidgetType() {
-        return WidgetType.RADIO_BUTTON;
+    public void setState(final PCheckBoxState state) {
+        if (!PCheckBoxState.INDETERMINATE.equals(state)) super.setState(state);
+        else throw new IllegalArgumentException("State of a RadioButton can't be indeterminate");
     }
 
-    public String getName() {
-        return name;
+    @Override
+    protected WidgetType getWidgetType() {
+        return WidgetType.RADIO_BUTTON;
     }
 
     public void setName(final String name) {
         if (Objects.equals(this.name, name)) return;
         this.name = name;
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.NAME, name));
+    }
+
+    public String getName() {
+        return name;
     }
 
 }

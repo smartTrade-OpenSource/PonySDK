@@ -79,7 +79,7 @@ public class RadioButtonPageActivity extends SamplePageActivity implements PValu
     }
 
     private PRadioButton newPRadioButton(final String name, final String label) {
-        final PRadioButton radioButton = Element.newPRadioButton(name, label);
+        final PRadioButton radioButton = Element.newPRadioButton(label);
         radioButton.addValueChangeHandler(this);
         return radioButton;
     }

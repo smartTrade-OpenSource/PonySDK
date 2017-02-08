@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -29,14 +29,11 @@ public class PValueChangeEvent<T> extends Event<PValueChangeHandler<T>> {
 
     public static final Type<PValueChangeHandler<?>> TYPE = new Type<>();
 
-    private final T value;
-
     public PValueChangeEvent(final Object sourceComponent, final T value) {
         super(sourceComponent);
-        this.value = value;
+        setData(value);
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public Type<PValueChangeHandler<T>> getAssociatedType() {
         return (Type) TYPE;
@@ -47,8 +44,17 @@ public class PValueChangeEvent<T> extends Event<PValueChangeHandler<T>> {
         handler.onValueChange(this);
     }
 
+    @Override
+    public T getData() {
+        return (T) super.getData();
+    }
+
+    /**
+     * @deprecated Use {@link #getData()} instead
+     */
+    @Deprecated
     public T getValue() {
-        return value;
+        return getData();
     }
 
 }

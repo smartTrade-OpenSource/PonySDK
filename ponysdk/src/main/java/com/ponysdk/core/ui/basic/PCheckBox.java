@@ -35,7 +35,6 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.PCheckBoxState;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.servlet.WebsocketEncoder;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 
@@ -70,12 +69,6 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
      */
     protected PCheckBox(final String label) {
         super(label);
-    }
-
-    @Override
-    protected void enrichOnInit(final WebsocketEncoder parser) {
-        super.enrichOnInit(parser);
-        if (PCheckBoxState.UNCHECKED.equals(this.state)) parser.encode(ServerToClientModel.VALUE_CHECKBOX, this.state.getValue());
     }
 
     @Override
@@ -135,12 +128,24 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
         setState(Boolean.TRUE.equals(value) ? PCheckBoxState.CHECKED : PCheckBoxState.UNCHECKED);
     }
 
+    /**
+     * Determines whether this check box is currently checked.
+     *
+     * @return <code>true</code> if the check box is checked, false otherwise.
+     */
+    public boolean isChecked() {
+        return PCheckBoxState.CHECKED.equals(state);
+    }
+
     @Override
     public void onValueChange(final PValueChangeEvent<Boolean> event) {
-        this.state = Boolean.TRUE.equals(event.getValue()) ? PCheckBoxState.CHECKED : PCheckBoxState.UNCHECKED;
-        if (handlers == null) return;
-        for (final PValueChangeHandler<Boolean> handler : handlers) {
-            handler.onValueChange(event);
+        final PCheckBoxState state = Boolean.TRUE.equals(event.getData()) ? PCheckBoxState.CHECKED : PCheckBoxState.UNCHECKED;
+        if (Objects.equals(this.state, state)) return;
+        this.state = state;
+        if (handlers != null) {
+            for (final PValueChangeHandler<Boolean> handler : handlers) {
+                handler.onValueChange(event);
+            }
         }
     }
 
