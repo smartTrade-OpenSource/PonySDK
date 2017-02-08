@@ -28,6 +28,8 @@ import java.util.Objects;
 import com.ponysdk.core.model.PCheckBoxState;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
+import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 
 /**
  * A mutually-exclusive selection radio button widget. Fires
@@ -56,8 +58,22 @@ public class PRadioButton extends PCheckBox {
 
     @Override
     public void setState(final PCheckBoxState state) {
-        if (!PCheckBoxState.INDETERMINATE.equals(state)) super.setState(state);
-        else throw new IllegalArgumentException("State of a RadioButton can't be indeterminate");
+        this.setState(state, true);
+    }
+
+    protected void setState(final PCheckBoxState state, final boolean propagate) {
+        if (!PCheckBoxState.INDETERMINATE.equals(state)) {
+            if (Objects.equals(this.state, state)) return;
+            super.setState(state);
+            if (propagate && handlers != null) {
+                final PValueChangeEvent<Boolean> event = new PValueChangeEvent<>(this, isChecked());
+                for (final PValueChangeHandler<Boolean> handler : handlers) {
+                    handler.onValueChange(event);
+                }
+            }
+        } else {
+            throw new IllegalArgumentException("State of a RadioButton can't be indeterminate");
+        }
     }
 
     @Override

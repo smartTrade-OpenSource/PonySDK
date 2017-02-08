@@ -51,9 +51,9 @@ import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
  */
 public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValueChangeHandler<Boolean> {
 
-    private List<PValueChangeHandler<Boolean>> handlers;
+    protected List<PValueChangeHandler<Boolean>> handlers;
 
-    private PCheckBoxState state = PCheckBoxState.UNCHECKED;
+    protected PCheckBoxState state = PCheckBoxState.UNCHECKED;
 
     /**
      * Creates a check box with no label.

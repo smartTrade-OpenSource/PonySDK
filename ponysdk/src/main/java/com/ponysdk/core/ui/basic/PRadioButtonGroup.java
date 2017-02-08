@@ -71,7 +71,9 @@ public class PRadioButtonGroup {
             @Override
             public void onValueChange(final PValueChangeEvent<Boolean> event) {
                 for (final PRadioButton button : buttons) {
-                    if (button != radioButton) button.setState(event.getData() ? PCheckBoxState.UNCHECKED : PCheckBoxState.CHECKED);
+                    if (button != radioButton) {
+                        button.setState(event.getData() ? PCheckBoxState.UNCHECKED : PCheckBoxState.CHECKED, false);
+                    }
                 }
                 if (handlers != null) {
                     for (final PValueChangeHandler<Boolean> handler : handlers) {
