@@ -69,11 +69,11 @@ public abstract class Event<H extends EventHandler> {
         return eventID;
     }
 
-    public abstract Type<H> getAssociatedType();
+    public abstract Type getAssociatedType();
 
     protected abstract void dispatch(H handler);
 
-    public static class Type<H> {
+    public static class Type {
 
         private static final AtomicInteger nextHashCode = new AtomicInteger(0);
 

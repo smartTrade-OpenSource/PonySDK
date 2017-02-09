@@ -45,7 +45,8 @@ public class PlaceHistoryHandler {
         this.mapper = mapper;
         this.placeController = placeController;
 
-        eventBus.addHandler(PlaceChangeEvent.TYPE, event -> history.newItem(mapper.getToken(event.getNewPlace()), false));
+        eventBus.addHandler(PlaceChangeEvent.TYPE,
+            (PlaceChangeHandler) event -> history.newItem(mapper.getToken(event.getNewPlace()), false));
 
         history.addValueChangeHandler((event) -> handleHistoryToken(event.getValue()));
     }

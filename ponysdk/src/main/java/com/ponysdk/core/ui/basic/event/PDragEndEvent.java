@@ -27,14 +27,14 @@ import com.ponysdk.core.model.DomHandlerType;
 
 public class PDragEndEvent extends PDomEvent<PDragEndHandler> {
 
-    public static final PDomEvent.Type<PDragEndHandler> TYPE = new PDomEvent.Type<>(DomHandlerType.DRAG_END);
+    public static final PDomEvent.Type TYPE = new PDomEvent.Type(DomHandlerType.DRAG_END);
 
     public PDragEndEvent(final Object sourceComponent) {
         super(sourceComponent);
     }
 
     @Override
-    public com.ponysdk.core.ui.eventbus.Event.Type<PDragEndHandler> getAssociatedType() {
+    public PDomEvent.Type getAssociatedType() {
         return TYPE;
     }
 

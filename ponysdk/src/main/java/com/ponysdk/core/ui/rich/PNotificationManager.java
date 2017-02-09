@@ -32,6 +32,7 @@ import com.ponysdk.core.ui.basic.PPopupPanel;
 import com.ponysdk.core.ui.basic.PSimplePanel;
 import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
 
 public class PNotificationManager {
 
@@ -118,7 +119,7 @@ public class PNotificationManager {
         popupPanel.addStyleName("pony-notification");
         popupPanel.addStyleName("humanized");
         popupPanel.setWidget(content);
-        popupPanel.addDomHandler(event -> popupPanel.hide(), PClickEvent.TYPE);
+        popupPanel.addDomHandler((PClickHandler) event -> popupPanel.hide(), PClickEvent.TYPE);
         popupPanel.addStyleName("closing");
         popupPanel.center();
 
@@ -130,7 +131,7 @@ public class PNotificationManager {
         popupPanel.addStyleName("pony-notification");
         popupPanel.addStyleName("warning");
         popupPanel.setWidget(content);
-        popupPanel.addDomHandler(event -> popupPanel.hide(), PClickEvent.TYPE);
+        popupPanel.addDomHandler((PClickHandler) event -> popupPanel.hide(), PClickEvent.TYPE);
 
         popupPanel.center();
         addAutoCloseTimer(popupPanel, warningDuration);
@@ -142,7 +143,7 @@ public class PNotificationManager {
         popupPanel.addStyleName("pony-notification");
         popupPanel.addStyleName("error");
         popupPanel.setWidget(content);
-        popupPanel.addDomHandler(event -> popupPanel.hide(), PClickEvent.TYPE);
+        popupPanel.addDomHandler((PClickHandler) event -> popupPanel.hide(), PClickEvent.TYPE);
 
         popupPanel.center();
     }

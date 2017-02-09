@@ -35,7 +35,7 @@ public class DemoBusinessEvent extends BusinessEvent<DemoBusinessEventHandler> {
         void onEvent(DemoBusinessEvent event);
     }
 
-    public static final Event.Type<DemoBusinessEventHandler> TYPE = new Event.Type<>();
+    public static final Event.Type TYPE = new Event.Type();
 
     public DemoBusinessEvent(final Object sourceComponent) {
         super(sourceComponent);
@@ -47,7 +47,7 @@ public class DemoBusinessEvent extends BusinessEvent<DemoBusinessEventHandler> {
     }
 
     @Override
-    public com.ponysdk.core.ui.eventbus.Event.Type<DemoBusinessEventHandler> getAssociatedType() {
+    public Event.Type getAssociatedType() {
         return TYPE;
     }
 

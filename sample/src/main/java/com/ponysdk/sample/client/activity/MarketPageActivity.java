@@ -43,9 +43,13 @@ import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.basic.event.PDragEnterEvent;
+import com.ponysdk.core.ui.basic.event.PDragEnterHandler;
 import com.ponysdk.core.ui.basic.event.PDragLeaveEvent;
+import com.ponysdk.core.ui.basic.event.PDragLeaveHandler;
 import com.ponysdk.core.ui.basic.event.PDragStartEvent;
+import com.ponysdk.core.ui.basic.event.PDragStartHandler;
 import com.ponysdk.core.ui.basic.event.PDropEvent;
+import com.ponysdk.core.ui.basic.event.PDropHandler;
 import com.ponysdk.core.ui.place.Place;
 import com.ponysdk.core.ui.rich.PNotificationManager;
 import com.ponysdk.impl.webapplication.page.PageActivity;
@@ -196,10 +200,10 @@ public class MarketPageActivity extends PageActivity {
         final PAnchor selector = Element.newPAnchor();
         selector.addStyleName("selector");
 
-        box.addDomHandler(event -> {
+        box.addDomHandler((PDragStartHandler) event -> {
         }, PDragStartEvent.TYPE);
 
-        box.addDomHandler(event -> {
+        box.addDomHandler((PDropHandler) event -> {
             box.removeStyleName("dragenter");
             final PWidget source = event.getDragSource();
             if (source != null && source != box) {
@@ -209,7 +213,7 @@ public class MarketPageActivity extends PageActivity {
             }
         }, PDropEvent.TYPE);
 
-        box.addDomHandler(event -> {
+        box.addDomHandler((PDragEnterHandler) event -> {
             if (currentDrag == null || !currentDrag.equals(box)) {
                 box.addStyleName("dragenter");
                 if (currentDrag != null) currentDrag.removeStyleName("dragenter");
@@ -217,7 +221,7 @@ public class MarketPageActivity extends PageActivity {
             }
         }, PDragEnterEvent.TYPE);
 
-        box.addDomHandler(event -> {
+        box.addDomHandler((PDragLeaveHandler) event -> {
             if (!currentDrag.equals(box)) {
                 box.removeStyleName("dragenter");
             }

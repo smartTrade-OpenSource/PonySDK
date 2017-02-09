@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -27,14 +27,14 @@ import com.ponysdk.core.model.DomHandlerType;
 
 public class PDoubleClickEvent extends PMouseEvent<PDoubleClickHandler> {
 
-    public static final PDomEvent.Type<PDoubleClickHandler> TYPE = new PDomEvent.Type<>(DomHandlerType.DOUBLE_CLICK);
+    public static final PDomEvent.Type TYPE = new PDomEvent.Type(DomHandlerType.DOUBLE_CLICK);
 
     public PDoubleClickEvent(final Object sourceComponent) {
         super(sourceComponent);
     }
 
     @Override
-    public PDomEvent.Type<PDoubleClickHandler> getAssociatedType() {
+    public PDomEvent.Type getAssociatedType() {
         return TYPE;
     }
 

@@ -28,7 +28,7 @@ import com.google.gwt.event.shared.GwtEvent;
 
 public class HttpRequestSendEvent extends GwtEvent<HttpRequestSendEvent.Handler> {
 
-    public static final Type<Handler> TYPE = new Type<>();
+    public static final Type<Handler> TYPE = new Type();
 
     public HttpRequestSendEvent() {}
 

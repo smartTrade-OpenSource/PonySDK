@@ -27,14 +27,14 @@ import com.ponysdk.core.model.DomHandlerType;
 
 public class PDragLeaveEvent extends PDomEvent<PDragLeaveHandler> {
 
-    public static final PDomEvent.Type<PDragLeaveHandler> TYPE = new PDomEvent.Type<>(DomHandlerType.DRAG_LEAVE);
+    public static final PDomEvent.Type TYPE = new PDomEvent.Type(DomHandlerType.DRAG_LEAVE);
 
     public PDragLeaveEvent(final Object sourceComponent) {
         super(sourceComponent);
     }
 
     @Override
-    public com.ponysdk.core.ui.eventbus.Event.Type<PDragLeaveHandler> getAssociatedType() {
+    public PDomEvent.Type getAssociatedType() {
         return TYPE;
     }
 

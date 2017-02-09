@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,13 +23,13 @@
 
 package com.ponysdk.core.export.event;
 
+import com.ponysdk.core.export.Exporter;
 import com.ponysdk.core.ui.eventbus.BusinessEvent;
 import com.ponysdk.core.ui.eventbus.Event;
-import com.ponysdk.core.export.Exporter;
 
 public class DataExportedEvent extends BusinessEvent<DataExportedHandler> {
 
-    public static final Event.Type<DataExportedHandler> TYPE = new Event.Type<>();
+    public static final Event.Type TYPE = new Event.Type();
 
     private final Exporter<?> exporter;
 
@@ -44,7 +44,7 @@ public class DataExportedEvent extends BusinessEvent<DataExportedHandler> {
     }
 
     @Override
-    public Event.Type<DataExportedHandler> getAssociatedType() {
+    public Event.Type getAssociatedType() {
         return TYPE;
     }
 

@@ -38,10 +38,10 @@ public class RootEventBus extends AbstractEventBus {
 
     private static final Logger log = LoggerFactory.getLogger(RootEventBus.class);
 
-    private final Map<Type<?>, Map<Object, Map<?, Boolean>>> map = new HashMap<>();
+    private final Map<Type, Map<Object, Map<?, Boolean>>> map = new HashMap<>();
 
     @Override
-    protected void doRemoveNow(final Type<? extends EventHandler> type, final Object source, final EventHandler handler) {
+    protected void doRemoveNow(final Type type, final Object source, final EventHandler handler) {
         final Map<Object, Map<?, Boolean>> sourceMap = map.get(type);
         if (sourceMap == null) return;
 
@@ -55,11 +55,11 @@ public class RootEventBus extends AbstractEventBus {
     }
 
     @Override
-    protected void doAddNow(final Type type, final Object source, final Object handler) {
+    protected void doAddNow(final Type type, final Object source, final EventHandler handler) {
         ensureHandlerSet(type, source).put(handler, true);
     }
 
-    private <H extends EventHandler> Map<H, Boolean> ensureHandlerSet(final Type<H> type, final Object source) {
+    private <H extends EventHandler> Map<H, Boolean> ensureHandlerSet(final Type type, final Object source) {
         Map<Object, Map<?, Boolean>> sourceMap = map.get(type);
         if (sourceMap == null) {
             sourceMap = new HashMap<>();
@@ -77,7 +77,7 @@ public class RootEventBus extends AbstractEventBus {
     }
 
     @Override
-    public <H extends EventHandler> Collection<H> getHandlers(final Type<H> type, final Object source) {
+    public <H extends EventHandler> Collection<H> getHandlers(final Type type, final Object source) {
         final Map<Object, Map<?, Boolean>> sourceMap = map.get(type);
         if (sourceMap == null) return Collections.emptySet();
 
@@ -87,7 +87,7 @@ public class RootEventBus extends AbstractEventBus {
         else return Collections.emptySet();
     }
 
-    private void prune(final Type<?> type, final Object source) {
+    private void prune(final Type type, final Object source) {
         final Map<Object, Map<?, Boolean>> sourceMap = map.get(type);
 
         final Map<?, Boolean> pruned = sourceMap.remove(source);

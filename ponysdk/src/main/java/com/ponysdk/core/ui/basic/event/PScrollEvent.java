@@ -28,7 +28,7 @@ import com.ponysdk.core.ui.eventbus.EventHandler;
 
 public class PScrollEvent extends Event<PScrollEvent.PScrollHandler> {
 
-    public static final Type<PScrollHandler> TYPE = new Type<>();
+    public static final Type TYPE = new Type();
 
     private final int height;
     private final int width;
@@ -51,7 +51,7 @@ public class PScrollEvent extends Event<PScrollEvent.PScrollHandler> {
     }
 
     @Override
-    public Type<PScrollHandler> getAssociatedType() {
+    public Type getAssociatedType() {
         return TYPE;
     }
 

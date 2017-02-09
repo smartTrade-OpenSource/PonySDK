@@ -28,7 +28,7 @@ import com.ponysdk.core.ui.basic.PWidget;
 
 public class PDropEvent extends PDomEvent<PDropHandler> {
 
-    public static final PDomEvent.Type<PDropHandler> TYPE = new PDomEvent.Type<>(DomHandlerType.DROP);
+    public static final PDomEvent.Type TYPE = new PDomEvent.Type(DomHandlerType.DROP);
 
     private PWidget dragSource;
 
@@ -37,7 +37,7 @@ public class PDropEvent extends PDomEvent<PDropHandler> {
     }
 
     @Override
-    public com.ponysdk.core.ui.eventbus.Event.Type<PDropHandler> getAssociatedType() {
+    public PDomEvent.Type getAssociatedType() {
         return TYPE;
     }
 

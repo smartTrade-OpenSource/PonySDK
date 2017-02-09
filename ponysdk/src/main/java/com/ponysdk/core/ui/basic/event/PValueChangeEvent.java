@@ -27,7 +27,7 @@ import com.ponysdk.core.ui.eventbus.Event;
 
 public class PValueChangeEvent<T> extends Event<PValueChangeHandler<T>> {
 
-    public static final Type<PValueChangeHandler<?>> TYPE = new Type<>();
+    public static final Type TYPE = new Type();
 
     public PValueChangeEvent(final Object sourceComponent, final T value) {
         super(sourceComponent);
@@ -35,8 +35,8 @@ public class PValueChangeEvent<T> extends Event<PValueChangeHandler<T>> {
     }
 
     @Override
-    public Type<PValueChangeHandler<T>> getAssociatedType() {
-        return (Type) TYPE;
+    public Type getAssociatedType() {
+        return TYPE;
     }
 
     @Override

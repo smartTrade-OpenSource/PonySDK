@@ -27,14 +27,14 @@ import com.ponysdk.core.model.DomHandlerType;
 
 public class PMouseOutEvent extends PMouseEvent<PMouseOutHandler> {
 
-    public static final PDomEvent.Type<PMouseOutHandler> TYPE = new PDomEvent.Type<>(DomHandlerType.MOUSE_OUT);
+    public static final PDomEvent.Type TYPE = new PDomEvent.Type(DomHandlerType.MOUSE_OUT);
 
     public PMouseOutEvent(final Object sourceComponent) {
         super(sourceComponent);
     }
 
     @Override
-    public com.ponysdk.core.ui.eventbus.Event.Type<PMouseOutHandler> getAssociatedType() {
+    public PDomEvent.Type getAssociatedType() {
         return TYPE;
     }
 

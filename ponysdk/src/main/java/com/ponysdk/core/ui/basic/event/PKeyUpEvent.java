@@ -27,7 +27,7 @@ import com.ponysdk.core.model.DomHandlerType;
 
 public class PKeyUpEvent extends PKeyEvent<PKeyUpHandler> {
 
-    public static final PDomEvent.Type<PKeyUpHandler> TYPE = new PDomEvent.Type<>(DomHandlerType.KEY_UP);
+    public static final PDomEvent.Type TYPE = new PDomEvent.Type(DomHandlerType.KEY_UP);
 
     private final int keyCode;
 
@@ -37,7 +37,7 @@ public class PKeyUpEvent extends PKeyEvent<PKeyUpHandler> {
     }
 
     @Override
-    public com.ponysdk.core.ui.eventbus.Event.Type<PKeyUpHandler> getAssociatedType() {
+    public PDomEvent.Type getAssociatedType() {
         return TYPE;
     }
 

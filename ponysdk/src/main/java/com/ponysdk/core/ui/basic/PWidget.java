@@ -332,7 +332,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
 
     // public <H extends EventHandler> HandlerRegistration
     // removeDomHandler(final JsonObject handler, final
-    // PDomEvent.Type<H> type) {
+    // PDomEvent.Type type) {
     // final HandlerRegistration handlerRegistration =
     // ensureDomHandler().addHandler(type, handler);
     //
@@ -342,7 +342,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     // return handlerRegistration;
     // }
 
-    public <H extends EventHandler> HandlerRegistration removeDomHandler(final H handler, final PDomEvent.Type<H> type) {
+    public <H extends EventHandler> HandlerRegistration removeDomHandler(final H handler, final PDomEvent.Type type) {
         final HandlerRegistration handlerRegistration = ensureDomHandler().addHandler(type, handler);
         saveRemoveHandler(HandlerModel.HANDLER_DOM);
         return handlerRegistration;
@@ -364,11 +364,11 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         else return addDomHandler(handler, PKeyUpEvent.TYPE);
     }
 
-    public <H extends EventHandler> HandlerRegistration addDomHandler(final H handler, final PDomEvent.Type<H> type) {
+    public <H extends EventHandler> HandlerRegistration addDomHandler(final H handler, final PDomEvent.Type type) {
         return addDomHandler(handler, type, null);
     }
 
-    private <H extends EventHandler> HandlerRegistration addDomHandler(final H handler, final PDomEvent.Type<H> type,
+    private <H extends EventHandler> HandlerRegistration addDomHandler(final H handler, final PDomEvent.Type type,
                                                                        final ServerBinaryModel binaryModel) {
         final Collection<H> handlerIterator = ensureDomHandler().getHandlers(type, this);
         final HandlerRegistration handlerRegistration = domHandler.addHandlerToSource(type, this, handler);
@@ -476,7 +476,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         return domHandler;
     }
 
-    protected <H extends EventHandler> Collection<H> getHandlerSet(final PDomEvent.Type<H> type, final Object source) {
+    protected <H extends EventHandler> Collection<H> getHandlerSet(final PDomEvent.Type type, final Object source) {
         return ensureDomHandler().getHandlers(type, null);
     }
 

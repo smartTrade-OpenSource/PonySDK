@@ -49,30 +49,30 @@ public abstract class AbstractEventBus implements EventBus {
     protected boolean firing = false;
 
     @Override
-    public <H extends EventHandler> HandlerRegistration addHandler(final Type<H> type, final H handler) {
+    public <H extends EventHandler> HandlerRegistration addHandler(final Type type, final H handler) {
         if (type == null) throw new NullPointerException("Cannot add a handler with a null type");
         else if (handler == null) throw new NullPointerException("Cannot add a null handler");
         else return doAdd(type, null, handler);
     }
 
     @Override
-    public <H extends EventHandler> HandlerRegistration addHandlerToSource(final Type<H> type, final Object source, final H handler) {
+    public <H extends EventHandler> HandlerRegistration addHandlerToSource(final Type type, final Object source, final H handler) {
         if (type == null) throw new NullPointerException("Cannot add a handler with a null type");
         else if (source == null) throw new NullPointerException("Cannot add a handler with a null source");
         else if (handler == null) throw new NullPointerException("Cannot add a null handler");
         else return doAdd(type, source, handler);
     }
 
-    protected <H extends EventHandler> HandlerRegistration doAdd(final Type<H> type, final Object source, final H handler) {
+    protected <H extends EventHandler> HandlerRegistration doAdd(final Type type, final Object source, final H handler) {
         if (!firing) doAddNow(type, source, handler);
         else defferedAdd(type, source, handler);
 
         return () -> doRemove(type, source, handler);
     }
 
-    protected abstract void doAddNow(final Type type, final Object source, final Object handler);
+    protected abstract void doAddNow(final Type type, final Object source, final EventHandler handler);
 
-    private <H extends EventHandler> void defferedAdd(final Type<H> type, final Object source, final H handler) {
+    private <H extends EventHandler> void defferedAdd(final Type type, final Object source, final H handler) {
         final HandlerContext<H> context = new HandlerContext<>();
         context.type = type;
         context.source = source;
@@ -88,23 +88,23 @@ public abstract class AbstractEventBus implements EventBus {
     }
 
     @Override
-    public <H extends EventHandler> void removeHandler(final Type<H> type, final H handler) {
+    public <H extends EventHandler> void removeHandler(final Type type, final H handler) {
         doRemove(type, null, handler);
     }
 
     @Override
-    public <H extends EventHandler> void removeHandlerFromSource(final Type<H> type, final Object source, final H handler) {
+    public <H extends EventHandler> void removeHandlerFromSource(final Type type, final Object source, final H handler) {
         doRemove(type, source, handler);
     }
 
-    protected <H extends EventHandler> void doRemove(final Type<H> type, final Object source, final H handler) {
+    protected <H extends EventHandler> void doRemove(final Type type, final Object source, final H handler) {
         if (!firing) doRemoveNow(type, source, handler);
         else defferedRemove(type, source, handler);
     }
 
-    protected abstract void doRemoveNow(final Type<? extends EventHandler> type, final Object source, final EventHandler handler);
+    protected abstract void doRemoveNow(final Type type, final Object source, final EventHandler handler);
 
-    protected <H extends EventHandler> void defferedRemove(final Type<H> type, final Object source, final H handler) {
+    protected <H extends EventHandler> void defferedRemove(final Type type, final Object source, final H handler) {
         final HandlerContext<H> context = new HandlerContext<>();
         context.type = type;
         context.source = source;
@@ -184,7 +184,7 @@ public abstract class AbstractEventBus implements EventBus {
         }
     }
 
-    private <H extends EventHandler> Collection<H> getDispatchSet(final Type<H> type, final Object source) {
+    private <H extends EventHandler> Collection<H> getDispatchSet(final Type type, final Object source) {
         final Collection<H> directHandlers = getHandlers(type, source);
         if (source != null) {
             final Collection<H> globalHandlers = getHandlers(type, null);
@@ -200,7 +200,7 @@ public abstract class AbstractEventBus implements EventBus {
 
         boolean add;
 
-        Type<H> type;
+        Type type;
         Object source;
         H handler;
 

@@ -24,13 +24,12 @@
 package com.ponysdk.core.ui.basic.event;
 
 import com.ponysdk.core.model.DomHandlerType;
-import com.ponysdk.core.ui.basic.event.PDomEvent.Type;
 import com.ponysdk.core.ui.eventbus.EventHandler;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 
 public abstract class PMouseWhellEvent {
 
-    public static final Type<Handler> TYPE = new Type<>(DomHandlerType.MOUSE_WHELL);
+    public static final PDomEvent.Type TYPE = new PDomEvent.Type(DomHandlerType.MOUSE_WHELL);
 
     @FunctionalInterface
     public interface Handler extends EventHandler {
@@ -51,7 +50,7 @@ public abstract class PMouseWhellEvent {
         }
 
         @Override
-        public Type<Handler> getAssociatedType() {
+        public PDomEvent.Type getAssociatedType() {
             return TYPE;
         }
 

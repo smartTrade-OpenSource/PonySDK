@@ -30,7 +30,7 @@ import com.ponysdk.core.ui.eventbus.EventHandler;
 
 public class PTerminalEvent extends Event<PTerminalEvent.Handler> {
 
-    public static final Type<PTerminalEvent.Handler> TYPE = new Type<>();
+    public static final Type TYPE = new Type();
     private final JsonObject jsonObject;
 
     public PTerminalEvent(final Object sourceComponent, final JsonObject jsonObject) {
@@ -39,7 +39,7 @@ public class PTerminalEvent extends Event<PTerminalEvent.Handler> {
     }
 
     @Override
-    public Type<PTerminalEvent.Handler> getAssociatedType() {
+    public Type getAssociatedType() {
         return TYPE;
     }
 
