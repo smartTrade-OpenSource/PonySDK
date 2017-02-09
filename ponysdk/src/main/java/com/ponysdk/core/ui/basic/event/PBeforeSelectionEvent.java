@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -27,7 +27,7 @@ import com.ponysdk.core.ui.eventbus.Event;
 
 public class PBeforeSelectionEvent<T> extends Event<PBeforeSelectionHandler<T>> {
 
-    public static final Type<PBeforeSelectionHandler<?>> TYPE = new Type<>();
+    public static final Type TYPE = new Type();
     private T selectedItem;
 
     public PBeforeSelectionEvent(final Object source, final T selectedItem) {
@@ -43,10 +43,9 @@ public class PBeforeSelectionEvent<T> extends Event<PBeforeSelectionHandler<T>> 
         this.selectedItem = item;
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    public Type<PBeforeSelectionHandler<T>> getAssociatedType() {
-        return (Type) TYPE;
+    public Type getAssociatedType() {
+        return TYPE;
     }
 
     @Override

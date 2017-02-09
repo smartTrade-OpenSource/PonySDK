@@ -29,7 +29,7 @@ import com.ponysdk.sample.client.datamodel.User;
 
 public class AuthenticationSucceedEvent extends SystemEvent<AuthenticationSucceedHandler> {
 
-    public static final Event.Type<AuthenticationSucceedHandler> TYPE = new Event.Type<>();
+    public static final Event.Type TYPE = new Event.Type();
 
     private final User user;
 
@@ -44,7 +44,7 @@ public class AuthenticationSucceedEvent extends SystemEvent<AuthenticationSuccee
     }
 
     @Override
-    public Event.Type<AuthenticationSucceedHandler> getAssociatedType() {
+    public Event.Type getAssociatedType() {
         return TYPE;
     }
 

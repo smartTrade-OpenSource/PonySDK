@@ -29,7 +29,7 @@ import com.ponysdk.sample.client.datamodel.User;
 
 public class UserLoggedInEvent extends BusinessEvent<UserLoggedInHandler> {
 
-    public static final Event.Type<UserLoggedInHandler> TYPE = new Event.Type<>();
+    public static final Event.Type TYPE = new Event.Type();
 
     private final User user;
 
@@ -44,7 +44,7 @@ public class UserLoggedInEvent extends BusinessEvent<UserLoggedInHandler> {
     }
 
     @Override
-    public Event.Type<UserLoggedInHandler> getAssociatedType() {
+    public Event.Type getAssociatedType() {
         return TYPE;
     }
 

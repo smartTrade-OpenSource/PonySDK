@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -29,13 +29,13 @@ import com.ponysdk.core.ui.eventbus.Event.Type;
 
 public interface EventBus {
 
-    <H extends EventHandler> HandlerRegistration addHandler(Type<H> type, H handler);
+    <H extends EventHandler> HandlerRegistration addHandler(Type type, H handler);
 
-    <H extends EventHandler> void removeHandler(Type<H> type, H handler);
+    <H extends EventHandler> void removeHandler(Type type, H handler);
 
-    <H extends EventHandler> HandlerRegistration addHandlerToSource(Type<H> type, Object source, H handler);
+    <H extends EventHandler> HandlerRegistration addHandlerToSource(Type type, Object source, H handler);
 
-    <H extends EventHandler> void removeHandlerFromSource(Type<H> type, Object source, H handler);
+    <H extends EventHandler> void removeHandlerFromSource(Type type, Object source, H handler);
 
     void addHandler(BroadcastEventHandler handler);
 
@@ -45,5 +45,5 @@ public interface EventBus {
 
     void fireEventFromSource(Event<?> event, Object source);
 
-    <H extends EventHandler> Collection<H> getHandlers(final Type<H> type, final Object source);
+    <H extends EventHandler> Collection<H> getHandlers(final Type type, final Object source);
 }

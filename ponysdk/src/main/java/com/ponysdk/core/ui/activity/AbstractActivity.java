@@ -81,16 +81,15 @@ public abstract class AbstractActivity<T extends IsPWidget> implements Activity 
         PlaceChangeRequest.fire(this, place);
     }
 
-    public <H extends EventHandler> HandlerRegistration addHandler(final Type<H> type, final H handler) {
+    public <H extends EventHandler> HandlerRegistration addHandler(final Type type, final H handler) {
         return UIContext.addHandler(type, handler);
     }
 
-    public <H extends EventHandler> HandlerRegistration addHandlerToSource(final Type<H> type, final Object source, final H handler) {
+    public <H extends EventHandler> HandlerRegistration addHandlerToSource(final Type type, final Object source, final H handler) {
         return UIContext.addHandlerToSource(type, source, handler);
     }
 
-    @SuppressWarnings("unchecked")
-    public <H extends EventHandler> HandlerRegistration addHandlerToSource(final Type<H> type, final Object source) {
+    public <H extends EventHandler> HandlerRegistration addHandlerToSource(final Type type, final Object source) {
         return addHandlerToSource(type, source, (H) this);
     }
 

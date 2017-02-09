@@ -31,6 +31,7 @@ import com.ponysdk.core.ui.basic.PPopupPanel;
 import com.ponysdk.core.ui.basic.PSimplePanel;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
 
 public class PClosableDialogBox extends PPopupPanel {
 
@@ -69,7 +70,7 @@ public class PClosableDialogBox extends PPopupPanel {
         layout.getCellFormatter().setHorizontalAlignment(0, 1, PHorizontalAlignment.ALIGN_RIGHT);
         layout.getRowFormatter().addStyleName(0, "header");
 
-        closeContainer.addDomHandler((PClickEvent) -> hide(), PClickEvent.TYPE);
+        closeContainer.addDomHandler((PClickHandler) event -> hide(), PClickEvent.TYPE);
 
         super.setWidget(layout);
 

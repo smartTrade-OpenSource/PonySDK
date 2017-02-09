@@ -28,7 +28,7 @@ import com.google.gwt.event.shared.GwtEvent;
 
 public class CommunicationErrorEvent extends GwtEvent<CommunicationErrorEvent.Handler> {
 
-    public static final Type<Handler> TYPE = new Type<>();
+    public static final Type<Handler> TYPE = new Type();
     private final Throwable throwable;
 
     public CommunicationErrorEvent(final Throwable throwable) {

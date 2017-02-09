@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -31,7 +31,7 @@ import com.ponysdk.core.ui.eventbus.Event;
 
 public class PLayoutResizeEvent extends Event<PLayoutResizeHandler> {
 
-    public static final Type<PLayoutResizeHandler> TYPE = new Type<>();
+    public static final Type TYPE = new Type();
 
     private final List<LayoutResizeData> layoutResizeData = new ArrayList<>();
 
@@ -44,7 +44,7 @@ public class PLayoutResizeEvent extends Event<PLayoutResizeHandler> {
     }
 
     @Override
-    public Type<PLayoutResizeHandler> getAssociatedType() {
+    public Type getAssociatedType() {
         return TYPE;
     }
 

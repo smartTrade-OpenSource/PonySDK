@@ -29,7 +29,7 @@ import com.ponysdk.sample.client.datamodel.User;
 
 public class UserLoggedOutEvent extends SystemEvent<UserLoggedOutHandler> {
 
-    public static final Event.Type<UserLoggedOutHandler> TYPE = new Event.Type<>();
+    public static final Event.Type TYPE = new Event.Type();
 
     private final User user;
 
@@ -44,7 +44,7 @@ public class UserLoggedOutEvent extends SystemEvent<UserLoggedOutHandler> {
     }
 
     @Override
-    public Event.Type<UserLoggedOutHandler> getAssociatedType() {
+    public Event.Type getAssociatedType() {
         return TYPE;
     }
 

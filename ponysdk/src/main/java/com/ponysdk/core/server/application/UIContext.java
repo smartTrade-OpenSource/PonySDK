@@ -123,20 +123,20 @@ public class UIContext {
         currentContext.set(uiContext);
     }
 
-    public static <H extends EventHandler> HandlerRegistration addHandler(final Type<H> type, final H handler) {
+    public static <H extends EventHandler> HandlerRegistration addHandler(final Type type, final H handler) {
         return get().getEventBus().addHandler(type, handler);
     }
 
-    public static <H extends EventHandler> void removeHandler(final Type<H> type, final H handler) {
+    public static <H extends EventHandler> void removeHandler(final Type type, final H handler) {
         get().getEventBus().removeHandler(type, handler);
     }
 
-    public static <H extends EventHandler> HandlerRegistration addHandlerToSource(final Type<H> type, final Object source,
-            final H handler) {
+    public static <H extends EventHandler> HandlerRegistration addHandlerToSource(final Type type, final Object source,
+                                                                                  final H handler) {
         return get().getEventBus().addHandlerToSource(type, source, handler);
     }
 
-    public static <H extends EventHandler> void removeHandlerFromSource(final Type<H> type, final Object source, final H handler) {
+    public static <H extends EventHandler> void removeHandlerFromSource(final Type type, final Object source, final H handler) {
         get().getEventBus().removeHandlerFromSource(type, source, handler);
     }
 
@@ -258,7 +258,7 @@ public class UIContext {
 
                     if (jsonObject.containsKey(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())) {
                         final int parentObjectID = jsonObject.getJsonNumber(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())
-                                .intValue();
+                            .intValue();
                         final PObject gcObject = weakReferences.get(parentObjectID);
                         log.warn("" + gcObject);
                     }

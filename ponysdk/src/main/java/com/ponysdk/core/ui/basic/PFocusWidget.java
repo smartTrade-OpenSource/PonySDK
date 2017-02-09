@@ -127,10 +127,10 @@ public abstract class PFocusWidget extends PWidget
     @Override
     public HandlerRegistration addClickHandler(final PClickHandler handler) {
         if (showLoadingOnRequest || !enabledOnRequest) {
-            return addDomHandler(event -> {
+            return addDomHandler((PClickHandler) event -> {
                 handler.onClick(event);
                 saveUpdate(writer -> writer.writeModel(ServerToClientModel.END_OF_PROCESSING));
-            } , PClickEvent.TYPE);
+            }, PClickEvent.TYPE);
         } else {
             return addDomHandler(handler, PClickEvent.TYPE);
         }
