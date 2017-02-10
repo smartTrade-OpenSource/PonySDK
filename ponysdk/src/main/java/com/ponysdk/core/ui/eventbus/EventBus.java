@@ -25,17 +25,15 @@ package com.ponysdk.core.ui.eventbus;
 
 import java.util.Collection;
 
-import com.ponysdk.core.ui.eventbus.Event.Type;
-
 public interface EventBus {
 
-    <H extends EventHandler> HandlerRegistration addHandler(Type type, H handler);
+    HandlerRegistration addHandler(Event.Type type, EventHandler handler);
 
-    <H extends EventHandler> void removeHandler(Type type, H handler);
+    void removeHandler(Event.Type type, EventHandler handler);
 
-    <H extends EventHandler> HandlerRegistration addHandlerToSource(Type type, Object source, H handler);
+    HandlerRegistration addHandlerToSource(Event.Type type, Object source, EventHandler handler);
 
-    <H extends EventHandler> void removeHandlerFromSource(Type type, Object source, H handler);
+    void removeHandlerFromSource(Event.Type type, Object source, EventHandler handler);
 
     void addHandler(BroadcastEventHandler handler);
 
@@ -45,5 +43,5 @@ public interface EventBus {
 
     void fireEventFromSource(Event<?> event, Object source);
 
-    <H extends EventHandler> Collection<H> getHandlers(final Type type, final Object source);
+    Collection<EventHandler> getHandlers(Event.Type type, Object source);
 }

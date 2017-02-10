@@ -27,7 +27,7 @@ import com.ponysdk.core.model.DomHandlerType;
 import com.ponysdk.core.ui.eventbus.Event;
 import com.ponysdk.core.ui.eventbus.EventHandler;
 
-public abstract class PDomEvent<T extends EventHandler> extends Event<T> {
+public abstract class PDomEvent<H extends EventHandler> extends Event<H> {
 
     public PDomEvent(final Object sourceComponent) {
         super(sourceComponent);

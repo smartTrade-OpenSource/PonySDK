@@ -53,7 +53,6 @@ import com.ponysdk.core.ui.basic.PHistory;
 import com.ponysdk.core.ui.basic.PObject;
 import com.ponysdk.core.ui.eventbus.BroadcastEventHandler;
 import com.ponysdk.core.ui.eventbus.Event;
-import com.ponysdk.core.ui.eventbus.Event.Type;
 import com.ponysdk.core.ui.eventbus.EventBus;
 import com.ponysdk.core.ui.eventbus.EventHandler;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
@@ -123,20 +122,19 @@ public class UIContext {
         currentContext.set(uiContext);
     }
 
-    public static <H extends EventHandler> HandlerRegistration addHandler(final Type type, final H handler) {
+    public static HandlerRegistration addHandler(final Event.Type type, final EventHandler handler) {
         return get().getEventBus().addHandler(type, handler);
     }
 
-    public static <H extends EventHandler> void removeHandler(final Type type, final H handler) {
+    public static void removeHandler(final Event.Type type, final EventHandler handler) {
         get().getEventBus().removeHandler(type, handler);
     }
 
-    public static <H extends EventHandler> HandlerRegistration addHandlerToSource(final Type type, final Object source,
-                                                                                  final H handler) {
+    public static HandlerRegistration addHandlerToSource(final Event.Type type, final Object source, final EventHandler handler) {
         return get().getEventBus().addHandlerToSource(type, source, handler);
     }
 
-    public static <H extends EventHandler> void removeHandlerFromSource(final Type type, final Object source, final H handler) {
+    public static void removeHandlerFromSource(final Event.Type type, final Object source, final EventHandler handler) {
         get().getEventBus().removeHandlerFromSource(type, source, handler);
     }
 

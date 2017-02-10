@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,12 +23,12 @@
 
 package com.ponysdk.core.ui.eventbus;
 
-public abstract class BusinessEvent<T extends EventHandler> extends Event<T> {
+public abstract class BusinessEvent<H extends EventHandler> extends Event<H> {
 
     private String businessMessage;
     private Level level = Level.INFO;
 
-    public BusinessEvent(Object sourceComponent) {
+    public BusinessEvent(final Object sourceComponent) {
         super(sourceComponent);
     }
 
@@ -36,7 +36,7 @@ public abstract class BusinessEvent<T extends EventHandler> extends Event<T> {
         return businessMessage;
     }
 
-    public void setBusinessMessage(String businessMessage) {
+    public void setBusinessMessage(final String businessMessage) {
         this.businessMessage = businessMessage;
     }
 
@@ -44,12 +44,14 @@ public abstract class BusinessEvent<T extends EventHandler> extends Event<T> {
         return level;
     }
 
-    public void setLevel(Level level) {
+    public void setLevel(final Level level) {
         this.level = level;
     }
 
     public enum Level {
-        INFO, WARNING, ERROR
+        INFO,
+        WARNING,
+        ERROR
     }
 
 }

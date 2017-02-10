@@ -330,19 +330,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.WIDGET_FULL_SIZE));
     }
 
-    // public <H extends EventHandler> HandlerRegistration
-    // removeDomHandler(final JsonObject handler, final
-    // PDomEvent.Type type) {
-    // final HandlerRegistration handlerRegistration =
-    // ensureDomHandler().addHandler(type, handler);
-    //
-    // saveRemoveHandler(Model.HANDLER_DOM_HANDLER, Model.DOM_HANDLER_CODE,
-    // handler);
-    //
-    // return handlerRegistration;
-    // }
-
-    public <H extends EventHandler> HandlerRegistration removeDomHandler(final H handler, final PDomEvent.Type type) {
+    public HandlerRegistration removeDomHandler(final EventHandler handler, final PDomEvent.Type type) {
         final HandlerRegistration handlerRegistration = ensureDomHandler().addHandler(type, handler);
         saveRemoveHandler(HandlerModel.HANDLER_DOM);
         return handlerRegistration;
@@ -364,13 +352,13 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         else return addDomHandler(handler, PKeyUpEvent.TYPE);
     }
 
-    public <H extends EventHandler> HandlerRegistration addDomHandler(final H handler, final PDomEvent.Type type) {
+    public HandlerRegistration addDomHandler(final EventHandler handler, final PDomEvent.Type type) {
         return addDomHandler(handler, type, null);
     }
 
-    private <H extends EventHandler> HandlerRegistration addDomHandler(final H handler, final PDomEvent.Type type,
-                                                                       final ServerBinaryModel binaryModel) {
-        final Collection<H> handlerIterator = ensureDomHandler().getHandlers(type, this);
+    private HandlerRegistration addDomHandler(final EventHandler handler, final PDomEvent.Type type,
+                                              final ServerBinaryModel binaryModel) {
+        final Collection<EventHandler> handlerIterator = ensureDomHandler().getHandlers(type, this);
         final HandlerRegistration handlerRegistration = domHandler.addHandlerToSource(type, this, handler);
         if (handlerIterator.isEmpty()) {
             final ServerBinaryModel binaryModel1 = new ServerBinaryModel(ServerToClientModel.DOM_HANDLER_CODE,
@@ -381,7 +369,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         return handlerRegistration;
     }
 
-    private <H extends EventHandler> void executeAddDomHandler(final ServerBinaryModel... binaryModels) {
+    private void executeAddDomHandler(final ServerBinaryModel... binaryModels) {
         final ModelWriter writer = Txn.getWriter();
         writer.beginObject();
         if (windowID != PWindow.getMain().getID()) writer.writeModel(ServerToClientModel.WINDOW_ID, windowID);
@@ -476,7 +464,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         return domHandler;
     }
 
-    protected <H extends EventHandler> Collection<H> getHandlerSet(final PDomEvent.Type type, final Object source) {
+    protected Collection<EventHandler> getHandlerSet(final PDomEvent.Type type, final Object source) {
         return ensureDomHandler().getHandlers(type, null);
     }
 

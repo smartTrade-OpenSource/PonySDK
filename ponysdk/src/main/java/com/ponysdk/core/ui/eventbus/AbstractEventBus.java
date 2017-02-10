@@ -36,8 +36,6 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.ui.eventbus.Event.Type;
-
 public abstract class AbstractEventBus implements EventBus {
 
     private static final Logger log = LoggerFactory.getLogger(RootEventBus.class);
@@ -45,35 +43,35 @@ public abstract class AbstractEventBus implements EventBus {
     protected final Set<BroadcastEventHandler> broadcastHandlerManager = new HashSet<>();
 
     protected final Queue<Event<? extends EventHandler>> eventQueue = new LinkedList<>();
-    protected final List<HandlerContext<? extends EventHandler>> pendingHandlerRegistration = new ArrayList<>();
+    protected final List<HandlerContext> pendingHandlerRegistration = new ArrayList<>();
     protected boolean firing = false;
 
     @Override
-    public <H extends EventHandler> HandlerRegistration addHandler(final Type type, final H handler) {
+    public HandlerRegistration addHandler(final Event.Type type, final EventHandler handler) {
         if (type == null) throw new NullPointerException("Cannot add a handler with a null type");
         else if (handler == null) throw new NullPointerException("Cannot add a null handler");
         else return doAdd(type, null, handler);
     }
 
     @Override
-    public <H extends EventHandler> HandlerRegistration addHandlerToSource(final Type type, final Object source, final H handler) {
+    public HandlerRegistration addHandlerToSource(final Event.Type type, final Object source, final EventHandler handler) {
         if (type == null) throw new NullPointerException("Cannot add a handler with a null type");
         else if (source == null) throw new NullPointerException("Cannot add a handler with a null source");
         else if (handler == null) throw new NullPointerException("Cannot add a null handler");
         else return doAdd(type, source, handler);
     }
 
-    protected <H extends EventHandler> HandlerRegistration doAdd(final Type type, final Object source, final H handler) {
+    protected HandlerRegistration doAdd(final Event.Type type, final Object source, final EventHandler handler) {
         if (!firing) doAddNow(type, source, handler);
         else defferedAdd(type, source, handler);
 
         return () -> doRemove(type, source, handler);
     }
 
-    protected abstract void doAddNow(final Type type, final Object source, final EventHandler handler);
+    protected abstract void doAddNow(final Event.Type type, final Object source, final EventHandler handler);
 
-    private <H extends EventHandler> void defferedAdd(final Type type, final Object source, final H handler) {
-        final HandlerContext<H> context = new HandlerContext<>();
+    private void defferedAdd(final Event.Type type, final Object source, final EventHandler handler) {
+        final HandlerContext context = new HandlerContext();
         context.type = type;
         context.source = source;
         context.handler = handler;
@@ -88,24 +86,24 @@ public abstract class AbstractEventBus implements EventBus {
     }
 
     @Override
-    public <H extends EventHandler> void removeHandler(final Type type, final H handler) {
+    public void removeHandler(final Event.Type type, final EventHandler handler) {
         doRemove(type, null, handler);
     }
 
     @Override
-    public <H extends EventHandler> void removeHandlerFromSource(final Type type, final Object source, final H handler) {
+    public void removeHandlerFromSource(final Event.Type type, final Object source, final EventHandler handler) {
         doRemove(type, source, handler);
     }
 
-    protected <H extends EventHandler> void doRemove(final Type type, final Object source, final H handler) {
+    protected void doRemove(final Event.Type type, final Object source, final EventHandler handler) {
         if (!firing) doRemoveNow(type, source, handler);
         else defferedRemove(type, source, handler);
     }
 
-    protected abstract void doRemoveNow(final Type type, final Object source, final EventHandler handler);
+    protected abstract void doRemoveNow(final Event.Type type, final Object source, final EventHandler handler);
 
-    protected <H extends EventHandler> void defferedRemove(final Type type, final Object source, final H handler) {
-        final HandlerContext<H> context = new HandlerContext<>();
+    protected void defferedRemove(final Event.Type type, final Object source, final EventHandler handler) {
+        final HandlerContext context = new HandlerContext();
         context.type = type;
         context.source = source;
         context.handler = handler;
@@ -171,7 +169,7 @@ public abstract class AbstractEventBus implements EventBus {
                 }
             }
 
-            for (final HandlerContext<? extends EventHandler> context : pendingHandlerRegistration) {
+            for (final HandlerContext context : pendingHandlerRegistration) {
                 if (context.add) doAddNow(context.type, context.source, context.handler);
                 else doRemoveNow(context.type, context.source, context.handler);
             }
@@ -184,11 +182,11 @@ public abstract class AbstractEventBus implements EventBus {
         }
     }
 
-    private <H extends EventHandler> Collection<H> getDispatchSet(final Type type, final Object source) {
-        final Collection<H> directHandlers = getHandlers(type, source);
+    private Collection<EventHandler> getDispatchSet(final Event.Type type, final Object source) {
+        final Collection<EventHandler> directHandlers = getHandlers(type, source);
         if (source != null) {
-            final Collection<H> globalHandlers = getHandlers(type, null);
-            final Set<H> rtn = new LinkedHashSet<>(directHandlers);
+            final Collection<EventHandler> globalHandlers = getHandlers(type, null);
+            final Set<EventHandler> rtn = new LinkedHashSet<>(directHandlers);
             rtn.addAll(globalHandlers);
             return rtn;
         } else {
@@ -196,20 +194,20 @@ public abstract class AbstractEventBus implements EventBus {
         }
     }
 
-    protected static class HandlerContext<H> {
+    protected static class HandlerContext {
 
         boolean add;
 
-        Type type;
+        Event.Type type;
         Object source;
-        H handler;
+        EventHandler handler;
 
         @Override
         public boolean equals(final Object o) {
             if (this == o) return true;
             else if (o == null || getClass() != o.getClass()) return false;
             else {
-                final HandlerContext<?> that = (HandlerContext<?>) o;
+                final HandlerContext that = (HandlerContext) o;
                 return add == that.add && Objects.equals(type, that.type) && Objects.equals(source, that.source)
                         && Objects.equals(handler, that.handler);
             }

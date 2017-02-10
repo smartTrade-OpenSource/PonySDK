@@ -32,20 +32,18 @@ import java.util.WeakHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.ui.eventbus.Event.Type;
-
 public class RootEventBus extends AbstractEventBus {
 
     private static final Logger log = LoggerFactory.getLogger(RootEventBus.class);
 
-    private final Map<Type, Map<Object, Map<?, Boolean>>> map = new HashMap<>();
+    private final Map<Event.Type, Map<Object, Map<EventHandler, Boolean>>> map = new HashMap<>();
 
     @Override
-    protected void doRemoveNow(final Type type, final Object source, final EventHandler handler) {
-        final Map<Object, Map<?, Boolean>> sourceMap = map.get(type);
+    protected void doRemoveNow(final Event.Type type, final Object source, final EventHandler handler) {
+        final Map<Object, Map<EventHandler, Boolean>> sourceMap = map.get(type);
         if (sourceMap == null) return;
 
-        final Map<?, Boolean> handlers = sourceMap.get(source);
+        final Map<EventHandler, Boolean> handlers = sourceMap.get(source);
         if (handlers == null) return;
 
         final boolean removed = Boolean.TRUE.equals(handlers.remove(handler));
@@ -55,19 +53,19 @@ public class RootEventBus extends AbstractEventBus {
     }
 
     @Override
-    protected void doAddNow(final Type type, final Object source, final EventHandler handler) {
+    protected void doAddNow(final Event.Type type, final Object source, final EventHandler handler) {
         ensureHandlerSet(type, source).put(handler, true);
     }
 
-    private <H extends EventHandler> Map<H, Boolean> ensureHandlerSet(final Type type, final Object source) {
-        Map<Object, Map<?, Boolean>> sourceMap = map.get(type);
+    private <H extends EventHandler> Map<EventHandler, Boolean> ensureHandlerSet(final Event.Type type, final Object source) {
+        Map<Object, Map<EventHandler, Boolean>> sourceMap = map.get(type);
         if (sourceMap == null) {
             sourceMap = new HashMap<>();
             map.put(type, sourceMap);
         }
 
         // safe, we control the puts.
-        Map<H, Boolean> handlers = (Map<H, Boolean>) sourceMap.get(source);
+        Map<EventHandler, Boolean> handlers = sourceMap.get(source);
         if (handlers == null) {
             handlers = new WeakHashMap<>();
             sourceMap.put(source, handlers);
@@ -77,20 +75,20 @@ public class RootEventBus extends AbstractEventBus {
     }
 
     @Override
-    public <H extends EventHandler> Collection<H> getHandlers(final Type type, final Object source) {
-        final Map<Object, Map<?, Boolean>> sourceMap = map.get(type);
+    public Collection<EventHandler> getHandlers(final Event.Type type, final Object source) {
+        final Map<Object, Map<EventHandler, Boolean>> sourceMap = map.get(type);
         if (sourceMap == null) return Collections.emptySet();
 
         // safe, we control the puts.
-        final Map<H, Boolean> handlers = (Map<H, Boolean>) sourceMap.get(source);
+        final Map<EventHandler, Boolean> handlers = sourceMap.get(source);
         if (handlers != null) return handlers.keySet();
         else return Collections.emptySet();
     }
 
-    private void prune(final Type type, final Object source) {
-        final Map<Object, Map<?, Boolean>> sourceMap = map.get(type);
+    private void prune(final Event.Type type, final Object source) {
+        final Map<Object, Map<EventHandler, Boolean>> sourceMap = map.get(type);
 
-        final Map<?, Boolean> pruned = sourceMap.remove(source);
+        final Map<EventHandler, Boolean> pruned = sourceMap.remove(source);
 
         if (pruned != null) {
             if (!pruned.isEmpty() && log.isInfoEnabled()) log.info("Pruned unempty list! {}", pruned);

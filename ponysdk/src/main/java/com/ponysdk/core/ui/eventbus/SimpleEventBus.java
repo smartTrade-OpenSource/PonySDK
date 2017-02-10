@@ -34,20 +34,18 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.ui.eventbus.Event.Type;
-
 public class SimpleEventBus extends AbstractEventBus {
 
     private static final Logger log = LoggerFactory.getLogger(SimpleEventBus.class);
 
-    private final Map<Type, Map<Object, Set<?>>> map = new HashMap<>();
+    private final Map<Event.Type, Map<Object, Set<EventHandler>>> map = new HashMap<>();
 
     @Override
-    protected void doRemoveNow(final Type type, final Object source, final EventHandler handler) {
-        final Map<Object, Set<?>> sourceMap = map.get(type);
+    protected void doRemoveNow(final Event.Type type, final Object source, final EventHandler handler) {
+        final Map<Object, Set<EventHandler>> sourceMap = map.get(type);
         if (sourceMap == null) return;
 
-        final Set<?> handlers = sourceMap.get(source);
+        final Set<EventHandler> handlers = sourceMap.get(source);
         if (handlers == null) return;
 
         final boolean removed = handlers.remove(handler);
@@ -57,19 +55,19 @@ public class SimpleEventBus extends AbstractEventBus {
     }
 
     @Override
-    protected void doAddNow(final Type type, final Object source, final EventHandler handler) {
+    protected void doAddNow(final Event.Type type, final Object source, final EventHandler handler) {
         ensureHandlerSet(type, source).add(handler);
     }
 
-    private <H extends EventHandler> Set<H> ensureHandlerSet(final Type type, final Object source) {
-        Map<Object, Set<?>> sourceMap = map.get(type);
+    private Set<EventHandler> ensureHandlerSet(final Event.Type type, final Object source) {
+        Map<Object, Set<EventHandler>> sourceMap = map.get(type);
         if (sourceMap == null) {
             sourceMap = new HashMap<>();
             map.put(type, sourceMap);
         }
 
         // safe, we control the puts.
-        Set<H> handlers = (Set<H>) sourceMap.get(source);
+        Set<EventHandler> handlers = sourceMap.get(source);
         if (handlers == null) {
             handlers = new LinkedHashSet<>();
             sourceMap.put(source, handlers);
@@ -79,20 +77,20 @@ public class SimpleEventBus extends AbstractEventBus {
     }
 
     @Override
-    public <H extends EventHandler> Collection<H> getHandlers(final Type type, final Object source) {
-        final Map<Object, Set<?>> sourceMap = map.get(type);
+    public Collection<EventHandler> getHandlers(final Event.Type type, final Object source) {
+        final Map<Object, Set<EventHandler>> sourceMap = map.get(type);
         if (sourceMap == null) return Collections.emptySet();
 
         // safe, we control the puts.
-        final Set<H> handlers = (Set<H>) sourceMap.get(source);
+        final Set<EventHandler> handlers = sourceMap.get(source);
         if (handlers != null) return new HashSet<>(handlers);
         else return Collections.emptySet();
     }
 
-    private void prune(final Type type, final Object source) {
-        final Map<Object, Set<?>> sourceMap = map.get(type);
+    private void prune(final Event.Type type, final Object source) {
+        final Map<Object, Set<EventHandler>> sourceMap = map.get(type);
 
-        final Set<?> pruned = sourceMap.remove(source);
+        final Set<EventHandler> pruned = sourceMap.remove(source);
 
         if (pruned != null) {
             if (!pruned.isEmpty() && log.isInfoEnabled()) log.info("Pruned unempty list! {}", pruned);
