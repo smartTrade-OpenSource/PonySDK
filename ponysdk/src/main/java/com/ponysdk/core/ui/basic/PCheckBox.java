@@ -159,4 +159,9 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
         }
     }
 
+    @Override
+    public String toString() {
+        return super.toString() + ", state=" + state;
+    }
+
 }
