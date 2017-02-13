@@ -163,7 +163,7 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
     }
 
     private void adopt(final PWidget child) {
-        if (child.getParent() != null) child.setParent(this);
+        if (child.getParent() == null) child.setParent(this);
         else throw new IllegalStateException("Can't adopt an already widget attached to a parent");
 
     }
