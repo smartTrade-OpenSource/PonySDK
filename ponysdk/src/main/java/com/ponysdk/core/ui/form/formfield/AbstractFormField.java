@@ -50,6 +50,8 @@ public abstract class AbstractFormField<T, W extends IsPWidget> implements FormF
     private FieldValidator validator;
     protected ListenerCollection<PValueChangeHandler<T>> handlers;
 
+    private boolean enabled = true;
+
     public AbstractFormField(final W widget, final DataConverter<String, T> dataProvider) {
         this.widget = widget;
         this.dataProvider = dataProvider;
@@ -58,9 +60,8 @@ public abstract class AbstractFormField<T, W extends IsPWidget> implements FormF
     @Override
     public ValidationResult isValid() {
         ValidationResult result;
-
-        if (validator == null) result = ValidationResult.newOKValidationResult();
-        else result = validator.isValid(getStringValue());
+        if (enabled && validator != null) result = validator.isValid(getStringValue());
+        else result = ValidationResult.newOKValidationResult();
 
         fireAfterValidation(result);
 
@@ -136,6 +137,11 @@ public abstract class AbstractFormField<T, W extends IsPWidget> implements FormF
     @Override
     public HasPValue<T> asHasPValue() {
         return this;
+    }
+
+    @Override
+    public void setEnabled(final boolean enabled) {
+        this.enabled = enabled;
     }
 
 }

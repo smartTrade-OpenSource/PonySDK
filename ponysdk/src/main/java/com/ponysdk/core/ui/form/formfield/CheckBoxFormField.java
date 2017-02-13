@@ -65,6 +65,7 @@ public class CheckBoxFormField extends AbstractFormField<Boolean, PCheckBox> {
 
     @Override
     public void setEnabled(final boolean enabled) {
+        super.setEnabled(enabled);
         widget.setEnabled(enabled);
     }
 

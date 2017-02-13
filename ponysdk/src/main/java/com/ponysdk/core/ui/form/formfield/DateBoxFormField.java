@@ -82,6 +82,7 @@ public class DateBoxFormField extends AbstractFormField<Date, PDateBox> {
 
     @Override
     public void setEnabled(final boolean enabled) {
+        super.setEnabled(enabled);
         widget.setEnabled(enabled);
     }
 

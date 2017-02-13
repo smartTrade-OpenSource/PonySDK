@@ -81,6 +81,7 @@ public class ListBoxFormField<T> extends AbstractFormField<T, PListBox> {
 
     @Override
     public void setEnabled(final boolean enabled) {
+        super.setEnabled(enabled);
         widget.setEnabled(enabled);
     }
 

@@ -66,6 +66,7 @@ public class TextBoxFormField<T> extends AbstractFormField<T, PTextBox> {
 
     @Override
     public void setEnabled(final boolean enabled) {
+        super.setEnabled(enabled);
         widget.setEnabled(enabled);
     }
 
