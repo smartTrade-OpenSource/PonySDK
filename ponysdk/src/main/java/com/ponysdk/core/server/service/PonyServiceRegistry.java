@@ -23,9 +23,7 @@
 
 package com.ponysdk.core.server.service;
 
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
@@ -38,33 +36,37 @@ public class PonyServiceRegistry {
     private static final Map<Class<?>, PonyService> registeredServices = new ConcurrentHashMap<>();
 
     public static final void registerPonyService(final PonyService service) {
+        final Class<? extends PonyService> registrableService = getGeneralizations(service.getClass());
+        final PonyService putIfAbsent = registeredServices.putIfAbsent(registrableService, service);
+        if (putIfAbsent != null) throw new IllegalArgumentException("Service " + registrableService + " is already registered");
 
-        final Set<Class<?>> classes = new HashSet<>();
+        if (!registrableService.equals(service.getClass())) {
+            registeredServices.putIfAbsent(service.getClass(), service);
+        }
 
-        getGeneralizations(service.getClass(), classes);
-
-        classes.stream().filter(PonyService.class::isAssignableFrom).forEach(clazz -> {
-            if (!registeredServices.containsKey(clazz)) {
-                registeredServices.put(clazz, service);
-                log.info("Service registered #{}", clazz);
-            } else {
-                throw new IllegalArgumentException("Already registered service #" + clazz);
-            }
-        });
+        log.info("Service {} registered for the implementation {}", registrableService, service);
     }
 
-    private static final void getGeneralizations(final Class<?> classObject, final Set<Class<?>> generalizations) {
+    private static final Class<? extends PonyService> getGeneralizations(final Class<?> classObject) {
         final Class<?> superClass = classObject.getSuperclass();
 
-        if (superClass != null) getGeneralizations(superClass, generalizations);
+        if (superClass != null && superClass != Object.class) {
+            final Class<? extends PonyService> result = getGeneralizations(superClass);
+            if (result != null) return result;
+        }
 
         for (final Class<?> clazz : classObject.getInterfaces()) {
-            generalizations.add(classObject);
-            getGeneralizations(clazz, generalizations);
+            if (clazz.isAssignableFrom(PonyService.class)) {
+                return (Class<? extends PonyService>) classObject;
+            } else {
+                final Class<? extends PonyService> result = getGeneralizations(clazz);
+                if (result != null) return result;
+            }
         }
+        return null;
     }
 
-    public static final <T extends PonyService> T getPonyService(final Class<T> clazz) {
+    public static final <T extends PonyService> T getPonyService(final Class<? extends PonyService> clazz) {
         final T ponyService = (T) registeredServices.get(clazz);
         if (ponyService != null) {
             return ponyService;

@@ -89,6 +89,7 @@ import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
 import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
 import com.ponysdk.core.ui.grid.AbstractGridWidget;
 import com.ponysdk.core.ui.grid.GridTableWidget;
+import com.ponysdk.core.ui.list.DataGridActivity;
 import com.ponysdk.core.ui.list.DataGridColumnDescriptor;
 import com.ponysdk.core.ui.list.refreshable.Cell;
 import com.ponysdk.core.ui.list.refreshable.RefreshableDataGrid;
@@ -114,18 +115,20 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     public void start(final UIContext uiContext) {
         uiContext.setClientDataOutput((object, instruction) -> System.err.println(object + " : " + instruction));
 
-        final PWindow a = new PWindow(null, "Window 2", "resizable=yes,location=0,status=0,scrollbars=0");
-        a.open();
+        final DataGridActivity<D> grid = new DataGridActivity<>();
 
-        final PLabel b = new PLabel();
-        a.add(b);
+        //final PWindow a = new PWindow(null, "Window 2", "resizable=yes,location=0,status=0,scrollbars=0");
+        //a.open();
 
-        final AtomicInteger i = new AtomicInteger();
-        PScheduler.scheduleWithFixedDelay(() -> {
-            b.setText(i.incrementAndGet() + "");
-        } , Duration.ofSeconds(1), Duration.ofSeconds(1));
+        //final PLabel b = new PLabel();
+        //a.add(b);
 
-        testUIDelegator();
+        //        final AtomicInteger i = new AtomicInteger();
+        //        PScheduler.scheduleWithFixedDelay(() -> {
+        //            b.setText(i.incrementAndGet() + "");
+        //        } , Duration.ofSeconds(1), Duration.ofSeconds(1));
+        //
+        //        testUIDelegator();
 
         //createGrid();
 
@@ -374,7 +377,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     private void createGrid() {
         final AbstractGridWidget listView = new GridTableWidget();
         listView.setStyleProperty("table-layout", "fixed");
-        final RefreshableDataGrid<Integer, Data> grid = new RefreshableDataGrid<Integer, UISampleEntryPoint.Data>(listView);
+        final RefreshableDataGrid<Integer, Data> grid = new RefreshableDataGrid<>(listView);
         PWindow.getMain().add(grid);
 
         final DataGridColumnDescriptor<Data, Data> columnDescriptor1 = new DataGridColumnDescriptor<>();
@@ -442,7 +445,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             for (int key = 1; key < 50; key++) {
                 grid.setData(key - 1, key, new Data(key, "" + i.incrementAndGet()));
             }
-        } , Duration.ofSeconds(1), Duration.ofMillis(100));
+        }, Duration.ofSeconds(1), Duration.ofMillis(100));
     }
 
     private void testUIDelegator() {
@@ -451,7 +454,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final AtomicInteger ai = new AtomicInteger();
         PScheduler.scheduleAtFixedRate(() -> {
             a.setText("a " + ai.incrementAndGet());
-        } , Duration.ofMillis(0), Duration.ofMillis(10));
+        }, Duration.ofMillis(0), Duration.ofMillis(10));
 
         final PLabel p = new PLabel();
         PWindow.getMain().add(p);
@@ -502,7 +505,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             windowContainer.add(label);
             label.setText("Window 3 " + i.incrementAndGet());
             windowContainer.add(new PCheckBox("Checkbox"));
-        } , Duration.ofSeconds(5), Duration.ofSeconds(5));
+        }, Duration.ofSeconds(5), Duration.ofSeconds(5));
 
         w3.open();
 
@@ -526,7 +529,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             windowContainer.add(label);
             label.setText("Window 2 " + i.incrementAndGet());
             windowContainer.add(new PCheckBox("Checkbox"));
-        } , Duration.ofSeconds(5), Duration.ofSeconds(5));
+        }, Duration.ofSeconds(5), Duration.ofSeconds(5));
         return w2;
     }
 
@@ -559,7 +562,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             label.setText("Window 1 " + i.incrementAndGet());
             windowContainer.add(label);
             windowContainer.add(new PCheckBox("Checkbox"));
-        } , Duration.ofSeconds(10), Duration.ofSeconds(10));
+        }, Duration.ofSeconds(10), Duration.ofSeconds(10));
         return w;
     }
 
