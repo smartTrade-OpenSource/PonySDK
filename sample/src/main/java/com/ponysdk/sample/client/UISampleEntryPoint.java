@@ -87,9 +87,12 @@ import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
 import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
+import com.ponysdk.core.ui.datagrid.ColumnDescriptor;
+import com.ponysdk.core.ui.datagrid.DataGrid;
+import com.ponysdk.core.ui.datagrid.impl.PLabelCellRenderer;
+import com.ponysdk.core.ui.datagrid.impl.PLabelHeaderCellRenderer;
 import com.ponysdk.core.ui.grid.AbstractGridWidget;
 import com.ponysdk.core.ui.grid.GridTableWidget;
-import com.ponysdk.core.ui.list.DataGridActivity;
 import com.ponysdk.core.ui.list.DataGridColumnDescriptor;
 import com.ponysdk.core.ui.list.refreshable.Cell;
 import com.ponysdk.core.ui.list.refreshable.RefreshableDataGrid;
@@ -115,7 +118,25 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     public void start(final UIContext uiContext) {
         uiContext.setClientDataOutput((object, instruction) -> System.err.println(object + " : " + instruction));
 
-        final DataGridActivity<D> grid = new DataGridActivity<>();
+        final DataGrid<String> grid = new DataGrid<>();
+
+        final ColumnDescriptor<String> column1 = new ColumnDescriptor<>();
+        column1.setCellRenderer(new PLabelCellRenderer<String>());
+        column1.setHeaderCellRenderer(new PLabelHeaderCellRenderer("Header 1"));
+        grid.addColumnDescriptor(column1);
+
+        final ColumnDescriptor<String> column2 = new ColumnDescriptor<>();
+        column2.setCellRenderer(new PLabelCellRenderer<String>(from -> "Test2"));
+        column2.setHeaderCellRenderer(new PLabelHeaderCellRenderer("Header 2"));
+        grid.addColumnDescriptor(column2);
+
+        PWindow.getMain().add(grid);
+
+        grid.setData("A");
+        grid.setData("B");
+        grid.setData("C");
+        grid.setData("D");
+        grid.setData("E");
 
         //final PWindow a = new PWindow(null, "Window 2", "resizable=yes,location=0,status=0,scrollbars=0");
         //a.open();

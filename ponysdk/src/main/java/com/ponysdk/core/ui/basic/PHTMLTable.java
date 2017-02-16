@@ -200,6 +200,12 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
         return true;
     }
 
+    public void setWidget(final int row, final int column, final IsPWidget widget) {
+        if (widget != null) {
+            setWidget(row, column, widget.asWidget());
+        }
+    }
+
     public void setWidget(final int row, final int column, final PWidget widget) {
         if (widget != null) {
             widget.removeFromParent();
@@ -212,7 +218,7 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
 
             // Physical attach.
             widget.saveAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.ROW, row),
-                    new ServerBinaryModel(ServerToClientModel.COLUMN, column));
+                new ServerBinaryModel(ServerToClientModel.COLUMN, column));
             widget.attach(windowID);
 
             adopt(widget);
@@ -355,8 +361,7 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
             for (final Entry<Integer, Set<String>> entry : styleNames.entrySet()) {
                 if (entry.getKey() >= row) {
                     temp.put(entry.getKey() + 1, entry.getValue());
-                } else
-                    temp.put(entry.getKey(), entry.getValue());
+                } else temp.put(entry.getKey(), entry.getValue());
             }
             temp.put(row, new HashSet<>());
             styleNames = temp;
@@ -368,8 +373,7 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
             for (final Entry<Integer, Set<String>> entry : styleNames.entrySet()) {
                 if (entry.getKey() > row) {
                     temp.put(entry.getKey() - 1, entry.getValue());
-                } else
-                    temp.put(entry.getKey(), entry.getValue());
+                } else temp.put(entry.getKey(), entry.getValue());
             }
             styleNames = temp;
         }

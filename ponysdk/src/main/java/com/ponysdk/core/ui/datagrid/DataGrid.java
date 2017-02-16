@@ -23,39 +23,43 @@
 
 package com.ponysdk.core.ui.datagrid;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.function.Function;
 
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PFlexTable;
 import com.ponysdk.core.ui.basic.PWidget;
 
-public abstract class DataGrid<DataType> implements IsPWidget {
+public class DataGrid<DataType> implements IsPWidget {
 
     private final int pageSize = Integer.MAX_VALUE;
 
     private final PFlexTable table;
-    private final List<DataGridColumnDescriptor<DataType>> columnDescriptors = new ArrayList<>();
+    private final Set<ColumnDescriptor<DataType>> columnDescriptors = new HashSet<>();
+    private final Map<Integer, ColumnDescriptor<DataType>> descriptorsByColumn = new TreeMap<>();
     private final Map<Integer, DataType> rows = new TreeMap<>();
     private final Map<Object, Integer> rowByKey = new HashMap<>();
+
+    private Function<DataType, ? extends Object> keyProvider = Function.identity();
 
     public DataGrid() {
         this.table = new PFlexTable();
     }
 
-    public List<DataGridColumnDescriptor<DataType>> getColumnDescriptors() {
-        return columnDescriptors;
+    public DataGrid(final Function<DataType, Object> keyProvider) {
+        this();
+        this.keyProvider = keyProvider;
     }
 
-    public void addDataGridColumnDescriptor(final DataGridColumnDescriptor<DataType> columnDescriptor) {
-        columnDescriptors.add(columnDescriptor);
-    }
-
-    public int getRowCount() {
-        return rows.size();
+    public void addColumnDescriptor(final ColumnDescriptor<DataType> columnDescriptor) {
+        if (columnDescriptors.add(columnDescriptor)) {
+            descriptorsByColumn.put(columnDescriptors.size() - 1, columnDescriptor);
+            drawHeader(columnDescriptor);
+        }
     }
 
     @Override
@@ -65,66 +69,72 @@ public abstract class DataGrid<DataType> implements IsPWidget {
 
     public void setData(final DataType data) {
         if (rows.size() < pageSize) {
-            final Object key = getKey(data);
-            final int row = rowByKey.get(key);
+            final Object key = keyProvider.apply(data);
+            Integer row = rowByKey.get(key);
 
-            if (row == -1) {
-                rowByKey.put(row, key);
-            } else {
-                rows.put(row, data);
+            if (row == null) {
+                row = rows.size();
+                rowByKey.put(key, row);
             }
+
+            rows.put(row, data);
 
             draw(row, data);
         }
-
     }
 
-    protected abstract Object getKey(DataType data);
+    private void drawHeader(final ColumnDescriptor<DataType> descriptor) {
+        final IsPWidget w = descriptor.getHeaderCellRenderer().render();
+        table.setWidget(0, columnDescriptors.size() - 1, w);
+    }
 
     private void draw(final int rowIndex, final DataType data) {
         int columnIndex = 0;
-        for (final DataGridColumnDescriptor<DataType> descriptor : columnDescriptors) {
-            final PWidget widget = table.getWidget(rowIndex, columnIndex);
-            if (widget == null) {
-                final IsPWidget newWidget = descriptor.getCellRenderer().render(data);
-                table.setWidget(rowIndex, columnIndex, newWidget.asWidget());
+        for (final ColumnDescriptor<DataType> descriptor : columnDescriptors) {
+            final PWidget w = table.getWidget(rowIndex, columnIndex);
+            if (w == null) {
+                table.setWidget(rowIndex, columnIndex, descriptor.getCellRenderer().render(data));
             } else {
-                descriptor.getCellRenderer().update(data, widget);
+                descriptor.getCellRenderer().update(data, w);
             }
             columnIndex++;
         }
     }
 
     public void removeData(final DataType data) {
-        final Object key = getKey(data);
-        final int row = keyByIndex.indexOf(key);
+        final Integer row = rowByKey.remove(keyProvider.apply(data));
+
+        if (row == null) return;
 
         rows.remove(row);
-        keyByIndex.remove(key);
 
         for (int i = row; i < rows.size(); i++) {
-            draw(i, getData(i));
+            draw(i, rows.get(row));
         }
-        reset(rows.size());
+
+        resetRow(rows.size());
     }
 
-    private DataType getData(final int rowIndex) {
-        return rows.get(rowIndex);
-    }
-
-    private void reset(final int rowIndex) {
-        int columnIndex = 0;
-        for (final DataGridColumnDescriptor<DataType> descriptor : columnDescriptors) {
-            final PWidget widget = table.getWidget(rowIndex, columnIndex);
+    private void resetColumn(final Integer column) {
+        final ColumnDescriptor<DataType> descriptor = descriptorsByColumn.get(column);
+        for (int row = 0; row < rows.size(); row++) {
+            final PWidget widget = table.getWidget(row, column);
             descriptor.getCellRenderer().reset(widget);
-            columnIndex++;
+        }
+    }
+
+    private void resetRow(final Integer row) {
+        for (int column = 0; column < columnDescriptors.size(); column++) {
+            final ColumnDescriptor<DataType> descriptor = descriptorsByColumn.get(column);
+            final PWidget widget = table.getWidget(row, column);
+            descriptor.getCellRenderer().reset(widget);
         }
     }
 
     public void moveColumn(final int from, final int to) {
         if (from != to) {
-            final DataGridColumnDescriptor<DataType> object = columnDescriptors.remove(from);
-            columnDescriptors.add(to, object);
+            final ColumnDescriptor<DataType> object = descriptorsByColumn.remove(from);
+            //            descriptorsByColumn.add(to, object);
             //            table.moveColumn(from, to);
         }
     }

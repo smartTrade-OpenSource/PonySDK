@@ -25,7 +25,7 @@ package com.ponysdk.core.ui.datagrid;
 
 import com.ponysdk.core.ui.list.renderer.header.HeaderCellRenderer;
 
-public class DataGridColumnDescriptor<D> {
+public class ColumnDescriptor<D> {
 
     private HeaderCellRenderer headerCellRenderer;
     private CellRenderer<D> cellRenderer;

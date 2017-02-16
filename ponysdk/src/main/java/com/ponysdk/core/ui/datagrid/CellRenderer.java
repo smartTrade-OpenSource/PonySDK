@@ -25,11 +25,11 @@ package com.ponysdk.core.ui.datagrid;
 
 import com.ponysdk.core.ui.basic.IsPWidget;
 
-public interface CellRenderer<D> {
+public interface CellRenderer<DataType> {
 
-    IsPWidget render(final D value);
+    IsPWidget render(final DataType value);
 
-    void update(final D value, IsPWidget current);
+    IsPWidget update(final DataType value, IsPWidget current);
 
     void reset(IsPWidget widget);
 
