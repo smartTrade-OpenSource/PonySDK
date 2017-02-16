@@ -53,9 +53,11 @@ public class StreamServiceServlet extends HttpServlet {
             if (application != null) {
                 final Integer uiContextID = Integer.parseInt(req.getParameter(ClientToServerModel.UI_CONTEXT_ID.toStringValue()));
                 final UIContext uiContext = application.getUIContext(uiContextID);
-                final StreamHandler streamHandler = uiContext.removeStreamListener(
-                        Integer.parseInt(req.getParameter(ClientToServerModel.STREAM_REQUEST_ID.toStringValue())));
+                final StreamHandler streamHandler = uiContext
+                    .removeStreamListener(Integer.parseInt(req.getParameter(ClientToServerModel.STREAM_REQUEST_ID.toStringValue())));
                 streamHandler.onStream(req, resp);
+            } else {
+                log.error("Can't find an application linked to the session #" + req.getSession().getId());
             }
         } catch (final Exception e) {
             log.error("Cannot stream request", e);
