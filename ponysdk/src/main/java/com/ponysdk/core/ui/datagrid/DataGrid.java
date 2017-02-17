@@ -23,120 +23,210 @@
 
 package com.ponysdk.core.ui.datagrid;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.TreeSet;
 import java.util.function.Function;
 
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PFlexTable;
 import com.ponysdk.core.ui.basic.PWidget;
 
-public class DataGrid<DataType> implements IsPWidget {
+public class DataGrid<DataType extends Comparable<DataType>> implements IsPWidget {
 
-    private final int pageSize = Integer.MAX_VALUE;
+    private final View view;
+    private final List<ColumnDescriptor<DataType>> columns = new ArrayList<>();
+    private final TreeSet<W> rows = new TreeSet<>(new DefaultComparator());
 
-    private final PFlexTable table;
-    private final Set<ColumnDescriptor<DataType>> columnDescriptors = new HashSet<>();
-    private final Map<Integer, ColumnDescriptor<DataType>> descriptorsByColumn = new TreeMap<>();
-    private final Map<Integer, DataType> rows = new TreeMap<>();
-    private final Map<Object, Integer> rowByKey = new HashMap<>();
-
-    private Function<DataType, ? extends Object> keyProvider = Function.identity();
+    private Function<DataType, ? extends Object> keyProvider;
 
     public DataGrid() {
-        this.table = new PFlexTable();
+        this(new DefaultView(), Function.identity());
     }
 
     public DataGrid(final Function<DataType, Object> keyProvider) {
-        this();
+        this(new DefaultView(), keyProvider);
+    }
+
+    public DataGrid(final View view, final Function<DataType, ? extends Object> keyProvider) {
+        this.view = view;
         this.keyProvider = keyProvider;
     }
 
-    public void addColumnDescriptor(final ColumnDescriptor<DataType> columnDescriptor) {
-        if (columnDescriptors.add(columnDescriptor)) {
-            descriptorsByColumn.put(columnDescriptors.size() - 1, columnDescriptor);
-            drawHeader(columnDescriptor);
+    public void addColumnDescriptor(final ColumnDescriptor<DataType> column) {
+        if (!columns.add(column)) {
+            drawHeader(column);
         }
     }
 
     @Override
     public PWidget asWidget() {
-        return table.asWidget();
+        return view.asWidget();
     }
 
     public void setData(final DataType data) {
-        if (rows.size() < pageSize) {
-            final Object key = keyProvider.apply(data);
-            Integer row = rowByKey.get(key);
-
-            if (row == null) {
-                row = rows.size();
-                rowByKey.put(key, row);
-            }
-
-            rows.put(row, data);
-
-            draw(row, data);
+        final W w = new W(data);
+        if (rows.add(w)) {
+            draw(w);
         }
     }
 
-    private void drawHeader(final ColumnDescriptor<DataType> descriptor) {
-        final IsPWidget w = descriptor.getHeaderCellRenderer().render();
-        table.setWidget(0, columnDescriptors.size() - 1, w);
+    private void drawHeader(final ColumnDescriptor<DataType> column) {
+        final IsPWidget w = column.getHeaderCellRenderer().render();
+        view.setHeader(columns.size() - 1, w);
     }
 
-    private void draw(final int rowIndex, final DataType data) {
-        int columnIndex = 0;
-        for (final ColumnDescriptor<DataType> descriptor : columnDescriptors) {
-            final PWidget w = table.getWidget(rowIndex, columnIndex);
-            if (w == null) {
-                table.setWidget(rowIndex, columnIndex, descriptor.getCellRenderer().render(data));
-            } else {
-                descriptor.getCellRenderer().update(data, w);
+    private void draw(final W from) {
+        if (from == null) return;
+        int r = rows.headSet(from).size() + 1;
+        int c = 0;
+
+        for (final ColumnDescriptor<DataType> column : columns) {
+            for (final W w : rows.tailSet(from, false)) {
+                drawCell(r++, c, column, w.data);
             }
-            columnIndex++;
+            c++;
         }
+    }
+
+    private void drawCell(final int r, final int c, final ColumnDescriptor<DataType> column, final DataType data) {
+        final PWidget w = view.getCell(r, c);
+        if (w == null) {
+            view.setCell(r, c, column.getCellRenderer().render(data));
+        } else {
+            column.getCellRenderer().update(data, w);
+        }
+    }
+
+    public void removeColumn(final ColumnDescriptor<DataType> column) {
+        if (columns.isEmpty()) return;
+
+        final int c = columns.indexOf(column);
+
+        if (c != -1) {
+            final ColumnDescriptor<DataType> last = columns.get(columns.size());
+            int r = 0;
+            columns.remove(c);
+
+            for (int i = c; i < columns.size(); i++) {
+                for (final W w : rows) {
+                    drawCell(r, c, columns.get(i), w.data);
+                }
+                r = 0;
+            }
+
+            resetColumn(columns.size(), last);
+        }
+
     }
 
     public void removeData(final DataType data) {
-        final Integer row = rowByKey.remove(keyProvider.apply(data));
-
-        if (row == null) return;
-
-        rows.remove(row);
-
-        for (int i = row; i < rows.size(); i++) {
-            draw(i, rows.get(row));
-        }
-
-        resetRow(rows.size());
-    }
-
-    private void resetColumn(final Integer column) {
-        final ColumnDescriptor<DataType> descriptor = descriptorsByColumn.get(column);
-        for (int row = 0; row < rows.size(); row++) {
-            final PWidget widget = table.getWidget(row, column);
-            descriptor.getCellRenderer().reset(widget);
+        final W w = new W(data);
+        final W higher = rows.higher(w);
+        if (rows.remove(w)) {
+            draw(higher);
+            resetRow(rows.size());
         }
     }
 
-    private void resetRow(final Integer row) {
-        for (int column = 0; column < columnDescriptors.size(); column++) {
-            final ColumnDescriptor<DataType> descriptor = descriptorsByColumn.get(column);
-            final PWidget widget = table.getWidget(row, column);
-            descriptor.getCellRenderer().reset(widget);
+    private void resetColumn(final Integer c, final ColumnDescriptor<DataType> column) {
+        for (int r = 0; r < view.getRowCount(); r++) {
+            column.getCellRenderer().reset(view.getCell(r, c));
         }
     }
 
-    public void moveColumn(final int from, final int to) {
-        if (from != to) {
-            final ColumnDescriptor<DataType> object = descriptorsByColumn.remove(from);
-            //            descriptorsByColumn.add(to, object);
-            //            table.moveColumn(from, to);
+    private void resetRow(final Integer r) {
+        int c = 0;
+        for (final ColumnDescriptor<DataType> column : columns) {
+            column.getCellRenderer().reset(view.getCell(r, c++));
         }
     }
+
+    private class W {
+
+        private Object key;
+        private DataType data;
+
+        private W(final DataType data) {
+            setData(data);
+        }
+
+        private void setData(final DataType data) {
+            this.data = data;
+            this.key = keyProvider.apply(data);
+        }
+
+        @Override
+        public int hashCode() {
+            return key.hashCode();
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            return key.equals(obj);
+        }
+
+    }
+
+    private class DefaultComparator implements Comparator<W> {
+
+        @Override
+        public int compare(final W o1, final W o2) {
+            return o1.data.compareTo(o2.data);
+        }
+
+    }
+
+    public interface View extends IsPWidget {
+
+        void setHeader(int c, IsPWidget w);
+
+        void setCell(int r, int c, IsPWidget w);
+
+        int getRowCount();
+
+        PWidget getCell(int r, int c);
+
+    }
+
+    public static class DefaultView implements View {
+
+        private final PFlexTable table = new PFlexTable();
+
+        @Override
+        public PWidget asWidget() {
+            return table;
+        }
+
+        @Override
+        public void setHeader(final int c, final IsPWidget w) {
+            table.setWidget(0, c, w);
+        }
+
+        @Override
+        public PWidget getCell(final int r, final int c) {
+            return table.getWidget(r + 1, c);
+        }
+
+        @Override
+        public int getRowCount() {
+            return table.getRowCount() - 1;
+        }
+
+        @Override
+        public void setCell(final int r, final int c, final IsPWidget w) {
+            table.setWidget(r, c, w);
+        }
+
+    }
+
+    //    public void moveColumn(final int from, final int to) {
+    //        if (from != to) {
+    //            final ColumnDescriptor<DataType> object = descriptorsByColumn.remove(from);
+    //            //            descriptorsByColumn.add(to, object);
+    //            //            table.moveColumn(from, to);
+    //        }
+    //    }
 
 }
