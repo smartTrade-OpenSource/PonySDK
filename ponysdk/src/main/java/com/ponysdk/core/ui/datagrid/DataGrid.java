@@ -1,30 +1,6 @@
-/*
- * Copyright (c) 2011 PonySDK
- *  Owners:
- *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *
- *  WebSite:
- *  http://code.google.com/p/pony-sdk/
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
-
 package com.ponysdk.core.ui.datagrid;
 
 import com.ponysdk.core.ui.basic.IsPWidget;
-import com.ponysdk.core.ui.basic.PFlexTable;
 import com.ponysdk.core.ui.basic.PWidget;
 
 import java.util.*;
@@ -34,7 +10,7 @@ public class DataGrid<DataType extends Comparable<DataType>> implements IsPWidge
 
     private final View view;
     private final List<ColumnDescriptor<DataType>> columns = new ArrayList<>();
-    private final TreeSet<W> rows = new TreeSet<>(new DefaultComparator());
+    private final TreeSet<Decorator> rows = new TreeSet<>(new DefaultComparator());
 
     private Function<DataType, ? extends Object> keyProvider;
 
@@ -63,11 +39,11 @@ public class DataGrid<DataType extends Comparable<DataType>> implements IsPWidge
     }
 
     public void setData(final DataType data) {
-        final W w = new W(data);
-        if (rows.add(w)) {
-            draw(w);
+        final Decorator d = new Decorator(data);
+        if (rows.add(d)) {
+            draw(d);
         } else {
-            update(w);
+            update(d);
         }
     }
 
@@ -76,23 +52,23 @@ public class DataGrid<DataType extends Comparable<DataType>> implements IsPWidge
         view.setHeader(c, w);
     }
 
-    private void update(final W w) {
-        final int r = rows.headSet(w).size();
+    private void update(final Decorator d) {
+        final int r = rows.headSet(d).size();
         int c = 0;
         for (final ColumnDescriptor<DataType> column : columns) {
-            drawCell(r, c++, column, w.data);
+            drawCell(r, c++, column, d.data);
         }
     }
 
-    private void draw(final W from) {
+    private void draw(final Decorator from) {
         if (from == null) return;
         final int index = rows.headSet(from).size();
-        final SortedSet<W> tail = rows.tailSet(from);
+        final SortedSet<Decorator> tail = rows.tailSet(from);
         int r = index;
         int c = 0;
 
         for (final ColumnDescriptor<DataType> column : columns) {
-            for (final W w : tail) {
+            for (final Decorator w : tail) {
                 drawCell(r++, c, column, w.data);
             }
             c++;
@@ -116,27 +92,27 @@ public class DataGrid<DataType extends Comparable<DataType>> implements IsPWidge
 
         if (c != -1) {
             int r = 0;
+
+            int size = columns.size() - 1;
+
             columns.remove(c);
 
             for (int i = c; i < columns.size(); i++) {
-
-                drawHeader(i, columns.get(i));
-
-                for (final W w : rows) {
-                    drawCell(r, c, columns.get(i), w.data);
+                final ColumnDescriptor<DataType> currentColumn = columns.get(i);
+                drawHeader(i, currentColumn);
+                for (final Decorator d : rows) {
+                    drawCell(r++, c, currentColumn, d.data);
                 }
-
                 r = 0;
             }
 
-            resetColumn(columns.size(), column);
+            resetColumn(size, column);
         }
-
     }
 
     public void removeData(final DataType data) {
-        final W w = new W(data);
-        final W higher = rows.higher(w);
+        final Decorator w = new Decorator(data);
+        final Decorator higher = rows.higher(w);
         if (rows.remove(w)) {
             draw(higher);
             resetRow(rows.size());
@@ -159,12 +135,12 @@ public class DataGrid<DataType extends Comparable<DataType>> implements IsPWidge
         }
     }
 
-    private class W {
+    private class Decorator {
 
         private Object key;
         private DataType data;
 
-        private W(final DataType data) {
+        private Decorator(final DataType data) {
             setData(data);
         }
 
@@ -185,71 +161,13 @@ public class DataGrid<DataType extends Comparable<DataType>> implements IsPWidge
 
     }
 
-    private class DefaultComparator implements Comparator<W> {
+    private class DefaultComparator implements Comparator<Decorator> {
 
         @Override
-        public int compare(final W o1, final W o2) {
-            return o1.data.compareTo(o2.data);
+        public int compare(final Decorator d1, final Decorator d2) {
+            return d1.data.compareTo(d2.data);
         }
 
     }
-
-    public interface View extends IsPWidget {
-
-        void setHeader(int c, IsPWidget w);
-
-        void setCell(int r, int c, IsPWidget w);
-
-        int getRowCount();
-
-        PWidget getHeader(int r);
-
-        PWidget getCell(int r, int c);
-
-    }
-
-    public static class DefaultView implements View {
-
-        private final PFlexTable table = new PFlexTable();
-
-        @Override
-        public PWidget asWidget() {
-            return table;
-        }
-
-        @Override
-        public void setHeader(final int c, final IsPWidget w) {
-            table.setWidget(0, c, w);
-        }
-
-        @Override
-        public PWidget getHeader(final int c) {
-            return table.getWidget(0, c);
-        }
-
-        @Override
-        public PWidget getCell(final int r, final int c) {
-            return table.getWidget(r + 1, c);
-        }
-
-        @Override
-        public int getRowCount() {
-            return table.getRowCount() - 1;
-        }
-
-        @Override
-        public void setCell(final int r, final int c, final IsPWidget w) {
-            table.setWidget(r + 1, c, w);
-        }
-
-    }
-
-    //    public void moveColumn(final int from, final int to) {
-    //        if (from != to) {
-    //            final ColumnDescriptor<DataType> object = descriptorsByColumn.remove(from);
-    //            //            descriptorsByColumn.add(to, object);
-    //            //            table.moveColumn(from, to);
-    //        }
-    //    }
 
 }

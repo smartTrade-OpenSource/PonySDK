@@ -132,7 +132,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             grid.addColumnDescriptor(column);
         }
 
-
         PButton add = new PButton("add");
         add.addClickHandler(e -> {
             final ColumnDescriptor<Integer> column = new ColumnDescriptor<>();
