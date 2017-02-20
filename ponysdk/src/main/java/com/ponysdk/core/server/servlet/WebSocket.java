@@ -139,7 +139,6 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
                         final long end = System.currentTimeMillis();
                         if (log.isDebugEnabled()) log.debug("Ping measurement : " + (end - start) + " ms");
                     } else if (jsonObject.containsKey(ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue())) {
-                        if (log.isInfoEnabled()) log.info("Message received from terminal : " + text);
                         applicationManager.fireInstructions(jsonObject, context);
                     } else {
                         log.error("Unknow message from terminal : " + text);
