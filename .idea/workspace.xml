@@ -9,13 +9,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d52aa1b3-766c-4153-bdbf-60cbf42d416d" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/datagrid/HeaderCellRenderer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/datagrid/ColumnDescriptor.java" afterPath="$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/datagrid/ColumnDescriptor.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/datagrid/DataGrid.java" afterPath="$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/datagrid/DataGrid.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/datagrid/impl/PLabelCellRenderer.java" afterPath="$PROJECT_DIR$/ponysdk/src/main/java/com/ponysdk/core/ui/datagrid/impl/PLabelCellRenderer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sample/src/main/java/com/ponysdk/sample/client/UISampleEntryPoint.java" afterPath="$PROJECT_DIR$/sample/src/main/java/com/ponysdk/sample/client/UISampleEntryPoint.java" />
     </list>
     <ignored path="PonySDK.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -179,6 +173,11 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="PREVIOUS_COMMIT_AUTHORS">
+      <list>
+        <option value="Ciaravola &lt;ciaravola.nicolas@gmail.com&gt;" />
+      </list>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GradleLocalSettings">
@@ -1604,7 +1603,7 @@
       <workItem from="1467453730959" duration="4769000" />
       <workItem from="1467659925766" duration="18000" />
       <workItem from="1467752209863" duration="2107000" />
-      <workItem from="1487360199687" duration="9608000" />
+      <workItem from="1487360199687" duration="10019000" />
     </task>
     <task id="LOCAL-00001" summary="Fix race + clean">
       <created>1465208593810</created>
@@ -1690,11 +1689,18 @@
       <option name="project" value="LOCAL" />
       <updated>1467617024305</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="fix add / remove">
+      <created>1487572241624</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1487572241624</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="148499000" />
+    <option name="totallyTimeSpent" value="148910000" />
   </component>
   <component name="TodoView" selected-index="1">
     <todo-panel id="selected-file">
@@ -1757,7 +1763,8 @@
     <MESSAGE value="add gradle + clean modules" />
     <MESSAGE value="fix httpsession destroy" />
     <MESSAGE value="clean" />
-    <option name="LAST_COMMIT_MESSAGE" value="clean" />
+    <MESSAGE value="fix add / remove" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix add / remove" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
