@@ -1,10 +1,10 @@
 
 package com.ponysdk.core.ui.datagrid.impl;
 
-import java.util.function.Function;
-
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.datagrid.TypedCellRenderer;
+
+import java.util.function.Function;
 
 public class PLabelCellRenderer<DataType> extends TypedCellRenderer<DataType, PLabel> {
 
@@ -30,7 +30,8 @@ public class PLabelCellRenderer<DataType> extends TypedCellRenderer<DataType, PL
 
     @Override
     protected void reset0(final PLabel widget) {
-        widget.setText("");
+        if (widget != null)
+            widget.setText("");
     }
 
 }

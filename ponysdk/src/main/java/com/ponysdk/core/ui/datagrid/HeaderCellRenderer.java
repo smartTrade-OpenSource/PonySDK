@@ -23,25 +23,10 @@
 
 package com.ponysdk.core.ui.datagrid;
 
-public class ColumnDescriptor<D> {
+import com.ponysdk.core.ui.basic.IsPWidget;
 
-    private HeaderCellRenderer headerCellRenderer;
-    private CellRenderer<D> cellRenderer;
+public interface HeaderCellRenderer {
 
-    public HeaderCellRenderer getHeaderCellRenderer() {
-        return headerCellRenderer;
-    }
-
-    public void setHeaderCellRenderer(final HeaderCellRenderer headerCellRender) {
-        this.headerCellRenderer = headerCellRender;
-    }
-
-    public CellRenderer<D> getCellRenderer() {
-        return cellRenderer;
-    }
-
-    public void setCellRenderer(final CellRenderer<D> cellRenderer) {
-        this.cellRenderer = cellRenderer;
-    }
+    IsPWidget render();
 
 }

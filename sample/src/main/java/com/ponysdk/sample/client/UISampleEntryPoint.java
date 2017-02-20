@@ -27,6 +27,7 @@ import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
 
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.server.application.UIContext;
@@ -118,25 +119,38 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     public void start(final UIContext uiContext) {
         uiContext.setClientDataOutput((object, instruction) -> System.err.println(object + " : " + instruction));
 
-        final DataGrid<String> grid = new DataGrid<>();
+        final DataGrid<Integer> grid = new DataGrid<>();
 
-        final ColumnDescriptor<String> column1 = new ColumnDescriptor<>();
-        column1.setCellRenderer(new PLabelCellRenderer<String>());
-        column1.setHeaderCellRenderer(new PLabelHeaderCellRenderer("Header 1"));
-        grid.addColumnDescriptor(column1);
+        AtomicInteger id = new AtomicInteger(0);
 
-        final ColumnDescriptor<String> column2 = new ColumnDescriptor<>();
-        column2.setCellRenderer(new PLabelCellRenderer<String>(from -> "Test2"));
-        column2.setHeaderCellRenderer(new PLabelHeaderCellRenderer("Header 2"));
-        grid.addColumnDescriptor(column2);
+        for(int i= 0 ; i < 20; i++){
+            final ColumnDescriptor<Integer> column = new ColumnDescriptor<>();
+            final PAnchor anchor =  new PAnchor("Header " + id.incrementAndGet());
+            anchor.addClickHandler(e -> grid.removeColumn(column));
+            column.setCellRenderer(new PLabelCellRenderer<>(from -> (int)(Math.random() * 1000) + ""));
+            column.setHeaderCellRenderer(() -> anchor);
+            grid.addColumnDescriptor(column);
+        }
 
+
+        PButton add = new PButton("add");
+        add.addClickHandler(e -> {
+            final ColumnDescriptor<Integer> column = new ColumnDescriptor<>();
+            final PAnchor anchor =  new PAnchor("Header " + id.incrementAndGet());
+            anchor.addClickHandler(click -> grid.removeColumn(column));
+            column.setCellRenderer(new PLabelCellRenderer<>(from -> (int)(Math.random() * 1000) + ""));
+            column.setHeaderCellRenderer(() -> anchor);
+            grid.addColumnDescriptor(column);
+        });
+
+        PWindow.getMain().add(add);
         PWindow.getMain().add(grid);
 
-        grid.setData("A");
-        grid.setData("B");
-        grid.setData("C");
-        grid.setData("D");
-        grid.setData("E");
+
+        PScheduler.scheduleAtFixedRate(() -> {
+            grid.setData((int)(Math.random() * 50));
+            grid.removeData((int)(Math.random() * 50));
+        },Duration.ofMillis(5));
 
         //final PWindow a = new PWindow(null, "Window 2", "resizable=yes,location=0,status=0,scrollbars=0");
         //a.open();

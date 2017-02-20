@@ -23,15 +23,12 @@
 
 package com.ponysdk.core.ui.datagrid;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.TreeSet;
-import java.util.function.Function;
-
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PFlexTable;
 import com.ponysdk.core.ui.basic.PWidget;
+
+import java.util.*;
+import java.util.function.Function;
 
 public class DataGrid<DataType extends Comparable<DataType>> implements IsPWidget {
 
@@ -55,8 +52,8 @@ public class DataGrid<DataType extends Comparable<DataType>> implements IsPWidge
     }
 
     public void addColumnDescriptor(final ColumnDescriptor<DataType> column) {
-        if (!columns.add(column)) {
-            drawHeader(column);
+        if (columns.add(column)) {
+            drawHeader(columns.size() - 1, column);
         }
     }
 
@@ -69,24 +66,37 @@ public class DataGrid<DataType extends Comparable<DataType>> implements IsPWidge
         final W w = new W(data);
         if (rows.add(w)) {
             draw(w);
+        } else {
+            update(w);
         }
     }
 
-    private void drawHeader(final ColumnDescriptor<DataType> column) {
+    private void drawHeader(int c, final ColumnDescriptor<DataType> column) {
         final IsPWidget w = column.getHeaderCellRenderer().render();
-        view.setHeader(columns.size() - 1, w);
+        view.setHeader(c, w);
+    }
+
+    private void update(final W w) {
+        final int r = rows.headSet(w).size();
+        int c = 0;
+        for (final ColumnDescriptor<DataType> column : columns) {
+            drawCell(r, c++, column, w.data);
+        }
     }
 
     private void draw(final W from) {
         if (from == null) return;
-        int r = rows.headSet(from).size() + 1;
+        final int index = rows.headSet(from).size();
+        final SortedSet<W> tail = rows.tailSet(from);
+        int r = index;
         int c = 0;
 
         for (final ColumnDescriptor<DataType> column : columns) {
-            for (final W w : rows.tailSet(from, false)) {
+            for (final W w : tail) {
                 drawCell(r++, c, column, w.data);
             }
             c++;
+            r = index;
         }
     }
 
@@ -105,18 +115,21 @@ public class DataGrid<DataType extends Comparable<DataType>> implements IsPWidge
         final int c = columns.indexOf(column);
 
         if (c != -1) {
-            final ColumnDescriptor<DataType> last = columns.get(columns.size());
             int r = 0;
             columns.remove(c);
 
             for (int i = c; i < columns.size(); i++) {
+
+                drawHeader(i, columns.get(i));
+
                 for (final W w : rows) {
                     drawCell(r, c, columns.get(i), w.data);
                 }
+
                 r = 0;
             }
 
-            resetColumn(columns.size(), last);
+            resetColumn(columns.size(), column);
         }
 
     }
@@ -131,6 +144,9 @@ public class DataGrid<DataType extends Comparable<DataType>> implements IsPWidge
     }
 
     private void resetColumn(final Integer c, final ColumnDescriptor<DataType> column) {
+        PWidget header = view.getHeader(c);
+        if (header != null) header.removeFromParent();
+
         for (int r = 0; r < view.getRowCount(); r++) {
             column.getCellRenderer().reset(view.getCell(r, c));
         }
@@ -186,6 +202,8 @@ public class DataGrid<DataType extends Comparable<DataType>> implements IsPWidge
 
         int getRowCount();
 
+        PWidget getHeader(int r);
+
         PWidget getCell(int r, int c);
 
     }
@@ -205,6 +223,11 @@ public class DataGrid<DataType extends Comparable<DataType>> implements IsPWidge
         }
 
         @Override
+        public PWidget getHeader(final int c) {
+            return table.getWidget(0, c);
+        }
+
+        @Override
         public PWidget getCell(final int r, final int c) {
             return table.getWidget(r + 1, c);
         }
@@ -216,7 +239,7 @@ public class DataGrid<DataType extends Comparable<DataType>> implements IsPWidge
 
         @Override
         public void setCell(final int r, final int c, final IsPWidget w) {
-            table.setWidget(r, c, w);
+            table.setWidget(r + 1, c, w);
         }
 
     }
