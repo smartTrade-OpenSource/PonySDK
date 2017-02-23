@@ -1,16 +1,15 @@
-
 package com.ponysdk.core.ui.datagrid.impl;
 
 import com.ponysdk.core.ui.basic.PLabel;
-import com.ponysdk.core.ui.datagrid.TypedCellRenderer;
 
 import java.util.function.Function;
 
 public class PLabelCellRenderer<DataType> extends TypedCellRenderer<DataType, PLabel> {
 
-    private Function<DataType, String> transform = from -> String.valueOf(from);
+    private final Function<DataType, String> transform;
 
     public PLabelCellRenderer() {
+        this(String::valueOf);
     }
 
     public PLabelCellRenderer(final Function<DataType, String> transform) {

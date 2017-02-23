@@ -1,13 +1,13 @@
 package com.ponysdk.core.ui.datagrid;
 
-import com.ponysdk.core.ui.basic.IsPWidget;
+import com.ponysdk.core.ui.basic.PWidget;
 
 public interface CellRenderer<DataType> {
 
-    IsPWidget render(final DataType value);
+    PWidget render(final DataType value);
 
-    IsPWidget update(final DataType value, IsPWidget current);
+    PWidget update(final DataType value, PWidget current);
 
-    void reset(IsPWidget widget);
+    void reset(PWidget widget);
 
 }

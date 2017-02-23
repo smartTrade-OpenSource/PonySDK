@@ -5,14 +5,14 @@ import com.ponysdk.core.ui.basic.PWidget;
 
 public interface View extends IsPWidget {
 
-        void setHeader(int c, IsPWidget w);
+    void setHeader(int c, PWidget w);
 
-        void setCell(int r, int c, IsPWidget w);
+    void setCell(int r, int c, PWidget w);
 
-        int getRowCount();
+    int getRowCount();
 
-        PWidget getHeader(int r);
+    PWidget getHeader(int r);
 
-        PWidget getCell(int r, int c);
+    PWidget getCell(int r, int c);
 
-    }
+}

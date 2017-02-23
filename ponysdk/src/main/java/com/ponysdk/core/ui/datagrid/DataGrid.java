@@ -2,6 +2,7 @@ package com.ponysdk.core.ui.datagrid;
 
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.datagrid.impl.DefaultView;
 
 import java.util.*;
 import java.util.function.Function;
@@ -10,27 +11,26 @@ public class DataGrid<DataType extends Comparable<DataType>> implements IsPWidge
 
     private final View view;
     private final List<ColumnDescriptor<DataType>> columns = new ArrayList<>();
-    private final TreeSet<Decorator> rows = new TreeSet<>(new DefaultComparator());
 
-    private Function<DataType, ? extends Object> keyProvider;
+    private final TreeSet<Decorator<DataType>> rows;
+    private final Function<DataType, ?> keyProvider;
 
     public DataGrid() {
         this(new DefaultView(), Function.identity());
     }
 
-    public DataGrid(final Function<DataType, Object> keyProvider) {
+    public DataGrid(final Function<DataType, ?> keyProvider) {
         this(new DefaultView(), keyProvider);
     }
 
-    public DataGrid(final View view, final Function<DataType, ? extends Object> keyProvider) {
-        this.view = view;
-        this.keyProvider = keyProvider;
+    public DataGrid(final View view, final Function<DataType, ?> keyProvider) {
+        this(view, keyProvider, Comparable::compareTo);
     }
 
-    public void addColumnDescriptor(final ColumnDescriptor<DataType> column) {
-        if (columns.add(column)) {
-            drawHeader(columns.size() - 1, column);
-        }
+    public DataGrid(final View view, final Function<DataType, ?> keyProvider, Comparator<DataType> comparator) {
+        this.view = view;
+        this.keyProvider = keyProvider;
+        this.rows = new TreeSet<>((o1, o2) -> comparator.compare(o1.data, o2.data));
     }
 
     @Override
@@ -38,50 +38,36 @@ public class DataGrid<DataType extends Comparable<DataType>> implements IsPWidge
         return view.asWidget();
     }
 
-    public void setData(final DataType data) {
-        final Decorator d = new Decorator(data);
-        if (rows.add(d)) {
-            draw(d);
-        } else {
-            update(d);
-        }
-    }
+    public void addColumnDescriptor(final ColumnDescriptor<DataType> column) {
+        if (columns.add(column)) {
+            int r = 0, c = columns.size() - 1;
 
-    private void drawHeader(int c, final ColumnDescriptor<DataType> column) {
-        final IsPWidget w = column.getHeaderCellRenderer().render();
-        view.setHeader(c, w);
-    }
+            drawHeader(c, column);
 
-    private void update(final Decorator d) {
-        final int r = rows.headSet(d).size();
-        int c = 0;
-        for (final ColumnDescriptor<DataType> column : columns) {
-            drawCell(r, c++, column, d.data);
-        }
-    }
-
-    private void draw(final Decorator from) {
-        if (from == null) return;
-        final int index = rows.headSet(from).size();
-        final SortedSet<Decorator> tail = rows.tailSet(from);
-        int r = index;
-        int c = 0;
-
-        for (final ColumnDescriptor<DataType> column : columns) {
-            for (final Decorator w : tail) {
+            for (final Decorator<DataType> w : rows) {
                 drawCell(r++, c, column, w.data);
             }
-            c++;
-            r = index;
         }
     }
 
-    private void drawCell(final int r, final int c, final ColumnDescriptor<DataType> column, final DataType data) {
-        final PWidget w = view.getCell(r, c);
-        if (w == null) {
-            view.setCell(r, c, column.getCellRenderer().render(data));
+    public void setData(final DataType data) {
+        final Decorator<DataType> d = new Decorator<>(keyProvider.apply(data), data);
+
+        if (rows.contains(d)) {
+            final int indexBefore = rows.headSet(d).size();
+            if (indexBefore != -1) {
+                rows.remove(d);
+                rows.add(d);
+                int indexAfter = rows.headSet(d).size();
+                if (indexBefore == indexAfter) {
+                    update(indexAfter, d);
+                } else {
+                    draw(Math.min(indexBefore, indexAfter), d);
+                }
+            }
         } else {
-            column.getCellRenderer().update(data, w);
+            rows.add(d);
+            draw(rows.headSet(d).size(), d);
         }
     }
 
@@ -100,8 +86,8 @@ public class DataGrid<DataType extends Comparable<DataType>> implements IsPWidge
             for (int i = c; i < columns.size(); i++) {
                 final ColumnDescriptor<DataType> currentColumn = columns.get(i);
                 drawHeader(i, currentColumn);
-                for (final Decorator d : rows) {
-                    drawCell(r++, c, currentColumn, d.data);
+                for (final Decorator<DataType> d : rows) {
+                    drawCell(r++, i, currentColumn, d.data);
                 }
                 r = 0;
             }
@@ -111,12 +97,55 @@ public class DataGrid<DataType extends Comparable<DataType>> implements IsPWidge
     }
 
     public void removeData(final DataType data) {
-        final Decorator w = new Decorator(data);
-        final Decorator higher = rows.higher(w);
-        if (rows.remove(w)) {
-            draw(higher);
+        final Decorator<DataType> d = new Decorator<>(keyProvider.apply(data), data);
+        final Decorator<DataType> higher = rows.higher(d);
+        final int index = rows.headSet(d).size();
+        if (rows.remove(d)) {
+            draw(index, higher);
             resetRow(rows.size());
         }
+    }
+
+    public List<ColumnDescriptor<DataType>> getColumns() {
+        return Collections.unmodifiableList(columns);
+    }
+
+    private void drawHeader(int c, final ColumnDescriptor<DataType> column) {
+        view.setHeader(c, column.getHeaderRenderer().render());
+    }
+
+    private void update(final int r, final Decorator<DataType> d) {
+        int c = 0;
+        for (final ColumnDescriptor<DataType> column : columns) {
+            drawCell(r, c++, column, d.data);
+        }
+    }
+
+    private void draw(int fromRow, final Decorator<DataType> from) {
+        if (from == null) return;
+        final SortedSet<Decorator<DataType>> tail = rows.tailSet(from);
+        int r = fromRow;
+        int c = 0;
+
+        for (final Decorator<DataType> w : tail) {
+            for (final ColumnDescriptor<DataType> column : columns) {
+                drawCell(r, c++, column, w.data);
+            }
+            c = 0;
+            r++;
+        }
+    }
+
+    private void drawCell(final int r, final int c, final ColumnDescriptor<DataType> column, final DataType data) {
+        PWidget w = view.getCell(r, c);
+
+        if (w == null) {
+            w = column.getCellRenderer().render(data);
+            view.setCell(r, c, w);
+        } else {
+            w = column.getCellRenderer().update(data, w);
+        }
+
     }
 
     private void resetColumn(final Integer c, final ColumnDescriptor<DataType> column) {
@@ -133,41 +162,6 @@ public class DataGrid<DataType extends Comparable<DataType>> implements IsPWidge
         for (final ColumnDescriptor<DataType> column : columns) {
             column.getCellRenderer().reset(view.getCell(r, c++));
         }
-    }
-
-    private class Decorator {
-
-        private Object key;
-        private DataType data;
-
-        private Decorator(final DataType data) {
-            setData(data);
-        }
-
-        private void setData(final DataType data) {
-            this.data = data;
-            this.key = keyProvider.apply(data);
-        }
-
-        @Override
-        public int hashCode() {
-            return key.hashCode();
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            return key.equals(obj);
-        }
-
-    }
-
-    private class DefaultComparator implements Comparator<Decorator> {
-
-        @Override
-        public int compare(final Decorator d1, final Decorator d2) {
-            return d1.data.compareTo(d2.data);
-        }
-
     }
 
 }
