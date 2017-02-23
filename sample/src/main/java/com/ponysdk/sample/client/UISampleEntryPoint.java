@@ -23,68 +23,18 @@
 
 package com.ponysdk.sample.client;
 
-import java.text.SimpleDateFormat;
-import java.time.Duration;
-import java.util.Date;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.PScheduler;
 import com.ponysdk.core.server.concurrent.PScheduler.UIRunnable;
-import com.ponysdk.core.ui.basic.IsPWidget;
-import com.ponysdk.core.ui.basic.PAbsolutePanel;
-import com.ponysdk.core.ui.basic.PAnchor;
-import com.ponysdk.core.ui.basic.PButton;
-import com.ponysdk.core.ui.basic.PCheckBox;
-import com.ponysdk.core.ui.basic.PCookies;
-import com.ponysdk.core.ui.basic.PDateBox;
-import com.ponysdk.core.ui.basic.PDatePicker;
-import com.ponysdk.core.ui.basic.PDecoratedPopupPanel;
-import com.ponysdk.core.ui.basic.PDecoratorPanel;
-import com.ponysdk.core.ui.basic.PDialogBox;
-import com.ponysdk.core.ui.basic.PDisclosurePanel;
-import com.ponysdk.core.ui.basic.PDockLayoutPanel;
-import com.ponysdk.core.ui.basic.PElement;
-import com.ponysdk.core.ui.basic.PFileUpload;
-import com.ponysdk.core.ui.basic.PFlexTable;
-import com.ponysdk.core.ui.basic.PFlowPanel;
-import com.ponysdk.core.ui.basic.PFocusPanel;
-import com.ponysdk.core.ui.basic.PGrid;
-import com.ponysdk.core.ui.basic.PHTML;
-import com.ponysdk.core.ui.basic.PHeaderPanel;
-import com.ponysdk.core.ui.basic.PHorizontalPanel;
-import com.ponysdk.core.ui.basic.PImage;
-import com.ponysdk.core.ui.basic.PLabel;
-import com.ponysdk.core.ui.basic.PLayoutPanel;
-import com.ponysdk.core.ui.basic.PListBox;
-import com.ponysdk.core.ui.basic.PMenuBar;
-import com.ponysdk.core.ui.basic.PMenuItem;
-import com.ponysdk.core.ui.basic.PPasswordTextBox;
-import com.ponysdk.core.ui.basic.PPopupPanel;
-import com.ponysdk.core.ui.basic.PPushButton;
-import com.ponysdk.core.ui.basic.PRadioButton;
-import com.ponysdk.core.ui.basic.PRichTextArea;
-import com.ponysdk.core.ui.basic.PRichTextToolbar;
-import com.ponysdk.core.ui.basic.PScript;
-import com.ponysdk.core.ui.basic.PScrollPanel;
-import com.ponysdk.core.ui.basic.PSimpleLayoutPanel;
-import com.ponysdk.core.ui.basic.PSimplePanel;
-import com.ponysdk.core.ui.basic.PSplitLayoutPanel;
-import com.ponysdk.core.ui.basic.PStackLayoutPanel;
-import com.ponysdk.core.ui.basic.PTabLayoutPanel;
-import com.ponysdk.core.ui.basic.PTabPanel;
-import com.ponysdk.core.ui.basic.PTextArea;
-import com.ponysdk.core.ui.basic.PTextBox;
-import com.ponysdk.core.ui.basic.PTree;
-import com.ponysdk.core.ui.basic.PTreeItem;
-import com.ponysdk.core.ui.basic.PVerticalPanel;
-import com.ponysdk.core.ui.basic.PWidget;
-import com.ponysdk.core.ui.basic.PWindow;
+import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
 import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
+import com.ponysdk.core.ui.datagrid.ColumnDescriptor;
+import com.ponysdk.core.ui.datagrid.DataGrid;
+import com.ponysdk.core.ui.datagrid.impl.PLabelCellRenderer;
 import com.ponysdk.core.ui.grid.AbstractGridWidget;
 import com.ponysdk.core.ui.grid.GridTableWidget;
 import com.ponysdk.core.ui.list.DataGridColumnDescriptor;
@@ -102,6 +52,11 @@ import com.ponysdk.sample.client.event.UserLoggedOutHandler;
 import com.ponysdk.sample.client.page.addon.LoggerAddOn;
 import com.ponysdk.sample.client.page.addon.SelectizeAddon;
 
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.util.Date;
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     private PLabel child2;
@@ -112,10 +67,10 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     public void start(final UIContext uiContext) {
         uiContext.setClientDataOutput((object, instruction) -> System.err.println(object + " : " + instruction));
 
-        final PWindow a = new PWindow(null, "Window 2", "resizable=yes,location=0,status=0,scrollbars=0");
+        final PWindow a = Element.newPWindow(null, "Window 2", "resizable=yes,location=0,status=0,scrollbars=0");
         a.open();
 
-        final PLabel b = new PLabel();
+        final PLabel b = Element.newPLabel();
         a.add(b);
 
         final AtomicInteger i = new AtomicInteger();
@@ -124,17 +79,20 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         } , Duration.ofSeconds(1), Duration.ofSeconds(1));
 
 
-        for (int i = 0; i < 20; i++) {
+        DataGrid<Integer> grid = new DataGrid();
+
+
+        for (int cpt = 0; cpt < 20; cpt++) {
             final ColumnDescriptor<Integer> column = new ColumnDescriptor<>();
-            final PAnchor anchor = new PAnchor("Header " + id.incrementAndGet());
+            final PAnchor anchor = Element.newPAnchor("Header " + i.incrementAndGet());
             anchor.addClickHandler(e -> grid.removeColumn(column));
             column.setCellRenderer(new PLabelCellRenderer<>(from -> a + ""));
             column.setHeaderRenderer(() -> anchor);
             grid.addColumnDescriptor(column);
         }
-        PTextBox textBox = new PTextBox();
+        PTextBox textBox = Element.newPTextBox();
 
-        PButton add = new PButton("add");
+        PButton add = Element.newPButton("add");
         add.addClickHandler(e -> {
             grid.setData(Integer.valueOf(textBox.getText()));
             /**final ColumnDescriptor<Integer> column = new ColumnDescriptor<>();
@@ -363,11 +321,11 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         boxContainer.add(Element.newPRadioButton("RadioLabel"));
         final PRichTextArea richTextArea = Element.newPRichTextArea();
         boxContainer.add(richTextArea);
-        boxContainer.add(new PRichTextToolbar(richTextArea));
-        boxContainer.add(new PScrollPanel());
-        boxContainer.add(new PSimpleLayoutPanel());
-        boxContainer.add(new PSimplePanel());
-        boxContainer.add(new PSplitLayoutPanel());
+        boxContainer.add(Element.newPRichTextToolbar(richTextArea));
+        boxContainer.add(Element.newPScrollPanel());
+        boxContainer.add(Element.newPSimpleLayoutPanel());
+        boxContainer.add(Element.newPSimplePanel());
+        boxContainer.add(Element.newPSplitLayoutPanel());
         boxContainer.add(createStackLayoutPanel());
         // boxContainer.add(new PSuggestBox());
         boxContainer.add(createTabLayoutPanel());
