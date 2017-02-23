@@ -29,6 +29,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -92,7 +94,7 @@ public class UIContext {
     private final CommunicationSanityChecker communicationSanityChecker;
     private final List<UIContextListener> uiContextListeners = new ArrayList<>();
     private final TxnContext context;
-    private final List<DataListener> listeners = new ArrayList<>();
+    private final Set<DataListener> listeners = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private int objectCounter = 1;
     private int streamRequestCounter = 0;
     private Map<String, Permission> permissions = new HashMap<>();

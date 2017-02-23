@@ -48,21 +48,25 @@ public class PWindow extends PObject {
     private final List<PCloseHandler> closeHandlers = new ArrayList<>();
     private final List<POpenHandler> openHandlers = new ArrayList<>();
     private final Queue<Runnable> stackedWindowsInstructions = new LinkedList<>();
+
     private String url;
     private String name;
     private String features;
     private boolean opened = false;
+    private boolean relative = false;
 
     PWindow() {
         initialized = true;
         PWindowManager.registerWindow(this);
     }
 
-    protected PWindow(final String url, final String name, final String features) {
+    //TODO nciaravola => feature + relative should be include in an Option Pojo
+    protected PWindow(final boolean relative, final String url, final String name, final String features) {
         this.windowID = getMain().getID();
         this.url = url;
         this.name = name;
         this.features = features;
+        this.relative = relative;
 
         init();
     }
@@ -106,6 +110,7 @@ public class PWindow extends PObject {
     @Override
     protected void enrichOnInit(final WebsocketEncoder parser) {
         super.enrichOnInit(parser);
+        parser.encode(ServerToClientModel.RELATIVE, relative);
         parser.encode(ServerToClientModel.URL, url);
         parser.encode(ServerToClientModel.NAME, name);
         parser.encode(ServerToClientModel.FEATURES, features);

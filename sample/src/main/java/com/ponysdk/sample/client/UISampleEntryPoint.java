@@ -31,8 +31,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.PScheduler;
-import com.ponysdk.core.server.concurrent.PScheduler.Callback;
-import com.ponysdk.core.server.concurrent.PScheduler.UIDelegator;
 import com.ponysdk.core.server.concurrent.PScheduler.UIRunnable;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
@@ -431,17 +429,17 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final boolean delegatorMode = true;
 
         if (delegatorMode) {
-            final UIDelegator<String> delegator = PScheduler.delegate(new Callback<String>() {
-
-                @Override
-                public void onSuccess(final String result) {
-                    p.setText(result);
-                }
-
-                @Override
-                public void onError(final String result, final Exception exception) {
-                }
-            });
+            //            final UIDelegator<String> delegator = PScheduler.delegate(new Callback<String>() {
+            //
+            //                @Override
+            //                public void onSuccess(final String result) {
+            //                    p.setText(result);
+            //                }
+            //
+            //                @Override
+            //                public void onError(final String result, final Exception exception) {
+            //                }
+            //            });
 
             new Thread() {
 
@@ -453,7 +451,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
-                    delegator.onSuccess("Test");
+                    //                    delegator.onSuccess("Test");
                 }
             }.start();
 

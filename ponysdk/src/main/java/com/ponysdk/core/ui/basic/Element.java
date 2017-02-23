@@ -380,7 +380,11 @@ public class Element {
     }
 
     public static final PWindow newPWindow(final String url, final String name, final String features) {
-        return f.newPWindow(url, name, features);
+        return f.newPWindow(false, url, name, features);
+    }
+
+    public static final PWindow newPWindow(final boolean relative, final String url, final String name, final String features) {
+        return f.newPWindow(relative, url, name, features);
     }
 
     public static final PElement newA() {

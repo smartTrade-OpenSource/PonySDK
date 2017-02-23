@@ -415,8 +415,8 @@ public class DefaultElementFactory implements ElementFactory {
     }
 
     @Override
-    public PWindow newPWindow(final String url, final String name, final String features) {
-        return new PWindow(url, name, features);
+    public PWindow newPWindow(final boolean relative, final String url, final String name, final String features) {
+        return new PWindow(relative, url, name, features);
     }
 
 }

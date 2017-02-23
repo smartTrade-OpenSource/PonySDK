@@ -213,6 +213,7 @@ public enum ServerToClientModel {
     LIMIT(ValueTypeModel.INTEGER),
     SUGGESTION(ValueTypeModel.STRING),
     FEATURES(ValueTypeModel.STRING),
+    RELATIVE(ValueTypeModel.BOOLEAN),
     URL(ValueTypeModel.STRING),
     CLOSE(ValueTypeModel.NULL),
     WIDGET_TYPE(ValueTypeModel.BYTE),

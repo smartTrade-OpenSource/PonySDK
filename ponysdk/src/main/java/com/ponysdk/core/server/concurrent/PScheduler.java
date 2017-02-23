@@ -32,6 +32,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -138,15 +139,15 @@ public class PScheduler implements UIContextListener {
         return uiRunnable;
     }
 
-    public static <R> UIDelegator<R> delegate(final Callback<R> callable) {
-        return delegate(callable, UIContext.get());
+    public static <R> Consumer<R> delegate(final Consumer<R> consumer) {
+        return delegate(consumer, UIContext.get());
     }
 
-    public static <R> UIDelegator<R> delegate(final Callback<R> callable, final UIContext uiContext) {
+    public static <R> Consumer<R> delegate(final Consumer<R> callable, final UIContext uiContext) {
         return INSTANCE.delegate0(callable, uiContext);
     }
 
-    private <R> UIDelegator<R> delegate0(final Callback<R> callback, final UIContext uiContext) {
+    private <R> Consumer<R> delegate0(final Consumer<R> callback, final UIContext uiContext) {
         return new UIDelegator<>(callback, uiContext);
     }
 
@@ -251,38 +252,6 @@ public class PScheduler implements UIContextListener {
         public UIContext getUiContext() {
             return uiContext;
         }
-
-    }
-
-    public static final class UIDelegator<R> {
-
-        private final Callback<R> callback;
-        private final UIContext uiContext;
-
-        UIDelegator(final Callback<R> callback, final UIContext uiContext) {
-            this.uiContext = uiContext;
-            this.callback = callback;
-        }
-
-        public UIRunnable onError(final R result, final Exception exception) {
-            return PScheduler.schedule(uiContext, () -> callback.onError(result, exception));
-        }
-
-        public UIRunnable onSuccess(final R result) {
-            return PScheduler.schedule(uiContext, () -> callback.onSuccess(result));
-        }
-
-        public UIContext getUiContext() {
-            return uiContext;
-        }
-
-    }
-
-    public static interface Callback<R> {
-
-        public void onSuccess(R result);
-
-        public void onError(R result, Exception exception);
     }
 
 }

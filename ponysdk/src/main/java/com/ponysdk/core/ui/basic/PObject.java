@@ -87,8 +87,9 @@ public abstract class PObject {
 
         init0();
 
-        while (!stackedInstructions.isEmpty())
+        while (!stackedInstructions.isEmpty()) {
             stackedInstructions.poll().run();
+        }
 
         if (attachListener != null) attachListener.onAttach();
 

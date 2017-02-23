@@ -48,8 +48,8 @@ public class PTWindow extends AbstractPTObject {
     private static final String EMPTY = "";
 
     private Window window;
-    private String url;
-    private String name;
+    private String url = EMPTY;
+    private String name = EMPTY;
     private String features;
 
     private UIBuilder uiService;
@@ -64,14 +64,15 @@ public class PTWindow extends AbstractPTObject {
 
         uiService = builder;
 
+        final boolean relative = buffer.readBinaryModel().getBooleanValue();
         url = buffer.readBinaryModel().getStringValue();
-        if (url == null) url = GWT.getHostPageBaseURL() + "?" + ClientToServerModel.WINDOW_ID.toStringValue() + "=" + objectId + "&"
-                + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "=" + PonySDK.uiContextId;
-
         name = buffer.readBinaryModel().getStringValue();
-        if (name == null) name = EMPTY;
         features = buffer.readBinaryModel().getStringValue();
-        if (features == null) features = EMPTY;
+
+        if (relative) {
+            url = GWT.getHostPageBaseURL() + url + "?" + ClientToServerModel.WINDOW_ID.toStringValue() + "=" + objectId + "&"
+                    + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "=" + PonySDK.uiContextId;
+        }
 
         PTWindowManager.get().register(this);
     }

@@ -148,7 +148,7 @@ public class WindowPageActivity extends SamplePageActivity implements PCloseHand
         private PRootLayoutPanel rootLayoutPanel;
 
         public MyWindow(final String name, final String features) {
-            super(null, name, features);
+            super(false, null, name, features);
         }
 
         // @Override
