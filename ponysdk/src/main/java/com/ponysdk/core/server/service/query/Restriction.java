@@ -1,6 +1,7 @@
 
 package com.ponysdk.core.server.service.query;
 
+/** WIP **/
 public class Restriction extends Criterion {
 
     public Restriction() {

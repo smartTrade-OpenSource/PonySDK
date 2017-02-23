@@ -1,5 +1,6 @@
 package com.ponysdk.core.ui.datagrid.impl;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PLabel;
 
 import java.util.function.Function;
@@ -18,7 +19,7 @@ public class PLabelCellRenderer<DataType> extends TypedCellRenderer<DataType, PL
 
     @Override
     public PLabel render(final DataType value) {
-        return new PLabel(transform.apply(value));
+        return Element.newPLabel(transform.apply(value));
     }
 
     @Override

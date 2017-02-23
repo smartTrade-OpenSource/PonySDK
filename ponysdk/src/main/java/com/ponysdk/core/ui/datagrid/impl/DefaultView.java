@@ -1,12 +1,13 @@
 package com.ponysdk.core.ui.datagrid.impl;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PFlexTable;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.datagrid.View;
 
 public class DefaultView implements View {
 
-    private final PFlexTable table = new PFlexTable();
+    private final PFlexTable table = Element.newPFlexTable();
 
     @Override
     public PWidget asWidget() {
