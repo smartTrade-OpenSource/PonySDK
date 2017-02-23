@@ -203,6 +203,12 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
         return true;
     }
 
+    public void setWidget(final int row, final int column, final IsPWidget widget) {
+        if (widget != null) {
+            setWidget(row, column, widget.asWidget());
+        }
+    }
+
     public void setWidget(final int row, final int column, final PWidget widget) {
         if (widget != null) {
             widget.removeFromParent();
