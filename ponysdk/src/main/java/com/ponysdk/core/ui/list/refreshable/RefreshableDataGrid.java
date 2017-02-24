@@ -133,9 +133,10 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
         }
     }
 
-    public void removeByKey(final K key) {
+    public int removeByKey(final K key) {
         final int removed = keyByIndex.indexOf(key);
         if (removed != -1) remove(removed);
+        return removed;
     }
 
     @Override
