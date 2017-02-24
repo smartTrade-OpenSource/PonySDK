@@ -50,13 +50,7 @@ public class RichTextAreaPageActivity extends SamplePageActivity {
         final PRichTextArea richTextArea = Element.newPRichTextArea();
         final PRichTextToolbar richTextToolbar = Element.newPRichTextToolbar(richTextArea);
 
-        richTextArea.addValueChangeHandler(new PValueChangeHandler<String>() {
-
-            @Override
-            public void onValueChange(final PValueChangeEvent<String> event) {
-                System.err.println(richTextArea.getHTML());
-            }
-        });
+        richTextArea.addValueChangeHandler(event -> System.err.println(richTextArea.getHTML()));
 
         final PFlowPanel flow = Element.newPFlowPanel();
         flow.add(Element.newPLabel("Edit rich content"));
@@ -74,13 +68,9 @@ public class RichTextAreaPageActivity extends SamplePageActivity {
         final PTextBox color = Element.newPTextBox();
         color.setPlaceholder("Color");
         final PButton update = Element.newPButton("Set back color");
-        update.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                final String c = color.getValue();
-                richTextArea.getFormatter().setBackColor(c);
-            }
+        update.addClickHandler(event -> {
+            final String c = color.getValue();
+            richTextArea.getFormatter().setBackColor(c);
         });
 
         final PFlowPanel toolbar = Element.newPFlowPanel();

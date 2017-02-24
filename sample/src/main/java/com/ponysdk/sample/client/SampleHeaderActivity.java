@@ -100,40 +100,27 @@ public class SampleHeaderActivity extends HeaderActivity implements PClickHandle
             }
         });
 
-        optionsAnchor.addClickHandler(new PClickHandler() {
+        optionsAnchor.addClickHandler(clickEvent -> {
+            if (popup.isShowing()) {
+                popup.hide();
+            } else {
+                // optionsAnchor.addStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_SELECTED);
+                popup.setPopupPositionAndShow((offsetWidth, offsetHeight, windowWidth, windowHeight) -> {
+                    final int left = windowWidth - 250;
+                    popup.setPopupPosition(left, 26);
 
-            @Override
-            public void onClick(final PClickEvent clickEvent) {
-                if (popup.isShowing()) {
-                    popup.hide();
-                } else {
-                    // optionsAnchor.addStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_SELECTED);
-                    popup.setPopupPositionAndShow(new PPositionCallback() {
-
-                        @Override
-                        public void setPosition(final int offsetWidth, final int offsetHeight, final int windowWidth,
-                                                final int windowHeight) {
-                            final int left = windowWidth - 250;
-                            popup.setPopupPosition(left, 26);
-
-                            // PonySession.getCurrent().getRootLayoutPanel().addDomHandler(SampleHeaderActivity.this,
-                            // PClickEvent.TYPE);
-                        }
-                    });
-                }
+                    // PonySession.getCurrent().getRootLayoutPanel().addDomHandler(SampleHeaderActivity.this,
+                    // PClickEvent.TYPE);
+                });
             }
         });
 
         popup.addDomHandler(SampleHeaderActivity.this, PClickEvent.TYPE);
 
-        popup.addCloseHandler(new PCloseHandler() {
-
-            @Override
-            public void onClose(final PCloseEvent closeEvent) {
-                // optionsAnchor.removeStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_SELECTED);
-                // PonySession.getCurrent().getRootLayoutPanel().removeHandler(SampleHeaderActivity.this,
-                // PClickEvent.TYPE);
-            }
+        popup.addCloseHandler(closeEvent -> {
+            // optionsAnchor.removeStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_SELECTED);
+            // PonySession.getCurrent().getRootLayoutPanel().removeHandler(SampleHeaderActivity.this,
+            // PClickEvent.TYPE);
         });
 
         return optionsAnchor;

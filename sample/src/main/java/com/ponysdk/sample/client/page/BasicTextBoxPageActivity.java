@@ -68,13 +68,9 @@ public class BasicTextBoxPageActivity extends SamplePageActivity {
         panel.add(placeHolder);
 
         final PButton button = Element.newPButton("Set");
-        button.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                textBox.setPlaceholder(placeHolder.getText());
-                textBoxReadOnly.setPlaceholder(placeHolder.getText());
-            }
+        button.addClickHandler(event -> {
+            textBox.setPlaceholder(placeHolder.getText());
+            textBoxReadOnly.setPlaceholder(placeHolder.getText());
         });
         panel.add(button);
 
@@ -89,16 +85,12 @@ public class BasicTextBoxPageActivity extends SamplePageActivity {
         final PTextBox replacement = Element.newPTextBox();
         final PCheckBox showMask = Element.newPCheckBox("Show mask");
         final PButton applyMaskButton = Element.newPButton("Apply mask");
-        applyMaskButton.addClickHandler(new PClickHandler() {
+        applyMaskButton.addClickHandler(event -> {
+            if (masked.getText().isEmpty()) return;
 
-            @Override
-            public void onClick(final PClickEvent event) {
-                if (masked.getText().isEmpty()) return;
-
-                String replaceChar = " ";
-                if (!replacement.getText().isEmpty()) replaceChar = replacement.getText().substring(0, 1);
-                maskedTextBox.applyMask(masked.getText(), showMask.getValue(), replaceChar);
-            }
+            String replaceChar = " ";
+            if (!replacement.getText().isEmpty()) replaceChar = replacement.getText().substring(0, 1);
+            maskedTextBox.applyMask(masked.getText(), showMask.getValue(), replaceChar);
         });
         masked.setPlaceholder("({{000}}) {{000}}.{{0000}}");
         replacement.setWidth("10px");

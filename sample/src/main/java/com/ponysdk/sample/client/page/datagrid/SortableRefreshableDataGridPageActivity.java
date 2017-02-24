@@ -51,25 +51,15 @@ public class SortableRefreshableDataGridPageActivity extends RefreshableDataGrid
         super.onFirstShowPage();
 
         final PButton addRow = Element.newPButton("Insert row");
-        addRow.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                if (added) return;
-                insertColspanRow();
-                added = true;
-            }
+        addRow.addClickHandler(event -> {
+            if (added) return;
+            insertColspanRow();
+            added = true;
         });
 
         actions.setWidget(0, 0, addRow);
 
-        dataGrid = new SortableRefreshableDataGrid<>(new Comparator<PonyStock>() {
-
-            @Override
-            public int compare(final PonyStock o1, final PonyStock o2) {
-                return o1.getPrice().compareTo(o2.getPrice());
-            }
-        });
+        dataGrid = new SortableRefreshableDataGrid<>((o1, o2) -> o1.getPrice().compareTo(o2.getPrice()));
 
         dataGrid.addDataGridColumnDescriptor(newIDDescriptor());
         dataGrid.addDataGridColumnDescriptor(newRaceDescriptor());

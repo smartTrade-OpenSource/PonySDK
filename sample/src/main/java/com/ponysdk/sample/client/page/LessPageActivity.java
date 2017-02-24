@@ -162,16 +162,11 @@ public class LessPageActivity extends SamplePageActivity {
 
         final PButton validateButton = Element.newPButton("Validate");
         validateButton.setStyleName("pony-PButton accent");
-        validateButton.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent clickEvent) {
-                final boolean isValid = form.isValid();
-                if (isValid) {
-                    updateClientColorAndRefreshLess();
-                }
+        validateButton.addClickHandler(clickEvent -> {
+            final boolean isValid = form.isValid();
+            if (isValid) {
+                updateClientColorAndRefreshLess();
             }
-
         });
 
         layout.add(formLayout);
@@ -180,13 +175,9 @@ public class LessPageActivity extends SamplePageActivity {
         final PListBox themesSelector = Element.newPListBox();
         themesSelector.addItem(STANDARD);
         themesSelector.addItem(DARK);
-        themesSelector.addChangeHandler(new PChangeHandler() {
-
-            @Override
-            public void onChange(final PChangeEvent event) {
-                final String selectedItem = themesSelector.getSelectedItem();
-                setTheme(selectedItem);
-            }
+        themesSelector.addChangeHandler(event -> {
+            final String selectedItem = themesSelector.getSelectedItem();
+            setTheme(selectedItem);
         });
 
         layout.add(Element.newPHTML("<br><br><br>"));
@@ -261,13 +252,9 @@ public class LessPageActivity extends SamplePageActivity {
         final StringTextBoxFormField ff = new StringTextBoxFormField();
         ff.setValidator(colorValidator);
         ff.setValue(defaultValue);
-        ff.getWidget().addValueChangeHandler(new PValueChangeHandler<String>() {
-
-            @Override
-            public void onValueChange(final PValueChangeEvent<String> event) {
-                if (colorValidator.isValid(event.getValue()).isValid()) {
-                    preview.setStyleProperty("backgroundColor", "#" + event.getValue());
-                }
+        ff.getWidget().addValueChangeHandler(event -> {
+            if (colorValidator.isValid(event.getValue()).isValid()) {
+                preview.setStyleProperty("backgroundColor", "#" + event.getValue());
             }
         });
 

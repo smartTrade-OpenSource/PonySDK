@@ -103,30 +103,22 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
         layout.add(formContainer);
 
         final PButton add = Element.newPButton("Add");
-        add.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                final Integer i = Integer.parseInt(line.getText());
-                final Pony father = dataGrid.getRow(i);
-                final List<Pony> copy = new ArrayList<>();
-                for (int j = 0; j < 3; j++) {
-                    final Pony p = new Pony(father.getId(), "Copy-" + father.getName(), father.getAge(), father.getRace());
-                    copy.add(p);
-                }
-                dataGrid.insertSubList(father, copy);
+        add.addClickHandler(event -> {
+            final Integer i = Integer.parseInt(line.getText());
+            final Pony father = dataGrid.getRow(i);
+            final List<Pony> copy = new ArrayList<>();
+            for (int j = 0; j < 3; j++) {
+                final Pony p = new Pony(father.getId(), "Copy-" + father.getName(), father.getAge(), father.getRace());
+                copy.add(p);
             }
+            dataGrid.insertSubList(father, copy);
         });
 
         final PButton remove = Element.newPButton("Remove");
-        remove.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                final Integer i = Integer.parseInt(line.getText());
-                final Pony father = dataGrid.getRow(i);
-                dataGrid.removeSubList(father);
-            }
+        remove.addClickHandler(event -> {
+            final Integer i = Integer.parseInt(line.getText());
+            final Pony father = dataGrid.getRow(i);
+            dataGrid.removeSubList(father);
         });
 
         layout.add(line);
@@ -182,19 +174,15 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
                 selectorCheckBox.addSelectableListener(selector);
                 selector.registerSelectable(selectorCheckBox);
 
-                selectorCheckBox.addValueChangeHandler(new PValueChangeHandler<Boolean>() {
+                selectorCheckBox.addValueChangeHandler(event -> {
+                    if (event.getValue()) {
+                        selectorCheckBox.onCheck();
+                        dataGrid.selectRow(value);
 
-                    @Override
-                    public void onValueChange(final PValueChangeEvent<Boolean> event) {
-                        if (event.getValue()) {
-                            selectorCheckBox.onCheck();
-                            dataGrid.selectRow(value);
+                    } else {
+                        selectorCheckBox.onUncheck();
+                        dataGrid.unSelectRow(value);
 
-                        } else {
-                            selectorCheckBox.onUncheck();
-                            dataGrid.unSelectRow(value);
-
-                        }
                     }
                 });
 
@@ -222,33 +210,33 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
             "name");
         nameHeaderCellRender.addFilterListener(dataProvider);
         nameColumnDescriptor.setHeaderCellRenderer(nameHeaderCellRender);
-        nameColumnDescriptor.setValueProvider(new BeanValueProvider<Pony, String>("name"));
-        nameColumnDescriptor.setCellRenderer(new LabelCellRenderer<String>());
-        nameColumnDescriptor.setSubCellRenderer(new LabelCellRenderer<String>());
+        nameColumnDescriptor.setValueProvider(new BeanValueProvider<>("name"));
+        nameColumnDescriptor.setCellRenderer(new LabelCellRenderer<>());
+        nameColumnDescriptor.setSubCellRenderer(new LabelCellRenderer<>());
 
-        nameColumnDescriptor.setSubCellRenderer(new LabelCellRenderer<String>());
+        nameColumnDescriptor.setSubCellRenderer(new LabelCellRenderer<>());
 
         final PListBox ageListBox = Element.newPListBox(true);
         for (int i = 0; i < 30; i++)
             ageListBox.addItem(i + " year", i);
 
         final DataGridColumnDescriptor<Pony, String> ageColumnDescriptor = new DataGridColumnDescriptor<>();
-        ageColumnDescriptor.setValueProvider(new BeanValueProvider<Pony, String>("age"));
+        ageColumnDescriptor.setValueProvider(new BeanValueProvider<>("age"));
         final ComplexHeaderCellRenderer ageHeaderCellRender = new ComplexHeaderCellRenderer("Age",
             new ListBoxFormField<Integer>(ageListBox), "age");
         ageHeaderCellRender.addFilterListener(dataProvider);
         ageColumnDescriptor.setHeaderCellRenderer(ageHeaderCellRender);
-        ageColumnDescriptor.setCellRenderer(new LabelCellRenderer<String>());
-        ageColumnDescriptor.setSubCellRenderer(new LabelCellRenderer<String>());
+        ageColumnDescriptor.setCellRenderer(new LabelCellRenderer<>());
+        ageColumnDescriptor.setSubCellRenderer(new LabelCellRenderer<>());
 
         final DataGridColumnDescriptor<Pony, String> raceColumnDescriptor = new DataGridColumnDescriptor<>();
-        raceColumnDescriptor.setValueProvider(new BeanValueProvider<Pony, String>("race"));
+        raceColumnDescriptor.setValueProvider(new BeanValueProvider<>("race"));
         final ComplexHeaderCellRenderer raceHeaderCellRender = new ComplexHeaderCellRenderer("Race", new StringTextBoxFormField(),
             "race");
         raceHeaderCellRender.addFilterListener(dataProvider);
         raceColumnDescriptor.setHeaderCellRenderer(raceHeaderCellRender);
-        raceColumnDescriptor.setCellRenderer(new LabelCellRenderer<String>());
-        raceColumnDescriptor.setSubCellRenderer(new LabelCellRenderer<String>());
+        raceColumnDescriptor.setCellRenderer(new LabelCellRenderer<>());
+        raceColumnDescriptor.setSubCellRenderer(new LabelCellRenderer<>());
 
         dataGrid.addDataGridColumnDescriptor(selectColumnDescriptor);
         dataGrid.addDataGridColumnDescriptor(nameColumnDescriptor);
@@ -262,24 +250,11 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
         formContainer.setWidget(0, 0, actionSelectorView);
 
         final PButton refresh = Element.newPButton("Refresh");
-        refresh.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                dataProvider.onPageChange(0);
-            }
-        });
+        refresh.addClickHandler(event -> dataProvider.onPageChange(0));
         formContainer.setWidget(0, 1, refresh);
 
         final PButton addPonyButton = Element.newPButton("Create new pony");
-        addPonyButton.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent clickEvent) {
-                showCreatePonyPopup();
-            }
-
-        });
+        addPonyButton.addClickHandler(clickEvent -> showCreatePonyPopup());
         // addPonyButton.addStyleName(PonySDKTheme.BUTTON_GREEN);
         formContainer.setWidget(0, 2, addPonyButton);
 

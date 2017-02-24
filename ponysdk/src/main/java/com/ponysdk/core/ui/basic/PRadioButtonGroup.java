@@ -55,12 +55,12 @@ public class PRadioButtonGroup {
     }
 
     public void addValueChangeHandler(final PValueChangeHandler<Boolean> handler) {
-        if (this.handlers == null) this.handlers = new ArrayList<>();
+        if (handlers == null) handlers = new ArrayList<>();
         handlers.add(handler);
     }
 
     public boolean removeValueChangeHandler(final PValueChangeHandler<Boolean> handler) {
-        return this.handlers != null ? handlers.remove(handler) : false;
+        return handlers != null && handlers.remove(handler);
     }
 
     public void addRadioButton(final PRadioButton radioButton) {
@@ -86,7 +86,7 @@ public class PRadioButtonGroup {
     }
 
     public void removeRadioButton(final PRadioButton radioButton) {
-        if (this.buttons != null) this.buttons.remove(radioButton);
+        if (buttons != null) buttons.remove(radioButton);
     }
 
     public void setName(final String name) {

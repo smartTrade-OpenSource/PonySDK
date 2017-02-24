@@ -74,9 +74,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         a.add(b);
 
         final AtomicInteger i = new AtomicInteger();
-        PScheduler.scheduleWithFixedDelay(() -> {
-            b.setText(i.incrementAndGet() + "");
-        } , Duration.ofSeconds(1), Duration.ofSeconds(1));
+        PScheduler.scheduleWithFixedDelay(() -> b.setText(i.incrementAndGet() + ""), Duration.ofSeconds(1), Duration.ofSeconds(1));
 
 
         DataGrid<Integer> grid = new DataGrid();
@@ -95,13 +93,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         PButton add = Element.newPButton("add");
         add.addClickHandler(e -> {
             grid.setData(Integer.valueOf(textBox.getText()));
-            /**final ColumnDescriptor<Integer> column = new ColumnDescriptor<>();
-            final PAnchor anchor = new PAnchor("Header " + id.incrementAndGet());
-            anchor.addClickHandler(click -> grid.removeColumn(column));
-            column.setCellRenderer(new PLabelCellRenderer<>(from -> (int) (Math.random() * 1000) + ""));
-            column.setHeaderRenderer(() -> anchor);
-            grid.addColumnDescriptor(column);
-             **/
         });
 
         PWindow.getMain().add(add);
@@ -216,31 +207,27 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         // flowPanel.add(label19);
         // flowPanel.add(label20);
 
-        PScheduler.scheduleAtFixedRate(new Runnable() {
-
-            @Override
-            public void run() {
-                label1.setInnerHTML("<div style='color:red'>" + "Test avec des accents : &��{" + "</div>");
-                label2.setInnerHTML("<div style='color:blue'>" + System.nanoTime() + "</div>");
-                label3.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
-                label4.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
-                label5.setInnerHTML("<div style='color:blue'>" + System.nanoTime() + "</div>");
-                label6.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
-                label7.setInnerHTML("<div style='color:orange'>" + System.nanoTime() + "</div>");
-                label8.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
-                label9.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
-                label10.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
-                label11.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
-                label12.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
-                label13.setInnerHTML("<div style='color:green'>" + System.nanoTime() + "</div>");
-                label14.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
-                label15.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
-                label16.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
-                label17.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
-                label18.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
-                label19.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
-                label20.setInnerHTML("<div style='color:yellow'>" + System.nanoTime() + "</div>");
-            }
+        PScheduler.scheduleAtFixedRate(() -> {
+            label1.setInnerHTML("<div style='color:red'>" + "Test avec des accents : &��{" + "</div>");
+            label2.setInnerHTML("<div style='color:blue'>" + System.nanoTime() + "</div>");
+            label3.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
+            label4.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
+            label5.setInnerHTML("<div style='color:blue'>" + System.nanoTime() + "</div>");
+            label6.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
+            label7.setInnerHTML("<div style='color:orange'>" + System.nanoTime() + "</div>");
+            label8.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
+            label9.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
+            label10.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
+            label11.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
+            label12.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
+            label13.setInnerHTML("<div style='color:green'>" + System.nanoTime() + "</div>");
+            label14.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
+            label15.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
+            label16.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
+            label17.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
+            label18.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
+            label19.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
+            label20.setInnerHTML("<div style='color:yellow'>" + System.nanoTime() + "</div>");
         }, Duration.ofMillis(5000));
 
         final PWindow window = Element.newPWindow(null, "a", null);
@@ -340,13 +327,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         PWindow.getMain().add(boxContainer);
 
         child2 = Element.newPLabel("Label2");
-        child2.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                System.out.println("bbbbb");
-            }
-        });
+        child2.addClickHandler(event -> System.out.println("bbbbb"));
         boxContainer.add(child2);
 
         try {
@@ -400,13 +381,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
                 return Element.newPLabel(value.key + "");
             }
         });
-        columnDescriptor1.setHeaderCellRenderer(new HeaderCellRenderer() {
-
-            @Override
-            public IsPWidget render() {
-                return Element.newPLabel("A");
-            }
-        });
+        columnDescriptor1.setHeaderCellRenderer(() -> Element.newPLabel("A"));
         columnDescriptor1.setValueProvider(new IdentityValueProvider<>());
         grid.addDataGridColumnDescriptor(columnDescriptor1);
         grid.addDataGridColumnDescriptor(columnDescriptor1);
@@ -431,13 +406,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
                     return Element.newPLabel(value.value);
                 }
             });
-            columnDescriptor3.setHeaderCellRenderer(new HeaderCellRenderer() {
-
-                @Override
-                public IsPWidget render() {
-                    return Element.newPLabel("B");
-                }
-            });
+            columnDescriptor3.setHeaderCellRenderer(() -> Element.newPLabel("B"));
             columnDescriptor3.setValueProvider(new IdentityValueProvider<>());
             grid.addDataGridColumnDescriptor(columnDescriptor3);
         }
@@ -459,9 +428,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PLabel a = Element.newPLabel();
         PWindow.getMain().add(a);
         final AtomicInteger ai = new AtomicInteger();
-        PScheduler.scheduleAtFixedRate(() -> {
-            a.setText("a " + ai.incrementAndGet());
-        }, Duration.ofMillis(0), Duration.ofMillis(10));
+        PScheduler.scheduleAtFixedRate(() -> a.setText("a " + ai.incrementAndGet()), Duration.ofMillis(0), Duration.ofMillis(10));
 
         final PLabel p = Element.newPLabel();
         PWindow.getMain().add(p);
@@ -651,13 +618,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         dateBox.setValue(new Date(0));
         flowPanel.add(dateBox);
         final PButton button = Element.newPButton("reset");
-        button.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                dateBox.setValue(null);
-            }
-        });
+        button.addClickHandler(event -> dateBox.setValue(null));
         flowPanel.add(button);
         return flowPanel;
     }

@@ -179,9 +179,7 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     }
 
     public void setYearArrowsVisible(final boolean visible) {
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.YEAR_ARROWS_VISIBLE, visible);
-        });
+        saveUpdate((writer) -> writer.writeModel(ServerToClientModel.YEAR_ARROWS_VISIBLE, visible));
     }
 
     public int getMonth() {

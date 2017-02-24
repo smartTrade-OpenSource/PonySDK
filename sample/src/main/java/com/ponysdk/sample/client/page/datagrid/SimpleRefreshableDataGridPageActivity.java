@@ -78,51 +78,35 @@ public class SimpleRefreshableDataGridPageActivity extends RefreshableDataGridPa
         toRowFormField.getWidget().setPlaceholder("Row index (move)");
 
         final PButton addButton = Element.newPButton("Add a row");
-        addButton.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                final Integer index = addRowFormField.getValue();
-                if (index != null) {
-                    dataGrid.insertRow(index, 0, 4, Element.newPLabel("Colspan 1 inserted"));
-                }
+        addButton.addClickHandler(event -> {
+            final Integer index = addRowFormField.getValue();
+            if (index != null) {
+                dataGrid.insertRow(index, 0, 4, Element.newPLabel("Colspan 1 inserted"));
             }
         });
 
         final PButton removeByKeyButton = Element.newPButton("Remove a row (by key)");
-        removeByKeyButton.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                final Long k = removeRowByKeyFormField.getValue();
-                if (k != null) {
-                    dataGrid.removeByKey(k);
-                }
+        removeByKeyButton.addClickHandler(event -> {
+            final Long k = removeRowByKeyFormField.getValue();
+            if (k != null) {
+                dataGrid.removeByKey(k);
             }
         });
 
         final PButton removeButton = Element.newPButton("Remove a row (by index)");
-        removeButton.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                final Integer v = removeRowFormField.getValue();
-                if (v != null) {
-                    dataGrid.remove(v);
-                }
+        removeButton.addClickHandler(event -> {
+            final Integer v = removeRowFormField.getValue();
+            if (v != null) {
+                dataGrid.remove(v);
             }
         });
 
         final PButton moveButton = Element.newPButton("Move a row");
-        moveButton.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                final Long k = keyRowFormField.getValue();
-                final Integer v = toRowFormField.getValue();
-                if (v != null && k != null) {
-                    //dataGrid.moveRow(k, v);
-                }
+        moveButton.addClickHandler(event -> {
+            final Long k = keyRowFormField.getValue();
+            final Integer v = toRowFormField.getValue();
+            if (v != null && k != null) {
+                //dataGrid.moveRow(k, v);
             }
         });
 

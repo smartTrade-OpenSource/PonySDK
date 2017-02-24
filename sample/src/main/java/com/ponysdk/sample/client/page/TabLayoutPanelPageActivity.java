@@ -66,53 +66,25 @@ public class TabLayoutPanelPageActivity extends SamplePageActivity {
         tabPanel.setAnimationVertical(false);
         tabPanel.setAnimationDuration(Duration.ofMillis(1000));
 
-        tabPanel.addBeforeSelectionHandler(new PBeforeSelectionHandler<Integer>() {
-
-            @Override
-            public void onBeforeSelection(final PBeforeSelectionEvent<Integer> event) {
-                PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
-                    "onBeforeSelection, tab index : " + event.getSelectedItem());
-            }
-        });
-        tabPanel.addSelectionHandler(new PSelectionHandler<Integer>() {
-
-            @Override
-            public void onSelection(final PSelectionEvent<Integer> event) {
-                PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
-                    "onSelection, tab index : " + event.getSelectedItem());
-            }
-        });
+        tabPanel.addBeforeSelectionHandler(event -> PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
+            "onBeforeSelection, tab index : " + event.getSelectedItem()));
+        tabPanel.addSelectionHandler(event -> PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
+            "onSelection, tab index : " + event.getSelectedItem()));
 
         final PButton button = Element.newPButton("Add Tab");
         button.setStyleProperty("margin", "10px");
-        button.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent clickEvent) {
-                addTabContent(tabPanel);
-            }
-        });
+        button.addClickHandler(clickEvent -> addTabContent(tabPanel));
 
         final PButton addCustomTabButton = Element.newPButton("Add Tab (custom tab)");
         addCustomTabButton.setStyleProperty("margin", "10px");
-        addCustomTabButton.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent clickEvent) {
-                addCustomTabContent(tabPanel);
-            }
-        });
+        addCustomTabButton.addClickHandler(clickEvent -> addCustomTabContent(tabPanel));
 
         final PTextBox indexTextBox = Element.newPTextBox();
         final PButton selectButton = Element.newPButton("Select Tab");
         selectButton.setStyleProperty("margin", "10px");
-        selectButton.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent clickEvent) {
-                final String text = indexTextBox.getText();
-                tabPanel.selectTab(Integer.valueOf(text));
-            }
+        selectButton.addClickHandler(clickEvent -> {
+            final String text = indexTextBox.getText();
+            tabPanel.selectTab(Integer.valueOf(text));
         });
 
         final PHorizontalPanel horizontalPanel = Element.newPHorizontalPanel();

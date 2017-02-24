@@ -66,16 +66,12 @@ public class SplitPanelPageActivity extends SamplePageActivity {
         splitLayoutPanel.setWidgetSnapClosedSize(south, 40);
         splitLayoutPanel.setWidgetToggleDisplayAllowed(south, true);
 
-        splitLayoutPanel.addLayoutResizeHandler(new PLayoutResizeHandler() {
-
-            @Override
-            public void onLayoutResize(final PLayoutResizeEvent resizeEvent) {
-                for (final LayoutResizeData data : resizeEvent.getLayoutResizeData()) {
-                    if (data.w == south) {
-                        PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(), "South size: " + data.size);
-                    } else if (data.w == east) {
-                        PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(), "East size: " + data.size);
-                    }
+        splitLayoutPanel.addLayoutResizeHandler(resizeEvent -> {
+            for (final LayoutResizeData data : resizeEvent.getLayoutResizeData()) {
+                if (data.w == south) {
+                    PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(), "South size: " + data.size);
+                } else if (data.w == east) {
+                    PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(), "East size: " + data.size);
                 }
             }
         });

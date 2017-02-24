@@ -53,36 +53,16 @@ public class HTMLPageActivity extends SamplePageActivity {
         final PHTML htmlBold = Element.newPHTML("<b>Pony Bold</b> and <font color='red'>Pony Red</font> using HTML");
         final PHTML htmlClickable = Element.newPHTML(
             "<span style='cursor: pointer;border: 1px solid black;color:white;background-color:gray;margin:5px;padding:10px'>click me!</span> using HTML and CSS");
-        htmlClickable.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent clickEvent) {
-                logEvent("HTML clicked", clickEvent);
-            }
-
-        });
+        htmlClickable.addClickHandler(clickEvent -> logEvent("HTML clicked", clickEvent));
 
         final PHTML htmlDoubleClickable = Element.newPHTML(
             "<span style='cursor: pointer;border: 1px solid black;color:white;background-color:gray;margin:5px;padding:10px'>double click me!</span> using HTML and CSS");
-        htmlDoubleClickable.addDoubleClickHandler(new PDoubleClickHandler() {
-
-            @Override
-            public void onDoubleClick(final PDoubleClickEvent clickEvent) {
-                logEvent("HTML double clicked", clickEvent);
-            }
-
-        });
+        htmlDoubleClickable.addDoubleClickHandler(clickEvent -> logEvent("HTML double clicked", clickEvent));
 
         final PHTML htmlWithContextMenu = Element.newPHTML(
             "<span style='cursor: pointer;border: 1px solid black;color:white;background-color:gray;margin:5px;padding:10px'>context menu on me!</span> using HTML and CSS");
         htmlWithContextMenu.preventEvent(PEventType.ONCONTEXTMENU);
-        htmlWithContextMenu.addDomHandler(new PContextMenuHandler() {
-
-            @Override
-            public void onContextMenu(final PContextMenuEvent event) {
-                PNotificationManager.showHumanizedNotification(getView().asWidget().getWindowID(), "Context menu triggered");
-            }
-        }, PContextMenuEvent.TYPE);
+        htmlWithContextMenu.addDomHandler((PContextMenuHandler) event -> PNotificationManager.showHumanizedNotification(getView().asWidget().getWindowID(), "Context menu triggered"), PContextMenuEvent.TYPE);
 
         final PCheckBox checkBox = Element.newPCheckBox();
         checkBox.setHTML("<font color='blue'>Pony-SDK</font>");

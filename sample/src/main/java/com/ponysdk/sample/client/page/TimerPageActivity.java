@@ -62,12 +62,10 @@ public class TimerPageActivity extends SamplePageActivity {
         label = Element.newPLabel("0");
 
         final PButton scheduleRepeatingButton = Element.newPButton("Start");
-        scheduleRepeatingButton.addClickHandler((event) -> {
-            scheduleAtFixedDelay = PScheduler.scheduleAtFixedRate(() -> {
-                time1++;
-                label.setText("" + time1);
-            }, Duration.ofMillis(Integer.valueOf(textBox.getText())));
-        });
+        scheduleRepeatingButton.addClickHandler((event) -> scheduleAtFixedDelay = PScheduler.scheduleAtFixedRate(() -> {
+            time1++;
+            label.setText("" + time1);
+        }, Duration.ofMillis(Integer.valueOf(textBox.getText()))));
         panel.add(Element.newPLabel("Simple repeating timer"));
         panel.add(label);
         panel.add(textBox);
@@ -80,14 +78,8 @@ public class TimerPageActivity extends SamplePageActivity {
         panel.add(Element.newPLabel("Fixed delay timer"));
         panel.add(dateLabel);
         final PButton fixedDelayButton = Element.newPButton("Start");
-        fixedDelayButton.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent clickEvent) {
-                PScheduler.scheduleAtFixedRate(() -> dateLabel.setText(dateFormat.format(Calendar.getInstance().getTime())),
-                    Duration.ofMillis(1000));
-            }
-        });
+        fixedDelayButton.addClickHandler(clickEvent -> PScheduler.scheduleAtFixedRate(() -> dateLabel.setText(dateFormat.format(Calendar.getInstance().getTime())),
+            Duration.ofMillis(1000)));
         panel.add(fixedDelayButton);
 
         // Client side only

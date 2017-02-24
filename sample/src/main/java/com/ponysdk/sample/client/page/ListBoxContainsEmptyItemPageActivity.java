@@ -50,14 +50,10 @@ public class ListBoxContainsEmptyItemPageActivity extends SamplePageActivity {
         listBox.addItem("Mustang");
         listBox.addItem("Altai horse");
 
-        listBox.addChangeHandler(new PChangeHandler() {
-
-            @Override
-            public void onChange(final PChangeEvent event) {
-                if (listBox.getSelectedIndex() != -1) {
-                    PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
-                        "Item selected : " + listBox.getSelectedItem());
-                }
+        listBox.addChangeHandler(event -> {
+            if (listBox.getSelectedIndex() != -1) {
+                PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
+                    "Item selected : " + listBox.getSelectedItem());
             }
         });
 
@@ -71,14 +67,8 @@ public class ListBoxContainsEmptyItemPageActivity extends SamplePageActivity {
         multiListBox.addItem("Mustang");
         multiListBox.addItem("Altai horse");
 
-        multiListBox.addChangeHandler(new PChangeHandler() {
-
-            @Override
-            public void onChange(final PChangeEvent event) {
-                PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
-                    "Item selected : " + multiListBox.getSelectedItems());
-            }
-        });
+        multiListBox.addChangeHandler(event -> PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
+            "Item selected : " + multiListBox.getSelectedItems()));
 
         panel.add(listBox);
         panel.add(multiListBox);

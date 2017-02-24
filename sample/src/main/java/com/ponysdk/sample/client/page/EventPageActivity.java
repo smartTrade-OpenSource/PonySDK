@@ -52,14 +52,10 @@ public class EventPageActivity extends SamplePageActivity {
         final PHorizontalPanel infoPanel = Element.newPHorizontalPanel();
         final PTextBox textField = Element.newPTextBox("This is an info eventbus");
         final PButton ok = Element.newPButton("send [INFO]");
-        ok.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent clickEvent) {
-                final DemoBusinessEvent businessEvent = new DemoBusinessEvent(EventPageActivity.this);
-                businessEvent.setBusinessMessage(textField.getText());
-                fireEvent(businessEvent);
-            }
+        ok.addClickHandler(clickEvent -> {
+            final DemoBusinessEvent businessEvent = new DemoBusinessEvent(EventPageActivity.this);
+            businessEvent.setBusinessMessage(textField.getText());
+            fireEvent(businessEvent);
         });
 
         infoPanel.add(textField);
@@ -70,15 +66,11 @@ public class EventPageActivity extends SamplePageActivity {
         final PTextBox textField2 = Element.newPTextBox("This is a warning eventbus");
         final PButton ok2 = Element.newPButton("send [WARN]");
 
-        ok2.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent clickEvent) {
-                final DemoBusinessEvent businessEvent = new DemoBusinessEvent(EventPageActivity.this);
-                businessEvent.setLevel(Level.WARNING);
-                businessEvent.setBusinessMessage(textField2.getText());
-                fireEvent(businessEvent);
-            }
+        ok2.addClickHandler(clickEvent -> {
+            final DemoBusinessEvent businessEvent = new DemoBusinessEvent(EventPageActivity.this);
+            businessEvent.setLevel(Level.WARNING);
+            businessEvent.setBusinessMessage(textField2.getText());
+            fireEvent(businessEvent);
         });
 
         warningPanel.add(textField2);
@@ -89,15 +81,11 @@ public class EventPageActivity extends SamplePageActivity {
         final PTextBox textField3 = Element.newPTextBox("This is an error eventbus");
         final PButton ok3 = Element.newPButton("send [ERROR]");
 
-        ok3.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent clickEvent) {
-                final DemoBusinessEvent businessEvent = new DemoBusinessEvent(EventPageActivity.this);
-                businessEvent.setLevel(Level.ERROR);
-                businessEvent.setBusinessMessage(textField3.getText());
-                fireEvent(businessEvent);
-            }
+        ok3.addClickHandler(clickEvent -> {
+            final DemoBusinessEvent businessEvent = new DemoBusinessEvent(EventPageActivity.this);
+            businessEvent.setLevel(Level.ERROR);
+            businessEvent.setBusinessMessage(textField3.getText());
+            fireEvent(businessEvent);
         });
 
         errorPanel.add(textField3);
@@ -108,13 +96,7 @@ public class EventPageActivity extends SamplePageActivity {
         final PTextBox textField4 = Element.newPTextBox("This is a tray notification");
         final PButton ok4 = Element.newPButton("show [TRAY]");
 
-        ok4.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent clickEvent) {
-                PNotificationManager.notify(textField4.getText(), Notification.TRAY);
-            }
-        });
+        ok4.addClickHandler(clickEvent -> PNotificationManager.notify(textField4.getText(), Notification.TRAY));
 
         trayPanel.add(textField4);
         trayPanel.add(ok4);

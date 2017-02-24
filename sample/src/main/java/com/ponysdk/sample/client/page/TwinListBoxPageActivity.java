@@ -48,14 +48,8 @@ public class TwinListBoxPageActivity extends SamplePageActivity {
         leftListBox.addItem("Item4");
         leftListBox.addItem("Item5");
         leftListBox.setVisibleItemCount(10);
-        leftListBox.addChangeHandler(new PChangeHandler() {
-
-            @Override
-            public void onChange(final PChangeEvent event) {
-                PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
-                        "Item selected : " + leftListBox.getSelectedItem());
-            }
-        });
+        leftListBox.addChangeHandler(event -> PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
+                "Item selected : " + leftListBox.getSelectedItem()));
 
         final PListBox rightListBox = twinListBox.getRightListBox();
         rightListBox.addItem("Item6");
@@ -63,22 +57,10 @@ public class TwinListBoxPageActivity extends SamplePageActivity {
         rightListBox.addItem("Item8");
         rightListBox.addItem("Item9");
         rightListBox.setVisibleItemCount(10);
-        rightListBox.addChangeHandler(new PChangeHandler() {
+        rightListBox.addChangeHandler(event -> PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
+                "Item selected : " + rightListBox.getSelectedItem()));
 
-            @Override
-            public void onChange(final PChangeEvent event) {
-                PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
-                        "Item selected : " + rightListBox.getSelectedItem());
-            }
-        });
-
-        twinListBox.addChangeHandler(new PChangeHandler() {
-
-            @Override
-            public void onChange(final PChangeEvent event) {
-                PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(), "Item changed");
-            }
-        });
+        twinListBox.addChangeHandler(event -> PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(), "Item changed"));
 
         examplePanel.setWidget(twinListBox);
     }

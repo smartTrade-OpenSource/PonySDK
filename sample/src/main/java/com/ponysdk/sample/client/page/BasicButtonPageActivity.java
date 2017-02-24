@@ -79,18 +79,14 @@ public class BasicButtonPageActivity extends SamplePageActivity {
         // styleListBox.addItem(PonySDKTheme.BUTTON_ROSY);
         // styleListBox.addItem("pony-PButton accent");
 
-        styleListBox.addChangeHandler(new PChangeHandler() {
+        styleListBox.addChangeHandler(event -> {
+            final String styleName = styleListBox.getSelectedItem();
 
-            @Override
-            public void onChange(final PChangeEvent event) {
-                final String styleName = styleListBox.getSelectedItem();
-
-                normalButton.setStyleName(styleName);
-                disabledOnRequestButton.setStyleName(styleName);
-                showLoadingOnRequestButton.setStyleName(styleName);
-                comboOnRequestButton.setStyleName(styleName);
-                disabledButton.setStyleName(styleName);
-            }
+            normalButton.setStyleName(styleName);
+            disabledOnRequestButton.setStyleName(styleName);
+            showLoadingOnRequestButton.setStyleName(styleName);
+            comboOnRequestButton.setStyleName(styleName);
+            disabledButton.setStyleName(styleName);
         });
 
         panel.add(Element.newPLabel("Select the button style : "));
@@ -112,15 +108,11 @@ public class BasicButtonPageActivity extends SamplePageActivity {
 
         showLoadingOnRequestButton = Element.newPButton("Show loading on request");
         showLoadingOnRequestButton.showLoadingOnRequest(true);
-        showLoadingOnRequestButton.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                fireEvent(new DemoBusinessEvent("Button clicked"));
-                try {
-                    Thread.sleep(5000);
-                } catch (final InterruptedException e) {
-                }
+        showLoadingOnRequestButton.addClickHandler(event -> {
+            fireEvent(new DemoBusinessEvent("Button clicked"));
+            try {
+                Thread.sleep(5000);
+            } catch (final InterruptedException e) {
             }
         });
 
@@ -128,15 +120,11 @@ public class BasicButtonPageActivity extends SamplePageActivity {
 
         disabledOnRequestButton = Element.newPButton("Disabled on request");
         disabledOnRequestButton.setEnabledOnRequest(false);
-        disabledOnRequestButton.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                fireEvent(new DemoBusinessEvent("Button clicked"));
-                try {
-                    Thread.sleep(5000);
-                } catch (final InterruptedException e) {
-                }
+        disabledOnRequestButton.addClickHandler(event -> {
+            fireEvent(new DemoBusinessEvent("Button clicked"));
+            try {
+                Thread.sleep(5000);
+            } catch (final InterruptedException e) {
             }
         });
 
@@ -145,15 +133,11 @@ public class BasicButtonPageActivity extends SamplePageActivity {
         comboOnRequestButton = Element.newPButton("Show loading and disable on request");
         comboOnRequestButton.setEnabledOnRequest(false);
         comboOnRequestButton.showLoadingOnRequest(true);
-        comboOnRequestButton.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                fireEvent(new DemoBusinessEvent("Button clicked"));
-                try {
-                    Thread.sleep(5000);
-                } catch (final InterruptedException e) {
-                }
+        comboOnRequestButton.addClickHandler(event -> {
+            fireEvent(new DemoBusinessEvent("Button clicked"));
+            try {
+                Thread.sleep(5000);
+            } catch (final InterruptedException e) {
             }
         });
 

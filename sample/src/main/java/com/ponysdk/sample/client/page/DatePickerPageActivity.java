@@ -61,36 +61,22 @@ public class DatePickerPageActivity extends SamplePageActivity {
 
         datePicker = Element.newPDatePicker();
         datePicker.addStyleToDates("off", dates("12/25/2013", "01/01/2014", "04/26/2014"));
-        datePicker.addValueChangeHandler(new PValueChangeHandler<Date>() {
-
-            @Override
-            public void onValueChange(final PValueChangeEvent<Date> event) {
-                notifyDateChange("picker", event.getValue());
-                dateBox.setDefaultMonth(datePicker.getValue());
-            }
+        datePicker.addValueChangeHandler(event -> {
+            notifyDateChange("picker", event.getValue());
+            dateBox.setDefaultMonth(datePicker.getValue());
         });
 
         final Date middecember = dates("12/15/2013").get(0);
-        datePicker.addShowRangeHandler(new PShowRangeHandler<Date>() {
-
-            @Override
-            public void onShowRange(final PShowRangeEvent<Date> event) {
-                PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
-                    "Range <" + event.getStart() + "," + event.getEnd() + ">");
-                if (middecember.after(event.getStart()) && middecember.before(event.getEnd())) {
-                    datePicker.setTransientEnabledOnDates(false, dates("12/21/2013", "12/22/2013", "12/23/2013", "12/24/2013"));
-                }
+        datePicker.addShowRangeHandler(event -> {
+            PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
+                "Range <" + event.getStart() + "," + event.getEnd() + ">");
+            if (middecember.after(event.getStart()) && middecember.before(event.getEnd())) {
+                datePicker.setTransientEnabledOnDates(false, dates("12/21/2013", "12/22/2013", "12/23/2013", "12/24/2013"));
             }
         });
 
         dateBox = Element.newPDateBox();
-        dateBox.addValueChangeHandler(new PValueChangeHandler<Date>() {
-
-            @Override
-            public void onValueChange(final PValueChangeEvent<Date> event) {
-                notifyDateChange("datebox", event.getValue());
-            }
-        });
+        dateBox.addValueChangeHandler(event -> notifyDateChange("datebox", event.getValue()));
 
         panel.add(Element.newPLabel("Permanent DatePicker:"));
         panel.add(datePicker);

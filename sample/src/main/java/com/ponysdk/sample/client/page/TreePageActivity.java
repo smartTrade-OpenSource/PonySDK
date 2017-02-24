@@ -54,26 +54,16 @@ public class TreePageActivity extends SamplePageActivity {
         tree.setAnimationEnabled(false);
         tree.setWidth("300px");
 
-        tree.addSelectionHandler(new PSelectionHandler<PTreeItem>() {
-
-            @Override
-            public void onSelection(final PSelectionEvent<PTreeItem> event) {
-                final String msg = "Selected item : name = " + event.getSelectedItem();
-                UIContext.getRootEventBus().fireEvent(new DemoBusinessEvent(msg));
-            }
+        tree.addSelectionHandler(event -> {
+            final String msg = "Selected item : name = " + event.getSelectedItem();
+            UIContext.getRootEventBus().fireEvent(new DemoBusinessEvent(msg));
         });
 
         final PTreeItem firstItem = Element.newPTreeItem("First item");
 
         final PAnchor anchor = Element.newPAnchor("Second item");
         final PTreeItem secondItem = Element.newPTreeItem(anchor);
-        anchor.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                secondItem.setState(!secondItem.getState());
-            }
-        });
+        anchor.addClickHandler(event -> secondItem.setState(!secondItem.getState()));
 
         final PTreeItem thirdItem = Element.newPTreeItem(Element.newPImage("images/pony.png"));
 

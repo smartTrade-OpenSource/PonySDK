@@ -100,8 +100,7 @@ public class PTTextBox extends PTTextBoxBase<TextBox> implements KeyPressHandler
      * @return true if the character matches the regular expression, false otherwise.
      */
     private boolean match(final char key) {
-        if (regExp == null) return true;
-        return regExp.exec(String.valueOf(key)) != null;
+        return regExp == null || regExp.exec(String.valueOf(key)) != null;
     }
 
     /**

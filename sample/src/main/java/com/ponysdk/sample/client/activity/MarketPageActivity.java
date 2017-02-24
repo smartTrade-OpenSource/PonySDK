@@ -135,9 +135,7 @@ public class MarketPageActivity extends PageActivity {
 
         final PHTML buy = Element.newPHTML("<div></div>");
         buy.addStyleName("buy");
-        buy.addClickHandler(clickEvent -> {
-            PNotificationManager.showHumanizedNotification(getView().asWidget().getWindowID(), "Buy clicked!");
-        });
+        buy.addClickHandler(clickEvent -> PNotificationManager.showHumanizedNotification(getView().asWidget().getWindowID(), "Buy clicked!"));
         box.add(buy);
 
         final PLabel buyPipHead = Element.newPLabel("buy");
@@ -262,13 +260,7 @@ public class MarketPageActivity extends PageActivity {
             }
         });
 
-        close.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                box.removeFromParent();
-            }
-        });
+        close.addClickHandler(event -> box.removeFromParent());
 
         return box;
     }

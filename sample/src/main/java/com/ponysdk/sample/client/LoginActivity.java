@@ -65,13 +65,7 @@ public class LoginActivity extends AbstractActivity<DefaultLoginPageView> {
             }
         });
 
-        view.getLoginButton().addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                doLogin();
-            }
-        });
+        view.getLoginButton().addClickHandler(event -> doLogin());
 
         doLogin();
     }

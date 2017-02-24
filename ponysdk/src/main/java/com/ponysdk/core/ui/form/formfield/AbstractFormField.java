@@ -121,7 +121,7 @@ public abstract class AbstractFormField<T, W extends IsPWidget> implements FormF
 
     @Override
     public boolean removeValueChangeHandler(final PValueChangeHandler<T> handler) {
-        return handlers != null ? handlers.remove(handler) : false;
+        return handlers != null && handlers.remove(handler);
     }
 
     @Override

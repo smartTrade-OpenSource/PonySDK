@@ -66,30 +66,22 @@ public class LayoutPanelPageActivity extends SamplePageActivity {
         layoutPanel.setWidgetBottomHeight(rightPane, 50, 100, PUnit.PX);
 
         // test animation
-        leftPane.addDomHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                // permute left/right
-                layoutPanel.setWidgetLeftWidth(rightPane, 50, 200, PUnit.PX);
-                layoutPanel.setWidgetTopHeight(rightPane, 50, 100, PUnit.PX);
-                layoutPanel.setWidgetRightWidth(leftPane, 50, 200, PUnit.PX);
-                layoutPanel.setWidgetBottomHeight(leftPane, 50, 100, PUnit.PX);
-                layoutPanel.animate(Duration.ofSeconds(2));
-            }
+        leftPane.addDomHandler((PClickHandler) event -> {
+            // permute left/right
+            layoutPanel.setWidgetLeftWidth(rightPane, 50, 200, PUnit.PX);
+            layoutPanel.setWidgetTopHeight(rightPane, 50, 100, PUnit.PX);
+            layoutPanel.setWidgetRightWidth(leftPane, 50, 200, PUnit.PX);
+            layoutPanel.setWidgetBottomHeight(leftPane, 50, 100, PUnit.PX);
+            layoutPanel.animate(Duration.ofSeconds(2));
         }, PClickEvent.TYPE);
 
-        rightPane.addDomHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                // restore
-                layoutPanel.setWidgetLeftWidth(leftPane, 50, 200, PUnit.PX);
-                layoutPanel.setWidgetTopHeight(leftPane, 50, 100, PUnit.PX);
-                layoutPanel.setWidgetRightWidth(rightPane, 50, 200, PUnit.PX);
-                layoutPanel.setWidgetBottomHeight(rightPane, 50, 100, PUnit.PX);
-                layoutPanel.animate(Duration.ofSeconds(2));
-            }
+        rightPane.addDomHandler((PClickHandler) event -> {
+            // restore
+            layoutPanel.setWidgetLeftWidth(leftPane, 50, 200, PUnit.PX);
+            layoutPanel.setWidgetTopHeight(leftPane, 50, 100, PUnit.PX);
+            layoutPanel.setWidgetRightWidth(rightPane, 50, 200, PUnit.PX);
+            layoutPanel.setWidgetBottomHeight(rightPane, 50, 100, PUnit.PX);
+            layoutPanel.animate(Duration.ofSeconds(2));
         }, PClickEvent.TYPE);
 
         examplePanel.setWidget(layoutPanel);

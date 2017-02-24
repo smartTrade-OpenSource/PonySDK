@@ -131,45 +131,33 @@ public class FormPageActivity extends SamplePageActivity {
         formLayout.setWidget(4, 1, formFieldComponent10);
 
         final PButton validateButton = Element.newPButton("Validate");
-        validateButton.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent clickEvent) {
-                final boolean isValid = form.isValid();
-                PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
-                    "The form is valid? " + (isValid ? "YES" : "NO"));
-            }
+        validateButton.addClickHandler(clickEvent -> {
+            final boolean isValid = form.isValid();
+            PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
+                "The form is valid? " + (isValid ? "YES" : "NO"));
         });
 
         final PButton resetButton = Element.newPButton("Reset");
-        resetButton.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent clickEvent) {
-                form.reset();
-                PNotificationManager.showHumanizedNotification(getView().asWidget().getWindowID(), "The form has been reseted");
-            }
+        resetButton.addClickHandler(clickEvent -> {
+            form.reset();
+            PNotificationManager.showHumanizedNotification(getView().asWidget().getWindowID(), "The form has been reseted");
         });
 
         final PListBox captionOriantationList = Element.newPListBox(true);
         for (final CaptionOrientation captionOriantation : CaptionOrientation.values()) {
             captionOriantationList.addItem(captionOriantation.name(), captionOriantation);
         }
-        captionOriantationList.addChangeHandler(new PChangeHandler() {
+        captionOriantationList.addChangeHandler(event -> {
+            final CaptionOrientation captionOriantation = (CaptionOrientation) captionOriantationList.getSelectedValue();
 
-            @Override
-            public void onChange(final PChangeEvent event) {
-                final CaptionOrientation captionOriantation = (CaptionOrientation) captionOriantationList.getSelectedValue();
-
-                formFieldComponent1.setCaptionOrientation(captionOriantation);
-                formFieldComponent2.setCaptionOrientation(captionOriantation);
-                formFieldComponent3.setCaptionOrientation(captionOriantation);
-                formFieldComponent4.setCaptionOrientation(captionOriantation);
-                formFieldComponent5.setCaptionOrientation(captionOriantation);
-                formFieldComponent6.setCaptionOrientation(captionOriantation);
-                formFieldComponent7.setCaptionOrientation(captionOriantation);
-                formFieldComponent8.setCaptionOrientation(captionOriantation);
-            }
+            formFieldComponent1.setCaptionOrientation(captionOriantation);
+            formFieldComponent2.setCaptionOrientation(captionOriantation);
+            formFieldComponent3.setCaptionOrientation(captionOriantation);
+            formFieldComponent4.setCaptionOrientation(captionOriantation);
+            formFieldComponent5.setCaptionOrientation(captionOriantation);
+            formFieldComponent6.setCaptionOrientation(captionOriantation);
+            formFieldComponent7.setCaptionOrientation(captionOriantation);
+            formFieldComponent8.setCaptionOrientation(captionOriantation);
         });
 
         panel.setWidget(0, 0, validateButton);

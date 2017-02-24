@@ -58,26 +58,18 @@ public class BreadCrumbsPageActivity extends SamplePageActivity {
         breadCrumbs.addItem("level 5");
         breadCrumbs.addItem("location");
 
-        breadCrumbs.addSelectionHandler(new PSelectionHandler<PBreadCrumbs.ItemLevel>() {
-
-            @Override
-            public void onSelection(final PSelectionEvent<ItemLevel> event) {
-                level = event.getSelectedItem().getLevel();
-                PNotificationManager.showHumanizedNotification(getView().asWidget().getWindowID(), "Selected level : " + level);
-            }
+        breadCrumbs.addSelectionHandler(event -> {
+            level = event.getSelectedItem().getLevel();
+            PNotificationManager.showHumanizedNotification(getView().asWidget().getWindowID(), "Selected level : " + level);
         });
 
         final PFlowPanel inputPanel = Element.newPFlowPanel();
         final PTextBox input = Element.newPTextBox();
         final PButton add = Element.newPButton("Add Level");
-        add.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                if (input.getText().isEmpty()) breadCrumbs.addItem("level " + ++level);
-                else breadCrumbs.addItem(input.getText());
-                input.setText("");
-            }
+        add.addClickHandler(event -> {
+            if (input.getText().isEmpty()) breadCrumbs.addItem("level " + ++level);
+            else breadCrumbs.addItem(input.getText());
+            input.setText("");
         });
         inputPanel.add(input);
         inputPanel.add(add);

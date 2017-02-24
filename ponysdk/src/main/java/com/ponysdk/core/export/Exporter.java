@@ -31,7 +31,6 @@ public interface Exporter<T> {
 
     /**
      * @return custom success message
-     * @throws Exception
      */
     String export(List<ExportableField> exportableFields, List<T> records) throws Exception;
 

@@ -45,13 +45,7 @@ public class ElementPageActivity extends SamplePageActivity {
         verticalPanel.setSpacing(10);
 
         final PAnchor anchor = Element.newPAnchor("And a link");
-        anchor.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(), "Link clicked");
-            }
-        });
+        anchor.addClickHandler(event -> PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(), "Link clicked"));
 
         final PElement ul = Element.newUl();
         final PElement li1 = Element.newLi();

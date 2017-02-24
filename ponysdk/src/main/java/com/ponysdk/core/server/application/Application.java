@@ -72,7 +72,7 @@ public class Application {
     }
 
     public void destroy() {
-        uiContexts.values().forEach(context -> context.destroyFromApplication());
+        uiContexts.values().forEach(UIContext::destroyFromApplication);
         uiContexts.clear();
         session.invalidate();
         SessionManager.get().unregisterApplication(this);

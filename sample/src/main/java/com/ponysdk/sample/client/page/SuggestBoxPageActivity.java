@@ -57,13 +57,9 @@ public class SuggestBoxPageActivity extends SamplePageActivity {
         suggestBox.setLimit(10);
 
         final PMultiWordSuggestOracle suggestOracle = (PMultiWordSuggestOracle) suggestBox.getSuggestOracle();
-        suggestBox.addSelectionHandler(new PSelectionHandler<PSuggestion>() {
-
-            @Override
-            public void onSelection(final PSelectionEvent<PSuggestion> event) {
-                final String msg = "Selected item : " + event.getSelectedItem().getReplacementString();
-                UIContext.getRootEventBus().fireEvent(new DemoBusinessEvent(msg));
-            }
+        suggestBox.addSelectionHandler(event -> {
+            final String msg = "Selected item : " + event.getSelectedItem().getReplacementString();
+            UIContext.getRootEventBus().fireEvent(new DemoBusinessEvent(msg));
         });
 
         final Query query = new Query();
@@ -88,29 +84,25 @@ public class SuggestBoxPageActivity extends SamplePageActivity {
         operation.addItem("Enable/Disable textbox", 2);
         operation.addItem("Clear", 3);
         operation.addItem("Add items", 4);
-        operation.addChangeHandler(new PChangeHandler() {
+        operation.addChangeHandler(event -> {
+            final Integer item = (Integer) operation.getSelectedValue();
+            if (item == null) return;
 
-            @Override
-            public void onChange(final PChangeEvent event) {
-                final Integer item = (Integer) operation.getSelectedValue();
-                if (item == null) return;
-
-                if (item.equals(0)) {
-                    suggestBox.setText("Friesian horse");
-                } else if (item.equals(1)) {
-                    UIContext.getRootEventBus().fireEvent(new DemoBusinessEvent("Text content: " + suggestBox.getText()));
-                } else if (item.equals(2)) {
-                    suggestBox.getTextBox().setEnabled(!suggestBox.getTextBox().isEnabled());
-                } else if (item.equals(3)) {
-                    final PMultiWordSuggestOracle oracle = (PMultiWordSuggestOracle) suggestBox.getSuggestOracle();
-                    oracle.clear();
-                } else if (item.equals(4)) {
-                    current++;
-                    // final Result<List<Pony>> ponys = command.execute();
-                    // for (final Pony pony : ponys.getData()) {
-                    // suggestOracle.add(pony.getName() + " " + current);
-                    // }
-                }
+            if (item.equals(0)) {
+                suggestBox.setText("Friesian horse");
+            } else if (item.equals(1)) {
+                UIContext.getRootEventBus().fireEvent(new DemoBusinessEvent("Text content: " + suggestBox.getText()));
+            } else if (item.equals(2)) {
+                suggestBox.getTextBox().setEnabled(!suggestBox.getTextBox().isEnabled());
+            } else if (item.equals(3)) {
+                final PMultiWordSuggestOracle oracle = (PMultiWordSuggestOracle) suggestBox.getSuggestOracle();
+                oracle.clear();
+            } else if (item.equals(4)) {
+                current++;
+                // final Result<List<Pony>> ponys = command.execute();
+                // for (final Pony pony : ponys.getData()) {
+                // suggestOracle.add(pony.getName() + " " + current);
+                // }
             }
         });
         panel.add(operation);

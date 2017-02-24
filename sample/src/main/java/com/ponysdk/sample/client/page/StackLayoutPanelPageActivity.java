@@ -61,13 +61,9 @@ public class StackLayoutPanelPageActivity extends SamplePageActivity {
         stackLayoutPanel.add(getHeader1Child(), "Header 1", true, 30);
         stackLayoutPanel.add(getHeader2Child(), "Header 2", true, 30);
 
-        stackLayoutPanel.addSelectionHandler(new PSelectionHandler<Integer>() {
-
-            @Override
-            public void onSelection(final PSelectionEvent<Integer> event) {
-                final String msg = "On selection : " + event.getSelectedItem();
-                UIContext.getRootEventBus().fireEvent(new DemoBusinessEvent(msg));
-            }
+        stackLayoutPanel.addSelectionHandler(event -> {
+            final String msg = "On selection : " + event.getSelectedItem();
+            UIContext.getRootEventBus().fireEvent(new DemoBusinessEvent(msg));
         });
 
         panel.add(stackLayoutPanel);

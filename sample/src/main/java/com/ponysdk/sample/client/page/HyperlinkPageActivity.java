@@ -46,53 +46,23 @@ public class HyperlinkPageActivity extends SamplePageActivity {
         panel.add(Element.newPLabel("Choose a section:"));
 
         final PAnchor checkBoxAnchor = Element.newPAnchor("CheckBox");
-        checkBoxAnchor.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                goTo(new PagePlace("CheckBox"));
-            }
-        });
+        checkBoxAnchor.addClickHandler(event -> goTo(new PagePlace("CheckBox")));
         panel.add(checkBoxAnchor);
 
         final PAnchor radioButtonAnchor = Element.newPAnchor("RadioButton");
-        radioButtonAnchor.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                goTo(new PagePlace("Radio Button"));
-            }
-        });
+        radioButtonAnchor.addClickHandler(event -> goTo(new PagePlace("Radio Button")));
         panel.add(radioButtonAnchor);
 
         final PAnchor basicButtonAnchor = Element.newPAnchor("BasicButton");
-        basicButtonAnchor.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                goTo(new PagePlace("Basic Button"));
-            }
-        });
+        basicButtonAnchor.addClickHandler(event -> goTo(new PagePlace("Basic Button")));
         panel.add(basicButtonAnchor);
 
         final PAnchor customButtonAnchor = Element.newPAnchor("CustomButton");
-        customButtonAnchor.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                goTo(new PagePlace("Custom Button"));
-            }
-        });
+        customButtonAnchor.addClickHandler(event -> goTo(new PagePlace("Custom Button")));
         panel.add(customButtonAnchor);
 
         final PAnchor fileUpload = Element.newPAnchor("FileUpload");
-        fileUpload.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                goTo(new PagePlace("File Upload"));
-            }
-        });
+        fileUpload.addClickHandler(event -> goTo(new PagePlace("File Upload")));
         panel.add(fileUpload);
 
         examplePanel.setWidget(panel);

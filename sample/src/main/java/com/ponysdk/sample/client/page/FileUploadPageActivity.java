@@ -53,26 +53,16 @@ public class FileUploadPageActivity extends SamplePageActivity {
 
         final PFileUpload fileUpload = Element.newPFileUpload();
         fileUpload.setName("my_file");
-        fileUpload.addSubmitCompleteHandler(new PSubmitCompleteHandler() {
+        fileUpload.addSubmitCompleteHandler(() -> PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
+            "File uploaded, submit file '" + fileUpload.getFileName() + "'"));
 
-            @Override
-            public void onSubmitComplete() {
-                PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
-                    "File uploaded, submit file '" + fileUpload.getFileName() + "'");
-            }
-        });
-
-        fileUpload.addStreamHandler(new StreamHandler() {
-
-            @Override
-            public void onStream(final HttpServletRequest request, final HttpServletResponse response) {
-                try {
-                    response.setStatus(HttpServletResponse.SC_CREATED);
-                    response.getWriter().print("The file was created successfully.");
-                    response.flushBuffer();
-                } catch (final IOException e) {
-                    e.printStackTrace();
-                }
+        fileUpload.addStreamHandler((request, response) -> {
+            try {
+                response.setStatus(HttpServletResponse.SC_CREATED);
+                response.getWriter().print("The file was created successfully.");
+                response.flushBuffer();
+            } catch (final IOException e) {
+                e.printStackTrace();
             }
         });
 
@@ -80,13 +70,7 @@ public class FileUploadPageActivity extends SamplePageActivity {
         submitButton.showLoadingOnRequest(true);
         submitButton.setEnabledOnRequest(false);
 
-        submitButton.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                fileUpload.submit();
-            }
-        });
+        submitButton.addClickHandler(event -> fileUpload.submit());
 
         panel.add(fileUpload);
         panel.add(submitButton);

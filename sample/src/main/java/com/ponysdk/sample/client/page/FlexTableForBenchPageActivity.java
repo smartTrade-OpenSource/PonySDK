@@ -76,37 +76,27 @@ public class FlexTableForBenchPageActivity extends SamplePageActivity {
         bodyLayout.setSizeFull();
 
         final PButton button = Element.newPButton("Remove last row");
-        button.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent clickEvent) {
-                table.removeRow(table.getRowCount() - 1);
-            }
-        });
+        button.addClickHandler(clickEvent -> table.removeRow(table.getRowCount() - 1));
 
         bodyLayout.add(button);
         bodyLayout.add(table);
 
         final PButton scheduleButton = Element.newPButton("Schedule");
-        scheduleButton.addClickHandler(new PClickHandler() {
+        scheduleButton.addClickHandler(clickEvent -> {
+            if (uiRunnable != null) {
+                uiRunnable.cancel();
+            }
 
-            @Override
-            public void onClick(final PClickEvent clickEvent) {
-                if (uiRunnable != null) {
-                    uiRunnable.cancel();
-                }
+            uiRunnable = PScheduler.scheduleWithFixedDelay(() -> {
+                time++;
+                updateTableData(100);
+            }, Duration.ZERO, Duration.ofMillis(Integer.valueOf(textBox.getText())));
 
-                uiRunnable = PScheduler.scheduleWithFixedDelay(() -> {
-                    time++;
-                    updateTableData(100);
-                }, Duration.ZERO, Duration.ofMillis(Integer.valueOf(textBox.getText())));
-
-                for (int r = 0; r < 100; r++) {
-                    for (int c = 0; c < 6; c++) {
-                        final PLabel label = Element.newPLabel(r + "_" + c + Math.random());
-                        labels[r][c] = label;
-                        table.setWidget(r, c, label);
-                    }
+            for (int r = 0; r < 100; r++) {
+                for (int c = 0; c < 6; c++) {
+                    final PLabel label = Element.newPLabel(r + "_" + c + Math.random());
+                    labels[r][c] = label;
+                    table.setWidget(r, c, label);
                 }
             }
         });
