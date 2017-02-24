@@ -233,8 +233,6 @@ public class UIContext {
             if (history != null) {
                 history.fireHistoryChanged(jsonObject.getString(ClientToServerModel.TYPE_HISTORY.toStringValue()));
             }
-        } else if (jsonObject.containsKey(ClientToServerModel.ERROR_MSG.toStringValue())) {
-            log.error(jsonObject.getString(ClientToServerModel.ERROR_MSG.toStringValue()));
         } else {
             final JsonValue jsonValue = jsonObject.get(ClientToServerModel.OBJECT_ID.toStringValue());
             int objectID;
@@ -266,12 +264,10 @@ public class UIContext {
                     return;
                 }
 
-                if (terminalDataReceiver != null) {
-                    terminalDataReceiver.onDataReceived(object, jsonObject);
-                }
+                if (terminalDataReceiver != null) terminalDataReceiver.onDataReceived(object, jsonObject);
+
                 object.onClientData(jsonObject);
             }
-
         }
     }
 

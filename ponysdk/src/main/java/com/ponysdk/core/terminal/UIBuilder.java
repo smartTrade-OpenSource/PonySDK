@@ -23,10 +23,8 @@
 
 package com.ponysdk.core.terminal;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -91,7 +89,6 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
     private final Map<Integer, PTObject> objectByID = new HashMap<>();
     private final Map<UIObject, Integer> objectIDByWidget = new HashMap<>();
     private final Map<Integer, UIObject> widgetIDByObjectID = new HashMap<>();
-    private final List<JSONObject> stackedErrors = new ArrayList<>();
     private final Map<String, JavascriptAddOnFactory> javascriptAddOnFactories = new HashMap<>();
 
     private SimplePanel loadingMessageBox;
@@ -395,24 +392,23 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         final JSONArray jsonArray = new JSONArray();
         jsonArray.set(0, instruction);
 
-        sendDataToServer(jsonArray);
-    }
-
-    private void sendDataToServer(final JSONArray jsonArray) {
         final PTInstruction requestData = new PTInstruction();
         requestData.put(ClientToServerModel.APPLICATION_INSTRUCTIONS, jsonArray);
 
-        if (!stackedErrors.isEmpty()) {
-            final JSONArray errors = new JSONArray();
-            int i = 0;
-            for (final JSONObject jsoObject : stackedErrors)
-                errors.set(i++, jsoObject);
-            stackedErrors.clear();
-            requestData.put(ClientToServerModel.APPLICATION_ERRORS, errors);
-        }
-
         if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Data to send " + requestData.toString());
 
+        requestBuilder.send(requestData);
+    }
+
+    public void sendErrorMessageToServer(final String message) {
+        final PTInstruction requestData = new PTInstruction();
+        requestData.put(ClientToServerModel.ERROR_MSG, message);
+        requestBuilder.send(requestData);
+    }
+
+    public void sendInfoMessageToServer(final String message) {
+        final PTInstruction requestData = new PTInstruction();
+        requestData.put(ClientToServerModel.INFO_MSG, message);
         requestBuilder.send(requestData);
     }
 

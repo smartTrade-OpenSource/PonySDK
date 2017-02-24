@@ -161,10 +161,7 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler {
     @Override
     public void onUncaughtException(final Throwable e) {
         log.log(Level.SEVERE, "PonySDK has encountered an internal error : ", e);
-
-        final PTInstruction instruction = new PTInstruction();
-        instruction.put(ClientToServerModel.ERROR_MSG, e.getMessage());
-        uiBuilder.sendDataToServer(instruction);
+        uiBuilder.sendErrorMessageToServer(e.getMessage());
     }
 
     @Export

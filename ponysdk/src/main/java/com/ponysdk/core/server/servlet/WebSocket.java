@@ -28,6 +28,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 
 import javax.json.Json;
+import javax.json.JsonArray;
 import javax.json.JsonObject;
 
 import org.eclipse.jetty.websocket.api.Session;
@@ -125,32 +126,49 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
      */
     @Override
     public void onWebSocketText(final String text) {
+        final UIContext uiContext = context.getUIContext();
         if (isLiving()) {
             if (monitor != null) monitor.onMessageReceived(WebSocket.this, text);
             try {
-                context.getUIContext().notifyMessageReceived();
+                uiContext.notifyMessageReceived();
 
                 if (ClientToServerModel.HEARTBEAT.toStringValue().equals(text)) {
-                    if (log.isDebugEnabled()) log.debug("Heartbeat received from terminal");
+                    if (log.isDebugEnabled()) log.debug("Heartbeat received from terminal #" + uiContext.getID());
                 } else {
                     final JsonObject jsonObject = Json.createReader(new StringReader(text)).readObject();
                     if (jsonObject.containsKey(ClientToServerModel.PING_SERVER.toStringValue())) {
                         final long start = jsonObject.getJsonNumber(ClientToServerModel.PING_SERVER.toStringValue()).longValue();
                         final long end = System.currentTimeMillis();
-                        if (log.isDebugEnabled()) log.debug("Ping measurement : " + (end - start) + " ms");
+                        if (log.isDebugEnabled())
+                            log.debug("Ping measurement : " + (end - start) + " ms from terminal #" + uiContext.getID());
                     } else if (jsonObject.containsKey(ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue())) {
-                        applicationManager.fireInstructions(jsonObject, context);
+                        final Application applicationSession = context.getApplication();
+                        if (applicationSession == null)
+                            throw new Exception("Invalid session, please reload your application (" + uiContext + ").");
+                        final String applicationInstructions = ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue();
+                        uiContext.execute(() -> {
+                            final JsonArray appInstructions = jsonObject.getJsonArray(applicationInstructions);
+                            for (int i = 0; i < appInstructions.size(); i++) {
+                                uiContext.fireClientData(appInstructions.getJsonObject(i));
+                            }
+                        });
+                    } else if (jsonObject.containsKey(ClientToServerModel.INFO_MSG.toStringValue())) {
+                        log.info("Message from terminal #" + uiContext.getID() + " : "
+                                + jsonObject.getJsonString(ClientToServerModel.INFO_MSG.toStringValue()));
+                    } else if (jsonObject.containsKey(ClientToServerModel.ERROR_MSG.toStringValue())) {
+                        log.error("Message from terminal #" + uiContext.getID() + " : "
+                                + jsonObject.getJsonString(ClientToServerModel.ERROR_MSG.toStringValue()));
                     } else {
-                        log.error("Unknow message from terminal : " + text);
+                        log.error("Unknow message from terminal #" + uiContext.getID() + " : " + text);
                     }
                 }
             } catch (final Throwable e) {
-                log.error("Cannot process message from the terminal : {}", text, e);
+                log.error("Cannot process message from terminal  #" + uiContext.getID() + " : {}", text, e);
             } finally {
                 if (monitor != null) monitor.onMessageProcessed(WebSocket.this);
             }
         } else {
-            if (log.isInfoEnabled()) log.info("Message dropped, ui context is destroyed");
+            if (log.isInfoEnabled()) log.info("UI Context is destroyed, message dropped from terminal : " + text);
         }
     }
 
@@ -411,7 +429,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         }
 
         public static final String getMessage(final int statusCode) {
-            for (final WebSocket.NiceStatusCode niceStatusCode : values()) {
+            for (final NiceStatusCode niceStatusCode : values()) {
                 if (niceStatusCode.getStatusCode() == statusCode) {
                     return statusCode + " : " + niceStatusCode.getMessage();
                 }

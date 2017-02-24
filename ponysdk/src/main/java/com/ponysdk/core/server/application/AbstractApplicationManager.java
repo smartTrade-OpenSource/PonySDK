@@ -23,14 +23,11 @@
 
 package com.ponysdk.core.server.application;
 
-import javax.json.JsonArray;
-import javax.json.JsonObject;
 import javax.servlet.ServletException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.server.stm.TxnContext;
 import com.ponysdk.core.ui.basic.PWindow;
@@ -45,13 +42,6 @@ public abstract class AbstractApplicationManager {
     protected AbstractApplicationManager(final ApplicationManagerOption options) {
         this.options = options;
         log.info(options.toString());
-    }
-
-    private static void process(final UIContext uiContext, final JsonArray applicationInstructions) {
-        for (int i = 0; i < applicationInstructions.size(); i++) {
-            final JsonObject item = applicationInstructions.getJsonObject(i);
-            uiContext.fireClientData(item);
-        }
     }
 
     public void startApplication(final TxnContext txnContext) throws Exception {
@@ -85,20 +75,6 @@ public abstract class AbstractApplicationManager {
         } finally {
             uiContext.end();
         }
-    }
-
-    public void fireInstructions(final JsonObject jsonObject, final TxnContext context) throws Exception {
-        final int key = 1;
-
-        final Application applicationSession = context.getApplication();
-        if (applicationSession == null) throw new Exception("Invalid session, please reload your application (viewID #" + key + ").");
-
-        final UIContext uiContext = context.getUIContext();
-        if (uiContext == null)
-            throw new Exception("Invalid session (no UIContext found), please reload your application (viewID #" + key + ").");
-
-        final String applicationInstructions = ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue();
-        uiContext.execute(() -> process(uiContext, jsonObject.getJsonArray(applicationInstructions)));
     }
 
     protected abstract EntryPoint initializeUIContext(final UIContext ponySession) throws ServletException;
