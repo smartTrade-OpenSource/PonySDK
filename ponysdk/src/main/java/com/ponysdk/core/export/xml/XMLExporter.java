@@ -67,7 +67,7 @@ public class XMLExporter<T> implements Exporter<T> {
 
     public void exportXMLString(final String fileName, final String content) throws Exception {
         // Set MIME type to binary data to prevent opening of PDF in browser window
-        UIContext.get().stackStreamRequest((req, response) -> {
+        UIContext.get().stackStreamRequest((req, response, uiContext) -> {
             response.reset();
             response.setContentType("application/xml");
             response.setHeader("Content-Disposition", "attachment; filename=" + fileName);

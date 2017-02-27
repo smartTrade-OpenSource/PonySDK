@@ -27,16 +27,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PFlowPanel;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
-import com.ponysdk.core.ui.eventbus.StreamHandler;
 
 public class StreamResourcePageActivity extends SamplePageActivity {
 
@@ -52,37 +46,27 @@ public class StreamResourcePageActivity extends SamplePageActivity {
 
         final PButton downloadImageButton = Element.newPButton("Download Pony image");
 
-        downloadImageButton.addClickHandler(new PClickHandler() {
+        downloadImageButton.addClickHandler(event -> UIContext.get().stackStreamRequest((request, response, uiContext) -> {
+            response.reset();
+            response.setContentType("image/png");
+            response.setHeader("Content-Disposition", "attachment; filename=pony_image.png");
 
-            @Override
-            public void onClick(final PClickEvent event) {
-                UIContext.get().stackStreamRequest(new StreamHandler() {
+            try {
+                final OutputStream output = response.getOutputStream();
+                final InputStream input = getClass().getClassLoader().getResourceAsStream("images/pony.png");
 
-                    @Override
-                    public void onStream(final HttpServletRequest request, final HttpServletResponse response) {
-                        response.reset();
-                        response.setContentType("image/png");
-                        response.setHeader("Content-Disposition", "attachment; filename=pony_image.png");
+                final byte[] buff = new byte[1024];
+                while (input.read(buff) != -1) {
+                    output.write(buff);
+                }
 
-                        try {
-                            final OutputStream output = response.getOutputStream();
-                            final InputStream input = getClass().getClassLoader().getResourceAsStream("images/pony.png");
-
-                            final byte[] buff = new byte[1024];
-                            while (input.read(buff) != -1) {
-                                output.write(buff);
-                            }
-
-                            output.flush();
-                            output.close();
-                        } catch (final IOException e) {
-                            e.printStackTrace();
-                        }
-
-                    }
-                });
+                output.flush();
+                output.close();
+            } catch (final IOException e) {
+                e.printStackTrace();
             }
-        });
+
+        }));
 
         panel.add(downloadImageButton);
 

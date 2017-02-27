@@ -58,7 +58,7 @@ public class CSVExporter<T> implements Exporter<T> {
 
     @Override
     public String export(final List<ExportableField> exportableFields, final List<T> records) throws Exception {
-        UIContext.get().stackStreamRequest((req, response) -> {
+        UIContext.get().stackStreamRequest((req, response, uiContext) -> {
             try {
                 response.reset();
                 response.setContentType("text/csv");
