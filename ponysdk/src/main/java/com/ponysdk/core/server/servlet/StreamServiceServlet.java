@@ -55,7 +55,7 @@ public class StreamServiceServlet extends HttpServlet {
                 final UIContext uiContext = application.getUIContext(uiContextID);
                 final StreamHandler streamHandler = uiContext
                     .removeStreamListener(Integer.parseInt(req.getParameter(ClientToServerModel.STREAM_REQUEST_ID.toStringValue())));
-                streamHandler.onStream(req, resp);
+                streamHandler.onStream(req, resp, uiContext);
             } else {
                 log.error("Can't find an application linked to the session #" + req.getSession().getId());
             }

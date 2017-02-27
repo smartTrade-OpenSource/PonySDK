@@ -25,17 +25,12 @@ package com.ponysdk.sample.client.page;
 
 import java.io.IOException;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PFileUpload;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
-import com.ponysdk.core.ui.basic.event.PSubmitCompleteHandler;
-import com.ponysdk.core.ui.eventbus.StreamHandler;
 import com.ponysdk.core.ui.rich.PNotificationManager;
 
 public class FileUploadPageActivity extends SamplePageActivity {
@@ -56,7 +51,7 @@ public class FileUploadPageActivity extends SamplePageActivity {
         fileUpload.addSubmitCompleteHandler(() -> PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
             "File uploaded, submit file '" + fileUpload.getFileName() + "'"));
 
-        fileUpload.addStreamHandler((request, response) -> {
+        fileUpload.addStreamHandler((request, response, uiContext) -> {
             try {
                 response.setStatus(HttpServletResponse.SC_CREATED);
                 response.getWriter().print("The file was created successfully.");
