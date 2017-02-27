@@ -23,12 +23,13 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
+import java.util.Set;
 
 import javax.json.JsonObject;
+
+import org.eclipse.jetty.util.ConcurrentHashSet;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -45,8 +46,8 @@ public class PWindow extends PObject {
 
     static final int EMPTY_WINDOW_ID = -1;
 
-    private final List<PCloseHandler> closeHandlers = new ArrayList<>();
-    private final List<POpenHandler> openHandlers = new ArrayList<>();
+    private final Set<PCloseHandler> closeHandlers = new ConcurrentHashSet<>();
+    private final Set<POpenHandler> openHandlers = new ConcurrentHashSet<>();
     private final Queue<Runnable> stackedWindowsInstructions = new LinkedList<>();
 
     private String url;
@@ -149,11 +150,13 @@ public class PWindow extends PObject {
 
             final POpenEvent e = new POpenEvent(this);
             openHandlers.forEach(handler -> handler.onOpen(e));
+            openHandlers.clear();
         } else if (event.containsKey(ClientToServerModel.HANDLER_CLOSE.toStringValue())) {
             PWindowManager.unregisterWindow(this);
             this.opened = false;
             final PCloseEvent e = new PCloseEvent(this);
             closeHandlers.forEach(handler -> handler.onClose(e));
+            closeHandlers.clear();
         } else {
             super.onClientData(event);
         }
