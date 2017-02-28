@@ -43,8 +43,7 @@ import com.ponysdk.core.ui.eventbus.StreamHandler;
 /**
  * A widget that wraps the HTML &lt;input type='file'&gt; element.
  */
-public class PFileUpload extends PWidget
-        implements HasPChangeHandlers, PChangeHandler, HasPSubmitCompleteHandlers, PSubmitCompleteHandler {
+public class PFileUpload extends PWidget implements HasPChangeHandlers, HasPSubmitCompleteHandlers {
 
     private final List<PChangeHandler> changeHandlers = new ArrayList<>();
 
@@ -76,20 +75,14 @@ public class PFileUpload extends PWidget
     public void onClientData(final JsonObject jsonObject) {
         if (jsonObject.containsKey(ClientToServerModel.HANDLER_CHANGE.toStringValue())) {
             final String fileName = jsonObject.getString(ClientToServerModel.HANDLER_CHANGE.toStringValue());
-            if (fileName != null) {
-                setFileName(fileName);
-            }
-            onChange(new PChangeEvent(this));
+            if (fileName != null) setFileName(fileName);
+            final PChangeEvent event = new PChangeEvent(this);
+            changeHandlers.forEach(handler -> handler.onChange(event));
         } else if (jsonObject.containsKey(ClientToServerModel.HANDLER_SUBMIT_COMPLETE.toStringValue())) {
-            onSubmitComplete();
+            submitCompleteHandlers.forEach(PSubmitCompleteHandler::onSubmitComplete);
         } else {
             super.onClientData(jsonObject);
         }
-    }
-
-    @Override
-    public void addSubmitCompleteHandler(final PSubmitCompleteHandler handler) {
-        submitCompleteHandlers.add(handler);
     }
 
     public void submit() {
@@ -103,10 +96,6 @@ public class PFileUpload extends PWidget
     public void setName(final String name) {
         this.name = name;
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.NAME, name));
-    }
-
-    public void addStreamHandler(final StreamHandler streamHandler) {
-        this.streamHandler = streamHandler;
     }
 
     public boolean isEnabled() {
@@ -131,16 +120,13 @@ public class PFileUpload extends PWidget
         changeHandlers.add(handler);
     }
 
-    @Override
-    public void onChange(final PChangeEvent event) {
-        for (final PChangeHandler handler : changeHandlers) {
-            handler.onChange(event);
-        }
+    public void addStreamHandler(final StreamHandler streamHandler) {
+        this.streamHandler = streamHandler;
     }
 
     @Override
-    public void onSubmitComplete() {
-        submitCompleteHandlers.forEach(PSubmitCompleteHandler::onSubmitComplete);
+    public void addSubmitCompleteHandler(final PSubmitCompleteHandler handler) {
+        submitCompleteHandlers.add(handler);
     }
 
 }
