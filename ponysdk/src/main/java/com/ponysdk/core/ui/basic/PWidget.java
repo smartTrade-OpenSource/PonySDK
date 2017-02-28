@@ -468,7 +468,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         return ensureDomHandler().getHandlers(type, null);
     }
 
-    public void fireMouseEvent(final JsonObject instruction, final PMouseEvent<?> event) {
+    public void fireMouseEvent(final JsonObject instruction, final PMouseEvent<? extends EventHandler> event) {
         final String eventInfoKey = ClientToServerModel.EVENT_INFO.toStringValue();
         if (instruction.containsKey(eventInfoKey)) {
             final JsonArray eventInfo = instruction.getJsonArray(eventInfoKey);
@@ -494,7 +494,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     }
 
     @Override
-    public void fireEvent(final Event<?> event) {
+    public void fireEvent(final Event<? extends EventHandler> event) {
         if (domHandler == null) return;
         domHandler.fireEvent(event);
     }

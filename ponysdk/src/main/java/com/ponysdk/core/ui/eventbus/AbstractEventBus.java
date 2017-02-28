@@ -120,7 +120,7 @@ public abstract class AbstractEventBus implements EventBus {
     }
 
     @Override
-    public void fireEvent(final Event<?> event) {
+    public void fireEvent(final Event<? extends EventHandler> event) {
         if (event == null) throw new NullPointerException("Cannot fire null eventbus");
         else doFire(event, null);
     }
@@ -134,7 +134,7 @@ public abstract class AbstractEventBus implements EventBus {
 
     protected void doFire(final Event<? extends EventHandler> event, final Object source) {
         if (source != null) event.setSource(source);
-
+        
         eventQueue.add(event);
 
         if (firing) return;

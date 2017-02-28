@@ -140,11 +140,11 @@ public class UIContext {
         get().getEventBus().removeHandlerFromSource(type, source, handler);
     }
 
-    public static void fireEvent(final Event<?> event) {
+    public static void fireEvent(final Event<? extends EventHandler> event) {
         get().getEventBus().fireEvent(event);
     }
 
-    public static void fireEventFromSource(final Event<?> event, final Object source) {
+    public static void fireEventFromSource(final Event<? extends EventHandler> event, final Object source) {
         get().getEventBus().fireEventFromSource(event, source);
     }
 

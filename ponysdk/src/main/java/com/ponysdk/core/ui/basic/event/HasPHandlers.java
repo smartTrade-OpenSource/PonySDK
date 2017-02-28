@@ -24,9 +24,10 @@
 package com.ponysdk.core.ui.basic.event;
 
 import com.ponysdk.core.ui.eventbus.Event;
+import com.ponysdk.core.ui.eventbus.EventHandler;
 
 @FunctionalInterface
 public interface HasPHandlers {
 
-    void fireEvent(Event<?> event);
+    void fireEvent(Event<? extends EventHandler> event);
 }

@@ -92,11 +92,11 @@ public abstract class AbstractActivity<T extends IsPWidget> implements Activity 
         return addHandlerToSource(type, source, (EventHandler) this);
     }
 
-    public void fireEvent(final Event<?> event) {
+    public void fireEvent(final Event<? extends EventHandler> event) {
         UIContext.fireEvent(event);
     }
 
-    public void fireEventFromSource(final Event<?> event, final Object source) {
+    public void fireEventFromSource(final Event<? extends EventHandler> event, final Object source) {
         UIContext.fireEventFromSource(event, source);
     }
 

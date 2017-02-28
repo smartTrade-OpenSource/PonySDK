@@ -39,9 +39,10 @@ public interface EventBus {
 
     void removeHandler(BroadcastEventHandler handler);
 
-    void fireEvent(Event<?> event);
+    void fireEvent(Event<? extends EventHandler> event);
 
-    void fireEventFromSource(Event<?> event, Object source);
+    void fireEventFromSource(Event<? extends EventHandler> event, Object source);
 
     Collection<EventHandler> getHandlers(Event.Type type, Object source);
+
 }
