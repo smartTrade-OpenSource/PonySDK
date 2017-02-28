@@ -249,7 +249,7 @@ public class UIContext {
             if (objectID == 0) {
                 cookies.onClientData(jsonObject);
             } else {
-                final PObject object = weakReferences.get(objectID);
+                final PObject object = getObject(objectID);
 
                 if (object == null) {
                     log.error("unknown reference from the browser. Unable to execute instruction: " + jsonObject);
@@ -297,7 +297,6 @@ public class UIContext {
         weakReferences.put(object.getID(), object);
     }
 
-    @SuppressWarnings("unchecked")
     public <T> T getObject(final int objectID) {
         return (T) weakReferences.get(objectID);
     }
