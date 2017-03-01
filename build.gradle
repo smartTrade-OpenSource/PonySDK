@@ -15,7 +15,7 @@ subprojects {
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
 
-    version = '2.2.2'
+    version = '2.2.3'
 
     repositories {
         mavenCentral()
