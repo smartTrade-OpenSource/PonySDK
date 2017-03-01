@@ -56,7 +56,7 @@ public abstract class PComplexPanel extends PPanel {
             child.saveAdd(child.getID(), ID);
             child.attach(windowID);
         } else {
-            if (windowID != PWindow.EMPTY_WINDOW_ID) {
+            if (initialized) {
                 throw new IllegalAccessError("Can't attach widget " + child + " to window #" + windowID
                         + " because it's already attached to window #" + child.getWindowID());
             } else {

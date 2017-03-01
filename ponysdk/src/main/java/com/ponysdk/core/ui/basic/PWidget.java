@@ -363,7 +363,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         if (handlerIterator.isEmpty()) {
             final ServerBinaryModel binaryModel1 = new ServerBinaryModel(ServerToClientModel.DOM_HANDLER_CODE,
                 type.getDomHandlerType().getValue());
-            if (windowID != PWindow.EMPTY_WINDOW_ID) executeAddDomHandler(binaryModel1, binaryModel);
+            if (initialized) executeAddDomHandler(binaryModel1, binaryModel);
             else stackedInstructions.add(() -> executeAddDomHandler(binaryModel1, binaryModel));
         }
         return handlerRegistration;

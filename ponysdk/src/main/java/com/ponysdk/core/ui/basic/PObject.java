@@ -59,7 +59,6 @@ public abstract class PObject {
     private AttachListener attachListener;
 
     PObject() {
-        UIContext.get().registerObject(this);
     }
 
     protected boolean attach(final int windowID) {
@@ -77,6 +76,8 @@ public abstract class PObject {
 
     void init() {
         if (initialized) return;
+        UIContext.get().registerObject(this);
+
         final WebsocketEncoder parser = Txn.get().getEncoder();
         parser.beginObject();
         if (windowID != PWindow.getMain().getID()) parser.encode(ServerToClientModel.WINDOW_ID, windowID);
@@ -163,7 +164,7 @@ public abstract class PObject {
     }
 
     protected void saveAdd(final int objectID, final int parentObjectID, final ServerBinaryModel... binaryModels) {
-        if (windowID != PWindow.EMPTY_WINDOW_ID) executeAdd(objectID, parentObjectID, binaryModels);
+        if (initialized) executeAdd(objectID, parentObjectID, binaryModels);
         else stackedInstructions.add(() -> executeAdd(objectID, parentObjectID, binaryModels));
     }
 
@@ -186,7 +187,7 @@ public abstract class PObject {
     }
 
     protected void saveAddHandler(final HandlerModel type) {
-        if (windowID != PWindow.EMPTY_WINDOW_ID) executeAddHandler(type);
+        if (initialized) executeAddHandler(type);
         else stackedInstructions.add(() -> executeAddHandler(type));
     }
 
@@ -204,7 +205,7 @@ public abstract class PObject {
     }
 
     protected void saveRemoveHandler(final HandlerModel type) {
-        if (windowID != PWindow.EMPTY_WINDOW_ID) executeRemoveHandler();
+        if (initialized) executeRemoveHandler();
         else stackedInstructions.add(this::executeRemoveHandler);
     }
 
@@ -221,7 +222,7 @@ public abstract class PObject {
     }
 
     void saveRemove(final int objectID, final int parentObjectID) {
-        if (windowID != PWindow.EMPTY_WINDOW_ID) executeRemove(objectID, parentObjectID);
+        if (initialized) executeRemove(objectID, parentObjectID);
         else stackedInstructions.add(() -> executeRemove(objectID, parentObjectID));
     }
 
@@ -239,7 +240,7 @@ public abstract class PObject {
     }
 
     protected void saveUpdate(final ModelWriterCallback callback) {
-        if (windowID != PWindow.EMPTY_WINDOW_ID) writeUpdate(callback);
+        if (initialized) writeUpdate(callback);
         else stackedInstructions.add(() -> writeUpdate(callback));
     }
 

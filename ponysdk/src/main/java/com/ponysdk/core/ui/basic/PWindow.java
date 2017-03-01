@@ -57,6 +57,7 @@ public class PWindow extends PObject {
     private boolean relative = false;
 
     PWindow() {
+        UIContext.get().registerObject(this);
         initialized = true;
         PWindowManager.registerWindow(this);
     }
