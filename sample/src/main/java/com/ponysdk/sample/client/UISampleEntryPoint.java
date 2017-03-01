@@ -23,13 +23,36 @@
 
 package com.ponysdk.sample.client;
 
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.util.Date;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.PScheduler;
 import com.ponysdk.core.server.concurrent.PScheduler.UIRunnable;
-import com.ponysdk.core.ui.basic.*;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.basic.Element;
+import com.ponysdk.core.ui.basic.PAbsolutePanel;
+import com.ponysdk.core.ui.basic.PAnchor;
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PCookies;
+import com.ponysdk.core.ui.basic.PDateBox;
+import com.ponysdk.core.ui.basic.PDockLayoutPanel;
+import com.ponysdk.core.ui.basic.PElement;
+import com.ponysdk.core.ui.basic.PFlowPanel;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PListBox;
+import com.ponysdk.core.ui.basic.PMenuBar;
+import com.ponysdk.core.ui.basic.PRadioButton;
+import com.ponysdk.core.ui.basic.PRichTextArea;
+import com.ponysdk.core.ui.basic.PScript;
+import com.ponysdk.core.ui.basic.PStackLayoutPanel;
+import com.ponysdk.core.ui.basic.PTabLayoutPanel;
+import com.ponysdk.core.ui.basic.PTextBox;
+import com.ponysdk.core.ui.basic.PTree;
+import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
 import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
 import com.ponysdk.core.ui.datagrid.ColumnDescriptor;
@@ -41,7 +64,6 @@ import com.ponysdk.core.ui.list.DataGridColumnDescriptor;
 import com.ponysdk.core.ui.list.refreshable.Cell;
 import com.ponysdk.core.ui.list.refreshable.RefreshableDataGrid;
 import com.ponysdk.core.ui.list.renderer.cell.CellRenderer;
-import com.ponysdk.core.ui.list.renderer.header.HeaderCellRenderer;
 import com.ponysdk.core.ui.list.valueprovider.IdentityValueProvider;
 import com.ponysdk.core.ui.main.EntryPoint;
 import com.ponysdk.core.ui.model.PKeyCodes;
@@ -52,22 +74,18 @@ import com.ponysdk.sample.client.event.UserLoggedOutHandler;
 import com.ponysdk.sample.client.page.addon.LoggerAddOn;
 import com.ponysdk.sample.client.page.addon.SelectizeAddon;
 
-import java.text.SimpleDateFormat;
-import java.time.Duration;
-import java.util.Date;
-import java.util.concurrent.atomic.AtomicInteger;
-
 public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     private PLabel child2;
 
     // HighChartsStackedColumnAddOn highChartsStackedColumnAddOn;
-    int a= 0;
+    int a = 0;
+
     @Override
     public void start(final UIContext uiContext) {
         uiContext.setClientDataOutput((object, instruction) -> System.err.println(object + " : " + instruction));
 
-        final PWindow a = Element.newPWindow(null, "Window 2", "resizable=yes,location=0,status=0,scrollbars=0");
+        final PWindow a = Element.newPWindow(true, null, "Window 2", "resizable=yes,location=0,status=0,scrollbars=0");
         a.open();
 
         final PLabel b = Element.newPLabel();
@@ -76,9 +94,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final AtomicInteger i = new AtomicInteger();
         PScheduler.scheduleWithFixedDelay(() -> b.setText(i.incrementAndGet() + ""), Duration.ofSeconds(1), Duration.ofSeconds(1));
 
-
-        DataGrid<Integer> grid = new DataGrid();
-
+        final DataGrid<Integer> grid = new DataGrid();
 
         for (int cpt = 0; cpt < 20; cpt++) {
             final ColumnDescriptor<Integer> column = new ColumnDescriptor<>();
@@ -88,9 +104,9 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             column.setHeaderRenderer(() -> anchor);
             grid.addColumnDescriptor(column);
         }
-        PTextBox textBox = Element.newPTextBox();
+        final PTextBox textBox = Element.newPTextBox();
 
-        PButton add = Element.newPButton("add");
+        final PButton add = Element.newPButton("add");
         add.addClickHandler(e -> {
             grid.setData(Integer.valueOf(textBox.getText()));
         });
@@ -100,20 +116,22 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         PWindow.getMain().add(textBox);
         PWindow.getMain().add(grid);
 
-    /**
-        PScheduler.scheduleAtFixedRate(() -> {
-            grid.setData((int) (Math.random() * 50));
-            grid.removeData((int) (Math.random() * 50));
-            grid.removeColumn(grid.getColumns().get((int) (Math.random() * grid.getColumns().size() - 1)));
-
-            final ColumnDescriptor<Integer> column = new ColumnDescriptor<>();
-            final PAnchor anchor = new PAnchor("Header " + id.incrementAndGet());
-            anchor.addClickHandler(click -> grid.removeColumn(column));
-            column.setCellRenderer(new PLabelCellRenderer<>(from -> (int) (Math.random() * 1000) + ""));
-            column.setHeaderRenderer(() -> anchor);
-            grid.addColumnDescriptor(column);
-        }, Duration.ofMillis(2000));
-**/
+        /**
+         * PScheduler.scheduleAtFixedRate(() -> {
+         * grid.setData((int) (Math.random() * 50));
+         * grid.removeData((int) (Math.random() * 50));
+         * grid.removeColumn(grid.getColumns().get((int) (Math.random() * grid.getColumns().size() -
+         * 1)));
+         * 
+         * final ColumnDescriptor<Integer> column = new ColumnDescriptor<>();
+         * final PAnchor anchor = new PAnchor("Header " + id.incrementAndGet());
+         * anchor.addClickHandler(click -> grid.removeColumn(column));
+         * column.setCellRenderer(new PLabelCellRenderer<>(from -> (int) (Math.random() * 1000) +
+         * ""));
+         * column.setHeaderRenderer(() -> anchor);
+         * grid.addColumnDescriptor(column);
+         * }, Duration.ofMillis(2000));
+         **/
 
         //final PWindow a = new PWindow(null, "Window 2", "resizable=yes,location=0,status=0,scrollbars=0");
         //a.open();
