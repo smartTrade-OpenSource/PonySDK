@@ -65,9 +65,15 @@ public class PTWindow extends AbstractPTObject {
         uiService = builder;
 
         final boolean relative = buffer.readBinaryModel().getBooleanValue();
-        url = buffer.readBinaryModel().getStringValue();
-        name = buffer.readBinaryModel().getStringValue();
-        features = buffer.readBinaryModel().getStringValue();
+
+        final String rawUrl = buffer.readBinaryModel().getStringValue();
+        url = rawUrl != null ? rawUrl : EMPTY;
+
+        final String rawName = buffer.readBinaryModel().getStringValue();
+        name = rawName != null ? rawName : EMPTY;
+
+        final String rawFeatures = buffer.readBinaryModel().getStringValue();
+        features = rawFeatures != null ? rawFeatures : EMPTY;
 
         if (relative) {
             url = GWT.getHostPageBaseURL() + url + "?" + ClientToServerModel.WINDOW_ID.toStringValue() + "=" + objectId + "&"
