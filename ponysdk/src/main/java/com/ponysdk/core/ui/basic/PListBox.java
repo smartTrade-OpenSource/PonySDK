@@ -37,8 +37,6 @@ import javax.json.JsonObject;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.servlet.WebsocketEncoder;
-import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.ui.basic.event.HasPChangeHandlers;
 import com.ponysdk.core.ui.basic.event.PChangeEvent;
 import com.ponysdk.core.ui.basic.event.PChangeHandler;
@@ -113,14 +111,13 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
         items.forEach((item) -> this.items.add(new ListItem(item, item)));
 
-        final WebsocketEncoder encoder = Txn.get().getEncoder();
-        encoder.beginObject();
-        if (windowID != PWindow.getMain().getID()) encoder.encode(ServerToClientModel.WINDOW_ID, windowID);
-        encoder.encode(ServerToClientModel.TYPE_ADD, ID);
-        final String s = items.toString();
-        encoder.encode(ServerToClientModel.ITEM_ADD, s.substring(1, s.length() - 1).replaceAll(",", ";").replaceAll(" ", EMPTY));
-        encoder.encode(ServerToClientModel.ITEM_GROUP, group);
-        encoder.endObject();
+        final String itemsTextual = items.toString();
+        final String s = itemsTextual.substring(1, itemsTextual.length() - 1).replaceAll(",", ";").replaceAll(" ", EMPTY);
+
+        saveUpdate(writer -> {
+            writer.writeModel(ServerToClientModel.ITEM_ADD, s);
+            writer.writeModel(ServerToClientModel.ITEM_GROUP, group);
+        });
     }
 
     public void addItem(final String item) {
