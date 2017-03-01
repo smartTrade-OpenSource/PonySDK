@@ -65,17 +65,54 @@ public class PTCookies extends AbstractPTObject {
             // ServerToClientModel.VALUE
             final String value = buffer.readBinaryModel().getStringValue();
 
-            final BinaryModel expire = buffer.readBinaryModel();
-            if (ServerToClientModel.COOKIE_EXPIRE.equals(expire.getModel())) {
-                final Date date = new Date(expire.getLongValue());
-                Cookies.setCookie(name, value, date);
+            final BinaryModel expireModel = buffer.readBinaryModel();
+            final Date expirationDate;
+            if (ServerToClientModel.COOKIE_EXPIRE.equals(expireModel.getModel())) {
+                expirationDate = new Date(expireModel.getLongValue());
             } else {
-                buffer.rewind(expire);
-                Cookies.setCookie(name, value);
+                expirationDate = null;
+                buffer.rewind(expireModel);
             }
+
+            final BinaryModel domainModel = buffer.readBinaryModel();
+            final String domain;
+            if (ServerToClientModel.COOKIE_DOMAIN.equals(domainModel.getModel())) {
+                domain = domainModel.getStringValue();
+            } else {
+                domain = null;
+                buffer.rewind(domainModel);
+            }
+
+            final BinaryModel pathModel = buffer.readBinaryModel();
+            final String path;
+            if (ServerToClientModel.COOKIE_PATH.equals(pathModel.getModel())) {
+                path = pathModel.getStringValue();
+            } else {
+                path = null;
+                buffer.rewind(pathModel);
+            }
+
+            final BinaryModel secureModel = buffer.readBinaryModel();
+            final boolean secure;
+            if (ServerToClientModel.COOKIE_SECURE.equals(secureModel.getModel())) {
+                secure = true;
+            } else {
+                secure = false;
+                buffer.rewind(pathModel);
+            }
+
+            Cookies.setCookie(name, value, expirationDate, domain, path, secure);
+
             return true;
         } else if (ServerToClientModel.REMOVE_COOKIE.ordinal() == modelOrdinal) {
-            Cookies.removeCookie(binaryModel.getStringValue());
+            final String name = binaryModel.getStringValue();
+            final BinaryModel path = buffer.readBinaryModel();
+            if (ServerToClientModel.COOKIE_PATH.equals(path.getModel())) {
+                Cookies.removeCookie(name, path.getStringValue());
+            } else {
+                buffer.rewind(path);
+                Cookies.removeCookie(name);
+            }
             return true;
         } else {
             return super.update(buffer, binaryModel);

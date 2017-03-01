@@ -59,20 +59,38 @@ public class PCookies {
     }
 
     public String removeCookie(final String name) {
+        return removeCookie(name, null);
+    }
+
+    public String removeCookie(final String name, final String path) {
         final WebsocketEncoder encoder = Txn.get().getEncoder();
         encoder.beginObject();
         encoder.encode(ServerToClientModel.TYPE_UPDATE, ID);
         encoder.encode(ServerToClientModel.REMOVE_COOKIE, name);
+        if (path != null) encoder.encode(ServerToClientModel.COOKIE_PATH, path);
         encoder.endObject();
 
         return cachedCookies.remove(name);
     }
 
     public void setCookie(final String name, final String value) {
-        setCookie(name, value, null);
+        setCookie(name, value, null, null);
+    }
+
+    public void setCookie(final String name, final String value, final String path) {
+        setCookie(name, value, null, path);
     }
 
     public void setCookie(final String name, final String value, final Date expires) {
+        setCookie(name, value, expires, null);
+    }
+
+    public void setCookie(final String name, final String value, final Date expires, final String path) {
+        setCookie(name, value, expires, path, null, false);
+    }
+
+    public void setCookie(final String name, final String value, final Date expires, final String domain, final String path,
+                          final boolean secure) {
         cachedCookies.put(name, value);
 
         final WebsocketEncoder encoder = Txn.get().getEncoder();
@@ -81,6 +99,9 @@ public class PCookies {
         encoder.encode(ServerToClientModel.ADD_COOKIE, name);
         encoder.encode(ServerToClientModel.VALUE, value);
         if (expires != null) encoder.encode(ServerToClientModel.COOKIE_EXPIRE, expires.getTime());
+        if (domain != null) encoder.encode(ServerToClientModel.COOKIE_DOMAIN, domain);
+        if (path != null) encoder.encode(ServerToClientModel.COOKIE_PATH, path);
+        if (secure) encoder.encode(ServerToClientModel.COOKIE_SECURE, secure);
         encoder.endObject();
     }
 
