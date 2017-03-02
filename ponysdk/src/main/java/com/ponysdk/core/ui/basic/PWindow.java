@@ -24,8 +24,6 @@
 package com.ponysdk.core.ui.basic;
 
 import java.util.Collections;
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -46,9 +44,8 @@ public class PWindow extends PObject {
 
     static final int EMPTY_WINDOW_ID = -1;
 
-    private final Set<PCloseHandler> closeHandlers = Collections.newSetFromMap(new ConcurrentHashMap<>());
-    private final Set<POpenHandler> openHandlers = Collections.newSetFromMap(new ConcurrentHashMap<>());
-    private final Queue<Runnable> stackedWindowsInstructions = new LinkedList<>();
+    private Set<POpenHandler> openHandlers;
+    private Set<PCloseHandler> closeHandlers;
 
     private String url;
     private String name;
@@ -145,35 +142,44 @@ public class PWindow extends PObject {
             PWindowManager.registerWindow(this);
             this.opened = true;
 
-            while (!stackedWindowsInstructions.isEmpty()) {
-                stackedWindowsInstructions.poll().run();
-            }
+            getPRootLayoutPanel().init();
+            getPRootPanel().init();
 
-            final POpenEvent e = new POpenEvent(this);
-            openHandlers.forEach(handler -> handler.onOpen(e));
-            openHandlers.clear();
+            if (openHandlers != null) {
+                final POpenEvent e = new POpenEvent(this);
+                openHandlers.forEach(handler -> handler.onOpen(e));
+                openHandlers.clear();
+            }
         } else if (event.containsKey(ClientToServerModel.HANDLER_CLOSE.toStringValue())) {
             PWindowManager.unregisterWindow(this);
             this.opened = false;
-            final PCloseEvent e = new PCloseEvent(this);
-            closeHandlers.forEach(handler -> handler.onClose(e));
-            closeHandlers.clear();
+            if (closeHandlers != null) {
+                final PCloseEvent e = new PCloseEvent(this);
+                closeHandlers.forEach(handler -> handler.onClose(e));
+                closeHandlers.clear();
+            }
             destroy();
         } else {
             super.onClientData(event);
         }
     }
 
-    public void addCloseHandler(final PCloseHandler handler) {
-        closeHandlers.add(handler);
-    }
-
     public void addOpenHandler(final POpenHandler handler) {
+        if (openHandlers == null) openHandlers = Collections.newSetFromMap(new ConcurrentHashMap<>());
         openHandlers.add(handler);
     }
 
-    public void removeCloseHandler(final PCloseHandler handler) {
-        closeHandlers.remove(handler);
+    public boolean removeOpenHandler(final POpenHandler handler) {
+        return openHandlers != null && openHandlers.remove(handler);
+    }
+
+    public void addCloseHandler(final PCloseHandler handler) {
+        if (closeHandlers == null) closeHandlers = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        closeHandlers.add(handler);
+    }
+
+    public boolean removeCloseHandler(final PCloseHandler handler) {
+        return closeHandlers != null && closeHandlers.remove(handler);
     }
 
     public PRootLayoutPanel getPRootLayoutPanel() {
@@ -185,11 +191,6 @@ public class PWindow extends PObject {
     }
 
     public void add(final IsPWidget widget) {
-        if (PWindowManager.getWindow(ID) == this) add0(widget.asWidget());
-        else stackedWindowsInstructions.add(() -> add0(widget.asWidget()));
-    }
-
-    private void add0(final PWidget widget) {
         getPRootPanel().add(widget);
     }
 
@@ -199,6 +200,11 @@ public class PWindow extends PObject {
 
     public String getUrl() {
         return url;
+    }
+
+    public void clear() {
+        getPRootLayoutPanel().clear();
+        getPRootPanel().clear();
     }
 
     @Override
