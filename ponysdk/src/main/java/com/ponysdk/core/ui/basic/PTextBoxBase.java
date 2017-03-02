@@ -43,7 +43,7 @@ public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, Ha
 
     private static final String EMPTY = "";
 
-    private final List<PValueChangeHandler<String>> handlers = new ArrayList<>();
+    private List<PValueChangeHandler<String>> handlers;
 
     private String text = EMPTY;
     private String placeholder = EMPTY;
@@ -105,17 +105,18 @@ public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, Ha
 
     @Override
     public void addValueChangeHandler(final PValueChangeHandler<String> handler) {
+        if (handlers == null) handlers = new ArrayList<>();
         handlers.add(handler);
     }
 
     @Override
     public boolean removeValueChangeHandler(final PValueChangeHandler<String> handler) {
-        return handlers.remove(handler);
+        return handlers != null && handlers.remove(handler);
     }
 
     @Override
     public Collection<PValueChangeHandler<String>> getValueChangeHandlers() {
-        return Collections.unmodifiableCollection(handlers);
+        return handlers != null ? Collections.unmodifiableCollection(handlers) : Collections.emptyList();
     }
 
     @Override
@@ -129,10 +130,8 @@ public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, Ha
     }
 
     protected void fireOnValueChange(final PValueChangeEvent<String> event) {
-        this.text = event.getValue();
-        for (final PValueChangeHandler<String> handler : handlers) {
-            handler.onValueChange(event);
-        }
+        this.text = event.getData();
+        if (handlers != null) handlers.forEach(handler -> handler.onValueChange(event));
     }
 
     @Override

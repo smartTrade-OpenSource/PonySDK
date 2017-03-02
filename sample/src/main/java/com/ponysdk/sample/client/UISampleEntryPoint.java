@@ -122,7 +122,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
          * grid.removeData((int) (Math.random() * 50));
          * grid.removeColumn(grid.getColumns().get((int) (Math.random() * grid.getColumns().size() -
          * 1)));
-         * 
+         *
          * final ColumnDescriptor<Integer> column = new ColumnDescriptor<>();
          * final PAnchor anchor = new PAnchor("Header " + id.incrementAndGet());
          * anchor.addClickHandler(click -> grid.removeColumn(column));
@@ -177,8 +177,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
         final PRadioButton buy = Element.newPRadioButton("Buy");
         final PRadioButton sell = Element.newPRadioButton("Sell");
-        buy.addValueChangeHandler((event) -> selectizeAddon.selectBuy(event.getValue()));
-        sell.addValueChangeHandler((event) -> selectizeAddon.selectSell(event.getValue()));
+        buy.addValueChangeHandler((event) -> selectizeAddon.selectBuy(event.getData()));
+        sell.addValueChangeHandler((event) -> selectizeAddon.selectSell(event.getData()));
 
         PWindow.getMain().add(buy);
         PWindow.getMain().add(sell);

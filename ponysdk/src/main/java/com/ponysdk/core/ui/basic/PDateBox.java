@@ -133,10 +133,8 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
 
     @Override
     public void onValueChange(final PValueChangeEvent<Date> event) {
-        this.date = event.getValue();
-        for (final PValueChangeHandler<Date> handler : getValueChangeHandlers()) {
-            handler.onValueChange(event);
-        }
+        this.date = event.getData();
+        getValueChangeHandlers().forEach(handler -> handler.onValueChange(event));
     }
 
     public SimpleDateFormat getDateFormat() {

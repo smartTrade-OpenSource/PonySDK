@@ -53,7 +53,7 @@ import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
  */
 public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueChangeHandlers<String> {
 
-    private final List<PValueChangeHandler<String>> handlers = new ArrayList<>();
+    private List<PValueChangeHandler<String>> handlers;
     private final Formatter formatter = new Formatter();
     private String html;
 
@@ -103,27 +103,24 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
     }
 
     protected void fireOnValueChange(final PValueChangeEvent<String> event) {
-        this.html = event.getValue();
-
-        for (final PValueChangeHandler<String> handler : handlers) {
-            handler.onValueChange(event);
-        }
-
+        this.html = event.getData();
+        if (handlers != null) handlers.forEach(handler -> handler.onValueChange(event));
     }
 
     @Override
     public void addValueChangeHandler(final PValueChangeHandler<String> handler) {
+        if (handlers == null) handlers = new ArrayList<>();
         handlers.add(handler);
     }
 
     @Override
     public boolean removeValueChangeHandler(final PValueChangeHandler<String> handler) {
-        return handlers.remove(handler);
+        return handlers != null && handlers.remove(handler);
     }
 
     @Override
     public Collection<PValueChangeHandler<String>> getValueChangeHandlers() {
-        return Collections.unmodifiableCollection(handlers);
+        return handlers != null ? Collections.unmodifiableCollection(handlers) : Collections.emptyList();
     }
 
     public class Formatter {

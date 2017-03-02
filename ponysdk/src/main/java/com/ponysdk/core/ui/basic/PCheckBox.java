@@ -107,12 +107,10 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
      *
      * @return <code>true</code> if the check box is checked, false otherwise.
      *         Will not return null
-     * @deprecated Use {@link #getState()} instead
      */
-    @Deprecated
     @Override
     public Boolean getValue() {
-        return isChecked();
+        return PCheckBoxState.CHECKED.equals(state);
     }
 
     /**
@@ -120,21 +118,10 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
      *
      * @param value
      *            true to check, false to uncheck; null value implies false
-     * @deprecated Use {@link #setState(PCheckBoxState)} instead
      */
-    @Deprecated
     @Override
     public void setValue(final Boolean value) {
         setState(Boolean.TRUE.equals(value) ? PCheckBoxState.CHECKED : PCheckBoxState.UNCHECKED);
-    }
-
-    /**
-     * Determines whether this check box is currently checked.
-     *
-     * @return <code>true</code> if the check box is checked, false otherwise.
-     */
-    public boolean isChecked() {
-        return PCheckBoxState.CHECKED.equals(state);
     }
 
     @Override
@@ -142,11 +129,7 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
         final PCheckBoxState state = Boolean.TRUE.equals(event.getData()) ? PCheckBoxState.CHECKED : PCheckBoxState.UNCHECKED;
         if (Objects.equals(this.state, state)) return;
         this.state = state;
-        if (handlers != null) {
-            for (final PValueChangeHandler<Boolean> handler : handlers) {
-                handler.onValueChange(event);
-            }
-        }
+        if (handlers != null) handlers.forEach(handler -> handler.onValueChange(event));
     }
 
     @Override

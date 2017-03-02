@@ -37,12 +37,6 @@ import com.ponysdk.core.ui.basic.PScript;
 import com.ponysdk.core.ui.basic.PScript.ExecutionCallback;
 import com.ponysdk.core.ui.basic.PSimplePanel;
 import com.ponysdk.core.ui.basic.PWindow;
-import com.ponysdk.core.ui.basic.event.PChangeEvent;
-import com.ponysdk.core.ui.basic.event.PChangeHandler;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
-import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
-import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 import com.ponysdk.core.ui.form.Form;
 import com.ponysdk.core.ui.form.FormFieldComponent;
 import com.ponysdk.core.ui.form.formfield.StringTextBoxFormField;
@@ -253,8 +247,8 @@ public class LessPageActivity extends SamplePageActivity {
         ff.setValidator(colorValidator);
         ff.setValue(defaultValue);
         ff.getWidget().addValueChangeHandler(event -> {
-            if (colorValidator.isValid(event.getValue()).isValid()) {
-                preview.setStyleProperty("backgroundColor", "#" + event.getValue());
+            if (colorValidator.isValid(event.getData()).isValid()) {
+                preview.setStyleProperty("backgroundColor", "#" + event.getData());
             }
         });
 

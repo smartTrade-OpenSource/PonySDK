@@ -49,12 +49,4 @@ public class PValueChangeEvent<T> extends Event<PValueChangeHandler<T>> {
         return (T) super.getData();
     }
 
-    /**
-     * @deprecated Use {@link #getData()} instead
-     */
-    @Deprecated
-    public T getValue() {
-        return getData();
-    }
-
 }

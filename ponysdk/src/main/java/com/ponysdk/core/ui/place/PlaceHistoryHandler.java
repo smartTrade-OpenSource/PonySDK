@@ -48,7 +48,7 @@ public class PlaceHistoryHandler {
         eventBus.addHandler(PlaceChangeEvent.TYPE,
             (PlaceChangeHandler) event -> history.newItem(mapper.getToken(event.getNewPlace()), false));
 
-        history.addValueChangeHandler((event) -> handleHistoryToken(event.getValue()));
+        history.addValueChangeHandler((event) -> handleHistoryToken(event.getData()));
     }
 
     public void setDefaultPlace(final Place defaultPlace) {

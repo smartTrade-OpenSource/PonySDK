@@ -126,7 +126,7 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
 
     @Override
     public void onValueChange(final PValueChangeEvent<Date> event) {
-        this.date = event.getValue();
+        this.date = event.getData();
         for (final PValueChangeHandler<Date> handler : handlers) {
             handler.onValueChange(event);
         }

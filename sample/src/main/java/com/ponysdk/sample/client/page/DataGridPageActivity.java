@@ -33,15 +33,10 @@ import com.ponysdk.core.ui.basic.PConfirmDialogHandler;
 import com.ponysdk.core.ui.basic.PDialogBox;
 import com.ponysdk.core.ui.basic.PFlexTable;
 import com.ponysdk.core.ui.basic.PFlowPanel;
-import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PListBox;
 import com.ponysdk.core.ui.basic.PScrollPanel;
 import com.ponysdk.core.ui.basic.PSimplePanel;
 import com.ponysdk.core.ui.basic.PTextBox;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
-import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
-import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 import com.ponysdk.core.ui.form.Form;
 import com.ponysdk.core.ui.form.FormFieldComponent;
 import com.ponysdk.core.ui.form.event.SubmitFormEvent;
@@ -64,7 +59,6 @@ import com.ponysdk.core.ui.list.renderer.cell.CellRenderer;
 import com.ponysdk.core.ui.list.renderer.cell.LabelCellRenderer;
 import com.ponysdk.core.ui.list.renderer.header.ComplexHeaderCellRenderer;
 import com.ponysdk.core.ui.list.renderer.header.FilterableHeaderCellRenderer;
-import com.ponysdk.core.ui.list.renderer.header.HeaderCellRenderer;
 import com.ponysdk.core.ui.list.renderer.header.StringHeaderCellRenderer;
 import com.ponysdk.core.ui.list.selector.CompositeSelectorView;
 import com.ponysdk.core.ui.list.selector.DefaultActionSelectorView;
@@ -175,14 +169,12 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
                 selector.registerSelectable(selectorCheckBox);
 
                 selectorCheckBox.addValueChangeHandler(event -> {
-                    if (event.getValue()) {
+                    if (event.getData()) {
                         selectorCheckBox.onCheck();
                         dataGrid.selectRow(value);
-
                     } else {
                         selectorCheckBox.onUncheck();
                         dataGrid.unSelectRow(value);
-
                     }
                 });
 
@@ -197,13 +189,7 @@ public class DataGridPageActivity extends SamplePageActivity implements SubmitFo
         selectColumnDescriptor.setSubCellRenderer(selectCellRenderer);
 
         final IdentityDataGridColumnDescriptor<Pony> descriptor = new IdentityDataGridColumnDescriptor<>();
-        descriptor.setHeaderCellRenderer(new HeaderCellRenderer() {
-
-            @Override
-            public PLabel render() {
-                return Element.newPLabel();
-            }
-        });
+        descriptor.setHeaderCellRenderer(() -> Element.newPLabel());
 
         final DataGridColumnDescriptor<Pony, String> nameColumnDescriptor = new DataGridColumnDescriptor<>();
         final ComplexHeaderCellRenderer nameHeaderCellRender = new FilterableHeaderCellRenderer("Name", new StringTextBoxFormField(),

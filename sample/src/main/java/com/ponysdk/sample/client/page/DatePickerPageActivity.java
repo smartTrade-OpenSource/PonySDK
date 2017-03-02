@@ -33,10 +33,6 @@ import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PDateBox;
 import com.ponysdk.core.ui.basic.PDatePicker;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
-import com.ponysdk.core.ui.basic.event.PShowRangeEvent;
-import com.ponysdk.core.ui.basic.event.PShowRangeHandler;
-import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
-import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 import com.ponysdk.core.ui.rich.PNotificationManager;
 import com.ponysdk.sample.client.event.DemoBusinessEvent;
 
@@ -62,7 +58,7 @@ public class DatePickerPageActivity extends SamplePageActivity {
         datePicker = Element.newPDatePicker();
         datePicker.addStyleToDates("off", dates("12/25/2013", "01/01/2014", "04/26/2014"));
         datePicker.addValueChangeHandler(event -> {
-            notifyDateChange("picker", event.getValue());
+            notifyDateChange("picker", event.getData());
             dateBox.setDefaultMonth(datePicker.getValue());
         });
 
@@ -76,7 +72,7 @@ public class DatePickerPageActivity extends SamplePageActivity {
         });
 
         dateBox = Element.newPDateBox();
-        dateBox.addValueChangeHandler(event -> notifyDateChange("datebox", event.getValue()));
+        dateBox.addValueChangeHandler(event -> notifyDateChange("datebox", event.getData()));
 
         panel.add(Element.newPLabel("Permanent DatePicker:"));
         panel.add(datePicker);
