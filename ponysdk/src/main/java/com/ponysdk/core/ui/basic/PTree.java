@@ -175,4 +175,10 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
         this.animationEnabled = animationEnabled;
         saveUpdate((writer) -> writer.writeModel(ServerToClientModel.ANIMATION, animationEnabled));
     }
+
+    @Override
+    public void destroy() {
+        super.destroy();
+        root.destroy();
+    }
 }

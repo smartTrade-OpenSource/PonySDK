@@ -195,4 +195,13 @@ public class PStackLayoutPanel extends PWidget
         saveUpdate((writer) -> writer.writeModel(ServerToClientModel.ANIMATION_DURATION, (int) duration.toMillis()));
     }
 
+    @Override
+    public void destroy() {
+        super.destroy();
+        final Iterator<PWidget> it = iterator();
+        while (it.hasNext()) {
+            it.next().destroy();
+        }
+    }
+
 }

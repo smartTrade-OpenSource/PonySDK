@@ -158,6 +158,7 @@ public class PWindow extends PObject {
             final PCloseEvent e = new PCloseEvent(this);
             closeHandlers.forEach(handler -> handler.onClose(e));
             closeHandlers.clear();
+            destroy();
         } else {
             super.onClientData(event);
         }
@@ -184,11 +185,11 @@ public class PWindow extends PObject {
     }
 
     public void add(final IsPWidget widget) {
-        if (PWindowManager.getWindow(ID) == this) add0(widget);
-        else stackedWindowsInstructions.add(() -> add0(widget));
+        if (PWindowManager.getWindow(ID) == this) add0(widget.asWidget());
+        else stackedWindowsInstructions.add(() -> add0(widget.asWidget()));
     }
 
-    private void add0(final IsPWidget widget) {
+    private void add0(final PWidget widget) {
         getPRootPanel().add(widget);
     }
 
@@ -198,6 +199,13 @@ public class PWindow extends PObject {
 
     public String getUrl() {
         return url;
+    }
+
+    @Override
+    public void destroy() {
+        super.destroy();
+        getPRootLayoutPanel().destroy();
+        getPRootPanel().destroy();
     }
 
     public static class TargetAttribut {

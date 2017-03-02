@@ -137,6 +137,6 @@ public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, Ha
 
     @Override
     public String toString() {
-        return "PTextBoxBase{" + "text='" + text + '\'' + ", placeholder='" + placeholder + '\'' + '}';
+        return super.toString() + ", text=" + text + ", placeholder=" + placeholder;
     }
 }

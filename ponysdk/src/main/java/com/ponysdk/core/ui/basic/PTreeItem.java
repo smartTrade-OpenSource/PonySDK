@@ -181,4 +181,10 @@ public class PTreeItem extends PObject {
         return widget;
     }
 
+    @Override
+    public void destroy() {
+        super.destroy();
+        children.forEach(PObject::destroy);
+    }
+
 }

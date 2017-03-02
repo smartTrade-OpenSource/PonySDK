@@ -23,8 +23,11 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.json.JsonObject;
 
@@ -38,6 +41,7 @@ import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.servlet.WebsocketEncoder;
 import com.ponysdk.core.server.stm.Txn;
+import com.ponysdk.core.ui.basic.event.PDestroyEvent;
 import com.ponysdk.core.ui.basic.event.PTerminalEvent;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.writer.ModelWriter;
@@ -46,7 +50,7 @@ import com.ponysdk.core.writer.ModelWriterCallback;
 /**
  * The superclass for all PonySDK objects.
  */
-public abstract class PObject {
+public abstract class PObject implements PDestroyEvent.HasHandler {
 
     private static final Logger log = LoggerFactory.getLogger(PObject.class);
 
@@ -57,6 +61,8 @@ public abstract class PObject {
     private String nativeBindingFunction;
     private PTerminalEvent.Handler terminalHandler;
     private AttachListener attachListener;
+
+    private Set<PDestroyEvent.Handler> destroyHandlers;
 
     PObject() {
     }
@@ -182,7 +188,7 @@ public abstract class PObject {
             }
             encoder.endObject();
         } else {
-            if (log.isWarnEnabled()) log.warn("Add : The attached window #" + windowID + " doesn't exist");
+            log.warn("Add on {} : The attached window #" + windowID + " doesn't exist", toString());
         }
     }
 
@@ -200,7 +206,7 @@ public abstract class PObject {
             parser.encode(ServerToClientModel.OBJECT_ID, ID);
             parser.endObject();
         } else {
-            if (log.isWarnEnabled()) log.warn("AddHandler : The attached window #" + windowID + " doesn't exist");
+            log.warn("Add Handler on {} : The attached window #" + windowID + " doesn't exist", toString());
         }
     }
 
@@ -217,7 +223,7 @@ public abstract class PObject {
             parser.encode(ServerToClientModel.TYPE_REMOVE_HANDLER, ID);
             parser.endObject();
         } else {
-            if (log.isWarnEnabled()) log.warn("RemoveHandler : The attached window #" + windowID + " doesn't exist");
+            log.warn("Remove Handler on {} : The attached window #" + windowID + " doesn't exist", toString());
         }
     }
 
@@ -235,7 +241,7 @@ public abstract class PObject {
             parser.encode(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
             parser.endObject();
         } else {
-            if (log.isWarnEnabled()) log.warn("Remove : The attached window #" + windowID + " doesn't exist");
+            log.warn("Remove on {} : The attached window #" + windowID + " doesn't exist", toString());
         }
     }
 
@@ -256,17 +262,36 @@ public abstract class PObject {
             callback.doWrite(writer);
             writer.endObject();
         } else {
-            if (log.isWarnEnabled()) log.warn("Update : The attached window #" + windowID + " doesn't exist");
+            log.warn("Update on {} : The attached window #" + windowID + " doesn't exist", toString());
         }
     }
 
     @Override
     public String toString() {
-        return "ID=" + ID + ", widgetType=" + getWidgetType().name();
+        return getClass().getSimpleName() + "#" + ID;
     }
 
     public void setAttachListener(final AttachListener attachListener) {
         this.attachListener = attachListener;
+    }
+
+    @Override
+    public void addDestroyHandler(final PDestroyEvent.Handler handler) {
+        if (destroyHandlers == null) destroyHandlers = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        destroyHandlers.add(handler);
+    }
+
+    @Override
+    public boolean removeDestroyHandler(final PDestroyEvent.Handler handler) {
+        return destroyHandlers != null && destroyHandlers.remove(handler);
+    }
+
+    public void destroy() {
+        if (destroyHandlers != null) {
+            final PDestroyEvent.Event destroyEvent = new PDestroyEvent.Event(this);
+            destroyHandlers.forEach(handler -> handler.onDestroy(destroyEvent));
+            destroyHandlers.clear();
+        }
     }
 
     @FunctionalInterface

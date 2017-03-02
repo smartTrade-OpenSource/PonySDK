@@ -76,4 +76,13 @@ public abstract class PPanel extends PWidget implements HasPWidgets {
         }
     }
 
+    @Override
+    public void destroy() {
+        super.destroy();
+        final Iterator<PWidget> it = iterator();
+        while (it.hasNext()) {
+            it.next().destroy();
+        }
+    }
+
 }

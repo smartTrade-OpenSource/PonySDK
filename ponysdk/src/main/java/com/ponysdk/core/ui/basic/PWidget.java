@@ -516,9 +516,4 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         return addon;
     }
 
-    @Override
-    public String toString() {
-        return getClass().getSimpleName() + " #" + ID;
-    }
-
 }

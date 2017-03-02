@@ -207,4 +207,10 @@ public class PMenuBar extends PWidget implements HasPAnimation {
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.ANIMATION, animationEnabled));
     }
 
+    @Override
+    public void destroy() {
+        super.destroy();
+        items.forEach(PObject::destroy);
+    }
+
 }
