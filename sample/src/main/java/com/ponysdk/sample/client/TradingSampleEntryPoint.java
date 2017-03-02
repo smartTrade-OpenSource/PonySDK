@@ -24,7 +24,6 @@
 package com.ponysdk.sample.client;
 
 import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.ui.activity.ActivityManager;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PElement;
 import com.ponysdk.core.ui.basic.PSimpleLayoutPanel;
@@ -35,7 +34,6 @@ import com.ponysdk.core.ui.place.DefaultPlaceHistoryMapper;
 import com.ponysdk.core.ui.place.PlaceController;
 import com.ponysdk.core.ui.place.PlaceHistoryHandler;
 import com.ponysdk.core.ui.place.PlaceHistoryMapper;
-import com.ponysdk.sample.client.activity.SampleActivityMapper;
 import com.ponysdk.sample.client.place.LoginPlace;
 
 public class TradingSampleEntryPoint implements EntryPoint {
@@ -50,12 +48,8 @@ public class TradingSampleEntryPoint implements EntryPoint {
 
         final EventBus eventBus = UIContext.getRootEventBus();
 
-        final SampleActivityMapper mapper = new SampleActivityMapper();
         final PlaceHistoryMapper historyMapper = new DefaultPlaceHistoryMapper(eventBus);
         final PlaceController placeController = new PlaceController(uiContext.getHistory(), eventBus);
-
-        final ActivityManager activityManager = new ActivityManager(mapper);
-        activityManager.setDisplay(panel);
 
         final PlaceHistoryHandler historyHandler = new PlaceHistoryHandler(uiContext.getHistory(), historyMapper, placeController,
             eventBus);

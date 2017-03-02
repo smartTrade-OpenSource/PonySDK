@@ -97,7 +97,6 @@ public class UIContext {
     private final Set<DataListener> listeners = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private int objectCounter = 1;
     private int streamRequestCounter = 0;
-    private Map<String, Permission> permissions = new HashMap<>();
     private int lastReceived = -1;
     private long lastSyncErrorTimestamp = 0;
     private TerminalDataReceiver terminalDataReceiver;
@@ -158,14 +157,6 @@ public class UIContext {
 
     public static EventBus getRootEventBus() {
         return get().getEventBus();
-    }
-
-    public static boolean hasPermission(final String permissionKey) {
-        return get().hasPermission0(permissionKey);
-    }
-
-    public static boolean hasPermission(final Permission permission) {
-        return get().hasPermission0(permission.getKey());
     }
 
     public int getID() {
@@ -347,14 +338,6 @@ public class UIContext {
         writer.beginObject();
         writer.writeModel(ServerToClientModel.TYPE_CLOSE, null);
         writer.endObject();
-    }
-
-    private boolean hasPermission0(final String permissionKey) {
-        return Permission.ALLOWED.getKey().equals(permissionKey) || permissions.containsKey(permissionKey);
-    }
-
-    public void setPermissions(final Map<String, Permission> permissions) {
-        this.permissions = permissions;
     }
 
     /**

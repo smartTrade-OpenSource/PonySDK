@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,7 +23,6 @@
 
 package com.ponysdk.impl.webapplication.application;
 
-import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.activity.Activity;
 import com.ponysdk.core.ui.basic.PAcceptsOneWidget;
 import com.ponysdk.core.ui.place.Place;
@@ -73,8 +72,6 @@ public class ApplicationActivity implements Activity {
             final HasPageName pagePlace = (HasPageName) place;
             final PageActivity pageActivity = pageProvider.getPageActivity(pagePlace.getPageName());
 
-            if (!UIContext.hasPermission(pageActivity.getPermission())) throw new RuntimeException("Missing permission #" + pageActivity.getPermission());
-
             if (currentPageActivity != null) {
                 currentPageActivity.leave();
             }
@@ -120,6 +117,7 @@ public class ApplicationActivity implements Activity {
     }
 
     @Override
-    public void stop() {}
+    public void stop() {
+    }
 
 }
