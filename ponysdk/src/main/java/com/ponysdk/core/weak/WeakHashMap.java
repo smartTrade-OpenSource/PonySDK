@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.ui.basic.PObject;
+import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.writer.ModelWriter;
 
 public class WeakHashMap implements Map<Integer, PObject> {
@@ -46,6 +47,7 @@ public class WeakHashMap implements Map<Integer, PObject> {
     private final ReferenceQueue<PObject> queue = new ReferenceQueue<>();
 
     private final Map<Integer, WeakReference<PObject>> referenceByObjectID = new ConcurrentHashMap<>();
+    private final Map<Integer, Integer> windowIDbyObjectID = new ConcurrentHashMap<>();
 
     private final Map<WeakReference<PObject>, Integer> objectIDByReferences = new ConcurrentHashMap<>();
 
@@ -86,6 +88,7 @@ public class WeakHashMap implements Map<Integer, PObject> {
         expungeStaleEntries();
         final WeakReference<PObject> weakReference = new WeakReference<>(value, queue);
         referenceByObjectID.put(objectID, weakReference);
+        windowIDbyObjectID.put(objectID, value.getWindowID());
         objectIDByReferences.put(weakReference, objectID);
 
         if (log.isDebugEnabled()) log.debug("Registering object: " + value);
@@ -138,11 +141,13 @@ public class WeakHashMap implements Map<Integer, PObject> {
         Reference<? extends PObject> reference;
         while ((reference = queue.poll()) != null) {
             final Integer objectID = objectIDByReferences.remove(reference);
-            final Reference<PObject> removedObject = referenceByObjectID.remove(objectID);
+            final Integer windowID = windowIDbyObjectID.remove(objectID);
+            referenceByObjectID.remove(objectID);
             if (log.isDebugEnabled()) log.debug("Removing reference on object #{}", objectID);
 
             final ModelWriter writer = Txn.getWriter();
             writer.beginObject();
+            if (windowID != PWindow.getMain().getID()) writer.writeModel(ServerToClientModel.WINDOW_ID, windowID);
             writer.writeModel(ServerToClientModel.TYPE_GC, objectID);
             writer.endObject();
         }

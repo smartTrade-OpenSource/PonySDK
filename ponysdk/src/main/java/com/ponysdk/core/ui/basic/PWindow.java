@@ -23,13 +23,13 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.json.JsonObject;
-
-import org.eclipse.jetty.util.ConcurrentHashSet;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -46,8 +46,8 @@ public class PWindow extends PObject {
 
     static final int EMPTY_WINDOW_ID = -1;
 
-    private final Set<PCloseHandler> closeHandlers = new ConcurrentHashSet<>();
-    private final Set<POpenHandler> openHandlers = new ConcurrentHashSet<>();
+    private final Set<PCloseHandler> closeHandlers = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private final Set<POpenHandler> openHandlers = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private final Queue<Runnable> stackedWindowsInstructions = new LinkedList<>();
 
     private String url;

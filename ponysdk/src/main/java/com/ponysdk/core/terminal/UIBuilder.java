@@ -23,7 +23,6 @@
 
 package com.ponysdk.core.terminal;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -73,9 +72,6 @@ import com.ponysdk.core.terminal.ui.PTObject;
 import com.ponysdk.core.terminal.ui.PTStreamResource;
 import com.ponysdk.core.terminal.ui.PTWindow;
 import com.ponysdk.core.terminal.ui.PTWindowManager;
-
-import elemental.client.Browser;
-import elemental.html.Uint8Array;
 
 public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceivedEvent.Handler, HttpRequestSendEvent.Handler {
 
@@ -350,20 +346,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         if (ptObject != null) {
             ptObject.destroy();
         } else {
-            final Collection<PTWindow> windows = PTWindowManager.getWindows();
-            if (!windows.isEmpty()) {
-                final short model = ServerToClientModel.TYPE_GC.getValue();
-                final Object[] array = { (byte) (model >>> 8), (byte) model, (byte) (objectId >>> 24), (byte) (objectId >>> 16),
-                                         (byte) (objectId >>> 8), (byte) objectId };
-                final elemental.html.Window browserWindow = Browser.getWindow();
-                for (final PTWindow window : windows) {
-                    final Uint8Array newUint8Array = browserWindow.newUint8Array(6);
-                    newUint8Array.setElements(array);
-                    window.postMessage(newUint8Array);
-                }
-            } else {
-                log.warning("Cannot GC a garbaged object #" + objectId);
-            }
+            log.warning("Cannot GC a garbaged object #" + objectId);
         }
     }
 
