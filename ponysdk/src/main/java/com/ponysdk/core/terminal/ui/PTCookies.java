@@ -98,7 +98,7 @@ public class PTCookies extends AbstractPTObject {
                 secure = true;
             } else {
                 secure = false;
-                buffer.rewind(pathModel);
+                buffer.rewind(secureModel);
             }
 
             Cookies.setCookie(name, value, expirationDate, domain, path, secure);
