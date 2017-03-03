@@ -49,7 +49,6 @@ public class PRootPanel extends PAbsolutePanel {
     private PRootPanel(final int windowID, final String id) {
         this.windowID = windowID;
         this.id = id;
-        init();
     }
 
     protected final static PRootPanel get(final int windowID) {
@@ -64,6 +63,28 @@ public class PRootPanel extends PAbsolutePanel {
             childs.put(id, defaultRoot);
         }
         return defaultRoot;
+    }
+
+    @Override
+    public void add(final PWidget child) {
+        assertNotMe(child);
+
+        if (child.getWindowID() == PWindow.EMPTY_WINDOW_ID || child.getWindowID() == windowID) {
+            child.removeFromParent();
+            children.add(child);
+            adopt(child);
+
+            child.saveAdd(child.getID(), ID);
+            if (initialized) child.attach(windowID);
+        } else {
+            if (initialized) {
+                throw new IllegalAccessError("Can't attach widget " + child + " to window #" + windowID
+                        + " because it's already attached to window #" + child.getWindowID());
+            } else {
+                throw new IllegalAccessError("Can't only attach widget " + child + " to window #" + child.getWindowID()
+                        + ". Need to attach the new parent to the same window before");
+            }
+        }
     }
 
     private static Map<String, PRootPanel> ensureChilds(final int windowID) {
