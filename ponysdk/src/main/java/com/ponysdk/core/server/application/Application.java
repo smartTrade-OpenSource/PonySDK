@@ -101,7 +101,6 @@ public class Application {
         attributes.put(name, value);
     }
 
-    @SuppressWarnings("unchecked")
     public <T> T getAttribute(final String name) {
         return (T) attributes.get(name);
     }

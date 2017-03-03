@@ -235,6 +235,14 @@ public class PWindow extends PObject {
         panelByZone = null;
     }
 
+    public PRootPanel getPRootPanel() {
+        return ensureRootPanel(null);
+    }
+
+    public PRootPanel getPRootPanel(final String zoneID) {
+        return ensureRootPanel(zoneID);
+    }
+
     public static class TargetAttribut {
 
         static final String BLANK = "_blank";
