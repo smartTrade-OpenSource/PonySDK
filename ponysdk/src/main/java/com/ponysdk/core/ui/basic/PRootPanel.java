@@ -23,9 +23,6 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.UIContext;
@@ -42,63 +39,13 @@ import com.ponysdk.core.ui.main.EntryPoint;
  */
 public class PRootPanel extends PAbsolutePanel {
 
-    private static final String KEY = PRootPanel.class.getSimpleName();
+    private String id;
 
-    private final String id;
+    PRootPanel() {
+    }
 
-    private PRootPanel(final int windowID, final String id) {
-        this.windowID = windowID;
+    PRootPanel(final String id) {
         this.id = id;
-    }
-
-    protected final static PRootPanel get(final int windowID) {
-        return get(windowID, null);
-    }
-
-    public final static PRootPanel get(final int windowID, final String id) {
-        final Map<String, PRootPanel> childs = ensureChilds(windowID);
-        PRootPanel defaultRoot = childs.get(id);
-        if (defaultRoot == null) {
-            defaultRoot = new PRootPanel(windowID, id);
-            childs.put(id, defaultRoot);
-        }
-        return defaultRoot;
-    }
-
-    @Override
-    public void add(final PWidget child) {
-        assertNotMe(child);
-
-        if (child.getWindowID() == PWindow.EMPTY_WINDOW_ID || child.getWindowID() == windowID) {
-            child.removeFromParent();
-            children.add(child);
-            adopt(child);
-
-            child.saveAdd(child.getID(), ID);
-            if (initialized) child.attach(windowID);
-        } else {
-            if (initialized) {
-                throw new IllegalAccessError("Can't attach widget " + child + " to window #" + windowID
-                        + " because it's already attached to window #" + child.getWindowID());
-            } else {
-                throw new IllegalAccessError("Can't only attach widget " + child + " to window #" + child.getWindowID()
-                        + ". Need to attach the new parent to the same window before");
-            }
-        }
-    }
-
-    private static Map<String, PRootPanel> ensureChilds(final int windowID) {
-        final UIContext session = UIContext.get();
-
-        final String key = KEY + windowID;
-
-        Map<String, PRootPanel> rootByIDs = session.getAttribute(key);
-        if (rootByIDs == null) {
-            rootByIDs = new HashMap<>();
-            session.setAttribute(key, rootByIDs);
-        }
-
-        return rootByIDs;
     }
 
     @Override

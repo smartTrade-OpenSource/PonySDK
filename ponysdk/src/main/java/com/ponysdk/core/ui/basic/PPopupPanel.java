@@ -101,9 +101,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
         final boolean result = super.attach(windowID);
 
         if (initialized) {
-            final PRootPanel root = PRootPanel.get(windowID);
-            final PWidget child = root.getChild(ID);
-            if (child == null) root.add(this);
+            PWindowManager.getWindow(windowID).add(ID + "", this);
         }
 
         return result;

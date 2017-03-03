@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.server.stm.TxnContext;
-import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.main.EntryPoint;
 
 public abstract class AbstractApplicationManager {
@@ -54,8 +53,6 @@ public abstract class AbstractApplicationManager {
 
                 final int receivedSeqNum = txnContext.getSeqNum();
                 uiContext.updateIncomingSeqNum(receivedSeqNum);// ??
-
-                PWindow.initialize();
 
                 final EntryPoint entryPoint = initializeUIContext(uiContext);
 

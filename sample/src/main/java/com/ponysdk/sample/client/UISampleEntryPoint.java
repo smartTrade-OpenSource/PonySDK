@@ -85,6 +85,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     public void start(final UIContext uiContext) {
         uiContext.setClientDataOutput((object, instruction) -> System.err.println(object + " : " + instruction));
 
+        PWindow.getMain().add(Element.newPLabel("COucou"));
+
         final PWindow a = Element.newPWindow(true, null, "Window 2", "resizable=yes,location=0,status=0,scrollbars=0");
         a.open();
 
@@ -94,7 +96,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final AtomicInteger i = new AtomicInteger();
         PScheduler.scheduleWithFixedDelay(() -> b.setText(i.incrementAndGet() + ""), Duration.ofSeconds(1), Duration.ofSeconds(1));
 
-        final DataGrid<Integer> grid = new DataGrid();
+        final DataGrid<Integer> grid = new DataGrid<>();
 
         for (int cpt = 0; cpt < 20; cpt++) {
             final ColumnDescriptor<Integer> column = new ColumnDescriptor<>();

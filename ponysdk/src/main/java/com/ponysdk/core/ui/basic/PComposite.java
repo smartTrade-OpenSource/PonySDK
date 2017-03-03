@@ -52,7 +52,6 @@ public abstract class PComposite<T extends PWidget> extends PWidget {
         child.removeFromParent();
         this.widget = child;
         child.setParent(this);
-
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.WIDGET_ID, child.getID()));
     }
 

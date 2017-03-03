@@ -89,7 +89,6 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
 
     private static final String HUNDRED_PERCENT = "100%";
 
-    protected Object data;
     boolean visible = true;
     private IsPWidget parent;
     private Set<String> styleNames;
@@ -315,10 +314,6 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         return data;
     }
 
-    public void setData(final Object data) {
-        this.data = data;
-    }
-
     @Override
     public PWidget asWidget() {
         return this;
@@ -364,7 +359,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
             final ServerBinaryModel binaryModel1 = new ServerBinaryModel(ServerToClientModel.DOM_HANDLER_CODE,
                 type.getDomHandlerType().getValue());
             if (initialized) executeAddDomHandler(binaryModel1, binaryModel);
-            else stackedInstructions.add(() -> executeAddDomHandler(binaryModel1, binaryModel));
+            else safeStackedInstructions().add(() -> executeAddDomHandler(binaryModel1, binaryModel));
         }
         return handlerRegistration;
     }
@@ -500,7 +495,8 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     }
 
     public void removeFromParent() {
-        if (parent instanceof HasPWidgets) ((HasPWidgets) parent).remove(this);
+        if (parent == null) return;
+        else if (parent instanceof HasPWidgets) ((HasPWidgets) parent).remove(this);
         else if (parent != null) throw new IllegalStateException("This widget's parent does not implement HasPWidgets");
     }
 

@@ -30,7 +30,6 @@ import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PFlexTable;
 import com.ponysdk.core.ui.basic.PFlowPanel;
-import com.ponysdk.core.ui.basic.PRootLayoutPanel;
 import com.ponysdk.core.ui.basic.PScript;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
@@ -145,7 +144,6 @@ public class WindowPageActivity extends SamplePageActivity implements PCloseHand
     private static class MyWindow extends PWindow {
 
         private int count = 1;
-        private PRootLayoutPanel rootLayoutPanel;
 
         public MyWindow(final String name, final String features) {
             super(false, null, name, features);
@@ -153,8 +151,6 @@ public class WindowPageActivity extends SamplePageActivity implements PCloseHand
 
         // @Override
         protected void onLoad() {
-            rootLayoutPanel = PWindow.getMain().getPRootLayoutPanel();
-
             final PFlowPanel flow = Element.newPFlowPanel();
             final PButton addMessage = Element.newPButton("Add message");
             addMessage.addClickHandler(new PClickHandler() {
@@ -185,7 +181,7 @@ public class WindowPageActivity extends SamplePageActivity implements PCloseHand
             flow.add(addMessage);
             flow.add(clearMessage);
             flow.add(execJs);
-            rootLayoutPanel.add(flow);
+            add(flow);
         }
 
     }

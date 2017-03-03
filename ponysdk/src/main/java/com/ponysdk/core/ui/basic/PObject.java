@@ -31,9 +31,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.json.JsonObject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -52,20 +49,24 @@ import com.ponysdk.core.writer.ModelWriterCallback;
  */
 public abstract class PObject implements PDestroyEvent.HasHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(PObject.class);
-
     protected final int ID = UIContext.get().nextID();
-    final Queue<Runnable> stackedInstructions = new LinkedList<>();
     protected int windowID = PWindow.EMPTY_WINDOW_ID;
+    protected AttachListener attachListener;
+    protected Object data;
+
     boolean initialized = false;
+    protected Queue<Runnable> stackedInstructions;
+
     private String nativeBindingFunction;
     private PTerminalEvent.Handler terminalHandler;
-    private AttachListener attachListener;
-
     private Set<PDestroyEvent.Handler> destroyHandlers;
+
+    protected boolean destroy = false;
 
     PObject() {
     }
+
+    protected abstract WidgetType getWidgetType();
 
     protected boolean attach(final int windowID) {
         if (this.windowID == PWindow.EMPTY_WINDOW_ID && windowID != PWindow.EMPTY_WINDOW_ID) {
@@ -82,7 +83,6 @@ public abstract class PObject implements PDestroyEvent.HasHandler {
 
     void init() {
         if (initialized) return;
-        UIContext.get().registerObject(this);
 
         final WebsocketEncoder parser = Txn.get().getEncoder();
         parser.beginObject();
@@ -92,10 +92,14 @@ public abstract class PObject implements PDestroyEvent.HasHandler {
         enrichOnInit(parser);
         parser.endObject();
 
+        UIContext.get().registerObject(this);
+
         init0();
 
-        while (!stackedInstructions.isEmpty()) {
-            stackedInstructions.poll().run();
+        if (stackedInstructions != null) {
+            while (!stackedInstructions.isEmpty()) {
+                stackedInstructions.poll().run();
+            }
         }
 
         if (attachListener != null) attachListener.onAttach();
@@ -117,12 +121,32 @@ public abstract class PObject implements PDestroyEvent.HasHandler {
         return PWindowManager.getWindow(windowID);
     }
 
-    protected abstract WidgetType getWidgetType();
-
     public final int getID() {
         return ID;
     }
 
+    /**
+     * Bind to a Terminal function, usefull to link the objectID and the widget reference
+     *
+     * <h2>Example :</h2>
+     *
+     * <pre>
+     * --- Java ---
+     *
+     * bindTerminalFunction("myFunction")
+     * </pre>
+     *
+     * <pre>
+     * --- JavaScript ---
+     *
+     * myFunction(id, object) {
+     * ....
+     * ....
+     * }
+     * </pre>
+     *
+     * @param functionName
+     */
     public void bindTerminalFunction(final String functionName) {
         if (nativeBindingFunction != null)
             throw new IllegalAccessError("Object already bind to native function: " + nativeBindingFunction);
@@ -133,6 +157,7 @@ public abstract class PObject implements PDestroyEvent.HasHandler {
     }
 
     public void sendToNative(final JsonObject data) {
+        if (destroy) return;
         if (nativeBindingFunction == null) throw new IllegalAccessError("Object not bind to a native function");
 
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.NATIVE, data));
@@ -142,7 +167,13 @@ public abstract class PObject implements PDestroyEvent.HasHandler {
         this.terminalHandler = terminalHandler;
     }
 
+    /**
+     * JSON received from the Terminal using pony.sendDataToServer(objectID, JSON)
+     *
+     * @param event
+     */
     public void onClientData(final JsonObject event) {
+        if (destroy) return;
         if (terminalHandler != null) {
             final String nativeKey = ClientToServerModel.NATIVE.toStringValue();
             if (event.containsKey(nativeKey)) {
@@ -151,18 +182,11 @@ public abstract class PObject implements PDestroyEvent.HasHandler {
         }
     }
 
-    @Override
-    public int hashCode() {
-        return ID;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
-        final PObject other = (PObject) obj;
-        return ID == other.ID;
+    protected Queue<Runnable> safeStackedInstructions() {
+        if (stackedInstructions == null) {
+            stackedInstructions = new LinkedList<>();
+        }
+        return stackedInstructions;
     }
 
     protected void saveAdd(final int objectID, final int parentObjectID) {
@@ -170,100 +194,91 @@ public abstract class PObject implements PDestroyEvent.HasHandler {
     }
 
     protected void saveAdd(final int objectID, final int parentObjectID, final ServerBinaryModel... binaryModels) {
+        if (destroy) return;
         if (initialized) executeAdd(objectID, parentObjectID, binaryModels);
-        else stackedInstructions.add(() -> executeAdd(objectID, parentObjectID, binaryModels));
+        else safeStackedInstructions().add(() -> executeAdd(objectID, parentObjectID, binaryModels));
     }
 
     private void executeAdd(final int objectID, final int parentObjectID, final ServerBinaryModel... binaryModels) {
-        if (PWindowManager.getWindow(windowID) != null) {
-            final WebsocketEncoder encoder = Txn.get().getEncoder();
-            encoder.beginObject();
-            if (windowID != PWindow.getMain().getID()) encoder.encode(ServerToClientModel.WINDOW_ID, windowID);
-            encoder.encode(ServerToClientModel.TYPE_ADD, objectID);
-            encoder.encode(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
-            if (binaryModels != null) {
-                for (final ServerBinaryModel binaryModel : binaryModels) {
-                    if (binaryModel != null) encoder.encode(binaryModel.getKey(), binaryModel.getValue());
-                }
+        if (destroy) return;
+        final WebsocketEncoder encoder = Txn.get().getEncoder();
+        encoder.beginObject();
+        if (windowID != PWindow.getMain().getID()) encoder.encode(ServerToClientModel.WINDOW_ID, windowID);
+        encoder.encode(ServerToClientModel.TYPE_ADD, objectID);
+        encoder.encode(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
+        if (binaryModels != null) {
+            for (final ServerBinaryModel binaryModel : binaryModels) {
+                if (binaryModel != null) encoder.encode(binaryModel.getKey(), binaryModel.getValue());
             }
-            encoder.endObject();
-        } else {
-            log.warn("Add on {} : The attached window #" + windowID + " doesn't exist", toString());
         }
+        encoder.endObject();
     }
 
     protected void saveAddHandler(final HandlerModel type) {
+        if (destroy) return;
         if (initialized) executeAddHandler(type);
-        else stackedInstructions.add(() -> executeAddHandler(type));
+        else safeStackedInstructions().add(() -> executeAddHandler(type));
     }
 
     private void executeAddHandler(final HandlerModel type) {
-        if (PWindowManager.getWindow(windowID) != null) {
-            final WebsocketEncoder parser = Txn.get().getEncoder();
-            parser.beginObject();
-            if (windowID != PWindow.getMain().getID()) parser.encode(ServerToClientModel.WINDOW_ID, windowID);
-            parser.encode(ServerToClientModel.TYPE_ADD_HANDLER, type.getValue());
-            parser.encode(ServerToClientModel.OBJECT_ID, ID);
-            parser.endObject();
-        } else {
-            log.warn("Add Handler on {} : The attached window #" + windowID + " doesn't exist", toString());
-        }
+        if (destroy) return;
+        final WebsocketEncoder parser = Txn.get().getEncoder();
+        parser.beginObject();
+        if (windowID != PWindow.getMain().getID()) parser.encode(ServerToClientModel.WINDOW_ID, windowID);
+        parser.encode(ServerToClientModel.TYPE_ADD_HANDLER, type.getValue());
+        parser.encode(ServerToClientModel.OBJECT_ID, ID);
+        parser.endObject();
     }
 
     protected void saveRemoveHandler(final HandlerModel type) {
+        if (destroy) return;
         if (initialized) executeRemoveHandler();
-        else stackedInstructions.add(this::executeRemoveHandler);
+        else safeStackedInstructions().add(this::executeRemoveHandler);
     }
 
     private void executeRemoveHandler() {
-        if (PWindowManager.getWindow(windowID) != null) {
-            final WebsocketEncoder parser = Txn.get().getEncoder();
-            parser.beginObject();
-            if (windowID != PWindow.getMain().getID()) parser.encode(ServerToClientModel.WINDOW_ID, windowID);
-            parser.encode(ServerToClientModel.TYPE_REMOVE_HANDLER, ID);
-            parser.endObject();
-        } else {
-            log.warn("Remove Handler on {} : The attached window #" + windowID + " doesn't exist", toString());
-        }
+        if (destroy) return;
+        final WebsocketEncoder parser = Txn.get().getEncoder();
+        parser.beginObject();
+        if (windowID != PWindow.getMain().getID()) parser.encode(ServerToClientModel.WINDOW_ID, windowID);
+        parser.encode(ServerToClientModel.TYPE_REMOVE_HANDLER, ID);
+        parser.endObject();
     }
 
     void saveRemove(final int objectID, final int parentObjectID) {
+        if (destroy) return;
         if (initialized) executeRemove(objectID, parentObjectID);
-        else stackedInstructions.add(() -> executeRemove(objectID, parentObjectID));
+        else safeStackedInstructions().add(() -> executeRemove(objectID, parentObjectID));
     }
 
     private void executeRemove(final int objectID, final int parentObjectID) {
-        if (PWindowManager.getWindow(windowID) != null) {
-            final WebsocketEncoder parser = Txn.get().getEncoder();
-            parser.beginObject();
-            if (windowID != PWindow.getMain().getID()) parser.encode(ServerToClientModel.WINDOW_ID, windowID);
-            parser.encode(ServerToClientModel.TYPE_REMOVE, objectID);
-            parser.encode(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
-            parser.endObject();
-        } else {
-            log.warn("Remove on {} : The attached window #" + windowID + " doesn't exist", toString());
-        }
+        if (destroy) return;
+        final WebsocketEncoder parser = Txn.get().getEncoder();
+        parser.beginObject();
+        if (windowID != PWindow.getMain().getID()) parser.encode(ServerToClientModel.WINDOW_ID, windowID);
+        parser.encode(ServerToClientModel.TYPE_REMOVE, objectID);
+        parser.encode(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
+        parser.endObject();
     }
 
     protected void saveUpdate(final ModelWriterCallback callback) {
+        if (destroy) return;
         if (initialized) writeUpdate(callback);
-        else stackedInstructions.add(() -> writeUpdate(callback));
+        else safeStackedInstructions().add(() -> writeUpdate(callback));
     }
 
-    private void writeUpdate(final ModelWriterCallback callback) {
-        if (PWindowManager.getWindow(windowID) != null) {
-            final ModelWriter writer = Txn.getWriter();
-            writer.beginObject();
-            if (windowID != PWindow.getMain().getID()) {
-                writer.writeModel(ServerToClientModel.WINDOW_ID, windowID);
-            }
-            writer.writeModel(ServerToClientModel.TYPE_UPDATE, ID);
+    void writeUpdate(final ModelWriterCallback callback) {
+        if (destroy) return;
 
-            callback.doWrite(writer);
-            writer.endObject();
-        } else {
-            log.warn("Update on {} : The attached window #" + windowID + " doesn't exist", toString());
+        final ModelWriter writer = Txn.getWriter();
+        writer.beginObject();
+        if (windowID != PWindow.getMain().getID()) {
+            writer.writeModel(ServerToClientModel.WINDOW_ID, windowID);
         }
+        writer.writeModel(ServerToClientModel.TYPE_UPDATE, ID);
+
+        callback.doWrite(writer);
+        writer.endObject();
     }
 
     @Override
@@ -287,11 +302,32 @@ public abstract class PObject implements PDestroyEvent.HasHandler {
     }
 
     public void destroy() {
+        destroy = true;
+        terminalHandler = null;
+        attachListener = null;
         if (destroyHandlers != null) {
             final PDestroyEvent.Event destroyEvent = new PDestroyEvent.Event(this);
             destroyHandlers.forEach(handler -> handler.onDestroy(destroyEvent));
-            destroyHandlers.clear();
+            destroyHandlers = null;
         }
+    }
+
+    public void setData(final Object data) {
+        this.data = data;
+    }
+
+    @Override
+    public int hashCode() {
+        return ID;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
+        final PObject other = (PObject) obj;
+        return ID == other.ID;
     }
 
     @FunctionalInterface

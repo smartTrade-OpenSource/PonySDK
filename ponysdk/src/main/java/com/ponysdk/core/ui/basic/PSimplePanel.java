@@ -86,14 +86,10 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
         if (w == this) throw new UnsupportedOperationException("You cannot call setWidget with 'this' in parameter");
 
         // Validate
-        if (w == widget) {
-            return;
-        }
+        if (w == widget) return;
 
         // Detach new child.
-        if (w != null) {
-            w.removeFromParent();
-        }
+        w.removeFromParent();
 
         // Remove old child.
         if (widget != null) {

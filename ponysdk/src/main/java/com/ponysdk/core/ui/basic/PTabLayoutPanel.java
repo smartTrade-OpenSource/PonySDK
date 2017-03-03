@@ -109,11 +109,10 @@ public class PTabLayoutPanel extends PComplexPanel
 
             children.insert(child, beforeIndex);
             adopt(child);
-
-            child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.TAB_WIDGET, tabWidget.getID()),
-                new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex));
             tabWidget.attach(windowID);
             child.attach(windowID);
+            child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.TAB_WIDGET, tabWidget.getID()),
+                new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex));
         } else {
             throw new IllegalAccessError("Widget " + child + " already attached to an other window, current window : "
                     + child.getWindowID() + ", new window : " + windowID);
@@ -126,10 +125,9 @@ public class PTabLayoutPanel extends PComplexPanel
 
             children.insert(child, beforeIndex);
             adopt(child);
-
+            child.attach(windowID);
             child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.TAB_TEXT, tabText),
                 new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex));
-            child.attach(windowID);
         } else {
             throw new IllegalAccessError("Widget " + child + " already attached to an other window, current window : "
                     + child.getWindowID() + ", new window : " + windowID);

@@ -115,20 +115,18 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
         if (w == content) return;
 
         // Detach new child.
-        if (w != null) w.removeFromParent();
+        w.removeFromParent();
 
         // Remove old child.
-        if (content != null) remove(content);
+        if (content != null) content.removeFromParent();
 
         // Logical attach.
+        adopt(w);
         content = w;
 
-        if (w != null) {
-            // Physical attach.
-            w.saveAdd(w.getID(), getID());
-            w.attach(windowID);
-            adopt(w);
-        }
+        // Physical attach.
+        w.attach(windowID);
+        w.saveAdd(w.getID(), getID());
     }
 
     @Override
@@ -138,7 +136,7 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
 
     @Override
     public void add(final PWidget w) {
-        if (this.getContent() == null) setContent(w);
+        if (content == null) setContent(w);
         else throw new IllegalStateException("A DisclosurePanel can only contain two Widgets.");
     }
 
@@ -154,8 +152,9 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
 
     @Override
     public boolean remove(final PWidget w) {
-        if (w == getContent()) {
-            setContent(null);
+        if (w == content) {
+            content.removeFromParent();
+            content = null;
             return true;
         } else {
             return false;

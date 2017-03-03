@@ -218,13 +218,13 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
 
             // Logical attach.
             addWidgetToMap(row, column, widget);
+            adopt(widget);
 
             // Physical attach.
+            widget.attach(windowID);
             widget.saveAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.ROW, row),
                 new ServerBinaryModel(ServerToClientModel.COLUMN, column));
-            widget.attach(windowID);
 
-            adopt(widget);
         }
     }
 

@@ -44,7 +44,7 @@ public class TradingSampleEntryPoint implements EntryPoint {
     public void start(final UIContext uiContext) {
         if (uiContext.getApplication().getAttribute(USER) == null) uiContext.getHistory().newItem("", false);
         final PSimpleLayoutPanel panel = Element.newPSimpleLayoutPanel();
-        PWindow.getMain().getPRootLayoutPanel().add(panel);
+        PWindow.getMain().add(panel);
 
         final EventBus eventBus = UIContext.getRootEventBus();
 
@@ -56,7 +56,7 @@ public class TradingSampleEntryPoint implements EntryPoint {
         historyHandler.setDefaultPlace(new LoginPlace());
         historyHandler.handleCurrentHistory();
 
-        PWindow.getMain().getPRootPanel().add(createReconnectionPanel());
+        PWindow.getMain().add(createReconnectionPanel());
     }
 
     private PElement createReconnectionPanel() {

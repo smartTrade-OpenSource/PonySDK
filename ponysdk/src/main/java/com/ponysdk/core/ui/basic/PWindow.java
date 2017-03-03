@@ -24,6 +24,8 @@
 package com.ponysdk.core.ui.basic;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -50,13 +52,12 @@ public class PWindow extends PObject {
     private String url;
     private String name;
     private String features;
-    private boolean opened = false;
     private boolean relative = false;
 
-    PWindow() {
-        UIContext.get().registerObject(this);
-        initialized = true;
-        PWindowManager.registerWindow(this);
+    private Map<String, PRootPanel> panelByZone = new HashMap<>();
+
+    private PWindow() {
+        init();
     }
 
     //TODO nciaravola => feature + relative should be include in an Option Pojo
@@ -66,13 +67,23 @@ public class PWindow extends PObject {
         this.name = name;
         this.features = features;
         this.relative = relative;
-
-        init();
     }
 
-    public static void initialize() {
-        final UIContext uiContext = UIContext.get();
-        PWindow mainWindow = uiContext.getAttribute(PWindow.class.getCanonicalName());
+    @Override
+    void init() {
+        if (stackedInstructions != null) {
+            while (!stackedInstructions.isEmpty()) {
+                stackedInstructions.poll().run();
+            }
+        }
+        if (attachListener != null) attachListener.onAttach();
+        initialized = true;
+
+        panelByZone.forEach((key, value) -> value.attach(getID()));
+    }
+
+    public static PWindow getMain() {
+        PWindow mainWindow = UIContext.get().getAttribute(PWindow.class.getCanonicalName());
         if (mainWindow == null) {
             mainWindow = new PWindow() {
 
@@ -92,13 +103,9 @@ public class PWindow extends PObject {
                 }
 
             };
-            mainWindow.opened = true;
-            uiContext.setAttribute(PWindow.class.getCanonicalName(), mainWindow);
+            UIContext.get().setAttribute(PWindow.class.getCanonicalName(), mainWindow);
         }
-    }
-
-    public static PWindow getMain() {
-        return UIContext.get().getAttribute(PWindow.class.getCanonicalName());
+        return mainWindow;
     }
 
     @Override
@@ -116,23 +123,33 @@ public class PWindow extends PObject {
     }
 
     public void open() {
-        if (!opened) {
+        if (destroy) return;
+        if (!initialized) {
+            final WebsocketEncoder parser = Txn.get().getEncoder();
+            parser.beginObject();
+            parser.encode(ServerToClientModel.TYPE_CREATE, ID);
+            parser.encode(ServerToClientModel.WIDGET_TYPE, getWidgetType().getValue());
+            enrichOnInit(parser);
+            parser.endObject();
+            UIContext.get().registerObject(this);
+
             PWindowManager.preregisterWindow(this);
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.OPEN));
+
+            writeUpdate(writer -> writer.writeModel(ServerToClientModel.OPEN));
             Txn.get().flush();
         }
     }
 
     public void print() {
-        if (opened) saveUpdate(writer -> writer.writeModel(ServerToClientModel.PRINT));
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.PRINT));
     }
 
     public void close() {
-        if (opened) saveUpdate(writer -> writer.writeModel(ServerToClientModel.CLOSE));
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.CLOSE));
     }
 
     public void setTitle(final String title) {
-        if (opened) saveUpdate(writer -> writer.writeModel(ServerToClientModel.WINDOW_TITLE, title));
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.WINDOW_TITLE, title));
     }
 
     @Override
@@ -140,10 +157,8 @@ public class PWindow extends PObject {
         if (event.containsKey(ClientToServerModel.HANDLER_OPEN.toStringValue())) {
             url = event.getString(ClientToServerModel.HANDLER_OPEN.toStringValue());
             PWindowManager.registerWindow(this);
-            this.opened = true;
 
-            getPRootLayoutPanel().init();
-            getPRootPanel().init();
+            init();
 
             if (openHandlers != null) {
                 final POpenEvent e = new POpenEvent(this);
@@ -152,7 +167,6 @@ public class PWindow extends PObject {
             }
         } else if (event.containsKey(ClientToServerModel.HANDLER_CLOSE.toStringValue())) {
             PWindowManager.unregisterWindow(this);
-            this.opened = false;
             if (closeHandlers != null) {
                 final PCloseEvent e = new PCloseEvent(this);
                 closeHandlers.forEach(handler -> handler.onClose(e));
@@ -182,20 +196,28 @@ public class PWindow extends PObject {
         return closeHandlers != null && closeHandlers.remove(handler);
     }
 
-    public PRootLayoutPanel getPRootLayoutPanel() {
-        return PRootLayoutPanel.get(getID());
+    public void add(final String id, final IsPWidget widget) {
+        ensureRootPanel(id).add(widget);
     }
 
-    public PRootPanel getPRootPanel() {
-        return PRootPanel.get(getID());
+    private PRootPanel ensureRootPanel(final String zoneID) {
+        PRootPanel rootPanel = panelByZone.get(zoneID);
+        if (rootPanel == null) {
+            rootPanel = new PRootPanel(zoneID);
+            panelByZone.put(zoneID, rootPanel);
+            if (initialized) {
+                rootPanel.attach(ID);
+            }
+        }
+        return rootPanel;
     }
 
     public void add(final IsPWidget widget) {
-        getPRootPanel().add(widget);
+        ensureRootPanel(null).add(widget);
     }
 
     public boolean isOpened() {
-        return opened;
+        return initialized;
     }
 
     public String getUrl() {
@@ -203,15 +225,14 @@ public class PWindow extends PObject {
     }
 
     public void clear() {
-        getPRootLayoutPanel().clear();
-        getPRootPanel().clear();
+        panelByZone.forEach((key, value) -> value.clear());
     }
 
     @Override
     public void destroy() {
         super.destroy();
-        getPRootLayoutPanel().destroy();
-        getPRootPanel().destroy();
+        panelByZone.forEach((key, value) -> value.destroy());
+        panelByZone = null;
     }
 
     public static class TargetAttribut {

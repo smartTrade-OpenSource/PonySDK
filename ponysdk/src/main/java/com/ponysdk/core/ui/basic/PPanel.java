@@ -63,7 +63,8 @@ public abstract class PPanel extends PWidget implements HasPWidgets {
     }
 
     final void orphan(final PWidget child) {
-        if (child.getParent() == this) child.setParent(null);
+        if (child == null) return;
+        else if (child.getParent() == this) child.setParent(null);
         else throw new IllegalStateException("Can't adopt an widget attached to another parent");
     }
 

@@ -52,9 +52,8 @@ public abstract class PComplexPanel extends PPanel {
             child.removeFromParent();
             children.add(child);
             adopt(child);
-
-            child.saveAdd(child.getID(), ID);
             child.attach(windowID);
+            child.saveAdd(child.getID(), ID);
         } else {
             if (initialized) {
                 throw new IllegalAccessError("Can't attach widget " + child + " to window #" + windowID
@@ -76,11 +75,11 @@ public abstract class PComplexPanel extends PPanel {
             adopt(child);
 
             if (children.size() - 1 == beforeIndex) {
+                child.attach(windowID);
                 child.saveAdd(child.getID(), ID);
-                child.attach(windowID);
             } else {
-                child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, beforeIndex));
                 child.attach(windowID);
+                child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, beforeIndex));
             }
         } else {
             throw new IllegalAccessError("Widget " + child + " already attached to an other window, current window : "
