@@ -28,12 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class DefaultPageProvider implements PageProvider {
-
-    private final Logger log = LoggerFactory.getLogger(DefaultPageProvider.class);
 
     private final Map<String, PageActivity> allPageActivitiesDeclared = new LinkedHashMap<>();
 

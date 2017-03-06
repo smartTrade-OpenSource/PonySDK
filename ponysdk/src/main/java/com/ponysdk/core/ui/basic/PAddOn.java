@@ -48,7 +48,7 @@ public abstract class PAddOn extends PObject {
     }
 
     @Override
-    protected boolean attach(final PWindow window) {
+    public boolean attach(final PWindow window) {
         if (this.window == null && window != null) {
             this.window = window;
             init();
