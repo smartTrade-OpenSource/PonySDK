@@ -23,12 +23,12 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Objects;
-
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.servlet.WebsocketEncoder;
 import com.ponysdk.core.ui.basic.event.PHasHTML;
+
+import java.util.Objects;
 
 /**
  * A widget that represents a simple &lt;a&gt; element.

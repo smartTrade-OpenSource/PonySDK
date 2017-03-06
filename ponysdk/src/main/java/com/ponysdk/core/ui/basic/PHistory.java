@@ -23,14 +23,14 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.servlet.WebsocketEncoder;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
+
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * This class allows you to interact with the browser's history stack. Each

@@ -23,8 +23,6 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.ponysdk.core.model.ClientToServerModel;
@@ -59,14 +57,10 @@ public class PTRadioButton extends PTCheckBox {
     @Override
     protected void addValueChangeHandler(final UIBuilder uiService) {
         final RadioButton radioButton = cast();
-        radioButton.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-
-            @Override
-            public void onValueChange(final ValueChangeEvent<Boolean> event) {
-                final PTInstruction instruction = new PTInstruction(objectID);
-                instruction.put(ClientToServerModel.HANDLER_BOOLEAN_VALUE_CHANGE, event.getValue());
-                uiService.sendDataToServer(cast(), instruction);
-            }
+        radioButton.addValueChangeHandler(event -> {
+            final PTInstruction instruction = new PTInstruction(objectID);
+            instruction.put(ClientToServerModel.HANDLER_BOOLEAN_VALUE_CHANGE, event.getValue());
+            uiService.sendDataToServer(cast(), instruction);
         });
     }
 

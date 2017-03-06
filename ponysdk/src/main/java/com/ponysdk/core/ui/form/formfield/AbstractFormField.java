@@ -23,12 +23,6 @@
 
 package com.ponysdk.core.ui.form.formfield;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
-import com.ponysdk.core.tools.ListenerCollection;
 import com.ponysdk.core.ui.basic.HasPValue;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PWidget;
@@ -37,6 +31,12 @@ import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 import com.ponysdk.core.ui.form.dataconverter.DataConverter;
 import com.ponysdk.core.ui.form.validator.FieldValidator;
 import com.ponysdk.core.ui.form.validator.ValidationResult;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A field of a {@link com.ponysdk.core.ui.form.Form} that can be validated or
@@ -48,7 +48,7 @@ public abstract class AbstractFormField<T, W extends IsPWidget> implements FormF
     private final Set<FormFieldListener> listeners = new HashSet<>();
     protected DataConverter<String, T> dataProvider;
     private FieldValidator validator;
-    protected ListenerCollection<PValueChangeHandler<T>> handlers;
+    protected Set<PValueChangeHandler<T>> handlers;
 
     private boolean enabled = true;
 
@@ -115,7 +115,7 @@ public abstract class AbstractFormField<T, W extends IsPWidget> implements FormF
 
     @Override
     public void addValueChangeHandler(final PValueChangeHandler<T> handler) {
-        if (handlers == null) handlers = new ListenerCollection<>();
+        if (handlers == null) handlers = Collections.newSetFromMap(new ConcurrentHashMap<>());
         handlers.add(handler);
     }
 

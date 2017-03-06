@@ -64,13 +64,7 @@ public class DialogBoxPageActivity extends SamplePageActivity {
             final PPopupPanel popupPanel = Element.newPPopupPanel(getView().asWidget().getWindow());
             final PVerticalPanel content = Element.newPVerticalPanel();
             final PButton closeButton = Element.newPButton("Close");
-            closeButton.addClickHandler(new PClickHandler() {
-
-                @Override
-                public void onClick(final PClickEvent clickEvent) {
-                    popupPanel.hide();
-                }
-            });
+            closeButton.addClickHandler(clickEvent1 -> popupPanel.hide());
             content.add(Element.newPLabel("A popup displayed relatively to the mouse click"));
             content.add(closeButton);
             content.setWidth("200px");

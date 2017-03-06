@@ -23,11 +23,11 @@
 
 package com.ponysdk.impl.webapplication.page;
 
-import java.util.Collection;
-import java.util.Collections;
-
 import com.ponysdk.core.ui.activity.AbstractActivity;
 import com.ponysdk.core.ui.place.Place;
+
+import java.util.Collection;
+import java.util.Collections;
 
 public abstract class PageActivity extends AbstractActivity<PageView> implements InitializingActivity {
 

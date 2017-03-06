@@ -311,7 +311,7 @@ public enum OperatingSystem {
 
     private OperatingSystem checkUserAgent(final String agentString) {
         if (this.isInUserAgentString(agentString)) {
-            if (this.children.size() > 0) {
+            if (!this.children.isEmpty()) {
                 for (final OperatingSystem childOperatingSystem : this.children) {
                     final OperatingSystem match = childOperatingSystem.checkUserAgent(agentString);
                     if (match != null) {

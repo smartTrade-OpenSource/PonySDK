@@ -23,17 +23,9 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import com.google.gwt.event.logical.shared.SelectionEvent;
-import com.google.gwt.event.logical.shared.SelectionHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestOracle;
-import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -41,6 +33,9 @@ import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class PTSuggestBox extends PTWidget<SuggestBox> {
 
@@ -80,25 +75,17 @@ public class PTSuggestBox extends PTWidget<SuggestBox> {
     @Override
     public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
         if (HandlerModel.HANDLER_STRING_VALUE_CHANGE.equals(handlerModel)) {
-            uiObject.addValueChangeHandler(new ValueChangeHandler<String>() {
-
-                @Override
-                public void onValueChange(final ValueChangeEvent<String> event) {
-                    final PTInstruction eventInstruction = new PTInstruction(getObjectID());
-                    eventInstruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE, event.getValue());
-                    uiService.sendDataToServer(uiObject, eventInstruction);
-                }
+            uiObject.addValueChangeHandler(event -> {
+                final PTInstruction eventInstruction = new PTInstruction(getObjectID());
+                eventInstruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE, event.getValue());
+                uiService.sendDataToServer(uiObject, eventInstruction);
             });
         } else if (HandlerModel.HANDLER_STRING_SELECTION.equals(handlerModel)) {
-            uiObject.addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
-
-                @Override
-                public void onSelection(final SelectionEvent<Suggestion> event) {
-                    final PTInstruction eventInstruction = new PTInstruction(getObjectID());
-                    eventInstruction.put(ClientToServerModel.HANDLER_STRING_SELECTION, event.getSelectedItem().getDisplayString());
-                    eventInstruction.put(ClientToServerModel.REPLACEMENT_STRING, event.getSelectedItem().getReplacementString());
-                    uiService.sendDataToServer(uiObject, eventInstruction);
-                }
+            uiObject.addSelectionHandler(event -> {
+                final PTInstruction eventInstruction = new PTInstruction(getObjectID());
+                eventInstruction.put(ClientToServerModel.HANDLER_STRING_SELECTION, event.getSelectedItem().getDisplayString());
+                eventInstruction.put(ClientToServerModel.REPLACEMENT_STRING, event.getSelectedItem().getReplacementString());
+                uiService.sendDataToServer(uiObject, eventInstruction);
             });
         } else {
             super.addHandler(buffer, handlerModel, uiService);

@@ -26,8 +26,6 @@ package com.ponysdk.sample.client.page;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PAnchor;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.impl.webapplication.page.place.PagePlace;
 
 public class HyperlinkPageActivity extends SamplePageActivity {

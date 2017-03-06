@@ -23,11 +23,8 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.json.JsonObject;
 
@@ -38,7 +35,6 @@ import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.servlet.WebsocketEncoder;
 import com.ponysdk.core.server.stm.Txn;
-import com.ponysdk.core.ui.basic.event.PDestroyEvent;
 import com.ponysdk.core.ui.basic.event.PTerminalEvent;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.writer.ModelWriter;
@@ -47,20 +43,20 @@ import com.ponysdk.core.writer.ModelWriterCallback;
 /**
  * The superclass for all PonySDK objects.
  */
-public abstract class PObject implements PDestroyEvent.HasHandler {
+public abstract class PObject {
 
     protected final int ID = UIContext.get().nextID();
     protected PWindow window;
-    protected AttachListener attachListener;
+    protected InitializeListener initializeListener;
+    protected DestroyListener destroyListener;
     protected Object data;
 
-    boolean initialized = false;
     protected Queue<Runnable> stackedInstructions;
-
     private String nativeBindingFunction;
-    private PTerminalEvent.Handler terminalHandler;
-    private Set<PDestroyEvent.Handler> destroyHandlers;
 
+    private PTerminalEvent.Handler terminalHandler;
+
+    protected boolean initialized = false;
     protected boolean destroy = false;
 
     PObject() {
@@ -109,7 +105,7 @@ public abstract class PObject implements PDestroyEvent.HasHandler {
             }
         }
 
-        if (attachListener != null) attachListener.onAttach();
+        if (initializeListener != null) initializeListener.onInitialize(this);
 
         initialized = true;
     }
@@ -130,14 +126,16 @@ public abstract class PObject implements PDestroyEvent.HasHandler {
 
     /**
      * Bind to a Terminal function, usefull to link the objectID and the widget reference
-     *
+     * <p>
      * <h2>Example :</h2>
+     * <p>
      *
      * <pre>
      * --- Java ---
      *
      * bindTerminalFunction("myFunction")
      * </pre>
+     * <p>
      *
      * <pre>
      * --- JavaScript ---
@@ -147,8 +145,6 @@ public abstract class PObject implements PDestroyEvent.HasHandler {
      * ....
      * }
      * </pre>
-     *
-     * @param functionName
      */
     public void bindTerminalFunction(final String functionName) {
         if (nativeBindingFunction != null)
@@ -172,8 +168,6 @@ public abstract class PObject implements PDestroyEvent.HasHandler {
 
     /**
      * JSON received from the Terminal using pony.sendDataToServer(objectID, JSON)
-     *
-     * @param event
      */
     public void onClientData(final JsonObject event) {
         if (destroy) return;
@@ -285,30 +279,20 @@ public abstract class PObject implements PDestroyEvent.HasHandler {
         return getClass().getSimpleName() + "#" + ID;
     }
 
-    public void setAttachListener(final AttachListener attachListener) {
-        this.attachListener = attachListener;
+    public void setInitializeListener(final InitializeListener listener) {
+        this.initializeListener = listener;
     }
 
-    @Override
-    public void addDestroyHandler(final PDestroyEvent.Handler handler) {
-        if (destroyHandlers == null) destroyHandlers = Collections.newSetFromMap(new ConcurrentHashMap<>());
-        destroyHandlers.add(handler);
-    }
-
-    @Override
-    public boolean removeDestroyHandler(final PDestroyEvent.Handler handler) {
-        return destroyHandlers != null && destroyHandlers.remove(handler);
+    public void setDestroyListener(final DestroyListener listener) {
+        this.destroyListener = listener;
     }
 
     public void destroy() {
         destroy = true;
         terminalHandler = null;
-        attachListener = null;
-        if (destroyHandlers != null) {
-            final PDestroyEvent.Event destroyEvent = new PDestroyEvent.Event(this);
-            destroyHandlers.forEach(handler -> handler.onDestroy(destroyEvent));
-            destroyHandlers = null;
-        }
+        initializeListener = null;
+        if (destroyListener != null) destroyListener.onDestroy(this);
+        destroyListener = null;
     }
 
     public void setData(final Object data) {
@@ -330,9 +314,15 @@ public abstract class PObject implements PDestroyEvent.HasHandler {
     }
 
     @FunctionalInterface
-    public interface AttachListener {
+    public interface InitializeListener {
 
-        void onAttach();
+        void onInitialize(PObject object);
+    }
+
+    @FunctionalInterface
+    public interface DestroyListener {
+
+        void onDestroy(PObject object);
     }
 
     public boolean isInitialized() {

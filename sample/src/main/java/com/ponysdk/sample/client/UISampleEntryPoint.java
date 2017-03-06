@@ -42,7 +42,6 @@ import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PListBox;
 import com.ponysdk.core.ui.basic.PMenuBar;
-import com.ponysdk.core.ui.basic.PRadioButton;
 import com.ponysdk.core.ui.basic.PRichTextArea;
 import com.ponysdk.core.ui.basic.PScript;
 import com.ponysdk.core.ui.basic.PStackLayoutPanel;
@@ -72,7 +71,6 @@ import com.ponysdk.core.ui.rich.PTwinListBox;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
 import com.ponysdk.sample.client.event.UserLoggedOutHandler;
 import com.ponysdk.sample.client.page.addon.LoggerAddOn;
-import com.ponysdk.sample.client.page.addon.SelectizeAddon;
 
 public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
@@ -87,6 +85,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
         mainLabel = Element.newPLabel("Can be modified by anybody");
         PWindow.getMain().add(mainLabel);
+
+        testPAddon();
 
         createWindow().open();
 
@@ -211,8 +211,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     }
 
     private void testPAddon() {
-        //        final LoggerAddOn addon = createPAddOn();
-        //        addon.attach(PWindow.getMain());
+        final LoggerAddOn addon = createPAddOn();
+        addon.attach(PWindow.getMain());
 
         // final PElementAddOn elementAddOn = new PElementAddOn();
         // elementAddOn.setInnerText("Coucou");
@@ -229,18 +229,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         // final PElementAddOn elementAddOn2 = new PElementAddOn();
         // elementAddOn2.setInnerText("Coucou dans window");
         // a.add(elementAddOn2);
-
-        final SelectizeAddon selectizeAddon = new SelectizeAddon();
-        selectizeAddon.text("test");
-        PWindow.getMain().add(selectizeAddon);
-
-        final PRadioButton buy = Element.newPRadioButton("Buy");
-        final PRadioButton sell = Element.newPRadioButton("Sell");
-        buy.addValueChangeHandler((event) -> selectizeAddon.selectBuy(event.getData()));
-        sell.addValueChangeHandler((event) -> selectizeAddon.selectSell(event.getData()));
-
-        PWindow.getMain().add(buy);
-        PWindow.getMain().add(sell);
     }
 
     private void testNewGrid() {

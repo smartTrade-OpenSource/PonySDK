@@ -25,6 +25,7 @@ package com.ponysdk.core.terminal.request;
 
 import com.google.gwt.json.client.JSONValue;
 
+@FunctionalInterface
 public interface RequestBuilder {
 
     void send(JSONValue requestData);

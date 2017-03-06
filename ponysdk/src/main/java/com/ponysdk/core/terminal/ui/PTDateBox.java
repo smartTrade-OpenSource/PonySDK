@@ -23,10 +23,6 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import java.util.Date;
-
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.datepicker.client.DateBox;
@@ -39,6 +35,8 @@ import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 import com.ponysdk.core.terminal.ui.PTDateBox.MyDateBox;
+
+import java.util.Date;
 
 public class PTDateBox extends PTWidget<MyDateBox> {
 
@@ -83,21 +81,8 @@ public class PTDateBox extends PTWidget<MyDateBox> {
     private void addValueChangeHandler(final UIBuilder uiService) {
         final DateBox dateBox = cast();
         final TextBox textBox = dateBox.getTextBox();
-        dateBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
-
-            @Override
-            public void onValueChange(final ValueChangeEvent<Date> event) {
-                triggerEvent(uiService, dateBox);
-            }
-
-        });
-        textBox.addValueChangeHandler(new ValueChangeHandler<String>() {
-
-            @Override
-            public void onValueChange(final ValueChangeEvent<String> event) {
-                triggerEvent(uiService, dateBox);
-            }
-        });
+        dateBox.addValueChangeHandler(event -> triggerEvent(uiService, dateBox));
+        textBox.addValueChangeHandler(event -> triggerEvent(uiService, dateBox));
     }
 
     private void triggerEvent(final UIBuilder uiService, final DateBox dateBox) {

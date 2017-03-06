@@ -23,21 +23,6 @@
 
 package com.ponysdk.core.server.servlet;
 
-import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
-
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-
-import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.StatusCode;
-import org.eclipse.jetty.websocket.api.WebSocketListener;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.AbstractApplicationManager;
@@ -45,6 +30,19 @@ import com.ponysdk.core.server.application.Application;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.stm.TxnContext;
 import com.ponysdk.core.useragent.UserAgent;
+import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.StatusCode;
+import org.eclipse.jetty.websocket.api.WebSocketListener;
+import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
 
 public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
@@ -267,7 +265,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         return context != null && context.getUIContext() != null && context.getUIContext().isLiving();
     }
 
-    private final boolean isSessionOpen() {
+    private boolean isSessionOpen() {
         return session != null && session.isOpen();
     }
 
@@ -334,48 +332,48 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         }
     }
 
-    private static final void encode(final ByteBuffer buffer, final ServerToClientModel model) {
+    private static void encode(final ByteBuffer buffer, final ServerToClientModel model) {
         if (log.isDebugEnabled()) log.debug("Writing in the buffer : " + model + " (position : " + buffer.position() + ")");
         buffer.putShort(model.getValue());
     }
 
-    private static final void encode(final ByteBuffer buffer, final ServerToClientModel model, final boolean value) {
+    private static void encode(final ByteBuffer buffer, final ServerToClientModel model, final boolean value) {
         encode(buffer, model, value ? TRUE : FALSE);
     }
 
-    private static final void encode(final ByteBuffer buffer, final ServerToClientModel model, final byte value) {
+    private static void encode(final ByteBuffer buffer, final ServerToClientModel model, final byte value) {
         if (log.isDebugEnabled())
             log.debug("Writing in the buffer : " + model + " => " + value + " (position : " + buffer.position() + ")");
         buffer.putShort(model.getValue());
         buffer.put(value);
     }
 
-    private static final void encode(final ByteBuffer buffer, final ServerToClientModel model, final short value) {
+    private static void encode(final ByteBuffer buffer, final ServerToClientModel model, final short value) {
         log.error("Writing in the buffer : " + model + " => " + value + " (position : " + buffer.position() + ")");
         buffer.putShort(model.getValue());
         buffer.putShort(value);
     }
 
-    private static final void encode(final ByteBuffer buffer, final ServerToClientModel model, final int value) {
+    private static void encode(final ByteBuffer buffer, final ServerToClientModel model, final int value) {
         if (log.isDebugEnabled())
             log.debug("Writing in the buffer : " + model + " => " + value + " (position : " + buffer.position() + ")");
         buffer.putShort(model.getValue());
         buffer.putInt(value);
     }
 
-    private static final void encode(final ByteBuffer buffer, final ServerToClientModel model, final long value) {
+    private static void encode(final ByteBuffer buffer, final ServerToClientModel model, final long value) {
         encode(buffer, model, String.valueOf(value));
     }
 
-    private static final void encode(final ByteBuffer buffer, final ServerToClientModel model, final double value) {
+    private static void encode(final ByteBuffer buffer, final ServerToClientModel model, final double value) {
         encode(buffer, model, String.valueOf(value));
     }
 
-    private static final void encode(final ByteBuffer buffer, final ServerToClientModel model, final JsonObject jsonObject) {
+    private static void encode(final ByteBuffer buffer, final ServerToClientModel model, final JsonObject jsonObject) {
         encode(buffer, model, jsonObject.toString());
     }
 
-    private static final void encode(final ByteBuffer buffer, final ServerToClientModel model, final String value) {
+    private static void encode(final ByteBuffer buffer, final ServerToClientModel model, final String value) {
         if (log.isDebugEnabled()) log.debug("Writing in the buffer : " + model + " => " + value + " (size : "
                 + (value != null ? value.length() : 0) + ")" + " (position : " + buffer.position() + ")");
         buffer.putShort(model.getValue());
@@ -393,7 +391,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         }
     }
 
-    private static enum NiceStatusCode {
+    private enum NiceStatusCode {
 
         NORMAL(StatusCode.NORMAL, "Normal closure"),
         SHUTDOWN(StatusCode.SHUTDOWN, "Shutdown"),
@@ -415,7 +413,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         private int statusCode;
         private String message;
 
-        private NiceStatusCode(final int statusCode, final String message) {
+        NiceStatusCode(final int statusCode, final String message) {
             this.statusCode = statusCode;
             this.message = message;
         }
@@ -428,7 +426,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
             return message;
         }
 
-        public static final String getMessage(final int statusCode) {
+        public static String getMessage(final int statusCode) {
             for (final NiceStatusCode niceStatusCode : values()) {
                 if (niceStatusCode.getStatusCode() == statusCode) {
                     return statusCode + " : " + niceStatusCode.getMessage();

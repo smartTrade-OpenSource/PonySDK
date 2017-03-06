@@ -24,11 +24,7 @@
 package com.ponysdk.core.terminal.ui;
 
 import com.google.gwt.event.dom.client.MouseDownEvent;
-import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.dom.client.MouseUpEvent;
-import com.google.gwt.event.dom.client.MouseUpHandler;
-import com.google.gwt.event.dom.client.ScrollEvent;
-import com.google.gwt.event.dom.client.ScrollHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -84,34 +80,22 @@ public class PTScrollPanel extends PTSimplePanel {
     @Override
     public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
         if (HandlerModel.HANDLER_SCROLL.equals(handlerModel)) {
-            cast().addScrollHandler(new ScrollHandler() {
-
-                @Override
-                public void onScroll(final ScrollEvent event) {
-                    if (!dragging) {
-                        sendScrollPositionEvent(uiService);
-                    }
-                }
-            });
-            cast().addDomHandler(new MouseDownHandler() {
-
-                @Override
-                public void onMouseDown(final MouseDownEvent event) {
-                    if (DOM.getCaptureElement() == null) {
-                        dragging = true;
-                        DOM.setCapture(cast().getElement());
-                    }
-                }
-            }, MouseDownEvent.getType());
-            cast().addDomHandler(new MouseUpHandler() {
-
-                @Override
-                public void onMouseUp(final MouseUpEvent event) {
-                    dragging = false;
-                    DOM.releaseCapture(uiObject.getElement());
-
+            cast().addScrollHandler(event -> {
+                if (!dragging) {
                     sendScrollPositionEvent(uiService);
                 }
+            });
+            cast().addDomHandler(event -> {
+                if (DOM.getCaptureElement() == null) {
+                    dragging = true;
+                    DOM.setCapture(cast().getElement());
+                }
+            }, MouseDownEvent.getType());
+            cast().addDomHandler(event -> {
+                dragging = false;
+                DOM.releaseCapture(uiObject.getElement());
+
+                sendScrollPositionEvent(uiService);
             }, MouseUpEvent.getType());
         } else {
             super.addHandler(buffer, handlerModel, uiService);

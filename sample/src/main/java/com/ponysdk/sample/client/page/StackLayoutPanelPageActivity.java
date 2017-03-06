@@ -30,8 +30,6 @@ import com.ponysdk.core.ui.basic.PSimplePanel;
 import com.ponysdk.core.ui.basic.PStackLayoutPanel;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
 import com.ponysdk.core.ui.basic.PWidget;
-import com.ponysdk.core.ui.basic.event.PSelectionEvent;
-import com.ponysdk.core.ui.basic.event.PSelectionHandler;
 import com.ponysdk.sample.client.event.DemoBusinessEvent;
 
 public class StackLayoutPanelPageActivity extends SamplePageActivity {

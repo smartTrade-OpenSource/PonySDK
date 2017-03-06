@@ -23,15 +23,11 @@
 
 package com.ponysdk.core.ui.list;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PWidget;
+
+import java.util.*;
 
 /***
  * A Grid of data that supports paging and columns.

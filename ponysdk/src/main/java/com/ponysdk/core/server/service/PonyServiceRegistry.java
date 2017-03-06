@@ -23,13 +23,13 @@
 
 package com.ponysdk.core.server.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class PonyServiceRegistry {
 
@@ -37,7 +37,7 @@ public class PonyServiceRegistry {
 
     private static final Map<Class<?>, PonyService> registeredServices = new ConcurrentHashMap<>();
 
-    public static final void registerPonyService(final PonyService service) {
+    public static void registerPonyService(final PonyService service) {
 
         final Set<Class<?>> classes = new HashSet<>();
 
@@ -53,7 +53,7 @@ public class PonyServiceRegistry {
         });
     }
 
-    private static final void getGeneralizations(final Class<?> classObject, final Set<Class<?>> generalizations) {
+    private static void getGeneralizations(final Class<?> classObject, final Set<Class<?>> generalizations) {
         final Class<?> superClass = classObject.getSuperclass();
 
         if (superClass != null) getGeneralizations(superClass, generalizations);
@@ -64,7 +64,7 @@ public class PonyServiceRegistry {
         }
     }
 
-    public static final <T extends PonyService> T getPonyService(final Class<T> clazz) {
+    public static <T extends PonyService> T getPonyService(final Class<T> clazz) {
         final T ponyService = (T) registeredServices.get(clazz);
         if (ponyService != null) {
             return ponyService;

@@ -23,15 +23,14 @@
 
 package com.ponysdk.core.terminal.ui;
 
+import com.google.gwt.core.client.Scheduler;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 
 public class PTWindowManager {
 
@@ -45,19 +44,19 @@ public class PTWindowManager {
         checkWindowsAlive();
     }
 
-    public static final PTWindowManager get() {
+    public static PTWindowManager get() {
         return instance;
     }
 
-    public static final Collection<PTWindow> getWindows() {
+    public static Collection<PTWindow> getWindows() {
         return new ArrayList<>(get().windows.values());
     }
 
-    public static final PTWindow getWindow(final int windowID) {
+    public static PTWindow getWindow(final int windowID) {
         return get().windows.get(windowID);
     }
 
-    public static final void closeAll() {
+    public static void closeAll() {
         final Collection<PTWindow> values = new ArrayList<>(get().windows.values());
         for (final PTWindow window : values) {
             window.close(true);
@@ -74,19 +73,15 @@ public class PTWindowManager {
     }
 
     private void checkWindowsAlive() {
-        Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
-
-            @Override
-            public boolean execute() {
-                try {
-                    for (final PTWindow window : windows.values()) {
-                        if (window.isClosed()) window.onClose();
-                    }
-                } catch (final Throwable t) {
-                    log.log(Level.SEVERE, "Can't checking windows status", t);
+        Scheduler.get().scheduleFixedDelay(() -> {
+            try {
+                for (final PTWindow window : windows.values()) {
+                    if (window.isClosed()) window.onClose();
                 }
-                return true;
+            } catch (final Throwable t) {
+                log.log(Level.SEVERE, "Can't checking windows status", t);
             }
+            return true;
         }, 2000);
     }
 }

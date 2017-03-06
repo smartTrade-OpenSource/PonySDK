@@ -220,7 +220,6 @@ public enum ServerToClientModel {
     URL(ValueTypeModel.STRING),
     CLOSE(ValueTypeModel.NULL),
     WIDGET_TYPE(ValueTypeModel.BYTE),
-    CLEAR_DOM(ValueTypeModel.BOOLEAN),
     STOP_EVENT(ValueTypeModel.INTEGER),
     BORDER_WIDTH(ValueTypeModel.INTEGER),
     SPACING(ValueTypeModel.INTEGER),

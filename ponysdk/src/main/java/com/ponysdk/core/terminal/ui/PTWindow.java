@@ -23,9 +23,6 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.google.gwt.core.client.GWT;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -34,12 +31,12 @@ import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
-
 import elemental.client.Browser;
-import elemental.events.Event;
-import elemental.events.EventListener;
 import elemental.html.Uint8Array;
 import elemental.html.Window;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class PTWindow extends AbstractPTObject {
 
@@ -88,13 +85,7 @@ public class PTWindow extends AbstractPTObject {
         final int modelOrdinal = binaryModel.getModel().ordinal();
         if (ServerToClientModel.OPEN.ordinal() == modelOrdinal) {
             window = Browser.getWindow().open(url, name, features);
-            window.setOnunload(new EventListener() {
-
-                @Override
-                public void handleEvent(final Event event) {
-                    onClose();
-                }
-            });
+            window.setOnunload(event -> onClose());
             return true;
         } else if (ServerToClientModel.PRINT.ordinal() == modelOrdinal) {
             window.print();

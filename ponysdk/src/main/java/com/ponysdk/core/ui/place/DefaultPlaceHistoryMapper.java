@@ -23,10 +23,10 @@
 
 package com.ponysdk.core.ui.place;
 
+import com.ponysdk.core.ui.eventbus.EventBus;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import com.ponysdk.core.ui.eventbus.EventBus;
 
 public class DefaultPlaceHistoryMapper implements PlaceHistoryMapper {
 

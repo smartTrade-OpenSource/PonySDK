@@ -23,27 +23,23 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Iterator;
-
-import javax.json.JsonObject;
-
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.terminal.ui.PTDatePicker;
-import com.ponysdk.core.tools.ListenerCollection;
 import com.ponysdk.core.ui.basic.event.PShowRangeEvent;
 import com.ponysdk.core.ui.basic.event.PShowRangeHandler;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 
+import javax.json.JsonObject;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChangeHandler<Date> {
 
-    private final ListenerCollection<PValueChangeHandler<Date>> handlers = new ListenerCollection<>();
-    private final ListenerCollection<PShowRangeHandler<Date>> showRangeHandlers = new ListenerCollection<>();
+    private Set<PValueChangeHandler<Date>> handlers = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private Set<PShowRangeHandler<Date>> showRangeHandlers = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     private Date date;
 
@@ -54,7 +50,7 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     protected PDatePicker() {
     }
 
-    private static final String dateToString(final Collection<Date> dates) {
+    private static String dateToString(final Collection<Date> dates) {
         final StringBuilder asString = new StringBuilder();
         final Iterator<Date> it = dates.iterator();
         while (it.hasNext()) {

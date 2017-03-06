@@ -38,7 +38,6 @@ public class SplitPanelPageActivity extends SamplePageActivity {
 
     private PHorizontalPanel south;
     private PHorizontalPanel east;
-    private PHorizontalPanel west;
 
     public SplitPanelPageActivity() {
         super("Split Panel", "Panels");
@@ -56,6 +55,7 @@ public class SplitPanelPageActivity extends SamplePageActivity {
         splitLayoutPanel.addNorth(buildComponent("north", "#f2a45c"), 50);
         splitLayoutPanel.addSouth(south = buildComponent("south", "#75ffdc"), 50);
         splitLayoutPanel.addEast(east = buildComponent("east", "#b879fc"), 100);
+        PHorizontalPanel west;
         splitLayoutPanel.addWest(west = buildComponent("west", "#e8b6ea"), 100);
         splitLayoutPanel.add(buildCenterPanel());
 

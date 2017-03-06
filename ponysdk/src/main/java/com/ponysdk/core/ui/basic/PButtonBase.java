@@ -23,11 +23,11 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Objects;
-
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.servlet.WebsocketEncoder;
 import com.ponysdk.core.ui.basic.event.PHasHTML;
+
+import java.util.Objects;
 
 /**
  * Abstract base class for {@link PButton}, {@link PCheckBox}.

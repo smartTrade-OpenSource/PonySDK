@@ -30,10 +30,6 @@ import com.ponysdk.core.ui.basic.PAnchor;
 import com.ponysdk.core.ui.basic.PTree;
 import com.ponysdk.core.ui.basic.PTreeItem;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
-import com.ponysdk.core.ui.basic.event.PSelectionEvent;
-import com.ponysdk.core.ui.basic.event.PSelectionHandler;
 import com.ponysdk.sample.client.event.DemoBusinessEvent;
 
 public class TreePageActivity extends SamplePageActivity {

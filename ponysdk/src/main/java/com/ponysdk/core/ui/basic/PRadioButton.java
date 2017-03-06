@@ -23,12 +23,12 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Objects;
-
 import com.ponysdk.core.model.PCheckBoxState;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
+
+import java.util.Objects;
 
 /**
  * A mutually-exclusive selection radio button widget. Fires

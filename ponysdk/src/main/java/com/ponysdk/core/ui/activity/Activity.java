@@ -23,9 +23,9 @@
 
 package com.ponysdk.core.ui.activity;
 
+import com.ponysdk.core.ui.basic.PAcceptsOneWidget;
 import com.ponysdk.core.ui.place.Place;
 import com.ponysdk.core.ui.place.PlaceChangeEvent;
-import com.ponysdk.core.ui.basic.PAcceptsOneWidget;
 
 /**
  * Implemented by objects that control a piece of user interface, with a life

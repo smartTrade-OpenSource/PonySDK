@@ -46,7 +46,7 @@ public abstract class PAddOnComposite<T extends PWidget> extends PAddOn implemen
             if (null != widget.getWindow()) {
                 attach(widget.getWindow());
             } else {
-                widget.setAttachListener(() -> attach(widget.getWindow()));
+                widget.setInitializeListener(object -> attach(widget.getWindow()));
             }
         } else {
             throw new IllegalArgumentException("Widget " + widget + " is already binded to an other Addon");

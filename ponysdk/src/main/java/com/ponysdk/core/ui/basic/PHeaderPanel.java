@@ -23,13 +23,13 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * A panel that includes a header (top), footer (bottom), and content (middle)

@@ -24,8 +24,6 @@
 package com.ponysdk.core.terminal.ui;
 
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.PCheckBoxState;
@@ -69,14 +67,10 @@ public class PTCheckBox extends PTButtonBase<CheckBox> {
     }
 
     protected void addValueChangeHandler(final UIBuilder uiService) {
-        uiObject.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-
-            @Override
-            public void onValueChange(final ValueChangeEvent<Boolean> event) {
-                final PTInstruction instruction = new PTInstruction(getObjectID());
-                instruction.put(ClientToServerModel.HANDLER_BOOLEAN_VALUE_CHANGE, event.getValue());
-                uiService.sendDataToServer(uiObject, instruction);
-            }
+        uiObject.addValueChangeHandler(event -> {
+            final PTInstruction instruction = new PTInstruction(getObjectID());
+            instruction.put(ClientToServerModel.HANDLER_BOOLEAN_VALUE_CHANGE, event.getValue());
+            uiService.sendDataToServer(uiObject, instruction);
         });
     }
 

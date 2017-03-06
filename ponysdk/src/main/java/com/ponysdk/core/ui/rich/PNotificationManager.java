@@ -23,8 +23,6 @@
 
 package com.ponysdk.core.ui.rich;
 
-import java.time.Duration;
-
 import com.ponysdk.core.server.concurrent.PScheduler;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
@@ -34,6 +32,8 @@ import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
+
+import java.time.Duration;
 
 public class PNotificationManager {
 

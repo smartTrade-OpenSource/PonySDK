@@ -111,7 +111,7 @@ public class PTLayoutPanel extends PTComplexPanel<LayoutPanel> {
         }
     }
 
-    private static final Unit getUnit(final PUnit u) {
+    private static Unit getUnit(final PUnit u) {
         switch (u) {
             case PX:
                 return Unit.PX;

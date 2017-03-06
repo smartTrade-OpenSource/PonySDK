@@ -23,12 +23,7 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import java.util.Date;
-
-import com.google.gwt.event.logical.shared.ShowRangeEvent;
-import com.google.gwt.event.logical.shared.ShowRangeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.datepicker.client.DatePicker;
 import com.ponysdk.core.model.ClientToServerModel;
@@ -37,6 +32,8 @@ import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
+
+import java.util.Date;
 
 public class PTDatePicker extends PTWidget<DatePicker> {
 
@@ -70,23 +67,13 @@ public class PTDatePicker extends PTWidget<DatePicker> {
     private void addHandlers(final UIBuilder uiService) {
         final DatePicker picker = cast();
 
-        picker.addValueChangeHandler(new ValueChangeHandler<Date>() {
-
-            @Override
-            public void onValueChange(final ValueChangeEvent<Date> event) {
-                triggerEvent(picker, uiService, event);
-            }
-        });
-        picker.addShowRangeHandler(new ShowRangeHandler<Date>() {
-
-            @Override
-            public void onShowRange(final ShowRangeEvent<Date> event) {
-                final PTInstruction instruction = new PTInstruction(getObjectID());
-                instruction.put(ClientToServerModel.HANDLER_SHOW_RANGE);
-                instruction.put(ClientToServerModel.START_DATE, event.getStart().getTime());
-                instruction.put(ClientToServerModel.END_DATE, event.getEnd().getTime());
-                uiService.sendDataToServer(picker, instruction);
-            }
+        picker.addValueChangeHandler(event -> triggerEvent(picker, uiService, event));
+        picker.addShowRangeHandler(event -> {
+            final PTInstruction instruction = new PTInstruction(getObjectID());
+            instruction.put(ClientToServerModel.HANDLER_SHOW_RANGE);
+            instruction.put(ClientToServerModel.START_DATE, event.getStart().getTime());
+            instruction.put(ClientToServerModel.END_DATE, event.getEnd().getTime());
+            uiService.sendDataToServer(picker, instruction);
         });
     }
 

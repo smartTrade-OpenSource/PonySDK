@@ -1,22 +1,17 @@
 
 package com.ponysdk.core.ui.basic;
 
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.server.servlet.WebsocketEncoder;
+
+import javax.json.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
-
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonValue;
-
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.servlet.WebsocketEncoder;
 
 public abstract class PAddOn extends PObject {
 
@@ -66,7 +61,7 @@ public abstract class PAddOn extends PObject {
         parser.encode(ServerToClientModel.FACTORY, getSignature());
         if (args != null) {
             parser.encode(ServerToClientModel.NATIVE, args);
-            args = null;//free memory
+            args = null;
         }
     }
 

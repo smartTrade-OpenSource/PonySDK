@@ -23,10 +23,10 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Objects;
-
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
+
+import java.util.Objects;
 
 /**
  * A text box that allows multiple lines of text to be entered.

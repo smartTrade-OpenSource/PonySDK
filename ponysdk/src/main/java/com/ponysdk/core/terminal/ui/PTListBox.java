@@ -27,8 +27,6 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.OptGroupElement;
 import com.google.gwt.dom.client.OptionElement;
 import com.google.gwt.dom.client.SelectElement;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.ListBox;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -51,28 +49,24 @@ public class PTListBox extends PTFocusWidget<ListBox> {
     }
 
     private void addHandler(final UIBuilder uiService) {
-        uiObject.addChangeHandler(new ChangeHandler() {
-
-            @Override
-            public void onChange(final ChangeEvent event) {
-                final int selectedIndex = uiObject.getSelectedIndex();
-                if (selectedIndex == -1) {
-                    final PTInstruction eventInstruction = new PTInstruction(getObjectID());
-                    eventInstruction.put(ClientToServerModel.HANDLER_CHANGE, "-1");
-                    uiService.sendDataToServer(uiObject, eventInstruction);
-                } else {
-                    String selectedIndexes = selectedIndex + "";
-                    for (int i = 0; i < uiObject.getItemCount(); i++) {
-                        if (uiObject.isItemSelected(i)) {
-                            if (i != selectedIndex) {
-                                selectedIndexes += "," + i;
-                            }
+        uiObject.addChangeHandler(event -> {
+            final int selectedIndex = uiObject.getSelectedIndex();
+            if (selectedIndex == -1) {
+                final PTInstruction eventInstruction = new PTInstruction(getObjectID());
+                eventInstruction.put(ClientToServerModel.HANDLER_CHANGE, "-1");
+                uiService.sendDataToServer(uiObject, eventInstruction);
+            } else {
+                String selectedIndexes = selectedIndex + "";
+                for (int i = 0; i < uiObject.getItemCount(); i++) {
+                    if (uiObject.isItemSelected(i)) {
+                        if (i != selectedIndex) {
+                            selectedIndexes += "," + i;
                         }
                     }
-                    final PTInstruction eventInstruction = new PTInstruction(getObjectID());
-                    eventInstruction.put(ClientToServerModel.HANDLER_CHANGE, selectedIndexes);
-                    uiService.sendDataToServer(uiObject, eventInstruction);
                 }
+                final PTInstruction eventInstruction = new PTInstruction(getObjectID());
+                eventInstruction.put(ClientToServerModel.HANDLER_CHANGE, selectedIndexes);
+                uiService.sendDataToServer(uiObject, eventInstruction);
             }
         });
     }

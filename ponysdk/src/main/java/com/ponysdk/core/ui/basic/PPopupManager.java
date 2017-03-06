@@ -23,10 +23,10 @@
 
 package com.ponysdk.core.ui.basic;
 
+import com.ponysdk.core.server.application.UIContext;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import com.ponysdk.core.server.application.UIContext;
 
 public class PPopupManager {
 

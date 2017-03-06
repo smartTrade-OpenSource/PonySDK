@@ -25,15 +25,7 @@ package com.ponysdk.core.ui.list;
 
 import com.ponysdk.core.model.PHorizontalAlignment;
 import com.ponysdk.core.model.PVerticalAlignment;
-import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.IsPWidget;
-import com.ponysdk.core.ui.basic.PAcceptsOneWidget;
-import com.ponysdk.core.ui.basic.PButton;
-import com.ponysdk.core.ui.basic.PHorizontalPanel;
-import com.ponysdk.core.ui.basic.PLabel;
-import com.ponysdk.core.ui.basic.PScrollPanel;
-import com.ponysdk.core.ui.basic.PSimplePanel;
-import com.ponysdk.core.ui.basic.PVerticalPanel;
+import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.rich.PToolbar;
 

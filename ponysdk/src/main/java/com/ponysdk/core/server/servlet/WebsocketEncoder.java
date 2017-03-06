@@ -27,14 +27,14 @@ import com.ponysdk.core.model.ServerToClientModel;
 
 public interface WebsocketEncoder {
 
-    public void beginObject();
+    void beginObject();
 
-    public void encode(final ServerToClientModel model, final Object value);
+    void encode(final ServerToClientModel model, final Object value);
 
-    public void endObject();
+    void endObject();
 
-    public void flush();
+    void flush();
 
-    public void release();
+    void release();
 
 }
