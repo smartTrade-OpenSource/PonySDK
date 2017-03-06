@@ -337,4 +337,8 @@ public abstract class PObject implements PDestroyEvent.HasHandler {
         void onAttach();
     }
 
+    public boolean isInitialized() {
+        return initialized;
+    }
+
 }
