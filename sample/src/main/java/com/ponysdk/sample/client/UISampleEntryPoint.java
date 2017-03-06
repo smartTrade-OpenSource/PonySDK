@@ -53,11 +53,13 @@ import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PTree;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.PWindow;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
 import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
 import com.ponysdk.core.ui.datagrid.ColumnDescriptor;
 import com.ponysdk.core.ui.datagrid.DataGrid;
 import com.ponysdk.core.ui.datagrid.impl.PLabelCellRenderer;
+import com.ponysdk.core.ui.eventbus2.EventBus.EventHandler;
 import com.ponysdk.core.ui.grid.AbstractGridWidget;
 import com.ponysdk.core.ui.grid.GridTableWidget;
 import com.ponysdk.core.ui.list.DataGridColumnDescriptor;
@@ -85,12 +87,10 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     public void start(final UIContext uiContext) {
         uiContext.setClientDataOutput((object, instruction) -> System.err.println(object + " : " + instruction));
 
-        PWindow.getMain().add(Element.newPLabel("COucou"));
-
         final PWindow a = Element.newPWindow(true, null, "Window 2", "resizable=yes,location=0,status=0,scrollbars=0");
         a.open();
 
-        final PLabel b = Element.newPLabel();
+        final PLabel b = Element.newPLabel("Test");
         a.add(b);
 
         final AtomicInteger i = new AtomicInteger();
@@ -117,6 +117,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
         PWindow.getMain().add(textBox);
         PWindow.getMain().add(grid);
+
+        testEvent();
 
         /**
          * PScheduler.scheduleAtFixedRate(() -> {
@@ -369,6 +371,15 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         }
 
         // uiContext.getHistory().newItem("", false);
+    }
+
+    private void testEvent() {
+        final EventHandler<PClickEvent> handler = UIContext.getNewEventBus().subscribe(PClickEvent.class,
+            event -> System.err.println("B " + event));
+        UIContext.getNewEventBus().post(new PClickEvent(this));
+        UIContext.getNewEventBus().post(new PClickEvent(this));
+        UIContext.getNewEventBus().unsubscribe(handler);
+        UIContext.getNewEventBus().post(new PClickEvent(this));
     }
 
     private class Data {

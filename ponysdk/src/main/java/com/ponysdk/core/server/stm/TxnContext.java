@@ -28,8 +28,8 @@ import java.util.Map;
 
 import com.ponysdk.core.server.application.Application;
 import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.server.servlet.WebsocketEncoder;
 import com.ponysdk.core.server.servlet.WebSocket;
+import com.ponysdk.core.server.servlet.WebsocketEncoder;
 import com.ponysdk.core.writer.ModelWriter;
 
 public class TxnContext implements TxnListener {
@@ -91,10 +91,6 @@ public class TxnContext implements TxnListener {
 
     public Object getAttribute(final String name) {
         return parameters.get(name);
-    }
-
-    public int getSeqNum() {
-        return 0;
     }
 
     public String getHistoryToken() {

@@ -55,13 +55,12 @@ import com.ponysdk.core.ui.basic.PHistory;
 import com.ponysdk.core.ui.basic.PObject;
 import com.ponysdk.core.ui.eventbus.BroadcastEventHandler;
 import com.ponysdk.core.ui.eventbus.Event;
-import com.ponysdk.core.ui.eventbus.EventBus;
 import com.ponysdk.core.ui.eventbus.EventHandler;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 import com.ponysdk.core.ui.eventbus.RootEventBus;
 import com.ponysdk.core.ui.eventbus.StreamHandler;
+import com.ponysdk.core.ui.eventbus2.EventBus;
 import com.ponysdk.core.ui.statistic.TerminalDataReceiver;
-import com.ponysdk.core.weak.WeakHashMap;
 import com.ponysdk.core.writer.ModelWriter;
 
 /**
@@ -81,25 +80,31 @@ public class UIContext {
     private static final Logger log = LoggerFactory.getLogger(UIContext.class);
 
     private static final AtomicInteger uiContextCount = new AtomicInteger();
-    private final WeakHashMap weakReferences = new WeakHashMap();
-    private final Map<Integer, StreamHandler> streamListenerByID = new HashMap<>();
-    private final PHistory history = new PHistory();
-    private final EventBus rootEventBus = new RootEventBus();
-    private final PCookies cookies = new PCookies();
-    private final Application application;
-    private final Map<String, Object> attributes = new HashMap<>();
-    private final ReentrantLock lock = new ReentrantLock();
-    private final Map<Integer, JsonObject> incomingMessageQueue = new HashMap<>();
+
     private final int ID;
+    private final Application application;
+    private final ReentrantLock lock = new ReentrantLock();
+    private final Map<String, Object> attributes = new HashMap<>();
+
+    private int objectCounter = 1;
+    private final PObjectWeakHashMap pObjectWeakReferences = new PObjectWeakHashMap();
+
+    private int streamRequestCounter = 0;
+    private final Map<Integer, StreamHandler> streamListenerByID = new HashMap<>();
+
+    private final PHistory history = new PHistory();
+    private final RootEventBus rootEventBus = new RootEventBus();
+    private final EventBus newEventBus = new EventBus();
+
+    private final PCookies cookies = new PCookies();
+
     private final CommunicationSanityChecker communicationSanityChecker;
     private final List<UIContextListener> uiContextListeners = new ArrayList<>();
     private final TxnContext context;
     private final Set<DataListener> listeners = Collections.newSetFromMap(new ConcurrentHashMap<>());
-    private int objectCounter = 1;
-    private int streamRequestCounter = 0;
-    private int lastReceived = -1;
-    private long lastSyncErrorTimestamp = 0;
+
     private TerminalDataReceiver terminalDataReceiver;
+
     private boolean living = true;
 
     public UIContext(final TxnContext context) {
@@ -111,52 +116,57 @@ public class UIContext {
         this.communicationSanityChecker.start();
     }
 
-    public static UIContext get() {
+    public static final UIContext get() {
         return currentContext.get();
     }
 
-    public static void remove() {
+    public static final void remove() {
         currentContext.remove();
     }
 
-    public static void setCurrent(final UIContext uiContext) {
+    public static final void setCurrent(final UIContext uiContext) {
         currentContext.set(uiContext);
     }
 
-    public static HandlerRegistration addHandler(final Event.Type type, final EventHandler handler) {
-        return get().getEventBus().addHandler(type, handler);
+    public static final HandlerRegistration addHandler(final Event.Type type, final EventHandler handler) {
+        return getRootEventBus().addHandler(type, handler);
     }
 
-    public static void removeHandler(final Event.Type type, final EventHandler handler) {
-        get().getEventBus().removeHandler(type, handler);
+    public static final void removeHandler(final Event.Type type, final EventHandler handler) {
+        getRootEventBus().removeHandler(type, handler);
     }
 
-    public static HandlerRegistration addHandlerToSource(final Event.Type type, final Object source, final EventHandler handler) {
-        return get().getEventBus().addHandlerToSource(type, source, handler);
+    public static final HandlerRegistration addHandlerToSource(final Event.Type type, final Object source,
+                                                               final EventHandler handler) {
+        return getRootEventBus().addHandlerToSource(type, source, handler);
     }
 
-    public static void removeHandlerFromSource(final Event.Type type, final Object source, final EventHandler handler) {
-        get().getEventBus().removeHandlerFromSource(type, source, handler);
+    public static final void removeHandlerFromSource(final Event.Type type, final Object source, final EventHandler handler) {
+        getRootEventBus().removeHandlerFromSource(type, source, handler);
     }
 
-    public static void fireEvent(final Event<? extends EventHandler> event) {
-        get().getEventBus().fireEvent(event);
+    public static final void fireEvent(final Event<? extends EventHandler> event) {
+        getRootEventBus().fireEvent(event);
     }
 
-    public static void fireEventFromSource(final Event<? extends EventHandler> event, final Object source) {
-        get().getEventBus().fireEventFromSource(event, source);
+    public static final void fireEventFromSource(final Event<? extends EventHandler> event, final Object source) {
+        getRootEventBus().fireEventFromSource(event, source);
     }
 
-    public static void addHandler(final BroadcastEventHandler handler) {
-        get().getEventBus().addHandler(handler);
+    public static final void addHandler(final BroadcastEventHandler handler) {
+        getRootEventBus().addHandler(handler);
     }
 
-    public static void removeHandler(final BroadcastEventHandler handler) {
-        get().getEventBus().removeHandler(handler);
+    public static final void removeHandler(final BroadcastEventHandler handler) {
+        getRootEventBus().removeHandler(handler);
     }
 
-    public static EventBus getRootEventBus() {
-        return get().getEventBus();
+    public static final RootEventBus getRootEventBus() {
+        return get().rootEventBus;
+    }
+
+    public static final EventBus getNewEventBus() {
+        return get().newEventBus;
     }
 
     public int getID() {
@@ -248,8 +258,8 @@ public class UIContext {
                     if (jsonObject.containsKey(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())) {
                         final int parentObjectID = jsonObject.getJsonNumber(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())
                             .intValue();
-                        final PObject gcObject = weakReferences.get(parentObjectID);
-                        log.warn("" + gcObject);
+                        final PObject gcObject = pObjectWeakReferences.get(parentObjectID);
+                        log.warn(String.valueOf(gcObject));
                     }
 
                     return;
@@ -280,24 +290,16 @@ public class UIContext {
         return objectCounter++;
     }
 
-    public int nextStreamRequestID() {
-        return streamRequestCounter++;
-    }
-
     public void registerObject(final PObject object) {
-        weakReferences.put(object.getID(), object);
+        pObjectWeakReferences.put(object.getID(), object);
     }
 
     public <T> T getObject(final int objectID) {
-        return (T) weakReferences.get(objectID);
-    }
-
-    public StreamHandler removeStreamListener(final int streamID) {
-        return streamListenerByID.remove(streamID);
+        return (T) pObjectWeakReferences.get(objectID);
     }
 
     public void stackStreamRequest(final StreamHandler streamListener) {
-        final int streamRequestID = UIContext.get().nextStreamRequestID();
+        final int streamRequestID = nextStreamRequestID();
 
         final ModelWriter writer = Txn.getWriter();
         writer.beginObject();
@@ -309,7 +311,7 @@ public class UIContext {
     }
 
     public void stackEmbededStreamRequest(final StreamHandler streamListener, final int objectID) {
-        final int streamRequestID = UIContext.get().nextStreamRequestID();
+        final int streamRequestID = nextStreamRequestID();
 
         final ModelWriter writer = Txn.getWriter();
         writer.beginObject();
@@ -321,12 +323,16 @@ public class UIContext {
         streamListenerByID.put(streamRequestID, streamListener);
     }
 
-    public PHistory getHistory() {
-        return history;
+    private int nextStreamRequestID() {
+        return streamRequestCounter++;
     }
 
-    private EventBus getEventBus() {
-        return rootEventBus;
+    public StreamHandler removeStreamListener(final int streamID) {
+        return streamListenerByID.remove(streamID);
+    }
+
+    public PHistory getHistory() {
+        return history;
     }
 
     public PCookies getCookies() {
@@ -378,7 +384,6 @@ public class UIContext {
      *            a string specifying the name of the object
      * @return the object with the specified name
      */
-    @SuppressWarnings("unchecked")
     public <T> T getAttribute(final String name) {
         return (T) attributes.get(name);
     }
@@ -389,45 +394,6 @@ public class UIContext {
 
     public void notifyMessageReceived() {
         communicationSanityChecker.onMessageReceived();
-    }
-
-    public boolean updateIncomingSeqNum(final int receivedSeqNum) {
-        notifyMessageReceived();
-
-        final int previous = lastReceived;
-        if (previous + 1 != receivedSeqNum) {
-            if (lastSyncErrorTimestamp <= 0) lastSyncErrorTimestamp = System.currentTimeMillis();
-            return false;
-        }
-        lastReceived = receivedSeqNum;
-        lastSyncErrorTimestamp = -1;
-
-        return true;
-    }
-
-    public void stackIncomingMessage(final int receivedSeqNum, final JsonObject data) {
-        incomingMessageQueue.put(receivedSeqNum, data);
-    }
-
-    public List<JsonObject> expungeIncomingMessageQueue(final int receivedSeqNum) {
-        if (incomingMessageQueue.isEmpty()) return Collections.emptyList();
-
-        final List<JsonObject> datas = new ArrayList<>();
-        int expected = receivedSeqNum + 1;
-        while (incomingMessageQueue.containsKey(expected)) {
-            datas.add(incomingMessageQueue.remove(expected));
-            lastReceived = expected;
-            expected++;
-        }
-
-        if (log.isDebugEnabled()) {
-            log.debug("Message synchronized from #{} to #{}", receivedSeqNum, lastReceived);
-        }
-        return datas;
-    }
-
-    public long getLastSyncErrorTimestamp() {
-        return lastSyncErrorTimestamp;
     }
 
     public void onDestroy() {
@@ -465,8 +431,6 @@ public class UIContext {
     }
 
     private void doDestroy() {
-        // log.info("Destroying UIContext ViewID #{} from the Session #{}",
-        // uiContextID, application.getSession().getId());
         living = false;
         communicationSanityChecker.stop();
         application.unregisterUIContext(ID);
@@ -474,8 +438,6 @@ public class UIContext {
         for (final UIContextListener listener : uiContextListeners) {
             listener.onUIContextDestroyed(this);
         }
-        // log.info("UIContext destroyed ViewID #{} from the Session #{}",
-        // uiContextID, application.getSession().getId());
     }
 
     public void sendHeartBeat() {
