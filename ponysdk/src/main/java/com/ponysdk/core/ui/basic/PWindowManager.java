@@ -23,10 +23,8 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -42,7 +40,6 @@ public class PWindowManager {
 
     private final Map<Integer, PWindow> preregisteredWindows = new HashMap<>();
     private final Map<Integer, PWindow> registeredWindows = new HashMap<>();
-    private final List<RegisterWindowListener> listeners = new ArrayList<>();
 
     private PWindowManager() {
     }
@@ -69,33 +66,12 @@ public class PWindowManager {
         get().unregisterWindow0(window);
     }
 
-    public static void addWindowListener(final RegisterWindowListener listener) {
-        get().addWindowListener0(listener);
-    }
-
     public static final Collection<Integer> getWindowIds() {
         return get().registeredWindows.keySet();
     }
 
-    public static PWindow getWindow(final int windowID) {
-        if (windowID == PWindow.EMPTY_WINDOW_ID) {
-            log.debug("Window ID is not already set, so no Window is associated");
-            return null;
-        } else {
-            final PWindow window = PWindowManager.get().registeredWindows.get(windowID);
-            if (window != null) {
-                log.debug("Window ID is set on window #" + windowID);
-                return window;
-            } else {
-                log.debug("Window ID is set on window #" + windowID + ", but no Window is already associated");
-                return null;
-            }
-        }
-    }
-
     private void registerWindow0(final PWindow window) {
         registeredWindows.put(window.getID(), window);
-        listeners.forEach(listener -> listener.registered(window.getID()));
     }
 
     private void unregisterWindow0(final PWindow window) {
@@ -103,19 +79,8 @@ public class PWindowManager {
         registeredWindows.remove(window.getID());
     }
 
-    private void addWindowListener0(final RegisterWindowListener listener) {
-        this.listeners.add(listener);
-    }
-
     public void closeAll() {
         registeredWindows.forEach((id, window) -> window.close());
-    }
-
-    interface RegisterWindowListener {
-
-        void registered(int windowID);
-
-        void unregistered(int windowID);
     }
 
 }

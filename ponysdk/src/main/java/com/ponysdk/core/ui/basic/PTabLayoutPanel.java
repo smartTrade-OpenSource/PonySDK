@@ -104,33 +104,33 @@ public class PTabLayoutPanel extends PComplexPanel
     public void insert(final PWidget child, final PWidget tabWidget, final int beforeIndex) {
         assertNotMe(child);
 
-        if (child.getWindowID() == PWindow.EMPTY_WINDOW_ID || child.getWindowID() == windowID) {
+        if (child.getWindow() == null || child.getWindow() == window) {
             child.removeFromParent();
 
             children.insert(child, beforeIndex);
             adopt(child);
-            tabWidget.attach(windowID);
-            child.attach(windowID);
+            tabWidget.attach(window);
+            child.attach(window);
             child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.TAB_WIDGET, tabWidget.getID()),
                 new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex));
         } else {
             throw new IllegalAccessError("Widget " + child + " already attached to an other window, current window : "
-                    + child.getWindowID() + ", new window : " + windowID);
+                    + child.getWindow() + ", new window : " + window);
         }
     }
 
     public void insert(final PWidget child, final String tabText, final int beforeIndex) {
-        if (child.getWindowID() == PWindow.EMPTY_WINDOW_ID || child.getWindowID() == windowID) {
+        if (child.getWindow() == null || child.getWindow() == window) {
             child.removeFromParent();
 
             children.insert(child, beforeIndex);
             adopt(child);
-            child.attach(windowID);
+            child.attach(window);
             child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.TAB_TEXT, tabText),
                 new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex));
         } else {
             throw new IllegalAccessError("Widget " + child + " already attached to an other window, current window : "
-                    + child.getWindowID() + ", new window : " + windowID);
+                    + child.getWindow() + ", new window : " + window);
         }
     }
 

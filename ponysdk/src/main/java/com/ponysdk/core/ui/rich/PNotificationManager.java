@@ -30,6 +30,7 @@ import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PPopupPanel;
 import com.ponysdk.core.ui.basic.PSimplePanel;
+import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
@@ -41,81 +42,53 @@ public class PNotificationManager {
     public static int trayDuration = 6000;
 
     public static void notify(final String message, final Notification notification) {
-        notify(PWindow.getMain().getID(), message, notification);
+        notify(PWindow.getMain(), message, notification);
     }
 
-    public static void notify(final int windowID, final String message, final Notification notification) {
+    public static void notify(final PWindow window, final String message, final Notification notification) {
         switch (notification) {
             case TRAY:
-                showTrayNotification(windowID, Element.newPLabel(message));
+                showTrayNotification(window, Element.newPLabel(message));
                 break;
             case HUMANIZED:
-                showHumanizedNotification(windowID, Element.newPLabel(message));
+                showHumanizedNotification(window, Element.newPLabel(message));
                 break;
             case WARNING_MESSAGE:
-                showWarningNotification(windowID, Element.newPLabel(message));
+                showWarningNotification(window, Element.newPLabel(message));
                 break;
             case ERROR_MESSAGE:
-                showErrorNotification(windowID, Element.newPLabel(message));
+                showErrorNotification(window, Element.newPLabel(message));
                 break;
             default:
                 break;
         }
     }
 
-    public static void notify(final int windowID, final IsPWidget content, final Notification notification) {
+    public static void notify(final PWindow window, final PWidget w, final Notification notification) {
         switch (notification) {
             case TRAY:
-                showTrayNotification(windowID, content);
+                showTrayNotification(window, w);
                 break;
             case HUMANIZED:
-                showHumanizedNotification(windowID, content);
+                showHumanizedNotification(window, w);
                 break;
             case WARNING_MESSAGE:
-                showWarningNotification(windowID, content);
+                showWarningNotification(window, w);
                 break;
             case ERROR_MESSAGE:
-                showErrorNotification(windowID, content);
+                showErrorNotification(window, w);
                 break;
             default:
                 break;
         }
     }
 
-    public static void showHumanizedNotification(final PWindow windowID, final String message) {
-        showHumanizedNotification(windowID.getID(), Element.newPLabel(message));
+    public static void showHumanizedNotification(final PWindow window, final String content) {
+        showHumanizedNotification(window, Element.newPLabel(content));
     }
 
-    public static void showHumanizedNotification(final int windowID, final String message) {
-        showHumanizedNotification(windowID, Element.newPLabel(message));
-    }
-
-    public static void showWarningNotification(final PWindow window, final String message) {
-        showWarningNotification(window.getID(), Element.newPLabel(message));
-    }
-
-    public static void showWarningNotification(final int windowID, final String message) {
-        showWarningNotification(windowID, Element.newPLabel(message));
-    }
-
-    public static void showErrorNotification(final PWindow window, final String message) {
-        showErrorNotification(window.getID(), Element.newPLabel(message));
-    }
-
-    public static void showErrorNotification(final int windowID, final String message) {
-        showErrorNotification(windowID, Element.newPLabel(message));
-    }
-
-    public static void showTrayNotification(final PWindow window, final String message) {
-        showTrayNotification(window.getID(), Element.newPLabel(message));
-    }
-
-    public static void showTrayNotification(final int windowID, final String message) {
-        showTrayNotification(windowID, Element.newPLabel(message));
-    }
-
-    private static void showHumanizedNotification(final int windowID, final IsPWidget content) {
-        final PPopupPanel popupPanel = Element.newPPopupPanel(windowID, true);
+    public static void showHumanizedNotification(final PWindow window, final IsPWidget content) {
+        final PPopupPanel popupPanel = Element.newPPopupPanel(window, true);
         popupPanel.addStyleName("pony-notification");
         popupPanel.addStyleName("humanized");
         popupPanel.setWidget(content);
@@ -126,8 +99,12 @@ public class PNotificationManager {
         addAutoCloseTimer(popupPanel, humanizedDuration);
     }
 
-    private static void showWarningNotification(final int windowID, final IsPWidget content) {
-        final PPopupPanel popupPanel = Element.newPPopupPanel(windowID, true);
+    public static void showWarningNotification(final PWindow window, final String content) {
+        showWarningNotification(window, Element.newPLabel(content));
+    }
+
+    public static void showWarningNotification(final PWindow window, final IsPWidget content) {
+        final PPopupPanel popupPanel = Element.newPPopupPanel(window, true);
         popupPanel.addStyleName("pony-notification");
         popupPanel.addStyleName("warning");
         popupPanel.setWidget(content);
@@ -137,8 +114,12 @@ public class PNotificationManager {
         addAutoCloseTimer(popupPanel, warningDuration);
     }
 
-    private static void showErrorNotification(final int windowID, final IsPWidget content) {
-        final PPopupPanel popupPanel = Element.newPPopupPanel(windowID, false);
+    public static void showErrorNotification(final PWindow window, final String content) {
+        showErrorNotification(window, Element.newPLabel(content));
+    }
+
+    public static void showErrorNotification(final PWindow window, final IsPWidget content) {
+        final PPopupPanel popupPanel = Element.newPPopupPanel(window, false);
         popupPanel.setGlassEnabled(false);
         popupPanel.addStyleName("pony-notification");
         popupPanel.addStyleName("error");
@@ -148,11 +129,15 @@ public class PNotificationManager {
         popupPanel.center();
     }
 
-    private static void showTrayNotification(final int windowID, final IsPWidget content) {
+    public static void showTrayNotification(final PWindow window, final String content) {
+        showTrayNotification(window, Element.newPLabel(content));
+    }
+
+    public static void showTrayNotification(final PWindow window, final IsPWidget content) {
         final PSimplePanel div2 = Element.newPSimplePanel();
         div2.setWidget(content);
 
-        final PPopupPanel popupPanel = Element.newPPopupPanel(windowID, true);
+        final PPopupPanel popupPanel = Element.newPPopupPanel(window, true);
         popupPanel.addStyleName("pony-notification");
         popupPanel.addStyleName("tray");
         popupPanel.setWidget(div2);

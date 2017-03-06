@@ -48,32 +48,14 @@ public abstract class PAddOn extends PObject {
     }
 
     @Override
-    public boolean attach(final int windowID) {
-        if (this.windowID == PWindow.EMPTY_WINDOW_ID && windowID != PWindow.EMPTY_WINDOW_ID) {
-            this.windowID = windowID;
-
-            final PWindow window = PWindowManager.getWindow(windowID);
-
-            if (window != null && window.isOpened()) {
-                init();
-            } else {
-                PWindowManager.addWindowListener(new PWindowManager.RegisterWindowListener() {
-
-                    @Override
-                    public void registered(final int registeredWindowID) {
-                        if (windowID == registeredWindowID) init();
-                    }
-
-                    @Override
-                    public void unregistered(final int windowID) {
-                    }
-                });
-            }
-
+    protected boolean attach(final PWindow window) {
+        if (this.window == null && window != null) {
+            this.window = window;
+            init();
             return true;
-        } else if (this.windowID != windowID) {
+        } else if (this.window != window) {
             throw new IllegalAccessError(
-                "Widget already attached to an other window, current window : #" + this.windowID + ", new window : #" + windowID);
+                "Widget already attached to an other window, current window : #" + this.window + ", new window : #" + window);
         }
         return false;
     }
@@ -142,6 +124,7 @@ public abstract class PAddOn extends PObject {
         callTerminalMethod("setLogLevel", LOG_LEVEL.get(logLevel));
     }
 
+    @Override
     public void destroy() {
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.DESTROY));
     }

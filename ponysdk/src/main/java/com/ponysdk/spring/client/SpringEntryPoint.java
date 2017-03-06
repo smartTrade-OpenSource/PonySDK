@@ -58,7 +58,7 @@ public abstract class SpringEntryPoint implements EntryPoint {
 
     protected void start(final Place place) {
         final PSimpleLayoutPanel panel = Element.newPSimpleLayoutPanel();
-        PRootLayoutPanel.get(PWindow.getMain().getID()).add(panel);
+        PRootLayoutPanel.get(PWindow.getMain()).add(panel);
 
         final ActivityManager activityManager = new ActivityManager(mapper);
         activityManager.setDisplay(panel);

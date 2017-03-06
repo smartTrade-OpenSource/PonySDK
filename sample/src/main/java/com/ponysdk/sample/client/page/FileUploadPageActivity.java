@@ -48,7 +48,7 @@ public class FileUploadPageActivity extends SamplePageActivity {
 
         final PFileUpload fileUpload = Element.newPFileUpload();
         fileUpload.setName("my_file");
-        fileUpload.addSubmitCompleteHandler(() -> PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
+        fileUpload.addSubmitCompleteHandler(() -> PNotificationManager.showTrayNotification(getView().asWidget().getWindow(),
             "File uploaded, submit file '" + fileUpload.getFileName() + "'"));
 
         fileUpload.addStreamHandler((request, response, uiContext) -> {

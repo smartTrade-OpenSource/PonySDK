@@ -48,18 +48,18 @@ public abstract class PComplexPanel extends PPanel {
     public void add(final PWidget child) {
         assertNotMe(child);
 
-        if (child.getWindowID() == PWindow.EMPTY_WINDOW_ID || child.getWindowID() == windowID) {
+        if (child.getWindow() == null || child.getWindow() == window) {
             child.removeFromParent();
             children.add(child);
             adopt(child);
-            child.attach(windowID);
+            child.attach(window);
             child.saveAdd(child.getID(), ID);
         } else {
             if (initialized) {
-                throw new IllegalAccessError("Can't attach widget " + child + " to window #" + windowID
-                        + " because it's already attached to window #" + child.getWindowID());
+                throw new IllegalAccessError(
+                    "Can't attach widget " + child + " to window #" + window + " because it's already attached to window #" + child);
             } else {
-                throw new IllegalAccessError("Can't only attach widget " + child + " to window #" + child.getWindowID()
+                throw new IllegalAccessError("Can't only attach widget " + child + " to window #" + child.getWindow()
                         + ". Need to attach the new parent to the same window before");
             }
         }
@@ -68,22 +68,22 @@ public abstract class PComplexPanel extends PPanel {
     public void insert(final PWidget child, final int beforeIndex) {
         assertNotMe(child);
 
-        if (child.getWindowID() == PWindow.EMPTY_WINDOW_ID || child.getWindowID() == windowID) {
+        if (child.getWindow() == null || child.getWindow() == window) {
             child.removeFromParent();
 
             children.insert(child, beforeIndex);
             adopt(child);
 
             if (children.size() - 1 == beforeIndex) {
-                child.attach(windowID);
+                child.attach(window);
                 child.saveAdd(child.getID(), ID);
             } else {
-                child.attach(windowID);
+                child.attach(window);
                 child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, beforeIndex));
             }
         } else {
             throw new IllegalAccessError("Widget " + child + " already attached to an other window, current window : "
-                    + child.getWindowID() + ", new window : " + windowID);
+                    + child.getWindow() + ", new window : " + window);
         }
     }
 

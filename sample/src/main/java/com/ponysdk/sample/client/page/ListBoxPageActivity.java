@@ -27,8 +27,6 @@ import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PFlexTable;
 import com.ponysdk.core.ui.basic.PListBox;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.rich.PNotificationManager;
 
 public class ListBoxPageActivity extends SamplePageActivity {
@@ -69,14 +67,14 @@ public class ListBoxPageActivity extends SamplePageActivity {
             roleListBox.setSelectedValue(1);
             roleListBox.setSelectedValue(2);
 
-            PNotificationManager.showHumanizedNotification(getView().asWidget().getWindowID(),
+            PNotificationManager.showHumanizedNotification(getView().asWidget().getWindow(),
                 "Selected items " + roleListBox.getSelectedItems());
         });
         final PButton unSelectedRole = Element.newPButton("Selected roles [1,2]");
         unSelectedRole.addClickHandler(event -> {
             roleListBox.setSelectedValue(1, false);
             roleListBox.setSelectedValue(2, false);
-            PNotificationManager.showHumanizedNotification(getView().asWidget().getWindowID(),
+            PNotificationManager.showHumanizedNotification(getView().asWidget().getWindow(),
                 "Unselected items " + roleListBox.getSelectedItems());
         });
         table.setWidget(1, 0, roleListBox);

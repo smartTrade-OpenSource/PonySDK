@@ -286,11 +286,11 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         boxContainer.add(Element.newPDateBox(new SimpleDateFormat("dd/MM/yyyy")));
         boxContainer.add(Element.newPDateBox(Element.newPDatePicker(), new SimpleDateFormat("yyyy/MM/dd")));
         boxContainer.add(Element.newPDatePicker());
-        boxContainer.add(Element.newPDecoratedPopupPanel(PWindow.getMain().getID(), false));
-        boxContainer.add(Element.newPDecoratedPopupPanel(PWindow.getMain().getID(), true));
+        boxContainer.add(Element.newPDecoratedPopupPanel(PWindow.getMain(), false));
+        boxContainer.add(Element.newPDecoratedPopupPanel(PWindow.getMain(), true));
         boxContainer.add(Element.newPDecoratorPanel());
-        boxContainer.add(Element.newPDialogBox(PWindow.getMain().getID()));
-        boxContainer.add(Element.newPDialogBox(PWindow.getMain().getID(), true));
+        boxContainer.add(Element.newPDialogBox(PWindow.getMain()));
+        boxContainer.add(Element.newPDialogBox(PWindow.getMain(), true));
         boxContainer.add(Element.newPDisclosurePanel("Disclosure"));
         boxContainer.add(createDockLayoutPanel());
         boxContainer.add(Element.newA());
@@ -318,8 +318,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         boxContainer.add(Element.newPPasswordTextBox());
         boxContainer.add(Element.newPPasswordTextBox("Password"));
 
-        boxContainer.add(Element.newPPopupPanel(PWindow.getMain().getID()));
-        boxContainer.add(Element.newPPopupPanel(PWindow.getMain().getID(), true));
+        boxContainer.add(Element.newPPopupPanel(PWindow.getMain()));
+        boxContainer.add(Element.newPPopupPanel(PWindow.getMain(), true));
 
         boxContainer.add(Element.newPPushButton(Element.newPImage())); // FIXME Test with
         // image
@@ -531,8 +531,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PWindow w = Element.newPWindow(null, "Window 1", null);
         w.open();
 
-        PScript.execute(w.getID(), "alert('coucou Window1');");
-        PScript.execute(w.getID(), "console.log('coucou Window1');");
+        PScript.execute(w, "alert('coucou Window1');");
+        PScript.execute(w, "console.log('coucou Window1');");
 
         for (int i = 0; i < 2; i++) {
             Element.newPWindow(null, "Winddsqsdqdqs" + i, null).open();

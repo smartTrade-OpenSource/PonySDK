@@ -100,18 +100,18 @@ public class DefaultElementFactory implements ElementFactory {
     }
 
     @Override
-    public PDecoratedPopupPanel newPDecoratedPopupPanel(final int windowID, final boolean autoHide) {
-        return new PDecoratedPopupPanel(windowID, autoHide);
+    public PDecoratedPopupPanel newPDecoratedPopupPanel(final PWindow window, final boolean autoHide) {
+        return new PDecoratedPopupPanel(window, autoHide);
     }
 
     @Override
-    public PDialogBox newPDialogBox(final int windowID) {
-        return new PDialogBox(windowID);
+    public PDialogBox newPDialogBox(final PWindow window) {
+        return new PDialogBox(window);
     }
 
     @Override
-    public PDialogBox newPDialogBox(final int windowID, final boolean autoHide) {
-        return new PDialogBox(windowID, autoHide);
+    public PDialogBox newPDialogBox(final PWindow window, final boolean autoHide) {
+        return new PDialogBox(window, autoHide);
     }
 
     @Override
@@ -285,13 +285,13 @@ public class DefaultElementFactory implements ElementFactory {
     }
 
     @Override
-    public PPopupPanel newPPopupPanel(final int windowID, final boolean autoHide) {
-        return new PPopupPanel(windowID, autoHide);
+    public PPopupPanel newPPopupPanel(final PWindow window, final boolean autoHide) {
+        return new PPopupPanel(window, autoHide);
     }
 
     @Override
-    public PPopupPanel newPPopupPanel(final int windowID) {
-        return new PPopupPanel(windowID);
+    public PPopupPanel newPPopupPanel(final PWindow window) {
+        return new PPopupPanel(window);
     }
 
     @Override

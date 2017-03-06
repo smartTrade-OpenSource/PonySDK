@@ -44,8 +44,6 @@ import com.ponysdk.core.ui.basic.event.POpenHandler;
 
 public class PWindow extends PObject {
 
-    static final int EMPTY_WINDOW_ID = -1;
-
     private Set<POpenHandler> openHandlers;
     private Set<PCloseHandler> closeHandlers;
 
@@ -62,7 +60,7 @@ public class PWindow extends PObject {
 
     //TODO nciaravola => feature + relative should be include in an Option Pojo
     protected PWindow(final boolean relative, final String url, final String name, final String features) {
-        this.windowID = getMain().getID();
+        this.window = getMain();
         this.url = url;
         this.name = name;
         this.features = features;
@@ -79,7 +77,7 @@ public class PWindow extends PObject {
         if (attachListener != null) attachListener.onAttach();
         initialized = true;
 
-        panelByZone.forEach((key, value) -> value.attach(getID()));
+        panelByZone.forEach((key, value) -> value.attach(this));
     }
 
     public static PWindow getMain() {
@@ -205,9 +203,7 @@ public class PWindow extends PObject {
         if (rootPanel == null) {
             rootPanel = new PRootPanel(zoneID);
             panelByZone.put(zoneID, rootPanel);
-            if (initialized) {
-                rootPanel.attach(ID);
-            }
+            rootPanel.attach(this);
         }
         return rootPanel;
     }
@@ -241,6 +237,10 @@ public class PWindow extends PObject {
 
     public PRootPanel getPRootPanel(final String zoneID) {
         return ensureRootPanel(zoneID);
+    }
+
+    public static boolean isMain(final PWindow window) {
+        return getMain() == window;
     }
 
     public static class TargetAttribut {

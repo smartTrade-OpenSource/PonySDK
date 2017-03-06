@@ -28,10 +28,6 @@ import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PFlexTable;
 import com.ponysdk.core.ui.basic.PListBox;
-import com.ponysdk.core.ui.basic.event.PChangeEvent;
-import com.ponysdk.core.ui.basic.event.PChangeHandler;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.form.Form;
 import com.ponysdk.core.ui.form.FormFieldComponent;
 import com.ponysdk.core.ui.form.FormFieldComponent.CaptionOrientation;
@@ -133,14 +129,14 @@ public class FormPageActivity extends SamplePageActivity {
         final PButton validateButton = Element.newPButton("Validate");
         validateButton.addClickHandler(clickEvent -> {
             final boolean isValid = form.isValid();
-            PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
+            PNotificationManager.showTrayNotification(getView().asWidget().getWindow(),
                 "The form is valid? " + (isValid ? "YES" : "NO"));
         });
 
         final PButton resetButton = Element.newPButton("Reset");
         resetButton.addClickHandler(clickEvent -> {
             form.reset();
-            PNotificationManager.showHumanizedNotification(getView().asWidget().getWindowID(), "The form has been reseted");
+            PNotificationManager.showHumanizedNotification(getView().asWidget().getWindow(), "The form has been reseted");
         });
 
         final PListBox captionOriantationList = Element.newPListBox(true);

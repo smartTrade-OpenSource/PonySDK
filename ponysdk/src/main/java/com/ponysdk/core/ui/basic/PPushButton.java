@@ -45,10 +45,10 @@ public class PPushButton extends PButton {
     }
 
     @Override
-    protected boolean attach(final int windowID) {
+    protected boolean attach(final PWindow window) {
         // WORKAROUND : element and sub element need to be created before any add
-        final boolean imageResult = image.attach(windowID);
-        final boolean result = super.attach(windowID);
+        final boolean imageResult = image.attach(window);
+        final boolean result = super.attach(window);
         if (imageResult) image.saveAdd(image.getID(), ID);
         return result;
     }

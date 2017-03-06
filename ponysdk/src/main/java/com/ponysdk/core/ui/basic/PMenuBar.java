@@ -114,7 +114,7 @@ public class PMenuBar extends PWidget implements HasPAnimation {
     protected void init0() {
         super.init0();
         for (final PWidget item : items) {
-            item.attach(windowID);
+            item.attach(window);
         }
     }
 
@@ -160,14 +160,14 @@ public class PMenuBar extends PWidget implements HasPAnimation {
     public <T extends PMenuSubElement> T addElement(final T elt) {
         items.add(elt);
         elt.saveAdd(elt.getID(), ID);
-        elt.attach(windowID);
+        elt.attach(window);
         return elt;
     }
 
     public <T extends PMenuSubElement> T insertElement(final T elt, final int beforeIndex) throws IndexOutOfBoundsException {
         items.add(beforeIndex, elt);
         elt.saveAdd(elt.getID(), ID, new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex));
-        elt.attach(windowID);
+        elt.attach(window);
         return elt;
     }
 

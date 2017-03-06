@@ -34,42 +34,28 @@ public class PPopupManager {
 
     private final Map<Integer, PPopupPanel> popups = new HashMap<>();
 
-    private final int windowID;
+    private final PWindow window;
 
-    private PPopupManager(final int windowID) {
-        this.windowID = windowID;
+    private PPopupManager(final PWindow window) {
+        this.window = window;
     }
 
-    public static PPopupManager get(final int windowID) {
+    public static PPopupManager get(final PWindow window) {
         final UIContext uiContext = UIContext.get();
-        final PPopupManager popupManager = uiContext.getAttribute(SCRIPT_KEY + windowID);
+        final PPopupManager popupManager = uiContext.getAttribute(SCRIPT_KEY + window.getID());
         if (popupManager == null) {
-            final PPopupManager newPopupManager = new PPopupManager(windowID);
-            uiContext.setAttribute(SCRIPT_KEY + windowID, newPopupManager);
-            if (PWindowManager.getWindow(windowID) != null) {
+            final PPopupManager newPopupManager = new PPopupManager(window);
+            uiContext.setAttribute(SCRIPT_KEY + window, newPopupManager);
+            if (window.isOpened()) {
                 for (final PPopupPanel popup : newPopupManager.popups.values()) {
-                    popup.attach(windowID);
+                    popup.attach(window);
                 }
             } else {
-                PWindowManager.addWindowListener(new PWindowManager.RegisterWindowListener() {
-
-                    @Override
-                    public void registered(final int registeredWindowID) {
-                        if (registeredWindowID == windowID) {
-                            for (final PPopupPanel popup : newPopupManager.popups.values()) {
-                                popup.attach(windowID);
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void unregistered(final int registeredWindowID) {
-                        if (registeredWindowID == windowID) {
-                            newPopupManager.popups.clear();
-                            uiContext.removeAttribute(SCRIPT_KEY + windowID);
-                        }
-                    }
-                });
+                window.addOpenHandler(e -> newPopupManager.popups.forEach((key, value) -> value.attach(window)));
+                window.addCloseHandler(e -> newPopupManager.popups.forEach((key, value) -> {
+                    newPopupManager.popups.clear();
+                    uiContext.removeAttribute(SCRIPT_KEY + window);
+                }));
             }
             return newPopupManager;
         }
@@ -78,10 +64,8 @@ public class PPopupManager {
 
     void registerPopup(final PPopupPanel popup) {
         popups.put(popup.getID(), popup);
-        if (PWindowManager.getWindow(windowID) != null) {
-            popup.attach(windowID);
-            popup.addCloseHandler((event) -> unregisterPopup(popup));
-        }
+        popup.attach(window);
+        popup.addCloseHandler((event) -> unregisterPopup(popup));
     }
 
     void unregisterPopup(final PPopupPanel popup) {

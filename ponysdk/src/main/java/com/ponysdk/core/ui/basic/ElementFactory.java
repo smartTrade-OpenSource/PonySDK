@@ -55,13 +55,13 @@ public interface ElementFactory {
 
     public PDatePicker newPDatePicker();
 
-    public PDecoratedPopupPanel newPDecoratedPopupPanel(int id, boolean b);
+    public PDecoratedPopupPanel newPDecoratedPopupPanel(PWindow window, boolean b);
 
     public PDecoratorPanel newPDecoratorPanel();
 
-    public PDialogBox newPDialogBox(final int windowID);
+    public PDialogBox newPDialogBox(final PWindow window);
 
-    public PDialogBox newPDialogBox(final int windowID, final boolean autoHide);
+    public PDialogBox newPDialogBox(final PWindow window, final boolean autoHide);
 
     public PDisclosurePanel newPDisclosurePanel(final String headerText);
 
@@ -131,9 +131,9 @@ public interface ElementFactory {
 
     public PPasswordTextBox newPPasswordTextBox(final String text);
 
-    public PPopupPanel newPPopupPanel(final int windowID, final boolean autoHide);
+    public PPopupPanel newPPopupPanel(final PWindow window, final boolean autoHide);
 
-    public PPopupPanel newPPopupPanel(final int windowID);
+    public PPopupPanel newPPopupPanel(final PWindow window);
 
     public PPushButton newPPushButton(final PImage image);
 

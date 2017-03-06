@@ -35,12 +35,6 @@ import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PSimplePanel;
 import com.ponysdk.core.ui.basic.PTabPanel;
 import com.ponysdk.core.ui.basic.PTextBox;
-import com.ponysdk.core.ui.basic.event.PBeforeSelectionEvent;
-import com.ponysdk.core.ui.basic.event.PBeforeSelectionHandler;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
-import com.ponysdk.core.ui.basic.event.PSelectionEvent;
-import com.ponysdk.core.ui.basic.event.PSelectionHandler;
 import com.ponysdk.core.ui.rich.PNotificationManager;
 
 public class TabPanelPageActivity extends SamplePageActivity {
@@ -61,9 +55,9 @@ public class TabPanelPageActivity extends SamplePageActivity {
         final PTabPanel tabPanel = Element.newPTabPanel();
         tabPanel.setSizeFull();
 
-        tabPanel.addBeforeSelectionHandler(event -> PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
+        tabPanel.addBeforeSelectionHandler(event -> PNotificationManager.showTrayNotification(getView().asWidget().getWindow(),
             "onBeforeSelection, tab index : " + event.getSelectedItem()));
-        tabPanel.addSelectionHandler(event -> PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
+        tabPanel.addSelectionHandler(event -> PNotificationManager.showTrayNotification(getView().asWidget().getWindow(),
             "onSelection, tab index : " + event.getSelectedItem()));
 
         final PButton button = Element.newPButton("Add Tab");

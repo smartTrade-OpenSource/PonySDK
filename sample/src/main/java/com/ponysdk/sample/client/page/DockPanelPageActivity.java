@@ -95,7 +95,7 @@ public class DockPanelPageActivity extends SamplePageActivity implements PClickH
         final double size = Double.parseDouble(headerSize.getText());
 
         if (size < 50) {
-            PNotificationManager.showHumanizedNotification(getView().asWidget().getWindowID(), "Size to small for the demo");
+            PNotificationManager.showHumanizedNotification(getView().asWidget().getWindow(), "Size to small for the demo");
         } else {
             dockLayoutPanel.setWidgetSize(headerWidget, size);
         }

@@ -40,8 +40,6 @@ import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PScrollPanel;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PWidget;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.basic.event.PDragEnterEvent;
 import com.ponysdk.core.ui.basic.event.PDragEnterHandler;
 import com.ponysdk.core.ui.basic.event.PDragLeaveEvent;
@@ -135,7 +133,8 @@ public class MarketPageActivity extends PageActivity {
 
         final PHTML buy = Element.newPHTML("<div></div>");
         buy.addStyleName("buy");
-        buy.addClickHandler(clickEvent -> PNotificationManager.showHumanizedNotification(getView().asWidget().getWindowID(), "Buy clicked!"));
+        buy.addClickHandler(
+            clickEvent -> PNotificationManager.showHumanizedNotification(getView().asWidget().getWindow(), "Buy clicked!"));
         box.add(buy);
 
         final PLabel buyPipHead = Element.newPLabel("buy");
@@ -161,7 +160,7 @@ public class MarketPageActivity extends PageActivity {
         final PHTML sell = Element.newPHTML("<div></div>");
         sell.addStyleName("sell");
         sell.addClickHandler(
-            (clickEvent) -> PNotificationManager.showHumanizedNotification(getView().asWidget().getWindowID(), "Sell clicked!"));
+            (clickEvent) -> PNotificationManager.showHumanizedNotification(getView().asWidget().getWindow(), "Sell clicked!"));
         box.add(sell);
 
         final PLabel sellPipHead = Element.newPLabel("offer");

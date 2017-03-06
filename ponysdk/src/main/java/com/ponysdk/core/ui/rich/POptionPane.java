@@ -32,6 +32,7 @@ import com.ponysdk.core.ui.basic.PHorizontalPanel;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
 import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.basic.PWindow;
 
 /**
  * POptionPane makes it easy to pop up a standard dialog box that prompts users
@@ -41,32 +42,32 @@ public class POptionPane implements IsPWidget {
 
     final PDialogBox dialogBox;
 
-    public POptionPane(final int windowID) {
-        this(Element.newPDialogBox(windowID));
+    public POptionPane(final PWindow window) {
+        this(Element.newPDialogBox(window));
     }
 
     public POptionPane(final PDialogBox dialogBox) {
         this.dialogBox = dialogBox;
     }
 
-    public static POptionPane showConfirmDialog(final int windowID, final PActionHandler handler, final String message) {
-        return showConfirmDialog(windowID, handler, message, "Message", POptionType.DEFAULT_OPTION);
+    public static POptionPane showConfirmDialog(final PWindow window, final PActionHandler handler, final String message) {
+        return showConfirmDialog(window, handler, message, "Message", POptionType.DEFAULT_OPTION);
     }
 
-    public static POptionPane showConfirmDialog(final int windowID, final PActionHandler handler, final String message,
+    public static POptionPane showConfirmDialog(final PWindow window, final PActionHandler handler, final String message,
                                                 final String title, final POptionType optionType) {
-        return showConfirmDialog(windowID, handler, message, title, optionType, PMessageType.QUESTION_MESSAGE);
+        return showConfirmDialog(window, handler, message, title, optionType, PMessageType.QUESTION_MESSAGE);
     }
 
-    public static POptionPane showConfirmDialog(final int windowID, final PActionHandler handler, final String message,
+    public static POptionPane showConfirmDialog(final PWindow window, final PActionHandler handler, final String message,
                                                 final String title, final POptionType optionType, final PMessageType messageType) {
-        return showOptionDialog(windowID, handler, message, title, optionType, messageType, getOptions(optionType));
+        return showOptionDialog(window, handler, message, title, optionType, messageType, getOptions(optionType));
     }
 
-    public static POptionPane showOptionDialog(final int windowID, final PActionHandler handler, final String message,
+    public static POptionPane showOptionDialog(final PWindow window, final PActionHandler handler, final String message,
                                                final String title, final POptionType optionType, final PMessageType messageType,
                                                final String... options) {
-        final POptionPane optionPane = new POptionPane(windowID);
+        final POptionPane optionPane = new POptionPane(window);
 
         final PDialogBox dialogBox = optionPane.getDialogBox();
         dialogBox.addStyleName("pony-DialogBox");

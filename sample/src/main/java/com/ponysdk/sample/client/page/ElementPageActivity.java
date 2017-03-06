@@ -27,8 +27,6 @@ import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PAnchor;
 import com.ponysdk.core.ui.basic.PElement;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.rich.PNotificationManager;
 
 public class ElementPageActivity extends SamplePageActivity {
@@ -45,7 +43,7 @@ public class ElementPageActivity extends SamplePageActivity {
         verticalPanel.setSpacing(10);
 
         final PAnchor anchor = Element.newPAnchor("And a link");
-        anchor.addClickHandler(event -> PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(), "Link clicked"));
+        anchor.addClickHandler(event -> PNotificationManager.showTrayNotification(getView().asWidget().getWindow(), "Link clicked"));
 
         final PElement ul = Element.newUl();
         final PElement li1 = Element.newLi();

@@ -87,7 +87,7 @@ public class RadioButtonPageActivity extends SamplePageActivity implements PValu
     @Override
     public void onValueChange(final PValueChangeEvent<Boolean> event) {
         final PRadioButton radioButton = (PRadioButton) event.getSource();
-        PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
+        PNotificationManager.showTrayNotification(getView().asWidget().getWindow(),
             "Text = " + radioButton.getText() + " Value = " + radioButton.getValue());
     }
 }

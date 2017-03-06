@@ -30,9 +30,7 @@ import com.ponysdk.core.ui.basic.PHorizontalPanel;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PScrollPanel;
 import com.ponysdk.core.ui.basic.PSplitLayoutPanel;
-import com.ponysdk.core.ui.basic.event.PLayoutResizeEvent;
 import com.ponysdk.core.ui.basic.event.PLayoutResizeEvent.LayoutResizeData;
-import com.ponysdk.core.ui.basic.event.PLayoutResizeHandler;
 import com.ponysdk.core.ui.rich.PNotificationManager;
 import com.ponysdk.impl.webapplication.page.DefaultPageView;
 
@@ -69,9 +67,9 @@ public class SplitPanelPageActivity extends SamplePageActivity {
         splitLayoutPanel.addLayoutResizeHandler(resizeEvent -> {
             for (final LayoutResizeData data : resizeEvent.getLayoutResizeData()) {
                 if (data.w == south) {
-                    PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(), "South size: " + data.size);
+                    PNotificationManager.showTrayNotification(getView().asWidget().getWindow(), "South size: " + data.size);
                 } else if (data.w == east) {
-                    PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(), "East size: " + data.size);
+                    PNotificationManager.showTrayNotification(getView().asWidget().getWindow(), "East size: " + data.size);
                 }
             }
         });

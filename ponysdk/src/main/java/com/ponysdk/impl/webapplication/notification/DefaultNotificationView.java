@@ -56,16 +56,16 @@ public class DefaultNotificationView extends LogConsolePanel implements Notifica
     public void addEventNotification(final BusinessEvent<?> event) {
         switch (event.getLevel()) {
             case INFO:
-                PNotificationManager.notify(windowID, notificationTypeRenderer.getWidget(event.getBusinessMessage()),
-                        Notification.HUMANIZED);
+                PNotificationManager.notify(window, notificationTypeRenderer.getWidget(event.getBusinessMessage()),
+                    Notification.HUMANIZED);
                 break;
             case WARNING:
-                PNotificationManager.notify(windowID, notificationTypeRenderer.getWidget(event.getBusinessMessage()),
-                        Notification.WARNING_MESSAGE);
+                PNotificationManager.notify(window, notificationTypeRenderer.getWidget(event.getBusinessMessage()),
+                    Notification.WARNING_MESSAGE);
                 break;
             case ERROR:
-                PNotificationManager.notify(windowID, notificationTypeRenderer.getWidget(event.getBusinessMessage()),
-                        Notification.ERROR_MESSAGE);
+                PNotificationManager.notify(window, notificationTypeRenderer.getWidget(event.getBusinessMessage()),
+                    Notification.ERROR_MESSAGE);
                 break;
             default:
                 break;

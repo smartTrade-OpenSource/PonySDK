@@ -367,7 +367,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     private void executeAddDomHandler(final ServerBinaryModel... binaryModels) {
         final ModelWriter writer = Txn.getWriter();
         writer.beginObject();
-        if (windowID != PWindow.getMain().getID()) writer.writeModel(ServerToClientModel.WINDOW_ID, windowID);
+        if (!PWindow.isMain(window)) writer.writeModel(ServerToClientModel.WINDOW_ID, window.getID());
         writer.writeModel(ServerToClientModel.TYPE_ADD_HANDLER, HandlerModel.HANDLER_DOM.getValue());
         writer.writeModel(ServerToClientModel.OBJECT_ID, ID);
         if (binaryModels != null) {

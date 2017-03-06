@@ -27,12 +27,7 @@ import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PTextBox;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
-import com.ponysdk.core.ui.basic.event.PSelectionEvent;
-import com.ponysdk.core.ui.basic.event.PSelectionHandler;
 import com.ponysdk.core.ui.rich.PBreadCrumbs;
-import com.ponysdk.core.ui.rich.PBreadCrumbs.ItemLevel;
 import com.ponysdk.core.ui.rich.PNotificationManager;
 
 public class BreadCrumbsPageActivity extends SamplePageActivity {
@@ -60,7 +55,7 @@ public class BreadCrumbsPageActivity extends SamplePageActivity {
 
         breadCrumbs.addSelectionHandler(event -> {
             level = event.getSelectedItem().getLevel();
-            PNotificationManager.showHumanizedNotification(getView().asWidget().getWindowID(), "Selected level : " + level);
+            PNotificationManager.showHumanizedNotification(getView().asWidget().getWindow(), "Selected level : " + level);
         });
 
         final PFlowPanel inputPanel = Element.newPFlowPanel();

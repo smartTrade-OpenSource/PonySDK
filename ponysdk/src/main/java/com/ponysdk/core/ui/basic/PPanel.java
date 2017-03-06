@@ -53,7 +53,7 @@ public abstract class PPanel extends PWidget implements HasPWidgets {
     protected void init0() {
         super.init0();
         for (final PWidget pWidget : this) {
-            pWidget.attach(windowID);
+            pWidget.attach(window);
         }
     }
 

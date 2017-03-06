@@ -191,7 +191,7 @@ public class WindowPageActivity extends SamplePageActivity implements PCloseHand
         final PWindow source = (PWindow) closeEvent.getSource();
         final boolean remove = windows.remove(source);
         if (remove) {
-            PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(), "Window #" + source.getID() + " closed.");
+            PNotificationManager.showTrayNotification(getView().asWidget().getWindow(), "Window #" + source.getID() + " closed.");
         }
     }
 }

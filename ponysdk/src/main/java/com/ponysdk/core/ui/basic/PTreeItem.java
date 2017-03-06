@@ -68,7 +68,7 @@ public class PTreeItem extends PObject {
     protected void init0() {
         super.init0();
         for (final PTreeItem item : children) {
-            item.attach(windowID);
+            item.attach(window);
         }
     }
 
@@ -120,7 +120,7 @@ public class PTreeItem extends PObject {
 
     final void setTree(final PTree tree) {
         this.tree = tree;
-        if (isRoot && tree.getWindowID() != PWindow.EMPTY_WINDOW_ID) tree.saveAdd(tree.getID(), ID);
+        if (isRoot && tree.getWindow() != null) tree.saveAdd(tree.getID(), ID);
         if (widget != null) setWidget();
     }
 
@@ -132,7 +132,7 @@ public class PTreeItem extends PObject {
         children.add(beforeIndex, item);
         item.setTree(tree);
         item.saveAdd(item.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, beforeIndex));
-        item.attach(windowID);
+        item.attach(window);
         return item;
     }
 
@@ -140,7 +140,7 @@ public class PTreeItem extends PObject {
         children.add(item);
         item.setTree(tree);
         item.saveAdd(item.getID(), ID);
-        item.attach(windowID);
+        item.attach(window);
         return item;
     }
 

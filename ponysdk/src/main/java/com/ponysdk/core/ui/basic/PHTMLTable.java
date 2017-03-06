@@ -59,7 +59,7 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
     protected void init0() {
         super.init0();
         for (final PWidget pWidget : cellByWidget.keySet()) {
-            pWidget.attach(windowID);
+            pWidget.attach(window);
         }
     }
 
@@ -221,7 +221,7 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
             adopt(widget);
 
             // Physical attach.
-            widget.attach(windowID);
+            widget.attach(window);
             widget.saveAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.ROW, row),
                 new ServerBinaryModel(ServerToClientModel.COLUMN, column));
 

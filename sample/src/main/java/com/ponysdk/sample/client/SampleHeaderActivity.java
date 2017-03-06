@@ -28,13 +28,10 @@ import com.ponysdk.core.ui.basic.PAnchor;
 import com.ponysdk.core.ui.basic.PDialogBox;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PPopupPanel;
-import com.ponysdk.core.ui.basic.PPopupPanel.PPositionCallback;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
-import com.ponysdk.core.ui.basic.event.PCloseEvent;
-import com.ponysdk.core.ui.basic.event.PCloseHandler;
 import com.ponysdk.core.ui.rich.POptionPane;
 import com.ponysdk.core.ui.rich.POptionPane.PActionHandler;
 import com.ponysdk.core.ui.rich.POptionPane.POption;
@@ -57,7 +54,7 @@ public class SampleHeaderActivity extends HeaderActivity implements PClickHandle
         optionsAnchor.ensureDebugId("options_anchor");
         // optionsAnchor.addStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU);
 
-        popup = Element.newPPopupPanel(getView().asWidget().getWindowID());
+        popup = Element.newPPopupPanel(getView().asWidget().getWindow());
         // popup.addStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_POPUP);
 
         final PVerticalPanel panel = Element.newPVerticalPanel();
@@ -82,7 +79,7 @@ public class SampleHeaderActivity extends HeaderActivity implements PClickHandle
                 // optionsAnchor.removeStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_SELECTED);
                 popup.hide();
 
-                final POptionPane optionPane = POptionPane.showConfirmDialog(getView().asWidget().getWindowID(), new PActionHandler() {
+                final POptionPane optionPane = POptionPane.showConfirmDialog(getView().asWidget().getWindow(), new PActionHandler() {
 
                     @Override
                     public void onAction(final PDialogBox dialogBox, final String option) {

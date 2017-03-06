@@ -81,7 +81,7 @@ public class CheckBoxPageActivity extends SamplePageActivity implements PValueCh
     @Override
     public void onValueChange(final PValueChangeEvent<Boolean> event) {
         final PCheckBox checkBox = (PCheckBox) event.getSource();
-        PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
+        PNotificationManager.showTrayNotification(getView().asWidget().getWindow(),
             checkBox.getText() + (event.getData() ? " is checked" : " is unchecked"));
     }
 }

@@ -26,8 +26,6 @@ package com.ponysdk.sample.client.page;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PListBox;
-import com.ponysdk.core.ui.basic.event.PChangeEvent;
-import com.ponysdk.core.ui.basic.event.PChangeHandler;
 import com.ponysdk.core.ui.rich.PNotificationManager;
 
 public class ListBoxContainsEmptyItemPageActivity extends SamplePageActivity {
@@ -52,7 +50,7 @@ public class ListBoxContainsEmptyItemPageActivity extends SamplePageActivity {
 
         listBox.addChangeHandler(event -> {
             if (listBox.getSelectedIndex() != -1) {
-                PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
+                PNotificationManager.showTrayNotification(getView().asWidget().getWindow(),
                     "Item selected : " + listBox.getSelectedItem());
             }
         });
@@ -67,7 +65,7 @@ public class ListBoxContainsEmptyItemPageActivity extends SamplePageActivity {
         multiListBox.addItem("Mustang");
         multiListBox.addItem("Altai horse");
 
-        multiListBox.addChangeHandler(event -> PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
+        multiListBox.addChangeHandler(event -> PNotificationManager.showTrayNotification(getView().asWidget().getWindow(),
             "Item selected : " + multiListBox.getSelectedItems()));
 
         panel.add(listBox);

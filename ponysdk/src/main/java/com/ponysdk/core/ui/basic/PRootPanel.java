@@ -39,10 +39,7 @@ import com.ponysdk.core.ui.main.EntryPoint;
  */
 public class PRootPanel extends PAbsolutePanel {
 
-    private String id;
-
-    PRootPanel() {
-    }
+    private final String id;
 
     PRootPanel(final String id) {
         this.id = id;

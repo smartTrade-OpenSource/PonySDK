@@ -27,12 +27,8 @@ import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PCheckBox;
 import com.ponysdk.core.ui.basic.PHTML;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.basic.event.PContextMenuEvent;
 import com.ponysdk.core.ui.basic.event.PContextMenuHandler;
-import com.ponysdk.core.ui.basic.event.PDoubleClickEvent;
-import com.ponysdk.core.ui.basic.event.PDoubleClickHandler;
 import com.ponysdk.core.ui.basic.event.PMouseEvent;
 import com.ponysdk.core.ui.model.PEventType;
 import com.ponysdk.core.ui.rich.PNotificationManager;
@@ -62,7 +58,8 @@ public class HTMLPageActivity extends SamplePageActivity {
         final PHTML htmlWithContextMenu = Element.newPHTML(
             "<span style='cursor: pointer;border: 1px solid black;color:white;background-color:gray;margin:5px;padding:10px'>context menu on me!</span> using HTML and CSS");
         htmlWithContextMenu.preventEvent(PEventType.ONCONTEXTMENU);
-        htmlWithContextMenu.addDomHandler((PContextMenuHandler) event -> PNotificationManager.showHumanizedNotification(getView().asWidget().getWindowID(), "Context menu triggered"), PContextMenuEvent.TYPE);
+        htmlWithContextMenu.addDomHandler((PContextMenuHandler) event -> PNotificationManager
+            .showHumanizedNotification(getView().asWidget().getWindow(), "Context menu triggered"), PContextMenuEvent.TYPE);
 
         final PCheckBox checkBox = Element.newPCheckBox();
         checkBox.setHTML("<font color='blue'>Pony-SDK</font>");
@@ -91,6 +88,6 @@ public class HTMLPageActivity extends SamplePageActivity {
     }
 
     protected void logEvent(final String message, final PMouseEvent<?> clickEvent) {
-        PNotificationManager.showHumanizedNotification(getView().asWidget().getWindowID(), message);
+        PNotificationManager.showHumanizedNotification(getView().asWidget().getWindow(), message);
     }
 }

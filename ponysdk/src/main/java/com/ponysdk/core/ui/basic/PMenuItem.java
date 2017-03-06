@@ -83,7 +83,7 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
     @Override
     protected void init0() {
         super.init0();
-        if (subMenu != null) subMenu.attach(windowID);
+        if (subMenu != null) subMenu.attach(window);
     }
 
     @Override
@@ -142,7 +142,7 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
     private void setSubMenu(final PMenuBar subMenu) {
         this.subMenu = subMenu;
         subMenu.saveAdd(subMenu.getID(), ID);
-        subMenu.attach(windowID);
+        subMenu.attach(window);
     }
 
     public Runnable getCmd() {

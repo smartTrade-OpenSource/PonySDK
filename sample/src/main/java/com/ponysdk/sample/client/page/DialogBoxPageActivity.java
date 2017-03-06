@@ -61,7 +61,7 @@ public class DialogBoxPageActivity extends SamplePageActivity {
         addLabel("Show a basic popup");
         final PButton anchor2 = addButton("Open");
         anchor2.addClickHandler(clickEvent -> {
-            final PPopupPanel popupPanel = Element.newPPopupPanel(getView().asWidget().getWindowID());
+            final PPopupPanel popupPanel = Element.newPPopupPanel(getView().asWidget().getWindow());
             final PVerticalPanel content = Element.newPVerticalPanel();
             final PButton closeButton = Element.newPButton("Close");
             closeButton.addClickHandler(new PClickHandler() {
@@ -83,7 +83,7 @@ public class DialogBoxPageActivity extends SamplePageActivity {
         addLabel("A draggable popup");
         final PButton anchor3 = addButton("Open");
         anchor3.addClickHandler(clickEvent -> {
-            final PClosableDialogBox dialogBox = new PClosableDialogBox(getView().asWidget().getWindowID(), "Custom caption");
+            final PClosableDialogBox dialogBox = new PClosableDialogBox(getView().asWidget().getWindow(), "Custom caption");
             dialogBox.setDraggable(true);
             dialogBox.setContent(Element.newPLabel("Content of a popup"));
             dialogBox.center();
@@ -95,7 +95,8 @@ public class DialogBoxPageActivity extends SamplePageActivity {
 
             @Override
             public void onClick(final PClickEvent clickEvent) {
-                final POptionPane dialodBox = POptionPane.showConfirmDialog(getView().asWidget().getWindowID(), (dialogBox, option) -> dialogBox.hide(), "Your custom text");
+                final POptionPane dialodBox = POptionPane.showConfirmDialog(getView().asWidget().getWindow(),
+                    (dialogBox, option) -> dialogBox.hide(), "Your custom text");
 
                 dialodBox.getDialogBox().addCloseHandler(new PCloseHandler() {
 
@@ -115,7 +116,7 @@ public class DialogBoxPageActivity extends SamplePageActivity {
 
             @Override
             public void onClick(final PClickEvent clickEvent) {
-                POptionPane.showConfirmDialog(getView().asWidget().getWindowID(), new PActionHandler() {
+                POptionPane.showConfirmDialog(getView().asWidget().getWindow(), new PActionHandler() {
 
                     @Override
                     public void onAction(final PDialogBox dialogBox, final String option) {
@@ -130,7 +131,7 @@ public class DialogBoxPageActivity extends SamplePageActivity {
 
         addLabel("PConfirmDialogBox");
         final PButton anchor6 = addButton("Open");
-        anchor6.addClickHandler(clickEvent -> PConfirmDialog.show(getView().asWidget().getWindowID(), "Question ?",
+        anchor6.addClickHandler(clickEvent -> PConfirmDialog.show(getView().asWidget().getWindow(), "Question ?",
             Element.newPLabel("This is a confirm dialog box")));
 
         examplePanel.setWidget(layout);

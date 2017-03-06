@@ -88,7 +88,7 @@ public class WeakHashMap implements Map<Integer, PObject> {
         expungeStaleEntries();
         final WeakReference<PObject> weakReference = new WeakReference<>(value, queue);
         referenceByObjectID.put(objectID, weakReference);
-        windowIDbyObjectID.put(objectID, value.getWindowID());
+        windowIDbyObjectID.put(objectID, value.getWindow().getID());
         objectIDByReferences.put(weakReference, objectID);
 
         if (log.isDebugEnabled()) log.debug("Registering object: " + value);
