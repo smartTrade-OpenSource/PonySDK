@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 
 public abstract class AbstractEventBus implements EventBus {
 
-    private static final Logger log = LoggerFactory.getLogger(RootEventBus.class);
+    private static final Logger log = LoggerFactory.getLogger(AbstractEventBus.class);
 
     protected final Set<BroadcastEventHandler> broadcastHandlerManager = new HashSet<>();
 
@@ -134,7 +134,7 @@ public abstract class AbstractEventBus implements EventBus {
 
     protected void doFire(final Event<? extends EventHandler> event, final Object source) {
         if (source != null) event.setSource(source);
-        
+
         eventQueue.add(event);
 
         if (firing) return;

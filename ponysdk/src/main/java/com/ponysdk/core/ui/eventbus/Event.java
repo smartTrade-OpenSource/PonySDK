@@ -62,7 +62,7 @@ public abstract class Event<H extends EventHandler> {
 
     @Override
     public String toString() {
-        return "An eventbus type";
+        return getClass().getSimpleName() + "#" + eventID + " with data : " + data;
     }
 
     public long getEventID() {

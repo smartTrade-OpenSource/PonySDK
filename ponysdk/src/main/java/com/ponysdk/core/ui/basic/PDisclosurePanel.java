@@ -59,7 +59,7 @@ import com.ponysdk.core.ui.basic.event.POpenHandler;
  * .gwt-DisclosurePanel-open .header { ... }
  * </p>
  */
-public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimation {
+public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimation, PAcceptsOneWidget {
 
     private final List<PCloseHandler> closeHandlers = new ArrayList<>();
     private final List<POpenHandler> openHandlers = new ArrayList<>();
@@ -108,6 +108,11 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
 
     public PWidget getContent() {
         return content;
+    }
+
+    @Override
+    public void setWidget(final IsPWidget w) {
+        setContent(w.asWidget());
     }
 
     public void setContent(final PWidget w) {
@@ -196,4 +201,5 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
         this.animationEnabled = animationEnabled;
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.ANIMATION, animationEnabled));
     }
+
 }

@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.core.weak;
+package com.ponysdk.core.server.application;
 
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
@@ -40,9 +40,9 @@ import com.ponysdk.core.ui.basic.PObject;
 import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.writer.ModelWriter;
 
-public class WeakHashMap implements Map<Integer, PObject> {
+public class PObjectWeakHashMap implements Map<Integer, PObject> {
 
-    private final Logger log = LoggerFactory.getLogger(WeakHashMap.class);
+    private final Logger log = LoggerFactory.getLogger(PObjectWeakHashMap.class);
 
     private final ReferenceQueue<PObject> queue = new ReferenceQueue<>();
 

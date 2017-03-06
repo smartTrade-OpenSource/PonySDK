@@ -50,17 +50,13 @@ public abstract class AbstractApplicationManager {
             final Txn txn = Txn.get();
             txn.begin(txnContext);
             try {
-
-                final int receivedSeqNum = txnContext.getSeqNum();
-                uiContext.updateIncomingSeqNum(receivedSeqNum);// ??
+                uiContext.notifyMessageReceived();
 
                 final EntryPoint entryPoint = initializeUIContext(uiContext);
 
                 final String historyToken = txnContext.getHistoryToken();
 
-                if (historyToken != null && !historyToken.isEmpty()) {
-                    uiContext.getHistory().newItem(historyToken, false);
-                }
+                if (historyToken != null && !historyToken.isEmpty()) uiContext.getHistory().newItem(historyToken, false);
 
                 entryPoint.start(uiContext);
 
