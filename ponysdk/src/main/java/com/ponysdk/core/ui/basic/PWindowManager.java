@@ -27,14 +27,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ponysdk.core.server.application.UIContext;
 
 public class PWindowManager {
-
-    private static final Logger log = LoggerFactory.getLogger(PWindowManager.class);
 
     private static final String ROOT = "WindowManager";
 
@@ -66,8 +61,8 @@ public class PWindowManager {
         get().unregisterWindow0(window);
     }
 
-    public static final Collection<Integer> getWindowIds() {
-        return get().registeredWindows.keySet();
+    public static final Collection<PWindow> getWindowIds() {
+        return get().registeredWindows.values();
     }
 
     private void registerWindow0(final PWindow window) {
