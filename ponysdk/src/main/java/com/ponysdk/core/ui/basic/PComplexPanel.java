@@ -45,6 +45,34 @@ public abstract class PComplexPanel extends PPanel {
     }
 
     @Override
+    protected boolean attach(final PWindow window) {
+        if (this.window == null && window != null) {
+            this.window = window;
+            init();
+            children.forEach(child -> attach(child));
+            return true;
+        } else if (this.window != window) {
+            throw new IllegalAccessError(
+                "Widget already attached to an other window, current window : #" + this.window + ", new window : #" + window);
+        }
+
+        return false;
+    }
+
+    private void attach(final PWidget child) {
+        attach(child, null);
+    }
+
+    private void attach(final PWidget child, final ServerBinaryModel binaryModel) {
+        child.attach(window);
+        if (binaryModel != null) {
+            child.saveAdd(child.getID(), ID, binaryModel);
+        } else {
+            child.saveAdd(child.getID(), ID);
+        }
+    }
+
+    @Override
     public void add(final PWidget child) {
         assertNotMe(child);
 
@@ -52,8 +80,7 @@ public abstract class PComplexPanel extends PPanel {
             child.removeFromParent();
             children.add(child);
             adopt(child);
-            child.attach(window);
-            child.saveAdd(child.getID(), ID);
+            if (isInitialized()) attach(child);
         } else {
             if (initialized) {
                 throw new IllegalAccessError(
@@ -75,11 +102,9 @@ public abstract class PComplexPanel extends PPanel {
             adopt(child);
 
             if (children.size() - 1 == beforeIndex) {
-                child.attach(window);
-                child.saveAdd(child.getID(), ID);
+                attach(child);
             } else {
-                child.attach(window);
-                child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, beforeIndex));
+                attach(child, new ServerBinaryModel(ServerToClientModel.INDEX, beforeIndex));
             }
         } else {
             throw new IllegalAccessError("Widget " + child + " already attached to an other window, current window : "
