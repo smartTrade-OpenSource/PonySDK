@@ -69,7 +69,7 @@ public abstract class PObject implements PDestroyEvent.HasHandler {
     protected abstract WidgetType getWidgetType();
 
     protected boolean attach(final PWindow window) {
-        if (this.window == null) {
+        if (this.window == null && window != null) {
             this.window = window;
             init();
             return true;
