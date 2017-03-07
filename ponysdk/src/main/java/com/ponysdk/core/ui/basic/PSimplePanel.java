@@ -64,6 +64,13 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
     }
 
     @Override
+    protected boolean attach(final PWindow window) {
+        final boolean attached = super.attach(window);
+        widget.attach(window);
+        return attached;
+    }
+
+    @Override
     public boolean remove(final PWidget w) {
         // Validate.
         if (widget == null || widget != w) {
@@ -99,12 +106,10 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
         // Logical attach.
         widget = w;
 
-        if (w != null) {
-            // Physical attach.
-            w.saveAdd(w.getID(), ID);
-            w.attach(window);
-            adopt(w);
-        }
+        adopt(w);
+
+        if (isInitialized()) w.attach(window);
+        w.saveAdd(w.getID(), ID);
     }
 
     @Override

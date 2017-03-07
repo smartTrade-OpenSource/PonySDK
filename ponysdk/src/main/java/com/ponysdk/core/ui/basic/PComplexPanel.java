@@ -100,11 +100,12 @@ public abstract class PComplexPanel extends PPanel {
 
             children.insert(child, beforeIndex);
             adopt(child);
-
-            if (children.size() - 1 == beforeIndex) {
-                attach(child);
-            } else {
-                attach(child, new ServerBinaryModel(ServerToClientModel.INDEX, beforeIndex));
+            if (isInitialized()) {
+                if (children.size() - 1 == beforeIndex) {
+                    attach(child);
+                } else {
+                    attach(child, new ServerBinaryModel(ServerToClientModel.INDEX, beforeIndex));
+                }
             }
         } else {
             throw new IllegalAccessError("Widget " + child + " already attached to an other window, current window : "
