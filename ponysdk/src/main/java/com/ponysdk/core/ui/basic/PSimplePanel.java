@@ -50,8 +50,8 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
 
     @Override
     public void add(final PWidget w) {
-        log.error("Use setWidget(IsWidget w)");
-        throw new UnsupportedOperationException("Use setWidget(IsWidget w)");
+        if (widget == null) setWidget(w);
+        else log.error("Can only contain one widget to a PSimplePanel, remove the previous one or use a PComplexPanel");
     }
 
     public PWidget getWidget() {
@@ -61,13 +61,6 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
     @Override
     public void setWidget(final IsPWidget w) {
         setWidget(w.asWidget());
-    }
-
-    @Override
-    protected boolean attach(final PWindow window) {
-        final boolean attached = super.attach(window);
-        widget.attach(window);
-        return attached;
     }
 
     @Override

@@ -49,7 +49,6 @@ public abstract class PComplexPanel extends PPanel {
         if (this.window == null && window != null) {
             this.window = window;
             init();
-            children.forEach(child -> attach(child));
             return true;
         } else if (this.window != window) {
             throw new IllegalAccessError(
@@ -57,19 +56,6 @@ public abstract class PComplexPanel extends PPanel {
         }
 
         return false;
-    }
-
-    private void attach(final PWidget child) {
-        attach(child, null);
-    }
-
-    private void attach(final PWidget child, final ServerBinaryModel binaryModel) {
-        child.attach(window);
-        if (binaryModel != null) {
-            child.saveAdd(child.getID(), ID, binaryModel);
-        } else {
-            child.saveAdd(child.getID(), ID);
-        }
     }
 
     @Override
@@ -80,7 +66,8 @@ public abstract class PComplexPanel extends PPanel {
             child.removeFromParent();
             children.add(child);
             adopt(child);
-            if (isInitialized()) attach(child);
+            if (isInitialized()) child.attach(window);
+            child.saveAdd(child.getID(), ID);
         } else {
             if (initialized) {
                 throw new IllegalAccessError(
@@ -100,13 +87,9 @@ public abstract class PComplexPanel extends PPanel {
 
             children.insert(child, beforeIndex);
             adopt(child);
-            if (isInitialized()) {
-                if (children.size() - 1 == beforeIndex) {
-                    attach(child);
-                } else {
-                    attach(child, new ServerBinaryModel(ServerToClientModel.INDEX, beforeIndex));
-                }
-            }
+            if (isInitialized()) child.attach(window);
+            if (children.size() - 1 == beforeIndex) child.saveAdd(child.getID(), ID);
+            else child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, beforeIndex));
         } else {
             throw new IllegalAccessError("Widget " + child + " already attached to an other window, current window : "
                     + child.getWindow() + ", new window : " + window);
