@@ -186,9 +186,7 @@ public abstract class PObject implements PDestroyEvent.HasHandler {
     }
 
     protected Queue<Runnable> safeStackedInstructions() {
-        if (stackedInstructions == null) {
-            stackedInstructions = new LinkedList<>();
-        }
+        if (stackedInstructions == null) stackedInstructions = new LinkedList<>();
         return stackedInstructions;
     }
 

@@ -69,15 +69,18 @@ public class PWindow extends PObject {
 
     @Override
     void init() {
+        if (initialized) return;
+
         if (stackedInstructions != null) {
             while (!stackedInstructions.isEmpty()) {
                 stackedInstructions.poll().run();
             }
         }
-        if (attachListener != null) attachListener.onAttach();
+
         initialized = true;
 
         panelByZone.forEach((key, value) -> value.attach(this));
+        if (attachListener != null) attachListener.onAttach();
     }
 
     public static PWindow getMain() {
@@ -203,7 +206,7 @@ public class PWindow extends PObject {
         if (rootPanel == null) {
             rootPanel = new PRootPanel(zoneID);
             panelByZone.put(zoneID, rootPanel);
-            rootPanel.attach(this);
+            if (isInitialized()) rootPanel.attach(this);
         }
         return rootPanel;
     }
@@ -243,12 +246,9 @@ public class PWindow extends PObject {
         return getMain() == window;
     }
 
-    public static class TargetAttribut {
-
-        static final String BLANK = "_blank";
-        static final String PARENT = "_parent";
-        static final String SELF = "_self";
-        static final String TOP = "_top";
+    @Override
+    public String toString() {
+        return super.toString() + ", name = " + name;
     }
 
 }
