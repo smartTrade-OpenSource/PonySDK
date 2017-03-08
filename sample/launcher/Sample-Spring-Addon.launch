@@ -55,5 +55,5 @@
 <booleanAttribute key="org.eclipse.jdt.launching.DEFAULT_CLASSPATH" value="false"/>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.ponysdk.impl.main.MainSpring"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="sample"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-server&#13; -Xms32m -Xmx128m -XX:+UseG1GC -XX:+PrintStringTableStatistics"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-server&#13; -Xms32m -Xmx512m -XX:+UseG1GC -XX:+PrintStringTableStatistics"/>
 </launchConfiguration>

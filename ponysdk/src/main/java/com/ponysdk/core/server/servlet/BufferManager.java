@@ -24,8 +24,6 @@
 package com.ponysdk.core.server.servlet;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -39,52 +37,42 @@ public class BufferManager {
 
     private static final Logger log = LoggerFactory.getLogger(BufferManager.class);
 
-    private static final int NUMBER_OF_BUFFERS = 50;
-    private static final int MAX_BUFFERS = 500;
-    private static final int DEFAULT_BUFFER_SIZE = 1024000;
+    private static final int BUFFERS_COUNT = 500;
+    private static final int BUFFER_SIZE = 1024000;
 
-    private final BlockingQueue<ByteBuffer> bufferPool = new LinkedBlockingQueue<>(MAX_BUFFERS);
-    private final List<ByteBuffer> buffers = new ArrayList<>(MAX_BUFFERS);
+    private final BlockingQueue<ByteBuffer> bufferPool = new LinkedBlockingQueue<>(BUFFERS_COUNT);
 
     public BufferManager() {
         log.info("Initializing Buffer allocation ...");
 
-        for (int i = 0; i < NUMBER_OF_BUFFERS; i++) {
+        for (int i = 0; i < BUFFERS_COUNT; i++) {
             bufferPool.add(createBuffer());
         }
-        buffers.addAll(bufferPool);
 
-        log.info("Buffer allocation initialized {}", DEFAULT_BUFFER_SIZE * bufferPool.size());
+        log.info("Buffer allocation initialized {}", BUFFER_SIZE * bufferPool.size());
     }
 
     public ByteBuffer allocate() {
         ByteBuffer buffer = bufferPool.poll();
 
         if (buffer == null) {
-            if (buffers.size() < MAX_BUFFERS) {
-                log.debug("No more available buffer (size : {}), allocating a new one", buffers.size());
-                buffer = createBuffer();
-                buffers.add(buffer);
-            } else {
-                log.warn("No more available buffer, max allocation reached ({}), waiting an available one", MAX_BUFFERS);
-                try {
-                    buffer = bufferPool.poll(25, TimeUnit.SECONDS);
-                    if (buffer == null) throw new IllegalStateException("No more buffer available");
-                } catch (final InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    throw new IllegalStateException(e);
-                }
+            log.warn("No more available buffer, max allocation reached ({}), waiting an available one", BUFFERS_COUNT);
+            try {
+                buffer = bufferPool.poll(25, TimeUnit.SECONDS);
+                if (buffer == null) throw new IllegalStateException("No more buffer available");
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new IllegalStateException(e);
             }
         }
 
         // Verify the buffer is good to be used
-        if (buffer.position() == 0 && buffer.limit() == DEFAULT_BUFFER_SIZE) {
+        if (buffer.position() == 0 && buffer.limit() == BUFFER_SIZE) {
             return buffer;
         } else {
             // Discard this buffer, let it be gc
             log.warn("A zombie buffer has been detected, it will be eliminated",
                 new IllegalStateException("Zombie buffer detected : " + buffer.toString()));
-            buffers.remove(buffer);
             return allocate();
         }
     }
@@ -118,7 +106,7 @@ public class BufferManager {
     }
 
     private static final ByteBuffer createBuffer() {
-        return ByteBuffer.allocateDirect(DEFAULT_BUFFER_SIZE);
+        return ByteBuffer.allocateDirect(BUFFER_SIZE);
     }
 
 }
