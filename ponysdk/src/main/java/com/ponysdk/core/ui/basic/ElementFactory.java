@@ -183,6 +183,9 @@ public interface ElementFactory {
 
     public PVerticalPanel newPVerticalPanel();
 
-    public PWindow newPWindow(boolean relative, final String url, final String name, final String features);
+    public PWindow newPWindow(final boolean relative, final String url, final String name, final String features);
+
+    public PWindow newPWindow(final PWindow parentWindow, final boolean relative, final String url, final String name,
+                              final String features);
 
 }

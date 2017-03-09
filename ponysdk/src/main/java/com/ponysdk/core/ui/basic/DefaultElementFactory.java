@@ -419,4 +419,10 @@ public class DefaultElementFactory implements ElementFactory {
         return new PWindow(relative, url, name, features);
     }
 
+    @Override
+    public PWindow newPWindow(final PWindow parentWindow, final boolean relative, final String url, final String name,
+                              final String features) {
+        return new PWindow(parentWindow, relative, url, name, features);
+    }
+
 }

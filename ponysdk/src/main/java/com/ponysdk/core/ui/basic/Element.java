@@ -379,12 +379,29 @@ public class Element {
         return f.newPVerticalPanel();
     }
 
+    public static final PWindow newPWindow(final String name, final String features) {
+        return f.newPWindow(true, null, name, features);
+    }
+
     public static final PWindow newPWindow(final String url, final String name, final String features) {
         return f.newPWindow(false, url, name, features);
     }
 
     public static final PWindow newPWindow(final boolean relative, final String url, final String name, final String features) {
         return f.newPWindow(relative, url, name, features);
+    }
+
+    public static final PWindow newPWindow(final PWindow parentWindow, final String name, final String features) {
+        return f.newPWindow(parentWindow, true, null, name, features);
+    }
+
+    public static final PWindow newPWindow(final PWindow parentWindow, final String url, final String name, final String features) {
+        return f.newPWindow(parentWindow, false, url, name, features);
+    }
+
+    public static final PWindow newPWindow(final PWindow parentWindow, final boolean relative, final String url, final String name,
+                                           final String features) {
+        return f.newPWindow(parentWindow, relative, url, name, features);
     }
 
     public static final PElement newA() {

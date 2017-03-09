@@ -46,6 +46,7 @@ public class PWindow extends PObject {
 
     private Set<POpenHandler> openHandlers;
     private Set<PCloseHandler> closeHandlers;
+    private Set<PWindow> subWindows;
 
     private String url;
     private String name;
@@ -65,6 +66,11 @@ public class PWindow extends PObject {
         this.name = name;
         this.features = features;
         this.relative = relative;
+    }
+
+    protected PWindow(final PWindow parentWindow, final boolean relative, final String url, final String name, final String features) {
+        this(relative, url, name, features);
+        if (parentWindow != null) parentWindow.addWindow(this);
     }
 
     @Override
@@ -128,6 +134,7 @@ public class PWindow extends PObject {
         if (!initialized) {
             final WebsocketEncoder parser = Txn.get().getEncoder();
             parser.beginObject();
+            if (window != PWindow.getMain()) parser.encode(ServerToClientModel.WINDOW_ID, window.getID());
             parser.encode(ServerToClientModel.TYPE_CREATE, ID);
             parser.encode(ServerToClientModel.WIDGET_TYPE, getWidgetType().getValue());
             enrichOnInit(parser);
@@ -168,6 +175,10 @@ public class PWindow extends PObject {
             }
         } else if (event.containsKey(ClientToServerModel.HANDLER_CLOSE.toStringValue())) {
             PWindowManager.unregisterWindow(this);
+            if (subWindows != null) {
+                subWindows.forEach(window -> window.close());
+                subWindows.clear();
+            }
             if (closeHandlers != null) {
                 final PCloseEvent e = new PCloseEvent(this);
                 closeHandlers.forEach(handler -> handler.onClose(e));
@@ -244,6 +255,16 @@ public class PWindow extends PObject {
 
     public static boolean isMain(final PWindow window) {
         return getMain() == window;
+    }
+
+    private void addWindow(final PWindow window) {
+        if (subWindows == null) subWindows = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        window.addCloseHandler(event -> removeWindow(window));
+        subWindows.add(window);
+    }
+
+    private Object removeWindow(final PWindow window) {
+        return subWindows != null && subWindows.remove(window);
     }
 
     @Override

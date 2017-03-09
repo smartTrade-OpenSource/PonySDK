@@ -31,7 +31,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.PScheduler;
-import com.ponysdk.core.server.concurrent.PScheduler.UIRunnable;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PAbsolutePanel;
 import com.ponysdk.core.ui.basic.PAnchor;
@@ -39,7 +38,6 @@ import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PCookies;
 import com.ponysdk.core.ui.basic.PDateBox;
 import com.ponysdk.core.ui.basic.PDockLayoutPanel;
-import com.ponysdk.core.ui.basic.PElement;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PListBox;
@@ -78,7 +76,7 @@ import com.ponysdk.sample.client.page.addon.SelectizeAddon;
 
 public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
-    private PLabel child2;
+    private PLabel mainLabel;
 
     // HighChartsStackedColumnAddOn highChartsStackedColumnAddOn;
     int a = 0;
@@ -87,187 +85,29 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     public void start(final UIContext uiContext) {
         uiContext.setClientDataOutput((object, instruction) -> System.err.println(object + " : " + instruction));
 
-        final PWindow a = Element.newPWindow(true, null, "Window 2", "resizable=yes,location=0,status=0,scrollbars=0");
-        a.open();
+        mainLabel = Element.newPLabel("Can be modified by anybody");
+        PWindow.getMain().add(mainLabel);
 
-        final PLabel b = Element.newPLabel("Test");
-        a.add(b);
-
-        final AtomicInteger i = new AtomicInteger();
-        PScheduler.scheduleWithFixedDelay(() -> b.setText(i.incrementAndGet() + ""), Duration.ofSeconds(1), Duration.ofSeconds(1));
-
-        final DataGrid<Integer> grid = new DataGrid<>();
-
-        for (int cpt = 0; cpt < 20; cpt++) {
-            final ColumnDescriptor<Integer> column = new ColumnDescriptor<>();
-            final PAnchor anchor = Element.newPAnchor("Header " + i.incrementAndGet());
-            anchor.addClickHandler(e -> grid.removeColumn(column));
-            column.setCellRenderer(new PLabelCellRenderer<>(from -> a + ""));
-            column.setHeaderRenderer(() -> anchor);
-            grid.addColumnDescriptor(column);
-        }
-        final PTextBox textBox = Element.newPTextBox();
-
-        final PButton add = Element.newPButton("add");
-        add.addClickHandler(e -> {
-            grid.setData(Integer.valueOf(textBox.getText()));
-        });
-
-        PWindow.getMain().add(add);
-
-        PWindow.getMain().add(textBox);
-        PWindow.getMain().add(grid);
-
-        testEvent();
-
-        /**
-         * PScheduler.scheduleAtFixedRate(() -> {
-         * grid.setData((int) (Math.random() * 50));
-         * grid.removeData((int) (Math.random() * 50));
-         * grid.removeColumn(grid.getColumns().get((int) (Math.random() * grid.getColumns().size() -
-         * 1)));
-         *
-         * final ColumnDescriptor<Integer> column = new ColumnDescriptor<>();
-         * final PAnchor anchor = new PAnchor("Header " + id.incrementAndGet());
-         * anchor.addClickHandler(click -> grid.removeColumn(column));
-         * column.setCellRenderer(new PLabelCellRenderer<>(from -> (int) (Math.random() * 1000) +
-         * ""));
-         * column.setHeaderRenderer(() -> anchor);
-         * grid.addColumnDescriptor(column);
-         * }, Duration.ofMillis(2000));
-         **/
-
-        //final PWindow a = new PWindow(null, "Window 2", "resizable=yes,location=0,status=0,scrollbars=0");
-        //a.open();
-
-        //final PLabel b = new PLabel();
-        //a.add(b);
-
-        //        final AtomicInteger i = new AtomicInteger();
-        //        PScheduler.scheduleWithFixedDelay(() -> {
-        //            b.setText(i.incrementAndGet() + "");
-        //        } , Duration.ofSeconds(1), Duration.ofSeconds(1));
-        //
-        //        testUIDelegator();
-
-        //createGrid();
+        createWindow().open();
 
         if (true) return;
 
-        // final LoggerAddOn addon = createPAddOn();
-        // addon.attach(PWindow.getMain());
+        testNewEvent();
 
-        // System.err.println(addon);
+        testUIDelegator();
 
-        // final PElementAddOn elementAddOn = new PElementAddOn();
-        // elementAddOn.setInnerText("Coucou");
-        // flowPanel.add(elementAddOn);
+        testNewGrid();
 
-        // highChartsStackedColumnAddOn = new HighChartsStackedColumnAddOn();
-        // PWindow.getMain().add(highChartsStackedColumnAddOn);
-        // highChartsStackedColumnAddOn.setSeries("");
+        PWindow.getMain().add(createGrid());
 
-        // final HighChartsStackedColumnAddOn h2 = new
-        // HighChartsStackedColumnAddOn();
-        // a.add(h2);
-        // h2.setSeries("");
-        // final PElementAddOn elementAddOn2 = new PElementAddOn();
-        // elementAddOn2.setInnerText("Coucou dans window");
-        // a.add(elementAddOn2);
-
-        final SelectizeAddon selectizeAddon = new SelectizeAddon();
-        selectizeAddon.text("test");
-        PWindow.getMain().add(selectizeAddon);
-
-        final PRadioButton buy = Element.newPRadioButton("Buy");
-        final PRadioButton sell = Element.newPRadioButton("Sell");
-        buy.addValueChangeHandler((event) -> selectizeAddon.selectBuy(event.getData()));
-        sell.addValueChangeHandler((event) -> selectizeAddon.selectSell(event.getData()));
-
-        PWindow.getMain().add(buy);
-        PWindow.getMain().add(sell);
-
-        final PElement label1 = Element.newDiv();
-        final PElement label2 = Element.newDiv();
-        final PElement label3 = Element.newDiv();
-        final PElement label4 = Element.newDiv();
-        final PElement label5 = Element.newDiv();
-        final PElement label6 = Element.newDiv();
-        final PElement label7 = Element.newDiv();
-        final PElement label8 = Element.newDiv();
-        final PElement label9 = Element.newDiv();
-        final PElement label10 = Element.newDiv();
-        final PElement label11 = Element.newDiv();
-        final PElement label12 = Element.newDiv();
-        final PElement label13 = Element.newDiv();
-        final PElement label14 = Element.newDiv();
-        final PElement label15 = Element.newDiv();
-        final PElement label16 = Element.newDiv();
-        final PElement label17 = Element.newDiv();
-        final PElement label18 = Element.newDiv();
-        final PElement label19 = Element.newDiv();
-        final PElement label20 = Element.newDiv();
-
-        // flowPanel.add(label1);
-        // flowPanel.add(label2);
-        // flowPanel.add(label3);
-        // flowPanel.add(label4);
-        // flowPanel.add(label5);
-        // flowPanel.add(label6);
-        // flowPanel.add(label7);
-        // flowPanel.add(label8);
-        // flowPanel.add(label9);
-        // flowPanel.add(label10);
-        // flowPanel.add(label11);
-        // flowPanel.add(label12);
-        // flowPanel.add(label13);
-        // flowPanel.add(label14);
-        // flowPanel.add(label15);
-        // flowPanel.add(label16);
-        // flowPanel.add(label17);
-        // flowPanel.add(label18);
-        // flowPanel.add(label19);
-        // flowPanel.add(label20);
-
-        PScheduler.scheduleAtFixedRate(() -> {
-            label1.setInnerHTML("<div style='color:red'>" + "Test avec des accents : &��{" + "</div>");
-            label2.setInnerHTML("<div style='color:blue'>" + System.nanoTime() + "</div>");
-            label3.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
-            label4.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
-            label5.setInnerHTML("<div style='color:blue'>" + System.nanoTime() + "</div>");
-            label6.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
-            label7.setInnerHTML("<div style='color:orange'>" + System.nanoTime() + "</div>");
-            label8.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
-            label9.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
-            label10.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
-            label11.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
-            label12.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
-            label13.setInnerHTML("<div style='color:green'>" + System.nanoTime() + "</div>");
-            label14.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
-            label15.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
-            label16.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
-            label17.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
-            label18.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
-            label19.setInnerHTML("<div style='color:red'>" + System.nanoTime() + "</div>");
-            label20.setInnerHTML("<div style='color:yellow'>" + System.nanoTime() + "</div>");
-        }, Duration.ofMillis(5000));
-
-        final PWindow window = Element.newPWindow(null, "a", null);
-        window.open();
-        final PWindow window1 = Element.newPWindow(null, "b", null);
-        window1.open();
-        final PWindow window2 = Element.newPWindow(null, "c", null);
-        window2.open();
-        final PWindow window3 = Element.newPWindow(null, "d", null);
-        window3.open();
+        testPAddon();
 
         final PFlowPanel boxContainer = Element.newPFlowPanel();
 
         PScript.execute(PWindow.getMain(), "alert('coucou Main');");
 
-        final PWindow w1 = createWindow1();
-        // final PWindow w2 = createWindow2();
-        // final PWindow w3 = createWindow3();
+        final PWindow window = createWindow();
+        window.open();
 
         // boxContainer.add(new PHistory());
         // boxContainer.add(new PNotificationManager());
@@ -323,8 +163,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         boxContainer.add(Element.newPPopupPanel(PWindow.getMain()));
         boxContainer.add(Element.newPPopupPanel(PWindow.getMain(), true));
 
-        boxContainer.add(Element.newPPushButton(Element.newPImage())); // FIXME Test with
-        // image
+        boxContainer.add(Element.newPPushButton(Element.newPImage())); // FIXME Test with image
 
         boxContainer.add(Element.newPRadioButton("RadioLabel"));
         boxContainer.add(Element.newPRadioButton("RadioLabel"));
@@ -348,14 +187,13 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
         PWindow.getMain().add(boxContainer);
 
-        child2 = Element.newPLabel("Label2");
-        child2.addClickHandler(event -> System.out.println("bbbbb"));
-        boxContainer.add(child2);
+        mainLabel = Element.newPLabel("Label2");
+        mainLabel.addClickHandler(event -> System.out.println("bbbbb"));
+        boxContainer.add(mainLabel);
 
         try {
-            w1.add(child2);
+            window.add(mainLabel);
         } catch (final Exception e) {
-
         }
 
         boxContainer.add(Element.newPLabel("Label3"));
@@ -363,8 +201,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PLabel label = Element.newPLabel("Label4");
 
         try {
-            w1.add(label);
-
+            window.add(label);
             boxContainer.add(label);
         } catch (final Exception e) {
 
@@ -373,7 +210,83 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         // uiContext.getHistory().newItem("", false);
     }
 
-    private void testEvent() {
+    private void testPAddon() {
+        //        final LoggerAddOn addon = createPAddOn();
+        //        addon.attach(PWindow.getMain());
+
+        // final PElementAddOn elementAddOn = new PElementAddOn();
+        // elementAddOn.setInnerText("Coucou");
+        // flowPanel.add(elementAddOn);
+
+        // highChartsStackedColumnAddOn = new HighChartsStackedColumnAddOn();
+        // PWindow.getMain().add(highChartsStackedColumnAddOn);
+        // highChartsStackedColumnAddOn.setSeries("");
+
+        // final HighChartsStackedColumnAddOn h2 = new
+        // HighChartsStackedColumnAddOn();
+        // a.add(h2);
+        // h2.setSeries("");
+        // final PElementAddOn elementAddOn2 = new PElementAddOn();
+        // elementAddOn2.setInnerText("Coucou dans window");
+        // a.add(elementAddOn2);
+
+        final SelectizeAddon selectizeAddon = new SelectizeAddon();
+        selectizeAddon.text("test");
+        PWindow.getMain().add(selectizeAddon);
+
+        final PRadioButton buy = Element.newPRadioButton("Buy");
+        final PRadioButton sell = Element.newPRadioButton("Sell");
+        buy.addValueChangeHandler((event) -> selectizeAddon.selectBuy(event.getData()));
+        sell.addValueChangeHandler((event) -> selectizeAddon.selectSell(event.getData()));
+
+        PWindow.getMain().add(buy);
+        PWindow.getMain().add(sell);
+    }
+
+    private void testNewGrid() {
+        final AtomicInteger i = new AtomicInteger();
+
+        final DataGrid<Integer> grid = new DataGrid<>();
+
+        for (int cpt = 0; cpt < 20; cpt++) {
+            final ColumnDescriptor<Integer> column = new ColumnDescriptor<>();
+            final PAnchor anchor = Element.newPAnchor("Header " + i.incrementAndGet());
+            anchor.addClickHandler(e -> grid.removeColumn(column));
+            column.setCellRenderer(new PLabelCellRenderer<>(from -> a + ""));
+            column.setHeaderRenderer(() -> anchor);
+            grid.addColumnDescriptor(column);
+        }
+        final PTextBox textBox = Element.newPTextBox();
+
+        final PButton add = Element.newPButton("add");
+        add.addClickHandler(e -> {
+            grid.setData(Integer.valueOf(textBox.getText()));
+        });
+
+        PWindow.getMain().add(add);
+
+        PWindow.getMain().add(textBox);
+        PWindow.getMain().add(grid);
+
+        /**
+         * PScheduler.scheduleAtFixedRate(() -> {
+         * grid.setData((int) (Math.random() * 50));
+         * grid.removeData((int) (Math.random() * 50));
+         * grid.removeColumn(grid.getColumns().get((int) (Math.random() * grid.getColumns().size() -
+         * 1)));
+         *
+         * final ColumnDescriptor<Integer> column = new ColumnDescriptor<>();
+         * final PAnchor anchor = new PAnchor("Header " + id.incrementAndGet());
+         * anchor.addClickHandler(click -> grid.removeColumn(column));
+         * column.setCellRenderer(new PLabelCellRenderer<>(from -> (int) (Math.random() * 1000) +
+         * ""));
+         * column.setHeaderRenderer(() -> anchor);
+         * grid.addColumnDescriptor(column);
+         * }, Duration.ofMillis(2000));
+         **/
+    }
+
+    private void testNewEvent() {
         final EventHandler<PClickEvent> handler = UIContext.getNewEventBus().subscribe(PClickEvent.class,
             event -> System.err.println("B " + event));
         UIContext.getNewEventBus().post(new PClickEvent(this));
@@ -393,11 +306,10 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         }
     }
 
-    private void createGrid() {
+    private RefreshableDataGrid<Integer, Data> createGrid() {
         final AbstractGridWidget listView = new GridTableWidget();
         listView.setStyleProperty("table-layout", "fixed");
         final RefreshableDataGrid<Integer, Data> grid = new RefreshableDataGrid<>(listView);
-        PWindow.getMain().add(grid);
 
         final DataGridColumnDescriptor<Data, Data> columnDescriptor1 = new DataGridColumnDescriptor<>();
         columnDescriptor1.setCellRenderer(new CellRenderer<UISampleEntryPoint.Data, PLabel>() {
@@ -453,6 +365,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
                 grid.setData(key - 1, key, new Data(key, "" + i.incrementAndGet()));
             }
         }, Duration.ofSeconds(1), Duration.ofMillis(100));
+
+        return grid;
     }
 
     private void testUIDelegator() {
@@ -497,77 +411,55 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     }
 
-    public PWindow createWindow3() {
-        final PWindow w3 = Element.newPWindow(null, "Window 3", "resizable=yes,location=0,status=0,scrollbars=0");
-        final PFlowPanel windowContainer = Element.newPFlowPanel();
-        w3.add(windowContainer);
-        final PLabel child = Element.newPLabel("Window 3");
-        windowContainer.add(child);
+    private PWindow createWindow() {
+        final PWindow w = Element.newPWindow("Window 1", "resizable=yes,location=0,status=0,scrollbars=0");
 
-        final AtomicInteger i = new AtomicInteger(100);
-        final UIRunnable scheduleAtFixedRate = PScheduler.scheduleAtFixedRate(() -> {
-            final PLabel label = Element.newPLabel();
-            windowContainer.add(label);
-            label.setText("Window 3 " + i.incrementAndGet());
-            windowContainer.add(Element.newPCheckBox("Checkbox"));
-        }, Duration.ofSeconds(5), Duration.ofSeconds(5));
-
-        w3.open();
-
-        w3.addCloseHandler((event) -> scheduleAtFixedRate.cancel());
-
-        return w3;
-    }
-
-    public PWindow createWindow2() {
-        final PWindow w2 = Element.newPWindow(null, "Window 2", "resizable=yes,location=0,status=0,scrollbars=0");
-        final PFlowPanel windowContainer = Element.newPFlowPanel();
-        w2.add(windowContainer);
-        final PLabel child = Element.newPLabel("Window 2");
-        windowContainer.add(child);
-
-        w2.open();
-
-        final AtomicInteger i = new AtomicInteger();
-        PScheduler.scheduleAtFixedRate(() -> {
-            final PLabel label = Element.newPLabel();
-            windowContainer.add(label);
-            label.setText("Window 2 " + i.incrementAndGet());
-            windowContainer.add(Element.newPCheckBox("Checkbox"));
-        }, Duration.ofSeconds(5), Duration.ofSeconds(5));
-        return w2;
-    }
-
-    public PWindow createWindow1() {
-        final PWindow w = Element.newPWindow(null, "Window 1", null);
-        w.open();
-
-        PScript.execute(w, "alert('coucou Window1');");
+        //PScript.execute(w, "alert('coucou Window1');");
         PScript.execute(w, "console.log('coucou Window1');");
 
-        for (int i = 0; i < 2; i++) {
-            Element.newPWindow(null, "Winddsqsdqdqs" + i, null).open();
-        }
         final PFlowPanel windowContainer = Element.newPFlowPanel();
         w.add(windowContainer);
+
         final PLabel child = Element.newPLabel("Window 1");
         child.setText("Modified Window 1");
+        windowContainer.add(child);
 
-        child.addClickHandler((event) -> {
-            child2.setText("Touched by God");
+        final PButton button = Element.newPButton("Modified main label on main window");
+        windowContainer.add(button);
+        button.addClickHandler(event -> {
+            mainLabel.setText("Touched by God : " + child.getWindow());
             PScript.execute(PWindow.getMain(), "alert('coucou');");
             child.setText("Clicked Window 1");
         });
-
-        windowContainer.add(child);
+        windowContainer.add(button);
 
         final AtomicInteger i = new AtomicInteger();
+
+        final PButton button1 = Element.newPButton("Open linked window");
+        windowContainer.add(button1);
+        button1.addClickHandler(event -> {
+            final PWindow newPWindow = Element.newPWindow(w, "Sub Window 1 " + i.incrementAndGet(),
+                "resizable=yes,location=0,status=0,scrollbars=0");
+            newPWindow.add(Element.newPLabel("Sub window"));
+            newPWindow.open();
+        });
+
+        final PButton button2 = Element.newPButton("Open not linked window");
+        windowContainer.add(button2);
+        button2.addClickHandler(event -> {
+            final PWindow newPWindow = Element.newPWindow("Not Sub Window 1 " + i.incrementAndGet(),
+                "resizable=yes,location=0,status=0,scrollbars=0");
+            newPWindow.add(Element.newPLabel("Sub window"));
+            newPWindow.open();
+        });
+
         PScheduler.scheduleAtFixedRate(() -> {
             final PLabel label = Element.newPLabel();
             label.setText("Window 1 " + i.incrementAndGet());
             windowContainer.add(label);
             windowContainer.add(Element.newPCheckBox("Checkbox"));
-        }, Duration.ofSeconds(10), Duration.ofSeconds(10));
+        }, Duration.ofSeconds(1), Duration.ofSeconds(10));
+
         return w;
     }
 
