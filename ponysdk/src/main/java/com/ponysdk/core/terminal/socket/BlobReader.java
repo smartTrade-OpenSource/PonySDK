@@ -25,16 +25,14 @@
 
 package com.ponysdk.core.terminal.socket;
 
-import java.util.LinkedList;
-
 import elemental.client.Browser;
-import elemental.events.Event;
-import elemental.events.EventListener;
 import elemental.events.MessageEvent;
 import elemental.html.ArrayBuffer;
 import elemental.html.Blob;
 import elemental.html.FileReader;
 import elemental.html.Window;
+
+import java.util.LinkedList;
 
 public class BlobReader implements MessageReader {
 
@@ -52,18 +50,14 @@ public class BlobReader implements MessageReader {
 
         final Window window = Browser.getWindow();
         this.fileReader = window.newFileReader();
-        fileReader.setOnload(new EventListener() {
+        fileReader.setOnload(event -> {
+            if (LOAD_FILE_READER_KEY.equals(event.getType())) {
+                BlobReader.this.messageSender.read((ArrayBuffer) fileReader.getResult());
+            }
 
-            @Override
-            public void handleEvent(final Event event) {
-                if (LOAD_FILE_READER_KEY.equals(event.getType())) {
-                    BlobReader.this.messageSender.read((ArrayBuffer) fileReader.getResult());
-                }
-
-                if (!queue.isEmpty()) {
-                    final Blob blob = queue.removeFirst();
-                    fileReader.readAsArrayBuffer(blob);
-                }
+            if (!queue.isEmpty()) {
+                final Blob blob = queue.removeFirst();
+                fileReader.readAsArrayBuffer(blob);
             }
         });
     }

@@ -24,10 +24,6 @@
 package com.ponysdk.core.terminal.ui;
 
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.logical.shared.BeforeSelectionEvent;
-import com.google.gwt.event.logical.shared.BeforeSelectionHandler;
-import com.google.gwt.event.logical.shared.SelectionEvent;
-import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.core.model.ClientToServerModel;
@@ -76,24 +72,16 @@ public class PTTabLayoutPanel extends PTWidget<TabLayoutPanel> {
     @Override
     public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
         if (HandlerModel.HANDLER_SELECTION.equals(handlerModel)) {
-            uiObject.addSelectionHandler(new SelectionHandler<Integer>() {
-
-                @Override
-                public void onSelection(final SelectionEvent<Integer> event) {
-                    final PTInstruction eventInstruction = new PTInstruction(getObjectID());
-                    eventInstruction.put(ClientToServerModel.HANDLER_SELECTION, uiObject.getSelectedIndex());
-                    uiService.sendDataToServer(uiObject, eventInstruction);
-                }
+            uiObject.addSelectionHandler(event -> {
+                final PTInstruction eventInstruction = new PTInstruction(getObjectID());
+                eventInstruction.put(ClientToServerModel.HANDLER_SELECTION, uiObject.getSelectedIndex());
+                uiService.sendDataToServer(uiObject, eventInstruction);
             });
         } else if (HandlerModel.HANDLER_BEFORE_SELECTION.equals(handlerModel)) {
-            uiObject.addBeforeSelectionHandler(new BeforeSelectionHandler<Integer>() {
-
-                @Override
-                public void onBeforeSelection(final BeforeSelectionEvent<Integer> event) {
-                    final PTInstruction eventInstruction = new PTInstruction(getObjectID());
-                    eventInstruction.put(ClientToServerModel.HANDLER_BEFORE_SELECTION, event.getItem());
-                    uiService.sendDataToServer(uiObject, eventInstruction);
-                }
+            uiObject.addBeforeSelectionHandler(event -> {
+                final PTInstruction eventInstruction = new PTInstruction(getObjectID());
+                eventInstruction.put(ClientToServerModel.HANDLER_BEFORE_SELECTION, event.getItem());
+                uiService.sendDataToServer(uiObject, eventInstruction);
             });
         } else {
             super.addHandler(buffer, handlerModel, uiService);

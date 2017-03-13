@@ -23,9 +23,9 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Iterator;
-
 import com.ponysdk.core.ui.basic.event.HasPWidgets;
+
+import java.util.Iterator;
 
 /**
  * Abstract base class for all panels, which are widgets that can contain other
@@ -61,7 +61,8 @@ public abstract class PPanel extends PWidget implements HasPWidgets {
     }
 
     final void orphan(final PWidget child) {
-        if (child == null) return;
+        if (child == null) {
+        }
         else if (child.getParent() == this) child.setParent(null);
         else throw new IllegalStateException("Can't adopt an widget attached to another parent");
     }
@@ -78,9 +79,8 @@ public abstract class PPanel extends PWidget implements HasPWidgets {
     @Override
     public void destroy() {
         super.destroy();
-        final Iterator<PWidget> it = iterator();
-        while (it.hasNext()) {
-            it.next().destroy();
+        for (PWidget pWidget : this) {
+            pWidget.destroy();
         }
     }
 

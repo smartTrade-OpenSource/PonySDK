@@ -23,13 +23,13 @@
 
 package com.ponysdk.impl.webapplication.notification;
 
-import java.util.Date;
-
 import com.ponysdk.core.ui.eventbus.BusinessEvent;
 import com.ponysdk.core.ui.rich.PNotificationManager;
 import com.ponysdk.core.ui.rich.PNotificationManager.Notification;
 import com.ponysdk.impl.webapplication.notification.renderer.NotificationTypeRenderer;
 import com.ponysdk.impl.webapplication.notification.renderer.PLabelRenderer;
+
+import java.util.Date;
 
 public class DefaultNotificationView extends LogConsolePanel implements NotificationView {
 

@@ -25,9 +25,7 @@ package com.ponysdk.core.ui.basic;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.servlet.WebsocketEncoder;
-import com.ponysdk.core.ui.main.EntryPoint;
 
 /**
  * The panel to which all other widgets must ultimately be added. RootPanels are never created
@@ -54,22 +52,5 @@ public class PRootPanel extends PAbsolutePanel {
     @Override
     protected WidgetType getWidgetType() {
         return WidgetType.ROOT_PANEL;
-    }
-
-    /**
-     * Clears the rootPanel. If clearDom is true, then also remove any DOM elements that are not
-     * widgets.
-     * <p>
-     * By default {@link #clear()} will only remove children that are widgets.
-     * This method also provides the option to remove all children including the non-widget DOM
-     * elements that are directly added.
-     *
-     * @param clearDom
-     *            if {@code true} this method will also remove any DOM elements
-     *            that are not widgets.
-     */
-    public void clear(final boolean clearDom) {
-        clear();
-        if (clearDom) saveUpdate(writer -> writer.writeModel(ServerToClientModel.CLEAR_DOM, clearDom));
     }
 }

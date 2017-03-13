@@ -23,14 +23,14 @@
 
 package com.ponysdk.core.server.stm;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.ponysdk.core.server.application.Application;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.servlet.WebSocket;
 import com.ponysdk.core.server.servlet.WebsocketEncoder;
 import com.ponysdk.core.writer.ModelWriter;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class TxnContext implements TxnListener {
 
@@ -121,4 +121,12 @@ public class TxnContext implements TxnListener {
         socket.release();
     }
 
+    @Override
+    public String toString() {
+        return "TxnContext{" +
+                "flushNow=" + flushNow +
+                ", application=" + application +
+                ", uiContext=" + uiContext +
+                '}';
+    }
 }

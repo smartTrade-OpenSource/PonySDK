@@ -23,15 +23,8 @@
 
 package com.ponysdk.core.terminal;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Visibility;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.EventBus;
@@ -43,18 +36,7 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.StatusCodeException;
-import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.UIObject;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -67,11 +49,12 @@ import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 import com.ponysdk.core.terminal.request.RequestBuilder;
-import com.ponysdk.core.terminal.ui.PTCookies;
-import com.ponysdk.core.terminal.ui.PTObject;
-import com.ponysdk.core.terminal.ui.PTStreamResource;
-import com.ponysdk.core.terminal.ui.PTWindow;
-import com.ponysdk.core.terminal.ui.PTWindowManager;
+import com.ponysdk.core.terminal.ui.*;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceivedEvent.Handler, HttpRequestSendEvent.Handler {
 
@@ -419,13 +402,9 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
                 "Server connection failed <br/>Code : " + caught.getStatusCode() + "<br/>" + "Cause : " + caught.getMessage()));
 
             final Anchor reloadAnchor = new Anchor("reload");
-            reloadAnchor.addClickHandler(new ClickHandler() {
-
-                @Override
-                public void onClick(final ClickEvent event) {
-                    History.newItem("");
-                    Window.Location.reload();
-                }
+            reloadAnchor.addClickHandler(event -> {
+                History.newItem("");
+                Window.Location.reload();
             });
 
             actionPanel.add(reloadAnchor);
@@ -437,13 +416,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         }
 
         final Anchor closeAnchor = new Anchor("close");
-        closeAnchor.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(final ClickEvent event) {
-                communicationErrorMessagePanel.hide();
-            }
-        });
+        closeAnchor.addClickHandler(event -> communicationErrorMessagePanel.hide());
         actionPanel.add(closeAnchor);
         actionPanel.setCellHorizontalAlignment(closeAnchor, HasHorizontalAlignment.ALIGN_CENTER);
         actionPanel.setCellVerticalAlignment(closeAnchor, HasVerticalAlignment.ALIGN_MIDDLE);
@@ -451,14 +424,8 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         content.add(actionPanel);
 
         communicationErrorMessagePanel.setWidget(content);
-        communicationErrorMessagePanel.setPopupPositionAndShow(new PositionCallback() {
-
-            @Override
-            public void setPosition(final int offsetWidth, final int offsetHeight) {
-                communicationErrorMessagePanel.setPopupPosition((Window.getClientWidth() - offsetWidth) / 2,
-                    (Window.getClientHeight() - offsetHeight) / 2);
-            }
-        });
+        communicationErrorMessagePanel.setPopupPositionAndShow((offsetWidth, offsetHeight) -> communicationErrorMessagePanel.setPopupPosition((Window.getClientWidth() - offsetWidth) / 2,
+            (Window.getClientHeight() - offsetHeight) / 2));
     }
 
     @Override

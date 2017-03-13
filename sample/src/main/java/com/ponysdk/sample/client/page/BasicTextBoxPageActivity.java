@@ -34,8 +34,6 @@ import com.ponysdk.core.ui.basic.PHorizontalPanel;
 import com.ponysdk.core.ui.basic.PTextArea;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
 
 public class BasicTextBoxPageActivity extends SamplePageActivity {
 

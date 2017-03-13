@@ -72,13 +72,7 @@ class PImageResource implements ImageResource {
 
     @Override
     public SafeUri getSafeUri() {
-        return new SafeUri() {
-
-            @Override
-            public String asString() {
-                return uri;
-            }
-        };
+        return () -> uri;
     }
 
     @Override

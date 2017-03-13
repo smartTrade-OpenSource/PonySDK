@@ -24,15 +24,18 @@
 package com.ponysdk.core.ui.list.selector;
 
 import com.ponysdk.core.internalization.PString;
-import com.ponysdk.core.tools.ListenerCollection;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PMenuBar;
 import com.ponysdk.core.ui.basic.PMenuItem;
 import com.ponysdk.core.ui.basic.PWidget;
 
+import java.util.Collections;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class DefaultActionSelectorView extends PMenuBar implements SelectorView {
 
-    private final ListenerCollection<SelectorViewListener> selectorViewListeners = new ListenerCollection<>();
+    private final Set<SelectorViewListener> selectorViewListeners = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     public DefaultActionSelectorView() {
         final PMenuBar menuBarAction = Element.newPMenuBar(true);
@@ -70,7 +73,7 @@ public class DefaultActionSelectorView extends PMenuBar implements SelectorView 
 
     @Override
     public void addSelectorViewListener(final SelectorViewListener selectorViewListener) {
-        selectorViewListeners.register(selectorViewListener);
+        selectorViewListeners.add(selectorViewListener);
     }
 
     @Override

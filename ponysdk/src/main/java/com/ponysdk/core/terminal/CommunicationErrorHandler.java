@@ -23,13 +23,10 @@
 
 package com.ponysdk.core.terminal;
 
-import org.timepedia.exporter.client.Export;
-import org.timepedia.exporter.client.ExportClosure;
-import org.timepedia.exporter.client.Exportable;
+import jsinterop.annotations.JsType;
 
-@Export
-@ExportClosure
-public interface CommunicationErrorHandler extends Exportable {
+@JsType
+public interface CommunicationErrorHandler {
 
     void onCommunicationError(int code, String message);
 }

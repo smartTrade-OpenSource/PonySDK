@@ -23,10 +23,10 @@
 
 package com.ponysdk.core.ui.basic;
 
+import com.ponysdk.core.ui.basic.event.HasPWidgets;
+
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-
-import com.ponysdk.core.ui.basic.event.HasPWidgets;
 
 /**
  * <p>
@@ -83,18 +83,14 @@ public class PWidgetCollection implements Iterable<PWidget> {
         // Realloc array if necessary (doubling).
         if (size == array.length) {
             final PWidget[] newArray = new PWidget[array.length * 2];
-            for (int i = 0; i < array.length; ++i) {
-                newArray[i] = array[i];
-            }
+            System.arraycopy(array, 0, newArray, 0, array.length);
             array = newArray;
         }
 
         ++size;
 
         // Move all widgets after 'beforeIndex' back a slot.
-        for (int i = size - 1; i > beforeIndex; --i) {
-            array[i] = array[i - 1];
-        }
+        System.arraycopy(array, beforeIndex, array, beforeIndex + 1, size - 1 - beforeIndex);
 
         array[beforeIndex] = w;
     }
@@ -110,9 +106,7 @@ public class PWidgetCollection implements Iterable<PWidget> {
         }
 
         --size;
-        for (int i = index; i < size; ++i) {
-            array[i] = array[i + 1];
-        }
+        System.arraycopy(array, index + 1, array, index, size - index);
 
         array[size] = null;
     }

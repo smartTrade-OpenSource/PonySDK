@@ -23,9 +23,6 @@
 
 package com.ponysdk.core.ui.rich;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.ponysdk.core.model.PHorizontalAlignment;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
@@ -35,8 +32,9 @@ import com.ponysdk.core.ui.basic.PListBox.ListItem;
 import com.ponysdk.core.ui.basic.event.HasPChangeHandlers;
 import com.ponysdk.core.ui.basic.event.PChangeEvent;
 import com.ponysdk.core.ui.basic.event.PChangeHandler;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class PTwinListBox<T> extends PFlexTable implements HasPChangeHandlers {
 
@@ -87,36 +85,32 @@ public class PTwinListBox<T> extends PFlexTable implements HasPChangeHandlers {
 
         switchButton = Element.newPButton("<>");
         switchButton.addStyleName("pony-TwinListBox-Switch-ListBox");
-        switchButton.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent clickEvent) {
-                final List<ListItem> leftRemovedItems = new ArrayList<>();
-                for (int i = leftListBox.getItemCount(); i > 0; i--) {
-                    if (leftListBox.isItemSelected(i - 1)) {
-                        leftRemovedItems.add(leftListBox.removeItem(i - 1));
-                    }
+        switchButton.addClickHandler(clickEvent -> {
+            final List<ListItem> leftRemovedItems = new ArrayList<>();
+            for (int i = leftListBox.getItemCount(); i > 0; i--) {
+                if (leftListBox.isItemSelected(i - 1)) {
+                    leftRemovedItems.add(leftListBox.removeItem(i - 1));
                 }
-
-                final List<ListItem> rightRemovedItems = new ArrayList<>();
-                for (int i = rightListBox.getItemCount(); i > 0; i--) {
-                    if (rightListBox.isItemSelected(i - 1)) {
-                        rightRemovedItems.add(rightListBox.removeItem(i - 1));
-                    }
-                }
-
-                for (int i = leftRemovedItems.size() - 1; i >= 0; i--) {
-                    final ListItem listItem = leftRemovedItems.get(i);
-                    rightListBox.addItem(listItem.getLabel(), listItem.getValue());
-                }
-                for (int i = rightRemovedItems.size() - 1; i >= 0; i--) {
-                    final ListItem listItem = rightRemovedItems.get(i);
-                    leftListBox.addItem(listItem.getLabel(), listItem.getValue());
-                }
-
-                fireChangeHandler();
-
             }
+
+            final List<ListItem> rightRemovedItems = new ArrayList<>();
+            for (int i = rightListBox.getItemCount(); i > 0; i--) {
+                if (rightListBox.isItemSelected(i - 1)) {
+                    rightRemovedItems.add(rightListBox.removeItem(i - 1));
+                }
+            }
+
+            for (int i = leftRemovedItems.size() - 1; i >= 0; i--) {
+                final ListItem listItem = leftRemovedItems.get(i);
+                rightListBox.addItem(listItem.getLabel(), listItem.getValue());
+            }
+            for (int i = rightRemovedItems.size() - 1; i >= 0; i--) {
+                final ListItem listItem = rightRemovedItems.get(i);
+                leftListBox.addItem(listItem.getLabel(), listItem.getValue());
+            }
+
+            fireChangeHandler();
+
         });
         setWidget(1, 1, switchButton);
     }

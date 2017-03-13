@@ -23,13 +23,12 @@
 
 package com.ponysdk.core.ui.basic;
 
+import com.ponysdk.core.model.PCheckBoxState;
+import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import com.ponysdk.core.model.PCheckBoxState;
-import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
-import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 
 /**
  * A mutually-exclusive selection radio button widget. Fires
@@ -66,19 +65,15 @@ public class PRadioButtonGroup {
     public void addRadioButton(final PRadioButton radioButton) {
         if (this.buttons == null) this.buttons = new ArrayList<>();
         radioButton.setName(name);
-        radioButton.addValueChangeHandler(new PValueChangeHandler<Boolean>() {
-
-            @Override
-            public void onValueChange(final PValueChangeEvent<Boolean> event) {
-                for (final PRadioButton button : buttons) {
-                    if (button != radioButton) {
-                        button.setState(event.getData() ? PCheckBoxState.UNCHECKED : PCheckBoxState.CHECKED, false);
-                    }
+        radioButton.addValueChangeHandler(event -> {
+            for (final PRadioButton button : buttons) {
+                if (button != radioButton) {
+                    button.setState(event.getData() ? PCheckBoxState.UNCHECKED : PCheckBoxState.CHECKED, false);
                 }
-                if (handlers != null) {
-                    for (final PValueChangeHandler<Boolean> handler : handlers) {
-                        handler.onValueChange(event);
-                    }
+            }
+            if (handlers != null) {
+                for (final PValueChangeHandler<Boolean> handler : handlers) {
+                    handler.onValueChange(event);
                 }
             }
         });

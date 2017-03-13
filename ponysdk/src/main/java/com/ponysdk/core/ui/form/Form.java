@@ -23,11 +23,11 @@
 
 package com.ponysdk.core.ui.form;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.ponysdk.core.ui.form.formfield.FormField;
 import com.ponysdk.core.ui.form.validator.ValidationResult;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A list of {@link com.ponysdk.core.ui.form.formfield.FormField} validated or

@@ -25,11 +25,7 @@ package com.ponysdk.impl.webapplication.header;
 
 import com.ponysdk.core.model.PHorizontalAlignment;
 import com.ponysdk.core.model.PVerticalAlignment;
-import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.PHorizontalPanel;
-import com.ponysdk.core.ui.basic.PLabel;
-import com.ponysdk.core.ui.basic.PSimplePanel;
-import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.basic.*;
 
 public class DefaultHeaderView extends PSimplePanel implements HeaderView {
 

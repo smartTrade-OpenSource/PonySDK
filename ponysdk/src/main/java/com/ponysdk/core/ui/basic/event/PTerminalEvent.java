@@ -23,10 +23,10 @@
 
 package com.ponysdk.core.ui.basic.event;
 
-import javax.json.JsonObject;
-
 import com.ponysdk.core.ui.eventbus.Event;
 import com.ponysdk.core.ui.eventbus.EventHandler;
+
+import javax.json.JsonObject;
 
 public class PTerminalEvent extends Event<PTerminalEvent.Handler> {
 

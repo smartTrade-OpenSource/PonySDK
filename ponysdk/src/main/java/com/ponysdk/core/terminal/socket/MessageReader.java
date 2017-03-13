@@ -27,6 +27,6 @@ import elemental.events.MessageEvent;
 
 public interface MessageReader {
 
-    public void read(final MessageEvent event);
+    void read(final MessageEvent event);
 
 }

@@ -23,17 +23,16 @@
 
 package com.ponysdk.core.server.servlet;
 
+import com.ponysdk.core.server.application.ApplicationManagerOption;
+import com.ponysdk.core.server.application.UIContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.concurrent.RunnableScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ponysdk.core.server.application.ApplicationManagerOption;
-import com.ponysdk.core.server.application.UIContext;
 
 public class CommunicationSanityChecker {
 

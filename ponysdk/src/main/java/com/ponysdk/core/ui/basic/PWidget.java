@@ -23,60 +23,24 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-
-import javax.json.JsonArray;
-import javax.json.JsonNumber;
-import javax.json.JsonObject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.DomHandlerType;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.stm.Txn;
-import com.ponysdk.core.ui.basic.event.HasPHandlers;
-import com.ponysdk.core.ui.basic.event.HasPKeyPressHandlers;
-import com.ponysdk.core.ui.basic.event.HasPKeyUpHandlers;
-import com.ponysdk.core.ui.basic.event.HasPWidgets;
-import com.ponysdk.core.ui.basic.event.PBlurEvent;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PContextMenuEvent;
-import com.ponysdk.core.ui.basic.event.PDomEvent;
-import com.ponysdk.core.ui.basic.event.PDoubleClickEvent;
-import com.ponysdk.core.ui.basic.event.PDragEndEvent;
-import com.ponysdk.core.ui.basic.event.PDragEnterEvent;
-import com.ponysdk.core.ui.basic.event.PDragLeaveEvent;
-import com.ponysdk.core.ui.basic.event.PDragOverEvent;
-import com.ponysdk.core.ui.basic.event.PDragStartEvent;
-import com.ponysdk.core.ui.basic.event.PDropEvent;
-import com.ponysdk.core.ui.basic.event.PFocusEvent;
-import com.ponysdk.core.ui.basic.event.PKeyPressEvent;
-import com.ponysdk.core.ui.basic.event.PKeyPressHandler;
-import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
-import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
-import com.ponysdk.core.ui.basic.event.PMouseDownEvent;
-import com.ponysdk.core.ui.basic.event.PMouseEvent;
-import com.ponysdk.core.ui.basic.event.PMouseOutEvent;
-import com.ponysdk.core.ui.basic.event.PMouseOverEvent;
-import com.ponysdk.core.ui.basic.event.PMouseUpEvent;
-import com.ponysdk.core.ui.basic.event.PMouseWhellEvent;
-import com.ponysdk.core.ui.eventbus.Event;
-import com.ponysdk.core.ui.eventbus.EventBus;
-import com.ponysdk.core.ui.eventbus.EventHandler;
-import com.ponysdk.core.ui.eventbus.HandlerRegistration;
-import com.ponysdk.core.ui.eventbus.SimpleEventBus;
+import com.ponysdk.core.ui.basic.event.*;
+import com.ponysdk.core.ui.eventbus.*;
 import com.ponysdk.core.ui.model.PEventType;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.writer.ModelWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.json.JsonArray;
+import javax.json.JsonNumber;
+import javax.json.JsonObject;
+import java.util.*;
 
 /**
  * The base class for the majority of user-interface objects. Widget adds
@@ -495,7 +459,8 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     }
 
     public void removeFromParent() {
-        if (parent == null) return;
+        if (parent == null) {
+        }
         else if (parent instanceof HasPWidgets) ((HasPWidgets) parent).remove(this);
         else if (parent != null) throw new IllegalStateException("This widget's parent does not implement HasPWidgets");
     }

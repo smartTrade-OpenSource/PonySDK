@@ -23,16 +23,10 @@
 
 package com.ponysdk.core.ui.eventbus;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 public class SimpleEventBus extends AbstractEventBus {
 

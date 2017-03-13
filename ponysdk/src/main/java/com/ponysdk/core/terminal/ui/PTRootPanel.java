@@ -47,15 +47,4 @@ public class PTRootPanel extends PTAbsolutePanel {
         return rootId != null ? RootPanel.get(rootId) : RootPanel.get();
     }
 
-    @Override
-    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.CLEAR_DOM.ordinal() == modelOrdinal) {
-            RootPanel.get().clear(true);
-            return true;
-        } else {
-            return super.update(buffer, binaryModel);
-        }
-    }
-
 }

@@ -39,7 +39,6 @@ public class GridPageActivity extends SamplePageActivity implements PClickHandle
     private PListBox cellListBox;
     private PListBox actionListBox;
     private PListBox styleListBox;
-    private PButton update;
     private PGrid table;
 
     public GridPageActivity() {
@@ -73,7 +72,7 @@ public class GridPageActivity extends SamplePageActivity implements PClickHandle
         cellListBox = buildIntListBox();
         actionListBox = buildActionListBox();
         styleListBox = buildStyleListBox();
-        update = Element.newPButton("update");
+        PButton update = Element.newPButton("update");
         update.addClickHandler(this);
 
         container.add(rowListBox);

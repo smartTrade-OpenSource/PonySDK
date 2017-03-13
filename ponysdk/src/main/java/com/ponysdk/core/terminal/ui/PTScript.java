@@ -23,15 +23,15 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.google.gwt.user.client.Timer;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class PTScript extends AbstractPTObject {
 
@@ -74,7 +74,7 @@ public class PTScript extends AbstractPTObject {
         }
     }
 
-    private static final void eval(final String script, final long delayMillis) {
+    private static void eval(final String script, final long delayMillis) {
         if (delayMillis == -1) {
             try {
                 eval(script);

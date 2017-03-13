@@ -23,11 +23,10 @@
 
 package com.ponysdk.core.ui.place;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ponysdk.core.ui.basic.PHistory;
 import com.ponysdk.core.ui.eventbus.EventBus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PlaceHistoryHandler {
 

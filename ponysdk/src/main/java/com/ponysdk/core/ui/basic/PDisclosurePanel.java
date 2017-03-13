@@ -23,23 +23,17 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-
-import javax.json.JsonObject;
-
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.servlet.WebsocketEncoder;
-import com.ponysdk.core.ui.basic.event.HasPAnimation;
-import com.ponysdk.core.ui.basic.event.HasPWidgets;
-import com.ponysdk.core.ui.basic.event.PCloseEvent;
-import com.ponysdk.core.ui.basic.event.PCloseHandler;
-import com.ponysdk.core.ui.basic.event.POpenEvent;
-import com.ponysdk.core.ui.basic.event.POpenHandler;
+import com.ponysdk.core.ui.basic.event.*;
+
+import javax.json.JsonObject;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * A widget that consists of a header and a content panel that discloses the

@@ -23,10 +23,6 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import com.google.gwt.event.logical.shared.CloseEvent;
-import com.google.gwt.event.logical.shared.CloseHandler;
-import com.google.gwt.event.logical.shared.OpenEvent;
-import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -61,24 +57,16 @@ public class PTDisclosurePanel extends PTWidget<DisclosurePanel> {
     }
 
     private void addHandlers(final ReaderBuffer buffer, final UIBuilder uiService) {
-        uiObject.addCloseHandler(new CloseHandler<DisclosurePanel>() {
-
-            @Override
-            public void onClose(final CloseEvent<DisclosurePanel> event) {
-                final PTInstruction instruction = new PTInstruction(getObjectID());
-                instruction.put(ClientToServerModel.HANDLER_CLOSE);
-                uiService.sendDataToServer(uiObject, instruction);
-            }
+        uiObject.addCloseHandler(event -> {
+            final PTInstruction instruction = new PTInstruction(getObjectID());
+            instruction.put(ClientToServerModel.HANDLER_CLOSE);
+            uiService.sendDataToServer(uiObject, instruction);
         });
 
-        uiObject.addOpenHandler(new OpenHandler<DisclosurePanel>() {
-
-            @Override
-            public void onOpen(final OpenEvent<DisclosurePanel> event) {
-                final PTInstruction instruction = new PTInstruction(getObjectID());
-                instruction.put(ClientToServerModel.HANDLER_OPEN);
-                uiService.sendDataToServer(uiObject, instruction);
-            }
+        uiObject.addOpenHandler(event -> {
+            final PTInstruction instruction = new PTInstruction(getObjectID());
+            instruction.put(ClientToServerModel.HANDLER_OPEN);
+            uiService.sendDataToServer(uiObject, instruction);
         });
     }
 

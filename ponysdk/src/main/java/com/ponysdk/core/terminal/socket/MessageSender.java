@@ -27,6 +27,6 @@ import elemental.html.ArrayBuffer;
 
 public interface MessageSender {
 
-    public void read(final ArrayBuffer arrayBuffer);
+    void read(final ArrayBuffer arrayBuffer);
 
 }

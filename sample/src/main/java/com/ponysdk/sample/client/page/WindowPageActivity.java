@@ -23,22 +23,13 @@
 
 package com.ponysdk.sample.client.page;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.PButton;
-import com.ponysdk.core.ui.basic.PFlexTable;
-import com.ponysdk.core.ui.basic.PFlowPanel;
-import com.ponysdk.core.ui.basic.PScript;
-import com.ponysdk.core.ui.basic.PTextBox;
-import com.ponysdk.core.ui.basic.PVerticalPanel;
-import com.ponysdk.core.ui.basic.PWindow;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.core.ui.basic.event.PCloseEvent;
 import com.ponysdk.core.ui.basic.event.PCloseHandler;
 import com.ponysdk.core.ui.rich.PNotificationManager;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class WindowPageActivity extends SamplePageActivity implements PCloseHandler {
 
@@ -72,16 +63,12 @@ public class WindowPageActivity extends SamplePageActivity implements PCloseHand
         table.setWidget(2, 1, featuresTextBox = Element.newPTextBox("width=1280,height=800,resizable,status=1"));
 
         final PButton open = Element.newPButton("Open new window");
-        open.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                final String url = urlTextBox.getText();
-                final String name = nameTextBox.getText();
-                final String features = featuresTextBox.getText();
-                final PWindow w = Element.newPWindow(url, name, features);
-                w.open();
-            }
+        open.addClickHandler(event -> {
+            final String url = urlTextBox.getText();
+            final String name = nameTextBox.getText();
+            final String features = featuresTextBox.getText();
+            final PWindow w = Element.newPWindow(url, name, features);
+            w.open();
         });
 
         // Open popup that communicate with server
@@ -92,39 +79,27 @@ public class WindowPageActivity extends SamplePageActivity implements PCloseHand
         table2.setWidget(1, 1, popFeaturesTextBox = Element.newPTextBox("width=500,height=300,resizable"));
 
         final PButton open2 = Element.newPButton("Open new window");
-        open2.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                final String disc = windows.size() == 0 ? "" : Integer.toString(windows.size());
-                final String name = popNameTextBox.getText();
-                final String features = popFeaturesTextBox.getText();
-                final MyWindow window = new MyWindow(name + disc, features);
-                window.open();
-                window.addCloseHandler(WindowPageActivity.this);
-                windows.add(window);
-            }
+        open2.addClickHandler(event -> {
+            final String disc = windows.isEmpty() ? "" : Integer.toString(windows.size());
+            final String name = popNameTextBox.getText();
+            final String features = popFeaturesTextBox.getText();
+            final MyWindow window = new MyWindow(name + disc, features);
+            window.open();
+            window.addCloseHandler(WindowPageActivity.this);
+            windows.add(window);
         });
 
         final PButton postHello = Element.newPButton("Post message");
-        postHello.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                for (final PWindow window : windows) {
-                    PNotificationManager.showHumanizedNotification(window, "Hello from opener");
-                }
+        postHello.addClickHandler(event -> {
+            for (final PWindow window : windows) {
+                PNotificationManager.showHumanizedNotification(window, "Hello from opener");
             }
         });
 
         final PButton closeAllWindow = Element.newPButton("Close all windows");
-        closeAllWindow.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                for (final PWindow window : windows) {
-                    window.close();
-                }
+        closeAllWindow.addClickHandler(event -> {
+            for (final PWindow window : windows) {
+                window.close();
             }
         });
 
@@ -153,31 +128,15 @@ public class WindowPageActivity extends SamplePageActivity implements PCloseHand
         protected void onLoad() {
             final PFlowPanel flow = Element.newPFlowPanel();
             final PButton addMessage = Element.newPButton("Add message");
-            addMessage.addClickHandler(new PClickHandler() {
-
-                @Override
-                public void onClick(final PClickEvent event) {
-                    flow.add(Element.newPLabel("Hello " + count++));
-                }
-            });
+            addMessage.addClickHandler(event -> flow.add(Element.newPLabel("Hello " + count++)));
             final PButton clearMessage = Element.newPButton("Clear message");
-            clearMessage.addClickHandler(new PClickHandler() {
-
-                @Override
-                public void onClick(final PClickEvent event) {
-                    for (int i = flow.getWidgetCount() - 1; i > 2; i--) {
-                        flow.remove(i);
-                    }
+            clearMessage.addClickHandler(event -> {
+                for (int i = flow.getWidgetCount() - 1; i > 2; i--) {
+                    flow.remove(i);
                 }
             });
             final PButton execJs = Element.newPButton("Exec javascript");
-            execJs.addClickHandler(new PClickHandler() {
-
-                @Override
-                public void onClick(final PClickEvent event) {
-                    PScript.execute(PWindow.getMain(), "alert('from the popup');");
-                }
-            });
+            execJs.addClickHandler(event -> PScript.execute(PWindow.getMain(), "alert('from the popup');"));
             flow.add(addMessage);
             flow.add(clearMessage);
             flow.add(execJs);

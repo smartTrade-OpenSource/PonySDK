@@ -82,11 +82,10 @@ public class PWindow extends PObject {
                 stackedInstructions.poll().run();
             }
         }
-
         initialized = true;
 
         panelByZone.forEach((key, value) -> value.attach(this));
-        if (attachListener != null) attachListener.onAttach();
+        if (initializeListener != null) initializeListener.onInitialize(this);
     }
 
     public static PWindow getMain() {

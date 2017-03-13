@@ -24,7 +24,6 @@
 package com.ponysdk.core.terminal.ui;
 
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.dom.client.DropEvent;
 import com.google.gwt.event.dom.client.DropHandler;
 import com.google.gwt.event.dom.client.KeyPressEvent;
@@ -108,17 +107,13 @@ public class PTTextBox extends PTTextBoxBase<TextBox> implements KeyPressHandler
      */
     private void filterText() {
         if (regExp == null) return;
-        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-
-            @Override
-            public void execute() {
-                final String pasteText = uiObject.getText();
-                final StringBuilder filteredText = new StringBuilder();
-                for (final char c : pasteText.toCharArray()) {
-                    if (match(c)) filteredText.append(c);
-                }
-                uiObject.setText(filteredText.toString());
+        Scheduler.get().scheduleDeferred(() -> {
+            final String pasteText = uiObject.getText();
+            final StringBuilder filteredText = new StringBuilder();
+            for (final char c : pasteText.toCharArray()) {
+                if (match(c)) filteredText.append(c);
             }
+            uiObject.setText(filteredText.toString());
         });
     }
 

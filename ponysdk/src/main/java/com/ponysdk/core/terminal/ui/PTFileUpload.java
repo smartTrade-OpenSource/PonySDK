@@ -24,12 +24,8 @@
 package com.ponysdk.core.terminal.ui;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
-import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
@@ -55,14 +51,10 @@ public class PTFileUpload extends PTWidget<FormPanel> {
         uiObject.setWidget(panel);
         panel.add(fileUpload);
 
-        uiObject.addSubmitCompleteHandler(new SubmitCompleteHandler() {
-
-            @Override
-            public void onSubmitComplete(final SubmitCompleteEvent event) {
-                final PTInstruction instruction = new PTInstruction(objectId);
-                instruction.put(ClientToServerModel.HANDLER_SUBMIT_COMPLETE);
-                uiService.sendDataToServer(uiObject, instruction);
-            }
+        uiObject.addSubmitCompleteHandler(event -> {
+            final PTInstruction instruction = new PTInstruction(objectId);
+            instruction.put(ClientToServerModel.HANDLER_SUBMIT_COMPLETE);
+            uiService.sendDataToServer(uiObject, instruction);
         });
     }
 
@@ -74,14 +66,10 @@ public class PTFileUpload extends PTWidget<FormPanel> {
     @Override
     public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
         if (HandlerModel.HANDLER_CHANGE.equals(handlerModel)) {
-            fileUpload.addChangeHandler(new ChangeHandler() {
-
-                @Override
-                public void onChange(final ChangeEvent event) {
-                    final PTInstruction eventInstruction = new PTInstruction(getObjectID());
-                    eventInstruction.put(ClientToServerModel.HANDLER_CHANGE, fileUpload.getFilename());
-                    uiService.sendDataToServer(fileUpload, eventInstruction);
-                }
+            fileUpload.addChangeHandler(event -> {
+                final PTInstruction eventInstruction = new PTInstruction(getObjectID());
+                eventInstruction.put(ClientToServerModel.HANDLER_CHANGE, fileUpload.getFilename());
+                uiService.sendDataToServer(fileUpload, eventInstruction);
             });
         } else if (HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST.equals(handlerModel)) {
             // ServerToClientModel.STREAM_REQUEST_ID

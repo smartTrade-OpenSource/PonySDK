@@ -23,13 +23,13 @@
 
 package com.ponysdk.core.server.servlet;
 
+import com.ponysdk.core.server.application.Application;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import com.ponysdk.core.server.application.Application;
 
 public class SessionManager {
 

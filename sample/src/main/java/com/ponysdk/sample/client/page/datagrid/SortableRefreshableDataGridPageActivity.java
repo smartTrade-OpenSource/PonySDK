@@ -23,18 +23,16 @@
 
 package com.ponysdk.sample.client.page.datagrid;
 
+import com.ponysdk.core.ui.basic.Element;
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.grid.GridTableWidget;
+import com.ponysdk.core.ui.list.refreshable.RefreshableDataGrid;
+import com.ponysdk.sample.client.datamodel.PonyStock;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
-import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.PButton;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
-import com.ponysdk.core.ui.grid.GridTableWidget;
-import com.ponysdk.core.ui.list.refreshable.RefreshableDataGrid;
-import com.ponysdk.sample.client.datamodel.PonyStock;
 
 public class SortableRefreshableDataGridPageActivity extends RefreshableDataGridPageActivity {
 

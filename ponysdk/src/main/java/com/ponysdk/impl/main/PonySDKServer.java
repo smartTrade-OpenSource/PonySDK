@@ -116,7 +116,7 @@ public class PonySDKServer {
         context.addFilter(new FilterHolder(servletContextFilter), MAPPING_BOOTSTRAP, EnumSet.of(DispatcherType.REQUEST));
 
         final SessionHandler sessionHandler = context.getSessionHandler();
-        sessionHandler.getSessionManager().setMaxInactiveInterval(60 * applicationManagerOption.getSessionTimeout());
+        sessionHandler.setMaxInactiveInterval(60 * applicationManagerOption.getSessionTimeout());
         sessionHandler.addEventListener(applicationLoader);
 
         return context;

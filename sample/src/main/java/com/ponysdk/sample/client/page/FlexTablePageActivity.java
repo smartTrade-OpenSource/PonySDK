@@ -30,8 +30,6 @@ import com.ponysdk.core.ui.basic.PScrollPanel;
 
 public class FlexTablePageActivity extends SamplePageActivity {
 
-    private PLabel[][] labels;
-
     public FlexTablePageActivity() {
         super("Flex Table", "Table");
     }
@@ -45,7 +43,7 @@ public class FlexTablePageActivity extends SamplePageActivity {
         table.setCellSpacing(0);
         table.setSizeFull();
 
-        labels = new PLabel[100][10];
+        PLabel[][] labels = new PLabel[100][10];
 
         for (int r = 0; r < 100; r++) {
             for (int c = 0; c < 10; c++) {

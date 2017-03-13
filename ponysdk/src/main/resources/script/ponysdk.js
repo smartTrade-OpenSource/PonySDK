@@ -94,7 +94,7 @@ var pony;
 function onPonySDKModuleLoaded() {
     console.log("onPonySDKModuleLoaded");
 
-    pony = new ponysdk();
+    pony = new com.ponysdk.core.terminal.PonySDK();
     if (typeof module !== 'undefined' && module.hasOwnProperty('exports')) module.exports.pony = pony;
     else window['pony'] = pony;
 
@@ -380,7 +380,7 @@ if (!String.prototype.codePointAt) {
             // Get the first code unit
             var first = string.charCodeAt(index);
             var second;
-            if ( // check if it’s the start of a surrogate pair
+            if ( // check if itï¿½s the start of a surrogate pair
                 first >= 0xD800 && first <= 0xDBFF && // high surrogate
                 size > index + 1 // there is a next code unit
             ) {

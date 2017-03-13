@@ -23,13 +23,13 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.time.Duration;
-
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.servlet.WebsocketEncoder;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
+
+import java.time.Duration;
 
 /**
  * A panel that lays its child widgets out "docked" at its outer edges, and

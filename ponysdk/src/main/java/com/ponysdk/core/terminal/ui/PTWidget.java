@@ -23,49 +23,8 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.logging.Logger;
-
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.event.dom.client.BlurEvent;
-import com.google.gwt.event.dom.client.BlurHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.ContextMenuEvent;
-import com.google.gwt.event.dom.client.ContextMenuHandler;
-import com.google.gwt.event.dom.client.DomEvent;
-import com.google.gwt.event.dom.client.DoubleClickEvent;
-import com.google.gwt.event.dom.client.DoubleClickHandler;
-import com.google.gwt.event.dom.client.DragEndEvent;
-import com.google.gwt.event.dom.client.DragEndHandler;
-import com.google.gwt.event.dom.client.DragEnterEvent;
-import com.google.gwt.event.dom.client.DragEnterHandler;
-import com.google.gwt.event.dom.client.DragLeaveEvent;
-import com.google.gwt.event.dom.client.DragLeaveHandler;
-import com.google.gwt.event.dom.client.DragOverEvent;
-import com.google.gwt.event.dom.client.DragOverHandler;
-import com.google.gwt.event.dom.client.DragStartEvent;
-import com.google.gwt.event.dom.client.DragStartHandler;
-import com.google.gwt.event.dom.client.DropEvent;
-import com.google.gwt.event.dom.client.DropHandler;
-import com.google.gwt.event.dom.client.FocusEvent;
-import com.google.gwt.event.dom.client.FocusHandler;
-import com.google.gwt.event.dom.client.KeyPressEvent;
-import com.google.gwt.event.dom.client.KeyPressHandler;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
-import com.google.gwt.event.dom.client.MouseDownEvent;
-import com.google.gwt.event.dom.client.MouseDownHandler;
-import com.google.gwt.event.dom.client.MouseEvent;
-import com.google.gwt.event.dom.client.MouseOutEvent;
-import com.google.gwt.event.dom.client.MouseOutHandler;
-import com.google.gwt.event.dom.client.MouseOverEvent;
-import com.google.gwt.event.dom.client.MouseOverHandler;
-import com.google.gwt.event.dom.client.MouseUpEvent;
-import com.google.gwt.event.dom.client.MouseUpHandler;
-import com.google.gwt.event.dom.client.MouseWheelEvent;
-import com.google.gwt.event.dom.client.MouseWheelHandler;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.user.client.Event;
@@ -80,6 +39,10 @@ import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.logging.Logger;
 
 public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implements IsWidget {
 
@@ -204,93 +167,31 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
         final Widget widget = asWidget();
         switch (domHandlerType) {
             case CLICK:
-                widget.addDomHandler(new ClickHandler() {
-
-                    @Override
-                    public void onClick(final ClickEvent event) {
-                        triggerMouseEvent(domHandlerType, uiService, event);
-                    }
-
-                }, ClickEvent.getType());
+                widget.addDomHandler(event -> triggerMouseEvent(domHandlerType, uiService, event), ClickEvent.getType());
                 break;
             case DOUBLE_CLICK:
-                widget.addDomHandler(new DoubleClickHandler() {
-
-                    @Override
-                    public void onDoubleClick(final DoubleClickEvent event) {
-                        triggerMouseEvent(domHandlerType, uiService, event);
-                    }
-                }, DoubleClickEvent.getType());
+                widget.addDomHandler(event -> triggerMouseEvent(domHandlerType, uiService, event), DoubleClickEvent.getType());
                 break;
             case MOUSE_OVER:
-                widget.addDomHandler(new MouseOverHandler() {
-
-                    @Override
-                    public void onMouseOver(final MouseOverEvent event) {
-                        triggerMouseEvent(domHandlerType, uiService, event);
-                    }
-
-                }, MouseOverEvent.getType());
+                widget.addDomHandler(event -> triggerMouseEvent(domHandlerType, uiService, event), MouseOverEvent.getType());
                 break;
             case MOUSE_OUT:
-                widget.addDomHandler(new MouseOutHandler() {
-
-                    @Override
-                    public void onMouseOut(final MouseOutEvent event) {
-                        triggerMouseEvent(domHandlerType, uiService, event);
-                    }
-
-                }, MouseOutEvent.getType());
+                widget.addDomHandler(event -> triggerMouseEvent(domHandlerType, uiService, event), MouseOutEvent.getType());
                 break;
             case MOUSE_DOWN:
-                widget.addDomHandler(new MouseDownHandler() {
-
-                    @Override
-                    public void onMouseDown(final MouseDownEvent event) {
-                        triggerMouseEvent(domHandlerType, uiService, event);
-                    }
-
-                }, MouseDownEvent.getType());
+                widget.addDomHandler(event -> triggerMouseEvent(domHandlerType, uiService, event), MouseDownEvent.getType());
                 break;
             case MOUSE_UP:
-                widget.addDomHandler(new MouseUpHandler() {
-
-                    @Override
-                    public void onMouseUp(final MouseUpEvent event) {
-                        triggerMouseEvent(domHandlerType, uiService, event);
-                    }
-
-                }, MouseUpEvent.getType());
+                widget.addDomHandler(event -> triggerMouseEvent(domHandlerType, uiService, event), MouseUpEvent.getType());
                 break;
             case MOUSE_WHELL:
-                widget.addDomHandler(new MouseWheelHandler() {
-
-                    @Override
-                    public void onMouseWheel(final MouseWheelEvent event) {
-                        triggerMouseEvent(domHandlerType, uiService, event);
-                    }
-
-                }, MouseWheelEvent.getType());
+                widget.addDomHandler(event -> triggerMouseEvent(domHandlerType, uiService, event), MouseWheelEvent.getType());
                 break;
             case BLUR:
-                widget.addDomHandler(new BlurHandler() {
-
-                    @Override
-                    public void onBlur(final BlurEvent event) {
-                        triggerDomEvent(domHandlerType, uiService, event);
-                    }
-
-                }, BlurEvent.getType());
+                widget.addDomHandler(event -> triggerDomEvent(domHandlerType, uiService, event), BlurEvent.getType());
                 break;
             case FOCUS:
-                widget.addDomHandler(new FocusHandler() {
-
-                    @Override
-                    public void onFocus(final FocusEvent event) {
-                        triggerDomEvent(domHandlerType, uiService, event);
-                    }
-
-                }, FocusEvent.getType());
+                widget.addDomHandler(event -> triggerDomEvent(domHandlerType, uiService, event), FocusEvent.getType());
                 break;
             case KEY_PRESS:
                 final BinaryModel binaryModel = buffer.readBinaryModel();
@@ -302,29 +203,24 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
                     keyFilter = null;
                 }
 
-                widget.addDomHandler(new KeyPressHandler() {
+                widget.addDomHandler(event -> {
+                    final Widget widget1 = asWidget();
+                    final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
+                    eventInstruction.put(ClientToServerModel.VALUE_KEY, event.getNativeEvent().getKeyCode());
 
-                    @Override
-                    public void onKeyPress(final KeyPressEvent event) {
-                        final Widget widget = asWidget();
-                        final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
-                        eventInstruction.put(ClientToServerModel.VALUE_KEY, event.getNativeEvent().getKeyCode());
-
-                        if (keyFilter != null) {
-                            for (int i = 0; i < keyFilter.size(); i++) {
-                                final JSONNumber keyCode = keyFilter.get(i).isNumber();
-                                if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
-                                    uiService.sendDataToServer(widget, eventInstruction);
-                                    break;
-                                }
+                    if (keyFilter != null) {
+                        for (int i = 0; i < keyFilter.size(); i++) {
+                            final JSONNumber keyCode = keyFilter.get(i).isNumber();
+                            if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
+                                uiService.sendDataToServer(widget1, eventInstruction);
+                                break;
                             }
-                        } else {
-                            uiService.sendDataToServer(widget, eventInstruction);
                         }
-
-                        preventOrStopEvent(event);
+                    } else {
+                        uiService.sendDataToServer(widget1, eventInstruction);
                     }
 
+                    preventOrStopEvent(event);
                 }, KeyPressEvent.getType());
                 break;
             case KEY_UP:
@@ -339,125 +235,81 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
 
                 if (widget instanceof TextBoxBase) {
                     final TextBoxBase textBox = (TextBoxBase) widget;
-                    textBox.addKeyUpHandler(new KeyUpHandler() {
+                    textBox.addKeyUpHandler(event -> {
+                        final PTInstruction changeHandlerInstruction = new PTInstruction(getObjectID());
+                        changeHandlerInstruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE, textBox.getText());
 
-                        @Override
-                        public void onKeyUp(final KeyUpEvent event) {
-                            final PTInstruction changeHandlerInstruction = new PTInstruction(getObjectID());
-                            changeHandlerInstruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE, textBox.getText());
+                        final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
+                        eventInstruction.put(ClientToServerModel.VALUE_KEY, event.getNativeEvent().getKeyCode());
 
-                            final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
-                            eventInstruction.put(ClientToServerModel.VALUE_KEY, event.getNativeEvent().getKeyCode());
-
-                            if (keyUpFilter != null) {
-                                for (int i = 0; i < keyUpFilter.size(); i++) {
-                                    final JSONNumber keyCode = keyUpFilter.get(i).isNumber();
-                                    if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
-                                        uiService.sendDataToServer(changeHandlerInstruction);
-                                        uiService.sendDataToServer(eventInstruction);
-                                        break;
-                                    }
+                        if (keyUpFilter != null) {
+                            for (int i = 0; i < keyUpFilter.size(); i++) {
+                                final JSONNumber keyCode = keyUpFilter.get(i).isNumber();
+                                if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
+                                    uiService.sendDataToServer(changeHandlerInstruction);
+                                    uiService.sendDataToServer(eventInstruction);
+                                    break;
                                 }
-                            } else {
-                                uiService.sendDataToServer(changeHandlerInstruction);
-                                uiService.sendDataToServer(eventInstruction);
                             }
-                            preventOrStopEvent(event);
+                        } else {
+                            uiService.sendDataToServer(changeHandlerInstruction);
+                            uiService.sendDataToServer(eventInstruction);
                         }
+                        preventOrStopEvent(event);
                     });
                 } else {
-                    widget.addDomHandler(new KeyUpHandler() {
+                    widget.addDomHandler(event -> {
+                        final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
+                        eventInstruction.put(ClientToServerModel.VALUE_KEY, event.getNativeEvent().getKeyCode());
 
-                        @Override
-                        public void onKeyUp(final KeyUpEvent event) {
-                            final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
-                            eventInstruction.put(ClientToServerModel.VALUE_KEY, event.getNativeEvent().getKeyCode());
-
-                            if (keyUpFilter != null) {
-                                for (int i = 0; i < keyUpFilter.size(); i++) {
-                                    final JSONNumber keyCode = keyUpFilter.get(i).isNumber();
-                                    if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
-                                        uiService.sendDataToServer(widget, eventInstruction);
-                                        break;
-                                    }
+                        if (keyUpFilter != null) {
+                            for (int i = 0; i < keyUpFilter.size(); i++) {
+                                final JSONNumber keyCode = keyUpFilter.get(i).isNumber();
+                                if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
+                                    uiService.sendDataToServer(widget, eventInstruction);
+                                    break;
                                 }
-                            } else {
-                                uiService.sendDataToServer(widget, eventInstruction);
                             }
-                            preventOrStopEvent(event);
+                        } else {
+                            uiService.sendDataToServer(widget, eventInstruction);
                         }
+                        preventOrStopEvent(event);
                     }, KeyUpEvent.getType());
                 }
                 break;
             case DRAG_START:
                 widget.getElement().setDraggable(Element.DRAGGABLE_TRUE);
-                widget.addBitlessDomHandler(new DragStartHandler() {
-
-                    @Override
-                    public void onDragStart(final DragStartEvent event) {
-                        event.setData("text", String.valueOf(getObjectID()));
-                        event.getDataTransfer().setDragImage(uiObject.getElement(), 10, 10);
-                        triggerDomEvent(domHandlerType, uiService, event);
-                    }
+                widget.addBitlessDomHandler(event -> {
+                    event.setData("text", String.valueOf(getObjectID()));
+                    event.getDataTransfer().setDragImage(uiObject.getElement(), 10, 10);
+                    triggerDomEvent(domHandlerType, uiService, event);
                 }, DragStartEvent.getType());
                 break;
             case DRAG_END:
-                widget.addBitlessDomHandler(new DragEndHandler() {
-
-                    @Override
-                    public void onDragEnd(final DragEndEvent event) {
-                        triggerDomEvent(domHandlerType, uiService, event);
-                    }
-                }, DragEndEvent.getType());
+                widget.addBitlessDomHandler(event -> triggerDomEvent(domHandlerType, uiService, event), DragEndEvent.getType());
                 break;
             case DRAG_ENTER:
-                widget.addBitlessDomHandler(new DragEnterHandler() {
-
-                    @Override
-                    public void onDragEnter(final DragEnterEvent event) {
-                        triggerDomEvent(domHandlerType, uiService, event);
-                    }
-                }, DragEnterEvent.getType());
+                widget.addBitlessDomHandler(event -> triggerDomEvent(domHandlerType, uiService, event), DragEnterEvent.getType());
                 break;
             case DRAG_LEAVE:
-                widget.addBitlessDomHandler(new DragLeaveHandler() {
-
-                    @Override
-                    public void onDragLeave(final DragLeaveEvent event) {
-                        triggerDomEvent(domHandlerType, uiService, event);
-                    }
-                }, DragLeaveEvent.getType());
+                widget.addBitlessDomHandler(event -> triggerDomEvent(domHandlerType, uiService, event), DragLeaveEvent.getType());
                 break;
             case DROP:
-                widget.addBitlessDomHandler(new DragOverHandler() {
-
-                    @Override
-                    public void onDragOver(final DragOverEvent event) {
-                        // required by GWT api
-                        // triggerDomEvent(addHandler.getObjectID(), domHandlerType, uiService);
-                    }
+                widget.addBitlessDomHandler(event -> {
+                    // required by GWT api
+                    // triggerDomEvent(addHandler.getObjectID(), domHandlerType, uiService);
                 }, DragOverEvent.getType());
 
-                widget.addBitlessDomHandler(new DropHandler() {
-
-                    @Override
-                    public void onDrop(final DropEvent event) {
-                        event.preventDefault();
-                        final String dragWidgetID = event.getData("text");
-                        final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
-                        if (dragWidgetID != null) eventInstruction.put(ClientToServerModel.DRAG_SRC, Long.parseLong(dragWidgetID));
-                        uiService.sendDataToServer(widget, eventInstruction);
-                    }
+                widget.addBitlessDomHandler(event -> {
+                    event.preventDefault();
+                    final String dragWidgetID = event.getData("text");
+                    final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
+                    if (dragWidgetID != null) eventInstruction.put(ClientToServerModel.DRAG_SRC, Long.parseLong(dragWidgetID));
+                    uiService.sendDataToServer(widget, eventInstruction);
                 }, DropEvent.getType());
                 break;
             case CONTEXT_MENU:
-                widget.addDomHandler(new ContextMenuHandler() {
-
-                    @Override
-                    public void onContextMenu(final ContextMenuEvent event) {
-                        triggerDomEvent(domHandlerType, uiService, event);
-                    }
-                }, ContextMenuEvent.getType());
+                widget.addDomHandler(event -> triggerDomEvent(domHandlerType, uiService, event), ContextMenuEvent.getType());
                 break;
             case CHANGE_HANDLER:
             case DRAG_OVER:

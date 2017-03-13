@@ -23,15 +23,8 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
@@ -41,6 +34,12 @@ import com.ponysdk.core.terminal.JavascriptAddOnFactory;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class PTAddOnComposite extends PTAddOn {
 
@@ -77,20 +76,16 @@ public class PTAddOnComposite extends PTAddOn {
         params.put("widgetID", new JSONString(String.valueOf(widgetID)));
         params.put("widgetElement", new JSONObject(element));
 
-        widget.addAttachHandler(new AttachEvent.Handler() {
-
-            @Override
-            public void onAttachOrDetach(final AttachEvent event) {
-                try {
-                    if (event.isAttached()) {
-                        addOn.onAttached();
-                        flushPendingUpdates();
-                    } else {
-                        addOn.onDetached();
-                    }
-                } catch (final JavaScriptException e) {
-                    log.log(Level.SEVERE, e.getMessage(), e);
+        widget.addAttachHandler(event -> {
+            try {
+                if (event.isAttached()) {
+                    addOn.onAttached();
+                    flushPendingUpdates();
+                } else {
+                    addOn.onDetached();
                 }
+            } catch (final JavaScriptException e) {
+                log.log(Level.SEVERE, e.getMessage(), e);
             }
         });
 

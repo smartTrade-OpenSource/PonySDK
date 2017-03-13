@@ -23,169 +23,169 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.text.SimpleDateFormat;
-
 import com.ponysdk.core.model.PUnit;
+
+import java.text.SimpleDateFormat;
 
 public interface ElementFactory {
 
-    public PAbsolutePanel newPAbsolutePanel();
+    PAbsolutePanel newPAbsolutePanel();
 
-    public PAnchor newPAnchor(final String text, final String href);
+    PAnchor newPAnchor(final String text, final String href);
 
-    public PAnchor newPAnchor(final String text);
+    PAnchor newPAnchor(final String text);
 
-    public PAnchor newPAnchor();
+    PAnchor newPAnchor();
 
-    public PButton newPButton(final String text, final String html);
+    PButton newPButton(final String text, final String html);
 
-    public PButton newPButton(final String text);
+    PButton newPButton(final String text);
 
-    public PButton newPButton();
+    PButton newPButton();
 
-    public PCheckBox newPCheckBox();
+    PCheckBox newPCheckBox();
 
-    public PCheckBox newPCheckBox(final String label);
+    PCheckBox newPCheckBox(final String label);
 
-    public PDateBox newPDateBox(final PDatePicker picker, final SimpleDateFormat dateFormat);
+    PDateBox newPDateBox(final PDatePicker picker, final SimpleDateFormat dateFormat);
 
-    public PDateBox newPDateBox(final SimpleDateFormat dateFormat);
+    PDateBox newPDateBox(final SimpleDateFormat dateFormat);
 
-    public PDateBox newPDateBox();
+    PDateBox newPDateBox();
 
-    public PDatePicker newPDatePicker();
+    PDatePicker newPDatePicker();
 
     public PDecoratedPopupPanel newPDecoratedPopupPanel(PWindow window, boolean b);
 
-    public PDecoratorPanel newPDecoratorPanel();
+    PDecoratorPanel newPDecoratorPanel();
 
     public PDialogBox newPDialogBox(final PWindow window);
 
     public PDialogBox newPDialogBox(final PWindow window, final boolean autoHide);
 
-    public PDisclosurePanel newPDisclosurePanel(final String headerText);
+    PDisclosurePanel newPDisclosurePanel(final String headerText);
 
-    public PDockLayoutPanel newPDockLayoutPanel(final PUnit unit);
+    PDockLayoutPanel newPDockLayoutPanel(final PUnit unit);
 
-    public PElement newPElement(final String tagName);
+    PElement newPElement(final String tagName);
 
-    public PFileUpload newPFileUpload();
+    PFileUpload newPFileUpload();
 
-    public PFlexTable newPFlexTable();
+    PFlexTable newPFlexTable();
 
-    public PFlowPanel newPFlowPanel();
+    PFlowPanel newPFlowPanel();
 
-    public PFocusPanel newPFocusPanel();
+    PFocusPanel newPFocusPanel();
 
-    public PGrid newPGrid();
+    PGrid newPGrid();
 
-    public PGrid newPGrid(final int rows, final int columns);
+    PGrid newPGrid(final int rows, final int columns);
 
-    public PHeaderPanel newPHeaderPanel();
+    PHeaderPanel newPHeaderPanel();
 
-    public PHorizontalPanel newPHorizontalPanel();
+    PHorizontalPanel newPHorizontalPanel();
 
-    public PHTML newPHTML(final String html, final boolean wordWrap);
+    PHTML newPHTML(final String html, final boolean wordWrap);
 
-    public PHTML newPHTML(final String html);
+    PHTML newPHTML(final String html);
 
-    public PHTML newPHTML();
+    PHTML newPHTML();
 
-    public PImage newPImage(final String url, final int left, final int top, final int width, final int height);
+    PImage newPImage(final String url, final int left, final int top, final int width, final int height);
 
-    public PImage newPImage(final String url);
+    PImage newPImage(final String url);
 
-    public PImage newPImage(final PImage.ClassPathURL classpathURL);
+    PImage newPImage(final PImage.ClassPathURL classpathURL);
 
-    public PImage newPImage();
+    PImage newPImage();
 
-    public PLabel newPLabel();
+    PLabel newPLabel();
 
-    public PLabel newPLabel(final String text);
+    PLabel newPLabel(final String text);
 
-    public PLayoutPanel newPLayoutPanel();
+    PLayoutPanel newPLayoutPanel();
 
-    public PListBox newPListBox();
+    PListBox newPListBox();
 
-    public PListBox newPListBox(final boolean containsEmptyItem);
+    PListBox newPListBox(final boolean containsEmptyItem);
 
-    public PMenuBar newPMenuBar();
+    PMenuBar newPMenuBar();
 
-    public PMenuBar newPMenuBar(final boolean vertical);
+    PMenuBar newPMenuBar(final boolean vertical);
 
-    public PMenuItem newPMenuItem(final String text, final boolean asHTML);
+    PMenuItem newPMenuItem(final String text, final boolean asHTML);
 
-    public PMenuItem newPMenuItem(final String text, final PMenuBar subMenu);
+    PMenuItem newPMenuItem(final String text, final PMenuBar subMenu);
 
-    public PMenuItem newPMenuItem(final String text);
+    PMenuItem newPMenuItem(final String text);
 
-    public PMenuItem newPMenuItem(final String text, final boolean asHTML, final Runnable cmd);
+    PMenuItem newPMenuItem(final String text, final boolean asHTML, final Runnable cmd);
 
-    public PMenuItem newPMenuItem(final String text, final boolean asHTML, final PMenuBar subMenu);
+    PMenuItem newPMenuItem(final String text, final boolean asHTML, final PMenuBar subMenu);
 
-    public PMenuItem newPMenuItem(final String text, final Runnable cmd);
+    PMenuItem newPMenuItem(final String text, final Runnable cmd);
 
-    public PMenuItemSeparator newPMenuItemSeparator();
+    PMenuItemSeparator newPMenuItemSeparator();
 
-    public PPasswordTextBox newPPasswordTextBox();
+    PPasswordTextBox newPPasswordTextBox();
 
-    public PPasswordTextBox newPPasswordTextBox(final String text);
+    PPasswordTextBox newPPasswordTextBox(final String text);
 
     public PPopupPanel newPPopupPanel(final PWindow window, final boolean autoHide);
 
     public PPopupPanel newPPopupPanel(final PWindow window);
 
-    public PPushButton newPPushButton(final PImage image);
+    PPushButton newPPushButton(final PImage image);
 
-    public PRadioButton newPRadioButton();
+    PRadioButton newPRadioButton();
 
-    public PRadioButton newPRadioButton(final String label);
+    PRadioButton newPRadioButton(final String label);
 
-    public PRadioButtonGroup newPRadioButtonGroup(final String name);
+    PRadioButtonGroup newPRadioButtonGroup(final String name);
 
-    public PRichTextArea newPRichTextArea();
+    PRichTextArea newPRichTextArea();
 
-    public PRichTextToolbar newPRichTextToolbar(final PRichTextArea richTextArea);
+    PRichTextToolbar newPRichTextToolbar(final PRichTextArea richTextArea);
 
-    public PScrollPanel newPScrollPanel();
+    PScrollPanel newPScrollPanel();
 
-    public PSimpleLayoutPanel newPSimpleLayoutPanel();
+    PSimpleLayoutPanel newPSimpleLayoutPanel();
 
-    public PSimplePanel newPSimplePanel();
+    PSimplePanel newPSimplePanel();
 
-    public PSplitLayoutPanel newPSplitLayoutPanel();
+    PSplitLayoutPanel newPSplitLayoutPanel();
 
-    public PStackLayoutPanel newPStackLayoutPanel(final PUnit unit);
+    PStackLayoutPanel newPStackLayoutPanel(final PUnit unit);
 
-    public PSuggestBox newPSuggestBox();
+    PSuggestBox newPSuggestBox();
 
-    public PSuggestBox newPSuggestBox(final PSuggestOracle suggestOracle);
+    PSuggestBox newPSuggestBox(final PSuggestOracle suggestOracle);
 
-    public PTabLayoutPanel newPTabLayoutPanel();
+    PTabLayoutPanel newPTabLayoutPanel();
 
-    public PTabPanel newPTabPanel();
+    PTabPanel newPTabPanel();
 
-    public PTextArea newPTextArea();
+    PTextArea newPTextArea();
 
-    public PTextArea newPTextArea(final String text);
+    PTextArea newPTextArea(final String text);
 
-    public PTextBox newPTextBox();
+    PTextBox newPTextBox();
 
-    public PTextBox newPTextBox(final String text);
+    PTextBox newPTextBox(final String text);
 
-    public PTree newPTree();
+    PTree newPTree();
 
-    public PTreeItem newPTreeItem(final String html);
+    PTreeItem newPTreeItem(final String html);
 
-    public PTreeItem newPTreeItem(final PWidget widget);
+    PTreeItem newPTreeItem(final PWidget widget);
 
-    public PTreeItem newPTreeItem();
+    PTreeItem newPTreeItem();
 
-    public PVerticalPanel newPVerticalPanel();
+    PVerticalPanel newPVerticalPanel();
 
-    public PWindow newPWindow(final boolean relative, final String url, final String name, final String features);
+    PWindow newPWindow(final boolean relative, final String url, final String name, final String features);
 
-    public PWindow newPWindow(final PWindow parentWindow, final boolean relative, final String url, final String name,
+    PWindow newPWindow(final PWindow parentWindow, final boolean relative, final String url, final String name,
                               final String features);
 
 }

@@ -23,31 +23,20 @@
 
 package com.ponysdk.impl.webapplication.menu;
 
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.ponysdk.core.model.PUnit;
-import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.PAnchor;
-import com.ponysdk.core.ui.basic.PComplexPanel;
-import com.ponysdk.core.ui.basic.PSimpleLayoutPanel;
-import com.ponysdk.core.ui.basic.PStackLayoutPanel;
-import com.ponysdk.core.ui.basic.PVerticalPanel;
-import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.basic.event.PSelectionEvent;
 import com.ponysdk.core.ui.basic.event.PSelectionHandler;
 
+import java.time.Duration;
+import java.util.*;
+
 public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView {
 
     private final Node root = new Node(null, "ROOT");
     private final PStackLayoutPanel layoutPanel;
-    private final double headerWidth = 2;// em
     private final double paddingLeft = 16;// px
     private final Map<Node, PComplexPanel> categoriesByNode = new LinkedHashMap<>();
     private final List<PSelectionHandler<MenuItem>> selectionHandlers = new ArrayList<>();
@@ -91,6 +80,7 @@ public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView 
             categoryPanel.ensureDebugId("category_" + categoryNode.name.replace(" ", "_"));
 
             categoryNode.ui = categoryPanel;
+            double headerWidth = 2;
             layoutPanel.add(categoryPanel, categoryNode.name, true, headerWidth);
             categoriesByNode.put(categoryNode, categoryPanel);
 

@@ -23,17 +23,15 @@
 
 package com.ponysdk.core.server.application;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.servlet.http.HttpSession;
-
+import com.ponysdk.core.server.servlet.SessionManager;
+import com.ponysdk.core.useragent.UserAgent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.server.servlet.SessionManager;
-import com.ponysdk.core.useragent.UserAgent;
+import javax.servlet.http.HttpSession;
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Wrapper of the HTTPSession, and contains the UIContexts.

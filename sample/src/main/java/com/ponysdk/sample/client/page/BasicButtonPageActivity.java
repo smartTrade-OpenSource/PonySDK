@@ -29,10 +29,6 @@ import com.ponysdk.core.ui.basic.PHorizontalPanel;
 import com.ponysdk.core.ui.basic.PListBox;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
 import com.ponysdk.core.ui.basic.PWidget;
-import com.ponysdk.core.ui.basic.event.PChangeEvent;
-import com.ponysdk.core.ui.basic.event.PChangeHandler;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.sample.client.event.DemoBusinessEvent;
 
 public class BasicButtonPageActivity extends SamplePageActivity {

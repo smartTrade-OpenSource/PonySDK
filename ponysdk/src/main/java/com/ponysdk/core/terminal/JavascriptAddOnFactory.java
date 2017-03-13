@@ -24,13 +24,11 @@
 package com.ponysdk.core.terminal;
 
 import com.google.gwt.core.client.JavaScriptObject;
-import org.timepedia.exporter.client.Export;
-import org.timepedia.exporter.client.ExportClosure;
-import org.timepedia.exporter.client.Exportable;
 
-@Export
-@ExportClosure
-public interface JavascriptAddOnFactory extends Exportable {
+import jsinterop.annotations.JsFunction;
+
+@JsFunction
+public interface JavascriptAddOnFactory {
 
     JavascriptAddOn newAddOn(JavaScriptObject params);
 

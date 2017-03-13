@@ -23,11 +23,7 @@
 
 package com.ponysdk.core.terminal.socket;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.RepeatingCommand;
 import com.google.gwt.user.client.rpc.StatusCodeException;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -37,7 +33,6 @@ import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 import com.ponysdk.core.terminal.request.WebSocketRequestBuilder;
-
 import elemental.client.Browser;
 import elemental.events.CloseEvent;
 import elemental.events.Event;
@@ -47,6 +42,9 @@ import elemental.html.ArrayBuffer;
 import elemental.html.WebSocket;
 import elemental.html.Window;
 import elemental.html.Worker;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class WebSocketClient implements MessageSender {
 
@@ -79,44 +77,28 @@ public class WebSocketClient implements MessageSender {
             throw new IllegalArgumentException("Wrong reader type : " + webSocketDataType);
         }
 
-        webSocket.setOnopen(new EventListener() {
+        webSocket.setOnopen(event -> {
+            if (log.isLoggable(Level.INFO)) log.info("WebSoket connected");
 
-            @Override
-            public void handleEvent(final Event event) {
-                if (log.isLoggable(Level.INFO)) log.info("WebSoket connected");
-
-                Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
-
-                    @Override
-                    public boolean execute() {
-                        if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Heart beat sent");
-                        send(ClientToServerModel.HEARTBEAT.toStringValue());
-                        return true;
-                    }
-                }, 1000);
+            Scheduler.get().scheduleFixedDelay(() -> {
+                if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Heart beat sent");
+                send(ClientToServerModel.HEARTBEAT.toStringValue());
+                return true;
+            }, 1000);
+        });
+        webSocket.setOnclose(event -> {
+            if (event instanceof CloseEvent) {
+                final CloseEvent closeEvent = (CloseEvent) event;
+                if (log.isLoggable(Level.INFO)) log.info("WebSoket disconnected : " + closeEvent.getCode());
+                uiBuilder.onCommunicationError(new StatusCodeException(closeEvent.getCode(), closeEvent.getReason()));
+            } else {
+                if (log.isLoggable(Level.INFO)) log.info("WebSoket disconnected");
+                uiBuilder.onCommunicationError(new Exception("Websocket connection closed"));
             }
         });
-        webSocket.setOnclose(new EventListener() {
-
-            @Override
-            public void handleEvent(final Event event) {
-                if (event instanceof CloseEvent) {
-                    final CloseEvent closeEvent = (CloseEvent) event;
-                    if (log.isLoggable(Level.INFO)) log.info("WebSoket disconnected : " + closeEvent.getCode());
-                    uiBuilder.onCommunicationError(new StatusCodeException(closeEvent.getCode(), closeEvent.getReason()));
-                } else {
-                    if (log.isLoggable(Level.INFO)) log.info("WebSoket disconnected");
-                    uiBuilder.onCommunicationError(new Exception("Websocket connection closed"));
-                }
-            }
-        });
-        webSocket.setOnerror(new EventListener() {
-
-            @Override
-            public void handleEvent(final Event event) {
-                if (log.isLoggable(Level.INFO)) log.info("WebSoket error");
-                uiBuilder.onCommunicationError(new Exception("Websocket error"));
-            }
+        webSocket.setOnerror(event -> {
+            if (log.isLoggable(Level.INFO)) log.info("WebSoket error");
+            uiBuilder.onCommunicationError(new Exception("Websocket error"));
         });
         webSocket.setOnmessage(new EventListener() {
 
@@ -184,7 +166,7 @@ public class WebSocketClient implements MessageSender {
 
         private String name;
 
-        private WebSocketDataType(final String name) {
+        WebSocketDataType(final String name) {
             this.name = name;
         }
 

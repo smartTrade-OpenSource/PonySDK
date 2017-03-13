@@ -26,16 +26,9 @@ package com.ponysdk.core.terminal;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.timepedia.exporter.client.Export;
-import org.timepedia.exporter.client.ExportConstructor;
-import org.timepedia.exporter.client.ExportPackage;
-import org.timepedia.exporter.client.Exportable;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.event.logical.shared.CloseEvent;
-import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
@@ -48,50 +41,35 @@ import com.ponysdk.core.terminal.socket.WebSocketClient;
 import com.ponysdk.core.terminal.socket.WebSocketClient.WebSocketDataType;
 import com.ponysdk.core.terminal.ui.PTWindowManager;
 
-@ExportPackage(value = "")
-@Export(value = "ponysdk")
-public class PonySDK implements Exportable, UncaughtExceptionHandler {
+import jsinterop.annotations.JsType;
 
-    private static final Logger log = Logger.getLogger(PonySDK.class.getName());
+@JsType
+public class PonySDK implements UncaughtExceptionHandler {
 
-    private static PonySDK INSTANCE;
+    private final Logger log = Logger.getLogger(PonySDK.class.getName());
 
     private final UIBuilder uiBuilder = new UIBuilder();
 
     private WebSocketClient socketClient;
 
-    private boolean started = false;
+    private boolean started;
 
+    @SuppressWarnings("unusable-by-js")
     public static Integer uiContextId;
 
-    private PonySDK() {
+    public PonySDK() {
     }
 
-    @ExportConstructor
-    public static PonySDK constructor() {
-        if (INSTANCE == null) {
-            INSTANCE = new PonySDK();
-            GWT.setUncaughtExceptionHandler(INSTANCE);
-            if (log.isLoggable(Level.INFO)) log.info("Creating PonySDK instance");
-        }
-        return INSTANCE;
-    }
-
-    @Export
     public void start() {
         if (started) return;
+        GWT.setUncaughtExceptionHandler(this);
+        if (log.isLoggable(Level.INFO)) log.info("Creating PonySDK instance");
         try {
             final String windowId = Window.Location.getParameter(ClientToServerModel.WINDOW_ID.toStringValue());
 
             if (log.isLoggable(Level.INFO)) log.info("Starting PonySDK instance");
             if (windowId == null) {
-                Window.addCloseHandler(new CloseHandler<Window>() {
-
-                    @Override
-                    public void onClose(final CloseEvent<Window> event) {
-                        close();
-                    }
-                });
+                Window.addCloseHandler(event -> close());
 
                 final String builder = GWT.getHostPageBaseURL().replaceFirst("http", "ws") + "ws?"
                         + ClientToServerModel.TYPE_HISTORY.toStringValue() + "=" + History.getToken();
@@ -120,40 +98,27 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler {
     /**
      * From other terminal to the server
      */
-    @Export
-    public void sendDataToServer(final String jsObject) {
+    public void sendDataToServerFromWindow(final String jsObject) {
         uiBuilder.sendDataToServer(JSONParser.parseStrict(jsObject));
     }
 
     /**
      * From Main terminal to the server
      */
-    @Export
-    public void sendDataToServer(final int objectID, final JavaScriptObject jsObject) {
-        final PTInstruction instruction = new PTInstruction(objectID);
+    public void sendDataToServer(final Object objectID, final JavaScriptObject jsObject) {
+        final PTInstruction instruction = new PTInstruction(Integer.valueOf(objectID.toString()));
         instruction.put(ClientToServerModel.NATIVE, jsObject);
         uiBuilder.sendDataToServer(instruction);
     }
 
-    /**
-     * From Main terminal to the server
-     */
-    @Export
-    public void sendDataToServer(final String objectID, final JavaScriptObject jsObject) {
-        sendDataToServer(Integer.parseInt(objectID), jsObject);
-    }
-
-    @Export
     public void setReadyWindow(final int windowID) {
         uiBuilder.setReadyWindow(windowID);
     }
 
-    @Export
     public void registerCommunicationError(final CommunicationErrorHandler communicationErrorClosure) {
         uiBuilder.registerCommunicationError(communicationErrorClosure);
     }
 
-    @Export
     public void registerAddOnFactory(final String signature, final JavascriptAddOnFactory javascriptAddOnFactory) {
         uiBuilder.registerJavascriptAddOnFactory(signature, javascriptAddOnFactory);
     }
@@ -164,7 +129,6 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler {
         uiBuilder.sendErrorMessageToServer(e.getMessage());
     }
 
-    @Export
     public void close() {
         socketClient.close();
         PTWindowManager.closeAll();

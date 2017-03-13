@@ -51,11 +51,7 @@ public class SamplePageActivity extends PageActivity {
 
     private static Logger log = LoggerFactory.getLogger(SamplePageActivity.class);
 
-    private PTabLayoutPanel tabPanel;
-
     protected PSimpleLayoutPanel examplePanel;
-
-    private PScrollPanel codePanel;
 
     public SamplePageActivity(final String pageName, final String pageCategory) {
         this(pageName, Collections.singleton(pageCategory));
@@ -80,7 +76,7 @@ public class SamplePageActivity extends PageActivity {
 
     @Override
     protected void onFirstShowPage() {
-        codePanel = Element.newPScrollPanel();
+        PScrollPanel codePanel = Element.newPScrollPanel();
 
         examplePanel = new PSimpleLayoutPanel() {
 
@@ -92,7 +88,7 @@ public class SamplePageActivity extends PageActivity {
         };
         examplePanel.setSizeFull();
 
-        tabPanel = Element.newPTabLayoutPanel();
+        PTabLayoutPanel tabPanel = Element.newPTabLayoutPanel();
 
         tabPanel.add(examplePanel, "Example");
 

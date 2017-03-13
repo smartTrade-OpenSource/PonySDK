@@ -30,8 +30,6 @@ import com.google.gwt.json.client.JSONValue;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 import elemental.client.Browser;
-import elemental.events.Event;
-import elemental.events.EventListener;
 import elemental.events.MessageEvent;
 import elemental.html.Uint8Array;
 
@@ -44,15 +42,11 @@ public class ParentWindowRequest implements RequestBuilder {
     public ParentWindowRequest(final String windowID, final RequestCallback callback) {
         this.callback = callback;
 
-        Browser.getWindow().setOnmessage(new EventListener() {
-
-            @Override
-            public void handleEvent(final Event event) {
-                final Uint8Array buffer = (Uint8Array) ((MessageEvent) event).getData();
-                final ReaderBuffer readerBuffer = new ReaderBuffer();
-                readerBuffer.init(buffer);
-                onDataReceived(readerBuffer);
-            }
+        Browser.getWindow().setOnmessage(event -> {
+            final Uint8Array buffer = (Uint8Array) ((MessageEvent) event).getData();
+            final ReaderBuffer readerBuffer = new ReaderBuffer();
+            readerBuffer.init(buffer);
+            onDataReceived(readerBuffer);
         });
 
         setReadyWindow(windowID);
@@ -77,7 +71,7 @@ public class ParentWindowRequest implements RequestBuilder {
      * To Main terminal
      */
     public static native void sendToParent(final String data) /*-{
-                                                              $wnd.opener.pony.sendDataToServer(data);
+                                                              $wnd.opener.pony.sendDataToServerFromWindow(data);
                                                               }-*/;
 
     /**

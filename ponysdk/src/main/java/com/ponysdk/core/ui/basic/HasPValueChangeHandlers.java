@@ -23,9 +23,9 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Collection;
-
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
+
+import java.util.Collection;
 
 /**
  * A widget that implements this interface is a public source of

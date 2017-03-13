@@ -23,13 +23,13 @@
 
 package com.ponysdk.core.ui.grid;
 
-import java.util.Iterator;
-
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PComplexPanel;
 import com.ponysdk.core.ui.basic.PElement;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.list.SimpleListView;
+
+import java.util.Iterator;
 
 public abstract class AbstractGridWidget extends PElement implements SimpleListView {
 

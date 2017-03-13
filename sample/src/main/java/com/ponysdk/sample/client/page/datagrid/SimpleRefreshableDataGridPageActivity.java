@@ -25,8 +25,6 @@ package com.ponysdk.sample.client.page.datagrid;
 
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.form.formfield.IntegerTextBoxFormField;
 import com.ponysdk.core.ui.form.formfield.LongTextBoxFormField;
 import com.ponysdk.core.ui.grid.GridTableWidget;

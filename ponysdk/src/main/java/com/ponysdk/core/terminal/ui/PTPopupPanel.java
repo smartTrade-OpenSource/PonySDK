@@ -24,16 +24,8 @@
 package com.ponysdk.core.terminal.ui;
 
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Document;
-import com.google.gwt.event.dom.client.MouseDownEvent;
-import com.google.gwt.event.dom.client.MouseDownHandler;
-import com.google.gwt.event.dom.client.MouseMoveEvent;
-import com.google.gwt.event.dom.client.MouseMoveHandler;
-import com.google.gwt.event.dom.client.MouseUpEvent;
-import com.google.gwt.event.dom.client.MouseUpHandler;
-import com.google.gwt.event.logical.shared.CloseEvent;
-import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.user.client.DOM;
@@ -83,14 +75,10 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
     }
 
     protected void addCloseHandler(final UIBuilder uiService) {
-        cast().addCloseHandler(new CloseHandler<PopupPanel>() {
-
-            @Override
-            public void onClose(final CloseEvent<PopupPanel> event) {
-                final PTInstruction instruction = new PTInstruction(getObjectID());
-                instruction.put(ClientToServerModel.HANDLER_CLOSE);
-                uiService.sendDataToServer(cast(), instruction);
-            }
+        cast().addCloseHandler(event -> {
+            final PTInstruction instruction = new PTInstruction(getObjectID());
+            instruction.put(ClientToServerModel.HANDLER_CLOSE);
+            uiService.sendDataToServer(cast(), instruction);
         });
     }
 
@@ -100,23 +88,19 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
             final PopupPanel popup = cast();
             popup.setVisible(true);
             popup.show();
-            Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+            Scheduler.get().scheduleDeferred(() -> {
+                final PTInstruction eventInstruction = new PTInstruction(getObjectID());
 
-                @Override
-                public void execute() {
-                    final PTInstruction eventInstruction = new PTInstruction(getObjectID());
+                final JSONArray widgetInfo = new JSONArray();
+                int i = 0;
+                widgetInfo.set(i++, new JSONNumber(popup.getOffsetWidth()));
+                widgetInfo.set(i++, new JSONNumber(popup.getOffsetHeight()));
+                widgetInfo.set(i++, new JSONNumber(Window.getClientWidth()));
+                widgetInfo.set(i++, new JSONNumber(Window.getClientHeight()));
 
-                    final JSONArray widgetInfo = new JSONArray();
-                    int i = 0;
-                    widgetInfo.set(i++, new JSONNumber(popup.getOffsetWidth()));
-                    widgetInfo.set(i++, new JSONNumber(popup.getOffsetHeight()));
-                    widgetInfo.set(i++, new JSONNumber(Window.getClientWidth()));
-                    widgetInfo.set(i++, new JSONNumber(Window.getClientHeight()));
+                eventInstruction.put(ClientToServerModel.POPUP_POSITION, widgetInfo);
 
-                    eventInstruction.put(ClientToServerModel.POPUP_POSITION, widgetInfo);
-
-                    uiService.sendDataToServer(cast(), eventInstruction);
-                }
+                uiService.sendDataToServer(cast(), eventInstruction);
             });
         } else {
             super.addHandler(buffer, handlerModel, uiService);

@@ -34,8 +34,6 @@ import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PScrollPanel;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.place.Place;
 
 public class FlexTableForBenchPageActivity extends SamplePageActivity {

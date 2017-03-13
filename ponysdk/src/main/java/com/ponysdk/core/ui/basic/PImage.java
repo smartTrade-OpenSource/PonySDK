@@ -23,14 +23,6 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.UIContext;
@@ -40,6 +32,13 @@ import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 import com.ponysdk.core.ui.eventbus.StreamHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 
 /**
  * A widget that displays the image at a given URL. The image can be in 'unclipped' mode (the

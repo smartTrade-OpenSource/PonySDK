@@ -23,13 +23,12 @@
 
 package com.ponysdk.core.server.servlet;
 
-import java.util.Calendar;
+import com.ponysdk.core.server.application.AbstractApplicationManager;
+import com.ponysdk.core.server.application.ApplicationManagerOption;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
-
-import com.ponysdk.core.server.application.AbstractApplicationManager;
-import com.ponysdk.core.server.application.ApplicationManagerOption;
+import java.util.Calendar;
 
 public abstract class AbstractApplicationLoader implements ApplicationLoader {
 
