@@ -66,6 +66,8 @@ import com.ponysdk.core.ui.list.renderer.cell.CellRenderer;
 import com.ponysdk.core.ui.list.valueprovider.IdentityValueProvider;
 import com.ponysdk.core.ui.main.EntryPoint;
 import com.ponysdk.core.ui.model.PKeyCodes;
+import com.ponysdk.core.ui.rich.PConfirmDialog;
+import com.ponysdk.core.ui.rich.POptionPane;
 import com.ponysdk.core.ui.rich.PToolbar;
 import com.ponysdk.core.ui.rich.PTwinListBox;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
@@ -128,11 +130,11 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         boxContainer.add(Element.newPDateBox(new SimpleDateFormat("dd/MM/yyyy")));
         boxContainer.add(Element.newPDateBox(Element.newPDatePicker(), new SimpleDateFormat("yyyy/MM/dd")));
         boxContainer.add(Element.newPDatePicker());
-        boxContainer.add(Element.newPDecoratedPopupPanel(PWindow.getMain(), false));
-        boxContainer.add(Element.newPDecoratedPopupPanel(PWindow.getMain(), true));
+        boxContainer.add(Element.newPDecoratedPopupPanel(false));
+        boxContainer.add(Element.newPDecoratedPopupPanel(true));
         boxContainer.add(Element.newPDecoratorPanel());
-        boxContainer.add(Element.newPDialogBox(PWindow.getMain()));
-        boxContainer.add(Element.newPDialogBox(PWindow.getMain(), true));
+        boxContainer.add(Element.newPDialogBox());
+        boxContainer.add(Element.newPDialogBox(true));
         boxContainer.add(Element.newPDisclosurePanel("Disclosure"));
         boxContainer.add(createDockLayoutPanel());
         boxContainer.add(Element.newA());
@@ -160,8 +162,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         boxContainer.add(Element.newPPasswordTextBox());
         boxContainer.add(Element.newPPasswordTextBox("Password"));
 
-        boxContainer.add(Element.newPPopupPanel(PWindow.getMain()));
-        boxContainer.add(Element.newPPopupPanel(PWindow.getMain(), true));
+        boxContainer.add(Element.newPPopupPanel());
+        boxContainer.add(Element.newPPopupPanel(true));
 
         boxContainer.add(Element.newPPushButton(Element.newPImage())); // FIXME Test with image
 
@@ -206,6 +208,10 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         } catch (final Exception e) {
 
         }
+
+        PConfirmDialog.show(PWindow.getMain(), "AAA", Element.newPLabel("AA"));
+
+        POptionPane.showConfirmDialog(PWindow.getMain(), null, "BBB");
 
         // uiContext.getHistory().newItem("", false);
     }

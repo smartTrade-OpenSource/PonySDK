@@ -23,9 +23,9 @@
 
 package com.ponysdk.core.ui.basic;
 
-import com.ponysdk.core.model.PUnit;
-
 import java.text.SimpleDateFormat;
+
+import com.ponysdk.core.model.PUnit;
 
 public class DefaultElementFactory implements ElementFactory {
 
@@ -100,18 +100,18 @@ public class DefaultElementFactory implements ElementFactory {
     }
 
     @Override
-    public PDecoratedPopupPanel newPDecoratedPopupPanel(final PWindow window, final boolean autoHide) {
-        return new PDecoratedPopupPanel(window, autoHide);
+    public PDecoratedPopupPanel newPDecoratedPopupPanel(final boolean autoHide) {
+        return new PDecoratedPopupPanel(autoHide);
     }
 
     @Override
-    public PDialogBox newPDialogBox(final PWindow window) {
-        return new PDialogBox(window);
+    public PDialogBox newPDialogBox() {
+        return new PDialogBox();
     }
 
     @Override
-    public PDialogBox newPDialogBox(final PWindow window, final boolean autoHide) {
-        return new PDialogBox(window, autoHide);
+    public PDialogBox newPDialogBox(final boolean autoHide) {
+        return new PDialogBox(autoHide);
     }
 
     @Override
@@ -285,13 +285,13 @@ public class DefaultElementFactory implements ElementFactory {
     }
 
     @Override
-    public PPopupPanel newPPopupPanel(final PWindow window, final boolean autoHide) {
-        return new PPopupPanel(window, autoHide);
+    public PPopupPanel newPPopupPanel(final boolean autoHide) {
+        return new PPopupPanel(autoHide);
     }
 
     @Override
-    public PPopupPanel newPPopupPanel(final PWindow window) {
-        return new PPopupPanel(window);
+    public PPopupPanel newPPopupPanel() {
+        return new PPopupPanel();
     }
 
     @Override

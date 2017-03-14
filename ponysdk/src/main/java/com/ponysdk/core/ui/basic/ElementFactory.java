@@ -23,9 +23,9 @@
 
 package com.ponysdk.core.ui.basic;
 
-import com.ponysdk.core.model.PUnit;
-
 import java.text.SimpleDateFormat;
+
+import com.ponysdk.core.model.PUnit;
 
 public interface ElementFactory {
 
@@ -55,13 +55,13 @@ public interface ElementFactory {
 
     PDatePicker newPDatePicker();
 
-    public PDecoratedPopupPanel newPDecoratedPopupPanel(PWindow window, boolean b);
-
     PDecoratorPanel newPDecoratorPanel();
 
-    public PDialogBox newPDialogBox(final PWindow window);
+    PDecoratedPopupPanel newPDecoratedPopupPanel(final boolean autoHide);
 
-    public PDialogBox newPDialogBox(final PWindow window, final boolean autoHide);
+    PDialogBox newPDialogBox();
+
+    PDialogBox newPDialogBox(final boolean autoHide);
 
     PDisclosurePanel newPDisclosurePanel(final String headerText);
 
@@ -131,9 +131,9 @@ public interface ElementFactory {
 
     PPasswordTextBox newPPasswordTextBox(final String text);
 
-    public PPopupPanel newPPopupPanel(final PWindow window, final boolean autoHide);
+    PPopupPanel newPPopupPanel(final boolean autoHide);
 
-    public PPopupPanel newPPopupPanel(final PWindow window);
+    PPopupPanel newPPopupPanel();
 
     PPushButton newPPushButton(final PImage image);
 
@@ -185,7 +185,6 @@ public interface ElementFactory {
 
     PWindow newPWindow(final boolean relative, final String url, final String name, final String features);
 
-    PWindow newPWindow(final PWindow parentWindow, final boolean relative, final String url, final String name,
-                              final String features);
+    PWindow newPWindow(final PWindow parentWindow, final boolean relative, final String url, final String name, final String features);
 
 }

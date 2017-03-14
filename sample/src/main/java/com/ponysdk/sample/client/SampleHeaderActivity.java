@@ -54,7 +54,8 @@ public class SampleHeaderActivity extends HeaderActivity implements PClickHandle
         optionsAnchor.ensureDebugId("options_anchor");
         // optionsAnchor.addStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU);
 
-        popup = Element.newPPopupPanel(getView().asWidget().getWindow());
+        popup = Element.newPPopupPanel();
+        getView().asWidget().getWindow().add(popup);
         // popup.addStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_POPUP);
 
         final PVerticalPanel panel = Element.newPVerticalPanel();
@@ -72,29 +73,25 @@ public class SampleHeaderActivity extends HeaderActivity implements PClickHandle
         popup.setWidget(panel);
 
         signOutAnchor.ensureDebugId("sign_out_anchor");
-        signOutAnchor.addClickHandler(new PClickHandler() {
+        signOutAnchor.addClickHandler(clickEvent -> {
+            // optionsAnchor.removeStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_SELECTED);
+            popup.hide();
 
-            @Override
-            public void onClick(final PClickEvent clickEvent) {
-                // optionsAnchor.removeStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_SELECTED);
-                popup.hide();
+            final POptionPane optionPane = POptionPane.showConfirmDialog(getView().asWidget().getWindow(), new PActionHandler() {
 
-                final POptionPane optionPane = POptionPane.showConfirmDialog(getView().asWidget().getWindow(), new PActionHandler() {
-
-                    @Override
-                    public void onAction(final PDialogBox dialogBox, final String option) {
-                        if (POption.YES_OPTION.equals(option)) {
-                            dialogBox.hide();
-                            final UserLoggedOutEvent userLoggedOutEvent = new UserLoggedOutEvent(this, userLogged);
-                            fireEvent(userLoggedOutEvent);
-                        } else {
-                            dialogBox.hide();
-                        }
+                @Override
+                public void onAction(final PDialogBox dialogBox, final String option) {
+                    if (POption.YES_OPTION.equals(option)) {
+                        dialogBox.hide();
+                        final UserLoggedOutEvent userLoggedOutEvent = new UserLoggedOutEvent(this, userLogged);
+                        fireEvent(userLoggedOutEvent);
+                    } else {
+                        dialogBox.hide();
                     }
-                }, "Really logout user " + userLogged.getName() + " ?", "Sign out", POptionType.YES_NO_OPTION);
+                }
+            }, "Really logout user " + userLogged.getName() + " ?", "Sign out", POptionType.YES_NO_OPTION);
 
-                optionPane.asWidget().ensureDebugId("sign_out_dialog");
-            }
+            optionPane.asWidget().ensureDebugId("sign_out_dialog");
         });
 
         optionsAnchor.addClickHandler(clickEvent -> {

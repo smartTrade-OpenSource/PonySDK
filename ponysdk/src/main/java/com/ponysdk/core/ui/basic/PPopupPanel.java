@@ -84,25 +84,13 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
     private PPositionCallback positionCallback;
 
-    protected PPopupPanel(final PWindow window, final boolean autoHide) {
+    protected PPopupPanel(final boolean autoHide) {
         this.visible = false;
         this.autoHide = autoHide;
-        PPopupManager.get(window).registerPopup(this);
     }
 
-    protected PPopupPanel(final PWindow window) {
-        this(window, false);
-    }
-
-    @Override
-    protected boolean attach(final PWindow window) {
-        final boolean result = super.attach(window);
-
-        if (initialized) {
-            window.add(ID + "", this);
-        }
-
-        return result;
+    protected PPopupPanel() {
+        this(false);
     }
 
     @Override

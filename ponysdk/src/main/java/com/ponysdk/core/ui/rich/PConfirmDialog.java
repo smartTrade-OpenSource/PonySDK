@@ -39,8 +39,8 @@ public class PConfirmDialog extends PDialogBox {
     private PButton okButton;
     private PButton cancelButton;
 
-    public PConfirmDialog(final PWindow window) {
-        super(window);
+    public PConfirmDialog() {
+        super();
     }
 
     public static PConfirmDialog show(final PWindow window, final String windowCaption, final String message, final String okCaption,
@@ -48,18 +48,27 @@ public class PConfirmDialog extends PDialogBox {
         return show(window, windowCaption, Element.newPLabel(message), okCaption, cancelCaption, confirmDialogHandler);
     }
 
+    // show a popup which have a ok button hiding the popup by default
+    public static PConfirmDialog show(final PWindow window, final String windowCaption, final PWidget content) {
+        return show(window, windowCaption, content, PString.get("dialog.ok"), null, null);
+    }
+
+    public static PConfirmDialog show(final PWindow windowID, final String windowCaption, final PWidget content,
+                                      final PConfirmDialogHandler confirmDialogHandler) {
+        return show(windowID, windowCaption, content, PString.get("dialog.ok"), null, confirmDialogHandler);
+    }
+
     public static PConfirmDialog show(final PWindow window, final String windowCaption, final PWidget content, final String okCaption,
                                       final String cancelCaption, final PConfirmDialogHandler confirmDialogHandler) {
-        final PConfirmDialog confirmDialog = buildPopup(window, windowCaption, content, okCaption, cancelCaption,
-            confirmDialogHandler);
+        final PConfirmDialog confirmDialog = buildPopup(windowCaption, content, okCaption, cancelCaption, confirmDialogHandler);
+        window.add(confirmDialog);
         confirmDialog.center();
         return confirmDialog;
     }
 
-    public static PConfirmDialog buildPopup(final PWindow window, final String windowCaption, final PWidget content,
-                                            final String okCaption, final String cancelCaption,
-                                            final PConfirmDialogHandler confirmDialogHandler) {
-        final PConfirmDialog confirmDialog = new PConfirmDialog(window);
+    public static PConfirmDialog buildPopup(final String windowCaption, final PWidget content, final String okCaption,
+                                            final String cancelCaption, final PConfirmDialogHandler confirmDialogHandler) {
+        final PConfirmDialog confirmDialog = new PConfirmDialog();
         confirmDialog.setStyleName("pony-DialogBox");
         confirmDialog.setAnimationEnabled(true);
         confirmDialog.setGlassEnabled(true);
@@ -102,16 +111,6 @@ public class PConfirmDialog extends PDialogBox {
         confirmDialog.setWidget(dialogContent);
 
         return confirmDialog;
-    }
-
-    // show a popup which have a ok button hiding the popup by default
-    public static PConfirmDialog show(final PWindow window, final String windowCaption, final PWidget content) {
-        return show(window, windowCaption, content, PString.get("dialog.ok"), null, null);
-    }
-
-    public static PConfirmDialog show(final PWindow windowID, final String windowCaption, final PWidget content,
-                                      final PConfirmDialogHandler confirmDialogHandler) {
-        return show(windowID, windowCaption, content, PString.get("dialog.ok"), null, confirmDialogHandler);
     }
 
     @Override

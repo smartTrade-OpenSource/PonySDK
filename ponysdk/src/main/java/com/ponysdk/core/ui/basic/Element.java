@@ -123,20 +123,20 @@ public class Element {
         return f.newPDatePicker();
     }
 
-    public static final PDecoratedPopupPanel newPDecoratedPopupPanel(final PWindow window, final boolean b) {
-        return f.newPDecoratedPopupPanel(window, b);
+    public static final PDecoratedPopupPanel newPDecoratedPopupPanel(final boolean autoHide) {
+        return f.newPDecoratedPopupPanel(autoHide);
     }
 
     public static final PDecoratorPanel newPDecoratorPanel() {
         return f.newPDecoratorPanel();
     }
 
-    public static final PDialogBox newPDialogBox(final PWindow window) {
-        return f.newPDialogBox(window);
+    public static final PDialogBox newPDialogBox() {
+        return f.newPDialogBox();
     }
 
-    public static final PDialogBox newPDialogBox(final PWindow window, final boolean autoHide) {
-        return f.newPDialogBox(window, autoHide);
+    public static final PDialogBox newPDialogBox(final boolean autoHide) {
+        return f.newPDialogBox(autoHide);
     }
 
     public static final PDisclosurePanel newPDisclosurePanel(final String headerText) {
@@ -275,12 +275,12 @@ public class Element {
         return f.newPPasswordTextBox(text);
     }
 
-    public static final PPopupPanel newPPopupPanel(final PWindow window, final boolean autoHide) {
-        return f.newPPopupPanel(window, autoHide);
+    public static final PPopupPanel newPPopupPanel(final boolean autoHide) {
+        return f.newPPopupPanel(autoHide);
     }
 
-    public static final PPopupPanel newPPopupPanel(final PWindow window) {
-        return f.newPPopupPanel(window);
+    public static final PPopupPanel newPPopupPanel() {
+        return f.newPPopupPanel();
     }
 
     public static final PPushButton newPPushButton(final PImage image) {

@@ -30,7 +30,6 @@ import com.ponysdk.core.ui.basic.PFlexTable;
 import com.ponysdk.core.ui.basic.PPopupPanel;
 import com.ponysdk.core.ui.basic.PSimplePanel;
 import com.ponysdk.core.ui.basic.PWidget;
-import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 
@@ -42,12 +41,12 @@ public class PClosableDialogBox extends PPopupPanel {
 
     private final PSimplePanel contentContainer;
 
-    public PClosableDialogBox(final PWindow window, final String caption) {
-        this(window, false, Element.newPLabel(caption), Element.newPImage("images/close_16.png"));
+    public PClosableDialogBox(final String caption) {
+        this(false, Element.newPLabel(caption), Element.newPImage("images/close_16.png"));
     }
 
-    public PClosableDialogBox(final PWindow window, final boolean modal, final IsPWidget captionWidget, final IsPWidget closeWidget) {
-        super(window, false);
+    public PClosableDialogBox(final boolean modal, final IsPWidget captionWidget, final IsPWidget closeWidget) {
+        super(false);
         setModal(modal);
 
         setStyleName("pony-closable-dialog-box");
