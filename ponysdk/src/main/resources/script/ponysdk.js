@@ -143,148 +143,189 @@ function decode(arrayBufferView) {
 if (typeof module !== 'undefined' && module.hasOwnProperty('exports')) module.exports.decode = decode;
 else window['decode'] = decode;
 
-var Addon = function (pony, params) {
-    this.logLevel = 0;
-    this.name = this.getName();
-    this.id = params.id;
-    this.widgetId = params.widgetID;
-    if (typeof params.widgetElement != 'undefined') {
-        this.element = params.widgetElement;
-    }
-    this.options = params.args || {};
-    this.initialized = false;
-    this.attached = false;
+function AbstractAddon(params) {
+  this.id = params.id;
+  this.logLevel = 0;
+
+  if (params.widgetElement) {
+    this.element = params.widgetElement;
+  }
+
+  // Java constructor parameters
+  this.options = params.args || {};
+  this.initialized = false;
+  this.attached = false;
 };
 
-Addon.prototype.onInit = function () {
-    if (!this.initialized) {
-        this.init();
-        this.initialized = true;
-    }
+// AbstractAddon methods
+AbstractAddon.prototype.onInit = function() {
+  if (!this.initialized) {
+    this.init();
+    this.initialized = true;
+  }
 };
 
-Addon.prototype.init = function () {
-    // Specific behavior
+AbstractAddon.prototype.onAttached = function() {
+  if (!this.attached) {
+    this.jqelement = $(this.element).attr("id", this.id);
+    this.initDom();
+    this.attached = true;
+  }
 };
 
-Addon.prototype.onAttached = function () {
-    if (!this.attached)  {
-        this.jqelement = $(this.element).attr("id", this.id);
-        this.initDom();
-        this.attached = true;
-    }
+AbstractAddon.prototype.setLogLevel = function(logLevel) {
+  this.logLevel = parseInt(logLevel);
 };
 
-Addon.prototype.initDom = function () {
-    // Specific behavior
+AbstractAddon.prototype.sendDataToServer = function(data) {
+  pony.sendDataToServer(this.id, data);
 };
 
-Addon.prototype.onDetached = function () {
-};
+AbstractAddon.prototype.log = function() {
+  var args = Array.prototype.splice.call(arguments, 0);
+  args.unshift("[" + this.getName() + "]");
+  console.log.apply(console, args);
+}
 
-Addon.prototype.sendDataToServer = function (data) {
-    pony.sendDataToServer(this.id, data);
-};
+AbstractAddon.prototype.getName = function() {
+  // Split the Java full qualified name to only get the associated class name
+  var splitted = this.javaClass.split(".");
+  return splitted[splitted.length - 1];
+}
 
-Addon.prototype.getName = function () {
-    if (Object.prototype.toString.call(this.javaClass) === '[object Array]') {
-        var names = [];
-        for (var i = 0; i < this.javaClass.length; i++) {
-            var splitted = this.javaClass[i].split(".");
-            names.push(splitted[splitted.length - 1]);
-        }
-        return names.join("/");
+AbstractAddon.prototype.update = function(d) {
+  var methodName = d['m'];
+
+  if (!this.initialized) {
+    throw "[" + this.getName() + "] Tried to call method '" + methodName + "' before init()";
+  }
+
+  try {
+    if (d.hasOwnProperty('arg')) {
+      if (this.logLevel > 1) this.log(methodName, d['arg']);
+      this[methodName].apply(this, d['arg']);
     } else {
-        var splitted = this.javaClass.split(".");
-        return splitted[splitted.length - 1];
+      if (this.logLevel > 1) this.log(methodName);
+      this[methodName].call(this);
     }
+  } catch (e) {
+    throw "[" + this.getName() + "#" + this.id + "] Calling '" + methodName + "' throw an exception : " + e.message + "\n";
+  }
 };
 
-Addon.prototype.log = function () {
-    var args = Array.prototype.slice.call(arguments, 0);
-    var logArgs = [];
-    logArgs.push("[" + this.name + "]");
-    logArgs.push(args[0]);
-    if (args.length == 2) logArgs.push(args[1]);
-    else if (args.length > 2) logArgs.push(args.slice(1));
-    console.log.apply(console, logArgs);
-};
+// SubClasses should override these methods to implement specific behaviour
+AbstractAddon.prototype.init = function() {};
+AbstractAddon.prototype.initDom = function() {};
+AbstractAddon.prototype.onDetached = function() {};
+AbstractAddon.prototype.destroy = function() {};
 
-Addon.prototype.setLogLevel = function (logLevel) {
-    this.logLevel = parseInt(logLevel);
-};
+// Addons Management methods
+AbstractAddon.defineAddon = function(name, propertiesObj) {
+  console.log("registering Addon: " + name);
 
-Addon.prototype.update = function (d) {
-    var methodName = d['m'];
+  var SuperClass = propertiesObj.extend || AbstractAddon;
 
-    if (!this.initialized)
-        throw "[" + this.name + "] Tried to call method '" + methodName + "' before init()";
-
-    try {
-        if (d.hasOwnProperty('arg')) {
-            if (this.logLevel > 1) this.log(methodName, d['arg']);
-            this[methodName].apply(this, d['arg']);
-        } else {
-            if (this.logLevel > 1) this.log(methodName);
-            this[methodName].call(this);
-        }
-    } catch (e) {
-        throw "[" + this.name + "#" + this.id + "] Calling '" + methodName + "' throw an exception : " + e.message + "\n";
+  var JsClass = function(params) {
+    SuperClass.apply(this, [params]);
+    if (propertiesObj.ctor) {
+      propertiesObj.ctor.call(this, params);
     }
+  };
+
+  JsClass.prototype = Object.create(SuperClass.prototype, mapProperties(SuperClass, propertiesObj));
+  JsClass.prototype.constructor = JsClass;
+  mapStaticProperties(propertiesObj, JsClass);
+  JsClass.prototype.javaClass = name;
+  JsClass.prototype.jsClass = JsClass;
+
+  AbstractAddon[name] = JsClass;
+
+  // Wrap the constructor method since GWT uses the function as a method and not a constructor
+  var wrap = function(params) {
+    return new JsClass(params);
+  }
+
+  if (document.ponyLoaded) {
+    pony.registerAddOnFactory(name, wrap);
+  } else {
+    document.onPonyLoaded(function(pony) {
+      pony.registerAddOnFactory(name, wrap);
+    });
+  }
 };
 
-Addon.new = function (javaClass, obj) {
-    var clazz = function (name, a, b) {
-        Addon.call(this, name, a, b);
+var lookup = function(Base, name) {
+  var baseFn = undefined;
+  var proto = Base.prototype;
+  while (!baseFn && proto) {
+    baseFn = proto[name];
+    proto = proto.prototype;
+  }
+
+  return baseFn;
+};
+
+var buildSuper = function(Base, name) {
+  var baseFn = lookup(Base, name);
+  if (baseFn === undefined || typeof baseFn !== 'function') {
+    return function() {
+      throw new Error('No definition for method ' + name + ' found in hierarchy');
     };
-    obj.__proto__ = Object.create(Addon.prototype);
-    clazz.prototype = Object.create(obj);
-    clazz.prototype.javaClass = javaClass;
-    clazz.prototype.constructor = Addon;
-    if (Object.prototype.toString.call(javaClass) === '[object Array]') {
-        for (var i = 0; i < javaClass.length; i++) {
-            this.registerTerminalAddon(javaClass[i], clazz);
-            if (obj.globalInit != undefined) Addon._initMethods[javaClass[i]] = obj.globalInit.bind(obj);
-        }
-    } else {
-        this.registerTerminalAddon(javaClass, clazz);
-        if (obj.globalInit != undefined) Addon._initMethods[javaClass] = obj.globalInit.bind(obj)
+  }
+
+  return baseFn;
+};
+
+var buildWrapper = function(Base, method, name) {
+  var _super = buildSuper(Base, name);
+  return function() {
+    var params = Array.prototype.splice.call(arguments, 0);
+    var oldSuper = this.super;
+    this.super = _super;
+    var r = method.apply(this, params);
+    this.super = oldSuper;
+    return r;
+  };
+};
+
+var mapProperties = function(SuperClass, objSrc) {
+  var result = Object.create(Object.prototype);
+
+  for (var property in objSrc) {
+    if (property === 'statics' || property === 'extend') {
+      continue;
     }
-};
 
-Addon.globalInit = function (args) {
-    throw "[" + this.name + "] abstract function Addon.globalInit() MUST be implemented"
-};
-
-Addon._initMethods = {};
-
-Addon.initAddon = function (signature, args) {
-    Addon._initMethods[signature](JSON.parse(args));
-};
-
-Addon.registerTerminalAddon = function (className, jsClass) {
-    console.log("registering Addon: " + className);
-    var callback = function (params) {
-        var addon = new jsClass(pony, params);
-        if (typeof addon.properties != "undefined") {
-            for (var key in addon.properties) {
-                addon[key] = addon.properties[key];
-                delete addon.properties;
-            }
-        }
-        return addon;
-    };
-    if (document.ponyLoaded) {
-        pony.registerAddOnFactory(className, callback);
+    var propertyConfig = Object.create(Object.prototype);
+    propertyConfig.enumerable = true;
+    propertyConfig.configurable = false;
+    if (typeof objSrc[property] === 'function') {
+      propertyConfig.writable = false;
+      propertyConfig.value = buildWrapper(SuperClass, objSrc[property], property);
     } else {
-        document.onPonyLoaded(function (pony) {
-            pony.registerAddOnFactory(className, callback);
-        });
+      propertyConfig.writable = true;
+      propertyConfig.value = objSrc[property];
     }
+    result[property] = propertyConfig;
+  }
+  return result;
 };
 
-if (typeof module !== 'undefined' && module.hasOwnProperty('exports')) module.exports = Addon;
-else window['Addon'] = Addon;
+var mapStaticProperties = function(objSrc, ClassFunction) {
+  var staticProperties = objSrc["statics"];
+  for (var staticProperty in staticProperties) {
+    var value = staticProperties[staticProperty];
+
+    if (typeof staticProperty == 'function') {
+      ClassFunction[staticProperty] = value.bind(ClassFunction);
+    } else {
+      ClassFunction[staticProperty] = value;
+    }
+  }
+};
+
+if (typeof module !== 'undefined' && module.hasOwnProperty('exports')) module.exports = AbstractAddon;
+else window['AbstractAddon'] = AbstractAddon;
 
 /*! http://mths.be/fromcodepoint v0.2.1 by @mathias */
 if (!String.fromCodePoint) {
