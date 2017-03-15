@@ -23,15 +23,6 @@
 
 package com.ponysdk.core.server.servlet;
 
-import com.ponysdk.core.server.application.ApplicationManagerOption;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.activation.MimetypesFileTypeMap;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
@@ -47,6 +38,17 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.activation.MimetypesFileTypeMap;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ponysdk.core.server.application.ApplicationManagerOption;
 
 public class BootstrapServlet extends HttpServlet {
 
@@ -66,6 +68,15 @@ public class BootstrapServlet extends HttpServlet {
     protected ApplicationManagerOption application;
 
     private Path indexPath;
+
+    private ClassLoader childClassLoader;
+
+    public BootstrapServlet() {
+    }
+
+    public BootstrapServlet(final ClassLoader classLoader) {
+        this.childClassLoader = classLoader;
+    }
 
     @Override
     public void init() throws ServletException {
@@ -115,8 +126,7 @@ public class BootstrapServlet extends HttpServlet {
         return request.getRequestURI().replaceFirst(contextPath, "");
     }
 
-    protected void handleRequest(final HttpServletRequest request, final HttpServletResponse response, final String path)
-            throws IOException {
+    protected void handleRequest(final HttpServletRequest request, final HttpServletResponse response, final String path) throws IOException {
         // Force session creation if there is no session
         request.getSession();
 
@@ -130,6 +140,10 @@ public class BootstrapServlet extends HttpServlet {
             final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
             final String jarPath = path.substring(1, path.length());
             inputStream = classLoader.getResourceAsStream(jarPath);
+            if (inputStream == null && childClassLoader != null) {
+                inputStream = childClassLoader.getResourceAsStream(jarPath);
+            }
+
             if (inputStream == null) {
                 if (path.equals("/index.html")) {
                     file = indexPath.toFile();
@@ -204,8 +218,10 @@ public class BootstrapServlet extends HttpServlet {
         writer.newLine();
 
         String ponyTerminalJsFileName;
-        if (application.isDebugMode()) ponyTerminalJsFileName = "ponyterminaldebug/ponyterminaldebug.nocache.js";
-        else ponyTerminalJsFileName = "ponyterminal/ponyterminal.nocache.js";
+        if (application.isDebugMode())
+            ponyTerminalJsFileName = "ponyterminaldebug/ponyterminaldebug.nocache.js";
+        else
+            ponyTerminalJsFileName = "ponyterminal/ponyterminal.nocache.js";
         writer.append("<script type=\"text/javascript\" src=\"").append(ponyTerminalJsFileName).append("\"></script>");
         writer.newLine();
         writer.append("<script type=\"text/javascript\" src=\"script/ponysdk.js\"></script>");
@@ -213,10 +229,10 @@ public class BootstrapServlet extends HttpServlet {
 
         for (final String style : stylesheets) {
             final String contentType = fileTypeMap.getContentType(style);
-            if (!contentType.equals("text/css")) writer.append("<link rel=\"stylesheet/less\" type=\"").append(contentType)
-                .append("\" href=\"").append(style).append("\">");
-            else writer.append("<link rel=\"stylesheet\" type=\"").append(contentType).append("\" href=\"").append(style)
-                .append("\">");
+            if (!contentType.equals("text/css"))
+                writer.append("<link rel=\"stylesheet/less\" type=\"").append(contentType).append("\" href=\"").append(style).append("\">");
+            else
+                writer.append("<link rel=\"stylesheet\" type=\"").append(contentType).append("\" href=\"").append(style).append("\">");
             writer.newLine();
         }
 
@@ -246,8 +262,7 @@ public class BootstrapServlet extends HttpServlet {
     }
 
     protected void addHistoryIFrame(final BufferedWriter writer) throws IOException {
-        writer.append(
-            "<iframe src=\"javascript:''\" id=\"__gwt_historyFrame\" tabIndex='-1' style=\"position:absolute;width:0;height:0;border:0\"></iframe>");
+        writer.append("<iframe src=\"javascript:''\" id=\"__gwt_historyFrame\" tabIndex='-1' style=\"position:absolute;width:0;height:0;border:0\"></iframe>");
     }
 
     protected void addLoading(final BufferedWriter writer) throws IOException {
@@ -257,8 +272,7 @@ public class BootstrapServlet extends HttpServlet {
     protected void addNoScript(final BufferedWriter writer) throws IOException {
         writer.append("<noscript>");
         writer.newLine();
-        writer.append(
-            "<div style=\"width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px;\">");
+        writer.append("<div style=\"width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px;\">");
         writer.newLine();
         writer.append("Your web browser must have JavaScript enabled");
         writer.newLine();
