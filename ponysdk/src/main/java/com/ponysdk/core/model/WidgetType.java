@@ -76,6 +76,7 @@ public enum WidgetType {
     FOCUS_PANEL,
     SCRIPT,
     WINDOW,
+    BROWSER,
     HEADER_PANEL,
     SUGGESTBOX,
     MULTIWORD_SUGGEST_ORACLE;

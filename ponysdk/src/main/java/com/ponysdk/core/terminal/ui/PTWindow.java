@@ -23,6 +23,9 @@
 
 package com.ponysdk.core.terminal.ui;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.google.gwt.core.client.GWT;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -31,12 +34,10 @@ import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
+
 import elemental.client.Browser;
 import elemental.html.Uint8Array;
 import elemental.html.Window;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class PTWindow extends AbstractPTObject {
 
@@ -57,7 +58,8 @@ public class PTWindow extends AbstractPTObject {
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder builder) {
         super.create(buffer, objectId, builder);
 
-        if (log.isLoggable(Level.INFO)) log.log(Level.INFO, "Create PTWindow #" + objectID);
+        if (log.isLoggable(Level.INFO))
+            log.log(Level.INFO, "Create PTWindow #" + objectID);
 
         uiService = builder;
 
@@ -73,8 +75,8 @@ public class PTWindow extends AbstractPTObject {
         features = rawFeatures != null ? rawFeatures : EMPTY;
 
         if (relative) {
-            url = GWT.getHostPageBaseURL() + url + "?" + ClientToServerModel.WINDOW_ID.toStringValue() + "=" + objectId + "&"
-                    + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "=" + PonySDK.uiContextId;
+            url = GWT.getHostPageBaseURL() + url + "?" + ClientToServerModel.WINDOW_ID.toStringValue() + "=" + objectId + "&" + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "="
+                    + PonySDK.uiContextId;
         }
 
         PTWindowManager.get().register(this);
@@ -93,6 +95,9 @@ public class PTWindow extends AbstractPTObject {
         } else if (ServerToClientModel.WINDOW_TITLE.ordinal() == modelOrdinal) {
             setTitle(binaryModel.getStringValue(), window);
             return true;
+        } else if (ServerToClientModel.WINDOW_LOCATION_REPLACE.ordinal() == modelOrdinal) {
+            window.getLocation().replace(binaryModel.getStringValue());
+            return true;
         } else if (ServerToClientModel.CLOSE.ordinal() == modelOrdinal) {
             close(false);
             return true;
@@ -106,9 +111,11 @@ public class PTWindow extends AbstractPTObject {
     }
 
     public void postMessage(final Uint8Array buffer) {
-        if (ready && window.isClosed()) onClose();
+        if (ready && window.isClosed())
+            onClose();
 
-        if (ready) window.postMessage(buffer, "*");
+        if (ready)
+            window.postMessage(buffer, "*");
     }
 
     public void setReady() {
@@ -138,7 +145,8 @@ public class PTWindow extends AbstractPTObject {
             instruction.put(ClientToServerModel.HANDLER_CLOSE);
             uiService.sendDataToServer(instruction);
 
-            if (log.isLoggable(Level.INFO)) log.log(Level.INFO, "Close PTWindow #" + objectID);
+            if (log.isLoggable(Level.INFO))
+                log.log(Level.INFO, "Close PTWindow #" + objectID);
         }
     }
 

@@ -52,30 +52,36 @@ public class PWindow extends PObject {
     private String name;
     private String features;
     private boolean relative = false;
+    private final Location location;
 
     private Map<String, PRootPanel> panelByZone = new HashMap<>();
 
-    private PWindow() {
+    PWindow() {
+        this.location = new Location(this);
+        this.window = this;
         init();
     }
 
-    //TODO nciaravola => feature + relative should be include in an Option Pojo
+    // TODO nciaravola => feature + relative should be include in an Option Pojo
     protected PWindow(final boolean relative, final String url, final String name, final String features) {
         this.window = getMain();
         this.url = url;
         this.name = name;
         this.features = features;
         this.relative = relative;
+        this.location = new Location(this);
     }
 
     protected PWindow(final PWindow parentWindow, final boolean relative, final String url, final String name, final String features) {
         this(relative, url, name, features);
-        if (parentWindow != null) parentWindow.addWindow(this);
+        if (parentWindow != null)
+            parentWindow.addWindow(this);
     }
 
     @Override
     void init() {
-        if (initialized) return;
+        if (initialized)
+            return;
 
         if (stackedInstructions != null) {
             while (!stackedInstructions.isEmpty()) {
@@ -85,30 +91,14 @@ public class PWindow extends PObject {
         initialized = true;
 
         panelByZone.forEach((key, value) -> value.attach(this));
-        if (initializeListener != null) initializeListener.onInitialize(this);
+        if (initializeListener != null)
+            initializeListener.onInitialize(this);
     }
 
     public static PWindow getMain() {
         PWindow mainWindow = UIContext.get().getAttribute(PWindow.class.getCanonicalName());
         if (mainWindow == null) {
-            mainWindow = new PWindow() {
-
-                @Override
-                public void open() {
-                    // Already open
-                }
-
-                @Override
-                public void close() {
-                    // Never be close
-                }
-
-                @Override
-                public void print() {
-                    PScript.execute(this, "window.print()");
-                }
-
-            };
+            mainWindow = new PMainWindow();
             UIContext.get().setAttribute(PWindow.class.getCanonicalName(), mainWindow);
         }
         return mainWindow;
@@ -129,11 +119,13 @@ public class PWindow extends PObject {
     }
 
     public void open() {
-        if (destroy) return;
+        if (destroy)
+            return;
         if (!initialized) {
             final WebsocketEncoder parser = Txn.get().getEncoder();
             parser.beginObject();
-            if (window != PWindow.getMain()) parser.encode(ServerToClientModel.WINDOW_ID, window.getID());
+            if (window != PWindow.getMain())
+                parser.encode(ServerToClientModel.WINDOW_ID, window.getID());
             parser.encode(ServerToClientModel.TYPE_CREATE, ID);
             parser.encode(ServerToClientModel.WIDGET_TYPE, getWidgetType().getValue());
             enrichOnInit(parser);
@@ -157,6 +149,10 @@ public class PWindow extends PObject {
 
     public void setTitle(final String title) {
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.WINDOW_TITLE, title));
+    }
+
+    public Location getLocation() {
+        return location;
     }
 
     @Override
@@ -190,7 +186,8 @@ public class PWindow extends PObject {
     }
 
     public void addOpenHandler(final POpenHandler handler) {
-        if (openHandlers == null) openHandlers = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        if (openHandlers == null)
+            openHandlers = Collections.newSetFromMap(new ConcurrentHashMap<>());
         openHandlers.add(handler);
     }
 
@@ -199,7 +196,8 @@ public class PWindow extends PObject {
     }
 
     public void addCloseHandler(final PCloseHandler handler) {
-        if (closeHandlers == null) closeHandlers = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        if (closeHandlers == null)
+            closeHandlers = Collections.newSetFromMap(new ConcurrentHashMap<>());
         closeHandlers.add(handler);
     }
 
@@ -216,7 +214,8 @@ public class PWindow extends PObject {
         if (rootPanel == null) {
             rootPanel = new PRootPanel(zoneID);
             panelByZone.put(zoneID, rootPanel);
-            if (isInitialized()) rootPanel.attach(this);
+            if (isInitialized())
+                rootPanel.attach(this);
         }
         return rootPanel;
     }
@@ -257,7 +256,8 @@ public class PWindow extends PObject {
     }
 
     private void addWindow(final PWindow window) {
-        if (subWindows == null) subWindows = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        if (subWindows == null)
+            subWindows = Collections.newSetFromMap(new ConcurrentHashMap<>());
         window.addCloseHandler(event -> removeWindow(window));
         subWindows.add(window);
     }
@@ -269,6 +269,18 @@ public class PWindow extends PObject {
     @Override
     public String toString() {
         return super.toString() + ", name = " + name;
+    }
+
+    public class Location {
+        private final PWindow window;
+
+        Location(final PWindow window) {
+            this.window = window;
+        }
+
+        public void replace(final String url) {
+            window.saveUpdate(writer -> writer.writeModel(ServerToClientModel.WINDOW_LOCATION_REPLACE, url));
+        }
     }
 
 }
