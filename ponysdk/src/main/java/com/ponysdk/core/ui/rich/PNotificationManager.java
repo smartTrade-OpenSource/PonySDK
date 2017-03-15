@@ -161,7 +161,10 @@ public class PNotificationManager {
     }
 
     private static void addAutoCloseTimer(final PPopupPanel popupPanel, final int delayBeforeClosing) {
-        PScheduler.schedule(popupPanel::hide, Duration.ofMillis(delayBeforeClosing));
+        PScheduler.schedule(() -> {
+            popupPanel.hide();
+            popupPanel.removeFromParent();
+        }, Duration.ofMillis(delayBeforeClosing));
     }
 
     public enum Notification {
