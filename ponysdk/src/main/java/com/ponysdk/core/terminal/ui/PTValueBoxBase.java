@@ -27,7 +27,6 @@ import com.google.gwt.user.client.ui.ValueBoxBase;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
@@ -46,15 +45,25 @@ public abstract class PTValueBoxBase<T extends ValueBoxBase<W>, W> extends PTFoc
     }
 
     @Override
-    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
+    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
         if (HandlerModel.HANDLER_CHANGE.equals(handlerModel)) {
             uiObject.addChangeHandler(event -> {
                 final PTInstruction eventInstruction = new PTInstruction(getObjectID());
                 eventInstruction.put(ClientToServerModel.HANDLER_CHANGE);
-                uiService.sendDataToServer(uiObject, eventInstruction);
+                uiBuilder.sendDataToServer(uiObject, eventInstruction);
             });
         } else {
-            super.addHandler(buffer, handlerModel, uiService);
+            super.addHandler(buffer, handlerModel);
         }
     }
+
+    @Override
+    public void removeHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
+        if (HandlerModel.HANDLER_CHANGE.equals(handlerModel)) {
+            // TODO Remove HANDLER_CHANGE
+        } else {
+            super.removeHandler(buffer, handlerModel);
+        }
+    }
+
 }

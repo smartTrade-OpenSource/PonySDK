@@ -23,14 +23,23 @@
 
 package com.ponysdk.core.ui.basic;
 
-import com.ponysdk.core.model.*;
-import com.ponysdk.core.ui.basic.event.PLayoutResizeEvent;
-import com.ponysdk.core.ui.basic.event.PLayoutResizeHandler;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+
+import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.HandlerModel;
+import com.ponysdk.core.model.PUnit;
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.ui.basic.event.PLayoutResizeEvent;
+import com.ponysdk.core.ui.basic.event.PLayoutResizeHandler;
 
 /**
  * A panel that adds user-positioned splitters between each of its child
@@ -172,14 +181,13 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
     }
 
     public void addLayoutResizeHandler(final PLayoutResizeHandler resizeHandler) {
-        if (handlers.isEmpty()) {
-            saveAddHandler(HandlerModel.HANDLER_RESIZE);
-        }
+        if (handlers.isEmpty()) saveAddHandler(HandlerModel.HANDLER_RESIZE);
         handlers.add(resizeHandler);
     }
 
     public void removeLayoutResizeHandler(final PLayoutResizeHandler resizeHandler) {
         handlers.remove(resizeHandler);
+        if (handlers.isEmpty()) saveRemoveHandler(HandlerModel.HANDLER_RESIZE);
     }
 
     public Collection<PLayoutResizeHandler> getResizeHandlers() {

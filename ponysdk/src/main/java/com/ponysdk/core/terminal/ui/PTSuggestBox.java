@@ -23,6 +23,9 @@
 
 package com.ponysdk.core.terminal.ui;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestOracle;
@@ -33,9 +36,6 @@ import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class PTSuggestBox extends PTWidget<SuggestBox> {
 
@@ -73,35 +73,44 @@ public class PTSuggestBox extends PTWidget<SuggestBox> {
     }
 
     @Override
-    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
+    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
         if (HandlerModel.HANDLER_STRING_VALUE_CHANGE.equals(handlerModel)) {
             uiObject.addValueChangeHandler(event -> {
                 final PTInstruction eventInstruction = new PTInstruction(getObjectID());
                 eventInstruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE, event.getValue());
-                uiService.sendDataToServer(uiObject, eventInstruction);
+                uiBuilder.sendDataToServer(uiObject, eventInstruction);
             });
         } else if (HandlerModel.HANDLER_STRING_SELECTION.equals(handlerModel)) {
             uiObject.addSelectionHandler(event -> {
                 final PTInstruction eventInstruction = new PTInstruction(getObjectID());
                 eventInstruction.put(ClientToServerModel.HANDLER_STRING_SELECTION, event.getSelectedItem().getDisplayString());
                 eventInstruction.put(ClientToServerModel.REPLACEMENT_STRING, event.getSelectedItem().getReplacementString());
-                uiService.sendDataToServer(uiObject, eventInstruction);
+                uiBuilder.sendDataToServer(uiObject, eventInstruction);
             });
         } else {
-            super.addHandler(buffer, handlerModel, uiService);
+            super.addHandler(buffer, handlerModel);
         }
     }
 
-    public static class PTMultiWordSuggestOracle extends AbstractPTObject {
+    @Override
+    public void removeHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
+        if (HandlerModel.HANDLER_STRING_VALUE_CHANGE.equals(handlerModel)) {
+            // TODO Remove HANDLER_STRING_VALUE_CHANGE
+        } else if (HandlerModel.HANDLER_STRING_SELECTION.equals(handlerModel)) {
+            // TODO Remove HANDLER_STRING_SELECTION
+        } else {
+            super.removeHandler(buffer, handlerModel);
+        }
+    }
+
+    public static final class PTMultiWordSuggestOracle extends AbstractPTObject {
 
         private MultiWordSuggestOracle oracle;
 
         @Override
         public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
             super.create(buffer, objectId, uiService);
-
             this.oracle = new MultiWordSuggestOracle();
-
             PTSuggestBox.oracleByID.put(objectID, oracle);
         }
 

@@ -42,7 +42,7 @@ public class PTImage extends PTWidget<Image> {
     private int height = -1;
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
         final BinaryModel urlModel = buffer.readBinaryModel();
         if (ServerToClientModel.IMAGE_URL.equals(urlModel.getModel())) {
             url = urlModel.getStringValue();
@@ -59,7 +59,7 @@ public class PTImage extends PTWidget<Image> {
             buffer.rewind(urlModel);
         }
 
-        super.create(buffer, objectId, uiService);
+        super.create(buffer, objectId, uiBuilder);
     }
 
     @Override
@@ -72,19 +72,6 @@ public class PTImage extends PTWidget<Image> {
     }
 
     @Override
-    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
-        if (HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST.equals(handlerModel)) {
-            // ServerToClientModel.STREAM_REQUEST_ID
-            final int streamRequestId = buffer.readBinaryModel().getIntValue();
-
-            cast().setUrl(GWT.getHostPageBaseURL() + "stream?" + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "="
-                    + PonySDK.uiContextId + "&" + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "=" + streamRequestId);
-        } else {
-            super.addHandler(buffer, handlerModel, uiService);
-        }
-    }
-
-    @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         final int modelOrdinal = binaryModel.getModel().ordinal();
         if (ServerToClientModel.IMAGE_URL.ordinal() == modelOrdinal) {
@@ -92,6 +79,19 @@ public class PTImage extends PTWidget<Image> {
             return true;
         } else {
             return super.update(buffer, binaryModel);
+        }
+    }
+
+    @Override
+    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
+        if (HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST.equals(handlerModel)) {
+            // ServerToClientModel.STREAM_REQUEST_ID
+            final int streamRequestId = buffer.readBinaryModel().getIntValue();
+
+            cast().setUrl(GWT.getHostPageBaseURL() + "stream?" + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "="
+                    + PonySDK.uiContextId + "&" + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "=" + streamRequestId);
+        } else {
+            super.addHandler(buffer, handlerModel);
         }
     }
 

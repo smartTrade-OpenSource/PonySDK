@@ -23,12 +23,11 @@
 
 package com.ponysdk.core.terminal.ui;
 
+import java.util.logging.Logger;
+
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
-import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
-
-import java.util.logging.Logger;
 
 abstract class PTPanel<T extends Panel> extends PTWidget<T> {
 
@@ -37,14 +36,12 @@ abstract class PTPanel<T extends Panel> extends PTWidget<T> {
     @Override
     public void add(final ReaderBuffer buffer, final PTObject ptObject) {
         final Widget widget = asWidget(ptObject);
-        if (widget != null)
-            uiObject.add(widget);
-        else
-            log.warning("No widget created for object #" + ptObject.getObjectID() + ", Details : " + buffer);
+        if (widget != null) uiObject.add(widget);
+        else log.warning("No widget created for object #" + ptObject.getObjectID() + ", Details : " + buffer);
     }
 
     @Override
-    public void remove(final ReaderBuffer buffer, final PTObject ptObject, final UIBuilder uiService) {
+    public void remove(final ReaderBuffer buffer, final PTObject ptObject) {
         uiObject.remove(asWidget(ptObject));
     }
 

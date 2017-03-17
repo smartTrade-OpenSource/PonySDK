@@ -39,8 +39,19 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 public class PTSplitLayoutPanel extends PTDockLayoutPanel {
 
     @Override
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
+        super.create(buffer, objectId, uiBuilder);
+        cast().uiBuilder = uiBuilder;
+    }
+
+    @Override
     protected MySplitLayoutPanel createUIObject() {
-        return new MySplitLayoutPanel();
+        return new MySplitLayoutPanel(objectID);
+    }
+
+    @Override
+    public MySplitLayoutPanel cast() {
+        return (MySplitLayoutPanel) uiObject;
     }
 
     @Override
@@ -67,27 +78,34 @@ public class PTSplitLayoutPanel extends PTDockLayoutPanel {
     }
 
     @Override
-    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
+    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
         if (HandlerModel.HANDLER_RESIZE.equals(handlerModel)) {
             cast().resizeHandler = true;
-            cast().objectId = getObjectID();
-            cast().uiService = uiService;
         } else {
-            super.addHandler(buffer, handlerModel, uiService);
+            super.addHandler(buffer, handlerModel);
         }
     }
 
     @Override
-    public MySplitLayoutPanel cast() {
-        return (MySplitLayoutPanel) uiObject;
+    public void removeHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
+        if (HandlerModel.HANDLER_RESIZE.equals(handlerModel)) {
+            cast().resizeHandler = false;
+        } else {
+            super.removeHandler(buffer, handlerModel);
+        }
     }
 
-    private class MySplitLayoutPanel extends SplitLayoutPanel {
+    private static final class MySplitLayoutPanel extends SplitLayoutPanel {
 
-        protected UIBuilder uiService = null;
-        protected int objectId = -1;
-        SendResizeCommand command;
-        boolean resizeHandler = false;
+        private int objectId = -1;
+        private UIBuilder uiBuilder;
+        private boolean resizeHandler;
+
+        private SendResizeCommand command;
+
+        public MySplitLayoutPanel(final int objectId) {
+            this.objectId = objectId;
+        }
 
         @Override
         public void onResize() {
@@ -96,13 +114,21 @@ public class PTSplitLayoutPanel extends PTDockLayoutPanel {
             if (resizeHandler) {
                 if (command != null) command.cancelled = true;
 
-                command = new SendResizeCommand();
+                command = new SendResizeCommand(objectId, uiBuilder);
 
                 Scheduler.get().scheduleFixedDelay(command, 500);
             }
         }
 
         public class SendResizeCommand implements RepeatingCommand {
+
+            private int objectId = -1;
+            private final UIBuilder uiBuilder;
+
+            public SendResizeCommand(final int objectId, final UIBuilder uiBuilder) {
+                this.objectId = objectId;
+                this.uiBuilder = uiBuilder;
+            }
 
             boolean cancelled = false;
 
@@ -113,7 +139,7 @@ public class PTSplitLayoutPanel extends PTDockLayoutPanel {
                 int i = 0;
                 final JSONArray jsonArray = new JSONArray();
                 for (final Widget w : getChildren()) {
-                    final PTObject ptObject = uiService.getPTObject(w);
+                    final PTObject ptObject = uiBuilder.getPTObject(w);
                     if (ptObject != null) {
                         final Double wSize = getWidgetSize(w);
                         final PTInstruction ws = new PTInstruction(ptObject.getObjectID());
@@ -122,10 +148,11 @@ public class PTSplitLayoutPanel extends PTDockLayoutPanel {
                         i++;
                     }
                 }
+
                 if (i > 0) {
                     final PTInstruction eventInstruction = new PTInstruction(objectId);
                     eventInstruction.put(ClientToServerModel.HANDLER_RESIZE, jsonArray);
-                    uiService.sendDataToServer(eventInstruction);
+                    uiBuilder.sendDataToServer(eventInstruction);
                 }
 
                 return false;

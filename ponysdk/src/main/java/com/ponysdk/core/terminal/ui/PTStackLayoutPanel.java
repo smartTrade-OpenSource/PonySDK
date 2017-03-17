@@ -62,26 +62,8 @@ public class PTStackLayoutPanel extends PTWidget<StackLayoutPanel> {
     }
 
     @Override
-    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
-        if (HandlerModel.HANDLER_SELECTION.equals(handlerModel)) {
-            uiObject.addSelectionHandler(event -> {
-                // FIXME not read on the server side
-                final PTInstruction eventInstruction = new PTInstruction(getObjectID());
-                eventInstruction.put(ClientToServerModel.HANDLER_SELECTION, event.getSelectedItem());
-                uiService.sendDataToServer(uiObject, eventInstruction);
-            });
-            return;
-        } else if (HandlerModel.HANDLER_BEFORE_SELECTION.equals(handlerModel)) {
-            uiObject.addBeforeSelectionHandler(event -> {
-                // FIXME not read on the server side
-                final PTInstruction eventInstruction = new PTInstruction(getObjectID());
-                eventInstruction.put(ClientToServerModel.HANDLER_BEFORE_SELECTION, event.getItem());
-                uiService.sendDataToServer(uiObject, eventInstruction);
-            });
-            return;
-        }
-
-        super.addHandler(buffer, handlerModel, uiService);
+    public void remove(final ReaderBuffer buffer, final PTObject ptObject) {
+        uiObject.remove(asWidget(ptObject));
     }
 
     @Override
@@ -102,8 +84,35 @@ public class PTStackLayoutPanel extends PTWidget<StackLayoutPanel> {
     }
 
     @Override
-    public void remove(final ReaderBuffer buffer, final PTObject ptObject, final UIBuilder uiService) {
-        uiObject.remove(asWidget(ptObject));
+    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
+        if (HandlerModel.HANDLER_SELECTION.equals(handlerModel)) {
+            uiObject.addSelectionHandler(event -> {
+                // FIXME not read on the server side
+                final PTInstruction eventInstruction = new PTInstruction(getObjectID());
+                eventInstruction.put(ClientToServerModel.HANDLER_SELECTION, event.getSelectedItem());
+                uiBuilder.sendDataToServer(uiObject, eventInstruction);
+            });
+        } else if (HandlerModel.HANDLER_BEFORE_SELECTION.equals(handlerModel)) {
+            uiObject.addBeforeSelectionHandler(event -> {
+                // FIXME not read on the server side
+                final PTInstruction eventInstruction = new PTInstruction(getObjectID());
+                eventInstruction.put(ClientToServerModel.HANDLER_BEFORE_SELECTION, event.getItem());
+                uiBuilder.sendDataToServer(uiObject, eventInstruction);
+            });
+        } else {
+            super.addHandler(buffer, handlerModel);
+        }
+    }
+
+    @Override
+    public void removeHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
+        if (HandlerModel.HANDLER_SELECTION.equals(handlerModel)) {
+            // TODO Remove HANDLER_SELECTION
+        } else if (HandlerModel.HANDLER_BEFORE_SELECTION.equals(handlerModel)) {
+            // TODO Remove HANDLER_BEFORE_SELECTION
+        } else {
+            super.removeHandler(buffer, handlerModel);
+        }
     }
 
 }

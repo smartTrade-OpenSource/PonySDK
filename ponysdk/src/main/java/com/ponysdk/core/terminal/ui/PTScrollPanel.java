@@ -31,7 +31,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
@@ -78,12 +77,10 @@ public class PTScrollPanel extends PTSimplePanel {
     }
 
     @Override
-    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
+    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
         if (HandlerModel.HANDLER_SCROLL.equals(handlerModel)) {
             cast().addScrollHandler(event -> {
-                if (!dragging) {
-                    sendScrollPositionEvent(uiService);
-                }
+                if (!dragging) sendScrollPositionEvent();
             });
             cast().addDomHandler(event -> {
                 if (DOM.getCaptureElement() == null) {
@@ -95,21 +92,30 @@ public class PTScrollPanel extends PTSimplePanel {
                 dragging = false;
                 DOM.releaseCapture(uiObject.getElement());
 
-                sendScrollPositionEvent(uiService);
+                sendScrollPositionEvent();
             }, MouseUpEvent.getType());
         } else {
-            super.addHandler(buffer, handlerModel, uiService);
+            super.addHandler(buffer, handlerModel);
         }
     }
 
-    private void sendScrollPositionEvent(final UIBuilder uiService) {
+    private void sendScrollPositionEvent() {
         final PTInstruction eventInstruction = new PTInstruction(getObjectID());
         eventInstruction.put(ClientToServerModel.HANDLER_SCROLL);
         eventInstruction.put(ClientToServerModel.HANDLER_SCROLL_HEIGHT, cast().getMaximumVerticalScrollPosition());
         eventInstruction.put(ClientToServerModel.HANDLER_SCROLL_WIDTH, cast().getMaximumHorizontalScrollPosition());
         eventInstruction.put(ClientToServerModel.HANDLER_SCROLL_VERTICAL, cast().getVerticalScrollPosition());
         eventInstruction.put(ClientToServerModel.HANDLER_SCROLL_HORIZONTAL, cast().getHorizontalScrollPosition());
-        uiService.sendDataToServer(uiObject, eventInstruction);
+        uiBuilder.sendDataToServer(uiObject, eventInstruction);
+    }
+
+    @Override
+    public void removeHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
+        if (HandlerModel.HANDLER_SCROLL.equals(handlerModel)) {
+            // TODO Remove HANDLER_SCROLL
+        } else {
+            super.removeHandler(buffer, handlerModel);
+        }
     }
 
 }

@@ -75,7 +75,7 @@ public class PTMenuBar extends PTWidget<MenuBar> {
     }
 
     @Override
-    public void remove(final ReaderBuffer buffer, final PTObject ptObject, final UIBuilder uiService) {
+    public void remove(final ReaderBuffer buffer, final PTObject ptObject) {
         if (ptObject instanceof PTMenuItem) {
             final PTMenuItem menuItem = (PTMenuItem) ptObject;
             uiObject.removeItem(menuItem.cast());

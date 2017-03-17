@@ -28,7 +28,6 @@ import com.google.gwt.user.client.ui.MenuItem;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
@@ -64,15 +63,24 @@ public class PTMenuItem extends PTUIObject<MenuItem> {
     }
 
     @Override
-    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
+    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
         if (HandlerModel.HANDLER_COMMAND.equals(handlerModel)) {
             uiObject.setScheduledCommand(() -> {
                 final PTInstruction eventInstruction = new PTInstruction(getObjectID());
                 eventInstruction.put(ClientToServerModel.HANDLER_COMMAND);
-                uiService.sendDataToServer(eventInstruction);
+                uiBuilder.sendDataToServer(eventInstruction);
             });
         } else {
-            super.addHandler(buffer, handlerModel, uiService);
+            super.addHandler(buffer, handlerModel);
+        }
+    }
+
+    @Override
+    public void removeHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
+        if (HandlerModel.HANDLER_COMMAND.equals(handlerModel)) {
+            uiObject.setScheduledCommand(null);
+        } else {
+            super.removeHandler(buffer, handlerModel);
         }
     }
 }

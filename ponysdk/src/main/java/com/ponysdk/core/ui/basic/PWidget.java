@@ -23,24 +23,62 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.json.JsonArray;
+import javax.json.JsonNumber;
+import javax.json.JsonObject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.DomHandlerType;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.stm.Txn;
-import com.ponysdk.core.ui.basic.event.*;
-import com.ponysdk.core.ui.eventbus.*;
+import com.ponysdk.core.ui.basic.event.HasPHandlers;
+import com.ponysdk.core.ui.basic.event.HasPKeyPressHandlers;
+import com.ponysdk.core.ui.basic.event.HasPKeyUpHandlers;
+import com.ponysdk.core.ui.basic.event.HasPWidgets;
+import com.ponysdk.core.ui.basic.event.PBlurEvent;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PContextMenuEvent;
+import com.ponysdk.core.ui.basic.event.PDomEvent;
+import com.ponysdk.core.ui.basic.event.PDoubleClickEvent;
+import com.ponysdk.core.ui.basic.event.PDragEndEvent;
+import com.ponysdk.core.ui.basic.event.PDragEnterEvent;
+import com.ponysdk.core.ui.basic.event.PDragLeaveEvent;
+import com.ponysdk.core.ui.basic.event.PDragOverEvent;
+import com.ponysdk.core.ui.basic.event.PDragStartEvent;
+import com.ponysdk.core.ui.basic.event.PDropEvent;
+import com.ponysdk.core.ui.basic.event.PFocusEvent;
+import com.ponysdk.core.ui.basic.event.PKeyPressEvent;
+import com.ponysdk.core.ui.basic.event.PKeyPressHandler;
+import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
+import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
+import com.ponysdk.core.ui.basic.event.PMouseDownEvent;
+import com.ponysdk.core.ui.basic.event.PMouseEvent;
+import com.ponysdk.core.ui.basic.event.PMouseOutEvent;
+import com.ponysdk.core.ui.basic.event.PMouseOverEvent;
+import com.ponysdk.core.ui.basic.event.PMouseUpEvent;
+import com.ponysdk.core.ui.basic.event.PMouseWhellEvent;
+import com.ponysdk.core.ui.eventbus.Event;
+import com.ponysdk.core.ui.eventbus.EventBus;
+import com.ponysdk.core.ui.eventbus.EventHandler;
+import com.ponysdk.core.ui.eventbus.HandlerRegistration;
+import com.ponysdk.core.ui.eventbus.SimpleEventBus;
 import com.ponysdk.core.ui.model.PEventType;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.writer.ModelWriter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.json.JsonArray;
-import javax.json.JsonNumber;
-import javax.json.JsonObject;
-import java.util.*;
 
 /**
  * The base class for the majority of user-interface objects. Widget adds
@@ -58,7 +96,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     private Set<String> styleNames;
     private Set<PEventType> preventEvents;
     private Set<PEventType> stopEvents;
-    private EventBus domHandler;
+    private EventBus eventBus;
     private Map<String, String> styleProperties;
     private Map<String, String> elementProperties;
     private Map<String, String> elementAttributes;
@@ -70,6 +108,9 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     private String debugID;
 
     private PAddOn addon;
+
+    // WORKAROUND Remove handler only server side
+    private Set<PDomEvent.Type> oneTimeHandlerCreation;
 
     protected PWidget() {
     }
@@ -289,10 +330,29 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.WIDGET_FULL_SIZE));
     }
 
-    public HandlerRegistration removeDomHandler(final EventHandler handler, final PDomEvent.Type type) {
-        final HandlerRegistration handlerRegistration = ensureDomHandler().addHandler(type, handler);
-        saveRemoveHandler(HandlerModel.HANDLER_DOM);
-        return handlerRegistration;
+    public void removeDomHandler(final EventHandler handler, final PDomEvent.Type type) {
+        if (destroy) return;
+        final Collection<EventHandler> handlers = eventBus.getHandlers(type, this);
+        if (handlers.contains(handler)) {
+            eventBus.removeHandlerFromSource(type, this, handler);
+            // TODO Handle remove DOM handler
+            // if (eventBus.getHandlers(type, this).isEmpty()) {
+            //     executeRemoveDomHandler(type);
+            //     if (initialized) executeRemoveDomHandler(type);
+            //     else safeStackedInstructions().add(() -> executeRemoveDomHandler(type));
+            // }
+        }
+    }
+
+    private void executeRemoveDomHandler(final PDomEvent.Type type) {
+        if (destroy) return;
+        final ModelWriter writer = Txn.getWriter();
+        writer.beginObject();
+        if (!PWindow.isMain(window)) writer.writeModel(ServerToClientModel.WINDOW_ID, window.getID());
+        writer.writeModel(ServerToClientModel.TYPE_REMOVE_HANDLER, ID);
+        writer.writeModel(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_DOM.getValue());
+        writer.writeModel(ServerToClientModel.DOM_HANDLER_CODE, type.getDomHandlerType().getValue());
+        writer.endObject();
     }
 
     @Override
@@ -317,14 +377,19 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
 
     private HandlerRegistration addDomHandler(final EventHandler handler, final PDomEvent.Type type,
                                               final ServerBinaryModel binaryModel) {
-        final Collection<EventHandler> handlerIterator = ensureDomHandler().getHandlers(type, this);
-        final HandlerRegistration handlerRegistration = domHandler.addHandlerToSource(type, this, handler);
-        if (handlerIterator.isEmpty()) {
+        if (destroy) return null;
+        final HandlerRegistration handlerRegistration = ensureEventBus().addHandlerToSource(type, this, handler);
+
+        if (oneTimeHandlerCreation == null) oneTimeHandlerCreation = Collections.newSetFromMap(new ConcurrentHashMap<>());
+
+        if (!oneTimeHandlerCreation.contains(type)) {
+            oneTimeHandlerCreation.add(type);
             final ServerBinaryModel binaryModel1 = new ServerBinaryModel(ServerToClientModel.DOM_HANDLER_CODE,
                 type.getDomHandlerType().getValue());
             if (initialized) executeAddDomHandler(binaryModel1, binaryModel);
             else safeStackedInstructions().add(() -> executeAddDomHandler(binaryModel1, binaryModel));
         }
+
         return handlerRegistration;
     }
 
@@ -332,8 +397,8 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         final ModelWriter writer = Txn.getWriter();
         writer.beginObject();
         if (!PWindow.isMain(window)) writer.writeModel(ServerToClientModel.WINDOW_ID, window.getID());
-        writer.writeModel(ServerToClientModel.TYPE_ADD_HANDLER, HandlerModel.HANDLER_DOM.getValue());
-        writer.writeModel(ServerToClientModel.OBJECT_ID, ID);
+        writer.writeModel(ServerToClientModel.TYPE_ADD_HANDLER, ID);
+        writer.writeModel(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_DOM.getValue());
         if (binaryModels != null) {
             for (final ServerBinaryModel binaryModel : binaryModels) {
                 if (binaryModel != null) writer.writeModel(binaryModel.getKey(), binaryModel.getValue());
@@ -418,13 +483,9 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         }
     }
 
-    private EventBus ensureDomHandler() {
-        if (domHandler == null) domHandler = new SimpleEventBus();
-        return domHandler;
-    }
-
-    protected Collection<EventHandler> getHandlerSet(final PDomEvent.Type type, final Object source) {
-        return ensureDomHandler().getHandlers(type, null);
+    private EventBus ensureEventBus() {
+        if (eventBus == null) eventBus = new SimpleEventBus();
+        return eventBus;
     }
 
     public void fireMouseEvent(final JsonObject instruction, final PMouseEvent<? extends EventHandler> event) {
@@ -454,14 +515,11 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
 
     @Override
     public void fireEvent(final Event<? extends EventHandler> event) {
-        if (domHandler == null) return;
-        domHandler.fireEvent(event);
+        if (eventBus != null) eventBus.fireEvent(event);
     }
 
     public void removeFromParent() {
-        if (parent == null) {
-        }
-        else if (parent instanceof HasPWidgets) ((HasPWidgets) parent).remove(this);
+        if (parent instanceof HasPWidgets) ((HasPWidgets) parent).remove(this);
         else if (parent != null) throw new IllegalStateException("This widget's parent does not implement HasPWidgets");
     }
 

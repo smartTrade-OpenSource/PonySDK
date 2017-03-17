@@ -27,7 +27,6 @@ import com.google.gwt.event.dom.client.MouseEvent;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.ponysdk.core.model.DomHandlerType;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
@@ -68,10 +67,10 @@ public abstract class PTFocusWidget<T extends FocusWidget> extends PTWidget<T> {
     }
 
     @Override
-    protected void triggerMouseEvent(final DomHandlerType domHandlerType, final UIBuilder uiService, final MouseEvent<?> event) {
+    protected void triggerMouseEvent(final DomHandlerType domHandlerType, final MouseEvent<?> event) {
         if (!enabledOnRequest) uiObject.setEnabled(false);
         if (showLoadingOnRequest) uiObject.addStyleName("pony-Loading");
-        super.triggerMouseEvent(domHandlerType, uiService, event);
+        super.triggerMouseEvent(domHandlerType, event);
     }
 
 }

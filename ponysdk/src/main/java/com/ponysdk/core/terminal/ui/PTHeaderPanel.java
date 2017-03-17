@@ -26,7 +26,6 @@ package com.ponysdk.core.terminal.ui;
 import com.google.gwt.user.client.ui.HeaderPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
@@ -76,7 +75,7 @@ public class PTHeaderPanel extends PTPanel<HeaderPanel> {
     }
 
     @Override
-    public void remove(final ReaderBuffer buffer, final PTObject ptObject, final UIBuilder uiService) {
+    public void remove(final ReaderBuffer buffer, final PTObject ptObject) {
         uiObject.remove(asWidget(ptObject));
     }
 

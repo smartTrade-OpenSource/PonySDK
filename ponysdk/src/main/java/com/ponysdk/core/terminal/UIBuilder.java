@@ -93,8 +93,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
     private CommunicationErrorHandler communicationErrorHandler;
 
     public void init(final RequestBuilder requestBuilder) {
-        if (log.isLoggable(Level.INFO))
-            log.info("Init request builder");
+        if (log.isLoggable(Level.INFO)) log.info("Init request builder");
 
         this.requestBuilder = requestBuilder;
 
@@ -132,17 +131,17 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
     public void onCommunicationError(final Throwable exception) {
         rootEventBus.fireEvent(new CommunicationErrorEvent(exception));
 
-        if (pendingClose)
-            return;
+        if (pendingClose) return;
 
         if (loadingMessageBox == null) {
             // First load failed
             if (exception instanceof StatusCodeException) {
                 final StatusCodeException codeException = (StatusCodeException) exception;
-                if (codeException.getStatusCode() == 0)
-                    return;
+                if (codeException.getStatusCode() == 0) return;
             }
-            log.log(Level.SEVERE, "Cannot initialize the application : " + exception.getMessage() + "\n" + exception + "\nPlease reload your application", exception);
+            log.log(Level.SEVERE, "Cannot initialize the application : " + exception.getMessage() + "\n" + exception
+                    + "\nPlease reload your application",
+                exception);
         }
 
         if (exception instanceof StatusCodeException) {
@@ -156,7 +155,8 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
             if (communicationErrorHandler != null) {
                 communicationErrorHandler.onCommunicationError(500, exception.getMessage());
             } else {
-                log.log(Level.SEVERE, "An unexcepted error occured: " + exception.getMessage() + ". Please check the server logs.", exception);
+                log.log(Level.SEVERE, "An unexcepted error occured: " + exception.getMessage() + ". Please check the server logs.",
+                    exception);
             }
         }
     }
@@ -218,8 +218,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
 
     private void update(final BinaryModel binaryModel, final ReaderBuffer buffer) {
         final ServerToClientModel model = binaryModel.getModel();
-        if (model == null)
-            return;
+        if (model == null) return;
 
         final int modelOrdinal = model.ordinal();
         if (ServerToClientModel.TYPE_CREATE.ordinal() == modelOrdinal) {
@@ -234,7 +233,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         } else if (ServerToClientModel.TYPE_REMOVE.ordinal() == modelOrdinal) {
             processRemove(buffer, binaryModel.getIntValue());
         } else if (ServerToClientModel.TYPE_ADD_HANDLER.ordinal() == modelOrdinal) {
-            processAddHandler(buffer, HandlerModel.values()[binaryModel.getByteValue()]);
+            processAddHandler(buffer, getPTObject(binaryModel.getIntValue()));
         } else if (ServerToClientModel.TYPE_REMOVE_HANDLER.ordinal() == modelOrdinal) {
             processRemoveHandler(buffer, getPTObject(binaryModel.getIntValue()));
         } else if (ServerToClientModel.TYPE_HISTORY.ordinal() == modelOrdinal) {
@@ -269,7 +268,8 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         if (parentObject != null) {
             parentObject.add(buffer, ptObject);
         } else {
-            log.warning("Cannot add " + ptObject + " to an garbaged parent object #" + parentId + ", so we will consume all the buffer of this object");
+            log.warning("Cannot add " + ptObject + " to an garbaged parent object #" + parentId
+                    + ", so we will consume all the buffer of this object");
             buffer.avoidBlock();
         }
     }
@@ -280,12 +280,10 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
             boolean result = false;
             do {
                 binaryModel = buffer.readBinaryModel();
-                if (binaryModel.getModel() != null)
-                    result = ptObject.update(buffer, binaryModel);
+                if (binaryModel.getModel() != null) result = ptObject.update(buffer, binaryModel);
             } while (result && buffer.hasRemaining());
 
-            if (!result)
-                buffer.rewind(binaryModel);
+            if (!result) buffer.rewind(binaryModel);
         } else {
             log.warning("Update on a null PTObject, so we will consume all the buffer of this object");
             buffer.avoidBlock();
@@ -298,33 +296,28 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
             final int parentId = buffer.readBinaryModel().getIntValue();
             final PTObject parentObject = parentId != -1 ? getPTObject(parentId) : ptObject;
 
-            if (parentObject != null) {
-                parentObject.remove(buffer, ptObject, this);
-            } else
-                log.warning("Cannot remove PTObject " + ptObject + " on a garbaged object #" + parentId);
+            if (parentObject != null) parentObject.remove(buffer, ptObject);
+            else log.warning("Cannot remove PTObject " + ptObject + " on a garbaged object #" + parentId);
         } else {
             log.warning("Remove a null PTObject #" + objectId + ", so we will consume all the buffer of this object");
             buffer.avoidBlock();
         }
     }
 
-    private void processAddHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
-        if (HandlerModel.HANDLER_STREAM_REQUEST.equals(handlerModel)) {
-            new PTStreamResource().addHandler(buffer, handlerModel, this);
-        } else {
-            // ServerToClientModel.OBJECT_ID
-            final int id = buffer.readBinaryModel().getIntValue();
-            final PTObject ptObject = getPTObject(id);
-            if (ptObject != null)
-                ptObject.addHandler(buffer, handlerModel, this);
-            else
-                log.warning("Cannot add handler on a garbaged object #" + id);
-        }
+    private void processAddHandler(final ReaderBuffer buffer, final PTObject ptObject) {
+        // ServerToClientModel.HANDLER_TYPE
+        final HandlerModel handlerModel = HandlerModel.values()[buffer.readBinaryModel().getByteValue()];
+
+        if (HandlerModel.HANDLER_STREAM_REQUEST.equals(handlerModel)) new PTStreamResource().addHandler(buffer, handlerModel);
+        else if (ptObject != null) ptObject.addHandler(buffer, handlerModel);
     }
 
     private void processRemoveHandler(final ReaderBuffer buffer, final PTObject ptObject) {
-        if (ptObject != null)
-            ptObject.removeHandler(buffer, this);
+        if (ptObject != null) {
+            // ServerToClientModel.HANDLER_TYPE
+            final HandlerModel handlerModel = HandlerModel.values()[buffer.readBinaryModel().getByteValue()];
+            ptObject.removeHandler(buffer, handlerModel);
+        }
     }
 
     private void processHistory(final ReaderBuffer buffer, final String token) {
@@ -333,8 +326,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         // ServerToClientModel.HISTORY_FIRE_EVENTS
         final boolean fireEvents = buffer.readBinaryModel().getBooleanValue();
         if (oldToken != null && oldToken.equals(token)) {
-            if (fireEvents)
-                History.fireCurrentHistoryState();
+            if (fireEvents) History.fireCurrentHistoryState();
         } else {
             History.newItem(token, fireEvents);
         }
@@ -358,8 +350,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
     private PTObject unregisterObject(final Integer objectId) {
         final PTObject ptObject = objectByID.remove(objectId);
         final UIObject uiObject = widgetIDByObjectID.remove(objectId);
-        if (uiObject != null)
-            objectIDByWidget.remove(uiObject);
+        if (uiObject != null) objectIDByWidget.remove(uiObject);
         return ptObject;
     }
 
@@ -367,8 +358,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         if (log.isLoggable(Level.FINE)) {
             if (widget != null) {
                 final Element source = widget.getElement();
-                if (source != null)
-                    log.fine("Action triggered, Instruction [" + instruction + "] , " + source.getInnerHTML());
+                if (source != null) log.fine("Action triggered, Instruction [" + instruction + "] , " + source.getInnerHTML());
             }
         }
         sendDataToServer(instruction);
@@ -385,8 +375,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         final PTInstruction requestData = new PTInstruction();
         requestData.put(ClientToServerModel.APPLICATION_INSTRUCTIONS, jsonArray);
 
-        if (log.isLoggable(Level.FINE))
-            log.log(Level.FINE, "Data to send " + requestData.toString());
+        if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Data to send " + requestData.toString());
 
         requestBuilder.send(requestData);
     }
@@ -404,8 +393,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
     }
 
     private Timer scheduleLoadingMessageBox() {
-        if (loadingMessageBox == null)
-            return null;
+        if (loadingMessageBox == null) return null;
 
         final Timer timer = new Timer() {
 
@@ -424,7 +412,8 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         actionPanel.setSize("100%", "100%");
 
         if (caught.getStatusCode() == ServerException.INVALID_SESSION) {
-            content.add(new HTML("Server connection failed <br/>Code : " + caught.getStatusCode() + "<br/>" + "Cause : " + caught.getMessage()));
+            content.add(new HTML(
+                "Server connection failed <br/>Code : " + caught.getStatusCode() + "<br/>" + "Cause : " + caught.getMessage()));
 
             final Anchor reloadAnchor = new Anchor("reload");
             reloadAnchor.addClickHandler(event -> {
@@ -436,7 +425,8 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
             actionPanel.setCellHorizontalAlignment(reloadAnchor, HasHorizontalAlignment.ALIGN_CENTER);
             actionPanel.setCellVerticalAlignment(reloadAnchor, HasVerticalAlignment.ALIGN_MIDDLE);
         } else {
-            content.add(new HTML("An unexpected error occured <br/>Code : " + caught.getStatusCode() + "<br/>" + "Cause : " + caught.getMessage()));
+            content.add(new HTML(
+                "An unexpected error occured <br/>Code : " + caught.getStatusCode() + "<br/>" + "Cause : " + caught.getMessage()));
         }
 
         final Anchor closeAnchor = new Anchor("close");
@@ -448,8 +438,8 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         content.add(actionPanel);
 
         communicationErrorMessagePanel.setWidget(content);
-        communicationErrorMessagePanel.setPopupPositionAndShow(
-                (offsetWidth, offsetHeight) -> communicationErrorMessagePanel.setPopupPosition((Window.getClientWidth() - offsetWidth) / 2, (Window.getClientHeight() - offsetHeight) / 2));
+        communicationErrorMessagePanel.setPopupPositionAndShow((offsetWidth, offsetHeight) -> communicationErrorMessagePanel
+            .setPopupPosition((Window.getClientWidth() - offsetWidth) / 2, (Window.getClientHeight() - offsetHeight) / 2));
     }
 
     @Override
@@ -463,15 +453,13 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
 
     public PTObject getPTObject(final Integer id) {
         final PTObject ptObject = objectByID.get(id);
-        if (ptObject == null)
-            log.warning("PTObject #" + id + " not found");
+        if (ptObject == null) log.warning("PTObject #" + id + " not found");
         return ptObject;
     }
 
     public PTObject getPTObject(final UIObject uiObject) {
         final Integer objectID = objectIDByWidget.get(uiObject);
-        if (objectID != null)
-            return getPTObject(objectID);
+        if (objectID != null) return getPTObject(objectID);
         return null;
     }
 
@@ -483,14 +471,12 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
     @Override
     public void onHttpRequestSend(final HttpRequestSendEvent event) {
         numberOfrequestInProgress++;
-        if (timer == null)
-            timer = scheduleLoadingMessageBox();
+        if (timer == null) timer = scheduleLoadingMessageBox();
     }
 
     @Override
     public void onHttpResponseReceivedEvent(final HttpResponseReceivedEvent event) {
-        if (numberOfrequestInProgress > 0)
-            numberOfrequestInProgress--;
+        if (numberOfrequestInProgress > 0) numberOfrequestInProgress--;
         hideLoadingMessageBox();
     }
 
@@ -516,10 +502,8 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
 
     void setReadyWindow(final int windowID) {
         final PTWindow window = PTWindowManager.getWindow(windowID);
-        if (window != null)
-            window.setReady();
-        else
-            log.warning("Window " + windowID + " doesn't exist");
+        if (window != null) window.setReady();
+        else log.warning("Window " + windowID + " doesn't exist");
     }
 
 }

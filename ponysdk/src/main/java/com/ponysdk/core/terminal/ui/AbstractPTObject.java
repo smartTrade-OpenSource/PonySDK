@@ -40,9 +40,9 @@ abstract class AbstractPTObject implements PTObject {
     }
 
     @Override
-    public void create(final ReaderBuffer buffer, final int id, final UIBuilder builder) {
+    public void create(final ReaderBuffer buffer, final int id, final UIBuilder uiBuilder) {
         this.objectID = id;
-        this.uiBuilder = builder;
+        this.uiBuilder = uiBuilder;
     }
 
     @Override
@@ -55,15 +55,15 @@ abstract class AbstractPTObject implements PTObject {
     }
 
     @Override
-    public void remove(final ReaderBuffer buffer, final PTObject ptObject, final UIBuilder uiService) {
+    public void remove(final ReaderBuffer buffer, final PTObject ptObject) {
     }
 
     @Override
-    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
+    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
     }
 
     @Override
-    public void removeHandler(final ReaderBuffer buffer, final UIBuilder uiService) {
+    public void removeHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
     }
 
     @Override

@@ -23,6 +23,26 @@
 
 package com.ponysdk.core.server.application;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
+
+import javax.json.JsonNumber;
+import javax.json.JsonObject;
+import javax.json.JsonString;
+import javax.json.JsonValue;
+import javax.json.JsonValue.ValueType;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -42,18 +62,6 @@ import com.ponysdk.core.ui.eventbus.StreamHandler;
 import com.ponysdk.core.ui.eventbus2.EventBus;
 import com.ponysdk.core.ui.statistic.TerminalDataReceiver;
 import com.ponysdk.core.writer.ModelWriter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.json.JsonNumber;
-import javax.json.JsonObject;
-import javax.json.JsonString;
-import javax.json.JsonValue;
-import javax.json.JsonValue.ValueType;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * <p>
@@ -295,7 +303,8 @@ public class UIContext {
 
         final ModelWriter writer = Txn.getWriter();
         writer.beginObject();
-        writer.writeModel(ServerToClientModel.TYPE_ADD_HANDLER, HandlerModel.HANDLER_STREAM_REQUEST.getValue());
+        writer.writeModel(ServerToClientModel.TYPE_ADD_HANDLER, -1);
+        writer.writeModel(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_STREAM_REQUEST.getValue());
         writer.writeModel(ServerToClientModel.STREAM_REQUEST_ID, streamRequestID);
         writer.endObject();
 
@@ -307,8 +316,8 @@ public class UIContext {
 
         final ModelWriter writer = Txn.getWriter();
         writer.beginObject();
-        writer.writeModel(ServerToClientModel.TYPE_ADD_HANDLER, HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST.getValue());
-        writer.writeModel(ServerToClientModel.OBJECT_ID, objectID);
+        writer.writeModel(ServerToClientModel.TYPE_ADD_HANDLER, objectID);
+        writer.writeModel(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST.getValue());
         writer.writeModel(ServerToClientModel.STREAM_REQUEST_ID, streamRequestID);
         writer.endObject();
 

@@ -25,7 +25,12 @@ package com.ponysdk.core.terminal.ui;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Document;
-import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.dom.client.MouseDownEvent;
+import com.google.gwt.event.dom.client.MouseDownHandler;
+import com.google.gwt.event.dom.client.MouseMoveEvent;
+import com.google.gwt.event.dom.client.MouseMoveHandler;
+import com.google.gwt.event.dom.client.MouseUpEvent;
+import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.user.client.DOM;
@@ -48,7 +53,12 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
     private int dragStartY;
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
+    public PopupPanel cast() {
+        return (PopupPanel) uiObject;
+    }
+
+    @Override
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
         final BinaryModel binaryModel = buffer.readBinaryModel();
         if (ServerToClientModel.POPUP_AUTO_HIDE.equals(binaryModel.getModel())) {
             autoHide = binaryModel.getBooleanValue();
@@ -57,14 +67,12 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
             buffer.rewind(binaryModel);
         }
 
-        super.create(buffer, objectId, uiService);
-
-        addCloseHandler(uiService);
+        super.create(buffer, objectId, uiBuilder);
     }
 
     @Override
     protected PopupPanel createUIObject() {
-        return new PopupPanel(autoHide) {
+        final PopupPanel popupPanel = new PopupPanel(autoHide) {
 
             @Override
             protected void onPreviewNativeEvent(final NativePreviewEvent event) {
@@ -72,39 +80,14 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
                 super.onPreviewNativeEvent(event);
             }
         };
-    }
 
-    protected void addCloseHandler(final UIBuilder uiService) {
-        cast().addCloseHandler(event -> {
+        popupPanel.addCloseHandler(event -> {
             final PTInstruction instruction = new PTInstruction(getObjectID());
             instruction.put(ClientToServerModel.HANDLER_CLOSE);
-            uiService.sendDataToServer(cast(), instruction);
+            uiBuilder.sendDataToServer(cast(), instruction);
         });
-    }
 
-    @Override
-    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
-        if (HandlerModel.HANDLER_POPUP_POSITION.equals(handlerModel)) {
-            final PopupPanel popup = cast();
-            popup.setVisible(true);
-            popup.show();
-            Scheduler.get().scheduleDeferred(() -> {
-                final PTInstruction eventInstruction = new PTInstruction(getObjectID());
-
-                final JSONArray widgetInfo = new JSONArray();
-                int i = 0;
-                widgetInfo.set(i++, new JSONNumber(popup.getOffsetWidth()));
-                widgetInfo.set(i++, new JSONNumber(popup.getOffsetHeight()));
-                widgetInfo.set(i++, new JSONNumber(Window.getClientWidth()));
-                widgetInfo.set(i++, new JSONNumber(Window.getClientHeight()));
-
-                eventInstruction.put(ClientToServerModel.POPUP_POSITION, widgetInfo);
-
-                uiService.sendDataToServer(cast(), eventInstruction);
-            });
-        } else {
-            super.addHandler(buffer, handlerModel, uiService);
-        }
+        return popupPanel;
     }
 
     @Override
@@ -180,11 +163,6 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
         DOM.releaseCapture(uiObject.getElement());
     }
 
-    @Override
-    public PopupPanel cast() {
-        return (PopupPanel) uiObject;
-    }
-
     private void onPreviewNativeEvent(final NativePreviewEvent event) {
         // NativeEvent nativeEvent = eventbus.getNativeEvent();
         //
@@ -193,5 +171,30 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
         // isCaptionEvent(nativeEvent) */) {
         // nativeEvent.preventDefault();
         // }
+    }
+
+    @Override
+    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
+        if (HandlerModel.HANDLER_POPUP_POSITION.equals(handlerModel)) {
+            final PopupPanel popup = cast();
+            popup.setVisible(true);
+            popup.show();
+            Scheduler.get().scheduleDeferred(() -> {
+                final PTInstruction eventInstruction = new PTInstruction(getObjectID());
+
+                final JSONArray widgetInfo = new JSONArray();
+                int i = 0;
+                widgetInfo.set(i++, new JSONNumber(popup.getOffsetWidth()));
+                widgetInfo.set(i++, new JSONNumber(popup.getOffsetHeight()));
+                widgetInfo.set(i++, new JSONNumber(Window.getClientWidth()));
+                widgetInfo.set(i++, new JSONNumber(Window.getClientHeight()));
+
+                eventInstruction.put(ClientToServerModel.POPUP_POSITION, widgetInfo);
+
+                uiBuilder.sendDataToServer(cast(), eventInstruction);
+            });
+        } else {
+            super.addHandler(buffer, handlerModel);
+        }
     }
 }

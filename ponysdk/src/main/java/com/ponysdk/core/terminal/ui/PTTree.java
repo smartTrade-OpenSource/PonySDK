@@ -27,7 +27,6 @@ import com.google.gwt.user.client.ui.Tree;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
@@ -40,21 +39,7 @@ public class PTTree extends PTWidget<Tree> {
     }
 
     @Override
-    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
-        if (HandlerModel.HANDLER_SELECTION.equals(handlerModel)) {
-            uiObject.addSelectionHandler(event -> {
-                final PTObject ptObject = uiService.getPTObject(event.getSelectedItem());
-                final PTInstruction eventInstruction = new PTInstruction(getObjectID());
-                eventInstruction.put(ClientToServerModel.HANDLER_SELECTION, ptObject.getObjectID());
-                uiService.sendDataToServer(uiObject, eventInstruction);
-            });
-        } else {
-            super.addHandler(buffer, handlerModel, uiService);
-        }
-    }
-
-    @Override
-    public void remove(final ReaderBuffer buffer, final PTObject ptObject, final UIBuilder uiService) {
+    public void remove(final ReaderBuffer buffer, final PTObject ptObject) {
         uiObject.remove(asWidget(ptObject));
     }
 
@@ -68,4 +53,28 @@ public class PTTree extends PTWidget<Tree> {
             return super.update(buffer, binaryModel);
         }
     }
+
+    @Override
+    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
+        if (HandlerModel.HANDLER_SELECTION.equals(handlerModel)) {
+            uiObject.addSelectionHandler(event -> {
+                final PTObject ptObject = uiBuilder.getPTObject(event.getSelectedItem());
+                final PTInstruction eventInstruction = new PTInstruction(getObjectID());
+                eventInstruction.put(ClientToServerModel.HANDLER_SELECTION, ptObject.getObjectID());
+                uiBuilder.sendDataToServer(uiObject, eventInstruction);
+            });
+        } else {
+            super.addHandler(buffer, handlerModel);
+        }
+    }
+
+    @Override
+    public void removeHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
+        if (HandlerModel.HANDLER_SELECTION.equals(handlerModel)) {
+            // TODO Remove HANDLER_SELECTION
+        } else {
+            super.removeHandler(buffer, handlerModel);
+        }
+    }
+
 }
