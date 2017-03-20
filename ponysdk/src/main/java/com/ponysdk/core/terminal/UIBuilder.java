@@ -65,6 +65,7 @@ import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 import com.ponysdk.core.terminal.request.RequestBuilder;
 import com.ponysdk.core.terminal.ui.PTCookies;
+import com.ponysdk.core.terminal.ui.PTFrame;
 import com.ponysdk.core.terminal.ui.PTObject;
 import com.ponysdk.core.terminal.ui.PTStreamResource;
 import com.ponysdk.core.terminal.ui.PTWindow;
@@ -163,8 +164,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
 
     public void updateMainTerminal(final ReaderBuffer buffer) {
         while (buffer.hasRemaining()) {
-            // Detect if the message is not for the main terminal but for a
-            // specific window
+            // Detect if the message is not for the main terminal but for a specific window
             final BinaryModel binaryModel = buffer.readBinaryModel();
             if (ServerToClientModel.WINDOW_ID.equals(binaryModel.getModel())) {
                 // Event on a specific window
@@ -174,14 +174,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
                 if (window != null && window.isReady()) {
                     log.log(Level.FINE, "The main terminal send the buffer to window " + requestedWindowId);
 
-                    final int startPosition = buffer.getIndex();
-
-                    // Type
-                    final BinaryModel type = buffer.readBinaryModel();
-                    buffer.avoidBlock();
-                    final int endPosition = buffer.getIndex();
-
-                    window.postMessage(buffer.slice(startPosition, endPosition));
+                    window.postMessage(buffer);
                 } else {
                     log.log(Level.SEVERE, "The requested window " + requestedWindowId + " doesn't exist or not ready");
 
@@ -206,6 +199,9 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
                         }
                     }
                 }
+            } else if (ServerToClientModel.FRAME_ID.equals(binaryModel.getModel())) {
+                final PTFrame frame = (PTFrame) getPTObject(binaryModel.getIntValue());
+                frame.postMessage(buffer);
             } else {
                 update(binaryModel, buffer);
             }
@@ -213,6 +209,17 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
     }
 
     public void updateWindowTerminal(final ReaderBuffer buffer) {
+        // Detect if the message is not for the window but for a specific frame
+        final BinaryModel binaryModel = buffer.readBinaryModel();
+        if (ServerToClientModel.FRAME_ID.equals(binaryModel.getModel())) {
+            final PTFrame frame = (PTFrame) getPTObject(binaryModel.getIntValue());
+            frame.postMessage(buffer);
+        } else {
+            update(buffer.readBinaryModel(), buffer);
+        }
+    }
+
+    public void updateFrameTerminal(final ReaderBuffer buffer) {
         update(buffer.readBinaryModel(), buffer);
     }
 
@@ -221,6 +228,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         if (model == null) return;
 
         final int modelOrdinal = model.ordinal();
+
         if (ServerToClientModel.TYPE_CREATE.ordinal() == modelOrdinal) {
             final PTObject ptObject = processCreate(buffer, binaryModel.getIntValue());
             processUpdate(buffer, ptObject);
@@ -504,6 +512,12 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         final PTWindow window = PTWindowManager.getWindow(windowID);
         if (window != null) window.setReady();
         else log.warning("Window " + windowID + " doesn't exist");
+    }
+
+    void setReadyFrame(final int frameID) {
+        final PTFrame frame = (PTFrame) getPTObject(frameID);
+        if (frame != null) frame.setReady();
+        else log.warning("Frame " + frame + " doesn't exist");
     }
 
 }

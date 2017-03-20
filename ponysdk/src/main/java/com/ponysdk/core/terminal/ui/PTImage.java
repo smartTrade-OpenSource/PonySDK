@@ -64,11 +64,8 @@ public class PTImage extends PTWidget<Image> {
 
     @Override
     protected Image createUIObject() {
-        if (url != null) {
-            return left != -1 ? new Image(url, left, top, width, height) : new Image(url);
-        } else {
-            return new Image();
-        }
+        if (url != null) return left != -1 ? new Image(url, left, top, width, height) : new Image(url);
+        else return new Image();
     }
 
     @Override

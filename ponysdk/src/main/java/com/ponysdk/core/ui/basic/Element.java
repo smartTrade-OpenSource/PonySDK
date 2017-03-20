@@ -399,9 +399,12 @@ public class Element {
         return f.newPWindow(parentWindow, false, url, name, features);
     }
 
-    public static final PWindow newPWindow(final PWindow parentWindow, final boolean relative, final String url, final String name,
-                                           final String features) {
+    public static final PWindow newPWindow(final PWindow parentWindow, final boolean relative, final String url, final String name, final String features) {
         return f.newPWindow(parentWindow, relative, url, name, features);
+    }
+
+    public static final PFrame newPFrame(final String url) {
+        return f.newPFrame(url);
     }
 
     public static final PElement newA() {

@@ -34,7 +34,8 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
-import com.ponysdk.core.terminal.request.ParentWindowRequest;
+import com.ponysdk.core.terminal.request.FrameRequestBuilder;
+import com.ponysdk.core.terminal.request.WindowRequestBuilder;
 import com.ponysdk.core.terminal.socket.WebSocketClient;
 import com.ponysdk.core.terminal.socket.WebSocketClient.WebSocketDataType;
 import com.ponysdk.core.terminal.ui.PTWindowManager;
@@ -65,27 +66,37 @@ public class PonySDK implements UncaughtExceptionHandler {
 
     public void start() {
         if (started) return;
-        if (log.isLoggable(Level.INFO)) log.info("Creating PonySDK instance");
+
+        if (log.isLoggable(Level.INFO)) log.info("Starting PonySDK instance");
+
         GWT.setUncaughtExceptionHandler(this);
+
         try {
-            final String windowId = Window.Location.getParameter(ClientToServerModel.WINDOW_ID.toStringValue());
+            final String child = Window.Location.getParameter(ClientToServerModel.UI_CONTEXT_ID.toStringValue());
 
-            if (log.isLoggable(Level.INFO)) log.info("Starting PonySDK instance");
-            if (windowId == null) {
-                Window.addCloseHandler(event -> close());
+            if (child == null) startMainContext();
+            else startChildContext();
 
-                final String builder = GWT.getHostPageBaseURL().replaceFirst("http", "ws") + "ws?"
-                        + ClientToServerModel.TYPE_HISTORY.toStringValue() + "=" + History.getToken();
-
-                socketClient = new WebSocketClient(builder, uiBuilder, WebSocketDataType.ARRAYBUFFER);
-            } else {
-                contextId = Integer.parseInt(Window.Location.getParameter(ClientToServerModel.UI_CONTEXT_ID.toStringValue()));
-                uiBuilder.init(new ParentWindowRequest(windowId, buffer -> uiBuilder.updateWindowTerminal(buffer)));
-            }
             started = true;
         } catch (final Throwable e) {
             log.log(Level.SEVERE, "Loading application has failed #" + e.getMessage(), e);
         }
+    }
+
+    private void startMainContext() {
+        Window.addCloseHandler(event -> close());
+        final String builder = GWT.getHostPageBaseURL().replaceFirst("http", "ws") + "ws?"
+                + ClientToServerModel.TYPE_HISTORY.toStringValue() + "=" + History.getToken();
+        socketClient = new WebSocketClient(builder, uiBuilder, WebSocketDataType.ARRAYBUFFER);
+    }
+
+    private void startChildContext() {
+        final String windowId = Window.Location.getParameter(ClientToServerModel.WINDOW_ID.toStringValue());
+        final String frameId = Window.Location.getParameter(ClientToServerModel.FRAME_ID.toStringValue());
+
+        contextId = Integer.parseInt(Window.Location.getParameter(ClientToServerModel.UI_CONTEXT_ID.toStringValue()));
+        uiBuilder.init(windowId != null ? new WindowRequestBuilder(windowId, buffer -> uiBuilder.updateWindowTerminal(buffer))
+                : new FrameRequestBuilder(frameId, buffer -> uiBuilder.updateFrameTerminal(buffer)));
     }
 
     /**
@@ -102,6 +113,10 @@ public class PonySDK implements UncaughtExceptionHandler {
         final PTInstruction instruction = new PTInstruction(Integer.valueOf(objectID.toString()));
         instruction.put(ClientToServerModel.NATIVE, jsObject);
         uiBuilder.sendDataToServer(instruction);
+    }
+
+    public void setReadyFrame(final int frameID) {
+        uiBuilder.setReadyFrame(frameID);
     }
 
     public void setReadyWindow(final int windowID) {
@@ -131,8 +146,8 @@ public class PonySDK implements UncaughtExceptionHandler {
         return contextId;
     }
 
-    public void setContextId(final int uiContextId) {
-        this.contextId = uiContextId;
+    public void setContextId(final int contextId) {
+        this.contextId = contextId;
     }
 
 }

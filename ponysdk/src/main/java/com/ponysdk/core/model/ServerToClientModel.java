@@ -208,6 +208,7 @@ public enum ServerToClientModel {
     POPUP_POSITION_AND_SHOW(ValueTypeModel.NULL),
     ROOT_ID(ValueTypeModel.STRING),
     WINDOW_ID(ValueTypeModel.INTEGER),
+    FRAME_ID(ValueTypeModel.INTEGER),
     EVAL(ValueTypeModel.STRING),
     VISIBLE_LINES(ValueTypeModel.INTEGER),
     CHARACTER_WIDTH(ValueTypeModel.INTEGER),

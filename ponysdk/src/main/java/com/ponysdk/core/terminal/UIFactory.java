@@ -44,6 +44,7 @@ import com.ponysdk.core.terminal.ui.PTFileUpload;
 import com.ponysdk.core.terminal.ui.PTFlexTable;
 import com.ponysdk.core.terminal.ui.PTFlowPanel;
 import com.ponysdk.core.terminal.ui.PTFocusPanel;
+import com.ponysdk.core.terminal.ui.PTFrame;
 import com.ponysdk.core.terminal.ui.PTGrid;
 import com.ponysdk.core.terminal.ui.PTHTML;
 import com.ponysdk.core.terminal.ui.PTHeaderPanel;
@@ -196,6 +197,8 @@ class UIFactory {
             return new PTWindow();
         case BROWSER:
             return new PTBrowser();
+        case FRAME:
+            return new PTFrame();
         default:
             Window.alert("UIFactory: Client implementation not found, type : " + widgetType);
             break;

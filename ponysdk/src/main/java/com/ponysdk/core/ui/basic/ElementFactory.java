@@ -187,4 +187,6 @@ public interface ElementFactory {
 
     PWindow newPWindow(final PWindow parentWindow, final boolean relative, final String url, final String name, final String features);
 
+    PFrame newPFrame(final String url);
+
 }

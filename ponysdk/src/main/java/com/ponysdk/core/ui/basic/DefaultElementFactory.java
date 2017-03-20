@@ -420,9 +420,13 @@ public class DefaultElementFactory implements ElementFactory {
     }
 
     @Override
-    public PWindow newPWindow(final PWindow parentWindow, final boolean relative, final String url, final String name,
-                              final String features) {
+    public PWindow newPWindow(final PWindow parentWindow, final boolean relative, final String url, final String name, final String features) {
         return new PWindow(parentWindow, relative, url, name, features);
+    }
+
+    @Override
+    public PFrame newPFrame(final String url) {
+        return new PFrame(url);
     }
 
 }

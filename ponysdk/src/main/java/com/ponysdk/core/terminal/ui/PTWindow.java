@@ -39,7 +39,7 @@ import elemental.client.Browser;
 import elemental.html.Uint8Array;
 import elemental.html.Window;
 
-public class PTWindow extends AbstractPTObject {
+public class PTWindow extends AbstractPTObject implements PostMessageHandler {
 
     private static final Logger log = Logger.getLogger(PTWindow.class.getName());
 
@@ -105,12 +105,14 @@ public class PTWindow extends AbstractPTObject {
         window.close();
     }
 
+    @Override
     public void postMessage(final Uint8Array buffer) {
         if (ready && window.isClosed()) onClose();
 
         if (ready) window.postMessage(buffer, "*");
     }
 
+    @Override
     public void setReady() {
         ready = true;
         setTitle(name, window); // WORKAROUND : Set title for Google Chrome
@@ -120,6 +122,7 @@ public class PTWindow extends AbstractPTObject {
         uiBuilder.sendDataToServer(instruction);
     }
 
+    @Override
     public boolean isReady() {
         return ready;
     }

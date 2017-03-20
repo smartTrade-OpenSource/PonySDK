@@ -23,13 +23,14 @@
 
 package com.ponysdk.core.server.servlet;
 
-import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.application.AbstractApplicationManager;
-import com.ponysdk.core.server.application.Application;
-import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.server.stm.TxnContext;
-import com.ponysdk.core.useragent.UserAgent;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
 import org.eclipse.jetty.websocket.api.WebSocketListener;
@@ -37,12 +38,13 @@ import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
+import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.application.AbstractApplicationManager;
+import com.ponysdk.core.server.application.Application;
+import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.stm.TxnContext;
+import com.ponysdk.core.useragent.UserAgent;
 
 public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
@@ -295,7 +297,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
                 || ServerToClientModel.TYPE_CLOSE.equals(model) || ServerToClientModel.TYPE_CREATE.equals(model)
                 || ServerToClientModel.TYPE_GC.equals(model) || ServerToClientModel.TYPE_HISTORY.equals(model)
                 || ServerToClientModel.TYPE_REMOVE.equals(model) || ServerToClientModel.TYPE_REMOVE_HANDLER.equals(model)
-                || ServerToClientModel.WINDOW_ID.equals(model)) {
+                || ServerToClientModel.WINDOW_ID.equals(model) || ServerToClientModel.FRAME_ID.equals(model)) {
             lastUpdatedID = -1;
         }
 

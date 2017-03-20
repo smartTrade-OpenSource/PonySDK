@@ -61,6 +61,9 @@ public class PWindow extends PObject {
         this.window = this;
         init();
     }
+    // return
+    // "resizable=yes,location=0,status=0,scrollbars=0,height=800,width=1200,title="
+    // + getName();
 
     // TODO nciaravola => feature + relative should be include in an Option Pojo
     protected PWindow(final boolean relative, final String url, final String name, final String features) {
@@ -74,14 +77,12 @@ public class PWindow extends PObject {
 
     protected PWindow(final PWindow parentWindow, final boolean relative, final String url, final String name, final String features) {
         this(relative, url, name, features);
-        if (parentWindow != null)
-            parentWindow.addWindow(this);
+        if (parentWindow != null) parentWindow.addWindow(this);
     }
 
     @Override
     void init() {
-        if (initialized)
-            return;
+        if (initialized) return;
 
         if (stackedInstructions != null) {
             while (!stackedInstructions.isEmpty()) {
@@ -91,8 +92,7 @@ public class PWindow extends PObject {
         initialized = true;
 
         panelByZone.forEach((key, value) -> value.attach(this));
-        if (initializeListener != null)
-            initializeListener.onInitialize(this);
+        if (initializeListener != null) initializeListener.onInitialize(this);
     }
 
     public static PWindow getMain() {
@@ -119,13 +119,11 @@ public class PWindow extends PObject {
     }
 
     public void open() {
-        if (destroy)
-            return;
+        if (destroy) return;
         if (!initialized) {
             final WebsocketEncoder parser = Txn.get().getEncoder();
             parser.beginObject();
-            if (window != PWindow.getMain())
-                parser.encode(ServerToClientModel.WINDOW_ID, window.getID());
+            if (window != PWindow.getMain()) parser.encode(ServerToClientModel.WINDOW_ID, window.getID());
             parser.encode(ServerToClientModel.TYPE_CREATE, ID);
             parser.encode(ServerToClientModel.WIDGET_TYPE, getWidgetType().getValue());
             enrichOnInit(parser);
@@ -186,8 +184,7 @@ public class PWindow extends PObject {
     }
 
     public void addOpenHandler(final POpenHandler handler) {
-        if (openHandlers == null)
-            openHandlers = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        if (openHandlers == null) openHandlers = Collections.newSetFromMap(new ConcurrentHashMap<>());
         openHandlers.add(handler);
     }
 
@@ -196,13 +193,16 @@ public class PWindow extends PObject {
     }
 
     public void addCloseHandler(final PCloseHandler handler) {
-        if (closeHandlers == null)
-            closeHandlers = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        if (closeHandlers == null) closeHandlers = Collections.newSetFromMap(new ConcurrentHashMap<>());
         closeHandlers.add(handler);
     }
 
     public boolean removeCloseHandler(final PCloseHandler handler) {
         return closeHandlers != null && closeHandlers.remove(handler);
+    }
+
+    public void add(final IsPWidget widget) {
+        ensureRootPanel(null).add(widget);
     }
 
     public void add(final String id, final IsPWidget widget) {
@@ -214,14 +214,9 @@ public class PWindow extends PObject {
         if (rootPanel == null) {
             rootPanel = new PRootPanel(zoneID);
             panelByZone.put(zoneID, rootPanel);
-            if (isInitialized())
-                rootPanel.attach(this);
+            if (isInitialized()) rootPanel.attach(this);
         }
         return rootPanel;
-    }
-
-    public void add(final IsPWidget widget) {
-        ensureRootPanel(null).add(widget);
     }
 
     public boolean isOpened() {
@@ -256,8 +251,7 @@ public class PWindow extends PObject {
     }
 
     private void addWindow(final PWindow window) {
-        if (subWindows == null)
-            subWindows = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        if (subWindows == null) subWindows = Collections.newSetFromMap(new ConcurrentHashMap<>());
         window.addCloseHandler(event -> removeWindow(window));
         subWindows.add(window);
     }
@@ -272,6 +266,7 @@ public class PWindow extends PObject {
     }
 
     public class Location {
+
         private final PWindow window;
 
         Location(final PWindow window) {
@@ -281,6 +276,110 @@ public class PWindow extends PObject {
         public void replace(final String url) {
             window.saveUpdate(writer -> writer.writeModel(ServerToClientModel.WINDOW_LOCATION_REPLACE, url));
         }
+    }
+
+    public class Parameter {
+
+        private String title;
+        private Integer fullScreen;
+        private Integer height = 100;
+        private Integer width = 100;
+        private Double left;
+        private Double top;
+        private Boolean menuBar;
+        private Boolean scrollbars;
+        private Boolean status;
+        private Boolean titlebar;
+        private Boolean toolbar;
+
+        public Integer getFullScreen() {
+            return fullScreen;
+        }
+
+        public void setFullScreen(final Integer fullScreen) {
+            this.fullScreen = fullScreen;
+        }
+
+        public Integer getHeight() {
+            return height;
+        }
+
+        public void setHeight(final Integer height) {
+            this.height = height;
+        }
+
+        public Integer getWidth() {
+            return width;
+        }
+
+        public void setWidth(final Integer width) {
+            this.width = width;
+        }
+
+        public Double getLeft() {
+            return left;
+        }
+
+        public void setLeft(final Double left) {
+            this.left = left;
+        }
+
+        public Double getTop() {
+            return top;
+        }
+
+        public void setTop(final Double top) {
+            this.top = top;
+        }
+
+        public Boolean getMenuBar() {
+            return menuBar;
+        }
+
+        public void setMenuBar(final Boolean menuBar) {
+            this.menuBar = menuBar;
+        }
+
+        public Boolean getScrollbars() {
+            return scrollbars;
+        }
+
+        public void setScrollbars(final Boolean scrollbars) {
+            this.scrollbars = scrollbars;
+        }
+
+        public Boolean getStatus() {
+            return status;
+        }
+
+        public void setStatus(final Boolean status) {
+            this.status = status;
+        }
+
+        public Boolean getTitlebar() {
+            return titlebar;
+        }
+
+        public void setTitlebar(final Boolean titlebar) {
+            this.titlebar = titlebar;
+        }
+
+        public Boolean getToolbar() {
+            return toolbar;
+        }
+
+        public void setToolbar(final Boolean toolbar) {
+            this.toolbar = toolbar;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(final String title) {
+            this.title = title;
+        }
+
     }
 
 }
