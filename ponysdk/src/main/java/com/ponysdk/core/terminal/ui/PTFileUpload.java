@@ -24,9 +24,11 @@
 package com.ponysdk.core.terminal.ui;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.LabelElement;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.FileUpload;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -38,19 +40,24 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 public class PTFileUpload extends PTWidget<FormPanel> {
 
     private FileUpload fileUpload;
+    private String fileUploadId;
+    private FlowPanel container;
+    private LabelElement label;
 
     @Override
     protected FormPanel createUIObject() {
         fileUpload = new FileUpload();
 
+        fileUploadId = DOM.createUniqueId();
+        fileUpload.getElement().setPropertyString("id", fileUploadId);
+
         final FormPanel formPanel = new FormPanel();
         formPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
         formPanel.setMethod(FormPanel.METHOD_POST);
 
-        final VerticalPanel panel = new VerticalPanel();
-        panel.setSize("100%", "100%");
-        panel.add(fileUpload);
-        formPanel.setWidget(panel);
+        container = new FlowPanel();
+        container.add(fileUpload);
+        formPanel.setWidget(container);
 
         formPanel.addSubmitCompleteHandler(event -> {
             final PTInstruction instruction = new PTInstruction(objectID);
@@ -69,6 +76,14 @@ public class PTFileUpload extends PTWidget<FormPanel> {
             return true;
         } else if (ServerToClientModel.ENABLED.ordinal() == modelOrdinal) {
             fileUpload.setEnabled(binaryModel.getBooleanValue());
+            return true;
+        } else if (ServerToClientModel.TEXT.ordinal() == modelOrdinal) {
+            if (label == null) {
+                label = DOM.createLabel().cast();
+                label.setHtmlFor(fileUploadId);
+                container.getElement().insertFirst(label);
+            }
+            label.setInnerText(binaryModel.getStringValue());
             return true;
         } else {
             return super.update(buffer, binaryModel);

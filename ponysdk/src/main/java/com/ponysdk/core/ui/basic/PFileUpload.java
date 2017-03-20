@@ -23,17 +23,23 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+import javax.json.JsonObject;
+
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.ui.basic.event.*;
+import com.ponysdk.core.ui.basic.event.HasPChangeHandlers;
+import com.ponysdk.core.ui.basic.event.HasPSubmitCompleteHandlers;
+import com.ponysdk.core.ui.basic.event.PChangeEvent;
+import com.ponysdk.core.ui.basic.event.PChangeHandler;
+import com.ponysdk.core.ui.basic.event.PSubmitCompleteHandler;
 import com.ponysdk.core.ui.eventbus.StreamHandler;
-
-import javax.json.JsonObject;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A widget that wraps the HTML &lt;input type='file'&gt; element.
@@ -51,6 +57,8 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, HasPSubm
     private String fileName;
 
     private boolean enabled = true;
+
+    private String label;
 
     protected PFileUpload() {
     }
@@ -89,8 +97,15 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, HasPSubm
     }
 
     public void setName(final String name) {
+        if (Objects.equals(this.name, name)) return;
         this.name = name;
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.NAME, name));
+    }
+
+    public void setLabel(final String label) {
+        if (Objects.equals(this.label, label)) return;
+        this.label = label;
+        saveUpdate(writer -> writer.writeModel(ServerToClientModel.TEXT, label));
     }
 
     public boolean isEnabled() {
@@ -98,6 +113,7 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, HasPSubm
     }
 
     public void setEnabled(final boolean enabled) {
+        if (Objects.equals(this.enabled, enabled)) return;
         this.enabled = enabled;
         saveUpdate(writer -> writer.writeModel(ServerToClientModel.ENABLED, enabled));
     }
