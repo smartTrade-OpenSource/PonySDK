@@ -332,15 +332,21 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
 
     public void removeDomHandler(final EventHandler handler, final PDomEvent.Type type) {
         if (destroy) return;
-        final Collection<EventHandler> handlers = eventBus.getHandlers(type, this);
-        if (handlers.contains(handler)) {
-            eventBus.removeHandlerFromSource(type, this, handler);
-            // TODO Handle remove DOM handler
-            // if (eventBus.getHandlers(type, this).isEmpty()) {
-            //     executeRemoveDomHandler(type);
-            //     if (initialized) executeRemoveDomHandler(type);
-            //     else safeStackedInstructions().add(() -> executeRemoveDomHandler(type));
-            // }
+        if (eventBus != null) {
+            final Collection<EventHandler> handlers = eventBus.getHandlers(type, this);
+            if (handlers.contains(handler)) {
+                eventBus.removeHandlerFromSource(type, this, handler);
+                // TODO Handle remove DOM handler
+                // if (eventBus.getHandlers(type, this).isEmpty()) {
+                //     executeRemoveDomHandler(type);
+                //     if (initialized) executeRemoveDomHandler(type);
+                //     else safeStackedInstructions().add(() -> executeRemoveDomHandler(type));
+                // }
+            } else {
+                log.warn("No event handler of type " + type + " found for " + toString());
+            }
+        } else {
+            log.warn("No event handler of type " + type + " found for " + toString());
         }
     }
 
