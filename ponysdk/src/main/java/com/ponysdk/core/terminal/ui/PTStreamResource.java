@@ -43,7 +43,8 @@ public class PTStreamResource extends AbstractPTObject {
             final int streamRequestId = buffer.readBinaryModel().getIntValue();
 
             final String action = GWT.getHostPageBaseURL() + "stream?" + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "="
-                    + PonySDK.uiContextId + "&" + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "=" + streamRequestId;
+                    + PonySDK.get().getContextId() + "&" + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "="
+                    + streamRequestId;
             frame = new Frame();
             frame.setWidth("0px");
             frame.setHeight("0px");

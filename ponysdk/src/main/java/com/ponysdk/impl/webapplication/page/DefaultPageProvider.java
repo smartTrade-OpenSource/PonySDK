@@ -23,9 +23,6 @@
 
 package com.ponysdk.impl.webapplication.page;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;

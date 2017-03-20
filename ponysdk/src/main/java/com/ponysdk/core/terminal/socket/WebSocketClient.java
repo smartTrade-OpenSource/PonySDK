@@ -23,6 +23,9 @@
 
 package com.ponysdk.core.terminal.socket;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.rpc.StatusCodeException;
 import com.ponysdk.core.model.ClientToServerModel;
@@ -33,18 +36,14 @@ import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 import com.ponysdk.core.terminal.request.WebSocketRequestBuilder;
+
 import elemental.client.Browser;
 import elemental.events.CloseEvent;
-import elemental.events.Event;
-import elemental.events.EventListener;
 import elemental.events.MessageEvent;
 import elemental.html.ArrayBuffer;
 import elemental.html.WebSocket;
 import elemental.html.Window;
 import elemental.html.Worker;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class WebSocketClient implements MessageSender {
 
@@ -100,16 +99,7 @@ public class WebSocketClient implements MessageSender {
             if (log.isLoggable(Level.INFO)) log.info("WebSoket error");
             uiBuilder.onCommunicationError(new Exception("Websocket error"));
         });
-        webSocket.setOnmessage(new EventListener() {
-
-            /**
-             * Message from server to Main terminal
-             */
-            @Override
-            public void handleEvent(final Event event) {
-                messageReader.read((MessageEvent) event);
-            }
-        });
+        webSocket.setOnmessage(event -> messageReader.read((MessageEvent) event));
     }
 
     // WORKAROUND : No setElements on Uint8Array but Elemental need it, create a passthrough
@@ -132,7 +122,7 @@ public class WebSocketClient implements MessageSender {
             } else if (type.getModel() == ServerToClientModel.HEARTBEAT) {
                 if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Heart beat received");
             } else if (type.getModel() == ServerToClientModel.UI_CONTEXT_ID) {
-                PonySDK.uiContextId = type.getIntValue();
+                PonySDK.get().setContextId(type.getIntValue());
                 uiBuilder.init(new WebSocketRequestBuilder(WebSocketClient.this));
             } else {
                 try {

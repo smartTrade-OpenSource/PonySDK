@@ -88,7 +88,8 @@ public class PTFileUpload extends PTWidget<FormPanel> {
             final int streamRequestId = buffer.readBinaryModel().getIntValue();
 
             final String action = GWT.getHostPageBaseURL() + "stream?" + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "="
-                    + PonySDK.uiContextId + "&" + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "=" + streamRequestId;
+                    + PonySDK.get().getContextId() + "&" + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "="
+                    + streamRequestId;
             uiObject.setAction(action);
             uiObject.submit();
         } else {

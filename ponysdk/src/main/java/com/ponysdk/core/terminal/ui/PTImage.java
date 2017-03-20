@@ -89,7 +89,8 @@ public class PTImage extends PTWidget<Image> {
             final int streamRequestId = buffer.readBinaryModel().getIntValue();
 
             cast().setUrl(GWT.getHostPageBaseURL() + "stream?" + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "="
-                    + PonySDK.uiContextId + "&" + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "=" + streamRequestId);
+                    + PonySDK.get().getContextId() + "&" + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "="
+                    + streamRequestId);
         } else {
             super.addHandler(buffer, handlerModel);
         }

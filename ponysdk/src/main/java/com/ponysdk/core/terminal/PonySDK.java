@@ -34,9 +34,7 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
-import com.ponysdk.core.terminal.model.ReaderBuffer;
 import com.ponysdk.core.terminal.request.ParentWindowRequest;
-import com.ponysdk.core.terminal.request.RequestCallback;
 import com.ponysdk.core.terminal.socket.WebSocketClient;
 import com.ponysdk.core.terminal.socket.WebSocketClient.WebSocketDataType;
 import com.ponysdk.core.terminal.ui.PTWindowManager;
@@ -46,24 +44,29 @@ import jsinterop.annotations.JsType;
 @JsType
 public class PonySDK implements UncaughtExceptionHandler {
 
-    private final Logger log = Logger.getLogger(PonySDK.class.getName());
+    private static final Logger log = Logger.getLogger(PonySDK.class.getName());
+
+    private static PonySDK INSTANCE;
 
     private final UIBuilder uiBuilder = new UIBuilder();
 
+    private int contextId;
     private WebSocketClient socketClient;
-
     private boolean started;
 
-    @SuppressWarnings("unusable-by-js")
-    public static Integer uiContextId;
-
     public PonySDK() {
+        if (INSTANCE != null) throw new RuntimeException("Cannot instanciate PonySDK twice");
+        INSTANCE = this;
+    }
+
+    public static final PonySDK get() {
+        return INSTANCE;
     }
 
     public void start() {
         if (started) return;
-        GWT.setUncaughtExceptionHandler(this);
         if (log.isLoggable(Level.INFO)) log.info("Creating PonySDK instance");
+        GWT.setUncaughtExceptionHandler(this);
         try {
             final String windowId = Window.Location.getParameter(ClientToServerModel.WINDOW_ID.toStringValue());
 
@@ -76,18 +79,8 @@ public class PonySDK implements UncaughtExceptionHandler {
 
                 socketClient = new WebSocketClient(builder, uiBuilder, WebSocketDataType.ARRAYBUFFER);
             } else {
-                uiContextId = Integer.parseInt(Window.Location.getParameter(ClientToServerModel.UI_CONTEXT_ID.toStringValue()));
-                uiBuilder.init(new ParentWindowRequest(windowId, new RequestCallback() {
-
-                    /**
-                     * Message from Main terminal to the matching terminal
-                     */
-                    @Override
-                    public void onDataReceived(final ReaderBuffer buffer) {
-                        uiBuilder.updateWindowTerminal(buffer);
-                    }
-
-                }));
+                contextId = Integer.parseInt(Window.Location.getParameter(ClientToServerModel.UI_CONTEXT_ID.toStringValue()));
+                uiBuilder.init(new ParentWindowRequest(windowId, buffer -> uiBuilder.updateWindowTerminal(buffer)));
             }
             started = true;
         } catch (final Throwable e) {
@@ -132,6 +125,14 @@ public class PonySDK implements UncaughtExceptionHandler {
     public void close() {
         socketClient.close();
         PTWindowManager.closeAll();
+    }
+
+    public int getContextId() {
+        return contextId;
+    }
+
+    public void setContextId(final int uiContextId) {
+        this.contextId = uiContextId;
     }
 
 }

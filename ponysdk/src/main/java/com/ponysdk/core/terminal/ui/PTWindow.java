@@ -50,18 +50,13 @@ public class PTWindow extends AbstractPTObject {
     private String name = EMPTY;
     private String features;
 
-    private UIBuilder uiService;
-
     private boolean ready = false;
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder builder) {
-        super.create(buffer, objectId, builder);
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
+        super.create(buffer, objectId, uiBuilder);
 
-        if (log.isLoggable(Level.INFO))
-            log.log(Level.INFO, "Create PTWindow #" + objectID);
-
-        uiService = builder;
+        if (log.isLoggable(Level.INFO)) log.log(Level.INFO, "Create PTWindow #" + objectID);
 
         final boolean relative = buffer.readBinaryModel().getBooleanValue();
 
@@ -75,8 +70,8 @@ public class PTWindow extends AbstractPTObject {
         features = rawFeatures != null ? rawFeatures : EMPTY;
 
         if (relative) {
-            url = GWT.getHostPageBaseURL() + url + "?" + ClientToServerModel.WINDOW_ID.toStringValue() + "=" + objectId + "&" + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "="
-                    + PonySDK.uiContextId;
+            url = GWT.getHostPageBaseURL() + url + "?" + ClientToServerModel.WINDOW_ID.toStringValue() + "=" + objectId + "&"
+                    + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "=" + PonySDK.get().getContextId();
         }
 
         PTWindowManager.get().register(this);
@@ -111,11 +106,9 @@ public class PTWindow extends AbstractPTObject {
     }
 
     public void postMessage(final Uint8Array buffer) {
-        if (ready && window.isClosed())
-            onClose();
+        if (ready && window.isClosed()) onClose();
 
-        if (ready)
-            window.postMessage(buffer, "*");
+        if (ready) window.postMessage(buffer, "*");
     }
 
     public void setReady() {
@@ -124,7 +117,7 @@ public class PTWindow extends AbstractPTObject {
 
         final PTInstruction instruction = new PTInstruction(objectID);
         instruction.put(ClientToServerModel.HANDLER_OPEN, url);
-        uiService.sendDataToServer(instruction);
+        uiBuilder.sendDataToServer(instruction);
     }
 
     public boolean isReady() {
@@ -143,10 +136,9 @@ public class PTWindow extends AbstractPTObject {
 
             final PTInstruction instruction = new PTInstruction(objectID);
             instruction.put(ClientToServerModel.HANDLER_CLOSE);
-            uiService.sendDataToServer(instruction);
+            uiBuilder.sendDataToServer(instruction);
 
-            if (log.isLoggable(Level.INFO))
-                log.log(Level.INFO, "Close PTWindow #" + objectID);
+            if (log.isLoggable(Level.INFO)) log.log(Level.INFO, "Close PTWindow #" + objectID);
         }
     }
 
