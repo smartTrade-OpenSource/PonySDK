@@ -43,7 +43,6 @@ import elemental.events.MessageEvent;
 import elemental.html.ArrayBuffer;
 import elemental.html.WebSocket;
 import elemental.html.Window;
-import elemental.html.Worker;
 
 public class WebSocketClient implements MessageSender {
 
@@ -144,10 +143,6 @@ public class WebSocketClient implements MessageSender {
     public void close() {
         webSocket.close();
     }
-
-    public final native void setWebsocket(Worker w, Window window, WebSocket webSocket) /*-{
-                                                                                        window.webSocket = webSocket;
-                                                                                        }-*/;
 
     public enum WebSocketDataType {
 

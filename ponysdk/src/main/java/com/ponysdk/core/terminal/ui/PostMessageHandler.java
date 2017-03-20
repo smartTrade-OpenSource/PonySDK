@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 PonySDK
+ * Copyright (c) 2017 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
@@ -21,27 +21,30 @@
  * the License.
  */
 
-package com.ponysdk.core.terminal.request;
+package com.ponysdk.core.terminal.ui;
 
-import com.google.gwt.json.client.JSONValue;
-import com.ponysdk.core.terminal.socket.WebSocketClient;
+import com.ponysdk.core.terminal.model.ReaderBuffer;
 
-public class WebSocketRequestBuilder implements RequestBuilder {
+import elemental.html.Uint8Array;
 
-    private final WebSocketClient webSocketClient;
+public interface PostMessageHandler {
 
-    public WebSocketRequestBuilder(final WebSocketClient webSocketClient) {
-        this.webSocketClient = webSocketClient;
-    }
+    void postMessage(final Uint8Array buffer);
 
-    @Override
-    public void send(final JSONValue value) {
-        webSocketClient.send(value.toString());
-    }
+    void setReady();
 
-    @Override
-    public String toString() {
-        return "Main builder";
+    boolean isReady();
+
+    public default void postMessage(final ReaderBuffer buffer) {
+        final int startPosition = buffer.getIndex();
+
+        // Read Type
+        buffer.readBinaryModel();
+        buffer.avoidBlock();
+
+        final int endPosition = buffer.getIndex();
+
+        postMessage(buffer.slice(startPosition, endPosition));
     }
 
 }

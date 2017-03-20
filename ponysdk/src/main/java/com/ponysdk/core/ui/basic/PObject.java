@@ -47,6 +47,7 @@ public abstract class PObject {
 
     protected final int ID = UIContext.get().nextID();
     protected PWindow window;
+    protected PFrame frame;
     protected InitializeListener initializeListener;
     protected DestroyListener destroyListener;
     protected Object data;
@@ -63,6 +64,10 @@ public abstract class PObject {
     }
 
     protected abstract WidgetType getWidgetType();
+
+    protected void attach(final PFrame frame) {
+        this.frame = frame;
+    }
 
     protected boolean attach(final PWindow window) {
         if (this.window == null && window != null) {
@@ -90,6 +95,7 @@ public abstract class PObject {
         final WebsocketEncoder parser = Txn.get().getEncoder();
         parser.beginObject();
         if (window != PWindow.getMain()) parser.encode(ServerToClientModel.WINDOW_ID, window.getID());
+        if (frame != null) parser.encode(ServerToClientModel.FRAME_ID, frame.getID());
         parser.encode(ServerToClientModel.TYPE_CREATE, ID);
         parser.encode(ServerToClientModel.WIDGET_TYPE, getWidgetType().getValue());
         enrichOnInit(parser);
@@ -118,6 +124,10 @@ public abstract class PObject {
 
     public PWindow getWindow() {
         return window;
+    }
+
+    public PFrame getFrame() {
+        return frame;
     }
 
     public final int getID() {
@@ -168,8 +178,7 @@ public abstract class PObject {
     }
 
     /**
-     * JSON received from the Terminal using pony.sendDataToServer(objectID,
-     * JSON)
+     * JSON received from the Terminal using pony.sendDataToServer(objectID, JSON)
      */
     public void onClientData(final JsonObject event) {
         if (destroy) return;
@@ -201,6 +210,7 @@ public abstract class PObject {
         final WebsocketEncoder encoder = Txn.get().getEncoder();
         encoder.beginObject();
         if (!PWindow.isMain(window)) encoder.encode(ServerToClientModel.WINDOW_ID, window.getID());
+        if (frame != null) encoder.encode(ServerToClientModel.FRAME_ID, frame.getID());
         encoder.encode(ServerToClientModel.TYPE_ADD, objectID);
         encoder.encode(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
         if (binaryModels != null) {
@@ -222,6 +232,7 @@ public abstract class PObject {
         final WebsocketEncoder parser = Txn.get().getEncoder();
         parser.beginObject();
         if (!PWindow.isMain(window)) parser.encode(ServerToClientModel.WINDOW_ID, window.getID());
+        if (frame != null) parser.encode(ServerToClientModel.FRAME_ID, frame.getID());
         parser.encode(ServerToClientModel.TYPE_ADD_HANDLER, ID);
         parser.encode(ServerToClientModel.HANDLER_TYPE, type.getValue());
         parser.endObject();
@@ -238,6 +249,7 @@ public abstract class PObject {
         final WebsocketEncoder parser = Txn.get().getEncoder();
         parser.beginObject();
         if (!PWindow.isMain(window)) parser.encode(ServerToClientModel.WINDOW_ID, window.getID());
+        if (frame != null) parser.encode(ServerToClientModel.FRAME_ID, frame.getID());
         parser.encode(ServerToClientModel.TYPE_REMOVE_HANDLER, ID);
         parser.encode(ServerToClientModel.HANDLER_TYPE, type.getValue());
         parser.endObject();
@@ -254,6 +266,7 @@ public abstract class PObject {
         final WebsocketEncoder parser = Txn.get().getEncoder();
         parser.beginObject();
         if (!PWindow.isMain(window)) parser.encode(ServerToClientModel.WINDOW_ID, window.getID());
+        if (frame != null) parser.encode(ServerToClientModel.FRAME_ID, frame.getID());
         parser.encode(ServerToClientModel.TYPE_REMOVE, objectID);
         parser.encode(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
         parser.endObject();
@@ -271,6 +284,7 @@ public abstract class PObject {
         final ModelWriter writer = Txn.getWriter();
         writer.beginObject();
         if (!PWindow.isMain(window)) writer.writeModel(ServerToClientModel.WINDOW_ID, window.getID());
+        if (frame != null) writer.writeModel(ServerToClientModel.FRAME_ID, frame.getID());
         writer.writeModel(ServerToClientModel.TYPE_UPDATE, ID);
 
         callback.doWrite(writer);

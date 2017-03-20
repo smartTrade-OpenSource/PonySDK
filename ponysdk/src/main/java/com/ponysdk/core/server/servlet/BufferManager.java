@@ -37,7 +37,7 @@ public class BufferManager {
 
     private static final Logger log = LoggerFactory.getLogger(BufferManager.class);
 
-    private static final int BUFFERS_COUNT = 500;
+    private static final int BUFFERS_COUNT = 200;
     private static final int BUFFER_SIZE = 1024000;
 
     private final BlockingQueue<ByteBuffer> bufferPool = new LinkedBlockingQueue<>(BUFFERS_COUNT);

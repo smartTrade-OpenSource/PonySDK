@@ -23,25 +23,25 @@
 
 package com.ponysdk.core.terminal.request;
 
-import com.google.gwt.json.client.JSONValue;
-import com.ponysdk.core.terminal.socket.WebSocketClient;
+public class FrameRequestBuilder extends ParentRequestBuilder {
 
-public class WebSocketRequestBuilder implements RequestBuilder {
-
-    private final WebSocketClient webSocketClient;
-
-    public WebSocketRequestBuilder(final WebSocketClient webSocketClient) {
-        this.webSocketClient = webSocketClient;
+    public FrameRequestBuilder(final String frameID, final RequestCallback callback) {
+        super(frameID, callback);
     }
 
     @Override
-    public void send(final JSONValue value) {
-        webSocketClient.send(value.toString());
-    }
+    public native void setReady(final String id) /*-{
+                                                 $wnd.parent.pony.setReadyFrame(id);
+                                                 }-*/;
+
+    @Override
+    public native void sendToParent(final String data) /*-{
+                                                       $wnd.parent.pony.sendDataToServerFromWindow(data);
+                                                       }-*/;
 
     @Override
     public String toString() {
-        return "Main builder";
+        return "Frame builder";
     }
 
 }

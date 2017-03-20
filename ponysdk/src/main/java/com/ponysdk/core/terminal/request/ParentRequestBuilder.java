@@ -33,13 +33,13 @@ import elemental.client.Browser;
 import elemental.events.MessageEvent;
 import elemental.html.Uint8Array;
 
-public class ParentWindowRequest implements RequestBuilder {
+public abstract class ParentRequestBuilder implements RequestBuilder {
 
-    private static final Logger log = Logger.getLogger(ParentWindowRequest.class.getName());
+    private static final Logger log = Logger.getLogger(ParentRequestBuilder.class.getName());
 
     private final RequestCallback callback;
 
-    public ParentWindowRequest(final String windowID, final RequestCallback callback) {
+    public ParentRequestBuilder(final String id, final RequestCallback callback) {
         this.callback = callback;
 
         Browser.getWindow().setOnmessage(event -> {
@@ -49,30 +49,26 @@ public class ParentWindowRequest implements RequestBuilder {
             onDataReceived(readerBuffer);
         });
 
-        setReadyWindow(windowID);
+        setReady(id);
     }
 
     /**
      * To Main terminal
      */
-    public static native void setReadyWindow(final String windowID) /*-{
-                                                                    $wnd.opener.pony.setReadyWindow(windowID);
-                                                                    }-*/;
+    public abstract void setReady(String id);
 
     /**
      * To Main terminal
      */
     @Override
-    public void send(final JSONValue value) {
-        sendToParent(value.toString());
+    public void send(final JSONValue requestData) {
+        sendToParent(requestData.toString());
     }
 
     /**
      * To Main terminal
      */
-    public static native void sendToParent(final String data) /*-{
-                                                              $wnd.opener.pony.sendDataToServerFromWindow(data);
-                                                              }-*/;
+    public abstract void sendToParent(String data);
 
     /**
      * From Main terminal to the matching window terminal

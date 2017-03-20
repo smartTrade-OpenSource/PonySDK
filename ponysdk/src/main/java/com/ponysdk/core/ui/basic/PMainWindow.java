@@ -1,3 +1,4 @@
+
 package com.ponysdk.core.ui.basic;
 
 import com.ponysdk.core.model.ServerToClientModel;
@@ -7,6 +8,7 @@ import com.ponysdk.core.server.servlet.WebsocketEncoder;
 import com.ponysdk.core.server.stm.Txn;
 
 public class PMainWindow extends PWindow {
+
     @Override
     void init() {
         final WebsocketEncoder parser = Txn.get().getEncoder();
@@ -37,4 +39,5 @@ public class PMainWindow extends PWindow {
     protected WidgetType getWidgetType() {
         return WidgetType.BROWSER;
     }
+
 }

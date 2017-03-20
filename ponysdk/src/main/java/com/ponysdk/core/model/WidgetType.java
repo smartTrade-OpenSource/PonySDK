@@ -76,6 +76,7 @@ public enum WidgetType {
     FOCUS_PANEL,
     SCRIPT,
     WINDOW,
+    FRAME,
     BROWSER,
     HEADER_PANEL,
     SUGGESTBOX,
