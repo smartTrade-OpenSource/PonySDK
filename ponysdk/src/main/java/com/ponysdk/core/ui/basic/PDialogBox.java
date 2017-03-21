@@ -23,6 +23,8 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.Objects;
+
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 
@@ -80,6 +82,7 @@ public class PDialogBox extends PDecoratedPopupPanel {
     }
 
     public void setCaption(final String caption) {
+        if (Objects.equals(this.caption, caption)) return;
         this.caption = caption;
         saveUpdate(writer -> writer.write(ServerToClientModel.POPUP_CAPTION, caption));
     }

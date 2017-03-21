@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 import javax.json.JsonObject;
 
@@ -183,10 +184,9 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
     }
 
     public void setOpen(final boolean isOpen) {
-        if (this.isOpen != isOpen) {
-            this.isOpen = isOpen;
-            saveUpdate(writer -> writer.write(ServerToClientModel.OPEN_CLOSE, isOpen));
-        }
+        if (Objects.equals(this.isOpen, isOpen)) return;
+        this.isOpen = isOpen;
+        saveUpdate(writer -> writer.write(ServerToClientModel.OPEN_CLOSE, isOpen));
     }
 
     @Override
@@ -196,6 +196,7 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
 
     @Override
     public void setAnimationEnabled(final boolean animationEnabled) {
+        if (Objects.equals(this.animationEnabled, animationEnabled)) return;
         this.animationEnabled = animationEnabled;
         saveUpdate(writer -> writer.write(ServerToClientModel.ANIMATION, animationEnabled));
     }

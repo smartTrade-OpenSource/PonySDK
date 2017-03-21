@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import javax.json.JsonObject;
 
@@ -142,6 +143,7 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
     }
 
     public void setDateFormat(final SimpleDateFormat dateFormat) {
+        if (Objects.equals(this.dateFormat, dateFormat)) return;
         this.dateFormat = dateFormat;
         saveUpdate(writer -> writer.write(ServerToClientModel.DATE_FORMAT_PATTERN, dateFormat.toPattern()));
     }
