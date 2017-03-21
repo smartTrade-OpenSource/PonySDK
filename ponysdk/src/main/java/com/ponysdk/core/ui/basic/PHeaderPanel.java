@@ -46,7 +46,7 @@ public class PHeaderPanel extends PPanel {
     }
 
     public void resize() {
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.RESIZE));
+        saveUpdate(writer -> writer.write(ServerToClientModel.RESIZE));
     }
 
     @Override

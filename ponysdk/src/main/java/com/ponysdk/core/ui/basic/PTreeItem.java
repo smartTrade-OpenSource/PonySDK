@@ -23,14 +23,14 @@
 
 package com.ponysdk.core.ui.basic;
 
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.servlet.WebsocketEncoder;
-import com.ponysdk.core.ui.model.ServerBinaryModel;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.ui.model.ServerBinaryModel;
+import com.ponysdk.core.writer.ModelWriter;
 
 /**
  * An item that can be contained within a {@link PTree}. Each tree item is
@@ -73,10 +73,10 @@ public class PTreeItem extends PObject {
     }
 
     @Override
-    protected void enrichOnInit(final WebsocketEncoder parser) {
-        super.enrichOnInit(parser);
-        parser.encode(ServerToClientModel.TEXT, html);
-        if (isRoot) parser.encode(ServerToClientModel.ROOT, isRoot);
+    protected void enrichOnInit(final ModelWriter writer) {
+        super.enrichOnInit(writer);
+        writer.write(ServerToClientModel.TEXT, html);
+        if (isRoot) writer.write(ServerToClientModel.ROOT, isRoot);
     }
 
     private void setWidget() {
@@ -111,7 +111,7 @@ public class PTreeItem extends PObject {
     public void setHTML(final String html) {
         if (Objects.equals(this.html, html)) return;
         this.html = html;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.TEXT, html));
+        saveUpdate(writer -> writer.write(ServerToClientModel.TEXT, html));
     }
 
     public PTree getTree() {
@@ -160,7 +160,7 @@ public class PTreeItem extends PObject {
     public void setSelected(final boolean selected) {
         if (Objects.equals(this.selected, selected)) return;
         this.selected = selected;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.SELECTED, selected));
+        saveUpdate(writer -> writer.write(ServerToClientModel.SELECTED, selected));
     }
 
     public boolean getState() {
@@ -170,7 +170,7 @@ public class PTreeItem extends PObject {
     public void setState(final boolean open) {
         if (Objects.equals(this.open, open)) return;
         this.open = open;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.STATE, open));
+        saveUpdate(writer -> writer.write(ServerToClientModel.STATE, open));
     }
 
     public PTreeItem getChild(final int index) {

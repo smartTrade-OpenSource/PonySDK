@@ -23,14 +23,14 @@
 
 package com.ponysdk.core.ui.basic;
 
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.servlet.WebsocketEncoder;
-import com.ponysdk.core.ui.basic.event.HasPAnimation;
-import com.ponysdk.core.ui.model.ServerBinaryModel;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.ui.basic.event.HasPAnimation;
+import com.ponysdk.core.ui.model.ServerBinaryModel;
+import com.ponysdk.core.writer.ModelWriter;
 
 /**
  * A standard menu bar widget. A menu bar can contain any number of menu items,
@@ -119,9 +119,9 @@ public class PMenuBar extends PWidget implements HasPAnimation {
     }
 
     @Override
-    protected void enrichOnInit(final WebsocketEncoder parser) {
-        super.enrichOnInit(parser);
-        parser.encode(ServerToClientModel.MENU_BAR_IS_VERTICAL, vertical);
+    protected void enrichOnInit(final ModelWriter writer) {
+        super.enrichOnInit(writer);
+        writer.write(ServerToClientModel.MENU_BAR_IS_VERTICAL, vertical);
     }
 
     @Override
@@ -188,7 +188,7 @@ public class PMenuBar extends PWidget implements HasPAnimation {
     }
 
     public void clearItems() {
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.CLEAR));
+        saveUpdate(writer -> writer.write(ServerToClientModel.CLEAR));
         items.clear();
     }
 
@@ -204,7 +204,7 @@ public class PMenuBar extends PWidget implements HasPAnimation {
     @Override
     public void setAnimationEnabled(final boolean animationEnabled) {
         this.animationEnabled = animationEnabled;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ANIMATION, animationEnabled));
+        saveUpdate(writer -> writer.write(ServerToClientModel.ANIMATION, animationEnabled));
     }
 
     @Override

@@ -101,8 +101,8 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
         assertIsChild(child);
         if (getMinSize(child) != minSize) {
             saveUpdate((writer) -> {
-                writer.writeModel(ServerToClientModel.MIN_SIZE, minSize);
-                writer.writeModel(ServerToClientModel.WIDGET_ID, child.getID());
+                writer.write(ServerToClientModel.MIN_SIZE, minSize);
+                writer.write(ServerToClientModel.WIDGET_ID, child.getID());
             });
             ensureWidgetInfo(child).minSize = minSize;
         }
@@ -127,8 +127,8 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
         assertIsChild(child);
         if (getSnapClosedSize(child) != snapClosedSize) {
             saveUpdate((writer) -> {
-                writer.writeModel(ServerToClientModel.SNAP_CLOSED_SIZE, snapClosedSize);
-                writer.writeModel(ServerToClientModel.WIDGET_ID, child.getID());
+                writer.write(ServerToClientModel.SNAP_CLOSED_SIZE, snapClosedSize);
+                writer.write(ServerToClientModel.WIDGET_ID, child.getID());
             });
             ensureWidgetInfo(child).snapClosedSize = snapClosedSize;
         }
@@ -147,8 +147,8 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
         assertIsChild(child);
         if (isToggleDisplayAllowed(child) != allowed) {
             saveUpdate((writer) -> {
-                writer.writeModel(ServerToClientModel.TOGGLE_DISPLAY_ALLOWED, allowed);
-                writer.writeModel(ServerToClientModel.WIDGET_ID, child.getID());
+                writer.write(ServerToClientModel.TOGGLE_DISPLAY_ALLOWED, allowed);
+                writer.write(ServerToClientModel.WIDGET_ID, child.getID());
             });
             ensureWidgetInfo(child).toggleDisplayAllowed = allowed;
         }

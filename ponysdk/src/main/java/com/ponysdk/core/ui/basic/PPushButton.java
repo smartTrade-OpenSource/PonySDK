@@ -25,7 +25,7 @@ package com.ponysdk.core.ui.basic;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.servlet.WebsocketEncoder;
+import com.ponysdk.core.writer.ModelWriter;
 
 /**
  * A normal push button with custom styling.
@@ -54,9 +54,9 @@ public class PPushButton extends PButton {
     }
 
     @Override
-    protected void enrichOnInit(final WebsocketEncoder parser) {
-        parser.encode(ServerToClientModel.WIDGET_ID, image.getID());
-        super.enrichOnInit(parser);
+    protected void enrichOnInit(final ModelWriter writer) {
+        writer.write(ServerToClientModel.WIDGET_ID, image.getID());
+        super.enrichOnInit(writer);
     }
 
     @Override

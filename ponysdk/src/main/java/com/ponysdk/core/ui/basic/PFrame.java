@@ -31,7 +31,7 @@ import javax.json.JsonObject;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.servlet.WebsocketEncoder;
+import com.ponysdk.core.writer.ModelWriter;
 
 public class PFrame extends PWidget {
 
@@ -45,9 +45,9 @@ public class PFrame extends PWidget {
     }
 
     @Override
-    protected void enrichOnInit(final WebsocketEncoder parser) {
-        super.enrichOnInit(parser);
-        if (url != null) parser.encode(ServerToClientModel.URL, url);
+    protected void enrichOnInit(final ModelWriter writer) {
+        super.enrichOnInit(writer);
+        if (url != null) writer.write(ServerToClientModel.URL, url);
     }
 
     @Override

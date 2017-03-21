@@ -99,13 +99,13 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, HasPSubm
     public void setName(final String name) {
         if (Objects.equals(this.name, name)) return;
         this.name = name;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.NAME, name));
+        saveUpdate(writer -> writer.write(ServerToClientModel.NAME, name));
     }
 
     public void setLabel(final String label) {
         if (Objects.equals(this.label, label)) return;
         this.label = label;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.TEXT, label));
+        saveUpdate(writer -> writer.write(ServerToClientModel.TEXT, label));
     }
 
     public boolean isEnabled() {
@@ -115,7 +115,7 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, HasPSubm
     public void setEnabled(final boolean enabled) {
         if (Objects.equals(this.enabled, enabled)) return;
         this.enabled = enabled;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ENABLED, enabled));
+        saveUpdate(writer -> writer.write(ServerToClientModel.ENABLED, enabled));
     }
 
     public String getFileName() {

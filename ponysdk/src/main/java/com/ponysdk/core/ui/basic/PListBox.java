@@ -108,8 +108,8 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         final String s = itemsTextual.substring(1, itemsTextual.length() - 1).replaceAll(",", ";").replaceAll(" ", EMPTY);
 
         saveUpdate(writer -> {
-            writer.writeModel(ServerToClientModel.ITEM_ADD, s);
-            writer.writeModel(ServerToClientModel.ITEM_GROUP, group);
+            writer.write(ServerToClientModel.ITEM_ADD, s);
+            writer.write(ServerToClientModel.ITEM_GROUP, group);
         });
     }
 
@@ -123,7 +123,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         final ListItem item = new ListItem(label, value);
         items.add(item);
 
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ITEM_INSERTED, label));
+        saveUpdate(writer -> writer.write(ServerToClientModel.ITEM_INSERTED, label));
     }
 
     public void insertItem(final String item, final int index) {
@@ -142,8 +142,8 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
         final int indexFinal = index;
         saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.ITEM_INSERTED, label);
-            writer.writeModel(ServerToClientModel.INDEX, indexFinal);
+            writer.write(ServerToClientModel.ITEM_INSERTED, label);
+            writer.write(ServerToClientModel.INDEX, indexFinal);
         });
     }
 
@@ -153,8 +153,8 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         items.get(index).label = text;
 
         saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.ITEM_UPDATED, text);
-            writer.writeModel(ServerToClientModel.INDEX, index);
+            writer.write(ServerToClientModel.ITEM_UPDATED, text);
+            writer.write(ServerToClientModel.INDEX, index);
         });
     }
 
@@ -201,7 +201,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     }
 
     private void sendRemoveItemInstruction(final int index) {
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ITEM_REMOVED, index));
+        saveUpdate(writer -> writer.write(ServerToClientModel.ITEM_REMOVED, index));
         if (selectedIndex >= index) setSelectedIndex(selectedIndex - 1);
     }
 
@@ -215,7 +215,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         items.clear();
         selectedIndexes.clear();
 
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.CLEAR));
+        saveUpdate(writer -> writer.write(ServerToClientModel.CLEAR));
 
         if (containsEmptyItem) addItem(EMPTY, null);
     }
@@ -232,8 +232,8 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         else selectedIndexes.remove(index);
 
         saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.SELECTED, selected);
-            writer.writeModel(ServerToClientModel.INDEX, index);
+            writer.write(ServerToClientModel.SELECTED, selected);
+            writer.write(ServerToClientModel.INDEX, index);
         });
     }
 
@@ -333,7 +333,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     public void setVisibleItemCount(final int visibleItemCount) {
         this.visibleItemCount = visibleItemCount;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.VISIBLE_ITEM_COUNT, visibleItemCount));
+        saveUpdate(writer -> writer.write(ServerToClientModel.VISIBLE_ITEM_COUNT, visibleItemCount));
     }
 
     public boolean isMultipleSelect() {
@@ -342,7 +342,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     public void setMultipleSelect(final boolean isMultipleSelect) {
         this.isMultipleSelect = isMultipleSelect;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.MULTISELECT, isMultipleSelect));
+        saveUpdate(writer -> writer.write(ServerToClientModel.MULTISELECT, isMultipleSelect));
     }
 
     public class ListItem {

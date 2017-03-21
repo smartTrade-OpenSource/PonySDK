@@ -136,11 +136,11 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     @Override
     public void setValue(final Date date) {
         this.date = date;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.DATE, date != null ? date.getTime() : -1));
+        saveUpdate(writer -> writer.write(ServerToClientModel.DATE, date != null ? date.getTime() : -1));
     }
 
     public void setCurrentMonth(final Date date) {
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.TIME, date != null ? date.getTime() : -1));
+        saveUpdate(writer -> writer.write(ServerToClientModel.TIME, date != null ? date.getTime() : -1));
     }
 
     /**
@@ -149,8 +149,8 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
      */
     public final void setTransientEnabledOnDates(final boolean enabled, final Collection<Date> dates) {
         saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.DATE_ENABLED, dateToString(dates));
-            writer.writeModel(ServerToClientModel.ENABLED, enabled);
+            writer.write(ServerToClientModel.DATE_ENABLED, dateToString(dates));
+            writer.write(ServerToClientModel.ENABLED, enabled);
         });
     }
 
@@ -159,8 +159,8 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
      */
     public void addStyleToDates(final String styleName, final Collection<Date> dates) {
         saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.ADD_DATE_STYLE, dateToString(dates));
-            writer.writeModel(ServerToClientModel.STYLE_NAME, styleName);
+            writer.write(ServerToClientModel.ADD_DATE_STYLE, dateToString(dates));
+            writer.write(ServerToClientModel.STYLE_NAME, styleName);
         });
     }
 
@@ -169,13 +169,13 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
      */
     public void removeStyleFromDates(final String styleName, final Collection<Date> dates) {
         saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.REMOVE_DATE_STYLE, dateToString(dates));
-            writer.writeModel(ServerToClientModel.STYLE_NAME, styleName);
+            writer.write(ServerToClientModel.REMOVE_DATE_STYLE, dateToString(dates));
+            writer.write(ServerToClientModel.STYLE_NAME, styleName);
         });
     }
 
     public void setYearArrowsVisible(final boolean visible) {
-        saveUpdate((writer) -> writer.writeModel(ServerToClientModel.YEAR_ARROWS_VISIBLE, visible));
+        saveUpdate((writer) -> writer.write(ServerToClientModel.YEAR_ARROWS_VISIBLE, visible));
     }
 
     public int getMonth() {

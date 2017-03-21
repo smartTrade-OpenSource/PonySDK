@@ -23,21 +23,26 @@
 
 package com.ponysdk.core.ui.basic;
 
-import com.ponysdk.core.model.HandlerModel;
-import com.ponysdk.core.model.PUnit;
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.servlet.WebsocketEncoder;
-import com.ponysdk.core.ui.basic.event.*;
-import com.ponysdk.core.ui.model.ServerBinaryModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ponysdk.core.model.HandlerModel;
+import com.ponysdk.core.model.PUnit;
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.ui.basic.event.HasPBeforeSelectionHandlers;
+import com.ponysdk.core.ui.basic.event.HasPSelectionHandlers;
+import com.ponysdk.core.ui.basic.event.HasPWidgets;
+import com.ponysdk.core.ui.basic.event.PBeforeSelectionHandler;
+import com.ponysdk.core.ui.basic.event.PSelectionHandler;
+import com.ponysdk.core.ui.model.ServerBinaryModel;
+import com.ponysdk.core.writer.ModelWriter;
 
 /**
  * A panel that stacks its children vertically, displaying only one at a time,
@@ -79,9 +84,9 @@ public class PStackLayoutPanel extends PWidget
     }
 
     @Override
-    protected void enrichOnInit(final WebsocketEncoder parser) {
-        super.enrichOnInit(parser);
-        parser.encode(ServerToClientModel.UNIT, unit.getByteValue());
+    protected void enrichOnInit(final ModelWriter writer) {
+        super.enrichOnInit(writer);
+        writer.write(ServerToClientModel.UNIT, unit.getByteValue());
     }
 
     @Override
@@ -169,12 +174,12 @@ public class PStackLayoutPanel extends PWidget
     }
 
     public void showWidget(final PWidget widget) {
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.WIDGET_ID, widget.getID()));
+        saveUpdate(writer -> writer.write(ServerToClientModel.WIDGET_ID, widget.getID()));
     }
 
     @Override
     public void animate(final Duration duration) {
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ANIMATE, duration.toMillis()));
+        saveUpdate(writer -> writer.write(ServerToClientModel.ANIMATE, duration.toMillis()));
     }
 
     public Duration getAnimationDuration() {
@@ -187,13 +192,13 @@ public class PStackLayoutPanel extends PWidget
     public void setAnimationDuration(final Duration duration) {
         if (Objects.equals(animationDuration, duration)) return;
         animationDuration = duration;
-        saveUpdate((writer) -> writer.writeModel(ServerToClientModel.ANIMATION_DURATION, (int) duration.toMillis()));
+        saveUpdate((writer) -> writer.write(ServerToClientModel.ANIMATION_DURATION, (int) duration.toMillis()));
     }
 
     @Override
     public void destroy() {
         super.destroy();
-        for (PWidget pWidget : this) {
+        for (final PWidget pWidget : this) {
             pWidget.destroy();
         }
     }

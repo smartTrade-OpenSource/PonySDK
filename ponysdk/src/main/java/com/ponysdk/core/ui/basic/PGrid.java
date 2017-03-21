@@ -25,7 +25,7 @@ package com.ponysdk.core.ui.basic;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.servlet.WebsocketEncoder;
+import com.ponysdk.core.writer.ModelWriter;
 
 /**
  * A rectangular grid that can contain text, html, or a child {@link PWidget}
@@ -49,11 +49,11 @@ public class PGrid extends PHTMLTable<PCellFormatter> {
     }
 
     @Override
-    protected void enrichOnInit(final WebsocketEncoder parser) {
-        super.enrichOnInit(parser);
+    protected void enrichOnInit(final ModelWriter writer) {
+        super.enrichOnInit(writer);
         if (rows != 0 && columns != 0) {
-            parser.encode(ServerToClientModel.ROW, rows);
-            parser.encode(ServerToClientModel.COLUMN, columns);
+            writer.write(ServerToClientModel.ROW, rows);
+            writer.write(ServerToClientModel.COLUMN, columns);
         }
     }
 

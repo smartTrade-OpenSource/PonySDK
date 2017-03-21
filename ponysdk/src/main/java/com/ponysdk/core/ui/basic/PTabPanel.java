@@ -68,7 +68,7 @@ public class PTabPanel extends PTabLayoutPanel implements HasPAnimation {
     public void setAnimationEnabled(final boolean animationEnabled) {
         if (Objects.equals(this.animationEnabled, animationEnabled)) return;
         this.animationEnabled = animationEnabled;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ANIMATION, animationEnabled));
+        saveUpdate(writer -> writer.write(ServerToClientModel.ANIMATION, animationEnabled));
     }
 
 }

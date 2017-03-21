@@ -152,9 +152,9 @@ public class PObjectWeakHashMap implements Map<Integer, PObject> {
 
             final ModelWriter writer = Txn.getWriter();
             writer.beginObject();
-            if (windowID != PWindow.getMain().getID()) writer.writeModel(ServerToClientModel.WINDOW_ID, windowID);
-            if (frameID != null) writer.writeModel(ServerToClientModel.FRAME_ID, frameID);
-            writer.writeModel(ServerToClientModel.TYPE_GC, objectID);
+            if (windowID != PWindow.getMain().getID()) writer.write(ServerToClientModel.WINDOW_ID, windowID);
+            if (frameID != null) writer.write(ServerToClientModel.FRAME_ID, frameID);
+            writer.write(ServerToClientModel.TYPE_GC, objectID);
             writer.endObject();
         }
     }

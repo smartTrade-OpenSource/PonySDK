@@ -23,12 +23,12 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.Objects;
+
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.servlet.WebsocketEncoder;
 import com.ponysdk.core.ui.basic.event.PHasHTML;
-
-import java.util.Objects;
+import com.ponysdk.core.writer.ModelWriter;
 
 /**
  * A widget that represents a simple &lt;a&gt; element.
@@ -70,11 +70,11 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
     }
 
     @Override
-    protected void enrichOnInit(final WebsocketEncoder parser) {
-        super.enrichOnInit(parser);
-        if (text != null) parser.encode(ServerToClientModel.TEXT, text);
-        if (href != null) parser.encode(ServerToClientModel.HREF, href);
-        if (html != null) parser.encode(ServerToClientModel.HTML, html);
+    protected void enrichOnInit(final ModelWriter writer) {
+        super.enrichOnInit(writer);
+        if (text != null) writer.write(ServerToClientModel.TEXT, text);
+        if (href != null) writer.write(ServerToClientModel.HREF, href);
+        if (html != null) writer.write(ServerToClientModel.HTML, html);
     }
 
     @Override
@@ -100,7 +100,7 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
     public void setHref(final String href) {
         if (Objects.equals(this.href, href)) return;
         this.href = href;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.HREF, href));
+        saveUpdate(writer -> writer.write(ServerToClientModel.HREF, href));
     }
 
     @Override
@@ -112,7 +112,7 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
     public void setText(final String text) {
         if (Objects.equals(this.text, text)) return;
         this.text = text;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.TEXT, text));
+        saveUpdate(writer -> writer.write(ServerToClientModel.TEXT, text));
     }
 
     @Override
@@ -124,7 +124,7 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
     public void setHTML(final String html) {
         if (Objects.equals(this.html, html)) return;
         this.html = html;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.HTML, html));
+        saveUpdate(writer -> writer.write(ServerToClientModel.HTML, html));
     }
 
 }

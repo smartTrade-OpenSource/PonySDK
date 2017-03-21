@@ -23,22 +23,23 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.server.servlet.WebsocketEncoder;
 import com.ponysdk.core.ui.basic.event.HasPClickHandlers;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 import com.ponysdk.core.ui.eventbus.StreamHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
+import com.ponysdk.core.writer.ModelWriter;
 
 /**
  * A widget that displays the image at a given URL. The image can be in 'unclipped' mode (the
@@ -99,15 +100,15 @@ public class PImage extends PWidget implements HasPClickHandlers {
     }
 
     @Override
-    protected void enrichOnInit(final WebsocketEncoder parser) {
-        super.enrichOnInit(parser);
+    protected void enrichOnInit(final ModelWriter writer) {
+        super.enrichOnInit(writer);
         if (url != null) {
-            parser.encode(ServerToClientModel.IMAGE_URL, url);
+            writer.write(ServerToClientModel.IMAGE_URL, url);
             if (top != -1 && left != -1 && imageHeight != -1 && imageWidth != -1) {
-                parser.encode(ServerToClientModel.IMAGE_LEFT, left);
-                parser.encode(ServerToClientModel.IMAGE_TOP, top);
-                parser.encode(ServerToClientModel.IMAGE_HEIGHT, imageHeight);
-                parser.encode(ServerToClientModel.IMAGE_WIDTH, imageWidth);
+                writer.write(ServerToClientModel.IMAGE_LEFT, left);
+                writer.write(ServerToClientModel.IMAGE_TOP, top);
+                writer.write(ServerToClientModel.IMAGE_HEIGHT, imageHeight);
+                writer.write(ServerToClientModel.IMAGE_WIDTH, imageWidth);
             }
         }
     }
@@ -123,7 +124,7 @@ public class PImage extends PWidget implements HasPClickHandlers {
 
     public void setUrl(final String url) {
         this.url = url;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.IMAGE_URL, url));
+        saveUpdate(writer -> writer.write(ServerToClientModel.IMAGE_URL, url));
     }
 
     public void setStream(final StreamHandler streamListener) {

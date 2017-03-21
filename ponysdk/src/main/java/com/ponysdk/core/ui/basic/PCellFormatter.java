@@ -37,41 +37,41 @@ public class PCellFormatter {
 
     public void addStyleName(final int row, final int column, final String styleName) {
         table.saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.CELL_FORMATTER_ADD_STYLE_NAME, styleName);
-            writer.writeModel(ServerToClientModel.ROW, row);
-            writer.writeModel(ServerToClientModel.COLUMN, column);
+            writer.write(ServerToClientModel.CELL_FORMATTER_ADD_STYLE_NAME, styleName);
+            writer.write(ServerToClientModel.ROW, row);
+            writer.write(ServerToClientModel.COLUMN, column);
         });
     }
 
     public void removeStyleName(final int row, final int column, final String styleName) {
         table.saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.CELL_FORMATTER_REMOVE_STYLE_NAME, styleName);
-            writer.writeModel(ServerToClientModel.ROW, row);
-            writer.writeModel(ServerToClientModel.COLUMN, column);
+            writer.write(ServerToClientModel.CELL_FORMATTER_REMOVE_STYLE_NAME, styleName);
+            writer.write(ServerToClientModel.ROW, row);
+            writer.write(ServerToClientModel.COLUMN, column);
         });
     }
 
     public void setStyleName(final int row, final int column, final String styleName) {
         table.saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.CELL_FORMATTER_SET_STYLE_NAME, styleName);
-            writer.writeModel(ServerToClientModel.ROW, row);
-            writer.writeModel(ServerToClientModel.COLUMN, column);
+            writer.write(ServerToClientModel.CELL_FORMATTER_SET_STYLE_NAME, styleName);
+            writer.write(ServerToClientModel.ROW, row);
+            writer.write(ServerToClientModel.COLUMN, column);
         });
     }
 
     public void setVerticalAlignment(final int row, final int column, final PVerticalAlignment align) {
         table.saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.VERTICAL_ALIGNMENT, align.getValue());
-            writer.writeModel(ServerToClientModel.ROW, row);
-            writer.writeModel(ServerToClientModel.COLUMN, column);
+            writer.write(ServerToClientModel.VERTICAL_ALIGNMENT, align.getValue());
+            writer.write(ServerToClientModel.ROW, row);
+            writer.write(ServerToClientModel.COLUMN, column);
         });
     }
 
     public void setHorizontalAlignment(final int row, final int column, final PHorizontalAlignment align) {
         table.saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.HORIZONTAL_ALIGNMENT, align.getValue());
-            writer.writeModel(ServerToClientModel.ROW, row);
-            writer.writeModel(ServerToClientModel.COLUMN, column);
+            writer.write(ServerToClientModel.HORIZONTAL_ALIGNMENT, align.getValue());
+            writer.write(ServerToClientModel.ROW, row);
+            writer.write(ServerToClientModel.COLUMN, column);
         });
     }
 }

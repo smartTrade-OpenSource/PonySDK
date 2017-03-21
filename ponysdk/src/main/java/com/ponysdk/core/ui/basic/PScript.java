@@ -84,13 +84,13 @@ public class PScript extends PObject {
 
     private void executeScript(final String js, final ExecutionCallback callback, final Duration period) {
         saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.EVAL, js);
+            writer.write(ServerToClientModel.EVAL, js);
             if (callback != null) {
                 callbacksByID.put(++executionID, callback);
-                writer.writeModel(ServerToClientModel.COMMAND_ID, executionID);
+                writer.write(ServerToClientModel.COMMAND_ID, executionID);
             }
             if (period != null) {
-                writer.writeModel(ServerToClientModel.FIXDELAY, period.toMillis());
+                writer.write(ServerToClientModel.FIXDELAY, period.toMillis());
             }
         });
     }

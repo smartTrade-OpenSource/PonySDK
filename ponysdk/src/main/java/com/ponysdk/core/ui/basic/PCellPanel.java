@@ -23,12 +23,12 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.Objects;
+
 import com.ponysdk.core.model.PHorizontalAlignment;
 import com.ponysdk.core.model.PVerticalAlignment;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.servlet.WebsocketEncoder;
-
-import java.util.Objects;
+import com.ponysdk.core.writer.ModelWriter;
 
 /**
  * A panel whose child widgets are contained within the cells of a table. Each
@@ -44,37 +44,37 @@ public abstract class PCellPanel extends PComplexPanel {
     }
 
     @Override
-    protected void enrichOnInit(final WebsocketEncoder parser) {
-        super.enrichOnInit(parser);
-        if (this.borderWidth != null) parser.encode(ServerToClientModel.BORDER_WIDTH, this.borderWidth);
-        if (this.spacing != null) parser.encode(ServerToClientModel.SPACING, this.spacing);
+    protected void enrichOnInit(final ModelWriter writer) {
+        super.enrichOnInit(writer);
+        if (this.borderWidth != null) writer.write(ServerToClientModel.BORDER_WIDTH, this.borderWidth);
+        if (this.spacing != null) writer.write(ServerToClientModel.SPACING, this.spacing);
     }
 
     public void setCellHorizontalAlignment(final PWidget widget, final PHorizontalAlignment align) {
         saveUpdate(writer -> {
-            writer.writeModel(ServerToClientModel.WIDGET_HORIZONTAL_ALIGNMENT, align.getValue());
-            writer.writeModel(ServerToClientModel.WIDGET_ID, widget.getID());
+            writer.write(ServerToClientModel.WIDGET_HORIZONTAL_ALIGNMENT, align.getValue());
+            writer.write(ServerToClientModel.WIDGET_ID, widget.getID());
         });
     }
 
     public void setCellVerticalAlignment(final PWidget widget, final PVerticalAlignment align) {
         saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.WIDGET_VERTICAL_ALIGNMENT, align.getValue());
-            writer.writeModel(ServerToClientModel.WIDGET_ID, widget.getID());
+            writer.write(ServerToClientModel.WIDGET_VERTICAL_ALIGNMENT, align.getValue());
+            writer.write(ServerToClientModel.WIDGET_ID, widget.getID());
         });
     }
 
     public void setCellHeight(final PWidget widget, final String height) {
         saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.CELL_HEIGHT, height);
-            writer.writeModel(ServerToClientModel.WIDGET_ID, widget.getID());
+            writer.write(ServerToClientModel.CELL_HEIGHT, height);
+            writer.write(ServerToClientModel.WIDGET_ID, widget.getID());
         });
     }
 
     public void setCellWidth(final PWidget widget, final String width) {
         saveUpdate(writer -> {
-            writer.writeModel(ServerToClientModel.CELL_WIDTH, width);
-            writer.writeModel(ServerToClientModel.WIDGET_ID, widget.getID());
+            writer.write(ServerToClientModel.CELL_WIDTH, width);
+            writer.write(ServerToClientModel.WIDGET_ID, widget.getID());
         });
     }
 
@@ -85,7 +85,7 @@ public abstract class PCellPanel extends PComplexPanel {
     public void setBorderWidth(final Integer borderWidth) {
         if (Objects.equals(this.borderWidth, borderWidth)) return;
         this.borderWidth = borderWidth;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.BORDER_WIDTH, borderWidth));
+        saveUpdate(writer -> writer.write(ServerToClientModel.BORDER_WIDTH, borderWidth));
     }
 
     public Integer getSpacing() {
@@ -95,7 +95,7 @@ public abstract class PCellPanel extends PComplexPanel {
     public void setSpacing(final Integer spacing) {
         if (Objects.equals(this.spacing, spacing)) return;
         this.spacing = spacing;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.SPACING, spacing));
+        saveUpdate(writer -> writer.write(ServerToClientModel.SPACING, spacing));
     }
 
 }

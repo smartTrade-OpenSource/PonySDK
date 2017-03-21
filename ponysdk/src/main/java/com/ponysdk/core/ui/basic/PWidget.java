@@ -153,7 +153,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         if (UIContext.get().getApplication().getOptions().isDebugMode()) {
             if (Objects.equals(this.debugID, debugID)) return;
             this.debugID = debugID;
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.ENSURE_DEBUG_ID, debugID));
+            saveUpdate(writer -> writer.write(ServerToClientModel.ENSURE_DEBUG_ID, debugID));
         }
     }
 
@@ -164,7 +164,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     public void setTitle(final String title) {
         if (Objects.equals(this.title, title)) return;
         this.title = title;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.WIDGET_TITLE, title));
+        saveUpdate(writer -> writer.write(ServerToClientModel.WIDGET_TITLE, title));
     }
 
     public boolean isVisible() {
@@ -174,7 +174,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     public void setVisible(final boolean visible) {
         if (Objects.equals(this.visible, visible)) return;
         this.visible = visible;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.WIDGET_VISIBLE, visible));
+        saveUpdate(writer -> writer.write(ServerToClientModel.WIDGET_VISIBLE, visible));
     }
 
     public String getWidth() {
@@ -184,7 +184,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     public void setWidth(final String width) {
         if (Objects.equals(this.width, width)) return;
         this.width = width;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.WIDGET_WIDTH, width));
+        saveUpdate(writer -> writer.write(ServerToClientModel.WIDGET_WIDTH, width));
     }
 
     public String getHeight() {
@@ -194,7 +194,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     public void setHeight(final String height) {
         if (Objects.equals(this.height, height)) return;
         this.height = height;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.WIDGET_HEIGHT, height));
+        saveUpdate(writer -> writer.write(ServerToClientModel.WIDGET_HEIGHT, height));
     }
 
     public String getStyleName() {
@@ -204,7 +204,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     public void setStyleName(final String styleName) {
         if (Objects.equals(this.styleName, styleName)) return;
         this.styleName = styleName;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.STYLE_NAME, styleName));
+        saveUpdate(writer -> writer.write(ServerToClientModel.STYLE_NAME, styleName));
     }
 
     public String getDebugID() {
@@ -218,7 +218,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     public void setStylePrimaryName(final String stylePrimaryName) {
         if (Objects.equals(this.stylePrimaryName, stylePrimaryName)) return;
         this.stylePrimaryName = stylePrimaryName;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.STYLE_PRIMARY_NAME, stylePrimaryName));
+        saveUpdate(writer -> writer.write(ServerToClientModel.STYLE_PRIMARY_NAME, stylePrimaryName));
     }
 
     public IsPWidget getParent() {
@@ -232,23 +232,23 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     public void setStyleProperty(final String name, final String value) {
         if (!Objects.equals(safeStyleProperties().put(name, value), value)) {
             saveUpdate((writer) -> {
-                writer.writeModel(ServerToClientModel.PUT_STYLE_KEY, name);
-                writer.writeModel(ServerToClientModel.STYLE_VALUE, value);
+                writer.write(ServerToClientModel.PUT_STYLE_KEY, name);
+                writer.write(ServerToClientModel.STYLE_VALUE, value);
             });
         }
     }
 
     public void removeStyleProperty(final String name) {
         if (safeStyleProperties().remove(name) != null) {
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.REMOVE_STYLE_KEY, name));
+            saveUpdate(writer -> writer.write(ServerToClientModel.REMOVE_STYLE_KEY, name));
         }
     }
 
     public void setProperty(final String name, final String value) {
         if (!Objects.equals(safeElementProperties().put(name, value), value)) {
             saveUpdate((writer) -> {
-                writer.writeModel(ServerToClientModel.PUT_PROPERTY_KEY, name);
-                writer.writeModel(ServerToClientModel.PROPERTY_VALUE, value);
+                writer.write(ServerToClientModel.PUT_PROPERTY_KEY, name);
+                writer.write(ServerToClientModel.PROPERTY_VALUE, value);
             });
         }
     }
@@ -266,14 +266,14 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
             return;
         }
         saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.PUT_ATTRIBUTE_KEY, name);
-            writer.writeModel(ServerToClientModel.ATTRIBUTE_VALUE, value);
+            writer.write(ServerToClientModel.PUT_ATTRIBUTE_KEY, name);
+            writer.write(ServerToClientModel.ATTRIBUTE_VALUE, value);
         });
     }
 
     public void removeAttribute(final String name) {
         if (safeElementAttributes().remove(name) != null) {
-            saveUpdate((writer) -> writer.writeModel(ServerToClientModel.REMOVE_ATTRIBUTE_KEY, name));
+            saveUpdate((writer) -> writer.write(ServerToClientModel.REMOVE_ATTRIBUTE_KEY, name));
         }
     }
 
@@ -287,19 +287,19 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
 
     public void preventEvent(final PEventType e) {
         if (safePreventEvents().add(e)) {
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.PREVENT_EVENT, e.getCode()));
+            saveUpdate(writer -> writer.write(ServerToClientModel.PREVENT_EVENT, e.getCode()));
         }
     }
 
     public void stopEvent(final PEventType e) {
         if (safeStopEvents().add(e)) {
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.STOP_EVENT, e.getCode()));
+            saveUpdate(writer -> writer.write(ServerToClientModel.STOP_EVENT, e.getCode()));
         }
     }
 
     public void addStyleName(final String styleName) {
         if (safeStyleName().add(styleName)) {
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.ADD_STYLE_NAME, styleName));
+            saveUpdate(writer -> writer.write(ServerToClientModel.ADD_STYLE_NAME, styleName));
         }
     }
 
@@ -308,7 +308,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     }
 
     private void removeStyle(final String styleName) {
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.REMOVE_STYLE_NAME, styleName));
+        saveUpdate(writer -> writer.write(ServerToClientModel.REMOVE_STYLE_NAME, styleName));
     }
 
     public boolean hasStyleName(final String styleName) {
@@ -327,7 +327,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     public void setSizeFull() {
         this.width = HUNDRED_PERCENT;
         this.height = HUNDRED_PERCENT;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.WIDGET_FULL_SIZE));
+        saveUpdate(writer -> writer.write(ServerToClientModel.WIDGET_FULL_SIZE));
     }
 
     public void removeDomHandler(final EventHandler handler, final PDomEvent.Type type) {
@@ -354,10 +354,10 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         if (destroy) return;
         final ModelWriter writer = Txn.getWriter();
         writer.beginObject();
-        if (!PWindow.isMain(window)) writer.writeModel(ServerToClientModel.WINDOW_ID, window.getID());
-        writer.writeModel(ServerToClientModel.TYPE_REMOVE_HANDLER, ID);
-        writer.writeModel(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_DOM.getValue());
-        writer.writeModel(ServerToClientModel.DOM_HANDLER_CODE, type.getDomHandlerType().getValue());
+        if (!PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
+        writer.write(ServerToClientModel.TYPE_REMOVE_HANDLER, ID);
+        writer.write(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_DOM.getValue());
+        writer.write(ServerToClientModel.DOM_HANDLER_CODE, type.getDomHandlerType().getValue());
         writer.endObject();
     }
 
@@ -402,12 +402,12 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     private void executeAddDomHandler(final ServerBinaryModel... binaryModels) {
         final ModelWriter writer = Txn.getWriter();
         writer.beginObject();
-        if (!PWindow.isMain(window)) writer.writeModel(ServerToClientModel.WINDOW_ID, window.getID());
-        writer.writeModel(ServerToClientModel.TYPE_ADD_HANDLER, ID);
-        writer.writeModel(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_DOM.getValue());
+        if (!PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
+        writer.write(ServerToClientModel.TYPE_ADD_HANDLER, ID);
+        writer.write(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_DOM.getValue());
         if (binaryModels != null) {
             for (final ServerBinaryModel binaryModel : binaryModels) {
-                if (binaryModel != null) writer.writeModel(binaryModel.getKey(), binaryModel.getValue());
+                if (binaryModel != null) writer.write(binaryModel.getKey(), binaryModel.getValue());
             }
         }
         writer.endObject();

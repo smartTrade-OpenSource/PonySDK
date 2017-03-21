@@ -23,17 +23,22 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import javax.json.JsonObject;
+
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.servlet.WebsocketEncoder;
-import com.ponysdk.core.ui.basic.event.*;
-
-import javax.json.JsonObject;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import com.ponysdk.core.ui.basic.event.HasPSelectionHandlers;
+import com.ponysdk.core.ui.basic.event.PSelectionEvent;
+import com.ponysdk.core.ui.basic.event.PSelectionHandler;
+import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
+import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
+import com.ponysdk.core.writer.ModelWriter;
 
 /**
  * A {@link PSuggestBox} is a text box or text area which displays a
@@ -98,9 +103,9 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
     }
 
     @Override
-    protected void enrichOnInit(final WebsocketEncoder parser) {
-        super.enrichOnInit(parser);
-        parser.encode(ServerToClientModel.ORACLE, suggestOracle.getID());
+    protected void enrichOnInit(final ModelWriter writer) {
+        super.enrichOnInit(writer);
+        writer.write(ServerToClientModel.ORACLE, suggestOracle.getID());
 
         // TODO nciaravola
 
@@ -108,7 +113,7 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
         // textBox = new PTextBox();
         // }
         //
-        // parser.parse(Model.TEXTBOX_ID, textBox.getID());
+        // writer.parse(Model.TEXTBOX_ID, textBox.getID());
     }
 
     @Override
@@ -156,7 +161,7 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
 
     public void setLimit(final int limit) {
         this.limit = limit;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.LIMIT, limit));
+        saveUpdate(writer -> writer.write(ServerToClientModel.LIMIT, limit));
     }
 
     public String getText() {
@@ -230,7 +235,7 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
 
         @Override
         public void add(final String suggestion) {
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.SUGGESTION, suggestion));
+            saveUpdate(writer -> writer.write(ServerToClientModel.SUGGESTION, suggestion));
         }
 
         @Override
@@ -247,7 +252,7 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
         }
 
         public void clear() {
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.CLEAR));
+            saveUpdate(writer -> writer.write(ServerToClientModel.CLEAR));
         }
 
         @Override

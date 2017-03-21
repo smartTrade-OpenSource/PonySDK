@@ -38,11 +38,11 @@ public class ModelWriter {
         encoder.beginObject();
     }
 
-    public void writeModel(final ServerToClientModel model) {
-        writeModel(model, null);
+    public void write(final ServerToClientModel model) {
+        write(model, null);
     }
 
-    public void writeModel(final ServerToClientModel model, final Object value) {
+    public void write(final ServerToClientModel model, final Object value) {
         encoder.encode(model, value);
     }
 

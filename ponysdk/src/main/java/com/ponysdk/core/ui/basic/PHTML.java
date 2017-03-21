@@ -23,12 +23,12 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.Objects;
+
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.servlet.WebsocketEncoder;
 import com.ponysdk.core.ui.basic.event.PHasHTML;
-
-import java.util.Objects;
+import com.ponysdk.core.writer.ModelWriter;
 
 /**
  * A widget that can contain arbitrary HTML. This widget uses a &lt;div&gt;
@@ -63,10 +63,10 @@ public class PHTML extends PLabel implements PHasHTML {
     }
 
     @Override
-    protected void enrichOnInit(final WebsocketEncoder parser) {
-        super.enrichOnInit(parser);
-        if (html != null) parser.encode(ServerToClientModel.HTML, html);
-        if (wordWrap) parser.encode(ServerToClientModel.WORD_WRAP, wordWrap);
+    protected void enrichOnInit(final ModelWriter writer) {
+        super.enrichOnInit(writer);
+        if (html != null) writer.write(ServerToClientModel.HTML, html);
+        if (wordWrap) writer.write(ServerToClientModel.WORD_WRAP, wordWrap);
     }
 
     @Override
@@ -84,7 +84,7 @@ public class PHTML extends PLabel implements PHasHTML {
         if (Objects.equals(this.html, html)) return;
         this.html = html;
         this.text = null;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.HTML, html));
+        saveUpdate(writer -> writer.write(ServerToClientModel.HTML, html));
     }
 
     @Override
@@ -92,7 +92,7 @@ public class PHTML extends PLabel implements PHasHTML {
         if (Objects.equals(this.text, text)) return;
         this.text = text;
         this.html = null;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.TEXT, this.text));
+        saveUpdate(writer -> writer.write(ServerToClientModel.TEXT, this.text));
     }
 
     public boolean isWordWrap() {
@@ -102,7 +102,7 @@ public class PHTML extends PLabel implements PHasHTML {
     public void setWordWrap(final boolean wordWrap) {
         if (Objects.equals(this.wordWrap, wordWrap)) return;
         this.wordWrap = wordWrap;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.WORD_WRAP, this.wordWrap));
+        saveUpdate(writer -> writer.write(ServerToClientModel.WORD_WRAP, this.wordWrap));
     }
 
     @Override

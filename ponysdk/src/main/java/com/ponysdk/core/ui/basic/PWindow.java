@@ -35,12 +35,12 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.server.servlet.WebsocketEncoder;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.ui.basic.event.PCloseEvent;
 import com.ponysdk.core.ui.basic.event.PCloseHandler;
 import com.ponysdk.core.ui.basic.event.POpenEvent;
 import com.ponysdk.core.ui.basic.event.POpenHandler;
+import com.ponysdk.core.writer.ModelWriter;
 
 public class PWindow extends PObject {
 
@@ -110,43 +110,43 @@ public class PWindow extends PObject {
     }
 
     @Override
-    protected void enrichOnInit(final WebsocketEncoder parser) {
-        super.enrichOnInit(parser);
-        parser.encode(ServerToClientModel.RELATIVE, relative);
-        parser.encode(ServerToClientModel.URL, url);
-        parser.encode(ServerToClientModel.NAME, name);
-        parser.encode(ServerToClientModel.FEATURES, features);
+    protected void enrichOnInit(final ModelWriter writer) {
+        super.enrichOnInit(writer);
+        writer.write(ServerToClientModel.RELATIVE, relative);
+        writer.write(ServerToClientModel.URL, url);
+        writer.write(ServerToClientModel.NAME, name);
+        writer.write(ServerToClientModel.FEATURES, features);
     }
 
     public void open() {
         if (destroy) return;
         if (!initialized) {
-            final WebsocketEncoder parser = Txn.get().getEncoder();
-            parser.beginObject();
-            if (window != PWindow.getMain()) parser.encode(ServerToClientModel.WINDOW_ID, window.getID());
-            parser.encode(ServerToClientModel.TYPE_CREATE, ID);
-            parser.encode(ServerToClientModel.WIDGET_TYPE, getWidgetType().getValue());
-            enrichOnInit(parser);
-            parser.endObject();
+            final ModelWriter writer = Txn.getWriter();
+            writer.beginObject();
+            if (window != PWindow.getMain()) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
+            writer.write(ServerToClientModel.TYPE_CREATE, ID);
+            writer.write(ServerToClientModel.WIDGET_TYPE, getWidgetType().getValue());
+            enrichOnInit(writer);
+            writer.endObject();
             UIContext.get().registerObject(this);
 
             PWindowManager.preregisterWindow(this);
 
-            writeUpdate(writer -> writer.writeModel(ServerToClientModel.OPEN));
+            writeUpdate(callback -> callback.write(ServerToClientModel.OPEN));
             Txn.get().flush();
         }
     }
 
     public void print() {
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.PRINT));
+        saveUpdate(writer -> writer.write(ServerToClientModel.PRINT));
     }
 
     public void close() {
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.CLOSE));
+        saveUpdate(writer -> writer.write(ServerToClientModel.CLOSE));
     }
 
     public void setTitle(final String title) {
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.WINDOW_TITLE, title));
+        saveUpdate(writer -> writer.write(ServerToClientModel.WINDOW_TITLE, title));
     }
 
     public Location getLocation() {
@@ -274,7 +274,7 @@ public class PWindow extends PObject {
         }
 
         public void replace(final String url) {
-            window.saveUpdate(writer -> writer.writeModel(ServerToClientModel.WINDOW_LOCATION_REPLACE, url));
+            window.saveUpdate(writer -> writer.write(ServerToClientModel.WINDOW_LOCATION_REPLACE, url));
         }
     }
 

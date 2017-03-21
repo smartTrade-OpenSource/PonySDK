@@ -25,7 +25,7 @@ package com.ponysdk.core.ui.basic;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.servlet.WebsocketEncoder;
+import com.ponysdk.core.writer.ModelWriter;
 
 public class PRichTextToolbar extends PWidget {
 
@@ -36,9 +36,9 @@ public class PRichTextToolbar extends PWidget {
     }
 
     @Override
-    protected void enrichOnInit(final WebsocketEncoder parser) {
-        super.enrichOnInit(parser);
-        parser.encode(ServerToClientModel.WIDGET_ID, richTextArea.getID());
+    protected void enrichOnInit(final ModelWriter writer) {
+        super.enrichOnInit(writer);
+        writer.write(ServerToClientModel.WIDGET_ID, richTextArea.getID());
     }
 
     @Override

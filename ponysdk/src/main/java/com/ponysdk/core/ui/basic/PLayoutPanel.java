@@ -52,8 +52,8 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
         assertIsChild(child);
 
         saveUpdate(writer -> {
-            writer.writeModel(ServerToClientModel.WIDGET_HORIZONTAL_ALIGNMENT, position.getValue());
-            writer.writeModel(ServerToClientModel.WIDGET_ID, child.getID());
+            writer.write(ServerToClientModel.WIDGET_HORIZONTAL_ALIGNMENT, position.getValue());
+            writer.write(ServerToClientModel.WIDGET_ID, child.getID());
         });
     }
 
@@ -61,8 +61,8 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
         assertIsChild(child);
 
         saveUpdate(writer -> {
-            writer.writeModel(ServerToClientModel.WIDGET_VERTICAL_ALIGNMENT, position.getValue());
-            writer.writeModel(ServerToClientModel.WIDGET_ID, child.getID());
+            writer.write(ServerToClientModel.WIDGET_VERTICAL_ALIGNMENT, position.getValue());
+            writer.write(ServerToClientModel.WIDGET_ID, child.getID());
         });
     }
 
@@ -70,8 +70,8 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
         assertIsChild(widget);
 
         saveUpdate(writer -> {
-            writer.writeModel(ServerToClientModel.WIDGET_HIDDEN, hidden);
-            writer.writeModel(ServerToClientModel.WIDGET_ID, widget.getID());
+            writer.write(ServerToClientModel.WIDGET_HIDDEN, hidden);
+            writer.write(ServerToClientModel.WIDGET_ID, widget.getID());
         });
     }
 
@@ -108,15 +108,15 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
     private void sendUpdate(final PWidget child, final ServerToClientModel key1, final double v1, final ServerToClientModel key2,
                             final double v2, final PUnit unit) {
         saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.UNIT, unit.getByteValue());
-            writer.writeModel(ServerToClientModel.WIDGET_ID, child.getID());
-            writer.writeModel(key1, v1);
-            writer.writeModel(key2, v2);
+            writer.write(ServerToClientModel.UNIT, unit.getByteValue());
+            writer.write(ServerToClientModel.WIDGET_ID, child.getID());
+            writer.write(key1, v1);
+            writer.write(key2, v2);
         });
     }
 
     @Override
     public void animate(final Duration duration) {
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ANIMATE, duration.toMillis()));
+        saveUpdate(writer -> writer.write(ServerToClientModel.ANIMATE, duration.toMillis()));
     }
 }

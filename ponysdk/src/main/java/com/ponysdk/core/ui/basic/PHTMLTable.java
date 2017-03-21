@@ -91,7 +91,7 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
 
     public void setCellPadding(final int padding) {
         cellPadding = padding;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.CELL_PADDING, padding));
+        saveUpdate(writer -> writer.write(ServerToClientModel.CELL_PADDING, padding));
     }
 
     public int getCellSpacing() {
@@ -100,7 +100,7 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
 
     public void setCellSpacing(final int spacing) {
         cellSpacing = spacing;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.CELL_SPACING, spacing));
+        saveUpdate(writer -> writer.write(ServerToClientModel.CELL_SPACING, spacing));
     }
 
     public int getBorderWidth() {
@@ -109,7 +109,7 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
 
     public void setBorderWidth(final int width) {
         this.borderWidth = width;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.BORDER_WIDTH, width));
+        saveUpdate(writer -> writer.write(ServerToClientModel.BORDER_WIDTH, width));
     }
 
     public PWidget getWidget(final int row, final int column) {
@@ -127,7 +127,7 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
             remove(w, false);
         }
 
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.CLEAR));
+        saveUpdate(writer -> writer.write(ServerToClientModel.CLEAR));
     }
 
     public void removeRow(final int row) {
@@ -151,7 +151,7 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
             }
         }
 
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.CLEAR_ROW, row));
+        saveUpdate(writer -> writer.write(ServerToClientModel.CLEAR_ROW, row));
     }
 
     public void insertRow(final int row) {
@@ -166,7 +166,7 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
             }
         }
         rowFormatter.insertRowStyle(row);
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.INSERT_ROW, row));
+        saveUpdate(writer -> writer.write(ServerToClientModel.INSERT_ROW, row));
     }
 
     @Override
@@ -316,8 +316,8 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
 
             if (styles.add(styleName)) {
                 saveUpdate((writer) -> {
-                    writer.writeModel(ServerToClientModel.ROW_FORMATTER_ADD_STYLE_NAME, styleName);
-                    writer.writeModel(ServerToClientModel.ROW, row);
+                    writer.write(ServerToClientModel.ROW_FORMATTER_ADD_STYLE_NAME, styleName);
+                    writer.write(ServerToClientModel.ROW, row);
                 });
             }
         }
@@ -329,8 +329,8 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
 
             if (styles.remove(styleName)) {
                 saveUpdate((writer) -> {
-                    writer.writeModel(ServerToClientModel.ROW_FORMATTER_REMOVE_STYLE_NAME, styleName);
-                    writer.writeModel(ServerToClientModel.ROW, row);
+                    writer.write(ServerToClientModel.ROW_FORMATTER_REMOVE_STYLE_NAME, styleName);
+                    writer.write(ServerToClientModel.ROW, row);
                 });
             }
         }
@@ -346,8 +346,8 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
             styles.add(styleName);
 
             saveUpdate((writer) -> {
-                writer.writeModel(ServerToClientModel.ROW_FORMATTER_SET_STYLE_NAME, styleName);
-                writer.writeModel(ServerToClientModel.ROW, row);
+                writer.write(ServerToClientModel.ROW_FORMATTER_SET_STYLE_NAME, styleName);
+                writer.write(ServerToClientModel.ROW, row);
             });
         }
 
@@ -378,29 +378,29 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
 
         public void setWidth(final int column, final String width) {
             saveUpdate((writer) -> {
-                writer.writeModel(ServerToClientModel.COLUMN_FORMATTER_COLUMN_WIDTH, width);
-                writer.writeModel(ServerToClientModel.COLUMN, column);
+                writer.write(ServerToClientModel.COLUMN_FORMATTER_COLUMN_WIDTH, width);
+                writer.write(ServerToClientModel.COLUMN, column);
             });
         }
 
         public void addStyleName(final int column, final String styleName) {
             saveUpdate((writer) -> {
-                writer.writeModel(ServerToClientModel.COLUMN_FORMATTER_ADD_STYLE_NAME, styleName);
-                writer.writeModel(ServerToClientModel.COLUMN, column);
+                writer.write(ServerToClientModel.COLUMN_FORMATTER_ADD_STYLE_NAME, styleName);
+                writer.write(ServerToClientModel.COLUMN, column);
             });
         }
 
         public void removeStyleName(final int column, final String styleName) {
             saveUpdate((writer) -> {
-                writer.writeModel(ServerToClientModel.COLUMN_FORMATTER_REMOVE_STYLE_NAME, styleName);
-                writer.writeModel(ServerToClientModel.COLUMN, column);
+                writer.write(ServerToClientModel.COLUMN_FORMATTER_REMOVE_STYLE_NAME, styleName);
+                writer.write(ServerToClientModel.COLUMN, column);
             });
         }
 
         public void setStyleName(final int column, final String styleName) {
             saveUpdate((writer) -> {
-                writer.writeModel(ServerToClientModel.COLUMN_FORMATTER_SET_STYLE_NAME, styleName);
-                writer.writeModel(ServerToClientModel.COLUMN, column);
+                writer.write(ServerToClientModel.COLUMN_FORMATTER_SET_STYLE_NAME, styleName);
+                writer.write(ServerToClientModel.COLUMN, column);
             });
         }
     }

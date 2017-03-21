@@ -23,15 +23,16 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.Objects;
+
+import javax.json.JsonObject;
+
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.servlet.WebsocketEncoder;
 import com.ponysdk.core.ui.basic.event.PHasHTML;
-
-import javax.json.JsonObject;
-import java.util.Objects;
+import com.ponysdk.core.writer.ModelWriter;
 
 /**
  * An entry in a {@link PMenuBar}. Menu items can either fire a {@link Runnable} when they are
@@ -86,10 +87,10 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
     }
 
     @Override
-    protected void enrichOnInit(final WebsocketEncoder parser) {
-        super.enrichOnInit(parser);
-        if (html != null) parser.encode(ServerToClientModel.HTML, html);
-        else parser.encode(ServerToClientModel.TEXT, text);
+    protected void enrichOnInit(final ModelWriter writer) {
+        super.enrichOnInit(writer);
+        if (html != null) writer.write(ServerToClientModel.HTML, html);
+        else writer.write(ServerToClientModel.TEXT, text);
     }
 
     @Override
@@ -105,7 +106,7 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
     @Override
     public void setText(final String text) {
         this.text = text;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.TEXT, text));
+        saveUpdate(writer -> writer.write(ServerToClientModel.TEXT, text));
     }
 
     @Override
@@ -117,7 +118,7 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
     public void setHTML(final String html) {
         if (Objects.equals(this.html, html)) return;
         this.html = html;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.HTML, html));
+        saveUpdate(writer -> writer.write(ServerToClientModel.HTML, html));
     }
 
     public void setCommand(final Runnable cmd) {
@@ -154,7 +155,7 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
 
     public void setEnabled(final boolean enabled) {
         this.enabled = enabled;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ENABLED, enabled));
+        saveUpdate(writer -> writer.write(ServerToClientModel.ENABLED, enabled));
     }
 
 }

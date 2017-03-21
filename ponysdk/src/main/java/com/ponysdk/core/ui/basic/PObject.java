@@ -33,7 +33,6 @@ import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.server.servlet.WebsocketEncoder;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.ui.basic.event.PTerminalEvent;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
@@ -92,14 +91,14 @@ public abstract class PObject {
     }
 
     protected void applyInit() {
-        final WebsocketEncoder parser = Txn.get().getEncoder();
-        parser.beginObject();
-        if (window != PWindow.getMain()) parser.encode(ServerToClientModel.WINDOW_ID, window.getID());
-        if (frame != null) parser.encode(ServerToClientModel.FRAME_ID, frame.getID());
-        parser.encode(ServerToClientModel.TYPE_CREATE, ID);
-        parser.encode(ServerToClientModel.WIDGET_TYPE, getWidgetType().getValue());
-        enrichOnInit(parser);
-        parser.endObject();
+        final ModelWriter writer = Txn.getWriter();
+        writer.beginObject();
+        if (window != PWindow.getMain()) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
+        if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
+        writer.write(ServerToClientModel.TYPE_CREATE, ID);
+        writer.write(ServerToClientModel.WIDGET_TYPE, getWidgetType().getValue());
+        enrichOnInit(writer);
+        writer.endObject();
 
         UIContext.get().registerObject(this);
 
@@ -116,7 +115,7 @@ public abstract class PObject {
         initialized = true;
     }
 
-    protected void enrichOnInit(final WebsocketEncoder encoder) {
+    protected void enrichOnInit(final ModelWriter writer) {
     }
 
     protected void init0() {
@@ -163,14 +162,14 @@ public abstract class PObject {
 
         nativeBindingFunction = functionName;
 
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.BIND, functionName));
+        saveUpdate(writer -> writer.write(ServerToClientModel.BIND, functionName));
     }
 
     public void sendToNative(final JsonObject data) {
         if (destroy) return;
         if (nativeBindingFunction == null) throw new IllegalAccessError("Object not bind to a native function");
 
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.NATIVE, data));
+        saveUpdate(writer -> writer.write(ServerToClientModel.NATIVE, data));
     }
 
     public void setTerminalHandler(final PTerminalEvent.Handler terminalHandler) {
@@ -207,18 +206,18 @@ public abstract class PObject {
 
     private void executeAdd(final int objectID, final int parentObjectID, final ServerBinaryModel... binaryModels) {
         if (destroy) return;
-        final WebsocketEncoder encoder = Txn.get().getEncoder();
-        encoder.beginObject();
-        if (!PWindow.isMain(window)) encoder.encode(ServerToClientModel.WINDOW_ID, window.getID());
-        if (frame != null) encoder.encode(ServerToClientModel.FRAME_ID, frame.getID());
-        encoder.encode(ServerToClientModel.TYPE_ADD, objectID);
-        encoder.encode(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
+        final ModelWriter writer = Txn.getWriter();
+        writer.beginObject();
+        if (!PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
+        if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
+        writer.write(ServerToClientModel.TYPE_ADD, objectID);
+        writer.write(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
         if (binaryModels != null) {
             for (final ServerBinaryModel binaryModel : binaryModels) {
-                if (binaryModel != null) encoder.encode(binaryModel.getKey(), binaryModel.getValue());
+                if (binaryModel != null) writer.write(binaryModel.getKey(), binaryModel.getValue());
             }
         }
-        encoder.endObject();
+        writer.endObject();
     }
 
     protected void saveAddHandler(final HandlerModel type) {
@@ -229,13 +228,13 @@ public abstract class PObject {
 
     private void executeAddHandler(final HandlerModel type) {
         if (destroy) return;
-        final WebsocketEncoder parser = Txn.get().getEncoder();
-        parser.beginObject();
-        if (!PWindow.isMain(window)) parser.encode(ServerToClientModel.WINDOW_ID, window.getID());
-        if (frame != null) parser.encode(ServerToClientModel.FRAME_ID, frame.getID());
-        parser.encode(ServerToClientModel.TYPE_ADD_HANDLER, ID);
-        parser.encode(ServerToClientModel.HANDLER_TYPE, type.getValue());
-        parser.endObject();
+        final ModelWriter writer = Txn.getWriter();
+        writer.beginObject();
+        if (!PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
+        if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
+        writer.write(ServerToClientModel.TYPE_ADD_HANDLER, ID);
+        writer.write(ServerToClientModel.HANDLER_TYPE, type.getValue());
+        writer.endObject();
     }
 
     protected void saveRemoveHandler(final HandlerModel type) {
@@ -246,13 +245,13 @@ public abstract class PObject {
 
     private void executeRemoveHandler(final HandlerModel type) {
         if (destroy) return;
-        final WebsocketEncoder parser = Txn.get().getEncoder();
-        parser.beginObject();
-        if (!PWindow.isMain(window)) parser.encode(ServerToClientModel.WINDOW_ID, window.getID());
-        if (frame != null) parser.encode(ServerToClientModel.FRAME_ID, frame.getID());
-        parser.encode(ServerToClientModel.TYPE_REMOVE_HANDLER, ID);
-        parser.encode(ServerToClientModel.HANDLER_TYPE, type.getValue());
-        parser.endObject();
+        final ModelWriter writer = Txn.getWriter();
+        writer.beginObject();
+        if (!PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
+        if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
+        writer.write(ServerToClientModel.TYPE_REMOVE_HANDLER, ID);
+        writer.write(ServerToClientModel.HANDLER_TYPE, type.getValue());
+        writer.endObject();
     }
 
     void saveRemove(final int objectID, final int parentObjectID) {
@@ -263,13 +262,13 @@ public abstract class PObject {
 
     private void executeRemove(final int objectID, final int parentObjectID) {
         if (destroy) return;
-        final WebsocketEncoder parser = Txn.get().getEncoder();
-        parser.beginObject();
-        if (!PWindow.isMain(window)) parser.encode(ServerToClientModel.WINDOW_ID, window.getID());
-        if (frame != null) parser.encode(ServerToClientModel.FRAME_ID, frame.getID());
-        parser.encode(ServerToClientModel.TYPE_REMOVE, objectID);
-        parser.encode(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
-        parser.endObject();
+        final ModelWriter writer = Txn.getWriter();
+        writer.beginObject();
+        if (!PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
+        if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
+        writer.write(ServerToClientModel.TYPE_REMOVE, objectID);
+        writer.write(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
+        writer.endObject();
     }
 
     protected void saveUpdate(final ModelWriterCallback callback) {
@@ -283,9 +282,9 @@ public abstract class PObject {
 
         final ModelWriter writer = Txn.getWriter();
         writer.beginObject();
-        if (!PWindow.isMain(window)) writer.writeModel(ServerToClientModel.WINDOW_ID, window.getID());
-        if (frame != null) writer.writeModel(ServerToClientModel.FRAME_ID, frame.getID());
-        writer.writeModel(ServerToClientModel.TYPE_UPDATE, ID);
+        if (!PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
+        if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
+        writer.write(ServerToClientModel.TYPE_UPDATE, ID);
 
         callback.doWrite(writer);
         writer.endObject();

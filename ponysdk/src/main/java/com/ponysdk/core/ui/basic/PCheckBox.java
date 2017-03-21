@@ -90,7 +90,7 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
     public void setState(final PCheckBoxState state) {
         if (Objects.equals(this.state, state)) return;
         this.state = state;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.VALUE_CHECKBOX, state.getValue()));
+        saveUpdate(writer -> writer.write(ServerToClientModel.VALUE_CHECKBOX, state.getValue()));
     }
 
     public PCheckBoxState getState() {

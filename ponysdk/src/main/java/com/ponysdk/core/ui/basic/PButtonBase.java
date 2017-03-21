@@ -23,11 +23,11 @@
 
 package com.ponysdk.core.ui.basic;
 
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.servlet.WebsocketEncoder;
-import com.ponysdk.core.ui.basic.event.PHasHTML;
-
 import java.util.Objects;
+
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.ui.basic.event.PHasHTML;
+import com.ponysdk.core.writer.ModelWriter;
 
 /**
  * Abstract base class for {@link PButton}, {@link PCheckBox}.
@@ -50,10 +50,10 @@ abstract class PButtonBase extends PFocusWidget implements PHasHTML {
     }
 
     @Override
-    protected void enrichOnInit(final WebsocketEncoder parser) {
-        super.enrichOnInit(parser);
-        if (text != null) parser.encode(ServerToClientModel.TEXT, text);
-        if (html != null) parser.encode(ServerToClientModel.HTML, html);
+    protected void enrichOnInit(final ModelWriter writer) {
+        super.enrichOnInit(writer);
+        if (text != null) writer.write(ServerToClientModel.TEXT, text);
+        if (html != null) writer.write(ServerToClientModel.HTML, html);
     }
 
     @Override
@@ -65,7 +65,7 @@ abstract class PButtonBase extends PFocusWidget implements PHasHTML {
     public void setHTML(final String html) {
         if (Objects.equals(this.html, html)) return;
         this.html = html;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.HTML, html));
+        saveUpdate(writer -> writer.write(ServerToClientModel.HTML, html));
     }
 
     @Override
@@ -77,7 +77,7 @@ abstract class PButtonBase extends PFocusWidget implements PHasHTML {
     public void setText(final String text) {
         if (Objects.equals(this.text, text)) return;
         this.text = text;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.TEXT, this.text));
+        saveUpdate(writer -> writer.write(ServerToClientModel.TEXT, this.text));
     }
 
     @Override

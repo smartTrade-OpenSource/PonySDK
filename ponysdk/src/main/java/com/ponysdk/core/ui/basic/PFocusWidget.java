@@ -62,14 +62,14 @@ public abstract class PFocusWidget extends PWidget
     public void showLoadingOnRequest(final boolean showLoadingOnRequest) {
         if (Objects.equals(this.showLoadingOnRequest, showLoadingOnRequest)) return;
         this.showLoadingOnRequest = showLoadingOnRequest;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.LOADING_ON_REQUEST, showLoadingOnRequest));
+        saveUpdate(writer -> writer.write(ServerToClientModel.LOADING_ON_REQUEST, showLoadingOnRequest));
     }
 
     @Override
     public void setFocus(final boolean focused) {
         if (Objects.equals(this.focused, focused)) return;
         this.focused = focused;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.FOCUSED, focused));
+        saveUpdate(writer -> writer.write(ServerToClientModel.FOCUSED, focused));
     }
 
     public boolean isEnabled() {
@@ -79,7 +79,7 @@ public abstract class PFocusWidget extends PWidget
     public void setEnabled(final boolean enabled) {
         if (Objects.equals(this.enabled, enabled)) return;
         this.enabled = enabled;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ENABLED, enabled));
+        saveUpdate(writer -> writer.write(ServerToClientModel.ENABLED, enabled));
     }
 
     public boolean isShowLoadingOnRequest() {
@@ -93,7 +93,7 @@ public abstract class PFocusWidget extends PWidget
     public void setEnabledOnRequest(final boolean enabledOnRequest) {
         if (Objects.equals(this.enabledOnRequest, enabledOnRequest)) return;
         this.enabledOnRequest = enabledOnRequest;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ENABLED_ON_REQUEST, enabledOnRequest));
+        saveUpdate(writer -> writer.write(ServerToClientModel.ENABLED_ON_REQUEST, enabledOnRequest));
     }
 
     public boolean isFocused() {
@@ -107,7 +107,7 @@ public abstract class PFocusWidget extends PWidget
     public void setTabindex(final int tabindex) {
         if (this.tabindex == tabindex) return;
         this.tabindex = tabindex;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.TABINDEX, tabindex));
+        saveUpdate(writer -> writer.write(ServerToClientModel.TABINDEX, tabindex));
     }
 
     @Override
@@ -115,7 +115,7 @@ public abstract class PFocusWidget extends PWidget
         if (showLoadingOnRequest || !enabledOnRequest) {
             return addDomHandler((PClickHandler) event -> {
                 handler.onClick(event);
-                saveUpdate(writer -> writer.writeModel(ServerToClientModel.END_OF_PROCESSING));
+                saveUpdate(writer -> writer.write(ServerToClientModel.END_OF_PROCESSING));
             }, PClickEvent.TYPE);
         } else {
             return addDomHandler(handler, PClickEvent.TYPE);
@@ -127,7 +127,7 @@ public abstract class PFocusWidget extends PWidget
         if (showLoadingOnRequest || !enabledOnRequest) {
             final PDoubleClickHandler clickHandler = event -> {
                 handler.onDoubleClick(event);
-                saveUpdate(writer -> writer.writeModel(ServerToClientModel.END_OF_PROCESSING));
+                saveUpdate(writer -> writer.write(ServerToClientModel.END_OF_PROCESSING));
             };
 
             return addDomHandler(clickHandler, PDoubleClickEvent.TYPE);

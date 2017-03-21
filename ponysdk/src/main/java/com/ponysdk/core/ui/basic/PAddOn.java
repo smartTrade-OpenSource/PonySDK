@@ -1,17 +1,22 @@
 
 package com.ponysdk.core.ui.basic;
 
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.servlet.WebsocketEncoder;
-
-import javax.json.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
+
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
+
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.writer.ModelWriter;
 
 public abstract class PAddOn extends PObject {
 
@@ -56,11 +61,11 @@ public abstract class PAddOn extends PObject {
     }
 
     @Override
-    protected void enrichOnInit(final WebsocketEncoder parser) {
-        super.enrichOnInit(parser);
-        parser.encode(ServerToClientModel.FACTORY, getSignature());
+    protected void enrichOnInit(final ModelWriter writer) {
+        super.enrichOnInit(writer);
+        writer.write(ServerToClientModel.FACTORY, getSignature());
         if (args != null) {
-            parser.encode(ServerToClientModel.NATIVE, args);
+            writer.write(ServerToClientModel.NATIVE, args);
             args = null;
         }
     }
@@ -112,7 +117,7 @@ public abstract class PAddOn extends PObject {
             builder.add(ARGUMENTS_PROPERTY_NAME, arrayBuilder);
         }
 
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.NATIVE, builder.build()));
+        saveUpdate(writer -> writer.write(ServerToClientModel.NATIVE, builder.build()));
     }
 
     public void setLogLevel(final Level logLevel) {
@@ -121,7 +126,7 @@ public abstract class PAddOn extends PObject {
 
     @Override
     public void destroy() {
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.DESTROY));
+        saveUpdate(writer -> writer.write(ServerToClientModel.DESTROY));
     }
 
 }

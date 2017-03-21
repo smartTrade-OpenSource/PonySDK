@@ -303,9 +303,9 @@ public class UIContext {
 
         final ModelWriter writer = Txn.getWriter();
         writer.beginObject();
-        writer.writeModel(ServerToClientModel.TYPE_ADD_HANDLER, -1);
-        writer.writeModel(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_STREAM_REQUEST.getValue());
-        writer.writeModel(ServerToClientModel.STREAM_REQUEST_ID, streamRequestID);
+        writer.write(ServerToClientModel.TYPE_ADD_HANDLER, -1);
+        writer.write(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_STREAM_REQUEST.getValue());
+        writer.write(ServerToClientModel.STREAM_REQUEST_ID, streamRequestID);
         writer.endObject();
 
         streamListenerByID.put(streamRequestID, streamListener);
@@ -316,9 +316,9 @@ public class UIContext {
 
         final ModelWriter writer = Txn.getWriter();
         writer.beginObject();
-        writer.writeModel(ServerToClientModel.TYPE_ADD_HANDLER, objectID);
-        writer.writeModel(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST.getValue());
-        writer.writeModel(ServerToClientModel.STREAM_REQUEST_ID, streamRequestID);
+        writer.write(ServerToClientModel.TYPE_ADD_HANDLER, objectID);
+        writer.write(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST.getValue());
+        writer.write(ServerToClientModel.STREAM_REQUEST_ID, streamRequestID);
         writer.endObject();
 
         streamListenerByID.put(streamRequestID, streamListener);
@@ -343,7 +343,7 @@ public class UIContext {
     public void close() {
         final ModelWriter writer = Txn.getWriter();
         writer.beginObject();
-        writer.writeModel(ServerToClientModel.TYPE_CLOSE, null);
+        writer.write(ServerToClientModel.TYPE_CLOSE, null);
         writer.endObject();
     }
 

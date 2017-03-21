@@ -147,7 +147,7 @@ public class PTabLayoutPanel extends PComplexPanel
     public void selectTab(final int index) {
         if (index >= getWidgetCount()) throw new IndexOutOfBoundsException();
         this.selectedItemIndex = index;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.SELECTED_INDEX, index));
+        saveUpdate(writer -> writer.write(ServerToClientModel.SELECTED_INDEX, index));
     }
 
     @Override
@@ -209,12 +209,12 @@ public class PTabLayoutPanel extends PComplexPanel
      *            true for vertical transitions, false for horizontal
      */
     public void setAnimationVertical(final boolean isVertical) {
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.VERTICAL, isVertical));
+        saveUpdate(writer -> writer.write(ServerToClientModel.VERTICAL, isVertical));
     }
 
     @Override
     public void animate(final Duration duration) {
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ANIMATE, duration.toMillis()));
+        saveUpdate(writer -> writer.write(ServerToClientModel.ANIMATE, duration.toMillis()));
     }
 
     public Duration getAnimationDuration() {
@@ -227,7 +227,7 @@ public class PTabLayoutPanel extends PComplexPanel
     public void setAnimationDuration(final Duration duration) {
         if (Objects.equals(this.animationDuration, duration)) return;
         this.animationDuration = duration;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ANIMATION_DURATION, (int) duration.toMillis()));
+        saveUpdate(writer -> writer.write(ServerToClientModel.ANIMATION_DURATION, (int) duration.toMillis()));
     }
 
 }

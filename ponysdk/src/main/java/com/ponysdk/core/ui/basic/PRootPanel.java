@@ -25,7 +25,8 @@ package com.ponysdk.core.ui.basic;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.servlet.WebsocketEncoder;
+import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.writer.ModelWriter;
 
 /**
  * The panel to which all other widgets must ultimately be added. RootPanels are never created
@@ -44,9 +45,9 @@ public class PRootPanel extends PAbsolutePanel {
     }
 
     @Override
-    protected void enrichOnInit(final WebsocketEncoder parser) {
-        super.enrichOnInit(parser);
-        if (id != null) parser.encode(ServerToClientModel.ROOT_ID, id);
+    protected void enrichOnInit(final ModelWriter writer) {
+        super.enrichOnInit(writer);
+        if (id != null) writer.write(ServerToClientModel.ROOT_ID, id);
     }
 
     @Override

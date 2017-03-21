@@ -23,16 +23,21 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+
+import javax.json.JsonObject;
+
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.servlet.WebsocketEncoder;
 import com.ponysdk.core.ui.basic.event.PHasText;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
-
-import javax.json.JsonObject;
-import java.util.*;
+import com.ponysdk.core.writer.ModelWriter;
 
 public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, HasPValue<String> {
 
@@ -53,10 +58,10 @@ public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, Ha
     }
 
     @Override
-    protected void enrichOnInit(final WebsocketEncoder parser) {
-        super.enrichOnInit(parser);
-        if (!EMPTY.equals(text)) parser.encode(ServerToClientModel.TEXT, this.text);
-        if (!EMPTY.equals(placeholder)) parser.encode(ServerToClientModel.PLACEHOLDER, this.placeholder);
+    protected void enrichOnInit(final ModelWriter writer) {
+        super.enrichOnInit(writer);
+        if (!EMPTY.equals(text)) writer.write(ServerToClientModel.TEXT, this.text);
+        if (!EMPTY.equals(placeholder)) writer.write(ServerToClientModel.PLACEHOLDER, this.placeholder);
     }
 
     @Override
@@ -74,7 +79,7 @@ public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, Ha
         if (text == null) text = EMPTY; // null not send over json
         if (Objects.equals(this.text, text)) return;
         this.text = text;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.TEXT, this.text));
+        saveUpdate(writer -> writer.write(ServerToClientModel.TEXT, this.text));
     }
 
     @Override
@@ -95,7 +100,7 @@ public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, Ha
         if (placeholder == null) placeholder = EMPTY; // null not send over json
         if (Objects.equals(this.placeholder, placeholder)) return;
         this.placeholder = placeholder;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.PLACEHOLDER, this.placeholder));
+        saveUpdate(writer -> writer.write(ServerToClientModel.PLACEHOLDER, this.placeholder));
     }
 
     @Override

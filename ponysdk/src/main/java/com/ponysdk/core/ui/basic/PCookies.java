@@ -23,17 +23,18 @@
 
 package com.ponysdk.core.ui.basic;
 
-import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.servlet.WebsocketEncoder;
-import com.ponysdk.core.server.stm.Txn;
-
-import javax.json.JsonArray;
-import javax.json.JsonObject;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+
+import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.stm.Txn;
+import com.ponysdk.core.writer.ModelWriter;
 
 public class PCookies {
 
@@ -62,12 +63,12 @@ public class PCookies {
     }
 
     public String removeCookie(final String name, final String path) {
-        final WebsocketEncoder encoder = Txn.get().getEncoder();
-        encoder.beginObject();
-        encoder.encode(ServerToClientModel.TYPE_UPDATE, ID);
-        encoder.encode(ServerToClientModel.REMOVE_COOKIE, name);
-        if (path != null) encoder.encode(ServerToClientModel.COOKIE_PATH, path);
-        encoder.endObject();
+        final ModelWriter writer = Txn.getWriter();
+        writer.beginObject();
+        writer.write(ServerToClientModel.TYPE_UPDATE, ID);
+        writer.write(ServerToClientModel.REMOVE_COOKIE, name);
+        if (path != null) writer.write(ServerToClientModel.COOKIE_PATH, path);
+        writer.endObject();
 
         return cachedCookies.remove(name);
     }
@@ -92,16 +93,16 @@ public class PCookies {
                           final boolean secure) {
         cachedCookies.put(name, value);
 
-        final WebsocketEncoder encoder = Txn.get().getEncoder();
-        encoder.beginObject();
-        encoder.encode(ServerToClientModel.TYPE_UPDATE, ID);
-        encoder.encode(ServerToClientModel.ADD_COOKIE, name);
-        encoder.encode(ServerToClientModel.VALUE, value);
-        if (expires != null) encoder.encode(ServerToClientModel.COOKIE_EXPIRE, expires.getTime());
-        if (domain != null) encoder.encode(ServerToClientModel.COOKIE_DOMAIN, domain);
-        if (path != null) encoder.encode(ServerToClientModel.COOKIE_PATH, path);
-        if (secure) encoder.encode(ServerToClientModel.COOKIE_SECURE, secure);
-        encoder.endObject();
+        final ModelWriter writer = Txn.getWriter();
+        writer.beginObject();
+        writer.write(ServerToClientModel.TYPE_UPDATE, ID);
+        writer.write(ServerToClientModel.ADD_COOKIE, name);
+        writer.write(ServerToClientModel.VALUE, value);
+        if (expires != null) writer.write(ServerToClientModel.COOKIE_EXPIRE, expires.getTime());
+        if (domain != null) writer.write(ServerToClientModel.COOKIE_DOMAIN, domain);
+        if (path != null) writer.write(ServerToClientModel.COOKIE_PATH, path);
+        if (secure) writer.write(ServerToClientModel.COOKIE_SECURE, secure);
+        writer.endObject();
     }
 
     public void onClientData(final JsonObject event) {

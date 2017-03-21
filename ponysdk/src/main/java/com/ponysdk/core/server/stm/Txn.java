@@ -23,12 +23,11 @@
 
 package com.ponysdk.core.server.stm;
 
-import com.ponysdk.core.server.servlet.WebsocketEncoder;
-import com.ponysdk.core.writer.ModelWriter;
-
 import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
+import com.ponysdk.core.writer.ModelWriter;
 
 public class Txn {
 
@@ -79,10 +78,6 @@ public class Txn {
 
     private ModelWriter getWriter0() {
         return txnContext.getWriter();
-    }
-
-    public WebsocketEncoder getEncoder() {
-        return txnContext.getEncoder();
     }
 
     public void addTxnListener(final TxnListener txnListener) {

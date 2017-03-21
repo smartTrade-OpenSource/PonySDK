@@ -23,13 +23,13 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.time.Duration;
+
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.servlet.WebsocketEncoder;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
-
-import java.time.Duration;
+import com.ponysdk.core.writer.ModelWriter;
 
 /**
  * A panel that lays its child widgets out "docked" at its outer edges, and
@@ -64,9 +64,9 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
     }
 
     @Override
-    protected void enrichOnInit(final WebsocketEncoder parser) {
-        super.enrichOnInit(parser);
-        parser.encode(ServerToClientModel.UNIT, unit.getByteValue());
+    protected void enrichOnInit(final ModelWriter writer) {
+        super.enrichOnInit(writer);
+        writer.write(ServerToClientModel.UNIT, unit.getByteValue());
     }
 
     @Override
@@ -105,15 +105,15 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
     public void setWidgetSize(final PWidget widget, final double size) {
         saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.WIDGET_SIZE, size);
-            writer.writeModel(ServerToClientModel.WIDGET_ID, widget.getID());
+            writer.write(ServerToClientModel.WIDGET_SIZE, size);
+            writer.write(ServerToClientModel.WIDGET_ID, widget.getID());
         });
     }
 
     public void setWidgetHidden(final PWidget widget, final boolean hidden) {
         saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.WIDGET_HIDDEN, hidden);
-            writer.writeModel(ServerToClientModel.WIDGET_ID, widget.getID());
+            writer.write(ServerToClientModel.WIDGET_HIDDEN, hidden);
+            writer.write(ServerToClientModel.WIDGET_ID, widget.getID());
         });
     }
 
@@ -132,7 +132,7 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
     @Override
     public void animate(final Duration duration) {
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ANIMATE, duration.toMillis()));
+        saveUpdate(writer -> writer.write(ServerToClientModel.ANIMATE, duration.toMillis()));
     }
 
     public PUnit getUnit() {

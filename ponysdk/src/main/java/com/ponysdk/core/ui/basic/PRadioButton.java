@@ -81,7 +81,7 @@ public class PRadioButton extends PCheckBox {
     void setName(final String name) {
         if (Objects.equals(this.name, name)) return;
         this.name = name;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.NAME, name));
+        saveUpdate(writer -> writer.write(ServerToClientModel.NAME, name));
     }
 
 }

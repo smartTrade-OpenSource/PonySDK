@@ -51,11 +51,11 @@ public class PScrollPanel extends PSimplePanel implements HasPScrollHandlers {
     }
 
     public void setHorizontalScrollPosition(final int position) {
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.HORIZONTAL_SCROLL_POSITION, position));
+        saveUpdate(writer -> writer.write(ServerToClientModel.HORIZONTAL_SCROLL_POSITION, position));
     }
 
     public void setVerticalScrollPosition(final int scrollPosition) {
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.VERTICAL_SCROLL_POSITION, scrollPosition));
+        saveUpdate(writer -> writer.write(ServerToClientModel.VERTICAL_SCROLL_POSITION, scrollPosition));
     }
 
     public void scrollToBottom() {
@@ -75,7 +75,7 @@ public class PScrollPanel extends PSimplePanel implements HasPScrollHandlers {
     }
 
     private void scrollTo(final ScrollType type) {
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.SCROLL_TO, type.ordinal()));
+        saveUpdate(writer -> writer.write(ServerToClientModel.SCROLL_TO, type.ordinal()));
     }
 
     @Override
