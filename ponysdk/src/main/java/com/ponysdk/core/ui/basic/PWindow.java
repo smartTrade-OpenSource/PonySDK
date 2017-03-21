@@ -142,7 +142,7 @@ public class PWindow extends PObject {
     }
 
     public void close() {
-        saveUpdate(writer -> writer.write(ServerToClientModel.CLOSE));
+        if (!destroy) saveUpdate(writer -> writer.write(ServerToClientModel.CLOSE));
     }
 
     public void setTitle(final String title) {
@@ -220,7 +220,7 @@ public class PWindow extends PObject {
     }
 
     public boolean isOpened() {
-        return initialized;
+        return initialized && !destroy;
     }
 
     public String getUrl() {
