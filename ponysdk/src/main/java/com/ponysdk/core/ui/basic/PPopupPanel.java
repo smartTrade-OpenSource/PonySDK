@@ -137,6 +137,11 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
         }
     }
 
+    public void close() {
+        hide();
+        removeFromParent();
+    }
+
     @Override
     public boolean isAnimationEnabled() {
         return animationEnabled;

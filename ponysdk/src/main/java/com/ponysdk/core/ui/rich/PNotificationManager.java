@@ -93,7 +93,7 @@ public class PNotificationManager {
         popupPanel.addStyleName("humanized");
         popupPanel.addStyleName("closing");
         popupPanel.setWidget(content);
-        popupPanel.addDomHandler((PClickHandler) event -> popupPanel.hide(), PClickEvent.TYPE);
+        popupPanel.addDomHandler((PClickHandler) event -> popupPanel.close(), PClickEvent.TYPE);
         popupPanel.center();
 
         window.add(popupPanel);
@@ -110,7 +110,7 @@ public class PNotificationManager {
         popupPanel.addStyleName("pony-notification");
         popupPanel.addStyleName("warning");
         popupPanel.setWidget(content);
-        popupPanel.addDomHandler((PClickHandler) event -> popupPanel.hide(), PClickEvent.TYPE);
+        popupPanel.addDomHandler((PClickHandler) event -> popupPanel.close(), PClickEvent.TYPE);
         popupPanel.center();
 
         window.add(popupPanel);
@@ -128,7 +128,7 @@ public class PNotificationManager {
         popupPanel.addStyleName("pony-notification");
         popupPanel.addStyleName("error");
         popupPanel.setWidget(content);
-        popupPanel.addDomHandler((PClickHandler) event -> popupPanel.hide(), PClickEvent.TYPE);
+        popupPanel.addDomHandler((PClickHandler) event -> popupPanel.close(), PClickEvent.TYPE);
         popupPanel.center();
 
         window.add(popupPanel);
@@ -161,10 +161,7 @@ public class PNotificationManager {
     }
 
     private static void addAutoCloseTimer(final PPopupPanel popupPanel, final int delayBeforeClosing) {
-        PScheduler.schedule(() -> {
-            popupPanel.hide();
-            popupPanel.removeFromParent();
-        }, Duration.ofMillis(delayBeforeClosing));
+        PScheduler.schedule(() -> popupPanel.close(), Duration.ofMillis(delayBeforeClosing));
     }
 
     public enum Notification {
