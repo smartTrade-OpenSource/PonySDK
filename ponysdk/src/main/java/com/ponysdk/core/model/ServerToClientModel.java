@@ -148,7 +148,7 @@ public enum ServerToClientModel {
     POPUP_AUTO_HIDE(ValueTypeModel.BOOLEAN),
     POPUP_MODAL(ValueTypeModel.BOOLEAN),
     POPUP_GLASS_ENABLED(ValueTypeModel.BOOLEAN),
-    POPUP_DRAGGABLE(ValueTypeModel.NULL),
+    POPUP_DRAGGABLE(ValueTypeModel.BOOLEAN),
     POPUP_CENTER(ValueTypeModel.NULL),
     POPUP_SHOW(ValueTypeModel.NULL),
     POPUP_HIDE(ValueTypeModel.NULL),

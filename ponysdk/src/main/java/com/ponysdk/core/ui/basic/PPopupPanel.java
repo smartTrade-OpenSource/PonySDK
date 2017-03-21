@@ -111,9 +111,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
     }
 
     public void setDraggable(final boolean draggable) {
-        if (draggable) {
-            saveUpdate(writer -> writer.write(ServerToClientModel.POPUP_DRAGGABLE));
-        }
+        saveUpdate(writer -> writer.write(ServerToClientModel.POPUP_DRAGGABLE, draggable));
     }
 
     public void center() {

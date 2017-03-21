@@ -47,7 +47,9 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, MouseUpHandler, MouseMoveHandler {
 
-    boolean autoHide;
+    protected boolean autoHide;
+    protected boolean draggable;
+
     private boolean dragging;
     private int dragStartX;
     private int dragStartY;
@@ -123,9 +125,12 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
             popup.setPopupPosition(left, top);
             return true;
         } else if (ServerToClientModel.POPUP_DRAGGABLE.ordinal() == modelOrdinal) {
-            popup.addDomHandler(this, MouseDownEvent.getType());
-            popup.addDomHandler(this, MouseUpEvent.getType());
-            popup.addDomHandler(this, MouseMoveEvent.getType());
+            draggable = binaryModel.getBooleanValue();
+            if (draggable) {
+                popup.addDomHandler(this, MouseDownEvent.getType());
+                popup.addDomHandler(this, MouseUpEvent.getType());
+                popup.addDomHandler(this, MouseMoveEvent.getType());
+            }
             return true;
         } else {
             return super.update(buffer, binaryModel);
@@ -134,7 +139,7 @@ public class PTPopupPanel extends PTSimplePanel implements MouseDownHandler, Mou
 
     @Override
     public void onMouseDown(final MouseDownEvent event) {
-        if (DOM.getCaptureElement() == null) {
+        if (draggable && DOM.getCaptureElement() == null) {
             dragging = true;
             DOM.setCapture(cast().getElement());
             dragStartX = event.getX();

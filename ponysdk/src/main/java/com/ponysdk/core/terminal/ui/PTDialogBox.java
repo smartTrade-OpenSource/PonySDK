@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.terminal.ui;
 
+import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.model.BinaryModel;
@@ -30,9 +31,13 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public class PTDialogBox extends PTDecoratedPopupPanel {
 
+    public PTDialogBox() {
+        this.draggable = true;
+    }
+
     @Override
     protected DialogBox createUIObject() {
-        return new DialogBox(autoHide, false);
+        return new MyDialogBox(autoHide);
     }
 
     @Override
@@ -41,6 +46,9 @@ public class PTDialogBox extends PTDecoratedPopupPanel {
         if (ServerToClientModel.POPUP_CAPTION.ordinal() == modelOrdinal) {
             final DialogBox dialogBox = cast();
             dialogBox.setHTML(binaryModel.getStringValue());
+            return true;
+        } else if (ServerToClientModel.POPUP_DRAGGABLE.ordinal() == modelOrdinal) {
+            draggable = binaryModel.getBooleanValue();
             return true;
         } else {
             return super.update(buffer, binaryModel);
@@ -51,4 +59,19 @@ public class PTDialogBox extends PTDecoratedPopupPanel {
     public DialogBox cast() {
         return (DialogBox) uiObject;
     }
+
+    public final class MyDialogBox extends DialogBox {
+
+        public MyDialogBox(final boolean autoHide) {
+            super(autoHide, false);
+        }
+
+        @Override
+        protected void beginDragging(final MouseDownEvent event) {
+            if (draggable) super.beginDragging(event);
+            else event.preventDefault();
+        }
+
+    }
+
 }
