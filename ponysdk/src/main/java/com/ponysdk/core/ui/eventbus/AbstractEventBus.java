@@ -23,20 +23,34 @@
 
 package com.ponysdk.core.ui.eventbus;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Queue;
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import com.ponysdk.core.ui.eventbus.Event.Type;
 
 public abstract class AbstractEventBus implements EventBus {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractEventBus.class);
 
-    protected final Set<BroadcastEventHandler> broadcastHandlerManager = new HashSet<>();
+    private final Set<BroadcastEventHandler> broadcastHandlerManager = new HashSet<>();
 
-    protected final Queue<Event<? extends EventHandler>> eventQueue = new LinkedList<>();
-    protected final List<HandlerContext> pendingHandlerRegistration = new ArrayList<>();
-    protected boolean firing = false;
+    private final Map<Event.Type, Map<Object, Set<EventHandler>>> map = new HashMap<>();
+    private final Queue<Event<? extends EventHandler>> eventQueue = new LinkedList<>();
+    private final List<HandlerContext> pendingHandlerRegistration = new ArrayList<>();
+    private boolean firing = false;
 
     @Override
     public HandlerRegistration addHandler(final Event.Type type, final EventHandler handler) {
@@ -53,28 +67,35 @@ public abstract class AbstractEventBus implements EventBus {
         else return doAdd(type, source, handler);
     }
 
-    protected HandlerRegistration doAdd(final Event.Type type, final Object source, final EventHandler handler) {
+    private HandlerRegistration doAdd(final Event.Type type, final Object source, final EventHandler handler) {
         if (!firing) doAddNow(type, source, handler);
         else defferedAdd(type, source, handler);
 
         return () -> doRemove(type, source, handler);
     }
 
-    protected abstract void doAddNow(final Event.Type type, final Object source, final EventHandler handler);
+    private void doAddNow(final Event.Type type, final Object source, final EventHandler handler) {
+        Map<Object, Set<EventHandler>> sourceMap = map.get(type);
+        if (sourceMap == null) {
+            sourceMap = new HashMap<>();
+            map.put(type, sourceMap);
+        }
 
-    private void defferedAdd(final Event.Type type, final Object source, final EventHandler handler) {
-        final HandlerContext context = new HandlerContext();
-        context.type = type;
-        context.source = source;
-        context.handler = handler;
-        context.add = true;
+        // safe, we control the puts.
+        Set<EventHandler> handlers = sourceMap.get(source);
+        if (handlers == null) {
+            handlers = createHandlerSet();
+            sourceMap.put(source, handlers);
+        }
 
-        pendingHandlerRegistration.add(context);
+        handlers.add(handler);
     }
 
-    @Override
-    public void addHandler(final BroadcastEventHandler handler) {
-        broadcastHandlerManager.add(handler);
+    protected abstract Set<EventHandler> createHandlerSet();
+
+    private void defferedAdd(final Event.Type type, final Object source, final EventHandler handler) {
+        final HandlerContext context = new HandlerContext(type, source, handler, true);
+        pendingHandlerRegistration.add(context);
     }
 
     @Override
@@ -87,28 +108,37 @@ public abstract class AbstractEventBus implements EventBus {
         doRemove(type, source, handler);
     }
 
-    protected void doRemove(final Event.Type type, final Object source, final EventHandler handler) {
+    private void doRemove(final Event.Type type, final Object source, final EventHandler handler) {
         if (!firing) doRemoveNow(type, source, handler);
         else defferedRemove(type, source, handler);
     }
 
-    protected abstract void doRemoveNow(final Event.Type type, final Object source, final EventHandler handler);
+    private void doRemoveNow(final Event.Type type, final Object source, final EventHandler handler) {
+        final Map<Object, Set<EventHandler>> sourceMap = map.get(type);
+        if (sourceMap == null) return;
 
-    protected void defferedRemove(final Event.Type type, final Object source, final EventHandler handler) {
-        final HandlerContext context = new HandlerContext();
-        context.type = type;
-        context.source = source;
-        context.handler = handler;
-        context.add = false;
+        final Set<EventHandler> handlers = sourceMap.get(source);
+        if (handlers == null) return;
 
-        final boolean removed = pendingHandlerRegistration.remove(context);
+        final boolean removed = handlers.remove(handler);
+        if (!removed) log.warn("Useless remove call : {}", handler);
 
-        if (!removed) pendingHandlerRegistration.add(context);
+        if (removed && handlers.isEmpty()) {
+            final Set<EventHandler> pruned = sourceMap.remove(source);
+
+            if (pruned != null) {
+                if (!pruned.isEmpty() && log.isInfoEnabled()) log.info("Pruned unempty list! {}", pruned);
+                if (sourceMap.isEmpty()) map.remove(type);
+            } else {
+                if (log.isInfoEnabled()) log.info("Can't prune what wasn't there {}", source);
+            }
+        }
     }
 
-    @Override
-    public void removeHandler(final BroadcastEventHandler handler) {
-        broadcastHandlerManager.remove(handler);
+    private void defferedRemove(final Event.Type type, final Object source, final EventHandler handler) {
+        final HandlerContext context = new HandlerContext(type, source, handler, false);
+        final boolean removed = pendingHandlerRegistration.remove(context);
+        if (!removed) pendingHandlerRegistration.add(context);
     }
 
     @Override
@@ -124,7 +154,7 @@ public abstract class AbstractEventBus implements EventBus {
         else doFire(event, source);
     }
 
-    protected void doFire(final Event<? extends EventHandler> event, final Object source) {
+    private void doFire(final Event<? extends EventHandler> event, final Object source) {
         if (source != null) event.setSource(source);
 
         eventQueue.add(event);
@@ -132,22 +162,31 @@ public abstract class AbstractEventBus implements EventBus {
         if (firing) return;
 
         firing = true;
-        Set<Throwable> causes = null;
 
         try {
-
             Event e;
+            Set<Throwable> causes = null;
 
             while ((e = eventQueue.poll()) != null) {
-
-                final Collection<? extends EventHandler> handlers = getDispatchSet(e.getAssociatedType(), e.getSource());
+                final Object eventSource = e.getSource();
+                final Type eventType = e.getAssociatedType();
+                final Collection<? extends EventHandler> handlers;
+                final Collection<EventHandler> directHandlers = getHandlers(eventType, eventSource);
+                if (eventSource != null) {
+                    final Collection<EventHandler> globalHandlers = getHandlers(eventType, null);
+                    final Set<EventHandler> rtn = new LinkedHashSet<>(directHandlers);
+                    rtn.addAll(globalHandlers);
+                    handlers = rtn;
+                } else {
+                    handlers = directHandlers;
+                }
 
                 for (final EventHandler handler1 : handlers) {
                     try {
                         if (log.isDebugEnabled()) log.debug("dispatch eventbus #" + e);
                         e.dispatch(handler1);
                     } catch (final Throwable t) {
-                        log.error("Cannot process fired eventbus #" + e.getAssociatedType(), t);
+                        log.error("Cannot process fired eventbus #" + eventType, t);
                         if (causes == null) {
                             causes = new HashSet<>();
                         }
@@ -174,25 +213,40 @@ public abstract class AbstractEventBus implements EventBus {
         }
     }
 
-    private Collection<EventHandler> getDispatchSet(final Event.Type type, final Object source) {
-        final Collection<EventHandler> directHandlers = getHandlers(type, source);
-        if (source != null) {
-            final Collection<EventHandler> globalHandlers = getHandlers(type, null);
-            final Set<EventHandler> rtn = new LinkedHashSet<>(directHandlers);
-            rtn.addAll(globalHandlers);
-            return rtn;
-        } else {
-            return directHandlers;
-        }
+    @Override
+    public Collection<EventHandler> getHandlers(final Event.Type type, final Object source) {
+        final Map<Object, Set<EventHandler>> sourceMap = map.get(type);
+        if (sourceMap == null) return Collections.emptySet();
+
+        // safe, we control the puts.
+        final Set<EventHandler> handlers = sourceMap.get(source);
+        if (handlers != null) return new HashSet<>(handlers);
+        else return Collections.emptySet();
     }
 
-    protected static class HandlerContext {
+    @Override
+    public void addHandler(final BroadcastEventHandler handler) {
+        broadcastHandlerManager.add(handler);
+    }
 
-        boolean add;
+    @Override
+    public void removeHandler(final BroadcastEventHandler handler) {
+        broadcastHandlerManager.remove(handler);
+    }
 
-        Event.Type type;
-        Object source;
-        EventHandler handler;
+    private static final class HandlerContext {
+
+        private final Event.Type type;
+        private final Object source;
+        private final EventHandler handler;
+        private final boolean add;
+
+        public HandlerContext(final Type type, final Object source, final EventHandler handler, final boolean add) {
+            this.type = type;
+            this.source = source;
+            this.handler = handler;
+            this.add = add;
+        }
 
         @Override
         public boolean equals(final Object o) {
