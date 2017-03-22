@@ -67,13 +67,9 @@ public class WebSocketClient implements MessageSender {
         webSocket.setBinaryType(webSocketDataType.getName());
 
         final MessageReader messageReader;
-        if (WebSocketDataType.ARRAYBUFFER.equals(webSocketDataType)) {
-            messageReader = new ArrayBufferReader(this);
-        } else if (WebSocketDataType.BLOB.equals(webSocketDataType)) {
-            messageReader = new BlobReader(this);
-        } else {
-            throw new IllegalArgumentException("Wrong reader type : " + webSocketDataType);
-        }
+        if (WebSocketDataType.ARRAYBUFFER.equals(webSocketDataType)) messageReader = new ArrayBufferReader(this);
+        else if (WebSocketDataType.BLOB.equals(webSocketDataType)) messageReader = new BlobReader(this);
+        else throw new IllegalArgumentException("Wrong reader type : " + webSocketDataType);
 
         webSocket.setOnopen(event -> {
             if (log.isLoggable(Level.INFO)) log.info("WebSoket connected");

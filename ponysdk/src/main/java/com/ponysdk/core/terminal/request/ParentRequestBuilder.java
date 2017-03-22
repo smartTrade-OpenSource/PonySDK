@@ -23,9 +23,6 @@
 
 package com.ponysdk.core.terminal.request;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.google.gwt.json.client.JSONValue;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
@@ -35,17 +32,14 @@ import elemental.html.Uint8Array;
 
 public abstract class ParentRequestBuilder implements RequestBuilder {
 
-    private static final Logger log = Logger.getLogger(ParentRequestBuilder.class.getName());
-
     private final RequestCallback callback;
 
     public ParentRequestBuilder(final String id, final RequestCallback callback) {
         this.callback = callback;
 
         Browser.getWindow().setOnmessage(event -> {
-            final Uint8Array buffer = (Uint8Array) ((MessageEvent) event).getData();
             final ReaderBuffer readerBuffer = new ReaderBuffer();
-            readerBuffer.init(buffer);
+            readerBuffer.init((Uint8Array) ((MessageEvent) event).getData());
             onDataReceived(readerBuffer);
         });
 
@@ -74,7 +68,6 @@ public abstract class ParentRequestBuilder implements RequestBuilder {
      * From Main terminal to the matching window terminal
      */
     public void onDataReceived(final ReaderBuffer buffer) {
-        if (log.isLoggable(Level.FINE)) log.fine("Data received from main terminal " + buffer.toString());
         callback.onDataReceived(buffer);
     }
 

@@ -39,6 +39,8 @@ public enum ServerToClientModel {
     TYPE_REMOVE_HANDLER(ValueTypeModel.NULL),
     TYPE_HISTORY(ValueTypeModel.STRING),
 
+    END(ValueTypeModel.NULL),
+
     UI_CONTEXT_ID(ValueTypeModel.INTEGER),
     NATIVE(ValueTypeModel.JSON_OBJECT),
     DATE(ValueTypeModel.LONG),
@@ -240,7 +242,7 @@ public enum ServerToClientModel {
 
     private final ValueTypeModel type;
 
-    ServerToClientModel(final ValueTypeModel size) {
+    private ServerToClientModel(final ValueTypeModel size) {
         this.type = size;
     }
 

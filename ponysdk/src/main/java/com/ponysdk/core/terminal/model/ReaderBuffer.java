@@ -23,15 +23,18 @@
 
 package com.ponysdk.core.terminal.model;
 
+import java.util.logging.Logger;
+
 import com.google.gwt.json.client.JSONException;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.ValueTypeModel;
+
+import elemental.client.Browser;
 import elemental.html.ArrayBufferView;
 import elemental.html.Uint8Array;
-
-import java.util.logging.Logger;
+import elemental.html.Window;
 
 public class ReaderBuffer {
 
@@ -49,19 +52,31 @@ public class ReaderBuffer {
 
     private int size;
 
+    private Window window;
+
     public ReaderBuffer() {
-        currentBinaryModel = new BinaryModel();
+        this.currentBinaryModel = new BinaryModel();
     }
 
     public void init(final Uint8Array buffer) {
-        this.buffer = buffer;
+        if (this.buffer != null && hasRemaining()) {
+            if (this.window == null) this.window = Browser.getWindow();
+            final int remaningBufferSize = this.size - this.position;
+            final Uint8Array mergedBuffer = window.newUint8Array(remaningBufferSize + buffer.getByteLength());
+            mergedBuffer.setElements(this.buffer.subarray(this.position), 0);
+            mergedBuffer.setElements(buffer, remaningBufferSize);
+            this.buffer = mergedBuffer;
+        } else {
+            this.buffer = buffer;
+        }
+
         this.position = 0;
         this.size = buffer.getByteLength();
     }
 
     private static native String fromCharCode(ArrayBufferView buffer) /*-{return $wnd.decode(buffer);}-*/;
 
-    public int getIndex() {
+    public int getPosition() {
         return position;
     }
 
@@ -192,21 +207,67 @@ public class ReaderBuffer {
         position -= binaryModel.getSize();
     }
 
+    private boolean hasEnoughRemainingBytes(final int blockSize) {
+        return position + blockSize <= size;
+    }
+
     public boolean hasRemaining() {
         return position < size;
     }
 
     /**
      * Go directly to the next block
+     * 
+     * @param dryRun
+     *            If true, not really shift
+     * @return Start position of the next block
      */
-    public void avoidBlock() {
+    public int shiftNextBlock(final boolean dryRun) {
+        final int startPosition = position;
+        int endPosition = -1;
         while (hasRemaining()) {
-            final BinaryModel binaryModel = readBinaryModel();
-            if (binaryModel.isBeginKey()) {
-                rewind(binaryModel);
+            try {
+                if (ServerToClientModel.END.equals(shiftBinaryModel())) {
+                    endPosition = position;
+                    break;
+                }
+            } catch (final ArrayIndexOutOfBoundsException e) {
+                // No more enough bytes
                 break;
             }
         }
+
+        // No end found, it's a split message, so we rewind
+        // If it's a dry run, we rewind all the time
+        if (endPosition == -1 || dryRun) position = startPosition;
+
+        return endPosition;
+    }
+
+    private final ServerToClientModel shiftBinaryModel() {
+        final ServerToClientModel key = SERVER_TO_CLIENT_MODELS[getShort()];
+
+        switch (key.getTypeModel()) {
+            case NULL:
+                break;
+            case BOOLEAN:
+            case BYTE:
+            case SHORT:
+            case INTEGER:
+                position += key.getTypeModel().getSize();
+                break;
+            case LONG:
+            case DOUBLE:
+            case STRING:
+            case JSON_OBJECT:
+                final int jsonSize = getInt();
+                position += jsonSize;
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown type model : " + key.getTypeModel());
+        }
+
+        return key;
     }
 
     public Uint8Array slice(final int startPosition, final int endPosition) {

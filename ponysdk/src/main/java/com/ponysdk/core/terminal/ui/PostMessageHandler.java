@@ -36,15 +36,7 @@ public interface PostMessageHandler {
     boolean isReady();
 
     public default void postMessage(final ReaderBuffer buffer) {
-        final int startPosition = buffer.getIndex();
-
-        // Read Type
-        buffer.readBinaryModel();
-        buffer.avoidBlock();
-
-        final int endPosition = buffer.getIndex();
-
-        postMessage(buffer.slice(startPosition, endPosition));
+        postMessage(buffer.slice(buffer.getPosition(), buffer.shiftNextBlock(false)));
     }
 
 }

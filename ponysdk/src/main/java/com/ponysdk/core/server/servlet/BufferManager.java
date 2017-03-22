@@ -56,7 +56,7 @@ public class BufferManager {
         ByteBuffer buffer = bufferPool.poll();
 
         if (buffer == null) {
-            log.warn("No more available buffer, max allocation reached ({}), waiting an available one", BUFFERS_COUNT);
+            log.info("No more available buffer, max allocation reached ({}), waiting an available one", BUFFERS_COUNT);
             try {
                 buffer = bufferPool.poll(25, TimeUnit.SECONDS);
                 if (buffer == null) throw new IllegalStateException("No more buffer available");

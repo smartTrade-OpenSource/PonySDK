@@ -168,39 +168,20 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
             final BinaryModel binaryModel = buffer.readBinaryModel();
             if (ServerToClientModel.WINDOW_ID.equals(binaryModel.getModel())) {
                 // Event on a specific window
-                final int requestedWindowId = binaryModel.getIntValue();
+                final int requestedId = binaryModel.getIntValue();
                 // Main terminal, we need to dispatch the eventbus
-                final PTWindow window = PTWindowManager.getWindow(requestedWindowId);
+                final PTWindow window = PTWindowManager.getWindow(requestedId);
                 if (window != null && window.isReady()) {
-                    log.log(Level.FINE, "The main terminal send the buffer to window " + requestedWindowId);
-
+                    if (log.isLoggable(Level.FINE)) log.fine("The main terminal send the buffer to window " + requestedId);
                     window.postMessage(buffer);
                 } else {
-                    log.log(Level.SEVERE, "The requested window " + requestedWindowId + " doesn't exist or not ready");
-
-                    // Type
-                    final BinaryModel type = buffer.readBinaryModel();
-                    log.log(Level.WARNING, "Consume message block : " + type);
-
-                    while (buffer.hasRemaining()) {
-                        final BinaryModel model = buffer.readBinaryModel();
-                        log.log(Level.WARNING, "Consume message block : " + model);
-                        if (ServerToClientModel.WINDOW_ID.equals(model.getModel())) {
-                            if (model.getIntValue() != requestedWindowId) {
-                                buffer.rewind(model);
-                                break;
-                            } else {
-                                // Type
-                                buffer.readBinaryModel();
-                            }
-                        } else if (model.isBeginKey()) {
-                            buffer.rewind(model);
-                            break;
-                        }
-                    }
+                    log.warning("The requested window " + requestedId + " doesn't exist anymore"); // TODO PERF LOG
+                    buffer.shiftNextBlock(false);
                 }
             } else if (ServerToClientModel.FRAME_ID.equals(binaryModel.getModel())) {
-                final PTFrame frame = (PTFrame) getPTObject(binaryModel.getIntValue());
+                final int requestedId = binaryModel.getIntValue();
+                final PTFrame frame = (PTFrame) getPTObject(requestedId);
+                if (log.isLoggable(Level.FINE)) log.fine("The main terminal send the buffer to frame " + requestedId);
                 frame.postMessage(buffer);
             } else {
                 update(binaryModel, buffer);
@@ -212,7 +193,9 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         // Detect if the message is not for the window but for a specific frame
         final BinaryModel binaryModel = buffer.readBinaryModel();
         if (ServerToClientModel.FRAME_ID.equals(binaryModel.getModel())) {
-            final PTFrame frame = (PTFrame) getPTObject(binaryModel.getIntValue());
+            final int requestedId = binaryModel.getIntValue();
+            final PTFrame frame = (PTFrame) getPTObject(requestedId);
+            if (log.isLoggable(Level.FINE)) log.fine("The main terminal send the buffer to frame " + requestedId);
             frame.postMessage(buffer);
         } else {
             update(binaryModel, buffer);
@@ -228,7 +211,6 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         if (model == null) return;
 
         final int modelOrdinal = model.ordinal();
-
         if (ServerToClientModel.TYPE_CREATE.ordinal() == modelOrdinal) {
             final PTObject ptObject = processCreate(buffer, binaryModel.getIntValue());
             processUpdate(buffer, ptObject);
@@ -250,8 +232,10 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
             processClose();
         } else {
             log.log(Level.WARNING, "Unknown instruction type : " + binaryModel);
-            buffer.avoidBlock();
+            buffer.shiftNextBlock(false);
         }
+
+        buffer.readBinaryModel(); // Read ServerToClientModel.END element
     }
 
     private PTObject processCreate(final ReaderBuffer buffer, final int objectIdValue) {
@@ -278,7 +262,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         } else {
             log.warning("Cannot add " + ptObject + " to an garbaged parent object #" + parentId
                     + ", so we will consume all the buffer of this object");
-            buffer.avoidBlock();
+            buffer.shiftNextBlock(false);
         }
     }
 
@@ -288,13 +272,15 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
             boolean result = false;
             do {
                 binaryModel = buffer.readBinaryModel();
-                if (binaryModel.getModel() != null) result = ptObject.update(buffer, binaryModel);
+                if (binaryModel.getModel() != null) {
+                    result = !ServerToClientModel.END.equals(binaryModel.getModel()) ? ptObject.update(buffer, binaryModel) : false;
+                }
             } while (result && buffer.hasRemaining());
 
             if (!result) buffer.rewind(binaryModel);
         } else {
             log.warning("Update on a null PTObject, so we will consume all the buffer of this object");
-            buffer.avoidBlock();
+            buffer.shiftNextBlock(false);
         }
     }
 
@@ -308,7 +294,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
             else log.warning("Cannot remove PTObject " + ptObject + " on a garbaged object #" + parentId);
         } else {
             log.warning("Remove a null PTObject #" + objectId + ", so we will consume all the buffer of this object");
-            buffer.avoidBlock();
+            buffer.shiftNextBlock(false);
         }
     }
 

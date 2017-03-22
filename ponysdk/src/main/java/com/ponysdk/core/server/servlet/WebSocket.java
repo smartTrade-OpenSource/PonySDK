@@ -64,7 +64,6 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     private Session session;
 
     private ByteBuffer buffer;
-    private int lastUpdatedID = -1;
 
     WebSocket(final ServletUpgradeRequest request, final WebsocketMonitor monitor, final BufferManager bufferManager,
             final AbstractApplicationManager applicationManager) {
@@ -184,19 +183,48 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         return bufferManager.allocate();
     }
 
+    /**
+     * Send heart beat to the client
+     */
+    public void sendHeartBeat() {
+        if (isLiving() && isSessionOpen()) {
+            final ByteBuffer buffer = getBuffer();
+            try {
+                encode(buffer, ServerToClientModel.HEARTBEAT);
+                flush(buffer);
+            } catch (final Throwable t) {
+                release(buffer);
+            }
+        }
+    }
+
+    /**
+     * Send round trip to the client
+     */
+    public void sendRoundTrip() {
+        if (isLiving() && isSessionOpen()) {
+            final ByteBuffer buffer = getBuffer();
+            try {
+                encode(buffer, ServerToClientModel.PING_SERVER, System.currentTimeMillis());
+                flush(buffer);
+            } catch (final Throwable t) {
+                release(buffer);
+            }
+        }
+    }
+
     @Override
     public void flush() {
         if (buffer != null) {
             flush(buffer);
             buffer = null;
-            lastUpdatedID = -1;
         }
     }
 
     /**
      * Send to the terminal
      */
-    public void flush(final ByteBuffer buffer) {
+    private void flush(final ByteBuffer buffer) {
         if (isLiving() && isSessionOpen()) {
             if (buffer.position() != 0) {
                 if (monitor != null) monitor.onBeforeFlush(WebSocket.this, buffer.position());
@@ -213,47 +241,16 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         release(buffer);
     }
 
-    /**
-     * Send heart beat to the client
-     */
-    public void sendHeartBeat() {
-        if (isLiving() && isSessionOpen()) {
-            final ByteBuffer buffer = getBuffer();
-            try {
-                encode(buffer, ServerToClientModel.HEARTBEAT);
-                flush(buffer);
-            } catch (final Throwable t) {
-                release(buffer);
-            }
-        }
-    }
-
     @Override
     public void release() {
         if (buffer != null) {
             release(buffer);
             buffer = null;
-            lastUpdatedID = -1;
         }
     }
 
-    public void release(final ByteBuffer buffer) {
+    private void release(final ByteBuffer buffer) {
         bufferManager.release(buffer);
-    }
-
-    /**
-     * Send round trip to the client
-     */
-    public void sendRoundTrip() {
-        if (isLiving() && isSessionOpen()) {
-            final ByteBuffer buffer = getBuffer();
-            try {
-                encode(buffer, ServerToClientModel.PING_SERVER, System.currentTimeMillis());
-                flush(buffer);
-            } catch (final Throwable t) {
-                release(buffer);
-            }
-        }
     }
 
     public void close() {
@@ -279,28 +276,12 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     @Override
     public void endObject() {
         if (buffer == null) return;
+        encode(ServerToClientModel.END, null);
         if (buffer.position() >= 4096) flush();
     }
 
     @Override
     public void encode(final ServerToClientModel model, final Object value) {
-        if (ServerToClientModel.TYPE_UPDATE.equals(model)) {
-            final int newUpdatedID = (int) value;
-            if (lastUpdatedID == newUpdatedID) {
-                if (log.isDebugEnabled())
-                    log.debug("A consecutive update on the same id " + lastUpdatedID + ", so we concatenate the instructions");
-                return;
-            } else {
-                lastUpdatedID = newUpdatedID;
-            }
-        } else if (ServerToClientModel.TYPE_ADD.equals(model) || ServerToClientModel.TYPE_ADD_HANDLER.equals(model)
-                || ServerToClientModel.TYPE_CLOSE.equals(model) || ServerToClientModel.TYPE_CREATE.equals(model)
-                || ServerToClientModel.TYPE_GC.equals(model) || ServerToClientModel.TYPE_HISTORY.equals(model)
-                || ServerToClientModel.TYPE_REMOVE.equals(model) || ServerToClientModel.TYPE_REMOVE_HANDLER.equals(model)
-                || ServerToClientModel.WINDOW_ID.equals(model) || ServerToClientModel.FRAME_ID.equals(model)) {
-            lastUpdatedID = -1;
-        }
-
         switch (model.getTypeModel()) {
             case NULL:
                 encode(buffer, model);
@@ -393,7 +374,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         }
     }
 
-    private enum NiceStatusCode {
+    private static enum NiceStatusCode {
 
         NORMAL(StatusCode.NORMAL, "Normal closure"),
         SHUTDOWN(StatusCode.SHUTDOWN, "Shutdown"),
@@ -428,7 +409,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
             return message;
         }
 
-        public static String getMessage(final int statusCode) {
+        public static final String getMessage(final int statusCode) {
             for (final NiceStatusCode niceStatusCode : values()) {
                 if (niceStatusCode.getStatusCode() == statusCode) {
                     return statusCode + " : " + niceStatusCode.getMessage();
