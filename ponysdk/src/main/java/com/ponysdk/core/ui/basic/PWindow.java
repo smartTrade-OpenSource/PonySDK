@@ -202,11 +202,11 @@ public class PWindow extends PObject {
     }
 
     public void add(final IsPWidget widget) {
-        ensureRootPanel(null).add(widget);
+        add(null, widget);
     }
 
     public void add(final String id, final IsPWidget widget) {
-        ensureRootPanel(id).add(widget);
+        if (!destroy) ensureRootPanel(id).add(widget);
     }
 
     private PRootPanel ensureRootPanel(final String zoneID) {

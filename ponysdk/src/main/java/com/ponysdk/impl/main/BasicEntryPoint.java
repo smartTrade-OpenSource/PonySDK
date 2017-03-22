@@ -24,7 +24,11 @@
 package com.ponysdk.impl.main;
 
 import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.ui.basic.*;
+import com.ponysdk.core.ui.basic.Element;
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PElement;
+import com.ponysdk.core.ui.basic.PFlowPanel;
+import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.main.EntryPoint;
 
 public class BasicEntryPoint implements EntryPoint {
@@ -133,7 +137,7 @@ public class BasicEntryPoint implements EntryPoint {
         // });
         //
         // final PLabel label = new PLabel("Dans La window");
-        // window.getPRootPanel().add(label);
+        // window.add(label);
         // UIScheduledThreadPoolExecutor.scheduleAtFixedRate(new Runnable() {
         //
         // @Override
