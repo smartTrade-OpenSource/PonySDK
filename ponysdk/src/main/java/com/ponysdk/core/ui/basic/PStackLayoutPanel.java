@@ -196,11 +196,9 @@ public class PStackLayoutPanel extends PWidget
     }
 
     @Override
-    public void destroy() {
-        super.destroy();
-        for (final PWidget pWidget : this) {
-            pWidget.destroy();
-        }
+    public void onDestroy() {
+        super.onDestroy();
+        forEach(PObject::onDestroy);
     }
 
 }

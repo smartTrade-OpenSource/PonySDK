@@ -124,7 +124,6 @@ public abstract class PAddOn extends PObject {
         callTerminalMethod("setLogLevel", LOG_LEVEL.get(logLevel));
     }
 
-    @Override
     public void destroy() {
         saveUpdate(writer -> writer.write(ServerToClientModel.DESTROY));
     }

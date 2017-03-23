@@ -303,7 +303,7 @@ public abstract class PObject {
         this.destroyListener = listener;
     }
 
-    public void destroy() {
+    public void onDestroy() {
         destroy = true;
         terminalHandler = null;
         initializeListener = null;

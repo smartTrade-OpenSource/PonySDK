@@ -177,7 +177,7 @@ public class PWindow extends PObject {
                 closeHandlers.forEach(handler -> handler.onClose(e));
                 closeHandlers.clear();
             }
-            destroy();
+            onDestroy();
         } else {
             super.onClientData(event);
         }
@@ -232,9 +232,9 @@ public class PWindow extends PObject {
     }
 
     @Override
-    public void destroy() {
-        super.destroy();
-        panelByZone.forEach((key, value) -> value.destroy());
+    public void onDestroy() {
+        super.onDestroy();
+        panelByZone.forEach((key, value) -> value.onDestroy());
         panelByZone = null;
     }
 

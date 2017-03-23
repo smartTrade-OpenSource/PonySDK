@@ -172,8 +172,8 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
     }
 
     @Override
-    public void destroy() {
-        super.destroy();
-        root.destroy();
+    public void onDestroy() {
+        super.onDestroy();
+        root.onDestroy();
     }
 }

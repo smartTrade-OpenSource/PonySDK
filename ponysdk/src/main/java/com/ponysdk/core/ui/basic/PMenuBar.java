@@ -208,9 +208,9 @@ public class PMenuBar extends PWidget implements HasPAnimation {
     }
 
     @Override
-    public void destroy() {
-        super.destroy();
-        items.forEach(PObject::destroy);
+    public void onDestroy() {
+        super.onDestroy();
+        items.forEach(PObject::onDestroy);
     }
 
 }

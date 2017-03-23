@@ -182,9 +182,9 @@ public class PTreeItem extends PObject {
     }
 
     @Override
-    public void destroy() {
-        super.destroy();
-        children.forEach(PObject::destroy);
+    public void onDestroy() {
+        super.onDestroy();
+        children.forEach(PObject::onDestroy);
     }
 
 }
