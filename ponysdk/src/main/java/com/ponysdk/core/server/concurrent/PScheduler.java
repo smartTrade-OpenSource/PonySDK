@@ -23,20 +23,24 @@
 
 package com.ponysdk.core.server.concurrent;
 
-import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.server.application.UIContextListener;
-import com.ponysdk.core.server.stm.Txn;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-public class PScheduler implements UIContextListener {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.stm.Txn;
+
+public class PScheduler {
 
     private static final Logger log = LoggerFactory.getLogger(PScheduler.class);
 
@@ -154,21 +158,16 @@ public class PScheduler implements UIContextListener {
 
     private void registerTask(final UIRunnable runnable) {
         final UIContext uiContext = runnable.getUiContext();
-        uiContext.addUIContextListener(this);
+        uiContext.addUIContextListener(myUiContext -> {
+            final Set<UIRunnable> runnables = runnablesByUIContexts.remove(myUiContext);
+            if (runnables != null) runnables.forEach(UIRunnable::cancel);
+        });
         Set<UIRunnable> runnables = runnablesByUIContexts.get(uiContext);
         if (runnables == null) {
             runnables = Collections.newSetFromMap(new ConcurrentHashMap<>());
             runnablesByUIContexts.put(uiContext, runnables);
         }
         runnables.add(runnable);
-    }
-
-    @Override
-    public void onUIContextDestroyed(final UIContext uiContext) {
-        final Set<UIRunnable> runnables = runnablesByUIContexts.remove(uiContext);
-        if (runnables != null) {
-            runnables.forEach(UIRunnable::cancel);
-        }
     }
 
     public static final class UIRunnable implements Runnable {

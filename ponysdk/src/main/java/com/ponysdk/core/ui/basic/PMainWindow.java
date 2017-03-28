@@ -18,6 +18,8 @@ public class PMainWindow extends PWindow {
         writer.endObject();
         UIContext.get().registerObject(this);
         initialized = true;
+
+        UIContext.get().addUIContextListener(uiContext -> onDestroy());
     }
 
     @Override

@@ -411,10 +411,7 @@ public class UIContext {
         try {
             living = false;
             communicationSanityChecker.stop();
-
-            for (final UIContextListener listener : uiContextListeners) {
-                listener.onUIContextDestroyed(this);
-            }
+            uiContextListeners.forEach(listener -> listener.onUIContextDestroyed(this));
             context.close();
         } finally {
             end();
@@ -435,10 +432,7 @@ public class UIContext {
         living = false;
         communicationSanityChecker.stop();
         application.unregisterUIContext(ID);
-
-        for (final UIContextListener listener : uiContextListeners) {
-            listener.onUIContextDestroyed(this);
-        }
+        uiContextListeners.forEach(listener -> listener.onUIContextDestroyed(this));
     }
 
     public void sendHeartBeat() {
