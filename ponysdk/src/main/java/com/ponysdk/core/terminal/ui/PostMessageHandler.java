@@ -23,8 +23,6 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import com.ponysdk.core.terminal.model.ReaderBuffer;
-
 import elemental.html.Uint8Array;
 
 public interface PostMessageHandler {
@@ -34,9 +32,5 @@ public interface PostMessageHandler {
     void setReady();
 
     boolean isReady();
-
-    public default void postMessage(final ReaderBuffer buffer) {
-        postMessage(buffer.slice(buffer.getPosition(), buffer.shiftNextBlock(false)));
-    }
 
 }

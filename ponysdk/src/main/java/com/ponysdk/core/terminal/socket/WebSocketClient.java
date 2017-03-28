@@ -29,11 +29,7 @@ import java.util.logging.Logger;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.rpc.StatusCodeException;
 import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.terminal.PonySDK;
 import com.ponysdk.core.terminal.UIBuilder;
-import com.ponysdk.core.terminal.instruction.PTInstruction;
-import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 import com.ponysdk.core.terminal.request.WebSocketRequestBuilder;
 
@@ -54,6 +50,8 @@ public class WebSocketClient implements MessageSender {
     private final Window window;
 
     private final ReaderBuffer readerBuffer;
+
+    private boolean initialized;
 
     public WebSocketClient(final String url, final UIBuilder uiBuilder, final WebSocketDataType webSocketDataType) {
         this.uiBuilder = uiBuilder;
@@ -105,30 +103,16 @@ public class WebSocketClient implements MessageSender {
     @Override
     public void read(final ArrayBuffer arrayBuffer) {
         try {
-            readerBuffer.init(window.newUint8Array(arrayBuffer, 0, arrayBuffer.getByteLength()));
-            // Get the first element on the message, always a key of element of the Model enum
-            final BinaryModel type = readerBuffer.readBinaryModel();
-
-            if (type.getModel() == ServerToClientModel.PING_SERVER) {
-                if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Ping received");
-                final PTInstruction requestData = new PTInstruction();
-                requestData.put(ClientToServerModel.PING_SERVER, type.getLongValue());
-                send(requestData.toString());
-            } else if (type.getModel() == ServerToClientModel.HEARTBEAT) {
-                if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Heart beat received");
-            } else if (type.getModel() == ServerToClientModel.UI_CONTEXT_ID) {
-                PonySDK.get().setContextId(type.getIntValue());
+            if (!initialized) {
                 uiBuilder.init(new WebSocketRequestBuilder(WebSocketClient.this));
-            } else {
-                try {
-                    readerBuffer.rewind(type);
-                    uiBuilder.updateMainTerminal(readerBuffer);
-                } catch (final Exception e) {
-                    log.log(Level.SEVERE, "Error while processing the " + readerBuffer, e);
-                }
+                initialized = true;
             }
+
+            readerBuffer.init(window.newUint8Array(arrayBuffer, 0, arrayBuffer.getByteLength()));
+
+            uiBuilder.updateMainTerminal(readerBuffer);
         } catch (final Exception e) {
-            log.log(Level.SEVERE, "Cannot parse " + arrayBuffer, e);
+            log.log(Level.SEVERE, "Error while processing the " + readerBuffer, e);
         }
     }
 

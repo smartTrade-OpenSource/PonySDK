@@ -112,7 +112,7 @@ public class UIBuilder implements HttpResponseReceivedEvent.Handler, HttpRequest
         RootPanel.get().add(loadingMessageBox);
 
         loadingMessageBox.setStyleName("pony-LoadingMessageBox");
-        com.google.gwt.user.client.Element element = loadingMessageBox.getElement();
+        final com.google.gwt.user.client.Element element = loadingMessageBox.getElement();
         element.getStyle().setVisibility(Visibility.HIDDEN);
         element.setInnerText("Loading ...");
 
@@ -129,41 +129,11 @@ public class UIBuilder implements HttpResponseReceivedEvent.Handler, HttpRequest
         }
     }
 
-    public void onCommunicationError(final Throwable exception) {
-        rootEventBus.fireEvent(new CommunicationErrorEvent(exception));
-
-        if (pendingClose) return;
-
-        if (loadingMessageBox == null) {
-            // First load failed
-            if (exception instanceof StatusCodeException) {
-                final StatusCodeException codeException = (StatusCodeException) exception;
-                if (codeException.getStatusCode() == 0) return;
-            }
-            log.log(Level.SEVERE, "Cannot initialize the application : " + exception.getMessage() + "\n" + exception
-                    + "\nPlease reload your application",
-                exception);
-        }
-
-        if (exception instanceof StatusCodeException) {
-            final StatusCodeException statusCodeException = (StatusCodeException) exception;
-            if (communicationErrorHandler != null) {
-                communicationErrorHandler.onCommunicationError(statusCodeException.getStatusCode(), statusCodeException.getMessage());
-            } else {
-                showCommunicationErrorMessage(statusCodeException);
-            }
-        } else {
-            if (communicationErrorHandler != null) {
-                communicationErrorHandler.onCommunicationError(500, exception.getMessage());
-            } else {
-                log.log(Level.SEVERE, "An unexcepted error occured: " + exception.getMessage() + ". Please check the server logs.",
-                    exception);
-            }
-        }
-    }
-
     public void updateMainTerminal(final ReaderBuffer buffer) {
         while (buffer.hasRemaining()) {
+            final int nextBlockPosition = buffer.shiftNextBlock(true);
+            if (nextBlockPosition == -1) return;
+
             // Detect if the message is not for the main terminal but for a specific window
             final BinaryModel binaryModel = buffer.readBinaryModel();
             if (ServerToClientModel.WINDOW_ID.equals(binaryModel.getModel())) {
@@ -173,7 +143,7 @@ public class UIBuilder implements HttpResponseReceivedEvent.Handler, HttpRequest
                 final PTWindow window = PTWindowManager.getWindow(requestedId);
                 if (window != null && window.isReady()) {
                     if (log.isLoggable(Level.FINE)) log.fine("The main terminal send the buffer to window " + requestedId);
-                    window.postMessage(buffer);
+                    window.postMessage(buffer.slice(buffer.getPosition(), nextBlockPosition));
                 } else {
                     log.warning("The requested window " + requestedId + " doesn't exist anymore"); // TODO PERF LOG
                     buffer.shiftNextBlock(false);
@@ -182,7 +152,19 @@ public class UIBuilder implements HttpResponseReceivedEvent.Handler, HttpRequest
                 final int requestedId = binaryModel.getIntValue();
                 final PTFrame frame = (PTFrame) getPTObject(requestedId);
                 if (log.isLoggable(Level.FINE)) log.fine("The main terminal send the buffer to frame " + requestedId);
-                frame.postMessage(buffer);
+                frame.postMessage(buffer.slice(buffer.getPosition(), nextBlockPosition));
+            } else if (ServerToClientModel.PING_SERVER.equals(binaryModel.getModel())) {
+                if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Ping received");
+                final PTInstruction requestData = new PTInstruction();
+                requestData.put(ClientToServerModel.PING_SERVER, binaryModel.getLongValue());
+                requestBuilder.send(requestData);
+                buffer.readBinaryModel(); // Read ServerToClientModel.END element
+            } else if (ServerToClientModel.HEARTBEAT.equals(binaryModel.getModel())) {
+                if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Heart beat received");
+                buffer.readBinaryModel(); // Read ServerToClientModel.END element
+            } else if (ServerToClientModel.CREATE_CONTEXT.equals(binaryModel.getModel())) {
+                PonySDK.get().setContextId(binaryModel.getIntValue());
+                buffer.readBinaryModel(); // Read ServerToClientModel.END element
             } else {
                 update(binaryModel, buffer);
             }
@@ -196,7 +178,7 @@ public class UIBuilder implements HttpResponseReceivedEvent.Handler, HttpRequest
             final int requestedId = binaryModel.getIntValue();
             final PTFrame frame = (PTFrame) getPTObject(requestedId);
             if (log.isLoggable(Level.FINE)) log.fine("The main terminal send the buffer to frame " + requestedId);
-            frame.postMessage(buffer);
+            frame.postMessage(buffer.slice(buffer.getPosition(), buffer.shiftNextBlock(true)));
         } else {
             update(binaryModel, buffer);
         }
@@ -208,7 +190,6 @@ public class UIBuilder implements HttpResponseReceivedEvent.Handler, HttpRequest
 
     private void update(final BinaryModel binaryModel, final ReaderBuffer buffer) {
         final ServerToClientModel model = binaryModel.getModel();
-        if (model == null) return;
 
         final int modelOrdinal = model.ordinal();
         if (ServerToClientModel.TYPE_CREATE.ordinal() == modelOrdinal) {
@@ -231,7 +212,7 @@ public class UIBuilder implements HttpResponseReceivedEvent.Handler, HttpRequest
         } else if (ServerToClientModel.TYPE_CLOSE.ordinal() == modelOrdinal) {
             processClose();
         } else {
-            log.log(Level.WARNING, "Unknown instruction type : " + binaryModel);
+            log.log(Level.WARNING, "Unknown instruction type : " + binaryModel + " ; " + buffer.toString());
             buffer.shiftNextBlock(false);
         }
 
@@ -294,7 +275,10 @@ public class UIBuilder implements HttpResponseReceivedEvent.Handler, HttpRequest
             else log.warning("Cannot remove PTObject " + ptObject + " on a garbaged object #" + parentId);
         } else {
             log.warning("Remove a null PTObject #" + objectId + ", so we will consume all the buffer of this object");
-            buffer.shiftNextBlock(false);
+            final int shiftNextBlock = buffer.shiftNextBlock(false);
+            if (shiftNextBlock == -1) {
+                log.severe("Shift");
+            }
         }
     }
 
@@ -363,10 +347,9 @@ public class UIBuilder implements HttpResponseReceivedEvent.Handler, HttpRequest
     }
 
     public void sendDataToServer(final JSONObject instruction) {
+        final PTInstruction requestData = new PTInstruction();
         final JSONArray jsonArray = new JSONArray();
         jsonArray.set(0, instruction);
-
-        final PTInstruction requestData = new PTInstruction();
         requestData.put(ClientToServerModel.APPLICATION_INSTRUCTIONS, jsonArray);
 
         if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Data to send " + requestData.toString());
@@ -386,56 +369,6 @@ public class UIBuilder implements HttpResponseReceivedEvent.Handler, HttpRequest
         requestBuilder.send(requestData);
     }
 
-    private Timer scheduleLoadingMessageBox() {
-        if (loadingMessageBox == null) return null;
-
-        final Timer timer = new Timer() {
-
-            @Override
-            public void run() {
-                loadingMessageBox.getElement().getStyle().setVisibility(Visibility.VISIBLE);
-            }
-        };
-        timer.schedule(500);
-        return timer;
-    }
-
-    private void showCommunicationErrorMessage(final StatusCodeException caught) {
-        final VerticalPanel content = new VerticalPanel();
-        final HorizontalPanel actionPanel = new HorizontalPanel();
-        actionPanel.setSize("100%", "100%");
-
-        if (caught.getStatusCode() == ServerException.INVALID_SESSION) {
-            content.add(new HTML(
-                "Server connection failed <br/>Code : " + caught.getStatusCode() + "<br/>" + "Cause : " + caught.getMessage()));
-
-            final Anchor reloadAnchor = new Anchor("reload");
-            reloadAnchor.addClickHandler(event -> {
-                History.newItem("");
-                Window.Location.reload();
-            });
-
-            actionPanel.add(reloadAnchor);
-            actionPanel.setCellHorizontalAlignment(reloadAnchor, HasHorizontalAlignment.ALIGN_CENTER);
-            actionPanel.setCellVerticalAlignment(reloadAnchor, HasVerticalAlignment.ALIGN_MIDDLE);
-        } else {
-            content.add(new HTML(
-                "An unexpected error occured <br/>Code : " + caught.getStatusCode() + "<br/>" + "Cause : " + caught.getMessage()));
-        }
-
-        final Anchor closeAnchor = new Anchor("close");
-        closeAnchor.addClickHandler(event -> communicationErrorMessagePanel.hide());
-        actionPanel.add(closeAnchor);
-        actionPanel.setCellHorizontalAlignment(closeAnchor, HasHorizontalAlignment.ALIGN_CENTER);
-        actionPanel.setCellVerticalAlignment(closeAnchor, HasVerticalAlignment.ALIGN_MIDDLE);
-
-        content.add(actionPanel);
-
-        communicationErrorMessagePanel.setWidget(content);
-        communicationErrorMessagePanel.setPopupPositionAndShow((offsetWidth, offsetHeight) -> communicationErrorMessagePanel
-            .setPopupPosition((Window.getClientWidth() - offsetWidth) / 2, (Window.getClientHeight() - offsetHeight) / 2));
-    }
-
     public PTObject getPTObject(final Integer id) {
         final PTObject ptObject = objectByID.get(id);
         if (ptObject == null) log.warning("PTObject #" + id + " not found");
@@ -453,36 +386,44 @@ public class UIBuilder implements HttpResponseReceivedEvent.Handler, HttpRequest
         widgetIDByObjectID.put(ID, uiObject);
     }
 
-    @Override
-    public void onHttpRequestSend(final HttpRequestSendEvent event) {
-        numberOfrequestInProgress++;
-        if (timer == null) timer = scheduleLoadingMessageBox();
-    }
-
-    @Override
-    public void onHttpResponseReceivedEvent(final HttpResponseReceivedEvent event) {
-        if (numberOfrequestInProgress > 0) numberOfrequestInProgress--;
-        hideLoadingMessageBox();
-    }
-
-    private void hideLoadingMessageBox() {
-        if (loadingMessageBox != null && numberOfrequestInProgress < 1 && timer != null) {
-            timer.cancel();
-            timer = null;
-            loadingMessageBox.getElement().getStyle().setVisibility(Visibility.HIDDEN);
-        }
-    }
-
-    void registerCommunicationError(final CommunicationErrorHandler communicationErrorClosure) {
-        this.communicationErrorHandler = communicationErrorClosure;
-    }
-
     void registerJavascriptAddOnFactory(final String signature, final JavascriptAddOnFactory javascriptAddOnFactory) {
         this.javascriptAddOnFactories.put(signature, javascriptAddOnFactory);
     }
 
     public Map<String, JavascriptAddOnFactory> getJavascriptAddOnFactory() {
         return javascriptAddOnFactories;
+    }
+
+    @Override
+    public void onHttpRequestSend(final HttpRequestSendEvent event) {
+        numberOfrequestInProgress++;
+        if (timer == null) timer = scheduleLoadingMessageBox();
+    }
+
+    private Timer scheduleLoadingMessageBox() {
+        if (loadingMessageBox != null) {
+            final Timer timer = new Timer() {
+
+                @Override
+                public void run() {
+                    loadingMessageBox.getElement().getStyle().setVisibility(Visibility.VISIBLE);
+                }
+            };
+            timer.schedule(500);
+            return timer;
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public void onHttpResponseReceivedEvent(final HttpResponseReceivedEvent event) {
+        if (numberOfrequestInProgress > 0) numberOfrequestInProgress--;
+        if (loadingMessageBox != null && numberOfrequestInProgress < 1 && timer != null) {
+            timer.cancel();
+            timer = null;
+            loadingMessageBox.getElement().getStyle().setVisibility(Visibility.HIDDEN);
+        }
     }
 
     void setReadyWindow(final int windowID) {
@@ -495,6 +436,76 @@ public class UIBuilder implements HttpResponseReceivedEvent.Handler, HttpRequest
         final PTFrame frame = (PTFrame) getPTObject(frameID);
         if (frame != null) frame.setReady();
         else log.warning("Frame " + frame + " doesn't exist");
+    }
+
+    public void onCommunicationError(final Throwable exception) {
+        rootEventBus.fireEvent(new CommunicationErrorEvent(exception));
+
+        if (pendingClose) return;
+
+        if (loadingMessageBox == null) {
+            // First load failed
+            if (exception instanceof StatusCodeException) {
+                final StatusCodeException codeException = (StatusCodeException) exception;
+                if (codeException.getStatusCode() == 0) return;
+            }
+            log.log(Level.SEVERE, "Cannot initialize the application : " + exception.getMessage() + "\n" + exception
+                    + "\nPlease reload your application",
+                exception);
+        }
+
+        if (exception instanceof StatusCodeException) {
+            final StatusCodeException statusCodeException = (StatusCodeException) exception;
+            final int statusCode = statusCodeException.getStatusCode();
+            if (communicationErrorHandler != null) {
+                communicationErrorHandler.onCommunicationError(statusCode, statusCodeException.getMessage());
+            } else {
+                final VerticalPanel content = new VerticalPanel();
+                final HorizontalPanel actionPanel = new HorizontalPanel();
+                actionPanel.setSize("100%", "100%");
+
+                if (statusCode == ServerException.INVALID_SESSION) {
+                    content.add(new HTML("Server connection failed <br/>Code : " + statusCode + "<br/>" + "Cause : "
+                            + statusCodeException.getMessage()));
+
+                    final Anchor reloadAnchor = new Anchor("reload");
+                    reloadAnchor.addClickHandler(event -> {
+                        History.newItem("");
+                        Window.Location.reload();
+                    });
+
+                    actionPanel.add(reloadAnchor);
+                    actionPanel.setCellHorizontalAlignment(reloadAnchor, HasHorizontalAlignment.ALIGN_CENTER);
+                    actionPanel.setCellVerticalAlignment(reloadAnchor, HasVerticalAlignment.ALIGN_MIDDLE);
+                } else {
+                    content.add(new HTML("An unexpected error occured <br/>Code : " + statusCode + "<br/>" + "Cause : "
+                            + statusCodeException.getMessage()));
+                }
+
+                final Anchor closeAnchor = new Anchor("close");
+                closeAnchor.addClickHandler(event -> communicationErrorMessagePanel.hide());
+                actionPanel.add(closeAnchor);
+                actionPanel.setCellHorizontalAlignment(closeAnchor, HasHorizontalAlignment.ALIGN_CENTER);
+                actionPanel.setCellVerticalAlignment(closeAnchor, HasVerticalAlignment.ALIGN_MIDDLE);
+
+                content.add(actionPanel);
+
+                communicationErrorMessagePanel.setWidget(content);
+                communicationErrorMessagePanel.setPopupPositionAndShow((offsetWidth, offsetHeight) -> communicationErrorMessagePanel
+                    .setPopupPosition((Window.getClientWidth() - offsetWidth) / 2, (Window.getClientHeight() - offsetHeight) / 2));
+            }
+        } else {
+            if (communicationErrorHandler != null) {
+                communicationErrorHandler.onCommunicationError(500, exception.getMessage());
+            } else {
+                log.log(Level.SEVERE, "An unexcepted error occured: " + exception.getMessage() + ". Please check the server logs.",
+                    exception);
+            }
+        }
+    }
+
+    void registerCommunicationError(final CommunicationErrorHandler communicationErrorClosure) {
+        this.communicationErrorHandler = communicationErrorClosure;
     }
 
 }
