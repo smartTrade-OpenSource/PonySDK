@@ -23,16 +23,23 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+
+import javax.json.JsonObject;
+
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.ui.basic.event.HasPChangeHandlers;
 import com.ponysdk.core.ui.basic.event.PChangeEvent;
 import com.ponysdk.core.ui.basic.event.PChangeHandler;
-
-import javax.json.JsonObject;
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * A widget that presents a list of choices to the user, either as a list box or
@@ -332,6 +339,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     }
 
     public void setVisibleItemCount(final int visibleItemCount) {
+        if (Objects.equals(this.visibleItemCount, visibleItemCount)) return;
         this.visibleItemCount = visibleItemCount;
         saveUpdate(writer -> writer.write(ServerToClientModel.VISIBLE_ITEM_COUNT, visibleItemCount));
     }
@@ -341,6 +349,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     }
 
     public void setMultipleSelect(final boolean isMultipleSelect) {
+        if (Objects.equals(this.isMultipleSelect, isMultipleSelect)) return;
         this.isMultipleSelect = isMultipleSelect;
         saveUpdate(writer -> writer.write(ServerToClientModel.MULTISELECT, isMultipleSelect));
     }

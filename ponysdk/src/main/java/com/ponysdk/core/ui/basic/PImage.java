@@ -27,6 +27,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -123,6 +124,7 @@ public class PImage extends PWidget implements HasPClickHandlers {
     }
 
     public void setUrl(final String url) {
+        if (Objects.equals(this.url, url)) return;
         this.url = url;
         saveUpdate(writer -> writer.write(ServerToClientModel.IMAGE_URL, url));
     }

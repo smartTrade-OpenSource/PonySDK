@@ -23,11 +23,20 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeMap;
+
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
-
-import java.util.*;
-import java.util.Map.Entry;
 
 /**
  * PHTMLTable contains the common table algorithms for {@link PGrid} and
@@ -90,6 +99,7 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
     }
 
     public void setCellPadding(final int padding) {
+        if (Objects.equals(this.cellPadding, padding)) return;
         cellPadding = padding;
         saveUpdate(writer -> writer.write(ServerToClientModel.CELL_PADDING, padding));
     }
@@ -99,6 +109,7 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
     }
 
     public void setCellSpacing(final int spacing) {
+        if (Objects.equals(this.cellSpacing, spacing)) return;
         cellSpacing = spacing;
         saveUpdate(writer -> writer.write(ServerToClientModel.CELL_SPACING, spacing));
     }
@@ -108,6 +119,7 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
     }
 
     public void setBorderWidth(final int width) {
+        if (Objects.equals(this.borderWidth, width)) return;
         this.borderWidth = width;
         saveUpdate(writer -> writer.write(ServerToClientModel.BORDER_WIDTH, width));
     }
@@ -340,9 +352,10 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
             if (styles == null) {
                 styles = new HashSet<>();
                 styleNames.put(row, styles);
+            } else {
+                styles.clear();
             }
 
-            styles.clear();
             styles.add(styleName);
 
             saveUpdate((writer) -> {

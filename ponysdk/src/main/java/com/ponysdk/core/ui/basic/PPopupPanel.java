@@ -25,6 +25,7 @@ package com.ponysdk.core.ui.basic;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import javax.json.JsonArray;
 import javax.json.JsonNumber;
@@ -149,6 +150,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
     @Override
     public void setAnimationEnabled(final boolean animationEnabled) {
+        if (Objects.equals(this.animationEnabled, animationEnabled)) return;
         this.animationEnabled = animationEnabled;
         saveUpdate(writer -> writer.write(ServerToClientModel.ANIMATION, animationEnabled));
     }

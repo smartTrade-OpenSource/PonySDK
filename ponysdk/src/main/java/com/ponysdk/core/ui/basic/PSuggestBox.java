@@ -26,6 +26,7 @@ package com.ponysdk.core.ui.basic;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 import javax.json.JsonObject;
 
@@ -160,6 +161,7 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
     }
 
     public void setLimit(final int limit) {
+        if (Objects.equals(this.limit, limit)) return;
         this.limit = limit;
         saveUpdate(writer -> writer.write(ServerToClientModel.LIMIT, limit));
     }

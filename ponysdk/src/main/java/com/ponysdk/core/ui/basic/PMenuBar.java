@@ -25,6 +25,7 @@ package com.ponysdk.core.ui.basic;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
@@ -188,8 +189,8 @@ public class PMenuBar extends PWidget implements HasPAnimation {
     }
 
     public void clearItems() {
-        saveUpdate(writer -> writer.write(ServerToClientModel.CLEAR));
         items.clear();
+        saveUpdate(writer -> writer.write(ServerToClientModel.CLEAR));
     }
 
     public boolean isVertical() {
@@ -203,6 +204,7 @@ public class PMenuBar extends PWidget implements HasPAnimation {
 
     @Override
     public void setAnimationEnabled(final boolean animationEnabled) {
+        if (Objects.equals(this.animationEnabled, animationEnabled)) return;
         this.animationEnabled = animationEnabled;
         saveUpdate(writer -> writer.write(ServerToClientModel.ANIMATION, animationEnabled));
     }

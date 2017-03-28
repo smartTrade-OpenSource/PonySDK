@@ -105,6 +105,7 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
 
     @Override
     public void setText(final String text) {
+        if (Objects.equals(this.text, text)) return;
         this.text = text;
         saveUpdate(writer -> writer.write(ServerToClientModel.TEXT, text));
     }
@@ -154,6 +155,7 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
     }
 
     public void setEnabled(final boolean enabled) {
+        if (Objects.equals(this.enabled, enabled)) return;
         this.enabled = enabled;
         saveUpdate(writer -> writer.write(ServerToClientModel.ENABLED, enabled));
     }

@@ -23,6 +23,8 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.Objects;
+
 import com.ponysdk.core.model.ServerToClientModel;
 
 /**
@@ -67,6 +69,7 @@ public class PTextBox extends PTextBoxBase {
      *            the maximum length, in characters
      */
     public void setMaxLength(final int length) {
+        if (Objects.equals(this.maxLength, length)) return;
         this.maxLength = length;
         saveUpdate(writer -> writer.write(ServerToClientModel.MAX_LENGTH, length));
     }
@@ -87,6 +90,7 @@ public class PTextBox extends PTextBoxBase {
      *            the number of visible characters
      */
     public void setVisibleLength(final int length) {
+        if (Objects.equals(this.visibleLength, length)) return;
         this.visibleLength = length;
         saveUpdate(writer -> writer.write(ServerToClientModel.VISIBLE_LENGTH, visibleLength));
     }
