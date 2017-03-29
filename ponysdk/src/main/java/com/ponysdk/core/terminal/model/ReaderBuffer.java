@@ -85,25 +85,26 @@ public class ReaderBuffer {
             final ServerToClientModel key = SERVER_TO_CLIENT_MODELS[getShort()];
             int size = ValueTypeModel.SHORT.getSize();
 
-            switch (key.getTypeModel()) {
+            final ValueTypeModel typeModel = key.getTypeModel();
+            switch (typeModel) {
                 case NULL:
-                    size += key.getTypeModel().getSize();
+                    size += typeModel.getSize();
                     currentBinaryModel.init(key, size);
                     break;
                 case BOOLEAN:
-                    size += key.getTypeModel().getSize();
+                    size += typeModel.getSize();
                     currentBinaryModel.init(key, getBoolean(), size);
                     break;
                 case BYTE:
-                    size += key.getTypeModel().getSize();
+                    size += typeModel.getSize();
                     currentBinaryModel.init(key, getByte(), size);
                     break;
                 case SHORT:
-                    size += key.getTypeModel().getSize();
+                    size += typeModel.getSize();
                     currentBinaryModel.init(key, getShort(), size);
                     break;
                 case INTEGER:
-                    size += key.getTypeModel().getSize();
+                    size += typeModel.getSize();
                     currentBinaryModel.init(key, getInt(), size);
                     break;
                 case LONG:
@@ -135,7 +136,7 @@ public class ReaderBuffer {
                     currentBinaryModel.init(key, getJson(jsonSize), size);
                     break;
                 default:
-                    throw new IllegalArgumentException("Unknown type model : " + key.getTypeModel());
+                    throw new IllegalArgumentException("Unknown type model : " + typeModel);
             }
         } else {
             currentBinaryModel.init(null, 0);
@@ -217,7 +218,7 @@ public class ReaderBuffer {
 
     /**
      * Go directly to the next block
-     * 
+     *
      * @param dryRun
      *            If true, not really shift
      * @return Start position of the next block
@@ -247,14 +248,15 @@ public class ReaderBuffer {
     private final ServerToClientModel shiftBinaryModel() {
         final ServerToClientModel key = SERVER_TO_CLIENT_MODELS[getShort()];
 
-        switch (key.getTypeModel()) {
+        final ValueTypeModel typeModel = key.getTypeModel();
+        switch (typeModel) {
             case NULL:
                 break;
             case BOOLEAN:
             case BYTE:
             case SHORT:
             case INTEGER:
-                position += key.getTypeModel().getSize();
+                position += typeModel.getSize();
                 break;
             case LONG:
             case DOUBLE:
@@ -264,7 +266,7 @@ public class ReaderBuffer {
                 position += jsonSize;
                 break;
             default:
-                throw new IllegalArgumentException("Unknown type model : " + key.getTypeModel());
+                throw new IllegalArgumentException("Unknown type model : " + typeModel);
         }
 
         return key;
