@@ -487,4 +487,8 @@ public class UIContext {
         return "UIContext [" + application + ", uiContextID=" + ID + ", living=" + living + "]";
     }
 
+    public void enableCommunicationChecker(final boolean enable) {
+        communicationSanityChecker.enableCommunicationChecker(enable);
+    }
+
 }

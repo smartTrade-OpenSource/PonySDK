@@ -23,38 +23,40 @@
 
 package com.ponysdk.core.server.servlet;
 
-import com.ponysdk.core.server.application.ApplicationManagerOption;
-import com.ponysdk.core.server.application.UIContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.concurrent.RunnableScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ponysdk.core.server.application.ApplicationManagerOption;
+import com.ponysdk.core.server.application.UIContext;
+
 public class CommunicationSanityChecker {
 
     protected static final Logger log = LoggerFactory.getLogger(CommunicationSanityChecker.class);
 
     private static final int CHECK_PERIOD = 1000;
-    private static final int MAX_THREAD_CHECKER = Integer
-            .parseInt(System.getProperty("communication.sanity.checker.thread.count",
-                    String.valueOf(Runtime.getRuntime().availableProcessors())));
+    private static final int MAX_THREAD_CHECKER = Integer.parseInt(
+        System.getProperty("communication.sanity.checker.thread.count", String.valueOf(Runtime.getRuntime().availableProcessors())));
     protected static final ScheduledThreadPoolExecutor sanityCheckerTimer = new ScheduledThreadPoolExecutor(MAX_THREAD_CHECKER,
-            new ThreadFactory() {
+        new ThreadFactory() {
 
-                private int i = 0;
+            private int i = 0;
 
-                @Override
-                public Thread newThread(final Runnable r) {
-                    final Thread t = new Thread(r);
-                    t.setName(CommunicationSanityChecker.class.getName() + "-" + i++);
-                    t.setDaemon(true);
-                    return t;
-                }
-            });
+            @Override
+            public Thread newThread(final Runnable r) {
+                final Thread t = new Thread(r);
+                t.setName(CommunicationSanityChecker.class.getName() + "-" + i++);
+                t.setDaemon(true);
+                return t;
+            }
+        });
+    private static final long HEARTBEAT_PERIOD_BLOCKED = TimeUnit.MINUTES.toMillis(10);
+
     protected final AtomicBoolean started = new AtomicBoolean(false);
     private final UIContext uiContext;
     private long heartBeatPeriod;
@@ -63,10 +65,13 @@ public class CommunicationSanityChecker {
     private CommunicationState currentState;
     private long suspectTime = -1;
 
+    private long oldHeartBeatPeriod;
+
     public CommunicationSanityChecker(final UIContext uiContext) {
         this.uiContext = uiContext;
         final ApplicationManagerOption options = uiContext.getApplication().getOptions();
         setHeartBeatPeriod(options.getHeartBeatPeriod(), options.getHeartBeatPeriodTimeUnit());
+        enableCommunicationChecker(!uiContext.getApplication().getOptions().isDebugMode());
     }
 
     private boolean isStarted() {
@@ -83,7 +88,7 @@ public class CommunicationSanityChecker {
                 } catch (final Throwable e) {
                     log.error("[{}] Error while checking communication state", uiContext, e);
                 }
-            } , 0, CHECK_PERIOD, TimeUnit.MILLISECONDS);
+            }, 0, CHECK_PERIOD, TimeUnit.MILLISECONDS);
             started.set(true);
             log.info("Started. HeartbeatPeriod: {} ms, {}", uiContext, heartBeatPeriod);
         }
@@ -107,6 +112,7 @@ public class CommunicationSanityChecker {
 
     public void setHeartBeatPeriod(final long heartbeat, final TimeUnit timeUnit) {
         heartBeatPeriod = TimeUnit.MILLISECONDS.convert(heartbeat, timeUnit);
+        oldHeartBeatPeriod = heartBeatPeriod;
         if (heartBeatPeriod <= 0) throw new IllegalArgumentException("'HeartBeatPeriod' parameter must be gretter than 0");
     }
 
@@ -123,8 +129,8 @@ public class CommunicationSanityChecker {
                     suspectTime = now;
                     currentState = CommunicationState.SUSPECT;
                     if (log.isDebugEnabled()) log.debug(
-                            "[{}] No message have been received, communication suspected to be non functional, sending heartbeat...",
-                            uiContext);
+                        "[{}] No message have been received, communication suspected to be non functional, sending heartbeat...",
+                        uiContext);
                     //uiContext.sendHeartBeat();
                 }
                 break;
@@ -133,10 +139,9 @@ public class CommunicationSanityChecker {
                     if (now - suspectTime >= heartBeatPeriod) {
                         // No message have been received since we suspected the
                         // communication to be non functional
-                        if (log.isInfoEnabled())
-                            log.info(
-                                    "[{}] No message have been received since we suspected the communication to be non functional, context will be destroyed",
-                                    uiContext);
+                        if (log.isInfoEnabled()) log.info(
+                            "[{}] No message have been received since we suspected the communication to be non functional, context will be destroyed",
+                            uiContext);
                         currentState = CommunicationState.KO;
                         stop();
                         uiContext.destroy();
@@ -159,6 +164,19 @@ public class CommunicationSanityChecker {
         OK,
         SUSPECT,
         KO
+    }
+
+    /**
+     * Don't really desactivate the communication checker, only set a long period
+     * ({@link #HEARTBEAT_PERIOD_BLOCKED}) for the heartbeat
+     */
+    public void enableCommunicationChecker(final boolean enabled) {
+        if (enabled) {
+            heartBeatPeriod = oldHeartBeatPeriod;
+        } else {
+            oldHeartBeatPeriod = heartBeatPeriod;
+            heartBeatPeriod = HEARTBEAT_PERIOD_BLOCKED;
+        }
     }
 
 }
