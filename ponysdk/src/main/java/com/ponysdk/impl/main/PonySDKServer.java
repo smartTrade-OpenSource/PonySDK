@@ -192,6 +192,10 @@ public class PonySDKServer {
         this.applicationLoader = applicationLoader;
     }
 
+    public ApplicationManagerOption getApplicationOption() {
+        return applicationLoader.getApplicationManagerOption();
+    }
+
     public void setHost(final String host) {
         this.host = host;
     }
