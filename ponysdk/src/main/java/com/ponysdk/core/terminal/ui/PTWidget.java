@@ -69,7 +69,7 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
 
     private static final String HUNDRED_PERCENT = "100%";
 
-    private final static Logger log = Logger.getLogger(PTWidget.class.getName());
+    private static final Logger log = Logger.getLogger(PTWidget.class.getName());
 
     private Set<Integer> preventedEvents;
     private Set<Integer> stoppedEvents;

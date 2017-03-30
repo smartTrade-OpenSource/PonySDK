@@ -37,7 +37,7 @@ import com.ponysdk.core.server.application.UIContext;
 
 public class CommunicationSanityChecker {
 
-    protected static final Logger log = LoggerFactory.getLogger(CommunicationSanityChecker.class);
+    private static final Logger log = LoggerFactory.getLogger(CommunicationSanityChecker.class);
 
     private static final int CHECK_PERIOD = 1000;
     private static final int MAX_THREAD_CHECKER = Integer.parseInt(

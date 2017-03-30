@@ -42,7 +42,7 @@ import com.ponysdk.core.writer.ModelWriter;
 
 public class PObjectWeakHashMap implements Map<Integer, PObject> {
 
-    private final Logger log = LoggerFactory.getLogger(PObjectWeakHashMap.class);
+    private static final Logger log = LoggerFactory.getLogger(PObjectWeakHashMap.class);
 
     private final ReferenceQueue<PObject> queue = new ReferenceQueue<>();
     private final Map<Integer, WeakReference<PObject>> referenceByObjectID = new ConcurrentHashMap<>();

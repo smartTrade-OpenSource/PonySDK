@@ -23,6 +23,9 @@
 
 package com.ponysdk.core.terminal.ui;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.google.gwt.user.client.Timer;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -30,12 +33,9 @@ import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 public class PTScript extends AbstractPTObject {
 
-    private final static Logger log = Logger.getLogger(PTScript.class.getName());
+    private static final Logger log = Logger.getLogger(PTScript.class.getName());
 
     public static native void eval(String script) /*-{
                                                      $wnd.eval(script);

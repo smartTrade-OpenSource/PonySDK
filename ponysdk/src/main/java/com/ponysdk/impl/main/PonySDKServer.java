@@ -55,7 +55,7 @@ public class PonySDKServer {
     public static final String MAPPING_WS = "/ws/*";
     public static final String MAPPING_STREAM = "/stream";
 
-    protected static final Logger log = LoggerFactory.getLogger(Main.class);
+    private static final Logger log = LoggerFactory.getLogger(PonySDKServer.class);
 
     protected final Server server;
 

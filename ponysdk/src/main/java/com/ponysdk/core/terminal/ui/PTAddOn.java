@@ -39,7 +39,7 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public class PTAddOn extends AbstractPTObject {
 
-    private final static Logger log = Logger.getLogger(PTAddOn.class.getName());
+    private static final Logger log = Logger.getLogger(PTAddOn.class.getName());
 
     protected boolean destroyed;
 

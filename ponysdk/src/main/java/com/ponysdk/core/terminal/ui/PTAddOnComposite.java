@@ -23,6 +23,12 @@
 
 package com.ponysdk.core.terminal.ui;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.json.client.JSONNumber;
@@ -35,15 +41,9 @@ import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 public class PTAddOnComposite extends PTAddOn {
 
-    private final static Logger log = Logger.getLogger(PTAddOnComposite.class.getName());
+    private static final Logger log = Logger.getLogger(PTAddOnComposite.class.getName());
 
     private final List<JSONObject> pendingUpdates = new ArrayList<>();
 

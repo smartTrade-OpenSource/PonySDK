@@ -31,7 +31,7 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 abstract class PTPanel<T extends Panel> extends PTWidget<T> {
 
-    private final static Logger log = Logger.getLogger(PTPanel.class.getName());
+    private static final Logger log = Logger.getLogger(PTPanel.class.getName());
 
     @Override
     public void add(final ReaderBuffer buffer, final PTObject ptObject) {
