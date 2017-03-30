@@ -23,11 +23,10 @@
 
 package com.ponysdk.core.server.application;
 
-import com.ponysdk.core.ui.main.EntryPoint;
-
-import java.util.Collections;
-import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
+import com.ponysdk.core.ui.main.EntryPoint;
 
 public class ApplicationManagerOption {
 
@@ -50,12 +49,9 @@ public class ApplicationManagerOption {
 
     private String communicationErrorFunction;
 
-    private List<String> javascript = Collections.emptyList();
-    private List<String> style = Collections.emptyList();
-    private List<String> meta = Collections.emptyList();
-    private List<String> customJavascript = Collections.emptyList();
-    private List<String> customStyle = Collections.emptyList();
-    private List<String> customMeta = Collections.emptyList();
+    private Set<String> javascript;
+    private Set<String> style;
+    private Set<String> meta;
 
     private Class<? extends EntryPoint> entryPointClass;
 
@@ -126,52 +122,28 @@ public class ApplicationManagerOption {
         this.sessionTimeout = sessionTimeout;
     }
 
-    public List<String> getJavascript() {
+    public Set<String> getJavascript() {
         return javascript;
     }
 
-    public void setJavascript(final List<String> javascript) {
+    public void setJavascript(final Set<String> javascript) {
         this.javascript = javascript;
     }
 
-    public List<String> getCustomJavascript() {
-        return customJavascript;
-    }
-
-    public void setCustomJavascript(final List<String> customJavascript) {
-        this.customJavascript = customJavascript;
-    }
-
-    public List<String> getStyle() {
+    public Set<String> getStyle() {
         return style;
     }
 
-    public void setStyle(final List<String> style) {
+    public void setStyle(final Set<String> style) {
         this.style = style;
     }
 
-    public List<String> getCustomStyle() {
-        return customStyle;
-    }
-
-    public void setCustomStyle(final List<String> customStyle) {
-        this.customStyle = customStyle;
-    }
-
-    public List<String> getMeta() {
+    public Set<String> getMeta() {
         return meta;
     }
 
-    public void setMeta(final List<String> meta) {
+    public void setMeta(final Set<String> meta) {
         this.meta = meta;
-    }
-
-    public List<String> getCustomMeta() {
-        return customMeta;
-    }
-
-    public void setCustomMeta(final List<String> customMeta) {
-        this.customMeta = customMeta;
     }
 
     public String getCommunicationErrorFunction() {

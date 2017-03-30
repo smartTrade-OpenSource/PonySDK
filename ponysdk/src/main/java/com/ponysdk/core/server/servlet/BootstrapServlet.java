@@ -34,10 +34,7 @@ import java.nio.channels.WritableByteChannel;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.ServletException;
@@ -52,20 +49,11 @@ import com.ponysdk.core.server.application.ApplicationManagerOption;
 
 public class BootstrapServlet extends HttpServlet {
 
-    protected static final Logger log = LoggerFactory.getLogger(BootstrapServlet.class);
-
-    private static final long serialVersionUID = 6993633431616272739L;
+    private static final Logger log = LoggerFactory.getLogger(BootstrapServlet.class);
 
     private final MimetypesFileTypeMap fileTypeMap = new MimetypesFileTypeMap();
 
-    protected final List<String> meta = new ArrayList<>();
-    protected final List<String> stylesheets = new ArrayList<>();
-    protected final List<String> javascripts = new ArrayList<>();
-    protected final Map<String, String> addons = new LinkedHashMap<>();
-
-    protected String communicationErrorFunction;
-
-    protected ApplicationManagerOption application;
+    private ApplicationManagerOption application;
 
     private Path indexPath;
 
@@ -81,14 +69,6 @@ public class BootstrapServlet extends HttpServlet {
     @Override
     public void init() throws ServletException {
         super.init();
-
-        addStylesheets(application.getStyle());
-        addJavascripts(application.getJavascript());
-        addStylesheets(application.getCustomStyle());
-        addJavascripts(application.getCustomJavascript());
-        // addMetas(application.getMeta());
-        // addMetas(application.getCustomMeta());
-
         initIndexFile();
     }
 
@@ -126,7 +106,8 @@ public class BootstrapServlet extends HttpServlet {
         return request.getRequestURI().replaceFirst(contextPath, "");
     }
 
-    protected void handleRequest(final HttpServletRequest request, final HttpServletResponse response, final String path) throws IOException {
+    protected void handleRequest(final HttpServletRequest request, final HttpServletResponse response, final String path)
+            throws IOException {
         // Force session creation if there is no session
         request.getSession();
 
@@ -181,7 +162,6 @@ public class BootstrapServlet extends HttpServlet {
             response.setContentLength(fileSize);
             Files.copy(file.toPath(), response.getOutputStream());
         }
-
     }
 
     private void initIndexFile() {
@@ -209,36 +189,43 @@ public class BootstrapServlet extends HttpServlet {
         writer.newLine();
         writer.append("<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">");
         writer.newLine();
-        for (final String m : meta) {
-            writer.append("<meta ").append(m).append(">");
-            writer.newLine();
-        }
 
+        final Set<String> metas = application.getMeta();
+        if (metas != null) {
+            for (final String m : metas) {
+                writer.append("<meta ").append(m).append(">");
+                writer.newLine();
+            }
+        }
         addToMeta(writer);
         writer.newLine();
 
         String ponyTerminalJsFileName;
-        if (application.isDebugMode())
-            ponyTerminalJsFileName = "ponyterminaldebug/ponyterminaldebug.nocache.js";
-        else
-            ponyTerminalJsFileName = "ponyterminal/ponyterminal.nocache.js";
+        if (application.isDebugMode()) ponyTerminalJsFileName = "ponyterminaldebug/ponyterminaldebug.nocache.js";
+        else ponyTerminalJsFileName = "ponyterminal/ponyterminal.nocache.js";
         writer.append("<script type=\"text/javascript\" src=\"").append(ponyTerminalJsFileName).append("\"></script>");
         writer.newLine();
         writer.append("<script type=\"text/javascript\" src=\"script/ponysdk.js\"></script>");
         writer.newLine();
 
-        for (final String style : stylesheets) {
-            final String contentType = fileTypeMap.getContentType(style);
-            if (!contentType.equals("text/css"))
-                writer.append("<link rel=\"stylesheet/less\" type=\"").append(contentType).append("\" href=\"").append(style).append("\">");
-            else
-                writer.append("<link rel=\"stylesheet\" type=\"").append(contentType).append("\" href=\"").append(style).append("\">");
-            writer.newLine();
+        final Set<String> styles = application.getStyle();
+        if (styles != null) {
+            for (final String style : styles) {
+                final String contentType = fileTypeMap.getContentType(style);
+                if (!contentType.equals("text/css")) writer.append("<link rel=\"stylesheet/less\" type=\"").append(contentType)
+                    .append("\" href=\"").append(style).append("\">");
+                else writer.append("<link rel=\"stylesheet\" type=\"").append(contentType).append("\" href=\"").append(style)
+                    .append("\">");
+                writer.newLine();
+            }
         }
 
-        for (final String script : javascripts) {
-            writer.append("<script type=\"text/javascript\" src=\"").append(script).append("\"></script>");
-            writer.newLine();
+        final Set<String> scripts = application.getJavascript();
+        if (scripts != null) {
+            for (final String script : scripts) {
+                writer.append("<script type=\"text/javascript\" src=\"").append(script).append("\"></script>");
+                writer.newLine();
+            }
         }
 
         addToHeader(writer);
@@ -262,7 +249,8 @@ public class BootstrapServlet extends HttpServlet {
     }
 
     protected void addHistoryIFrame(final BufferedWriter writer) throws IOException {
-        writer.append("<iframe src=\"javascript:''\" id=\"__gwt_historyFrame\" tabIndex='-1' style=\"position:absolute;width:0;height:0;border:0\"></iframe>");
+        writer.append(
+            "<iframe src=\"javascript:''\" id=\"__gwt_historyFrame\" tabIndex='-1' style=\"position:absolute;width:0;height:0;border:0\"></iframe>");
     }
 
     protected void addLoading(final BufferedWriter writer) throws IOException {
@@ -272,7 +260,8 @@ public class BootstrapServlet extends HttpServlet {
     protected void addNoScript(final BufferedWriter writer) throws IOException {
         writer.append("<noscript>");
         writer.newLine();
-        writer.append("<div style=\"width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px;\">");
+        writer.append(
+            "<div style=\"width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px;\">");
         writer.newLine();
         writer.append("Your web browser must have JavaScript enabled");
         writer.newLine();
@@ -290,34 +279,6 @@ public class BootstrapServlet extends HttpServlet {
     }
 
     protected void addToBody(final BufferedWriter writer) {
-    }
-
-    public void addStylesheets(final List<String> stylesheetPaths) {
-        stylesheets.addAll(stylesheetPaths);
-    }
-
-    public void addStylesheet(final String stylesheetPath) {
-        stylesheets.add(stylesheetPath);
-    }
-
-    public void addMetas(final List<String> m) {
-        meta.addAll(m);
-    }
-
-    public void addMeta(final String m) {
-        meta.add(m);
-    }
-
-    public void addJavascripts(final List<String> javascriptPaths) {
-        javascripts.addAll(javascriptPaths);
-    }
-
-    public void addJavascript(final String javascriptPath) {
-        javascripts.add(javascriptPath);
-    }
-
-    public void addAddOn(final String signature, final String factory) {
-        addons.put(signature, factory);
     }
 
     public void setApplication(final ApplicationManagerOption application) {
