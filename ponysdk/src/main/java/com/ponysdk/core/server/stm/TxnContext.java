@@ -23,9 +23,6 @@
 
 package com.ponysdk.core.server.stm;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.ponysdk.core.server.application.Application;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.servlet.WebSocket;
@@ -35,7 +32,6 @@ public class TxnContext implements TxnListener {
 
     private final WebSocket socket;
     private final ModelWriter modelWriter;
-    private final Map<String, Object> parameters = new HashMap<>();
 
     private boolean flushNow = false;
     private Application application;
@@ -80,16 +76,8 @@ public class TxnContext implements TxnListener {
         this.application = application;
     }
 
-    public void setAttribute(final String name, final Object value) {
-        parameters.put(name, value);
-    }
-
-    public Object getAttribute(final String name) {
-        return parameters.get(name);
-    }
-
     public String getHistoryToken() {
-        return null;
+        return this.socket.getHistoryToken();
     }
 
     public UIContext getUIContext() {

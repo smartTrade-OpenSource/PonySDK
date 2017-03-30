@@ -26,6 +26,7 @@ package com.ponysdk.core.server.servlet;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.util.List;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -177,6 +178,11 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     @Override
     public void onWebSocketBinary(final byte[] payload, final int offset, final int len) {
         // Can't receive binary data from terminal (GWT limitation)
+    }
+
+    public String getHistoryToken() {
+        final List<String> historyTokens = this.request.getParameterMap().get(ClientToServerModel.TYPE_HISTORY.toStringValue());
+        return !historyTokens.isEmpty() ? historyTokens.get(0) : null;
     }
 
     public ByteBuffer getBuffer() {

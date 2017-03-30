@@ -30,8 +30,6 @@ import java.util.logging.Logger;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Visibility;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.json.client.JSONArray;
@@ -66,12 +64,13 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 import com.ponysdk.core.terminal.request.RequestBuilder;
 import com.ponysdk.core.terminal.ui.PTCookies;
 import com.ponysdk.core.terminal.ui.PTFrame;
+import com.ponysdk.core.terminal.ui.PTHistory;
 import com.ponysdk.core.terminal.ui.PTObject;
 import com.ponysdk.core.terminal.ui.PTStreamResource;
 import com.ponysdk.core.terminal.ui.PTWindow;
 import com.ponysdk.core.terminal.ui.PTWindowManager;
 
-public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceivedEvent.Handler, HttpRequestSendEvent.Handler {
+public class UIBuilder implements HttpResponseReceivedEvent.Handler, HttpRequestSendEvent.Handler {
 
     private static final Logger log = Logger.getLogger(UIBuilder.class.getName());
 
@@ -98,7 +97,7 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
 
         this.requestBuilder = requestBuilder;
 
-        History.addValueChangeHandler(this);
+        PTHistory.addValueChangeHandler(this);
 
         rootEventBus.addHandler(HttpResponseReceivedEvent.TYPE, this);
         rootEventBus.addHandler(HttpRequestSendEvent.TYPE, this);
@@ -113,8 +112,9 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         RootPanel.get().add(loadingMessageBox);
 
         loadingMessageBox.setStyleName("pony-LoadingMessageBox");
-        loadingMessageBox.getElement().getStyle().setVisibility(Visibility.HIDDEN);
-        loadingMessageBox.getElement().setInnerText("Loading ...");
+        com.google.gwt.user.client.Element element = loadingMessageBox.getElement();
+        element.getStyle().setVisibility(Visibility.HIDDEN);
+        element.setInnerText("Loading ...");
 
         final PTCookies cookies = new PTCookies(this);
         objectByID.put(0, cookies);
@@ -434,15 +434,6 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         communicationErrorMessagePanel.setWidget(content);
         communicationErrorMessagePanel.setPopupPositionAndShow((offsetWidth, offsetHeight) -> communicationErrorMessagePanel
             .setPopupPosition((Window.getClientWidth() - offsetWidth) / 2, (Window.getClientHeight() - offsetHeight) / 2));
-    }
-
-    @Override
-    public void onValueChange(final ValueChangeEvent<String> event) {
-        if (event.getValue() != null && !event.getValue().isEmpty()) {
-            final PTInstruction eventInstruction = new PTInstruction();
-            eventInstruction.put(ClientToServerModel.TYPE_HISTORY, event.getValue());
-            sendDataToServer(eventInstruction);
-        }
     }
 
     public PTObject getPTObject(final Integer id) {
