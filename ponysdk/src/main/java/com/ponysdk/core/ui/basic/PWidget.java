@@ -444,7 +444,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
                     fireMouseEvent(instruction, new PMouseUpEvent(this));
                     break;
                 case MOUSE_WHELL:
-                    fireMouseEvent(instruction, new PMouseWhellEvent.Event(this));
+                    fireMouseWheelEvent(instruction, new PMouseWhellEvent.Event(this));
                     break;
                 case FOCUS:
                     fireEvent(new PFocusEvent(this));
@@ -504,6 +504,32 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
             event.setClientX(((JsonNumber) eventInfo.get(2)).intValue());
             event.setClientY(((JsonNumber) eventInfo.get(3)).intValue());
             event.setNativeButton(((JsonNumber) eventInfo.get(4)).intValue());
+        }
+
+        final String widgetPositionKey = ClientToServerModel.WIDGET_POSITION.toStringValue();
+        if (instruction.containsKey(widgetPositionKey)) {
+            final JsonArray widgetInfo = instruction.getJsonArray(widgetPositionKey);
+
+            event.setSourceAbsoluteLeft(((JsonNumber) widgetInfo.get(0)).intValue());
+            event.setSourceAbsoluteTop(((JsonNumber) widgetInfo.get(1)).intValue());
+            event.setSourceOffsetHeight(((JsonNumber) widgetInfo.get(2)).intValue());
+            event.setSourceOffsetWidth(((JsonNumber) widgetInfo.get(3)).intValue());
+        }
+
+        fireEvent(event);
+    }
+
+    private void fireMouseWheelEvent(final JsonObject instruction, final PMouseWhellEvent.Event event) {
+        final String eventInfoKey = ClientToServerModel.EVENT_INFO.toStringValue();
+        if (instruction.containsKey(eventInfoKey)) {
+            final JsonArray eventInfo = instruction.getJsonArray(eventInfoKey);
+
+            event.setX(((JsonNumber) eventInfo.get(0)).intValue());
+            event.setY(((JsonNumber) eventInfo.get(1)).intValue());
+            event.setClientX(((JsonNumber) eventInfo.get(2)).intValue());
+            event.setClientY(((JsonNumber) eventInfo.get(3)).intValue());
+            event.setNativeButton(((JsonNumber) eventInfo.get(4)).intValue());
+            event.setDeltaY(((JsonNumber) eventInfo.get(5)).intValue());
         }
 
         final String widgetPositionKey = ClientToServerModel.WIDGET_POSITION.toStringValue();

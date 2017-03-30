@@ -113,4 +113,11 @@ public abstract class PMouseEvent<H extends EventHandler> extends PHumanInputEve
         this.y = y;
     }
 
+    @Override
+    public String toString() {
+        return super.toString() + " ; x = " + x + " ; y = " + y + " ; nativeButton = " + nativeButton + " ; clientX = " + clientX
+                + " ; clientY = " + clientY + " ; sourceAbsoluteLeft = " + sourceAbsoluteLeft + " ; sourceAbsoluteTop = "
+                + sourceAbsoluteTop + " ; sourceOffsetHeight = " + sourceOffsetHeight + " ; sourceOffsetWidth = " + sourceOffsetWidth;
+    }
+
 }

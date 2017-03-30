@@ -45,6 +45,8 @@ public abstract class PMouseWhellEvent {
 
     public static final class Event extends PMouseEvent<Handler> {
 
+        private int deltaY;
+
         public Event(final Object sourceComponent) {
             super(sourceComponent);
         }
@@ -57,6 +59,19 @@ public abstract class PMouseWhellEvent {
         @Override
         protected void dispatch(final Handler handler) {
             handler.onMouseWhell(this);
+        }
+
+        public int getDeltaY() {
+            return deltaY;
+        }
+
+        public void setDeltaY(final int deltaY) {
+            this.deltaY = deltaY;
+        }
+
+        @Override
+        public String toString() {
+            return super.toString() + " ; deltaY = " + deltaY;
         }
 
     }

@@ -54,12 +54,6 @@ public abstract class Event<H extends EventHandler> {
         this.source = source;
     }
 
-    public String toDebugString() {
-        String name = this.getClass().getName();
-        name = name.substring(name.lastIndexOf(".") + 1);
-        return "eventbus: " + name + ":";
-    }
-
     @Override
     public String toString() {
         return getClass().getSimpleName() + "#" + eventID + " with data : " + data;

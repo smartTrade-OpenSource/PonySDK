@@ -141,41 +141,6 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
         return null;
     }
 
-    protected void triggerMouseEvent(final DomHandlerType domHandlerType, final MouseEvent<?> event) {
-        final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
-        final JSONArray eventInfo = new JSONArray();
-        eventInfo.set(0, new JSONNumber(event.getClientX()));
-        eventInfo.set(1, new JSONNumber(event.getClientY()));
-        eventInfo.set(2, new JSONNumber(event.getX()));
-        eventInfo.set(3, new JSONNumber(event.getY()));
-        eventInfo.set(4, new JSONNumber(event.getNativeButton()));
-        eventInstruction.put(ClientToServerModel.EVENT_INFO, eventInfo);
-
-        final Widget widget = asWidget();
-        final JSONArray widgetInfo = new JSONArray();
-        widgetInfo.set(0, new JSONNumber(widget.getAbsoluteLeft()));
-        widgetInfo.set(1, new JSONNumber(widget.getAbsoluteTop()));
-        widgetInfo.set(2, new JSONNumber(widget.getOffsetHeight()));
-        widgetInfo.set(3, new JSONNumber(widget.getOffsetWidth()));
-        eventInstruction.put(ClientToServerModel.WIDGET_POSITION, widgetInfo);
-
-        uiBuilder.sendDataToServer(widget, eventInstruction);
-
-        preventOrStopEvent(event);
-    }
-
-    private void triggerDomEvent(final DomHandlerType domHandlerType, final DomEvent<?> event) {
-        final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
-        uiBuilder.sendDataToServer(asWidget(), eventInstruction);
-        preventOrStopEvent(event);
-    }
-
-    private PTInstruction buildEventInstruction(final DomHandlerType domHandlerType) {
-        final PTInstruction eventInstruction = new PTInstruction(getObjectID());
-        eventInstruction.put(ClientToServerModel.DOM_HANDLER_TYPE, domHandlerType.getValue());
-        return eventInstruction;
-    }
-
     private void addDomHandler(final ReaderBuffer buffer, final DomHandlerType domHandlerType) {
         final Widget widget = asWidget();
         switch (domHandlerType) {
@@ -198,7 +163,7 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
                 widget.addDomHandler(event -> triggerMouseEvent(domHandlerType, event), MouseUpEvent.getType());
                 break;
             case MOUSE_WHELL:
-                widget.addDomHandler(event -> triggerMouseEvent(domHandlerType, event), MouseWheelEvent.getType());
+                widget.addDomHandler(event -> triggerMouseWhellEvent(domHandlerType, event), MouseWheelEvent.getType());
                 break;
             case BLUR:
                 widget.addDomHandler(event -> triggerDomEvent(domHandlerType, event), BlurEvent.getType());
@@ -330,6 +295,66 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
                 log.info("Handler not supported #" + domHandlerType);
                 break;
         }
+    }
+
+    private PTInstruction buildEventInstruction(final DomHandlerType domHandlerType) {
+        final PTInstruction eventInstruction = new PTInstruction(getObjectID());
+        eventInstruction.put(ClientToServerModel.DOM_HANDLER_TYPE, domHandlerType.getValue());
+        return eventInstruction;
+    }
+
+    private void triggerDomEvent(final DomHandlerType domHandlerType, final DomEvent<?> event) {
+        final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
+        uiBuilder.sendDataToServer(asWidget(), eventInstruction);
+        preventOrStopEvent(event);
+    }
+
+    protected void triggerMouseEvent(final DomHandlerType domHandlerType, final MouseEvent<?> event) {
+        final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
+
+        final JSONArray eventInfo = new JSONArray();
+        eventInfo.set(0, new JSONNumber(event.getClientX()));
+        eventInfo.set(1, new JSONNumber(event.getClientY()));
+        eventInfo.set(2, new JSONNumber(event.getX()));
+        eventInfo.set(3, new JSONNumber(event.getY()));
+        eventInfo.set(4, new JSONNumber(event.getNativeButton()));
+        eventInstruction.put(ClientToServerModel.EVENT_INFO, eventInfo);
+
+        final Widget widget = asWidget();
+        final JSONArray widgetInfo = new JSONArray();
+        widgetInfo.set(0, new JSONNumber(widget.getAbsoluteLeft()));
+        widgetInfo.set(1, new JSONNumber(widget.getAbsoluteTop()));
+        widgetInfo.set(2, new JSONNumber(widget.getOffsetHeight()));
+        widgetInfo.set(3, new JSONNumber(widget.getOffsetWidth()));
+        eventInstruction.put(ClientToServerModel.WIDGET_POSITION, widgetInfo);
+
+        uiBuilder.sendDataToServer(widget, eventInstruction);
+
+        preventOrStopEvent(event);
+    }
+
+    private void triggerMouseWhellEvent(final DomHandlerType domHandlerType, final MouseWheelEvent event) {
+        final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
+        final JSONArray eventInfo = new JSONArray();
+        eventInfo.set(0, new JSONNumber(event.getClientX()));
+        eventInfo.set(1, new JSONNumber(event.getClientY()));
+        eventInfo.set(2, new JSONNumber(event.getX()));
+        eventInfo.set(3, new JSONNumber(event.getY()));
+        eventInfo.set(4, new JSONNumber(event.getNativeButton()));
+        eventInfo.set(5, new JSONNumber(event.getDeltaY()));
+        eventInstruction.put(ClientToServerModel.EVENT_INFO, eventInfo);
+
+        final Widget widget = asWidget();
+        final JSONArray widgetInfo = new JSONArray();
+        widgetInfo.set(0, new JSONNumber(widget.getAbsoluteLeft()));
+        widgetInfo.set(1, new JSONNumber(widget.getAbsoluteTop()));
+        widgetInfo.set(2, new JSONNumber(widget.getOffsetHeight()));
+        widgetInfo.set(3, new JSONNumber(widget.getOffsetWidth()));
+        eventInstruction.put(ClientToServerModel.WIDGET_POSITION, widgetInfo);
+
+        uiBuilder.sendDataToServer(widget, eventInstruction);
+
+        preventOrStopEvent(event);
     }
 
     private void preventOrStopEvent(final DomEvent<?> event) {
