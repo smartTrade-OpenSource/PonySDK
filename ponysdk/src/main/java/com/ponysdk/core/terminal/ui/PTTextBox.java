@@ -49,13 +49,7 @@ public class PTTextBox extends PTTextBoxBase<TextBox> implements KeyPressHandler
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.TEXT.ordinal() == modelOrdinal) {
-            uiObject.setText(binaryModel.getStringValue());
-            return true;
-        } else if (ServerToClientModel.VALUE.ordinal() == modelOrdinal) {
-            uiObject.setValue(binaryModel.getStringValue());
-            return true;
-        } else if (ServerToClientModel.VISIBLE_LENGTH.ordinal() == modelOrdinal) {
+        if (ServerToClientModel.VISIBLE_LENGTH.ordinal() == modelOrdinal) {
             uiObject.setVisibleLength(binaryModel.getIntValue());
             return true;
         } else if (ServerToClientModel.MAX_LENGTH.ordinal() == modelOrdinal) {

@@ -30,8 +30,8 @@ public class ModelWriter {
 
     private final WebsocketEncoder encoder;
 
-    public ModelWriter(final WebsocketEncoder Encoder) {
-        this.encoder = Encoder;
+    public ModelWriter(final WebsocketEncoder encoder) {
+        this.encoder = encoder;
     }
 
     public void beginObject() {
