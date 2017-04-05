@@ -27,7 +27,8 @@ public enum ServerToClientModel {
 
     HEARTBEAT(ValueTypeModel.NULL),
     PING_SERVER(ValueTypeModel.LONG),
-    OBJECT_ID(ValueTypeModel.INTEGER),
+    CREATE_CONTEXT(ValueTypeModel.INTEGER),
+    END(ValueTypeModel.NULL),
 
     TYPE_CREATE(ValueTypeModel.INTEGER),
     TYPE_UPDATE(ValueTypeModel.INTEGER),
@@ -39,9 +40,6 @@ public enum ServerToClientModel {
     TYPE_REMOVE_HANDLER(ValueTypeModel.NULL),
     TYPE_HISTORY(ValueTypeModel.STRING),
 
-    END(ValueTypeModel.NULL),
-
-    UI_CONTEXT_ID(ValueTypeModel.INTEGER),
     NATIVE(ValueTypeModel.JSON_OBJECT),
     DATE(ValueTypeModel.LONG),
     VALUE(ValueTypeModel.STRING),

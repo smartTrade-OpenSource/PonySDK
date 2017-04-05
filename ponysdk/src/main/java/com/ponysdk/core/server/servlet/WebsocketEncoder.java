@@ -23,6 +23,8 @@
 
 package com.ponysdk.core.server.servlet;
 
+import java.io.IOException;
+
 import com.ponysdk.core.model.ServerToClientModel;
 
 public interface WebsocketEncoder {
@@ -33,8 +35,6 @@ public interface WebsocketEncoder {
 
     void endObject();
 
-    void flush();
-
-    void release();
+    void flush() throws IOException;
 
 }

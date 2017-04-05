@@ -100,10 +100,6 @@ public class TxnContext implements TxnListener {
         socket.close();
     }
 
-    public void release() {
-        socket.release();
-    }
-
     @Override
     public String toString() {
         return "TxnContext{" + "flushNow=" + flushNow + ", application=" + application + ", uiContext=" + uiContext + '}';

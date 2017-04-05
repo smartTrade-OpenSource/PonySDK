@@ -24,9 +24,8 @@
 package com.ponysdk.core.server.servlet;
 
 import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -51,26 +50,20 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
     private static final Logger log = LoggerFactory.getLogger(WebSocket.class);
 
-    private static final byte TRUE = 1;
-    private static final byte FALSE = 0;
-
     private static final String ENCODING_CHARSET = "UTF-8";
 
     private final ServletUpgradeRequest request;
     private final WebsocketMonitor monitor;
-    private final BufferManager bufferManager;
+    private WebSocketPusher websocketPusher;
     private final AbstractApplicationManager applicationManager;
 
     private TxnContext context;
     private Session session;
 
-    private ByteBuffer buffer;
-
-    WebSocket(final ServletUpgradeRequest request, final WebsocketMonitor monitor, final BufferManager bufferManager,
+    WebSocket(final ServletUpgradeRequest request, final WebsocketMonitor monitor,
             final AbstractApplicationManager applicationManager) {
         this.request = request;
         this.monitor = monitor;
-        this.bufferManager = bufferManager;
         this.applicationManager = applicationManager;
     }
 
@@ -80,6 +73,9 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
             request.getSession(), request.getHeader("User-Agent"));
 
         this.session = session;
+        // 1K for max chunk size and 1M for total buffer size
+        // Don't set max chunk size > 8K because when using Jetty Websocket compression, the chunks are limited to 8K
+        this.websocketPusher = new WebSocketPusher(session, 1 << 20, 1 << 12, TimeUnit.SECONDS.toMillis(60));
         this.context = new TxnContext(this);
 
         Application application = SessionManager.get().getApplication(request.getSession().getId());
@@ -97,13 +93,18 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
             context.setUIContext(uiContext);
             application.registerUIContext(uiContext);
 
-            final ByteBuffer buffer = getBuffer();
+            uiContext.begin();
             try {
-                encode(buffer, ServerToClientModel.UI_CONTEXT_ID, uiContext.getID());
-                flush(buffer);
-            } catch (final Throwable t) {
-                release(buffer);
+                beginObject();
+                encode(ServerToClientModel.CREATE_CONTEXT, uiContext.getID());
+                endObject();
+                flush();
+            } catch (final Throwable e) {
+                log.error("Cannot send server heart beat to client", e);
+            } finally {
+                uiContext.end();
             }
+
             applicationManager.startApplication(context);
         } catch (final Exception e) {
             log.error("Cannot process WebSocket instructions", e);
@@ -185,22 +186,15 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         return !historyTokens.isEmpty() ? historyTokens.get(0) : null;
     }
 
-    public ByteBuffer getBuffer() {
-        return bufferManager.allocate();
-    }
-
     /**
      * Send heart beat to the client
      */
     public void sendHeartBeat() {
         if (isLiving() && isSessionOpen()) {
-            final ByteBuffer buffer = getBuffer();
-            try {
-                encode(buffer, ServerToClientModel.HEARTBEAT);
-                flush(buffer);
-            } catch (final Throwable t) {
-                release(buffer);
-            }
+            beginObject();
+            encode(ServerToClientModel.HEARTBEAT, null);
+            endObject();
+            flush();
         }
     }
 
@@ -209,54 +203,16 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
      */
     public void sendRoundTrip() {
         if (isLiving() && isSessionOpen()) {
-            final ByteBuffer buffer = getBuffer();
-            try {
-                encode(buffer, ServerToClientModel.PING_SERVER, System.currentTimeMillis());
-                flush(buffer);
-            } catch (final Throwable t) {
-                release(buffer);
-            }
+            beginObject();
+            encode(ServerToClientModel.PING_SERVER, System.currentTimeMillis());
+            endObject();
+            flush();
         }
     }
 
     @Override
     public void flush() {
-        if (buffer != null) {
-            flush(buffer);
-            buffer = null;
-        }
-    }
-
-    /**
-     * Send to the terminal
-     */
-    private void flush(final ByteBuffer buffer) {
-        if (isLiving() && isSessionOpen()) {
-            if (buffer.position() != 0) {
-                if (monitor != null) monitor.onBeforeFlush(WebSocket.this, buffer.position());
-                try {
-                    bufferManager.send(session.getRemote(), buffer);
-                } finally {
-                    if (monitor != null) monitor.onAfterFlush(WebSocket.this);
-                }
-
-                return;
-            }
-        }
-
-        release(buffer);
-    }
-
-    @Override
-    public void release() {
-        if (buffer != null) {
-            release(buffer);
-            buffer = null;
-        }
-    }
-
-    private void release(final ByteBuffer buffer) {
-        bufferManager.release(buffer);
+        websocketPusher.flush();
     }
 
     public void close() {
@@ -276,108 +232,16 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
     @Override
     public void beginObject() {
-        if (buffer == null) buffer = getBuffer();
     }
 
     @Override
     public void endObject() {
-        if (buffer == null) return;
         encode(ServerToClientModel.END, null);
-        if (buffer.position() >= 4096) flush();
     }
 
     @Override
     public void encode(final ServerToClientModel model, final Object value) {
-        switch (model.getTypeModel()) {
-            case NULL:
-                encode(buffer, model);
-                break;
-            case BOOLEAN:
-                encode(buffer, model, (boolean) value);
-                break;
-            case BYTE:
-                encode(buffer, model, (byte) value);
-                break;
-            case SHORT:
-                encode(buffer, model, (short) value);
-                break;
-            case INTEGER:
-                encode(buffer, model, (int) value);
-                break;
-            case LONG:
-                encode(buffer, model, (long) value);
-                break;
-            case DOUBLE:
-                encode(buffer, model, (double) value);
-                break;
-            case STRING:
-                encode(buffer, model, (String) value);
-                break;
-            case JSON_OBJECT:
-                encode(buffer, model, (JsonObject) value);
-                break;
-            default:
-                break;
-        }
-    }
-
-    private static void encode(final ByteBuffer buffer, final ServerToClientModel model) {
-        if (log.isDebugEnabled()) log.debug("Writing in the buffer : " + model + " (position : " + buffer.position() + ")");
-        buffer.putShort(model.getValue());
-    }
-
-    private static void encode(final ByteBuffer buffer, final ServerToClientModel model, final boolean value) {
-        encode(buffer, model, value ? TRUE : FALSE);
-    }
-
-    private static void encode(final ByteBuffer buffer, final ServerToClientModel model, final byte value) {
-        if (log.isDebugEnabled())
-            log.debug("Writing in the buffer : " + model + " => " + value + " (position : " + buffer.position() + ")");
-        buffer.putShort(model.getValue());
-        buffer.put(value);
-    }
-
-    private static void encode(final ByteBuffer buffer, final ServerToClientModel model, final short value) {
-        log.error("Writing in the buffer : " + model + " => " + value + " (position : " + buffer.position() + ")");
-        buffer.putShort(model.getValue());
-        buffer.putShort(value);
-    }
-
-    private static void encode(final ByteBuffer buffer, final ServerToClientModel model, final int value) {
-        if (log.isDebugEnabled())
-            log.debug("Writing in the buffer : " + model + " => " + value + " (position : " + buffer.position() + ")");
-        buffer.putShort(model.getValue());
-        buffer.putInt(value);
-    }
-
-    private static void encode(final ByteBuffer buffer, final ServerToClientModel model, final long value) {
-        encode(buffer, model, String.valueOf(value));
-    }
-
-    private static void encode(final ByteBuffer buffer, final ServerToClientModel model, final double value) {
-        encode(buffer, model, String.valueOf(value));
-    }
-
-    private static void encode(final ByteBuffer buffer, final ServerToClientModel model, final JsonObject jsonObject) {
-        encode(buffer, model, jsonObject.toString());
-    }
-
-    private static void encode(final ByteBuffer buffer, final ServerToClientModel model, final String value) {
-        if (log.isDebugEnabled()) log.debug("Writing in the buffer : " + model + " => " + value + " (size : "
-                + (value != null ? value.length() : 0) + ")" + " (position : " + buffer.position() + ")");
-        buffer.putShort(model.getValue());
-
-        try {
-            if (value != null) {
-                final byte[] bytes = value.getBytes(ENCODING_CHARSET);
-                buffer.putInt(bytes.length);
-                buffer.put(bytes);
-            } else {
-                buffer.putInt(0);
-            }
-        } catch (final UnsupportedEncodingException e) {
-            log.error("Cannot convert string");
-        }
+        websocketPusher.encode(model, value);
     }
 
     private static enum NiceStatusCode {

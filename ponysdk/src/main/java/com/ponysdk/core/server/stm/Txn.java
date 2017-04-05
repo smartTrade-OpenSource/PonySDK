@@ -67,7 +67,6 @@ public class Txn {
     public void rollback() {
         final Txn txn = transactions.get();
         if (txn.txnContext == null) throw new RuntimeException("Call begin() before rollback() a transaction.");
-        txn.txnContext.release();
         fireBeforeRollback();
         transactions.remove();
     }

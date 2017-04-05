@@ -23,12 +23,13 @@
 
 package com.ponysdk.core.server.servlet;
 
-import com.ponysdk.core.server.application.AbstractApplicationManager;
+import javax.servlet.ServletException;
+
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletException;
+import com.ponysdk.core.server.application.AbstractApplicationManager;
 
 public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSocketServlet {
 
@@ -39,16 +40,12 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
     private AbstractApplicationManager applicationManager;
     private WebsocketMonitor monitor;
 
-    private BufferManager bufferManager;
-
     @Override
     public void init() throws ServletException {
         super.init();
 
         applicationManager = (AbstractApplicationManager) getServletContext()
             .getAttribute(AbstractApplicationManager.class.getCanonicalName());
-
-        bufferManager = new BufferManager();
     }
 
     @Override
@@ -61,7 +58,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
             // Force session creation if there is no session
             request.getHttpServletRequest().getSession(true);
             if (request.getSession() != null) {
-                return new WebSocket(request, monitor, bufferManager, applicationManager);
+                return new WebSocket(request, monitor, applicationManager);
             } else {
                 log.error("No HTTP session found");
                 return null;
