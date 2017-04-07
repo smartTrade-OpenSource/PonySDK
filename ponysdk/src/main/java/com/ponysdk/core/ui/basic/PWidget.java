@@ -79,6 +79,7 @@ import com.ponysdk.core.ui.eventbus.SimpleEventBus;
 import com.ponysdk.core.ui.model.PEventType;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.writer.ModelWriter;
+import com.ponysdk.core.writer.ModelWriterCallback;
 
 /**
  * The base class for the majority of user-interface objects. Widget adds
@@ -392,25 +393,16 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
             oneTimeHandlerCreation.add(type);
             final ServerBinaryModel binaryModel1 = new ServerBinaryModel(ServerToClientModel.DOM_HANDLER_CODE,
                 type.getDomHandlerType().getValue());
-            if (initialized) executeAddDomHandler(binaryModel1, binaryModel);
-            else safeStackedInstructions().add(() -> executeAddDomHandler(binaryModel1, binaryModel));
+            final ModelWriterCallback callback = writer -> {
+                writer.write(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_DOM.getValue());
+                writer.write(binaryModel1.getKey(), binaryModel1.getValue());
+                if (binaryModel != null) writer.write(binaryModel.getKey(), binaryModel.getValue());
+            };
+            if (initialized) writeAddHandler(callback);
+            else safeStackedInstructions().add(() -> writeAddHandler(callback));
         }
 
         return handlerRegistration;
-    }
-
-    private void executeAddDomHandler(final ServerBinaryModel... binaryModels) {
-        final ModelWriter writer = Txn.getWriter();
-        writer.beginObject();
-        if (!PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
-        writer.write(ServerToClientModel.TYPE_ADD_HANDLER, ID);
-        writer.write(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_DOM.getValue());
-        if (binaryModels != null) {
-            for (final ServerBinaryModel binaryModel : binaryModels) {
-                if (binaryModel != null) writer.write(binaryModel.getKey(), binaryModel.getValue());
-            }
-        }
-        writer.endObject();
     }
 
     @Override

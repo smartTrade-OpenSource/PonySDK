@@ -194,85 +194,9 @@ public abstract class PObject {
         return stackedInstructions;
     }
 
-    protected void saveAdd(final int objectID, final int parentObjectID) {
-        saveAdd(objectID, parentObjectID, (ServerBinaryModel) null);
-    }
-
-    protected void saveAdd(final int objectID, final int parentObjectID, final ServerBinaryModel... binaryModels) {
-        if (destroy) return;
-        if (initialized) executeAdd(objectID, parentObjectID, binaryModels);
-        else safeStackedInstructions().add(() -> executeAdd(objectID, parentObjectID, binaryModels));
-    }
-
-    private void executeAdd(final int objectID, final int parentObjectID, final ServerBinaryModel... binaryModels) {
-        if (destroy) return;
-        final ModelWriter writer = Txn.getWriter();
-        writer.beginObject();
-        if (!PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
-        if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
-        writer.write(ServerToClientModel.TYPE_ADD, objectID);
-        writer.write(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
-        if (binaryModels != null) {
-            for (final ServerBinaryModel binaryModel : binaryModels) {
-                if (binaryModel != null) writer.write(binaryModel.getKey(), binaryModel.getValue());
-            }
-        }
-        writer.endObject();
-    }
-
-    protected void saveAddHandler(final HandlerModel type) {
-        if (destroy) return;
-        if (initialized) executeAddHandler(type);
-        else safeStackedInstructions().add(() -> executeAddHandler(type));
-    }
-
-    private void executeAddHandler(final HandlerModel type) {
-        if (destroy) return;
-        final ModelWriter writer = Txn.getWriter();
-        writer.beginObject();
-        if (!PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
-        if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
-        writer.write(ServerToClientModel.TYPE_ADD_HANDLER, ID);
-        writer.write(ServerToClientModel.HANDLER_TYPE, type.getValue());
-        writer.endObject();
-    }
-
-    protected void saveRemoveHandler(final HandlerModel type) {
-        if (destroy) return;
-        if (initialized) executeRemoveHandler(type);
-        else safeStackedInstructions().add(() -> executeRemoveHandler(type));
-    }
-
-    private void executeRemoveHandler(final HandlerModel type) {
-        if (destroy) return;
-        final ModelWriter writer = Txn.getWriter();
-        writer.beginObject();
-        if (!PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
-        if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
-        writer.write(ServerToClientModel.TYPE_REMOVE_HANDLER, ID);
-        writer.write(ServerToClientModel.HANDLER_TYPE, type.getValue());
-        writer.endObject();
-    }
-
-    void saveRemove(final int objectID, final int parentObjectID) {
-        if (destroy) return;
-        if (initialized) executeRemove(objectID, parentObjectID);
-        else safeStackedInstructions().add(() -> executeRemove(objectID, parentObjectID));
-    }
-
-    private void executeRemove(final int objectID, final int parentObjectID) {
-        if (destroy) return;
-        final ModelWriter writer = Txn.getWriter();
-        writer.beginObject();
-        if (!PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
-        if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
-        writer.write(ServerToClientModel.TYPE_REMOVE, objectID);
-        writer.write(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
-        writer.endObject();
-    }
-
     protected void saveUpdate(final ModelWriterCallback callback) {
         if (destroy) return;
+
         if (initialized) writeUpdate(callback);
         else safeStackedInstructions().add(() -> writeUpdate(callback));
     }
@@ -290,9 +214,103 @@ public abstract class PObject {
         writer.endObject();
     }
 
-    @Override
-    public String toString() {
-        return getClass().getSimpleName() + "#" + ID;
+    protected void saveAdd(final int objectID, final int parentObjectID) {
+        saveAdd(objectID, parentObjectID, (ServerBinaryModel) null);
+    }
+
+    protected void saveAdd(final int objectID, final int parentObjectID, final ServerBinaryModel... binaryModels) {
+        if (destroy) return;
+
+        final ModelWriterCallback callback = writer -> {
+            writer.write(ServerToClientModel.TYPE_ADD, objectID);
+            writer.write(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
+            if (binaryModels != null) {
+                for (final ServerBinaryModel binaryModel : binaryModels) {
+                    if (binaryModel != null) writer.write(binaryModel.getKey(), binaryModel.getValue());
+                }
+            }
+        };
+        if (initialized) writeAdd(callback);
+        else safeStackedInstructions().add(() -> writeAdd(callback));
+    }
+
+    private void writeAdd(final ModelWriterCallback callback) {
+        if (destroy) return;
+
+        final ModelWriter writer = Txn.getWriter();
+        writer.beginObject();
+        if (!PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
+        if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
+
+        callback.doWrite(writer);
+        writer.endObject();
+    }
+
+    protected void saveAddHandler(final HandlerModel type) {
+        if (destroy) return;
+
+        final ModelWriterCallback callback = writer -> writer.write(ServerToClientModel.HANDLER_TYPE, type.getValue());
+        if (initialized) writeAddHandler(callback);
+        else safeStackedInstructions().add(() -> writeAddHandler(callback));
+    }
+
+    void writeAddHandler(final ModelWriterCallback callback) {
+        if (destroy) return;
+
+        final ModelWriter writer = Txn.getWriter();
+        writer.beginObject();
+        if (!PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
+        if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
+        writer.write(ServerToClientModel.TYPE_ADD_HANDLER, ID);
+
+        callback.doWrite(writer);
+        writer.endObject();
+    }
+
+    protected void saveRemoveHandler(final HandlerModel type) {
+        if (destroy) return;
+
+        final ModelWriterCallback callback = writer -> {
+            writer.write(ServerToClientModel.TYPE_REMOVE_HANDLER, ID);
+            writer.write(ServerToClientModel.HANDLER_TYPE, type.getValue());
+        };
+        if (initialized) writeRemoveHandler(callback);
+        else safeStackedInstructions().add(() -> writeRemoveHandler(callback));
+    }
+
+    private void writeRemoveHandler(final ModelWriterCallback callback) {
+        if (destroy) return;
+
+        final ModelWriter writer = Txn.getWriter();
+        writer.beginObject();
+        if (!PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
+        if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
+
+        callback.doWrite(writer);
+        writer.endObject();
+    }
+
+    void saveRemove(final int objectID, final int parentObjectID) {
+        if (destroy) return;
+
+        final ModelWriterCallback callback = writer -> {
+            writer.write(ServerToClientModel.TYPE_REMOVE, objectID);
+            writer.write(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
+        };
+        if (initialized) writeRemove(callback);
+        else safeStackedInstructions().add(() -> writeRemove(callback));
+    }
+
+    private void writeRemove(final ModelWriterCallback callback) {
+        if (destroy) return;
+
+        final ModelWriter writer = Txn.getWriter();
+        writer.beginObject();
+        if (!PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
+        if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
+
+        callback.doWrite(writer);
+        writer.endObject();
     }
 
     public void setInitializeListener(final InitializeListener listener) {
@@ -327,6 +345,11 @@ public abstract class PObject {
         if (getClass() != obj.getClass()) return false;
         final PObject other = (PObject) obj;
         return ID == other.ID;
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "#" + ID;
     }
 
     @FunctionalInterface
