@@ -136,7 +136,8 @@ public class UIBuilder implements HttpResponseReceivedEvent.Handler, HttpRequest
 
             // Detect if the message is not for the main terminal but for a specific window
             final BinaryModel binaryModel = buffer.readBinaryModel();
-            if (ServerToClientModel.WINDOW_ID.equals(binaryModel.getModel())) {
+            ServerToClientModel model = binaryModel.getModel();
+            if (ServerToClientModel.WINDOW_ID.equals(model)) {
                 // Event on a specific window
                 final int requestedId = binaryModel.getIntValue();
                 // Main terminal, we need to dispatch the eventbus
@@ -148,22 +149,25 @@ public class UIBuilder implements HttpResponseReceivedEvent.Handler, HttpRequest
                     log.warning("The requested window " + requestedId + " doesn't exist anymore"); // TODO PERF LOG
                     buffer.shiftNextBlock(false);
                 }
-            } else if (ServerToClientModel.FRAME_ID.equals(binaryModel.getModel())) {
+            } else if (ServerToClientModel.FRAME_ID.equals(model)) {
                 final int requestedId = binaryModel.getIntValue();
                 final PTFrame frame = (PTFrame) getPTObject(requestedId);
                 if (log.isLoggable(Level.FINE)) log.fine("The main terminal send the buffer to frame " + requestedId);
                 frame.postMessage(buffer.slice(buffer.getPosition(), nextBlockPosition));
-            } else if (ServerToClientModel.PING_SERVER.equals(binaryModel.getModel())) {
+            } else if (ServerToClientModel.PING_SERVER.equals(model)) {
                 if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Ping received");
                 final PTInstruction requestData = new PTInstruction();
                 requestData.put(ClientToServerModel.PING_SERVER, binaryModel.getLongValue());
                 requestBuilder.send(requestData);
                 buffer.readBinaryModel(); // Read ServerToClientModel.END element
-            } else if (ServerToClientModel.HEARTBEAT.equals(binaryModel.getModel())) {
+            } else if (ServerToClientModel.HEARTBEAT.equals(model)) {
                 if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Heart beat received");
                 buffer.readBinaryModel(); // Read ServerToClientModel.END element
-            } else if (ServerToClientModel.CREATE_CONTEXT.equals(binaryModel.getModel())) {
+            } else if (ServerToClientModel.CREATE_CONTEXT.equals(model)) {
                 PonySDK.get().setContextId(binaryModel.getIntValue());
+                buffer.readBinaryModel(); // Read ServerToClientModel.END element
+            } else if (ServerToClientModel.DESTROY_CONTEXT.equals(model)) {
+                processClose();
                 buffer.readBinaryModel(); // Read ServerToClientModel.END element
             } else {
                 update(binaryModel, buffer);
@@ -209,8 +213,6 @@ public class UIBuilder implements HttpResponseReceivedEvent.Handler, HttpRequest
             processRemoveHandler(buffer, getPTObject(binaryModel.getIntValue()));
         } else if (ServerToClientModel.TYPE_HISTORY.ordinal() == modelOrdinal) {
             processHistory(buffer, binaryModel.getStringValue());
-        } else if (ServerToClientModel.TYPE_CLOSE.ordinal() == modelOrdinal) {
-            processClose();
         } else {
             log.log(Level.WARNING, "Unknown instruction type : " + binaryModel + " ; " + buffer.toString());
             buffer.shiftNextBlock(false);

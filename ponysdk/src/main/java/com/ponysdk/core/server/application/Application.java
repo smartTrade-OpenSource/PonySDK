@@ -23,15 +23,17 @@
 
 package com.ponysdk.core.server.application;
 
-import com.ponysdk.core.server.servlet.SessionManager;
-import com.ponysdk.core.useragent.UserAgent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.servlet.http.HttpSession;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import javax.servlet.http.HttpSession;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ponysdk.core.server.servlet.SessionManager;
+import com.ponysdk.core.useragent.UserAgent;
 
 /**
  * Wrapper of the HTTPSession, and contains the UIContexts.
@@ -113,6 +115,10 @@ public class Application {
 
     public UserAgent getUserAgent() {
         return userAgent;
+    }
+
+    public int countUIContexts() {
+        return uiContexts.size();
     }
 
     @Override

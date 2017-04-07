@@ -23,13 +23,13 @@
 
 package com.ponysdk.core.server.servlet;
 
-import com.ponysdk.core.server.application.Application;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import com.ponysdk.core.server.application.Application;
 
 public class SessionManager {
 
@@ -63,6 +63,17 @@ public class SessionManager {
 
     public void addApplicationListener(final ApplicationListener listener) {
         listeners.add(listener);
+    }
+
+    /**
+     * @return The number of UIContext
+     */
+    public int countUIContexts() {
+        int count = 0;
+        for (final Application application : applicationsBySessionID.values()) {
+            count += application.countUIContexts();
+        }
+        return count;
     }
 
 }

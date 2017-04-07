@@ -24,8 +24,10 @@
 package com.ponysdk.core.server.servlet;
 
 import java.io.StringReader;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -49,8 +51,6 @@ import com.ponysdk.core.useragent.UserAgent;
 public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
     private static final Logger log = LoggerFactory.getLogger(WebSocket.class);
-
-    private static final String ENCODING_CHARSET = "UTF-8";
 
     private final ServletUpgradeRequest request;
     private final WebsocketMonitor monitor;
@@ -142,6 +142,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
                         final long end = System.currentTimeMillis();
                         if (log.isDebugEnabled())
                             log.debug("Ping measurement : " + (end - start) + " ms from terminal #" + uiContext.getID());
+                        uiContext.addPingValue(end - start);
                     } else if (jsonObject.containsKey(ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue())) {
                         final Application applicationSession = context.getApplication();
                         if (applicationSession == null)
@@ -266,28 +267,27 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         private int statusCode;
         private String message;
 
-        NiceStatusCode(final int statusCode, final String message) {
+        private NiceStatusCode(final int statusCode, final String message) {
             this.statusCode = statusCode;
             this.message = message;
         }
 
-        public int getStatusCode() {
-            return statusCode;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-
         public static final String getMessage(final int statusCode) {
-            for (final NiceStatusCode niceStatusCode : values()) {
-                if (niceStatusCode.getStatusCode() == statusCode) {
-                    return statusCode + " : " + niceStatusCode.getMessage();
-                }
+            final List<NiceStatusCode> codes = Arrays.stream(values())
+                .filter(niceStatusCode -> niceStatusCode.statusCode == statusCode).collect(Collectors.toList());
+            if (!codes.isEmpty()) {
+                return codes.get(0).toString();
+            } else {
+                log.error("No matching status code found for {}", statusCode);
+                return String.valueOf(statusCode);
             }
-            log.error("No matching status code found for {}", statusCode);
-            return String.valueOf(statusCode);
         }
+
+        @Override
+        public String toString() {
+            return message + " (" + statusCode + ")";
+        }
+
     }
 
 }

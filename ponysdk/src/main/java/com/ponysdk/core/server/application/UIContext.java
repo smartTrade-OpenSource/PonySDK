@@ -26,6 +26,7 @@ package com.ponysdk.core.server.application;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -106,6 +107,8 @@ public class UIContext {
     private TerminalDataReceiver terminalDataReceiver;
 
     private boolean living = true;
+
+    private final BoundedLinkedList<Long> pings = new BoundedLinkedList<>(10);
 
     public UIContext(final TxnContext context) {
         this.application = context.getApplication();
@@ -343,7 +346,7 @@ public class UIContext {
     public void close() {
         final ModelWriter writer = Txn.getWriter();
         writer.beginObject();
-        writer.write(ServerToClientModel.TYPE_CLOSE, null);
+        writer.write(ServerToClientModel.DESTROY_CONTEXT, null);
         writer.endObject();
     }
 
@@ -489,6 +492,32 @@ public class UIContext {
 
     public void enableCommunicationChecker(final boolean enable) {
         communicationSanityChecker.enableCommunicationChecker(enable);
+    }
+
+    public void addPingValue(final long pingValue) {
+        pings.add(pingValue);
+    }
+
+    /**
+     * Get an average latency from the last 10 measurements
+     */
+    public double getLatency() {
+        return pings.stream().mapToLong(ping -> ping).average().orElse(0);
+    }
+
+    private static final class BoundedLinkedList<E> extends LinkedList<E> {
+
+        private final int limit;
+
+        public BoundedLinkedList(final int limit) {
+            this.limit = limit;
+        }
+
+        @Override
+        public boolean add(final E e) {
+            if (this.size() == this.limit) this.removeFirst();
+            return super.add(e);
+        }
     }
 
 }
