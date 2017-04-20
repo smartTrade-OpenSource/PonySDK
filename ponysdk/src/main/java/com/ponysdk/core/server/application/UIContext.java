@@ -502,7 +502,7 @@ public class UIContext {
      * Get an average latency from the last 10 measurements
      */
     public double getLatency() {
-        return pings.stream().mapToLong(ping -> ping).average().orElse(0);
+        return pings.stream().mapToLong(Long::longValue).average().orElse(0);
     }
 
     private static final class BoundedLinkedList<E> extends LinkedList<E> {
