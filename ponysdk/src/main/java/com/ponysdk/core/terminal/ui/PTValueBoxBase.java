@@ -39,6 +39,15 @@ public abstract class PTValueBoxBase<T extends ValueBoxBase<W>, W> extends PTFoc
         if (ServerToClientModel.SELECT_ALL.ordinal() == modelOrdinal) {
             uiObject.selectAll();
             return true;
+        } else if (ServerToClientModel.CURSOR_POSITION.ordinal() == modelOrdinal) {
+            uiObject.setCursorPos(binaryModel.getIntValue());
+            return true;
+        } else if (ServerToClientModel.SELECTION_RANGE_START.ordinal() == modelOrdinal) {
+            final int start = binaryModel.getIntValue();
+            // ServerToClientModel.SELECTION_RANGE_LENGTH
+            final int length = buffer.readBinaryModel().getIntValue();
+            uiObject.setSelectionRange(start, length);
+            return true;
         } else {
             return super.update(buffer, binaryModel);
         }
