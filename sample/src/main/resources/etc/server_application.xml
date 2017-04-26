@@ -22,7 +22,7 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 		<property name="entryPointClass" value="com.ponysdk.sample.client.UISampleEntryPoint" />
         <property name="javascript">
             <list>
-				<value>script/ponysdk.js</value>
+				<value>script/jquery-3.0.0.min.js</value>
                 <value>script/sample.js</value>
             </list>
         </property>
