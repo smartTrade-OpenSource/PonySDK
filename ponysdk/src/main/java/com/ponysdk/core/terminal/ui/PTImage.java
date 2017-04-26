@@ -72,7 +72,7 @@ public class PTImage extends PTWidget<Image> {
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         final int modelOrdinal = binaryModel.getModel().ordinal();
         if (ServerToClientModel.IMAGE_URL.ordinal() == modelOrdinal) {
-            cast().setUrl(binaryModel.getStringValue());
+            uiObject.setUrl(binaryModel.getStringValue());
             return true;
         } else {
             return super.update(buffer, binaryModel);
@@ -85,7 +85,7 @@ public class PTImage extends PTWidget<Image> {
             // ServerToClientModel.STREAM_REQUEST_ID
             final int streamRequestId = buffer.readBinaryModel().getIntValue();
 
-            cast().setUrl(GWT.getHostPageBaseURL() + "stream?" + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "="
+            uiObject.setUrl(GWT.getHostPageBaseURL() + "stream?" + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "="
                     + PonySDK.get().getContextId() + "&" + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "="
                     + streamRequestId);
         } else {

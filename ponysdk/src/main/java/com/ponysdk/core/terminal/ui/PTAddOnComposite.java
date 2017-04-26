@@ -71,7 +71,7 @@ public class PTAddOnComposite extends PTAddOn {
 
         final int widgetID = binaryModel.getIntValue();
         final PTWidget<?> object = (PTWidget<?>) uiService.getPTObject(widgetID);
-        widget = object.cast();
+        widget = object.uiObject;
         final Element element = widget.getElement();
         params.put("widgetID", new JSONString(String.valueOf(widgetID)));
         params.put("widgetElement", new JSONObject(element));

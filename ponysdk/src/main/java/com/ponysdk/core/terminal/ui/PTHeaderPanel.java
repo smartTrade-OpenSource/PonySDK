@@ -43,15 +43,15 @@ public class PTHeaderPanel extends PTPanel<HeaderPanel> {
             final Widget w = asWidget(ptObject);
             final int index = binaryModel.getIntValue();
             if (index == 0) {
-                cast().setHeaderWidget(w);
+                uiObject.setHeaderWidget(w);
                 // Wait GWT fix :
                 // https://groups.google.com/forum/#!msg/google-web-toolkit/8odDZdlhDVo/hw852twqQAUJ
                 w.getElement().getParentElement().getStyle().clearProperty("minWidth");
                 w.getElement().getParentElement().getStyle().clearProperty("minHeight");
             } else if (index == 1) {
-                cast().setContentWidget(w);
+                uiObject.setContentWidget(w);
             } else if (index == 2) {
-                cast().setFooterWidget(w);
+                uiObject.setFooterWidget(w);
                 // Wait GWT fix :
                 // https://groups.google.com/forum/#!msg/google-web-toolkit/8odDZdlhDVo/hw852twqQAUJ
                 w.getElement().getParentElement().getStyle().clearProperty("minWidth");

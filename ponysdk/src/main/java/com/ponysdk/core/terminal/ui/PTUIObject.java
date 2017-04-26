@@ -122,7 +122,7 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
 
     public UIObject asWidget(final PTObject ptObject) {
         if (ptObject instanceof PTUIObject) {
-            return ((PTUIObject<?>) ptObject).cast();
+            return ((PTUIObject<?>) ptObject).uiObject;
         }
         throw new IllegalStateException("This object is not an UIObject");
     }

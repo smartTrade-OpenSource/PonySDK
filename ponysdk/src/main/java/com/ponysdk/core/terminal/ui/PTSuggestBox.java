@@ -58,7 +58,7 @@ public class PTSuggestBox extends PTWidget<SuggestBox> {
 
     @Override
     protected SuggestBox createUIObject() {
-        return new SuggestBox(oracle, ptTextBox.cast());
+        return new SuggestBox(oracle, ptTextBox.uiObject);
     }
 
     @Override

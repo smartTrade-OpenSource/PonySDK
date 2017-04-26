@@ -69,7 +69,7 @@ public class PTFrame extends PTWidget<HTMLPanel> implements PostMessageHandler {
 
     @Override
     public void postMessage(final Uint8Array buffer) {
-        postMessage(cast().getElement(), buffer);
+        postMessage(uiObject.getElement(), buffer);
     }
 
     @Override

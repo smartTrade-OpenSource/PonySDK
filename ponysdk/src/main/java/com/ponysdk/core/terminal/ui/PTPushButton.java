@@ -40,7 +40,7 @@ public class PTPushButton extends PTButtonBase<PushButton> {
 
     @Override
     protected PushButton createUIObject() {
-        return new PushButton(image.cast());
+        return new PushButton(image.uiObject);
     }
 
 }

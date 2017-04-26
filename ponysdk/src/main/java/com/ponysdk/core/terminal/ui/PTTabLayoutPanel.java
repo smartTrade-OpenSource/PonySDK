@@ -60,10 +60,10 @@ public class PTTabLayoutPanel extends PTWidget<TabLayoutPanel> {
             final PTWidget<?> ptWidget = (PTWidget<?>) uiBuilder.getPTObject(binaryModel.getIntValue());
             final BinaryModel beforeIndexModel = buffer.readBinaryModel();
             if (ServerToClientModel.BEFORE_INDEX.equals(beforeIndexModel.getModel())) {
-                tabPanel.insert(w, ptWidget.cast(), beforeIndexModel.getIntValue());
+                tabPanel.insert(w, ptWidget.uiObject, beforeIndexModel.getIntValue());
             } else {
                 buffer.rewind(beforeIndexModel);
-                tabPanel.add(w, ptWidget.cast());
+                tabPanel.add(w, ptWidget.uiObject);
             }
         }
     }

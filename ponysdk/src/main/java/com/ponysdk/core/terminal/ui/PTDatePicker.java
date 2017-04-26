@@ -23,6 +23,8 @@
 
 package com.ponysdk.core.terminal.ui;
 
+import java.util.Date;
+
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.datepicker.client.DatePicker;
@@ -32,8 +34,6 @@ import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
-
-import java.util.Date;
 
 public class PTDatePicker extends PTWidget<DatePicker> {
 
@@ -65,15 +65,13 @@ public class PTDatePicker extends PTWidget<DatePicker> {
     }
 
     private void addHandlers(final UIBuilder uiService) {
-        final DatePicker picker = cast();
-
-        picker.addValueChangeHandler(event -> triggerEvent(picker, uiService, event));
-        picker.addShowRangeHandler(event -> {
+        uiObject.addValueChangeHandler(event -> triggerEvent(uiObject, uiService, event));
+        uiObject.addShowRangeHandler(event -> {
             final PTInstruction instruction = new PTInstruction(getObjectID());
             instruction.put(ClientToServerModel.HANDLER_SHOW_RANGE);
             instruction.put(ClientToServerModel.START_DATE, event.getStart().getTime());
             instruction.put(ClientToServerModel.END_DATE, event.getEnd().getTime());
-            uiService.sendDataToServer(picker, instruction);
+            uiService.sendDataToServer(uiObject, instruction);
         });
     }
 
@@ -101,20 +99,19 @@ public class PTDatePicker extends PTWidget<DatePicker> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final DatePicker picker = cast();
         final int modelOrdinal = binaryModel.getModel().ordinal();
         if (ServerToClientModel.DATE.ordinal() == modelOrdinal) {
-            picker.setValue(asDate(binaryModel.getLongValue()));
+            uiObject.setValue(asDate(binaryModel.getLongValue()));
             return true;
         } else if (ServerToClientModel.TIME.ordinal() == modelOrdinal) {
-            picker.setCurrentMonth(asDate(binaryModel.getLongValue()));
+            uiObject.setCurrentMonth(asDate(binaryModel.getLongValue()));
             return true;
         } else if (ServerToClientModel.DATE_ENABLED.ordinal() == modelOrdinal) {
             final String[] dates = binaryModel.getStringValue().split(DATE_SEPARATOR);
             // ServerToClientModel.ENABLED
             final boolean enabled = buffer.readBinaryModel().getBooleanValue();
             for (final String date : dates) {
-                picker.setTransientEnabledOnDates(enabled, asDate(date));
+                uiObject.setTransientEnabledOnDates(enabled, asDate(date));
             }
             return true;
         } else if (ServerToClientModel.ADD_DATE_STYLE.ordinal() == modelOrdinal) {
@@ -122,7 +119,7 @@ public class PTDatePicker extends PTWidget<DatePicker> {
             // ServerToClientModel.STYLE_NAME
             final String style = buffer.readBinaryModel().getStringValue();
             for (final String date : dates) {
-                picker.addStyleToDates(style, asDate(date));
+                uiObject.addStyleToDates(style, asDate(date));
             }
             return true;
         } else if (ServerToClientModel.REMOVE_DATE_STYLE.ordinal() == modelOrdinal) {
@@ -130,11 +127,11 @@ public class PTDatePicker extends PTWidget<DatePicker> {
             // ServerToClientModel.STYLE_NAME
             final String style = buffer.readBinaryModel().getStringValue();
             for (final String date : dates) {
-                picker.removeStyleFromDates(style, asDate(date));
+                uiObject.removeStyleFromDates(style, asDate(date));
             }
             return true;
         } else if (ServerToClientModel.YEAR_ARROWS_VISIBLE.ordinal() == modelOrdinal) {
-            picker.setYearArrowsVisible(binaryModel.getBooleanValue());
+            uiObject.setYearArrowsVisible(binaryModel.getBooleanValue());
             return true;
         } else {
             return super.update(buffer, binaryModel);
