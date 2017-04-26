@@ -53,9 +53,9 @@ public class PConfirmDialog extends PDialogBox {
         return show(window, windowCaption, content, PString.get("dialog.ok"), null, null);
     }
 
-    public static PConfirmDialog show(final PWindow windowID, final String windowCaption, final PWidget content,
+    public static PConfirmDialog show(final PWindow window, final String windowCaption, final PWidget content,
                                       final PConfirmDialogHandler confirmDialogHandler) {
-        return show(windowID, windowCaption, content, PString.get("dialog.ok"), null, confirmDialogHandler);
+        return show(window, windowCaption, content, PString.get("dialog.ok"), null, confirmDialogHandler);
     }
 
     public static PConfirmDialog show(final PWindow window, final String windowCaption, final PWidget content, final String okCaption,
