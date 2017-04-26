@@ -92,7 +92,7 @@ public class PWindow extends PObject {
         initialized = true;
 
         panelByZone.forEach((key, value) -> value.attach(this));
-        if (initializeListener != null) initializeListener.onInitialize(this);
+        if (initializeListeners != null) initializeListeners.forEach(listener -> listener.onInitialize(this));
     }
 
     public static PWindow getMain() {

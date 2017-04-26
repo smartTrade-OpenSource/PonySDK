@@ -23,8 +23,10 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.Set;
 
 import javax.json.JsonObject;
 
@@ -47,8 +49,8 @@ public abstract class PObject {
     protected final int ID = UIContext.get().nextID();
     protected PWindow window;
     protected PFrame frame;
-    protected InitializeListener initializeListener;
-    protected DestroyListener destroyListener;
+    protected Set<InitializeListener> initializeListeners;
+    protected Set<DestroyListener> destroyListeners;
     protected Object data;
 
     protected Queue<Runnable> stackedInstructions;
@@ -110,7 +112,7 @@ public abstract class PObject {
             }
         }
 
-        if (initializeListener != null) initializeListener.onInitialize(this);
+        if (initializeListeners != null) initializeListeners.forEach(listener -> listener.onInitialize(this));
 
         initialized = true;
     }
@@ -313,20 +315,22 @@ public abstract class PObject {
         writer.endObject();
     }
 
-    public void setInitializeListener(final InitializeListener listener) {
-        this.initializeListener = listener;
+    public void addInitializeListener(final InitializeListener listener) {
+        if (this.initializeListeners == null) initializeListeners = new LinkedHashSet<>();
+        this.initializeListeners.add(listener);
     }
 
-    public void setDestroyListener(final DestroyListener listener) {
-        this.destroyListener = listener;
+    public void addDestroyListener(final DestroyListener listener) {
+        if (this.destroyListeners == null) destroyListeners = new LinkedHashSet<>();
+        this.destroyListeners.add(listener);
     }
 
     public void onDestroy() {
         destroy = true;
         terminalHandler = null;
-        initializeListener = null;
-        if (destroyListener != null) destroyListener.onDestroy(this);
-        destroyListener = null;
+        initializeListeners = null;
+        if (this.destroyListeners != null) this.destroyListeners.forEach(listener -> listener.onDestroy(this));
+        this.destroyListeners = null;
     }
 
     public void setData(final Object data) {

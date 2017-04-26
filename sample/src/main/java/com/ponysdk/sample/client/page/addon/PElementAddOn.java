@@ -30,7 +30,11 @@ import com.ponysdk.core.ui.basic.PElement;
 public class PElementAddOn extends PAddOnComposite<PElement> {
 
     public PElementAddOn() {
-        super(Element.newDiv());
+        this(Element.newDiv());
+    }
+
+    public PElementAddOn(final PElement element) {
+        super(element);
     }
 
     public void setInnerText(final String text) {

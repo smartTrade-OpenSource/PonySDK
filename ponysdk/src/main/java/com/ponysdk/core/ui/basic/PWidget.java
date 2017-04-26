@@ -108,7 +108,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     private String stylePrimaryName;
     private String debugID;
 
-    private PAddOn addon;
+    private Set<PAddOn> addons;
 
     // WORKAROUND Remove handler only server side
     private Set<PDomEvent.Type> oneTimeHandlerCreation;
@@ -548,15 +548,21 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     }
 
     void bindAddon(final PAddOn addon) {
-        this.addon = addon;
+        if (this.addons == null) this.addons = new HashSet<>();
+        this.addons.add(addon);
     }
 
-    boolean isAddonAlreadyBound(final PAddOn addon) {
-        return this.addon != null && !Objects.equals(this.addon, addon);
+    public Set<PAddOn> getAddons() {
+        return addons;
     }
 
+    /**
+     * @deprecated Use {@link #getAddons()} instead
+     * @return First binded addon
+     */
+    @Deprecated
     public PAddOn getAddon() {
-        return addon;
+        return addons != null && !addons.isEmpty() ? addons.iterator().next() : null;
     }
 
 }

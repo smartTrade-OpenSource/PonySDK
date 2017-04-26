@@ -39,18 +39,10 @@ public abstract class PAddOnComposite<T extends PWidget> extends PAddOn implemen
     protected PAddOnComposite(final T widget, final JsonObject args) {
         super(args);
         this.widget = widget;
+        this.widget.bindAddon(this);
 
-        if (!this.widget.isAddonAlreadyBound(this)) {
-            this.widget.bindAddon(this);
-
-            if (null != widget.getWindow()) {
-                attach(widget.getWindow());
-            } else {
-                widget.setInitializeListener(object -> attach(widget.getWindow()));
-            }
-        } else {
-            throw new IllegalArgumentException("Widget " + widget + " is already binded to an other Addon");
-        }
+        if (null != widget.getWindow()) attach(widget.getWindow());
+        else widget.addInitializeListener(object -> attach(widget.getWindow()));
     }
 
     protected PAddOnComposite(final T widget) {

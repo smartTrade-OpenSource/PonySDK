@@ -145,6 +145,7 @@ else window['decode'] = decode;
 
 function AbstractAddon(params) {
   this.id = params.id;
+  this.widgetID = params.widgetID;
   this.logLevel = 0;
 
   if (params.widgetElement) {
@@ -167,7 +168,7 @@ AbstractAddon.prototype.onInit = function() {
 
 AbstractAddon.prototype.onAttached = function() {
   if (!this.attached) {
-    this.jqelement = $(this.element).attr("id", this.id);
+    this.jqelement = $(this.element).attr("id", this.widgetID);
     this.initDom();
     this.attached = true;
   }
