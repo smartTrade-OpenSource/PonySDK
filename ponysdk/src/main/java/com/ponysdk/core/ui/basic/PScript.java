@@ -23,15 +23,16 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.json.JsonObject;
+
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.UIContext;
-
-import javax.json.JsonObject;
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * This class allows to execute native Java-script code.
@@ -41,17 +42,20 @@ public class PScript extends PObject {
     private static final String SCRIPT_KEY = PScript.class.getCanonicalName();
     private final Map<Long, ExecutionCallback> callbacksByID = new HashMap<>();
     private long executionID = 0;
+    private String key;
 
     private PScript() {
     }
 
-    private static PScript get(final PWindow window) {
+    private static final PScript get(final PWindow window) {
         if (window != null) {
             final UIContext uiContext = UIContext.get();
+            final String key = SCRIPT_KEY + window.getID();
             final PScript script = uiContext.getAttribute(SCRIPT_KEY + window.getID());
             if (script == null) {
                 final PScript newScript = new PScript();
-                uiContext.setAttribute(SCRIPT_KEY + window, newScript);
+                newScript.key = key;
+                uiContext.setAttribute(key, newScript);
                 newScript.attach(window);
                 return newScript;
             }
@@ -59,6 +63,19 @@ public class PScript extends PObject {
         } else {
             throw new IllegalArgumentException("PScript need to be executed on a window");
         }
+    }
+
+    @Override
+    public boolean attach(final PWindow window) {
+        final boolean result = super.attach(window);
+        if (result) window.addDestroyListener(event -> onDestroy());
+        return result;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        UIContext.get().removeAttribute(key);
     }
 
     public static void execute(final PWindow window, final String js) {

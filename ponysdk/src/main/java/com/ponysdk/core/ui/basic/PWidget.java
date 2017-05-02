@@ -556,6 +556,12 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         return addons;
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (addons != null) addons.forEach(addon -> addon.onDestroy());
+    }
+
     /**
      * @deprecated Use {@link #getAddons()} instead
      * @return First binded addon

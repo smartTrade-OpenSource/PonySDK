@@ -49,15 +49,9 @@ public abstract class PAddOn extends PObject {
 
     @Override
     public boolean attach(final PWindow window) {
-        if (this.window == null && window != null) {
-            this.window = window;
-            init();
-            return true;
-        } else if (this.window != window) {
-            throw new IllegalAccessError(
-                "Widget already attached to an other window, current window : #" + this.window + ", new window : #" + window);
-        }
-        return false;
+        final boolean result = super.attach(window);
+        if (result) window.addDestroyListener(event -> onDestroy());
+        return result;
     }
 
     @Override

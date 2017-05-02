@@ -50,6 +50,19 @@ public abstract class PAddOnComposite<T extends PWidget> extends PAddOn implemen
     }
 
     @Override
+    public boolean attach(final PWindow window) {
+        if (this.window == null && window != null) {
+            this.window = window;
+            init();
+            return true;
+        } else if (this.window != window) {
+            throw new IllegalAccessError(
+                "Widget already attached to an other window, current window : #" + this.window + ", new window : #" + window);
+        }
+        return false;
+    }
+
+    @Override
     protected WidgetType getWidgetType() {
         return WidgetType.ADDON_COMPOSITE;
     }

@@ -331,6 +331,7 @@ public abstract class PObject {
         initializeListeners = null;
         if (this.destroyListeners != null) this.destroyListeners.forEach(listener -> listener.onDestroy(this));
         this.destroyListeners = null;
+        window = null;
     }
 
     public void setData(final Object data) {
