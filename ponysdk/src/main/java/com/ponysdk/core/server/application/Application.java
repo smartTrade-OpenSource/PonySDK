@@ -52,9 +52,12 @@ public class Application {
 
     private final HttpSession session;
 
-    public Application(final HttpSession session, final ApplicationManagerOption options, final UserAgent userAgent) {
-        this.options = options;
+    private final String id;
+
+    public Application(final String id, final HttpSession session, final ApplicationManagerOption options, final UserAgent userAgent) {
+        this.id = id;
         this.session = session;
+        this.options = options;
         this.userAgent = userAgent;
     }
 
@@ -109,6 +112,10 @@ public class Application {
         return options;
     }
 
+    public String getId() {
+        return id;
+    }
+
     public HttpSession getSession() {
         return session;
     }
@@ -123,7 +130,7 @@ public class Application {
 
     @Override
     public String toString() {
-        return "Application [options=" + options + ", userAgent=" + userAgent + ", session=" + session + "]";
+        return "Application [id=" + id + ", options=" + options + ", userAgent=" + userAgent + "]";
     }
 
 }

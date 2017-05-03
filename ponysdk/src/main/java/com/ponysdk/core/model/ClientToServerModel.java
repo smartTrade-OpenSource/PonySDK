@@ -84,7 +84,9 @@ public enum ClientToServerModel {
     HANDLER_SCROLL_HEIGHT("K"),
     HANDLER_SCROLL_WIDTH("L"),
     HANDLER_SCROLL_VERTICAL("M"),
-    HANDLER_SCROLL_HORIZONTAL("N");
+    HANDLER_SCROLL_HORIZONTAL("N"),
+
+    APPLICATION_ID("O");
 
     private String key;
 

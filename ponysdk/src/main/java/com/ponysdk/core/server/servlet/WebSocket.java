@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.servlet.http.HttpSession;
 
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
@@ -69,8 +70,9 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
     @Override
     public void onWebSocketConnect(final Session session) {
+        final HttpSession httpSession = request.getSession();
         if (log.isInfoEnabled()) log.info("WebSocket connected from {}, sessionID {}, userAgent {}", session.getRemoteAddress(),
-            request.getSession(), request.getHeader("User-Agent"));
+            httpSession, request.getHeader("User-Agent"));
 
         this.session = session;
         // 1K for max chunk size and 1M for total buffer size
@@ -78,9 +80,10 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         this.websocketPusher = new WebSocketPusher(session, 1 << 20, 1 << 12, TimeUnit.SECONDS.toMillis(60));
         this.context = new TxnContext(this);
 
-        Application application = SessionManager.get().getApplication(request.getSession().getId());
+        final String applicationId = httpSession.getId();
+        Application application = SessionManager.get().getApplication(applicationId);
         if (application == null) {
-            application = new Application(request.getSession(), applicationManager.getOptions(),
+            application = new Application(applicationId, httpSession, applicationManager.getOptions(),
                 UserAgent.parseUserAgentString(request.getHeader("User-Agent")));
             SessionManager.get().registerApplication(application);
         }

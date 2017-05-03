@@ -27,6 +27,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Image;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
+import com.ponysdk.core.model.MappingPath;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.PonySDK;
 import com.ponysdk.core.terminal.UIBuilder;
@@ -85,9 +86,14 @@ public class PTImage extends PTWidget<Image> {
             // ServerToClientModel.STREAM_REQUEST_ID
             final int streamRequestId = buffer.readBinaryModel().getIntValue();
 
-            uiObject.setUrl(GWT.getHostPageBaseURL() + "stream?" + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "="
-                    + PonySDK.get().getContextId() + "&" + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "="
-                    + streamRequestId);
+            // ServerToClientModel.APPLICATION_ID
+            final String applicationId = buffer.readBinaryModel().getStringValue();
+
+            final String action = GWT.getHostPageBaseURL() + MappingPath.STREAM + "?"
+                    + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "=" + PonySDK.get().getContextId() + "&"
+                    + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "=" + streamRequestId + "&"
+                    + ClientToServerModel.APPLICATION_ID.toStringValue() + "=" + applicationId;
+            uiObject.setUrl(action);
         } else {
             super.addHandler(buffer, handlerModel);
         }

@@ -23,6 +23,9 @@
 
 package com.ponysdk.sample.client;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.Date;
@@ -94,6 +97,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         testPAddon();
 
         createWindow().open();
+
+        downloadFile();
 
         testNewEvent();
 
@@ -218,6 +223,31 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         POptionPane.showConfirmDialog(PWindow.getMain(), null, "BBB");
 
         // uiContext.getHistory().newItem("", false);
+    }
+
+    private void downloadFile() {
+        final PButton downloadImageButton = Element.newPButton("Download Pony image");
+        downloadImageButton.addClickHandler(event -> UIContext.get().stackStreamRequest((request, response, uiContext1) -> {
+            response.reset();
+            response.setContentType("image/png");
+            response.setHeader("Content-Disposition", "attachment; filename=pony_image.png");
+
+            try {
+                final OutputStream output = response.getOutputStream();
+                final InputStream input = getClass().getClassLoader().getResourceAsStream("images/pony.png");
+
+                final byte[] buff = new byte[1024];
+                while (input.read(buff) != -1) {
+                    output.write(buff);
+                }
+
+                output.flush();
+                output.close();
+            } catch (final IOException e) {
+                e.printStackTrace();
+            }
+        }));
+        PWindow.getMain().add(downloadImageButton);
     }
 
     private void testPAddon() {

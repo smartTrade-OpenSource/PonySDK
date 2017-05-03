@@ -309,6 +309,7 @@ public class UIContext {
         writer.write(ServerToClientModel.TYPE_ADD_HANDLER, -1);
         writer.write(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_STREAM_REQUEST.getValue());
         writer.write(ServerToClientModel.STREAM_REQUEST_ID, streamRequestID);
+        writer.write(ServerToClientModel.APPLICATION_ID, getApplication().getId());
         writer.endObject();
 
         streamListenerByID.put(streamRequestID, streamListener);
@@ -322,6 +323,7 @@ public class UIContext {
         writer.write(ServerToClientModel.TYPE_ADD_HANDLER, objectID);
         writer.write(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST.getValue());
         writer.write(ServerToClientModel.STREAM_REQUEST_ID, streamRequestID);
+        writer.write(ServerToClientModel.APPLICATION_ID, getApplication().getId());
         writer.endObject();
 
         streamListenerByID.put(streamRequestID, streamListener);

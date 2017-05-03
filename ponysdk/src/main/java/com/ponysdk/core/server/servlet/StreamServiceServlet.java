@@ -23,18 +23,20 @@
 
 package com.ponysdk.core.server.servlet;
 
-import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.server.application.Application;
-import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.ui.eventbus.StreamHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.IOException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.server.application.Application;
+import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.ui.eventbus.StreamHandler;
 
 /**
  * The server side implementation of the RPC service.
@@ -47,16 +49,13 @@ public class StreamServiceServlet extends HttpServlet {
 
     private static void streamRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         try {
-            final Application application = SessionManager.get().getApplication(req.getSession().getId());
-            if (application != null) {
-                final Integer uiContextID = Integer.parseInt(req.getParameter(ClientToServerModel.UI_CONTEXT_ID.toStringValue()));
-                final UIContext uiContext = application.getUIContext(uiContextID);
-                final StreamHandler streamHandler = uiContext
-                    .removeStreamListener(Integer.parseInt(req.getParameter(ClientToServerModel.STREAM_REQUEST_ID.toStringValue())));
-                streamHandler.onStream(req, resp, uiContext);
-            } else {
-                log.error("Can't find an application linked to the session #" + req.getSession().getId());
-            }
+            final String applicationId = req.getParameter(ClientToServerModel.APPLICATION_ID.toStringValue());
+            final Application application = SessionManager.get().getApplication(applicationId);
+            final Integer uiContextID = Integer.parseInt(req.getParameter(ClientToServerModel.UI_CONTEXT_ID.toStringValue()));
+            final UIContext uiContext = application.getUIContext(uiContextID);
+            final StreamHandler streamHandler = uiContext
+                .removeStreamListener(Integer.parseInt(req.getParameter(ClientToServerModel.STREAM_REQUEST_ID.toStringValue())));
+            streamHandler.onStream(req, resp, uiContext);
         } catch (final Exception e) {
             log.error("Cannot stream request", e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());

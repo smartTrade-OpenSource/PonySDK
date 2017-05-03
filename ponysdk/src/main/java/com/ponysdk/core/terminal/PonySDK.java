@@ -33,6 +33,7 @@ import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.MappingPath;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.request.FrameRequestBuilder;
 import com.ponysdk.core.terminal.request.WindowRequestBuilder;
@@ -85,7 +86,7 @@ public class PonySDK implements UncaughtExceptionHandler {
 
     private void startMainContext() {
         Window.addCloseHandler(event -> close());
-        final String builder = GWT.getHostPageBaseURL().replaceFirst("http", "ws") + "ws?"
+        final String builder = GWT.getHostPageBaseURL().replaceFirst("http", "ws") + MappingPath.WEBSOCKET + "?"
                 + ClientToServerModel.TYPE_HISTORY.toStringValue() + "=" + History.getToken();
         socketClient = new WebSocketClient(builder, uiBuilder, WebSocketDataType.ARRAYBUFFER);
     }

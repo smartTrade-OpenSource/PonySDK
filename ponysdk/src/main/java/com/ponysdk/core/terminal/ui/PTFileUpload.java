@@ -31,6 +31,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
+import com.ponysdk.core.model.MappingPath;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.PonySDK;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
@@ -102,9 +103,13 @@ public class PTFileUpload extends PTWidget<FormPanel> {
             // ServerToClientModel.STREAM_REQUEST_ID
             final int streamRequestId = buffer.readBinaryModel().getIntValue();
 
-            final String action = GWT.getHostPageBaseURL() + "stream?" + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "="
-                    + PonySDK.get().getContextId() + "&" + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "="
-                    + streamRequestId;
+            // ServerToClientModel.APPLICATION_ID
+            final String applicationId = buffer.readBinaryModel().getStringValue();
+
+            final String action = GWT.getHostPageBaseURL() + MappingPath.STREAM + "?"
+                    + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "=" + PonySDK.get().getContextId() + "&"
+                    + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "=" + streamRequestId + "&"
+                    + ClientToServerModel.APPLICATION_ID.toStringValue() + "=" + applicationId;
             uiObject.setAction(action);
             uiObject.submit();
         } else {

@@ -35,7 +35,7 @@ public class SessionManager {
 
     private static final SessionManager INSTANCE = new SessionManager();
 
-    private final Map<String, Application> applicationsBySessionID = new ConcurrentHashMap<>();
+    private final Map<String, Application> applications = new ConcurrentHashMap<>();
 
     private final List<ApplicationListener> listeners = new ArrayList<>();
 
@@ -44,20 +44,20 @@ public class SessionManager {
     }
 
     public Collection<Application> getApplications() {
-        return new ArrayList<>(applicationsBySessionID.values());
+        return new ArrayList<>(applications.values());
     }
 
-    public Application getApplication(final String sessionID) {
-        return applicationsBySessionID.get(sessionID);
+    public Application getApplication(final String id) {
+        return applications.get(id);
     }
 
     public void registerApplication(final Application application) {
-        applicationsBySessionID.put(application.getSession().getId(), application);
+        applications.put(application.getId(), application);
         listeners.forEach(listener -> listener.onApplicationCreated(application));
     }
 
     public void unregisterApplication(final Application application) {
-        applicationsBySessionID.remove(application.getSession().getId());
+        applications.remove(application.getId());
         listeners.forEach(listener -> listener.onApplicationDestroyed(application));
     }
 
@@ -70,7 +70,7 @@ public class SessionManager {
      */
     public int countUIContexts() {
         int count = 0;
-        for (final Application application : applicationsBySessionID.values()) {
+        for (final Application application : applications.values()) {
             count += application.countUIContexts();
         }
         return count;
