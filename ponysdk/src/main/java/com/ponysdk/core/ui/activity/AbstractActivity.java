@@ -49,7 +49,9 @@ public abstract class AbstractActivity<T extends IsPWidget> implements Activity 
         this.world = world;
         this.started = true;
 
-        this.world.setWidget(getView());
+        final T view2 = getView();
+        view2.asWidget().addStyleName("pony-LoadingBox");
+        this.world.setWidget(view2);
 
         if (firstStart) {
             buildView();
@@ -57,6 +59,7 @@ public abstract class AbstractActivity<T extends IsPWidget> implements Activity 
         }
 
         updateView(place);
+        view2.asWidget().removeStyleName("pony-LoadingBox");
     }
 
     public T getView() {
