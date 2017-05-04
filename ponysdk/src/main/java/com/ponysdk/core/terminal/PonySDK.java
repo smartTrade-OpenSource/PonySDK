@@ -124,10 +124,6 @@ public class PonySDK implements UncaughtExceptionHandler {
         uiBuilder.setReadyWindow(windowID);
     }
 
-    public void registerCommunicationError(final CommunicationErrorHandler communicationErrorClosure) {
-        uiBuilder.registerCommunicationError(communicationErrorClosure);
-    }
-
     public void registerAddOnFactory(final String signature, final JavascriptAddOnFactory javascriptAddOnFactory) {
         uiBuilder.registerJavascriptAddOnFactory(signature, javascriptAddOnFactory);
     }

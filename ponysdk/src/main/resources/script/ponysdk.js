@@ -108,11 +108,6 @@ function onPonySDKModuleLoaded() {
         }
     }
 
-    pony.registerCommunicationError(function(code, message) {
-        // When the client signout, we reload the application
-        if(code == 1000) location.reload();
-    });
-
     pony.start();
 
     reconnectionCheck = new Check();

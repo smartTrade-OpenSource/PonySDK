@@ -27,7 +27,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.user.client.rpc.StatusCodeException;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
@@ -81,16 +80,14 @@ public class WebSocketClient implements MessageSender {
         webSocket.setOnclose(event -> {
             if (event instanceof CloseEvent) {
                 final CloseEvent closeEvent = (CloseEvent) event;
-                if (log.isLoggable(Level.INFO)) log.info("WebSoket disconnected : " + closeEvent.getCode());
-                uiBuilder.onCommunicationError(new StatusCodeException(closeEvent.getCode(), closeEvent.getReason()));
+                final int statusCode = closeEvent.getCode();
+                if (log.isLoggable(Level.INFO)) log.info("WebSoket disconnected : " + statusCode);
             } else {
-                if (log.isLoggable(Level.INFO)) log.info("WebSoket disconnected");
-                uiBuilder.onCommunicationError(new Exception("Websocket connection closed"));
+                log.severe("WebSoket disconnected : " + event);
             }
         });
         webSocket.setOnerror(event -> {
-            if (log.isLoggable(Level.INFO)) log.info("WebSoket error");
-            uiBuilder.onCommunicationError(new Exception("Websocket error"));
+            log.severe("WebSoket error : " + event);
         });
         webSocket.setOnmessage(event -> messageReader.read((MessageEvent) event));
     }
