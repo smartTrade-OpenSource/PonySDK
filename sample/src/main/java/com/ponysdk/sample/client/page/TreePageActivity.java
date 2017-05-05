@@ -62,10 +62,9 @@ public class TreePageActivity extends SamplePageActivity {
         anchor.addClickHandler(event -> secondItem.setState(!secondItem.getState()));
 
         final PTreeItem thirdItem = Element.newPTreeItem(Element.newPImage("images/pony.png"));
-
-        tree.addItem(firstItem);
-        tree.addItem(secondItem);
-        tree.addItem(thirdItem);
+        tree.add(firstItem);
+        tree.add(secondItem);
+        tree.add(thirdItem);
 
         final Query query = new Query();
         // final FindPonysCommand command = new FindPonysCommand(query);

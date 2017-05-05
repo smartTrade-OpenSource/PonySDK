@@ -23,6 +23,14 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import javax.json.JsonObject;
+
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -32,9 +40,6 @@ import com.ponysdk.core.ui.basic.event.HasPAnimation;
 import com.ponysdk.core.ui.basic.event.HasPSelectionHandlers;
 import com.ponysdk.core.ui.basic.event.PSelectionEvent;
 import com.ponysdk.core.ui.basic.event.PSelectionHandler;
-
-import javax.json.JsonObject;
-import java.util.*;
 
 /**
  * A standard hierarchical tree widget. The tree contains a hierarchy of
@@ -59,32 +64,19 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
     private PTreeItem curSelection;
 
     protected PTree() {
-        root = new PTreeItem(true);
+        root = new PTreeItem(this);
         root.saveAdd(root.getID(), ID);
     }
 
     @Override
     protected void init0() {
         super.init0();
-        root.setTree(this);
         root.attach(window);
     }
 
     @Override
     protected WidgetType getWidgetType() {
         return WidgetType.TREE;
-    }
-
-    public PTreeItem addItem(final String item) {
-        return root.addItem(item);
-    }
-
-    public PTreeItem addItem(final PTreeItem item) {
-        return root.addItem(item);
-    }
-
-    public void removeItem(final PTreeItem item) {
-        root.removeItem(item);
     }
 
     public PTreeItem getSelectedItem() {
@@ -99,8 +91,20 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
         curSelection.setSelected(true);
     }
 
-    public PTreeItem getItem(final int index) {
-        return root.getChild(index);
+    public PTreeItem add(final String item) {
+        return root.add(item);
+    }
+
+    public PTreeItem add(final PTreeItem item) {
+        return root.add(item);
+    }
+
+    public void remove(final PTreeItem item) {
+        root.remove(item);
+    }
+
+    public PTreeItem get(final int index) {
+        return root.get(index);
     }
 
     /**
@@ -108,15 +112,15 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
      *
      * @return this tree's item count
      */
-    public int getItemCount() {
-        return root.getChildCount();
+    public int size() {
+        return root.size();
     }
 
     void orphan(final PWidget child) {
         if (child.getParent() == this) {
             child.setParent(null);
             childWidgets.remove(child);
-        } else {
+        } else if (child.getParent() != null) {
             throw new IllegalStateException("Can't adopt an widget attached to another parent");
         }
     }

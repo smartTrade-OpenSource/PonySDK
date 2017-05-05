@@ -52,6 +52,7 @@ import com.ponysdk.core.ui.basic.PStackLayoutPanel;
 import com.ponysdk.core.ui.basic.PTabLayoutPanel;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PTree;
+import com.ponysdk.core.ui.basic.PTreeItem;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
@@ -604,8 +605,21 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     private static final PTree createTree() {
         final PTree tree = Element.newPTree();
-        tree.addItem("1");
-        tree.addItem(Element.newPTreeItem("2"));
+
+        final PTreeItem firstFolder = tree.add("First");
+        firstFolder.add("2");
+        firstFolder.add(0, Element.newPTreeItem("1"));
+
+        firstFolder.setState(true);
+
+        final PTreeItem secondFolder = Element.newPTreeItem("Second");
+        final PTreeItem subItem = secondFolder.add(Element.newPTreeItem());
+        subItem.setText("3");
+        secondFolder.add(Element.newPTreeItem(Element.newPLabel("4")));
+        tree.add(secondFolder);
+
+        secondFolder.setSelected(true);
+
         return tree;
     }
 

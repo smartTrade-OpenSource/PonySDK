@@ -35,22 +35,24 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public class PTTreeItem extends PTUIObject<TreeItem> {
 
-    private boolean isRoot = false;
-
     private Tree tree;
 
     private String text;
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
-        // ServerToClientModel.TEXT
-        this.text = buffer.readBinaryModel().getStringValue();
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
+        BinaryModel binaryModel = buffer.readBinaryModel();
+        if (ServerToClientModel.TEXT.equals(binaryModel.getModel())) {
+            this.text = binaryModel.getStringValue();
+        } else {
+            buffer.rewind(binaryModel);
+        }
 
-        super.create(buffer, objectId, uiService);
+        super.create(buffer, objectId, uiBuilder);
 
-        final BinaryModel binaryModel = buffer.readBinaryModel();
-        if (ServerToClientModel.ROOT.equals(binaryModel.getModel())) {
-            this.isRoot = binaryModel.getBooleanValue();
+        binaryModel = buffer.readBinaryModel();
+        if (ServerToClientModel.TREE_ROOT.equals(binaryModel.getModel())) {
+            this.tree = (Tree) asWidget(uiBuilder.getPTObject(binaryModel.getIntValue()));
         } else {
             buffer.rewind(binaryModel);
         }
@@ -65,24 +67,20 @@ public class PTTreeItem extends PTUIObject<TreeItem> {
     public void add(final ReaderBuffer buffer, final PTObject ptObject) {
         final UIObject widget = asWidget(ptObject);
 
-        if (widget instanceof Tree) {
-            this.tree = (Tree) widget;
+        final BinaryModel binaryModel = buffer.readBinaryModel();
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.WIDGET.equals(model)) {
+            uiObject.setWidget((Widget) widget);
+        } else if (ServerToClientModel.INDEX.equals(model)) {
+            final int index = binaryModel.getIntValue();
+            final TreeItem w = (TreeItem) widget;
+            if (tree != null) tree.insertItem(index, w);
+            else uiObject.insertItem(index, w);
         } else {
-            final BinaryModel binaryModel = buffer.readBinaryModel();
-            ServerToClientModel model = binaryModel.getModel();
-            if (ServerToClientModel.WIDGET.equals(model)) {
-                uiObject.setWidget((Widget) widget);
-            } else if (ServerToClientModel.INDEX.equals(model)) {
-                final int index = binaryModel.getIntValue();
-                final TreeItem w = (TreeItem) widget;
-                if (isRoot) tree.insertItem(index, w);
-                else uiObject.insertItem(index, w);
-            } else {
-                buffer.rewind(binaryModel);
-                final TreeItem w = (TreeItem) widget;
-                if (isRoot) tree.addItem(w);
-                else uiObject.addItem(w);
-            }
+            buffer.rewind(binaryModel);
+            final TreeItem w = (TreeItem) widget;
+            if (tree != null) tree.addItem(w);
+            else uiObject.addItem(w);
         }
     }
 
@@ -94,6 +92,9 @@ public class PTTreeItem extends PTUIObject<TreeItem> {
             return true;
         } else if (ServerToClientModel.STATE.ordinal() == modelOrdinal) {
             uiObject.setState(binaryModel.getBooleanValue());
+            return true;
+        } else if (ServerToClientModel.TEXT.ordinal() == modelOrdinal) {
+            uiObject.setText(binaryModel.getStringValue());
             return true;
         } else {
             return super.update(buffer, binaryModel);

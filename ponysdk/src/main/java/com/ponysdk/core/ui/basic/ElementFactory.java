@@ -175,7 +175,7 @@ public interface ElementFactory {
 
     PTree newPTree();
 
-    PTreeItem newPTreeItem(final String html);
+    PTreeItem newPTreeItem(final String text);
 
     PTreeItem newPTreeItem(final PWidget widget);
 

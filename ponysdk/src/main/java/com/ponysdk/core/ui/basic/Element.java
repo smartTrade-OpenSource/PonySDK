@@ -363,8 +363,8 @@ public class Element {
         return f.newPTree();
     }
 
-    public static final PTreeItem newPTreeItem(final String html) {
-        return f.newPTreeItem(html);
+    public static final PTreeItem newPTreeItem(final String text) {
+        return f.newPTreeItem(text);
     }
 
     public static final PTreeItem newPTreeItem(final PWidget widget) {
@@ -399,7 +399,8 @@ public class Element {
         return f.newPWindow(parentWindow, false, url, name, features);
     }
 
-    public static final PWindow newPWindow(final PWindow parentWindow, final boolean relative, final String url, final String name, final String features) {
+    public static final PWindow newPWindow(final PWindow parentWindow, final boolean relative, final String url, final String name,
+                                           final String features) {
         return f.newPWindow(parentWindow, relative, url, name, features);
     }
 

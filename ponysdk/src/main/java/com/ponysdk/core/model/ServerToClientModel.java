@@ -185,7 +185,7 @@ public enum ServerToClientModel {
     COMMAND_ID(ValueTypeModel.LONG),
     ORACLE(ValueTypeModel.INTEGER),
     STREAM_REQUEST_ID(ValueTypeModel.INTEGER),
-    ROOT(ValueTypeModel.BOOLEAN),
+    TREE_ROOT(ValueTypeModel.INTEGER),
     STATE(ValueTypeModel.BOOLEAN),
     FACTORY(ValueTypeModel.STRING),
     DIRECTION(ValueTypeModel.BYTE),
