@@ -56,16 +56,6 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     protected PDatePicker() {
     }
 
-    private static String dateToString(final Collection<Date> dates) {
-        final StringBuilder asString = new StringBuilder();
-        final Iterator<Date> it = dates.iterator();
-        while (it.hasNext()) {
-            asString.append(String.valueOf(it.next().getTime()));
-            if (it.hasNext()) asString.append(PTDatePicker.DATE_SEPARATOR);
-        }
-        return asString.toString();
-    }
-
     @Override
     protected WidgetType getWidgetType() {
         return WidgetType.DATEPICKER;
@@ -155,30 +145,39 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
      * next time the DatePicker is refreshed.
      */
     public final void setTransientEnabledOnDates(final boolean enabled, final Collection<Date> dates) {
-        saveUpdate((writer) -> {
-            writer.write(ServerToClientModel.DATE_ENABLED, dateToString(dates));
-            writer.write(ServerToClientModel.ENABLED, enabled);
-        });
+        final String encodedDates = dateToString(dates);
+        if (encodedDates != null && !encodedDates.isEmpty()) {
+            saveUpdate((writer) -> {
+                writer.write(ServerToClientModel.DATE_ENABLED, encodedDates);
+                writer.write(ServerToClientModel.ENABLED, enabled);
+            });
+        }
     }
 
     /**
      * Add a style name to the given dates.
      */
     public void addStyleToDates(final String styleName, final Collection<Date> dates) {
-        saveUpdate((writer) -> {
-            writer.write(ServerToClientModel.ADD_DATE_STYLE, dateToString(dates));
-            writer.write(ServerToClientModel.STYLE_NAME, styleName);
-        });
+        final String encodedDates = dateToString(dates);
+        if (encodedDates != null && !encodedDates.isEmpty()) {
+            saveUpdate((writer) -> {
+                writer.write(ServerToClientModel.ADD_DATE_STYLE, encodedDates);
+                writer.write(ServerToClientModel.STYLE_NAME, styleName);
+            });
+        }
     }
 
     /**
      * Removes the styleName from the given dates (even if it is transient).
      */
     public void removeStyleFromDates(final String styleName, final Collection<Date> dates) {
-        saveUpdate((writer) -> {
-            writer.write(ServerToClientModel.REMOVE_DATE_STYLE, dateToString(dates));
-            writer.write(ServerToClientModel.STYLE_NAME, styleName);
-        });
+        final String encodedDates = dateToString(dates);
+        if (encodedDates != null && !encodedDates.isEmpty()) {
+            saveUpdate((writer) -> {
+                writer.write(ServerToClientModel.REMOVE_DATE_STYLE, encodedDates);
+                writer.write(ServerToClientModel.STYLE_NAME, styleName);
+            });
+        }
     }
 
     public void setYearArrowsVisible(final boolean visible) {
@@ -199,6 +198,20 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
 
     public int getDay() {
         return day;
+    }
+
+    private static final String dateToString(final Collection<Date> dates) {
+        if (dates != null && !dates.isEmpty()) {
+            final StringBuilder asString = new StringBuilder();
+            final Iterator<Date> it = dates.iterator();
+            while (it.hasNext()) {
+                asString.append(String.valueOf(it.next().getTime()));
+                if (it.hasNext()) asString.append(PTDatePicker.DATE_SEPARATOR);
+            }
+            return asString.toString();
+        } else {
+            return null;
+        }
     }
 
 }
