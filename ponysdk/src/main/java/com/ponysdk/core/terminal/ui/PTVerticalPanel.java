@@ -27,7 +27,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
-import com.ponysdk.core.terminal.ui.alignment.AlignmentConverter;
+import com.ponysdk.core.terminal.ui.converter.GWTConverter;
 
 public class PTVerticalPanel extends PTCellPanel<VerticalPanel> {
 
@@ -57,13 +57,14 @@ public class PTVerticalPanel extends PTCellPanel<VerticalPanel> {
             uiObject.setSpacing(binaryModel.getIntValue());
             return true;
         } else if (ServerToClientModel.HORIZONTAL_ALIGNMENT.ordinal() == modelOrdinal) {
-            uiObject.setHorizontalAlignment(AlignmentConverter.asHorizontalAlignmentConstant(binaryModel.getByteValue()));
+            uiObject.setHorizontalAlignment(GWTConverter.asHorizontalAlignmentConstant(binaryModel.getByteValue()));
             return true;
         } else if (ServerToClientModel.VERTICAL_ALIGNMENT.ordinal() == modelOrdinal) {
-            uiObject.setVerticalAlignment(AlignmentConverter.asVerticalAlignmentConstant(binaryModel.getByteValue()));
+            uiObject.setVerticalAlignment(GWTConverter.asVerticalAlignmentConstant(binaryModel.getByteValue()));
             return true;
         } else {
             return super.update(buffer, binaryModel);
         }
     }
+
 }

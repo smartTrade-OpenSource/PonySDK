@@ -169,9 +169,9 @@ public enum ServerToClientModel {
     UNORDERED(ValueTypeModel.NULL),
     BACK_COLOR(ValueTypeModel.STRING),
     FONT_NAME(ValueTypeModel.STRING),
-    FONT_SIZE(ValueTypeModel.STRING),
+    FONT_SIZE(ValueTypeModel.BYTE),
     FONT_COLOR(ValueTypeModel.STRING),
-    JUSTIFICATION(ValueTypeModel.STRING),
+    JUSTIFICATION(ValueTypeModel.BYTE),
     TOGGLE_BOLD(ValueTypeModel.NULL),
     TOGGLE_ITALIC(ValueTypeModel.NULL),
     TOGGLE_SUBSCRIPT(ValueTypeModel.NULL),
@@ -248,15 +248,15 @@ public enum ServerToClientModel {
         this.type = size;
     }
 
-    public short getValue() {
+    public final short getValue() {
         return (short) ordinal();
     }
 
-    public ValueTypeModel getTypeModel() {
+    public final ValueTypeModel getTypeModel() {
         return type;
     }
 
-    public boolean equals(final ServerToClientModel other) {
+    public final boolean equals(final ServerToClientModel other) {
         return other != null && this.ordinal() == other.ordinal();
     }
 

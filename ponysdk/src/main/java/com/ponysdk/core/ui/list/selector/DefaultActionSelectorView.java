@@ -23,11 +23,11 @@
 
 package com.ponysdk.core.ui.list.selector;
 
-import com.ponysdk.core.internalization.PString;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PMenuBar;
 import com.ponysdk.core.ui.basic.PMenuItem;
 import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.i18n.PString;
 
 import java.util.Collections;
 import java.util.Set;

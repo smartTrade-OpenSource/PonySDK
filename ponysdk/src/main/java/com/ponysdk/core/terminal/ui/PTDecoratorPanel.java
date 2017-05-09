@@ -25,16 +25,11 @@ package com.ponysdk.core.terminal.ui;
 
 import com.google.gwt.user.client.ui.DecoratorPanel;
 
-public class PTDecoratorPanel extends PTSimplePanel {
+public class PTDecoratorPanel extends PTSimplePanel<DecoratorPanel> {
 
     @Override
     protected DecoratorPanel createUIObject() {
         return new DecoratorPanel();
-    }
-
-    @Override
-    public DecoratorPanel cast() {
-        return (DecoratorPanel) uiObject;
     }
 
 }

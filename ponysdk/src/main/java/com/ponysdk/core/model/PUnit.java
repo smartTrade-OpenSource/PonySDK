@@ -37,16 +37,16 @@ public enum PUnit {
 
     private final String value;
 
-    PUnit(final String unit) {
+    private PUnit(final String unit) {
         this.value = unit;
     }
 
-    public String getValue() {
-        return value;
+    public final byte getByteValue() {
+        return (byte) ordinal();
     }
 
-    public byte getByteValue() {
-        return (byte) ordinal();
+    public final String getValue() {
+        return value;
     }
 
 }

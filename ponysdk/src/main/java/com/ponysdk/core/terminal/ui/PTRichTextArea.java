@@ -32,6 +32,7 @@ import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
+import com.ponysdk.core.terminal.ui.converter.GWTConverter;
 
 public class PTRichTextArea extends PTFocusWidget<RichTextArea> implements BlurHandler {
 
@@ -80,32 +81,10 @@ public class PTRichTextArea extends PTFocusWidget<RichTextArea> implements BlurH
             uiObject.getFormatter().setFontName(binaryModel.getStringValue());
             return true;
         } else if (ServerToClientModel.FONT_SIZE.ordinal() == modelOrdinal) {
-            final FontSize fontSize = FontSize.valueOf(binaryModel.getStringValue());
-            switch (fontSize) {
-                case LARGE:
-                    uiObject.getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.LARGE);
-                    break;
-                case SMALL:
-                    uiObject.getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.SMALL);
-                    break;
-                case MEDIUM:
-                    uiObject.getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.MEDIUM);
-                    break;
-                case X_LARGE:
-                    uiObject.getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.X_LARGE);
-                    break;
-                case X_SMALL:
-                    uiObject.getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.X_SMALL);
-                    break;
-                case XX_LARGE:
-                    uiObject.getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.XX_LARGE);
-                    break;
-                case XX_SMALL:
-                    uiObject.getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.XX_SMALL);
-                    break;
-                default:
-                    break;
-            }
+            uiObject.getFormatter().setFontSize(GWTConverter.asFontSize(binaryModel.getByteValue()));
+            return true;
+        } else if (ServerToClientModel.JUSTIFICATION.ordinal() == modelOrdinal) {
+            uiObject.getFormatter().setJustification(GWTConverter.asJustification(binaryModel.getByteValue()));
             return true;
         } else {
             return super.update(buffer, binaryModel);
@@ -117,23 +96,6 @@ public class PTRichTextArea extends PTFocusWidget<RichTextArea> implements BlurH
         final PTInstruction instruction = new PTInstruction(getObjectID());
         instruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE, uiObject.getHTML());
         uiBuilder.sendDataToServer(uiObject, instruction);
-    }
-
-    public enum FontSize {
-        LARGE,
-        MEDIUM,
-        SMALL,
-        X_LARGE,
-        X_SMALL,
-        XX_LARGE,
-        XX_SMALL
-    }
-
-    public enum Justification {
-        CENTER,
-        FULL,
-        LEFT,
-        RIGHT
     }
 
 }

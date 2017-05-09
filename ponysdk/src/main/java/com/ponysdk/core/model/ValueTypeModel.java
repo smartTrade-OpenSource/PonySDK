@@ -37,11 +37,11 @@ public enum ValueTypeModel {
 
     private final int size;
 
-    ValueTypeModel(final byte size) {
+    private ValueTypeModel(final byte size) {
         this.size = size;
     }
 
-    public int getSize() {
+    public final int getSize() {
         return size;
     }
 

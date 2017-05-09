@@ -32,9 +32,10 @@ import java.util.Objects;
 import javax.json.JsonObject;
 
 import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.PFontSize;
+import com.ponysdk.core.model.PJustification;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.terminal.ui.PTRichTextArea;
 import com.ponysdk.core.ui.basic.event.PHasHTML;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
@@ -157,16 +158,16 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
             saveUpdate(writer -> writer.write(ServerToClientModel.FONT_NAME, name));
         }
 
-        public void setFontSize(final String fontSize) {
-            saveUpdate(writer -> writer.write(ServerToClientModel.FONT_SIZE, fontSize));
+        public void setFontSize(final PFontSize fontSize) {
+            saveUpdate(writer -> writer.write(ServerToClientModel.FONT_SIZE, fontSize.getValue()));
         }
 
         public void setForeColor(final String color) {
             saveUpdate(writer -> writer.write(ServerToClientModel.FONT_COLOR, color));
         }
 
-        public void setJustification(final PTRichTextArea.Justification justification) {
-            saveUpdate(writer -> writer.write(ServerToClientModel.JUSTIFICATION, justification.name()));
+        public void setJustification(final PJustification justification) {
+            saveUpdate(writer -> writer.write(ServerToClientModel.JUSTIFICATION, justification.getValue()));
         }
 
         public void toggleBold() {

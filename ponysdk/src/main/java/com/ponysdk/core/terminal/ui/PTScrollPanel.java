@@ -35,18 +35,13 @@ import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
-public class PTScrollPanel extends PTSimplePanel {
+public class PTScrollPanel extends PTSimplePanel<ScrollPanel> {
 
     private boolean dragging;
 
     @Override
     protected ScrollPanel createUIObject() {
         return new ScrollPanel();
-    }
-
-    @Override
-    public ScrollPanel cast() {
-        return (ScrollPanel) uiObject;
     }
 
     @Override
@@ -59,17 +54,17 @@ public class PTScrollPanel extends PTSimplePanel {
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         final int modelOrdinal = binaryModel.getModel().ordinal();
         if (ServerToClientModel.HORIZONTAL_SCROLL_POSITION.ordinal() == modelOrdinal) {
-            cast().setHorizontalScrollPosition(binaryModel.getIntValue());
+            uiObject.setHorizontalScrollPosition(binaryModel.getIntValue());
             return true;
         } else if (ServerToClientModel.VERTICAL_SCROLL_POSITION.ordinal() == modelOrdinal) {
-            cast().setVerticalScrollPosition(binaryModel.getIntValue());
+            uiObject.setVerticalScrollPosition(binaryModel.getIntValue());
             return true;
         } else if (ServerToClientModel.SCROLL_TO.ordinal() == modelOrdinal) {
             final long scrollTo = binaryModel.getLongValue();
-            if (scrollTo == 0) cast().scrollToBottom();
-            else if (scrollTo == 1) cast().scrollToLeft();
-            else if (scrollTo == 2) cast().scrollToRight();
-            else if (scrollTo == 3) cast().scrollToTop();
+            if (scrollTo == 0) uiObject.scrollToBottom();
+            else if (scrollTo == 1) uiObject.scrollToLeft();
+            else if (scrollTo == 2) uiObject.scrollToRight();
+            else if (scrollTo == 3) uiObject.scrollToTop();
             return true;
         } else {
             return super.update(buffer, binaryModel);
@@ -79,16 +74,16 @@ public class PTScrollPanel extends PTSimplePanel {
     @Override
     public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
         if (HandlerModel.HANDLER_SCROLL.equals(handlerModel)) {
-            cast().addScrollHandler(event -> {
+            uiObject.addScrollHandler(event -> {
                 if (!dragging) sendScrollPositionEvent();
             });
-            cast().addDomHandler(event -> {
+            uiObject.addDomHandler(event -> {
                 if (DOM.getCaptureElement() == null) {
                     dragging = true;
-                    DOM.setCapture(cast().getElement());
+                    DOM.setCapture(uiObject.getElement());
                 }
             }, MouseDownEvent.getType());
-            cast().addDomHandler(event -> {
+            uiObject.addDomHandler(event -> {
                 dragging = false;
                 DOM.releaseCapture(uiObject.getElement());
 
@@ -102,10 +97,10 @@ public class PTScrollPanel extends PTSimplePanel {
     private void sendScrollPositionEvent() {
         final PTInstruction eventInstruction = new PTInstruction(getObjectID());
         eventInstruction.put(ClientToServerModel.HANDLER_SCROLL);
-        eventInstruction.put(ClientToServerModel.HANDLER_SCROLL_HEIGHT, cast().getMaximumVerticalScrollPosition());
-        eventInstruction.put(ClientToServerModel.HANDLER_SCROLL_WIDTH, cast().getMaximumHorizontalScrollPosition());
-        eventInstruction.put(ClientToServerModel.HANDLER_SCROLL_VERTICAL, cast().getVerticalScrollPosition());
-        eventInstruction.put(ClientToServerModel.HANDLER_SCROLL_HORIZONTAL, cast().getHorizontalScrollPosition());
+        eventInstruction.put(ClientToServerModel.HANDLER_SCROLL_HEIGHT, uiObject.getMaximumVerticalScrollPosition());
+        eventInstruction.put(ClientToServerModel.HANDLER_SCROLL_WIDTH, uiObject.getMaximumHorizontalScrollPosition());
+        eventInstruction.put(ClientToServerModel.HANDLER_SCROLL_VERTICAL, uiObject.getVerticalScrollPosition());
+        eventInstruction.put(ClientToServerModel.HANDLER_SCROLL_HORIZONTAL, uiObject.getHorizontalScrollPosition());
         uiBuilder.sendDataToServer(uiObject, eventInstruction);
     }
 

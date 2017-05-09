@@ -116,8 +116,7 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
     }
 
     public UIObject asWidget(final int objectID, final UIBuilder uiService) {
-        final PTObject ptObject = uiService.getPTObject(objectID);
-        return asWidget(ptObject);
+        return asWidget(uiService.getPTObject(objectID));
     }
 
     public UIObject asWidget(final PTObject ptObject) {

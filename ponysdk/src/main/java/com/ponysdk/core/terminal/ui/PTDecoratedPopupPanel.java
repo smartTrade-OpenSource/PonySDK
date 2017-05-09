@@ -25,16 +25,11 @@ package com.ponysdk.core.terminal.ui;
 
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 
-public class PTDecoratedPopupPanel extends PTPopupPanel {
+public class PTDecoratedPopupPanel<T extends DecoratedPopupPanel> extends PTPopupPanel<T> {
 
     @Override
-    protected DecoratedPopupPanel createUIObject() {
-        return new DecoratedPopupPanel(autoHide);
-    }
-
-    @Override
-    public DecoratedPopupPanel cast() {
-        return (DecoratedPopupPanel) uiObject;
+    protected T createUIObject() {
+        return (T) new DecoratedPopupPanel(autoHide);
     }
 
 }

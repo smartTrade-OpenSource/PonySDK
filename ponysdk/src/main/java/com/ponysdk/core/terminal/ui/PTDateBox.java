@@ -91,13 +91,13 @@ public class PTDateBox extends PTWidget<MyDateBox> {
 
     static final class MyDateBox extends DateBox {
 
-        private Date defaultMonth = null;
+        private Date defaultMonth;
 
-        MyDateBox(final DatePicker picker, final Date date, final Format format) {
+        private MyDateBox(final DatePicker picker, final Date date, final Format format) {
             super(picker, date, format);
         }
 
-        void setDefaultMonth(final long m) {
+        private void setDefaultMonth(final long m) {
             defaultMonth = new Date(m);
         }
 

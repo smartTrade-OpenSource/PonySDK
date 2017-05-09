@@ -29,7 +29,7 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
-public class PTDialogBox extends PTDecoratedPopupPanel {
+public class PTDialogBox extends PTDecoratedPopupPanel<DialogBox> {
 
     public PTDialogBox() {
         this.draggable = true;
@@ -44,7 +44,7 @@ public class PTDialogBox extends PTDecoratedPopupPanel {
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         final int modelOrdinal = binaryModel.getModel().ordinal();
         if (ServerToClientModel.POPUP_CAPTION.ordinal() == modelOrdinal) {
-            final DialogBox dialogBox = cast();
+            final DialogBox dialogBox = uiObject;
             dialogBox.setHTML(binaryModel.getStringValue());
             return true;
         } else if (ServerToClientModel.POPUP_DRAGGABLE.ordinal() == modelOrdinal) {
@@ -55,12 +55,7 @@ public class PTDialogBox extends PTDecoratedPopupPanel {
         }
     }
 
-    @Override
-    public DialogBox cast() {
-        return (DialogBox) uiObject;
-    }
-
-    public final class MyDialogBox extends DialogBox {
+    private final class MyDialogBox extends DialogBox {
 
         public MyDialogBox(final boolean autoHide) {
             super(autoHide, false);

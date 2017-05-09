@@ -23,7 +23,6 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.PCheckBoxState;
@@ -33,10 +32,10 @@ import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
-public class PTRadioButton extends PTCheckBox {
+public class PTRadioButton extends PTCheckBox<RadioButton> {
 
     @Override
-    protected CheckBox createUIObject() {
+    protected RadioButton createUIObject() {
         return new RadioButton(null);
     }
 
@@ -44,10 +43,10 @@ public class PTRadioButton extends PTCheckBox {
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         final int modelOrdinal = binaryModel.getModel().ordinal();
         if (ServerToClientModel.NAME.ordinal() == modelOrdinal) {
-            cast().setName(binaryModel.getStringValue());
+            uiObject.setName(binaryModel.getStringValue());
             return true;
         } else if (ServerToClientModel.VALUE_CHECKBOX.ordinal() == modelOrdinal) {
-            cast().setValue(PCheckBoxState.CHECKED.equals(PCheckBoxState.fromByte(binaryModel.getByteValue())), true);
+            uiObject.setValue(PCheckBoxState.CHECKED.equals(PCheckBoxState.fromByte(binaryModel.getByteValue())), true);
             return true;
         } else {
             return super.update(buffer, binaryModel);
@@ -56,17 +55,11 @@ public class PTRadioButton extends PTCheckBox {
 
     @Override
     protected void addValueChangeHandler(final UIBuilder uiService) {
-        final RadioButton radioButton = cast();
-        radioButton.addValueChangeHandler(event -> {
+        uiObject.addValueChangeHandler(event -> {
             final PTInstruction instruction = new PTInstruction(objectID);
             instruction.put(ClientToServerModel.HANDLER_BOOLEAN_VALUE_CHANGE, event.getValue());
-            uiService.sendDataToServer(cast(), instruction);
+            uiService.sendDataToServer(uiObject, instruction);
         });
-    }
-
-    @Override
-    public RadioButton cast() {
-        return (RadioButton) uiObject;
     }
 
 }

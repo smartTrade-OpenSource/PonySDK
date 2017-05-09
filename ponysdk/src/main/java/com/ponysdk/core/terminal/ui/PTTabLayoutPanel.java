@@ -122,4 +122,5 @@ public class PTTabLayoutPanel extends PTWidget<TabLayoutPanel> {
             super.removeHandler(buffer, handlerModel);
         }
     }
+
 }

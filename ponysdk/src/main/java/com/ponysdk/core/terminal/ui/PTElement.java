@@ -30,8 +30,9 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
+import com.ponysdk.core.terminal.ui.PTElement.MyHTMLPanel;
 
-public class PTElement extends PTComplexPanel<MyWidget> {
+public class PTElement extends PTComplexPanel<MyHTMLPanel> {
 
     private static final String EMPTY = "";
     private String tag;
@@ -44,8 +45,8 @@ public class PTElement extends PTComplexPanel<MyWidget> {
     }
 
     @Override
-    protected MyWidget createUIObject() {
-        return new MyWidget(tag, EMPTY);
+    protected MyHTMLPanel createUIObject() {
+        return new MyHTMLPanel(tag, EMPTY);
     }
 
     @Override
@@ -73,17 +74,17 @@ public class PTElement extends PTComplexPanel<MyWidget> {
         }
     }
 
-}
+    static final class MyHTMLPanel extends HTMLPanel {
 
-final class MyWidget extends HTMLPanel {
+        private MyHTMLPanel(final String tag, final String html) {
+            super(tag, html);
+        }
 
-    public MyWidget(final String tag, final String html) {
-        super(tag, html);
-    }
+        @Override
+        protected void insert(final Widget child, final Element container, final int beforeIndex, final boolean domInsert) {
+            super.insert(child, container, beforeIndex, domInsert);
+        }
 
-    @Override
-    protected void insert(final Widget child, final Element container, final int beforeIndex, final boolean domInsert) {
-        super.insert(child, container, beforeIndex, domInsert);
     }
 
 }

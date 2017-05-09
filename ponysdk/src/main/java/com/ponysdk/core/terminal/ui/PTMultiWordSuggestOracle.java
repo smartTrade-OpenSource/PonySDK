@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 PonySDK
+ * Copyright (c) 2017 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
@@ -20,48 +20,49 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.ponysdk.core.terminal.ui;
 
-import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
-public class PTGrid extends PTHTMLTable<Grid> {
+public final class PTMultiWordSuggestOracle extends AbstractPTObject {
 
-    private int rows = -1;
-    private int columns = -1;
+    private MultiWordSuggestOracle oracle;
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
-        final BinaryModel binaryModel = buffer.readBinaryModel();
-        if (ServerToClientModel.ROW.equals(binaryModel.getModel())) {
-            rows = binaryModel.getIntValue();
-            columns = buffer.readBinaryModel().getIntValue();
-        } else {
-            buffer.rewind(binaryModel);
-        }
-
         super.create(buffer, objectId, uiService);
-
-        this.uiObject.addStyleName("pony-PGrid");
-    }
-
-    @Override
-    protected Grid createUIObject() {
-        return rows != -1 ? new Grid(rows, columns) : new Grid();
+        this.oracle = new MultiWordSuggestOracle();
+        PTSuggestBox.oracleByID.put(objectID, oracle);
     }
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.CLEAR_ROW.ordinal() == modelOrdinal) {
-            uiObject.removeRow(binaryModel.getIntValue());
+        if (ServerToClientModel.SUGGESTION.equals(binaryModel.getModel())) {
+            oracle.add(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.INSERT_ROW.ordinal() == modelOrdinal) {
-            uiObject.insertRow(binaryModel.getIntValue());
+        }
+        /*
+         * FIXME else if (Model.SUGGESTIONS.equals(binaryModel.getModel())) {
+         * final JSONArray jsonArray = binaryModel.get().isArray(); for (int
+         * i = 0; i < jsonArray.size(); i++) {
+         * oracle.add(jsonArray.get(i).isString().stringValue()); } return
+         * true; }
+         */
+        /*
+         * FIXME else if (Model.DEFAULT_SUGGESTIONS.equals(binaryModel.getModel())) {
+         * final List<String> defaultSuggestions = new ArrayList<>(); final
+         * JSONArray jsonArray = binaryModel.get().isArray(); for (int i =
+         * 0; i < jsonArray.size(); i++) {
+         * defaultSuggestions.add(jsonArray.get(i).isString().stringValue())
+         * ; } oracle.setDefaultSuggestionsFromText(defaultSuggestions);
+         * return true; }
+         */
+        else if (ServerToClientModel.CLEAR.equals(binaryModel.getModel())) {
+            oracle.clear();
             return true;
         } else {
             return super.update(buffer, binaryModel);

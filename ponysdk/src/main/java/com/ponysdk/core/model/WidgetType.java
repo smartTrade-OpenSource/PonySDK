@@ -82,7 +82,11 @@ public enum WidgetType {
     SUGGESTBOX,
     MULTIWORD_SUGGEST_ORACLE;
 
-    public byte getValue() {
+    private WidgetType() {
+    }
+
+    public final byte getValue() {
         return (byte) ordinal();
     }
+
 }

@@ -131,4 +131,5 @@ public class PTListBox extends PTFocusWidget<ListBox> {
             return super.update(buffer, binaryModel);
         }
     }
+
 }

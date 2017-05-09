@@ -90,11 +90,11 @@ public enum ClientToServerModel {
 
     private String key;
 
-    ClientToServerModel(final String key) {
+    private ClientToServerModel(final String key) {
         this.key = key;
     }
 
-    public String toStringValue() {
+    public final String toStringValue() {
         return key;
     }
 

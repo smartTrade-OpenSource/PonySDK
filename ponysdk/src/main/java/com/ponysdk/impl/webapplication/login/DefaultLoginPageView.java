@@ -23,10 +23,10 @@
 
 package com.ponysdk.impl.webapplication.login;
 
-import com.ponysdk.core.internalization.PString;
 import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
+import com.ponysdk.core.ui.i18n.PString;
 
 public class DefaultLoginPageView extends PSimplePanel implements LoginPageView {
 

@@ -33,14 +33,9 @@ import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
-public class PTCheckBox extends PTButtonBase<CheckBox> {
+public class PTCheckBox<T extends CheckBox> extends PTButtonBase<T> {
 
     private Element inputElement;
-
-    @Override
-    protected CheckBox createUIObject() {
-        return new CheckBox();
-    }
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
@@ -50,6 +45,11 @@ public class PTCheckBox extends PTButtonBase<CheckBox> {
         inputElement = uiObject.getElement();
         final Element child = inputElement.getFirstChildElement();
         if (child != null) inputElement = child;
+    }
+
+    @Override
+    protected T createUIObject() {
+        return (T) new CheckBox();
     }
 
     @Override

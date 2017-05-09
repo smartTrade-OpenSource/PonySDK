@@ -1,13 +1,13 @@
 /*
- * Copyright (c) 2011 PonySDK
+ * Copyright (c) 2017 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -21,24 +21,27 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.form.validator;
+package com.ponysdk.core.model;
 
-import com.ponysdk.core.ui.i18n.PString;
+public enum PFontSize {
 
-public class FloatFieldValidator implements FieldValidator {
+    LARGE,
+    MEDIUM,
+    SMALL,
+    X_LARGE,
+    X_SMALL,
+    XX_LARGE,
+    XX_SMALL;
 
-    private static ValidationResult isAFloat(final String value) {
-        try {
-            Float.parseFloat(value);
-            return ValidationResult.newOKValidationResult();
-        } catch (final Exception e) {
-            return ValidationResult.newFailedValidationResult(PString.get("validator.error.float"));
-        }
+    private PFontSize() {
     }
 
-    @Override
-    public ValidationResult isValid(final String value) {
-        if (value == null || value.isEmpty()) return ValidationResult.newOKValidationResult();
-        return isAFloat(value);
+    public final byte getValue() {
+        return (byte) ordinal();
     }
+
+    public static final PFontSize fromByte(final byte byteValue) {
+        return PFontSize.values()[byteValue];
+    }
+
 }

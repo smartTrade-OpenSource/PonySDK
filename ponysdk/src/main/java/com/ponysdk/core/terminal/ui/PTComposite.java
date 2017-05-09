@@ -50,7 +50,7 @@ public abstract class PTComposite extends PTWidget<MyComposite> {
 
     static final class MyComposite extends Composite {
 
-        MyComposite() {
+        private MyComposite() {
         }
 
         @Override

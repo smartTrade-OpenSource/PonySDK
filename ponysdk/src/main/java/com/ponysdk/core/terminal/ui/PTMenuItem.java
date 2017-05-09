@@ -83,4 +83,5 @@ public class PTMenuItem extends PTUIObject<MenuItem> {
             super.removeHandler(buffer, handlerModel);
         }
     }
+
 }

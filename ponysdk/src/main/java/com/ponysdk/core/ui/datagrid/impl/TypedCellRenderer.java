@@ -1,3 +1,4 @@
+
 package com.ponysdk.core.ui.datagrid.impl;
 
 import com.ponysdk.core.ui.basic.PWidget;
@@ -10,7 +11,6 @@ public abstract class TypedCellRenderer<DataType, WidgetType extends PWidget> im
         return update0(value, cast(current));
     }
 
-    @SuppressWarnings("unchecked")
     private WidgetType cast(final PWidget w) {
         return (WidgetType) w;
     }

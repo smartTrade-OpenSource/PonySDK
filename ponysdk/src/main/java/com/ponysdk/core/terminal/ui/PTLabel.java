@@ -28,11 +28,11 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
-public class PTLabel extends PTWidget<Label> {
+public class PTLabel<T extends Label> extends PTWidget<T> {
 
     @Override
-    protected Label createUIObject() {
-        return new Label();
+    protected T createUIObject() {
+        return (T) new Label();
     }
 
     @Override

@@ -35,13 +35,14 @@ import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
+import com.ponysdk.core.terminal.ui.PTSplitLayoutPanel.MySplitLayoutPanel;
 
-public class PTSplitLayoutPanel extends PTDockLayoutPanel {
+public class PTSplitLayoutPanel extends PTDockLayoutPanel<MySplitLayoutPanel> {
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
         super.create(buffer, objectId, uiBuilder);
-        cast().uiBuilder = uiBuilder;
+        uiObject.uiBuilder = uiBuilder;
     }
 
     @Override
@@ -50,27 +51,22 @@ public class PTSplitLayoutPanel extends PTDockLayoutPanel {
     }
 
     @Override
-    public MySplitLayoutPanel cast() {
-        return (MySplitLayoutPanel) uiObject;
-    }
-
-    @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         final int modelOrdinal = binaryModel.getModel().ordinal();
         if (ServerToClientModel.MIN_SIZE.ordinal() == modelOrdinal) {
             final int minSize = binaryModel.getIntValue();
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
-            cast().setWidgetMinSize(w, minSize);
+            uiObject.setWidgetMinSize(w, minSize);
             return true;
         } else if (ServerToClientModel.SNAP_CLOSED_SIZE.ordinal() == modelOrdinal) {
             final int snapClosedSize = binaryModel.getIntValue();
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
-            cast().setWidgetSnapClosedSize(w, snapClosedSize);
+            uiObject.setWidgetSnapClosedSize(w, snapClosedSize);
             return true;
         } else if (ServerToClientModel.TOGGLE_DISPLAY_ALLOWED.ordinal() == modelOrdinal) {
             final boolean enable = binaryModel.getBooleanValue();
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
-            cast().setWidgetToggleDisplayAllowed(w, enable);
+            uiObject.setWidgetToggleDisplayAllowed(w, enable);
             return true;
         } else {
             return super.update(buffer, binaryModel);
@@ -79,23 +75,17 @@ public class PTSplitLayoutPanel extends PTDockLayoutPanel {
 
     @Override
     public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
-        if (HandlerModel.HANDLER_RESIZE.equals(handlerModel)) {
-            cast().resizeHandler = true;
-        } else {
-            super.addHandler(buffer, handlerModel);
-        }
+        if (HandlerModel.HANDLER_RESIZE.equals(handlerModel)) uiObject.resizeHandler = true;
+        else super.addHandler(buffer, handlerModel);
     }
 
     @Override
     public void removeHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
-        if (HandlerModel.HANDLER_RESIZE.equals(handlerModel)) {
-            cast().resizeHandler = false;
-        } else {
-            super.removeHandler(buffer, handlerModel);
-        }
+        if (HandlerModel.HANDLER_RESIZE.equals(handlerModel)) uiObject.resizeHandler = false;
+        else super.removeHandler(buffer, handlerModel);
     }
 
-    private static final class MySplitLayoutPanel extends SplitLayoutPanel {
+    static final class MySplitLayoutPanel extends SplitLayoutPanel {
 
         private int objectId = -1;
         private UIBuilder uiBuilder;

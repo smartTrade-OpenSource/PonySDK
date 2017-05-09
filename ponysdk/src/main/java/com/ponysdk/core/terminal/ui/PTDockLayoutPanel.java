@@ -32,7 +32,7 @@ import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
-public class PTDockLayoutPanel extends PTComplexPanel<DockLayoutPanel> {
+public class PTDockLayoutPanel<T extends DockLayoutPanel> extends PTComplexPanel<T> {
 
     private Unit unit;
 
@@ -44,8 +44,8 @@ public class PTDockLayoutPanel extends PTComplexPanel<DockLayoutPanel> {
     }
 
     @Override
-    protected DockLayoutPanel createUIObject() {
-        return new DockLayoutPanel(unit);
+    protected T createUIObject() {
+        return (T) new DockLayoutPanel(unit);
     }
 
     @Override
@@ -55,7 +55,6 @@ public class PTDockLayoutPanel extends PTComplexPanel<DockLayoutPanel> {
         final Direction direction = Direction.values()[buffer.readBinaryModel().getByteValue()];
         // ServerToClientModel.SIZE
         final double size = buffer.readBinaryModel().getDoubleValue();
-
         switch (direction) {
             case CENTER: {
                 uiObject.add(w);

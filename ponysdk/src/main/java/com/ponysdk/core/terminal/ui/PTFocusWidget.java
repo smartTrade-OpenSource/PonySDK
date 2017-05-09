@@ -33,9 +33,7 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 public abstract class PTFocusWidget<T extends FocusWidget> extends PTWidget<T> {
 
     private boolean showLoadingOnRequest = false;
-
     private boolean enabledOnRequest = false;
-
     private boolean enabled = true;
 
     @Override

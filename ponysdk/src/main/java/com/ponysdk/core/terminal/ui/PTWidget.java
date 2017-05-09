@@ -134,7 +134,7 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
     public Widget asWidget(final PTObject ptObject) {
         if (ptObject != null) {
             final PTWidget<?> ptWidget = ptObject.isPTWidget();
-            if (ptWidget != null) return ptWidget.asWidget();
+            if (ptWidget != null) return ptWidget.cast();
         } else {
             log.severe("No widget found for object #" + objectID);
         }
@@ -142,34 +142,33 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
     }
 
     private void addDomHandler(final ReaderBuffer buffer, final DomHandlerType domHandlerType) {
-        final Widget widget = asWidget();
         switch (domHandlerType) {
             case CLICK:
-                widget.addDomHandler(event -> triggerMouseEvent(domHandlerType, event), ClickEvent.getType());
+                uiObject.addDomHandler(event -> triggerMouseEvent(domHandlerType, event), ClickEvent.getType());
                 break;
             case DOUBLE_CLICK:
-                widget.addDomHandler(event -> triggerMouseEvent(domHandlerType, event), DoubleClickEvent.getType());
+                uiObject.addDomHandler(event -> triggerMouseEvent(domHandlerType, event), DoubleClickEvent.getType());
                 break;
             case MOUSE_OVER:
-                widget.addDomHandler(event -> triggerMouseEvent(domHandlerType, event), MouseOverEvent.getType());
+                uiObject.addDomHandler(event -> triggerMouseEvent(domHandlerType, event), MouseOverEvent.getType());
                 break;
             case MOUSE_OUT:
-                widget.addDomHandler(event -> triggerMouseEvent(domHandlerType, event), MouseOutEvent.getType());
+                uiObject.addDomHandler(event -> triggerMouseEvent(domHandlerType, event), MouseOutEvent.getType());
                 break;
             case MOUSE_DOWN:
-                widget.addDomHandler(event -> triggerMouseEvent(domHandlerType, event), MouseDownEvent.getType());
+                uiObject.addDomHandler(event -> triggerMouseEvent(domHandlerType, event), MouseDownEvent.getType());
                 break;
             case MOUSE_UP:
-                widget.addDomHandler(event -> triggerMouseEvent(domHandlerType, event), MouseUpEvent.getType());
+                uiObject.addDomHandler(event -> triggerMouseEvent(domHandlerType, event), MouseUpEvent.getType());
                 break;
             case MOUSE_WHELL:
-                widget.addDomHandler(event -> triggerMouseWhellEvent(domHandlerType, event), MouseWheelEvent.getType());
+                uiObject.addDomHandler(event -> triggerMouseWhellEvent(domHandlerType, event), MouseWheelEvent.getType());
                 break;
             case BLUR:
-                widget.addDomHandler(event -> triggerDomEvent(domHandlerType, event), BlurEvent.getType());
+                uiObject.addDomHandler(event -> triggerDomEvent(domHandlerType, event), BlurEvent.getType());
                 break;
             case FOCUS:
-                widget.addDomHandler(event -> triggerDomEvent(domHandlerType, event), FocusEvent.getType());
+                uiObject.addDomHandler(event -> triggerDomEvent(domHandlerType, event), FocusEvent.getType());
                 break;
             case KEY_PRESS:
                 final BinaryModel binaryModel = buffer.readBinaryModel();
@@ -181,8 +180,7 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
                     keyFilter = null;
                 }
 
-                widget.addDomHandler(event -> {
-                    final Widget widget1 = asWidget();
+                uiObject.addDomHandler(event -> {
                     final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
                     eventInstruction.put(ClientToServerModel.VALUE_KEY, event.getNativeEvent().getKeyCode());
 
@@ -190,12 +188,12 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
                         for (int i = 0; i < keyFilter.size(); i++) {
                             final JSONNumber keyCode = keyFilter.get(i).isNumber();
                             if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
-                                uiBuilder.sendDataToServer(widget1, eventInstruction);
+                                uiBuilder.sendDataToServer(uiObject, eventInstruction);
                                 break;
                             }
                         }
                     } else {
-                        uiBuilder.sendDataToServer(widget1, eventInstruction);
+                        uiBuilder.sendDataToServer(uiObject, eventInstruction);
                     }
 
                     preventOrStopEvent(event);
@@ -211,8 +209,8 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
                     keyUpFilter = null;
                 }
 
-                if (widget instanceof TextBoxBase) {
-                    final TextBoxBase textBox = (TextBoxBase) widget;
+                if (uiObject instanceof TextBoxBase) {
+                    final TextBoxBase textBox = (TextBoxBase) uiObject;
                     textBox.addKeyUpHandler(event -> {
                         final PTInstruction changeHandlerInstruction = new PTInstruction(getObjectID());
                         changeHandlerInstruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE, textBox.getText());
@@ -236,7 +234,7 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
                         preventOrStopEvent(event);
                     });
                 } else {
-                    widget.addDomHandler(event -> {
+                    uiObject.addDomHandler(event -> {
                         final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
                         eventInstruction.put(ClientToServerModel.VALUE_KEY, event.getNativeEvent().getKeyCode());
 
@@ -244,50 +242,50 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
                             for (int i = 0; i < keyUpFilter.size(); i++) {
                                 final JSONNumber keyCode = keyUpFilter.get(i).isNumber();
                                 if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
-                                    uiBuilder.sendDataToServer(widget, eventInstruction);
+                                    uiBuilder.sendDataToServer(uiObject, eventInstruction);
                                     break;
                                 }
                             }
                         } else {
-                            uiBuilder.sendDataToServer(widget, eventInstruction);
+                            uiBuilder.sendDataToServer(uiObject, eventInstruction);
                         }
                         preventOrStopEvent(event);
                     }, KeyUpEvent.getType());
                 }
                 break;
             case DRAG_START:
-                widget.getElement().setDraggable(Element.DRAGGABLE_TRUE);
-                widget.addBitlessDomHandler(event -> {
+                uiObject.getElement().setDraggable(Element.DRAGGABLE_TRUE);
+                uiObject.addBitlessDomHandler(event -> {
                     event.setData("text", String.valueOf(getObjectID()));
                     event.getDataTransfer().setDragImage(uiObject.getElement(), 10, 10);
                     triggerDomEvent(domHandlerType, event);
                 }, DragStartEvent.getType());
                 break;
             case DRAG_END:
-                widget.addBitlessDomHandler(event -> triggerDomEvent(domHandlerType, event), DragEndEvent.getType());
+                uiObject.addBitlessDomHandler(event -> triggerDomEvent(domHandlerType, event), DragEndEvent.getType());
                 break;
             case DRAG_ENTER:
-                widget.addBitlessDomHandler(event -> triggerDomEvent(domHandlerType, event), DragEnterEvent.getType());
+                uiObject.addBitlessDomHandler(event -> triggerDomEvent(domHandlerType, event), DragEnterEvent.getType());
                 break;
             case DRAG_LEAVE:
-                widget.addBitlessDomHandler(event -> triggerDomEvent(domHandlerType, event), DragLeaveEvent.getType());
+                uiObject.addBitlessDomHandler(event -> triggerDomEvent(domHandlerType, event), DragLeaveEvent.getType());
                 break;
             case DROP:
-                widget.addBitlessDomHandler(event -> {
+                uiObject.addBitlessDomHandler(event -> {
                     // required by GWT api
                     // triggerDomEvent(addHandler.getObjectID(), domHandlerType);
                 }, DragOverEvent.getType());
 
-                widget.addBitlessDomHandler(event -> {
+                uiObject.addBitlessDomHandler(event -> {
                     event.preventDefault();
                     final String dragWidgetID = event.getData("text");
                     final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
                     if (dragWidgetID != null) eventInstruction.put(ClientToServerModel.DRAG_SRC, Long.parseLong(dragWidgetID));
-                    uiBuilder.sendDataToServer(widget, eventInstruction);
+                    uiBuilder.sendDataToServer(uiObject, eventInstruction);
                 }, DropEvent.getType());
                 break;
             case CONTEXT_MENU:
-                widget.addDomHandler(event -> triggerDomEvent(domHandlerType, event), ContextMenuEvent.getType());
+                uiObject.addDomHandler(event -> triggerDomEvent(domHandlerType, event), ContextMenuEvent.getType());
                 break;
             case CHANGE_HANDLER:
             case DRAG_OVER:
@@ -305,7 +303,7 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
 
     private void triggerDomEvent(final DomHandlerType domHandlerType, final DomEvent<?> event) {
         final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
-        uiBuilder.sendDataToServer(asWidget(), eventInstruction);
+        uiBuilder.sendDataToServer(uiObject, eventInstruction);
         preventOrStopEvent(event);
     }
 
@@ -320,15 +318,14 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
         eventInfo.set(4, new JSONNumber(event.getNativeButton()));
         eventInstruction.put(ClientToServerModel.EVENT_INFO, eventInfo);
 
-        final Widget widget = asWidget();
         final JSONArray widgetInfo = new JSONArray();
-        widgetInfo.set(0, new JSONNumber(widget.getAbsoluteLeft()));
-        widgetInfo.set(1, new JSONNumber(widget.getAbsoluteTop()));
-        widgetInfo.set(2, new JSONNumber(widget.getOffsetHeight()));
-        widgetInfo.set(3, new JSONNumber(widget.getOffsetWidth()));
+        widgetInfo.set(0, new JSONNumber(uiObject.getAbsoluteLeft()));
+        widgetInfo.set(1, new JSONNumber(uiObject.getAbsoluteTop()));
+        widgetInfo.set(2, new JSONNumber(uiObject.getOffsetHeight()));
+        widgetInfo.set(3, new JSONNumber(uiObject.getOffsetWidth()));
         eventInstruction.put(ClientToServerModel.WIDGET_POSITION, widgetInfo);
 
-        uiBuilder.sendDataToServer(widget, eventInstruction);
+        uiBuilder.sendDataToServer(uiObject, eventInstruction);
 
         preventOrStopEvent(event);
     }
@@ -344,15 +341,14 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
         eventInfo.set(5, new JSONNumber(event.getDeltaY()));
         eventInstruction.put(ClientToServerModel.EVENT_INFO, eventInfo);
 
-        final Widget widget = asWidget();
         final JSONArray widgetInfo = new JSONArray();
-        widgetInfo.set(0, new JSONNumber(widget.getAbsoluteLeft()));
-        widgetInfo.set(1, new JSONNumber(widget.getAbsoluteTop()));
-        widgetInfo.set(2, new JSONNumber(widget.getOffsetHeight()));
-        widgetInfo.set(3, new JSONNumber(widget.getOffsetWidth()));
+        widgetInfo.set(0, new JSONNumber(uiObject.getAbsoluteLeft()));
+        widgetInfo.set(1, new JSONNumber(uiObject.getAbsoluteTop()));
+        widgetInfo.set(2, new JSONNumber(uiObject.getOffsetHeight()));
+        widgetInfo.set(3, new JSONNumber(uiObject.getOffsetWidth()));
         eventInstruction.put(ClientToServerModel.WIDGET_POSITION, widgetInfo);
 
-        uiBuilder.sendDataToServer(widget, eventInstruction);
+        uiBuilder.sendDataToServer(uiObject, eventInstruction);
 
         preventOrStopEvent(event);
     }

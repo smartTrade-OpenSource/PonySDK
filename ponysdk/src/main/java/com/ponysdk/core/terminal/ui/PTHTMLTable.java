@@ -30,9 +30,9 @@ import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
-import com.ponysdk.core.terminal.ui.alignment.AlignmentConverter;
+import com.ponysdk.core.terminal.ui.converter.GWTConverter;
 
-public abstract class PTHTMLTable extends PTPanel<HTMLTable> {
+public abstract class PTHTMLTable<T extends HTMLTable> extends PTPanel<T> {
 
     @Override
     public void add(final ReaderBuffer buffer, final PTObject ptObject) {
@@ -105,7 +105,7 @@ public abstract class PTHTMLTable extends PTPanel<HTMLTable> {
             uiObject.getCellFormatter().setStyleName(cellRow, cellColumn, value);
             return true;
         } else if (ServerToClientModel.VERTICAL_ALIGNMENT.ordinal() == modelOrdinal) {
-            final VerticalAlignmentConstant value = AlignmentConverter.asVerticalAlignmentConstant(binaryModel.getByteValue());
+            final VerticalAlignmentConstant value = GWTConverter.asVerticalAlignmentConstant(binaryModel.getByteValue());
             // ServerToClientModel.ROW
             final int cellRow = buffer.readBinaryModel().getIntValue();
             // ServerToClientModel.COLUMN
@@ -113,7 +113,7 @@ public abstract class PTHTMLTable extends PTPanel<HTMLTable> {
             uiObject.getCellFormatter().setVerticalAlignment(cellRow, cellColumn, value);
             return true;
         } else if (ServerToClientModel.HORIZONTAL_ALIGNMENT.ordinal() == modelOrdinal) {
-            final HorizontalAlignmentConstant value = AlignmentConverter.asHorizontalAlignmentConstant(binaryModel.getByteValue());
+            final HorizontalAlignmentConstant value = GWTConverter.asHorizontalAlignmentConstant(binaryModel.getByteValue());
             // ServerToClientModel.ROW
             final int cellRow = buffer.readBinaryModel().getIntValue();
             // ServerToClientModel.COLUMN
@@ -148,4 +148,5 @@ public abstract class PTHTMLTable extends PTPanel<HTMLTable> {
             return super.update(buffer, binaryModel);
         }
     }
+
 }

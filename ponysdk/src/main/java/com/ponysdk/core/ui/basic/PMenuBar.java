@@ -24,6 +24,7 @@
 package com.ponysdk.core.ui.basic;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
@@ -95,10 +96,9 @@ import com.ponysdk.core.writer.ModelWriter;
  * elements as children. MenuItems may contain HTML and MenuBars.
  * </p>
  */
-public class PMenuBar extends PWidget implements HasPAnimation {
+public class PMenuBar extends PWidget implements HasPAnimation, Iterable<PMenuSubElement> {
 
-    // TODO warning : gwt contains 2 list 1 all items (with separator) + 1
-    // menuItem only
+    // TODO warning : gwt contains 2 list 1 all items (with separator) + 1 menuItem only
     private final List<PMenuSubElement> items = new ArrayList<>();
     private final boolean vertical;
     private boolean animationEnabled = false;
@@ -114,9 +114,7 @@ public class PMenuBar extends PWidget implements HasPAnimation {
     @Override
     protected void init0() {
         super.init0();
-        for (final PWidget item : items) {
-            item.attach(window);
-        }
+        forEach(item -> item.attach(window));
     }
 
     @Override
@@ -212,7 +210,12 @@ public class PMenuBar extends PWidget implements HasPAnimation {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        items.forEach(PObject::onDestroy);
+        forEach(PObject::onDestroy);
+    }
+
+    @Override
+    public Iterator<PMenuSubElement> iterator() {
+        return items.iterator();
     }
 
 }

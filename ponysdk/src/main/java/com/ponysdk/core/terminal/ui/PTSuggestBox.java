@@ -26,7 +26,6 @@ package com.ponysdk.core.terminal.ui;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestOracle;
 import com.ponysdk.core.model.ClientToServerModel;
@@ -39,7 +38,7 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public class PTSuggestBox extends PTWidget<SuggestBox> {
 
-    private static final Map<Integer, SuggestOracle> oracleByID = new HashMap<>();
+    static final Map<Integer, SuggestOracle> oracleByID = new HashMap<>();
     private PTTextBox ptTextBox;
     private SuggestOracle oracle;
 
@@ -101,48 +100,5 @@ public class PTSuggestBox extends PTWidget<SuggestBox> {
         } else {
             super.removeHandler(buffer, handlerModel);
         }
-    }
-
-    public static final class PTMultiWordSuggestOracle extends AbstractPTObject {
-
-        private MultiWordSuggestOracle oracle;
-
-        @Override
-        public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
-            super.create(buffer, objectId, uiService);
-            this.oracle = new MultiWordSuggestOracle();
-            PTSuggestBox.oracleByID.put(objectID, oracle);
-        }
-
-        @Override
-        public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-            if (ServerToClientModel.SUGGESTION.equals(binaryModel.getModel())) {
-                oracle.add(binaryModel.getStringValue());
-                return true;
-            }
-            /*
-             * FIXME else if (Model.SUGGESTIONS.equals(binaryModel.getModel())) {
-             * final JSONArray jsonArray = binaryModel.get().isArray(); for (int
-             * i = 0; i < jsonArray.size(); i++) {
-             * oracle.add(jsonArray.get(i).isString().stringValue()); } return
-             * true; }
-             */
-            /*
-             * FIXME else if (Model.DEFAULT_SUGGESTIONS.equals(binaryModel.getModel())) {
-             * final List<String> defaultSuggestions = new ArrayList<>(); final
-             * JSONArray jsonArray = binaryModel.get().isArray(); for (int i =
-             * 0; i < jsonArray.size(); i++) {
-             * defaultSuggestions.add(jsonArray.get(i).isString().stringValue())
-             * ; } oracle.setDefaultSuggestionsFromText(defaultSuggestions);
-             * return true; }
-             */
-            else if (ServerToClientModel.CLEAR.equals(binaryModel.getModel())) {
-                oracle.clear();
-                return true;
-            } else {
-                return super.update(buffer, binaryModel);
-            }
-        }
-
     }
 }

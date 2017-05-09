@@ -44,8 +44,9 @@ public class PTTextArea extends PTTextBoxBase<TextArea> {
         } else if (ServerToClientModel.CHARACTER_WIDTH.ordinal() == modelOrdinal) {
             uiObject.setCharacterWidth(binaryModel.getIntValue());
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
 
 }

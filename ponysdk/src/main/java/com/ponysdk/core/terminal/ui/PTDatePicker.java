@@ -29,6 +29,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.datepicker.client.DatePicker;
 import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.DateConverter;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
@@ -37,21 +38,9 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public class PTDatePicker extends PTWidget<DatePicker> {
 
-    public static final String DATE_SEPARATOR = ",";
+    private static final String DATE_SEPARATOR = ",";
 
     private final DateTimeFormat format = DateTimeFormat.getFormat("yyyy-MM-dd");
-
-    private static Date asDate(final String timestamp) {
-        try {
-            return new Date(Long.parseLong(timestamp));
-        } catch (final NumberFormatException e) {
-            return null;
-        }
-    }
-
-    private static Date asDate(final long timestamp) {
-        return timestamp != -1 ? new Date(timestamp) : null;
-    }
 
     @Override
     protected DatePicker createUIObject() {
@@ -101,17 +90,17 @@ public class PTDatePicker extends PTWidget<DatePicker> {
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         final int modelOrdinal = binaryModel.getModel().ordinal();
         if (ServerToClientModel.DATE.ordinal() == modelOrdinal) {
-            uiObject.setValue(asDate(binaryModel.getLongValue()));
+            uiObject.setValue(DateConverter.fromTimestamp(binaryModel.getLongValue()));
             return true;
         } else if (ServerToClientModel.TIME.ordinal() == modelOrdinal) {
-            uiObject.setCurrentMonth(asDate(binaryModel.getLongValue()));
+            uiObject.setCurrentMonth(DateConverter.fromTimestamp(binaryModel.getLongValue()));
             return true;
         } else if (ServerToClientModel.DATE_ENABLED.ordinal() == modelOrdinal) {
             final String[] dates = binaryModel.getStringValue().split(DATE_SEPARATOR);
             // ServerToClientModel.ENABLED
             final boolean enabled = buffer.readBinaryModel().getBooleanValue();
             for (final String date : dates) {
-                uiObject.setTransientEnabledOnDates(enabled, asDate(date));
+                uiObject.setTransientEnabledOnDates(enabled, DateConverter.decode(date));
             }
             return true;
         } else if (ServerToClientModel.ADD_DATE_STYLE.ordinal() == modelOrdinal) {
@@ -119,7 +108,7 @@ public class PTDatePicker extends PTWidget<DatePicker> {
             // ServerToClientModel.STYLE_NAME
             final String style = buffer.readBinaryModel().getStringValue();
             for (final String date : dates) {
-                uiObject.addStyleToDates(style, asDate(date));
+                uiObject.addStyleToDates(style, DateConverter.decode(date));
             }
             return true;
         } else if (ServerToClientModel.REMOVE_DATE_STYLE.ordinal() == modelOrdinal) {
@@ -127,7 +116,7 @@ public class PTDatePicker extends PTWidget<DatePicker> {
             // ServerToClientModel.STYLE_NAME
             final String style = buffer.readBinaryModel().getStringValue();
             for (final String date : dates) {
-                uiObject.removeStyleFromDates(style, asDate(date));
+                uiObject.removeStyleFromDates(style, DateConverter.decode(date));
             }
             return true;
         } else if (ServerToClientModel.YEAR_ARROWS_VISIBLE.ordinal() == modelOrdinal) {

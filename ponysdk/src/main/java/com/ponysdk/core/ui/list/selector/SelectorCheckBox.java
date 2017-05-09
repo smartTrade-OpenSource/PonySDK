@@ -23,11 +23,11 @@
 
 package com.ponysdk.core.ui.list.selector;
 
-import com.ponysdk.core.ui.basic.PCheckBox;
-import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import com.ponysdk.core.ui.basic.PCheckBox;
+import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 
 public class SelectorCheckBox<T> extends PCheckBox implements Selectable<T> {
 
@@ -45,7 +45,6 @@ public class SelectorCheckBox<T> extends PCheckBox implements Selectable<T> {
         onValueChange(new PValueChangeEvent<>(this, false));
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public T getSelectedData() {
         if (getValue()) return (T) data;

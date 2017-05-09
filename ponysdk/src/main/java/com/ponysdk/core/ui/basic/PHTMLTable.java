@@ -48,6 +48,7 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
     private final Map<PWidget, Cell> cellByWidget = new HashMap<>();
     private final PColumnFormatter columnFormatter = new PColumnFormatter();
     private final PRowFormatter rowFormatter = new PRowFormatter();
+
     private T cellFormatter;
     private int cellPadding;
     private int cellSpacing;
@@ -59,14 +60,12 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
     @Override
     protected void init0() {
         super.init0();
-        for (final PWidget pWidget : cellByWidget.keySet()) {
-            pWidget.attach(window);
-        }
+        cellByWidget.keySet().forEach(widget -> widget.attach(window));
     }
 
     public int getRowCount() {
         if (columnByRow.isEmpty()) return 0;
-        return columnByRow.lastKey().value + 1;
+        else return columnByRow.lastKey().value + 1;
     }
 
     public int getCellCount(final int row) {

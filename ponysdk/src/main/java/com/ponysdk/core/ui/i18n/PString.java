@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.core.internalization;
+package com.ponysdk.core.ui.i18n;
 
 import com.ponysdk.core.server.application.UIContext;
 
