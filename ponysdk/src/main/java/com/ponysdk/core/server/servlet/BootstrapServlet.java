@@ -200,16 +200,8 @@ public class BootstrapServlet extends HttpServlet {
         addToMeta(writer);
         writer.newLine();
 
-        String ponyTerminalJsFileName;
-        if (application.isDebugMode()) ponyTerminalJsFileName = "ponyterminaldebug/ponyterminaldebug.nocache.js";
-        else ponyTerminalJsFileName = "ponyterminal/ponyterminal.nocache.js";
-        writer.append("<script type=\"text/javascript\" src=\"").append(ponyTerminalJsFileName).append("\"></script>");
-        writer.newLine();
-        writer.append("<script type=\"text/javascript\" src=\"script/ponysdk.js\"></script>");
-        writer.newLine();
-
         final Set<String> styles = application.getStyle();
-        if (styles != null) {
+        if (styles != null && !styles.isEmpty()) {
             for (final String style : styles) {
                 final String contentType = fileTypeMap.getContentType(style);
                 if (!contentType.equals("text/css")) writer.append("<link rel=\"stylesheet/less\" type=\"").append(contentType)
@@ -220,8 +212,16 @@ public class BootstrapServlet extends HttpServlet {
             }
         }
 
+        String ponyTerminalJsFileName;
+        if (application.isDebugMode()) ponyTerminalJsFileName = "ponyterminaldebug/ponyterminaldebug.nocache.js";
+        else ponyTerminalJsFileName = "ponyterminal/ponyterminal.nocache.js";
+        writer.append("<script type=\"text/javascript\" src=\"").append(ponyTerminalJsFileName).append("\"></script>");
+        writer.newLine();
+        writer.append("<script type=\"text/javascript\" src=\"script/ponysdk.js\"></script>");
+        writer.newLine();
+
         final Set<String> scripts = application.getJavascript();
-        if (scripts != null) {
+        if (scripts != null && !scripts.isEmpty()) {
             for (final String script : scripts) {
                 writer.append("<script type=\"text/javascript\" src=\"").append(script).append("\"></script>");
                 writer.newLine();
