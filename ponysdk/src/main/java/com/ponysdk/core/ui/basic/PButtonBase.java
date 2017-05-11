@@ -65,6 +65,7 @@ abstract class PButtonBase extends PFocusWidget implements PHasHTML {
     public void setHTML(final String html) {
         if (Objects.equals(this.html, html)) return;
         this.html = html;
+        this.text = null;
         saveUpdate(ServerToClientModel.HTML, html);
     }
 
@@ -77,6 +78,7 @@ abstract class PButtonBase extends PFocusWidget implements PHasHTML {
     public void setText(final String text) {
         if (Objects.equals(this.text, text)) return;
         this.text = text;
+        this.html = null;
         saveUpdate(ServerToClientModel.TEXT, this.text);
     }
 

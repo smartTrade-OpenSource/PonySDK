@@ -89,10 +89,8 @@ public class PHTML extends PLabel implements PHasHTML {
 
     @Override
     public void setText(final String text) {
-        if (Objects.equals(this.text, text)) return;
-        this.text = text;
+        super.setText(text);
         this.html = null;
-        saveUpdate(ServerToClientModel.TEXT, this.text);
     }
 
     public boolean isWordWrap() {

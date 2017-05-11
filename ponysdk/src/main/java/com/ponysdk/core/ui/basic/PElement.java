@@ -67,6 +67,7 @@ public class PElement extends PComplexPanel {
     public void setInnerText(final String innerText) {
         if (Objects.equals(this.innerText, innerText)) return;
         this.innerText = innerText;
+        this.innerHTML = null;
         saveUpdate(ServerToClientModel.INNER_TEXT, this.innerText);
     }
 
@@ -77,6 +78,7 @@ public class PElement extends PComplexPanel {
     public void setInnerHTML(final String innerHTML) {
         if (Objects.equals(this.innerHTML, innerHTML)) return;
         this.innerHTML = innerHTML;
+        this.innerText = null;
         saveUpdate(ServerToClientModel.INNER_HTML, this.innerHTML);
     }
 }
