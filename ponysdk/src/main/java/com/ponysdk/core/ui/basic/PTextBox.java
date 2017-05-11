@@ -71,7 +71,7 @@ public class PTextBox extends PTextBoxBase {
     public void setMaxLength(final int length) {
         if (Objects.equals(this.maxLength, length)) return;
         this.maxLength = length;
-        saveUpdate(writer -> writer.write(ServerToClientModel.MAX_LENGTH, length));
+        saveUpdate(ServerToClientModel.MAX_LENGTH, length);
     }
 
     /**
@@ -92,7 +92,7 @@ public class PTextBox extends PTextBoxBase {
     public void setVisibleLength(final int length) {
         if (Objects.equals(this.visibleLength, length)) return;
         this.visibleLength = length;
-        saveUpdate(writer -> writer.write(ServerToClientModel.VISIBLE_LENGTH, visibleLength));
+        saveUpdate(ServerToClientModel.VISIBLE_LENGTH, visibleLength);
     }
 
     public void applyMask(final String mask) {
@@ -127,7 +127,7 @@ public class PTextBox extends PTextBoxBase {
      *            the regular expression to use as filter.
      */
     public void setFilter(final String regExp) {
-        saveUpdate(writer -> writer.write(ServerToClientModel.REGEX_FILTER, regExp));
+        saveUpdate(ServerToClientModel.REGEX_FILTER, regExp);
     }
 
 }

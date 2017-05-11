@@ -108,11 +108,11 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
     }
 
     public void setModal(final boolean modal) {
-        saveUpdate(writer -> writer.write(ServerToClientModel.POPUP_MODAL, modal));
+        saveUpdate(ServerToClientModel.POPUP_MODAL, modal);
     }
 
     public void setDraggable(final boolean draggable) {
-        saveUpdate(writer -> writer.write(ServerToClientModel.POPUP_DRAGGABLE, draggable));
+        saveUpdate(ServerToClientModel.POPUP_DRAGGABLE, draggable);
     }
 
     public void center() {
@@ -152,11 +152,11 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
     public void setAnimationEnabled(final boolean animationEnabled) {
         if (Objects.equals(this.animationEnabled, animationEnabled)) return;
         this.animationEnabled = animationEnabled;
-        saveUpdate(writer -> writer.write(ServerToClientModel.ANIMATION, animationEnabled));
+        saveUpdate(ServerToClientModel.ANIMATION, animationEnabled);
     }
 
     public void setGlassEnabled(final boolean glassEnabled) {
-        saveUpdate(writer -> writer.write(ServerToClientModel.POPUP_GLASS_ENABLED, glassEnabled));
+        saveUpdate(ServerToClientModel.POPUP_GLASS_ENABLED, glassEnabled);
     }
 
     public boolean isShowing() {
@@ -164,7 +164,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
     }
 
     public void setPopupPosition(final int left, final int top) {
-        saveUpdate((writer) -> {
+        saveUpdate(writer -> {
             writer.write(ServerToClientModel.POPUP_POSITION_LEFT, left);
             writer.write(ServerToClientModel.POPUP_POSITION_TOP, top);
         });
@@ -208,7 +208,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
     }
 
     public void setGlassStyleName(final String glassStyleName) {
-        saveUpdate(writer -> writer.write(ServerToClientModel.POPUP_GLASS_STYLE_NAME, glassStyleName));
+        saveUpdate(ServerToClientModel.POPUP_GLASS_STYLE_NAME, glassStyleName);
     }
 
     /**

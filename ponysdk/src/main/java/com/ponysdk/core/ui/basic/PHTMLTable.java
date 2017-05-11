@@ -130,13 +130,9 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
     @Override
     public void clear() {
         final List<PWidget> values = new ArrayList<>();
-        for (final TreeMap<Integer, PWidget> widgetByColumn : columnByRow.values()) {
-            values.addAll(widgetByColumn.values());
-        }
+        columnByRow.values().forEach(widgetByColumn -> values.addAll(widgetByColumn.values()));
 
-        for (final PWidget w : values) {
-            remove(w, false);
-        }
+        values.forEach(widget -> remove(widget, false));
 
         saveUpdate(writer -> writer.write(ServerToClientModel.CLEAR));
     }
@@ -147,9 +143,7 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
         getRowFormatter().removeRowStyle(row);
 
         final List<PWidget> values = new ArrayList<>(widgetByColumn.values());
-        for (final PWidget w : values) {
-            remove(w, false);
-        }
+        values.forEach(widget -> remove(widget, false));
 
         for (final Entry<Row, TreeMap<Integer, PWidget>> entry : columnByRow.entrySet()) {
             final Row irow = entry.getKey();

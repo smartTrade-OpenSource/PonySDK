@@ -79,7 +79,7 @@ public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, Ha
         if (text == null) text = EMPTY; // null not send over json
         if (Objects.equals(this.text, text)) return;
         this.text = text;
-        saveUpdate(writer -> writer.write(ServerToClientModel.TEXT, this.text));
+        saveUpdate(ServerToClientModel.TEXT, this.text);
     }
 
     @Override
@@ -100,7 +100,7 @@ public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, Ha
         if (placeholder == null) placeholder = EMPTY; // null not send over json
         if (Objects.equals(this.placeholder, placeholder)) return;
         this.placeholder = placeholder;
-        saveUpdate(writer -> writer.write(ServerToClientModel.PLACEHOLDER, this.placeholder));
+        saveUpdate(ServerToClientModel.PLACEHOLDER, this.placeholder);
     }
 
     @Override

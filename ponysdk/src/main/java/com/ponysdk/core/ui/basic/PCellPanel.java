@@ -58,14 +58,14 @@ public abstract class PCellPanel extends PComplexPanel {
     }
 
     public void setCellVerticalAlignment(final PWidget widget, final PVerticalAlignment align) {
-        saveUpdate((writer) -> {
+        saveUpdate(writer -> {
             writer.write(ServerToClientModel.WIDGET_VERTICAL_ALIGNMENT, align.getValue());
             writer.write(ServerToClientModel.WIDGET_ID, widget.getID());
         });
     }
 
     public void setCellHeight(final PWidget widget, final String height) {
-        saveUpdate((writer) -> {
+        saveUpdate(writer -> {
             writer.write(ServerToClientModel.CELL_HEIGHT, height);
             writer.write(ServerToClientModel.WIDGET_ID, widget.getID());
         });
@@ -85,7 +85,7 @@ public abstract class PCellPanel extends PComplexPanel {
     public void setBorderWidth(final Integer borderWidth) {
         if (Objects.equals(this.borderWidth, borderWidth)) return;
         this.borderWidth = borderWidth;
-        saveUpdate(writer -> writer.write(ServerToClientModel.BORDER_WIDTH, borderWidth));
+        saveUpdate(ServerToClientModel.BORDER_WIDTH, borderWidth);
     }
 
     public Integer getSpacing() {
@@ -95,7 +95,7 @@ public abstract class PCellPanel extends PComplexPanel {
     public void setSpacing(final Integer spacing) {
         if (Objects.equals(this.spacing, spacing)) return;
         this.spacing = spacing;
-        saveUpdate(writer -> writer.write(ServerToClientModel.SPACING, spacing));
+        saveUpdate(ServerToClientModel.SPACING, spacing);
     }
 
 }

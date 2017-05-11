@@ -32,7 +32,7 @@ public class PFlexCellFormatter extends PCellFormatter {
     }
 
     public void setColSpan(final int row, final int column, final int colSpan) {
-        table.saveUpdate((writer) -> {
+        table.saveUpdate(writer -> {
             writer.write(ServerToClientModel.SET_COL_SPAN, colSpan);
             writer.write(ServerToClientModel.ROW, row);
             writer.write(ServerToClientModel.COLUMN, column);
@@ -40,7 +40,7 @@ public class PFlexCellFormatter extends PCellFormatter {
     }
 
     public void setRowSpan(final int row, final int column, final int rowSpan) {
-        table.saveUpdate((writer) -> {
+        table.saveUpdate(writer -> {
             writer.write(ServerToClientModel.SET_ROW_SPAN, rowSpan);
             writer.write(ServerToClientModel.ROW, row);
             writer.write(ServerToClientModel.COLUMN, column);

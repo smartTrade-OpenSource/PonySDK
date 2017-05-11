@@ -148,7 +148,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         items.add(index, item);
 
         final int indexFinal = index;
-        saveUpdate((writer) -> {
+        saveUpdate(writer -> {
             writer.write(ServerToClientModel.ITEM_INSERTED, label);
             writer.write(ServerToClientModel.INDEX, indexFinal);
         });
@@ -159,7 +159,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
         items.get(index).label = text;
 
-        saveUpdate((writer) -> {
+        saveUpdate(writer -> {
             writer.write(ServerToClientModel.ITEM_UPDATED, text);
             writer.write(ServerToClientModel.INDEX, index);
         });
@@ -238,7 +238,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         if (isMultipleSelect && selected) selectedIndexes.add(index);
         else selectedIndexes.remove(index);
 
-        saveUpdate((writer) -> {
+        saveUpdate(writer -> {
             writer.write(ServerToClientModel.SELECTED, selected);
             writer.write(ServerToClientModel.INDEX, index);
         });
@@ -341,7 +341,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     public void setVisibleItemCount(final int visibleItemCount) {
         if (Objects.equals(this.visibleItemCount, visibleItemCount)) return;
         this.visibleItemCount = visibleItemCount;
-        saveUpdate(writer -> writer.write(ServerToClientModel.VISIBLE_ITEM_COUNT, visibleItemCount));
+        saveUpdate(ServerToClientModel.VISIBLE_ITEM_COUNT, visibleItemCount);
     }
 
     public boolean isMultipleSelect() {
@@ -351,7 +351,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     public void setMultipleSelect(final boolean isMultipleSelect) {
         if (Objects.equals(this.isMultipleSelect, isMultipleSelect)) return;
         this.isMultipleSelect = isMultipleSelect;
-        saveUpdate(writer -> writer.write(ServerToClientModel.MULTISELECT, isMultipleSelect));
+        saveUpdate(ServerToClientModel.MULTISELECT, isMultipleSelect);
     }
 
     public class ListItem {

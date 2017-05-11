@@ -84,11 +84,8 @@ public class PWindow extends PObject {
     void init() {
         if (initialized) return;
 
-        if (stackedInstructions != null) {
-            while (!stackedInstructions.isEmpty()) {
-                stackedInstructions.poll().run();
-            }
-        }
+        if (stackedInstructions != null) stackedInstructions.values().forEach(Runnable::run);
+
         initialized = true;
 
         panelByZone.forEach((key, value) -> value.attach(this));
@@ -146,7 +143,7 @@ public class PWindow extends PObject {
     }
 
     public void setTitle(final String title) {
-        saveUpdate(writer -> writer.write(ServerToClientModel.WINDOW_TITLE, title));
+        saveUpdate(ServerToClientModel.WINDOW_TITLE, title);
     }
 
     public Location getLocation() {

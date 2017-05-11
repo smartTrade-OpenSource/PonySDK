@@ -109,7 +109,7 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
     public void setText(final String text) {
         if (Objects.equals(this.text, text)) return;
         this.text = text;
-        saveUpdate(writer -> writer.write(ServerToClientModel.TEXT, text));
+        saveUpdate(ServerToClientModel.TEXT, text);
     }
 
     private void setTree(final PTree tree) {
@@ -119,7 +119,7 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
     public void setSelected(final boolean selected) {
         if (Objects.equals(this.selected, selected)) return;
         this.selected = selected;
-        saveUpdate(writer -> writer.write(ServerToClientModel.SELECTED, selected));
+        saveUpdate(ServerToClientModel.SELECTED, selected);
     }
 
     public boolean isSelected() {
@@ -129,7 +129,7 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
     public void setState(final boolean open) {
         if (Objects.equals(this.open, open)) return;
         this.open = open;
-        saveUpdate(writer -> writer.write(ServerToClientModel.STATE, open));
+        saveUpdate(ServerToClientModel.STATE, open);
     }
 
     public boolean getState() {

@@ -84,7 +84,7 @@ public class PHTML extends PLabel implements PHasHTML {
         if (Objects.equals(this.html, html)) return;
         this.html = html;
         this.text = null;
-        saveUpdate(writer -> writer.write(ServerToClientModel.HTML, html));
+        saveUpdate(ServerToClientModel.HTML, this.html);
     }
 
     @Override
@@ -92,7 +92,7 @@ public class PHTML extends PLabel implements PHasHTML {
         if (Objects.equals(this.text, text)) return;
         this.text = text;
         this.html = null;
-        saveUpdate(writer -> writer.write(ServerToClientModel.TEXT, this.text));
+        saveUpdate(ServerToClientModel.TEXT, this.text);
     }
 
     public boolean isWordWrap() {
@@ -102,7 +102,7 @@ public class PHTML extends PLabel implements PHasHTML {
     public void setWordWrap(final boolean wordWrap) {
         if (Objects.equals(this.wordWrap, wordWrap)) return;
         this.wordWrap = wordWrap;
-        saveUpdate(writer -> writer.write(ServerToClientModel.WORD_WRAP, this.wordWrap));
+        saveUpdate(ServerToClientModel.WORD_WRAP, this.wordWrap);
     }
 
     @Override

@@ -104,14 +104,14 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
     }
 
     public void setWidgetSize(final PWidget widget, final double size) {
-        saveUpdate((writer) -> {
+        saveUpdate(writer -> {
             writer.write(ServerToClientModel.WIDGET_SIZE, size);
             writer.write(ServerToClientModel.WIDGET_ID, widget.getID());
         });
     }
 
     public void setWidgetHidden(final PWidget widget, final boolean hidden) {
-        saveUpdate((writer) -> {
+        saveUpdate(writer -> {
             writer.write(ServerToClientModel.WIDGET_HIDDEN, hidden);
             writer.write(ServerToClientModel.WIDGET_ID, widget.getID());
         });

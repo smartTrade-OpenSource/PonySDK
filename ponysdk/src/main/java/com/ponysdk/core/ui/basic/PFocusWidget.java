@@ -83,7 +83,7 @@ public abstract class PFocusWidget extends PWidget
     public void setFocus(final boolean focused) {
         if (Objects.equals(this.focused, focused)) return;
         this.focused = focused;
-        saveUpdate(writer -> writer.write(ServerToClientModel.FOCUSED, focused));
+        saveUpdate(ServerToClientModel.FOCUSED, focused);
     }
 
     public boolean isEnabled() {
@@ -93,7 +93,7 @@ public abstract class PFocusWidget extends PWidget
     public void setEnabled(final boolean enabled) {
         if (Objects.equals(this.enabled, enabled)) return;
         this.enabled = enabled;
-        saveUpdate(writer -> writer.write(ServerToClientModel.ENABLED, enabled));
+        saveUpdate(ServerToClientModel.ENABLED, enabled);
     }
 
     public boolean isShowLoadingOnRequest() {
@@ -107,7 +107,7 @@ public abstract class PFocusWidget extends PWidget
     public void setEnabledOnRequest(final boolean enabledOnRequest) {
         if (Objects.equals(this.enabledOnRequest, enabledOnRequest)) return;
         this.enabledOnRequest = enabledOnRequest;
-        saveUpdate(writer -> writer.write(ServerToClientModel.ENABLED_ON_REQUEST, enabledOnRequest));
+        saveUpdate(ServerToClientModel.ENABLED_ON_REQUEST, enabledOnRequest);
     }
 
     public boolean isFocused() {
@@ -121,7 +121,7 @@ public abstract class PFocusWidget extends PWidget
     public void setTabindex(final int tabindex) {
         if (Objects.equals(this.tabindex, tabindex)) return;
         this.tabindex = tabindex;
-        saveUpdate(writer -> writer.write(ServerToClientModel.TABINDEX, tabindex));
+        saveUpdate(ServerToClientModel.TABINDEX, tabindex);
     }
 
     @Override

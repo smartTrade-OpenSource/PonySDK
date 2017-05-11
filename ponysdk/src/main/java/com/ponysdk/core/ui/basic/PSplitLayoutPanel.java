@@ -100,7 +100,7 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
     public void setWidgetMinSize(final PWidget child, final int minSize) {
         assertIsChild(child);
         if (getMinSize(child) != minSize) {
-            saveUpdate((writer) -> {
+            saveUpdate(writer -> {
                 writer.write(ServerToClientModel.MIN_SIZE, minSize);
                 writer.write(ServerToClientModel.WIDGET_ID, child.getID());
             });
@@ -126,7 +126,7 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
     public void setWidgetSnapClosedSize(final PWidget child, final int snapClosedSize) {
         assertIsChild(child);
         if (getSnapClosedSize(child) != snapClosedSize) {
-            saveUpdate((writer) -> {
+            saveUpdate(writer -> {
                 writer.write(ServerToClientModel.SNAP_CLOSED_SIZE, snapClosedSize);
                 writer.write(ServerToClientModel.WIDGET_ID, child.getID());
             });
@@ -146,7 +146,7 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
     public void setWidgetToggleDisplayAllowed(final PWidget child, final boolean allowed) {
         assertIsChild(child);
         if (isToggleDisplayAllowed(child) != allowed) {
-            saveUpdate((writer) -> {
+            saveUpdate(writer -> {
                 writer.write(ServerToClientModel.TOGGLE_DISPLAY_ALLOWED, allowed);
                 writer.write(ServerToClientModel.WIDGET_ID, child.getID());
             });

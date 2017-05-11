@@ -192,7 +192,7 @@ public class PStackLayoutPanel extends PWidget
     public void setAnimationDuration(final Duration duration) {
         if (Objects.equals(animationDuration, duration)) return;
         animationDuration = duration;
-        saveUpdate((writer) -> writer.write(ServerToClientModel.ANIMATION_DURATION, (int) duration.toMillis()));
+        saveUpdate(ServerToClientModel.ANIMATION_DURATION, (int) duration.toMillis());
     }
 
     @Override

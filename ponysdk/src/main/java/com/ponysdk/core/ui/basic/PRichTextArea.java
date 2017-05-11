@@ -74,7 +74,7 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
     @Override
     public void setText(final String text) {
         this.html = text;
-        saveUpdate(writer -> writer.write(ServerToClientModel.TEXT, text));
+        saveUpdate(ServerToClientModel.TEXT, text);
     }
 
     @Override
@@ -86,7 +86,7 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
     public void setHTML(final String html) {
         if (Objects.equals(this.html, html)) return;
         this.html = html;
-        saveUpdate(writer -> writer.write(ServerToClientModel.HTML, html));
+        saveUpdate(ServerToClientModel.HTML, html);
     }
 
     public Formatter getFormatter() {

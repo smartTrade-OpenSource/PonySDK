@@ -126,7 +126,7 @@ public class PImage extends PWidget implements HasPClickHandlers {
     public void setUrl(final String url) {
         if (Objects.equals(this.url, url)) return;
         this.url = url;
-        saveUpdate(writer -> writer.write(ServerToClientModel.IMAGE_URL, url));
+        saveUpdate(ServerToClientModel.IMAGE_URL, url);
     }
 
     public void setStream(final StreamHandler streamListener) {

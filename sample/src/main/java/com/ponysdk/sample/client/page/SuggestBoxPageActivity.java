@@ -27,8 +27,8 @@ import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.service.query.Query;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PListBox;
+import com.ponysdk.core.ui.basic.PMultiWordSuggestOracle;
 import com.ponysdk.core.ui.basic.PSuggestBox;
-import com.ponysdk.core.ui.basic.PSuggestBox.PMultiWordSuggestOracle;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
 import com.ponysdk.sample.client.event.DemoBusinessEvent;
 

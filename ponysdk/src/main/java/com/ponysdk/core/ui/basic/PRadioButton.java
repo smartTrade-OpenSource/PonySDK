@@ -23,12 +23,12 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.Objects;
+
 import com.ponysdk.core.model.PCheckBoxState;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
-
-import java.util.Objects;
 
 /**
  * A mutually-exclusive selection radio button widget. Fires
@@ -81,7 +81,7 @@ public class PRadioButton extends PCheckBox {
     void setName(final String name) {
         if (Objects.equals(this.name, name)) return;
         this.name = name;
-        saveUpdate(writer -> writer.write(ServerToClientModel.NAME, name));
+        saveUpdate(ServerToClientModel.NAME, name);
     }
 
 }

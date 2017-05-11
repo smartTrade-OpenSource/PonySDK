@@ -39,7 +39,7 @@ public abstract class PValueBoxBase extends PFocusWidget {
     }
 
     public void setCursorPosition(final int cursorPosition) {
-        saveUpdate(writer -> writer.write(ServerToClientModel.CURSOR_POSITION, cursorPosition));
+        saveUpdate(ServerToClientModel.CURSOR_POSITION, cursorPosition);
     }
 
     public void setSelectionRange(final int startPosition, final int rangeLength) {

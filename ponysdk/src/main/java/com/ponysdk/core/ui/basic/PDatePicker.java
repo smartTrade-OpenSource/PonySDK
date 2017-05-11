@@ -132,11 +132,11 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     public void setValue(final Date date) {
         if (Objects.equals(this.date, date)) return;
         this.date = date;
-        saveUpdate(writer -> writer.write(ServerToClientModel.DATE, DateConverter.toTimestamp(date)));
+        saveUpdate(ServerToClientModel.DATE, DateConverter.toTimestamp(date));
     }
 
     public void setCurrentMonth(final Date date) {
-        saveUpdate(writer -> writer.write(ServerToClientModel.TIME, DateConverter.toTimestamp(date)));
+        saveUpdate(ServerToClientModel.TIME, DateConverter.toTimestamp(date));
     }
 
     /**
@@ -146,7 +146,7 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     public final void setTransientEnabledOnDates(final boolean enabled, final Collection<Date> dates) {
         final String encodedDates = DateConverter.encode(dates);
         if (encodedDates != null && !encodedDates.isEmpty()) {
-            saveUpdate((writer) -> {
+            saveUpdate(writer -> {
                 writer.write(ServerToClientModel.DATE_ENABLED, encodedDates);
                 writer.write(ServerToClientModel.ENABLED, enabled);
             });
@@ -159,7 +159,7 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     public void addStyleToDates(final String styleName, final Collection<Date> dates) {
         final String encodedDates = DateConverter.encode(dates);
         if (encodedDates != null && !encodedDates.isEmpty()) {
-            saveUpdate((writer) -> {
+            saveUpdate(writer -> {
                 writer.write(ServerToClientModel.ADD_DATE_STYLE, encodedDates);
                 writer.write(ServerToClientModel.STYLE_NAME, styleName);
             });
@@ -172,7 +172,7 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     public void removeStyleFromDates(final String styleName, final Collection<Date> dates) {
         final String encodedDates = DateConverter.encode(dates);
         if (encodedDates != null && !encodedDates.isEmpty()) {
-            saveUpdate((writer) -> {
+            saveUpdate(writer -> {
                 writer.write(ServerToClientModel.REMOVE_DATE_STYLE, encodedDates);
                 writer.write(ServerToClientModel.STYLE_NAME, styleName);
             });
@@ -180,7 +180,7 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     }
 
     public void setYearArrowsVisible(final boolean visible) {
-        saveUpdate((writer) -> writer.write(ServerToClientModel.YEAR_ARROWS_VISIBLE, visible));
+        saveUpdate(ServerToClientModel.YEAR_ARROWS_VISIBLE, visible);
     }
 
     public int getMonth() {

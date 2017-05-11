@@ -186,7 +186,7 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
     public void setOpen(final boolean isOpen) {
         if (Objects.equals(this.isOpen, isOpen)) return;
         this.isOpen = isOpen;
-        saveUpdate(writer -> writer.write(ServerToClientModel.OPEN_CLOSE, isOpen));
+        saveUpdate(ServerToClientModel.OPEN_CLOSE, isOpen);
     }
 
     @Override
@@ -198,7 +198,7 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
     public void setAnimationEnabled(final boolean animationEnabled) {
         if (Objects.equals(this.animationEnabled, animationEnabled)) return;
         this.animationEnabled = animationEnabled;
-        saveUpdate(writer -> writer.write(ServerToClientModel.ANIMATION, animationEnabled));
+        saveUpdate(ServerToClientModel.ANIMATION, animationEnabled);
     }
 
 }

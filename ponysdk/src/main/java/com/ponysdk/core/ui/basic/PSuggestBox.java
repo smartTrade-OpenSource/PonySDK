@@ -163,7 +163,7 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
     public void setLimit(final int limit) {
         if (Objects.equals(this.limit, limit)) return;
         this.limit = limit;
-        saveUpdate(writer -> writer.write(ServerToClientModel.LIMIT, limit));
+        saveUpdate(ServerToClientModel.LIMIT, limit);
     }
 
     public String getText() {
@@ -227,39 +227,6 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
         @Override
         public String getReplacementString() {
             return replacementString;
-        }
-    }
-
-    public static class PMultiWordSuggestOracle extends PSuggestOracle {
-
-        public PMultiWordSuggestOracle() {
-        }
-
-        @Override
-        public void add(final String suggestion) {
-            saveUpdate(writer -> writer.write(ServerToClientModel.SUGGESTION, suggestion));
-        }
-
-        @Override
-        public void addAll(final Collection<String> collection) {
-            //            saveUpdate((writer) -> {
-            //                writer.writeModel(ServerToClientModel.SUGGESTIONS, collection);
-            //            });
-        }
-
-        public void setDefaultSuggestions(final Collection<String> collection) {
-            //            saveUpdate((writer) -> {
-            //                writer.writeModel(ServerToClientModel.DEFAULT_SUGGESTIONS, collection);
-            //            });
-        }
-
-        public void clear() {
-            saveUpdate(writer -> writer.write(ServerToClientModel.CLEAR));
-        }
-
-        @Override
-        protected WidgetType getWidgetType() {
-            return WidgetType.MULTIWORD_SUGGEST_ORACLE;
         }
     }
 }

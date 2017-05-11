@@ -172,7 +172,7 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
     public void setAnimationEnabled(final boolean animationEnabled) {
         if (Objects.equals(this.animationEnabled, animationEnabled)) return;
         this.animationEnabled = animationEnabled;
-        saveUpdate((writer) -> writer.write(ServerToClientModel.ANIMATION, animationEnabled));
+        saveUpdate(ServerToClientModel.ANIMATION, animationEnabled);
     }
 
     @Override

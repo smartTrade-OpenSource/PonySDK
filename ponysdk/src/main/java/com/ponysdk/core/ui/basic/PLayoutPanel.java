@@ -23,12 +23,12 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.time.Duration;
+
 import com.ponysdk.core.model.PAlignment;
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-
-import java.time.Duration;
 
 /**
  * A panel that lays its children
@@ -107,7 +107,7 @@ public class PLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
     private void sendUpdate(final PWidget child, final ServerToClientModel key1, final double v1, final ServerToClientModel key2,
                             final double v2, final PUnit unit) {
-        saveUpdate((writer) -> {
+        saveUpdate(writer -> {
             writer.write(ServerToClientModel.UNIT, unit.getByteValue());
             writer.write(ServerToClientModel.WIDGET_ID, child.getID());
             writer.write(key1, v1);

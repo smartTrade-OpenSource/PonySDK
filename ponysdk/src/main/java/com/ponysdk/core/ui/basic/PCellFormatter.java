@@ -36,7 +36,7 @@ public class PCellFormatter {
     }
 
     public void addStyleName(final int row, final int column, final String styleName) {
-        table.saveUpdate((writer) -> {
+        table.saveUpdate(writer -> {
             writer.write(ServerToClientModel.CELL_FORMATTER_ADD_STYLE_NAME, styleName);
             writer.write(ServerToClientModel.ROW, row);
             writer.write(ServerToClientModel.COLUMN, column);
@@ -44,7 +44,7 @@ public class PCellFormatter {
     }
 
     public void removeStyleName(final int row, final int column, final String styleName) {
-        table.saveUpdate((writer) -> {
+        table.saveUpdate(writer -> {
             writer.write(ServerToClientModel.CELL_FORMATTER_REMOVE_STYLE_NAME, styleName);
             writer.write(ServerToClientModel.ROW, row);
             writer.write(ServerToClientModel.COLUMN, column);
@@ -52,7 +52,7 @@ public class PCellFormatter {
     }
 
     public void setStyleName(final int row, final int column, final String styleName) {
-        table.saveUpdate((writer) -> {
+        table.saveUpdate(writer -> {
             writer.write(ServerToClientModel.CELL_FORMATTER_SET_STYLE_NAME, styleName);
             writer.write(ServerToClientModel.ROW, row);
             writer.write(ServerToClientModel.COLUMN, column);
@@ -74,4 +74,5 @@ public class PCellFormatter {
             writer.write(ServerToClientModel.COLUMN, column);
         });
     }
+
 }

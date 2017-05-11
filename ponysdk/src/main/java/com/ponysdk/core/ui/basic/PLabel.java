@@ -56,9 +56,8 @@ import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 import com.ponysdk.core.writer.ModelWriter;
 
 /**
- * A widget that contains arbitrary text, <i>not</i> interpreted as HTML. This
- * widget uses a &lt;div&gt; element, causing it to be displayed with block
- * layout.
+ * A widget that contains arbitrary text, <i>not</i> interpreted as HTML. This widget uses a
+ * &lt;div&gt; element, causing it to be displayed with block layout.
  * <h3>CSS Style Rules</h3>
  * <ul class='css'>
  * <li>.gwt-Label { }</li>
@@ -96,7 +95,7 @@ public class PLabel extends PWidget implements PHasText, HasPClickHandlers, HasP
     public void setText(final String text) {
         if (Objects.equals(this.text, text)) return;
         this.text = text;
-        saveUpdate(writer -> writer.write(ServerToClientModel.TEXT, this.text));
+        saveUpdate(ServerToClientModel.TEXT, this.text);
     }
 
     @Override

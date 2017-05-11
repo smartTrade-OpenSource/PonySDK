@@ -23,10 +23,10 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.json.JsonObject;
 
@@ -53,13 +53,15 @@ public abstract class PObject {
     protected Set<DestroyListener> destroyListeners;
     protected Object data;
 
-    protected Queue<Runnable> stackedInstructions;
+    protected LinkedHashMap<Integer, Runnable> stackedInstructions;
     private String nativeBindingFunction;
 
     private PTerminalEvent.Handler terminalHandler;
 
     protected boolean initialized = false;
     protected boolean destroy = false;
+
+    protected final AtomicInteger atomicKey = new AtomicInteger(ServerToClientModel.DESTROY.getValue());
 
     PObject() {
     }
@@ -106,11 +108,7 @@ public abstract class PObject {
 
         init0();
 
-        if (stackedInstructions != null) {
-            while (!stackedInstructions.isEmpty()) {
-                stackedInstructions.poll().run();
-            }
-        }
+        if (stackedInstructions != null) stackedInstructions.values().forEach(Runnable::run);
 
         if (initializeListeners != null) initializeListeners.forEach(listener -> listener.onInitialize(this));
 
@@ -191,16 +189,24 @@ public abstract class PObject {
         }
     }
 
-    protected Queue<Runnable> safeStackedInstructions() {
-        if (stackedInstructions == null) stackedInstructions = new LinkedList<>();
+    protected LinkedHashMap<Integer, Runnable> safeStackedInstructions() {
+        if (stackedInstructions == null) stackedInstructions = new LinkedHashMap<>();
         return stackedInstructions;
     }
 
     protected void saveUpdate(final ModelWriterCallback callback) {
+        saveUpdate(atomicKey.incrementAndGet(), callback);
+    }
+
+    protected void saveUpdate(final ServerToClientModel serverToClientModel, final Object value) {
+        saveUpdate(serverToClientModel.getValue(), writer -> writer.write(serverToClientModel, value));
+    }
+
+    private void saveUpdate(final int atomicKey, final ModelWriterCallback callback) {
         if (destroy) return;
 
         if (initialized) writeUpdate(callback);
-        else safeStackedInstructions().add(() -> writeUpdate(callback));
+        else safeStackedInstructions().put(atomicKey, () -> writeUpdate(callback));
     }
 
     void writeUpdate(final ModelWriterCallback callback) {
@@ -233,7 +239,7 @@ public abstract class PObject {
             }
         };
         if (initialized) writeAdd(callback);
-        else safeStackedInstructions().add(() -> writeAdd(callback));
+        else safeStackedInstructions().put(atomicKey.incrementAndGet(), () -> writeAdd(callback));
     }
 
     private void writeAdd(final ModelWriterCallback callback) {
@@ -253,7 +259,7 @@ public abstract class PObject {
 
         final ModelWriterCallback callback = writer -> writer.write(ServerToClientModel.HANDLER_TYPE, type.getValue());
         if (initialized) writeAddHandler(callback);
-        else safeStackedInstructions().add(() -> writeAddHandler(callback));
+        else safeStackedInstructions().put(atomicKey.incrementAndGet(), () -> writeAddHandler(callback));
     }
 
     void writeAddHandler(final ModelWriterCallback callback) {
@@ -277,7 +283,7 @@ public abstract class PObject {
             writer.write(ServerToClientModel.HANDLER_TYPE, type.getValue());
         };
         if (initialized) writeRemoveHandler(callback);
-        else safeStackedInstructions().add(() -> writeRemoveHandler(callback));
+        else safeStackedInstructions().put(atomicKey.incrementAndGet(), () -> writeRemoveHandler(callback));
     }
 
     private void writeRemoveHandler(final ModelWriterCallback callback) {
@@ -300,7 +306,7 @@ public abstract class PObject {
             writer.write(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
         };
         if (initialized) writeRemove(callback);
-        else safeStackedInstructions().add(() -> writeRemove(callback));
+        else safeStackedInstructions().put(atomicKey.incrementAndGet(), () -> writeRemove(callback));
     }
 
     private void writeRemove(final ModelWriterCallback callback) {
