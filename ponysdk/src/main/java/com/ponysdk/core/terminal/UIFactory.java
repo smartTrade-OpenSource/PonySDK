@@ -23,6 +23,8 @@
 
 package com.ponysdk.core.terminal;
 
+import java.util.logging.Logger;
+
 import com.google.gwt.user.client.Window;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.terminal.ui.PTAbsolutePanel;
@@ -84,6 +86,8 @@ import com.ponysdk.core.terminal.ui.PTWindow;
 
 class UIFactory {
 
+    private static final Logger log = Logger.getLogger(UIFactory.class.getName());
+
     PTObject newUIObject(final WidgetType widgetType) {
         switch (widgetType) {
             case ABSOLUTE_PANEL:
@@ -99,7 +103,7 @@ class UIFactory {
             case CHECKBOX:
                 return new PTCheckBox<>();
             case COMPOSITE:
-                Window.alert("UIFactory: Client implementation not found, type : " + widgetType);
+                log.severe("UIFactory: Client implementation not found, type : " + widgetType);
                 break;
             case DATEBOX:
                 return new PTDateBox();
@@ -200,7 +204,7 @@ class UIFactory {
             case FRAME:
                 return new PTFrame();
             default:
-                Window.alert("UIFactory: Client implementation not found, type : " + widgetType);
+                log.severe("UIFactory: Client implementation not found, type : " + widgetType);
                 break;
         }
 
