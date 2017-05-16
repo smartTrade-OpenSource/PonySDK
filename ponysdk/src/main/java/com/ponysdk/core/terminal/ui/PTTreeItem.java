@@ -90,7 +90,7 @@ public class PTTreeItem extends PTUIObject<TreeItem> {
         if (ServerToClientModel.SELECTED.ordinal() == modelOrdinal) {
             uiObject.setSelected(binaryModel.getBooleanValue());
             return true;
-        } else if (ServerToClientModel.STATE.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.OPEN_CLOSE.ordinal() == modelOrdinal) {
             uiObject.setState(binaryModel.getBooleanValue());
             return true;
         } else if (ServerToClientModel.TEXT.ordinal() == modelOrdinal) {
@@ -99,6 +99,12 @@ public class PTTreeItem extends PTUIObject<TreeItem> {
         } else {
             return super.update(buffer, binaryModel);
         }
+    }
+
+    @Override
+    public void remove(final ReaderBuffer buffer, final PTObject ptObject) {
+        if (tree != null) tree.removeItem(asWidget(ptObject));
+         else uiObject.removeItem(asWidget(ptObject));
     }
 
 }

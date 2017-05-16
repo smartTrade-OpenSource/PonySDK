@@ -25,6 +25,7 @@ package com.ponysdk.core.ui.basic;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -54,7 +55,7 @@ import com.ponysdk.core.ui.basic.event.PSelectionHandler;
  * <dd>a selected tree item</dd>
  * </dl>
  */
-public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, HasPAnimation {
+public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, HasPAnimation, Iterable<PTreeItem> {
 
     private final List<PSelectionHandler<PTreeItem>> selectionHandlers = new ArrayList<>();
     private final Map<PWidget, PTreeItem> childWidgets = new HashMap<>();
@@ -103,6 +104,11 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
 
     public PTreeItem get(final int index) {
         return root.get(index);
+    }
+
+    @Override
+    public Iterator<PTreeItem> iterator() {
+        return root.iterator();
     }
 
     /**
@@ -155,10 +161,6 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
         } else {
             super.onClientData(instruction);
         }
-    }
-
-    public PTreeItem getRoot() {
-        return root;
     }
 
     @Override

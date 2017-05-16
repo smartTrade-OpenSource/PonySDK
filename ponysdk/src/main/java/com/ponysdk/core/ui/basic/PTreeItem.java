@@ -41,12 +41,13 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
 
     private final List<PTreeItem> children = new ArrayList<>();
 
+    private PTreeItem parent;
     private PTree tree;
     private boolean isRoot;
     private String text;
     private boolean selected;
 
-    private boolean open;
+    private boolean openState;
 
     private PWidget widget;
 
@@ -126,18 +127,19 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
         return selected;
     }
 
-    public void setState(final boolean open) {
-        if (Objects.equals(this.open, open)) return;
-        this.open = open;
-        saveUpdate(ServerToClientModel.STATE, open);
+    public void setState(final boolean openState) {
+        if (Objects.equals(this.openState, openState)) return;
+        this.openState = openState;
+        saveUpdate(ServerToClientModel.OPEN_CLOSE, openState);
     }
 
     public boolean getState() {
-        return open;
+        return openState;
     }
 
     public PTreeItem add(final int beforeIndex, final PTreeItem item) {
         children.add(beforeIndex, item);
+        item.setParent(this);
         item.setTree(tree);
         if (isInitialized()) item.attach(window);
         item.saveAdd(item.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, beforeIndex));
@@ -146,6 +148,7 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
 
     public PTreeItem add(final PTreeItem item) {
         children.add(item);
+        item.setParent(this);
         item.setTree(tree);
         if (isInitialized()) item.attach(window);
         item.saveAdd(item.getID(), ID);
@@ -157,7 +160,7 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
     }
 
     public boolean remove(final PTreeItem item) {
-        tree.saveRemove(tree.getID(), ID);
+        item.saveRemove(item.getID(), ID);
         return children.remove(item);
     }
 
@@ -172,6 +175,15 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
 
     public int size() {
         return children.size();
+    }
+
+    void setParent(final PTreeItem pTreeItem) {
+        this.parent = pTreeItem;
+    }
+
+    public void removeFromParent() {
+        if (!isRoot) parent.remove(this);
+        else tree.removeFromParent();
     }
 
     @Override
