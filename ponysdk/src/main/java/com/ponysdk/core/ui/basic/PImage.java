@@ -104,10 +104,10 @@ public class PImage extends PWidget implements HasPClickHandlers {
     protected void enrichOnInit(final ModelWriter writer) {
         super.enrichOnInit(writer);
         if (url != null) {
-            writer.write(ServerToClientModel.IMAGE_URL, url);
+            writer.write(ServerToClientModel.URL, url);
             if (top != -1 && left != -1 && imageHeight != -1 && imageWidth != -1) {
-                writer.write(ServerToClientModel.IMAGE_LEFT, left);
-                writer.write(ServerToClientModel.IMAGE_TOP, top);
+                writer.write(ServerToClientModel.POSITION_LEFT, left);
+                writer.write(ServerToClientModel.POSITION_TOP, top);
                 writer.write(ServerToClientModel.IMAGE_HEIGHT, imageHeight);
                 writer.write(ServerToClientModel.IMAGE_WIDTH, imageWidth);
             }
@@ -126,7 +126,7 @@ public class PImage extends PWidget implements HasPClickHandlers {
     public void setUrl(final String url) {
         if (Objects.equals(this.url, url)) return;
         this.url = url;
-        saveUpdate(ServerToClientModel.IMAGE_URL, url);
+        saveUpdate(ServerToClientModel.URL, url);
     }
 
     public void setStream(final StreamHandler streamListener) {

@@ -131,7 +131,7 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
     public class Formatter {
 
         public void createLink(final String url) {
-            saveUpdate(writer -> writer.write(ServerToClientModel.CREATE_LINK, url));
+            saveUpdate(writer -> writer.write(ServerToClientModel.URL, url));
         }
 
         public void insertHorizontalRule() {

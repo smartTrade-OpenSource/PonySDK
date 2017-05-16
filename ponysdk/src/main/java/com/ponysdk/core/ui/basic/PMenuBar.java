@@ -120,7 +120,7 @@ public class PMenuBar extends PWidget implements HasPAnimation, Iterable<PMenuSu
     @Override
     protected void enrichOnInit(final ModelWriter writer) {
         super.enrichOnInit(writer);
-        writer.write(ServerToClientModel.MENU_BAR_IS_VERTICAL, vertical);
+        writer.write(ServerToClientModel.VERTICAL, vertical);
     }
 
     @Override

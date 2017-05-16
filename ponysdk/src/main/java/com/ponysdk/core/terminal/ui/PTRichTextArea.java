@@ -53,7 +53,7 @@ public class PTRichTextArea extends PTFocusWidget<RichTextArea> implements BlurH
         if (ServerToClientModel.HTML.ordinal() == modelOrdinal) {
             uiObject.setHTML(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.CREATE_LINK.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.URL.ordinal() == modelOrdinal) {
             uiObject.getFormatter().createLink(binaryModel.getStringValue());
             return true;
         } else if (ServerToClientModel.INSERT_HORIZONTAL_RULE.ordinal() == modelOrdinal) {

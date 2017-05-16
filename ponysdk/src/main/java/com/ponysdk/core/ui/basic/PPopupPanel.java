@@ -108,22 +108,22 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
     }
 
     public void setModal(final boolean modal) {
-        saveUpdate(ServerToClientModel.POPUP_MODAL, modal);
+        saveUpdate(ServerToClientModel.MODAL, modal);
     }
 
     public void setDraggable(final boolean draggable) {
-        saveUpdate(ServerToClientModel.POPUP_DRAGGABLE, draggable);
+        saveUpdate(ServerToClientModel.DRAGGABLE, draggable);
     }
 
     public void center() {
         this.showing = true;
-        saveUpdate(writer -> writer.write(ServerToClientModel.POPUP_CENTER));
+        saveUpdate(writer -> writer.write(ServerToClientModel.CENTER));
     }
 
     public void show() {
         if (!showing) {
             this.showing = true;
-            saveUpdate(writer -> writer.write(ServerToClientModel.POPUP_SHOW));
+            saveUpdate(writer -> writer.write(ServerToClientModel.OPEN));
         } else {
             log.warn("The popup is already opened : {}", this);
         }
@@ -132,7 +132,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
     public void hide() {
         if (showing) {
             this.showing = false;
-            saveUpdate(writer -> writer.write(ServerToClientModel.POPUP_HIDE));
+            saveUpdate(writer -> writer.write(ServerToClientModel.CLOSE));
         } else {
             log.warn("The popup is already hidden : {}", this);
         }
@@ -165,8 +165,8 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
     public void setPopupPosition(final int left, final int top) {
         saveUpdate(writer -> {
-            writer.write(ServerToClientModel.POPUP_POSITION_LEFT, left);
-            writer.write(ServerToClientModel.POPUP_POSITION_TOP, top);
+            writer.write(ServerToClientModel.POSITION_LEFT, left);
+            writer.write(ServerToClientModel.POSITION_TOP, top);
         });
     }
 

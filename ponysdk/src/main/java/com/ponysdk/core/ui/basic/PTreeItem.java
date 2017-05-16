@@ -130,7 +130,8 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
     public void setState(final boolean openState) {
         if (Objects.equals(this.openState, openState)) return;
         this.openState = openState;
-        saveUpdate(ServerToClientModel.OPEN_CLOSE, openState);
+        if (openState) saveUpdate(ServerToClientModel.OPEN, openState);
+        else saveUpdate(ServerToClientModel.CLOSE, openState);
     }
 
     public boolean getState() {

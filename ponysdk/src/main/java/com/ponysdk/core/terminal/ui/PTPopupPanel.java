@@ -94,32 +94,32 @@ public class PTPopupPanel<T extends PopupPanel> extends PTSimplePanel<T>
         if (ServerToClientModel.ANIMATION.ordinal() == modelOrdinal) {
             uiObject.setAnimationEnabled(binaryModel.getBooleanValue());
             return true;
-        } else if (ServerToClientModel.POPUP_CENTER.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.CENTER.ordinal() == modelOrdinal) {
             uiObject.show();
             uiObject.center();
             return true;
-        } else if (ServerToClientModel.POPUP_SHOW.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.OPEN.ordinal() == modelOrdinal) {
             uiObject.show();
             return true;
         } else if (ServerToClientModel.POPUP_POSITION_AND_SHOW.ordinal() == modelOrdinal) {
             uiObject.setVisible(true);
             return true;
-        } else if (ServerToClientModel.POPUP_HIDE.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.CLOSE.ordinal() == modelOrdinal) {
             uiObject.hide();
             return true;
         } else if (ServerToClientModel.POPUP_GLASS_ENABLED.ordinal() == modelOrdinal) {
             uiObject.setGlassEnabled(binaryModel.getBooleanValue());
             return true;
-        } else if (ServerToClientModel.POPUP_MODAL.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.MODAL.ordinal() == modelOrdinal) {
             uiObject.setModal(binaryModel.getBooleanValue());
             return true;
-        } else if (ServerToClientModel.POPUP_POSITION_LEFT.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.POSITION_LEFT.ordinal() == modelOrdinal) {
             final int left = binaryModel.getIntValue();
-            // ServerToClientModel.POPUP_POSITION_TOP
+            // ServerToClientModel.POSITION_TOP
             final int top = buffer.readBinaryModel().getIntValue();
             uiObject.setPopupPosition(left, top);
             return true;
-        } else if (ServerToClientModel.POPUP_DRAGGABLE.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.DRAGGABLE.ordinal() == modelOrdinal) {
             draggable = binaryModel.getBooleanValue();
             if (draggable) {
                 uiObject.addDomHandler(this, MouseDownEvent.getType());

@@ -90,8 +90,11 @@ public class PTTreeItem extends PTUIObject<TreeItem> {
         if (ServerToClientModel.SELECTED.ordinal() == modelOrdinal) {
             uiObject.setSelected(binaryModel.getBooleanValue());
             return true;
-        } else if (ServerToClientModel.OPEN_CLOSE.ordinal() == modelOrdinal) {
-            uiObject.setState(binaryModel.getBooleanValue());
+        } else if (ServerToClientModel.OPEN.ordinal() == modelOrdinal) {
+            uiObject.setState(true);
+            return true;
+        } else if (ServerToClientModel.CLOSE.ordinal() == modelOrdinal) {
+            uiObject.setState(false);
             return true;
         } else if (ServerToClientModel.TEXT.ordinal() == modelOrdinal) {
             uiObject.setText(binaryModel.getStringValue());

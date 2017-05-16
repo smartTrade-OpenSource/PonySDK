@@ -47,7 +47,7 @@ public class PTDialogBox extends PTDecoratedPopupPanel<DialogBox> {
             final DialogBox dialogBox = uiObject;
             dialogBox.setHTML(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.POPUP_DRAGGABLE.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.DRAGGABLE.ordinal() == modelOrdinal) {
             draggable = binaryModel.getBooleanValue();
             return true;
         } else {

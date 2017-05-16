@@ -45,10 +45,10 @@ public class PTImage extends PTWidget<Image> {
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
         final BinaryModel urlModel = buffer.readBinaryModel();
-        if (ServerToClientModel.IMAGE_URL.equals(urlModel.getModel())) {
+        if (ServerToClientModel.URL.equals(urlModel.getModel())) {
             url = urlModel.getStringValue();
             final BinaryModel leftModel = buffer.readBinaryModel();
-            if (ServerToClientModel.IMAGE_LEFT.equals(leftModel.getModel())) {
+            if (ServerToClientModel.POSITION_LEFT.equals(leftModel.getModel())) {
                 left = leftModel.getIntValue();
                 top = buffer.readBinaryModel().getIntValue();
                 width = buffer.readBinaryModel().getIntValue();
@@ -72,7 +72,7 @@ public class PTImage extends PTWidget<Image> {
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.IMAGE_URL.ordinal() == modelOrdinal) {
+        if (ServerToClientModel.URL.ordinal() == modelOrdinal) {
             uiObject.setUrl(binaryModel.getStringValue());
             return true;
         } else {

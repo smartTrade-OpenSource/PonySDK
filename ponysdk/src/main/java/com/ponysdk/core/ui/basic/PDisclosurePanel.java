@@ -186,7 +186,8 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
     public void setOpen(final boolean isOpen) {
         if (Objects.equals(this.isOpen, isOpen)) return;
         this.isOpen = isOpen;
-        saveUpdate(ServerToClientModel.OPEN_CLOSE, isOpen);
+        if (isOpen) saveUpdate(ServerToClientModel.OPEN, isOpen);
+        else saveUpdate(ServerToClientModel.CLOSE, isOpen);
     }
 
     @Override

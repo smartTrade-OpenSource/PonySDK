@@ -78,8 +78,11 @@ public class PTDisclosurePanel extends PTWidget<DisclosurePanel> {
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.OPEN_CLOSE.ordinal() == modelOrdinal) {
-            uiObject.setOpen(binaryModel.getBooleanValue());
+        if (ServerToClientModel.OPEN.ordinal() == modelOrdinal) {
+            uiObject.setOpen(true);
+            return true;
+        } else if (ServerToClientModel.CLOSE.ordinal() == modelOrdinal) {
+            uiObject.setOpen(false);
             return true;
         } else if (ServerToClientModel.ANIMATION.ordinal() == modelOrdinal) {
             uiObject.setAnimationEnabled(binaryModel.getBooleanValue());

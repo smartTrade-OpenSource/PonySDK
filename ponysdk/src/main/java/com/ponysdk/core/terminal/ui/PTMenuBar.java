@@ -37,6 +37,7 @@ public class PTMenuBar extends PTWidget<MenuBar> {
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
+        // ServerToClientModel.VERTICAL
         isVertical = buffer.readBinaryModel().getBooleanValue();
 
         super.create(buffer, objectId, uiService);
