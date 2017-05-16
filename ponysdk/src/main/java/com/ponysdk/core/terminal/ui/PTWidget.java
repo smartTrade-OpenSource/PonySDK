@@ -58,7 +58,6 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.DomHandlerType;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
@@ -117,28 +116,7 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
 
     @Override
     public T asWidget() {
-        return cast();
-    }
-
-    @Override
-    public PTWidget<T> isPTWidget() {
-        return this;
-    }
-
-    @Override
-    public Widget asWidget(final int objectID, final UIBuilder uiService) {
-        return asWidget(uiService.getPTObject(objectID));
-    }
-
-    @Override
-    public Widget asWidget(final PTObject ptObject) {
-        if (ptObject != null) {
-            final PTWidget<?> ptWidget = ptObject.isPTWidget();
-            if (ptWidget != null) return ptWidget.cast();
-        } else {
-            log.severe("No widget found for object #" + objectID);
-        }
-        return null;
+        return uiObject;
     }
 
     private void addDomHandler(final ReaderBuffer buffer, final DomHandlerType domHandlerType) {

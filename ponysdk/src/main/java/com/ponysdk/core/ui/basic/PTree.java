@@ -84,15 +84,13 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
     }
 
     public void setSelectedItem(final PTreeItem item) {
-        if (curSelection != null) {
-            curSelection.setSelected(false);
-        }
+        if (curSelection != null) curSelection.setSelected(false);
         curSelection = item;
         curSelection.setSelected(true);
     }
 
     public PTreeItem add(final String item) {
-        return root.add(item);
+        return add(Element.newPTreeItem(item));
     }
 
     public PTreeItem add(final PTreeItem item) {

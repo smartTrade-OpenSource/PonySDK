@@ -71,11 +71,6 @@ abstract class AbstractPTObject implements PTObject {
     }
 
     @Override
-    public PTWidget<?> isPTWidget() {
-        return null;
-    }
-
-    @Override
     public String toString() {
         return getClass().getSimpleName() + " #" + getObjectID();
     }

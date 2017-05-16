@@ -46,6 +46,4 @@ public interface PTObject {
 
     int getObjectID();
 
-    PTWidget<?> isPTWidget();
-
 }

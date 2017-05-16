@@ -41,10 +41,6 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
 
     protected abstract T createUIObject();
 
-    public T cast() {
-        return uiObject;
-    }
-
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
         super.create(buffer, objectId, uiBuilder);
@@ -115,15 +111,13 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
         }
     }
 
-    public UIObject asWidget(final int objectID, final UIBuilder uiService) {
+    public <WIDGET_TYPE extends UIObject> WIDGET_TYPE asWidget(final int objectID, final UIBuilder uiService) {
         return asWidget(uiService.getPTObject(objectID));
     }
 
-    public UIObject asWidget(final PTObject ptObject) {
-        if (ptObject instanceof PTUIObject) {
-            return ((PTUIObject<?>) ptObject).uiObject;
-        }
-        throw new IllegalStateException("This object is not an UIObject");
+    public <WIDGET_TYPE extends UIObject> WIDGET_TYPE asWidget(final PTObject ptObject) {
+        if (ptObject instanceof PTUIObject) return ((PTUIObject<WIDGET_TYPE>) ptObject).uiObject;
+        else throw new IllegalStateException("This object is not an UIObject");
     }
 
     private native Object bind(String functionName, int objectID, Element element) /*-{
