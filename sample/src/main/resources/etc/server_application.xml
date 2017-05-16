@@ -28,6 +28,7 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
         </property>
         <property name="style">
             <list>
+                <value>css/ponysdk.css</value>
                 <value>css/sample.css</value>
             </list>
         </property>

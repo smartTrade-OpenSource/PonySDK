@@ -25,8 +25,8 @@ package com.ponysdk.core.terminal.ui;
 
 import com.google.gwt.user.client.ui.Tree;
 import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
@@ -34,8 +34,32 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 public class PTTree extends PTWidget<Tree> {
 
     @Override
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
+        super.create(buffer, objectId, uiBuilder);
+        addHandler(uiBuilder);
+    }
+
+    @Override
     protected Tree createUIObject() {
         return new Tree();
+    }
+
+    private void addHandler(final UIBuilder uiBuilder) {
+        uiObject.addSelectionHandler(event -> {
+            final PTInstruction eventInstruction = new PTInstruction(getObjectID());
+            eventInstruction.put(ClientToServerModel.HANDLER_SELECTION, uiBuilder.getPTObject(event.getSelectedItem()).getObjectID());
+            uiBuilder.sendDataToServer(uiObject, eventInstruction);
+        });
+        uiObject.addOpenHandler(event -> {
+            final PTInstruction eventInstruction = new PTInstruction(getObjectID());
+            eventInstruction.put(ClientToServerModel.HANDLER_OPEN, uiBuilder.getPTObject(event.getTarget()).getObjectID());
+            uiBuilder.sendDataToServer(uiObject, eventInstruction);
+        });
+        uiObject.addCloseHandler(event -> {
+            final PTInstruction eventInstruction = new PTInstruction(getObjectID());
+            eventInstruction.put(ClientToServerModel.HANDLER_CLOSE, uiBuilder.getPTObject(event.getTarget()).getObjectID());
+            uiBuilder.sendDataToServer(uiObject, eventInstruction);
+        });
     }
 
     @Override
@@ -49,31 +73,16 @@ public class PTTree extends PTWidget<Tree> {
         if (ServerToClientModel.ANIMATION.ordinal() == modelOrdinal) {
             uiObject.setAnimationEnabled(binaryModel.getBooleanValue());
             return true;
+        } else if (ServerToClientModel.SELECTED_INDEX.ordinal() == modelOrdinal) {
+            final int selectedItemId = binaryModel.getIntValue();
+            if (selectedItemId != -1) uiObject.setSelectedItem(asWidget(selectedItemId, uiBuilder), false);
+            else uiObject.setSelectedItem(null, false);
+            return true;
+        } else if (ServerToClientModel.CLEAR.ordinal() == modelOrdinal) {
+            uiObject.clear();
+            return true;
         } else {
             return super.update(buffer, binaryModel);
-        }
-    }
-
-    @Override
-    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
-        if (HandlerModel.HANDLER_SELECTION.equals(handlerModel)) {
-            uiObject.addSelectionHandler(event -> {
-                final PTObject ptObject = uiBuilder.getPTObject(event.getSelectedItem());
-                final PTInstruction eventInstruction = new PTInstruction(getObjectID());
-                eventInstruction.put(ClientToServerModel.HANDLER_SELECTION, ptObject.getObjectID());
-                uiBuilder.sendDataToServer(uiObject, eventInstruction);
-            });
-        } else {
-            super.addHandler(buffer, handlerModel);
-        }
-    }
-
-    @Override
-    public void removeHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
-        if (HandlerModel.HANDLER_SELECTION.equals(handlerModel)) {
-            // TODO Remove HANDLER_SELECTION
-        } else {
-            super.removeHandler(buffer, handlerModel);
         }
     }
 

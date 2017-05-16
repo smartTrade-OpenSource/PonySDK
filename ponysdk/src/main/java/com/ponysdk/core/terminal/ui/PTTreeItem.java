@@ -52,7 +52,7 @@ public class PTTreeItem extends PTUIObject<TreeItem> {
 
         binaryModel = buffer.readBinaryModel();
         if (ServerToClientModel.TREE_ROOT.equals(binaryModel.getModel())) {
-            this.tree = (Tree) asWidget(uiBuilder.getPTObject(binaryModel.getIntValue()));
+            this.tree = (Tree) asWidget(binaryModel.getIntValue(), uiBuilder);
         } else {
             buffer.rewind(binaryModel);
         }
@@ -87,14 +87,11 @@ public class PTTreeItem extends PTUIObject<TreeItem> {
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.SELECTED.ordinal() == modelOrdinal) {
-            uiObject.setSelected(binaryModel.getBooleanValue());
-            return true;
-        } else if (ServerToClientModel.OPEN.ordinal() == modelOrdinal) {
-            uiObject.setState(true);
+        if (ServerToClientModel.OPEN.ordinal() == modelOrdinal) {
+            uiObject.setState(true, false);
             return true;
         } else if (ServerToClientModel.CLOSE.ordinal() == modelOrdinal) {
-            uiObject.setState(false);
+            uiObject.setState(false, false);
             return true;
         } else if (ServerToClientModel.TEXT.ordinal() == modelOrdinal) {
             uiObject.setText(binaryModel.getStringValue());
@@ -107,7 +104,7 @@ public class PTTreeItem extends PTUIObject<TreeItem> {
     @Override
     public void remove(final ReaderBuffer buffer, final PTObject ptObject) {
         if (tree != null) tree.removeItem(asWidget(ptObject));
-         else uiObject.removeItem(asWidget(ptObject));
+        else uiObject.removeItem(asWidget(ptObject));
     }
 
 }

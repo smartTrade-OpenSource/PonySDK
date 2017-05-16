@@ -34,21 +34,18 @@ import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.writer.ModelWriter;
 
 /**
- * An item that can be contained within a {@link PTree}. Each tree item is
- * assigned a unique DOM id in order to support ARIA.
+ * An item that can be contained within a {@link PTree}. Each tree item is assigned a unique DOM id
+ * in order to support ARIA.
  */
 public class PTreeItem extends PObject implements Iterable<PTreeItem> {
 
-    private final List<PTreeItem> children = new ArrayList<>();
-
-    private PTreeItem parent;
     private PTree tree;
+    private PTreeItem parent;
+    private List<PTreeItem> children;
+
     private boolean isRoot;
     private String text;
-    private boolean selected;
-
-    private boolean openState;
-
+    protected boolean openState;
     private PWidget widget;
 
     protected PTreeItem() {
@@ -117,14 +114,14 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
         this.tree = tree;
     }
 
-    public void setSelected(final boolean selected) {
-        if (Objects.equals(this.selected, selected)) return;
-        this.selected = selected;
-        saveUpdate(ServerToClientModel.SELECTED, selected);
+    public void setSelected(final boolean newSelected) {
+        final boolean selected = isSelected();
+        if (!selected && newSelected) tree.setSelectedItem(this);
+        else if (selected && !newSelected) tree.setSelectedItem(null);
     }
 
     public boolean isSelected() {
-        return selected;
+        return this.equals(tree.getSelectedItem());
     }
 
     public void setState(final boolean openState) {
@@ -139,6 +136,7 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
     }
 
     public PTreeItem add(final int beforeIndex, final PTreeItem item) {
+        if (children == null) children = new ArrayList<>();
         children.add(beforeIndex, item);
         item.setParent(this);
         item.setTree(tree);
@@ -148,6 +146,7 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
     }
 
     public PTreeItem add(final PTreeItem item) {
+        if (children == null) children = new ArrayList<>();
         children.add(item);
         item.setParent(this);
         item.setTree(tree);
@@ -166,16 +165,16 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
     }
 
     public PTreeItem get(final int index) {
-        return children.get(index);
+        return children != null ? children.get(index) : null;
     }
 
     @Override
     public Iterator<PTreeItem> iterator() {
-        return children.iterator();
+        return children != null ? children.iterator() : null;
     }
 
     public int size() {
-        return children.size();
+        return children != null ? children.size() : 0;
     }
 
     void setParent(final PTreeItem pTreeItem) {
@@ -185,6 +184,10 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
     public void removeFromParent() {
         if (!isRoot) parent.remove(this);
         else tree.removeFromParent();
+    }
+
+    void clear() {
+        children.clear();
     }
 
     @Override

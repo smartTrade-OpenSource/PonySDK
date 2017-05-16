@@ -33,7 +33,6 @@ import java.util.Objects;
 import javax.json.JsonObject;
 
 import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.UIContext;
@@ -57,12 +56,13 @@ import com.ponysdk.core.ui.basic.event.PSelectionHandler;
  */
 public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, HasPAnimation, Iterable<PTreeItem> {
 
-    private final List<PSelectionHandler<PTreeItem>> selectionHandlers = new ArrayList<>();
     private final Map<PWidget, PTreeItem> childWidgets = new HashMap<>();
 
     private final PTreeItem root;
     private boolean animationEnabled = false;
-    private PTreeItem curSelection;
+    private PTreeItem selectedItem;
+
+    private List<PSelectionHandler<PTreeItem>> selectionHandlers;
 
     protected PTree() {
         root = new PTreeItem(this);
@@ -80,14 +80,30 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
         return WidgetType.TREE;
     }
 
-    public PTreeItem getSelectedItem() {
-        return curSelection;
+    @Override
+    public void setAnimationEnabled(final boolean animationEnabled) {
+        if (Objects.equals(this.animationEnabled, animationEnabled)) return;
+        this.animationEnabled = animationEnabled;
+        saveUpdate(ServerToClientModel.ANIMATION, animationEnabled);
     }
 
-    public void setSelectedItem(final PTreeItem item) {
-        if (curSelection != null) curSelection.setSelected(false);
-        curSelection = item;
-        curSelection.setSelected(true);
+    @Override
+    public boolean isAnimationEnabled() {
+        return animationEnabled;
+    }
+
+    public void setSelectedItem(final PTreeItem selectedItem) {
+        if (Objects.equals(this.selectedItem, selectedItem)) return;
+        this.selectedItem = selectedItem;
+        saveUpdate(ServerToClientModel.SELECTED_INDEX, selectedItem != null ? selectedItem.getID() : -1);
+        if (selectionHandlers != null) {
+            final PSelectionEvent<PTreeItem> selectionEvent = new PSelectionEvent<>(this, selectedItem);
+            selectionHandlers.forEach(handler -> handler.onSelection(selectionEvent));
+        }
+    }
+
+    public PTreeItem getSelectedItem() {
+        return selectedItem;
     }
 
     public PTreeItem add(final String item) {
@@ -140,39 +156,44 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
 
     @Override
     public void addSelectionHandler(final PSelectionHandler<PTreeItem> handler) {
+        if (selectionHandlers == null) selectionHandlers = new ArrayList<>();
         selectionHandlers.add(handler);
-        saveAddHandler(HandlerModel.HANDLER_SELECTION);
     }
 
     @Override
     public void removeSelectionHandler(final PSelectionHandler<PTreeItem> handler) {
-        selectionHandlers.remove(handler);
-        saveRemoveHandler(HandlerModel.HANDLER_SELECTION);
+        if (selectionHandlers != null) selectionHandlers.remove(handler);
+    }
+
+    public PTreeItem getRoot() {
+        return root;
+    }
+
+    public void clear() {
+        root.clear();
+        saveUpdate(writer -> writer.write(ServerToClientModel.CLEAR));
     }
 
     @Override
     public void onClientData(final JsonObject instruction) {
         if (instruction.containsKey(ClientToServerModel.HANDLER_SELECTION.toStringValue())) {
             final int widgetId = instruction.getJsonNumber(ClientToServerModel.HANDLER_SELECTION.toStringValue()).intValue();
-            final PSelectionEvent<PTreeItem> selectionEvent = new PSelectionEvent<>(this, UIContext.get().getObject(widgetId));
-            for (final PSelectionHandler<PTreeItem> handler : selectionHandlers) {
-                handler.onSelection(selectionEvent);
+            selectedItem = UIContext.get().getObject(widgetId);
+            if (selectionHandlers != null) {
+                final PSelectionEvent<PTreeItem> selectionEvent = new PSelectionEvent<>(this, selectedItem);
+                selectionHandlers.forEach(handler -> handler.onSelection(selectionEvent));
             }
+        } else if (instruction.containsKey(ClientToServerModel.HANDLER_OPEN.toStringValue())) {
+            final int widgetId = instruction.getJsonNumber(ClientToServerModel.HANDLER_OPEN.toStringValue()).intValue();
+            final PTreeItem item = UIContext.get().getObject(widgetId);
+            item.openState = true;
+        } else if (instruction.containsKey(ClientToServerModel.HANDLER_CLOSE.toStringValue())) {
+            final int widgetId = instruction.getJsonNumber(ClientToServerModel.HANDLER_CLOSE.toStringValue()).intValue();
+            final PTreeItem item = UIContext.get().getObject(widgetId);
+            item.openState = false;
         } else {
             super.onClientData(instruction);
         }
-    }
-
-    @Override
-    public boolean isAnimationEnabled() {
-        return animationEnabled;
-    }
-
-    @Override
-    public void setAnimationEnabled(final boolean animationEnabled) {
-        if (Objects.equals(this.animationEnabled, animationEnabled)) return;
-        this.animationEnabled = animationEnabled;
-        saveUpdate(ServerToClientModel.ANIMATION, animationEnabled);
     }
 
     @Override
@@ -180,4 +201,5 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
         super.onDestroy();
         root.onDestroy();
     }
+
 }
