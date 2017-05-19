@@ -416,7 +416,13 @@ public class UIContext {
         try {
             living = false;
             communicationSanityChecker.stop();
-            uiContextListeners.forEach(listener -> listener.onUIContextDestroyed(this));
+            uiContextListeners.forEach(listener -> {
+                try {
+                    listener.onUIContextDestroyed(this);
+                } catch (final Exception e) {
+                    log.error("Exception while destroying UIContext #" + getID(), e);
+                }
+            });
             context.close();
         } finally {
             end();

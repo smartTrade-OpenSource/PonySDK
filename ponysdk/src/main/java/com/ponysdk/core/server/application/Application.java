@@ -75,9 +75,19 @@ public class Application {
     }
 
     public void destroy() {
-        uiContexts.values().forEach(UIContext::destroyFromApplication);
+        uiContexts.values().forEach(uiContext -> {
+            try {
+                uiContext.destroyFromApplication();
+            } catch (final Exception e) {
+                log.error("Can't destroy the UIContext #" + uiContext.getID(), e);
+            }
+        });
         uiContexts.clear();
-        session.invalidate();
+        try {
+            session.invalidate();
+        } catch (final IllegalArgumentException e) {
+            log.error("The session is already invalid", e);
+        }
         SessionManager.get().unregisterApplication(this);
     }
 
