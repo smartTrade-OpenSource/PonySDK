@@ -68,7 +68,6 @@ public class Application {
     void unregisterUIContext(final int uiContextID) {
         uiContexts.remove(uiContextID);
         if (uiContexts.isEmpty()) {
-            log.info("Invalidate session, all ui contexts have been destroyed");
             session.invalidate();
             SessionManager.get().unregisterApplication(this);
         }
@@ -79,11 +78,14 @@ public class Application {
             try {
                 uiContext.destroyFromApplication();
             } catch (final Exception e) {
-                log.error("Can't destroy the UIContext #" + uiContext.getID(), e);
+                log.error("Can't destroy the UIContext #" + uiContext.getID() + " on Application #" + getId(), e);
             }
         });
         uiContexts.clear();
+
         try {
+            if (log.isInfoEnabled())
+                log.info("Invalidate session on Application #{} because all ui contexts have been destroyed", getId());
             session.invalidate();
         } catch (final IllegalArgumentException e) {
             log.error("The session is already invalid", e);

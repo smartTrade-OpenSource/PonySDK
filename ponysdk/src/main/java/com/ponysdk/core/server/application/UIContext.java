@@ -495,7 +495,7 @@ public class UIContext {
 
     @Override
     public String toString() {
-        return "UIContext [" + application + ", uiContextID=" + ID + ", living=" + living + "]";
+        return "UIContext [ID=" + ID + ", living=" + living + ", ApplicationID=" + application.getId() + "]";
     }
 
     public void enableCommunicationChecker(final boolean enable) {

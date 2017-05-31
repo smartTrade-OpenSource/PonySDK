@@ -71,8 +71,10 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     @Override
     public void onWebSocketConnect(final Session session) {
         final HttpSession httpSession = request.getSession();
-        if (log.isInfoEnabled()) log.info("WebSocket connected from {}, sessionID {}, userAgent {}", session.getRemoteAddress(),
-            httpSession, request.getHeader("User-Agent"));
+        final String applicationId = httpSession.getId();
+        String userAgent = request.getHeader("User-Agent");
+        if (log.isInfoEnabled()) log.info("WebSocket connected from {}, sessionID={}, userAgent={}", session.getRemoteAddress(),
+            applicationId, userAgent);
 
         this.session = session;
         // 1K for max chunk size and 1M for total buffer size
@@ -80,19 +82,18 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         this.websocketPusher = new WebSocketPusher(session, 1 << 20, 1 << 12, TimeUnit.SECONDS.toMillis(60));
         this.context = new TxnContext(this);
 
-        final String applicationId = httpSession.getId();
         Application application = SessionManager.get().getApplication(applicationId);
         if (application == null) {
             application = new Application(applicationId, httpSession, applicationManager.getOptions(),
-                UserAgent.parseUserAgentString(request.getHeader("User-Agent")));
+                UserAgent.parseUserAgentString(userAgent));
             SessionManager.get().registerApplication(application);
         }
 
         context.setApplication(application);
 
-        if (log.isInfoEnabled()) log.info("Creating a new application, {}", application.toString());
         try {
             final UIContext uiContext = new UIContext(context);
+            if (log.isInfoEnabled()) log.info("Creating a new {}", uiContext);
             context.setUIContext(uiContext);
             application.registerUIContext(uiContext);
 
@@ -121,7 +122,8 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
     @Override
     public void onWebSocketClose(final int statusCode, final String reason) {
-        log.info("WebSocket closed {}, reason : {}", NiceStatusCode.getMessage(statusCode), reason != null ? reason : "");
+        if (log.isInfoEnabled()) log.info("WebSocket closed on UIContext #{} : {}, reason : {}", context.getUIContext().getID(),
+            NiceStatusCode.getMessage(statusCode), reason != null ? reason : "");
         if (isLiving()) context.getUIContext().onDestroy();
     }
 
@@ -137,19 +139,19 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
                 uiContext.notifyMessageReceived();
 
                 if (ClientToServerModel.HEARTBEAT.toStringValue().equals(text)) {
-                    if (log.isDebugEnabled()) log.debug("Heartbeat received from terminal #" + uiContext.getID());
+                    if (log.isDebugEnabled()) log.debug("Heartbeat received from terminal #{}", uiContext.getID());
                 } else {
                     final JsonObject jsonObject = Json.createReader(new StringReader(text)).readObject();
                     if (jsonObject.containsKey(ClientToServerModel.PING_SERVER.toStringValue())) {
                         final long start = jsonObject.getJsonNumber(ClientToServerModel.PING_SERVER.toStringValue()).longValue();
                         final long end = System.currentTimeMillis();
                         if (log.isDebugEnabled())
-                            log.debug("Ping measurement : " + (end - start) + " ms from terminal #" + uiContext.getID());
+                            log.debug("Ping measurement : {} ms from terminal #{}", end - start, uiContext.getID());
                         uiContext.addPingValue(end - start);
                     } else if (jsonObject.containsKey(ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue())) {
                         final Application applicationSession = context.getApplication();
                         if (applicationSession == null)
-                            throw new Exception("Invalid session, please reload your application (" + uiContext + ").");
+                            throw new Exception("Invalid session, please reload your application (" + uiContext + ")");
                         final String applicationInstructions = ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue();
                         uiContext.execute(() -> {
                             final JsonArray appInstructions = jsonObject.getJsonArray(applicationInstructions);
@@ -158,22 +160,22 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
                             }
                         });
                     } else if (jsonObject.containsKey(ClientToServerModel.INFO_MSG.toStringValue())) {
-                        log.info("Message from terminal #" + uiContext.getID() + " : "
-                                + jsonObject.getJsonString(ClientToServerModel.INFO_MSG.toStringValue()));
+                        if (log.isInfoEnabled()) log.info("Message from terminal #{} : {}", uiContext.getID(),
+                            jsonObject.getJsonString(ClientToServerModel.INFO_MSG.toStringValue()));
                     } else if (jsonObject.containsKey(ClientToServerModel.ERROR_MSG.toStringValue())) {
-                        log.error("Message from terminal #" + uiContext.getID() + " : "
-                                + jsonObject.getJsonString(ClientToServerModel.ERROR_MSG.toStringValue()));
+                        log.error("Message from terminal #{} : {}", uiContext.getID(),
+                            jsonObject.getJsonString(ClientToServerModel.ERROR_MSG.toStringValue()));
                     } else {
-                        log.error("Unknow message from terminal #" + uiContext.getID() + " : " + text);
+                        log.error("Unknow message from terminal #{} : {}", uiContext.getID(), text);
                     }
                 }
             } catch (final Throwable e) {
-                log.error("Cannot process message from terminal  #" + uiContext.getID() + " : {}", text, e);
+                log.error("Cannot process message from terminal  #" + uiContext.getID() + " : " + text, e);
             } finally {
                 if (monitor != null) monitor.onMessageProcessed(WebSocket.this);
             }
         } else {
-            if (log.isInfoEnabled()) log.info("UI Context is destroyed, message dropped from terminal : " + text);
+            if (log.isInfoEnabled()) log.info("UI Context is destroyed, message dropped from terminal : {}", text);
         }
     }
 
@@ -221,7 +223,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
     public void close() {
         if (isSessionOpen()) {
-            log.info("Closing websocket programaticly");
+            if (log.isInfoEnabled()) log.info("Closing websocket programaticly");
             session.close();
         }
     }

@@ -67,6 +67,12 @@ public class CommunicationSanityChecker {
 
     private long oldHeartBeatPeriod;
 
+    private static enum CommunicationState {
+        OK,
+        SUSPECT,
+        KO
+    }
+
     public CommunicationSanityChecker(final UIContext uiContext) {
         this.uiContext = uiContext;
         final ApplicationManagerOption options = uiContext.getApplication().getOptions();
@@ -86,11 +92,11 @@ public class CommunicationSanityChecker {
                 try {
                     checkCommunicationState();
                 } catch (final Throwable e) {
-                    log.error("[{}] Error while checking communication state", uiContext, e);
+                    log.error("Error while checking communication state on UIContext #{}", uiContext.getID(), e);
                 }
             }, 0, CHECK_PERIOD, TimeUnit.MILLISECONDS);
             started.set(true);
-            log.info("Started. HeartbeatPeriod: {} ms, {}", uiContext, heartBeatPeriod);
+            log.info("Start communication sanity checker on UIContext #{} with period: {} ms", uiContext.getID(), heartBeatPeriod);
         }
     }
 
@@ -102,7 +108,7 @@ public class CommunicationSanityChecker {
                 sanityChecker = null;
             }
             started.set(false);
-            log.info("[{}] Stopped.", uiContext);
+            log.info("Stop communication sanity checker on UIContext #{}", uiContext.getID());
         }
     }
 
@@ -129,8 +135,8 @@ public class CommunicationSanityChecker {
                     suspectTime = now;
                     currentState = CommunicationState.SUSPECT;
                     if (log.isDebugEnabled()) log.debug(
-                        "[{}] No message have been received, communication suspected to be non functional, sending heartbeat...",
-                        uiContext);
+                        "No message have been received on UIContext #{}, communication suspected to be non functional, sending heartbeat...",
+                        uiContext.getID());
                     //uiContext.sendHeartBeat();
                 }
                 break;
@@ -140,8 +146,8 @@ public class CommunicationSanityChecker {
                         // No message have been received since we suspected the
                         // communication to be non functional
                         if (log.isInfoEnabled()) log.info(
-                            "[{}] No message have been received since we suspected the communication to be non functional, context will be destroyed",
-                            uiContext);
+                            "No message have been received on UIContext #{} since we suspected the communication to be non functional, context will be destroyed",
+                            uiContext.getID());
                         currentState = CommunicationState.KO;
                         stop();
                         uiContext.destroy();
@@ -158,12 +164,6 @@ public class CommunicationSanityChecker {
 
         uiContext.sendHeartBeat();
         uiContext.sendRoundTrip();
-    }
-
-    protected enum CommunicationState {
-        OK,
-        SUSPECT,
-        KO
     }
 
     /**
