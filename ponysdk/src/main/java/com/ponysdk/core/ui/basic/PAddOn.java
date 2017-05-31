@@ -47,9 +47,13 @@ public abstract class PAddOn extends PObject {
         this.args = args;
     }
 
-    @Override
     public boolean attach(final PWindow window) {
-        final boolean result = super.attach(window);
+        return attach(window, null);
+    }
+
+    @Override
+    public boolean attach(final PWindow window, final PFrame frame) {
+        final boolean result = super.attach(window, frame);
         if (result) window.addDestroyListener(event -> onDestroy());
         return result;
     }

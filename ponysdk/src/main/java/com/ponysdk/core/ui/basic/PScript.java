@@ -56,7 +56,7 @@ public class PScript extends PObject {
                 final PScript newScript = new PScript();
                 newScript.key = key;
                 uiContext.setAttribute(key, newScript);
-                newScript.attach(window);
+                newScript.attach(window, null);
                 return newScript;
             }
             return script;
@@ -66,8 +66,8 @@ public class PScript extends PObject {
     }
 
     @Override
-    public boolean attach(final PWindow window) {
-        final boolean result = super.attach(window);
+    protected boolean attach(final PWindow window, final PFrame frame) {
+        final boolean result = super.attach(window, frame);
         if (result) window.addDestroyListener(event -> onDestroy());
         return result;
     }

@@ -69,7 +69,7 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
         super.init0();
         forEach(child -> {
             child.setTree(tree);
-            child.attach(window);
+            child.attach(window, frame);
         });
 
         if (widget != null) {
@@ -82,7 +82,7 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
 
             if (tree != null) {
                 tree.adopt(widget, this);
-                widget.attach(window);
+                widget.attach(window, frame);
                 saveAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.WIDGET, null));
             }
         }
@@ -140,7 +140,7 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
         children.add(beforeIndex, item);
         item.setParent(this);
         item.setTree(tree);
-        if (isInitialized()) item.attach(window);
+        if (isInitialized()) item.attach(window, frame);
         item.saveAdd(item.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, beforeIndex));
         return item;
     }
@@ -150,7 +150,7 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
         children.add(item);
         item.setParent(this);
         item.setTree(tree);
-        if (isInitialized()) item.attach(window);
+        if (isInitialized()) item.attach(window, frame);
         item.saveAdd(item.getID(), ID);
         return item;
     }

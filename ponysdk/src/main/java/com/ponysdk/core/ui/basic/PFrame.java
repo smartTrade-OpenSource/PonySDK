@@ -47,7 +47,7 @@ public class PFrame extends PWidget {
     @Override
     protected void enrichOnInit(final ModelWriter writer) {
         super.enrichOnInit(writer);
-        if (url != null) writer.write(ServerToClientModel.URL, url);
+        if (url != null && !url.isEmpty()) writer.write(ServerToClientModel.URL, url);
     }
 
     @Override
@@ -71,9 +71,8 @@ public class PFrame extends PWidget {
         PRootPanel rootPanel = panelByZone.get(zoneID);
         if (rootPanel == null) {
             rootPanel = new PRootPanel(zoneID);
-            rootPanel.attach(this);
 
-            if (ready && isInitialized()) rootPanel.attach(getWindow());
+            if (ready && isInitialized()) rootPanel.attach(getWindow(), this);
 
             panelByZone.put(zoneID, rootPanel);
         }
@@ -85,7 +84,9 @@ public class PFrame extends PWidget {
         if (event.containsKey(ClientToServerModel.HANDLER_OPEN.toStringValue())) {
             url = event.getString(ClientToServerModel.HANDLER_OPEN.toStringValue());
             ready = true;
-            panelByZone.forEach((key, value) -> value.attach(this.getWindow()));
+            panelByZone.forEach((key, value) -> {
+                value.attach(this.getWindow(), this);
+            });
         } else {
             super.onClientData(event);
         }

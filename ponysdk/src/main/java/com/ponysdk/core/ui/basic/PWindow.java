@@ -84,11 +84,14 @@ public class PWindow extends PObject {
     void init() {
         if (initialized) return;
 
-        if (stackedInstructions != null) stackedInstructions.values().forEach(Runnable::run);
+        if (stackedInstructions != null) {
+            stackedInstructions.values().forEach(Runnable::run);
+            stackedInstructions = null;
+        }
 
         initialized = true;
 
-        panelByZone.forEach((key, value) -> value.attach(this));
+        panelByZone.forEach((key, value) -> value.attach(this, null));
         if (initializeListeners != null) initializeListeners.forEach(listener -> listener.onInitialize(this));
     }
 
@@ -211,7 +214,7 @@ public class PWindow extends PObject {
         if (rootPanel == null) {
             rootPanel = new PRootPanel(zoneID);
             panelByZone.put(zoneID, rootPanel);
-            if (isInitialized()) rootPanel.attach(this);
+            if (isInitialized()) rootPanel.attach(this, null);
         }
         return rootPanel;
     }

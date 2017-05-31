@@ -109,8 +109,8 @@ public class PTabLayoutPanel extends PComplexPanel
 
             children.insert(child, beforeIndex);
             adopt(child);
-            tabWidget.attach(window);
-            child.attach(window);
+            tabWidget.attach(window, frame);
+            child.attach(window, frame);
             child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.TAB_WIDGET, tabWidget.getID()),
                 new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex));
         } else {
@@ -125,7 +125,7 @@ public class PTabLayoutPanel extends PComplexPanel
 
             children.insert(child, beforeIndex);
             adopt(child);
-            child.attach(window);
+            child.attach(window, frame);
             child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.TAB_TEXT, tabText),
                 new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex));
         } else {

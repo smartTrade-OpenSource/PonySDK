@@ -68,11 +68,9 @@ public abstract class PObject {
 
     protected abstract WidgetType getWidgetType();
 
-    protected void attach(final PFrame frame) {
+    protected boolean attach(final PWindow window, final PFrame frame) {
         this.frame = frame;
-    }
 
-    protected boolean attach(final PWindow window) {
         if (this.window == null && window != null) {
             this.window = window;
             init();
@@ -87,11 +85,13 @@ public abstract class PObject {
 
     void init() {
         if (initialized) return;
-        if (window.isOpened()) {
-            applyInit();
-        } else {
-            window.addOpenHandler(window -> applyInit());
-        }
+        if (isParentInitialized()) applyInit();
+        else if (frame != null && !frame.isInitialized()) frame.addInitializeListener(event -> applyInit());
+        else window.addOpenHandler(window -> applyInit());
+    }
+
+    public boolean isParentInitialized() {
+        return window.isOpened() && (frame == null || frame.isInitialized());
     }
 
     protected void applyInit() {
@@ -108,11 +108,14 @@ public abstract class PObject {
 
         init0();
 
-        if (stackedInstructions != null) stackedInstructions.values().forEach(Runnable::run);
-
-        if (initializeListeners != null) initializeListeners.forEach(listener -> listener.onInitialize(this));
+        if (stackedInstructions != null) {
+            stackedInstructions.values().forEach(Runnable::run);
+            stackedInstructions = null;
+        }
 
         initialized = true;
+
+        if (initializeListeners != null) initializeListeners.forEach(listener -> listener.onInitialize(this));
     }
 
     protected void enrichOnInit(final ModelWriter writer) {

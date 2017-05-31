@@ -99,7 +99,7 @@ public class PStackLayoutPanel extends PWidget
         children.add(child);
         adopt(child);
 
-        child.attach(window);
+        child.attach(window, frame);
         child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.HTML, header),
             new ServerBinaryModel(ServerToClientModel.SIZE, headerSize));
     }

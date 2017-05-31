@@ -45,7 +45,9 @@ public abstract class PComplexPanel extends PPanel {
     }
 
     @Override
-    protected boolean attach(final PWindow window) {
+    protected boolean attach(final PWindow window, final PFrame frame) {
+        this.frame = frame;
+
         if (this.window == null && window != null) {
             this.window = window;
             init();
@@ -66,9 +68,8 @@ public abstract class PComplexPanel extends PPanel {
             child.removeFromParent();
             children.add(child);
             adopt(child);
-            if (isInitialized()) {
-                child.attach(window);
-            }
+            if (isInitialized()) child.attach(window, frame);
+
             child.saveAdd(child.getID(), ID);
         } else {
             if (initialized) {
@@ -89,7 +90,7 @@ public abstract class PComplexPanel extends PPanel {
 
             children.insert(child, beforeIndex);
             adopt(child);
-            if (isInitialized()) child.attach(window);
+            if (isInitialized()) child.attach(window, frame);
             if (children.size() - 1 == beforeIndex) child.saveAdd(child.getID(), ID);
             else child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, beforeIndex));
         } else {

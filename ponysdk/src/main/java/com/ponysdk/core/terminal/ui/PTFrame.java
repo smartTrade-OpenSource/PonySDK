@@ -29,9 +29,11 @@ import java.util.logging.Logger;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.PonySDK;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
+import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 import elemental.html.Uint8Array;
@@ -48,7 +50,13 @@ public class PTFrame extends PTWidget<HTMLPanel> implements PostMessageHandler {
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder builder) {
         if (log.isLoggable(Level.INFO)) log.log(Level.INFO, "Create PTFrame #" + objectId);
 
-        url = buffer.readBinaryModel().getStringValue();
+        final BinaryModel binaryModel = buffer.readBinaryModel();
+        if (ServerToClientModel.URL.ordinal() == binaryModel.getModel().ordinal()) {
+            url = binaryModel.getStringValue();
+        } else {
+            url = "";
+            buffer.rewind(binaryModel);
+        }
 
         super.create(buffer, objectId, builder);
     }

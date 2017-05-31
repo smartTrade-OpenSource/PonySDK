@@ -23,12 +23,13 @@
 
 package com.ponysdk.core.ui.basic;
 
-import com.ponysdk.core.model.WidgetType;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Iterator;
-import java.util.NoSuchElementException;
+import com.ponysdk.core.model.WidgetType;
 
 /**
  * Base class for panels that contain only one widget.
@@ -100,7 +101,7 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
 
         adopt(w);
 
-        if (isInitialized()) w.attach(window);
+        if (isInitialized()) w.attach(window, frame);
         w.saveAdd(w.getID(), ID);
     }
 

@@ -41,8 +41,8 @@ public abstract class PAddOnComposite<T extends PWidget> extends PAddOn implemen
         this.widget = widget;
         this.widget.bindAddon(this);
 
-        if (null != widget.getWindow()) attach(widget.getWindow());
-        else widget.addInitializeListener(object -> attach(widget.getWindow()));
+        if (null != widget.getWindow()) attach(widget.getWindow(), widget.getFrame());
+        else widget.addInitializeListener(object -> attach(widget.getWindow(), widget.getFrame()));
     }
 
     protected PAddOnComposite(final T widget) {
@@ -50,7 +50,9 @@ public abstract class PAddOnComposite<T extends PWidget> extends PAddOn implemen
     }
 
     @Override
-    public boolean attach(final PWindow window) {
+    public boolean attach(final PWindow window, final PFrame frame) {
+        this.frame = frame;
+
         if (this.window == null && window != null) {
             this.window = window;
             init();

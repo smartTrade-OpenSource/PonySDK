@@ -129,7 +129,7 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
         content = w;
 
         // Physical attach.
-        w.attach(window);
+        w.attach(window, frame);
         w.saveAdd(w.getID(), getID());
     }
 
