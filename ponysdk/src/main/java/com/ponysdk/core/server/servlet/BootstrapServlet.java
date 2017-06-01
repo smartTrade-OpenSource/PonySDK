@@ -34,6 +34,8 @@ import java.nio.channels.WritableByteChannel;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.activation.MimetypesFileTypeMap;
@@ -200,14 +202,15 @@ public class BootstrapServlet extends HttpServlet {
         addToMeta(writer);
         writer.newLine();
 
-        final Set<String> styles = application.getStyle();
+        final Map<String, String> styles = application.getStyle();
         if (styles != null && !styles.isEmpty()) {
-            for (final String style : styles) {
-                final String contentType = fileTypeMap.getContentType(style);
-                if (!contentType.equals("text/css")) writer.append("<link rel=\"stylesheet/less\" type=\"").append(contentType)
-                    .append("\" href=\"").append(style).append("\">");
-                else writer.append("<link rel=\"stylesheet\" type=\"").append(contentType).append("\" href=\"").append(style)
-                    .append("\">");
+            for (final Entry<String, String> style : styles.entrySet()) {
+                final String id = style.getKey();
+                final String url = style.getValue();
+                final String contentType = fileTypeMap.getContentType(url);
+                writer.append("<link id=\"").append(id).append("\"  rel=\"stylesheet");
+                if (!contentType.equals("text/css")) writer.append("/less");
+                writer.append("\" type=\"").append(contentType).append("\" href=\"").append(url).append("\">");
                 writer.newLine();
             }
         }

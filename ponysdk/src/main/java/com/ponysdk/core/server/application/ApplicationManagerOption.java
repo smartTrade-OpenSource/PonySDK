@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.server.application;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -49,9 +50,9 @@ public class ApplicationManagerOption {
 
     private String communicationErrorFunction;
 
-    private Set<String> javascript;
-    private Set<String> style;
     private Set<String> meta;
+    private Map<String, String> style;
+    private Set<String> javascript;
 
     private Class<? extends EntryPoint> entryPointClass;
 
@@ -130,11 +131,11 @@ public class ApplicationManagerOption {
         this.javascript = javascript;
     }
 
-    public Set<String> getStyle() {
+    public Map<String, String> getStyle() {
         return style;
     }
 
-    public void setStyle(final Set<String> style) {
+    public void setStyle(final Map<String, String> style) {
         this.style = style;
     }
 

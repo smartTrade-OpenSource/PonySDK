@@ -24,6 +24,7 @@
 package com.ponysdk.impl.main;
 
 import java.util.Arrays;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.ponysdk.core.server.application.ApplicationManagerOption;
@@ -47,7 +48,8 @@ public class Main {
 
         final String styles = System.getProperty(ApplicationManagerOption.STYLESHEETS);
         if (styles != null && !styles.isEmpty()) {
-            applicationManagerOption.setStyle(Arrays.stream(styles.trim().split(";")).collect(Collectors.toSet()));
+            applicationManagerOption
+                .setStyle(Arrays.stream(styles.trim().split(";")).collect(Collectors.toMap(Function.identity(), Function.identity())));
         }
 
         final String scripts = System.getProperty(ApplicationManagerOption.JAVASCRIPTS);
