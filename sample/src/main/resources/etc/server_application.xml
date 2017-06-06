@@ -27,10 +27,10 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
             </list>
         </property>
         <property name="style">
-            <list>
-                <value>css/ponysdk.css</value>
-                <value>css/sample.css</value>
-            </list>
+            <map>
+                <entry key="ponysdk" value="css/ponysdk.css" />
+                <entry key="sample" value="sample" />
+            </map>
         </property>
 	</bean>
 
