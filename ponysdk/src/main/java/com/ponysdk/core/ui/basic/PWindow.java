@@ -382,4 +382,36 @@ public class PWindow extends PObject {
 
     }
 
+    private static final class PMainWindow extends PWindow {
+
+        @Override
+        final void init() {
+            final ModelWriter writer = Txn.getWriter();
+            writer.beginObject();
+            writer.write(ServerToClientModel.TYPE_CREATE, ID);
+            writer.write(ServerToClientModel.WIDGET_TYPE, getWidgetType().getValue());
+            writer.endObject();
+            UIContext.get().registerObject(this);
+            initialized = true;
+
+            UIContext.get().addUIContextListener(uiContext -> onDestroy());
+        }
+
+        @Override
+        public final void open() {
+            // Already open
+        }
+
+        @Override
+        public final void close() {
+            // should destroy the main window ??
+        }
+
+        @Override
+        protected WidgetType getWidgetType() {
+            return WidgetType.BROWSER;
+        }
+
+    }
+
 }
