@@ -78,7 +78,7 @@ public class PHistory {
     public void newItem(final String token, final boolean fireEvents) {
         this.token = token;
 
-        final ModelWriter writer = Txn.getWriter();
+        final ModelWriter writer = Txn.get().getWriter();
         writer.beginObject();
         writer.write(ServerToClientModel.TYPE_HISTORY, token);
         writer.write(ServerToClientModel.HISTORY_FIRE_EVENTS, fireEvents);

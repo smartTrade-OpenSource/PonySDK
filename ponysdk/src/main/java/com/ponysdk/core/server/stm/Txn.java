@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.ponysdk.core.server.AlreadyDestroyedApplication;
 import com.ponysdk.core.writer.ModelWriter;
 
 public class Txn {
@@ -47,8 +48,9 @@ public class Txn {
         return txn;
     }
 
-    public static ModelWriter getWriter() {
-        return get().getWriter0();
+    public final ModelWriter getWriter() {
+        if (txnContext != null) return txnContext.getWriter();
+        else throw new AlreadyDestroyedApplication("TxnContext destroyed");
     }
 
     public void begin(final TxnContext txnContext) {
@@ -73,10 +75,6 @@ public class Txn {
 
     public void flush() {
         txnContext.flush();
-    }
-
-    private ModelWriter getWriter0() {
-        return txnContext.getWriter();
     }
 
     public void addTxnListener(final TxnListener txnListener) {

@@ -121,7 +121,7 @@ public class PWindow extends PObject {
     public void open() {
         if (destroy) return;
         if (!initialized) {
-            final ModelWriter writer = Txn.getWriter();
+            final ModelWriter writer = Txn.get().getWriter();
             writer.beginObject();
             if (window != PWindow.getMain()) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
             writer.write(ServerToClientModel.TYPE_CREATE, ID);
@@ -386,7 +386,7 @@ public class PWindow extends PObject {
 
         @Override
         final void init() {
-            final ModelWriter writer = Txn.getWriter();
+            final ModelWriter writer = Txn.get().getWriter();
             writer.beginObject();
             writer.write(ServerToClientModel.TYPE_CREATE, ID);
             writer.write(ServerToClientModel.WIDGET_TYPE, getWidgetType().getValue());

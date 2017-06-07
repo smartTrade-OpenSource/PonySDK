@@ -150,7 +150,7 @@ public class PObjectWeakHashMap implements Map<Integer, PObject> {
             referenceByObjectID.remove(objectID);
             if (log.isDebugEnabled()) log.debug("Removing reference on object #{}", objectID);
 
-            final ModelWriter writer = Txn.getWriter();
+            final ModelWriter writer = Txn.get().getWriter();
             writer.beginObject();
             if (windowID != PWindow.getMain().getID()) writer.write(ServerToClientModel.WINDOW_ID, windowID);
             if (frameID != null) writer.write(ServerToClientModel.FRAME_ID, frameID);

@@ -72,9 +72,9 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     public void onWebSocketConnect(final Session session) {
         final HttpSession httpSession = request.getSession();
         final String applicationId = httpSession.getId();
-        String userAgent = request.getHeader("User-Agent");
-        if (log.isInfoEnabled()) log.info("WebSocket connected from {}, sessionID={}, userAgent={}", session.getRemoteAddress(),
-            applicationId, userAgent);
+        final String userAgent = request.getHeader("User-Agent");
+        if (log.isInfoEnabled())
+            log.info("WebSocket connected from {}, sessionID={}, userAgent={}", session.getRemoteAddress(), applicationId, userAgent);
 
         this.session = session;
         // 1K for max chunk size and 1M for total buffer size
@@ -218,7 +218,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
     @Override
     public void flush() {
-        websocketPusher.flush();
+        if (isLiving() && isSessionOpen()) websocketPusher.flush();
     }
 
     public void close() {

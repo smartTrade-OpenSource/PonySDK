@@ -63,7 +63,7 @@ public class PCookies {
     }
 
     public String removeCookie(final String name, final String path) {
-        final ModelWriter writer = Txn.getWriter();
+        final ModelWriter writer = Txn.get().getWriter();
         writer.beginObject();
         writer.write(ServerToClientModel.TYPE_UPDATE, ID);
         writer.write(ServerToClientModel.REMOVE_COOKIE, name);
@@ -93,7 +93,7 @@ public class PCookies {
                           final boolean secure) {
         cachedCookies.put(name, value);
 
-        final ModelWriter writer = Txn.getWriter();
+        final ModelWriter writer = Txn.get().getWriter();
         writer.beginObject();
         writer.write(ServerToClientModel.TYPE_UPDATE, ID);
         writer.write(ServerToClientModel.ADD_COOKIE, name);

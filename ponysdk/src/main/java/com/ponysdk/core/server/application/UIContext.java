@@ -47,6 +47,7 @@ import org.slf4j.LoggerFactory;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.AlreadyDestroyedApplication;
 import com.ponysdk.core.server.servlet.CommunicationSanityChecker;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.server.stm.TxnContext;
@@ -304,7 +305,7 @@ public class UIContext {
     public void stackStreamRequest(final StreamHandler streamListener) {
         final int streamRequestID = nextStreamRequestID();
 
-        final ModelWriter writer = Txn.getWriter();
+        final ModelWriter writer = Txn.get().getWriter();
         writer.beginObject();
         writer.write(ServerToClientModel.TYPE_ADD_HANDLER, -1);
         writer.write(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_STREAM_REQUEST.getValue());
@@ -318,7 +319,7 @@ public class UIContext {
     public void stackEmbededStreamRequest(final StreamHandler streamListener, final int objectID) {
         final int streamRequestID = nextStreamRequestID();
 
-        final ModelWriter writer = Txn.getWriter();
+        final ModelWriter writer = Txn.get().getWriter();
         writer.beginObject();
         writer.write(ServerToClientModel.TYPE_ADD_HANDLER, objectID);
         writer.write(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST.getValue());
@@ -346,7 +347,7 @@ public class UIContext {
     }
 
     public void close() {
-        final ModelWriter writer = Txn.getWriter();
+        final ModelWriter writer = Txn.get().getWriter();
         writer.beginObject();
         writer.write(ServerToClientModel.DESTROY_CONTEXT, null);
         writer.endObject();
@@ -419,6 +420,8 @@ public class UIContext {
             uiContextListeners.forEach(listener -> {
                 try {
                     listener.onUIContextDestroyed(this);
+                } catch (final AlreadyDestroyedApplication e) {
+                    if (log.isDebugEnabled()) log.debug("Exception while destroying UIContext #" + getID(), e);
                 } catch (final Exception e) {
                     log.error("Exception while destroying UIContext #" + getID(), e);
                 }
@@ -451,7 +454,7 @@ public class UIContext {
         try {
             context.sendHeartBeat();
         } catch (final Throwable e) {
-            log.error("Cannot send server heart beat to client", e);
+            log.error("Cannot send server heart beat to UIContext #" + getID(), e);
         } finally {
             end();
         }
@@ -462,7 +465,7 @@ public class UIContext {
         try {
             context.sendRoundTrip();
         } catch (final Throwable e) {
-            log.error("Cannot send server round trip to client", e);
+            log.error("Cannot send server round trip to UIContext #" + getID(), e);
         } finally {
             end();
         }

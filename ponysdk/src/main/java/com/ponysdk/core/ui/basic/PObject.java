@@ -95,7 +95,7 @@ public abstract class PObject {
     }
 
     protected void applyInit() {
-        final ModelWriter writer = Txn.getWriter();
+        final ModelWriter writer = Txn.get().getWriter();
         writer.beginObject();
         if (window != PWindow.getMain()) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
         if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
@@ -215,7 +215,7 @@ public abstract class PObject {
     void writeUpdate(final ModelWriterCallback callback) {
         if (destroy) return;
 
-        final ModelWriter writer = Txn.getWriter();
+        final ModelWriter writer = Txn.get().getWriter();
         writer.beginObject();
         if (!PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
         if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
@@ -248,7 +248,7 @@ public abstract class PObject {
     private void writeAdd(final ModelWriterCallback callback) {
         if (destroy) return;
 
-        final ModelWriter writer = Txn.getWriter();
+        final ModelWriter writer = Txn.get().getWriter();
         writer.beginObject();
         if (!PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
         if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
@@ -268,7 +268,7 @@ public abstract class PObject {
     void writeAddHandler(final ModelWriterCallback callback) {
         if (destroy) return;
 
-        final ModelWriter writer = Txn.getWriter();
+        final ModelWriter writer = Txn.get().getWriter();
         writer.beginObject();
         if (!PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
         if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
@@ -292,7 +292,7 @@ public abstract class PObject {
     private void writeRemoveHandler(final ModelWriterCallback callback) {
         if (destroy) return;
 
-        final ModelWriter writer = Txn.getWriter();
+        final ModelWriter writer = Txn.get().getWriter();
         writer.beginObject();
         if (!PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
         if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
@@ -315,7 +315,7 @@ public abstract class PObject {
     private void writeRemove(final ModelWriterCallback callback) {
         if (destroy) return;
 
-        final ModelWriter writer = Txn.getWriter();
+        final ModelWriter writer = Txn.get().getWriter();
         writer.beginObject();
         if (!PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
         if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());

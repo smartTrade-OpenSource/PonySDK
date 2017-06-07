@@ -94,7 +94,7 @@ public class CommunicationSanityChecker {
                 } catch (final Throwable e) {
                     log.error("Error while checking communication state on UIContext #{}", uiContext.getID(), e);
                 }
-            }, 0, CHECK_PERIOD, TimeUnit.MILLISECONDS);
+            }, 10, CHECK_PERIOD, TimeUnit.MILLISECONDS);
             started.set(true);
             log.info("Start communication sanity checker on UIContext #{} with period: {} ms", uiContext.getID(), heartBeatPeriod);
         }

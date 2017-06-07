@@ -343,7 +343,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
 
     private void executeRemoveDomHandler(final PDomEvent.Type type) {
         if (destroy) return;
-        final ModelWriter writer = Txn.getWriter();
+        final ModelWriter writer = Txn.get().getWriter();
         writer.beginObject();
         if (!PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
         writer.write(ServerToClientModel.TYPE_REMOVE_HANDLER, ID);
