@@ -55,6 +55,7 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, HasPSubm
     private String name;
 
     private String fileName;
+    private int fileSize;
 
     private boolean enabled = true;
 
@@ -79,6 +80,9 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, HasPSubm
         if (jsonObject.containsKey(ClientToServerModel.HANDLER_CHANGE.toStringValue())) {
             final String fileName = jsonObject.getString(ClientToServerModel.HANDLER_CHANGE.toStringValue());
             if (fileName != null) setFileName(fileName);
+            final int fileSize = jsonObject.getInt(ClientToServerModel.SIZE.toStringValue());
+            setFileSize(fileSize);
+
             final PChangeEvent event = new PChangeEvent(this);
             changeHandlers.forEach(handler -> handler.onChange(event));
         } else if (jsonObject.containsKey(ClientToServerModel.HANDLER_SUBMIT_COMPLETE.toStringValue())) {
@@ -116,6 +120,14 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, HasPSubm
         if (Objects.equals(this.enabled, enabled)) return;
         this.enabled = enabled;
         saveUpdate(ServerToClientModel.ENABLED, enabled);
+    }
+
+    public int getFileSize() {
+        return fileSize;
+    }
+
+    private void setFileSize(final int fileSize) {
+        this.fileSize = fileSize;
     }
 
     public String getFileName() {

@@ -24,6 +24,7 @@
 package com.ponysdk.core.terminal.ui;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.LabelElement;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.FileUpload;
@@ -97,6 +98,7 @@ public class PTFileUpload extends PTWidget<FormPanel> {
             fileUpload.addChangeHandler(event -> {
                 final PTInstruction eventInstruction = new PTInstruction(getObjectID());
                 eventInstruction.put(ClientToServerModel.HANDLER_CHANGE, fileUpload.getFilename());
+                eventInstruction.put(ClientToServerModel.SIZE, getFileSize(fileUpload.getElement()));
                 uiBuilder.sendDataToServer(fileUpload, eventInstruction);
             });
         } else if (HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST.equals(handlerModel)) {
@@ -116,6 +118,10 @@ public class PTFileUpload extends PTWidget<FormPanel> {
             super.addHandler(buffer, handlerModel);
         }
     }
+
+    private native int getFileSize(final Element data) /*-{
+                                                       return data.files[0].size;
+                                                       }-*/;
 
     @Override
     public void removeHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
