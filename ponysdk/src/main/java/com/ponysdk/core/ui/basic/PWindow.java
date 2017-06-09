@@ -56,6 +56,8 @@ public class PWindow extends PObject {
 
     private Map<String, PRootPanel> panelByZone = new HashMap<>();
 
+    private PWindow parent;
+
     PWindow() {
         this.location = new Location(this);
         this.window = this;
@@ -75,9 +77,12 @@ public class PWindow extends PObject {
         this.location = new Location(this);
     }
 
-    protected PWindow(final PWindow parentWindow, final boolean relative, final String url, final String name, final String features) {
+    protected PWindow(final PWindow parent, final boolean relative, final String url, final String name, final String features) {
         this(relative, url, name, features);
-        if (parentWindow != null) parentWindow.addWindow(this);
+        if (parent != null) {
+            parent.addWindow(this);
+            this.parent = parent;
+        }
     }
 
     @Override
@@ -260,12 +265,16 @@ public class PWindow extends PObject {
         return subWindows != null && subWindows.remove(window);
     }
 
+    public PWindow getParent() {
+        return parent;
+    }
+
     @Override
     public String toString() {
         return super.toString() + ", name = " + name;
     }
 
-    public class Location {
+    public static final class Location {
 
         private final PWindow window;
 
@@ -278,7 +287,7 @@ public class PWindow extends PObject {
         }
     }
 
-    public class Parameter {
+    public static final class Parameter {
 
         private String title;
         private Integer fullScreen;
@@ -379,7 +388,6 @@ public class PWindow extends PObject {
         public void setTitle(final String title) {
             this.title = title;
         }
-
     }
 
     private static final class PMainWindow extends PWindow {
