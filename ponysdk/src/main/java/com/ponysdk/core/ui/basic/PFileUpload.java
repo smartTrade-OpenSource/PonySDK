@@ -112,6 +112,10 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, HasPSubm
         saveUpdate(ServerToClientModel.TEXT, label);
     }
 
+    public void reset() {
+        saveUpdate(writer -> writer.write(ServerToClientModel.CLEAR));
+    }
+
     public boolean isEnabled() {
         return enabled;
     }

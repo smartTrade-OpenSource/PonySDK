@@ -87,6 +87,9 @@ public class PTFileUpload extends PTWidget<FormPanel> {
             }
             label.setInnerText(binaryModel.getStringValue());
             return true;
+        } else if (ServerToClientModel.CLEAR.ordinal() == modelOrdinal) {
+            uiObject.reset();
+            return true;
         } else {
             return super.update(buffer, binaryModel);
         }
