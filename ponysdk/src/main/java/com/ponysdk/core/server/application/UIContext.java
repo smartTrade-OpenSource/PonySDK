@@ -26,12 +26,12 @@ package com.ponysdk.core.server.application;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -110,7 +110,7 @@ public class UIContext {
 
     private boolean living = true;
 
-    private final BoundedLinkedList<Long> pings = new BoundedLinkedList<>(10);
+    private final ConcurrentBoundedLinkedQueue<Long> pings = new ConcurrentBoundedLinkedQueue<>(10);
 
     public UIContext(final TxnContext context) {
         this.application = context.getApplication();
@@ -520,17 +520,17 @@ public class UIContext {
         return pings.stream().mapToLong(Long::longValue).average().orElse(0);
     }
 
-    private static final class BoundedLinkedList<E> extends LinkedList<E> {
+    private static final class ConcurrentBoundedLinkedQueue<E> extends ConcurrentLinkedQueue<E> {
 
         private final int limit;
 
-        public BoundedLinkedList(final int limit) {
+        public ConcurrentBoundedLinkedQueue(final int limit) {
             this.limit = limit;
         }
 
         @Override
         public boolean add(final E e) {
-            if (this.size() == this.limit) this.removeFirst();
+            if (this.size() == this.limit) this.remove();
             return super.add(e);
         }
     }
