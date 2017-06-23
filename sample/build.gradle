@@ -18,7 +18,9 @@ dependencies {
         
         'de.java2html:java2html:' + java2htmlVersion,
         
-        'org.eclipse.jetty.websocket:websocket-client:' + jettyVersion
+        'org.eclipse.jetty.websocket:websocket-client:' + jettyVersion,
+        
+        'commons-beanutils:commons-beanutils:1.8.3'
     )
 
     runtime (
