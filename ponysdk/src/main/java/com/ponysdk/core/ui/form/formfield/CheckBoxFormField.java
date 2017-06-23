@@ -30,11 +30,19 @@ import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 public class CheckBoxFormField extends AbstractFormField<Boolean, PCheckBox> {
 
     public CheckBoxFormField() {
-        this(Element.newPCheckBox());
+        this(false);
+    }
+
+    public CheckBoxFormField(final boolean dirtyMode) {
+        this(Element.newPCheckBox(), dirtyMode);
     }
 
     public CheckBoxFormField(final PCheckBox widget) {
-        super(widget, null);
+        this(widget, false);
+    }
+
+    public CheckBoxFormField(final PCheckBox widget, final boolean dirtyMode) {
+        super(widget, null, dirtyMode);
     }
 
     @Override

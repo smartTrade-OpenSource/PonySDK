@@ -34,26 +34,42 @@ import com.ponysdk.core.ui.form.dataconverter.DataConverter;
 public class ListBoxFormField<T> extends AbstractFormField<T, PListBox> {
 
     public ListBoxFormField() {
-        this(Element.newPListBox(), null);
+        this(false);
+    }
+
+    public ListBoxFormField(final boolean dirtyMode) {
+        this(Element.newPListBox(), null, dirtyMode);
     }
 
     public ListBoxFormField(final DataConverter<String, T> dataProvider) {
-        this(Element.newPListBox(), dataProvider);
+        this(dataProvider, false);
+    }
+
+    public ListBoxFormField(final DataConverter<String, T> dataProvider, final boolean dirtyMode) {
+        this(Element.newPListBox(), dataProvider, dirtyMode);
     }
 
     public ListBoxFormField(final PListBox widget) {
-        this(widget, null);
+        this(widget, false);
+    }
+
+    public ListBoxFormField(final PListBox widget, final boolean dirtyMode) {
+        this(widget, null, dirtyMode);
     }
 
     public ListBoxFormField(final Map<String, T> datas) {
-        this(Element.newPListBox(), null);
+        this(Element.newPListBox());
         for (final Entry<String, T> entry : datas.entrySet()) {
             widget.addItem(entry.getKey(), entry.getValue());
         }
     }
 
     public ListBoxFormField(final PListBox widget, final DataConverter<String, T> dataProvider) {
-        super(widget, dataProvider);
+        super(widget, dataProvider, false);
+    }
+
+    public ListBoxFormField(final PListBox widget, final DataConverter<String, T> dataProvider, final boolean dirtyMode) {
+        super(widget, dataProvider, dirtyMode);
     }
 
     @Override

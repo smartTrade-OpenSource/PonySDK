@@ -31,11 +31,19 @@ import com.ponysdk.core.ui.form.dataconverter.DataConverter;
 public class TextBoxFormField<T> extends AbstractFormField<T, PTextBox> {
 
     public TextBoxFormField(final DataConverter<String, T> dataProvider) {
-        this(Element.newPTextBox(), dataProvider);
+        this(dataProvider, false);
+    }
+
+    public TextBoxFormField(final DataConverter<String, T> dataProvider, final boolean dirtyMode) {
+        this(Element.newPTextBox(), dataProvider, dirtyMode);
     }
 
     public TextBoxFormField(final PTextBox widget, final DataConverter<String, T> dataProvider) {
-        super(widget, dataProvider);
+        this(widget, dataProvider, false);
+    }
+
+    public TextBoxFormField(final PTextBox widget, final DataConverter<String, T> dataProvider, final boolean dirtyMode) {
+        super(widget, dataProvider, dirtyMode);
     }
 
     @Override

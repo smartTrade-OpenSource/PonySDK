@@ -23,6 +23,12 @@
 
 package com.ponysdk.core.ui.form.formfield;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
 import com.ponysdk.core.ui.basic.HasPValue;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PWidget;
@@ -31,12 +37,6 @@ import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 import com.ponysdk.core.ui.form.dataconverter.DataConverter;
 import com.ponysdk.core.ui.form.validator.FieldValidator;
 import com.ponysdk.core.ui.form.validator.ValidationResult;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A field of a {@link com.ponysdk.core.ui.form.Form} that can be validated or
@@ -50,11 +50,33 @@ public abstract class AbstractFormField<T, W extends IsPWidget> implements FormF
     private FieldValidator validator;
     protected Set<PValueChangeHandler<T>> handlers;
 
+    private boolean dirty = false;
+    private PValueChangeHandler<T> dirtyModeHandler;
+
     private boolean enabled = true;
 
+    public AbstractFormField(final W widget) {
+        this(widget, null);
+    }
+
     public AbstractFormField(final W widget, final DataConverter<String, T> dataProvider) {
+        this(widget, dataProvider, false);
+    }
+
+    public AbstractFormField(final W widget, final DataConverter<String, T> dataProvider, final boolean dirtyMode) {
         this.widget = widget;
         this.dataProvider = dataProvider;
+
+        if (dirtyMode) {
+            this.dirtyModeHandler = event -> dirty = true;
+            this.addValueChangeHandler(dirtyModeHandler);
+        }
+
+        this.widget.asWidget().addDestroyListener(event -> onDestroy());
+    }
+
+    private void onDestroy() {
+        if (dirtyModeHandler != null) removeValueChangeHandler(dirtyModeHandler);
     }
 
     @Override
@@ -81,19 +103,16 @@ public abstract class AbstractFormField<T, W extends IsPWidget> implements FormF
     @Override
     public void reset() {
         reset0();
+        dirty = false;
         fireAfterReset();
     }
 
     private void fireAfterReset() {
-        for (final FormFieldListener listener : listeners) {
-            listener.afterReset(this);
-        }
+        listeners.forEach(listener -> listener.afterReset(this));
     }
 
     private void fireAfterValidation(final ValidationResult result) {
-        for (final FormFieldListener listener : listeners) {
-            listener.afterValidation(this, result);
-        }
+        listeners.forEach(listener -> listener.afterValidation(this, result));
     }
 
     @Override
@@ -142,6 +161,14 @@ public abstract class AbstractFormField<T, W extends IsPWidget> implements FormF
     @Override
     public void setEnabled(final boolean enabled) {
         this.enabled = enabled;
+    }
+
+    /**
+     * Handle form field dirty state. The field is considered dirty as soon as the user edited its
+     * value (even if the value is the same as the original one).
+     */
+    public boolean isDirty() {
+        return dirty;
     }
 
 }

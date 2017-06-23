@@ -23,35 +23,55 @@
 
 package com.ponysdk.core.ui.form.formfield;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PDateBox;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 import com.ponysdk.core.ui.form.dataconverter.DataConverter;
 import com.ponysdk.core.ui.form.dataconverter.DateConverter;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 public class DateBoxFormField extends AbstractFormField<Date, PDateBox> {
 
     public DateBoxFormField() {
-        this(Element.newPDateBox(), new DateConverter());
+        this(false);
+    }
+
+    public DateBoxFormField(final boolean dirtyMode) {
+        this(Element.newPDateBox(), new DateConverter(), dirtyMode);
     }
 
     public DateBoxFormField(final String dateFormat) {
-        this(Element.newPDateBox(new SimpleDateFormat(dateFormat)), new DateConverter(new SimpleDateFormat(dateFormat)));
+        this(dateFormat, false);
+    }
+
+    public DateBoxFormField(final String dateFormat, final boolean dirtyMode) {
+        this(Element.newPDateBox(new SimpleDateFormat(dateFormat)), new DateConverter(new SimpleDateFormat(dateFormat)), dirtyMode);
     }
 
     public DateBoxFormField(final SimpleDateFormat dateFormat) {
+        this(dateFormat, false);
+    }
+
+    public DateBoxFormField(final SimpleDateFormat dateFormat, final boolean dirtyMode) {
         this(Element.newPDateBox(dateFormat), new DateConverter(dateFormat));
     }
 
     public DateBoxFormField(final PDateBox dateBox) {
-        this(dateBox, new DateConverter(dateBox.getDateFormat()));
+        this(dateBox, false);
+    }
+
+    public DateBoxFormField(final PDateBox dateBox, final boolean dirtyMode) {
+        this(dateBox, new DateConverter(dateBox.getDateFormat()), dirtyMode);
     }
 
     public DateBoxFormField(final PDateBox widget, final DataConverter<String, Date> dataConverter) {
-        super(widget, dataConverter);
+        this(widget, dataConverter, false);
+    }
+
+    public DateBoxFormField(final PDateBox widget, final DataConverter<String, Date> dataConverter, final boolean dirtyMode) {
+        super(widget, dataConverter, dirtyMode);
     }
 
     @Override
