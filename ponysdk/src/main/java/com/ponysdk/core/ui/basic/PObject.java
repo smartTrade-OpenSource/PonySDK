@@ -385,6 +385,11 @@ public abstract class PObject {
         return initialized;
     }
 
+    /**
+     * Usage : Add a HTTP Request Handler and it will be awaken by an ajax request like :
+     * $.get({url : "http://.../ajax", headers : { "pony.contextID" : pony.getContextId(),
+     * "pony.objectID" : getID() } });
+     */
     public void setHTTPRequester(final HTTPRequestHandler httpRequestHandler) {
         this.httpRequestHandler = httpRequestHandler;
     }

@@ -95,6 +95,18 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
         if (true) return;
 
+        mainLabel.setAttribute("id", String.valueOf(mainLabel.getID()));
+        mainLabel.setHTTPRequester((req, resp) -> {
+            try {
+                resp.setStatus(200);
+                resp.setContentType("application/json");
+                resp.getWriter().print("COUCOU");
+                resp.getWriter().flush();
+            } catch (final IOException e) {
+                e.printStackTrace();
+            }
+        });
+
         testPAddon();
 
         createWindow().open();
