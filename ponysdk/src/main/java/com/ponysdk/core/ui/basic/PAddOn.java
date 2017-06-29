@@ -23,7 +23,7 @@ public abstract class PAddOn extends PObject {
     private static final String ARGUMENTS_PROPERTY_NAME = "arg";
     private static final String METHOD_PROPERTY_NAME = "m";
 
-    private final static Map<Level, Byte> LOG_LEVEL = new HashMap<>();
+    private static final Map<Level, Byte> LOG_LEVEL = new HashMap<>();
 
     static {
         byte level = 0;
@@ -125,5 +125,4 @@ public abstract class PAddOn extends PObject {
     public void destroy() {
         saveUpdate(writer -> writer.write(ServerToClientModel.DESTROY));
     }
-
 }

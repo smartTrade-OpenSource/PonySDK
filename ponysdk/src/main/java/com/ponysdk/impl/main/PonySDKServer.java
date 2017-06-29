@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.model.MappingPath;
 import com.ponysdk.core.server.application.ApplicationManagerOption;
+import com.ponysdk.core.server.servlet.AjaxServlet;
 import com.ponysdk.core.server.servlet.ApplicationLoader;
 import com.ponysdk.core.server.servlet.BootstrapServlet;
 import com.ponysdk.core.server.servlet.ServletContextFilter;
@@ -55,6 +56,7 @@ public class PonySDKServer {
     public static final String MAPPING_BOOTSTRAP = "/*";
     public static final String MAPPING_WS = "/" + MappingPath.WEBSOCKET + "/*";
     public static final String MAPPING_STREAM = "/" + MappingPath.STREAM;
+    public static final String MAPPING_AJAX = "/" + MappingPath.AJAX;
 
     private static final Logger log = LoggerFactory.getLogger(PonySDKServer.class);
 
@@ -111,6 +113,7 @@ public class PonySDKServer {
 
         context.addServlet(new ServletHolder(createBootstrapServlet()), MAPPING_BOOTSTRAP);
         context.addServlet(new ServletHolder(createStreamServiceServlet()), MAPPING_STREAM);
+        context.addServlet(new ServletHolder(createAjaxServlet()), MAPPING_AJAX);
         context.addServlet(new ServletHolder(createWebSocketServlet()), MAPPING_WS);
 
         final ServletContextFilter servletContextFilter = new ServletContextFilter();
@@ -179,6 +182,10 @@ public class PonySDKServer {
 
     protected StreamServiceServlet createStreamServiceServlet() {
         return new StreamServiceServlet();
+    }
+
+    protected AjaxServlet createAjaxServlet() {
+        return new AjaxServlet();
     }
 
     protected WebSocketServlet createWebSocketServlet() {

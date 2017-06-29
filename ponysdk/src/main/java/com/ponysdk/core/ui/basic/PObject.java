@@ -29,6 +29,8 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.json.JsonObject;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
@@ -62,6 +64,7 @@ public abstract class PObject {
     protected boolean destroy = false;
 
     protected final AtomicInteger atomicKey = new AtomicInteger(ServerToClientModel.DESTROY.getValue());
+    private HTTPRequestHandler httpRequestHandler;
 
     PObject() {
     }
@@ -380,6 +383,20 @@ public abstract class PObject {
 
     public boolean isInitialized() {
         return initialized;
+    }
+
+    public void setHTTPRequester(final HTTPRequestHandler httpRequestHandler) {
+        this.httpRequestHandler = httpRequestHandler;
+    }
+
+    public final void handleHTTPRequest(final HttpServletRequest req, final HttpServletResponse resp) {
+        httpRequestHandler.handleHTTPRequest(req, resp);
+    }
+
+    @FunctionalInterface
+    public static interface HTTPRequestHandler {
+
+        void handleHTTPRequest(final HttpServletRequest req, final HttpServletResponse resp);
     }
 
 }

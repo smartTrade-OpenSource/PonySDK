@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.ponysdk.core.server.application.Application;
+import com.ponysdk.core.server.application.UIContext;
 
 public class SessionManager {
 
@@ -44,7 +45,7 @@ public class SessionManager {
     }
 
     public Collection<Application> getApplications() {
-        return new ArrayList<>(applications.values());
+        return applications.values();
     }
 
     public Application getApplication(final String id) {
@@ -65,15 +66,12 @@ public class SessionManager {
         listeners.add(listener);
     }
 
-    /**
-     * @return The number of UIContext
-     */
+    public UIContext getUIcontext(final int id) {
+        return applications.values().stream().map(app -> app.getUIContext(id)).findFirst().orElse(null);
+    }
+
     public int countUIContexts() {
-        int count = 0;
-        for (final Application application : applications.values()) {
-            count += application.countUIContexts();
-        }
-        return count;
+        return applications.values().stream().mapToInt(Application::countUIContexts).sum();
     }
 
 }

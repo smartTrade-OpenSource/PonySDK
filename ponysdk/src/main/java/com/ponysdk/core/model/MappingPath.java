@@ -27,5 +27,6 @@ public interface MappingPath {
 
     public static final String WEBSOCKET = "ws";
     public static final String STREAM = "stream";
+    public static final String AJAX = "ajax";
 
 }
