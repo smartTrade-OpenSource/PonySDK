@@ -25,6 +25,7 @@ package com.ponysdk.core.terminal;
 
 import jsinterop.annotations.JsFunction;
 
+@FunctionalInterface
 @JsFunction
 public interface CommunicationErrorHandler {
 

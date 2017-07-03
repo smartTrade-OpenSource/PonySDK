@@ -25,6 +25,7 @@ package com.ponysdk.core.terminal.socket;
 
 import elemental.html.ArrayBuffer;
 
+@FunctionalInterface
 public interface MessageSender {
 
     void read(final ArrayBuffer arrayBuffer);
