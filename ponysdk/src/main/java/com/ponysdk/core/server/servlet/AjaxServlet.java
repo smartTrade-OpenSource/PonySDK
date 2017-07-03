@@ -33,6 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.PObject;
 
@@ -42,11 +43,22 @@ public class AjaxServlet extends HttpServlet {
 
     private void process(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         try {
-            final Integer contextID = Integer.parseInt(req.getHeader("pony.contextID"));
-            final Integer objectID = Integer.parseInt(req.getHeader("pony.objectID"));
+            final Integer contextID = Integer.parseInt(req.getHeader(ClientToServerModel.UI_CONTEXT_ID.name()));
+            final Integer objectID = Integer.parseInt(req.getHeader(ClientToServerModel.OBJECT_ID.name()));
             final UIContext uiContext = SessionManager.get().getUIcontext(contextID);
             final PObject pObject = uiContext.getObject(objectID);
-            uiContext.execute(() -> pObject.handleHTTPRequest(req, resp));
+            uiContext.execute(() -> {
+                try {
+                    pObject.handleAjaxRequest(req, resp);
+                } catch (ServletException | IOException e) {
+                    log.error("Cannot stream request", e);
+                    try {
+                        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                    } catch (final IOException e1) {
+                        log.error("Cannot send error", e);
+                    }
+                }
+            });
         } catch (final Exception e) {
             log.error("Cannot stream request", e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
@@ -55,13 +67,11 @@ public class AjaxServlet extends HttpServlet {
 
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        super.doGet(req, resp);
         process(req, resp);
     }
 
     @Override
     protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        super.doPost(req, resp);
         process(req, resp);
     }
 }

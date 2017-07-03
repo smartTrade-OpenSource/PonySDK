@@ -9,12 +9,30 @@
 
     log: function () {
       console.log("LabelPAddOn");
+      this.sendDataToServer({
+        "info": "Init done"
+      });
+      this.sendDataToServer({
+        info: "Get Data",
+        info2: "Get Data2"
+      }, function(response) {
+          console.log(JSON.parse(response));
+      });
     },
 
     logWithText: function (value) {
       console.log("LabelPAddOn : " + value);
-    }
-  
+      this.sendDataToServer({
+        "info": "Init done"
+      });
+      this.sendDataToServer({
+        info: "Get Data",
+        info2: value
+      }, function(response) {
+          console.log(JSON.parse(response));
+      });
+    },
+
   });
 
   AbstractAddon.defineAddon("com.ponysdk.sample.client.page.addon.PElementAddOn", {

@@ -173,8 +173,8 @@ AbstractAddon.prototype.setLogLevel = function(logLevel) {
   this.logLevel = parseInt(logLevel);
 };
 
-AbstractAddon.prototype.sendDataToServer = function(data) {
-  pony.sendDataToServer(this.id, data);
+AbstractAddon.prototype.sendDataToServer = function(params, callback) {
+  pony.sendDataToServer(this.id, params, callback);
 };
 
 AbstractAddon.prototype.log = function() {

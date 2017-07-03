@@ -23,19 +23,19 @@
 
 package com.ponysdk.core.ui.basic.event;
 
+import javax.json.JsonObject;
+
 import com.ponysdk.core.ui.eventbus.Event;
 import com.ponysdk.core.ui.eventbus.EventHandler;
 
-import javax.json.JsonObject;
-
+// TODO No need for an Event, refactor like {@link com.ponysdk.core.ui.basic.PObject.AjaxHandler}
 public class PTerminalEvent extends Event<PTerminalEvent.Handler> {
 
     public static final Type TYPE = new Type();
-    private final JsonObject jsonObject;
 
-    public PTerminalEvent(final Object sourceComponent, final JsonObject jsonObject) {
+    public PTerminalEvent(final Object sourceComponent, final JsonObject data) {
         super(sourceComponent);
-        this.jsonObject = jsonObject;
+        setData(data);
     }
 
     @Override
@@ -48,8 +48,17 @@ public class PTerminalEvent extends Event<PTerminalEvent.Handler> {
         handler.onTerminalEvent(this);
     }
 
+    /**
+     * @deprecated Use {@link #getData()} directly
+     */
+    @Deprecated
     public JsonObject getJsonObject() {
-        return jsonObject;
+        return getData();
+    }
+
+    @Override
+    public JsonObject getData() {
+        return (JsonObject) super.getData();
     }
 
     @FunctionalInterface

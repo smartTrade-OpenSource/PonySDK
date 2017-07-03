@@ -31,6 +31,8 @@ import java.time.Duration;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.servlet.http.HttpServletResponse;
+
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.PScheduler;
@@ -93,21 +95,9 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         mainLabel = Element.newPLabel("Can be modified by anybody");
         PWindow.getMain().add(mainLabel);
 
-        if (true) return;
-
-        mainLabel.setAttribute("id", String.valueOf(mainLabel.getID()));
-        mainLabel.setHTTPRequester((req, resp) -> {
-            try {
-                resp.setStatus(200);
-                resp.setContentType("application/json");
-                resp.getWriter().print("COUCOU");
-                resp.getWriter().flush();
-            } catch (final IOException e) {
-                e.printStackTrace();
-            }
-        });
-
         testPAddon();
+
+        if (true) return;
 
         createWindow().open();
 
@@ -594,6 +584,24 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     private static final LoggerAddOn createPAddOn() {
         final LoggerAddOn labelPAddOn = new LoggerAddOn();
         labelPAddOn.log("addon logger test");
+
+        labelPAddOn.setAjaxHandler((req, resp) -> {
+            final String header = req.getHeader("info");
+
+            if (header.equals("Get Data")) {
+                resp.setStatus(HttpServletResponse.SC_OK);
+                resp.setContentType("application/json");
+                resp.getWriter().print("{\"response\": \"" + header + "\"}");
+                resp.getWriter().flush();
+            } else {
+                resp.sendError(500);
+            }
+        });
+
+        labelPAddOn.setTerminalHandler(event -> {
+            System.err.println(event.toString());
+        });
+
         return labelPAddOn;
     }
 

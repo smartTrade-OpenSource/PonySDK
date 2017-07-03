@@ -23,12 +23,14 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.json.JsonObject;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -64,7 +66,7 @@ public abstract class PObject {
     protected boolean destroy = false;
 
     protected final AtomicInteger atomicKey = new AtomicInteger(ServerToClientModel.DESTROY.getValue());
-    private HTTPRequestHandler httpRequestHandler;
+    private AjaxHandler ajaxHandler;
 
     PObject() {
     }
@@ -350,6 +352,10 @@ public abstract class PObject {
         this.data = data;
     }
 
+    public boolean isInitialized() {
+        return initialized;
+    }
+
     @Override
     public int hashCode() {
         return ID;
@@ -369,6 +375,26 @@ public abstract class PObject {
         return getClass().getSimpleName() + "#" + ID;
     }
 
+    /**
+     * Usage : Add a HTTP Request Handler and it will be awaken by an ajax request
+     * Sample in JQuery : $.get({url : pony.getHostPageBaseURL() + "/ajax", headers : {
+     * "UI_CONTEXT_ID" : pony.getContextId(), "OBJECT_ID" : getID() } });
+     */
+    public void setAjaxHandler(final AjaxHandler httpRequestHandler) {
+        this.ajaxHandler = httpRequestHandler;
+    }
+
+    public final void handleAjaxRequest(final HttpServletRequest req, final HttpServletResponse resp)
+            throws ServletException, IOException {
+        if (ajaxHandler != null) ajaxHandler.handleAjaxRequest(req, resp);
+    }
+
+    @FunctionalInterface
+    public static interface AjaxHandler {
+
+        void handleAjaxRequest(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException;
+    }
+
     @FunctionalInterface
     public interface InitializeListener {
 
@@ -379,29 +405,6 @@ public abstract class PObject {
     public interface DestroyListener {
 
         void onDestroy(PObject object);
-    }
-
-    public boolean isInitialized() {
-        return initialized;
-    }
-
-    /**
-     * Usage : Add a HTTP Request Handler and it will be awaken by an ajax request like :
-     * $.get({url : "http://.../ajax", headers : { "pony.contextID" : pony.getContextId(),
-     * "pony.objectID" : getID() } });
-     */
-    public void setHTTPRequester(final HTTPRequestHandler httpRequestHandler) {
-        this.httpRequestHandler = httpRequestHandler;
-    }
-
-    public final void handleHTTPRequest(final HttpServletRequest req, final HttpServletResponse resp) {
-        httpRequestHandler.handleHTTPRequest(req, resp);
-    }
-
-    @FunctionalInterface
-    public static interface HTTPRequestHandler {
-
-        void handleHTTPRequest(final HttpServletRequest req, final HttpServletResponse resp);
     }
 
 }

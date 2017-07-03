@@ -29,7 +29,10 @@ import java.util.logging.Logger;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONString;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.ponysdk.core.model.ClientToServerModel;
@@ -39,8 +42,11 @@ import com.ponysdk.core.terminal.request.FrameRequestBuilder;
 import com.ponysdk.core.terminal.request.WindowRequestBuilder;
 import com.ponysdk.core.terminal.socket.WebSocketClient;
 import com.ponysdk.core.terminal.socket.WebSocketClient.WebSocketDataType;
+import com.ponysdk.core.terminal.ui.PTObject;
 import com.ponysdk.core.terminal.ui.PTWindowManager;
 
+import elemental.client.Browser;
+import elemental.xml.XMLHttpRequest;
 import jsinterop.annotations.JsType;
 
 @JsType
@@ -109,11 +115,37 @@ public class PonySDK implements UncaughtExceptionHandler {
 
     /**
      * From Main terminal to the server
+     * Ajax implementation
      */
-    public void sendDataToServer(final Object objectID, final JavaScriptObject jsObject) {
-        final PTInstruction instruction = new PTInstruction(Integer.valueOf(objectID.toString()));
-        instruction.put(ClientToServerModel.NATIVE, jsObject);
-        uiBuilder.sendDataToServer(instruction);
+    public void sendDataToServer(final Object objectID, final JavaScriptObject jsObject, final AjaxCallback callback) {
+        if (callback == null) {
+            final PTInstruction instruction = new PTInstruction(Integer.valueOf(objectID.toString()));
+            instruction.put(ClientToServerModel.NATIVE, jsObject);
+            uiBuilder.sendDataToServer(instruction);
+        } else {
+            final XMLHttpRequest xhr = Browser.getWindow().newXMLHttpRequest();
+
+            final PTObject ptObject = uiBuilder.getPTObject(Integer.parseInt(objectID.toString()));
+
+            xhr.setOnload(evt -> callback.setAjaxResponse(xhr.getResponseText()));
+
+            xhr.open("GET", MappingPath.AJAX);
+            xhr.setRequestHeader(ClientToServerModel.UI_CONTEXT_ID.name(), String.valueOf(contextId));
+            xhr.setRequestHeader(ClientToServerModel.OBJECT_ID.name(), String.valueOf(ptObject.getObjectID()));
+
+            final JSONObject jsonArray = new JSONObject(jsObject);
+            for (final String key : jsonArray.keySet()) {
+                final JSONValue jsonValue = jsonArray.get(key);
+                final JSONString stringValue = jsonValue.isString();
+                xhr.setRequestHeader(key, stringValue != null ? stringValue.stringValue() : jsonValue.toString());
+            }
+
+            xhr.send();
+        }
+    }
+
+    public void request(final Object objectID, final JavaScriptObject jsObject, final AjaxCallback callback) {
+        sendDataToServer(objectID, jsObject, callback);
     }
 
     public void setReadyFrame(final int frameID) {
@@ -126,6 +158,10 @@ public class PonySDK implements UncaughtExceptionHandler {
 
     public void registerAddOnFactory(final String signature, final JavascriptAddOnFactory javascriptAddOnFactory) {
         uiBuilder.registerJavascriptAddOnFactory(signature, javascriptAddOnFactory);
+    }
+
+    public String getHostPageBaseURL() {
+        return GWT.getHostPageBaseURL();
     }
 
     @Override
