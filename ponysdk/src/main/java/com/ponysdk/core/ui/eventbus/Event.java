@@ -24,18 +24,21 @@
 package com.ponysdk.core.ui.eventbus;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 public abstract class Event<H extends EventHandler> {
 
-    private static AtomicLong count = new AtomicLong();
-    private final long eventID;
+    /**
+     * @deprecated Useless
+     * @since v2.7.3
+     */
+    @Deprecated
+    private final long eventID = 0;
+
     private Object source;
     private Object data;
 
     protected Event(final Object source) {
         this.source = source;
-        eventID = count.getAndIncrement();
     }
 
     public Object getData() {
@@ -56,9 +59,14 @@ public abstract class Event<H extends EventHandler> {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "#" + eventID + " with data : " + data;
+        return getClass().getSimpleName() + " with data : " + data;
     }
 
+    /**
+     * @deprecated Useless
+     * @since v2.7.3
+     */
+    @Deprecated
     public long getEventID() {
         return eventID;
     }
