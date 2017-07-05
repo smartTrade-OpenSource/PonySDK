@@ -46,9 +46,9 @@ public class AjaxServlet extends HttpServlet {
             final Integer contextID = Integer.parseInt(req.getHeader(ClientToServerModel.UI_CONTEXT_ID.name()));
             final Integer objectID = Integer.parseInt(req.getHeader(ClientToServerModel.OBJECT_ID.name()));
             final UIContext uiContext = SessionManager.get().getUIcontext(contextID);
-            final PObject pObject = uiContext.getObject(objectID);
             uiContext.execute(() -> {
                 try {
+                    final PObject pObject = uiContext.getObject(objectID);
                     pObject.handleAjaxRequest(req, resp);
                 } catch (ServletException | IOException e) {
                     log.error("Cannot stream request", e);
