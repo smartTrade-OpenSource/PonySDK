@@ -102,7 +102,7 @@ public class UIContext {
     private final PCookies cookies = new PCookies();
 
     private final CommunicationSanityChecker communicationSanityChecker;
-    private final List<UIContextListener> uiContextListeners = new ArrayList<>();
+    private final List<ContextDestroyListener> destroyListeners = new ArrayList<>();
     private final TxnContext context;
     private final Set<DataListener> listeners = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
@@ -420,16 +420,16 @@ public class UIContext {
         begin();
         try {
             living = false;
-            communicationSanityChecker.stop();
-            uiContextListeners.forEach(listener -> {
+            destroyListeners.forEach(listener -> {
                 try {
-                    listener.onUIContextDestroyed(this);
+                    listener.onBeforeDestroy(this);
                 } catch (final AlreadyDestroyedApplication e) {
                     if (log.isDebugEnabled()) log.debug("Exception while destroying UIContext #" + getID(), e);
                 } catch (final Exception e) {
                     log.error("Exception while destroying UIContext #" + getID(), e);
                 }
             });
+            communicationSanityChecker.stop();
             context.close();
         } finally {
             end();
@@ -448,9 +448,17 @@ public class UIContext {
 
     private void doDestroy() {
         living = false;
+        destroyListeners.forEach(listener -> {
+            try {
+                listener.onBeforeDestroy(this);
+            } catch (final AlreadyDestroyedApplication e) {
+                if (log.isDebugEnabled()) log.debug("Exception while destroying UIContext #" + getID(), e);
+            } catch (final Exception e) {
+                log.error("Exception while destroying UIContext #" + getID(), e);
+            }
+        });
         communicationSanityChecker.stop();
         application.unregisterUIContext(ID);
-        uiContextListeners.forEach(listener -> listener.onUIContextDestroyed(this));
     }
 
     public void sendHeartBeat() {
@@ -475,8 +483,8 @@ public class UIContext {
         }
     }
 
-    public void addUIContextListener(final UIContextListener listener) {
-        uiContextListeners.add(listener);
+    public void addContextDestroyListener(final ContextDestroyListener listener) {
+        destroyListeners.add(listener);
     }
 
     public boolean isLiving() {

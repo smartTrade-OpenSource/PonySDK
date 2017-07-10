@@ -158,8 +158,8 @@ public class PScheduler {
 
     private void registerTask(final UIRunnable runnable) {
         final UIContext uiContext = runnable.getUiContext();
-        uiContext.addUIContextListener(myUiContext -> {
-            final Set<UIRunnable> runnables = runnablesByUIContexts.remove(myUiContext);
+        uiContext.addContextDestroyListener(context -> {
+            final Set<UIRunnable> runnables = runnablesByUIContexts.remove(context);
             if (runnables != null) runnables.forEach(UIRunnable::cancel);
         });
         Set<UIRunnable> runnables = runnablesByUIContexts.get(uiContext);
