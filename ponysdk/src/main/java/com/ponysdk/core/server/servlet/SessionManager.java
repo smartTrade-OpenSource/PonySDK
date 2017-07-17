@@ -67,7 +67,7 @@ public class SessionManager {
     }
 
     public UIContext getUIcontext(final int id) {
-        return applications.values().stream().map(app -> app.getUIContext(id)).findFirst().orElse(null);
+        return applications.values().stream().map(app -> app.getUIContext(id)).filter(e -> e != null).findFirst().orElse(null);
     }
 
     public int countUIContexts() {
