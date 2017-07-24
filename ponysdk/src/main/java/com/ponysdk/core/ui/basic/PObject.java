@@ -378,21 +378,22 @@ public abstract class PObject {
     /**
      * Usage : Add a HTTP Request Handler and it will be awaken by an ajax request
      * Sample in JQuery : $.get({url : pony.getHostPageBaseURL() + "/ajax", headers : {
-     * "UI_CONTEXT_ID" : pony.getContextId(), "OBJECT_ID" : getID() } });
+     * "UI_CONTEXT_ID" : pony.getContextId(), "OBJECT_ID" : this.id } });
      */
     public void setAjaxHandler(final AjaxHandler httpRequestHandler) {
         this.ajaxHandler = httpRequestHandler;
     }
 
-    public final void handleAjaxRequest(final HttpServletRequest req, final HttpServletResponse resp)
+    public final void handleAjaxRequest(final HttpServletRequest request, final HttpServletResponse response)
             throws ServletException, IOException {
-        if (ajaxHandler != null) ajaxHandler.handleAjaxRequest(req, resp);
+        if (ajaxHandler != null) ajaxHandler.handleAjaxRequest(request, response);
     }
 
     @FunctionalInterface
     public static interface AjaxHandler {
 
-        void handleAjaxRequest(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException;
+        void handleAjaxRequest(final HttpServletRequest request, final HttpServletResponse response)
+                throws ServletException, IOException;
     }
 
     @FunctionalInterface
