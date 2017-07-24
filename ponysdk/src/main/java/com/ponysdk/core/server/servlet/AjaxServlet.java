@@ -43,22 +43,27 @@ public class AjaxServlet extends HttpServlet {
 
     private void process(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         try {
-            final Integer contextID = Integer.parseInt(req.getHeader(ClientToServerModel.UI_CONTEXT_ID.name()));
+            final Integer uiContextID = Integer.parseInt(req.getHeader(ClientToServerModel.UI_CONTEXT_ID.name()));
             final Integer objectID = Integer.parseInt(req.getHeader(ClientToServerModel.OBJECT_ID.name()));
-            final UIContext uiContext = SessionManager.get().getUIcontext(contextID);
-            uiContext.execute(() -> {
-                try {
-                    final PObject pObject = uiContext.getObject(objectID);
-                    pObject.handleAjaxRequest(req, resp);
-                } catch (ServletException | IOException e) {
-                    log.error("Cannot stream request", e);
+            final UIContext uiContext = SessionManager.get().getUIContext(uiContextID);
+            if (uiContext != null) {
+                uiContext.execute(() -> {
                     try {
-                        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-                    } catch (final IOException e1) {
-                        log.error("Cannot send error", e);
+                        final PObject pObject = uiContext.getObject(objectID);
+                        pObject.handleAjaxRequest(req, resp);
+                    } catch (ServletException | IOException e) {
+                        log.error("Cannot stream request", e);
+                        try {
+                            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                        } catch (final IOException e1) {
+                            log.error("Cannot send error", e);
+                        }
                     }
-                }
-            });
+                });
+            } else {
+                log.warn("Can't found UI Context #" + uiContextID + ", already destroyed ?");
+                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "UI Context #" + uiContextID + " not found");
+            }
         } catch (final Exception e) {
             log.error("Cannot stream request", e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());

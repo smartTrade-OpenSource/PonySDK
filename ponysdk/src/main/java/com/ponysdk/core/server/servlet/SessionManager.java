@@ -66,7 +66,7 @@ public class SessionManager {
         listeners.add(listener);
     }
 
-    public UIContext getUIcontext(final int id) {
+    public UIContext getUIContext(final int id) {
         return applications.values().stream().map(app -> app.getUIContext(id)).filter(e -> e != null).findFirst().orElse(null);
     }
 
