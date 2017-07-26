@@ -15,8 +15,8 @@ var reconnectionInProgress = false;
 
 var Check = function() {};
 Check.prototype = {
+    httpTimeout: 5000,
     errorDetected: false,
-    counter: 3,
     delay_retry: 2000,
     delay_heartbeat: 2000,
     currentInitCheck: null,
@@ -24,36 +24,29 @@ Check.prototype = {
     reconnectionInProgress: false,
 
     initCheck: function () {
-        if (window.opener === null || typeof window.opener == "undefined") {
-            setTimeout(function() {
-                var xmlhttp = new XMLHttpRequest();
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.timeout = Check.prototype.httpTimeout; // time in milliseconds
 
-                xmlhttp.onreadystatechange = function() {
-                    if (xmlhttp.readyState == XMLHttpRequest.DONE) {
-                        if(xmlhttp.status == 200) reconnectionCheck.onCheckSuccess();
-                        else reconnectionCheck.onCheckError();
-                    }
-                };
+        xmlhttp.onreadystatechange = function() {
+            if (xmlhttp.readyState == XMLHttpRequest.DONE) {
+                if(xmlhttp.status == 200) reconnectionCheck.onCheckSuccess();
+                else reconnectionCheck.onCheckError();
+            }
+        };
 
-                xmlhttp.open("GET", reconnectionCheck.getCheckUrl(), true);
-                xmlhttp.send();
-            }, reconnectionCheck.delay_heartbeat);
-        }
+        xmlhttp.open("GET", reconnectionCheck.getCheckUrl(), true);
+        xmlhttp.send();
     },
 
     failureCheck: function () {
-        reconnectionCheck.counter--;
         var reconnectionElement = document.getElementById('reconnection'); // $('#reconnection');
         reconnectionElement.style.display = 'block'; // reconnectionElement.show();
         var reconnectingElement = document.getElementById('reconnecting');
-        reconnectingElement.innerHTML = 'Connection to server lost<br>Reconnecting in ' + reconnectionCheck.counter + ' seconds <strong>...</strong>'; // reconnectionElement.html('Connection to server lost<br>Reconnecting in ' + reconnectionCheck.counter + ' seconds <strong>...</strong>');
-        if (reconnectionCheck.counter == 0) {
-            reconnectingElement.innerHTML = 'Reconnecting...'; // reconnectionElement.html('Reconnecting...');
-            reconnectionCheck.reconnectionInProgress = true;
-            window.clearInterval(reconnectionCheck.currentFailureCheck);
-            reconnectionCheck.errorDetected = false;
-            reconnectionCheck.currentInitCheck = setTimeout(reconnectionCheck.initCheck, reconnectionCheck.delay_heartbeat);
-        }
+        reconnectingElement.innerHTML = 'Connection to server lost<br>Reconnecting <strong>...</strong>'; // reconnectionElement.html('Connection to server lost<br>Reconnecting in ' + reconnectionCheck.counter + ' seconds <strong>...</strong>');
+        reconnectionCheck.reconnectionInProgress = true;
+        window.clearInterval(reconnectionCheck.currentFailureCheck);
+        reconnectionCheck.errorDetected = false;
+        reconnectionCheck.currentInitCheck = setTimeout(reconnectionCheck.initCheck, reconnectionCheck.delay_heartbeat);
     },
 
     onCheckError: function (data) {
@@ -62,7 +55,6 @@ Check.prototype = {
         reconnectionCheck.errorDetected = true;
         console.log("Failure detected");
         notifyConnectionLostListeners();
-        reconnectionCheck.counter = 3;
 
         reconnectionCheck.currentFailureCheck = setInterval(reconnectionCheck.failureCheck, reconnectionCheck.delay_retry);
     },
@@ -91,7 +83,7 @@ Check.prototype = {
 var reconnectionCheck;
 var pony;
 
-function onPonySDKModuleLoaded() {
+function onPonySDKModuleLoaded(isMainWindow) {
     console.log("onPonySDKModuleLoaded");
 
     pony = new ponysdk();
@@ -108,15 +100,19 @@ function onPonySDKModuleLoaded() {
         }
     }
 
-    pony.registerCommunicationError(function(code, message) {
-        // When the client signout, we reload the application
-        if(code == 1000) location.reload();
-    });
-
     pony.start();
 
-    reconnectionCheck = new Check();
-    reconnectionCheck.initCheck();
+    if(isMainWindow) {
+        reconnectionCheck = new Check();
+
+        pony.registerCommunicationError(function(code, message) {
+            // When the client signout, we reload the application
+            if(code == 1000) location.reload();
+            else reconnectionCheck.onCheckError();
+        });
+        
+        reconnectionCheck.initCheck();
+    }
 }
 
 if (typeof module !== 'undefined' && module.hasOwnProperty('exports')) module.exports.onPonySDKModuleLoaded = onPonySDKModuleLoaded;
@@ -380,7 +376,7 @@ if (!String.prototype.codePointAt) {
             // Get the first code unit
             var first = string.charCodeAt(index);
             var second;
-            if ( // check if it’s the start of a surrogate pair
+            if ( // check if itï¿½s the start of a surrogate pair
                 first >= 0xD800 && first <= 0xDBFF && // high surrogate
                 size > index + 1 // there is a next code unit
             ) {

@@ -23,11 +23,14 @@
 
 package com.ponysdk.core.terminal;
 
-import com.google.gwt.core.client.EntryPoint;
-import org.timepedia.exporter.client.ExporterUtil;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.timepedia.exporter.client.ExporterUtil;
+
+import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.user.client.Window;
+import com.ponysdk.core.model.ClientToServerModel;
 
 public class CommunicationEntryPoint implements EntryPoint {
 
@@ -40,14 +43,12 @@ public class CommunicationEntryPoint implements EntryPoint {
         if (useExternalStart()) {
             if (log.isLoggable(Level.INFO))
                 log.info("'onPonySDKModuleLoaded' is detected, PonySDK must be instanciate by an external javascript");
-            onModuleLoaded();
+            onModuleLoaded(Window.Location.getParameter(ClientToServerModel.WINDOW_ID.toStringValue()) == null);
         } else {
-            if (log.isLoggable(Level.INFO))
-                log.info("Create PonySDK using the default entry point");
+            if (log.isLoggable(Level.INFO)) log.info("Create PonySDK using the default entry point");
             final PonySDK ponysdk = PonySDK.constructor();
             ponysdk.start();
         }
-
     }
 
     private native boolean useExternalStart() /*-{
@@ -55,7 +56,8 @@ public class CommunicationEntryPoint implements EntryPoint {
                                               return false;
                                               }-*/;
 
-    private native void onModuleLoaded() /*-{
-                                         if ($wnd.onPonySDKModuleLoaded && typeof $wnd.onPonySDKModuleLoaded == 'function') $wnd.onPonySDKModuleLoaded();
-                                         }-*/;
+    private native void onModuleLoaded(boolean isMainWindow) /*-{
+                                                             if ($wnd.onPonySDKModuleLoaded && typeof $wnd.onPonySDKModuleLoaded == 'function') $wnd.onPonySDKModuleLoaded(isMainWindow);
+                                                             }-*/;
+
 }
