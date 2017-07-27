@@ -1,95 +1,16 @@
-document.ponyLoaded = false;
-document.onPonyLoadedListeners = [];
-document.onConnectionLostListeners = [];
+var pony;
 
+document.ponyLoaded = false;
+
+document.onPonyLoadedListeners = [];
 document.onPonyLoaded = function(callback) {
     document.onPonyLoadedListeners.push(callback);
 };
 
+document.onConnectionLostListeners = [];
 document.onConnectionLost = function(callback) {
     document.onConnectionLostListeners.push(callback);
 };
-
-window.webappsdk = {};
-var reconnectionInProgress = false;
-
-var Check = function() {};
-Check.prototype = {
-    errorDetected: false,
-    counter: 3,
-    delay_retry: 2000,
-    delay_heartbeat: 2000,
-    currentInitCheck: null,
-    currentFailureCheck: null,
-    reconnectionInProgress: false,
-
-    initCheck: function () {
-        if (window.opener === null || typeof window.opener == "undefined") {
-            setTimeout(function() {
-                var xmlhttp = new XMLHttpRequest();
-
-                xmlhttp.onreadystatechange = function() {
-                    if (xmlhttp.readyState == XMLHttpRequest.DONE) {
-                        if(xmlhttp.status == 200) reconnectionCheck.onCheckSuccess();
-                        else reconnectionCheck.onCheckError();
-                    }
-                };
-
-                xmlhttp.open("GET", reconnectionCheck.getCheckUrl(), true);
-                xmlhttp.send();
-            }, reconnectionCheck.delay_heartbeat);
-        }
-    },
-
-    failureCheck: function () {
-        reconnectionCheck.counter--;
-        var reconnectionElement = document.getElementById('reconnection'); // $('#reconnection');
-        reconnectionElement.style.display = 'block'; // reconnectionElement.show();
-        var reconnectingElement = document.getElementById('reconnecting');
-        reconnectingElement.innerHTML = 'Connection to server lost<br>Reconnecting in ' + reconnectionCheck.counter + ' seconds <strong>...</strong>'; // reconnectionElement.html('Connection to server lost<br>Reconnecting in ' + reconnectionCheck.counter + ' seconds <strong>...</strong>');
-        if (reconnectionCheck.counter == 0) {
-            reconnectingElement.innerHTML = 'Reconnecting...'; // reconnectionElement.html('Reconnecting...');
-            reconnectionCheck.reconnectionInProgress = true;
-            window.clearInterval(reconnectionCheck.currentFailureCheck);
-            reconnectionCheck.errorDetected = false;
-            reconnectionCheck.currentInitCheck = setTimeout(reconnectionCheck.initCheck, reconnectionCheck.delay_heartbeat);
-        }
-    },
-
-    onCheckError: function (data) {
-        if (reconnectionCheck.errorDetected) return;
-
-        reconnectionCheck.errorDetected = true;
-        console.log("Failure detected");
-        notifyConnectionLostListeners();
-        reconnectionCheck.counter = 3;
-
-        reconnectionCheck.currentFailureCheck = setInterval(reconnectionCheck.failureCheck, reconnectionCheck.delay_retry);
-    },
-
-    getCheckUrl: function () {
-        var i = document.URL.indexOf("#");
-        var paramSeparator = document.URL.indexOf("?") === -1 ? "?" : "&";
-        var url = "";
-        if (i === -1) {
-            url = document.URL;
-        } else {
-            url = document.URL.substr(0, i);
-        }
-        return url + paramSeparator + 'ping=' + new Date().getTime();
-    },
-
-    onCheckSuccess: function (data) {
-        if (reconnectionCheck.reconnectionInProgress) {
-            location.reload();
-        } else {
-            reconnectionCheck.currentInitCheck = setTimeout(reconnectionCheck.initCheck, reconnectionCheck.delay_heartbeat);
-        }
-    }
-};
-
-var reconnectionCheck;
-var pony;
 
 function onPonySDKModuleLoaded() {
     console.log("onPonySDKModuleLoaded");
@@ -100,7 +21,7 @@ function onPonySDKModuleLoaded() {
 
     document.ponyLoaded = true;
 
-    for(var i=0; i<document.onPonyLoadedListeners.length; i++) {
+    for(var i = 0 ; i < document.onPonyLoadedListeners.length ; i++) {
         try {
             document.onPonyLoadedListeners[i](pony);
         } catch (error) {
@@ -109,23 +30,9 @@ function onPonySDKModuleLoaded() {
     }
 
     pony.start();
-
-    reconnectionCheck = new Check();
-    reconnectionCheck.initCheck();
 }
-
 if (typeof module !== 'undefined' && module.hasOwnProperty('exports')) module.exports.onPonySDKModuleLoaded = onPonySDKModuleLoaded;
 else window['onPonySDKModuleLoaded'] = onPonySDKModuleLoaded;
-
-function notifyConnectionLostListeners() {
-    for(var i=0; i<document.onConnectionLostListeners.length; i++) {
-        try {
-            document.onConnectionLostListeners[i]();
-        } catch (error) {
-            throw "cannot call onConnectionLostListeners callback: " + document.onConnectionLostListeners[i] + ", error " + error;
-        }
-    }
-}
 
 // Decode ArrayBuffer from server
 var textDecoder = null;

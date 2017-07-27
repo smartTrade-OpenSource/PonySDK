@@ -50,6 +50,7 @@ import com.ponysdk.core.ui.basic.PListBox;
 import com.ponysdk.core.ui.basic.PMenuBar;
 import com.ponysdk.core.ui.basic.PRichTextArea;
 import com.ponysdk.core.ui.basic.PScript;
+import com.ponysdk.core.ui.basic.PSimplePanel;
 import com.ponysdk.core.ui.basic.PStackLayoutPanel;
 import com.ponysdk.core.ui.basic.PTabLayoutPanel;
 import com.ponysdk.core.ui.basic.PTextBox;
@@ -91,6 +92,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     @Override
     public void start(final UIContext uiContext) {
         uiContext.setClientDataOutput((object, instruction) -> System.err.println(object + " : " + instruction));
+
+        createReconnectingPanel();
 
         mainLabel = Element.newPLabel("Can be modified by anybody");
         PWindow.getMain().add(mainLabel);
@@ -226,6 +229,15 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         POptionPane.showConfirmDialog(PWindow.getMain(), null, "BBB");
 
         // uiContext.getHistory().newItem("", false);
+    }
+
+    private void createReconnectingPanel() {
+        final PSimplePanel reconnectionPanel = Element.newPSimplePanel();
+        reconnectionPanel.setAttribute("id", "reconnection");
+        final PSimplePanel reconnectingPanel = Element.newPSimplePanel();
+        reconnectingPanel.setAttribute("id", "reconnecting");
+        reconnectionPanel.setWidget(reconnectingPanel);
+        PWindow.getMain().add(reconnectionPanel);
     }
 
     private void downloadFile() {

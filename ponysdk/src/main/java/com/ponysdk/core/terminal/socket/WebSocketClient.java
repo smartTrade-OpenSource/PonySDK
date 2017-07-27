@@ -28,6 +28,7 @@ import java.util.logging.Logger;
 
 import com.google.gwt.core.client.Scheduler;
 import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.terminal.ReconnectionChecker;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 import com.ponysdk.core.terminal.request.WebSocketRequestBuilder;
@@ -52,7 +53,8 @@ public class WebSocketClient implements MessageSender {
 
     private boolean initialized;
 
-    public WebSocketClient(final String url, final UIBuilder uiBuilder, final WebSocketDataType webSocketDataType) {
+    public WebSocketClient(final String url, final UIBuilder uiBuilder, final WebSocketDataType webSocketDataType,
+            final ReconnectionChecker reconnectionChecker) {
         this.uiBuilder = uiBuilder;
 
         createSetElementsMethodOnUint8Array();
@@ -72,8 +74,10 @@ public class WebSocketClient implements MessageSender {
             if (log.isLoggable(Level.INFO)) log.info("WebSoket connected");
 
             Scheduler.get().scheduleFixedDelay(() -> {
-                if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Heart beat sent");
-                send(ClientToServerModel.HEARTBEAT.toStringValue());
+                if (webSocket.getReadyState() == WebSocket.OPEN) {
+                    if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Heart beat sent");
+                    send(ClientToServerModel.HEARTBEAT.toStringValue());
+                }
                 return true;
             }, 1000);
         });
@@ -82,8 +86,11 @@ public class WebSocketClient implements MessageSender {
                 final CloseEvent closeEvent = (CloseEvent) event;
                 final int statusCode = closeEvent.getCode();
                 if (log.isLoggable(Level.INFO)) log.info("WebSoket disconnected : " + statusCode);
+                // If it's a not normal disconnection
+                if (statusCode != 1000) reconnectionChecker.detectConnectionFailure();
             } else {
                 log.severe("WebSoket disconnected : " + event);
+                reconnectionChecker.detectConnectionFailure();
             }
         });
         webSocket.setOnerror(event -> {
