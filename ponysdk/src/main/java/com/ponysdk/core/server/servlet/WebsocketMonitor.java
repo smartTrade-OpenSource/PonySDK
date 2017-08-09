@@ -25,11 +25,20 @@ package com.ponysdk.core.server.servlet;
 
 public interface WebsocketMonitor {
 
-    void onMessageReceived(WebSocket webSocket, String text);
+    void processing(WebSocketServer webSocket, String text);
 
-    void onMessageProcessed(WebSocket webSocket);
+    void processing(WebSocketServer webSocketServer, byte[] payload, int offset, int len);
 
-    void onBeforeFlush(WebSocket webSocket, int position);
+    void processed(WebSocketServer webSocket, String text);
 
-    void onAfterFlush(WebSocket webSocket);
+    void processed(WebSocketServer webSocketServer, byte[] payload, int offset, int len);
+
+    void sending(WebSocketServer webSocketServer, String text);
+
+    void sent(WebSocketServer webSocketServer, String text);
+
+    void closing(WebSocketServer webSocketServer, int statusCode, String reason);
+
+    void closed(WebSocketServer webSocketServer, int statusCode, String reason);
+
 }

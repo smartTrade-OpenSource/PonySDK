@@ -80,7 +80,8 @@ public enum WidgetType {
     BROWSER,
     HEADER_PANEL,
     SUGGESTBOX,
-    MULTIWORD_SUGGEST_ORACLE;
+    MULTIWORD_SUGGEST_ORACLE,
+    WEBSOCKET;
 
     private WidgetType() {
     }

@@ -33,6 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.ponysdk.core.listener.ProcessListener;
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.PScheduler;
@@ -56,6 +57,7 @@ import com.ponysdk.core.ui.basic.PTabLayoutPanel;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PTree;
 import com.ponysdk.core.ui.basic.PTreeItem;
+import com.ponysdk.core.ui.basic.PWebSocket;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
@@ -93,14 +95,31 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     public void start(final UIContext uiContext) {
         uiContext.setClientDataOutput((object, instruction) -> System.err.println(object + " : " + instruction));
 
+        final PWebSocket webSocket = Element.newPWebsocket();
+
+        webSocket.setListener(new ProcessListener() {
+
+            @Override
+            public void process(final String text) {
+
+            }
+
+            @Override
+            public void process(final byte[] payload, final int offset, final int len) {
+            }
+
+            @Override
+            public void onClose() {
+            }
+        });
+
+        if (true) return;
         createReconnectingPanel();
 
         mainLabel = Element.newPLabel("Can be modified by anybody");
         PWindow.getMain().add(mainLabel);
 
         testPAddon();
-
-        if (true) return;
 
         createWindow().open();
 

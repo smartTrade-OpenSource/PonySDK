@@ -412,6 +412,10 @@ public class Element {
         return f.newPFrame(url);
     }
 
+    public static final PWebSocket newPWebsocket() {
+        return new PWebSocket();
+    }
+
     public static final PElement newA() {
         return newPElement(E_A);
     }
@@ -551,5 +555,4 @@ public class Element {
     public static final PElement newStyle() {
         return newPElement(E_STYLE);
     }
-
 }

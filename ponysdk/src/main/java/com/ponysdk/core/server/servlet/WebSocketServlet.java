@@ -29,7 +29,10 @@ import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.server.application.AbstractApplicationManager;
+import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.ui.basic.PWebSocket;
 
 public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSocketServlet {
 
@@ -43,7 +46,6 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
     @Override
     public void init() throws ServletException {
         super.init();
-
         applicationManager = (AbstractApplicationManager) getServletContext()
             .getAttribute(AbstractApplicationManager.class.getCanonicalName());
     }
@@ -57,12 +59,27 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         factory.setCreator((request, response) -> {
             // Force session creation if there is no session
             request.getHttpServletRequest().getSession(true);
-            if (request.getSession() != null) {
-                return new WebSocket(request, monitor, applicationManager);
+
+            final Integer uiContextID = Integer.parseInt(request.getHeader(ClientToServerModel.UI_CONTEXT_ID.name()));
+            final Integer objectID = Integer.parseInt(request.getHeader(ClientToServerModel.OBJECT_ID.name()));
+            final UIContext uiContext = SessionManager.get().getUIContext(uiContextID);
+
+            WebSocketServer webSocketServer = null;
+
+            if (uiContext != null) {
+                final PWebSocket websocket = uiContext.getObject(objectID);
+                webSocketServer = new WebSocketServer();
+                websocket.setWebsocketServer(webSocketServer);
             } else {
-                log.error("No HTTP session found");
-                return null;
+                if (request.getSession() != null) {
+                    webSocketServer = new MainWebSocket(request, applicationManager);
+                } else {
+                    log.error("No HTTP session found");
+                }
             }
+            if (webSocketServer != null) webSocketServer.setMonitor(monitor);
+            return webSocketServer;
+
         });
     }
 

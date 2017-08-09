@@ -25,12 +25,12 @@ package com.ponysdk.core.server.stm;
 
 import com.ponysdk.core.server.application.Application;
 import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.server.servlet.WebSocket;
+import com.ponysdk.core.server.servlet.MainWebSocket;
 import com.ponysdk.core.writer.ModelWriter;
 
 public class TxnContext implements TxnListener {
 
-    private final WebSocket socket;
+    private final MainWebSocket socket;
     private final ModelWriter modelWriter;
 
     private boolean flushNow = false;
@@ -38,7 +38,7 @@ public class TxnContext implements TxnListener {
 
     private UIContext uiContext;
 
-    public TxnContext(final WebSocket socket) {
+    public TxnContext(final MainWebSocket socket) {
         this.socket = socket;
         this.modelWriter = new ModelWriter(socket);
     }
