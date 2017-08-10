@@ -25,7 +25,6 @@ package com.ponysdk.core.terminal;
 
 import java.util.logging.Logger;
 
-import com.google.gwt.user.client.Window;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.terminal.ui.PTAbsolutePanel;
 import com.ponysdk.core.terminal.ui.PTAddOn;
@@ -82,6 +81,7 @@ import com.ponysdk.core.terminal.ui.PTTextBox;
 import com.ponysdk.core.terminal.ui.PTTree;
 import com.ponysdk.core.terminal.ui.PTTreeItem;
 import com.ponysdk.core.terminal.ui.PTVerticalPanel;
+import com.ponysdk.core.terminal.ui.PTWebSocket;
 import com.ponysdk.core.terminal.ui.PTWindow;
 
 class UIFactory {
@@ -203,6 +203,8 @@ class UIFactory {
                 return new PTBrowser();
             case FRAME:
                 return new PTFrame();
+            case WEBSOCKET:
+                return new PTWebSocket();
             default:
                 log.severe("UIFactory: Client implementation not found, type : " + widgetType);
                 break;

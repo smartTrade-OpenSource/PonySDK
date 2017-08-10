@@ -29,6 +29,7 @@ import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.Date;
+import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletResponse;
@@ -91,29 +92,41 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     // HighChartsStackedColumnAddOn highChartsStackedColumnAddOn;
     int a = 0;
 
+    private PWebSocket pWebSocket;
+
+    private Scanner sc;
+
     @Override
     public void start(final UIContext uiContext) {
         uiContext.setClientDataOutput((object, instruction) -> System.err.println(object + " : " + instruction));
 
-        final PWebSocket webSocket = Element.newPWebsocket();
-
-        webSocket.setListener(new ProcessListener() {
-
-            @Override
-            public void process(final String text) {
-
-            }
+        pWebSocket = Element.newPWebsocket(new ProcessListener() {
 
             @Override
             public void process(final byte[] payload, final int offset, final int len) {
+                System.err.println("ProcessListener : process on Bytes" + payload);
+            }
+
+            @Override
+            public void process(final String text) {
+                System.err.println("ProcessListener : Procss of text : " + text);
             }
 
             @Override
             public void onClose() {
+                System.err.println("ProcessListener : Close");
+            }
+
+            @Override
+            public void onConnected() {
+                pWebSocket.send("test");
+                pWebSocket.close();
             }
         });
 
+        pWebSocket.attach(PWindow.getMain(), null);
         if (true) return;
+
         createReconnectingPanel();
 
         mainLabel = Element.newPLabel("Can be modified by anybody");

@@ -41,7 +41,7 @@ public class URL {
     }
 
     public static String getWebsocketURL(final Map<String, String> parameters) {
-        String url = getHostURL().replaceFirst("http", "ws") + MappingPath.WEBSOCKET + "?";
+        String url = getHostURL().replaceFirst("http", "ws") + MappingPath.WEBSOCKET;
 
         if (parameters != null) {
             url += "?";
@@ -51,7 +51,7 @@ public class URL {
             while (iterator.hasNext()) {
                 final Entry<String, String> entry = iterator.next();
                 url += entry.getKey() + "=" + entry.getValue();
-                if (!iterator.hasNext()) url += "&";
+                if (iterator.hasNext()) url += "&";
             }
         }
 

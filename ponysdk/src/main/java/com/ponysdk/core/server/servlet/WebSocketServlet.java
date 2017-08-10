@@ -23,6 +23,8 @@
 
 package com.ponysdk.core.server.servlet;
 
+import java.util.Map;
+
 import javax.servlet.ServletException;
 
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
@@ -32,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.server.application.AbstractApplicationManager;
 import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.tools.URLUtils;
 import com.ponysdk.core.ui.basic.PWebSocket;
 
 public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSocketServlet {
@@ -60,26 +63,36 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
             // Force session creation if there is no session
             request.getHttpServletRequest().getSession(true);
 
-            final Integer uiContextID = Integer.parseInt(request.getHeader(ClientToServerModel.UI_CONTEXT_ID.name()));
-            final Integer objectID = Integer.parseInt(request.getHeader(ClientToServerModel.OBJECT_ID.name()));
-            final UIContext uiContext = SessionManager.get().getUIContext(uiContextID);
-
+            Integer uiContextID = null;
+            UIContext uiContext = null;
+            Integer objectID = null;
             WebSocketServer webSocketServer = null;
 
-            if (uiContext != null) {
-                final PWebSocket websocket = uiContext.getObject(objectID);
+            final Map<String, String> queryStringParameters = URLUtils.getQueryStringParameters(request.getQueryString());
+            final String headerUIcontextID = queryStringParameters.get(ClientToServerModel.UI_CONTEXT_ID.toStringValue());
+            final String headerObjectID = queryStringParameters.get(ClientToServerModel.OBJECT_ID.toStringValue());
+
+            if (headerUIcontextID != null) {
+                uiContextID = Integer.parseInt(headerUIcontextID);
+                objectID = Integer.parseInt(headerObjectID);
+                uiContext = SessionManager.get().getUIContext(uiContextID);
+
+                final PWebSocket pWebsocket = uiContext.getObject(objectID);
+
                 webSocketServer = new WebSocketServer();
-                websocket.setWebsocketServer(webSocketServer);
+                webSocketServer.setMonitor(monitor);
+                pWebsocket.setWebsocketServer(webSocketServer);
+                return webSocketServer;
             } else {
                 if (request.getSession() != null) {
                     webSocketServer = new MainWebSocket(request, applicationManager);
+                    webSocketServer.setMonitor(monitor);
+                    return webSocketServer;
                 } else {
                     log.error("No HTTP session found");
+                    return null;
                 }
             }
-            if (webSocketServer != null) webSocketServer.setMonitor(monitor);
-            return webSocketServer;
-
         });
     }
 

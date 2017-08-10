@@ -45,9 +45,11 @@ public class PTWebSocket extends AbstractPTObject {
         super.create(buffer, id, uiBuilder);
 
         final Map<String, String> parameters = new HashMap<>();
+
         parameters.put(ClientToServerModel.OBJECT_ID.toStringValue(), String.valueOf(objectID));
         parameters.put(ClientToServerModel.UI_CONTEXT_ID.toStringValue(), String.valueOf(PonySDK.get().getContextId()));
 
+        Browser.getWindow().getConsole().log("webSocket created to :  " + URL.getWebsocketURL(parameters));
         webSocket = Browser.getWindow().newWebSocket(URL.getWebsocketURL(parameters));
     }
 

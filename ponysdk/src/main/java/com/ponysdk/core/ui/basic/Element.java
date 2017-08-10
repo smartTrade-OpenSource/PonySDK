@@ -25,6 +25,7 @@ package com.ponysdk.core.ui.basic;
 
 import java.text.SimpleDateFormat;
 
+import com.ponysdk.core.listener.ProcessListener;
 import com.ponysdk.core.model.PUnit;
 
 public class Element {
@@ -412,8 +413,8 @@ public class Element {
         return f.newPFrame(url);
     }
 
-    public static final PWebSocket newPWebsocket() {
-        return new PWebSocket();
+    public static final PWebSocket newPWebsocket(final ProcessListener listener) {
+        return new PWebSocket(listener);
     }
 
     public static final PElement newA() {

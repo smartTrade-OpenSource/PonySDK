@@ -23,8 +23,6 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.io.IOException;
-
 import com.ponysdk.core.listener.ProcessListener;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.servlet.WebSocketServer;
@@ -35,6 +33,10 @@ public class PWebSocket extends PObject implements ProcessListener {
 
     private ProcessListener listener;
 
+    public PWebSocket(final ProcessListener listener) {
+        this.listener = listener;
+    }
+
     @Override
     protected WidgetType getWidgetType() {
         return WidgetType.WEBSOCKET;
@@ -44,8 +46,11 @@ public class PWebSocket extends PObject implements ProcessListener {
         websocketServer.close();
     }
 
-    public void send(final String text) throws IOException {
-        websocketServer.sendString(text);
+    public void send(final String text) {
+        if (isConnected()) {
+            websocketServer.sendString(text);
+        } else System.err.println("Not connected yet");
+
     }
 
     public void setWebsocketServer(final WebSocketServer websocketServer) {
@@ -68,8 +73,23 @@ public class PWebSocket extends PObject implements ProcessListener {
     }
 
     @Override
+    public void onConnected() {
+        listener.onConnected();
+    }
+
+    @Override
     public void onClose() {
         listener.onClose();
+    }
+
+    public boolean isConnected() {
+        return websocketServer != null && websocketServer.isOpen();
+
+    }
+
+    @Override
+    public boolean attach(final PWindow window, final PFrame frame) {
+        return super.attach(window, frame);
     }
 
 }

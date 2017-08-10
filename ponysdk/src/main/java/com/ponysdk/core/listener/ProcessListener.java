@@ -9,4 +9,6 @@ public interface ProcessListener {
 
     void onClose();
 
+    void onConnected();
+
 }

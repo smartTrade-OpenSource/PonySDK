@@ -23,8 +23,6 @@
 
 package com.ponysdk.core.server.servlet;
 
-import java.io.IOException;
-
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketListener;
 import org.slf4j.Logger;
@@ -42,9 +40,13 @@ public class WebSocketServer implements WebSocketListener {
 
     private ProcessListener processListener;
 
+    public WebSocketServer() {
+    }
+
     @Override
     public void onWebSocketConnect(final Session session) {
         this.session = session;
+        processListener.onConnected();
     }
 
     @Override
@@ -54,37 +56,38 @@ public class WebSocketServer implements WebSocketListener {
 
     @Override
     public void onWebSocketClose(final int statusCode, final String reason) {
-        monitor.closing(this, statusCode, reason);
+        if (monitor != null) monitor.closing(this, statusCode, reason);
+
         try {
             close(statusCode, reason);
         } catch (final Exception e) {
             log.error("Cannot close websocket status code {}, reason {}", statusCode, reason);
         } finally {
-            monitor.closed(this, statusCode, reason);
+            if (monitor != null) monitor.closed(this, statusCode, reason);
         }
     }
 
     @Override
     public void onWebSocketText(final String text) {
-        monitor.processing(this, text);
+        if (monitor != null) monitor.processing(this, text);
         try {
             process(text);
         } catch (final Exception e) {
             log.error("Cannot process text {}", text, e);
         } finally {
-            monitor.processed(this, text);
+            if (monitor != null) monitor.processed(this, text);
         }
     }
 
     @Override
     public void onWebSocketBinary(final byte[] payload, final int offset, final int len) {
-        monitor.processing(this, payload, offset, len);
+        if (monitor != null) monitor.processing(this, payload, offset, len);
         try {
             process(payload, offset, len);
         } catch (final Exception e) {
             log.error("Cannot process bytes", e);
         } finally {
-            monitor.processed(this, payload, offset, len);
+            if (monitor != null) monitor.processed(this, payload, offset, len);
         }
     }
 
@@ -115,14 +118,14 @@ public class WebSocketServer implements WebSocketListener {
         this.monitor = monitor;
     }
 
-    public void sendString(final String text) throws IOException {
-        monitor.sending(this, text);
+    public void sendString(final String text) {
+        if (monitor != null) monitor.sending(this, text);
         try {
             session.getRemote().sendString(text);
         } catch (final Exception e) {
             log.error("Cannot process text {}", text, e);
         } finally {
-            monitor.sent(this, text);
+            if (monitor != null) monitor.sent(this, text);
         }
     }
 
