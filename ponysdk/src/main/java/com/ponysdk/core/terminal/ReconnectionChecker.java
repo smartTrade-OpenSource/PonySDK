@@ -57,7 +57,6 @@ public class ReconnectionChecker {
         window = Browser.getWindow();
 
         connectionRequest = window.newXMLHttpRequest();
-        setHTTPRequestTimeout(connectionRequest, CHECK_TIMEOUT);
         connectionRequest.setOnreadystatechange(evt -> {
             if (connectionRequest.getReadyState() == XMLHttpRequest.DONE) {
                 if (connectionRequest.getStatus() == HTTP_STATUS_CODE_OK) {
@@ -73,7 +72,6 @@ public class ReconnectionChecker {
         });
 
         reconnectionRequest = window.newXMLHttpRequest();
-        setHTTPRequestTimeout(reconnectionRequest, RETRY_TIMEOUT);
         reconnectionRequest.setOnreadystatechange(evt -> {
             if (reconnectionRequest.getReadyState() == XMLHttpRequest.DONE) {
                 if (reconnectionRequest.getStatus() == HTTP_STATUS_CODE_OK) {
@@ -92,6 +90,7 @@ public class ReconnectionChecker {
 
     protected void checkConnection() {
         connectionRequest.open("GET", getPingUrl() + "&check");
+        setHTTPRequestTimeout(connectionRequest, CHECK_TIMEOUT);
         connectionRequest.send();
     }
 
@@ -140,6 +139,7 @@ public class ReconnectionChecker {
 
     private void retryConnection() {
         reconnectionRequest.open("GET", getPingUrl() + "&retry");
+        setHTTPRequestTimeout(reconnectionRequest, RETRY_TIMEOUT);
         reconnectionRequest.send();
     }
 
