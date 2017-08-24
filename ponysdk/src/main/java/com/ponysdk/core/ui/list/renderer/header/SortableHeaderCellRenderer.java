@@ -25,6 +25,7 @@ package com.ponysdk.core.ui.list.renderer.header;
 
 import com.ponysdk.core.server.service.query.Criterion;
 import com.ponysdk.core.server.service.query.SortingType;
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.list.*;
@@ -46,7 +47,7 @@ public class SortableHeaderCellRenderer implements Queriable, HeaderCellRenderer
     }
 
     public SortableHeaderCellRenderer(final String caption, final String key, final FilterListener filterListener) {
-        this.title = new PLabel(caption);
+        this.title = Element.newPLabel(caption);
         this.key = key;
         this.filterListener = filterListener;
 

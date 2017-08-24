@@ -35,6 +35,9 @@ public abstract class PComplexPanel extends PPanel {
 
     protected PWidgetCollection children = new PWidgetCollection(this);
 
+    protected PComplexPanel() {
+    }
+
     public void add(final PWidget... widgets) {
         for (final PWidget w : widgets) {
             add(w);
@@ -42,22 +45,38 @@ public abstract class PComplexPanel extends PPanel {
     }
 
     @Override
+    protected boolean attach(final PWindow window, final PFrame frame) {
+        this.frame = frame;
+
+        if (this.window == null && window != null) {
+            this.window = window;
+            init();
+            return true;
+        } else if (this.window != window) {
+            throw new IllegalAccessError(
+                "Widget already attached to an other window, current window : #" + this.window + ", new window : #" + window);
+        }
+
+        return false;
+    }
+
+    @Override
     public void add(final PWidget child) {
         assertNotMe(child);
 
-        if (child.getWindowID() == PWindow.EMPTY_WINDOW_ID || child.getWindowID() == windowID) {
+        if (child.getWindow() == null || child.getWindow() == window) {
             child.removeFromParent();
             children.add(child);
             adopt(child);
+            if (isInitialized()) child.attach(window, frame);
 
             child.saveAdd(child.getID(), ID);
-            child.attach(windowID);
         } else {
-            if (windowID != PWindow.EMPTY_WINDOW_ID) {
-                throw new IllegalAccessError("Can't attach widget " + child + " to window #" + windowID
-                        + " because it's already attached to window #" + child.getWindowID());
+            if (initialized) {
+                throw new IllegalAccessError(
+                    "Can't attach widget " + child + " to window #" + window + " because it's already attached to window #" + child);
             } else {
-                throw new IllegalAccessError("Can't only attach widget " + child + " to window #" + child.getWindowID()
+                throw new IllegalAccessError("Can't only attach widget " + child + " to window #" + child.getWindow()
                         + ". Need to attach the new parent to the same window before");
             }
         }
@@ -66,22 +85,17 @@ public abstract class PComplexPanel extends PPanel {
     public void insert(final PWidget child, final int beforeIndex) {
         assertNotMe(child);
 
-        if (child.getWindowID() == PWindow.EMPTY_WINDOW_ID || child.getWindowID() == windowID) {
+        if (child.getWindow() == null || child.getWindow() == window) {
             child.removeFromParent();
 
             children.insert(child, beforeIndex);
             adopt(child);
-
-            if (children.size() - 1 == beforeIndex) {
-                child.saveAdd(child.getID(), ID);
-                child.attach(windowID);
-            } else {
-                child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, beforeIndex));
-                child.attach(windowID);
-            }
+            if (isInitialized()) child.attach(window, frame);
+            if (children.size() - 1 == beforeIndex) child.saveAdd(child.getID(), ID);
+            else child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, beforeIndex));
         } else {
             throw new IllegalAccessError("Widget " + child + " already attached to an other window, current window : "
-                    + child.getWindowID() + ", new window : " + windowID);
+                    + child.getWindow() + ", new window : " + window);
         }
     }
 

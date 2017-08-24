@@ -23,34 +23,33 @@
 
 package com.ponysdk.impl.webapplication.page;
 
-import java.util.Collection;
-import java.util.Collections;
-
 import com.ponysdk.core.ui.activity.AbstractActivity;
 import com.ponysdk.core.ui.place.Place;
-import com.ponysdk.core.server.application.Permission;
+
+import java.util.Collection;
+import java.util.Collections;
 
 public abstract class PageActivity extends AbstractActivity<PageView> implements InitializingActivity {
 
     protected final String pageName;
 
     protected final Collection<String> pageCategories;
-    protected final Permission permission;
+    protected final String permission;
     private boolean shown = false;
 
     public PageActivity(final String pageName, final String pageCategory) {
-        this(pageName, Collections.singleton(pageCategory), Permission.ALLOWED);
+        this(pageName, Collections.singleton(pageCategory), null);
     }
 
-    public PageActivity(final String pageName, final String pageCategory, final Permission permission) {
+    public PageActivity(final String pageName, final String pageCategory, final String permission) {
         this(pageName, Collections.singleton(pageCategory), permission);
     }
 
     public PageActivity(final String pageName, final Collection<String> pageCategories) {
-        this(pageName, pageCategories, Permission.ALLOWED);
+        this(pageName, pageCategories, null);
     }
 
-    public PageActivity(final String pageName, final Collection<String> pageCategories, final Permission permission) {
+    public PageActivity(final String pageName, final Collection<String> pageCategories, final String permission) {
         this.pageName = pageName;
         this.pageCategories = pageCategories;
         this.permission = permission;
@@ -88,7 +87,7 @@ public abstract class PageActivity extends AbstractActivity<PageView> implements
         return pageName;
     }
 
-    public Permission getPermission() {
+    public String getPermission() {
         return permission;
     }
 

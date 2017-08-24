@@ -23,13 +23,10 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.ui.ValueBoxBase;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
@@ -38,27 +35,44 @@ public abstract class PTValueBoxBase<T extends ValueBoxBase<W>, W> extends PTFoc
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.SELECT_ALL.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.SELECT_ALL.ordinal() == modelOrdinal) {
             uiObject.selectAll();
             return true;
+        } else if (ServerToClientModel.CURSOR_POSITION.ordinal() == modelOrdinal) {
+            uiObject.setCursorPos(binaryModel.getIntValue());
+            return true;
+        } else if (ServerToClientModel.SELECTION_RANGE_START.ordinal() == modelOrdinal) {
+            final int start = binaryModel.getIntValue();
+            // ServerToClientModel.SELECTION_RANGE_LENGTH
+            final int length = buffer.readBinaryModel().getIntValue();
+            uiObject.setSelectionRange(start, length);
+            return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
 
     @Override
-    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
+    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
         if (HandlerModel.HANDLER_CHANGE.equals(handlerModel)) {
-            uiObject.addChangeHandler(new ChangeHandler() {
-
-                @Override
-                public void onChange(final ChangeEvent event) {
-                    final PTInstruction eventInstruction = new PTInstruction(getObjectID());
-                    eventInstruction.put(ClientToServerModel.HANDLER_CHANGE);
-                    uiService.sendDataToServer(uiObject, eventInstruction);
-                }
+            uiObject.addChangeHandler(event -> {
+                final PTInstruction eventInstruction = new PTInstruction(getObjectID());
+                eventInstruction.put(ClientToServerModel.HANDLER_CHANGE);
+                uiBuilder.sendDataToServer(uiObject, eventInstruction);
             });
         } else {
-            super.addHandler(buffer, handlerModel, uiService);
+            super.addHandler(buffer, handlerModel);
         }
     }
+
+    @Override
+    public void removeHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
+        if (HandlerModel.HANDLER_CHANGE.equals(handlerModel)) {
+            // TODO Remove HANDLER_CHANGE
+        } else {
+            super.removeHandler(buffer, handlerModel);
+        }
+    }
+
 }

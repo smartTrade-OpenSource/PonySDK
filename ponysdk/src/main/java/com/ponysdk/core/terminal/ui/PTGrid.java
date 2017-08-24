@@ -24,13 +24,12 @@
 package com.ponysdk.core.terminal.ui;
 
 import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.HTMLTable;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
-public class PTGrid extends PTHTMLTable {
+public class PTGrid extends PTHTMLTable<Grid> {
 
     private int rows = -1;
     private int columns = -1;
@@ -51,25 +50,22 @@ public class PTGrid extends PTHTMLTable {
     }
 
     @Override
-    protected HTMLTable createUIObject() {
+    protected Grid createUIObject() {
         return rows != -1 ? new Grid(rows, columns) : new Grid();
     }
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.CLEAR_ROW.equals(binaryModel.getModel())) {
-            cast().removeRow(binaryModel.getIntValue());
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.CLEAR_ROW.ordinal() == modelOrdinal) {
+            uiObject.removeRow(binaryModel.getIntValue());
             return true;
-        }
-        if (ServerToClientModel.INSERT_ROW.equals(binaryModel.getModel())) {
-            cast().insertRow(binaryModel.getIntValue());
+        } else if (ServerToClientModel.INSERT_ROW.ordinal() == modelOrdinal) {
+            uiObject.insertRow(binaryModel.getIntValue());
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
 
-    @Override
-    public Grid cast() {
-        return (Grid) uiObject;
-    }
 }

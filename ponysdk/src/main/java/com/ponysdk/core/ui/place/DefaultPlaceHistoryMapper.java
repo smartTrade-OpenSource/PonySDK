@@ -23,10 +23,10 @@
 
 package com.ponysdk.core.ui.place;
 
+import com.ponysdk.core.ui.eventbus.EventBus;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import com.ponysdk.core.ui.eventbus.EventBus;
 
 public class DefaultPlaceHistoryMapper implements PlaceHistoryMapper {
 
@@ -35,7 +35,7 @@ public class DefaultPlaceHistoryMapper implements PlaceHistoryMapper {
     protected PlaceTokenizer<Place> placeTokenizer;
 
     public DefaultPlaceHistoryMapper(final EventBus eventBus) {
-        eventBus.addHandler(PlaceChangeEvent.TYPE, event -> {
+        eventBus.addHandler(PlaceChangeEvent.TYPE, (PlaceChangeHandler) event -> {
             final Place place = event.getNewPlace();
             placeContextByToken.put(getToken(place), place);
         });

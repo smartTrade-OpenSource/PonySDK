@@ -27,7 +27,7 @@ import javax.json.JsonObject;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.writer.ModelWriter;
 
 /**
  * AddOn are used to bind server side object with javascript object
@@ -36,25 +36,32 @@ public abstract class PAddOnComposite<T extends PWidget> extends PAddOn implemen
 
     protected T widget;
 
-    public PAddOnComposite(final T widget, final JsonObject args) {
+    protected PAddOnComposite(final T widget, final JsonObject args) {
         super(args);
         this.widget = widget;
+        this.widget.bindAddon(this);
 
-        if (!this.widget.isAddonAlreadyBound(this)) {
-            this.widget.bindAddon(this);
-
-            if (PWindow.EMPTY_WINDOW_ID != widget.getWindowID()) {
-                attach(widget.getWindowID());
-            } else {
-                widget.setAttachListener(() -> attach(widget.getWindowID()));
-            }
-        } else {
-            throw new IllegalArgumentException("Widget " + widget + " is already binded to an other Addon");
-        }
+        if (null != widget.getWindow()) attach(widget.getWindow(), widget.getFrame());
+        else widget.addInitializeListener(object -> attach(widget.getWindow(), widget.getFrame()));
     }
 
-    public PAddOnComposite(final T widget) {
+    protected PAddOnComposite(final T widget) {
         this(widget, null);
+    }
+
+    @Override
+    public boolean attach(final PWindow window, final PFrame frame) {
+        this.frame = frame;
+
+        if (this.window == null && window != null) {
+            this.window = window;
+            init();
+            return true;
+        } else if (this.window != window) {
+            throw new IllegalAccessError(
+                "Widget already attached to an other window, current window : #" + this.window + ", new window : #" + window);
+        }
+        return false;
     }
 
     @Override
@@ -63,9 +70,9 @@ public abstract class PAddOnComposite<T extends PWidget> extends PAddOn implemen
     }
 
     @Override
-    protected void enrichOnInit(final Parser parser) {
-        super.enrichOnInit(parser);
-        parser.parse(ServerToClientModel.WIDGET_ID, widget.asWidget().getID());
+    protected void enrichOnInit(final ModelWriter writer) {
+        super.enrichOnInit(writer);
+        writer.write(ServerToClientModel.WIDGET_ID, widget.asWidget().getID());
     }
 
     @Override

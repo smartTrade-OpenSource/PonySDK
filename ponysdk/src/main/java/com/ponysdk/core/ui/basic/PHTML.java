@@ -27,8 +27,8 @@ import java.util.Objects;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.ui.basic.event.PHasHTML;
+import com.ponysdk.core.writer.ModelWriter;
 
 /**
  * A widget that can contain arbitrary HTML. This widget uses a &lt;div&gt;
@@ -48,25 +48,25 @@ public class PHTML extends PLabel implements PHasHTML {
     private String html;
     private boolean wordWrap = false;
 
-    public PHTML() {
+    protected PHTML() {
         super();
     }
 
-    public PHTML(final String html) {
+    protected PHTML(final String html) {
         this(html, false);
     }
 
-    public PHTML(final String html, final boolean wordWrap) {
+    protected PHTML(final String html, final boolean wordWrap) {
         super();
         this.html = html;
         this.wordWrap = wordWrap;
     }
 
     @Override
-    protected void enrichOnInit(final Parser parser) {
-        super.enrichOnInit(parser);
-        if (html != null) parser.parse(ServerToClientModel.HTML, html);
-        if (wordWrap) parser.parse(ServerToClientModel.WORD_WRAP, wordWrap);
+    protected void enrichOnInit(final ModelWriter writer) {
+        super.enrichOnInit(writer);
+        if (html != null) writer.write(ServerToClientModel.HTML, html);
+        if (wordWrap) writer.write(ServerToClientModel.WORD_WRAP, wordWrap);
     }
 
     @Override
@@ -84,15 +84,13 @@ public class PHTML extends PLabel implements PHasHTML {
         if (Objects.equals(this.html, html)) return;
         this.html = html;
         this.text = null;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.HTML, html));
+        saveUpdate(ServerToClientModel.HTML, this.html);
     }
 
     @Override
     public void setText(final String text) {
-        if (Objects.equals(this.text, text)) return;
-        this.text = text;
+        super.setText(text);
         this.html = null;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.TEXT, this.text));
     }
 
     public boolean isWordWrap() {
@@ -102,7 +100,7 @@ public class PHTML extends PLabel implements PHasHTML {
     public void setWordWrap(final boolean wordWrap) {
         if (Objects.equals(this.wordWrap, wordWrap)) return;
         this.wordWrap = wordWrap;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.WORD_WRAP, this.wordWrap));
+        saveUpdate(ServerToClientModel.WORD_WRAP, this.wordWrap);
     }
 
     @Override

@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -28,13 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.ponysdk.core.server.application.UIContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class DefaultPageProvider implements PageProvider {
-
-    private final Logger log = LoggerFactory.getLogger(DefaultPageProvider.class);
 
     private final Map<String, PageActivity> allPageActivitiesDeclared = new LinkedHashMap<>();
 
@@ -63,11 +57,7 @@ public class DefaultPageProvider implements PageProvider {
     private void initPagePermissions() {
         allActivePageActivities = new LinkedHashMap<>();
         for (final Entry<String, PageActivity> entry : allPageActivitiesDeclared.entrySet()) {
-            if (UIContext.hasPermission(entry.getValue().getPermission())) {
-                allActivePageActivities.put(entry.getKey(), entry.getValue());
-            } else {
-                log.info("Permission " + entry.getValue().getPermission() + " not found for the page activity  #" + entry.getKey());
-            }
+            allActivePageActivities.put(entry.getKey(), entry.getValue());
         }
     }
 

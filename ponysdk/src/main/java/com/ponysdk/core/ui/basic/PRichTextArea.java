@@ -32,9 +32,10 @@ import java.util.Objects;
 import javax.json.JsonObject;
 
 import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.PFontSize;
+import com.ponysdk.core.model.PJustification;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.terminal.ui.PTRichTextArea;
 import com.ponysdk.core.ui.basic.event.PHasHTML;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
@@ -44,7 +45,8 @@ import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
  * formatter interface, accessed via {@link #getFormatter()}. A browser that
  * does not support rich text editing at all will return <code>null</code> for
  * both of these, while one that supports only the basic functionality will
- * return <code>null</code> for the latter. <h3>CSS Style Rules</h3>
+ * return <code>null</code> for the latter.
+ * <h3>CSS Style Rules</h3>
  * <dl>
  * <dt>.gwt-RichTextArea</dt>
  * <dd>Applied to the rich text element.</dd>
@@ -52,9 +54,13 @@ import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
  */
 public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueChangeHandlers<String> {
 
-    private final List<PValueChangeHandler<String>> handlers = new ArrayList<>();
+    private List<PValueChangeHandler<String>> handlers;
     private final Formatter formatter = new Formatter();
+    private String text;
     private String html;
+
+    protected PRichTextArea() {
+    }
 
     @Override
     protected WidgetType getWidgetType() {
@@ -63,13 +69,15 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
 
     @Override
     public String getText() {
-        return html;
+        return text;
     }
 
     @Override
     public void setText(final String text) {
-        this.html = text;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.TEXT, text));
+        if (Objects.equals(this.text, text)) return;
+        this.text = text;
+        this.html = null;
+        saveUpdate(ServerToClientModel.TEXT, text);
     }
 
     @Override
@@ -81,7 +89,8 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
     public void setHTML(final String html) {
         if (Objects.equals(this.html, html)) return;
         this.html = html;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.HTML, html));
+        this.text = null;
+        saveUpdate(ServerToClientModel.HTML, html);
     }
 
     public Formatter getFormatter() {
@@ -91,121 +100,118 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
     @Override
     public void onClientData(final JsonObject instruction) {
         if (instruction.containsKey(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE.toStringValue())) {
-            fireOnValueChange(new PValueChangeEvent<>(this,
-                    instruction.getString(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE.toStringValue())));
+            fireOnValueChange(
+                new PValueChangeEvent<>(this, instruction.getString(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE.toStringValue())));
         } else {
             super.onClientData(instruction);
         }
     }
 
     protected void fireOnValueChange(final PValueChangeEvent<String> event) {
-        this.html = event.getValue();
-
-        for (final PValueChangeHandler<String> handler : handlers) {
-            handler.onValueChange(event);
-        }
-
+        this.html = event.getData();
+        if (handlers != null) handlers.forEach(handler -> handler.onValueChange(event));
     }
 
     @Override
     public void addValueChangeHandler(final PValueChangeHandler<String> handler) {
+        if (handlers == null) handlers = new ArrayList<>();
         handlers.add(handler);
     }
 
     @Override
     public boolean removeValueChangeHandler(final PValueChangeHandler<String> handler) {
-        return handlers.remove(handler);
+        return handlers != null && handlers.remove(handler);
     }
 
     @Override
     public Collection<PValueChangeHandler<String>> getValueChangeHandlers() {
-        return Collections.unmodifiableCollection(handlers);
+        return handlers != null ? Collections.unmodifiableCollection(handlers) : Collections.emptyList();
     }
 
     public class Formatter {
 
         public void createLink(final String url) {
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.CREATE_LINK, url));
+            saveUpdate(writer -> writer.write(ServerToClientModel.URL, url));
         }
 
         public void insertHorizontalRule() {
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.INSERT_HORIZONTAL_RULE));
+            saveUpdate(writer -> writer.write(ServerToClientModel.INSERT_HORIZONTAL_RULE));
         }
 
         public void insertHTML(final String html) {
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.INSERT_HTML, html));
+            saveUpdate(writer -> writer.write(ServerToClientModel.INSERT_HTML, html));
         }
 
         public void insertImage(final String url) {
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.IMAGE_URL, url));
+            saveUpdate(writer -> writer.write(ServerToClientModel.IMAGE_URL, url));
         }
 
         public void insertOrderedList() {
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.ORDERED));
+            saveUpdate(writer -> writer.write(ServerToClientModel.ORDERED));
         }
 
         public void insertUnorderedList() {
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.UNORDERED));
+            saveUpdate(writer -> writer.write(ServerToClientModel.UNORDERED));
         }
 
         public void setBackColor(final String color) {
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.BACK_COLOR, color));
+            saveUpdate(writer -> writer.write(ServerToClientModel.BACK_COLOR, color));
         }
 
         public void setFontName(final String name) {
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.FONT_NAME, name));
+            saveUpdate(writer -> writer.write(ServerToClientModel.FONT_NAME, name));
         }
 
-        public void setFontSize(final String fontSize) {
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.FONT_SIZE, fontSize));
+        public void setFontSize(final PFontSize fontSize) {
+            saveUpdate(writer -> writer.write(ServerToClientModel.FONT_SIZE, fontSize.getValue()));
         }
 
         public void setForeColor(final String color) {
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.FONT_COLOR, color));
+            saveUpdate(writer -> writer.write(ServerToClientModel.FONT_COLOR, color));
         }
 
-        public void setJustification(final PTRichTextArea.Justification justification) {
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.JUSTIFICATION, justification.name()));
+        public void setJustification(final PJustification justification) {
+            saveUpdate(writer -> writer.write(ServerToClientModel.JUSTIFICATION, justification.getValue()));
         }
 
         public void toggleBold() {
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.TOGGLE_BOLD));
+            saveUpdate(writer -> writer.write(ServerToClientModel.TOGGLE_BOLD));
         }
 
         public void toggleItalic() {
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.TOGGLE_ITALIC));
+            saveUpdate(writer -> writer.write(ServerToClientModel.TOGGLE_ITALIC));
         }
 
         public void toggleSubscript() {
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.TOGGLE_SUBSCRIPT));
+            saveUpdate(writer -> writer.write(ServerToClientModel.TOGGLE_SUBSCRIPT));
         }
 
         public void toggleUnderline() {
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.TOGGLE_UNDERLINE));
+            saveUpdate(writer -> writer.write(ServerToClientModel.TOGGLE_UNDERLINE));
         }
 
         public void leftIndent() {
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.LEFT_INDENT));
+            saveUpdate(writer -> writer.write(ServerToClientModel.LEFT_INDENT));
         }
 
         public void redo() {
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.REDO));
+            saveUpdate(writer -> writer.write(ServerToClientModel.REDO));
         }
 
         public void removeFormat() {
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.REMOVE_FORMAT));
+            saveUpdate(writer -> writer.write(ServerToClientModel.REMOVE_FORMAT));
         }
 
         public void removeLink() {
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.REMOVE_LINK));
+            saveUpdate(writer -> writer.write(ServerToClientModel.REMOVE_LINK));
         }
 
         public void rightIndent() {
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.TOGGLE_RIGHT_INDENT));
+            saveUpdate(writer -> writer.write(ServerToClientModel.TOGGLE_RIGHT_INDENT));
         }
 
         public void selectAll() {
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.SELECT_ALL));
+            saveUpdate(writer -> writer.write(ServerToClientModel.SELECT_ALL));
         }
     }
 

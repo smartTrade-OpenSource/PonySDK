@@ -11,8 +11,7 @@ import com.ponysdk.core.server.application.Application;
 import com.ponysdk.core.server.servlet.SessionManager;
 import com.ponysdk.sample.client.activity.MarketData;
 
-public class TradingServiceImpl /** implements TradingService **/
-{
+public class TradingServiceImpl {
 
     private final List<MarketData> marketDatas = new ArrayList<>();
 

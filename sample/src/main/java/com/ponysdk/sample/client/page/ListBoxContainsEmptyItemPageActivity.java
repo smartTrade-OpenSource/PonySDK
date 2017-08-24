@@ -23,10 +23,9 @@
 
 package com.ponysdk.sample.client.page;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PListBox;
-import com.ponysdk.core.ui.basic.event.PChangeEvent;
-import com.ponysdk.core.ui.basic.event.PChangeHandler;
 import com.ponysdk.core.ui.rich.PNotificationManager;
 
 public class ListBoxContainsEmptyItemPageActivity extends SamplePageActivity {
@@ -39,9 +38,9 @@ public class ListBoxContainsEmptyItemPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PFlowPanel panel = new PFlowPanel();
+        final PFlowPanel panel = Element.newPFlowPanel();
 
-        final PListBox listBox = new PListBox(true);
+        final PListBox listBox = Element.newPListBox(true);
         listBox.addItem("Altai horseBengin");
         listBox.addItem("American Warmblood");
         listBox.addItem("Falabella");
@@ -49,18 +48,14 @@ public class ListBoxContainsEmptyItemPageActivity extends SamplePageActivity {
         listBox.addItem("Mustang");
         listBox.addItem("Altai horse");
 
-        listBox.addChangeHandler(new PChangeHandler() {
-
-            @Override
-            public void onChange(final PChangeEvent event) {
-                if (listBox.getSelectedIndex() != -1) {
-                    PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
-                            "Item selected : " + listBox.getSelectedItem());
-                }
+        listBox.addChangeHandler(event -> {
+            if (listBox.getSelectedIndex() != -1) {
+                PNotificationManager.showTrayNotification(getView().asWidget().getWindow(),
+                    "Item selected : " + listBox.getSelectedItem());
             }
         });
 
-        final PListBox multiListBox = new PListBox(true);
+        final PListBox multiListBox = Element.newPListBox(true);
         multiListBox.setMultipleSelect(true);
         multiListBox.setVisibleItemCount(10);
         multiListBox.addItem("Altai horseBengin");
@@ -70,14 +65,8 @@ public class ListBoxContainsEmptyItemPageActivity extends SamplePageActivity {
         multiListBox.addItem("Mustang");
         multiListBox.addItem("Altai horse");
 
-        multiListBox.addChangeHandler(new PChangeHandler() {
-
-            @Override
-            public void onChange(final PChangeEvent event) {
-                PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
-                        "Item selected : " + multiListBox.getSelectedItems());
-            }
-        });
+        multiListBox.addChangeHandler(event -> PNotificationManager.showTrayNotification(getView().asWidget().getWindow(),
+            "Item selected : " + multiListBox.getSelectedItems()));
 
         panel.add(listBox);
         panel.add(multiListBox);

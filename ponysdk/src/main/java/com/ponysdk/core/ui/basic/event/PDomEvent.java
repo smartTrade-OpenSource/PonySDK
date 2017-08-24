@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -27,17 +27,17 @@ import com.ponysdk.core.model.DomHandlerType;
 import com.ponysdk.core.ui.eventbus.Event;
 import com.ponysdk.core.ui.eventbus.EventHandler;
 
-public abstract class PDomEvent<T extends EventHandler> extends Event<T> {
+public abstract class PDomEvent<H extends EventHandler> extends Event<H> {
 
-    public PDomEvent(Object sourceComponent) {
+    public PDomEvent(final Object sourceComponent) {
         super(sourceComponent);
     }
 
-    public static class Type<H extends EventHandler> extends Event.Type<H> {
+    public static class Type extends Event.Type {
 
         private final DomHandlerType domHandlerType;
 
-        public Type(DomHandlerType domHandlerType) {
+        public Type(final DomHandlerType domHandlerType) {
             super();
             this.domHandlerType = domHandlerType;
         }

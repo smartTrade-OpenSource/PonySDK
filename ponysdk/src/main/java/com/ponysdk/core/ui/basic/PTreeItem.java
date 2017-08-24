@@ -24,74 +24,75 @@
 package com.ponysdk.core.ui.basic;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
+import com.ponysdk.core.writer.ModelWriter;
 
 /**
- * An item that can be contained within a {@link PTree}. Each tree item is
- * assigned a unique DOM id in order to support ARIA.
+ * An item that can be contained within a {@link PTree}. Each tree item is assigned a unique DOM id
+ * in order to support ARIA.
  */
-public class PTreeItem extends PObject {
+public class PTreeItem extends PObject implements Iterable<PTreeItem> {
 
-    private final List<PTreeItem> children = new ArrayList<>();
     private PTree tree;
-    private boolean isRoot = false;
-    private String html = null;
-    private boolean selected;
+    private PTreeItem parent;
+    private List<PTreeItem> children;
 
-    private boolean open;
-
+    private boolean isRoot;
+    private String text;
+    protected boolean openState;
     private PWidget widget;
 
-    public PTreeItem() {
+    protected PTreeItem() {
     }
 
-    public PTreeItem(final PWidget widget) {
+    protected PTreeItem(final PWidget widget) {
         this.widget = widget;
     }
 
-    public PTreeItem(final String html) {
-        this.html = html;
+    protected PTreeItem(final String text) {
+        this.text = text;
     }
 
-    PTreeItem(final boolean isRoot) {
-        this.isRoot = isRoot;
+    PTreeItem(final PTree tree) {
+        this.isRoot = true;
+        this.tree = tree;
     }
 
     @Override
     protected void init0() {
         super.init0();
-        for (final PTreeItem item : children) {
-            item.attach(windowID);
+        forEach(child -> {
+            child.setTree(tree);
+            child.attach(window, frame);
+        });
+
+        if (widget != null) {
+            if (widget.getParent() != null) widget.removeFromParent();
+
+            if (tree != null) {
+                tree.orphan(widget);
+                widget.saveRemove(widget.getID(), tree.getID());
+            }
+
+            if (tree != null) {
+                tree.adopt(widget, this);
+                widget.attach(window, frame);
+                saveAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.WIDGET, null));
+            }
         }
     }
 
     @Override
-    protected void enrichOnInit(final Parser parser) {
-        super.enrichOnInit(parser);
-        parser.parse(ServerToClientModel.TEXT, html);
-        if (isRoot) parser.parse(ServerToClientModel.ROOT, isRoot);
-    }
-
-    private void setWidget() {
-        if (widget.getParent() != null) {
-            widget.removeFromParent();
-        }
-
-        if (tree != null) {
-            tree.orphan(widget);
-            widget.saveRemove(widget.getID(), tree.getID());
-        }
-
-        if (tree != null) {
-            tree.adopt(widget, this);
-            saveAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.WIDGET, null));
-        }
+    protected void enrichOnInit(final ModelWriter writer) {
+        super.enrichOnInit(writer);
+        if (this.text != null) writer.write(ServerToClientModel.TEXT, text);
+        if (this.isRoot) writer.write(ServerToClientModel.TREE_ROOT, tree.getID());
     }
 
     @Override
@@ -99,85 +100,100 @@ public class PTreeItem extends PObject {
         return WidgetType.TREE_ITEM;
     }
 
-    public boolean isRoot() {
-        return isRoot;
+    public PWidget getWidget() {
+        return widget;
     }
 
-    public String getHtml() {
-        return html;
+    public void setText(final String text) {
+        if (Objects.equals(this.text, text)) return;
+        this.text = text;
+        saveUpdate(ServerToClientModel.TEXT, text);
     }
 
-    public void setHTML(final String html) {
-        if (Objects.equals(this.html, html)) return;
-        this.html = html;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.TEXT, html));
-    }
-
-    public PTree getTree() {
-        return tree;
-    }
-
-    final void setTree(final PTree tree) {
+    private void setTree(final PTree tree) {
         this.tree = tree;
-        if (isRoot && tree.getWindowID() != PWindow.EMPTY_WINDOW_ID) tree.saveAdd(tree.getID(), ID);
-        if (widget != null) setWidget();
     }
 
-    public int getChildCount() {
-        return children.size();
-    }
-
-    public PTreeItem insertItem(final int beforeIndex, final PTreeItem item) {
-        children.add(beforeIndex, item);
-        item.setTree(tree);
-        item.saveAdd(item.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, beforeIndex));
-        item.attach(windowID);
-        return item;
-    }
-
-    public PTreeItem addItem(final PTreeItem item) {
-        children.add(item);
-        item.setTree(tree);
-        item.saveAdd(item.getID(), ID);
-        item.attach(windowID);
-        return item;
-    }
-
-    public PTreeItem addItem(final String itemHtml) {
-        return addItem(new PTreeItem(itemHtml));
-    }
-
-    public boolean removeItem(final PTreeItem item) {
-        tree.saveRemove(tree.getID(), ID);
-        return children.remove(item);
+    public void setSelected(final boolean newSelected) {
+        final boolean selected = isSelected();
+        if (!selected && newSelected) tree.setSelectedItem(this);
+        else if (selected && !newSelected) tree.setSelectedItem(null);
     }
 
     public boolean isSelected() {
-        return selected;
+        return this.equals(tree.getSelectedItem());
     }
 
-    public void setSelected(final boolean selected) {
-        if (Objects.equals(this.selected, selected)) return;
-        this.selected = selected;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.SELECTED, selected));
+    public void setState(final boolean openState) {
+        if (Objects.equals(this.openState, openState)) return;
+        this.openState = openState;
+        if (openState) saveUpdate(ServerToClientModel.OPEN, openState);
+        else saveUpdate(ServerToClientModel.CLOSE, openState);
     }
 
     public boolean getState() {
-        return open;
+        return openState;
     }
 
-    public void setState(final boolean open) {
-        if (Objects.equals(this.open, open)) return;
-        this.open = open;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.STATE, open));
+    public PTreeItem add(final int beforeIndex, final PTreeItem item) {
+        if (children == null) children = new ArrayList<>();
+        children.add(beforeIndex, item);
+        item.setParent(this);
+        item.setTree(tree);
+        if (isInitialized()) item.attach(window, frame);
+        item.saveAdd(item.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, beforeIndex));
+        return item;
     }
 
-    public PTreeItem getChild(final int index) {
-        return children.get(index);
+    public PTreeItem add(final PTreeItem item) {
+        if (children == null) children = new ArrayList<>();
+        children.add(item);
+        item.setParent(this);
+        item.setTree(tree);
+        if (isInitialized()) item.attach(window, frame);
+        item.saveAdd(item.getID(), ID);
+        return item;
     }
 
-    public PWidget getWidget() {
-        return widget;
+    public PTreeItem add(final String itemHtml) {
+        return add(Element.newPTreeItem(itemHtml));
+    }
+
+    public boolean remove(final PTreeItem item) {
+        item.saveRemove(item.getID(), ID);
+        return children.remove(item);
+    }
+
+    public PTreeItem get(final int index) {
+        return children != null ? children.get(index) : null;
+    }
+
+    @Override
+    public Iterator<PTreeItem> iterator() {
+        return children != null ? children.iterator() : null;
+    }
+
+    public int size() {
+        return children != null ? children.size() : 0;
+    }
+
+    void setParent(final PTreeItem pTreeItem) {
+        this.parent = pTreeItem;
+    }
+
+    public void removeFromParent() {
+        if (!isRoot) parent.remove(this);
+        else tree.removeFromParent();
+    }
+
+    void clear() {
+        children.clear();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        forEach(PObject::onDestroy);
     }
 
 }

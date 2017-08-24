@@ -28,10 +28,12 @@ import java.util.Iterator;
 import com.ponysdk.core.ui.basic.event.HasPWidgets;
 
 /**
- * Abstract base class for all panels, which are widgets that can contain other
- * widgets.
+ * Abstract base class for all panels, which are widgets that can contain other widgets.
  */
 public abstract class PPanel extends PWidget implements HasPWidgets {
+
+    PPanel() {
+    }
 
     @Override
     public abstract boolean remove(PWidget child);
@@ -49,19 +51,18 @@ public abstract class PPanel extends PWidget implements HasPWidgets {
     @Override
     protected void init0() {
         super.init0();
-        for (final PWidget pWidget : this) {
-            pWidget.attach(windowID);
-        }
+        forEach(widget -> widget.attach(window, frame));
     }
 
     protected final void adopt(final PWidget child) {
-        assert child.getParent() == null;
-        child.setParent(this);
+        if (child.getParent() == null) child.setParent(this);
+        else throw new IllegalStateException("Can't adopt an already widget attached to a parent");
     }
 
     final void orphan(final PWidget child) {
-        assert child.getParent() == this;
-        child.setParent(null);
+        if (child == null) {
+        } else if (child.getParent() == this) child.setParent(null);
+        else throw new IllegalStateException("Can't adopt an widget attached to another parent");
     }
 
     @Override
@@ -71,6 +72,12 @@ public abstract class PPanel extends PWidget implements HasPWidgets {
             it.next();
             it.remove();
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        forEach(PObject::onDestroy);
     }
 
 }

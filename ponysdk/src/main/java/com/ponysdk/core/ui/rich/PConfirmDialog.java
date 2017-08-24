@@ -23,53 +23,64 @@
 
 package com.ponysdk.core.ui.rich;
 
-import com.ponysdk.core.internalization.PString;
 import com.ponysdk.core.model.PHorizontalAlignment;
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PConfirmDialogHandler;
 import com.ponysdk.core.ui.basic.PDialogBox;
 import com.ponysdk.core.ui.basic.PHorizontalPanel;
-import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
 import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.basic.PWindow;
+import com.ponysdk.core.ui.i18n.PString;
 
 public class PConfirmDialog extends PDialogBox {
 
     private PButton okButton;
     private PButton cancelButton;
 
-    public PConfirmDialog(final int windowID) {
-        super(windowID);
+    public PConfirmDialog() {
+        super();
     }
 
-    public static PConfirmDialog show(final int windowID, final String windowCaption, final String message, final String okCaption,
-            final String cancelCaption, final PConfirmDialogHandler confirmDialogHandler) {
-        return show(windowID, windowCaption, new PLabel(message), okCaption, cancelCaption, confirmDialogHandler);
+    public static PConfirmDialog show(final PWindow window, final String windowCaption, final String message, final String okCaption,
+                                      final String cancelCaption, final PConfirmDialogHandler confirmDialogHandler) {
+        return show(window, windowCaption, Element.newPLabel(message), okCaption, cancelCaption, confirmDialogHandler);
     }
 
-    public static PConfirmDialog show(final int windowID, final String windowCaption, final PWidget content, final String okCaption,
-            final String cancelCaption, final PConfirmDialogHandler confirmDialogHandler) {
-        final PConfirmDialog confirmDialog = buildPopup(windowID, windowCaption, content, okCaption, cancelCaption,
-                confirmDialogHandler);
+    // show a popup which have a ok button hiding the popup by default
+    public static PConfirmDialog show(final PWindow window, final String windowCaption, final PWidget content) {
+        return show(window, windowCaption, content, PString.get("dialog.ok"), null, null);
+    }
+
+    public static PConfirmDialog show(final PWindow window, final String windowCaption, final PWidget content,
+                                      final PConfirmDialogHandler confirmDialogHandler) {
+        return show(window, windowCaption, content, PString.get("dialog.ok"), null, confirmDialogHandler);
+    }
+
+    public static PConfirmDialog show(final PWindow window, final String windowCaption, final PWidget content, final String okCaption,
+                                      final String cancelCaption, final PConfirmDialogHandler confirmDialogHandler) {
+        final PConfirmDialog confirmDialog = buildPopup(windowCaption, content, okCaption, cancelCaption, confirmDialogHandler);
+        window.add(confirmDialog);
         confirmDialog.center();
         return confirmDialog;
     }
 
-    public static PConfirmDialog buildPopup(final int windowID, final String windowCaption, final PWidget content,
-            final String okCaption, final String cancelCaption, final PConfirmDialogHandler confirmDialogHandler) {
-        final PConfirmDialog confirmDialog = new PConfirmDialog(windowID);
+    public static PConfirmDialog buildPopup(final String windowCaption, final PWidget content, final String okCaption,
+                                            final String cancelCaption, final PConfirmDialogHandler confirmDialogHandler) {
+        final PConfirmDialog confirmDialog = new PConfirmDialog();
         confirmDialog.setStyleName("pony-DialogBox");
         confirmDialog.setAnimationEnabled(true);
         confirmDialog.setGlassEnabled(true);
 
         // Build content
-        final PVerticalPanel dialogContent = new PVerticalPanel();
+        final PVerticalPanel dialogContent = Element.newPVerticalPanel();
         dialogContent.add(content);
-        final PHorizontalPanel controlsPanel = new PHorizontalPanel();
+        final PHorizontalPanel controlsPanel = Element.newPHorizontalPanel();
         controlsPanel.setStyleName("dialogControls");
 
         if (cancelCaption != null) {
-            final PButton cancelButton = new PButton(cancelCaption);
+            final PButton cancelButton = Element.newPButton(cancelCaption);
             cancelButton.addClickHandler(event -> {
                 if (confirmDialogHandler != null) {
                     confirmDialogHandler.onCancel();
@@ -81,12 +92,11 @@ public class PConfirmDialog extends PDialogBox {
             confirmDialog.setCancelButton(cancelButton);
         }
         if (okCaption != null) {
-            final PButton okButton = new PButton(okCaption);
+            final PButton okButton = Element.newPButton(okCaption);
             okButton.addClickHandler(event -> {
                 if (confirmDialogHandler != null) {
                     if (confirmDialogHandler.onOK(confirmDialog)) confirmDialog.hide();
-                } else
-                    confirmDialog.hide();
+                } else confirmDialog.hide();
             });
 
             controlsPanel.add(okButton);
@@ -101,16 +111,6 @@ public class PConfirmDialog extends PDialogBox {
         confirmDialog.setWidget(dialogContent);
 
         return confirmDialog;
-    }
-
-    // show a popup which have a ok button hiding the popup by default
-    public static PConfirmDialog show(final int windowID, final String windowCaption, final PWidget content) {
-        return show(windowID, windowCaption, content, PString.get("dialog.ok"), null, null);
-    }
-
-    public static PConfirmDialog show(final int windowID, final String windowCaption, final PWidget content,
-            final PConfirmDialogHandler confirmDialogHandler) {
-        return show(windowID, windowCaption, content, PString.get("dialog.ok"), null, confirmDialogHandler);
     }
 
     @Override

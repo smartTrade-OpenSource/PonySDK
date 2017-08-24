@@ -24,6 +24,7 @@
 package com.ponysdk.impl.main;
 
 import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PElement;
 import com.ponysdk.core.ui.basic.PFlowPanel;
@@ -32,7 +33,7 @@ import com.ponysdk.core.ui.main.EntryPoint;
 
 public class BasicEntryPoint implements EntryPoint {
 
-    final PButton button = new PButton(" => Button");
+    final PButton button = Element.newPButton(" => Button");
 
     @Override
     public void start(final UIContext uiContext) {
@@ -42,7 +43,7 @@ public class BasicEntryPoint implements EntryPoint {
 
         // final long start = System.currentTimeMillis();
 
-        final PFlowPanel flowPanel = new PFlowPanel();
+        final PFlowPanel flowPanel = Element.newPFlowPanel();
         //
         // final PGrid grid = new PGrid(200, 200);
         // PRootPanel.get().add(grid);
@@ -51,7 +52,7 @@ public class BasicEntryPoint implements EntryPoint {
 
         for (int i = 0; i < 100; i++) {
             for (int j = 0; j < 100; j++) {
-                final PElement div = new PElement("input");
+                final PElement div = Element.newInput();
                 div.setAttribute("type", "text");
                 div.setAttribute("value", i + "-" + j);
                 flowPanel.add(div);
@@ -136,7 +137,7 @@ public class BasicEntryPoint implements EntryPoint {
         // });
         //
         // final PLabel label = new PLabel("Dans La window");
-        // window.getPRootPanel().add(label);
+        // window.add(label);
         // UIScheduledThreadPoolExecutor.scheduleAtFixedRate(new Runnable() {
         //
         // @Override

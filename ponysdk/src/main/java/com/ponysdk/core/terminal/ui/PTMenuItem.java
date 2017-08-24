@@ -23,13 +23,11 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.MenuItem;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
@@ -49,35 +47,41 @@ public class PTMenuItem extends PTUIObject<MenuItem> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.TEXT.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.TEXT.ordinal() == modelOrdinal) {
             uiObject.setText(binaryModel.getStringValue());
             return true;
-        }
-        if (ServerToClientModel.HTML.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.HTML.ordinal() == modelOrdinal) {
             uiObject.setHTML(binaryModel.getStringValue());
             return true;
-        }
-        if (ServerToClientModel.ENABLED.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.ENABLED.ordinal() == modelOrdinal) {
             uiObject.setEnabled(binaryModel.getBooleanValue());
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
 
     @Override
-    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
+    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
         if (HandlerModel.HANDLER_COMMAND.equals(handlerModel)) {
-            uiObject.setScheduledCommand(new ScheduledCommand() {
-
-                @Override
-                public void execute() {
-                    final PTInstruction eventInstruction = new PTInstruction(getObjectID());
-                    eventInstruction.put(ClientToServerModel.HANDLER_COMMAND);
-                    uiService.sendDataToServer(eventInstruction);
-                }
+            uiObject.setScheduledCommand(() -> {
+                final PTInstruction eventInstruction = new PTInstruction(getObjectID());
+                eventInstruction.put(ClientToServerModel.HANDLER_COMMAND);
+                uiBuilder.sendDataToServer(eventInstruction);
             });
         } else {
-            super.addHandler(buffer, handlerModel, uiService);
+            super.addHandler(buffer, handlerModel);
         }
     }
+
+    @Override
+    public void removeHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
+        if (HandlerModel.HANDLER_COMMAND.equals(handlerModel)) {
+            uiObject.setScheduledCommand(null);
+        } else {
+            super.removeHandler(buffer, handlerModel);
+        }
+    }
+
 }

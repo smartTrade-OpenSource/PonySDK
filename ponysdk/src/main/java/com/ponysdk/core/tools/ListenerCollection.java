@@ -29,6 +29,11 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * @deprecated Use {@link java.util.Collections#newSetFromMap(java.util.Map)} directly
+ * @since v2.7.1
+ */
+@Deprecated
 public class ListenerCollection<C> implements Collection<C> {
 
     private final Set<C> listeners = Collections.newSetFromMap(new ConcurrentHashMap<>());

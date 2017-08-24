@@ -41,7 +41,7 @@ public class PTRichTextToolbar extends PTWidget<RichTextToolbar> {
 
     @Override
     protected RichTextToolbar createUIObject() {
-        return new RichTextToolbar(richTextArea.cast());
+        return new RichTextToolbar(richTextArea.uiObject);
     }
 
 }

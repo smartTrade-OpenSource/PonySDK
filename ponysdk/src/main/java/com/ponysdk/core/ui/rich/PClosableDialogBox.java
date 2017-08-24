@@ -24,14 +24,14 @@
 package com.ponysdk.core.ui.rich;
 
 import com.ponysdk.core.model.PHorizontalAlignment;
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PFlexTable;
-import com.ponysdk.core.ui.basic.PImage;
-import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PPopupPanel;
 import com.ponysdk.core.ui.basic.PSimplePanel;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
 
 public class PClosableDialogBox extends PPopupPanel {
 
@@ -41,24 +41,24 @@ public class PClosableDialogBox extends PPopupPanel {
 
     private final PSimplePanel contentContainer;
 
-    public PClosableDialogBox(final int windowID, final String caption) {
-        this(windowID, false, new PLabel(caption), new PImage("images/close_16.png"));
+    public PClosableDialogBox(final String caption) {
+        this(false, Element.newPLabel(caption), Element.newPImage("images/close_16.png"));
     }
 
-    public PClosableDialogBox(final int windowID, final boolean modal, final IsPWidget captionWidget, final IsPWidget closeWidget) {
-        super(windowID, false);
+    public PClosableDialogBox(final boolean modal, final IsPWidget captionWidget, final IsPWidget closeWidget) {
+        super(false);
         setModal(modal);
 
         setStyleName("pony-closable-dialog-box");
 
-        captionContainer = new PSimplePanel();
-        closeContainer = new PSimplePanel();
-        contentContainer = new PSimplePanel();
+        captionContainer = Element.newPSimplePanel();
+        closeContainer = Element.newPSimplePanel();
+        contentContainer = Element.newPSimplePanel();
         captionContainer.setStyleName("caption");
         closeContainer.setStyleName("close");
         contentContainer.setStyleName("content");
 
-        final PFlexTable layout = new PFlexTable();
+        final PFlexTable layout = Element.newPFlexTable();
         layout.addStyleName("layout");
 
         layout.setWidget(0, 0, captionContainer);
@@ -70,7 +70,7 @@ public class PClosableDialogBox extends PPopupPanel {
         layout.getCellFormatter().setHorizontalAlignment(0, 1, PHorizontalAlignment.ALIGN_RIGHT);
         layout.getRowFormatter().addStyleName(0, "header");
 
-        closeContainer.addDomHandler((PClickEvent) -> hide(), PClickEvent.TYPE);
+        closeContainer.addDomHandler((PClickHandler) event -> hide(), PClickEvent.TYPE);
 
         super.setWidget(layout);
 
@@ -96,7 +96,7 @@ public class PClosableDialogBox extends PPopupPanel {
     }
 
     public void displayAtCenter() {
-        setPopupPositionAndShow((offsetWidth, offsetHeight, windowWidth,
-                windowHeight) -> setPopupPosition((windowWidth - offsetWidth) / 2, (windowHeight - offsetHeight) / 2));
+        setPopupPositionAndShow((offsetWidth, offsetHeight, windowWidth, windowHeight) -> setPopupPosition(
+            (windowWidth - offsetWidth) / 2, (windowHeight - offsetHeight) / 2));
     }
 }

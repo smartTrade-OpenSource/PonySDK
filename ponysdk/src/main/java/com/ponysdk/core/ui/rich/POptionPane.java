@@ -24,6 +24,7 @@
 package com.ponysdk.core.ui.rich;
 
 import com.ponysdk.core.model.PHorizontalAlignment;
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PDialogBox;
@@ -31,6 +32,7 @@ import com.ponysdk.core.ui.basic.PHorizontalPanel;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
 import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.basic.PWindow;
 
 /**
  * POptionPane makes it easy to pop up a standard dialog box that prompts users
@@ -40,31 +42,32 @@ public class POptionPane implements IsPWidget {
 
     final PDialogBox dialogBox;
 
-    public POptionPane(final int windowID) {
-        this(new PDialogBox(windowID));
+    public POptionPane() {
+        this(Element.newPDialogBox());
     }
 
     public POptionPane(final PDialogBox dialogBox) {
         this.dialogBox = dialogBox;
     }
 
-    public static POptionPane showConfirmDialog(final int windowID, final PActionHandler handler, final String message) {
-        return showConfirmDialog(windowID, handler, message, "Message", POptionType.DEFAULT_OPTION);
+    public static POptionPane showConfirmDialog(final PWindow window, final PActionHandler handler, final String message) {
+        return showConfirmDialog(window, handler, message, "Message", POptionType.DEFAULT_OPTION);
     }
 
-    public static POptionPane showConfirmDialog(final int windowID, final PActionHandler handler, final String message,
-            final String title, final POptionType optionType) {
-        return showConfirmDialog(windowID, handler, message, title, optionType, PMessageType.QUESTION_MESSAGE);
+    public static POptionPane showConfirmDialog(final PWindow window, final PActionHandler handler, final String message,
+                                                final String title, final POptionType optionType) {
+        return showConfirmDialog(window, handler, message, title, optionType, PMessageType.QUESTION_MESSAGE);
     }
 
-    public static POptionPane showConfirmDialog(final int windowID, final PActionHandler handler, final String message,
-            final String title, final POptionType optionType, final PMessageType messageType) {
-        return showOptionDialog(windowID, handler, message, title, optionType, messageType, getOptions(optionType));
+    public static POptionPane showConfirmDialog(final PWindow window, final PActionHandler handler, final String message,
+                                                final String title, final POptionType optionType, final PMessageType messageType) {
+        return showOptionDialog(window, handler, message, title, optionType, messageType, getOptions(optionType));
     }
 
-    public static POptionPane showOptionDialog(final int windowID, final PActionHandler handler, final String message,
-            final String title, final POptionType optionType, final PMessageType messageType, final String... options) {
-        final POptionPane optionPane = new POptionPane(windowID);
+    public static POptionPane showOptionDialog(final PWindow window, final PActionHandler handler, final String message,
+                                               final String title, final POptionType optionType, final PMessageType messageType,
+                                               final String... options) {
+        final POptionPane optionPane = new POptionPane();
 
         final PDialogBox dialogBox = optionPane.getDialogBox();
         dialogBox.addStyleName("pony-DialogBox");
@@ -74,15 +77,15 @@ public class POptionPane implements IsPWidget {
         dialogBox.setCaption(messageType.getName());
 
         // Build content
-        final PVerticalPanel panel = new PVerticalPanel();
-        final PLabel content = new PLabel(message);
+        final PVerticalPanel panel = Element.newPVerticalPanel();
+        final PLabel content = Element.newPLabel(message);
         panel.add(content);
-        final PHorizontalPanel controlsPanel = new PHorizontalPanel();
+        final PHorizontalPanel controlsPanel = Element.newPHorizontalPanel();
         controlsPanel.addStyleName("dialogControls");
         controlsPanel.setHorizontalAlignment(PHorizontalAlignment.ALIGN_CENTER);
 
         for (final String option : options) {
-            final PButton button = new PButton(option);
+            final PButton button = Element.newPButton(option);
             button.ensureDebugId("optionpane[" + option + "]");
             button.addClickHandler(clickEvent -> handler.onAction(dialogBox, option));
             controlsPanel.add(button);
@@ -92,6 +95,8 @@ public class POptionPane implements IsPWidget {
         panel.add(controlsPanel);
         panel.setCellHorizontalAlignment(controlsPanel, PHorizontalAlignment.ALIGN_CENTER);
         panel.setCellHorizontalAlignment(content, PHorizontalAlignment.ALIGN_CENTER);
+
+        window.add(optionPane);
 
         dialogBox.setWidget(panel);
         dialogBox.center();

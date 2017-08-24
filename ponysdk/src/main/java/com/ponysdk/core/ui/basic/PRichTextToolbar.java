@@ -25,20 +25,20 @@ package com.ponysdk.core.ui.basic;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.writer.ModelWriter;
 
 public class PRichTextToolbar extends PWidget {
 
     private final PRichTextArea richTextArea;
 
-    public PRichTextToolbar(final PRichTextArea richTextArea) {
+    protected PRichTextToolbar(final PRichTextArea richTextArea) {
         this.richTextArea = richTextArea;
     }
 
     @Override
-    protected void enrichOnInit(final Parser parser) {
-        super.enrichOnInit(parser);
-        parser.parse(ServerToClientModel.WIDGET_ID, richTextArea.getID());
+    protected void enrichOnInit(final ModelWriter writer) {
+        super.enrichOnInit(writer);
+        writer.write(ServerToClientModel.WIDGET_ID, richTextArea.getID());
     }
 
     @Override

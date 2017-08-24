@@ -24,58 +24,53 @@
 package com.ponysdk.core.terminal.ui;
 
 import com.google.gwt.user.client.ui.FlexTable;
-import com.google.gwt.user.client.ui.HTMLTable;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
-public class PTFlexTable extends PTHTMLTable {
+public class PTFlexTable extends PTHTMLTable<FlexTable> {
 
     private static final String PONY_FLEX_TABLE_STYLE_NAME = "pony-PFlexTable";
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
         super.create(buffer, objectId, uiService);
-
         this.uiObject.addStyleName(PONY_FLEX_TABLE_STYLE_NAME);
     }
 
     @Override
-    protected HTMLTable createUIObject() {
+    protected FlexTable createUIObject() {
         return new FlexTable();
     }
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.CLEAR_ROW.equals(binaryModel.getModel())) {
-            cast().removeRow(binaryModel.getIntValue());
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.CLEAR_ROW.ordinal() == modelOrdinal) {
+            uiObject.removeRow(binaryModel.getIntValue());
             return true;
-        }
-        if (ServerToClientModel.INSERT_ROW.equals(binaryModel.getModel())) {
-            cast().insertRow(binaryModel.getIntValue());
+        } else if (ServerToClientModel.INSERT_ROW.ordinal() == modelOrdinal) {
+            uiObject.insertRow(binaryModel.getIntValue());
             return true;
-        }
-        if (ServerToClientModel.SET_COL_SPAN.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.SET_COL_SPAN.ordinal() == modelOrdinal) {
+            final int value = binaryModel.getIntValue();
             // ServerToClientModel.ROW
             final int cellFormatterRow = buffer.readBinaryModel().getIntValue();
             // ServerToClientModel.COLUMN
             final int cellFormatterColumn = buffer.readBinaryModel().getIntValue();
-            cast().getFlexCellFormatter().setColSpan(cellFormatterRow, cellFormatterColumn, binaryModel.getIntValue());
-        }
-        if (ServerToClientModel.SET_ROW_SPAN.equals(binaryModel.getModel())) {
+            uiObject.getFlexCellFormatter().setColSpan(cellFormatterRow, cellFormatterColumn, value);
+            return true;
+        } else if (ServerToClientModel.SET_ROW_SPAN.ordinal() == modelOrdinal) {
+            final int value = binaryModel.getIntValue();
             // ServerToClientModel.ROW
             final int cellFormatterRow = buffer.readBinaryModel().getIntValue();
             // ServerToClientModel.COLUMN
             final int cellFormatterColumn = buffer.readBinaryModel().getIntValue();
-            cast().getFlexCellFormatter().setRowSpan(cellFormatterRow, cellFormatterColumn, binaryModel.getIntValue());
+            uiObject.getFlexCellFormatter().setRowSpan(cellFormatterRow, cellFormatterColumn, value);
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
-    }
-
-    @Override
-    public FlexTable cast() {
-        return (FlexTable) uiObject;
     }
 }

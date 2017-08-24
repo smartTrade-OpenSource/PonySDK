@@ -23,10 +23,10 @@
 
 package com.ponysdk.core.server.servlet;
 
-import javax.servlet.ServletContextListener;
-
 import com.ponysdk.core.server.application.AbstractApplicationManager;
 import com.ponysdk.core.server.application.ApplicationManagerOption;
+
+import javax.servlet.ServletContextListener;
 
 public interface ApplicationLoader extends ServletContextListener {
 

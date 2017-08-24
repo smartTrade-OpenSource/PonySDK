@@ -31,7 +31,6 @@ import java.util.logging.Logger;
 
 import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
@@ -44,11 +43,13 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public class PTAddOnComposite extends PTAddOn {
 
-    private final static Logger log = Logger.getLogger(PTAddOnComposite.class.getName());
+    private static final Logger log = Logger.getLogger(PTAddOnComposite.class.getName());
 
     private final List<JSONObject> pendingUpdates = new ArrayList<>();
 
     private Widget widget;
+
+    private boolean initialized;
 
     @Override
     protected void doCreate(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
@@ -56,9 +57,8 @@ public class PTAddOnComposite extends PTAddOn {
         final String signature = buffer.readBinaryModel().getStringValue();
         final Map<String, JavascriptAddOnFactory> factories = uiService.getJavascriptAddOnFactory();
         final JavascriptAddOnFactory factory = factories.get(signature);
-        if (factory == null)
-            throw new IllegalArgumentException("AddOn factory not found for signature: " + signature + ". Addons registered: "
-                    + factories.keySet());
+        if (factory == null) throw new IllegalArgumentException(
+            "AddOn factory not found for signature: " + signature + ". Addons registered: " + factories.keySet());
 
         final JSONObject params = new JSONObject();
         params.put("id", new JSONNumber(objectId));
@@ -71,22 +71,21 @@ public class PTAddOnComposite extends PTAddOn {
 
         final int widgetID = binaryModel.getIntValue();
         final PTWidget<?> object = (PTWidget<?>) uiService.getPTObject(widgetID);
-        widget = object.cast();
+        widget = object.uiObject;
         final Element element = widget.getElement();
         params.put("widgetID", new JSONString(String.valueOf(widgetID)));
         params.put("widgetElement", new JSONObject(element));
 
-        widget.addAttachHandler(new AttachEvent.Handler() {
-
-            @Override
-            public void onAttachOrDetach(final AttachEvent event) {
-                try {
-                    if (event.isAttached()) addOn.onAttached();
-                    else addOn.onDetached();
+        widget.addAttachHandler(event -> {
+            try {
+                if (event.isAttached()) {
+                    addOn.onAttached();
                     flushPendingUpdates();
-                } catch (final JavaScriptException e) {
-                    log.log(Level.SEVERE, e.getMessage(), e);
+                } else {
+                    addOn.onDetached();
                 }
+            } catch (final JavaScriptException e) {
+                log.log(Level.SEVERE, e.getMessage(), e);
             }
         });
 
@@ -94,6 +93,7 @@ public class PTAddOnComposite extends PTAddOn {
             addOn = factory.newAddOn(params.getJavaScriptObject());
             addOn.onInit();
             if (widget.isAttached()) addOn.onAttached();
+            initialized = true;
         } catch (final JavaScriptException e) {
             log.log(Level.SEVERE, e.getMessage(), e);
         }
@@ -101,11 +101,15 @@ public class PTAddOnComposite extends PTAddOn {
 
     @Override
     protected void doUpdate(final JSONObject data) {
-        if (widget.isAttached()) {
-            flushPendingUpdates();
-            super.doUpdate(data);
+        if (!destroyed) {
+            if (initialized && widget.isAttached()) {
+                flushPendingUpdates();
+                super.doUpdate(data);
+            } else {
+                pendingUpdates.add(data);
+            }
         } else {
-            pendingUpdates.add(data);
+            log.warning("PTAddOnComposite #" + getObjectID() + " destroyed, so updates will be discarded : " + data.toString());
         }
     }
 
@@ -115,6 +119,14 @@ public class PTAddOnComposite extends PTAddOn {
                 super.doUpdate(update);
             }
             pendingUpdates.clear();
+        }
+    }
+
+    @Override
+    public void destroy() {
+        if (!destroyed) {
+            pendingUpdates.clear();
+            super.destroy();
         }
     }
 }

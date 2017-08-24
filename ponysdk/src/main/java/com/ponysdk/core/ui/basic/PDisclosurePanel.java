@@ -27,19 +27,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 import javax.json.JsonObject;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.ui.basic.event.HasPAnimation;
 import com.ponysdk.core.ui.basic.event.HasPWidgets;
 import com.ponysdk.core.ui.basic.event.PCloseEvent;
 import com.ponysdk.core.ui.basic.event.PCloseHandler;
 import com.ponysdk.core.ui.basic.event.POpenEvent;
 import com.ponysdk.core.ui.basic.event.POpenHandler;
+import com.ponysdk.core.writer.ModelWriter;
 
 /**
  * A widget that consists of a header and a content panel that discloses the
@@ -59,7 +60,7 @@ import com.ponysdk.core.ui.basic.event.POpenHandler;
  * .gwt-DisclosurePanel-open .header { ... }
  * </p>
  */
-public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimation {
+public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimation, PAcceptsOneWidget {
 
     private final List<PCloseHandler> closeHandlers = new ArrayList<>();
     private final List<POpenHandler> openHandlers = new ArrayList<>();
@@ -68,20 +69,18 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
     private PWidget content;
     private boolean isOpen;
 
-    public PDisclosurePanel(final String headerText) {
+    protected PDisclosurePanel(final String headerText) {
         this.headerText = headerText;
     }
 
     @Override
-    protected void enrichOnInit(final Parser parser) {
-        super.enrichOnInit(parser);
-        parser.parse(ServerToClientModel.TEXT, headerText);
+    protected void enrichOnInit(final ModelWriter writer) {
+        super.enrichOnInit(writer);
+        writer.write(ServerToClientModel.TEXT, headerText);
 
         // TODO add ImageResources parametters ..
-        // parser.parse(ServerToClientModel.DISCLOSURE_PANEL_OPEN_IMG,
-        // openImage.getID());
-        // parser.parse(ServerToClientModel.DISCLOSURE_PANEL_CLOSE_IMG,
-        // closeImage.getID());
+        // writer.writeModel(ServerToClientModel.DISCLOSURE_PANEL_OPEN_IMG, openImage.getID());
+        // writer.writeModel(ServerToClientModel.DISCLOSURE_PANEL_CLOSE_IMG, closeImage.getID());
     }
 
     @Override
@@ -110,28 +109,28 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
         return content;
     }
 
+    @Override
+    public void setWidget(final IsPWidget w) {
+        setContent(w.asWidget());
+    }
+
     public void setContent(final PWidget w) {
         // Validate
-        if (w == content)
-            return;
+        if (w == content) return;
 
         // Detach new child.
-        if (w != null)
-            w.removeFromParent();
+        w.removeFromParent();
 
         // Remove old child.
-        if (content != null)
-            remove(content);
+        if (content != null) content.removeFromParent();
 
         // Logical attach.
+        adopt(w);
         content = w;
 
-        if (w != null) {
-            // Physical attach.
-            w.saveAdd(w.getID(), getID());
-            w.attach(windowID);
-            adopt(w);
-        }
+        // Physical attach.
+        w.attach(window, frame);
+        w.saveAdd(w.getID(), getID());
     }
 
     @Override
@@ -141,10 +140,8 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
 
     @Override
     public void add(final PWidget w) {
-        if (this.getContent() == null)
-            setContent(w);
-        else
-            throw new IllegalStateException("A DisclosurePanel can only contain two Widgets.");
+        if (content == null) setContent(w);
+        else throw new IllegalStateException("A DisclosurePanel can only contain two Widgets.");
     }
 
     @Override
@@ -159,8 +156,9 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
 
     @Override
     public boolean remove(final PWidget w) {
-        if (w == getContent()) {
-            setContent(null);
+        if (w == content) {
+            content.removeFromParent();
+            content = null;
             return true;
         } else {
             return false;
@@ -168,8 +166,9 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
     }
 
     private void adopt(final PWidget child) {
-        assert child.getParent() == null;
-        child.setParent(this);
+        if (child.getParent() == null) child.setParent(this);
+        else throw new IllegalStateException("Can't adopt an already widget attached to a parent");
+
     }
 
     public void addCloseHandler(final PCloseHandler handler) {
@@ -185,10 +184,10 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
     }
 
     public void setOpen(final boolean isOpen) {
-        if (this.isOpen != isOpen) {
-            this.isOpen = isOpen;
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.OPEN_CLOSE, isOpen));
-        }
+        if (Objects.equals(this.isOpen, isOpen)) return;
+        this.isOpen = isOpen;
+        if (isOpen) saveUpdate(ServerToClientModel.OPEN, isOpen);
+        else saveUpdate(ServerToClientModel.CLOSE, isOpen);
     }
 
     @Override
@@ -198,7 +197,9 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
 
     @Override
     public void setAnimationEnabled(final boolean animationEnabled) {
+        if (Objects.equals(this.animationEnabled, animationEnabled)) return;
         this.animationEnabled = animationEnabled;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ANIMATION, animationEnabled));
+        saveUpdate(ServerToClientModel.ANIMATION, animationEnabled);
     }
+
 }

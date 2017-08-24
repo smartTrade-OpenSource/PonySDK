@@ -42,8 +42,11 @@ public class PHeaderPanel extends PPanel {
     private PWidget content;
     private PWidget footer;
 
+    protected PHeaderPanel() {
+    }
+
     public void resize() {
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.RESIZE));
+        saveUpdate(writer -> writer.write(ServerToClientModel.RESIZE));
     }
 
     @Override

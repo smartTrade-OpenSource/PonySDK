@@ -42,7 +42,9 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ponysdk.core.model.MappingPath;
 import com.ponysdk.core.server.application.ApplicationManagerOption;
+import com.ponysdk.core.server.servlet.AjaxServlet;
 import com.ponysdk.core.server.servlet.ApplicationLoader;
 import com.ponysdk.core.server.servlet.BootstrapServlet;
 import com.ponysdk.core.server.servlet.ServletContextFilter;
@@ -52,10 +54,11 @@ import com.ponysdk.core.server.servlet.WebSocketServlet;
 public class PonySDKServer {
 
     public static final String MAPPING_BOOTSTRAP = "/*";
-    public static final String MAPPING_WS = "/ws/*";
-    public static final String MAPPING_STREAM = "/stream";
+    public static final String MAPPING_WS = "/" + MappingPath.WEBSOCKET + "/*";
+    public static final String MAPPING_STREAM = "/" + MappingPath.STREAM;
+    public static final String MAPPING_AJAX = "/" + MappingPath.AJAX;
 
-    protected static final Logger log = LoggerFactory.getLogger(Main.class);
+    private static final Logger log = LoggerFactory.getLogger(PonySDKServer.class);
 
     protected final Server server;
 
@@ -110,13 +113,14 @@ public class PonySDKServer {
 
         context.addServlet(new ServletHolder(createBootstrapServlet()), MAPPING_BOOTSTRAP);
         context.addServlet(new ServletHolder(createStreamServiceServlet()), MAPPING_STREAM);
+        context.addServlet(new ServletHolder(createAjaxServlet()), MAPPING_AJAX);
         context.addServlet(new ServletHolder(createWebSocketServlet()), MAPPING_WS);
 
         final ServletContextFilter servletContextFilter = new ServletContextFilter();
         context.addFilter(new FilterHolder(servletContextFilter), MAPPING_BOOTSTRAP, EnumSet.of(DispatcherType.REQUEST));
 
         final SessionHandler sessionHandler = context.getSessionHandler();
-        sessionHandler.getSessionManager().setMaxInactiveInterval(60 * applicationManagerOption.getSessionTimeout());
+        sessionHandler.setMaxInactiveInterval(60 * applicationManagerOption.getSessionTimeout());
         sessionHandler.addEventListener(applicationLoader);
 
         return context;
@@ -180,6 +184,10 @@ public class PonySDKServer {
         return new StreamServiceServlet();
     }
 
+    protected AjaxServlet createAjaxServlet() {
+        return new AjaxServlet();
+    }
+
     protected WebSocketServlet createWebSocketServlet() {
         return new WebSocketServlet();
     }
@@ -190,6 +198,10 @@ public class PonySDKServer {
 
     public void setApplicationLoader(final ApplicationLoader applicationLoader) {
         this.applicationLoader = applicationLoader;
+    }
+
+    public ApplicationManagerOption getApplicationOption() {
+        return applicationLoader.getApplicationManagerOption();
     }
 
     public void setHost(final String host) {

@@ -72,8 +72,8 @@ import com.ponysdk.core.model.WidgetType;
  */
 public class PDecoratedPopupPanel extends PPopupPanel {
 
-    public PDecoratedPopupPanel(final int windowID, final boolean autoHide) {
-        super(windowID, autoHide);
+    protected PDecoratedPopupPanel(final boolean autoHide) {
+        super(autoHide);
     }
 
     @Override

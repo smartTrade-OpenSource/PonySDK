@@ -31,6 +31,9 @@ import com.ponysdk.core.model.WidgetType;
  */
 public class PFlowPanel extends PComplexPanel {
 
+    protected PFlowPanel() {
+    }
+
     @Override
     protected WidgetType getWidgetType() {
         return WidgetType.FLOW_PANEL;

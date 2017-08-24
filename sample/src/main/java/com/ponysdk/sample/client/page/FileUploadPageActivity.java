@@ -25,16 +25,12 @@ package com.ponysdk.sample.client.page;
 
 import java.io.IOException;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PFileUpload;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
-import com.ponysdk.core.ui.basic.event.PSubmitCompleteHandler;
-import com.ponysdk.core.ui.eventbus.StreamHandler;
 import com.ponysdk.core.ui.rich.PNotificationManager;
 
 public class FileUploadPageActivity extends SamplePageActivity {
@@ -47,45 +43,29 @@ public class FileUploadPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PVerticalPanel panel = new PVerticalPanel();
+        final PVerticalPanel panel = Element.newPVerticalPanel();
         panel.setSpacing(10);
 
-        final PFileUpload fileUpload = new PFileUpload();
+        final PFileUpload fileUpload = Element.newPFileUpload();
         fileUpload.setName("my_file");
-        fileUpload.addSubmitCompleteHandler(new PSubmitCompleteHandler() {
+        fileUpload.addSubmitCompleteHandler(() -> PNotificationManager.showTrayNotification(getView().asWidget().getWindow(),
+            "File uploaded, submit file '" + fileUpload.getFileName() + "'"));
 
-            @Override
-            public void onSubmitComplete() {
-                PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
-                        "File uploaded, submit file '" + fileUpload.getFileName() + "'");
+        fileUpload.addStreamHandler((request, response, uiContext) -> {
+            try {
+                response.setStatus(HttpServletResponse.SC_CREATED);
+                response.getWriter().print("The file was created successfully.");
+                response.flushBuffer();
+            } catch (final IOException e) {
+                e.printStackTrace();
             }
         });
 
-        fileUpload.addStreamHandler(new StreamHandler() {
-
-            @Override
-            public void onStream(final HttpServletRequest request, final HttpServletResponse response) {
-                try {
-                    response.setStatus(HttpServletResponse.SC_CREATED);
-                    response.getWriter().print("The file was created successfully.");
-                    response.flushBuffer();
-                } catch (final IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-
-        final PButton submitButton = new PButton("Upload File");
+        final PButton submitButton = Element.newPButton("Upload File");
         submitButton.showLoadingOnRequest(true);
         submitButton.setEnabledOnRequest(false);
 
-        submitButton.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                fileUpload.submit();
-            }
-        });
+        submitButton.addClickHandler(event -> fileUpload.submit());
 
         panel.add(fileUpload);
         panel.add(submitButton);

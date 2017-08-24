@@ -32,7 +32,7 @@ import com.ponysdk.core.model.WidgetType;
  */
 public class PFlexTable extends PHTMLTable<PFlexCellFormatter> {
 
-    public PFlexTable() {
+    protected PFlexTable() {
         super();
         setCellFormatter(new PFlexCellFormatter(this));
     }

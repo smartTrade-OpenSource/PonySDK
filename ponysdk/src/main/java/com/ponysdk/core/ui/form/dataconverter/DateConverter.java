@@ -23,12 +23,12 @@
 
 package com.ponysdk.core.ui.form.dataconverter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class DateConverter implements DataConverter<String, Date> {
 

@@ -24,6 +24,7 @@
 package com.ponysdk.core.model;
 
 public enum DomHandlerType {
+
     CLICK,
     DOUBLE_CLICK,
     MOUSE_OVER,
@@ -32,6 +33,7 @@ public enum DomHandlerType {
     MOUSE_OUT,
     MOUSE_DOWN,
     MOUSE_UP,
+    MOUSE_WHELL,
     FOCUS,
     BLUR,
     DRAG_ENTER,
@@ -43,7 +45,8 @@ public enum DomHandlerType {
     CONTEXT_MENU,
     CHANGE_HANDLER;
 
-    public byte getValue() {
+    public final byte getValue() {
         return (byte) ordinal();
     }
+
 }

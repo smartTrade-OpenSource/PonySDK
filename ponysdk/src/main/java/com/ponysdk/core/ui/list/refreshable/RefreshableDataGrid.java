@@ -23,35 +23,151 @@
 
 package com.ponysdk.core.ui.list.refreshable;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
-import com.ponysdk.core.ui.basic.PSimplePanel;
-import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.list.DataGridActivity;
 import com.ponysdk.core.ui.list.DataGridColumnDescriptor;
 import com.ponysdk.core.ui.list.SimpleListView;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
- * Extends {@link DataGridActivity} Capable of moving columns and refreshing a
- * set of rows instead of always refreshing the entire grid
+ * Extends {@link DataGridActivity} Capable of moving columns and refreshing a set of rows instead
+ * of always refreshing the entire grid
  *
  * @param <K>
  * @param <D>
  */
 public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
 
-    private final Map<K, Map<DataGridColumnDescriptor<K, D>, Cell<D, ? extends IsPWidget>>> cells = new HashMap<>();
-    private final List<K> keyByIndex = new ArrayList<>();
-    private final Map<K, D> valueByKey = new HashMap<>();
+    protected final Map<Integer, Map<DataGridColumnDescriptor<D, ?>, Cell<D, ? extends IsPWidget>>> cells = new HashMap<>();
+    protected final List<K> keyByIndex = new ArrayList<>();
 
     public RefreshableDataGrid(final SimpleListView listView) {
         super(listView);
+    }
+
+    public void setData(final int rowIndex, final K key, final D data) {
+        if (!cells.containsKey(rowIndex)) {
+            addData(rowIndex, key, data);
+        } else {
+            updateData(rowIndex, key, data);
+        }
+    }
+
+    private void addData(final int rowIndex, final K key, final D data) {
+        final Map<DataGridColumnDescriptor<D, ?>, Cell<D, ? extends IsPWidget>> map = new HashMap<>();
+        cells.put(rowIndex, map);
+        keyByIndex.add(key);
+
+        rows.add(data);
+        dataCount++;
+
+        int col = 0;
+
+        for (final DataGridColumnDescriptor descriptor : columnDescriptors) {
+            final Cell<D, IsPWidget> cell = new Cell<>();
+            cell.setData(data);
+            final IsPWidget widget = descriptor.getCellRenderer().render(rowIndex, descriptor.getValueProvider().getValue(data));
+            cell.setWidget(widget);
+            map.put(descriptor, cell);
+            view.addWidget(cell.getWidget(), col++, rowIndex + 1, 1);
+        }
+        view.addWidget(Element.newPSimplePanel(), col, rowIndex + 1, 1);
+    }
+
+    private void updateData(final int rowIndex, final K key, final D data) {
+        final int previousIndex = keyByIndex.indexOf(key);
+
+        if (previousIndex != -1) {
+            if (rowIndex == previousIndex) {
+                rows.set(previousIndex, data);
+                keyByIndex.set(previousIndex, key);
+            } else {
+                rows.remove(previousIndex);
+                keyByIndex.remove(previousIndex);
+
+                if (rowIndex < rows.size()) {
+                    rows.set(rowIndex, data);
+                    keyByIndex.set(rowIndex, key);
+                } else {
+                    rows.add(rowIndex, data);
+                    keyByIndex.add(rowIndex, key);
+                }
+            }
+        } else {
+            if (rowIndex < rows.size()) {
+                rows.set(rowIndex, data);
+                keyByIndex.set(rowIndex, key);
+            } else {
+                rows.add(rowIndex, data);
+                keyByIndex.add(rowIndex, key);
+            }
+        }
+
+        final Map<DataGridColumnDescriptor<D, ?>, Cell<D, ? extends IsPWidget>> map = cells.get(rowIndex);
+        for (final DataGridColumnDescriptor descriptor : columnDescriptors) {
+            final Cell<D, ? extends IsPWidget> current = map.get(descriptor);
+            descriptor.getCellRenderer().update(descriptor.getValueProvider().getValue(data), current);
+            current.setData(data);
+        }
+    }
+
+    public int getViewRowDataIndex(final D data) {
+        return rows.indexOf(data);
+    }
+
+    public D getViewData(final int row) {
+        final Map<DataGridColumnDescriptor<D, ?>, Cell<D, ? extends IsPWidget>> map = cells.get(row);
+        return map != null ? map.values().iterator().next().getData() : null;
+    }
+
+    public void moveColumn(final int from, final int to) {
+        if (from != to) {
+            final DataGridColumnDescriptor<D, ?> object = columnDescriptors.remove(from);
+            columnDescriptors.add(to, object);
+            view.moveColumn(from, to);
+        }
+    }
+
+    public int removeByKey(final K key) {
+        final int removed = keyByIndex.indexOf(key);
+        if (removed != -1) remove(removed);
+        return removed;
+    }
+
+    @Override
+    public void remove(final int rowIndex) {
+        super.remove(rowIndex);
+
+        cells.remove(rowIndex);
+        keyByIndex.remove(rowIndex);
+
+        // update model
+        for (int i = rowIndex; i < rows.size(); i++) {
+            final Map<DataGridColumnDescriptor<D, ?>, Cell<D, ? extends IsPWidget>> cellRow = cells.get(i);
+            if (cellRow != null) {
+                for (final Cell<D, ? extends IsPWidget> entry : cellRow.values()) {
+                    entry.setRow(i);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void clear() {
+        view.clear(1);
+        keyByIndex.clear();
+        cells.clear();
+        rows.clear();
+    }
+
+    @Override
+    public void setData(final int row, final D data) {
+        throw new RuntimeException("Use setData(key, data)");
     }
 
     @Override
@@ -60,158 +176,8 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
     }
 
     @Override
-    public void addData(final D data) {
-        throw new RuntimeException("Use setData(key, data)");
-    }
-
-    @Override
     public void remove(final D data) {
         throw new RuntimeException("Use removeByKey(key)");
-    }
-
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void setData(final K key, final D data) {
-        Map<DataGridColumnDescriptor<K, D>, Cell<D, ? extends IsPWidget>> map = cells.get(key);
-        if (map == null) {
-            final int row = getRowCount();
-            map = new HashMap<>();
-            cells.put(key, map);
-            keyByIndex.add(key);
-
-            rows.add(data);
-            dataCount++;
-
-            valueByKey.put(key, data);
-
-            int col = 0;
-
-            for (final DataGridColumnDescriptor descriptor : columnDescriptors) {
-                final Cell cell = new Cell();
-                cell.setCol(col++);
-                cell.setData(data);
-                cell.setRow(row);
-                cell.setValue(descriptor.getValueProvider().getValue(data));
-                cell.setWidget(descriptor.getCellRenderer().render(row, cell.getValue()));
-                map.put(descriptor, cell);
-                view.addWidget(cell.getWidget(), cell.getCol(), cell.getRow() + 1, 1);
-            }
-            view.addWidget(new PSimplePanel(), col, row + 1, 1);
-        } else {
-            final D previousData = valueByKey.remove(key);
-            final int previousIndex = rows.indexOf(previousData);
-            rows.remove(previousIndex);
-            rows.add(previousIndex, data);
-            valueByKey.put(key, data);
-
-            for (final DataGridColumnDescriptor descriptor : columnDescriptors) {
-                final Object value = descriptor.getValueProvider().getValue(data);
-                descriptor.getCellRenderer().update(value, map.get(descriptor));
-                map.get(descriptor).setData(data);
-                map.get(descriptor).setValue(value);
-            }
-        }
-    }
-
-    public void removeByKey(final K key) {
-        final D removed = valueByKey.get(key);
-        if (removed != null) {
-            super.remove(removed);
-        }
-    }
-
-    @Override
-    public void remove(final int index) {
-        super.remove(index);
-
-        final K k = keyByIndex.remove(index);
-        if (k != null) {
-            valueByKey.remove(k);
-            cells.remove(k);
-        }
-
-        updateRowIndex(index);
-    }
-
-    @Override
-    protected void updateRowIndex(final int min) {
-        // update model
-        for (int i = min; i < rows.size(); i++) {
-            final K k = keyByIndex.get(i);
-            if (k != null) {
-                final Map<DataGridColumnDescriptor<K, D>, Cell<D, ? extends IsPWidget>> cellRow = cells.get(k);
-                for (final Entry<DataGridColumnDescriptor<K, D>, Cell<D, ? extends IsPWidget>> entry : cellRow
-                        .entrySet()) {
-                    entry.getValue().setRow(i);
-                }
-            }
-        }
-    }
-
-    @Override
-    public void insertRow(final int row, final int column, final int colSpan, final PWidget widget) {
-        keyByIndex.add(row, null);
-        super.insertRow(row, column, colSpan, widget);
-    }
-
-    public void moveRow(final K key, final int beforeIndex) {
-        final Map<DataGridColumnDescriptor<K, D>, Cell<D, ? extends IsPWidget>> map = cells.get(key);
-        if (map == null) throw new IndexOutOfBoundsException("cell not found");
-
-        final Cell<D, ? extends IsPWidget> cell = map.entrySet().iterator().next().getValue();
-        final int realRow = cell.getRow();
-
-        if (realRow == beforeIndex) return;
-
-        view.moveRow(realRow + 1, beforeIndex + 1);
-
-        final D data = valueByKey.get(key);
-        final int row = getDataIndex(data);
-
-        keyByIndex.remove(row);
-        keyByIndex.add(beforeIndex, key);
-
-        // permutation
-        rows.remove(row);
-        rows.add(beforeIndex, cell.getData());
-
-        final int min = Math.min(row, beforeIndex);
-        updateRowIndex(min);
-    }
-
-    public void moveColumn(final int index, final int beforeIndex) {
-        throw new RuntimeException("not yet implemented");
-    }
-
-    public int getRow(final K key) {
-        final Map<DataGridColumnDescriptor<K, D>, Cell<D, ? extends IsPWidget>> map = cells.get(key);
-        if (map == null) return -1;
-        return map.entrySet().iterator().next().getValue().getRow();
-    }
-
-    @SuppressWarnings("unchecked")
-    public <W extends IsPWidget> Collection<Cell<D, W>> getColumn(final DataGridColumnDescriptor<D, ?> descriptor) {
-        final List<Cell<D, W>> c = new ArrayList<>();
-        final Collection<Map<DataGridColumnDescriptor<K, D>, Cell<D, ? extends IsPWidget>>> values = cells
-                .values();
-        for (final Map<DataGridColumnDescriptor<K, D>, Cell<D, ? extends IsPWidget>> map : values) {
-            final Cell<D, W> cell = (Cell<D, W>) map.get(descriptor);
-            if (cell != null) c.add(cell);
-        }
-        return c;
-    }
-
-    public D getData(final K key) {
-        final Map<DataGridColumnDescriptor<K, D>, Cell<D, ? extends IsPWidget>> map = cells.get(key);
-        if (map == null) return null;
-        return map.entrySet().iterator().next().getValue().getData();
-    }
-
-    @Override
-    public void clear() {
-        view.clear(1);
-        cells.clear();
-        keyByIndex.clear();
-        valueByKey.clear();
     }
 
 }

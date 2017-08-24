@@ -27,7 +27,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.server.AlreadyDestroyedApplication;
 import com.ponysdk.core.writer.ModelWriter;
 
 public class Txn {
@@ -48,8 +48,9 @@ public class Txn {
         return txn;
     }
 
-    public static ModelWriter getWriter() {
-        return get().getWriter0();
+    public final ModelWriter getWriter() {
+        if (txnContext != null) return txnContext.getWriter();
+        else throw new AlreadyDestroyedApplication("TxnContext destroyed");
     }
 
     public void begin(final TxnContext txnContext) {
@@ -73,23 +74,7 @@ public class Txn {
     }
 
     public void flush() {
-        try {
-            txnContext.flush();
-        } catch (final Exception e) {
-            // final String msg = "Cannot send instructions to the browser,
-            // Session ID #" +
-            // uiContext.getSession().getId();
-            // throw new RuntimeException(msg);
-            // throw new RuntimeException("TMP", e);
-        }
-    }
-
-    private ModelWriter getWriter0() {
-        return txnContext.getWriter();
-    }
-
-    public Parser getParser() {
-        return txnContext.getParser();
+        txnContext.flush();
     }
 
     public void addTxnListener(final TxnListener txnListener) {

@@ -38,6 +38,9 @@ public abstract class PComposite<T extends PWidget> extends PWidget {
 
     protected T widget;
 
+    protected PComposite() {
+    }
+
     @Override
     protected WidgetType getWidgetType() {
         return WidgetType.COMPOSITE;
@@ -49,8 +52,7 @@ public abstract class PComposite<T extends PWidget> extends PWidget {
         child.removeFromParent();
         this.widget = child;
         child.setParent(this);
-
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.WIDGET_ID, child.getID()));
+        saveUpdate(writer -> writer.write(ServerToClientModel.WIDGET_ID, child.getID()));
     }
 
 }

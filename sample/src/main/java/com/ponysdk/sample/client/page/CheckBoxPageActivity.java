@@ -23,8 +23,8 @@
 
 package com.ponysdk.sample.client.page;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PCheckBox;
-import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
@@ -40,37 +40,37 @@ public class CheckBoxPageActivity extends SamplePageActivity implements PValueCh
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PVerticalPanel panel = new PVerticalPanel();
+        final PVerticalPanel panel = Element.newPVerticalPanel();
         panel.setSpacing(10);
 
-        panel.add(new PLabel("Check all days that you are available:"));
+        panel.add(Element.newPLabel("Check all days that you are available:"));
 
-        final PCheckBox monday = new PCheckBox("Monday");
+        final PCheckBox monday = Element.newPCheckBox("Monday");
         monday.addValueChangeHandler(this);
         panel.add(monday);
 
-        final PCheckBox tuesday = new PCheckBox("Tuesday");
+        final PCheckBox tuesday = Element.newPCheckBox("Tuesday");
         tuesday.addValueChangeHandler(this);
         panel.add(tuesday);
 
-        final PCheckBox wednesday = new PCheckBox("Wednesday");
+        final PCheckBox wednesday = Element.newPCheckBox("Wednesday");
         wednesday.addValueChangeHandler(this);
         panel.add(wednesday);
 
-        final PCheckBox thursday = new PCheckBox("Thursday");
+        final PCheckBox thursday = Element.newPCheckBox("Thursday");
         thursday.addValueChangeHandler(this);
         panel.add(thursday);
 
-        final PCheckBox friday = new PCheckBox("Friday");
+        final PCheckBox friday = Element.newPCheckBox("Friday");
         friday.addValueChangeHandler(this);
         panel.add(friday);
 
-        final PCheckBox saturday = new PCheckBox("Saturday");
+        final PCheckBox saturday = Element.newPCheckBox("Saturday");
         saturday.addValueChangeHandler(this);
         saturday.setEnabled(false);
         panel.add(saturday);
 
-        final PCheckBox sunday = new PCheckBox("Sunday");
+        final PCheckBox sunday = Element.newPCheckBox("Sunday");
         sunday.addValueChangeHandler(this);
         sunday.setEnabled(false);
         panel.add(sunday);
@@ -81,7 +81,7 @@ public class CheckBoxPageActivity extends SamplePageActivity implements PValueCh
     @Override
     public void onValueChange(final PValueChangeEvent<Boolean> event) {
         final PCheckBox checkBox = (PCheckBox) event.getSource();
-        PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
-                checkBox.getText() + (event.getValue() ? " is checked" : " is unchecked"));
+        PNotificationManager.showTrayNotification(getView().asWidget().getWindow(),
+            checkBox.getText() + (event.getData() ? " is checked" : " is unchecked"));
     }
 }

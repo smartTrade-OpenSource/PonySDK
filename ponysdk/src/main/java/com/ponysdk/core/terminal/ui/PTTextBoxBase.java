@@ -23,8 +23,6 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.TextBoxBase;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -42,28 +40,25 @@ public abstract class PTTextBoxBase<T extends TextBoxBase> extends PTValueBoxBas
     }
 
     private void addHandler(final UIBuilder uiService) {
-        uiObject.addValueChangeHandler(new ValueChangeHandler<String>() {
-
-            @Override
-            public void onValueChange(final ValueChangeEvent<String> event) {
-                final PTInstruction eventInstruction = new PTInstruction(getObjectID());
-                eventInstruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE, event.getValue());
-                uiService.sendDataToServer(uiObject, eventInstruction);
-            }
+        uiObject.addValueChangeHandler(event -> {
+            final PTInstruction eventInstruction = new PTInstruction(getObjectID());
+            eventInstruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE, event.getValue());
+            uiService.sendDataToServer(uiObject, eventInstruction);
         });
     }
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.TEXT.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.TEXT.ordinal() == modelOrdinal) {
             uiObject.setText(binaryModel.getStringValue());
             return true;
-        }
-        if (ServerToClientModel.PLACEHOLDER.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.PLACEHOLDER.ordinal() == modelOrdinal) {
             uiObject.getElement().setAttribute("placeholder", binaryModel.getStringValue());
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
 
 }

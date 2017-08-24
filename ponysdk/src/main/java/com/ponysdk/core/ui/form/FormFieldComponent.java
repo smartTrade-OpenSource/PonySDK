@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.ui.form;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.form.formfield.FormField;
@@ -38,7 +39,7 @@ public class FormFieldComponent extends PFlowPanel implements FormFieldListener,
 
     protected final FormField formField;
 
-    protected PFlowPanel container = new PFlowPanel();
+    protected PFlowPanel container = Element.newPFlowPanel();
     protected PLabel captionLabel;
     protected PLabel errorLabel;
 
@@ -76,13 +77,13 @@ public class FormFieldComponent extends PFlowPanel implements FormFieldListener,
     }
 
     protected void buildErrorLabel() {
-        errorLabel = new PLabel();
+        errorLabel = Element.newPLabel();
         errorLabel.addStyleName("error-label");
         container.add(errorLabel);
     }
 
     protected void buildCaption(final String caption) {
-        captionLabel = new PLabel();
+        captionLabel = Element.newPLabel();
         captionLabel.addStyleName("caption");
         captionLabel.setVisible(false);
         setCaption(caption);

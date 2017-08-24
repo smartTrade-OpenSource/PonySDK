@@ -23,11 +23,10 @@
 
 package com.ponysdk.sample.client.page;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PFlexTable;
 import com.ponysdk.core.ui.basic.PListBox;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.rich.PNotificationManager;
 
 public class ListBoxPageActivity extends SamplePageActivity {
@@ -40,9 +39,9 @@ public class ListBoxPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PFlexTable table = new PFlexTable();
+        final PFlexTable table = Element.newPFlexTable();
 
-        final PListBox listBoxCategory = new PListBox();
+        final PListBox listBoxCategory = Element.newPListBox();
         listBoxCategory.addItem("Test1");
         listBoxCategory.addItem("Test2");
         listBoxCategory.addItem("Test3");
@@ -56,35 +55,27 @@ public class ListBoxPageActivity extends SamplePageActivity {
         table.setWidth("100%");
         table.setWidget(0, 0, listBoxCategory);
 
-        final PListBox roleListBox = new PListBox(false);
+        final PListBox roleListBox = Element.newPListBox(false);
         roleListBox.setMultipleSelect(true);
         roleListBox.setVisibleItemCount(5);
         for (int i = 0; i < 10; i++) {
             roleListBox.addItem("Role" + i, i);
         }
 
-        final PButton selectedRole = new PButton("Selected roles [1,2]");
-        selectedRole.addClickHandler(new PClickHandler() {
+        final PButton selectedRole = Element.newPButton("Selected roles [1,2]");
+        selectedRole.addClickHandler(event -> {
+            roleListBox.setSelectedValue(1);
+            roleListBox.setSelectedValue(2);
 
-            @Override
-            public void onClick(final PClickEvent event) {
-                roleListBox.setSelectedValue(1);
-                roleListBox.setSelectedValue(2);
-
-                PNotificationManager.showHumanizedNotification(getView().asWidget().getWindowID(),
-                        "Selected items " + roleListBox.getSelectedItems());
-            }
+            PNotificationManager.showHumanizedNotification(getView().asWidget().getWindow(),
+                "Selected items " + roleListBox.getSelectedItems());
         });
-        final PButton unSelectedRole = new PButton("Selected roles [1,2]");
-        unSelectedRole.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                roleListBox.setSelectedValue(1, false);
-                roleListBox.setSelectedValue(2, false);
-                PNotificationManager.showHumanizedNotification(getView().asWidget().getWindowID(),
-                        "Unselected items " + roleListBox.getSelectedItems());
-            }
+        final PButton unSelectedRole = Element.newPButton("Selected roles [1,2]");
+        unSelectedRole.addClickHandler(event -> {
+            roleListBox.setSelectedValue(1, false);
+            roleListBox.setSelectedValue(2, false);
+            PNotificationManager.showHumanizedNotification(getView().asWidget().getWindow(),
+                "Unselected items " + roleListBox.getSelectedItems());
         });
         table.setWidget(1, 0, roleListBox);
         table.setWidget(1, 1, selectedRole);

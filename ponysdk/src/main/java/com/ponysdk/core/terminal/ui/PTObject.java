@@ -36,16 +36,14 @@ public interface PTObject {
 
     void add(final ReaderBuffer buffer, final PTObject ptObject);
 
-    void remove(final ReaderBuffer buffer, final PTObject ptObject, final UIBuilder uiService);
+    void remove(final ReaderBuffer buffer, final PTObject ptObject);
 
-    void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService);
+    void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel);
 
-    void removeHandler(final ReaderBuffer buffer, final UIBuilder uiService);
+    void removeHandler(final ReaderBuffer buffer, final HandlerModel handlerModel);
 
-    void gc(final UIBuilder uiService);
+    void destroy();
 
     int getObjectID();
-
-    PTWidget<?> isPTWidget();
 
 }

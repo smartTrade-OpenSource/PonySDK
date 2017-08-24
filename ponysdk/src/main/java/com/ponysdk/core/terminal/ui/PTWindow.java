@@ -36,100 +36,117 @@ import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 import elemental.client.Browser;
-import elemental.events.Event;
-import elemental.events.EventListener;
+import elemental.html.Uint8Array;
 import elemental.html.Window;
 
-public class PTWindow extends AbstractPTObject {
+public class PTWindow extends AbstractPTObject implements PostMessageHandler {
 
     private static final Logger log = Logger.getLogger(PTWindow.class.getName());
 
     private static final String EMPTY = "";
 
     private Window window;
-    private String url;
-    private String name;
+    private String url = EMPTY;
+    private String name = EMPTY;
     private String features;
 
-    private UIBuilder uiService;
-
-    private boolean ponySDKStarted = false;
+    private boolean ready = false;
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder builder) {
-        super.create(buffer, objectId, builder);
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
+        super.create(buffer, objectId, uiBuilder);
 
-        if (log.isLoggable(Level.INFO)) log.log(Level.INFO, "PTWindowID created : " + objectID);
+        if (log.isLoggable(Level.INFO)) log.log(Level.INFO, "Create PTWindow #" + objectID);
 
-        uiService = builder;
+        final boolean relative = buffer.readBinaryModel().getBooleanValue();
 
-        url = buffer.readBinaryModel().getStringValue();
-        if (url == null)
-            url = GWT.getHostPageBaseURL() + "?" +
-                    ClientToServerModel.WINDOW_ID.toStringValue() + "=" + objectId + "&" +
-                    ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "=" + PonySDK.uiContextId;
+        final String rawUrl = buffer.readBinaryModel().getStringValue();
+        url = rawUrl != null ? rawUrl : EMPTY;
 
-        name = buffer.readBinaryModel().getStringValue();
-        if (name == null)
-            name = EMPTY;
-        features = buffer.readBinaryModel().getStringValue();
-        if (features == null)
-            features = EMPTY;
+        final String rawName = buffer.readBinaryModel().getStringValue();
+        name = rawName != null ? rawName : EMPTY;
+
+        final String rawFeatures = buffer.readBinaryModel().getStringValue();
+        features = rawFeatures != null ? rawFeatures : EMPTY;
+
+        if (relative) {
+            url = GWT.getHostPageBaseURL() + url + "?" + ClientToServerModel.WINDOW_ID.toStringValue() + "=" + objectId + "&"
+                    + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "=" + PonySDK.get().getContextId();
+        }
 
         PTWindowManager.get().register(this);
     }
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.OPEN.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.OPEN.ordinal() == modelOrdinal) {
             window = Browser.getWindow().open(url, name, features);
-            window.setOnbeforeunload(new EventListener() {
-
-                @Override
-                public void handleEvent(final Event event) {
-                    final PTInstruction instruction = new PTInstruction(objectID);
-                    instruction.put(ClientToServerModel.HANDLER_CLOSE);
-                    uiService.sendDataToServer(instruction);
-                    PTWindowManager.get().unregister(PTWindow.this);
-                }
-            });
+            window.setOnunload(event -> onClose());
             return true;
-        } else if (ServerToClientModel.PRINT.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.PRINT.ordinal() == modelOrdinal) {
             window.print();
             return true;
-        } else if (ServerToClientModel.WINDOW_TITLE.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.WINDOW_TITLE.ordinal() == modelOrdinal) {
             setTitle(binaryModel.getStringValue(), window);
             return true;
-        } else if (ServerToClientModel.CLOSE.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.WINDOW_LOCATION_REPLACE.ordinal() == modelOrdinal) {
+            window.getLocation().replace(binaryModel.getStringValue());
+            return true;
+        } else if (ServerToClientModel.CLOSE.ordinal() == modelOrdinal) {
             close(false);
             return true;
+        } else {
+            return false;
         }
-        return false;
     }
 
     public void close(final boolean forced) {
         window.close();
     }
 
-    public void postMessage(final ReaderBuffer buffer) {
-        window.postMessage(buffer.getMessage(), "*");
+    @Override
+    public void postMessage(final Uint8Array buffer) {
+        if (ready && window.isClosed()) onClose();
+
+        if (ready) window.postMessage(buffer, "*");
     }
 
+    @Override
     public void setReady() {
-        ponySDKStarted = true;
-        setTitle(name, window);//workaround to set title on google chrome
+        ready = true;
+        setTitle(name, window); // WORKAROUND : Set title for Google Chrome
 
         final PTInstruction instruction = new PTInstruction(objectID);
         instruction.put(ClientToServerModel.HANDLER_OPEN, url);
-        uiService.sendDataToServer(instruction);
+        uiBuilder.sendDataToServer(instruction);
     }
 
+    @Override
     public boolean isReady() {
-        return ponySDKStarted;
+        return ready;
     }
 
     public final native void setTitle(String title, Window window) /*-{
                                                                    window.document.title = title;
                                                                    }-*/;
+
+    protected void onClose() {
+        if (ready && window != null) {
+            ready = false;
+            window = null;
+            PTWindowManager.get().unregister(PTWindow.this);
+
+            final PTInstruction instruction = new PTInstruction(objectID);
+            instruction.put(ClientToServerModel.HANDLER_CLOSE);
+            uiBuilder.sendDataToServer(instruction);
+
+            if (log.isLoggable(Level.INFO)) log.log(Level.INFO, "Close PTWindow #" + objectID);
+        }
+    }
+
+    public boolean isClosed() {
+        return window == null || window.isClosed();
+    }
 
 }

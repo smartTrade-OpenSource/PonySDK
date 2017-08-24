@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,12 +23,10 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.impl.webapplication.page.place.PagePlace;
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PAnchor;
-import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.impl.webapplication.page.place.PagePlace;
 
 public class HyperlinkPageActivity extends SamplePageActivity {
 
@@ -40,59 +38,29 @@ public class HyperlinkPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PVerticalPanel panel = new PVerticalPanel();
+        final PVerticalPanel panel = Element.newPVerticalPanel();
         panel.setSpacing(10);
 
-        panel.add(new PLabel("Choose a section:"));
+        panel.add(Element.newPLabel("Choose a section:"));
 
-        final PAnchor checkBoxAnchor = new PAnchor("CheckBox");
-        checkBoxAnchor.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                goTo(new PagePlace("CheckBox"));
-            }
-        });
+        final PAnchor checkBoxAnchor = Element.newPAnchor("CheckBox");
+        checkBoxAnchor.addClickHandler(event -> goTo(new PagePlace("CheckBox")));
         panel.add(checkBoxAnchor);
 
-        final PAnchor radioButtonAnchor = new PAnchor("RadioButton");
-        radioButtonAnchor.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                goTo(new PagePlace("Radio Button"));
-            }
-        });
+        final PAnchor radioButtonAnchor = Element.newPAnchor("RadioButton");
+        radioButtonAnchor.addClickHandler(event -> goTo(new PagePlace("Radio Button")));
         panel.add(radioButtonAnchor);
 
-        final PAnchor basicButtonAnchor = new PAnchor("BasicButton");
-        basicButtonAnchor.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                goTo(new PagePlace("Basic Button"));
-            }
-        });
+        final PAnchor basicButtonAnchor = Element.newPAnchor("BasicButton");
+        basicButtonAnchor.addClickHandler(event -> goTo(new PagePlace("Basic Button")));
         panel.add(basicButtonAnchor);
 
-        final PAnchor customButtonAnchor = new PAnchor("CustomButton");
-        customButtonAnchor.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                goTo(new PagePlace("Custom Button"));
-            }
-        });
+        final PAnchor customButtonAnchor = Element.newPAnchor("CustomButton");
+        customButtonAnchor.addClickHandler(event -> goTo(new PagePlace("Custom Button")));
         panel.add(customButtonAnchor);
 
-        final PAnchor fileUpload = new PAnchor("FileUpload");
-        fileUpload.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                goTo(new PagePlace("File Upload"));
-            }
-        });
+        final PAnchor fileUpload = Element.newPAnchor("FileUpload");
+        fileUpload.addClickHandler(event -> goTo(new PagePlace("File Upload")));
         panel.add(fileUpload);
 
         examplePanel.setWidget(panel);

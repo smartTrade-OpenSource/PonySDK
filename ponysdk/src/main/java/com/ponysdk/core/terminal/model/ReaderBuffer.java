@@ -32,7 +32,7 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.ValueTypeModel;
 
 import elemental.client.Browser;
-import elemental.html.ArrayBuffer;
+import elemental.html.ArrayBufferView;
 import elemental.html.Uint8Array;
 import elemental.html.Window;
 
@@ -44,112 +44,158 @@ public class ReaderBuffer {
 
     private static final ServerToClientModel[] SERVER_TO_CLIENT_MODELS = ServerToClientModel.values();
 
-    private final ArrayBuffer message;
-    private final Window window;
+    private final BinaryModel currentBinaryModel;
+
+    private Uint8Array buffer;
+
     private int position;
-    private final Uint8Array array;
 
-    public ReaderBuffer(final ArrayBuffer message) {
-        this.message = message;
-        this.window = Browser.getWindow();
+    private int size;
 
-        this.array = window.newUint8Array(message, 0, message.getByteLength());
+    private Window window;
+
+    public ReaderBuffer() {
+        this.currentBinaryModel = new BinaryModel();
     }
 
-    private static native String fromCharCode(ArrayBuffer buf) /*-{return $wnd.decode(buf);}-*/;
+    public void init(final Uint8Array buffer) {
+        if (this.buffer != null && hasRemaining()) {
+            if (this.window == null) this.window = Browser.getWindow();
+            final int remaningBufferSize = this.size - this.position;
+            final Uint8Array mergedBuffer = window.newUint8Array(remaningBufferSize + buffer.getByteLength());
+            mergedBuffer.setElements(this.buffer.subarray(this.position), 0);
+            mergedBuffer.setElements(buffer, remaningBufferSize);
 
-    public int getIndex() {
+            this.buffer = mergedBuffer;
+        } else {
+            this.buffer = buffer;
+        }
+
+        this.position = 0;
+        this.size = this.buffer.getByteLength();
+    }
+
+    private static native String fromCharCode(ArrayBufferView buffer) /*-{return $wnd.decode(buffer);}-*/;
+
+    public int getPosition() {
         return position;
     }
 
     public BinaryModel readBinaryModel() {
-        if (!hasRemaining()) return BinaryModel.NULL;
         final ServerToClientModel key = SERVER_TO_CLIENT_MODELS[getShort()];
         int size = ValueTypeModel.SHORT.getSize();
 
-        switch (key.getTypeModel()) {
+        final ValueTypeModel typeModel = key.getTypeModel();
+        switch (typeModel) {
             case NULL:
-                size += key.getTypeModel().getSize();
-                return new BinaryModel(key, size);
+                size += typeModel.getSize();
+                currentBinaryModel.init(key, size);
+                break;
             case BOOLEAN:
-                size += key.getTypeModel().getSize();
-                return new BinaryModel(key, getBoolean(), size);
+                size += typeModel.getSize();
+                currentBinaryModel.init(key, getBoolean(), size);
+                break;
             case BYTE:
-                size += key.getTypeModel().getSize();
-                return new BinaryModel(key, getByte(), size);
+                size += typeModel.getSize();
+                currentBinaryModel.init(key, getByte(), size);
+                break;
             case SHORT:
-                size += key.getTypeModel().getSize();
-                return new BinaryModel(key, getShort(), size);
+                size += typeModel.getSize();
+                currentBinaryModel.init(key, getShort(), size);
+                break;
             case INTEGER:
-                size += key.getTypeModel().getSize();
-                return new BinaryModel(key, getInt(), size);
+                size += typeModel.getSize();
+                currentBinaryModel.init(key, getInt(), size);
+                break;
             case LONG:
                 // TODO Read really a long
                 // return new BinaryModel(key, getLong(), size);
                 size += ValueTypeModel.INTEGER.getSize();
                 final int messageLongSize = getInt();
                 size += messageLongSize;
-                return new BinaryModel(key, Long.parseLong(getString(messageLongSize)), size);
+                currentBinaryModel.init(key, Long.parseLong(getString(messageLongSize)), size);
+                break;
             case DOUBLE:
                 // TODO Read really a double
                 // return new BinaryModel(key, getDouble(), size);
                 size += ValueTypeModel.INTEGER.getSize();
                 final int messageDoubleSize = getInt();
                 size += messageDoubleSize;
-                return new BinaryModel(key, Double.parseDouble(getString(messageDoubleSize)), size);
+                currentBinaryModel.init(key, Double.parseDouble(getString(messageDoubleSize)), size);
+                break;
             case STRING:
                 size += ValueTypeModel.INTEGER.getSize();
                 final int messageSize = getInt();
                 size += messageSize;
-                return new BinaryModel(key, getString(messageSize), size);
+                currentBinaryModel.init(key, getString(messageSize), size);
+                break;
             case JSON_OBJECT:
                 size += ValueTypeModel.INTEGER.getSize();
                 final int jsonSize = getInt();
                 size += jsonSize;
-                return new BinaryModel(key, getJson(jsonSize), size);
+                currentBinaryModel.init(key, getJson(jsonSize), size);
+                break;
             default:
-                throw new IllegalArgumentException("Unknown type model : " + key.getTypeModel());
+                throw new IllegalArgumentException("Unknown type model : " + typeModel);
         }
+
+        return currentBinaryModel;
     }
 
     private boolean getBoolean() {
         final int size = ValueTypeModel.BOOLEAN.getSize();
-        final boolean result = array.intAt(position) == TRUE;
-        position += size;
-        return result;
+        if (hasEnoughRemainingBytes(size)) {
+            final boolean result = buffer.intAt(position) == TRUE;
+            position += size;
+            return result;
+        } else {
+            throw new ArrayIndexOutOfBoundsException();
+        }
     }
 
     private byte getByte() {
         final int size = ValueTypeModel.BYTE.getSize();
-        final byte result = (byte) array.intAt(position);
-        position += size;
-        return result;
+        if (hasEnoughRemainingBytes(size)) {
+            final byte result = (byte) buffer.intAt(position);
+            position += size;
+            return result;
+        } else {
+            throw new ArrayIndexOutOfBoundsException();
+        }
     }
 
     private short getShort() {
         final int size = ValueTypeModel.SHORT.getSize();
+        if (hasEnoughRemainingBytes(size)) {
 
-        int result = 0;
-        for (int i = position; i < position + size; i++) {
-            result = (result << 8) + array.intAt(i);
+            int result = 0;
+            for (int i = position; i < position + size; i++) {
+                result = (result << 8) + buffer.intAt(i);
+            }
+
+            position += size;
+
+            return (short) result;
+        } else {
+            throw new ArrayIndexOutOfBoundsException();
         }
-
-        position += size;
-
-        return (short) result;
     }
 
     private int getInt() {
         final int size = ValueTypeModel.INTEGER.getSize();
+        if (hasEnoughRemainingBytes(size)) {
 
-        int result = 0;
-        for (int i = position; i < position + size; i++) {
-            result = (result << 8) + array.intAt(i);
+            int result = 0;
+            for (int i = position; i < position + size; i++) {
+                result = (result << 8) + buffer.intAt(i);
+            }
+
+            position += size;
+
+            return result;
+        } else {
+            throw new ArrayIndexOutOfBoundsException();
         }
-
-        position += size;
-
-        return result;
     }
 
     private JSONObject getJson(final int msgSize) {
@@ -161,11 +207,15 @@ public class ReaderBuffer {
         }
     }
 
-    private String getString(final int end) {
-        if (end != 0) {
-            final String result = fromCharCode(message.slice(position, position + end));
-            position += end;
-            return result;
+    private String getString(final int size) {
+        if (size != 0) {
+            if (hasEnoughRemainingBytes(size)) {
+                final String result = fromCharCode(buffer.subarray(position, position + size));
+                position += size;
+                return result;
+            } else {
+                throw new ArrayIndexOutOfBoundsException();
+            }
         } else {
             return null;
         }
@@ -175,33 +225,81 @@ public class ReaderBuffer {
         position -= binaryModel.getSize();
     }
 
+    private boolean hasEnoughRemainingBytes(final int blockSize) {
+        return position + blockSize <= size;
+    }
+
     public boolean hasRemaining() {
-        return position < message.getByteLength();
+        return position < size;
     }
 
     /**
      * Go directly to the next block
+     *
+     * @param dryRun
+     *            If true, not really shift
+     * @return Start position of the next block
      */
-    public void avoidBlock() {
-        boolean result = false;
-        while (!result && hasRemaining()) {
-            final BinaryModel binaryModel = readBinaryModel();
-            log.warning("Consume " + binaryModel + " on null PTObject");
-            result = ServerToClientModel.WINDOW_ID.equals(binaryModel.getModel()) || binaryModel.isBeginKey();
-            if (result) rewind(binaryModel);
+    public int shiftNextBlock(final boolean dryRun) {
+        final int startPosition = position;
+        int endPosition = -1;
+        while (hasRemaining()) {
+            try {
+                if (ServerToClientModel.END.equals(shiftBinaryModel())) {
+                    endPosition = position;
+                    break;
+                }
+            } catch (final ArrayIndexOutOfBoundsException e) {
+                // No more enough bytes
+                break;
+            }
         }
+
+        // No end found, it's a split message, so we rewind
+        // If it's a dry run, we rewind all the time
+        if (endPosition == -1 || dryRun) position = startPosition;
+
+        return endPosition;
     }
 
-    public ArrayBuffer getMessage() {
-        return message;
+    private final ServerToClientModel shiftBinaryModel() {
+        final ServerToClientModel key = SERVER_TO_CLIENT_MODELS[getShort()];
+
+        final ValueTypeModel typeModel = key.getTypeModel();
+        switch (typeModel) {
+            case NULL:
+                break;
+            case BOOLEAN:
+            case BYTE:
+            case SHORT:
+            case INTEGER:
+                position += typeModel.getSize();
+                break;
+            case LONG:
+            case DOUBLE:
+            case STRING:
+            case JSON_OBJECT:
+                final int jsonSize = getInt();
+                position += jsonSize;
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown type model : " + typeModel);
+        }
+
+        return key;
+    }
+
+    /**
+     * Slice the array [startPosition, endPosition[
+     */
+    public Uint8Array slice(final int startPosition, final int endPosition) {
+        position = endPosition;
+        return buffer.subarray(startPosition, endPosition);
     }
 
     @Override
     public String toString() {
-        return "ReaderBuffer {" +
-                "window=" + window.getName() +
-                ", position=" + position +
-                "}";
+        return "Buffer " + hashCode() + " ; position = " + position + " ; size = " + size;
     }
 
 }

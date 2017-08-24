@@ -23,13 +23,14 @@
 
 package com.ponysdk.core.ui.form.formfield;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.form.dataconverter.IdentityConverter;
 
 public class StringTextBoxFormField extends TextBoxFormField<String> {
 
     public StringTextBoxFormField() {
-        this(new PTextBox());
+        this(Element.newPTextBox());
     }
 
     public StringTextBoxFormField(final PTextBox textBox) {

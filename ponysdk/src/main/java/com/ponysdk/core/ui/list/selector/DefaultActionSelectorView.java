@@ -23,23 +23,27 @@
 
 package com.ponysdk.core.ui.list.selector;
 
-import com.ponysdk.core.internalization.PString;
-import com.ponysdk.core.tools.ListenerCollection;
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PMenuBar;
 import com.ponysdk.core.ui.basic.PMenuItem;
 import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.i18n.PString;
+
+import java.util.Collections;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DefaultActionSelectorView extends PMenuBar implements SelectorView {
 
-    private final ListenerCollection<SelectorViewListener> selectorViewListeners = new ListenerCollection<>();
+    private final Set<SelectorViewListener> selectorViewListeners = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     public DefaultActionSelectorView() {
-        final PMenuBar menuBarAction = new PMenuBar(true);
+        final PMenuBar menuBarAction = Element.newPMenuBar(true);
         addItem("", menuBarAction);
-        PMenuItem selectAllMenuItem = new PMenuItem(PString.get("list.selector.all"));
+        final PMenuItem selectAllMenuItem = Element.newPMenuItem(PString.get("list.selector.all"));
         selectAllMenuItem.setCommand(getSelectAllCommand());
         addItem(selectAllMenuItem);
-        PMenuItem selectNoneMenuItem = new PMenuItem(PString.get("list.selector.none"));
+        final PMenuItem selectNoneMenuItem = Element.newPMenuItem(PString.get("list.selector.none"));
         selectNoneMenuItem.setCommand(getSelectNoneCommand());
 
         menuBarAction.addItem(selectAllMenuItem);
@@ -69,7 +73,7 @@ public class DefaultActionSelectorView extends PMenuBar implements SelectorView 
 
     @Override
     public void addSelectorViewListener(final SelectorViewListener selectorViewListener) {
-        selectorViewListeners.register(selectorViewListener);
+        selectorViewListeners.add(selectorViewListener);
     }
 
     @Override

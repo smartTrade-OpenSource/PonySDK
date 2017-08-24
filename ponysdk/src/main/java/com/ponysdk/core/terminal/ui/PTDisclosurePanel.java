@@ -23,10 +23,6 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import com.google.gwt.event.logical.shared.CloseEvent;
-import com.google.gwt.event.logical.shared.CloseHandler;
-import com.google.gwt.event.logical.shared.OpenEvent;
-import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -36,6 +32,7 @@ import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public class PTDisclosurePanel extends PTWidget<DisclosurePanel> {
+
     private static final String OPENNED = "images/disclosure_openned.png";
     private static final String CLOSED = "images/disclosure_closed.png";
 
@@ -60,24 +57,16 @@ public class PTDisclosurePanel extends PTWidget<DisclosurePanel> {
     }
 
     private void addHandlers(final ReaderBuffer buffer, final UIBuilder uiService) {
-        uiObject.addCloseHandler(new CloseHandler<DisclosurePanel>() {
-
-            @Override
-            public void onClose(final CloseEvent<DisclosurePanel> event) {
-                final PTInstruction instruction = new PTInstruction(getObjectID());
-                instruction.put(ClientToServerModel.HANDLER_CLOSE);
-                uiService.sendDataToServer(uiObject, instruction);
-            }
+        uiObject.addCloseHandler(event -> {
+            final PTInstruction instruction = new PTInstruction(getObjectID());
+            instruction.put(ClientToServerModel.HANDLER_CLOSE);
+            uiService.sendDataToServer(uiObject, instruction);
         });
 
-        uiObject.addOpenHandler(new OpenHandler<DisclosurePanel>() {
-
-            @Override
-            public void onOpen(final OpenEvent<DisclosurePanel> event) {
-                final PTInstruction instruction = new PTInstruction(getObjectID());
-                instruction.put(ClientToServerModel.HANDLER_OPEN);
-                uiService.sendDataToServer(uiObject, instruction);
-            }
+        uiObject.addOpenHandler(event -> {
+            final PTInstruction instruction = new PTInstruction(getObjectID());
+            instruction.put(ClientToServerModel.HANDLER_OPEN);
+            uiService.sendDataToServer(uiObject, instruction);
         });
     }
 
@@ -88,15 +77,19 @@ public class PTDisclosurePanel extends PTWidget<DisclosurePanel> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.OPEN_CLOSE.equals(binaryModel.getModel())) {
-            uiObject.setOpen(binaryModel.getBooleanValue());
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.OPEN.ordinal() == modelOrdinal) {
+            uiObject.setOpen(true);
             return true;
-        }
-        if (ServerToClientModel.ANIMATION.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.CLOSE.ordinal() == modelOrdinal) {
+            uiObject.setOpen(false);
+            return true;
+        } else if (ServerToClientModel.ANIMATION.ordinal() == modelOrdinal) {
             uiObject.setAnimationEnabled(binaryModel.getBooleanValue());
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
 
 }

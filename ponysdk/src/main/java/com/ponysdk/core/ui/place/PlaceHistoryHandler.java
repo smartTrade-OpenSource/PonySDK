@@ -23,11 +23,10 @@
 
 package com.ponysdk.core.ui.place;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ponysdk.core.ui.basic.PHistory;
 import com.ponysdk.core.ui.eventbus.EventBus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PlaceHistoryHandler {
 
@@ -45,9 +44,10 @@ public class PlaceHistoryHandler {
         this.mapper = mapper;
         this.placeController = placeController;
 
-        eventBus.addHandler(PlaceChangeEvent.TYPE, event -> history.newItem(mapper.getToken(event.getNewPlace()), false));
+        eventBus.addHandler(PlaceChangeEvent.TYPE,
+            (PlaceChangeHandler) event -> history.newItem(mapper.getToken(event.getNewPlace()), false));
 
-        history.addValueChangeHandler((event) -> handleHistoryToken(event.getValue()));
+        history.addValueChangeHandler((event) -> handleHistoryToken(event.getData()));
     }
 
     public void setDefaultPlace(final Place defaultPlace) {

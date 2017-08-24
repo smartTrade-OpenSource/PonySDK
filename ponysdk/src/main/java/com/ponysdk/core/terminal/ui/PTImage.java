@@ -27,6 +27,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Image;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
+import com.ponysdk.core.model.MappingPath;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.PonySDK;
 import com.ponysdk.core.terminal.UIBuilder;
@@ -42,13 +43,12 @@ public class PTImage extends PTWidget<Image> {
     private int height = -1;
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId,
-            final UIBuilder uiService) {
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
         final BinaryModel urlModel = buffer.readBinaryModel();
-        if (ServerToClientModel.IMAGE_URL.equals(urlModel.getModel())) {
-            final BinaryModel leftModel = buffer.readBinaryModel();
+        if (ServerToClientModel.URL.equals(urlModel.getModel())) {
             url = urlModel.getStringValue();
-            if (ServerToClientModel.IMAGE_LEFT.equals(leftModel.getModel())) {
+            final BinaryModel leftModel = buffer.readBinaryModel();
+            if (ServerToClientModel.POSITION_LEFT.equals(leftModel.getModel())) {
                 left = leftModel.getIntValue();
                 top = buffer.readBinaryModel().getIntValue();
                 width = buffer.readBinaryModel().getIntValue();
@@ -60,40 +60,43 @@ public class PTImage extends PTWidget<Image> {
             buffer.rewind(urlModel);
         }
 
-        super.create(buffer, objectId, uiService);
+        super.create(buffer, objectId, uiBuilder);
     }
 
     @Override
     protected Image createUIObject() {
-        if (url != null) {
-            return left != -1 ? new Image(url, left, top, width, height) : new Image(url);
-        } else {
-            return new Image();
-        }
-    }
-
-    @Override
-    public void addHandler(final ReaderBuffer buffer,
-            final HandlerModel handlerModel, final UIBuilder uiService) {
-        if (HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST.equals(handlerModel)) {
-            // ServerToClientModel.STREAM_REQUEST_ID
-            final int streamRequestId = buffer.readBinaryModel().getIntValue();
-
-            cast().setUrl(GWT.getHostPageBaseURL() + "stream?"
-                    + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "=" + PonySDK.uiContextId + "&"
-                    + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "=" + streamRequestId);
-        } else {
-            super.addHandler(buffer, handlerModel, uiService);
-        }
+        if (url != null) return left != -1 ? new Image(url, left, top, width, height) : new Image(url);
+        else return new Image();
     }
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.IMAGE_URL.equals(binaryModel.getModel())) {
-            cast().setUrl(binaryModel.getStringValue());
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.URL.ordinal() == modelOrdinal) {
+            uiObject.setUrl(binaryModel.getStringValue());
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
+    }
+
+    @Override
+    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
+        if (HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST.equals(handlerModel)) {
+            // ServerToClientModel.STREAM_REQUEST_ID
+            final int streamRequestId = buffer.readBinaryModel().getIntValue();
+
+            // ServerToClientModel.APPLICATION_ID
+            final String applicationId = buffer.readBinaryModel().getStringValue();
+
+            final String action = GWT.getHostPageBaseURL() + MappingPath.STREAM + "?"
+                    + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "=" + PonySDK.get().getContextId() + "&"
+                    + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "=" + streamRequestId + "&"
+                    + ClientToServerModel.APPLICATION_ID.toStringValue() + "=" + applicationId;
+            uiObject.setUrl(action);
+        } else {
+            super.addHandler(buffer, handlerModel);
+        }
     }
 
 }

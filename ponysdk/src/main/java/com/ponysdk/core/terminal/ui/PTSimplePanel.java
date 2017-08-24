@@ -26,11 +26,11 @@ package com.ponysdk.core.terminal.ui;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
-public class PTSimplePanel extends PTPanel<SimplePanel> {
+public class PTSimplePanel<T extends SimplePanel> extends PTPanel<T> {
 
     @Override
-    protected SimplePanel createUIObject() {
-        return new SimplePanel();
+    protected T createUIObject() {
+        return (T) new SimplePanel();
     }
 
     @Override

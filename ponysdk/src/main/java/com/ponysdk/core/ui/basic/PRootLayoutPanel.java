@@ -23,53 +23,42 @@
 
 package com.ponysdk.core.ui.basic;
 
+import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.server.application.UIContext;
+
 import java.util.HashMap;
 import java.util.Map;
 
-import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.model.WidgetType;
-
-/**
- * A singleton implementation of {@link PLayoutPanel} that always attaches
- * itself to the document body (i.e. {@link PRootPanel#get(int)}).
- * <p>
- * NOTE: This widget will <em>only</em> work in standards mode, which requires
- * that the HTML page in which it is run have an explicit &lt;!DOCTYPE&gt;
- * declaration.
- * </p>
- */
 public class PRootLayoutPanel extends PLayoutPanel {
 
     private static final String KEY = PRootLayoutPanel.class.getSimpleName();
 
-    private PRootLayoutPanel(final int windowID) {
-        this.windowID = windowID;
-        init();
+    private PRootLayoutPanel(final PWindow window) {
+        this.window = window;
     }
 
-    private PRootLayoutPanel(final int windowID, final String id) {
-        this(windowID);
-        // TODO
+    private PRootLayoutPanel(final PWindow window, final String id) {
+        this(window);
     }
 
-    public static PRootLayoutPanel get(final int windowID) {
-        return get(windowID, null);
+    public static PRootLayoutPanel get(final PWindow window) {
+        return get(window, null);
     }
 
-    public static PRootLayoutPanel get(final int windowID, final String id) {
-        final Map<String, PRootLayoutPanel> childs = ensureChilds(windowID);
+    public static PRootLayoutPanel get(final PWindow window, final String id) {
+        final Map<String, PRootLayoutPanel> childs = ensureChilds(window);
         PRootLayoutPanel defaultRoot = childs.get(id);
         if (defaultRoot == null) {
-            defaultRoot = new PRootLayoutPanel(windowID, id);
+            defaultRoot = new PRootLayoutPanel(window, id);
             childs.put(id, defaultRoot);
         }
         return defaultRoot;
     }
 
-    private static Map<String, PRootLayoutPanel> ensureChilds(final int windowID) {
+    private static Map<String, PRootLayoutPanel> ensureChilds(final PWindow window) {
         final UIContext session = UIContext.get();
 
-        final String key = KEY + windowID;
+        final String key = KEY + window.getID();
 
         Map<String, PRootLayoutPanel> rootByIDs = session.getAttribute(key);
         if (rootByIDs == null) {

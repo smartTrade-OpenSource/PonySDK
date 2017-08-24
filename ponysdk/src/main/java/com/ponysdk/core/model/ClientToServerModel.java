@@ -31,40 +31,41 @@ public enum ClientToServerModel {
 
     UI_CONTEXT_ID("2"),
     WINDOW_ID("3"),
+    FRAME_ID("4"),
 
-    NATIVE("4"),
-    APPLICATION_INSTRUCTIONS("5"),
-    APPLICATION_ERRORS("6"),
-    COOKIES("7"),
-    COOKIE_NAME("8"),
-    COOKIE_VALUE("9"),
+    NATIVE("5"),
+    APPLICATION_INSTRUCTIONS("6"),
+    INFO_MSG("7"),
+    COOKIES("8"),
+    COOKIE_NAME("9"),
+    COOKIE_VALUE("a"),
 
-    TYPE_HISTORY("a"),
+    TYPE_HISTORY("b"),
 
-    WIDGET_POSITION("b"),
-    POPUP_POSITION("c"),
-    EVENT_INFO("d"),
-    DOM_HANDLER_TYPE("e"),
+    WIDGET_POSITION("c"),
+    POPUP_POSITION("d"),
+    EVENT_INFO("e"),
+    DOM_HANDLER_TYPE("f"),
 
-    ERROR_MSG("f"),
-    YEAR("g"),
-    MONTH("h"),
-    DAY("i"),
+    ERROR_MSG("g"),
+    YEAR("h"),
+    MONTH("i"),
+    DAY("j"),
 
-    PARENT_OBJECT_ID("j"),
-    VALUE_KEY("k"),
-    REPLACEMENT_STRING("l"),
-    COMMAND_ID("m"),
-    STREAM_REQUEST_ID("n"),
-    SIZE("o"),
-    DRAG_SRC("p"),
-    START_DATE("q"),
-    END_DATE("r"),
-    KEY_FILTER("s"),
-    RESULT("t"),
+    PARENT_OBJECT_ID("k"),
+    VALUE_KEY("l"),
+    REPLACEMENT_STRING("m"),
+    COMMAND_ID("n"),
+    STREAM_REQUEST_ID("o"),
+    SIZE("p"),
+    DRAG_SRC("q"),
+    START_DATE("r"),
+    END_DATE("s"),
+    KEY_FILTER("t"),
+    RESULT("u"),
 
-    HANDLER_BOOLEAN_VALUE_CHANGE("u"),
-    HANDLER_DATE_VALUE_CHANGE("v"),
+    HANDLER_BOOLEAN_VALUE_CHANGE("v"),
+    HANDLER_DATE_VALUE_CHANGE("w"),
     HANDLER_STRING_VALUE_CHANGE("x"),
     HANDLER_BEFORE_SELECTION("y"),
     HANDLER_CHANGE("z"),
@@ -83,15 +84,17 @@ public enum ClientToServerModel {
     HANDLER_SCROLL_HEIGHT("K"),
     HANDLER_SCROLL_WIDTH("L"),
     HANDLER_SCROLL_VERTICAL("M"),
-    HANDLER_SCROLL_HORIZONTAL("N");
+    HANDLER_SCROLL_HORIZONTAL("N"),
+
+    APPLICATION_ID("O");
 
     private String key;
 
-    ClientToServerModel(final String key) {
+    private ClientToServerModel(final String key) {
         this.key = key;
     }
 
-    public String toStringValue() {
+    public final String toStringValue() {
         return key;
     }
 

@@ -33,8 +33,8 @@ import javax.json.JsonObject;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.server.stm.Txn;
+import com.ponysdk.core.writer.ModelWriter;
 
 public class PCookies {
 
@@ -51,34 +51,58 @@ public class PCookies {
 
     private CookiesListener listener;
 
+    public PCookies() {
+    }
+
     public String getCookie(final String name) {
         return cachedCookies.get(name);
     }
 
     public String removeCookie(final String name) {
-        final Parser parser = Txn.get().getParser();
-        parser.beginObject();
-        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        parser.parse(ServerToClientModel.REMOVE_COOKIE, name);
-        parser.endObject();
+        return removeCookie(name, null);
+    }
+
+    public String removeCookie(final String name, final String path) {
+        final ModelWriter writer = Txn.get().getWriter();
+        writer.beginObject();
+        writer.write(ServerToClientModel.TYPE_UPDATE, ID);
+        writer.write(ServerToClientModel.REMOVE_COOKIE, name);
+        if (path != null) writer.write(ServerToClientModel.COOKIE_PATH, path);
+        writer.endObject();
 
         return cachedCookies.remove(name);
     }
 
     public void setCookie(final String name, final String value) {
-        setCookie(name, value, null);
+        setCookie(name, value, null, null);
+    }
+
+    public void setCookie(final String name, final String value, final String path) {
+        setCookie(name, value, null, path);
     }
 
     public void setCookie(final String name, final String value, final Date expires) {
+        setCookie(name, value, expires, null);
+    }
+
+    public void setCookie(final String name, final String value, final Date expires, final String path) {
+        setCookie(name, value, expires, path, null, false);
+    }
+
+    public void setCookie(final String name, final String value, final Date expires, final String domain, final String path,
+                          final boolean secure) {
         cachedCookies.put(name, value);
 
-        final Parser parser = Txn.get().getParser();
-        parser.beginObject();
-        parser.parse(ServerToClientModel.TYPE_UPDATE, ID);
-        parser.parse(ServerToClientModel.ADD_COOKIE, name);
-        parser.parse(ServerToClientModel.VALUE, value);
-        if (expires != null) parser.parse(ServerToClientModel.COOKIE_EXPIRE, expires.getTime());
-        parser.endObject();
+        final ModelWriter writer = Txn.get().getWriter();
+        writer.beginObject();
+        writer.write(ServerToClientModel.TYPE_UPDATE, ID);
+        writer.write(ServerToClientModel.ADD_COOKIE, name);
+        writer.write(ServerToClientModel.VALUE, value);
+        if (expires != null) writer.write(ServerToClientModel.COOKIE_EXPIRE, expires.getTime());
+        if (domain != null) writer.write(ServerToClientModel.COOKIE_DOMAIN, domain);
+        if (path != null) writer.write(ServerToClientModel.COOKIE_PATH, path);
+        if (secure) writer.write(ServerToClientModel.COOKIE_SECURE, secure);
+        writer.endObject();
     }
 
     public void onClientData(final JsonObject event) {

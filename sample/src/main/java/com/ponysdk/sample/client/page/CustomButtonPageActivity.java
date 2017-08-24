@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,11 +23,9 @@
 
 package com.ponysdk.sample.client.page;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PHorizontalPanel;
-import com.ponysdk.core.ui.basic.PImage;
-import com.ponysdk.core.ui.basic.PLabel;
-import com.ponysdk.core.ui.basic.PPushButton;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
 
 public class CustomButtonPageActivity extends SamplePageActivity {
@@ -48,23 +46,23 @@ public class CustomButtonPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PVerticalPanel panel = new PVerticalPanel();
+        final PVerticalPanel panel = Element.newPVerticalPanel();
         panel.setSpacing(10);
 
-        panel.add(new PLabel("Push button :"));
+        panel.add(Element.newPLabel("Push button :"));
         panel.add(buildPushButtonPanel());
 
         examplePanel.setWidget(panel);
     }
 
     private PHorizontalPanel buildPushButtonPanel() {
-        final PHorizontalPanel panel = new PHorizontalPanel();
+        final PHorizontalPanel panel = Element.newPHorizontalPanel();
         panel.setSpacing(10);
 
-        enabledPushButton = new PPushButton(new PImage("images/pony.png"));
+        enabledPushButton = Element.newPPushButton(Element.newPImage("images/pony.png"));
         panel.add(enabledPushButton);
 
-        disabledPushButton = new PPushButton(new PImage("images/pony.png"));
+        disabledPushButton = Element.newPPushButton(Element.newPImage("images/pony.png"));
         disabledPushButton.setEnabled(false);
         panel.add(disabledPushButton);
 

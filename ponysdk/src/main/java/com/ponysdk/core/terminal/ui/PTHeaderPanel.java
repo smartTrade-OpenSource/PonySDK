@@ -26,7 +26,6 @@ package com.ponysdk.core.terminal.ui;
 import com.google.gwt.user.client.ui.HeaderPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
@@ -44,15 +43,15 @@ public class PTHeaderPanel extends PTPanel<HeaderPanel> {
             final Widget w = asWidget(ptObject);
             final int index = binaryModel.getIntValue();
             if (index == 0) {
-                cast().setHeaderWidget(w);
+                uiObject.setHeaderWidget(w);
                 // Wait GWT fix :
                 // https://groups.google.com/forum/#!msg/google-web-toolkit/8odDZdlhDVo/hw852twqQAUJ
                 w.getElement().getParentElement().getStyle().clearProperty("minWidth");
                 w.getElement().getParentElement().getStyle().clearProperty("minHeight");
             } else if (index == 1) {
-                cast().setContentWidget(w);
+                uiObject.setContentWidget(w);
             } else if (index == 2) {
-                cast().setFooterWidget(w);
+                uiObject.setFooterWidget(w);
                 // Wait GWT fix :
                 // https://groups.google.com/forum/#!msg/google-web-toolkit/8odDZdlhDVo/hw852twqQAUJ
                 w.getElement().getParentElement().getStyle().clearProperty("minWidth");
@@ -66,15 +65,17 @@ public class PTHeaderPanel extends PTPanel<HeaderPanel> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.RESIZE.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.RESIZE.ordinal() == modelOrdinal) {
             uiObject.onResize();
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
 
     @Override
-    public void remove(final ReaderBuffer buffer, final PTObject ptObject, final UIBuilder uiService) {
+    public void remove(final ReaderBuffer buffer, final PTObject ptObject) {
         uiObject.remove(asWidget(ptObject));
     }
 

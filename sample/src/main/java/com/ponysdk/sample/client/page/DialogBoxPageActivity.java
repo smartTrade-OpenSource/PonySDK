@@ -23,14 +23,13 @@
 
 package com.ponysdk.sample.client.page;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PDialogBox;
 import com.ponysdk.core.ui.basic.PFlexTable;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PPopupPanel;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.basic.event.PCloseEvent;
 import com.ponysdk.core.ui.basic.event.PCloseHandler;
 import com.ponysdk.core.ui.rich.PClosableDialogBox;
@@ -55,113 +54,81 @@ public class DialogBoxPageActivity extends SamplePageActivity {
         super.onFirstShowPage();
 
         row = 0;
-        layout = new PFlexTable();
+        layout = Element.newPFlexTable();
 
         addLabel("Show a basic popup");
         final PButton anchor2 = addButton("Open");
-        anchor2.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent clickEvent) {
-                final PPopupPanel popupPanel = new PPopupPanel(getView().asWidget().getWindowID());
-                final PVerticalPanel content = new PVerticalPanel();
-                final PButton closeButton = new PButton("Close");
-                closeButton.addClickHandler(new PClickHandler() {
-
-                    @Override
-                    public void onClick(final PClickEvent clickEvent) {
-                        popupPanel.hide();
-                    }
-                });
-                content.add(new PLabel("A popup displayed relatively to the mouse click"));
-                content.add(closeButton);
-                content.setWidth("200px");
-                content.setHeight("200px");
-                popupPanel.setWidget(content);
-                popupPanel.setPopupPosition(clickEvent.getClientX(), clickEvent.getClientY());
-                popupPanel.show();
-            }
+        anchor2.addClickHandler(clickEvent -> {
+            final PPopupPanel popupPanel = Element.newPPopupPanel();
+            final PVerticalPanel content = Element.newPVerticalPanel();
+            final PButton closeButton = Element.newPButton("Close");
+            closeButton.addClickHandler(clickEvent1 -> popupPanel.hide());
+            content.add(Element.newPLabel("A popup displayed relatively to the mouse click"));
+            content.add(closeButton);
+            content.setWidth("200px");
+            content.setHeight("200px");
+            popupPanel.setWidget(content);
+            popupPanel.setPopupPosition(clickEvent.getClientX(), clickEvent.getClientY());
+            popupPanel.show();
+            getView().asWidget().getWindow().add(popupPanel);
         });
 
         addLabel("A draggable popup");
         final PButton anchor3 = addButton("Open");
-        anchor3.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent clickEvent) {
-                final PClosableDialogBox dialogBox = new PClosableDialogBox(getView().asWidget().getWindowID(), "Custom caption");
-                dialogBox.setDraggable(true);
-                dialogBox.setContent(new PLabel("Content of a popup"));
-                dialogBox.center();
-            }
+        anchor3.addClickHandler(clickEvent -> {
+            final PClosableDialogBox dialogBox = new PClosableDialogBox("Custom caption");
+            dialogBox.setDraggable(true);
+            dialogBox.setContent(Element.newPLabel("Content of a popup"));
+            dialogBox.center();
+            getView().asWidget().getWindow().add(dialogBox);
         });
 
         addLabel("A confirm dialog listenening on the close eventbus");
         final PButton anchor4 = addButton("Open");
-        anchor4.addClickHandler(new PClickHandler() {
+        anchor4.addClickHandler(clickEvent -> {
+            final POptionPane dialodBox = POptionPane.showConfirmDialog(getView().asWidget().getWindow(),
+                (dialogBox, option) -> dialogBox.hide(), "Your custom text");
 
-            @Override
-            public void onClick(final PClickEvent clickEvent) {
-                final POptionPane dialodBox = POptionPane.showConfirmDialog(getView().asWidget().getWindowID(), new PActionHandler() {
+            dialodBox.getDialogBox().addCloseHandler(new PCloseHandler() {
 
-                    @Override
-                    public void onAction(final PDialogBox dialogBox, final String option) {
-                        dialogBox.hide();
-                    }
-                }, "Your custom text");
-
-                dialodBox.getDialogBox().addCloseHandler(new PCloseHandler() {
-
-                    @Override
-                    public void onClose(final PCloseEvent closeEvent) {
-                        final DemoBusinessEvent event = new DemoBusinessEvent(this);
-                        event.setBusinessMessage("Dialog box closed");
-                        fireEvent(event);
-                    }
-                });
-            }
+                @Override
+                public void onClose(final PCloseEvent closeEvent) {
+                    final DemoBusinessEvent event = new DemoBusinessEvent(this);
+                    event.setBusinessMessage("Dialog box closed");
+                    fireEvent(event);
+                }
+            });
         });
 
         addLabel("A confirm dialog listenening on the close eventbus");
         final PButton anchor5 = addButton("Open");
-        anchor5.addClickHandler(new PClickHandler() {
+        anchor5.addClickHandler(clickEvent -> POptionPane.showConfirmDialog(getView().asWidget().getWindow(), new PActionHandler() {
 
             @Override
-            public void onClick(final PClickEvent clickEvent) {
-                POptionPane.showConfirmDialog(getView().asWidget().getWindowID(), new PActionHandler() {
-
-                    @Override
-                    public void onAction(final PDialogBox dialogBox, final String option) {
-                        dialogBox.hide();
-                        final DemoBusinessEvent event = new DemoBusinessEvent(this);
-                        event.setBusinessMessage("Option selected #" + option);
-                        fireEvent(event);
-                    }
-                }, "Your custom text", "Your title", POptionType.YES_NO_CANCEL_OPTION);
+            public void onAction(final PDialogBox dialogBox, final String option) {
+                dialogBox.hide();
+                final DemoBusinessEvent event = new DemoBusinessEvent(this);
+                event.setBusinessMessage("Option selected #" + option);
+                fireEvent(event);
             }
-        });
+        }, "Your custom text", "Your title", POptionType.YES_NO_CANCEL_OPTION));
 
         addLabel("PConfirmDialogBox");
         final PButton anchor6 = addButton("Open");
-        anchor6.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent clickEvent) {
-                PConfirmDialog.show(getView().asWidget().getWindowID(), "Question ?", new PLabel("This is a confirm dialog box"));
-            }
-        });
+        anchor6.addClickHandler(clickEvent -> PConfirmDialog.show(getView().asWidget().getWindow(), "Question ?",
+            Element.newPLabel("This is a confirm dialog box")));
 
         examplePanel.setWidget(layout);
     }
 
     private PLabel addLabel(final String text) {
-        final PLabel label = new PLabel(text);
+        final PLabel label = Element.newPLabel(text);
         layout.setWidget(row, 0, label);
         return label;
     }
 
     private PButton addButton(final String text) {
-        final PButton button = new PButton(text);
+        final PButton button = Element.newPButton(text);
         layout.setWidget(row++, 1, button);
         return button;
     }

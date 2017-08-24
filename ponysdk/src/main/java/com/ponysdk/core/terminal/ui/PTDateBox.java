@@ -25,8 +25,6 @@ package com.ponysdk.core.terminal.ui;
 
 import java.util.Date;
 
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.datepicker.client.DateBox;
@@ -55,50 +53,34 @@ public class PTDateBox extends PTWidget<MyDateBox> {
 
     @Override
     protected MyDateBox createUIObject() {
-        return new MyDateBox(datePicker.cast(), null, defaultFormat);
+        return new MyDateBox(datePicker.uiObject, null, defaultFormat);
     }
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final MyDateBox dateBox = cast();
-        if (ServerToClientModel.VALUE.equals(binaryModel.getModel())) {
-            dateBox.getTextBox().setValue(binaryModel.getStringValue());
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.VALUE.ordinal() == modelOrdinal) {
+            uiObject.getTextBox().setValue(binaryModel.getStringValue());
             return true;
-        }
-        if (ServerToClientModel.DATE_FORMAT_PATTERN.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.DATE_FORMAT_PATTERN.ordinal() == modelOrdinal) {
             defaultFormat = new DefaultFormat(DateTimeFormat.getFormat(binaryModel.getStringValue()));
-            dateBox.setFormat(defaultFormat);
+            uiObject.setFormat(defaultFormat);
             return true;
-        }
-        if (ServerToClientModel.ENABLED.equals(binaryModel.getModel())) {
-            dateBox.setEnabled(binaryModel.getBooleanValue());
+        } else if (ServerToClientModel.ENABLED.ordinal() == modelOrdinal) {
+            uiObject.setEnabled(binaryModel.getBooleanValue());
             return true;
-        }
-        if (ServerToClientModel.TIME.equals(binaryModel.getModel())) {
-            dateBox.setDefaultMonth(binaryModel.getLongValue());
+        } else if (ServerToClientModel.TIME.ordinal() == modelOrdinal) {
+            uiObject.setDefaultMonth(binaryModel.getLongValue());
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
 
     private void addValueChangeHandler(final UIBuilder uiService) {
-        final DateBox dateBox = cast();
-        final TextBox textBox = dateBox.getTextBox();
-        dateBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
-
-            @Override
-            public void onValueChange(final ValueChangeEvent<Date> event) {
-                triggerEvent(uiService, dateBox);
-            }
-
-        });
-        textBox.addValueChangeHandler(new ValueChangeHandler<String>() {
-
-            @Override
-            public void onValueChange(final ValueChangeEvent<String> event) {
-                triggerEvent(uiService, dateBox);
-            }
-        });
+        final TextBox textBox = uiObject.getTextBox();
+        uiObject.addValueChangeHandler(event -> triggerEvent(uiService, uiObject));
+        textBox.addValueChangeHandler(event -> triggerEvent(uiService, uiObject));
     }
 
     private void triggerEvent(final UIBuilder uiService, final DateBox dateBox) {
@@ -107,15 +89,15 @@ public class PTDateBox extends PTWidget<MyDateBox> {
         uiService.sendDataToServer(dateBox, instruction);
     }
 
-    static class MyDateBox extends DateBox {
+    static final class MyDateBox extends DateBox {
 
-        private Date defaultMonth = null;
+        private Date defaultMonth;
 
-        MyDateBox(final DatePicker picker, final Date date, final Format format) {
+        private MyDateBox(final DatePicker picker, final Date date, final Format format) {
             super(picker, date, format);
         }
 
-        void setDefaultMonth(final long m) {
+        private void setDefaultMonth(final long m) {
             defaultMonth = new Date(m);
         }
 

@@ -24,8 +24,6 @@
 package com.ponysdk.sample.client;
 
 import com.ponysdk.core.ui.activity.AbstractActivity;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.basic.event.PKeyPressEvent;
 import com.ponysdk.core.ui.basic.event.PKeyPressHandler;
 import com.ponysdk.core.ui.model.PKeyCodes;
@@ -65,13 +63,7 @@ public class LoginActivity extends AbstractActivity<DefaultLoginPageView> {
             }
         });
 
-        view.getLoginButton().addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                doLogin();
-            }
-        });
+        view.getLoginButton().addClickHandler(event -> doLogin());
 
         doLogin();
     }

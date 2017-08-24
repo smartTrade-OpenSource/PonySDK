@@ -35,59 +35,67 @@ import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
+import com.ponysdk.core.terminal.ui.PTSplitLayoutPanel.MySplitLayoutPanel;
 
-public class PTSplitLayoutPanel extends PTDockLayoutPanel {
+public class PTSplitLayoutPanel extends PTDockLayoutPanel<MySplitLayoutPanel> {
+
+    @Override
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
+        super.create(buffer, objectId, uiBuilder);
+        uiObject.uiBuilder = uiBuilder;
+    }
 
     @Override
     protected MySplitLayoutPanel createUIObject() {
-        return new MySplitLayoutPanel();
+        return new MySplitLayoutPanel(objectID);
     }
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.MIN_SIZE.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.MIN_SIZE.ordinal() == modelOrdinal) {
             final int minSize = binaryModel.getIntValue();
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
-            cast().setWidgetMinSize(w, minSize);
+            uiObject.setWidgetMinSize(w, minSize);
             return true;
-        }
-        if (ServerToClientModel.SNAP_CLOSED_SIZE.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.SNAP_CLOSED_SIZE.ordinal() == modelOrdinal) {
             final int snapClosedSize = binaryModel.getIntValue();
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
-            cast().setWidgetSnapClosedSize(w, snapClosedSize);
+            uiObject.setWidgetSnapClosedSize(w, snapClosedSize);
             return true;
-        }
-        if (ServerToClientModel.TOGGLE_DISPLAY_ALLOWED.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.TOGGLE_DISPLAY_ALLOWED.ordinal() == modelOrdinal) {
             final boolean enable = binaryModel.getBooleanValue();
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
-            cast().setWidgetToggleDisplayAllowed(w, enable);
+            uiObject.setWidgetToggleDisplayAllowed(w, enable);
             return true;
-        }
-        return super.update(buffer, binaryModel);
-    }
-
-    @Override
-    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
-        if (HandlerModel.HANDLER_RESIZE.equals(handlerModel)) {
-            cast().resizeHandler = true;
-            cast().objectId = getObjectID();
-            cast().uiService = uiService;
         } else {
-            super.addHandler(buffer, handlerModel, uiService);
+            return super.update(buffer, binaryModel);
         }
     }
 
     @Override
-    public MySplitLayoutPanel cast() {
-        return (MySplitLayoutPanel) uiObject;
+    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
+        if (HandlerModel.HANDLER_RESIZE.equals(handlerModel)) uiObject.resizeHandler = true;
+        else super.addHandler(buffer, handlerModel);
     }
 
-    private class MySplitLayoutPanel extends SplitLayoutPanel {
+    @Override
+    public void removeHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
+        if (HandlerModel.HANDLER_RESIZE.equals(handlerModel)) uiObject.resizeHandler = false;
+        else super.removeHandler(buffer, handlerModel);
+    }
 
-        protected UIBuilder uiService = null;
-        protected int objectId = -1;
-        SendResizeCommand command;
-        boolean resizeHandler = false;
+    static final class MySplitLayoutPanel extends SplitLayoutPanel {
+
+        private int objectId = -1;
+        private UIBuilder uiBuilder;
+        private boolean resizeHandler;
+
+        private SendResizeCommand command;
+
+        public MySplitLayoutPanel(final int objectId) {
+            this.objectId = objectId;
+        }
 
         @Override
         public void onResize() {
@@ -96,13 +104,21 @@ public class PTSplitLayoutPanel extends PTDockLayoutPanel {
             if (resizeHandler) {
                 if (command != null) command.cancelled = true;
 
-                command = new SendResizeCommand();
+                command = new SendResizeCommand(objectId, uiBuilder);
 
                 Scheduler.get().scheduleFixedDelay(command, 500);
             }
         }
 
         public class SendResizeCommand implements RepeatingCommand {
+
+            private int objectId = -1;
+            private final UIBuilder uiBuilder;
+
+            public SendResizeCommand(final int objectId, final UIBuilder uiBuilder) {
+                this.objectId = objectId;
+                this.uiBuilder = uiBuilder;
+            }
 
             boolean cancelled = false;
 
@@ -113,7 +129,7 @@ public class PTSplitLayoutPanel extends PTDockLayoutPanel {
                 int i = 0;
                 final JSONArray jsonArray = new JSONArray();
                 for (final Widget w : getChildren()) {
-                    final PTObject ptObject = uiService.getPTObject(w);
+                    final PTObject ptObject = uiBuilder.getPTObject(w);
                     if (ptObject != null) {
                         final Double wSize = getWidgetSize(w);
                         final PTInstruction ws = new PTInstruction(ptObject.getObjectID());
@@ -122,10 +138,11 @@ public class PTSplitLayoutPanel extends PTDockLayoutPanel {
                         i++;
                     }
                 }
+
                 if (i > 0) {
                     final PTInstruction eventInstruction = new PTInstruction(objectId);
                     eventInstruction.put(ClientToServerModel.HANDLER_RESIZE, jsonArray);
-                    uiService.sendDataToServer(eventInstruction);
+                    uiBuilder.sendDataToServer(eventInstruction);
                 }
 
                 return false;

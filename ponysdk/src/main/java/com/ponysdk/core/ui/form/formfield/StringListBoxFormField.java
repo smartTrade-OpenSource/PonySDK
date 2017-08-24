@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.ui.form.formfield;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PListBox;
 import com.ponysdk.core.ui.form.dataconverter.DataConverter;
 import com.ponysdk.core.ui.form.dataconverter.IdentityConverter;
@@ -30,7 +31,7 @@ import com.ponysdk.core.ui.form.dataconverter.IdentityConverter;
 public class StringListBoxFormField extends ListBoxFormField<String> {
 
     public StringListBoxFormField() {
-        this(new PListBox(), IdentityConverter.STRING);
+        this(Element.newPListBox(), IdentityConverter.STRING);
     }
 
     public StringListBoxFormField(final PListBox listBox) {

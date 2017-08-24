@@ -25,13 +25,11 @@ package com.ponysdk.core.terminal.ui;
 
 import java.util.Date;
 
-import com.google.gwt.event.logical.shared.ShowRangeEvent;
-import com.google.gwt.event.logical.shared.ShowRangeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.datepicker.client.DatePicker;
 import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.DateConverter;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
@@ -40,21 +38,9 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public class PTDatePicker extends PTWidget<DatePicker> {
 
-    public static final String DATE_SEPARATOR = ",";
+    private static final String DATE_SEPARATOR = ",";
 
     private final DateTimeFormat format = DateTimeFormat.getFormat("yyyy-MM-dd");
-
-    private static Date asDate(final String timestamp) {
-        try {
-            return new Date(Long.parseLong(timestamp));
-        } catch (final NumberFormatException e) {
-            return null;
-        }
-    }
-
-    private static Date asDate(final long timestamp) {
-        return timestamp != -1 ? new Date(timestamp) : null;
-    }
 
     @Override
     protected DatePicker createUIObject() {
@@ -68,25 +54,13 @@ public class PTDatePicker extends PTWidget<DatePicker> {
     }
 
     private void addHandlers(final UIBuilder uiService) {
-        final DatePicker picker = cast();
-
-        picker.addValueChangeHandler(new ValueChangeHandler<Date>() {
-
-            @Override
-            public void onValueChange(final ValueChangeEvent<Date> event) {
-                triggerEvent(picker, uiService, event);
-            }
-        });
-        picker.addShowRangeHandler(new ShowRangeHandler<Date>() {
-
-            @Override
-            public void onShowRange(final ShowRangeEvent<Date> event) {
-                final PTInstruction instruction = new PTInstruction(getObjectID());
-                instruction.put(ClientToServerModel.HANDLER_SHOW_RANGE);
-                instruction.put(ClientToServerModel.START_DATE, event.getStart().getTime());
-                instruction.put(ClientToServerModel.END_DATE, event.getEnd().getTime());
-                uiService.sendDataToServer(picker, instruction);
-            }
+        uiObject.addValueChangeHandler(event -> triggerEvent(uiObject, uiService, event));
+        uiObject.addShowRangeHandler(event -> {
+            final PTInstruction instruction = new PTInstruction(getObjectID());
+            instruction.put(ClientToServerModel.HANDLER_SHOW_RANGE);
+            instruction.put(ClientToServerModel.START_DATE, event.getStart().getTime());
+            instruction.put(ClientToServerModel.END_DATE, event.getEnd().getTime());
+            uiService.sendDataToServer(uiObject, instruction);
         });
     }
 
@@ -114,43 +88,43 @@ public class PTDatePicker extends PTWidget<DatePicker> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final DatePicker picker = cast();
-        if (ServerToClientModel.DATE.equals(binaryModel.getModel())) {
-            picker.setValue(asDate(binaryModel.getLongValue()));
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.DATE.ordinal() == modelOrdinal) {
+            uiObject.setValue(DateConverter.fromTimestamp(binaryModel.getLongValue()));
             return true;
-        }
-        if (ServerToClientModel.TIME.equals(binaryModel.getModel())) {
-            picker.setCurrentMonth(asDate(binaryModel.getLongValue()));
+        } else if (ServerToClientModel.TIME.ordinal() == modelOrdinal) {
+            uiObject.setCurrentMonth(DateConverter.fromTimestamp(binaryModel.getLongValue()));
             return true;
-        }
-        if (ServerToClientModel.DATE_ENABLED.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.DATE_ENABLED.ordinal() == modelOrdinal) {
             final String[] dates = binaryModel.getStringValue().split(DATE_SEPARATOR);
             // ServerToClientModel.ENABLED
             final boolean enabled = buffer.readBinaryModel().getBooleanValue();
             for (final String date : dates) {
-                picker.setTransientEnabledOnDates(enabled, asDate(date));
+                uiObject.setTransientEnabledOnDates(enabled, DateConverter.decode(date));
             }
             return true;
-        }
-        if (ServerToClientModel.ADD_DATE_STYLE.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.ADD_DATE_STYLE.ordinal() == modelOrdinal) {
             final String[] dates = binaryModel.getStringValue().split(DATE_SEPARATOR);
             // ServerToClientModel.STYLE_NAME
             final String style = buffer.readBinaryModel().getStringValue();
             for (final String date : dates) {
-                picker.addStyleToDates(style, asDate(date));
+                uiObject.addStyleToDates(style, DateConverter.decode(date));
             }
             return true;
-        }
-        if (ServerToClientModel.REMOVE_DATE_STYLE.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.REMOVE_DATE_STYLE.ordinal() == modelOrdinal) {
             final String[] dates = binaryModel.getStringValue().split(DATE_SEPARATOR);
             // ServerToClientModel.STYLE_NAME
             final String style = buffer.readBinaryModel().getStringValue();
             for (final String date : dates) {
-                picker.removeStyleFromDates(style, asDate(date));
+                uiObject.removeStyleFromDates(style, DateConverter.decode(date));
             }
             return true;
+        } else if (ServerToClientModel.YEAR_ARROWS_VISIBLE.ordinal() == modelOrdinal) {
+            uiObject.setYearArrowsVisible(binaryModel.getBooleanValue());
+            return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
 
 }

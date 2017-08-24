@@ -28,7 +28,7 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
-public class PTHTML extends PTLabel {
+public class PTHTML extends PTLabel<HTML> {
 
     @Override
     protected HTML createUIObject() {
@@ -37,20 +37,16 @@ public class PTHTML extends PTLabel {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.HTML.equals(binaryModel.getModel())) {
-            cast().setHTML(binaryModel.getStringValue());
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.HTML.ordinal() == modelOrdinal) {
+            uiObject.setHTML(binaryModel.getStringValue());
             return true;
-        }
-        if (ServerToClientModel.WORD_WRAP.equals(binaryModel.getModel())) {
-            cast().setWordWrap(binaryModel.getBooleanValue());
+        } else if (ServerToClientModel.WORD_WRAP.ordinal() == modelOrdinal) {
+            uiObject.setWordWrap(binaryModel.getBooleanValue());
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
-    }
-
-    @Override
-    public HTML cast() {
-        return (HTML) super.cast();
     }
 
 }

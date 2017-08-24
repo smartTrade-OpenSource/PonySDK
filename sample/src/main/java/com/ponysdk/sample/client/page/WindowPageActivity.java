@@ -23,24 +23,13 @@
 
 package com.ponysdk.sample.client.page;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.ponysdk.core.ui.basic.PButton;
-import com.ponysdk.core.ui.basic.PFlexTable;
-import com.ponysdk.core.ui.basic.PFlowPanel;
-import com.ponysdk.core.ui.basic.PHTML;
-import com.ponysdk.core.ui.basic.PLabel;
-import com.ponysdk.core.ui.basic.PRootLayoutPanel;
-import com.ponysdk.core.ui.basic.PScript;
-import com.ponysdk.core.ui.basic.PTextBox;
-import com.ponysdk.core.ui.basic.PVerticalPanel;
-import com.ponysdk.core.ui.basic.PWindow;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.core.ui.basic.event.PCloseEvent;
 import com.ponysdk.core.ui.basic.event.PCloseHandler;
 import com.ponysdk.core.ui.rich.PNotificationManager;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class WindowPageActivity extends SamplePageActivity implements PCloseHandler {
 
@@ -61,80 +50,64 @@ public class WindowPageActivity extends SamplePageActivity implements PCloseHand
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PVerticalPanel verticalPanel = new PVerticalPanel();
+        final PVerticalPanel verticalPanel = Element.newPVerticalPanel();
         verticalPanel.setSpacing(10);
 
         // Open popup with custom URL
-        final PFlexTable table = new PFlexTable();
-        table.setWidget(0, 0, new PLabel("URL"));
-        table.setWidget(0, 1, urlTextBox = new PTextBox("https://github.com/PonySDK/PonySDK"));
-        table.setWidget(1, 0, new PLabel("Name"));
-        table.setWidget(1, 1, nameTextBox = new PTextBox("PonySDK"));
-        table.setWidget(2, 0, new PLabel("Features"));
-        table.setWidget(2, 1, featuresTextBox = new PTextBox("width=1280,height=800,resizable,status=1"));
+        final PFlexTable table = Element.newPFlexTable();
+        table.setWidget(0, 0, Element.newPLabel("URL"));
+        table.setWidget(0, 1, urlTextBox = Element.newPTextBox("https://github.com/PonySDK/PonySDK"));
+        table.setWidget(1, 0, Element.newPLabel("Name"));
+        table.setWidget(1, 1, nameTextBox = Element.newPTextBox("PonySDK"));
+        table.setWidget(2, 0, Element.newPLabel("Features"));
+        table.setWidget(2, 1, featuresTextBox = Element.newPTextBox("width=1280,height=800,resizable,status=1"));
 
-        final PButton open = new PButton("Open new window");
-        open.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                final String url = urlTextBox.getText();
-                final String name = nameTextBox.getText();
-                final String features = featuresTextBox.getText();
-                final PWindow w = new PWindow(url, name, features);
-                w.open();
-            }
+        final PButton open = Element.newPButton("Open new window");
+        open.addClickHandler(event -> {
+            final String url = urlTextBox.getText();
+            final String name = nameTextBox.getText();
+            final String features = featuresTextBox.getText();
+            final PWindow w = Element.newPWindow(url, name, features);
+            w.open();
         });
 
         // Open popup that communicate with server
-        final PFlexTable table2 = new PFlexTable();
-        table2.setWidget(0, 0, new PLabel("Name"));
-        table2.setWidget(0, 1, popNameTextBox = new PTextBox("Popup"));
-        table2.setWidget(1, 0, new PLabel("Features"));
-        table2.setWidget(1, 1, popFeaturesTextBox = new PTextBox("width=500,height=300,resizable"));
+        final PFlexTable table2 = Element.newPFlexTable();
+        table2.setWidget(0, 0, Element.newPLabel("Name"));
+        table2.setWidget(0, 1, popNameTextBox = Element.newPTextBox("Popup"));
+        table2.setWidget(1, 0, Element.newPLabel("Features"));
+        table2.setWidget(1, 1, popFeaturesTextBox = Element.newPTextBox("width=500,height=300,resizable"));
 
-        final PButton open2 = new PButton("Open new window");
-        open2.addClickHandler(new PClickHandler() {
+        final PButton open2 = Element.newPButton("Open new window");
+        open2.addClickHandler(event -> {
+            final String disc = windows.isEmpty() ? "" : Integer.toString(windows.size());
+            final String name = popNameTextBox.getText();
+            final String features = popFeaturesTextBox.getText();
+            final MyWindow window = new MyWindow(name + disc, features);
+            window.open();
+            window.addCloseHandler(WindowPageActivity.this);
+            windows.add(window);
+        });
 
-            @Override
-            public void onClick(final PClickEvent event) {
-                final String disc = windows.size() == 0 ? "" : Integer.toString(windows.size());
-                final String name = popNameTextBox.getText();
-                final String features = popFeaturesTextBox.getText();
-                final MyWindow window = new MyWindow(name + disc, features);
-                window.open();
-                window.addCloseHandler(WindowPageActivity.this);
-                windows.add(window);
+        final PButton postHello = Element.newPButton("Post message");
+        postHello.addClickHandler(event -> {
+            for (final PWindow window : windows) {
+                PNotificationManager.showHumanizedNotification(window, "Hello from opener");
             }
         });
 
-        final PButton postHello = new PButton("Post message");
-        postHello.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                for (final PWindow window : windows) {
-                    PNotificationManager.showHumanizedNotification(window, "Hello from opener");
-                }
+        final PButton closeAllWindow = Element.newPButton("Close all windows");
+        closeAllWindow.addClickHandler(event -> {
+            for (final PWindow window : windows) {
+                window.close();
             }
         });
 
-        final PButton closeAllWindow = new PButton("Close all windows");
-        closeAllWindow.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                for (final PWindow window : windows) {
-                    window.close();
-                }
-            }
-        });
-
-        verticalPanel.add(new PHTML("<b>Simple popup</b>"));
+        verticalPanel.add(Element.newPHTML("<b>Simple popup</b>"));
         verticalPanel.add(table);
         verticalPanel.add(open);
 
-        verticalPanel.add(new PHTML("<br><br><b>Communicating popup</b>"));
+        verticalPanel.add(Element.newPHTML("<br><br><b>Communicating popup</b>"));
         verticalPanel.add(table2);
         verticalPanel.add(open2);
         verticalPanel.add(postHello);
@@ -146,47 +119,28 @@ public class WindowPageActivity extends SamplePageActivity implements PCloseHand
     private static class MyWindow extends PWindow {
 
         private int count = 1;
-        private PRootLayoutPanel rootLayoutPanel;
 
         public MyWindow(final String name, final String features) {
-            super(null, name, features);
+            super(false, null, name, features);
         }
 
         // @Override
         protected void onLoad() {
-            rootLayoutPanel = PWindow.getMain().getPRootLayoutPanel();
-
-            final PFlowPanel flow = new PFlowPanel();
-            final PButton addMessage = new PButton("Add message");
-            addMessage.addClickHandler(new PClickHandler() {
-
-                @Override
-                public void onClick(final PClickEvent event) {
-                    flow.add(new PLabel("Hello " + count++));
+            final PFlowPanel flow = Element.newPFlowPanel();
+            final PButton addMessage = Element.newPButton("Add message");
+            addMessage.addClickHandler(event -> flow.add(Element.newPLabel("Hello " + count++)));
+            final PButton clearMessage = Element.newPButton("Clear message");
+            clearMessage.addClickHandler(event -> {
+                for (int i = flow.getWidgetCount() - 1; i > 2; i--) {
+                    flow.remove(i);
                 }
             });
-            final PButton clearMessage = new PButton("Clear message");
-            clearMessage.addClickHandler(new PClickHandler() {
-
-                @Override
-                public void onClick(final PClickEvent event) {
-                    for (int i = flow.getWidgetCount() - 1; i > 2; i--) {
-                        flow.remove(i);
-                    }
-                }
-            });
-            final PButton execJs = new PButton("Exec javascript");
-            execJs.addClickHandler(new PClickHandler() {
-
-                @Override
-                public void onClick(final PClickEvent event) {
-                    PScript.execute(PWindow.getMain(), "alert('from the popup');");
-                }
-            });
+            final PButton execJs = Element.newPButton("Exec javascript");
+            execJs.addClickHandler(event -> PScript.execute(PWindow.getMain(), "alert('from the popup');"));
             flow.add(addMessage);
             flow.add(clearMessage);
             flow.add(execJs);
-            rootLayoutPanel.add(flow);
+            add(flow);
         }
 
     }
@@ -196,7 +150,7 @@ public class WindowPageActivity extends SamplePageActivity implements PCloseHand
         final PWindow source = (PWindow) closeEvent.getSource();
         final boolean remove = windows.remove(source);
         if (remove) {
-            PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(), "Window #" + source.getID() + " closed.");
+            PNotificationManager.showTrayNotification(getView().asWidget().getWindow(), "Window #" + source.getID() + " closed.");
         }
     }
 }

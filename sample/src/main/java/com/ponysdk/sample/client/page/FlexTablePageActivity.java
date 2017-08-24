@@ -23,13 +23,12 @@
 
 package com.ponysdk.sample.client.page;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PFlexTable;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PScrollPanel;
 
 public class FlexTablePageActivity extends SamplePageActivity {
-
-    private PLabel[][] labels;
 
     public FlexTablePageActivity() {
         super("Flex Table", "Table");
@@ -39,16 +38,16 @@ public class FlexTablePageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PFlexTable table = new PFlexTable();
+        final PFlexTable table = Element.newPFlexTable();
         table.setCellPadding(0);
         table.setCellSpacing(0);
         table.setSizeFull();
 
-        labels = new PLabel[100][10];
+        PLabel[][] labels = new PLabel[100][10];
 
         for (int r = 0; r < 100; r++) {
             for (int c = 0; c < 10; c++) {
-                final PLabel pLabel = new PLabel(r + "_" + c);
+                final PLabel pLabel = Element.newPLabel(r + "_" + c);
                 labels[r][c] = pLabel;
                 pLabel.setWidth("40px");
                 table.setWidget(r, c, pLabel);
@@ -57,18 +56,18 @@ public class FlexTablePageActivity extends SamplePageActivity {
 
         /*
          * UIContext.get().addConnectionListener(new ConnectionListener() {
-         * 
+         *
          * final Timer timer = new Timer();
-         * 
+         *
          * @Override
          * public void onOpen() {
-         * 
+         *
          * timer.scheduleAtFixedRate(new TimerTask() {
-         * 
+         *
          * @Override
          * public void run() {
          * UIContext.get().execute(new Runnable() {
-         * 
+         *
          * @Override
          * public void run() {
          * for (int r = 0; r < 100; r++) {
@@ -85,7 +84,7 @@ public class FlexTablePageActivity extends SamplePageActivity {
          * }
          * }, 0, 300);
          * }
-         * 
+         *
          * @Override
          * public void onClose() {
          * timer.cancel();
@@ -93,7 +92,7 @@ public class FlexTablePageActivity extends SamplePageActivity {
          * });
          */
 
-        final PScrollPanel scrollPanel = new PScrollPanel();
+        final PScrollPanel scrollPanel = Element.newPScrollPanel();
         scrollPanel.setWidget(table);
         scrollPanel.setSizeFull();
 

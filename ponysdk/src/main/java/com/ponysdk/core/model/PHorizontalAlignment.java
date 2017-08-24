@@ -24,15 +24,20 @@
 package com.ponysdk.core.model;
 
 public enum PHorizontalAlignment {
+
     ALIGN_LEFT,
     ALIGN_CENTER,
     ALIGN_RIGHT;
 
-    public byte getValue() {
+    private PHorizontalAlignment() {
+    }
+
+    public final byte getValue() {
         return (byte) ordinal();
     }
 
-    public static PHorizontalAlignment fromByte(final byte byteValue) {
+    public static final PHorizontalAlignment fromByte(final byte byteValue) {
         return PHorizontalAlignment.values()[byteValue];
     }
+
 }

@@ -23,26 +23,28 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.json.JsonObject;
+
 import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.DateConverter;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.terminal.ui.PTDatePicker;
-import com.ponysdk.core.tools.ListenerCollection;
 import com.ponysdk.core.ui.basic.event.PShowRangeEvent;
 import com.ponysdk.core.ui.basic.event.PShowRangeHandler;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 
-import javax.json.JsonObject;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Iterator;
-
 public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChangeHandler<Date> {
 
-    private final ListenerCollection<PValueChangeHandler<Date>> handlers = new ListenerCollection<>();
-    private final ListenerCollection<PShowRangeHandler<Date>> showRangeHandlers = new ListenerCollection<>();
+    private final Set<PValueChangeHandler<Date>> handlers = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private final Set<PShowRangeHandler<Date>> showRangeHandlers = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     private Date date;
 
@@ -50,14 +52,7 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     private int month = -1;
     private int day = -1;
 
-    private static String dateToString(final Collection<Date> dates) {
-        final StringBuilder asString = new StringBuilder();
-        final Iterator<Date> it = dates.iterator();
-        while (it.hasNext()) {
-            asString.append(String.valueOf(it.next().getTime()));
-            if (it.hasNext()) asString.append(PTDatePicker.DATE_SEPARATOR);
-        }
-        return asString.toString();
+    protected PDatePicker() {
     }
 
     @Override
@@ -122,7 +117,7 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
 
     @Override
     public void onValueChange(final PValueChangeEvent<Date> event) {
-        this.date = event.getValue();
+        this.date = event.getData();
         for (final PValueChangeHandler<Date> handler : handlers) {
             handler.onValueChange(event);
         }
@@ -135,12 +130,13 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
 
     @Override
     public void setValue(final Date date) {
+        if (Objects.equals(this.date, date)) return;
         this.date = date;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.DATE, date != null ? date.getTime() : -1));
+        saveUpdate(ServerToClientModel.DATE, DateConverter.toTimestamp(date));
     }
 
     public void setCurrentMonth(final Date date) {
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.TIME, date != null ? date.getTime() : -1));
+        saveUpdate(ServerToClientModel.TIME, DateConverter.toTimestamp(date));
     }
 
     /**
@@ -148,30 +144,43 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
      * next time the DatePicker is refreshed.
      */
     public final void setTransientEnabledOnDates(final boolean enabled, final Collection<Date> dates) {
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.DATE_ENABLED, dateToString(dates));
-            writer.writeModel(ServerToClientModel.ENABLED, enabled);
-        });
+        final String encodedDates = DateConverter.encode(dates);
+        if (encodedDates != null && !encodedDates.isEmpty()) {
+            saveUpdate(writer -> {
+                writer.write(ServerToClientModel.DATE_ENABLED, encodedDates);
+                writer.write(ServerToClientModel.ENABLED, enabled);
+            });
+        }
     }
 
     /**
      * Add a style name to the given dates.
      */
     public void addStyleToDates(final String styleName, final Collection<Date> dates) {
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.ADD_DATE_STYLE, dateToString(dates));
-            writer.writeModel(ServerToClientModel.STYLE_NAME, styleName);
-        });
+        final String encodedDates = DateConverter.encode(dates);
+        if (encodedDates != null && !encodedDates.isEmpty()) {
+            saveUpdate(writer -> {
+                writer.write(ServerToClientModel.ADD_DATE_STYLE, encodedDates);
+                writer.write(ServerToClientModel.STYLE_NAME, styleName);
+            });
+        }
     }
 
     /**
      * Removes the styleName from the given dates (even if it is transient).
      */
     public void removeStyleFromDates(final String styleName, final Collection<Date> dates) {
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.REMOVE_DATE_STYLE, dateToString(dates));
-            writer.writeModel(ServerToClientModel.STYLE_NAME, styleName);
-        });
+        final String encodedDates = DateConverter.encode(dates);
+        if (encodedDates != null && !encodedDates.isEmpty()) {
+            saveUpdate(writer -> {
+                writer.write(ServerToClientModel.REMOVE_DATE_STYLE, encodedDates);
+                writer.write(ServerToClientModel.STYLE_NAME, styleName);
+            });
+        }
+    }
+
+    public void setYearArrowsVisible(final boolean visible) {
+        saveUpdate(ServerToClientModel.YEAR_ARROWS_VISIBLE, visible);
     }
 
     public int getMonth() {

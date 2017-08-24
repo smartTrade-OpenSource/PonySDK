@@ -27,15 +27,14 @@ import java.time.Duration;
 
 import com.ponysdk.core.server.concurrent.PScheduler;
 import com.ponysdk.core.server.concurrent.PScheduler.UIRunnable;
-import com.ponysdk.core.ui.place.Place;
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PFlexTable;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PScrollPanel;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.place.Place;
 
 public class FlexTableForBenchPageActivity extends SamplePageActivity {
 
@@ -43,7 +42,7 @@ public class FlexTableForBenchPageActivity extends SamplePageActivity {
 
     private final PLabel[][] labels = new PLabel[100][6];
 
-    private final PTextBox textBox = new PTextBox();
+    private final PTextBox textBox = Element.newPTextBox();
 
     private UIRunnable uiRunnable;
 
@@ -66,45 +65,36 @@ public class FlexTableForBenchPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PFlexTable table = new PFlexTable();
+        final PFlexTable table = Element.newPFlexTable();
         table.setCellPadding(0);
         table.setCellSpacing(0);
         table.setSizeFull();
 
-        final PVerticalPanel bodyLayout = new PVerticalPanel();
+        final PVerticalPanel bodyLayout = Element.newPVerticalPanel();
         bodyLayout.setSizeFull();
 
-        final PButton button = new PButton("Remove last row");
-        button.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent clickEvent) {
-                table.removeRow(table.getRowCount() - 1);
-            }
-        });
+        final PButton button = Element.newPButton("Remove last row");
+        button.addClickHandler(clickEvent -> table.removeRow(table.getRowCount() - 1));
 
         bodyLayout.add(button);
         bodyLayout.add(table);
 
-        final PButton scheduleButton = new PButton("Schedule");
-        scheduleButton.addClickHandler(new PClickHandler() {
-            @Override
-            public void onClick(final PClickEvent clickEvent) {
-                if (uiRunnable != null) {
-                    uiRunnable.cancel();
-                }
+        final PButton scheduleButton = Element.newPButton("Schedule");
+        scheduleButton.addClickHandler(clickEvent -> {
+            if (uiRunnable != null) {
+                uiRunnable.cancel();
+            }
 
-                uiRunnable = PScheduler.scheduleWithFixedDelay(() -> {
-                    time++;
-                    updateTableData(100);
-                }, Duration.ZERO, Duration.ofMillis(Integer.valueOf(textBox.getText())));
+            uiRunnable = PScheduler.scheduleWithFixedDelay(() -> {
+                time++;
+                updateTableData(100);
+            }, Duration.ZERO, Duration.ofMillis(Integer.valueOf(textBox.getText())));
 
-                for (int r = 0; r < 100; r++) {
-                    for (int c = 0; c < 6; c++) {
-                        final PLabel label = new PLabel(r + "_" + c + Math.random());
-                        labels[r][c] = label;
-                        table.setWidget(r, c, label);
-                    }
+            for (int r = 0; r < 100; r++) {
+                for (int c = 0; c < 6; c++) {
+                    final PLabel label = Element.newPLabel(r + "_" + c + Math.random());
+                    labels[r][c] = label;
+                    table.setWidget(r, c, label);
                 }
             }
         });
@@ -112,7 +102,7 @@ public class FlexTableForBenchPageActivity extends SamplePageActivity {
         bodyLayout.add(textBox);
         bodyLayout.add(scheduleButton);
 
-        final PScrollPanel scrollPanel = new PScrollPanel();
+        final PScrollPanel scrollPanel = Element.newPScrollPanel();
         scrollPanel.setSizeFull();
         scrollPanel.setWidget(bodyLayout);
 

@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -25,18 +25,12 @@ package com.ponysdk.sample.client.page;
 
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.service.query.Query;
-import com.ponysdk.sample.client.event.DemoBusinessEvent;
-import com.ponysdk.core.ui.basic.PHTML;
-import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PListBox;
+import com.ponysdk.core.ui.basic.PMultiWordSuggestOracle;
 import com.ponysdk.core.ui.basic.PSuggestBox;
-import com.ponysdk.core.ui.basic.PSuggestBox.PMultiWordSuggestOracle;
-import com.ponysdk.core.ui.basic.PSuggestOracle.PSuggestion;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
-import com.ponysdk.core.ui.basic.event.PChangeEvent;
-import com.ponysdk.core.ui.basic.event.PChangeHandler;
-import com.ponysdk.core.ui.basic.event.PSelectionEvent;
-import com.ponysdk.core.ui.basic.event.PSelectionHandler;
+import com.ponysdk.sample.client.event.DemoBusinessEvent;
 
 public class SuggestBoxPageActivity extends SamplePageActivity {
 
@@ -50,21 +44,17 @@ public class SuggestBoxPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PVerticalPanel panel = new PVerticalPanel();
+        final PVerticalPanel panel = Element.newPVerticalPanel();
 
-        panel.add(new PLabel("Choose a word:"));
+        panel.add(Element.newPLabel("Choose a word:"));
 
-        final PSuggestBox suggestBox = new PSuggestBox();
+        final PSuggestBox suggestBox = Element.newPSuggestBox();
         suggestBox.setLimit(10);
 
         final PMultiWordSuggestOracle suggestOracle = (PMultiWordSuggestOracle) suggestBox.getSuggestOracle();
-        suggestBox.addSelectionHandler(new PSelectionHandler<PSuggestion>() {
-
-            @Override
-            public void onSelection(final PSelectionEvent<PSuggestion> event) {
-                final String msg = "Selected item : " + event.getSelectedItem().getReplacementString();
-                UIContext.getRootEventBus().fireEvent(new DemoBusinessEvent(msg));
-            }
+        suggestBox.addSelectionHandler(event -> {
+            final String msg = "Selected item : " + event.getSelectedItem().getReplacementString();
+            UIContext.getRootEventBus().fireEvent(new DemoBusinessEvent(msg));
         });
 
         final Query query = new Query();
@@ -80,38 +70,34 @@ public class SuggestBoxPageActivity extends SamplePageActivity {
 
         panel.add(suggestBox);
 
-        panel.add(new PHTML("<br><br>"));
+        panel.add(Element.newPHTML("<br><br>"));
 
-        panel.add(new PLabel("Manipulate the suggest box:"));
-        final PListBox operation = new PListBox(true);
+        panel.add(Element.newPLabel("Manipulate the suggest box:"));
+        final PListBox operation = Element.newPListBox(true);
         operation.addItem("Select \"Friesian horse\"", 0);
         operation.addItem("Get textbox value", 1);
         operation.addItem("Enable/Disable textbox", 2);
         operation.addItem("Clear", 3);
         operation.addItem("Add items", 4);
-        operation.addChangeHandler(new PChangeHandler() {
+        operation.addChangeHandler(event -> {
+            final Integer item = (Integer) operation.getSelectedValue();
+            if (item == null) return;
 
-            @Override
-            public void onChange(final PChangeEvent event) {
-                final Integer item = (Integer) operation.getSelectedValue();
-                if (item == null) return;
-
-                if (item.equals(0)) {
-                    suggestBox.setText("Friesian horse");
-                } else if (item.equals(1)) {
-                    UIContext.getRootEventBus().fireEvent(new DemoBusinessEvent("Text content: " + suggestBox.getText()));
-                } else if (item.equals(2)) {
-                    suggestBox.getTextBox().setEnabled(!suggestBox.getTextBox().isEnabled());
-                } else if (item.equals(3)) {
-                    final PMultiWordSuggestOracle oracle = (PMultiWordSuggestOracle) suggestBox.getSuggestOracle();
-                    oracle.clear();
-                } else if (item.equals(4)) {
-                    current++;
-                    // final Result<List<Pony>> ponys = command.execute();
-                    // for (final Pony pony : ponys.getData()) {
-                    // suggestOracle.add(pony.getName() + " " + current);
-                    // }
-                }
+            if (item.equals(0)) {
+                suggestBox.setText("Friesian horse");
+            } else if (item.equals(1)) {
+                UIContext.getRootEventBus().fireEvent(new DemoBusinessEvent("Text content: " + suggestBox.getText()));
+            } else if (item.equals(2)) {
+                suggestBox.getTextBox().setEnabled(!suggestBox.getTextBox().isEnabled());
+            } else if (item.equals(3)) {
+                final PMultiWordSuggestOracle oracle = (PMultiWordSuggestOracle) suggestBox.getSuggestOracle();
+                oracle.clear();
+            } else if (item.equals(4)) {
+                current++;
+                // final Result<List<Pony>> ponys = command.execute();
+                // for (final Pony pony : ponys.getData()) {
+                // suggestOracle.add(pony.getName() + " " + current);
+                // }
             }
         });
         panel.add(operation);

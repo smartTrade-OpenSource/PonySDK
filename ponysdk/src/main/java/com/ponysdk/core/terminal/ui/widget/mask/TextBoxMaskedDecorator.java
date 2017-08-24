@@ -23,21 +23,14 @@
 
 package com.ponysdk.core.terminal.ui.widget.mask;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
-import com.google.gwt.event.dom.client.FocusEvent;
-import com.google.gwt.event.dom.client.FocusHandler;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.dom.client.KeyDownHandler;
-import com.google.gwt.event.dom.client.KeyPressEvent;
-import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.ui.TextBox;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class TextBoxMaskedDecorator implements KeyPressHandler, FocusHandler, KeyDownHandler {
 
@@ -105,13 +98,7 @@ public class TextBoxMaskedDecorator implements KeyPressHandler, FocusHandler, Ke
 
     @Override
     public void onFocus(final FocusEvent event) {
-        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-
-            @Override
-            public void execute() {
-                setInitialPosition();
-            }
-        });
+        Scheduler.get().scheduleDeferred(this::setInitialPosition);
     }
 
     protected void setInitialPosition() {

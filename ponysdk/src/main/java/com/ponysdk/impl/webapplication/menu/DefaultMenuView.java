@@ -18,6 +18,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PSimpleLayoutPanel;
 import com.ponysdk.core.ui.basic.PTree;
 import com.ponysdk.core.ui.basic.PTreeItem;
@@ -33,7 +34,7 @@ public class DefaultMenuView extends PSimpleLayoutPanel implements MenuView {
     private final List<PSelectionHandler<MenuItem>> selectionHandlers = new ArrayList<>();
 
     public DefaultMenuView() {
-        tree = new PTree();
+        tree = Element.newPTree();
         setWidget(tree);
         setSizeFull();
         tree.setSizeFull();
@@ -53,7 +54,7 @@ public class DefaultMenuView extends PSimpleLayoutPanel implements MenuView {
     private PTreeItem createCategoryItemIfNeeded(final String category) {
         PTreeItem categoryItem = categoryByName.get(category);
         if (categoryItem == null) {
-            categoryItem = tree.addItem(category);
+            categoryItem = tree.add(category);
             categoryByName.put(category, categoryItem);
         }
         return categoryItem;
@@ -63,8 +64,8 @@ public class DefaultMenuView extends PSimpleLayoutPanel implements MenuView {
     public void addItem(final MenuItem menuItem) {
         final PTreeItem categoryItem = createCategoryItemIfNeeded(menuItem.getCategories().iterator().next());
         if (menuItem.getName() != null) {
-            final PTreeItem captionItem = new PTreeItem(menuItem.getName());
-            categoryItem.addItem(captionItem);
+            final PTreeItem captionItem = Element.newPTreeItem(menuItem.getName());
+            categoryItem.add(captionItem);
             itemsByTree.put(captionItem, menuItem);
             treeByMenuItem.put(menuItem, captionItem);
         }

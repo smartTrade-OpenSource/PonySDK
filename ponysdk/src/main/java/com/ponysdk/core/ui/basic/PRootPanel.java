@@ -23,14 +23,10 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.ui.main.EntryPoint;
+import com.ponysdk.core.writer.ModelWriter;
 
 /**
  * The panel to which all other widgets must ultimately be added. RootPanels are never created
@@ -42,69 +38,20 @@ import com.ponysdk.core.ui.main.EntryPoint;
  */
 public class PRootPanel extends PAbsolutePanel {
 
-    private static final String KEY = PRootPanel.class.getSimpleName();
-
     private final String id;
 
-    private PRootPanel(final int windowID, final String id) {
-        this.windowID = windowID;
+    PRootPanel(final String id) {
         this.id = id;
-        init();
-    }
-
-    protected final static PRootPanel get(final int windowID) {
-        return get(windowID, null);
-    }
-
-    public final static PRootPanel get(final int windowID, final String id) {
-        final Map<String, PRootPanel> childs = ensureChilds(windowID);
-        PRootPanel defaultRoot = childs.get(id);
-        if (defaultRoot == null) {
-            defaultRoot = new PRootPanel(windowID, id);
-            childs.put(id, defaultRoot);
-        }
-        return defaultRoot;
-    }
-
-    private static Map<String, PRootPanel> ensureChilds(final int windowID) {
-        final UIContext session = UIContext.get();
-
-        final String key = KEY + windowID;
-
-        Map<String, PRootPanel> rootByIDs = session.getAttribute(key);
-        if (rootByIDs == null) {
-            rootByIDs = new HashMap<>();
-            session.setAttribute(key, rootByIDs);
-        }
-
-        return rootByIDs;
     }
 
     @Override
-    protected void enrichOnInit(final Parser parser) {
-        super.enrichOnInit(parser);
-        if (id != null) parser.parse(ServerToClientModel.ROOT_ID, id);
+    protected void enrichOnInit(final ModelWriter writer) {
+        super.enrichOnInit(writer);
+        if (id != null) writer.write(ServerToClientModel.ROOT_ID, id);
     }
 
     @Override
     protected WidgetType getWidgetType() {
         return WidgetType.ROOT_PANEL;
-    }
-
-    /**
-     * Clears the rootPanel. If clearDom is true, then also remove any DOM elements that are not
-     * widgets.
-     * <p>
-     * By default {@link #clear()} will only remove children that are widgets.
-     * This method also provides the option to remove all children including the non-widget DOM
-     * elements that are directly added.
-     *
-     * @param clearDom
-     *            if {@code true} this method will also remove any DOM elements
-     *            that are not widgets.
-     */
-    public void clear(final boolean clearDom) {
-        clear();
-        if (clearDom) saveUpdate(writer -> writer.writeModel(ServerToClientModel.CLEAR_DOM, clearDom));
     }
 }

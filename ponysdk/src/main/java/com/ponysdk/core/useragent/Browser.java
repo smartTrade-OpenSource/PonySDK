@@ -425,7 +425,7 @@ public enum Browser {
 
     private Browser checkUserAgent(final String agentString) {
         if (this.isInUserAgentString(agentString)) {
-            if (this.children.size() > 0) {
+            if (!this.children.isEmpty()) {
                 for (final Browser childBrowser : this.children) {
                     final Browser match = childBrowser.checkUserAgent(agentString);
                     if (match != null) {

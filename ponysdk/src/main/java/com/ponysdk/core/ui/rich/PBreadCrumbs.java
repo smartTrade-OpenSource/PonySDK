@@ -23,17 +23,18 @@
 
 package com.ponysdk.core.ui.rich;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PAnchor;
 import com.ponysdk.core.ui.basic.PElement;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.basic.event.PSelectionEvent;
 import com.ponysdk.core.ui.basic.event.PSelectionHandler;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class PBreadCrumbs extends PElement {
 
@@ -121,7 +122,7 @@ public class PBreadCrumbs extends PElement {
         void unselect() {
             setInnerText(null);
 
-            anchor = new PAnchor(item);
+            anchor = Element.newPAnchor(item);
             anchor.addClickHandler(this);
 
             add(anchor);

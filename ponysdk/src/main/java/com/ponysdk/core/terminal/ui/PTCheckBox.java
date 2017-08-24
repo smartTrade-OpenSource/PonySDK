@@ -23,48 +23,67 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.PCheckBoxState;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
-public class PTCheckBox extends PTButtonBase<CheckBox> {
+public class PTCheckBox<T extends CheckBox> extends PTButtonBase<T> {
 
-    @Override
-    protected CheckBox createUIObject() {
-        return new CheckBox();
-    }
+    private Element inputElement;
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
         super.create(buffer, objectId, uiService);
         addValueChangeHandler(uiService);
+
+        inputElement = uiObject.getElement();
+        final Element child = inputElement.getFirstChildElement();
+        if (child != null) inputElement = child;
+    }
+
+    @Override
+    protected T createUIObject() {
+        return (T) new CheckBox();
     }
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.VALUE_CHECKBOX.equals(binaryModel.getModel())) {
-            uiObject.setValue(binaryModel.getBooleanValue());
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.VALUE_CHECKBOX.ordinal() == modelOrdinal) {
+            final PCheckBoxState state = PCheckBoxState.fromByte(binaryModel.getByteValue());
+            final boolean indeterminate = PCheckBoxState.INDETERMINATE.equals(state);
+            if (!indeterminate) uiObject.setValue(PCheckBoxState.CHECKED.equals(state));
+            setIndeterminate(inputElement, indeterminate);
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
 
     protected void addValueChangeHandler(final UIBuilder uiService) {
-        uiObject.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-
-            @Override
-            public void onValueChange(final ValueChangeEvent<Boolean> event) {
-                final PTInstruction instruction = new PTInstruction(getObjectID());
-                instruction.put(ClientToServerModel.HANDLER_BOOLEAN_VALUE_CHANGE, event.getValue());
-                uiService.sendDataToServer(uiObject, instruction);
-            }
+        uiObject.addValueChangeHandler(event -> {
+            final PTInstruction instruction = new PTInstruction(getObjectID());
+            instruction.put(ClientToServerModel.HANDLER_BOOLEAN_VALUE_CHANGE, event.getValue());
+            uiService.sendDataToServer(uiObject, instruction);
         });
     }
+
+    /**
+     * JavaScript to give an ID'd element in a form the focus
+     *
+     * @param checkbox
+     *            Element to manipulate
+     * @param indeterminate
+     *            True if indeterminate, false if not
+     */
+    public static native void setIndeterminate(Element checkbox, boolean indeterminate) /*-{
+                                                                                        checkbox.indeterminate = indeterminate;
+                                                                                        }-*/;
 
 }

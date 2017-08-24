@@ -23,15 +23,12 @@
 
 package com.ponysdk.sample.client.page;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PCheckBox;
 import com.ponysdk.core.ui.basic.PHTML;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.basic.event.PContextMenuEvent;
 import com.ponysdk.core.ui.basic.event.PContextMenuHandler;
-import com.ponysdk.core.ui.basic.event.PDoubleClickEvent;
-import com.ponysdk.core.ui.basic.event.PDoubleClickHandler;
 import com.ponysdk.core.ui.basic.event.PMouseEvent;
 import com.ponysdk.core.ui.model.PEventType;
 import com.ponysdk.core.ui.rich.PNotificationManager;
@@ -46,44 +43,25 @@ public class HTMLPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PVerticalPanel verticalPanel = new PVerticalPanel();
+        final PVerticalPanel verticalPanel = Element.newPVerticalPanel();
         verticalPanel.setSpacing(10);
 
-        final PHTML htmlBold = new PHTML("<b>Pony Bold</b> and <font color='red'>Pony Red</font> using HTML");
-        final PHTML htmlClickable = new PHTML(
-                "<span style='cursor: pointer;border: 1px solid black;color:white;background-color:gray;margin:5px;padding:10px'>click me!</span> using HTML and CSS");
-        htmlClickable.addClickHandler(new PClickHandler() {
+        final PHTML htmlBold = Element.newPHTML("<b>Pony Bold</b> and <font color='red'>Pony Red</font> using HTML");
+        final PHTML htmlClickable = Element.newPHTML(
+            "<span style='cursor: pointer;border: 1px solid black;color:white;background-color:gray;margin:5px;padding:10px'>click me!</span> using HTML and CSS");
+        htmlClickable.addClickHandler(clickEvent -> logEvent("HTML clicked", clickEvent));
 
-            @Override
-            public void onClick(final PClickEvent clickEvent) {
-                logEvent("HTML clicked", clickEvent);
-            }
+        final PHTML htmlDoubleClickable = Element.newPHTML(
+            "<span style='cursor: pointer;border: 1px solid black;color:white;background-color:gray;margin:5px;padding:10px'>double click me!</span> using HTML and CSS");
+        htmlDoubleClickable.addDoubleClickHandler(clickEvent -> logEvent("HTML double clicked", clickEvent));
 
-        });
-
-        final PHTML htmlDoubleClickable = new PHTML(
-                "<span style='cursor: pointer;border: 1px solid black;color:white;background-color:gray;margin:5px;padding:10px'>double click me!</span> using HTML and CSS");
-        htmlDoubleClickable.addDoubleClickHandler(new PDoubleClickHandler() {
-
-            @Override
-            public void onDoubleClick(final PDoubleClickEvent clickEvent) {
-                logEvent("HTML double clicked", clickEvent);
-            }
-
-        });
-
-        final PHTML htmlWithContextMenu = new PHTML(
-                "<span style='cursor: pointer;border: 1px solid black;color:white;background-color:gray;margin:5px;padding:10px'>context menu on me!</span> using HTML and CSS");
+        final PHTML htmlWithContextMenu = Element.newPHTML(
+            "<span style='cursor: pointer;border: 1px solid black;color:white;background-color:gray;margin:5px;padding:10px'>context menu on me!</span> using HTML and CSS");
         htmlWithContextMenu.preventEvent(PEventType.ONCONTEXTMENU);
-        htmlWithContextMenu.addDomHandler(new PContextMenuHandler() {
+        htmlWithContextMenu.addDomHandler((PContextMenuHandler) event -> PNotificationManager
+            .showHumanizedNotification(getView().asWidget().getWindow(), "Context menu triggered"), PContextMenuEvent.TYPE);
 
-            @Override
-            public void onContextMenu(final PContextMenuEvent event) {
-                PNotificationManager.showHumanizedNotification(getView().asWidget().getWindowID(), "Context menu triggered");
-            }
-        }, PContextMenuEvent.TYPE);
-
-        final PCheckBox checkBox = new PCheckBox();
+        final PCheckBox checkBox = Element.newPCheckBox();
         checkBox.setHTML("<font color='blue'>Pony-SDK</font>");
 
         verticalPanel.add(htmlBold);
@@ -110,6 +88,6 @@ public class HTMLPageActivity extends SamplePageActivity {
     }
 
     protected void logEvent(final String message, final PMouseEvent<?> clickEvent) {
-        PNotificationManager.showHumanizedNotification(getView().asWidget().getWindowID(), message);
+        PNotificationManager.showHumanizedNotification(getView().asWidget().getWindow(), message);
     }
 }

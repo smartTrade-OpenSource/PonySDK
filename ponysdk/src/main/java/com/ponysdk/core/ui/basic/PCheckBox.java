@@ -32,9 +32,9 @@ import java.util.Objects;
 import javax.json.JsonObject;
 
 import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.PCheckBoxState;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 
@@ -51,14 +51,14 @@ import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
  */
 public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValueChangeHandler<Boolean> {
 
-    private List<PValueChangeHandler<Boolean>> handlers;
+    protected List<PValueChangeHandler<Boolean>> handlers;
 
-    private Boolean value = Boolean.FALSE;
+    protected PCheckBoxState state = PCheckBoxState.UNCHECKED;
 
     /**
      * Creates a check box with no label.
      */
-    public PCheckBox() {
+    protected PCheckBox() {
     }
 
     /**
@@ -67,14 +67,8 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
      * @param label
      *            the check box's label
      */
-    public PCheckBox(final String label) {
+    protected PCheckBox(final String label) {
         super(label);
-    }
-
-    @Override
-    protected void enrichOnInit(final Parser parser) {
-        super.enrichOnInit(parser);
-        if (this.value != Boolean.FALSE) parser.parse(ServerToClientModel.VALUE_CHECKBOX, this.value);
     }
 
     @Override
@@ -98,6 +92,16 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
         return handlers != null ? Collections.unmodifiableCollection(handlers) : Collections.emptyList();
     }
 
+    public void setState(final PCheckBoxState state) {
+        if (Objects.equals(this.state, state)) return;
+        this.state = state;
+        saveUpdate(ServerToClientModel.VALUE_CHECKBOX, state.getValue());
+    }
+
+    public PCheckBoxState getState() {
+        return state;
+    }
+
     /**
      * Determines whether this check box is currently checked.
      *
@@ -106,7 +110,7 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
      */
     @Override
     public Boolean getValue() {
-        return value;
+        return PCheckBoxState.CHECKED.equals(state);
     }
 
     /**
@@ -117,28 +121,30 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
      */
     @Override
     public void setValue(final Boolean value) {
-        if (Objects.equals(this.value, value)) return;
-        this.value = Boolean.TRUE.equals(value);
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.VALUE_CHECKBOX, this.value));
+        setState(Boolean.TRUE.equals(value) ? PCheckBoxState.CHECKED : PCheckBoxState.UNCHECKED);
     }
 
     @Override
     public void onValueChange(final PValueChangeEvent<Boolean> event) {
-        this.value = event.getValue();
-        if (handlers == null) return;
-        for (final PValueChangeHandler<Boolean> handler : handlers) {
-            handler.onValueChange(event);
-        }
+        final PCheckBoxState state = Boolean.TRUE.equals(event.getData()) ? PCheckBoxState.CHECKED : PCheckBoxState.UNCHECKED;
+        if (Objects.equals(this.state, state)) return;
+        this.state = state;
+        if (handlers != null) handlers.forEach(handler -> handler.onValueChange(event));
     }
 
     @Override
     public void onClientData(final JsonObject jsonObject) {
         if (jsonObject.containsKey(ClientToServerModel.HANDLER_BOOLEAN_VALUE_CHANGE.toStringValue())) {
             onValueChange(new PValueChangeEvent<>(this,
-                    jsonObject.getBoolean(ClientToServerModel.HANDLER_BOOLEAN_VALUE_CHANGE.toStringValue())));
+                jsonObject.getBoolean(ClientToServerModel.HANDLER_BOOLEAN_VALUE_CHANGE.toStringValue())));
         } else {
             super.onClientData(jsonObject);
         }
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + ", state=" + state;
     }
 
 }

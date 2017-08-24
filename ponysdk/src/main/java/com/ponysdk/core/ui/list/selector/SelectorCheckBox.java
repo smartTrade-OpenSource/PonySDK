@@ -45,7 +45,6 @@ public class SelectorCheckBox<T> extends PCheckBox implements Selectable<T> {
         onValueChange(new PValueChangeEvent<>(this, false));
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public T getSelectedData() {
         if (getValue()) return (T) data;

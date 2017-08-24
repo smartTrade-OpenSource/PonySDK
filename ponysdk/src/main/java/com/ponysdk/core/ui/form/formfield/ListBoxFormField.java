@@ -26,6 +26,7 @@ package com.ponysdk.core.ui.form.formfield;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PListBox;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 import com.ponysdk.core.ui.form.dataconverter.DataConverter;
@@ -33,26 +34,42 @@ import com.ponysdk.core.ui.form.dataconverter.DataConverter;
 public class ListBoxFormField<T> extends AbstractFormField<T, PListBox> {
 
     public ListBoxFormField() {
-        this(new PListBox(), null);
+        this(false);
+    }
+
+    public ListBoxFormField(final boolean dirtyMode) {
+        this(Element.newPListBox(), null, dirtyMode);
     }
 
     public ListBoxFormField(final DataConverter<String, T> dataProvider) {
-        this(new PListBox(), dataProvider);
+        this(dataProvider, false);
+    }
+
+    public ListBoxFormField(final DataConverter<String, T> dataProvider, final boolean dirtyMode) {
+        this(Element.newPListBox(), dataProvider, dirtyMode);
     }
 
     public ListBoxFormField(final PListBox widget) {
-        this(widget, null);
+        this(widget, false);
+    }
+
+    public ListBoxFormField(final PListBox widget, final boolean dirtyMode) {
+        this(widget, null, dirtyMode);
     }
 
     public ListBoxFormField(final Map<String, T> datas) {
-        this(new PListBox(), null);
+        this(Element.newPListBox());
         for (final Entry<String, T> entry : datas.entrySet()) {
             widget.addItem(entry.getKey(), entry.getValue());
         }
     }
 
     public ListBoxFormField(final PListBox widget, final DataConverter<String, T> dataProvider) {
-        super(widget, dataProvider);
+        super(widget, dataProvider, false);
+    }
+
+    public ListBoxFormField(final PListBox widget, final DataConverter<String, T> dataProvider, final boolean dirtyMode) {
+        super(widget, dataProvider, dirtyMode);
     }
 
     @Override
@@ -66,7 +83,6 @@ public class ListBoxFormField<T> extends AbstractFormField<T, PListBox> {
         widget.setSelectedIndex(-1);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public T getValue() {
         if (dataProvider != null) return dataProvider.to(widget.getSelectedItem());
@@ -80,6 +96,7 @@ public class ListBoxFormField<T> extends AbstractFormField<T, PListBox> {
 
     @Override
     public void setEnabled(final boolean enabled) {
+        super.setEnabled(enabled);
         widget.setEnabled(enabled);
     }
 

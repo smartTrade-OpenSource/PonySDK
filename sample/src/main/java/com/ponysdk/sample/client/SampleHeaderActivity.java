@@ -23,17 +23,15 @@
 
 package com.ponysdk.sample.client;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PAnchor;
 import com.ponysdk.core.ui.basic.PDialogBox;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PPopupPanel;
-import com.ponysdk.core.ui.basic.PPopupPanel.PPositionCallback;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
-import com.ponysdk.core.ui.basic.event.PCloseEvent;
-import com.ponysdk.core.ui.basic.event.PCloseHandler;
 import com.ponysdk.core.ui.rich.POptionPane;
 import com.ponysdk.core.ui.rich.POptionPane.PActionHandler;
 import com.ponysdk.core.ui.rich.POptionPane.POption;
@@ -52,87 +50,71 @@ public class SampleHeaderActivity extends HeaderActivity implements PClickHandle
     }
 
     private PWidget createUserAccountMenu(final User userLogged) {
-        final PAnchor optionsAnchor = new PAnchor(userLogged.getLogin());
+        final PAnchor optionsAnchor = Element.newPAnchor(userLogged.getLogin());
         optionsAnchor.ensureDebugId("options_anchor");
         // optionsAnchor.addStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU);
 
-        popup = new PPopupPanel(getView().asWidget().getWindowID());
+        popup = Element.newPPopupPanel();
+        getView().asWidget().getWindow().add(popup);
         // popup.addStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_POPUP);
 
-        final PVerticalPanel panel = new PVerticalPanel();
-        final PLabel userName = new PLabel(userLogged.getName());
+        final PVerticalPanel panel = Element.newPVerticalPanel();
+        final PLabel userName = Element.newPLabel(userLogged.getName());
         // userName.addStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_POPUP_USER_NAME);
         panel.add(userName);
 
-        final PLabel userLogin = new PLabel(userLogged.getLogin());
+        final PLabel userLogin = Element.newPLabel(userLogged.getLogin());
         // userLogin.addStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_POPUP_USER_LOGIN);
         panel.add(userLogin);
 
-        final PAnchor signOutAnchor = new PAnchor("Sign out");
+        final PAnchor signOutAnchor = Element.newPAnchor("Sign out");
 
         panel.add(signOutAnchor);
         popup.setWidget(panel);
 
         signOutAnchor.ensureDebugId("sign_out_anchor");
-        signOutAnchor.addClickHandler(new PClickHandler() {
+        signOutAnchor.addClickHandler(clickEvent -> {
+            // optionsAnchor.removeStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_SELECTED);
+            popup.hide();
 
-            @Override
-            public void onClick(final PClickEvent clickEvent) {
-                // optionsAnchor.removeStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_SELECTED);
-                popup.hide();
+            final POptionPane optionPane = POptionPane.showConfirmDialog(getView().asWidget().getWindow(), new PActionHandler() {
 
-                final POptionPane optionPane = POptionPane.showConfirmDialog(getView().asWidget().getWindowID(), new PActionHandler() {
-
-                    @Override
-                    public void onAction(final PDialogBox dialogBox, final String option) {
-                        if (POption.YES_OPTION.equals(option)) {
-                            dialogBox.hide();
-                            final UserLoggedOutEvent userLoggedOutEvent = new UserLoggedOutEvent(this, userLogged);
-                            fireEvent(userLoggedOutEvent);
-                        } else {
-                            dialogBox.hide();
-                        }
+                @Override
+                public void onAction(final PDialogBox dialogBox, final String option) {
+                    if (POption.YES_OPTION.equals(option)) {
+                        dialogBox.hide();
+                        final UserLoggedOutEvent userLoggedOutEvent = new UserLoggedOutEvent(this, userLogged);
+                        fireEvent(userLoggedOutEvent);
+                    } else {
+                        dialogBox.hide();
                     }
-                }, "Really logout user " + userLogged.getName() + " ?", "Sign out", POptionType.YES_NO_OPTION);
+                }
+            }, "Really logout user " + userLogged.getName() + " ?", "Sign out", POptionType.YES_NO_OPTION);
 
-                optionPane.asWidget().ensureDebugId("sign_out_dialog");
-            }
+            optionPane.asWidget().ensureDebugId("sign_out_dialog");
         });
 
-        optionsAnchor.addClickHandler(new PClickHandler() {
+        optionsAnchor.addClickHandler(clickEvent -> {
+            if (popup.isShowing()) {
+                popup.hide();
+            } else {
+                // optionsAnchor.addStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_SELECTED);
+                popup.setPopupPositionAndShow((offsetWidth, offsetHeight, windowWidth, windowHeight) -> {
+                    final int left = windowWidth - 250;
+                    popup.setPopupPosition(left, 26);
 
-            @Override
-            public void onClick(final PClickEvent clickEvent) {
-                if (popup.isShowing()) {
-                    popup.hide();
-                } else {
-                    // optionsAnchor.addStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_SELECTED);
-                    popup.setPopupPositionAndShow(new PPositionCallback() {
-
-                        @Override
-                        public void setPosition(final int offsetWidth, final int offsetHeight, final int windowWidth,
-                                final int windowHeight) {
-                            final int left = windowWidth - 250;
-                            popup.setPopupPosition(left, 26);
-
-                            // PonySession.getCurrent().getRootLayoutPanel().addDomHandler(SampleHeaderActivity.this,
-                            // PClickEvent.TYPE);
-                        }
-                    });
-                }
+                    // PonySession.getCurrent().getRootLayoutPanel().addDomHandler(SampleHeaderActivity.this,
+                    // PClickEvent.TYPE);
+                });
             }
         });
 
         popup.addDomHandler(SampleHeaderActivity.this, PClickEvent.TYPE);
 
-        popup.addCloseHandler(new PCloseHandler() {
-
-            @Override
-            public void onClose(final PCloseEvent closeEvent) {
-                // optionsAnchor.removeStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_SELECTED);
-                // PonySession.getCurrent().getRootLayoutPanel().removeHandler(SampleHeaderActivity.this,
-                // PClickEvent.TYPE);
-            }
+        popup.addCloseHandler(closeEvent -> {
+            // optionsAnchor.removeStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_SELECTED);
+            // PonySession.getCurrent().getRootLayoutPanel().removeHandler(SampleHeaderActivity.this,
+            // PClickEvent.TYPE);
         });
 
         return optionsAnchor;
@@ -140,7 +122,6 @@ public class SampleHeaderActivity extends HeaderActivity implements PClickHandle
 
     @Override
     public void onClick(final PClickEvent event) {
-        if (popup.isShowing())
-            popup.hide();
+        if (popup.isShowing()) popup.hide();
     }
 }

@@ -49,14 +49,13 @@ public class StreamServiceServlet extends HttpServlet {
 
     private static void streamRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         try {
-            final Application application = SessionManager.get().getApplication(req.getSession().getId());
-            if (application != null) {
-                final Integer uiContextID = Integer.parseInt(req.getParameter(ClientToServerModel.UI_CONTEXT_ID.toStringValue()));
-                final UIContext uiContext = application.getUIContext(uiContextID);
-                final StreamHandler streamHandler = uiContext.removeStreamListener(
-                        Integer.parseInt(req.getParameter(ClientToServerModel.STREAM_REQUEST_ID.toStringValue())));
-                streamHandler.onStream(req, resp);
-            }
+            final String applicationId = req.getParameter(ClientToServerModel.APPLICATION_ID.toStringValue());
+            final Application application = SessionManager.get().getApplication(applicationId);
+            final Integer uiContextID = Integer.parseInt(req.getParameter(ClientToServerModel.UI_CONTEXT_ID.toStringValue()));
+            final UIContext uiContext = application.getUIContext(uiContextID);
+            final StreamHandler streamHandler = uiContext
+                .removeStreamListener(Integer.parseInt(req.getParameter(ClientToServerModel.STREAM_REQUEST_ID.toStringValue())));
+            streamHandler.onStream(req, resp, uiContext);
         } catch (final Exception e) {
             log.error("Cannot stream request", e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());

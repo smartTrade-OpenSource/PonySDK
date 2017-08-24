@@ -25,17 +25,8 @@ package com.ponysdk.core.ui.list;
 
 import java.util.List;
 
+@FunctionalInterface
 public interface HasPData<T> {
-
-    PSelectionModel<T> getSelectionModel();
-
-    void setSelectionModel(PSelectionModel<T> selectionModel);
-
-    T getVisibleItem(int indexOnPage);
-
-    int getVisibleItemCount();
-
-    Iterable<T> getVisibleItems();
 
     void setData(List<T> values);
 

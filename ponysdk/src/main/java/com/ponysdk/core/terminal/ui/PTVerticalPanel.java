@@ -27,7 +27,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
-import com.ponysdk.core.terminal.ui.alignment.AlignmentConverter;
+import com.ponysdk.core.terminal.ui.converter.GWTConverter;
 
 public class PTVerticalPanel extends PTCellPanel<VerticalPanel> {
 
@@ -49,23 +49,22 @@ public class PTVerticalPanel extends PTCellPanel<VerticalPanel> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.BORDER_WIDTH.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.BORDER_WIDTH.ordinal() == modelOrdinal) {
             uiObject.setBorderWidth(binaryModel.getIntValue());
             return true;
-        }
-        if (ServerToClientModel.SPACING.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.SPACING.ordinal() == modelOrdinal) {
             uiObject.setSpacing(binaryModel.getIntValue());
             return true;
-        }
-        if (ServerToClientModel.HORIZONTAL_ALIGNMENT.equals(binaryModel.getModel())) {
-            uiObject.setHorizontalAlignment(AlignmentConverter.asHorizontalAlignmentConstant(binaryModel));
+        } else if (ServerToClientModel.HORIZONTAL_ALIGNMENT.ordinal() == modelOrdinal) {
+            uiObject.setHorizontalAlignment(GWTConverter.asHorizontalAlignmentConstant(binaryModel.getByteValue()));
             return true;
-        }
-        if (ServerToClientModel.VERTICAL_ALIGNMENT.equals(binaryModel.getModel())) {
-            uiObject.setVerticalAlignment(AlignmentConverter.asVerticalAlignmentConstant(binaryModel));
+        } else if (ServerToClientModel.VERTICAL_ALIGNMENT.ordinal() == modelOrdinal) {
+            uiObject.setVerticalAlignment(GWTConverter.asVerticalAlignmentConstant(binaryModel.getByteValue()));
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-
-        return super.update(buffer, binaryModel);
     }
+
 }

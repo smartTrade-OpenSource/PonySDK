@@ -23,31 +23,26 @@
 
 package com.ponysdk.core.terminal;
 
-import com.google.gwt.core.client.EntryPoint;
-import org.timepedia.exporter.client.ExporterUtil;
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.gwt.core.client.EntryPoint;
+
 public class CommunicationEntryPoint implements EntryPoint {
 
-    private final static Logger log = Logger.getLogger(CommunicationEntryPoint.class.getName());
+    private static final Logger log = Logger.getLogger(CommunicationEntryPoint.class.getName());
 
     @Override
     public void onModuleLoad() {
-        ExporterUtil.exportAll();
-
         if (useExternalStart()) {
             if (log.isLoggable(Level.INFO))
                 log.info("'onPonySDKModuleLoaded' is detected, PonySDK must be instanciate by an external javascript");
             onModuleLoaded();
         } else {
-            if (log.isLoggable(Level.INFO))
-                log.info("Create PonySDK using the default entry point");
-            final PonySDK ponysdk = PonySDK.constructor();
+            if (log.isLoggable(Level.INFO)) log.info("Create PonySDK using the default entry point");
+            final PonySDK ponysdk = new PonySDK();
             ponysdk.start();
         }
-
     }
 
     private native boolean useExternalStart() /*-{

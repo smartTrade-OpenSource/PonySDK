@@ -24,13 +24,10 @@
 package com.ponysdk.sample.client.page;
 
 import com.ponysdk.core.model.PHorizontalAlignment;
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PFlexTable;
 import com.ponysdk.core.ui.basic.PListBox;
-import com.ponysdk.core.ui.basic.event.PChangeEvent;
-import com.ponysdk.core.ui.basic.event.PChangeHandler;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.form.Form;
 import com.ponysdk.core.ui.form.FormFieldComponent;
 import com.ponysdk.core.ui.form.FormFieldComponent.CaptionOrientation;
@@ -56,7 +53,7 @@ public class FormPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PFlexTable panel = new PFlexTable();
+        final PFlexTable panel = Element.newPFlexTable();
 
         final Form form = new Form();
 
@@ -71,7 +68,7 @@ public class FormPageActivity extends SamplePageActivity {
         final CheckBoxFormField field5 = new CheckBoxFormField();
         field5.setValidator(new UncheckedFieldValidator());
 
-        final PListBox listBox = new PListBox(true);
+        final PListBox listBox = Element.newPListBox(true);
         listBox.addItem("Item 1");
         listBox.addItem("Item 2");
         listBox.addItem("Item 3");
@@ -116,7 +113,7 @@ public class FormPageActivity extends SamplePageActivity {
         final FormFieldComponent formFieldComponent9 = new FormFieldComponent("field9", field9);
         final FormFieldComponent formFieldComponent10 = new FormFieldComponent("field10", field10);
 
-        final PFlexTable formLayout = new PFlexTable();
+        final PFlexTable formLayout = Element.newPFlexTable();
         formLayout.addStyleName("cell-top");
         formLayout.setWidget(0, 0, formFieldComponent1);
         formLayout.setWidget(0, 1, formFieldComponent2);
@@ -129,46 +126,34 @@ public class FormPageActivity extends SamplePageActivity {
         formLayout.setWidget(4, 0, formFieldComponent9);
         formLayout.setWidget(4, 1, formFieldComponent10);
 
-        final PButton validateButton = new PButton("Validate");
-        validateButton.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent clickEvent) {
-                final boolean isValid = form.isValid();
-                PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(),
-                        "The form is valid? " + (isValid ? "YES" : "NO"));
-            }
+        final PButton validateButton = Element.newPButton("Validate");
+        validateButton.addClickHandler(clickEvent -> {
+            final boolean isValid = form.isValid();
+            PNotificationManager.showTrayNotification(getView().asWidget().getWindow(),
+                "The form is valid? " + (isValid ? "YES" : "NO"));
         });
 
-        final PButton resetButton = new PButton("Reset");
-        resetButton.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent clickEvent) {
-                form.reset();
-                PNotificationManager.showHumanizedNotification(getView().asWidget().getWindowID(), "The form has been reseted");
-            }
+        final PButton resetButton = Element.newPButton("Reset");
+        resetButton.addClickHandler(clickEvent -> {
+            form.reset();
+            PNotificationManager.showHumanizedNotification(getView().asWidget().getWindow(), "The form has been reseted");
         });
 
-        final PListBox captionOriantationList = new PListBox(true);
+        final PListBox captionOriantationList = Element.newPListBox(true);
         for (final CaptionOrientation captionOriantation : CaptionOrientation.values()) {
             captionOriantationList.addItem(captionOriantation.name(), captionOriantation);
         }
-        captionOriantationList.addChangeHandler(new PChangeHandler() {
+        captionOriantationList.addChangeHandler(event -> {
+            final CaptionOrientation captionOriantation = (CaptionOrientation) captionOriantationList.getSelectedValue();
 
-            @Override
-            public void onChange(final PChangeEvent event) {
-                final CaptionOrientation captionOriantation = (CaptionOrientation) captionOriantationList.getSelectedValue();
-
-                formFieldComponent1.setCaptionOrientation(captionOriantation);
-                formFieldComponent2.setCaptionOrientation(captionOriantation);
-                formFieldComponent3.setCaptionOrientation(captionOriantation);
-                formFieldComponent4.setCaptionOrientation(captionOriantation);
-                formFieldComponent5.setCaptionOrientation(captionOriantation);
-                formFieldComponent6.setCaptionOrientation(captionOriantation);
-                formFieldComponent7.setCaptionOrientation(captionOriantation);
-                formFieldComponent8.setCaptionOrientation(captionOriantation);
-            }
+            formFieldComponent1.setCaptionOrientation(captionOriantation);
+            formFieldComponent2.setCaptionOrientation(captionOriantation);
+            formFieldComponent3.setCaptionOrientation(captionOriantation);
+            formFieldComponent4.setCaptionOrientation(captionOriantation);
+            formFieldComponent5.setCaptionOrientation(captionOriantation);
+            formFieldComponent6.setCaptionOrientation(captionOriantation);
+            formFieldComponent7.setCaptionOrientation(captionOriantation);
+            formFieldComponent8.setCaptionOrientation(captionOriantation);
         });
 
         panel.setWidget(0, 0, validateButton);

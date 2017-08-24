@@ -24,13 +24,15 @@
 package com.ponysdk.core.ui.basic;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.ui.basic.event.HasPAnimation;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
+import com.ponysdk.core.writer.ModelWriter;
 
 /**
  * A standard menu bar widget. A menu bar can contain any number of menu items,
@@ -94,34 +96,31 @@ import com.ponysdk.core.ui.model.ServerBinaryModel;
  * elements as children. MenuItems may contain HTML and MenuBars.
  * </p>
  */
-public class PMenuBar extends PWidget implements HasPAnimation {
+public class PMenuBar extends PWidget implements HasPAnimation, Iterable<PMenuSubElement> {
 
-    // TODO warning : gwt contains 2 list 1 all items (with separator) + 1
-    // menuItem only
+    // TODO warning : gwt contains 2 list 1 all items (with separator) + 1 menuItem only
     private final List<PMenuSubElement> items = new ArrayList<>();
     private final boolean vertical;
     private boolean animationEnabled = false;
 
-    public PMenuBar() {
+    protected PMenuBar() {
         this(false);
     }
 
-    public PMenuBar(final boolean vertical) {
+    protected PMenuBar(final boolean vertical) {
         this.vertical = vertical;
     }
 
     @Override
     protected void init0() {
         super.init0();
-        for (final PWidget item : items) {
-            item.attach(windowID);
-        }
+        forEach(item -> item.attach(window, frame));
     }
 
     @Override
-    protected void enrichOnInit(final Parser parser) {
-        super.enrichOnInit(parser);
-        parser.parse(ServerToClientModel.MENU_BAR_IS_VERTICAL, vertical);
+    protected void enrichOnInit(final ModelWriter writer) {
+        super.enrichOnInit(writer);
+        writer.write(ServerToClientModel.VERTICAL, vertical);
     }
 
     @Override
@@ -160,14 +159,14 @@ public class PMenuBar extends PWidget implements HasPAnimation {
     public <T extends PMenuSubElement> T addElement(final T elt) {
         items.add(elt);
         elt.saveAdd(elt.getID(), ID);
-        elt.attach(windowID);
+        elt.attach(window, frame);
         return elt;
     }
 
     public <T extends PMenuSubElement> T insertElement(final T elt, final int beforeIndex) throws IndexOutOfBoundsException {
         items.add(beforeIndex, elt);
         elt.saveAdd(elt.getID(), ID, new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex));
-        elt.attach(windowID);
+        elt.attach(window, frame);
         return elt;
     }
 
@@ -188,8 +187,8 @@ public class PMenuBar extends PWidget implements HasPAnimation {
     }
 
     public void clearItems() {
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.CLEAR));
         items.clear();
+        saveUpdate(writer -> writer.write(ServerToClientModel.CLEAR));
     }
 
     public boolean isVertical() {
@@ -203,8 +202,20 @@ public class PMenuBar extends PWidget implements HasPAnimation {
 
     @Override
     public void setAnimationEnabled(final boolean animationEnabled) {
+        if (Objects.equals(this.animationEnabled, animationEnabled)) return;
         this.animationEnabled = animationEnabled;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ANIMATION, animationEnabled));
+        saveUpdate(ServerToClientModel.ANIMATION, animationEnabled);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        forEach(PObject::onDestroy);
+    }
+
+    @Override
+    public Iterator<PMenuSubElement> iterator() {
+        return items.iterator();
     }
 
 }

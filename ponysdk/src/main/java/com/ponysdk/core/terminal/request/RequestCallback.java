@@ -25,6 +25,7 @@ package com.ponysdk.core.terminal.request;
 
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
+@FunctionalInterface
 public interface RequestCallback {
 
     void onDataReceived(ReaderBuffer buffer);

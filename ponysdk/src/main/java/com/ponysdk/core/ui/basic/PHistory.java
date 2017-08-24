@@ -26,11 +26,11 @@ package com.ponysdk.core.ui.basic;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import com.ponysdk.core.server.application.Parser;
-import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
+import com.ponysdk.core.writer.ModelWriter;
 
 /**
  * This class allows you to interact with the browser's history stack. Each
@@ -64,6 +64,9 @@ public class PHistory {
 
     private String token;
 
+    public PHistory() {
+    }
+
     public void addValueChangeHandler(final PValueChangeHandler<String> handler) {
         handlers.add(handler);
     }
@@ -75,11 +78,11 @@ public class PHistory {
     public void newItem(final String token, final boolean fireEvents) {
         this.token = token;
 
-        final Parser parser = Txn.get().getParser();
-        parser.beginObject();
-        parser.parse(ServerToClientModel.TYPE_HISTORY, token);
-        parser.parse(ServerToClientModel.HISTORY_FIRE_EVENTS, fireEvents);
-        parser.endObject();
+        final ModelWriter writer = Txn.get().getWriter();
+        writer.beginObject();
+        writer.write(ServerToClientModel.TYPE_HISTORY, token);
+        writer.write(ServerToClientModel.HISTORY_FIRE_EVENTS, fireEvents);
+        writer.endObject();
     }
 
     public void fireHistoryChanged(final String token) {
@@ -88,7 +91,6 @@ public class PHistory {
         for (final PValueChangeHandler<String> handler : handlers) {
             handler.onValueChange(event);
         }
-
     }
 
     public String getToken() {

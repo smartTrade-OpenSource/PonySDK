@@ -26,14 +26,8 @@ package com.ponysdk.core.terminal.ui;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.google.gwt.event.logical.shared.SelectionEvent;
-import com.google.gwt.event.logical.shared.SelectionHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestOracle;
-import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -44,7 +38,7 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public class PTSuggestBox extends PTWidget<SuggestBox> {
 
-    private static final Map<Integer, SuggestOracle> oracleByID = new HashMap<>();
+    static final Map<Integer, SuggestOracle> oracleByID = new HashMap<>();
     private PTTextBox ptTextBox;
     private SuggestOracle oracle;
 
@@ -63,88 +57,48 @@ public class PTSuggestBox extends PTWidget<SuggestBox> {
 
     @Override
     protected SuggestBox createUIObject() {
-        return new SuggestBox(oracle, ptTextBox.cast());
+        return new SuggestBox(oracle, ptTextBox.uiObject);
     }
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.LIMIT.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.LIMIT.ordinal() == modelOrdinal) {
             uiObject.setLimit(binaryModel.getIntValue());
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
 
     @Override
-    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
+    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
         if (HandlerModel.HANDLER_STRING_VALUE_CHANGE.equals(handlerModel)) {
-            uiObject.addValueChangeHandler(new ValueChangeHandler<String>() {
-
-                @Override
-                public void onValueChange(final ValueChangeEvent<String> event) {
-                    final PTInstruction eventInstruction = new PTInstruction(getObjectID());
-                    eventInstruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE, event.getValue());
-                    uiService.sendDataToServer(uiObject, eventInstruction);
-                }
+            uiObject.addValueChangeHandler(event -> {
+                final PTInstruction eventInstruction = new PTInstruction(getObjectID());
+                eventInstruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE, event.getValue());
+                uiBuilder.sendDataToServer(uiObject, eventInstruction);
             });
         } else if (HandlerModel.HANDLER_STRING_SELECTION.equals(handlerModel)) {
-            uiObject.addSelectionHandler(new SelectionHandler<SuggestOracle.Suggestion>() {
-
-                @Override
-                public void onSelection(final SelectionEvent<Suggestion> event) {
-                    final PTInstruction eventInstruction = new PTInstruction(getObjectID());
-                    eventInstruction.put(ClientToServerModel.HANDLER_STRING_SELECTION, event.getSelectedItem().getDisplayString());
-                    eventInstruction.put(ClientToServerModel.REPLACEMENT_STRING, event.getSelectedItem().getReplacementString());
-                    uiService.sendDataToServer(uiObject, eventInstruction);
-                }
+            uiObject.addSelectionHandler(event -> {
+                final PTInstruction eventInstruction = new PTInstruction(getObjectID());
+                eventInstruction.put(ClientToServerModel.HANDLER_STRING_SELECTION, event.getSelectedItem().getDisplayString());
+                eventInstruction.put(ClientToServerModel.REPLACEMENT_STRING, event.getSelectedItem().getReplacementString());
+                uiBuilder.sendDataToServer(uiObject, eventInstruction);
             });
         } else {
-            super.addHandler(buffer, handlerModel, uiService);
+            super.addHandler(buffer, handlerModel);
         }
     }
 
-    public static class PTMultiWordSuggestOracle extends AbstractPTObject {
-
-        private MultiWordSuggestOracle oracle;
-
-        @Override
-        public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
-            super.create(buffer, objectId, uiService);
-
-            this.oracle = new MultiWordSuggestOracle();
-
-            PTSuggestBox.oracleByID.put(objectID, oracle);
+    @Override
+    public void removeHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
+        if (HandlerModel.HANDLER_STRING_VALUE_CHANGE.equals(handlerModel)) {
+            // TODO Remove HANDLER_STRING_VALUE_CHANGE
+        } else if (HandlerModel.HANDLER_STRING_SELECTION.equals(handlerModel)) {
+            // TODO Remove HANDLER_STRING_SELECTION
+        } else {
+            super.removeHandler(buffer, handlerModel);
         }
-
-        @Override
-        public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-            if (ServerToClientModel.SUGGESTION.equals(binaryModel.getModel())) {
-                oracle.add(binaryModel.getStringValue());
-                return true;
-            }
-            /*
-             * FIXME if (Model.SUGGESTIONS.equals(binaryModel.getModel())) {
-             * final JSONArray jsonArray = binaryModel.get().isArray(); for (int
-             * i = 0; i < jsonArray.size(); i++) {
-             * oracle.add(jsonArray.get(i).isString().stringValue()); } return
-             * true; }
-             */
-            /*
-             * FIXME if
-             * (Model.DEFAULT_SUGGESTIONS.equals(binaryModel.getModel())) {
-             * final List<String> defaultSuggestions = new ArrayList<>(); final
-             * JSONArray jsonArray = binaryModel.get().isArray(); for (int i =
-             * 0; i < jsonArray.size(); i++) {
-             * defaultSuggestions.add(jsonArray.get(i).isString().stringValue())
-             * ; } oracle.setDefaultSuggestionsFromText(defaultSuggestions);
-             * return true; }
-             */
-            if (ServerToClientModel.CLEAR.equals(binaryModel.getModel())) {
-                oracle.clear();
-                return true;
-            }
-            return super.update(buffer, binaryModel);
-        }
-
     }
 }

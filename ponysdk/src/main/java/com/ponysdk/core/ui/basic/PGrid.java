@@ -25,7 +25,7 @@ package com.ponysdk.core.ui.basic;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.writer.ModelWriter;
 
 /**
  * A rectangular grid that can contain text, html, or a child {@link PWidget}
@@ -37,11 +37,11 @@ public class PGrid extends PHTMLTable<PCellFormatter> {
     private final int columns;
     private final int rows;
 
-    public PGrid() {
+    protected PGrid() {
         this(0, 0);
     }
 
-    public PGrid(final int rows, final int columns) {
+    protected PGrid(final int rows, final int columns) {
         super();
         this.rows = rows;
         this.columns = columns;
@@ -49,11 +49,11 @@ public class PGrid extends PHTMLTable<PCellFormatter> {
     }
 
     @Override
-    protected void enrichOnInit(final Parser parser) {
-        super.enrichOnInit(parser);
+    protected void enrichOnInit(final ModelWriter writer) {
+        super.enrichOnInit(writer);
         if (rows != 0 && columns != 0) {
-            parser.parse(ServerToClientModel.ROW, rows);
-            parser.parse(ServerToClientModel.COLUMN, columns);
+            writer.write(ServerToClientModel.ROW, rows);
+            writer.write(ServerToClientModel.COLUMN, columns);
         }
     }
 

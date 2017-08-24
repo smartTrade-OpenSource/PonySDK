@@ -24,20 +24,22 @@
 package com.ponysdk.core.ui.basic;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 
-import com.ponysdk.core.tools.ListenerCollection;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.ui.basic.event.PLayoutResizeEvent;
 import com.ponysdk.core.ui.basic.event.PLayoutResizeHandler;
-import com.ponysdk.core.model.WidgetType;
 
 /**
  * A panel that adds user-positioned splitters between each of its child
@@ -63,9 +65,11 @@ import com.ponysdk.core.model.WidgetType;
  */
 public class PSplitLayoutPanel extends PDockLayoutPanel {
 
-    private final ListenerCollection<PLayoutResizeHandler> handlers = new ListenerCollection<>();
+    private final Set<PLayoutResizeHandler> handlers = Collections.newSetFromMap(new ConcurrentHashMap<>());
+
     private final Map<PWidget, SplitInfoHolder> splitInfoByWidget = new HashMap<>();
-    public PSplitLayoutPanel() {
+
+    protected PSplitLayoutPanel() {
         super(PUnit.PX);
     }
 
@@ -96,9 +100,9 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
     public void setWidgetMinSize(final PWidget child, final int minSize) {
         assertIsChild(child);
         if (getMinSize(child) != minSize) {
-            saveUpdate((writer) -> {
-                writer.writeModel(ServerToClientModel.MIN_SIZE, minSize);
-                writer.writeModel(ServerToClientModel.WIDGET_ID, child.getID());
+            saveUpdate(writer -> {
+                writer.write(ServerToClientModel.MIN_SIZE, minSize);
+                writer.write(ServerToClientModel.WIDGET_ID, child.getID());
             });
             ensureWidgetInfo(child).minSize = minSize;
         }
@@ -122,9 +126,9 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
     public void setWidgetSnapClosedSize(final PWidget child, final int snapClosedSize) {
         assertIsChild(child);
         if (getSnapClosedSize(child) != snapClosedSize) {
-            saveUpdate((writer) -> {
-                writer.writeModel(ServerToClientModel.SNAP_CLOSED_SIZE, snapClosedSize);
-                writer.writeModel(ServerToClientModel.WIDGET_ID, child.getID());
+            saveUpdate(writer -> {
+                writer.write(ServerToClientModel.SNAP_CLOSED_SIZE, snapClosedSize);
+                writer.write(ServerToClientModel.WIDGET_ID, child.getID());
             });
             ensureWidgetInfo(child).snapClosedSize = snapClosedSize;
         }
@@ -142,9 +146,9 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
     public void setWidgetToggleDisplayAllowed(final PWidget child, final boolean allowed) {
         assertIsChild(child);
         if (isToggleDisplayAllowed(child) != allowed) {
-            saveUpdate((writer) -> {
-                writer.writeModel(ServerToClientModel.TOGGLE_DISPLAY_ALLOWED, allowed);
-                writer.writeModel(ServerToClientModel.WIDGET_ID, child.getID());
+            saveUpdate(writer -> {
+                writer.write(ServerToClientModel.TOGGLE_DISPLAY_ALLOWED, allowed);
+                writer.write(ServerToClientModel.WIDGET_ID, child.getID());
             });
             ensureWidgetInfo(child).toggleDisplayAllowed = allowed;
         }
@@ -177,14 +181,13 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
     }
 
     public void addLayoutResizeHandler(final PLayoutResizeHandler resizeHandler) {
-        if (handlers.isEmpty()) {
-            saveAddHandler(HandlerModel.HANDLER_RESIZE);
-        }
+        if (handlers.isEmpty()) saveAddHandler(HandlerModel.HANDLER_RESIZE);
         handlers.add(resizeHandler);
     }
 
     public void removeLayoutResizeHandler(final PLayoutResizeHandler resizeHandler) {
         handlers.remove(resizeHandler);
+        if (handlers.isEmpty()) saveRemoveHandler(HandlerModel.HANDLER_RESIZE);
     }
 
     public Collection<PLayoutResizeHandler> getResizeHandlers() {

@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.ui.form.formfield;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 import com.ponysdk.core.ui.form.dataconverter.DataConverter;
@@ -30,11 +31,19 @@ import com.ponysdk.core.ui.form.dataconverter.DataConverter;
 public class TextBoxFormField<T> extends AbstractFormField<T, PTextBox> {
 
     public TextBoxFormField(final DataConverter<String, T> dataProvider) {
-        this(new PTextBox(), dataProvider);
+        this(dataProvider, false);
+    }
+
+    public TextBoxFormField(final DataConverter<String, T> dataProvider, final boolean dirtyMode) {
+        this(Element.newPTextBox(), dataProvider, dirtyMode);
     }
 
     public TextBoxFormField(final PTextBox widget, final DataConverter<String, T> dataProvider) {
-        super(widget, dataProvider);
+        this(widget, dataProvider, false);
+    }
+
+    public TextBoxFormField(final PTextBox widget, final DataConverter<String, T> dataProvider, final boolean dirtyMode) {
+        super(widget, dataProvider, dirtyMode);
     }
 
     @Override
@@ -65,6 +74,7 @@ public class TextBoxFormField<T> extends AbstractFormField<T, PTextBox> {
 
     @Override
     public void setEnabled(final boolean enabled) {
+        super.setEnabled(enabled);
         widget.setEnabled(enabled);
     }
 

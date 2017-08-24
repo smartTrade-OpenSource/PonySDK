@@ -28,7 +28,7 @@ import com.ponysdk.core.ui.eventbus.Event;
 
 public class AuthenticationFailedEvent extends BusinessEvent<AuthenticationFailedHandler> {
 
-    public static final Event.Type<AuthenticationFailedHandler> TYPE = new Event.Type<>();
+    public static final Event.Type TYPE = new Event.Type();
 
     public AuthenticationFailedEvent(final Object sourceComponent) {
         super(sourceComponent);
@@ -40,7 +40,7 @@ public class AuthenticationFailedEvent extends BusinessEvent<AuthenticationFaile
     }
 
     @Override
-    public Event.Type<AuthenticationFailedHandler> getAssociatedType() {
+    public Event.Type getAssociatedType() {
         return TYPE;
     }
 

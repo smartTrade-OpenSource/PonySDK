@@ -25,7 +25,7 @@ package com.ponysdk.core.ui.basic;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.writer.ModelWriter;
 
 /**
  * A normal push button with custom styling.
@@ -39,24 +39,24 @@ public class PPushButton extends PButton {
 
     private final PImage image;
 
-    public PPushButton(final PImage image) {
+    protected PPushButton(final PImage image) {
         super();
         this.image = image;
     }
 
     @Override
-    protected boolean attach(final int windowID) {
+    protected boolean attach(final PWindow window, final PFrame frame) {
         // WORKAROUND : element and sub element need to be created before any add
-        final boolean imageResult = image.attach(windowID);
-        final boolean result = super.attach(windowID);
+        final boolean imageResult = image.attach(window, frame);
+        final boolean result = super.attach(window, frame);
         if (imageResult) image.saveAdd(image.getID(), ID);
         return result;
     }
 
     @Override
-    protected void enrichOnInit(final Parser parser) {
-        parser.parse(ServerToClientModel.WIDGET_ID, image.getID());
-        super.enrichOnInit(parser);
+    protected void enrichOnInit(final ModelWriter writer) {
+        writer.write(ServerToClientModel.WIDGET_ID, image.getID());
+        super.enrichOnInit(writer);
     }
 
     @Override

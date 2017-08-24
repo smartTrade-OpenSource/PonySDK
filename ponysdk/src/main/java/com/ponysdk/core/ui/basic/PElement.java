@@ -27,7 +27,7 @@ import java.util.Objects;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.Parser;
+import com.ponysdk.core.writer.ModelWriter;
 
 /**
  * All HTML element interfaces derive from this class.Useful to create native
@@ -40,15 +40,15 @@ public class PElement extends PComplexPanel {
     private String innerText;
     private String innerHTML;
 
-    public PElement(final String tagName) {
+    protected PElement(final String tagName) {
         super();
         this.tagName = tagName;
     }
 
     @Override
-    protected void enrichOnInit(final Parser parser) {
-        super.enrichOnInit(parser);
-        parser.parse(ServerToClientModel.TAG, tagName);
+    protected void enrichOnInit(final ModelWriter writer) {
+        super.enrichOnInit(writer);
+        writer.write(ServerToClientModel.TAG, tagName);
     }
 
     @Override
@@ -67,7 +67,8 @@ public class PElement extends PComplexPanel {
     public void setInnerText(final String innerText) {
         if (Objects.equals(this.innerText, innerText)) return;
         this.innerText = innerText;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.INNER_TEXT, this.innerText));
+        this.innerHTML = null;
+        saveUpdate(ServerToClientModel.INNER_TEXT, this.innerText);
     }
 
     public String getInnerHTML() {
@@ -77,6 +78,7 @@ public class PElement extends PComplexPanel {
     public void setInnerHTML(final String innerHTML) {
         if (Objects.equals(this.innerHTML, innerHTML)) return;
         this.innerHTML = innerHTML;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.INNER_HTML, this.innerHTML));
+        this.innerText = null;
+        saveUpdate(ServerToClientModel.INNER_HTML, this.innerHTML);
     }
 }

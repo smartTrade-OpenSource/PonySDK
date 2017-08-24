@@ -76,11 +76,17 @@ public enum WidgetType {
     FOCUS_PANEL,
     SCRIPT,
     WINDOW,
+    FRAME,
+    BROWSER,
     HEADER_PANEL,
     SUGGESTBOX,
     MULTIWORD_SUGGEST_ORACLE;
 
-    public byte getValue() {
+    private WidgetType() {
+    }
+
+    public final byte getValue() {
         return (byte) ordinal();
     }
+
 }

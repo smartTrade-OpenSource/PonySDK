@@ -23,11 +23,11 @@
 
 package com.ponysdk.core.ui.list.renderer.cell;
 
-import javax.validation.constraints.NotNull;
-
-import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.place.Place;
+
+import javax.validation.constraints.NotNull;
 
 public abstract class WidgetCellRenderer<D> implements CellRenderer<D, PWidget> {
 
@@ -45,7 +45,7 @@ public abstract class WidgetCellRenderer<D> implements CellRenderer<D, PWidget> 
     @Override
     public PWidget render(final int row, final D rawValue) {
         final String value = rawValue != null ? getValue(rawValue) : null;
-        return value != null ? render0(row, rawValue) : new PLabel(nullDisplay);
+        return value != null ? render0(row, rawValue) : Element.newPLabel(nullDisplay);
     }
 
     protected abstract PWidget render0(int row, D rawValue);

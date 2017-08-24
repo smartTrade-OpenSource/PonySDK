@@ -23,12 +23,8 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import com.google.gwt.event.logical.shared.SelectionEvent;
-import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.ui.Tree;
-import com.google.gwt.user.client.ui.TreeItem;
 import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
@@ -38,39 +34,56 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 public class PTTree extends PTWidget<Tree> {
 
     @Override
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
+        super.create(buffer, objectId, uiBuilder);
+        addHandler(uiBuilder);
+    }
+
+    @Override
     protected Tree createUIObject() {
         return new Tree();
     }
 
-    @Override
-    public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel, final UIBuilder uiService) {
-        if (HandlerModel.HANDLER_SELECTION.equals(handlerModel)) {
-            uiObject.addSelectionHandler(new SelectionHandler<TreeItem>() {
-
-                @Override
-                public void onSelection(final SelectionEvent<TreeItem> event) {
-                    final PTObject ptObject = uiService.getPTObject(event.getSelectedItem());
-                    final PTInstruction eventInstruction = new PTInstruction(getObjectID());
-                    eventInstruction.put(ClientToServerModel.HANDLER_SELECTION, ptObject.getObjectID());
-                    uiService.sendDataToServer(uiObject, eventInstruction);
-                }
-            });
-        } else {
-            super.addHandler(buffer, handlerModel, uiService);
-        }
+    private void addHandler(final UIBuilder uiBuilder) {
+        uiObject.addSelectionHandler(event -> {
+            final PTInstruction eventInstruction = new PTInstruction(getObjectID());
+            eventInstruction.put(ClientToServerModel.HANDLER_SELECTION, uiBuilder.getPTObject(event.getSelectedItem()).getObjectID());
+            uiBuilder.sendDataToServer(uiObject, eventInstruction);
+        });
+        uiObject.addOpenHandler(event -> {
+            final PTInstruction eventInstruction = new PTInstruction(getObjectID());
+            eventInstruction.put(ClientToServerModel.HANDLER_OPEN, uiBuilder.getPTObject(event.getTarget()).getObjectID());
+            uiBuilder.sendDataToServer(uiObject, eventInstruction);
+        });
+        uiObject.addCloseHandler(event -> {
+            final PTInstruction eventInstruction = new PTInstruction(getObjectID());
+            eventInstruction.put(ClientToServerModel.HANDLER_CLOSE, uiBuilder.getPTObject(event.getTarget()).getObjectID());
+            uiBuilder.sendDataToServer(uiObject, eventInstruction);
+        });
     }
 
     @Override
-    public void remove(final ReaderBuffer buffer, final PTObject ptObject, final UIBuilder uiService) {
+    public void remove(final ReaderBuffer buffer, final PTObject ptObject) {
         uiObject.remove(asWidget(ptObject));
     }
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.ANIMATION.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.ANIMATION.ordinal() == modelOrdinal) {
             uiObject.setAnimationEnabled(binaryModel.getBooleanValue());
             return true;
+        } else if (ServerToClientModel.SELECTED_INDEX.ordinal() == modelOrdinal) {
+            final int selectedItemId = binaryModel.getIntValue();
+            if (selectedItemId != -1) uiObject.setSelectedItem(asWidget(selectedItemId, uiBuilder), false);
+            else uiObject.setSelectedItem(null, false);
+            return true;
+        } else if (ServerToClientModel.CLEAR.ordinal() == modelOrdinal) {
+            uiObject.clear();
+            return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
+
 }

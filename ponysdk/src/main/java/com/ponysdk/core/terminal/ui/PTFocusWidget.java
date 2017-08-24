@@ -27,56 +27,48 @@ import com.google.gwt.event.dom.client.MouseEvent;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.ponysdk.core.model.DomHandlerType;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public abstract class PTFocusWidget<T extends FocusWidget> extends PTWidget<T> {
 
     private boolean showLoadingOnRequest = false;
-
     private boolean enabledOnRequest = false;
-
     private boolean enabled = true;
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.LOADING_ON_REQUEST.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.LOADING_ON_REQUEST.ordinal() == modelOrdinal) {
             showLoadingOnRequest = binaryModel.getBooleanValue();
             return true;
-        }
-        if (ServerToClientModel.ENABLED_ON_REQUEST.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.ENABLED_ON_REQUEST.ordinal() == modelOrdinal) {
             enabledOnRequest = binaryModel.getBooleanValue();
             return true;
-        }
-        if (ServerToClientModel.END_OF_PROCESSING.equals(binaryModel.getModel())) {
-            if (showLoadingOnRequest)
-                uiObject.removeStyleName("pony-Loading");
-            if (!enabledOnRequest)
-                uiObject.setEnabled(enabled);
+        } else if (ServerToClientModel.END_OF_PROCESSING.ordinal() == modelOrdinal) {
+            if (showLoadingOnRequest) uiObject.removeStyleName("pony-Loading");
+            if (!enabledOnRequest) uiObject.setEnabled(enabled);
             return true;
-        }
-        if (ServerToClientModel.ENABLED.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.ENABLED.ordinal() == modelOrdinal) {
             this.enabled = binaryModel.getBooleanValue();
             uiObject.setEnabled(enabled);
             return true;
-        }
-        if (ServerToClientModel.TABINDEX.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.TABINDEX.ordinal() == modelOrdinal) {
             uiObject.setTabIndex(binaryModel.getIntValue());
             return true;
-        }
-        if (ServerToClientModel.FOCUSED.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.FOCUSED.ordinal() == modelOrdinal) {
             uiObject.setFocus(binaryModel.getBooleanValue());
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
 
     @Override
-    protected void triggerMouseEvent(final DomHandlerType domHandlerType, final UIBuilder uiService, final MouseEvent<?> event) {
+    protected void triggerMouseEvent(final DomHandlerType domHandlerType, final MouseEvent<?> event) {
         if (!enabledOnRequest) uiObject.setEnabled(false);
         if (showLoadingOnRequest) uiObject.addStyleName("pony-Loading");
-        super.triggerMouseEvent(domHandlerType, uiService, event);
+        super.triggerMouseEvent(domHandlerType, event);
     }
 
 }

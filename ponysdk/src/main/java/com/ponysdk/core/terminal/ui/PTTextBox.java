@@ -24,7 +24,6 @@
 package com.ponysdk.core.terminal.ui;
 
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.dom.client.DropEvent;
 import com.google.gwt.event.dom.client.DropHandler;
 import com.google.gwt.event.dom.client.KeyPressEvent;
@@ -49,41 +48,31 @@ public class PTTextBox extends PTTextBoxBase<TextBox> implements KeyPressHandler
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.TEXT.equals(binaryModel.getModel())) {
-            uiObject.setText(binaryModel.getStringValue());
-            return true;
-        }
-        if (ServerToClientModel.VALUE.equals(binaryModel.getModel())) {
-            uiObject.setValue(binaryModel.getStringValue());
-            return true;
-        }
-        if (ServerToClientModel.VISIBLE_LENGTH.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.VISIBLE_LENGTH.ordinal() == modelOrdinal) {
             uiObject.setVisibleLength(binaryModel.getIntValue());
             return true;
-        }
-        if (ServerToClientModel.MAX_LENGTH.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.MAX_LENGTH.ordinal() == modelOrdinal) {
             uiObject.setMaxLength(binaryModel.getIntValue());
             return true;
-        }
-        if (ServerToClientModel.MASK.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.MASK.ordinal() == modelOrdinal) {
             final String mask = binaryModel.getStringValue();
             // ServerToClientModel.VISIBILITY
-            final boolean showMask = binaryModel.getBooleanValue();
+            final boolean showMask = buffer.readBinaryModel().getBooleanValue();
             // ServerToClientModel.REPLACEMENT_STRING
-            final String replace = binaryModel.getStringValue();
-            if (maskDecorator == null)
-                maskDecorator = new TextBoxMaskedDecorator(cast());
+            final String replace = buffer.readBinaryModel().getStringValue();
+            if (maskDecorator == null) maskDecorator = new TextBoxMaskedDecorator(uiObject);
             maskDecorator.setMask(mask, showMask, replace.charAt(0));
             return true;
-        }
-        if (ServerToClientModel.REGEX_FILTER.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.REGEX_FILTER.ordinal() == modelOrdinal) {
             regExp = RegExp.compile(binaryModel.getStringValue());
             uiObject.addKeyPressHandler(this);
             uiObject.addDropHandler(this);
             uiObject.sinkEvents(Event.ONPASTE);
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
 
     @Override
@@ -104,8 +93,7 @@ public class PTTextBox extends PTTextBoxBase<TextBox> implements KeyPressHandler
      * @return true if the character matches the regular expression, false otherwise.
      */
     private boolean match(final char key) {
-        if (regExp == null) return true;
-        return regExp.exec(String.valueOf(key)) != null;
+        return regExp == null || regExp.exec(String.valueOf(key)) != null;
     }
 
     /**
@@ -113,17 +101,13 @@ public class PTTextBox extends PTTextBoxBase<TextBox> implements KeyPressHandler
      */
     private void filterText() {
         if (regExp == null) return;
-        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-
-            @Override
-            public void execute() {
-                final String pasteText = uiObject.getText();
-                final StringBuilder filteredText = new StringBuilder();
-                for (final char c : pasteText.toCharArray()) {
-                    if (match(c)) filteredText.append(c);
-                }
-                uiObject.setText(filteredText.toString());
+        Scheduler.get().scheduleDeferred(() -> {
+            final String pasteText = uiObject.getText();
+            final StringBuilder filteredText = new StringBuilder();
+            for (final char c : pasteText.toCharArray()) {
+                if (match(c)) filteredText.append(c);
             }
+            uiObject.setText(filteredText.toString());
         });
     }
 

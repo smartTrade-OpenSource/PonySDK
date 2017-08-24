@@ -25,6 +25,7 @@ package com.ponysdk.core.ui.basic;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -32,7 +33,6 @@ import java.util.Objects;
 import javax.json.JsonObject;
 
 import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.UIContext;
@@ -54,25 +54,25 @@ import com.ponysdk.core.ui.basic.event.PSelectionHandler;
  * <dd>a selected tree item</dd>
  * </dl>
  */
-public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, HasPAnimation {
-
-    private final List<PSelectionHandler<PTreeItem>> selectionHandlers = new ArrayList<>();
+public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, HasPAnimation, Iterable<PTreeItem> {
 
     private final Map<PWidget, PTreeItem> childWidgets = new HashMap<>();
+
     private final PTreeItem root;
     private boolean animationEnabled = false;
-    private PTreeItem curSelection;
+    private PTreeItem selectedItem;
 
-    public PTree() {
-        root = new PTreeItem(true);
+    private List<PSelectionHandler<PTreeItem>> selectionHandlers;
+
+    protected PTree() {
+        root = new PTreeItem(this);
         root.saveAdd(root.getID(), ID);
     }
 
     @Override
     protected void init0() {
         super.init0();
-        root.setTree(this);
-        root.attach(windowID);
+        root.attach(window, frame);
     }
 
     @Override
@@ -80,82 +80,11 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
         return WidgetType.TREE;
     }
 
-    public PTreeItem addItem(final String item) {
-        return root.addItem(item);
-    }
-
-    public PTreeItem addItem(final PTreeItem item) {
-        return root.addItem(item);
-    }
-
-    public void removeItem(final PTreeItem item) {
-        root.removeItem(item);
-    }
-
-    public PTreeItem getSelectedItem() {
-        return curSelection;
-    }
-
-    public void setSelectedItem(final PTreeItem item) {
-        if (curSelection != null) {
-            curSelection.setSelected(false);
-        }
-        curSelection = item;
-        curSelection.setSelected(true);
-    }
-
-    public PTreeItem getItem(final int index) {
-        return root.getChild(index);
-    }
-
-    /**
-     * Gets the number of items contained at the root of this tree.
-     *
-     * @return this tree's item count
-     */
-    public int getItemCount() {
-        return root.getChildCount();
-    }
-
-    void orphan(final PWidget widget) {
-        assert widget.getParent() == this;
-        widget.setParent(null);
-        childWidgets.remove(widget);
-    }
-
-    void adopt(final PWidget widget, final PTreeItem item) {
-        assert !childWidgets.containsKey(widget);
-        childWidgets.put(widget, item);
-        widget.setParent(this);
-    }
-
     @Override
-    public void addSelectionHandler(final PSelectionHandler<PTreeItem> handler) {
-        selectionHandlers.add(handler);
-        saveAddHandler(HandlerModel.HANDLER_SELECTION);
-    }
-
-    @Override
-    public void removeSelectionHandler(final PSelectionHandler<PTreeItem> handler) {
-        selectionHandlers.remove(handler);
-        saveRemoveHandler(HandlerModel.HANDLER_SELECTION);
-    }
-
-    @Override
-    public void onClientData(final JsonObject instruction) {
-        if (instruction.containsKey(ClientToServerModel.HANDLER_SELECTION.toStringValue())) {
-            final int widgetId = instruction.getJsonNumber(ClientToServerModel.HANDLER_SELECTION.toStringValue()).intValue();
-            final PSelectionEvent<PTreeItem> selectionEvent = new PSelectionEvent<>(this, UIContext.get().getObject(widgetId));
-            for (final PSelectionHandler<PTreeItem> handler : selectionHandlers) {
-                handler.onSelection(selectionEvent);
-            }
-        } else {
-            super.onClientData(instruction);
-        }
-    }
-
-    public PTreeItem getRoot() {
-        return root;
+    public void setAnimationEnabled(final boolean animationEnabled) {
+        if (Objects.equals(this.animationEnabled, animationEnabled)) return;
+        this.animationEnabled = animationEnabled;
+        saveUpdate(ServerToClientModel.ANIMATION, animationEnabled);
     }
 
     @Override
@@ -163,10 +92,114 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
         return animationEnabled;
     }
 
-    @Override
-    public void setAnimationEnabled(final boolean animationEnabled) {
-        if (Objects.equals(this.animationEnabled, animationEnabled)) return;
-        this.animationEnabled = animationEnabled;
-        saveUpdate((writer) -> writer.writeModel(ServerToClientModel.ANIMATION, animationEnabled));
+    public void setSelectedItem(final PTreeItem selectedItem) {
+        if (Objects.equals(this.selectedItem, selectedItem)) return;
+        this.selectedItem = selectedItem;
+        saveUpdate(ServerToClientModel.SELECTED_INDEX, selectedItem != null ? selectedItem.getID() : -1);
+        if (selectionHandlers != null) {
+            final PSelectionEvent<PTreeItem> selectionEvent = new PSelectionEvent<>(this, selectedItem);
+            selectionHandlers.forEach(handler -> handler.onSelection(selectionEvent));
+        }
     }
+
+    public PTreeItem getSelectedItem() {
+        return selectedItem;
+    }
+
+    public PTreeItem add(final String item) {
+        return add(Element.newPTreeItem(item));
+    }
+
+    public PTreeItem add(final PTreeItem item) {
+        return root.add(item);
+    }
+
+    public void remove(final PTreeItem item) {
+        root.remove(item);
+    }
+
+    public PTreeItem get(final int index) {
+        return root.get(index);
+    }
+
+    @Override
+    public Iterator<PTreeItem> iterator() {
+        return root.iterator();
+    }
+
+    /**
+     * Gets the number of items contained at the root of this tree.
+     *
+     * @return this tree's item count
+     */
+    public int size() {
+        return root.size();
+    }
+
+    void orphan(final PWidget child) {
+        if (child.getParent() == this) {
+            child.setParent(null);
+            childWidgets.remove(child);
+        } else if (child.getParent() != null) {
+            throw new IllegalStateException("Can't adopt an widget attached to another parent");
+        }
+    }
+
+    void adopt(final PWidget widget, final PTreeItem item) {
+        if (!childWidgets.containsKey(widget)) {
+            childWidgets.put(widget, item);
+            widget.setParent(this);
+        } else {
+            throw new IllegalStateException("Can't adopt an already widget attached to a parent");
+        }
+    }
+
+    @Override
+    public void addSelectionHandler(final PSelectionHandler<PTreeItem> handler) {
+        if (selectionHandlers == null) selectionHandlers = new ArrayList<>();
+        selectionHandlers.add(handler);
+    }
+
+    @Override
+    public void removeSelectionHandler(final PSelectionHandler<PTreeItem> handler) {
+        if (selectionHandlers != null) selectionHandlers.remove(handler);
+    }
+
+    public PTreeItem getRoot() {
+        return root;
+    }
+
+    public void clear() {
+        root.clear();
+        saveUpdate(writer -> writer.write(ServerToClientModel.CLEAR));
+    }
+
+    @Override
+    public void onClientData(final JsonObject instruction) {
+        if (instruction.containsKey(ClientToServerModel.HANDLER_SELECTION.toStringValue())) {
+            final int widgetId = instruction.getJsonNumber(ClientToServerModel.HANDLER_SELECTION.toStringValue()).intValue();
+            selectedItem = UIContext.get().getObject(widgetId);
+            if (selectionHandlers != null) {
+                final PSelectionEvent<PTreeItem> selectionEvent = new PSelectionEvent<>(this, selectedItem);
+                selectionHandlers.forEach(handler -> handler.onSelection(selectionEvent));
+            }
+        } else if (instruction.containsKey(ClientToServerModel.HANDLER_OPEN.toStringValue())) {
+            final int widgetId = instruction.getJsonNumber(ClientToServerModel.HANDLER_OPEN.toStringValue()).intValue();
+            final PTreeItem item = UIContext.get().getObject(widgetId);
+            item.openState = true;
+        } else if (instruction.containsKey(ClientToServerModel.HANDLER_CLOSE.toStringValue())) {
+            final int widgetId = instruction.getJsonNumber(ClientToServerModel.HANDLER_CLOSE.toStringValue()).intValue();
+            final PTreeItem item = UIContext.get().getObject(widgetId);
+            item.openState = false;
+        } else {
+            super.onClientData(instruction);
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        root.onDestroy();
+    }
+
 }

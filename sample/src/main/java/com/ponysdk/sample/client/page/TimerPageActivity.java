@@ -23,20 +23,14 @@
 
 package com.ponysdk.sample.client.page;
 
+import com.ponysdk.core.server.concurrent.PScheduler;
+import com.ponysdk.core.server.concurrent.PScheduler.UIRunnable;
+import com.ponysdk.core.ui.basic.*;
+
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.Calendar;
 import java.util.concurrent.atomic.AtomicLong;
-
-import com.ponysdk.core.server.concurrent.PScheduler;
-import com.ponysdk.core.server.concurrent.PScheduler.UIRunnable;
-import com.ponysdk.core.ui.basic.PButton;
-import com.ponysdk.core.ui.basic.PHTML;
-import com.ponysdk.core.ui.basic.PLabel;
-import com.ponysdk.core.ui.basic.PTextBox;
-import com.ponysdk.core.ui.basic.PVerticalPanel;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
 
 public class TimerPageActivity extends SamplePageActivity {
 
@@ -44,10 +38,9 @@ public class TimerPageActivity extends SamplePageActivity {
     protected long time2 = 0;
     protected AtomicLong time3 = new AtomicLong();
 
-    private final PTextBox textBox = new PTextBox("1000");
-    private final PVerticalPanel panel = new PVerticalPanel();
+    private final PTextBox textBox = Element.newPTextBox("1000");
+    private final PVerticalPanel panel = Element.newPVerticalPanel();
     private UIRunnable scheduleAtFixedRate;
-    private PLabel labelScheduler;
     private PLabel label;
     private UIRunnable scheduleAtFixedDelay;
 
@@ -59,40 +52,33 @@ public class TimerPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        label = new PLabel("0");
+        label = Element.newPLabel("0");
 
-        final PButton scheduleRepeatingButton = new PButton("Start");
-        scheduleRepeatingButton.addClickHandler((event) -> {
-            scheduleAtFixedDelay = PScheduler.scheduleAtFixedRate(() -> {
-                time1++;
-                label.setText("" + time1);
-            }, Duration.ofMillis(Integer.valueOf(textBox.getText())));
-        });
-        panel.add(new PLabel("Simple repeating timer"));
+        final PButton scheduleRepeatingButton = Element.newPButton("Start");
+        scheduleRepeatingButton.addClickHandler((event) -> scheduleAtFixedDelay = PScheduler.scheduleAtFixedRate(() -> {
+            time1++;
+            label.setText("" + time1);
+        }, Duration.ofMillis(Integer.valueOf(textBox.getText()))));
+        panel.add(Element.newPLabel("Simple repeating timer"));
         panel.add(label);
         panel.add(textBox);
         panel.add(scheduleRepeatingButton);
 
         // Fixed delay
         final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy MM dd hh:mm:ss");
-        final PLabel dateLabel = new PLabel(dateFormat.format(Calendar.getInstance().getTime()));
-        panel.add(new PHTML("<br>"));
-        panel.add(new PLabel("Fixed delay timer"));
+        final PLabel dateLabel = Element.newPLabel(dateFormat.format(Calendar.getInstance().getTime()));
+        panel.add(Element.newPHTML("<br>"));
+        panel.add(Element.newPLabel("Fixed delay timer"));
         panel.add(dateLabel);
-        final PButton fixedDelayButton = new PButton("Start");
-        fixedDelayButton.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent clickEvent) {
-                PScheduler.scheduleAtFixedRate(() -> dateLabel.setText(dateFormat.format(Calendar.getInstance().getTime())), Duration.ofMillis(1000));
-            }
-        });
+        final PButton fixedDelayButton = Element.newPButton("Start");
+        fixedDelayButton.addClickHandler(clickEvent -> PScheduler.scheduleAtFixedRate(() -> dateLabel.setText(dateFormat.format(Calendar.getInstance().getTime())),
+            Duration.ofMillis(1000)));
         panel.add(fixedDelayButton);
 
         // Client side only
-        panel.add(new PHTML("<br>"));
-        panel.add(new PLabel("Timer (terminal side)"));
-        final PButton changeColorsBUtton = new PButton("Start");
+        panel.add(Element.newPHTML("<br>"));
+        panel.add(Element.newPLabel("Timer (terminal side)"));
+        final PButton changeColorsBUtton = Element.newPButton("Start");
 
         changeColorsBUtton.addClickHandler((event) -> {
             PScheduler.schedule(() -> changeColorsBUtton.setStyleProperty("color", "blue"), Duration.ofMillis(2000));
@@ -102,9 +88,9 @@ public class TimerPageActivity extends SamplePageActivity {
 
         panel.add(changeColorsBUtton);
 
-        labelScheduler = new PLabel("0");
+        PLabel labelScheduler = Element.newPLabel("0");
 
-        panel.add(new PLabel("UI Scheduler"));
+        panel.add(Element.newPLabel("UI Scheduler"));
         panel.add(labelScheduler);
 
         examplePanel.setWidget(panel);

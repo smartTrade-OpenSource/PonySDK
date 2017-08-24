@@ -23,15 +23,11 @@
 
 package com.ponysdk.sample.client.page;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PTextBox;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
-import com.ponysdk.core.ui.basic.event.PSelectionEvent;
-import com.ponysdk.core.ui.basic.event.PSelectionHandler;
 import com.ponysdk.core.ui.rich.PBreadCrumbs;
-import com.ponysdk.core.ui.rich.PBreadCrumbs.ItemLevel;
 import com.ponysdk.core.ui.rich.PNotificationManager;
 
 public class BreadCrumbsPageActivity extends SamplePageActivity {
@@ -46,7 +42,7 @@ public class BreadCrumbsPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PFlowPanel panel = new PFlowPanel();
+        final PFlowPanel panel = Element.newPFlowPanel();
 
         final PBreadCrumbs breadCrumbs = new PBreadCrumbs();
 
@@ -57,28 +53,18 @@ public class BreadCrumbsPageActivity extends SamplePageActivity {
         breadCrumbs.addItem("level 5");
         breadCrumbs.addItem("location");
 
-        breadCrumbs.addSelectionHandler(new PSelectionHandler<PBreadCrumbs.ItemLevel>() {
-
-            @Override
-            public void onSelection(final PSelectionEvent<ItemLevel> event) {
-                level = event.getSelectedItem().getLevel();
-                PNotificationManager.showHumanizedNotification(getView().asWidget().getWindowID(), "Selected level : " + level);
-            }
+        breadCrumbs.addSelectionHandler(event -> {
+            level = event.getSelectedItem().getLevel();
+            PNotificationManager.showHumanizedNotification(getView().asWidget().getWindow(), "Selected level : " + level);
         });
 
-        final PFlowPanel inputPanel = new PFlowPanel();
-        final PTextBox input = new PTextBox();
-        final PButton add = new PButton("Add Level");
-        add.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                if (input.getText().isEmpty())
-                    breadCrumbs.addItem("level " + ++level);
-                else
-                    breadCrumbs.addItem(input.getText());
-                input.setText("");
-            }
+        final PFlowPanel inputPanel = Element.newPFlowPanel();
+        final PTextBox input = Element.newPTextBox();
+        final PButton add = Element.newPButton("Add Level");
+        add.addClickHandler(event -> {
+            if (input.getText().isEmpty()) breadCrumbs.addItem("level " + ++level);
+            else breadCrumbs.addItem(input.getText());
+            input.setText("");
         });
         inputPanel.add(input);
         inputPanel.add(add);

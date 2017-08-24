@@ -38,7 +38,8 @@ public enum HandlerModel {
     HANDLER_STREAM_REQUEST,
     HANDLER_SCROLL;
 
-    public byte getValue() {
+    public final byte getValue() {
         return (byte) ordinal();
     }
+
 }

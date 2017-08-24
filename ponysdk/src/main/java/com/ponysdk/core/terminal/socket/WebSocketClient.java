@@ -27,26 +27,18 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.RepeatingCommand;
-import com.google.gwt.user.client.rpc.StatusCodeException;
 import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.terminal.PonySDK;
+import com.ponysdk.core.terminal.ReconnectionChecker;
 import com.ponysdk.core.terminal.UIBuilder;
-import com.ponysdk.core.terminal.instruction.PTInstruction;
-import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 import com.ponysdk.core.terminal.request.WebSocketRequestBuilder;
 
 import elemental.client.Browser;
 import elemental.events.CloseEvent;
-import elemental.events.Event;
-import elemental.events.EventListener;
 import elemental.events.MessageEvent;
 import elemental.html.ArrayBuffer;
 import elemental.html.WebSocket;
 import elemental.html.Window;
-import elemental.html.Worker;
 
 public class WebSocketClient implements MessageSender {
 
@@ -55,101 +47,76 @@ public class WebSocketClient implements MessageSender {
     private final WebSocket webSocket;
     private final UIBuilder uiBuilder;
 
-    public WebSocketClient(final String url, final UIBuilder uiBuilder, final WebSocketDataType webSocketDataType) {
+    private final Window window;
+
+    private final ReaderBuffer readerBuffer;
+
+    private boolean initialized;
+
+    public WebSocketClient(final String url, final UIBuilder uiBuilder, final WebSocketDataType webSocketDataType,
+            final ReconnectionChecker reconnectionChecker) {
         this.uiBuilder = uiBuilder;
 
-        final Window window = Browser.getWindow();
+        createSetElementsMethodOnUint8Array();
+
+        readerBuffer = new ReaderBuffer();
+
+        window = Browser.getWindow();
         webSocket = window.newWebSocket(url);
         webSocket.setBinaryType(webSocketDataType.getName());
 
         final MessageReader messageReader;
-        if (WebSocketDataType.ARRAYBUFFER.equals(webSocketDataType)) {
-            messageReader = new ArrayBufferReader(this);
-        } else if (WebSocketDataType.BLOB.equals(webSocketDataType)) {
-            messageReader = new BlobReader(this);
-        } else {
-            throw new IllegalArgumentException("Wrong reader type : " + webSocketDataType);
-        }
+        if (WebSocketDataType.ARRAYBUFFER.equals(webSocketDataType)) messageReader = new ArrayBufferReader(this);
+        else if (WebSocketDataType.BLOB.equals(webSocketDataType)) messageReader = new BlobReader(this);
+        else throw new IllegalArgumentException("Wrong reader type : " + webSocketDataType);
 
-        webSocket.setOnopen(new EventListener() {
+        webSocket.setOnopen(event -> {
+            if (log.isLoggable(Level.INFO)) log.info("WebSoket connected");
 
-            @Override
-            public void handleEvent(final Event event) {
-                if (log.isLoggable(Level.INFO)) log.info("WebSoket connected");
-
-                Scheduler.get().scheduleFixedDelay(new RepeatingCommand() {
-
-                    @Override
-                    public boolean execute() {
-                        if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Heart beat sent");
-                        send(ClientToServerModel.HEARTBEAT.toStringValue());
-                        return true;
-                    }
-                }, 1000);
-            }
-        });
-        webSocket.setOnclose(new EventListener() {
-
-            @Override
-            public void handleEvent(final Event event) {
-                if (event instanceof CloseEvent) {
-                    final CloseEvent closeEvent = (CloseEvent) event;
-                    if (log.isLoggable(Level.INFO)) log.info("WebSoket disconnected : " + closeEvent.getCode());
-                    uiBuilder.onCommunicationError(new StatusCodeException(closeEvent.getCode(), closeEvent.getReason()));
-                } else {
-                    if (log.isLoggable(Level.INFO)) log.info("WebSoket disconnected");
-                    uiBuilder.onCommunicationError(new Exception("Websocket connection closed"));
+            Scheduler.get().scheduleFixedDelay(() -> {
+                if (webSocket.getReadyState() == WebSocket.OPEN) {
+                    if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Heart beat sent");
+                    send(ClientToServerModel.HEARTBEAT.toStringValue());
                 }
+                return true;
+            }, 1000);
+        });
+        webSocket.setOnclose(event -> {
+            if (event instanceof CloseEvent) {
+                final CloseEvent closeEvent = (CloseEvent) event;
+                final int statusCode = closeEvent.getCode();
+                if (log.isLoggable(Level.INFO)) log.info("WebSoket disconnected : " + statusCode);
+                // If it's a not normal disconnection
+                if (statusCode != 1000) reconnectionChecker.detectConnectionFailure();
+            } else {
+                log.severe("WebSoket disconnected : " + event);
+                reconnectionChecker.detectConnectionFailure();
             }
         });
-        webSocket.setOnerror(new EventListener() {
-
-            @Override
-            public void handleEvent(final Event event) {
-                if (log.isLoggable(Level.INFO)) log.info("WebSoket error");
-                uiBuilder.onCommunicationError(new Exception("Websocket error"));
-            }
+        webSocket.setOnerror(event -> {
+            log.severe("WebSoket error : " + event);
         });
-        webSocket.setOnmessage(new EventListener() {
-
-            /**
-             * Message from server to Main terminal
-             */
-            @Override
-            public void handleEvent(final Event event) {
-                messageReader.read((MessageEvent) event);
-            }
-        });
+        webSocket.setOnmessage(event -> messageReader.read((MessageEvent) event));
     }
+
+    // WORKAROUND : No setElements on Uint8Array but Elemental need it, create a passthrough
+    private final native void createSetElementsMethodOnUint8Array() /*-{
+                                                                    Uint8Array.prototype.setElements = function(array, offset) { this.set(array, offset) };
+                                                                    }-*/;
 
     @Override
     public void read(final ArrayBuffer arrayBuffer) {
         try {
-            final ReaderBuffer buffer = new ReaderBuffer(arrayBuffer);
-            // Get the first element on the message, always a key of element of the Model enum
-            final BinaryModel type = buffer.readBinaryModel();
-
-            if (type.getModel() == ServerToClientModel.PING_SERVER) {
-                if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Ping received");
-                final PTInstruction requestData = new PTInstruction();
-                requestData.put(ClientToServerModel.PING_SERVER, type.getLongValue());
-                send(requestData.toString());
-            } else if (type.getModel() == ServerToClientModel.HEARTBEAT) {
-                if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Heart beat received");
-            } else if (type.getModel() == ServerToClientModel.BEGIN_OBJECT) {
-                try {
-                    uiBuilder.updateMainTerminal(buffer);
-                } catch (final Exception e) {
-                    log.log(Level.SEVERE, "Error while processing the " + buffer, e);
-                }
-            } else if (type.getModel() == ServerToClientModel.UI_CONTEXT_ID) {
-                PonySDK.uiContextId = type.getIntValue();
+            if (!initialized) {
                 uiBuilder.init(new WebSocketRequestBuilder(WebSocketClient.this));
-            } else {
-                log.severe("Unknown model : " + type.getModel());
+                initialized = true;
             }
+
+            readerBuffer.init(window.newUint8Array(arrayBuffer, 0, arrayBuffer.getByteLength()));
+
+            uiBuilder.updateMainTerminal(readerBuffer);
         } catch (final Exception e) {
-            log.log(Level.SEVERE, "Cannot parse " + arrayBuffer, e);
+            log.log(Level.SEVERE, "Error while processing the " + readerBuffer, e);
         }
     }
 
@@ -161,10 +128,6 @@ public class WebSocketClient implements MessageSender {
         webSocket.close();
     }
 
-    public final native void setWebsocket(Worker w, Window window, WebSocket webSocket) /*-{
-                                                                                        window.webSocket = webSocket;
-                                                                                        }-*/;
-
     public enum WebSocketDataType {
 
         ARRAYBUFFER("arraybuffer"),
@@ -172,13 +135,10 @@ public class WebSocketClient implements MessageSender {
 
         private String name;
 
-        private WebSocketDataType(final String name) {
+        WebSocketDataType(final String name) {
             this.name = name;
         }
 
-        /**
-         * @return the name
-         */
         public String getName() {
             return name;
         }

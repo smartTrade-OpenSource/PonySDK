@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.ui.basic.event;
 
+@FunctionalInterface
 public interface HasPSubmitCompleteHandlers {
 
     void addSubmitCompleteHandler(PSubmitCompleteHandler handler);

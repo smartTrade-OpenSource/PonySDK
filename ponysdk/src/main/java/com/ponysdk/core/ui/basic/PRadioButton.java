@@ -25,12 +25,16 @@ package com.ponysdk.core.ui.basic;
 
 import java.util.Objects;
 
+import com.ponysdk.core.model.PCheckBoxState;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 
 /**
- * A mutually-exclusive selection radio button widget. Fires {@link com.ponysdk.core.ui.basic.event.PClickEvent}s when the radio
- * button is clicked, and {@link com.ponysdk.core.ui.basic.event.PValueChangeEvent}s when the button becomes checked. Note, however,
+ * A mutually-exclusive selection radio button widget. Fires
+ * {@link com.ponysdk.core.ui.basic.event.PClickEvent}s when the radio
+ * button is clicked, and {@link com.ponysdk.core.ui.basic.event.PValueChangeEvent}s when the button
+ * becomes checked. Note, however,
  * that browser limitations prevent PValueChangeEvents from being sent when the radio button is
  * cleared as a side effect of another in the group being clicked.
  * <h3>CSS Style Rules</h3>
@@ -43,13 +47,30 @@ public class PRadioButton extends PCheckBox {
 
     private String name;
 
-    public PRadioButton(final String name, final String label) {
-        this(label);
-        setName(name);
+    protected PRadioButton() {
+        super();
     }
 
-    public PRadioButton(final String label) {
+    protected PRadioButton(final String label) {
         super(label);
+    }
+
+    @Override
+    public void setState(final PCheckBoxState state) {
+        this.setState(state, true);
+    }
+
+    protected void setState(final PCheckBoxState state, final boolean propagate) {
+        if (!PCheckBoxState.INDETERMINATE.equals(state)) {
+            if (Objects.equals(this.state, state)) return;
+            super.setState(state);
+            if (propagate && handlers != null) {
+                final PValueChangeEvent<Boolean> event = new PValueChangeEvent<>(this, getValue());
+                handlers.forEach(handler -> handler.onValueChange(event));
+            }
+        } else {
+            throw new IllegalArgumentException("State of a RadioButton can't be indeterminate");
+        }
     }
 
     @Override
@@ -57,14 +78,10 @@ public class PRadioButton extends PCheckBox {
         return WidgetType.RADIO_BUTTON;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(final String name) {
+    void setName(final String name) {
         if (Objects.equals(this.name, name)) return;
         this.name = name;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.NAME, name));
+        saveUpdate(ServerToClientModel.NAME, name);
     }
 
 }

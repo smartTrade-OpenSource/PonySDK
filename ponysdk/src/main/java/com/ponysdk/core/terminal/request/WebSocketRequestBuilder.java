@@ -39,4 +39,9 @@ public class WebSocketRequestBuilder implements RequestBuilder {
         webSocketClient.send(value.toString());
     }
 
+    @Override
+    public String toString() {
+        return "Main builder";
+    }
+
 }

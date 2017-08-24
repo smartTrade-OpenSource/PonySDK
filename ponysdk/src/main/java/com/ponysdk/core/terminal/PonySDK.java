@@ -26,33 +26,31 @@ package com.ponysdk.core.terminal;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.timepedia.exporter.client.Export;
-import org.timepedia.exporter.client.ExportConstructor;
-import org.timepedia.exporter.client.ExportPackage;
-import org.timepedia.exporter.client.Exportable;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.event.logical.shared.CloseEvent;
-import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONString;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.MappingPath;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
-import com.ponysdk.core.terminal.model.ReaderBuffer;
-import com.ponysdk.core.terminal.request.ParentWindowRequest;
-import com.ponysdk.core.terminal.request.RequestCallback;
+import com.ponysdk.core.terminal.request.FrameRequestBuilder;
+import com.ponysdk.core.terminal.request.WindowRequestBuilder;
 import com.ponysdk.core.terminal.socket.WebSocketClient;
 import com.ponysdk.core.terminal.socket.WebSocketClient.WebSocketDataType;
+import com.ponysdk.core.terminal.ui.PTObject;
 import com.ponysdk.core.terminal.ui.PTWindowManager;
 
 import elemental.client.Browser;
+import elemental.xml.XMLHttpRequest;
+import jsinterop.annotations.JsType;
 
-@ExportPackage(value = "")
-@Export(value = "ponysdk")
-public class PonySDK implements Exportable, UncaughtExceptionHandler {
+@JsType
+public class PonySDK implements UncaughtExceptionHandler {
 
     private static final Logger log = Logger.getLogger(PonySDK.class.getName());
 
@@ -60,125 +58,132 @@ public class PonySDK implements Exportable, UncaughtExceptionHandler {
 
     private final UIBuilder uiBuilder = new UIBuilder();
 
+    private int contextId;
     private WebSocketClient socketClient;
+    private boolean started;
 
-    private boolean started = false;
-
-    public static Integer uiContextId;
-
-    private PonySDK() {
+    public PonySDK() {
+        if (INSTANCE != null) throw new RuntimeException("Cannot instanciate PonySDK twice");
+        INSTANCE = this;
     }
 
-    @ExportConstructor
-    public static PonySDK constructor() {
-        if (INSTANCE == null) {
-            INSTANCE = new PonySDK();
-            GWT.setUncaughtExceptionHandler(INSTANCE);
-            if (log.isLoggable(Level.INFO)) log.info("Creating PonySDK instance");
-        }
+    public static final PonySDK get() {
         return INSTANCE;
     }
 
-    @Export
     public void start() {
         if (started) return;
 
+        if (log.isLoggable(Level.INFO)) log.info("Starting PonySDK instance");
+
+        GWT.setUncaughtExceptionHandler(this);
+
         try {
-            if (log.isLoggable(Level.INFO)) log.info("Starting PonySDK instance");
-            final elemental.html.Window window = Browser.getWindow();
-            final elemental.html.Window opener = window.getOpener();
+            final String child = Window.Location.getParameter(ClientToServerModel.UI_CONTEXT_ID.toStringValue());
 
-            if (opener == null) {
-                Window.addCloseHandler(new CloseHandler<Window>() {
+            if (child == null) startMainContext();
+            else startChildContext();
 
-                    @Override
-                    public void onClose(final CloseEvent<Window> event) {
-                        close();
-                    }
-                });
-
-                final String builder = GWT.getHostPageBaseURL().replaceFirst("http", "ws") + "ws?" +
-                        ClientToServerModel.TYPE_HISTORY.toStringValue() + "=" + History.getToken();
-
-                socketClient = new WebSocketClient(builder, uiBuilder, WebSocketDataType.ARRAYBUFFER);
-            } else {
-                uiContextId = Integer.parseInt(Window.Location.getParameter(ClientToServerModel.UI_CONTEXT_ID.toStringValue()));
-
-                final String windowId = Window.Location.getParameter(ClientToServerModel.WINDOW_ID.toStringValue());
-                uiBuilder.init(new ParentWindowRequest(windowId, new RequestCallback() {
-
-                    /**
-                     * Message from Main terminal to the matching terminal
-                     */
-                    @Override
-                    public void onDataReceived(final ReaderBuffer buffer) {
-                        uiBuilder.updatWindowTerminal(buffer);
-                    }
-
-                }));
-            }
-
+            started = true;
         } catch (final Throwable e) {
             log.log(Level.SEVERE, "Loading application has failed #" + e.getMessage(), e);
         }
+    }
 
-        started = true;
+    private void startMainContext() {
+        Window.addCloseHandler(event -> close());
+        final String builder = GWT.getHostPageBaseURL().replaceFirst("http", "ws") + MappingPath.WEBSOCKET + "?"
+                + ClientToServerModel.TYPE_HISTORY.toStringValue() + "=" + History.getToken();
+        final ReconnectionChecker reconnectionChecker = new ReconnectionChecker();
+        socketClient = new WebSocketClient(builder, uiBuilder, WebSocketDataType.ARRAYBUFFER, reconnectionChecker);
+
+        reconnectionChecker.checkConnection();
+    }
+
+    private void startChildContext() {
+        final String windowId = Window.Location.getParameter(ClientToServerModel.WINDOW_ID.toStringValue());
+        final String frameId = Window.Location.getParameter(ClientToServerModel.FRAME_ID.toStringValue());
+
+        contextId = Integer.parseInt(Window.Location.getParameter(ClientToServerModel.UI_CONTEXT_ID.toStringValue()));
+        uiBuilder.init(windowId != null ? new WindowRequestBuilder(windowId, buffer -> uiBuilder.updateWindowTerminal(buffer))
+                : new FrameRequestBuilder(frameId, buffer -> uiBuilder.updateFrameTerminal(buffer)));
     }
 
     /**
      * From other terminal to the server
      */
-    @Export
-    public void sendDataToServer(final String jsObject) {
+    public void sendDataToServerFromWindow(final String jsObject) {
         uiBuilder.sendDataToServer(JSONParser.parseStrict(jsObject));
     }
 
     /**
      * From Main terminal to the server
+     * Ajax implementation
      */
-    @Export
-    public void sendDataToServer(final int objectID, final JavaScriptObject jsObject) {
-        final PTInstruction instruction = new PTInstruction(objectID);
-        instruction.put(ClientToServerModel.NATIVE, jsObject);
-        uiBuilder.sendDataToServer(instruction);
+    public void sendDataToServer(final Object objectID, final JavaScriptObject jsObject, final AjaxCallback callback) {
+        if (callback == null) {
+            final PTInstruction instruction = new PTInstruction(Integer.valueOf(objectID.toString()));
+            instruction.put(ClientToServerModel.NATIVE, jsObject);
+            uiBuilder.sendDataToServer(instruction);
+        } else {
+            final XMLHttpRequest xhr = Browser.getWindow().newXMLHttpRequest();
+
+            final PTObject ptObject = uiBuilder.getPTObject(Integer.parseInt(objectID.toString()));
+
+            xhr.setOnload(evt -> callback.setAjaxResponse(xhr.getResponseText()));
+
+            xhr.open("GET", MappingPath.AJAX);
+            xhr.setRequestHeader(ClientToServerModel.UI_CONTEXT_ID.name(), String.valueOf(contextId));
+            xhr.setRequestHeader(ClientToServerModel.OBJECT_ID.name(), String.valueOf(ptObject.getObjectID()));
+
+            final JSONObject jsonArray = new JSONObject(jsObject);
+            for (final String key : jsonArray.keySet()) {
+                final JSONValue jsonValue = jsonArray.get(key);
+                final JSONString stringValue = jsonValue.isString();
+                xhr.setRequestHeader(key, stringValue != null ? stringValue.stringValue() : jsonValue.toString());
+            }
+
+            xhr.send();
+        }
     }
 
-    /**
-     * From Main terminal to the server
-     */
-    @Export
-    public void sendDataToServer(final String objectID, final JavaScriptObject jsObject) {
-        sendDataToServer(Integer.parseInt(objectID), jsObject);
+    public void request(final Object objectID, final JavaScriptObject jsObject, final AjaxCallback callback) {
+        sendDataToServer(objectID, jsObject, callback);
     }
 
-    @Export
+    public void setReadyFrame(final int frameID) {
+        uiBuilder.setReadyFrame(frameID);
+    }
+
     public void setReadyWindow(final int windowID) {
         uiBuilder.setReadyWindow(windowID);
     }
 
-    @Export
-    public void registerCommunicationError(final CommunicationErrorHandler communicationErrorClosure) {
-        uiBuilder.registerCommunicationError(communicationErrorClosure);
-    }
-
-    @Export
     public void registerAddOnFactory(final String signature, final JavascriptAddOnFactory javascriptAddOnFactory) {
         uiBuilder.registerJavascriptAddOnFactory(signature, javascriptAddOnFactory);
+    }
+
+    public String getHostPageBaseURL() {
+        return GWT.getHostPageBaseURL();
     }
 
     @Override
     public void onUncaughtException(final Throwable e) {
         log.log(Level.SEVERE, "PonySDK has encountered an internal error : ", e);
-
-        final PTInstruction instruction = new PTInstruction();
-        instruction.put(ClientToServerModel.ERROR_MSG, e.getMessage());
-        uiBuilder.sendDataToServer(instruction);
+        uiBuilder.sendErrorMessageToServer(e.getMessage());
     }
 
-    @Export
     public void close() {
         socketClient.close();
         PTWindowManager.closeAll();
+    }
+
+    public int getContextId() {
+        return contextId;
+    }
+
+    public void setContextId(final int contextId) {
+        this.contextId = contextId;
     }
 
 }

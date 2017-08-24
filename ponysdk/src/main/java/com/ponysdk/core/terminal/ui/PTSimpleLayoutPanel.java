@@ -25,7 +25,7 @@ package com.ponysdk.core.terminal.ui;
 
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 
-public class PTSimpleLayoutPanel extends PTSimplePanel {
+public class PTSimpleLayoutPanel extends PTSimplePanel<SimpleLayoutPanel> {
 
     @Override
     protected SimpleLayoutPanel createUIObject() {

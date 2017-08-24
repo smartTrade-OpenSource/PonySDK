@@ -23,6 +23,7 @@
 
 package com.ponysdk.sample.client.page;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
@@ -38,7 +39,7 @@ import com.ponysdk.core.ui.basic.event.PDropHandler;
 
 public class DragAndDropPageActivity extends SamplePageActivity {
 
-    private final PFlowPanel boxContainer = new PFlowPanel();
+    private final PFlowPanel boxContainer = Element.newPFlowPanel();
 
     public DragAndDropPageActivity() {
         super("Drag and Drop", "Extra");
@@ -48,7 +49,7 @@ public class DragAndDropPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PVerticalPanel verticalPanel = new PVerticalPanel();
+        final PVerticalPanel verticalPanel = Element.newPVerticalPanel();
 
         final PWidget box1 = buildBox("Box 1");
         final PWidget box2 = buildBox("Box 2");
@@ -65,49 +66,29 @@ public class DragAndDropPageActivity extends SamplePageActivity {
     }
 
     private PWidget buildBox(final String label) {
-        final PLabel lbl = new PLabel(label);
+        final PLabel lbl = Element.newPLabel(label);
         lbl.addStyleName("label");
 
-        final PFlowPanel box = new PFlowPanel();
+        final PFlowPanel box = Element.newPFlowPanel();
         box.addStyleName("ddbox");
         box.add(lbl);
 
-        box.addDomHandler(new PDragStartHandler() {
-
-            @Override
-            public void onDragStart(final PDragStartEvent event) {
-            }
+        box.addDomHandler((PDragStartHandler) event -> {
         }, PDragStartEvent.TYPE);
 
-        box.addDomHandler(new PDropHandler() {
-
-            @Override
-            public void onDrop(final PDropEvent event) {
-                box.removeStyleName("dragenter");
-                final PWidget source = event.getDragSource();
-                if (source != null && source != box) {
-                    final int dropIndex = boxContainer.getWidgetIndex(box);
-                    boxContainer.remove(source);
-                    boxContainer.insert(source, dropIndex);
-                }
+        box.addDomHandler((PDropHandler) event -> {
+            box.removeStyleName("dragenter");
+            final PWidget source = event.getDragSource();
+            if (source != null && source != box) {
+                final int dropIndex = boxContainer.getWidgetIndex(box);
+                boxContainer.remove(source);
+                boxContainer.insert(source, dropIndex);
             }
         }, PDropEvent.TYPE);
 
-        box.addDomHandler(new PDragEnterHandler() {
+        box.addDomHandler((PDragEnterHandler) event -> box.addStyleName("dragenter"), PDragEnterEvent.TYPE);
 
-            @Override
-            public void onDragEnter(final PDragEnterEvent event) {
-                box.addStyleName("dragenter");
-            }
-        }, PDragEnterEvent.TYPE);
-
-        box.addDomHandler(new PDragLeaveHandler() {
-
-            @Override
-            public void onDragLeave(final PDragLeaveEvent event) {
-                box.removeStyleName("dragenter");
-            }
-        }, PDragLeaveEvent.TYPE);
+        box.addDomHandler((PDragLeaveHandler) event -> box.removeStyleName("dragenter"), PDragLeaveEvent.TYPE);
 
         return box;
     }

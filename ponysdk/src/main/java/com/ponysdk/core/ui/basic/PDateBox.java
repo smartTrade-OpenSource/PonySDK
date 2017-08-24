@@ -23,19 +23,26 @@
 
 package com.ponysdk.core.ui.basic;
 
-import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.Parser;
-import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
-import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+
+import javax.json.JsonObject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.json.JsonObject;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
+import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
+import com.ponysdk.core.writer.ModelWriter;
 
 /**
  * A text box that shows a {@link PDatePicker} when the user focuses on it.
@@ -59,31 +66,31 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
     private Date date;
     private SimpleDateFormat dateFormat;
 
-    public PDateBox() {
+    protected PDateBox() {
         this(new SimpleDateFormat("MM/dd/yyyy"));
     }
 
-    public PDateBox(final SimpleDateFormat dateFormat) {
+    protected PDateBox(final SimpleDateFormat dateFormat) {
         this(new PDatePicker(), dateFormat);
     }
 
-    public PDateBox(final PDatePicker picker, final SimpleDateFormat dateFormat) {
+    protected PDateBox(final PDatePicker picker, final SimpleDateFormat dateFormat) {
         this.datePicker = picker;
         this.dateFormat = dateFormat;
         saveAdd(datePicker.getID(), ID);
     }
 
     @Override
-    protected boolean attach(final int windowID) {
-        datePicker.attach(windowID);
-        return super.attach(windowID);
+    protected boolean attach(final PWindow window, final PFrame frame) {
+        datePicker.attach(window, frame);
+        return super.attach(window, frame);
     }
 
     @Override
-    protected void enrichOnInit(final Parser parser) {
-        super.enrichOnInit(parser);
-        parser.parse(ServerToClientModel.PICKER, datePicker.getID());
-        parser.parse(ServerToClientModel.DATE_FORMAT_PATTERN, dateFormat.toPattern());
+    protected void enrichOnInit(final ModelWriter writer) {
+        super.enrichOnInit(writer);
+        writer.write(ServerToClientModel.PICKER, datePicker.getID());
+        writer.write(ServerToClientModel.DATE_FORMAT_PATTERN, dateFormat.toPattern());
     }
 
     @Override
@@ -127,10 +134,8 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
 
     @Override
     public void onValueChange(final PValueChangeEvent<Date> event) {
-        this.date = event.getValue();
-        for (final PValueChangeHandler<Date> handler : getValueChangeHandlers()) {
-            handler.onValueChange(event);
-        }
+        this.date = event.getData();
+        getValueChangeHandlers().forEach(handler -> handler.onValueChange(event));
     }
 
     public SimpleDateFormat getDateFormat() {
@@ -138,8 +143,9 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
     }
 
     public void setDateFormat(final SimpleDateFormat dateFormat) {
+        if (Objects.equals(this.dateFormat, dateFormat)) return;
         this.dateFormat = dateFormat;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.DATE_FORMAT_PATTERN, dateFormat.toPattern()));
+        saveUpdate(ServerToClientModel.DATE_FORMAT_PATTERN, dateFormat.toPattern());
     }
 
     @Override
@@ -150,19 +156,17 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
     @Override
     public void setValue(final Date date) {
         this.date = date;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.VALUE, date != null ? dateFormat.format(date) : EMPTY));
+        saveUpdate(ServerToClientModel.VALUE, date != null ? dateFormat.format(date) : EMPTY);
         datePicker.setValue(date);
     }
 
     public String getDisplayedValue() {
-        if (getValue() == null)
-            return EMPTY;
-        else
-            return getDateFormat().format(getValue());
+        if (getValue() == null) return EMPTY;
+        else return getDateFormat().format(getValue());
     }
 
     public void setDefaultMonth(final Date date) {
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.TIME, date.getTime()));
+        saveUpdate(ServerToClientModel.TIME, date.getTime());
     }
 
     public PDatePicker getDatePicker() {

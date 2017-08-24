@@ -23,15 +23,11 @@
 
 package com.ponysdk.core.ui.list;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
-import com.ponysdk.core.ui.basic.PSimplePanel;
 import com.ponysdk.core.ui.basic.PWidget;
+
+import java.util.*;
 
 /***
  * A Grid of data that supports paging and columns.
@@ -45,8 +41,7 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
     protected final List<D> rows = new ArrayList<>();
     private final Map<D, Integer> subListSizeByFather = new HashMap<>();
     protected int dataCount = 0;
-    private PSelectionModel<D> setSelectionModel;
-    private int colCount = 0;
+    protected int colCount = 0;
 
     public DataGridActivity(final SimpleListView listView) {
         this.view = listView;
@@ -64,30 +59,13 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
             final IsPWidget renderCell = field.renderCell(row, data);
             view.addWidget(renderCell, col++, row + 1, 1);
         }
-        view.addWidget(new PSimplePanel(), col, row + 1, 1);
-    }
-
-    protected void updateRowIndex(final int min) {
-    }
-
-    public void insertRow(final int row, final int column, final int colSpan, final PWidget widget) {
-        if (row > getRowCount() + 1) throw new IndexOutOfBoundsException("row (" + row + ") > size (" + getRowCount() + ")");
-
-        rows.add(row, null);
-
-        view.insertRow(row + 1);
-        view.addWidget(widget, column, row + 1, colSpan);
-        updateRowIndex(row);
-    }
-
-    public void insertWidget(final int row, final int column, final int colSpan, final PWidget widget) {
-        view.addWidget(widget, column, row, colSpan);
+        view.addWidget(Element.newPSimplePanel(), col, row + 1, 1);
     }
 
     public void insertSubList(final D fatherData, final List<D> datas) {
         if (datas.isEmpty()) return;
 
-        final int fatherRow = getDataIndex(fatherData);
+        final int fatherRow = getModelRowIndex(fatherData);
         subListSizeByFather.put(fatherData, datas.size());
 
         // rows start includes data only
@@ -102,13 +80,13 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
             for (final DataGridColumnDescriptor<D, ?> field : this.columnDescriptors) {
                 this.view.addWidget(field.renderSubCell(subRow + 1, data), col++, subRow + 1, 1);
             }
-            this.view.addWidget(new PSimplePanel(), col, subRow + 1, 1);
+            this.view.addWidget(Element.newPSimplePanel(), col, subRow + 1, 1);
             subRow++;
         }
     }
 
     public void removeSubList(final D fatherData) {
-        final int fatherRow = getDataIndex(fatherData);
+        final int fatherRow = getModelRowIndex(fatherData);
         final Integer subListSize = subListSizeByFather.remove(fatherData);
 
         if (subListSize != null) {
@@ -125,38 +103,29 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
     }
 
     public void selectRow(final D data) {
-        view.selectRow(getDataIndex(data));
+        view.selectRow(getModelRowIndex(data));
     }
 
     public void unSelectRow(final D data) {
-        view.unSelectRow(getDataIndex(data));
+        view.unSelectRow(getModelRowIndex(data));
     }
 
-    @Override
-    public PSelectionModel<D> getSelectionModel() {
-        return setSelectionModel;
+    public D getRow(final int rowIndex) {
+        return rows.get(rowIndex);
     }
 
-    @Override
-    public void setSelectionModel(final PSelectionModel<D> selectionModel) {
-        this.setSelectionModel = selectionModel;
-    }
-
-    @Override
-    public D getVisibleItem(final int indexOnPage) {
-        return rows.get(indexOnPage);
+    public int getModelRowIndex(final D data) {
+        return rows.indexOf(data);
     }
 
     public int getRowCount() {
         return rows.size();
     }
 
-    @Override
     public int getVisibleItemCount() {
         return dataCount;
     }
 
-    @Override
     public Iterable<D> getVisibleItems() {
 
         return new Iterable<D>() {
@@ -192,10 +161,6 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
         };
     }
 
-    public int getDataIndex(final D data) {
-        return rows.indexOf(data);
-    }
-
     @Override
     public void setData(final List<D> data) {
         rows.clear();
@@ -212,18 +177,6 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
         }
     }
 
-    public void addData(final D data) {
-        insertData(getVisibleItemCount(), data);
-    }
-
-    public void insertData(final int index, final D data) {
-        rows.add(index, data);
-        dataCount++;
-
-        view.insertRow(index + 1);
-        setData(index, data);
-    }
-
     public void remove(final int index) {
         view.removeRow(index + 1);
 
@@ -231,13 +184,8 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
         if (removed != null) dataCount--;
     }
 
-    public void remove(final D data) {
+    protected void remove(final D data) {
         remove(rows.indexOf(data));
-    }
-
-    @Override
-    public PWidget asWidget() {
-        return view.asWidget();
     }
 
     public List<DataGridColumnDescriptor<D, ?>> getColumnDescriptors() {
@@ -246,6 +194,24 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
 
     public SimpleListView getListView() {
         return view;
+    }
+
+    @Override
+    public PWidget asWidget() {
+        return view.asWidget();
+    }
+
+    public void insertRow(final int row, final int column, final int colSpan, final PWidget widget) {
+        if (row > getRowCount() + 1) throw new IndexOutOfBoundsException("row (" + row + ") > size (" + getRowCount() + ")");
+
+        rows.add(row, null);
+
+        view.insertRow(row + 1);
+        view.addWidget(widget, column, row + 1, colSpan);
+    }
+
+    public void insertWidget(final int row, final int column, final int colSpan, final PWidget widget) {
+        view.addWidget(widget, column, row, colSpan);
     }
 
 }

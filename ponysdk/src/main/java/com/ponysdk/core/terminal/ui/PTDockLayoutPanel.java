@@ -32,7 +32,7 @@ import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
-public class PTDockLayoutPanel extends PTComplexPanel<DockLayoutPanel> {
+public class PTDockLayoutPanel<T extends DockLayoutPanel> extends PTComplexPanel<T> {
 
     private Unit unit;
 
@@ -44,31 +44,8 @@ public class PTDockLayoutPanel extends PTComplexPanel<DockLayoutPanel> {
     }
 
     @Override
-    protected DockLayoutPanel createUIObject() {
-        return new DockLayoutPanel(unit);
-    }
-
-    @Override
-    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.WIDGET_SIZE.equals(binaryModel.getModel())) {
-            final double newSize = binaryModel.getDoubleValue();
-            // ServerToClientModel.WIDGET_ID
-            final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
-            uiObject.setWidgetSize(w, newSize);
-            return true;
-        }
-        if (ServerToClientModel.WIDGET_HIDDEN.equals(binaryModel.getModel())) {
-            final boolean hidden = binaryModel.getBooleanValue();
-            // ServerToClientModel.WIDGET_ID
-            final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
-            uiObject.setWidgetHidden(w, hidden);
-            return true;
-        }
-        if (ServerToClientModel.ANIMATE.equals(binaryModel.getModel())) {
-            uiObject.animate(binaryModel.getIntValue());
-            return true;
-        }
-        return super.update(buffer, binaryModel);
+    protected T createUIObject() {
+        return (T) new DockLayoutPanel(unit);
     }
 
     @Override
@@ -78,7 +55,6 @@ public class PTDockLayoutPanel extends PTComplexPanel<DockLayoutPanel> {
         final Direction direction = Direction.values()[buffer.readBinaryModel().getByteValue()];
         // ServerToClientModel.SIZE
         final double size = buffer.readBinaryModel().getDoubleValue();
-
         switch (direction) {
             case CENTER: {
                 uiObject.add(w);
@@ -108,6 +84,29 @@ public class PTDockLayoutPanel extends PTComplexPanel<DockLayoutPanel> {
                 uiObject.addLineEnd(w, size);
                 break;
             }
+        }
+    }
+
+    @Override
+    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.WIDGET_SIZE.ordinal() == modelOrdinal) {
+            final double newSize = binaryModel.getDoubleValue();
+            // ServerToClientModel.WIDGET_ID
+            final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
+            uiObject.setWidgetSize(w, newSize);
+            return true;
+        } else if (ServerToClientModel.WIDGET_HIDDEN.ordinal() == modelOrdinal) {
+            final boolean hidden = binaryModel.getBooleanValue();
+            // ServerToClientModel.WIDGET_ID
+            final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
+            uiObject.setWidgetHidden(w, hidden);
+            return true;
+        } else if (ServerToClientModel.ANIMATE.ordinal() == modelOrdinal) {
+            uiObject.animate(binaryModel.getIntValue());
+            return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
     }
 

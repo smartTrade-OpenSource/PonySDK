@@ -25,6 +25,7 @@ package com.ponysdk.core.ui.basic;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import javax.json.JsonArray;
 import javax.json.JsonNumber;
@@ -37,10 +38,10 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.ui.basic.event.HasPAnimation;
 import com.ponysdk.core.ui.basic.event.PCloseEvent;
 import com.ponysdk.core.ui.basic.event.PCloseHandler;
+import com.ponysdk.core.writer.ModelWriter;
 
 /**
  * A panel that can "pop up" over other widgets. It overlays the browser's
@@ -86,32 +87,19 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
     private PPositionCallback positionCallback;
 
-    public PPopupPanel(final int windowID, final boolean autoHide) {
+    protected PPopupPanel(final boolean autoHide) {
         this.visible = false;
         this.autoHide = autoHide;
-        PPopupManager.get(windowID).registerPopup(this);
     }
 
-    public PPopupPanel(final int windowID) {
-        this(windowID, false);
-    }
-
-    @Override
-    protected boolean attach(final int windowID) {
-        final boolean result = super.attach(windowID);
-
-        if (windowID != PWindow.EMPTY_WINDOW_ID) {
-            final PRootPanel root = PRootPanel.get(windowID);
-            final PWidget child = root.getChild(ID);
-            if (child == null) root.add(this);
-        }
-
-        return result;
+    protected PPopupPanel() {
+        this(false);
     }
 
     @Override
-    protected void enrichOnInit(final Parser parser) {
-        if (autoHide) parser.parse(ServerToClientModel.POPUP_AUTO_HIDE, autoHide);
+    protected void enrichOnInit(final ModelWriter writer) {
+        super.enrichOnInit(writer);
+        if (autoHide) writer.write(ServerToClientModel.POPUP_AUTO_HIDE, autoHide);
     }
 
     @Override
@@ -120,24 +108,22 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
     }
 
     public void setModal(final boolean modal) {
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.POPUP_MODAL, modal));
+        saveUpdate(ServerToClientModel.MODAL, modal);
     }
 
     public void setDraggable(final boolean draggable) {
-        if (draggable) {
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.POPUP_DRAGGABLE));
-        }
+        saveUpdate(ServerToClientModel.DRAGGABLE, draggable);
     }
 
     public void center() {
         this.showing = true;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.POPUP_CENTER));
+        saveUpdate(writer -> writer.write(ServerToClientModel.CENTER));
     }
 
     public void show() {
         if (!showing) {
             this.showing = true;
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.POPUP_SHOW));
+            saveUpdate(writer -> writer.write(ServerToClientModel.OPEN));
         } else {
             log.warn("The popup is already opened : {}", this);
         }
@@ -146,10 +132,15 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
     public void hide() {
         if (showing) {
             this.showing = false;
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.POPUP_HIDE));
+            saveUpdate(writer -> writer.write(ServerToClientModel.CLOSE));
         } else {
             log.warn("The popup is already hidden : {}", this);
         }
+    }
+
+    public void close() {
+        hide();
+        removeFromParent();
     }
 
     @Override
@@ -159,12 +150,13 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
     @Override
     public void setAnimationEnabled(final boolean animationEnabled) {
+        if (Objects.equals(this.animationEnabled, animationEnabled)) return;
         this.animationEnabled = animationEnabled;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ANIMATION, animationEnabled));
+        saveUpdate(ServerToClientModel.ANIMATION, animationEnabled);
     }
 
     public void setGlassEnabled(final boolean glassEnabled) {
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.POPUP_GLASS_ENABLED, glassEnabled));
+        saveUpdate(ServerToClientModel.POPUP_GLASS_ENABLED, glassEnabled);
     }
 
     public boolean isShowing() {
@@ -172,9 +164,9 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
     }
 
     public void setPopupPosition(final int left, final int top) {
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.POPUP_POSITION_LEFT, left);
-            writer.writeModel(ServerToClientModel.POPUP_POSITION_TOP, top);
+        saveUpdate(writer -> {
+            writer.write(ServerToClientModel.POSITION_LEFT, left);
+            writer.write(ServerToClientModel.POSITION_TOP, top);
         });
     }
 
@@ -200,7 +192,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
             setPosition(windowWidth, windowHeight, clientWith, clientHeight);
 
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.POPUP_POSITION_AND_SHOW));
+            saveUpdate(writer -> writer.write(ServerToClientModel.POPUP_POSITION_AND_SHOW));
         } else if (instruction.containsKey(ClientToServerModel.HANDLER_CLOSE.toStringValue())) {
             this.showing = false;
             listeners.forEach(handler -> handler.onClose(new PCloseEvent(this)));
@@ -216,7 +208,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
     }
 
     public void setGlassStyleName(final String glassStyleName) {
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.POPUP_GLASS_STYLE_NAME, glassStyleName));
+        saveUpdate(ServerToClientModel.POPUP_GLASS_STYLE_NAME, glassStyleName);
     }
 
     /**

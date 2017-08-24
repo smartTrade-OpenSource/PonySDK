@@ -32,6 +32,7 @@ import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
+import com.ponysdk.core.terminal.ui.converter.GWTConverter;
 
 public class PTRichTextArea extends PTFocusWidget<RichTextArea> implements BlurHandler {
 
@@ -48,76 +49,46 @@ public class PTRichTextArea extends PTFocusWidget<RichTextArea> implements BlurH
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.HTML.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.HTML.ordinal() == modelOrdinal) {
             uiObject.setHTML(binaryModel.getStringValue());
             return true;
-        }
-        if (ServerToClientModel.CREATE_LINK.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.URL.ordinal() == modelOrdinal) {
             uiObject.getFormatter().createLink(binaryModel.getStringValue());
             return true;
-        }
-        if (ServerToClientModel.INSERT_HORIZONTAL_RULE.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.INSERT_HORIZONTAL_RULE.ordinal() == modelOrdinal) {
             uiObject.getFormatter().insertHorizontalRule();
             return true;
-        }
-        if (ServerToClientModel.INSERT_HTML.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.INSERT_HTML.ordinal() == modelOrdinal) {
             uiObject.getFormatter().insertHTML(binaryModel.getStringValue());
             return true;
-        }
-        if (ServerToClientModel.IMAGE_URL.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.IMAGE_URL.ordinal() == modelOrdinal) {
             uiObject.getFormatter().insertImage(binaryModel.getStringValue());
             return true;
-        }
-        if (ServerToClientModel.ORDERED.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.ORDERED.ordinal() == modelOrdinal) {
             uiObject.getFormatter().insertOrderedList();
             return true;
-        }
-        if (ServerToClientModel.UNORDERED.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.UNORDERED.ordinal() == modelOrdinal) {
             uiObject.getFormatter().insertUnorderedList();
             return true;
-        }
-        if (ServerToClientModel.BACK_COLOR.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.BACK_COLOR.ordinal() == modelOrdinal) {
             uiObject.getFormatter().setBackColor(binaryModel.getStringValue());
             return true;
-        }
-        if (ServerToClientModel.FONT_COLOR.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.FONT_COLOR.ordinal() == modelOrdinal) {
             uiObject.getFormatter().setForeColor(binaryModel.getStringValue());
             return true;
-        }
-        if (ServerToClientModel.FONT_NAME.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.FONT_NAME.ordinal() == modelOrdinal) {
             uiObject.getFormatter().setFontName(binaryModel.getStringValue());
             return true;
-        }
-        if (ServerToClientModel.FONT_SIZE.equals(binaryModel.getModel())) {
-            final FontSize fontSize = FontSize.valueOf(binaryModel.getStringValue());
-            switch (fontSize) {
-            case LARGE:
-                uiObject.getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.LARGE);
-                break;
-            case SMALL:
-                uiObject.getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.SMALL);
-                break;
-            case MEDIUM:
-                uiObject.getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.MEDIUM);
-                break;
-            case X_LARGE:
-                uiObject.getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.X_LARGE);
-                break;
-            case X_SMALL:
-                uiObject.getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.X_SMALL);
-                break;
-            case XX_LARGE:
-                uiObject.getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.XX_LARGE);
-                break;
-            case XX_SMALL:
-                uiObject.getFormatter().setFontSize(com.google.gwt.user.client.ui.RichTextArea.FontSize.XX_SMALL);
-                break;
-            default:
-                break;
-            }
+        } else if (ServerToClientModel.FONT_SIZE.ordinal() == modelOrdinal) {
+            uiObject.getFormatter().setFontSize(GWTConverter.asFontSize(binaryModel.getByteValue()));
             return true;
+        } else if (ServerToClientModel.JUSTIFICATION.ordinal() == modelOrdinal) {
+            uiObject.getFormatter().setJustification(GWTConverter.asJustification(binaryModel.getByteValue()));
+            return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
 
     @Override
@@ -125,14 +96,6 @@ public class PTRichTextArea extends PTFocusWidget<RichTextArea> implements BlurH
         final PTInstruction instruction = new PTInstruction(getObjectID());
         instruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE, uiObject.getHTML());
         uiBuilder.sendDataToServer(uiObject, instruction);
-    }
-
-    public enum FontSize {
-        LARGE, MEDIUM, SMALL, X_LARGE, X_SMALL, XX_LARGE, XX_SMALL
-    }
-
-    public enum Justification {
-        CENTER, FULL, LEFT, RIGHT
     }
 
 }

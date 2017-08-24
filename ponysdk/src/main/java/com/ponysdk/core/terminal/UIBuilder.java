@@ -23,63 +23,40 @@
 
 package com.ponysdk.core.terminal;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.Style.Visibility;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.event.shared.EventBus;
-import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.StatusCodeException;
-import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.UIObject;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.terminal.event.CommunicationErrorEvent;
-import com.ponysdk.core.terminal.event.HttpRequestSendEvent;
-import com.ponysdk.core.terminal.event.HttpResponseReceivedEvent;
-import com.ponysdk.core.terminal.exception.ServerException;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 import com.ponysdk.core.terminal.request.RequestBuilder;
 import com.ponysdk.core.terminal.ui.PTCookies;
+import com.ponysdk.core.terminal.ui.PTFrame;
+import com.ponysdk.core.terminal.ui.PTHistory;
 import com.ponysdk.core.terminal.ui.PTObject;
 import com.ponysdk.core.terminal.ui.PTStreamResource;
 import com.ponysdk.core.terminal.ui.PTWindow;
 import com.ponysdk.core.terminal.ui.PTWindowManager;
 
-public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceivedEvent.Handler, HttpRequestSendEvent.Handler {
+import elemental.client.Browser;
+
+public class UIBuilder {
 
     private static final Logger log = Logger.getLogger(UIBuilder.class.getName());
-
-    private static final EventBus rootEventBus = new SimpleEventBus();
 
     private static final WidgetType[] WIDGET_TYPES = WidgetType.values();
 
@@ -87,39 +64,19 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
     private final Map<Integer, PTObject> objectByID = new HashMap<>();
     private final Map<UIObject, Integer> objectIDByWidget = new HashMap<>();
     private final Map<Integer, UIObject> widgetIDByObjectID = new HashMap<>();
-    private final List<JSONObject> stackedErrors = new ArrayList<>();
     private final Map<String, JavascriptAddOnFactory> javascriptAddOnFactories = new HashMap<>();
 
-    private SimplePanel loadingMessageBox;
-    private PopupPanel communicationErrorMessagePanel;
-    private Timer timer;
-    private int numberOfrequestInProgress = 0;
-    private boolean pendingClose;
     private RequestBuilder requestBuilder;
-    private CommunicationErrorHandler communicationErrorHandler;
+
+    private static class AvoidBlockException extends Exception {
+    }
 
     public void init(final RequestBuilder requestBuilder) {
         if (log.isLoggable(Level.INFO)) log.info("Init request builder");
 
         this.requestBuilder = requestBuilder;
 
-        History.addValueChangeHandler(this);
-
-        rootEventBus.addHandler(HttpResponseReceivedEvent.TYPE, this);
-        rootEventBus.addHandler(HttpRequestSendEvent.TYPE, this);
-
-        loadingMessageBox = new SimplePanel();
-
-        communicationErrorMessagePanel = new PopupPanel(false, true);
-        communicationErrorMessagePanel.setGlassEnabled(true);
-        communicationErrorMessagePanel.setStyleName("pony-notification");
-        communicationErrorMessagePanel.addStyleName("error");
-
-        RootPanel.get().add(loadingMessageBox);
-
-        loadingMessageBox.setStyleName("pony-LoadingMessageBox");
-        loadingMessageBox.getElement().getStyle().setVisibility(Visibility.HIDDEN);
-        loadingMessageBox.getElement().setInnerText("Loading ...");
+        PTHistory.addValueChangeHandler(this);
 
         final PTCookies cookies = new PTCookies(this);
         objectByID.put(0, cookies);
@@ -134,235 +91,201 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         }
     }
 
-    public void onCommunicationError(final Throwable exception) {
-        rootEventBus.fireEvent(new CommunicationErrorEvent(exception));
-
-        if (pendingClose) return;
-
-        if (loadingMessageBox == null) {
-            // First load failed
-            if (exception instanceof StatusCodeException) {
-                final StatusCodeException codeException = (StatusCodeException) exception;
-                if (codeException.getStatusCode() == 0) return;
-            }
-            log.log(Level.SEVERE, "Cannot initialize the application : " + exception.getMessage() + "\n" + exception
-                    + "\nPlease reload your application", exception);
-        }
-
-        if (exception instanceof StatusCodeException) {
-            final StatusCodeException statusCodeException = (StatusCodeException) exception;
-            if (communicationErrorHandler != null) {
-                communicationErrorHandler.onCommunicationError(statusCodeException.getStatusCode(), statusCodeException.getMessage());
-            } else {
-                showCommunicationErrorMessage(statusCodeException);
-            }
-        } else {
-            if (communicationErrorHandler != null) {
-                communicationErrorHandler.onCommunicationError(500, exception.getMessage());
-            } else {
-                log.log(Level.SEVERE, "An unexcepted error occured: " + exception.getMessage() + ". Please check the server logs.",
-                        exception);
-            }
-        }
-    }
-
     public void updateMainTerminal(final ReaderBuffer buffer) {
         while (buffer.hasRemaining()) {
+            final int nextBlockPosition = buffer.shiftNextBlock(true);
+            if (nextBlockPosition == -1) return;
+
             // Detect if the message is not for the main terminal but for a specific window
-            final BinaryModel windowIdModel = buffer.readBinaryModel();
-            if (ServerToClientModel.WINDOW_ID.equals(windowIdModel.getModel())) {
+            final BinaryModel binaryModel = buffer.readBinaryModel();
+            final ServerToClientModel model = binaryModel.getModel();
+            if (ServerToClientModel.WINDOW_ID.equals(model)) {
                 // Event on a specific window
-                final int requestedWindowId = windowIdModel.getIntValue();
+                final int requestedId = binaryModel.getIntValue();
                 // Main terminal, we need to dispatch the eventbus
-                final PTWindow window = PTWindowManager.getWindow(requestedWindowId);
+                final PTWindow window = PTWindowManager.getWindow(requestedId);
                 if (window != null && window.isReady()) {
-                    log.log(Level.FINE, "The main terminal send the buffer to window " + requestedWindowId);
-
-                    final int startPosition = buffer.getIndex();
-
-                    // Type
-                    final BinaryModel type = buffer.readBinaryModel();
-
-                    while (buffer.hasRemaining()) {
-                        final BinaryModel model = buffer.readBinaryModel();
-                        if (ServerToClientModel.WINDOW_ID.equals(model.getModel())) {
-                            if (model.getIntValue() != requestedWindowId) {
-                                buffer.rewind(model);
-                                break;
-                            } else {
-                                // Type
-                                buffer.readBinaryModel();
-                            }
-                        } else if (model.isBeginKey()) {
-                            buffer.rewind(model);
-                            break;
-                        }
-                    }
-
-                    final int endPosition = buffer.getIndex();
-
-                    window.postMessage(new ReaderBuffer(buffer.getMessage().slice(startPosition, endPosition)));
+                    if (log.isLoggable(Level.FINE)) log.fine("The main terminal send the buffer to window " + requestedId);
+                    window.postMessage(buffer.slice(buffer.getPosition(), nextBlockPosition));
                 } else {
-                    log.log(Level.SEVERE, "The requested window " + requestedWindowId + " doesn't exist or not ready");
-
-                    // Type
-                    final BinaryModel type = buffer.readBinaryModel();
-                    log.log(Level.WARNING, "Consume message block : " + type);
-
-                    while (buffer.hasRemaining()) {
-                        final BinaryModel model = buffer.readBinaryModel();
-                        log.log(Level.WARNING, "Consume message block : " + model);
-                        if (ServerToClientModel.WINDOW_ID.equals(model.getModel())) {
-                            if (model.getIntValue() != requestedWindowId) {
-                                buffer.rewind(model);
-                                break;
-                            } else {
-                                // Type
-                                buffer.readBinaryModel();
-                            }
-                        } else if (model.isBeginKey()) {
-                            buffer.rewind(model);
-                            break;
-                        }
-                    }
+                    log.warning("The requested window " + requestedId + " doesn't exist anymore"); // TODO PERF LOG
+                    buffer.shiftNextBlock(false);
                 }
+            } else if (ServerToClientModel.FRAME_ID.equals(model)) {
+                final int requestedId = binaryModel.getIntValue();
+                final PTFrame frame = (PTFrame) getPTObject(requestedId);
+                if (log.isLoggable(Level.FINE)) log.fine("The main terminal send the buffer to frame " + requestedId);
+                frame.postMessage(buffer.slice(buffer.getPosition(), nextBlockPosition));
+            } else if (ServerToClientModel.PING_SERVER.equals(model)) {
+                if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Ping received");
+                final PTInstruction requestData = new PTInstruction();
+                requestData.put(ClientToServerModel.PING_SERVER, binaryModel.getLongValue());
+                requestBuilder.send(requestData);
+                buffer.readBinaryModel(); // Read ServerToClientModel.END element
+            } else if (ServerToClientModel.HEARTBEAT.equals(model)) {
+                if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Heart beat received");
+                buffer.readBinaryModel(); // Read ServerToClientModel.END element
+            } else if (ServerToClientModel.CREATE_CONTEXT.equals(model)) {
+                PonySDK.get().setContextId(binaryModel.getIntValue());
+                buffer.readBinaryModel(); // Read ServerToClientModel.END element
+            } else if (ServerToClientModel.DESTROY_CONTEXT.equals(model)) {
+                destroy();
+                buffer.readBinaryModel(); // Read ServerToClientModel.END element
             } else {
-                buffer.rewind(windowIdModel);
-                update(buffer);
+                update(binaryModel, buffer);
             }
         }
     }
 
-    public void updatWindowTerminal(final ReaderBuffer buffer) {
-        while (buffer.hasRemaining()) {
-            // Remove useless WINDOW_ID binary model
-            final BinaryModel windowIdModel = buffer.readBinaryModel();
-            if (ServerToClientModel.WINDOW_ID.equals(windowIdModel.getModel())) {
-                update(buffer);
-            } else {
-                buffer.rewind(windowIdModel);
-                update(buffer);
-            }
-        }
-    }
-
-    private void update(final ReaderBuffer buffer) {
+    public void updateWindowTerminal(final ReaderBuffer buffer) {
+        // Detect if the message is not for the window but for a specific frame
         final BinaryModel binaryModel = buffer.readBinaryModel();
-        if (BinaryModel.NULL.equals(binaryModel)) return;
-
-        if (ServerToClientModel.TYPE_CREATE.equals(binaryModel.getModel())) {
-            final PTObject ptObject = processCreate(buffer, binaryModel.getIntValue());
-            processUpdate(buffer, ptObject);
-        } else if (ServerToClientModel.TYPE_UPDATE.equals(binaryModel.getModel())) {
-            processUpdate(buffer, getPTObject(binaryModel.getIntValue()));
-        } else if (ServerToClientModel.TYPE_ADD.equals(binaryModel.getModel())) {
-            processAdd(buffer, getPTObject(binaryModel.getIntValue()));
-        } else if (ServerToClientModel.TYPE_GC.equals(binaryModel.getModel())) {
-            processGC(binaryModel.getIntValue());
-        } else if (ServerToClientModel.TYPE_REMOVE.equals(binaryModel.getModel())) {
-            processRemove(buffer, binaryModel.getIntValue());
-        } else if (ServerToClientModel.TYPE_ADD_HANDLER.equals(binaryModel.getModel())) {
-            processAddHandler(buffer, HandlerModel.values()[binaryModel.getByteValue()]);
-        } else if (ServerToClientModel.TYPE_REMOVE_HANDLER.equals(binaryModel.getModel())) {
-            processRemoveHandler(buffer, getPTObject(binaryModel.getIntValue()));
-        } else if (ServerToClientModel.TYPE_HISTORY.equals(binaryModel.getModel())) {
-            processHistory(buffer, binaryModel.getStringValue());
-        } else if (ServerToClientModel.TYPE_CLOSE.equals(binaryModel.getModel())) {
-            processClose();
+        if (ServerToClientModel.FRAME_ID.equals(binaryModel.getModel())) {
+            final int requestedId = binaryModel.getIntValue();
+            final PTFrame frame = (PTFrame) getPTObject(requestedId);
+            if (log.isLoggable(Level.FINE)) log.fine("The main terminal send the buffer to frame " + requestedId);
+            frame.postMessage(buffer.slice(buffer.getPosition(), buffer.shiftNextBlock(true)));
         } else {
-            log.log(Level.WARNING, "Unknown instruction type : " + binaryModel);
-            buffer.avoidBlock();
+            update(binaryModel, buffer);
         }
     }
 
-    private PTObject processCreate(final ReaderBuffer buffer, final int objectIdValue) {
+    public void updateFrameTerminal(final ReaderBuffer buffer) {
+        update(buffer.readBinaryModel(), buffer);
+    }
+
+    private void update(final BinaryModel binaryModel, final ReaderBuffer buffer) {
+        final ServerToClientModel model = binaryModel.getModel();
+
+        final int modelOrdinal = model.ordinal();
+        try {
+            if (ServerToClientModel.TYPE_CREATE.ordinal() == modelOrdinal) {
+                final int objectID = binaryModel.getIntValue();
+                processCreate(buffer, objectID);
+                processUpdate(buffer, objectID);
+            } else if (ServerToClientModel.TYPE_UPDATE.ordinal() == modelOrdinal) {
+                processUpdate(buffer, binaryModel.getIntValue());
+            } else if (ServerToClientModel.TYPE_ADD.ordinal() == modelOrdinal) {
+                processAdd(buffer, binaryModel.getIntValue());
+            } else if (ServerToClientModel.TYPE_GC.ordinal() == modelOrdinal) {
+                processGC(binaryModel.getIntValue());
+            } else if (ServerToClientModel.TYPE_REMOVE.ordinal() == modelOrdinal) {
+                processRemove(buffer, binaryModel.getIntValue());
+            } else if (ServerToClientModel.TYPE_ADD_HANDLER.ordinal() == modelOrdinal) {
+                processAddHandler(buffer, binaryModel.getIntValue());
+            } else if (ServerToClientModel.TYPE_REMOVE_HANDLER.ordinal() == modelOrdinal) {
+                processRemoveHandler(buffer, binaryModel.getIntValue());
+            } else if (ServerToClientModel.TYPE_HISTORY.ordinal() == modelOrdinal) {
+                processHistory(buffer, binaryModel.getStringValue());
+            } else {
+                log.log(Level.WARNING, "Unknown instruction type : " + binaryModel + " ; " + buffer.toString());
+                buffer.shiftNextBlock(false);
+            }
+            buffer.readBinaryModel(); // Read ServerToClientModel.END element
+        } catch (final AvoidBlockException e) {
+            buffer.shiftNextBlock(false);
+        }
+    }
+
+    private void processCreate(final ReaderBuffer buffer, final int objectID) throws AvoidBlockException {
         // ServerToClientModel.WIDGET_TYPE
         final WidgetType widgetType = WIDGET_TYPES[buffer.readBinaryModel().getByteValue()];
 
         final PTObject ptObject = uiFactory.newUIObject(widgetType);
         if (ptObject != null) {
-            if (log.isLoggable(Level.FINE))
-                log.log(Level.FINE, "Create " + ptObject.getClass().getSimpleName() + " #" + objectIdValue);
-            ptObject.create(buffer, objectIdValue, this);
-            objectByID.put(objectIdValue, ptObject);
+            ptObject.create(buffer, objectID, this);
+            objectByID.put(objectID, ptObject);
         } else {
-            log.warning("Cannot create object " + objectIdValue + " with widget type : " + widgetType);
-        }
-
-        return ptObject;
-    }
-
-    private void processAdd(final ReaderBuffer buffer, final PTObject ptObject) {
-        // ServerToClientModel.PARENT_OBJECT_ID
-        final int parentId = buffer.readBinaryModel().getIntValue();
-        final PTObject parentObject = getPTObject(parentId);
-        if (parentObject != null) {
-            if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Add " + ptObject + " on " + parentObject);
-            parentObject.add(buffer, ptObject);
-        } else {
-            log.warning("Cannot add object " + ptObject + " to an garbaged parent object #" + parentId
-                    + ", so we will consume all the buffer of this object");
-            buffer.avoidBlock();
+            log.warning("Cannot create PObject #" + objectID + " with widget type : " + widgetType);
+            throw new AvoidBlockException();
         }
     }
 
-    private void processUpdate(final ReaderBuffer buffer, final PTObject ptObject) {
+    private void processAdd(final ReaderBuffer buffer, final int objectID) throws AvoidBlockException {
+        final PTObject ptObject = getPTObject(objectID);
+        if (ptObject != null) {
+            // ServerToClientModel.PARENT_OBJECT_ID
+            final int parentId = buffer.readBinaryModel().getIntValue();
+            final PTObject parentObject = getPTObject(parentId);
+            if (parentObject != null) {
+                parentObject.add(buffer, ptObject);
+            } else {
+                log.warning("Cannot add " + ptObject + " to an garbaged parent object #" + parentId
+                        + ", so we will consume all the buffer of this object");
+                throw new AvoidBlockException();
+            }
+        } else {
+            log.warning("Add a null PTObject #" + objectID + ", so we will consume all the buffer of this object");
+            throw new AvoidBlockException();
+        }
+    }
+
+    private void processUpdate(final ReaderBuffer buffer, final int objectID) throws AvoidBlockException {
+        final PTObject ptObject = getPTObject(objectID);
         if (ptObject != null) {
             BinaryModel binaryModel;
             boolean result = false;
             do {
                 binaryModel = buffer.readBinaryModel();
-                if (!BinaryModel.NULL.equals(binaryModel)) {
-                    if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Update : " + binaryModel + " on " + ptObject);
-                    result = ptObject.update(buffer, binaryModel);
+                if (binaryModel.getModel() != null) {
+                    result = !ServerToClientModel.END.equals(binaryModel.getModel()) ? ptObject.update(buffer, binaryModel) : false;
                 }
             } while (result && buffer.hasRemaining());
 
             if (!result) buffer.rewind(binaryModel);
         } else {
-            log.warning("Update on a null PTObject, so we will consume all the buffer of this object");
-            buffer.avoidBlock();
+            log.warning("Update on a null PTObject #" + objectID + ", so we will consume all the buffer of this object");
+            throw new AvoidBlockException();
         }
     }
 
-    private void processRemove(final ReaderBuffer buffer, final int objectId) {
-        final PTObject ptObject = getPTObject(objectId);
+    private void processRemove(final ReaderBuffer buffer, final int objectID) throws AvoidBlockException {
+        final PTObject ptObject = getPTObject(objectID);
         if (ptObject != null) {
             final int parentId = buffer.readBinaryModel().getIntValue();
             final PTObject parentObject = parentId != -1 ? getPTObject(parentId) : ptObject;
 
             if (parentObject != null) {
-                if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Remove : " + ptObject);
-                parentObject.remove(buffer, ptObject, this);
-            } else log.warning("Cannot remove PTObject " + ptObject + " on a garbaged object #" + parentId);
+                parentObject.remove(buffer, ptObject);
+            } else {
+                log.warning("Cannot remove " + ptObject + " on a garbaged object #" + parentId);
+                throw new AvoidBlockException();
+            }
         } else {
-            log.warning("Remove a null PTObject #" + objectId + ", so we will consume all the buffer of this object");
-            buffer.avoidBlock();
+            log.warning("Remove a null PTObject #" + objectID + ", so we will consume all the buffer of this object");
+            throw new AvoidBlockException();
         }
     }
 
-    private void processAddHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
-        if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Add handler " + handlerModel);
+    private void processAddHandler(final ReaderBuffer buffer, final int objectID) throws AvoidBlockException {
+        final PTObject ptObject = getPTObject(objectID);
+
+        // ServerToClientModel.HANDLER_TYPE
+        final HandlerModel handlerModel = HandlerModel.values()[buffer.readBinaryModel().getByteValue()];
+
         if (HandlerModel.HANDLER_STREAM_REQUEST.equals(handlerModel)) {
-            new PTStreamResource().addHandler(buffer, handlerModel, this);
+            new PTStreamResource().addHandler(buffer, handlerModel);
+        } else if (ptObject != null) {
+            ptObject.addHandler(buffer, handlerModel);
         } else {
-            // ServerToClientModel.OBJECT_ID
-            final int id = buffer.readBinaryModel().getIntValue();
-            final PTObject ptObject = getPTObject(id);
-            if (ptObject != null) ptObject.addHandler(buffer, handlerModel, this);
-            else log.warning("Cannot add handler on a garbaged object #" + id);
+            log.warning("Add handler on a null PTObject #" + objectID + ", so we will consume all the buffer of this object");
+            throw new AvoidBlockException();
         }
     }
 
-    private void processRemoveHandler(final ReaderBuffer buffer, final PTObject ptObject) {
+    private void processRemoveHandler(final ReaderBuffer buffer, final int objectID) throws AvoidBlockException {
+        final PTObject ptObject = getPTObject(objectID);
         if (ptObject != null) {
-            if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Remove handler : " + ptObject);
-            ptObject.removeHandler(buffer, this);
+            // ServerToClientModel.HANDLER_TYPE
+            final HandlerModel handlerModel = HandlerModel.values()[buffer.readBinaryModel().getByteValue()];
+            ptObject.removeHandler(buffer, handlerModel);
+        } else {
+            log.warning("Remove handler on a null PTObject #" + objectID + ", so we will consume all the buffer of this object");
+            throw new AvoidBlockException();
         }
     }
 
     private void processHistory(final ReaderBuffer buffer, final String token) {
-        if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "History instruction : " + token);
         final String oldToken = History.getToken();
 
         // ServerToClientModel.HISTORY_FIRE_EVENTS
@@ -374,23 +297,26 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         }
     }
 
-    private void processClose() {
-        pendingClose = true;
-        PTWindowManager.closeAll();
-        Window.Location.reload();
+    private void processGC(final int objectID) throws AvoidBlockException {
+        final PTObject ptObject = unregisterObject(objectID);
+        if (ptObject != null) {
+            ptObject.destroy();
+        } else {
+            log.warning("Cannot GC a garbaged PTObject #" + objectID);
+            throw new AvoidBlockException();
+        }
     }
 
-    private void processGC(final int objectId) {
-        final PTObject ptObject = unregisterObject(objectId);
-        if (ptObject != null) ptObject.gc(this);
-        else log.warning("Cannot GC a garbaged object #" + objectId);
-    }
-
-    private PTObject unregisterObject(final Integer objectId) {
-        final PTObject ptObject = objectByID.remove(objectId);
-        final UIObject uiObject = widgetIDByObjectID.remove(objectId);
+    private PTObject unregisterObject(final Integer objectID) {
+        final PTObject ptObject = objectByID.remove(objectID);
+        final UIObject uiObject = widgetIDByObjectID.remove(objectID);
         if (uiObject != null) objectIDByWidget.remove(uiObject);
         return ptObject;
+    }
+
+    private void destroy() {
+        PTWindowManager.closeAll();
+        Browser.getWindow().getLocation().reload();
     }
 
     public void sendDataToServer(final Widget widget, final PTInstruction instruction) {
@@ -408,103 +334,26 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
     }
 
     public void sendDataToServer(final JSONObject instruction) {
+        final PTInstruction requestData = new PTInstruction();
         final JSONArray jsonArray = new JSONArray();
         jsonArray.set(0, instruction);
-
-        sendDataToServer(jsonArray);
-    }
-
-    private void sendDataToServer(final JSONArray jsonArray) {
-        final PTInstruction requestData = new PTInstruction();
         requestData.put(ClientToServerModel.APPLICATION_INSTRUCTIONS, jsonArray);
-
-        if (!stackedErrors.isEmpty()) {
-            final JSONArray errors = new JSONArray();
-            int i = 0;
-            for (final JSONObject jsoObject : stackedErrors)
-                errors.set(i++, jsoObject);
-            stackedErrors.clear();
-            requestData.put(ClientToServerModel.APPLICATION_ERRORS, errors);
-        }
 
         if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Data to send " + requestData.toString());
 
         requestBuilder.send(requestData);
     }
 
-    private Timer scheduleLoadingMessageBox() {
-        if (loadingMessageBox == null) return null;
-
-        final Timer timer = new Timer() {
-
-            @Override
-            public void run() {
-                loadingMessageBox.getElement().getStyle().setVisibility(Visibility.VISIBLE);
-            }
-        };
-        timer.schedule(500);
-        return timer;
+    public void sendErrorMessageToServer(final String message) {
+        final PTInstruction requestData = new PTInstruction();
+        requestData.put(ClientToServerModel.ERROR_MSG, message);
+        requestBuilder.send(requestData);
     }
 
-    private void showCommunicationErrorMessage(final StatusCodeException caught) {
-        final VerticalPanel content = new VerticalPanel();
-        final HorizontalPanel actionPanel = new HorizontalPanel();
-        actionPanel.setSize("100%", "100%");
-
-        if (caught.getStatusCode() == ServerException.INVALID_SESSION) {
-            content.add(new HTML(
-                    "Server connection failed <br/>Code : " + caught.getStatusCode() + "<br/>" + "Cause : " + caught.getMessage()));
-
-            final Anchor reloadAnchor = new Anchor("reload");
-            reloadAnchor.addClickHandler(new ClickHandler() {
-
-                @Override
-                public void onClick(final ClickEvent event) {
-                    History.newItem("");
-                    Window.Location.reload();
-                }
-            });
-
-            actionPanel.add(reloadAnchor);
-            actionPanel.setCellHorizontalAlignment(reloadAnchor, HasHorizontalAlignment.ALIGN_CENTER);
-            actionPanel.setCellVerticalAlignment(reloadAnchor, HasVerticalAlignment.ALIGN_MIDDLE);
-        } else {
-            content.add(new HTML(
-                    "An unexpected error occured <br/>Code : " + caught.getStatusCode() + "<br/>" + "Cause : " + caught.getMessage()));
-        }
-
-        final Anchor closeAnchor = new Anchor("close");
-        closeAnchor.addClickHandler(new ClickHandler() {
-
-            @Override
-            public void onClick(final ClickEvent event) {
-                communicationErrorMessagePanel.hide();
-            }
-        });
-        actionPanel.add(closeAnchor);
-        actionPanel.setCellHorizontalAlignment(closeAnchor, HasHorizontalAlignment.ALIGN_CENTER);
-        actionPanel.setCellVerticalAlignment(closeAnchor, HasVerticalAlignment.ALIGN_MIDDLE);
-
-        content.add(actionPanel);
-
-        communicationErrorMessagePanel.setWidget(content);
-        communicationErrorMessagePanel.setPopupPositionAndShow(new PositionCallback() {
-
-            @Override
-            public void setPosition(final int offsetWidth, final int offsetHeight) {
-                communicationErrorMessagePanel.setPopupPosition((Window.getClientWidth() - offsetWidth) / 2,
-                        (Window.getClientHeight() - offsetHeight) / 2);
-            }
-        });
-    }
-
-    @Override
-    public void onValueChange(final ValueChangeEvent<String> event) {
-        if (event.getValue() != null && !event.getValue().isEmpty()) {
-            final PTInstruction eventInstruction = new PTInstruction();
-            eventInstruction.put(ClientToServerModel.TYPE_HISTORY, event.getValue());
-            sendDataToServer(eventInstruction);
-        }
+    public void sendInfoMessageToServer(final String message) {
+        final PTInstruction requestData = new PTInstruction();
+        requestData.put(ClientToServerModel.INFO_MSG, message);
+        requestBuilder.send(requestData);
     }
 
     public PTObject getPTObject(final Integer id) {
@@ -519,33 +368,9 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         return null;
     }
 
-    public void registerUIObject(final int ID, final UIObject uiObject) {
+    public void registerUIObject(final Integer ID, final UIObject uiObject) {
         objectIDByWidget.put(uiObject, ID);
         widgetIDByObjectID.put(ID, uiObject);
-    }
-
-    @Override
-    public void onHttpRequestSend(final HttpRequestSendEvent event) {
-        numberOfrequestInProgress++;
-        if (timer == null) timer = scheduleLoadingMessageBox();
-    }
-
-    @Override
-    public void onHttpResponseReceivedEvent(final HttpResponseReceivedEvent event) {
-        if (numberOfrequestInProgress > 0) numberOfrequestInProgress--;
-        hideLoadingMessageBox();
-    }
-
-    private void hideLoadingMessageBox() {
-        if (loadingMessageBox != null && numberOfrequestInProgress < 1 && timer != null) {
-            timer.cancel();
-            timer = null;
-            loadingMessageBox.getElement().getStyle().setVisibility(Visibility.HIDDEN);
-        }
-    }
-
-    void registerCommunicationError(final CommunicationErrorHandler communicationErrorClosure) {
-        this.communicationErrorHandler = communicationErrorClosure;
     }
 
     void registerJavascriptAddOnFactory(final String signature, final JavascriptAddOnFactory javascriptAddOnFactory) {
@@ -560,6 +385,12 @@ public class UIBuilder implements ValueChangeHandler<String>, HttpResponseReceiv
         final PTWindow window = PTWindowManager.getWindow(windowID);
         if (window != null) window.setReady();
         else log.warning("Window " + windowID + " doesn't exist");
+    }
+
+    void setReadyFrame(final int frameID) {
+        final PTFrame frame = (PTFrame) getPTObject(frameID);
+        if (frame != null) frame.setReady();
+        else log.warning("Frame " + frame + " doesn't exist");
     }
 
 }

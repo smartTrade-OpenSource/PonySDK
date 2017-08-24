@@ -34,10 +34,9 @@ import java.nio.channels.WritableByteChannel;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.ServletException;
@@ -52,34 +51,26 @@ import com.ponysdk.core.server.application.ApplicationManagerOption;
 
 public class BootstrapServlet extends HttpServlet {
 
-    protected static final Logger log = LoggerFactory.getLogger(BootstrapServlet.class);
-
-    private static final long serialVersionUID = 6993633431616272739L;
+    private static final Logger log = LoggerFactory.getLogger(BootstrapServlet.class);
 
     private final MimetypesFileTypeMap fileTypeMap = new MimetypesFileTypeMap();
 
-    protected final List<String> meta = new ArrayList<>();
-    protected final List<String> stylesheets = new ArrayList<>();
-    protected final List<String> javascripts = new ArrayList<>();
-    protected final Map<String, String> addons = new LinkedHashMap<>();
-
-    protected String communicationErrorFunction;
-
-    protected ApplicationManagerOption application;
+    private ApplicationManagerOption application;
 
     private Path indexPath;
+
+    private ClassLoader childClassLoader;
+
+    public BootstrapServlet() {
+    }
+
+    public BootstrapServlet(final ClassLoader classLoader) {
+        this.childClassLoader = classLoader;
+    }
 
     @Override
     public void init() throws ServletException {
         super.init();
-
-        addStylesheets(application.getStyle());
-        addJavascripts(application.getJavascript());
-        addStylesheets(application.getCustomStyle());
-        addJavascripts(application.getCustomJavascript());
-        // addMetas(application.getMeta());
-        // addMetas(application.getCustomMeta());
-
         initIndexFile();
     }
 
@@ -132,6 +123,10 @@ public class BootstrapServlet extends HttpServlet {
             final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
             final String jarPath = path.substring(1, path.length());
             inputStream = classLoader.getResourceAsStream(jarPath);
+            if (inputStream == null && childClassLoader != null) {
+                inputStream = childClassLoader.getResourceAsStream(jarPath);
+            }
+
             if (inputStream == null) {
                 if (path.equals("/index.html")) {
                     file = indexPath.toFile();
@@ -169,7 +164,6 @@ public class BootstrapServlet extends HttpServlet {
             response.setContentLength(fileSize);
             Files.copy(file.toPath(), response.getOutputStream());
         }
-
     }
 
     private void initIndexFile() {
@@ -197,32 +191,44 @@ public class BootstrapServlet extends HttpServlet {
         writer.newLine();
         writer.append("<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">");
         writer.newLine();
-        for (final String m : meta) {
-            writer.append("<meta ").append(m).append(">");
-            writer.newLine();
-        }
 
+        final Set<String> metas = application.getMeta();
+        if (metas != null) {
+            for (final String m : metas) {
+                writer.append("<meta ").append(m).append(">");
+                writer.newLine();
+            }
+        }
         addToMeta(writer);
         writer.newLine();
+
+        final Map<String, String> styles = application.getStyle();
+        if (styles != null && !styles.isEmpty()) {
+            for (final Entry<String, String> style : styles.entrySet()) {
+                final String id = style.getKey();
+                final String url = style.getValue();
+                final String contentType = fileTypeMap.getContentType(url);
+                writer.append("<link id=\"").append(id).append("\"  rel=\"stylesheet");
+                if (!contentType.equals("text/css")) writer.append("/less");
+                writer.append("\" type=\"").append(contentType).append("\" href=\"").append(url).append("\">");
+                writer.newLine();
+            }
+        }
 
         String ponyTerminalJsFileName;
         if (application.isDebugMode()) ponyTerminalJsFileName = "ponyterminaldebug/ponyterminaldebug.nocache.js";
         else ponyTerminalJsFileName = "ponyterminal/ponyterminal.nocache.js";
-        writer.append("<script type=\"text/javascript\" src=\"" + ponyTerminalJsFileName + "\"></script>");
+        writer.append("<script type=\"text/javascript\" src=\"").append(ponyTerminalJsFileName).append("\"></script>");
+        writer.newLine();
+        writer.append("<script type=\"text/javascript\" src=\"script/ponysdk.js\"></script>");
         writer.newLine();
 
-        for (final String style : stylesheets) {
-            final String contentType = fileTypeMap.getContentType(style);
-            if (!contentType.equals("text/css")) writer.append("<link rel=\"stylesheet/less\" type=\"").append(contentType)
-                .append("\" href=\"").append(style).append("\">");
-            else writer.append("<link rel=\"stylesheet\" type=\"").append(contentType).append("\" href=\"").append(style)
-                .append("\">");
-            writer.newLine();
-        }
-
-        for (final String script : javascripts) {
-            writer.append("<script type=\"text/javascript\" src=\"").append(script).append("\"></script>");
-            writer.newLine();
+        final Set<String> scripts = application.getJavascript();
+        if (scripts != null && !scripts.isEmpty()) {
+            for (final String script : scripts) {
+                writer.append("<script type=\"text/javascript\" src=\"").append(script).append("\"></script>");
+                writer.newLine();
+            }
         }
 
         addToHeader(writer);
@@ -276,34 +282,6 @@ public class BootstrapServlet extends HttpServlet {
     }
 
     protected void addToBody(final BufferedWriter writer) {
-    }
-
-    public void addStylesheets(final List<String> stylesheetPaths) {
-        stylesheets.addAll(stylesheetPaths);
-    }
-
-    public void addStylesheet(final String stylesheetPath) {
-        stylesheets.add(stylesheetPath);
-    }
-
-    public void addMetas(final List<String> m) {
-        meta.addAll(m);
-    }
-
-    public void addMeta(final String m) {
-        meta.add(m);
-    }
-
-    public void addJavascripts(final List<String> javascriptPaths) {
-        javascripts.addAll(javascriptPaths);
-    }
-
-    public void addJavascript(final String javascriptPath) {
-        javascripts.add(javascriptPath);
-    }
-
-    public void addAddOn(final String signature, final String factory) {
-        addons.put(signature, factory);
     }
 
     public void setApplication(final ApplicationManagerOption application) {

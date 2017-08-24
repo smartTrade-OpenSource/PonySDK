@@ -25,22 +25,18 @@ package com.ponysdk.sample.client.page;
 
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.sample.client.event.DemoBusinessEvent;
-import com.ponysdk.core.ui.basic.PAnchor;
-import com.ponysdk.core.ui.basic.PCheckBox;
-import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PSimplePanel;
 import com.ponysdk.core.ui.basic.PStackLayoutPanel;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
 import com.ponysdk.core.ui.basic.PWidget;
-import com.ponysdk.core.ui.basic.event.PSelectionEvent;
-import com.ponysdk.core.ui.basic.event.PSelectionHandler;
+import com.ponysdk.sample.client.event.DemoBusinessEvent;
 
 public class StackLayoutPanelPageActivity extends SamplePageActivity {
 
-    private final PVerticalPanel header1Child = new PVerticalPanel();
+    private final PVerticalPanel header1Child = Element.newPVerticalPanel();
 
-    private final PVerticalPanel header2Child = new PVerticalPanel();
+    private final PVerticalPanel header2Child = Element.newPVerticalPanel();
 
     public StackLayoutPanelPageActivity() {
         super("Stack Layout Panel", "Lists and Menus");
@@ -50,11 +46,11 @@ public class StackLayoutPanelPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PVerticalPanel panel = new PVerticalPanel();
+        final PVerticalPanel panel = Element.newPVerticalPanel();
 
-        panel.add(new PLabel("StackLayout: "));
+        panel.add(Element.newPLabel("StackLayout: "));
 
-        final PStackLayoutPanel stackLayoutPanel = new PStackLayoutPanel(PUnit.PX);
+        final PStackLayoutPanel stackLayoutPanel = Element.newPStackLayoutPanel(PUnit.PX);
 
         stackLayoutPanel.setStyleProperty("border", "1px solid #CCC");
 
@@ -63,13 +59,9 @@ public class StackLayoutPanelPageActivity extends SamplePageActivity {
         stackLayoutPanel.add(getHeader1Child(), "Header 1", true, 30);
         stackLayoutPanel.add(getHeader2Child(), "Header 2", true, 30);
 
-        stackLayoutPanel.addSelectionHandler(new PSelectionHandler<Integer>() {
-
-            @Override
-            public void onSelection(final PSelectionEvent<Integer> event) {
-                final String msg = "On selection : " + event.getSelectedItem();
-                UIContext.getRootEventBus().fireEvent(new DemoBusinessEvent(msg));
-            }
+        stackLayoutPanel.addSelectionHandler(event -> {
+            final String msg = "On selection : " + event.getSelectedItem();
+            UIContext.getRootEventBus().fireEvent(new DemoBusinessEvent(msg));
         });
 
         panel.add(stackLayoutPanel);
@@ -79,21 +71,21 @@ public class StackLayoutPanelPageActivity extends SamplePageActivity {
 
     private PWidget getHeader1Child() {
         header1Child.setWidth("100%");
-        header1Child.add(new PAnchor("Element 1.1"));
-        header1Child.add(new PAnchor("Element 1.2"));
-        header1Child.add(new PAnchor("Element 1.3"));
-        header1Child.add(new PAnchor("Element 1.4"));
-        final PSimplePanel container = new PSimplePanel();
+        header1Child.add(Element.newPAnchor("Element 1.1"));
+        header1Child.add(Element.newPAnchor("Element 1.2"));
+        header1Child.add(Element.newPAnchor("Element 1.3"));
+        header1Child.add(Element.newPAnchor("Element 1.4"));
+        final PSimplePanel container = Element.newPSimplePanel();
         container.setWidget(header1Child);
         return container;
     }
 
     private PSimplePanel getHeader2Child() {
         header2Child.setWidth("100%");
-        header2Child.add(new PCheckBox("checkbox 1"));
-        header2Child.add(new PCheckBox("checkbox 2"));
-        header2Child.add(new PCheckBox("checkbox 3"));
-        final PSimplePanel container = new PSimplePanel();
+        header2Child.add(Element.newPCheckBox("checkbox 1"));
+        header2Child.add(Element.newPCheckBox("checkbox 2"));
+        header2Child.add(Element.newPCheckBox("checkbox 3"));
+        final PSimplePanel container = Element.newPSimplePanel();
         container.setWidget(header2Child);
         return container;
     }

@@ -40,6 +40,9 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
 
     private PWidget widget;
 
+    protected PSimplePanel() {
+    }
+
     @Override
     protected WidgetType getWidgetType() {
         return WidgetType.SIMPLE_PANEL;
@@ -47,8 +50,8 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
 
     @Override
     public void add(final PWidget w) {
-        log.error("Use setWidget(IsWidget w)");
-        throw new UnsupportedOperationException("Use setWidget(IsWidget w)");
+        if (widget == null) setWidget(w);
+        else log.error("Can only contain one widget to a PSimplePanel, remove the previous one or use a PComplexPanel");
     }
 
     public PWidget getWidget() {
@@ -83,14 +86,10 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
         if (w == this) throw new UnsupportedOperationException("You cannot call setWidget with 'this' in parameter");
 
         // Validate
-        if (w == widget) {
-            return;
-        }
+        if (w == widget) return;
 
         // Detach new child.
-        if (w != null) {
-            w.removeFromParent();
-        }
+        w.removeFromParent();
 
         // Remove old child.
         if (widget != null) {
@@ -100,12 +99,10 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
         // Logical attach.
         widget = w;
 
-        if (w != null) {
-            // Physical attach.
-            w.saveAdd(w.getID(), ID);
-            w.attach(windowID);
-            adopt(w);
-        }
+        adopt(w);
+
+        if (isInitialized()) w.attach(window, frame);
+        w.saveAdd(w.getID(), ID);
     }
 
     @Override

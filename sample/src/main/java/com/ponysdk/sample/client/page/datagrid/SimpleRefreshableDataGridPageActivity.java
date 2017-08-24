@@ -23,13 +23,11 @@
 
 package com.ponysdk.sample.client.page.datagrid;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
-import com.ponysdk.core.ui.basic.PLabel;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
-import com.ponysdk.core.ui.celltable.SimpleTableView;
 import com.ponysdk.core.ui.form.formfield.IntegerTextBoxFormField;
 import com.ponysdk.core.ui.form.formfield.LongTextBoxFormField;
+import com.ponysdk.core.ui.grid.GridTableWidget;
 import com.ponysdk.core.ui.list.refreshable.RefreshableDataGrid;
 import com.ponysdk.sample.client.datamodel.PonyStock;
 
@@ -48,7 +46,7 @@ public class SimpleRefreshableDataGridPageActivity extends RefreshableDataGridPa
 
         addForm();
 
-        dataGrid = new RefreshableDataGrid<>(new SimpleTableView());
+        dataGrid = new RefreshableDataGrid<>(new GridTableWidget());
 
         dataGrid.addDataGridColumnDescriptor(newIDDescriptor());
         dataGrid.addDataGridColumnDescriptor(newRaceDescriptor());
@@ -77,52 +75,36 @@ public class SimpleRefreshableDataGridPageActivity extends RefreshableDataGridPa
         keyRowFormField.getWidget().setPlaceholder("Row key (move)");
         toRowFormField.getWidget().setPlaceholder("Row index (move)");
 
-        final PButton addButton = new PButton("Add a row");
-        addButton.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                final Integer index = addRowFormField.getValue();
-                if (index != null) {
-                    dataGrid.insertRow(index, 0, 4, new PLabel("Colspan 1 inserted"));
-                }
+        final PButton addButton = Element.newPButton("Add a row");
+        addButton.addClickHandler(event -> {
+            final Integer index = addRowFormField.getValue();
+            if (index != null) {
+                dataGrid.insertRow(index, 0, 4, Element.newPLabel("Colspan 1 inserted"));
             }
         });
 
-        final PButton removeByKeyButton = new PButton("Remove a row (by key)");
-        removeByKeyButton.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                final Long k = removeRowByKeyFormField.getValue();
-                if (k != null) {
-                    dataGrid.removeByKey(k);
-                }
+        final PButton removeByKeyButton = Element.newPButton("Remove a row (by key)");
+        removeByKeyButton.addClickHandler(event -> {
+            final Long k = removeRowByKeyFormField.getValue();
+            if (k != null) {
+                dataGrid.removeByKey(k);
             }
         });
 
-        final PButton removeButton = new PButton("Remove a row (by index)");
-        removeButton.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                final Integer v = removeRowFormField.getValue();
-                if (v != null) {
-                    dataGrid.remove(v);
-                }
+        final PButton removeButton = Element.newPButton("Remove a row (by index)");
+        removeButton.addClickHandler(event -> {
+            final Integer v = removeRowFormField.getValue();
+            if (v != null) {
+                dataGrid.remove(v);
             }
         });
 
-        final PButton moveButton = new PButton("Move a row");
-        moveButton.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                final Long k = keyRowFormField.getValue();
-                final Integer v = toRowFormField.getValue();
-                if (v != null && k != null) {
-                    dataGrid.moveRow(k, v);
-                }
+        final PButton moveButton = Element.newPButton("Move a row");
+        moveButton.addClickHandler(event -> {
+            final Long k = keyRowFormField.getValue();
+            final Integer v = toRowFormField.getValue();
+            if (v != null && k != null) {
+                //dataGrid.moveRow(k, v);
             }
         });
 
@@ -140,7 +122,7 @@ public class SimpleRefreshableDataGridPageActivity extends RefreshableDataGridPa
 
     @Override
     protected void onPonyStock(final PonyStock data) {
-        dataGrid.setData(data.getId(), data);
+        //        dataGrid.setData(data.getId(), data);
     }
 
 }

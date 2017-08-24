@@ -34,34 +34,34 @@ import javax.json.JsonObject;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.ui.basic.event.PHasText;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
+import com.ponysdk.core.writer.ModelWriter;
 
 public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, HasPValue<String> {
 
     private static final String EMPTY = "";
 
-    private final List<PValueChangeHandler<String>> handlers = new ArrayList<>();
+    private List<PValueChangeHandler<String>> handlers;
 
     private String text = EMPTY;
     private String placeholder = EMPTY;
 
-    public PTextBoxBase() {
+    protected PTextBoxBase() {
         this(EMPTY);
     }
 
-    public PTextBoxBase(final String text) {
+    protected PTextBoxBase(final String text) {
         super();
         this.text = text != null ? text : EMPTY;
     }
 
     @Override
-    protected void enrichOnInit(final Parser parser) {
-        super.enrichOnInit(parser);
-        if (!EMPTY.equals(text)) parser.parse(ServerToClientModel.TEXT, this.text);
-        if (!EMPTY.equals(placeholder)) parser.parse(ServerToClientModel.PLACEHOLDER, this.placeholder);
+    protected void enrichOnInit(final ModelWriter writer) {
+        super.enrichOnInit(writer);
+        if (!EMPTY.equals(text)) writer.write(ServerToClientModel.TEXT, this.text);
+        if (!EMPTY.equals(placeholder)) writer.write(ServerToClientModel.PLACEHOLDER, this.placeholder);
     }
 
     @Override
@@ -79,7 +79,7 @@ public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, Ha
         if (text == null) text = EMPTY; // null not send over json
         if (Objects.equals(this.text, text)) return;
         this.text = text;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.TEXT, this.text));
+        saveUpdate(ServerToClientModel.TEXT, this.text);
     }
 
     @Override
@@ -100,22 +100,23 @@ public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, Ha
         if (placeholder == null) placeholder = EMPTY; // null not send over json
         if (Objects.equals(this.placeholder, placeholder)) return;
         this.placeholder = placeholder;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.PLACEHOLDER, this.placeholder));
+        saveUpdate(ServerToClientModel.PLACEHOLDER, this.placeholder);
     }
 
     @Override
     public void addValueChangeHandler(final PValueChangeHandler<String> handler) {
+        if (handlers == null) handlers = new ArrayList<>();
         handlers.add(handler);
     }
 
     @Override
     public boolean removeValueChangeHandler(final PValueChangeHandler<String> handler) {
-        return handlers.remove(handler);
+        return handlers != null && handlers.remove(handler);
     }
 
     @Override
     public Collection<PValueChangeHandler<String>> getValueChangeHandlers() {
-        return Collections.unmodifiableCollection(handlers);
+        return handlers != null ? Collections.unmodifiableCollection(handlers) : Collections.emptyList();
     }
 
     @Override
@@ -129,17 +130,12 @@ public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, Ha
     }
 
     protected void fireOnValueChange(final PValueChangeEvent<String> event) {
-        this.text = event.getValue();
-        for (final PValueChangeHandler<String> handler : handlers) {
-            handler.onValueChange(event);
-        }
+        this.text = event.getData();
+        if (handlers != null) handlers.forEach(handler -> handler.onValueChange(event));
     }
 
     @Override
     public String toString() {
-        return "PTextBoxBase{" +
-                "text='" + text + '\'' +
-                ", placeholder='" + placeholder + '\'' +
-                '}';
+        return super.toString() + ", text=" + text + ", placeholder=" + placeholder;
     }
 }

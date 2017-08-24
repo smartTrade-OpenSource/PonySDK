@@ -23,7 +23,7 @@
 
 package com.ponysdk.core.ui.form.validator;
 
-import com.ponysdk.core.internalization.PString;
+import com.ponysdk.core.ui.i18n.PString;
 
 public class UncheckedFieldValidator implements FieldValidator {
 

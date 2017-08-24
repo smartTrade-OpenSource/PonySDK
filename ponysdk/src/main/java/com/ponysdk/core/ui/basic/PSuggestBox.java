@@ -26,6 +26,7 @@ package com.ponysdk.core.ui.basic;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 import javax.json.JsonObject;
 
@@ -33,12 +34,12 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.ui.basic.event.HasPSelectionHandlers;
 import com.ponysdk.core.ui.basic.event.PSelectionEvent;
 import com.ponysdk.core.ui.basic.event.PSelectionHandler;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
+import com.ponysdk.core.writer.ModelWriter;
 
 /**
  * A {@link PSuggestBox} is a text box or text area which displays a
@@ -78,9 +79,8 @@ import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
  * @see PMultiWordSuggestOracle
  * @see PTextBoxBase
  */
-public class PSuggestBox extends PWidget
-        implements Focusable, HasPValueChangeHandlers<String>, PSelectionHandler<PSuggestOracle.PSuggestion>,
-        HasPSelectionHandlers<PSuggestOracle.PSuggestion> {
+public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHandlers<String>,
+        PSelectionHandler<PSuggestOracle.PSuggestion>, HasPSelectionHandlers<PSuggestOracle.PSuggestion> {
 
     private final PSuggestOracle suggestOracle;
     private List<PSelectionHandler<PSuggestOracle.PSuggestion>> selectionHandler;
@@ -88,11 +88,11 @@ public class PSuggestBox extends PWidget
 
     private int limit;
 
-    public PSuggestBox() {
+    protected PSuggestBox() {
         this(new PMultiWordSuggestOracle());
     }
 
-    public PSuggestBox(final PSuggestOracle suggestOracle) {
+    protected PSuggestBox(final PSuggestOracle suggestOracle) {
         this.suggestOracle = suggestOracle;
     }
 
@@ -104,9 +104,9 @@ public class PSuggestBox extends PWidget
     }
 
     @Override
-    protected void enrichOnInit(final Parser parser) {
-        super.enrichOnInit(parser);
-        parser.parse(ServerToClientModel.ORACLE, suggestOracle.getID());
+    protected void enrichOnInit(final ModelWriter writer) {
+        super.enrichOnInit(writer);
+        writer.write(ServerToClientModel.ORACLE, suggestOracle.getID());
 
         // TODO nciaravola
 
@@ -114,7 +114,7 @@ public class PSuggestBox extends PWidget
         // textBox = new PTextBox();
         // }
         //
-        // parser.parse(Model.TEXTBOX_ID, textBox.getID());
+        // writer.parse(Model.TEXTBOX_ID, textBox.getID());
     }
 
     @Override
@@ -161,8 +161,9 @@ public class PSuggestBox extends PWidget
     }
 
     public void setLimit(final int limit) {
+        if (Objects.equals(this.limit, limit)) return;
         this.limit = limit;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.LIMIT, limit));
+        saveUpdate(ServerToClientModel.LIMIT, limit);
     }
 
     public String getText() {
@@ -226,39 +227,6 @@ public class PSuggestBox extends PWidget
         @Override
         public String getReplacementString() {
             return replacementString;
-        }
-    }
-
-    public static class PMultiWordSuggestOracle extends PSuggestOracle {
-
-        public PMultiWordSuggestOracle() {
-        }
-
-        @Override
-        public void add(final String suggestion) {
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.SUGGESTION, suggestion));
-        }
-
-        @Override
-        public void addAll(final Collection<String> collection) {
-            //            saveUpdate((writer) -> {
-            //                writer.writeModel(ServerToClientModel.SUGGESTIONS, collection);
-            //            });
-        }
-
-        public void setDefaultSuggestions(final Collection<String> collection) {
-            //            saveUpdate((writer) -> {
-            //                writer.writeModel(ServerToClientModel.DEFAULT_SUGGESTIONS, collection);
-            //            });
-        }
-
-        public void clear() {
-            saveUpdate(writer -> writer.writeModel(ServerToClientModel.CLEAR));
-        }
-
-        @Override
-        protected WidgetType getWidgetType() {
-            return WidgetType.MULTIWORD_SUGGEST_ORACLE;
         }
     }
 }

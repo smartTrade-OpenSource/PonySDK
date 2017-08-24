@@ -23,17 +23,26 @@
 
 package com.ponysdk.core.ui.form.formfield;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PCheckBox;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 
 public class CheckBoxFormField extends AbstractFormField<Boolean, PCheckBox> {
 
     public CheckBoxFormField() {
-        this(new PCheckBox());
+        this(false);
+    }
+
+    public CheckBoxFormField(final boolean dirtyMode) {
+        this(Element.newPCheckBox(), dirtyMode);
     }
 
     public CheckBoxFormField(final PCheckBox widget) {
-        super(widget, null);
+        this(widget, false);
+    }
+
+    public CheckBoxFormField(final PCheckBox widget, final boolean dirtyMode) {
+        super(widget, null, dirtyMode);
     }
 
     @Override
@@ -64,6 +73,7 @@ public class CheckBoxFormField extends AbstractFormField<Boolean, PCheckBox> {
 
     @Override
     public void setEnabled(final boolean enabled) {
+        super.setEnabled(enabled);
         widget.setEnabled(enabled);
     }
 

@@ -23,11 +23,7 @@
 
 package com.ponysdk.core.ui.list.paging;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PAnchor;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PWidget;
@@ -35,15 +31,20 @@ import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class DefaultPagerView extends PFlowPanel implements PagerView, PClickHandler {
 
     private final Map<Integer, PAnchor> items = new HashMap<>();
     private final List<HandlerRegistration> registrations = new ArrayList<>();
 
-    private final PAnchor startMenuItem = new PAnchor("<<");
-    private final PAnchor previousMenuItem = new PAnchor("<");
-    private final PAnchor nextMenuItem = new PAnchor(">");
-    private final PAnchor endMenuItem = new PAnchor(">>");
+    private final PAnchor startMenuItem = Element.newPAnchor("<<");
+    private final PAnchor previousMenuItem = Element.newPAnchor("<");
+    private final PAnchor nextMenuItem = Element.newPAnchor(">");
+    private final PAnchor endMenuItem = Element.newPAnchor(">>");
 
     private final List<PagerListener> pagerListeners = new ArrayList<>();
 
@@ -68,7 +69,7 @@ public class DefaultPagerView extends PFlowPanel implements PagerView, PClickHan
 
     @Override
     public void addPageIndex(final int pageIndex) {
-        final PAnchor item = new PAnchor(String.valueOf(pageIndex + 1));
+        final PAnchor item = Element.newPAnchor(String.valueOf(pageIndex + 1));
         item.setData(pageIndex);
         // TODO Rework
         insert(item, 2 + items.values().size());

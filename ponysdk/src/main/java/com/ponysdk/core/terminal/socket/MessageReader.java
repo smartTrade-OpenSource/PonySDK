@@ -25,8 +25,9 @@ package com.ponysdk.core.terminal.socket;
 
 import elemental.events.MessageEvent;
 
+@FunctionalInterface
 public interface MessageReader {
 
-    public void read(final MessageEvent event);
+    void read(final MessageEvent event);
 
 }

@@ -37,14 +37,16 @@ public class PTTextArea extends PTTextBoxBase<TextArea> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.VISIBLE_LINES.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.VISIBLE_LINES.ordinal() == modelOrdinal) {
             uiObject.setVisibleLines(binaryModel.getIntValue());
             return true;
-        } else if (ServerToClientModel.CHARACTER_WIDTH.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.CHARACTER_WIDTH.ordinal() == modelOrdinal) {
             uiObject.setCharacterWidth(binaryModel.getIntValue());
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
 
 }

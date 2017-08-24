@@ -35,22 +35,24 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public class PTTreeItem extends PTUIObject<TreeItem> {
 
-    private boolean isRoot = false;
-
     private Tree tree;
 
     private String text;
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
-        // ServerToClientModel.TEXT
-        this.text = buffer.readBinaryModel().getStringValue();
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
+        BinaryModel binaryModel = buffer.readBinaryModel();
+        if (ServerToClientModel.TEXT.equals(binaryModel.getModel())) {
+            this.text = binaryModel.getStringValue();
+        } else {
+            buffer.rewind(binaryModel);
+        }
 
-        super.create(buffer, objectId, uiService);
+        super.create(buffer, objectId, uiBuilder);
 
-        final BinaryModel binaryModel = buffer.readBinaryModel();
-        if (ServerToClientModel.ROOT.equals(binaryModel.getModel())) {
-            this.isRoot = binaryModel.getBooleanValue();
+        binaryModel = buffer.readBinaryModel();
+        if (ServerToClientModel.TREE_ROOT.equals(binaryModel.getModel())) {
+            this.tree = (Tree) asWidget(binaryModel.getIntValue(), uiBuilder);
         } else {
             buffer.rewind(binaryModel);
         }
@@ -65,37 +67,44 @@ public class PTTreeItem extends PTUIObject<TreeItem> {
     public void add(final ReaderBuffer buffer, final PTObject ptObject) {
         final UIObject widget = asWidget(ptObject);
 
-        if (widget instanceof Tree) {
-            this.tree = (Tree) widget;
+        final BinaryModel binaryModel = buffer.readBinaryModel();
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.WIDGET.equals(model)) {
+            uiObject.setWidget((Widget) widget);
+        } else if (ServerToClientModel.INDEX.equals(model)) {
+            final int index = binaryModel.getIntValue();
+            final TreeItem w = (TreeItem) widget;
+            if (tree != null) tree.insertItem(index, w);
+            else uiObject.insertItem(index, w);
         } else {
-            final BinaryModel binaryModel = buffer.readBinaryModel();
-            if (ServerToClientModel.WIDGET.equals(binaryModel.getModel())) {
-                uiObject.setWidget((Widget) widget);
-            } else if (ServerToClientModel.INDEX.equals(binaryModel.getModel())) {
-                final TreeItem w = (TreeItem) widget;
-                final int index = binaryModel.getIntValue();
-                if (isRoot) tree.insertItem(index, w);
-                else uiObject.insertItem(index, w);
-            } else {
-                buffer.rewind(binaryModel);
-                final TreeItem w = (TreeItem) widget;
-                if (isRoot) tree.addItem(w);
-                else uiObject.addItem(w);
-            }
+            buffer.rewind(binaryModel);
+            final TreeItem w = (TreeItem) widget;
+            if (tree != null) tree.addItem(w);
+            else uiObject.addItem(w);
         }
     }
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.SELECTED.equals(binaryModel.getModel())) {
-            uiObject.setSelected(binaryModel.getBooleanValue());
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.OPEN.ordinal() == modelOrdinal) {
+            uiObject.setState(true, false);
             return true;
-        }
-        if (ServerToClientModel.STATE.equals(binaryModel.getModel())) {
-            uiObject.setState(binaryModel.getBooleanValue());
+        } else if (ServerToClientModel.CLOSE.ordinal() == modelOrdinal) {
+            uiObject.setState(false, false);
             return true;
+        } else if (ServerToClientModel.TEXT.ordinal() == modelOrdinal) {
+            uiObject.setText(binaryModel.getStringValue());
+            return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
+    }
+
+    @Override
+    public void remove(final ReaderBuffer buffer, final PTObject ptObject) {
+        if (tree != null) tree.removeItem(asWidget(ptObject));
+        else uiObject.removeItem(asWidget(ptObject));
     }
 
 }

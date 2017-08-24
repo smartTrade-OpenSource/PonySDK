@@ -27,12 +27,26 @@ import com.ponysdk.core.model.ServerToClientModel;
 
 public abstract class PValueBoxBase extends PFocusWidget {
 
+    protected PValueBoxBase() {
+    }
+
     /**
      * Selects all of the text in the box. This will only work when the widget is attached to the
      * document and not hidden.
      */
     public void selectAll() {
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.SELECT_ALL));
+        saveUpdate(writer -> writer.write(ServerToClientModel.SELECT_ALL));
+    }
+
+    public void setCursorPosition(final int cursorPosition) {
+        saveUpdate(ServerToClientModel.CURSOR_POSITION, cursorPosition);
+    }
+
+    public void setSelectionRange(final int startPosition, final int rangeLength) {
+        saveUpdate(writer -> {
+            writer.write(ServerToClientModel.SELECTION_RANGE_START, startPosition);
+            writer.write(ServerToClientModel.SELECTION_RANGE_LENGTH, rangeLength);
+        });
     }
 
 }

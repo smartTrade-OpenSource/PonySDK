@@ -27,19 +27,20 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.event.HasPClickHandlers;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 import com.ponysdk.core.ui.eventbus.StreamHandler;
+import com.ponysdk.core.writer.ModelWriter;
 
 /**
  * A widget that displays the image at a given URL. The image can be in 'unclipped' mode (the
@@ -77,19 +78,19 @@ public class PImage extends PWidget implements HasPClickHandlers {
     private final int imageHeight;
     private String url;
 
-    public PImage() {
+    protected PImage() {
         this((String) null);
     }
 
-    public PImage(final ClassPathURL classpathURL) {
+    protected PImage(final ClassPathURL classpathURL) {
         this(classpathURL.toUrl());
     }
 
-    public PImage(final String url) {
+    protected PImage(final String url) {
         this(url, -1, -1, -1, -1);
     }
 
-    public PImage(final String url, final int left, final int top, final int width, final int height) {
+    protected PImage(final String url, final int left, final int top, final int width, final int height) {
         super();
         this.url = url;
         this.left = left;
@@ -100,15 +101,15 @@ public class PImage extends PWidget implements HasPClickHandlers {
     }
 
     @Override
-    protected void enrichOnInit(final Parser parser) {
-        super.enrichOnInit(parser);
+    protected void enrichOnInit(final ModelWriter writer) {
+        super.enrichOnInit(writer);
         if (url != null) {
-            parser.parse(ServerToClientModel.IMAGE_URL, url);
+            writer.write(ServerToClientModel.URL, url);
             if (top != -1 && left != -1 && imageHeight != -1 && imageWidth != -1) {
-                parser.parse(ServerToClientModel.IMAGE_LEFT, left);
-                parser.parse(ServerToClientModel.IMAGE_TOP, top);
-                parser.parse(ServerToClientModel.IMAGE_HEIGHT, imageHeight);
-                parser.parse(ServerToClientModel.IMAGE_WIDTH, imageWidth);
+                writer.write(ServerToClientModel.POSITION_LEFT, left);
+                writer.write(ServerToClientModel.POSITION_TOP, top);
+                writer.write(ServerToClientModel.IMAGE_HEIGHT, imageHeight);
+                writer.write(ServerToClientModel.IMAGE_WIDTH, imageWidth);
             }
         }
     }
@@ -123,8 +124,9 @@ public class PImage extends PWidget implements HasPClickHandlers {
     }
 
     public void setUrl(final String url) {
+        if (Objects.equals(this.url, url)) return;
         this.url = url;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.IMAGE_URL, url));
+        saveUpdate(ServerToClientModel.URL, url);
     }
 
     public void setStream(final StreamHandler streamListener) {
@@ -159,8 +161,7 @@ public class PImage extends PWidget implements HasPClickHandlers {
                 log.error("Cannot load resource from " + this, e);
             }
 
-            final String extension = url.getFile()
-                    .substring(url.getFile().lastIndexOf('.') + 1);
+            final String extension = url.getFile().substring(url.getFile().lastIndexOf('.') + 1);
 
             return "data:image/" + extension + ";base64," + imageToBase64;
         }

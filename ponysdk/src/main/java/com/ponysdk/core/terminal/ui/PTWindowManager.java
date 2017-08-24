@@ -23,6 +23,8 @@
 
 package com.ponysdk.core.terminal.ui;
 
+import com.google.gwt.core.client.Scheduler;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -39,17 +41,22 @@ public class PTWindowManager {
     private final Map<Integer, PTWindow> windows = new HashMap<>();
 
     private PTWindowManager() {
+        checkWindowsAlive();
     }
 
-    public static final PTWindowManager get() {
+    public static PTWindowManager get() {
         return instance;
     }
 
-    public static final PTWindow getWindow(final int windowID) {
+    public static Collection<PTWindow> getWindows() {
+        return new ArrayList<>(get().windows.values());
+    }
+
+    public static PTWindow getWindow(final int windowID) {
         return get().windows.get(windowID);
     }
 
-    public static final void closeAll() {
+    public static void closeAll() {
         final Collection<PTWindow> values = new ArrayList<>(get().windows.values());
         for (final PTWindow window : values) {
             window.close(true);
@@ -63,5 +70,18 @@ public class PTWindowManager {
 
     void unregister(final PTWindow window) {
         windows.remove(window.getObjectID());
+    }
+
+    private void checkWindowsAlive() {
+        Scheduler.get().scheduleFixedDelay(() -> {
+            try {
+                for (final PTWindow window : windows.values()) {
+                    if (window.isClosed()) window.onClose();
+                }
+            } catch (final Throwable t) {
+                log.log(Level.SEVERE, "Can't checking windows status", t);
+            }
+            return true;
+        }, 2000);
     }
 }

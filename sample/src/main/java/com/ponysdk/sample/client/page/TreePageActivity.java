@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -25,17 +25,12 @@ package com.ponysdk.sample.client.page;
 
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.service.query.Query;
-import com.ponysdk.sample.client.event.DemoBusinessEvent;
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PAnchor;
-import com.ponysdk.core.ui.basic.PImage;
-import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PTree;
 import com.ponysdk.core.ui.basic.PTreeItem;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
-import com.ponysdk.core.ui.basic.event.PSelectionEvent;
-import com.ponysdk.core.ui.basic.event.PSelectionHandler;
+import com.ponysdk.sample.client.event.DemoBusinessEvent;
 
 public class TreePageActivity extends SamplePageActivity {
 
@@ -47,40 +42,29 @@ public class TreePageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PVerticalPanel panel = new PVerticalPanel();
+        final PVerticalPanel panel = Element.newPVerticalPanel();
 
-        panel.add(new PLabel("Static Tree:"));
+        panel.add(Element.newPLabel("Static Tree:"));
 
-        final PTree tree = new PTree();
+        final PTree tree = Element.newPTree();
         tree.setAnimationEnabled(false);
         tree.setWidth("300px");
 
-        tree.addSelectionHandler(new PSelectionHandler<PTreeItem>() {
-
-            @Override
-            public void onSelection(final PSelectionEvent<PTreeItem> event) {
-                final String msg = "Selected item : name = " + event.getSelectedItem();
-                UIContext.getRootEventBus().fireEvent(new DemoBusinessEvent(msg));
-            }
+        tree.addSelectionHandler(event -> {
+            final String msg = "Selected item : name = " + event.getSelectedItem();
+            UIContext.getRootEventBus().fireEvent(new DemoBusinessEvent(msg));
         });
 
-        final PTreeItem firstItem = new PTreeItem("First item");
+        final PTreeItem firstItem = Element.newPTreeItem("First item");
 
-        final PAnchor anchor = new PAnchor("Second item");
-        final PTreeItem secondItem = new PTreeItem(anchor);
-        anchor.addClickHandler(new PClickHandler() {
+        final PAnchor anchor = Element.newPAnchor("Second item");
+        final PTreeItem secondItem = Element.newPTreeItem(anchor);
+        anchor.addClickHandler(event -> secondItem.setState(!secondItem.getState()));
 
-            @Override
-            public void onClick(final PClickEvent event) {
-                secondItem.setState(!secondItem.getState());
-            }
-        });
-
-        final PTreeItem thirdItem = new PTreeItem(new PImage("images/pony.png"));
-
-        tree.addItem(firstItem);
-        tree.addItem(secondItem);
-        tree.addItem(thirdItem);
+        final PTreeItem thirdItem = Element.newPTreeItem(Element.newPImage("images/pony.png"));
+        tree.add(firstItem);
+        tree.add(secondItem);
+        tree.add(thirdItem);
 
         final Query query = new Query();
         // final FindPonysCommand command = new FindPonysCommand(query);

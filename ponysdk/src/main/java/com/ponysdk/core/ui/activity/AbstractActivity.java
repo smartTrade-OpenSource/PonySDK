@@ -28,7 +28,6 @@ import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PAcceptsOneWidget;
 import com.ponysdk.core.ui.eventbus.BroadcastEventHandler;
 import com.ponysdk.core.ui.eventbus.Event;
-import com.ponysdk.core.ui.eventbus.Event.Type;
 import com.ponysdk.core.ui.eventbus.EventHandler;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 import com.ponysdk.core.ui.place.Place;
@@ -50,7 +49,9 @@ public abstract class AbstractActivity<T extends IsPWidget> implements Activity 
         this.world = world;
         this.started = true;
 
-        this.world.setWidget(getView());
+        final T view2 = getView();
+        view2.asWidget().addStyleName("pony-LoadingBox");
+        this.world.setWidget(view2);
 
         if (firstStart) {
             buildView();
@@ -58,6 +59,7 @@ public abstract class AbstractActivity<T extends IsPWidget> implements Activity 
         }
 
         updateView(place);
+        view2.asWidget().removeStyleName("pony-LoadingBox");
     }
 
     public T getView() {
@@ -81,24 +83,23 @@ public abstract class AbstractActivity<T extends IsPWidget> implements Activity 
         PlaceChangeRequest.fire(this, place);
     }
 
-    public <H extends EventHandler> HandlerRegistration addHandler(final Type<H> type, final H handler) {
+    public HandlerRegistration addHandler(final Event.Type type, final EventHandler handler) {
         return UIContext.addHandler(type, handler);
     }
 
-    public <H extends EventHandler> HandlerRegistration addHandlerToSource(final Type<H> type, final Object source, final H handler) {
+    public HandlerRegistration addHandlerToSource(final Event.Type type, final Object source, final EventHandler handler) {
         return UIContext.addHandlerToSource(type, source, handler);
     }
 
-    @SuppressWarnings("unchecked")
-    public <H extends EventHandler> HandlerRegistration addHandlerToSource(final Type<H> type, final Object source) {
-        return addHandlerToSource(type, source, (H) this);
+    public HandlerRegistration addHandlerToSource(final Event.Type type, final Object source) {
+        return addHandlerToSource(type, source, (EventHandler) this);
     }
 
-    public void fireEvent(final Event<?> event) {
+    public void fireEvent(final Event<? extends EventHandler> event) {
         UIContext.fireEvent(event);
     }
 
-    public void fireEventFromSource(final Event<?> event, final Object source) {
+    public void fireEventFromSource(final Event<? extends EventHandler> event, final Object source) {
         UIContext.fireEventFromSource(event, source);
     }
 

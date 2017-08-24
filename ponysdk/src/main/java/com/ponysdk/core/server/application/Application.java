@@ -52,9 +52,12 @@ public class Application {
 
     private final HttpSession session;
 
-    public Application(final HttpSession session, final ApplicationManagerOption options, final UserAgent userAgent) {
-        this.options = options;
+    private final String id;
+
+    public Application(final String id, final HttpSession session, final ApplicationManagerOption options, final UserAgent userAgent) {
+        this.id = id;
         this.session = session;
+        this.options = options;
         this.userAgent = userAgent;
     }
 
@@ -65,16 +68,28 @@ public class Application {
     void unregisterUIContext(final int uiContextID) {
         uiContexts.remove(uiContextID);
         if (uiContexts.isEmpty()) {
-            log.info("Invalidate session, all ui contexts have been destroyed");
             session.invalidate();
             SessionManager.get().unregisterApplication(this);
         }
     }
 
     public void destroy() {
-        uiContexts.values().forEach(context -> context.destroyFromApplication());
+        uiContexts.values().forEach(uiContext -> {
+            try {
+                uiContext.destroyFromApplication();
+            } catch (final Exception e) {
+                log.error("Can't destroy the UIContext #" + uiContext.getID() + " on Application #" + getId(), e);
+            }
+        });
         uiContexts.clear();
-        session.invalidate();
+
+        try {
+            if (log.isInfoEnabled())
+                log.info("Invalidate session on Application #{} because all ui contexts have been destroyed", getId());
+            session.invalidate();
+        } catch (final IllegalArgumentException e) {
+            log.error("The session is already invalid", e);
+        }
         SessionManager.get().unregisterApplication(this);
     }
 
@@ -101,13 +116,16 @@ public class Application {
         attributes.put(name, value);
     }
 
-    @SuppressWarnings("unchecked")
     public <T> T getAttribute(final String name) {
         return (T) attributes.get(name);
     }
 
     public ApplicationManagerOption getOptions() {
         return options;
+    }
+
+    public String getId() {
+        return id;
     }
 
     public HttpSession getSession() {
@@ -118,9 +136,13 @@ public class Application {
         return userAgent;
     }
 
+    public int countUIContexts() {
+        return uiContexts.size();
+    }
+
     @Override
     public String toString() {
-        return "Application [options=" + options + ", userAgent=" + userAgent + ", session=" + session + "]";
+        return "Application [id=" + id + ", options=" + options + ", userAgent=" + userAgent + "]";
     }
 
 }

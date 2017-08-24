@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -27,7 +27,7 @@ import com.ponysdk.core.ui.eventbus.Event;
 
 public class PlaceChangeRequestEvent extends Event<PlaceChangeRequestHandler> {
 
-    public static final Type<PlaceChangeRequestHandler> TYPE = new Type<>();
+    public static final Type TYPE = new Type();
 
     private final Place place;
 
@@ -37,7 +37,7 @@ public class PlaceChangeRequestEvent extends Event<PlaceChangeRequestHandler> {
     }
 
     @Override
-    public Type<PlaceChangeRequestHandler> getAssociatedType() {
+    public Type getAssociatedType() {
         return TYPE;
     }
 

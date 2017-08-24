@@ -23,10 +23,11 @@
 
 package com.ponysdk.core.ui.list.renderer.cell;
 
-import javax.validation.constraints.NotNull;
-
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.list.refreshable.Cell;
+
+import javax.validation.constraints.NotNull;
 
 public class LabelCellRenderer<D> implements CellRenderer<D, PLabel> {
 
@@ -44,7 +45,7 @@ public class LabelCellRenderer<D> implements CellRenderer<D, PLabel> {
     @Override
     public PLabel render(final int row, final D rawValue) {
         final String value = rawValue != null ? getValue(rawValue) : null;
-        return new PLabel(value != null ? value : nullDisplay);
+        return Element.newPLabel(value != null ? value : nullDisplay);
     }
 
     protected String getValue(@NotNull final D value) {

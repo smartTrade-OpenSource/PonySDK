@@ -23,12 +23,70 @@
 
 package com.ponysdk.core.terminal;
 
+import java.util.logging.Logger;
+
 import com.google.gwt.user.client.Window;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.terminal.ui.*;
-import com.ponysdk.core.terminal.ui.PTSuggestBox.PTMultiWordSuggestOracle;
+import com.ponysdk.core.terminal.ui.PTAbsolutePanel;
+import com.ponysdk.core.terminal.ui.PTAddOn;
+import com.ponysdk.core.terminal.ui.PTAddOnComposite;
+import com.ponysdk.core.terminal.ui.PTAnchor;
+import com.ponysdk.core.terminal.ui.PTBrowser;
+import com.ponysdk.core.terminal.ui.PTButton;
+import com.ponysdk.core.terminal.ui.PTCheckBox;
+import com.ponysdk.core.terminal.ui.PTDateBox;
+import com.ponysdk.core.terminal.ui.PTDatePicker;
+import com.ponysdk.core.terminal.ui.PTDecoratedPopupPanel;
+import com.ponysdk.core.terminal.ui.PTDecoratorPanel;
+import com.ponysdk.core.terminal.ui.PTDialogBox;
+import com.ponysdk.core.terminal.ui.PTDisclosurePanel;
+import com.ponysdk.core.terminal.ui.PTDockLayoutPanel;
+import com.ponysdk.core.terminal.ui.PTElement;
+import com.ponysdk.core.terminal.ui.PTFileUpload;
+import com.ponysdk.core.terminal.ui.PTFlexTable;
+import com.ponysdk.core.terminal.ui.PTFlowPanel;
+import com.ponysdk.core.terminal.ui.PTFocusPanel;
+import com.ponysdk.core.terminal.ui.PTFrame;
+import com.ponysdk.core.terminal.ui.PTGrid;
+import com.ponysdk.core.terminal.ui.PTHTML;
+import com.ponysdk.core.terminal.ui.PTHeaderPanel;
+import com.ponysdk.core.terminal.ui.PTHorizontalPanel;
+import com.ponysdk.core.terminal.ui.PTImage;
+import com.ponysdk.core.terminal.ui.PTLabel;
+import com.ponysdk.core.terminal.ui.PTLayoutPanel;
+import com.ponysdk.core.terminal.ui.PTListBox;
+import com.ponysdk.core.terminal.ui.PTMenuBar;
+import com.ponysdk.core.terminal.ui.PTMenuItem;
+import com.ponysdk.core.terminal.ui.PTMenuItemSeparator;
+import com.ponysdk.core.terminal.ui.PTMultiWordSuggestOracle;
+import com.ponysdk.core.terminal.ui.PTObject;
+import com.ponysdk.core.terminal.ui.PTPasswordTextBox;
+import com.ponysdk.core.terminal.ui.PTPopupPanel;
+import com.ponysdk.core.terminal.ui.PTPushButton;
+import com.ponysdk.core.terminal.ui.PTRadioButton;
+import com.ponysdk.core.terminal.ui.PTRichTextArea;
+import com.ponysdk.core.terminal.ui.PTRichTextToolbar;
+import com.ponysdk.core.terminal.ui.PTRootLayoutPanel;
+import com.ponysdk.core.terminal.ui.PTRootPanel;
+import com.ponysdk.core.terminal.ui.PTScript;
+import com.ponysdk.core.terminal.ui.PTScrollPanel;
+import com.ponysdk.core.terminal.ui.PTSimpleLayoutPanel;
+import com.ponysdk.core.terminal.ui.PTSimplePanel;
+import com.ponysdk.core.terminal.ui.PTSplitLayoutPanel;
+import com.ponysdk.core.terminal.ui.PTStackLayoutPanel;
+import com.ponysdk.core.terminal.ui.PTSuggestBox;
+import com.ponysdk.core.terminal.ui.PTTabLayoutPanel;
+import com.ponysdk.core.terminal.ui.PTTabPanel;
+import com.ponysdk.core.terminal.ui.PTTextArea;
+import com.ponysdk.core.terminal.ui.PTTextBox;
+import com.ponysdk.core.terminal.ui.PTTree;
+import com.ponysdk.core.terminal.ui.PTTreeItem;
+import com.ponysdk.core.terminal.ui.PTVerticalPanel;
+import com.ponysdk.core.terminal.ui.PTWindow;
 
 class UIFactory {
+
+    private static final Logger log = Logger.getLogger(UIFactory.class.getName());
 
     PTObject newUIObject(final WidgetType widgetType) {
         switch (widgetType) {
@@ -43,16 +101,16 @@ class UIFactory {
             case BUTTON:
                 return new PTButton();
             case CHECKBOX:
-                return new PTCheckBox();
+                return new PTCheckBox<>();
             case COMPOSITE:
-                Window.alert("UIFactory: Client implementation not found, type : " + widgetType);
+                log.severe("UIFactory: Client implementation not found, type : " + widgetType);
                 break;
             case DATEBOX:
                 return new PTDateBox();
             case DATEPICKER:
                 return new PTDatePicker();
             case DECORATED_POPUP_PANEL:
-                return new PTDecoratedPopupPanel();
+                return new PTDecoratedPopupPanel<>();
             case DECORATOR_PANEL:
                 return new PTDecoratorPanel();
             case DIALOG_BOX:
@@ -60,7 +118,7 @@ class UIFactory {
             case DISCLOSURE_PANEL:
                 return new PTDisclosurePanel();
             case DOCK_LAYOUT_PANEL:
-                return new PTDockLayoutPanel();
+                return new PTDockLayoutPanel<>();
             case ELEMENT:
                 return new PTElement();
             case FILE_UPLOAD:
@@ -82,7 +140,7 @@ class UIFactory {
             case IMAGE:
                 return new PTImage();
             case LABEL:
-                return new PTLabel();
+                return new PTLabel<>();
             case LAYOUT_PANEL:
                 return new PTLayoutPanel();
             case LISTBOX:
@@ -98,7 +156,7 @@ class UIFactory {
             case PASSWORD_TEXTBOX:
                 return new PTPasswordTextBox();
             case POPUP_PANEL:
-                return new PTPopupPanel();
+                return new PTPopupPanel<>();
             case PUSH_BUTTON:
                 return new PTPushButton();
             case RADIO_BUTTON:
@@ -118,7 +176,7 @@ class UIFactory {
             case SIMPLE_LAYOUT_PANEL:
                 return new PTSimpleLayoutPanel();
             case SIMPLE_PANEL:
-                return new PTSimplePanel();
+                return new PTSimplePanel<>();
             case SPLIT_LAYOUT_PANEL:
                 return new PTSplitLayoutPanel();
             case STACKLAYOUT_PANEL:
@@ -141,8 +199,12 @@ class UIFactory {
                 return new PTVerticalPanel();
             case WINDOW:
                 return new PTWindow();
+            case BROWSER:
+                return new PTBrowser();
+            case FRAME:
+                return new PTFrame();
             default:
-                Window.alert("UIFactory: Client implementation not found, type : " + widgetType);
+                log.severe("UIFactory: Client implementation not found, type : " + widgetType);
                 break;
         }
 

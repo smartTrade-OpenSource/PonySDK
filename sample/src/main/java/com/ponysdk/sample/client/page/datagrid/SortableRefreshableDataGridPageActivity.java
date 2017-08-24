@@ -23,18 +23,16 @@
 
 package com.ponysdk.sample.client.page.datagrid;
 
+import com.ponysdk.core.ui.basic.Element;
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.grid.GridTableWidget;
+import com.ponysdk.core.ui.list.refreshable.RefreshableDataGrid;
+import com.ponysdk.sample.client.datamodel.PonyStock;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
-import com.ponysdk.core.ui.basic.PButton;
-import com.ponysdk.core.ui.basic.PLabel;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
-import com.ponysdk.core.ui.celltable.SimpleTableView;
-import com.ponysdk.core.ui.list.refreshable.RefreshableDataGrid;
-import com.ponysdk.sample.client.datamodel.PonyStock;
 
 public class SortableRefreshableDataGridPageActivity extends RefreshableDataGridPageActivity {
 
@@ -50,26 +48,16 @@ public class SortableRefreshableDataGridPageActivity extends RefreshableDataGrid
 
         super.onFirstShowPage();
 
-        final PButton addRow = new PButton("Insert row");
-        addRow.addClickHandler(new PClickHandler() {
-
-            @Override
-            public void onClick(final PClickEvent event) {
-                if (added) return;
-                insertColspanRow();
-                added = true;
-            }
+        final PButton addRow = Element.newPButton("Insert row");
+        addRow.addClickHandler(event -> {
+            if (added) return;
+            insertColspanRow();
+            added = true;
         });
 
         actions.setWidget(0, 0, addRow);
 
-        dataGrid = new SortableRefreshableDataGrid<>(new Comparator<PonyStock>() {
-
-            @Override
-            public int compare(final PonyStock o1, final PonyStock o2) {
-                return o1.getPrice().compareTo(o2.getPrice());
-            }
-        });
+        dataGrid = new SortableRefreshableDataGrid<>((o1, o2) -> o1.getPrice().compareTo(o2.getPrice()));
 
         dataGrid.addDataGridColumnDescriptor(newIDDescriptor());
         dataGrid.addDataGridColumnDescriptor(newRaceDescriptor());
@@ -87,7 +75,7 @@ public class SortableRefreshableDataGridPageActivity extends RefreshableDataGrid
 
     @Override
     protected void onPonyStock(final PonyStock data) {
-        dataGrid.setData(data.getId(), data);
+        //        dataGrid.setData(data.getId(), data);
     }
 
     private class SortableRefreshableDataGrid<K, D> extends RefreshableDataGrid<K, D> {
@@ -97,36 +85,35 @@ public class SortableRefreshableDataGridPageActivity extends RefreshableDataGrid
         private final Comparator<D> comparator;
 
         public SortableRefreshableDataGrid(final Comparator<D> comparator) {
-            super(new SimpleTableView());
+            super(new GridTableWidget());
             this.comparator = comparator;
         }
 
         @Override
-        public SimpleTableView getListView() {
-            return (SimpleTableView) super.getListView();
+        public GridTableWidget getListView() {
+            return (GridTableWidget) super.getListView();
         }
 
-        @Override
         public void setData(final K key, final D data) {
 
             if (added) {
                 removeColspanRow();
             }
 
-            final int previousRow = getRow(key);
-            if (previousRow == -1) {
-                // add new row
-                datas.add(data);
-            }
+            //            final int previousRow = getViewRowIndex(key);
+            //            if (previousRow == -1) {
+            //                // add new row
+            //                datas.add(data);
+            //            }
 
-            super.setData(key, data);
+            //            super.setData(key, data);
 
             Collections.sort(datas, comparator);
 
             final int newRow = datas.indexOf(data);
-            if (previousRow != newRow) {
-                moveRow(key, newRow);
-            }
+            //            if (previousRow != newRow) {
+            //                moveRow(key, newRow);
+            //            }
 
             if (added) {
                 insertColspanRow();
@@ -139,7 +126,7 @@ public class SortableRefreshableDataGridPageActivity extends RefreshableDataGrid
     }
 
     protected void insertColspanRow() {
-        dataGrid.insertRow(5, 0, 4, new PLabel("Hello " + System.currentTimeMillis()));
+        dataGrid.insertRow(5, 0, 4, Element.newPLabel("Hello " + System.currentTimeMillis()));
     }
 
 }

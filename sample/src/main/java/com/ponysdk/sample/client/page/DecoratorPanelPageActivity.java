@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,10 +23,9 @@
 
 package com.ponysdk.sample.client.page;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PDecoratorPanel;
 import com.ponysdk.core.ui.basic.PFlexTable;
-import com.ponysdk.core.ui.basic.PLabel;
-import com.ponysdk.core.ui.basic.PTextBox;
 
 public class DecoratorPanelPageActivity extends SamplePageActivity {
 
@@ -38,16 +37,16 @@ public class DecoratorPanelPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        PDecoratorPanel decoratorPanel = new PDecoratorPanel();
+        final PDecoratorPanel decoratorPanel = Element.newPDecoratorPanel();
 
-        PFlexTable panel = new PFlexTable();
+        final PFlexTable panel = Element.newPFlexTable();
 
         panel.setStyleProperty("padding", "10px");
 
-        panel.setWidget(0, 0, new PLabel("Name :"));
-        panel.setWidget(0, 1, new PTextBox("name"));
-        panel.setWidget(1, 0, new PLabel("Description :"));
-        panel.setWidget(1, 1, new PTextBox("description"));
+        panel.setWidget(0, 0, Element.newPLabel("Name :"));
+        panel.setWidget(0, 1, Element.newPTextBox("name"));
+        panel.setWidget(1, 0, Element.newPLabel("Description :"));
+        panel.setWidget(1, 1, Element.newPTextBox("description"));
 
         decoratorPanel.setWidget(panel);
 

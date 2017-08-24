@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -24,20 +24,20 @@
 package com.ponysdk.impl.webapplication.application;
 
 import com.ponysdk.core.model.PUnit;
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PDockLayoutPanel;
-import com.ponysdk.core.ui.basic.PSimpleLayoutPanel;
 import com.ponysdk.core.ui.basic.PSimplePanel;
 import com.ponysdk.core.ui.basic.PSplitLayoutPanel;
 
 public class SimpleView extends PDockLayoutPanel implements ApplicationView {
 
-    private final PSimplePanel body = new PSimpleLayoutPanel();
+    private final PSimplePanel body = Element.newPSimpleLayoutPanel();
 
     public SimpleView() {
         super(PUnit.PX);
         setSizeFull();
 
-        PSplitLayoutPanel center = new PSplitLayoutPanel();
+        final PSplitLayoutPanel center = Element.newPSplitLayoutPanel();
         center.setSizeFull();
         center.add(body);
 

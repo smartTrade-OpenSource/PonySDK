@@ -23,12 +23,10 @@
 
 package com.ponysdk.sample.client.page;
 
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PAnchor;
 import com.ponysdk.core.ui.basic.PElement;
-import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.rich.PNotificationManager;
 
 public class ElementPageActivity extends SamplePageActivity {
@@ -41,23 +39,17 @@ public class ElementPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PVerticalPanel verticalPanel = new PVerticalPanel();
+        final PVerticalPanel verticalPanel = Element.newPVerticalPanel();
         verticalPanel.setSpacing(10);
 
-        final PAnchor anchor = new PAnchor("And a link");
-        anchor.addClickHandler(new PClickHandler() {
+        final PAnchor anchor = Element.newPAnchor("And a link");
+        anchor.addClickHandler(event -> PNotificationManager.showTrayNotification(getView().asWidget().getWindow(), "Link clicked"));
 
-            @Override
-            public void onClick(final PClickEvent event) {
-                PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(), "Link clicked");
-            }
-        });
-
-        final PElement ul = new PElement("ul");
-        final PElement li1 = new PElement("li");
-        final PElement li2 = new PElement("li");
-        final PElement li3 = new PElement("li");
-        final PElement li4 = new PElement("li");
+        final PElement ul = Element.newUl();
+        final PElement li1 = Element.newLi();
+        final PElement li2 = Element.newLi();
+        final PElement li3 = Element.newLi();
+        final PElement li4 = Element.newLi();
         li1.setInnerText("Item 1");
         li2.setInnerText("Item 2");
         li3.setInnerText("Item 3");
@@ -69,7 +61,7 @@ public class ElementPageActivity extends SamplePageActivity {
         ul.add(li4);
         ul.addStyleName("customList");
 
-        verticalPanel.add(new PLabel("Example of the use of PElement to create an unordered list"));
+        verticalPanel.add(Element.newPLabel("Example of the use of PElement to create an unordered list"));
         verticalPanel.add(ul);
 
         examplePanel.setWidget(verticalPanel);

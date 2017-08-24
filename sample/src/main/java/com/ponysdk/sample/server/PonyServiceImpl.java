@@ -18,8 +18,7 @@ import com.ponysdk.core.server.servlet.SessionManager;
 import com.ponysdk.sample.client.datamodel.Pony;
 import com.ponysdk.sample.client.datamodel.PonyStock;
 
-public class PonyServiceImpl /** implements com.ponysdk.sample.service.pony.PonyService **/
-{
+public class PonyServiceImpl {
 
     private static Logger log = LoggerFactory.getLogger(PonyServiceImpl.class);
 

@@ -27,7 +27,6 @@ import java.util.Objects;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.Parser;
 import com.ponysdk.core.ui.basic.event.HasPClickHandlers;
 import com.ponysdk.core.ui.basic.event.HasPDoubleClickHandlers;
 import com.ponysdk.core.ui.basic.event.HasPDragEndHandlers;
@@ -54,11 +53,11 @@ import com.ponysdk.core.ui.basic.event.PDropEvent;
 import com.ponysdk.core.ui.basic.event.PDropHandler;
 import com.ponysdk.core.ui.basic.event.PHasText;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
+import com.ponysdk.core.writer.ModelWriter;
 
 /**
- * A widget that contains arbitrary text, <i>not</i> interpreted as HTML. This
- * widget uses a &lt;div&gt; element, causing it to be displayed with block
- * layout.
+ * A widget that contains arbitrary text, <i>not</i> interpreted as HTML. This widget uses a
+ * &lt;div&gt; element, causing it to be displayed with block layout.
  * <h3>CSS Style Rules</h3>
  * <ul class='css'>
  * <li>.gwt-Label { }</li>
@@ -69,17 +68,17 @@ public class PLabel extends PWidget implements PHasText, HasPClickHandlers, HasP
 
     protected String text;
 
-    public PLabel() {
+    protected PLabel() {
     }
 
-    public PLabel(final String text) {
+    protected PLabel(final String text) {
         this.text = text;
     }
 
     @Override
-    protected void enrichOnInit(final Parser parser) {
-        super.enrichOnInit(parser);
-        if (this.text != null) parser.parse(ServerToClientModel.TEXT, this.text);
+    protected void enrichOnInit(final ModelWriter writer) {
+        super.enrichOnInit(writer);
+        if (this.text != null) writer.write(ServerToClientModel.TEXT, this.text);
     }
 
     @Override
@@ -96,7 +95,7 @@ public class PLabel extends PWidget implements PHasText, HasPClickHandlers, HasP
     public void setText(final String text) {
         if (Objects.equals(this.text, text)) return;
         this.text = text;
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.TEXT, this.text));
+        saveUpdate(ServerToClientModel.TEXT, this.text);
     }
 
     @Override

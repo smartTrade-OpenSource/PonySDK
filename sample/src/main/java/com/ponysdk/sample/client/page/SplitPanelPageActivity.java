@@ -25,13 +25,12 @@ package com.ponysdk.sample.client.page;
 
 import com.ponysdk.core.model.PHorizontalAlignment;
 import com.ponysdk.core.model.PVerticalAlignment;
+import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PHorizontalPanel;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PScrollPanel;
 import com.ponysdk.core.ui.basic.PSplitLayoutPanel;
-import com.ponysdk.core.ui.basic.event.PLayoutResizeEvent;
 import com.ponysdk.core.ui.basic.event.PLayoutResizeEvent.LayoutResizeData;
-import com.ponysdk.core.ui.basic.event.PLayoutResizeHandler;
 import com.ponysdk.core.ui.rich.PNotificationManager;
 import com.ponysdk.impl.webapplication.page.DefaultPageView;
 
@@ -39,7 +38,6 @@ public class SplitPanelPageActivity extends SamplePageActivity {
 
     private PHorizontalPanel south;
     private PHorizontalPanel east;
-    private PHorizontalPanel west;
 
     public SplitPanelPageActivity() {
         super("Split Panel", "Panels");
@@ -52,11 +50,12 @@ public class SplitPanelPageActivity extends SamplePageActivity {
     protected void onFirstShowPage() {
         super.onFirstShowPage();
 
-        final PSplitLayoutPanel splitLayoutPanel = new PSplitLayoutPanel();
+        final PSplitLayoutPanel splitLayoutPanel = Element.newPSplitLayoutPanel();
 
         splitLayoutPanel.addNorth(buildComponent("north", "#f2a45c"), 50);
         splitLayoutPanel.addSouth(south = buildComponent("south", "#75ffdc"), 50);
         splitLayoutPanel.addEast(east = buildComponent("east", "#b879fc"), 100);
+        PHorizontalPanel west;
         splitLayoutPanel.addWest(west = buildComponent("west", "#e8b6ea"), 100);
         splitLayoutPanel.add(buildCenterPanel());
 
@@ -65,16 +64,12 @@ public class SplitPanelPageActivity extends SamplePageActivity {
         splitLayoutPanel.setWidgetSnapClosedSize(south, 40);
         splitLayoutPanel.setWidgetToggleDisplayAllowed(south, true);
 
-        splitLayoutPanel.addLayoutResizeHandler(new PLayoutResizeHandler() {
-
-            @Override
-            public void onLayoutResize(final PLayoutResizeEvent resizeEvent) {
-                for (final LayoutResizeData data : resizeEvent.getLayoutResizeData()) {
-                    if (data.w == south) {
-                        PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(), "South size: " + data.size);
-                    } else if (data.w == east) {
-                        PNotificationManager.showTrayNotification(getView().asWidget().getWindowID(), "East size: " + data.size);
-                    }
+        splitLayoutPanel.addLayoutResizeHandler(resizeEvent -> {
+            for (final LayoutResizeData data : resizeEvent.getLayoutResizeData()) {
+                if (data.w == south) {
+                    PNotificationManager.showTrayNotification(getView().asWidget().getWindow(), "South size: " + data.size);
+                } else if (data.w == east) {
+                    PNotificationManager.showTrayNotification(getView().asWidget().getWindow(), "East size: " + data.size);
                 }
             }
         });
@@ -83,19 +78,19 @@ public class SplitPanelPageActivity extends SamplePageActivity {
     }
 
     private PScrollPanel buildCenterPanel() {
-        final PScrollPanel panel = new PScrollPanel();
+        final PScrollPanel panel = Element.newPScrollPanel();
         panel.setSizeFull();
         panel.setStyleProperty("backgroundColor", "#c17d7d");
-        panel.setWidget(new PLabel(
-                "This is some text to show how the contents on either side of the splitter flow. This is some text to show how the contents on either side of the splitter flow. This is some text to show how the contents on either side of the splitter flow. This is some text to show how the contents on either side of the splitter flow. This is some text to show how the contents on either side of the splitter flow. This is some text to show how the contents on either side of the splitter flow. This is some text to show how the contents on either side of the splitter flow. This is some text to show how the contents on either side of the splitter flow."));
+        panel.setWidget(Element.newPLabel(
+            "This is some text to show how the contents on either side of the splitter flow. This is some text to show how the contents on either side of the splitter flow. This is some text to show how the contents on either side of the splitter flow. This is some text to show how the contents on either side of the splitter flow. This is some text to show how the contents on either side of the splitter flow. This is some text to show how the contents on either side of the splitter flow. This is some text to show how the contents on either side of the splitter flow. This is some text to show how the contents on either side of the splitter flow."));
         return panel;
     }
 
     private PHorizontalPanel buildComponent(final String name, final String color) {
-        final PHorizontalPanel panel = new PHorizontalPanel();
+        final PHorizontalPanel panel = Element.newPHorizontalPanel();
         panel.setSizeFull();
         panel.setStyleProperty("backgroundColor", color);
-        final PLabel label = new PLabel("The " + name + " component");
+        final PLabel label = Element.newPLabel("The " + name + " component");
         panel.add(label);
         panel.setCellHorizontalAlignment(label, PHorizontalAlignment.ALIGN_CENTER);
         panel.setCellVerticalAlignment(label, PVerticalAlignment.ALIGN_MIDDLE);

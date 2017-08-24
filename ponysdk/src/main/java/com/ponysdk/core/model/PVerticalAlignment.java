@@ -24,15 +24,19 @@
 package com.ponysdk.core.model;
 
 public enum PVerticalAlignment {
+
     ALIGN_TOP,
     ALIGN_MIDDLE,
     ALIGN_BOTTOM;
 
-    public byte getValue() {
+    private PVerticalAlignment() {
+    }
+
+    public final byte getValue() {
         return (byte) ordinal();
     }
 
-    public static PVerticalAlignment fromByte(final byte byteValue) {
+    public static final PVerticalAlignment fromByte(final byte byteValue) {
         return PVerticalAlignment.values()[byteValue];
     }
 }

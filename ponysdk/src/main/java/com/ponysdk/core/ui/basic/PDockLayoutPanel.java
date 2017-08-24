@@ -23,13 +23,13 @@
 
 package com.ponysdk.core.ui.basic;
 
-import com.ponysdk.core.server.application.Parser;
+import java.time.Duration;
+
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.model.WidgetType;
-
-import java.time.Duration;
+import com.ponysdk.core.ui.model.ServerBinaryModel;
+import com.ponysdk.core.writer.ModelWriter;
 
 /**
  * A panel that lays its child widgets out "docked" at its outer edges, and
@@ -58,15 +58,15 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
     private final PUnit unit;
 
-    public PDockLayoutPanel(final PUnit unit) {
+    protected PDockLayoutPanel(final PUnit unit) {
         super();
         this.unit = unit;
     }
 
     @Override
-    protected void enrichOnInit(final Parser parser) {
-        super.enrichOnInit(parser);
-        parser.parse(ServerToClientModel.UNIT, unit.getByteValue());
+    protected void enrichOnInit(final ModelWriter writer) {
+        super.enrichOnInit(writer);
+        writer.write(ServerToClientModel.UNIT, unit.getByteValue());
     }
 
     @Override
@@ -104,16 +104,16 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
     }
 
     public void setWidgetSize(final PWidget widget, final double size) {
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.WIDGET_SIZE, size);
-            writer.writeModel(ServerToClientModel.WIDGET_ID, widget.getID());
+        saveUpdate(writer -> {
+            writer.write(ServerToClientModel.WIDGET_SIZE, size);
+            writer.write(ServerToClientModel.WIDGET_ID, widget.getID());
         });
     }
 
     public void setWidgetHidden(final PWidget widget, final boolean hidden) {
-        saveUpdate((writer) -> {
-            writer.writeModel(ServerToClientModel.WIDGET_HIDDEN, hidden);
-            writer.writeModel(ServerToClientModel.WIDGET_ID, widget.getID());
+        saveUpdate(writer -> {
+            writer.write(ServerToClientModel.WIDGET_HIDDEN, hidden);
+            writer.write(ServerToClientModel.WIDGET_ID, widget.getID());
         });
     }
 
@@ -125,14 +125,14 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
         // Adopt.
         adopt(child);
 
+        child.attach(window, frame);
         child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.DIRECTION, direction.getValue()),
-                new ServerBinaryModel(ServerToClientModel.SIZE, size));
-        child.attach(windowID);
+            new ServerBinaryModel(ServerToClientModel.SIZE, size));
     }
 
     @Override
     public void animate(final Duration duration) {
-        saveUpdate(writer -> writer.writeModel(ServerToClientModel.ANIMATE, duration.toMillis()));
+        saveUpdate(writer -> writer.write(ServerToClientModel.ANIMATE, duration.toMillis()));
     }
 
     public PUnit getUnit() {

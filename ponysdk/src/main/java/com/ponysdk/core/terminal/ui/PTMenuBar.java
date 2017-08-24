@@ -37,6 +37,7 @@ public class PTMenuBar extends PTWidget<MenuBar> {
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
+        // ServerToClientModel.VERTICAL
         isVertical = buffer.readBinaryModel().getBooleanValue();
 
         super.create(buffer, objectId, uiService);
@@ -51,50 +52,49 @@ public class PTMenuBar extends PTWidget<MenuBar> {
 
     @Override
     public void add(final ReaderBuffer buffer, final PTObject ptObject) {
-        final MenuBar menuBar = cast();
-
         if (ptObject instanceof PTMenuItem) {
             final PTMenuItem menuItem = (PTMenuItem) ptObject;
             final BinaryModel binaryModel = buffer.readBinaryModel();
             if (ServerToClientModel.BEFORE_INDEX.equals(binaryModel.getModel())) {
-                menuBar.insertItem(menuItem.cast(), binaryModel.getIntValue());
+                uiObject.insertItem(menuItem.uiObject, binaryModel.getIntValue());
             } else {
                 buffer.rewind(binaryModel);
-                menuBar.addItem(menuItem.cast());
+                uiObject.addItem(menuItem.uiObject);
             }
         } else {
             final PTMenuItemSeparator menuItem = (PTMenuItemSeparator) ptObject;
             final BinaryModel binaryModel = buffer.readBinaryModel();
             if (ServerToClientModel.BEFORE_INDEX.equals(binaryModel.getModel())) {
-                menuBar.insertSeparator(menuItem.cast(), binaryModel.getIntValue());
+                uiObject.insertSeparator(menuItem.uiObject, binaryModel.getIntValue());
             } else {
                 buffer.rewind(binaryModel);
-                menuBar.addSeparator(menuItem.cast());
+                uiObject.addSeparator(menuItem.uiObject);
             }
         }
     }
 
     @Override
-    public void remove(final ReaderBuffer buffer, final PTObject ptObject, final UIBuilder uiService) {
+    public void remove(final ReaderBuffer buffer, final PTObject ptObject) {
         if (ptObject instanceof PTMenuItem) {
             final PTMenuItem menuItem = (PTMenuItem) ptObject;
-            uiObject.removeItem(menuItem.cast());
+            uiObject.removeItem(menuItem.uiObject);
         } else {
             final PTMenuItemSeparator menuItem = (PTMenuItemSeparator) ptObject;
-            uiObject.removeSeparator(menuItem.cast());
+            uiObject.removeSeparator(menuItem.uiObject);
         }
     }
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.CLEAR.equals(binaryModel.getModel())) {
+        final int modelOrdinal = binaryModel.getModel().ordinal();
+        if (ServerToClientModel.CLEAR.ordinal() == modelOrdinal) {
             uiObject.clearItems();
             return true;
-        }
-        if (ServerToClientModel.ANIMATION.equals(binaryModel.getModel())) {
+        } else if (ServerToClientModel.ANIMATION.ordinal() == modelOrdinal) {
             uiObject.setAnimationEnabled(binaryModel.getBooleanValue());
             return true;
+        } else {
+            return super.update(buffer, binaryModel);
         }
-        return super.update(buffer, binaryModel);
     }
 }

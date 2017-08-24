@@ -23,20 +23,21 @@
 
 package com.ponysdk.core.ui.list.selector;
 
-import com.ponysdk.core.internalization.PString;
 import com.ponysdk.core.model.PHorizontalAlignment;
-import com.ponysdk.core.tools.ListenerCollection;
-import com.ponysdk.core.ui.basic.PAnchor;
-import com.ponysdk.core.ui.basic.PHorizontalPanel;
-import com.ponysdk.core.ui.basic.PLabel;
-import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.basic.*;
+import com.ponysdk.core.ui.i18n.PString;
+
+import java.util.Collections;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DefaultInfoSelectorView extends PHorizontalPanel implements SelectorView {
 
-    final PLabel numberOfSelectedMessage = new PLabel();
-    final PAnchor selectAllAnchor = new PAnchor();
-    final PAnchor selectNoneAnchor = new PAnchor();
-    private final ListenerCollection<SelectorViewListener> selectorViewListeners = new ListenerCollection<>();
+    final PLabel numberOfSelectedMessage = Element.newPLabel();
+    final PAnchor selectAllAnchor = Element.newPAnchor();
+    final PAnchor selectNoneAnchor = Element.newPAnchor();
+
+    private Set<SelectorViewListener> selectorViewListeners = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     public DefaultInfoSelectorView() {
         setHorizontalAlignment(PHorizontalAlignment.ALIGN_CENTER);
@@ -61,7 +62,7 @@ public class DefaultInfoSelectorView extends PHorizontalPanel implements Selecto
 
     @Override
     public void addSelectorViewListener(final SelectorViewListener selectorViewListener) {
-        selectorViewListeners.register(selectorViewListener);
+        selectorViewListeners.add(selectorViewListener);
     }
 
     @Override
