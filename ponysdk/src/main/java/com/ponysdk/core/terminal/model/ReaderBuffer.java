@@ -63,7 +63,7 @@ public class ReaderBuffer {
             if (this.window == null) this.window = Browser.getWindow();
             final int remaningBufferSize = this.size - this.position;
             final Uint8Array mergedBuffer = window.newUint8Array(remaningBufferSize + buffer.getByteLength());
-            mergedBuffer.setElements(this.buffer.subarray(this.position), 0);
+            mergedBuffer.setElements(this.position == 0 ? this.buffer : this.buffer.subarray(this.position), 0);
             mergedBuffer.setElements(buffer, remaningBufferSize);
 
             this.buffer = mergedBuffer;
@@ -243,9 +243,11 @@ public class ReaderBuffer {
     public int shiftNextBlock(final boolean dryRun) {
         final int startPosition = position;
         int endPosition = -1;
-        while (hasRemaining()) {
+        final int ServerToClientModelEnd = ServerToClientModel.END.ordinal();
+        while (hasEnoughRemainingBytes(ValueTypeModel.SHORT.getSize())) {
             try {
-                if (ServerToClientModel.END.equals(shiftBinaryModel())) {
+                final int currentKeyModel = shiftBinaryModel();
+                if (ServerToClientModelEnd == currentKeyModel) {
                     endPosition = position;
                     break;
                 }
@@ -262,7 +264,7 @@ public class ReaderBuffer {
         return endPosition;
     }
 
-    private final ServerToClientModel shiftBinaryModel() {
+    private final int shiftBinaryModel() {
         final ServerToClientModel key = SERVER_TO_CLIENT_MODELS[getShort()];
 
         final ValueTypeModel typeModel = key.getTypeModel();
@@ -286,7 +288,7 @@ public class ReaderBuffer {
                 throw new IllegalArgumentException("Unknown type model : " + typeModel);
         }
 
-        return key;
+        return key.ordinal();
     }
 
     /**

@@ -251,7 +251,7 @@ public enum ServerToClientModel {
     }
 
     public final boolean equals(final ServerToClientModel other) {
-        return other != null && this.ordinal() == other.ordinal();
+        return this == other ? true : other != null && this.ordinal() == other.ordinal();
     }
 
 }
