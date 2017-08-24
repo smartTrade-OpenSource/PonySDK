@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.terminal.ui;
 
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.Label;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.model.BinaryModel;
@@ -39,10 +40,15 @@ public class PTLabel<T extends Label> extends PTWidget<T> {
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         final int modelOrdinal = binaryModel.getModel().ordinal();
         if (ServerToClientModel.TEXT.ordinal() == modelOrdinal) {
-            uiObject.setText(binaryModel.getStringValue());
+            setText(uiObject.getElement(), binaryModel.getStringValue());
             return true;
         } else {
             return super.update(buffer, binaryModel);
         }
     }
+
+    private static final native void setText(Element element, String text) /*-{
+                                                                           element.textContent = text;
+                                                                           }-*/;
+
 }
