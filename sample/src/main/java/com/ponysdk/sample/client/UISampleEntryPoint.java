@@ -28,7 +28,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletResponse;
@@ -89,6 +91,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     // HighChartsStackedColumnAddOn highChartsStackedColumnAddOn;
     int a = 0;
 
+    private static int counter;
+
     @Override
     public void start(final UIContext uiContext) {
         uiContext.setClientDataOutput((object, instruction) -> System.err.println(object + " : " + instruction));
@@ -98,9 +102,11 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         mainLabel = Element.newPLabel("Can be modified by anybody");
         PWindow.getMain().add(mainLabel);
 
-        testPAddon();
+        testPerf();
 
         if (true) return;
+
+        testPAddon();
 
         createWindow().open();
 
@@ -229,6 +235,36 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         POptionPane.showConfirmDialog(PWindow.getMain(), null, "BBB");
 
         // uiContext.getHistory().newItem("", false);
+    }
+
+    private void testPerf() {
+        final PWindow w = Element.newPWindow("Window 1", "resizable=yes,location=0,status=0,scrollbars=0");
+        final List<PLabel> labels = new ArrayList<>(1000);
+
+        final PButton start = Element.newPButton("Start");
+        w.add(start);
+        start.addClickHandler(event -> scheduleUpdate(labels));
+
+        for (int i = 0; i < 1000; i++) {
+            final PLabel label = Element.newPLabel(counter + "-" + i);
+            labels.add(label);
+            w.add(label);
+        }
+
+        w.open();
+    }
+
+    private void scheduleUpdate(final List<PLabel> labels) {
+        PScheduler.schedule(() -> {
+            int i = 0;
+            counter++;
+            for (final PLabel label : labels) {
+                label.setText(counter + "-" + i);
+                i++;
+            }
+            if (counter < 20) scheduleUpdate(labels);
+            else counter = 0;
+        }, Duration.ofMillis(20));
     }
 
     private void createReconnectingPanel() {
