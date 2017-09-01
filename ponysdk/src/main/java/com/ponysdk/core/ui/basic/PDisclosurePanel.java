@@ -85,6 +85,7 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
 
     @Override
     public void onClientData(final JsonObject jsonObject) {
+        if (!isVisible()) return;
         if (jsonObject.containsKey(ClientToServerModel.HANDLER_CLOSE.toStringValue())) {
             isOpen = false;
             for (final PCloseHandler closeHandler : closeHandlers) {

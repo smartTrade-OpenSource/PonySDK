@@ -62,6 +62,7 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
 
     @Override
     public void onClientData(final JsonObject jsonObject) {
+        if (!isVisible()) return;
         if (jsonObject.containsKey(ClientToServerModel.HANDLER_DATE_VALUE_CHANGE.toStringValue())) {
             final long data = jsonObject.getJsonNumber(ClientToServerModel.HANDLER_DATE_VALUE_CHANGE.toStringValue()).longValue();
             Date date = null;

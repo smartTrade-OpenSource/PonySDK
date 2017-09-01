@@ -77,6 +77,7 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, HasPSubm
 
     @Override
     public void onClientData(final JsonObject jsonObject) {
+        if (!isVisible()) return;
         if (jsonObject.containsKey(ClientToServerModel.HANDLER_CHANGE.toStringValue())) {
             final String fileName = jsonObject.getString(ClientToServerModel.HANDLER_CHANGE.toStringValue());
             if (fileName != null) setFileName(fileName);

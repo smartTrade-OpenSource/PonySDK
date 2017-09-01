@@ -131,6 +131,7 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
 
     @Override
     public void onClientData(final JsonObject event) {
+        if (!isVisible()) return;
         if (event.containsKey(ClientToServerModel.HANDLER_COMMAND.toStringValue())) {
             cmd.run();
         } else {

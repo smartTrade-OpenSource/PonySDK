@@ -182,6 +182,7 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
 
     @Override
     public void onClientData(final JsonObject instruction) {
+        if (!isVisible()) return;
         if (instruction.containsKey(ClientToServerModel.POPUP_POSITION.toStringValue())) {
             final JsonArray widgetInfo = instruction.getJsonArray(ClientToServerModel.POPUP_POSITION.toStringValue());
             int i = 0;

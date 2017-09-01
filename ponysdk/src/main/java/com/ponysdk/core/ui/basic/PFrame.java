@@ -81,6 +81,7 @@ public class PFrame extends PWidget {
 
     @Override
     public void onClientData(final JsonObject event) {
+        if (!isVisible()) return;
         if (event.containsKey(ClientToServerModel.HANDLER_OPEN.toStringValue())) {
             url = event.getString(ClientToServerModel.HANDLER_OPEN.toStringValue());
             ready = true;
