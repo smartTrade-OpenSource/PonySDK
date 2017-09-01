@@ -116,22 +116,22 @@ public class ReaderBuffer {
             case LONG:
                 // TODO Read really a long
                 // return new BinaryModel(key, getLong(), size);
-                size += ValueTypeModel.INTEGER_SIZE;
-                final int messageLongSize = getInt();
+                size += ValueTypeModel.SHORT_SIZE;
+                final int messageLongSize = getShort();
                 size += messageLongSize;
                 currentBinaryModel.init(key, Long.parseLong(getString(messageLongSize)), size);
                 break;
             case DOUBLE:
                 // TODO Read really a double
                 // return new BinaryModel(key, getDouble(), size);
-                size += ValueTypeModel.INTEGER_SIZE;
-                final int messageDoubleSize = getInt();
+                size += ValueTypeModel.SHORT_SIZE;
+                final int messageDoubleSize = getShort();
                 size += messageDoubleSize;
                 currentBinaryModel.init(key, Double.parseDouble(getString(messageDoubleSize)), size);
                 break;
             case STRING:
-                size += ValueTypeModel.INTEGER_SIZE;
-                final int messageSize = getInt();
+                size += ValueTypeModel.SHORT_SIZE;
+                final int messageSize = getShort();
                 size += messageSize;
                 currentBinaryModel.init(key, getString(messageSize), size);
                 break;
@@ -262,6 +262,9 @@ public class ReaderBuffer {
             case LONG:
             case DOUBLE:
             case STRING:
+                final short stringSize = getShort();
+                position += stringSize;
+                break;
             case JSON_OBJECT:
                 final int jsonSize = getInt();
                 position += jsonSize;

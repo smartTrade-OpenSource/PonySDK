@@ -161,23 +161,47 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
         write(model, String.valueOf(value));
     }
 
-    private void write(final ServerToClientModel model, final JsonObject jsonObject) throws IOException {
-        write(model, jsonObject.toString());
-    }
-
     private void write(final ServerToClientModel model, final String value) throws IOException {
         putShort(model.getValue());
 
         try {
             if (value != null) {
                 final byte[] bytes = value.getBytes(ENCODING_CHARSET);
-                putInt(bytes.length);
-                put(bytes);
+                final short length = (short) bytes.length;
+                if (length < Short.MAX_VALUE) {
+                    putShort(length);
+                    put(bytes);
+                } else {
+                    throw new IllegalArgumentException("Message too big, use a JsonObject instead : " + value);
+                }
+            } else {
+                putShort((short) 0);
+            }
+        } catch (final UnsupportedEncodingException e) {
+            throw new IllegalArgumentException("Cannot convert message : " + value);
+        }
+    }
+
+    private void write(final ServerToClientModel model, final JsonObject jsonObject) throws IOException {
+        final String value = jsonObject.toString();
+
+        putShort(model.getValue());
+
+        try {
+            if (value != null) {
+                final byte[] bytes = value.getBytes(ENCODING_CHARSET);
+                final int length = bytes.length;
+                if (length < Integer.MAX_VALUE) {
+                    putInt(bytes.length);
+                    put(bytes);
+                } else {
+                    throw new IllegalArgumentException("Message too big, can't be sent : " + value);
+                }
             } else {
                 putInt(0);
             }
         } catch (final UnsupportedEncodingException e) {
-            log.error("Cannot convert string");
+            throw new IllegalArgumentException("Cannot convert message : " + value);
         }
     }
 
