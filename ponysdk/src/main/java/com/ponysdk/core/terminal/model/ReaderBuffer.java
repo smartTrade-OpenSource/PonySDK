@@ -59,7 +59,7 @@ public class ReaderBuffer {
     }
 
     public void init(final Uint8Array buffer) {
-        if (this.buffer != null && hasRemaining()) {
+        if (this.buffer != null && position < size) {
             if (this.window == null) this.window = Browser.getWindow();
             final int remaningBufferSize = this.size - this.position;
             final Uint8Array mergedBuffer = window.newUint8Array(remaningBufferSize + buffer.getByteLength());
@@ -225,12 +225,12 @@ public class ReaderBuffer {
         position -= binaryModel.getSize();
     }
 
-    private boolean hasEnoughRemainingBytes(final int blockSize) {
-        return position + blockSize <= size;
+    public boolean hasEnoughKeyBytes() {
+        return hasEnoughRemainingBytes(ValueTypeModel.SHORT.getSize());
     }
 
-    public boolean hasRemaining() {
-        return position < size;
+    public boolean hasEnoughRemainingBytes(final int blockSize) {
+        return position + blockSize <= size;
     }
 
     /**
@@ -244,7 +244,7 @@ public class ReaderBuffer {
         final int startPosition = position;
         int endPosition = -1;
         final int ServerToClientModelEnd = ServerToClientModel.END.ordinal();
-        while (hasEnoughRemainingBytes(ValueTypeModel.SHORT.getSize())) {
+        while (hasEnoughKeyBytes()) {
             try {
                 final int currentKeyModel = shiftBinaryModel();
                 if (ServerToClientModelEnd == currentKeyModel) {
@@ -297,6 +297,10 @@ public class ReaderBuffer {
     public Uint8Array slice(final int startPosition, final int endPosition) {
         position = endPosition;
         return buffer.subarray(startPosition, endPosition);
+    }
+
+    public void setPosition(final int position) {
+        this.position = position;
     }
 
     @Override

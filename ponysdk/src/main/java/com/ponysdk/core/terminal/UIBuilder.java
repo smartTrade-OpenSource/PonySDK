@@ -92,13 +92,14 @@ public class UIBuilder {
     }
 
     public void updateMainTerminal(final ReaderBuffer buffer) {
-        while (buffer.hasRemaining()) {
-            final int nextBlockPosition = buffer.shiftNextBlock(true);
+        while (buffer.hasEnoughKeyBytes()) {
+            int nextBlockPosition = buffer.shiftNextBlock(true);
             if (nextBlockPosition == -1) return;
 
             // Detect if the message is not for the main terminal but for a specific window
             final BinaryModel binaryModel = buffer.readBinaryModel();
             final ServerToClientModel model = binaryModel.getModel();
+
             if (ServerToClientModel.WINDOW_ID.equals(model)) {
                 // Event on a specific window
                 final int requestedId = binaryModel.getIntValue();
@@ -106,7 +107,24 @@ public class UIBuilder {
                 final PTWindow window = PTWindowManager.getWindow(requestedId);
                 if (window != null && window.isReady()) {
                     if (log.isLoggable(Level.FINE)) log.fine("The main terminal send the buffer to window " + requestedId);
-                    window.postMessage(buffer.slice(buffer.getPosition(), nextBlockPosition));
+
+                    final int startPosition = buffer.getPosition();
+
+                    // Concat multiple messages for the same window
+                    while (buffer.hasEnoughKeyBytes()) {
+                        buffer.setPosition(nextBlockPosition);
+                        final int nextBlockPosition1 = buffer.shiftNextBlock(true);
+                        if (nextBlockPosition1 != -1) {
+                            final BinaryModel newBinaryModel = buffer.readBinaryModel();
+                            final ServerToClientModel newModel = newBinaryModel.getModel();
+                            if (ServerToClientModel.WINDOW_ID.equals(newModel)) nextBlockPosition = nextBlockPosition1;
+                            else break;
+                        } else {
+                            break;
+                        }
+                    }
+
+                    window.postMessage(buffer.slice(startPosition, nextBlockPosition));
                 } else {
                     log.warning("The requested window " + requestedId + " doesn't exist anymore"); // TODO PERF LOG
                     buffer.shiftNextBlock(false);
@@ -138,15 +156,20 @@ public class UIBuilder {
     }
 
     public void updateWindowTerminal(final ReaderBuffer buffer) {
-        // Detect if the message is not for the window but for a specific frame
-        final BinaryModel binaryModel = buffer.readBinaryModel();
-        if (ServerToClientModel.FRAME_ID.equals(binaryModel.getModel())) {
-            final int requestedId = binaryModel.getIntValue();
-            final PTFrame frame = (PTFrame) getPTObject(requestedId);
-            if (log.isLoggable(Level.FINE)) log.fine("The main terminal send the buffer to frame " + requestedId);
-            frame.postMessage(buffer.slice(buffer.getPosition(), buffer.shiftNextBlock(true)));
-        } else {
-            update(binaryModel, buffer);
+        while (buffer.hasEnoughKeyBytes()) {
+            // Detect if the message is not for the window but for a specific frame
+            BinaryModel binaryModel = buffer.readBinaryModel();
+
+            if (ServerToClientModel.WINDOW_ID.equals(binaryModel.getModel())) binaryModel = buffer.readBinaryModel();
+
+            if (ServerToClientModel.FRAME_ID.equals(binaryModel.getModel())) {
+                final int requestedId = binaryModel.getIntValue();
+                final PTFrame frame = (PTFrame) getPTObject(requestedId);
+                if (log.isLoggable(Level.FINE)) log.fine("The main terminal send the buffer to frame " + requestedId);
+                frame.postMessage(buffer.slice(buffer.getPosition(), buffer.shiftNextBlock(true)));
+            } else {
+                update(binaryModel, buffer);
+            }
         }
     }
 
@@ -230,7 +253,7 @@ public class UIBuilder {
                 if (binaryModel.getModel() != null) {
                     result = !ServerToClientModel.END.equals(binaryModel.getModel()) ? ptObject.update(buffer, binaryModel) : false;
                 }
-            } while (result && buffer.hasRemaining());
+            } while (result && buffer.hasEnoughKeyBytes());
 
             if (!result) buffer.rewind(binaryModel);
         } else {
