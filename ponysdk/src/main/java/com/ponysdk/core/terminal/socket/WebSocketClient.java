@@ -93,9 +93,7 @@ public class WebSocketClient implements MessageSender {
                 reconnectionChecker.detectConnectionFailure();
             }
         });
-        webSocket.setOnerror(event -> {
-            log.severe("WebSoket error : " + event);
-        });
+        webSocket.setOnerror(event -> log.severe("WebSoket error : " + event));
         webSocket.setOnmessage(event -> messageReader.read((MessageEvent) event));
     }
 

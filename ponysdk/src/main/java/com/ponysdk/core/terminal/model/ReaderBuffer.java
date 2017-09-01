@@ -75,10 +75,16 @@ public class ReaderBuffer {
         this.size = this.buffer.getByteLength();
     }
 
-    private static native String fromCharCode(ArrayBufferView buffer) /*-{return $wnd.decode(buffer);}-*/;
+    private static final native String fromCharCode(ArrayBufferView buffer, int position, int size) /*-{
+                                                                                                    return $wnd.decode(buffer, position, size);
+                                                                                                    }-*/;
 
     public int getPosition() {
         return position;
+    }
+
+    public void setPosition(final int position) {
+        this.position = position;
     }
 
     public BinaryModel readBinaryModel() {
@@ -143,38 +149,19 @@ public class ReaderBuffer {
     }
 
     private boolean getBoolean() {
-        final int size = ValueTypeModel.BOOLEAN_SIZE;
-        if (hasEnoughRemainingBytes(size)) {
-            final boolean result = buffer.intAt(position) == TRUE;
-            position += size;
-            return result;
-        } else {
-            throw new ArrayIndexOutOfBoundsException();
-        }
+        if (hasEnoughRemainingBytes(ValueTypeModel.BOOLEAN_SIZE)) return buffer.intAt(position++) == TRUE;
+        else throw new ArrayIndexOutOfBoundsException();
     }
 
     private byte getByte() {
-        final int size = ValueTypeModel.BYTE_SIZE;
-        if (hasEnoughRemainingBytes(size)) {
-            final byte result = (byte) buffer.intAt(position);
-            position += size;
-            return result;
-        } else {
-            throw new ArrayIndexOutOfBoundsException();
-        }
+        if (hasEnoughRemainingBytes(ValueTypeModel.BYTE_SIZE)) return (byte) buffer.intAt(position++);
+        else throw new ArrayIndexOutOfBoundsException();
     }
 
     private short getShort() {
-        final int size = ValueTypeModel.SHORT_SIZE;
-        if (hasEnoughRemainingBytes(size)) {
-
-            int result = 0;
-            for (int i = position; i < position + size; i++) {
-                result = (result << 8) + buffer.intAt(i);
-            }
-
-            position += size;
-
+        if (hasEnoughRemainingBytes(ValueTypeModel.SHORT_SIZE)) {
+            int result = buffer.intAt(position++);
+            result = (result << 8) + buffer.intAt(position++);
             return (short) result;
         } else {
             throw new ArrayIndexOutOfBoundsException();
@@ -182,16 +169,11 @@ public class ReaderBuffer {
     }
 
     private int getInt() {
-        final int size = ValueTypeModel.INTEGER_SIZE;
-        if (hasEnoughRemainingBytes(size)) {
-
-            int result = 0;
-            for (int i = position; i < position + size; i++) {
-                result = (result << 8) + buffer.intAt(i);
-            }
-
-            position += size;
-
+        if (hasEnoughRemainingBytes(ValueTypeModel.INTEGER_SIZE)) {
+            int result = buffer.intAt(position++);
+            result = (result << 8) + buffer.intAt(position++);
+            result = (result << 8) + buffer.intAt(position++);
+            result = (result << 8) + buffer.intAt(position++);
             return result;
         } else {
             throw new ArrayIndexOutOfBoundsException();
@@ -210,7 +192,7 @@ public class ReaderBuffer {
     private String getString(final int size) {
         if (size != 0) {
             if (hasEnoughRemainingBytes(size)) {
-                final String result = fromCharCode(buffer.subarray(position, position + size));
+                final String result = fromCharCode(buffer, position, position + size);
                 position += size;
                 return result;
             } else {
@@ -297,10 +279,6 @@ public class ReaderBuffer {
     public Uint8Array slice(final int startPosition, final int endPosition) {
         position = endPosition;
         return buffer.subarray(startPosition, endPosition);
-    }
-
-    public void setPosition(final int position) {
-        this.position = position;
     }
 
     @Override
