@@ -25,15 +25,25 @@ package com.ponysdk.core.model;
 
 public enum ValueTypeModel {
 
-    NULL((byte) 0),
-    BOOLEAN((byte) 1),
-    BYTE((byte) 1),
-    SHORT((byte) 2),
-    INTEGER((byte) 4),
-    LONG((byte) 8), // FIXME
-    DOUBLE((byte) 16), // FIXME
-    STRING((byte) -1),
-    JSON_OBJECT((byte) -1);
+    NULL(ValueTypeModel.NULL_SIZE),
+    BOOLEAN(ValueTypeModel.BOOLEAN_SIZE),
+    BYTE(ValueTypeModel.BYTE_SIZE),
+    SHORT(ValueTypeModel.SHORT_SIZE),
+    INTEGER(ValueTypeModel.INTEGER_SIZE),
+    LONG(ValueTypeModel.LONG_SIZE),
+    DOUBLE(ValueTypeModel.DOUBLE_SIZE),
+    STRING(ValueTypeModel.STRING_SIZE),
+    JSON_OBJECT(ValueTypeModel.JSON_OBJECT_SIZE);
+
+    public static final byte NULL_SIZE = 0;
+    public static final byte BOOLEAN_SIZE = 1;
+    public static final byte BYTE_SIZE = 1;
+    public static final byte SHORT_SIZE = 2;
+    public static final byte INTEGER_SIZE = 4;
+    public static final byte LONG_SIZE = 8;
+    public static final byte DOUBLE_SIZE = 16;
+    public static final byte STRING_SIZE = -1;
+    public static final byte JSON_OBJECT_SIZE = -1;
 
     private final int size;
 

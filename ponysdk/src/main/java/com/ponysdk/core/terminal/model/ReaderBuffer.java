@@ -83,7 +83,7 @@ public class ReaderBuffer {
 
     public BinaryModel readBinaryModel() {
         final ServerToClientModel key = SERVER_TO_CLIENT_MODELS[getShort()];
-        int size = ValueTypeModel.SHORT.getSize();
+        int size = ValueTypeModel.SHORT_SIZE;
 
         final ValueTypeModel typeModel = key.getTypeModel();
         switch (typeModel) {
@@ -110,7 +110,7 @@ public class ReaderBuffer {
             case LONG:
                 // TODO Read really a long
                 // return new BinaryModel(key, getLong(), size);
-                size += ValueTypeModel.INTEGER.getSize();
+                size += ValueTypeModel.INTEGER_SIZE;
                 final int messageLongSize = getInt();
                 size += messageLongSize;
                 currentBinaryModel.init(key, Long.parseLong(getString(messageLongSize)), size);
@@ -118,19 +118,19 @@ public class ReaderBuffer {
             case DOUBLE:
                 // TODO Read really a double
                 // return new BinaryModel(key, getDouble(), size);
-                size += ValueTypeModel.INTEGER.getSize();
+                size += ValueTypeModel.INTEGER_SIZE;
                 final int messageDoubleSize = getInt();
                 size += messageDoubleSize;
                 currentBinaryModel.init(key, Double.parseDouble(getString(messageDoubleSize)), size);
                 break;
             case STRING:
-                size += ValueTypeModel.INTEGER.getSize();
+                size += ValueTypeModel.INTEGER_SIZE;
                 final int messageSize = getInt();
                 size += messageSize;
                 currentBinaryModel.init(key, getString(messageSize), size);
                 break;
             case JSON_OBJECT:
-                size += ValueTypeModel.INTEGER.getSize();
+                size += ValueTypeModel.INTEGER_SIZE;
                 final int jsonSize = getInt();
                 size += jsonSize;
                 currentBinaryModel.init(key, getJson(jsonSize), size);
@@ -143,7 +143,7 @@ public class ReaderBuffer {
     }
 
     private boolean getBoolean() {
-        final int size = ValueTypeModel.BOOLEAN.getSize();
+        final int size = ValueTypeModel.BOOLEAN_SIZE;
         if (hasEnoughRemainingBytes(size)) {
             final boolean result = buffer.intAt(position) == TRUE;
             position += size;
@@ -154,7 +154,7 @@ public class ReaderBuffer {
     }
 
     private byte getByte() {
-        final int size = ValueTypeModel.BYTE.getSize();
+        final int size = ValueTypeModel.BYTE_SIZE;
         if (hasEnoughRemainingBytes(size)) {
             final byte result = (byte) buffer.intAt(position);
             position += size;
@@ -165,7 +165,7 @@ public class ReaderBuffer {
     }
 
     private short getShort() {
-        final int size = ValueTypeModel.SHORT.getSize();
+        final int size = ValueTypeModel.SHORT_SIZE;
         if (hasEnoughRemainingBytes(size)) {
 
             int result = 0;
@@ -182,7 +182,7 @@ public class ReaderBuffer {
     }
 
     private int getInt() {
-        final int size = ValueTypeModel.INTEGER.getSize();
+        final int size = ValueTypeModel.INTEGER_SIZE;
         if (hasEnoughRemainingBytes(size)) {
 
             int result = 0;
@@ -226,7 +226,7 @@ public class ReaderBuffer {
     }
 
     public boolean hasEnoughKeyBytes() {
-        return hasEnoughRemainingBytes(ValueTypeModel.SHORT.getSize());
+        return hasEnoughRemainingBytes(ValueTypeModel.SHORT_SIZE);
     }
 
     public boolean hasEnoughRemainingBytes(final int blockSize) {
