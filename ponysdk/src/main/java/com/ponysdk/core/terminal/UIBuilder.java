@@ -59,6 +59,7 @@ public class UIBuilder {
     private static final Logger log = Logger.getLogger(UIBuilder.class.getName());
 
     private static final WidgetType[] WIDGET_TYPES = WidgetType.values();
+    private static final HandlerModel[] HANDLER_MODELS = HandlerModel.values();
 
     private final UIFactory uiFactory = new UIFactory();
     private final Map<Integer, PTObject> objectByID = new HashMap<>();
@@ -284,7 +285,7 @@ public class UIBuilder {
         final PTObject ptObject = getPTObject(objectID);
 
         // ServerToClientModel.HANDLER_TYPE
-        final HandlerModel handlerModel = HandlerModel.values()[buffer.readBinaryModel().getByteValue()];
+        final HandlerModel handlerModel = HANDLER_MODELS[buffer.readBinaryModel().getByteValue()];
 
         if (HandlerModel.HANDLER_STREAM_REQUEST.equals(handlerModel)) {
             new PTStreamResource().addHandler(buffer, handlerModel);

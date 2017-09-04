@@ -35,6 +35,8 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
 
+    private static final String PID_KEY = "pid";
+
     protected T uiObject;
 
     private Object nativeObject;
@@ -86,7 +88,7 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
             uiObject.setVisible(binaryModel.getBooleanValue());
             return true;
         } else if (ServerToClientModel.ENSURE_DEBUG_ID.ordinal() == modelOrdinal) {
-            uiObject.getElement().setAttribute("pid", binaryModel.getStringValue());
+            uiObject.getElement().setAttribute(PID_KEY, binaryModel.getStringValue());
             return true;
         } else if (ServerToClientModel.WIDGET_TITLE.ordinal() == modelOrdinal) {
             uiObject.setTitle(binaryModel.getStringValue());
