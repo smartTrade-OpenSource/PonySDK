@@ -23,11 +23,11 @@
 
 package com.ponysdk.core.terminal.request;
 
-import com.ponysdk.core.terminal.model.ReaderBuffer;
+import elemental.html.Uint8Array;
 
 @FunctionalInterface
 public interface RequestCallback {
 
-    void onDataReceived(ReaderBuffer buffer);
+    void onDataReceived(Uint8Array buffer);
 
 }

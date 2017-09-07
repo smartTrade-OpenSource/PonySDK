@@ -30,7 +30,6 @@ import com.google.gwt.core.client.Scheduler;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.terminal.ReconnectionChecker;
 import com.ponysdk.core.terminal.UIBuilder;
-import com.ponysdk.core.terminal.model.ReaderBuffer;
 import com.ponysdk.core.terminal.request.WebSocketRequestBuilder;
 
 import elemental.client.Browser;
@@ -49,8 +48,6 @@ public class WebSocketClient implements MessageSender {
 
     private final Window window;
 
-    private final ReaderBuffer readerBuffer;
-
     private boolean initialized;
 
     public WebSocketClient(final String url, final UIBuilder uiBuilder, final WebSocketDataType webSocketDataType,
@@ -58,8 +55,6 @@ public class WebSocketClient implements MessageSender {
         this.uiBuilder = uiBuilder;
 
         createSetElementsMethodOnUint8Array();
-
-        readerBuffer = new ReaderBuffer();
 
         window = Browser.getWindow();
         webSocket = window.newWebSocket(url);
@@ -110,11 +105,9 @@ public class WebSocketClient implements MessageSender {
                 initialized = true;
             }
 
-            readerBuffer.init(window.newUint8Array(arrayBuffer, 0, arrayBuffer.getByteLength()));
-
-            uiBuilder.updateMainTerminal(readerBuffer);
+            uiBuilder.updateMainTerminal(window.newUint8Array(arrayBuffer, 0, arrayBuffer.getByteLength()));
         } catch (final Exception e) {
-            log.log(Level.SEVERE, "Error while processing the " + readerBuffer, e);
+            log.log(Level.SEVERE, "Error while processing the " + arrayBuffer, e);
         }
     }
 
