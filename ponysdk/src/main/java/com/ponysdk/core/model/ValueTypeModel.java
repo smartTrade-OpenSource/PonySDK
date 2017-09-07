@@ -35,19 +35,19 @@ public enum ValueTypeModel {
     STRING(ValueTypeModel.STRING_SIZE),
     JSON_OBJECT(ValueTypeModel.JSON_OBJECT_SIZE);
 
-    public static final byte NULL_SIZE = 0;
-    public static final byte BOOLEAN_SIZE = 1;
-    public static final byte BYTE_SIZE = 1;
-    public static final byte SHORT_SIZE = 2;
-    public static final byte INTEGER_SIZE = 4;
-    public static final byte LONG_SIZE = 8;
-    public static final byte DOUBLE_SIZE = 16;
-    public static final byte STRING_SIZE = -1;
-    public static final byte JSON_OBJECT_SIZE = -1;
+    public static final int NULL_SIZE = 0;
+    public static final int BOOLEAN_SIZE = 1;
+    public static final int BYTE_SIZE = 1;
+    public static final int SHORT_SIZE = 2;
+    public static final int INTEGER_SIZE = 4;
+    public static final int LONG_SIZE = 8;
+    public static final int DOUBLE_SIZE = 16;
+    public static final int STRING_SIZE = -1;
+    public static final int JSON_OBJECT_SIZE = -1;
 
     private final int size;
 
-    private ValueTypeModel(final byte size) {
+    private ValueTypeModel(final int size) {
         this.size = size;
     }
 

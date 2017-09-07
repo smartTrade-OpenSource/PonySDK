@@ -88,8 +88,8 @@ public class ReaderBuffer {
     }
 
     public BinaryModel readBinaryModel() {
-        final ServerToClientModel key = SERVER_TO_CLIENT_MODELS[getShort()];
-        int size = ValueTypeModel.SHORT_SIZE;
+        final ServerToClientModel key = SERVER_TO_CLIENT_MODELS[getUnsignedByte()];
+        int size = ValueTypeModel.BYTE_SIZE;
 
         final ValueTypeModel typeModel = key.getTypeModel();
         switch (typeModel) {
@@ -116,22 +116,22 @@ public class ReaderBuffer {
             case LONG:
                 // TODO Read really a long
                 // return new BinaryModel(key, getLong(), size);
-                size += ValueTypeModel.SHORT_SIZE;
-                final int messageLongSize = getShort();
+                size += ValueTypeModel.BYTE_SIZE;
+                final short messageLongSize = getUnsignedByte();
                 size += messageLongSize;
                 currentBinaryModel.init(key, Long.parseLong(getString(messageLongSize)), size);
                 break;
             case DOUBLE:
                 // TODO Read really a double
                 // return new BinaryModel(key, getDouble(), size);
-                size += ValueTypeModel.SHORT_SIZE;
-                final int messageDoubleSize = getShort();
+                size += ValueTypeModel.BYTE_SIZE;
+                final short messageDoubleSize = getUnsignedByte();
                 size += messageDoubleSize;
                 currentBinaryModel.init(key, Double.parseDouble(getString(messageDoubleSize)), size);
                 break;
             case STRING:
                 size += ValueTypeModel.SHORT_SIZE;
-                final int messageSize = getShort();
+                final int messageSize = getUnsignedShort();
                 size += messageSize;
                 currentBinaryModel.init(key, getString(messageSize), size);
                 break;
@@ -158,6 +158,10 @@ public class ReaderBuffer {
         else throw new ArrayIndexOutOfBoundsException();
     }
 
+    private short getUnsignedByte() {
+        return (short) (getByte() & 0xFF);
+    }
+
     private short getShort() {
         if (hasEnoughRemainingBytes(ValueTypeModel.SHORT_SIZE)) {
             int result = buffer.intAt(position++);
@@ -166,6 +170,10 @@ public class ReaderBuffer {
         } else {
             throw new ArrayIndexOutOfBoundsException();
         }
+    }
+
+    private int getUnsignedShort() {
+        return getShort() & 0xFFFF;
     }
 
     private int getInt() {
@@ -178,6 +186,10 @@ public class ReaderBuffer {
         } else {
             throw new ArrayIndexOutOfBoundsException();
         }
+    }
+
+    private long getUnsignedInt() {
+        return getInt() & 0xFFFFFF;
     }
 
     private JSONObject getJson(final int msgSize) {
@@ -208,7 +220,7 @@ public class ReaderBuffer {
     }
 
     public boolean hasEnoughKeyBytes() {
-        return hasEnoughRemainingBytes(ValueTypeModel.SHORT_SIZE);
+        return hasEnoughRemainingBytes(ValueTypeModel.BYTE_SIZE);
     }
 
     public boolean hasEnoughRemainingBytes(final int blockSize) {
@@ -247,7 +259,7 @@ public class ReaderBuffer {
     }
 
     private final int shiftBinaryModel() {
-        final ServerToClientModel key = SERVER_TO_CLIENT_MODELS[getShort()];
+        final ServerToClientModel key = SERVER_TO_CLIENT_MODELS[getUnsignedByte()];
 
         final ValueTypeModel typeModel = key.getTypeModel();
         switch (typeModel) {
@@ -260,9 +272,15 @@ public class ReaderBuffer {
                 position += typeModel.getSize();
                 break;
             case LONG:
+                final short longSize = getUnsignedByte();
+                position += longSize;
+                break;
             case DOUBLE:
+                final short doubleSize = getUnsignedByte();
+                position += doubleSize;
+                break;
             case STRING:
-                final short stringSize = getShort();
+                final int stringSize = getUnsignedShort();
                 position += stringSize;
                 break;
             case JSON_OBJECT:

@@ -47,6 +47,9 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
 
     private static final String ENCODING_CHARSET = "UTF-8";
 
+    private static final int MAX_UNSIGNED_BYTE_VALUE = Byte.MAX_VALUE * 2 + 1;
+    private static final int MAX_UNSIGNED_SHORT_VALUE = Short.MAX_VALUE * 2 + 1;
+
     private final Session session;
 
     public WebSocketPusher(final Session session, final int bufferSize, final int maxChunkSize, final long timeoutMillis) {
@@ -122,6 +125,7 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
                     write(model, (JsonObject) value);
                     break;
                 default:
+                    log.error("Unknow model type : {}", model.getTypeModel());
                     break;
             }
         } catch (final IOException e) {
@@ -131,7 +135,7 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
     }
 
     private void write(final ServerToClientModel model) throws IOException {
-        putShort(model.getValue());
+        putModelKey(model);
     }
 
     private void write(final ServerToClientModel model, final boolean value) throws IOException {
@@ -139,43 +143,86 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
     }
 
     private void write(final ServerToClientModel model, final byte value) throws IOException {
-        putShort(model.getValue());
+        putModelKey(model);
         put(value);
     }
 
     private void write(final ServerToClientModel model, final short value) throws IOException {
-        putShort(model.getValue());
+        putModelKey(model);
         putShort(value);
     }
 
     private void write(final ServerToClientModel model, final int value) throws IOException {
-        putShort(model.getValue());
+        putModelKey(model);
         putInt(value);
     }
 
-    private void write(final ServerToClientModel model, final long value) throws IOException {
-        write(model, String.valueOf(value));
-    }
+    private void write(final ServerToClientModel model, final long longValue) throws IOException {
+        final String value = String.valueOf(longValue);
 
-    private void write(final ServerToClientModel model, final double value) throws IOException {
-        write(model, String.valueOf(value));
-    }
-
-    private void write(final ServerToClientModel model, final String value) throws IOException {
-        putShort(model.getValue());
+        putModelKey(model);
 
         try {
             if (value != null) {
                 final byte[] bytes = value.getBytes(ENCODING_CHARSET);
-                final short length = (short) bytes.length;
-                if (length < Short.MAX_VALUE) {
-                    putShort(length);
+                final int length = bytes.length;
+                if (length <= MAX_UNSIGNED_BYTE_VALUE) {
+                    putUnsignedByte((short) length);
                     put(bytes);
                 } else {
-                    throw new IllegalArgumentException("Message too big, use a JsonObject instead : " + value);
+                    throw new IllegalArgumentException("Message too big (" + value.length() + " > " + MAX_UNSIGNED_BYTE_VALUE
+                            + "), use a String instead : " + value.substring(0, Math.min(value.length(), 100)) + "...");
                 }
             } else {
-                putShort((short) 0);
+                putUnsignedByte((short) 0);
+            }
+        } catch (final UnsupportedEncodingException e) {
+            throw new IllegalArgumentException("Cannot convert message : " + value);
+        }
+    }
+
+    private void write(final ServerToClientModel model, final double doubleValue) throws IOException {
+        final String value = String.valueOf(doubleValue);
+
+        putModelKey(model);
+
+        try {
+            if (value != null) {
+                final byte[] bytes = value.getBytes(ENCODING_CHARSET);
+                final int length = bytes.length;
+                if (length <= MAX_UNSIGNED_BYTE_VALUE) {
+                    putUnsignedByte((short) length);
+                    put(bytes);
+                } else {
+                    throw new IllegalArgumentException("Message too big (" + value.length() + " > " + MAX_UNSIGNED_BYTE_VALUE
+                            + "), use a String instead : " + value.substring(0, Math.min(value.length(), 100)) + "...");
+                }
+            } else {
+                putUnsignedByte((short) 0);
+            }
+        } catch (final UnsupportedEncodingException e) {
+            throw new IllegalArgumentException("Cannot convert message : " + value);
+        }
+    }
+
+    private void write(final ServerToClientModel model, final String value) throws IOException {
+        putModelKey(model);
+
+        try {
+            if (value != null) {
+                final byte[] bytes = value.getBytes(ENCODING_CHARSET);
+                final int length = bytes.length;
+                if (value.length() > MAX_UNSIGNED_BYTE_VALUE)
+                    log.info("Message : " + value.length() + " : " + value.substring(0, Math.min(value.length(), 100)));
+                if (length <= MAX_UNSIGNED_SHORT_VALUE) {
+                    putUnsignedShort(length);
+                    put(bytes);
+                } else {
+                    throw new IllegalArgumentException("Message too big (" + value.length() + " > " + MAX_UNSIGNED_SHORT_VALUE
+                            + "), use a JsonObject instead : " + value.substring(0, Math.min(value.length(), 100)) + "...");
+                }
+            } else {
+                putUnsignedShort(0);
             }
         } catch (final UnsupportedEncodingException e) {
             throw new IllegalArgumentException("Cannot convert message : " + value);
@@ -185,17 +232,18 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
     private void write(final ServerToClientModel model, final JsonObject jsonObject) throws IOException {
         final String value = jsonObject.toString();
 
-        putShort(model.getValue());
+        putModelKey(model);
 
         try {
             if (value != null) {
                 final byte[] bytes = value.getBytes(ENCODING_CHARSET);
                 final int length = bytes.length;
-                if (length < Integer.MAX_VALUE) {
+                if (length <= Integer.MAX_VALUE) {
                     putInt(bytes.length);
                     put(bytes);
                 } else {
-                    throw new IllegalArgumentException("Message too big, can't be sent : " + value);
+                    throw new IllegalArgumentException("Message too big (" + value.length() + " > " + Integer.MAX_VALUE
+                            + "), can't be sent : " + value.substring(0, Math.min(value.length(), 100)) + "...");
                 }
             } else {
                 putInt(0);
@@ -203,6 +251,22 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
         } catch (final UnsupportedEncodingException e) {
             throw new IllegalArgumentException("Cannot convert message : " + value);
         }
+    }
+
+    private void putModelKey(final ServerToClientModel model) throws IOException {
+        putUnsignedByte(model.getValue());
+    }
+
+    public final void putUnsignedByte(final short shortValue) throws IOException {
+        put((byte) (shortValue & 0xFF));
+    }
+
+    public final void putUnsignedShort(final int intValue) throws IOException {
+        putShort((short) (intValue & 0xFFFF));
+    }
+
+    public final void putUnsignedInteger(final long longValue) throws IOException {
+        putInt((int) (longValue & 0xFFFFFF));
     }
 
 }
