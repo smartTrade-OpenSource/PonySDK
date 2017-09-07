@@ -35,6 +35,8 @@ public enum PUnit {
     CM("cm"),
     MM("mm");
 
+    private static final PUnit[] VALUES = PUnit.values();
+
     private final String value;
 
     private PUnit(final String unit) {
@@ -47,6 +49,10 @@ public enum PUnit {
 
     public final String getValue() {
         return value;
+    }
+
+    public static final PUnit fromRawValue(final byte rawValue) {
+        return VALUES[rawValue];
     }
 
 }

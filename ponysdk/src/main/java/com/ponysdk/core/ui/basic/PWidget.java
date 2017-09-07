@@ -403,7 +403,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         if (!isVisible()) return;
         final String domHandlerType = ClientToServerModel.DOM_HANDLER_TYPE.toStringValue();
         if (instruction.containsKey(domHandlerType)) {
-            final DomHandlerType domHandler = DomHandlerType.values()[instruction.getInt(domHandlerType)];
+            final DomHandlerType domHandler = DomHandlerType.fromRawValue((byte) instruction.getInt(domHandlerType));
             switch (domHandler) {
                 case KEY_PRESS:
                     fireEvent(new PKeyPressEvent(this, instruction.getInt(ClientToServerModel.VALUE_KEY.toStringValue())));

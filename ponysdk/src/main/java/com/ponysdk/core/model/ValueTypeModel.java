@@ -45,6 +45,8 @@ public enum ValueTypeModel {
     public static final int STRING_SIZE = -1;
     public static final int JSON_OBJECT_SIZE = -1;
 
+    private static final ValueTypeModel[] VALUES = ValueTypeModel.values();
+
     private final int size;
 
     private ValueTypeModel(final int size) {
@@ -53,6 +55,14 @@ public enum ValueTypeModel {
 
     public final int getSize() {
         return size;
+    }
+
+    public final byte getValue() {
+        return (byte) ordinal();
+    }
+
+    public static final ValueTypeModel fromRawValue(final byte rawValue) {
+        return VALUES[rawValue];
     }
 
 }

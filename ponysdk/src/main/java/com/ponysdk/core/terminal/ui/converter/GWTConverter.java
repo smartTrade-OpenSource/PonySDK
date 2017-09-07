@@ -39,7 +39,7 @@ import com.ponysdk.core.model.PVerticalAlignment;
 public final class GWTConverter {
 
     public static final HorizontalAlignmentConstant asHorizontalAlignmentConstant(final byte byteValue) {
-        final PHorizontalAlignment alignment = PHorizontalAlignment.fromByte(byteValue);
+        final PHorizontalAlignment alignment = PHorizontalAlignment.fromRawValue(byteValue);
         switch (alignment) {
             case ALIGN_LEFT:
                 return HasHorizontalAlignment.ALIGN_LEFT;
@@ -53,7 +53,7 @@ public final class GWTConverter {
     }
 
     public static final VerticalAlignmentConstant asVerticalAlignmentConstant(final byte byteValue) {
-        final PVerticalAlignment alignment = PVerticalAlignment.fromByte(byteValue);
+        final PVerticalAlignment alignment = PVerticalAlignment.fromRawValue(byteValue);
         switch (alignment) {
             case ALIGN_TOP:
                 return HasVerticalAlignment.ALIGN_TOP;
@@ -67,7 +67,7 @@ public final class GWTConverter {
     }
 
     public static final Alignment asAlignment(final byte byteValue) {
-        final PAlignment alignment = PAlignment.fromByte(byteValue);
+        final PAlignment alignment = PAlignment.fromRawValue(byteValue);
         switch (alignment) {
             case BEGIN:
                 return Alignment.BEGIN;
@@ -81,7 +81,7 @@ public final class GWTConverter {
     }
 
     public static final FontSize asFontSize(final byte byteValue) {
-        final PFontSize fontSize = PFontSize.fromByte(byteValue);
+        final PFontSize fontSize = PFontSize.fromRawValue(byteValue);
         switch (fontSize) {
             case XX_LARGE:
                 return FontSize.XX_LARGE;
@@ -103,7 +103,7 @@ public final class GWTConverter {
     }
 
     public static final Justification asJustification(final byte byteValue) {
-        final PJustification justification = PJustification.fromByte(byteValue);
+        final PJustification justification = PJustification.fromRawValue(byteValue);
         switch (justification) {
             case CENTER:
                 return Justification.CENTER;

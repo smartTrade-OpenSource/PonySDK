@@ -29,6 +29,8 @@ public enum PHorizontalAlignment {
     ALIGN_CENTER,
     ALIGN_RIGHT;
 
+    private static final PHorizontalAlignment[] VALUES = PHorizontalAlignment.values();
+
     private PHorizontalAlignment() {
     }
 
@@ -36,8 +38,8 @@ public enum PHorizontalAlignment {
         return (byte) ordinal();
     }
 
-    public static final PHorizontalAlignment fromByte(final byte byteValue) {
-        return PHorizontalAlignment.values()[byteValue];
+    public static final PHorizontalAlignment fromRawValue(final byte rawValue) {
+        return VALUES[rawValue];
     }
 
 }

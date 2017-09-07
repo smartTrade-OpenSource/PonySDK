@@ -45,8 +45,17 @@ public enum DomHandlerType {
     CONTEXT_MENU,
     CHANGE_HANDLER;
 
+    private static final DomHandlerType[] VALUES = DomHandlerType.values();
+
+    private DomHandlerType() {
+    }
+
     public final byte getValue() {
         return (byte) ordinal();
+    }
+
+    public static final DomHandlerType fromRawValue(final byte rawValue) {
+        return VALUES[rawValue];
     }
 
 }

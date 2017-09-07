@@ -58,9 +58,6 @@ public class UIBuilder {
 
     private static final Logger log = Logger.getLogger(UIBuilder.class.getName());
 
-    private static final WidgetType[] WIDGET_TYPES = WidgetType.values();
-    private static final HandlerModel[] HANDLER_MODELS = HandlerModel.values();
-
     private final UIFactory uiFactory = new UIFactory();
     private final Map<Integer, PTObject> objectByID = new HashMap<>();
     private final Map<UIObject, Integer> objectIDByWidget = new HashMap<>();
@@ -213,7 +210,7 @@ public class UIBuilder {
 
     private void processCreate(final ReaderBuffer buffer, final int objectID) throws AvoidBlockException {
         // ServerToClientModel.WIDGET_TYPE
-        final WidgetType widgetType = WIDGET_TYPES[buffer.readBinaryModel().getByteValue()];
+        final WidgetType widgetType = WidgetType.fromRawValue(buffer.readBinaryModel().getByteValue());
 
         final PTObject ptObject = uiFactory.newUIObject(widgetType);
         if (ptObject != null) {
@@ -285,7 +282,7 @@ public class UIBuilder {
         final PTObject ptObject = getPTObject(objectID);
 
         // ServerToClientModel.HANDLER_TYPE
-        final HandlerModel handlerModel = HANDLER_MODELS[buffer.readBinaryModel().getByteValue()];
+        final HandlerModel handlerModel = HandlerModel.fromRawValue(buffer.readBinaryModel().getByteValue());
 
         if (HandlerModel.HANDLER_STREAM_REQUEST.equals(handlerModel)) {
             new PTStreamResource().addHandler(buffer, handlerModel);
@@ -301,7 +298,7 @@ public class UIBuilder {
         final PTObject ptObject = getPTObject(objectID);
         if (ptObject != null) {
             // ServerToClientModel.HANDLER_TYPE
-            final HandlerModel handlerModel = HandlerModel.values()[buffer.readBinaryModel().getByteValue()];
+            final HandlerModel handlerModel = HandlerModel.fromRawValue(buffer.readBinaryModel().getByteValue());
             ptObject.removeHandler(buffer, handlerModel);
         } else {
             log.warning("Remove handler on a null PTObject #" + objectID + ", so we will consume all the buffer of this object");

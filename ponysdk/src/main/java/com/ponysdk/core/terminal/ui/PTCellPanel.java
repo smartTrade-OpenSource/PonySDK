@@ -39,7 +39,7 @@ public abstract class PTCellPanel<W extends CellPanel> extends PTComplexPanel<W>
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         final int modelOrdinal = binaryModel.getModel().ordinal();
         if (ServerToClientModel.WIDGET_HORIZONTAL_ALIGNMENT.ordinal() == modelOrdinal) {
-            final PHorizontalAlignment horizontalAlignment = PHorizontalAlignment.values()[binaryModel.getByteValue()];
+            final PHorizontalAlignment horizontalAlignment = PHorizontalAlignment.fromRawValue(binaryModel.getByteValue());
             // ServerToClientModel.WIDGET_ID
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
             switch (horizontalAlignment) {
@@ -57,7 +57,7 @@ public abstract class PTCellPanel<W extends CellPanel> extends PTComplexPanel<W>
             }
             return true;
         } else if (ServerToClientModel.WIDGET_VERTICAL_ALIGNMENT.ordinal() == modelOrdinal) {
-            final PVerticalAlignment verticalAlignment = PVerticalAlignment.values()[binaryModel.getByteValue()];
+            final PVerticalAlignment verticalAlignment = PVerticalAlignment.fromRawValue(binaryModel.getByteValue());
             // ServerToClientModel.WIDGET_ID
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
             switch (verticalAlignment) {

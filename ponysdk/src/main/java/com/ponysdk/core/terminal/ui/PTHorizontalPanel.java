@@ -60,7 +60,7 @@ public class PTHorizontalPanel extends PTCellPanel<HorizontalPanel> {
             uiObject.setSpacing(binaryModel.getIntValue());
             return true;
         } else if (ServerToClientModel.HORIZONTAL_ALIGNMENT.ordinal() == modelOrdinal) {
-            final PHorizontalAlignment horizontalAlignment = PHorizontalAlignment.values()[binaryModel.getByteValue()];
+            final PHorizontalAlignment horizontalAlignment = PHorizontalAlignment.fromRawValue(binaryModel.getByteValue());
             switch (horizontalAlignment) {
                 case ALIGN_LEFT:
                     uiObject.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
@@ -76,7 +76,7 @@ public class PTHorizontalPanel extends PTCellPanel<HorizontalPanel> {
             }
             return true;
         } else if (ServerToClientModel.VERTICAL_ALIGNMENT.ordinal() == modelOrdinal) {
-            final PVerticalAlignment verticalAlignment = PVerticalAlignment.values()[binaryModel.getByteValue()];
+            final PVerticalAlignment verticalAlignment = PVerticalAlignment.fromRawValue(binaryModel.getByteValue());
             switch (verticalAlignment) {
                 case ALIGN_TOP:
                     uiObject.setVerticalAlignment(HasVerticalAlignment.ALIGN_TOP);

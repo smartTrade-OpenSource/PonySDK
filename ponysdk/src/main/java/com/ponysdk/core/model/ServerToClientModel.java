@@ -236,6 +236,8 @@ public enum ServerToClientModel {
     DEFAULT_SUGGESTIONS(ValueTypeModel.STRING),
     TEXTBOX_ID(ValueTypeModel.INTEGER);
 
+    private static final ServerToClientModel[] VALUES = ServerToClientModel.values();
+
     private final ValueTypeModel type;
 
     private ServerToClientModel(final ValueTypeModel size) {
@@ -252,6 +254,10 @@ public enum ServerToClientModel {
 
     public final boolean equals(final ServerToClientModel other) {
         return this == other ? true : other != null && this.ordinal() == other.ordinal();
+    }
+
+    public static final ServerToClientModel fromRawValue(final short rawValue) {
+        return VALUES[rawValue];
     }
 
 }

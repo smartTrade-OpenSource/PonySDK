@@ -29,6 +29,8 @@ public enum PCheckBoxState {
     UNCHECKED,
     INDETERMINATE;
 
+    private static final PCheckBoxState[] VALUES = PCheckBoxState.values();
+
     private PCheckBoxState() {
     }
 
@@ -36,8 +38,8 @@ public enum PCheckBoxState {
         return (byte) ordinal();
     }
 
-    public static final PCheckBoxState fromByte(final byte byteValue) {
-        return PCheckBoxState.values()[byteValue];
+    public static final PCheckBoxState fromRawValue(final byte rawValue) {
+        return VALUES[rawValue];
     }
 
 }

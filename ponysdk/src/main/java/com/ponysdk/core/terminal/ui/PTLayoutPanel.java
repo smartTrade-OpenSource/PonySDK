@@ -56,7 +56,7 @@ public class PTLayoutPanel extends PTComplexPanel<LayoutPanel> {
             uiObject.setWidgetVerticalPosition(w, alignment);
             return true;
         } else if (ServerToClientModel.UNIT.ordinal() == modelOrdinal) {
-            final Unit unit = getUnit(PUnit.values()[binaryModel.getByteValue()]);
+            final Unit unit = getUnit(PUnit.fromRawValue(binaryModel.getByteValue()));
             // ServerToClientModel.WIDGET_ID
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
 
