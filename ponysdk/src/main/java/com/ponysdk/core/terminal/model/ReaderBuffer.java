@@ -42,8 +42,6 @@ public class ReaderBuffer {
 
     private static final byte TRUE = 1;
 
-    private static final ServerToClientModel[] SERVER_TO_CLIENT_MODELS = ServerToClientModel.values();
-
     private final BinaryModel currentBinaryModel;
 
     private Uint8Array buffer;
@@ -88,61 +86,52 @@ public class ReaderBuffer {
     }
 
     public BinaryModel readBinaryModel() {
-        final ServerToClientModel key = SERVER_TO_CLIENT_MODELS[getUnsignedByte()];
-        int size = ValueTypeModel.BYTE_SIZE;
+        final ServerToClientModel key = getModelKey();
+        int size = getModelKeySize();
 
         final ValueTypeModel typeModel = key.getTypeModel();
-        switch (typeModel) {
-            case NULL:
-                size += typeModel.getSize();
-                currentBinaryModel.init(key, size);
-                break;
-            case BOOLEAN:
-                size += typeModel.getSize();
-                currentBinaryModel.init(key, getBoolean(), size);
-                break;
-            case BYTE:
-                size += typeModel.getSize();
-                currentBinaryModel.init(key, getByte(), size);
-                break;
-            case SHORT:
-                size += typeModel.getSize();
-                currentBinaryModel.init(key, getShort(), size);
-                break;
-            case INTEGER:
-                size += typeModel.getSize();
-                currentBinaryModel.init(key, getInt(), size);
-                break;
-            case LONG:
-                // TODO Read really a long
-                // return new BinaryModel(key, getLong(), size);
-                size += ValueTypeModel.BYTE_SIZE;
-                final short messageLongSize = getUnsignedByte();
-                size += messageLongSize;
-                currentBinaryModel.init(key, Long.parseLong(getString(messageLongSize)), size);
-                break;
-            case DOUBLE:
-                // TODO Read really a double
-                // return new BinaryModel(key, getDouble(), size);
-                size += ValueTypeModel.BYTE_SIZE;
-                final short messageDoubleSize = getUnsignedByte();
-                size += messageDoubleSize;
-                currentBinaryModel.init(key, Double.parseDouble(getString(messageDoubleSize)), size);
-                break;
-            case STRING:
-                size += ValueTypeModel.SHORT_SIZE;
-                final int messageSize = getUnsignedShort();
-                size += messageSize;
-                currentBinaryModel.init(key, getString(messageSize), size);
-                break;
-            case JSON_OBJECT:
-                size += ValueTypeModel.INTEGER_SIZE;
-                final int jsonSize = getInt();
-                size += jsonSize;
-                currentBinaryModel.init(key, getJson(jsonSize), size);
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown type model : " + typeModel);
+        if (ValueTypeModel.INTEGER.equals(typeModel)) {
+            size += typeModel.getSize();
+            currentBinaryModel.init(key, getInt(), size);
+        } else if (ValueTypeModel.STRING.equals(typeModel)) {
+            size += ValueTypeModel.SHORT_SIZE;
+            final int messageSize = getUnsignedShort();
+            size += messageSize;
+            currentBinaryModel.init(key, getString(messageSize), size);
+        } else if (ValueTypeModel.JSON_OBJECT.equals(typeModel)) {
+            size += ValueTypeModel.INTEGER_SIZE;
+            final int jsonSize = getInt();
+            size += jsonSize;
+            currentBinaryModel.init(key, getJson(jsonSize), size);
+        } else if (ValueTypeModel.NULL.equals(typeModel)) {
+            size += typeModel.getSize();
+            currentBinaryModel.init(key, size);
+        } else if (ValueTypeModel.BOOLEAN.equals(typeModel)) {
+            size += typeModel.getSize();
+            currentBinaryModel.init(key, getBoolean(), size);
+        } else if (ValueTypeModel.BYTE.equals(typeModel)) {
+            size += typeModel.getSize();
+            currentBinaryModel.init(key, getByte(), size);
+        } else if (ValueTypeModel.DOUBLE.equals(typeModel)) {
+            // TODO Read really a double
+            // return new BinaryModel(key, getDouble(), size);
+            size += ValueTypeModel.BYTE_SIZE;
+            final short messageDoubleSize = getUnsignedByte();
+            size += messageDoubleSize;
+            currentBinaryModel.init(key, Double.parseDouble(getString(messageDoubleSize)), size);
+        } else if (ValueTypeModel.LONG.equals(typeModel)) {
+            // TODO Read really a long
+            // return new BinaryModel(key, getLong(), size);
+            size += ValueTypeModel.BYTE_SIZE;
+            final short messageLongSize = getUnsignedByte();
+            size += messageLongSize;
+            currentBinaryModel.init(key, Long.parseLong(getString(messageLongSize)), size);
+        } else if (ValueTypeModel.SHORT.equals(typeModel)) {
+            size += typeModel.getSize();
+            currentBinaryModel.init(key, getShort(), size);
+        } else {
+            // Never have to happen
+            throw new IllegalArgumentException("Unknown type model : " + typeModel);
         }
 
         return currentBinaryModel;
@@ -220,7 +209,7 @@ public class ReaderBuffer {
     }
 
     public boolean hasEnoughKeyBytes() {
-        return hasEnoughRemainingBytes(ValueTypeModel.BYTE_SIZE);
+        return hasEnoughRemainingBytes(getModelKeySize());
     }
 
     public boolean hasEnoughRemainingBytes(final int blockSize) {
@@ -259,39 +248,51 @@ public class ReaderBuffer {
     }
 
     private final int shiftBinaryModel() {
-        final ServerToClientModel key = SERVER_TO_CLIENT_MODELS[getUnsignedByte()];
+        final ServerToClientModel key = getModelKey();
 
         final ValueTypeModel typeModel = key.getTypeModel();
-        switch (typeModel) {
-            case NULL:
-                break;
-            case BOOLEAN:
-            case BYTE:
-            case SHORT:
-            case INTEGER:
-                position += typeModel.getSize();
-                break;
-            case LONG:
-                final short longSize = getUnsignedByte();
-                position += longSize;
-                break;
-            case DOUBLE:
-                final short doubleSize = getUnsignedByte();
-                position += doubleSize;
-                break;
-            case STRING:
-                final int stringSize = getUnsignedShort();
-                position += stringSize;
-                break;
-            case JSON_OBJECT:
-                final int jsonSize = getInt();
-                position += jsonSize;
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown type model : " + typeModel);
+
+        if (ValueTypeModel.INTEGER.equals(typeModel)) {
+            position += typeModel.getSize();
+        } else if (ValueTypeModel.STRING.equals(typeModel)) {
+            final int stringSize = getUnsignedShort();
+            position += stringSize;
+        } else if (ValueTypeModel.JSON_OBJECT.equals(typeModel)) {
+            final int jsonSize = getInt();
+            position += jsonSize;
+        } else if (ValueTypeModel.NULL.equals(typeModel)) {
+            // Nothing to do
+        } else if (ValueTypeModel.BOOLEAN.equals(typeModel)) {
+            position += typeModel.getSize();
+        } else if (ValueTypeModel.BYTE.equals(typeModel)) {
+            position += typeModel.getSize();
+        } else if (ValueTypeModel.DOUBLE.equals(typeModel)) {
+            final short doubleSize = getUnsignedByte();
+            position += doubleSize;
+        } else if (ValueTypeModel.LONG.equals(typeModel)) {
+            final short longSize = getUnsignedByte();
+            position += longSize;
+        } else if (ValueTypeModel.SHORT.equals(typeModel)) {
+            position += typeModel.getSize();
+        } else {
+            throw new IllegalArgumentException("Unknown type model : " + typeModel);
         }
 
         return key.ordinal();
+    }
+
+    /**
+     * Get the model key
+     */
+    private ServerToClientModel getModelKey() {
+        return ServerToClientModel.fromRawValue(getUnsignedByte());
+    }
+
+    /**
+     * Get the model key size
+     */
+    private static final int getModelKeySize() {
+        return ValueTypeModel.BYTE_SIZE;
     }
 
     /**
