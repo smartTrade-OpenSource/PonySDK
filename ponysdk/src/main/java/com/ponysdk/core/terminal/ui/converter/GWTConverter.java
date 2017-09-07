@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.terminal.ui.converter;
 
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.layout.client.Layout.Alignment;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment.HorizontalAlignmentConstant;
@@ -34,88 +35,68 @@ import com.ponysdk.core.model.PAlignment;
 import com.ponysdk.core.model.PFontSize;
 import com.ponysdk.core.model.PHorizontalAlignment;
 import com.ponysdk.core.model.PJustification;
+import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.model.PVerticalAlignment;
 
 public final class GWTConverter {
 
     public static final HorizontalAlignmentConstant asHorizontalAlignmentConstant(final byte byteValue) {
         final PHorizontalAlignment alignment = PHorizontalAlignment.fromRawValue(byteValue);
-        switch (alignment) {
-            case ALIGN_LEFT:
-                return HasHorizontalAlignment.ALIGN_LEFT;
-            case ALIGN_CENTER:
-                return HasHorizontalAlignment.ALIGN_CENTER;
-            case ALIGN_RIGHT:
-                return HasHorizontalAlignment.ALIGN_RIGHT;
-            default:
-                throw new IllegalArgumentException("Undefined alignement");
-        }
+        if (PHorizontalAlignment.ALIGN_LEFT.equals(alignment)) return HasHorizontalAlignment.ALIGN_LEFT;
+        else if (PHorizontalAlignment.ALIGN_CENTER.equals(alignment)) return HasHorizontalAlignment.ALIGN_CENTER;
+        else if (PHorizontalAlignment.ALIGN_RIGHT.equals(alignment)) return HasHorizontalAlignment.ALIGN_RIGHT;
+        else throw new IllegalArgumentException("Undefined alignement : " + byteValue);
     }
 
     public static final VerticalAlignmentConstant asVerticalAlignmentConstant(final byte byteValue) {
         final PVerticalAlignment alignment = PVerticalAlignment.fromRawValue(byteValue);
-        switch (alignment) {
-            case ALIGN_TOP:
-                return HasVerticalAlignment.ALIGN_TOP;
-            case ALIGN_MIDDLE:
-                return HasVerticalAlignment.ALIGN_MIDDLE;
-            case ALIGN_BOTTOM:
-                return HasVerticalAlignment.ALIGN_BOTTOM;
-            default:
-                throw new IllegalArgumentException("Undefined alignement");
-        }
+        if (PVerticalAlignment.ALIGN_TOP.equals(alignment)) return HasVerticalAlignment.ALIGN_TOP;
+        else if (PVerticalAlignment.ALIGN_MIDDLE.equals(alignment)) return HasVerticalAlignment.ALIGN_MIDDLE;
+        else if (PVerticalAlignment.ALIGN_BOTTOM.equals(alignment)) return HasVerticalAlignment.ALIGN_BOTTOM;
+        else throw new IllegalArgumentException("Undefined alignement : " + byteValue);
     }
 
     public static final Alignment asAlignment(final byte byteValue) {
         final PAlignment alignment = PAlignment.fromRawValue(byteValue);
-        switch (alignment) {
-            case BEGIN:
-                return Alignment.BEGIN;
-            case END:
-                return Alignment.END;
-            case STRETCH:
-                return Alignment.STRETCH;
-            default:
-                throw new IllegalArgumentException("Undefined alignement");
-        }
+        if (PAlignment.BEGIN.equals(alignment)) return Alignment.BEGIN;
+        else if (PAlignment.END.equals(alignment)) return Alignment.END;
+        else if (PAlignment.STRETCH.equals(alignment)) return Alignment.STRETCH;
+        else throw new IllegalArgumentException("Undefined alignement : " + byteValue);
     }
 
     public static final FontSize asFontSize(final byte byteValue) {
         final PFontSize fontSize = PFontSize.fromRawValue(byteValue);
-        switch (fontSize) {
-            case XX_LARGE:
-                return FontSize.XX_LARGE;
-            case X_LARGE:
-                return FontSize.X_LARGE;
-            case LARGE:
-                return FontSize.LARGE;
-            case MEDIUM:
-                return FontSize.MEDIUM;
-            case SMALL:
-                return FontSize.SMALL;
-            case X_SMALL:
-                return FontSize.X_SMALL;
-            case XX_SMALL:
-                return FontSize.XX_SMALL;
-            default:
-                throw new IllegalArgumentException("Undefined font size");
-        }
+        if (PFontSize.XX_LARGE.equals(fontSize)) return FontSize.XX_LARGE;
+        else if (PFontSize.X_LARGE.equals(fontSize)) return FontSize.X_LARGE;
+        else if (PFontSize.LARGE.equals(fontSize)) return FontSize.LARGE;
+        else if (PFontSize.MEDIUM.equals(fontSize)) return FontSize.MEDIUM;
+        else if (PFontSize.SMALL.equals(fontSize)) return FontSize.SMALL;
+        else if (PFontSize.X_SMALL.equals(fontSize)) return FontSize.X_SMALL;
+        else if (PFontSize.XX_SMALL.equals(fontSize)) return FontSize.XX_SMALL;
+        else throw new IllegalArgumentException("Undefined font size : " + byteValue);
     }
 
     public static final Justification asJustification(final byte byteValue) {
         final PJustification justification = PJustification.fromRawValue(byteValue);
-        switch (justification) {
-            case CENTER:
-                return Justification.CENTER;
-            case FULL:
-                return Justification.FULL;
-            case LEFT:
-                return Justification.LEFT;
-            case RIGHT:
-                return Justification.RIGHT;
-            default:
-                throw new IllegalArgumentException("Undefined justification");
-        }
+        if (PJustification.CENTER.equals(justification)) return Justification.CENTER;
+        else if (PJustification.FULL.equals(justification)) return Justification.FULL;
+        else if (PJustification.LEFT.equals(justification)) return Justification.LEFT;
+        else if (PJustification.RIGHT.equals(justification)) return Justification.RIGHT;
+        else throw new IllegalArgumentException("Undefined justification : " + byteValue);
+    }
+
+    public static final Unit asUnit(final byte byteValue) {
+        final PUnit unit = PUnit.fromRawValue(byteValue);
+        if (PUnit.PX.equals(unit)) return Unit.PX;
+        else if (PUnit.EM.equals(unit)) return Unit.EM;
+        else if (PUnit.PCT.equals(unit)) return Unit.PCT;
+        else if (PUnit.CM.equals(unit)) return Unit.CM;
+        else if (PUnit.EX.equals(unit)) return Unit.EX;
+        else if (PUnit.IN.equals(unit)) return Unit.IN;
+        else if (PUnit.MM.equals(unit)) return Unit.MM;
+        else if (PUnit.PC.equals(unit)) return Unit.PC;
+        else if (PUnit.PT.equals(unit)) return Unit.PT;
+        else throw new IllegalArgumentException("Undefined unit : " + byteValue);
     }
 
 }

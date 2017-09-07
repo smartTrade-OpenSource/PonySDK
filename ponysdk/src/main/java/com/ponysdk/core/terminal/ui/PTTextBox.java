@@ -116,11 +116,7 @@ public class PTTextBox extends PTTextBoxBase<TextBox> implements KeyPressHandler
         @Override
         public void onBrowserEvent(final Event event) {
             super.onBrowserEvent(event);
-            switch (event.getTypeInt()) {
-                case Event.ONPASTE:
-                    filterText();
-                    break;
-            }
+            if (Event.ONPASTE == event.getTypeInt()) filterText();
         }
     }
 

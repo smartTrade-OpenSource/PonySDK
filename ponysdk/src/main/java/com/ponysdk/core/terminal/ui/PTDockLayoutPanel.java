@@ -25,8 +25,8 @@ package com.ponysdk.core.terminal.ui;
 
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.gwt.user.client.ui.DockLayoutPanel.Direction;
 import com.google.gwt.user.client.ui.Widget;
+import com.ponysdk.core.model.PDirection;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
@@ -52,39 +52,19 @@ public class PTDockLayoutPanel<T extends DockLayoutPanel> extends PTComplexPanel
     public void add(final ReaderBuffer buffer, final PTObject ptObject) {
         final Widget w = asWidget(ptObject);
         // ServerToClientModel.DIRECTION
-        final Direction direction = Direction.values()[buffer.readBinaryModel().getByteValue()];
+        final PDirection direction = PDirection.fromRawValue(buffer.readBinaryModel().getByteValue());
+
         // ServerToClientModel.SIZE
         final double size = buffer.readBinaryModel().getDoubleValue();
-        switch (direction) {
-            case CENTER: {
-                uiObject.add(w);
-                break;
-            }
-            case NORTH: {
-                uiObject.addNorth(w, size);
-                break;
-            }
-            case SOUTH: {
-                uiObject.addSouth(w, size);
-                break;
-            }
-            case EAST: {
-                uiObject.addEast(w, size);
-                break;
-            }
-            case WEST: {
-                uiObject.addWest(w, size);
-                break;
-            }
-            case LINE_START: {
-                uiObject.addLineStart(w, size);
-                break;
-            }
-            case LINE_END: {
-                uiObject.addLineEnd(w, size);
-                break;
-            }
-        }
+
+        if (PDirection.CENTER.equals(direction)) uiObject.add(w);
+        else if (PDirection.NORTH.equals(direction)) uiObject.addNorth(w, size);
+        else if (PDirection.SOUTH.equals(direction)) uiObject.addSouth(w, size);
+        else if (PDirection.EAST.equals(direction)) uiObject.addEast(w, size);
+        else if (PDirection.WEST.equals(direction)) uiObject.addWest(w, size);
+        else if (PDirection.LINE_START.equals(direction)) uiObject.addLineStart(w, size);
+        else if (PDirection.LINE_END.equals(direction)) uiObject.addLineEnd(w, size);
+        else throw new IllegalArgumentException("Unkown direction : " + direction);
     }
 
     @Override

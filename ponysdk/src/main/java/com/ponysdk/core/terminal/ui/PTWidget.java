@@ -118,51 +118,94 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
     }
 
     private void addDomHandler(final ReaderBuffer buffer, final DomHandlerType domHandlerType) {
-        switch (domHandlerType) {
-            case CLICK:
-                uiObject.addDomHandler(event -> triggerMouseEvent(domHandlerType, event), ClickEvent.getType());
-                break;
-            case DOUBLE_CLICK:
-                uiObject.addDomHandler(event -> triggerMouseEvent(domHandlerType, event), DoubleClickEvent.getType());
-                break;
-            case MOUSE_OVER:
-                uiObject.addDomHandler(event -> triggerMouseEvent(domHandlerType, event), MouseOverEvent.getType());
-                break;
-            case MOUSE_OUT:
-                uiObject.addDomHandler(event -> triggerMouseEvent(domHandlerType, event), MouseOutEvent.getType());
-                break;
-            case MOUSE_DOWN:
-                uiObject.addDomHandler(event -> triggerMouseEvent(domHandlerType, event), MouseDownEvent.getType());
-                break;
-            case MOUSE_UP:
-                uiObject.addDomHandler(event -> triggerMouseEvent(domHandlerType, event), MouseUpEvent.getType());
-                break;
-            case MOUSE_WHELL:
-                uiObject.addDomHandler(event -> triggerMouseWhellEvent(domHandlerType, event), MouseWheelEvent.getType());
-                break;
-            case BLUR:
-                uiObject.addDomHandler(event -> triggerDomEvent(domHandlerType, event), BlurEvent.getType());
-                break;
-            case FOCUS:
-                uiObject.addDomHandler(event -> triggerDomEvent(domHandlerType, event), FocusEvent.getType());
-                break;
-            case KEY_PRESS:
-                final BinaryModel binaryModel = buffer.readBinaryModel();
-                final JSONArray keyFilter;
-                if (ServerToClientModel.KEY_FILTER.equals(binaryModel.getModel())) {
-                    keyFilter = binaryModel.getJsonObject().get(ClientToServerModel.KEY_FILTER.toStringValue()).isArray();
+        if (DomHandlerType.CLICK.equals(domHandlerType)) {
+            uiObject.addDomHandler(event -> triggerMouseEvent(domHandlerType, event), ClickEvent.getType());
+        } else if (DomHandlerType.DOUBLE_CLICK.equals(domHandlerType)) {
+            uiObject.addDomHandler(event -> triggerMouseEvent(domHandlerType, event), DoubleClickEvent.getType());
+        } else if (DomHandlerType.MOUSE_OVER.equals(domHandlerType)) {
+            uiObject.addDomHandler(event -> triggerMouseEvent(domHandlerType, event), MouseOverEvent.getType());
+        } else if (DomHandlerType.MOUSE_OUT.equals(domHandlerType)) {
+            uiObject.addDomHandler(event -> triggerMouseEvent(domHandlerType, event), MouseOutEvent.getType());
+        } else if (DomHandlerType.MOUSE_DOWN.equals(domHandlerType)) {
+            uiObject.addDomHandler(event -> triggerMouseEvent(domHandlerType, event), MouseDownEvent.getType());
+        } else if (DomHandlerType.MOUSE_UP.equals(domHandlerType)) {
+            uiObject.addDomHandler(event -> triggerMouseEvent(domHandlerType, event), MouseUpEvent.getType());
+        } else if (DomHandlerType.MOUSE_WHELL.equals(domHandlerType)) {
+            uiObject.addDomHandler(event -> triggerMouseWhellEvent(domHandlerType, event), MouseWheelEvent.getType());
+        } else if (DomHandlerType.BLUR.equals(domHandlerType)) {
+            uiObject.addDomHandler(event -> triggerDomEvent(domHandlerType, event), BlurEvent.getType());
+        } else if (DomHandlerType.FOCUS.equals(domHandlerType)) {
+            uiObject.addDomHandler(event -> triggerDomEvent(domHandlerType, event), FocusEvent.getType());
+        } else if (DomHandlerType.KEY_PRESS.equals(domHandlerType)) {
+            final BinaryModel binaryModel = buffer.readBinaryModel();
+            final JSONArray keyFilter;
+            if (ServerToClientModel.KEY_FILTER.equals(binaryModel.getModel())) {
+                keyFilter = binaryModel.getJsonObject().get(ClientToServerModel.KEY_FILTER.toStringValue()).isArray();
+            } else {
+                buffer.rewind(binaryModel);
+                keyFilter = null;
+            }
+
+            uiObject.addDomHandler(event -> {
+                final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
+                eventInstruction.put(ClientToServerModel.VALUE_KEY, event.getNativeEvent().getKeyCode());
+
+                if (keyFilter != null) {
+                    for (int i = 0; i < keyFilter.size(); i++) {
+                        final JSONNumber keyCode = keyFilter.get(i).isNumber();
+                        if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
+                            uiBuilder.sendDataToServer(uiObject, eventInstruction);
+                            break;
+                        }
+                    }
                 } else {
-                    buffer.rewind(binaryModel);
-                    keyFilter = null;
+                    uiBuilder.sendDataToServer(uiObject, eventInstruction);
                 }
 
+                preventOrStopEvent(event);
+            }, KeyPressEvent.getType());
+        } else if (DomHandlerType.KEY_UP.equals(domHandlerType)) {
+            final BinaryModel keyUpModel = buffer.readBinaryModel();
+            final JSONArray keyUpFilter;
+            if (ServerToClientModel.KEY_FILTER.equals(keyUpModel.getModel())) {
+                keyUpFilter = keyUpModel.getJsonObject().get(ClientToServerModel.KEY_FILTER.toStringValue()).isArray();
+            } else {
+                buffer.rewind(keyUpModel);
+                keyUpFilter = null;
+            }
+
+            if (uiObject instanceof TextBoxBase) {
+                final TextBoxBase textBox = (TextBoxBase) uiObject;
+                textBox.addKeyUpHandler(event -> {
+                    final PTInstruction changeHandlerInstruction = new PTInstruction(getObjectID());
+                    changeHandlerInstruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE, textBox.getText());
+
+                    final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
+                    eventInstruction.put(ClientToServerModel.VALUE_KEY, event.getNativeEvent().getKeyCode());
+
+                    if (keyUpFilter != null) {
+                        for (int i = 0; i < keyUpFilter.size(); i++) {
+                            final JSONNumber keyCode = keyUpFilter.get(i).isNumber();
+                            if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
+                                uiBuilder.sendDataToServer(changeHandlerInstruction);
+                                uiBuilder.sendDataToServer(eventInstruction);
+                                break;
+                            }
+                        }
+                    } else {
+                        uiBuilder.sendDataToServer(changeHandlerInstruction);
+                        uiBuilder.sendDataToServer(eventInstruction);
+                    }
+                    preventOrStopEvent(event);
+                });
+            } else {
                 uiObject.addDomHandler(event -> {
                     final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
                     eventInstruction.put(ClientToServerModel.VALUE_KEY, event.getNativeEvent().getKeyCode());
 
-                    if (keyFilter != null) {
-                        for (int i = 0; i < keyFilter.size(); i++) {
-                            final JSONNumber keyCode = keyFilter.get(i).isNumber();
+                    if (keyUpFilter != null) {
+                        for (int i = 0; i < keyUpFilter.size(); i++) {
+                            final JSONNumber keyCode = keyUpFilter.get(i).isNumber();
                             if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
                                 uiBuilder.sendDataToServer(uiObject, eventInstruction);
                                 break;
@@ -171,103 +214,39 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
                     } else {
                         uiBuilder.sendDataToServer(uiObject, eventInstruction);
                     }
-
                     preventOrStopEvent(event);
-                }, KeyPressEvent.getType());
-                break;
-            case KEY_UP:
-                final BinaryModel keyUpModel = buffer.readBinaryModel();
-                final JSONArray keyUpFilter;
-                if (ServerToClientModel.KEY_FILTER.equals(keyUpModel.getModel())) {
-                    keyUpFilter = keyUpModel.getJsonObject().get(ClientToServerModel.KEY_FILTER.toStringValue()).isArray();
-                } else {
-                    buffer.rewind(keyUpModel);
-                    keyUpFilter = null;
-                }
+                }, KeyUpEvent.getType());
+            }
+        } else if (DomHandlerType.DRAG_START.equals(domHandlerType)) {
+            uiObject.getElement().setDraggable(Element.DRAGGABLE_TRUE);
+            uiObject.addBitlessDomHandler(event -> {
+                event.setData("text", String.valueOf(getObjectID()));
+                event.getDataTransfer().setDragImage(uiObject.getElement(), 10, 10);
+                triggerDomEvent(domHandlerType, event);
+            }, DragStartEvent.getType());
+        } else if (DomHandlerType.DRAG_END.equals(domHandlerType)) {
+            uiObject.addBitlessDomHandler(event -> triggerDomEvent(domHandlerType, event), DragEndEvent.getType());
+        } else if (DomHandlerType.DRAG_ENTER.equals(domHandlerType)) {
+            uiObject.addBitlessDomHandler(event -> triggerDomEvent(domHandlerType, event), DragEnterEvent.getType());
+        } else if (DomHandlerType.DRAG_LEAVE.equals(domHandlerType)) {
+            uiObject.addBitlessDomHandler(event -> triggerDomEvent(domHandlerType, event), DragLeaveEvent.getType());
+        } else if (DomHandlerType.DROP.equals(domHandlerType)) {
+            uiObject.addBitlessDomHandler(event -> {
+                // required by GWT api
+                // triggerDomEvent(addHandler.getObjectID(), domHandlerType);
+            }, DragOverEvent.getType());
 
-                if (uiObject instanceof TextBoxBase) {
-                    final TextBoxBase textBox = (TextBoxBase) uiObject;
-                    textBox.addKeyUpHandler(event -> {
-                        final PTInstruction changeHandlerInstruction = new PTInstruction(getObjectID());
-                        changeHandlerInstruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE, textBox.getText());
-
-                        final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
-                        eventInstruction.put(ClientToServerModel.VALUE_KEY, event.getNativeEvent().getKeyCode());
-
-                        if (keyUpFilter != null) {
-                            for (int i = 0; i < keyUpFilter.size(); i++) {
-                                final JSONNumber keyCode = keyUpFilter.get(i).isNumber();
-                                if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
-                                    uiBuilder.sendDataToServer(changeHandlerInstruction);
-                                    uiBuilder.sendDataToServer(eventInstruction);
-                                    break;
-                                }
-                            }
-                        } else {
-                            uiBuilder.sendDataToServer(changeHandlerInstruction);
-                            uiBuilder.sendDataToServer(eventInstruction);
-                        }
-                        preventOrStopEvent(event);
-                    });
-                } else {
-                    uiObject.addDomHandler(event -> {
-                        final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
-                        eventInstruction.put(ClientToServerModel.VALUE_KEY, event.getNativeEvent().getKeyCode());
-
-                        if (keyUpFilter != null) {
-                            for (int i = 0; i < keyUpFilter.size(); i++) {
-                                final JSONNumber keyCode = keyUpFilter.get(i).isNumber();
-                                if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
-                                    uiBuilder.sendDataToServer(uiObject, eventInstruction);
-                                    break;
-                                }
-                            }
-                        } else {
-                            uiBuilder.sendDataToServer(uiObject, eventInstruction);
-                        }
-                        preventOrStopEvent(event);
-                    }, KeyUpEvent.getType());
-                }
-                break;
-            case DRAG_START:
-                uiObject.getElement().setDraggable(Element.DRAGGABLE_TRUE);
-                uiObject.addBitlessDomHandler(event -> {
-                    event.setData("text", String.valueOf(getObjectID()));
-                    event.getDataTransfer().setDragImage(uiObject.getElement(), 10, 10);
-                    triggerDomEvent(domHandlerType, event);
-                }, DragStartEvent.getType());
-                break;
-            case DRAG_END:
-                uiObject.addBitlessDomHandler(event -> triggerDomEvent(domHandlerType, event), DragEndEvent.getType());
-                break;
-            case DRAG_ENTER:
-                uiObject.addBitlessDomHandler(event -> triggerDomEvent(domHandlerType, event), DragEnterEvent.getType());
-                break;
-            case DRAG_LEAVE:
-                uiObject.addBitlessDomHandler(event -> triggerDomEvent(domHandlerType, event), DragLeaveEvent.getType());
-                break;
-            case DROP:
-                uiObject.addBitlessDomHandler(event -> {
-                    // required by GWT api
-                    // triggerDomEvent(addHandler.getObjectID(), domHandlerType);
-                }, DragOverEvent.getType());
-
-                uiObject.addBitlessDomHandler(event -> {
-                    event.preventDefault();
-                    final String dragWidgetID = event.getData("text");
-                    final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
-                    if (dragWidgetID != null) eventInstruction.put(ClientToServerModel.DRAG_SRC, Long.parseLong(dragWidgetID));
-                    uiBuilder.sendDataToServer(uiObject, eventInstruction);
-                }, DropEvent.getType());
-                break;
-            case CONTEXT_MENU:
-                uiObject.addDomHandler(event -> triggerDomEvent(domHandlerType, event), ContextMenuEvent.getType());
-                break;
-            case CHANGE_HANDLER:
-            case DRAG_OVER:
-            default:
-                log.info("Handler not supported #" + domHandlerType);
-                break;
+            uiObject.addBitlessDomHandler(event -> {
+                event.preventDefault();
+                final String dragWidgetID = event.getData("text");
+                final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
+                if (dragWidgetID != null) eventInstruction.put(ClientToServerModel.DRAG_SRC, Long.parseLong(dragWidgetID));
+                uiBuilder.sendDataToServer(uiObject, eventInstruction);
+            }, DropEvent.getType());
+        } else if (DomHandlerType.CONTEXT_MENU.equals(domHandlerType)) {
+            uiObject.addDomHandler(event -> triggerDomEvent(domHandlerType, event), ContextMenuEvent.getType());
+        } else {
+            log.info("Handler not supported #" + domHandlerType);
         }
     }
 
