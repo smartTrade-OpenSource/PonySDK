@@ -212,8 +212,6 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
             if (value != null) {
                 final byte[] bytes = value.getBytes(ENCODING_CHARSET);
                 final int length = bytes.length;
-                if (value.length() > MAX_UNSIGNED_BYTE_VALUE)
-                    log.info("Message : " + value.length() + " : " + value.substring(0, Math.min(value.length(), 100)));
                 if (length <= MAX_UNSIGNED_SHORT_VALUE) {
                     putUnsignedShort(length);
                     put(bytes);
