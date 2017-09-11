@@ -46,19 +46,15 @@ public class PTAddOn extends AbstractPTObject {
     JavascriptAddOn addOn;
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
-        super.create(buffer, objectId, uiService);
-        doCreate(buffer, objectId, uiService);
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
+        super.create(buffer, objectId, uiBuilder);
+        doCreate(buffer, objectId, uiBuilder);
     }
 
-    protected void doCreate(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
+    protected void doCreate(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
         // ServerToClientModel.FACTORY
         final String signature = buffer.readBinaryModel().getStringValue();
-        final Map<String, JavascriptAddOnFactory> factories = uiService.getJavascriptAddOnFactory();
-
-        final JavascriptAddOnFactory factory = factories.get(signature);
-        if (factory == null) throw new IllegalArgumentException(
-            "AddOn factory not found for signature: " + signature + ". Addons registered: " + factories.keySet());
+        final JavascriptAddOnFactory factory = getFactory(uiBuilder, signature);
 
         final JSONObject params = new JSONObject();
         params.put("id", new JSONNumber(objectId));
@@ -71,8 +67,16 @@ public class PTAddOn extends AbstractPTObject {
             addOn = factory.newAddOn(params.getJavaScriptObject());
             addOn.onInit();
         } catch (final JavaScriptException e) {
-            log.log(Level.SEVERE, e.getMessage(), e);
+            log.log(Level.SEVERE, "PTAddOn #" + getObjectID() + " (" + signature + ") " + e.getMessage(), e);
         }
+    }
+
+    protected static final JavascriptAddOnFactory getFactory(final UIBuilder uiService, final String signature) {
+        final Map<String, JavascriptAddOnFactory> factories = uiService.getJavascriptAddOnFactory();
+        final JavascriptAddOnFactory factory = factories.get(signature);
+        if (factory == null) throw new IllegalArgumentException(
+            "AddOn factory not found for signature: " + signature + ". Addons registered: " + factories.keySet());
+        return factory;
     }
 
     @Override
