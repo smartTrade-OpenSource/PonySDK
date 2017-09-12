@@ -58,7 +58,10 @@ public class ReaderBuffer {
 
     public void init(final Uint8Array buffer) {
         if (this.buffer != null && position < size) {
-            if (this.window == null) this.window = Browser.getWindow();
+            if (this.window == null) {
+                this.window = Browser.getWindow();
+                createSetElementsMethodOnUint8Array();
+            }
             final int remaningBufferSize = this.size - this.position;
             final Uint8Array mergedBuffer = window.newUint8Array(remaningBufferSize + buffer.getByteLength());
             mergedBuffer.setElements(this.position == 0 ? this.buffer : this.buffer.subarray(this.position), 0);
@@ -72,6 +75,11 @@ public class ReaderBuffer {
         this.position = 0;
         this.size = this.buffer.getByteLength();
     }
+
+    // WORKAROUND : No setElements on Uint8Array but Elemental need it, create a passthrough
+    private static final native void createSetElementsMethodOnUint8Array() /*-{
+                                                                           Uint8Array.prototype.setElements = function(array, offset) { this.set(array, offset) };
+                                                                           }-*/;
 
     private static final native String fromCharCode(ArrayBufferView buffer, int position, int size) /*-{
                                                                                                     return $wnd.decode(buffer, position, size);

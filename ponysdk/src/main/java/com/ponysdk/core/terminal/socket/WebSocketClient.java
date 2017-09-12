@@ -54,8 +54,6 @@ public class WebSocketClient implements MessageSender {
             final ReconnectionChecker reconnectionChecker) {
         this.uiBuilder = uiBuilder;
 
-        createSetElementsMethodOnUint8Array();
-
         window = Browser.getWindow();
         webSocket = window.newWebSocket(url);
         webSocket.setBinaryType(webSocketDataType.getName());
@@ -91,11 +89,6 @@ public class WebSocketClient implements MessageSender {
         webSocket.setOnerror(event -> log.severe("WebSoket error : " + event));
         webSocket.setOnmessage(event -> messageReader.read((MessageEvent) event));
     }
-
-    // WORKAROUND : No setElements on Uint8Array but Elemental need it, create a passthrough
-    private final native void createSetElementsMethodOnUint8Array() /*-{
-                                                                    Uint8Array.prototype.setElements = function(array, offset) { this.set(array, offset) };
-                                                                    }-*/;
 
     @Override
     public void read(final ArrayBuffer arrayBuffer) {
