@@ -227,6 +227,14 @@ public enum ServerToClientModel {
     WINDOW_LOCATION_REPLACE(ValueTypeModel.STRING),
     PRINT(ValueTypeModel.NULL),
     DESTROY(ValueTypeModel.NULL),
+    RESIZE_BY_X(ValueTypeModel.DOUBLE),
+    RESIZE_BY_Y(ValueTypeModel.DOUBLE),
+    RESIZE_TO_WIDTH(ValueTypeModel.INTEGER),
+    RESIZE_TO_HEIGHT(ValueTypeModel.INTEGER),
+    MOVE_BY_X(ValueTypeModel.DOUBLE),
+    MOVE_BY_Y(ValueTypeModel.DOUBLE),
+    MOVE_TO_X(ValueTypeModel.DOUBLE),
+    MOVE_TO_Y(ValueTypeModel.DOUBLE),
 
     // Old, useless or not used
     POPUP_GLASS_STYLE_NAME(ValueTypeModel.INTEGER),
