@@ -113,6 +113,7 @@ public class UIBuilder {
 
                     final int startPosition = readerBuffer.getPosition();
 
+                    /* FIXME Need to be fixed, verify if the next message is for the right window
                     // Concat multiple messages for the same window
                     while (readerBuffer.hasEnoughKeyBytes()) {
                         readerBuffer.setPosition(nextBlockPosition);
@@ -126,6 +127,7 @@ public class UIBuilder {
                             break;
                         }
                     }
+                    */
 
                     window.postMessage(readerBuffer.slice(startPosition, nextBlockPosition));
                 } else {
@@ -166,7 +168,8 @@ public class UIBuilder {
             BinaryModel binaryModel = readerBuffer.readBinaryModel();
 
             final ServerToClientModel model = binaryModel.getModel();
-            if (ServerToClientModel.WINDOW_ID.equals(model)) binaryModel = readerBuffer.readBinaryModel();
+            // FIXME  Need to be fixed
+            //if (ServerToClientModel.WINDOW_ID.equals(model)) binaryModel = readerBuffer.readBinaryModel();
 
             if (ServerToClientModel.FRAME_ID.equals(model)) {
                 final int requestedId = binaryModel.getIntValue();
