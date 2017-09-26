@@ -38,9 +38,10 @@ import elemental.html.Window;
 
 public class ReaderBuffer {
 
-    private static final Logger log = Logger.getLogger(ReaderBuffer.class.getName());
-
+    public static final int NOT_FULL_BUFFER_POSITION = -1;
     private static final byte TRUE = 1;
+
+    private static final Logger log = Logger.getLogger(ReaderBuffer.class.getName());
 
     private final BinaryModel currentBinaryModel;
 
@@ -233,7 +234,7 @@ public class ReaderBuffer {
      */
     public int shiftNextBlock(final boolean dryRun) {
         final int startPosition = position;
-        int endPosition = -1;
+        int endPosition = NOT_FULL_BUFFER_POSITION;
         final int ServerToClientModelEnd = ServerToClientModel.END.ordinal();
         while (hasEnoughKeyBytes()) {
             try {
@@ -250,7 +251,7 @@ public class ReaderBuffer {
 
         // No end found, it's a split message, so we rewind
         // If it's a dry run, we rewind all the time
-        if (endPosition == -1 || dryRun) position = startPosition;
+        if (endPosition == NOT_FULL_BUFFER_POSITION || dryRun) position = startPosition;
 
         return endPosition;
     }

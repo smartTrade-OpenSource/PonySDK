@@ -97,7 +97,7 @@ public class UIBuilder {
 
         while (readerBuffer.hasEnoughKeyBytes()) {
             int nextBlockPosition = readerBuffer.shiftNextBlock(true);
-            if (nextBlockPosition == -1) return;
+            if (nextBlockPosition == ReaderBuffer.NOT_FULL_BUFFER_POSITION) return;
 
             // Detect if the message is not for the main terminal but for a specific window
             final BinaryModel binaryModel = readerBuffer.readBinaryModel();
@@ -118,7 +118,7 @@ public class UIBuilder {
                     while (readerBuffer.hasEnoughKeyBytes()) {
                         readerBuffer.setPosition(nextBlockPosition);
                         final int nextBlockPosition1 = readerBuffer.shiftNextBlock(true);
-                        if (nextBlockPosition1 != -1) {
+                        if (nextBlockPosition1 != ReaderBuffer.NOT_FULL_BUFFER_POSITION) {
                             final BinaryModel newBinaryModel = readerBuffer.readBinaryModel();
                             final ServerToClientModel newModel = newBinaryModel.getModel();
                             if (ServerToClientModel.WINDOW_ID.equals(newModel)) nextBlockPosition = nextBlockPosition1;
