@@ -23,8 +23,6 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import com.google.gwt.core.client.Scheduler;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -32,7 +30,11 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.gwt.core.client.Scheduler;
+
 public class PTWindowManager {
+
+    private static final int IS_ALIVE_WINDOWS_TIMER = 10000; // 10 seconds
 
     private static final Logger log = Logger.getLogger(PTWindowManager.class.getName());
 
@@ -75,13 +77,14 @@ public class PTWindowManager {
     private void checkWindowsAlive() {
         Scheduler.get().scheduleFixedDelay(() -> {
             try {
-                for (final PTWindow window : windows.values()) {
+                final Collection<PTWindow> values = new ArrayList<>(windows.values());
+                for (final PTWindow window : values) {
                     if (window.isClosed()) window.onClose();
                 }
             } catch (final Throwable t) {
                 log.log(Level.SEVERE, "Can't checking windows status", t);
             }
             return true;
-        }, 2000);
+        }, IS_ALIVE_WINDOWS_TIMER);
     }
 }
