@@ -41,12 +41,12 @@ public class PTRadioButton extends PTCheckBox<RadioButton> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.NAME.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.NAME == model) {
             uiObject.setName(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.VALUE_CHECKBOX.ordinal() == modelOrdinal) {
-            uiObject.setValue(PCheckBoxState.CHECKED.equals(PCheckBoxState.fromRawValue(binaryModel.getByteValue())), true);
+        } else if (ServerToClientModel.VALUE_CHECKBOX == model) {
+            uiObject.setValue(PCheckBoxState.CHECKED == PCheckBoxState.fromRawValue(binaryModel.getByteValue()), true);
             return true;
         } else {
             return super.update(buffer, binaryModel);

@@ -73,16 +73,16 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.WIDGET_FULL_SIZE.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.WIDGET_FULL_SIZE == model) {
             uiObject.setWidth(HUNDRED_PERCENT);
             uiObject.setHeight(HUNDRED_PERCENT);
             return true;
-        } else if (ServerToClientModel.PREVENT_EVENT.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.PREVENT_EVENT == model) {
             if (preventedEvents == null) preventedEvents = new HashSet<>();
             preventedEvents.add(binaryModel.getIntValue());
             return true;
-        } else if (ServerToClientModel.STOP_EVENT.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.STOP_EVENT == model) {
             if (stoppedEvents == null) stoppedEvents = new HashSet<>();
             stoppedEvents.add(binaryModel.getIntValue());
             return true;
@@ -93,7 +93,7 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
 
     @Override
     public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
-        if (HandlerModel.HANDLER_DOM.equals(handlerModel)) {
+        if (HandlerModel.HANDLER_DOM == handlerModel) {
             // ServerToClientModel.DOM_HANDLER_CODE
             final DomHandlerType domHandlerType = DomHandlerType.fromRawValue(buffer.readBinaryModel().getByteValue());
             addDomHandler(buffer, domHandlerType);
@@ -104,7 +104,7 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
 
     @Override
     public void removeHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
-        if (HandlerModel.HANDLER_DOM.equals(handlerModel)) {
+        if (HandlerModel.HANDLER_DOM == handlerModel) {
             // TODO Remove HANDLER_DOM
             // removeDomHandler(DomHandlerType.fromByte(buffer.readBinaryModel().getByteValue()));
         } else {
@@ -118,28 +118,28 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
     }
 
     private void addDomHandler(final ReaderBuffer buffer, final DomHandlerType domHandlerType) {
-        if (DomHandlerType.CLICK.equals(domHandlerType)) {
+        if (DomHandlerType.CLICK == domHandlerType) {
             uiObject.addDomHandler(event -> triggerMouseEvent(domHandlerType, event), ClickEvent.getType());
-        } else if (DomHandlerType.DOUBLE_CLICK.equals(domHandlerType)) {
+        } else if (DomHandlerType.DOUBLE_CLICK == domHandlerType) {
             uiObject.addDomHandler(event -> triggerMouseEvent(domHandlerType, event), DoubleClickEvent.getType());
-        } else if (DomHandlerType.MOUSE_OVER.equals(domHandlerType)) {
+        } else if (DomHandlerType.MOUSE_OVER == domHandlerType) {
             uiObject.addDomHandler(event -> triggerMouseEvent(domHandlerType, event), MouseOverEvent.getType());
-        } else if (DomHandlerType.MOUSE_OUT.equals(domHandlerType)) {
+        } else if (DomHandlerType.MOUSE_OUT == domHandlerType) {
             uiObject.addDomHandler(event -> triggerMouseEvent(domHandlerType, event), MouseOutEvent.getType());
-        } else if (DomHandlerType.MOUSE_DOWN.equals(domHandlerType)) {
+        } else if (DomHandlerType.MOUSE_DOWN == domHandlerType) {
             uiObject.addDomHandler(event -> triggerMouseEvent(domHandlerType, event), MouseDownEvent.getType());
-        } else if (DomHandlerType.MOUSE_UP.equals(domHandlerType)) {
+        } else if (DomHandlerType.MOUSE_UP == domHandlerType) {
             uiObject.addDomHandler(event -> triggerMouseEvent(domHandlerType, event), MouseUpEvent.getType());
-        } else if (DomHandlerType.MOUSE_WHELL.equals(domHandlerType)) {
+        } else if (DomHandlerType.MOUSE_WHELL == domHandlerType) {
             uiObject.addDomHandler(event -> triggerMouseWhellEvent(domHandlerType, event), MouseWheelEvent.getType());
-        } else if (DomHandlerType.BLUR.equals(domHandlerType)) {
+        } else if (DomHandlerType.BLUR == domHandlerType) {
             uiObject.addDomHandler(event -> triggerDomEvent(domHandlerType, event), BlurEvent.getType());
-        } else if (DomHandlerType.FOCUS.equals(domHandlerType)) {
+        } else if (DomHandlerType.FOCUS == domHandlerType) {
             uiObject.addDomHandler(event -> triggerDomEvent(domHandlerType, event), FocusEvent.getType());
-        } else if (DomHandlerType.KEY_PRESS.equals(domHandlerType)) {
+        } else if (DomHandlerType.KEY_PRESS == domHandlerType) {
             final BinaryModel binaryModel = buffer.readBinaryModel();
             final JSONArray keyFilter;
-            if (ServerToClientModel.KEY_FILTER.equals(binaryModel.getModel())) {
+            if (ServerToClientModel.KEY_FILTER == binaryModel.getModel()) {
                 keyFilter = binaryModel.getJsonObject().get(ClientToServerModel.KEY_FILTER.toStringValue()).isArray();
             } else {
                 buffer.rewind(binaryModel);
@@ -164,10 +164,10 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
 
                 preventOrStopEvent(event);
             }, KeyPressEvent.getType());
-        } else if (DomHandlerType.KEY_UP.equals(domHandlerType)) {
+        } else if (DomHandlerType.KEY_UP == domHandlerType) {
             final BinaryModel keyUpModel = buffer.readBinaryModel();
             final JSONArray keyUpFilter;
-            if (ServerToClientModel.KEY_FILTER.equals(keyUpModel.getModel())) {
+            if (ServerToClientModel.KEY_FILTER == keyUpModel.getModel()) {
                 keyUpFilter = keyUpModel.getJsonObject().get(ClientToServerModel.KEY_FILTER.toStringValue()).isArray();
             } else {
                 buffer.rewind(keyUpModel);
@@ -217,20 +217,20 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
                     preventOrStopEvent(event);
                 }, KeyUpEvent.getType());
             }
-        } else if (DomHandlerType.DRAG_START.equals(domHandlerType)) {
+        } else if (DomHandlerType.DRAG_START == domHandlerType) {
             uiObject.getElement().setDraggable(Element.DRAGGABLE_TRUE);
             uiObject.addBitlessDomHandler(event -> {
                 event.setData("text", String.valueOf(getObjectID()));
                 event.getDataTransfer().setDragImage(uiObject.getElement(), 10, 10);
                 triggerDomEvent(domHandlerType, event);
             }, DragStartEvent.getType());
-        } else if (DomHandlerType.DRAG_END.equals(domHandlerType)) {
+        } else if (DomHandlerType.DRAG_END == domHandlerType) {
             uiObject.addBitlessDomHandler(event -> triggerDomEvent(domHandlerType, event), DragEndEvent.getType());
-        } else if (DomHandlerType.DRAG_ENTER.equals(domHandlerType)) {
+        } else if (DomHandlerType.DRAG_ENTER == domHandlerType) {
             uiObject.addBitlessDomHandler(event -> triggerDomEvent(domHandlerType, event), DragEnterEvent.getType());
-        } else if (DomHandlerType.DRAG_LEAVE.equals(domHandlerType)) {
+        } else if (DomHandlerType.DRAG_LEAVE == domHandlerType) {
             uiObject.addBitlessDomHandler(event -> triggerDomEvent(domHandlerType, event), DragLeaveEvent.getType());
-        } else if (DomHandlerType.DROP.equals(domHandlerType)) {
+        } else if (DomHandlerType.DROP == domHandlerType) {
             uiObject.addBitlessDomHandler(event -> {
                 // required by GWT api
                 // triggerDomEvent(addHandler.getObjectID(), domHandlerType);
@@ -243,7 +243,7 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
                 if (dragWidgetID != null) eventInstruction.put(ClientToServerModel.DRAG_SRC, Long.parseLong(dragWidgetID));
                 uiBuilder.sendDataToServer(uiObject, eventInstruction);
             }, DropEvent.getType());
-        } else if (DomHandlerType.CONTEXT_MENU.equals(domHandlerType)) {
+        } else if (DomHandlerType.CONTEXT_MENU == domHandlerType) {
             uiObject.addDomHandler(event -> triggerDomEvent(domHandlerType, event), ContextMenuEvent.getType());
         } else {
             log.info("Handler not supported #" + domHandlerType);

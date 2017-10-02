@@ -47,14 +47,14 @@ public class PTMenuItem extends PTUIObject<MenuItem> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.TEXT.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.TEXT == model) {
             uiObject.setText(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.HTML.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.HTML == model) {
             uiObject.setHTML(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.ENABLED.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.ENABLED == model) {
             uiObject.setEnabled(binaryModel.getBooleanValue());
             return true;
         } else {
@@ -64,7 +64,7 @@ public class PTMenuItem extends PTUIObject<MenuItem> {
 
     @Override
     public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
-        if (HandlerModel.HANDLER_COMMAND.equals(handlerModel)) {
+        if (HandlerModel.HANDLER_COMMAND == handlerModel) {
             uiObject.setScheduledCommand(() -> {
                 final PTInstruction eventInstruction = new PTInstruction(getObjectID());
                 eventInstruction.put(ClientToServerModel.HANDLER_COMMAND);
@@ -77,7 +77,7 @@ public class PTMenuItem extends PTUIObject<MenuItem> {
 
     @Override
     public void removeHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
-        if (HandlerModel.HANDLER_COMMAND.equals(handlerModel)) {
+        if (HandlerModel.HANDLER_COMMAND == handlerModel) {
             uiObject.setScheduledCommand(null);
         } else {
             super.removeHandler(buffer, handlerModel);

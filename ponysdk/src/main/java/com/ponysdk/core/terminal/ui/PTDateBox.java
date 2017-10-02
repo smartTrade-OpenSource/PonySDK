@@ -58,18 +58,18 @@ public class PTDateBox extends PTWidget<MyDateBox> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.VALUE.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.VALUE == model) {
             uiObject.getTextBox().setValue(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.DATE_FORMAT_PATTERN.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.DATE_FORMAT_PATTERN == model) {
             defaultFormat = new DefaultFormat(DateTimeFormat.getFormat(binaryModel.getStringValue()));
             uiObject.setFormat(defaultFormat);
             return true;
-        } else if (ServerToClientModel.ENABLED.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.ENABLED == model) {
             uiObject.setEnabled(binaryModel.getBooleanValue());
             return true;
-        } else if (ServerToClientModel.TIME.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.TIME == model) {
             uiObject.setDefaultMonth(binaryModel.getLongValue());
             return true;
         } else {

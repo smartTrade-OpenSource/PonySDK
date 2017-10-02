@@ -45,19 +45,19 @@ public class PTTabPanel extends PTWidget<TabPanel> {
 
         final BinaryModel binaryModel = buffer.readBinaryModel();
         final ServerToClientModel model = binaryModel.getModel();
-        if (ServerToClientModel.TAB_TEXT.equals(model)) {
+        if (ServerToClientModel.TAB_TEXT == model) {
             final String value = binaryModel.getStringValue();
             final BinaryModel beforeIndexModel = buffer.readBinaryModel();
-            if (ServerToClientModel.BEFORE_INDEX.equals(beforeIndexModel.getModel())) {
+            if (ServerToClientModel.BEFORE_INDEX == beforeIndexModel.getModel()) {
                 uiObject.insert(w, value, beforeIndexModel.getIntValue());
             } else {
                 buffer.rewind(beforeIndexModel);
                 uiObject.add(w, value);
             }
-        } else if (ServerToClientModel.TAB_WIDGET.equals(model)) {
+        } else if (ServerToClientModel.TAB_WIDGET == model) {
             final PTWidget<?> ptWidget = (PTWidget<?>) uiBuilder.getPTObject(binaryModel.getIntValue());
             final BinaryModel beforeIndexModel = buffer.readBinaryModel();
-            if (ServerToClientModel.BEFORE_INDEX.equals(beforeIndexModel.getModel())) {
+            if (ServerToClientModel.BEFORE_INDEX == beforeIndexModel.getModel()) {
                 uiObject.insert(w, ptWidget.uiObject, beforeIndexModel.getIntValue());
             } else {
                 buffer.rewind(beforeIndexModel);
@@ -75,11 +75,11 @@ public class PTTabPanel extends PTWidget<TabPanel> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.SELECTED_INDEX.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.SELECTED_INDEX == model) {
             uiObject.selectTab(binaryModel.getIntValue());
             return true;
-        } else if (ServerToClientModel.ANIMATION.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.ANIMATION == model) {
             uiObject.setAnimationEnabled(binaryModel.getBooleanValue());
             return true;
         } else {
@@ -89,13 +89,13 @@ public class PTTabPanel extends PTWidget<TabPanel> {
 
     @Override
     public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
-        if (HandlerModel.HANDLER_SELECTION.equals(handlerModel)) {
+        if (HandlerModel.HANDLER_SELECTION == handlerModel) {
             uiObject.addSelectionHandler(event -> {
                 final PTInstruction eventInstruction = new PTInstruction(getObjectID());
                 eventInstruction.put(ClientToServerModel.HANDLER_SELECTION, event.getSelectedItem());
                 uiBuilder.sendDataToServer(uiObject, eventInstruction);
             });
-        } else if (HandlerModel.HANDLER_BEFORE_SELECTION.equals(handlerModel)) {
+        } else if (HandlerModel.HANDLER_BEFORE_SELECTION == handlerModel) {
             uiObject.addBeforeSelectionHandler(event -> {
                 final PTInstruction eventInstruction = new PTInstruction(getObjectID());
                 eventInstruction.put(ClientToServerModel.HANDLER_BEFORE_SELECTION, event.getItem());
@@ -108,9 +108,9 @@ public class PTTabPanel extends PTWidget<TabPanel> {
 
     @Override
     public void removeHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
-        if (HandlerModel.HANDLER_SELECTION.equals(handlerModel)) {
+        if (HandlerModel.HANDLER_SELECTION == handlerModel) {
             // TODO Remove HANDLER_SELECTION
-        } else if (HandlerModel.HANDLER_BEFORE_SELECTION.equals(handlerModel)) {
+        } else if (HandlerModel.HANDLER_BEFORE_SELECTION == handlerModel) {
             // TODO Remove HANDLER_BEFORE_SELECTION
         } else {
             super.removeHandler(buffer, handlerModel);

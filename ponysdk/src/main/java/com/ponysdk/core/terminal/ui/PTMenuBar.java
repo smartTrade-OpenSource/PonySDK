@@ -55,7 +55,7 @@ public class PTMenuBar extends PTWidget<MenuBar> {
         if (ptObject instanceof PTMenuItem) {
             final PTMenuItem menuItem = (PTMenuItem) ptObject;
             final BinaryModel binaryModel = buffer.readBinaryModel();
-            if (ServerToClientModel.BEFORE_INDEX.equals(binaryModel.getModel())) {
+            if (ServerToClientModel.BEFORE_INDEX == binaryModel.getModel()) {
                 uiObject.insertItem(menuItem.uiObject, binaryModel.getIntValue());
             } else {
                 buffer.rewind(binaryModel);
@@ -64,7 +64,7 @@ public class PTMenuBar extends PTWidget<MenuBar> {
         } else {
             final PTMenuItemSeparator menuItem = (PTMenuItemSeparator) ptObject;
             final BinaryModel binaryModel = buffer.readBinaryModel();
-            if (ServerToClientModel.BEFORE_INDEX.equals(binaryModel.getModel())) {
+            if (ServerToClientModel.BEFORE_INDEX == binaryModel.getModel()) {
                 uiObject.insertSeparator(menuItem.uiObject, binaryModel.getIntValue());
             } else {
                 buffer.rewind(binaryModel);
@@ -86,11 +86,11 @@ public class PTMenuBar extends PTWidget<MenuBar> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.CLEAR.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.CLEAR == model) {
             uiObject.clearItems();
             return true;
-        } else if (ServerToClientModel.ANIMATION.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.ANIMATION == model) {
             uiObject.setAnimationEnabled(binaryModel.getBooleanValue());
             return true;
         } else {

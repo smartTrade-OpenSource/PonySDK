@@ -39,7 +39,7 @@ public class PTHorizontalPanel extends PTCellPanel<HorizontalPanel> {
     @Override
     public void add(final ReaderBuffer buffer, final PTObject ptObject) {
         final BinaryModel model = buffer.readBinaryModel();
-        if (ServerToClientModel.INDEX.equals(model.getModel())) {
+        if (ServerToClientModel.INDEX == model.getModel()) {
             uiObject.insert(asWidget(ptObject), model.getIntValue());
         } else {
             buffer.rewind(model);
@@ -49,17 +49,17 @@ public class PTHorizontalPanel extends PTCellPanel<HorizontalPanel> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.BORDER_WIDTH.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.BORDER_WIDTH == model) {
             uiObject.setBorderWidth(binaryModel.getIntValue());
             return true;
-        } else if (ServerToClientModel.SPACING.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.SPACING == model) {
             uiObject.setSpacing(binaryModel.getIntValue());
             return true;
-        } else if (ServerToClientModel.HORIZONTAL_ALIGNMENT.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.HORIZONTAL_ALIGNMENT == model) {
             uiObject.setHorizontalAlignment(GWTConverter.asHorizontalAlignmentConstant(binaryModel.getByteValue()));
             return true;
-        } else if (ServerToClientModel.VERTICAL_ALIGNMENT.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.VERTICAL_ALIGNMENT == model) {
             uiObject.setVerticalAlignment(GWTConverter.asVerticalAlignmentConstant(binaryModel.getByteValue()));
             return true;
         } else {

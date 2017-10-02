@@ -242,9 +242,10 @@ public class UIContext {
         } else {
             final JsonValue jsonValue = jsonObject.get(ClientToServerModel.OBJECT_ID.toStringValue());
             int objectID;
-            if (ValueType.NUMBER.equals(jsonValue.getValueType())) {
+            final ValueType valueType = jsonValue.getValueType();
+            if (ValueType.NUMBER == valueType) {
                 objectID = ((JsonNumber) jsonValue).intValue();
-            } else if (ValueType.STRING.equals(jsonValue.getValueType())) {
+            } else if (ValueType.STRING == valueType) {
                 objectID = Integer.parseInt(((JsonString) jsonValue).getString());
             } else {
                 log.error("unknown reference from the browser. Unable to execute instruction: " + jsonObject);

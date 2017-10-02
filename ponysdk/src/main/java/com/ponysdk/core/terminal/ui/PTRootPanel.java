@@ -36,7 +36,7 @@ public class PTRootPanel extends PTAbsolutePanel {
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
         final BinaryModel binaryModel = buffer.readBinaryModel();
-        if (ServerToClientModel.ROOT_ID.equals(binaryModel.getModel())) rootId = binaryModel.getStringValue();
+        if (ServerToClientModel.ROOT_ID == binaryModel.getModel()) rootId = binaryModel.getStringValue();
         else buffer.rewind(binaryModel);
 
         super.create(buffer, objectId, uiService);

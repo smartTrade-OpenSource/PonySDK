@@ -38,8 +38,8 @@ public class PTLabel<T extends Label> extends PTWidget<T> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.TEXT.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.TEXT == model) {
             setText(uiObject.getElement(), binaryModel.getStringValue());
             return true;
         } else {

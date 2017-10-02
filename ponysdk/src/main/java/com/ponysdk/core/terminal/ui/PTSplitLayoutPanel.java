@@ -52,18 +52,18 @@ public class PTSplitLayoutPanel extends PTDockLayoutPanel<MySplitLayoutPanel> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.MIN_SIZE.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.MIN_SIZE == model) {
             final int minSize = binaryModel.getIntValue();
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
             uiObject.setWidgetMinSize(w, minSize);
             return true;
-        } else if (ServerToClientModel.SNAP_CLOSED_SIZE.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.SNAP_CLOSED_SIZE == model) {
             final int snapClosedSize = binaryModel.getIntValue();
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
             uiObject.setWidgetSnapClosedSize(w, snapClosedSize);
             return true;
-        } else if (ServerToClientModel.TOGGLE_DISPLAY_ALLOWED.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.TOGGLE_DISPLAY_ALLOWED == model) {
             final boolean enable = binaryModel.getBooleanValue();
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
             uiObject.setWidgetToggleDisplayAllowed(w, enable);
@@ -75,13 +75,13 @@ public class PTSplitLayoutPanel extends PTDockLayoutPanel<MySplitLayoutPanel> {
 
     @Override
     public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
-        if (HandlerModel.HANDLER_RESIZE.equals(handlerModel)) uiObject.resizeHandler = true;
+        if (HandlerModel.HANDLER_RESIZE == handlerModel) uiObject.resizeHandler = true;
         else super.addHandler(buffer, handlerModel);
     }
 
     @Override
     public void removeHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
-        if (HandlerModel.HANDLER_RESIZE.equals(handlerModel)) uiObject.resizeHandler = false;
+        if (HandlerModel.HANDLER_RESIZE == handlerModel) uiObject.resizeHandler = false;
         else super.removeHandler(buffer, handlerModel);
     }
 

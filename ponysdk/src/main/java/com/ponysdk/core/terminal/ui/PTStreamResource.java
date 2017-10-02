@@ -39,7 +39,7 @@ public class PTStreamResource extends AbstractPTObject {
 
     @Override
     public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
-        if (HandlerModel.HANDLER_STREAM_REQUEST.equals(handlerModel)) {
+        if (HandlerModel.HANDLER_STREAM_REQUEST == handlerModel) {
             // ServerToClientModel.STREAM_REQUEST_ID
             final int streamRequestId = buffer.readBinaryModel().getIntValue();
 

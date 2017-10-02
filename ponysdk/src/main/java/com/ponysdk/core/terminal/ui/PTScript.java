@@ -49,8 +49,8 @@ public class PTScript extends AbstractPTObject {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.EVAL.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.EVAL == model) {
             long commandID = -1;
             long delayMillis = -1;
 
@@ -58,11 +58,11 @@ public class PTScript extends AbstractPTObject {
 
             final BinaryModel commandIdModel = buffer.readBinaryModel();
 
-            if (ServerToClientModel.COMMAND_ID.equals(commandIdModel.getModel())) commandID = commandIdModel.getLongValue();
+            if (ServerToClientModel.COMMAND_ID == commandIdModel.getModel()) commandID = commandIdModel.getLongValue();
             else buffer.rewind(commandIdModel);
 
             final BinaryModel delayModel = buffer.readBinaryModel();
-            if (ServerToClientModel.FIXDELAY.equals(delayModel.getModel())) delayMillis = delayModel.getLongValue();
+            if (ServerToClientModel.FIXDELAY == delayModel.getModel()) delayMillis = delayModel.getLongValue();
             else buffer.rewind(delayModel);
 
             if (commandID == -1) eval(script, delayMillis);

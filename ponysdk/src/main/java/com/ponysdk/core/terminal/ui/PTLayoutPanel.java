@@ -41,57 +41,57 @@ public class PTLayoutPanel extends PTComplexPanel<LayoutPanel> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.WIDGET_HORIZONTAL_ALIGNMENT.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.WIDGET_HORIZONTAL_ALIGNMENT == model) {
             final Alignment alignment = GWTConverter.asAlignment(binaryModel.getByteValue());
             // ServerToClientModel.WIDGET_ID
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
             uiObject.setWidgetHorizontalPosition(w, alignment);
             return true;
-        } else if (ServerToClientModel.WIDGET_VERTICAL_ALIGNMENT.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.WIDGET_VERTICAL_ALIGNMENT == model) {
             final Alignment alignment = GWTConverter.asAlignment(binaryModel.getByteValue());
             // ServerToClientModel.WIDGET_ID
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
             uiObject.setWidgetVerticalPosition(w, alignment);
             return true;
-        } else if (ServerToClientModel.UNIT.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.UNIT == model) {
             final Unit unit = GWTConverter.asUnit(binaryModel.getByteValue());
             // ServerToClientModel.WIDGET_ID
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
 
             final BinaryModel key1 = buffer.readBinaryModel();
-            if (ServerToClientModel.LEFT.equals(key1.getModel())) {
+            if (ServerToClientModel.LEFT == key1.getModel()) {
                 final double left = key1.getDoubleValue();
                 final BinaryModel key2 = buffer.readBinaryModel();
-                if (ServerToClientModel.RIGHT.equals(key2.getModel())) {
+                if (ServerToClientModel.RIGHT == key2.getModel()) {
                     final double right = key2.getDoubleValue();
                     uiObject.setWidgetLeftRight(w, left, unit, right, unit);
                     return true;
-                } else if (ServerToClientModel.WIDTH.equals(key2.getModel())) {
+                } else if (ServerToClientModel.WIDTH == key2.getModel()) {
                     final double width = key2.getDoubleValue();
                     uiObject.setWidgetLeftWidth(w, left, unit, width, unit);
                     return true;
                 }
-            } else if (ServerToClientModel.RIGHT.equals(key1.getModel())) {
+            } else if (ServerToClientModel.RIGHT == key1.getModel()) {
                 final double right = key1.getDoubleValue();
                 // ServerToClientModel.WIDTH
                 final BinaryModel key2 = buffer.readBinaryModel();
                 final double width = key2.getDoubleValue();
                 uiObject.setWidgetRightWidth(w, right, unit, width, unit);
                 return true;
-            } else if (ServerToClientModel.TOP.equals(key1.getModel())) {
+            } else if (ServerToClientModel.TOP == key1.getModel()) {
                 final double top = key1.getDoubleValue();
                 final BinaryModel key2 = buffer.readBinaryModel();
-                if (ServerToClientModel.BOTTOM.equals(key2.getModel())) {
+                if (ServerToClientModel.BOTTOM == key2.getModel()) {
                     final double bottom = key2.getDoubleValue();
                     uiObject.setWidgetTopBottom(w, top, unit, bottom, unit);
                     return true;
-                } else if (ServerToClientModel.HEIGHT.equals(key2.getModel())) {
+                } else if (ServerToClientModel.HEIGHT == key2.getModel()) {
                     final double height = key2.getDoubleValue();
                     uiObject.setWidgetTopHeight(w, top, unit, height, unit);
                     return true;
                 }
-            } else if (ServerToClientModel.BOTTOM.equals(key1.getModel())) {
+            } else if (ServerToClientModel.BOTTOM == key1.getModel()) {
                 final double bottom = key1.getDoubleValue();
                 // ServerToClientModel.HEIGHT
                 final BinaryModel key2 = buffer.readBinaryModel();
@@ -102,7 +102,7 @@ public class PTLayoutPanel extends PTComplexPanel<LayoutPanel> {
         }
 
         // FIXME
-        if (ServerToClientModel.ANIMATE.ordinal() == modelOrdinal) {
+        if (ServerToClientModel.ANIMATE == model) {
             uiObject.animate(binaryModel.getIntValue());
             return true;
         } else {

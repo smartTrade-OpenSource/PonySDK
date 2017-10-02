@@ -60,7 +60,7 @@ public class PTAddOnComposite extends PTAddOn {
         params.put("id", new JSONNumber(objectId));
 
         BinaryModel binaryModel = buffer.readBinaryModel();
-        if (ServerToClientModel.NATIVE.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.NATIVE == binaryModel.getModel()) {
             params.put("args", binaryModel.getJsonObject());
             binaryModel = buffer.readBinaryModel();
         }

@@ -72,14 +72,14 @@ public class PTFileUpload extends PTWidget<FormPanel> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.NAME.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.NAME == model) {
             fileUpload.setName(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.ENABLED.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.ENABLED == model) {
             fileUpload.setEnabled(binaryModel.getBooleanValue());
             return true;
-        } else if (ServerToClientModel.TEXT.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.TEXT == model) {
             if (label == null) {
                 label = DOM.createLabel().cast();
                 label.setHtmlFor(fileUploadId);
@@ -87,7 +87,7 @@ public class PTFileUpload extends PTWidget<FormPanel> {
             }
             label.setInnerText(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.CLEAR.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.CLEAR == model) {
             uiObject.reset();
             return true;
         } else {
@@ -97,14 +97,14 @@ public class PTFileUpload extends PTWidget<FormPanel> {
 
     @Override
     public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
-        if (HandlerModel.HANDLER_CHANGE.equals(handlerModel)) {
+        if (HandlerModel.HANDLER_CHANGE == handlerModel) {
             fileUpload.addChangeHandler(event -> {
                 final PTInstruction eventInstruction = new PTInstruction(getObjectID());
                 eventInstruction.put(ClientToServerModel.HANDLER_CHANGE, fileUpload.getFilename());
                 eventInstruction.put(ClientToServerModel.SIZE, getFileSize(fileUpload.getElement()));
                 uiBuilder.sendDataToServer(fileUpload, eventInstruction);
             });
-        } else if (HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST.equals(handlerModel)) {
+        } else if (HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST == handlerModel) {
             // ServerToClientModel.STREAM_REQUEST_ID
             final int streamRequestId = buffer.readBinaryModel().getIntValue();
 
@@ -128,7 +128,7 @@ public class PTFileUpload extends PTWidget<FormPanel> {
 
     @Override
     public void removeHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
-        if (HandlerModel.HANDLER_CHANGE.equals(handlerModel)) {
+        if (HandlerModel.HANDLER_CHANGE == handlerModel) {
             // TODO Remove HANDLER_CHANGE
         } else {
             super.removeHandler(buffer, handlerModel);

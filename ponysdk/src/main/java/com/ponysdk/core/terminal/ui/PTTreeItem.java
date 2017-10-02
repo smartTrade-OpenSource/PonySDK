@@ -42,7 +42,7 @@ public class PTTreeItem extends PTUIObject<TreeItem> {
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
         BinaryModel binaryModel = buffer.readBinaryModel();
-        if (ServerToClientModel.TEXT.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.TEXT == binaryModel.getModel()) {
             this.text = binaryModel.getStringValue();
         } else {
             buffer.rewind(binaryModel);
@@ -51,7 +51,7 @@ public class PTTreeItem extends PTUIObject<TreeItem> {
         super.create(buffer, objectId, uiBuilder);
 
         binaryModel = buffer.readBinaryModel();
-        if (ServerToClientModel.TREE_ROOT.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.TREE_ROOT == binaryModel.getModel()) {
             this.tree = (Tree) asWidget(binaryModel.getIntValue(), uiBuilder);
         } else {
             buffer.rewind(binaryModel);
@@ -69,9 +69,9 @@ public class PTTreeItem extends PTUIObject<TreeItem> {
 
         final BinaryModel binaryModel = buffer.readBinaryModel();
         final ServerToClientModel model = binaryModel.getModel();
-        if (ServerToClientModel.WIDGET.equals(model)) {
+        if (ServerToClientModel.WIDGET == model) {
             uiObject.setWidget((Widget) widget);
-        } else if (ServerToClientModel.INDEX.equals(model)) {
+        } else if (ServerToClientModel.INDEX == model) {
             final int index = binaryModel.getIntValue();
             final TreeItem w = (TreeItem) widget;
             if (tree != null) tree.insertItem(index, w);
@@ -86,14 +86,14 @@ public class PTTreeItem extends PTUIObject<TreeItem> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.OPEN.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.OPEN == model) {
             uiObject.setState(true, false);
             return true;
-        } else if (ServerToClientModel.CLOSE.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.CLOSE == model) {
             uiObject.setState(false, false);
             return true;
-        } else if (ServerToClientModel.TEXT.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.TEXT == model) {
             uiObject.setText(binaryModel.getStringValue());
             return true;
         } else {

@@ -61,7 +61,7 @@ public class PRadioButton extends PCheckBox {
     }
 
     protected void setState(final PCheckBoxState state, final boolean propagate) {
-        if (!PCheckBoxState.INDETERMINATE.equals(state)) {
+        if (PCheckBoxState.INDETERMINATE != state) {
             if (Objects.equals(this.state, state)) return;
             super.setState(state);
             if (propagate && handlers != null) {

@@ -60,7 +60,7 @@ public class PTAddOn extends AbstractPTObject {
         params.put("id", new JSONNumber(objectId));
 
         final BinaryModel binaryModel = buffer.readBinaryModel();
-        if (ServerToClientModel.NATIVE.equals(binaryModel.getModel())) params.put("args", binaryModel.getJsonObject());
+        if (ServerToClientModel.NATIVE == binaryModel.getModel()) params.put("args", binaryModel.getJsonObject());
         else buffer.rewind(binaryModel);
 
         try {
@@ -81,11 +81,11 @@ public class PTAddOn extends AbstractPTObject {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.NATIVE.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.NATIVE == model) {
             doUpdate(binaryModel.getJsonObject());
             return true;
-        } else if (ServerToClientModel.DESTROY.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.DESTROY == model) {
             destroy();
             return true;
         } else {

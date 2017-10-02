@@ -58,7 +58,7 @@ public class PTPopupPanel<T extends PopupPanel> extends PTSimplePanel<T>
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
         final BinaryModel binaryModel = buffer.readBinaryModel();
-        if (ServerToClientModel.POPUP_AUTO_HIDE.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.POPUP_AUTO_HIDE == binaryModel.getModel()) {
             autoHide = binaryModel.getBooleanValue();
         } else {
             autoHide = false;
@@ -90,36 +90,36 @@ public class PTPopupPanel<T extends PopupPanel> extends PTSimplePanel<T>
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.ANIMATION.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.ANIMATION == model) {
             uiObject.setAnimationEnabled(binaryModel.getBooleanValue());
             return true;
-        } else if (ServerToClientModel.CENTER.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.CENTER == model) {
             uiObject.show();
             uiObject.center();
             return true;
-        } else if (ServerToClientModel.OPEN.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.OPEN == model) {
             uiObject.show();
             return true;
-        } else if (ServerToClientModel.POPUP_POSITION_AND_SHOW.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.POPUP_POSITION_AND_SHOW == model) {
             uiObject.setVisible(true);
             return true;
-        } else if (ServerToClientModel.CLOSE.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.CLOSE == model) {
             uiObject.hide();
             return true;
-        } else if (ServerToClientModel.POPUP_GLASS_ENABLED.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.POPUP_GLASS_ENABLED == model) {
             uiObject.setGlassEnabled(binaryModel.getBooleanValue());
             return true;
-        } else if (ServerToClientModel.MODAL.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.MODAL == model) {
             uiObject.setModal(binaryModel.getBooleanValue());
             return true;
-        } else if (ServerToClientModel.POSITION_LEFT.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.POSITION_LEFT == model) {
             final int left = binaryModel.getIntValue();
             // ServerToClientModel.POSITION_TOP
             final int top = buffer.readBinaryModel().getIntValue();
             uiObject.setPopupPosition(left, top);
             return true;
-        } else if (ServerToClientModel.DRAGGABLE.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.DRAGGABLE == model) {
             draggable = binaryModel.getBooleanValue();
             if (draggable) {
                 uiObject.addDomHandler(this, MouseDownEvent.getType());
@@ -175,7 +175,7 @@ public class PTPopupPanel<T extends PopupPanel> extends PTSimplePanel<T>
 
     @Override
     public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
-        if (HandlerModel.HANDLER_POPUP_POSITION.equals(handlerModel)) {
+        if (HandlerModel.HANDLER_POPUP_POSITION == handlerModel) {
             uiObject.setVisible(true);
             uiObject.show();
             Scheduler.get().scheduleDeferred(() -> {

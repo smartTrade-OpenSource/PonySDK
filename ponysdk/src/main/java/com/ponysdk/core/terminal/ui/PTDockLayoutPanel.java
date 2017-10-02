@@ -57,32 +57,32 @@ public class PTDockLayoutPanel<T extends DockLayoutPanel> extends PTComplexPanel
         // ServerToClientModel.SIZE
         final double size = buffer.readBinaryModel().getDoubleValue();
 
-        if (PDirection.CENTER.equals(direction)) uiObject.add(w);
-        else if (PDirection.NORTH.equals(direction)) uiObject.addNorth(w, size);
-        else if (PDirection.SOUTH.equals(direction)) uiObject.addSouth(w, size);
-        else if (PDirection.EAST.equals(direction)) uiObject.addEast(w, size);
-        else if (PDirection.WEST.equals(direction)) uiObject.addWest(w, size);
-        else if (PDirection.LINE_START.equals(direction)) uiObject.addLineStart(w, size);
-        else if (PDirection.LINE_END.equals(direction)) uiObject.addLineEnd(w, size);
+        if (PDirection.CENTER == direction) uiObject.add(w);
+        else if (PDirection.NORTH == direction) uiObject.addNorth(w, size);
+        else if (PDirection.SOUTH == direction) uiObject.addSouth(w, size);
+        else if (PDirection.EAST == direction) uiObject.addEast(w, size);
+        else if (PDirection.WEST == direction) uiObject.addWest(w, size);
+        else if (PDirection.LINE_START == direction) uiObject.addLineStart(w, size);
+        else if (PDirection.LINE_END == direction) uiObject.addLineEnd(w, size);
         else throw new IllegalArgumentException("Unkown direction : " + direction);
     }
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.WIDGET_SIZE.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.WIDGET_SIZE == model) {
             final double newSize = binaryModel.getDoubleValue();
             // ServerToClientModel.WIDGET_ID
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
             uiObject.setWidgetSize(w, newSize);
             return true;
-        } else if (ServerToClientModel.WIDGET_HIDDEN.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.WIDGET_HIDDEN == model) {
             final boolean hidden = binaryModel.getBooleanValue();
             // ServerToClientModel.WIDGET_ID
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
             uiObject.setWidgetHidden(w, hidden);
             return true;
-        } else if (ServerToClientModel.ANIMATE.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.ANIMATE == model) {
             uiObject.animate(binaryModel.getIntValue());
             return true;
         } else {

@@ -52,14 +52,14 @@ public class PTScrollPanel extends PTSimplePanel<ScrollPanel> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.HORIZONTAL_SCROLL_POSITION.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.HORIZONTAL_SCROLL_POSITION == model) {
             uiObject.setHorizontalScrollPosition(binaryModel.getIntValue());
             return true;
-        } else if (ServerToClientModel.VERTICAL_SCROLL_POSITION.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.VERTICAL_SCROLL_POSITION == model) {
             uiObject.setVerticalScrollPosition(binaryModel.getIntValue());
             return true;
-        } else if (ServerToClientModel.SCROLL_TO.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.SCROLL_TO == model) {
             final long scrollTo = binaryModel.getLongValue();
             if (scrollTo == 0) uiObject.scrollToBottom();
             else if (scrollTo == 1) uiObject.scrollToLeft();
@@ -73,7 +73,7 @@ public class PTScrollPanel extends PTSimplePanel<ScrollPanel> {
 
     @Override
     public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
-        if (HandlerModel.HANDLER_SCROLL.equals(handlerModel)) {
+        if (HandlerModel.HANDLER_SCROLL == handlerModel) {
             uiObject.addScrollHandler(event -> {
                 if (!dragging) sendScrollPositionEvent();
             });
@@ -106,7 +106,7 @@ public class PTScrollPanel extends PTSimplePanel<ScrollPanel> {
 
     @Override
     public void removeHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
-        if (HandlerModel.HANDLER_SCROLL.equals(handlerModel)) {
+        if (HandlerModel.HANDLER_SCROLL == handlerModel) {
             // TODO Remove HANDLER_SCROLL
         } else {
             super.removeHandler(buffer, handlerModel);

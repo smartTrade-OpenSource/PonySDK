@@ -134,15 +134,15 @@ public class BinaryModel {
         if (model == null) return null;
 
         final ValueTypeModel typeModel = model.getTypeModel();
-        if (ValueTypeModel.NULL.equals(typeModel)) return String.valueOf(model);
-        else if (ValueTypeModel.BOOLEAN.equals(typeModel)) return model + " => " + booleanValue;
-        else if (ValueTypeModel.BYTE.equals(typeModel)) return model + " => " + byteValue;
-        else if (ValueTypeModel.SHORT.equals(typeModel)) return model + " => " + shortValue;
-        else if (ValueTypeModel.INTEGER.equals(typeModel)) return model + " => " + intValue;
-        else if (ValueTypeModel.LONG.equals(typeModel)) return model + " => " + longValue;
-        else if (ValueTypeModel.DOUBLE.equals(typeModel)) return model + " => " + doubleValue;
-        else if (ValueTypeModel.STRING.equals(typeModel)) return model + " => " + stringValue;
-        else if (ValueTypeModel.JSON_OBJECT.equals(typeModel)) return model + " => " + jsonObject;
+        if (ValueTypeModel.NULL == typeModel) return String.valueOf(model);
+        else if (ValueTypeModel.BOOLEAN == typeModel) return model + " => " + booleanValue;
+        else if (ValueTypeModel.BYTE == typeModel) return model + " => " + byteValue;
+        else if (ValueTypeModel.SHORT == typeModel) return model + " => " + shortValue;
+        else if (ValueTypeModel.INTEGER == typeModel) return model + " => " + intValue;
+        else if (ValueTypeModel.LONG == typeModel) return model + " => " + longValue;
+        else if (ValueTypeModel.DOUBLE == typeModel) return model + " => " + doubleValue;
+        else if (ValueTypeModel.STRING == typeModel) return model + " => " + stringValue;
+        else if (ValueTypeModel.JSON_OBJECT == typeModel) return model + " => " + jsonObject;
         else throw new IllegalArgumentException("No model type configured : " + typeModel);
     }
 

@@ -260,10 +260,6 @@ public enum ServerToClientModel {
         return type;
     }
 
-    public final boolean equals(final ServerToClientModel other) {
-        return this == other ? true : other != null && this.ordinal() == other.ordinal();
-    }
-
     public static final ServerToClientModel fromRawValue(final short rawValue) {
         return VALUES[rawValue];
     }

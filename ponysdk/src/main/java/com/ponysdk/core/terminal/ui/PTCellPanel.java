@@ -36,26 +36,26 @@ public abstract class PTCellPanel<W extends CellPanel> extends PTComplexPanel<W>
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.WIDGET_HORIZONTAL_ALIGNMENT.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.WIDGET_HORIZONTAL_ALIGNMENT == model) {
             final HorizontalAlignmentConstant horizontalAlignment = GWTConverter
                 .asHorizontalAlignmentConstant(binaryModel.getByteValue());
             // ServerToClientModel.WIDGET_ID
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
             uiObject.setCellHorizontalAlignment(w, horizontalAlignment);
             return true;
-        } else if (ServerToClientModel.WIDGET_VERTICAL_ALIGNMENT.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.WIDGET_VERTICAL_ALIGNMENT == model) {
             final VerticalAlignmentConstant verticalAlignment = GWTConverter.asVerticalAlignmentConstant(binaryModel.getByteValue());
             // ServerToClientModel.WIDGET_ID
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
             uiObject.setCellVerticalAlignment(w, verticalAlignment);
             return true;
-        } else if (ServerToClientModel.CELL_WIDTH.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.CELL_WIDTH == model) {
             final String value = binaryModel.getStringValue();
             // ServerToClientModel.WIDGET_ID
             uiObject.setCellWidth(asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder), value);
             return true;
-        } else if (ServerToClientModel.CELL_HEIGHT.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.CELL_HEIGHT == model) {
             final String value = binaryModel.getStringValue();
             // ServerToClientModel.WIDGET_ID
             uiObject.setCellHeight(asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder), value);
