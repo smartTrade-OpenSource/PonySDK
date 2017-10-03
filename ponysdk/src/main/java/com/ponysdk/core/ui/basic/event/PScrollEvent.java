@@ -84,4 +84,20 @@ public class PScrollEvent extends Event<PScrollEvent.PScrollHandler> {
         return horizontalPosition / (double) width;
     }
 
+    public int getHeight() {
+        return height;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getVerticalPostion() {
+        return verticalPostion;
+    }
+
+    public int getHorizontalPosition() {
+        return horizontalPosition;
+    }
+
 }
