@@ -59,7 +59,7 @@ public class PTWindowManager {
 
     public static void closeAll() {
         final JsArrayOf<PTWindow> windows = get().windows.values();
-        for (int i = windows.length() - 1; i >= 0; i++) {
+        for (int i = windows.length() - 1; i >= 0; i--) {
             windows.get(i).close(true);
         }
     }
@@ -77,7 +77,7 @@ public class PTWindowManager {
         Scheduler.get().scheduleFixedDelay(() -> {
             try {
                 final JsArrayOf<PTWindow> windows = get().windows.values();
-                for (int i = windows.length() - 1; i >= 0; i++) {
+                for (int i = windows.length() - 1; i >= 0; i--) {
                     final PTWindow window = windows.get(i);
                     if (window.isClosed()) window.onClose();
                 }
