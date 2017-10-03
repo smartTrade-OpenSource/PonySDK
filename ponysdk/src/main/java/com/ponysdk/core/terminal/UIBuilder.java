@@ -54,16 +54,18 @@ import com.ponysdk.core.terminal.ui.PTWindowManager;
 
 import elemental.client.Browser;
 import elemental.html.Uint8Array;
+import elemental.js.util.JsMapFromIntTo;
+import elemental.js.util.JsMapFromStringTo;
 
 public class UIBuilder {
 
     private static final Logger log = Logger.getLogger(UIBuilder.class.getName());
 
     private final UIFactory uiFactory = new UIFactory();
-    private final Map<Integer, PTObject> objectByID = new HashMap<>();
+    private final JsMapFromIntTo<PTObject> objectByID = JsMapFromIntTo.create();
     private final Map<UIObject, Integer> objectIDByWidget = new HashMap<>();
-    private final Map<Integer, UIObject> widgetIDByObjectID = new HashMap<>();
-    private final Map<String, JavascriptAddOnFactory> javascriptAddOnFactories = new HashMap<>();
+    private final JsMapFromIntTo<UIObject> widgetIDByObjectID = JsMapFromIntTo.create();
+    private final JsMapFromStringTo<JavascriptAddOnFactory> javascriptAddOnFactories = JsMapFromStringTo.create();
 
     private final ReaderBuffer readerBuffer = new ReaderBuffer();
 
@@ -110,24 +112,30 @@ public class UIBuilder {
                 final PTWindow window = PTWindowManager.getWindow(requestedId);
                 if (window != null && window.isReady()) {
                     final int startPosition = readerBuffer.getPosition();
+                    final int endPosition = nextBlockPosition;
 
-                    /* FIXME Need to be fixed, verify if the next message is for the right window
-                    // Concat multiple messages for the same window
-                    while (readerBuffer.hasEnoughKeyBytes()) {
-                        readerBuffer.setPosition(nextBlockPosition);
-                        final int nextBlockPosition1 = readerBuffer.shiftNextBlock(true);
-                        if (nextBlockPosition1 != ReaderBuffer.NOT_FULL_BUFFER_POSITION) {
-                            final BinaryModel newBinaryModel = readerBuffer.readBinaryModel();
-                            final ServerToClientModel newModel = newBinaryModel.getModel();
-                            if (ServerToClientModel.WINDOW_ID == newModel) nextBlockPosition = nextBlockPosition1;
-                            else break;
-                        } else {
-                            break;
-                        }
-                    }
+                    /*
+                     * TODO Need to be tested
+                     * // Concat multiple messages for the same window
+                     * readerBuffer.setPosition(endPosition);
+                     * while (readerBuffer.hasEnoughKeyBytes()) {
+                     * final int nextBlockPosition1 = readerBuffer.shiftNextBlock(true);
+                     * if (nextBlockPosition1 != ReaderBuffer.NOT_FULL_BUFFER_POSITION) {
+                     * final BinaryModel newBinaryModel = readerBuffer.readBinaryModel();
+                     * final ServerToClientModel newModel = newBinaryModel.getModel();
+                     * if (ServerToClientModel.WINDOW_ID == newModel) {
+                     * endPosition = nextBlockPosition1;
+                     * readerBuffer.setPosition(endPosition);
+                     * } else {
+                     * break;
+                     * }
+                     * } else {
+                     * break;
+                     * }
+                     * }
                      */
 
-                    window.postMessage(readerBuffer.slice(startPosition, nextBlockPosition));
+                    window.postMessage(readerBuffer.slice(startPosition, endPosition));
                 } else {
                     log.warning("The requested window " + requestedId + " doesn't exist anymore"); // TODO PERF LOG
                     readerBuffer.shiftNextBlock(false);
@@ -162,11 +170,13 @@ public class UIBuilder {
             // Detect if the message is not for the window but for a specific frame
             final BinaryModel binaryModel = readerBuffer.readBinaryModel();
 
-            final ServerToClientModel model = binaryModel.getModel();
-            // FIXME  Need to be fixed
-            //if (ServerToClientModel.WINDOW_ID == model) binaryModel = readerBuffer.readBinaryModel();
+            /*
+             * TODO Need to be tested
+             * if (ServerToClientModel.WINDOW_ID == binaryModel.getModel()) binaryModel =
+             * readerBuffer.readBinaryModel();
+             */
 
-            if (ServerToClientModel.FRAME_ID == model) {
+            if (ServerToClientModel.FRAME_ID == binaryModel.getModel()) {
                 final int requestedId = binaryModel.getIntValue();
                 final PTFrame frame = (PTFrame) getPTObject(requestedId);
                 if (log.isLoggable(Level.FINE)) log.fine("The main terminal send the buffer to frame " + requestedId);
@@ -334,9 +344,11 @@ public class UIBuilder {
         }
     }
 
-    private PTObject unregisterObject(final Integer objectID) {
-        final PTObject ptObject = objectByID.remove(objectID);
-        final UIObject uiObject = widgetIDByObjectID.remove(objectID);
+    private PTObject unregisterObject(final int objectID) {
+        final PTObject ptObject = objectByID.get(objectID);
+        objectByID.remove(objectID);
+        final UIObject uiObject = widgetIDByObjectID.get(objectID);
+        widgetIDByObjectID.remove(objectID);
         if (uiObject != null) objectIDByWidget.remove(uiObject);
         return ptObject;
     }
@@ -383,7 +395,7 @@ public class UIBuilder {
         requestBuilder.send(requestData);
     }
 
-    public PTObject getPTObject(final Integer id) {
+    public PTObject getPTObject(final int id) {
         final PTObject ptObject = objectByID.get(id);
         if (ptObject == null) log.warning("PTObject #" + id + " not found");
         return ptObject;
@@ -391,7 +403,7 @@ public class UIBuilder {
 
     public PTObject getPTObject(final UIObject uiObject) {
         final Integer objectID = objectIDByWidget.get(uiObject);
-        if (objectID != null) return getPTObject(objectID);
+        if (objectID != null) return getPTObject(objectID.intValue());
         return null;
     }
 
@@ -404,7 +416,7 @@ public class UIBuilder {
         this.javascriptAddOnFactories.put(signature, javascriptAddOnFactory);
     }
 
-    public Map<String, JavascriptAddOnFactory> getJavascriptAddOnFactory() {
+    public JsMapFromStringTo<JavascriptAddOnFactory> getJavascriptAddOnFactory() {
         return javascriptAddOnFactories;
     }
 

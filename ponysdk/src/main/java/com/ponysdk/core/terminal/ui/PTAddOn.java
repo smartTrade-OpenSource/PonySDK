@@ -23,7 +23,6 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,6 +35,8 @@ import com.ponysdk.core.terminal.JavascriptAddOnFactory;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
+
+import elemental.js.util.JsMapFromStringTo;
 
 public class PTAddOn extends AbstractPTObject {
 
@@ -72,10 +73,10 @@ public class PTAddOn extends AbstractPTObject {
     }
 
     protected static final JavascriptAddOnFactory getFactory(final UIBuilder uiService, final String signature) {
-        final Map<String, JavascriptAddOnFactory> factories = uiService.getJavascriptAddOnFactory();
+        final JsMapFromStringTo<JavascriptAddOnFactory> factories = uiService.getJavascriptAddOnFactory();
         final JavascriptAddOnFactory factory = factories.get(signature);
         if (factory == null) throw new IllegalArgumentException(
-            "AddOn factory not found for signature: " + signature + ". Addons registered: " + factories.keySet());
+            "AddOn factory not found for signature: " + signature + ". Addons registered: " + factories.keys());
         return factory;
     }
 
