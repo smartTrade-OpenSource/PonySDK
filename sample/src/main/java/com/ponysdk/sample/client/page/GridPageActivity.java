@@ -72,7 +72,7 @@ public class GridPageActivity extends SamplePageActivity implements PClickHandle
         cellListBox = buildIntListBox();
         actionListBox = buildActionListBox();
         styleListBox = buildStyleListBox();
-        PButton update = Element.newPButton("update");
+        final PButton update = Element.newPButton("update");
         update.addClickHandler(this);
 
         container.add(rowListBox);
@@ -93,7 +93,7 @@ public class GridPageActivity extends SamplePageActivity implements PClickHandle
         for (int i = 0; i < 10; i++) {
             r.addItem("" + i, i);
         }
-        r.setSelectedIndex(0);
+        r.selectIndex(0);
         return r;
     }
 
@@ -108,7 +108,7 @@ public class GridPageActivity extends SamplePageActivity implements PClickHandle
         r.addItem("add cell style", 7);
         r.addItem("remove cell style", 8);
         r.addItem("set cell style", 9);
-        r.setSelectedIndex(0);
+        r.selectIndex(0);
         return r;
     }
 
@@ -117,7 +117,7 @@ public class GridPageActivity extends SamplePageActivity implements PClickHandle
         r.addItem("orange", "orange");
         r.addItem("yellow", "yellow");
         r.addItem("bold", "bold");
-        r.setSelectedIndex(0);
+        r.selectIndex(0);
         return r;
     }
 

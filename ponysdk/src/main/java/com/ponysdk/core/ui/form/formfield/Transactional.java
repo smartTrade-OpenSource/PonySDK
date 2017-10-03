@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 2011 PonySDK
+ * Copyright (c) 2017 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
@@ -23,20 +23,9 @@
 
 package com.ponysdk.core.ui.form.formfield;
 
-import com.ponysdk.core.ui.basic.HasPValue;
-import com.ponysdk.core.ui.basic.IsPWidget;
-import com.ponysdk.core.ui.form.validator.FieldValidator;
-import com.ponysdk.core.ui.list.Resetable;
-import com.ponysdk.core.ui.list.Validable;
+public interface Transactional {
 
-public interface FormField extends IsPWidget, Validable, Resetable, Transactional {
+    void commit();
 
-    void addFormFieldListener(final FormFieldListener listener);
-
-    void setValidator(final FieldValidator validator);
-
-    void setEnabled(final boolean enabled);
-
-    HasPValue<?> asHasPValue();
-
+    void rollback();
 }

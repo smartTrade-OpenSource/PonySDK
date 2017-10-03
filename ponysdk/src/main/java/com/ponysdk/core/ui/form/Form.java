@@ -23,17 +23,18 @@
 
 package com.ponysdk.core.ui.form;
 
-import com.ponysdk.core.ui.form.formfield.FormField;
-import com.ponysdk.core.ui.form.validator.ValidationResult;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import com.ponysdk.core.ui.form.formfield.FormField;
+import com.ponysdk.core.ui.form.formfield.Transactional;
+import com.ponysdk.core.ui.form.validator.ValidationResult;
 
 /**
  * A list of {@link com.ponysdk.core.ui.form.formfield.FormField} validated or
  * reset altogether
  */
-public class Form {
+public class Form implements Transactional {
 
     protected final List<FormField> formFields = new ArrayList<>();
 
@@ -62,6 +63,16 @@ public class Form {
 
     public List<FormField> getFormFields() {
         return formFields;
+    }
+
+    @Override
+    public void commit() {
+        formFields.forEach(FormField::commit);
+    }
+
+    @Override
+    public void rollback() {
+        formFields.forEach(FormField::rollback);
     }
 
 }

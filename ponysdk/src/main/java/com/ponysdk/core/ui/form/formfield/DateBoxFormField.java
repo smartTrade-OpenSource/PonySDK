@@ -28,56 +28,32 @@ import java.util.Date;
 
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PDateBox;
-import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 import com.ponysdk.core.ui.form.dataconverter.DataConverter;
 import com.ponysdk.core.ui.form.dataconverter.DateConverter;
 
 public class DateBoxFormField extends AbstractFormField<Date, PDateBox> {
 
-    public DateBoxFormField() {
-        this(false);
-    }
+    protected Date initialValue;
 
-    public DateBoxFormField(final boolean dirtyMode) {
-        this(Element.newPDateBox(), new DateConverter(), dirtyMode);
+    public DateBoxFormField() {
+        this(Element.newPDateBox(), new DateConverter());
     }
 
     public DateBoxFormField(final String dateFormat) {
-        this(dateFormat, false);
-    }
-
-    public DateBoxFormField(final String dateFormat, final boolean dirtyMode) {
-        this(Element.newPDateBox(new SimpleDateFormat(dateFormat)), new DateConverter(new SimpleDateFormat(dateFormat)), dirtyMode);
+        this(Element.newPDateBox(new SimpleDateFormat(dateFormat)), new DateConverter(new SimpleDateFormat(dateFormat)));
     }
 
     public DateBoxFormField(final SimpleDateFormat dateFormat) {
-        this(dateFormat, false);
-    }
-
-    public DateBoxFormField(final SimpleDateFormat dateFormat, final boolean dirtyMode) {
         this(Element.newPDateBox(dateFormat), new DateConverter(dateFormat));
     }
 
     public DateBoxFormField(final PDateBox dateBox) {
-        this(dateBox, false);
-    }
-
-    public DateBoxFormField(final PDateBox dateBox, final boolean dirtyMode) {
-        this(dateBox, new DateConverter(dateBox.getDateFormat()), dirtyMode);
+        this(dateBox, new DateConverter(dateBox.getDateFormat()));
     }
 
     public DateBoxFormField(final PDateBox widget, final DataConverter<String, Date> dataConverter) {
-        this(widget, dataConverter, false);
-    }
-
-    public DateBoxFormField(final PDateBox widget, final DataConverter<String, Date> dataConverter, final boolean dirtyMode) {
-        super(widget, dataConverter, dirtyMode);
-    }
-
-    @Override
-    public void addValueChangeHandler(final PValueChangeHandler<Date> handler) {
-        if (handlers == null) widget.addValueChangeHandler(event -> fireValueChange(getValue()));
-        super.addValueChangeHandler(handler);
+        super(widget, dataConverter);
+        widget.addValueChangeHandler(event -> fireValueChange(getValue()));
     }
 
     @Override
@@ -104,6 +80,16 @@ public class DateBoxFormField extends AbstractFormField<Date, PDateBox> {
     public void setEnabled(final boolean enabled) {
         super.setEnabled(enabled);
         widget.setEnabled(enabled);
+    }
+
+    @Override
+    public void commit() {
+        initialValue = getValue();
+    }
+
+    @Override
+    public void rollback() {
+        setValue(initialValue);
     }
 
 }

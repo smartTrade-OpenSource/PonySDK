@@ -29,6 +29,9 @@ import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PElement;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PWindow;
+import com.ponysdk.core.ui.form.Form;
+import com.ponysdk.core.ui.form.formfield.StringListBoxFormField;
+import com.ponysdk.core.ui.form.formfield.StringTextBoxFormField;
 import com.ponysdk.core.ui.main.EntryPoint;
 
 public class BasicEntryPoint implements EntryPoint {
@@ -39,6 +42,52 @@ public class BasicEntryPoint implements EntryPoint {
     public void start(final UIContext uiContext) {
         uiContext.setClientDataOutput((object, instruction) -> System.err.println(object + "" + instruction));
 
+        final PFlowPanel panel = Element.newPFlowPanel();
+        PWindow.getMain().add(panel);
+
+        final Form form = new Form();
+
+        final StringTextBoxFormField field1 = new StringTextBoxFormField();
+        final StringTextBoxFormField field2 = new StringTextBoxFormField();
+        final StringTextBoxFormField field3 = new StringTextBoxFormField();
+        final StringTextBoxFormField field4 = new StringTextBoxFormField();
+        final StringTextBoxFormField field5 = new StringTextBoxFormField();
+        final StringTextBoxFormField field6 = new StringTextBoxFormField();
+        final StringListBoxFormField field7 = new StringListBoxFormField();
+        field7.addItem("Totot");
+        field7.addItem("Toto");
+        field7.addItem("Toto1");
+        field7.addItem("Toto2");
+        field7.addItem("Toto3");
+        field7.addItem("Toto4");
+        field7.addItem("Toto5");
+
+        form.addFormField(field1);
+        form.addFormField(field2);
+        form.addFormField(field3);
+        form.addFormField(field4);
+        form.addFormField(field5);
+        form.addFormField(field6);
+        form.addFormField(field7);
+
+        panel.add(field1);
+        panel.add(field2);
+        panel.add(field3);
+        panel.add(field4);
+        panel.add(field5);
+        panel.add(field6);
+        panel.add(field7);
+
+        final PButton buttonC = Element.newPButton("Commit");
+        final PButton buttonR = Element.newPButton("Rollback");
+
+        panel.add(buttonC);
+        panel.add(buttonR);
+
+        buttonC.addClickHandler(e -> form.commit());
+        buttonR.addClickHandler(e -> form.rollback());
+
+        if (true) return;
         // PRootPanel.get().clear(true);
 
         // final long start = System.currentTimeMillis();

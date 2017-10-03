@@ -1,16 +1,18 @@
+
 package com.ponysdk.core.ui.datagrid.impl;
+
+import java.util.function.Function;
 
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PLabel;
 
-import java.util.function.Function;
-
 public class PLabelCellRenderer<DataType> extends TypedCellRenderer<DataType, PLabel> {
 
+    private static final String EMPTY = "";
     private final Function<DataType, String> transform;
 
     public PLabelCellRenderer() {
-        this(String::valueOf);
+        this(value -> value != null ? String.valueOf(value) : EMPTY);
     }
 
     public PLabelCellRenderer(final Function<DataType, String> transform) {
@@ -30,8 +32,7 @@ public class PLabelCellRenderer<DataType> extends TypedCellRenderer<DataType, PL
 
     @Override
     protected void reset0(final PLabel widget) {
-        if (widget != null)
-            widget.setText("");
+        if (widget != null) widget.setText(EMPTY);
     }
 
 }

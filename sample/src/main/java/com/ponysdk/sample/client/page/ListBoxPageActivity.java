@@ -64,16 +64,16 @@ public class ListBoxPageActivity extends SamplePageActivity {
 
         final PButton selectedRole = Element.newPButton("Selected roles [1,2]");
         selectedRole.addClickHandler(event -> {
-            roleListBox.setSelectedValue(1);
-            roleListBox.setSelectedValue(2);
+            roleListBox.selectValue(1);
+            roleListBox.selectValue(2);
 
             PNotificationManager.showHumanizedNotification(getView().asWidget().getWindow(),
                 "Selected items " + roleListBox.getSelectedItems());
         });
         final PButton unSelectedRole = Element.newPButton("Selected roles [1,2]");
         unSelectedRole.addClickHandler(event -> {
-            roleListBox.setSelectedValue(1, false);
-            roleListBox.setSelectedValue(2, false);
+            roleListBox.selectValue(1, false);
+            roleListBox.selectValue(2, false);
             PNotificationManager.showHumanizedNotification(getView().asWidget().getWindow(),
                 "Unselected items " + roleListBox.getSelectedItems());
         });
