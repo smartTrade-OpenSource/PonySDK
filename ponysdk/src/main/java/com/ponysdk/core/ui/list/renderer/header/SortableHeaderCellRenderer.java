@@ -85,7 +85,7 @@ public class SortableHeaderCellRenderer implements Queriable, HeaderCellRenderer
         title.removeStyleName(HeaderSortingHelper.getAssociatedStyleName(sortingType));
         sortingType = newSortingType;
         title.addStyleName(HeaderSortingHelper.getAssociatedStyleName(newSortingType));
-        if (SortingType.NONE != newSortingType) {
+        if (filterListener != null && SortingType.NONE != newSortingType) {
             filterListener.onSort(this);
         }
     }
