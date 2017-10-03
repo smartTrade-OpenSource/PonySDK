@@ -112,28 +112,25 @@ public class UIBuilder {
                 final PTWindow window = PTWindowManager.getWindow(requestedId);
                 if (window != null && window.isReady()) {
                     final int startPosition = readerBuffer.getPosition();
-                    final int endPosition = nextBlockPosition;
+                    int endPosition = nextBlockPosition;
 
-                    /*
-                     * TODO Need to be tested
-                     * // Concat multiple messages for the same window
-                     * readerBuffer.setPosition(endPosition);
-                     * while (readerBuffer.hasEnoughKeyBytes()) {
-                     * final int nextBlockPosition1 = readerBuffer.shiftNextBlock(true);
-                     * if (nextBlockPosition1 != ReaderBuffer.NOT_FULL_BUFFER_POSITION) {
-                     * final BinaryModel newBinaryModel = readerBuffer.readBinaryModel();
-                     * final ServerToClientModel newModel = newBinaryModel.getModel();
-                     * if (ServerToClientModel.WINDOW_ID == newModel) {
-                     * endPosition = nextBlockPosition1;
-                     * readerBuffer.setPosition(endPosition);
-                     * } else {
-                     * break;
-                     * }
-                     * } else {
-                     * break;
-                     * }
-                     * }
-                     */
+                    // Concat multiple messages for the same window
+                    readerBuffer.setPosition(endPosition);
+                    while (readerBuffer.hasEnoughKeyBytes()) {
+                        final int nextBlockPosition1 = readerBuffer.shiftNextBlock(true);
+                        if (nextBlockPosition1 != ReaderBuffer.NOT_FULL_BUFFER_POSITION) {
+                            final BinaryModel newBinaryModel = readerBuffer.readBinaryModel();
+                            final ServerToClientModel newModel = newBinaryModel.getModel();
+                            if (ServerToClientModel.WINDOW_ID == newModel) {
+                                endPosition = nextBlockPosition1;
+                                readerBuffer.setPosition(endPosition);
+                            } else {
+                                break;
+                            }
+                        } else {
+                            break;
+                        }
+                    }
 
                     window.postMessage(readerBuffer.slice(startPosition, endPosition));
                 } else {
@@ -168,13 +165,9 @@ public class UIBuilder {
 
         while (readerBuffer.hasEnoughKeyBytes()) {
             // Detect if the message is not for the window but for a specific frame
-            final BinaryModel binaryModel = readerBuffer.readBinaryModel();
+            BinaryModel binaryModel = readerBuffer.readBinaryModel();
 
-            /*
-             * TODO Need to be tested
-             * if (ServerToClientModel.WINDOW_ID == binaryModel.getModel()) binaryModel =
-             * readerBuffer.readBinaryModel();
-             */
+            if (ServerToClientModel.WINDOW_ID == binaryModel.getModel()) binaryModel = readerBuffer.readBinaryModel();
 
             if (ServerToClientModel.FRAME_ID == binaryModel.getModel()) {
                 final int requestedId = binaryModel.getIntValue();
