@@ -93,8 +93,10 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
         try {
             final UIContext uiContext = new UIContext(context);
+            final CommunicationSanityChecker communicationSanityChecker = new CommunicationSanityChecker(uiContext);
             if (log.isInfoEnabled()) log.info("Creating a new {}", uiContext);
             context.setUIContext(uiContext);
+            context.setCommunicationSanityChecker(communicationSanityChecker);
             application.registerUIContext(uiContext);
 
             uiContext.begin();
@@ -110,6 +112,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
             }
 
             applicationManager.startApplication(context);
+            communicationSanityChecker.start();
         } catch (final Exception e) {
             log.error("Cannot process WebSocket instructions", e);
         }
@@ -136,7 +139,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         if (isLiving()) {
             if (monitor != null) monitor.onMessageReceived(WebSocket.this, text);
             try {
-                uiContext.notifyMessageReceived();
+                context.getCommunicationSanityChecker().onMessageReceived();
 
                 if (ClientToServerModel.HEARTBEAT.toStringValue().equals(text)) {
                     if (log.isDebugEnabled()) log.debug("Heartbeat received from terminal #{}", uiContext.getID());

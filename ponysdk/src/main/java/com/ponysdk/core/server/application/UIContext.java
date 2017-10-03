@@ -48,7 +48,6 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.AlreadyDestroyedApplication;
-import com.ponysdk.core.server.servlet.CommunicationSanityChecker;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.server.stm.TxnContext;
 import com.ponysdk.core.ui.basic.DataListener;
@@ -101,7 +100,6 @@ public class UIContext {
 
     private final PCookies cookies = new PCookies();
 
-    private final CommunicationSanityChecker communicationSanityChecker;
     private final List<ContextDestroyListener> destroyListeners = new ArrayList<>();
     private final TxnContext context;
     private final Set<DataListener> listeners = Collections.newSetFromMap(new ConcurrentHashMap<>());
@@ -116,9 +114,6 @@ public class UIContext {
         this.application = context.getApplication();
         this.ID = uiContextCount.incrementAndGet();
         this.context = context;
-
-        this.communicationSanityChecker = new CommunicationSanityChecker(this);
-        this.communicationSanityChecker.start();
     }
 
     public static final UIContext get() {
@@ -404,10 +399,6 @@ public class UIContext {
         return application;
     }
 
-    public void notifyMessageReceived() {
-        communicationSanityChecker.onMessageReceived();
-    }
-
     public void onDestroy() {
         begin();
         try {
@@ -430,7 +421,6 @@ public class UIContext {
                     log.error("Exception while destroying UIContext #" + getID(), e);
                 }
             });
-            communicationSanityChecker.stop();
             context.close();
         } finally {
             end();
@@ -458,7 +448,6 @@ public class UIContext {
                 log.error("Exception while destroying UIContext #" + getID(), e);
             }
         });
-        communicationSanityChecker.stop();
         application.unregisterUIContext(ID);
     }
 
@@ -512,10 +501,6 @@ public class UIContext {
     @Override
     public String toString() {
         return "UIContext [ID=" + ID + ", living=" + living + ", ApplicationID=" + application.getId() + "]";
-    }
-
-    public void enableCommunicationChecker(final boolean enable) {
-        communicationSanityChecker.enableCommunicationChecker(enable);
     }
 
     public void addPingValue(final long pingValue) {
