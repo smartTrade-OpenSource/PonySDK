@@ -34,7 +34,6 @@ import com.ponysdk.core.ui.main.EntryPoint;
 
 public class Main {
 
-    @SuppressWarnings("unchecked")
     public static void main(final String[] args) throws Exception {
         final ApplicationManagerOption applicationManagerOption = new ApplicationManagerOption();
         applicationManagerOption.setApplicationID(System.getProperty(ApplicationManagerOption.APPLICATION_ID, "ID"));

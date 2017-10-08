@@ -143,8 +143,6 @@ task gwtc(dependsOn: classes, type: JavaExec) {
         Runtime.getRuntime().availableProcessors(),
         'com.ponysdk.core.PonyTerminal',
         '-generateJsInteropExports'
-        //'-style', 'DETAILED',
-        //'-optimize', '0'
     ]
 
     maxHeapSize = '512M'

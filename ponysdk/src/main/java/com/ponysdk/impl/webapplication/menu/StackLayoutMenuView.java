@@ -205,7 +205,7 @@ public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView 
         selectionHandlers.remove(handler);
     }
 
-    private class Node {
+    private static class Node {
 
         private final String name;
         private final Node parent;

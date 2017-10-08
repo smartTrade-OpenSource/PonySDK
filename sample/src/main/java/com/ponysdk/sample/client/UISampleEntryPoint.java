@@ -108,11 +108,13 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         mainLabel = Element.newPLabel("Can be modified by anybody");
         PWindow.getMain().add(mainLabel);
 
-        testPerf();
+        //testPerf();
 
-        if (true) return;
+        
 
         PWindow.getMain().add(createNewGridSystem());
+
+        if (true) return;
 
         testPAddon();
 

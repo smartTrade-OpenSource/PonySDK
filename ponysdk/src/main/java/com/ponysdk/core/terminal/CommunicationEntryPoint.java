@@ -36,7 +36,7 @@ public class CommunicationEntryPoint implements EntryPoint {
     public void onModuleLoad() {
         if (useExternalStart()) {
             if (log.isLoggable(Level.INFO))
-                log.info("'onPonySDKModuleLoaded' is detected, PonySDK must be instanciate by an external javascript");
+                log.info("'onPonySDKModuleLoaded' is detected, PonySDK must be instantiated by an external javascript");
             onModuleLoaded();
         } else {
             if (log.isLoggable(Level.INFO)) log.info("Create PonySDK using the default entry point");

@@ -237,18 +237,13 @@ public enum ServerToClientModel {
     MOVE_TO_Y(ValueTypeModel.DOUBLE),
 
     // Old, useless or not used
-    POPUP_GLASS_STYLE_NAME(ValueTypeModel.INTEGER),
-    DISCLOSURE_PANEL_OPEN_IMG(ValueTypeModel.INTEGER),
-    DISCLOSURE_PANEL_CLOSE_IMG(ValueTypeModel.INTEGER),
-    SUGGESTIONS(ValueTypeModel.STRING),
-    DEFAULT_SUGGESTIONS(ValueTypeModel.STRING),
-    TEXTBOX_ID(ValueTypeModel.INTEGER);
+    POPUP_GLASS_STYLE_NAME(ValueTypeModel.INTEGER);
 
     private static final ServerToClientModel[] VALUES = ServerToClientModel.values();
 
     private final ValueTypeModel type;
 
-    private ServerToClientModel(final ValueTypeModel size) {
+    ServerToClientModel(final ValueTypeModel size) {
         this.type = size;
     }
 

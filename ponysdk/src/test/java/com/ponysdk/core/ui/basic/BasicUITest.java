@@ -23,17 +23,16 @@
 
 package com.ponysdk.core.ui.basic;
 
-import static org.junit.Assert.assertEquals;
-
+import com.ponysdk.core.model.PCheckBoxState;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
+import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.ponysdk.core.model.PCheckBoxState;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
-
-public class TestUnit extends PSuite {
+public class BasicUITest extends PSuite {
 
     @Test
     public void testLabel() {
@@ -44,12 +43,23 @@ public class TestUnit extends PSuite {
     @Test
     public void testListbox() {
         final PListBox listBox = Element.newPListBox();
-        listBox.addItem("Item1");
-        listBox.addItem("Item2");
-        listBox.addItem("Item3");
-        listBox.addItem("Item4");
-        listBox.addItem("Item5");
-        Assert.assertEquals(5, listBox.getItemCount());
+
+        int itemCount = 10;
+
+        for (int i = 0; i < itemCount; i++) {
+            listBox.addItem("Item" + i);
+        }
+
+        Assert.assertEquals(itemCount, listBox.getItemCount());
+
+        for (int i = 0; i < itemCount; i++) {
+            Assert.assertEquals("Item" + i, listBox.getItem(i));
+        }
+
+        listBox.setSelectedIndex(itemCount - 1);
+        Assert.assertEquals("Item" + (itemCount - 1), listBox.getItem(itemCount - 1));
+
+        //Assert.assertNull(listBox.getSelectedValue()); //TODO nciaravola behaviour ?
     }
 
     @Test
@@ -59,15 +69,11 @@ public class TestUnit extends PSuite {
         button.setText("test2");
         Assert.assertEquals("test2", button.getText());
 
-        final PClickEvent trueEvent = new PClickEvent(button);
-
+        final PClickEvent event = new PClickEvent(button);
         final PClickHandler handler = Mockito.mock(PClickHandler.class);
         button.addClickHandler(handler);
-
-        button.addClickHandler(event -> assertEquals(trueEvent, event));
-
-        button.fireEvent(trueEvent);
-        Mockito.verify(handler);
+        button.fireEvent(event);
+        Mockito.verify(handler,Mockito.times(1)).onClick(event);
     }
 
     @Test
@@ -77,5 +83,18 @@ public class TestUnit extends PSuite {
         checkBox.setState(PCheckBoxState.CHECKED);
         Assert.assertEquals(PCheckBoxState.CHECKED, checkBox.getState());
     }
+
+    @Test
+    public void testTextBox() {
+        final PTextBox textBox = Element.newPTextBox("test");
+        Assert.assertEquals("test", textBox.getText());
+        final PValueChangeHandler<String> handler = Mockito.mock(PValueChangeHandler.class);
+        textBox.addValueChangeHandler(handler);
+        PValueChangeEvent<String> event = new PValueChangeEvent<>(this, "test2");
+        textBox.fireOnValueChange(event);
+        Mockito.verify(handler,Mockito.times(1)).onValueChange(event);
+        Assert.assertEquals("test2", textBox.getText());
+    }
+
 
 }

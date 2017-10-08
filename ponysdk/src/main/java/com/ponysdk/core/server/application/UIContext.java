@@ -23,47 +23,29 @@
 
 package com.ponysdk.core.server.application;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.ReentrantLock;
-
-import javax.json.JsonNumber;
-import javax.json.JsonObject;
-import javax.json.JsonString;
-import javax.json.JsonValue;
-import javax.json.JsonValue.ValueType;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.AlreadyDestroyedApplication;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.server.stm.TxnContext;
-import com.ponysdk.core.ui.basic.DataListener;
-import com.ponysdk.core.ui.basic.PCookies;
-import com.ponysdk.core.ui.basic.PHistory;
-import com.ponysdk.core.ui.basic.PObject;
-import com.ponysdk.core.ui.basic.PWindow;
-import com.ponysdk.core.ui.eventbus.BroadcastEventHandler;
-import com.ponysdk.core.ui.eventbus.Event;
-import com.ponysdk.core.ui.eventbus.EventHandler;
-import com.ponysdk.core.ui.eventbus.HandlerRegistration;
-import com.ponysdk.core.ui.eventbus.RootEventBus;
-import com.ponysdk.core.ui.eventbus.StreamHandler;
+import com.ponysdk.core.ui.basic.*;
+import com.ponysdk.core.ui.eventbus.*;
 import com.ponysdk.core.ui.eventbus2.EventBus;
 import com.ponysdk.core.ui.statistic.TerminalDataReceiver;
 import com.ponysdk.core.writer.ModelWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.json.JsonNumber;
+import javax.json.JsonObject;
+import javax.json.JsonString;
+import javax.json.JsonValue;
+import javax.json.JsonValue.ValueType;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * <p>
@@ -108,7 +90,7 @@ public class UIContext {
 
     private boolean living = true;
 
-    private final ConcurrentBoundedLinkedQueue<Long> pings = new ConcurrentBoundedLinkedQueue<>(10);
+    private final Latency latency = new Latency(10);
 
     public UIContext(final TxnContext context) {
         this.application = context.getApplication();
@@ -116,56 +98,56 @@ public class UIContext {
         this.context = context;
     }
 
-    public static final UIContext get() {
+    public static UIContext get() {
         return currentContext.get();
     }
 
-    public static final void remove() {
+    public static void remove() {
         currentContext.remove();
     }
 
-    public static final void setCurrent(final UIContext uiContext) {
+    public static void setCurrent(final UIContext uiContext) {
         currentContext.set(uiContext);
     }
 
-    public static final HandlerRegistration addHandler(final Event.Type type, final EventHandler handler) {
+    public static HandlerRegistration addHandler(final Event.Type type, final EventHandler handler) {
         return getRootEventBus().addHandler(type, handler);
     }
 
-    public static final void removeHandler(final Event.Type type, final EventHandler handler) {
+    public static void removeHandler(final Event.Type type, final EventHandler handler) {
         getRootEventBus().removeHandler(type, handler);
     }
 
-    public static final HandlerRegistration addHandlerToSource(final Event.Type type, final Object source,
-                                                               final EventHandler handler) {
+    public static HandlerRegistration addHandlerToSource(final Event.Type type, final Object source,
+                                                         final EventHandler handler) {
         return getRootEventBus().addHandlerToSource(type, source, handler);
     }
 
-    public static final void removeHandlerFromSource(final Event.Type type, final Object source, final EventHandler handler) {
+    public static void removeHandlerFromSource(final Event.Type type, final Object source, final EventHandler handler) {
         getRootEventBus().removeHandlerFromSource(type, source, handler);
     }
 
-    public static final void fireEvent(final Event<? extends EventHandler> event) {
+    public static void fireEvent(final Event<? extends EventHandler> event) {
         getRootEventBus().fireEvent(event);
     }
 
-    public static final void fireEventFromSource(final Event<? extends EventHandler> event, final Object source) {
+    public static void fireEventFromSource(final Event<? extends EventHandler> event, final Object source) {
         getRootEventBus().fireEventFromSource(event, source);
     }
 
-    public static final void addHandler(final BroadcastEventHandler handler) {
+    public static void addHandler(final BroadcastEventHandler handler) {
         getRootEventBus().addHandler(handler);
     }
 
-    public static final void removeHandler(final BroadcastEventHandler handler) {
+    public static void removeHandler(final BroadcastEventHandler handler) {
         getRootEventBus().removeHandler(handler);
     }
 
-    public static final RootEventBus getRootEventBus() {
+    public static RootEventBus getRootEventBus() {
         return get().rootEventBus;
     }
 
-    public static final EventBus getNewEventBus() {
+    public static EventBus getNewEventBus() {
         return get().newEventBus;
     }
 
@@ -258,7 +240,7 @@ public class UIContext {
 
                     if (jsonObject.containsKey(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())) {
                         final int parentObjectID = jsonObject.getJsonNumber(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())
-                            .intValue();
+                                .intValue();
                         final PObject gcObject = pObjectWeakReferences.get(parentObjectID);
                         log.warn(String.valueOf(gcObject));
                     }
@@ -319,7 +301,8 @@ public class UIContext {
         final ModelWriter writer = Txn.get().getWriter();
         writer.beginObject();
         final PObject pObject = getObject(objectID);
-        if (!PWindow.isMain(pObject.getWindow())) writer.write(ServerToClientModel.WINDOW_ID, pObject.getWindow().getID());
+        if (!PWindow.isMain(pObject.getWindow()))
+            writer.write(ServerToClientModel.WINDOW_ID, pObject.getWindow().getID());
         if (pObject.getFrame() != null) writer.write(ServerToClientModel.FRAME_ID, pObject.getFrame().getID());
         writer.write(ServerToClientModel.TYPE_ADD_HANDLER, objectID);
         writer.write(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST.getValue());
@@ -360,10 +343,8 @@ public class UIContext {
      * If the value passed in is null, this has the same effect as calling
      * <code>removeAttribute()<code>.
      *
-     * @param name
-     *            the name to which the object is bound; cannot be null
-     * @param value
-     *            the object to be bound
+     * @param name  the name to which the object is bound; cannot be null
+     * @param value the object to be bound
      */
     public void setAttribute(final String name, final Object value) {
         if (value == null) removeAttribute(name);
@@ -375,8 +356,7 @@ public class UIContext {
      * the session does not have an object bound with the specified name, this
      * method does nothing.
      *
-     * @param name
-     *            the name of the object to remove from this session
+     * @param name the name of the object to remove from this session
      */
 
     public Object removeAttribute(final String name) {
@@ -387,8 +367,7 @@ public class UIContext {
      * Returns the object bound with the specified name in this session, or <code>null</code> if no
      * object is bound under the name.
      *
-     * @param name
-     *            a string specifying the name of the object
+     * @param name a string specifying the name of the object
      * @return the object with the specified name
      */
     public <T> T getAttribute(final String name) {
@@ -448,7 +427,7 @@ public class UIContext {
                 log.error("Exception while destroying UIContext #" + getID(), e);
             }
         });
-        application.unregisterUIContext(ID);
+        application.deregisterUIContext(ID);
     }
 
     public void sendHeartBeat() {
@@ -504,28 +483,36 @@ public class UIContext {
     }
 
     public void addPingValue(final long pingValue) {
-        pings.add(pingValue);
+        latency.add(pingValue);
     }
 
-    /**
-     * Get an average latency from the last 10 measurements
-     */
     public double getLatency() {
-        return pings.stream().mapToLong(Long::longValue).average().orElse(0);
+        return latency.getValue();
     }
 
-    private static final class ConcurrentBoundedLinkedQueue<E> extends ConcurrentLinkedQueue<E> {
+    private static final class Latency {
 
-        private final int limit;
+        private int index = 0;
+        private final long[] values;
 
-        public ConcurrentBoundedLinkedQueue(final int limit) {
-            this.limit = limit;
+        private Latency(int size) {
+            values = new long[size];
+            for (int i = 0; i < values.length; i++) {
+                values[i] = 0L;
+            }
         }
 
-        @Override
-        public boolean add(final E e) {
-            if (this.size() == this.limit) this.remove();
-            return super.add(e);
+        public void add(final long value) {
+            values[index++] = value;
+            if (index >= values.length) index = 0;
+        }
+
+        public double getValue() {
+            double average = 0;
+            for (long value : values) {
+                average += value;
+            }
+            return average / values.length;
         }
     }
 

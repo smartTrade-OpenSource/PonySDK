@@ -45,14 +45,11 @@ public enum PAlignment {
 
     private static final PAlignment[] VALUES = PAlignment.values();
 
-    private PAlignment() {
-    }
-
     public final byte getValue() {
         return (byte) ordinal();
     }
 
-    public static final PAlignment fromRawValue(final byte rawValue) {
+    public static PAlignment fromRawValue(final byte rawValue) {
         return VALUES[rawValue];
     }
 

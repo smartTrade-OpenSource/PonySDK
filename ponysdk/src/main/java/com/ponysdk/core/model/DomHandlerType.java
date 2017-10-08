@@ -47,14 +47,11 @@ public enum DomHandlerType {
 
     private static final DomHandlerType[] VALUES = DomHandlerType.values();
 
-    private DomHandlerType() {
-    }
-
     public final byte getValue() {
         return (byte) ordinal();
     }
 
-    public static final DomHandlerType fromRawValue(final byte rawValue) {
+    public static DomHandlerType fromRawValue(final byte rawValue) {
         return VALUES[rawValue];
     }
 

@@ -163,18 +163,14 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
         putModelKey(model);
 
         try {
-            if (value != null) {
-                final byte[] bytes = value.getBytes(ENCODING_CHARSET);
-                final int length = bytes.length;
-                if (length <= MAX_UNSIGNED_BYTE_VALUE) {
-                    putUnsignedByte((short) length);
-                    put(bytes);
-                } else {
-                    throw new IllegalArgumentException("Message too big (" + value.length() + " > " + MAX_UNSIGNED_BYTE_VALUE
-                            + "), use a String instead : " + value.substring(0, Math.min(value.length(), 100)) + "...");
-                }
+            final byte[] bytes = value.getBytes(ENCODING_CHARSET);
+            final int length = bytes.length;
+            if (length <= MAX_UNSIGNED_BYTE_VALUE) {
+                putUnsignedByte((short) length);
+                put(bytes);
             } else {
-                putUnsignedByte((short) 0);
+                throw new IllegalArgumentException("Message too big (" + value.length() + " > " + MAX_UNSIGNED_BYTE_VALUE
+                        + "), use a String instead : " + value.substring(0, Math.min(value.length(), 100)) + "...");
             }
         } catch (final UnsupportedEncodingException e) {
             throw new IllegalArgumentException("Cannot convert message : " + value);
@@ -187,18 +183,14 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
         putModelKey(model);
 
         try {
-            if (value != null) {
-                final byte[] bytes = value.getBytes(ENCODING_CHARSET);
-                final int length = bytes.length;
-                if (length <= MAX_UNSIGNED_BYTE_VALUE) {
-                    putUnsignedByte((short) length);
-                    put(bytes);
-                } else {
-                    throw new IllegalArgumentException("Message too big (" + value.length() + " > " + MAX_UNSIGNED_BYTE_VALUE
-                            + "), use a String instead : " + value.substring(0, Math.min(value.length(), 100)) + "...");
-                }
+            final byte[] bytes = value.getBytes(ENCODING_CHARSET);
+            final int length = bytes.length;
+            if (length <= MAX_UNSIGNED_BYTE_VALUE) {
+                putUnsignedByte((short) length);
+                put(bytes);
             } else {
-                putUnsignedByte((short) 0);
+                throw new IllegalArgumentException("Message too big (" + value.length() + " > " + MAX_UNSIGNED_BYTE_VALUE
+                        + "), use a String instead : " + value.substring(0, Math.min(value.length(), 100)) + "...");
             }
         } catch (final UnsupportedEncodingException e) {
             throw new IllegalArgumentException("Cannot convert message : " + value);
@@ -235,14 +227,8 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
         try {
             if (value != null) {
                 final byte[] bytes = value.getBytes(ENCODING_CHARSET);
-                final int length = bytes.length;
-                if (length <= Integer.MAX_VALUE) {
-                    putInt(bytes.length);
-                    put(bytes);
-                } else {
-                    throw new IllegalArgumentException("Message too big (" + value.length() + " > " + Integer.MAX_VALUE
-                            + "), can't be sent : " + value.substring(0, Math.min(value.length(), 100)) + "...");
-                }
+                putInt(bytes.length);
+                put(bytes);
             } else {
                 putInt(0);
             }
