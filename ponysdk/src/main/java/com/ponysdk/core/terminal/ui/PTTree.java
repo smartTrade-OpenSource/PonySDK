@@ -69,16 +69,16 @@ public class PTTree extends PTWidget<Tree> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.ANIMATION.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.ANIMATION == model) {
             uiObject.setAnimationEnabled(binaryModel.getBooleanValue());
             return true;
-        } else if (ServerToClientModel.SELECTED_INDEX.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.SELECTED_INDEX == model) {
             final int selectedItemId = binaryModel.getIntValue();
             if (selectedItemId != -1) uiObject.setSelectedItem(asWidget(selectedItemId, uiBuilder), false);
             else uiObject.setSelectedItem(null, false);
             return true;
-        } else if (ServerToClientModel.CLEAR.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.CLEAR == model) {
             uiObject.clear();
             return true;
         } else {

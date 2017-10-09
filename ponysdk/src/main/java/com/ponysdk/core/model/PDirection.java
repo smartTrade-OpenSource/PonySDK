@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 2011 PonySDK
+ * Copyright (c) 2017 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
@@ -21,22 +21,26 @@
  * the License.
  */
 
-package com.ponysdk.core.terminal.socket;
+package com.ponysdk.core.model;
 
-import elemental.events.MessageEvent;
-import elemental.html.ArrayBuffer;
+public enum PDirection {
 
-public class ArrayBufferReader implements MessageReader {
+    NORTH,
+    EAST,
+    SOUTH,
+    WEST,
+    CENTER,
+    LINE_START,
+    LINE_END;
 
-    private final MessageSender messageSender;
+    private static final PDirection[] VALUES = PDirection.values();
 
-    public ArrayBufferReader(final MessageSender messageSender) {
-        this.messageSender = messageSender;
+    public byte getValue() {
+        return (byte) ordinal();
     }
 
-    @Override
-    public void read(final MessageEvent event) {
-        messageSender.read((ArrayBuffer) event.getData());
+    public static final PDirection fromRawValue(final byte rawValue) {
+        return VALUES[rawValue];
     }
 
 }

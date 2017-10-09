@@ -25,7 +25,6 @@ package com.ponysdk.core.terminal.ui;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -52,25 +51,22 @@ public class PTAddOnComposite extends PTAddOn {
     private boolean initialized;
 
     @Override
-    protected void doCreate(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
+    protected void doCreate(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
         // ServerToClientModel.FACTORY
         final String signature = buffer.readBinaryModel().getStringValue();
-        final Map<String, JavascriptAddOnFactory> factories = uiService.getJavascriptAddOnFactory();
-        final JavascriptAddOnFactory factory = factories.get(signature);
-        if (factory == null) throw new IllegalArgumentException(
-            "AddOn factory not found for signature: " + signature + ". Addons registered: " + factories.keySet());
+        final JavascriptAddOnFactory factory = getFactory(uiBuilder, signature);
 
         final JSONObject params = new JSONObject();
         params.put("id", new JSONNumber(objectId));
 
         BinaryModel binaryModel = buffer.readBinaryModel();
-        if (ServerToClientModel.NATIVE.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.NATIVE == binaryModel.getModel()) {
             params.put("args", binaryModel.getJsonObject());
             binaryModel = buffer.readBinaryModel();
         }
 
         final int widgetID = binaryModel.getIntValue();
-        final PTWidget<?> object = (PTWidget<?>) uiService.getPTObject(widgetID);
+        final PTWidget<?> object = (PTWidget<?>) uiBuilder.getPTObject(widgetID);
         widget = object.uiObject;
         final Element element = widget.getElement();
         params.put("widgetID", new JSONString(String.valueOf(widgetID)));
@@ -85,7 +81,7 @@ public class PTAddOnComposite extends PTAddOn {
                     addOn.onDetached();
                 }
             } catch (final JavaScriptException e) {
-                log.log(Level.SEVERE, e.getMessage(), e);
+                log.log(Level.SEVERE, "PTAddOnComposite #" + getObjectID() + " (" + signature + ") " + e.getMessage(), e);
             }
         });
 
@@ -95,7 +91,7 @@ public class PTAddOnComposite extends PTAddOn {
             if (widget.isAttached()) addOn.onAttached();
             initialized = true;
         } catch (final JavaScriptException e) {
-            log.log(Level.SEVERE, e.getMessage(), e);
+            log.log(Level.SEVERE, "PTAddOnComposite #" + getObjectID() + " (" + signature + ") " + e.getMessage(), e);
         }
     }
 

@@ -159,11 +159,11 @@ public class UserAgent implements Serializable {
         final UserAgent other = (UserAgent) obj;
         if (browser == null) {
             if (other.browser != null) return false;
-        } else if (!browser.equals(other.browser)) return false;
+        } else if (browser != other.browser) return false;
         if (id != other.id) return false;
         if (operatingSystem == null) {
             if (other.operatingSystem != null) return false;
-        } else if (!operatingSystem.equals(other.operatingSystem)) return false;
+        } else if (operatingSystem != other.operatingSystem) return false;
         return true;
     }
 

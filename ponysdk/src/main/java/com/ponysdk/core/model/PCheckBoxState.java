@@ -29,15 +29,14 @@ public enum PCheckBoxState {
     UNCHECKED,
     INDETERMINATE;
 
-    private PCheckBoxState() {
-    }
+    private static final PCheckBoxState[] VALUES = PCheckBoxState.values();
 
     public final byte getValue() {
         return (byte) ordinal();
     }
 
-    public static final PCheckBoxState fromByte(final byte byteValue) {
-        return PCheckBoxState.values()[byteValue];
+    public static final PCheckBoxState fromRawValue(final byte rawValue) {
+        return VALUES[rawValue];
     }
 
 }

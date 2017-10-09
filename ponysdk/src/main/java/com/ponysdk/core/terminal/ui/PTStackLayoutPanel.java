@@ -68,14 +68,14 @@ public class PTStackLayoutPanel extends PTWidget<StackLayoutPanel> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.WIDGET_ID.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.WIDGET_ID == model) {
             uiObject.showWidget(asWidget(binaryModel.getIntValue(), uiBuilder));
             return true;
-        } else if (ServerToClientModel.ANIMATE.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.ANIMATE == model) {
             uiObject.animate(binaryModel.getIntValue());
             return true;
-        } else if (ServerToClientModel.ANIMATION_DURATION.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.ANIMATION_DURATION == model) {
             uiObject.setAnimationDuration(binaryModel.getIntValue());
             return true;
         } else {
@@ -85,14 +85,14 @@ public class PTStackLayoutPanel extends PTWidget<StackLayoutPanel> {
 
     @Override
     public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
-        if (HandlerModel.HANDLER_SELECTION.equals(handlerModel)) {
+        if (HandlerModel.HANDLER_SELECTION == handlerModel) {
             uiObject.addSelectionHandler(event -> {
                 // FIXME not read on the server side
                 final PTInstruction eventInstruction = new PTInstruction(getObjectID());
                 eventInstruction.put(ClientToServerModel.HANDLER_SELECTION, event.getSelectedItem());
                 uiBuilder.sendDataToServer(uiObject, eventInstruction);
             });
-        } else if (HandlerModel.HANDLER_BEFORE_SELECTION.equals(handlerModel)) {
+        } else if (HandlerModel.HANDLER_BEFORE_SELECTION == handlerModel) {
             uiObject.addBeforeSelectionHandler(event -> {
                 // FIXME not read on the server side
                 final PTInstruction eventInstruction = new PTInstruction(getObjectID());
@@ -106,9 +106,9 @@ public class PTStackLayoutPanel extends PTWidget<StackLayoutPanel> {
 
     @Override
     public void removeHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
-        if (HandlerModel.HANDLER_SELECTION.equals(handlerModel)) {
+        if (HandlerModel.HANDLER_SELECTION == handlerModel) {
             // TODO Remove HANDLER_SELECTION
-        } else if (HandlerModel.HANDLER_BEFORE_SELECTION.equals(handlerModel)) {
+        } else if (HandlerModel.HANDLER_BEFORE_SELECTION == handlerModel) {
             // TODO Remove HANDLER_BEFORE_SELECTION
         } else {
             super.removeHandler(buffer, handlerModel);

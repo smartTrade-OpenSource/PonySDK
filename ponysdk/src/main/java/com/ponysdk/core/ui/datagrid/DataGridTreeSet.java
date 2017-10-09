@@ -13,11 +13,6 @@ public class DataGridTreeSet<E> extends TreeSet<E> {
 
     private final Map<Object, E> map = new HashMap<>();
 
-    class Structure {
-
-        E data;
-        int index;
-    }
 
     public DataGridTreeSet(final Comparator<E> comparator, final Function<E, ?> keyProvider) {
         super((o1, o2) -> {

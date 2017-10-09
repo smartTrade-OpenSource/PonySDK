@@ -1,12 +1,12 @@
 ext {
-    gwtVersion = '2.8.0'
+    gwtVersion = '2.8.1'
     
     jettyVersion = '9.4.6.v20170531'
     springVersion = '4.2.9.RELEASE'
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '3.5'
+    gradleVersion = '4.2.1'
 }
 
 allprojects{
@@ -22,7 +22,7 @@ subprojects {
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
 
-    version = '2.7.4'
+    version = '2.7.8'
 
     repositories {
         mavenCentral()

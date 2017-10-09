@@ -156,6 +156,7 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
 
     @Override
     public void onClientData(final JsonObject instruction) {
+        if (!isVisible()) return;
         if (instruction.containsKey(ClientToServerModel.HANDLER_RESIZE.toStringValue())) {
             final PLayoutResizeEvent resizeEvent = new PLayoutResizeEvent(this);
             final JsonArray array = instruction.getJsonArray(ClientToServerModel.HANDLER_RESIZE.toStringValue());

@@ -177,7 +177,7 @@ public class DataGrid<TYPE> implements IsPWidget {
             w = column.getCellRenderer().render(data);
             view.setCell(r, c, w);
         } else {
-            w = column.getCellRenderer().update(data, w);
+            column.getCellRenderer().update(data, w);
         }
     }
 

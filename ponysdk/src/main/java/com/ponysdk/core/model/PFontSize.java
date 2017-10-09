@@ -33,15 +33,14 @@ public enum PFontSize {
     XX_LARGE,
     XX_SMALL;
 
-    private PFontSize() {
-    }
+    private static final PFontSize[] VALUES = PFontSize.values();
 
     public final byte getValue() {
         return (byte) ordinal();
     }
 
-    public static final PFontSize fromByte(final byte byteValue) {
-        return PFontSize.values()[byteValue];
+    public static final PFontSize fromRawValue(final byte rawValue) {
+        return VALUES[rawValue];
     }
 
 }

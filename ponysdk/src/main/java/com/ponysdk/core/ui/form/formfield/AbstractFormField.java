@@ -55,6 +55,10 @@ public abstract class AbstractFormField<T, W extends IsPWidget> implements FormF
 
     private boolean enabled = true;
 
+    public AbstractFormField() {
+        this(null);
+    }
+
     public AbstractFormField(final W widget) {
         this(widget, null);
     }
@@ -72,7 +76,7 @@ public abstract class AbstractFormField<T, W extends IsPWidget> implements FormF
             this.addValueChangeHandler(dirtyModeHandler);
         }
 
-        this.widget.asWidget().addDestroyListener(event -> onDestroy());
+        if (this.widget != null) this.widget.asWidget().addDestroyListener(event -> onDestroy());
     }
 
     private void onDestroy() {

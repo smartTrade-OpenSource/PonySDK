@@ -23,14 +23,11 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.ponysdk.core.model.PHorizontalAlignment;
-import com.ponysdk.core.model.PVerticalAlignment;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
+import com.ponysdk.core.terminal.ui.converter.GWTConverter;
 
 public class PTHorizontalPanel extends PTCellPanel<HorizontalPanel> {
 
@@ -42,7 +39,7 @@ public class PTHorizontalPanel extends PTCellPanel<HorizontalPanel> {
     @Override
     public void add(final ReaderBuffer buffer, final PTObject ptObject) {
         final BinaryModel model = buffer.readBinaryModel();
-        if (ServerToClientModel.INDEX.equals(model.getModel())) {
+        if (ServerToClientModel.INDEX == model.getModel()) {
             uiObject.insert(asWidget(ptObject), model.getIntValue());
         } else {
             buffer.rewind(model);
@@ -52,44 +49,18 @@ public class PTHorizontalPanel extends PTCellPanel<HorizontalPanel> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.BORDER_WIDTH.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.BORDER_WIDTH == model) {
             uiObject.setBorderWidth(binaryModel.getIntValue());
             return true;
-        } else if (ServerToClientModel.SPACING.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.SPACING == model) {
             uiObject.setSpacing(binaryModel.getIntValue());
             return true;
-        } else if (ServerToClientModel.HORIZONTAL_ALIGNMENT.ordinal() == modelOrdinal) {
-            final PHorizontalAlignment horizontalAlignment = PHorizontalAlignment.values()[binaryModel.getByteValue()];
-            switch (horizontalAlignment) {
-                case ALIGN_LEFT:
-                    uiObject.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
-                    break;
-                case ALIGN_CENTER:
-                    uiObject.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
-                    break;
-                case ALIGN_RIGHT:
-                    uiObject.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-                    break;
-                default:
-                    break;
-            }
+        } else if (ServerToClientModel.HORIZONTAL_ALIGNMENT == model) {
+            uiObject.setHorizontalAlignment(GWTConverter.asHorizontalAlignmentConstant(binaryModel.getByteValue()));
             return true;
-        } else if (ServerToClientModel.VERTICAL_ALIGNMENT.ordinal() == modelOrdinal) {
-            final PVerticalAlignment verticalAlignment = PVerticalAlignment.values()[binaryModel.getByteValue()];
-            switch (verticalAlignment) {
-                case ALIGN_TOP:
-                    uiObject.setVerticalAlignment(HasVerticalAlignment.ALIGN_TOP);
-                    break;
-                case ALIGN_MIDDLE:
-                    uiObject.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
-                    break;
-                case ALIGN_BOTTOM:
-                    uiObject.setVerticalAlignment(HasVerticalAlignment.ALIGN_BOTTOM);
-                    break;
-                default:
-                    break;
-            }
+        } else if (ServerToClientModel.VERTICAL_ALIGNMENT == model) {
+            uiObject.setVerticalAlignment(GWTConverter.asVerticalAlignmentConstant(binaryModel.getByteValue()));
             return true;
         } else {
             return super.update(buffer, binaryModel);

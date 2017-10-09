@@ -93,6 +93,7 @@ public class PScrollPanel extends PSimplePanel implements HasPScrollHandlers {
 
     @Override
     public void onClientData(final JsonObject instruction) {
+        if (!isVisible()) return;
         if (instruction.containsKey(ClientToServerModel.HANDLER_SCROLL.toStringValue())) {
             final int height = instruction.getJsonNumber(ClientToServerModel.HANDLER_SCROLL_HEIGHT.toStringValue()).intValue();
             final int width = instruction.getJsonNumber(ClientToServerModel.HANDLER_SCROLL_WIDTH.toStringValue()).intValue();

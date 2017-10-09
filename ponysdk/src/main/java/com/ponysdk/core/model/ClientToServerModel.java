@@ -90,7 +90,7 @@ public enum ClientToServerModel {
 
     private String key;
 
-    private ClientToServerModel(final String key) {
+    ClientToServerModel(final String key) {
         this.key = key;
     }
 

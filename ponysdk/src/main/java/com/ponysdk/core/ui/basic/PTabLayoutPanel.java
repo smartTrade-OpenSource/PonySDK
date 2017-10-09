@@ -184,6 +184,7 @@ public class PTabLayoutPanel extends PComplexPanel
 
     @Override
     public void onClientData(final JsonObject instruction) {
+        if (!isVisible()) return;
         if (instruction.containsKey(ClientToServerModel.HANDLER_SELECTION.toStringValue())) {
             for (final PSelectionHandler<Integer> handler : selectionHandlers) {
                 handler.onSelection(

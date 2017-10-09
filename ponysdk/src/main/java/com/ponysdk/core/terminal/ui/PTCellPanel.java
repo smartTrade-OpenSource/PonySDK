@@ -24,62 +24,38 @@
 package com.ponysdk.core.terminal.ui;
 
 import com.google.gwt.user.client.ui.CellPanel;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment.HorizontalAlignmentConstant;
+import com.google.gwt.user.client.ui.HasVerticalAlignment.VerticalAlignmentConstant;
 import com.google.gwt.user.client.ui.Widget;
-import com.ponysdk.core.model.PHorizontalAlignment;
-import com.ponysdk.core.model.PVerticalAlignment;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
+import com.ponysdk.core.terminal.ui.converter.GWTConverter;
 
 public abstract class PTCellPanel<W extends CellPanel> extends PTComplexPanel<W> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.WIDGET_HORIZONTAL_ALIGNMENT.ordinal() == modelOrdinal) {
-            final PHorizontalAlignment horizontalAlignment = PHorizontalAlignment.values()[binaryModel.getByteValue()];
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.WIDGET_HORIZONTAL_ALIGNMENT == model) {
+            final HorizontalAlignmentConstant horizontalAlignment = GWTConverter
+                .asHorizontalAlignmentConstant(binaryModel.getByteValue());
             // ServerToClientModel.WIDGET_ID
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
-            switch (horizontalAlignment) {
-                case ALIGN_LEFT:
-                    uiObject.setCellHorizontalAlignment(w, HasHorizontalAlignment.ALIGN_LEFT);
-                    break;
-                case ALIGN_CENTER:
-                    uiObject.setCellHorizontalAlignment(w, HasHorizontalAlignment.ALIGN_CENTER);
-                    break;
-                case ALIGN_RIGHT:
-                    uiObject.setCellHorizontalAlignment(w, HasHorizontalAlignment.ALIGN_RIGHT);
-                    break;
-                default:
-                    break;
-            }
+            uiObject.setCellHorizontalAlignment(w, horizontalAlignment);
             return true;
-        } else if (ServerToClientModel.WIDGET_VERTICAL_ALIGNMENT.ordinal() == modelOrdinal) {
-            final PVerticalAlignment verticalAlignment = PVerticalAlignment.values()[binaryModel.getByteValue()];
+        } else if (ServerToClientModel.WIDGET_VERTICAL_ALIGNMENT == model) {
+            final VerticalAlignmentConstant verticalAlignment = GWTConverter.asVerticalAlignmentConstant(binaryModel.getByteValue());
             // ServerToClientModel.WIDGET_ID
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
-            switch (verticalAlignment) {
-                case ALIGN_TOP:
-                    uiObject.setCellVerticalAlignment(w, HasVerticalAlignment.ALIGN_TOP);
-                    break;
-                case ALIGN_MIDDLE:
-                    uiObject.setCellVerticalAlignment(w, HasVerticalAlignment.ALIGN_MIDDLE);
-                    break;
-                case ALIGN_BOTTOM:
-                    uiObject.setCellVerticalAlignment(w, HasVerticalAlignment.ALIGN_BOTTOM);
-                    break;
-                default:
-                    break;
-            }
+            uiObject.setCellVerticalAlignment(w, verticalAlignment);
             return true;
-        } else if (ServerToClientModel.CELL_WIDTH.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.CELL_WIDTH == model) {
             final String value = binaryModel.getStringValue();
             // ServerToClientModel.WIDGET_ID
             uiObject.setCellWidth(asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder), value);
             return true;
-        } else if (ServerToClientModel.CELL_HEIGHT.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.CELL_HEIGHT == model) {
             final String value = binaryModel.getStringValue();
             // ServerToClientModel.WIDGET_ID
             uiObject.setCellHeight(asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder), value);

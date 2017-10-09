@@ -26,10 +26,13 @@ package com.ponysdk.sample.client;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -41,7 +44,9 @@ import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.PScheduler;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PAbsolutePanel;
+import com.ponysdk.core.ui.basic.PAnchor;
 import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PCookies;
 import com.ponysdk.core.ui.basic.PDateBox;
 import com.ponysdk.core.ui.basic.PDockLayoutPanel;
 import com.ponysdk.core.ui.basic.PFlowPanel;
@@ -49,6 +54,7 @@ import com.ponysdk.core.ui.basic.PFrame;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PListBox;
 import com.ponysdk.core.ui.basic.PMenuBar;
+import com.ponysdk.core.ui.basic.PRichTextArea;
 import com.ponysdk.core.ui.basic.PScript;
 import com.ponysdk.core.ui.basic.PSimplePanel;
 import com.ponysdk.core.ui.basic.PStackLayoutPanel;
@@ -61,9 +67,11 @@ import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
 import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
+import com.ponysdk.core.ui.datagrid.ColumnDescriptor;
 import com.ponysdk.core.ui.datagrid.DataGrid;
 import com.ponysdk.core.ui.datagrid.dynamic.Configuration;
 import com.ponysdk.core.ui.datagrid.dynamic.DynamicDataGrid;
+import com.ponysdk.core.ui.datagrid.impl.PLabelCellRenderer;
 import com.ponysdk.core.ui.eventbus2.EventBus.EventHandler;
 import com.ponysdk.core.ui.grid.AbstractGridWidget;
 import com.ponysdk.core.ui.grid.GridTableWidget;
@@ -74,6 +82,10 @@ import com.ponysdk.core.ui.list.renderer.cell.CellRenderer;
 import com.ponysdk.core.ui.list.valueprovider.IdentityValueProvider;
 import com.ponysdk.core.ui.main.EntryPoint;
 import com.ponysdk.core.ui.model.PKeyCodes;
+import com.ponysdk.core.ui.rich.PConfirmDialog;
+import com.ponysdk.core.ui.rich.POptionPane;
+import com.ponysdk.core.ui.rich.PToolbar;
+import com.ponysdk.core.ui.rich.PTwinListBox;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
 import com.ponysdk.sample.client.event.UserLoggedOutHandler;
 import com.ponysdk.sample.client.page.addon.LoggerAddOn;
@@ -85,18 +97,189 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     // HighChartsStackedColumnAddOn highChartsStackedColumnAddOn;
     int a = 0;
 
+    private static int counter;
+
     @Override
     public void start(final UIContext uiContext) {
-
         uiContext.setClientDataOutput((object, instruction) -> System.err.println(object + " : " + instruction));
 
+        createReconnectingPanel();
+
+        mainLabel = Element.newPLabel("Can be modified by anybody");
+        PWindow.getMain().add(mainLabel);
+
+        //testPerf();
+
+        
+
+        PWindow.getMain().add(createNewGridSystem());
+
+        if (true) return;
+
+        testPAddon();
+
+        createWindow().open();
+
+        downloadFile();
+
+        createNewEvent();
+
+        testUIDelegator();
+
+        testNewGrid();
+
+        PWindow.getMain().add(createGrid());
+
+        testPAddon();
+
+        PScript.execute(PWindow.getMain(), "alert('coucou Main');");
+
+        final PWindow window = createWindow();
+        window.open();
+
+        PWindow.getMain().add(Element.newA());
+
+        // PWindow.getMain().add(new PHistory());
+        // PWindow.getMain().add(new PNotificationManager());
+        // PWindow.getMain().add(new PSuggestBox());
+
+        PWindow.getMain().add(createBlock(createAbsolutePanel()));
+        // PWindow.getMain().add(createPAddOn().asWidget());
+        PWindow.getMain().add(Element.newPAnchor());
+        PWindow.getMain().add(Element.newPAnchor("Anchor"));
+        PWindow.getMain().add(Element.newPAnchor("Anchor 1", "anchor2"));
+        PWindow.getMain().add(Element.newPButton());
+        PWindow.getMain().add(createButton());
+        PWindow.getMain().add(Element.newPCheckBox());
+        PWindow.getMain().add(Element.newPCheckBox("Checkbox"));
+        final PCookies cookies = new PCookies();
+        cookies.setCookie("Cook", "ies");
+        PWindow.getMain().add(createDateBox());
+        PWindow.getMain().add(Element.newPDateBox(new SimpleDateFormat("dd/MM/yyyy")));
+        PWindow.getMain().add(Element.newPDateBox(Element.newPDatePicker(), new SimpleDateFormat("yyyy/MM/dd")));
+        PWindow.getMain().add(Element.newPDatePicker());
+        PWindow.getMain().add(Element.newPDecoratedPopupPanel(false));
+        PWindow.getMain().add(Element.newPDecoratedPopupPanel(true));
+        PWindow.getMain().add(Element.newPDecoratorPanel());
+        PWindow.getMain().add(Element.newPDialogBox());
+        PWindow.getMain().add(Element.newPDialogBox(true));
+        PWindow.getMain().add(Element.newPDisclosurePanel("Disclosure"));
+        PWindow.getMain().add(createDockLayoutPanel());
+        final PFrame frame = Element.newPFrame("http://localhost:8081/sample/");
+        frame.add(Element.newPLabel("Inside the frame"));
+        PWindow.getMain().add(frame);
+        PWindow.getMain().add(Element.newPFileUpload());
+        PWindow.getMain().add(Element.newPFlexTable());
+        PWindow.getMain().add(createPFlowPanel());
+        PWindow.getMain().add(Element.newPFocusPanel());
+        PWindow.getMain().add(Element.newPGrid());
+        PWindow.getMain().add(Element.newPGrid(2, 3));
+        PWindow.getMain().add(Element.newPHeaderPanel());
+        // PWindow.getMain().add(new PHistory());
+        PWindow.getMain().add(Element.newPHorizontalPanel());
+        PWindow.getMain().add(Element.newPHTML());
+        PWindow.getMain().add(Element.newPHTML("Html"));
+        PWindow.getMain().add(Element.newPHTML("Html 1", true));
+        PWindow.getMain().add(Element.newPImage()); // FIXME Test with image
+        PWindow.getMain().add(Element.newPLabel());
+        PWindow.getMain().add(Element.newPLabel("Label"));
+        PWindow.getMain().add(Element.newPLayoutPanel());
+        PWindow.getMain().add(Element.newPListBox());
+        PWindow.getMain().add(createListBox());
+        PWindow.getMain().add(Element.newPMenuBar());
+        PWindow.getMain().add(createMenu());
+        // PWindow.getMain().add(new PNotificationManager());
+        PWindow.getMain().add(Element.newPPasswordTextBox());
+        PWindow.getMain().add(Element.newPPasswordTextBox("Password"));
+
+        PWindow.getMain().add(Element.newPPopupPanel());
+        PWindow.getMain().add(Element.newPPopupPanel(true));
+
+        PWindow.getMain().add(Element.newPPushButton(Element.newPImage())); // FIXME
+        // Test
+        // with
+        // image
+
+        PWindow.getMain().add(Element.newPRadioButton("RadioLabel"));
+        PWindow.getMain().add(Element.newPRadioButton("RadioLabel"));
+        final PRichTextArea richTextArea = Element.newPRichTextArea();
+        PWindow.getMain().add(richTextArea);
+        PWindow.getMain().add(Element.newPRichTextToolbar(richTextArea));
+        PWindow.getMain().add(Element.newPScrollPanel());
+        PWindow.getMain().add(Element.newPSimpleLayoutPanel());
+        PWindow.getMain().add(Element.newPSimplePanel());
+        PWindow.getMain().add(Element.newPSplitLayoutPanel());
+        PWindow.getMain().add(createStackLayoutPanel());
+        // PWindow.getMain().add(new PSuggestBox());
+        PWindow.getMain().add(createTabLayoutPanel());
+        PWindow.getMain().add(Element.newPTabPanel());
+        PWindow.getMain().add(Element.newPTextArea());
+        PWindow.getMain().add(createPTextBox());
+        PWindow.getMain().add(new PToolbar());
+        PWindow.getMain().add(createTree());
+        PWindow.getMain().add(new PTwinListBox<>());
+        PWindow.getMain().add(Element.newPVerticalPanel());
+
+        mainLabel = Element.newPLabel("Label2");
+        mainLabel.addClickHandler(event -> System.out.println("bbbbb"));
+        PWindow.getMain().add(mainLabel);
+
+        try {
+            window.add(mainLabel);
+        } catch (final Exception e) {
+        }
+
+        PWindow.getMain().add(Element.newPLabel("Label3"));
+
+        final PLabel label = Element.newPLabel("Label4");
+
+        try {
+            window.add(label);
+            PWindow.getMain().add(label);
+        } catch (final Exception e) {
+        }
+
+        PConfirmDialog.show(PWindow.getMain(), "AAA", Element.newPLabel("AA"));
+
+        POptionPane.showConfirmDialog(PWindow.getMain(), null, "BBB");
+
+        // uiContext.getHistory().newItem("", false);
+    }
+
+    private void testPerf() {
+        final PWindow w = Element.newPWindow("Window 1", "resizable=yes,location=0,status=0,scrollbars=0");
+        final List<PLabel> labels = new ArrayList<>(1000);
+
+        final PButton start = Element.newPButton("Start");
+        w.add(start);
+        start.addClickHandler(event -> scheduleUpdate(labels));
+
+        for (int i = 0; i < 1000; i++) {
+            final PLabel label = Element.newPLabel(counter + "-" + i);
+            labels.add(label);
+            w.add(label);
+        }
+
+        w.open();
+    }
+
+    private void scheduleUpdate(final List<PLabel> labels) {
+        PScheduler.schedule(() -> {
+            int i = 0;
+            counter++;
+            for (final PLabel label : labels) {
+                label.setText(counter + "-" + i);
+                i++;
+            }
+            if (counter < 20) scheduleUpdate(labels);
+            else counter = 0;
+        }, Duration.ofMillis(20));
+    }
+
+    private DataGrid<Pojo> createNewGridSystem() {
         //        final DataGrid<Pojo> grid = new DataGrid<>((a, b) -> a.bid.compareTo(b.bid));
-
         final Configuration<Pojo> configuration = new Configuration<>(Pojo.class);
-
         final DataGrid<Pojo> grid = new DynamicDataGrid<>(configuration, Comparator.comparing(Pojo::getBid));
-
-        PWindow.getMain().add(grid);
 
         final Random random = new Random();
 
@@ -131,143 +314,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             }
         }, Duration.ofMillis(150));
 
-        /**
-         * createReconnectingPanel();
-         *
-         * mainLabel = Element.newPLabel("Can be modified by anybody");
-         * PWindow.getMain().add(mainLabel);
-         *
-         * testPAddon();
-         *
-         * createWindow().open();
-         *
-         * downloadFile();
-         *
-         * testNewEvent();
-         *
-         * testUIDelegator();
-         *
-         * testNewGrid();
-         *
-         * PWindow.getMain().add(createGrid());
-         *
-         * testPAddon();
-         *
-         * PScript.execute(PWindow.getMain(), "alert('coucou Main');");
-         *
-         * final PWindow window = createWindow();
-         * window.open();
-         *
-         * PWindow.getMain().add(Element.newA());
-         *
-         * // PWindow.getMain().add(new PHistory());
-         * // PWindow.getMain().add(new PNotificationManager());
-         * // PWindow.getMain().add(new PSuggestBox());
-         *
-         * PWindow.getMain().add(createBlock(createAbsolutePanel()));
-         * // PWindow.getMain().add(createPAddOn().asWidget());
-         * PWindow.getMain().add(Element.newPAnchor());
-         * PWindow.getMain().add(Element.newPAnchor("Anchor"));
-         * PWindow.getMain().add(Element.newPAnchor("Anchor 1", "anchor2"));
-         * PWindow.getMain().add(Element.newPButton());
-         * PWindow.getMain().add(createButton());
-         * PWindow.getMain().add(Element.newPCheckBox());
-         * PWindow.getMain().add(Element.newPCheckBox("Checkbox"));
-         * final PCookies cookies = new PCookies();
-         * cookies.setCookie("Cook", "ies");
-         * PWindow.getMain().add(createDateBox());
-         * PWindow.getMain().add(Element.newPDateBox(new SimpleDateFormat("dd/MM/yyyy")));
-         * PWindow.getMain().add(Element.newPDateBox(Element.newPDatePicker(), new
-         * SimpleDateFormat("yyyy/MM/dd")));
-         * PWindow.getMain().add(Element.newPDatePicker());
-         * PWindow.getMain().add(Element.newPDecoratedPopupPanel(false));
-         * PWindow.getMain().add(Element.newPDecoratedPopupPanel(true));
-         * PWindow.getMain().add(Element.newPDecoratorPanel());
-         * PWindow.getMain().add(Element.newPDialogBox());
-         * PWindow.getMain().add(Element.newPDialogBox(true));
-         * PWindow.getMain().add(Element.newPDisclosurePanel("Disclosure"));
-         * PWindow.getMain().add(createDockLayoutPanel());
-         * final PFrame frame = Element.newPFrame("http://localhost:8081/sample/");
-         * frame.add(Element.newPLabel("Inside the frame"));
-         * PWindow.getMain().add(frame);
-         * PWindow.getMain().add(Element.newPFileUpload());
-         * PWindow.getMain().add(Element.newPFlexTable());
-         * PWindow.getMain().add(createPFlowPanel());
-         * PWindow.getMain().add(Element.newPFocusPanel());
-         * PWindow.getMain().add(Element.newPGrid());
-         * PWindow.getMain().add(Element.newPGrid(2, 3));
-         * PWindow.getMain().add(Element.newPHeaderPanel());
-         * // PWindow.getMain().add(new PHistory());
-         * PWindow.getMain().add(Element.newPHorizontalPanel());
-         * PWindow.getMain().add(Element.newPHTML());
-         * PWindow.getMain().add(Element.newPHTML("Html"));
-         * PWindow.getMain().add(Element.newPHTML("Html 1", true));
-         * PWindow.getMain().add(Element.newPImage()); // FIXME Test with image
-         * PWindow.getMain().add(Element.newPLabel());
-         * PWindow.getMain().add(Element.newPLabel("Label"));
-         * PWindow.getMain().add(Element.newPLayoutPanel());
-         * PWindow.getMain().add(Element.newPListBox());
-         * PWindow.getMain().add(createListBox());
-         * PWindow.getMain().add(Element.newPMenuBar());
-         * PWindow.getMain().add(createMenu());
-         * // PWindow.getMain().add(new PNotificationManager());
-         * PWindow.getMain().add(Element.newPPasswordTextBox());
-         * PWindow.getMain().add(Element.newPPasswordTextBox("Password"));
-         *
-         * PWindow.getMain().add(Element.newPPopupPanel());
-         * PWindow.getMain().add(Element.newPPopupPanel(true));
-         *
-         * PWindow.getMain().add(Element.newPPushButton(Element.newPImage())); // FIXME
-         * // Test
-         * // with
-         * // image
-         *
-         * PWindow.getMain().add(Element.newPRadioButton("RadioLabel"));
-         * PWindow.getMain().add(Element.newPRadioButton("RadioLabel"));
-         * final PRichTextArea richTextArea = Element.newPRichTextArea();
-         * PWindow.getMain().add(richTextArea);
-         * PWindow.getMain().add(Element.newPRichTextToolbar(richTextArea));
-         * PWindow.getMain().add(Element.newPScrollPanel());
-         * PWindow.getMain().add(Element.newPSimpleLayoutPanel());
-         * PWindow.getMain().add(Element.newPSimplePanel());
-         * PWindow.getMain().add(Element.newPSplitLayoutPanel());
-         * PWindow.getMain().add(createStackLayoutPanel());
-         * // PWindow.getMain().add(new PSuggestBox());
-         * PWindow.getMain().add(createTabLayoutPanel());
-         * PWindow.getMain().add(Element.newPTabPanel());
-         * PWindow.getMain().add(Element.newPTextArea());
-         * PWindow.getMain().add(createPTextBox());
-         * PWindow.getMain().add(new PToolbar());
-         * PWindow.getMain().add(createTree());
-         * PWindow.getMain().add(new PTwinListBox<>());
-         * PWindow.getMain().add(Element.newPVerticalPanel());
-         *
-         * mainLabel = Element.newPLabel("Label2");
-         * mainLabel.addClickHandler(event -> System.out.println("bbbbb"));
-         * PWindow.getMain().add(mainLabel);
-         *
-         * try {
-         * window.add(mainLabel);
-         * } catch (final Exception e) {
-         * }
-         *
-         * PWindow.getMain().add(Element.newPLabel("Label3"));
-         *
-         * final PLabel label = Element.newPLabel("Label4");
-         *
-         * try {
-         * window.add(label);
-         * PWindow.getMain().add(label);
-         * } catch (final Exception e) {
-         *
-         * }
-         *
-         * PConfirmDialog.show(PWindow.getMain(), "AAA", Element.newPLabel("AA"));
-         *
-         * POptionPane.showConfirmDialog(PWindow.getMain(), null, "BBB");
-         *
-         * // uiContext.getHistory().newItem("", false);
-         **/
+        return grid;
     }
 
     private void createReconnectingPanel() {
@@ -326,47 +373,44 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     }
 
     private void testNewGrid() {
-        //        final AtomicInteger i = new AtomicInteger();
-        //
-        //        final DataGrid<Integer> grid = new DataGrid<>();
-        //
-        //        for (int cpt = 0; cpt < 20; cpt++) {
-        //            final ColumnDescriptor<Integer> column = new ColumnDescriptor<>();
-        //            final PAnchor anchor = Element.newPAnchor("Header " + i.incrementAndGet());
-        //            anchor.addClickHandler(e -> grid.removeColumn(column));
-        //            column.setCellRenderer(new PLabelCellRenderer<>(from -> a + ""));
-        //            column.setHeaderRenderer(() -> anchor);
-        //            grid.addColumnDescriptor(column);
-        //        }
-        //        final PTextBox textBox = Element.newPTextBox();
-        //
+        final AtomicInteger i = new AtomicInteger();
+
+        final DataGrid<Integer> grid = new DataGrid<>();
+
+        for (int cpt = 0; cpt < 20; cpt++) {
+            final ColumnDescriptor<Integer> column = new ColumnDescriptor<>();
+            final PAnchor anchor = Element.newPAnchor("Header " + i.incrementAndGet());
+            anchor.addClickHandler(e -> grid.removeColumn(column));
+            column.setCellRenderer(new PLabelCellRenderer<>(from -> a + ""));
+            column.setHeaderRenderer(() -> anchor);
+            grid.addColumnDescriptor(column);
+        }
+        final PTextBox textBox = Element.newPTextBox();
+
         //        final PButton add = Element.newPButton("add");
-        //        add.addClickHandler(e -> {
-        //            grid.setData(Integer.valueOf(textBox.getText()));
-        //        });
-        //
+        //        add.addClickHandler(e -> grid.setData(Integer.valueOf(textBox.getText())));
         //        PWindow.getMain().add(add);
-        //
-        //        PWindow.getMain().add(textBox);
-        //        PWindow.getMain().add(grid);
-        //
-        //        /**
-        //         * PScheduler.scheduleAtFixedRate(() -> { grid.setData((int)
-        //         * (Math.random() * 50)); grid.removeData((int) (Math.random() * 50));
-        //         * grid.removeColumn(grid.getColumns().get((int) (Math.random() *
-        //         * grid.getColumns().size() - 1)));
-        //         *
-        //         * final ColumnDescriptor<Integer> column = new ColumnDescriptor<>();
-        //         * final PAnchor anchor = new PAnchor("Header " + id.incrementAndGet());
-        //         * anchor.addClickHandler(click -> grid.removeColumn(column));
-        //         * column.setCellRenderer(new PLabelCellRenderer<>(from -> (int)
-        //         * (Math.random() * 1000) + "")); column.setHeaderRenderer(() ->
-        //         * anchor); grid.addColumnDescriptor(column); },
-        //         * Duration.ofMillis(2000));
-        //         **/
+
+        PWindow.getMain().add(textBox);
+        PWindow.getMain().add(grid);
+
+        /**
+         * PScheduler.scheduleAtFixedRate(() -> { grid.setData((int)
+         * (Math.random() * 50)); grid.removeData((int) (Math.random() * 50));
+         * grid.removeColumn(grid.getColumns().get((int) (Math.random() *
+         * grid.getColumns().size() - 1)));
+         *
+         * final ColumnDescriptor<Integer> column = new ColumnDescriptor<>();
+         * final PAnchor anchor = new PAnchor("Header " + id.incrementAndGet());
+         * anchor.addClickHandler(click -> grid.removeColumn(column));
+         * column.setCellRenderer(new PLabelCellRenderer<>(from -> (int)
+         * (Math.random() * 1000) + "")); column.setHeaderRenderer(() ->
+         * anchor); grid.addColumnDescriptor(column); },
+         * Duration.ofMillis(2000));
+         **/
     }
 
-    private void testNewEvent() {
+    private void createNewEvent() {
         final EventHandler<PClickEvent> handler = UIContext.getNewEventBus().subscribe(PClickEvent.class,
             event -> System.err.println("B " + event));
         UIContext.getNewEventBus().post(new PClickEvent(this));
@@ -375,7 +419,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         UIContext.getNewEventBus().post(new PClickEvent(this));
     }
 
-    private class Data {
+    private static final class Data {
 
         protected Integer key;
         protected String value;

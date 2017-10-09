@@ -23,9 +23,6 @@
 
 package com.ponysdk.core.terminal;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -41,13 +38,14 @@ import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.request.FrameRequestBuilder;
 import com.ponysdk.core.terminal.request.WindowRequestBuilder;
 import com.ponysdk.core.terminal.socket.WebSocketClient;
-import com.ponysdk.core.terminal.socket.WebSocketClient.WebSocketDataType;
 import com.ponysdk.core.terminal.ui.PTObject;
 import com.ponysdk.core.terminal.ui.PTWindowManager;
-
 import elemental.client.Browser;
 import elemental.xml.XMLHttpRequest;
 import jsinterop.annotations.JsType;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @JsType
 public class PonySDK implements UncaughtExceptionHandler {
@@ -95,7 +93,7 @@ public class PonySDK implements UncaughtExceptionHandler {
         final String builder = GWT.getHostPageBaseURL().replaceFirst("http", "ws") + MappingPath.WEBSOCKET + "?"
                 + ClientToServerModel.TYPE_HISTORY.toStringValue() + "=" + History.getToken();
         final ReconnectionChecker reconnectionChecker = new ReconnectionChecker();
-        socketClient = new WebSocketClient(builder, uiBuilder, WebSocketDataType.ARRAYBUFFER, reconnectionChecker);
+        socketClient = new WebSocketClient(builder, uiBuilder, reconnectionChecker);
 
         reconnectionChecker.checkConnection();
     }

@@ -57,7 +57,7 @@ public class EventBus {
         }
     }
 
-    public <T> EventHandler<T> register(final Class<T> type) {
+    private <T> EventHandler<T> register(final Class<T> type) {
         final EventHandler<T> handler = new EventHandler<>(type);
         Set<EventHandler<?>> handlers = handlersByType.get(type);
         if (handlers == null) {
@@ -75,7 +75,7 @@ public class EventBus {
         return handler;
     }
 
-    public <T> boolean unsubscribe(final EventHandler<?> handler) {
+    public boolean unsubscribe(final EventHandler<?> handler) {
         final Set<EventHandler<?>> handlers = handlersByType.get(handler.type);
         if (handlers != null) {
             final boolean remove = handlers.remove(handler);

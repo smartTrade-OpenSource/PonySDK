@@ -20,6 +20,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package com.ponysdk.core.terminal.ui;
 
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
@@ -41,19 +42,19 @@ public final class PTMultiWordSuggestOracle extends AbstractPTObject {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        if (ServerToClientModel.SUGGESTION.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.SUGGESTION == binaryModel.getModel()) {
             oracle.add(binaryModel.getStringValue());
             return true;
         }
         /*
-         * FIXME else if (Model.SUGGESTIONS.equals(binaryModel.getModel())) {
+         * FIXME else if (Model.SUGGESTIONS == binaryModel.getModel()) {
          * final JSONArray jsonArray = binaryModel.get().isArray(); for (int
          * i = 0; i < jsonArray.size(); i++) {
          * oracle.add(jsonArray.get(i).isString().stringValue()); } return
          * true; }
          */
         /*
-         * FIXME else if (Model.DEFAULT_SUGGESTIONS.equals(binaryModel.getModel())) {
+         * FIXME else if (Model.DEFAULT_SUGGESTIONS == binaryModel.getModel()) {
          * final List<String> defaultSuggestions = new ArrayList<>(); final
          * JSONArray jsonArray = binaryModel.get().isArray(); for (int i =
          * 0; i < jsonArray.size(); i++) {
@@ -61,7 +62,7 @@ public final class PTMultiWordSuggestOracle extends AbstractPTObject {
          * ; } oracle.setDefaultSuggestionsFromText(defaultSuggestions);
          * return true; }
          */
-        else if (ServerToClientModel.CLEAR.equals(binaryModel.getModel())) {
+        else if (ServerToClientModel.CLEAR == binaryModel.getModel()) {
             oracle.clear();
             return true;
         } else {

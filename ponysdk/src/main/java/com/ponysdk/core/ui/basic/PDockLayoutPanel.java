@@ -25,6 +25,7 @@ package com.ponysdk.core.ui.basic;
 
 import java.time.Duration;
 
+import com.ponysdk.core.model.PDirection;
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
@@ -76,31 +77,31 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
     @Override
     public void add(final PWidget child) {
-        add(child, Direction.CENTER, 0);
+        add(child, PDirection.CENTER, 0);
     }
 
     public void addNorth(final PWidget widget, final double size) {
-        add(widget, Direction.NORTH, size);
+        add(widget, PDirection.NORTH, size);
     }
 
     public void addSouth(final PWidget widget, final double size) {
-        add(widget, Direction.SOUTH, size);
+        add(widget, PDirection.SOUTH, size);
     }
 
     public void addEast(final PWidget widget, final double size) {
-        add(widget, Direction.EAST, size);
+        add(widget, PDirection.EAST, size);
     }
 
     public void addWest(final PWidget widget, final double size) {
-        add(widget, Direction.WEST, size);
+        add(widget, PDirection.WEST, size);
     }
 
     public void addLineEnd(final PWidget widget, final double size) {
-        add(widget, Direction.LINE_END, size);
+        add(widget, PDirection.LINE_END, size);
     }
 
     public void addLineStart(final PWidget widget, final double size) {
-        add(widget, Direction.LINE_START, size);
+        add(widget, PDirection.LINE_START, size);
     }
 
     public void setWidgetSize(final PWidget widget, final double size) {
@@ -117,7 +118,7 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
         });
     }
 
-    public void add(final PWidget child, final Direction direction, final double size) {
+    public void add(final PWidget child, final PDirection direction, final double size) {
         // Detach new child.
         child.removeFromParent();
         // Logical attach.
@@ -137,19 +138,5 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
     public PUnit getUnit() {
         return unit;
-    }
-
-    public enum Direction {
-        NORTH,
-        EAST,
-        SOUTH,
-        WEST,
-        CENTER,
-        LINE_START,
-        LINE_END;
-
-        public byte getValue() {
-            return (byte) ordinal();
-        }
     }
 }

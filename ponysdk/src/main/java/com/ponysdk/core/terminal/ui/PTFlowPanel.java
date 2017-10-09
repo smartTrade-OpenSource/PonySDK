@@ -38,7 +38,7 @@ public class PTFlowPanel extends PTComplexPanel<FlowPanel> {
     @Override
     public void add(final ReaderBuffer buffer, final PTObject ptObject) {
         final BinaryModel binaryModel = buffer.readBinaryModel();
-        if (ServerToClientModel.INDEX.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.INDEX == binaryModel.getModel()) {
             final int beforeIndex = binaryModel.getIntValue();
             uiObject.insert(asWidget(ptObject), beforeIndex);
         } else {

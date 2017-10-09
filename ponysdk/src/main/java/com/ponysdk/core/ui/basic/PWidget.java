@@ -259,12 +259,15 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     public void setAttribute(final String name, final String value) {
         if (name == null) return;
 
-        if (!safeElementAttributes().containsKey(name)) safeElementAttributes().put(name, value);
-        else if (Objects.equals(safeElementAttributes().put(name, value), value)) return;
+        // HTML specs is the value is equals to the name if value is null or empty
+        final String newValue = value != null && !value.isEmpty() ? value : name.toLowerCase();
+
+        if (!safeElementAttributes().containsKey(name)) safeElementAttributes().put(name, newValue);
+        else if (Objects.equals(safeElementAttributes().put(name, newValue), newValue)) return;
 
         saveUpdate((writer) -> {
             writer.write(ServerToClientModel.PUT_ATTRIBUTE_KEY, name);
-            writer.write(ServerToClientModel.ATTRIBUTE_VALUE, value);
+            writer.write(ServerToClientModel.ATTRIBUTE_VALUE, newValue);
         });
     }
 
@@ -397,9 +400,10 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
 
     @Override
     public void onClientData(final JsonObject instruction) {
+        if (!isVisible()) return;
         final String domHandlerType = ClientToServerModel.DOM_HANDLER_TYPE.toStringValue();
         if (instruction.containsKey(domHandlerType)) {
-            final DomHandlerType domHandler = DomHandlerType.values()[instruction.getInt(domHandlerType)];
+            final DomHandlerType domHandler = DomHandlerType.fromRawValue((byte) instruction.getInt(domHandlerType));
             switch (domHandler) {
                 case KEY_PRESS:
                     fireEvent(new PKeyPressEvent(this, instruction.getInt(ClientToServerModel.VALUE_KEY.toStringValue())));

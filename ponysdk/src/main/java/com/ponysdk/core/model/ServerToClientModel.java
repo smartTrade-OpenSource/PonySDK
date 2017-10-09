@@ -227,18 +227,23 @@ public enum ServerToClientModel {
     WINDOW_LOCATION_REPLACE(ValueTypeModel.STRING),
     PRINT(ValueTypeModel.NULL),
     DESTROY(ValueTypeModel.NULL),
+    RESIZE_BY_X(ValueTypeModel.DOUBLE),
+    RESIZE_BY_Y(ValueTypeModel.DOUBLE),
+    RESIZE_TO_WIDTH(ValueTypeModel.INTEGER),
+    RESIZE_TO_HEIGHT(ValueTypeModel.INTEGER),
+    MOVE_BY_X(ValueTypeModel.DOUBLE),
+    MOVE_BY_Y(ValueTypeModel.DOUBLE),
+    MOVE_TO_X(ValueTypeModel.DOUBLE),
+    MOVE_TO_Y(ValueTypeModel.DOUBLE),
 
     // Old, useless or not used
-    POPUP_GLASS_STYLE_NAME(ValueTypeModel.INTEGER),
-    DISCLOSURE_PANEL_OPEN_IMG(ValueTypeModel.INTEGER),
-    DISCLOSURE_PANEL_CLOSE_IMG(ValueTypeModel.INTEGER),
-    SUGGESTIONS(ValueTypeModel.STRING),
-    DEFAULT_SUGGESTIONS(ValueTypeModel.STRING),
-    TEXTBOX_ID(ValueTypeModel.INTEGER);
+    POPUP_GLASS_STYLE_NAME(ValueTypeModel.INTEGER);
+
+    private static final ServerToClientModel[] VALUES = ServerToClientModel.values();
 
     private final ValueTypeModel type;
 
-    private ServerToClientModel(final ValueTypeModel size) {
+    ServerToClientModel(final ValueTypeModel size) {
         this.type = size;
     }
 
@@ -250,8 +255,8 @@ public enum ServerToClientModel {
         return type;
     }
 
-    public final boolean equals(final ServerToClientModel other) {
-        return other != null && this.ordinal() == other.ordinal();
+    public static final ServerToClientModel fromRawValue(final short rawValue) {
+        return VALUES[rawValue];
     }
 
 }

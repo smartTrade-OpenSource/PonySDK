@@ -38,8 +38,17 @@ public enum HandlerModel {
     HANDLER_STREAM_REQUEST,
     HANDLER_SCROLL;
 
+    private static final HandlerModel[] VALUES = HandlerModel.values();
+
+    private HandlerModel() {
+    }
+
     public final byte getValue() {
         return (byte) ordinal();
+    }
+
+    public static final HandlerModel fromRawValue(final byte rawValue) {
+        return VALUES[rawValue];
     }
 
 }

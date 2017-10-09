@@ -75,7 +75,8 @@ dependencies {
     )
 
     testCompile (
-        'junit:junit:' + junitVersion
+        'junit:junit:' + junitVersion,
+        'org.mockito:mockito-all:1.10.19'
     )
     
     runtime (
@@ -142,8 +143,6 @@ task gwtc(dependsOn: classes, type: JavaExec) {
         Runtime.getRuntime().availableProcessors(),
         'com.ponysdk.core.PonyTerminal',
         '-generateJsInteropExports'
-        //'-style', 'DETAILED',
-        //'-optimize', '0'
     ]
 
     maxHeapSize = '512M'

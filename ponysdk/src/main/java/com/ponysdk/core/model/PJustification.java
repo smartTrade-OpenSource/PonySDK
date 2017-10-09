@@ -30,6 +30,8 @@ public enum PJustification {
     LEFT,
     RIGHT;
 
+    private static final PJustification[] VALUES = PJustification.values();
+
     private PJustification() {
     }
 
@@ -37,8 +39,8 @@ public enum PJustification {
         return (byte) ordinal();
     }
 
-    public static final PJustification fromByte(final byte byteValue) {
-        return PJustification.values()[byteValue];
+    public static final PJustification fromRawValue(final byte rawValue) {
+        return VALUES[rawValue];
     }
 
 }
