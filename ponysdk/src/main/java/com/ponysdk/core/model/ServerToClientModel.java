@@ -30,7 +30,6 @@ public enum ServerToClientModel {
     CREATE_CONTEXT(ValueTypeModel.INTEGER),
     DESTROY_CONTEXT(ValueTypeModel.NULL),
     END(ValueTypeModel.NULL),
-
     TYPE_CREATE(ValueTypeModel.INTEGER),
     TYPE_UPDATE(ValueTypeModel.INTEGER),
     TYPE_ADD(ValueTypeModel.INTEGER),
@@ -39,7 +38,6 @@ public enum ServerToClientModel {
     TYPE_REMOVE_HANDLER(ValueTypeModel.NULL),
     TYPE_HISTORY(ValueTypeModel.STRING),
     TYPE_GC(ValueTypeModel.INTEGER),
-
     NATIVE(ValueTypeModel.JSON_OBJECT),
     APPLICATION_ID(ValueTypeModel.STRING),
     DATE(ValueTypeModel.LONG),

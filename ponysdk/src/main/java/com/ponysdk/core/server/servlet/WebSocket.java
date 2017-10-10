@@ -62,7 +62,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     private Session session;
 
     WebSocket(final ServletUpgradeRequest request, final WebsocketMonitor monitor,
-            final AbstractApplicationManager applicationManager) {
+              final AbstractApplicationManager applicationManager) {
         this.request = request;
         this.monitor = monitor;
         this.applicationManager = applicationManager;
@@ -85,7 +85,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         Application application = SessionManager.get().getApplication(applicationId);
         if (application == null) {
             application = new Application(applicationId, httpSession, applicationManager.getOptions(),
-                UserAgent.parseUserAgentString(userAgent));
+                    UserAgent.parseUserAgentString(userAgent));
             SessionManager.get().registerApplication(application);
         }
 
@@ -125,8 +125,9 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
     @Override
     public void onWebSocketClose(final int statusCode, final String reason) {
-        if (log.isInfoEnabled()) log.info("WebSocket closed on UIContext #{} : {}, reason : {}", context.getUIContext().getID(),
-            NiceStatusCode.getMessage(statusCode), reason != null ? reason : "");
+        if (log.isInfoEnabled())
+            log.info("WebSocket closed on UIContext #{} : {}, reason : {}", context.getUIContext().getID(),
+                    NiceStatusCode.getMessage(statusCode), reason != null ? reason : "");
         if (isLiving()) context.getUIContext().onDestroy();
     }
 
@@ -164,10 +165,10 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
                         });
                     } else if (jsonObject.containsKey(ClientToServerModel.INFO_MSG.toStringValue())) {
                         if (log.isInfoEnabled()) log.info("Message from terminal #{} : {}", uiContext.getID(),
-                            jsonObject.getJsonString(ClientToServerModel.INFO_MSG.toStringValue()));
+                                jsonObject.getJsonString(ClientToServerModel.INFO_MSG.toStringValue()));
                     } else if (jsonObject.containsKey(ClientToServerModel.ERROR_MSG.toStringValue())) {
                         log.error("Message from terminal #{} : {}", uiContext.getID(),
-                            jsonObject.getJsonString(ClientToServerModel.ERROR_MSG.toStringValue()));
+                                jsonObject.getJsonString(ClientToServerModel.ERROR_MSG.toStringValue()));
                     } else {
                         log.error("Unknow message from terminal #{} : {}", uiContext.getID(), text);
                     }
@@ -253,7 +254,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         websocketPusher.encode(model, value);
     }
 
-    private static enum NiceStatusCode {
+    private enum NiceStatusCode {
 
         NORMAL(StatusCode.NORMAL, "Normal closure"),
         SHUTDOWN(StatusCode.SHUTDOWN, "Shutdown"),
@@ -275,14 +276,14 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         private int statusCode;
         private String message;
 
-        private NiceStatusCode(final int statusCode, final String message) {
+        NiceStatusCode(final int statusCode, final String message) {
             this.statusCode = statusCode;
             this.message = message;
         }
 
-        public static final String getMessage(final int statusCode) {
+        public static String getMessage(final int statusCode) {
             final List<NiceStatusCode> codes = Arrays.stream(values())
-                .filter(niceStatusCode -> niceStatusCode.statusCode == statusCode).collect(Collectors.toList());
+                    .filter(niceStatusCode -> niceStatusCode.statusCode == statusCode).collect(Collectors.toList());
             if (!codes.isEmpty()) {
                 return codes.get(0).toString();
             } else {
