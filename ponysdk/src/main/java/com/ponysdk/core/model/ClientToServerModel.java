@@ -48,9 +48,6 @@ public enum ClientToServerModel {
     DOM_HANDLER_TYPE("f"),
 
     ERROR_MSG("g"),
-    YEAR("h"),
-    MONTH("i"),
-    DAY("j"),
 
     PARENT_OBJECT_ID("k"),
     VALUE_KEY("l"),
