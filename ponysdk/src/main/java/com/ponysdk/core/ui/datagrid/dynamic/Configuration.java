@@ -6,14 +6,14 @@ import java.util.function.Predicate;
 
 public class Configuration<DataType> {
 
-    public static final Function<String, String> DEFAULT_TRANSFORM = s -> s.replaceAll("^get|^set|^is", "").toUpperCase();
-    public static final Predicate<Method> DEFAULT_FILTER = m -> m.getReturnType() != Void.TYPE && 0 == m.getParameterCount();
+    private static final Function<String, String> DEFAULT_TRANSFORM = s -> s.replaceAll("^get|^set|^is", "").toUpperCase();
+    private static final Predicate<Method> DEFAULT_FILTER = m -> m.getReturnType() != Void.TYPE && 0 == m.getParameterCount();
 
     private final Class<DataType> type;
 
-    private final Function<String, String> captionTransform;
+    private Function<String, String> captionTransform;
 
-    private final Predicate<Method> filter;
+    private Predicate<Method> filter;
 
     public Configuration(Class<DataType> type) {
         this.type = type;
@@ -21,10 +21,12 @@ public class Configuration<DataType> {
         this.filter = DEFAULT_FILTER;
     }
 
-    public Configuration(Class<DataType> type, Function<String, String> captionTransform, Predicate<Method> filter) {
-        this.type = type;
+    public void setCaptionTransform(Function<String, String> captionTransform){
         this.captionTransform = captionTransform;
-        this.filter = DEFAULT_FILTER.and(filter);
+    }
+
+    public void setFilter(Predicate<Method> filter){
+        this.filter = filter;
     }
 
     public Class<DataType> getType() {

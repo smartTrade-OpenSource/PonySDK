@@ -42,6 +42,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.PScheduler;
+import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PAbsolutePanel;
 import com.ponysdk.core.ui.basic.PAnchor;
@@ -112,7 +113,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
         
 
-        PWindow.getMain().add(createNewGridSystem());
+        createNewGridSystem();
 
         if (true) return;
 
@@ -278,8 +279,14 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     private DataGrid<Pojo> createNewGridSystem() {
         //        final DataGrid<Pojo> grid = new DataGrid<>((a, b) -> a.bid.compareTo(b.bid));
+
         final Configuration<Pojo> configuration = new Configuration<>(Pojo.class);
+        configuration.setFilter(method -> method.getName().contains("coucou"));
+
+
         final DataGrid<Pojo> grid = new DynamicDataGrid<>(configuration, Comparator.comparing(Pojo::getBid));
+
+        PWindow.getMain().add(grid);
 
         final Random random = new Random();
 
@@ -297,10 +304,18 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             pojo.coucou2 = random.nextDouble() * i + "";
             pojo.coucou3 = random.nextDouble() * i + "";
             pojo.coucou4 = random.nextDouble() * i + "";
+            pojo.coucou5 = random.nextDouble() * i + "";
+            pojo.coucou6 = random.nextDouble() * i + "";
+            pojo.coucou7 = random.nextDouble() * i + "";
+            pojo.coucou8 = random.nextDouble() * i + "";
+            pojo.coucou9 = random.nextDouble() * i + "";
+            pojo.coucou10 = random.nextDouble() * i + "";
             map.put("security" + i, pojo);
             grid.addData(pojo);
 
         }
+
+        Txn.get().flush();
 
         PScheduler.scheduleAtFixedRate(() -> {
             for (int i = 0; i < 40; i++) {
@@ -312,7 +327,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
                     return p;
                 });
             }
-        }, Duration.ofMillis(150));
+        }, Duration.ofMillis(300));
 
         return grid;
     }
@@ -763,6 +778,12 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         public String coucou2;
         public String coucou3;
         public String coucou4;
+        public String coucou5;
+        public String coucou6;
+        public String coucou7;
+        public String coucou8;
+        public String coucou9;
+        public String coucou10;
 
         /**
          * @return the security

@@ -7,36 +7,37 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.SortedSet;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.datagrid.impl.DefaultView;
 
-public class DataGrid<TYPE> implements IsPWidget {
+public class DataGrid<T> implements IsPWidget {
 
     private final View view;
-    private final List<ColumnDescriptor<TYPE>> columns = new ArrayList<>();
+    private final List<ColumnDescriptor<T>> columns = new ArrayList<>();
 
-    private DataGridTreeSet<TYPE> rows;
+    private DataGridTreeSet<T> rows;
 
     public DataGrid() {
         this(new DefaultView(), Function.identity());
     }
 
-    public DataGrid(final Comparator<TYPE> comparator) {
+    public DataGrid(final Comparator<T> comparator) {
         this(new DefaultView(), Function.identity(), comparator);
     }
 
-    public DataGrid(final Function<TYPE, ?> keyProvider) {
+    public DataGrid(final Function<T, ?> keyProvider) {
         this(new DefaultView(), keyProvider);
     }
 
-    public DataGrid(final View view, final Function<TYPE, ?> keyProvider) {
-        this(view, keyProvider, (Comparator<TYPE>) Comparator.naturalOrder());
+    public DataGrid(final View view, final Function<T, ?> keyProvider) {
+        this(view, keyProvider, (Comparator<T>) Comparator.naturalOrder());
     }
 
-    public DataGrid(final View view, final Function<TYPE, ?> keyProvider, final Comparator<TYPE> comparator) {
+    public DataGrid(final View view, final Function<T, ?> keyProvider, final Comparator<T> comparator) {
         this.view = view;
         this.rows = new DataGridTreeSet<>(comparator, keyProvider);
     }
@@ -46,28 +47,32 @@ public class DataGrid<TYPE> implements IsPWidget {
         return view.asWidget();
     }
 
-    public void addColumnDescriptor(final ColumnDescriptor<TYPE> column) {
+    public void addColumnDescriptor(final ColumnDescriptor<T> column) {
         if (columns.add(column)) {
             int r = 0;
             final int c = columns.size() - 1;
 
             drawHeader(c, column);
 
-            for (final TYPE w : rows) {
+            for (final T w : rows) {
                 drawCell(r++, c, column, w);
             }
         }
     }
 
-    public Collection<TYPE> getData() {
+    public Collection<T> getData() {
         return Collections.unmodifiableSet(rows);
     }
 
-    public void addData(final Collection<TYPE> data) {
+    public void addData(final Collection<T> data) {
         data.forEach(this::addData);
     }
 
-    public void addData(final TYPE data) {
+    public Consumer<T> getConsumer() {
+        return data -> this.addData(data);
+    }
+
+    public void addData(final T data) {
         if (rows.containsData(data)) {
             final int indexBefore = rows.getPosition(data);
             if (indexBefore != -1) {
@@ -88,7 +93,7 @@ public class DataGrid<TYPE> implements IsPWidget {
         }
     }
 
-    public void removeColumn(final ColumnDescriptor<TYPE> column) {
+    public void removeColumn(final ColumnDescriptor<T> column) {
         if (columns.isEmpty()) return;
 
         final int c = columns.indexOf(column);
@@ -101,9 +106,9 @@ public class DataGrid<TYPE> implements IsPWidget {
             columns.remove(c);
 
             for (int i = c; i < columns.size(); i++) {
-                final ColumnDescriptor<TYPE> currentColumn = columns.get(i);
+                final ColumnDescriptor<T> currentColumn = columns.get(i);
                 drawHeader(i, currentColumn);
-                for (final TYPE data : rows) {
+                for (final T data : rows) {
                     drawCell(r++, i, currentColumn, data);
                 }
                 r = 0;
@@ -113,8 +118,8 @@ public class DataGrid<TYPE> implements IsPWidget {
         }
     }
 
-    public void removeData(final TYPE data) {
-        final TYPE higher = rows.higher(data);
+    public void removeData(final T data) {
+        final T higher = rows.higher(data);
         final int index = rows.headSet(data).size();
         if (rows.remove(data)) {
             draw(index, higher);
@@ -122,15 +127,15 @@ public class DataGrid<TYPE> implements IsPWidget {
         }
     }
 
-    public List<ColumnDescriptor<TYPE>> getColumns() {
+    public List<ColumnDescriptor<T>> getColumns() {
         return Collections.unmodifiableList(columns);
     }
 
-    private void drawHeader(final int c, final ColumnDescriptor<TYPE> column) {
+    private void drawHeader(final int c, final ColumnDescriptor<T> column) {
         view.setHeader(c, column.getHeaderRenderer().render());
     }
 
-    public void update(final TYPE data, final Function<TYPE, TYPE> merge) {
+    public void update(final T data, final Function<T, T> merge) {
         final int indexBefore = rows.getPosition(data);
         if (indexBefore != -1) {
             rows.remove(data);
@@ -148,21 +153,21 @@ public class DataGrid<TYPE> implements IsPWidget {
 
     }
 
-    private void update(final int r, final TYPE data) {
+    private void update(final int r, final T data) {
         int c = 0;
-        for (final ColumnDescriptor<TYPE> column : columns) {
+        for (final ColumnDescriptor<T> column : columns) {
             drawCell(r, c++, column, data);
         }
     }
 
-    private void draw(final int fromRow, final TYPE from) {
+    private void draw(final int fromRow, final T from) {
         if (from == null) return;
-        final SortedSet<TYPE> tail = rows.tailSet(from);
+        final SortedSet<T> tail = rows.tailSet(from);
         int r = fromRow;
         int c = 0;
 
-        for (final TYPE w : tail) {
-            for (final ColumnDescriptor<TYPE> column : columns) {
+        for (final T w : tail) {
+            for (final ColumnDescriptor<T> column : columns) {
                 drawCell(r, c++, column, w);
             }
             c = 0;
@@ -170,7 +175,7 @@ public class DataGrid<TYPE> implements IsPWidget {
         }
     }
 
-    private void drawCell(final int r, final int c, final ColumnDescriptor<TYPE> column, final TYPE data) {
+    private void drawCell(final int r, final int c, final ColumnDescriptor<T> column, final T data) {
         PWidget w = view.getCell(r, c);
 
         if (w == null) {
@@ -181,7 +186,7 @@ public class DataGrid<TYPE> implements IsPWidget {
         }
     }
 
-    private void resetColumn(final Integer c, final ColumnDescriptor<TYPE> column) {
+    private void resetColumn(final Integer c, final ColumnDescriptor<T> column) {
         final PWidget header = view.getHeader(c);
         if (header != null) header.removeFromParent();
 
@@ -192,7 +197,7 @@ public class DataGrid<TYPE> implements IsPWidget {
 
     private void resetRow(final Integer r) {
         int c = 0;
-        for (final ColumnDescriptor<TYPE> column : columns) {
+        for (final ColumnDescriptor<T> column : columns) {
             column.getCellRenderer().reset(view.getCell(r, c++));
         }
     }

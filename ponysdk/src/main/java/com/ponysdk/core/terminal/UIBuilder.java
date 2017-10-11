@@ -97,67 +97,72 @@ public class UIBuilder {
     public void updateMainTerminal(final Uint8Array buffer) {
         readerBuffer.init(buffer);
 
-        while (readerBuffer.hasEnoughKeyBytes()) {
-            final int nextBlockPosition = readerBuffer.shiftNextBlock(true);
-            if (nextBlockPosition == ReaderBuffer.NOT_FULL_BUFFER_POSITION) return;
+        Browser.getWindow().webkitRequestAnimationFrame(e-> {
 
-            // Detect if the message is not for the main terminal but for a specific window
-            final BinaryModel binaryModel = readerBuffer.readBinaryModel();
-            final ServerToClientModel model = binaryModel.getModel();
+            while (readerBuffer.hasEnoughKeyBytes()) {
+                final int nextBlockPosition = readerBuffer.shiftNextBlock(true);
+                if (nextBlockPosition == ReaderBuffer.NOT_FULL_BUFFER_POSITION) return true;
 
-            if (ServerToClientModel.WINDOW_ID == model) {
-                // Event on a specific window
-                final int requestedId = binaryModel.getIntValue();
-                // Main terminal, we need to dispatch the eventbus
-                final PTWindow window = PTWindowManager.getWindow(requestedId);
-                if (window != null && window.isReady()) {
-                    final int startPosition = readerBuffer.getPosition();
-                    int endPosition = nextBlockPosition;
+                // Detect if the message is not for the main terminal but for a specific window
+                final BinaryModel binaryModel = readerBuffer.readBinaryModel();
+                final ServerToClientModel model = binaryModel.getModel();
 
-                    // Concat multiple messages for the same window
-                    readerBuffer.setPosition(endPosition);
-                    while (readerBuffer.hasEnoughKeyBytes()) {
-                        final int nextBlockPosition1 = readerBuffer.shiftNextBlock(true);
-                        if (nextBlockPosition1 != ReaderBuffer.NOT_FULL_BUFFER_POSITION) {
-                            final BinaryModel newBinaryModel = readerBuffer.readBinaryModel();
-                            final ServerToClientModel newModel = newBinaryModel.getModel();
-                            if (ServerToClientModel.WINDOW_ID == newModel) {
-                                endPosition = nextBlockPosition1;
-                                readerBuffer.setPosition(endPosition);
+                if (ServerToClientModel.WINDOW_ID == model) {
+                    // Event on a specific window
+                    final int requestedId = binaryModel.getIntValue();
+                    // Main terminal, we need to dispatch the eventbus
+                    final PTWindow window = PTWindowManager.getWindow(requestedId);
+                    if (window != null && window.isReady()) {
+                        final int startPosition = readerBuffer.getPosition();
+                        int endPosition = nextBlockPosition;
+
+                        // Concat multiple messages for the same window
+                        readerBuffer.setPosition(endPosition);
+                        while (readerBuffer.hasEnoughKeyBytes()) {
+                            final int nextBlockPosition1 = readerBuffer.shiftNextBlock(true);
+                            if (nextBlockPosition1 != ReaderBuffer.NOT_FULL_BUFFER_POSITION) {
+                                final BinaryModel newBinaryModel = readerBuffer.readBinaryModel();
+                                final ServerToClientModel newModel = newBinaryModel.getModel();
+                                if (ServerToClientModel.WINDOW_ID == newModel) {
+                                    endPosition = nextBlockPosition1;
+                                    readerBuffer.setPosition(endPosition);
+                                } else {
+                                    break;
+                                }
                             } else {
                                 break;
                             }
-                        } else {
-                            break;
                         }
-                    }
 
-                    window.postMessage(readerBuffer.slice(startPosition, endPosition));
+                        window.postMessage(readerBuffer.slice(startPosition, endPosition));
+                    } else {
+                        log.warning("The requested window " + requestedId + " doesn't exist anymore"); // TODO PERF LOG
+                        readerBuffer.shiftNextBlock(false);
+                    }
+                } else if (ServerToClientModel.FRAME_ID == model) {
+                    final int requestedId = binaryModel.getIntValue();
+                    final PTFrame frame = (PTFrame) getPTObject(requestedId);
+                    frame.postMessage(readerBuffer.slice(readerBuffer.getPosition(), nextBlockPosition));
+                } else if (ServerToClientModel.PING_SERVER == model) {
+                    final PTInstruction requestData = new PTInstruction();
+                    requestData.put(ClientToServerModel.PING_SERVER, binaryModel.getLongValue());
+                    requestBuilder.send(requestData);
+                    readerBuffer.readBinaryModel(); // Read ServerToClientModel.END element
+                } else if (ServerToClientModel.HEARTBEAT == model) {
+                    readerBuffer.readBinaryModel(); // Read ServerToClientModel.END element
+                } else if (ServerToClientModel.CREATE_CONTEXT == model) {
+                    PonySDK.get().setContextId(binaryModel.getIntValue());
+                    readerBuffer.readBinaryModel(); // Read ServerToClientModel.END element
+                } else if (ServerToClientModel.DESTROY_CONTEXT == model) {
+                    destroy();
+                    readerBuffer.readBinaryModel(); // Read ServerToClientModel.END element
                 } else {
-                    log.warning("The requested window " + requestedId + " doesn't exist anymore"); // TODO PERF LOG
-                    readerBuffer.shiftNextBlock(false);
+                    update(binaryModel, readerBuffer);
                 }
-            } else if (ServerToClientModel.FRAME_ID == model) {
-                final int requestedId = binaryModel.getIntValue();
-                final PTFrame frame = (PTFrame) getPTObject(requestedId);
-                frame.postMessage(readerBuffer.slice(readerBuffer.getPosition(), nextBlockPosition));
-            } else if (ServerToClientModel.PING_SERVER == model) {
-                final PTInstruction requestData = new PTInstruction();
-                requestData.put(ClientToServerModel.PING_SERVER, binaryModel.getLongValue());
-                requestBuilder.send(requestData);
-                readerBuffer.readBinaryModel(); // Read ServerToClientModel.END element
-            } else if (ServerToClientModel.HEARTBEAT == model) {
-                readerBuffer.readBinaryModel(); // Read ServerToClientModel.END element
-            } else if (ServerToClientModel.CREATE_CONTEXT == model) {
-                PonySDK.get().setContextId(binaryModel.getIntValue());
-                readerBuffer.readBinaryModel(); // Read ServerToClientModel.END element
-            } else if (ServerToClientModel.DESTROY_CONTEXT == model) {
-                destroy();
-                readerBuffer.readBinaryModel(); // Read ServerToClientModel.END element
-            } else {
-                update(binaryModel, readerBuffer);
             }
-        }
+
+            return true;
+        });
     }
 
     public void updateWindowTerminal(final Uint8Array buffer) {
