@@ -55,7 +55,6 @@ public class CommunicationSanityChecker {
                 return t;
             }
         });
-    private static final long HEARTBEAT_PERIOD_BLOCKED = TimeUnit.MINUTES.toMillis(10);
 
     protected final AtomicBoolean started = new AtomicBoolean(false);
     private final UIContext uiContext;
@@ -64,8 +63,6 @@ public class CommunicationSanityChecker {
     private RunnableScheduledFuture<?> sanityChecker;
     private CommunicationState currentState;
     private long suspectTime = -1;
-
-    private long oldHeartBeatPeriod;
 
     private static enum CommunicationState {
         OK,
@@ -78,7 +75,6 @@ public class CommunicationSanityChecker {
         this.uiContext.addContextDestroyListener(context -> stop());
         final ApplicationManagerOption options = uiContext.getApplication().getOptions();
         setHeartBeatPeriod(options.getHeartBeatPeriod(), options.getHeartBeatPeriodTimeUnit());
-        enableCommunicationChecker(!uiContext.getApplication().getOptions().isDebugMode());
     }
 
     private boolean isStarted() {
@@ -119,7 +115,6 @@ public class CommunicationSanityChecker {
 
     public void setHeartBeatPeriod(final long heartbeat, final TimeUnit timeUnit) {
         heartBeatPeriod = TimeUnit.MILLISECONDS.convert(heartbeat, timeUnit);
-        oldHeartBeatPeriod = heartBeatPeriod;
         if (heartBeatPeriod <= 0) throw new IllegalArgumentException("'HeartBeatPeriod' parameter must be gretter than 0");
     }
 
@@ -165,19 +160,6 @@ public class CommunicationSanityChecker {
 
         uiContext.sendHeartBeat();
         uiContext.sendRoundTrip();
-    }
-
-    /**
-     * Don't really desactivate the communication checker, only set a long period
-     * ({@link #HEARTBEAT_PERIOD_BLOCKED}) for the heartbeat
-     */
-    public void enableCommunicationChecker(final boolean enabled) {
-        if (enabled) {
-            heartBeatPeriod = oldHeartBeatPeriod;
-        } else {
-            oldHeartBeatPeriod = heartBeatPeriod;
-            heartBeatPeriod = HEARTBEAT_PERIOD_BLOCKED;
-        }
     }
 
 }
