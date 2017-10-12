@@ -36,6 +36,8 @@ import com.ponysdk.core.writer.ModelWriter;
  * <ul class='css'>
  * <li>.gwt-Anchor { }</li>
  * </ul>
+ *
+ * @see com.google.gwt.user.client.ui.Anchor
  */
 public class PAnchor extends PFocusWidget implements PHasHTML {
 
@@ -43,11 +45,14 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
     private String html;
     private String href;
 
+    /**
+     * Instantiates a new PAnchor
+     */
     protected PAnchor() {
     }
 
     /**
-     * Creates an anchor with its text specified.
+     * Instantiates a new PAnchor with its text specified.
      *
      * @param text
      *            the anchor's text
@@ -57,7 +62,7 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
     }
 
     /**
-     * Creates an anchor with its text and href (target URL) specified.
+     * Instantiates a new PAnchor with its text and href (target URL) specified.
      *
      * @param text
      *            the anchor's text

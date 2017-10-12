@@ -59,7 +59,8 @@ import com.ponysdk.core.writer.ModelWriter;
  * </p>
  * <h3>CSS Style Rules</h3>
  * <dl>
- * <dt>.gwt-Image</dt></dd>The outer element</dd>
+ * <dt>.gwt-Image</dt>
+ * <dd>The outer element</dd>
  * </dl>
  * Transformations between clipped and unclipped state will result in a loss of any style names that
  * were set/added; the only style names that are preserved are those that are mentioned in the

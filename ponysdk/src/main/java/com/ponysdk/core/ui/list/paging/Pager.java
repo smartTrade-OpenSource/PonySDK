@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,15 +23,13 @@
 
 package com.ponysdk.core.ui.list.paging;
 
-
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PWidget;
 
 /**
  * Manages and displays a Pagination Component
- * 
+ *
  * @see PagerView
- * @param <T>
  */
 public class Pager<T> implements IsPWidget {
 
@@ -93,7 +91,7 @@ public class Pager<T> implements IsPWidget {
 
         int page = currentPage - pagingWindow / 2;
         if (page + pagingWindow > pageCount) {
-            page -= (page + pagingWindow) - pageCount;
+            page -= page + pagingWindow - pageCount;
         }
 
         for (int tempPageCount = 0; tempPageCount < pagingWindow && page < pageCount; page++) {

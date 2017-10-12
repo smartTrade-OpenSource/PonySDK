@@ -27,10 +27,21 @@ import com.ponysdk.core.model.PHorizontalAlignment;
 import com.ponysdk.core.model.PVerticalAlignment;
 import com.ponysdk.core.model.ServerToClientModel;
 
+/**
+ * This class contains methods used to format a table's cells.
+ *
+ * @ee com.google.gwt.user.client.ui.HTMLTable.CellFormatter
+ */
 public class PCellFormatter {
 
     protected final PHTMLTable<? extends PCellFormatter> table;
 
+    /**
+     * Instantiates a new PCellFormatter
+     *
+     * @param table
+     *            the table
+     */
     protected PCellFormatter(final PHTMLTable<? extends PCellFormatter> table) {
         this.table = table;
     }

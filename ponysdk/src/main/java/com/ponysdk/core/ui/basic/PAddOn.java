@@ -1,3 +1,25 @@
+/*
+ * Copyright (c) 2017 PonySDK
+ *  Owners:
+ *  Luciano Broussal  <luciano.broussal AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *
+ *  WebSite:
+ *  http://code.google.com/p/pony-sdk/
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 
 package com.ponysdk.core.ui.basic;
 
@@ -18,9 +40,13 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.writer.ModelWriter;
 
+/**
+ * AddOn are used to bind server side with javascript browser
+ */
 public abstract class PAddOn extends PObject {
 
     private static final String ARGUMENTS_PROPERTY_NAME = "arg";
+
     private static final String METHOD_PROPERTY_NAME = "m";
 
     private static final Map<Level, Byte> LOG_LEVEL = new HashMap<>();
@@ -40,13 +66,29 @@ public abstract class PAddOn extends PObject {
 
     private JsonObject args;
 
+    /**
+     * Instantiates a new PAddOn
+     */
     protected PAddOn() {
     }
 
+    /**
+     * Instantiates a new PAddOn
+     *
+     * @param args
+     *            the JsonObject arguments
+     */
     protected PAddOn(final JsonObject args) {
         this.args = args;
     }
 
+    /**
+     * Attachs the PAddOn to a window
+     *
+     * @param window
+     *            the window
+     * @return true, if successful
+     */
     public boolean attach(final PWindow window) {
         return attach(window, null);
     }
@@ -68,6 +110,11 @@ public abstract class PAddOn extends PObject {
         }
     }
 
+    /**
+     * Gets the signature
+     *
+     * @return the signature
+     */
     public String getSignature() {
         return getClass().getCanonicalName();
     }
@@ -77,6 +124,14 @@ public abstract class PAddOn extends PObject {
         return WidgetType.ADDON;
     }
 
+    /**
+     * Calls terminal method
+     *
+     * @param methodName
+     *            the method name
+     * @param args
+     *            the arguments
+     */
     protected void callTerminalMethod(final String methodName, final Object... args) {
         final JsonObjectBuilder builder = Json.createObjectBuilder();
         builder.add(METHOD_PROPERTY_NAME, methodName);
@@ -118,11 +173,21 @@ public abstract class PAddOn extends PObject {
         saveUpdate(writer -> writer.write(ServerToClientModel.NATIVE, builder.build()));
     }
 
+    /**
+     * Sets the log level
+     *
+     * @param logLevel
+     *            the new log level
+     */
     public void setLogLevel(final Level logLevel) {
         callTerminalMethod("setLogLevel", LOG_LEVEL.get(logLevel));
     }
 
+    /**
+     * Destroys
+     */
     public void destroy() {
         saveUpdate(writer -> writer.write(ServerToClientModel.DESTROY));
     }
+
 }

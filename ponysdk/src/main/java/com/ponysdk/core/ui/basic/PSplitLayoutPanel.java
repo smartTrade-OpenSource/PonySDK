@@ -87,9 +87,8 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
     /**
      * Sets the minimum allowable size for the given widget.
      * <p>
-     * Its associated splitter cannot be dragged to a position that would make
-     * it smaller than this size. This method has no effect for the
-     * {@link PDockLayoutPanel.Direction#CENTER} widget.
+     * Its associated splitter cannot be dragged to a position that would make it smaller than this size. This method
+     * has no effect for the {@link com.ponysdk.core.model.PDirection#CENTER} widget.
      * </p>
      *
      * @param child
@@ -109,13 +108,11 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
     }
 
     /**
-     * Sets a size below which the slider will close completely. This can be
-     * used in conjunction with {@link #setWidgetMinSize} to provide a
-     * speed-bump effect where the slider will stick to a preferred minimum size
+     * Sets a size below which the slider will close completely. This can be used in conjunction with
+     * {@link #setWidgetMinSize} to provide a speed-bump effect where the slider will stick to a preferred minimum size
      * before closing completely.
      * <p>
-     * This method has no effect for the
-     * {@link PDockLayoutPanel.Direction#CENTER} widget.
+     * This method has no effect for the {@link com.ponysdk.core.model.PDirection#CENTER} widget.
      * </p>
      *
      * @param child

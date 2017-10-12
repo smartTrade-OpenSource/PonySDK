@@ -1,12 +1,12 @@
 /*
  * Copyright (c) 2011 PonySDK
- *  Owners:
- *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ * Owners:
+ * Luciano Broussal <luciano.broussal AT gmail.com>
+ * Mathieu Barbier <mathieu.barbier AT gmail.com>
+ * Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *
- *  WebSite:
- *  http://code.google.com/p/pony-sdk/
+ * WebSite:
+ * http://code.google.com/p/pony-sdk/
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -33,16 +33,13 @@ import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.writer.ModelWriter;
 
 /**
- * A panel that lays its child widgets out "docked" at its outer edges, and
- * allows its last widget to take up the remaining space in its center.
+ * A panel that lays its child widgets out "docked" at its outer edges, and allows its last widget to take up the
+ * remaining space in its center.
  * <p>
- * This widget will <em>only</em> work in standards mode, which requires that
- * the HTML page in which it is run have an explicit &lt;!DOCTYPE&gt;
- * declaration.
+ * This widget will <em>only</em> work in standards mode, which requires that the HTML page in which it is run have an
+ * explicit DOCTYPE declaration.
  * </p>
- * DockLayoutPanel contains children tagged with the cardinal directions, and
- * center:
- * <p>
+ * DockLayoutPanel contains children tagged with the cardinal directions, and center:
  * <dl>
  * <dt>center</dt>
  * <dt>north</dt>
@@ -51,8 +48,8 @@ import com.ponysdk.core.writer.ModelWriter;
  * <dt>east</dt>
  * </dl>
  * <p>
- * Each child can hold only widget, and there can be only one &lt;g:center>.
- * However, there can be any number of the directional children.
+ * Each child can hold only widget, and there can be only one in center. However, there can be any number of the
+ * directional children.
  * </p>
  */
 public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {

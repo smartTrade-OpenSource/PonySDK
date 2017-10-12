@@ -50,7 +50,6 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.AlreadyDestroyedApplication;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.server.stm.TxnContext;
-import com.ponysdk.core.ui.basic.DataListener;
 import com.ponysdk.core.ui.basic.PCookies;
 import com.ponysdk.core.ui.basic.PHistory;
 import com.ponysdk.core.ui.basic.PObject;
@@ -88,11 +87,11 @@ public class UIContext {
     private final ReentrantLock lock = new ReentrantLock();
     private final Map<String, Object> attributes = new HashMap<>();
 
-    private int objectCounter = 1;
     private final PObjectWeakHashMap pObjectWeakReferences = new PObjectWeakHashMap();
+    private int objectCounter = 1;
 
-    private int streamRequestCounter = 0;
     private final Map<Integer, StreamHandler> streamListenerByID = new HashMap<>();
+    private int streamRequestCounter = 0;
 
     private final PHistory history = new PHistory();
     private final RootEventBus rootEventBus = new RootEventBus();
@@ -110,77 +109,210 @@ public class UIContext {
 
     private final ConcurrentBoundedLinkedQueue<Long> pings = new ConcurrentBoundedLinkedQueue<>(10);
 
+    /**
+     * The default constructor
+     *
+     * @param context
+     *            the transaction context
+     */
     public UIContext(final TxnContext context) {
         this.application = context.getApplication();
         this.ID = uiContextCount.incrementAndGet();
         this.context = context;
     }
 
+    /**
+     * Returns the current UIContext
+     *
+     * @return The current UIContext
+     */
     public static final UIContext get() {
         return currentContext.get();
     }
 
+    /**
+     * Removed the current UIContext
+     */
     public static final void remove() {
         currentContext.remove();
     }
 
+    /**
+     * Sets the current UIContext
+     *
+     * @param uiContext
+     *            the UIContext
+     */
     public static final void setCurrent(final UIContext uiContext) {
         currentContext.set(uiContext);
     }
 
+    /**
+     * Adds {@link EventHandler} to the {@link RootEventBus}
+     *
+     * @param type
+     *            the event type
+     * @param handler
+     *            the event handler
+     * @return the HandlerRegistration in order to remove the EventHandler
+     * @see #fireEvent(Event)
+     */
     public static final HandlerRegistration addHandler(final Event.Type type, final EventHandler handler) {
         return getRootEventBus().addHandler(type, handler);
     }
 
+    /**
+     * Fires an {@link Event} on the {@link RootEventBus}
+     * Only {@link EventHandler}s added before fires event will be stimulated
+     *
+     * @param event
+     *            the fired event
+     * @see #addHandler(BroadcastEventHandler)
+     */
+    public static final void fireEvent(final Event<? extends EventHandler> event) {
+        getRootEventBus().fireEvent(event);
+    }
+
+    /**
+     * Removes {@link EventHandler} from the {@link RootEventBus}
+     *
+     * @param type
+     *            the event type
+     * @param handler
+     *            the event handler
+     * @see #addHandler(com.ponysdk.core.ui.eventbus.Event.Type, EventHandler)
+     */
     public static final void removeHandler(final Event.Type type, final EventHandler handler) {
         getRootEventBus().removeHandler(type, handler);
     }
 
+    /**
+     * Adds {@link EventHandler} to the {@link RootEventBus} with a specific source
+     * Use {@link #fireEventFromSource(Event, Object)} to stimulate this event handler
+     *
+     * @param type
+     *            the event type
+     * @param source
+     *            the source
+     * @param handler
+     *            the event handler
+     * @return the {@link HandlerRegistration} in order to remove the {@link EventHandler}
+     * @see #fireEventFromSource(Event, Object)
+     */
     public static final HandlerRegistration addHandlerToSource(final Event.Type type, final Object source,
                                                                final EventHandler handler) {
         return getRootEventBus().addHandlerToSource(type, source, handler);
     }
 
-    public static final void removeHandlerFromSource(final Event.Type type, final Object source, final EventHandler handler) {
-        getRootEventBus().removeHandlerFromSource(type, source, handler);
-    }
-
-    public static final void fireEvent(final Event<? extends EventHandler> event) {
-        getRootEventBus().fireEvent(event);
-    }
-
+    /**
+     * Fires an {@link Event} on the {@link RootEventBus} with a specific source
+     * Only {@link EventHandler}s added before fires event will be stimulated
+     *
+     * @param event
+     *            the fired event
+     * @param source
+     *            the source
+     * @see #addHandlerToSource(com.ponysdk.core.ui.eventbus.Event.Type, Object, EventHandler)
+     */
     public static final void fireEventFromSource(final Event<? extends EventHandler> event, final Object source) {
         getRootEventBus().fireEventFromSource(event, source);
     }
 
+    /**
+     * Removes handler from the {@link RootEventBus} with a specific source
+     *
+     * @param type
+     *            the event type
+     * @param source
+     *            the source
+     * @param handler
+     *            the event handler
+     * @see #addHandlerToSource(com.ponysdk.core.ui.eventbus.Event.Type, Object, EventHandler)
+     */
+    public static final void removeHandlerFromSource(final Event.Type type, final Object source, final EventHandler handler) {
+        getRootEventBus().removeHandlerFromSource(type, source, handler);
+    }
+
+    /**
+     * Adds a {@link BroadcastEventHandler} to the {@link RootEventBus} that receive all the events
+     * All call to {@link #fireEvent(Event)} or {@link #fireEventFromSource(Event, Object)} will stimulate this event
+     * handler
+     *
+     * @param handler
+     *            the broadcast event handler
+     * @see #fireEvent(Event)
+     * @see #fireEventFromSource(Event, Object)
+     */
     public static final void addHandler(final BroadcastEventHandler handler) {
         getRootEventBus().addHandler(handler);
     }
 
+    /**
+     * Removes broadcast handler from the {@link RootEventBus}
+     *
+     * @param handler
+     *            the broadcast event handler
+     * @see #addHandler(BroadcastEventHandler)
+     */
     public static final void removeHandler(final BroadcastEventHandler handler) {
         getRootEventBus().removeHandler(handler);
     }
 
+    /**
+     * Gets the default {@link RootEventBus}
+     *
+     * @return the root event bus
+     */
     public static final RootEventBus getRootEventBus() {
         return get().rootEventBus;
     }
 
+    /**
+     * Gets the default {@link EventBus}
+     *
+     * @return the new event bus
+     */
     public static final EventBus getNewEventBus() {
         return get().newEventBus;
     }
 
+    /**
+     * Gets the ID of the UIContext
+     *
+     * @return the ID
+     */
     public int getID() {
         return ID;
     }
 
-    public void addDataListener(final DataListener listener) {
-        listeners.add(listener);
+    /**
+     * Adds a {@link DataListener} to the UIContext
+     *
+     * @param listener
+     *            the data listener
+     */
+    public boolean addDataListener(final DataListener listener) {
+        return listeners.add(listener);
     }
 
-    public void removeDataListener(final DataListener listener) {
-        listeners.remove(listener);
+    /**
+     * Removes the {@link DataListener} from UIContext
+     *
+     * @param listener
+     *            the data listener
+     */
+    public boolean removeDataListener(final DataListener listener) {
+        return listeners.remove(listener);
     }
 
+    /**
+     * Executes a {@link Runnable} that represents a task in a graphical context
+     *
+     * This method locks the UIContext
+     *
+     * @param runnable
+     *            the tasks
+     */
     public void execute(final Runnable runnable) {
         if (log.isDebugEnabled()) log.debug("Pushing to #" + this);
         if (UIContext.get() != this) {
@@ -203,32 +335,47 @@ public class UIContext {
         }
     }
 
+    /**
+     * Stimulates all {@link DataListener} with a list of object
+     *
+     * @param data
+     *            list of object
+     */
     public void pushToClient(final List<Object> data) {
-        execute(() -> fireOnData(data));
+        execute(() -> {
+            if (listeners.isEmpty()) return;
+            try {
+                listeners.forEach(listener -> data.forEach(listener::onData));
+            } catch (final Throwable e) {
+                log.error("Cannot send data", e);
+            }
+        });
     }
 
+    /**
+     * Stimulates all {@link DataListener} with an object
+     *
+     * @param data
+     *            the object
+     */
     public void pushToClient(final Object data) {
-        execute(() -> fireOnData(data));
+        execute(() -> {
+            if (listeners.isEmpty()) return;
+            try {
+                listeners.forEach(listener -> listener.onData(data));
+            } catch (final Throwable e) {
+                log.error("Cannot send data", e);
+            }
+        });
     }
 
-    private void fireOnData(final List<Object> data) {
-        if (listeners.isEmpty()) return;
-        try {
-            listeners.forEach(listener -> data.forEach(listener::onData));
-        } catch (final Throwable e) {
-            log.error("Cannot send data", e);
-        }
-    }
-
-    private void fireOnData(final Object data) {
-        if (listeners.isEmpty()) return;
-        try {
-            listeners.forEach(listener -> listener.onData(data));
-        } catch (final Throwable e) {
-            log.error("Cannot send data", e);
-        }
-    }
-
+    /**
+     * Sends data to the targetted {@link PObject} from {@link JsonObject} instruction
+     * Called from terminal side
+     *
+     * @param jsonObject
+     *            the JSON instructions
+     */
     public void fireClientData(final JsonObject jsonObject) {
         if (jsonObject.containsKey(ClientToServerModel.TYPE_HISTORY.toStringValue())) {
             if (history != null) {
@@ -273,32 +420,70 @@ public class UIContext {
         }
     }
 
-    public void setClientDataOutput(final TerminalDataReceiver clientDataOutput) {
-        this.terminalDataReceiver = clientDataOutput;
+    /**
+     * Sets a {@link TerminalDataReceiver}
+     *
+     * @param terminalDataReceiver
+     *            the terminal data receiver
+     */
+    public void setClientDataOutput(final TerminalDataReceiver terminalDataReceiver) {
+        this.terminalDataReceiver = terminalDataReceiver;
     }
 
+    /**
+     * Locks the current UIContext
+     */
     public void begin() {
         lock.lock();
         UIContext.setCurrent(this);
     }
 
+    /**
+     * Unlock the current UIContext
+     */
     public void end() {
         UIContext.remove();
         lock.unlock();
     }
 
+    /**
+     * Generates the new {@link PObject} id
+     *
+     * @return the new ID
+     */
     public int nextID() {
         return objectCounter++;
     }
 
-    public void registerObject(final PObject object) {
-        pObjectWeakReferences.put(object.getID(), object);
+    /**
+     * Registers a {@link PObject} in the UIContext
+     *
+     * @param pObject
+     *            the pObject
+     * @see #getObject(int)
+     */
+    public void registerObject(final PObject pObject) {
+        pObjectWeakReferences.put(pObject.getID(), pObject);
     }
 
+    /**
+     * Gets the {@link PObject} with a specific object ID
+     *
+     * @param objectID
+     *            the object ID of the searched {@link PObject}
+     * @return the {@link PObject} or null if not found
+     * @see #registerObject(PObject)
+     */
     public <T> T getObject(final int objectID) {
         return (T) pObjectWeakReferences.get(objectID);
     }
 
+    /**
+     * Registers a {@link StreamHandler} that will be called on the terminal side
+     *
+     * @param streamListener
+     *            the stream handler
+     */
     public void stackStreamRequest(final StreamHandler streamListener) {
         final int streamRequestID = nextStreamRequestID();
 
@@ -313,6 +498,14 @@ public class UIContext {
         streamListenerByID.put(streamRequestID, streamListener);
     }
 
+    /**
+     * Registers a {@link StreamHandler} that will be called on a specific {@link com.ponysdk.core.terminal.ui.PTObject}
+     *
+     * @param streamListener
+     *            the stream handler
+     * @param objectID
+     *            the object ID of a {@link PObject}
+     */
     public void stackEmbededStreamRequest(final StreamHandler streamListener, final int objectID) {
         final int streamRequestID = nextStreamRequestID();
 
@@ -330,22 +523,29 @@ public class UIContext {
         streamListenerByID.put(streamRequestID, streamListener);
     }
 
+    /**
+     * Generates the new stream id
+     *
+     * @return the new ID
+     */
     private int nextStreamRequestID() {
         return streamRequestCounter++;
     }
 
+    /**
+     * Removes the {@link StreamHandler} with a specific ID in the current UIContext
+     *
+     * @param streamID
+     *            the stream ID
+     * @return the removed stream handler or null if not found
+     */
     public StreamHandler removeStreamListener(final int streamID) {
         return streamListenerByID.remove(streamID);
     }
 
-    public PHistory getHistory() {
-        return history;
-    }
-
-    public PCookies getCookies() {
-        return cookies;
-    }
-
+    /**
+     * Closes the current UIContext
+     */
     public void close() {
         final ModelWriter writer = Txn.get().getWriter();
         writer.beginObject();
@@ -354,11 +554,10 @@ public class UIContext {
     }
 
     /**
-     * Binds an object to this session, using the name specified. If an object
-     * of the same name is already bound to the session, the object is replaced.
+     * Binds an object to this session, using the name specified. If an object of the same name is already bound to the
+     * session, the object is replaced.
      * <p>
-     * If the value passed in is null, this has the same effect as calling
-     * <code>removeAttribute()<code>.
+     * If the value passed in is null, this has the same effect as calling {@link #removeAttribute(String)}.
      *
      * @param name
      *            the name to which the object is bound; cannot be null
@@ -378,7 +577,6 @@ public class UIContext {
      * @param name
      *            the name of the object to remove from this session
      */
-
     public Object removeAttribute(final String name) {
         return attributes.remove(name);
     }
@@ -395,10 +593,11 @@ public class UIContext {
         return (T) attributes.get(name);
     }
 
-    public Application getApplication() {
-        return application;
-    }
-
+    /**
+     * Destroys the current UIContext when the {@link com.ponysdk.core.server.servlet.WebSocket} is closed
+     *
+     * This method locks the UIContext
+     */
     public void onDestroy() {
         begin();
         try {
@@ -408,6 +607,11 @@ public class UIContext {
         }
     }
 
+    /**
+     * Destroys the current UIContext when the {@link Application} is destroyed
+     *
+     * This method locks the UIContext
+     */
     void destroyFromApplication() {
         begin();
         try {
@@ -427,6 +631,11 @@ public class UIContext {
         }
     }
 
+    /**
+     * Destroys the UIContext
+     *
+     * This method locks the UIContext
+     */
     public void destroy() {
         begin();
         try {
@@ -437,6 +646,9 @@ public class UIContext {
         }
     }
 
+    /**
+     * Destroys effectively the UIContext
+     */
     private void doDestroy() {
         living = false;
         destroyListeners.forEach(listener -> {
@@ -451,6 +663,22 @@ public class UIContext {
         application.unregisterUIContext(ID);
     }
 
+    /**
+     * Adds a {@link ContextDestroyListener} that will be stimulated when the UIContext is destroyed
+     *
+     * @param listener
+     *            the context destroy listener
+     * @since {@link #destroy()}
+     */
+    public void addContextDestroyListener(final ContextDestroyListener listener) {
+        destroyListeners.add(listener);
+    }
+
+    /**
+     * Sends the heart beat
+     *
+     * This method locks the UIContext
+     */
     public void sendHeartBeat() {
         begin();
         try {
@@ -462,6 +690,11 @@ public class UIContext {
         }
     }
 
+    /**
+     * Sends the round trip
+     *
+     * This method locks the UIContext
+     */
     public void sendRoundTrip() {
         begin();
         try {
@@ -473,16 +706,49 @@ public class UIContext {
         }
     }
 
-    public void addContextDestroyListener(final ContextDestroyListener listener) {
-        destroyListeners.add(listener);
-    }
-
+    /**
+     * Returns the living state of the current UIContext
+     *
+     * @return the living state
+     */
     public boolean isLiving() {
         return living;
     }
 
+    /**
+     * Gets the {@link TxnContext} of the UIContext
+     *
+     * @return the TxnContext
+     */
     public TxnContext getContext() {
         return context;
+    }
+
+    /**
+     * Gets the {@link Application} of the UIContext
+     *
+     * @return The Application
+     */
+    public Application getApplication() {
+        return application;
+    }
+
+    /**
+     * Gets the {@link PHistory} of the UIContext
+     *
+     * @return the PHistory
+     */
+    public PHistory getHistory() {
+        return history;
+    }
+
+    /**
+     * Gets the {@link PCookies} of the UIContext
+     *
+     * @return the PCookies
+     */
+    public PCookies getCookies() {
+        return cookies;
     }
 
     @Override
@@ -503,21 +769,41 @@ public class UIContext {
         return "UIContext [ID=" + ID + ", living=" + living + ", ApplicationID=" + application.getId() + "]";
     }
 
+    /**
+     * Adds a ping value
+     *
+     * @param pingValue
+     *            the ping value
+     */
     public void addPingValue(final long pingValue) {
         pings.add(pingValue);
     }
 
     /**
-     * Get an average latency from the last 10 measurements
+     * Gets an average latency from the last 10 measurements
+     *
+     * @return the lantency
      */
     public double getLatency() {
         return pings.stream().mapToLong(Long::longValue).average().orElse(0);
     }
 
+    /**
+     * A {@link ConcurrentLinkedQueue} that is bounded with a size limit
+     *
+     * @param <E>
+     *            the type of elements held in this collection
+     */
     private static final class ConcurrentBoundedLinkedQueue<E> extends ConcurrentLinkedQueue<E> {
 
         private final int limit;
 
+        /**
+         * The default constructor
+         *
+         * @param limit
+         *            the size limit of the list
+         */
         public ConcurrentBoundedLinkedQueue(final int limit) {
             this.limit = limit;
         }

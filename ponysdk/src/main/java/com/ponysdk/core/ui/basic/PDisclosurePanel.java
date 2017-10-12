@@ -43,8 +43,7 @@ import com.ponysdk.core.ui.basic.event.POpenHandler;
 import com.ponysdk.core.writer.ModelWriter;
 
 /**
- * A widget that consists of a header and a content panel that discloses the
- * content when a user clicks on the header.
+ * A widget that consists of a header and a content panel that discloses the content when a user clicks on the header.
  * <h3>CSS Style Rules</h3>
  * <dl class="css">
  * <dt>.gwt-DisclosurePanel
@@ -55,8 +54,7 @@ import com.ponysdk.core.writer.ModelWriter;
  * <dd>dependent style set when panel is closed
  * </dl>
  * <p>
- * The header and content sections can be easily selected using css with a child
- * selector:<br/>
+ * The header and content sections can be easily selected using css with a child selector:
  * .gwt-DisclosurePanel-open .header { ... }
  * </p>
  */

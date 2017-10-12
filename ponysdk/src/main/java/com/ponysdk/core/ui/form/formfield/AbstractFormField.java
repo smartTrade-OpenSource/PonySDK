@@ -170,6 +170,8 @@ public abstract class AbstractFormField<T, W extends IsPWidget> implements FormF
     /**
      * Handle form field dirty state. The field is considered dirty as soon as the user edited its
      * value (even if the value is the same as the original one).
+     *
+     * @return true if dirty
      */
     public boolean isDirty() {
         return dirty;

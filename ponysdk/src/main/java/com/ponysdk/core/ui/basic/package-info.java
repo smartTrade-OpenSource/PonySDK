@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 2011 PonySDK
+ * Copyright (c) 2017 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
@@ -20,25 +20,10 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+/**
+ * Basic UI components
+ *
+ * This package contains all the basic UI components such Label, Input, ...
+ */
 
 package com.ponysdk.core.ui.basic;
-
-import java.time.Duration;
-
-/**
- * Specifies that a panel can animate between layouts.
- * <p>
- * The normal use pattern is to set all childrens' positions, then to call {@link #animate(Duration)} to
- * move them to their new positions over some period of time.
- * </p>
- * 
- * @see com.google.gwt.user.client.ui.AnimatedLayout
- */
-@FunctionalInterface
-public interface PAnimatedLayout {
-
-    /**
-     * Layout children, animating over the specified period of time.
-     */
-    void animate(Duration duration);
-}

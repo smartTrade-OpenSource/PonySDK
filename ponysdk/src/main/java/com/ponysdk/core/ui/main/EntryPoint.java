@@ -25,6 +25,9 @@ package com.ponysdk.core.ui.main;
 
 import com.ponysdk.core.server.application.UIContext;
 
+/**
+ * The Entry Point of the Application
+ */
 @FunctionalInterface
 public interface EntryPoint {
 

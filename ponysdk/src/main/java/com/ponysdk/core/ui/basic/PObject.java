@@ -71,8 +71,22 @@ public abstract class PObject {
     PObject() {
     }
 
+    /**
+     * Gets the widget type
+     *
+     * @return the widget type
+     */
     protected abstract WidgetType getWidgetType();
 
+    /**
+     * Attachs the PAddOn to a frame if not null else to a window
+     *
+     * @param window
+     *            the window
+     * @param frame
+     *            the frame
+     * @return true, if successful
+     */
     protected boolean attach(final PWindow window, final PFrame frame) {
         this.frame = frame;
 
@@ -123,6 +137,12 @@ public abstract class PObject {
         if (initializeListeners != null) initializeListeners.forEach(listener -> listener.onInitialize(this));
     }
 
+    /**
+     * Enrichs on the initialization
+     *
+     * @param writer
+     *            the writer
+     */
     protected void enrichOnInit(final ModelWriter writer) {
     }
 

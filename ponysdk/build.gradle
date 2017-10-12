@@ -121,6 +121,10 @@ jar {
     }
 }
 
+javadoc {
+    exclude '**/terminal/**'
+}
+
 task gwtc(dependsOn: classes, type: JavaExec) {
     inputs.files fileTree('src/main/java/com/ponysdk/core/terminal')
     outputs.files fileTree(gwtOutputDirName)

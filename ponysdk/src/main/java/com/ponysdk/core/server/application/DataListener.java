@@ -21,24 +21,10 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.basic;
+package com.ponysdk.core.server.application;
 
-import java.time.Duration;
-
-/**
- * Specifies that a panel can animate between layouts.
- * <p>
- * The normal use pattern is to set all childrens' positions, then to call {@link #animate(Duration)} to
- * move them to their new positions over some period of time.
- * </p>
- * 
- * @see com.google.gwt.user.client.ui.AnimatedLayout
- */
 @FunctionalInterface
-public interface PAnimatedLayout {
+public interface DataListener {
 
-    /**
-     * Layout children, animating over the specified period of time.
-     */
-    void animate(Duration duration);
+    void onData(Object data);
 }

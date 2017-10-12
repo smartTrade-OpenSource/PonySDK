@@ -31,15 +31,19 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.writer.ModelWriter;
 
 /**
- * A panel whose child widgets are contained within the cells of a table. Each
- * cell's size may be set independently. Each child widget can take up a subset
- * of its cell and can be aligned within it.
+ * A panel whose child widgets are contained within the cells of a table. Each cell's size may be set independently.
+ * Each child widget can take up a subset of its cell and can be aligned within it.
+ *
+ * @see com.google.gwt.user.client.ui.CellPanel
  */
 public abstract class PCellPanel extends PComplexPanel {
 
     private Integer borderWidth;
     private Integer spacing;
 
+    /**
+     * Instantiates a new PCellPanel
+     */
     protected PCellPanel() {
     }
 

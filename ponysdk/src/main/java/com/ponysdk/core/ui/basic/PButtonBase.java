@@ -31,19 +31,39 @@ import com.ponysdk.core.writer.ModelWriter;
 
 /**
  * Abstract base class for {@link PButton}, {@link PCheckBox}.
+ *
+ * @see com.google.gwt.user.client.ui.ButtonBase
  */
 abstract class PButtonBase extends PFocusWidget implements PHasHTML {
 
     private String text;
+
     private String html;
 
+    /**
+     * Instantiates a new PButtonBase
+     */
     PButtonBase() {
     }
 
+    /**
+     * Instantiates a new PButtonBase
+     *
+     * @param text
+     *            the text
+     */
     PButtonBase(final String text) {
         this.text = text;
     }
 
+    /**
+     * Instantiates a new PButtonBase
+     *
+     * @param text
+     *            the text
+     * @param html
+     *            the html
+     */
     PButtonBase(final String text, final String html) {
         this.text = text;
         this.html = html;

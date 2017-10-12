@@ -145,7 +145,7 @@ public class PWindow extends PObject {
     /**
      * Opens the Print Dialog to print the current document.
      *
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/Window/print
+     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/print">MDN</a>
      */
     public void print() {
         saveUpdate(writer -> writer.write(ServerToClientModel.PRINT));
@@ -159,7 +159,7 @@ public class PWindow extends PObject {
      * @param yDelta
      *            is the number of pixels to grow the window vertically.
      *
-     * @see https://developer.mozilla.org/fr/docs/Web/API/Window/resizeBy
+     * @see <a href="https://developer.mozilla.org/fr/docs/Web/API/Window/resizeBy">MDN</a>
      */
     public void resizeBy(final float xDelta, final float yDelta) {
         saveUpdate(writer -> {
@@ -178,7 +178,7 @@ public class PWindow extends PObject {
      *            is an integer value representing the new outerHeight in pixels (including scroll
      *            bars, title bars, etc).
      *
-     * @see https://developer.mozilla.org/fr/docs/Web/API/Window/resizeTo
+     * @see <a href="https://developer.mozilla.org/fr/docs/Web/API/Window/resizeTo">MDN</a>
      */
     public void resizeTo(final int width, final int height) {
         saveUpdate(writer -> {
@@ -195,7 +195,7 @@ public class PWindow extends PObject {
      * @param deltaY
      *            is the amount of pixels to move the window vertically.
      *
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/window/moveBy
+     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/window/moveBy">MDN</a>
      */
     public void moveBy(final float deltaX, final float deltaY) {
         saveUpdate(writer -> {
@@ -212,7 +212,7 @@ public class PWindow extends PObject {
      * @param y
      *            is the vertical coordinate to be moved to.
      *
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/window/moveTo
+     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/window/moveTo">MDN</a>
      */
     public void moveTo(final float x, final float y) {
         saveUpdate(writer -> {
@@ -224,7 +224,7 @@ public class PWindow extends PObject {
     /**
      * The Window.close() method closes the current window, or the window on which it was called.
      *
-     * @see https://developer.mozilla.org/fr/docs/Web/API/Window/resizeTo
+     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/close">MDN</a>
      */
     public void close() {
         if (!destroy) saveUpdate(writer -> writer.write(ServerToClientModel.CLOSE));

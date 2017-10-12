@@ -31,11 +31,22 @@ import com.ponysdk.core.writer.ModelWriter;
 
 /**
  * AddOn are used to bind server side object with javascript object
+ *
+ * @param <T>
+ *            the linked PWidget type
  */
 public abstract class PAddOnComposite<T extends PWidget> extends PAddOn implements IsPWidget {
 
     protected T widget;
 
+    /**
+     * Instantiates a new PAddOnComposite
+     *
+     * @param widget
+     *            the widget
+     * @param args
+     *            the JsonObject arguments
+     */
     protected PAddOnComposite(final T widget, final JsonObject args) {
         super(args);
         this.widget = widget;
@@ -45,6 +56,12 @@ public abstract class PAddOnComposite<T extends PWidget> extends PAddOn implemen
         else widget.addInitializeListener(object -> attach(widget.getWindow(), widget.getFrame()));
     }
 
+    /**
+     * Instantiates a new PAddOnComposite
+     *
+     * @param widget
+     *            the widget
+     */
     protected PAddOnComposite(final T widget) {
         this(widget, null);
     }
@@ -79,4 +96,5 @@ public abstract class PAddOnComposite<T extends PWidget> extends PAddOn implemen
     public T asWidget() {
         return widget;
     }
+
 }

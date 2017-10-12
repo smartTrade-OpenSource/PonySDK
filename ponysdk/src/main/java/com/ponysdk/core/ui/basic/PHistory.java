@@ -33,29 +33,23 @@ import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 import com.ponysdk.core.writer.ModelWriter;
 
 /**
- * This class allows you to interact with the browser's history stack. Each
- * "item" on the stack is represented by a single string, referred to as a
- * "token". You can create new history items (which have a token associated with
- * them when they are created), and you can programmatically force the current
- * history to move back or forward.
+ * This class allows you to interact with the browser's history stack. Each "item" on the stack is represented by a
+ * single string, referred to as a "token". You can create new history items (which have a token associated with them
+ * when they are created), and you can programmatically force the current history to move back or forward.
  * <p>
- * In order to receive notification of user-directed changes to the current
- * history item, implement the {@link PValueChangeHandler} interface and attach
- * it via {@link #addValueChangeHandler(PValueChangeHandler)} .
+ * In order to receive notification of user-directed changes to the current history item, implement the
+ * {@link PValueChangeHandler} interface and attach it via {@link #addValueChangeHandler(PValueChangeHandler)}.
  * </p>
- * <p>
- * <h3>URL Encoding</h3> Any valid characters may be used in the history token
- * and will survive round-trips through {@link #newItem(String)} to
- * {@link #getToken()}/
- * {@link PValueChangeHandler#onValueChange(PValueChangeEvent)} , but most will
- * be encoded in the user-visible URL. The following US-ASCII characters are not
- * encoded on any currently supported browser (but may be in the future due to
+ * <h3>URL Encoding</h3> Any valid characters may be used in the history token and will survive round-trips through
+ * {@link #newItem(String)} to {@link #getToken()}/{@link PValueChangeHandler#onValueChange(PValueChangeEvent)} , but
+ * most will be encoded in the user-visible URL.
+ * The following US-ASCII characters are not encoded on any currently supported browser (but may be in the future due to
  * future browser changes):
  * <ul>
  * <li>a-z</li>
  * <li>A-Z</li>
  * <li>0-9</li>
- * <li>;,/?:@&=+$-_.!~*()</li>
+ * <li>;,/?:@&amp;=+$-_.!~*()</li>
  * </ul>
  */
 public class PHistory {
