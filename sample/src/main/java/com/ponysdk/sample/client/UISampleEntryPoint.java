@@ -327,7 +327,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
                     return p;
                 });
             }
-        }, Duration.ofMillis(300));
+        }, Duration.ofMillis(500));
 
         return grid;
     }

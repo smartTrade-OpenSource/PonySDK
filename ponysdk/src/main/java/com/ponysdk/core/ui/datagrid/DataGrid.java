@@ -18,7 +18,6 @@ public class DataGrid<T> implements IsPWidget {
 
     private final View view;
     private final List<ColumnDescriptor<T>> columns = new ArrayList<>();
-
     private DataGridTreeSet<T> rows;
 
     public DataGrid() {
@@ -68,7 +67,7 @@ public class DataGrid<T> implements IsPWidget {
         data.forEach(this::addData);
     }
 
-    public Consumer<T> getConsumer() {
+    public Consumer<T> newConsumer() {
         return data -> this.addData(data);
     }
 
@@ -186,7 +185,7 @@ public class DataGrid<T> implements IsPWidget {
         }
     }
 
-    private void resetColumn(final Integer c, final ColumnDescriptor<T> column) {
+    private void resetColumn(final int c, final ColumnDescriptor<T> column) {
         final PWidget header = view.getHeader(c);
         if (header != null) header.removeFromParent();
 
@@ -195,7 +194,7 @@ public class DataGrid<T> implements IsPWidget {
         }
     }
 
-    private void resetRow(final Integer r) {
+    private void resetRow(final int r) {
         int c = 0;
         for (final ColumnDescriptor<T> column : columns) {
             column.getCellRenderer().reset(view.getCell(r, c++));

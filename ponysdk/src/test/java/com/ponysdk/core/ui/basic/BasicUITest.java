@@ -24,10 +24,8 @@
 package com.ponysdk.core.ui.basic;
 
 import com.ponysdk.core.model.PCheckBoxState;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
-import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
-import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
+import com.ponysdk.core.ui.basic.event.*;
+import com.ponysdk.core.ui.model.PKeyCodes;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -73,7 +71,7 @@ public class BasicUITest extends PSuite {
         final PClickHandler handler = Mockito.mock(PClickHandler.class);
         button.addClickHandler(handler);
         button.fireEvent(event);
-        Mockito.verify(handler,Mockito.times(1)).onClick(event);
+        Mockito.verify(handler, Mockito.times(1)).onClick(event);
     }
 
     @Test
@@ -92,8 +90,12 @@ public class BasicUITest extends PSuite {
         textBox.addValueChangeHandler(handler);
         PValueChangeEvent<String> event = new PValueChangeEvent<>(this, "test2");
         textBox.fireOnValueChange(event);
-        Mockito.verify(handler,Mockito.times(1)).onValueChange(event);
+        Mockito.verify(handler, Mockito.times(1)).onValueChange(event);
         Assert.assertEquals("test2", textBox.getText());
+
+        Mockito.reset(handler);
+        textBox.fireEvent(new PKeyUpEvent(this, PKeyCodes.DOWN.getCode()));
+        Mockito.verify(handler, Mockito.times(0)).onValueChange(event);
     }
 
 

@@ -50,4 +50,5 @@ public class FormTest extends PSuite {
         formField.setValue("test1");
         Assert.assertTrue(form.isValid());
     }
+
 }
