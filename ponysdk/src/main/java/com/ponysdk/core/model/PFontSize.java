@@ -42,7 +42,7 @@ public enum PFontSize {
         return (byte) ordinal();
     }
 
-    public static final PFontSize fromRawValue(final byte rawValue) {
+    public static PFontSize fromRawValue(final byte rawValue) {
         return VALUES[rawValue];
     }
 

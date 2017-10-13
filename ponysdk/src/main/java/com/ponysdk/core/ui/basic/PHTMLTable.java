@@ -269,7 +269,7 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
         return rowFormatter;
     }
 
-    class Row implements Comparable<Row> {
+    static class Row implements Comparable<Row> {
 
         private int value;
 
@@ -287,7 +287,7 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
         }
     }
 
-    protected class Cell {
+    protected static class Cell {
 
         private int row;
 

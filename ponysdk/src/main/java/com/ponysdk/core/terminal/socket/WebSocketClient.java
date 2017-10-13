@@ -64,7 +64,7 @@ public class WebSocketClient implements MessageSender {
         else throw new IllegalArgumentException("Wrong reader type : " + webSocketDataType);
 
         webSocket.setOnopen(event -> {
-            if (log.isLoggable(Level.INFO)) log.info("WebSoket connected");
+            if (log.isLoggable(Level.INFO)) log.info("WebSocket connected");
 
             Scheduler.get().scheduleFixedDelay(() -> {
                 if (webSocket.getReadyState() == WebSocket.OPEN) {
@@ -78,15 +78,15 @@ public class WebSocketClient implements MessageSender {
             if (event instanceof CloseEvent) {
                 final CloseEvent closeEvent = (CloseEvent) event;
                 final int statusCode = closeEvent.getCode();
-                if (log.isLoggable(Level.INFO)) log.info("WebSoket disconnected : " + statusCode);
+                if (log.isLoggable(Level.INFO)) log.info("WebSocket disconnected : " + statusCode);
                 // If it's a not normal disconnection
                 if (statusCode != 1000) reconnectionChecker.detectConnectionFailure();
             } else {
-                log.severe("WebSoket disconnected : " + event);
+                log.severe("WebSocket disconnected : " + event);
                 reconnectionChecker.detectConnectionFailure();
             }
         });
-        webSocket.setOnerror(event -> log.severe("WebSoket error : " + event));
+        webSocket.setOnerror(event -> log.severe("WebSocket error : " + event));
         webSocket.setOnmessage(event -> messageReader.read((MessageEvent) event));
     }
 

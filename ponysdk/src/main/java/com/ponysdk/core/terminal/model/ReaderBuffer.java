@@ -23,8 +23,6 @@
 
 package com.ponysdk.core.terminal.model;
 
-import java.util.logging.Logger;
-
 import com.google.gwt.json.client.JSONException;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
@@ -40,8 +38,6 @@ public class ReaderBuffer {
 
     public static final int NOT_FULL_BUFFER_POSITION = -1;
     private static final byte TRUE = 1;
-
-    private static final Logger log = Logger.getLogger(ReaderBuffer.class.getName());
 
     private final BinaryModel currentBinaryModel;
 

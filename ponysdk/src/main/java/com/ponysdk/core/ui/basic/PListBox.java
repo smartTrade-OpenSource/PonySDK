@@ -355,7 +355,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         saveUpdate(ServerToClientModel.MULTISELECT, isMultipleSelect);
     }
 
-    public class ListItem {
+    public static class ListItem {
 
         protected String label;
 
@@ -376,7 +376,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     }
 
-    private class ListGroupItem extends ListItem {
+    private static class ListGroupItem extends ListItem {
 
         ListGroupItem(final String group) {
             super(group, null);

@@ -56,16 +56,12 @@ public class PTListBox extends PTFocusWidget<ListBox> {
                 eventInstruction.put(ClientToServerModel.HANDLER_CHANGE, "-1");
                 uiService.sendDataToServer(uiObject, eventInstruction);
             } else {
-                String selectedIndexes = selectedIndex + "";
+                final StringBuilder selectedIndexes = new StringBuilder(String.valueOf(selectedIndex));
                 for (int i = 0; i < uiObject.getItemCount(); i++) {
-                    if (uiObject.isItemSelected(i)) {
-                        if (i != selectedIndex) {
-                            selectedIndexes += "," + i;
-                        }
-                    }
+                    if (uiObject.isItemSelected(i) && i != selectedIndex) selectedIndexes.append(",").append(i);
                 }
                 final PTInstruction eventInstruction = new PTInstruction(getObjectID());
-                eventInstruction.put(ClientToServerModel.HANDLER_CHANGE, selectedIndexes);
+                eventInstruction.put(ClientToServerModel.HANDLER_CHANGE, selectedIndexes.toString());
                 uiService.sendDataToServer(uiObject, eventInstruction);
             }
         });

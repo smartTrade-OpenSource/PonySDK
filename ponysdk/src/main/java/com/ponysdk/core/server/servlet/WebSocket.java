@@ -300,7 +300,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
             this.message = message;
         }
 
-        public static final String getMessage(final int statusCode) {
+        public static String getMessage(final int statusCode) {
             final List<NiceStatusCode> codes = Arrays.stream(values())
                 .filter(niceStatusCode -> niceStatusCode.statusCode == statusCode).collect(Collectors.toList());
             if (!codes.isEmpty()) {

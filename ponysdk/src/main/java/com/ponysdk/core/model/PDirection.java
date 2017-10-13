@@ -42,7 +42,7 @@ public enum PDirection {
         return (byte) ordinal();
     }
 
-    public static final PDirection fromRawValue(final byte rawValue) {
+    public static PDirection fromRawValue(final byte rawValue) {
         return VALUES[rawValue];
     }
 

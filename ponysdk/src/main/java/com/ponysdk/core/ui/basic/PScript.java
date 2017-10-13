@@ -47,7 +47,7 @@ public class PScript extends PObject {
     private PScript() {
     }
 
-    private static final PScript get(final PWindow window) {
+    private static PScript get(final PWindow window) {
         if (window != null) {
             final UIContext uiContext = UIContext.get();
             final String key = SCRIPT_KEY + window.getID();
