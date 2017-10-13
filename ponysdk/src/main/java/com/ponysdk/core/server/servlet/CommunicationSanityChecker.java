@@ -141,7 +141,7 @@ public class CommunicationSanityChecker {
                     if (now - suspectTime >= heartBeatPeriod) {
                         // No message have been received since we suspected the
                         // communication to be non functional
-                        if (log.isInfoEnabled()) log.info(
+                        log.info(
                             "No message have been received on UIContext #{} since we suspected the communication to be non functional, context will be destroyed",
                             uiContext.getID());
                         currentState = CommunicationState.KO;

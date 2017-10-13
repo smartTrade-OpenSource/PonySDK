@@ -127,7 +127,7 @@ public abstract class AbstractEventBus implements EventBus {
             final Set<EventHandler> pruned = sourceMap.remove(source);
 
             if (pruned != null) {
-                if (!pruned.isEmpty() && log.isInfoEnabled()) log.info("Pruned unempty list! {}", pruned);
+                if (!pruned.isEmpty()) log.info("Pruned unempty list! {}", pruned);
                 if (sourceMap.isEmpty()) map.remove(type);
             } else {
                 if (log.isInfoEnabled()) log.info("Can't prune what wasn't there {}", source);

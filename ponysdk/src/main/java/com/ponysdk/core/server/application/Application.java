@@ -84,8 +84,7 @@ public class Application {
         uiContexts.clear();
 
         try {
-            if (log.isInfoEnabled())
-                log.info("Invalidate session on Application #{} because all ui contexts have been destroyed", getId());
+            log.info("Invalidate session on Application #{} because all ui contexts have been destroyed", getId());
             session.invalidate();
         } catch (final IllegalArgumentException e) {
             log.error("The session is already invalid", e);

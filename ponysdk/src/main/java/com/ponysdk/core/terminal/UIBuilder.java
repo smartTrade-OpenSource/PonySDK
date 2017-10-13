@@ -382,15 +382,45 @@ public class UIBuilder {
         requestBuilder.send(requestData);
     }
 
+    public void sendErrorMessageToServer(final String message, final int objectID) {
+        final PTInstruction requestData = new PTInstruction();
+        requestData.put(ClientToServerModel.ERROR_MSG, message);
+        requestData.put(ClientToServerModel.OBJECT_ID, objectID);
+        requestBuilder.send(requestData);
+    }
+
+    public void sendWarningMessageToServer(final String message) {
+        final PTInstruction requestData = new PTInstruction();
+        requestData.put(ClientToServerModel.WARNING_MSG, message);
+        requestBuilder.send(requestData);
+    }
+
+    public void sendWarningMessageToServer(final String message, final int objectID) {
+        final PTInstruction requestData = new PTInstruction();
+        requestData.put(ClientToServerModel.WARNING_MSG, message);
+        requestData.put(ClientToServerModel.OBJECT_ID, objectID);
+        requestBuilder.send(requestData);
+    }
+
     public void sendInfoMessageToServer(final String message) {
         final PTInstruction requestData = new PTInstruction();
         requestData.put(ClientToServerModel.INFO_MSG, message);
         requestBuilder.send(requestData);
     }
 
+    public void sendInfoMessageToServer(final String message, final int objectID) {
+        final PTInstruction requestData = new PTInstruction();
+        requestData.put(ClientToServerModel.INFO_MSG, message);
+        requestData.put(ClientToServerModel.OBJECT_ID, objectID);
+        requestBuilder.send(requestData);
+    }
+
     public PTObject getPTObject(final int id) {
         final PTObject ptObject = objectByID.get(id);
-        if (ptObject == null) log.warning("PTObject #" + id + " not found");
+        if (ptObject == null) {
+            log.warning("PTObject #" + id + " not found");
+            sendWarningMessageToServer("PTObject #" + id + " not found", id);
+        }
         return ptObject;
     }
 

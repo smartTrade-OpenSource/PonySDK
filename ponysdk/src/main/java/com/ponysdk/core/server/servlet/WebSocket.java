@@ -73,8 +73,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         final HttpSession httpSession = request.getSession();
         final String applicationId = httpSession.getId();
         final String userAgent = request.getHeader("User-Agent");
-        if (log.isInfoEnabled())
-            log.info("WebSocket connected from {}, sessionID={}, userAgent={}", session.getRemoteAddress(), applicationId, userAgent);
+        log.info("WebSocket connected from {}, sessionID={}, userAgent={}", session.getRemoteAddress(), applicationId, userAgent);
 
         this.session = session;
         // 1K for max chunk size and 1M for total buffer size
@@ -94,7 +93,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         try {
             final UIContext uiContext = new UIContext(context);
             final CommunicationSanityChecker communicationSanityChecker = new CommunicationSanityChecker(uiContext);
-            if (log.isInfoEnabled()) log.info("Creating a new {}", uiContext);
+            log.info("Creating a new {}", uiContext);
             context.setUIContext(uiContext);
             context.setCommunicationSanityChecker(communicationSanityChecker);
             application.registerUIContext(uiContext);
@@ -125,7 +124,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
     @Override
     public void onWebSocketClose(final int statusCode, final String reason) {
-        if (log.isInfoEnabled()) log.info("WebSocket closed on UIContext #{} : {}, reason : {}", context.getUIContext().getID(),
+        log.info("WebSocket closed on UIContext #{} : {}, reason : {}", context.getUIContext().getID(),
             NiceStatusCode.getMessage(statusCode), reason != null ? reason : "");
         if (isLiving()) context.getUIContext().onDestroy();
     }
@@ -162,12 +161,33 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
                                 uiContext.fireClientData(appInstructions.getJsonObject(i));
                             }
                         });
-                    } else if (jsonObject.containsKey(ClientToServerModel.INFO_MSG.toStringValue())) {
-                        if (log.isInfoEnabled()) log.info("Message from terminal #{} : {}", uiContext.getID(),
-                            jsonObject.getJsonString(ClientToServerModel.INFO_MSG.toStringValue()));
                     } else if (jsonObject.containsKey(ClientToServerModel.ERROR_MSG.toStringValue())) {
-                        log.error("Message from terminal #{} : {}", uiContext.getID(),
-                            jsonObject.getJsonString(ClientToServerModel.ERROR_MSG.toStringValue()));
+                        String extraMsg = "";
+                        if (jsonObject.containsKey(ClientToServerModel.OBJECT_ID.toStringValue())) {
+                            final int objectID = jsonObject.getJsonNumber(ClientToServerModel.OBJECT_ID.toStringValue()).intValue();
+                            extraMsg = " on " + uiContext.getObject(objectID);
+                        }
+                        log.error("Message from terminal #{} : {}{}", uiContext.getID(),
+                            jsonObject.getJsonString(ClientToServerModel.ERROR_MSG.toStringValue()), extraMsg);
+                    } else if (jsonObject.containsKey(ClientToServerModel.WARNING_MSG.toStringValue())) {
+                        String extraMsg = "";
+                        if (jsonObject.containsKey(ClientToServerModel.OBJECT_ID.toStringValue())) {
+                            final int objectID = jsonObject.getJsonNumber(ClientToServerModel.OBJECT_ID.toStringValue()).intValue();
+                            extraMsg = " on " + uiContext.getObject(objectID);
+                        }
+                        log.warn("Message from terminal #{} : {}{}", uiContext.getID(),
+                            jsonObject.getJsonString(ClientToServerModel.WARNING_MSG.toStringValue()), extraMsg);
+                    } else if (jsonObject.containsKey(ClientToServerModel.INFO_MSG.toStringValue())) {
+                        if (log.isInfoEnabled()) {
+                            String extraMsg = "";
+                            if (jsonObject.containsKey(ClientToServerModel.OBJECT_ID.toStringValue())) {
+                                final int objectID = jsonObject.getJsonNumber(ClientToServerModel.OBJECT_ID.toStringValue())
+                                    .intValue();
+                                extraMsg = " on " + uiContext.getObject(objectID);
+                            }
+                            log.info("Message from terminal #{} : {}{}", uiContext.getID(),
+                                jsonObject.getJsonString(ClientToServerModel.INFO_MSG.toStringValue()), extraMsg);
+                        }
                     } else {
                         log.error("Unknow message from terminal #{} : {}", uiContext.getID(), text);
                     }
@@ -178,7 +198,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
                 if (monitor != null) monitor.onMessageProcessed(WebSocket.this);
             }
         } else {
-            if (log.isInfoEnabled()) log.info("UI Context is destroyed, message dropped from terminal : {}", text);
+            log.info("UI Context is destroyed, message dropped from terminal : {}", text);
         }
     }
 
@@ -226,7 +246,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
     public void close() {
         if (isSessionOpen()) {
-            if (log.isInfoEnabled()) log.info("Closing websocket programaticly");
+            log.info("Closing websocket programaticly");
             session.close();
         }
     }
