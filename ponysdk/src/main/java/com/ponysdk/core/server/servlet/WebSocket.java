@@ -102,7 +102,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
             uiContext.begin();
             try {
                 beginObject();
-                encode(ServerToClientModel.CREATE_CONTEXT, uiContext.getID());
+                encode(ServerToClientModel.CREATE_CONTEXT, uiContext.getID());//TODO nciaravola integer ?
                 endObject();
                 flush();
             } catch (final Throwable e) {

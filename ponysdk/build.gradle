@@ -12,6 +12,7 @@ ext {
     javaxValidationVersion = '1.0.0.GA'
     seleniumVersion = '3.6.0'
     junitVersion = '4.12'
+    tyrusVersion = '1.13.1'
 }
 
 configurations {
@@ -75,7 +76,7 @@ dependencies {
             'org.seleniumhq.selenium:selenium-api:' + seleniumVersion,
             'org.seleniumhq.selenium:selenium-java:' + seleniumVersion,
             'javax.websocket:javax.websocket-client-api:1.1',
-            'org.glassfish.tyrus:tyrus-client:1.13.1'
+            'org.glassfish.tyrus:tyrus-client:' + tyrusVersion
     )
 
     runtime(
@@ -83,6 +84,10 @@ dependencies {
             'org.slf4j:jcl-over-slf4j:' + slf4jVersion,
             'ch.qos.logback:logback-core:' + logbackVersion,
             'ch.qos.logback:logback-classic:' + logbackVersion
+    )
+
+    testRuntime(
+            'org.glassfish.tyrus:tyrus-container-grizzly-client:' + tyrusVersion
     )
 }
 

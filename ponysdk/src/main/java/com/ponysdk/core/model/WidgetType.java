@@ -84,14 +84,14 @@ public enum WidgetType {
 
     private static final WidgetType[] VALUES = WidgetType.values();
 
-    private WidgetType() {
+    WidgetType() {
     }
 
     public final byte getValue() {
         return (byte) ordinal();
     }
 
-    public static final WidgetType fromRawValue(final byte rawValue) {
+    public static WidgetType fromRawValue(final byte rawValue) {
         return VALUES[rawValue];
     }
 

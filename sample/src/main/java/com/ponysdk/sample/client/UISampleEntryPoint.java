@@ -104,18 +104,18 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     public void start(final UIContext uiContext) {
         uiContext.setClientDataOutput((object, instruction) -> System.err.println(object + " : " + instruction));
 
-        createReconnectingPanel();
+        //createReconnectingPanel();
 
         mainLabel = Element.newPLabel("Can be modified by anybody");
         PWindow.getMain().add(mainLabel);
 
+        if (true) return;
         //testPerf();
 
-        
+
 
         createNewGridSystem();
 
-        if (true) return;
 
         testPAddon();
 

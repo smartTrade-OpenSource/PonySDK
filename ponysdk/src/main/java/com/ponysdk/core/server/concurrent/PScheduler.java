@@ -234,8 +234,8 @@ public class PScheduler {
         }
 
         public void cancel() {
-            this.cancelled = true;
-            this.future.cancel(false);
+            cancelled = true;
+            future.cancel(false);
             scheduler.purge(this);
         }
 

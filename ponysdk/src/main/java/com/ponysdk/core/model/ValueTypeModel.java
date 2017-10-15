@@ -49,7 +49,7 @@ public enum ValueTypeModel {
 
     private final int size;
 
-    private ValueTypeModel(final int size) {
+    ValueTypeModel(final int size) {
         this.size = size;
     }
 
