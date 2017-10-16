@@ -1,8 +1,8 @@
 ext {
     gwtVersion = '2.8.1'
     
-    jettyVersion = '9.4.6.v20170531'
-    springVersion = '4.2.9.RELEASE'
+    jettyVersion = '9.4.7.v20170914'
+    springVersion = '4.3.12.RELEASE'
 }
 
 task wrapper(type: Wrapper) {
