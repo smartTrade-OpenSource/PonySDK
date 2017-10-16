@@ -185,10 +185,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         PWindow.getMain().add(Element.newPPopupPanel());
         PWindow.getMain().add(Element.newPPopupPanel(true));
 
-        PWindow.getMain().add(Element.newPPushButton(Element.newPImage())); // FIXME
-        // Test
-        // with
-        // image
+        PWindow.getMain().add(Element.newPPushButton(Element.newPImage())); // FIXME Test with image
 
         PWindow.getMain().add(Element.newPRadioButton("RadioLabel"));
         PWindow.getMain().add(Element.newPRadioButton("RadioLabel"));

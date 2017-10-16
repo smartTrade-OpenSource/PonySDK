@@ -96,7 +96,7 @@ public class ReaderBuffer {
 
         final ValueTypeModel typeModel = key.getTypeModel();
         if (ValueTypeModel.INTEGER == typeModel) {
-            size += typeModel.getSize();
+            size += ValueTypeModel.INTEGER_SIZE;
             currentBinaryModel.init(key, getInt(), size);
         } else if (ValueTypeModel.STRING == typeModel) {
             size += ValueTypeModel.SHORT_SIZE;
@@ -109,13 +109,12 @@ public class ReaderBuffer {
             size += jsonSize;
             currentBinaryModel.init(key, getJson(jsonSize), size);
         } else if (ValueTypeModel.NULL == typeModel) {
-            size += typeModel.getSize();
             currentBinaryModel.init(key, size);
         } else if (ValueTypeModel.BOOLEAN == typeModel) {
-            size += typeModel.getSize();
+            size += ValueTypeModel.BOOLEAN_SIZE;
             currentBinaryModel.init(key, getBoolean(), size);
         } else if (ValueTypeModel.BYTE == typeModel) {
-            size += typeModel.getSize();
+            size += ValueTypeModel.BYTE_SIZE;
             currentBinaryModel.init(key, getByte(), size);
         } else if (ValueTypeModel.DOUBLE == typeModel) {
             // TODO Read really a double
@@ -132,7 +131,7 @@ public class ReaderBuffer {
             size += messageLongSize;
             currentBinaryModel.init(key, Long.parseLong(getString(messageLongSize)), size);
         } else if (ValueTypeModel.SHORT == typeModel) {
-            size += typeModel.getSize();
+            size += ValueTypeModel.SHORT_SIZE;
             currentBinaryModel.init(key, getShort(), size);
         } else {
             // Never have to happen
@@ -257,7 +256,7 @@ public class ReaderBuffer {
         final ValueTypeModel typeModel = key.getTypeModel();
 
         if (ValueTypeModel.INTEGER == typeModel) {
-            position += typeModel.getSize();
+            position += ValueTypeModel.INTEGER_SIZE;
         } else if (ValueTypeModel.STRING == typeModel) {
             final int stringSize = getUnsignedShort();
             position += stringSize;
@@ -267,9 +266,9 @@ public class ReaderBuffer {
         } else if (ValueTypeModel.NULL == typeModel) {
             // Nothing to do
         } else if (ValueTypeModel.BOOLEAN == typeModel) {
-            position += typeModel.getSize();
+            position += ValueTypeModel.BOOLEAN_SIZE;
         } else if (ValueTypeModel.BYTE == typeModel) {
-            position += typeModel.getSize();
+            position += ValueTypeModel.BYTE_SIZE;
         } else if (ValueTypeModel.DOUBLE == typeModel) {
             final short doubleSize = getUnsignedByte();
             position += doubleSize;
@@ -277,7 +276,7 @@ public class ReaderBuffer {
             final short longSize = getUnsignedByte();
             position += longSize;
         } else if (ValueTypeModel.SHORT == typeModel) {
-            position += typeModel.getSize();
+            position += ValueTypeModel.SHORT_SIZE;
         } else {
             throw new IllegalArgumentException("Unknown type model : " + typeModel);
         }
