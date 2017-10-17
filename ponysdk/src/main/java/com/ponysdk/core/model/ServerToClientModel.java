@@ -225,8 +225,6 @@ public enum ServerToClientModel {
     WIDGET_FULL_SIZE(ValueTypeModel.NULL),
     WINDOW_TITLE(ValueTypeModel.STRING),
     WINDOW_LOCATION_REPLACE(ValueTypeModel.STRING),
-    PRINT(ValueTypeModel.NULL),
-    DESTROY(ValueTypeModel.NULL),
     RESIZE_BY_X(ValueTypeModel.DOUBLE),
     RESIZE_BY_Y(ValueTypeModel.DOUBLE),
     RESIZE_TO_WIDTH(ValueTypeModel.INTEGER),
@@ -235,6 +233,9 @@ public enum ServerToClientModel {
     MOVE_BY_Y(ValueTypeModel.DOUBLE),
     MOVE_TO_X(ValueTypeModel.DOUBLE),
     MOVE_TO_Y(ValueTypeModel.DOUBLE),
+    FOCUS(ValueTypeModel.NULL),
+    PRINT(ValueTypeModel.NULL),
+    DESTROY(ValueTypeModel.NULL),
 
     // Old, useless or not used
     POPUP_GLASS_STYLE_NAME(ValueTypeModel.INTEGER),

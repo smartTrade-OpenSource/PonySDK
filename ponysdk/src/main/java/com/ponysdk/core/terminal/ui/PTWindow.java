@@ -113,6 +113,9 @@ public class PTWindow extends AbstractPTObject implements PostMessageHandler {
             final float y = (float) buffer.readBinaryModel().getDoubleValue();
             window.moveTo(x, y);
             return true;
+        } else if (ServerToClientModel.FOCUS == model) {
+            window.focus();
+            return true;
         } else if (ServerToClientModel.CLOSE == model) {
             close(false);
             return true;

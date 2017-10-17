@@ -69,6 +69,10 @@ public class PWindowManager {
         return get().registeredWindows.values();
     }
 
+    public static final PWindow getWindow(final int windowID) {
+        return get().registeredWindows.get(windowID);
+    }
+
     private void registerWindow0(final PWindow window) {
         registeredWindows.put(window.getID(), window);
     }

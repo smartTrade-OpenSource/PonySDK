@@ -222,6 +222,16 @@ public class PWindow extends PObject {
     }
 
     /**
+     * Makes a request to bring the window to the front. It may fail due to user settings and the window isn't
+     * guaranteed to be frontmost before this method returns.
+     *
+     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/focus">MDN</a>
+     */
+    public void focus() {
+        saveUpdate(writer -> writer.write(ServerToClientModel.FOCUS));
+    }
+
+    /**
      * The Window.close() method closes the current window, or the window on which it was called.
      *
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/close">MDN</a>
