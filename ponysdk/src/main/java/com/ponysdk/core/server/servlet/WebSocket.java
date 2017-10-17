@@ -103,7 +103,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
                 beginObject();
                 encode(ServerToClientModel.CREATE_CONTEXT, uiContext.getID());
                 endObject();
-                flush();
+                if (isLiving() && isSessionOpen()) flush0();
             } catch (final Throwable e) {
                 log.error("Cannot send server heart beat to client", e);
             } finally {
@@ -223,7 +223,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
             beginObject();
             encode(ServerToClientModel.HEARTBEAT, null);
             endObject();
-            flush();
+            flush0();
         }
     }
 
@@ -235,13 +235,16 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
             beginObject();
             encode(ServerToClientModel.PING_SERVER, System.currentTimeMillis());
             endObject();
-            flush();
+            flush0();
         }
     }
 
-    @Override
     public void flush() {
-        if (isLiving() && isSessionOpen()) websocketPusher.flush();
+        if (isLiving() && isSessionOpen()) flush0();
+    }
+
+    private void flush0() {
+        websocketPusher.flush();
     }
 
     public void close() {
