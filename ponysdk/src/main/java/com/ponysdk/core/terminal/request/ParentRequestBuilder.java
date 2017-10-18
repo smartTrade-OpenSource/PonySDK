@@ -31,12 +31,9 @@ import elemental.html.Uint8Array;
 
 public abstract class ParentRequestBuilder implements RequestBuilder {
 
-    private final RequestCallback callback;
-
     public ParentRequestBuilder(final String id, final RequestCallback callback) {
-        this.callback = callback;
-
-        Browser.getWindow().setOnmessage(event -> onDataReceived((Uint8Array) ((MessageEvent) event).getData()));
+        // From Main terminal to the matching window terminal
+        Browser.getWindow().setOnmessage(event -> callback.onDataReceived((Uint8Array) ((MessageEvent) event).getData()));
 
         setReady(id);
     }
@@ -58,12 +55,5 @@ public abstract class ParentRequestBuilder implements RequestBuilder {
      * To Main terminal
      */
     public abstract void sendToParent(String data);
-
-    /**
-     * From Main terminal to the matching window terminal
-     */
-    public void onDataReceived(final Uint8Array buffer) {
-        callback.onDataReceived(buffer);
-    }
 
 }
