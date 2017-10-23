@@ -78,15 +78,6 @@ public abstract class PObject {
      */
     protected abstract WidgetType getWidgetType();
 
-    /**
-     * Attachs the PAddOn to a frame if not null else to a window
-     *
-     * @param window
-     *            the window
-     * @param frame
-     *            the frame
-     * @return true, if successful
-     */
     protected boolean attach(final PWindow window, final PFrame frame) {
         this.frame = frame;
 

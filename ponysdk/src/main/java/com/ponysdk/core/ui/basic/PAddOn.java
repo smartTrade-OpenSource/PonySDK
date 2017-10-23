@@ -93,6 +93,15 @@ public abstract class PAddOn extends PObject {
         return attach(window, null);
     }
 
+    /**
+     * Attachs the PAddOn to a frame if not null else to a window
+     *
+     * @param window
+     *            the window
+     * @param frame
+     *            the frame
+     * @return true, if successful
+     */
     @Override
     public boolean attach(final PWindow window, final PFrame frame) {
         final boolean result = super.attach(window, frame);
