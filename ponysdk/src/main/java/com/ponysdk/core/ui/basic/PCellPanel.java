@@ -48,8 +48,8 @@ public abstract class PCellPanel extends PComplexPanel {
     }
 
     @Override
-    protected void enrichOnInit(final ModelWriter writer) {
-        super.enrichOnInit(writer);
+    protected void enrichForUpdate(final ModelWriter writer) {
+        super.enrichForUpdate(writer);
         if (this.borderWidth != null) writer.write(ServerToClientModel.BORDER_WIDTH, this.borderWidth);
         if (this.spacing != null) writer.write(ServerToClientModel.SPACING, this.spacing);
     }

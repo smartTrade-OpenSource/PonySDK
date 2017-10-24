@@ -46,8 +46,8 @@ public class PElement extends PComplexPanel {
     }
 
     @Override
-    protected void enrichOnInit(final ModelWriter writer) {
-        super.enrichOnInit(writer);
+    protected void enrichForCreation(final ModelWriter writer) {
+        super.enrichForCreation(writer);
         writer.write(ServerToClientModel.TAG, tagName);
     }
 

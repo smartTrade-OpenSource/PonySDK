@@ -102,8 +102,8 @@ public class PImage extends PWidget implements HasPClickHandlers {
     }
 
     @Override
-    protected void enrichOnInit(final ModelWriter writer) {
-        super.enrichOnInit(writer);
+    protected void enrichForCreation(final ModelWriter writer) {
+        super.enrichForCreation(writer);
         if (url != null) {
             writer.write(ServerToClientModel.URL, url);
             if (top != -1 && left != -1 && imageHeight != -1 && imageWidth != -1) {

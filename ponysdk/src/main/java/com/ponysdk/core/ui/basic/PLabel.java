@@ -76,8 +76,8 @@ public class PLabel extends PWidget implements PHasText, HasPClickHandlers, HasP
     }
 
     @Override
-    protected void enrichOnInit(final ModelWriter writer) {
-        super.enrichOnInit(writer);
+    protected void enrichForUpdate(final ModelWriter writer) {
+        super.enrichForUpdate(writer);
         if (this.text != null) writer.write(ServerToClientModel.TEXT, this.text);
     }
 

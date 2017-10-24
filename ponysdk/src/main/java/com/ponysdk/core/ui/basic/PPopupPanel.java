@@ -92,8 +92,8 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
     }
 
     @Override
-    protected void enrichOnInit(final ModelWriter writer) {
-        super.enrichOnInit(writer);
+    protected void enrichForCreation(final ModelWriter writer) {
+        super.enrichForCreation(writer);
         if (autoHide) writer.write(ServerToClientModel.POPUP_AUTO_HIDE, autoHide);
     }
 

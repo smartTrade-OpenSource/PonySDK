@@ -75,8 +75,13 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
     }
 
     @Override
-    protected void enrichOnInit(final ModelWriter writer) {
-        super.enrichOnInit(writer);
+    protected void enrichForCreation(final ModelWriter writer) {
+        super.enrichForCreation(writer);
+    }
+
+    @Override
+    protected void enrichForUpdate(final ModelWriter writer) {
+        super.enrichForUpdate(writer);
         if (text != null) writer.write(ServerToClientModel.TEXT, text);
         if (href != null) writer.write(ServerToClientModel.HREF, href);
         if (html != null) writer.write(ServerToClientModel.HTML, html);

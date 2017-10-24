@@ -62,8 +62,8 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
     }
 
     @Override
-    protected void enrichOnInit(final ModelWriter writer) {
-        super.enrichOnInit(writer);
+    protected void enrichForCreation(final ModelWriter writer) {
+        super.enrichForCreation(writer);
         writer.write(ServerToClientModel.UNIT, unit.getByteValue());
     }
 

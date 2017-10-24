@@ -84,8 +84,8 @@ public class PStackLayoutPanel extends PWidget
     }
 
     @Override
-    protected void enrichOnInit(final ModelWriter writer) {
-        super.enrichOnInit(writer);
+    protected void enrichForCreation(final ModelWriter writer) {
+        super.enrichForCreation(writer);
         writer.write(ServerToClientModel.UNIT, unit.getByteValue());
     }
 

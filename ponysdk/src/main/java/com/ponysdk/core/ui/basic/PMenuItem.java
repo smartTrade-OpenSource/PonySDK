@@ -87,8 +87,8 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
     }
 
     @Override
-    protected void enrichOnInit(final ModelWriter writer) {
-        super.enrichOnInit(writer);
+    protected void enrichForUpdate(final ModelWriter writer) {
+        super.enrichForUpdate(writer);
         if (html != null) writer.write(ServerToClientModel.HTML, html);
         else writer.write(ServerToClientModel.TEXT, text);
     }

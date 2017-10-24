@@ -70,8 +70,8 @@ abstract class PButtonBase extends PFocusWidget implements PHasHTML {
     }
 
     @Override
-    protected void enrichOnInit(final ModelWriter writer) {
-        super.enrichOnInit(writer);
+    protected void enrichForUpdate(final ModelWriter writer) {
+        super.enrichForUpdate(writer);
         if (text != null) writer.write(ServerToClientModel.TEXT, text);
         if (html != null) writer.write(ServerToClientModel.HTML, html);
     }

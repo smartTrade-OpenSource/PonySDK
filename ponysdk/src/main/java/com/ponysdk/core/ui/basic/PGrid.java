@@ -49,8 +49,8 @@ public class PGrid extends PHTMLTable<PCellFormatter> {
     }
 
     @Override
-    protected void enrichOnInit(final ModelWriter writer) {
-        super.enrichOnInit(writer);
+    protected void enrichForCreation(final ModelWriter writer) {
+        super.enrichForCreation(writer);
         if (rows != 0 && columns != 0) {
             writer.write(ServerToClientModel.ROW, rows);
             writer.write(ServerToClientModel.COLUMN, columns);

@@ -58,8 +58,8 @@ public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, Ha
     }
 
     @Override
-    protected void enrichOnInit(final ModelWriter writer) {
-        super.enrichOnInit(writer);
+    protected void enrichForUpdate(final ModelWriter writer) {
+        super.enrichForUpdate(writer);
         if (!EMPTY.equals(text)) writer.write(ServerToClientModel.TEXT, this.text);
         if (!EMPTY.equals(placeholder)) writer.write(ServerToClientModel.PLACEHOLDER, this.placeholder);
     }

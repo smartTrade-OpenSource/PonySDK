@@ -45,8 +45,8 @@ public class PFrame extends PWidget {
     }
 
     @Override
-    protected void enrichOnInit(final ModelWriter writer) {
-        super.enrichOnInit(writer);
+    protected void enrichForCreation(final ModelWriter writer) {
+        super.enrichForCreation(writer);
         if (url != null && !url.isEmpty()) writer.write(ServerToClientModel.URL, url);
     }
 

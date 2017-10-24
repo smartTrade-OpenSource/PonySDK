@@ -87,8 +87,8 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
     }
 
     @Override
-    protected void enrichOnInit(final ModelWriter writer) {
-        super.enrichOnInit(writer);
+    protected void enrichForCreation(final ModelWriter writer) {
+        super.enrichForCreation(writer);
         writer.write(ServerToClientModel.PICKER, datePicker.getID());
         writer.write(ServerToClientModel.DATE_FORMAT_PATTERN, dateFormat.toPattern());
     }

@@ -115,8 +115,8 @@ public class PWindow extends PObject {
     }
 
     @Override
-    protected void enrichOnInit(final ModelWriter writer) {
-        super.enrichOnInit(writer);
+    protected void enrichForCreation(final ModelWriter writer) {
+        super.enrichForCreation(writer);
         writer.write(ServerToClientModel.RELATIVE, relative);
         writer.write(ServerToClientModel.URL, url);
         writer.write(ServerToClientModel.NAME, name);
@@ -131,7 +131,7 @@ public class PWindow extends PObject {
             if (window != PWindow.getMain()) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
             writer.write(ServerToClientModel.TYPE_CREATE, ID);
             writer.write(ServerToClientModel.WIDGET_TYPE, getWidgetType().getValue());
-            enrichOnInit(writer);
+            enrichForCreation(writer);
             writer.endObject();
             UIContext.get().registerObject(this);
 

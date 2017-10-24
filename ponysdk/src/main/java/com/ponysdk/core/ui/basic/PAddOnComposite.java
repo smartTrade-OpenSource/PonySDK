@@ -87,8 +87,8 @@ public abstract class PAddOnComposite<T extends PWidget> extends PAddOn implemen
     }
 
     @Override
-    protected void enrichOnInit(final ModelWriter writer) {
-        super.enrichOnInit(writer);
+    protected void enrichForCreation(final ModelWriter writer) {
+        super.enrichForCreation(writer);
         writer.write(ServerToClientModel.WIDGET_ID, widget.asWidget().getID());
     }
 

@@ -111,7 +111,8 @@ public abstract class PObject {
         if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
         writer.write(ServerToClientModel.TYPE_CREATE, ID);
         writer.write(ServerToClientModel.WIDGET_TYPE, getWidgetType().getValue());
-        enrichOnInit(writer);
+        enrichForCreation(writer);
+        enrichForUpdate(writer);
         writer.endObject();
 
         UIContext.get().registerObject(this);
@@ -129,12 +130,21 @@ public abstract class PObject {
     }
 
     /**
-     * Enrichs on the initialization
+     * Enrichs on the initialization for the creation
      *
      * @param writer
      *            the writer
      */
-    protected void enrichOnInit(final ModelWriter writer) {
+    protected void enrichForCreation(final ModelWriter writer) {
+    }
+
+    /**
+     * Enrichs on the initialization for the update
+     *
+     * @param writer
+     *            the writer
+     */
+    protected void enrichForUpdate(final ModelWriter writer) {
     }
 
     protected void init0() {

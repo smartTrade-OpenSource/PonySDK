@@ -72,8 +72,8 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
     }
 
     @Override
-    protected void enrichOnInit(final ModelWriter writer) {
-        super.enrichOnInit(writer);
+    protected void enrichForCreation(final ModelWriter writer) {
+        super.enrichForCreation(writer);
         writer.write(ServerToClientModel.TEXT, headerText);
 
         // TODO add ImageResources parametters ..
