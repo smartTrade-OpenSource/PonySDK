@@ -146,7 +146,7 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
     public void setDateFormat(final SimpleDateFormat dateFormat) {
         if (Objects.equals(this.dateFormat, dateFormat)) return;
         this.dateFormat = dateFormat;
-        saveUpdate(ServerToClientModel.DATE_FORMAT_PATTERN, dateFormat.toPattern());
+        if (initialized) saveUpdate(ServerToClientModel.DATE_FORMAT_PATTERN, dateFormat.toPattern());
     }
 
     @Override

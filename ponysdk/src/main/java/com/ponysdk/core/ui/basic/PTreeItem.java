@@ -107,7 +107,7 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
     public void setText(final String text) {
         if (Objects.equals(this.text, text)) return;
         this.text = text;
-        saveUpdate(ServerToClientModel.TEXT, text);
+        if (initialized) saveUpdate(ServerToClientModel.TEXT, text);
     }
 
     private void setTree(final PTree tree) {

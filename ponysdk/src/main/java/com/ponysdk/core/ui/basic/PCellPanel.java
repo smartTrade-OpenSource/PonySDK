@@ -89,7 +89,7 @@ public abstract class PCellPanel extends PComplexPanel {
     public void setBorderWidth(final Integer borderWidth) {
         if (Objects.equals(this.borderWidth, borderWidth)) return;
         this.borderWidth = borderWidth;
-        saveUpdate(ServerToClientModel.BORDER_WIDTH, borderWidth);
+        if (initialized) saveUpdate(ServerToClientModel.BORDER_WIDTH, borderWidth);
     }
 
     public Integer getSpacing() {
@@ -99,7 +99,7 @@ public abstract class PCellPanel extends PComplexPanel {
     public void setSpacing(final Integer spacing) {
         if (Objects.equals(this.spacing, spacing)) return;
         this.spacing = spacing;
-        saveUpdate(ServerToClientModel.SPACING, spacing);
+        if (initialized) saveUpdate(ServerToClientModel.SPACING, spacing);
     }
 
 }

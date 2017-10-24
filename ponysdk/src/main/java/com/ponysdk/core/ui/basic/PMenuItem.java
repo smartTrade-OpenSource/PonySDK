@@ -108,7 +108,7 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
         if (Objects.equals(this.text, text)) return;
         this.text = text;
         this.html = null;
-        saveUpdate(ServerToClientModel.TEXT, text);
+        if (initialized) saveUpdate(ServerToClientModel.TEXT, text);
     }
 
     @Override
@@ -121,7 +121,7 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
         if (Objects.equals(this.html, html)) return;
         this.html = html;
         this.text = null;
-        saveUpdate(ServerToClientModel.HTML, html);
+        if (initialized) saveUpdate(ServerToClientModel.HTML, html);
     }
 
     public void setCommand(final Runnable cmd) {
