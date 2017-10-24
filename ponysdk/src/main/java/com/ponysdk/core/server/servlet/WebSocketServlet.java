@@ -25,6 +25,9 @@ package com.ponysdk.core.server.servlet;
 
 import javax.servlet.ServletException;
 
+import org.eclipse.jetty.websocket.common.extensions.compress.DeflateFrameExtension;
+import org.eclipse.jetty.websocket.common.extensions.compress.PerMessageDeflateExtension;
+import org.eclipse.jetty.websocket.common.extensions.compress.XWebkitDeflateFrameExtension;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,9 +53,6 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
     @Override
     public void configure(final WebSocketServletFactory factory) {
-        // Remove compression capabilities to avoid a max buffer size bug
-        factory.getExtensionFactory().unregister("permessage-deflate");
-
         factory.getPolicy().setIdleTimeout(maxIdleTime);
         factory.setCreator((request, response) -> {
             // Force session creation if there is no session
