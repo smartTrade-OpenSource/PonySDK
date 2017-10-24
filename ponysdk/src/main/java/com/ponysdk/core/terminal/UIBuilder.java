@@ -134,7 +134,6 @@ public class UIBuilder {
 
                     window.postMessage(readerBuffer.slice(startPosition, endPosition));
                 } else {
-                    log.warning("The requested window " + requestedId + " doesn't exist anymore"); // TODO PERF LOG
                     readerBuffer.shiftNextBlock(false);
                 }
             } else if (ServerToClientModel.FRAME_ID == model) {
