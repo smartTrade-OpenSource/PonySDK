@@ -33,7 +33,10 @@ public abstract class ParentRequestBuilder implements RequestBuilder {
 
     public ParentRequestBuilder(final String id, final RequestCallback callback) {
         // From Main terminal to the matching window terminal
-        Browser.getWindow().setOnmessage(event -> callback.onDataReceived((Uint8Array) ((MessageEvent) event).getData()));
+        Browser.getWindow().setOnmessage(event -> {
+            final Object data = ((MessageEvent) event).getData();
+            if (data instanceof Uint8Array) callback.onDataReceived((Uint8Array) data);
+        });
 
         setReady(id);
     }
