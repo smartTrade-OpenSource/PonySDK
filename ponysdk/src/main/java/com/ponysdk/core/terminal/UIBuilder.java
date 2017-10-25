@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.terminal;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -373,6 +374,11 @@ public class UIBuilder {
         if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Data to send " + requestData.toString());
 
         requestBuilder.send(requestData);
+    }
+
+    public void sendExceptionMessageToServer(final Throwable t) {
+        sendErrorMessageToServer(
+            t.getClass().getCanonicalName() + " : " + t.getMessage() + " : " + Arrays.toString(t.getStackTrace()));
     }
 
     public void sendErrorMessageToServer(final String message) {

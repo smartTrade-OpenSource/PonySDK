@@ -170,7 +170,7 @@ public class PonySDK implements UncaughtExceptionHandler {
     @Override
     public void onUncaughtException(final Throwable e) {
         log.log(Level.SEVERE, "PonySDK has encountered an internal error : ", e);
-        uiBuilder.sendErrorMessageToServer(e.getMessage());
+        uiBuilder.sendExceptionMessageToServer(e);
     }
 
     public void close() {
