@@ -215,6 +215,10 @@ public class UIBuilder {
             buffer.readBinaryModel(); // Read ServerToClientModel.END element
         } catch (final AvoidBlockException e) {
             buffer.shiftNextBlock(false);
+        } catch (final Exception e) {
+            log.log(Level.SEVERE, "Error occured when reading data", e);
+            buffer.shiftNextBlock(false);
+            sendExceptionMessageToServer(e);
         }
     }
 
