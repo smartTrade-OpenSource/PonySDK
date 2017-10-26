@@ -273,6 +273,8 @@ public class PWindow extends PObject {
                 closeHandlers.clear();
             }
             onDestroy();
+        } else if (event.containsKey(ClientToServerModel.HANDLER_DESTROY.toStringValue())) {
+            onDestroy();
         } else {
             super.onClientData(event);
         }

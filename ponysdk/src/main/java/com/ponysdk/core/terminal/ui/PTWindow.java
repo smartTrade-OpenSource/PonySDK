@@ -82,7 +82,18 @@ public class PTWindow extends AbstractPTObject implements PostMessageHandler {
         final ServerToClientModel model = binaryModel.getModel();
         if (ServerToClientModel.OPEN == model) {
             window = Browser.getWindow().open(url, name, features);
-            window.setOnunload(event -> onClose());
+            // Window can be null if browser doesn't allow popup
+            if (window != null) {
+                window.setOnunload(event -> onClose());
+            } else {
+                log.log(Level.WARNING, "Can't open PTWindow #" + objectID + ". Check the browser's settings");
+
+                final PTInstruction instruction = new PTInstruction(objectID);
+                instruction.put(ClientToServerModel.HANDLER_DESTROY);
+                uiBuilder.sendDataToServer(instruction);
+
+                uiBuilder.sendWarningMessageToServer("Can't open PTWindow #" + objectID + ". Check the browser's settings", objectID);
+            }
             return true;
         } else if (ServerToClientModel.PRINT == model) {
             window.print();
