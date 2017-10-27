@@ -72,11 +72,8 @@ public class UIBuilder {
 
     private RequestBuilder requestBuilder;
 
-    private static class AvoidBlockException extends Exception {
-    }
-
     public void init(final RequestBuilder requestBuilder) {
-        if (log.isLoggable(Level.INFO)) log.info("Init request builder");
+        if (log.isLoggable(Level.INFO)) log.info("Init graphical system");
 
         this.requestBuilder = requestBuilder;
 
@@ -191,15 +188,13 @@ public class UIBuilder {
 
         try {
             if (ServerToClientModel.TYPE_CREATE == model) {
-                final int objectID = binaryModel.getIntValue();
-                processCreate(buffer, objectID);
-                processUpdate(buffer, objectID);
+                processCreate(buffer, binaryModel.getIntValue());
             } else if (ServerToClientModel.TYPE_UPDATE == model) {
                 processUpdate(buffer, binaryModel.getIntValue());
             } else if (ServerToClientModel.TYPE_ADD == model) {
                 processAdd(buffer, binaryModel.getIntValue());
             } else if (ServerToClientModel.TYPE_GC == model) {
-                processGC(binaryModel.getIntValue());
+                processGC(buffer, binaryModel.getIntValue());
             } else if (ServerToClientModel.TYPE_REMOVE == model) {
                 processRemove(buffer, binaryModel.getIntValue());
             } else if (ServerToClientModel.TYPE_ADD_HANDLER == model) {
@@ -212,17 +207,13 @@ public class UIBuilder {
                 log.log(Level.WARNING, "Unknown instruction type : " + binaryModel + " ; " + buffer.toString());
                 buffer.shiftNextBlock(false);
             }
-            buffer.readBinaryModel(); // Read ServerToClientModel.END element
-        } catch (final AvoidBlockException e) {
-            buffer.shiftNextBlock(false);
         } catch (final Exception e) {
-            log.log(Level.SEVERE, "Error occured when reading data", e);
             buffer.shiftNextBlock(false);
             sendExceptionMessageToServer(e);
         }
     }
 
-    private void processCreate(final ReaderBuffer buffer, final int objectID) throws AvoidBlockException {
+    private void processCreate(final ReaderBuffer buffer, final int objectID) {
         // ServerToClientModel.WIDGET_TYPE
         final WidgetType widgetType = WidgetType.fromRawValue(buffer.readBinaryModel().getByteValue());
 
@@ -230,13 +221,15 @@ public class UIBuilder {
         if (ptObject != null) {
             ptObject.create(buffer, objectID, this);
             objectByID.put(objectID, ptObject);
+
+            processUpdate(buffer, objectID);
         } else {
             log.warning("Cannot create PObject #" + objectID + " with widget type : " + widgetType);
-            throw new AvoidBlockException();
+            buffer.shiftNextBlock(false);
         }
     }
 
-    private void processAdd(final ReaderBuffer buffer, final int objectID) throws AvoidBlockException {
+    private void processAdd(final ReaderBuffer buffer, final int objectID) {
         final PTObject ptObject = getPTObject(objectID);
         if (ptObject != null) {
             // ServerToClientModel.PARENT_OBJECT_ID
@@ -244,18 +237,19 @@ public class UIBuilder {
             final PTObject parentObject = getPTObject(parentId);
             if (parentObject != null) {
                 parentObject.add(buffer, ptObject);
+                buffer.readBinaryModel(); // Read ServerToClientModel.END element
             } else {
                 log.warning("Cannot add " + ptObject + " to an garbaged parent object #" + parentId
                         + ", so we will consume all the buffer of this object");
-                throw new AvoidBlockException();
+                buffer.shiftNextBlock(false);
             }
         } else {
             log.warning("Add a null PTObject #" + objectID + ", so we will consume all the buffer of this object");
-            throw new AvoidBlockException();
+            buffer.shiftNextBlock(false);
         }
     }
 
-    private void processUpdate(final ReaderBuffer buffer, final int objectID) throws AvoidBlockException {
+    private void processUpdate(final ReaderBuffer buffer, final int objectID) {
         final PTObject ptObject = getPTObject(objectID);
         if (ptObject != null) {
             BinaryModel binaryModel;
@@ -267,13 +261,15 @@ public class UIBuilder {
             } while (result && buffer.hasEnoughKeyBytes());
 
             if (!result) buffer.rewind(binaryModel);
+
+            buffer.readBinaryModel(); // Read ServerToClientModel.END element
         } else {
             log.warning("Update on a null PTObject #" + objectID + ", so we will consume all the buffer of this object");
-            throw new AvoidBlockException();
+            buffer.shiftNextBlock(false);
         }
     }
 
-    private void processRemove(final ReaderBuffer buffer, final int objectID) throws AvoidBlockException {
+    private void processRemove(final ReaderBuffer buffer, final int objectID) {
         final PTObject ptObject = getPTObject(objectID);
         if (ptObject != null) {
             final int parentId = buffer.readBinaryModel().getIntValue();
@@ -281,17 +277,18 @@ public class UIBuilder {
 
             if (parentObject != null) {
                 parentObject.remove(buffer, ptObject);
+                buffer.readBinaryModel(); // Read ServerToClientModel.END element
             } else {
                 log.warning("Cannot remove " + ptObject + " on a garbaged object #" + parentId);
-                throw new AvoidBlockException();
+                buffer.shiftNextBlock(false);
             }
         } else {
             log.warning("Remove a null PTObject #" + objectID + ", so we will consume all the buffer of this object");
-            throw new AvoidBlockException();
+            buffer.shiftNextBlock(false);
         }
     }
 
-    private void processAddHandler(final ReaderBuffer buffer, final int objectID) throws AvoidBlockException {
+    private void processAddHandler(final ReaderBuffer buffer, final int objectID) {
         final PTObject ptObject = getPTObject(objectID);
 
         // ServerToClientModel.HANDLER_TYPE
@@ -299,23 +296,26 @@ public class UIBuilder {
 
         if (HandlerModel.HANDLER_STREAM_REQUEST == handlerModel) {
             new PTStreamResource().addHandler(buffer, handlerModel);
+            buffer.readBinaryModel(); // Read ServerToClientModel.END element
         } else if (ptObject != null) {
             ptObject.addHandler(buffer, handlerModel);
+            buffer.readBinaryModel(); // Read ServerToClientModel.END element
         } else {
             log.warning("Add handler on a null PTObject #" + objectID + ", so we will consume all the buffer of this object");
-            throw new AvoidBlockException();
+            buffer.shiftNextBlock(false);
         }
     }
 
-    private void processRemoveHandler(final ReaderBuffer buffer, final int objectID) throws AvoidBlockException {
+    private void processRemoveHandler(final ReaderBuffer buffer, final int objectID) {
         final PTObject ptObject = getPTObject(objectID);
         if (ptObject != null) {
             // ServerToClientModel.HANDLER_TYPE
             final HandlerModel handlerModel = HandlerModel.fromRawValue(buffer.readBinaryModel().getByteValue());
             ptObject.removeHandler(buffer, handlerModel);
+            buffer.readBinaryModel(); // Read ServerToClientModel.END element
         } else {
             log.warning("Remove handler on a null PTObject #" + objectID + ", so we will consume all the buffer of this object");
-            throw new AvoidBlockException();
+            buffer.shiftNextBlock(false);
         }
     }
 
@@ -329,15 +329,18 @@ public class UIBuilder {
         } else {
             History.newItem(token, fireEvents);
         }
+
+        buffer.readBinaryModel(); // Read ServerToClientModel.END element
     }
 
-    private void processGC(final int objectID) throws AvoidBlockException {
+    private void processGC(final ReaderBuffer buffer, final int objectID) {
         final PTObject ptObject = unregisterObject(objectID);
         if (ptObject != null) {
             ptObject.destroy();
+            buffer.readBinaryModel(); // Read ServerToClientModel.END element
         } else {
             log.warning("Cannot GC a garbaged PTObject #" + objectID);
-            throw new AvoidBlockException();
+            buffer.shiftNextBlock(false);
         }
     }
 
@@ -381,6 +384,7 @@ public class UIBuilder {
     }
 
     public void sendExceptionMessageToServer(final Throwable t) {
+        log.log(Level.SEVERE, "PonySDK has encountered an internal error : ", t);
         sendErrorMessageToServer(
             t.getClass().getCanonicalName() + " : " + t.getMessage() + " : " + Arrays.toString(t.getStackTrace()));
     }

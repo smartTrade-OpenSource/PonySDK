@@ -74,8 +74,6 @@ public class PonySDK implements UncaughtExceptionHandler {
     public void start() {
         if (started) return;
 
-        if (log.isLoggable(Level.INFO)) log.info("Starting PonySDK instance");
-
         GWT.setUncaughtExceptionHandler(this);
 
         try {
@@ -169,7 +167,6 @@ public class PonySDK implements UncaughtExceptionHandler {
 
     @Override
     public void onUncaughtException(final Throwable e) {
-        log.log(Level.SEVERE, "PonySDK has encountered an internal error : ", e);
         uiBuilder.sendExceptionMessageToServer(e);
     }
 
