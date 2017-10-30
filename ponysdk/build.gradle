@@ -231,5 +231,5 @@ artifacts {
     archives sourcesJar
 }
 
-jar.dependsOn('gwtc')
+//jar.dependsOn('gwtc')
 jar.dependsOn('gwtcDebug')
