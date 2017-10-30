@@ -95,22 +95,24 @@ public class UIBuilder {
     public void updateMainTerminal(final Uint8Array buffer) {
         readerBuffer.init(buffer);
 
-        while (readerBuffer.hasEnoughKeyBytes()) {
-            final int nextBlockPosition = readerBuffer.shiftNextBlock(true);
-            if (nextBlockPosition == ReaderBuffer.NOT_FULL_BUFFER_POSITION) return;
+        Browser.getWindow().webkitRequestAnimationFrame(e-> {
 
-            // Detect if the message is not for the main terminal but for a specific window
-            final BinaryModel binaryModel = readerBuffer.readBinaryModel();
-            final ServerToClientModel model = binaryModel.getModel();
+            while (readerBuffer.hasEnoughKeyBytes()) {
+                final int nextBlockPosition = readerBuffer.shiftNextBlock(true);
+                if (nextBlockPosition == ReaderBuffer.NOT_FULL_BUFFER_POSITION) return true;
 
-            if (ServerToClientModel.WINDOW_ID == model) {
-                // Event on a specific window
-                final int requestedId = binaryModel.getIntValue();
-                // Main terminal, we need to dispatch the eventbus
-                final PTWindow window = PTWindowManager.getWindow(requestedId);
-                if (window != null && window.isReady()) {
-                    final int startPosition = readerBuffer.getPosition();
-                    int endPosition = nextBlockPosition;
+                // Detect if the message is not for the main terminal but for a specific window
+                final BinaryModel binaryModel = readerBuffer.readBinaryModel();
+                final ServerToClientModel model = binaryModel.getModel();
+
+                if (ServerToClientModel.WINDOW_ID == model) {
+                    // Event on a specific window
+                    final int requestedId = binaryModel.getIntValue();
+                    // Main terminal, we need to dispatch the eventbus
+                    final PTWindow window = PTWindowManager.getWindow(requestedId);
+                    if (window != null && window.isReady()) {
+                        final int startPosition = readerBuffer.getPosition();
+                        int endPosition = nextBlockPosition;
 
                     // Concat multiple messages for the same window
                     readerBuffer.setPosition(endPosition);
@@ -155,6 +157,9 @@ public class UIBuilder {
                 update(binaryModel, readerBuffer);
             }
         }
+
+            return true;
+        });
     }
 
     public void updateWindowTerminal(final Uint8Array buffer) {
