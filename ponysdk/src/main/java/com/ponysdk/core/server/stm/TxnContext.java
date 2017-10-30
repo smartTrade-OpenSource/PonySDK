@@ -34,7 +34,6 @@ public class TxnContext implements TxnListener {
     private final WebSocket socket;
     private final ModelWriter modelWriter;
 
-    private boolean flushNow = false;
     private Application application;
 
     private UIContext uiContext;
@@ -51,11 +50,6 @@ public class TxnContext implements TxnListener {
 
     @Override
     public void beforeFlush(final TxnContext txnContext) {
-        if (!flushNow) return;
-
-        flushNow = false;
-
-        Txn.get().flush();
     }
 
     @Override
@@ -112,6 +106,6 @@ public class TxnContext implements TxnListener {
 
     @Override
     public String toString() {
-        return "TxnContext{" + "flushNow=" + flushNow + ", application=" + application + ", uiContext=" + uiContext + '}';
+        return "TxnContext{ application=" + application + ", uiContext=" + uiContext + '}';
     }
 }
