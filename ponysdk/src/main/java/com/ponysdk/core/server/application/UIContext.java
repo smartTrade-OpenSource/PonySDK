@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -107,7 +106,7 @@ public class UIContext {
 
     private boolean living = true;
 
-    private final ConcurrentBoundedLinkedQueue<Long> pings = new ConcurrentBoundedLinkedQueue<>(10);
+    private final Latency latency = new Latency(10);
 
     /**
      * The default constructor
@@ -777,7 +776,7 @@ public class UIContext {
      *            the ping value
      */
     public void addPingValue(final long pingValue) {
-        pings.add(pingValue);
+        latency.add(pingValue);
     }
 
     /**
@@ -786,33 +785,32 @@ public class UIContext {
      * @return the lantency
      */
     public double getLatency() {
-        return pings.stream().mapToLong(Long::longValue).average().orElse(0);
+        return latency.getValue();
     }
 
-    /**
-     * A {@link ConcurrentLinkedQueue} that is bounded with a size limit
-     *
-     * @param <E>
-     *            the type of elements held in this collection
-     */
-    private static final class ConcurrentBoundedLinkedQueue<E> extends ConcurrentLinkedQueue<E> {
+    private static final class Latency {
 
-        private final int limit;
+        private int index = 0;
+        private final long[] values;
 
-        /**
-         * The default constructor
-         *
-         * @param limit
-         *            the size limit of the list
-         */
-        public ConcurrentBoundedLinkedQueue(final int limit) {
-            this.limit = limit;
+        private Latency(final int size) {
+            values = new long[size];
+            for (int i = 0; i < values.length; i++) {
+                values[i] = 0L;
+            }
         }
 
-        @Override
-        public boolean add(final E e) {
-            if (this.size() == this.limit) this.remove();
-            return super.add(e);
+        public void add(final long value) {
+            values[index++] = value;
+            if (index >= values.length) index = 0;
+        }
+
+        public double getValue() {
+            double average = 0;
+            for (final long value : values) {
+                average += value;
+            }
+            return average / values.length;
         }
     }
 
