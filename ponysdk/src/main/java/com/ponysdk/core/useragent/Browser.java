@@ -424,6 +424,7 @@ public enum Browser {
     }
 
     private Browser checkUserAgent(final String agentString) {
+        if(agentString == null) return Browser.UNKNOWN;
         if (this.isInUserAgentString(agentString)) {
             if (!this.children.isEmpty()) {
                 for (final Browser childBrowser : this.children) {
@@ -440,7 +441,7 @@ public enum Browser {
             }
 
         }
-        return null;
+        return Browser.UNKNOWN;
     }
 
 }
