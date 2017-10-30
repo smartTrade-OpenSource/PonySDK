@@ -23,32 +23,30 @@
 
 package com.ponysdk.core.terminal.socket;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.google.gwt.core.client.Scheduler;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.terminal.ReconnectionChecker;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.request.WebSocketRequestBuilder;
+
 import elemental.client.Browser;
 import elemental.events.CloseEvent;
-import elemental.events.Event;
 import elemental.events.MessageEvent;
 import elemental.html.ArrayBuffer;
 import elemental.html.WebSocket;
 import elemental.html.Window;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-public class WebSocketClient{
+public class WebSocketClient {
 
     private static final Logger log = Logger.getLogger(WebSocketClient.class.getName());
 
-    private final UIBuilder uiBuilder;
     private final Window window;
     private final WebSocket webSocket;
 
     public WebSocketClient(final String url, final UIBuilder uiBuilder, final ReconnectionChecker reconnectionChecker) {
-        this.uiBuilder = uiBuilder;
         this.window = Browser.getWindow();
         this.webSocket = window.newWebSocket(url);
         this.webSocket.setBinaryType("arraybuffer");
@@ -81,16 +79,17 @@ public class WebSocketClient{
         });
 
         webSocket.setOnerror(event -> log.severe("WebSocket error : " + event));
-        webSocket.setOnmessage(this::read);
-    }
-
-    public void read(final Event event) {
-        ArrayBuffer buffer =  (ArrayBuffer) ((MessageEvent)event).getData(); //TODO nciaravola avoid cast ?
-        try {
-            uiBuilder.updateMainTerminal(window.newUint8Array(buffer, 0, buffer.getByteLength()));
-        } catch (final Exception e) {
-            log.log(Level.SEVERE, "Error while processing the " + buffer, e);
-        }
+        webSocket.setOnmessage(event -> {
+            final Object data = ((MessageEvent) event).getData();
+            if (data instanceof ArrayBuffer) {
+                final ArrayBuffer buffer = (ArrayBuffer) data; //TODO nciaravola avoid cast ?
+                try {
+                    uiBuilder.updateMainTerminal(window.newUint8Array(buffer, 0, buffer.getByteLength()));
+                } catch (final Exception e) {
+                    log.log(Level.SEVERE, "Error while processing the " + buffer, e);
+                }
+            }
+        });
     }
 
     public void send(final String message) {
