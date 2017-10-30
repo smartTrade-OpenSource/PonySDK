@@ -41,7 +41,6 @@ import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.request.FrameRequestBuilder;
 import com.ponysdk.core.terminal.request.WindowRequestBuilder;
 import com.ponysdk.core.terminal.socket.WebSocketClient;
-import com.ponysdk.core.terminal.socket.WebSocketClient.WebSocketDataType;
 import com.ponysdk.core.terminal.ui.PTObject;
 import com.ponysdk.core.terminal.ui.PTWindowManager;
 
@@ -93,7 +92,7 @@ public class PonySDK implements UncaughtExceptionHandler {
         final String builder = GWT.getHostPageBaseURL().replaceFirst("http", "ws") + MappingPath.WEBSOCKET + "?"
                 + ClientToServerModel.TYPE_HISTORY.toStringValue() + "=" + History.getToken();
         final ReconnectionChecker reconnectionChecker = new ReconnectionChecker();
-        socketClient = new WebSocketClient(builder, uiBuilder, WebSocketDataType.ARRAYBUFFER, reconnectionChecker);
+        socketClient = new WebSocketClient(builder, uiBuilder, reconnectionChecker);
 
         reconnectionChecker.checkConnection();
     }

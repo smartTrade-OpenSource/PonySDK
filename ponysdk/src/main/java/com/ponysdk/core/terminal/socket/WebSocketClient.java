@@ -23,49 +23,41 @@
 
 package com.ponysdk.core.terminal.socket;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.google.gwt.core.client.Scheduler;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.terminal.ReconnectionChecker;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.request.WebSocketRequestBuilder;
-
 import elemental.client.Browser;
 import elemental.events.CloseEvent;
+import elemental.events.Event;
 import elemental.events.MessageEvent;
 import elemental.html.ArrayBuffer;
 import elemental.html.WebSocket;
 import elemental.html.Window;
 
-public class WebSocketClient implements MessageSender {
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+public class WebSocketClient{
 
     private static final Logger log = Logger.getLogger(WebSocketClient.class.getName());
 
-    private final WebSocket webSocket;
     private final UIBuilder uiBuilder;
-
     private final Window window;
+    private final WebSocket webSocket;
 
-    private boolean initialized;
-
-    public WebSocketClient(final String url, final UIBuilder uiBuilder, final WebSocketDataType webSocketDataType,
-            final ReconnectionChecker reconnectionChecker) {
+    public WebSocketClient(final String url, final UIBuilder uiBuilder, final ReconnectionChecker reconnectionChecker) {
         this.uiBuilder = uiBuilder;
-
-        window = Browser.getWindow();
-        webSocket = window.newWebSocket(url);
-        webSocket.setBinaryType(webSocketDataType.getName());
-
-        final MessageReader messageReader;
-        if (WebSocketDataType.ARRAYBUFFER == webSocketDataType) messageReader = new ArrayBufferReader(this);
-        else if (WebSocketDataType.BLOB == webSocketDataType) messageReader = new BlobReader(this);
-        else throw new IllegalArgumentException("Wrong reader type : " + webSocketDataType);
+        this.window = Browser.getWindow();
+        this.webSocket = window.newWebSocket(url);
+        this.webSocket.setBinaryType("arraybuffer");
 
         webSocket.setOnopen(event -> {
-            if (log.isLoggable(Level.INFO)) log.info("WebSocket connected");
+            uiBuilder.init(new WebSocketRequestBuilder(WebSocketClient.this));
 
+            if (log.isLoggable(Level.INFO)) log.info("WebSocket connected");
+            //TODO nciaravola send ping block processs ?
             Scheduler.get().scheduleFixedDelay(() -> {
                 if (webSocket.getReadyState() == WebSocket.OPEN) {
                     if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Heart beat sent");
@@ -74,6 +66,7 @@ public class WebSocketClient implements MessageSender {
                 return true;
             }, 1000);
         });
+
         webSocket.setOnclose(event -> {
             if (event instanceof CloseEvent) {
                 final CloseEvent closeEvent = (CloseEvent) event;
@@ -86,21 +79,17 @@ public class WebSocketClient implements MessageSender {
                 reconnectionChecker.detectConnectionFailure();
             }
         });
+
         webSocket.setOnerror(event -> log.severe("WebSocket error : " + event));
-        webSocket.setOnmessage(event -> messageReader.read((MessageEvent) event));
+        webSocket.setOnmessage(this::read);
     }
 
-    @Override
-    public void read(final ArrayBuffer arrayBuffer) {
+    public void read(final Event event) {
+        ArrayBuffer buffer =  (ArrayBuffer) ((MessageEvent)event).getData(); //TODO nciaravola avoid cast ?
         try {
-            if (!initialized) {
-                uiBuilder.init(new WebSocketRequestBuilder(WebSocketClient.this));
-                initialized = true;
-            }
-
-            uiBuilder.updateMainTerminal(window.newUint8Array(arrayBuffer, 0, arrayBuffer.getByteLength()));
+            uiBuilder.updateMainTerminal(window.newUint8Array(buffer, 0, buffer.getByteLength()));
         } catch (final Exception e) {
-            log.log(Level.SEVERE, "Error while processing the " + arrayBuffer, e);
+            log.log(Level.SEVERE, "Error while processing the " + buffer, e);
         }
     }
 
@@ -110,27 +99,6 @@ public class WebSocketClient implements MessageSender {
 
     public void close() {
         webSocket.close();
-    }
-
-    public enum WebSocketDataType {
-
-        ARRAYBUFFER("arraybuffer"),
-        BLOB("blob");
-
-        private String name;
-
-        WebSocketDataType(final String name) {
-            this.name = name;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        @Override
-        public String toString() {
-            return getName();
-        }
     }
 
 }
