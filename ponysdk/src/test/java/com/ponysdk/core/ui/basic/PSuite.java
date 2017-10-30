@@ -23,11 +23,13 @@
 
 package com.ponysdk.core.ui.basic;
 
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.mockito.Mockito;
 
 import com.ponysdk.core.server.application.Application;
 import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.servlet.WebSocket;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.server.stm.TxnContext;
 import com.ponysdk.core.writer.ModelWriter;
@@ -36,8 +38,7 @@ public class PSuite {
 
     @BeforeClass
     public static void beforeClass() {
-        //Element.f = new TestElementFactory();
-        final TxnContext context = Mockito.spy(new TxnContext(null));
+        final TxnContext context = Mockito.spy(new TxnContext(Mockito.mock(WebSocket.class)));
         final ModelWriter mw = Mockito.mock(ModelWriter.class);
         Mockito.when(context.getWriter()).thenReturn(mw);
 
@@ -47,6 +48,11 @@ public class PSuite {
         Txn.get().begin(context);
         final UIContext uiContext = Mockito.spy(new UIContext(context));
         UIContext.setCurrent(uiContext);
+    }
+
+    @AfterClass
+    public static void afterClass() {
+        Txn.get().commit();
     }
 
 }
