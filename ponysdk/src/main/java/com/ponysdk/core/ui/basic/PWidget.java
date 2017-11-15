@@ -35,6 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.json.JsonArray;
 import javax.json.JsonNumber;
 import javax.json.JsonObject;
+import javax.json.JsonValue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -490,6 +491,10 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
             event.setClientX(((JsonNumber) eventInfo.get(2)).intValue());
             event.setClientY(((JsonNumber) eventInfo.get(3)).intValue());
             event.setNativeButton(((JsonNumber) eventInfo.get(4)).intValue());
+            event.setControlKeyDown(JsonValue.TRUE.equals(eventInfo.get(5)));
+            event.setAltKeyDown(JsonValue.TRUE.equals(eventInfo.get(6)));
+            event.setShiftKeyDown(JsonValue.TRUE.equals(eventInfo.get(7)));
+            event.setMetaKeyDown(JsonValue.TRUE.equals(eventInfo.get(8)));
         }
 
         final String widgetPositionKey = ClientToServerModel.WIDGET_POSITION.toStringValue();

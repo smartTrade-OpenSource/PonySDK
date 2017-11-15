@@ -37,6 +37,11 @@ public abstract class PMouseEvent<H extends EventHandler> extends PHumanInputEve
     private int sourceOffsetHeight;
     private int sourceOffsetWidth;
 
+    private boolean controlKeyDown;
+    private boolean altKeyDown;
+    private boolean shiftKeyDown;
+    private boolean metaKeyDown;
+
     public PMouseEvent(final Object sourceComponent) {
         super(sourceComponent);
     }
@@ -111,6 +116,38 @@ public abstract class PMouseEvent<H extends EventHandler> extends PHumanInputEve
 
     public void setY(final int y) {
         this.y = y;
+    }
+
+    public void setControlKeyDown(final boolean controlKeyDown) {
+        this.controlKeyDown = controlKeyDown;
+    }
+
+    public boolean isControlKeyDown() {
+        return controlKeyDown;
+    }
+
+    public void setAltKeyDown(final boolean altKeyDown) {
+        this.altKeyDown = altKeyDown;
+    }
+
+    public boolean isAltKeyDown() {
+        return altKeyDown;
+    }
+
+    public void setShiftKeyDown(final boolean shiftKeyDown) {
+        this.shiftKeyDown = shiftKeyDown;
+    }
+
+    public boolean isShiftKeyDown() {
+        return shiftKeyDown;
+    }
+
+    public void setMetaKeyDown(final boolean metaKeyDown) {
+        this.metaKeyDown = metaKeyDown;
+    }
+
+    public boolean isMetaKeyDown() {
+        return metaKeyDown;
     }
 
     @Override

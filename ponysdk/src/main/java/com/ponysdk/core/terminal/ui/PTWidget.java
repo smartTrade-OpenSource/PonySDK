@@ -49,6 +49,7 @@ import com.google.gwt.event.dom.client.MouseOverEvent;
 import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseWheelEvent;
 import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONBoolean;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.IsWidget;
@@ -271,6 +272,10 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
         eventInfo.set(2, new JSONNumber(event.getX()));
         eventInfo.set(3, new JSONNumber(event.getY()));
         eventInfo.set(4, new JSONNumber(event.getNativeButton()));
+        eventInfo.set(5, JSONBoolean.getInstance(event.isControlKeyDown()));
+        eventInfo.set(6, JSONBoolean.getInstance(event.isAltKeyDown()));
+        eventInfo.set(7, JSONBoolean.getInstance(event.isShiftKeyDown()));
+        eventInfo.set(8, JSONBoolean.getInstance(event.isMetaKeyDown()));
         eventInstruction.put(ClientToServerModel.EVENT_INFO, eventInfo);
 
         final JSONArray widgetInfo = new JSONArray();
