@@ -34,7 +34,6 @@ import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.ponysdk.core.model.ClientToServerModel;
@@ -70,14 +69,7 @@ public class PTPopupPanel<T extends PopupPanel> extends PTSimplePanel<T>
 
     @Override
     protected T createUIObject() {
-        final PopupPanel popupPanel = new PopupPanel(autoHide) {
-
-            @Override
-            protected void onPreviewNativeEvent(final NativePreviewEvent event) {
-                PTPopupPanel.this.onPreviewNativeEvent(event);
-                super.onPreviewNativeEvent(event);
-            }
-        };
+        final PopupPanel popupPanel = new PopupPanel(autoHide);
 
         popupPanel.addCloseHandler(event -> {
             final PTInstruction instruction = new PTInstruction(getObjectID());
@@ -161,16 +153,6 @@ public class PTPopupPanel<T extends PopupPanel> extends PTSimplePanel<T>
     public void onMouseUp(final MouseUpEvent event) {
         dragging = false;
         DOM.releaseCapture(uiObject.getElement());
-    }
-
-    private void onPreviewNativeEvent(final NativePreviewEvent event) {
-        // NativeEvent nativeEvent = eventbus.getNativeEvent();
-        //
-        // if (!eventbus.isCanceled() && (eventbus.getTypeInt() == Event.ONMOUSEDOWN)
-        // /* &&
-        // isCaptionEvent(nativeEvent) */) {
-        // nativeEvent.preventDefault();
-        // }
     }
 
     @Override
