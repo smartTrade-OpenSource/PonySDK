@@ -78,9 +78,13 @@ public class ReaderBuffer {
                                                                            Uint8Array.prototype.setElements = function(array, offset) { this.set(array, offset) };
                                                                            }-*/;
 
-    private static final native String fromCharCode(ArrayBufferView buffer, int position, int size) /*-{
+    private static final native String decode(ArrayBufferView buffer, int position, int size) /*-{
                                                                                                     return $wnd.decode(buffer, position, size);
                                                                                                     }-*/;
+
+    private static final native String fromCharCode(Uint8Array buffer) /*-{
+                                                                       return String.fromCharCode.apply(null, buffer);
+                                                                       }-*/;
 
     public int getPosition() {
         return position;
@@ -99,6 +103,11 @@ public class ReaderBuffer {
             size += ValueTypeModel.INTEGER_SIZE;
             currentBinaryModel.init(key, getInt(), size);
         } else if (ValueTypeModel.STRING == typeModel) {
+            size += ValueTypeModel.SHORT_SIZE;
+            final int messageSize = getUnsignedShort();
+            size += messageSize;
+            currentBinaryModel.init(key, getStringSimple(messageSize), size);
+        } else if (ValueTypeModel.STRING_UTF8 == typeModel) {
             size += ValueTypeModel.SHORT_SIZE;
             final int messageSize = getUnsignedShort();
             size += messageSize;
@@ -122,14 +131,14 @@ public class ReaderBuffer {
             size += ValueTypeModel.BYTE_SIZE;
             final short messageDoubleSize = getUnsignedByte();
             size += messageDoubleSize;
-            currentBinaryModel.init(key, Double.parseDouble(getString(messageDoubleSize)), size);
+            currentBinaryModel.init(key, Double.parseDouble(getStringSimple(messageDoubleSize)), size);
         } else if (ValueTypeModel.LONG == typeModel) {
             // TODO Read really a long
             // return new BinaryModel(key, getLong(), size);
             size += ValueTypeModel.BYTE_SIZE;
             final short messageLongSize = getUnsignedByte();
             size += messageLongSize;
-            currentBinaryModel.init(key, Long.parseLong(getString(messageLongSize)), size);
+            currentBinaryModel.init(key, Long.parseLong(getStringSimple(messageLongSize)), size);
         } else if (ValueTypeModel.SHORT == typeModel) {
             size += ValueTypeModel.SHORT_SIZE;
             currentBinaryModel.init(key, getShort(), size);
@@ -185,19 +194,10 @@ public class ReaderBuffer {
         return getInt() & 0xFFFFFF;
     }
 
-    private JSONObject getJson(final int msgSize) {
-        final String s = getString(msgSize);
-        try {
-            return s != null ? JSONParser.parseStrict(s).isObject() : null;
-        } catch (final JSONException e) {
-            throw new JSONException(e.getMessage() + " : " + s, e);
-        }
-    }
-
-    private String getString(final int size) {
+    private String getStringSimple(final int size) {
         if (size != 0) {
             if (hasEnoughRemainingBytes(size)) {
-                final String result = fromCharCode(buffer, position, position + size);
+                final String result = fromCharCode(buffer.subarray(position, position + size));
                 position += size;
                 return result;
             } else {
@@ -205,6 +205,29 @@ public class ReaderBuffer {
             }
         } else {
             return null;
+        }
+    }
+
+    private String getString(final int size) {
+        if (size != 0) {
+            if (hasEnoughRemainingBytes(size)) {
+                final String result = decode(buffer, position, position + size);
+                position += size;
+                return result;
+            } else {
+                throw new ArrayIndexOutOfBoundsException();
+            }
+        } else {
+            return null;
+        }
+    }
+
+    private JSONObject getJson(final int msgSize) {
+        final String s = getString(msgSize);
+        try {
+            return s != null ? JSONParser.parseStrict(s).isObject() : null;
+        } catch (final JSONException e) {
+            throw new JSONException(e.getMessage() + " : " + s, e);
         }
     }
 
@@ -258,6 +281,9 @@ public class ReaderBuffer {
         if (ValueTypeModel.INTEGER == typeModel) {
             position += ValueTypeModel.INTEGER_SIZE;
         } else if (ValueTypeModel.STRING == typeModel) {
+            final int stringSize = getUnsignedShort();
+            position += stringSize;
+        } else if (ValueTypeModel.STRING_UTF8 == typeModel) {
             final int stringSize = getUnsignedShort();
             position += stringSize;
         } else if (ValueTypeModel.JSON_OBJECT == typeModel) {

@@ -119,6 +119,7 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
                     write(model, (double) value);
                     break;
                 case STRING:
+                case STRING_UTF8:
                     write(model, (String) value);
                     break;
                 case JSON_OBJECT:

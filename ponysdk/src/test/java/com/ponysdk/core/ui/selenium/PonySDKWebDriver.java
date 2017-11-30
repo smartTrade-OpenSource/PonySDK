@@ -167,9 +167,10 @@ public class PonySDKWebDriver implements WebDriver, MessageHandler.Whole<ByteBuf
                         break;
                     case INTEGER:
                         if (buffer.remaining() > 4) value = buffer.getInt();
-                        else System.err.println("Not enought : ");
+                        else System.err.println("Not enough : ");
                         break;
-                    case STRING: {
+                    case STRING:
+                    case STRING_UTF8: {
                         final int size = buffer.getShort();
 
                         if (buffer.remaining() > size) {
@@ -177,12 +178,11 @@ public class PonySDKWebDriver implements WebDriver, MessageHandler.Whole<ByteBuf
                             buffer.get(bytes);
                             value = new String(bytes, Charset.forName("UTF8"));
                         } else {
-                            System.err.println("Not enought : ");
+                            System.err.println("Not enough : ");
                             return;
                         }
                         break;
                     }
-
                     case LONG: {
                         final int size = getUnsignedByte(buffer);
 
@@ -191,12 +191,11 @@ public class PonySDKWebDriver implements WebDriver, MessageHandler.Whole<ByteBuf
                             buffer.get(bytes);
                             value = new String(bytes, Charset.forName("UTF8"));
                         } else {
-                            System.err.println("Not enought : ");
+                            System.err.println("Not enough : ");
                             return;
                         }
                         break;
                     }
-
                     case DOUBLE: {
                         final int size = buffer.getShort();
 
@@ -205,14 +204,13 @@ public class PonySDKWebDriver implements WebDriver, MessageHandler.Whole<ByteBuf
                             buffer.get(bytes);
                             value = new String(bytes, Charset.forName("UTF8"));//Cast to Double
                         } else {
-                            System.err.println("Not enought : ");
+                            System.err.println("Not enough : ");
                             return;
                         }
                         break;
                     }
                     default:
                         System.err.println("not used " + model.getTypeModel());
-
                 }
 
                 switch (model) {

@@ -142,6 +142,7 @@ public class BinaryModel {
         else if (ValueTypeModel.LONG == typeModel) return model + " => " + longValue;
         else if (ValueTypeModel.DOUBLE == typeModel) return model + " => " + doubleValue;
         else if (ValueTypeModel.STRING == typeModel) return model + " => " + stringValue;
+        else if (ValueTypeModel.STRING_UTF8 == typeModel) return model + " => " + stringValue;
         else if (ValueTypeModel.JSON_OBJECT == typeModel) return model + " => " + jsonObject;
         else throw new IllegalArgumentException("No model type configured : " + typeModel);
     }
