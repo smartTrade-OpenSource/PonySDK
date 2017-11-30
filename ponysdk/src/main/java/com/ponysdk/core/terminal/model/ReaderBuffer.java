@@ -225,7 +225,7 @@ public class ReaderBuffer {
     private JSONObject getJson(final int msgSize) {
         final String s = getString(msgSize);
         try {
-            return s != null ? JSONParser.parseStrict(s).isObject() : null;
+            return s != null ? JSONParser.parseLenient(s).isObject() : null;
         } catch (final JSONException e) {
             throw new JSONException(e.getMessage() + " : " + s, e);
         }
