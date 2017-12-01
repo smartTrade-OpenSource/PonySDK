@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import javax.json.JsonArray;
 import javax.json.JsonNumber;
@@ -115,6 +116,14 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     private Set<PDomEvent.Type> oneTimeHandlerCreation;
 
     protected PWidget() {
+    }
+
+    @Override
+    protected void enrichForUpdate(final ModelWriter writer) {
+        super.enrichForUpdate(writer);
+        if (styleNames != null && !styleNames.isEmpty()) {
+            writer.write(ServerToClientModel.ADD_STYLE_NAME, styleNames.stream().collect(Collectors.joining(" ")));
+        }
     }
 
     static PWidget asWidgetOrNull(final IsPWidget w) {
@@ -295,19 +304,19 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     }
 
     public void addStyleName(final String styleName) {
-        if (safeStyleName().add(styleName)) saveUpdate(writer -> writer.write(ServerToClientModel.ADD_STYLE_NAME, styleName));
+        if (!styleName.isEmpty() && safeStyleName().add(styleName) && initialized) {
+            saveUpdate(writer -> writer.write(ServerToClientModel.ADD_STYLE_NAME, styleName));
+        }
     }
 
     public void removeStyleName(final String styleName) {
-        if (styleNames != null && styleNames.remove(styleName)) removeStyle(styleName);
-    }
-
-    private void removeStyle(final String styleName) {
-        saveUpdate(writer -> writer.write(ServerToClientModel.REMOVE_STYLE_NAME, styleName));
+        if (styleNames != null && !styleName.isEmpty() && styleNames.remove(styleName) && initialized) {
+            saveUpdate(writer -> writer.write(ServerToClientModel.REMOVE_STYLE_NAME, styleName));
+        }
     }
 
     public boolean hasStyleName(final String styleName) {
-        return styleNames != null && styleNames.contains(styleName);
+        return styleNames != null && !styleName.isEmpty() && styleNames.contains(styleName);
     }
 
     public Object getData() {
