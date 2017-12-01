@@ -106,12 +106,12 @@ public class ReaderBuffer {
             size += ValueTypeModel.SHORT_SIZE;
             final int messageSize = getUnsignedShort();
             size += messageSize;
-            currentBinaryModel.init(key, getStringSimple(messageSize), size);
+            currentBinaryModel.init(key, getString(messageSize), size);
         } else if (ValueTypeModel.STRING_UTF8 == typeModel) {
             size += ValueTypeModel.SHORT_SIZE;
             final int messageSize = getUnsignedShort();
             size += messageSize;
-            currentBinaryModel.init(key, getString(messageSize), size);
+            currentBinaryModel.init(key, getStringUTF8(messageSize), size);
         } else if (ValueTypeModel.JSON_OBJECT == typeModel) {
             size += ValueTypeModel.INTEGER_SIZE;
             final int jsonSize = getInt();
@@ -131,14 +131,14 @@ public class ReaderBuffer {
             size += ValueTypeModel.BYTE_SIZE;
             final short messageDoubleSize = getUnsignedByte();
             size += messageDoubleSize;
-            currentBinaryModel.init(key, Double.parseDouble(getStringSimple(messageDoubleSize)), size);
+            currentBinaryModel.init(key, Double.parseDouble(getString(messageDoubleSize)), size);
         } else if (ValueTypeModel.LONG == typeModel) {
             // TODO Read really a long
             // return new BinaryModel(key, getLong(), size);
             size += ValueTypeModel.BYTE_SIZE;
             final short messageLongSize = getUnsignedByte();
             size += messageLongSize;
-            currentBinaryModel.init(key, Long.parseLong(getStringSimple(messageLongSize)), size);
+            currentBinaryModel.init(key, Long.parseLong(getString(messageLongSize)), size);
         } else if (ValueTypeModel.SHORT == typeModel) {
             size += ValueTypeModel.SHORT_SIZE;
             currentBinaryModel.init(key, getShort(), size);
@@ -194,7 +194,7 @@ public class ReaderBuffer {
         return getInt() & 0xFFFFFF;
     }
 
-    private String getStringSimple(final int size) {
+    private String getString(final int size) {
         if (size != 0) {
             if (hasEnoughRemainingBytes(size)) {
                 final String result = fromCharCode(buffer.subarray(position, position + size));
@@ -208,7 +208,7 @@ public class ReaderBuffer {
         }
     }
 
-    private String getString(final int size) {
+    private String getStringUTF8(final int size) {
         if (size != 0) {
             if (hasEnoughRemainingBytes(size)) {
                 final String result = decode(buffer, position, position + size);
@@ -223,7 +223,7 @@ public class ReaderBuffer {
     }
 
     private JSONObject getJson(final int msgSize) {
-        final String s = getString(msgSize);
+        final String s = getStringUTF8(msgSize);
         try {
             return s != null ? JSONParser.parseLenient(s).isObject() : null;
         } catch (final JSONException e) {

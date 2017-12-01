@@ -26,6 +26,7 @@ package com.ponysdk.core.server.servlet;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
 import javax.json.JsonObject;
 
@@ -45,7 +46,8 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
     private static final byte TRUE = 1;
     private static final byte FALSE = 0;
 
-    private static final String ENCODING_CHARSET = "UTF-8";
+    private static final Charset STANDARD_CHARSET = Charset.forName("ISO-8859-1");
+    private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
 
     private static final int MAX_UNSIGNED_BYTE_VALUE = Byte.MAX_VALUE * 2 + 1;
     private static final int MAX_UNSIGNED_SHORT_VALUE = Short.MAX_VALUE * 2 + 1;
@@ -119,8 +121,10 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
                     write(model, (double) value);
                     break;
                 case STRING:
+                    write(model, (String) value, STANDARD_CHARSET);
+                    break;
                 case STRING_UTF8:
-                    write(model, (String) value);
+                    write(model, (String) value, UTF8_CHARSET);
                     break;
                 case JSON_OBJECT:
                     write(model, (JsonObject) value);
@@ -164,7 +168,7 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
         putModelKey(model);
 
         try {
-            final byte[] bytes = value.getBytes(ENCODING_CHARSET);
+            final byte[] bytes = value.getBytes(STANDARD_CHARSET);
             final int length = bytes.length;
             if (length <= MAX_UNSIGNED_BYTE_VALUE) {
                 putUnsignedByte((short) length);
@@ -184,7 +188,7 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
         putModelKey(model);
 
         try {
-            final byte[] bytes = value.getBytes(ENCODING_CHARSET);
+            final byte[] bytes = value.getBytes(STANDARD_CHARSET);
             final int length = bytes.length;
             if (length <= MAX_UNSIGNED_BYTE_VALUE) {
                 putUnsignedByte((short) length);
@@ -198,12 +202,12 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
         }
     }
 
-    private void write(final ServerToClientModel model, final String value) throws IOException {
+    private void write(final ServerToClientModel model, final String value, final Charset encodingCharset) throws IOException {
         putModelKey(model);
 
         try {
             if (value != null) {
-                final byte[] bytes = value.getBytes(ENCODING_CHARSET);
+                final byte[] bytes = value.getBytes(encodingCharset);
                 final int length = bytes.length;
                 if (length <= MAX_UNSIGNED_SHORT_VALUE) {
                     putUnsignedShort(length);
@@ -227,7 +231,7 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
 
         try {
             if (value != null) {
-                final byte[] bytes = value.getBytes(ENCODING_CHARSET);
+                final byte[] bytes = value.getBytes(UTF8_CHARSET);
                 putInt(bytes.length);
                 put(bytes);
             } else {
