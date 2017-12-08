@@ -60,7 +60,8 @@ public class PTWindowManager {
     public static void closeAll() {
         final JsArrayOf<PTWindow> windows = get().windows.values();
         for (int i = windows.length() - 1; i >= 0; i--) {
-            windows.get(i).close(true);
+            final PTWindow window = windows.get(i);
+            if (window != null) window.close(true);
         }
     }
 
@@ -79,7 +80,7 @@ public class PTWindowManager {
                 final JsArrayOf<PTWindow> windows = get().windows.values();
                 for (int i = windows.length() - 1; i >= 0; i--) {
                     final PTWindow window = windows.get(i);
-                    if (window.isClosed()) window.onClose();
+                    if (window != null && window.isClosed()) window.onClose();
                 }
             } catch (final Throwable t) {
                 log.log(Level.SEVERE, "Can't checking windows status", t);
