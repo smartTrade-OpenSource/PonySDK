@@ -41,7 +41,6 @@ public enum ServerToClientModel {
     TYPE_GC(ValueTypeModel.INTEGER),
 
     NATIVE(ValueTypeModel.JSON_OBJECT),
-    APPLICATION_ID(ValueTypeModel.STRING),
     DATE(ValueTypeModel.LONG),
     VALUE(ValueTypeModel.STRING_UTF8),
     PARENT_OBJECT_ID(ValueTypeModel.INTEGER),

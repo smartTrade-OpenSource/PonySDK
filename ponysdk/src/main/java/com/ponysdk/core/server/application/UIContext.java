@@ -492,7 +492,6 @@ public class UIContext {
         writer.write(ServerToClientModel.TYPE_ADD_HANDLER, -1);
         writer.write(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_STREAM_REQUEST.getValue());
         writer.write(ServerToClientModel.STREAM_REQUEST_ID, streamRequestID);
-        writer.write(ServerToClientModel.APPLICATION_ID, getApplication().getId());
         writer.endObject();
 
         streamListenerByID.put(streamRequestID, streamListener);
@@ -517,7 +516,6 @@ public class UIContext {
         writer.write(ServerToClientModel.TYPE_ADD_HANDLER, objectID);
         writer.write(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST.getValue());
         writer.write(ServerToClientModel.STREAM_REQUEST_ID, streamRequestID);
-        writer.write(ServerToClientModel.APPLICATION_ID, getApplication().getId());
         writer.endObject();
 
         streamListenerByID.put(streamRequestID, streamListener);
@@ -749,6 +747,15 @@ public class UIContext {
      */
     public PCookies getCookies() {
         return cookies;
+    }
+
+    /**
+     * Get a cookie from the {@link PCookies} of the UIContext
+     *
+     * @return the cookie
+     */
+    public String getCookie(final String name) {
+        return getCookies().getCookie(name);
     }
 
     @Override
