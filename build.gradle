@@ -23,7 +23,7 @@ subprojects {
     targetCompatibility = 1.8
 
     def suffix = project.hasProperty('BUILD_RELEASE') ? "" : "-SNAPSHOT"
-    version = '2.7.14' + suffix
+    version = '2.7.15' + suffix
 
     repositories {
         mavenCentral()
