@@ -304,13 +304,13 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     }
 
     public void addStyleName(final String styleName) {
-        if (!styleName.isEmpty() && safeStyleName().add(styleName) && initialized) {
+        if (styleName != null && !styleName.isEmpty() && safeStyleName().add(styleName) && initialized) {
             saveUpdate(writer -> writer.write(ServerToClientModel.ADD_STYLE_NAME, styleName));
         }
     }
 
     public void removeStyleName(final String styleName) {
-        if (styleNames != null && !styleName.isEmpty() && styleNames.remove(styleName) && initialized) {
+        if (styleNames != null && styleName != null && !styleName.isEmpty() && styleNames.remove(styleName) && initialized) {
             saveUpdate(writer -> writer.write(ServerToClientModel.REMOVE_STYLE_NAME, styleName));
         }
     }
