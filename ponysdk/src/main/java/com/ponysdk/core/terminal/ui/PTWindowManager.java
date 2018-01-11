@@ -61,7 +61,13 @@ public class PTWindowManager {
         final JsArrayOf<PTWindow> windows = get().windows.values();
         for (int i = windows.length() - 1; i >= 0; i--) {
             final PTWindow window = windows.get(i);
-            if (window != null) window.close(true);
+            if (window != null) {
+                try {
+                    window.close(true);
+                } catch (final Exception e) {
+                    log.log(Level.WARNING, "Can't close window : " + window.getObjectID());
+                }
+            }
         }
     }
 
