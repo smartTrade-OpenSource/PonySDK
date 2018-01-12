@@ -103,7 +103,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
                 beginObject();
                 encode(ServerToClientModel.CREATE_CONTEXT, uiContext.getID()); // TODO nciaravola integer ?
                 endObject();
-                if (isLiving() && isSessionOpen()) flush0();
+                if (isAlive() && isSessionOpen()) flush0();
             } catch (final Throwable e) {
                 log.error("Cannot send server heart beat to client", e);
             } finally {
@@ -127,7 +127,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         if (log.isInfoEnabled())
             log.info("WebSocket closed on UIContext #{} : {}, reason : {}", context.getUIContext().getID(),
                     NiceStatusCode.getMessage(statusCode), reason != null ? reason : "");
-        if (isLiving()) context.getUIContext().onDestroy();
+        if (isAlive()) context.getUIContext().onDestroy();
     }
 
     /**
@@ -136,7 +136,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     @Override
     public void onWebSocketText(final String text) {
         final UIContext uiContext = context.getUIContext();
-        if (isLiving()) {
+        if (isAlive()) {
             if (monitor != null) monitor.onMessageReceived(WebSocket.this, text);
             try {
                 context.getCommunicationSanityChecker().onMessageReceived();
@@ -220,7 +220,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
      * Send heart beat to the client
      */
     public void sendHeartBeat() {
-        if (isLiving() && isSessionOpen()) {
+        if (isAlive() && isSessionOpen()) {
             beginObject();
             encode(ServerToClientModel.HEARTBEAT, null);
             endObject();
@@ -232,7 +232,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
      * Send round trip to the client
      */
     public void sendRoundTrip() {
-        if (isLiving() && isSessionOpen()) {
+        if (isAlive() && isSessionOpen()) {
             beginObject();
             encode(ServerToClientModel.PING_SERVER, System.currentTimeMillis());
             endObject();
@@ -241,7 +241,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     }
 
     public void flush() {
-        if (isLiving() && isSessionOpen()) flush0();
+        if (isAlive() && isSessionOpen()) flush0();
     }
 
     private void flush0() {
@@ -255,8 +255,8 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         }
     }
 
-    private boolean isLiving() {
-        return context != null && context.getUIContext() != null && context.getUIContext().isLiving();
+    private boolean isAlive() {
+        return context != null && context.getUIContext() != null && context.getUIContext().isAlive();
     }
 
     private boolean isSessionOpen() {

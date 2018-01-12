@@ -47,7 +47,7 @@ public class PSuite {
 
         Txn.get().begin(context);
         final UIContext uiContext = Mockito.spy(new UIContext(context));
-        UIContext.setCurrent(uiContext);
+        uiContext.begin();
     }
 
     @AfterClass

@@ -23,13 +23,7 @@
 
 package com.ponysdk.core.server.application;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
@@ -98,54 +92,33 @@ public class UIContext {
 
     private final PCookies cookies = new PCookies();
 
-    private final List<ContextDestroyListener> destroyListeners = new ArrayList<>();
+    /**
+     * ????? concurrence ??
+     */
+    private final Set<ContextDestroyListener> destroyListeners = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private final TxnContext context;
     private final Set<DataListener> listeners = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     private TerminalDataReceiver terminalDataReceiver;
 
-    private boolean living = true;
+    private boolean alive = true;
 
     private final Latency latency = new Latency(10);
 
-    /**
-     * The default constructor
-     *
-     * @param context
-     *            the transaction context
-     */
+
     public UIContext(final TxnContext context) {
         this.application = context.getApplication();
         this.ID = uiContextCount.incrementAndGet();
         this.context = context;
     }
 
-    /**
-     * Returns the current UIContext
-     *
-     * @return The current UIContext
-     */
     public static UIContext get() {
         return currentContext.get();
     }
 
-    /**
-     * Removed the current UIContext
-     */
     public static void remove() {
         currentContext.remove();
     }
-
-    /**
-     * Sets the current UIContext
-     *
-     * @param uiContext
-     *            the UIContext
-     */
-    public static void setCurrent(final UIContext uiContext) {
-        currentContext.set(uiContext);
-    }
-
     /**
      * Adds {@link EventHandler} to the {@link RootEventBus}
      *
@@ -274,31 +247,14 @@ public class UIContext {
         return get().newEventBus;
     }
 
-    /**
-     * Gets the ID of the UIContext
-     *
-     * @return the ID
-     */
     public int getID() {
         return ID;
     }
 
-    /**
-     * Adds a {@link DataListener} to the UIContext
-     *
-     * @param listener
-     *            the data listener
-     */
     public boolean addDataListener(final DataListener listener) {
         return listeners.add(listener);
     }
 
-    /**
-     * Removes the {@link DataListener} from UIContext
-     *
-     * @param listener
-     *            the data listener
-     */
     public boolean removeDataListener(final DataListener listener) {
         return listeners.remove(listener);
     }
@@ -312,6 +268,7 @@ public class UIContext {
      *            the tasks
      */
     public void execute(final Runnable runnable) {
+        if(!isAlive()) return;
         if (log.isDebugEnabled()) log.debug("Pushing to #" + this);
         if (UIContext.get() != this) {
             begin();
@@ -340,6 +297,7 @@ public class UIContext {
      *            list of object
      */
     public void pushToClient(final List<Object> data) {
+        if(!isAlive()) return;
         if (data != null && !listeners.isEmpty()) {
             execute(() -> {
                 try {
@@ -358,6 +316,7 @@ public class UIContext {
      *            the object
      */
     public void pushToClient(final Object data) {
+        if(!isAlive()) return;
         if (data != null && !listeners.isEmpty()) {
             execute(() -> {
                 try {
@@ -430,17 +389,11 @@ public class UIContext {
         this.terminalDataReceiver = terminalDataReceiver;
     }
 
-    /**
-     * Locks the current UIContext
-     */
     public void begin() {
         lock.lock();
-        UIContext.setCurrent(this);
+        currentContext.set(this);
     }
 
-    /**
-     * Unlock the current UIContext
-     */
     public void end() {
         UIContext.remove();
         lock.unlock();
@@ -613,7 +566,7 @@ public class UIContext {
     void destroyFromApplication() {
         begin();
         try {
-            living = false;
+            alive = false;
             destroyListeners.forEach(listener -> {
                 try {
                     listener.onBeforeDestroy(this);
@@ -648,7 +601,7 @@ public class UIContext {
      * Destroys effectively the UIContext
      */
     private void doDestroy() {
-        living = false;
+        alive = false;
         destroyListeners.forEach(listener -> {
             try {
                 listener.onBeforeDestroy(this);
@@ -705,12 +658,12 @@ public class UIContext {
     }
 
     /**
-     * Returns the living state of the current UIContext
+     * Returns is UIContext alive ?
      *
-     * @return the living state
+     * @return alive state
      */
-    public boolean isLiving() {
-        return living;
+    public boolean isAlive() {
+        return alive;
     }
 
     /**
@@ -773,7 +726,7 @@ public class UIContext {
 
     @Override
     public String toString() {
-        return "UIContext [ID=" + ID + ", living=" + living + ", ApplicationID=" + application.getId() + "]";
+        return "UIContext [ID=" + ID + ", alive=" + alive + ", ApplicationID=" + application.getId() + "]";
     }
 
     /**

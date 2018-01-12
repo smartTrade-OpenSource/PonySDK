@@ -1,17 +1,11 @@
 ext {
-    gwtVersion = '2.8.1'
-    
-    jettyVersion = '9.4.7.v20170914'
-    springVersion = '4.3.12.RELEASE'
+    gwtVersion = '2.8.2'
+    jettyVersion = '9.4.8.v20171121'
+    springVersion = '5.0.2.RELEASE'
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '3.5'
-}
-
-allprojects{
-    apply plugin: 'eclipse'
-    apply plugin: 'idea'
+    gradleVersion = '4.4.1'
 }
 
 subprojects {
@@ -23,7 +17,7 @@ subprojects {
     targetCompatibility = 1.8
 
     def suffix = project.hasProperty('BUILD_RELEASE') ? "" : "-SNAPSHOT"
-    version = '2.7.15' + suffix
+    version = '3.0.0' + suffix
 
     repositories {
         mavenCentral()

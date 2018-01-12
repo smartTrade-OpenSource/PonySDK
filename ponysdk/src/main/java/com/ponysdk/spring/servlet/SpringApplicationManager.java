@@ -8,7 +8,6 @@ import com.ponysdk.impl.webapplication.page.InitializingActivity;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.util.StringUtils;
 
-import javax.servlet.ServletException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -33,12 +32,12 @@ class SpringApplicationManager extends AbstractApplicationManager {
     }
 
     @Override
-    protected EntryPoint initializeUIContext(UIContext ponySession) throws ServletException {
+    protected EntryPoint initializeUIContext(UIContext ponySession) {
         try (ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext(configurations)) {
             EntryPoint entryPoint = applicationContext.getBean(EntryPoint.class);
 
             final Map<String, InitializingActivity> initializingPages = applicationContext.getBeansOfType(InitializingActivity.class);
-            if (initializingPages != null && !initializingPages.isEmpty()) {
+            if (!initializingPages.isEmpty()) {
                 initializingPages.values().forEach(InitializingActivity::afterContextInitialized);
             }
             return entryPoint;

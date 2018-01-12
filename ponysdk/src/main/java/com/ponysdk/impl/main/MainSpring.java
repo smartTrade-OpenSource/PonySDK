@@ -29,9 +29,8 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public class MainSpring {
 
     @SuppressWarnings("resource")
-    public static void main(final String[] args) throws Exception {
+    public static void main(final String[] args) {
         final String serverConfigLocation = System.getProperty(SpringApplicationLoader.SERVER_CONFIG_LOCATION, "classpath:etc/server_application.xml");
-
         new ClassPathXmlApplicationContext(serverConfigLocation);
     }
 
