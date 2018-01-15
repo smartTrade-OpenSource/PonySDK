@@ -28,6 +28,7 @@ import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 public class PTDecoratedPopupPanel<T extends DecoratedPopupPanel> extends PTPopupPanel<T> {
 
     @Override
+    @SuppressWarnings("unchecked")
     protected T createUIObject() {
         return (T) new DecoratedPopupPanel(autoHide);
     }

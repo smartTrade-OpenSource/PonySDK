@@ -45,6 +45,7 @@ public class PValueChangeEvent<T> extends Event<PValueChangeHandler<T>> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public T getData() {
         return (T) super.getData();
     }

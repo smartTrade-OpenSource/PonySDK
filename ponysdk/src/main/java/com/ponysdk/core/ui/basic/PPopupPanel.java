@@ -154,15 +154,6 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
         saveUpdate(ServerToClientModel.POPUP_GLASS_ENABLED, glassEnabled);
     }
 
-    /**
-     * @deprecated Use {@link #isVisible()} directly
-     * @since v2.7.8
-     */
-    @Deprecated
-    public boolean isShowing() {
-        return isVisible();
-    }
-
     @Override
     public void setVisible(final boolean visible) {
         if (visible) show();

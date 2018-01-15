@@ -419,16 +419,8 @@ public class UIContext {
         pObjectWeakReferences.put(pObject.getID(), pObject);
     }
 
-    /**
-     * Gets the {@link PObject} with a specific object ID
-     *
-     * @param objectID
-     *            the object ID of the searched {@link PObject}
-     * @return the {@link PObject} or null if not found
-     * @see #registerObject(PObject)
-     */
-    public <T> T getObject(final int objectID) {
-        return (T) pObjectWeakReferences.get(objectID);
+    public PObject getObject(final int objectID) {
+        return pObjectWeakReferences.get(objectID);
     }
 
     /**
@@ -540,6 +532,7 @@ public class UIContext {
      *            a string specifying the name of the object
      * @return the object with the specified name
      */
+    @SuppressWarnings("unchecked")
     public <T> T getAttribute(final String name) {
         return (T) attributes.get(name);
     }

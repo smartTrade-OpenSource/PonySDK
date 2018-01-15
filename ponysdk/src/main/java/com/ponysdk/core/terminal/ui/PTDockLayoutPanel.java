@@ -44,6 +44,7 @@ public class PTDockLayoutPanel<T extends DockLayoutPanel> extends PTComplexPanel
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     protected T createUIObject() {
         return (T) new DockLayoutPanel(unit);
     }

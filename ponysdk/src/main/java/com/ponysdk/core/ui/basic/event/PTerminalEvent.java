@@ -48,14 +48,6 @@ public class PTerminalEvent extends Event<PTerminalEvent.Handler> {
         handler.onTerminalEvent(this);
     }
 
-    /**
-     * @deprecated Use {@link #getData()} directly
-     */
-    @Deprecated
-    public JsonObject getJsonObject() {
-        return getData();
-    }
-
     @Override
     public JsonObject getData() {
         return (JsonObject) super.getData();

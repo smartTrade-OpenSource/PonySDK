@@ -39,7 +39,7 @@ public class JavaApplicationLoader extends AbstractApplicationLoader {
             protected EntryPoint initializeUIContext(final UIContext uiContext) throws ServletException {
                 final Class<? extends EntryPoint> entryPointClassName = applicationManagerOption.getEntryPointClass();
                 try {
-                    return entryPointClassName.newInstance();
+                    return entryPointClassName.getDeclaredConstructor().newInstance();
                 } catch (final Exception e) {
                     throw new ServletException("Failed to instantiate the EntryPoint #" + entryPointClassName, e);
                 }

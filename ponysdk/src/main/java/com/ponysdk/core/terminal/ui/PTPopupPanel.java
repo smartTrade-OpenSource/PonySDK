@@ -68,6 +68,7 @@ public class PTPopupPanel<T extends PopupPanel> extends PTSimplePanel<T>
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     protected T createUIObject() {
         final PopupPanel popupPanel = new PopupPanel(autoHide);
 

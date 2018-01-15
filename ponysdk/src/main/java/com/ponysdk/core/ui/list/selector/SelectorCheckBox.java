@@ -46,6 +46,7 @@ public class SelectorCheckBox<T> extends PCheckBox implements Selectable<T> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public T getSelectedData() {
         if (getValue()) return (T) data;
         else return null;

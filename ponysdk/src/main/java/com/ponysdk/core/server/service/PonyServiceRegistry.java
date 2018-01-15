@@ -64,6 +64,7 @@ public class PonyServiceRegistry {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static <T extends PonyService> T getPonyService(final Class<T> clazz) {
         final T ponyService = (T) registeredServices.get(clazz);
         if (ponyService != null) {

@@ -55,6 +55,7 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
         }
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private void addData(final int rowIndex, final K key, final D data) {
         final Map<DataGridColumnDescriptor<D, ?>, Cell<D, ? extends IsPWidget>> map = new HashMap<>();
         cells.put(rowIndex, map);
@@ -76,6 +77,7 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
         view.addWidget(Element.newPSimplePanel(), col, rowIndex + 1, 1);
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private void updateData(final int rowIndex, final K key, final D data) {
         final int previousIndex = keyByIndex.indexOf(key);
 

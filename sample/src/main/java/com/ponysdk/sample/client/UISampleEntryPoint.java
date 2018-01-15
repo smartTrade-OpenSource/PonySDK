@@ -657,7 +657,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
             @Override
             public void onKeyUp(final PKeyUpEvent keyUpEvent) {
-                PScript.execute(PWindow.getMain(), "alert('" + keyUpEvent.getEventID() + "');");
+                PScript.execute(PWindow.getMain(), "alert('key up event');");
             }
 
             @Override

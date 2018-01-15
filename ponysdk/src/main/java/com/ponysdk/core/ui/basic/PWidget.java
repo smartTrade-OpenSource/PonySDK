@@ -467,7 +467,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
                     final PDropEvent dropEvent = new PDropEvent(this);
                     final String dragSrc = ClientToServerModel.DRAG_SRC.toStringValue();
                     if (instruction.containsKey(dragSrc)) {
-                        final PWidget source = UIContext.get().getObject(instruction.getJsonNumber(dragSrc).intValue());
+                        final PWidget source = (PWidget) UIContext.get().getObject(instruction.getJsonNumber(dragSrc).intValue());
                         dropEvent.setDragSource(source);
                     }
                     fireEvent(dropEvent);
@@ -568,15 +568,6 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     public void onDestroy() {
         super.onDestroy();
         if (addons != null) addons.forEach(addon -> addon.onDestroy());
-    }
-
-    /**
-     * @deprecated Use {@link #getAddons()} instead
-     * @return First binded addon
-     */
-    @Deprecated
-    public PAddOn getAddon() {
-        return addons != null && !addons.isEmpty() ? addons.iterator().next() : null;
     }
 
 }

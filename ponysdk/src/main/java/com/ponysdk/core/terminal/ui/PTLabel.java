@@ -32,6 +32,7 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 public class PTLabel<T extends Label> extends PTWidget<T> {
 
     @Override
+    @SuppressWarnings("unchecked")
     protected T createUIObject() {
         return (T) new Label();
     }

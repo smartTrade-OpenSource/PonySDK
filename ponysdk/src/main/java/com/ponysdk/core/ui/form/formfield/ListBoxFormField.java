@@ -84,6 +84,7 @@ public class ListBoxFormField<T> extends AbstractFormField<T, PListBox> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public T getValue() {
         if (dataProvider != null) return dataProvider.to(widget.getSelectedItem());
         return (T) widget.getSelectedValue();

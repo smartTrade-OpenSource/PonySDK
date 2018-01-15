@@ -48,6 +48,7 @@ public class PTCheckBox<T extends CheckBox> extends PTButtonBase<T> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     protected T createUIObject() {
         return (T) new CheckBox();
     }

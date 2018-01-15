@@ -52,6 +52,7 @@ public class EventBus {
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public void accept(final Object event) {
             function.accept((T) event);
         }

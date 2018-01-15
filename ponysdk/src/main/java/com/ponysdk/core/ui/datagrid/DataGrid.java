@@ -29,6 +29,7 @@ public class DataGrid<DataType extends Comparable<DataType>> implements IsPWidge
         this(new DefaultView(), keyProvider);
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public DataGrid(final View view, final Function<DataType, ?> keyProvider) {
         this(view, keyProvider, Comparable::compareTo);
     }

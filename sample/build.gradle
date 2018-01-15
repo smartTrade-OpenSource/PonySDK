@@ -15,21 +15,16 @@ ext {
 dependencies {
     compile (
         project(':ponysdk'),
-        
         'de.java2html:java2html:' + java2htmlVersion,
-        
-        'org.eclipse.jetty.websocket:websocket-client:' + jettyVersion,
-        
+        //'org.eclipse.jetty.websocket:websocket-client:' + jettyVersion,
         'commons-beanutils:commons-beanutils:1.8.3'
     )
 
     runtime (
-        'com.google.gwt:gwt-codeserver:' + gwtVersion,
-
-        'de.java2html:java2html:' + java2htmlVersion,
-        
-        'org.springframework:spring-aop:' + springVersion,
-        'org.springframework:spring-expression:' + springVersion
+        'com.google.gwt:gwt-codeserver:' + gwtVersion//,
+        //'de.java2html:java2html:' + java2htmlVersion
+        //'org.springframework:spring-aop:' + springVersion,
+        //'org.springframework:spring-expression:' + springVersion
     )
 }
 

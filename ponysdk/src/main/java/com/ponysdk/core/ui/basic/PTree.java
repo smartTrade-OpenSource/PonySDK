@@ -179,18 +179,18 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
         if (!isVisible()) return;
         if (instruction.containsKey(ClientToServerModel.HANDLER_SELECTION.toStringValue())) {
             final int widgetId = instruction.getJsonNumber(ClientToServerModel.HANDLER_SELECTION.toStringValue()).intValue();
-            selectedItem = UIContext.get().getObject(widgetId);
+            selectedItem = (PTreeItem) UIContext.get().getObject(widgetId);
             if (selectionHandlers != null) {
                 final PSelectionEvent<PTreeItem> selectionEvent = new PSelectionEvent<>(this, selectedItem);
                 selectionHandlers.forEach(handler -> handler.onSelection(selectionEvent));
             }
         } else if (instruction.containsKey(ClientToServerModel.HANDLER_OPEN.toStringValue())) {
             final int widgetId = instruction.getJsonNumber(ClientToServerModel.HANDLER_OPEN.toStringValue()).intValue();
-            final PTreeItem item = UIContext.get().getObject(widgetId);
+            final PTreeItem item = (PTreeItem)UIContext.get().getObject(widgetId);
             item.openState = true;
         } else if (instruction.containsKey(ClientToServerModel.HANDLER_CLOSE.toStringValue())) {
             final int widgetId = instruction.getJsonNumber(ClientToServerModel.HANDLER_CLOSE.toStringValue()).intValue();
-            final PTreeItem item = UIContext.get().getObject(widgetId);
+            final PTreeItem item = (PTreeItem)UIContext.get().getObject(widgetId);
             item.openState = false;
         } else {
             super.onClientData(instruction);

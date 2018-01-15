@@ -3,15 +3,17 @@ ext {
     gwtOutputDirName = buildDir.name + "/gwt"
     buildInfoOutputDirName = buildDir.name + "/buildinfo"
     javadocResources = "src/main/javadoc"
-    jsinteropVersion = '1.0.1'
+
+    jettyVersion = '9.4.8.v20171121'
+    springVersion = '5.0.2.RELEASE'
+    jsinteropVersion = '1.0.2'
     slf4jVersion = '1.7.25'
     logbackVersion = '1.2.3'
-    
     javaxServletVersion = '3.1.0'
     glassfishVersion = '1.0.4'
     jsonVersion = '1.0'
     javaxValidationVersion = '1.0.0.GA'
-    seleniumVersion = '3.6.0'
+    seleniumVersion = '3.8.1'
     junitVersion = '4.12'
     tyrusVersion = '1.13.1'
 }
@@ -90,6 +92,11 @@ dependencies {
     testRuntime(
             'org.glassfish.tyrus:tyrus-container-grizzly-client:' + tyrusVersion
     )
+}
+
+compileJava {
+    options.deprecation = true
+    options.compilerArgs += ["-Xlint:all", "-Xlint:-serial","-Werror"]
 }
 
 jar {

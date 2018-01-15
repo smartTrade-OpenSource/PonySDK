@@ -29,6 +29,7 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 public class PTSimplePanel<T extends SimplePanel> extends PTPanel<T> {
 
     @Override
+    @SuppressWarnings("unchecked")
     protected T createUIObject() {
         return (T) new SimplePanel();
     }

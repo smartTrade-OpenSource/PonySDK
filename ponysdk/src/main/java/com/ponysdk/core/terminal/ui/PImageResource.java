@@ -81,9 +81,9 @@ class PImageResource implements ImageResource {
     }
 
     @Override
-    @Deprecated
+    @SuppressWarnings("deprecation")
     public String getURL() {
-        return uri;
+        return getSafeUri().asString();
     }
 
     @Override

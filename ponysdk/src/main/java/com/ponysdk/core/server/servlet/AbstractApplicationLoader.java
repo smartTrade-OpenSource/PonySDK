@@ -28,7 +28,6 @@ import com.ponysdk.core.server.application.ApplicationManagerOption;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
-import java.util.Calendar;
 
 public abstract class AbstractApplicationLoader implements ApplicationLoader {
 
@@ -39,41 +38,11 @@ public abstract class AbstractApplicationLoader implements ApplicationLoader {
     @Override
     public void start() {
         applicationManager = createApplicationManager();
-        printWelcomBanner();
     }
 
     @Override
     public void contextDestroyed(final ServletContextEvent event) {
-        printGoodbyeBanner();
-    }
 
-    private void printWelcomBanner() {
-        final BannerPrinter bannerPrinter = new BannerPrinter(60);
-        bannerPrinter.appendNewEmptyLine();
-        bannerPrinter.appendNewEmptyLine();
-        bannerPrinter.appendLineSeparator();
-        bannerPrinter.appendCenteredLine("PonySDK http://www.ponysdk.com");
-        bannerPrinter.appendCenteredLine("WEB  APPLICATION");
-        bannerPrinter.appendCenteredLine(applicationManagerOption.getApplicationID());
-        bannerPrinter.appendCenteredLine(applicationManagerOption.getApplicationName());
-        bannerPrinter.appendCenteredLine("(c) " + Calendar.getInstance().get(Calendar.YEAR) + " PonySDK");
-        bannerPrinter.appendLineSeparator();
-
-        bannerPrinter.print();
-    }
-
-    private void printGoodbyeBanner() {
-        final BannerPrinter bannerPrinter = new BannerPrinter(60);
-        bannerPrinter.appendNewEmptyLine();
-        bannerPrinter.appendNewEmptyLine();
-        bannerPrinter.appendLineSeparator();
-        bannerPrinter.appendCenteredLine("Context Destroyed");
-        bannerPrinter.appendCenteredLine(applicationManagerOption.getApplicationID());
-        bannerPrinter.appendCenteredLine(applicationManagerOption.getApplicationName());
-        bannerPrinter.appendCenteredLine("(c) " + Calendar.getInstance().get(Calendar.YEAR) + " PonySDK");
-        bannerPrinter.appendLineSeparator();
-
-        bannerPrinter.print();
     }
 
     @Override
