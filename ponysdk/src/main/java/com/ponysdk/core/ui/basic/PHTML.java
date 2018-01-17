@@ -23,12 +23,12 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Objects;
-
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.ui.basic.event.PHasHTML;
 import com.ponysdk.core.writer.ModelWriter;
+
+import java.util.Objects;
 
 /**
  * A widget that can contain arbitrary HTML. This widget uses a &lt;div&gt;

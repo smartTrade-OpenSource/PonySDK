@@ -23,11 +23,6 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.json.JsonObject;
-
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -35,6 +30,10 @@ import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.ui.basic.event.HasPScrollHandlers;
 import com.ponysdk.core.ui.basic.event.PScrollEvent;
 import com.ponysdk.core.ui.basic.event.PScrollEvent.PScrollHandler;
+
+import javax.json.JsonObject;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A simple panel that wraps its contents in a scrollable area.

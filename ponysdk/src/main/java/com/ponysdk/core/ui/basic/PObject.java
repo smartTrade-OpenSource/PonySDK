@@ -63,7 +63,7 @@ public abstract class PObject {
     protected boolean initialized = false;
     protected boolean destroy = false;
 
-    private final AtomicInteger atomicKey = new AtomicInteger(ServerToClientModel.DESTROY.getValue());
+    protected final AtomicInteger atomicKey = new AtomicInteger(ServerToClientModel.DESTROY.getValue());
     private AjaxHandler ajaxHandler;
 
     PObject() {

@@ -23,9 +23,6 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.google.gwt.core.client.GWT;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -34,10 +31,12 @@ import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
-
 import elemental.client.Browser;
 import elemental.html.Uint8Array;
 import elemental.html.Window;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class PTWindow extends AbstractPTObject implements PostMessageHandler {
 

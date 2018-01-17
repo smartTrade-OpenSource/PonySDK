@@ -23,12 +23,6 @@
 
 package com.ponysdk.core.terminal;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
@@ -45,18 +39,17 @@ import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 import com.ponysdk.core.terminal.request.RequestBuilder;
-import com.ponysdk.core.terminal.ui.PTCookies;
-import com.ponysdk.core.terminal.ui.PTFrame;
-import com.ponysdk.core.terminal.ui.PTHistory;
-import com.ponysdk.core.terminal.ui.PTObject;
-import com.ponysdk.core.terminal.ui.PTStreamResource;
-import com.ponysdk.core.terminal.ui.PTWindow;
-import com.ponysdk.core.terminal.ui.PTWindowManager;
-
+import com.ponysdk.core.terminal.ui.*;
 import elemental.client.Browser;
 import elemental.html.Uint8Array;
 import elemental.js.util.JsMapFromIntTo;
 import elemental.js.util.JsMapFromStringTo;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class UIBuilder {
 

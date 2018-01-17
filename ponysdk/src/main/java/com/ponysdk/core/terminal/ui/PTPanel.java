@@ -23,11 +23,11 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import java.util.logging.Logger;
-
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
+
+import java.util.logging.Logger;
 
 abstract class PTPanel<T extends Panel> extends PTWidget<T> {
 

@@ -23,11 +23,11 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Objects;
-
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.writer.ModelWriter;
+
+import java.util.Objects;
 
 /**
  * All HTML element interfaces derive from this class.Useful to create native

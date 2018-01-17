@@ -28,7 +28,6 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.ValueTypeModel;
-
 import elemental.client.Browser;
 import elemental.html.ArrayBufferView;
 import elemental.html.Uint8Array;

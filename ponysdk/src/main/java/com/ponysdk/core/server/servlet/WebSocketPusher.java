@@ -23,21 +23,19 @@
 
 package com.ponysdk.core.server.servlet;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-
-import javax.json.JsonObject;
-
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.concurrent.AutoFlushedBuffer;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WriteCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.server.concurrent.AutoFlushedBuffer;
+import javax.json.JsonObject;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
 public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback {
 

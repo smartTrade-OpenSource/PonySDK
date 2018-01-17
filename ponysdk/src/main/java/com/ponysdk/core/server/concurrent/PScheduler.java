@@ -23,22 +23,16 @@
 
 package com.ponysdk.core.server.concurrent;
 
+import com.ponysdk.core.server.application.UIContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.function.Consumer;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.server.stm.Txn;
 
 public class PScheduler {
 
@@ -201,30 +195,17 @@ public class PScheduler {
             }
         }
 
-        void begin() {
-            uiContext.begin();
-        }
-
-        void end() {
-            uiContext.end();
-        }
-
         public boolean execute() {
             try {
-                begin();
+                uiContext.acquire();
                 try {
-                    final Txn txn = Txn.get();
-                    txn.begin(uiContext.getContext());
-                    try {
-                        runnable.run();
-                        txn.commit();
-                    } catch (final Throwable e) {
-                        log.error("Cannot process commmand", e);
-                        txn.rollback();
-                        return false;
-                    }
+                    runnable.run();
+                    uiContext.flush();
+                } catch (final Throwable e) {
+                    log.error("Cannot process commmand", e);
+                    return false;
                 } finally {
-                    end();
+                    uiContext.release();
                 }
             } catch (final Throwable e) {
                 log.error("Cannot execute command : " + runnable, e);

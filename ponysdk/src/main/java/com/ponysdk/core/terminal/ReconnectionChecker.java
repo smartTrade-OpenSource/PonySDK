@@ -23,16 +23,15 @@
 
 package com.ponysdk.core.terminal;
 
-import java.util.logging.Logger;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
-
 import elemental.client.Browser;
 import elemental.dom.Document;
 import elemental.dom.Element;
 import elemental.html.Window;
 import elemental.xml.XMLHttpRequest;
+
+import java.util.logging.Logger;
 
 public class ReconnectionChecker {
 

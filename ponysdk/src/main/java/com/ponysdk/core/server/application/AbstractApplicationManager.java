@@ -23,15 +23,12 @@
 
 package com.ponysdk.core.server.application;
 
-import javax.servlet.ServletException;
-
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.ui.main.EntryPoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.server.stm.Txn;
-import com.ponysdk.core.server.stm.TxnContext;
-import com.ponysdk.core.ui.main.EntryPoint;
+import javax.servlet.ServletException;
 
 public abstract class AbstractApplicationManager {
 
@@ -47,26 +44,21 @@ public abstract class AbstractApplicationManager {
     public void startApplication(UIContext uiContext) {
         uiContext.acquire();
         try {
-            final Txn txn = Txn.get();
-            txn.begin(uiContext);
-            try {
-                uiContext.getWriter().write(ServerToClientModel.CREATE_CONTEXT, uiContext.getID());
-                uiContext.getWriter().write(ServerToClientModel.END, null);
+            uiContext.getWriter().write(ServerToClientModel.CREATE_CONTEXT, uiContext.getID());
+            uiContext.getWriter().write(ServerToClientModel.END, null);
 
-                final EntryPoint entryPoint = initializeUIContext(uiContext);
+            final EntryPoint entryPoint = initializeUIContext(uiContext);
 
-                final String historyToken = uiContext.getHistoryToken();
+            final String historyToken = uiContext.getHistoryToken();
 
-                if (historyToken != null && !historyToken.isEmpty())
-                    uiContext.getHistory().newItem(historyToken, false);
+            if (historyToken != null && !historyToken.isEmpty())
+                uiContext.getHistory().newItem(historyToken, false);
 
-                entryPoint.start(uiContext);
+            entryPoint.start(uiContext);
 
-                txn.commit();
-            } catch (final Throwable e) {
-                log.error("Cannot send instructions to the browser " + uiContext, e);
-                txn.rollback();
-            }
+            uiContext.flush();
+        } catch (final Throwable e) {
+            log.error("Cannot send instructions to the browser " + uiContext, e);
         } finally {
             uiContext.release();
         }

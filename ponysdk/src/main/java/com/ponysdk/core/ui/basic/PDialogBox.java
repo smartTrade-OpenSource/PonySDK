@@ -23,10 +23,10 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Objects;
-
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
+
+import java.util.Objects;
 
 /**
  * A form of popup that has a caption area at the top and can be dragged by the user. Unlike a

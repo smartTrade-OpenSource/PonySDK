@@ -23,10 +23,10 @@
 
 package com.ponysdk.core.ui.basic.event;
 
-import javax.json.JsonObject;
-
 import com.ponysdk.core.ui.eventbus.Event;
 import com.ponysdk.core.ui.eventbus.EventHandler;
+
+import javax.json.JsonObject;
 
 // TODO No need for an Event, refactor like {@link com.ponysdk.core.ui.basic.PObject.AjaxHandler}
 public class PTerminalEvent extends Event<PTerminalEvent.Handler> {

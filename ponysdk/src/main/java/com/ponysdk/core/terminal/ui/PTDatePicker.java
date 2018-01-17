@@ -23,8 +23,6 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import java.util.Date;
-
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.datepicker.client.DatePicker;
@@ -35,6 +33,8 @@ import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
+
+import java.util.Date;
 
 public class PTDatePicker extends PTWidget<DatePicker> {
 

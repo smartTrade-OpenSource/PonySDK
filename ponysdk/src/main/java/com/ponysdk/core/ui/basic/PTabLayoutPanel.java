@@ -23,24 +23,18 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
-import javax.json.JsonObject;
-
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.ui.basic.event.HasPBeforeSelectionHandlers;
-import com.ponysdk.core.ui.basic.event.HasPSelectionHandlers;
-import com.ponysdk.core.ui.basic.event.PBeforeSelectionEvent;
-import com.ponysdk.core.ui.basic.event.PBeforeSelectionHandler;
-import com.ponysdk.core.ui.basic.event.PSelectionEvent;
-import com.ponysdk.core.ui.basic.event.PSelectionHandler;
+import com.ponysdk.core.ui.basic.event.*;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
+
+import javax.json.JsonObject;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * A panel that represents a tabbed set of pages, each of which contains another widget. Its child widgets are shown as

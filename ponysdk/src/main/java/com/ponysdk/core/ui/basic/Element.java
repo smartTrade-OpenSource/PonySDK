@@ -23,9 +23,9 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.text.SimpleDateFormat;
-
 import com.ponysdk.core.model.PUnit;
+
+import java.text.SimpleDateFormat;
 
 public class Element {
 

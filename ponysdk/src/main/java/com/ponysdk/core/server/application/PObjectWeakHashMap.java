@@ -23,6 +23,12 @@
 
 package com.ponysdk.core.server.application;
 
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.ui.basic.PObject;
+import com.ponysdk.core.ui.basic.PWindow;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
@@ -30,15 +36,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.stm.Txn;
-import com.ponysdk.core.ui.basic.PObject;
-import com.ponysdk.core.ui.basic.PWindow;
-import com.ponysdk.core.writer.ModelWriter;
 
 public class PObjectWeakHashMap implements Map<Integer, PObject> {
 

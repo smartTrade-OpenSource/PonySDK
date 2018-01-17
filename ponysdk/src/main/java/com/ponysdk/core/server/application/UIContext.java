@@ -27,9 +27,7 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.AlreadyDestroyedApplication;
-import com.ponysdk.core.server.servlet.CommunicationSanityChecker;
 import com.ponysdk.core.server.servlet.WebSocket;
-import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.ui.basic.PCookies;
 import com.ponysdk.core.ui.basic.PHistory;
 import com.ponysdk.core.ui.basic.PObject;
@@ -38,6 +36,7 @@ import com.ponysdk.core.ui.eventbus.*;
 import com.ponysdk.core.ui.eventbus2.EventBus;
 import com.ponysdk.core.ui.statistic.TerminalDataReceiver;
 import com.ponysdk.core.writer.ModelWriter;
+import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,6 +76,7 @@ public class UIContext {
 
     private final PObjectWeakHashMap pObjectWeakReferences = new PObjectWeakHashMap();
     private final ModelWriter writer;
+    private final ServletUpgradeRequest request;
 
     private int objectCounter = 1;
 
@@ -102,11 +102,12 @@ public class UIContext {
     private final Latency latency = new Latency(10);
 
 
-    public UIContext(final WebSocket socket, Application application) {
+    public UIContext(final WebSocket socket, ServletUpgradeRequest request, Application application) {
         this.application = application;
         this.ID = uiContextCount.incrementAndGet();
         this.socket = socket;
         this.writer = new ModelWriter(socket);
+        this.request = request;
     }
 
     public static UIContext get() {
@@ -255,15 +256,10 @@ public class UIContext {
         if (UIContext.get() != this) {
             acquire();
             try {
-                final Txn txn = Txn.get();
-                txn.begin(this);
-                try {
-                    runnable.run();
-                    txn.commit();
-                } catch (final Throwable e) {
-                    log.error("Cannot process client instruction", e);
-                    txn.rollback();
-                }
+                runnable.run();
+                flush();
+            } catch (final Throwable e) {
+                log.error("Cannot process client instruction", e);
             } finally {
                 release();
             }
@@ -343,7 +339,7 @@ public class UIContext {
 
                     if (jsonObject.containsKey(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())) {
                         final int parentObjectID = jsonObject.getJsonNumber(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())
-                                .intValue();
+                            .intValue();
                         final PObject gcObject = pObjectWeakReferences.get(parentObjectID);
                         log.warn(String.valueOf(gcObject));
                     }
@@ -375,6 +371,10 @@ public class UIContext {
     public void release() {
         UIContext.remove();
         lock.unlock();
+    }
+
+    public void flush() {
+        socket.flush();
     }
 
     /**
@@ -697,10 +697,6 @@ public class UIContext {
         return latency.getValue();
     }
 
-    public void flush() {
-        socket.flush();
-    }
-
     public ModelWriter getWriter() {
         return writer;
     }
@@ -721,6 +717,10 @@ public class UIContext {
         get().writer.endObject();
     }
 
+    public String getHistoryToken() {
+        final List<String> historyTokens = this.request.getParameterMap().get(ClientToServerModel.TYPE_HISTORY.toStringValue());
+        return !historyTokens.isEmpty() ? historyTokens.get(0) : null;
+    }
 
     private static final class Latency {
 

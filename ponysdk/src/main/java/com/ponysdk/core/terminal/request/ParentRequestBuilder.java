@@ -24,7 +24,6 @@
 package com.ponysdk.core.terminal.request;
 
 import com.google.gwt.json.client.JSONValue;
-
 import elemental.client.Browser;
 import elemental.events.MessageEvent;
 import elemental.html.Uint8Array;

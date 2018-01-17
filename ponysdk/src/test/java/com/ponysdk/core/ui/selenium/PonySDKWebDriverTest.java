@@ -23,13 +23,12 @@
 
 package com.ponysdk.core.ui.selenium;
 
+import com.ponysdk.core.model.ClientToServerModel;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.WebDriverWait;
-
-import com.ponysdk.core.model.ClientToServerModel;
 
 public class PonySDKWebDriverTest {
 

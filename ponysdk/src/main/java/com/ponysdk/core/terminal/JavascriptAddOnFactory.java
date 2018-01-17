@@ -24,7 +24,6 @@
 package com.ponysdk.core.terminal;
 
 import com.google.gwt.core.client.JavaScriptObject;
-
 import jsinterop.annotations.JsFunction;
 
 @FunctionalInterface

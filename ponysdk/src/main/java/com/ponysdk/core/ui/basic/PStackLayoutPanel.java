@@ -23,26 +23,21 @@
 
 package com.ponysdk.core.ui.basic;
 
+import com.ponysdk.core.model.HandlerModel;
+import com.ponysdk.core.model.PUnit;
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.ui.basic.event.*;
+import com.ponysdk.core.ui.model.ServerBinaryModel;
+import com.ponysdk.core.writer.ModelWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ponysdk.core.model.HandlerModel;
-import com.ponysdk.core.model.PUnit;
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.ui.basic.event.HasPBeforeSelectionHandlers;
-import com.ponysdk.core.ui.basic.event.HasPSelectionHandlers;
-import com.ponysdk.core.ui.basic.event.HasPWidgets;
-import com.ponysdk.core.ui.basic.event.PBeforeSelectionHandler;
-import com.ponysdk.core.ui.basic.event.PSelectionHandler;
-import com.ponysdk.core.ui.model.ServerBinaryModel;
-import com.ponysdk.core.writer.ModelWriter;
 
 /**
  * A panel that stacks its children vertically, displaying only one at a time,

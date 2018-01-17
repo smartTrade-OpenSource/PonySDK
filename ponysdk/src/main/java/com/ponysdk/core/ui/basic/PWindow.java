@@ -23,24 +23,22 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.json.JsonObject;
-
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.ui.basic.event.PCloseEvent;
 import com.ponysdk.core.ui.basic.event.PCloseHandler;
 import com.ponysdk.core.ui.basic.event.POpenEvent;
 import com.ponysdk.core.ui.basic.event.POpenHandler;
 import com.ponysdk.core.writer.ModelWriter;
+
+import javax.json.JsonObject;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PWindow extends PObject {
 
@@ -126,7 +124,7 @@ public class PWindow extends PObject {
     public void open() {
         if (destroy) return;
         if (!initialized) {
-            final ModelWriter writer = Txn.get().getWriter();
+            final ModelWriter writer = UIContext.get().getWriter();
             writer.beginObject();
             if (window != PWindow.getMain()) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
             writer.write(ServerToClientModel.TYPE_CREATE, ID);
@@ -138,7 +136,7 @@ public class PWindow extends PObject {
             PWindowManager.preregisterWindow(this);
 
             writeUpdate(callback -> callback.write(ServerToClientModel.OPEN));
-            Txn.get().flush();
+            UIContext.get().flush();
         }
     }
 
@@ -486,7 +484,7 @@ public class PWindow extends PObject {
 
         @Override
         final void init() {
-            final ModelWriter writer = Txn.get().getWriter();
+            final ModelWriter writer = UIContext.get().getWriter();
             writer.beginObject();
             writer.write(ServerToClientModel.TYPE_CREATE, ID);
             writer.write(ServerToClientModel.WIDGET_TYPE, getWidgetType().getValue());

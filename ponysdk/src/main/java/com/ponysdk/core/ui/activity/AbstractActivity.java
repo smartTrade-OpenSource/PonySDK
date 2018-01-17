@@ -24,7 +24,6 @@
 package com.ponysdk.core.ui.activity;
 
 import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PAcceptsOneWidget;
 import com.ponysdk.core.ui.eventbus.BroadcastEventHandler;
@@ -55,7 +54,7 @@ public abstract class AbstractActivity<T extends IsPWidget> implements Activity 
         this.world.setWidget(view2);
 
         // Force flush to show the Loading information
-        Txn.get().flush();
+        UIContext.get().flush();
 
         if (firstStart) {
             buildView();

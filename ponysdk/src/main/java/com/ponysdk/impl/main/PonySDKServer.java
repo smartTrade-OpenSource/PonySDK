@@ -23,12 +23,9 @@
 
 package com.ponysdk.impl.main;
 
-import java.net.InetAddress;
-import java.net.URL;
-import java.util.EnumSet;
-
-import javax.servlet.DispatcherType;
-
+import com.ponysdk.core.model.MappingPath;
+import com.ponysdk.core.server.application.ApplicationManagerOption;
+import com.ponysdk.core.server.servlet.*;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
@@ -42,14 +39,10 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.model.MappingPath;
-import com.ponysdk.core.server.application.ApplicationManagerOption;
-import com.ponysdk.core.server.servlet.AjaxServlet;
-import com.ponysdk.core.server.servlet.ApplicationLoader;
-import com.ponysdk.core.server.servlet.BootstrapServlet;
-import com.ponysdk.core.server.servlet.ServletContextFilter;
-import com.ponysdk.core.server.servlet.StreamServiceServlet;
-import com.ponysdk.core.server.servlet.WebSocketServlet;
+import javax.servlet.DispatcherType;
+import java.net.InetAddress;
+import java.net.URL;
+import java.util.EnumSet;
 
 public class PonySDKServer {
 

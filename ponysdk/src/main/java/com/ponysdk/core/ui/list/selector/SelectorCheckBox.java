@@ -23,11 +23,11 @@
 
 package com.ponysdk.core.ui.list.selector;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.ponysdk.core.ui.basic.PCheckBox;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class SelectorCheckBox<T> extends PCheckBox implements Selectable<T> {
 

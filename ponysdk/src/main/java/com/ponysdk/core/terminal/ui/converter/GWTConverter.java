@@ -31,12 +31,7 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment.VerticalAlignmentConstant;
 import com.google.gwt.user.client.ui.RichTextArea.FontSize;
 import com.google.gwt.user.client.ui.RichTextArea.Justification;
-import com.ponysdk.core.model.PAlignment;
-import com.ponysdk.core.model.PFontSize;
-import com.ponysdk.core.model.PHorizontalAlignment;
-import com.ponysdk.core.model.PJustification;
-import com.ponysdk.core.model.PUnit;
-import com.ponysdk.core.model.PVerticalAlignment;
+import com.ponysdk.core.model.*;
 
 public final class GWTConverter {
 

@@ -23,11 +23,11 @@
 
 package com.ponysdk.core.server.application;
 
+import com.ponysdk.core.ui.main.EntryPoint;
+
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-
-import com.ponysdk.core.ui.main.EntryPoint;
 
 public class ApplicationManagerOption {
 

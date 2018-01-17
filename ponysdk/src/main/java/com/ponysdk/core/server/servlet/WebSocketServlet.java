@@ -23,16 +23,12 @@
 
 package com.ponysdk.core.server.servlet;
 
-import javax.servlet.ServletException;
-
-import org.eclipse.jetty.websocket.common.extensions.compress.DeflateFrameExtension;
-import org.eclipse.jetty.websocket.common.extensions.compress.PerMessageDeflateExtension;
-import org.eclipse.jetty.websocket.common.extensions.compress.XWebkitDeflateFrameExtension;
+import com.ponysdk.core.server.application.AbstractApplicationManager;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.server.application.AbstractApplicationManager;
+import javax.servlet.ServletException;
 
 public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSocketServlet {
 

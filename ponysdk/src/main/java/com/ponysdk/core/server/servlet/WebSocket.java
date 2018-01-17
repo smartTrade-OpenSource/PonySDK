@@ -80,7 +80,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         final Application application = new Application(applicationManager.getOptions(), UserAgent.parseUserAgentString(userAgent));
         sessionManager.registerApplication(application);
 
-        this.uiContext = new UIContext(this, application);
+        this.uiContext = new UIContext(this,request, application);
         this.communicationSanityChecker = new CommunicationSanityChecker(uiContext);
         log.info("Creating a new {}", uiContext);
         //uiContext.setCommunicationSanityChecker(communicationSanityChecker);
@@ -182,11 +182,6 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     public void onWebSocketBinary(final byte[] payload, final int offset, final int len) {
         // Can't receive binary data from terminal (GWT limitation)
     }
-
-    //public String getHistoryToken() {
-    //    final List<String> historyTokens = this.request.getParameterMap().get(ClientToServerModel.TYPE_HISTORY.toStringValue());
-    //    return !historyTokens.isEmpty() ? historyTokens.get(0) : null;
-    //}
 
     /**
      * Send heart beat to the client

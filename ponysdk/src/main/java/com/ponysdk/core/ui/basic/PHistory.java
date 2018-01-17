@@ -23,14 +23,14 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.stm.Txn;
+import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 import com.ponysdk.core.writer.ModelWriter;
+
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * This class allows you to interact with the browser's history stack. Each "item" on the stack is represented by a
@@ -72,7 +72,7 @@ public class PHistory {
     public void newItem(final String token, final boolean fireEvents) {
         this.token = token;
 
-        final ModelWriter writer = Txn.get().getWriter();
+        final ModelWriter writer = UIContext.get().getWriter();
         writer.beginObject();
         writer.write(ServerToClientModel.TYPE_HISTORY, token);
         writer.write(ServerToClientModel.HISTORY_FIRE_EVENTS, fireEvents);
