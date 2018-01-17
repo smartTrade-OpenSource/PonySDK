@@ -32,9 +32,6 @@ public enum PJustification {
 
     private static final PJustification[] VALUES = PJustification.values();
 
-    private PJustification() {
-    }
-
     public final byte getValue() {
         return (byte) ordinal();
     }

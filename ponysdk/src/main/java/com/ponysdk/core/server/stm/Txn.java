@@ -23,43 +23,34 @@
 
 package com.ponysdk.core.server.stm;
 
-import java.util.Collections;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import com.ponysdk.core.server.application.UIContext;
 
-import com.ponysdk.core.server.AlreadyDestroyedApplication;
-import com.ponysdk.core.writer.ModelWriter;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Txn {
 
-    private static final ThreadLocal<Txn> transactions = new ThreadLocal<>();
+    private static final ThreadLocal<Txn> transactions = ThreadLocal.withInitial(Txn::new);
 
-    private final Set<TxnListener> txnListeners = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private final Set<TxnListener> txnListeners = new HashSet<>();
 
-    private TxnContext txnContext;
+    private UIContext uiContext;
 
     public static Txn get() {
-        Txn txn = transactions.get();
-
-        if (txn == null) {
-            txn = new Txn();
-            transactions.set(txn);
-        }
-        return txn;
+        return transactions.get();
     }
 
-    public final ModelWriter getWriter() {
-        if (txnContext != null) return txnContext.getWriter();
-        else throw new AlreadyDestroyedApplication("TxnContext destroyed");
-    }
+    //public final ModelWriter getWriter() {
+    //    if (uiContext != null) return uiContext.getWriter();
+    //    else throw new AlreadyDestroyedApplication("TxnContext destroyed");
+    //}
 
-    public void begin(final TxnContext txnContext) {
-        this.txnContext = txnContext;
+    public void begin(final UIContext uiContext) {
+        this.uiContext = uiContext;
     }
 
     public void commit() {
-        final Txn txn = transactions.get();
-        if (txn.txnContext == null) throw new RuntimeException("Call begin() before commit() a transaction.");
+        if (uiContext == null) throw new RuntimeException("Call begin() before commit() a transaction.");
         fireBeforeFlush();
         flush();
         fireAfterFlush();
@@ -67,14 +58,13 @@ public class Txn {
     }
 
     public void rollback() {
-        final Txn txn = transactions.get();
-        if (txn.txnContext == null) throw new RuntimeException("Call begin() before rollback() a transaction.");
+        if (uiContext == null) throw new RuntimeException("Call begin() before rollback() a transaction.");
         fireBeforeRollback();
         transactions.remove();
     }
 
     public void flush() {
-        txnContext.flush();
+        uiContext.flush();
     }
 
     public void addTxnListener(final TxnListener txnListener) {
@@ -82,11 +72,11 @@ public class Txn {
     }
 
     private void fireBeforeFlush() {
-        txnListeners.forEach(listener -> listener.beforeFlush(txnContext));
+        txnListeners.forEach(listener -> listener.beforeFlush(this));
     }
 
     private void fireAfterFlush() {
-        txnListeners.forEach(listener -> listener.afterFlush(txnContext));
+        txnListeners.forEach(listener -> listener.afterFlush(this));
     }
 
     private void fireBeforeRollback() {

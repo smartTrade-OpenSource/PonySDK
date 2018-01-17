@@ -23,17 +23,16 @@
 
 package com.ponysdk.core.server.servlet;
 
+import com.ponysdk.core.server.application.ApplicationManagerOption;
+import com.ponysdk.core.server.application.UIContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.concurrent.RunnableScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ponysdk.core.server.application.ApplicationManagerOption;
-import com.ponysdk.core.server.application.UIContext;
 
 public class CommunicationSanityChecker {
 
@@ -41,22 +40,22 @@ public class CommunicationSanityChecker {
 
     private static final int CHECK_PERIOD = 1000;
     private static final int MAX_THREAD_CHECKER = Integer.parseInt(
-        System.getProperty("communication.sanity.checker.thread.count", String.valueOf(Runtime.getRuntime().availableProcessors())));
-    protected static final ScheduledThreadPoolExecutor sanityCheckerTimer = new ScheduledThreadPoolExecutor(MAX_THREAD_CHECKER,
-        new ThreadFactory() {
+            System.getProperty("communication.sanity.checker.thread.count", String.valueOf(Runtime.getRuntime().availableProcessors())));
+    private static final ScheduledThreadPoolExecutor sanityCheckerTimer = new ScheduledThreadPoolExecutor(MAX_THREAD_CHECKER,
+            new ThreadFactory() {
 
-            private int i = 0;
+                private int i = 0;
 
-            @Override
-            public Thread newThread(final Runnable r) {
-                final Thread t = new Thread(r);
-                t.setName(CommunicationSanityChecker.class.getName() + "-" + i++);
-                t.setDaemon(true);
-                return t;
-            }
-        });
+                @Override
+                public Thread newThread(final Runnable r) {
+                    final Thread t = new Thread(r);
+                    t.setName(CommunicationSanityChecker.class.getName() + "-" + i++);
+                    t.setDaemon(true);
+                    return t;
+                }
+            });
 
-    protected final AtomicBoolean started = new AtomicBoolean(false);
+    private final AtomicBoolean started = new AtomicBoolean(false);
     private final UIContext uiContext;
     private long heartBeatPeriod;
     private long lastReceivedTime;
@@ -64,7 +63,7 @@ public class CommunicationSanityChecker {
     private CommunicationState currentState;
     private long suspectTime = -1;
 
-    private static enum CommunicationState {
+    private enum CommunicationState {
         OK,
         SUSPECT,
         KO
@@ -115,7 +114,8 @@ public class CommunicationSanityChecker {
 
     public void setHeartBeatPeriod(final long heartbeat, final TimeUnit timeUnit) {
         heartBeatPeriod = TimeUnit.MILLISECONDS.convert(heartbeat, timeUnit);
-        if (heartBeatPeriod <= 0) throw new IllegalArgumentException("'HeartBeatPeriod' parameter must be gretter than 0");
+        if (heartBeatPeriod <= 0)
+            throw new IllegalArgumentException("'HeartBeatPeriod' parameter must be gretter than 0");
     }
 
     private boolean isCommunicationSuspectedToBeNonFunctional(final long now) {
@@ -123,7 +123,7 @@ public class CommunicationSanityChecker {
         return now - lastReceivedTime >= heartBeatPeriod;
     }
 
-    protected void checkCommunicationState() {
+    private void checkCommunicationState() {
         final long now = System.currentTimeMillis();
         switch (currentState) {
             case OK:
@@ -131,8 +131,8 @@ public class CommunicationSanityChecker {
                     suspectTime = now;
                     currentState = CommunicationState.SUSPECT;
                     if (log.isDebugEnabled()) log.debug(
-                        "No message have been received on UIContext #{}, communication suspected to be non functional, sending heartbeat...",
-                        uiContext.getID());
+                            "No message have been received on UIContext #{}, communication suspected to be non functional, sending heartbeat...",
+                            uiContext.getID());
                     //uiContext.sendHeartBeat();
                 }
                 break;
@@ -142,8 +142,8 @@ public class CommunicationSanityChecker {
                         // No message have been received since we suspected the
                         // communication to be non functional
                         log.info(
-                            "No message have been received on UIContext #{} since we suspected the communication to be non functional, context will be destroyed",
-                            uiContext.getID());
+                                "No message have been received on UIContext #{} since we suspected the communication to be non functional, context will be destroyed",
+                                uiContext.getID());
                         currentState = CommunicationState.KO;
                         stop();
                         uiContext.destroy();

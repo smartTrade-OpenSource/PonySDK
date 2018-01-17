@@ -32,21 +32,11 @@ import com.ponysdk.core.writer.ModelWriter;
 public class TxnContext implements TxnListener {
 
     private final WebSocket socket;
-    private final ModelWriter modelWriter;
 
     private boolean flushNow = false;
-    private Application application;
-
-    private UIContext uiContext;
-    private CommunicationSanityChecker communicationSanityChecker;
 
     public TxnContext(final WebSocket socket) {
         this.socket = socket;
-        this.modelWriter = new ModelWriter(socket);
-    }
-
-    void flush() {
-        socket.flush();
     }
 
     @Override
@@ -66,52 +56,5 @@ public class TxnContext implements TxnListener {
     public void afterFlush(final TxnContext txnContext) {
     }
 
-    public ModelWriter getWriter() {
-        return modelWriter;
-    }
 
-    public Application getApplication() {
-        return application;
-    }
-
-    public void setApplication(final Application application) {
-        this.application = application;
-    }
-
-    public String getHistoryToken() {
-        return this.socket.getHistoryToken();
-    }
-
-    public UIContext getUIContext() {
-        return uiContext;
-    }
-
-    public void setUIContext(final UIContext uiContext) {
-        this.uiContext = uiContext;
-    }
-
-    public void setCommunicationSanityChecker(final CommunicationSanityChecker communicationSanityChecker) {
-        this.communicationSanityChecker = communicationSanityChecker;
-    }
-
-    public CommunicationSanityChecker getCommunicationSanityChecker() {
-        return communicationSanityChecker;
-    }
-
-    public void sendHeartBeat() {
-        socket.sendHeartBeat();
-    }
-
-    public void sendRoundTrip() {
-        socket.sendRoundTrip();
-    }
-
-    public void close() {
-        socket.close();
-    }
-
-    @Override
-    public String toString() {
-        return "TxnContext{" + "flushNow=" + flushNow + ", application=" + application + ", uiContext=" + uiContext + '}';
-    }
 }

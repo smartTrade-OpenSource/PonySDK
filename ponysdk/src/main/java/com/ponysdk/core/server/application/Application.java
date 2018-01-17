@@ -23,21 +23,16 @@
 
 package com.ponysdk.core.server.application;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.servlet.http.HttpSession;
-
+import com.ponysdk.core.server.servlet.SessionManager;
+import com.ponysdk.core.useragent.UserAgent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.server.servlet.SessionManager;
-import com.ponysdk.core.useragent.UserAgent;
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * Wrapper of the HTTPSession, and contains the UIContexts.
- */
 public class Application {
 
     private static final Logger log = LoggerFactory.getLogger(Application.class);
@@ -50,15 +45,18 @@ public class Application {
 
     private final UserAgent userAgent;
 
-    private final HttpSession session;
+    private static final AtomicInteger applicationCount = new AtomicInteger();
 
-    private final String id;
+    private final int ID;
 
-    public Application(final String id, final HttpSession session, final ApplicationManagerOption options, final UserAgent userAgent) {
-        this.id = id;
-        this.session = session;
+    public Application(final int ID, final ApplicationManagerOption options, final UserAgent userAgent) {
+        this.ID = ID;
         this.options = options;
         this.userAgent = userAgent;
+    }
+
+    public Application(final ApplicationManagerOption options, final UserAgent userAgent) {
+        this(applicationCount.incrementAndGet(), options, userAgent);
     }
 
     public void registerUIContext(final UIContext uiContext) {
@@ -68,7 +66,7 @@ public class Application {
     void deregisterUIContext(final int uiContextID) {
         uiContexts.remove(uiContextID);
         if (uiContexts.isEmpty()) {
-            session.invalidate();
+            //session.invalidate();
             SessionManager.get().unregisterApplication(this);
         }
     }
@@ -83,12 +81,6 @@ public class Application {
         });
         uiContexts.clear();
 
-        try {
-            log.info("Invalidate session on Application #{} because all ui contexts have been destroyed", getId());
-            session.invalidate();
-        } catch (final IllegalArgumentException e) {
-            log.error("The session is already invalid", e);
-        }
         SessionManager.get().unregisterApplication(this);
     }
 
@@ -106,7 +98,7 @@ public class Application {
             try {
                 uiContext.pushToClient(message);
             } catch (final Throwable throwable) {
-                log.error("Cannot flush message on the session {}", uiContext.getContext(), throwable);
+                log.error("Cannot flush message on the session {}", uiContext, throwable);
             }
         }
     }
@@ -124,12 +116,8 @@ public class Application {
         return options;
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public HttpSession getSession() {
-        return session;
+    public int getId() {
+        return ID;
     }
 
     public UserAgent getUserAgent() {
@@ -142,7 +130,7 @@ public class Application {
 
     @Override
     public String toString() {
-        return "Application [id=" + id + ", options=" + options + ", userAgent=" + userAgent + "]";
+        return "Application [id=" + ID + ", options=" + options + ", userAgent=" + userAgent + "]";
     }
 
 }

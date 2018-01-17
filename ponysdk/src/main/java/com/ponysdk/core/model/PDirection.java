@@ -35,9 +35,6 @@ public enum PDirection {
 
     private static final PDirection[] VALUES = PDirection.values();
 
-    private PDirection() {
-    }
-
     public byte getValue() {
         return (byte) ordinal();
     }

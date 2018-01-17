@@ -45,9 +45,6 @@ public enum PAlignment {
 
     private static final PAlignment[] VALUES = PAlignment.values();
 
-    private PAlignment() {
-    }
-
     public final byte getValue() {
         return (byte) ordinal();
     }

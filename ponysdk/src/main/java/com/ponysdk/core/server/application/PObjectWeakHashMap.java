@@ -142,6 +142,7 @@ public class PObjectWeakHashMap implements Map<Integer, PObject> {
     }
 
     private void expungeStaleEntries() {
+        UIContext uiContext = UIContext.get();
         Reference<? extends PObject> reference;
         while ((reference = queue.poll()) != null) {
             final Integer objectID = objectIDByReferences.remove(reference);
@@ -150,12 +151,11 @@ public class PObjectWeakHashMap implements Map<Integer, PObject> {
             referenceByObjectID.remove(objectID);
             if (log.isDebugEnabled()) log.debug("Removing reference on object #{}", objectID);
 
-            final ModelWriter writer = Txn.get().getWriter();
-            writer.beginObject();
-            if (windowID != PWindow.getMain().getID()) writer.write(ServerToClientModel.WINDOW_ID, windowID);
-            if (frameID != null) writer.write(ServerToClientModel.FRAME_ID, frameID);
-            writer.write(ServerToClientModel.TYPE_GC, objectID);
-            writer.endObject();
+            uiContext.beginObject();
+            if (windowID != PWindow.getMain().getID()) uiContext.write(ServerToClientModel.WINDOW_ID, windowID);
+            if (frameID != null) uiContext.write(ServerToClientModel.FRAME_ID, frameID);
+            uiContext.write(ServerToClientModel.TYPE_GC, objectID);
+            uiContext.endObject();
         }
     }
 

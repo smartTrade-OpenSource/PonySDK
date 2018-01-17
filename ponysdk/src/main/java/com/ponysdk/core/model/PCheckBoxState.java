@@ -31,9 +31,6 @@ public enum PCheckBoxState {
 
     private static final PCheckBoxState[] VALUES = PCheckBoxState.values();
 
-    private PCheckBoxState() {
-    }
-
     public final byte getValue() {
         return (byte) ordinal();
     }

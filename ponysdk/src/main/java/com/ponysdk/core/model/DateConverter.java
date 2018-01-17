@@ -32,9 +32,6 @@ public final class DateConverter {
     private static final int EMPTY_TIMESTAMP = -1;
     private static final String DATE_SEPARATOR = ",";
 
-    private DateConverter() {
-    }
-
     public static String encode(final Collection<Date> dates) {
         if (dates != null && !dates.isEmpty()) {
             final StringBuilder asString = new StringBuilder();

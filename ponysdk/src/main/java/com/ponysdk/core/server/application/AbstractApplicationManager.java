@@ -25,6 +25,7 @@ package com.ponysdk.core.server.application;
 
 import javax.servlet.ServletException;
 
+import com.ponysdk.core.model.ServerToClientModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,28 +44,31 @@ public abstract class AbstractApplicationManager {
         log.info(options.toString());
     }
 
-    public void startApplication(final TxnContext txnContext) throws Exception {
-        final UIContext uiContext = txnContext.getUIContext();
-        uiContext.begin();
+    public void startApplication(UIContext uiContext) {
+        uiContext.acquire();
         try {
             final Txn txn = Txn.get();
-            txn.begin(txnContext);
+            txn.begin(uiContext);
             try {
+                uiContext.getWriter().write(ServerToClientModel.CREATE_CONTEXT, uiContext.getID());
+                uiContext.getWriter().write(ServerToClientModel.END, null);
+
                 final EntryPoint entryPoint = initializeUIContext(uiContext);
 
-                final String historyToken = txnContext.getHistoryToken();
+                final String historyToken = uiContext.getHistoryToken();
 
-                if (historyToken != null && !historyToken.isEmpty()) uiContext.getHistory().newItem(historyToken, false);
+                if (historyToken != null && !historyToken.isEmpty())
+                    uiContext.getHistory().newItem(historyToken, false);
 
                 entryPoint.start(uiContext);
 
                 txn.commit();
             } catch (final Throwable e) {
-                log.error("Cannot send instructions to the browser " + txnContext, e);
+                log.error("Cannot send instructions to the browser " + uiContext, e);
                 txn.rollback();
             }
         } finally {
-            uiContext.end();
+            uiContext.release();
         }
     }
 

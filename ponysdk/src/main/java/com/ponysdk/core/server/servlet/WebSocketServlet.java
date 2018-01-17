@@ -56,13 +56,13 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         factory.getPolicy().setIdleTimeout(maxIdleTime);
         factory.setCreator((request, response) -> {
             // Force session creation if there is no session
-            request.getHttpServletRequest().getSession(true);
-            if (request.getSession() != null) {
+            //request.getHttpServletRequest().getSession(true);
+            //if (request.getSession() != null) {
                 return new WebSocket(request, monitor, applicationManager);
-            } else {
-                log.error("No HTTP session found");
-                return null;
-            }
+            //} else {
+            //    log.error("No HTTP session found");
+            //    return null;
+            //}
         });
     }
 

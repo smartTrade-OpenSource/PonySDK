@@ -23,39 +23,33 @@
 
 package com.ponysdk.core.server.application;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.ReentrantLock;
+import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.HandlerModel;
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.AlreadyDestroyedApplication;
+import com.ponysdk.core.server.servlet.CommunicationSanityChecker;
+import com.ponysdk.core.server.servlet.WebSocket;
+import com.ponysdk.core.server.stm.Txn;
+import com.ponysdk.core.ui.basic.PCookies;
+import com.ponysdk.core.ui.basic.PHistory;
+import com.ponysdk.core.ui.basic.PObject;
+import com.ponysdk.core.ui.basic.PWindow;
+import com.ponysdk.core.ui.eventbus.*;
+import com.ponysdk.core.ui.eventbus2.EventBus;
+import com.ponysdk.core.ui.statistic.TerminalDataReceiver;
+import com.ponysdk.core.writer.ModelWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.json.JsonString;
 import javax.json.JsonValue;
 import javax.json.JsonValue.ValueType;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.model.HandlerModel;
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.AlreadyDestroyedApplication;
-import com.ponysdk.core.server.stm.Txn;
-import com.ponysdk.core.server.stm.TxnContext;
-import com.ponysdk.core.ui.basic.PCookies;
-import com.ponysdk.core.ui.basic.PHistory;
-import com.ponysdk.core.ui.basic.PObject;
-import com.ponysdk.core.ui.basic.PWindow;
-import com.ponysdk.core.ui.eventbus.BroadcastEventHandler;
-import com.ponysdk.core.ui.eventbus.Event;
-import com.ponysdk.core.ui.eventbus.EventHandler;
-import com.ponysdk.core.ui.eventbus.HandlerRegistration;
-import com.ponysdk.core.ui.eventbus.RootEventBus;
-import com.ponysdk.core.ui.eventbus.StreamHandler;
-import com.ponysdk.core.ui.eventbus2.EventBus;
-import com.ponysdk.core.ui.statistic.TerminalDataReceiver;
-import com.ponysdk.core.writer.ModelWriter;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * <p>
@@ -79,8 +73,11 @@ public class UIContext {
     private final Application application;
     private final ReentrantLock lock = new ReentrantLock();
     private final Map<String, Object> attributes = new HashMap<>();
+    private final WebSocket socket;
 
     private final PObjectWeakHashMap pObjectWeakReferences = new PObjectWeakHashMap();
+    private final ModelWriter writer;
+
     private int objectCounter = 1;
 
     private final Map<Integer, StreamHandler> streamListenerByID = new HashMap<>();
@@ -96,7 +93,6 @@ public class UIContext {
      * ????? concurrence ??
      */
     private final Set<ContextDestroyListener> destroyListeners = Collections.newSetFromMap(new ConcurrentHashMap<>());
-    private final TxnContext context;
     private final Set<DataListener> listeners = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     private TerminalDataReceiver terminalDataReceiver;
@@ -106,10 +102,11 @@ public class UIContext {
     private final Latency latency = new Latency(10);
 
 
-    public UIContext(final TxnContext context) {
-        this.application = context.getApplication();
+    public UIContext(final WebSocket socket, Application application) {
+        this.application = application;
         this.ID = uiContextCount.incrementAndGet();
-        this.context = context;
+        this.socket = socket;
+        this.writer = new ModelWriter(socket);
     }
 
     public static UIContext get() {
@@ -119,13 +116,12 @@ public class UIContext {
     public static void remove() {
         currentContext.remove();
     }
+
     /**
      * Adds {@link EventHandler} to the {@link RootEventBus}
      *
-     * @param type
-     *            the event type
-     * @param handler
-     *            the event handler
+     * @param type    the event type
+     * @param handler the event handler
      * @return the HandlerRegistration in order to remove the EventHandler
      * @see #fireEvent(Event)
      */
@@ -137,8 +133,7 @@ public class UIContext {
      * Fires an {@link Event} on the {@link RootEventBus}
      * Only {@link EventHandler}s added before fires event will be stimulated
      *
-     * @param event
-     *            the fired event
+     * @param event the fired event
      * @see #addHandler(BroadcastEventHandler)
      */
     public static void fireEvent(final Event<? extends EventHandler> event) {
@@ -148,10 +143,8 @@ public class UIContext {
     /**
      * Removes {@link EventHandler} from the {@link RootEventBus}
      *
-     * @param type
-     *            the event type
-     * @param handler
-     *            the event handler
+     * @param type    the event type
+     * @param handler the event handler
      * @see #addHandler(com.ponysdk.core.ui.eventbus.Event.Type, EventHandler)
      */
     public static void removeHandler(final Event.Type type, final EventHandler handler) {
@@ -162,12 +155,9 @@ public class UIContext {
      * Adds {@link EventHandler} to the {@link RootEventBus} with a specific source
      * Use {@link #fireEventFromSource(Event, Object)} to stimulate this event handler
      *
-     * @param type
-     *            the event type
-     * @param source
-     *            the source
-     * @param handler
-     *            the event handler
+     * @param type    the event type
+     * @param source  the source
+     * @param handler the event handler
      * @return the {@link HandlerRegistration} in order to remove the {@link EventHandler}
      * @see #fireEventFromSource(Event, Object)
      */
@@ -179,10 +169,8 @@ public class UIContext {
      * Fires an {@link Event} on the {@link RootEventBus} with a specific source
      * Only {@link EventHandler}s added before fires event will be stimulated
      *
-     * @param event
-     *            the fired event
-     * @param source
-     *            the source
+     * @param event  the fired event
+     * @param source the source
      * @see #addHandlerToSource(com.ponysdk.core.ui.eventbus.Event.Type, Object, EventHandler)
      */
     public static void fireEventFromSource(final Event<? extends EventHandler> event, final Object source) {
@@ -192,12 +180,9 @@ public class UIContext {
     /**
      * Removes handler from the {@link RootEventBus} with a specific source
      *
-     * @param type
-     *            the event type
-     * @param source
-     *            the source
-     * @param handler
-     *            the event handler
+     * @param type    the event type
+     * @param source  the source
+     * @param handler the event handler
      * @see #addHandlerToSource(com.ponysdk.core.ui.eventbus.Event.Type, Object, EventHandler)
      */
     public static void removeHandlerFromSource(final Event.Type type, final Object source, final EventHandler handler) {
@@ -209,8 +194,7 @@ public class UIContext {
      * All call to {@link #fireEvent(Event)} or {@link #fireEventFromSource(Event, Object)} will stimulate this event
      * handler
      *
-     * @param handler
-     *            the broadcast event handler
+     * @param handler the broadcast event handler
      * @see #fireEvent(Event)
      * @see #fireEventFromSource(Event, Object)
      */
@@ -221,8 +205,7 @@ public class UIContext {
     /**
      * Removes broadcast handler from the {@link RootEventBus}
      *
-     * @param handler
-     *            the broadcast event handler
+     * @param handler the broadcast event handler
      * @see #addHandler(BroadcastEventHandler)
      */
     public static void removeHandler(final BroadcastEventHandler handler) {
@@ -261,20 +244,19 @@ public class UIContext {
 
     /**
      * Executes a {@link Runnable} that represents a task in a graphical context
-     *
+     * <p>
      * This method locks the UIContext
      *
-     * @param runnable
-     *            the tasks
+     * @param runnable the tasks
      */
     public void execute(final Runnable runnable) {
-        if(!isAlive()) return;
+        if (!isAlive()) return;
         if (log.isDebugEnabled()) log.debug("Pushing to #" + this);
         if (UIContext.get() != this) {
-            begin();
+            acquire();
             try {
                 final Txn txn = Txn.get();
-                txn.begin(context);
+                txn.begin(this);
                 try {
                     runnable.run();
                     txn.commit();
@@ -283,7 +265,7 @@ public class UIContext {
                     txn.rollback();
                 }
             } finally {
-                end();
+                release();
             }
         } else {
             runnable.run();
@@ -293,11 +275,10 @@ public class UIContext {
     /**
      * Stimulates all {@link DataListener} with a list of object
      *
-     * @param data
-     *            list of object
+     * @param data list of object
      */
     public void pushToClient(final List<Object> data) {
-        if(!isAlive()) return;
+        if (!isAlive()) return;
         if (data != null && !listeners.isEmpty()) {
             execute(() -> {
                 try {
@@ -312,11 +293,10 @@ public class UIContext {
     /**
      * Stimulates all {@link DataListener} with an object
      *
-     * @param data
-     *            the object
+     * @param data the object
      */
     public void pushToClient(final Object data) {
-        if(!isAlive()) return;
+        if (!isAlive()) return;
         if (data != null && !listeners.isEmpty()) {
             execute(() -> {
                 try {
@@ -332,8 +312,7 @@ public class UIContext {
      * Sends data to the targetted {@link PObject} from {@link JsonObject} instruction
      * Called from terminal side
      *
-     * @param jsonObject
-     *            the JSON instructions
+     * @param jsonObject the JSON instructions
      */
     public void fireClientData(final JsonObject jsonObject) {
         if (jsonObject.containsKey(ClientToServerModel.TYPE_HISTORY.toStringValue())) {
@@ -364,7 +343,7 @@ public class UIContext {
 
                     if (jsonObject.containsKey(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())) {
                         final int parentObjectID = jsonObject.getJsonNumber(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())
-                            .intValue();
+                                .intValue();
                         final PObject gcObject = pObjectWeakReferences.get(parentObjectID);
                         log.warn(String.valueOf(gcObject));
                     }
@@ -382,19 +361,18 @@ public class UIContext {
     /**
      * Sets a {@link TerminalDataReceiver}
      *
-     * @param terminalDataReceiver
-     *            the terminal data receiver
+     * @param terminalDataReceiver the terminal data receiver
      */
     public void setClientDataOutput(final TerminalDataReceiver terminalDataReceiver) {
         this.terminalDataReceiver = terminalDataReceiver;
     }
 
-    public void begin() {
+    public void acquire() {
         lock.lock();
         currentContext.set(this);
     }
 
-    public void end() {
+    public void release() {
         UIContext.remove();
         lock.unlock();
     }
@@ -411,8 +389,7 @@ public class UIContext {
     /**
      * Registers a {@link PObject} in the UIContext
      *
-     * @param pObject
-     *            the pObject
+     * @param pObject the pObject
      * @see #getObject(int)
      */
     public void registerObject(final PObject pObject) {
@@ -426,13 +403,11 @@ public class UIContext {
     /**
      * Registers a {@link StreamHandler} that will be called on the terminal side
      *
-     * @param streamListener
-     *            the stream handler
+     * @param streamListener the stream handler
      */
     public void stackStreamRequest(final StreamHandler streamListener) {
         final int streamRequestID = nextStreamRequestID();
 
-        final ModelWriter writer = Txn.get().getWriter();
         writer.beginObject();
         writer.write(ServerToClientModel.TYPE_ADD_HANDLER, -1);
         writer.write(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_STREAM_REQUEST.getValue());
@@ -445,18 +420,16 @@ public class UIContext {
     /**
      * Registers a {@link StreamHandler} that will be called on a specific {@link com.ponysdk.core.terminal.ui.PTObject}
      *
-     * @param streamListener
-     *            the stream handler
-     * @param objectID
-     *            the object ID of a {@link PObject}
+     * @param streamListener the stream handler
+     * @param objectID       the object ID of a {@link PObject}
      */
     public void stackEmbededStreamRequest(final StreamHandler streamListener, final int objectID) {
         final int streamRequestID = nextStreamRequestID();
 
-        final ModelWriter writer = Txn.get().getWriter();
         writer.beginObject();
         final PObject pObject = getObject(objectID);
-        if (!PWindow.isMain(pObject.getWindow())) writer.write(ServerToClientModel.WINDOW_ID, pObject.getWindow().getID());
+        if (!PWindow.isMain(pObject.getWindow()))
+            writer.write(ServerToClientModel.WINDOW_ID, pObject.getWindow().getID());
         if (pObject.getFrame() != null) writer.write(ServerToClientModel.FRAME_ID, pObject.getFrame().getID());
         writer.write(ServerToClientModel.TYPE_ADD_HANDLER, objectID);
         writer.write(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST.getValue());
@@ -478,8 +451,7 @@ public class UIContext {
     /**
      * Removes the {@link StreamHandler} with a specific ID in the current UIContext
      *
-     * @param streamID
-     *            the stream ID
+     * @param streamID the stream ID
      * @return the removed stream handler or null if not found
      */
     public StreamHandler removeStreamListener(final int streamID) {
@@ -490,7 +462,6 @@ public class UIContext {
      * Closes the current UIContext
      */
     public void close() {
-        final ModelWriter writer = Txn.get().getWriter();
         writer.beginObject();
         writer.write(ServerToClientModel.DESTROY_CONTEXT, null);
         writer.endObject();
@@ -502,10 +473,8 @@ public class UIContext {
      * <p>
      * If the value passed in is null, this has the same effect as calling {@link #removeAttribute(String)}.
      *
-     * @param name
-     *            the name to which the object is bound; cannot be null
-     * @param value
-     *            the object to be bound
+     * @param name  the name to which the object is bound; cannot be null
+     * @param value the object to be bound
      */
     public void setAttribute(final String name, final Object value) {
         if (value == null) removeAttribute(name);
@@ -517,8 +486,7 @@ public class UIContext {
      * the session does not have an object bound with the specified name, this
      * method does nothing.
      *
-     * @param name
-     *            the name of the object to remove from this session
+     * @param name the name of the object to remove from this session
      */
     public Object removeAttribute(final String name) {
         return attributes.remove(name);
@@ -528,8 +496,7 @@ public class UIContext {
      * Returns the object bound with the specified name in this session, or <code>null</code> if no
      * object is bound under the name.
      *
-     * @param name
-     *            a string specifying the name of the object
+     * @param name a string specifying the name of the object
      * @return the object with the specified name
      */
     @SuppressWarnings("unchecked")
@@ -539,25 +506,25 @@ public class UIContext {
 
     /**
      * Destroys the current UIContext when the {@link com.ponysdk.core.server.servlet.WebSocket} is closed
-     *
+     * <p>
      * This method locks the UIContext
      */
     public void onDestroy() {
-        begin();
+        acquire();
         try {
             doDestroy();
         } finally {
-            end();
+            release();
         }
     }
 
     /**
      * Destroys the current UIContext when the {@link Application} is destroyed
-     *
+     * <p>
      * This method locks the UIContext
      */
     void destroyFromApplication() {
-        begin();
+        acquire();
         try {
             alive = false;
             destroyListeners.forEach(listener -> {
@@ -569,24 +536,24 @@ public class UIContext {
                     log.error("Exception while destroying UIContext #" + getID(), e);
                 }
             });
-            context.close();
+            close();
         } finally {
-            end();
+            release();
         }
     }
 
     /**
      * Destroys the UIContext
-     *
+     * <p>
      * This method locks the UIContext
      */
     public void destroy() {
-        begin();
+        acquire();
         try {
             doDestroy();
-            context.close();
+            socket.close();
         } finally {
-            end();
+            release();
         }
     }
 
@@ -594,7 +561,6 @@ public class UIContext {
      * Destroys effectively the UIContext
      */
     private void doDestroy() {
-        alive = false;
         destroyListeners.forEach(listener -> {
             try {
                 listener.onBeforeDestroy(this);
@@ -605,13 +571,13 @@ public class UIContext {
             }
         });
         application.deregisterUIContext(ID);
+        alive = false;
     }
 
     /**
      * Adds a {@link ContextDestroyListener} that will be stimulated when the UIContext is destroyed
      *
-     * @param listener
-     *            the context destroy listener
+     * @param listener the context destroy listener
      * @since {@link #destroy()}
      */
     public void addContextDestroyListener(final ContextDestroyListener listener) {
@@ -620,33 +586,33 @@ public class UIContext {
 
     /**
      * Sends the heart beat
-     *
+     * <p>
      * This method locks the UIContext
      */
     public void sendHeartBeat() {
-        begin();
+        acquire();
         try {
-            context.sendHeartBeat();
+            socket.sendHeartBeat();
         } catch (final Throwable e) {
             log.error("Cannot send server heart beat to UIContext #" + getID(), e);
         } finally {
-            end();
+            release();
         }
     }
 
     /**
      * Sends the round trip
-     *
+     * <p>
      * This method locks the UIContext
      */
     public void sendRoundTrip() {
-        begin();
+        //begin();
         try {
-            context.sendRoundTrip();
+            socket.sendRoundTrip();
         } catch (final Throwable e) {
             log.error("Cannot send server round trip to UIContext #" + getID(), e);
         } finally {
-            end();
+            //end();
         }
     }
 
@@ -657,15 +623,6 @@ public class UIContext {
      */
     public boolean isAlive() {
         return alive;
-    }
-
-    /**
-     * Gets the {@link TxnContext} of the UIContext
-     *
-     * @return the TxnContext
-     */
-    public TxnContext getContext() {
-        return context;
     }
 
     /**
@@ -725,8 +682,7 @@ public class UIContext {
     /**
      * Adds a ping value
      *
-     * @param pingValue
-     *            the ping value
+     * @param pingValue the ping value
      */
     public void addPingValue(final long pingValue) {
         latency.add(pingValue);
@@ -740,6 +696,31 @@ public class UIContext {
     public double getLatency() {
         return latency.getValue();
     }
+
+    public void flush() {
+        socket.flush();
+    }
+
+    public ModelWriter getWriter() {
+        return writer;
+    }
+
+    public static void beginObject() {
+        get().writer.beginObject();
+    }
+
+    public static void write(final ServerToClientModel model) {
+        get().writer.write(model, null);
+    }
+
+    public static void write(final ServerToClientModel model, final Object value) {
+        get().writer.write(model, value);
+    }
+
+    public static void endObject() {
+        get().writer.endObject();
+    }
+
 
     private static final class Latency {
 

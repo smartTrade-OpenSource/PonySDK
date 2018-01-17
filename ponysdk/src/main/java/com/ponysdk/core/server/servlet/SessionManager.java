@@ -23,11 +23,9 @@
 
 package com.ponysdk.core.server.servlet;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 import com.ponysdk.core.server.application.Application;
 import com.ponysdk.core.server.application.UIContext;
@@ -36,9 +34,9 @@ public class SessionManager {
 
     private static final SessionManager INSTANCE = new SessionManager();
 
-    private final Map<String, Application> applications = new ConcurrentHashMap<>();
+    private final Map<Integer, Application> applications = new ConcurrentHashMap<>();
 
-    private final List<ApplicationListener> listeners = new ArrayList<>();
+    private final Set<ApplicationListener> listeners = new HashSet<>();
 
     public static SessionManager get() {
         return INSTANCE;
@@ -52,14 +50,16 @@ public class SessionManager {
         return applications.get(id);
     }
 
-    public void registerApplication(final Application application) {
+    public void registerApplication(Application application) {
         applications.put(application.getId(), application);
         listeners.forEach(listener -> listener.onApplicationCreated(application));
     }
 
     public void unregisterApplication(final Application application) {
-        applications.remove(application.getId());
-        listeners.forEach(listener -> listener.onApplicationDestroyed(application));
+        Application removedApplication = applications.remove(application.getId());
+        if (removedApplication != null) {
+            listeners.forEach(listener -> listener.onApplicationDestroyed(application));
+        }
     }
 
     public void addApplicationListener(final ApplicationListener listener) {
@@ -67,7 +67,7 @@ public class SessionManager {
     }
 
     public UIContext getUIContext(final int id) {
-        return applications.values().stream().map(app -> app.getUIContext(id)).filter(e -> e != null).findFirst().orElse(null);
+        return applications.values().stream().map(app -> app.getUIContext(id)).filter(Objects::nonNull).findFirst().orElse(null);
     }
 
     public int countUIContexts() {

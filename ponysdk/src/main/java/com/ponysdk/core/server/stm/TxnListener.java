@@ -25,10 +25,10 @@ package com.ponysdk.core.server.stm;
 
 public interface TxnListener {
 
-    void beforeFlush(TxnContext txnContext);
+    void beforeFlush(Txn txn);
 
     void beforeRollback();
 
-    void afterFlush(TxnContext txnContext);
+    void afterFlush(Txn txn);
 
 }
