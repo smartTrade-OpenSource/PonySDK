@@ -29,7 +29,6 @@ import com.ponysdk.core.server.application.AbstractApplicationManager;
 import com.ponysdk.core.server.application.Application;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.useragent.UserAgent;
-import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
 import org.eclipse.jetty.websocket.api.WebSocketListener;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
@@ -39,13 +38,16 @@ import org.slf4j.LoggerFactory;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.websocket.Endpoint;
+import javax.websocket.EndpointConfig;
+import javax.websocket.Session;
 import java.io.StringReader;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-public class WebSocket implements WebSocketListener, WebsocketEncoder {
+public class WebSocket extends Endpoint implements WebsocketEncoder {
 
     private static final Logger log = LoggerFactory.getLogger(WebSocket.class);
 
@@ -65,29 +67,6 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         this.applicationManager = applicationManager;
     }
 
-    @Override
-    public void onWebSocketConnect(final Session session) {
-        final String userAgent = request.getHeader("User-Agent");
-        //String applicationId = request.getHttpServletRequest().getParameter("application");
-        //log.info("WebSocket connected from {}, sessionID={}, userAgent={}", session.getRemoteAddress(), request.getSession().getId(), userAgent);
-
-        this.session = session;
-        // 1K for max chunk size and 1M for total buffer size
-        // Don't set max chunk size > 8K because when using Jetty Websocket compression, the chunks are limited to 8K
-        this.websocketPusher = new WebSocketPusher(session, 1 << 20, 1 << 12, TimeUnit.SECONDS.toMillis(60));
-
-        final SessionManager sessionManager = SessionManager.get();
-        final Application application = new Application(applicationManager.getOptions(), UserAgent.parseUserAgentString(userAgent));
-        sessionManager.registerApplication(application);
-
-        this.uiContext = new UIContext(this,request, application);
-        this.communicationSanityChecker = new CommunicationSanityChecker(uiContext);
-        log.info("Creating a new {}", uiContext);
-        //uiContext.setCommunicationSanityChecker(communicationSanityChecker);
-        application.registerUIContext(uiContext);
-        applicationManager.startApplication(uiContext);
-        communicationSanityChecker.start();
-    }
 
     @Override
     public void onWebSocketError(final Throwable throwable) {
@@ -242,6 +221,30 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     @Override
     public void encode(final ServerToClientModel model, final Object value) {
         websocketPusher.encode(model, value);
+    }
+
+    @Override
+    public void onOpen(Session session, EndpointConfig config) {
+        final String userAgent = request.getHeader("User-Agent");
+        //String applicationId = request.getHttpServletRequest().getParameter("application");
+        //log.info("WebSocket connected from {}, sessionID={}, userAgent={}", session.getRemoteAddress(), request.getSession().getId(), userAgent);
+
+        this.session = session;
+        // 1K for max chunk size and 1M for total buffer size
+        // Don't set max chunk size > 8K because when using Jetty Websocket compression, the chunks are limited to 8K
+        this.websocketPusher = new WebSocketPusher(session, 1 << 20, 1 << 12, TimeUnit.SECONDS.toMillis(60));
+
+        final SessionManager sessionManager = SessionManager.get();
+        final Application application = new Application(applicationManager.getOptions(), UserAgent.parseUserAgentString(userAgent));
+        sessionManager.registerApplication(application);
+
+        this.uiContext = new UIContext(this,request, application);
+        this.communicationSanityChecker = new CommunicationSanityChecker(uiContext);
+        log.info("Creating a new {}", uiContext);
+        //uiContext.setCommunicationSanityChecker(communicationSanityChecker);
+        application.registerUIContext(uiContext);
+        applicationManager.startApplication(uiContext);
+        communicationSanityChecker.start();
     }
 
     private enum NiceStatusCode {
