@@ -104,8 +104,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
         testPerf();
 
-        if (true) return;
-
         testPAddon();
 
         createWindow().open();
