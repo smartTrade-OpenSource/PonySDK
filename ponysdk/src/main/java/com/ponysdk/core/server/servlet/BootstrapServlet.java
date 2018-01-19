@@ -23,8 +23,6 @@
 
 package com.ponysdk.core.server.servlet;
 
-import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -32,14 +30,11 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.activation.MimetypesFileTypeMap;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -51,13 +46,21 @@ import com.ponysdk.core.server.application.ApplicationManagerOption;
 
 public class BootstrapServlet extends HttpServlet {
 
+    private static final String INDEX_URL = "/index.html";
+    protected static final String NEW_LINE = "\n";
+
+    protected static final String TITLE_PATTERN = "<title>%s</title>";
+    protected static final String META_PATTERN = "<meta %s>";
+    protected static final String STYLE_PATTERN = "<link id=\"%s\" rel=\"stylesheet\" type=\"%s\" href=\"%s\"/>";
+    protected static final String SCRIPT_PATTERN = "<script type=\"text/javascript\" src=\"%s\"></script>";
+
     private static final Logger log = LoggerFactory.getLogger(BootstrapServlet.class);
 
     private final MimetypesFileTypeMap fileTypeMap = new MimetypesFileTypeMap();
 
-    private ApplicationManagerOption application;
+    protected ApplicationManagerOption application;
 
-    private Path indexPath;
+    protected String rootPath = "";
 
     private ClassLoader childClassLoader;
 
@@ -66,12 +69,6 @@ public class BootstrapServlet extends HttpServlet {
 
     public BootstrapServlet(final ClassLoader classLoader) {
         this.childClassLoader = classLoader;
-    }
-
-    @Override
-    public void init() throws ServletException {
-        super.init();
-        initIndexFile();
     }
 
     @Override
@@ -89,7 +86,7 @@ public class BootstrapServlet extends HttpServlet {
             final String extraPathInfo = getPath(request);
 
             if (extraPathInfo == null || extraPathInfo.isEmpty() || extraPathInfo.equals("/")) {
-                handleRequest(request, response, "/index.html");
+                handleRequest(request, response, INDEX_URL);
             } else {
                 if (log.isDebugEnabled()) {
                     log.debug("Loading resource: " + extraPathInfo);
@@ -113,94 +110,111 @@ public class BootstrapServlet extends HttpServlet {
         // Force session creation if there is no session
         request.getSession();
 
+        final InputStream inputStream = getInputStreamFromPath(path);
+
+        final String mimeType = fileTypeMap.getContentType(path);
+        response.setContentType(mimeType);
+
+        if (inputStream != null) {
+            ReadableByteChannel inputChannel = null;
+            WritableByteChannel outputChannel = null;
+            try {
+                inputChannel = Channels.newChannel(inputStream);
+                outputChannel = Channels.newChannel(response.getOutputStream());
+
+                final ByteBuffer buffer = ByteBuffer.allocateDirect(16 * 1024);
+                while (inputChannel.read(buffer) != -1) {
+                    buffer.flip();
+                    outputChannel.write(buffer);
+                    response.getOutputStream().flush();
+                    buffer.compact();
+                }
+                buffer.flip();
+                while (buffer.hasRemaining()) {
+                    outputChannel.write(buffer);
+                }
+            } finally {
+                if (inputChannel != null) inputChannel.close();
+                if (outputChannel != null) outputChannel.close();
+            }
+        } else {
+            if (path.equals(INDEX_URL)) {
+                final WritableByteChannel outputChannel = Channels.newChannel(response.getOutputStream());
+                final ByteBuffer buffer = ByteBuffer.wrap(buildIndexHTML(request).getBytes(Charset.forName("UTF8")));
+                outputChannel.write(buffer);
+            } else {
+                log.error("Failed to load resource: " + request.getPathInfo());
+                response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            }
+        }
+    }
+
+    public InputStream getInputStreamFromPath(final String path) {
         // Try to load from context
         InputStream inputStream = getServletContext().getResourceAsStream(path);
-
-        File file;
 
         if (inputStream == null) {
             // Try to load from jar
             final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
             final String jarPath = path.substring(1, path.length());
             inputStream = classLoader.getResourceAsStream(jarPath);
-            if (inputStream == null && childClassLoader != null) {
-                inputStream = childClassLoader.getResourceAsStream(jarPath);
-            }
-
-            if (inputStream == null) {
-                if (path.equals("/index.html")) {
-                    file = indexPath.toFile();
-                } else {
-                    log.error("Failed to load resource: " + request.getPathInfo());
-                    response.sendError(HttpServletResponse.SC_NOT_FOUND);
-                    return;
-                }
-            } else {
-                file = new File(jarPath);
-            }
-        } else {
-            file = new File(path);
+            if (inputStream == null && childClassLoader != null) inputStream = childClassLoader.getResourceAsStream(jarPath);
         }
-
-        final String mimeType = fileTypeMap.getContentType(file);
-        response.setContentType(mimeType);
-
-        if (inputStream != null) {
-            final ReadableByteChannel inputChannel = Channels.newChannel(inputStream);
-            final WritableByteChannel outputChannel = Channels.newChannel(response.getOutputStream());
-            final ByteBuffer buffer = ByteBuffer.allocateDirect(16 * 1024);
-
-            while (inputChannel.read(buffer) != -1) {
-                buffer.flip();
-                outputChannel.write(buffer);
-                buffer.compact();
-            }
-            buffer.flip();
-            while (buffer.hasRemaining()) {
-                outputChannel.write(buffer);
-            }
-        } else {
-            final int fileSize = Long.valueOf(file.length()).intValue();
-            response.setContentLength(fileSize);
-            Files.copy(file.toPath(), response.getOutputStream());
-        }
+        return inputStream;
     }
 
-    private void initIndexFile() {
-        try {
-            indexPath = Files.createTempFile("index", ".html");
-            indexPath.toFile().deleteOnExit();
+    protected String buildIndexHTML(final HttpServletRequest request) {
+        final StringBuilder sb = new StringBuilder();
 
-            try (BufferedWriter writer = Files.newBufferedWriter(indexPath, Charset.forName("UTF8"))) {
-                writeIndexHTML(writer);
-            }
+        sb.append("<!doctype html>").append(NEW_LINE);
+        sb.append("<html>").append(NEW_LINE);
+        sb.append("<head>").append(NEW_LINE);
+        sb.append(addHeader(request));
+        sb.append("</head>").append(NEW_LINE);
+        sb.append("<body>").append(NEW_LINE);
+        sb.append(addToBody(request));
+        sb.append("</body>").append(NEW_LINE);
+        sb.append("</html>").append(NEW_LINE);
 
-        } catch (final IOException e) {
-            log.error("Cannot generate index.html", e);
-        }
+        return sb.toString();
     }
 
-    protected void writeIndexHTML(final BufferedWriter writer) throws IOException {
-        writer.append("<!doctype html>");
-        writer.newLine();
-        writer.append("<html>");
-        writer.newLine();
-        writer.append("<head>");
-        writer.newLine();
-        writer.append("<title>").append(application.getApplicationName()).append("</title>");
-        writer.newLine();
-        writer.append("<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">");
-        writer.newLine();
+    protected String addHeader(final HttpServletRequest request) {
+        final StringBuilder sb = new StringBuilder();
+
+        sb.append(addTitle(request));
+        sb.append(addMeta(request));
+        sb.append(addStyle(request));
+        sb.append(addScript(request));
+
+        return sb.toString();
+    }
+
+    protected String addTitle(final HttpServletRequest request) {
+        final StringBuilder sb = new StringBuilder();
+
+        sb.append(String.format(TITLE_PATTERN, application.getApplicationName())).append(NEW_LINE);
+
+        return sb.toString();
+    }
+
+    protected String addMeta(final HttpServletRequest request) {
+        final StringBuilder sb = new StringBuilder();
+
+        sb.append(String.format(META_PATTERN, "http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\"")).append(NEW_LINE);
 
         final Set<String> metas = application.getMeta();
         if (metas != null) {
             for (final String m : metas) {
-                writer.append("<meta ").append(m).append(">");
-                writer.newLine();
+                sb.append(String.format(META_PATTERN, m)).append(NEW_LINE);
             }
         }
-        addToMeta(writer);
-        writer.newLine();
+
+        return sb.toString();
+    }
+
+    protected String addStyle(final HttpServletRequest request) {
+        final StringBuilder sb = new StringBuilder();
 
         final Map<String, String> styles = application.getStyle();
         if (styles != null && !styles.isEmpty()) {
@@ -208,83 +222,76 @@ public class BootstrapServlet extends HttpServlet {
                 final String id = style.getKey();
                 final String url = style.getValue();
                 final String contentType = fileTypeMap.getContentType(url);
-                writer.append("<link id=\"").append(id).append("\"  rel=\"stylesheet");
-                if (!contentType.equals("text/css")) writer.append("/less");
-                writer.append("\" type=\"").append(contentType).append("\" href=\"").append(url).append("\">");
-                writer.newLine();
+                sb.append(String.format(STYLE_PATTERN, id, contentType, url)).append(NEW_LINE);
             }
         }
+
+        return sb.toString();
+    }
+
+    protected String addScript(final HttpServletRequest request) {
+        final StringBuilder sb = new StringBuilder();
 
         String ponyTerminalJsFileName;
         if (application.isDebugMode()) ponyTerminalJsFileName = "ponyterminaldebug/ponyterminaldebug.nocache.js";
         else ponyTerminalJsFileName = "ponyterminal/ponyterminal.nocache.js";
-        writer.append("<script type=\"text/javascript\" src=\"").append(ponyTerminalJsFileName).append("\"></script>");
-        writer.newLine();
-        writer.append("<script type=\"text/javascript\" src=\"script/ponysdk.js\"></script>");
-        writer.newLine();
+
+        sb.append(String.format(SCRIPT_PATTERN, rootPath + ponyTerminalJsFileName)).append(NEW_LINE);
+        sb.append(String.format(SCRIPT_PATTERN, rootPath + "script/ponysdk.js")).append(NEW_LINE);
 
         final Set<String> scripts = application.getJavascript();
         if (scripts != null && !scripts.isEmpty()) {
             for (final String script : scripts) {
-                writer.append("<script type=\"text/javascript\" src=\"").append(script).append("\"></script>");
-                writer.newLine();
+                sb.append(String.format(SCRIPT_PATTERN, script)).append(NEW_LINE);
             }
         }
 
-        addToHeader(writer);
-        writer.newLine();
-        writer.append("</head>");
-        writer.newLine();
-        writer.append("<body>");
-        writer.newLine();
-        addHistoryIFrame(writer);
-        writer.newLine();
-        addLoading(writer);
-        writer.newLine();
-        addNoScript(writer);
-        writer.newLine();
-        addToBody(writer);
-        writer.newLine();
-        writer.append("</body>");
-        writer.newLine();
-        writer.append("</html>");
-        writer.newLine();
+        return sb.toString();
     }
 
-    protected void addHistoryIFrame(final BufferedWriter writer) throws IOException {
-        writer.append(
-            "<iframe src=\"javascript:''\" id=\"__gwt_historyFrame\" tabIndex='-1' style=\"position:absolute;width:0;height:0;border:0\"></iframe>");
+    protected String addToBody(final HttpServletRequest request) {
+        final StringBuilder sb = new StringBuilder();
+
+        sb.append(addHistoryIFrame(request));
+        sb.append(addLoading(request));
+        sb.append(addNoScript(request));
+
+        return sb.toString();
     }
 
-    protected void addLoading(final BufferedWriter writer) throws IOException {
-        writer.append("<div id=\"loading\">Loading ").append(application.getApplicationName()).append("...</div>");
+    protected String addHistoryIFrame(final HttpServletRequest request) {
+        return "<iframe src=\"javascript:''\" id=\"__gwt_historyFrame\" tabIndex='-1' style=\"position:absolute;width:0;height:0;border:0\"></iframe>"
+                + NEW_LINE;
     }
 
-    protected void addNoScript(final BufferedWriter writer) throws IOException {
-        writer.append("<noscript>");
-        writer.newLine();
-        writer.append(
-            "<div style=\"width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px;\">");
-        writer.newLine();
-        writer.append("Your web browser must have JavaScript enabled");
-        writer.newLine();
-        writer.append("in order for this application to display correctly.");
-        writer.newLine();
-        writer.append("</div>");
-        writer.newLine();
-        writer.append("</noscript>");
+    protected String addLoading(final HttpServletRequest request) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("<div id=\"loading\">Loading ");
+        sb.append(application.getApplicationName());
+        sb.append("...</div>").append(NEW_LINE);
+        return sb.toString();
     }
 
-    protected void addToMeta(final BufferedWriter writer) {
-    }
+    protected String addNoScript(final HttpServletRequest request) {
+        final StringBuilder sb = new StringBuilder();
 
-    protected void addToHeader(final BufferedWriter writer) {
-    }
+        sb.append("<noscript>").append(NEW_LINE);
+        sb.append(
+            "<div style=\"width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px;\">")
+            .append(NEW_LINE);
+        sb.append("Your web browser must have JavaScript enabled").append(NEW_LINE);
+        sb.append("in order for this application to display correctly.").append(NEW_LINE);
+        sb.append("</div>").append(NEW_LINE);
+        sb.append("</noscript>").append(NEW_LINE);
 
-    protected void addToBody(final BufferedWriter writer) {
+        return sb.toString();
     }
 
     public void setApplication(final ApplicationManagerOption application) {
         this.application = application;
+    }
+
+    public void setRootPath(final String rootPath) {
+        this.rootPath = rootPath;
     }
 }
