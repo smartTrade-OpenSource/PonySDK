@@ -17,6 +17,8 @@ So, with PonySDK, you will be able to write standard Java code for creating your
 
 [Installation](#installation)
 
+[Demo](#demo)
+
 [Frequently asked questions](#frequently-asked-questions)
 
 ----
@@ -36,5 +38,27 @@ Git version : https://github.com/Nciaravola/PonySDK.git
 Latest version : https://github.com/Nciaravola/PonySDK/archive/master.zip
 Released version : https://github.com/Nciaravola/PonySDK/releases
 ```
+
+## Demo
+
+For testing PonySDK, there is a sample that launched an embedded Jetty Server and served a demo page.
+
+Follow the steps :
+
+```sh
+$ git clone https://github.com/Nciaravola/PonySDK.git
+$ cd PonySDK
+$ gradlew runSampleSpring
+```
+
+Wait a little and you will have on the console, logs like this :
+
+```
+INFO  [ContextHandler] Started o.e.j.s.ServletContextHandler@6440112d{/sample,null,AVAILABLE}
+INFO  [AbstractConnector] Started ServerConnector@4239156f{HTTP/1.1,[http/1.1]}{0.0.0.0:8081}
+INFO  [AbstractConnector] Started ServerConnector@5a7fe64f{SSL,[ssl, http/1.1]}{0.0.0.0:8082}
+```
+
+Now you can go on http://localhost:8081/sample/ or https://localhost:8081/sample/ (SSL is activated by default)
 
 ## [Frequently asked questions](https://github.com/Nciaravola/PonySDK/wiki)
