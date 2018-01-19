@@ -47,12 +47,20 @@ import com.ponysdk.core.server.application.ApplicationManagerOption;
 public class BootstrapServlet extends HttpServlet {
 
     private static final String INDEX_URL = "/index.html";
+    protected static final String NEW_LINE = "\n";
+
+    protected static final String TITLE_PATTERN = "<title>%s</title>";
+    protected static final String META_PATTERN = "<meta %s>";
+    protected static final String STYLE_PATTERN = "<link id=\"%s\" rel=\"stylesheet\" type=\"%s\" href=\"%s\"/>";
+    protected static final String SCRIPT_PATTERN = "<script type=\"text/javascript\" src=\"%s\"></script>";
 
     private static final Logger log = LoggerFactory.getLogger(BootstrapServlet.class);
 
     private final MimetypesFileTypeMap fileTypeMap = new MimetypesFileTypeMap();
 
     protected ApplicationManagerOption application;
+
+    protected String rootPath = "";
 
     private ClassLoader childClassLoader;
 
@@ -158,19 +166,55 @@ public class BootstrapServlet extends HttpServlet {
     protected String buildIndexHTML(final HttpServletRequest request) {
         final StringBuilder sb = new StringBuilder();
 
-        sb.append("<!doctype html>\n");
-        sb.append("<html>\n");
-        sb.append("<head>\n");
-        sb.append("<title>").append(application.getApplicationName()).append("</title>\n");
-        sb.append("<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">\n");
+        sb.append("<!doctype html>").append(NEW_LINE);
+        sb.append("<html>").append(NEW_LINE);
+        sb.append("<head>").append(NEW_LINE);
+        sb.append(addHeader(request));
+        sb.append("</head>").append(NEW_LINE);
+        sb.append("<body>").append(NEW_LINE);
+        sb.append(addToBody(request));
+        sb.append("</body>").append(NEW_LINE);
+        sb.append("</html>").append(NEW_LINE);
+
+        return sb.toString();
+    }
+
+    protected String addHeader(final HttpServletRequest request) {
+        final StringBuilder sb = new StringBuilder();
+
+        sb.append(addTitle(request));
+        sb.append(addMeta(request));
+        sb.append(addStyle(request));
+        sb.append(addScript(request));
+
+        return sb.toString();
+    }
+
+    protected String addTitle(final HttpServletRequest request) {
+        final StringBuilder sb = new StringBuilder();
+
+        sb.append(String.format(TITLE_PATTERN, application.getApplicationName())).append(NEW_LINE);
+
+        return sb.toString();
+    }
+
+    protected String addMeta(final HttpServletRequest request) {
+        final StringBuilder sb = new StringBuilder();
+
+        sb.append(String.format(META_PATTERN, "http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\"")).append(NEW_LINE);
 
         final Set<String> metas = application.getMeta();
         if (metas != null) {
             for (final String m : metas) {
-                sb.append("<meta ").append(m).append(">\n");
+                sb.append(String.format(META_PATTERN, m)).append(NEW_LINE);
             }
         }
-        sb.append(addToMeta(request));
+
+        return sb.toString();
+    }
+
+    protected String addStyle(final HttpServletRequest request) {
+        final StringBuilder sb = new StringBuilder();
 
         final Map<String, String> styles = application.getStyle();
         if (styles != null && !styles.isEmpty()) {
@@ -178,85 +222,76 @@ public class BootstrapServlet extends HttpServlet {
                 final String id = style.getKey();
                 final String url = style.getValue();
                 final String contentType = fileTypeMap.getContentType(url);
-                sb.append("<link id=\"").append(id).append("\"  rel=\"stylesheet");
-                if (!contentType.equals("text/css")) sb.append("/less");
-                sb.append("\" type=\"").append(contentType).append("\" href=\"").append(url).append("\">\n");
+                sb.append(String.format(STYLE_PATTERN, id, contentType, url)).append(NEW_LINE);
             }
         }
-        sb.append(addToStyle(request));
+
+        return sb.toString();
+    }
+
+    protected String addScript(final HttpServletRequest request) {
+        final StringBuilder sb = new StringBuilder();
 
         String ponyTerminalJsFileName;
         if (application.isDebugMode()) ponyTerminalJsFileName = "ponyterminaldebug/ponyterminaldebug.nocache.js";
         else ponyTerminalJsFileName = "ponyterminal/ponyterminal.nocache.js";
-        sb.append("<script type=\"text/javascript\" src=\"").append(ponyTerminalJsFileName).append("\"></script>\n");
-        sb.append("<script type=\"text/javascript\" src=\"script/ponysdk.js\"></script>\n");
+
+        sb.append(String.format(SCRIPT_PATTERN, rootPath + ponyTerminalJsFileName)).append(NEW_LINE);
+        sb.append(String.format(SCRIPT_PATTERN, rootPath + "script/ponysdk.js")).append(NEW_LINE);
 
         final Set<String> scripts = application.getJavascript();
         if (scripts != null && !scripts.isEmpty()) {
             for (final String script : scripts) {
-                sb.append("<script type=\"text/javascript\" src=\"").append(script).append("\"></script>\n");
+                sb.append(String.format(SCRIPT_PATTERN, script)).append(NEW_LINE);
             }
         }
-        sb.append(addToScript(request));
 
-        sb.append(addToHeader(request));
-        sb.append("</head>\n");
-        sb.append("<body>\n");
+        return sb.toString();
+    }
+
+    protected String addToBody(final HttpServletRequest request) {
+        final StringBuilder sb = new StringBuilder();
+
         sb.append(addHistoryIFrame(request));
         sb.append(addLoading(request));
         sb.append(addNoScript(request));
-        sb.append(addToBody(request));
-        sb.append("</body>\n");
-        sb.append("</html>\n");
 
         return sb.toString();
     }
 
     protected String addHistoryIFrame(final HttpServletRequest request) {
-        return "<iframe src=\"javascript:''\" id=\"__gwt_historyFrame\" tabIndex='-1' style=\"position:absolute;width:0;height:0;border:0\"></iframe>\n";
+        return "<iframe src=\"javascript:''\" id=\"__gwt_historyFrame\" tabIndex='-1' style=\"position:absolute;width:0;height:0;border:0\"></iframe>"
+                + NEW_LINE;
     }
 
     protected String addLoading(final HttpServletRequest request) {
         final StringBuilder sb = new StringBuilder();
         sb.append("<div id=\"loading\">Loading ");
         sb.append(application.getApplicationName());
-        sb.append("...</div>\n");
+        sb.append("...</div>").append(NEW_LINE);
         return sb.toString();
     }
 
     protected String addNoScript(final HttpServletRequest request) {
         final StringBuilder sb = new StringBuilder();
-        sb.append("<noscript>\n");
+
+        sb.append("<noscript>").append(NEW_LINE);
         sb.append(
-            "<div style=\"width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px;\">\n");
-        sb.append("Your web browser must have JavaScript enabled\n");
-        sb.append("in order for this application to display correctly.\n");
-        sb.append("</div>\n");
-        sb.append("</noscript>\n");
+            "<div style=\"width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px;\">")
+            .append(NEW_LINE);
+        sb.append("Your web browser must have JavaScript enabled").append(NEW_LINE);
+        sb.append("in order for this application to display correctly.").append(NEW_LINE);
+        sb.append("</div>").append(NEW_LINE);
+        sb.append("</noscript>").append(NEW_LINE);
+
         return sb.toString();
-    }
-
-    protected String addToMeta(final HttpServletRequest request) {
-        return "\n";
-    }
-
-    protected String addToStyle(final HttpServletRequest request) {
-        return "\n";
-    }
-
-    protected String addToScript(final HttpServletRequest request) {
-        return "\n";
-    }
-
-    protected String addToHeader(final HttpServletRequest request) {
-        return "\n";
-    }
-
-    protected String addToBody(final HttpServletRequest request) {
-        return "\n";
     }
 
     public void setApplication(final ApplicationManagerOption application) {
         this.application = application;
+    }
+
+    public void setRootPath(final String rootPath) {
+        this.rootPath = rootPath;
     }
 }
