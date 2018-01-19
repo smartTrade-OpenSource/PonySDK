@@ -52,7 +52,7 @@ public class BootstrapServlet extends HttpServlet {
 
     private final MimetypesFileTypeMap fileTypeMap = new MimetypesFileTypeMap();
 
-    private ApplicationManagerOption application;
+    protected ApplicationManagerOption application;
 
     private ClassLoader childClassLoader;
 
