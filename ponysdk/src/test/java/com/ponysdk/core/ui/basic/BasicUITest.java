@@ -24,7 +24,6 @@
 package com.ponysdk.core.ui.basic;
 
 import com.ponysdk.core.model.PCheckBoxState;
-import com.ponysdk.core.ui.basic.event.*;
 import com.ponysdk.core.ui.model.PKeyCodes;
 import org.junit.Assert;
 import org.junit.Test;

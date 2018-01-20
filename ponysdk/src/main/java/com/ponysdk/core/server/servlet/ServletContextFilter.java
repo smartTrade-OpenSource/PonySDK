@@ -31,7 +31,7 @@ import java.io.IOException;
 public class ServletContextFilter implements Filter {
 
     @Override
-    public void init(final FilterConfig filterConfig) throws ServletException {
+    public void init(final FilterConfig filterConfig) {
     }
 
     @Override

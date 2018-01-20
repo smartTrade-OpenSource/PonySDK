@@ -54,6 +54,7 @@ dependencies {
             'org.eclipse.jetty:jetty-util:' + jettyVersion,
             'org.eclipse.jetty:jetty-http:' + jettyVersion,
             'org.eclipse.jetty:jetty-security:' + jettyVersion,
+            'org.eclipse.jetty:jetty-annotations:' + jettyVersion,
             'org.eclipse.jetty:jetty-continuation:' + jettyVersion,
             //'org.eclipse.jetty.websocket:websocket-api:' + jettyVersion,
             'javax.websocket:javax.websocket-api:1.1',
@@ -239,5 +240,5 @@ artifacts {
     archives sourcesJar
 }
 
-jar.dependsOn('gwtc')
-jar.dependsOn('gwtcDebug')
+//jar.dependsOn('gwtc')
+//jar.dependsOn('gwtcDebug')

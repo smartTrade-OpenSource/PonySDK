@@ -30,7 +30,6 @@ import com.ponysdk.core.server.application.Application;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.useragent.UserAgent;
 import org.eclipse.jetty.websocket.api.StatusCode;
-import org.eclipse.jetty.websocket.api.WebSocketListener;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,16 +37,17 @@ import org.slf4j.LoggerFactory;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
-import javax.websocket.Endpoint;
-import javax.websocket.EndpointConfig;
-import javax.websocket.Session;
+import javax.websocket.*;
+import javax.websocket.server.ServerEndpoint;
+import java.io.IOException;
 import java.io.StringReader;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-public class WebSocket extends Endpoint implements WebsocketEncoder {
+@ServerEndpoint("/ws/*")
+public class WebSocket implements WebsocketEncoder, MessageHandler.Whole<String> {
 
     private static final Logger log = LoggerFactory.getLogger(WebSocket.class);
 
@@ -65,101 +65,6 @@ public class WebSocket extends Endpoint implements WebsocketEncoder {
         this.request = request;
         this.monitor = monitor;
         this.applicationManager = applicationManager;
-    }
-
-
-    @Override
-    public void onWebSocketError(final Throwable throwable) {
-        log.error("WebSocket Error", throwable);
-    }
-
-    @Override
-    public void onWebSocketClose(final int statusCode, final String reason) {
-        //if (log.isInfoEnabled())
-        //    log.info("WebSocket closed on UIContext #{} : {}, reason : {}", uiContext.getID(),
-        //            NiceStatusCode.getMessage(statusCode), reason != null ? reason : "");
-        if (isAlive())
-            uiContext.onDestroy();
-    }
-
-    /**
-     * Receive from the terminal
-     */
-    @Override
-    public void onWebSocketText(final String text) {
-        if (isAlive()) {
-            if (monitor != null) monitor.onMessageReceived(WebSocket.this, text);
-            try {
-                communicationSanityChecker.onMessageReceived();
-
-                if (ClientToServerModel.HEARTBEAT.toStringValue().equals(text)) {
-                    if (log.isDebugEnabled()) log.debug("Heartbeat received from terminal #{}", uiContext.getID());
-                } else {
-                    final JsonObject jsonObject = Json.createReader(new StringReader(text)).readObject();
-                    if (jsonObject.containsKey(ClientToServerModel.PING_SERVER.toStringValue())) {
-                        final long start = jsonObject.getJsonNumber(ClientToServerModel.PING_SERVER.toStringValue()).longValue();
-                        final long end = System.currentTimeMillis();
-                        if (log.isDebugEnabled())
-                            log.debug("Ping measurement : {} ms from terminal #{}", end - start, uiContext.getID());
-                        uiContext.addPingValue(end - start);
-                    } else if (jsonObject.containsKey(ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue())) {
-                        final Application applicationSession = uiContext.getApplication();
-                        if (applicationSession == null)
-                            throw new Exception("Invalid session, please reload your application (" + uiContext + ")");
-                        final String applicationInstructions = ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue();
-                        uiContext.execute(() -> {
-                            final JsonArray appInstructions = jsonObject.getJsonArray(applicationInstructions);
-                            for (int i = 0; i < appInstructions.size(); i++) {
-                                uiContext.fireClientData(appInstructions.getJsonObject(i));
-                            }
-                        });
-                    } else if (jsonObject.containsKey(ClientToServerModel.ERROR_MSG.toStringValue())) {
-                        String extraMsg = "";
-                        if (jsonObject.containsKey(ClientToServerModel.OBJECT_ID.toStringValue())) {
-                            final int objectID = jsonObject.getJsonNumber(ClientToServerModel.OBJECT_ID.toStringValue()).intValue();
-                            extraMsg = " on " + uiContext.getObject(objectID);
-                        }
-                        log.error("Message from terminal #{} : {}{}", uiContext.getID(),
-                                jsonObject.getJsonString(ClientToServerModel.ERROR_MSG.toStringValue()), extraMsg);
-                    } else if (jsonObject.containsKey(ClientToServerModel.WARNING_MSG.toStringValue())) {
-                        String extraMsg = "";
-                        if (jsonObject.containsKey(ClientToServerModel.OBJECT_ID.toStringValue())) {
-                            final int objectID = jsonObject.getJsonNumber(ClientToServerModel.OBJECT_ID.toStringValue()).intValue();
-                            extraMsg = " on " + uiContext.getObject(objectID);
-                        }
-                        log.warn("Message from terminal #{} : {}{}", uiContext.getID(),
-                                jsonObject.getJsonString(ClientToServerModel.WARNING_MSG.toStringValue()), extraMsg);
-                    } else if (jsonObject.containsKey(ClientToServerModel.INFO_MSG.toStringValue())) {
-                        if (log.isInfoEnabled()) {
-                            String extraMsg = "";
-                            if (jsonObject.containsKey(ClientToServerModel.OBJECT_ID.toStringValue())) {
-                                final int objectID = jsonObject.getJsonNumber(ClientToServerModel.OBJECT_ID.toStringValue())
-                                        .intValue();
-                                extraMsg = " on " + uiContext.getObject(objectID);
-                            }
-                            log.info("Message from terminal #{} : {}{}", uiContext.getID(),
-                                    jsonObject.getJsonString(ClientToServerModel.INFO_MSG.toStringValue()), extraMsg);
-                        }
-                    } else {
-                        log.error("Unknow message from terminal #{} : {}", uiContext.getID(), text);
-                    }
-                }
-            } catch (final Throwable e) {
-                log.error("Cannot process message from terminal  #" + uiContext.getID() + " : " + text, e);
-            } finally {
-                if (monitor != null) monitor.onMessageProcessed(WebSocket.this);
-            }
-        } else {
-            log.info("UI Context is destroyed, message dropped from terminal : {}", text);
-        }
-    }
-
-    /**
-     * Receive from the terminal
-     */
-    @Override
-    public void onWebSocketBinary(final byte[] payload, final int offset, final int len) {
-        // Can't receive binary data from terminal (GWT limitation)
     }
 
     /**
@@ -194,7 +99,7 @@ public class WebSocket extends Endpoint implements WebsocketEncoder {
         websocketPusher.flush();
     }
 
-    public void close() {
+    public void close() throws IOException {
         if (isSessionOpen()) {
             log.info("Closing websocket programaticly");
             session.close();
@@ -223,8 +128,11 @@ public class WebSocket extends Endpoint implements WebsocketEncoder {
         websocketPusher.encode(model, value);
     }
 
-    @Override
+    @OnOpen
     public void onOpen(Session session, EndpointConfig config) {
+        session.addMessageHandler(this);
+
+
         final String userAgent = request.getHeader("User-Agent");
         //String applicationId = request.getHttpServletRequest().getParameter("application");
         //log.info("WebSocket connected from {}, sessionID={}, userAgent={}", session.getRemoteAddress(), request.getSession().getId(), userAgent);
@@ -237,14 +145,91 @@ public class WebSocket extends Endpoint implements WebsocketEncoder {
         final SessionManager sessionManager = SessionManager.get();
         final Application application = new Application(applicationManager.getOptions(), UserAgent.parseUserAgentString(userAgent));
         sessionManager.registerApplication(application);
-
-        this.uiContext = new UIContext(this,request, application);
-        this.communicationSanityChecker = new CommunicationSanityChecker(uiContext);
         log.info("Creating a new {}", uiContext);
-        //uiContext.setCommunicationSanityChecker(communicationSanityChecker);
+        this.uiContext = new UIContext(this, request, application);
+        this.communicationSanityChecker = new CommunicationSanityChecker(uiContext);
         application.registerUIContext(uiContext);
         applicationManager.startApplication(uiContext);
         communicationSanityChecker.start();
+    }
+
+    @OnClose
+    public void onClose(Session session, CloseReason closeReason) {
+        if (isAlive()) uiContext.onDestroy();
+    }
+
+    @OnError
+    public void onError(Session session, Throwable throwable) {
+        log.error("WebSocket Error", throwable);
+    }
+
+    @Override
+    public void onMessage(String message) {
+        if (isAlive()) {
+            if (monitor != null) monitor.onMessageReceived(WebSocket.this, message);
+            try {
+                communicationSanityChecker.onMessageReceived();
+
+                if (ClientToServerModel.HEARTBEAT.toStringValue().equals(message)) {
+                    if (log.isDebugEnabled()) log.debug("Heartbeat received from terminal #{}", uiContext.getID());
+                } else {
+                    final JsonObject jsonObject = Json.createReader(new StringReader(message)).readObject();
+                    if (jsonObject.containsKey(ClientToServerModel.PING_SERVER.toStringValue())) {
+                        final long start = jsonObject.getJsonNumber(ClientToServerModel.PING_SERVER.toStringValue()).longValue();
+                        final long end = System.currentTimeMillis();
+                        if (log.isDebugEnabled())
+                            log.debug("Ping measurement : {} ms from terminal #{}", end - start, uiContext.getID());
+                        uiContext.addPingValue(end - start);
+                    } else if (jsonObject.containsKey(ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue())) {
+                        final Application applicationSession = uiContext.getApplication();
+                        if (applicationSession == null)
+                            throw new Exception("Invalid session, please reload your application (" + uiContext + ")");
+                        final String applicationInstructions = ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue();
+                        uiContext.execute(() -> {
+                            final JsonArray appInstructions = jsonObject.getJsonArray(applicationInstructions);
+                            for (int i = 0; i < appInstructions.size(); i++) {
+                                uiContext.fireClientData(appInstructions.getJsonObject(i));
+                            }
+                        });
+                    } else if (jsonObject.containsKey(ClientToServerModel.ERROR_MSG.toStringValue())) {
+                        String extraMsg = "";
+                        if (jsonObject.containsKey(ClientToServerModel.OBJECT_ID.toStringValue())) {
+                            final int objectID = jsonObject.getJsonNumber(ClientToServerModel.OBJECT_ID.toStringValue()).intValue();
+                            extraMsg = " on " + uiContext.getObject(objectID);
+                        }
+                        log.error("Message from terminal #{} : {}{}", uiContext.getID(),
+                            jsonObject.getJsonString(ClientToServerModel.ERROR_MSG.toStringValue()), extraMsg);
+                    } else if (jsonObject.containsKey(ClientToServerModel.WARNING_MSG.toStringValue())) {
+                        String extraMsg = "";
+                        if (jsonObject.containsKey(ClientToServerModel.OBJECT_ID.toStringValue())) {
+                            final int objectID = jsonObject.getJsonNumber(ClientToServerModel.OBJECT_ID.toStringValue()).intValue();
+                            extraMsg = " on " + uiContext.getObject(objectID);
+                        }
+                        log.warn("Message from terminal #{} : {}{}", uiContext.getID(),
+                            jsonObject.getJsonString(ClientToServerModel.WARNING_MSG.toStringValue()), extraMsg);
+                    } else if (jsonObject.containsKey(ClientToServerModel.INFO_MSG.toStringValue())) {
+                        if (log.isInfoEnabled()) {
+                            String extraMsg = "";
+                            if (jsonObject.containsKey(ClientToServerModel.OBJECT_ID.toStringValue())) {
+                                final int objectID = jsonObject.getJsonNumber(ClientToServerModel.OBJECT_ID.toStringValue())
+                                    .intValue();
+                                extraMsg = " on " + uiContext.getObject(objectID);
+                            }
+                            log.info("Message from terminal #{} : {}{}", uiContext.getID(),
+                                jsonObject.getJsonString(ClientToServerModel.INFO_MSG.toStringValue()), extraMsg);
+                        }
+                    } else {
+                        log.error("Unknow message from terminal #{} : {}", uiContext.getID(), message);
+                    }
+                }
+            } catch (final Throwable e) {
+                log.error("Cannot process message from terminal  #" + uiContext.getID() + " : " + message, e);
+            } finally {
+                if (monitor != null) monitor.onMessageProcessed(WebSocket.this);
+            }
+        } else {
+            log.info("UI Context is destroyed, message dropped from terminal : {}", message);
+        }
     }
 
     private enum NiceStatusCode {
@@ -276,7 +261,7 @@ public class WebSocket extends Endpoint implements WebsocketEncoder {
 
         public static String getMessage(final int statusCode) {
             final List<NiceStatusCode> codes = Arrays.stream(values())
-                    .filter(niceStatusCode -> niceStatusCode.statusCode == statusCode).collect(Collectors.toList());
+                .filter(niceStatusCode -> niceStatusCode.statusCode == statusCode).collect(Collectors.toList());
             if (!codes.isEmpty()) {
                 return codes.get(0).toString();
             } else {

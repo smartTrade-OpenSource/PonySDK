@@ -36,17 +36,23 @@ import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
+import org.eclipse.jetty.websocket.jsr356.server.*;
+import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 
 import javax.servlet.DispatcherType;
+import javax.servlet.ServletException;
+import javax.websocket.DeploymentException;
+import javax.websocket.server.ServerEndpointConfig;
 import java.net.InetAddress;
 import java.net.URL;
 import java.util.EnumSet;
 
 public class PonySDKServer {
 
-    public static final String MAPPING_BOOTSTRAP = "/*";
+    public static final String MAPPING_BOOTSTRAP = "/";
     public static final String MAPPING_WS = "/" + MappingPath.WEBSOCKET + "/*";
     public static final String MAPPING_STREAM = "/" + MappingPath.STREAM;
     public static final String MAPPING_AJAX = "/" + MappingPath.AJAX;
@@ -69,7 +75,7 @@ public class PonySDKServer {
     private String sslTrustStorePassphrase;
     private String sslTrustStoreType = "JKS";
     private boolean needClientAuth = false;
-    private String[] enabledProtocols = new String[] { "TLSv1", "TLSv1.1", "TLSv1.2" };
+    private String[] enabledProtocols = new String[]{"TLSv1", "TLSv1.1", "TLSv1.2"};
     private String enabledCipherSuites;
 
     public PonySDKServer() {
@@ -81,17 +87,31 @@ public class PonySDKServer {
         if (useSSL) server.addConnector(createHttpsConnector());
 
         final ServletContextHandler context = createWebApp();
-
         final GzipHandler gzip = new GzipHandler();
         gzip.setHandler(context);
 
-        server.setHandler(gzip);
+        server.setHandler(context);
+
+        ServerContainer container = WebSocketServerContainerInitializer.configureContext( context );
+        container.addEndpoint(WebSocket.class);
+
+        server.start();
+        server.join();
+
+
+
+        /**
+        ServerContainer serverContainer = WebSocketServerContainerInitializer.configureContext(context);
+        ServerEndpointConfig serverEndpointConfig = new BasicServerEndpointConfig(serverContainer,WebSocket.class,"/" );
+        serverEndpointConfig.getUserProperties().put("contextPath", "/sample");
+        serverContainer.addEndpoint(serverEndpointConfig);
+        serverContainer.setAsyncSendTimeout(10000);
+         **/
 
         context.addEventListener(applicationLoader);
         applicationLoader.start();
 
         server.start();
-
         server.join();
 
         log.info("Webserver started on: " + InetAddress.getLocalHost().getHostAddress() + ":" + port);
@@ -105,9 +125,10 @@ public class PonySDKServer {
         context.setContextPath("/" + applicationManagerOption.getApplicationContextName());
 
         context.addServlet(new ServletHolder(createBootstrapServlet()), MAPPING_BOOTSTRAP);
-        context.addServlet(new ServletHolder(createStreamServiceServlet()), MAPPING_STREAM);
-        context.addServlet(new ServletHolder(createAjaxServlet()), MAPPING_AJAX);
-        context.addServlet(new ServletHolder(createWebSocketServlet()), MAPPING_WS);
+        //context.addServlet(new ServletHolder(createStreamServiceServlet()), MAPPING_STREAM);
+        //context.addServlet(new ServletHolder(createAjaxServlet()), MAPPING_AJAX);
+
+        //context.addServlet(new ServletHolder(createWebSocketServlet()), MAPPING_WS);
 
         final ServletContextFilter servletContextFilter = new ServletContextFilter();
         context.addFilter(new FilterHolder(servletContextFilter), MAPPING_BOOTSTRAP, EnumSet.of(DispatcherType.REQUEST));

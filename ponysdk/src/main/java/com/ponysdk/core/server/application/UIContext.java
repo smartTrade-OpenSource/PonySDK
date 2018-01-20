@@ -552,6 +552,8 @@ public class UIContext {
         try {
             doDestroy();
             socket.close();
+        }catch (Throwable throwable){
+            log.error("Cannot close websocket for {}",this, throwable);
         } finally {
             release();
         }
