@@ -23,43 +23,37 @@
 
 package com.ponysdk.core.ui.datagrid.impl;
 
+import java.util.function.Function;
+
 import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.PFlexTable;
-import com.ponysdk.core.ui.basic.PWidget;
-import com.ponysdk.core.ui.datagrid.View;
+import com.ponysdk.core.ui.basic.PHTML;
 
-public class DefaultView implements View {
+public class PHTMLCellRenderer<DataType> extends TypedCellRenderer<DataType, PHTML> {
 
-    private final PFlexTable table = Element.newPFlexTable();
+    private final Function<DataType, String> transform;
 
-    @Override
-    public PWidget asWidget() {
-        return table;
+    public PHTMLCellRenderer() {
+        this(String::valueOf);
+    }
+
+    public PHTMLCellRenderer(final Function<DataType, String> transform) {
+        this.transform = transform;
     }
 
     @Override
-    public void setHeader(final int c, final PWidget w) {
-        table.setWidget(0, c, w);
+    public PHTML render(final DataType value) {
+        return Element.newPHTML(transform.apply(value));
     }
 
     @Override
-    public PWidget getHeader(final int c) {
-        return table.getWidget(0, c);
+    protected PHTML update0(final DataType value, final PHTML widget) {
+        widget.setHTML(transform.apply(value));
+        return widget;
     }
 
     @Override
-    public PWidget getCell(final int r, final int c) {
-        return table.getWidget(r + 1, c);
-    }
-
-    @Override
-    public int getRowCount() {
-        return table.getRowCount() - 1;
-    }
-
-    @Override
-    public void setCell(final int r, final int c, final PWidget w) {
-        table.setWidget(r + 1, c, w);
+    protected void reset0(final PHTML widget) {
+        if (widget != null) widget.setHTML("");
     }
 
 }

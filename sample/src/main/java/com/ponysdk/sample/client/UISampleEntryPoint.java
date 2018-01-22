@@ -29,8 +29,12 @@ import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletResponse;
@@ -38,6 +42,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.PScheduler;
+import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PAbsolutePanel;
 import com.ponysdk.core.ui.basic.PAnchor;
@@ -65,6 +70,8 @@ import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
 import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
 import com.ponysdk.core.ui.datagrid.ColumnDescriptor;
 import com.ponysdk.core.ui.datagrid.DataGrid;
+import com.ponysdk.core.ui.datagrid.dynamic.Configuration;
+import com.ponysdk.core.ui.datagrid.dynamic.DynamicDataGrid;
 import com.ponysdk.core.ui.datagrid.impl.PLabelCellRenderer;
 import com.ponysdk.core.ui.eventbus2.EventBus.EventHandler;
 import com.ponysdk.core.ui.grid.AbstractGridWidget;
@@ -106,13 +113,15 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
         if (true) return;
 
+        createNewGridSystem();
+
         testPAddon();
 
         createWindow().open();
 
         downloadFile();
 
-        testNewEvent();
+        createNewEvent();
 
         testUIDelegator();
 
@@ -224,7 +233,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             window.add(label);
             PWindow.getMain().add(label);
         } catch (final Exception e) {
-
         }
 
         PConfirmDialog.show(PWindow.getMain(), "AAA", Element.newPLabel("AA"));
@@ -262,6 +270,58 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             if (counter < 20) scheduleUpdate(labels);
             else counter = 0;
         }, Duration.ofMillis(20));
+    }
+
+    private void createNewGridSystem() {
+        //        final DataGrid<Pojo> grid = new DataGrid<>((a, b) -> a.bid.compareTo(b.bid));
+
+        final Configuration<Pojo> configuration = new Configuration<>(Pojo.class);
+        //configuration.setFilter(method -> method.getName().contains("COUCOU"));
+
+        final DataGrid<Pojo> grid = new DynamicDataGrid<>(configuration, Comparator.comparing(Pojo::getBid));
+
+        PWindow.getMain().add(grid);
+
+        final Random random = new Random();
+
+        final Map<String, Pojo> map = new HashMap<>();
+
+        for (int i = 0; i < 40; i++) {
+            final Pojo pojo = new Pojo();
+            pojo.security = "security" + i;
+            pojo.classe = "class" + i;
+            pojo.bid = random.nextDouble() * i;
+            pojo.offer = random.nextDouble() * i;
+            pojo.spread = random.nextDouble() * i;
+            pojo.coucou = random.nextDouble() * i + "";
+            pojo.coucou1 = random.nextDouble() * i + "";
+            pojo.coucou2 = random.nextDouble() * i + "";
+            pojo.coucou3 = random.nextDouble() * i + "";
+            pojo.coucou4 = random.nextDouble() * i + "";
+            pojo.coucou5 = random.nextDouble() * i + "";
+            pojo.coucou6 = random.nextDouble() * i + "";
+            pojo.coucou7 = random.nextDouble() * i + "";
+            pojo.coucou8 = random.nextDouble() * i + "";
+            pojo.coucou9 = random.nextDouble() * i + "";
+            pojo.coucou10 = random.nextDouble() * i + "";
+            map.put("security" + i, pojo);
+            grid.addData(pojo);
+
+        }
+
+        Txn.get().flush();
+
+        PScheduler.scheduleAtFixedRate(() -> {
+            for (int i = 0; i < 40; i++) {
+                final Pojo pojo = map.get("security" + i);
+                grid.update(pojo, p -> {
+                    p.bid = random.nextDouble();
+                    p.offer = random.nextDouble();
+                    p.spread = random.nextDouble();
+                    return p;
+                });
+            }
+        }, Duration.ofMillis(300));
     }
 
     private void createReconnectingPanel() {
@@ -334,12 +394,9 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         }
         final PTextBox textBox = Element.newPTextBox();
 
-        final PButton add = Element.newPButton("add");
-        add.addClickHandler(e -> {
-            grid.setData(Integer.valueOf(textBox.getText()));
-        });
-
-        PWindow.getMain().add(add);
+        //        final PButton add = Element.newPButton("add");
+        //        add.addClickHandler(e -> grid.setData(Integer.valueOf(textBox.getText())));
+        //        PWindow.getMain().add(add);
 
         PWindow.getMain().add(textBox);
         PWindow.getMain().add(grid);
@@ -360,7 +417,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
          **/
     }
 
-    private void testNewEvent() {
+    private void createNewEvent() {
         final EventHandler<PClickEvent> handler = UIContext.getNewEventBus().subscribe(PClickEvent.class,
             event -> System.err.println("B " + event));
         UIContext.getNewEventBus().post(new PClickEvent(this));
@@ -369,7 +426,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         UIContext.getNewEventBus().post(new PClickEvent(this));
     }
 
-    private class Data {
+    private static final class Data {
 
         protected Integer key;
         protected String value;
@@ -657,7 +714,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
             @Override
             public void onKeyUp(final PKeyUpEvent keyUpEvent) {
-                PScript.execute(PWindow.getMain(), "alert('" + keyUpEvent.getEventID() + "');");
+                PScript.execute(PWindow.getMain(), "alert('" + keyUpEvent + "');");
             }
 
             @Override
@@ -699,6 +756,177 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PButton pButton = Element.newPButton("Button 1");
         pButton.addClickHandler(handler -> pButton.setText("Button 1 clicked"));
         return pButton;
+    }
+
+    class Pojo {
+
+        public String security;
+        public String classe;
+        public Double bid;
+        public Double offer;
+        public Double spread;
+        public String coucou;
+        public String coucou1;
+        public String coucou2;
+        public String coucou3;
+        public String coucou4;
+        public String coucou5;
+        public String coucou6;
+        public String coucou7;
+        public String coucou8;
+        public String coucou9;
+        public String coucou10;
+
+        /**
+         * @return the security
+         */
+        public String getSecurity() {
+            return security;
+        }
+
+        /**
+         * @param security
+         *            the security to set
+         */
+        public void setSecurity(final String security) {
+            this.security = security;
+        }
+
+        /**
+         * @return the classe
+         */
+        public String getClasse() {
+            return classe;
+        }
+
+        /**
+         * @param classe
+         *            the classe to set
+         */
+        public void setClasse(final String classe) {
+            this.classe = classe;
+        }
+
+        /**
+         * @return the bid
+         */
+        public Double getBid() {
+            return bid;
+        }
+
+        /**
+         * @param bid
+         *            the bid to set
+         */
+        public void setBid(final Double bid) {
+            this.bid = bid;
+        }
+
+        /**
+         * @return the offer
+         */
+        public Double getOffer() {
+            return offer;
+        }
+
+        /**
+         * @param offer
+         *            the offer to set
+         */
+        public void setOffer(final Double offer) {
+            this.offer = offer;
+        }
+
+        /**
+         * @return the spread
+         */
+        public Double getSpread() {
+            return spread;
+        }
+
+        /**
+         * @param spread
+         *            the spread to set
+         */
+        public void setSpread(final Double spread) {
+            this.spread = spread;
+        }
+
+        /**
+         * @return the coucou
+         */
+        public String getCoucou() {
+            return coucou;
+        }
+
+        /**
+         * @param coucou
+         *            the coucou to set
+         */
+        public void setCoucou(final String coucou) {
+            this.coucou = coucou;
+        }
+
+        /**
+         * @return the coucou1
+         */
+        public String getCoucou1() {
+            return coucou1;
+        }
+
+        /**
+         * @param coucou1
+         *            the coucou1 to set
+         */
+        public void setCoucou1(final String coucou1) {
+            this.coucou1 = coucou1;
+        }
+
+        /**
+         * @return the coucou2
+         */
+        public String getCoucou2() {
+            return coucou2;
+        }
+
+        /**
+         * @param coucou2
+         *            the coucou2 to set
+         */
+        public void setCoucou2(final String coucou2) {
+            this.coucou2 = coucou2;
+        }
+
+        /**
+         * @return the coucou3
+         */
+        public String getCoucou3() {
+            return coucou3;
+        }
+
+        /**
+         * @param coucou3
+         *            the coucou3 to set
+         */
+        public void setCoucou3(final String coucou3) {
+            this.coucou3 = coucou3;
+        }
+
+        /**
+         * @return the coucou4
+         */
+        public String getCoucou4() {
+            return coucou4;
+        }
+
+        /**
+         * @param coucou4
+         *            the coucou4 to set
+         */
+        public void setCoucou4(final String coucou4) {
+            this.coucou4 = coucou4;
+        }
+
     }
 
 }
