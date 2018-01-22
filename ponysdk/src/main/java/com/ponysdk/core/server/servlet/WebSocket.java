@@ -41,24 +41,31 @@ import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.io.StringReader;
+import java.security.Principal;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-@ServerEndpoint("/ws/*")
+@ServerEndpoint(value = "/ws", configurator = CustomConfigurator.class)
 public class WebSocket implements WebsocketEncoder, MessageHandler.Whole<String> {
 
     private static final Logger log = LoggerFactory.getLogger(WebSocket.class);
 
-    private final ServletUpgradeRequest request;
-    private final WebsocketMonitor monitor;
+    private ServletUpgradeRequest request;
+    private WebsocketMonitor monitor;
     private WebSocketPusher websocketPusher;
-    private final AbstractApplicationManager applicationManager;
+    private AbstractApplicationManager applicationManager;
     private Session session;
 
     private UIContext uiContext;
     private CommunicationSanityChecker communicationSanityChecker;
+
+
+    public WebSocket() {
+
+    }
 
     WebSocket(final ServletUpgradeRequest request, final WebsocketMonitor monitor,
               final AbstractApplicationManager applicationManager) {
@@ -131,7 +138,7 @@ public class WebSocket implements WebsocketEncoder, MessageHandler.Whole<String>
     @OnOpen
     public void onOpen(Session session, EndpointConfig config) {
         session.addMessageHandler(this);
-
+        Map<String, List<String>> requestParameterMap = session.getRequestParameterMap();
 
         final String userAgent = request.getHeader("User-Agent");
         //String applicationId = request.getHttpServletRequest().getParameter("application");
@@ -198,7 +205,7 @@ public class WebSocket implements WebsocketEncoder, MessageHandler.Whole<String>
                             extraMsg = " on " + uiContext.getObject(objectID);
                         }
                         log.error("Message from terminal #{} : {}{}", uiContext.getID(),
-                            jsonObject.getJsonString(ClientToServerModel.ERROR_MSG.toStringValue()), extraMsg);
+                                jsonObject.getJsonString(ClientToServerModel.ERROR_MSG.toStringValue()), extraMsg);
                     } else if (jsonObject.containsKey(ClientToServerModel.WARNING_MSG.toStringValue())) {
                         String extraMsg = "";
                         if (jsonObject.containsKey(ClientToServerModel.OBJECT_ID.toStringValue())) {
@@ -206,17 +213,17 @@ public class WebSocket implements WebsocketEncoder, MessageHandler.Whole<String>
                             extraMsg = " on " + uiContext.getObject(objectID);
                         }
                         log.warn("Message from terminal #{} : {}{}", uiContext.getID(),
-                            jsonObject.getJsonString(ClientToServerModel.WARNING_MSG.toStringValue()), extraMsg);
+                                jsonObject.getJsonString(ClientToServerModel.WARNING_MSG.toStringValue()), extraMsg);
                     } else if (jsonObject.containsKey(ClientToServerModel.INFO_MSG.toStringValue())) {
                         if (log.isInfoEnabled()) {
                             String extraMsg = "";
                             if (jsonObject.containsKey(ClientToServerModel.OBJECT_ID.toStringValue())) {
                                 final int objectID = jsonObject.getJsonNumber(ClientToServerModel.OBJECT_ID.toStringValue())
-                                    .intValue();
+                                        .intValue();
                                 extraMsg = " on " + uiContext.getObject(objectID);
                             }
                             log.info("Message from terminal #{} : {}{}", uiContext.getID(),
-                                jsonObject.getJsonString(ClientToServerModel.INFO_MSG.toStringValue()), extraMsg);
+                                    jsonObject.getJsonString(ClientToServerModel.INFO_MSG.toStringValue()), extraMsg);
                         }
                     } else {
                         log.error("Unknow message from terminal #{} : {}", uiContext.getID(), message);
@@ -261,7 +268,7 @@ public class WebSocket implements WebsocketEncoder, MessageHandler.Whole<String>
 
         public static String getMessage(final int statusCode) {
             final List<NiceStatusCode> codes = Arrays.stream(values())
-                .filter(niceStatusCode -> niceStatusCode.statusCode == statusCode).collect(Collectors.toList());
+                    .filter(niceStatusCode -> niceStatusCode.statusCode == statusCode).collect(Collectors.toList());
             if (!codes.isEmpty()) {
                 return codes.get(0).toString();
             } else {

@@ -30,6 +30,7 @@ import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.FilterHolder;
@@ -52,14 +53,14 @@ import java.util.EnumSet;
 
 public class PonySDKServer {
 
-    public static final String MAPPING_BOOTSTRAP = "/";
+    public static final String MAPPING_BOOTSTRAP = "/";/* + MappingPath.RESOURCE;*/
     public static final String MAPPING_WS = "/" + MappingPath.WEBSOCKET + "/*";
     public static final String MAPPING_STREAM = "/" + MappingPath.STREAM;
     public static final String MAPPING_AJAX = "/" + MappingPath.AJAX;
 
     private static final Logger log = LoggerFactory.getLogger(PonySDKServer.class);
 
-    protected final Server server;
+    protected Server server;
 
     protected ApplicationLoader applicationLoader;
 
@@ -78,41 +79,84 @@ public class PonySDKServer {
     private String[] enabledProtocols = new String[]{"TLSv1", "TLSv1.1", "TLSv1.2"};
     private String enabledCipherSuites;
 
-    public PonySDKServer() {
-        server = new Server();
-    }
 
     public void start() throws Exception {
-        server.addConnector(createHttpConnector());
-        if (useSSL) server.addConnector(createHttpsConnector());
+        server = new Server();
+        ServerConnector connector = new ServerConnector(server);
+        connector.setPort(8080);
+        server.addConnector(connector);
 
-        final ServletContextHandler context = createWebApp();
-        final GzipHandler gzip = new GzipHandler();
-        gzip.setHandler(context);
-
+        ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        context.setContextPath("/");
         server.setHandler(context);
 
-        ServerContainer container = WebSocketServerContainerInitializer.configureContext( context );
-        container.addEndpoint(WebSocket.class);
+        ServerContainer wscontainer = WebSocketServerContainerInitializer.configureContext(context);
+        wscontainer.addEndpoint(WebSocket.class);
 
         server.start();
         server.join();
 
+        //server.addConnector(createHttpConnector());
+        //if (useSSL) server.addConnector(createHttpsConnector());
 
 
-        /**
-        ServerContainer serverContainer = WebSocketServerContainerInitializer.configureContext(context);
-        ServerEndpointConfig serverEndpointConfig = new BasicServerEndpointConfig(serverContainer,WebSocket.class,"/" );
-        serverEndpointConfig.getUserProperties().put("contextPath", "/sample");
-        serverContainer.addEndpoint(serverEndpointConfig);
-        serverContainer.setAsyncSendTimeout(10000);
+        //ContextHandlerCollection contexts = new ContextHandlerCollection();
+        //server.setHandler(contexts);
+
+        //final ApplicationManagerOption applicationManagerOption = applicationLoader.getApplicationManagerOption();
+        //ServletContextHandler root = new ServletContextHandler(contexts, "/" + applicationManagerOption.getApplicationContextName(),
+        //        ServletContextHandler.SESSIONS);
+
+        /**final ApplicationManagerOption applicationManagerOption = applicationLoader.getApplicationManagerOption();
+         log.info("Adding application #" + applicationManagerOption.getApplicationContextName());
+
+         final String contextPath = "/" + applicationManagerOption.getApplicationContextName();
+         final ServletContextHandler context = new ServletContextHandler(contexts, contextPath, ServletContextHandler.SESSIONS);
+         context.addServlet(new ServletHolder(createBootstrapServlet()), MAPPING_BOOTSTRAP);
+         context.addServlet(new ServletHolder(createStreamServiceServlet()), MAPPING_STREAM);
+         context.addServlet(new ServletHolder(createAjaxServlet()), MAPPING_AJAX);
+         //context.addServlet(new ServletHolder(createWebSocketServlet()), MAPPING_WS);
+         final ServletContextFilter servletContextFilter = new ServletContextFilter();
+         context.addFilter(new FilterHolder(servletContextFilter), MAPPING_BOOTSTRAP, EnumSet.of(DispatcherType.REQUEST));
+         final SessionHandler sessionHandler = context.getSessionHandler();
+         sessionHandler.setMaxInactiveInterval(60 * applicationManagerOption.getSessionTimeout());
+         sessionHandler.addEventListener(applicationLoader);
+
+         final ServletContextHandler context2 = new ServletContextHandler(contexts, contextPath + "/ws/", ServletContextHandler.SESSIONS);
+         ServerContainer container = WebSocketServerContainerInitializer.configureContext(context2);
+         container.addEndpoint(WebSocket.class);
+
+
+
+
+
+         server.start();
+         server.join();
+
+
+         //final ServletContextHandler context = createWebApp();
+         //final GzipHandler gzip = new GzipHandler();
+         //gzip.setHandler(context);
+
+         //server.setHandler(context);
+
+         //ServerContainer container = WebSocketServerContainerInitializer.configureContext(context);
+         //container.addEndpoint(WebSocket.class);
          **/
 
-        context.addEventListener(applicationLoader);
-        applicationLoader.start();
+        /**
+         ServerContainer serverContainer = WebSocketServerContainerInitializer.configureContext(context);
+         ServerEndpointConfig serverEndpointConfig = new BasicServerEndpointConfig(serverContainer,WebSocket.class,"/" );
+         serverEndpointConfig.getUserProperties().put("contextPath", "/sample");
+         serverContainer.addEndpoint(serverEndpointConfig);
+         serverContainer.setAsyncSendTimeout(10000);
+         **/
 
-        server.start();
-        server.join();
+        //context.addEventListener(applicationLoader);
+        //applicationLoader.start();
+
+        //server.start();
+        //server.join();
 
         log.info("Webserver started on: " + InetAddress.getLocalHost().getHostAddress() + ":" + port);
     }
