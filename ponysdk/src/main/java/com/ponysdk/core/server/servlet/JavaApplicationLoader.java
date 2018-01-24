@@ -23,11 +23,11 @@
 
 package com.ponysdk.core.server.servlet;
 
+import javax.servlet.ServletException;
+
 import com.ponysdk.core.server.application.AbstractApplicationManager;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.main.EntryPoint;
-
-import javax.servlet.ServletException;
 
 public class JavaApplicationLoader extends AbstractApplicationLoader {
 
@@ -39,7 +39,7 @@ public class JavaApplicationLoader extends AbstractApplicationLoader {
             protected EntryPoint initializeUIContext(final UIContext uiContext) throws ServletException {
                 final Class<? extends EntryPoint> entryPointClassName = applicationManagerOption.getEntryPointClass();
                 try {
-                    return entryPointClassName.newInstance();
+                    return entryPointClassName.getDeclaredConstructor().newInstance();
                 } catch (final Exception e) {
                     throw new ServletException("Failed to instantiate the EntryPoint #" + entryPointClassName, e);
                 }
