@@ -104,7 +104,7 @@ public class UIContext {
 
     private TerminalDataReceiver terminalDataReceiver;
 
-    private boolean living = true;
+    private boolean alive = true;
 
     private final Latency latency = new Latency(10);
 
@@ -312,6 +312,7 @@ public class UIContext {
      *            the tasks
      */
     public void execute(final Runnable runnable) {
+        if (!isAlive()) return;
         if (log.isDebugEnabled()) log.debug("Pushing to #" + this);
         if (UIContext.get() != this) {
             begin();
@@ -340,6 +341,7 @@ public class UIContext {
      *            list of object
      */
     public void pushToClient(final List<Object> data) {
+        if (!isAlive()) return;
         if (data != null && !listeners.isEmpty()) {
             execute(() -> {
                 try {
@@ -358,6 +360,7 @@ public class UIContext {
      *            the object
      */
     public void pushToClient(final Object data) {
+        if (!isAlive()) return;
         if (data != null && !listeners.isEmpty()) {
             execute(() -> {
                 try {
@@ -435,7 +438,7 @@ public class UIContext {
      */
     public void begin() {
         lock.lock();
-        UIContext.setCurrent(this);
+        currentContext.set(this);
     }
 
     /**
@@ -613,7 +616,7 @@ public class UIContext {
     void destroyFromApplication() {
         begin();
         try {
-            living = false;
+            alive = false;
             destroyListeners.forEach(listener -> {
                 try {
                     listener.onBeforeDestroy(this);
@@ -648,7 +651,7 @@ public class UIContext {
      * Destroys effectively the UIContext
      */
     private void doDestroy() {
-        living = false;
+        alive = false;
         destroyListeners.forEach(listener -> {
             try {
                 listener.onBeforeDestroy(this);
@@ -705,12 +708,12 @@ public class UIContext {
     }
 
     /**
-     * Returns the living state of the current UIContext
+     * Returns the alive state of the current UIContext
      *
-     * @return the living state
+     * @return the alive state
      */
-    public boolean isLiving() {
-        return living;
+    public boolean isAlive() {
+        return alive;
     }
 
     /**
@@ -773,7 +776,7 @@ public class UIContext {
 
     @Override
     public String toString() {
-        return "UIContext [ID=" + ID + ", living=" + living + ", ApplicationID=" + application.getId() + "]";
+        return "UIContext [ID=" + ID + ", living=" + alive + ", ApplicationID=" + application.getId() + "]";
     }
 
     /**
