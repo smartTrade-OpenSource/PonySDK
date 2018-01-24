@@ -477,8 +477,8 @@ public class UIContext {
      * @return the {@link PObject} or null if not found
      * @see #registerObject(PObject)
      */
-    public <T> T getObject(final int objectID) {
-        return (T) pObjectWeakReferences.get(objectID);
+    public PObject getObject(final int objectID) {
+        return pObjectWeakReferences.get(objectID);
     }
 
     /**
