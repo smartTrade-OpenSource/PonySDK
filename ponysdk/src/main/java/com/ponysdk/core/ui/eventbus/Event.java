@@ -27,13 +27,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class Event<H extends EventHandler> {
 
-    /**
-     * @deprecated Useless
-     * @since v2.7.3
-     */
-    @Deprecated
-    private final long eventID = 0;
-
     private Object source;
     private Object data;
 
@@ -68,7 +61,7 @@ public abstract class Event<H extends EventHandler> {
      */
     @Deprecated
     public long getEventID() {
-        return eventID;
+        return 0;
     }
 
     public abstract Type getAssociatedType();

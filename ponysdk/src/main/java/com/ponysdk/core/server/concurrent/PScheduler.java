@@ -201,17 +201,9 @@ public class PScheduler {
             }
         }
 
-        void begin() {
-            uiContext.begin();
-        }
-
-        void end() {
-            uiContext.end();
-        }
-
         public boolean execute() {
             try {
-                begin();
+                uiContext.begin();
                 try {
                     final Txn txn = Txn.get();
                     txn.begin(uiContext.getContext());
@@ -224,7 +216,7 @@ public class PScheduler {
                         return false;
                     }
                 } finally {
-                    end();
+                    uiContext.end();
                 }
             } catch (final Throwable e) {
                 log.error("Cannot execute command : " + runnable, e);
