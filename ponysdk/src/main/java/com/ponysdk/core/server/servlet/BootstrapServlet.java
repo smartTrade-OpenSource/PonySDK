@@ -57,13 +57,7 @@ public class BootstrapServlet extends HttpServlet {
 
     private Path indexPath;
 
-    private ClassLoader childClassLoader;
-
     public BootstrapServlet() {
-    }
-
-    public BootstrapServlet(final ClassLoader classLoader) {
-        this.childClassLoader = classLoader;
     }
 
     @Override
@@ -121,9 +115,6 @@ public class BootstrapServlet extends HttpServlet {
             final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
             final String jarPath = path.substring(1, path.length());
             inputStream = classLoader.getResourceAsStream(jarPath);
-            if (inputStream == null && childClassLoader != null) {
-                inputStream = childClassLoader.getResourceAsStream(jarPath);
-            }
 
             if (inputStream == null) {
                 if (path.equals("/index.html")) {

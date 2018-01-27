@@ -30,7 +30,6 @@ import com.ponysdk.core.server.application.Application;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.useragent.UserAgent;
 import org.eclipse.jetty.websocket.api.StatusCode;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,22 +37,20 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.websocket.*;
+import javax.websocket.server.HandshakeRequest;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.io.StringReader;
-import java.security.Principal;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-@ServerEndpoint(value = "/ws", configurator = CustomConfigurator.class)
-public class WebSocket implements WebsocketEncoder, MessageHandler.Whole<String> {
+@ServerEndpoint(value = "/ws")
+public class WebSocket  implements WebsocketEncoder {
 
     private static final Logger log = LoggerFactory.getLogger(WebSocket.class);
 
-    private ServletUpgradeRequest request;
     private WebsocketMonitor monitor;
     private WebSocketPusher websocketPusher;
     private AbstractApplicationManager applicationManager;
@@ -61,17 +58,18 @@ public class WebSocket implements WebsocketEncoder, MessageHandler.Whole<String>
 
     private UIContext uiContext;
     private CommunicationSanityChecker communicationSanityChecker;
+    private HandshakeRequest request;
 
 
     public WebSocket() {
-
     }
 
-    WebSocket(final ServletUpgradeRequest request, final WebsocketMonitor monitor,
-              final AbstractApplicationManager applicationManager) {
-        this.request = request;
-        this.monitor = monitor;
+    public void setApplicationManager(AbstractApplicationManager applicationManager) {
         this.applicationManager = applicationManager;
+    }
+
+    public void setMonitor(WebsocketMonitor monitor) {
+        this.monitor = monitor;
     }
 
     /**
@@ -137,10 +135,7 @@ public class WebSocket implements WebsocketEncoder, MessageHandler.Whole<String>
 
     @OnOpen
     public void onOpen(Session session, EndpointConfig config) {
-        session.addMessageHandler(this);
-        Map<String, List<String>> requestParameterMap = session.getRequestParameterMap();
-
-        final String userAgent = request.getHeader("User-Agent");
+        final String userAgent = request.getHeaders().get("User-Agent").get(0);
         //String applicationId = request.getHttpServletRequest().getParameter("application");
         //log.info("WebSocket connected from {}, sessionID={}, userAgent={}", session.getRemoteAddress(), request.getSession().getId(), userAgent);
 
@@ -152,8 +147,8 @@ public class WebSocket implements WebsocketEncoder, MessageHandler.Whole<String>
         final SessionManager sessionManager = SessionManager.get();
         final Application application = new Application(applicationManager.getOptions(), UserAgent.parseUserAgentString(userAgent));
         sessionManager.registerApplication(application);
-        log.info("Creating a new {}", uiContext);
         this.uiContext = new UIContext(this, request, application);
+        log.info("Creating a new {}", uiContext);
         this.communicationSanityChecker = new CommunicationSanityChecker(uiContext);
         application.registerUIContext(uiContext);
         applicationManager.startApplication(uiContext);
@@ -170,7 +165,7 @@ public class WebSocket implements WebsocketEncoder, MessageHandler.Whole<String>
         log.error("WebSocket Error", throwable);
     }
 
-    @Override
+    @OnMessage
     public void onMessage(String message) {
         if (isAlive()) {
             if (monitor != null) monitor.onMessageReceived(WebSocket.this, message);
@@ -205,7 +200,7 @@ public class WebSocket implements WebsocketEncoder, MessageHandler.Whole<String>
                             extraMsg = " on " + uiContext.getObject(objectID);
                         }
                         log.error("Message from terminal #{} : {}{}", uiContext.getID(),
-                                jsonObject.getJsonString(ClientToServerModel.ERROR_MSG.toStringValue()), extraMsg);
+                            jsonObject.getJsonString(ClientToServerModel.ERROR_MSG.toStringValue()), extraMsg);
                     } else if (jsonObject.containsKey(ClientToServerModel.WARNING_MSG.toStringValue())) {
                         String extraMsg = "";
                         if (jsonObject.containsKey(ClientToServerModel.OBJECT_ID.toStringValue())) {
@@ -213,17 +208,17 @@ public class WebSocket implements WebsocketEncoder, MessageHandler.Whole<String>
                             extraMsg = " on " + uiContext.getObject(objectID);
                         }
                         log.warn("Message from terminal #{} : {}{}", uiContext.getID(),
-                                jsonObject.getJsonString(ClientToServerModel.WARNING_MSG.toStringValue()), extraMsg);
+                            jsonObject.getJsonString(ClientToServerModel.WARNING_MSG.toStringValue()), extraMsg);
                     } else if (jsonObject.containsKey(ClientToServerModel.INFO_MSG.toStringValue())) {
                         if (log.isInfoEnabled()) {
                             String extraMsg = "";
                             if (jsonObject.containsKey(ClientToServerModel.OBJECT_ID.toStringValue())) {
                                 final int objectID = jsonObject.getJsonNumber(ClientToServerModel.OBJECT_ID.toStringValue())
-                                        .intValue();
+                                    .intValue();
                                 extraMsg = " on " + uiContext.getObject(objectID);
                             }
                             log.info("Message from terminal #{} : {}{}", uiContext.getID(),
-                                    jsonObject.getJsonString(ClientToServerModel.INFO_MSG.toStringValue()), extraMsg);
+                                jsonObject.getJsonString(ClientToServerModel.INFO_MSG.toStringValue()), extraMsg);
                         }
                     } else {
                         log.error("Unknow message from terminal #{} : {}", uiContext.getID(), message);
@@ -237,6 +232,10 @@ public class WebSocket implements WebsocketEncoder, MessageHandler.Whole<String>
         } else {
             log.info("UI Context is destroyed, message dropped from terminal : {}", message);
         }
+    }
+
+    public void setRequest(HandshakeRequest request) {
+        this.request = request;
     }
 
     private enum NiceStatusCode {
@@ -268,7 +267,7 @@ public class WebSocket implements WebsocketEncoder, MessageHandler.Whole<String>
 
         public static String getMessage(final int statusCode) {
             final List<NiceStatusCode> codes = Arrays.stream(values())
-                    .filter(niceStatusCode -> niceStatusCode.statusCode == statusCode).collect(Collectors.toList());
+                .filter(niceStatusCode -> niceStatusCode.statusCode == statusCode).collect(Collectors.toList());
             if (!codes.isEmpty()) {
                 return codes.get(0).toString();
             } else {

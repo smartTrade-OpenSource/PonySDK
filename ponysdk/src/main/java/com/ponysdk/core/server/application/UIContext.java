@@ -36,7 +36,6 @@ import com.ponysdk.core.ui.eventbus.*;
 import com.ponysdk.core.ui.eventbus2.EventBus;
 import com.ponysdk.core.ui.statistic.TerminalDataReceiver;
 import com.ponysdk.core.writer.ModelWriter;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +44,7 @@ import javax.json.JsonObject;
 import javax.json.JsonString;
 import javax.json.JsonValue;
 import javax.json.JsonValue.ValueType;
+import javax.websocket.server.HandshakeRequest;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -76,7 +76,7 @@ public class UIContext {
 
     private final PObjectWeakHashMap pObjectWeakReferences = new PObjectWeakHashMap();
     private final ModelWriter writer;
-    private final ServletUpgradeRequest request;
+    private final HandshakeRequest request;
 
     private int objectCounter = 1;
 
@@ -86,7 +86,6 @@ public class UIContext {
     private final PHistory history = new PHistory();
     private final RootEventBus rootEventBus = new RootEventBus();
     private final EventBus newEventBus = new EventBus();
-
     private final PCookies cookies = new PCookies();
 
     /**
@@ -102,7 +101,7 @@ public class UIContext {
     private final Latency latency = new Latency(10);
 
 
-    public UIContext(final WebSocket socket, ServletUpgradeRequest request, Application application) {
+    public UIContext(final WebSocket socket, HandshakeRequest request, Application application) {
         this.application = application;
         this.ID = uiContextCount.incrementAndGet();
         this.socket = socket;
