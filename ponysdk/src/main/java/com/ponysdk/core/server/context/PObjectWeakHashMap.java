@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.core.server.application;
+package com.ponysdk.core.server.context;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.ui.basic.PObject;

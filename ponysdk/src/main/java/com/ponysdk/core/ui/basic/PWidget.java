@@ -27,7 +27,7 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.DomHandlerType;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.context.UIContext;
 import com.ponysdk.core.ui.basic.event.*;
 import com.ponysdk.core.ui.eventbus.*;
 import com.ponysdk.core.ui.model.PEventType;
@@ -123,7 +123,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     }
 
     public void ensureDebugId(final String debugID) {
-        if (UIContext.get().getApplication().getOptions().isDebugMode()) {
+        if (UIContext.get().getConfiguration().isDebugMode()) {
             if (Objects.equals(this.debugID, debugID)) return;
             this.debugID = debugID;
             saveUpdate(writer -> writer.write(ServerToClientModel.ENSURE_DEBUG_ID, debugID));

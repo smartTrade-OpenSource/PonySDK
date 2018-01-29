@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.core.server.application;
+package com.ponysdk.core.server.context;
 
 @FunctionalInterface
 public interface DataListener {

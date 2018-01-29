@@ -2,8 +2,8 @@
  * Copyright (c) 2011 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
@@ -21,15 +21,18 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.eventbus;
+package com.ponysdk.core.server.application;
 
-import com.ponysdk.core.server.context.UIContext;
+import javax.servlet.ServletContextListener;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+public interface ApplicationLoader extends ServletContextListener {
 
-@FunctionalInterface
-public interface StreamHandler {
+    void start();
 
-    void onStream(HttpServletRequest request, HttpServletResponse response, UIContext uiContext);
+    AbstractApplicationManager createApplicationManager();
+
+    ApplicationManagerOption getApplicationManagerOption();
+
+    void setApplicationManagerOption(ApplicationManagerOption applicationManagerOption);
+
 }

@@ -1,12 +1,10 @@
-package com.ponysdk.core.server.servlet;
+package com.ponysdk.core.server.websocket;
 
 import com.ponysdk.core.server.application.AbstractApplicationManager;
 
 import javax.websocket.HandshakeResponse;
 import javax.websocket.server.HandshakeRequest;
 import javax.websocket.server.ServerEndpointConfig;
-import java.util.List;
-import java.util.Map;
 
 public class CustomConfigurator extends ServerEndpointConfig.Configurator {
 

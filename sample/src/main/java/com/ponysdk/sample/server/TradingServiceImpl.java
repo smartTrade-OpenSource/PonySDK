@@ -1,15 +1,11 @@
 
 package com.ponysdk.sample.server;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import com.ponysdk.core.server.application.Application;
-import com.ponysdk.core.server.servlet.SessionManager;
+import com.ponysdk.core.server.context.UIContext;
+import com.ponysdk.core.server.context.UIContexts;
 import com.ponysdk.sample.client.activity.MarketData;
+
+import java.util.*;
 
 public class TradingServiceImpl {
 
@@ -49,8 +45,8 @@ public class TradingServiceImpl {
                 final MarketData market = marketDatas.get(rdm.nextInt(marketDatas.size()));
                 final MarketData price = new MarketData(market.getCurrency(), (int) (Math.random() * 99), (int) (Math.random() * 99));
 
-                for (final Application application : SessionManager.get().getApplications()) {
-                    application.pushToClients(price);
+                for (final UIContext context :UIContexts.getContexts()) {
+                    context.pushToClient(price);
                 }
             }
         }, 1000, 200);

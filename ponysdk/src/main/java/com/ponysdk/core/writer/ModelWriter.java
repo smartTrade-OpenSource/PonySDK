@@ -24,7 +24,7 @@
 package com.ponysdk.core.writer;
 
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.servlet.WebsocketEncoder;
+import com.ponysdk.core.server.websocket.WebsocketEncoder;
 
 public class ModelWriter {
 

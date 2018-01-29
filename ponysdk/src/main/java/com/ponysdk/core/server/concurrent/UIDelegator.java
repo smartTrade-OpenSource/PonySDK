@@ -1,7 +1,7 @@
 
 package com.ponysdk.core.server.concurrent;
 
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.context.UIContext;
 
 import java.util.function.Consumer;
 

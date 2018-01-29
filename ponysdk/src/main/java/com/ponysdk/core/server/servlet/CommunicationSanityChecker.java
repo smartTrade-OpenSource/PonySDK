@@ -24,7 +24,7 @@
 package com.ponysdk.core.server.servlet;
 
 import com.ponysdk.core.server.application.ApplicationManagerOption;
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.context.UIContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,7 +72,7 @@ public class CommunicationSanityChecker {
     public CommunicationSanityChecker(final UIContext uiContext) {
         this.uiContext = uiContext;
         this.uiContext.addContextDestroyListener(context -> stop());
-        final ApplicationManagerOption options = uiContext.getApplication().getOptions();
+        final ApplicationManagerOption options = uiContext.getConfiguration();
         setHeartBeatPeriod(options.getHeartBeatPeriod(), options.getHeartBeatPeriodTimeUnit());
     }
 

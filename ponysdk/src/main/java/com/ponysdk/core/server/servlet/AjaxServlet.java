@@ -24,7 +24,8 @@
 package com.ponysdk.core.server.servlet;
 
 import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.context.UIContext;
+import com.ponysdk.core.server.context.UIContexts;
 import com.ponysdk.core.ui.basic.PObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +43,7 @@ public class AjaxServlet extends HttpServlet {
     private void process(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         try {
             final Integer uiContextID = Integer.parseInt(req.getHeader(ClientToServerModel.UI_CONTEXT_ID.name()));
-            final UIContext uiContext = SessionManager.get().getUIContext(uiContextID);
+            final UIContext uiContext = UIContexts.getContext(uiContextID);
             if (uiContext != null) {
                 final Integer objectID = Integer.parseInt(req.getHeader(ClientToServerModel.OBJECT_ID.name()));
                 uiContext.execute(() -> {
@@ -69,12 +70,12 @@ public class AjaxServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         process(req, resp);
     }
 
     @Override
-    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         process(req, resp);
     }
 }

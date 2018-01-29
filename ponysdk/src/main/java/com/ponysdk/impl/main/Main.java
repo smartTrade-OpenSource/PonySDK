@@ -23,9 +23,9 @@
 
 package com.ponysdk.impl.main;
 
+import com.ponysdk.core.server.application.ApplicationLoader;
 import com.ponysdk.core.server.application.ApplicationManagerOption;
-import com.ponysdk.core.server.servlet.ApplicationLoader;
-import com.ponysdk.core.server.servlet.JavaApplicationLoader;
+import com.ponysdk.core.server.application.JavaApplicationLoader;
 import com.ponysdk.core.ui.main.EntryPoint;
 
 import java.util.Arrays;

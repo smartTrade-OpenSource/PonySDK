@@ -24,7 +24,7 @@
 package com.ponysdk.sample.client.page;
 
 import com.ponysdk.core.model.PUnit;
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.context.UIContext;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PSimplePanel;
 import com.ponysdk.core.ui.basic.PStackLayoutPanel;

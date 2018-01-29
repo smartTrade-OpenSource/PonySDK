@@ -21,11 +21,37 @@
  * the License.
  */
 
-package com.ponysdk.core.server.servlet;
+package com.ponysdk.core.server.context;
 
-public interface ConnectionListener {
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-    void onOpen();
+public class UIContexts {
 
-    void onClose();
+    private static final UIContexts INSTANCE = new UIContexts();
+    private final Map<Integer, UIContext> contexts = new ConcurrentHashMap<>();
+
+    private UIContexts() {
+    }
+
+    public static UIContexts get() {
+        return INSTANCE;
+    }
+
+    public static UIContext getContext(final Integer id) {
+        return get().getContext0(id);
+    }
+
+    private UIContext getContext0(final Integer id) {
+        return contexts.get(id);
+    }
+
+    public static Collection<UIContext> getContexts() {
+        return get().getContexts0();
+    }
+
+    private Collection<UIContext> getContexts0() {
+        return contexts.values();
+    }
 }

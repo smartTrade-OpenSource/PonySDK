@@ -23,7 +23,7 @@
 
 package com.ponysdk.core.ui.i18n;
 
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.context.UIContext;
 
 import java.text.MessageFormat;
 import java.util.Locale;

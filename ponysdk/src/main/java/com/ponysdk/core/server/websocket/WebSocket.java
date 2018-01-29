@@ -21,14 +21,13 @@
  * the License.
  */
 
-package com.ponysdk.core.server.servlet;
+package com.ponysdk.core.server.websocket;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.AbstractApplicationManager;
-import com.ponysdk.core.server.application.Application;
-import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.useragent.UserAgent;
+import com.ponysdk.core.server.context.UIContext;
+import com.ponysdk.core.server.servlet.CommunicationSanityChecker;
 import org.eclipse.jetty.websocket.api.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,10 +58,6 @@ public class WebSocket  implements WebsocketEncoder {
     private UIContext uiContext;
     private CommunicationSanityChecker communicationSanityChecker;
     private HandshakeRequest request;
-
-
-    public WebSocket() {
-    }
 
     public void setApplicationManager(AbstractApplicationManager applicationManager) {
         this.applicationManager = applicationManager;
@@ -144,13 +139,13 @@ public class WebSocket  implements WebsocketEncoder {
         // Don't set max chunk size > 8K because when using Jetty Websocket compression, the chunks are limited to 8K
         this.websocketPusher = new WebSocketPusher(session, 1 << 20, 1 << 12, TimeUnit.SECONDS.toMillis(60));
 
-        final SessionManager sessionManager = SessionManager.get();
-        final Application application = new Application(applicationManager.getOptions(), UserAgent.parseUserAgentString(userAgent));
-        sessionManager.registerApplication(application);
-        this.uiContext = new UIContext(this, request, application);
+        //final SessionManager sessionManager = SessionManager.get();
+        //final Application application = new Application(applicationManager.getOptions(), UserAgent.parseUserAgentString(userAgent));
+        //sessionManager.registerApplication(application);
+        this.uiContext = new UIContext(this, request,applicationManager.getOptions());
         log.info("Creating a new {}", uiContext);
         this.communicationSanityChecker = new CommunicationSanityChecker(uiContext);
-        application.registerUIContext(uiContext);
+        //application.registerUIContext(uiContext);
         applicationManager.startApplication(uiContext);
         communicationSanityChecker.start();
     }
@@ -183,9 +178,6 @@ public class WebSocket  implements WebsocketEncoder {
                             log.debug("Ping measurement : {} ms from terminal #{}", end - start, uiContext.getID());
                         uiContext.addPingValue(end - start);
                     } else if (jsonObject.containsKey(ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue())) {
-                        final Application applicationSession = uiContext.getApplication();
-                        if (applicationSession == null)
-                            throw new Exception("Invalid session, please reload your application (" + uiContext + ")");
                         final String applicationInstructions = ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue();
                         uiContext.execute(() -> {
                             final JsonArray appInstructions = jsonObject.getJsonArray(applicationInstructions);

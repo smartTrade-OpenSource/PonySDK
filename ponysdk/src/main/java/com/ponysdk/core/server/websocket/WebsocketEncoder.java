@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 2011 PonySDK
+ * Copyright (c) 2017 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
@@ -21,15 +21,16 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.eventbus;
+package com.ponysdk.core.server.websocket;
 
-import com.ponysdk.core.server.context.UIContext;
+import com.ponysdk.core.model.ServerToClientModel;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+public interface WebsocketEncoder {
 
-@FunctionalInterface
-public interface StreamHandler {
+    void beginObject();
 
-    void onStream(HttpServletRequest request, HttpServletResponse response, UIContext uiContext);
+    void encode(final ServerToClientModel model, final Object value);
+
+    void endObject();
+
 }

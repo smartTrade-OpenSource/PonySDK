@@ -24,12 +24,12 @@
 package com.ponysdk.core.server.servlet;
 
 import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.context.UIContext;
+import com.ponysdk.core.server.context.UIContexts;
 import com.ponysdk.core.ui.eventbus.StreamHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -47,7 +47,7 @@ public class StreamServiceServlet extends HttpServlet {
     private static void streamRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         try {
             final Integer uiContextID = Integer.parseInt(req.getParameter(ClientToServerModel.UI_CONTEXT_ID.toStringValue()));
-            final UIContext uiContext = SessionManager.get().getUIContext(uiContextID);
+            final UIContext uiContext = UIContexts.getContext(uiContextID);
             final StreamHandler streamHandler = uiContext
                 .removeStreamListener(Integer.parseInt(req.getParameter(ClientToServerModel.STREAM_REQUEST_ID.toStringValue())));
             streamHandler.onStream(req, resp, uiContext);

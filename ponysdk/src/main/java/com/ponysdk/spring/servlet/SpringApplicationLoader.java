@@ -23,8 +23,8 @@
 
 package com.ponysdk.spring.servlet;
 
+import com.ponysdk.core.server.application.AbstractApplicationLoader;
 import com.ponysdk.core.server.application.AbstractApplicationManager;
-import com.ponysdk.core.server.servlet.AbstractApplicationLoader;
 
 public class SpringApplicationLoader extends AbstractApplicationLoader {
 

@@ -2,7 +2,7 @@ package com.ponysdk.spring.servlet;
 
 import com.ponysdk.core.server.application.AbstractApplicationManager;
 import com.ponysdk.core.server.application.ApplicationManagerOption;
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.context.UIContext;
 import com.ponysdk.core.ui.main.EntryPoint;
 import com.ponysdk.impl.webapplication.page.InitializingActivity;
 import org.springframework.context.support.ClassPathXmlApplicationContext;

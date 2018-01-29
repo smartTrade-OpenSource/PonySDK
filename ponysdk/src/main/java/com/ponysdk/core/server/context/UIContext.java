@@ -21,13 +21,15 @@
  * the License.
  */
 
-package com.ponysdk.core.server.application;
+package com.ponysdk.core.server.context;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.AlreadyDestroyedApplication;
-import com.ponysdk.core.server.servlet.WebSocket;
+import com.ponysdk.core.server.application.ApplicationManagerOption;
+import com.ponysdk.core.server.application.ContextDestroyListener;
+import com.ponysdk.core.server.websocket.WebSocket;
 import com.ponysdk.core.ui.basic.PCookies;
 import com.ponysdk.core.ui.basic.PHistory;
 import com.ponysdk.core.ui.basic.PObject;
@@ -55,10 +57,6 @@ import java.util.concurrent.locks.ReentrantLock;
  * Provides a way to identify a user across more than one page request or visit to a Web site and to
  * store information about that user.
  * </p>
- * <p>
- * There is ONE unique UIContext for each screen displayed. Each UIContext is bound to the current
- * {@link Application} .
- * </p>
  */
 public class UIContext {
 
@@ -69,7 +67,6 @@ public class UIContext {
     private static final AtomicInteger uiContextCount = new AtomicInteger();
 
     private final int ID;
-    private final Application application;
     private final ReentrantLock lock = new ReentrantLock();
     private final Map<String, Object> attributes = new HashMap<>();
     private final WebSocket socket;
@@ -101,8 +98,7 @@ public class UIContext {
     private final Latency latency = new Latency(10);
 
 
-    public UIContext(final WebSocket socket, HandshakeRequest request, Application application) {
-        this.application = application;
+    public UIContext(final WebSocket socket, HandshakeRequest request, ApplicationManagerOption option) {
         this.ID = uiContextCount.incrementAndGet();
         this.socket = socket;
         this.writer = new ModelWriter(socket);
@@ -504,7 +500,7 @@ public class UIContext {
     }
 
     /**
-     * Destroys the current UIContext when the {@link com.ponysdk.core.server.servlet.WebSocket} is closed
+     * Destroys the current UIContext when the {@link WebSocket} is closed
      * <p>
      * This method locks the UIContext
      */
@@ -512,30 +508,6 @@ public class UIContext {
         acquire();
         try {
             doDestroy();
-        } finally {
-            release();
-        }
-    }
-
-    /**
-     * Destroys the current UIContext when the {@link Application} is destroyed
-     * <p>
-     * This method locks the UIContext
-     */
-    void destroyFromApplication() {
-        acquire();
-        try {
-            alive = false;
-            destroyListeners.forEach(listener -> {
-                try {
-                    listener.onBeforeDestroy(this);
-                } catch (final AlreadyDestroyedApplication e) {
-                    if (log.isDebugEnabled()) log.debug("Exception while destroying UIContext #" + getID(), e);
-                } catch (final Exception e) {
-                    log.error("Exception while destroying UIContext #" + getID(), e);
-                }
-            });
-            close();
         } finally {
             release();
         }
@@ -551,8 +523,8 @@ public class UIContext {
         try {
             doDestroy();
             socket.close();
-        }catch (Throwable throwable){
-            log.error("Cannot close websocket for {}",this, throwable);
+        } catch (Throwable throwable) {
+            log.error("Cannot close websocket for {}", this, throwable);
         } finally {
             release();
         }
@@ -571,7 +543,6 @@ public class UIContext {
                 log.error("Exception while destroying UIContext #" + getID(), e);
             }
         });
-        application.deregisterUIContext(ID);
         alive = false;
     }
 
@@ -627,15 +598,6 @@ public class UIContext {
     }
 
     /**
-     * Gets the {@link Application} of the UIContext
-     *
-     * @return The Application
-     */
-    public Application getApplication() {
-        return application;
-    }
-
-    /**
      * Gets the {@link PHistory} of the UIContext
      *
      * @return the PHistory
@@ -677,7 +639,7 @@ public class UIContext {
 
     @Override
     public String toString() {
-        return "UIContext [ID=" + ID + ", alive=" + alive + ", ApplicationID=" + application.getId() + "]";
+        return "UIContext [ID=" + ID + ", alive=" + alive + "]";
     }
 
     /**
@@ -722,7 +684,6 @@ public class UIContext {
         final List<String> historyTokens = this.request.getParameterMap().get(ClientToServerModel.TYPE_HISTORY.toStringValue());
         return !historyTokens.isEmpty() ? historyTokens.get(0) : null;
     }
-
     private static final class Latency {
 
         private int index = 0;

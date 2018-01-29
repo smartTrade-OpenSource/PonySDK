@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 PonySDK
+ * Copyright (c) 2011 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
@@ -21,15 +21,11 @@
  * the License.
  */
 
-package com.ponysdk.core.server.servlet;
+package com.ponysdk.core.server.context;
 
-public interface WebsocketMonitor {
+public interface ConnectionListener {
 
-    void onMessageReceived(WebSocket webSocket, String text);
+    void onOpen();
 
-    void onMessageProcessed(WebSocket webSocket);
-
-    void onBeforeFlush(WebSocket webSocket, int position);
-
-    void onAfterFlush(WebSocket webSocket);
+    void onClose();
 }
