@@ -97,6 +97,8 @@ public class UIContext {
 
     private final Latency latency = new Latency(10);
 
+    private long lastReceivedTime;
+
 
     public UIContext(final WebSocket socket, HandshakeRequest request, ApplicationManagerOption option) {
         this.ID = uiContextCount.incrementAndGet();
@@ -109,8 +111,8 @@ public class UIContext {
         return currentContext.get();
     }
 
-    public static void remove() {
-        currentContext.remove();
+    public void onMessageReceived() {
+        lastReceivedTime = System.currentTimeMillis();
     }
 
     /**
@@ -245,21 +247,24 @@ public class UIContext {
      *
      * @param runnable the tasks
      */
-    public void execute(final Runnable runnable) {
-        if (!isAlive()) return;
+    public boolean execute(final Runnable runnable) {
+        if (!isAlive()) return false;
         if (log.isDebugEnabled()) log.debug("Pushing to #" + this);
         if (UIContext.get() != this) {
             acquire();
             try {
                 runnable.run();
                 flush();
+                return true;
             } catch (final Throwable e) {
                 log.error("Cannot process client instruction", e);
+                return false;
             } finally {
                 release();
             }
         } else {
             runnable.run();
+            return true;
         }
     }
 
@@ -334,7 +339,7 @@ public class UIContext {
 
                     if (jsonObject.containsKey(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())) {
                         final int parentObjectID = jsonObject.getJsonNumber(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())
-                            .intValue();
+                                .intValue();
                         final PObject gcObject = pObjectWeakReferences.get(parentObjectID);
                         log.warn(String.valueOf(gcObject));
                     }
@@ -358,13 +363,13 @@ public class UIContext {
         this.terminalDataReceiver = terminalDataReceiver;
     }
 
-    public void acquire() {
+    private void acquire() {
         lock.lock();
         currentContext.set(this);
     }
 
-    public void release() {
-        UIContext.remove();
+    private void release() {
+        currentContext.remove();
         lock.unlock();
     }
 
@@ -684,6 +689,11 @@ public class UIContext {
         final List<String> historyTokens = this.request.getParameterMap().get(ClientToServerModel.TYPE_HISTORY.toStringValue());
         return !historyTokens.isEmpty() ? historyTokens.get(0) : null;
     }
+
+    public boolean isDebugMode() {
+        return false;
+    }
+
     private static final class Latency {
 
         private int index = 0;

@@ -42,18 +42,18 @@ public class PScheduler {
 
     static {
         final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(Runtime.getRuntime().availableProcessors(),
-            new ThreadFactory() {
+                new ThreadFactory() {
 
-                private int i = 0;
+                    private int i = 0;
 
-                @Override
-                public Thread newThread(final Runnable r) {
-                    final Thread t = new Thread(r);
-                    t.setName(PScheduler.class.getName() + "-" + i++);
-                    t.setDaemon(true);
-                    return t;
-                }
-            });
+                    @Override
+                    public Thread newThread(final Runnable r) {
+                        final Thread t = new Thread(r);
+                        t.setName(PScheduler.class.getName() + "-" + i++);
+                        t.setDaemon(true);
+                        return t;
+                    }
+                });
         INSTANCE = new PScheduler(executor);
     }
 
@@ -125,7 +125,7 @@ public class PScheduler {
                                                final long periodMillis) {
         final UIRunnable uiRunnable = new UIRunnable(context, this, runnable, true);
         final ScheduledFuture<?> future = executor.scheduleWithFixedDelay(uiRunnable, delayMillis, periodMillis,
-            TimeUnit.MILLISECONDS);
+                TimeUnit.MILLISECONDS);
         uiRunnable.setFuture(future);
         registerTask(uiRunnable);
 
@@ -196,22 +196,7 @@ public class PScheduler {
         }
 
         public boolean execute() {
-            try {
-                uiContext.acquire();
-                try {
-                    runnable.run();
-                    uiContext.flush();
-                } catch (final Throwable e) {
-                    log.error("Cannot process commmand", e);
-                    return false;
-                } finally {
-                    uiContext.release();
-                }
-            } catch (final Throwable e) {
-                log.error("Cannot execute command : " + runnable, e);
-                return false;
-            }
-            return true;
+            return uiContext.execute(runnable);
         }
 
         public void cancel() {

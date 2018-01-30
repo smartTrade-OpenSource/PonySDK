@@ -29,8 +29,6 @@ import com.ponysdk.core.ui.main.EntryPoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletException;
-
 public abstract class AbstractApplicationManager {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractApplicationManager.class);
@@ -43,8 +41,7 @@ public abstract class AbstractApplicationManager {
     }
 
     public void startApplication(UIContext uiContext) {
-        uiContext.acquire();
-        try {
+        uiContext.execute(() -> {
             uiContext.getWriter().write(ServerToClientModel.CREATE_CONTEXT, uiContext.getID());
             uiContext.getWriter().write(ServerToClientModel.END, null);
 
@@ -56,16 +53,10 @@ public abstract class AbstractApplicationManager {
                 uiContext.getHistory().newItem(historyToken, false);
 
             entryPoint.start(uiContext);
-
-            uiContext.flush();
-        } catch (final Throwable e) {
-            log.error("Cannot send instructions to the browser " + uiContext, e);
-        } finally {
-            uiContext.release();
-        }
+        });
     }
 
-    protected abstract EntryPoint initializeUIContext(final UIContext ponySession) throws ServletException;
+    protected abstract EntryPoint initializeUIContext(final UIContext uiContext);
 
     public ApplicationManagerOption getOptions() {
         return options;

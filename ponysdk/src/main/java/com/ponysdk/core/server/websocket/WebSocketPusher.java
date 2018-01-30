@@ -63,7 +63,7 @@ public class WebSocketPusher extends AutoFlushedBuffer implements SendHandler {
         try {
             super.flush();
         } catch (final IOException e) {
-            log.error("Can't write on the websocket, so we destroy the application", e);
+            log.error("Can't write on the websocket, so we destroy the ui context", e);
             UIContext.get().destroy();
         }
     }
@@ -117,7 +117,7 @@ public class WebSocketPusher extends AutoFlushedBuffer implements SendHandler {
                     break;
             }
         } catch (final IOException e) {
-            log.error("Can't write on the websocket, so we destroy the application", e);
+            log.error("Can't write on the websocket, so we destroy the ui context", e);
             final UIContext uiContext = UIContext.get();
             if (uiContext != null) uiContext.destroy();
         }

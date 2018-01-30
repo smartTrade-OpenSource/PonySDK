@@ -23,14 +23,14 @@
 
 package com.ponysdk.core.server.servlet;
 
-import com.ponysdk.core.server.application.ApplicationManagerOption;
 import com.ponysdk.core.server.context.UIContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.RunnableScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadFactory;
+import java.time.Duration;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -39,27 +39,13 @@ public class CommunicationSanityChecker {
     private static final Logger log = LoggerFactory.getLogger(CommunicationSanityChecker.class);
 
     private static final int CHECK_PERIOD = 1000;
-    private static final int MAX_THREAD_CHECKER = Integer.parseInt(
-            System.getProperty("communication.sanity.checker.thread.count", String.valueOf(Runtime.getRuntime().availableProcessors())));
-    private static final ScheduledThreadPoolExecutor sanityCheckerTimer = new ScheduledThreadPoolExecutor(MAX_THREAD_CHECKER,
-            new ThreadFactory() {
 
-                private int i = 0;
 
-                @Override
-                public Thread newThread(final Runnable r) {
-                    final Thread t = new Thread(r);
-                    t.setName(CommunicationSanityChecker.class.getName() + "-" + i++);
-                    t.setDaemon(true);
-                    return t;
-                }
-            });
+    private static final Executor checker = Executors.newSingleThreadExecutor();
 
     private final AtomicBoolean started = new AtomicBoolean(false);
-    private final UIContext uiContext;
-    private long heartBeatPeriod;
-    private long lastReceivedTime;
-    private RunnableScheduledFuture<?> sanityChecker;
+    private Duration heartBeatPeriod;
+    private ScheduledFuture<?> sanityChecker;
     private CommunicationState currentState;
     private long suspectTime = -1;
 
@@ -69,35 +55,25 @@ public class CommunicationSanityChecker {
         KO
     }
 
-    public CommunicationSanityChecker(final UIContext uiContext) {
-        this.uiContext = uiContext;
-        this.uiContext.addContextDestroyListener(context -> stop());
-        final ApplicationManagerOption options = uiContext.getConfiguration();
-        setHeartBeatPeriod(options.getHeartBeatPeriod(), options.getHeartBeatPeriodTimeUnit());
+    public CommunicationSanityChecker(Duration duration) {
+        this.heartBeatPeriod = duration;
     }
 
-    private boolean isStarted() {
-        return started.get();
+    public void registerUIContext(UIContext uiContext){
+        uiContext.addContextDestroyListener(context -> stop());
     }
 
     public void start() {
-        lastReceivedTime = System.currentTimeMillis();
-        if (!isStarted()) {
+        if (!started.get()) {
             currentState = CommunicationState.OK;
-            sanityChecker = (RunnableScheduledFuture<?>) sanityCheckerTimer.scheduleWithFixedDelay(() -> {
-                try {
-                    checkCommunicationState();
-                } catch (final Throwable e) {
-                    log.error("Error while checking communication state on UIContext #{}", uiContext.getID(), e);
-                }
-            }, 10, CHECK_PERIOD, TimeUnit.MILLISECONDS);
+            sanityChecker = checker.scheduleWithFixedDelay(this::checkCommunicationState, 10, CHECK_PERIOD, TimeUnit.MILLISECONDS);
             started.set(true);
             log.info("Start communication sanity checker on UIContext #{} with period: {} ms", uiContext.getID(), heartBeatPeriod);
         }
     }
 
     public void stop() {
-        if (isStarted()) {
+        if (started.get()) {
             if (sanityChecker != null) {
                 sanityChecker.cancel(false);
                 sanityCheckerTimer.remove(sanityChecker);
@@ -108,58 +84,51 @@ public class CommunicationSanityChecker {
         }
     }
 
-    public void onMessageReceived() {
-        lastReceivedTime = System.currentTimeMillis();
-    }
-
-    public void setHeartBeatPeriod(final long heartbeat, final TimeUnit timeUnit) {
-        heartBeatPeriod = TimeUnit.MILLISECONDS.convert(heartbeat, timeUnit);
-        if (heartBeatPeriod <= 0)
-            throw new IllegalArgumentException("'HeartBeatPeriod' parameter must be gretter than 0");
-    }
-
     private boolean isCommunicationSuspectedToBeNonFunctional(final long now) {
         // No message have been received or sent during the HeartbeatPeriod
-        return now - lastReceivedTime >= heartBeatPeriod;
+        return (now - lastReceivedTime) >= heartBeatPeriod;
     }
 
     private void checkCommunicationState() {
-        final long now = System.currentTimeMillis();
-        switch (currentState) {
-            case OK:
-                if (isCommunicationSuspectedToBeNonFunctional(now)) {
-                    suspectTime = now;
-                    currentState = CommunicationState.SUSPECT;
-                    if (log.isDebugEnabled()) log.debug(
-                            "No message have been received on UIContext #{}, communication suspected to be non functional, sending heartbeat...",
-                            uiContext.getID());
-                    //uiContext.sendHeartBeat();
-                }
-                break;
-            case SUSPECT:
-                if (lastReceivedTime < suspectTime) {
-                    if (now - suspectTime >= heartBeatPeriod) {
-                        // No message have been received since we suspected the
-                        // communication to be non functional
-                        log.info(
-                                "No message have been received on UIContext #{} since we suspected the communication to be non functional, context will be destroyed",
+        try {
+            final long now = System.currentTimeMillis();
+            switch (currentState) {
+                case OK:
+                    if (isCommunicationSuspectedToBeNonFunctional(now)) {
+                        suspectTime = now;
+                        currentState = CommunicationState.SUSPECT;
+                        if (log.isDebugEnabled()) log.debug(
+                                "No message have been received on UIContext #{}, communication suspected to be non functional, sending heartbeat...",
                                 uiContext.getID());
-                        currentState = CommunicationState.KO;
-                        stop();
-                        uiContext.destroy();
                     }
-                } else {
-                    currentState = CommunicationState.OK;
-                    suspectTime = -1;
-                }
-                break;
-            case KO:
-            default:
-                break;
-        }
+                    break;
+                case SUSPECT:
+                    if (lastReceivedTime < suspectTime) {
+                        if (now - suspectTime >= heartBeatPeriod) {
+                            // No message have been received since we suspected the
+                            // communication to be non functional
+                            log.info(
+                                    "No message have been received on UIContext #{} since we suspected the communication to be non functional, context will be destroyed",
+                                    uiContext.getID());
+                            currentState = CommunicationState.KO;
+                            stop();
+                            uiContext.destroy();
+                        }
+                    } else {
+                        currentState = CommunicationState.OK;
+                        suspectTime = -1;
+                    }
+                    break;
+                case KO:
+                default:
+                    break;
+            }
 
-        uiContext.sendHeartBeat();
-        uiContext.sendRoundTrip();
+            uiContext.sendHeartBeat();
+            uiContext.sendRoundTrip();
+        } catch (final Throwable e) {
+            log.error("Error while checking communication state on UIContext #{}", uiContext.getID(), e);
+        }
     }
 
 }

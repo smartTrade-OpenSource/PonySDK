@@ -39,7 +39,6 @@ public abstract class AbstractApplicationLoader implements ApplicationLoader {
 
     @Override
     public void contextDestroyed(final ServletContextEvent event) {
-
     }
 
     @Override
