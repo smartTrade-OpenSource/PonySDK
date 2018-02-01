@@ -148,9 +148,25 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
         return WidgetType.SUGGESTBOX;
     }
 
+    /**
+     * @deprecated Use {@link #focus()} or {@link #blur()}
+     * @since v2.7.16
+     */
+    @Deprecated
     @Override
     public void setFocus(final boolean focused) {
-        textBox.setFocus(focused);
+        if (focused) focus();
+        else blur();
+    }
+
+    @Override
+    public void focus() {
+        textBox.focus();
+    }
+
+    @Override
+    public void blur() {
+        textBox.blur();
     }
 
     public PTextBox getTextBox() {

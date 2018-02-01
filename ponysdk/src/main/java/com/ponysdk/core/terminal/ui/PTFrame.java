@@ -70,6 +70,8 @@ public class PTFrame extends PTWidget<HTMLPanel> implements PostMessageHandler {
 
         url += url.contains("?") ? "&" : "?";
         url += contextID + "&" + frameID;
+        if (PonySDK.get().isTabindexOnlyFormField())
+            url += "&" + ClientToServerModel.OPTION_TABINDEX_ACTIVATED.toStringValue() + "=" + PonySDK.get().isTabindexOnlyFormField();
 
         iframe.getElement().setAttribute("src", url);
         return iframe;

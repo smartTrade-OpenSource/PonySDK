@@ -44,7 +44,14 @@ public class PTRichTextArea extends PTFocusWidget<RichTextArea> implements BlurH
 
     @Override
     protected RichTextArea createUIObject() {
-        return new RichTextArea();
+        return new RichTextArea() {
+
+            @Override
+            public int getTabIndex() {
+                final int tabIndex = super.getTabIndex();
+                return tabIndex == -1 ? -2 : tabIndex;
+            }
+        };
     }
 
     @Override

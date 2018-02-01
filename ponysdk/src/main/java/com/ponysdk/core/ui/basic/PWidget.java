@@ -109,11 +109,29 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     private String styleName;
     private String stylePrimaryName;
     private String debugID;
+    private boolean focused;
+    protected int tabindex = -Integer.MAX_VALUE;
 
     private Set<PAddOn> addons;
 
     // WORKAROUND Remove handler only server side
     private Set<PDomEvent.Type> oneTimeHandlerCreation;
+
+    public enum TabindexMode {
+
+        FOCUSABLE(-1),
+        TABULABLE(0);
+
+        private int tabIndex;
+
+        private TabindexMode(final int tabIndex) {
+            this.tabIndex = tabIndex;
+        }
+
+        public int getTabIndex() {
+            return tabIndex;
+        }
+    }
 
     protected PWidget() {
     }
@@ -570,6 +588,34 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         if (addons != null) addons.forEach(addon -> addon.onDestroy());
     }
 
+    public void focus() {
+        focus(true);
+    }
+
+    public void blur() {
+        focus(false);
+    }
+
+    protected void focus(final boolean focused) {
+        //if (Objects.equals(this.focused, focused)) return;
+        this.focused = focused;
+        saveUpdate(ServerToClientModel.FOCUS, focused);
+    }
+
+    public void setTabindex(final TabindexMode tabindexMode) {
+        setTabindex(tabindexMode.getTabIndex());
+    }
+
+    public void setTabindex(final int tabindex) {
+        if (Objects.equals(this.tabindex, tabindex)) return;
+        this.tabindex = tabindex;
+        saveUpdate(ServerToClientModel.TABINDEX, tabindex);
+    }
+
+    public int getTabindex() {
+        return tabindex;
+    }
+
     /**
      * @deprecated Use {@link #getAddons()} instead
      * @return First binded addon
@@ -577,6 +623,14 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     @Deprecated
     public PAddOn getAddon() {
         return addons != null && !addons.isEmpty() ? addons.iterator().next() : null;
+    }
+
+    /**
+     * @deprecated Add a FocusHandler if you want to know the focused state
+     */
+    @Deprecated
+    public boolean isFocused() {
+        return focused;
     }
 
 }

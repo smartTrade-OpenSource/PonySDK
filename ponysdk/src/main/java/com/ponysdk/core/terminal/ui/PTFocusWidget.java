@@ -27,6 +27,8 @@ import com.google.gwt.event.dom.client.MouseEvent;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.ponysdk.core.model.DomHandlerType;
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.terminal.PonySDK;
+import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
@@ -35,6 +37,12 @@ public abstract class PTFocusWidget<T extends FocusWidget> extends PTWidget<T> {
     private boolean showLoadingOnRequest = false;
     private boolean enabledOnRequest = false;
     private boolean enabled = true;
+
+    @Override
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
+        super.create(buffer, objectId, uiBuilder);
+        if (PonySDK.get().isTabindexOnlyFormField()) uiObject.setTabIndex(-1);
+    }
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
@@ -52,12 +60,6 @@ public abstract class PTFocusWidget<T extends FocusWidget> extends PTWidget<T> {
         } else if (ServerToClientModel.ENABLED == model) {
             this.enabled = binaryModel.getBooleanValue();
             uiObject.setEnabled(enabled);
-            return true;
-        } else if (ServerToClientModel.TABINDEX == model) {
-            uiObject.setTabIndex(binaryModel.getIntValue());
-            return true;
-        } else if (ServerToClientModel.FOCUSED == model) {
-            uiObject.setFocus(binaryModel.getBooleanValue());
             return true;
         } else {
             return super.update(buffer, binaryModel);

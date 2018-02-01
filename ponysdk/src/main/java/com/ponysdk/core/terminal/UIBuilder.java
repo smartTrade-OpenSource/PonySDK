@@ -147,6 +147,8 @@ public class UIBuilder {
                 readerBuffer.readBinaryModel(); // Read ServerToClientModel.END element
             } else if (ServerToClientModel.CREATE_CONTEXT == model) {
                 PonySDK.get().setContextId(binaryModel.getIntValue());
+                // Read ServerToClientModel.OPTION_FORMFIELD_TABULATION element
+                PonySDK.get().setTabindexOnlyFormField(readerBuffer.readBinaryModel().getBooleanValue());
                 readerBuffer.readBinaryModel(); // Read ServerToClientModel.END element
             } else if (ServerToClientModel.DESTROY_CONTEXT == model) {
                 destroy();

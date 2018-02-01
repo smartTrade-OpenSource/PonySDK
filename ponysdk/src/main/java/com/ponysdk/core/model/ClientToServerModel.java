@@ -84,7 +84,9 @@ public enum ClientToServerModel {
     HANDLER_SCROLL_WIDTH("K"),
     HANDLER_SCROLL_VERTICAL("L"),
     HANDLER_SCROLL_HORIZONTAL("M"),
-    HANDLER_DESTROY("N");
+    HANDLER_DESTROY("N"),
+
+    OPTION_TABINDEX_ACTIVATED("O");
 
     private String key;
 

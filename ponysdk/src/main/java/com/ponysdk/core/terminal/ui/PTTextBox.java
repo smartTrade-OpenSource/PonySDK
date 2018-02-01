@@ -43,7 +43,20 @@ public class PTTextBox extends PTTextBoxBase<TextBox> implements KeyPressHandler
 
     @Override
     protected TextBox createUIObject() {
-        return new ExtendedTextBox();
+        return new TextBox() {
+
+            @Override
+            public int getTabIndex() {
+                final int tabIndex = super.getTabIndex();
+                return tabIndex == -1 ? -2 : tabIndex;
+            }
+
+            @Override
+            public void onBrowserEvent(final Event event) {
+                super.onBrowserEvent(event);
+                if (Event.ONPASTE == event.getTypeInt()) filterText();
+            }
+        };
     }
 
     @Override
@@ -109,15 +122,6 @@ public class PTTextBox extends PTTextBoxBase<TextBox> implements KeyPressHandler
             }
             uiObject.setText(filteredText.toString());
         });
-    }
-
-    private class ExtendedTextBox extends TextBox {
-
-        @Override
-        public void onBrowserEvent(final Event event) {
-            super.onBrowserEvent(event);
-            if (Event.ONPASTE == event.getTypeInt()) filterText();
-        }
     }
 
 }

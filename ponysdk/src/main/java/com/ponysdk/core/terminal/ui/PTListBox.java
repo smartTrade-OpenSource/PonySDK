@@ -38,14 +38,21 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 public class PTListBox extends PTFocusWidget<ListBox> {
 
     @Override
-    protected ListBox createUIObject() {
-        return new ListBox();
-    }
-
-    @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
         super.create(buffer, objectId, uiService);
         addHandler(uiService);
+    }
+
+    @Override
+    protected ListBox createUIObject() {
+        return new ListBox() {
+
+            @Override
+            public int getTabIndex() {
+                final int tabIndex = super.getTabIndex();
+                return tabIndex == -1 ? -2 : tabIndex;
+            }
+        };
     }
 
     private void addHandler(final UIBuilder uiService) {

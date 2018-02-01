@@ -32,7 +32,14 @@ public class PTAnchor extends PTFocusWidget<Anchor> {
 
     @Override
     protected Anchor createUIObject() {
-        return new Anchor();
+        return new Anchor() {
+
+            @Override
+            public int getTabIndex() {
+                final int tabIndex = super.getTabIndex();
+                return tabIndex == -1 ? -2 : tabIndex;
+            }
+        };
     }
 
     @Override

@@ -108,6 +108,13 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
             final JSONObject object = JSONParser.parseStrict(binaryModel.getStringValue()).isObject();
             sendToNative(objectID, nativeObject, object.getJavaScriptObject());
             return true;
+        } else if (ServerToClientModel.TABINDEX == model) {
+            uiObject.getElement().setTabIndex(binaryModel.getIntValue());
+            return true;
+        } else if (ServerToClientModel.FOCUS == model) {
+            if (binaryModel.getBooleanValue()) uiObject.getElement().focus();
+            else uiObject.getElement().blur();
+            return true;
         } else {
             return super.update(buffer, binaryModel);
         }

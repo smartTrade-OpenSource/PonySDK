@@ -30,6 +30,7 @@ public enum ServerToClientModel {
     CREATE_CONTEXT(ValueTypeModel.INTEGER),
     DESTROY_CONTEXT(ValueTypeModel.NULL),
     END(ValueTypeModel.NULL),
+    OPTION_FORMFIELD_TABULATION(ValueTypeModel.BOOLEAN),
 
     TYPE_CREATE(ValueTypeModel.INTEGER),
     TYPE_UPDATE(ValueTypeModel.INTEGER),
@@ -192,7 +193,7 @@ public enum ServerToClientModel {
     ENABLED_ON_REQUEST(ValueTypeModel.BOOLEAN),
     TABINDEX(ValueTypeModel.INTEGER),
     END_OF_PROCESSING(ValueTypeModel.NULL),
-    FOCUSED(ValueTypeModel.BOOLEAN),
+    FOCUS(ValueTypeModel.BOOLEAN),
     HANDLER_TYPE(ValueTypeModel.BYTE),
     DOM_HANDLER_CODE(ValueTypeModel.BYTE),
     HISTORY_FIRE_EVENTS(ValueTypeModel.BOOLEAN),
@@ -232,7 +233,6 @@ public enum ServerToClientModel {
     MOVE_BY_Y(ValueTypeModel.DOUBLE),
     MOVE_TO_X(ValueTypeModel.DOUBLE),
     MOVE_TO_Y(ValueTypeModel.DOUBLE),
-    FOCUS(ValueTypeModel.NULL),
     PRINT(ValueTypeModel.NULL),
     DESTROY(ValueTypeModel.NULL),
 

@@ -60,6 +60,8 @@ public class ApplicationManagerOption {
 
     private boolean debugMode;
 
+    private boolean tabindexOnlyFormField;
+
     public ApplicationManagerOption() {
         applicationID = System.getProperty(APPLICATION_ID);
         applicationName = System.getProperty(APPLICATION_NAME);
@@ -177,6 +179,14 @@ public class ApplicationManagerOption {
 
     public void setDebugMode(final boolean debugMode) {
         this.debugMode = debugMode;
+    }
+
+    public boolean isTabindexOnlyFormField() {
+        return tabindexOnlyFormField;
+    }
+
+    public void setTabindexOnlyFormField(final boolean tabindexOnlyFormField) {
+        this.tabindexOnlyFormField = tabindexOnlyFormField;
     }
 
     @Override

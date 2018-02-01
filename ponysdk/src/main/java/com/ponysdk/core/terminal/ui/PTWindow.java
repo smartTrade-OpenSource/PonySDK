@@ -72,6 +72,8 @@ public class PTWindow extends AbstractPTObject implements PostMessageHandler {
         if (relative) {
             url = GWT.getHostPageBaseURL() + url + "?" + ClientToServerModel.WINDOW_ID.toStringValue() + "=" + objectId + "&"
                     + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "=" + PonySDK.get().getContextId();
+            if (PonySDK.get().isTabindexOnlyFormField()) url += "&" + ClientToServerModel.OPTION_TABINDEX_ACTIVATED.toStringValue()
+                    + "=" + PonySDK.get().isTabindexOnlyFormField();
         }
 
         PTWindowManager.get().register(this);
@@ -125,7 +127,8 @@ public class PTWindow extends AbstractPTObject implements PostMessageHandler {
             window.moveTo(x, y);
             return true;
         } else if (ServerToClientModel.FOCUS == model) {
-            window.focus();
+            if (binaryModel.getBooleanValue()) window.focus();
+            else window.blur();
             return true;
         } else if (ServerToClientModel.CLOSE == model) {
             close(false);

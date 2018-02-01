@@ -61,6 +61,8 @@ public class PonySDK implements UncaughtExceptionHandler {
     private WebSocketClient socketClient;
     private boolean started;
 
+    private boolean tabindexOnlyFormField;
+
     public PonySDK() {
         if (INSTANCE != null) throw new RuntimeException("Cannot instanciate PonySDK twice");
         INSTANCE = this;
@@ -102,6 +104,10 @@ public class PonySDK implements UncaughtExceptionHandler {
         final String frameId = Window.Location.getParameter(ClientToServerModel.FRAME_ID.toStringValue());
 
         contextId = Integer.parseInt(Window.Location.getParameter(ClientToServerModel.UI_CONTEXT_ID.toStringValue()));
+        final String tabindexOnlyFormFieldRaw = Window.Location
+            .getParameter(ClientToServerModel.OPTION_TABINDEX_ACTIVATED.toStringValue());
+        if (tabindexOnlyFormFieldRaw != null) tabindexOnlyFormField = Boolean.parseBoolean(tabindexOnlyFormFieldRaw);
+
         uiBuilder.init(windowId != null ? new WindowRequestBuilder(windowId, buffer -> uiBuilder.updateWindowTerminal(buffer))
                 : new FrameRequestBuilder(frameId, buffer -> uiBuilder.updateFrameTerminal(buffer)));
     }
@@ -180,6 +186,14 @@ public class PonySDK implements UncaughtExceptionHandler {
 
     public void setContextId(final int contextId) {
         this.contextId = contextId;
+    }
+
+    public boolean isTabindexOnlyFormField() {
+        return tabindexOnlyFormField;
+    }
+
+    public void setTabindexOnlyFormField(final boolean tabindexOnlyFormField) {
+        this.tabindexOnlyFormField = tabindexOnlyFormField;
     }
 
 }

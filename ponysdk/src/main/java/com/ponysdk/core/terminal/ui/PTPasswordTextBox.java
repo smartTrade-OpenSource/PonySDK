@@ -29,7 +29,14 @@ public class PTPasswordTextBox extends PTTextBox {
 
     @Override
     protected PasswordTextBox createUIObject() {
-        return new PasswordTextBox();
+        return new PasswordTextBox() {
+
+            @Override
+            public int getTabIndex() {
+                final int tabIndex = super.getTabIndex();
+                return tabIndex == -1 ? -2 : tabIndex;
+            }
+        };
     }
 
 }

@@ -62,7 +62,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     private Session session;
 
     WebSocket(final ServletUpgradeRequest request, final WebsocketMonitor monitor,
-              final AbstractApplicationManager applicationManager) {
+            final AbstractApplicationManager applicationManager) {
         this.request = request;
         this.monitor = monitor;
         this.applicationManager = applicationManager;
@@ -84,7 +84,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         Application application = SessionManager.get().getApplication(applicationId);
         if (application == null) {
             application = new Application(applicationId, httpSession, applicationManager.getOptions(),
-                    UserAgent.parseUserAgentString(userAgent));
+                UserAgent.parseUserAgentString(userAgent));
             SessionManager.get().registerApplication(application);
         }
 
@@ -102,6 +102,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
             try {
                 beginObject();
                 encode(ServerToClientModel.CREATE_CONTEXT, uiContext.getID()); // TODO nciaravola integer ?
+                encode(ServerToClientModel.OPTION_FORMFIELD_TABULATION, applicationManager.getOptions().isTabindexOnlyFormField());
                 endObject();
                 if (isAlive() && isSessionOpen()) flush0();
             } catch (final Throwable e) {
@@ -124,9 +125,8 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
     @Override
     public void onWebSocketClose(final int statusCode, final String reason) {
-        if (log.isInfoEnabled())
-            log.info("WebSocket closed on UIContext #{} : {}, reason : {}", context.getUIContext().getID(),
-                    NiceStatusCode.getMessage(statusCode), reason != null ? reason : "");
+        if (log.isInfoEnabled()) log.info("WebSocket closed on UIContext #{} : {}, reason : {}", context.getUIContext().getID(),
+            NiceStatusCode.getMessage(statusCode), reason != null ? reason : "");
         if (isAlive()) context.getUIContext().onDestroy();
     }
 
@@ -306,7 +306,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
         public static String getMessage(final int statusCode) {
             final List<NiceStatusCode> codes = Arrays.stream(values())
-                    .filter(niceStatusCode -> niceStatusCode.statusCode == statusCode).collect(Collectors.toList());
+                .filter(niceStatusCode -> niceStatusCode.statusCode == statusCode).collect(Collectors.toList());
             if (!codes.isEmpty()) {
                 return codes.get(0).toString();
             } else {

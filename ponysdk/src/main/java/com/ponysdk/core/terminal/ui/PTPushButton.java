@@ -40,7 +40,14 @@ public class PTPushButton extends PTButtonBase<PushButton> {
 
     @Override
     protected PushButton createUIObject() {
-        return new PushButton(image.uiObject);
+        return new PushButton(image.uiObject) {
+
+            @Override
+            public int getTabIndex() {
+                final int tabIndex = super.getTabIndex();
+                return tabIndex == -1 ? -2 : tabIndex;
+            }
+        };
     }
 
 }

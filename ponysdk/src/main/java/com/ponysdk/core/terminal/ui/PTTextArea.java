@@ -32,7 +32,14 @@ public class PTTextArea extends PTTextBoxBase<TextArea> {
 
     @Override
     protected TextArea createUIObject() {
-        return new TextArea();
+        return new TextArea() {
+
+            @Override
+            public int getTabIndex() {
+                final int tabIndex = super.getTabIndex();
+                return tabIndex == -1 ? -2 : tabIndex;
+            }
+        };
     }
 
     @Override

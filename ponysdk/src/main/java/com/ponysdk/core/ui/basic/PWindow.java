@@ -228,7 +228,7 @@ public class PWindow extends PObject {
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/focus">MDN</a>
      */
     public void focus() {
-        saveUpdate(writer -> writer.write(ServerToClientModel.FOCUS));
+        saveUpdate(writer -> writer.write(ServerToClientModel.FOCUS, true));
     }
 
     /**

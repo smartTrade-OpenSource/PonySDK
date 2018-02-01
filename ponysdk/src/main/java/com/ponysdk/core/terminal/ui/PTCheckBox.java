@@ -49,7 +49,14 @@ public class PTCheckBox<T extends CheckBox> extends PTButtonBase<T> {
 
     @Override
     protected T createUIObject() {
-        return (T) new CheckBox();
+        return (T) new CheckBox() {
+
+            @Override
+            public int getTabIndex() {
+                final int tabIndex = super.getTabIndex();
+                return tabIndex == -1 ? -2 : tabIndex;
+            }
+        };
     }
 
     @Override
@@ -60,6 +67,9 @@ public class PTCheckBox<T extends CheckBox> extends PTButtonBase<T> {
             final boolean indeterminate = PCheckBoxState.INDETERMINATE == state;
             if (!indeterminate) uiObject.setValue(PCheckBoxState.CHECKED == state);
             setIndeterminate(inputElement, indeterminate);
+            return true;
+        } else if (ServerToClientModel.TABINDEX == model) {
+            inputElement.setTabIndex(binaryModel.getIntValue());
             return true;
         } else {
             return super.update(buffer, binaryModel);

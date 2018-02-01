@@ -26,6 +26,7 @@ package com.ponysdk.core.ui.basic;
 import java.util.Objects;
 
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.event.HasPBlurHandlers;
 import com.ponysdk.core.ui.basic.event.HasPClickHandlers;
 import com.ponysdk.core.ui.basic.event.HasPDoubleClickHandlers;
@@ -51,11 +52,10 @@ public abstract class PFocusWidget extends PWidget
 
     private boolean enabled = true;
     private boolean enabledOnRequest = false;
-    private boolean focused = false;
     private boolean showLoadingOnRequest;
-    private int tabindex = Integer.MIN_VALUE;
 
     protected PFocusWidget() {
+        if (UIContext.get().getApplication().getOptions().isTabindexOnlyFormField()) tabindex = -1;
     }
 
     @Override
@@ -79,11 +79,15 @@ public abstract class PFocusWidget extends PWidget
         saveUpdate(writer -> writer.write(ServerToClientModel.LOADING_ON_REQUEST, showLoadingOnRequest));
     }
 
+    /**
+     * @deprecated Use {@link #focus()} or {@link #blur()}
+     * @since v2.7.16
+     */
+    @Deprecated
     @Override
     public void setFocus(final boolean focused) {
-        if (Objects.equals(this.focused, focused)) return;
-        this.focused = focused;
-        saveUpdate(ServerToClientModel.FOCUSED, focused);
+        if (focused) focus();
+        else blur();
     }
 
     public boolean isEnabled() {
@@ -108,20 +112,6 @@ public abstract class PFocusWidget extends PWidget
         if (Objects.equals(this.enabledOnRequest, enabledOnRequest)) return;
         this.enabledOnRequest = enabledOnRequest;
         saveUpdate(ServerToClientModel.ENABLED_ON_REQUEST, enabledOnRequest);
-    }
-
-    public boolean isFocused() {
-        return focused;
-    }
-
-    public int getTabindex() {
-        return tabindex;
-    }
-
-    public void setTabindex(final int tabindex) {
-        if (Objects.equals(this.tabindex, tabindex)) return;
-        this.tabindex = tabindex;
-        saveUpdate(ServerToClientModel.TABINDEX, tabindex);
     }
 
     @Override
