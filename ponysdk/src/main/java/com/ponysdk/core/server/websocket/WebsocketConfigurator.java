@@ -6,12 +6,12 @@ import javax.websocket.HandshakeResponse;
 import javax.websocket.server.HandshakeRequest;
 import javax.websocket.server.ServerEndpointConfig;
 
-public class CustomConfigurator extends ServerEndpointConfig.Configurator {
+public class WebsocketConfigurator extends ServerEndpointConfig.Configurator {
 
     private final AbstractApplicationManager applicationManager;
     private ThreadLocal<HandshakeRequest> requests = new ThreadLocal<>();
 
-    public CustomConfigurator(AbstractApplicationManager applicationManager) {
+    public WebsocketConfigurator(AbstractApplicationManager applicationManager) {
         this.applicationManager = applicationManager;
     }
 

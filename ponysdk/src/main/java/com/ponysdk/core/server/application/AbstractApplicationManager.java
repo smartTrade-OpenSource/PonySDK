@@ -24,42 +24,59 @@
 package com.ponysdk.core.server.application;
 
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.context.CommunicationSanityChecker;
 import com.ponysdk.core.server.context.UIContext;
 import com.ponysdk.core.ui.main.EntryPoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
+
 public abstract class AbstractApplicationManager {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractApplicationManager.class);
 
-    private final ApplicationManagerOption options;
+    protected ApplicationConfiguration configuration;
 
-    protected AbstractApplicationManager(final ApplicationManagerOption options) {
-        this.options = options;
-        log.info(options.toString());
+    private CommunicationSanityChecker communicationSanityChecker;
+
+    public void start() {
+        long period = configuration.getHeartBeatPeriodTimeUnit().toMillis(configuration.getHeartBeatPeriod());
+        communicationSanityChecker = new CommunicationSanityChecker(Duration.ofMillis(period));
+        communicationSanityChecker.start();
     }
 
-    public void startApplication(UIContext uiContext) {
+    public void startContext(UIContext uiContext) {
+        communicationSanityChecker.registerUIContext(uiContext);
         uiContext.execute(() -> {
-            uiContext.getWriter().write(ServerToClientModel.CREATE_CONTEXT, uiContext.getID());
-            uiContext.getWriter().write(ServerToClientModel.END, null);
 
-            final EntryPoint entryPoint = initializeUIContext(uiContext);
+            final EntryPoint entryPoint;
+            try {
+                uiContext.getWriter().write(ServerToClientModel.CREATE_CONTEXT, uiContext.getID());
+                uiContext.getWriter().write(ServerToClientModel.END, null);
 
-            final String historyToken = uiContext.getHistoryToken();
+                entryPoint = initializeUIContext(uiContext);
+                final String historyToken = uiContext.getHistoryToken();
 
-            if (historyToken != null && !historyToken.isEmpty())
-                uiContext.getHistory().newItem(historyToken, false);
+                if (historyToken != null && !historyToken.isEmpty())
+                    uiContext.getHistory().newItem(historyToken, false);
 
-            entryPoint.start(uiContext);
+                entryPoint.start(uiContext);
+            } catch (Exception e) {
+                log.error("Cannot start UIContext", e);
+                //TODO nciaravola destroy if exception ?
+            }
         });
     }
 
-    protected abstract EntryPoint initializeUIContext(final UIContext uiContext);
+    protected abstract EntryPoint initializeUIContext(final UIContext uiContext) throws Exception;
 
-    public ApplicationManagerOption getOptions() {
-        return options;
+    public void setConfiguration(ApplicationConfiguration configuration) {
+        this.configuration = configuration;
+    }
+
+    public ApplicationConfiguration getConfiguration() {
+        return configuration;
     }
 
 }

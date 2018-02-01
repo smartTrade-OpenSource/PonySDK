@@ -23,7 +23,7 @@
 
 package com.ponysdk.core.server.servlet;
 
-import com.ponysdk.core.server.application.ApplicationManagerOption;
+import com.ponysdk.core.server.application.ApplicationConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,12 +53,9 @@ public class BootstrapServlet extends HttpServlet {
 
     private final MimetypesFileTypeMap fileTypeMap = new MimetypesFileTypeMap();
 
-    private ApplicationManagerOption application;
+    private ApplicationConfiguration option;
 
     private Path indexPath;
-
-    public BootstrapServlet() {
-    }
 
     @Override
     public void init() throws ServletException {
@@ -102,9 +99,6 @@ public class BootstrapServlet extends HttpServlet {
 
     protected void handleRequest(final HttpServletRequest request, final HttpServletResponse response, final String path)
             throws IOException {
-        // Force session creation if there is no session
-        request.getSession();
-
         // Try to load from context
         InputStream inputStream = getServletContext().getResourceAsStream(path);
 
@@ -176,12 +170,12 @@ public class BootstrapServlet extends HttpServlet {
         writer.newLine();
         writer.append("<head>");
         writer.newLine();
-        writer.append("<title>").append(application.getApplicationName()).append("</title>");
+        writer.append("<title>").append(option.getApplicationName()).append("</title>");
         writer.newLine();
         writer.append("<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">");
         writer.newLine();
 
-        final Set<String> metas = application.getMeta();
+        final Set<String> metas = option.getMeta();
         if (metas != null) {
             for (final String m : metas) {
                 writer.append("<meta ").append(m).append(">");
@@ -191,7 +185,7 @@ public class BootstrapServlet extends HttpServlet {
         addToMeta(writer);
         writer.newLine();
 
-        final Map<String, String> styles = application.getStyle();
+        final Map<String, String> styles = option.getStyle();
         if (styles != null && !styles.isEmpty()) {
             for (final Entry<String, String> style : styles.entrySet()) {
                 final String id = style.getKey();
@@ -205,14 +199,14 @@ public class BootstrapServlet extends HttpServlet {
         }
 
         String ponyTerminalJsFileName;
-        if (application.isDebugMode()) ponyTerminalJsFileName = "ponyterminaldebug/ponyterminaldebug.nocache.js";
+        if (option.isDebugMode()) ponyTerminalJsFileName = "ponyterminaldebug/ponyterminaldebug.nocache.js";
         else ponyTerminalJsFileName = "ponyterminal/ponyterminal.nocache.js";
         writer.append("<script type=\"text/javascript\" src=\"").append(ponyTerminalJsFileName).append("\"></script>");
         writer.newLine();
         writer.append("<script type=\"text/javascript\" src=\"script/ponysdk.js\"></script>");
         writer.newLine();
 
-        final Set<String> scripts = application.getJavascript();
+        final Set<String> scripts = option.getJavascript();
         if (scripts != null && !scripts.isEmpty()) {
             for (final String script : scripts) {
                 writer.append("<script type=\"text/javascript\" src=\"").append(script).append("\"></script>");
@@ -246,7 +240,7 @@ public class BootstrapServlet extends HttpServlet {
     }
 
     protected void addLoading(final BufferedWriter writer) throws IOException {
-        writer.append("<div id=\"loading\">Loading ").append(application.getApplicationName()).append("...</div>");
+        writer.append("<div id=\"loading\">Loading ").append(option.getApplicationName()).append("...</div>");
     }
 
     protected void addNoScript(final BufferedWriter writer) throws IOException {
@@ -273,7 +267,7 @@ public class BootstrapServlet extends HttpServlet {
     protected void addToBody(final BufferedWriter writer) {
     }
 
-    public void setApplication(final ApplicationManagerOption application) {
-        this.application = application;
+    public void setApplicationOption(final ApplicationConfiguration applicationOption) {
+        this.option = applicationOption;
     }
 }

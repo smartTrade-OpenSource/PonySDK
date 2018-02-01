@@ -26,8 +26,7 @@ package com.ponysdk.core.server.context;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.AlreadyDestroyedApplication;
-import com.ponysdk.core.server.application.ApplicationManagerOption;
+import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.ContextDestroyListener;
 import com.ponysdk.core.server.websocket.WebSocket;
 import com.ponysdk.core.ui.basic.PCookies;
@@ -47,6 +46,7 @@ import javax.json.JsonString;
 import javax.json.JsonValue;
 import javax.json.JsonValue.ValueType;
 import javax.websocket.server.HandshakeRequest;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -60,10 +60,8 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class UIContext {
 
-    private static final ThreadLocal<UIContext> currentContext = new ThreadLocal<>();
-
     private static final Logger log = LoggerFactory.getLogger(UIContext.class);
-
+    private static final ThreadLocal<UIContext> currentContext = new ThreadLocal<>();
     private static final AtomicInteger uiContextCount = new AtomicInteger();
 
     private final int ID;
@@ -85,22 +83,18 @@ public class UIContext {
     private final EventBus newEventBus = new EventBus();
     private final PCookies cookies = new PCookies();
 
-    /**
-     * ????? concurrence ??
-     */
     private final Set<ContextDestroyListener> destroyListeners = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private final Set<DataListener> listeners = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     private TerminalDataReceiver terminalDataReceiver;
 
-    private boolean alive = true;
+    private volatile boolean alive = true;
 
     private final Latency latency = new Latency(10);
 
-    private long lastReceivedTime;
+    private Instant lastReceivedTime = Instant.now();
 
-
-    public UIContext(final WebSocket socket, HandshakeRequest request, ApplicationManagerOption option) {
+    public UIContext(final WebSocket socket, HandshakeRequest request, ApplicationConfiguration option) {
         this.ID = uiContextCount.incrementAndGet();
         this.socket = socket;
         this.writer = new ModelWriter(socket);
@@ -112,7 +106,11 @@ public class UIContext {
     }
 
     public void onMessageReceived() {
-        lastReceivedTime = System.currentTimeMillis();
+        lastReceivedTime = Instant.now();
+    }
+
+    public Instant getLastReceivedTime() {
+        return lastReceivedTime;
     }
 
     /**
@@ -268,23 +266,8 @@ public class UIContext {
         }
     }
 
-    /**
-     * Stimulates all {@link DataListener} with a list of object
-     *
-     * @param data list of object
-     */
-    public void pushToClient(final List<Object> data) {
-        if (!isAlive()) return;
-        if (data != null && !listeners.isEmpty()) {
-            execute(() -> {
-                try {
-                    listeners.forEach(listener -> data.forEach(listener::onData));
-                } catch (final Throwable e) {
-                    log.error("Cannot send data", e);
-                }
-            });
-        }
-    }
+
+    //Recheck
 
     /**
      * Stimulates all {@link DataListener} with an object
@@ -305,7 +288,7 @@ public class UIContext {
     }
 
     /**
-     * Sends data to the targetted {@link PObject} from {@link JsonObject} instruction
+     * Sends data to the targeted {@link PObject} from {@link JsonObject} instruction
      * Called from terminal side
      *
      * @param jsonObject the JSON instructions
@@ -339,7 +322,7 @@ public class UIContext {
 
                     if (jsonObject.containsKey(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())) {
                         final int parentObjectID = jsonObject.getJsonNumber(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())
-                                .intValue();
+                            .intValue();
                         final PObject gcObject = pObjectWeakReferences.get(parentObjectID);
                         log.warn(String.valueOf(gcObject));
                     }
@@ -359,7 +342,7 @@ public class UIContext {
      *
      * @param terminalDataReceiver the terminal data receiver
      */
-    public void setClientDataOutput(final TerminalDataReceiver terminalDataReceiver) {
+    public void setTerminalDataReceiver(final TerminalDataReceiver terminalDataReceiver) {
         this.terminalDataReceiver = terminalDataReceiver;
     }
 
@@ -423,7 +406,7 @@ public class UIContext {
      * @param streamListener the stream handler
      * @param objectID       the object ID of a {@link PObject}
      */
-    public void stackEmbededStreamRequest(final StreamHandler streamListener, final int objectID) {
+    public void stackEmbeddedStreamRequest(final StreamHandler streamListener, final int objectID) {
         final int streamRequestID = nextStreamRequestID();
 
         writer.beginObject();
@@ -505,34 +488,15 @@ public class UIContext {
     }
 
     /**
-     * Destroys the current UIContext when the {@link WebSocket} is closed
-     * <p>
-     * This method locks the UIContext
-     */
-    public void onDestroy() {
-        acquire();
-        try {
-            doDestroy();
-        } finally {
-            release();
-        }
-    }
-
-    /**
      * Destroys the UIContext
      * <p>
      * This method locks the UIContext
      */
     public void destroy() {
-        acquire();
-        try {
-            doDestroy();
-            socket.close();
-        } catch (Throwable throwable) {
-            log.error("Cannot close websocket for {}", this, throwable);
-        } finally {
-            release();
-        }
+        if (!isAlive()) return;
+        alive = false;
+        doDestroy();
+        //socket.close();
     }
 
     /**
@@ -542,13 +506,10 @@ public class UIContext {
         destroyListeners.forEach(listener -> {
             try {
                 listener.onBeforeDestroy(this);
-            } catch (final AlreadyDestroyedApplication e) {
-                if (log.isDebugEnabled()) log.debug("Exception while destroying UIContext #" + getID(), e);
             } catch (final Exception e) {
                 log.error("Exception while destroying UIContext #" + getID(), e);
             }
         });
-        alive = false;
     }
 
     /**

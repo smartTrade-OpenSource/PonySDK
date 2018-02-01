@@ -95,7 +95,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     @Override
     public void start(final UIContext uiContext) {
-        uiContext.setClientDataOutput((object, instruction) -> System.err.println(object + " : " + instruction));
+        uiContext.setTerminalDataReceiver((object, instruction) -> System.err.println(object + " : " + instruction));
 
         createReconnectingPanel();
 

@@ -26,18 +26,11 @@ package com.ponysdk.core.server.application;
 import com.ponysdk.core.server.context.UIContext;
 import com.ponysdk.core.ui.main.EntryPoint;
 
-public class JavaApplicationLoader extends AbstractApplicationLoader {
+public class JavaApplicationManager extends AbstractApplicationManager {
 
     @Override
-    public AbstractApplicationManager createApplicationManager() {
-        return new AbstractApplicationManager(applicationManagerOption) {
-
-            @Override
-            protected EntryPoint initializeUIContext(final UIContext uiContext) {
-                final Class<? extends EntryPoint> entryPointClassName = applicationManagerOption.getEntryPointClass();
-                return entryPointClassName.getDeclaredConstructor().newInstance();
-            }
-        };
+    protected EntryPoint initializeUIContext(UIContext uiContext) throws Exception {
+        final Class<? extends EntryPoint> entryPointClassName = configuration.getEntryPointClass();
+        return entryPointClassName.getDeclaredConstructor().newInstance();
     }
-
 }

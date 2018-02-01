@@ -89,7 +89,7 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, HasPSubm
     }
 
     public void submit() {
-        UIContext.get().stackEmbededStreamRequest(streamHandler, getID());
+        UIContext.get().stackEmbeddedStreamRequest(streamHandler, getID());
     }
 
     public String getName() {

@@ -1,7 +1,6 @@
 package com.ponysdk.spring.servlet;
 
 import com.ponysdk.core.server.application.AbstractApplicationManager;
-import com.ponysdk.core.server.application.ApplicationManagerOption;
 import com.ponysdk.core.server.context.UIContext;
 import com.ponysdk.core.ui.main.EntryPoint;
 import com.ponysdk.impl.webapplication.page.InitializingActivity;
@@ -13,22 +12,24 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-class SpringApplicationManager extends AbstractApplicationManager {
+public class SpringApplicationManager extends AbstractApplicationManager {
+    public static final String SERVER_CONFIG_LOCATION = "ponysdk.spring.application.server.configuration.file";
+
     private String[] configurations;
 
-
-    SpringApplicationManager(ApplicationManagerOption options) {
-        super(options);
-
+    @Override
+    public void start() {
         final List<String> files = new ArrayList<>();
 
-        final String clientConfigFile = getOptions().getClientConfigFile();
-        if (StringUtils.isEmpty(clientConfigFile))
+        final String clientConfigFile = getConfiguration().getClientConfigFile();
+        if (StringUtils.isEmpty(clientConfigFile)) {
             files.addAll(Arrays.asList("conf/client_application.inc.xml", "etc/client_application.xml"));
-        else
+        } else {
             files.add(clientConfigFile);
-
+        }
         configurations = files.toArray(new String[0]);
+
+        super.start();
     }
 
     @Override

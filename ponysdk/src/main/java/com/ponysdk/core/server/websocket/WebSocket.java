@@ -27,7 +27,6 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.AbstractApplicationManager;
 import com.ponysdk.core.server.context.UIContext;
-import com.ponysdk.core.server.servlet.CommunicationSanityChecker;
 import org.eclipse.jetty.websocket.api.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +45,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @ServerEndpoint(value = "/ws")
-public class WebSocket  implements WebsocketEncoder {
+public class WebSocket implements WebsocketEncoder {
 
     private static final Logger log = LoggerFactory.getLogger(WebSocket.class);
 
@@ -56,103 +55,24 @@ public class WebSocket  implements WebsocketEncoder {
     private Session session;
 
     private UIContext uiContext;
-    private CommunicationSanityChecker communicationSanityChecker;
     private HandshakeRequest request;
 
-    public void setApplicationManager(AbstractApplicationManager applicationManager) {
-        this.applicationManager = applicationManager;
-    }
-
-    public void setMonitor(WebsocketMonitor monitor) {
-        this.monitor = monitor;
-    }
-
-    /**
-     * Send heart beat to the client
-     */
-    public void sendHeartBeat() {
-        if (isAlive() && isSessionOpen()) {
-            beginObject();
-            encode(ServerToClientModel.HEARTBEAT, null);
-            endObject();
-            flush0();
-        }
-    }
-
-    /**
-     * Send round trip to the client
-     */
-    public void sendRoundTrip() {
-        if (isAlive() && isSessionOpen()) {
-            beginObject();
-            encode(ServerToClientModel.PING_SERVER, System.currentTimeMillis());
-            endObject();
-            flush0();
-        }
-    }
-
-    public void flush() {
-        if (isAlive() && isSessionOpen()) flush0();
-    }
-
-    private void flush0() {
-        websocketPusher.flush();
-    }
-
-    public void close() throws IOException {
-        if (isSessionOpen()) {
-            log.info("Closing websocket programaticly");
-            session.close();
-        }
-    }
-
-    private boolean isAlive() {
-        return uiContext != null && uiContext.isAlive();
-    }
-
-    private boolean isSessionOpen() {
-        return session != null && session.isOpen();
-    }
-
-    @Override
-    public void beginObject() {
-    }
-
-    @Override
-    public void endObject() {
-        encode(ServerToClientModel.END, null);
-    }
-
-    @Override
-    public void encode(final ServerToClientModel model, final Object value) {
-        websocketPusher.encode(model, value);
-    }
-
     @OnOpen
-    public void onOpen(Session session, EndpointConfig config) {
-        final String userAgent = request.getHeaders().get("User-Agent").get(0);
-        //String applicationId = request.getHttpServletRequest().getParameter("application");
-        //log.info("WebSocket connected from {}, sessionID={}, userAgent={}", session.getRemoteAddress(), request.getSession().getId(), userAgent);
+    public void onOpen(Session s, EndpointConfig config) {
+        session = s;
+        //final String userAgent = request.getHeaders().get("User-Agent").get(0);
+        //log.info("WebSocket connected from {}, sessionID={}, userAgent={}", session.getBasicRemote(), request.getSession().getId(), userAgent);
 
-        this.session = session;
         // 1K for max chunk size and 1M for total buffer size
         // Don't set max chunk size > 8K because when using Jetty Websocket compression, the chunks are limited to 8K
-        this.websocketPusher = new WebSocketPusher(session, 1 << 20, 1 << 12, TimeUnit.SECONDS.toMillis(60));
-
-        //final SessionManager sessionManager = SessionManager.get();
-        //final Application application = new Application(applicationManager.getOptions(), UserAgent.parseUserAgentString(userAgent));
-        //sessionManager.registerApplication(application);
-        this.uiContext = new UIContext(this, request,applicationManager.getOptions());
-        log.info("Creating a new {}", uiContext);
-        this.communicationSanityChecker = new CommunicationSanityChecker(uiContext);
-        //application.registerUIContext(uiContext);
-        applicationManager.startApplication(uiContext);
-        communicationSanityChecker.start();
+        websocketPusher = new WebSocketPusher(session, 1 << 20, 1 << 12, TimeUnit.SECONDS.toMillis(60));
+        uiContext = new UIContext(this, request, applicationManager.getConfiguration());
+        applicationManager.startContext(uiContext);
     }
 
     @OnClose
     public void onClose(Session session, CloseReason closeReason) {
-        if (isAlive()) uiContext.onDestroy();
+        uiContext.destroy();
     }
 
     @OnError
@@ -165,7 +85,7 @@ public class WebSocket  implements WebsocketEncoder {
         if (isAlive()) {
             if (monitor != null) monitor.onMessageReceived(WebSocket.this, message);
             try {
-                communicationSanityChecker.onMessageReceived();
+                uiContext.onMessageReceived();
 
                 if (ClientToServerModel.HEARTBEAT.toStringValue().equals(message)) {
                     if (log.isDebugEnabled()) log.debug("Heartbeat received from terminal #{}", uiContext.getID());
@@ -224,6 +144,75 @@ public class WebSocket  implements WebsocketEncoder {
         } else {
             log.info("UI Context is destroyed, message dropped from terminal : {}", message);
         }
+    }
+
+    public void setApplicationManager(AbstractApplicationManager applicationManager) {
+        this.applicationManager = applicationManager;
+    }
+
+    public void setMonitor(WebsocketMonitor monitor) {
+        this.monitor = monitor;
+    }
+
+    /**
+     * Send heart beat to the terminal
+     */
+    public void sendHeartBeat() {
+        if (isAlive() && isSessionOpen()) {
+            beginObject();
+            encode(ServerToClientModel.HEARTBEAT, null);
+            endObject();
+            flush0();
+        }
+    }
+
+    /**
+     * Send round trip to the terminal
+     */
+    public void sendRoundTrip() {
+        if (isAlive() && isSessionOpen()) {
+            beginObject();
+            encode(ServerToClientModel.PING_SERVER, System.currentTimeMillis());
+            endObject();
+            flush0();
+        }
+    }
+
+    public void flush() {
+        if (isAlive() && isSessionOpen()) flush0();
+    }
+
+    private void flush0() {
+        websocketPusher.flush();
+    }
+
+    public void close() throws IOException {
+        if (isSessionOpen()) {
+            log.info("Closing websocket programaticly");
+            session.close();
+        }
+    }
+
+    private boolean isAlive() {
+        return uiContext != null && uiContext.isAlive();
+    }
+
+    private boolean isSessionOpen() {
+        return session != null && session.isOpen();
+    }
+
+    @Override
+    public void beginObject() {
+    }
+
+    @Override
+    public void endObject() {
+        encode(ServerToClientModel.END, null);
+    }
+
+    @Override
+    public void encode(final ServerToClientModel model, final Object value) {
+        websocketPusher.encode(model, value);
     }
 
     public void setRequest(HandshakeRequest request) {
