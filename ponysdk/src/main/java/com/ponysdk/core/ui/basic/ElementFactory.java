@@ -47,9 +47,13 @@ public interface ElementFactory {
 
     PCheckBox newPCheckBox(final String label);
 
+    PDateBox newPDateBox(final PDatePicker picker, final SimpleDateFormat dateFormat, final boolean keepDayTimeNeeded);
+
     PDateBox newPDateBox(final PDatePicker picker, final SimpleDateFormat dateFormat);
 
     PDateBox newPDateBox(final SimpleDateFormat dateFormat);
+
+    PDateBox newPDateBox(final SimpleDateFormat dateFormat, final boolean keepDayTimeNeeded);
 
     PDateBox newPDateBox();
 

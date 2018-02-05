@@ -156,6 +156,11 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         PWindow.getMain().add(createDateBox());
         PWindow.getMain().add(Element.newPDateBox(new SimpleDateFormat("dd/MM/yyyy")));
         PWindow.getMain().add(Element.newPDateBox(Element.newPDatePicker(), new SimpleDateFormat("yyyy/MM/dd")));
+
+        final PDateBox dateBox = Element.newPDateBox(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss:SSS"), true);
+        dateBox.addValueChangeHandler(event -> System.err.println(event.getData()));
+        PWindow.getMain().add(dateBox);
+
         PWindow.getMain().add(Element.newPDatePicker());
         PWindow.getMain().add(Element.newPDecoratedPopupPanel(false));
         PWindow.getMain().add(Element.newPDecoratedPopupPanel(true));
