@@ -65,18 +65,29 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
     private List<PValueChangeHandler<Date>> handlers;
     private Date date;
     private SimpleDateFormat dateFormat;
+    private final boolean keepTime;
 
     protected PDateBox() {
         this(new SimpleDateFormat("MM/dd/yyyy"));
     }
 
     protected PDateBox(final SimpleDateFormat dateFormat) {
-        this(new PDatePicker(), dateFormat);
+        this(dateFormat, false);
+    }
+
+    protected PDateBox(final SimpleDateFormat dateFormat, final boolean keepTime) {
+        this(new PDatePicker(), dateFormat, keepTime);
     }
 
     protected PDateBox(final PDatePicker picker, final SimpleDateFormat dateFormat) {
+        this(picker, dateFormat, false);
+
+    }
+
+    protected PDateBox(final PDatePicker picker, final SimpleDateFormat dateFormat, final boolean keepTime) {
         this.datePicker = picker;
         this.dateFormat = dateFormat;
+        this.keepTime = keepTime;
         saveAdd(datePicker.getID(), ID);
     }
 
@@ -91,6 +102,7 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
         super.enrichForCreation(writer);
         writer.write(ServerToClientModel.PICKER, datePicker.getID());
         writer.write(ServerToClientModel.DATE_FORMAT_PATTERN, dateFormat.toPattern());
+        if (keepTime) writer.write(ServerToClientModel.KEEP_DAY_TIME_NEEDED);
     }
 
     @Override

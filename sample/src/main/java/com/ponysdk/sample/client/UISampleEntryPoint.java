@@ -99,6 +99,11 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
         createReconnectingPanel();
 
+        final PDateBox dateBox = Element.newPDateBox(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss:SSS"), true);
+        dateBox.addValueChangeHandler(event -> System.err.println(event.getData()));
+        PWindow.getMain().add(dateBox);
+
+        if (true) return;
         mainLabel = Element.newPLabel("Can be modified by anybody");
         PWindow.getMain().add(mainLabel);
 

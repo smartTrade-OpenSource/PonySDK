@@ -75,8 +75,18 @@ public class DefaultElementFactory implements ElementFactory {
     }
 
     @Override
+    public PDateBox newPDateBox(final PDatePicker picker, final SimpleDateFormat dateFormat, final boolean iskeepDayTimeNeeded) {
+        return new PDateBox(picker, dateFormat, iskeepDayTimeNeeded);
+    }
+
+    @Override
     public PDateBox newPDateBox(final PDatePicker picker, final SimpleDateFormat dateFormat) {
         return new PDateBox(picker, dateFormat);
+    }
+
+    @Override
+    public PDateBox newPDateBox(final SimpleDateFormat dateFormat, final boolean iskeepDayTimeNeeded) {
+        return new PDateBox(dateFormat, iskeepDayTimeNeeded);
     }
 
     @Override
