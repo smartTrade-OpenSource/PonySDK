@@ -36,7 +36,10 @@ public abstract class PTValueBoxBase<T extends ValueBoxBase<W>, W> extends PTFoc
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         final ServerToClientModel model = binaryModel.getModel();
-        if (ServerToClientModel.SELECT_ALL == model) {
+        if (ServerToClientModel.TEXT == model) {
+            uiObject.setText(binaryModel.getStringValue());
+            return true;
+        } else if (ServerToClientModel.SELECT_ALL == model) {
             uiObject.selectAll();
             return true;
         } else if (ServerToClientModel.CURSOR_POSITION == model) {

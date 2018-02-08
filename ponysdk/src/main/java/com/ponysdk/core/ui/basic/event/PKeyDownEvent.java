@@ -21,42 +21,26 @@
  * the License.
  */
 
-package com.ponysdk.core.model;
+package com.ponysdk.core.ui.basic.event;
 
-public enum DomHandlerType {
+import com.ponysdk.core.model.DomHandlerType;
 
-    CLICK,
-    DOUBLE_CLICK,
-    MOUSE_OVER,
-    KEY_PRESS,
-    KEY_UP,
-    KEY_DOWN,
-    MOUSE_OUT,
-    MOUSE_DOWN,
-    MOUSE_UP,
-    MOUSE_WHELL,
-    FOCUS,
-    BLUR,
-    DRAG_ENTER,
-    DRAG_END,
-    DRAG_START,
-    DRAG_LEAVE,
-    DRAG_OVER,
-    DROP,
-    CONTEXT_MENU,
-    CHANGE_HANDLER;
+public class PKeyDownEvent extends PKeyEvent<PKeyDownHandler> {
 
-    private static final DomHandlerType[] VALUES = DomHandlerType.values();
+    public static final PDomEvent.Type TYPE = new PDomEvent.Type(DomHandlerType.KEY_DOWN);
 
-    private DomHandlerType() {
+    public PKeyDownEvent(final Object sourceComponent, final int keyCode) {
+        super(sourceComponent, keyCode);
     }
 
-    public final byte getValue() {
-        return (byte) ordinal();
+    @Override
+    public PDomEvent.Type getAssociatedType() {
+        return TYPE;
     }
 
-    public static DomHandlerType fromRawValue(final byte rawValue) {
-        return VALUES[rawValue];
+    @Override
+    protected void dispatch(final PKeyDownHandler handler) {
+        handler.onKeyDown(this);
     }
 
 }

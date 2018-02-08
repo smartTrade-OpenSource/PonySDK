@@ -23,11 +23,31 @@
 
 package com.ponysdk.core.ui.basic;
 
-import com.ponysdk.core.model.ServerToClientModel;
+import java.util.Objects;
 
-public abstract class PValueBoxBase extends PFocusWidget {
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.ui.basic.event.PHasText;
+import com.ponysdk.core.writer.ModelWriter;
+
+public abstract class PValueBoxBase extends PFocusWidget implements PHasText {
+
+    protected static final String EMPTY = "";
+
+    protected String text = EMPTY;
 
     protected PValueBoxBase() {
+        this(EMPTY);
+    }
+
+    protected PValueBoxBase(final String text) {
+        super();
+        this.text = text != null ? text : EMPTY;
+    }
+
+    @Override
+    protected void enrichForUpdate(final ModelWriter writer) {
+        super.enrichForUpdate(writer);
+        if (!EMPTY.equals(text)) writer.write(ServerToClientModel.TEXT, this.text);
     }
 
     /**
@@ -39,7 +59,7 @@ public abstract class PValueBoxBase extends PFocusWidget {
     }
 
     public void setCursorPosition(final int cursorPosition) {
-        saveUpdate(ServerToClientModel.CURSOR_POSITION, cursorPosition);
+        saveUpdate(ServerToClientModel.CURSOR_POSITION, Math.min(cursorPosition, this.text.length()));
     }
 
     public void setSelectionRange(final int startPosition, final int rangeLength) {
@@ -47,6 +67,24 @@ public abstract class PValueBoxBase extends PFocusWidget {
             writer.write(ServerToClientModel.SELECTION_RANGE_START, startPosition);
             writer.write(ServerToClientModel.SELECTION_RANGE_LENGTH, rangeLength);
         });
+    }
+
+    @Override
+    public String getText() {
+        return text;
+    }
+
+    @Override
+    public void setText(String text) {
+        if (text == null) text = EMPTY; // null not send over json
+        if (Objects.equals(this.text, text)) return;
+        this.text = text;
+        if (initialized) saveUpdate(ServerToClientModel.TEXT, this.text);
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + ", text=" + text;
     }
 
 }

@@ -40,6 +40,7 @@ import com.google.gwt.event.dom.client.DragOverEvent;
 import com.google.gwt.event.dom.client.DragStartEvent;
 import com.google.gwt.event.dom.client.DropEvent;
 import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.MouseDownEvent;
@@ -165,6 +166,34 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
 
                 preventOrStopEvent(event);
             }, KeyPressEvent.getType());
+        } else if (DomHandlerType.KEY_DOWN == domHandlerType) {
+            final BinaryModel binaryModel = buffer.readBinaryModel();
+            final JSONArray keyFilter;
+            if (ServerToClientModel.KEY_FILTER == binaryModel.getModel()) {
+                keyFilter = binaryModel.getJsonObject().get(ClientToServerModel.KEY_FILTER.toStringValue()).isArray();
+            } else {
+                buffer.rewind(binaryModel);
+                keyFilter = null;
+            }
+
+            uiObject.addDomHandler(event -> {
+                final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
+                eventInstruction.put(ClientToServerModel.VALUE_KEY, event.getNativeKeyCode());
+
+                if (keyFilter != null) {
+                    for (int i = 0; i < keyFilter.size(); i++) {
+                        final JSONNumber keyCode = keyFilter.get(i).isNumber();
+                        if (keyCode.doubleValue() == event.getNativeKeyCode()) {
+                            uiBuilder.sendDataToServer(uiObject, eventInstruction);
+                            break;
+                        }
+                    }
+                } else {
+                    uiBuilder.sendDataToServer(uiObject, eventInstruction);
+                }
+
+                preventOrStopEvent(event);
+            }, KeyDownEvent.getType());
         } else if (DomHandlerType.KEY_UP == domHandlerType) {
             final BinaryModel keyUpModel = buffer.readBinaryModel();
             final JSONArray keyUpFilter;
@@ -182,12 +211,12 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
                     changeHandlerInstruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE, textBox.getText());
 
                     final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
-                    eventInstruction.put(ClientToServerModel.VALUE_KEY, event.getNativeEvent().getKeyCode());
+                    eventInstruction.put(ClientToServerModel.VALUE_KEY, event.getNativeKeyCode());
 
                     if (keyUpFilter != null) {
                         for (int i = 0; i < keyUpFilter.size(); i++) {
                             final JSONNumber keyCode = keyUpFilter.get(i).isNumber();
-                            if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
+                            if (keyCode.doubleValue() == event.getNativeKeyCode()) {
                                 uiBuilder.sendDataToServer(changeHandlerInstruction);
                                 uiBuilder.sendDataToServer(eventInstruction);
                                 break;
@@ -202,12 +231,12 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
             } else {
                 uiObject.addDomHandler(event -> {
                     final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
-                    eventInstruction.put(ClientToServerModel.VALUE_KEY, event.getNativeEvent().getKeyCode());
+                    eventInstruction.put(ClientToServerModel.VALUE_KEY, event.getNativeKeyCode());
 
                     if (keyUpFilter != null) {
                         for (int i = 0; i < keyUpFilter.size(); i++) {
                             final JSONNumber keyCode = keyUpFilter.get(i).isNumber();
-                            if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
+                            if (keyCode.doubleValue() == event.getNativeKeyCode()) {
                                 uiBuilder.sendDataToServer(uiObject, eventInstruction);
                                 break;
                             }
