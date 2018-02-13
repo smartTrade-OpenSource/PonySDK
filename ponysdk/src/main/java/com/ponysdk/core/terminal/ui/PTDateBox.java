@@ -65,7 +65,8 @@ public class PTDateBox extends PTWidget<MyDateBox> {
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         final ServerToClientModel model = binaryModel.getModel();
         if (ServerToClientModel.VALUE == model) {
-            uiObject.setValue(format.parse(uiObject, binaryModel.getStringValue(), false));
+            final String dateText = binaryModel.getStringValue();
+            uiObject.setValue(format.parse(uiObject, dateText != null ? dateText : "", false));
             return true;
         } else if (ServerToClientModel.DATE_FORMAT_PATTERN == model) {
             format = new DefaultFormat(DateTimeFormat.getFormat(binaryModel.getStringValue()));
