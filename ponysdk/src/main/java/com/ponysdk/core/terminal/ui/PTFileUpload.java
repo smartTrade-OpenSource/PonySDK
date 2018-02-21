@@ -52,6 +52,7 @@ public class PTFileUpload extends PTWidget<FormPanel> {
 
         fileUploadId = DOM.createUniqueId();
         fileUpload.getElement().setPropertyString("id", fileUploadId);
+        fileUpload.setName("file");
 
         final FormPanel formPanel = new FormPanel();
         formPanel.setEncoding(FormPanel.ENCODING_MULTIPART);

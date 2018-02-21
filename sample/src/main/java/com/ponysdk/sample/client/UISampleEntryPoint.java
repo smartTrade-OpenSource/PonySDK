@@ -23,8 +23,13 @@
 
 package com.ponysdk.sample.client;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
@@ -39,6 +44,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
+
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.PScheduler;
@@ -50,6 +61,7 @@ import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PCookies;
 import com.ponysdk.core.ui.basic.PDateBox;
 import com.ponysdk.core.ui.basic.PDockLayoutPanel;
+import com.ponysdk.core.ui.basic.PFileUpload;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PFrame;
 import com.ponysdk.core.ui.basic.PLabel;
@@ -172,7 +184,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PFrame frame = Element.newPFrame("http://localhost:8081/sample/");
         frame.add(Element.newPLabel("Inside the frame"));
         PWindow.getMain().add(frame);
-        PWindow.getMain().add(Element.newPFileUpload());
+        PWindow.getMain().add(createPFileUpload());
         PWindow.getMain().add(Element.newPFlexTable());
         PWindow.getMain().add(createPFlowPanel());
         PWindow.getMain().add(Element.newPFocusPanel());
@@ -245,6 +257,50 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         POptionPane.showConfirmDialog(PWindow.getMain(), null, "BBB");
 
         // uiContext.getHistory().newItem("", false);
+    }
+
+    public PFlowPanel createPFileUpload() {
+        final PFlowPanel panel = Element.newPFlowPanel();
+        final PFileUpload fileUpload = Element.newPFileUpload();
+        fileUpload.setName("file");
+        panel.add(fileUpload);
+        fileUpload.addChangeHandler(event -> {
+            final PFileUpload pFileUpload = (PFileUpload) event.getSource();
+            System.out.println("File name : " + pFileUpload.getFileName());
+            System.out.println("File size : " + pFileUpload.getFileSize() + " bytes");
+        });
+        fileUpload.addStreamHandler((request, response, context) -> {
+            try {
+                final List<FileItem> items = new ServletFileUpload(new DiskFileItemFactory()).parseRequest(request);
+                for (final FileItem item : items) {
+                    if (!item.isFormField()) readFileItem(item);
+                }
+            } catch (final Exception e) {
+                e.printStackTrace();
+            }
+        });
+        final PButton button = Element.newPButton("Submit");
+        button.addClickHandler(event -> fileUpload.submit());
+        panel.add(button);
+        return panel;
+    }
+
+    private void readFileItem(final FileItem item) throws IOException, FileNotFoundException {
+        // Store the uploaded file on the server (don't forget to remove)
+        final String fileName = FilenameUtils.getName(item.getName());
+        final InputStream fileContent = item.getInputStream();
+        final File uploadedFile = File.createTempFile(fileName, "fileUpload");
+        IOUtils.copy(fileContent, new FileOutputStream(uploadedFile));
+        uploadedFile.deleteOnExit();
+
+        // Read directly the input stream
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(item.getInputStream(), "UTF-8"));
+        final StringBuilder value = new StringBuilder();
+        final char[] buffer = new char[1024];
+        for (int length = 0; (length = reader.read(buffer)) > 0;) {
+            value.append(buffer, 0, length);
+        }
+        System.out.println(value.toString());
     }
 
     private void testPerf() {
