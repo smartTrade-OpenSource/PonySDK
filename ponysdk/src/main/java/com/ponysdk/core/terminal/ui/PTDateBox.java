@@ -120,9 +120,8 @@ public class PTDateBox extends PTWidget<MyDateBox> {
         }
 
         private void onTextBoxChanged(final ValueChangeEvent<String> event) {
-            final Date textBoxDate = format.parse(this, event.getValue(), true);
-            lastDate = textBoxDate;
-            if (textBoxDate != null) fireDateChanged();
+            lastDate = format.parse(this, event.getValue(), true);
+            fireDateChanged();
         }
 
         private void onDatePickerChanged(final ValueChangeEvent<Date> event) {
