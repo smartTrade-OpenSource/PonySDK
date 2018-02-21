@@ -4,8 +4,6 @@ ext {
     buildInfoOutputDirName = buildDir.name + "/buildinfo"
     javadocResources = "src/main/javadoc"
     jsinteropVersion = '1.0.2'
-    slf4jVersion = '1.7.25'
-    logbackVersion = '1.2.3'
     
     javaxServletVersion = '3.1.0'
     glassfishVersion = '1.0.4'
@@ -80,14 +78,14 @@ dependencies {
             'org.glassfish.tyrus:tyrus-client:' + tyrusVersion
     )
 
-    runtime(
-            'org.slf4j:log4j-over-slf4j:' + slf4jVersion,
-            'org.slf4j:jcl-over-slf4j:' + slf4jVersion,
-            'ch.qos.logback:logback-core:' + logbackVersion,
-            'ch.qos.logback:logback-classic:' + logbackVersion
-    )
-
     testRuntime(
+            'org.slf4j:jcl-over-slf4j:' + slf4jVersion,
+            'org.slf4j:log4j-over-slf4j:' + slf4jVersion,
+            'org.slf4j:jul-to-slf4j:' + slf4jVersion,
+            'org.apache.logging.log4j:log4j-api:' + log4jVersion,
+            'org.apache.logging.log4j:log4j-core:' + log4jVersion,
+            'org.apache.logging.log4j:log4j-slf4j-impl:' + log4jVersion,
+            
             'org.glassfish.tyrus:tyrus-container-grizzly-client:' + tyrusVersion
     )
 }

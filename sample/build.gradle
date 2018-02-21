@@ -32,7 +32,14 @@ dependencies {
         'de.java2html:java2html:' + java2htmlVersion,
         
         'org.springframework:spring-aop:' + springVersion,
-        'org.springframework:spring-expression:' + springVersion
+        'org.springframework:spring-expression:' + springVersion,
+        
+        'org.slf4j:jcl-over-slf4j:' + slf4jVersion,
+        'org.slf4j:log4j-over-slf4j:' + slf4jVersion,
+        'org.slf4j:jul-to-slf4j:' + slf4jVersion,
+        'org.apache.logging.log4j:log4j-api:' + log4jVersion,
+        'org.apache.logging.log4j:log4j-core:' + log4jVersion,
+        'org.apache.logging.log4j:log4j-slf4j-impl:' + log4jVersion,
     )
 }
 
@@ -53,13 +60,15 @@ task runSampleSpring(type: JavaExec) {
   classpath = sourceSets.main.runtimeClasspath
   classpath += files(buildDir.getAbsolutePath() + '/gwt')
   classpath += files(buildDir.getAbsolutePath() + '/resources')
+  classpath += files(buildDir.getAbsolutePath() + '/resources/main')
   main = 'com.ponysdk.impl.main.MainSpring'
-  jvmArgs = ['-server', '-Xmx512m','-Dlogback.configurationFile=etc/logback.xml']
+  jvmArgs = ['-server', '-Xmx512m', '-Dlog4j.configurationFile=etc/log4j2.xml', '-agentlib:jdwp=transport=dt_socket,server=y,address=8888,suspend=n']
 }
 
 task runSampleTrading(type: JavaExec) {
   classpath = sourceSets.main.runtimeClasspath
   classpath += files(buildDir.getAbsolutePath() + '/gwt')
+  classpath += files(buildDir.getAbsolutePath() + '/resources/etc')
   main = 'com.ponysdk.impl.main.Main'
   jvmArgs = ['-server', '-Xmx512m', '-Dponysdk.application.id=trading', '-Dponysdk.application.name="Trading sample"', '-Dponysdk.application.description="Trading Sample"',
              '-Dponysdk.application.context.name=trading', '-Dponysdk.entry.point.class=com.ponysdk.sample.client.TradingSampleEntryPoint',
