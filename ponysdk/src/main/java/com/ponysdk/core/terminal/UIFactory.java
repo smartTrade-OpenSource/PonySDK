@@ -25,6 +25,7 @@ package com.ponysdk.core.terminal;
 
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.terminal.ui.*;
+import com.ponysdk.core.terminal.ui.elemental.DivElemental;
 
 import java.util.logging.Logger;
 
@@ -88,6 +89,7 @@ class UIFactory {
         else if (WidgetType.WINDOW == widgetType) return new PTWindow();
         else if (WidgetType.BROWSER == widgetType) return new PTBrowser();
         else if (WidgetType.FRAME == widgetType) return new PTFrame();
+        else if (WidgetType.DIV == widgetType) return new DivElemental();
         else log.severe("UIFactory: Client implementation not found, type : " + widgetType);
 
         return null;

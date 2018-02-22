@@ -27,6 +27,7 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.AbstractApplicationManager;
 import com.ponysdk.core.server.context.UIContext;
+import com.ponysdk.core.ui.basic.PObject;
 import org.eclipse.jetty.websocket.api.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +73,12 @@ public class WebSocket implements WebsocketEncoder {
 
     @OnClose
     public void onClose(Session session, CloseReason closeReason) {
-        uiContext.destroy();
+        if (isAlive()) {
+            uiContext.destroy();
+            log.info("WebSocket closed for UIContext #{} : {}, reason : {}", uiContext.getID(), closeReason);
+        } else {
+
+        }
     }
 
     @OnError
@@ -82,68 +88,92 @@ public class WebSocket implements WebsocketEncoder {
 
     @OnMessage
     public void onMessage(String message) {
+        //todo if tt est a null ....
+
+
         if (isAlive()) {
-            if (monitor != null) monitor.onMessageReceived(WebSocket.this, message);
             try {
                 uiContext.onMessageReceived();
+                if (monitor != null) monitor.onMessageReceived(WebSocket.this, message);
+                //uiContext.sendHeartBeat();
+                //uiContext.sendRoundTrip();
 
                 if (ClientToServerModel.HEARTBEAT.toStringValue().equals(message)) {
-                    if (log.isDebugEnabled()) log.debug("Heartbeat received from terminal #{}", uiContext.getID());
+                    processHeartbeat();
+                    //sendHeartBeat(); //TODO nciaravola temp
+                    //sendRoundTrip();
                 } else {
-                    final JsonObject jsonObject = Json.createReader(new StringReader(message)).readObject();
-                    if (jsonObject.containsKey(ClientToServerModel.PING_SERVER.toStringValue())) {
-                        final long start = jsonObject.getJsonNumber(ClientToServerModel.PING_SERVER.toStringValue()).longValue();
-                        final long end = System.currentTimeMillis();
-                        if (log.isDebugEnabled())
-                            log.debug("Ping measurement : {} ms from terminal #{}", end - start, uiContext.getID());
-                        uiContext.addPingValue(end - start);
-                    } else if (jsonObject.containsKey(ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue())) {
-                        final String applicationInstructions = ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue();
-                        uiContext.execute(() -> {
-                            final JsonArray appInstructions = jsonObject.getJsonArray(applicationInstructions);
-                            for (int i = 0; i < appInstructions.size(); i++) {
-                                uiContext.fireClientData(appInstructions.getJsonObject(i));
-                            }
-                        });
-                    } else if (jsonObject.containsKey(ClientToServerModel.ERROR_MSG.toStringValue())) {
-                        String extraMsg = "";
-                        if (jsonObject.containsKey(ClientToServerModel.OBJECT_ID.toStringValue())) {
-                            final int objectID = jsonObject.getJsonNumber(ClientToServerModel.OBJECT_ID.toStringValue()).intValue();
-                            extraMsg = " on " + uiContext.getObject(objectID);
-                        }
-                        log.error("Message from terminal #{} : {}{}", uiContext.getID(),
-                            jsonObject.getJsonString(ClientToServerModel.ERROR_MSG.toStringValue()), extraMsg);
-                    } else if (jsonObject.containsKey(ClientToServerModel.WARNING_MSG.toStringValue())) {
-                        String extraMsg = "";
-                        if (jsonObject.containsKey(ClientToServerModel.OBJECT_ID.toStringValue())) {
-                            final int objectID = jsonObject.getJsonNumber(ClientToServerModel.OBJECT_ID.toStringValue()).intValue();
-                            extraMsg = " on " + uiContext.getObject(objectID);
-                        }
-                        log.warn("Message from terminal #{} : {}{}", uiContext.getID(),
-                            jsonObject.getJsonString(ClientToServerModel.WARNING_MSG.toStringValue()), extraMsg);
-                    } else if (jsonObject.containsKey(ClientToServerModel.INFO_MSG.toStringValue())) {
-                        if (log.isInfoEnabled()) {
-                            String extraMsg = "";
-                            if (jsonObject.containsKey(ClientToServerModel.OBJECT_ID.toStringValue())) {
-                                final int objectID = jsonObject.getJsonNumber(ClientToServerModel.OBJECT_ID.toStringValue())
-                                    .intValue();
-                                extraMsg = " on " + uiContext.getObject(objectID);
-                            }
-                            log.info("Message from terminal #{} : {}{}", uiContext.getID(),
-                                jsonObject.getJsonString(ClientToServerModel.INFO_MSG.toStringValue()), extraMsg);
-                        }
+                    final JsonObject json = Json.createReader(new StringReader(message)).readObject();
+
+                    if (json.containsKey(ClientToServerModel.PING_SERVER.toStringValue())) {
+                        processPing(json);
+                    } else if (json.containsKey(ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue())) {
+                        processInstructions(json);
+                    } else if (json.containsKey(ClientToServerModel.ERROR_MSG.toStringValue())) {
+                        processTerminalLog(json, ClientToServerModel.ERROR_MSG);
+                    } else if (json.containsKey(ClientToServerModel.WARN_MSG.toStringValue())) {
+                        processTerminalLog(json, ClientToServerModel.WARN_MSG);
+                    } else if (json.containsKey(ClientToServerModel.INFO_MSG.toStringValue())) {
+                        processTerminalLog(json, ClientToServerModel.INFO_MSG);
                     } else {
-                        log.error("Unknow message from terminal #{} : {}", uiContext.getID(), message);
+                        log.error("Unknown message received from terminal UIContext = {} : Message = {}", uiContext.getID(), message);
                     }
                 }
+                if (monitor != null) monitor.onMessageProcessed(WebSocket.this, message);
             } catch (final Throwable e) {
                 log.error("Cannot process message from terminal  #" + uiContext.getID() + " : " + message, e);
             } finally {
-                if (monitor != null) monitor.onMessageProcessed(WebSocket.this);
+                if (monitor != null) monitor.onMessageUnprocessed(WebSocket.this, message);
             }
         } else {
-            log.info("UI Context is destroyed, message dropped from terminal : {}", message);
+            log.info("UIContext is destroyed, message received from terminal has been dropped UIContext = {} : Message = {}", uiContext.getID(), message);
         }
+    }
+
+    private void processTerminalLog(JsonObject json, ClientToServerModel level) {
+        String message = json.getJsonString(level.toStringValue()).getString();
+        String objectInformation = "";
+
+        if (json.containsKey(ClientToServerModel.OBJECT_ID.toStringValue())) {
+            PObject object = uiContext.getObject(json.getJsonNumber(ClientToServerModel.OBJECT_ID.toStringValue()).intValue());
+            objectInformation = object == null ? "NA" : object.toString();
+        }
+
+        switch (level) {
+            case INFO_MSG:
+                log.info("Message received from terminal UIContext = {} : Object = {} : Message = {}", uiContext.getID(), objectInformation, message);
+                break;
+            case WARN_MSG:
+                log.warn("Message received from terminal UIContext = {} : Object = {} : Message = {}", uiContext.getID(), objectInformation, message);
+                break;
+            case ERROR_MSG:
+                log.error("Message received from terminal UIContext = {} : Object = {} : Message = {}", uiContext.getID(), objectInformation, message);
+                break;
+            default:
+                log.error("Unknown log level during terminal log processing : {}", level);
+        }
+    }
+
+    private void processPing(JsonObject json) {
+        final long start = json.getJsonNumber(ClientToServerModel.PING_SERVER.toStringValue()).longValue();
+        final long end = System.currentTimeMillis();
+        if (log.isDebugEnabled())
+            log.debug("Ping measurement : {} ms from terminal #{}", end - start, uiContext.getID());
+        uiContext.addPingValue(end - start);
+    }
+
+    private void processInstructions(JsonObject json) {
+        final String applicationInstructions = ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue();
+        uiContext.execute(() -> {
+            final JsonArray appInstructions = json.getJsonArray(applicationInstructions);
+            for (int i = 0; i < appInstructions.size(); i++) {
+                uiContext.fireClientData(appInstructions.getJsonObject(i));
+            }
+        });
+    }
+
+    private void processHeartbeat() {
+        if (log.isDebugEnabled()) log.debug("Heartbeat received from terminal #{}", uiContext.getID());
     }
 
     public void setApplicationManager(AbstractApplicationManager applicationManager) {
@@ -217,51 +247,6 @@ public class WebSocket implements WebsocketEncoder {
 
     public void setRequest(HandshakeRequest request) {
         this.request = request;
-    }
-
-    private enum NiceStatusCode {
-
-        NORMAL(StatusCode.NORMAL, "Normal closure"),
-        SHUTDOWN(StatusCode.SHUTDOWN, "Shutdown"),
-        PROTOCOL(StatusCode.PROTOCOL, "Protocol error"),
-        BAD_DATA(StatusCode.BAD_DATA, "Received bad data"),
-        UNDEFINED(StatusCode.UNDEFINED, "Undefined"),
-        NO_CODE(StatusCode.NO_CODE, "No code present"),
-        NO_CLOSE(StatusCode.NO_CLOSE, "Abnormal connection closed"),
-        ABNORMAL(StatusCode.ABNORMAL, "Abnormal connection closed"),
-        BAD_PAYLOAD(StatusCode.BAD_PAYLOAD, "Not consistent message"),
-        POLICY_VIOLATION(StatusCode.POLICY_VIOLATION, "Received message violates policy"),
-        MESSAGE_TOO_LARGE(StatusCode.MESSAGE_TOO_LARGE, "Message too big"),
-        REQUIRED_EXTENSION(StatusCode.REQUIRED_EXTENSION, "Required extension not sent"),
-        SERVER_ERROR(StatusCode.SERVER_ERROR, "Server error"),
-        SERVICE_RESTART(StatusCode.SERVICE_RESTART, "Server restart"),
-        TRY_AGAIN_LATER(StatusCode.TRY_AGAIN_LATER, "Server overload"),
-        FAILED_TLS_HANDSHAKE(StatusCode.POLICY_VIOLATION, "Failure handshake");
-
-        private int statusCode;
-        private String message;
-
-        NiceStatusCode(final int statusCode, final String message) {
-            this.statusCode = statusCode;
-            this.message = message;
-        }
-
-        public static String getMessage(final int statusCode) {
-            final List<NiceStatusCode> codes = Arrays.stream(values())
-                .filter(niceStatusCode -> niceStatusCode.statusCode == statusCode).collect(Collectors.toList());
-            if (!codes.isEmpty()) {
-                return codes.get(0).toString();
-            } else {
-                log.error("No matching status code found for {}", statusCode);
-                return String.valueOf(statusCode);
-            }
-        }
-
-        @Override
-        public String toString() {
-            return message + " (" + statusCode + ")";
-        }
-
     }
 
 }

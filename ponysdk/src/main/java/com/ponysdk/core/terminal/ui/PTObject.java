@@ -27,6 +27,7 @@ import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
+import elemental.dom.Node;
 
 public interface PTObject {
 
@@ -45,5 +46,9 @@ public interface PTObject {
     void destroy();
 
     int getObjectID();
+
+    default Node asNode() {
+        return null;
+    }
 
 }

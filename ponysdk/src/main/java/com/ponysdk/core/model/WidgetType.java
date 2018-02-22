@@ -80,11 +80,12 @@ public enum WidgetType {
     BROWSER,
     HEADER_PANEL,
     SUGGESTBOX,
+    DIV,
     MULTIWORD_SUGGEST_ORACLE;
 
     private static final WidgetType[] VALUES = WidgetType.values();
 
-    private WidgetType() {
+    WidgetType() {
     }
 
     public final byte getValue() {

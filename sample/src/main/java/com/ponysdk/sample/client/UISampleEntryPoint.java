@@ -88,7 +88,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     private PLabel mainLabel;
 
-    // HighChartsStackedColumnAddOn highChartsStackedColumnAddOn;
     int a = 0;
 
     private static int counter;

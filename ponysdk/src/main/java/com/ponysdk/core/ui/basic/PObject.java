@@ -66,7 +66,7 @@ public abstract class PObject {
     protected final AtomicInteger atomicKey = new AtomicInteger(ServerToClientModel.DESTROY.getValue());
     private AjaxHandler ajaxHandler;
 
-    PObject() {
+    public PObject() {
     }
 
     /**
@@ -183,7 +183,7 @@ public abstract class PObject {
      */
     public void bindTerminalFunction(final String functionName) {
         if (nativeBindingFunction != null)
-            throw new IllegalAccessError("Object already bind to native function: " + nativeBindingFunction);
+            throw new IllegalAccessError("Object already bind to elemental function: " + nativeBindingFunction);
 
         nativeBindingFunction = functionName;
 
@@ -192,7 +192,7 @@ public abstract class PObject {
 
     public void sendToNative(final JsonObject data) {
         if (destroy) return;
-        if (nativeBindingFunction == null) throw new IllegalAccessError("Object not bind to a native function");
+        if (nativeBindingFunction == null) throw new IllegalAccessError("Object not bind to a elemental function");
 
         saveUpdate(writer -> writer.write(ServerToClientModel.NATIVE, data));
     }

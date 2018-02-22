@@ -397,13 +397,13 @@ public class UIBuilder {
 
     public void sendWarningMessageToServer(final String message) {
         final PTInstruction requestData = new PTInstruction();
-        requestData.put(ClientToServerModel.WARNING_MSG, message);
+        requestData.put(ClientToServerModel.WARN_MSG, message);
         requestBuilder.send(requestData);
     }
 
     public void sendWarningMessageToServer(final String message, final int objectID) {
         final PTInstruction requestData = new PTInstruction();
-        requestData.put(ClientToServerModel.WARNING_MSG, message);
+        requestData.put(ClientToServerModel.WARN_MSG, message);
         requestData.put(ClientToServerModel.OBJECT_ID, objectID);
         requestBuilder.send(requestData);
     }

@@ -30,7 +30,7 @@ import com.ponysdk.core.writer.ModelWriter;
 import java.util.Objects;
 
 /**
- * All HTML element interfaces derive from this class.Useful to create native
+ * All HTML element interfaces derive from this class.Useful to create elemental
  * HTML component.
  */
 public class PElement extends PComplexPanel {

@@ -74,14 +74,12 @@ public class CommunicationSanityChecker {
         try {
             if (uiContext.isAlive()) {
                 final Instant now = Instant.now();
-                final Duration duration = Duration.between(uiContext.getLastReceivedTime(), now);
-                if (heartBeatPeriod.compareTo(duration) > 0) {
-                    log.info("Close UIContext {}, no message received for {}", uiContext.getID(),heartBeatPeriod);
+                final Duration duration = Duration.between(uiContext.getLastReceivedTime(), now).abs();
+                if (heartBeatPeriod.compareTo(duration) < 0) {
+                    log.info("UIContext {} will be closed, no message received for {} seconds", uiContext.getID(), heartBeatPeriod.getSeconds());
                     uiContext.destroy();
                 }
             }
-            //uiContext.sendHeartBeat();
-            //uiContext.sendRoundTrip();
         } catch (final Throwable e) {
             log.error("Error while checking communication state on UIContext #{}", uiContext.getID(), e);
             //remove UIContext ?

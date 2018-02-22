@@ -34,7 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This class allows to execute native Java-script code.
+ * This class allows to execute elemental Java-script code.
  */
 public class PScript extends PObject {
 
