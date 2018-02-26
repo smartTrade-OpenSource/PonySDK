@@ -23,16 +23,17 @@
 
 package com.ponysdk.core.terminal.ui.widget.mask;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.ui.TextBox;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class TextBoxMaskedDecorator implements KeyPressHandler, FocusHandler, KeyDownHandler {
+public class TextBoxMaskedDecorator {
 
     private static final RegExp regExp = RegExp.compile("{{([A0]+)}}", "g");
     private final InputValue value = new InputValue();
@@ -40,13 +41,71 @@ public class TextBoxMaskedDecorator implements KeyPressHandler, FocusHandler, Ke
 
     public TextBoxMaskedDecorator(final TextBox textBox) {
         this.textBox = textBox;
-        this.textBox.addKeyDownHandler(this);
-        this.textBox.addKeyPressHandler(this);
-        this.textBox.addFocusHandler(this);
+        this.textBox.addKeyDownHandler(event -> {
+            final int pos = textBox.getCursorPos();
+            if (event.getNativeKeyCode() == KeyCodes.KEY_BACKSPACE) {
+
+                if (textBox.getSelectionLength() > 0) {
+                    clearSelection();
+                    cancelKey();
+                    return;
+                }
+
+                final String oldValue = value.getText();
+
+                final int from = pos - 1;
+                final int to = from + 1;
+
+                int np = pos - 1;
+                if (np < 0) np = 0;
+
+                if (value.remove(from, to)) refresh(np);
+                else setCursorPos(np);
+
+                ValueChangeEvent.fireIfNotEqual(textBox, oldValue, value.getText());
+                cancelKey();
+            } else if (event.getNativeKeyCode() == KeyCodes.KEY_DELETE) {
+
+                if (textBox.getSelectionLength() > 0) {
+                    clearSelection();
+                    cancelKey();
+                    return;
+                }
+
+                final String oldValue = value.getText();
+
+                final int to = pos + 1;
+
+                if (value.remove(pos, to)) refresh(pos);
+                else setCursorPos(pos);
+
+                ValueChangeEvent.fireIfNotEqual(textBox, oldValue, value.getText());
+                cancelKey();
+            }
+        });
+        this.textBox.addKeyPressHandler(event -> {
+            final int pos = textBox.getCursorPos();
+            if (textBox.getSelectionLength() > 0) clearSelection();
+
+            final String oldValue = value.getText();
+
+            value.remove(pos, pos + 1);
+            final int nextPos = value.insert(pos, event.getCharCode());
+            if (nextPos != -1) refresh(nextPos);
+
+            ValueChangeEvent.fireIfNotEqual(textBox, oldValue, value.getText());
+
+            cancelKey();
+        });
+        this.textBox.addFocusHandler(event -> {
+            Scheduler.get().scheduleDeferred(() -> {
+                setText(value.getText());
+                setCursorPos(0);
+            });
+        });
     }
 
     public void setMask(final String mask, final boolean showMask, final char freeSymbol) {
-
         final List<Flag> flags = new ArrayList<>();
 
         int current = 0;
@@ -85,7 +144,7 @@ public class TextBoxMaskedDecorator implements KeyPressHandler, FocusHandler, Ke
 
         value.init(flags);
 
-        final String currentText = getText();
+        final String currentText = textBox.getText();
         for (int c = 0; c < currentText.length(); c++) {
             final int insert = value.insert(c, currentText.charAt(c));
             if (insert == -1) break;
@@ -96,87 +155,16 @@ public class TextBoxMaskedDecorator implements KeyPressHandler, FocusHandler, Ke
         setMaxLength(text.length());
     }
 
-    @Override
-    public void onFocus(final FocusEvent event) {
-        Scheduler.get().scheduleDeferred(this::setInitialPosition);
-    }
-
-    protected void setInitialPosition() {
-        setText(value.getText());
-        setCursorPos(value.getInsertPosition());
-    }
-
     private void refresh(final int newPosition) {
         setText(value.getText());
         setCursorPos(newPosition);
     }
 
-    @Override
-    public void onKeyPress(final KeyPressEvent event) {
-
-        final int pos = getCursorPos();
-        if (getSelectionLength() > 0) clearSelection();
-
-        final int nextPos = value.insert(pos, event.getCharCode());
-        if (nextPos != -1) {
-            refresh(nextPos);
-        }
-
-        cancelKey();
-    }
-
-    @Override
-    public void onKeyDown(final KeyDownEvent event) {
-        final int pos = getCursorPos();
-        if (event.getNativeKeyCode() == KeyCodes.KEY_BACKSPACE) {
-
-            if (getSelectionLength() > 0) {
-                clearSelection();
-                cancelKey();
-                return;
-            }
-
-            final int from = pos - 1;
-            final int to = from + 1;
-
-            int np = pos - 1;
-            if (np < 0) np = 0;
-
-            if (value.remove(from, to)) {
-                refresh(np);
-            } else {
-                setCursorPos(np);
-            }
-
-            cancelKey();
-        } else if (event.getNativeKeyCode() == KeyCodes.KEY_DELETE) {
-
-            if (getSelectionLength() > 0) {
-                clearSelection();
-                cancelKey();
-                return;
-            }
-
-            final int to = pos + 1;
-
-            if (value.remove(pos, to)) {
-                refresh(pos);
-            } else {
-                setCursorPos(pos);
-            }
-
-            cancelKey();
-        }
-    }
-
     private void clearSelection() {
-        final int from = getCursorPos();
-        final int to = from + getSelectionLength();
-        if (value.remove(from, to)) {
-            refresh(from);
-        } else {
-            setCursorPos(from);
-        }
+        final int from = textBox.getCursorPos();
+        final int to = from + textBox.getSelectionLength();
+        if (value.remove(from, to)) refresh(from);
+        else setCursorPos(from);
     }
 
     // Delegates
@@ -184,24 +172,12 @@ public class TextBoxMaskedDecorator implements KeyPressHandler, FocusHandler, Ke
         textBox.cancelKey();
     }
 
-    public int getCursorPos() {
-        return textBox.getCursorPos();
-    }
-
     public void setCursorPos(final int pos) {
         textBox.setCursorPos(pos);
     }
 
-    public String getText() {
-        return textBox.getText();
-    }
-
     public void setText(final String text) {
         textBox.setText(text);
-    }
-
-    public int getSelectionLength() {
-        return textBox.getSelectionLength();
     }
 
     public void setMaxLength(final int length) {
@@ -254,13 +230,11 @@ public class TextBoxMaskedDecorator implements KeyPressHandler, FocusHandler, Ke
 
         @Override
         public String toString() {
-            if (isSet()) return Character.toString(c);
-            return " ";
+            return isSet() ? Character.toString(c) : " ";
         }
 
         public char getValue(final boolean filling) {
-            if (set) return c;
-            return freeSymbol;
+            return set ? c : freeSymbol;
         }
 
     }
@@ -284,8 +258,7 @@ public class TextBoxMaskedDecorator implements KeyPressHandler, FocusHandler, Ke
 
         @Override
         public String toString() {
-            if (isSet()) return Character.toString(c);
-            return "0";
+            return isSet() ? Character.toString(c) : "0";
         }
     }
 
@@ -308,8 +281,7 @@ public class TextBoxMaskedDecorator implements KeyPressHandler, FocusHandler, Ke
 
         @Override
         public String toString() {
-            if (isSet()) return Character.toString(c);
-            return "@";
+            return isSet() ? Character.toString(c) : "@";
         }
     }
 
@@ -332,13 +304,8 @@ public class TextBoxMaskedDecorator implements KeyPressHandler, FocusHandler, Ke
 
         @Override
         public char getValue(final boolean filling) {
-            if (!filling) {
-                if (showMask) return c;
-                return freeSymbol;
-            }
-
-            if (set) return c;
-            return freeSymbol;
+            if (!filling) return showMask ? c : freeSymbol;
+            else return set ? c : freeSymbol;
         }
     }
 
@@ -378,7 +345,6 @@ public class TextBoxMaskedDecorator implements KeyPressHandler, FocusHandler, Ke
         }
 
         public int insert(final int pos, final char charCode) {
-
             // if full, return
             if (pos >= flags.size()) return -1;
 
@@ -425,7 +391,6 @@ public class TextBoxMaskedDecorator implements KeyPressHandler, FocusHandler, Ke
         }
 
         private void shift(final int pos) {
-
             if (pos >= flags.size()) return;
 
             // go to next "settable"
