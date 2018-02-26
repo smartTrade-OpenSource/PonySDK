@@ -23,7 +23,15 @@
 
 package com.ponysdk.impl.webapplication.login;
 
-import com.ponysdk.core.ui.basic.*;
+import com.ponysdk.core.ui.basic.Element;
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PCheckBox;
+import com.ponysdk.core.ui.basic.PFlowPanel;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PPasswordTextBox;
+import com.ponysdk.core.ui.basic.PSimplePanel;
+import com.ponysdk.core.ui.basic.PTextBox;
+import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
 import com.ponysdk.core.ui.i18n.PString;
@@ -144,7 +152,8 @@ public class DefaultLoginPageView extends PSimplePanel implements LoginPageView 
 
     @Override
     public void setFocusOnLogin(final boolean focused) {
-        loginTextBox.setFocus(focused);
+        if (focused) loginTextBox.focus();
+        else loginTextBox.blur();
     }
 
     public PButton getLoginButton() {

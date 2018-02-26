@@ -3,6 +3,9 @@ ext {
     
     jettyVersion = '9.4.8.v20171121'
     springVersion = '5.0.2.RELEASE'
+    
+    slf4jVersion = '1.7.25'
+    log4jVersion = '2.10.0'
 }
 
 task wrapper(type: Wrapper) {
