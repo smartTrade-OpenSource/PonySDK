@@ -61,11 +61,15 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
     private static final Logger log = LoggerFactory.getLogger(PDateBox.class);
 
     private static final String EMPTY = "";
+
     private final PDatePicker datePicker;
-    private List<PValueChangeHandler<Date>> handlers;
-    private Date date;
+
     private SimpleDateFormat dateFormat;
+    private List<PValueChangeHandler<Date>> handlers;
     private final boolean keepDayTimeNeeded;
+
+    private String rawValue;
+    private Date date;
 
     protected PDateBox() {
         this(new SimpleDateFormat("MM/dd/yyyy"));
@@ -114,13 +118,13 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
     public void onClientData(final JsonObject jsonObject) {
         if (!isVisible()) return;
         if (jsonObject.containsKey(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE.toStringValue())) {
-            final String data = jsonObject.getString(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE.toStringValue());
+            rawValue = jsonObject.getString(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE.toStringValue());
             Date date = null;
-            if (data != null && !data.isEmpty()) {
+            if (rawValue != null && !rawValue.isEmpty()) {
                 try {
-                    date = dateFormat.parse(data);
+                    date = dateFormat.parse(rawValue);
                 } catch (final ParseException ex) {
-                    if (log.isWarnEnabled()) log.warn("Cannot parse the date #{}", data);
+                    if (log.isWarnEnabled()) log.warn("Cannot parse the date #{}", rawValue);
                 }
             }
             onValueChange(new PValueChangeEvent<>(this, date));
@@ -169,7 +173,8 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
     @Override
     public void setValue(final Date date) {
         this.date = date;
-        saveUpdate(ServerToClientModel.VALUE, date != null ? dateFormat.format(date) : EMPTY);
+        this.rawValue = date != null ? dateFormat.format(date) : EMPTY;
+        saveUpdate(ServerToClientModel.VALUE, rawValue);
         datePicker.setValue(date);
     }
 
@@ -184,6 +189,10 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
 
     public PDatePicker getDatePicker() {
         return datePicker;
+    }
+
+    public String getRawValue() {
+        return rawValue;
     }
 
 }
