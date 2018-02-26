@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.terminal.ui;
 
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.ValueBoxBase;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
@@ -32,6 +33,8 @@ import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public abstract class PTValueBoxBase<T extends ValueBoxBase<W>, W> extends PTFocusWidget<T> {
+
+    protected boolean handlePasteEnabled;
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
@@ -64,6 +67,9 @@ public abstract class PTValueBoxBase<T extends ValueBoxBase<W>, W> extends PTFoc
                 eventInstruction.put(ClientToServerModel.HANDLER_CHANGE);
                 uiBuilder.sendDataToServer(uiObject, eventInstruction);
             });
+        } else if (HandlerModel.HANDLER_PASTE == handlerModel) {
+            handlePasteEnabled = true;
+            uiObject.sinkEvents(Event.ONPASTE);
         } else {
             super.addHandler(buffer, handlerModel);
         }
@@ -73,9 +79,17 @@ public abstract class PTValueBoxBase<T extends ValueBoxBase<W>, W> extends PTFoc
     public void removeHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
         if (HandlerModel.HANDLER_CHANGE == handlerModel) {
             // TODO Remove HANDLER_CHANGE
+        } else if (HandlerModel.HANDLER_PASTE == handlerModel) {
+            // TODO Remove HANDLER_PASTE
         } else {
             super.removeHandler(buffer, handlerModel);
         }
+    }
+
+    protected void sendPasteEvent(final Event event) {
+        final PTInstruction eventInstruction = new PTInstruction(getObjectID());
+        eventInstruction.put(ClientToServerModel.HANDLER_PASTE, uiObject.getText());
+        uiBuilder.sendDataToServer(uiObject, eventInstruction);
     }
 
 }

@@ -21,32 +21,39 @@
  * the License.
  */
 
-package com.ponysdk.core.terminal.ui;
+package com.ponysdk.core.ui.basic.event;
 
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.ui.PasswordTextBox;
+import com.ponysdk.core.ui.eventbus.Event;
+import com.ponysdk.core.ui.eventbus.EventHandler;
 
-public class PTPasswordTextBox extends PTTextBox {
+public class PPasteEvent extends Event<PPasteEvent.PPasteHandler> {
+
+    public static final Type TYPE = new Type();
+
+    @FunctionalInterface
+    public interface PPasteHandler extends EventHandler {
+
+        void onPaste(PPasteEvent event);
+    }
+
+    public PPasteEvent(final Object source, final String data) {
+        super(source);
+        setData(data);
+    }
 
     @Override
-    protected PasswordTextBox createUIObject() {
-        return new PasswordTextBox() {
+    public Type getAssociatedType() {
+        return TYPE;
+    }
 
-            @Override
-            public int getTabIndex() {
-                final int tabIndex = super.getTabIndex();
-                return tabIndex == -1 ? -2 : tabIndex;
-            }
+    @Override
+    public String getData() {
+        return (String) super.getData();
+    }
 
-            @Override
-            public void onBrowserEvent(final Event event) {
-                super.onBrowserEvent(event);
-                if (Event.ONPASTE == event.getTypeInt()) {
-                    if (handlePasteEnabled) Scheduler.get().scheduleDeferred(() -> sendPasteEvent(event));
-                }
-            }
-        };
+    @Override
+    protected void dispatch(final PPasteHandler handler) {
+        handler.onPaste(this);
     }
 
 }

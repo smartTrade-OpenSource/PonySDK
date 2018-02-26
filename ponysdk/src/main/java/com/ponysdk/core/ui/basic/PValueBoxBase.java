@@ -23,15 +23,25 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
+import javax.json.JsonObject;
+
+import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.ui.basic.event.PHasText;
+import com.ponysdk.core.ui.basic.event.PPasteEvent;
+import com.ponysdk.core.ui.basic.event.PPasteEvent.PPasteHandler;
 import com.ponysdk.core.writer.ModelWriter;
 
 public abstract class PValueBoxBase extends PFocusWidget implements PHasText {
 
     protected static final String EMPTY = "";
+
+    private List<PPasteHandler> pasteHandlers;
 
     protected String text = EMPTY;
 
@@ -80,6 +90,35 @@ public abstract class PValueBoxBase extends PFocusWidget implements PHasText {
         if (Objects.equals(this.text, text)) return;
         this.text = text;
         if (initialized) saveUpdate(ServerToClientModel.TEXT, this.text);
+    }
+
+    public void addPasteHandler(final PPasteHandler pasteHandler) {
+        if (pasteHandlers == null) {
+            pasteHandlers = new ArrayList<>();
+            saveAddHandler(HandlerModel.HANDLER_PASTE);
+        }
+        pasteHandlers.add(pasteHandler);
+    }
+
+    public void removePasteHandler(final PPasteHandler pasteHandler) {
+        if (pasteHandlers != null) {
+            pasteHandlers.remove(pasteHandler);
+            if (pasteHandlers.isEmpty()) saveRemoveHandler(HandlerModel.HANDLER_PASTE);
+        }
+    }
+
+    @Override
+    public void onClientData(final JsonObject instruction) {
+        if (!isVisible()) return;
+        if (instruction.containsKey(ClientToServerModel.HANDLER_PASTE.toStringValue())) {
+            if (pasteHandlers != null) {
+                final String data = instruction.getString(ClientToServerModel.HANDLER_PASTE.toStringValue());
+                final PPasteEvent pasteEvent = new PPasteEvent(this, data);
+                pasteHandlers.forEach(handler -> handler.onPaste(pasteEvent));
+            }
+        } else {
+            super.onClientData(instruction);
+        }
     }
 
     @Override

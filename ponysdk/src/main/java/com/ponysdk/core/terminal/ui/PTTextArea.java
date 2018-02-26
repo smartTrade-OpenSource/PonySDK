@@ -23,6 +23,8 @@
 
 package com.ponysdk.core.terminal.ui;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.TextArea;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.model.BinaryModel;
@@ -38,6 +40,14 @@ public class PTTextArea extends PTTextBoxBase<TextArea> {
             public int getTabIndex() {
                 final int tabIndex = super.getTabIndex();
                 return tabIndex == -1 ? -2 : tabIndex;
+            }
+
+            @Override
+            public void onBrowserEvent(final Event event) {
+                super.onBrowserEvent(event);
+                if (Event.ONPASTE == event.getTypeInt()) {
+                    if (handlePasteEnabled) Scheduler.get().scheduleDeferred(() -> sendPasteEvent(event));
+                }
             }
         };
     }

@@ -36,7 +36,8 @@ public enum HandlerModel {
     HANDLER_SELECTION,
     HANDLER_STRING_SELECTION,
     HANDLER_STREAM_REQUEST,
-    HANDLER_SCROLL;
+    HANDLER_SCROLL,
+    HANDLER_PASTE;
 
     private static final HandlerModel[] VALUES = HandlerModel.values();
 
