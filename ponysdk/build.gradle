@@ -3,15 +3,17 @@ ext {
     gwtOutputDirName = buildDir.name + "/gwt"
     buildInfoOutputDirName = buildDir.name + "/buildinfo"
     javadocResources = "src/main/javadoc"
+    
     jsinteropVersion = '1.0.2'
     
     javaxServletVersion = '3.1.0'
-    glassfishVersion = '1.0.4'
-    jsonVersion = '1.0'
+    glassfishVersion = '1.1.2'
+    jsonVersion = '1.1.2'
     javaxValidationVersion = '1.0.0.GA'
-    seleniumVersion = '3.8.1'
+    seleniumVersion = '3.9.1'
     junitVersion = '4.12'
     tyrusVersion = '1.13.1'
+    mockitoVersion = '1.10.19'
 }
 
 configurations {
@@ -71,7 +73,7 @@ dependencies {
 
     testCompile(
             'junit:junit:' + junitVersion,
-            'org.mockito:mockito-all:1.10.19',
+            'org.mockito:mockito-all:' + mockitoVersion,
             'org.seleniumhq.selenium:selenium-api:' + seleniumVersion,
             'org.seleniumhq.selenium:selenium-java:' + seleniumVersion,
             'javax.websocket:javax.websocket-client-api:1.1',
@@ -93,10 +95,10 @@ dependencies {
 jar {
     baseName = 'ponysdk'
     into('ponyterminal') {
-        from gwtOutputDirName + '/ponyterminal'
+        from gwtOutputDirName + '/prod/gwt/ponyterminal'
     }
     into('ponyterminaldebug') {
-        from gwtOutputDirName + '/ponyterminaldebug'
+        from gwtOutputDirName + '/debug/gwt/ponyterminaldebug'
     }
 
     exclude('*.devmode.js')
@@ -128,12 +130,16 @@ javadoc {
     exclude '**/terminal/**'
 }
 
-task gwtc(dependsOn: classes, type: JavaExec) {
-    inputs.files fileTree('src/main/java/com/ponysdk/core/terminal')
-    outputs.files fileTree(gwtOutputDirName)
+task createGWTProdBuildDir << {
+    mkdir new File(gwtOutputDirName, "prod")
+}
+
+task gwtc(dependsOn: 'classes', type: JavaExec) {
+    inputs.dir('src/main/java/com/ponysdk/core/terminal')
+    outputs.dir(gwtOutputDirName + '/prod/gwt/ponyterminal')
     description = "GWT compile to JavaScript (production mode)"
     main = 'com.google.gwt.dev.Compiler'
-    workingDir = buildDir
+    workingDir = new File(gwtOutputDirName, "prod")
 
     classpath {
         [
@@ -155,12 +161,16 @@ task gwtc(dependsOn: classes, type: JavaExec) {
     maxHeapSize = '512M'
 }
 
+task createGWTDebugBuildDir << {
+    mkdir new File(gwtOutputDirName, "debug")
+}
+
 task gwtcDebug(dependsOn: classes, type: JavaExec) {
-    inputs.files fileTree('src/main/java/com/ponysdk/core/terminal')
-    outputs.files fileTree(gwtOutputDirName)
-    description = "GWT compile to JavaScript (production mode)"
+    inputs.dir('src/main/java/com/ponysdk/core/terminal')
+    outputs.dir(gwtOutputDirName + '/debug/gwt/ponyterminaldebug')
+    description = "GWT compile to JavaScript (debug mode)"
     main = 'com.google.gwt.dev.Compiler'
-    workingDir = buildDir
+    workingDir = new File(gwtOutputDirName, "debug")
 
     classpath {
         [
@@ -229,5 +239,8 @@ artifacts {
     archives sourcesJar
 }
 
+gwtc.dependsOn('createGWTProdBuildDir')
 jar.dependsOn('gwtc')
+
+gwtcDebug.dependsOn('createGWTDebugBuildDir')
 jar.dependsOn('gwtcDebug')

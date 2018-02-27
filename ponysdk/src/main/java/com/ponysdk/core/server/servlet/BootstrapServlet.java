@@ -34,7 +34,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -55,8 +54,6 @@ public class BootstrapServlet extends HttpServlet {
     protected static final String SCRIPT_PATTERN = "<script type=\"text/javascript\" src=\"%s\"></script>";
 
     private static final Logger log = LoggerFactory.getLogger(BootstrapServlet.class);
-
-    private final MimetypesFileTypeMap fileTypeMap = new MimetypesFileTypeMap();
 
     protected ApplicationManagerOption application;
 
@@ -112,7 +109,7 @@ public class BootstrapServlet extends HttpServlet {
 
         final InputStream inputStream = getInputStreamFromPath(path);
 
-        final String mimeType = fileTypeMap.getContentType(path);
+        final String mimeType = getServletContext().getMimeType(path);
         response.setContentType(mimeType);
 
         if (inputStream != null) {
@@ -221,7 +218,7 @@ public class BootstrapServlet extends HttpServlet {
             for (final Entry<String, String> style : styles.entrySet()) {
                 final String id = style.getKey();
                 final String url = style.getValue();
-                final String contentType = fileTypeMap.getContentType(url);
+                final String contentType = getServletContext().getMimeType(url);
                 sb.append(String.format(STYLE_PATTERN, id, contentType, url)).append(NEW_LINE);
             }
         }

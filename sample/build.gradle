@@ -10,6 +10,9 @@ repositories {
 
 ext {
     java2htmlVersion = '5.0'
+    commonsBeanutilsVersion = '1.9.3'
+    commonsIoVersion = '2.6'
+    commonsFileuploadVersion = '1.3.3'
 }
 
 dependencies {
@@ -20,10 +23,10 @@ dependencies {
         
         'org.eclipse.jetty.websocket:websocket-client:' + jettyVersion,
         
-        'commons-beanutils:commons-beanutils:1.9.3',
+        'commons-beanutils:commons-beanutils:' + commonsBeanutilsVersion,
         
-        'commons-io:commons-io:2.6',
-        'commons-fileupload:commons-fileupload:1.3.3'
+        'commons-io:commons-io:' + commonsIoVersion,
+        'commons-fileupload:commons-fileupload:' + commonsFileuploadVersion
     )
 
     runtime (
@@ -58,7 +61,8 @@ task runCodeServer(type: JavaExec) {
 
 task runSampleSpring(type: JavaExec) {
   classpath = sourceSets.main.runtimeClasspath
-  classpath += files(buildDir.getAbsolutePath() + '/gwt')
+  classpath += files(buildDir.getAbsolutePath() + '/gwt/debug/gwt')
+  classpath += files(buildDir.getAbsolutePath() + '/gwt/prod/gwt')
   classpath += files(buildDir.getAbsolutePath() + '/resources')
   classpath += files(buildDir.getAbsolutePath() + '/resources/main')
   main = 'com.ponysdk.impl.main.MainSpring'
@@ -67,7 +71,8 @@ task runSampleSpring(type: JavaExec) {
 
 task runSampleTrading(type: JavaExec) {
   classpath = sourceSets.main.runtimeClasspath
-  classpath += files(buildDir.getAbsolutePath() + '/gwt')
+  classpath += files(buildDir.getAbsolutePath() + '/gwt/debug/gwt')
+  classpath += files(buildDir.getAbsolutePath() + '/gwt/prod/gwt')
   classpath += files(buildDir.getAbsolutePath() + '/resources/etc')
   main = 'com.ponysdk.impl.main.Main'
   jvmArgs = ['-server', '-Xmx512m', '-Dponysdk.application.id=trading', '-Dponysdk.application.name="Trading sample"', '-Dponysdk.application.description="Trading Sample"',
