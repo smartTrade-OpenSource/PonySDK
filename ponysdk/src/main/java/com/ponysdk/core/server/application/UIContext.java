@@ -311,8 +311,8 @@ public class UIContext {
      * @param runnable
      *            the tasks
      */
-    public void execute(final Runnable runnable) {
-        if (!isAlive()) return;
+    public boolean execute(final Runnable runnable) {
+        if (!isAlive()) return false;
         if (log.isDebugEnabled()) log.debug("Pushing to #" + this);
         if (UIContext.get() != this) {
             begin();
@@ -322,15 +322,18 @@ public class UIContext {
                 try {
                     runnable.run();
                     txn.commit();
+                    return true;
                 } catch (final Throwable e) {
                     log.error("Cannot process client instruction", e);
                     txn.rollback();
+                    return false;
                 }
             } finally {
                 end();
             }
         } else {
             runnable.run();
+            return false;
         }
     }
 

@@ -23,12 +23,9 @@
 
 package com.ponysdk.core.server.application;
 
-import javax.servlet.ServletException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.server.stm.TxnContext;
 import com.ponysdk.core.ui.main.EntryPoint;
 
@@ -45,30 +42,22 @@ public abstract class AbstractApplicationManager {
 
     public void startApplication(final TxnContext txnContext) throws Exception {
         final UIContext uiContext = txnContext.getUIContext();
-        uiContext.begin();
-        try {
-            final Txn txn = Txn.get();
-            txn.begin(txnContext);
+        uiContext.execute(() -> {
             try {
                 final EntryPoint entryPoint = initializeUIContext(uiContext);
-
                 final String historyToken = txnContext.getHistoryToken();
 
                 if (historyToken != null && !historyToken.isEmpty()) uiContext.getHistory().newItem(historyToken, false);
 
                 entryPoint.start(uiContext);
-
-                txn.commit();
-            } catch (final Throwable e) {
-                log.error("Cannot send instructions to the browser " + txnContext, e);
-                txn.rollback();
+            } catch (final Exception e) {
+                log.error("Cannot start UIContext", e);
+                // TODO nciaravola destroy if exception ?
             }
-        } finally {
-            uiContext.end();
-        }
+        });
     }
 
-    protected abstract EntryPoint initializeUIContext(final UIContext ponySession) throws ServletException;
+    protected abstract EntryPoint initializeUIContext(final UIContext ponySession) throws Exception;
 
     public ApplicationManagerOption getOptions() {
         return options;
