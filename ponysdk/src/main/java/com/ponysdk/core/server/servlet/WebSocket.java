@@ -170,14 +170,14 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
                         }
                         log.error("Message from terminal #{} : {}{}", uiContext.getID(),
                             jsonObject.getJsonString(ClientToServerModel.ERROR_MSG.toStringValue()), extraMsg);
-                    } else if (jsonObject.containsKey(ClientToServerModel.WARNING_MSG.toStringValue())) {
+                    } else if (jsonObject.containsKey(ClientToServerModel.WARN_MSG.toStringValue())) {
                         String extraMsg = "";
                         if (jsonObject.containsKey(ClientToServerModel.OBJECT_ID.toStringValue())) {
                             final int objectID = jsonObject.getJsonNumber(ClientToServerModel.OBJECT_ID.toStringValue()).intValue();
                             extraMsg = " on " + uiContext.getObject(objectID);
                         }
                         log.warn("Message from terminal #{} : {}{}", uiContext.getID(),
-                            jsonObject.getJsonString(ClientToServerModel.WARNING_MSG.toStringValue()), extraMsg);
+                            jsonObject.getJsonString(ClientToServerModel.WARN_MSG.toStringValue()), extraMsg);
                     } else if (jsonObject.containsKey(ClientToServerModel.INFO_MSG.toStringValue())) {
                         if (log.isInfoEnabled()) {
                             String extraMsg = "";

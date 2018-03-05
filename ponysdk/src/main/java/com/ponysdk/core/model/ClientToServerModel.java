@@ -37,7 +37,7 @@ public enum ClientToServerModel {
     APPLICATION_INSTRUCTIONS("6"),
 
     ERROR_MSG("7"),
-    WARNING_MSG("8"),
+    WARN_MSG("8"),
     INFO_MSG("9"),
 
     COOKIES("a"),
