@@ -98,7 +98,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
             context.setCommunicationSanityChecker(communicationSanityChecker);
             application.registerUIContext(uiContext);
 
-            uiContext.begin();
+            uiContext.acquire();
             try {
                 beginObject();
                 encode(ServerToClientModel.CREATE_CONTEXT, uiContext.getID()); // TODO nciaravola integer ?
@@ -108,7 +108,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
             } catch (final Throwable e) {
                 log.error("Cannot send server heart beat to client", e);
             } finally {
-                uiContext.end();
+                uiContext.release();
             }
 
             applicationManager.startApplication(context);

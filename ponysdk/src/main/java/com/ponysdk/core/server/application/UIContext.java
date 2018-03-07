@@ -315,7 +315,7 @@ public class UIContext {
         if (!isAlive()) return false;
         if (log.isDebugEnabled()) log.debug("Pushing to #" + this);
         if (UIContext.get() != this) {
-            begin();
+            acquire();
             try {
                 final Txn txn = Txn.get();
                 txn.begin(context);
@@ -329,7 +329,7 @@ public class UIContext {
                     return false;
                 }
             } finally {
-                end();
+                release();
             }
         } else {
             runnable.run();
@@ -376,7 +376,7 @@ public class UIContext {
     }
 
     /**
-     * Sends data to the targetted {@link PObject} from {@link JsonObject} instruction
+     * Sends data to the targeted {@link PObject} from {@link JsonObject} instruction
      * Called from terminal side
      *
      * @param jsonObject
@@ -432,14 +432,22 @@ public class UIContext {
      * @param terminalDataReceiver
      *            the terminal data receiver
      */
-    public void setClientDataOutput(final TerminalDataReceiver terminalDataReceiver) {
+    public void setTerminalDataReceiver(final TerminalDataReceiver terminalDataReceiver) {
         this.terminalDataReceiver = terminalDataReceiver;
+    }
+
+    /**
+     * @deprecated Use {@link #setTerminalDataReceiver(TerminalDataReceiver)} directly
+     */
+    @Deprecated
+    public void setClientDataOutput(final TerminalDataReceiver terminalDataReceiver) {
+        setTerminalDataReceiver(terminalDataReceiver);
     }
 
     /**
      * Locks the current UIContext
      */
-    public void begin() {
+    public void acquire() {
         lock.lock();
         currentContext.set(this);
     }
@@ -447,7 +455,7 @@ public class UIContext {
     /**
      * Unlock the current UIContext
      */
-    public void end() {
+    public void release() {
         UIContext.remove();
         lock.unlock();
     }
@@ -511,7 +519,7 @@ public class UIContext {
      * @param objectID
      *            the object ID of a {@link PObject}
      */
-    public void stackEmbededStreamRequest(final StreamHandler streamListener, final int objectID) {
+    public void stackEmbeddedStreamRequest(final StreamHandler streamListener, final int objectID) {
         final int streamRequestID = nextStreamRequestID();
 
         final ModelWriter writer = Txn.get().getWriter();
@@ -603,11 +611,11 @@ public class UIContext {
      * This method locks the UIContext
      */
     public void onDestroy() {
-        begin();
+        acquire();
         try {
             doDestroy();
         } finally {
-            end();
+            release();
         }
     }
 
@@ -617,7 +625,7 @@ public class UIContext {
      * This method locks the UIContext
      */
     void destroyFromApplication() {
-        begin();
+        acquire();
         try {
             alive = false;
             destroyListeners.forEach(listener -> {
@@ -631,7 +639,7 @@ public class UIContext {
             });
             context.close();
         } finally {
-            end();
+            release();
         }
     }
 
@@ -641,12 +649,12 @@ public class UIContext {
      * This method locks the UIContext
      */
     public void destroy() {
-        begin();
+        acquire();
         try {
             doDestroy();
             context.close();
         } finally {
-            end();
+            release();
         }
     }
 
@@ -684,13 +692,13 @@ public class UIContext {
      * This method locks the UIContext
      */
     public void sendHeartBeat() {
-        begin();
+        acquire();
         try {
             context.sendHeartBeat();
         } catch (final Throwable e) {
             log.error("Cannot send server heart beat to UIContext #" + getID(), e);
         } finally {
-            end();
+            release();
         }
     }
 
@@ -700,13 +708,13 @@ public class UIContext {
      * This method locks the UIContext
      */
     public void sendRoundTrip() {
-        begin();
+        acquire();
         try {
             context.sendRoundTrip();
         } catch (final Throwable e) {
             log.error("Cannot send server round trip to UIContext #" + getID(), e);
         } finally {
-            end();
+            release();
         }
     }
 
