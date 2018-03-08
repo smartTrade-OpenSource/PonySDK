@@ -23,11 +23,11 @@
 
 package com.ponysdk.core.ui.list.selector;
 
-import com.ponysdk.core.ui.basic.PWidget;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import com.ponysdk.core.ui.basic.PWidget;
 
 public class CompositeSelectorView implements SelectorView {
 

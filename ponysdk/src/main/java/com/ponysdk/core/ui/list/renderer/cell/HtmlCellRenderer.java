@@ -23,11 +23,11 @@
 
 package com.ponysdk.core.ui.list.renderer.cell;
 
+import javax.validation.constraints.NotNull;
+
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PHTML;
 import com.ponysdk.core.ui.list.refreshable.Cell;
-
-import javax.validation.constraints.NotNull;
 
 public class HtmlCellRenderer<D> implements CellRenderer<D, PHTML> {
 

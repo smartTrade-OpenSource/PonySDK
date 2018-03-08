@@ -23,11 +23,11 @@
 
 package com.ponysdk.core.ui.list.selector;
 
-import com.ponysdk.core.ui.basic.PWidget;
-import com.ponysdk.core.ui.list.Resetable;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.list.Resetable;
 
 public class Selector<T> implements SelectorViewListener, SelectableListener, Resetable {
 

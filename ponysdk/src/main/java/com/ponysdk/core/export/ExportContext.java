@@ -23,11 +23,11 @@
 
 package com.ponysdk.core.export;
 
-import com.ponysdk.core.server.service.query.Query;
-import com.ponysdk.core.ui.list.selector.SelectionResult;
-
 import java.io.Serializable;
 import java.util.List;
+
+import com.ponysdk.core.server.service.query.Query;
+import com.ponysdk.core.ui.list.selector.SelectionResult;
 
 public class ExportContext<T> implements Serializable {
 

@@ -24,7 +24,12 @@
 package com.ponysdk.impl.webapplication.application;
 
 import com.ponysdk.core.model.PUnit;
-import com.ponysdk.core.ui.basic.*;
+import com.ponysdk.core.ui.basic.Element;
+import com.ponysdk.core.ui.basic.PDockLayoutPanel;
+import com.ponysdk.core.ui.basic.PSimpleLayoutPanel;
+import com.ponysdk.core.ui.basic.PSimplePanel;
+import com.ponysdk.core.ui.basic.PSplitLayoutPanel;
+import com.ponysdk.core.ui.basic.PWidget;
 
 public class DefaultApplicationView implements ApplicationView {
 

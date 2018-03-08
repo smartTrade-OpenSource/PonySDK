@@ -23,16 +23,21 @@
 
 package com.ponysdk.spring.client;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.ponysdk.core.ui.activity.ActivityManager;
 import com.ponysdk.core.ui.activity.ActivityMapper;
-import com.ponysdk.core.ui.basic.*;
+import com.ponysdk.core.ui.basic.Element;
+import com.ponysdk.core.ui.basic.PHistory;
+import com.ponysdk.core.ui.basic.PRootLayoutPanel;
+import com.ponysdk.core.ui.basic.PSimpleLayoutPanel;
+import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.eventbus.EventBus;
 import com.ponysdk.core.ui.main.EntryPoint;
 import com.ponysdk.core.ui.place.Place;
 import com.ponysdk.core.ui.place.PlaceController;
 import com.ponysdk.core.ui.place.PlaceHistoryHandler;
 import com.ponysdk.core.ui.place.PlaceHistoryMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class SpringEntryPoint implements EntryPoint {
 
