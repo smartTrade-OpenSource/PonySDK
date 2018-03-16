@@ -343,16 +343,17 @@ public class UIContext {
      * @param data
      *            list of object
      */
-    public void pushToClient(final List<Object> data) {
-        if (!isAlive()) return;
-        if (data != null && !listeners.isEmpty()) {
-            execute(() -> {
+    public boolean pushToClient(final List<Object> data) {
+        if (isAlive() && data != null && !listeners.isEmpty()) {
+            return execute(() -> {
                 try {
                     listeners.forEach(listener -> data.forEach(listener::onData));
                 } catch (final Throwable e) {
                     log.error("Cannot send data", e);
                 }
             });
+        } else {
+            return false;
         }
     }
 
@@ -362,16 +363,17 @@ public class UIContext {
      * @param data
      *            the object
      */
-    public void pushToClient(final Object data) {
-        if (!isAlive()) return;
-        if (data != null && !listeners.isEmpty()) {
-            execute(() -> {
+    public boolean pushToClient(final Object data) {
+        if (isAlive() && data != null && !listeners.isEmpty()) {
+            return execute(() -> {
                 try {
                     listeners.forEach(listener -> listener.onData(data));
                 } catch (final Throwable e) {
                     log.error("Cannot send data", e);
                 }
             });
+        } else {
+            return false;
         }
     }
 
