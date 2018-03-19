@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.servlet.http.HttpSession;
@@ -48,6 +47,7 @@ import com.ponysdk.core.server.application.Application;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.stm.TxnContext;
 import com.ponysdk.core.useragent.UserAgent;
+import com.ponysdk.core.util.JsonUtil;
 
 public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
@@ -144,7 +144,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
                 if (ClientToServerModel.HEARTBEAT.toStringValue().equals(text)) {
                     if (log.isDebugEnabled()) log.debug("Heartbeat received from terminal #{}", uiContext.getID());
                 } else {
-                    final JsonObject jsonObject = Json.createReader(new StringReader(text)).readObject();
+                    final JsonObject jsonObject = JsonUtil.createReader(new StringReader(text)).readObject();
                     if (jsonObject.containsKey(ClientToServerModel.PING_SERVER.toStringValue())) {
                         final long start = jsonObject.getJsonNumber(ClientToServerModel.PING_SERVER.toStringValue()).longValue();
                         final long end = System.currentTimeMillis();

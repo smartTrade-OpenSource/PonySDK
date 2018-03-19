@@ -235,6 +235,9 @@ public enum ServerToClientModel {
     MOVE_TO_X(ValueTypeModel.DOUBLE),
     MOVE_TO_Y(ValueTypeModel.DOUBLE),
     PRINT(ValueTypeModel.NULL),
+    PADDON_CREATION(ValueTypeModel.JSON_OBJECT),
+    PADDON_METHOD(ValueTypeModel.STRING),
+    PADDON_ARGUMENTS(ValueTypeModel.JSON_OBJECT),
     DESTROY(ValueTypeModel.NULL),
 
     // Old, useless or not used

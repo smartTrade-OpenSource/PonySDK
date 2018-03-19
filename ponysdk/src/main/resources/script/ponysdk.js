@@ -96,17 +96,16 @@ AbstractAddon.prototype.getName = function() {
   return splitted[splitted.length - 1];
 }
 
-AbstractAddon.prototype.update = function(d) {
-  var methodName = d['m'];
-
+AbstractAddon.prototype.update = function(methodName, arguments) {
   if (!this.initialized) {
     throw "[" + this.getName() + "] Tried to call method '" + methodName + "' before init()";
   }
 
   try {
-    if (d.hasOwnProperty('arg')) {
-      if (this.logLevel > 1) this.log(methodName, d['arg']);
-      this[methodName].apply(this, d['arg']);
+    if (arguments.hasOwnProperty('arg')) {
+      var args = arguments['arg'];
+      if (this.logLevel > 1) this.log(methodName, args);
+      this[methodName].apply(this, args);
     } else {
       if (this.logLevel > 1) this.log(methodName);
       this[methodName].call(this);

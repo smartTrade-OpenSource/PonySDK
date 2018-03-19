@@ -29,6 +29,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.JavaScriptException;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
@@ -44,7 +45,7 @@ public class PTAddOnComposite extends PTAddOn {
 
     private static final Logger log = Logger.getLogger(PTAddOnComposite.class.getName());
 
-    private final List<JSONObject> pendingUpdates = new ArrayList<>();
+    private final List<PAddOnExecution> pendingUpdates = new ArrayList<>();
 
     private Widget widget;
 
@@ -60,7 +61,7 @@ public class PTAddOnComposite extends PTAddOn {
         params.put("id", new JSONNumber(objectId));
 
         BinaryModel binaryModel = buffer.readBinaryModel();
-        if (ServerToClientModel.NATIVE == binaryModel.getModel()) {
+        if (ServerToClientModel.PADDON_CREATION == binaryModel.getModel()) {
             params.put("args", binaryModel.getJsonObject());
             binaryModel = buffer.readBinaryModel();
         }
@@ -96,23 +97,23 @@ public class PTAddOnComposite extends PTAddOn {
     }
 
     @Override
-    protected void doUpdate(final JSONObject data) {
+    protected void doUpdate(final String methodName, final JavaScriptObject arguments) {
         if (!destroyed) {
             if (initialized && widget.isAttached()) {
                 flushPendingUpdates();
-                super.doUpdate(data);
+                super.doUpdate(methodName, arguments);
             } else {
-                pendingUpdates.add(data);
+                pendingUpdates.add(new PAddOnExecution(methodName, arguments));
             }
         } else {
-            log.warning("PTAddOnComposite #" + getObjectID() + " destroyed, so updates will be discarded : " + data.toString());
+            log.warning("PTAddOnComposite #" + getObjectID() + " destroyed, so updates will be discarded : " + methodName);
         }
     }
 
     private void flushPendingUpdates() {
         if (!pendingUpdates.isEmpty()) {
-            for (final JSONObject update : pendingUpdates) {
-                super.doUpdate(update);
+            for (final PAddOnExecution update : pendingUpdates) {
+                super.doUpdate(update.getMethodName(), update.getArguments());
             }
             pendingUpdates.clear();
         }
@@ -123,6 +124,25 @@ public class PTAddOnComposite extends PTAddOn {
         if (!destroyed) {
             pendingUpdates.clear();
             super.destroy();
+        }
+    }
+
+    private static final class PAddOnExecution {
+
+        private final String methodName;
+        private final JavaScriptObject arguments;
+
+        public PAddOnExecution(final String methodName, final JavaScriptObject arguments) {
+            this.methodName = methodName;
+            this.arguments = arguments;
+        }
+
+        public String getMethodName() {
+            return methodName;
+        }
+
+        public JavaScriptObject getArguments() {
+            return arguments;
         }
     }
 }

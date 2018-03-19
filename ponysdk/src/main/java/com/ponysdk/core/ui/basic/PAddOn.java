@@ -30,7 +30,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 
-import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
@@ -38,16 +37,13 @@ import javax.json.JsonValue;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.util.JsonUtil;
 import com.ponysdk.core.writer.ModelWriter;
 
 /**
  * AddOn are used to bind server side with javascript browser
  */
 public abstract class PAddOn extends PObject {
-
-    private static final String ARGUMENTS_PROPERTY_NAME = "arg";
-
-    private static final String METHOD_PROPERTY_NAME = "m";
 
     private static final Map<Level, Byte> LOG_LEVEL = new HashMap<>();
 
@@ -67,13 +63,13 @@ public abstract class PAddOn extends PObject {
     private JsonObject args;
 
     /**
-     * Instantiates a new PAddOn
+     * Instantiate a new PAddOn
      */
     protected PAddOn() {
     }
 
     /**
-     * Instantiates a new PAddOn
+     * Instantiate a new PAddOn
      *
      * @param args
      *            the JsonObject arguments
@@ -83,7 +79,7 @@ public abstract class PAddOn extends PObject {
     }
 
     /**
-     * Attachs the PAddOn to a window
+     * Attach the PAddOn to a window
      *
      * @param window
      *            the window
@@ -94,7 +90,7 @@ public abstract class PAddOn extends PObject {
     }
 
     /**
-     * Attachs the PAddOn to a frame if not null else to a window
+     * Attach the PAddOn to a frame if not null else to a window
      *
      * @param window
      *            the window
@@ -114,13 +110,13 @@ public abstract class PAddOn extends PObject {
         super.enrichForCreation(writer);
         writer.write(ServerToClientModel.FACTORY, getSignature());
         if (args != null) {
-            writer.write(ServerToClientModel.NATIVE, args);
+            writer.write(ServerToClientModel.PADDON_CREATION, args);
             args = null;
         }
     }
 
     /**
-     * Gets the signature
+     * Get the signature
      *
      * @return the signature
      */
@@ -134,7 +130,7 @@ public abstract class PAddOn extends PObject {
     }
 
     /**
-     * Calls terminal method
+     * Call terminal method
      *
      * @param methodName
      *            the method name
@@ -142,11 +138,9 @@ public abstract class PAddOn extends PObject {
      *            the arguments
      */
     protected void callTerminalMethod(final String methodName, final Object... args) {
-        final JsonObjectBuilder builder = Json.createObjectBuilder();
-        builder.add(METHOD_PROPERTY_NAME, methodName);
-
+        final JsonObject arguments;
         if (args.length > 0) {
-            final JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+            final JsonArrayBuilder arrayBuilder = JsonUtil.createArrayBuilder();
             for (final Object object : args) {
                 if (object != null) {
                     if (object instanceof JsonValue) {
@@ -176,14 +170,22 @@ public abstract class PAddOn extends PObject {
                     arrayBuilder.addNull();
                 }
             }
-            builder.add(ARGUMENTS_PROPERTY_NAME, arrayBuilder);
+
+            final JsonObjectBuilder argumentsBuilder = JsonUtil.createObjectBuilder();
+            argumentsBuilder.add("arg", arrayBuilder.build());
+            arguments = argumentsBuilder.build();
+        } else {
+            arguments = null;
         }
 
-        saveUpdate(writer -> writer.write(ServerToClientModel.NATIVE, builder.build()));
+        saveUpdate(writer -> {
+            writer.write(ServerToClientModel.PADDON_METHOD, methodName);
+            if (arguments != null) writer.write(ServerToClientModel.PADDON_ARGUMENTS, arguments);
+        });
     }
 
     /**
-     * Sets the log level
+     * Set the log level
      *
      * @param logLevel
      *            the new log level
@@ -193,7 +195,7 @@ public abstract class PAddOn extends PObject {
     }
 
     /**
-     * Destroys
+     * Destroy
      */
     public void destroy() {
         saveUpdate(writer -> writer.write(ServerToClientModel.DESTROY));

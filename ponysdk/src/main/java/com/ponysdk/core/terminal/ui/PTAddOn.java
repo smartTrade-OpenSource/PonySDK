@@ -27,6 +27,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.JavaScriptException;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -61,7 +62,7 @@ public class PTAddOn extends AbstractPTObject {
         params.put("id", new JSONNumber(objectId));
 
         final BinaryModel binaryModel = buffer.readBinaryModel();
-        if (ServerToClientModel.NATIVE == binaryModel.getModel()) params.put("args", binaryModel.getJsonObject());
+        if (ServerToClientModel.PADDON_CREATION == binaryModel.getModel()) params.put("args", binaryModel.getJsonObject());
         else buffer.rewind(binaryModel);
 
         try {
@@ -83,8 +84,15 @@ public class PTAddOn extends AbstractPTObject {
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         final ServerToClientModel model = binaryModel.getModel();
-        if (ServerToClientModel.NATIVE == model) {
-            doUpdate(binaryModel.getJsonObject());
+        if (ServerToClientModel.PADDON_METHOD == model) {
+            final String methodName = binaryModel.getStringValue();
+            final BinaryModel arguments = buffer.readBinaryModel();
+            if (ServerToClientModel.PADDON_ARGUMENTS == arguments.getModel()) {
+                doUpdate(methodName, arguments.getJsonObject().getJavaScriptObject());
+            } else {
+                buffer.rewind(arguments);
+                doUpdate(methodName, null);
+            }
             return true;
         } else if (ServerToClientModel.DESTROY == model) {
             destroy();
@@ -94,10 +102,10 @@ public class PTAddOn extends AbstractPTObject {
         }
     }
 
-    protected void doUpdate(final JSONObject data) {
+    protected void doUpdate(final String methodName, final JavaScriptObject arguments) {
         try {
-            if (!destroyed) addOn.update(data.getJavaScriptObject());
-            else log.warning("PTAddOn #" + getObjectID() + " destroyed, so updates will be discarded : " + data.toString());
+            if (!destroyed) addOn.update(methodName, arguments);
+            else log.warning("PTAddOn #" + getObjectID() + " destroyed, so updates will be discarded : " + arguments.toString());
         } catch (final JavaScriptException e) {
             log.log(Level.SEVERE, e.getMessage(), e);
         }
