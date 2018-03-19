@@ -102,7 +102,7 @@ AbstractAddon.prototype.update = function(methodName, arguments) {
   }
 
   try {
-    if (arguments.hasOwnProperty('arg')) {
+    if (arguments != null) {
       var args = arguments['arg'];
       if (this.logLevel > 1) this.log(methodName, args);
       this[methodName].apply(this, args);
