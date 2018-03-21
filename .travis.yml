@@ -1,3 +1,6 @@
 language: java
 jdk:
   - oraclejdk9
+branches:
+  only:
+  - master
