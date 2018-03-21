@@ -235,8 +235,10 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
 
     public void setStyleName(final String styleName) {
         if (Objects.equals(this.styleName, styleName)) return;
-        this.styleName = styleName;
-        saveUpdate(ServerToClientModel.STYLE_NAME, styleName);
+        if (styleName != null && !styleName.isEmpty() && safeStyleName().add(styleName) && initialized) {
+            this.styleName = styleName;
+            saveUpdate(ServerToClientModel.STYLE_NAME, styleName);
+        }
     }
 
     public String getDebugID() {
