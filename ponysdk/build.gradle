@@ -265,3 +265,5 @@ jar.dependsOn('gwtc')
 
 gwtcDebug.dependsOn('createGWTDebugBuildDir')
 jar.dependsOn('gwtcDebug')
+
+check.dependsOn jacocoTestReport
