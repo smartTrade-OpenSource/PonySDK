@@ -26,26 +26,23 @@ package com.ponysdk.core.server.application;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.server.stm.TxnContext;
 import com.ponysdk.core.ui.main.EntryPoint;
 
 public abstract class AbstractApplicationManager {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractApplicationManager.class);
 
-    private final ApplicationManagerOption options;
+    private final ApplicationManagerOption configuration;
 
-    protected AbstractApplicationManager(final ApplicationManagerOption options) {
-        this.options = options;
-        log.info(options.toString());
+    protected AbstractApplicationManager(final ApplicationManagerOption configuration) {
+        this.configuration = configuration;
     }
 
-    public void startApplication(final TxnContext txnContext) throws Exception {
-        final UIContext uiContext = txnContext.getUIContext();
+    public void startApplication(final UIContext uiContext) throws Exception {
         uiContext.execute(() -> {
             try {
                 final EntryPoint entryPoint = initializeUIContext(uiContext);
-                final String historyToken = txnContext.getHistoryToken();
+                final String historyToken = uiContext.getHistoryToken();
 
                 if (historyToken != null && !historyToken.isEmpty()) uiContext.getHistory().newItem(historyToken, false);
 
@@ -59,8 +56,8 @@ public abstract class AbstractApplicationManager {
 
     protected abstract EntryPoint initializeUIContext(final UIContext ponySession) throws Exception;
 
-    public ApplicationManagerOption getOptions() {
-        return options;
+    public ApplicationManagerOption getConfiguration() {
+        return configuration;
     }
 
 }

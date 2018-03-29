@@ -45,7 +45,7 @@ public class CheckBoxFormField extends AbstractFormField<Boolean, PCheckBox> {
 
     public CheckBoxFormField(final PCheckBox widget, final boolean dirtyMode) {
         super(widget, null, dirtyMode);
-        if (UIContext.get().getApplication().getOptions().isTabindexOnlyFormField()) widget.setTabindex(TabindexMode.TABULABLE);
+        if (UIContext.get().getConfiguration().isTabindexOnlyFormField()) widget.setTabindex(TabindexMode.TABULABLE);
     }
 
     @Override

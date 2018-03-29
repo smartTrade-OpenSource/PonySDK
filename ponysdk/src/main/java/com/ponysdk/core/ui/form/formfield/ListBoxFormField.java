@@ -72,7 +72,7 @@ public class ListBoxFormField<T> extends AbstractFormField<T, PListBox> {
 
     public ListBoxFormField(final PListBox widget, final DataConverter<String, T> dataProvider, final boolean dirtyMode) {
         super(widget, dataProvider, dirtyMode);
-        if (UIContext.get().getApplication().getOptions().isTabindexOnlyFormField()) widget.setTabindex(TabindexMode.TABULABLE);
+        if (UIContext.get().getConfiguration().isTabindexOnlyFormField()) widget.setTabindex(TabindexMode.TABULABLE);
     }
 
     @Override

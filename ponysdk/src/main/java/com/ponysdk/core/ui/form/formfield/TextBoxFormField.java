@@ -46,7 +46,7 @@ public class TextBoxFormField<T> extends AbstractFormField<T, PTextBox> {
 
     public TextBoxFormField(final PTextBox widget, final DataConverter<String, T> dataProvider, final boolean dirtyMode) {
         super(widget, dataProvider, dirtyMode);
-        if (UIContext.get().getApplication().getOptions().isTabindexOnlyFormField()) widget.setTabindex(TabindexMode.TABULABLE);
+        if (UIContext.get().getConfiguration().isTabindexOnlyFormField()) widget.setTabindex(TabindexMode.TABULABLE);
     }
 
     @Override

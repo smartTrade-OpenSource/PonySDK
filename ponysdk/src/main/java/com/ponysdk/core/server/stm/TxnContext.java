@@ -24,8 +24,6 @@
 package com.ponysdk.core.server.stm;
 
 import com.ponysdk.core.server.application.Application;
-import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.server.servlet.CommunicationSanityChecker;
 import com.ponysdk.core.server.servlet.WebSocket;
 import com.ponysdk.core.writer.ModelWriter;
 
@@ -36,9 +34,6 @@ public class TxnContext implements TxnListener {
 
     private boolean flushNow = false;
     private Application application;
-
-    private UIContext uiContext;
-    private CommunicationSanityChecker communicationSanityChecker;
 
     public TxnContext(final WebSocket socket) {
         this.socket = socket;
@@ -78,26 +73,6 @@ public class TxnContext implements TxnListener {
         this.application = application;
     }
 
-    public String getHistoryToken() {
-        return this.socket.getHistoryToken();
-    }
-
-    public UIContext getUIContext() {
-        return uiContext;
-    }
-
-    public void setUIContext(final UIContext uiContext) {
-        this.uiContext = uiContext;
-    }
-
-    public void setCommunicationSanityChecker(final CommunicationSanityChecker communicationSanityChecker) {
-        this.communicationSanityChecker = communicationSanityChecker;
-    }
-
-    public CommunicationSanityChecker getCommunicationSanityChecker() {
-        return communicationSanityChecker;
-    }
-
     public void sendHeartBeat() {
         socket.sendHeartBeat();
     }
@@ -110,8 +85,12 @@ public class TxnContext implements TxnListener {
         socket.close();
     }
 
+    public WebSocket getSocket() {
+        return socket;
+    }
+
     @Override
     public String toString() {
-        return "TxnContext{" + "flushNow=" + flushNow + ", application=" + application + ", uiContext=" + uiContext + '}';
+        return "TxnContext{" + "flushNow=" + flushNow + ", application=" + application + '}';
     }
 }

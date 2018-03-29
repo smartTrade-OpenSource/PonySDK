@@ -59,7 +59,6 @@ public class CommunicationSanityChecker {
     protected final AtomicBoolean started = new AtomicBoolean(false);
     private final UIContext uiContext;
     private long heartBeatPeriod;
-    private long lastReceivedTime;
     private RunnableScheduledFuture<?> sanityChecker;
     private CommunicationState currentState;
     private long suspectTime = -1;
@@ -73,7 +72,7 @@ public class CommunicationSanityChecker {
     public CommunicationSanityChecker(final UIContext uiContext) {
         this.uiContext = uiContext;
         this.uiContext.addContextDestroyListener(context -> stop());
-        final ApplicationManagerOption options = uiContext.getApplication().getOptions();
+        final ApplicationManagerOption options = uiContext.getConfiguration();
         setHeartBeatPeriod(options.getHeartBeatPeriod(), options.getHeartBeatPeriodTimeUnit());
     }
 
@@ -82,7 +81,6 @@ public class CommunicationSanityChecker {
     }
 
     public void start() {
-        lastReceivedTime = System.currentTimeMillis();
         if (!isStarted()) {
             currentState = CommunicationState.OK;
             sanityChecker = (RunnableScheduledFuture<?>) sanityCheckerTimer.scheduleWithFixedDelay(() -> {
@@ -109,10 +107,6 @@ public class CommunicationSanityChecker {
         }
     }
 
-    public void onMessageReceived() {
-        lastReceivedTime = System.currentTimeMillis();
-    }
-
     public void setHeartBeatPeriod(final long heartbeat, final TimeUnit timeUnit) {
         heartBeatPeriod = TimeUnit.MILLISECONDS.convert(heartbeat, timeUnit);
         if (heartBeatPeriod <= 0) throw new IllegalArgumentException("'HeartBeatPeriod' parameter must be gretter than 0");
@@ -120,7 +114,7 @@ public class CommunicationSanityChecker {
 
     private boolean isCommunicationSuspectedToBeNonFunctional(final long now) {
         // No message have been received or sent during the HeartbeatPeriod
-        return now - lastReceivedTime >= heartBeatPeriod;
+        return now - uiContext.getLastReceivedTime() >= heartBeatPeriod;
     }
 
     protected void checkCommunicationState() {
@@ -137,7 +131,7 @@ public class CommunicationSanityChecker {
                 }
                 break;
             case SUSPECT:
-                if (lastReceivedTime < suspectTime) {
+                if (uiContext.getLastReceivedTime() < suspectTime) {
                     if (now - suspectTime >= heartBeatPeriod) {
                         // No message have been received since we suspected the
                         // communication to be non functional

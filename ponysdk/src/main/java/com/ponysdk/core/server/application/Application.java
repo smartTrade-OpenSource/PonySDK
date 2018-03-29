@@ -78,13 +78,13 @@ public class Application {
             try {
                 uiContext.destroyFromApplication();
             } catch (final Exception e) {
-                log.error("Can't destroy the UIContext #" + uiContext.getID() + " on Application #" + getId(), e);
+                log.error("Can't destroy the UIContext #" + uiContext.getID() + " on Application #" + id, e);
             }
         });
         uiContexts.clear();
 
         try {
-            log.info("Invalidate session on Application #{} because all ui contexts have been destroyed", getId());
+            log.info("Invalidate session on Application #{} because all ui contexts have been destroyed", id);
             session.invalidate();
         } catch (final IllegalArgumentException e) {
             log.error("The session is already invalid", e);
@@ -106,7 +106,7 @@ public class Application {
             try {
                 uiContext.pushToClient(message);
             } catch (final Throwable throwable) {
-                log.error("Cannot flush message on the session {}", uiContext.getContext(), throwable);
+                log.error("Cannot flush message on the session {}", uiContext, throwable);
             }
         }
     }

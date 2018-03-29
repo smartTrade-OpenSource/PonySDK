@@ -46,7 +46,7 @@ class SpringApplicationManager extends AbstractApplicationManager {
 
         final List<String> files = new ArrayList<>();
 
-        final String clientConfigFile = getOptions().getClientConfigFile();
+        final String clientConfigFile = getConfiguration().getClientConfigFile();
         if (StringUtils.isEmpty(clientConfigFile))
             files.addAll(Arrays.asList("conf/client_application.inc.xml", "etc/client_application.xml"));
         else files.add(clientConfigFile);

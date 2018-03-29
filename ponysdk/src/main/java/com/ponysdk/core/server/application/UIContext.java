@@ -39,6 +39,7 @@ import javax.json.JsonObject;
 import javax.json.JsonString;
 import javax.json.JsonValue;
 import javax.json.JsonValue.ValueType;
+import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +48,7 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.AlreadyDestroyedApplication;
+import com.ponysdk.core.server.servlet.WebSocket;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.server.stm.TxnContext;
 import com.ponysdk.core.ui.basic.PCookies;
@@ -61,6 +63,7 @@ import com.ponysdk.core.ui.eventbus.RootEventBus;
 import com.ponysdk.core.ui.eventbus.StreamHandler;
 import com.ponysdk.core.ui.eventbus2.EventBus;
 import com.ponysdk.core.ui.statistic.TerminalDataReceiver;
+import com.ponysdk.core.useragent.UserAgent;
 import com.ponysdk.core.writer.ModelWriter;
 
 /**
@@ -75,14 +78,16 @@ import com.ponysdk.core.writer.ModelWriter;
  */
 public class UIContext {
 
-    private static final ThreadLocal<UIContext> currentContext = new ThreadLocal<>();
-
     private static final Logger log = LoggerFactory.getLogger(UIContext.class);
+
+    private static final ThreadLocal<UIContext> currentContext = new ThreadLocal<>();
 
     private static final AtomicInteger uiContextCount = new AtomicInteger();
 
     private final int ID;
+    @Deprecated(forRemoval = true, since = "v2.8.0")
     private final Application application;
+
     private final ReentrantLock lock = new ReentrantLock();
     private final Map<String, Object> attributes = new HashMap<>();
 
@@ -99,6 +104,7 @@ public class UIContext {
     private final PCookies cookies = new PCookies();
 
     private final List<ContextDestroyListener> destroyListeners = new ArrayList<>();
+    @Deprecated(forRemoval = true, since = "v2.8.0")
     private final TxnContext context;
     private final Set<DataListener> listeners = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
@@ -108,16 +114,28 @@ public class UIContext {
 
     private final Latency latency = new Latency(10);
 
+    private final ApplicationManagerOption configuration;
+    private final WebSocket socket;
+
+    private long lastReceivedTime = System.currentTimeMillis();
+
     /**
      * The default constructor
      *
      * @param context
      *            the transaction context
      */
-    public UIContext(final TxnContext context) {
-        this.application = context.getApplication();
+    public UIContext(final WebSocket socket, final TxnContext context, final ApplicationManagerOption configuration) {
         this.ID = uiContextCount.incrementAndGet();
+        this.socket = socket;
+        this.configuration = configuration;
         this.context = context;
+        this.application = context.getApplication();
+    }
+
+    @Deprecated(forRemoval = true, since = "v2.8.0")
+    public UIContext(final TxnContext context) {
+        this(context.getSocket(), context, context.getApplication().getOptions());
     }
 
     /**
@@ -439,14 +457,6 @@ public class UIContext {
     }
 
     /**
-     * @deprecated Use {@link #setTerminalDataReceiver(TerminalDataReceiver)} directly
-     */
-    @Deprecated
-    public void setClientDataOutput(final TerminalDataReceiver terminalDataReceiver) {
-        setTerminalDataReceiver(terminalDataReceiver);
-    }
-
-    /**
      * Locks the current UIContext
      */
     public void acquire() {
@@ -639,7 +649,7 @@ public class UIContext {
                     log.error("Exception while destroying UIContext #" + getID(), e);
                 }
             });
-            context.close();
+            socket.close();
         } finally {
             release();
         }
@@ -654,7 +664,7 @@ public class UIContext {
         acquire();
         try {
             doDestroy();
-            context.close();
+            socket.close();
         } finally {
             release();
         }
@@ -696,7 +706,7 @@ public class UIContext {
     public void sendHeartBeat() {
         acquire();
         try {
-            context.sendHeartBeat();
+            socket.sendHeartBeat();
         } catch (final Throwable e) {
             log.error("Cannot send server heart beat to UIContext #" + getID(), e);
         } finally {
@@ -712,7 +722,7 @@ public class UIContext {
     public void sendRoundTrip() {
         acquire();
         try {
-            context.sendRoundTrip();
+            socket.sendRoundTrip();
         } catch (final Throwable e) {
             log.error("Cannot send server round trip to UIContext #" + getID(), e);
         } finally {
@@ -730,21 +740,12 @@ public class UIContext {
     }
 
     /**
-     * Gets the {@link TxnContext} of the UIContext
+     * Gets the {@link ApplicationManagerOption} of the UIContext
      *
-     * @return the TxnContext
+     * @return The ApplicationManagerOption
      */
-    public TxnContext getContext() {
-        return context;
-    }
-
-    /**
-     * Gets the {@link Application} of the UIContext
-     *
-     * @return The Application
-     */
-    public Application getApplication() {
-        return application;
+    public ApplicationManagerOption getConfiguration() {
+        return configuration;
     }
 
     /**
@@ -754,6 +755,10 @@ public class UIContext {
      */
     public PHistory getHistory() {
         return history;
+    }
+
+    public String getHistoryToken() {
+        return socket.getHistoryToken();
     }
 
     /**
@@ -774,6 +779,34 @@ public class UIContext {
         return getCookies().getCookie(name);
     }
 
+    public void onMessageReceived() {
+        lastReceivedTime = System.currentTimeMillis();
+    }
+
+    public long getLastReceivedTime() {
+        return lastReceivedTime;
+    }
+
+    public UserAgent getUserAgent() {
+        return application.getUserAgent();
+    }
+
+    public HttpSession getSession() {
+        return application.getSession();
+    }
+
+    public <T> T getApplicationAttribute(final String name) {
+        return application.getAttribute(name);
+    }
+
+    public void setApplicationAttribute(final String name, final Object value) {
+        application.setAttribute(name, value);
+    }
+
+    public String getApplicationId() {
+        return application.getId();
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
@@ -789,7 +822,7 @@ public class UIContext {
 
     @Override
     public String toString() {
-        return "UIContext [ID=" + ID + ", living=" + alive + ", ApplicationID=" + application.getId() + "]";
+        return "UIContext [ID=" + ID + ", alive=" + alive + "]";
     }
 
     /**
@@ -833,8 +866,18 @@ public class UIContext {
             for (final long value : values) {
                 average += value;
             }
-            return average / values.length;
+            return average;
         }
+    }
+
+    /**
+     * Gets the {@link Application} of the UIContext
+     *
+     * @return The Application
+     */
+    @Deprecated(forRemoval = true, since = "v2.8.0")
+    public Application getApplication() {
+        return application;
     }
 
 }

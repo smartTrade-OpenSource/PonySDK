@@ -58,8 +58,10 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     private WebSocketPusher websocketPusher;
     private final AbstractApplicationManager applicationManager;
 
+    @Deprecated(forRemoval = true, since = "v2.8.0")
     private TxnContext context;
     private Session session;
+    private UIContext uiContext;
 
     WebSocket(final ServletUpgradeRequest request, final WebsocketMonitor monitor,
             final AbstractApplicationManager applicationManager) {
@@ -83,7 +85,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
         Application application = SessionManager.get().getApplication(applicationId);
         if (application == null) {
-            application = new Application(applicationId, httpSession, applicationManager.getOptions(),
+            application = new Application(applicationId, httpSession, applicationManager.getConfiguration(),
                 UserAgent.parseUserAgentString(userAgent));
             SessionManager.get().registerApplication(application);
         }
@@ -91,18 +93,16 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         context.setApplication(application);
 
         try {
-            final UIContext uiContext = new UIContext(context);
+            uiContext = new UIContext(this, context, applicationManager.getConfiguration());
             final CommunicationSanityChecker communicationSanityChecker = new CommunicationSanityChecker(uiContext);
             log.info("Creating a new {}", uiContext);
-            context.setUIContext(uiContext);
-            context.setCommunicationSanityChecker(communicationSanityChecker);
             application.registerUIContext(uiContext);
 
             uiContext.acquire();
             try {
                 beginObject();
                 encode(ServerToClientModel.CREATE_CONTEXT, uiContext.getID()); // TODO nciaravola integer ?
-                encode(ServerToClientModel.OPTION_FORMFIELD_TABULATION, applicationManager.getOptions().isTabindexOnlyFormField());
+                encode(ServerToClientModel.OPTION_FORMFIELD_TABULATION, uiContext.getConfiguration().isTabindexOnlyFormField());
                 endObject();
                 if (isAlive() && isSessionOpen()) flush0();
             } catch (final Throwable e) {
@@ -111,7 +111,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
                 uiContext.release();
             }
 
-            applicationManager.startApplication(context);
+            applicationManager.startApplication(uiContext);
             communicationSanityChecker.start();
         } catch (final Exception e) {
             log.error("Cannot process WebSocket instructions", e);
@@ -125,9 +125,9 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
     @Override
     public void onWebSocketClose(final int statusCode, final String reason) {
-        if (log.isInfoEnabled()) log.info("WebSocket closed on UIContext #{} : {}, reason : {}", context.getUIContext().getID(),
+        if (log.isInfoEnabled()) log.info("WebSocket closed on UIContext #{} : {}, reason : {}", uiContext.getID(),
             NiceStatusCode.getMessage(statusCode), reason != null ? reason : "");
-        if (isAlive()) context.getUIContext().onDestroy();
+        if (isAlive()) uiContext.onDestroy();
     }
 
     /**
@@ -135,11 +135,10 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
      */
     @Override
     public void onWebSocketText(final String text) {
-        final UIContext uiContext = context.getUIContext();
         if (isAlive()) {
             if (monitor != null) monitor.onMessageReceived(WebSocket.this, text);
             try {
-                context.getCommunicationSanityChecker().onMessageReceived();
+                uiContext.onMessageReceived();
 
                 if (ClientToServerModel.HEARTBEAT.toStringValue().equals(text)) {
                     if (log.isDebugEnabled()) log.debug("Heartbeat received from terminal #{}", uiContext.getID());
@@ -152,8 +151,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
                             log.debug("Ping measurement : {} ms from terminal #{}", end - start, uiContext.getID());
                         uiContext.addPingValue(end - start);
                     } else if (jsonObject.containsKey(ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue())) {
-                        final Application applicationSession = context.getApplication();
-                        if (applicationSession == null)
+                        if (uiContext == null)
                             throw new Exception("Invalid session, please reload your application (" + uiContext + ")");
                         final String applicationInstructions = ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue();
                         uiContext.execute(() -> {
@@ -256,7 +254,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     }
 
     private boolean isAlive() {
-        return context != null && context.getUIContext() != null && context.getUIContext().isAlive();
+        return uiContext != null && uiContext.isAlive();
     }
 
     private boolean isSessionOpen() {

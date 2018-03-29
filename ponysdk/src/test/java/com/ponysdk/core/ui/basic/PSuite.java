@@ -28,6 +28,7 @@ import org.junit.BeforeClass;
 import org.mockito.Mockito;
 
 import com.ponysdk.core.server.application.Application;
+import com.ponysdk.core.server.application.ApplicationManagerOption;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.servlet.WebSocket;
 import com.ponysdk.core.server.stm.Txn;
@@ -38,15 +39,19 @@ public class PSuite {
 
     @BeforeClass
     public static void beforeClass() {
-        final TxnContext context = Mockito.spy(new TxnContext(Mockito.mock(WebSocket.class)));
+        final WebSocket socket = Mockito.mock(WebSocket.class);
+
+        final TxnContext context = Mockito.spy(new TxnContext(socket));
         final ModelWriter mw = Mockito.mock(ModelWriter.class);
         Mockito.when(context.getWriter()).thenReturn(mw);
 
         final Application application = Mockito.mock(Application.class, Mockito.RETURNS_MOCKS);
         Mockito.when(context.getApplication()).thenReturn(application);
 
+        final ApplicationManagerOption configuration = Mockito.mock(ApplicationManagerOption.class);
+
         Txn.get().begin(context);
-        final UIContext uiContext = Mockito.spy(new UIContext(context));
+        final UIContext uiContext = Mockito.spy(new UIContext(socket, context, configuration));
         UIContext.setCurrent(uiContext);
     }
 

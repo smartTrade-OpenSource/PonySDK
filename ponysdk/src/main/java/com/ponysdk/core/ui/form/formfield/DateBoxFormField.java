@@ -74,7 +74,7 @@ public class DateBoxFormField extends AbstractFormField<Date, PDateBox> {
 
     public DateBoxFormField(final PDateBox widget, final DataConverter<String, Date> dataConverter, final boolean dirtyMode) {
         super(widget, dataConverter, dirtyMode);
-        if (UIContext.get().getApplication().getOptions().isTabindexOnlyFormField()) widget.setTabindex(TabindexMode.TABULABLE);
+        if (UIContext.get().getConfiguration().isTabindexOnlyFormField()) widget.setTabindex(TabindexMode.TABULABLE);
     }
 
     @Override
