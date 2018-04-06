@@ -139,7 +139,7 @@ public class PTWindow extends AbstractPTObject implements PostMessageHandler {
     }
 
     public void close(final boolean forced) {
-        window.close();
+        if (ready && window != null && !window.isClosed()) window.close();
     }
 
     @Override
