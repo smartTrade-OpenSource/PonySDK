@@ -14,6 +14,11 @@ task wrapper(type: Wrapper) {
 
 allprojects{
     apply plugin: 'eclipse'
+    apply plugin: 'jacoco'
+
+    repositories {
+        mavenCentral()
+    }
 }
 
 subprojects {
@@ -27,10 +32,6 @@ subprojects {
     def suffix = project.hasProperty('BUILD_RELEASE') ? "" : "-SNAPSHOT"
     version = '2.8.1' + suffix
 
-    repositories {
-        mavenCentral()
-    }
-
     publishing {
         publications {
             maven(MavenPublication) {
@@ -40,4 +41,23 @@ subprojects {
             }
         }
     }
+}
+
+task codeCoverageReport(type: JacocoReport) {
+    executionData fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec")
+
+    subprojects.each {
+        sourceSets it.sourceSets.main
+    }
+
+    reports {
+        xml.enabled true
+        xml.destination "${buildDir}/reports/jacoco/report.xml"
+        html.enabled false
+        csv.enabled false
+    }
+}
+
+codeCoverageReport.dependsOn {
+    subprojects*.test
 }
