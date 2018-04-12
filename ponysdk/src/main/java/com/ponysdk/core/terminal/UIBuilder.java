@@ -207,7 +207,7 @@ public class UIBuilder {
                 processHistory(buffer, binaryModel.getStringValue());
             } else {
                 log.log(Level.WARNING, "Unknown instruction type : " + binaryModel + " ; " + buffer.toString());
-                buffer.shiftNextBlock(false);
+                if (ServerToClientModel.END != model) buffer.shiftNextBlock(false);
             }
         } catch (final Exception e) {
             buffer.shiftNextBlock(false);
