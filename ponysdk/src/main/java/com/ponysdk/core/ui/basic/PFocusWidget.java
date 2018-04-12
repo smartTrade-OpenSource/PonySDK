@@ -118,8 +118,11 @@ public abstract class PFocusWidget extends PWidget
     public HandlerRegistration addClickHandler(final PClickHandler handler) {
         if (showLoadingOnRequest || !enabledOnRequest) {
             return addDomHandler((PClickHandler) event -> {
-                handler.onClick(event);
-                saveUpdate(writer -> writer.write(ServerToClientModel.END_OF_PROCESSING));
+                try {
+                    handler.onClick(event);
+                } finally {
+                    saveUpdate(writer -> writer.write(ServerToClientModel.END_OF_PROCESSING));
+                }
             }, PClickEvent.TYPE);
         } else {
             return addDomHandler(handler, PClickEvent.TYPE);
@@ -130,8 +133,11 @@ public abstract class PFocusWidget extends PWidget
     public HandlerRegistration addDoubleClickHandler(final PDoubleClickHandler handler) {
         if (showLoadingOnRequest || !enabledOnRequest) {
             final PDoubleClickHandler clickHandler = event -> {
-                handler.onDoubleClick(event);
-                saveUpdate(writer -> writer.write(ServerToClientModel.END_OF_PROCESSING));
+                try {
+                    handler.onDoubleClick(event);
+                } finally {
+                    saveUpdate(writer -> writer.write(ServerToClientModel.END_OF_PROCESSING));
+                }
             };
 
             return addDomHandler(clickHandler, PDoubleClickEvent.TYPE);
