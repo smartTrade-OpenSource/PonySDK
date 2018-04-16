@@ -210,7 +210,7 @@ public class UIBuilder {
                 if (ServerToClientModel.END != model) buffer.shiftNextBlock(false);
             }
         } catch (final Exception e) {
-            buffer.shiftNextBlock(false);
+            if (ServerToClientModel.END != model) buffer.shiftNextBlock(false);
             sendExceptionMessageToServer(e);
         }
     }
@@ -262,9 +262,10 @@ public class UIBuilder {
                 if (model != null) result = ServerToClientModel.END != model ? ptObject.update(buffer, binaryModel) : false;
             } while (result && buffer.hasEnoughKeyBytes());
 
-            if (!result) buffer.rewind(binaryModel);
-
-            buffer.readBinaryModel(); // Read ServerToClientModel.END element
+            if (ServerToClientModel.END != binaryModel.getModel()) {
+                if (!result) buffer.rewind(binaryModel);
+                buffer.readBinaryModel(); // Read ServerToClientModel.END element
+            }
         } else {
             log.warning("Update on a null PTObject #" + objectID + ", so we will consume all the buffer of this object");
             buffer.shiftNextBlock(false);
