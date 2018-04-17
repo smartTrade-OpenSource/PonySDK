@@ -152,7 +152,7 @@ public class CommunicationSanityChecker {
                 break;
         }
 
-        uiContext.sendHeartBeat();
+        //uiContext.sendHeartBeat(); // Useless ?
         uiContext.sendRoundTrip();
     }
 
