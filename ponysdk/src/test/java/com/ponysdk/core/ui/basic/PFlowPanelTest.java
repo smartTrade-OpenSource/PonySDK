@@ -2,11 +2,21 @@
 package com.ponysdk.core.ui.basic;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 
+import com.ponysdk.core.model.WidgetType;
+
 public class PFlowPanelTest extends PSuite {
+
+    @Test
+    public void testInit() {
+        final PFlowPanel widget = new PFlowPanel();
+        assertEquals(WidgetType.FLOW_PANEL, widget.getWidgetType());
+        assertNotNull(widget.toString());
+    }
 
     @Test
     public void testAdd() {

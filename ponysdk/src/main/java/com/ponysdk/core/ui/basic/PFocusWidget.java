@@ -58,21 +58,6 @@ public abstract class PFocusWidget extends PWidget
         if (UIContext.get().getConfiguration().isTabindexOnlyFormField()) tabindex = -1;
     }
 
-    @Override
-    public HandlerRegistration addMouseOverHandler(final PMouseOverHandler handler) {
-        return addDomHandler(handler, PMouseOverEvent.TYPE);
-    }
-
-    @Override
-    public HandlerRegistration addFocusHandler(final PFocusHandler handler) {
-        return addDomHandler(handler, PFocusEvent.TYPE);
-    }
-
-    @Override
-    public HandlerRegistration addBlurHandler(final PBlurHandler handler) {
-        return addDomHandler(handler, PBlurEvent.TYPE);
-    }
-
     public void showLoadingOnRequest(final boolean showLoadingOnRequest) {
         if (Objects.equals(this.showLoadingOnRequest, showLoadingOnRequest)) return;
         this.showLoadingOnRequest = showLoadingOnRequest;
@@ -112,6 +97,21 @@ public abstract class PFocusWidget extends PWidget
         if (Objects.equals(this.enabledOnRequest, enabledOnRequest)) return;
         this.enabledOnRequest = enabledOnRequest;
         saveUpdate(ServerToClientModel.ENABLED_ON_REQUEST, enabledOnRequest);
+    }
+
+    @Override
+    public HandlerRegistration addMouseOverHandler(final PMouseOverHandler handler) {
+        return addDomHandler(handler, PMouseOverEvent.TYPE);
+    }
+
+    @Override
+    public HandlerRegistration addFocusHandler(final PFocusHandler handler) {
+        return addDomHandler(handler, PFocusEvent.TYPE);
+    }
+
+    @Override
+    public HandlerRegistration addBlurHandler(final PBlurHandler handler) {
+        return addDomHandler(handler, PBlurEvent.TYPE);
     }
 
     @Override
