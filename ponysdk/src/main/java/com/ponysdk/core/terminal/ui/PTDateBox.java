@@ -93,12 +93,8 @@ public class PTDateBox extends PTWidget<MyDateBox> {
 
         private MyDateBox() {
             super(datePicker.uiObject, null, format);
-            if (keepDayTimeNeeded) {
-                getTextBox().addValueChangeHandler(this::onTextBoxChanged);
-                getDatePicker().addValueChangeHandler(this::onDatePickerChanged);
-            } else {
-                addValueChangeHandler(this::onDateChanged);
-            }
+            getTextBox().addValueChangeHandler(this::onTextBoxChanged);
+            getDatePicker().addValueChangeHandler(this::onDatePickerChanged);
         }
 
         @Override
@@ -120,18 +116,20 @@ public class PTDateBox extends PTWidget<MyDateBox> {
         }
 
         private void onTextBoxChanged(final ValueChangeEvent<String> event) {
-            lastDate = format.parse(this, event.getValue(), true);
+            if (keepDayTimeNeeded) lastDate = format.parse(this, event.getValue(), true);
             fireDateChanged();
         }
 
         private void onDatePickerChanged(final ValueChangeEvent<Date> event) {
-            Date pickerDate = event.getValue();
-            if (lastDate != null) {
-                final int dayTime = (int) (lastDate.getTime() % ONE_DAY_IN_MILLIS
-                        - lastDate.getTimezoneOffset() * ONE_MINUTE_IN_MILLIS);
-                final long dateInMillis = pickerDate.getTime() + dayTime;
-                pickerDate = new Date(dateInMillis);
-                getTextBox().setValue(format.format(this, pickerDate), false);
+            if (keepDayTimeNeeded) {
+                Date pickerDate = event.getValue();
+                if (lastDate != null) {
+                    final int dayTime = (int) (lastDate.getTime() % ONE_DAY_IN_MILLIS
+                            - lastDate.getTimezoneOffset() * ONE_MINUTE_IN_MILLIS);
+                    final long dateInMillis = pickerDate.getTime() + dayTime;
+                    pickerDate = new Date(dateInMillis);
+                    getTextBox().setValue(format.format(this, pickerDate), false);
+                }
             }
             fireDateChanged();
         }
