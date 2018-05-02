@@ -37,7 +37,7 @@ public final class PTMultiWordSuggestOracle extends AbstractPTObject {
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
         super.create(buffer, objectId, uiService);
         this.oracle = new MultiWordSuggestOracle();
-        PTSuggestBox.oracleByID.put(objectID, oracle);
+        PTSuggestBox.put(objectID, oracle);
     }
 
     @Override

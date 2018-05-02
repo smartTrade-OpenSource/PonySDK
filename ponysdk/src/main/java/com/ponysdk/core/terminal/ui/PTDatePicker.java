@@ -40,17 +40,18 @@ public class PTDatePicker extends PTWidget<DatePicker> {
 
     private static final String DATE_SEPARATOR = ",";
 
-    private final DateTimeFormat format = DateTimeFormat.getFormat("yyyy-MM-dd");
+    private DateTimeFormat format;
+
+    @Override
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
+        format = DateTimeFormat.getFormat("yyyy-MM-dd");
+        super.create(buffer, objectId, uiService);
+        addHandlers(uiService);
+    }
 
     @Override
     protected DatePicker createUIObject() {
         return new DatePicker();
-    }
-
-    @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
-        super.create(buffer, objectId, uiService);
-        addHandlers(uiService);
     }
 
     private void addHandlers(final UIBuilder uiService) {

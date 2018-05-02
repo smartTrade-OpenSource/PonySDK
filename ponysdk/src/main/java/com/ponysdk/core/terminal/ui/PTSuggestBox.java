@@ -37,7 +37,8 @@ import elemental.js.util.JsMapFromIntTo;
 
 public class PTSuggestBox extends PTWidget<SuggestBox> {
 
-    static final JsMapFromIntTo<SuggestOracle> oracleByID = JsMapFromIntTo.create();
+    private static JsMapFromIntTo<SuggestOracle> oracleByID;
+
     private PTTextBox ptTextBox;
     private SuggestOracle oracle;
 
@@ -100,4 +101,10 @@ public class PTSuggestBox extends PTWidget<SuggestBox> {
             super.removeHandler(buffer, handlerModel);
         }
     }
+
+    public static void put(final int objectID, final SuggestOracle oracle) {
+        if (oracleByID == null) oracleByID = JsMapFromIntTo.create();
+        oracleByID.put(objectID, oracle);
+    }
+
 }

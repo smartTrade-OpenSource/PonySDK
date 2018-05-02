@@ -292,7 +292,7 @@ public class ElementTest extends PSuite {
     }
 
     @Test
-    public void testNewPWindowBooleanStringStringString() {
+    public void testNewPWindow() {
         final PObject widget = Element.newPWindow(false, null, null, null);
         assertEquals(WidgetType.WINDOW, widget.getWidgetType());
     }
