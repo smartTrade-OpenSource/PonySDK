@@ -57,10 +57,7 @@ public class DatePickerPageActivity extends SamplePageActivity {
 
         datePicker = Element.newPDatePicker();
         datePicker.addStyleToDates("off", dates("12/25/2013", "01/01/2014", "04/26/2014"));
-        datePicker.addValueChangeHandler(event -> {
-            notifyDateChange("picker", event.getData());
-            dateBox.setDefaultMonth(datePicker.getValue());
-        });
+        datePicker.addValueChangeHandler(event -> notifyDateChange("picker", event.getData()));
 
         final Date middecember = dates("12/15/2013").get(0);
         datePicker.addShowRangeHandler(event -> {

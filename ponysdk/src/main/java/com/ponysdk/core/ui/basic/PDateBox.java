@@ -183,10 +183,6 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
         else return getDateFormat().format(getValue());
     }
 
-    public void setDefaultMonth(final Date date) {
-        saveUpdate(ServerToClientModel.TIME, date.getTime());
-    }
-
     public PDatePicker getDatePicker() {
         return datePicker;
     }

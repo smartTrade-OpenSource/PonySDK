@@ -75,9 +75,6 @@ public class PTDateBox extends PTWidget<MyDateBox> {
         } else if (ServerToClientModel.ENABLED == model) {
             uiObject.setEnabled(binaryModel.getBooleanValue());
             return true;
-        } else if (ServerToClientModel.TIME == model) {
-            uiObject.setDefaultMonth(binaryModel.getLongValue());
-            return true;
         } else {
             return super.update(buffer, binaryModel);
         }
@@ -87,8 +84,12 @@ public class PTDateBox extends PTWidget<MyDateBox> {
 
         private static final int ONE_MINUTE_IN_MILLIS = 60 * 1000;
         private static final int ONE_DAY_IN_MILLIS = 24 * 60 * ONE_MINUTE_IN_MILLIS;
+        private static final String DATE_PICKER_DAY_IS_TODAY_STYLENAME = "datePickerDayIsToday";
 
-        private Date defaultMonth;
+        private final DateTimeFormat formatter = DateTimeFormat.getFormat("yyyyMMdd");
+        private Date todayDate;
+        private String formattedTodayDate;
+
         private Date lastDate;
 
         private MyDateBox() {
@@ -107,16 +108,24 @@ public class PTDateBox extends PTWidget<MyDateBox> {
             if (keepDayTimeNeeded) lastDate = date;
         }
 
-        private void setDefaultMonth(final long m) {
-            defaultMonth = new Date(m);
-        }
-
         @Override
         public void showDatePicker() {
             super.showDatePicker();
-            if (defaultMonth != null && getTextBox().getText().trim().isEmpty()) {
-                getDatePicker().setCurrentMonth(defaultMonth);
+            final Date newTodayDate = new Date();
+            if (todayDate != null) {
+                if (formattedTodayDate == null) formattedTodayDate = formatter.format(todayDate);
+                final String newFormattedTodayDate = formatter.format(newTodayDate);
+                if (!formattedTodayDate.equals(newFormattedTodayDate)) {
+                    getDatePicker().removeStyleFromDates(DATE_PICKER_DAY_IS_TODAY_STYLENAME, todayDate);
+                    getDatePicker().addStyleToDates(DATE_PICKER_DAY_IS_TODAY_STYLENAME, newTodayDate);
+                    todayDate = newTodayDate;
+                    formattedTodayDate = newFormattedTodayDate;
+                }
+            } else {
+                getDatePicker().addStyleToDates(DATE_PICKER_DAY_IS_TODAY_STYLENAME, newTodayDate);
+                todayDate = newTodayDate;
             }
+            super.showDatePicker();
         }
 
         private void onTextBoxChanged(final ValueChangeEvent<String> event) {
