@@ -121,7 +121,7 @@ public abstract class PFocusWidget extends PWidget
                 try {
                     handler.onClick(event);
                 } finally {
-                    writeUpdate(writer -> writer.write(ServerToClientModel.END_OF_PROCESSING));
+                    saveUpdate(writer -> writer.write(ServerToClientModel.END_OF_PROCESSING));
                 }
             }, PClickEvent.TYPE);
         } else {
@@ -136,7 +136,7 @@ public abstract class PFocusWidget extends PWidget
                 try {
                     handler.onDoubleClick(event);
                 } finally {
-                    writeUpdate(writer -> writer.write(ServerToClientModel.END_OF_PROCESSING));
+                    saveUpdate(writer -> writer.write(ServerToClientModel.END_OF_PROCESSING));
                 }
             };
 
