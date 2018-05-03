@@ -68,6 +68,8 @@ public class BasicUITest extends PSuite {
     @Test
     public void testButton() {
         final PButton button = Element.newPButton("test");
+        button.window = Element.newPWindow(null, null);
+        button.initialized = true;
         Assert.assertEquals("test", button.getText());
         button.setText("test2");
         Assert.assertEquals("test2", button.getText());
