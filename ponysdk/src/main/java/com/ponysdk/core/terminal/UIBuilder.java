@@ -262,9 +262,9 @@ public class UIBuilder {
                 if (model != null) result = ServerToClientModel.END != model ? ptObject.update(buffer, binaryModel) : false;
             } while (result && buffer.hasEnoughKeyBytes());
 
-            if (ServerToClientModel.END != binaryModel.getModel()) {
-                if (!result) buffer.rewind(binaryModel);
-                buffer.readBinaryModel(); // Read ServerToClientModel.END element
+            if (!result && ServerToClientModel.END != binaryModel.getModel()) {
+                log.warning("Update PObject #" + objectID + " with key : " + binaryModel + " doesn't exist");
+                buffer.shiftNextBlock(false);
             }
         } else {
             log.warning("Update on a null PTObject #" + objectID + ", so we will consume all the buffer of this object");

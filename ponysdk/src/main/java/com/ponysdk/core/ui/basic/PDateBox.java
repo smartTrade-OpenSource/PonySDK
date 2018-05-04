@@ -40,8 +40,25 @@ import org.slf4j.LoggerFactory;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.ui.basic.event.HasPBlurHandlers;
+import com.ponysdk.core.ui.basic.event.HasPClickHandlers;
+import com.ponysdk.core.ui.basic.event.HasPDoubleClickHandlers;
+import com.ponysdk.core.ui.basic.event.HasPFocusHandlers;
+import com.ponysdk.core.ui.basic.event.HasPMouseOverHandlers;
+import com.ponysdk.core.ui.basic.event.PBlurEvent;
+import com.ponysdk.core.ui.basic.event.PBlurHandler;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.basic.event.PDoubleClickEvent;
+import com.ponysdk.core.ui.basic.event.PDoubleClickHandler;
+import com.ponysdk.core.ui.basic.event.PFocusEvent;
+import com.ponysdk.core.ui.basic.event.PFocusHandler;
+import com.ponysdk.core.ui.basic.event.PMouseOverEvent;
+import com.ponysdk.core.ui.basic.event.PMouseOverHandler;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
+import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 import com.ponysdk.core.writer.ModelWriter;
 
 /**
@@ -56,7 +73,8 @@ import com.ponysdk.core.writer.ModelWriter;
  * <dd>Default style for when the date box has bad input.</dd>
  * </dl>
  */
-public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueChangeHandler<Date> {
+public class PDateBox extends PWidget implements Focusable, HasPClickHandlers, HasPDoubleClickHandlers, HasPMouseOverHandlers,
+        HasPFocusHandlers, HasPBlurHandlers, HasPValue<Date>, PValueChangeHandler<Date> {
 
     private static final Logger log = LoggerFactory.getLogger(PDateBox.class);
 
@@ -70,6 +88,7 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
 
     private String rawValue;
     private Date date;
+    private boolean enabled = true;
 
     protected PDateBox() {
         this(new SimpleDateFormat("MM/dd/yyyy"));
@@ -89,6 +108,7 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
     }
 
     protected PDateBox(final PDatePicker picker, final SimpleDateFormat dateFormat, final boolean keepDayTimeNeeded) {
+        if (UIContext.get().getConfiguration().isTabindexOnlyFormField()) tabindex = -1;
         this.datePicker = picker;
         this.dateFormat = dateFormat;
         this.keepDayTimeNeeded = keepDayTimeNeeded;
@@ -183,16 +203,58 @@ public class PDateBox extends PFocusWidget implements HasPValue<Date>, PValueCha
         else return getDateFormat().format(getValue());
     }
 
-    public void setDefaultMonth(final Date date) {
-        saveUpdate(ServerToClientModel.TIME, date.getTime());
-    }
-
     public PDatePicker getDatePicker() {
         return datePicker;
     }
 
     public String getRawValue() {
         return rawValue;
+    }
+
+    /**
+     * @deprecated Use {@link #focus()} or {@link #blur()}
+     * @since v2.7.16
+     */
+    @Deprecated
+    @Override
+    public void setFocus(final boolean focused) {
+        if (focused) focus();
+        else blur();
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(final boolean enabled) {
+        if (Objects.equals(this.enabled, enabled)) return;
+        this.enabled = enabled;
+        saveUpdate(ServerToClientModel.ENABLED, enabled);
+    }
+
+    @Override
+    public HandlerRegistration addMouseOverHandler(final PMouseOverHandler handler) {
+        return addDomHandler(handler, PMouseOverEvent.TYPE);
+    }
+
+    @Override
+    public HandlerRegistration addFocusHandler(final PFocusHandler handler) {
+        return addDomHandler(handler, PFocusEvent.TYPE);
+    }
+
+    @Override
+    public HandlerRegistration addBlurHandler(final PBlurHandler handler) {
+        return addDomHandler(handler, PBlurEvent.TYPE);
+    }
+
+    @Override
+    public HandlerRegistration addClickHandler(final PClickHandler handler) {
+        return addDomHandler(handler, PClickEvent.TYPE);
+    }
+
+    @Override
+    public HandlerRegistration addDoubleClickHandler(final PDoubleClickHandler handler) {
+        return addDomHandler(handler, PDoubleClickEvent.TYPE);
     }
 
 }
