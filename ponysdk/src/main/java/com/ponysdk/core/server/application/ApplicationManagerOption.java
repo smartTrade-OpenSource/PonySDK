@@ -27,9 +27,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+
 import com.ponysdk.core.ui.main.EntryPoint;
 
-public class ApplicationManagerOption {
+public class ApplicationManagerOption implements ApplicationContextAware {
 
     public static final String APPLICATION_ID = "ponysdk.application.id";
     public static final String APPLICATION_NAME = "ponysdk.application.name";
@@ -38,6 +41,8 @@ public class ApplicationManagerOption {
     public static final String STYLESHEETS = "ponysdk.application.stylesheets";
     public static final String JAVASCRIPTS = "ponysdk.application.javascripts";
     public static final String POINTCLASS = "ponysdk.entry.point.class";
+
+    private ApplicationContext context;
 
     private String applicationID;
     private String applicationName;
@@ -187,6 +192,15 @@ public class ApplicationManagerOption {
 
     public void setTabindexOnlyFormField(final boolean tabindexOnlyFormField) {
         this.tabindexOnlyFormField = tabindexOnlyFormField;
+    }
+
+    public ApplicationContext getApplicationContext() {
+        return context;
+    }
+
+    @Override
+    public void setApplicationContext(final ApplicationContext context) {
+        this.context = context;
     }
 
     @Override

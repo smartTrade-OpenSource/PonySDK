@@ -55,8 +55,12 @@ class SpringApplicationManager extends AbstractApplicationManager {
     }
 
     @Override
-    protected EntryPoint initializeUIContext(final UIContext ponySession) {
+    protected EntryPoint initializeUIContext(final UIContext uiContext) {
         try (ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext(configurations)) {
+            final String[] serverActiveProfiles = uiContext.getConfiguration().getApplicationContext().getEnvironment()
+                .getActiveProfiles();
+            Arrays.stream(serverActiveProfiles).forEach(profile -> applicationContext.getEnvironment().addActiveProfile(profile));
+
             final EntryPoint entryPoint = applicationContext.getBean(EntryPoint.class);
 
             final Map<String, InitializingActivity> initializingPages = applicationContext.getBeansOfType(InitializingActivity.class);
