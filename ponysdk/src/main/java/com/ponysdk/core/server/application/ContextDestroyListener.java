@@ -23,6 +23,8 @@
 
 package com.ponysdk.core.server.application;
 
+import com.ponysdk.core.server.context.UIContext;
+
 @FunctionalInterface
 public interface ContextDestroyListener{
 

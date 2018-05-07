@@ -25,7 +25,6 @@ package com.ponysdk.core.server.servlet;
 
 import java.io.IOException;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -34,7 +33,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.context.UIContext;
+import com.ponysdk.core.server.context.UIContexts;
 import com.ponysdk.core.ui.eventbus.StreamHandler;
 
 /**
@@ -49,7 +49,7 @@ public class StreamServiceServlet extends HttpServlet {
     private static void streamRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         try {
             final Integer uiContextID = Integer.parseInt(req.getParameter(ClientToServerModel.UI_CONTEXT_ID.toStringValue()));
-            final UIContext uiContext = SessionManager.get().getUIContext(uiContextID);
+            final UIContext uiContext = UIContexts.getContext(uiContextID);
             final StreamHandler streamHandler = uiContext
                 .removeStreamListener(Integer.parseInt(req.getParameter(ClientToServerModel.STREAM_REQUEST_ID.toStringValue())));
             streamHandler.onStream(req, resp, uiContext);
@@ -60,12 +60,12 @@ public class StreamServiceServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         streamRequest(req, resp);
     }
 
     @Override
-    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         streamRequest(req, resp);
     }
 }

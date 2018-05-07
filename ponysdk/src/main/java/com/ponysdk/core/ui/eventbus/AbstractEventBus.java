@@ -75,11 +75,7 @@ public abstract class AbstractEventBus implements EventBus {
     }
 
     private void doAddNow(final Event.Type type, final Object source, final EventHandler handler) {
-        Map<Object, Set<EventHandler>> sourceMap = map.get(type);
-        if (sourceMap == null) {
-            sourceMap = new HashMap<>();
-            map.put(type, sourceMap);
-        }
+        Map<Object, Set<EventHandler>> sourceMap = map.computeIfAbsent(type, k -> new HashMap<>());
 
         // safe, we control the puts.
         Set<EventHandler> handlers = sourceMap.get(source);
@@ -154,6 +150,7 @@ public abstract class AbstractEventBus implements EventBus {
         else doFire(event, source);
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private void doFire(final Event<? extends EventHandler> event, final Object source) {
         if (source != null) event.setSource(source);
 

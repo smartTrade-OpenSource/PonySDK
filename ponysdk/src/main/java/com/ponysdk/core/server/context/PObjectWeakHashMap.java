@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.core.server.application;
+package com.ponysdk.core.server.context;
 
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
@@ -35,10 +35,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.ui.basic.PObject;
 import com.ponysdk.core.ui.basic.PWindow;
-import com.ponysdk.core.writer.ModelWriter;
 
 public class PObjectWeakHashMap implements Map<Integer, PObject> {
 
@@ -150,12 +148,11 @@ public class PObjectWeakHashMap implements Map<Integer, PObject> {
             referenceByObjectID.remove(objectID);
             if (log.isDebugEnabled()) log.debug("Removing reference on object #{}", objectID);
 
-            final ModelWriter writer = Txn.get().getWriter();
-            writer.beginObject();
-            if (windowID != PWindow.getMain().getID()) writer.write(ServerToClientModel.WINDOW_ID, windowID);
-            if (frameID != null) writer.write(ServerToClientModel.FRAME_ID, frameID);
-            writer.write(ServerToClientModel.TYPE_GC, objectID);
-            writer.endObject();
+            UIContext.beginObject();
+            if (windowID != PWindow.getMain().getID()) UIContext.write(ServerToClientModel.WINDOW_ID, windowID);
+            if (frameID != null) UIContext.write(ServerToClientModel.FRAME_ID, frameID);
+            UIContext.write(ServerToClientModel.TYPE_GC, objectID);
+            UIContext.endObject();
         }
     }
 

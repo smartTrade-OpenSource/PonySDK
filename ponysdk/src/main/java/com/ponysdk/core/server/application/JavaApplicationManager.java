@@ -21,18 +21,16 @@
  * the License.
  */
 
-package com.ponysdk.spring.servlet;
+package com.ponysdk.core.server.application;
 
-import com.ponysdk.core.server.application.AbstractApplicationManager;
-import com.ponysdk.core.server.servlet.AbstractApplicationLoader;
+import com.ponysdk.core.server.context.UIContext;
+import com.ponysdk.core.ui.main.EntryPoint;
 
-public class SpringApplicationLoader extends AbstractApplicationLoader {
-
-    public static final String SERVER_CONFIG_LOCATION = "ponysdk.spring.application.server.configuration.file";
+public class JavaApplicationManager extends AbstractApplicationManager {
 
     @Override
-    public AbstractApplicationManager createApplicationManager() {
-        return new SpringApplicationManager(applicationManagerOption);
+    protected EntryPoint initializeUIContext(UIContext uiContext) throws Exception {
+        final Class<? extends EntryPoint> entryPointClassName = configuration.getEntryPointClass();
+        return entryPointClassName.getDeclaredConstructor().newInstance();
     }
-
 }

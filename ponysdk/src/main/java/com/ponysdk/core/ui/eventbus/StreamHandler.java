@@ -23,10 +23,10 @@
 
 package com.ponysdk.core.ui.eventbus;
 
-import com.ponysdk.core.server.application.UIContext;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import com.ponysdk.core.server.context.UIContext;
 
 @FunctionalInterface
 public interface StreamHandler {

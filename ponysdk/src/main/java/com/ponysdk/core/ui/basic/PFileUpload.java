@@ -33,7 +33,7 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.context.UIContext;
 import com.ponysdk.core.ui.basic.event.HasPChangeHandlers;
 import com.ponysdk.core.ui.basic.event.HasPSubmitCompleteHandlers;
 import com.ponysdk.core.ui.basic.event.PChangeEvent;
@@ -94,7 +94,7 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, HasPSubm
     }
 
     public void submit() {
-        UIContext.get().stackEmbededStreamRequest(streamHandler, getID());
+        UIContext.get().stackEmbeddedStreamRequest(streamHandler, getID());
     }
 
     public String getName() {

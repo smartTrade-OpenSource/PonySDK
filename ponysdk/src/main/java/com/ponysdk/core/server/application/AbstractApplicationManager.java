@@ -23,55 +23,61 @@
 
 package com.ponysdk.core.server.application;
 
-import javax.servlet.ServletException;
+import java.time.Duration;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.server.stm.Txn;
-import com.ponysdk.core.server.stm.TxnContext;
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.context.CommunicationSanityChecker;
+import com.ponysdk.core.server.context.UIContext;
 import com.ponysdk.core.ui.main.EntryPoint;
 
 public abstract class AbstractApplicationManager {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractApplicationManager.class);
 
-    private final ApplicationManagerOption options;
+    protected ApplicationConfiguration configuration;
 
-    protected AbstractApplicationManager(final ApplicationManagerOption options) {
-        this.options = options;
-        log.info(options.toString());
+    private CommunicationSanityChecker communicationSanityChecker;
+
+    public void start() {
+        long period = configuration.getHeartBeatPeriodTimeUnit().toMillis(configuration.getHeartBeatPeriod());
+        communicationSanityChecker = new CommunicationSanityChecker(Duration.ofMillis(period));
+        communicationSanityChecker.start();
     }
 
-    public void startApplication(final TxnContext txnContext) throws Exception {
-        final UIContext uiContext = txnContext.getUIContext();
-        uiContext.begin();
-        try {
-            final Txn txn = Txn.get();
-            txn.begin(txnContext);
+    public void startContext(UIContext uiContext) {
+        communicationSanityChecker.registerUIContext(uiContext);
+        uiContext.execute(() -> {
+
+            final EntryPoint entryPoint;
             try {
-                final EntryPoint entryPoint = initializeUIContext(uiContext);
+                uiContext.getWriter().write(ServerToClientModel.CREATE_CONTEXT, uiContext.getID());
+                uiContext.getWriter().write(ServerToClientModel.END, null);
 
-                final String historyToken = txnContext.getHistoryToken();
+                entryPoint = initializeUIContext(uiContext);
+                final String historyToken = uiContext.getHistoryToken();
 
-                if (historyToken != null && !historyToken.isEmpty()) uiContext.getHistory().newItem(historyToken, false);
+                if (historyToken != null && !historyToken.isEmpty())
+                    uiContext.getHistory().newItem(historyToken, false);
 
                 entryPoint.start(uiContext);
-
-                txn.commit();
-            } catch (final Throwable e) {
-                log.error("Cannot send instructions to the browser " + txnContext, e);
-                txn.rollback();
+            } catch (Exception e) {
+                log.error("Cannot start UIContext", e);
+                //TODO nciaravola destroy if exception ?
             }
-        } finally {
-            uiContext.end();
-        }
+        });
     }
 
-    protected abstract EntryPoint initializeUIContext(final UIContext ponySession) throws ServletException;
+    protected abstract EntryPoint initializeUIContext(final UIContext uiContext) throws Exception;
 
-    public ApplicationManagerOption getOptions() {
-        return options;
+    public void setConfiguration(ApplicationConfiguration configuration) {
+        this.configuration = configuration;
+    }
+
+    public ApplicationConfiguration getConfiguration() {
+        return configuration;
     }
 
 }

@@ -27,7 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Contains the native key codes.
+ * Contains the elemental key codes.
  */
 public enum PKeyCodes {
 

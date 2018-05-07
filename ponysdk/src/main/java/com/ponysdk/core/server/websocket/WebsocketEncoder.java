@@ -2,8 +2,8 @@
  * Copyright (c) 2017 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
@@ -21,12 +21,16 @@
  * the License.
  */
 
-package com.ponysdk.core.server;
+package com.ponysdk.core.server.websocket;
 
-public class AlreadyDestroyedApplication extends RuntimeException {
+import com.ponysdk.core.model.ServerToClientModel;
 
-    public AlreadyDestroyedApplication(final String string) {
-        super(string);
-    }
+public interface WebsocketEncoder {
+
+    void beginObject();
+
+    void encode(final ServerToClientModel model, final Object value);
+
+    void endObject();
 
 }

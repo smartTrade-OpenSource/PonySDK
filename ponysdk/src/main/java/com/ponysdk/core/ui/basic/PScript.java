@@ -32,10 +32,10 @@ import javax.json.JsonObject;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.context.UIContext;
 
 /**
- * This class allows to execute native Java-script code.
+ * This class allows to execute elemental Java-script code.
  */
 public class PScript extends PObject {
 

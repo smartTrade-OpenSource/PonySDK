@@ -23,15 +23,15 @@
 
 package com.ponysdk.impl.main;
 
-import com.ponysdk.spring.servlet.SpringApplicationLoader;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import com.ponysdk.spring.servlet.SpringApplicationManager;
 
 public class MainSpring {
 
     @SuppressWarnings("resource")
-    public static void main(final String[] args) throws Exception {
-        final String serverConfigLocation = System.getProperty(SpringApplicationLoader.SERVER_CONFIG_LOCATION, "classpath:etc/server_application.xml");
-
+    public static void main(final String[] args) {
+        final String serverConfigLocation = System.getProperty(SpringApplicationManager.SERVER_CONFIG_LOCATION, "classpath:etc/server_application.xml");
         new ClassPathXmlApplicationContext(serverConfigLocation);
     }
 

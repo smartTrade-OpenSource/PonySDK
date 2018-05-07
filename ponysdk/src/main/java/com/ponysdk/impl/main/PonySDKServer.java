@@ -25,45 +25,35 @@ package com.ponysdk.impl.main;
 
 import java.net.InetAddress;
 import java.net.URL;
-import java.util.EnumSet;
 
-import javax.servlet.DispatcherType;
+import javax.websocket.server.ServerEndpointConfig;
 
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
-import org.eclipse.jetty.server.session.SessionHandler;
-import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
+import org.eclipse.jetty.websocket.jsr356.server.ServerContainer;
+import org.eclipse.jetty.websocket.jsr356.server.deploy.WebSocketServerContainerInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.model.MappingPath;
-import com.ponysdk.core.server.application.ApplicationManagerOption;
+import com.ponysdk.core.server.application.AbstractApplicationManager;
 import com.ponysdk.core.server.servlet.AjaxServlet;
-import com.ponysdk.core.server.servlet.ApplicationLoader;
 import com.ponysdk.core.server.servlet.BootstrapServlet;
-import com.ponysdk.core.server.servlet.ServletContextFilter;
 import com.ponysdk.core.server.servlet.StreamServiceServlet;
-import com.ponysdk.core.server.servlet.WebSocketServlet;
+import com.ponysdk.core.server.websocket.WebSocket;
+import com.ponysdk.core.server.websocket.WebsocketConfigurator;
 
 public class PonySDKServer {
 
-    public static final String MAPPING_BOOTSTRAP = "/*";
-    public static final String MAPPING_WS = "/" + MappingPath.WEBSOCKET + "/*";
-    public static final String MAPPING_STREAM = "/" + MappingPath.STREAM;
-    public static final String MAPPING_AJAX = "/" + MappingPath.AJAX;
+    private static final Logger LOG = LoggerFactory.getLogger(PonySDKServer.class);
 
-    private static final Logger log = LoggerFactory.getLogger(PonySDKServer.class);
-
-    protected final Server server;
-
-    protected ApplicationLoader applicationLoader;
-
+    protected Server server;
     protected String host = "0.0.0.0";
     protected int port = 80;
 
@@ -76,53 +66,43 @@ public class PonySDKServer {
     private String sslTrustStorePassphrase;
     private String sslTrustStoreType = "JKS";
     private boolean needClientAuth = false;
-    private String[] enabledProtocols = new String[] { "TLSv1", "TLSv1.1", "TLSv1.2" };
+    private String[] enabledProtocols = new String[]{"TLSv1", "TLSv1.1", "TLSv1.2"};
     private String enabledCipherSuites;
 
-    public PonySDKServer() {
-        server = new Server();
-    }
+    private AbstractApplicationManager applicationManager;
 
     public void start() throws Exception {
+        server = new Server();
+
+        //connectors
         server.addConnector(createHttpConnector());
         if (useSSL) server.addConnector(createHttpsConnector());
 
+        //servlets
         final ServletContextHandler context = createWebApp();
-
         final GzipHandler gzip = new GzipHandler();
         gzip.setHandler(context);
-
         server.setHandler(gzip);
 
-        context.addEventListener(applicationLoader);
-        applicationLoader.start();
+        //websocket
+        final WebsocketConfigurator configurator = new WebsocketConfigurator(applicationManager);
+        ServerContainer wscontainer = WebSocketServerContainerInitializer.configureContext(context);
+        wscontainer.setAsyncSendTimeout(10000);
+        wscontainer.addEndpoint(ServerEndpointConfig.Builder.create(WebSocket.class, "/ws").configurator(configurator).build());
 
+        applicationManager.start();
         server.start();
-
         server.join();
 
-        log.info("Webserver started on: " + InetAddress.getLocalHost().getHostAddress() + ":" + port);
+        LOG.info("Webserver started on: " + InetAddress.getLocalHost().getHostAddress() + ":" + port);
     }
 
     protected ServletContextHandler createWebApp() {
-        final ApplicationManagerOption applicationManagerOption = applicationLoader.getApplicationManagerOption();
-        log.info("Adding application #" + applicationManagerOption.getApplicationContextName());
-
-        final ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
-        context.setContextPath("/" + applicationManagerOption.getApplicationContextName());
-
-        context.addServlet(new ServletHolder(createBootstrapServlet()), MAPPING_BOOTSTRAP);
-        context.addServlet(new ServletHolder(createStreamServiceServlet()), MAPPING_STREAM);
-        context.addServlet(new ServletHolder(createAjaxServlet()), MAPPING_AJAX);
-        context.addServlet(new ServletHolder(createWebSocketServlet()), MAPPING_WS);
-
-        final ServletContextFilter servletContextFilter = new ServletContextFilter();
-        context.addFilter(new FilterHolder(servletContextFilter), MAPPING_BOOTSTRAP, EnumSet.of(DispatcherType.REQUEST));
-
-        final SessionHandler sessionHandler = context.getSessionHandler();
-        sessionHandler.setMaxInactiveInterval(60 * applicationManagerOption.getSessionTimeout());
-        sessionHandler.addEventListener(applicationLoader);
-
+        final ServletContextHandler context = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
+        context.setContextPath("/" + applicationManager.getConfiguration().getApplicationContextName());
+        context.addServlet(new ServletHolder(createBootstrapServlet()), "/"/* + MappingPath.RESOURCE;*/);
+        context.addServlet(new ServletHolder(createStreamServiceServlet()), "/" + MappingPath.STREAM);
+        context.addServlet(new ServletHolder(createAjaxServlet()), "/" + MappingPath.AJAX);
         return context;
     }
 
@@ -176,7 +156,7 @@ public class PonySDKServer {
 
     protected BootstrapServlet createBootstrapServlet() {
         final BootstrapServlet bootstrapServlet = new BootstrapServlet();
-        bootstrapServlet.setApplication(applicationLoader.getApplicationManagerOption());
+        bootstrapServlet.setApplicationOption(applicationManager.getConfiguration());
         return bootstrapServlet;
     }
 
@@ -188,20 +168,8 @@ public class PonySDKServer {
         return new AjaxServlet();
     }
 
-    protected WebSocketServlet createWebSocketServlet() {
-        return new WebSocketServlet();
-    }
-
     public void stop() throws Exception {
         server.stop();
-    }
-
-    public void setApplicationLoader(final ApplicationLoader applicationLoader) {
-        this.applicationLoader = applicationLoader;
-    }
-
-    public ApplicationManagerOption getApplicationOption() {
-        return applicationLoader.getApplicationManagerOption();
     }
 
     public void setHost(final String host) {
@@ -214,10 +182,6 @@ public class PonySDKServer {
 
     public void setUseSSL(final boolean useSSL) {
         this.useSSL = useSSL;
-    }
-
-    public boolean isUseSSL() {
-        return useSSL;
     }
 
     public void setSslKeyStoreFile(final String sslKeyStoreFile) {
@@ -260,4 +224,7 @@ public class PonySDKServer {
         this.enabledCipherSuites = enabledCipherSuites;
     }
 
+    public void setApplicationManager(AbstractApplicationManager applicationManager) {
+        this.applicationManager = applicationManager;
+    }
 }

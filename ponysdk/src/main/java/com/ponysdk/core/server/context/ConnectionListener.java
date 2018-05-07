@@ -21,14 +21,11 @@
  * the License.
  */
 
-package com.ponysdk.core.server.stm;
+package com.ponysdk.core.server.context;
 
-public interface TxnListener {
+public interface ConnectionListener {
 
-    void beforeFlush(TxnContext txnContext);
+    void onOpen();
 
-    void beforeRollback();
-
-    void afterFlush(TxnContext txnContext);
-
+    void onClose();
 }

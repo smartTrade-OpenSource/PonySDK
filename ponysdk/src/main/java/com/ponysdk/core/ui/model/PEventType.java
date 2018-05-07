@@ -27,7 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Contains the native eventbus codes.
+ * Contains the elemental eventbus codes.
  */
 public enum PEventType {
 

@@ -30,7 +30,7 @@ import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.writer.ModelWriter;
 
 /**
- * All HTML element interfaces derive from this class.Useful to create native
+ * All HTML element interfaces derive from this class.Useful to create elemental
  * HTML component.
  */
 public class PElement extends PComplexPanel {

@@ -23,14 +23,14 @@
 
 package com.ponysdk.core.ui.basic.event;
 
-import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.ui.eventbus.EventHandler;
-import com.ponysdk.core.ui.model.PKeyCodes;
-
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+
+import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.ui.eventbus.EventHandler;
+import com.ponysdk.core.ui.model.PKeyCodes;
 
 public interface PKeyFilterHandler extends EventHandler {
 

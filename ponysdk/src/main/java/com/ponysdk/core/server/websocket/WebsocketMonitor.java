@@ -21,16 +21,14 @@
  * the License.
  */
 
-package com.ponysdk.core.server.servlet;
+package com.ponysdk.core.server.websocket;
 
-import com.ponysdk.core.model.ServerToClientModel;
+public interface WebsocketMonitor {
 
-public interface WebsocketEncoder {
+    void onMessageReceived(WebSocket webSocket, String message);
 
-    void beginObject();
+    void onMessageProcessed(WebSocket webSocket, String message);
 
-    void encode(final ServerToClientModel model, final Object value);
-
-    void endObject();
+    void onMessageUnprocessed(WebSocket webSocket, String message);
 
 }

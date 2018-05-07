@@ -66,7 +66,7 @@ public class JavascriptPageActivity extends SamplePageActivity {
         dock.addSouth(inputTextBox, 30);
         dock.add(scroll);
 
-        history.add(Element.newPLabel("> With PonySDK, you can also execute native javascript"));
+        history.add(Element.newPLabel("> With PonySDK, you can also execute elemental javascript"));
         history.add(Element.newPLabel("> Try it out.. "));
 
         inputTextBox.addKeyUpHandler(new PKeyUpHandler() {

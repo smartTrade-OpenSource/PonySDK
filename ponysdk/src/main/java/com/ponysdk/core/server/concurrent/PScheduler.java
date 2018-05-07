@@ -37,8 +37,7 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.server.stm.Txn;
+import com.ponysdk.core.server.context.UIContext;
 
 public class PScheduler {
 
@@ -201,36 +200,8 @@ public class PScheduler {
             }
         }
 
-        void begin() {
-            uiContext.begin();
-        }
-
-        void end() {
-            uiContext.end();
-        }
-
         public boolean execute() {
-            try {
-                begin();
-                try {
-                    final Txn txn = Txn.get();
-                    txn.begin(uiContext.getContext());
-                    try {
-                        runnable.run();
-                        txn.commit();
-                    } catch (final Throwable e) {
-                        log.error("Cannot process commmand", e);
-                        txn.rollback();
-                        return false;
-                    }
-                } finally {
-                    end();
-                }
-            } catch (final Throwable e) {
-                log.error("Cannot execute command : " + runnable, e);
-                return false;
-            }
-            return true;
+            return uiContext.execute(runnable);
         }
 
         public void cancel() {

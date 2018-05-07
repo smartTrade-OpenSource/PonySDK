@@ -82,6 +82,7 @@ import com.ponysdk.core.terminal.ui.PTTree;
 import com.ponysdk.core.terminal.ui.PTTreeItem;
 import com.ponysdk.core.terminal.ui.PTVerticalPanel;
 import com.ponysdk.core.terminal.ui.PTWindow;
+import com.ponysdk.core.terminal.ui.elemental.DivElemental;
 
 class UIFactory {
 
@@ -143,6 +144,7 @@ class UIFactory {
         else if (WidgetType.WINDOW == widgetType) return new PTWindow();
         else if (WidgetType.BROWSER == widgetType) return new PTBrowser();
         else if (WidgetType.FRAME == widgetType) return new PTFrame();
+        else if (WidgetType.DIV == widgetType) return new DivElemental();
         else log.severe("UIFactory: Client implementation not found, type : " + widgetType);
 
         return null;

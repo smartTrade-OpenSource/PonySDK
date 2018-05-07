@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.core.server.servlet;
+package com.ponysdk.core.server.websocket;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -29,17 +29,18 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
 import javax.json.JsonObject;
+import javax.websocket.SendHandler;
+import javax.websocket.SendResult;
+import javax.websocket.Session;
 
-import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.WriteCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.AutoFlushedBuffer;
+import com.ponysdk.core.server.context.UIContext;
 
-public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback {
+public class WebSocketPusher extends AutoFlushedBuffer implements SendHandler {
 
     private static final Logger log = LoggerFactory.getLogger(WebSocketPusher.class);
 
@@ -64,35 +65,19 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
         try {
             super.flush();
         } catch (final IOException e) {
-            log.error("Can't write on the websocket, so we destroy the application", e);
+            log.error("Can't write on the websocket, so we destroy the ui context", e);
             UIContext.get().destroy();
         }
     }
 
     @Override
     protected void doFlush(final ByteBuffer bufferToFlush) {
-        session.getRemote().sendBytes(bufferToFlush, this);
+        session.getAsyncRemote().sendBinary(bufferToFlush, this);
     }
 
     @Override
-    protected void closeFlusher() {
+    protected void closeFlusher() throws IOException {
         session.close();
-    }
-
-    @Override
-    public void writeFailed(final Throwable t) {
-        if (t instanceof Exception) {
-            onFlushFailure((Exception) t);
-        } else {
-            // wrap error into a generic exception to notify producer thread and rethrow the original throwable
-            onFlushFailure(new IOException(t));
-            throw (RuntimeException) t;
-        }
-    }
-
-    @Override
-    public void writeSuccess() {
-        onFlushCompletion();
     }
 
     protected void encode(final ServerToClientModel model, final Object value) {
@@ -134,7 +119,7 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
                     break;
             }
         } catch (final IOException e) {
-            log.error("Can't write on the websocket, so we destroy the application", e);
+            log.error("Can't write on the websocket, so we destroy the ui context", e);
             final UIContext uiContext = UIContext.get();
             if (uiContext != null) uiContext.destroy();
         }
@@ -259,4 +244,19 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
         putInt((int) (longValue & 0xFFFFFF));
     }
 
+    @Override
+    public void onResult(SendResult result) {
+        if(result.isOK()){
+            onFlushCompletion(); // TODO nciaravola si ca chie pas d'impact ?
+        }else{
+            Throwable t = result.getException();
+            if (t instanceof Exception) {
+                onFlushFailure((Exception) t);
+            } else {
+                // wrap error into a generic exception to notify producer thread and rethrow the original throwable
+                onFlushFailure(new IOException(t));
+                throw (RuntimeException) t;
+            }
+        }
+    }
 }

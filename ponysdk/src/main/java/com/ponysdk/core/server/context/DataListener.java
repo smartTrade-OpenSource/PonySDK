@@ -2,8 +2,8 @@
  * Copyright (c) 2011 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
@@ -21,16 +21,10 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.eventbus;
+package com.ponysdk.core.server.context;
 
-/**
- * @deprecated Useless
- * @since v2.7.11
- */
-@Deprecated
-public interface HasPEvent {
+@FunctionalInterface
+public interface DataListener {
 
-    BusinessEvent<?> getEvent();
-
-    void addEvent(BusinessEvent<?> event);
+    void onData(Object data);
 }

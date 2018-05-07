@@ -21,9 +21,9 @@
  * the License.
  */
 
-package com.ponysdk.core.server.application;
+package com.ponysdk.core.server.context;
 
-import java.util.ArrayList;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +39,7 @@ import javax.json.JsonObject;
 import javax.json.JsonString;
 import javax.json.JsonValue;
 import javax.json.JsonValue.ValueType;
+import javax.websocket.server.HandshakeRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,9 +47,9 @@ import org.slf4j.LoggerFactory;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.AlreadyDestroyedApplication;
-import com.ponysdk.core.server.stm.Txn;
-import com.ponysdk.core.server.stm.TxnContext;
+import com.ponysdk.core.server.application.ApplicationConfiguration;
+import com.ponysdk.core.server.application.ContextDestroyListener;
+import com.ponysdk.core.server.websocket.WebSocket;
 import com.ponysdk.core.ui.basic.PCookies;
 import com.ponysdk.core.ui.basic.PHistory;
 import com.ponysdk.core.ui.basic.PObject;
@@ -68,25 +69,22 @@ import com.ponysdk.core.writer.ModelWriter;
  * Provides a way to identify a user across more than one page request or visit to a Web site and to
  * store information about that user.
  * </p>
- * <p>
- * There is ONE unique UIContext for each screen displayed. Each UIContext is bound to the current
- * {@link Application} .
- * </p>
  */
 public class UIContext {
 
-    private static final ThreadLocal<UIContext> currentContext = new ThreadLocal<>();
-
     private static final Logger log = LoggerFactory.getLogger(UIContext.class);
-
+    private static final ThreadLocal<UIContext> currentContext = new ThreadLocal<>();
     private static final AtomicInteger uiContextCount = new AtomicInteger();
 
     private final int ID;
-    private final Application application;
     private final ReentrantLock lock = new ReentrantLock();
     private final Map<String, Object> attributes = new HashMap<>();
+    private final WebSocket socket;
 
     private final PObjectWeakHashMap pObjectWeakReferences = new PObjectWeakHashMap();
+    private final ModelWriter writer;
+    private final HandshakeRequest request;
+
     private int objectCounter = 1;
 
     private final Map<Integer, StreamHandler> streamListenerByID = new HashMap<>();
@@ -95,55 +93,36 @@ public class UIContext {
     private final PHistory history = new PHistory();
     private final RootEventBus rootEventBus = new RootEventBus();
     private final EventBus newEventBus = new EventBus();
-
     private final PCookies cookies = new PCookies();
 
-    private final List<ContextDestroyListener> destroyListeners = new ArrayList<>();
-    private final TxnContext context;
+    private final Set<ContextDestroyListener> destroyListeners = Collections.newSetFromMap(new ConcurrentHashMap<>());
     private final Set<DataListener> listeners = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     private TerminalDataReceiver terminalDataReceiver;
 
-    private boolean living = true;
+    private volatile boolean alive = true;
 
     private final Latency latency = new Latency(10);
 
-    /**
-     * The default constructor
-     *
-     * @param context
-     *            the transaction context
-     */
-    public UIContext(final TxnContext context) {
-        this.application = context.getApplication();
+    private Instant lastReceivedTime = Instant.now();
+
+    public UIContext(final WebSocket socket, final HandshakeRequest request, final ApplicationConfiguration option) {
         this.ID = uiContextCount.incrementAndGet();
-        this.context = context;
+        this.socket = socket;
+        this.writer = new ModelWriter(socket);
+        this.request = request;
     }
 
-    /**
-     * Returns the current UIContext
-     *
-     * @return The current UIContext
-     */
     public static UIContext get() {
         return currentContext.get();
     }
 
-    /**
-     * Removed the current UIContext
-     */
-    public static void remove() {
-        currentContext.remove();
+    public void onMessageReceived() {
+        lastReceivedTime = Instant.now();
     }
 
-    /**
-     * Sets the current UIContext
-     *
-     * @param uiContext
-     *            the UIContext
-     */
-    public static void setCurrent(final UIContext uiContext) {
-        currentContext.set(uiContext);
+    public Instant getLastReceivedTime() {
+        return lastReceivedTime;
     }
 
     /**
@@ -274,82 +253,48 @@ public class UIContext {
         return get().newEventBus;
     }
 
-    /**
-     * Gets the ID of the UIContext
-     *
-     * @return the ID
-     */
     public int getID() {
         return ID;
     }
 
-    /**
-     * Adds a {@link DataListener} to the UIContext
-     *
-     * @param listener
-     *            the data listener
-     */
     public boolean addDataListener(final DataListener listener) {
         return listeners.add(listener);
     }
 
-    /**
-     * Removes the {@link DataListener} from UIContext
-     *
-     * @param listener
-     *            the data listener
-     */
     public boolean removeDataListener(final DataListener listener) {
         return listeners.remove(listener);
     }
 
     /**
      * Executes a {@link Runnable} that represents a task in a graphical context
-     *
+     * <p>
      * This method locks the UIContext
      *
      * @param runnable
      *            the tasks
      */
-    public void execute(final Runnable runnable) {
+    public boolean execute(final Runnable runnable) {
+        if (!isAlive()) return false;
         if (log.isDebugEnabled()) log.debug("Pushing to #" + this);
         if (UIContext.get() != this) {
-            begin();
+            acquire();
             try {
-                final Txn txn = Txn.get();
-                txn.begin(context);
-                try {
-                    runnable.run();
-                    txn.commit();
-                } catch (final Throwable e) {
-                    log.error("Cannot process client instruction", e);
-                    txn.rollback();
-                }
+                runnable.run();
+                flush();
+                return true;
+            } catch (final Throwable e) {
+                log.error("Cannot process client instruction", e);
+                return false;
             } finally {
-                end();
+                release();
             }
         } else {
             runnable.run();
+            return true;
         }
     }
 
-    /**
-     * Stimulates all {@link DataListener} with a list of object
-     *
-     * @param data
-     *            list of object
-     */
-    public void pushToClient(final List<Object> data) {
-        if (data != null && !listeners.isEmpty()) {
-            execute(() -> {
-                try {
-                    listeners.forEach(listener -> data.forEach(listener::onData));
-                } catch (final Throwable e) {
-                    log.error("Cannot send data", e);
-                }
-            });
-        }
-    }
+    //Recheck
 
     /**
      * Stimulates all {@link DataListener} with an object
@@ -358,6 +303,7 @@ public class UIContext {
      *            the object
      */
     public void pushToClient(final Object data) {
+        if (!isAlive()) return;
         if (data != null && !listeners.isEmpty()) {
             execute(() -> {
                 try {
@@ -370,7 +316,7 @@ public class UIContext {
     }
 
     /**
-     * Sends data to the targetted {@link PObject} from {@link JsonObject} instruction
+     * Sends data to the targeted {@link PObject} from {@link JsonObject} instruction
      * Called from terminal side
      *
      * @param jsonObject
@@ -426,24 +372,22 @@ public class UIContext {
      * @param terminalDataReceiver
      *            the terminal data receiver
      */
-    public void setClientDataOutput(final TerminalDataReceiver terminalDataReceiver) {
+    public void setTerminalDataReceiver(final TerminalDataReceiver terminalDataReceiver) {
         this.terminalDataReceiver = terminalDataReceiver;
     }
 
-    /**
-     * Locks the current UIContext
-     */
-    public void begin() {
+    public void acquire() {
         lock.lock();
-        UIContext.setCurrent(this);
+        currentContext.set(this);
     }
 
-    /**
-     * Unlock the current UIContext
-     */
-    public void end() {
-        UIContext.remove();
+    public void release() {
+        currentContext.remove();
         lock.unlock();
+    }
+
+    public void flush() {
+        socket.flush();
     }
 
     /**
@@ -466,16 +410,8 @@ public class UIContext {
         pObjectWeakReferences.put(pObject.getID(), pObject);
     }
 
-    /**
-     * Gets the {@link PObject} with a specific object ID
-     *
-     * @param objectID
-     *            the object ID of the searched {@link PObject}
-     * @return the {@link PObject} or null if not found
-     * @see #registerObject(PObject)
-     */
-    public <T> T getObject(final int objectID) {
-        return (T) pObjectWeakReferences.get(objectID);
+    public PObject getObject(final int objectID) {
+        return pObjectWeakReferences.get(objectID);
     }
 
     /**
@@ -487,7 +423,6 @@ public class UIContext {
     public void stackStreamRequest(final StreamHandler streamListener) {
         final int streamRequestID = nextStreamRequestID();
 
-        final ModelWriter writer = Txn.get().getWriter();
         writer.beginObject();
         writer.write(ServerToClientModel.TYPE_ADD_HANDLER, -1);
         writer.write(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_STREAM_REQUEST.getValue());
@@ -505,10 +440,9 @@ public class UIContext {
      * @param objectID
      *            the object ID of a {@link PObject}
      */
-    public void stackEmbededStreamRequest(final StreamHandler streamListener, final int objectID) {
+    public void stackEmbeddedStreamRequest(final StreamHandler streamListener, final int objectID) {
         final int streamRequestID = nextStreamRequestID();
 
-        final ModelWriter writer = Txn.get().getWriter();
         writer.beginObject();
         final PObject pObject = getObject(objectID);
         if (!PWindow.isMain(pObject.getWindow())) writer.write(ServerToClientModel.WINDOW_ID, pObject.getWindow().getID());
@@ -545,7 +479,6 @@ public class UIContext {
      * Closes the current UIContext
      */
     public void close() {
-        final ModelWriter writer = Txn.get().getWriter();
         writer.beginObject();
         writer.write(ServerToClientModel.DESTROY_CONTEXT, null);
         writer.endObject();
@@ -587,78 +520,34 @@ public class UIContext {
      *            a string specifying the name of the object
      * @return the object with the specified name
      */
+    @SuppressWarnings("unchecked")
     public <T> T getAttribute(final String name) {
         return (T) attributes.get(name);
     }
 
     /**
-     * Destroys the current UIContext when the {@link com.ponysdk.core.server.servlet.WebSocket} is closed
-     *
-     * This method locks the UIContext
-     */
-    public void onDestroy() {
-        begin();
-        try {
-            doDestroy();
-        } finally {
-            end();
-        }
-    }
-
-    /**
-     * Destroys the current UIContext when the {@link Application} is destroyed
-     *
-     * This method locks the UIContext
-     */
-    void destroyFromApplication() {
-        begin();
-        try {
-            living = false;
-            destroyListeners.forEach(listener -> {
-                try {
-                    listener.onBeforeDestroy(this);
-                } catch (final AlreadyDestroyedApplication e) {
-                    if (log.isDebugEnabled()) log.debug("Exception while destroying UIContext #" + getID(), e);
-                } catch (final Exception e) {
-                    log.error("Exception while destroying UIContext #" + getID(), e);
-                }
-            });
-            context.close();
-        } finally {
-            end();
-        }
-    }
-
-    /**
      * Destroys the UIContext
-     *
+     * <p>
      * This method locks the UIContext
      */
     public void destroy() {
-        begin();
-        try {
-            doDestroy();
-            context.close();
-        } finally {
-            end();
-        }
+        if (!isAlive()) return;
+        alive = false;
+        doDestroy();
+        //socket.close();
     }
 
     /**
      * Destroys effectively the UIContext
      */
     private void doDestroy() {
-        living = false;
         destroyListeners.forEach(listener -> {
             try {
                 listener.onBeforeDestroy(this);
-            } catch (final AlreadyDestroyedApplication e) {
-                if (log.isDebugEnabled()) log.debug("Exception while destroying UIContext #" + getID(), e);
             } catch (final Exception e) {
                 log.error("Exception while destroying UIContext #" + getID(), e);
             }
         });
-        application.deregisterUIContext(ID);
     }
 
     /**
@@ -674,61 +563,43 @@ public class UIContext {
 
     /**
      * Sends the heart beat
-     *
+     * <p>
      * This method locks the UIContext
      */
     public void sendHeartBeat() {
-        begin();
+        acquire();
         try {
-            context.sendHeartBeat();
+            socket.sendHeartBeat();
         } catch (final Throwable e) {
             log.error("Cannot send server heart beat to UIContext #" + getID(), e);
         } finally {
-            end();
+            release();
         }
     }
 
     /**
      * Sends the round trip
-     *
+     * <p>
      * This method locks the UIContext
      */
     public void sendRoundTrip() {
-        begin();
+        //begin();
         try {
-            context.sendRoundTrip();
+            socket.sendRoundTrip();
         } catch (final Throwable e) {
             log.error("Cannot send server round trip to UIContext #" + getID(), e);
         } finally {
-            end();
+            //end();
         }
     }
 
     /**
-     * Returns the living state of the current UIContext
+     * Returns is UIContext alive ?
      *
-     * @return the living state
+     * @return alive state
      */
-    public boolean isLiving() {
-        return living;
-    }
-
-    /**
-     * Gets the {@link TxnContext} of the UIContext
-     *
-     * @return the TxnContext
-     */
-    public TxnContext getContext() {
-        return context;
-    }
-
-    /**
-     * Gets the {@link Application} of the UIContext
-     *
-     * @return The Application
-     */
-    public Application getApplication() {
-        return application;
+    public boolean isAlive() {
+        return alive;
     }
 
     /**
@@ -773,7 +644,7 @@ public class UIContext {
 
     @Override
     public String toString() {
-        return "UIContext [ID=" + ID + ", living=" + living + ", ApplicationID=" + application.getId() + "]";
+        return "UIContext [ID=" + ID + ", alive=" + alive + "]";
     }
 
     /**
@@ -793,6 +664,35 @@ public class UIContext {
      */
     public double getLatency() {
         return latency.getValue();
+    }
+
+    public ModelWriter getWriter() {
+        return writer;
+    }
+
+    public static void beginObject() {
+        get().writer.beginObject();
+    }
+
+    public static void write(final ServerToClientModel model) {
+        get().writer.write(model, null);
+    }
+
+    public static void write(final ServerToClientModel model, final Object value) {
+        get().writer.write(model, value);
+    }
+
+    public static void endObject() {
+        get().writer.endObject();
+    }
+
+    public String getHistoryToken() {
+        final List<String> historyTokens = this.request.getParameterMap().get(ClientToServerModel.TYPE_HISTORY.toStringValue());
+        return !historyTokens.isEmpty() ? historyTokens.get(0) : null;
+    }
+
+    public boolean isDebugMode() {
+        return false;
     }
 
     private static final class Latency {

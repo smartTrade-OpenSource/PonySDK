@@ -38,8 +38,7 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.server.stm.Txn;
+import com.ponysdk.core.server.context.UIContext;
 import com.ponysdk.core.ui.basic.event.PTerminalEvent;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.writer.ModelWriter;
@@ -68,7 +67,7 @@ public abstract class PObject {
     protected final AtomicInteger atomicKey = new AtomicInteger(ServerToClientModel.DESTROY.getValue());
     private AjaxHandler ajaxHandler;
 
-    PObject() {
+    public PObject() {
     }
 
     /**
@@ -87,7 +86,7 @@ public abstract class PObject {
             return true;
         } else if (this.window != window) {
             throw new IllegalAccessError(
-                "Widget already attached to an other window, current window : #" + this.window + ", new window : #" + window);
+                    "Widget already attached to an other window, current window : #" + this.window + ", new window : #" + window);
         }
 
         return false;
@@ -105,7 +104,7 @@ public abstract class PObject {
     }
 
     protected void applyInit() {
-        final ModelWriter writer = Txn.get().getWriter();
+        final ModelWriter writer = UIContext.get().getWriter();
         writer.beginObject();
         if (window != PWindow.getMain()) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
         if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
@@ -132,8 +131,7 @@ public abstract class PObject {
     /**
      * Enrichs on the initialization for the creation
      *
-     * @param writer
-     *            the writer
+     * @param writer the writer
      */
     protected void enrichForCreation(final ModelWriter writer) {
     }
@@ -141,8 +139,7 @@ public abstract class PObject {
     /**
      * Enrichs on the initialization for the update
      *
-     * @param writer
-     *            the writer
+     * @param writer the writer
      */
     protected void enrichForUpdate(final ModelWriter writer) {
     }
@@ -168,14 +165,14 @@ public abstract class PObject {
      * <p>
      * <h2>Example :</h2>
      * <p>
-     *
+     * <p>
      * <pre>
      * --- Java ---
      *
      * bindTerminalFunction("myFunction")
      * </pre>
      * <p>
-     *
+     * <p>
      * <pre>
      * --- JavaScript ---
      *
@@ -187,7 +184,7 @@ public abstract class PObject {
      */
     public void bindTerminalFunction(final String functionName) {
         if (nativeBindingFunction != null)
-            throw new IllegalAccessError("Object already bind to native function: " + nativeBindingFunction);
+            throw new IllegalAccessError("Object already bind to elemental function: " + nativeBindingFunction);
 
         nativeBindingFunction = functionName;
 
@@ -196,7 +193,7 @@ public abstract class PObject {
 
     public void sendToNative(final JsonObject data) {
         if (destroy) return;
-        if (nativeBindingFunction == null) throw new IllegalAccessError("Object not bind to a native function");
+        if (nativeBindingFunction == null) throw new IllegalAccessError("Object not bind to a elemental function");
 
         saveUpdate(writer -> writer.write(ServerToClientModel.NATIVE, data));
     }
@@ -241,7 +238,7 @@ public abstract class PObject {
     void writeUpdate(final ModelWriterCallback callback) {
         if (destroy) return;
 
-        final ModelWriter writer = Txn.get().getWriter();
+        final ModelWriter writer = UIContext.get().getWriter();
         writer.beginObject();
         if (!PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
         if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
@@ -274,7 +271,7 @@ public abstract class PObject {
     private void writeAdd(final ModelWriterCallback callback) {
         if (destroy) return;
 
-        final ModelWriter writer = Txn.get().getWriter();
+        final ModelWriter writer = UIContext.get().getWriter();
         writer.beginObject();
         if (!PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
         if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
@@ -294,7 +291,7 @@ public abstract class PObject {
     void writeAddHandler(final ModelWriterCallback callback) {
         if (destroy) return;
 
-        final ModelWriter writer = Txn.get().getWriter();
+        final ModelWriter writer = UIContext.get().getWriter();
         writer.beginObject();
         if (!PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
         if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
@@ -318,7 +315,7 @@ public abstract class PObject {
     private void writeRemoveHandler(final ModelWriterCallback callback) {
         if (destroy) return;
 
-        final ModelWriter writer = Txn.get().getWriter();
+        final ModelWriter writer = UIContext.get().getWriter();
         writer.beginObject();
         if (!PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
         if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
@@ -341,7 +338,7 @@ public abstract class PObject {
     private void writeRemove(final ModelWriterCallback callback) {
         if (destroy) return;
 
-        final ModelWriter writer = Txn.get().getWriter();
+        final ModelWriter writer = UIContext.get().getWriter();
         writer.beginObject();
         if (!PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
         if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());

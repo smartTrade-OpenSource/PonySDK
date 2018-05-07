@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.ponysdk.core.ui.main.EntryPoint;
 
-public class ApplicationManagerOption {
+public class ApplicationConfiguration {
 
     public static final String APPLICATION_ID = "ponysdk.application.id";
     public static final String APPLICATION_NAME = "ponysdk.application.name";
@@ -60,7 +60,7 @@ public class ApplicationManagerOption {
 
     private boolean debugMode;
 
-    public ApplicationManagerOption() {
+    public ApplicationConfiguration() {
         applicationID = System.getProperty(APPLICATION_ID);
         applicationName = System.getProperty(APPLICATION_NAME);
         applicationDescription = System.getProperty(APPLICATION_DESCRIPTION);
@@ -181,7 +181,7 @@ public class ApplicationManagerOption {
 
     @Override
     public String toString() {
-        return "ApplicationManagerOption [heartBeatPeriod=" + heartBeatPeriod + " " + heartBeatPeriodTimeUnit + "]";
+        return "ApplicationConfiguration [heartBeatPeriod=" + heartBeatPeriod + " " + heartBeatPeriodTimeUnit + "]";
     }
 
 }

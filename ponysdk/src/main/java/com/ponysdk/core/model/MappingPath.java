@@ -26,6 +26,7 @@ package com.ponysdk.core.model;
 public interface MappingPath {
 
     String WEBSOCKET = "ws";
+    String RESOURCE = "resource";
     String STREAM = "stream";
     String AJAX = "ajax";
 

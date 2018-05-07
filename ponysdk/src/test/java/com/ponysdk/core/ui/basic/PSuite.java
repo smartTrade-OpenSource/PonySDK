@@ -23,36 +23,32 @@
 
 package com.ponysdk.core.ui.basic;
 
+import javax.websocket.server.HandshakeRequest;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.mockito.Mockito;
 
-import com.ponysdk.core.server.application.Application;
-import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.server.servlet.WebSocket;
-import com.ponysdk.core.server.stm.Txn;
-import com.ponysdk.core.server.stm.TxnContext;
+import com.ponysdk.core.server.application.ApplicationConfiguration;
+import com.ponysdk.core.server.context.UIContext;
+import com.ponysdk.core.server.websocket.WebSocket;
 import com.ponysdk.core.writer.ModelWriter;
 
 public class PSuite {
 
     @BeforeClass
     public static void beforeClass() {
-        final TxnContext context = Mockito.spy(new TxnContext(Mockito.mock(WebSocket.class)));
+        final ApplicationConfiguration application = Mockito.mock(ApplicationConfiguration.class, Mockito.RETURNS_MOCKS);
+        final HandshakeRequest request = Mockito.mock(HandshakeRequest.class, Mockito.RETURNS_MOCKS);
+        final UIContext uiContext = Mockito.spy(new UIContext(Mockito.mock(WebSocket.class), request, application));
         final ModelWriter mw = Mockito.mock(ModelWriter.class);
-        Mockito.when(context.getWriter()).thenReturn(mw);
-
-        final Application application = Mockito.mock(Application.class, Mockito.RETURNS_MOCKS);
-        Mockito.when(context.getApplication()).thenReturn(application);
-
-        Txn.get().begin(context);
-        final UIContext uiContext = Mockito.spy(new UIContext(context));
-        UIContext.setCurrent(uiContext);
+        Mockito.when(uiContext.getWriter()).thenReturn(mw);
+        uiContext.acquire();
     }
 
     @AfterClass
     public static void afterClass() {
-        Txn.get().commit();
+        UIContext.get().release();
     }
 
 }

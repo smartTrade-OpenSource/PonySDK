@@ -1,9 +1,9 @@
 
 package com.ponysdk.core.server.concurrent;
 
-import com.ponysdk.core.server.application.UIContext;
-
 import java.util.function.Consumer;
+
+import com.ponysdk.core.server.context.UIContext;
 
 public final class UIDelegator<R> implements Consumer<R> {
 

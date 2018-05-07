@@ -45,8 +45,7 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.DomHandlerType;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.server.stm.Txn;
+import com.ponysdk.core.server.context.UIContext;
 import com.ponysdk.core.ui.basic.event.HasPHandlers;
 import com.ponysdk.core.ui.basic.event.HasPKeyPressHandlers;
 import com.ponysdk.core.ui.basic.event.HasPKeyUpHandlers;
@@ -161,7 +160,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     }
 
     public void ensureDebugId(final String debugID) {
-        if (UIContext.get().getApplication().getOptions().isDebugMode()) {
+        if (UIContext.get().isDebugMode()) {
             if (Objects.equals(this.debugID, debugID)) return;
             this.debugID = debugID;
             saveUpdate(writer -> writer.write(ServerToClientModel.ENSURE_DEBUG_ID, debugID));
@@ -356,7 +355,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
 
     private void executeRemoveDomHandler(final PDomEvent.Type type) {
         if (destroy) return;
-        final ModelWriter writer = Txn.get().getWriter();
+        final ModelWriter writer = UIContext.get().getWriter();
         writer.beginObject();
         if (!PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
         writer.write(ServerToClientModel.TYPE_REMOVE_HANDLER, ID);
@@ -467,7 +466,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
                     final PDropEvent dropEvent = new PDropEvent(this);
                     final String dragSrc = ClientToServerModel.DRAG_SRC.toStringValue();
                     if (instruction.containsKey(dragSrc)) {
-                        final PWidget source = UIContext.get().getObject(instruction.getJsonNumber(dragSrc).intValue());
+                        final PWidget source = (PWidget) UIContext.get().getObject(instruction.getJsonNumber(dragSrc).intValue());
                         dropEvent.setDragSource(source);
                     }
                     fireEvent(dropEvent);
@@ -568,15 +567,6 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     public void onDestroy() {
         super.onDestroy();
         if (addons != null) addons.forEach(addon -> addon.onDestroy());
-    }
-
-    /**
-     * @deprecated Use {@link #getAddons()} instead
-     * @return First binded addon
-     */
-    @Deprecated
-    public PAddOn getAddon() {
-        return addons != null && !addons.isEmpty() ? addons.iterator().next() : null;
     }
 
 }
