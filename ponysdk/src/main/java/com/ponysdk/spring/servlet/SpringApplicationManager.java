@@ -34,8 +34,8 @@ import org.springframework.util.StringUtils;
 import com.ponysdk.core.server.application.AbstractApplicationManager;
 import com.ponysdk.core.server.application.ApplicationManagerOption;
 import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.ui.activity.InitializingActivity;
 import com.ponysdk.core.ui.main.EntryPoint;
-import com.ponysdk.impl.webapplication.page.InitializingActivity;
 
 class SpringApplicationManager extends AbstractApplicationManager {
 
@@ -67,6 +67,7 @@ class SpringApplicationManager extends AbstractApplicationManager {
             if (initializingPages != null && !initializingPages.isEmpty()) {
                 initializingPages.values().forEach(InitializingActivity::afterContextInitialized);
             }
+
             return entryPoint;
         }
     }

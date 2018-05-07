@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 import com.ponysdk.core.ui.activity.AbstractActivity;
+import com.ponysdk.core.ui.activity.InitializingActivity;
 import com.ponysdk.core.ui.place.Place;
 
 public abstract class PageActivity extends AbstractActivity<PageView> implements InitializingActivity {

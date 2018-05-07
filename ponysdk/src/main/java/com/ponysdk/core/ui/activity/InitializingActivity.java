@@ -21,10 +21,11 @@
  * the License.
  */
 
-package com.ponysdk.impl.webapplication.page;
+package com.ponysdk.core.ui.activity;
 
 @FunctionalInterface
 public interface InitializingActivity {
 
     void afterContextInitialized();
+
 }
