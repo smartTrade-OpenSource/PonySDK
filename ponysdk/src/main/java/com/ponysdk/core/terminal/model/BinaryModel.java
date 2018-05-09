@@ -131,7 +131,7 @@ public class BinaryModel {
 
     @Override
     public String toString() {
-        if (model == null) return null;
+        if (model == null) return "";
 
         final ValueTypeModel typeModel = model.getTypeModel();
         if (ValueTypeModel.NULL == typeModel) return String.valueOf(model);

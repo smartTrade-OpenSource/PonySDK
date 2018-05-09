@@ -71,7 +71,7 @@ public class PCellFormatter {
     }
 
     public void setVerticalAlignment(final int row, final int column, final PVerticalAlignment align) {
-        table.saveUpdate((writer) -> {
+        table.saveUpdate(writer -> {
             writer.write(ServerToClientModel.VERTICAL_ALIGNMENT, align.getValue());
             writer.write(ServerToClientModel.ROW, row);
             writer.write(ServerToClientModel.COLUMN, column);
@@ -79,7 +79,7 @@ public class PCellFormatter {
     }
 
     public void setHorizontalAlignment(final int row, final int column, final PHorizontalAlignment align) {
-        table.saveUpdate((writer) -> {
+        table.saveUpdate(writer -> {
             writer.write(ServerToClientModel.HORIZONTAL_ALIGNMENT, align.getValue());
             writer.write(ServerToClientModel.ROW, row);
             writer.write(ServerToClientModel.COLUMN, column);

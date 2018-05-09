@@ -31,7 +31,7 @@ import com.ponysdk.core.ui.place.Place;
 
 public abstract class WidgetCellRenderer<D> implements CellRenderer<D, PWidget> {
 
-    private static String DASH = "-";
+    private static final String DASH = "-";
 
     protected String nullDisplay = DASH;
 

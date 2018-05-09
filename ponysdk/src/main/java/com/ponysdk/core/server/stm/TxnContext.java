@@ -55,10 +55,12 @@ public class TxnContext implements TxnListener {
 
     @Override
     public void beforeRollback() {
+        // Nothing to do
     }
 
     @Override
     public void afterFlush(final TxnContext txnContext) {
+        // Nothing to do
     }
 
     public ModelWriter getWriter() {

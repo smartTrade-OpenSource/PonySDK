@@ -85,9 +85,7 @@ public class PFrame extends PWidget {
         if (event.containsKey(ClientToServerModel.HANDLER_OPEN.toStringValue())) {
             url = event.getString(ClientToServerModel.HANDLER_OPEN.toStringValue());
             ready = true;
-            panelByZone.forEach((key, value) -> {
-                value.attach(this.getWindow(), this);
-            });
+            panelByZone.forEach((key, value) -> value.attach(this.getWindow(), this));
         } else {
             super.onClientData(event);
         }

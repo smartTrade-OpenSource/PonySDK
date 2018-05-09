@@ -27,6 +27,7 @@ import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -95,7 +96,7 @@ public class PObjectWeakHashMap implements Map<Integer, PObject> {
 
         objectIDByReferences.put(weakReference, objectID);
 
-        if (log.isDebugEnabled()) log.debug("Registering object: " + value);
+        if (log.isDebugEnabled()) log.debug("Registering object: {}", value);
 
         return value;
     }
@@ -105,7 +106,7 @@ public class PObjectWeakHashMap implements Map<Integer, PObject> {
         expungeStaleEntries();
         final Reference<PObject> reference = referenceByObjectID.remove(key);
 
-        if (log.isDebugEnabled()) log.debug("Removing reference on object #" + key);
+        if (log.isDebugEnabled()) log.debug("Removing reference on object #{}", key);
         if (reference == null) return null;
 
         objectIDByReferences.remove(reference);

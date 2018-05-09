@@ -70,12 +70,20 @@ public class BootstrapServlet extends HttpServlet {
 
     @Override
     protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
-        handlePonyResource(request, response);
+        try {
+            handlePonyResource(request, response);
+        } catch (final IOException e) {
+            log.error("Cannot stream request", e);
+        }
     }
 
     @Override
     public void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
-        handlePonyResource(request, response);
+        try {
+            handlePonyResource(request, response);
+        } catch (final IOException e) {
+            log.error("Cannot stream request", e);
+        }
     }
 
     protected void handlePonyResource(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
@@ -85,9 +93,7 @@ public class BootstrapServlet extends HttpServlet {
             if (extraPathInfo == null || extraPathInfo.isEmpty() || extraPathInfo.equals("/")) {
                 handleRequest(request, response, INDEX_URL);
             } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Loading resource: " + extraPathInfo);
-                }
+                if (log.isDebugEnabled()) log.debug("Loading resource: {}", extraPathInfo);
                 handleRequest(request, response, extraPathInfo);
             }
 
@@ -113,12 +119,8 @@ public class BootstrapServlet extends HttpServlet {
         response.setContentType(mimeType);
 
         if (inputStream != null) {
-            ReadableByteChannel inputChannel = null;
-            WritableByteChannel outputChannel = null;
-            try {
-                inputChannel = Channels.newChannel(inputStream);
-                outputChannel = Channels.newChannel(response.getOutputStream());
-
+            try (ReadableByteChannel inputChannel = Channels.newChannel(inputStream);
+                    WritableByteChannel outputChannel = Channels.newChannel(response.getOutputStream())) {
                 final ByteBuffer buffer = ByteBuffer.allocateDirect(16 * 1024);
                 while (inputChannel.read(buffer) != -1) {
                     buffer.flip();
@@ -130,17 +132,15 @@ public class BootstrapServlet extends HttpServlet {
                 while (buffer.hasRemaining()) {
                     outputChannel.write(buffer);
                 }
-            } finally {
-                if (inputChannel != null) inputChannel.close();
-                if (outputChannel != null) outputChannel.close();
             }
         } else {
             if (path.equals(INDEX_URL)) {
-                final WritableByteChannel outputChannel = Channels.newChannel(response.getOutputStream());
-                final ByteBuffer buffer = ByteBuffer.wrap(buildIndexHTML(request).getBytes(Charset.forName("UTF8")));
-                outputChannel.write(buffer);
+                try (final WritableByteChannel outputChannel = Channels.newChannel(response.getOutputStream())) {
+                    final ByteBuffer buffer = ByteBuffer.wrap(buildIndexHTML(request).getBytes(Charset.forName("UTF8")));
+                    outputChannel.write(buffer);
+                }
             } else {
-                log.error("Failed to load resource: " + request.getPathInfo());
+                log.error("Failed to load resource: {}", request.getPathInfo());
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
         }

@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
@@ -132,11 +133,11 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
 
     public Iterable<D> getVisibleItems() {
 
-        return new Iterable<D>() {
+        return new Iterable<>() {
 
             private final Iterator<D> rowsIterator = rows.iterator();
             private D next;
-            private final Iterator<D> visibleItemIterator = new Iterator<D>() {
+            private final Iterator<D> visibleItemIterator = new Iterator<>() {
 
                 @Override
                 public boolean hasNext() {
@@ -149,7 +150,8 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
 
                 @Override
                 public D next() {
-                    return next;
+                    if (hasNext()) return next;
+                    else throw new NoSuchElementException();
                 }
 
                 @Override

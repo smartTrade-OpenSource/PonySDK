@@ -25,8 +25,10 @@ package com.ponysdk.core.util;
 
 import java.io.InputStream;
 import java.io.Reader;
+import java.io.StringReader;
 
 import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
 import javax.json.spi.JsonProvider;
@@ -86,6 +88,12 @@ public class JsonUtil {
      */
     public static JsonReader createReader(final Reader reader) {
         return createJsonProvider().createReader(reader);
+    }
+
+    public static JsonObject readObject(final String text) {
+        try (final JsonReader reader = JsonUtil.createReader(new StringReader(text))) {
+            return reader.readObject();
+        }
     }
 
 }

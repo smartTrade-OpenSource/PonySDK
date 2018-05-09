@@ -61,11 +61,20 @@ public class StreamServiceServlet extends HttpServlet {
 
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        streamRequest(req, resp);
+        try {
+            streamRequest(req, resp);
+        } catch (final IOException e) {
+            log.error("Cannot stream request", e);
+        }
     }
 
     @Override
     protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        streamRequest(req, resp);
+        try {
+            streamRequest(req, resp);
+        } catch (final IOException e) {
+            log.error("Cannot stream request", e);
+        }
     }
+
 }

@@ -109,6 +109,7 @@ public class BasicButtonPageActivity extends SamplePageActivity {
             try {
                 Thread.sleep(5000);
             } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         });
 
@@ -121,6 +122,7 @@ public class BasicButtonPageActivity extends SamplePageActivity {
             try {
                 Thread.sleep(5000);
             } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         });
 
@@ -134,6 +136,7 @@ public class BasicButtonPageActivity extends SamplePageActivity {
             try {
                 Thread.sleep(5000);
             } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         });
 

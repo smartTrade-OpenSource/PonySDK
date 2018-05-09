@@ -100,15 +100,13 @@ public class PScript extends PObject {
     }
 
     private void executeScript(final String js, final ExecutionCallback callback, final Duration period) {
-        saveUpdate((writer) -> {
+        saveUpdate(writer -> {
             writer.write(ServerToClientModel.EVAL, js);
             if (callback != null) {
                 callbacksByID.put(++executionID, callback);
                 writer.write(ServerToClientModel.COMMAND_ID, executionID);
             }
-            if (period != null) {
-                writer.write(ServerToClientModel.FIXDELAY, period.toMillis());
-            }
+            if (period != null) writer.write(ServerToClientModel.FIXDELAY, period.toMillis());
         });
     }
 

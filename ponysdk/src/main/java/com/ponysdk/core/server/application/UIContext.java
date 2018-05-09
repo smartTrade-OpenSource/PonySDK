@@ -331,7 +331,7 @@ public class UIContext {
      */
     public boolean execute(final Runnable runnable) {
         if (!isAlive()) return false;
-        if (log.isDebugEnabled()) log.debug("Pushing to #" + this);
+        if (log.isDebugEnabled()) log.debug("Pushing to #{}", this);
         if (UIContext.get() != this) {
             acquire();
             try {
@@ -404,9 +404,7 @@ public class UIContext {
      */
     public void fireClientData(final JsonObject jsonObject) {
         if (jsonObject.containsKey(ClientToServerModel.TYPE_HISTORY.toStringValue())) {
-            if (history != null) {
-                history.fireHistoryChanged(jsonObject.getString(ClientToServerModel.TYPE_HISTORY.toStringValue()));
-            }
+            history.fireHistoryChanged(jsonObject.getString(ClientToServerModel.TYPE_HISTORY.toStringValue()));
         } else {
             final JsonValue jsonValue = jsonObject.get(ClientToServerModel.OBJECT_ID.toStringValue());
             int objectID;
@@ -416,7 +414,7 @@ public class UIContext {
             } else if (ValueType.STRING == valueType) {
                 objectID = Integer.parseInt(((JsonString) jsonValue).getString());
             } else {
-                log.error("unknown reference from the browser. Unable to execute instruction: " + jsonObject);
+                log.error("unknown reference from the browser. Unable to execute instruction: {}", jsonObject);
                 return;
             }
 
@@ -427,13 +425,13 @@ public class UIContext {
                 final PObject object = getObject(objectID);
 
                 if (object == null) {
-                    log.error("unknown reference from the browser. Unable to execute instruction: " + jsonObject);
+                    log.error("unknown reference from the browser. Unable to execute instruction: {}", jsonObject);
 
                     if (jsonObject.containsKey(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())) {
                         final int parentObjectID = jsonObject.getJsonNumber(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())
                             .intValue();
                         final PObject gcObject = pObjectWeakReferences.get(parentObjectID);
-                        log.warn(String.valueOf(gcObject));
+                        if (log.isWarnEnabled()) log.warn(String.valueOf(gcObject));
                     }
 
                     return;

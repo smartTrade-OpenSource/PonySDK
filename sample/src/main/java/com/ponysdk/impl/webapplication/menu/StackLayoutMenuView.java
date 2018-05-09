@@ -45,9 +45,10 @@ import com.ponysdk.core.ui.basic.event.PSelectionHandler;
 
 public class StackLayoutMenuView extends PSimpleLayoutPanel implements MenuView {
 
+    private static final double paddingLeft = 16;// px
+
     private final Node root = new Node(null, "ROOT");
     private final PStackLayoutPanel layoutPanel;
-    private final double paddingLeft = 16;// px
     private final Map<Node, PComplexPanel> categoriesByNode = new LinkedHashMap<>();
     private final List<PSelectionHandler<MenuItem>> selectionHandlers = new ArrayList<>();
     private final Map<MenuItem, PAnchor> anchorByName = new LinkedHashMap<>();

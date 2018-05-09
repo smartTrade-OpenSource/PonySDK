@@ -84,6 +84,16 @@ public abstract class Event<H extends EventHandler> {
         }
 
         @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) return true;
+            if (obj == null) return false;
+            if (getClass() != obj.getClass()) return false;
+            final Type other = (Type) obj;
+            if (index != other.index) return false;
+            return true;
+        }
+
+        @Override
         public String toString() {
             return "Event type";
         }

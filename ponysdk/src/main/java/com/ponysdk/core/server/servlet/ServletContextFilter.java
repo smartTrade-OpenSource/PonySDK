@@ -38,6 +38,7 @@ public class ServletContextFilter implements Filter {
 
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
+        // Nothing to do
     }
 
     @Override
@@ -57,6 +58,7 @@ public class ServletContextFilter implements Filter {
 
     @Override
     public void destroy() {
+        // Nothing to do
     }
 
 }

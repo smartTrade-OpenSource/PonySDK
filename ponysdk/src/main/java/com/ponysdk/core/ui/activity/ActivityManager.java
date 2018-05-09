@@ -27,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PAcceptsOneWidget;
 import com.ponysdk.core.ui.eventbus.EventBus;
 import com.ponysdk.core.ui.place.PlaceChangeEvent;
@@ -68,7 +67,7 @@ public class ActivityManager implements PlaceChangeHandler {
     @Override
     public void onPlaceChange(final PlaceChangeEvent event) {
         if (world == null) {
-            if (log.isDebugEnabled()) log.debug("No world to display this place #" + event);
+            if (log.isDebugEnabled()) log.debug("No world to display this place #{}", event);
             return;
         }
 

@@ -97,12 +97,10 @@ public class TextBoxMaskedDecorator {
 
             cancelKey();
         });
-        this.textBox.addFocusHandler(event -> {
-            Scheduler.get().scheduleDeferred(() -> {
-                setText(value.getText());
-                setCursorPos(0);
-            });
-        });
+        this.textBox.addFocusHandler(event -> Scheduler.get().scheduleDeferred(() -> {
+            setText(value.getText());
+            setCursorPos(0);
+        }));
     }
 
     public void setMask(final String mask, final boolean showMask, final char freeSymbol) {

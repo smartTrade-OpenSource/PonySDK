@@ -23,7 +23,6 @@
 
 package com.ponysdk.core.server.servlet;
 
-import java.io.StringReader;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -143,7 +142,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
                 if (ClientToServerModel.HEARTBEAT.toStringValue().equals(text)) {
                     if (log.isDebugEnabled()) log.debug("Heartbeat received from terminal #{}", uiContext.getID());
                 } else {
-                    final JsonObject jsonObject = JsonUtil.createReader(new StringReader(text)).readObject();
+                    final JsonObject jsonObject = JsonUtil.readObject(text);
                     if (jsonObject.containsKey(ClientToServerModel.PING_SERVER.toStringValue())) {
                         final long start = jsonObject.getJsonNumber(ClientToServerModel.PING_SERVER.toStringValue()).longValue();
                         final long end = System.currentTimeMillis();
@@ -151,8 +150,6 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
                             log.debug("Ping measurement : {} ms from terminal #{}", end - start, uiContext.getID());
                         uiContext.addPingValue(end - start);
                     } else if (jsonObject.containsKey(ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue())) {
-                        if (uiContext == null)
-                            throw new Exception("Invalid session, please reload your application (" + uiContext + ")");
                         final String applicationInstructions = ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue();
                         uiContext.execute(() -> {
                             final JsonArray appInstructions = jsonObject.getJsonArray(applicationInstructions);
@@ -263,6 +260,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
     @Override
     public void beginObject() {
+        // Nothing to do
     }
 
     @Override

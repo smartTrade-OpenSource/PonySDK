@@ -59,12 +59,20 @@ public class PLayoutResizeEvent extends Event<PLayoutResizeHandler> {
 
     public static class LayoutResizeData {
 
-        public PWidget w;
-        public double size;
+        private final PWidget widget;
+        private final double size;
 
-        public LayoutResizeData(final PWidget w, final double size) {
-            this.w = w;
+        public LayoutResizeData(final PWidget widget, final double size) {
+            this.widget = widget;
             this.size = size;
+        }
+
+        public PWidget getWidget() {
+            return widget;
+        }
+
+        public double getSize() {
+            return size;
         }
 
     }

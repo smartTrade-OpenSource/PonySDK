@@ -118,6 +118,7 @@ public class ApplicationActivity implements Activity {
 
     @Override
     public void stop() {
+        // Nothing to do
     }
 
 }

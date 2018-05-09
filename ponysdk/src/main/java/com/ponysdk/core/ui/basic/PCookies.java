@@ -51,9 +51,6 @@ public class PCookies {
 
     private CookiesListener listener;
 
-    public PCookies() {
-    }
-
     public String getCookie(final String name) {
         return cachedCookies.get(name);
     }

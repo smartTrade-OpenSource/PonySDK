@@ -52,6 +52,7 @@ public class FlexTableForBenchPageActivity extends SamplePageActivity {
 
     @Override
     protected void onShowPage(final Place place) {
+        // Nothing to do
     }
 
     @Override

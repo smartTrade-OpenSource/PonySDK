@@ -96,7 +96,7 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
     }
 
     protected void encode(final ServerToClientModel model, final Object value) {
-        if (log.isDebugEnabled()) log.debug("Writing in the buffer : " + model + " => " + value);
+        if (log.isDebugEnabled()) log.debug("Writing in the buffer : {} => {}", model, value);
         try {
             switch (model.getTypeModel()) {
                 case NULL:

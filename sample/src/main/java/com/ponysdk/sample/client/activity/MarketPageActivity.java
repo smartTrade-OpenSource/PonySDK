@@ -67,6 +67,7 @@ public class MarketPageActivity extends PageActivity {
 
     @Override
     protected void onInitialization() {
+        // Nothing to do
     }
 
     @Override
@@ -103,10 +104,12 @@ public class MarketPageActivity extends PageActivity {
 
     @Override
     protected void onShowPage(final Place place) {
+        // Nothing to do
     }
 
     @Override
     protected void onLeavingPage() {
+        // Nothing to do
     }
 
     private PWidget buildFXBox(final PFlowPanel box, final String currency) {
@@ -160,7 +163,7 @@ public class MarketPageActivity extends PageActivity {
         final PHTML sell = Element.newPHTML("<div></div>");
         sell.addStyleName("sell");
         sell.addClickHandler(
-            (clickEvent) -> PNotificationManager.showHumanizedNotification(getView().asWidget().getWindow(), "Sell clicked!"));
+            event -> PNotificationManager.showHumanizedNotification(getView().asWidget().getWindow(), "Sell clicked!"));
         box.add(sell);
 
         final PLabel sellPipHead = Element.newPLabel("offer");

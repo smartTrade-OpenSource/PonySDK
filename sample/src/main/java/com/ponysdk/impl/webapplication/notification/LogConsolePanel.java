@@ -34,7 +34,7 @@ import com.ponysdk.core.ui.basic.PVerticalPanel;
 
 public class LogConsolePanel extends PScrollPanel {
 
-    protected static final DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+    protected final DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 
     protected PVerticalPanel content = Element.newPVerticalPanel();
 

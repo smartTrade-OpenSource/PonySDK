@@ -264,7 +264,7 @@ public class PWindow extends PObject {
         } else if (event.containsKey(ClientToServerModel.HANDLER_CLOSE.toStringValue())) {
             PWindowManager.unregisterWindow(this);
             if (subWindows != null) {
-                subWindows.forEach(window -> window.close());
+                subWindows.forEach(PWindow::close);
                 subWindows.clear();
             }
             if (closeHandlers != null) {

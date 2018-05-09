@@ -101,12 +101,12 @@ public class PonySDKServer {
 
         server.join();
 
-        log.info("Webserver started on: " + InetAddress.getLocalHost().getHostAddress() + ":" + port);
+        log.info("Webserver started on: {}:{}", InetAddress.getLocalHost().getHostAddress(), port);
     }
 
     protected ServletContextHandler createWebApp() {
         final ApplicationManagerOption applicationManagerOption = applicationLoader.getApplicationManagerOption();
-        log.info("Adding application #" + applicationManagerOption.getApplicationContextName());
+        log.info("Adding application #{}", applicationManagerOption.getApplicationContextName());
 
         final ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/" + applicationManagerOption.getApplicationContextName());

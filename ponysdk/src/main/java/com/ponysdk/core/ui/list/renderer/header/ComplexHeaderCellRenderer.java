@@ -101,7 +101,7 @@ public class ComplexHeaderCellRenderer
     protected void buildCaption(final String s) {
         caption = Element.newPLabel(s);
         caption.addStyleName("sortable");
-        caption.addClickHandler((PClickEvent) -> {
+        caption.addClickHandler(event -> {
             caption.addStyleName(HeaderSortingHelper.getAssociatedStyleName(sortingType));
             final SortingType nextSortingType = HeaderSortingHelper.getNextSortingType(sortingType);
             sort(nextSortingType);

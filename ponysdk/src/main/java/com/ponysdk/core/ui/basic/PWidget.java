@@ -265,7 +265,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
 
     public void setStyleProperty(final String name, final String value) {
         if (!Objects.equals(safeStyleProperties().put(name, value), value)) {
-            saveUpdate((writer) -> {
+            saveUpdate(writer -> {
                 writer.write(ServerToClientModel.PUT_STYLE_KEY, name);
                 writer.write(ServerToClientModel.STYLE_VALUE, value);
             });
@@ -278,7 +278,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
 
     public void setProperty(final String name, final String value) {
         if (!Objects.equals(safeElementProperties().put(name, value), value)) {
-            saveUpdate((writer) -> {
+            saveUpdate(writer -> {
                 writer.write(ServerToClientModel.PUT_PROPERTY_KEY, name);
                 writer.write(ServerToClientModel.PROPERTY_VALUE, value);
             });
@@ -298,7 +298,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         if (!safeElementAttributes().containsKey(name)) safeElementAttributes().put(name, newValue);
         else if (Objects.equals(safeElementAttributes().put(name, newValue), newValue)) return;
 
-        saveUpdate((writer) -> {
+        saveUpdate(writer -> {
             writer.write(ServerToClientModel.PUT_ATTRIBUTE_KEY, name);
             writer.write(ServerToClientModel.ATTRIBUTE_VALUE, newValue);
         });
@@ -306,7 +306,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
 
     public void removeAttribute(final String name) {
         if (safeElementAttributes().remove(name) != null) {
-            saveUpdate((writer) -> writer.write(ServerToClientModel.REMOVE_ATTRIBUTE_KEY, name));
+            saveUpdate(writer -> writer.write(ServerToClientModel.REMOVE_ATTRIBUTE_KEY, name));
         }
     }
 
@@ -370,10 +370,10 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
                 //     else safeStackedInstructions().add(() -> executeRemoveDomHandler(type));
                 // }
             } else {
-                log.warn("No event handler of type " + type + " found for " + toString());
+                log.warn("No event handler of type {} found for {}", type, this);
             }
         } else {
-            log.warn("No event handler of type " + type + " found for " + toString());
+            log.warn("No event handler of type {} found for {}", type, this);
         }
     }
 
@@ -513,7 +513,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
                     break;
                 case CHANGE_HANDLER:
                 default:
-                    log.error("Dom Handler not implemented: " + domHandler);
+                    log.error("Dom Handler not implemented: {}", domHandler);
                     break;
             }
         } else {
@@ -607,7 +607,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (addons != null) addons.forEach(addon -> addon.onDestroy());
+        if (addons != null) addons.forEach(PAddOn::onDestroy);
     }
 
     public void focus() {

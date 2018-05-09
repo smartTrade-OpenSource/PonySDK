@@ -79,6 +79,7 @@ public class RefreshableDataGridPageActivity extends SamplePageActivity implemen
     }
 
     protected void onPonyStock(final PonyStock data) {
+        // Nothing to do
     }
 
     protected IdentityDataGridColumnDescriptor<PonyStock> newCountDescriptor() {

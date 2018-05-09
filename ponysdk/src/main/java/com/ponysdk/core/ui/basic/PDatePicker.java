@@ -229,8 +229,9 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     /**
      * @deprecated Useless
      */
-    @Deprecated
+    @Deprecated(forRemoval = true, since = "2.8.2")
     public void setMonth(final int month) {
+        // To be removed
     }
 
 }

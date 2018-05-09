@@ -64,19 +64,22 @@ public class SamplePageActivity extends PageActivity {
 
     @Override
     protected void onInitialization() {
+        // Nothing to do
     }
 
     @Override
     protected void onShowPage(final Place place) {
+        // Nothing to do
     }
 
     @Override
     protected void onLeavingPage() {
+        // Nothing to do
     }
 
     @Override
     protected void onFirstShowPage() {
-        PScrollPanel codePanel = Element.newPScrollPanel();
+        final PScrollPanel codePanel = Element.newPScrollPanel();
 
         examplePanel = new PSimpleLayoutPanel() {
 
@@ -88,7 +91,7 @@ public class SamplePageActivity extends PageActivity {
         };
         examplePanel.setSizeFull();
 
-        PTabLayoutPanel tabPanel = Element.newPTabLayoutPanel();
+        final PTabLayoutPanel tabPanel = Element.newPTabLayoutPanel();
 
         tabPanel.add(examplePanel, "Example");
 

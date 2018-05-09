@@ -183,7 +183,7 @@ public abstract class AbstractEventBus implements EventBus {
 
                 for (final EventHandler handler1 : handlers) {
                     try {
-                        if (log.isDebugEnabled()) log.debug("dispatch eventbus #" + e);
+                        if (log.isDebugEnabled()) log.debug("dispatch eventbus #{}", e);
                         e.dispatch(handler1);
                     } catch (final Throwable t) {
                         log.error("Cannot process fired eventbus #" + eventType, t);
@@ -195,7 +195,7 @@ public abstract class AbstractEventBus implements EventBus {
                 }
 
                 for (final BroadcastEventHandler handler : broadcastHandlerManager) {
-                    if (log.isDebugEnabled()) log.debug("broadcast eventbus #" + e);
+                    if (log.isDebugEnabled()) log.debug("broadcast eventbus #{}", e);
                     handler.onEvent(e);
                 }
             }

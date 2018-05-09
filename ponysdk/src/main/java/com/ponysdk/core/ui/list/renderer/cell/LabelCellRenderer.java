@@ -31,7 +31,7 @@ import com.ponysdk.core.ui.list.refreshable.Cell;
 
 public class LabelCellRenderer<D> implements CellRenderer<D, PLabel> {
 
-    private static String DASH = "-";
+    private static final String DASH = "-";
 
     protected String nullDisplay = DASH;
 

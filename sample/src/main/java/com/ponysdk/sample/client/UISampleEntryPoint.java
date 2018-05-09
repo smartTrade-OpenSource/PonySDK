@@ -569,40 +569,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
         final PLabel p = Element.newPLabel();
         PWindow.getMain().add(p);
-
-        final boolean delegatorMode = true;
-
-        if (delegatorMode) {
-            // final UIDelegator<String> delegator = PScheduler.delegate(new
-            // Callback<String>() {
-            //
-            // @Override
-            // public void onSuccess(final String result) {
-            // p.setText(result);
-            // }
-            //
-            // @Override
-            // public void onError(final String result, final Exception
-            // exception) {
-            // }
-            // });
-
-            new Thread() {
-
-                @Override
-                public void run() {
-                    try {
-                        Thread.sleep(3000);
-                    } catch (final InterruptedException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                    // delegator.onSuccess("Test");
-                }
-            }.start();
-
-        }
-
     }
 
     private PWindow createWindow() {
@@ -761,9 +727,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             }
         });
 
-        labelPAddOn.setTerminalHandler(event -> {
-            System.err.println(event.toString());
-        });
+        labelPAddOn.setTerminalHandler(event -> System.err.println(event.toString()));
 
         return labelPAddOn;
     }

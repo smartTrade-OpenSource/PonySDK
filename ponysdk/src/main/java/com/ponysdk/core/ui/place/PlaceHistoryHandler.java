@@ -48,7 +48,7 @@ public class PlaceHistoryHandler {
         eventBus.addHandler(PlaceChangeEvent.TYPE,
             (PlaceChangeHandler) event -> history.newItem(mapper.getToken(event.getNewPlace()), false));
 
-        history.addValueChangeHandler((event) -> handleHistoryToken(event.getData()));
+        history.addValueChangeHandler(event -> handleHistoryToken(event.getData()));
     }
 
     public void setDefaultPlace(final Place defaultPlace) {
@@ -74,9 +74,9 @@ public class PlaceHistoryHandler {
         if (newPlace == null) {
             if (defaultPlace != null) {
                 newPlace = defaultPlace;
-                log.warn("Unrecognized history token: " + token + ". Going to default place: " + defaultPlace);
+                log.warn("Unrecognized history token: {}. Going to default place: {}", token, defaultPlace);
             } else {
-                log.warn("Unrecognized history token: " + token);
+                log.warn("Unrecognized history token: {}", token);
                 return;
             }
         }

@@ -31,7 +31,7 @@ import com.ponysdk.core.ui.list.refreshable.Cell;
 
 public class HtmlCellRenderer<D> implements CellRenderer<D, PHTML> {
 
-    private static String DASH = "-";
+    private static final String DASH = "-";
 
     protected String nullDisplay = DASH;
 

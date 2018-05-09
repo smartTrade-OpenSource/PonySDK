@@ -90,7 +90,7 @@ public class DataGrid<T> implements IsPWidget {
     }
 
     public Consumer<T> newConsumer() {
-        return data -> this.addData(data);
+        return this::addData;
     }
 
     public void addData(final T data) {

@@ -25,7 +25,7 @@ package com.ponysdk.core.ui.form.dataconverter;
 
 public class IdentityConverter<T> implements DataConverter<T, T> {
 
-    public static IdentityConverter<String> STRING = new IdentityConverter<>();
+    public static final IdentityConverter<String> STRING = new IdentityConverter<>();
 
     @Override
     public T from(final T t) {

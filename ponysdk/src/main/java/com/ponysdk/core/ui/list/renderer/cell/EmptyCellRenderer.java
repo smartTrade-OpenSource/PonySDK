@@ -38,6 +38,7 @@ public class EmptyCellRenderer<V> implements CellRenderer<V, PLabel> {
 
     @Override
     public void update(final V value, final Cell<V, PLabel> previous) {
+        // Nothing to do
     }
 
 }
