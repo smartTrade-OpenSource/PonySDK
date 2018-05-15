@@ -21,11 +21,19 @@
  * the License.
  */
 
-package com.ponysdk.core.server.servlet;
+package com.ponysdk.impl.spring;
 
-public interface ConnectionListener {
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-    void onOpen();
+import com.ponysdk.impl.spring.server.SpringApplicationManager;
 
-    void onClose();
+public class MainSpring {
+
+    public static void main(final String[] args) {
+        final String serverConfigLocation = System.getProperty(SpringApplicationManager.SERVER_CONFIG_LOCATION,
+            "classpath:etc/server_application.xml");
+
+        new ClassPathXmlApplicationContext(serverConfigLocation);
+    }
+
 }

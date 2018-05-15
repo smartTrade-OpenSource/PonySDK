@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.impl.main;
+package com.ponysdk.impl.java;
 
 import java.util.Arrays;
 import java.util.function.Function;
@@ -29,8 +29,9 @@ import java.util.stream.Collectors;
 
 import com.ponysdk.core.server.application.ApplicationManagerOption;
 import com.ponysdk.core.server.servlet.ApplicationLoader;
-import com.ponysdk.core.server.servlet.JavaApplicationLoader;
 import com.ponysdk.core.ui.main.EntryPoint;
+import com.ponysdk.impl.java.server.JavaApplicationLoader;
+import com.ponysdk.impl.main.PonySDKServer;
 
 public class Main {
 

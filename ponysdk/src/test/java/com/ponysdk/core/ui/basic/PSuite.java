@@ -30,9 +30,9 @@ import org.mockito.Mockito;
 import com.ponysdk.core.server.application.Application;
 import com.ponysdk.core.server.application.ApplicationManagerOption;
 import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.server.servlet.WebSocket;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.server.stm.TxnContext;
+import com.ponysdk.core.server.websocket.WebSocket;
 import com.ponysdk.core.writer.ModelWriter;
 
 public class PSuite {

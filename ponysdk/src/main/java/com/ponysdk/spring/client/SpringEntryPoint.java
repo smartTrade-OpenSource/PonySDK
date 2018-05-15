@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 PonySDK
+ * Copyright (c) 2018 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
@@ -23,49 +23,10 @@
 
 package com.ponysdk.spring.client;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.ponysdk.core.ui.activity.ActivityManager;
-import com.ponysdk.core.ui.activity.ActivityMapper;
-import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.PHistory;
-import com.ponysdk.core.ui.basic.PRootLayoutPanel;
-import com.ponysdk.core.ui.basic.PSimpleLayoutPanel;
-import com.ponysdk.core.ui.basic.PWindow;
-import com.ponysdk.core.ui.eventbus.EventBus;
-import com.ponysdk.core.ui.main.EntryPoint;
-import com.ponysdk.core.ui.place.Place;
-import com.ponysdk.core.ui.place.PlaceController;
-import com.ponysdk.core.ui.place.PlaceHistoryHandler;
-import com.ponysdk.core.ui.place.PlaceHistoryMapper;
-
-public abstract class SpringEntryPoint implements EntryPoint {
-
-    @Autowired
-    protected PlaceController placeController;
-
-    @Autowired
-    protected EventBus eventBus;
-
-    @Autowired
-    protected PHistory history;
-
-    @Autowired
-    protected ActivityMapper mapper;
-
-    @Autowired
-    protected PlaceHistoryMapper historyMapper;
-
-    protected void start(final Place place) {
-        final PSimpleLayoutPanel panel = Element.newPSimpleLayoutPanel();
-        PRootLayoutPanel.get(PWindow.getMain()).add(panel);
-
-        final ActivityManager activityManager = new ActivityManager(mapper);
-        activityManager.setDisplay(panel);
-
-        final PlaceHistoryHandler historyHandler = new PlaceHistoryHandler(history, historyMapper, placeController, eventBus);
-        historyHandler.setDefaultPlace(place);
-        historyHandler.handleCurrentHistory();
-    }
+/**
+ * Use {@link com.ponysdk.impl.spring.client.SpringEntryPoint} instead
+ */
+@Deprecated(forRemoval = true, since = "v2.8.1")
+public abstract class SpringEntryPoint extends com.ponysdk.impl.spring.client.SpringEntryPoint {
 
 }

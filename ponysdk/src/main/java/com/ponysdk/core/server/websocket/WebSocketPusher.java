@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.core.server.servlet;
+package com.ponysdk.core.server.websocket;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;

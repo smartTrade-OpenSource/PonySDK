@@ -25,17 +25,12 @@ package com.ponysdk.impl.main;
 
 import java.net.InetAddress;
 import java.net.URL;
-import java.util.EnumSet;
-
-import javax.servlet.DispatcherType;
 
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
-import org.eclipse.jetty.server.session.SessionHandler;
-import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
@@ -43,13 +38,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.model.MappingPath;
+import com.ponysdk.core.server.application.ApplicationManager;
 import com.ponysdk.core.server.application.ApplicationManagerOption;
 import com.ponysdk.core.server.servlet.AjaxServlet;
 import com.ponysdk.core.server.servlet.ApplicationLoader;
 import com.ponysdk.core.server.servlet.BootstrapServlet;
-import com.ponysdk.core.server.servlet.ServletContextFilter;
 import com.ponysdk.core.server.servlet.StreamServiceServlet;
-import com.ponysdk.core.server.servlet.WebSocketServlet;
+import com.ponysdk.core.server.websocket.WebSocketServlet;
 
 public class PonySDKServer {
 
@@ -62,7 +57,9 @@ public class PonySDKServer {
 
     protected final Server server;
 
+    @Deprecated(forRemoval = true, since = "v2.8.1")
     protected ApplicationLoader applicationLoader;
+    protected ApplicationManager applicationManager;
 
     protected String host = "0.0.0.0";
     protected int port = 80;
@@ -94,18 +91,16 @@ public class PonySDKServer {
 
         server.setHandler(gzip);
 
-        context.addEventListener(applicationLoader);
         applicationLoader.start();
 
         server.start();
-
         server.join();
 
         log.info("Webserver started on: {}:{}", InetAddress.getLocalHost().getHostAddress(), port);
     }
 
     protected ServletContextHandler createWebApp() {
-        final ApplicationManagerOption applicationManagerOption = applicationLoader.getApplicationManagerOption();
+        final ApplicationManagerOption applicationManagerOption = applicationManager.getConfiguration();
         log.info("Adding application #{}", applicationManagerOption.getApplicationContextName());
 
         final ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
@@ -115,13 +110,6 @@ public class PonySDKServer {
         context.addServlet(new ServletHolder(createStreamServiceServlet()), MAPPING_STREAM);
         context.addServlet(new ServletHolder(createAjaxServlet()), MAPPING_AJAX);
         context.addServlet(new ServletHolder(createWebSocketServlet()), MAPPING_WS);
-
-        final ServletContextFilter servletContextFilter = new ServletContextFilter();
-        context.addFilter(new FilterHolder(servletContextFilter), MAPPING_BOOTSTRAP, EnumSet.of(DispatcherType.REQUEST));
-
-        final SessionHandler sessionHandler = context.getSessionHandler();
-        sessionHandler.setMaxInactiveInterval(60 * applicationManagerOption.getSessionTimeout());
-        sessionHandler.addEventListener(applicationLoader);
 
         return context;
     }
@@ -176,7 +164,7 @@ public class PonySDKServer {
 
     protected BootstrapServlet createBootstrapServlet() {
         final BootstrapServlet bootstrapServlet = new BootstrapServlet();
-        bootstrapServlet.setApplication(applicationLoader.getApplicationManagerOption());
+        bootstrapServlet.setApplication(applicationManager.getConfiguration());
         return bootstrapServlet;
     }
 
@@ -189,19 +177,11 @@ public class PonySDKServer {
     }
 
     protected WebSocketServlet createWebSocketServlet() {
-        return new WebSocketServlet();
+        return new WebSocketServlet(applicationManager);
     }
 
     public void stop() throws Exception {
         server.stop();
-    }
-
-    public void setApplicationLoader(final ApplicationLoader applicationLoader) {
-        this.applicationLoader = applicationLoader;
-    }
-
-    public ApplicationManagerOption getApplicationOption() {
-        return applicationLoader.getApplicationManagerOption();
     }
 
     public void setHost(final String host) {
@@ -258,6 +238,25 @@ public class PonySDKServer {
 
     public void setEnabledCipherSuites(final String enabledCipherSuites) {
         this.enabledCipherSuites = enabledCipherSuites;
+    }
+
+    public void setApplicationManager(final ApplicationManager applicationManager) {
+        this.applicationManager = applicationManager;
+    }
+
+    public ApplicationManagerOption getApplicationConfiguration() {
+        return applicationManager.getConfiguration();
+    }
+
+    @Deprecated
+    public ApplicationManagerOption getApplicationOption() {
+        return applicationManager.getConfiguration();
+    }
+
+    @Deprecated
+    public void setApplicationLoader(final ApplicationLoader applicationLoader) {
+        this.applicationLoader = applicationLoader;
+        setApplicationManager(applicationLoader.getApplicationManager());
     }
 
 }

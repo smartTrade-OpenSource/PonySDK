@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 PonySDK
+ * Copyright (c) 2017 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
@@ -21,25 +21,16 @@
  * the License.
  */
 
-package com.ponysdk.core.server.concurrent;
+package com.ponysdk.core.server.websocket;
 
-import java.util.function.Consumer;
+import com.ponysdk.core.model.ServerToClientModel;
 
-import com.ponysdk.core.server.application.UIContext;
+public interface WebsocketEncoder {
 
-public final class UIDelegator<R> implements Consumer<R> {
+    void beginObject();
 
-    private final Consumer<R> consumer;
-    private final UIContext uiContext;
+    void encode(final ServerToClientModel model, final Object value);
 
-    UIDelegator(final Consumer<R> callback, final UIContext uiContext) {
-        this.uiContext = uiContext;
-        this.consumer = callback;
-    }
-
-    @Override
-    public void accept(final R t) {
-        PScheduler.schedule(uiContext, () -> consumer.accept(t));
-    }
+    void endObject();
 
 }

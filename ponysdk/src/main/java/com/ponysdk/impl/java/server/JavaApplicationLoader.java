@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 PonySDK
+ * Copyright (c) 2011 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
@@ -21,16 +21,20 @@
  * the License.
  */
 
-package com.ponysdk.core.server.servlet;
+package com.ponysdk.impl.java.server;
 
-import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.application.ApplicationManager;
+import com.ponysdk.core.server.servlet.ApplicationLoader;
 
-public interface WebsocketEncoder {
+/**
+ * @deprecated Use {@link com.ponysdk.impl.java.server.JavaApplicationManager} directly
+ */
+@Deprecated(forRemoval = true, since = "v2.8.1")
+public class JavaApplicationLoader extends ApplicationLoader {
 
-    void beginObject();
-
-    void encode(final ServerToClientModel model, final Object value);
-
-    void endObject();
+    @Override
+    public ApplicationManager createApplicationManager() {
+        return new JavaApplicationManager();
+    }
 
 }

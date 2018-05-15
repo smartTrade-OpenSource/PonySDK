@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.spring.servlet;
+package com.ponysdk.impl.spring.server;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,22 +31,21 @@ import java.util.Map;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.util.StringUtils;
 
-import com.ponysdk.core.server.application.AbstractApplicationManager;
-import com.ponysdk.core.server.application.ApplicationManagerOption;
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.application.ApplicationManager;
 import com.ponysdk.core.ui.activity.InitializingActivity;
 import com.ponysdk.core.ui.main.EntryPoint;
 
-class SpringApplicationManager extends AbstractApplicationManager {
+public class SpringApplicationManager extends ApplicationManager {
 
-    private final String[] configurations;
+    public static final String SERVER_CONFIG_LOCATION = "ponysdk.spring.application.server.configuration.file";
 
-    SpringApplicationManager(final ApplicationManagerOption options) {
-        super(options);
+    private String[] configurations;
 
+    @Override
+    public void start() {
         final List<String> files = new ArrayList<>();
 
-        final String clientConfigFile = getConfiguration().getClientConfigFile();
+        final String clientConfigFile = configuration.getClientConfigFile();
         if (StringUtils.isEmpty(clientConfigFile))
             files.addAll(Arrays.asList("conf/client_application.inc.xml", "etc/client_application.xml"));
         else files.add(clientConfigFile);
@@ -55,10 +54,9 @@ class SpringApplicationManager extends AbstractApplicationManager {
     }
 
     @Override
-    protected EntryPoint initializeUIContext(final UIContext uiContext) {
+    protected EntryPoint initializeEntryPoint() {
         try (ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext(configurations)) {
-            final String[] serverActiveProfiles = uiContext.getConfiguration().getApplicationContext().getEnvironment()
-                .getActiveProfiles();
+            final String[] serverActiveProfiles = configuration.getApplicationContext().getEnvironment().getActiveProfiles();
             Arrays.stream(serverActiveProfiles).forEach(profile -> applicationContext.getEnvironment().addActiveProfile(profile));
 
             final EntryPoint entryPoint = applicationContext.getBean(EntryPoint.class);

@@ -24,7 +24,7 @@
 package com.ponysdk.core.server.stm;
 
 import com.ponysdk.core.server.application.Application;
-import com.ponysdk.core.server.servlet.WebSocket;
+import com.ponysdk.core.server.websocket.WebSocket;
 import com.ponysdk.core.writer.ModelWriter;
 
 public class TxnContext implements TxnListener {

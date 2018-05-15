@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.impl.main;
+package com.ponysdk.impl.java;
 
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.Element;

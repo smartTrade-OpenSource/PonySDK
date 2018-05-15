@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.core.server.servlet;
+package com.ponysdk.core.server.context;
 
 import java.util.concurrent.RunnableScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;

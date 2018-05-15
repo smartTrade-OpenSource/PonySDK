@@ -62,7 +62,7 @@ public abstract class AutoFlushedBuffer implements Closeable {
     /**
      * Release resources associated to the flushing mechanism. Will be called at most once.
      */
-    protected abstract void closeFlusher();
+    protected abstract void closeFlusher() throws IOException;
 
     // the ringbuffer that holds data
     // invariant : the range [position, limit[ is always available for write, it cannot contains pending data
@@ -381,7 +381,7 @@ public abstract class AutoFlushedBuffer implements Closeable {
      * already closed.
      */
     @Override
-    public synchronized final void close() {
+    public synchronized final void close() throws IOException {
         //FIXME: wait for flush on close ? or javadoc data may be lost
         if (!closed) {
             closed = true;
@@ -527,7 +527,7 @@ public abstract class AutoFlushedBuffer implements Closeable {
     }
 
     //update the data structure after a write to the buffer. Triggers flush automatically if needed
-    private void notifyWrite(final int length) {
+    private void notifyWrite(final int length) throws IOException {
         producerIndex += length;
 
         //auto-flush if more than maxChunkSize data

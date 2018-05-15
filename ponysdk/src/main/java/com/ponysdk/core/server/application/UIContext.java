@@ -41,6 +41,7 @@ import javax.json.JsonValue;
 import javax.json.JsonValue.ValueType;
 import javax.servlet.http.HttpSession;
 
+import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,9 +49,10 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.AlreadyDestroyedApplication;
-import com.ponysdk.core.server.servlet.WebSocket;
+import com.ponysdk.core.server.context.PObjectWeakHashMap;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.server.stm.TxnContext;
+import com.ponysdk.core.server.websocket.WebSocket;
 import com.ponysdk.core.ui.basic.PCookies;
 import com.ponysdk.core.ui.basic.PHistory;
 import com.ponysdk.core.ui.basic.PObject;
@@ -116,21 +118,25 @@ public class UIContext {
 
     private final ApplicationManagerOption configuration;
     private final WebSocket socket;
+    private final ServletUpgradeRequest request;
+    private final UserAgent userAgent;
 
     private long lastReceivedTime = System.currentTimeMillis();
 
-    /**
-     * The default constructor
-     *
-     * @param context
-     *            the transaction context
-     */
-    public UIContext(final WebSocket socket, final TxnContext context, final ApplicationManagerOption configuration) {
+    public UIContext(final WebSocket socket, final TxnContext context, final ApplicationManagerOption configuration,
+            final ServletUpgradeRequest request) {
         this.ID = uiContextCount.incrementAndGet();
         this.socket = socket;
         this.configuration = configuration;
+        this.request = request;
+        this.userAgent = UserAgent.parseUserAgentString(request.getHeader("User-Agent"));
         this.context = context;
         this.application = context.getApplication();
+    }
+
+    @Deprecated(forRemoval = true, since = "v2.8.1")
+    public UIContext(final WebSocket socket, final TxnContext context, final ApplicationManagerOption configuration) {
+        this(socket, context, configuration, socket.getRequest());
     }
 
     @Deprecated(forRemoval = true, since = "v2.8.0")
@@ -616,7 +622,7 @@ public class UIContext {
     }
 
     /**
-     * Destroys the current UIContext when the {@link com.ponysdk.core.server.servlet.WebSocket} is closed
+     * Destroys the current UIContext when the {@link com.ponysdk.core.server.websocket.WebSocket} is closed
      *
      * This method locks the UIContext
      */
@@ -635,6 +641,7 @@ public class UIContext {
      * This method locks the UIContext
      */
     void destroyFromApplication() {
+        if (!isAlive()) return;
         acquire();
         try {
             alive = false;
@@ -659,6 +666,7 @@ public class UIContext {
      * This method locks the UIContext
      */
     public void destroy() {
+        if (!isAlive()) return;
         acquire();
         try {
             doDestroy();
@@ -756,7 +764,8 @@ public class UIContext {
     }
 
     public String getHistoryToken() {
-        return socket.getHistoryToken();
+        final List<String> historyTokens = this.request.getParameterMap().get(ClientToServerModel.TYPE_HISTORY.toStringValue());
+        return !historyTokens.isEmpty() ? historyTokens.get(0) : null;
     }
 
     /**
@@ -786,11 +795,11 @@ public class UIContext {
     }
 
     public UserAgent getUserAgent() {
-        return application.getUserAgent();
+        return userAgent;
     }
 
     public HttpSession getSession() {
-        return application.getSession();
+        return request.getSession();
     }
 
     public <T> T getApplicationAttribute(final String name) {

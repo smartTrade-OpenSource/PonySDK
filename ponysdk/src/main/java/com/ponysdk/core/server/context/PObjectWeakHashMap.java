@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.core.server.application;
+package com.ponysdk.core.server.context;
 
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;

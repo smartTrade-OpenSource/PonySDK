@@ -21,15 +21,13 @@
  * the License.
  */
 
-package com.ponysdk.core.server.servlet;
-
-import javax.servlet.ServletException;
+package com.ponysdk.core.server.websocket;
 
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.server.application.AbstractApplicationManager;
+import com.ponysdk.core.server.application.ApplicationManager;
 
 public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSocketServlet {
 
@@ -37,15 +35,11 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
     private static final long serialVersionUID = 1L;
     private int maxIdleTime = 1000000;
-    private AbstractApplicationManager applicationManager;
+    private final ApplicationManager applicationManager;
     private WebsocketMonitor monitor;
 
-    @Override
-    public void init() throws ServletException {
-        super.init();
-
-        applicationManager = (AbstractApplicationManager) getServletContext()
-            .getAttribute(AbstractApplicationManager.class.getCanonicalName());
+    public WebSocketServlet(final ApplicationManager applicationManager) {
+        this.applicationManager = applicationManager;
     }
 
     @Override

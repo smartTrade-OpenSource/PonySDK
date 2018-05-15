@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 2017 PonySDK
+ * Copyright (c) 2018 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
@@ -21,15 +21,22 @@
  * the License.
  */
 
-package com.ponysdk.core.server.servlet;
+package com.ponysdk.impl.java.server;
 
-public interface WebsocketMonitor {
+import com.ponysdk.core.server.application.ApplicationManager;
+import com.ponysdk.core.ui.main.EntryPoint;
 
-    void onMessageReceived(WebSocket webSocket, String text);
+public class JavaApplicationManager extends ApplicationManager {
 
-    void onMessageProcessed(WebSocket webSocket);
+    @Override
+    public void start() {
+        // Nothing to do
+    }
 
-    void onBeforeFlush(WebSocket webSocket, int position);
+    @Override
+    protected EntryPoint initializeEntryPoint() throws Exception {
+        final Class<? extends EntryPoint> entryPointClassName = configuration.getEntryPointClass();
+        return entryPointClassName.getDeclaredConstructor().newInstance();
+    }
 
-    void onAfterFlush(WebSocket webSocket);
 }

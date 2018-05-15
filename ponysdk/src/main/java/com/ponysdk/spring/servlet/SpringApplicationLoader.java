@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 2011 PonySDK
+ * Copyright (c) 2018 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
@@ -23,16 +23,10 @@
 
 package com.ponysdk.spring.servlet;
 
-import com.ponysdk.core.server.application.AbstractApplicationManager;
-import com.ponysdk.core.server.servlet.AbstractApplicationLoader;
-
-public class SpringApplicationLoader extends AbstractApplicationLoader {
-
-    public static final String SERVER_CONFIG_LOCATION = "ponysdk.spring.application.server.configuration.file";
-
-    @Override
-    public AbstractApplicationManager createApplicationManager() {
-        return new SpringApplicationManager(applicationManagerOption);
-    }
+/**
+ * @deprecated Use {@link com.ponysdk.impl.spring.server.SpringApplicationLoader} instead
+ */
+@Deprecated(forRemoval = true, since = "v6.2.0.0")
+public class SpringApplicationLoader extends com.ponysdk.impl.spring.server.SpringApplicationLoader {
 
 }

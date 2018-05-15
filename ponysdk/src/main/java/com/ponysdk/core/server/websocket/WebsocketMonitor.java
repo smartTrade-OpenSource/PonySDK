@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 PonySDK
+ * Copyright (c) 2017 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
@@ -21,19 +21,12 @@
  * the License.
  */
 
-package com.ponysdk.impl.main;
+package com.ponysdk.core.server.websocket;
 
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+public interface WebsocketMonitor {
 
-import com.ponysdk.spring.servlet.SpringApplicationLoader;
+    void onMessageReceived(WebSocket webSocket, String text);
 
-public class MainSpring {
-
-    public static void main(final String[] args) {
-        final String serverConfigLocation = System.getProperty(SpringApplicationLoader.SERVER_CONFIG_LOCATION,
-            "classpath:etc/server_application.xml");
-
-        new ClassPathXmlApplicationContext(serverConfigLocation);
-    }
+    void onMessageProcessed(WebSocket webSocket);
 
 }

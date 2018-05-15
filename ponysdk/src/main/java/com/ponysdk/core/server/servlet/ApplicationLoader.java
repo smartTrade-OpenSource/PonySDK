@@ -23,19 +23,56 @@
 
 package com.ponysdk.core.server.servlet;
 
+import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import com.ponysdk.core.server.application.AbstractApplicationManager;
+import com.ponysdk.core.server.application.ApplicationManager;
 import com.ponysdk.core.server.application.ApplicationManagerOption;
 
-public interface ApplicationLoader extends ServletContextListener {
+/**
+ * @deprecated Use {@link com.ponysdk.core.server.application.ApplicationManager} directly
+ */
+@Deprecated(forRemoval = true, since = "v2.8.1")
+public abstract class ApplicationLoader implements ServletContextListener {
 
-    void start();
+    private ApplicationManager applicationManager;
+    protected ApplicationManagerOption configuration;
 
-    AbstractApplicationManager createApplicationManager();
+    public ApplicationLoader() {
+        applicationManager = createApplicationManager();
+    }
 
-    ApplicationManagerOption getApplicationManagerOption();
+    public void start() {
+        applicationManager.start();
+    }
 
-    void setApplicationManagerOption(ApplicationManagerOption applicationManagerOption);
+    protected abstract ApplicationManager createApplicationManager();
+
+    public ApplicationManagerOption getApplicationManagerOption() {
+        return applicationManager.getConfiguration();
+    }
+
+    public void setApplicationManagerOption(final ApplicationManagerOption configuration) {
+        this.configuration = configuration;
+        applicationManager.setConfiguration(configuration);
+    }
+
+    public ApplicationManager getApplicationManager() {
+        return applicationManager;
+    }
+
+    public void setApplicationManager(final ApplicationManager applicationManager) {
+        this.applicationManager = applicationManager;
+    }
+
+    @Override
+    public void contextInitialized(final ServletContextEvent event) {
+        // Nothing to do
+    }
+
+    @Override
+    public void contextDestroyed(final ServletContextEvent event) {
+        // Nothing to do
+    }
 
 }

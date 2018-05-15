@@ -28,20 +28,16 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.ui.main.EntryPoint;
 
-public abstract class AbstractApplicationManager {
+public abstract class ApplicationManager {
 
-    private static final Logger log = LoggerFactory.getLogger(AbstractApplicationManager.class);
+    private static final Logger log = LoggerFactory.getLogger(ApplicationManager.class);
 
-    private final ApplicationManagerOption configuration;
-
-    protected AbstractApplicationManager(final ApplicationManagerOption configuration) {
-        this.configuration = configuration;
-    }
+    protected ApplicationManagerOption configuration;
 
     public void startApplication(final UIContext uiContext) throws Exception {
         uiContext.execute(() -> {
             try {
-                final EntryPoint entryPoint = initializeUIContext(uiContext);
+                final EntryPoint entryPoint = initializeEntryPoint();
                 final String historyToken = uiContext.getHistoryToken();
 
                 if (historyToken != null && !historyToken.isEmpty()) uiContext.getHistory().newItem(historyToken, false);
@@ -54,10 +50,16 @@ public abstract class AbstractApplicationManager {
         });
     }
 
-    protected abstract EntryPoint initializeUIContext(final UIContext ponySession) throws Exception;
+    protected abstract EntryPoint initializeEntryPoint() throws Exception;
 
     public ApplicationManagerOption getConfiguration() {
         return configuration;
     }
+
+    public void setConfiguration(final ApplicationManagerOption configuration) {
+        this.configuration = configuration;
+    }
+
+    public abstract void start();
 
 }
