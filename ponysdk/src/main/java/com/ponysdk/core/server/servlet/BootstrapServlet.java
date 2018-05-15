@@ -41,6 +41,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.ApplicationManagerOption;
 
 public class BootstrapServlet extends HttpServlet {
@@ -55,7 +56,7 @@ public class BootstrapServlet extends HttpServlet {
 
     private static final Logger log = LoggerFactory.getLogger(BootstrapServlet.class);
 
-    protected ApplicationManagerOption application;
+    protected ApplicationConfiguration configuration;
 
     protected String rootPath = "";
 
@@ -190,7 +191,7 @@ public class BootstrapServlet extends HttpServlet {
     protected String addTitle(final HttpServletRequest request) {
         final StringBuilder sb = new StringBuilder();
 
-        sb.append(String.format(TITLE_PATTERN, application.getApplicationName())).append(NEW_LINE);
+        sb.append(String.format(TITLE_PATTERN, configuration.getApplicationName())).append(NEW_LINE);
 
         return sb.toString();
     }
@@ -200,7 +201,7 @@ public class BootstrapServlet extends HttpServlet {
 
         sb.append(String.format(META_PATTERN, "http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\"")).append(NEW_LINE);
 
-        final Set<String> metas = application.getMeta();
+        final Set<String> metas = configuration.getMeta();
         if (metas != null) {
             for (final String m : metas) {
                 sb.append(String.format(META_PATTERN, m)).append(NEW_LINE);
@@ -213,7 +214,7 @@ public class BootstrapServlet extends HttpServlet {
     protected String addStyle(final HttpServletRequest request) {
         final StringBuilder sb = new StringBuilder();
 
-        final Map<String, String> styles = application.getStyle();
+        final Map<String, String> styles = configuration.getStyle();
         if (styles != null && !styles.isEmpty()) {
             for (final Entry<String, String> style : styles.entrySet()) {
                 final String id = style.getKey();
@@ -230,13 +231,13 @@ public class BootstrapServlet extends HttpServlet {
         final StringBuilder sb = new StringBuilder();
 
         String ponyTerminalJsFileName;
-        if (application.isDebugMode()) ponyTerminalJsFileName = "ponyterminaldebug/ponyterminaldebug.nocache.js";
+        if (configuration.isDebugMode()) ponyTerminalJsFileName = "ponyterminaldebug/ponyterminaldebug.nocache.js";
         else ponyTerminalJsFileName = "ponyterminal/ponyterminal.nocache.js";
 
         sb.append(String.format(SCRIPT_PATTERN, rootPath + ponyTerminalJsFileName)).append(NEW_LINE);
         sb.append(String.format(SCRIPT_PATTERN, rootPath + "script/ponysdk.js")).append(NEW_LINE);
 
-        final Set<String> scripts = application.getJavascript();
+        final Set<String> scripts = configuration.getJavascript();
         if (scripts != null && !scripts.isEmpty()) {
             for (final String script : scripts) {
                 sb.append(String.format(SCRIPT_PATTERN, script)).append(NEW_LINE);
@@ -264,7 +265,7 @@ public class BootstrapServlet extends HttpServlet {
     protected String addLoading(final HttpServletRequest request) {
         final StringBuilder sb = new StringBuilder();
         sb.append("<div id=\"loading\">Loading ");
-        sb.append(application.getApplicationName());
+        sb.append(configuration.getApplicationName());
         sb.append("...</div>").append(NEW_LINE);
         return sb.toString();
     }
@@ -284,8 +285,16 @@ public class BootstrapServlet extends HttpServlet {
         return sb.toString();
     }
 
+    public void setConfiguration(final ApplicationConfiguration configuration) {
+        this.configuration = configuration;
+    }
+
+    /**
+     * @deprecated Use {@link #setConfiguration(ApplicationConfiguration)} directly
+     */
+    @Deprecated(forRemoval = true, since = "v2.8.1")
     public void setApplication(final ApplicationManagerOption application) {
-        this.application = application;
+        setConfiguration(application);
     }
 
     public void setRootPath(final String rootPath) {

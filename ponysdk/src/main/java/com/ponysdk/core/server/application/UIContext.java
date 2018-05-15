@@ -813,6 +813,15 @@ public class UIContext {
         return application.getId();
     }
 
+    /**
+     * Gets the {@link Application} of the UIContext
+     *
+     * @return The Application
+     */
+    public Application getApplication() {
+        return application;
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
@@ -874,16 +883,6 @@ public class UIContext {
             }
             return average;
         }
-    }
-
-    /**
-     * Gets the {@link Application} of the UIContext
-     *
-     * @return The Application
-     */
-    @Deprecated(forRemoval = true, since = "v2.8.0")
-    public Application getApplication() {
-        return application;
     }
 
 }
