@@ -600,6 +600,7 @@ public class UIContext {
      * This method locks the UIContext
      */
     public void onDestroy() {
+        if (!isAlive()) return;
         begin();
         try {
             doDestroy();
@@ -638,6 +639,7 @@ public class UIContext {
      * This method locks the UIContext
      */
     public void destroy() {
+        if (!isAlive()) return;
         begin();
         try {
             doDestroy();
