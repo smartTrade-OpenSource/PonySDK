@@ -119,7 +119,6 @@ public class UIContext {
     private final ApplicationManagerOption configuration;
     private final WebSocket socket;
     private final ServletUpgradeRequest request;
-    private final UserAgent userAgent;
 
     private long lastReceivedTime = System.currentTimeMillis();
 
@@ -129,7 +128,6 @@ public class UIContext {
         this.socket = socket;
         this.configuration = configuration;
         this.request = request;
-        this.userAgent = UserAgent.parseUserAgentString(request.getHeader("User-Agent"));
         this.context = context;
         this.application = context.getApplication();
     }
@@ -627,6 +625,7 @@ public class UIContext {
      * This method locks the UIContext
      */
     public void onDestroy() {
+        if (!isAlive()) return;
         acquire();
         try {
             doDestroy();
@@ -795,7 +794,7 @@ public class UIContext {
     }
 
     public UserAgent getUserAgent() {
-        return userAgent;
+        return UserAgent.parseUserAgentString(request.getHeader("User-Agent"));
     }
 
     public HttpSession getSession() {

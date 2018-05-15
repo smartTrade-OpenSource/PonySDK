@@ -65,7 +65,7 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
             super.flush();
         } catch (final IOException e) {
             log.error("Can't write on the websocket, so we destroy the application", e);
-            UIContext.get().destroy();
+            UIContext.get().onDestroy();
         }
     }
 
@@ -135,8 +135,7 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
             }
         } catch (final IOException e) {
             log.error("Can't write on the websocket, so we destroy the application", e);
-            final UIContext uiContext = UIContext.get();
-            if (uiContext != null) uiContext.destroy();
+            UIContext.get().onDestroy();
         }
     }
 
