@@ -23,12 +23,13 @@
 
 package com.ponysdk.core.ui.basic;
 
+import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.mockito.Mockito;
 
 import com.ponysdk.core.server.application.Application;
-import com.ponysdk.core.server.application.ApplicationManagerOption;
+import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.server.stm.TxnContext;
@@ -40,6 +41,7 @@ public class PSuite {
     @BeforeClass
     public static void beforeClass() {
         final WebSocket socket = Mockito.mock(WebSocket.class);
+        final ServletUpgradeRequest request = Mockito.mock(ServletUpgradeRequest.class);
 
         final TxnContext context = Mockito.spy(new TxnContext(socket));
         final ModelWriter mw = Mockito.mock(ModelWriter.class);
@@ -48,10 +50,10 @@ public class PSuite {
         final Application application = Mockito.mock(Application.class, Mockito.RETURNS_MOCKS);
         Mockito.when(context.getApplication()).thenReturn(application);
 
-        final ApplicationManagerOption configuration = Mockito.mock(ApplicationManagerOption.class);
+        final ApplicationConfiguration configuration = Mockito.mock(ApplicationConfiguration.class);
 
         Txn.get().begin(context);
-        final UIContext uiContext = Mockito.spy(new UIContext(socket, context, configuration));
+        final UIContext uiContext = Mockito.spy(new UIContext(socket, context, configuration, request));
         UIContext.setCurrent(uiContext);
     }
 

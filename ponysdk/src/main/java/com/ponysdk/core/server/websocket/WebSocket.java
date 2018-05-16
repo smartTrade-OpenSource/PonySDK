@@ -47,7 +47,6 @@ import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.context.CommunicationSanityChecker;
 import com.ponysdk.core.server.servlet.SessionManager;
 import com.ponysdk.core.server.stm.TxnContext;
-import com.ponysdk.core.useragent.UserAgent;
 import com.ponysdk.core.util.JsonUtil;
 
 public class WebSocket implements WebSocketListener, WebsocketEncoder {
@@ -86,8 +85,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
         Application application = SessionManager.get().getApplication(applicationId);
         if (application == null) {
-            application = new Application(applicationId, httpSession, applicationManager.getConfiguration(),
-                UserAgent.parseUserAgentString(userAgent));
+            application = new Application(applicationId, httpSession, applicationManager.getConfiguration());
             SessionManager.get().registerApplication(application);
         }
 

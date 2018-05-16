@@ -32,7 +32,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.server.application.ApplicationManagerOption;
+import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.UIContext;
 
 public class CommunicationSanityChecker {
@@ -72,8 +72,8 @@ public class CommunicationSanityChecker {
     public CommunicationSanityChecker(final UIContext uiContext) {
         this.uiContext = uiContext;
         this.uiContext.addContextDestroyListener(context -> stop());
-        final ApplicationManagerOption options = uiContext.getConfiguration();
-        setHeartBeatPeriod(options.getHeartBeatPeriod(), options.getHeartBeatPeriodTimeUnit());
+        final ApplicationConfiguration configuration = uiContext.getConfiguration();
+        setHeartBeatPeriod(configuration.getHeartBeatPeriod(), configuration.getHeartBeatPeriodTimeUnit());
     }
 
     private boolean isStarted() {

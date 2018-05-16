@@ -46,19 +46,25 @@ public class Application {
 
     private final Map<String, Object> attributes = new ConcurrentHashMap<>();
 
-    private final ApplicationManagerOption options;
-
-    private final UserAgent userAgent;
+    private final ApplicationConfiguration configuration;
 
     private final HttpSession session;
 
     private final String id;
 
-    public Application(final String id, final HttpSession session, final ApplicationManagerOption options, final UserAgent userAgent) {
+    public Application(final String id, final HttpSession session, final ApplicationConfiguration configuration) {
         this.id = id;
         this.session = session;
-        this.options = options;
-        this.userAgent = userAgent;
+        this.configuration = configuration;
+    }
+
+    /**
+     * @deprecated Use {@link #Application(String, HttpSession, ApplicationManagerOption)} directly
+     */
+    @Deprecated(forRemoval = true, since = "v2.8.1")
+    public Application(final String id, final HttpSession session, final ApplicationConfiguration configuration,
+            final UserAgent userAgent) {
+        this(id, session, configuration);
     }
 
     public void registerUIContext(final UIContext uiContext) {
@@ -119,20 +125,12 @@ public class Application {
         return (T) attributes.get(name);
     }
 
-    public ApplicationManagerOption getOptions() {
-        return options;
+    public ApplicationConfiguration getOptions() {
+        return configuration;
     }
 
     public String getId() {
         return id;
-    }
-
-    public HttpSession getSession() {
-        return session;
-    }
-
-    public UserAgent getUserAgent() {
-        return userAgent;
     }
 
     public int countUIContexts() {
@@ -141,7 +139,7 @@ public class Application {
 
     @Override
     public String toString() {
-        return "Application [id=" + id + ", options=" + options + ", userAgent=" + userAgent + "]";
+        return "Application [id=" + id + ", options=" + configuration + "]";
     }
 
 }

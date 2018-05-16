@@ -23,20 +23,16 @@
 
 package com.ponysdk.core.server.servlet;
 
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-
+import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.ApplicationManager;
-import com.ponysdk.core.server.application.ApplicationManagerOption;
 
 /**
  * @deprecated Use {@link com.ponysdk.core.server.application.ApplicationManager} directly
  */
 @Deprecated(forRemoval = true, since = "v2.8.1")
-public abstract class ApplicationLoader implements ServletContextListener {
+public abstract class ApplicationLoader {
 
     private ApplicationManager applicationManager;
-    protected ApplicationManagerOption configuration;
 
     public ApplicationLoader() {
         applicationManager = createApplicationManager();
@@ -48,12 +44,7 @@ public abstract class ApplicationLoader implements ServletContextListener {
 
     protected abstract ApplicationManager createApplicationManager();
 
-    public ApplicationManagerOption getApplicationManagerOption() {
-        return applicationManager.getConfiguration();
-    }
-
-    public void setApplicationManagerOption(final ApplicationManagerOption configuration) {
-        this.configuration = configuration;
+    public void setApplicationManagerOption(final ApplicationConfiguration configuration) {
         applicationManager.setConfiguration(configuration);
     }
 
@@ -63,16 +54,6 @@ public abstract class ApplicationLoader implements ServletContextListener {
 
     public void setApplicationManager(final ApplicationManager applicationManager) {
         this.applicationManager = applicationManager;
-    }
-
-    @Override
-    public void contextInitialized(final ServletContextEvent event) {
-        // Nothing to do
-    }
-
-    @Override
-    public void contextDestroyed(final ServletContextEvent event) {
-        // Nothing to do
     }
 
 }

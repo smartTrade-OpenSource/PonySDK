@@ -32,7 +32,7 @@ public abstract class ApplicationManager {
 
     private static final Logger log = LoggerFactory.getLogger(ApplicationManager.class);
 
-    protected ApplicationManagerOption configuration;
+    protected ApplicationConfiguration configuration;
 
     public void startApplication(final UIContext uiContext) throws Exception {
         uiContext.execute(() -> {
@@ -52,11 +52,11 @@ public abstract class ApplicationManager {
 
     protected abstract EntryPoint initializeEntryPoint() throws Exception;
 
-    public ApplicationManagerOption getConfiguration() {
+    public ApplicationConfiguration getConfiguration() {
         return configuration;
     }
 
-    public void setConfiguration(final ApplicationManagerOption configuration) {
+    public void setConfiguration(final ApplicationConfiguration configuration) {
         this.configuration = configuration;
     }
 

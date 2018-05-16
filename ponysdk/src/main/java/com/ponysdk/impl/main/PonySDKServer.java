@@ -38,8 +38,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.model.MappingPath;
+import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.ApplicationManager;
-import com.ponysdk.core.server.application.ApplicationManagerOption;
 import com.ponysdk.core.server.servlet.AjaxServlet;
 import com.ponysdk.core.server.servlet.ApplicationLoader;
 import com.ponysdk.core.server.servlet.BootstrapServlet;
@@ -57,8 +57,6 @@ public class PonySDKServer {
 
     protected final Server server;
 
-    @Deprecated(forRemoval = true, since = "v2.8.1")
-    protected ApplicationLoader applicationLoader;
     protected ApplicationManager applicationManager;
 
     protected String host = "0.0.0.0";
@@ -91,7 +89,7 @@ public class PonySDKServer {
 
         server.setHandler(gzip);
 
-        applicationLoader.start();
+        applicationManager.start();
 
         server.start();
         server.join();
@@ -100,11 +98,11 @@ public class PonySDKServer {
     }
 
     protected ServletContextHandler createWebApp() {
-        final ApplicationManagerOption applicationManagerOption = applicationManager.getConfiguration();
-        log.info("Adding application #{}", applicationManagerOption.getApplicationContextName());
+        final ApplicationConfiguration configuration = applicationManager.getConfiguration();
+        log.info("Adding application #{}", configuration.getApplicationContextName());
 
         final ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
-        context.setContextPath("/" + applicationManagerOption.getApplicationContextName());
+        context.setContextPath("/" + configuration.getApplicationContextName());
 
         context.addServlet(new ServletHolder(createBootstrapServlet()), MAPPING_BOOTSTRAP);
         context.addServlet(new ServletHolder(createStreamServiceServlet()), MAPPING_STREAM);
@@ -164,7 +162,7 @@ public class PonySDKServer {
 
     protected BootstrapServlet createBootstrapServlet() {
         final BootstrapServlet bootstrapServlet = new BootstrapServlet();
-        bootstrapServlet.setApplication(applicationManager.getConfiguration());
+        bootstrapServlet.setConfiguration(applicationManager.getConfiguration());
         return bootstrapServlet;
     }
 
@@ -244,18 +242,15 @@ public class PonySDKServer {
         this.applicationManager = applicationManager;
     }
 
-    public ApplicationManagerOption getApplicationConfiguration() {
+    public ApplicationConfiguration getApplicationConfiguration() {
         return applicationManager.getConfiguration();
     }
 
-    @Deprecated
-    public ApplicationManagerOption getApplicationOption() {
-        return applicationManager.getConfiguration();
-    }
-
-    @Deprecated
+    /**
+     * @deprecated Use {@link #setApplicationManager(ApplicationManager)} instead
+     */
+    @Deprecated(forRemoval = true, since = "v2.8.1")
     public void setApplicationLoader(final ApplicationLoader applicationLoader) {
-        this.applicationLoader = applicationLoader;
         setApplicationManager(applicationLoader.getApplicationManager());
     }
 

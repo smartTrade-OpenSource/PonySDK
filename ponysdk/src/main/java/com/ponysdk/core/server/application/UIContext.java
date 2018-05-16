@@ -116,13 +116,13 @@ public class UIContext {
 
     private final Latency latency = new Latency(10);
 
-    private final ApplicationManagerOption configuration;
+    private final ApplicationConfiguration configuration;
     private final WebSocket socket;
     private final ServletUpgradeRequest request;
 
     private long lastReceivedTime = System.currentTimeMillis();
 
-    public UIContext(final WebSocket socket, final TxnContext context, final ApplicationManagerOption configuration,
+    public UIContext(final WebSocket socket, final TxnContext context, final ApplicationConfiguration configuration,
             final ServletUpgradeRequest request) {
         this.ID = uiContextCount.incrementAndGet();
         this.socket = socket;
@@ -133,7 +133,7 @@ public class UIContext {
     }
 
     @Deprecated(forRemoval = true, since = "v2.8.1")
-    public UIContext(final WebSocket socket, final TxnContext context, final ApplicationManagerOption configuration) {
+    public UIContext(final WebSocket socket, final TxnContext context, final ApplicationConfiguration configuration) {
         this(socket, context, configuration, socket.getRequest());
     }
 
@@ -749,7 +749,7 @@ public class UIContext {
      *
      * @return The ApplicationManagerOption
      */
-    public ApplicationManagerOption getConfiguration() {
+    public ApplicationConfiguration getConfiguration() {
         return configuration;
     }
 
