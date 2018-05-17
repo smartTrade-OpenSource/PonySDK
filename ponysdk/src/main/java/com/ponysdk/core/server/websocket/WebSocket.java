@@ -120,13 +120,14 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     @Override
     public void onWebSocketError(final Throwable throwable) {
         log.error("WebSocket Error", throwable);
+        uiContext.onDestroy();
     }
 
     @Override
     public void onWebSocketClose(final int statusCode, final String reason) {
         if (log.isInfoEnabled()) log.info("WebSocket closed on UIContext #{} : {}, reason : {}", uiContext.getID(),
             NiceStatusCode.getMessage(statusCode), reason != null ? reason : "");
-        if (isAlive()) uiContext.onDestroy();
+        uiContext.onDestroy();
     }
 
     /**
