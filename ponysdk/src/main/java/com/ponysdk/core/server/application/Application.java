@@ -71,7 +71,7 @@ public class Application {
         uiContexts.put(uiContext.getID(), uiContext);
     }
 
-    void deregisterUIContext(final int uiContextID) {
+    public void deregisterUIContext(final int uiContextID) {
         uiContexts.remove(uiContextID);
         if (uiContexts.isEmpty()) {
             session.invalidate();

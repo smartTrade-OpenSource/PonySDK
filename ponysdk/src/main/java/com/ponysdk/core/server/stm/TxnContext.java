@@ -24,6 +24,7 @@
 package com.ponysdk.core.server.stm;
 
 import com.ponysdk.core.server.application.Application;
+import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.websocket.WebSocket;
 import com.ponysdk.core.writer.ModelWriter;
 
@@ -38,6 +39,10 @@ public class TxnContext implements TxnListener {
     public TxnContext(final WebSocket socket) {
         this.socket = socket;
         this.modelWriter = new ModelWriter(socket);
+    }
+
+    public ModelWriter getWriter() {
+        return modelWriter;
     }
 
     void flush() {
@@ -63,8 +68,8 @@ public class TxnContext implements TxnListener {
         // Nothing to do
     }
 
-    public ModelWriter getWriter() {
-        return modelWriter;
+    public WebSocket getSocket() {
+        return socket;
     }
 
     public Application getApplication() {
@@ -75,24 +80,29 @@ public class TxnContext implements TxnListener {
         this.application = application;
     }
 
-    public void sendHeartBeat() {
-        socket.sendHeartBeat();
+    public <T> T getAttribute(final String name) {
+        return application != null ? application.getAttribute(name) : null;
     }
 
-    public void sendRoundTrip() {
-        socket.sendRoundTrip();
+    public void setAttribute(final String name, final Object value) {
+        if (application != null) application.setAttribute(name, value);
     }
 
-    public void close() {
-        socket.close();
+    public String getId() {
+        return application != null ? application.getId() : null;
     }
 
-    public WebSocket getSocket() {
-        return socket;
+    public void registerUIContext(final UIContext uiContext) {
+        if (application != null) application.registerUIContext(uiContext);
+    }
+
+    public void deregisterUIContext(final int ID) {
+        if (application != null) application.deregisterUIContext(ID);
     }
 
     @Override
     public String toString() {
-        return "TxnContext{" + "flushNow=" + flushNow + ", application=" + application + '}';
+        return "TxnContext{" + "flushNow=" + flushNow + ", modelWriter=" + modelWriter + '}';
     }
+
 }

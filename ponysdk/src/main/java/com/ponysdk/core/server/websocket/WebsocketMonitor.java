@@ -25,8 +25,10 @@ package com.ponysdk.core.server.websocket;
 
 public interface WebsocketMonitor {
 
-    void onMessageReceived(WebSocket webSocket, String text);
+    void onMessageReceived(WebSocket webSocket, String message);
 
-    void onMessageProcessed(WebSocket webSocket);
+    void onMessageProcessed(WebSocket webSocket, String message);
+
+    void onMessageUnprocessed(WebSocket webSocket, String message);
 
 }

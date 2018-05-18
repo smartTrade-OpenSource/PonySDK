@@ -35,7 +35,10 @@ import com.ponysdk.core.server.websocket.WebsocketMonitor;
 public class WebSocket extends com.ponysdk.core.server.websocket.WebSocket {
 
     WebSocket(final ServletUpgradeRequest request, final WebsocketMonitor monitor, final ApplicationManager applicationManager) {
-        super(request, monitor, applicationManager);
+        super();
+        setRequest(request);
+        setMonitor(monitor);
+        setApplicationManager(applicationManager);
     }
 
 }

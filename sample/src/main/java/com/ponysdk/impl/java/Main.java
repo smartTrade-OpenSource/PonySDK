@@ -28,7 +28,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.ponysdk.core.server.application.ApplicationConfiguration;
-import com.ponysdk.core.server.application.ApplicationManagerOption;
 import com.ponysdk.core.ui.main.EntryPoint;
 import com.ponysdk.impl.java.server.JavaApplicationManager;
 import com.ponysdk.impl.main.PonySDKServer;
@@ -36,11 +35,10 @@ import com.ponysdk.impl.main.PonySDKServer;
 public class Main {
 
     public static void main(final String[] args) throws Exception {
-        final ApplicationManagerOption configuration = new ApplicationManagerOption();
+        final ApplicationConfiguration configuration = new ApplicationConfiguration();
         configuration.setApplicationID(System.getProperty(ApplicationConfiguration.APPLICATION_ID, "ID"));
         configuration.setApplicationName(System.getProperty(ApplicationConfiguration.APPLICATION_NAME, "NAME"));
-        configuration
-            .setApplicationDescription(System.getProperty(ApplicationConfiguration.APPLICATION_DESCRIPTION, "DESCRIPTION"));
+        configuration.setApplicationDescription(System.getProperty(ApplicationConfiguration.APPLICATION_DESCRIPTION, "DESCRIPTION"));
         configuration.setApplicationContextName(System.getProperty(ApplicationConfiguration.APPLICATION_CONTEXT_NAME, ""));
         configuration.setSessionTimeout(1000);
         configuration.setEntryPointClass((Class<? extends EntryPoint>) Class

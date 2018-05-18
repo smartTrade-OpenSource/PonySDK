@@ -23,11 +23,17 @@
 
 package com.ponysdk.core.server.websocket;
 
+import javax.servlet.http.HttpSession;
+
+import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ponysdk.core.server.application.Application;
 import com.ponysdk.core.server.application.ApplicationManager;
+import com.ponysdk.core.server.servlet.SessionManager;
+import com.ponysdk.core.server.stm.TxnContext;
 
 public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSocketServlet {
 
@@ -46,15 +52,39 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
     public void configure(final WebSocketServletFactory factory) {
         factory.getPolicy().setIdleTimeout(maxIdleTime);
         factory.setCreator((request, response) -> {
-            // Force session creation if there is no session
-            request.getHttpServletRequest().getSession(true);
-            if (request.getSession() != null) {
-                return new WebSocket(request, monitor, applicationManager);
-            } else {
-                log.error("No HTTP session found");
-                return null;
+            final WebSocket webSocket = new WebSocket();
+            webSocket.setRequest(request);
+            webSocket.setApplicationManager(applicationManager);
+            webSocket.setMonitor(monitor);
+
+            final TxnContext context = new TxnContext(webSocket);
+            webSocket.setContext(context);
+
+            if (request.getHttpServletRequest().getServletContext().getSessionCookieConfig() != null) {
+                configureWithSession(request, context);
             }
+
+            return webSocket;
         });
+    }
+
+    protected void configureWithSession(final ServletUpgradeRequest request, final TxnContext context) {
+        // Force session creation if there is no session
+        request.getHttpServletRequest().getSession(true);
+        final HttpSession httpSession = request.getSession();
+        if (httpSession != null) {
+            final String applicationId = httpSession.getId();
+
+            Application application = SessionManager.get().getApplication(applicationId);
+            if (application == null) {
+                application = new Application(applicationId, httpSession, applicationManager.getConfiguration());
+                SessionManager.get().registerApplication(application);
+            }
+            context.setApplication(application);
+        } else {
+            log.error("No HTTP session found");
+            throw new IllegalStateException("No HTTP session found");
+        }
     }
 
     public void setMaxIdleTime(final int maxIdleTime) {

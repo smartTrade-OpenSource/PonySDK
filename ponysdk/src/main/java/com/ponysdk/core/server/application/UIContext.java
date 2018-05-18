@@ -87,8 +87,6 @@ public class UIContext {
     private static final AtomicInteger uiContextCount = new AtomicInteger();
 
     private final int ID;
-    @Deprecated(forRemoval = true, since = "v2.8.0")
-    private final Application application;
 
     private final ReentrantLock lock = new ReentrantLock();
     private final Map<String, Object> attributes = new HashMap<>();
@@ -129,7 +127,6 @@ public class UIContext {
         this.configuration = configuration;
         this.request = request;
         this.context = context;
-        this.application = context.getApplication();
     }
 
     @Deprecated(forRemoval = true, since = "v2.8.1")
@@ -689,7 +686,7 @@ public class UIContext {
                 log.error("Exception while destroying UIContext #" + getID(), e);
             }
         });
-        application.deregisterUIContext(ID);
+        context.deregisterUIContext(ID);
     }
 
     /**
@@ -802,15 +799,15 @@ public class UIContext {
     }
 
     public <T> T getApplicationAttribute(final String name) {
-        return application.getAttribute(name);
+        return context.getAttribute(name);
     }
 
     public void setApplicationAttribute(final String name, final Object value) {
-        application.setAttribute(name, value);
+        context.setAttribute(name, value);
     }
 
     public String getApplicationId() {
-        return application.getId();
+        return context.getId();
     }
 
     /**
@@ -819,7 +816,7 @@ public class UIContext {
      * @return The Application
      */
     public Application getApplication() {
-        return application;
+        return context.getApplication();
     }
 
     @Override
