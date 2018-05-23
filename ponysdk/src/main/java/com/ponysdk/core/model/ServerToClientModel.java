@@ -108,8 +108,6 @@ public enum ServerToClientModel {
     DATE_FORMAT_PATTERN(ValueTypeModel.STRING_UTF8),
     KEEP_DAY_TIME_NEEDED(ValueTypeModel.NULL),
     TAG(ValueTypeModel.STRING),
-    INNER_HTML(ValueTypeModel.STRING_UTF8),
-    INNER_TEXT(ValueTypeModel.STRING_UTF8),
     PICKER(ValueTypeModel.INTEGER),
     ROW(ValueTypeModel.INTEGER),
     ROW_FORMATTER_ADD_STYLE_NAME(ValueTypeModel.STRING),
