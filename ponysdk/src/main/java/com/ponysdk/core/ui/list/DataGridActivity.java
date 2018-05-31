@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
@@ -150,8 +149,7 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
 
                 @Override
                 public D next() {
-                    if (hasNext()) return next;
-                    else throw new NoSuchElementException();
+                    return next;
                 }
 
                 @Override
