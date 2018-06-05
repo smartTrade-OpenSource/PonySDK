@@ -85,8 +85,11 @@ public class PTDatePicker extends PTWidget<DatePicker> {
             final String[] dates = binaryModel.getStringValue().split(DATE_SEPARATOR);
             // ServerToClientModel.ENABLED
             final boolean enabled = buffer.readBinaryModel().getBooleanValue();
-            for (final String date : dates) {
-                uiObject.setTransientEnabledOnDates(enabled, DateConverter.decode(date));
+            for (final String rawDate : dates) {
+                final Date date = DateConverter.decode(rawDate);
+                if (date.after(uiObject.getFirstDate()) && date.before(uiObject.getLastDate())) {
+                    uiObject.setTransientEnabledOnDates(enabled, date);
+                }
             }
             return true;
         } else if (ServerToClientModel.ADD_DATE_STYLE == model) {
