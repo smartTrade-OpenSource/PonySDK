@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -30,13 +30,21 @@ public class Query {
 
     private final List<Criterion> criteria = new ArrayList<>();
     private int pageSize = Integer.MAX_VALUE;
-
-    private int pageNum = 0;
+    private int pageNum;
+    private String queryHint;
 
     private QueryMode queryMode = QueryMode.PAGINATION;
 
     public Query() {
         super();
+    }
+
+    public void setQueryHint(final String queryHint) {
+        this.queryHint = queryHint;
+    }
+
+    public String getQueryHint() {
+        return queryHint;
     }
 
     public int getPageSize() {
@@ -72,8 +80,8 @@ public class Query {
     }
 
     public Criterion getCriterion(final String pojoProperty) {
-        for(Criterion criterion : criteria){
-            if(criterion.getPojoProperty().equals(pojoProperty)){
+        for (final Criterion criterion : criteria) {
+            if (criterion.getPojoProperty().equals(pojoProperty)) {
                 return criterion;
             }
         }
@@ -89,6 +97,7 @@ public class Query {
     }
 
     public enum QueryMode {
-        PAGINATION, FULL_RESULT
+        PAGINATION,
+        FULL_RESULT
     }
 }
