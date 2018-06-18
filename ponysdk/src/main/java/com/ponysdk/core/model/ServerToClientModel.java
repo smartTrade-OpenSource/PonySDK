@@ -246,6 +246,7 @@ public enum ServerToClientModel {
     DEFAULT_SUGGESTIONS(ValueTypeModel.STRING_UTF8),
     TEXTBOX_ID(ValueTypeModel.INTEGER);
 
+    public static final int MAX_VALUE = Short.MAX_VALUE;
     private static final ServerToClientModel[] VALUES = ServerToClientModel.values();
 
     private final ValueTypeModel type;

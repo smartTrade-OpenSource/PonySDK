@@ -432,7 +432,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
                 if (binaryModel != null) writer.write(binaryModel.getKey(), binaryModel.getValue());
             };
             if (initialized) writeAddHandler(callback);
-            else safeStackedInstructions().put(atomicKey.incrementAndGet(), () -> writeAddHandler(callback));
+            else safeStackedInstructions().put(saveKey++, () -> writeAddHandler(callback));
         }
 
         return handlerRegistration;

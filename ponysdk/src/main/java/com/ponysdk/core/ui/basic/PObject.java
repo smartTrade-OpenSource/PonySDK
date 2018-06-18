@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.json.JsonObject;
 import javax.servlet.ServletException;
@@ -65,7 +64,7 @@ public abstract class PObject {
     protected boolean initialized = false;
     protected boolean destroy = false;
 
-    protected final AtomicInteger atomicKey = new AtomicInteger(ServerToClientModel.DESTROY.getValue());
+    protected int saveKey = ServerToClientModel.MAX_VALUE; // Has to be higher than all ordinal of ServerToClientModel
     private AjaxHandler ajaxHandler;
 
     PObject() {
@@ -224,7 +223,7 @@ public abstract class PObject {
     }
 
     protected void saveUpdate(final ModelWriterCallback callback) {
-        saveUpdate(atomicKey.incrementAndGet(), callback);
+        saveUpdate(saveKey++, callback);
     }
 
     protected void saveUpdate(final ServerToClientModel serverToClientModel, final Object value) {
@@ -268,7 +267,7 @@ public abstract class PObject {
             }
         };
         if (initialized) writeAdd(callback);
-        else safeStackedInstructions().put(atomicKey.incrementAndGet(), () -> writeAdd(callback));
+        else safeStackedInstructions().put(saveKey++, () -> writeAdd(callback));
     }
 
     private void writeAdd(final ModelWriterCallback callback) {
@@ -288,7 +287,7 @@ public abstract class PObject {
 
         final ModelWriterCallback callback = writer -> writer.write(ServerToClientModel.HANDLER_TYPE, type.getValue());
         if (initialized) writeAddHandler(callback);
-        else safeStackedInstructions().put(atomicKey.incrementAndGet(), () -> writeAddHandler(callback));
+        else safeStackedInstructions().put(saveKey++, () -> writeAddHandler(callback));
     }
 
     void writeAddHandler(final ModelWriterCallback callback) {
@@ -312,7 +311,7 @@ public abstract class PObject {
             writer.write(ServerToClientModel.HANDLER_TYPE, type.getValue());
         };
         if (initialized) writeRemoveHandler(callback);
-        else safeStackedInstructions().put(atomicKey.incrementAndGet(), () -> writeRemoveHandler(callback));
+        else safeStackedInstructions().put(saveKey++, () -> writeRemoveHandler(callback));
     }
 
     private void writeRemoveHandler(final ModelWriterCallback callback) {
@@ -335,7 +334,7 @@ public abstract class PObject {
             writer.write(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
         };
         if (initialized) writeRemove(callback);
-        else safeStackedInstructions().put(atomicKey.incrementAndGet(), () -> writeRemove(callback));
+        else safeStackedInstructions().put(saveKey++, () -> writeRemove(callback));
     }
 
     private void writeRemove(final ModelWriterCallback callback) {
