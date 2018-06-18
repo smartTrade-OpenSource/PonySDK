@@ -23,9 +23,9 @@
 
 package com.ponysdk.core.server.application;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -98,7 +98,7 @@ public class UIContext {
 
     private final PCookies cookies = new PCookies();
 
-    private final List<ContextDestroyListener> destroyListeners = new ArrayList<>();
+    private final Set<ContextDestroyListener> destroyListeners = new HashSet<>();
     private final TxnContext context;
     private final Set<DataListener> listeners = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
