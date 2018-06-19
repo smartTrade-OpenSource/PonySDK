@@ -25,6 +25,7 @@ package com.ponysdk.impl.main;
 
 import com.ponysdk.core.model.MappingPath;
 import com.ponysdk.core.server.application.AbstractApplicationManager;
+import com.ponysdk.core.server.context.CommunicationSanityChecker;
 import com.ponysdk.core.server.servlet.AjaxServlet;
 import com.ponysdk.core.server.servlet.BootstrapServlet;
 import com.ponysdk.core.server.servlet.StreamServiceServlet;
@@ -51,9 +52,9 @@ public class PonySDKServer {
 
     private static final Logger LOG = LoggerFactory.getLogger(PonySDKServer.class);
 
-    protected Server server;
-    protected String host = "0.0.0.0";
-    protected int port = 80;
+    private Server server;
+    private String host = "0.0.0.0";
+    private int port = 80;
 
     private boolean useSSL = true;
     private int sslPort = 443;
@@ -68,6 +69,7 @@ public class PonySDKServer {
     private String enabledCipherSuites;
 
     private AbstractApplicationManager applicationManager;
+    private CommunicationSanityChecker communicationSanityChecker;
 
     public void start() throws Exception {
         server = new Server();
@@ -89,6 +91,8 @@ public class PonySDKServer {
         wscontainer.addEndpoint(ServerEndpointConfig.Builder.create(WebSocket.class, "/ws").configurator(configurator).build());
 
         applicationManager.start();
+        communicationSanityChecker.start();
+
         server.start();
         server.join();
 
@@ -224,5 +228,9 @@ public class PonySDKServer {
 
     public void setApplicationManager(AbstractApplicationManager applicationManager) {
         this.applicationManager = applicationManager;
+    }
+
+    public void setCommunicationSanityChecker(CommunicationSanityChecker communicationSanityChecker) {
+        this.communicationSanityChecker = communicationSanityChecker;
     }
 }

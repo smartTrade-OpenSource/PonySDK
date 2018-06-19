@@ -24,32 +24,19 @@
 package com.ponysdk.core.server.application;
 
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.context.CommunicationSanityChecker;
 import com.ponysdk.core.server.context.UIContext;
 import com.ponysdk.core.ui.main.EntryPoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Duration;
-
 public abstract class AbstractApplicationManager {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractApplicationManager.class);
 
-    protected ApplicationConfiguration configuration;
-
-    private CommunicationSanityChecker communicationSanityChecker;
-
-    public void start() {
-        long period = configuration.getHeartBeatPeriodTimeUnit().toMillis(configuration.getHeartBeatPeriod());
-        communicationSanityChecker = new CommunicationSanityChecker(Duration.ofMillis(period));
-        communicationSanityChecker.start();
-    }
+    private ApplicationConfiguration configuration;
 
     public void startContext(UIContext uiContext) {
-        communicationSanityChecker.registerUIContext(uiContext);
         uiContext.execute(() -> {
-
             final EntryPoint entryPoint;
             try {
                 uiContext.getWriter().write(ServerToClientModel.CREATE_CONTEXT, uiContext.getID());
@@ -58,15 +45,17 @@ public abstract class AbstractApplicationManager {
                 entryPoint = initializeUIContext(uiContext);
                 final String historyToken = uiContext.getHistoryToken();
 
-                if (historyToken != null && !historyToken.isEmpty())
+                if (historyToken != null && !historyToken.isEmpty()) {
                     uiContext.getHistory().newItem(historyToken, false);
+                }
 
                 entryPoint.start(uiContext);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 log.error("Cannot start UIContext", e);
-                //TODO nciaravola destroy if exception ?
+                uiContext.destroy();
             }
         });
+
     }
 
     protected abstract EntryPoint initializeUIContext(final UIContext uiContext) throws Exception;

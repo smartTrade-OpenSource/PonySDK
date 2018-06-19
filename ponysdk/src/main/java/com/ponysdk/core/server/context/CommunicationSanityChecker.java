@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.server.context;
 
+import com.ponysdk.core.server.websocket.WebSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,28 +38,28 @@ import java.util.concurrent.TimeUnit;
 public class CommunicationSanityChecker {
 
     private static final Logger log = LoggerFactory.getLogger(CommunicationSanityChecker.class);
-    private static final int CHECK_PERIOD = 1;
+    private static final int DELAY = 1;
 
     private final ScheduledExecutorService checker = Executors.newSingleThreadScheduledExecutor();
     private Duration heartBeatPeriod;
-    private Map<Integer, UIContext> contexts = new ConcurrentHashMap<>();
+
+    private Map<String, WebSocket> sockets = new ConcurrentHashMap<>();
 
     public CommunicationSanityChecker(Duration duration) {
         this.heartBeatPeriod = duration;
     }
 
-    public void registerUIContext(UIContext uiContext) {
-        contexts.put(uiContext.getID(), uiContext);
-        uiContext.addContextDestroyListener(this::removeUIContext);
+    public void registerSession(WebSocket socket) {
+        sockets.put(socket.getSessionID(), socket);
     }
 
     public void start() {
-        checker.scheduleWithFixedDelay(this::check, 0, CHECK_PERIOD, TimeUnit.SECONDS);
-        log.info("Communication sanity checker is now started, period : {} seconds", CHECK_PERIOD);
+        checker.scheduleWithFixedDelay(this::check, 0, DELAY, TimeUnit.SECONDS);
+        log.info("Communication sanity checker is now started, period : {} seconds", DELAY);
     }
 
     private void check() {
-        contexts.forEach(this::checkCommunicationState);
+        sockets.forEach(this::checkCommunicationState);
     }
 
     public void stop() {
@@ -66,23 +67,29 @@ public class CommunicationSanityChecker {
         log.info("Communication sanity checker is now terminated");
     }
 
-    private void removeUIContext(UIContext uiContext) {
-        contexts.remove(uiContext.getID());
-    }
-
-    private void checkCommunicationState(Integer ID, UIContext uiContext) {
+    private void checkCommunicationState(String ID, WebSocket socket) {
         try {
-            if (uiContext.isAlive()) {
-                final Instant now = Instant.now();
-                final Duration duration = Duration.between(uiContext.getLastReceivedTime(), now).abs();
+            if (socket.isSessionOpen()) {
+                final Duration duration = Duration.between(socket.getLastReceivedTime(), Instant.now()).abs();
                 if (heartBeatPeriod.compareTo(duration) < 0) {
-                    log.info("UIContext {} will be closed, no message received for {} seconds", uiContext.getID(), heartBeatPeriod.getSeconds());
-                    uiContext.destroy();
+                    log.info("Session {} will be closed, no message received for {} seconds", socket, heartBeatPeriod.getSeconds());
+                    closeSession(socket);
                 }
             }
         } catch (final Throwable e) {
-            log.error("Error while checking communication state on UIContext #{}", uiContext.getID(), e);
-            //remove UIContext ?
+            log.error("Error while checking communication state on session {}", socket, e);
+            closeSession(socket);
+        }
+    }
+
+    private void closeSession(WebSocket socket) {
+        if (socket == null) return;
+        try {
+            socket.close();
+        } catch (Throwable t) {
+            log.error("Cannot close the session {}", socket, t);
+        } finally {
+            sockets.remove(socket.getSessionID());
         }
     }
 

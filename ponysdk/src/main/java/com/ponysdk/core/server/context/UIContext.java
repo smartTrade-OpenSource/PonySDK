@@ -46,7 +46,6 @@ import javax.json.JsonString;
 import javax.json.JsonValue;
 import javax.json.JsonValue.ValueType;
 import javax.websocket.server.HandshakeRequest;
-import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -92,8 +91,6 @@ public class UIContext {
 
     private final Latency latency = new Latency(10);
 
-    private Instant lastReceivedTime = Instant.now();
-
     public UIContext(final WebSocket socket, HandshakeRequest request, ApplicationConfiguration option) {
         this.ID = uiContextCount.incrementAndGet();
         this.socket = socket;
@@ -103,14 +100,6 @@ public class UIContext {
 
     public static UIContext get() {
         return currentContext.get();
-    }
-
-    public void onMessageReceived() {
-        lastReceivedTime = Instant.now();
-    }
-
-    public Instant getLastReceivedTime() {
-        return lastReceivedTime;
     }
 
     /**
@@ -496,7 +485,6 @@ public class UIContext {
         if (!isAlive()) return;
         alive = false;
         doDestroy();
-        //socket.close();
     }
 
     /**

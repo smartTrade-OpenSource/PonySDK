@@ -26,9 +26,9 @@ package com.ponysdk.core.server.websocket;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.AbstractApplicationManager;
+import com.ponysdk.core.server.context.CommunicationSanityChecker;
 import com.ponysdk.core.server.context.UIContext;
 import com.ponysdk.core.ui.basic.PObject;
-import org.eclipse.jetty.websocket.api.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,10 +40,8 @@ import javax.websocket.server.HandshakeRequest;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
+import java.time.Instant;
+import java.time.temporal.Temporal;
 
 @ServerEndpoint(value = "/ws")
 public class WebSocket implements WebsocketEncoder {
@@ -53,32 +51,29 @@ public class WebSocket implements WebsocketEncoder {
     private WebsocketMonitor monitor;
     private WebSocketPusher websocketPusher;
     private AbstractApplicationManager applicationManager;
+    private CommunicationSanityChecker communicationSanityChecker;
     private Session session;
 
     private UIContext uiContext;
     private HandshakeRequest request;
+
+    private Instant lastReceivedTime = Instant.now();
 
     @OnOpen
     public void onOpen(Session s, EndpointConfig config) {
         session = s;
         //final String userAgent = request.getHeaders().get("User-Agent").get(0);
         //log.info("WebSocket connected from {}, sessionID={}, userAgent={}", session.getBasicRemote(), request.getSession().getId(), userAgent);
-
-        // 1K for max chunk size and 1M for total buffer size
-        // Don't set max chunk size > 8K because when using Jetty Websocket compression, the chunks are limited to 8K
-        websocketPusher = new WebSocketPusher(session, 1 << 20, 1 << 12, TimeUnit.SECONDS.toMillis(60));
+        websocketPusher = new WebSocketPusher(session);
         uiContext = new UIContext(this, request, applicationManager.getConfiguration());
         applicationManager.startContext(uiContext);
+        communicationSanityChecker.registerSession(this);
     }
 
     @OnClose
     public void onClose(Session session, CloseReason closeReason) {
-        if (isAlive()) {
-            uiContext.destroy();
-            log.info("WebSocket closed for UIContext #{} : {}, reason : {}", uiContext.getID(), closeReason);
-        } else {
-
-        }
+        uiContext.destroy();
+        log.info("WebSocket closed for UIContext #{} : {}, reason : {}", uiContext.getID(), closeReason);
     }
 
     @OnError
@@ -89,12 +84,9 @@ public class WebSocket implements WebsocketEncoder {
     @OnMessage
     public void onMessage(String message) {
         //todo if tt est a null ....
-
-
         if (isAlive()) {
             try {
-                uiContext.onMessageReceived();
-                if (monitor != null) monitor.onMessageReceived(WebSocket.this, message);
+                onMessageReceived(message);
                 //uiContext.sendHeartBeat();
                 //uiContext.sendRoundTrip();
 
@@ -180,6 +172,10 @@ public class WebSocket implements WebsocketEncoder {
         this.applicationManager = applicationManager;
     }
 
+    public void setCommunicationSanityChecker(CommunicationSanityChecker communicationSanityChecker) {
+        this.communicationSanityChecker = communicationSanityChecker;
+    }
+
     public void setMonitor(WebsocketMonitor monitor) {
         this.monitor = monitor;
     }
@@ -217,17 +213,15 @@ public class WebSocket implements WebsocketEncoder {
     }
 
     public void close() throws IOException {
-        if (isSessionOpen()) {
-            log.info("Closing websocket programaticly");
-            session.close();
-        }
+        log.info("Closing websocket programaticly");
+        session.close();
     }
 
     private boolean isAlive() {
         return uiContext != null && uiContext.isAlive();
     }
 
-    private boolean isSessionOpen() {
+    public boolean isSessionOpen() {
         return session != null && session.isOpen();
     }
 
@@ -247,6 +241,27 @@ public class WebSocket implements WebsocketEncoder {
 
     public void setRequest(HandshakeRequest request) {
         this.request = request;
+    }
+
+    public String getSessionID() {
+        return session.getId();
+    }
+
+    private void onMessageReceived(String message) {
+        lastReceivedTime = Instant.now();
+        if (monitor != null) monitor.onMessageReceived(WebSocket.this, message);
+    }
+
+    public Temporal getLastReceivedTime() {
+        return lastReceivedTime;
+    }
+
+    @Override
+    public String toString() {
+        return "WebSocket{" +
+                "session=" + session +
+                ", uiContext=" + uiContext +
+                '}';
     }
 
 }

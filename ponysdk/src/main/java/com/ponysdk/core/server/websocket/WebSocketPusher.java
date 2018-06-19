@@ -37,6 +37,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.concurrent.TimeUnit;
 
 public class WebSocketPusher extends AutoFlushedBuffer implements SendHandler {
 
@@ -55,6 +56,13 @@ public class WebSocketPusher extends AutoFlushedBuffer implements SendHandler {
 
     public WebSocketPusher(final Session session, final int bufferSize, final int maxChunkSize, final long timeoutMillis) {
         super(bufferSize, true, maxChunkSize, 0.25f, timeoutMillis);
+        this.session = session;
+    }
+
+    // 1K for max chunk size and 1M for total buffer size
+    // Don't set max chunk size > 8K because when using Jetty Websocket compression, the chunks are limited to 8K
+    public WebSocketPusher(final Session session) {
+        super(1 << 20, true, 1 << 12, 0.25f, TimeUnit.SECONDS.toMillis(60));
         this.session = session;
     }
 
@@ -244,9 +252,9 @@ public class WebSocketPusher extends AutoFlushedBuffer implements SendHandler {
 
     @Override
     public void onResult(SendResult result) {
-        if(result.isOK()){
+        if (result.isOK()) {
             onFlushCompletion(); // TODO nciaravola si ca chie pas d'impact ?
-        }else{
+        } else {
             Throwable t = result.getException();
             if (t instanceof Exception) {
                 onFlushFailure((Exception) t);

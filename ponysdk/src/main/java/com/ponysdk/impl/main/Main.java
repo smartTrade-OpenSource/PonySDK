@@ -25,8 +25,10 @@ package com.ponysdk.impl.main;
 
 import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.JavaApplicationManager;
+import com.ponysdk.core.server.context.CommunicationSanityChecker;
 import com.ponysdk.core.ui.main.EntryPoint;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -61,6 +63,11 @@ public class Main {
         JavaApplicationManager javaApplicationManager = new JavaApplicationManager();
         javaApplicationManager.setConfiguration(configuration);
         ponySDKServer.setApplicationManager(javaApplicationManager);
+
+        long period = configuration.getHeartBeatPeriodTimeUnit().toMillis(configuration.getHeartBeatPeriod());
+        CommunicationSanityChecker communicationSanityChecker = new CommunicationSanityChecker(Duration.ofMillis(period));
+        ponySDKServer.setCommunicationSanityChecker(communicationSanityChecker);
+
         ponySDKServer.setPort(8081);
         ponySDKServer.setHost("0.0.0.0");
         ponySDKServer.setUseSSL(false);
