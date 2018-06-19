@@ -1,8 +1,8 @@
 ext {
     gwtVersion = '2.8.2'
     
-    jettyVersion = '9.4.8.v20171121'
-    springVersion = '5.0.5.RELEASE'
+    jettyVersion = '9.4.11.v20180605'
+    springVersion = '5.0.7.RELEASE'
     
     slf4jVersion = '1.8.0-alpha2'
     log4jVersion = '2.10.0'
