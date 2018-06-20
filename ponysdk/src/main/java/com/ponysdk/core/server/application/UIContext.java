@@ -626,6 +626,7 @@ public class UIContext {
         acquire();
         try {
             doDestroy();
+            context.deregisterUIContext(ID);
         } finally {
             release();
         }
@@ -640,16 +641,7 @@ public class UIContext {
         if (!isAlive()) return;
         acquire();
         try {
-            alive = false;
-            destroyListeners.forEach(listener -> {
-                try {
-                    listener.onBeforeDestroy(this);
-                } catch (final AlreadyDestroyedApplication e) {
-                    if (log.isDebugEnabled()) log.debug("Exception while destroying UIContext #" + getID(), e);
-                } catch (final Exception e) {
-                    log.error("Exception while destroying UIContext #" + getID(), e);
-                }
-            });
+            doDestroy();
             socket.close();
         } finally {
             release();
@@ -666,6 +658,7 @@ public class UIContext {
         acquire();
         try {
             doDestroy();
+            context.deregisterUIContext(ID);
             socket.close();
         } finally {
             release();
@@ -686,7 +679,6 @@ public class UIContext {
                 log.error("Exception while destroying UIContext #" + getID(), e);
             }
         });
-        context.deregisterUIContext(ID);
     }
 
     /**

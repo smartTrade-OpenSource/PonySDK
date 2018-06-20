@@ -149,19 +149,26 @@ public class PScheduler {
         return new UIDelegator<>(callback, uiContext);
     }
 
-    private void purge(final UIRunnable uiRunnable) {
+    private void destroy(final UIContext uiContext) {
+        final Set<UIRunnable> uiRunnables = runnablesByUIContexts.remove(uiContext);
+        if (uiRunnables != null) uiRunnables.forEach(UIRunnable::onCancel);
         executor.purge();
-        runnablesByUIContexts.get(uiRunnable.getUiContext()).remove(uiRunnable);
+    }
+
+    private void purge(final UIRunnable uiRunnable) {
+        final Set<UIRunnable> uiRunnables = runnablesByUIContexts.get(uiRunnable.getUIContext());
+        if (uiRunnables != null) uiRunnables.remove(uiRunnable);
+        executor.purge();
     }
 
     private void registerTask(final UIRunnable runnable) {
-        final UIContext uiContext = runnable.getUiContext();
+        final UIContext uiContext = runnable.getUIContext();
         Set<UIRunnable> runnables = runnablesByUIContexts.get(uiContext);
         if (runnables == null) {
             runnables = Collections.newSetFromMap(new ConcurrentHashMap<>());
             runnables.add(runnable);
             runnablesByUIContexts.put(uiContext, runnables);
-            uiContext.addContextDestroyListener(context -> runnablesByUIContexts.remove(context).forEach(UIRunnable::cancel));
+            uiContext.addContextDestroyListener(this::destroy);
         } else {
             runnables.add(runnable);
         }
@@ -192,9 +199,7 @@ public class PScheduler {
                 log.error("Error occurred", throwable);
                 cancel();
             } finally {
-                if (!repeated) {
-                    scheduler.purge(this);
-                }
+                if (!repeated) scheduler.purge(this);
             }
         }
 
@@ -203,16 +208,20 @@ public class PScheduler {
         }
 
         public void cancel() {
+            onCancel();
+            scheduler.purge(this);
+        }
+
+        public void onCancel() {
             this.cancelled = true;
             this.future.cancel(false);
-            scheduler.purge(this);
         }
 
         void setFuture(final ScheduledFuture<?> future) {
             this.future = future;
         }
 
-        public UIContext getUiContext() {
+        public UIContext getUIContext() {
             return uiContext;
         }
     }
