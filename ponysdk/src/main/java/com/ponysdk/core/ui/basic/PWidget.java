@@ -342,10 +342,6 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         return styleNames != null && !styleName.isEmpty() && styleNames.contains(styleName);
     }
 
-    public Object getData() {
-        return data;
-    }
-
     @Override
     public PWidget asWidget() {
         return this;

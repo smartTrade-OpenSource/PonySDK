@@ -23,7 +23,6 @@
 
 package com.ponysdk.core.util;
 
-import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 
@@ -66,17 +65,10 @@ public class JsonUtil {
         return createJsonProvider().createObjectBuilder();
     }
 
-    /**
-     * Creates a JSON reader from a byte stream. The character encoding of
-     * the stream is determined as described in
-     * <a href="http://tools.ietf.org/rfc/rfc7159.txt">RFC 7159</a>.
-     *
-     * @param in
-     *            a byte stream from which JSON is to be read
-     * @return a JSON reader
-     */
-    public static JsonReader createReader(final InputStream in) {
-        return createJsonProvider().createReader(in);
+    public static JsonObject readObject(final String text) {
+        try (final JsonReader reader = JsonUtil.createReader(new StringReader(text))) {
+            return reader.readObject();
+        }
     }
 
     /**
@@ -86,14 +78,8 @@ public class JsonUtil {
      *            a reader from which JSON is to be read
      * @return a JSON reader
      */
-    public static JsonReader createReader(final Reader reader) {
+    private static JsonReader createReader(final Reader reader) {
         return createJsonProvider().createReader(reader);
-    }
-
-    public static JsonObject readObject(final String text) {
-        try (final JsonReader reader = JsonUtil.createReader(new StringReader(text))) {
-            return reader.readObject();
-        }
     }
 
 }

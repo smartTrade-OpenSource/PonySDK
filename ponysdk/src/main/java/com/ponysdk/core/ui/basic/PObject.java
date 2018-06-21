@@ -372,6 +372,10 @@ public abstract class PObject {
         this.data = data;
     }
 
+    public Object getData() {
+        return data;
+    }
+
     public boolean isInitialized() {
         return initialized;
     }
