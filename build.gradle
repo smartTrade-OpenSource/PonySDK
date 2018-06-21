@@ -30,7 +30,7 @@ subprojects {
     targetCompatibility = 9
 
     def suffix = project.hasProperty('BUILD_RELEASE') ? "" : "-SNAPSHOT"
-    version = '2.8.4' + suffix
+    version = '2.8.5' + suffix
 
     publishing {
         publications {
