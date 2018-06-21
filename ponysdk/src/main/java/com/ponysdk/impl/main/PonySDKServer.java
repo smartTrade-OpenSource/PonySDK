@@ -90,7 +90,6 @@ public class PonySDKServer {
         wscontainer.setAsyncSendTimeout(10000);
         wscontainer.addEndpoint(ServerEndpointConfig.Builder.create(WebSocket.class, "/ws").configurator(configurator).build());
 
-        applicationManager.start();
         communicationSanityChecker.start();
 
         server.start();

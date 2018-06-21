@@ -30,7 +30,7 @@ public class JavaApplicationManager extends AbstractApplicationManager {
 
     @Override
     protected EntryPoint initializeUIContext(UIContext uiContext) throws Exception {
-        final Class<? extends EntryPoint> entryPointClassName = configuration.getEntryPointClass();
+        final Class<? extends EntryPoint> entryPointClassName = getConfiguration().getEntryPointClass();
         return entryPointClassName.getDeclaredConstructor().newInstance();
     }
 }

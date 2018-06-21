@@ -38,9 +38,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -55,7 +53,7 @@ public abstract class PObject {
     protected Set<DestroyListener> destroyListeners;
     protected Object data;
 
-    protected LinkedHashMap<Integer, Runnable> stackedInstructions;
+    protected List<Runnable> stackedInstructions;
     private String nativeBindingFunction;
 
     private PTerminalEvent.Handler terminalHandler;
@@ -63,17 +61,8 @@ public abstract class PObject {
     protected boolean initialized = false;
     protected boolean destroy = false;
 
-    protected final AtomicInteger atomicKey = new AtomicInteger(ServerToClientModel.DESTROY.getValue());
     private AjaxHandler ajaxHandler;
 
-    public PObject() {
-    }
-
-    /**
-     * Gets the widget type
-     *
-     * @return the widget type
-     */
     protected abstract WidgetType getWidgetType();
 
     protected boolean attach(final PWindow window, final PFrame frame) {
@@ -118,7 +107,7 @@ public abstract class PObject {
         init0();
 
         if (stackedInstructions != null) {
-            stackedInstructions.values().forEach(Runnable::run);
+            stackedInstructions.forEach(Runnable::run);
             stackedInstructions = null;
         }
 
@@ -214,24 +203,19 @@ public abstract class PObject {
         }
     }
 
-    protected LinkedHashMap<Integer, Runnable> safeStackedInstructions() {
-        if (stackedInstructions == null) stackedInstructions = new LinkedHashMap<>();
+    protected List<Runnable> safeStackedInstructions() {
+        if (stackedInstructions == null) stackedInstructions = new ArrayList<>();
         return stackedInstructions;
     }
 
     protected void saveUpdate(final ModelWriterCallback callback) {
-        saveUpdate(atomicKey.incrementAndGet(), callback);
+        if (destroy) return;
+        if (initialized) writeUpdate(callback);
+        else safeStackedInstructions().add(() -> writeUpdate(callback));
     }
 
     protected void saveUpdate(final ServerToClientModel serverToClientModel, final Object value) {
-        saveUpdate(serverToClientModel.getValue(), writer -> writer.write(serverToClientModel, value));
-    }
-
-    private void saveUpdate(final int atomicKey, final ModelWriterCallback callback) {
-        if (destroy) return;
-
-        if (initialized) writeUpdate(callback);
-        else safeStackedInstructions().put(atomicKey, () -> writeUpdate(callback));
+        saveUpdate(writer -> writer.write(serverToClientModel, value));
     }
 
     void writeUpdate(final ModelWriterCallback callback) {
@@ -264,12 +248,42 @@ public abstract class PObject {
             }
         };
         if (initialized) writeAdd(callback);
-        else safeStackedInstructions().put(atomicKey.incrementAndGet(), () -> writeAdd(callback));
+        else safeStackedInstructions().add(() -> writeAdd(callback));
+    }
+
+    protected void saveAddHandler(final HandlerModel type) {
+        if (destroy) return;
+
+        final ModelWriterCallback callback = writer -> writer.write(ServerToClientModel.HANDLER_TYPE, type.getValue());
+        if (initialized) writeAddHandler(callback);
+        else safeStackedInstructions().add(() -> writeAddHandler(callback));
+    }
+
+
+    protected void saveRemoveHandler(final HandlerModel type) {
+        if (destroy) return;
+
+        final ModelWriterCallback callback = writer -> {
+            writer.write(ServerToClientModel.TYPE_REMOVE_HANDLER, ID);
+            writer.write(ServerToClientModel.HANDLER_TYPE, type.getValue());
+        };
+        if (initialized) writeRemoveHandler(callback);
+        else safeStackedInstructions().add(() -> writeRemoveHandler(callback));
+    }
+
+
+    void saveRemove(final int objectID, final int parentObjectID) {
+        if (destroy) return;
+
+        final ModelWriterCallback callback = writer -> {
+            writer.write(ServerToClientModel.TYPE_REMOVE, objectID);
+            writer.write(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
+        };
+        if (initialized) writeRemove(callback);
+        else safeStackedInstructions().add(() -> writeRemove(callback));
     }
 
     private void writeAdd(final ModelWriterCallback callback) {
-        if (destroy) return;
-
         final ModelWriter writer = UIContext.get().getWriter();
         writer.beginObject();
         if (!PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
@@ -279,17 +293,7 @@ public abstract class PObject {
         writer.endObject();
     }
 
-    protected void saveAddHandler(final HandlerModel type) {
-        if (destroy) return;
-
-        final ModelWriterCallback callback = writer -> writer.write(ServerToClientModel.HANDLER_TYPE, type.getValue());
-        if (initialized) writeAddHandler(callback);
-        else safeStackedInstructions().put(atomicKey.incrementAndGet(), () -> writeAddHandler(callback));
-    }
-
     void writeAddHandler(final ModelWriterCallback callback) {
-        if (destroy) return;
-
         final ModelWriter writer = UIContext.get().getWriter();
         writer.beginObject();
         if (!PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
@@ -300,20 +304,7 @@ public abstract class PObject {
         writer.endObject();
     }
 
-    protected void saveRemoveHandler(final HandlerModel type) {
-        if (destroy) return;
-
-        final ModelWriterCallback callback = writer -> {
-            writer.write(ServerToClientModel.TYPE_REMOVE_HANDLER, ID);
-            writer.write(ServerToClientModel.HANDLER_TYPE, type.getValue());
-        };
-        if (initialized) writeRemoveHandler(callback);
-        else safeStackedInstructions().put(atomicKey.incrementAndGet(), () -> writeRemoveHandler(callback));
-    }
-
     private void writeRemoveHandler(final ModelWriterCallback callback) {
-        if (destroy) return;
-
         final ModelWriter writer = UIContext.get().getWriter();
         writer.beginObject();
         if (!PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
@@ -323,24 +314,11 @@ public abstract class PObject {
         writer.endObject();
     }
 
-    void saveRemove(final int objectID, final int parentObjectID) {
-        if (destroy) return;
-
-        final ModelWriterCallback callback = writer -> {
-            writer.write(ServerToClientModel.TYPE_REMOVE, objectID);
-            writer.write(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
-        };
-        if (initialized) writeRemove(callback);
-        else safeStackedInstructions().put(atomicKey.incrementAndGet(), () -> writeRemove(callback));
-    }
-
     private void writeRemove(final ModelWriterCallback callback) {
-        if (destroy) return;
-
         final ModelWriter writer = UIContext.get().getWriter();
         writer.beginObject();
         if (!PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
-        if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
+        if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());g r
 
         callback.doWrite(writer);
         writer.endObject();

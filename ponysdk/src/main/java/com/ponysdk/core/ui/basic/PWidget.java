@@ -212,7 +212,8 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     }
 
     public void removeStyleProperty(final String name) {
-        if (safeStyleProperties().remove(name) != null) saveUpdate(writer -> writer.write(ServerToClientModel.REMOVE_STYLE_KEY, name));
+        if (safeStyleProperties().remove(name) != null)
+            saveUpdate(writer -> writer.write(ServerToClientModel.REMOVE_STYLE_KEY, name));
     }
 
     public void setProperty(final String name, final String value) {
@@ -258,7 +259,8 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     }
 
     public void preventEvent(final PEventType e) {
-        if (safePreventEvents().add(e)) saveUpdate(writer -> writer.write(ServerToClientModel.PREVENT_EVENT, e.getCode()));
+        if (safePreventEvents().add(e))
+            saveUpdate(writer -> writer.write(ServerToClientModel.PREVENT_EVENT, e.getCode()));
     }
 
     public void stopEvent(final PEventType e) {
@@ -352,19 +354,20 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         if (destroy) return null;
         final HandlerRegistration handlerRegistration = ensureEventBus().addHandlerToSource(type, this, handler);
 
-        if (oneTimeHandlerCreation == null) oneTimeHandlerCreation = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        if (oneTimeHandlerCreation == null)
+            oneTimeHandlerCreation = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
         if (!oneTimeHandlerCreation.contains(type)) {
             oneTimeHandlerCreation.add(type);
             final ServerBinaryModel binaryModel1 = new ServerBinaryModel(ServerToClientModel.DOM_HANDLER_CODE,
-                type.getDomHandlerType().getValue());
+                    type.getDomHandlerType().getValue());
             final ModelWriterCallback callback = writer -> {
                 writer.write(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_DOM.getValue());
                 writer.write(binaryModel1.getKey(), binaryModel1.getValue());
                 if (binaryModel != null) writer.write(binaryModel.getKey(), binaryModel.getValue());
             };
             if (initialized) writeAddHandler(callback);
-            else safeStackedInstructions().put(atomicKey.incrementAndGet(), () -> writeAddHandler(callback));
+            else safeStackedInstructions().add(() -> writeAddHandler(callback));
         }
 
         return handlerRegistration;

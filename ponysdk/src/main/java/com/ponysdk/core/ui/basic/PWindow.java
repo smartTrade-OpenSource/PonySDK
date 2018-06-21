@@ -88,7 +88,7 @@ public class PWindow extends PObject {
         if (initialized) return;
 
         if (stackedInstructions != null) {
-            stackedInstructions.values().forEach(Runnable::run);
+            stackedInstructions.forEach(Runnable::run);
             stackedInstructions = null;
         }
 
