@@ -320,7 +320,7 @@ public abstract class PObject {
         final ModelWriter writer = UIContext.get().getWriter();
         writer.beginObject();
         if (!PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
-        if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());g r
+        if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
 
         callback.doWrite(writer);
         writer.endObject();
