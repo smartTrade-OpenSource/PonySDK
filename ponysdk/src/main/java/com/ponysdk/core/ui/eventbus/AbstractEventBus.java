@@ -45,11 +45,11 @@ public abstract class AbstractEventBus implements EventBus {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractEventBus.class);
 
-    private final Set<BroadcastEventHandler> broadcastHandlerManager = new HashSet<>();
+    private Set<BroadcastEventHandler> broadcastHandlerManager;
 
     private final Map<Event.Type, Map<Object, Set<EventHandler>>> map = new HashMap<>();
-    private final Queue<Event<? extends EventHandler>> eventQueue = new LinkedList<>();
-    private final List<HandlerContext> pendingHandlerRegistration = new ArrayList<>();
+    private Queue<Event<? extends EventHandler>> eventQueue;
+    private List<HandlerContext> pendingHandlerRegistration;
     private boolean firing = false;
 
     @Override
@@ -95,6 +95,7 @@ public abstract class AbstractEventBus implements EventBus {
 
     private void defferedAdd(final Event.Type type, final Object source, final EventHandler handler) {
         final HandlerContext context = new HandlerContext(type, source, handler, true);
+        if (pendingHandlerRegistration == null) pendingHandlerRegistration = new ArrayList<>();
         pendingHandlerRegistration.add(context);
     }
 
@@ -136,9 +137,11 @@ public abstract class AbstractEventBus implements EventBus {
     }
 
     private void defferedRemove(final Event.Type type, final Object source, final EventHandler handler) {
-        final HandlerContext context = new HandlerContext(type, source, handler, false);
-        final boolean removed = pendingHandlerRegistration.remove(context);
-        if (!removed) pendingHandlerRegistration.add(context);
+        if (pendingHandlerRegistration != null) {
+            final HandlerContext context = new HandlerContext(type, source, handler, false);
+            final boolean removed = pendingHandlerRegistration.remove(context);
+            if (!removed) pendingHandlerRegistration.add(context);
+        }
     }
 
     @Override
@@ -157,6 +160,7 @@ public abstract class AbstractEventBus implements EventBus {
     private void doFire(final Event<? extends EventHandler> event, final Object source) {
         if (source != null) event.setSource(source);
 
+        if (eventQueue == null) eventQueue = new LinkedList<>();
         eventQueue.add(event);
 
         if (firing) return;
@@ -194,18 +198,22 @@ public abstract class AbstractEventBus implements EventBus {
                     }
                 }
 
-                for (final BroadcastEventHandler handler : broadcastHandlerManager) {
-                    if (log.isDebugEnabled()) log.debug("broadcast eventbus #{}", e);
-                    handler.onEvent(e);
+                if (broadcastHandlerManager != null) {
+                    for (final BroadcastEventHandler handler : broadcastHandlerManager) {
+                        if (log.isDebugEnabled()) log.debug("broadcast eventbus #{}", e);
+                        handler.onEvent(e);
+                    }
                 }
             }
 
-            for (final HandlerContext context : pendingHandlerRegistration) {
-                if (context.add) doAddNow(context.type, context.source, context.handler);
-                else doRemoveNow(context.type, context.source, context.handler);
-            }
+            if (pendingHandlerRegistration != null) {
+                for (final HandlerContext context : pendingHandlerRegistration) {
+                    if (context.add) doAddNow(context.type, context.source, context.handler);
+                    else doRemoveNow(context.type, context.source, context.handler);
+                }
 
-            pendingHandlerRegistration.clear();
+                pendingHandlerRegistration.clear();
+            }
 
             if (causes != null) throw new UmbrellaException(causes);
         } finally {
@@ -226,12 +234,13 @@ public abstract class AbstractEventBus implements EventBus {
 
     @Override
     public void addHandler(final BroadcastEventHandler handler) {
+        if (broadcastHandlerManager == null) broadcastHandlerManager = new HashSet<>();
         broadcastHandlerManager.add(handler);
     }
 
     @Override
     public void removeHandler(final BroadcastEventHandler handler) {
-        broadcastHandlerManager.remove(handler);
+        if (broadcastHandlerManager != null) broadcastHandlerManager.remove(handler);
     }
 
     private static final class HandlerContext {
