@@ -24,13 +24,11 @@
 package com.ponysdk.core.ui.basic;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import javax.json.JsonArray;
@@ -416,7 +414,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         if (destroy) return null;
         final HandlerRegistration handlerRegistration = ensureEventBus().addHandlerToSource(type, this, handler);
 
-        if (oneTimeHandlerCreation == null) oneTimeHandlerCreation = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        if (oneTimeHandlerCreation == null) oneTimeHandlerCreation = new HashSet<>();
 
         if (!oneTimeHandlerCreation.contains(type)) {
             oneTimeHandlerCreation.add(type);

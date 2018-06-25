@@ -27,7 +27,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import com.ponysdk.core.ui.basic.HasPValue;
 import com.ponysdk.core.ui.basic.IsPWidget;
@@ -45,7 +44,7 @@ import com.ponysdk.core.ui.form.validator.ValidationResult;
 public abstract class AbstractFormField<T, W extends IsPWidget> implements FormField, HasPValue<T> {
 
     protected final W widget;
-    private final Set<FormFieldListener> listeners = new HashSet<>();
+    private Set<FormFieldListener> listeners;
     protected DataConverter<String, T> dataProvider;
     private FieldValidator validator;
     protected Set<PValueChangeHandler<T>> handlers;
@@ -101,6 +100,7 @@ public abstract class AbstractFormField<T, W extends IsPWidget> implements FormF
 
     @Override
     public void addFormFieldListener(final FormFieldListener listener) {
+        if (listeners == null) listeners = new HashSet<>();
         listeners.add(listener);
     }
 
@@ -112,11 +112,11 @@ public abstract class AbstractFormField<T, W extends IsPWidget> implements FormF
     }
 
     private void fireAfterReset() {
-        listeners.forEach(listener -> listener.afterReset(this));
+        if (listeners != null) listeners.forEach(listener -> listener.afterReset(this));
     }
 
     private void fireAfterValidation(final ValidationResult result) {
-        listeners.forEach(listener -> listener.afterValidation(this, result));
+        if (listeners != null) listeners.forEach(listener -> listener.afterValidation(this, result));
     }
 
     @Override
@@ -138,7 +138,7 @@ public abstract class AbstractFormField<T, W extends IsPWidget> implements FormF
 
     @Override
     public void addValueChangeHandler(final PValueChangeHandler<T> handler) {
-        if (handlers == null) handlers = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        if (handlers == null) handlers = new HashSet<>();
         handlers.add(handler);
     }
 
@@ -153,8 +153,7 @@ public abstract class AbstractFormField<T, W extends IsPWidget> implements FormF
     }
 
     protected void fireValueChange(final T value) {
-        if (handlers == null) return;
-        handlers.forEach(handler -> handler.onValueChange(new PValueChangeEvent<>(this, value)));
+        if (handlers != null) handlers.forEach(handler -> handler.onValueChange(new PValueChangeEvent<>(this, value)));
     }
 
     @Override

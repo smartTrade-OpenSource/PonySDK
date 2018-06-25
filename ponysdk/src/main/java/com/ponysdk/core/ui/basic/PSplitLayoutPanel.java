@@ -24,11 +24,10 @@
 package com.ponysdk.core.ui.basic;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
@@ -65,8 +64,7 @@ import com.ponysdk.core.ui.basic.event.PLayoutResizeHandler;
  */
 public class PSplitLayoutPanel extends PDockLayoutPanel {
 
-    private final Set<PLayoutResizeHandler> handlers = Collections.newSetFromMap(new ConcurrentHashMap<>());
-
+    private final Set<PLayoutResizeHandler> handlers = new HashSet<>();
     private final Map<PWidget, SplitInfoHolder> splitInfoByWidget = new HashMap<>();
 
     protected PSplitLayoutPanel() {

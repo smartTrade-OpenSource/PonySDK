@@ -23,9 +23,8 @@
 
 package com.ponysdk.core.ui.list.selector;
 
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import com.ponysdk.core.model.PHorizontalAlignment;
 import com.ponysdk.core.ui.basic.Element;
@@ -41,7 +40,7 @@ public class DefaultInfoSelectorView extends PHorizontalPanel implements Selecto
     final PAnchor selectAllAnchor = Element.newPAnchor();
     final PAnchor selectNoneAnchor = Element.newPAnchor();
 
-    private Set<SelectorViewListener> selectorViewListeners = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private final Set<SelectorViewListener> selectorViewListeners = new HashSet<>();
 
     public DefaultInfoSelectorView() {
         setHorizontalAlignment(PHorizontalAlignment.ALIGN_CENTER);

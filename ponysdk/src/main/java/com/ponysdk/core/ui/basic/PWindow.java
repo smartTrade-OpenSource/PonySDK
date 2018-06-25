@@ -23,11 +23,10 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.json.JsonObject;
 
@@ -281,7 +280,7 @@ public class PWindow extends PObject {
     }
 
     public void addOpenHandler(final POpenHandler handler) {
-        if (openHandlers == null) openHandlers = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        if (openHandlers == null) openHandlers = new HashSet<>();
         openHandlers.add(handler);
     }
 
@@ -290,7 +289,7 @@ public class PWindow extends PObject {
     }
 
     public void addCloseHandler(final PCloseHandler handler) {
-        if (closeHandlers == null) closeHandlers = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        if (closeHandlers == null) closeHandlers = new HashSet<>();
         closeHandlers.add(handler);
     }
 
@@ -348,7 +347,7 @@ public class PWindow extends PObject {
     }
 
     private void addWindow(final PWindow window) {
-        if (subWindows == null) subWindows = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        if (subWindows == null) subWindows = new HashSet<>();
         window.addCloseHandler(event -> removeWindow(window));
         subWindows.add(window);
     }
