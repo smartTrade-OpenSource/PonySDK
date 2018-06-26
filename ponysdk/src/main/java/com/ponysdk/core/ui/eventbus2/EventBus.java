@@ -59,13 +59,8 @@ public class EventBus {
 
     private <T> EventHandler<T> register(final Class<T> type) {
         final EventHandler<T> handler = new EventHandler<>(type);
-        Set<EventHandler<?>> handlers = handlersByType.get(type);
-        if (handlers == null) {
-            handlers = new LinkedHashSet<>();
-            handlersByType.put(type, handlers);
-        }
+        final Set<EventHandler<?>> handlers = handlersByType.computeIfAbsent(type, t -> new LinkedHashSet<>(4));
         handlers.add(handler);
-
         return handler;
     }
 

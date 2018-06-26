@@ -40,7 +40,7 @@ public class PCookies {
 
     private static final int ID = 0; // reserved
 
-    private final Map<String, String> cachedCookies = new HashMap<>();
+    private final Map<String, String> cachedCookies = new HashMap<>(4);
 
     private boolean isInitialized = false;
 

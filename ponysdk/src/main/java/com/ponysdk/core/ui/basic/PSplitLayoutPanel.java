@@ -64,8 +64,8 @@ import com.ponysdk.core.ui.basic.event.PLayoutResizeHandler;
  */
 public class PSplitLayoutPanel extends PDockLayoutPanel {
 
-    private final Set<PLayoutResizeHandler> handlers = new HashSet<>();
-    private final Map<PWidget, SplitInfoHolder> splitInfoByWidget = new HashMap<>();
+    private final Set<PLayoutResizeHandler> handlers = new HashSet<>(4);
+    private final Map<PWidget, SplitInfoHolder> splitInfoByWidget = new HashMap<>(4);
 
     protected PSplitLayoutPanel() {
         super(PUnit.PX);

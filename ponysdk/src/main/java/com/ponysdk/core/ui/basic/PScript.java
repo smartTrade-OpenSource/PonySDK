@@ -104,7 +104,7 @@ public class PScript extends PObject {
         saveUpdate(writer -> {
             writer.write(ServerToClientModel.EVAL, js);
             if (callback != null) {
-                if (callbacksByID == null) callbacksByID = new HashMap<>();
+                if (callbacksByID == null) callbacksByID = new HashMap<>(4);
                 callbacksByID.put(++executionID, callback);
                 writer.write(ServerToClientModel.COMMAND_ID, executionID);
             }

@@ -53,7 +53,7 @@ public class PWindow extends PObject {
     private boolean relative = false;
     private final Location location;
 
-    private Map<String, PRootPanel> panelByZone = new HashMap<>();
+    private Map<String, PRootPanel> panelByZone = new HashMap<>(8);
 
     private PWindow parent;
 
@@ -280,7 +280,7 @@ public class PWindow extends PObject {
     }
 
     public void addOpenHandler(final POpenHandler handler) {
-        if (openHandlers == null) openHandlers = new HashSet<>();
+        if (openHandlers == null) openHandlers = new HashSet<>(4);
         openHandlers.add(handler);
     }
 
@@ -289,7 +289,7 @@ public class PWindow extends PObject {
     }
 
     public void addCloseHandler(final PCloseHandler handler) {
-        if (closeHandlers == null) closeHandlers = new HashSet<>();
+        if (closeHandlers == null) closeHandlers = new HashSet<>(4);
         closeHandlers.add(handler);
     }
 
@@ -347,7 +347,7 @@ public class PWindow extends PObject {
     }
 
     private void addWindow(final PWindow window) {
-        if (subWindows == null) subWindows = new HashSet<>();
+        if (subWindows == null) subWindows = new HashSet<>(4);
         window.addCloseHandler(event -> removeWindow(window));
         subWindows.add(window);
     }

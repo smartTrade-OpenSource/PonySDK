@@ -75,27 +75,21 @@ public abstract class AbstractEventBus implements EventBus {
     }
 
     private void doAddNow(final Event.Type type, final Object source, final EventHandler handler) {
-        Map<Object, Set<EventHandler>> sourceMap = map.get(type);
-        if (sourceMap == null) {
-            sourceMap = new HashMap<>();
-            map.put(type, sourceMap);
-        }
+        final Map<Object, Set<EventHandler>> sourceMap = map.computeIfAbsent(type, eventType -> createEventHandlerMap());
 
         // safe, we control the puts.
-        Set<EventHandler> handlers = sourceMap.get(source);
-        if (handlers == null) {
-            handlers = createHandlerSet();
-            sourceMap.put(source, handlers);
-        }
+        final Set<EventHandler> handlers = sourceMap.computeIfAbsent(source, eventSource -> createHandlerSet());
 
         handlers.add(handler);
     }
+
+    protected abstract Map<Object, Set<EventHandler>> createEventHandlerMap();
 
     protected abstract Set<EventHandler> createHandlerSet();
 
     private void defferedAdd(final Event.Type type, final Object source, final EventHandler handler) {
         final HandlerContext context = new HandlerContext(type, source, handler, true);
-        if (pendingHandlerRegistration == null) pendingHandlerRegistration = new ArrayList<>();
+        if (pendingHandlerRegistration == null) pendingHandlerRegistration = new ArrayList<>(4);
         pendingHandlerRegistration.add(context);
     }
 
@@ -169,7 +163,7 @@ public abstract class AbstractEventBus implements EventBus {
 
         try {
             Event e;
-            Set<Throwable> causes = null;
+            Collection<Throwable> causes = null;
 
             while ((e = eventQueue.poll()) != null) {
                 final Object eventSource = e.getSource();
@@ -191,9 +185,7 @@ public abstract class AbstractEventBus implements EventBus {
                         e.dispatch(handler1);
                     } catch (final Throwable t) {
                         log.error("Cannot process fired eventbus #" + eventType, t);
-                        if (causes == null) {
-                            causes = new HashSet<>();
-                        }
+                        if (causes == null) causes = new ArrayList<>();
                         causes.add(t);
                     }
                 }
@@ -234,7 +226,7 @@ public abstract class AbstractEventBus implements EventBus {
 
     @Override
     public void addHandler(final BroadcastEventHandler handler) {
-        if (broadcastHandlerManager == null) broadcastHandlerManager = new HashSet<>();
+        if (broadcastHandlerManager == null) broadcastHandlerManager = new HashSet<>(4);
         broadcastHandlerManager.add(handler);
     }
 

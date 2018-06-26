@@ -23,14 +23,12 @@
 
 package com.ponysdk.core.server.application;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -80,10 +78,10 @@ import com.ponysdk.core.writer.ModelWriter;
  */
 public class UIContext {
 
+    private static final int INITIAL_STREAM_MAP_CAPACITY = 2;
+
     private static final Logger log = LoggerFactory.getLogger(UIContext.class);
-
     private static final ThreadLocal<UIContext> currentContext = new ThreadLocal<>();
-
     private static final AtomicInteger uiContextCount = new AtomicInteger();
 
     private final int ID;
@@ -94,7 +92,7 @@ public class UIContext {
     private final PObjectWeakHashMap pObjectWeakReferences = new PObjectWeakHashMap();
     private int objectCounter = 1;
 
-    private final Map<Integer, StreamHandler> streamListenerByID = new HashMap<>();
+    private Map<Integer, StreamHandler> streamListenerByID;
     private int streamRequestCounter = 0;
 
     private final PHistory history = new PHistory();
@@ -106,7 +104,7 @@ public class UIContext {
     private final Set<ContextDestroyListener> destroyListeners = new HashSet<>();
     @Deprecated(forRemoval = true, since = "v2.8.0")
     private final TxnContext context;
-    private final Set<DataListener> listeners = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private final Set<DataListener> listeners = new HashSet<>();
 
     private TerminalDataReceiver terminalDataReceiver;
 
@@ -519,6 +517,7 @@ public class UIContext {
         writer.write(ServerToClientModel.STREAM_REQUEST_ID, streamRequestID);
         writer.endObject();
 
+        if (streamListenerByID == null) streamListenerByID = new HashMap<>(INITIAL_STREAM_MAP_CAPACITY);
         streamListenerByID.put(streamRequestID, streamListener);
     }
 
@@ -543,6 +542,7 @@ public class UIContext {
         writer.write(ServerToClientModel.STREAM_REQUEST_ID, streamRequestID);
         writer.endObject();
 
+        if (streamListenerByID == null) streamListenerByID = new HashMap<>(INITIAL_STREAM_MAP_CAPACITY);
         streamListenerByID.put(streamRequestID, streamListener);
     }
 
@@ -563,7 +563,7 @@ public class UIContext {
      * @return the removed stream handler or null if not found
      */
     public StreamHandler removeStreamListener(final int streamID) {
-        return streamListenerByID.remove(streamID);
+        return streamListenerByID != null ? streamListenerByID.remove(streamID) : null;
     }
 
     /**

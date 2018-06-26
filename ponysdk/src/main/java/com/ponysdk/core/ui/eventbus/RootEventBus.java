@@ -24,10 +24,16 @@
 package com.ponysdk.core.ui.eventbus;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.WeakHashMap;
 
 public class RootEventBus extends AbstractEventBus {
+
+    @Override
+    protected HashMap<Object, Set<EventHandler>> createEventHandlerMap() {
+        return new HashMap<>();
+    }
 
     @Override
     protected Set<EventHandler> createHandlerSet() {

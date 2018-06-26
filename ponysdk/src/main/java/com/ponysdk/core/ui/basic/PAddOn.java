@@ -26,7 +26,6 @@ package com.ponysdk.core.ui.basic;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 
@@ -45,20 +44,9 @@ import com.ponysdk.core.writer.ModelWriter;
  */
 public abstract class PAddOn extends PObject {
 
-    private static final Map<Level, Byte> LOG_LEVEL = new HashMap<>();
-
-    static {
-        byte level = 0;
-        LOG_LEVEL.put(Level.OFF, level++);
-        LOG_LEVEL.put(Level.SEVERE, level++);
-        LOG_LEVEL.put(Level.WARNING, level++);
-        LOG_LEVEL.put(Level.INFO, level++);
-        LOG_LEVEL.put(Level.CONFIG, level++);
-        LOG_LEVEL.put(Level.FINE, level++);
-        LOG_LEVEL.put(Level.FINER, level++);
-        LOG_LEVEL.put(Level.FINEST, level++);
-        LOG_LEVEL.put(Level.ALL, level++);
-    }
+    private static final Map<Level, Byte> LOG_LEVEL = Map.of(Level.OFF, (byte) 0, Level.SEVERE, (byte) 1, Level.WARNING, (byte) 2,
+        Level.INFO, (byte) 3, Level.CONFIG, (byte) 4, Level.FINE, (byte) 5, Level.FINER, (byte) 6, Level.FINEST, (byte) 7, Level.ALL,
+        (byte) 8);
 
     private JsonObject args;
 

@@ -100,7 +100,7 @@ public abstract class AbstractFormField<T, W extends IsPWidget> implements FormF
 
     @Override
     public void addFormFieldListener(final FormFieldListener listener) {
-        if (listeners == null) listeners = new HashSet<>();
+        if (listeners == null) listeners = new HashSet<>(4);
         listeners.add(listener);
     }
 
@@ -138,7 +138,7 @@ public abstract class AbstractFormField<T, W extends IsPWidget> implements FormF
 
     @Override
     public void addValueChangeHandler(final PValueChangeHandler<T> handler) {
-        if (handlers == null) handlers = new HashSet<>();
+        if (handlers == null) handlers = new HashSet<>(4);
         handlers.add(handler);
     }
 

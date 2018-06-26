@@ -23,8 +23,8 @@
 
 package com.ponysdk.core.ui.eventbus;
 
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.Set;
 
 public class UmbrellaException extends RuntimeException {
 
@@ -33,14 +33,14 @@ public class UmbrellaException extends RuntimeException {
     private static final String MULTIPLE = " exceptions caught: ";
     private static final String ONE = "Exception caught: ";
 
-    private final Set<Throwable> causes;
+    private final Collection<Throwable> causes;
 
-    public UmbrellaException(final Set<Throwable> causes) {
+    public UmbrellaException(final Collection<Throwable> causes) {
         super(makeMessage(causes), makeCause(causes));
         this.causes = causes;
     }
 
-    protected static Throwable makeCause(final Set<Throwable> causes) {
+    protected static Throwable makeCause(final Collection<Throwable> causes) {
         final Iterator<Throwable> iterator = causes.iterator();
         if (!iterator.hasNext()) {
             return null;
@@ -49,7 +49,7 @@ public class UmbrellaException extends RuntimeException {
         return iterator.next();
     }
 
-    protected static String makeMessage(final Set<Throwable> causes) {
+    protected static String makeMessage(final Collection<Throwable> causes) {
         final int count = causes.size();
         if (count == 0) {
             return null;
@@ -69,7 +69,8 @@ public class UmbrellaException extends RuntimeException {
         return b.toString();
     }
 
-    public Set<Throwable> getCauses() {
+    public Collection<Throwable> getCauses() {
         return causes;
     }
+
 }

@@ -150,32 +150,32 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     }
 
     private Set<String> safeStyleName() {
-        if (styleNames == null) styleNames = new HashSet<>();
+        if (styleNames == null) styleNames = new HashSet<>(8);
         return styleNames;
     }
 
     private Set<PEventType> safePreventEvents() {
-        if (preventEvents == null) preventEvents = new HashSet<>();
+        if (preventEvents == null) preventEvents = new HashSet<>(4);
         return preventEvents;
     }
 
     private Set<PEventType> safeStopEvents() {
-        if (stopEvents == null) stopEvents = new HashSet<>();
+        if (stopEvents == null) stopEvents = new HashSet<>(4);
         return stopEvents;
     }
 
     private Map<String, String> safeStyleProperties() {
-        if (styleProperties == null) styleProperties = new HashMap<>();
+        if (styleProperties == null) styleProperties = new HashMap<>(8);
         return styleProperties;
     }
 
     private Map<String, String> safeElementProperties() {
-        if (elementProperties == null) elementProperties = new HashMap<>();
+        if (elementProperties == null) elementProperties = new HashMap<>(8);
         return elementProperties;
     }
 
     private Map<String, String> safeElementAttributes() {
-        if (elementAttributes == null) elementAttributes = new HashMap<>();
+        if (elementAttributes == null) elementAttributes = new HashMap<>(8);
         return elementAttributes;
     }
 
@@ -414,7 +414,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         if (destroy) return null;
         final HandlerRegistration handlerRegistration = ensureEventBus().addHandlerToSource(type, this, handler);
 
-        if (oneTimeHandlerCreation == null) oneTimeHandlerCreation = new HashSet<>();
+        if (oneTimeHandlerCreation == null) oneTimeHandlerCreation = new HashSet<>(8);
 
         if (!oneTimeHandlerCreation.contains(type)) {
             oneTimeHandlerCreation.add(type);
@@ -590,7 +590,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     }
 
     void bindAddon(final PAddOn addon) {
-        if (this.addons == null) this.addons = new HashSet<>();
+        if (this.addons == null) this.addons = new HashSet<>(4);
         this.addons.add(addon);
     }
 

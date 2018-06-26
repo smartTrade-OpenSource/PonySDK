@@ -81,11 +81,11 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
             uiObject.setHeight(HUNDRED_PERCENT);
             return true;
         } else if (ServerToClientModel.PREVENT_EVENT == model) {
-            if (preventedEvents == null) preventedEvents = new HashSet<>();
+            if (preventedEvents == null) preventedEvents = new HashSet<>(4);
             preventedEvents.add(binaryModel.getIntValue());
             return true;
         } else if (ServerToClientModel.STOP_EVENT == model) {
-            if (stoppedEvents == null) stoppedEvents = new HashSet<>();
+            if (stoppedEvents == null) stoppedEvents = new HashSet<>(4);
             stoppedEvents.add(binaryModel.getIntValue());
             return true;
         } else {
