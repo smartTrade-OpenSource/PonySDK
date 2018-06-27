@@ -58,7 +58,7 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
     }
 
     @Override
-    protected void init0() {
+    void init0() {
         super.init0();
         cellByWidget.keySet().forEach(widget -> widget.attach(window, frame));
     }

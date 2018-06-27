@@ -146,7 +146,7 @@ public abstract class PObject {
     protected void enrichForUpdate(final ModelWriter writer) {
     }
 
-    protected void init0() {
+    void init0() {
     }
 
     public PWindow getWindow() {

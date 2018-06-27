@@ -49,7 +49,7 @@ public abstract class PPanel extends PWidget implements HasPWidgets {
     }
 
     @Override
-    protected void init0() {
+    void init0() {
         super.init0();
         forEach(widget -> widget.attach(window, frame));
     }

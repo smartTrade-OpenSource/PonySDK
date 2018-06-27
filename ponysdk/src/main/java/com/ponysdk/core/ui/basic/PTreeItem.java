@@ -65,7 +65,7 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
     }
 
     @Override
-    protected void init0() {
+    void init0() {
         super.init0();
         forEach(child -> {
             child.setTree(tree);

@@ -80,7 +80,7 @@ public class PTabLayoutPanel extends PComplexPanel
     }
 
     @Override
-    protected void init0() {
+    void init0() {
         super.init0();
         saveAddHandler(HandlerModel.HANDLER_SELECTION);
     }

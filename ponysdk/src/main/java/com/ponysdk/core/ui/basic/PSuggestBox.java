@@ -97,7 +97,7 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
     }
 
     @Override
-    protected void init0() {
+    void init0() {
         super.init0();
         saveAddHandler(HandlerModel.HANDLER_STRING_VALUE_CHANGE);
         saveAddHandler(HandlerModel.HANDLER_STRING_SELECTION);
