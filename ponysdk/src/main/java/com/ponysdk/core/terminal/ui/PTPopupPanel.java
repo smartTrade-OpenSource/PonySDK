@@ -34,7 +34,6 @@ import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Event.NativePreviewEvent;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.ponysdk.core.model.ClientToServerModel;
@@ -58,7 +57,7 @@ public class PTPopupPanel<T extends PopupPanel> extends PTSimplePanel<T>
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
         final BinaryModel binaryModel = buffer.readBinaryModel();
-        if (ServerToClientModel.POPUP_AUTO_HIDE.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.POPUP_AUTO_HIDE == binaryModel.getModel()) {
             autoHide = binaryModel.getBooleanValue();
         } else {
             autoHide = false;
@@ -70,14 +69,7 @@ public class PTPopupPanel<T extends PopupPanel> extends PTSimplePanel<T>
 
     @Override
     protected T createUIObject() {
-        final PopupPanel popupPanel = new PopupPanel(autoHide) {
-
-            @Override
-            protected void onPreviewNativeEvent(final NativePreviewEvent event) {
-                PTPopupPanel.this.onPreviewNativeEvent(event);
-                super.onPreviewNativeEvent(event);
-            }
-        };
+        final PopupPanel popupPanel = new PopupPanel(autoHide);
 
         popupPanel.addCloseHandler(event -> {
             final PTInstruction instruction = new PTInstruction(getObjectID());
@@ -90,36 +82,36 @@ public class PTPopupPanel<T extends PopupPanel> extends PTSimplePanel<T>
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.ANIMATION.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.ANIMATION == model) {
             uiObject.setAnimationEnabled(binaryModel.getBooleanValue());
             return true;
-        } else if (ServerToClientModel.CENTER.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.CENTER == model) {
             uiObject.show();
             uiObject.center();
             return true;
-        } else if (ServerToClientModel.OPEN.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.OPEN == model) {
             uiObject.show();
             return true;
-        } else if (ServerToClientModel.POPUP_POSITION_AND_SHOW.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.POPUP_POSITION_AND_SHOW == model) {
             uiObject.setVisible(true);
             return true;
-        } else if (ServerToClientModel.CLOSE.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.CLOSE == model) {
             uiObject.hide();
             return true;
-        } else if (ServerToClientModel.POPUP_GLASS_ENABLED.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.POPUP_GLASS_ENABLED == model) {
             uiObject.setGlassEnabled(binaryModel.getBooleanValue());
             return true;
-        } else if (ServerToClientModel.MODAL.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.MODAL == model) {
             uiObject.setModal(binaryModel.getBooleanValue());
             return true;
-        } else if (ServerToClientModel.POSITION_LEFT.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.POSITION_LEFT == model) {
             final int left = binaryModel.getIntValue();
             // ServerToClientModel.POSITION_TOP
             final int top = buffer.readBinaryModel().getIntValue();
             uiObject.setPopupPosition(left, top);
             return true;
-        } else if (ServerToClientModel.DRAGGABLE.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.DRAGGABLE == model) {
             draggable = binaryModel.getBooleanValue();
             if (draggable) {
                 uiObject.addDomHandler(this, MouseDownEvent.getType());
@@ -163,19 +155,9 @@ public class PTPopupPanel<T extends PopupPanel> extends PTSimplePanel<T>
         DOM.releaseCapture(uiObject.getElement());
     }
 
-    private void onPreviewNativeEvent(final NativePreviewEvent event) {
-        // NativeEvent nativeEvent = eventbus.getNativeEvent();
-        //
-        // if (!eventbus.isCanceled() && (eventbus.getTypeInt() == Event.ONMOUSEDOWN)
-        // /* &&
-        // isCaptionEvent(nativeEvent) */) {
-        // nativeEvent.preventDefault();
-        // }
-    }
-
     @Override
     public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
-        if (HandlerModel.HANDLER_POPUP_POSITION.equals(handlerModel)) {
+        if (HandlerModel.HANDLER_POPUP_POSITION == handlerModel) {
             uiObject.setVisible(true);
             uiObject.show();
             Scheduler.get().scheduleDeferred(() -> {

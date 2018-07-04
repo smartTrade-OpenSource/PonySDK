@@ -29,6 +29,8 @@ public enum PVerticalAlignment {
     ALIGN_MIDDLE,
     ALIGN_BOTTOM;
 
+    private static final PVerticalAlignment[] VALUES = PVerticalAlignment.values();
+
     private PVerticalAlignment() {
     }
 
@@ -36,7 +38,7 @@ public enum PVerticalAlignment {
         return (byte) ordinal();
     }
 
-    public static final PVerticalAlignment fromByte(final byte byteValue) {
-        return PVerticalAlignment.values()[byteValue];
+    public static PVerticalAlignment fromRawValue(final byte rawValue) {
+        return VALUES[rawValue];
     }
 }

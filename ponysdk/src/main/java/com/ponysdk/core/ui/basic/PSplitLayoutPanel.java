@@ -24,11 +24,10 @@
 package com.ponysdk.core.ui.basic;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
@@ -65,9 +64,8 @@ import com.ponysdk.core.ui.basic.event.PLayoutResizeHandler;
  */
 public class PSplitLayoutPanel extends PDockLayoutPanel {
 
-    private final Set<PLayoutResizeHandler> handlers = Collections.newSetFromMap(new ConcurrentHashMap<>());
-
-    private final Map<PWidget, SplitInfoHolder> splitInfoByWidget = new HashMap<>();
+    private final Set<PLayoutResizeHandler> handlers = new HashSet<>(4);
+    private final Map<PWidget, SplitInfoHolder> splitInfoByWidget = new HashMap<>(4);
 
     protected PSplitLayoutPanel() {
         super(PUnit.PX);
@@ -87,9 +85,8 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
     /**
      * Sets the minimum allowable size for the given widget.
      * <p>
-     * Its associated splitter cannot be dragged to a position that would make
-     * it smaller than this size. This method has no effect for the
-     * {@link PDockLayoutPanel.Direction#CENTER} widget.
+     * Its associated splitter cannot be dragged to a position that would make it smaller than this size. This method
+     * has no effect for the {@link com.ponysdk.core.model.PDirection#CENTER} widget.
      * </p>
      *
      * @param child
@@ -109,13 +106,11 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
     }
 
     /**
-     * Sets a size below which the slider will close completely. This can be
-     * used in conjunction with {@link #setWidgetMinSize} to provide a
-     * speed-bump effect where the slider will stick to a preferred minimum size
+     * Sets a size below which the slider will close completely. This can be used in conjunction with
+     * {@link #setWidgetMinSize} to provide a speed-bump effect where the slider will stick to a preferred minimum size
      * before closing completely.
      * <p>
-     * This method has no effect for the
-     * {@link PDockLayoutPanel.Direction#CENTER} widget.
+     * This method has no effect for the {@link com.ponysdk.core.model.PDirection#CENTER} widget.
      * </p>
      *
      * @param child
@@ -156,6 +151,7 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
 
     @Override
     public void onClientData(final JsonObject instruction) {
+        if (!isVisible()) return;
         if (instruction.containsKey(ClientToServerModel.HANDLER_RESIZE.toStringValue())) {
             final PLayoutResizeEvent resizeEvent = new PLayoutResizeEvent(this);
             final JsonArray array = instruction.getJsonArray(ClientToServerModel.HANDLER_RESIZE.toStringValue());

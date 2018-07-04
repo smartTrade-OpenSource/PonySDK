@@ -24,7 +24,7 @@
 package com.ponysdk.core.server.application;
 
 @FunctionalInterface
-public interface ContextDestroyListener{
+public interface ContextDestroyListener {
 
     void onBeforeDestroy(UIContext uiContext);
 }

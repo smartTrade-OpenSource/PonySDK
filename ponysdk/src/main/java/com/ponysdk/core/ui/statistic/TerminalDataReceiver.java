@@ -23,9 +23,9 @@
 
 package com.ponysdk.core.ui.statistic;
 
-import com.ponysdk.core.ui.basic.PObject;
-
 import javax.json.JsonObject;
+
+import com.ponysdk.core.ui.basic.PObject;
 
 @FunctionalInterface
 public interface TerminalDataReceiver {

@@ -23,8 +23,10 @@
 
 package com.ponysdk.core.ui.basic;
 
-@FunctionalInterface
-public interface DataListener {
+/**
+ * @deprecated Use {@link com.ponysdk.core.server.application.DataListener} directly
+ */
+@Deprecated
+public interface DataListener extends com.ponysdk.core.server.application.DataListener {
 
-    void onData(Object data);
 }

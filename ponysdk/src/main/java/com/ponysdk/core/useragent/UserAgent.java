@@ -44,8 +44,10 @@ public class UserAgent implements Serializable {
 
         OperatingSystem operatingSystem = OperatingSystem.UNKNOWN;
 
-        // BOTs don't have an interesting OS for us
-        if (browser != Browser.BOT) operatingSystem = OperatingSystem.parseUserAgentString(userAgentString);
+        if(userAgentString != null){
+            // BOTs don't have an interesting OS for us
+            if (browser != Browser.BOT) operatingSystem = OperatingSystem.parseUserAgentString(userAgentString);
+        }
 
         this.operatingSystem = operatingSystem;
         this.browser = browser;
@@ -110,8 +112,7 @@ public class UserAgent implements Serializable {
     }
 
     /**
-     * Returns an unique integer value of the operating system & browser
-     * combination
+     * Returns an unique integer value of the operating system &amp; browser combination
      *
      * @return the id
      */
@@ -131,11 +132,6 @@ public class UserAgent implements Serializable {
         return userAgentString;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -146,11 +142,6 @@ public class UserAgent implements Serializable {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(final Object obj) {
         if (this == obj) return true;
@@ -159,11 +150,11 @@ public class UserAgent implements Serializable {
         final UserAgent other = (UserAgent) obj;
         if (browser == null) {
             if (other.browser != null) return false;
-        } else if (!browser.equals(other.browser)) return false;
+        } else if (browser != other.browser) return false;
         if (id != other.id) return false;
         if (operatingSystem == null) {
             if (other.operatingSystem != null) return false;
-        } else if (!operatingSystem.equals(other.operatingSystem)) return false;
+        } else if (operatingSystem != other.operatingSystem) return false;
         return true;
     }
 

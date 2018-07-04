@@ -35,7 +35,7 @@ public final class DateConverter {
     private DateConverter() {
     }
 
-    public static final String encode(final Collection<Date> dates) {
+    public static String encode(final Collection<Date> dates) {
         if (dates != null && !dates.isEmpty()) {
             final StringBuilder asString = new StringBuilder();
             final Iterator<Date> it = dates.iterator();
@@ -49,11 +49,11 @@ public final class DateConverter {
         }
     }
 
-    public static final String encode(final Date date) {
+    public static String encode(final Date date) {
         return date != null ? String.valueOf(date.getTime()) : null;
     }
 
-    public static final Date decode(final String timestamp) {
+    public static Date decode(final String timestamp) {
         try {
             return new Date(Long.parseLong(timestamp));
         } catch (final NumberFormatException e) {
@@ -61,11 +61,11 @@ public final class DateConverter {
         }
     }
 
-    public static final long toTimestamp(final Date date) {
+    public static long toTimestamp(final Date date) {
         return date != null ? date.getTime() : EMPTY_TIMESTAMP;
     }
 
-    public static final Date fromTimestamp(final long timestamp) {
+    public static Date fromTimestamp(final long timestamp) {
         return timestamp != EMPTY_TIMESTAMP ? new Date(timestamp) : null;
     }
 

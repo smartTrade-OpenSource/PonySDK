@@ -25,13 +25,14 @@ package com.ponysdk.core.terminal.ui;
 
 import java.util.Date;
 
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.datepicker.client.DateBox;
 import com.google.gwt.user.datepicker.client.DateBox.DefaultFormat;
 import com.google.gwt.user.datepicker.client.DatePicker;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.terminal.PonySDK;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
@@ -41,72 +42,122 @@ import com.ponysdk.core.terminal.ui.PTDateBox.MyDateBox;
 public class PTDateBox extends PTWidget<MyDateBox> {
 
     private PTDatePicker datePicker;
-    private DefaultFormat defaultFormat;
+    private DefaultFormat format;
+    private Date defaultDate;
+    private boolean keepDayTimeNeeded;
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
         datePicker = (PTDatePicker) uiService.getPTObject(buffer.readBinaryModel().getIntValue());
-        defaultFormat = new DefaultFormat(DateTimeFormat.getFormat(buffer.readBinaryModel().getStringValue()));
+        final DateTimeFormat dateTimeFormat = DateTimeFormat.getFormat(buffer.readBinaryModel().getStringValue());
+        format = new DefaultFormat(dateTimeFormat);
+
+        final BinaryModel dateModel = buffer.readBinaryModel();
+        if (dateModel.getModel() == ServerToClientModel.VALUE) {
+            final String dateText = dateModel.getStringValue();
+            defaultDate = dateText != null && !dateText.isEmpty() ? dateTimeFormat.parse(dateText) : null;
+        } else {
+            buffer.rewind(dateModel);
+        }
+
+        final BinaryModel keepTimeModel = buffer.readBinaryModel();
+        if (keepTimeModel.getModel() == ServerToClientModel.KEEP_DAY_TIME_NEEDED) this.keepDayTimeNeeded = true;
+        else buffer.rewind(keepTimeModel);
+
         super.create(buffer, objectId, uiService);
-        addValueChangeHandler(uiService);
+        if (PonySDK.get().isTabindexOnlyFormField()) uiObject.setTabIndex(-1);
     }
 
     @Override
     protected MyDateBox createUIObject() {
-        return new MyDateBox(datePicker.uiObject, null, defaultFormat);
+        return new MyDateBox(datePicker.uiObject, defaultDate, format);
     }
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.VALUE.ordinal() == modelOrdinal) {
-            uiObject.getTextBox().setValue(binaryModel.getStringValue());
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.VALUE == model) {
+            final String dateText = binaryModel.getStringValue();
+            uiObject.setValue(format.parse(uiObject, dateText != null ? dateText : "", false));
             return true;
-        } else if (ServerToClientModel.DATE_FORMAT_PATTERN.ordinal() == modelOrdinal) {
-            defaultFormat = new DefaultFormat(DateTimeFormat.getFormat(binaryModel.getStringValue()));
-            uiObject.setFormat(defaultFormat);
+        } else if (ServerToClientModel.DATE_FORMAT_PATTERN == model) {
+            format = new DefaultFormat(DateTimeFormat.getFormat(binaryModel.getStringValue()));
+            uiObject.setFormat(format);
             return true;
-        } else if (ServerToClientModel.ENABLED.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.ENABLED == model) {
             uiObject.setEnabled(binaryModel.getBooleanValue());
-            return true;
-        } else if (ServerToClientModel.TIME.ordinal() == modelOrdinal) {
-            uiObject.setDefaultMonth(binaryModel.getLongValue());
             return true;
         } else {
             return super.update(buffer, binaryModel);
         }
     }
 
-    private void addValueChangeHandler(final UIBuilder uiService) {
-        final TextBox textBox = uiObject.getTextBox();
-        uiObject.addValueChangeHandler(event -> triggerEvent(uiService, uiObject));
-        textBox.addValueChangeHandler(event -> triggerEvent(uiService, uiObject));
-    }
+    class MyDateBox extends DateBox {
 
-    private void triggerEvent(final UIBuilder uiService, final DateBox dateBox) {
-        final PTInstruction instruction = new PTInstruction(getObjectID());
-        instruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE, dateBox.getTextBox().getText());
-        uiService.sendDataToServer(dateBox, instruction);
-    }
+        private static final int ONE_MINUTE_IN_MILLIS = 60 * 1000;
+        private static final int ONE_DAY_IN_MILLIS = 24 * 60 * ONE_MINUTE_IN_MILLIS;
+        private static final String DATE_PICKER_DAY_IS_TODAY_STYLENAME = "datePickerDayIsToday";
 
-    static final class MyDateBox extends DateBox {
+        private final DateTimeFormat formatter = DateTimeFormat.getFormat("yyyyMMdd");
+        private Date todayDate;
+        private String formattedTodayDate;
 
-        private Date defaultMonth;
+        private Date lastDate;
 
         private MyDateBox(final DatePicker picker, final Date date, final Format format) {
             super(picker, date, format);
+            getTextBox().addValueChangeHandler(this::onTextBoxChanged);
+            getDatePicker().addValueChangeHandler(this::onDatePickerChanged);
         }
 
-        private void setDefaultMonth(final long m) {
-            defaultMonth = new Date(m);
+        @Override
+        public void setValue(final Date date, final boolean fireEvents) {
+            super.setValue(date, fireEvents);
+            if (keepDayTimeNeeded) lastDate = date;
         }
 
         @Override
         public void showDatePicker() {
-            super.showDatePicker();
-            if (defaultMonth != null && getTextBox().getText().trim().isEmpty()) {
-                getDatePicker().setCurrentMonth(defaultMonth);
+            final Date newTodayDate = new Date();
+            if (todayDate != null) {
+                if (formattedTodayDate == null) formattedTodayDate = formatter.format(todayDate);
+                final String newFormattedTodayDate = formatter.format(newTodayDate);
+                if (!formattedTodayDate.equals(newFormattedTodayDate)) {
+                    getDatePicker().removeStyleFromDates(DATE_PICKER_DAY_IS_TODAY_STYLENAME, todayDate);
+                    getDatePicker().addStyleToDates(DATE_PICKER_DAY_IS_TODAY_STYLENAME, newTodayDate);
+                    todayDate = newTodayDate;
+                    formattedTodayDate = newFormattedTodayDate;
+                }
+            } else {
+                getDatePicker().addStyleToDates(DATE_PICKER_DAY_IS_TODAY_STYLENAME, newTodayDate);
+                todayDate = newTodayDate;
             }
+            super.showDatePicker();
+        }
+
+        private void onTextBoxChanged(final ValueChangeEvent<String> event) {
+            if (keepDayTimeNeeded) lastDate = format.parse(this, event.getValue(), true);
+            fireDateChanged();
+        }
+
+        private void onDatePickerChanged(final ValueChangeEvent<Date> event) {
+            if (keepDayTimeNeeded) {
+                Date pickerDate = event.getValue();
+                if (lastDate != null) {
+                    final int dayTime = (int) (lastDate.getTime() % ONE_DAY_IN_MILLIS
+                            - lastDate.getTimezoneOffset() * ONE_MINUTE_IN_MILLIS);
+                    final long dateInMillis = pickerDate.getTime() + dayTime;
+                    pickerDate = new Date(dateInMillis);
+                    getTextBox().setValue(format.format(this, pickerDate), false);
+                }
+            }
+            fireDateChanged();
+        }
+
+        private void fireDateChanged() {
+            final PTInstruction instruction = new PTInstruction(PTDateBox.this.getObjectID());
+            instruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE, getTextBox().getValue());
+            uiBuilder.sendDataToServer(this, instruction);
         }
 
     }

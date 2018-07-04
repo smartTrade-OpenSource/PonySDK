@@ -23,15 +23,15 @@
 
 package com.ponysdk.core.ui.list.renderer.cell;
 
+import javax.validation.constraints.NotNull;
+
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.list.refreshable.Cell;
 
-import javax.validation.constraints.NotNull;
-
 public class LabelCellRenderer<D> implements CellRenderer<D, PLabel> {
 
-    private static String DASH = "-";
+    private static final String DASH = "-";
 
     protected String nullDisplay = DASH;
 

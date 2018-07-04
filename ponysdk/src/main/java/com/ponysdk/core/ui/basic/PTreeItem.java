@@ -65,7 +65,7 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
     }
 
     @Override
-    protected void init0() {
+    void init0() {
         super.init0();
         forEach(child -> {
             child.setTree(tree);
@@ -89,8 +89,8 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
     }
 
     @Override
-    protected void enrichOnInit(final ModelWriter writer) {
-        super.enrichOnInit(writer);
+    protected void enrichForCreation(final ModelWriter writer) {
+        super.enrichForCreation(writer);
         if (this.text != null) writer.write(ServerToClientModel.TEXT, text);
         if (this.isRoot) writer.write(ServerToClientModel.TREE_ROOT, tree.getID());
     }
@@ -107,7 +107,7 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
     public void setText(final String text) {
         if (Objects.equals(this.text, text)) return;
         this.text = text;
-        saveUpdate(ServerToClientModel.TEXT, text);
+        if (initialized) saveUpdate(ServerToClientModel.TEXT, text);
     }
 
     private void setTree(final PTree tree) {

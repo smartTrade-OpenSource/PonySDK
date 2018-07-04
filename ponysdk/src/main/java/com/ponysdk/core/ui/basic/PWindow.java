@@ -23,11 +23,10 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.json.JsonObject;
 
@@ -54,7 +53,7 @@ public class PWindow extends PObject {
     private boolean relative = false;
     private final Location location;
 
-    private Map<String, PRootPanel> panelByZone = new HashMap<>();
+    private Map<String, PRootPanel> panelByZone = new HashMap<>(8);
 
     private PWindow parent;
 
@@ -115,8 +114,8 @@ public class PWindow extends PObject {
     }
 
     @Override
-    protected void enrichOnInit(final ModelWriter writer) {
-        super.enrichOnInit(writer);
+    protected void enrichForCreation(final ModelWriter writer) {
+        super.enrichForCreation(writer);
         writer.write(ServerToClientModel.RELATIVE, relative);
         writer.write(ServerToClientModel.URL, url);
         writer.write(ServerToClientModel.NAME, name);
@@ -131,7 +130,7 @@ public class PWindow extends PObject {
             if (window != PWindow.getMain()) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
             writer.write(ServerToClientModel.TYPE_CREATE, ID);
             writer.write(ServerToClientModel.WIDGET_TYPE, getWidgetType().getValue());
-            enrichOnInit(writer);
+            enrichForCreation(writer);
             writer.endObject();
             UIContext.get().registerObject(this);
 
@@ -142,10 +141,100 @@ public class PWindow extends PObject {
         }
     }
 
+    /**
+     * Opens the Print Dialog to print the current document.
+     *
+     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/print">MDN</a>
+     */
     public void print() {
         saveUpdate(writer -> writer.write(ServerToClientModel.PRINT));
     }
 
+    /**
+     * Resizes the current window by a certain amount.
+     *
+     * @param xDelta
+     *            is the number of pixels to grow the window horizontally.
+     * @param yDelta
+     *            is the number of pixels to grow the window vertically.
+     *
+     * @see <a href="https://developer.mozilla.org/fr/docs/Web/API/Window/resizeBy">MDN</a>
+     */
+    public void resizeBy(final float xDelta, final float yDelta) {
+        saveUpdate(writer -> {
+            writer.write(ServerToClientModel.RESIZE_BY_X, (double) xDelta);
+            writer.write(ServerToClientModel.RESIZE_BY_Y, (double) yDelta);
+        });
+    }
+
+    /**
+     * Dynamically resizes window.
+     *
+     * @param width
+     *            is an integer representing the new outerWidth in pixels (including scroll bars,
+     *            title bars, etc).
+     * @param height
+     *            is an integer value representing the new outerHeight in pixels (including scroll
+     *            bars, title bars, etc).
+     *
+     * @see <a href="https://developer.mozilla.org/fr/docs/Web/API/Window/resizeTo">MDN</a>
+     */
+    public void resizeTo(final int width, final int height) {
+        saveUpdate(writer -> {
+            writer.write(ServerToClientModel.RESIZE_TO_WIDTH, width);
+            writer.write(ServerToClientModel.RESIZE_TO_HEIGHT, height);
+        });
+    }
+
+    /**
+     * Moves the current window by a specified amount.
+     *
+     * @param deltaX
+     *            is the amount of pixels to move the window horizontally.
+     * @param deltaY
+     *            is the amount of pixels to move the window vertically.
+     *
+     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/window/moveBy">MDN</a>
+     */
+    public void moveBy(final float deltaX, final float deltaY) {
+        saveUpdate(writer -> {
+            writer.write(ServerToClientModel.MOVE_BY_X, (double) deltaX);
+            writer.write(ServerToClientModel.MOVE_BY_Y, (double) deltaY);
+        });
+    }
+
+    /**
+     * Moves the window to the specified coordinates.
+     *
+     * @param x
+     *            is the horizontal coordinate to be moved to.
+     * @param y
+     *            is the vertical coordinate to be moved to.
+     *
+     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/window/moveTo">MDN</a>
+     */
+    public void moveTo(final float x, final float y) {
+        saveUpdate(writer -> {
+            writer.write(ServerToClientModel.MOVE_TO_X, (double) x);
+            writer.write(ServerToClientModel.MOVE_TO_Y, (double) y);
+        });
+    }
+
+    /**
+     * Makes a request to bring the window to the front. It may fail due to user settings and the window isn't
+     * guaranteed to be frontmost before this method returns.
+     *
+     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/focus">MDN</a>
+     */
+    public void focus() {
+        saveUpdate(writer -> writer.write(ServerToClientModel.FOCUS, true));
+    }
+
+    /**
+     * The Window.close() method closes the current window, or the window on which it was called.
+     *
+     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/close">MDN</a>
+     */
     public void close() {
         if (!destroy) saveUpdate(writer -> writer.write(ServerToClientModel.CLOSE));
     }
@@ -174,7 +263,7 @@ public class PWindow extends PObject {
         } else if (event.containsKey(ClientToServerModel.HANDLER_CLOSE.toStringValue())) {
             PWindowManager.unregisterWindow(this);
             if (subWindows != null) {
-                subWindows.forEach(window -> window.close());
+                subWindows.forEach(PWindow::close);
                 subWindows.clear();
             }
             if (closeHandlers != null) {
@@ -183,13 +272,15 @@ public class PWindow extends PObject {
                 closeHandlers.clear();
             }
             onDestroy();
+        } else if (event.containsKey(ClientToServerModel.HANDLER_DESTROY.toStringValue())) {
+            onDestroy();
         } else {
             super.onClientData(event);
         }
     }
 
     public void addOpenHandler(final POpenHandler handler) {
-        if (openHandlers == null) openHandlers = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        if (openHandlers == null) openHandlers = new HashSet<>(4);
         openHandlers.add(handler);
     }
 
@@ -198,7 +289,7 @@ public class PWindow extends PObject {
     }
 
     public void addCloseHandler(final PCloseHandler handler) {
-        if (closeHandlers == null) closeHandlers = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        if (closeHandlers == null) closeHandlers = new HashSet<>(4);
         closeHandlers.add(handler);
     }
 
@@ -256,7 +347,7 @@ public class PWindow extends PObject {
     }
 
     private void addWindow(final PWindow window) {
-        if (subWindows == null) subWindows = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        if (subWindows == null) subWindows = new HashSet<>(4);
         window.addCloseHandler(event -> removeWindow(window));
         subWindows.add(window);
     }

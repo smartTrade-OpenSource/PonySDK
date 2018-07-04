@@ -51,7 +51,7 @@ public class PTFrame extends PTWidget<HTMLPanel> implements PostMessageHandler {
         if (log.isLoggable(Level.INFO)) log.log(Level.INFO, "Create PTFrame #" + objectId);
 
         final BinaryModel binaryModel = buffer.readBinaryModel();
-        if (ServerToClientModel.URL.ordinal() == binaryModel.getModel().ordinal()) {
+        if (ServerToClientModel.URL == binaryModel.getModel()) {
             url = binaryModel.getStringValue();
         } else {
             url = "";
@@ -70,6 +70,8 @@ public class PTFrame extends PTWidget<HTMLPanel> implements PostMessageHandler {
 
         url += url.contains("?") ? "&" : "?";
         url += contextID + "&" + frameID;
+        if (PonySDK.get().isTabindexOnlyFormField())
+            url += "&" + ClientToServerModel.OPTION_TABINDEX_ACTIVATED.toStringValue() + "=" + PonySDK.get().isTabindexOnlyFormField();
 
         iframe.getElement().setAttribute("src", url);
         return iframe;

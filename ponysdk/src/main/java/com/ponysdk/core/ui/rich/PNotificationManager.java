@@ -37,9 +37,9 @@ import com.ponysdk.core.ui.basic.event.PClickHandler;
 
 public class PNotificationManager {
 
-    public static int humanizedDuration = 5000;
-    public static int warningDuration = 6000;
-    public static int trayDuration = 6000;
+    public static final int humanizedDuration = 5000;
+    public static final int warningDuration = 6000;
+    public static final int trayDuration = 6000;
 
     public static void notify(final String message, final Notification notification) {
         notify(PWindow.getMain(), message, notification);
@@ -161,7 +161,7 @@ public class PNotificationManager {
     }
 
     private static void addAutoCloseTimer(final PPopupPanel popupPanel, final int delayBeforeClosing) {
-        PScheduler.schedule(() -> popupPanel.close(), Duration.ofMillis(delayBeforeClosing));
+        PScheduler.schedule(popupPanel::close, Duration.ofMillis(delayBeforeClosing));
     }
 
     public enum Notification {

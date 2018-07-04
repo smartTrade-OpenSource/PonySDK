@@ -23,6 +23,11 @@
 
 package com.ponysdk.core.ui.list.paging;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PAnchor;
 import com.ponysdk.core.ui.basic.PFlowPanel;
@@ -30,11 +35,6 @@ import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class DefaultPagerView extends PFlowPanel implements PagerView, PClickHandler {
 

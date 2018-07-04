@@ -40,14 +40,15 @@ import com.ponysdk.core.server.application.UIContext;
 public class PScript extends PObject {
 
     private static final String SCRIPT_KEY = PScript.class.getCanonicalName();
-    private final Map<Long, ExecutionCallback> callbacksByID = new HashMap<>();
+
+    private Map<Long, ExecutionCallback> callbacksByID;
     private long executionID = 0;
     private String key;
 
     private PScript() {
     }
 
-    private static final PScript get(final PWindow window) {
+    private static PScript get(final PWindow window) {
         if (window != null) {
             final UIContext uiContext = UIContext.get();
             final String key = SCRIPT_KEY + window.getID();
@@ -100,28 +101,31 @@ public class PScript extends PObject {
     }
 
     private void executeScript(final String js, final ExecutionCallback callback, final Duration period) {
-        saveUpdate((writer) -> {
+        saveUpdate(writer -> {
             writer.write(ServerToClientModel.EVAL, js);
             if (callback != null) {
+                if (callbacksByID == null) callbacksByID = new HashMap<>(4);
                 callbacksByID.put(++executionID, callback);
                 writer.write(ServerToClientModel.COMMAND_ID, executionID);
             }
-            if (period != null) {
-                writer.write(ServerToClientModel.FIXDELAY, period.toMillis());
-            }
+            if (period != null) writer.write(ServerToClientModel.FIXDELAY, period.toMillis());
         });
     }
 
     @Override
     public void onClientData(final JsonObject instruction) {
         if (instruction.containsKey(ClientToServerModel.ERROR_MSG.toStringValue())) {
-            final ExecutionCallback callback = callbacksByID
-                .remove(instruction.getJsonNumber(ClientToServerModel.COMMAND_ID.toStringValue()).longValue());
-            if (callback != null) callback.onFailure(instruction.getString(ClientToServerModel.ERROR_MSG.toStringValue()));
+            if (callbacksByID != null) {
+                final ExecutionCallback callback = callbacksByID
+                    .remove(instruction.getJsonNumber(ClientToServerModel.COMMAND_ID.toStringValue()).longValue());
+                if (callback != null) callback.onFailure(instruction.getString(ClientToServerModel.ERROR_MSG.toStringValue()));
+            }
         } else if (instruction.containsKey(ClientToServerModel.RESULT.toStringValue())) {
-            final ExecutionCallback callback = callbacksByID
-                .remove(instruction.getJsonNumber(ClientToServerModel.COMMAND_ID.toStringValue()).longValue());
-            if (callback != null) callback.onSuccess(instruction.getString(ClientToServerModel.RESULT.toStringValue()));
+            if (callbacksByID != null) {
+                final ExecutionCallback callback = callbacksByID
+                    .remove(instruction.getJsonNumber(ClientToServerModel.COMMAND_ID.toStringValue()).longValue());
+                if (callback != null) callback.onSuccess(instruction.getString(ClientToServerModel.RESULT.toStringValue()));
+            }
         } else {
             super.onClientData(instruction);
         }

@@ -54,9 +54,9 @@ public class PPushButton extends PButton {
     }
 
     @Override
-    protected void enrichOnInit(final ModelWriter writer) {
+    protected void enrichForCreation(final ModelWriter writer) {
+        super.enrichForCreation(writer);
         writer.write(ServerToClientModel.WIDGET_ID, image.getID());
-        super.enrichOnInit(writer);
     }
 
     @Override

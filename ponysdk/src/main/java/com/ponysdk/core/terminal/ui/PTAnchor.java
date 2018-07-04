@@ -32,19 +32,26 @@ public class PTAnchor extends PTFocusWidget<Anchor> {
 
     @Override
     protected Anchor createUIObject() {
-        return new Anchor();
+        return new Anchor() {
+
+            @Override
+            public int getTabIndex() {
+                final int tabIndex = super.getTabIndex();
+                return tabIndex == -1 ? -2 : tabIndex;
+            }
+        };
     }
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.TEXT.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.TEXT == model) {
             uiObject.setText(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.HTML.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.HTML == model) {
             uiObject.setHTML(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.HREF.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.HREF == model) {
             uiObject.setHref(binaryModel.getStringValue());
             return true;
         } else {

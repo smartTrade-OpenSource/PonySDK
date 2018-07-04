@@ -1,17 +1,24 @@
 ext {
-    gwtVersion = '2.8.0'
+    gwtVersion = '2.8.2'
     
-    jettyVersion = '9.4.6.v20170531'
-    springVersion = '4.2.9.RELEASE'
+    jettyVersion = '9.4.11.v20180605'
+    springVersion = '5.0.7.RELEASE'
+    
+    slf4jVersion = '1.8.0-alpha2'
+    log4jVersion = '2.10.0'
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '3.5'
+    gradleVersion = '4.6'
 }
 
 allprojects{
     apply plugin: 'eclipse'
-    apply plugin: 'idea'
+    apply plugin: 'jacoco'
+
+    repositories {
+        mavenCentral()
+    }
 }
 
 subprojects {
@@ -19,23 +26,38 @@ subprojects {
     apply plugin: 'maven'
     apply plugin: 'maven-publish'
 
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
+    sourceCompatibility = 9
+    targetCompatibility = 9
 
-    version = '2.7.4'
-
-    repositories {
-        mavenCentral()
-    }
+    def suffix = project.hasProperty('BUILD_RELEASE') ? "" : "-SNAPSHOT"
+    version = '2.8.5' + suffix
 
     publishing {
         publications {
             maven(MavenPublication) {
                 groupId 'com.ponysdk'
                 artifactId project.name
-
                 from components.java
             }
         }
     }
+}
+
+task codeCoverageReport(type: JacocoReport) {
+    executionData fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec")
+
+    subprojects.each {
+        sourceSets it.sourceSets.main
+    }
+
+    reports {
+        xml.enabled true
+        xml.destination "${buildDir}/reports/jacoco/report.xml"
+        html.enabled false
+        csv.enabled false
+    }
+}
+
+codeCoverageReport.dependsOn {
+    subprojects*.test
 }

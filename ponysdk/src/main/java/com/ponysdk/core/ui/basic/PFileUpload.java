@@ -65,7 +65,7 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, HasPSubm
     }
 
     @Override
-    protected void init0() {
+    void init0() {
         super.init0();
         saveAddHandler(HandlerModel.HANDLER_CHANGE);
     }
@@ -77,6 +77,7 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, HasPSubm
 
     @Override
     public void onClientData(final JsonObject jsonObject) {
+        if (!isVisible()) return;
         if (jsonObject.containsKey(ClientToServerModel.HANDLER_CHANGE.toStringValue())) {
             final String fileName = jsonObject.getString(ClientToServerModel.HANDLER_CHANGE.toStringValue());
             if (fileName != null) setFileName(fileName);
@@ -93,7 +94,7 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, HasPSubm
     }
 
     public void submit() {
-        UIContext.get().stackEmbededStreamRequest(streamHandler, getID());
+        UIContext.get().stackEmbeddedStreamRequest(streamHandler, getID());
     }
 
     public String getName() {

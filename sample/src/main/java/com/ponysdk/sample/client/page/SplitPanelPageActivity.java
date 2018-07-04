@@ -66,10 +66,10 @@ public class SplitPanelPageActivity extends SamplePageActivity {
 
         splitLayoutPanel.addLayoutResizeHandler(resizeEvent -> {
             for (final LayoutResizeData data : resizeEvent.getLayoutResizeData()) {
-                if (data.w == south) {
-                    PNotificationManager.showTrayNotification(getView().asWidget().getWindow(), "South size: " + data.size);
-                } else if (data.w == east) {
-                    PNotificationManager.showTrayNotification(getView().asWidget().getWindow(), "East size: " + data.size);
+                if (data.getWidget() == south) {
+                    PNotificationManager.showTrayNotification(getView().asWidget().getWindow(), "South size: " + data.getSize());
+                } else if (data.getWidget() == east) {
+                    PNotificationManager.showTrayNotification(getView().asWidget().getWindow(), "East size: " + data.getSize());
                 }
             }
         });

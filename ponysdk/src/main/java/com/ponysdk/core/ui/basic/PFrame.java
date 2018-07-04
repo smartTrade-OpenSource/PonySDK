@@ -35,7 +35,7 @@ import com.ponysdk.core.writer.ModelWriter;
 
 public class PFrame extends PWidget {
 
-    private final Map<String, PRootPanel> panelByZone = new HashMap<>();
+    private final Map<String, PRootPanel> panelByZone = new HashMap<>(8);
 
     private String url;
     private boolean ready;
@@ -45,8 +45,8 @@ public class PFrame extends PWidget {
     }
 
     @Override
-    protected void enrichOnInit(final ModelWriter writer) {
-        super.enrichOnInit(writer);
+    protected void enrichForCreation(final ModelWriter writer) {
+        super.enrichForCreation(writer);
         if (url != null && !url.isEmpty()) writer.write(ServerToClientModel.URL, url);
     }
 
@@ -81,12 +81,11 @@ public class PFrame extends PWidget {
 
     @Override
     public void onClientData(final JsonObject event) {
+        if (!isVisible()) return;
         if (event.containsKey(ClientToServerModel.HANDLER_OPEN.toStringValue())) {
             url = event.getString(ClientToServerModel.HANDLER_OPEN.toStringValue());
             ready = true;
-            panelByZone.forEach((key, value) -> {
-                value.attach(this.getWindow(), this);
-            });
+            panelByZone.forEach((key, value) -> value.attach(this.getWindow(), this));
         } else {
             super.onClientData(event);
         }

@@ -29,11 +29,11 @@ import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.writer.ModelWriter;
 
 /**
- * The panel to which all other widgets must ultimately be added. RootPanels are never created
- * directly. Rather, they are accessed via {@link PRootPanel#get(int)} .
+ * The panel to which all other widgets must ultimately be added. RootPanels are never created directly. Rather, they
+ * are accessed via {@link PWindow#getPRootPanel(String)} .
  * <p>
  * Most applications will add widgets to the default root panel in their
- * {@link EntryPoint#start(UIContext)} methods.
+ * {@link com.ponysdk.core.ui.main.EntryPoint#start(UIContext)} methods.
  * </p>
  */
 public class PRootPanel extends PAbsolutePanel {
@@ -45,8 +45,8 @@ public class PRootPanel extends PAbsolutePanel {
     }
 
     @Override
-    protected void enrichOnInit(final ModelWriter writer) {
-        super.enrichOnInit(writer);
+    protected void enrichForCreation(final ModelWriter writer) {
+        super.enrichForCreation(writer);
         if (id != null) writer.write(ServerToClientModel.ROOT_ID, id);
     }
 

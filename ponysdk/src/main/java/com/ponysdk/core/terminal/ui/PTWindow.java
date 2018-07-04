@@ -72,6 +72,8 @@ public class PTWindow extends AbstractPTObject implements PostMessageHandler {
         if (relative) {
             url = GWT.getHostPageBaseURL() + url + "?" + ClientToServerModel.WINDOW_ID.toStringValue() + "=" + objectId + "&"
                     + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "=" + PonySDK.get().getContextId();
+            if (PonySDK.get().isTabindexOnlyFormField()) url += "&" + ClientToServerModel.OPTION_TABINDEX_ACTIVATED.toStringValue()
+                    + "=" + PonySDK.get().isTabindexOnlyFormField();
         }
 
         PTWindowManager.get().register(this);
@@ -79,21 +81,56 @@ public class PTWindow extends AbstractPTObject implements PostMessageHandler {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.OPEN.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.OPEN == model) {
             window = Browser.getWindow().open(url, name, features);
-            window.setOnunload(event -> onClose());
+            // Window can be null if browser doesn't allow popup
+            if (window != null) {
+                window.setOnunload(event -> onClose());
+            } else {
+                log.log(Level.WARNING, "Can't open PTWindow #" + objectID + ". Check the browser's settings");
+
+                final PTInstruction instruction = new PTInstruction(objectID);
+                instruction.put(ClientToServerModel.HANDLER_DESTROY);
+                uiBuilder.sendDataToServer(instruction);
+
+                uiBuilder.sendWarningMessageToServer("Can't open PTWindow #" + objectID + ". Check the browser's settings", objectID);
+            }
             return true;
-        } else if (ServerToClientModel.PRINT.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.PRINT == model) {
             window.print();
             return true;
-        } else if (ServerToClientModel.WINDOW_TITLE.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.WINDOW_TITLE == model) {
             setTitle(binaryModel.getStringValue(), window);
             return true;
-        } else if (ServerToClientModel.WINDOW_LOCATION_REPLACE.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.WINDOW_LOCATION_REPLACE == model) {
             window.getLocation().replace(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.CLOSE.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.RESIZE_BY_X == model) {
+            final float x = (float) binaryModel.getDoubleValue();
+            final float y = (float) buffer.readBinaryModel().getDoubleValue();
+            window.resizeBy(x, y);
+            return true;
+        } else if (ServerToClientModel.RESIZE_TO_WIDTH == model) {
+            final int width = binaryModel.getIntValue();
+            final int height = buffer.readBinaryModel().getIntValue();
+            window.resizeTo(width, height);
+            return true;
+        } else if (ServerToClientModel.MOVE_BY_X == model) {
+            final float x = (float) binaryModel.getDoubleValue();
+            final float y = (float) buffer.readBinaryModel().getDoubleValue();
+            window.moveBy(x, y);
+            return true;
+        } else if (ServerToClientModel.MOVE_TO_X == model) {
+            final float x = (float) binaryModel.getDoubleValue();
+            final float y = (float) buffer.readBinaryModel().getDoubleValue();
+            window.moveTo(x, y);
+            return true;
+        } else if (ServerToClientModel.FOCUS == model) {
+            if (binaryModel.getBooleanValue()) window.focus();
+            else window.blur();
+            return true;
+        } else if (ServerToClientModel.CLOSE == model) {
             close(false);
             return true;
         } else {
@@ -102,7 +139,7 @@ public class PTWindow extends AbstractPTObject implements PostMessageHandler {
     }
 
     public void close(final boolean forced) {
-        window.close();
+        if (ready && window != null && !window.isClosed()) window.close();
     }
 
     @Override

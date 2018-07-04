@@ -30,9 +30,6 @@ import com.ponysdk.core.model.WidgetType;
 
 public class PMultiWordSuggestOracle extends PSuggestOracle {
 
-    public PMultiWordSuggestOracle() {
-    }
-
     @Override
     public void add(final String suggestion) {
         saveUpdate(writer -> writer.write(ServerToClientModel.SUGGESTION, suggestion));

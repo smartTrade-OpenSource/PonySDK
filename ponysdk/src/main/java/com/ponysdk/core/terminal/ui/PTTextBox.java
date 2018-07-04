@@ -43,19 +43,35 @@ public class PTTextBox extends PTTextBoxBase<TextBox> implements KeyPressHandler
 
     @Override
     protected TextBox createUIObject() {
-        return new ExtendedTextBox();
+        return new TextBox() {
+
+            @Override
+            public int getTabIndex() {
+                final int tabIndex = super.getTabIndex();
+                return tabIndex == -1 ? -2 : tabIndex;
+            }
+
+            @Override
+            public void onBrowserEvent(final Event event) {
+                super.onBrowserEvent(event);
+                if (Event.ONPASTE == event.getTypeInt()) {
+                    filterText();
+                    if (handlePasteEnabled) Scheduler.get().scheduleDeferred(() -> sendPasteEvent(event));
+                }
+            }
+        };
     }
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.VISIBLE_LENGTH.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.VISIBLE_LENGTH == model) {
             uiObject.setVisibleLength(binaryModel.getIntValue());
             return true;
-        } else if (ServerToClientModel.MAX_LENGTH.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.MAX_LENGTH == model) {
             uiObject.setMaxLength(binaryModel.getIntValue());
             return true;
-        } else if (ServerToClientModel.MASK.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.MASK == model) {
             final String mask = binaryModel.getStringValue();
             // ServerToClientModel.VISIBILITY
             final boolean showMask = buffer.readBinaryModel().getBooleanValue();
@@ -64,7 +80,7 @@ public class PTTextBox extends PTTextBoxBase<TextBox> implements KeyPressHandler
             if (maskDecorator == null) maskDecorator = new TextBoxMaskedDecorator(uiObject);
             maskDecorator.setMask(mask, showMask, replace.charAt(0));
             return true;
-        } else if (ServerToClientModel.REGEX_FILTER.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.REGEX_FILTER == model) {
             regExp = RegExp.compile(binaryModel.getStringValue());
             uiObject.addKeyPressHandler(this);
             uiObject.addDropHandler(this);
@@ -109,19 +125,6 @@ public class PTTextBox extends PTTextBoxBase<TextBox> implements KeyPressHandler
             }
             uiObject.setText(filteredText.toString());
         });
-    }
-
-    private class ExtendedTextBox extends TextBox {
-
-        @Override
-        public void onBrowserEvent(final Event event) {
-            super.onBrowserEvent(event);
-            switch (event.getTypeInt()) {
-                case Event.ONPASTE:
-                    filterText();
-                    break;
-            }
-        }
     }
 
 }

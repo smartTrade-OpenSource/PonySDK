@@ -40,17 +40,18 @@ public class PTDatePicker extends PTWidget<DatePicker> {
 
     private static final String DATE_SEPARATOR = ",";
 
-    private final DateTimeFormat format = DateTimeFormat.getFormat("yyyy-MM-dd");
+    private DateTimeFormat format;
+
+    @Override
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
+        format = DateTimeFormat.getFormat("yyyy-MM-dd");
+        super.create(buffer, objectId, uiService);
+        addHandlers(uiService);
+    }
 
     @Override
     protected DatePicker createUIObject() {
         return new DatePicker();
-    }
-
-    @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
-        super.create(buffer, objectId, uiService);
-        addHandlers(uiService);
     }
 
     private void addHandlers(final UIBuilder uiService) {
@@ -58,52 +59,40 @@ public class PTDatePicker extends PTWidget<DatePicker> {
         uiObject.addShowRangeHandler(event -> {
             final PTInstruction instruction = new PTInstruction(getObjectID());
             instruction.put(ClientToServerModel.HANDLER_SHOW_RANGE);
-            instruction.put(ClientToServerModel.START_DATE, event.getStart().getTime());
-            instruction.put(ClientToServerModel.END_DATE, event.getEnd().getTime());
+            instruction.put(ClientToServerModel.START_DATE, format.format(event.getStart()));
+            instruction.put(ClientToServerModel.END_DATE, format.format(event.getEnd()));
             uiService.sendDataToServer(uiObject, instruction);
         });
     }
 
     protected void triggerEvent(final DatePicker picker, final UIBuilder uiService, final ValueChangeEvent<Date> event) {
-        long date = -1;
-        int year = -1;
-        int month = -1;
-        int day = -1;
-
-        if (event.getValue() != null) {
-            date = event.getValue().getTime();
-            final String[] values = format.format(event.getValue()).split("-");
-            year = Integer.parseInt(values[0]);
-            month = Integer.parseInt(values[1]);
-            day = Integer.parseInt(values[2]);
-        }
-
         final PTInstruction instruction = new PTInstruction(getObjectID());
-        instruction.put(ClientToServerModel.HANDLER_DATE_VALUE_CHANGE, date);
-        instruction.put(ClientToServerModel.YEAR, year);
-        instruction.put(ClientToServerModel.MONTH, month);
-        instruction.put(ClientToServerModel.DAY, day);
+        instruction.put(ClientToServerModel.HANDLER_DATE_VALUE_CHANGE,
+            event.getValue() != null ? format.format(event.getValue()) : null);
         uiService.sendDataToServer(picker, instruction);
     }
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.DATE.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.DATE == model) {
             uiObject.setValue(DateConverter.fromTimestamp(binaryModel.getLongValue()));
             return true;
-        } else if (ServerToClientModel.TIME.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.TIME == model) {
             uiObject.setCurrentMonth(DateConverter.fromTimestamp(binaryModel.getLongValue()));
             return true;
-        } else if (ServerToClientModel.DATE_ENABLED.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.DATE_ENABLED == model) {
             final String[] dates = binaryModel.getStringValue().split(DATE_SEPARATOR);
             // ServerToClientModel.ENABLED
             final boolean enabled = buffer.readBinaryModel().getBooleanValue();
-            for (final String date : dates) {
-                uiObject.setTransientEnabledOnDates(enabled, DateConverter.decode(date));
+            for (final String rawDate : dates) {
+                final Date date = DateConverter.decode(rawDate);
+                if (date.after(uiObject.getFirstDate()) && date.before(uiObject.getLastDate())) {
+                    uiObject.setTransientEnabledOnDates(enabled, date);
+                }
             }
             return true;
-        } else if (ServerToClientModel.ADD_DATE_STYLE.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.ADD_DATE_STYLE == model) {
             final String[] dates = binaryModel.getStringValue().split(DATE_SEPARATOR);
             // ServerToClientModel.STYLE_NAME
             final String style = buffer.readBinaryModel().getStringValue();
@@ -111,7 +100,7 @@ public class PTDatePicker extends PTWidget<DatePicker> {
                 uiObject.addStyleToDates(style, DateConverter.decode(date));
             }
             return true;
-        } else if (ServerToClientModel.REMOVE_DATE_STYLE.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.REMOVE_DATE_STYLE == model) {
             final String[] dates = binaryModel.getStringValue().split(DATE_SEPARATOR);
             // ServerToClientModel.STYLE_NAME
             final String style = buffer.readBinaryModel().getStringValue();
@@ -119,7 +108,7 @@ public class PTDatePicker extends PTWidget<DatePicker> {
                 uiObject.removeStyleFromDates(style, DateConverter.decode(date));
             }
             return true;
-        } else if (ServerToClientModel.YEAR_ARROWS_VISIBLE.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.YEAR_ARROWS_VISIBLE == model) {
             uiObject.setYearArrowsVisible(binaryModel.getBooleanValue());
             return true;
         } else {

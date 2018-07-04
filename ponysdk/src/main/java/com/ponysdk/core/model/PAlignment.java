@@ -43,6 +43,8 @@ public enum PAlignment {
      */
     STRETCH;
 
+    private static final PAlignment[] VALUES = PAlignment.values();
+
     private PAlignment() {
     }
 
@@ -50,8 +52,8 @@ public enum PAlignment {
         return (byte) ordinal();
     }
 
-    public static final PAlignment fromByte(final byte byteValue) {
-        return PAlignment.values()[byteValue];
+    public static PAlignment fromRawValue(final byte rawValue) {
+        return VALUES[rawValue];
     }
 
 }

@@ -39,8 +39,8 @@ public abstract class PTComposite extends PTWidget<MyComposite> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.WIDGET_ID.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.WIDGET_ID == model) {
             uiObject.initWidget(asWidget(binaryModel.getIntValue(), uiBuilder));
             return true;
         } else {

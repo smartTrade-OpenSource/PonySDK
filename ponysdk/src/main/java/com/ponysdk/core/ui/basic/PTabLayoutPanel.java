@@ -43,13 +43,11 @@ import com.ponysdk.core.ui.basic.event.PSelectionHandler;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
 
 /**
- * A panel that represents a tabbed set of pages, each of which contains another
- * widget. Its child widgets are shown as the user selects the various tabs
- * associated with them. The tabs can contain arbitrary text, HTML, or widgets.
+ * A panel that represents a tabbed set of pages, each of which contains another widget. Its child widgets are shown as
+ * the user selects the various tabs associated with them. The tabs can contain arbitrary text, HTML, or widgets.
  * <p>
- * This widget will <em>only</em> work in standards mode, which requires that
- * the HTML page in which it is run have an explicit &lt;!DOCTYPE&gt;
- * declaration.
+ * This widget will <em>only</em> work in standards mode, which requires that the HTML page in which it is run have an
+ * explicit DOCTYPE declaration.
  * </p>
  * <h3>CSS Style Rules</h3>
  * <dl>
@@ -65,10 +63,9 @@ import com.ponysdk.core.ui.model.ServerBinaryModel;
  * <dd>applied to all child content widgets
  * </dl>
  * <p>
- * The children of a TabLayoutPanel element are laid out in &lt;g:tab> elements.
- * Each tab can have one widget child and one of two types of header elements. A
- * &lt;g:header> element can hold html, or a &lt;g:customHeader> element can
- * hold a widget.
+ * The children of a TabLayoutPanel element are laid out in tab elements.
+ * Each tab can have one widget child and one of two types of header elements.
+ * A header element can hold html, or a customHeader element can hold a widget.
  */
 public class PTabLayoutPanel extends PComplexPanel
         implements HasPBeforeSelectionHandlers<Integer>, HasPSelectionHandlers<Integer>, PSelectionHandler<Integer>, PAnimatedLayout {
@@ -83,7 +80,7 @@ public class PTabLayoutPanel extends PComplexPanel
     }
 
     @Override
-    protected void init0() {
+    void init0() {
         super.init0();
         saveAddHandler(HandlerModel.HANDLER_SELECTION);
     }
@@ -107,7 +104,9 @@ public class PTabLayoutPanel extends PComplexPanel
         if (child.getWindow() == null || child.getWindow() == window) {
             child.removeFromParent();
 
+            if (children == null) children = new PWidgetCollection(this);
             children.insert(child, beforeIndex);
+
             adopt(child);
             tabWidget.attach(window, frame);
             child.attach(window, frame);
@@ -123,7 +122,9 @@ public class PTabLayoutPanel extends PComplexPanel
         if (child.getWindow() == null || child.getWindow() == window) {
             child.removeFromParent();
 
+            if (children == null) children = new PWidgetCollection(this);
             children.insert(child, beforeIndex);
+
             adopt(child);
             child.attach(window, frame);
             child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.TAB_TEXT, tabText),
@@ -184,6 +185,7 @@ public class PTabLayoutPanel extends PComplexPanel
 
     @Override
     public void onClientData(final JsonObject instruction) {
+        if (!isVisible()) return;
         if (instruction.containsKey(ClientToServerModel.HANDLER_SELECTION.toStringValue())) {
             for (final PSelectionHandler<Integer> handler : selectionHandlers) {
                 handler.onSelection(

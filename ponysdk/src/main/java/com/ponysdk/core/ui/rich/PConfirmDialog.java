@@ -70,7 +70,7 @@ public class PConfirmDialog extends PDialogBox {
                                             final String cancelCaption, final PConfirmDialogHandler confirmDialogHandler) {
         final PConfirmDialog confirmDialog = new PConfirmDialog();
         confirmDialog.setStyleName("pony-DialogBox");
-        confirmDialog.setAnimationEnabled(true);
+        confirmDialog.setAnimationEnabled(false);
         confirmDialog.setGlassEnabled(true);
 
         // Build content

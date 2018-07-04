@@ -25,8 +25,8 @@ package com.ponysdk.sample.client.page.datagrid;
 
 import java.util.Arrays;
 
+import com.ponysdk.core.server.application.DataListener;
 import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.ui.basic.DataListener;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PFlexTable;
 import com.ponysdk.core.ui.basic.PFlowPanel;
@@ -79,6 +79,7 @@ public class RefreshableDataGridPageActivity extends SamplePageActivity implemen
     }
 
     protected void onPonyStock(final PonyStock data) {
+        // Nothing to do
     }
 
     protected IdentityDataGridColumnDescriptor<PonyStock> newCountDescriptor() {

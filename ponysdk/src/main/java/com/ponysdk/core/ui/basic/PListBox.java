@@ -81,6 +81,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     @Override
     public void onClientData(final JsonObject jsonObject) {
+        if (!isVisible()) return;
         if (jsonObject.containsKey(ClientToServerModel.HANDLER_CHANGE.toStringValue())) {
             final String data = jsonObject.getString(ClientToServerModel.HANDLER_CHANGE.toStringValue());
             final String[] tokens = data.split(COMMA);
@@ -109,7 +110,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         final ListItem groupItem = new ListGroupItem(group);
         this.items.add(groupItem);
 
-        items.forEach((item) -> this.items.add(new ListItem(item, item)));
+        items.forEach(item -> this.items.add(new ListItem(item, item)));
 
         final String itemsTextual = items.toString();
         final String s = itemsTextual.substring(1, itemsTextual.length() - 1).replaceAll(",", ";").replaceAll(" ", EMPTY);
@@ -354,7 +355,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         saveUpdate(ServerToClientModel.MULTISELECT, isMultipleSelect);
     }
 
-    public class ListItem {
+    public static class ListItem {
 
         protected String label;
 
@@ -375,7 +376,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     }
 
-    private class ListGroupItem extends ListItem {
+    private static class ListGroupItem extends ListItem {
 
         ListGroupItem(final String group) {
             super(group, null);

@@ -23,14 +23,20 @@
 
 package com.ponysdk.core.ui.eventbus;
 
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class SimpleEventBus extends AbstractEventBus {
 
     @Override
+    protected HashMap<Object, Set<EventHandler>> createEventHandlerMap() {
+        return new HashMap<>(1); // Alway only one element in this map because it's a SimpleEventBus, so only on one PObject
+    }
+
+    @Override
     protected Set<EventHandler> createHandlerSet() {
-        return new LinkedHashSet<>();
+        return new LinkedHashSet<>(4);
     }
 
 }

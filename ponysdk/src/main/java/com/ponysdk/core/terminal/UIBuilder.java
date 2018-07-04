@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.terminal;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -53,26 +54,26 @@ import com.ponysdk.core.terminal.ui.PTWindow;
 import com.ponysdk.core.terminal.ui.PTWindowManager;
 
 import elemental.client.Browser;
+import elemental.html.Uint8Array;
+import elemental.js.util.JsMapFromIntTo;
+import elemental.js.util.JsMapFromStringTo;
 
 public class UIBuilder {
 
     private static final Logger log = Logger.getLogger(UIBuilder.class.getName());
 
-    private static final WidgetType[] WIDGET_TYPES = WidgetType.values();
-
     private final UIFactory uiFactory = new UIFactory();
-    private final Map<Integer, PTObject> objectByID = new HashMap<>();
+    private final JsMapFromIntTo<PTObject> objectByID = JsMapFromIntTo.create();
     private final Map<UIObject, Integer> objectIDByWidget = new HashMap<>();
-    private final Map<Integer, UIObject> widgetIDByObjectID = new HashMap<>();
-    private final Map<String, JavascriptAddOnFactory> javascriptAddOnFactories = new HashMap<>();
+    private final JsMapFromIntTo<UIObject> widgetIDByObjectID = JsMapFromIntTo.create();
+    private final JsMapFromStringTo<JavascriptAddOnFactory> javascriptAddOnFactories = JsMapFromStringTo.create();
+
+    private final ReaderBuffer readerBuffer = new ReaderBuffer();
 
     private RequestBuilder requestBuilder;
 
-    private static class AvoidBlockException extends Exception {
-    }
-
     public void init(final RequestBuilder requestBuilder) {
-        if (log.isLoggable(Level.INFO)) log.info("Init request builder");
+        if (log.isLoggable(Level.INFO)) log.info("Init graphical system");
 
         this.requestBuilder = requestBuilder;
 
@@ -91,117 +92,146 @@ public class UIBuilder {
         }
     }
 
-    public void updateMainTerminal(final ReaderBuffer buffer) {
-        while (buffer.hasRemaining()) {
-            final int nextBlockPosition = buffer.shiftNextBlock(true);
-            if (nextBlockPosition == -1) return;
+    public void updateMainTerminal(final Uint8Array buffer) {
+        readerBuffer.init(buffer);
+
+        while (readerBuffer.hasEnoughKeyBytes()) {
+            final int nextBlockPosition = readerBuffer.shiftNextBlock(true);
+            if (nextBlockPosition == ReaderBuffer.NOT_FULL_BUFFER_POSITION) return;
 
             // Detect if the message is not for the main terminal but for a specific window
-            final BinaryModel binaryModel = buffer.readBinaryModel();
+            final BinaryModel binaryModel = readerBuffer.readBinaryModel();
             final ServerToClientModel model = binaryModel.getModel();
-            if (ServerToClientModel.WINDOW_ID.equals(model)) {
+
+            if (ServerToClientModel.WINDOW_ID == model) {
                 // Event on a specific window
                 final int requestedId = binaryModel.getIntValue();
                 // Main terminal, we need to dispatch the eventbus
                 final PTWindow window = PTWindowManager.getWindow(requestedId);
                 if (window != null && window.isReady()) {
-                    if (log.isLoggable(Level.FINE)) log.fine("The main terminal send the buffer to window " + requestedId);
-                    window.postMessage(buffer.slice(buffer.getPosition(), nextBlockPosition));
+                    final int startPosition = readerBuffer.getPosition();
+                    int endPosition = nextBlockPosition;
+
+                    // Concat multiple messages for the same window
+                    readerBuffer.setPosition(endPosition);
+                    while (readerBuffer.hasEnoughKeyBytes()) {
+                        final int nextBlockPosition1 = readerBuffer.shiftNextBlock(true);
+                        if (nextBlockPosition1 != ReaderBuffer.NOT_FULL_BUFFER_POSITION) {
+                            final BinaryModel newBinaryModel = readerBuffer.readBinaryModel();
+                            if (ServerToClientModel.WINDOW_ID == newBinaryModel.getModel()
+                                    && requestedId == newBinaryModel.getIntValue()) {
+                                endPosition = nextBlockPosition1;
+                                readerBuffer.setPosition(endPosition);
+                            } else {
+                                break;
+                            }
+                        } else {
+                            break;
+                        }
+                    }
+
+                    window.postMessage(readerBuffer.slice(startPosition, endPosition));
                 } else {
-                    log.warning("The requested window " + requestedId + " doesn't exist anymore"); // TODO PERF LOG
-                    buffer.shiftNextBlock(false);
+                    readerBuffer.shiftNextBlock(false);
                 }
-            } else if (ServerToClientModel.FRAME_ID.equals(model)) {
+            } else if (ServerToClientModel.FRAME_ID == model) {
                 final int requestedId = binaryModel.getIntValue();
                 final PTFrame frame = (PTFrame) getPTObject(requestedId);
-                if (log.isLoggable(Level.FINE)) log.fine("The main terminal send the buffer to frame " + requestedId);
-                frame.postMessage(buffer.slice(buffer.getPosition(), nextBlockPosition));
-            } else if (ServerToClientModel.PING_SERVER.equals(model)) {
-                if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Ping received");
+                frame.postMessage(readerBuffer.slice(readerBuffer.getPosition(), nextBlockPosition));
+            } else if (ServerToClientModel.PING_SERVER == model) {
                 final PTInstruction requestData = new PTInstruction();
                 requestData.put(ClientToServerModel.PING_SERVER, binaryModel.getLongValue());
                 requestBuilder.send(requestData);
-                buffer.readBinaryModel(); // Read ServerToClientModel.END element
-            } else if (ServerToClientModel.HEARTBEAT.equals(model)) {
-                if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Heart beat received");
-                buffer.readBinaryModel(); // Read ServerToClientModel.END element
-            } else if (ServerToClientModel.CREATE_CONTEXT.equals(model)) {
+                readerBuffer.readBinaryModel(); // Read ServerToClientModel.END element
+            } else if (ServerToClientModel.HEARTBEAT == model) {
+                readerBuffer.readBinaryModel(); // Read ServerToClientModel.END element
+            } else if (ServerToClientModel.CREATE_CONTEXT == model) {
                 PonySDK.get().setContextId(binaryModel.getIntValue());
-                buffer.readBinaryModel(); // Read ServerToClientModel.END element
-            } else if (ServerToClientModel.DESTROY_CONTEXT.equals(model)) {
+                // Read ServerToClientModel.OPTION_FORMFIELD_TABULATION element
+                PonySDK.get().setTabindexOnlyFormField(readerBuffer.readBinaryModel().getBooleanValue());
+                readerBuffer.readBinaryModel(); // Read ServerToClientModel.END element
+            } else if (ServerToClientModel.DESTROY_CONTEXT == model) {
                 destroy();
-                buffer.readBinaryModel(); // Read ServerToClientModel.END element
+                readerBuffer.readBinaryModel(); // Read ServerToClientModel.END element
             } else {
-                update(binaryModel, buffer);
+                update(binaryModel, readerBuffer);
             }
         }
     }
 
-    public void updateWindowTerminal(final ReaderBuffer buffer) {
-        // Detect if the message is not for the window but for a specific frame
-        final BinaryModel binaryModel = buffer.readBinaryModel();
-        if (ServerToClientModel.FRAME_ID.equals(binaryModel.getModel())) {
-            final int requestedId = binaryModel.getIntValue();
-            final PTFrame frame = (PTFrame) getPTObject(requestedId);
-            if (log.isLoggable(Level.FINE)) log.fine("The main terminal send the buffer to frame " + requestedId);
-            frame.postMessage(buffer.slice(buffer.getPosition(), buffer.shiftNextBlock(true)));
-        } else {
-            update(binaryModel, buffer);
+    public void updateWindowTerminal(final Uint8Array buffer) {
+        readerBuffer.init(buffer);
+
+        while (readerBuffer.hasEnoughKeyBytes()) {
+            // Detect if the message is not for the window but for a specific frame
+            BinaryModel binaryModel = readerBuffer.readBinaryModel();
+
+            if (ServerToClientModel.WINDOW_ID == binaryModel.getModel()) binaryModel = readerBuffer.readBinaryModel();
+
+            if (ServerToClientModel.FRAME_ID == binaryModel.getModel()) {
+                final int requestedId = binaryModel.getIntValue();
+                final PTFrame frame = (PTFrame) getPTObject(requestedId);
+                if (log.isLoggable(Level.FINE)) log.fine("The main terminal send the buffer to frame " + requestedId);
+                frame.postMessage(readerBuffer.slice(readerBuffer.getPosition(), readerBuffer.shiftNextBlock(true)));
+            } else {
+                update(binaryModel, readerBuffer);
+            }
         }
     }
 
-    public void updateFrameTerminal(final ReaderBuffer buffer) {
-        update(buffer.readBinaryModel(), buffer);
+    public void updateFrameTerminal(final Uint8Array buffer) {
+        readerBuffer.init(buffer);
+
+        update(readerBuffer.readBinaryModel(), readerBuffer);
     }
 
     private void update(final BinaryModel binaryModel, final ReaderBuffer buffer) {
         final ServerToClientModel model = binaryModel.getModel();
 
-        final int modelOrdinal = model.ordinal();
         try {
-            if (ServerToClientModel.TYPE_CREATE.ordinal() == modelOrdinal) {
-                final int objectID = binaryModel.getIntValue();
-                processCreate(buffer, objectID);
-                processUpdate(buffer, objectID);
-            } else if (ServerToClientModel.TYPE_UPDATE.ordinal() == modelOrdinal) {
+            if (ServerToClientModel.TYPE_CREATE == model) {
+                processCreate(buffer, binaryModel.getIntValue());
+            } else if (ServerToClientModel.TYPE_UPDATE == model) {
                 processUpdate(buffer, binaryModel.getIntValue());
-            } else if (ServerToClientModel.TYPE_ADD.ordinal() == modelOrdinal) {
+            } else if (ServerToClientModel.TYPE_ADD == model) {
                 processAdd(buffer, binaryModel.getIntValue());
-            } else if (ServerToClientModel.TYPE_GC.ordinal() == modelOrdinal) {
-                processGC(binaryModel.getIntValue());
-            } else if (ServerToClientModel.TYPE_REMOVE.ordinal() == modelOrdinal) {
+            } else if (ServerToClientModel.TYPE_GC == model) {
+                processGC(buffer, binaryModel.getIntValue());
+            } else if (ServerToClientModel.TYPE_REMOVE == model) {
                 processRemove(buffer, binaryModel.getIntValue());
-            } else if (ServerToClientModel.TYPE_ADD_HANDLER.ordinal() == modelOrdinal) {
+            } else if (ServerToClientModel.TYPE_ADD_HANDLER == model) {
                 processAddHandler(buffer, binaryModel.getIntValue());
-            } else if (ServerToClientModel.TYPE_REMOVE_HANDLER.ordinal() == modelOrdinal) {
+            } else if (ServerToClientModel.TYPE_REMOVE_HANDLER == model) {
                 processRemoveHandler(buffer, binaryModel.getIntValue());
-            } else if (ServerToClientModel.TYPE_HISTORY.ordinal() == modelOrdinal) {
+            } else if (ServerToClientModel.TYPE_HISTORY == model) {
                 processHistory(buffer, binaryModel.getStringValue());
             } else {
                 log.log(Level.WARNING, "Unknown instruction type : " + binaryModel + " ; " + buffer.toString());
-                buffer.shiftNextBlock(false);
+                if (ServerToClientModel.END != model) buffer.shiftNextBlock(false);
             }
-            buffer.readBinaryModel(); // Read ServerToClientModel.END element
-        } catch (final AvoidBlockException e) {
-            buffer.shiftNextBlock(false);
+        } catch (final Exception e) {
+            if (ServerToClientModel.END != model) buffer.shiftNextBlock(false);
+            sendExceptionMessageToServer(e);
         }
     }
 
-    private void processCreate(final ReaderBuffer buffer, final int objectID) throws AvoidBlockException {
+    private void processCreate(final ReaderBuffer buffer, final int objectID) {
         // ServerToClientModel.WIDGET_TYPE
-        final WidgetType widgetType = WIDGET_TYPES[buffer.readBinaryModel().getByteValue()];
+        final WidgetType widgetType = WidgetType.fromRawValue(buffer.readBinaryModel().getByteValue());
 
         final PTObject ptObject = uiFactory.newUIObject(widgetType);
         if (ptObject != null) {
             ptObject.create(buffer, objectID, this);
             objectByID.put(objectID, ptObject);
+
+            processUpdate(buffer, objectID);
         } else {
             log.warning("Cannot create PObject #" + objectID + " with widget type : " + widgetType);
-            throw new AvoidBlockException();
+            buffer.shiftNextBlock(false);
         }
     }
 
-    private void processAdd(final ReaderBuffer buffer, final int objectID) throws AvoidBlockException {
+    private void processAdd(final ReaderBuffer buffer, final int objectID) {
         final PTObject ptObject = getPTObject(objectID);
         if (ptObject != null) {
             // ServerToClientModel.PARENT_OBJECT_ID
@@ -209,37 +239,40 @@ public class UIBuilder {
             final PTObject parentObject = getPTObject(parentId);
             if (parentObject != null) {
                 parentObject.add(buffer, ptObject);
+                buffer.readBinaryModel(); // Read ServerToClientModel.END element
             } else {
                 log.warning("Cannot add " + ptObject + " to an garbaged parent object #" + parentId
                         + ", so we will consume all the buffer of this object");
-                throw new AvoidBlockException();
+                buffer.shiftNextBlock(false);
             }
         } else {
             log.warning("Add a null PTObject #" + objectID + ", so we will consume all the buffer of this object");
-            throw new AvoidBlockException();
+            buffer.shiftNextBlock(false);
         }
     }
 
-    private void processUpdate(final ReaderBuffer buffer, final int objectID) throws AvoidBlockException {
+    private void processUpdate(final ReaderBuffer buffer, final int objectID) {
         final PTObject ptObject = getPTObject(objectID);
         if (ptObject != null) {
             BinaryModel binaryModel;
             boolean result = false;
             do {
                 binaryModel = buffer.readBinaryModel();
-                if (binaryModel.getModel() != null) {
-                    result = !ServerToClientModel.END.equals(binaryModel.getModel()) ? ptObject.update(buffer, binaryModel) : false;
-                }
-            } while (result && buffer.hasRemaining());
+                final ServerToClientModel model = binaryModel.getModel();
+                if (model != null) result = ServerToClientModel.END != model ? ptObject.update(buffer, binaryModel) : false;
+            } while (result && buffer.hasEnoughKeyBytes());
 
-            if (!result) buffer.rewind(binaryModel);
+            if (!result && ServerToClientModel.END != binaryModel.getModel()) {
+                log.warning("Update PObject #" + objectID + " with key : " + binaryModel + " doesn't exist");
+                buffer.shiftNextBlock(false);
+            }
         } else {
             log.warning("Update on a null PTObject #" + objectID + ", so we will consume all the buffer of this object");
-            throw new AvoidBlockException();
+            buffer.shiftNextBlock(false);
         }
     }
 
-    private void processRemove(final ReaderBuffer buffer, final int objectID) throws AvoidBlockException {
+    private void processRemove(final ReaderBuffer buffer, final int objectID) {
         final PTObject ptObject = getPTObject(objectID);
         if (ptObject != null) {
             final int parentId = buffer.readBinaryModel().getIntValue();
@@ -247,41 +280,45 @@ public class UIBuilder {
 
             if (parentObject != null) {
                 parentObject.remove(buffer, ptObject);
+                buffer.readBinaryModel(); // Read ServerToClientModel.END element
             } else {
                 log.warning("Cannot remove " + ptObject + " on a garbaged object #" + parentId);
-                throw new AvoidBlockException();
+                buffer.shiftNextBlock(false);
             }
         } else {
             log.warning("Remove a null PTObject #" + objectID + ", so we will consume all the buffer of this object");
-            throw new AvoidBlockException();
+            buffer.shiftNextBlock(false);
         }
     }
 
-    private void processAddHandler(final ReaderBuffer buffer, final int objectID) throws AvoidBlockException {
+    private void processAddHandler(final ReaderBuffer buffer, final int objectID) {
         final PTObject ptObject = getPTObject(objectID);
 
         // ServerToClientModel.HANDLER_TYPE
-        final HandlerModel handlerModel = HandlerModel.values()[buffer.readBinaryModel().getByteValue()];
+        final HandlerModel handlerModel = HandlerModel.fromRawValue(buffer.readBinaryModel().getByteValue());
 
-        if (HandlerModel.HANDLER_STREAM_REQUEST.equals(handlerModel)) {
+        if (HandlerModel.HANDLER_STREAM_REQUEST == handlerModel) {
             new PTStreamResource().addHandler(buffer, handlerModel);
+            buffer.readBinaryModel(); // Read ServerToClientModel.END element
         } else if (ptObject != null) {
             ptObject.addHandler(buffer, handlerModel);
+            buffer.readBinaryModel(); // Read ServerToClientModel.END element
         } else {
             log.warning("Add handler on a null PTObject #" + objectID + ", so we will consume all the buffer of this object");
-            throw new AvoidBlockException();
+            buffer.shiftNextBlock(false);
         }
     }
 
-    private void processRemoveHandler(final ReaderBuffer buffer, final int objectID) throws AvoidBlockException {
+    private void processRemoveHandler(final ReaderBuffer buffer, final int objectID) {
         final PTObject ptObject = getPTObject(objectID);
         if (ptObject != null) {
             // ServerToClientModel.HANDLER_TYPE
-            final HandlerModel handlerModel = HandlerModel.values()[buffer.readBinaryModel().getByteValue()];
+            final HandlerModel handlerModel = HandlerModel.fromRawValue(buffer.readBinaryModel().getByteValue());
             ptObject.removeHandler(buffer, handlerModel);
+            buffer.readBinaryModel(); // Read ServerToClientModel.END element
         } else {
             log.warning("Remove handler on a null PTObject #" + objectID + ", so we will consume all the buffer of this object");
-            throw new AvoidBlockException();
+            buffer.shiftNextBlock(false);
         }
     }
 
@@ -295,21 +332,26 @@ public class UIBuilder {
         } else {
             History.newItem(token, fireEvents);
         }
+
+        buffer.readBinaryModel(); // Read ServerToClientModel.END element
     }
 
-    private void processGC(final int objectID) throws AvoidBlockException {
+    private void processGC(final ReaderBuffer buffer, final int objectID) {
         final PTObject ptObject = unregisterObject(objectID);
         if (ptObject != null) {
             ptObject.destroy();
+            buffer.readBinaryModel(); // Read ServerToClientModel.END element
         } else {
             log.warning("Cannot GC a garbaged PTObject #" + objectID);
-            throw new AvoidBlockException();
+            buffer.shiftNextBlock(false);
         }
     }
 
-    private PTObject unregisterObject(final Integer objectID) {
-        final PTObject ptObject = objectByID.remove(objectID);
-        final UIObject uiObject = widgetIDByObjectID.remove(objectID);
+    private PTObject unregisterObject(final int objectID) {
+        final PTObject ptObject = objectByID.get(objectID);
+        objectByID.remove(objectID);
+        final UIObject uiObject = widgetIDByObjectID.get(objectID);
+        widgetIDByObjectID.remove(objectID);
         if (uiObject != null) objectIDByWidget.remove(uiObject);
         return ptObject;
     }
@@ -344,9 +386,35 @@ public class UIBuilder {
         requestBuilder.send(requestData);
     }
 
+    public void sendExceptionMessageToServer(final Throwable t) {
+        log.log(Level.SEVERE, "PonySDK has encountered an internal error : ", t);
+        sendErrorMessageToServer(
+            t.getClass().getCanonicalName() + " : " + t.getMessage() + " : " + Arrays.toString(t.getStackTrace()));
+    }
+
     public void sendErrorMessageToServer(final String message) {
         final PTInstruction requestData = new PTInstruction();
         requestData.put(ClientToServerModel.ERROR_MSG, message);
+        requestBuilder.send(requestData);
+    }
+
+    public void sendErrorMessageToServer(final String message, final int objectID) {
+        final PTInstruction requestData = new PTInstruction();
+        requestData.put(ClientToServerModel.ERROR_MSG, message);
+        requestData.put(ClientToServerModel.OBJECT_ID, objectID);
+        requestBuilder.send(requestData);
+    }
+
+    public void sendWarningMessageToServer(final String message) {
+        final PTInstruction requestData = new PTInstruction();
+        requestData.put(ClientToServerModel.WARN_MSG, message);
+        requestBuilder.send(requestData);
+    }
+
+    public void sendWarningMessageToServer(final String message, final int objectID) {
+        final PTInstruction requestData = new PTInstruction();
+        requestData.put(ClientToServerModel.WARN_MSG, message);
+        requestData.put(ClientToServerModel.OBJECT_ID, objectID);
         requestBuilder.send(requestData);
     }
 
@@ -356,15 +424,25 @@ public class UIBuilder {
         requestBuilder.send(requestData);
     }
 
-    public PTObject getPTObject(final Integer id) {
+    public void sendInfoMessageToServer(final String message, final int objectID) {
+        final PTInstruction requestData = new PTInstruction();
+        requestData.put(ClientToServerModel.INFO_MSG, message);
+        requestData.put(ClientToServerModel.OBJECT_ID, objectID);
+        requestBuilder.send(requestData);
+    }
+
+    public PTObject getPTObject(final int id) {
         final PTObject ptObject = objectByID.get(id);
-        if (ptObject == null) log.warning("PTObject #" + id + " not found");
+        if (ptObject == null) {
+            log.warning("PTObject #" + id + " not found");
+            sendWarningMessageToServer("PTObject #" + id + " not found", id);
+        }
         return ptObject;
     }
 
     public PTObject getPTObject(final UIObject uiObject) {
         final Integer objectID = objectIDByWidget.get(uiObject);
-        if (objectID != null) return getPTObject(objectID);
+        if (objectID != null) return getPTObject(objectID.intValue());
         return null;
     }
 
@@ -377,7 +455,7 @@ public class UIBuilder {
         this.javascriptAddOnFactories.put(signature, javascriptAddOnFactory);
     }
 
-    public Map<String, JavascriptAddOnFactory> getJavascriptAddOnFactory() {
+    public JsMapFromStringTo<JavascriptAddOnFactory> getJavascriptAddOnFactory() {
         return javascriptAddOnFactories;
     }
 

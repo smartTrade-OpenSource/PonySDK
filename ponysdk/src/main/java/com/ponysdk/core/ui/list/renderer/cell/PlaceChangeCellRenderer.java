@@ -32,7 +32,7 @@ import com.ponysdk.core.ui.place.PlaceChangeRequest;
 
 public class PlaceChangeCellRenderer implements CellRenderer<String, PWidget> {
 
-    private static String DASH = "-";
+    private static final String DASH = "-";
 
     protected String nullDisplay = DASH;
 
@@ -52,7 +52,7 @@ public class PlaceChangeCellRenderer implements CellRenderer<String, PWidget> {
         final String value = getValue(rawValue);
         if (value != null) {
             final PAnchor anchor = Element.newPAnchor(rawValue);
-            anchor.addClickHandler((event) -> PlaceChangeRequest.fire(this, place));
+            anchor.addClickHandler(event -> PlaceChangeRequest.fire(this, place));
             return anchor;
         } else {
             return Element.newPLabel(nullDisplay);

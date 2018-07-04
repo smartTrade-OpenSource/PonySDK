@@ -44,46 +44,53 @@ public class PTRichTextArea extends PTFocusWidget<RichTextArea> implements BlurH
 
     @Override
     protected RichTextArea createUIObject() {
-        return new RichTextArea();
+        return new RichTextArea() {
+
+            @Override
+            public int getTabIndex() {
+                final int tabIndex = super.getTabIndex();
+                return tabIndex == -1 ? -2 : tabIndex;
+            }
+        };
     }
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.HTML.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.HTML == model) {
             uiObject.setHTML(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.URL.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.URL == model) {
             uiObject.getFormatter().createLink(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.INSERT_HORIZONTAL_RULE.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.INSERT_HORIZONTAL_RULE == model) {
             uiObject.getFormatter().insertHorizontalRule();
             return true;
-        } else if (ServerToClientModel.INSERT_HTML.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.INSERT_HTML == model) {
             uiObject.getFormatter().insertHTML(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.IMAGE_URL.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.IMAGE_URL == model) {
             uiObject.getFormatter().insertImage(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.ORDERED.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.ORDERED == model) {
             uiObject.getFormatter().insertOrderedList();
             return true;
-        } else if (ServerToClientModel.UNORDERED.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.UNORDERED == model) {
             uiObject.getFormatter().insertUnorderedList();
             return true;
-        } else if (ServerToClientModel.BACK_COLOR.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.BACK_COLOR == model) {
             uiObject.getFormatter().setBackColor(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.FONT_COLOR.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.FONT_COLOR == model) {
             uiObject.getFormatter().setForeColor(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.FONT_NAME.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.FONT_NAME == model) {
             uiObject.getFormatter().setFontName(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.FONT_SIZE.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.FONT_SIZE == model) {
             uiObject.getFormatter().setFontSize(GWTConverter.asFontSize(binaryModel.getByteValue()));
             return true;
-        } else if (ServerToClientModel.JUSTIFICATION.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.JUSTIFICATION == model) {
             uiObject.getFormatter().setJustification(GWTConverter.asJustification(binaryModel.getByteValue()));
             return true;
         } else {

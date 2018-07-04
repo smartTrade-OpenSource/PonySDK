@@ -23,13 +23,18 @@
 
 package com.ponysdk.spring;
 
+import java.util.ArrayList;
+import java.util.Map;
+
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
-import java.util.ArrayList;
-import java.util.Map;
-
+/**
+ * @deprecated Useless
+ * @since v2.7.16
+ */
+@Deprecated
 public class ListLoader extends ArrayList<Object> implements ApplicationContextAware {
 
     private static final long serialVersionUID = 1L;

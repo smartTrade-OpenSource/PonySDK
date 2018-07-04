@@ -23,11 +23,41 @@
 
 package com.ponysdk.core.ui.basic;
 
-import com.ponysdk.core.model.ServerToClientModel;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
-public abstract class PValueBoxBase extends PFocusWidget {
+import javax.json.JsonObject;
+
+import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.HandlerModel;
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.ui.basic.event.PHasText;
+import com.ponysdk.core.ui.basic.event.PPasteEvent;
+import com.ponysdk.core.ui.basic.event.PPasteEvent.PPasteHandler;
+import com.ponysdk.core.writer.ModelWriter;
+
+public abstract class PValueBoxBase extends PFocusWidget implements PHasText {
+
+    protected static final String EMPTY = "";
+
+    private List<PPasteHandler> pasteHandlers;
+
+    protected String text = EMPTY;
 
     protected PValueBoxBase() {
+        this(EMPTY);
+    }
+
+    protected PValueBoxBase(final String text) {
+        super();
+        this.text = text != null ? text : EMPTY;
+    }
+
+    @Override
+    protected void enrichForUpdate(final ModelWriter writer) {
+        super.enrichForUpdate(writer);
+        if (!EMPTY.equals(text)) writer.write(ServerToClientModel.TEXT, this.text);
     }
 
     /**
@@ -39,7 +69,7 @@ public abstract class PValueBoxBase extends PFocusWidget {
     }
 
     public void setCursorPosition(final int cursorPosition) {
-        saveUpdate(ServerToClientModel.CURSOR_POSITION, cursorPosition);
+        saveUpdate(ServerToClientModel.CURSOR_POSITION, Math.min(cursorPosition, this.text.length()));
     }
 
     public void setSelectionRange(final int startPosition, final int rangeLength) {
@@ -47,6 +77,53 @@ public abstract class PValueBoxBase extends PFocusWidget {
             writer.write(ServerToClientModel.SELECTION_RANGE_START, startPosition);
             writer.write(ServerToClientModel.SELECTION_RANGE_LENGTH, rangeLength);
         });
+    }
+
+    @Override
+    public String getText() {
+        return text;
+    }
+
+    @Override
+    public void setText(String text) {
+        if (text == null) text = EMPTY; // null not send over json
+        if (Objects.equals(this.text, text)) return;
+        this.text = text;
+        if (initialized) saveUpdate(ServerToClientModel.TEXT, this.text);
+    }
+
+    public void addPasteHandler(final PPasteHandler pasteHandler) {
+        if (pasteHandlers == null) {
+            pasteHandlers = new ArrayList<>();
+            saveAddHandler(HandlerModel.HANDLER_PASTE);
+        }
+        pasteHandlers.add(pasteHandler);
+    }
+
+    public void removePasteHandler(final PPasteHandler pasteHandler) {
+        if (pasteHandlers != null) {
+            pasteHandlers.remove(pasteHandler);
+            if (pasteHandlers.isEmpty()) saveRemoveHandler(HandlerModel.HANDLER_PASTE);
+        }
+    }
+
+    @Override
+    public void onClientData(final JsonObject instruction) {
+        if (!isVisible()) return;
+        if (instruction.containsKey(ClientToServerModel.HANDLER_PASTE.toStringValue())) {
+            if (pasteHandlers != null) {
+                final String data = instruction.getString(ClientToServerModel.HANDLER_PASTE.toStringValue());
+                final PPasteEvent pasteEvent = new PPasteEvent(this, data);
+                pasteHandlers.forEach(handler -> handler.onPaste(pasteEvent));
+            }
+        } else {
+            super.onClientData(instruction);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + ", text=" + text;
     }
 
 }

@@ -23,15 +23,8 @@
 
 package com.ponysdk.core.server;
 
-/**
- * @author nvelin
- *
- */
 public class AlreadyDestroyedApplication extends RuntimeException {
 
-    /**
-     * @param string
-     */
     public AlreadyDestroyedApplication(final String string) {
         super(string);
     }

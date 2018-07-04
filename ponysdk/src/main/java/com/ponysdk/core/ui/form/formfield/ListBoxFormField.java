@@ -26,8 +26,10 @@ package com.ponysdk.core.ui.form.formfield;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PListBox;
+import com.ponysdk.core.ui.basic.PWidget.TabindexMode;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 import com.ponysdk.core.ui.form.dataconverter.DataConverter;
 
@@ -70,6 +72,7 @@ public class ListBoxFormField<T> extends AbstractFormField<T, PListBox> {
 
     public ListBoxFormField(final PListBox widget, final DataConverter<String, T> dataProvider, final boolean dirtyMode) {
         super(widget, dataProvider, dirtyMode);
+        if (UIContext.get().getConfiguration().isTabindexOnlyFormField()) widget.setTabindex(TabindexMode.TABULABLE);
     }
 
     @Override

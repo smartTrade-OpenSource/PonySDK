@@ -44,9 +44,9 @@ public class AjaxServlet extends HttpServlet {
     private void process(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         try {
             final Integer uiContextID = Integer.parseInt(req.getHeader(ClientToServerModel.UI_CONTEXT_ID.name()));
-            final Integer objectID = Integer.parseInt(req.getHeader(ClientToServerModel.OBJECT_ID.name()));
             final UIContext uiContext = SessionManager.get().getUIContext(uiContextID);
             if (uiContext != null) {
+                final Integer objectID = Integer.parseInt(req.getHeader(ClientToServerModel.OBJECT_ID.name()));
                 uiContext.execute(() -> {
                     try {
                         final PObject pObject = uiContext.getObject(objectID);
@@ -61,7 +61,7 @@ public class AjaxServlet extends HttpServlet {
                     }
                 });
             } else {
-                log.warn("Can't found UI Context #" + uiContextID + ", already destroyed ?");
+                log.warn("Can't found UI Context #{}, already destroyed ?", uiContextID);
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "UI Context #" + uiContextID + " not found");
             }
         } catch (final Exception e) {
@@ -72,11 +72,19 @@ public class AjaxServlet extends HttpServlet {
 
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        process(req, resp);
+        try {
+            process(req, resp);
+        } catch (final IOException e) {
+            log.error("Cannot stream request", e);
+        }
     }
 
     @Override
     protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        process(req, resp);
+        try {
+            process(req, resp);
+        } catch (final IOException e) {
+            log.error("Cannot stream request", e);
+        }
     }
 }

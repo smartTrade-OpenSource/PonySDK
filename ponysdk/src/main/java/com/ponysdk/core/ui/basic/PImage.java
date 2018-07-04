@@ -59,7 +59,8 @@ import com.ponysdk.core.writer.ModelWriter;
  * </p>
  * <h3>CSS Style Rules</h3>
  * <dl>
- * <dt>.gwt-Image</dt></dd>The outer element</dd>
+ * <dt>.gwt-Image</dt>
+ * <dd>The outer element</dd>
  * </dl>
  * Transformations between clipped and unclipped state will result in a loss of any style names that
  * were set/added; the only style names that are preserved are those that are mentioned in the
@@ -101,8 +102,8 @@ public class PImage extends PWidget implements HasPClickHandlers {
     }
 
     @Override
-    protected void enrichOnInit(final ModelWriter writer) {
-        super.enrichOnInit(writer);
+    protected void enrichForCreation(final ModelWriter writer) {
+        super.enrichForCreation(writer);
         if (url != null) {
             writer.write(ServerToClientModel.URL, url);
             if (top != -1 && left != -1 && imageHeight != -1 && imageWidth != -1) {
@@ -126,11 +127,11 @@ public class PImage extends PWidget implements HasPClickHandlers {
     public void setUrl(final String url) {
         if (Objects.equals(this.url, url)) return;
         this.url = url;
-        saveUpdate(ServerToClientModel.URL, url);
+        if (initialized) saveUpdate(ServerToClientModel.URL, url);
     }
 
     public void setStream(final StreamHandler streamListener) {
-        UIContext.get().stackEmbededStreamRequest(streamListener, getID());
+        UIContext.get().stackEmbeddedStreamRequest(streamListener, getID());
     }
 
     @Override

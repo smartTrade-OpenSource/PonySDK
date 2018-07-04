@@ -34,52 +34,33 @@ import javax.json.JsonObject;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.ui.basic.event.PHasText;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 import com.ponysdk.core.writer.ModelWriter;
 
-public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, HasPValue<String> {
-
-    private static final String EMPTY = "";
+public abstract class PTextBoxBase extends PValueBoxBase implements HasPValue<String> {
 
     private List<PValueChangeHandler<String>> handlers;
 
-    private String text = EMPTY;
     private String placeholder = EMPTY;
 
     protected PTextBoxBase() {
-        this(EMPTY);
+        super();
     }
 
     protected PTextBoxBase(final String text) {
-        super();
-        this.text = text != null ? text : EMPTY;
+        super(text);
     }
 
     @Override
-    protected void enrichOnInit(final ModelWriter writer) {
-        super.enrichOnInit(writer);
-        if (!EMPTY.equals(text)) writer.write(ServerToClientModel.TEXT, this.text);
+    protected void enrichForUpdate(final ModelWriter writer) {
+        super.enrichForUpdate(writer);
         if (!EMPTY.equals(placeholder)) writer.write(ServerToClientModel.PLACEHOLDER, this.placeholder);
     }
 
     @Override
     protected WidgetType getWidgetType() {
         return WidgetType.TEXTBOX;
-    }
-
-    @Override
-    public String getText() {
-        return text;
-    }
-
-    @Override
-    public void setText(String text) {
-        if (text == null) text = EMPTY; // null not send over json
-        if (Objects.equals(this.text, text)) return;
-        this.text = text;
-        saveUpdate(ServerToClientModel.TEXT, this.text);
     }
 
     @Override
@@ -100,7 +81,7 @@ public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, Ha
         if (placeholder == null) placeholder = EMPTY; // null not send over json
         if (Objects.equals(this.placeholder, placeholder)) return;
         this.placeholder = placeholder;
-        saveUpdate(ServerToClientModel.PLACEHOLDER, this.placeholder);
+        if (initialized) saveUpdate(ServerToClientModel.PLACEHOLDER, this.placeholder);
     }
 
     @Override
@@ -121,6 +102,7 @@ public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, Ha
 
     @Override
     public void onClientData(final JsonObject instruction) {
+        if (!isVisible()) return;
         if (instruction.containsKey(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE.toStringValue())) {
             final String value = instruction.getString(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE.toStringValue());
             fireOnValueChange(new PValueChangeEvent<>(this, value));
@@ -136,6 +118,6 @@ public abstract class PTextBoxBase extends PValueBoxBase implements PHasText, Ha
 
     @Override
     public String toString() {
-        return super.toString() + ", text=" + text + ", placeholder=" + placeholder;
+        return super.toString() + ", placeholder=" + placeholder;
     }
 }

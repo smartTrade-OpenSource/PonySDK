@@ -38,7 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.server.stm.Txn;
 
 public class PScheduler {
 
@@ -150,24 +149,29 @@ public class PScheduler {
         return new UIDelegator<>(callback, uiContext);
     }
 
-    private void purge(final UIRunnable uiRunnable) {
+    private void destroy(final UIContext uiContext) {
+        final Set<UIRunnable> uiRunnables = runnablesByUIContexts.remove(uiContext);
+        if (uiRunnables != null) uiRunnables.forEach(UIRunnable::onCancel);
         executor.purge();
-        final Set<UIRunnable> set = runnablesByUIContexts.get(uiRunnable.getUiContext());
-        if (set != null) set.remove(uiRunnable);
+    }
+
+    private void purge(final UIRunnable uiRunnable) {
+        final Set<UIRunnable> uiRunnables = runnablesByUIContexts.get(uiRunnable.getUIContext());
+        if (uiRunnables != null) uiRunnables.remove(uiRunnable);
+        executor.purge();
     }
 
     private void registerTask(final UIRunnable runnable) {
-        final UIContext uiContext = runnable.getUiContext();
-        uiContext.addContextDestroyListener(context -> {
-            final Set<UIRunnable> runnables = runnablesByUIContexts.remove(context);
-            if (runnables != null) runnables.forEach(UIRunnable::cancel);
-        });
+        final UIContext uiContext = runnable.getUIContext();
         Set<UIRunnable> runnables = runnablesByUIContexts.get(uiContext);
         if (runnables == null) {
             runnables = Collections.newSetFromMap(new ConcurrentHashMap<>());
+            runnables.add(runnable);
             runnablesByUIContexts.put(uiContext, runnables);
+            uiContext.addContextDestroyListener(this::destroy);
+        } else {
+            runnables.add(runnable);
         }
-        runnables.add(runnable);
     }
 
     public static final class UIRunnable implements Runnable {
@@ -195,55 +199,29 @@ public class PScheduler {
                 log.error("Error occurred", throwable);
                 cancel();
             } finally {
-                if (!repeated) {
-                    scheduler.purge(this);
-                }
+                if (!repeated) scheduler.purge(this);
             }
-        }
-
-        void begin() {
-            uiContext.begin();
-        }
-
-        void end() {
-            uiContext.end();
         }
 
         public boolean execute() {
-            try {
-                begin();
-                try {
-                    final Txn txn = Txn.get();
-                    txn.begin(uiContext.getContext());
-                    try {
-                        runnable.run();
-                        txn.commit();
-                    } catch (final Throwable e) {
-                        log.error("Cannot process commmand", e);
-                        txn.rollback();
-                        return false;
-                    }
-                } finally {
-                    end();
-                }
-            } catch (final Throwable e) {
-                log.error("Cannot execute command : " + runnable, e);
-                return false;
-            }
-            return true;
+            return uiContext.execute(runnable);
         }
 
         public void cancel() {
+            onCancel();
+            scheduler.purge(this);
+        }
+
+        public void onCancel() {
             this.cancelled = true;
             this.future.cancel(false);
-            scheduler.purge(this);
         }
 
         void setFuture(final ScheduledFuture<?> future) {
             this.future = future;
         }
 
-        public UIContext getUiContext() {
+        public UIContext getUIContext() {
             return uiContext;
         }
     }

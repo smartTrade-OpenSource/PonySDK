@@ -23,13 +23,30 @@
 
 package com.ponysdk.core.terminal.ui;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 
 public class PTPasswordTextBox extends PTTextBox {
 
     @Override
     protected PasswordTextBox createUIObject() {
-        return new PasswordTextBox();
+        return new PasswordTextBox() {
+
+            @Override
+            public int getTabIndex() {
+                final int tabIndex = super.getTabIndex();
+                return tabIndex == -1 ? -2 : tabIndex;
+            }
+
+            @Override
+            public void onBrowserEvent(final Event event) {
+                super.onBrowserEvent(event);
+                if (Event.ONPASTE == event.getTypeInt()) {
+                    if (handlePasteEnabled) Scheduler.get().scheduleDeferred(() -> sendPasteEvent(event));
+                }
+            }
+        };
     }
 
 }

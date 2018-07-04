@@ -32,11 +32,11 @@ abstract class PTButtonBase<T extends ButtonBase> extends PTFocusWidget<T> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.TEXT.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.TEXT == model) {
             uiObject.setText(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.HTML.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.HTML == model) {
             uiObject.setHTML(binaryModel.getStringValue());
             return true;
         } else {

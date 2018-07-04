@@ -42,12 +42,12 @@ public class PTDialogBox extends PTDecoratedPopupPanel<DialogBox> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.POPUP_CAPTION.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.POPUP_CAPTION == model) {
             final DialogBox dialogBox = uiObject;
             dialogBox.setHTML(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.DRAGGABLE.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.DRAGGABLE == model) {
             draggable = binaryModel.getBooleanValue();
             return true;
         } else {

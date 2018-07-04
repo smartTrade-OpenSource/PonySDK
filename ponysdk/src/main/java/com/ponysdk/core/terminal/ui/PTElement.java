@@ -52,7 +52,7 @@ public class PTElement extends PTComplexPanel<MyHTMLPanel> {
     @Override
     public void add(final ReaderBuffer buffer, final PTObject ptObject) {
         final BinaryModel binaryModel = buffer.readBinaryModel();
-        if (ServerToClientModel.INDEX.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.INDEX == binaryModel.getModel()) {
             uiObject.insert(asWidget(ptObject), uiObject.getElement(), binaryModel.getIntValue(), true);
         } else {
             buffer.rewind(binaryModel);
@@ -62,11 +62,11 @@ public class PTElement extends PTComplexPanel<MyHTMLPanel> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.INNER_HTML.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.HTML == model) {
             uiObject.getElement().setInnerHTML(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.INNER_TEXT.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.TEXT == model) {
             uiObject.getElement().setInnerText(binaryModel.getStringValue());
             return true;
         } else {

@@ -30,7 +30,7 @@ public class JavascriptAddOn extends JavaScriptObject {
     protected JavascriptAddOn() {
     }
 
-    public final native void update(JavaScriptObject json) /*-{ this.update(json); }-*/;
+    public final native void update(String methodName, JavaScriptObject arguments) /*-{ this.update(methodName, arguments); }-*/;
 
     public final native void onInit() /*-{ this.onInit(); }-*/;
 

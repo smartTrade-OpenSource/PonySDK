@@ -112,14 +112,14 @@ public class PMenuBar extends PWidget implements HasPAnimation, Iterable<PMenuSu
     }
 
     @Override
-    protected void init0() {
+    void init0() {
         super.init0();
         forEach(item -> item.attach(window, frame));
     }
 
     @Override
-    protected void enrichOnInit(final ModelWriter writer) {
-        super.enrichOnInit(writer);
+    protected void enrichForCreation(final ModelWriter writer) {
+        super.enrichForCreation(writer);
         writer.write(ServerToClientModel.VERTICAL, vertical);
     }
 

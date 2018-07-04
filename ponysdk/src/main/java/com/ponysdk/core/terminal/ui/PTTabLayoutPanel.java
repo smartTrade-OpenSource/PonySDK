@@ -47,19 +47,19 @@ public class PTTabLayoutPanel extends PTWidget<TabLayoutPanel> {
 
         final BinaryModel binaryModel = buffer.readBinaryModel();
         final ServerToClientModel model = binaryModel.getModel();
-        if (ServerToClientModel.TAB_TEXT.equals(model)) {
+        if (ServerToClientModel.TAB_TEXT == model) {
             final String value = binaryModel.getStringValue();
             final BinaryModel beforeIndexModel = buffer.readBinaryModel();
-            if (ServerToClientModel.BEFORE_INDEX.equals(beforeIndexModel.getModel())) {
+            if (ServerToClientModel.BEFORE_INDEX == beforeIndexModel.getModel()) {
                 tabPanel.insert(w, value, beforeIndexModel.getIntValue());
             } else {
                 buffer.rewind(beforeIndexModel);
                 tabPanel.add(w, value);
             }
-        } else if (ServerToClientModel.TAB_WIDGET.equals(model)) {
+        } else if (ServerToClientModel.TAB_WIDGET == model) {
             final PTWidget<?> ptWidget = (PTWidget<?>) uiBuilder.getPTObject(binaryModel.getIntValue());
             final BinaryModel beforeIndexModel = buffer.readBinaryModel();
-            if (ServerToClientModel.BEFORE_INDEX.equals(beforeIndexModel.getModel())) {
+            if (ServerToClientModel.BEFORE_INDEX == beforeIndexModel.getModel()) {
                 tabPanel.insert(w, ptWidget.uiObject, beforeIndexModel.getIntValue());
             } else {
                 buffer.rewind(beforeIndexModel);
@@ -75,17 +75,17 @@ public class PTTabLayoutPanel extends PTWidget<TabLayoutPanel> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.ANIMATE.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.ANIMATE == model) {
             uiObject.animate(binaryModel.getIntValue());
             return true;
-        } else if (ServerToClientModel.VERTICAL.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.VERTICAL == model) {
             uiObject.setAnimationVertical(binaryModel.getBooleanValue());
             return true;
-        } else if (ServerToClientModel.ANIMATION_DURATION.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.ANIMATION_DURATION == model) {
             uiObject.setAnimationDuration(binaryModel.getIntValue());
             return true;
-        } else if (ServerToClientModel.SELECTED_INDEX.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.SELECTED_INDEX == model) {
             uiObject.selectTab(binaryModel.getIntValue());
             return true;
         } else {
@@ -95,13 +95,13 @@ public class PTTabLayoutPanel extends PTWidget<TabLayoutPanel> {
 
     @Override
     public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
-        if (HandlerModel.HANDLER_SELECTION.equals(handlerModel)) {
+        if (HandlerModel.HANDLER_SELECTION == handlerModel) {
             uiObject.addSelectionHandler(event -> {
                 final PTInstruction eventInstruction = new PTInstruction(getObjectID());
                 eventInstruction.put(ClientToServerModel.HANDLER_SELECTION, uiObject.getSelectedIndex());
                 uiBuilder.sendDataToServer(uiObject, eventInstruction);
             });
-        } else if (HandlerModel.HANDLER_BEFORE_SELECTION.equals(handlerModel)) {
+        } else if (HandlerModel.HANDLER_BEFORE_SELECTION == handlerModel) {
             uiObject.addBeforeSelectionHandler(event -> {
                 final PTInstruction eventInstruction = new PTInstruction(getObjectID());
                 eventInstruction.put(ClientToServerModel.HANDLER_BEFORE_SELECTION, event.getItem());
@@ -114,9 +114,9 @@ public class PTTabLayoutPanel extends PTWidget<TabLayoutPanel> {
 
     @Override
     public void removeHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
-        if (HandlerModel.HANDLER_SELECTION.equals(handlerModel)) {
+        if (HandlerModel.HANDLER_SELECTION == handlerModel) {
             // TODO Remove HANDLER_SELECTION
-        } else if (HandlerModel.HANDLER_BEFORE_SELECTION.equals(handlerModel)) {
+        } else if (HandlerModel.HANDLER_BEFORE_SELECTION == handlerModel) {
             // TODO Remove HANDLER_BEFORE_SELECTION
         } else {
             super.removeHandler(buffer, handlerModel);

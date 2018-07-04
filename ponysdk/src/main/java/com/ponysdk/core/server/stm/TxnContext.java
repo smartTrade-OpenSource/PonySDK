@@ -25,7 +25,7 @@ package com.ponysdk.core.server.stm;
 
 import com.ponysdk.core.server.application.Application;
 import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.server.servlet.WebSocket;
+import com.ponysdk.core.server.websocket.WebSocket;
 import com.ponysdk.core.writer.ModelWriter;
 
 public class TxnContext implements TxnListener {
@@ -36,11 +36,13 @@ public class TxnContext implements TxnListener {
     private boolean flushNow = false;
     private Application application;
 
-    private UIContext uiContext;
-
     public TxnContext(final WebSocket socket) {
         this.socket = socket;
         this.modelWriter = new ModelWriter(socket);
+    }
+
+    public ModelWriter getWriter() {
+        return modelWriter;
     }
 
     void flush() {
@@ -58,14 +60,16 @@ public class TxnContext implements TxnListener {
 
     @Override
     public void beforeRollback() {
+        // Nothing to do
     }
 
     @Override
     public void afterFlush(final TxnContext txnContext) {
+        // Nothing to do
     }
 
-    public ModelWriter getWriter() {
-        return modelWriter;
+    public WebSocket getSocket() {
+        return socket;
     }
 
     public Application getApplication() {
@@ -76,32 +80,29 @@ public class TxnContext implements TxnListener {
         this.application = application;
     }
 
-    public String getHistoryToken() {
-        return this.socket.getHistoryToken();
+    public <T> T getAttribute(final String name) {
+        return application != null ? application.getAttribute(name) : null;
     }
 
-    public UIContext getUIContext() {
-        return uiContext;
+    public void setAttribute(final String name, final Object value) {
+        if (application != null) application.setAttribute(name, value);
     }
 
-    public void setUIContext(final UIContext uiContext) {
-        this.uiContext = uiContext;
+    public String getId() {
+        return application != null ? application.getId() : null;
     }
 
-    public void sendHeartBeat() {
-        socket.sendHeartBeat();
+    public void registerUIContext(final UIContext uiContext) {
+        if (application != null) application.registerUIContext(uiContext);
     }
 
-    public void sendRoundTrip() {
-        socket.sendRoundTrip();
-    }
-
-    public void close() {
-        socket.close();
+    public void deregisterUIContext(final int ID) {
+        if (application != null) application.deregisterUIContext(ID);
     }
 
     @Override
     public String toString() {
-        return "TxnContext{" + "flushNow=" + flushNow + ", application=" + application + ", uiContext=" + uiContext + '}';
+        return "TxnContext{" + "flushNow=" + flushNow + ", modelWriter=" + modelWriter + '}';
     }
+
 }

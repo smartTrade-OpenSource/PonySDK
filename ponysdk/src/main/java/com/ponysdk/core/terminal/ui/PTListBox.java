@@ -38,14 +38,21 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 public class PTListBox extends PTFocusWidget<ListBox> {
 
     @Override
-    protected ListBox createUIObject() {
-        return new ListBox();
-    }
-
-    @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
         super.create(buffer, objectId, uiService);
         addHandler(uiService);
+    }
+
+    @Override
+    protected ListBox createUIObject() {
+        return new ListBox() {
+
+            @Override
+            public int getTabIndex() {
+                final int tabIndex = super.getTabIndex();
+                return tabIndex == -1 ? -2 : tabIndex;
+            }
+        };
     }
 
     private void addHandler(final UIBuilder uiService) {
@@ -56,16 +63,12 @@ public class PTListBox extends PTFocusWidget<ListBox> {
                 eventInstruction.put(ClientToServerModel.HANDLER_CHANGE, "-1");
                 uiService.sendDataToServer(uiObject, eventInstruction);
             } else {
-                String selectedIndexes = selectedIndex + "";
+                final StringBuilder selectedIndexes = new StringBuilder(String.valueOf(selectedIndex));
                 for (int i = 0; i < uiObject.getItemCount(); i++) {
-                    if (uiObject.isItemSelected(i)) {
-                        if (i != selectedIndex) {
-                            selectedIndexes += "," + i;
-                        }
-                    }
+                    if (uiObject.isItemSelected(i) && i != selectedIndex) selectedIndexes.append(",").append(i);
                 }
                 final PTInstruction eventInstruction = new PTInstruction(getObjectID());
-                eventInstruction.put(ClientToServerModel.HANDLER_CHANGE, selectedIndexes);
+                eventInstruction.put(ClientToServerModel.HANDLER_CHANGE, selectedIndexes.toString());
                 uiService.sendDataToServer(uiObject, eventInstruction);
             }
         });
@@ -73,21 +76,21 @@ public class PTListBox extends PTFocusWidget<ListBox> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.CLEAR.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.CLEAR == model) {
             uiObject.clear();
             return true;
-        } else if (ServerToClientModel.ITEM_INSERTED.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.ITEM_INSERTED == model) {
             final String item = binaryModel.getStringValue() != null ? binaryModel.getStringValue() : "";
             final BinaryModel indexModel = buffer.readBinaryModel();
-            if (ServerToClientModel.INDEX.equals(indexModel.getModel())) {
+            if (ServerToClientModel.INDEX == indexModel.getModel()) {
                 uiObject.insertItem(item, indexModel.getIntValue());
             } else {
                 buffer.rewind(indexModel);
                 uiObject.addItem(item);
             }
             return true;
-        } else if (ServerToClientModel.ITEM_ADD.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.ITEM_ADD == model) {
             final String items = binaryModel.getStringValue();
             // ServerToClientModel.ITEM_GROUP
             final String groupName = buffer.readBinaryModel().getStringValue();
@@ -105,26 +108,26 @@ public class PTListBox extends PTFocusWidget<ListBox> {
             }
             select.appendChild(groupElement);
             return true;
-        } else if (ServerToClientModel.ITEM_UPDATED.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.ITEM_UPDATED == model) {
             final String item = binaryModel.getStringValue() != null ? binaryModel.getStringValue() : "";
             // ServerToClientModel.INDEX
             final int index = buffer.readBinaryModel().getIntValue();
             uiObject.setItemText(index, item);
             return true;
-        } else if (ServerToClientModel.ITEM_REMOVED.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.ITEM_REMOVED == model) {
             uiObject.removeItem(binaryModel.getIntValue());
             return true;
-        } else if (ServerToClientModel.SELECTED.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.SELECTED == model) {
             final boolean selected = binaryModel.getBooleanValue();
             // ServerToClientModel.INDEX
             final int index = buffer.readBinaryModel().getIntValue();
             if (index == -1) uiObject.setSelectedIndex(index);
             else uiObject.setItemSelected(index, selected);
             return true;
-        } else if (ServerToClientModel.VISIBLE_ITEM_COUNT.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.VISIBLE_ITEM_COUNT == model) {
             uiObject.setVisibleItemCount(binaryModel.getIntValue());
             return true;
-        } else if (ServerToClientModel.MULTISELECT.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.MULTISELECT == model) {
             uiObject.setMultipleSelect(binaryModel.getBooleanValue());
             return true;
         } else {

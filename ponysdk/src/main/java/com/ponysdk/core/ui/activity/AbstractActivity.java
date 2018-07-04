@@ -24,6 +24,7 @@
 package com.ponysdk.core.ui.activity;
 
 import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PAcceptsOneWidget;
 import com.ponysdk.core.ui.eventbus.BroadcastEventHandler;
@@ -52,6 +53,9 @@ public abstract class AbstractActivity<T extends IsPWidget> implements Activity 
         final T view2 = getView();
         view2.asWidget().addStyleName("pony-LoadingBox");
         this.world.setWidget(view2);
+
+        // Force flush to show the Loading information
+        Txn.get().flush();
 
         if (firstStart) {
             buildView();
@@ -87,12 +91,24 @@ public abstract class AbstractActivity<T extends IsPWidget> implements Activity 
         return UIContext.addHandler(type, handler);
     }
 
+    public void removeHandler(final Event.Type type, final EventHandler handler) {
+        UIContext.removeHandler(type, handler);
+    }
+
     public HandlerRegistration addHandlerToSource(final Event.Type type, final Object source, final EventHandler handler) {
         return UIContext.addHandlerToSource(type, source, handler);
     }
 
+    public void removeHandlerFromSource(final Event.Type type, final Object source, final EventHandler handler) {
+        UIContext.removeHandlerFromSource(type, source, handler);
+    }
+
     public HandlerRegistration addHandlerToSource(final Event.Type type, final Object source) {
         return addHandlerToSource(type, source, (EventHandler) this);
+    }
+
+    public void removeHandlerFromSource(final Event.Type type, final Object source) {
+        removeHandlerFromSource(type, source, (EventHandler) this);
     }
 
     public void fireEvent(final Event<? extends EventHandler> event) {
@@ -105,6 +121,10 @@ public abstract class AbstractActivity<T extends IsPWidget> implements Activity 
 
     public void addHandler(final BroadcastEventHandler handler) {
         UIContext.addHandler(handler);
+    }
+
+    public void removeHandler(final BroadcastEventHandler handler) {
+        UIContext.removeHandler(handler);
     }
 
 }

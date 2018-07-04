@@ -27,8 +27,18 @@ import com.ponysdk.core.ui.eventbus.EventHandler;
 
 public abstract class PKeyEvent<H extends EventHandler> extends PDomEvent<H> {
 
-    public PKeyEvent(final Object sourceComponent) {
+    public PKeyEvent(final Object sourceComponent, final int keyCode) {
         super(sourceComponent);
+        setData(keyCode);
+    }
+
+    @Override
+    public Integer getData() {
+        return (Integer) super.getData();
+    }
+
+    public int getKeyCode() {
+        return getData();
     }
 
 }

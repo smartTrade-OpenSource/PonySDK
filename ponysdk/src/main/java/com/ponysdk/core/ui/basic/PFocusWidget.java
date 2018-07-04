@@ -26,6 +26,7 @@ package com.ponysdk.core.ui.basic;
 import java.util.Objects;
 
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.event.HasPBlurHandlers;
 import com.ponysdk.core.ui.basic.event.HasPClickHandlers;
 import com.ponysdk.core.ui.basic.event.HasPDoubleClickHandlers;
@@ -51,26 +52,10 @@ public abstract class PFocusWidget extends PWidget
 
     private boolean enabled = true;
     private boolean enabledOnRequest = false;
-    private boolean focused = false;
     private boolean showLoadingOnRequest;
-    private int tabindex = Integer.MIN_VALUE;
 
     protected PFocusWidget() {
-    }
-
-    @Override
-    public HandlerRegistration addMouseOverHandler(final PMouseOverHandler handler) {
-        return addDomHandler(handler, PMouseOverEvent.TYPE);
-    }
-
-    @Override
-    public HandlerRegistration addFocusHandler(final PFocusHandler handler) {
-        return addDomHandler(handler, PFocusEvent.TYPE);
-    }
-
-    @Override
-    public HandlerRegistration addBlurHandler(final PBlurHandler handler) {
-        return addDomHandler(handler, PBlurEvent.TYPE);
+        if (UIContext.get().getConfiguration().isTabindexOnlyFormField()) tabindex = -1;
     }
 
     public void showLoadingOnRequest(final boolean showLoadingOnRequest) {
@@ -79,11 +64,15 @@ public abstract class PFocusWidget extends PWidget
         saveUpdate(writer -> writer.write(ServerToClientModel.LOADING_ON_REQUEST, showLoadingOnRequest));
     }
 
+    /**
+     * @deprecated Use {@link #focus()} or {@link #blur()}
+     * @since v2.7.16
+     */
+    @Deprecated
     @Override
     public void setFocus(final boolean focused) {
-        if (Objects.equals(this.focused, focused)) return;
-        this.focused = focused;
-        saveUpdate(ServerToClientModel.FOCUSED, focused);
+        if (focused) focus();
+        else blur();
     }
 
     public boolean isEnabled() {
@@ -110,26 +99,30 @@ public abstract class PFocusWidget extends PWidget
         saveUpdate(ServerToClientModel.ENABLED_ON_REQUEST, enabledOnRequest);
     }
 
-    public boolean isFocused() {
-        return focused;
+    @Override
+    public HandlerRegistration addMouseOverHandler(final PMouseOverHandler handler) {
+        return addDomHandler(handler, PMouseOverEvent.TYPE);
     }
 
-    public int getTabindex() {
-        return tabindex;
+    @Override
+    public HandlerRegistration addFocusHandler(final PFocusHandler handler) {
+        return addDomHandler(handler, PFocusEvent.TYPE);
     }
 
-    public void setTabindex(final int tabindex) {
-        if (Objects.equals(this.tabindex, tabindex)) return;
-        this.tabindex = tabindex;
-        saveUpdate(ServerToClientModel.TABINDEX, tabindex);
+    @Override
+    public HandlerRegistration addBlurHandler(final PBlurHandler handler) {
+        return addDomHandler(handler, PBlurEvent.TYPE);
     }
 
     @Override
     public HandlerRegistration addClickHandler(final PClickHandler handler) {
         if (showLoadingOnRequest || !enabledOnRequest) {
             return addDomHandler((PClickHandler) event -> {
-                handler.onClick(event);
-                saveUpdate(writer -> writer.write(ServerToClientModel.END_OF_PROCESSING));
+                try {
+                    handler.onClick(event);
+                } finally {
+                    saveUpdate(writer -> writer.write(ServerToClientModel.END_OF_PROCESSING));
+                }
             }, PClickEvent.TYPE);
         } else {
             return addDomHandler(handler, PClickEvent.TYPE);
@@ -140,8 +133,11 @@ public abstract class PFocusWidget extends PWidget
     public HandlerRegistration addDoubleClickHandler(final PDoubleClickHandler handler) {
         if (showLoadingOnRequest || !enabledOnRequest) {
             final PDoubleClickHandler clickHandler = event -> {
-                handler.onDoubleClick(event);
-                saveUpdate(writer -> writer.write(ServerToClientModel.END_OF_PROCESSING));
+                try {
+                    handler.onDoubleClick(event);
+                } finally {
+                    saveUpdate(writer -> writer.write(ServerToClientModel.END_OF_PROCESSING));
+                }
             };
 
             return addDomHandler(clickHandler, PDoubleClickEvent.TYPE);

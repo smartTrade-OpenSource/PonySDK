@@ -23,11 +23,11 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.JavaScriptException;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -36,6 +36,8 @@ import com.ponysdk.core.terminal.JavascriptAddOnFactory;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
+
+import elemental.js.util.JsMapFromStringTo;
 
 public class PTAddOn extends AbstractPTObject {
 
@@ -46,42 +48,53 @@ public class PTAddOn extends AbstractPTObject {
     JavascriptAddOn addOn;
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
-        super.create(buffer, objectId, uiService);
-        doCreate(buffer, objectId, uiService);
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
+        super.create(buffer, objectId, uiBuilder);
+        doCreate(buffer, objectId, uiBuilder);
     }
 
-    protected void doCreate(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
+    protected void doCreate(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
         // ServerToClientModel.FACTORY
         final String signature = buffer.readBinaryModel().getStringValue();
-        final Map<String, JavascriptAddOnFactory> factories = uiService.getJavascriptAddOnFactory();
-
-        final JavascriptAddOnFactory factory = factories.get(signature);
-        if (factory == null) throw new IllegalArgumentException(
-            "AddOn factory not found for signature: " + signature + ". Addons registered: " + factories.keySet());
+        final JavascriptAddOnFactory factory = getFactory(uiBuilder, signature);
 
         final JSONObject params = new JSONObject();
         params.put("id", new JSONNumber(objectId));
 
         final BinaryModel binaryModel = buffer.readBinaryModel();
-        if (ServerToClientModel.NATIVE.equals(binaryModel.getModel())) params.put("args", binaryModel.getJsonObject());
+        if (ServerToClientModel.PADDON_CREATION == binaryModel.getModel()) params.put("args", binaryModel.getJsonObject());
         else buffer.rewind(binaryModel);
 
         try {
             addOn = factory.newAddOn(params.getJavaScriptObject());
             addOn.onInit();
         } catch (final JavaScriptException e) {
-            log.log(Level.SEVERE, e.getMessage(), e);
+            log.log(Level.SEVERE, "PTAddOn #" + getObjectID() + " (" + signature + ") " + e.getMessage(), e);
         }
+    }
+
+    protected static final JavascriptAddOnFactory getFactory(final UIBuilder uiService, final String signature) {
+        final JsMapFromStringTo<JavascriptAddOnFactory> factories = uiService.getJavascriptAddOnFactory();
+        final JavascriptAddOnFactory factory = factories.get(signature);
+        if (factory == null) throw new IllegalArgumentException(
+            "AddOn factory not found for signature: " + signature + ". Addons registered: " + factories.keys());
+        return factory;
     }
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.NATIVE.ordinal() == modelOrdinal) {
-            doUpdate(binaryModel.getJsonObject());
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.PADDON_METHOD == model) {
+            final String methodName = binaryModel.getStringValue();
+            final BinaryModel arguments = buffer.readBinaryModel();
+            if (ServerToClientModel.PADDON_ARGUMENTS == arguments.getModel()) {
+                doUpdate(methodName, arguments.getJsonObject().getJavaScriptObject());
+            } else {
+                buffer.rewind(arguments);
+                doUpdate(methodName, null);
+            }
             return true;
-        } else if (ServerToClientModel.DESTROY.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.DESTROY == model) {
             destroy();
             return true;
         } else {
@@ -89,10 +102,10 @@ public class PTAddOn extends AbstractPTObject {
         }
     }
 
-    protected void doUpdate(final JSONObject data) {
+    protected void doUpdate(final String methodName, final JavaScriptObject arguments) {
         try {
-            if (!destroyed) addOn.update(data.getJavaScriptObject());
-            else log.warning("PTAddOn #" + getObjectID() + " destroyed, so updates will be discarded : " + data.toString());
+            if (!destroyed) addOn.update(methodName, arguments);
+            else log.warning("PTAddOn #" + getObjectID() + " destroyed, so updates will be discarded : " + arguments.toString());
         } catch (final JavaScriptException e) {
             log.log(Level.SEVERE, e.getMessage(), e);
         }

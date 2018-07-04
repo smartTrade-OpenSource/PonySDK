@@ -23,22 +23,23 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import com.google.gwt.core.client.Scheduler;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.gwt.core.client.Scheduler;
+
+import elemental.js.util.JsArrayOf;
+import elemental.js.util.JsMapFromIntTo;
+
 public class PTWindowManager {
+
+    private static final int IS_ALIVE_WINDOWS_TIMER = 10000; // 10 seconds
 
     private static final Logger log = Logger.getLogger(PTWindowManager.class.getName());
 
     private static final PTWindowManager instance = new PTWindowManager();
 
-    private final Map<Integer, PTWindow> windows = new HashMap<>();
+    private final JsMapFromIntTo<PTWindow> windows = JsMapFromIntTo.create();
 
     private PTWindowManager() {
         checkWindowsAlive();
@@ -48,8 +49,8 @@ public class PTWindowManager {
         return instance;
     }
 
-    public static Collection<PTWindow> getWindows() {
-        return new ArrayList<>(get().windows.values());
+    public static JsArrayOf<PTWindow> getWindows() {
+        return get().windows.values();
     }
 
     public static PTWindow getWindow(final int windowID) {
@@ -57,9 +58,16 @@ public class PTWindowManager {
     }
 
     public static void closeAll() {
-        final Collection<PTWindow> values = new ArrayList<>(get().windows.values());
-        for (final PTWindow window : values) {
-            window.close(true);
+        final JsArrayOf<PTWindow> windows = get().windows.values();
+        for (int i = windows.length() - 1; i >= 0; i--) {
+            final PTWindow window = windows.get(i);
+            if (window != null) {
+                try {
+                    window.close(true);
+                } catch (final Exception e) {
+                    log.log(Level.WARNING, "Can't close window : " + window.getObjectID());
+                }
+            }
         }
     }
 
@@ -75,13 +83,15 @@ public class PTWindowManager {
     private void checkWindowsAlive() {
         Scheduler.get().scheduleFixedDelay(() -> {
             try {
-                for (final PTWindow window : windows.values()) {
-                    if (window.isClosed()) window.onClose();
+                final JsArrayOf<PTWindow> windows = get().windows.values();
+                for (int i = windows.length() - 1; i >= 0; i--) {
+                    final PTWindow window = windows.get(i);
+                    if (window != null && window.isClosed()) window.onClose();
                 }
             } catch (final Throwable t) {
                 log.log(Level.SEVERE, "Can't checking windows status", t);
             }
             return true;
-        }, 2000);
+        }, IS_ALIVE_WINDOWS_TIMER);
     }
 }

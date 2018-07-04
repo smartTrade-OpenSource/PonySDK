@@ -97,15 +97,15 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
     }
 
     @Override
-    protected void init0() {
+    void init0() {
         super.init0();
         saveAddHandler(HandlerModel.HANDLER_STRING_VALUE_CHANGE);
         saveAddHandler(HandlerModel.HANDLER_STRING_SELECTION);
     }
 
     @Override
-    protected void enrichOnInit(final ModelWriter writer) {
-        super.enrichOnInit(writer);
+    protected void enrichForCreation(final ModelWriter writer) {
+        super.enrichForCreation(writer);
         writer.write(ServerToClientModel.ORACLE, suggestOracle.getID());
 
         // TODO nciaravola
@@ -119,6 +119,7 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
 
     @Override
     public void onClientData(final JsonObject instruction) {
+        if (!isVisible()) return;
         if (instruction.containsKey(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE.toStringValue())) {
             final String text = instruction.getString(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE.toStringValue());
             textBox.fireOnValueChange(new PValueChangeEvent<>(this, text));
@@ -147,9 +148,25 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
         return WidgetType.SUGGESTBOX;
     }
 
+    /**
+     * @deprecated Use {@link #focus()} or {@link #blur()}
+     * @since v2.7.16
+     */
+    @Deprecated
     @Override
     public void setFocus(final boolean focused) {
-        textBox.setFocus(focused);
+        if (focused) focus();
+        else blur();
+    }
+
+    @Override
+    public void focus() {
+        textBox.focus();
+    }
+
+    @Override
+    public void blur() {
+        textBox.blur();
     }
 
     public PTextBox getTextBox() {

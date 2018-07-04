@@ -23,29 +23,39 @@
 
 package com.ponysdk.core.ui.list.renderer.header;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import com.ponysdk.core.server.service.query.Criterion;
 import com.ponysdk.core.server.service.query.SortingType;
-import com.ponysdk.core.ui.basic.*;
+import com.ponysdk.core.ui.basic.Element;
+import com.ponysdk.core.ui.basic.HasPValue;
+import com.ponysdk.core.ui.basic.IsPWidget;
+import com.ponysdk.core.ui.basic.PGrid;
+import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
 import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
 import com.ponysdk.core.ui.form.formfield.FormField;
 import com.ponysdk.core.ui.form.formfield.FormFieldListener;
 import com.ponysdk.core.ui.form.validator.ValidationResult;
-import com.ponysdk.core.ui.list.*;
+import com.ponysdk.core.ui.list.FilterListener;
+import com.ponysdk.core.ui.list.HasCriteria;
+import com.ponysdk.core.ui.list.HasFilterListeners;
+import com.ponysdk.core.ui.list.Queriable;
+import com.ponysdk.core.ui.list.Resetable;
+import com.ponysdk.core.ui.list.Sortable;
+import com.ponysdk.core.ui.list.Validable;
 import com.ponysdk.core.ui.model.PKeyCodes;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class ComplexHeaderCellRenderer
         implements Queriable, HeaderCellRenderer, Resetable, HasCriteria, Sortable, Validable, FormFieldListener, HasFilterListeners {
 
     protected final FormField formField;
     protected final String key;
-    protected final Set<FilterListener> filterListeners = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    protected final Set<FilterListener> filterListeners = new HashSet<>();
     protected PGrid panel;
     protected PLabel caption;
     protected SortingType sortingType = SortingType.NONE;
@@ -91,7 +101,7 @@ public class ComplexHeaderCellRenderer
     protected void buildCaption(final String s) {
         caption = Element.newPLabel(s);
         caption.addStyleName("sortable");
-        caption.addClickHandler((PClickEvent) -> {
+        caption.addClickHandler(event -> {
             caption.addStyleName(HeaderSortingHelper.getAssociatedStyleName(sortingType));
             final SortingType nextSortingType = HeaderSortingHelper.getNextSortingType(sortingType);
             sort(nextSortingType);

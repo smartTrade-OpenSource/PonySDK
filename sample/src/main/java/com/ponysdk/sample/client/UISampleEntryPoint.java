@@ -23,19 +23,37 @@
 
 package com.ponysdk.sample.client;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
+
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.PScheduler;
+import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PAbsolutePanel;
 import com.ponysdk.core.ui.basic.PAnchor;
@@ -43,6 +61,7 @@ import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PCookies;
 import com.ponysdk.core.ui.basic.PDateBox;
 import com.ponysdk.core.ui.basic.PDockLayoutPanel;
+import com.ponysdk.core.ui.basic.PFileUpload;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PFrame;
 import com.ponysdk.core.ui.basic.PLabel;
@@ -63,6 +82,8 @@ import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
 import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
 import com.ponysdk.core.ui.datagrid.ColumnDescriptor;
 import com.ponysdk.core.ui.datagrid.DataGrid;
+import com.ponysdk.core.ui.datagrid.dynamic.Configuration;
+import com.ponysdk.core.ui.datagrid.dynamic.DynamicDataGrid;
 import com.ponysdk.core.ui.datagrid.impl.PLabelCellRenderer;
 import com.ponysdk.core.ui.eventbus2.EventBus.EventHandler;
 import com.ponysdk.core.ui.grid.AbstractGridWidget;
@@ -89,24 +110,30 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     // HighChartsStackedColumnAddOn highChartsStackedColumnAddOn;
     int a = 0;
 
+    private static int counter;
+
     @Override
     public void start(final UIContext uiContext) {
-        uiContext.setClientDataOutput((object, instruction) -> System.err.println(object + " : " + instruction));
+        uiContext.setTerminalDataReceiver((object, instruction) -> System.err.println(object + " : " + instruction));
 
         createReconnectingPanel();
 
         mainLabel = Element.newPLabel("Can be modified by anybody");
         PWindow.getMain().add(mainLabel);
 
-        testPAddon();
+        testPerf();
 
         if (true) return;
+
+        createNewGridSystem();
+
+        testPAddon();
 
         createWindow().open();
 
         downloadFile();
 
-        testNewEvent();
+        createNewEvent();
 
         testUIDelegator();
 
@@ -141,6 +168,11 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         PWindow.getMain().add(createDateBox());
         PWindow.getMain().add(Element.newPDateBox(new SimpleDateFormat("dd/MM/yyyy")));
         PWindow.getMain().add(Element.newPDateBox(Element.newPDatePicker(), new SimpleDateFormat("yyyy/MM/dd")));
+
+        final PDateBox dateBox = Element.newPDateBox(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss:SSS"), true);
+        dateBox.addValueChangeHandler(event -> System.err.println(event.getData()));
+        PWindow.getMain().add(dateBox);
+
         PWindow.getMain().add(Element.newPDatePicker());
         PWindow.getMain().add(Element.newPDecoratedPopupPanel(false));
         PWindow.getMain().add(Element.newPDecoratedPopupPanel(true));
@@ -152,7 +184,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PFrame frame = Element.newPFrame("http://localhost:8081/sample/");
         frame.add(Element.newPLabel("Inside the frame"));
         PWindow.getMain().add(frame);
-        PWindow.getMain().add(Element.newPFileUpload());
+        PWindow.getMain().add(createPFileUpload());
         PWindow.getMain().add(Element.newPFlexTable());
         PWindow.getMain().add(createPFlowPanel());
         PWindow.getMain().add(Element.newPFocusPanel());
@@ -179,10 +211,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         PWindow.getMain().add(Element.newPPopupPanel());
         PWindow.getMain().add(Element.newPPopupPanel(true));
 
-        PWindow.getMain().add(Element.newPPushButton(Element.newPImage())); // FIXME
-        // Test
-        // with
-        // image
+        PWindow.getMain().add(Element.newPPushButton(Element.newPImage())); // FIXME Test with image
 
         PWindow.getMain().add(Element.newPRadioButton("RadioLabel"));
         PWindow.getMain().add(Element.newPRadioButton("RadioLabel"));
@@ -221,7 +250,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             window.add(label);
             PWindow.getMain().add(label);
         } catch (final Exception e) {
-
         }
 
         PConfirmDialog.show(PWindow.getMain(), "AAA", Element.newPLabel("AA"));
@@ -229,6 +257,132 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         POptionPane.showConfirmDialog(PWindow.getMain(), null, "BBB");
 
         // uiContext.getHistory().newItem("", false);
+    }
+
+    public PFlowPanel createPFileUpload() {
+        final PFlowPanel panel = Element.newPFlowPanel();
+        final PFileUpload fileUpload = Element.newPFileUpload();
+        fileUpload.setName("file");
+        panel.add(fileUpload);
+        fileUpload.addChangeHandler(event -> {
+            final PFileUpload pFileUpload = (PFileUpload) event.getSource();
+            System.out.println("File name : " + pFileUpload.getFileName());
+            System.out.println("File size : " + pFileUpload.getFileSize() + " bytes");
+        });
+        fileUpload.addStreamHandler((request, response, context) -> {
+            try {
+                final List<FileItem> items = new ServletFileUpload(new DiskFileItemFactory()).parseRequest(request);
+                for (final FileItem item : items) {
+                    if (!item.isFormField()) readFileItem(item);
+                }
+            } catch (final Exception e) {
+                e.printStackTrace();
+            }
+        });
+        final PButton button = Element.newPButton("Submit");
+        button.addClickHandler(event -> fileUpload.submit());
+        panel.add(button);
+        return panel;
+    }
+
+    private void readFileItem(final FileItem item) throws IOException, FileNotFoundException {
+        // Store the uploaded file on the server (don't forget to remove)
+        final String fileName = FilenameUtils.getName(item.getName());
+        final InputStream fileContent = item.getInputStream();
+        final File uploadedFile = File.createTempFile(fileName, "fileUpload");
+        IOUtils.copy(fileContent, new FileOutputStream(uploadedFile));
+        uploadedFile.deleteOnExit();
+
+        // Read directly the input stream
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(item.getInputStream(), "UTF-8"));
+        final StringBuilder value = new StringBuilder();
+        final char[] buffer = new char[1024];
+        for (int length = 0; (length = reader.read(buffer)) > 0;) {
+            value.append(buffer, 0, length);
+        }
+        System.out.println(value.toString());
+    }
+
+    private void testPerf() {
+        final PWindow w = Element.newPWindow("Window 1", "resizable=yes,location=0,status=0,scrollbars=0");
+        final List<PLabel> labels = new ArrayList<>(1000);
+
+        final PButton start = Element.newPButton("Start");
+        w.add(start);
+        start.addClickHandler(event -> scheduleUpdate(labels));
+
+        for (int i = 0; i < 1000; i++) {
+            final PLabel label = Element.newPLabel(counter + "-" + i);
+            labels.add(label);
+            w.add(label);
+        }
+
+        w.open();
+    }
+
+    private void scheduleUpdate(final List<PLabel> labels) {
+        PScheduler.schedule(() -> {
+            int i = 0;
+            counter++;
+            for (final PLabel label : labels) {
+                label.setText(counter + "-" + i);
+                i++;
+            }
+            if (counter < 20) scheduleUpdate(labels);
+            else counter = 0;
+        }, Duration.ofMillis(20));
+    }
+
+    private void createNewGridSystem() {
+        //        final DataGrid<Pojo> grid = new DataGrid<>((a, b) -> a.bid.compareTo(b.bid));
+
+        final Configuration<Pojo> configuration = new Configuration<>(Pojo.class);
+        //configuration.setFilter(method -> method.getName().contains("COUCOU"));
+
+        final DataGrid<Pojo> grid = new DynamicDataGrid<>(configuration, Comparator.comparing(Pojo::getBid));
+
+        PWindow.getMain().add(grid);
+
+        final Random random = new Random();
+
+        final Map<String, Pojo> map = new HashMap<>();
+
+        for (int i = 0; i < 40; i++) {
+            final Pojo pojo = new Pojo();
+            pojo.security = "security" + i;
+            pojo.classe = "class" + i;
+            pojo.bid = random.nextDouble() * i;
+            pojo.offer = random.nextDouble() * i;
+            pojo.spread = random.nextDouble() * i;
+            pojo.coucou = random.nextDouble() * i + "";
+            pojo.coucou1 = random.nextDouble() * i + "";
+            pojo.coucou2 = random.nextDouble() * i + "";
+            pojo.coucou3 = random.nextDouble() * i + "";
+            pojo.coucou4 = random.nextDouble() * i + "";
+            pojo.coucou5 = random.nextDouble() * i + "";
+            pojo.coucou6 = random.nextDouble() * i + "";
+            pojo.coucou7 = random.nextDouble() * i + "";
+            pojo.coucou8 = random.nextDouble() * i + "";
+            pojo.coucou9 = random.nextDouble() * i + "";
+            pojo.coucou10 = random.nextDouble() * i + "";
+            map.put("security" + i, pojo);
+            grid.addData(pojo);
+
+        }
+
+        Txn.get().flush();
+
+        PScheduler.scheduleAtFixedRate(() -> {
+            for (int i = 0; i < 40; i++) {
+                final Pojo pojo = map.get("security" + i);
+                grid.update(pojo, p -> {
+                    p.bid = random.nextDouble();
+                    p.offer = random.nextDouble();
+                    p.spread = random.nextDouble();
+                    return p;
+                });
+            }
+        }, Duration.ofMillis(300));
     }
 
     private void createReconnectingPanel() {
@@ -301,12 +455,9 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         }
         final PTextBox textBox = Element.newPTextBox();
 
-        final PButton add = Element.newPButton("add");
-        add.addClickHandler(e -> {
-            grid.setData(Integer.valueOf(textBox.getText()));
-        });
-
-        PWindow.getMain().add(add);
+        //        final PButton add = Element.newPButton("add");
+        //        add.addClickHandler(e -> grid.setData(Integer.valueOf(textBox.getText())));
+        //        PWindow.getMain().add(add);
 
         PWindow.getMain().add(textBox);
         PWindow.getMain().add(grid);
@@ -327,7 +478,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
          **/
     }
 
-    private void testNewEvent() {
+    private void createNewEvent() {
         final EventHandler<PClickEvent> handler = UIContext.getNewEventBus().subscribe(PClickEvent.class,
             event -> System.err.println("B " + event));
         UIContext.getNewEventBus().post(new PClickEvent(this));
@@ -336,7 +487,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         UIContext.getNewEventBus().post(new PClickEvent(this));
     }
 
-    private class Data {
+    private static final class Data {
 
         protected Integer key;
         protected String value;
@@ -418,40 +569,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
         final PLabel p = Element.newPLabel();
         PWindow.getMain().add(p);
-
-        final boolean delegatorMode = true;
-
-        if (delegatorMode) {
-            // final UIDelegator<String> delegator = PScheduler.delegate(new
-            // Callback<String>() {
-            //
-            // @Override
-            // public void onSuccess(final String result) {
-            // p.setText(result);
-            // }
-            //
-            // @Override
-            // public void onError(final String result, final Exception
-            // exception) {
-            // }
-            // });
-
-            new Thread() {
-
-                @Override
-                public void run() {
-                    try {
-                        Thread.sleep(3000);
-                    } catch (final InterruptedException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                    // delegator.onSuccess("Test");
-                }
-            }.start();
-
-        }
-
     }
 
     private PWindow createWindow() {
@@ -610,9 +727,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             }
         });
 
-        labelPAddOn.setTerminalHandler(event -> {
-            System.err.println(event.toString());
-        });
+        labelPAddOn.setTerminalHandler(event -> System.err.println(event.toString()));
 
         return labelPAddOn;
     }
@@ -624,7 +739,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
             @Override
             public void onKeyUp(final PKeyUpEvent keyUpEvent) {
-                PScript.execute(PWindow.getMain(), "alert('" + keyUpEvent.getEventID() + "');");
+                PScript.execute(PWindow.getMain(), "alert('" + keyUpEvent + "');");
             }
 
             @Override
@@ -666,6 +781,177 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PButton pButton = Element.newPButton("Button 1");
         pButton.addClickHandler(handler -> pButton.setText("Button 1 clicked"));
         return pButton;
+    }
+
+    class Pojo {
+
+        public String security;
+        public String classe;
+        public Double bid;
+        public Double offer;
+        public Double spread;
+        public String coucou;
+        public String coucou1;
+        public String coucou2;
+        public String coucou3;
+        public String coucou4;
+        public String coucou5;
+        public String coucou6;
+        public String coucou7;
+        public String coucou8;
+        public String coucou9;
+        public String coucou10;
+
+        /**
+         * @return the security
+         */
+        public String getSecurity() {
+            return security;
+        }
+
+        /**
+         * @param security
+         *            the security to set
+         */
+        public void setSecurity(final String security) {
+            this.security = security;
+        }
+
+        /**
+         * @return the classe
+         */
+        public String getClasse() {
+            return classe;
+        }
+
+        /**
+         * @param classe
+         *            the classe to set
+         */
+        public void setClasse(final String classe) {
+            this.classe = classe;
+        }
+
+        /**
+         * @return the bid
+         */
+        public Double getBid() {
+            return bid;
+        }
+
+        /**
+         * @param bid
+         *            the bid to set
+         */
+        public void setBid(final Double bid) {
+            this.bid = bid;
+        }
+
+        /**
+         * @return the offer
+         */
+        public Double getOffer() {
+            return offer;
+        }
+
+        /**
+         * @param offer
+         *            the offer to set
+         */
+        public void setOffer(final Double offer) {
+            this.offer = offer;
+        }
+
+        /**
+         * @return the spread
+         */
+        public Double getSpread() {
+            return spread;
+        }
+
+        /**
+         * @param spread
+         *            the spread to set
+         */
+        public void setSpread(final Double spread) {
+            this.spread = spread;
+        }
+
+        /**
+         * @return the coucou
+         */
+        public String getCoucou() {
+            return coucou;
+        }
+
+        /**
+         * @param coucou
+         *            the coucou to set
+         */
+        public void setCoucou(final String coucou) {
+            this.coucou = coucou;
+        }
+
+        /**
+         * @return the coucou1
+         */
+        public String getCoucou1() {
+            return coucou1;
+        }
+
+        /**
+         * @param coucou1
+         *            the coucou1 to set
+         */
+        public void setCoucou1(final String coucou1) {
+            this.coucou1 = coucou1;
+        }
+
+        /**
+         * @return the coucou2
+         */
+        public String getCoucou2() {
+            return coucou2;
+        }
+
+        /**
+         * @param coucou2
+         *            the coucou2 to set
+         */
+        public void setCoucou2(final String coucou2) {
+            this.coucou2 = coucou2;
+        }
+
+        /**
+         * @return the coucou3
+         */
+        public String getCoucou3() {
+            return coucou3;
+        }
+
+        /**
+         * @param coucou3
+         *            the coucou3 to set
+         */
+        public void setCoucou3(final String coucou3) {
+            this.coucou3 = coucou3;
+        }
+
+        /**
+         * @return the coucou4
+         */
+        public String getCoucou4() {
+            return coucou4;
+        }
+
+        /**
+         * @param coucou4
+         *            the coucou4 to set
+         */
+        public void setCoucou4(final String coucou4) {
+            this.coucou4 = coucou4;
+        }
+
     }
 
 }

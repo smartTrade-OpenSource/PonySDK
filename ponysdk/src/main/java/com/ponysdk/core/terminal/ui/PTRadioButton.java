@@ -23,12 +23,12 @@
 
 package com.ponysdk.core.terminal.ui;
 
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.RadioButton;
-import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.PCheckBoxState;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.terminal.UIBuilder;
-import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
@@ -36,30 +36,43 @@ public class PTRadioButton extends PTCheckBox<RadioButton> {
 
     @Override
     protected RadioButton createUIObject() {
-        return new RadioButton(null);
+        return new RadioButton(null) {
+
+            @Override
+            public int getTabIndex() {
+                final int tabIndex = super.getTabIndex();
+                return tabIndex == -1 ? -2 : tabIndex;
+            }
+
+            /**
+             * Overridden to send ValueChangeEvents only when appropriate.
+             */
+            @Override
+            public void onBrowserEvent(final Event event) {
+                super.onBrowserEvent(event);
+
+                switch (DOM.eventGetType(event)) {
+                    case Event.ONCLICK:
+                        ValueChangeEvent.fire(this, getValue());
+                        break;
+                }
+            }
+
+        };
     }
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.NAME.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.NAME == model) {
             uiObject.setName(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.VALUE_CHECKBOX.ordinal() == modelOrdinal) {
-            uiObject.setValue(PCheckBoxState.CHECKED.equals(PCheckBoxState.fromByte(binaryModel.getByteValue())), true);
+        } else if (ServerToClientModel.VALUE_CHECKBOX == model) {
+            uiObject.setValue(PCheckBoxState.CHECKED == PCheckBoxState.fromRawValue(binaryModel.getByteValue()), true);
             return true;
         } else {
             return super.update(buffer, binaryModel);
         }
-    }
-
-    @Override
-    protected void addValueChangeHandler(final UIBuilder uiService) {
-        uiObject.addValueChangeHandler(event -> {
-            final PTInstruction instruction = new PTInstruction(objectID);
-            instruction.put(ClientToServerModel.HANDLER_BOOLEAN_VALUE_CHANGE, event.getValue());
-            uiService.sendDataToServer(uiObject, instruction);
-        });
     }
 
 }

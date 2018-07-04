@@ -26,8 +26,10 @@ package com.ponysdk.core.ui.form.formfield;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PDateBox;
+import com.ponysdk.core.ui.basic.PWidget.TabindexMode;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 import com.ponysdk.core.ui.form.dataconverter.DataConverter;
 import com.ponysdk.core.ui.form.dataconverter.DateConverter;
@@ -72,6 +74,7 @@ public class DateBoxFormField extends AbstractFormField<Date, PDateBox> {
 
     public DateBoxFormField(final PDateBox widget, final DataConverter<String, Date> dataConverter, final boolean dirtyMode) {
         super(widget, dataConverter, dirtyMode);
+        if (UIContext.get().getConfiguration().isTabindexOnlyFormField()) widget.setTabindex(TabindexMode.TABULABLE);
     }
 
     @Override

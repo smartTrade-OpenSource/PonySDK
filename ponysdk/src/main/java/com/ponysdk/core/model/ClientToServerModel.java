@@ -35,22 +35,24 @@ public enum ClientToServerModel {
 
     NATIVE("5"),
     APPLICATION_INSTRUCTIONS("6"),
-    INFO_MSG("7"),
-    COOKIES("8"),
-    COOKIE_NAME("9"),
-    COOKIE_VALUE("a"),
 
-    TYPE_HISTORY("b"),
+    ERROR_MSG("7"),
+    WARN_MSG("8"),
+    INFO_MSG("9"),
 
-    WIDGET_POSITION("c"),
-    POPUP_POSITION("d"),
-    EVENT_INFO("e"),
-    DOM_HANDLER_TYPE("f"),
+    COOKIES("a"),
+    COOKIE_NAME("b"),
+    COOKIE_VALUE("c"),
 
-    ERROR_MSG("g"),
-    YEAR("h"),
-    MONTH("i"),
-    DAY("j"),
+    TYPE_HISTORY("d"),
+
+    WIDGET_POSITION("e"),
+    POPUP_POSITION("f"),
+    EVENT_INFO("g"),
+    DOM_HANDLER_TYPE("h"),
+
+    PING_SERVER("i"),
+    APPLICATION_ID("j"),
 
     PARENT_OBJECT_ID("k"),
     VALUE_KEY("l"),
@@ -64,11 +66,12 @@ public enum ClientToServerModel {
     KEY_FILTER("t"),
     RESULT("u"),
 
-    HANDLER_BOOLEAN_VALUE_CHANGE("v"),
-    HANDLER_DATE_VALUE_CHANGE("w"),
-    HANDLER_STRING_VALUE_CHANGE("x"),
-    HANDLER_BEFORE_SELECTION("y"),
-    HANDLER_CHANGE("z"),
+    OPTION_TABINDEX_ACTIVATED("v"),
+
+    HANDLER_BOOLEAN_VALUE_CHANGE("w"),
+    HANDLER_DATE_VALUE_CHANGE("x"),
+    HANDLER_STRING_VALUE_CHANGE("y"),
+    HANDLER_BEFORE_SELECTION("z"),
     HANDLER_COMMAND("A"),
     HANDLER_CLOSE("B"),
     HANDLER_OPEN("C"),
@@ -77,16 +80,14 @@ public enum ClientToServerModel {
     HANDLER_SHOW_RANGE("F"),
     HANDLER_STRING_SELECTION("G"),
     HANDLER_SUBMIT_COMPLETE("H"),
-
-    PING_SERVER("I"),
-
-    HANDLER_SCROLL("J"),
-    HANDLER_SCROLL_HEIGHT("K"),
-    HANDLER_SCROLL_WIDTH("L"),
-    HANDLER_SCROLL_VERTICAL("M"),
-    HANDLER_SCROLL_HORIZONTAL("N"),
-
-    APPLICATION_ID("O");
+    HANDLER_SCROLL("I"),
+    HANDLER_SCROLL_HEIGHT("J"),
+    HANDLER_SCROLL_WIDTH("K"),
+    HANDLER_SCROLL_VERTICAL("L"),
+    HANDLER_SCROLL_HORIZONTAL("M"),
+    HANDLER_CHANGE("N"),
+    HANDLER_PASTE("O"),
+    HANDLER_DESTROY("P");
 
     private String key;
 

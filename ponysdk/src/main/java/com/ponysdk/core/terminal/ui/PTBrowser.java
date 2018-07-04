@@ -33,14 +33,14 @@ public class PTBrowser extends AbstractPTObject {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.WINDOW_LOCATION_REPLACE.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.WINDOW_LOCATION_REPLACE == model) {
             Browser.getWindow().getLocation().replace(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.PRINT.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.PRINT == model) {
             Browser.getWindow().print();
             return true;
-        } else if (ServerToClientModel.WINDOW_TITLE.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.WINDOW_TITLE == model) {
             Browser.getDocument().setTitle(binaryModel.getStringValue());
             return true;
         } else {

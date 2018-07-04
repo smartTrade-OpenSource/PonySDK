@@ -23,6 +23,8 @@
 
 package com.ponysdk.core.terminal.ui;
 
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.TextArea;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.model.BinaryModel;
@@ -32,16 +34,31 @@ public class PTTextArea extends PTTextBoxBase<TextArea> {
 
     @Override
     protected TextArea createUIObject() {
-        return new TextArea();
+        return new TextArea() {
+
+            @Override
+            public int getTabIndex() {
+                final int tabIndex = super.getTabIndex();
+                return tabIndex == -1 ? -2 : tabIndex;
+            }
+
+            @Override
+            public void onBrowserEvent(final Event event) {
+                super.onBrowserEvent(event);
+                if (Event.ONPASTE == event.getTypeInt()) {
+                    if (handlePasteEnabled) Scheduler.get().scheduleDeferred(() -> sendPasteEvent(event));
+                }
+            }
+        };
     }
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.VISIBLE_LINES.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.VISIBLE_LINES == model) {
             uiObject.setVisibleLines(binaryModel.getIntValue());
             return true;
-        } else if (ServerToClientModel.CHARACTER_WIDTH.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.CHARACTER_WIDTH == model) {
             uiObject.setCharacterWidth(binaryModel.getIntValue());
             return true;
         } else {

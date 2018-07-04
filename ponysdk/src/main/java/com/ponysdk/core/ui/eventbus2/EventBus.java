@@ -57,25 +57,22 @@ public class EventBus {
         }
     }
 
-    public <T> EventHandler<T> register(final Class<T> type) {
+    private <T> EventHandler<T> register(final Class<T> type) {
         final EventHandler<T> handler = new EventHandler<>(type);
-        Set<EventHandler<?>> handlers = handlersByType.get(type);
-        if (handlers == null) {
-            handlers = new LinkedHashSet<>();
-            handlersByType.put(type, handlers);
-        }
+        final Set<EventHandler<?>> handlers = handlersByType.computeIfAbsent(type, t -> new LinkedHashSet<>(4));
         handlers.add(handler);
-
         return handler;
     }
 
     public <T> EventHandler<T> subscribe(final Class<T> type, final Consumer<T> function) {
+        if (type == null) return null;
         final EventHandler<T> handler = register(type);
         handler.subscribe(function);
         return handler;
     }
 
-    public <T> boolean unsubscribe(final EventHandler<?> handler) {
+    public boolean unsubscribe(final EventHandler<?> handler) {
+        if (handler == null) return false;
         final Set<EventHandler<?>> handlers = handlersByType.get(handler.type);
         if (handlers != null) {
             final boolean remove = handlers.remove(handler);
@@ -88,6 +85,7 @@ public class EventBus {
     }
 
     public void post(final Object event) {
+        if (event == null) return;
         final Set<EventHandler<?>> handlers = handlersByType.get(event.getClass());
         if (handlers != null) handlers.forEach(handler -> handler.accept(event));
         else log.error("No subscribed handlers for {}", event.getClass());

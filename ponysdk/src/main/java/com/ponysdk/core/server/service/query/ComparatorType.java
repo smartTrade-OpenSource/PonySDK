@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -23,22 +23,30 @@
 
 package com.ponysdk.core.server.service.query;
 
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public enum ComparatorType {
-    EQ("="), NE("!="), GT(">"), LT("<"), LE("<="), GE(">="), IN("IN"), LIKE("LIKE"), IS_NULL("IS NULL"), IS_NOT_NULL("IS NOT NULL");
 
-    private static final Map<ComparatorType, String> names = new HashMap<>();
-    private static final Map<String, ComparatorType> comparatorTypeByName = new HashMap<>();
+    EQ("="),
+    NE("!="),
+    GT(">"),
+    LT("<"),
+    LE("<="),
+    GE(">="),
+    IN("IN"),
+    LIKE("LIKE"),
+    IS_NULL("IS NULL"),
+    IS_NOT_NULL("IS NOT NULL");
 
-    static {
-        for (final ComparatorType comparatorType : ComparatorType.values()) {
-            names.put(comparatorType, comparatorType.getName());
-            comparatorTypeByName.put(comparatorType.getName(), comparatorType);
-        }
-    }
+    private static final Map<ComparatorType, String> names = Arrays.stream(ComparatorType.values())
+        .collect(Collectors.toMap(Function.identity(), ComparatorType::name));
+
+    private static final Map<String, ComparatorType> comparatorTypeByName = Arrays.stream(ComparatorType.values())
+        .collect(Collectors.toMap(ComparatorType::name, Function.identity()));
 
     private String name;
 

@@ -23,11 +23,11 @@
 
 package com.ponysdk.core.ui.basic;
 
-import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.UIContext;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.server.application.UIContext;
 
 public class PRootLayoutPanel extends PLayoutPanel {
 
@@ -62,7 +62,7 @@ public class PRootLayoutPanel extends PLayoutPanel {
 
         Map<String, PRootLayoutPanel> rootByIDs = session.getAttribute(key);
         if (rootByIDs == null) {
-            rootByIDs = new HashMap<>();
+            rootByIDs = new HashMap<>(8);
             session.setAttribute(key, rootByIDs);
         }
 

@@ -58,7 +58,7 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
     }
 
     @Override
-    protected void init0() {
+    void init0() {
         super.init0();
         cellByWidget.keySet().forEach(widget -> widget.attach(window, frame));
     }
@@ -269,7 +269,7 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
         return rowFormatter;
     }
 
-    class Row implements Comparable<Row> {
+    static class Row implements Comparable<Row> {
 
         private int value;
 
@@ -287,7 +287,7 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
         }
     }
 
-    protected class Cell {
+    protected static class Cell {
 
         private int row;
 
@@ -320,7 +320,7 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
             }
 
             if (styles.add(styleName)) {
-                saveUpdate((writer) -> {
+                saveUpdate(writer -> {
                     writer.write(ServerToClientModel.ROW_FORMATTER_ADD_STYLE_NAME, styleName);
                     writer.write(ServerToClientModel.ROW, row);
                 });
@@ -333,7 +333,7 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
             if (styles == null) return;
 
             if (styles.remove(styleName)) {
-                saveUpdate((writer) -> {
+                saveUpdate(writer -> {
                     writer.write(ServerToClientModel.ROW_FORMATTER_REMOVE_STYLE_NAME, styleName);
                     writer.write(ServerToClientModel.ROW, row);
                 });
@@ -351,7 +351,7 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
 
             styles.add(styleName);
 
-            saveUpdate((writer) -> {
+            saveUpdate(writer -> {
                 writer.write(ServerToClientModel.ROW_FORMATTER_SET_STYLE_NAME, styleName);
                 writer.write(ServerToClientModel.ROW, row);
             });
@@ -383,28 +383,28 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
     public class PColumnFormatter {
 
         public void setWidth(final int column, final String width) {
-            saveUpdate((writer) -> {
+            saveUpdate(writer -> {
                 writer.write(ServerToClientModel.COLUMN_FORMATTER_COLUMN_WIDTH, width);
                 writer.write(ServerToClientModel.COLUMN, column);
             });
         }
 
         public void addStyleName(final int column, final String styleName) {
-            saveUpdate((writer) -> {
+            saveUpdate(writer -> {
                 writer.write(ServerToClientModel.COLUMN_FORMATTER_ADD_STYLE_NAME, styleName);
                 writer.write(ServerToClientModel.COLUMN, column);
             });
         }
 
         public void removeStyleName(final int column, final String styleName) {
-            saveUpdate((writer) -> {
+            saveUpdate(writer -> {
                 writer.write(ServerToClientModel.COLUMN_FORMATTER_REMOVE_STYLE_NAME, styleName);
                 writer.write(ServerToClientModel.COLUMN, column);
             });
         }
 
         public void setStyleName(final int column, final String styleName) {
-            saveUpdate((writer) -> {
+            saveUpdate(writer -> {
                 writer.write(ServerToClientModel.COLUMN_FORMATTER_SET_STYLE_NAME, styleName);
                 writer.write(ServerToClientModel.COLUMN, column);
             });

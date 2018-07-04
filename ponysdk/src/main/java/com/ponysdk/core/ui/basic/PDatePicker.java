@@ -23,14 +23,20 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.json.JsonObject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.DateConverter;
@@ -41,10 +47,15 @@ import com.ponysdk.core.ui.basic.event.PShowRangeHandler;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 
+// FIXME Need to manipulate LocalDate instead of Date to avoid timezone issues
 public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChangeHandler<Date> {
 
-    private final Set<PValueChangeHandler<Date>> handlers = Collections.newSetFromMap(new ConcurrentHashMap<>());
-    private final Set<PShowRangeHandler<Date>> showRangeHandlers = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private static final Logger log = LoggerFactory.getLogger(PDatePicker.class);
+
+    private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+    private List<PValueChangeHandler<Date>> handlers;
+    private List<PShowRangeHandler<Date>> showRangeHandlers;
 
     private Date date;
 
@@ -61,66 +72,86 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     }
 
     @Override
-    public void onClientData(final JsonObject jsonObject) {
-        if (jsonObject.containsKey(ClientToServerModel.HANDLER_DATE_VALUE_CHANGE.toStringValue())) {
-            final long data = jsonObject.getJsonNumber(ClientToServerModel.HANDLER_DATE_VALUE_CHANGE.toStringValue()).longValue();
-            Date date = null;
-            if (data != -1) date = new Date(data);
-            year = jsonObject.getInt(ClientToServerModel.YEAR.toStringValue());
-            month = jsonObject.getInt(ClientToServerModel.MONTH.toStringValue());
-            day = jsonObject.getInt(ClientToServerModel.DAY.toStringValue());
-            onValueChange(new PValueChangeEvent<>(this, date));
-        } else if (jsonObject.containsKey(ClientToServerModel.HANDLER_SHOW_RANGE.toStringValue())) {
-            final long start = jsonObject.getJsonNumber(ClientToServerModel.START_DATE.toStringValue()).longValue();
-            final long end = jsonObject.getJsonNumber(ClientToServerModel.END_DATE.toStringValue()).longValue();
-            final Date sd = new Date(start);
-            final Date ed = new Date(end);
-
-            // TODO nicolas Use date ???
-
-            final PShowRangeEvent<Date> showRangeEvent = new PShowRangeEvent<>(this, sd, ed);
-            for (final PShowRangeHandler<Date> handler : showRangeHandlers) {
-                handler.onShowRange(showRangeEvent);
-            }
-        } else {
-            super.onClientData(jsonObject);
-        }
-
-    }
-
-    @Override
     public void addValueChangeHandler(final PValueChangeHandler<Date> handler) {
+        if (handlers == null) handlers = new ArrayList<>();
         handlers.add(handler);
     }
 
     @Override
     public boolean removeValueChangeHandler(final PValueChangeHandler<Date> handler) {
-        return handlers.remove(handler);
+        return handlers != null && handlers.remove(handler);
     }
 
     @Override
     public Collection<PValueChangeHandler<Date>> getValueChangeHandlers() {
-        return Collections.unmodifiableCollection(handlers);
-    }
-
-    public Collection<PShowRangeHandler<Date>> getShowRangeHandlers() {
-        return Collections.unmodifiableCollection(showRangeHandlers);
-    }
-
-    public void addShowRangeHandler(final PShowRangeHandler<Date> handler) {
-        showRangeHandlers.add(handler);
-    }
-
-    public void removeShowRangeHandler(final PShowRangeHandler<Date> handler) {
-        showRangeHandlers.remove(handler);
+        return handlers != null ? Collections.unmodifiableCollection(handlers) : Collections.emptyList();
     }
 
     @Override
     public void onValueChange(final PValueChangeEvent<Date> event) {
         this.date = event.getData();
-        for (final PValueChangeHandler<Date> handler : handlers) {
-            handler.onValueChange(event);
+        if (handlers != null) {
+            for (final PValueChangeHandler<Date> handler : handlers) {
+                handler.onValueChange(event);
+            }
         }
+    }
+
+    @Override
+    public void onClientData(final JsonObject jsonObject) {
+        if (!isVisible()) return;
+        if (jsonObject.containsKey(ClientToServerModel.HANDLER_DATE_VALUE_CHANGE.toStringValue())) {
+            final String rawDate = jsonObject.getString(ClientToServerModel.HANDLER_DATE_VALUE_CHANGE.toStringValue());
+
+            Date date = null;
+            if (rawDate != null) {
+                try {
+                    date = dateFormat.parse(rawDate);
+
+                    final String[] values = rawDate.split("-");
+                    year = Integer.parseInt(values[0]);
+                    month = Integer.parseInt(values[1]);
+                    day = Integer.parseInt(values[2]);
+                } catch (final ParseException e) {
+                    log.error("Can't parse the date : " + rawDate, e);
+                }
+            } else {
+                year = -1;
+                month = -1;
+                day = -1;
+            }
+            onValueChange(new PValueChangeEvent<>(this, date));
+        } else if (jsonObject.containsKey(ClientToServerModel.HANDLER_SHOW_RANGE.toStringValue())) {
+            if (showRangeHandlers != null) {
+                final String start = jsonObject.getString(ClientToServerModel.START_DATE.toStringValue());
+                final String end = jsonObject.getString(ClientToServerModel.END_DATE.toStringValue());
+                try {
+                    // FIXME Need to be removed (but need to upgrade the Pony version and break commpatibility)
+                    // final PShowRangeEvent<String> event = new PShowRangeEvent<>(this, start, end);
+                    final PShowRangeEvent<Date> event = new PShowRangeEvent<>(this, dateFormat.parse(start), dateFormat.parse(end));
+                    for (final PShowRangeHandler<Date> handler : showRangeHandlers) {
+                        handler.onShowRange(event);
+                    }
+                } catch (final ParseException e) {
+                    log.error("Can't parse the dates " + start + " or " + end, e);
+                }
+            }
+        } else {
+            super.onClientData(jsonObject);
+        }
+    }
+
+    public void addShowRangeHandler(final PShowRangeHandler<Date> handler) {
+        if (showRangeHandlers == null) showRangeHandlers = new ArrayList<>();
+        showRangeHandlers.add(handler);
+    }
+
+    public boolean removeShowRangeHandler(final PShowRangeHandler<Date> handler) {
+        return showRangeHandlers != null && showRangeHandlers.remove(handler);
+    }
+
+    public Collection<PShowRangeHandler<Date>> getShowRangeHandlers() {
+        return showRangeHandlers != null ? Collections.unmodifiableCollection(showRangeHandlers) : Collections.emptyList();
     }
 
     @Override
@@ -183,20 +214,24 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
         saveUpdate(ServerToClientModel.YEAR_ARROWS_VISIBLE, visible);
     }
 
-    public int getMonth() {
-        return month;
-    }
-
-    public void setMonth(final int month) {
-        this.month = month;
-    }
-
     public int getYear() {
         return year;
     }
 
+    public int getMonth() {
+        return month;
+    }
+
     public int getDay() {
         return day;
+    }
+
+    /**
+     * @deprecated Useless
+     */
+    @Deprecated(forRemoval = true, since = "2.8.2")
+    public void setMonth(final int month) {
+        // To be removed
     }
 
 }

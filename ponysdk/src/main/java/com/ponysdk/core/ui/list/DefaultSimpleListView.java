@@ -59,7 +59,7 @@ public class DefaultSimpleListView extends PFlexTable implements SimpleListView 
 
     @Override
     public void setColumns(final int size) {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -105,10 +105,12 @@ public class DefaultSimpleListView extends PFlexTable implements SimpleListView 
 
     @Override
     public void moveRow(final int index, final int beforeIndex) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void moveColumn(final int index, final int beforeIndex) {
+        throw new UnsupportedOperationException();
     }
 
 }

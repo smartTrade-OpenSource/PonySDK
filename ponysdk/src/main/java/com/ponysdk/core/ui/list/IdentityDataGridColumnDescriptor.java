@@ -27,8 +27,6 @@ import com.ponysdk.core.ui.list.valueprovider.IdentityValueProvider;
 
 /**
  * By default an IdentityDataGridColumnDescriptor has an IdentityValueProvider
- *
- * @param <D>
  */
 public class IdentityDataGridColumnDescriptor<D> extends DataGridColumnDescriptor<D, D> {
 

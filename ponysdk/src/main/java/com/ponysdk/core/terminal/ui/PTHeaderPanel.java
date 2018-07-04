@@ -39,7 +39,7 @@ public class PTHeaderPanel extends PTPanel<HeaderPanel> {
     @Override
     public void add(final ReaderBuffer buffer, final PTObject ptObject) {
         final BinaryModel binaryModel = buffer.readBinaryModel();
-        if (ServerToClientModel.INDEX.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.INDEX == binaryModel.getModel()) {
             final Widget w = asWidget(ptObject);
             final int index = binaryModel.getIntValue();
             if (index == 0) {
@@ -65,8 +65,8 @@ public class PTHeaderPanel extends PTPanel<HeaderPanel> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.RESIZE.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.RESIZE == model) {
             uiObject.onResize();
             return true;
         } else {

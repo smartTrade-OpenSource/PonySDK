@@ -23,10 +23,10 @@
 
 package com.ponysdk.core.ui.basic;
 
-import com.ponysdk.core.ui.basic.event.HasPWidgets;
-
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+
+import com.ponysdk.core.ui.basic.event.HasPWidgets;
 
 /**
  * <p>

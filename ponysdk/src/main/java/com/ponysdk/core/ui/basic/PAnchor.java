@@ -36,6 +36,8 @@ import com.ponysdk.core.writer.ModelWriter;
  * <ul class='css'>
  * <li>.gwt-Anchor { }</li>
  * </ul>
+ *
+ * @see com.google.gwt.user.client.ui.Anchor
  */
 public class PAnchor extends PFocusWidget implements PHasHTML {
 
@@ -43,11 +45,14 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
     private String html;
     private String href;
 
+    /**
+     * Instantiates a new PAnchor
+     */
     protected PAnchor() {
     }
 
     /**
-     * Creates an anchor with its text specified.
+     * Instantiates a new PAnchor with its text specified.
      *
      * @param text
      *            the anchor's text
@@ -57,7 +62,7 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
     }
 
     /**
-     * Creates an anchor with its text and href (target URL) specified.
+     * Instantiates a new PAnchor with its text and href (target URL) specified.
      *
      * @param text
      *            the anchor's text
@@ -70,8 +75,13 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
     }
 
     @Override
-    protected void enrichOnInit(final ModelWriter writer) {
-        super.enrichOnInit(writer);
+    protected void enrichForCreation(final ModelWriter writer) {
+        super.enrichForCreation(writer);
+    }
+
+    @Override
+    protected void enrichForUpdate(final ModelWriter writer) {
+        super.enrichForUpdate(writer);
         if (text != null) writer.write(ServerToClientModel.TEXT, text);
         if (href != null) writer.write(ServerToClientModel.HREF, href);
         if (html != null) writer.write(ServerToClientModel.HTML, html);
@@ -100,7 +110,7 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
     public void setHref(final String href) {
         if (Objects.equals(this.href, href)) return;
         this.href = href;
-        saveUpdate(ServerToClientModel.HREF, href);
+        if (initialized) saveUpdate(ServerToClientModel.HREF, href);
     }
 
     @Override
@@ -113,7 +123,7 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
         if (Objects.equals(this.text, text)) return;
         this.text = text;
         this.html = null;
-        saveUpdate(ServerToClientModel.TEXT, text);
+        if (initialized) saveUpdate(ServerToClientModel.TEXT, text);
     }
 
     @Override
@@ -126,7 +136,7 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
         if (Objects.equals(this.html, html)) return;
         this.html = html;
         this.text = null;
-        saveUpdate(ServerToClientModel.HTML, html);
+        if (initialized) saveUpdate(ServerToClientModel.HTML, html);
     }
 
 }

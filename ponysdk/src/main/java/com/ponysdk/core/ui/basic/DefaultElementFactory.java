@@ -75,8 +75,18 @@ public class DefaultElementFactory implements ElementFactory {
     }
 
     @Override
+    public PDateBox newPDateBox(final PDatePicker picker, final SimpleDateFormat dateFormat, final boolean keepDayTimeNeeded) {
+        return new PDateBox(picker, dateFormat, keepDayTimeNeeded);
+    }
+
+    @Override
     public PDateBox newPDateBox(final PDatePicker picker, final SimpleDateFormat dateFormat) {
         return new PDateBox(picker, dateFormat);
+    }
+
+    @Override
+    public PDateBox newPDateBox(final SimpleDateFormat dateFormat, final boolean keepDayTimeNeeded) {
+        return new PDateBox(dateFormat, keepDayTimeNeeded);
     }
 
     @Override

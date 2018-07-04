@@ -25,8 +25,8 @@ package com.ponysdk.core.terminal.ui;
 
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.gwt.user.client.ui.DockLayoutPanel.Direction;
 import com.google.gwt.user.client.ui.Widget;
+import com.ponysdk.core.model.PDirection;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
@@ -52,57 +52,37 @@ public class PTDockLayoutPanel<T extends DockLayoutPanel> extends PTComplexPanel
     public void add(final ReaderBuffer buffer, final PTObject ptObject) {
         final Widget w = asWidget(ptObject);
         // ServerToClientModel.DIRECTION
-        final Direction direction = Direction.values()[buffer.readBinaryModel().getByteValue()];
+        final PDirection direction = PDirection.fromRawValue(buffer.readBinaryModel().getByteValue());
+
         // ServerToClientModel.SIZE
         final double size = buffer.readBinaryModel().getDoubleValue();
-        switch (direction) {
-            case CENTER: {
-                uiObject.add(w);
-                break;
-            }
-            case NORTH: {
-                uiObject.addNorth(w, size);
-                break;
-            }
-            case SOUTH: {
-                uiObject.addSouth(w, size);
-                break;
-            }
-            case EAST: {
-                uiObject.addEast(w, size);
-                break;
-            }
-            case WEST: {
-                uiObject.addWest(w, size);
-                break;
-            }
-            case LINE_START: {
-                uiObject.addLineStart(w, size);
-                break;
-            }
-            case LINE_END: {
-                uiObject.addLineEnd(w, size);
-                break;
-            }
-        }
+
+        if (PDirection.CENTER == direction) uiObject.add(w);
+        else if (PDirection.NORTH == direction) uiObject.addNorth(w, size);
+        else if (PDirection.SOUTH == direction) uiObject.addSouth(w, size);
+        else if (PDirection.EAST == direction) uiObject.addEast(w, size);
+        else if (PDirection.WEST == direction) uiObject.addWest(w, size);
+        else if (PDirection.LINE_START == direction) uiObject.addLineStart(w, size);
+        else if (PDirection.LINE_END == direction) uiObject.addLineEnd(w, size);
+        else throw new IllegalArgumentException("Unkown direction : " + direction);
     }
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.WIDGET_SIZE.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.WIDGET_SIZE == model) {
             final double newSize = binaryModel.getDoubleValue();
             // ServerToClientModel.WIDGET_ID
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
             uiObject.setWidgetSize(w, newSize);
             return true;
-        } else if (ServerToClientModel.WIDGET_HIDDEN.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.WIDGET_HIDDEN == model) {
             final boolean hidden = binaryModel.getBooleanValue();
             // ServerToClientModel.WIDGET_ID
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
             uiObject.setWidgetHidden(w, hidden);
             return true;
-        } else if (ServerToClientModel.ANIMATE.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.ANIMATE == model) {
             uiObject.animate(binaryModel.getIntValue());
             return true;
         } else {

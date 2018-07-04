@@ -39,8 +39,8 @@ import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 
 /**
- * A standard check box widget. This class also serves as a base class for
- * {@link PRadioButton}.
+ * A standard check box widget.
+ * This class also serves as a base class for {@link PRadioButton}.
  * <h3>CSS Style Rules</h3>
  * <dl>
  * <dt>.gwt-CheckBox</dt>
@@ -48,6 +48,8 @@ import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
  * <dt>.gwt-CheckBox-disabled</dt>
  * <dd>applied when PCheckbox is disabled</dd>
  * </dl>
+ *
+ * @see com.google.gwt.user.client.ui.CheckBox
  */
 public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValueChangeHandler<Boolean> {
 
@@ -110,7 +112,7 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
      */
     @Override
     public Boolean getValue() {
-        return PCheckBoxState.CHECKED.equals(state);
+        return PCheckBoxState.CHECKED == state;
     }
 
     /**
@@ -134,6 +136,7 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
 
     @Override
     public void onClientData(final JsonObject jsonObject) {
+        if (!isVisible()) return;
         if (jsonObject.containsKey(ClientToServerModel.HANDLER_BOOLEAN_VALUE_CHANGE.toStringValue())) {
             onValueChange(new PValueChangeEvent<>(this,
                 jsonObject.getBoolean(ClientToServerModel.HANDLER_BOOLEAN_VALUE_CHANGE.toStringValue())));

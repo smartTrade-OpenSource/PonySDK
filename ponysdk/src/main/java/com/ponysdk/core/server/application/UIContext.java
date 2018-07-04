@@ -23,15 +23,12 @@
 
 package com.ponysdk.core.server.application;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -40,7 +37,9 @@ import javax.json.JsonObject;
 import javax.json.JsonString;
 import javax.json.JsonValue;
 import javax.json.JsonValue.ValueType;
+import javax.servlet.http.HttpSession;
 
+import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,10 +47,10 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.AlreadyDestroyedApplication;
-import com.ponysdk.core.server.servlet.CommunicationSanityChecker;
+import com.ponysdk.core.server.context.PObjectWeakHashMap;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.server.stm.TxnContext;
-import com.ponysdk.core.ui.basic.DataListener;
+import com.ponysdk.core.server.websocket.WebSocket;
 import com.ponysdk.core.ui.basic.PCookies;
 import com.ponysdk.core.ui.basic.PHistory;
 import com.ponysdk.core.ui.basic.PObject;
@@ -64,6 +63,7 @@ import com.ponysdk.core.ui.eventbus.RootEventBus;
 import com.ponysdk.core.ui.eventbus.StreamHandler;
 import com.ponysdk.core.ui.eventbus2.EventBus;
 import com.ponysdk.core.ui.statistic.TerminalDataReceiver;
+import com.ponysdk.core.useragent.UserAgent;
 import com.ponysdk.core.writer.ModelWriter;
 
 /**
@@ -78,22 +78,22 @@ import com.ponysdk.core.writer.ModelWriter;
  */
 public class UIContext {
 
-    private static final ThreadLocal<UIContext> currentContext = new ThreadLocal<>();
+    private static final int INITIAL_STREAM_MAP_CAPACITY = 2;
 
     private static final Logger log = LoggerFactory.getLogger(UIContext.class);
-
+    private static final ThreadLocal<UIContext> currentContext = new ThreadLocal<>();
     private static final AtomicInteger uiContextCount = new AtomicInteger();
 
     private final int ID;
-    private final Application application;
+
     private final ReentrantLock lock = new ReentrantLock();
     private final Map<String, Object> attributes = new HashMap<>();
 
-    private int objectCounter = 1;
     private final PObjectWeakHashMap pObjectWeakReferences = new PObjectWeakHashMap();
+    private int objectCounter = 1;
 
+    private Map<Integer, StreamHandler> streamListenerByID;
     private int streamRequestCounter = 0;
-    private final Map<Integer, StreamHandler> streamListenerByID = new HashMap<>();
 
     private final PHistory history = new PHistory();
     private final RootEventBus rootEventBus = new RootEventBus();
@@ -101,153 +101,319 @@ public class UIContext {
 
     private final PCookies cookies = new PCookies();
 
-    private final CommunicationSanityChecker communicationSanityChecker;
-    private final List<ContextDestroyListener> destroyListeners = new ArrayList<>();
+    private final Set<ContextDestroyListener> destroyListeners = new HashSet<>();
+    @Deprecated(forRemoval = true, since = "v2.8.0")
     private final TxnContext context;
-    private final Set<DataListener> listeners = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private final Set<DataListener> listeners = new HashSet<>();
 
     private TerminalDataReceiver terminalDataReceiver;
 
-    private boolean living = true;
+    private boolean alive = true;
 
-    private final ConcurrentBoundedLinkedQueue<Long> pings = new ConcurrentBoundedLinkedQueue<>(10);
+    private final Latency latency = new Latency(10);
 
-    public UIContext(final TxnContext context) {
-        this.application = context.getApplication();
+    private final ApplicationConfiguration configuration;
+    private final WebSocket socket;
+    private final ServletUpgradeRequest request;
+
+    private long lastReceivedTime = System.currentTimeMillis();
+
+    public UIContext(final WebSocket socket, final TxnContext context, final ApplicationConfiguration configuration,
+            final ServletUpgradeRequest request) {
         this.ID = uiContextCount.incrementAndGet();
+        this.socket = socket;
+        this.configuration = configuration;
+        this.request = request;
         this.context = context;
-
-        this.communicationSanityChecker = new CommunicationSanityChecker(this);
-        this.communicationSanityChecker.start();
     }
 
-    public static final UIContext get() {
+    @Deprecated(forRemoval = true, since = "v2.8.1")
+    public UIContext(final WebSocket socket, final TxnContext context, final ApplicationConfiguration configuration) {
+        this(socket, context, configuration, socket.getRequest());
+    }
+
+    @Deprecated(forRemoval = true, since = "v2.8.0")
+    public UIContext(final TxnContext context) {
+        this(context.getSocket(), context, context.getApplication().getOptions());
+    }
+
+    /**
+     * Returns the current UIContext
+     *
+     * @return The current UIContext
+     */
+    public static UIContext get() {
         return currentContext.get();
     }
 
-    public static final void remove() {
+    /**
+     * Removed the current UIContext
+     */
+    public static void remove() {
         currentContext.remove();
     }
 
-    public static final void setCurrent(final UIContext uiContext) {
+    /**
+     * Sets the current UIContext
+     *
+     * @param uiContext
+     *            the UIContext
+     */
+    public static void setCurrent(final UIContext uiContext) {
         currentContext.set(uiContext);
     }
 
-    public static final HandlerRegistration addHandler(final Event.Type type, final EventHandler handler) {
+    /**
+     * Adds {@link EventHandler} to the {@link RootEventBus}
+     *
+     * @param type
+     *            the event type
+     * @param handler
+     *            the event handler
+     * @return the HandlerRegistration in order to remove the EventHandler
+     * @see #fireEvent(Event)
+     */
+    public static HandlerRegistration addHandler(final Event.Type type, final EventHandler handler) {
         return getRootEventBus().addHandler(type, handler);
     }
 
-    public static final void removeHandler(final Event.Type type, final EventHandler handler) {
-        getRootEventBus().removeHandler(type, handler);
-    }
-
-    public static final HandlerRegistration addHandlerToSource(final Event.Type type, final Object source,
-                                                               final EventHandler handler) {
-        return getRootEventBus().addHandlerToSource(type, source, handler);
-    }
-
-    public static final void removeHandlerFromSource(final Event.Type type, final Object source, final EventHandler handler) {
-        getRootEventBus().removeHandlerFromSource(type, source, handler);
-    }
-
-    public static final void fireEvent(final Event<? extends EventHandler> event) {
+    /**
+     * Fires an {@link Event} on the {@link RootEventBus}
+     * Only {@link EventHandler}s added before fires event will be stimulated
+     *
+     * @param event
+     *            the fired event
+     * @see #addHandler(BroadcastEventHandler)
+     */
+    public static void fireEvent(final Event<? extends EventHandler> event) {
         getRootEventBus().fireEvent(event);
     }
 
-    public static final void fireEventFromSource(final Event<? extends EventHandler> event, final Object source) {
+    /**
+     * Removes {@link EventHandler} from the {@link RootEventBus}
+     *
+     * @param type
+     *            the event type
+     * @param handler
+     *            the event handler
+     * @see #addHandler(com.ponysdk.core.ui.eventbus.Event.Type, EventHandler)
+     */
+    public static void removeHandler(final Event.Type type, final EventHandler handler) {
+        getRootEventBus().removeHandler(type, handler);
+    }
+
+    /**
+     * Adds {@link EventHandler} to the {@link RootEventBus} with a specific source
+     * Use {@link #fireEventFromSource(Event, Object)} to stimulate this event handler
+     *
+     * @param type
+     *            the event type
+     * @param source
+     *            the source
+     * @param handler
+     *            the event handler
+     * @return the {@link HandlerRegistration} in order to remove the {@link EventHandler}
+     * @see #fireEventFromSource(Event, Object)
+     */
+    public static HandlerRegistration addHandlerToSource(final Event.Type type, final Object source, final EventHandler handler) {
+        return getRootEventBus().addHandlerToSource(type, source, handler);
+    }
+
+    /**
+     * Fires an {@link Event} on the {@link RootEventBus} with a specific source
+     * Only {@link EventHandler}s added before fires event will be stimulated
+     *
+     * @param event
+     *            the fired event
+     * @param source
+     *            the source
+     * @see #addHandlerToSource(com.ponysdk.core.ui.eventbus.Event.Type, Object, EventHandler)
+     */
+    public static void fireEventFromSource(final Event<? extends EventHandler> event, final Object source) {
         getRootEventBus().fireEventFromSource(event, source);
     }
 
-    public static final void addHandler(final BroadcastEventHandler handler) {
+    /**
+     * Removes handler from the {@link RootEventBus} with a specific source
+     *
+     * @param type
+     *            the event type
+     * @param source
+     *            the source
+     * @param handler
+     *            the event handler
+     * @see #addHandlerToSource(com.ponysdk.core.ui.eventbus.Event.Type, Object, EventHandler)
+     */
+    public static void removeHandlerFromSource(final Event.Type type, final Object source, final EventHandler handler) {
+        getRootEventBus().removeHandlerFromSource(type, source, handler);
+    }
+
+    /**
+     * Adds a {@link BroadcastEventHandler} to the {@link RootEventBus} that receive all the events
+     * All call to {@link #fireEvent(Event)} or {@link #fireEventFromSource(Event, Object)} will stimulate this event
+     * handler
+     *
+     * @param handler
+     *            the broadcast event handler
+     * @see #fireEvent(Event)
+     * @see #fireEventFromSource(Event, Object)
+     */
+    public static void addHandler(final BroadcastEventHandler handler) {
         getRootEventBus().addHandler(handler);
     }
 
-    public static final void removeHandler(final BroadcastEventHandler handler) {
+    /**
+     * Removes broadcast handler from the {@link RootEventBus}
+     *
+     * @param handler
+     *            the broadcast event handler
+     * @see #addHandler(BroadcastEventHandler)
+     */
+    public static void removeHandler(final BroadcastEventHandler handler) {
         getRootEventBus().removeHandler(handler);
     }
 
-    public static final RootEventBus getRootEventBus() {
+    /**
+     * Gets the default {@link RootEventBus}
+     *
+     * @return the root event bus
+     */
+    public static RootEventBus getRootEventBus() {
         return get().rootEventBus;
     }
 
-    public static final EventBus getNewEventBus() {
+    /**
+     * Gets the default {@link EventBus}
+     *
+     * @return the new event bus
+     */
+    public static EventBus getNewEventBus() {
         return get().newEventBus;
     }
 
+    /**
+     * Gets the ID of the UIContext
+     *
+     * @return the ID
+     */
     public int getID() {
         return ID;
     }
 
-    public void addDataListener(final DataListener listener) {
-        listeners.add(listener);
+    /**
+     * Adds a {@link DataListener} to the UIContext
+     *
+     * @param listener
+     *            the data listener
+     */
+    public boolean addDataListener(final DataListener listener) {
+        return listeners.add(listener);
     }
 
-    public void removeDataListener(final DataListener listener) {
-        listeners.remove(listener);
+    /**
+     * Removes the {@link DataListener} from UIContext
+     *
+     * @param listener
+     *            the data listener
+     */
+    public boolean removeDataListener(final DataListener listener) {
+        return listeners.remove(listener);
     }
 
-    public void execute(final Runnable runnable) {
-        if (log.isDebugEnabled()) log.debug("Pushing to #" + this);
+    /**
+     * Executes a {@link Runnable} that represents a task in a graphical context
+     *
+     * This method locks the UIContext
+     *
+     * @param runnable
+     *            the tasks
+     */
+    public boolean execute(final Runnable runnable) {
+        if (!isAlive()) return false;
+        if (log.isDebugEnabled()) log.debug("Pushing to #{}", this);
         if (UIContext.get() != this) {
-            begin();
+            acquire();
             try {
                 final Txn txn = Txn.get();
                 txn.begin(context);
                 try {
                     runnable.run();
                     txn.commit();
+                    return true;
                 } catch (final Throwable e) {
                     log.error("Cannot process client instruction", e);
                     txn.rollback();
+                    return false;
                 }
             } finally {
-                end();
+                release();
             }
         } else {
             runnable.run();
+            return false;
         }
     }
 
-    public void pushToClient(final List<Object> data) {
-        execute(() -> fireOnData(data));
-    }
-
-    public void pushToClient(final Object data) {
-        execute(() -> fireOnData(data));
-    }
-
-    private void fireOnData(final List<Object> data) {
-        if (listeners.isEmpty()) return;
-        try {
-            listeners.forEach(listener -> data.forEach(listener::onData));
-        } catch (final Throwable e) {
-            log.error("Cannot send data", e);
+    /**
+     * Stimulates all {@link DataListener} with a list of object
+     *
+     * @param data
+     *            list of object
+     */
+    public boolean pushToClient(final List<Object> data) {
+        if (isAlive() && data != null && !listeners.isEmpty()) {
+            return execute(() -> {
+                try {
+                    listeners.forEach(listener -> data.forEach(listener::onData));
+                } catch (final Throwable e) {
+                    log.error("Cannot send data", e);
+                }
+            });
+        } else {
+            return false;
         }
     }
 
-    private void fireOnData(final Object data) {
-        if (listeners.isEmpty()) return;
-        try {
-            listeners.forEach(listener -> listener.onData(data));
-        } catch (final Throwable e) {
-            log.error("Cannot send data", e);
+    /**
+     * Stimulates all {@link DataListener} with an object
+     *
+     * @param data
+     *            the object
+     */
+    public boolean pushToClient(final Object data) {
+        if (isAlive() && data != null && !listeners.isEmpty()) {
+            return execute(() -> {
+                try {
+                    listeners.forEach(listener -> listener.onData(data));
+                } catch (final Throwable e) {
+                    log.error("Cannot send data", e);
+                }
+            });
+        } else {
+            return false;
         }
     }
 
+    /**
+     * Sends data to the targeted {@link PObject} from {@link JsonObject} instruction
+     * Called from terminal side
+     *
+     * @param jsonObject
+     *            the JSON instructions
+     */
     public void fireClientData(final JsonObject jsonObject) {
         if (jsonObject.containsKey(ClientToServerModel.TYPE_HISTORY.toStringValue())) {
-            if (history != null) {
-                history.fireHistoryChanged(jsonObject.getString(ClientToServerModel.TYPE_HISTORY.toStringValue()));
-            }
+            history.fireHistoryChanged(jsonObject.getString(ClientToServerModel.TYPE_HISTORY.toStringValue()));
         } else {
             final JsonValue jsonValue = jsonObject.get(ClientToServerModel.OBJECT_ID.toStringValue());
             int objectID;
-            if (ValueType.NUMBER.equals(jsonValue.getValueType())) {
+            final ValueType valueType = jsonValue.getValueType();
+            if (ValueType.NUMBER == valueType) {
                 objectID = ((JsonNumber) jsonValue).intValue();
-            } else if (ValueType.STRING.equals(jsonValue.getValueType())) {
+            } else if (ValueType.STRING == valueType) {
                 objectID = Integer.parseInt(((JsonString) jsonValue).getString());
             } else {
-                log.error("unknown reference from the browser. Unable to execute instruction: " + jsonObject);
+                log.error("unknown reference from the browser. Unable to execute instruction: {}", jsonObject);
                 return;
             }
 
@@ -258,13 +424,13 @@ public class UIContext {
                 final PObject object = getObject(objectID);
 
                 if (object == null) {
-                    log.error("unknown reference from the browser. Unable to execute instruction: " + jsonObject);
+                    log.error("unknown reference from the browser. Unable to execute instruction: {}", jsonObject);
 
                     if (jsonObject.containsKey(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())) {
                         final int parentObjectID = jsonObject.getJsonNumber(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())
                             .intValue();
                         final PObject gcObject = pObjectWeakReferences.get(parentObjectID);
-                        log.warn(String.valueOf(gcObject));
+                        if (log.isWarnEnabled()) log.warn(String.valueOf(gcObject));
                     }
 
                     return;
@@ -277,32 +443,70 @@ public class UIContext {
         }
     }
 
-    public void setClientDataOutput(final TerminalDataReceiver clientDataOutput) {
-        this.terminalDataReceiver = clientDataOutput;
+    /**
+     * Sets a {@link TerminalDataReceiver}
+     *
+     * @param terminalDataReceiver
+     *            the terminal data receiver
+     */
+    public void setTerminalDataReceiver(final TerminalDataReceiver terminalDataReceiver) {
+        this.terminalDataReceiver = terminalDataReceiver;
     }
 
-    public void begin() {
+    /**
+     * Locks the current UIContext
+     */
+    public void acquire() {
         lock.lock();
-        UIContext.setCurrent(this);
+        currentContext.set(this);
     }
 
-    public void end() {
+    /**
+     * Unlock the current UIContext
+     */
+    public void release() {
         UIContext.remove();
         lock.unlock();
     }
 
+    /**
+     * Generates the new {@link PObject} id
+     *
+     * @return the new ID
+     */
     public int nextID() {
         return objectCounter++;
     }
 
-    public void registerObject(final PObject object) {
-        pObjectWeakReferences.put(object.getID(), object);
+    /**
+     * Registers a {@link PObject} in the UIContext
+     *
+     * @param pObject
+     *            the pObject
+     * @see #getObject(int)
+     */
+    public void registerObject(final PObject pObject) {
+        pObjectWeakReferences.put(pObject.getID(), pObject);
     }
 
-    public <T> T getObject(final int objectID) {
-        return (T) pObjectWeakReferences.get(objectID);
+    /**
+     * Gets the {@link PObject} with a specific object ID
+     *
+     * @param objectID
+     *            the object ID of the searched {@link PObject}
+     * @return the {@link PObject} or null if not found
+     * @see #registerObject(PObject)
+     */
+    public PObject getObject(final int objectID) {
+        return pObjectWeakReferences.get(objectID);
     }
 
+    /**
+     * Registers a {@link StreamHandler} that will be called on the terminal side
+     *
+     * @param streamListener
+     *            the stream handler
+     */
     public void stackStreamRequest(final StreamHandler streamListener) {
         final int streamRequestID = nextStreamRequestID();
 
@@ -311,13 +515,21 @@ public class UIContext {
         writer.write(ServerToClientModel.TYPE_ADD_HANDLER, -1);
         writer.write(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_STREAM_REQUEST.getValue());
         writer.write(ServerToClientModel.STREAM_REQUEST_ID, streamRequestID);
-        writer.write(ServerToClientModel.APPLICATION_ID, getApplication().getId());
         writer.endObject();
 
+        if (streamListenerByID == null) streamListenerByID = new HashMap<>(INITIAL_STREAM_MAP_CAPACITY);
         streamListenerByID.put(streamRequestID, streamListener);
     }
 
-    public void stackEmbededStreamRequest(final StreamHandler streamListener, final int objectID) {
+    /**
+     * Registers a {@link StreamHandler} that will be called on a specific {@link com.ponysdk.core.terminal.ui.PTObject}
+     *
+     * @param streamListener
+     *            the stream handler
+     * @param objectID
+     *            the object ID of a {@link PObject}
+     */
+    public void stackEmbeddedStreamRequest(final StreamHandler streamListener, final int objectID) {
         final int streamRequestID = nextStreamRequestID();
 
         final ModelWriter writer = Txn.get().getWriter();
@@ -328,28 +540,35 @@ public class UIContext {
         writer.write(ServerToClientModel.TYPE_ADD_HANDLER, objectID);
         writer.write(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST.getValue());
         writer.write(ServerToClientModel.STREAM_REQUEST_ID, streamRequestID);
-        writer.write(ServerToClientModel.APPLICATION_ID, getApplication().getId());
         writer.endObject();
 
+        if (streamListenerByID == null) streamListenerByID = new HashMap<>(INITIAL_STREAM_MAP_CAPACITY);
         streamListenerByID.put(streamRequestID, streamListener);
     }
 
+    /**
+     * Generates the new stream id
+     *
+     * @return the new ID
+     */
     private int nextStreamRequestID() {
         return streamRequestCounter++;
     }
 
+    /**
+     * Removes the {@link StreamHandler} with a specific ID in the current UIContext
+     *
+     * @param streamID
+     *            the stream ID
+     * @return the removed stream handler or null if not found
+     */
     public StreamHandler removeStreamListener(final int streamID) {
-        return streamListenerByID.remove(streamID);
+        return streamListenerByID != null ? streamListenerByID.remove(streamID) : null;
     }
 
-    public PHistory getHistory() {
-        return history;
-    }
-
-    public PCookies getCookies() {
-        return cookies;
-    }
-
+    /**
+     * Closes the current UIContext
+     */
     public void close() {
         final ModelWriter writer = Txn.get().getWriter();
         writer.beginObject();
@@ -358,11 +577,10 @@ public class UIContext {
     }
 
     /**
-     * Binds an object to this session, using the name specified. If an object
-     * of the same name is already bound to the session, the object is replaced.
+     * Binds an object to this session, using the name specified. If an object of the same name is already bound to the
+     * session, the object is replaced.
      * <p>
-     * If the value passed in is null, this has the same effect as calling
-     * <code>removeAttribute()<code>.
+     * If the value passed in is null, this has the same effect as calling {@link #removeAttribute(String)}.
      *
      * @param name
      *            the name to which the object is bound; cannot be null
@@ -382,7 +600,6 @@ public class UIContext {
      * @param name
      *            the name of the object to remove from this session
      */
-
     public Object removeAttribute(final String name) {
         return attributes.remove(name);
     }
@@ -399,55 +616,60 @@ public class UIContext {
         return (T) attributes.get(name);
     }
 
-    public Application getApplication() {
-        return application;
-    }
-
-    public void notifyMessageReceived() {
-        communicationSanityChecker.onMessageReceived();
-    }
-
+    /**
+     * Destroys the current UIContext when the {@link com.ponysdk.core.server.websocket.WebSocket} is closed
+     *
+     * This method locks the UIContext
+     */
     public void onDestroy() {
-        begin();
+        if (!isAlive()) return;
+        acquire();
         try {
             doDestroy();
+            context.deregisterUIContext(ID);
         } finally {
-            end();
+            release();
         }
     }
 
+    /**
+     * Destroys the current UIContext when the {@link Application} is destroyed
+     *
+     * This method locks the UIContext
+     */
     void destroyFromApplication() {
-        begin();
-        try {
-            living = false;
-            destroyListeners.forEach(listener -> {
-                try {
-                    listener.onBeforeDestroy(this);
-                } catch (final AlreadyDestroyedApplication e) {
-                    if (log.isDebugEnabled()) log.debug("Exception while destroying UIContext #" + getID(), e);
-                } catch (final Exception e) {
-                    log.error("Exception while destroying UIContext #" + getID(), e);
-                }
-            });
-            communicationSanityChecker.stop();
-            context.close();
-        } finally {
-            end();
-        }
-    }
-
-    public void destroy() {
-        begin();
+        if (!isAlive()) return;
+        acquire();
         try {
             doDestroy();
-            context.close();
+            socket.close();
         } finally {
-            end();
+            release();
         }
     }
 
+    /**
+     * Destroys the UIContext
+     *
+     * This method locks the UIContext
+     */
+    public void destroy() {
+        if (!isAlive()) return;
+        acquire();
+        try {
+            doDestroy();
+            context.deregisterUIContext(ID);
+            socket.close();
+        } finally {
+            release();
+        }
+    }
+
+    /**
+     * Destroys effectively the UIContext
+     */
     private void doDestroy() {
-        living = false;
+        alive = false;
         destroyListeners.forEach(listener -> {
             try {
                 listener.onBeforeDestroy(this);
@@ -457,42 +679,147 @@ public class UIContext {
                 log.error("Exception while destroying UIContext #" + getID(), e);
             }
         });
-        communicationSanityChecker.stop();
-        application.unregisterUIContext(ID);
     }
 
-    public void sendHeartBeat() {
-        begin();
-        try {
-            context.sendHeartBeat();
-        } catch (final Throwable e) {
-            log.error("Cannot send server heart beat to UIContext #" + getID(), e);
-        } finally {
-            end();
-        }
-    }
-
-    public void sendRoundTrip() {
-        begin();
-        try {
-            context.sendRoundTrip();
-        } catch (final Throwable e) {
-            log.error("Cannot send server round trip to UIContext #" + getID(), e);
-        } finally {
-            end();
-        }
-    }
-
+    /**
+     * Adds a {@link ContextDestroyListener} that will be stimulated when the UIContext is destroyed
+     *
+     * @param listener
+     *            the context destroy listener
+     * @since {@link #destroy()}
+     */
     public void addContextDestroyListener(final ContextDestroyListener listener) {
         destroyListeners.add(listener);
     }
 
-    public boolean isLiving() {
-        return living;
+    /**
+     * Removes a {@link ContextDestroyListener}
+     *
+     * @param listener
+     *            the context destroy listener
+     * @since {@link #destroy()}
+     */
+    public void removeContextDestroyListener(final ContextDestroyListener listener) {
+        destroyListeners.remove(listener);
     }
 
-    public TxnContext getContext() {
-        return context;
+    /**
+     * Sends the heart beat
+     *
+     * This method locks the UIContext
+     */
+    public void sendHeartBeat() {
+        acquire();
+        try {
+            socket.sendHeartBeat();
+        } catch (final Throwable e) {
+            log.error("Cannot send server heart beat to UIContext #" + getID(), e);
+        } finally {
+            release();
+        }
+    }
+
+    /**
+     * Sends the round trip
+     *
+     * This method locks the UIContext
+     */
+    public void sendRoundTrip() {
+        acquire();
+        try {
+            socket.sendRoundTrip();
+        } catch (final Throwable e) {
+            log.error("Cannot send server round trip to UIContext #" + getID(), e);
+        } finally {
+            release();
+        }
+    }
+
+    /**
+     * Returns the alive state of the current UIContext
+     *
+     * @return the alive state
+     */
+    public boolean isAlive() {
+        return alive;
+    }
+
+    /**
+     * Gets the {@link ApplicationManagerOption} of the UIContext
+     *
+     * @return The ApplicationManagerOption
+     */
+    public ApplicationConfiguration getConfiguration() {
+        return configuration;
+    }
+
+    /**
+     * Gets the {@link PHistory} of the UIContext
+     *
+     * @return the PHistory
+     */
+    public PHistory getHistory() {
+        return history;
+    }
+
+    public String getHistoryToken() {
+        final List<String> historyTokens = this.request.getParameterMap().get(ClientToServerModel.TYPE_HISTORY.toStringValue());
+        return !historyTokens.isEmpty() ? historyTokens.get(0) : null;
+    }
+
+    /**
+     * Gets the {@link PCookies} of the UIContext
+     *
+     * @return the PCookies
+     */
+    public PCookies getCookies() {
+        return cookies;
+    }
+
+    /**
+     * Get a cookie from the {@link PCookies} of the UIContext
+     *
+     * @return the cookie
+     */
+    public String getCookie(final String name) {
+        return getCookies().getCookie(name);
+    }
+
+    public void onMessageReceived() {
+        lastReceivedTime = System.currentTimeMillis();
+    }
+
+    public long getLastReceivedTime() {
+        return lastReceivedTime;
+    }
+
+    public UserAgent getUserAgent() {
+        return UserAgent.parseUserAgentString(request.getHeader("User-Agent"));
+    }
+
+    public HttpSession getSession() {
+        return request.getSession();
+    }
+
+    public <T> T getApplicationAttribute(final String name) {
+        return context.getAttribute(name);
+    }
+
+    public void setApplicationAttribute(final String name, final Object value) {
+        context.setAttribute(name, value);
+    }
+
+    public String getApplicationId() {
+        return context.getId();
+    }
+
+    /**
+     * Gets the {@link Application} of the UIContext
+     *
+     * @return The Application
+     */
+    public Application getApplication() {
+        return context.getApplication();
     }
 
     @Override
@@ -510,36 +837,51 @@ public class UIContext {
 
     @Override
     public String toString() {
-        return "UIContext [ID=" + ID + ", living=" + living + ", ApplicationID=" + application.getId() + "]";
-    }
-
-    public void enableCommunicationChecker(final boolean enable) {
-        communicationSanityChecker.enableCommunicationChecker(enable);
-    }
-
-    public void addPingValue(final long pingValue) {
-        pings.add(pingValue);
+        return "UIContext [ID=" + ID + ", alive=" + alive + "]";
     }
 
     /**
-     * Get an average latency from the last 10 measurements
+     * Adds a ping value
+     *
+     * @param pingValue
+     *            the ping value
      */
-    public double getLatency() {
-        return pings.stream().mapToLong(Long::longValue).average().orElse(0);
+    public void addPingValue(final long pingValue) {
+        latency.add(pingValue);
     }
 
-    private static final class ConcurrentBoundedLinkedQueue<E> extends ConcurrentLinkedQueue<E> {
+    /**
+     * Gets an average latency from the last 10 measurements
+     *
+     * @return the lantency
+     */
+    public double getLatency() {
+        return latency.getValue();
+    }
 
-        private final int limit;
+    private static final class Latency {
 
-        public ConcurrentBoundedLinkedQueue(final int limit) {
-            this.limit = limit;
+        private int index = 0;
+        private final long[] values;
+
+        private Latency(final int size) {
+            values = new long[size];
+            for (int i = 0; i < values.length; i++) {
+                values[i] = 0L;
+            }
         }
 
-        @Override
-        public boolean add(final E e) {
-            if (this.size() == this.limit) this.remove();
-            return super.add(e);
+        public void add(final long value) {
+            values[index++] = value;
+            if (index >= values.length) index = 0;
+        }
+
+        public double getValue() {
+            double average = 0;
+            for (final long value : values) {
+                average += value;
+            }
+            return average;
         }
     }
 

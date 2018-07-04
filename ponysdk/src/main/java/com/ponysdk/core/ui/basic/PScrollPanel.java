@@ -41,7 +41,7 @@ import com.ponysdk.core.ui.basic.event.PScrollEvent.PScrollHandler;
  */
 public class PScrollPanel extends PSimplePanel implements HasPScrollHandlers {
 
-    private final List<PScrollHandler> scrollHandlers = new ArrayList<>();
+    private List<PScrollHandler> scrollHandlers;
 
     protected PScrollPanel() {
     }
@@ -81,25 +81,34 @@ public class PScrollPanel extends PSimplePanel implements HasPScrollHandlers {
 
     @Override
     public void addScrollHandler(final PScrollHandler handler) {
+        if (scrollHandlers == null) {
+            scrollHandlers = new ArrayList<>();
+            saveAddHandler(HandlerModel.HANDLER_SCROLL);
+        }
         scrollHandlers.add(handler);
-        saveAddHandler(HandlerModel.HANDLER_SCROLL);
     }
 
     @Override
     public void removeScrollHandler(final PScrollHandler handler) {
-        scrollHandlers.remove(handler);
-        saveRemoveHandler(HandlerModel.HANDLER_SCROLL);
+        if (scrollHandlers != null) {
+            scrollHandlers.remove(handler);
+            if (scrollHandlers.isEmpty()) saveRemoveHandler(HandlerModel.HANDLER_SCROLL);
+        }
     }
 
     @Override
     public void onClientData(final JsonObject instruction) {
+        if (!isVisible()) return;
         if (instruction.containsKey(ClientToServerModel.HANDLER_SCROLL.toStringValue())) {
-            final int height = instruction.getJsonNumber(ClientToServerModel.HANDLER_SCROLL_HEIGHT.toStringValue()).intValue();
-            final int width = instruction.getJsonNumber(ClientToServerModel.HANDLER_SCROLL_WIDTH.toStringValue()).intValue();
-            final int vertical = instruction.getJsonNumber(ClientToServerModel.HANDLER_SCROLL_VERTICAL.toStringValue()).intValue();
-            final int horizontal = instruction.getJsonNumber(ClientToServerModel.HANDLER_SCROLL_HORIZONTAL.toStringValue()).intValue();
-            final PScrollEvent scrollEvent = new PScrollEvent(this, height, width, vertical, horizontal);
-            scrollHandlers.forEach(handler -> handler.onScroll(scrollEvent));
+            if (scrollHandlers != null) {
+                final int height = instruction.getJsonNumber(ClientToServerModel.HANDLER_SCROLL_HEIGHT.toStringValue()).intValue();
+                final int width = instruction.getJsonNumber(ClientToServerModel.HANDLER_SCROLL_WIDTH.toStringValue()).intValue();
+                final int vertical = instruction.getJsonNumber(ClientToServerModel.HANDLER_SCROLL_VERTICAL.toStringValue()).intValue();
+                final int horizontal = instruction.getJsonNumber(ClientToServerModel.HANDLER_SCROLL_HORIZONTAL.toStringValue())
+                    .intValue();
+                final PScrollEvent scrollEvent = new PScrollEvent(this, height, width, vertical, horizontal);
+                scrollHandlers.forEach(handler -> handler.onScroll(scrollEvent));
+            }
         } else {
             super.onClientData(instruction);
         }

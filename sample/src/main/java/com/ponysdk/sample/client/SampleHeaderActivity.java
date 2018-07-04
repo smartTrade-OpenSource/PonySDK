@@ -95,7 +95,7 @@ public class SampleHeaderActivity extends HeaderActivity implements PClickHandle
         });
 
         optionsAnchor.addClickHandler(clickEvent -> {
-            if (popup.isShowing()) {
+            if (popup.isVisible()) {
                 popup.hide();
             } else {
                 // optionsAnchor.addStyleName(PonySDKTheme.HEADER_ACCOUNT_MENU_SELECTED);
@@ -122,6 +122,6 @@ public class SampleHeaderActivity extends HeaderActivity implements PClickHandle
 
     @Override
     public void onClick(final PClickEvent event) {
-        if (popup.isShowing()) popup.hide();
+        if (popup.isVisible()) popup.hide();
     }
 }

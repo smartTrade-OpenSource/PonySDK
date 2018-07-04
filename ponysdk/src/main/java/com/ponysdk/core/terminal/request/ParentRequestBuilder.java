@@ -24,7 +24,6 @@
 package com.ponysdk.core.terminal.request;
 
 import com.google.gwt.json.client.JSONValue;
-import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 import elemental.client.Browser;
 import elemental.events.MessageEvent;
@@ -32,15 +31,11 @@ import elemental.html.Uint8Array;
 
 public abstract class ParentRequestBuilder implements RequestBuilder {
 
-    private final RequestCallback callback;
-
     public ParentRequestBuilder(final String id, final RequestCallback callback) {
-        this.callback = callback;
-
+        // From Main terminal to the matching window terminal
         Browser.getWindow().setOnmessage(event -> {
-            final ReaderBuffer readerBuffer = new ReaderBuffer();
-            readerBuffer.init((Uint8Array) ((MessageEvent) event).getData());
-            onDataReceived(readerBuffer);
+            final Object data = ((MessageEvent) event).getData();
+            if (data instanceof Uint8Array) callback.onDataReceived((Uint8Array) data);
         });
 
         setReady(id);
@@ -63,12 +58,5 @@ public abstract class ParentRequestBuilder implements RequestBuilder {
      * To Main terminal
      */
     public abstract void sendToParent(String data);
-
-    /**
-     * From Main terminal to the matching window terminal
-     */
-    public void onDataReceived(final ReaderBuffer buffer) {
-        callback.onDataReceived(buffer);
-    }
 
 }

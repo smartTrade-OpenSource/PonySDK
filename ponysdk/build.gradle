@@ -4,29 +4,27 @@ ext {
     buildInfoOutputDirName = buildDir.name + "/buildinfo"
     javadocResources = "src/main/javadoc"
     
-    jsinteropVersion = '1.0.1'
-    
-    slf4jVersion = '1.7.25'
-    logbackVersion = '1.1.10'
+    jsinteropVersion = '1.0.2'
     
     javaxServletVersion = '3.1.0'
-    glassfishVersion = '1.0.4'
-    jsonVersion = '1.0'
-    
+    glassfishVersion = '1.1.2'
+    jsonVersion = '1.1.2'
     javaxValidationVersion = '1.0.0.GA'
-    
+    seleniumVersion = '3.9.1'
     junitVersion = '4.12'
+    tyrusVersion = '1.13.1'
+    mockitoVersion = '1.10.19'
 }
 
 configurations {
-    gwtdev 
+    gwtdev
 }
 
 dependencies {
-    gwtdev (
+    gwtdev(
         'com.google.gwt:gwt-dev:' + gwtVersion
     )
-    
+
     compile('javax.validation:validation-api:' + javaxValidationVersion) {
         artifact {
             name = 'validation-api'
@@ -39,60 +37,68 @@ dependencies {
         }
     }
 
-    compile (
-        'com.google.gwt:gwt-user:' + gwtVersion,
-        'com.google.gwt:gwt-elemental:' + gwtVersion,
-        'com.google.jsinterop:jsinterop:' + jsinteropVersion,
-        'com.google.jsinterop:jsinterop-annotations:' + jsinteropVersion,
-        
-        'org.eclipse.jetty:jetty-server:' + jettyVersion,
-        'org.eclipse.jetty:jetty-servlet:' + jettyVersion,
-        'org.eclipse.jetty:jetty-webapp:' + jettyVersion,
-        'org.eclipse.jetty:jetty-servlets:' + jettyVersion,
-        'org.eclipse.jetty:jetty-client:' + jettyVersion,
-        'org.eclipse.jetty:jetty-io:' + jettyVersion,
-        'org.eclipse.jetty:jetty-util:' + jettyVersion,
-        'org.eclipse.jetty:jetty-http:' + jettyVersion,
-        'org.eclipse.jetty:jetty-security:' + jettyVersion,
-        'org.eclipse.jetty:jetty-continuation:' + jettyVersion,
-        'org.eclipse.jetty.websocket:websocket-api:' + jettyVersion,
-        'org.eclipse.jetty.websocket:websocket-common:' + jettyVersion,
-        'org.eclipse.jetty.websocket:websocket-server:' + jettyVersion,
-        'org.eclipse.jetty.websocket:websocket-servlet:' + jettyVersion,
-        'org.eclipse.jetty.websocket:javax-websocket-server-impl:' + jettyVersion,
-        
-        'org.springframework:spring-core:' + springVersion,
-        'org.springframework:spring-web:' + springVersion,
-        'org.springframework:spring-beans:' + springVersion,
-        'org.springframework:spring-context:' + springVersion,
-        
-        'org.slf4j:slf4j-api:' + slf4jVersion,
+    compile(
+            'com.google.gwt:gwt-user:' + gwtVersion,
+            'com.google.gwt:gwt-elemental:' + gwtVersion,
+            'com.google.jsinterop:jsinterop:' + jsinteropVersion,
+            'com.google.jsinterop:jsinterop-annotations:' + jsinteropVersion,
 
-        'javax.servlet:javax.servlet-api:' + javaxServletVersion,
+            'org.eclipse.jetty:jetty-server:' + jettyVersion,
+            'org.eclipse.jetty:jetty-servlet:' + jettyVersion,
+            'org.eclipse.jetty:jetty-webapp:' + jettyVersion,
+            'org.eclipse.jetty:jetty-servlets:' + jettyVersion,
+            'org.eclipse.jetty:jetty-client:' + jettyVersion,
+            'org.eclipse.jetty:jetty-io:' + jettyVersion,
+            'org.eclipse.jetty:jetty-util:' + jettyVersion,
+            'org.eclipse.jetty:jetty-http:' + jettyVersion,
+            'org.eclipse.jetty:jetty-security:' + jettyVersion,
+            'org.eclipse.jetty:jetty-continuation:' + jettyVersion,
+            'org.eclipse.jetty.websocket:websocket-api:' + jettyVersion,
+            'org.eclipse.jetty.websocket:websocket-common:' + jettyVersion,
+            'org.eclipse.jetty.websocket:websocket-server:' + jettyVersion,
+            'org.eclipse.jetty.websocket:websocket-servlet:' + jettyVersion,
+            'org.eclipse.jetty.websocket:javax-websocket-server-impl:' + jettyVersion,
 
-        'javax.json:javax.json-api:' + jsonVersion,
-        'org.glassfish:javax.json:' + glassfishVersion
+            'org.springframework:spring-core:' + springVersion,
+            'org.springframework:spring-web:' + springVersion,
+            'org.springframework:spring-beans:' + springVersion,
+            'org.springframework:spring-context:' + springVersion,
+
+            'org.slf4j:slf4j-api:' + slf4jVersion,
+
+            'javax.servlet:javax.servlet-api:' + javaxServletVersion,
+            'javax.json:javax.json-api:' + jsonVersion,
+            'org.glassfish:javax.json:' + glassfishVersion
     )
 
-    testCompile (
-        'junit:junit:' + junitVersion
+    testCompile(
+            'junit:junit:' + junitVersion,
+            'org.mockito:mockito-all:' + mockitoVersion,
+            'org.seleniumhq.selenium:selenium-api:' + seleniumVersion,
+            'org.seleniumhq.selenium:selenium-java:' + seleniumVersion,
+            'javax.websocket:javax.websocket-client-api:1.1',
+            'org.glassfish.tyrus:tyrus-client:' + tyrusVersion
     )
-    
-    runtime (
-        'org.slf4j:log4j-over-slf4j:' + slf4jVersion,
-        'org.slf4j:jcl-over-slf4j:' + slf4jVersion,
-        'ch.qos.logback:logback-core:' + logbackVersion,
-        'ch.qos.logback:logback-classic:' + logbackVersion
+
+    testRuntime(
+            'org.slf4j:jcl-over-slf4j:' + slf4jVersion,
+            'org.slf4j:log4j-over-slf4j:' + slf4jVersion,
+            'org.slf4j:jul-to-slf4j:' + slf4jVersion,
+            'org.apache.logging.log4j:log4j-api:' + log4jVersion,
+            'org.apache.logging.log4j:log4j-core:' + log4jVersion,
+            'org.apache.logging.log4j:log4j-slf4j-impl:' + log4jVersion,
+            
+            'org.glassfish.tyrus:tyrus-container-grizzly-client:' + tyrusVersion
     )
 }
 
 jar {
     baseName = 'ponysdk'
     into('ponyterminal') {
-        from gwtOutputDirName + '/ponyterminal'
+        from gwtOutputDirName + '/prod/gwt/ponyterminal'
     }
     into('ponyterminaldebug') {
-        from gwtOutputDirName + '/ponyterminaldebug'
+        from gwtOutputDirName + '/debug/gwt/ponyterminaldebug'
     }
 
     exclude('*.devmode.js')
@@ -120,59 +126,69 @@ jar {
     }
 }
 
-task gwtc(dependsOn: classes, type: JavaExec) {
-    inputs.files fileTree('src/main/java/com/ponysdk/core/terminal')
-    outputs.files fileTree(gwtOutputDirName)
+javadoc {
+    exclude '**/terminal/**'
+}
+
+task createGWTProdBuildDir << {
+    mkdir new File(gwtOutputDirName, "prod")
+}
+
+task gwtc(dependsOn: 'classes', type: JavaExec) {
+    inputs.dir('src/main/java/com/ponysdk/core/terminal')
+    outputs.dir(gwtOutputDirName + '/prod/gwt/ponyterminal')
     description = "GWT compile to JavaScript (production mode)"
     main = 'com.google.gwt.dev.Compiler'
-    workingDir = buildDir
+    workingDir = new File(gwtOutputDirName, "prod")
 
     classpath {
         [
-            sourceSets.main.java.srcDirs,
-            configurations.compile,
-            configurations.gwtdev
+                sourceSets.main.java.srcDirs,
+                configurations.compile,
+                configurations.gwtdev
         ]
     }
 
     args = [
-        '-war',
-        'gwt',
-        '-localWorkers',
-        Runtime.getRuntime().availableProcessors(),
-        'com.ponysdk.core.PonyTerminal',
-        '-generateJsInteropExports'
-        //'-style', 'DETAILED',
-        //'-optimize', '0'
+            '-war',
+            'gwt',
+            '-localWorkers',
+            Runtime.getRuntime().availableProcessors(),
+            'com.ponysdk.core.PonyTerminal',
+            '-generateJsInteropExports'
     ]
 
     maxHeapSize = '512M'
 }
 
+task createGWTDebugBuildDir << {
+    mkdir new File(gwtOutputDirName, "debug")
+}
+
 task gwtcDebug(dependsOn: classes, type: JavaExec) {
-    inputs.files fileTree('src/main/java/com/ponysdk/core/terminal')
-    outputs.files fileTree(gwtOutputDirName)
-    description = "GWT compile to JavaScript (production mode)"
+    inputs.dir('src/main/java/com/ponysdk/core/terminal')
+    outputs.dir(gwtOutputDirName + '/debug/gwt/ponyterminaldebug')
+    description = "GWT compile to JavaScript (debug mode)"
     main = 'com.google.gwt.dev.Compiler'
-    workingDir = buildDir
+    workingDir = new File(gwtOutputDirName, "debug")
 
     classpath {
         [
-            sourceSets.main.java.srcDirs,
-            configurations.compile,
-            configurations.gwtdev
+                sourceSets.main.java.srcDirs,
+                configurations.compile,
+                configurations.gwtdev
         ]
     }
 
     args = [
-        '-war',
-        'gwt',
-        '-localWorkers',
-        Runtime.getRuntime().availableProcessors(),
-        'com.ponysdk.core.PonyTerminalDebug',
-        '-generateJsInteropExports',
-        '-style', 'DETAILED',
-        '-optimize', '0'
+            '-war',
+            'gwt',
+            '-localWorkers',
+            Runtime.getRuntime().availableProcessors(),
+            'com.ponysdk.core.PonyTerminalDebug',
+            '-generateJsInteropExports',
+            '-style', 'DETAILED',
+            '-optimize', '0'
     ]
 
     maxHeapSize = '512M'
@@ -223,5 +239,8 @@ artifacts {
     archives sourcesJar
 }
 
+gwtc.dependsOn('createGWTProdBuildDir')
 jar.dependsOn('gwtc')
+
+gwtcDebug.dependsOn('createGWTDebugBuildDir')
 jar.dependsOn('gwtcDebug')

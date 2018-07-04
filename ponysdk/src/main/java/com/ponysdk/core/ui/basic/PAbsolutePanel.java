@@ -35,6 +35,8 @@ import com.ponysdk.core.model.WidgetType;
  * Once a widget has been added to an absolute panel, the panel effectively "owns" the positioning
  * of the widget. Any existing positioning attributes on the widget may be modified by the panel.
  * </p>
+ *
+ * @see com.google.gwt.user.client.ui.AbsolutePanel
  */
 public class PAbsolutePanel extends PComplexPanel {
 

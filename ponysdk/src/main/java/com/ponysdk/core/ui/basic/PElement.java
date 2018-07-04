@@ -46,8 +46,8 @@ public class PElement extends PComplexPanel {
     }
 
     @Override
-    protected void enrichOnInit(final ModelWriter writer) {
-        super.enrichOnInit(writer);
+    protected void enrichForCreation(final ModelWriter writer) {
+        super.enrichForCreation(writer);
         writer.write(ServerToClientModel.TAG, tagName);
     }
 
@@ -68,7 +68,7 @@ public class PElement extends PComplexPanel {
         if (Objects.equals(this.innerText, innerText)) return;
         this.innerText = innerText;
         this.innerHTML = null;
-        saveUpdate(ServerToClientModel.INNER_TEXT, this.innerText);
+        saveUpdate(ServerToClientModel.TEXT, this.innerText);
     }
 
     public String getInnerHTML() {
@@ -79,6 +79,6 @@ public class PElement extends PComplexPanel {
         if (Objects.equals(this.innerHTML, innerHTML)) return;
         this.innerHTML = innerHTML;
         this.innerText = null;
-        saveUpdate(ServerToClientModel.INNER_HTML, this.innerHTML);
+        saveUpdate(ServerToClientModel.HTML, this.innerHTML);
     }
 }

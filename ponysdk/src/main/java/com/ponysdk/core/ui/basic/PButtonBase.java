@@ -31,27 +31,47 @@ import com.ponysdk.core.writer.ModelWriter;
 
 /**
  * Abstract base class for {@link PButton}, {@link PCheckBox}.
+ *
+ * @see com.google.gwt.user.client.ui.ButtonBase
  */
 abstract class PButtonBase extends PFocusWidget implements PHasHTML {
 
     private String text;
+
     private String html;
 
+    /**
+     * Instantiates a new PButtonBase
+     */
     PButtonBase() {
     }
 
+    /**
+     * Instantiates a new PButtonBase
+     *
+     * @param text
+     *            the text
+     */
     PButtonBase(final String text) {
         this.text = text;
     }
 
+    /**
+     * Instantiates a new PButtonBase
+     *
+     * @param text
+     *            the text
+     * @param html
+     *            the html
+     */
     PButtonBase(final String text, final String html) {
         this.text = text;
         this.html = html;
     }
 
     @Override
-    protected void enrichOnInit(final ModelWriter writer) {
-        super.enrichOnInit(writer);
+    protected void enrichForUpdate(final ModelWriter writer) {
+        super.enrichForUpdate(writer);
         if (text != null) writer.write(ServerToClientModel.TEXT, text);
         if (html != null) writer.write(ServerToClientModel.HTML, html);
     }
@@ -66,7 +86,7 @@ abstract class PButtonBase extends PFocusWidget implements PHasHTML {
         if (Objects.equals(this.html, html)) return;
         this.html = html;
         this.text = null;
-        saveUpdate(ServerToClientModel.HTML, html);
+        if (initialized) saveUpdate(ServerToClientModel.HTML, html);
     }
 
     @Override
@@ -79,7 +99,7 @@ abstract class PButtonBase extends PFocusWidget implements PHasHTML {
         if (Objects.equals(this.text, text)) return;
         this.text = text;
         this.html = null;
-        saveUpdate(ServerToClientModel.TEXT, this.text);
+        if (initialized) saveUpdate(ServerToClientModel.TEXT, this.text);
     }
 
     @Override

@@ -46,26 +46,32 @@ public class Application {
 
     private final Map<String, Object> attributes = new ConcurrentHashMap<>();
 
-    private final ApplicationManagerOption options;
-
-    private final UserAgent userAgent;
+    private final ApplicationConfiguration configuration;
 
     private final HttpSession session;
 
     private final String id;
 
-    public Application(final String id, final HttpSession session, final ApplicationManagerOption options, final UserAgent userAgent) {
+    public Application(final String id, final HttpSession session, final ApplicationConfiguration configuration) {
         this.id = id;
         this.session = session;
-        this.options = options;
-        this.userAgent = userAgent;
+        this.configuration = configuration;
+    }
+
+    /**
+     * @deprecated Use {@link #Application(String, HttpSession, ApplicationManagerOption)} directly
+     */
+    @Deprecated(forRemoval = true, since = "v2.8.1")
+    public Application(final String id, final HttpSession session, final ApplicationConfiguration configuration,
+            final UserAgent userAgent) {
+        this(id, session, configuration);
     }
 
     public void registerUIContext(final UIContext uiContext) {
         uiContexts.put(uiContext.getID(), uiContext);
     }
 
-    void unregisterUIContext(final int uiContextID) {
+    public void deregisterUIContext(final int uiContextID) {
         uiContexts.remove(uiContextID);
         if (uiContexts.isEmpty()) {
             session.invalidate();
@@ -78,14 +84,13 @@ public class Application {
             try {
                 uiContext.destroyFromApplication();
             } catch (final Exception e) {
-                log.error("Can't destroy the UIContext #" + uiContext.getID() + " on Application #" + getId(), e);
+                log.error("Can't destroy the UIContext #" + uiContext.getID() + " on Application #" + id, e);
             }
         });
         uiContexts.clear();
 
         try {
-            if (log.isInfoEnabled())
-                log.info("Invalidate session on Application #{} because all ui contexts have been destroyed", getId());
+            log.info("Invalidate session on Application #{} because all ui contexts have been destroyed", id);
             session.invalidate();
         } catch (final IllegalArgumentException e) {
             log.error("The session is already invalid", e);
@@ -107,7 +112,7 @@ public class Application {
             try {
                 uiContext.pushToClient(message);
             } catch (final Throwable throwable) {
-                log.error("Cannot flush message on the session {}", uiContext.getContext(), throwable);
+                log.error("Cannot flush message on the session {}", uiContext, throwable);
             }
         }
     }
@@ -120,20 +125,12 @@ public class Application {
         return (T) attributes.get(name);
     }
 
-    public ApplicationManagerOption getOptions() {
-        return options;
+    public ApplicationConfiguration getOptions() {
+        return configuration;
     }
 
     public String getId() {
         return id;
-    }
-
-    public HttpSession getSession() {
-        return session;
-    }
-
-    public UserAgent getUserAgent() {
-        return userAgent;
     }
 
     public int countUIContexts() {
@@ -142,7 +139,7 @@ public class Application {
 
     @Override
     public String toString() {
-        return "Application [id=" + id + ", options=" + options + ", userAgent=" + userAgent + "]";
+        return "Application [id=" + id + ", options=" + configuration + "]";
     }
 
 }

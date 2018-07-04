@@ -23,19 +23,37 @@
 
 package com.ponysdk.core.server.servlet;
 
-import com.ponysdk.core.server.application.AbstractApplicationManager;
-import com.ponysdk.core.server.application.ApplicationManagerOption;
+import com.ponysdk.core.server.application.ApplicationConfiguration;
+import com.ponysdk.core.server.application.ApplicationManager;
 
-import javax.servlet.ServletContextListener;
+/**
+ * @deprecated Use {@link com.ponysdk.core.server.application.ApplicationManager} directly
+ */
+@Deprecated(forRemoval = true, since = "v2.8.1")
+public abstract class ApplicationLoader {
 
-public interface ApplicationLoader extends ServletContextListener {
+    private ApplicationManager applicationManager;
 
-    void start();
+    public ApplicationLoader() {
+        applicationManager = createApplicationManager();
+    }
 
-    AbstractApplicationManager createApplicationManager();
+    public void start() {
+        applicationManager.start();
+    }
 
-    ApplicationManagerOption getApplicationManagerOption();
+    protected abstract ApplicationManager createApplicationManager();
 
-    void setApplicationManagerOption(ApplicationManagerOption applicationManagerOption);
+    public void setApplicationManagerOption(final ApplicationConfiguration configuration) {
+        applicationManager.setConfiguration(configuration);
+    }
+
+    public ApplicationManager getApplicationManager() {
+        return applicationManager;
+    }
+
+    public void setApplicationManager(final ApplicationManager applicationManager) {
+        this.applicationManager = applicationManager;
+    }
 
 }

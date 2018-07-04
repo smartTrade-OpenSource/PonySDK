@@ -38,9 +38,9 @@ else window['onPonySDKModuleLoaded'] = onPonySDKModuleLoaded;
 var textDecoder = null;
 if ('TextDecoder' in window) textDecoder = new TextDecoder('utf-8');
 
-function decode(arrayBufferView) {
-    if(textDecoder != null) return textDecoder.decode(arrayBufferView);
-    else return UTF8.getStringFromBytes(arrayBufferView);
+function decode(arrayBufferView, byteOffset, byteLength) {
+    if(textDecoder != null) return textDecoder.decode(arrayBufferView.subarray(byteOffset, byteLength));
+    else return UTF8.getStringFromBytes(arrayBufferView, byteOffset, byteLength);
 }
 if (typeof module !== 'undefined' && module.hasOwnProperty('exports')) module.exports.decode = decode;
 else window['decode'] = decode;
@@ -96,17 +96,16 @@ AbstractAddon.prototype.getName = function() {
   return splitted[splitted.length - 1];
 }
 
-AbstractAddon.prototype.update = function(d) {
-  var methodName = d['m'];
-
+AbstractAddon.prototype.update = function(methodName, arguments) {
   if (!this.initialized) {
     throw "[" + this.getName() + "] Tried to call method '" + methodName + "' before init()";
   }
 
   try {
-    if (d.hasOwnProperty('arg')) {
-      if (this.logLevel > 1) this.log(methodName, d['arg']);
-      this[methodName].apply(this, d['arg']);
+    if (arguments != null) {
+      var args = arguments['arg'];
+      if (this.logLevel > 1) this.log(methodName, args);
+      this[methodName].apply(this, args);
     } else {
       if (this.logLevel > 1) this.log(methodName);
       this[methodName].call(this);

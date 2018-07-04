@@ -32,17 +32,36 @@ import com.ponysdk.core.model.WidgetType;
  * <dt>.gwt-Button</dt>
  * <dd>the outer element</dd>
  * </dl>
+ *
+ * @see com.google.gwt.user.client.ui.Button
  */
 public class PButton extends PButtonBase {
 
+    /**
+     * Instantiates a new PButton
+     */
     protected PButton() {
         super();
     }
 
+    /**
+     * Instantiates a new PButton
+     *
+     * @param text
+     *            the text
+     */
     protected PButton(final String text) {
         super(text);
     }
 
+    /**
+     * Instantiates a new PButton
+     *
+     * @param text
+     *            the text
+     * @param html
+     *            the html
+     */
     protected PButton(final String text, final String html) {
         super(text, html);
     }

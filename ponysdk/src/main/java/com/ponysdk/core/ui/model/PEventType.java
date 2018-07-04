@@ -23,8 +23,10 @@
 
 package com.ponysdk.core.ui.model;
 
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Contains the native eventbus codes.
@@ -64,13 +66,8 @@ public enum PEventType {
     TOUCHEVENTS(0x100000 | 0x200000 | 0x400000 | 0x800000),
     GESTUREEVENTS(0x1000000 | 0x2000000 | 0x4000000);
 
-    private static final Map<Integer, PEventType> eventsByCode = new HashMap<>();
-
-    static {
-        for (final PEventType code : PEventType.values()) {
-            eventsByCode.put(code.getCode(), code);
-        }
-    }
+    private static final Map<Integer, PEventType> eventsByCode = Arrays.stream(PEventType.values())
+        .collect(Collectors.toMap(PEventType::getCode, Function.identity()));
 
     private int code;
 

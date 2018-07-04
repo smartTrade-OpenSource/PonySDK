@@ -29,7 +29,14 @@ public class PTButton extends PTButtonBase<Button> {
 
     @Override
     protected Button createUIObject() {
-        return new Button();
+        return new Button() {
+
+            @Override
+            public int getTabIndex() {
+                final int tabIndex = super.getTabIndex();
+                return tabIndex == -1 ? -2 : tabIndex;
+            }
+        };
     }
 
 }

@@ -27,10 +27,21 @@ import com.ponysdk.core.model.PHorizontalAlignment;
 import com.ponysdk.core.model.PVerticalAlignment;
 import com.ponysdk.core.model.ServerToClientModel;
 
+/**
+ * This class contains methods used to format a table's cells.
+ *
+ * @ee com.google.gwt.user.client.ui.HTMLTable.CellFormatter
+ */
 public class PCellFormatter {
 
     protected final PHTMLTable<? extends PCellFormatter> table;
 
+    /**
+     * Instantiates a new PCellFormatter
+     *
+     * @param table
+     *            the table
+     */
     protected PCellFormatter(final PHTMLTable<? extends PCellFormatter> table) {
         this.table = table;
     }
@@ -60,7 +71,7 @@ public class PCellFormatter {
     }
 
     public void setVerticalAlignment(final int row, final int column, final PVerticalAlignment align) {
-        table.saveUpdate((writer) -> {
+        table.saveUpdate(writer -> {
             writer.write(ServerToClientModel.VERTICAL_ALIGNMENT, align.getValue());
             writer.write(ServerToClientModel.ROW, row);
             writer.write(ServerToClientModel.COLUMN, column);
@@ -68,7 +79,7 @@ public class PCellFormatter {
     }
 
     public void setHorizontalAlignment(final int row, final int column, final PHorizontalAlignment align) {
-        table.saveUpdate((writer) -> {
+        table.saveUpdate(writer -> {
             writer.write(ServerToClientModel.HORIZONTAL_ALIGNMENT, align.getValue());
             writer.write(ServerToClientModel.ROW, row);
             writer.write(ServerToClientModel.COLUMN, column);

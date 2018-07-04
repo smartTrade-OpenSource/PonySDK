@@ -41,7 +41,7 @@ import com.ponysdk.core.ui.rich.PNotificationManager;
 
 public class TabLayoutPanelPageActivity extends SamplePageActivity {
 
-    private final String[] colors = { "#F34A53", "#FAE3B4", "#AAC789", "#437356", "#1E4147" };
+    private static final String[] colors = { "#F34A53", "#FAE3B4", "#AAC789", "#437356", "#1E4147" };
     protected int tabCount = 0;
 
     public TabLayoutPanelPageActivity() {

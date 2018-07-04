@@ -23,6 +23,11 @@
 
 package com.ponysdk.core.ui.rich;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PAnchor;
 import com.ponysdk.core.ui.basic.PElement;
@@ -31,16 +36,11 @@ import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.basic.event.PSelectionEvent;
 import com.ponysdk.core.ui.basic.event.PSelectionHandler;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 public class PBreadCrumbs extends PElement {
 
-    private final Map<String, ItemLevel> elementsByItems = new HashMap<>();
+    private final Map<String, ItemLevel> elementsByItems = new HashMap<>(8);
 
-    private final Set<PSelectionHandler<ItemLevel>> handlers = new HashSet<>();
+    private final Set<PSelectionHandler<ItemLevel>> handlers = new HashSet<>(4);
 
     private ItemLevel current;
 

@@ -23,14 +23,18 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.core.server.concurrent.PScheduler;
-import com.ponysdk.core.server.concurrent.PScheduler.UIRunnable;
-import com.ponysdk.core.ui.basic.*;
-
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.Calendar;
 import java.util.concurrent.atomic.AtomicLong;
+
+import com.ponysdk.core.server.concurrent.PScheduler;
+import com.ponysdk.core.server.concurrent.PScheduler.UIRunnable;
+import com.ponysdk.core.ui.basic.Element;
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PTextBox;
+import com.ponysdk.core.ui.basic.PVerticalPanel;
 
 public class TimerPageActivity extends SamplePageActivity {
 
@@ -55,7 +59,7 @@ public class TimerPageActivity extends SamplePageActivity {
         label = Element.newPLabel("0");
 
         final PButton scheduleRepeatingButton = Element.newPButton("Start");
-        scheduleRepeatingButton.addClickHandler((event) -> scheduleAtFixedDelay = PScheduler.scheduleAtFixedRate(() -> {
+        scheduleRepeatingButton.addClickHandler(event -> scheduleAtFixedDelay = PScheduler.scheduleAtFixedRate(() -> {
             time1++;
             label.setText("" + time1);
         }, Duration.ofMillis(Integer.valueOf(textBox.getText()))));
@@ -71,24 +75,24 @@ public class TimerPageActivity extends SamplePageActivity {
         panel.add(Element.newPLabel("Fixed delay timer"));
         panel.add(dateLabel);
         final PButton fixedDelayButton = Element.newPButton("Start");
-        fixedDelayButton.addClickHandler(clickEvent -> PScheduler.scheduleAtFixedRate(() -> dateLabel.setText(dateFormat.format(Calendar.getInstance().getTime())),
-            Duration.ofMillis(1000)));
+        fixedDelayButton.addClickHandler(event -> PScheduler.scheduleAtFixedRate(
+            () -> dateLabel.setText(dateFormat.format(Calendar.getInstance().getTime())), Duration.ofMillis(1000)));
         panel.add(fixedDelayButton);
 
         // Client side only
         panel.add(Element.newPHTML("<br>"));
         panel.add(Element.newPLabel("Timer (terminal side)"));
-        final PButton changeColorsBUtton = Element.newPButton("Start");
+        final PButton changeColorsButton = Element.newPButton("Start");
 
-        changeColorsBUtton.addClickHandler((event) -> {
-            PScheduler.schedule(() -> changeColorsBUtton.setStyleProperty("color", "blue"), Duration.ofMillis(2000));
-            PScheduler.schedule(() -> changeColorsBUtton.setStyleProperty("color", "orange"), Duration.ofMillis(4000));
-            PScheduler.schedule(() -> changeColorsBUtton.setStyleProperty("color", "black"), Duration.ofMillis(6000));
+        changeColorsButton.addClickHandler(event -> {
+            PScheduler.schedule(() -> changeColorsButton.setStyleProperty("color", "blue"), Duration.ofMillis(2000));
+            PScheduler.schedule(() -> changeColorsButton.setStyleProperty("color", "orange"), Duration.ofMillis(4000));
+            PScheduler.schedule(() -> changeColorsButton.setStyleProperty("color", "black"), Duration.ofMillis(6000));
         });
 
-        panel.add(changeColorsBUtton);
+        panel.add(changeColorsButton);
 
-        PLabel labelScheduler = Element.newPLabel("0");
+        final PLabel labelScheduler = Element.newPLabel("0");
 
         panel.add(Element.newPLabel("UI Scheduler"));
         panel.add(labelScheduler);

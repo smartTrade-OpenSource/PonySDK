@@ -37,7 +37,7 @@ public class PTGrid extends PTHTMLTable<Grid> {
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
         final BinaryModel binaryModel = buffer.readBinaryModel();
-        if (ServerToClientModel.ROW.equals(binaryModel.getModel())) {
+        if (ServerToClientModel.ROW == binaryModel.getModel()) {
             rows = binaryModel.getIntValue();
             columns = buffer.readBinaryModel().getIntValue();
         } else {
@@ -56,11 +56,11 @@ public class PTGrid extends PTHTMLTable<Grid> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.CLEAR_ROW.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.CLEAR_ROW == model) {
             uiObject.removeRow(binaryModel.getIntValue());
             return true;
-        } else if (ServerToClientModel.INSERT_ROW.ordinal() == modelOrdinal) {
+        } else if (ServerToClientModel.INSERT_ROW == model) {
             uiObject.insertRow(binaryModel.getIntValue());
             return true;
         } else {

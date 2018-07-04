@@ -23,9 +23,6 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestOracle;
 import com.ponysdk.core.model.ClientToServerModel;
@@ -36,9 +33,12 @@ import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
+import elemental.js.util.JsMapFromIntTo;
+
 public class PTSuggestBox extends PTWidget<SuggestBox> {
 
-    static final Map<Integer, SuggestOracle> oracleByID = new HashMap<>();
+    private static JsMapFromIntTo<SuggestOracle> oracleByID;
+
     private PTTextBox ptTextBox;
     private SuggestOracle oracle;
 
@@ -62,8 +62,8 @@ public class PTSuggestBox extends PTWidget<SuggestBox> {
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final int modelOrdinal = binaryModel.getModel().ordinal();
-        if (ServerToClientModel.LIMIT.ordinal() == modelOrdinal) {
+        final ServerToClientModel model = binaryModel.getModel();
+        if (ServerToClientModel.LIMIT == model) {
             uiObject.setLimit(binaryModel.getIntValue());
             return true;
         } else {
@@ -73,13 +73,13 @@ public class PTSuggestBox extends PTWidget<SuggestBox> {
 
     @Override
     public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
-        if (HandlerModel.HANDLER_STRING_VALUE_CHANGE.equals(handlerModel)) {
+        if (HandlerModel.HANDLER_STRING_VALUE_CHANGE == handlerModel) {
             uiObject.addValueChangeHandler(event -> {
                 final PTInstruction eventInstruction = new PTInstruction(getObjectID());
                 eventInstruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE, event.getValue());
                 uiBuilder.sendDataToServer(uiObject, eventInstruction);
             });
-        } else if (HandlerModel.HANDLER_STRING_SELECTION.equals(handlerModel)) {
+        } else if (HandlerModel.HANDLER_STRING_SELECTION == handlerModel) {
             uiObject.addSelectionHandler(event -> {
                 final PTInstruction eventInstruction = new PTInstruction(getObjectID());
                 eventInstruction.put(ClientToServerModel.HANDLER_STRING_SELECTION, event.getSelectedItem().getDisplayString());
@@ -93,12 +93,18 @@ public class PTSuggestBox extends PTWidget<SuggestBox> {
 
     @Override
     public void removeHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
-        if (HandlerModel.HANDLER_STRING_VALUE_CHANGE.equals(handlerModel)) {
+        if (HandlerModel.HANDLER_STRING_VALUE_CHANGE == handlerModel) {
             // TODO Remove HANDLER_STRING_VALUE_CHANGE
-        } else if (HandlerModel.HANDLER_STRING_SELECTION.equals(handlerModel)) {
+        } else if (HandlerModel.HANDLER_STRING_SELECTION == handlerModel) {
             // TODO Remove HANDLER_STRING_SELECTION
         } else {
             super.removeHandler(buffer, handlerModel);
         }
     }
+
+    public static void put(final int objectID, final SuggestOracle oracle) {
+        if (oracleByID == null) oracleByID = JsMapFromIntTo.create();
+        oracleByID.put(objectID, oracle);
+    }
+
 }

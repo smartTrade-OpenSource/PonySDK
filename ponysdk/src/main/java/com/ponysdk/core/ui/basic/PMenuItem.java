@@ -81,14 +81,14 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
     }
 
     @Override
-    protected void init0() {
+    void init0() {
         super.init0();
         if (subMenu != null) subMenu.attach(window, frame);
     }
 
     @Override
-    protected void enrichOnInit(final ModelWriter writer) {
-        super.enrichOnInit(writer);
+    protected void enrichForUpdate(final ModelWriter writer) {
+        super.enrichForUpdate(writer);
         if (html != null) writer.write(ServerToClientModel.HTML, html);
         else writer.write(ServerToClientModel.TEXT, text);
     }
@@ -108,7 +108,7 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
         if (Objects.equals(this.text, text)) return;
         this.text = text;
         this.html = null;
-        saveUpdate(ServerToClientModel.TEXT, text);
+        if (initialized) saveUpdate(ServerToClientModel.TEXT, text);
     }
 
     @Override
@@ -121,7 +121,7 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
         if (Objects.equals(this.html, html)) return;
         this.html = html;
         this.text = null;
-        saveUpdate(ServerToClientModel.HTML, html);
+        if (initialized) saveUpdate(ServerToClientModel.HTML, html);
     }
 
     public void setCommand(final Runnable cmd) {
@@ -131,6 +131,7 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
 
     @Override
     public void onClientData(final JsonObject event) {
+        if (!isVisible()) return;
         if (event.containsKey(ClientToServerModel.HANDLER_COMMAND.toStringValue())) {
             cmd.run();
         } else {

@@ -31,21 +31,25 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.writer.ModelWriter;
 
 /**
- * A panel whose child widgets are contained within the cells of a table. Each
- * cell's size may be set independently. Each child widget can take up a subset
- * of its cell and can be aligned within it.
+ * A panel whose child widgets are contained within the cells of a table. Each cell's size may be set independently.
+ * Each child widget can take up a subset of its cell and can be aligned within it.
+ *
+ * @see com.google.gwt.user.client.ui.CellPanel
  */
 public abstract class PCellPanel extends PComplexPanel {
 
     private Integer borderWidth;
     private Integer spacing;
 
+    /**
+     * Instantiates a new PCellPanel
+     */
     protected PCellPanel() {
     }
 
     @Override
-    protected void enrichOnInit(final ModelWriter writer) {
-        super.enrichOnInit(writer);
+    protected void enrichForUpdate(final ModelWriter writer) {
+        super.enrichForUpdate(writer);
         if (this.borderWidth != null) writer.write(ServerToClientModel.BORDER_WIDTH, this.borderWidth);
         if (this.spacing != null) writer.write(ServerToClientModel.SPACING, this.spacing);
     }
@@ -85,7 +89,7 @@ public abstract class PCellPanel extends PComplexPanel {
     public void setBorderWidth(final Integer borderWidth) {
         if (Objects.equals(this.borderWidth, borderWidth)) return;
         this.borderWidth = borderWidth;
-        saveUpdate(ServerToClientModel.BORDER_WIDTH, borderWidth);
+        if (initialized) saveUpdate(ServerToClientModel.BORDER_WIDTH, borderWidth);
     }
 
     public Integer getSpacing() {
@@ -95,7 +99,7 @@ public abstract class PCellPanel extends PComplexPanel {
     public void setSpacing(final Integer spacing) {
         if (Objects.equals(this.spacing, spacing)) return;
         this.spacing = spacing;
-        saveUpdate(ServerToClientModel.SPACING, spacing);
+        if (initialized) saveUpdate(ServerToClientModel.SPACING, spacing);
     }
 
 }

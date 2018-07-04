@@ -23,19 +23,18 @@
 
 package com.ponysdk.core.ui.list.selector;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PMenuBar;
 import com.ponysdk.core.ui.basic.PMenuItem;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.i18n.PString;
 
-import java.util.Collections;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
 public class DefaultActionSelectorView extends PMenuBar implements SelectorView {
 
-    private final Set<SelectorViewListener> selectorViewListeners = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private final Set<SelectorViewListener> selectorViewListeners = new HashSet<>();
 
     public DefaultActionSelectorView() {
         final PMenuBar menuBarAction = Element.newPMenuBar(true);

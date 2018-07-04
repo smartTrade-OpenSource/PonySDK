@@ -24,6 +24,7 @@
 package com.ponysdk.core.ui.grid;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PComplexPanel;
@@ -177,7 +178,7 @@ public abstract class AbstractGridWidget extends PElement implements SimpleListV
     public Iterator<PComplexPanel> getColumnIterator(final int column) {
         checkColumnBound(column);
 
-        return new Iterator<PComplexPanel>() {
+        return new Iterator<>() {
 
             int index = 0;
             int rows = body.getWidgetCount();
@@ -189,10 +190,14 @@ public abstract class AbstractGridWidget extends PElement implements SimpleListV
 
             @Override
             public PComplexPanel next() {
-                final PComplexPanel row = (PComplexPanel) body.getWidget(index);
-                final PComplexPanel next = (PComplexPanel) row.getWidget(column);
-                index++;
-                return next;
+                if (hasNext()) {
+                    final PComplexPanel row = (PComplexPanel) body.getWidget(index);
+                    final PComplexPanel next = (PComplexPanel) row.getWidget(column);
+                    index++;
+                    return next;
+                } else {
+                    throw new NoSuchElementException();
+                }
             }
 
             @Override

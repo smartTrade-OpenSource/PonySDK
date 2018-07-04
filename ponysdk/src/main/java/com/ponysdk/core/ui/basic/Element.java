@@ -107,8 +107,17 @@ public class Element {
         return f.newPCheckBox(label);
     }
 
+    public static final PDateBox newPDateBox(final PDatePicker picker, final SimpleDateFormat dateFormat,
+                                             final boolean keepDayTimeNeeded) {
+        return f.newPDateBox(picker, dateFormat, keepDayTimeNeeded);
+    }
+
     public static final PDateBox newPDateBox(final PDatePicker picker, final SimpleDateFormat dateFormat) {
         return f.newPDateBox(picker, dateFormat);
+    }
+
+    public static final PDateBox newPDateBox(final SimpleDateFormat dateFormat, final boolean keepDayTimeNeeded) {
+        return f.newPDateBox(dateFormat, keepDayTimeNeeded);
     }
 
     public static final PDateBox newPDateBox(final SimpleDateFormat dateFormat) {
