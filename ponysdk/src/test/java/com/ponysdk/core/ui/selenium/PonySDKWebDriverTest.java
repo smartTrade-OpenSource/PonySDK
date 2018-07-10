@@ -23,14 +23,18 @@
 
 package com.ponysdk.core.ui.selenium;
 
+import static org.junit.Assert.assertNotNull;
+
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.driver.PonySDKWebDriver;
 
 @Ignore
 public class PonySDKWebDriverTest {
@@ -43,26 +47,24 @@ public class PonySDKWebDriverTest {
         driver = new PonySDKWebDriver();
         wait = new WebDriverWait(driver, 30);
         driver.get("ws://localhost:8081/sample/ws?" + ClientToServerModel.TYPE_HISTORY.toStringValue() + "=");
-        boolean result;
-        try {
-            //driver.findElement(By.name("test")).click();
+    }
 
-            result = wait.until((ExpectedCondition<Boolean>) webDriver -> {
-                System.out.println("Searching ...");
-                return webDriver.findElement(By.id("label")) != null;
-            });
-        } catch (final Exception e) {
-            e.printStackTrace();
-            result = false;
-        } finally {
-            driver.close();
-        }
-
-        System.out.println("result final ... " + result);
+    @AfterClass
+    public static void afterClass() {
+        driver.close();
     }
 
     @Test
     public void test() {
+        final WebElement element = driver.findElement(By.id("5"));
+        assertNotNull(element);
 
+        element.click();
+
+        //        assertTrue(wait.until((ExpectedCondition<Boolean>) webDriver -> {
+        //            System.out.println("Searching ...");
+        //            return webDriver.findElement(By.id("label")) != null;
+        //        }));
     }
+
 }
