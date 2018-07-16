@@ -68,15 +68,23 @@ public abstract class PValueBoxBase extends PFocusWidget implements PHasText {
         saveUpdate(writer -> writer.write(ServerToClientModel.SELECT_ALL));
     }
 
-    public void setCursorPosition(final int cursorPosition) {
-        saveUpdate(ServerToClientModel.CURSOR_POSITION, Math.min(cursorPosition, this.text.length()));
-    }
-
-    public void setSelectionRange(final int startPosition, final int rangeLength) {
+    public void select(final int startPosition, final int rangeLength) {
         saveUpdate(writer -> {
             writer.write(ServerToClientModel.SELECTION_RANGE_START, startPosition);
             writer.write(ServerToClientModel.SELECTION_RANGE_LENGTH, rangeLength);
         });
+    }
+
+    /**
+     * @deprecated Use {@link #select(int, int)} instead
+     */
+    @Deprecated(forRemoval = true, since = "v2.8.0")
+    public void setSelectionRange(final int startPosition, final int rangeLength) {
+        select(startPosition, rangeLength);
+    }
+
+    public void setCursorPosition(final int cursorPosition) {
+        saveUpdate(ServerToClientModel.CURSOR_POSITION, Math.min(cursorPosition, this.text.length()));
     }
 
     @Override
