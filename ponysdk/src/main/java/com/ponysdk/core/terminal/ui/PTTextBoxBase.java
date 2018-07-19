@@ -34,16 +34,13 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 public abstract class PTTextBoxBase<T extends TextBoxBase> extends PTValueBoxBase<T, String> {
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
-        super.create(buffer, objectId, uiService);
-        addHandler(uiService);
-    }
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
+        super.create(buffer, objectId, uiBuilder);
 
-    private void addHandler(final UIBuilder uiService) {
         uiObject.addValueChangeHandler(event -> {
             final PTInstruction eventInstruction = new PTInstruction(getObjectID());
             eventInstruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE, event.getValue());
-            uiService.sendDataToServer(uiObject, eventInstruction);
+            uiBuilder.sendDataToServer(uiObject, eventInstruction);
         });
     }
 
