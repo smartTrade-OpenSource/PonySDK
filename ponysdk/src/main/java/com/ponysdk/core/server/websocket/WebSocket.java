@@ -23,21 +23,6 @@
 
 package com.ponysdk.core.server.websocket;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-
-import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.StatusCode;
-import org.eclipse.jetty.websocket.api.WebSocketListener;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.ApplicationManager;
@@ -45,7 +30,21 @@ import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.context.CommunicationSanityChecker;
 import com.ponysdk.core.server.stm.TxnContext;
 import com.ponysdk.core.ui.basic.PObject;
-import com.ponysdk.core.util.JsonUtil;
+import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.StatusCode;
+import org.eclipse.jetty.websocket.api.WebSocketListener;
+import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import java.io.StringReader;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
@@ -124,7 +123,12 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
                 if (ClientToServerModel.HEARTBEAT.toStringValue().equals(message)) {
                     processHeartbeat();
                 } else {
-                    final JsonObject jsonObject = JsonUtil.readObject(message);
+                    final JsonObject jsonObject;
+
+                    try (final JsonReader reader = uiContext.getJsonProvider().createReader(new StringReader(message))) {
+                        jsonObject =  reader.readObject();
+                    }
+
                     if (jsonObject.containsKey(ClientToServerModel.PING_SERVER.toStringValue())) {
                         processPing(jsonObject);
                     } else if (jsonObject.containsKey(ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue())) {

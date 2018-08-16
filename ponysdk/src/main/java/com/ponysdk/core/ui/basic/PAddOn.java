@@ -23,21 +23,20 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.Collection;
-import java.util.Map;
-import java.util.logging.Level;
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.writer.ModelWriter;
 
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
-
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.util.JsonUtil;
-import com.ponysdk.core.writer.ModelWriter;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.Collection;
+import java.util.Map;
+import java.util.logging.Level;
 
 /**
  * AddOn are used to bind server side with javascript browser
@@ -128,7 +127,7 @@ public abstract class PAddOn extends PObject {
     protected void callTerminalMethod(final String methodName, final Object... args) {
         final JsonObject arguments;
         if (args.length > 0) {
-            final JsonArrayBuilder arrayBuilder = JsonUtil.createArrayBuilder();
+            final JsonArrayBuilder arrayBuilder = UIContext.get().getJsonProvider().createArrayBuilder();
             for (final Object object : args) {
                 if (object != null) {
                     if (object instanceof JsonValue) {
@@ -159,7 +158,7 @@ public abstract class PAddOn extends PObject {
                 }
             }
 
-            final JsonObjectBuilder argumentsBuilder = JsonUtil.createObjectBuilder();
+            final JsonObjectBuilder argumentsBuilder = UIContext.get().getJsonProvider().createObjectBuilder();
             argumentsBuilder.add("arg", arrayBuilder.build());
             arguments = argumentsBuilder.build();
         } else {
