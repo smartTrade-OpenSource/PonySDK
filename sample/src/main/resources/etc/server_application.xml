@@ -7,11 +7,11 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd">
 
 
-    <bean name="applicationLoader" class="com.ponysdk.spring.servlet.SpringApplicationLoader">
-        <property name="applicationManagerOption" ref="applicationManagerOption" />
+    <bean name="applicationManager" class="com.ponysdk.impl.spring.server.SpringApplicationManager">
+        <property name="configuration" ref="configuration" />
     </bean>
 
-    <bean name="applicationManagerOption" class="com.ponysdk.core.server.application.ApplicationManagerOption">
+    <bean name="configuration" class="com.ponysdk.core.server.application.ApplicationConfiguration">
         <property name="applicationID" value="sample" />
         <property name="applicationName" value="sample" />
         <property name="applicationDescription" value="sample" />
@@ -37,8 +37,8 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
     <bean name="ponySDKServer" class="com.ponysdk.impl.main.PonySDKServer" init-method="start">
         <property name="port" value="8081"/>
         <property name="host" value="0.0.0.0"/>
-        <property name="applicationLoader" ref="applicationLoader"/>
-        
+        <property name="applicationManager" ref="applicationManager"/>
+
         <property name="sslPort" value="8082" />
         <property name="sslKeyStoreFile" value="keystore"/>
         <property name="sslKeyStorePassphrase" value="strade"/>
