@@ -54,7 +54,6 @@ import com.google.gwt.json.client.JSONBoolean;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.user.client.ui.TextBoxBase;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.DomHandlerType;
@@ -81,11 +80,11 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
             uiObject.setHeight(HUNDRED_PERCENT);
             return true;
         } else if (ServerToClientModel.PREVENT_EVENT == model) {
-            if (preventedEvents == null) preventedEvents = new HashSet<>();
+            if (preventedEvents == null) preventedEvents = new HashSet<>(4);
             preventedEvents.add(binaryModel.getIntValue());
             return true;
         } else if (ServerToClientModel.STOP_EVENT == model) {
-            if (stoppedEvents == null) stoppedEvents = new HashSet<>();
+            if (stoppedEvents == null) stoppedEvents = new HashSet<>(4);
             stoppedEvents.add(binaryModel.getIntValue());
             return true;
         } else {
@@ -139,114 +138,11 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
         } else if (DomHandlerType.FOCUS == domHandlerType) {
             uiObject.addDomHandler(event -> triggerDomEvent(domHandlerType, event), FocusEvent.getType());
         } else if (DomHandlerType.KEY_PRESS == domHandlerType) {
-            final BinaryModel binaryModel = buffer.readBinaryModel();
-            final JSONArray keyFilter;
-            if (ServerToClientModel.KEY_FILTER == binaryModel.getModel()) {
-                keyFilter = binaryModel.getJsonObject().get(ClientToServerModel.KEY_FILTER.toStringValue()).isArray();
-            } else {
-                buffer.rewind(binaryModel);
-                keyFilter = null;
-            }
-
-            uiObject.addDomHandler(event -> {
-                final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
-                eventInstruction.put(ClientToServerModel.VALUE_KEY, event.getNativeEvent().getKeyCode());
-
-                if (keyFilter != null) {
-                    for (int i = 0; i < keyFilter.size(); i++) {
-                        final JSONNumber keyCode = keyFilter.get(i).isNumber();
-                        if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
-                            uiBuilder.sendDataToServer(uiObject, eventInstruction);
-                            break;
-                        }
-                    }
-                } else {
-                    uiBuilder.sendDataToServer(uiObject, eventInstruction);
-                }
-
-                preventOrStopEvent(event);
-            }, KeyPressEvent.getType());
+            triggerKeyPressEvent(domHandlerType, extractKeyFilter(buffer));
         } else if (DomHandlerType.KEY_DOWN == domHandlerType) {
-            final BinaryModel binaryModel = buffer.readBinaryModel();
-            final JSONArray keyFilter;
-            if (ServerToClientModel.KEY_FILTER == binaryModel.getModel()) {
-                keyFilter = binaryModel.getJsonObject().get(ClientToServerModel.KEY_FILTER.toStringValue()).isArray();
-            } else {
-                buffer.rewind(binaryModel);
-                keyFilter = null;
-            }
-
-            uiObject.addDomHandler(event -> {
-                final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
-                eventInstruction.put(ClientToServerModel.VALUE_KEY, event.getNativeKeyCode());
-
-                if (keyFilter != null) {
-                    for (int i = 0; i < keyFilter.size(); i++) {
-                        final JSONNumber keyCode = keyFilter.get(i).isNumber();
-                        if (keyCode.doubleValue() == event.getNativeKeyCode()) {
-                            uiBuilder.sendDataToServer(uiObject, eventInstruction);
-                            break;
-                        }
-                    }
-                } else {
-                    uiBuilder.sendDataToServer(uiObject, eventInstruction);
-                }
-
-                preventOrStopEvent(event);
-            }, KeyDownEvent.getType());
+            triggerKeyDownEvent(domHandlerType, extractKeyFilter(buffer));
         } else if (DomHandlerType.KEY_UP == domHandlerType) {
-            final BinaryModel keyUpModel = buffer.readBinaryModel();
-            final JSONArray keyUpFilter;
-            if (ServerToClientModel.KEY_FILTER == keyUpModel.getModel()) {
-                keyUpFilter = keyUpModel.getJsonObject().get(ClientToServerModel.KEY_FILTER.toStringValue()).isArray();
-            } else {
-                buffer.rewind(keyUpModel);
-                keyUpFilter = null;
-            }
-
-            if (uiObject instanceof TextBoxBase) {
-                final TextBoxBase textBox = (TextBoxBase) uiObject;
-                textBox.addKeyUpHandler(event -> {
-                    final PTInstruction changeHandlerInstruction = new PTInstruction(getObjectID());
-                    changeHandlerInstruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE, textBox.getText());
-
-                    final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
-                    eventInstruction.put(ClientToServerModel.VALUE_KEY, event.getNativeKeyCode());
-
-                    if (keyUpFilter != null) {
-                        for (int i = 0; i < keyUpFilter.size(); i++) {
-                            final JSONNumber keyCode = keyUpFilter.get(i).isNumber();
-                            if (keyCode.doubleValue() == event.getNativeKeyCode()) {
-                                uiBuilder.sendDataToServer(changeHandlerInstruction);
-                                uiBuilder.sendDataToServer(eventInstruction);
-                                break;
-                            }
-                        }
-                    } else {
-                        uiBuilder.sendDataToServer(changeHandlerInstruction);
-                        uiBuilder.sendDataToServer(eventInstruction);
-                    }
-                    preventOrStopEvent(event);
-                });
-            } else {
-                uiObject.addDomHandler(event -> {
-                    final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
-                    eventInstruction.put(ClientToServerModel.VALUE_KEY, event.getNativeKeyCode());
-
-                    if (keyUpFilter != null) {
-                        for (int i = 0; i < keyUpFilter.size(); i++) {
-                            final JSONNumber keyCode = keyUpFilter.get(i).isNumber();
-                            if (keyCode.doubleValue() == event.getNativeKeyCode()) {
-                                uiBuilder.sendDataToServer(uiObject, eventInstruction);
-                                break;
-                            }
-                        }
-                    } else {
-                        uiBuilder.sendDataToServer(uiObject, eventInstruction);
-                    }
-                    preventOrStopEvent(event);
-                }, KeyUpEvent.getType());
-            }
+            triggerKeyUpEvent(domHandlerType, extractKeyFilter(buffer));
         } else if (DomHandlerType.DRAG_START == domHandlerType) {
             uiObject.getElement().setDraggable(Element.DRAGGABLE_TRUE);
             uiObject.addBitlessDomHandler(event -> {
@@ -280,7 +176,7 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
         }
     }
 
-    private PTInstruction buildEventInstruction(final DomHandlerType domHandlerType) {
+    protected PTInstruction buildEventInstruction(final DomHandlerType domHandlerType) {
         final PTInstruction eventInstruction = new PTInstruction(getObjectID());
         eventInstruction.put(ClientToServerModel.DOM_HANDLER_TYPE, domHandlerType.getValue());
         return eventInstruction;
@@ -342,7 +238,69 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
         preventOrStopEvent(event);
     }
 
-    private void preventOrStopEvent(final DomEvent<?> event) {
+    private void triggerKeyPressEvent(final DomHandlerType domHandlerType, final JSONArray keyFilter) {
+        uiObject.addDomHandler(event -> {
+            final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
+            eventInstruction.put(ClientToServerModel.VALUE_KEY, event.getNativeEvent().getKeyCode());
+
+            if (keyFilter != null) {
+                for (int i = 0; i < keyFilter.size(); i++) {
+                    final JSONNumber keyCode = keyFilter.get(i).isNumber();
+                    if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
+                        uiBuilder.sendDataToServer(uiObject, eventInstruction);
+                        break;
+                    }
+                }
+            } else {
+                uiBuilder.sendDataToServer(uiObject, eventInstruction);
+            }
+
+            preventOrStopEvent(event);
+        }, KeyPressEvent.getType());
+    }
+
+    private void triggerKeyDownEvent(final DomHandlerType domHandlerType, final JSONArray keyFilter) {
+        uiObject.addDomHandler(event -> {
+            final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
+            eventInstruction.put(ClientToServerModel.VALUE_KEY, event.getNativeKeyCode());
+
+            if (keyFilter != null) {
+                for (int i = 0; i < keyFilter.size(); i++) {
+                    final JSONNumber keyCode = keyFilter.get(i).isNumber();
+                    if (keyCode.doubleValue() == event.getNativeKeyCode()) {
+                        uiBuilder.sendDataToServer(uiObject, eventInstruction);
+                        break;
+                    }
+                }
+            } else {
+                uiBuilder.sendDataToServer(uiObject, eventInstruction);
+            }
+
+            preventOrStopEvent(event);
+        }, KeyDownEvent.getType());
+    }
+
+    protected void triggerKeyUpEvent(final DomHandlerType domHandlerType, final JSONArray keyUpFilter) {
+        uiObject.addDomHandler(event -> {
+            final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
+            eventInstruction.put(ClientToServerModel.VALUE_KEY, event.getNativeKeyCode());
+
+            if (keyUpFilter != null) {
+                for (int i = 0; i < keyUpFilter.size(); i++) {
+                    final JSONNumber keyCode = keyUpFilter.get(i).isNumber();
+                    if (keyCode.doubleValue() == event.getNativeKeyCode()) {
+                        uiBuilder.sendDataToServer(uiObject, eventInstruction);
+                        break;
+                    }
+                }
+            } else {
+                uiBuilder.sendDataToServer(uiObject, eventInstruction);
+            }
+            preventOrStopEvent(event);
+        }, KeyUpEvent.getType());
+    }
+
+    protected void preventOrStopEvent(final DomEvent<?> event) {
         preventEvent(event);
         stopEvent(event);
     }
@@ -360,4 +318,17 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
             if (stoppedEvents.contains(typeInt)) event.stopPropagation();
         }
     }
+
+    private static final JSONArray extractKeyFilter(final ReaderBuffer buffer) {
+        final BinaryModel binaryModel = buffer.readBinaryModel();
+        final JSONArray keyFilter;
+        if (ServerToClientModel.KEY_FILTER == binaryModel.getModel()) {
+            keyFilter = binaryModel.getJsonObject().get(ClientToServerModel.KEY_FILTER.toStringValue()).isArray();
+        } else {
+            buffer.rewind(binaryModel);
+            keyFilter = null;
+        }
+        return keyFilter;
+    }
+
 }

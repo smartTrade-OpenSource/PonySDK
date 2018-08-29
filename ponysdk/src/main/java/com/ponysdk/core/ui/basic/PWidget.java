@@ -24,13 +24,11 @@
 package com.ponysdk.core.ui.basic;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import javax.json.JsonArray;
@@ -152,29 +150,29 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     static PWidget asWidgetOrNull(final IsPWidget w) {
         return w == null ? null : w.asWidget();
     }
-
+  
     private Set<PEventType> safePreventEvents() {
-        if (preventEvents == null) preventEvents = new HashSet<>();
+        if (preventEvents == null) preventEvents = new HashSet<>(4);
         return preventEvents;
     }
 
     private Set<PEventType> safeStopEvents() {
-        if (stopEvents == null) stopEvents = new HashSet<>();
+        if (stopEvents == null) stopEvents = new HashSet<>(4);
         return stopEvents;
     }
 
     private Map<String, String> safeStyleProperties() {
-        if (styleProperties == null) styleProperties = new HashMap<>();
+        if (styleProperties == null) styleProperties = new HashMap<>(8);
         return styleProperties;
     }
 
     private Map<String, String> safeElementProperties() {
-        if (elementProperties == null) elementProperties = new HashMap<>();
+        if (elementProperties == null) elementProperties = new HashMap<>(8);
         return elementProperties;
     }
 
     private Map<String, String> safeElementAttributes() {
-        if (elementAttributes == null) elementAttributes = new HashMap<>();
+        if (elementAttributes == null) elementAttributes = new HashMap<>(8);
         return elementAttributes;
     }
 
@@ -353,10 +351,6 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         return !styleName.isEmpty() && styleNames.contains(styleName);
     }
 
-    public Object getData() {
-        return data;
-    }
-
     @Override
     public PWidget asWidget() {
         return this;
@@ -431,7 +425,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         if (destroy) return null;
         final HandlerRegistration handlerRegistration = ensureEventBus().addHandlerToSource(type, this, handler);
 
-        if (oneTimeHandlerCreation == null) oneTimeHandlerCreation = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        if (oneTimeHandlerCreation == null) oneTimeHandlerCreation = new HashSet<>(8);
 
         if (!oneTimeHandlerCreation.contains(type)) {
             oneTimeHandlerCreation.add(type);
@@ -607,7 +601,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     }
 
     void bindAddon(final PAddOn addon) {
-        if (this.addons == null) this.addons = new HashSet<>();
+        if (this.addons == null) this.addons = new HashSet<>(4);
         this.addons.add(addon);
     }
 

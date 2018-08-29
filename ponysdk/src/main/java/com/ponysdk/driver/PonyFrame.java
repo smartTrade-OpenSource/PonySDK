@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 PonySDK
+ * Copyright (c) 2018 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
@@ -21,22 +21,32 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.eventbus;
+package com.ponysdk.driver;
 
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import com.ponysdk.core.model.ServerToClientModel;
 
-public class SimpleEventBus extends AbstractEventBus {
+public class PonyFrame {
 
-    @Override
-    protected HashMap<Object, Set<EventHandler>> createEventHandlerMap() {
-        return new HashMap<>(1); // Alway only one element in this map because it's a SimpleEventBus, so only on one PObject
+    final ServerToClientModel model;
+    final Object value;
+
+    PonyFrame(final ServerToClientModel model, final Object value) {
+        super();
+        this.model = model;
+        this.value = value;
+    }
+
+    public ServerToClientModel getModel() {
+        return model;
+    }
+
+    public Object getValue() {
+        return value;
     }
 
     @Override
-    protected Set<EventHandler> createHandlerSet() {
-        return new LinkedHashSet<>(4);
+    public String toString() {
+        return "model=" + model + ", value=" + value;
     }
 
 }

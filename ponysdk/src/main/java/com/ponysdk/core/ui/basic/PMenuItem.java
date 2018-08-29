@@ -81,7 +81,7 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
     }
 
     @Override
-    protected void init0() {
+    void init0() {
         super.init0();
         if (subMenu != null) subMenu.attach(window, frame);
     }

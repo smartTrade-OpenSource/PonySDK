@@ -38,9 +38,9 @@ import com.ponysdk.core.ui.basic.event.PSelectionHandler;
 
 public class PBreadCrumbs extends PElement {
 
-    private final Map<String, ItemLevel> elementsByItems = new HashMap<>();
+    private final Map<String, ItemLevel> elementsByItems = new HashMap<>(8);
 
-    private final Set<PSelectionHandler<ItemLevel>> handlers = new HashSet<>();
+    private final Set<PSelectionHandler<ItemLevel>> handlers = new HashSet<>(4);
 
     private ItemLevel current;
 

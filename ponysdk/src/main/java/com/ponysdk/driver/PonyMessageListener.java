@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 PonySDK
+ * Copyright (c) 2018 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
@@ -21,22 +21,15 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.eventbus;
+package com.ponysdk.driver;
 
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.List;
 
-public class SimpleEventBus extends AbstractEventBus {
+import javax.json.JsonObject;
 
-    @Override
-    protected HashMap<Object, Set<EventHandler>> createEventHandlerMap() {
-        return new HashMap<>(1); // Alway only one element in this map because it's a SimpleEventBus, so only on one PObject
-    }
+public interface PonyMessageListener {
 
-    @Override
-    protected Set<EventHandler> createHandlerSet() {
-        return new LinkedHashSet<>(4);
-    }
+    public void onSendMessage(JsonObject message);
 
+    public void onReceiveMessage(List<PonyFrame> message);
 }

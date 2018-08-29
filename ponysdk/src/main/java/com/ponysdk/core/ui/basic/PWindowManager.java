@@ -31,10 +31,12 @@ import com.ponysdk.core.server.application.UIContext;
 
 public class PWindowManager {
 
+    private static final int INITIAL_WINDOW_MAP_CAPACITY = 8;
+
     private static final String ROOT = "WindowManager";
 
-    private final Map<Integer, PWindow> preregisteredWindows = new HashMap<>();
-    private final Map<Integer, PWindow> registeredWindows = new HashMap<>();
+    private final Map<Integer, PWindow> preregisteredWindows = new HashMap<>(INITIAL_WINDOW_MAP_CAPACITY);
+    private final Map<Integer, PWindow> registeredWindows = new HashMap<>(INITIAL_WINDOW_MAP_CAPACITY);
 
     private PWindowManager() {
     }
@@ -74,6 +76,7 @@ public class PWindowManager {
     }
 
     private void registerWindow0(final PWindow window) {
+        preregisteredWindows.remove(window.getID());
         registeredWindows.put(window.getID(), window);
     }
 
@@ -85,6 +88,7 @@ public class PWindowManager {
     private void closeAll0() {
         registeredWindows.forEach((id, window) -> window.close());
         registeredWindows.clear();
+        preregisteredWindows.clear();
     }
 
 }

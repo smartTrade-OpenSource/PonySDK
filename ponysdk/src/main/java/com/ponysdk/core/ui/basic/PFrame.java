@@ -35,7 +35,7 @@ import com.ponysdk.core.writer.ModelWriter;
 
 public class PFrame extends PWidget {
 
-    private final Map<String, PRootPanel> panelByZone = new HashMap<>();
+    private final Map<String, PRootPanel> panelByZone = new HashMap<>(8);
 
     private String url;
     private boolean ready;

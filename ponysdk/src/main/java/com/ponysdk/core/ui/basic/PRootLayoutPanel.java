@@ -62,7 +62,7 @@ public class PRootLayoutPanel extends PLayoutPanel {
 
         Map<String, PRootLayoutPanel> rootByIDs = session.getAttribute(key);
         if (rootByIDs == null) {
-            rootByIDs = new HashMap<>();
+            rootByIDs = new HashMap<>(8);
             session.setAttribute(key, rootByIDs);
         }
 

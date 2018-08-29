@@ -23,11 +23,11 @@
 
 package com.ponysdk.core.ui.form;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.ponysdk.core.ui.form.formfield.FormField;
 import com.ponysdk.core.ui.form.validator.ValidationResult;
+
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * A list of {@link com.ponysdk.core.ui.form.formfield.FormField} validated or
@@ -35,7 +35,7 @@ import com.ponysdk.core.ui.form.validator.ValidationResult;
  */
 public class Form {
 
-    protected final List<FormField> formFields = new ArrayList<>();
+    protected final Set<FormField> formFields = new LinkedHashSet<>();
 
     public void addFormField(final FormField formField) {
         formFields.add(formField);
@@ -60,7 +60,7 @@ public class Form {
         formFields.forEach(FormField::reset);
     }
 
-    public List<FormField> getFormFields() {
+    public Set<FormField> getFormFields() {
         return formFields;
     }
 

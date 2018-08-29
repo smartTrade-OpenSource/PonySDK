@@ -25,9 +25,9 @@ package com.ponysdk.core.ui.list.renderer.header;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import com.ponysdk.core.server.service.query.Criterion;
 import com.ponysdk.core.server.service.query.SortingType;
@@ -55,7 +55,7 @@ public class ComplexHeaderCellRenderer
 
     protected final FormField formField;
     protected final String key;
-    protected final Set<FilterListener> filterListeners = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    protected final Set<FilterListener> filterListeners = new HashSet<>();
     protected PGrid panel;
     protected PLabel caption;
     protected SortingType sortingType = SortingType.NONE;

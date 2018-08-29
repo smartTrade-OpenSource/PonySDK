@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.Collections;
 import java.util.Iterator;
 
 import com.ponysdk.core.model.ServerToClientModel;
@@ -33,7 +34,7 @@ import com.ponysdk.core.ui.model.ServerBinaryModel;
  */
 public abstract class PComplexPanel extends PPanel {
 
-    protected PWidgetCollection children = new PWidgetCollection(this);
+    protected PWidgetCollection children;
 
     protected PComplexPanel() {
     }
@@ -66,7 +67,10 @@ public abstract class PComplexPanel extends PPanel {
 
         if (child.getWindow() == null || child.getWindow() == window) {
             child.removeFromParent();
+
+            if (children == null) children = new PWidgetCollection(this);
             children.add(child);
+
             adopt(child);
             if (isInitialized()) child.attach(window, frame);
 
@@ -88,7 +92,9 @@ public abstract class PComplexPanel extends PPanel {
         if (child.getWindow() == null || child.getWindow() == window) {
             child.removeFromParent();
 
+            if (children == null) children = new PWidgetCollection(this);
             children.insert(child, beforeIndex);
+
             adopt(child);
             if (isInitialized()) child.attach(window, frame);
             if (children.size() - 1 == beforeIndex) child.saveAdd(child.getID(), ID);
@@ -100,14 +106,14 @@ public abstract class PComplexPanel extends PPanel {
     }
 
     @Override
-    public boolean remove(final PWidget w) {
-        if (children.remove(w)) {
-            orphan(w);
-            w.saveRemove(w.getID(), ID);
+    public boolean remove(final PWidget child) {
+        if (children != null && child != null && children.remove(child)) {
+            orphan(child);
+            child.saveRemove(child.getID(), ID);
             return true;
+        } else {
+            return false;
         }
-
-        return false;
     }
 
     public boolean remove(final int index) {
@@ -115,27 +121,29 @@ public abstract class PComplexPanel extends PPanel {
     }
 
     protected PWidget getChild(final long objectID) {
-        for (final PWidget w : children) {
-            if (w.getID() == objectID) return w;
+        if (children != null) {
+            for (final PWidget w : children) {
+                if (w.getID() == objectID) return w;
+            }
         }
         return null;
     }
 
     public int getWidgetCount() {
-        return children.size();
+        return children != null ? children.size() : 0;
     }
 
     public PWidget getWidget(final int index) {
-        return children.get(index);
+        return children != null ? children.get(index) : null;
     }
 
     public int getWidgetIndex(final PWidget child) {
-        return children.indexOf(child);
+        return children != null ? children.indexOf(child) : -1;
     }
 
     @Override
     public Iterator<PWidget> iterator() {
-        return children.iterator();
+        return children != null ? children.iterator() : Collections.emptyIterator();
     }
 
     void assertIsChild(final PWidget widget) {

@@ -23,42 +23,29 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.writer.ModelWriter;
 
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
-
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.util.JsonUtil;
-import com.ponysdk.core.writer.ModelWriter;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.Collection;
+import java.util.Map;
+import java.util.logging.Level;
 
 /**
  * AddOn are used to bind server side with javascript browser
  */
 public abstract class PAddOn extends PObject {
 
-    private static final Map<Level, Byte> LOG_LEVEL = new HashMap<>();
-
-    static {
-        byte level = 0;
-        LOG_LEVEL.put(Level.OFF, level++);
-        LOG_LEVEL.put(Level.SEVERE, level++);
-        LOG_LEVEL.put(Level.WARNING, level++);
-        LOG_LEVEL.put(Level.INFO, level++);
-        LOG_LEVEL.put(Level.CONFIG, level++);
-        LOG_LEVEL.put(Level.FINE, level++);
-        LOG_LEVEL.put(Level.FINER, level++);
-        LOG_LEVEL.put(Level.FINEST, level++);
-        LOG_LEVEL.put(Level.ALL, level++);
-    }
+    private static final Map<Level, Byte> LOG_LEVEL = Map.of(Level.OFF, (byte) 0, Level.SEVERE, (byte) 1, Level.WARNING, (byte) 2,
+        Level.INFO, (byte) 3, Level.CONFIG, (byte) 4, Level.FINE, (byte) 5, Level.FINER, (byte) 6, Level.FINEST, (byte) 7, Level.ALL,
+        (byte) 8);
 
     private JsonObject args;
 
@@ -140,7 +127,7 @@ public abstract class PAddOn extends PObject {
     protected void callTerminalMethod(final String methodName, final Object... args) {
         final JsonObject arguments;
         if (args.length > 0) {
-            final JsonArrayBuilder arrayBuilder = JsonUtil.createArrayBuilder();
+            final JsonArrayBuilder arrayBuilder = UIContext.get().getJsonProvider().createArrayBuilder();
             for (final Object object : args) {
                 if (object != null) {
                     if (object instanceof JsonValue) {
@@ -171,7 +158,7 @@ public abstract class PAddOn extends PObject {
                 }
             }
 
-            final JsonObjectBuilder argumentsBuilder = JsonUtil.createObjectBuilder();
+            final JsonObjectBuilder argumentsBuilder = UIContext.get().getJsonProvider().createObjectBuilder();
             argumentsBuilder.add("arg", arrayBuilder.build());
             arguments = argumentsBuilder.build();
         } else {

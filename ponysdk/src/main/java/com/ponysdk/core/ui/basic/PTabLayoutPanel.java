@@ -80,7 +80,7 @@ public class PTabLayoutPanel extends PComplexPanel
     }
 
     @Override
-    protected void init0() {
+    void init0() {
         super.init0();
         saveAddHandler(HandlerModel.HANDLER_SELECTION);
     }
@@ -104,7 +104,9 @@ public class PTabLayoutPanel extends PComplexPanel
         if (child.getWindow() == null || child.getWindow() == window) {
             child.removeFromParent();
 
+            if (children == null) children = new PWidgetCollection(this);
             children.insert(child, beforeIndex);
+
             adopt(child);
             tabWidget.attach(window, frame);
             child.attach(window, frame);
@@ -120,7 +122,9 @@ public class PTabLayoutPanel extends PComplexPanel
         if (child.getWindow() == null || child.getWindow() == window) {
             child.removeFromParent();
 
+            if (children == null) children = new PWidgetCollection(this);
             children.insert(child, beforeIndex);
+
             adopt(child);
             child.attach(window, frame);
             child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.TAB_TEXT, tabText),

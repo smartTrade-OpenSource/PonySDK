@@ -119,7 +119,10 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
         // Detach new child.
         child.removeFromParent();
         // Logical attach.
+
+        if (children == null) children = new PWidgetCollection(this);
         children.add(child);
+
         // Adopt.
         adopt(child);
 

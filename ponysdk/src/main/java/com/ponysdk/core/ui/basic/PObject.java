@@ -146,7 +146,7 @@ public abstract class PObject {
     protected void enrichForUpdate(final ModelWriter writer) {
     }
 
-    protected void init0() {
+    void init0() {
     }
 
     public PWindow getWindow() {
@@ -218,7 +218,7 @@ public abstract class PObject {
     }
 
     protected LinkedHashMap<Integer, Runnable> safeStackedInstructions() {
-        if (stackedInstructions == null) stackedInstructions = new LinkedHashMap<>();
+        if (stackedInstructions == null) stackedInstructions = new LinkedHashMap<>(8);
         return stackedInstructions;
     }
 
@@ -350,12 +350,12 @@ public abstract class PObject {
     }
 
     public void addInitializeListener(final InitializeListener listener) {
-        if (this.initializeListeners == null) initializeListeners = new LinkedHashSet<>();
+        if (this.initializeListeners == null) initializeListeners = new LinkedHashSet<>(4);
         this.initializeListeners.add(listener);
     }
 
     public void addDestroyListener(final DestroyListener listener) {
-        if (this.destroyListeners == null) destroyListeners = new LinkedHashSet<>();
+        if (this.destroyListeners == null) destroyListeners = new LinkedHashSet<>(4);
         this.destroyListeners.add(listener);
     }
 
@@ -370,6 +370,10 @@ public abstract class PObject {
 
     public void setData(final Object data) {
         this.data = data;
+    }
+
+    public Object getData() {
+        return data;
     }
 
     public boolean isInitialized() {

@@ -23,23 +23,26 @@
 
 package com.ponysdk.impl.spring.server;
 
+import com.ponysdk.core.server.application.ApplicationManager;
+import com.ponysdk.core.ui.activity.InitializingActivity;
+import com.ponysdk.core.ui.main.EntryPoint;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.util.StringUtils;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.util.StringUtils;
-
-import com.ponysdk.core.server.application.ApplicationManager;
-import com.ponysdk.core.ui.activity.InitializingActivity;
-import com.ponysdk.core.ui.main.EntryPoint;
-
-public class SpringApplicationManager extends ApplicationManager {
+public class SpringApplicationManager extends ApplicationManager implements ApplicationContextAware {
 
     public static final String SERVER_CONFIG_LOCATION = "ponysdk.spring.application.server.configuration.file";
 
     private String[] configurations;
+    private ApplicationContext serverApplicationContext;
 
     @Override
     public void start() {
@@ -56,17 +59,20 @@ public class SpringApplicationManager extends ApplicationManager {
     @Override
     protected EntryPoint initializeEntryPoint() {
         try (ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext(configurations)) {
-            final String[] serverActiveProfiles = configuration.getApplicationContext().getEnvironment().getActiveProfiles();
+            final String[] serverActiveProfiles = serverApplicationContext.getEnvironment().getActiveProfiles();
             Arrays.stream(serverActiveProfiles).forEach(profile -> applicationContext.getEnvironment().addActiveProfile(profile));
 
             final EntryPoint entryPoint = applicationContext.getBean(EntryPoint.class);
 
             final Map<String, InitializingActivity> initializingPages = applicationContext.getBeansOfType(InitializingActivity.class);
-            if (initializingPages != null && !initializingPages.isEmpty()) {
-                initializingPages.values().forEach(InitializingActivity::afterContextInitialized);
-            }
+            initializingPages.values().forEach(InitializingActivity::afterContextInitialized);
 
             return entryPoint;
         }
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.serverApplicationContext = applicationContext;
     }
 }

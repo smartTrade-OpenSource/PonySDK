@@ -65,7 +65,7 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, HasPSubm
     }
 
     @Override
-    protected void init0() {
+    void init0() {
         super.init0();
         saveAddHandler(HandlerModel.HANDLER_CHANGE);
     }
