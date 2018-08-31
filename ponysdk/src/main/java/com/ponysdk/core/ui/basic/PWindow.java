@@ -43,6 +43,8 @@ import com.ponysdk.core.writer.ModelWriter;
 
 public class PWindow extends PObject {
 
+    private static final String CANONICAL_NAME = PWindow.class.getCanonicalName();
+
     private Set<POpenHandler> openHandlers;
     private Set<PCloseHandler> closeHandlers;
     private Set<PWindow> subWindows;
@@ -100,10 +102,10 @@ public class PWindow extends PObject {
     }
 
     public static PWindow getMain() {
-        PWindow mainWindow = UIContext.get().getAttribute(PWindow.class.getCanonicalName());
+        PWindow mainWindow = UIContext.get().getAttribute(CANONICAL_NAME);
         if (mainWindow == null) {
             mainWindow = new PMainWindow();
-            UIContext.get().setAttribute(PWindow.class.getCanonicalName(), mainWindow);
+            UIContext.get().setAttribute(CANONICAL_NAME, mainWindow);
         }
         return mainWindow;
     }
