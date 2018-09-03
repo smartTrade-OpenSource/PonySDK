@@ -292,20 +292,21 @@ public class UIBuilder {
     }
 
     private void processAddHandler(final ReaderBuffer buffer, final int objectID) {
-        final PTObject ptObject = getPTObject(objectID);
-
         // ServerToClientModel.HANDLER_TYPE
         final HandlerModel handlerModel = HandlerModel.fromRawValue(buffer.readBinaryModel().getByteValue());
 
         if (HandlerModel.HANDLER_STREAM_REQUEST == handlerModel) {
             new PTStreamResource().addHandler(buffer, handlerModel);
             buffer.readBinaryModel(); // Read ServerToClientModel.END element
-        } else if (ptObject != null) {
-            ptObject.addHandler(buffer, handlerModel);
-            buffer.readBinaryModel(); // Read ServerToClientModel.END element
         } else {
-            log.warning("Add handler on a null PTObject #" + objectID + ", so we will consume all the buffer of this object");
-            buffer.shiftNextBlock(false);
+            final PTObject ptObject = getPTObject(objectID);
+            if (ptObject != null) {
+                ptObject.addHandler(buffer, handlerModel);
+                buffer.readBinaryModel(); // Read ServerToClientModel.END element
+            } else {
+                log.warning("Add handler on a null PTObject #" + objectID + ", so we will consume all the buffer of this object");
+                buffer.shiftNextBlock(false);
+            }
         }
     }
 
