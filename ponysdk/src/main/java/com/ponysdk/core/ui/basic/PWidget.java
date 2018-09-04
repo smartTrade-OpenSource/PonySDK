@@ -81,6 +81,7 @@ import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 import com.ponysdk.core.ui.eventbus.SimpleEventBus;
 import com.ponysdk.core.ui.model.PEventType;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
+import com.ponysdk.core.util.SetPool;
 import com.ponysdk.core.writer.ModelWriter;
 import com.ponysdk.core.writer.ModelWriterCallback;
 
@@ -92,12 +93,13 @@ import com.ponysdk.core.writer.ModelWriterCallback;
 public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers, HasPKeyPressHandlers, HasPKeyUpHandlers {
 
     private static final Logger log = LoggerFactory.getLogger(PWidget.class);
+    private static final SetPool<String> styleNamesSetPool = new SetPool<>();
 
     private static final String HUNDRED_PERCENT = "100%";
 
     boolean visible = true;
     private IsPWidget parent;
-    private Set<String> styleNames;
+    private SetPool<String>.ImmutableSet styleNames = styleNamesSetPool.emptyImmutableSet();
     private Set<PEventType> preventEvents;
     private Set<PEventType> stopEvents;
     private EventBus eventBus;
@@ -140,7 +142,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     @Override
     protected void enrichForUpdate(final ModelWriter writer) {
         super.enrichForUpdate(writer);
-        if (styleNames != null && !styleNames.isEmpty()) {
+        if (!styleNames.isEmpty()) {
             writer.write(ServerToClientModel.ADD_STYLE_NAME, styleNames.stream().collect(Collectors.joining(" ")));
         }
     }
@@ -148,12 +150,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     static PWidget asWidgetOrNull(final IsPWidget w) {
         return w == null ? null : w.asWidget();
     }
-
-    private Set<String> safeStyleName() {
-        if (styleNames == null) styleNames = new HashSet<>(8);
-        return styleNames;
-    }
-
+  
     private Set<PEventType> safePreventEvents() {
         if (preventEvents == null) preventEvents = new HashSet<>(4);
         return preventEvents;
@@ -233,7 +230,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
 
     public void setStyleName(final String styleName) {
         if (Objects.equals(this.styleName, styleName)) return;
-        if (styleName != null && !styleName.isEmpty() && safeStyleName().add(styleName) && initialized) {
+        if (styleName != null && !styleName.isEmpty() && doAddStyleName(styleName) && initialized) {
             this.styleName = styleName;
             saveUpdate(ServerToClientModel.STYLE_NAME, styleName);
         }
@@ -324,20 +321,34 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         if (safeStopEvents().add(e)) saveUpdate(writer -> writer.write(ServerToClientModel.STOP_EVENT, e.getCode()));
     }
 
+    private boolean doAddStyleName(final String styleName) {
+        final SetPool<String>.ImmutableSet s = styleNames.getAdd(styleName);
+        if (s == styleNames) return false;
+        styleNames = s;
+        return true;
+    }
+
     public void addStyleName(final String styleName) {
-        if (styleName != null && !styleName.isEmpty() && safeStyleName().add(styleName) && initialized) {
+        if (styleName != null && !styleName.isEmpty() && doAddStyleName(styleName) && initialized) {
             saveUpdate(writer -> writer.write(ServerToClientModel.ADD_STYLE_NAME, styleName));
         }
     }
 
+    private boolean doRemoveStyleName(final String styleName) {
+        final SetPool<String>.ImmutableSet s = styleNames.getRemove(styleName);
+        if (s == styleNames) return false;
+        styleNames = s;
+        return true;
+    }
+
     public void removeStyleName(final String styleName) {
-        if (styleNames != null && styleName != null && !styleName.isEmpty() && styleNames.remove(styleName) && initialized) {
+        if (styleName != null && !styleName.isEmpty() && doRemoveStyleName(styleName) && initialized) {
             saveUpdate(writer -> writer.write(ServerToClientModel.REMOVE_STYLE_NAME, styleName));
         }
     }
 
     public boolean hasStyleName(final String styleName) {
-        return styleNames != null && !styleName.isEmpty() && styleNames.contains(styleName);
+        return !styleName.isEmpty() && styleNames.contains(styleName);
     }
 
     @Override
