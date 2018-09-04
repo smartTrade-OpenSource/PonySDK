@@ -25,7 +25,6 @@ package com.ponysdk.core.ui.basic;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -39,6 +38,7 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.ui.basic.event.PLayoutResizeEvent;
 import com.ponysdk.core.ui.basic.event.PLayoutResizeHandler;
+import com.ponysdk.core.util.SetUtils;
 
 /**
  * A panel that adds user-positioned splitters between each of its child
@@ -64,7 +64,7 @@ import com.ponysdk.core.ui.basic.event.PLayoutResizeHandler;
  */
 public class PSplitLayoutPanel extends PDockLayoutPanel {
 
-    private final Set<PLayoutResizeHandler> handlers = new HashSet<>(4);
+    private final Set<PLayoutResizeHandler> handlers = SetUtils.newArraySet(4);
     private final Map<PWidget, SplitInfoHolder> splitInfoByWidget = new HashMap<>(4);
 
     protected PSplitLayoutPanel() {

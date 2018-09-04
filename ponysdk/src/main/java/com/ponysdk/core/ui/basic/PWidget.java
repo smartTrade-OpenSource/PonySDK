@@ -25,7 +25,6 @@ package com.ponysdk.core.ui.basic;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -53,6 +52,7 @@ import com.ponysdk.core.ui.basic.event.PBlurEvent;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PContextMenuEvent;
 import com.ponysdk.core.ui.basic.event.PDomEvent;
+import com.ponysdk.core.ui.basic.event.PDomEvent.Type;
 import com.ponysdk.core.ui.basic.event.PDoubleClickEvent;
 import com.ponysdk.core.ui.basic.event.PDragEndEvent;
 import com.ponysdk.core.ui.basic.event.PDragEnterEvent;
@@ -81,6 +81,8 @@ import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 import com.ponysdk.core.ui.eventbus.SimpleEventBus;
 import com.ponysdk.core.ui.model.PEventType;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
+import com.ponysdk.core.util.SetPool;
+import com.ponysdk.core.util.SetUtils;
 import com.ponysdk.core.writer.ModelWriter;
 import com.ponysdk.core.writer.ModelWriterCallback;
 
@@ -92,14 +94,17 @@ import com.ponysdk.core.writer.ModelWriterCallback;
 public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers, HasPKeyPressHandlers, HasPKeyUpHandlers {
 
     private static final Logger log = LoggerFactory.getLogger(PWidget.class);
+    private static final SetPool<String> styleNamesSetPool = new SetPool<>();
+    private static final SetPool<PEventType> preventOrStopEventsSetPool = new SetPool<>();
+    private static final SetPool<PDomEvent.Type> oneTimeHandlerCreationSetPool = new SetPool<>();
 
     private static final String HUNDRED_PERCENT = "100%";
 
     boolean visible = true;
     private IsPWidget parent;
-    private Set<String> styleNames;
-    private Set<PEventType> preventEvents;
-    private Set<PEventType> stopEvents;
+    private SetPool<String>.ImmutableSet styleNames = styleNamesSetPool.emptyImmutableSet();
+    private SetPool<PEventType>.ImmutableSet preventEvents = preventOrStopEventsSetPool.emptyImmutableSet();
+    private SetPool<PEventType>.ImmutableSet stopEvents = preventOrStopEventsSetPool.emptyImmutableSet();
     private EventBus eventBus;
     private Map<String, String> styleProperties;
     private Map<String, String> elementProperties;
@@ -116,7 +121,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     private Set<PAddOn> addons;
 
     // WORKAROUND Remove handler only server side
-    private Set<PDomEvent.Type> oneTimeHandlerCreation;
+    private SetPool<PDomEvent.Type>.ImmutableSet oneTimeHandlerCreation = oneTimeHandlerCreationSetPool.emptyImmutableSet();
 
     public enum TabindexMode {
 
@@ -140,28 +145,13 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     @Override
     protected void enrichForUpdate(final ModelWriter writer) {
         super.enrichForUpdate(writer);
-        if (styleNames != null && !styleNames.isEmpty()) {
+        if (!styleNames.isEmpty()) {
             writer.write(ServerToClientModel.ADD_STYLE_NAME, styleNames.stream().collect(Collectors.joining(" ")));
         }
     }
 
     static PWidget asWidgetOrNull(final IsPWidget w) {
         return w == null ? null : w.asWidget();
-    }
-
-    private Set<String> safeStyleName() {
-        if (styleNames == null) styleNames = new HashSet<>(8);
-        return styleNames;
-    }
-
-    private Set<PEventType> safePreventEvents() {
-        if (preventEvents == null) preventEvents = new HashSet<>(4);
-        return preventEvents;
-    }
-
-    private Set<PEventType> safeStopEvents() {
-        if (stopEvents == null) stopEvents = new HashSet<>(4);
-        return stopEvents;
     }
 
     private Map<String, String> safeStyleProperties() {
@@ -233,7 +223,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
 
     public void setStyleName(final String styleName) {
         if (Objects.equals(this.styleName, styleName)) return;
-        if (styleName != null && !styleName.isEmpty() && safeStyleName().add(styleName) && initialized) {
+        if (styleName != null && !styleName.isEmpty() && doAddStyleName(styleName) && initialized) {
             this.styleName = styleName;
             saveUpdate(ServerToClientModel.STYLE_NAME, styleName);
         }
@@ -317,27 +307,49 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     }
 
     public void preventEvent(final PEventType e) {
-        if (safePreventEvents().add(e)) saveUpdate(writer -> writer.write(ServerToClientModel.PREVENT_EVENT, e.getCode()));
+        final SetPool<PEventType>.ImmutableSet pool = preventEvents.getAdd(e);
+        if (pool != preventEvents) {
+            preventEvents = pool;
+            saveUpdate(writer -> writer.write(ServerToClientModel.PREVENT_EVENT, e.getCode()));
+        }
     }
 
     public void stopEvent(final PEventType e) {
-        if (safeStopEvents().add(e)) saveUpdate(writer -> writer.write(ServerToClientModel.STOP_EVENT, e.getCode()));
+        final SetPool<PEventType>.ImmutableSet pool = stopEvents.getAdd(e);
+        if (pool != stopEvents) {
+            stopEvents = pool;
+            saveUpdate(writer -> writer.write(ServerToClientModel.STOP_EVENT, e.getCode()));
+        }
+    }
+
+    private boolean doAddStyleName(final String styleName) {
+        final SetPool<String>.ImmutableSet s = styleNames.getAdd(styleName);
+        if (s == styleNames) return false;
+        styleNames = s;
+        return true;
     }
 
     public void addStyleName(final String styleName) {
-        if (styleName != null && !styleName.isEmpty() && safeStyleName().add(styleName) && initialized) {
+        if (styleName != null && !styleName.isEmpty() && doAddStyleName(styleName) && initialized) {
             saveUpdate(writer -> writer.write(ServerToClientModel.ADD_STYLE_NAME, styleName));
         }
     }
 
+    private boolean doRemoveStyleName(final String styleName) {
+        final SetPool<String>.ImmutableSet s = styleNames.getRemove(styleName);
+        if (s == styleNames) return false;
+        styleNames = s;
+        return true;
+    }
+
     public void removeStyleName(final String styleName) {
-        if (styleNames != null && styleName != null && !styleName.isEmpty() && styleNames.remove(styleName) && initialized) {
+        if (styleName != null && !styleName.isEmpty() && doRemoveStyleName(styleName) && initialized) {
             saveUpdate(writer -> writer.write(ServerToClientModel.REMOVE_STYLE_NAME, styleName));
         }
     }
 
     public boolean hasStyleName(final String styleName) {
-        return styleNames != null && !styleName.isEmpty() && styleNames.contains(styleName);
+        return !styleName.isEmpty() && styleNames.contains(styleName);
     }
 
     @Override
@@ -414,10 +426,9 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         if (destroy) return null;
         final HandlerRegistration handlerRegistration = ensureEventBus().addHandlerToSource(type, this, handler);
 
-        if (oneTimeHandlerCreation == null) oneTimeHandlerCreation = new HashSet<>(8);
-
-        if (!oneTimeHandlerCreation.contains(type)) {
-            oneTimeHandlerCreation.add(type);
+        final SetPool<Type>.ImmutableSet pool = oneTimeHandlerCreation.getAdd(type);
+        if (pool != oneTimeHandlerCreation) {
+            oneTimeHandlerCreation = pool;
             final ServerBinaryModel binaryModel1 = new ServerBinaryModel(ServerToClientModel.DOM_HANDLER_CODE,
                 type.getDomHandlerType().getValue());
             final ModelWriterCallback callback = writer -> {
@@ -590,7 +601,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     }
 
     void bindAddon(final PAddOn addon) {
-        if (this.addons == null) this.addons = new HashSet<>(4);
+        if (this.addons == null) this.addons = SetUtils.newArraySet(4);
         this.addons.add(addon);
     }
 

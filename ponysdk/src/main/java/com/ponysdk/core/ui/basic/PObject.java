@@ -25,7 +25,6 @@ package com.ponysdk.core.ui.basic;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.Set;
 
 import javax.json.JsonObject;
@@ -41,6 +40,7 @@ import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.ui.basic.event.PTerminalEvent;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
+import com.ponysdk.core.util.SetUtils;
 import com.ponysdk.core.writer.ModelWriter;
 import com.ponysdk.core.writer.ModelWriterCallback;
 
@@ -350,12 +350,12 @@ public abstract class PObject {
     }
 
     public void addInitializeListener(final InitializeListener listener) {
-        if (this.initializeListeners == null) initializeListeners = new LinkedHashSet<>(4);
+        if (this.initializeListeners == null) initializeListeners = SetUtils.newArraySet(4);
         this.initializeListeners.add(listener);
     }
 
     public void addDestroyListener(final DestroyListener listener) {
-        if (this.destroyListeners == null) destroyListeners = new LinkedHashSet<>(4);
+        if (this.destroyListeners == null) destroyListeners = SetUtils.newArraySet(4);
         this.destroyListeners.add(listener);
     }
 

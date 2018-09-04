@@ -27,8 +27,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.ui.eventbus.Event.Type;
+import com.ponysdk.core.util.SetUtils;
 
 public abstract class AbstractEventBus implements EventBus {
 
@@ -172,7 +171,7 @@ public abstract class AbstractEventBus implements EventBus {
                 final Collection<EventHandler> directHandlers = getHandlers(eventType, eventSource);
                 if (eventSource != null) {
                     final Collection<EventHandler> globalHandlers = getHandlers(eventType, null);
-                    final Set<EventHandler> rtn = new LinkedHashSet<>(directHandlers);
+                    final Set<EventHandler> rtn = SetUtils.newArraySet(directHandlers);
                     rtn.addAll(globalHandlers);
                     handlers = rtn;
                 } else {
@@ -220,13 +219,13 @@ public abstract class AbstractEventBus implements EventBus {
 
         // safe, we control the puts.
         final Set<EventHandler> handlers = sourceMap.get(source);
-        if (handlers != null) return new HashSet<>(handlers);
+        if (handlers != null) return SetUtils.newArraySet(handlers);
         else return Collections.emptySet();
     }
 
     @Override
     public void addHandler(final BroadcastEventHandler handler) {
-        if (broadcastHandlerManager == null) broadcastHandlerManager = new HashSet<>(4);
+        if (broadcastHandlerManager == null) broadcastHandlerManager = SetUtils.newArraySet(4);
         broadcastHandlerManager.add(handler);
     }
 

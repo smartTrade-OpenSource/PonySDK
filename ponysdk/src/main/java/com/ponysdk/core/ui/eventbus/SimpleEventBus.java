@@ -24,8 +24,9 @@
 package com.ponysdk.core.ui.eventbus;
 
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.Set;
+
+import com.ponysdk.core.util.SetUtils;
 
 public class SimpleEventBus extends AbstractEventBus {
 
@@ -36,7 +37,7 @@ public class SimpleEventBus extends AbstractEventBus {
 
     @Override
     protected Set<EventHandler> createHandlerSet() {
-        return new LinkedHashSet<>(4);
+        return SetUtils.newArraySet(4);
     }
 
 }

@@ -24,7 +24,6 @@
 package com.ponysdk.core.ui.basic;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -39,6 +38,7 @@ import com.ponysdk.core.ui.basic.event.PCloseEvent;
 import com.ponysdk.core.ui.basic.event.PCloseHandler;
 import com.ponysdk.core.ui.basic.event.POpenEvent;
 import com.ponysdk.core.ui.basic.event.POpenHandler;
+import com.ponysdk.core.util.SetUtils;
 import com.ponysdk.core.writer.ModelWriter;
 
 public class PWindow extends PObject {
@@ -282,7 +282,7 @@ public class PWindow extends PObject {
     }
 
     public void addOpenHandler(final POpenHandler handler) {
-        if (openHandlers == null) openHandlers = new HashSet<>(4);
+        if (openHandlers == null) openHandlers = SetUtils.newArraySet(4);
         openHandlers.add(handler);
     }
 
@@ -291,7 +291,7 @@ public class PWindow extends PObject {
     }
 
     public void addCloseHandler(final PCloseHandler handler) {
-        if (closeHandlers == null) closeHandlers = new HashSet<>(4);
+        if (closeHandlers == null) closeHandlers = SetUtils.newArraySet(4);
         closeHandlers.add(handler);
     }
 
@@ -349,7 +349,7 @@ public class PWindow extends PObject {
     }
 
     private void addWindow(final PWindow window) {
-        if (subWindows == null) subWindows = new HashSet<>(4);
+        if (subWindows == null) subWindows = SetUtils.newArraySet(4);
         window.addCloseHandler(event -> removeWindow(window));
         subWindows.add(window);
     }

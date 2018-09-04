@@ -25,7 +25,6 @@ package com.ponysdk.core.ui.form.formfield;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 
 import com.ponysdk.core.ui.basic.HasPValue;
@@ -36,6 +35,7 @@ import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 import com.ponysdk.core.ui.form.dataconverter.DataConverter;
 import com.ponysdk.core.ui.form.validator.FieldValidator;
 import com.ponysdk.core.ui.form.validator.ValidationResult;
+import com.ponysdk.core.util.SetUtils;
 
 /**
  * A field of a {@link com.ponysdk.core.ui.form.Form} that can be validated or
@@ -100,7 +100,7 @@ public abstract class AbstractFormField<T, W extends IsPWidget> implements FormF
 
     @Override
     public void addFormFieldListener(final FormFieldListener listener) {
-        if (listeners == null) listeners = new HashSet<>(4);
+        if (listeners == null) listeners = SetUtils.newArraySet(4);
         listeners.add(listener);
     }
 
@@ -138,7 +138,7 @@ public abstract class AbstractFormField<T, W extends IsPWidget> implements FormF
 
     @Override
     public void addValueChangeHandler(final PValueChangeHandler<T> handler) {
-        if (handlers == null) handlers = new HashSet<>(4);
+        if (handlers == null) handlers = SetUtils.newArraySet(4);
         handlers.add(handler);
     }
 

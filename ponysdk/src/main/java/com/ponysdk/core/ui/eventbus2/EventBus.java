@@ -24,13 +24,14 @@
 package com.ponysdk.core.ui.eventbus2;
 
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.ponysdk.core.util.SetUtils;
 
 public class EventBus {
 
@@ -59,7 +60,7 @@ public class EventBus {
 
     private <T> EventHandler<T> register(final Class<T> type) {
         final EventHandler<T> handler = new EventHandler<>(type);
-        final Set<EventHandler<?>> handlers = handlersByType.computeIfAbsent(type, t -> new LinkedHashSet<>(4));
+        final Set<EventHandler<?>> handlers = handlersByType.computeIfAbsent(type, t -> SetUtils.newArraySet(4));
         handlers.add(handler);
         return handler;
     }

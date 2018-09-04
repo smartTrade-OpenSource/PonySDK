@@ -23,7 +23,6 @@
 
 package com.ponysdk.core.ui.list.selector;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import com.ponysdk.core.ui.basic.Element;
@@ -31,10 +30,11 @@ import com.ponysdk.core.ui.basic.PMenuBar;
 import com.ponysdk.core.ui.basic.PMenuItem;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.i18n.PString;
+import com.ponysdk.core.util.SetUtils;
 
 public class DefaultActionSelectorView extends PMenuBar implements SelectorView {
 
-    private final Set<SelectorViewListener> selectorViewListeners = new HashSet<>();
+    private final Set<SelectorViewListener> selectorViewListeners = SetUtils.newArraySet();
 
     public DefaultActionSelectorView() {
         final PMenuBar menuBarAction = Element.newPMenuBar(true);
