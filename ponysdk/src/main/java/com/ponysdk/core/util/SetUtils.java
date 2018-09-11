@@ -25,6 +25,7 @@ package com.ponysdk.core.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.ListIterator;
 import java.util.Set;
 
@@ -81,6 +82,26 @@ public class SetUtils {
                 added |= add(e);
             }
             return added;
+        }
+
+        @Override
+        public int hashCode() {
+            int h = 0;
+            final Iterator<E> i = iterator();
+            while (i.hasNext()) {
+                final E obj = i.next();
+                if (obj != null) h += obj.hashCode();
+            }
+            return h;
+        }
+
+        @Override
+        public boolean equals(final Object o) {
+            if (o == this) return true;
+            if (!(o instanceof Set)) return false;
+            final Collection<?> c = (Collection<?>) o;
+            if (c.size() != size()) return false;
+            return containsAll(c);
         }
 
         @Override
