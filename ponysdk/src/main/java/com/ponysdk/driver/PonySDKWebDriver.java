@@ -216,6 +216,11 @@ public class PonySDKWebDriver implements WebDriver {
         onMessageSwitch.put(ServerToClientModel.HEARTBEAT, (message, frame) -> {
             sendMessage("0");
         });
+        onMessageSwitch.put(ServerToClientModel.WIDGET_VISIBLE, (message, frame) -> {
+            final PonyWebElement element = findElement(message);
+            if (element == null) return;
+            element.displayed = (boolean) frame.value;
+        });
     }
 
     @Override

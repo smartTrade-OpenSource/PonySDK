@@ -58,6 +58,7 @@ public class PonyWebElement implements WebElement {
     final WidgetType widgetType;
     volatile PonyWebElement parent;
     volatile String text;
+    volatile boolean displayed = true;
 
     PonyWebElement(final PonySDKWebDriver ponySDKWebDriver, final int objectID, final WidgetType widgetType) {
         this.ponySDKWebDriver = ponySDKWebDriver;
@@ -178,7 +179,7 @@ public class PonyWebElement implements WebElement {
 
     @Override
     public boolean isDisplayed() {
-        return false;
+        return displayed;
     }
 
     @Override
