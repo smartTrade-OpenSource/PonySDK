@@ -46,7 +46,7 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.DomHandlerType;
 import com.ponysdk.core.model.WidgetType;
 
-class PonyWebElement implements WebElement {
+public class PonyWebElement implements WebElement {
 
     private final PonySDKWebDriver ponySDKWebDriver;
 
