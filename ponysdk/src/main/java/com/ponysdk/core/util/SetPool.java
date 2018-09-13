@@ -155,7 +155,7 @@ public class SetPool<E> {
      * @return an {@code ImmutableSet} that is equivalent to <code>(original UNION c)</code>, or {@code original}
      *         itself if {@code c} is a subset of it
      */
-    public ImmutableSet addAll(final ImmutableSet original, final Collection<? extends E> c) {
+    public ImmutableSet addAll(final ImmutableSet original, final Set<? extends E> c) {
         return find(original, c, addAllElementsSetLocals.get());
     }
 
@@ -163,7 +163,7 @@ public class SetPool<E> {
      * @return an {@code ImmutableSet} that is equivalent to <code>(original INTERSECT c)</code>, or {@code original}
      *         itself if it is a subset of {@code c}
      */
-    public ImmutableSet retainAll(final ImmutableSet original, final Collection<?> c) {
+    public ImmutableSet retainAll(final ImmutableSet original, final Set<?> c) {
         return find(original, c, retainAllElementsSetLocals.get());
     }
 
@@ -171,7 +171,7 @@ public class SetPool<E> {
      * @return an {@code ImmutableSet} that is equivalent to <code>(original MINUS c)</code>, or {@code original}
      *         itself if {@code c} has no intersection with it
      */
-    public ImmutableSet removeAll(final ImmutableSet original, final Collection<?> c) {
+    public ImmutableSet removeAll(final ImmutableSet original, final Set<?> c) {
         return find(original, c, removeAllElementsSetLocals.get());
     }
 
@@ -290,12 +290,12 @@ public class SetPool<E> {
          * @return from the {@code SetPool}, an {@code ImmutableSet} that is equivalent to <code>(this UNION c)</code>,
          *         or {@code this} if {@code c} is a subset of it
          */
-        public ImmutableSet getAddAll(final Collection<? extends E> c) {
+        public ImmutableSet getAddAll(final Set<? extends E> c) {
             return SetPool.this.addAll(this, c);
         }
 
         /**
-         * UNSUPPORTED, use <code>getAddAll(Collection)</code> instead
+         * UNSUPPORTED, use <code>getAddAll(Set)</code> instead
          */
         @Override
         public boolean addAll(final Collection<? extends E> c) {
@@ -306,12 +306,12 @@ public class SetPool<E> {
          * @return from the {@code SetPool}, an {@code ImmutableSet} that is equivalent to
          *         <code>(this INTERSECT c)</code>, or {@code this} if it is a subset of {@code c}
          */
-        public ImmutableSet getRetainAll(final Collection<?> c) {
+        public ImmutableSet getRetainAll(final Set<?> c) {
             return SetPool.this.retainAll(this, c);
         }
 
         /**
-         * UNSUPPORTED, use <code>getRetainAll(Collection)</code> instead
+         * UNSUPPORTED, use <code>getRetainAll(Set)</code> instead
          */
         @Override
         public boolean retainAll(final Collection<?> c) {
@@ -322,12 +322,12 @@ public class SetPool<E> {
          * @return from the {@code SetPool}, an {@code ImmutableSet} that is equivalent to <code>(this MINUS c)</code>,
          *         or {@code this} if {@code c} has no intersection with it
          */
-        public ImmutableSet getRemoveAll(final Collection<?> c) {
+        public ImmutableSet getRemoveAll(final Set<?> c) {
             return SetPool.this.removeAll(this, c);
         }
 
         /**
-         * UNSUPPORTED, use <code>getRemoveAll(Collection)</code> instead
+         * UNSUPPORTED, use <code>getRemoveAll(Set)</code> instead
          */
         @Override
         public boolean removeAll(final Collection<?> c) {
@@ -593,10 +593,10 @@ public class SetPool<E> {
 
     }
 
-    private class AddAllElementsSet extends MutableSet<Collection<? extends E>> {
+    private class AddAllElementsSet extends MutableSet<Set<? extends E>> {
 
         @Override
-        protected boolean updateSizeAndHashCode(final SetPool<E>.ImmutableSet originalSet, final Collection<? extends E> delta) {
+        protected boolean updateSizeAndHashCode(final SetPool<E>.ImmutableSet originalSet, final Set<? extends E> delta) {
             int hashCode = originalSet.hashCode();
             int nbElements = originalSet.size();
             for (final E e : delta) {
@@ -612,7 +612,7 @@ public class SetPool<E> {
         }
 
         @Override
-        protected boolean containsAll(final ImmutableSet originalSet, final Collection<? extends E> delta, final Collection<?> c) {
+        protected boolean containsAll(final ImmutableSet originalSet, final Set<? extends E> delta, final Collection<?> c) {
             for (final Object o : c) {
                 if (!delta.contains(o) || !originalSet.contains(o)) {
                     return false;
@@ -622,16 +622,16 @@ public class SetPool<E> {
         }
 
         @Override
-        protected void applyDelta(final Set<E> set, final Collection<? extends E> delta) {
+        protected void applyDelta(final Set<E> set, final Set<? extends E> delta) {
             set.addAll(delta);
         }
 
     }
 
-    private class RetainAllElementsSet extends MutableSet<Collection<?>> {
+    private class RetainAllElementsSet extends MutableSet<Set<?>> {
 
         @Override
-        protected boolean updateSizeAndHashCode(final SetPool<E>.ImmutableSet originalSet, final Collection<?> delta) {
+        protected boolean updateSizeAndHashCode(final SetPool<E>.ImmutableSet originalSet, final Set<?> delta) {
             int hashCode = originalSet.hashCode();
             int nbElements = originalSet.size();
             for (final E e : originalSet) {
@@ -647,7 +647,7 @@ public class SetPool<E> {
         }
 
         @Override
-        protected boolean containsAll(final ImmutableSet originalSet, final Collection<?> delta, final Collection<?> c) {
+        protected boolean containsAll(final ImmutableSet originalSet, final Set<?> delta, final Collection<?> c) {
             for (final Object o : c) {
                 if (!delta.contains(o) && !originalSet.contains(o)) {
                     return false;
@@ -657,16 +657,16 @@ public class SetPool<E> {
         }
 
         @Override
-        protected void applyDelta(final Set<E> set, final Collection<?> delta) {
+        protected void applyDelta(final Set<E> set, final Set<?> delta) {
             set.retainAll(delta);
         }
 
     }
 
-    private class RemoveAllElementsSet extends MutableSet<Collection<?>> {
+    private class RemoveAllElementsSet extends MutableSet<Set<?>> {
 
         @Override
-        protected boolean updateSizeAndHashCode(final SetPool<E>.ImmutableSet originalSet, final Collection<?> delta) {
+        protected boolean updateSizeAndHashCode(final SetPool<E>.ImmutableSet originalSet, final Set<?> delta) {
             int hashCode = originalSet.hashCode();
             int nbElements = originalSet.size();
             for (final Object o : delta) {
@@ -682,7 +682,7 @@ public class SetPool<E> {
         }
 
         @Override
-        protected boolean containsAll(final ImmutableSet originalSet, final Collection<?> delta, final Collection<?> c) {
+        protected boolean containsAll(final ImmutableSet originalSet, final Set<?> delta, final Collection<?> c) {
             for (final Object o : c) {
                 if (delta.contains(o) || !originalSet.contains(o)) {
                     return false;
@@ -692,7 +692,7 @@ public class SetPool<E> {
         }
 
         @Override
-        protected void applyDelta(final Set<E> set, final Collection<?> delta) {
+        protected void applyDelta(final Set<E> set, final Set<?> delta) {
             set.removeAll(delta);
         }
 
