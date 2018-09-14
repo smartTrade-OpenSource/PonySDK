@@ -131,7 +131,7 @@ public class PImage extends PWidget implements HasPClickHandlers {
     }
 
     public void setStream(final StreamHandler streamListener) {
-        UIContext.get().stackEmbeddedStreamRequest(streamListener, getID());
+        UIContext.get().stackEmbeddedStreamRequest(streamListener, this);
     }
 
     @Override

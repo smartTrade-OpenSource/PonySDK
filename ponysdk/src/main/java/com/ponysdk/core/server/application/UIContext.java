@@ -487,16 +487,28 @@ public class UIContext {
         return pObjectWeakReferences.get(objectID);
     }
 
+
+
     /**
      * Registers a {@link StreamHandler} that will be called on the terminal side
      *
      * @param streamListener the stream handler
      */
     public void stackStreamRequest(final StreamHandler streamListener) {
+        stackStreamRequest(streamListener, PWindow.getMain());
+    }
+
+    /**
+     * Registers a {@link StreamHandler} that will be called on the terminal side
+     *
+     * @param streamListener the stream handler
+     */
+    public void stackStreamRequest(final StreamHandler streamListener, PWindow window) {
         final int streamRequestID = nextStreamRequestID();
 
         final ModelWriter writer = Txn.get().getWriter();
         writer.beginObject();
+        if(!PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
         writer.write(ServerToClientModel.TYPE_ADD_HANDLER, -1);
         writer.write(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_STREAM_REQUEST.getValue());
         writer.write(ServerToClientModel.STREAM_REQUEST_ID, streamRequestID);
@@ -510,18 +522,17 @@ public class UIContext {
      * Registers a {@link StreamHandler} that will be called on a specific {@link com.ponysdk.core.terminal.ui.PTObject}
      *
      * @param streamListener the stream handler
-     * @param objectID       the object ID of a {@link PObject}
+     * @param pObject        the {@link PObject}
      */
-    public void stackEmbeddedStreamRequest(final StreamHandler streamListener, final int objectID) {
+    public void stackEmbeddedStreamRequest(final StreamHandler streamListener, final PObject pObject) {
         final int streamRequestID = nextStreamRequestID();
 
         final ModelWriter writer = Txn.get().getWriter();
         writer.beginObject();
-        final PObject pObject = getObject(objectID);
         if (!PWindow.isMain(pObject.getWindow()))
             writer.write(ServerToClientModel.WINDOW_ID, pObject.getWindow().getID());
         if (pObject.getFrame() != null) writer.write(ServerToClientModel.FRAME_ID, pObject.getFrame().getID());
-        writer.write(ServerToClientModel.TYPE_ADD_HANDLER, objectID);
+        writer.write(ServerToClientModel.TYPE_ADD_HANDLER, pObject.getID());
         writer.write(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST.getValue());
         writer.write(ServerToClientModel.STREAM_REQUEST_ID, streamRequestID);
         writer.endObject();
