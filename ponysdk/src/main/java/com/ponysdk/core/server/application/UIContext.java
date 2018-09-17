@@ -488,10 +488,15 @@ public class UIContext {
      *            the stream handler
      */
     public void stackStreamRequest(final StreamHandler streamListener) {
+        stackStreamRequest(streamListener, PWindow.getMain());
+    }
+
+    public void stackStreamRequest(final StreamHandler streamListener, final PWindow window) {
         final int streamRequestID = nextStreamRequestID();
 
         final ModelWriter writer = Txn.get().getWriter();
         writer.beginObject();
+        if (!PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
         writer.write(ServerToClientModel.TYPE_ADD_HANDLER, -1);
         writer.write(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_STREAM_REQUEST.getValue());
         writer.write(ServerToClientModel.STREAM_REQUEST_ID, streamRequestID);
