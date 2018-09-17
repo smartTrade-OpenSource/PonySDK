@@ -106,7 +106,7 @@ public abstract class PObject {
     protected void applyInit() {
         final ModelWriter writer = Txn.get().getWriter();
         writer.beginObject();
-        if (window != PWindow.getMain()) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
+        if (!PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
         if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
         writer.write(ServerToClientModel.TYPE_CREATE, ID);
         writer.write(ServerToClientModel.WIDGET_TYPE, getWidgetType().getValue());

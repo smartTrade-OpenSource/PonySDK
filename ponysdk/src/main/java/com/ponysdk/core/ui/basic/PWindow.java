@@ -129,7 +129,7 @@ public class PWindow extends PObject {
         if (!initialized) {
             final ModelWriter writer = Txn.get().getWriter();
             writer.beginObject();
-            if (window != PWindow.getMain()) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
+            if (!isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
             writer.write(ServerToClientModel.TYPE_CREATE, ID);
             writer.write(ServerToClientModel.WIDGET_TYPE, getWidgetType().getValue());
             enrichForCreation(writer);
