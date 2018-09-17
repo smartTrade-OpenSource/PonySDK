@@ -623,8 +623,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         focus(false);
     }
 
-    protected void focus(final boolean focused) {
-        //if (Objects.equals(this.focused, focused)) return;
+    private void focus(final boolean focused) {
         this.focused = focused;
         saveUpdate(ServerToClientModel.FOCUS, focused);
     }

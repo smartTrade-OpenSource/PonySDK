@@ -25,6 +25,8 @@ package com.ponysdk.core.ui.basic;
 
 import java.util.Objects;
 
+import javax.json.JsonObject;
+
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.event.HasPBlurHandlers;
@@ -144,6 +146,21 @@ public abstract class PFocusWidget extends PWidget
         } else {
             return addDomHandler(handler, PDoubleClickEvent.TYPE);
         }
+    }
+
+    @Override
+    public void onClientData(final JsonObject instruction) {
+        if (isVisible() && isEnabled()) super.onClientData(instruction);
+    }
+
+    @Override
+    public void focus() {
+        if (isVisible() && isEnabled()) super.focus();
+    }
+
+    @Override
+    public void blur() {
+        if (isVisible() && isEnabled()) super.blur();
     }
 
 }
