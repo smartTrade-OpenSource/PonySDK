@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -120,6 +121,11 @@ public class PWidgetCollection implements Iterable<PWidget> {
 
     public int size() {
         return size;
+    }
+
+    @Override
+    public String toString() {
+        return Arrays.toString(array);
     }
 
     private class WidgetIterator implements Iterator<PWidget> {
