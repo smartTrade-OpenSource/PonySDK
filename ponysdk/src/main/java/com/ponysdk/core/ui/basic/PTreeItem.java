@@ -174,7 +174,7 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
 
     @Override
     public Iterator<PTreeItem> iterator() {
-        return children != null ? children.iterator() : null;
+        return children != null ? children.iterator() : Collections.emptyIterator();
     }
 
     public int size() {
