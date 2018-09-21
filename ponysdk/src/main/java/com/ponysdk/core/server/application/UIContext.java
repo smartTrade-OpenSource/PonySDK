@@ -48,7 +48,7 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.AlreadyDestroyedApplication;
-import com.ponysdk.core.server.context.PObjectWeakHashMap;
+import com.ponysdk.core.server.context.PObjectCache;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.server.stm.TxnContext;
 import com.ponysdk.core.server.websocket.WebSocket;
@@ -89,7 +89,7 @@ public class UIContext {
     private final ReentrantLock lock = new ReentrantLock();
     private final Map<String, Object> attributes = new HashMap<>();
 
-    private final PObjectWeakHashMap pObjectWeakReferences = new PObjectWeakHashMap();
+    private final PObjectCache pObjectCache = new PObjectCache();
     private int objectCounter = 1;
 
     private Map<Integer, StreamHandler> streamListenerByID;
@@ -419,7 +419,7 @@ public class UIContext {
                     if (jsonObject.containsKey(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())) {
                         final int parentObjectID = jsonObject.getJsonNumber(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())
                             .intValue();
-                        final PObject gcObject = pObjectWeakReferences.get(parentObjectID);
+                        final PObject gcObject = getObject(parentObjectID);
                         if (log.isWarnEnabled()) log.warn(String.valueOf(gcObject));
                     }
 
@@ -474,7 +474,7 @@ public class UIContext {
      * @see #getObject(int)
      */
     public void registerObject(final PObject pObject) {
-        pObjectWeakReferences.put(pObject.getID(), pObject);
+        pObjectCache.add(pObject);
     }
 
     /**
@@ -485,7 +485,7 @@ public class UIContext {
      * @see #registerObject(PObject)
      */
     public PObject getObject(final int objectID) {
-        return pObjectWeakReferences.get(objectID);
+        return pObjectCache.get(objectID);
     }
 
     /**
