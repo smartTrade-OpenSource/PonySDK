@@ -45,8 +45,8 @@ public class PTTextArea extends PTTextBoxBase<TextArea> {
             @Override
             public void onBrowserEvent(final Event event) {
                 super.onBrowserEvent(event);
-                if (Event.ONPASTE == event.getTypeInt()) {
-                    if (handlePasteEnabled) Scheduler.get().scheduleDeferred(() -> sendPasteEvent(event));
+                if (handlePasteEnabled && Event.ONPASTE == event.getTypeInt() && enabled) {
+                    Scheduler.get().scheduleDeferred(() -> sendPasteEvent(event));
                 }
             }
         };

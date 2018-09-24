@@ -75,10 +75,8 @@ import com.ponysdk.core.ui.basic.event.PMouseOverEvent;
 import com.ponysdk.core.ui.basic.event.PMouseUpEvent;
 import com.ponysdk.core.ui.basic.event.PMouseWhellEvent;
 import com.ponysdk.core.ui.eventbus.Event;
-import com.ponysdk.core.ui.eventbus.EventBus;
 import com.ponysdk.core.ui.eventbus.EventHandler;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
-import com.ponysdk.core.ui.eventbus.SimpleEventBus;
 import com.ponysdk.core.ui.model.PEventType;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.util.SetPool;
@@ -105,7 +103,6 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     private SetPool<String>.ImmutableSet styleNames = styleNamesSetPool.emptyImmutableSet();
     private SetPool<PEventType>.ImmutableSet preventEvents = preventOrStopEventsSetPool.emptyImmutableSet();
     private SetPool<PEventType>.ImmutableSet stopEvents = preventOrStopEventsSetPool.emptyImmutableSet();
-    private EventBus eventBus;
     private Map<String, String> styleProperties;
     private Map<String, String> elementProperties;
     private Map<String, String> elementAttributes;
@@ -365,19 +362,15 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
 
     public void removeDomHandler(final EventHandler handler, final PDomEvent.Type type) {
         if (destroy) return;
-        if (eventBus != null) {
-            final Collection<EventHandler> handlers = eventBus.getHandlers(type, this);
-            if (handlers.contains(handler)) {
-                eventBus.removeHandlerFromSource(type, this, handler);
-                // TODO Handle remove DOM handler
-                // if (eventBus.getHandlers(type, this).isEmpty()) {
-                //     executeRemoveDomHandler(type);
-                //     if (initialized) executeRemoveDomHandler(type);
-                //     else safeStackedInstructions().add(() -> executeRemoveDomHandler(type));
-                // }
-            } else {
-                log.warn("No event handler of type {} found for {}", type, this);
-            }
+        final Collection<EventHandler> handlers = UIContext.getRootEventBus().getHandlers(type, this);
+        if (handlers.contains(handler)) {
+            UIContext.removeHandlerFromSource(type, this, handler);
+            // TODO Handle remove DOM handler
+            // if (eventBus.getHandlers(type, this).isEmpty()) {
+            //     executeRemoveDomHandler(type);
+            //     if (initialized) executeRemoveDomHandler(type);
+            //     else safeStackedInstructions().add(() -> executeRemoveDomHandler(type));
+            // }
         } else {
             log.warn("No event handler of type {} found for {}", type, this);
         }
@@ -424,7 +417,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     private HandlerRegistration addDomHandler(final EventHandler handler, final PDomEvent.Type type,
                                               final ServerBinaryModel binaryModel) {
         if (destroy) return null;
-        final HandlerRegistration handlerRegistration = ensureEventBus().addHandlerToSource(type, this, handler);
+        final HandlerRegistration handlerRegistration = UIContext.addHandlerToSource(type, this, handler);
 
         final SetPool<Type>.ImmutableSet pool = oneTimeHandlerCreation.getAdd(type);
         if (pool != oneTimeHandlerCreation) {
@@ -526,11 +519,6 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         }
     }
 
-    private EventBus ensureEventBus() {
-        if (eventBus == null) eventBus = new SimpleEventBus();
-        return eventBus;
-    }
-
     public void fireKeyEvent(final JsonObject instruction, final PKeyEvent<? extends EventHandler> event) {
         fireEvent(event);
     }
@@ -592,7 +580,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
 
     @Override
     public void fireEvent(final Event<? extends EventHandler> event) {
-        if (eventBus != null) eventBus.fireEvent(event);
+        UIContext.fireEventFromSource(event, this);
     }
 
     public void removeFromParent() {
@@ -623,8 +611,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         focus(false);
     }
 
-    protected void focus(final boolean focused) {
-        //if (Objects.equals(this.focused, focused)) return;
+    private void focus(final boolean focused) {
         this.focused = focused;
         saveUpdate(ServerToClientModel.FOCUS, focused);
     }

@@ -24,6 +24,7 @@
 package com.ponysdk.core.ui.basic;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -141,7 +142,10 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
         item.setParent(this);
         item.setTree(tree);
         if (isInitialized()) item.attach(window, frame);
-        item.saveAdd(item.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, beforeIndex));
+
+        if (!isInitialized()) item.saveAdd(item.getID(), ID);
+        else item.saveAdd(item.getID(), ID, new ServerBinaryModel(ServerToClientModel.INDEX, beforeIndex));
+
         return item;
     }
 
@@ -170,7 +174,7 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
 
     @Override
     public Iterator<PTreeItem> iterator() {
-        return children != null ? children.iterator() : null;
+        return children != null ? children.iterator() : Collections.emptyIterator();
     }
 
     public int size() {

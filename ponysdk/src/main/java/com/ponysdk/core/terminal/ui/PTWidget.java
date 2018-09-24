@@ -25,6 +25,7 @@ package com.ponysdk.core.terminal.ui;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 import com.google.gwt.dom.client.Element;
@@ -41,6 +42,7 @@ import com.google.gwt.event.dom.client.DragStartEvent;
 import com.google.gwt.event.dom.client.DropEvent;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyEvent;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.MouseDownEvent;
@@ -120,9 +122,9 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
 
     private void addDomHandler(final ReaderBuffer buffer, final DomHandlerType domHandlerType) {
         if (DomHandlerType.CLICK == domHandlerType) {
-            uiObject.addDomHandler(event -> triggerMouseEvent(domHandlerType, event), ClickEvent.getType());
+            uiObject.addDomHandler(event -> triggerMouseClickEvent(domHandlerType, event), ClickEvent.getType());
         } else if (DomHandlerType.DOUBLE_CLICK == domHandlerType) {
-            uiObject.addDomHandler(event -> triggerMouseEvent(domHandlerType, event), DoubleClickEvent.getType());
+            uiObject.addDomHandler(event -> triggerMouseClickEvent(domHandlerType, event), DoubleClickEvent.getType());
         } else if (DomHandlerType.MOUSE_OVER == domHandlerType) {
             uiObject.addDomHandler(event -> triggerMouseEvent(domHandlerType, event), MouseOverEvent.getType());
         } else if (DomHandlerType.MOUSE_OUT == domHandlerType) {
@@ -138,11 +140,14 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
         } else if (DomHandlerType.FOCUS == domHandlerType) {
             uiObject.addDomHandler(event -> triggerDomEvent(domHandlerType, event), FocusEvent.getType());
         } else if (DomHandlerType.KEY_PRESS == domHandlerType) {
-            triggerKeyPressEvent(domHandlerType, extractKeyFilter(buffer));
+            final JSONArray keyFilter = extractKeyFilter(buffer);
+            uiObject.addDomHandler(event -> triggerKeyEvent(domHandlerType, event, keyFilter), KeyPressEvent.getType());
         } else if (DomHandlerType.KEY_DOWN == domHandlerType) {
-            triggerKeyDownEvent(domHandlerType, extractKeyFilter(buffer));
+            final JSONArray keyFilter = extractKeyFilter(buffer);
+            uiObject.addDomHandler(event -> triggerKeyEvent(domHandlerType, event, keyFilter), KeyDownEvent.getType());
         } else if (DomHandlerType.KEY_UP == domHandlerType) {
-            triggerKeyUpEvent(domHandlerType, extractKeyFilter(buffer));
+            final JSONArray keyFilter = extractKeyFilter(buffer);
+            uiObject.addDomHandler(event -> triggerKeyUpEvent(domHandlerType, event, keyFilter), KeyUpEvent.getType());
         } else if (DomHandlerType.DRAG_START == domHandlerType) {
             uiObject.getElement().setDraggable(Element.DRAGGABLE_TRUE);
             uiObject.addBitlessDomHandler(event -> {
@@ -164,8 +169,9 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
 
             uiObject.addBitlessDomHandler(event -> {
                 event.preventDefault();
-                final String dragWidgetID = event.getData("text");
+
                 final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
+                final String dragWidgetID = event.getData("text");
                 if (dragWidgetID != null) eventInstruction.put(ClientToServerModel.DRAG_SRC, Long.parseLong(dragWidgetID));
                 uiBuilder.sendDataToServer(uiObject, eventInstruction);
             }, DropEvent.getType());
@@ -183,121 +189,90 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
     }
 
     private void triggerDomEvent(final DomHandlerType domHandlerType, final DomEvent<?> event) {
+        triggerDomEvent(domHandlerType, event, null);
+    }
+
+    protected void triggerDomEvent(final DomHandlerType domHandlerType, final DomEvent<?> event,
+                                   final Consumer<PTInstruction> enricher) {
         final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
+        if (enricher != null) enricher.accept(eventInstruction);
         uiBuilder.sendDataToServer(uiObject, eventInstruction);
         preventOrStopEvent(event);
     }
 
     protected void triggerMouseEvent(final DomHandlerType domHandlerType, final MouseEvent<?> event) {
-        final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
+        triggerDomEvent(domHandlerType, event, instruction -> {
+            final JSONArray eventInfo = new JSONArray();
+            eventInfo.set(0, new JSONNumber(event.getClientX()));
+            eventInfo.set(1, new JSONNumber(event.getClientY()));
+            eventInfo.set(2, new JSONNumber(event.getX()));
+            eventInfo.set(3, new JSONNumber(event.getY()));
+            eventInfo.set(4, new JSONNumber(event.getNativeButton()));
+            eventInfo.set(5, JSONBoolean.getInstance(event.isControlKeyDown()));
+            eventInfo.set(6, JSONBoolean.getInstance(event.isAltKeyDown()));
+            eventInfo.set(7, JSONBoolean.getInstance(event.isShiftKeyDown()));
+            eventInfo.set(8, JSONBoolean.getInstance(event.isMetaKeyDown()));
+            instruction.put(ClientToServerModel.EVENT_INFO, eventInfo);
 
-        final JSONArray eventInfo = new JSONArray();
-        eventInfo.set(0, new JSONNumber(event.getClientX()));
-        eventInfo.set(1, new JSONNumber(event.getClientY()));
-        eventInfo.set(2, new JSONNumber(event.getX()));
-        eventInfo.set(3, new JSONNumber(event.getY()));
-        eventInfo.set(4, new JSONNumber(event.getNativeButton()));
-        eventInfo.set(5, JSONBoolean.getInstance(event.isControlKeyDown()));
-        eventInfo.set(6, JSONBoolean.getInstance(event.isAltKeyDown()));
-        eventInfo.set(7, JSONBoolean.getInstance(event.isShiftKeyDown()));
-        eventInfo.set(8, JSONBoolean.getInstance(event.isMetaKeyDown()));
-        eventInstruction.put(ClientToServerModel.EVENT_INFO, eventInfo);
+            final JSONArray widgetInfo = new JSONArray();
+            widgetInfo.set(0, new JSONNumber(uiObject.getAbsoluteLeft()));
+            widgetInfo.set(1, new JSONNumber(uiObject.getAbsoluteTop()));
+            widgetInfo.set(2, new JSONNumber(uiObject.getOffsetHeight()));
+            widgetInfo.set(3, new JSONNumber(uiObject.getOffsetWidth()));
+            instruction.put(ClientToServerModel.WIDGET_POSITION, widgetInfo);
+        });
+    }
 
-        final JSONArray widgetInfo = new JSONArray();
-        widgetInfo.set(0, new JSONNumber(uiObject.getAbsoluteLeft()));
-        widgetInfo.set(1, new JSONNumber(uiObject.getAbsoluteTop()));
-        widgetInfo.set(2, new JSONNumber(uiObject.getOffsetHeight()));
-        widgetInfo.set(3, new JSONNumber(uiObject.getOffsetWidth()));
-        eventInstruction.put(ClientToServerModel.WIDGET_POSITION, widgetInfo);
-
-        uiBuilder.sendDataToServer(uiObject, eventInstruction);
-
-        preventOrStopEvent(event);
+    protected void triggerMouseClickEvent(final DomHandlerType domHandlerType, final MouseEvent<?> event) {
+        triggerMouseEvent(domHandlerType, event);
     }
 
     private void triggerMouseWhellEvent(final DomHandlerType domHandlerType, final MouseWheelEvent event) {
-        final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
-        final JSONArray eventInfo = new JSONArray();
-        eventInfo.set(0, new JSONNumber(event.getClientX()));
-        eventInfo.set(1, new JSONNumber(event.getClientY()));
-        eventInfo.set(2, new JSONNumber(event.getX()));
-        eventInfo.set(3, new JSONNumber(event.getY()));
-        eventInfo.set(4, new JSONNumber(event.getNativeButton()));
-        eventInfo.set(5, new JSONNumber(event.getDeltaY()));
-        eventInstruction.put(ClientToServerModel.EVENT_INFO, eventInfo);
+        triggerDomEvent(domHandlerType, event, instruction -> {
+            final JSONArray eventInfo = new JSONArray();
+            eventInfo.set(0, new JSONNumber(event.getClientX()));
+            eventInfo.set(1, new JSONNumber(event.getClientY()));
+            eventInfo.set(2, new JSONNumber(event.getX()));
+            eventInfo.set(3, new JSONNumber(event.getY()));
+            eventInfo.set(4, new JSONNumber(event.getNativeButton()));
+            eventInfo.set(5, new JSONNumber(event.getDeltaY()));
+            instruction.put(ClientToServerModel.EVENT_INFO, eventInfo);
 
-        final JSONArray widgetInfo = new JSONArray();
-        widgetInfo.set(0, new JSONNumber(uiObject.getAbsoluteLeft()));
-        widgetInfo.set(1, new JSONNumber(uiObject.getAbsoluteTop()));
-        widgetInfo.set(2, new JSONNumber(uiObject.getOffsetHeight()));
-        widgetInfo.set(3, new JSONNumber(uiObject.getOffsetWidth()));
-        eventInstruction.put(ClientToServerModel.WIDGET_POSITION, widgetInfo);
+            final JSONArray widgetInfo = new JSONArray();
+            widgetInfo.set(0, new JSONNumber(uiObject.getAbsoluteLeft()));
+            widgetInfo.set(1, new JSONNumber(uiObject.getAbsoluteTop()));
+            widgetInfo.set(2, new JSONNumber(uiObject.getOffsetHeight()));
+            widgetInfo.set(3, new JSONNumber(uiObject.getOffsetWidth()));
+            instruction.put(ClientToServerModel.WIDGET_POSITION, widgetInfo);
+        });
+    }
 
-        uiBuilder.sendDataToServer(uiObject, eventInstruction);
+    protected void triggerKeyEvent(final DomHandlerType domHandlerType, final KeyEvent<?> event, final JSONArray keyFilter) {
+        boolean needToBeSent = false;
+        final int nativeKeyCode = event.getNativeEvent().getKeyCode();
+        if (keyFilter != null) {
+            for (int i = 0; i < keyFilter.size(); i++) {
+                final JSONNumber keyCode = keyFilter.get(i).isNumber();
+                if (keyCode.doubleValue() == nativeKeyCode) {
+                    needToBeSent = true;
+                    break;
+                }
+            }
+        } else {
+            needToBeSent = true;
+        }
+
+        if (needToBeSent) {
+            final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
+            eventInstruction.put(ClientToServerModel.VALUE_KEY, nativeKeyCode);
+            uiBuilder.sendDataToServer(uiObject, eventInstruction);
+        }
 
         preventOrStopEvent(event);
     }
 
-    private void triggerKeyPressEvent(final DomHandlerType domHandlerType, final JSONArray keyFilter) {
-        uiObject.addDomHandler(event -> {
-            final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
-            eventInstruction.put(ClientToServerModel.VALUE_KEY, event.getNativeEvent().getKeyCode());
-
-            if (keyFilter != null) {
-                for (int i = 0; i < keyFilter.size(); i++) {
-                    final JSONNumber keyCode = keyFilter.get(i).isNumber();
-                    if (keyCode.doubleValue() == event.getNativeEvent().getKeyCode()) {
-                        uiBuilder.sendDataToServer(uiObject, eventInstruction);
-                        break;
-                    }
-                }
-            } else {
-                uiBuilder.sendDataToServer(uiObject, eventInstruction);
-            }
-
-            preventOrStopEvent(event);
-        }, KeyPressEvent.getType());
-    }
-
-    private void triggerKeyDownEvent(final DomHandlerType domHandlerType, final JSONArray keyFilter) {
-        uiObject.addDomHandler(event -> {
-            final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
-            eventInstruction.put(ClientToServerModel.VALUE_KEY, event.getNativeKeyCode());
-
-            if (keyFilter != null) {
-                for (int i = 0; i < keyFilter.size(); i++) {
-                    final JSONNumber keyCode = keyFilter.get(i).isNumber();
-                    if (keyCode.doubleValue() == event.getNativeKeyCode()) {
-                        uiBuilder.sendDataToServer(uiObject, eventInstruction);
-                        break;
-                    }
-                }
-            } else {
-                uiBuilder.sendDataToServer(uiObject, eventInstruction);
-            }
-
-            preventOrStopEvent(event);
-        }, KeyDownEvent.getType());
-    }
-
-    protected void triggerKeyUpEvent(final DomHandlerType domHandlerType, final JSONArray keyUpFilter) {
-        uiObject.addDomHandler(event -> {
-            final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
-            eventInstruction.put(ClientToServerModel.VALUE_KEY, event.getNativeKeyCode());
-
-            if (keyUpFilter != null) {
-                for (int i = 0; i < keyUpFilter.size(); i++) {
-                    final JSONNumber keyCode = keyUpFilter.get(i).isNumber();
-                    if (keyCode.doubleValue() == event.getNativeKeyCode()) {
-                        uiBuilder.sendDataToServer(uiObject, eventInstruction);
-                        break;
-                    }
-                }
-            } else {
-                uiBuilder.sendDataToServer(uiObject, eventInstruction);
-            }
-            preventOrStopEvent(event);
-        }, KeyUpEvent.getType());
+    protected void triggerKeyUpEvent(final DomHandlerType domHandlerType, final KeyUpEvent event, final JSONArray keyFilter) {
+        triggerKeyEvent(domHandlerType, event, keyFilter);
     }
 
     protected void preventOrStopEvent(final DomEvent<?> event) {

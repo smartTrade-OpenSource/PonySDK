@@ -23,21 +23,11 @@
 
 package com.ponysdk.core.ui.eventbus;
 
-import java.util.HashMap;
-import java.util.Set;
-
-import com.ponysdk.core.util.SetUtils;
-
-public class SimpleEventBus extends AbstractEventBus {
-
-    @Override
-    protected HashMap<Object, Set<EventHandler>> createEventHandlerMap() {
-        return new HashMap<>(1); // Alway only one element in this map because it's a SimpleEventBus, so only on one PObject
-    }
-
-    @Override
-    protected Set<EventHandler> createHandlerSet() {
-        return SetUtils.newArraySet(4);
-    }
+/**
+ * @deprecated Use {@link EventBus} directly
+ * @since v2.8.8
+ */
+@Deprecated(forRemoval = true, since = "v2.8.8")
+public class SimpleEventBus extends EventBus {
 
 }

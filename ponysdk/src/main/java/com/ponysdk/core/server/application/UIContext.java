@@ -23,7 +23,6 @@
 
 package com.ponysdk.core.server.application;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -33,7 +32,10 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.json.*;
+import javax.json.JsonNumber;
+import javax.json.JsonObject;
+import javax.json.JsonString;
+import javax.json.JsonValue;
 import javax.json.JsonValue.ValueType;
 import javax.json.spi.JsonProvider;
 import javax.servlet.http.HttpSession;
@@ -46,7 +48,7 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.AlreadyDestroyedApplication;
-import com.ponysdk.core.server.context.PObjectWeakHashMap;
+import com.ponysdk.core.server.context.PObjectCache;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.server.stm.TxnContext;
 import com.ponysdk.core.server.websocket.WebSocket;
@@ -58,9 +60,7 @@ import com.ponysdk.core.ui.eventbus.BroadcastEventHandler;
 import com.ponysdk.core.ui.eventbus.Event;
 import com.ponysdk.core.ui.eventbus.EventHandler;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
-import com.ponysdk.core.ui.eventbus.RootEventBus;
 import com.ponysdk.core.ui.eventbus.StreamHandler;
-import com.ponysdk.core.ui.eventbus2.EventBus;
 import com.ponysdk.core.ui.statistic.TerminalDataReceiver;
 import com.ponysdk.core.useragent.UserAgent;
 import com.ponysdk.core.writer.ModelWriter;
@@ -89,15 +89,15 @@ public class UIContext {
     private final ReentrantLock lock = new ReentrantLock();
     private final Map<String, Object> attributes = new HashMap<>();
 
-    private final PObjectWeakHashMap pObjectWeakReferences = new PObjectWeakHashMap();
+    private final PObjectCache pObjectCache = new PObjectCache();
     private int objectCounter = 1;
 
     private Map<Integer, StreamHandler> streamListenerByID;
     private int streamRequestCounter = 0;
 
     private final PHistory history = new PHistory();
-    private final RootEventBus rootEventBus = new RootEventBus();
-    private final EventBus newEventBus = new EventBus();
+    private final com.ponysdk.core.ui.eventbus.EventBus rootEventBus = new com.ponysdk.core.ui.eventbus.EventBus();
+    private final com.ponysdk.core.ui.eventbus2.EventBus newEventBus = new com.ponysdk.core.ui.eventbus2.EventBus();
 
     private final PCookies cookies = new PCookies();
 
@@ -121,17 +121,17 @@ public class UIContext {
     private final JsonProvider jsonProvider;
 
     public UIContext(final WebSocket socket, final TxnContext context, final ApplicationConfiguration configuration,
-                     final ServletUpgradeRequest request) {
+            final ServletUpgradeRequest request) {
         this.ID = uiContextCount.incrementAndGet();
         this.socket = socket;
         this.configuration = configuration;
         this.request = request;
         this.context = context;
 
-        JsonProvider provider ;
+        JsonProvider provider;
         try {
             provider = (JsonProvider) Class.forName(DEFAULT_PROVIDER).getDeclaredConstructor().newInstance();
-        } catch (Throwable t) {
+        } catch (final Throwable t) {
             provider = JsonProvider.provider();
         }
 
@@ -174,9 +174,9 @@ public class UIContext {
     }
 
     /**
-     * Adds {@link EventHandler} to the {@link RootEventBus}
+     * Adds {@link EventHandler} to the {@link com.ponysdk.core.ui.eventbus.EventBus}
      *
-     * @param type    the event type
+     * @param type the event type
      * @param handler the event handler
      * @return the HandlerRegistration in order to remove the EventHandler
      * @see #fireEvent(Event)
@@ -186,7 +186,7 @@ public class UIContext {
     }
 
     /**
-     * Fires an {@link Event} on the {@link RootEventBus}
+     * Fires an {@link Event} on the {@link com.ponysdk.core.ui.eventbus.EventBus}
      * Only {@link EventHandler}s added before fires event will be stimulated
      *
      * @param event the fired event
@@ -197,9 +197,9 @@ public class UIContext {
     }
 
     /**
-     * Removes {@link EventHandler} from the {@link RootEventBus}
+     * Removes {@link EventHandler} from the {@link com.ponysdk.core.ui.eventbus.EventBus}
      *
-     * @param type    the event type
+     * @param type the event type
      * @param handler the event handler
      * @see #addHandler(com.ponysdk.core.ui.eventbus.Event.Type, EventHandler)
      */
@@ -208,11 +208,11 @@ public class UIContext {
     }
 
     /**
-     * Adds {@link EventHandler} to the {@link RootEventBus} with a specific source
+     * Adds {@link EventHandler} to the {@link com.ponysdk.core.ui.eventbus.EventBus} with a specific source
      * Use {@link #fireEventFromSource(Event, Object)} to stimulate this event handler
      *
-     * @param type    the event type
-     * @param source  the source
+     * @param type the event type
+     * @param source the source
      * @param handler the event handler
      * @return the {@link HandlerRegistration} in order to remove the {@link EventHandler}
      * @see #fireEventFromSource(Event, Object)
@@ -222,10 +222,10 @@ public class UIContext {
     }
 
     /**
-     * Fires an {@link Event} on the {@link RootEventBus} with a specific source
+     * Fires an {@link Event} on the {@link com.ponysdk.core.ui.eventbus.EventBus} with a specific source
      * Only {@link EventHandler}s added before fires event will be stimulated
      *
-     * @param event  the fired event
+     * @param event the fired event
      * @param source the source
      * @see #addHandlerToSource(com.ponysdk.core.ui.eventbus.Event.Type, Object, EventHandler)
      */
@@ -234,10 +234,10 @@ public class UIContext {
     }
 
     /**
-     * Removes handler from the {@link RootEventBus} with a specific source
+     * Removes handler from the {@link com.ponysdk.core.ui.eventbus.EventBus} with a specific source
      *
-     * @param type    the event type
-     * @param source  the source
+     * @param type the event type
+     * @param source the source
      * @param handler the event handler
      * @see #addHandlerToSource(com.ponysdk.core.ui.eventbus.Event.Type, Object, EventHandler)
      */
@@ -246,7 +246,8 @@ public class UIContext {
     }
 
     /**
-     * Adds a {@link BroadcastEventHandler} to the {@link RootEventBus} that receive all the events
+     * Adds a {@link BroadcastEventHandler} to the {@link com.ponysdk.core.ui.eventbus.EventBus} that receive all the
+     * events
      * All call to {@link #fireEvent(Event)} or {@link #fireEventFromSource(Event, Object)} will stimulate this event
      * handler
      *
@@ -259,7 +260,7 @@ public class UIContext {
     }
 
     /**
-     * Removes broadcast handler from the {@link RootEventBus}
+     * Removes broadcast handler from the {@link com.ponysdk.core.ui.eventbus.EventBus}
      *
      * @param handler the broadcast event handler
      * @see #addHandler(BroadcastEventHandler)
@@ -269,20 +270,20 @@ public class UIContext {
     }
 
     /**
-     * Gets the default {@link RootEventBus}
+     * Gets the default {@link com.ponysdk.core.ui.eventbus.EventBus}
      *
      * @return the root event bus
      */
-    public static RootEventBus getRootEventBus() {
+    public static com.ponysdk.core.ui.eventbus.EventBus getRootEventBus() {
         return get().rootEventBus;
     }
 
     /**
-     * Gets the default {@link EventBus}
+     * Gets the default {@link com.ponysdk.core.ui.eventbus2.EventBus}
      *
      * @return the new event bus
      */
-    public static EventBus getNewEventBus() {
+    public static com.ponysdk.core.ui.eventbus2.EventBus getNewEventBus() {
         return get().newEventBus;
     }
 
@@ -417,8 +418,8 @@ public class UIContext {
 
                     if (jsonObject.containsKey(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())) {
                         final int parentObjectID = jsonObject.getJsonNumber(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())
-                                .intValue();
-                        final PObject gcObject = pObjectWeakReferences.get(parentObjectID);
+                            .intValue();
+                        final PObject gcObject = getObject(parentObjectID);
                         if (log.isWarnEnabled()) log.warn(String.valueOf(gcObject));
                     }
 
@@ -473,7 +474,7 @@ public class UIContext {
      * @see #getObject(int)
      */
     public void registerObject(final PObject pObject) {
-        pObjectWeakReferences.put(pObject.getID(), pObject);
+        pObjectCache.add(pObject);
     }
 
     /**
@@ -484,7 +485,7 @@ public class UIContext {
      * @see #registerObject(PObject)
      */
     public PObject getObject(final int objectID) {
-        return pObjectWeakReferences.get(objectID);
+        return pObjectCache.get(objectID);
     }
 
     /**
@@ -493,10 +494,20 @@ public class UIContext {
      * @param streamListener the stream handler
      */
     public void stackStreamRequest(final StreamHandler streamListener) {
+        stackStreamRequest(streamListener, PWindow.getMain());
+    }
+
+    /**
+     * Registers a {@link StreamHandler} that will be called on the terminal side
+     *
+     * @param streamListener the stream handler
+     */
+    public void stackStreamRequest(final StreamHandler streamListener, final PWindow window) {
         final int streamRequestID = nextStreamRequestID();
 
         final ModelWriter writer = Txn.get().getWriter();
         writer.beginObject();
+        if (!PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
         writer.write(ServerToClientModel.TYPE_ADD_HANDLER, -1);
         writer.write(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_STREAM_REQUEST.getValue());
         writer.write(ServerToClientModel.STREAM_REQUEST_ID, streamRequestID);
@@ -510,18 +521,16 @@ public class UIContext {
      * Registers a {@link StreamHandler} that will be called on a specific {@link com.ponysdk.core.terminal.ui.PTObject}
      *
      * @param streamListener the stream handler
-     * @param objectID       the object ID of a {@link PObject}
+     * @param pObject the {@link PObject}
      */
-    public void stackEmbeddedStreamRequest(final StreamHandler streamListener, final int objectID) {
+    public void stackEmbeddedStreamRequest(final StreamHandler streamListener, final PObject pObject) {
         final int streamRequestID = nextStreamRequestID();
 
         final ModelWriter writer = Txn.get().getWriter();
         writer.beginObject();
-        final PObject pObject = getObject(objectID);
-        if (!PWindow.isMain(pObject.getWindow()))
-            writer.write(ServerToClientModel.WINDOW_ID, pObject.getWindow().getID());
+        if (!PWindow.isMain(pObject.getWindow())) writer.write(ServerToClientModel.WINDOW_ID, pObject.getWindow().getID());
         if (pObject.getFrame() != null) writer.write(ServerToClientModel.FRAME_ID, pObject.getFrame().getID());
-        writer.write(ServerToClientModel.TYPE_ADD_HANDLER, objectID);
+        writer.write(ServerToClientModel.TYPE_ADD_HANDLER, pObject.getID());
         writer.write(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST.getValue());
         writer.write(ServerToClientModel.STREAM_REQUEST_ID, streamRequestID);
         writer.endObject();
@@ -565,7 +574,7 @@ public class UIContext {
      * <p>
      * If the value passed in is null, this has the same effect as calling {@link #removeAttribute(String)}.
      *
-     * @param name  the name to which the object is bound; cannot be null
+     * @param name the name to which the object is bound; cannot be null
      * @param value the object to be bound
      */
     public void setAttribute(final String name, final Object value) {

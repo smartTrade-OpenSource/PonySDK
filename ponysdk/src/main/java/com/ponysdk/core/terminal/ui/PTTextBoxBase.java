@@ -25,6 +25,7 @@ package com.ponysdk.core.terminal.ui;
 
 import java.util.Objects;
 
+import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.user.client.ui.TextBoxBase;
@@ -64,42 +65,42 @@ public abstract class PTTextBoxBase<T extends TextBoxBase> extends PTValueBoxBas
     }
 
     @Override
-    protected void triggerKeyUpEvent(final DomHandlerType domHandlerType, final JSONArray keyUpFilter) {
-        uiObject.addKeyUpHandler(event -> {
-            if (keyUpFilter != null) {
-                for (int i = 0; i < keyUpFilter.size(); i++) {
-                    final JSONNumber keyCode = keyUpFilter.get(i).isNumber();
-                    if (keyCode.doubleValue() == event.getNativeKeyCode()) {
-                        final String newValue = uiObject.getText();
-                        if (!Objects.equals(newValue, this.lastValue)) {
-                            this.lastValue = newValue;
-                            final PTInstruction changeHandlerInstruction = new PTInstruction(getObjectID());
-                            changeHandlerInstruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE, this.lastValue);
-                            uiBuilder.sendDataToServer(changeHandlerInstruction);
-                        }
-
-                        final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
-                        eventInstruction.put(ClientToServerModel.VALUE_KEY, event.getNativeKeyCode());
-                        uiBuilder.sendDataToServer(eventInstruction);
-
-                        break;
+    protected void triggerKeyUpEvent(final DomHandlerType domHandlerType, final KeyUpEvent event, final JSONArray keyFilter) {
+        if (!enabled) return;
+        final int nativeKeyCode = event.getNativeKeyCode();
+        if (keyFilter != null) {
+            for (int i = 0; i < keyFilter.size(); i++) {
+                final JSONNumber keyCode = keyFilter.get(i).isNumber();
+                if (keyCode.doubleValue() == nativeKeyCode) {
+                    final String newValue = uiObject.getText();
+                    if (!Objects.equals(newValue, this.lastValue)) {
+                        this.lastValue = newValue;
+                        final PTInstruction changeHandlerInstruction = new PTInstruction(getObjectID());
+                        changeHandlerInstruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE, this.lastValue);
+                        uiBuilder.sendDataToServer(changeHandlerInstruction);
                     }
-                }
-            } else {
-                final String newValue = uiObject.getText();
-                if (!Objects.equals(newValue, this.lastValue)) {
-                    this.lastValue = newValue;
-                    final PTInstruction changeHandlerInstruction = new PTInstruction(getObjectID());
-                    changeHandlerInstruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE, this.lastValue);
-                    uiBuilder.sendDataToServer(changeHandlerInstruction);
-                }
 
-                final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
-                eventInstruction.put(ClientToServerModel.VALUE_KEY, event.getNativeKeyCode());
-                uiBuilder.sendDataToServer(eventInstruction);
+                    final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
+                    eventInstruction.put(ClientToServerModel.VALUE_KEY, nativeKeyCode);
+                    uiBuilder.sendDataToServer(eventInstruction);
+
+                    break;
+                }
             }
-            preventOrStopEvent(event);
-        });
+        } else {
+            final String newValue = uiObject.getText();
+            if (!Objects.equals(newValue, this.lastValue)) {
+                this.lastValue = newValue;
+                final PTInstruction changeHandlerInstruction = new PTInstruction(getObjectID());
+                changeHandlerInstruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE, this.lastValue);
+                uiBuilder.sendDataToServer(changeHandlerInstruction);
+            }
+
+            final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
+            eventInstruction.put(ClientToServerModel.VALUE_KEY, nativeKeyCode);
+            uiBuilder.sendDataToServer(eventInstruction);
+        }
+        preventOrStopEvent(event);
     }
 
 }
