@@ -67,7 +67,7 @@ public class ListBoxFormField<T> extends AbstractFormField<T, PListBox> {
     }
 
     public ListBoxFormField(final PListBox widget, final DataConverter<String, T> dataProvider) {
-        super(widget, dataProvider, false);
+        this(widget, dataProvider, false);
     }
 
     public ListBoxFormField(final PListBox widget, final DataConverter<String, T> dataProvider, final boolean dirtyMode) {
