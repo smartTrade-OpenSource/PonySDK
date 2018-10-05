@@ -246,7 +246,7 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
                 putInt(bytes.length);
                 put(bytes);
             } else {
-                if (model.getTypeModel() == ValueTypeModel.STRING) put(CharsetModel.ASCII.getValue());
+                put(CharsetModel.ASCII.getValue());
                 putInt(0);
             }
         } catch (final UnsupportedEncodingException e) {
