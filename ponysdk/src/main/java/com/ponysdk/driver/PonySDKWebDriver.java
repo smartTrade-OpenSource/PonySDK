@@ -98,6 +98,7 @@ public class PonySDKWebDriver implements WebDriver {
     private final List<PonyFrame> messageInConstruction = new ArrayList<>();
     private final PonyMessageListener messageListener;
     private final PonyBandwithListener bandwithListener;
+    private final boolean handleImplicitCommunication;
 
     // Use EnumMap instead of normal switch since the latter calls ServerToClientModel::values each time causing enormous garbage
     private final EnumMap<ServerToClientModel, BiConsumer<List<PonyFrame>, PonyFrame>> onMessageSwitch = new EnumMap<>(
@@ -110,23 +111,25 @@ public class PonySDKWebDriver implements WebDriver {
     private ByteBuffer buffer = ByteBuffer.allocate(4096);
 
     public PonySDKWebDriver() {
-        this(null, null);
+        this(null, null, true);
     }
 
-    public PonySDKWebDriver(final PonyMessageListener messageListener, final PonyBandwithListener bandwithListener) {
+    public PonySDKWebDriver(final PonyMessageListener messageListener, final PonyBandwithListener bandwithListener,
+            final boolean handleImplicitCommunication) {
         super();
+        this.handleImplicitCommunication = handleImplicitCommunication;
         this.messageListener = messageListener == null ? INDIFFERENT_MSG_LISTENER : messageListener;
         this.bandwithListener = bandwithListener == null ? INDIFFERENT_BANDWITH_LISTENER : bandwithListener;
 
         onMessageSwitch.put(ServerToClientModel.CREATE_CONTEXT, (message, frame) -> {
             log.info("UI Context created with ID {}", contextId = (int) frame.value);
-            sendCookies();
+            if (handleImplicitCommunication) sendCookies();
         });
         onMessageSwitch.put(ServerToClientModel.HISTORY_FIRE_EVENTS, (message, frame) -> {
             if ((boolean) frame.getValue()) {
                 final String typeHistory = (String) findValueForModel(message, ServerToClientModel.TYPE_HISTORY);
                 if (typeHistory == null) return;
-                sendTypeHistory(this.typeHistory = typeHistory);
+                if (handleImplicitCommunication) sendTypeHistory(this.typeHistory = typeHistory);
             }
         });
         onMessageSwitch.put(ServerToClientModel.TYPE_ADD, (message, frame) -> {
@@ -205,17 +208,21 @@ public class PonySDKWebDriver implements WebDriver {
         onMessageSwitch.put(ServerToClientModel.OPEN, (message, frame) -> {
             final PonyWebElement element = findElement(message);
             if (element == null) return;
-            element.sendApplicationInstruction(ClientToServerModel.HANDLER_OPEN, "");
-            sendCookies();
+            if (handleImplicitCommunication) {
+                element.sendApplicationInstruction(ClientToServerModel.HANDLER_OPEN, "");
+                sendCookies();
+            }
         });
         onMessageSwitch.put(ServerToClientModel.PING_SERVER, (message, frame) -> {
-            final JsonObject json = Json.createObjectBuilder() //
-                .add(ClientToServerModel.PING_SERVER.toStringValue(), (long) frame.value) //
-                .build();
-            sendMessage(json);
+            if (handleImplicitCommunication) {
+                final JsonObject json = Json.createObjectBuilder() //
+                    .add(ClientToServerModel.PING_SERVER.toStringValue(), (long) frame.value) //
+                    .build();
+                sendMessage(json);
+            }
         });
         onMessageSwitch.put(ServerToClientModel.HEARTBEAT, (message, frame) -> {
-            sendMessage("0");
+            if (handleImplicitCommunication) sendMessage("0");
         });
         onMessageSwitch.put(ServerToClientModel.WIDGET_VISIBLE, (message, frame) -> {
             final PonyWebElement element = findElement(message);
@@ -584,6 +591,10 @@ public class PonySDKWebDriver implements WebDriver {
 
     public void clear() {
         elements.clear();
+    }
+
+    public boolean isHandleImplicitCommunication() {
+        return handleImplicitCommunication;
     }
 
 }
