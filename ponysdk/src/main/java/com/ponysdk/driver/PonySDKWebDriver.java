@@ -55,6 +55,7 @@ import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ponysdk.core.model.CharsetModel;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.ValueTypeModel;
@@ -97,6 +98,7 @@ public class PonySDKWebDriver implements WebDriver {
     private final List<PonyFrame> messageInConstruction = new ArrayList<>();
     private final PonyMessageListener messageListener;
     private final PonyBandwithListener bandwithListener;
+    private final boolean handleImplicitCommunication;
 
     // Use EnumMap instead of normal switch since the latter calls ServerToClientModel::values each time causing enormous garbage
     private final EnumMap<ServerToClientModel, BiConsumer<List<PonyFrame>, PonyFrame>> onMessageSwitch = new EnumMap<>(
@@ -109,23 +111,25 @@ public class PonySDKWebDriver implements WebDriver {
     private ByteBuffer buffer = ByteBuffer.allocate(4096);
 
     public PonySDKWebDriver() {
-        this(null, null);
+        this(null, null, true);
     }
 
-    public PonySDKWebDriver(final PonyMessageListener messageListener, final PonyBandwithListener bandwithListener) {
+    public PonySDKWebDriver(final PonyMessageListener messageListener, final PonyBandwithListener bandwithListener,
+            final boolean handleImplicitCommunication) {
         super();
+        this.handleImplicitCommunication = handleImplicitCommunication;
         this.messageListener = messageListener == null ? INDIFFERENT_MSG_LISTENER : messageListener;
         this.bandwithListener = bandwithListener == null ? INDIFFERENT_BANDWITH_LISTENER : bandwithListener;
 
         onMessageSwitch.put(ServerToClientModel.CREATE_CONTEXT, (message, frame) -> {
             log.info("UI Context created with ID {}", contextId = (int) frame.value);
-            sendCookies();
+            if (handleImplicitCommunication) sendCookies();
         });
         onMessageSwitch.put(ServerToClientModel.HISTORY_FIRE_EVENTS, (message, frame) -> {
             if ((boolean) frame.getValue()) {
                 final String typeHistory = (String) findValueForModel(message, ServerToClientModel.TYPE_HISTORY);
                 if (typeHistory == null) return;
-                sendTypeHistory(this.typeHistory = typeHistory);
+                if (handleImplicitCommunication) sendTypeHistory(this.typeHistory = typeHistory);
             }
         });
         onMessageSwitch.put(ServerToClientModel.TYPE_ADD, (message, frame) -> {
@@ -204,22 +208,31 @@ public class PonySDKWebDriver implements WebDriver {
         onMessageSwitch.put(ServerToClientModel.OPEN, (message, frame) -> {
             final PonyWebElement element = findElement(message);
             if (element == null) return;
-            element.sendApplicationInstruction(ClientToServerModel.HANDLER_OPEN, "");
-            sendCookies();
+            if (handleImplicitCommunication) {
+                element.sendApplicationInstruction(ClientToServerModel.HANDLER_OPEN, "");
+                sendCookies();
+            }
         });
         onMessageSwitch.put(ServerToClientModel.PING_SERVER, (message, frame) -> {
-            final JsonObject json = Json.createObjectBuilder() //
-                .add(ClientToServerModel.PING_SERVER.toStringValue(), (long) frame.value) //
-                .build();
-            sendMessage(json);
+            if (handleImplicitCommunication) {
+                final JsonObject json = Json.createObjectBuilder() //
+                    .add(ClientToServerModel.PING_SERVER.toStringValue(), (long) frame.value) //
+                    .build();
+                sendMessage(json);
+            }
         });
         onMessageSwitch.put(ServerToClientModel.HEARTBEAT, (message, frame) -> {
-            sendMessage("0");
+            if (handleImplicitCommunication) sendMessage("0");
         });
         onMessageSwitch.put(ServerToClientModel.WIDGET_VISIBLE, (message, frame) -> {
             final PonyWebElement element = findElement(message);
             if (element == null) return;
             element.displayed = (boolean) frame.value;
+        });
+        onMessageSwitch.put(ServerToClientModel.ENABLED, (message, frame) -> {
+            final PonyWebElement element = findElement(message);
+            if (element == null) return;
+            element.enabled = (boolean) frame.value;
         });
     }
 
@@ -380,7 +393,7 @@ public class PonySDKWebDriver implements WebDriver {
                         if (value == null) break loop;
                         value = Double.parseDouble((String) value);
                         break;
-                    case STRING:
+                    case STRING_ASCII:
                         length = readStringLength(b, position, 2, PonySDKWebDriver::readUnsignedShort);
                         if (length < 0 || length > b.remaining()) {
                             b.position(position);
@@ -389,22 +402,40 @@ public class PonySDKWebDriver implements WebDriver {
                         value = readString(StandardCharsets.ISO_8859_1, b, length);
                         if (value == null) break loop;
                         break;
-                    case STRING_UTF8:
+                    case STRING:
+                        if (!b.hasRemaining()) {
+                            b.position(position);
+                            break loop;
+                        }
+
+                        final byte charsetStringType = b.get();
+
                         length = readStringLength(b, position, 2, PonySDKWebDriver::readUnsignedShort);
                         if (length < 0 || length > b.remaining()) {
                             b.position(position);
                             break loop;
                         }
-                        value = readString(StandardCharsets.UTF_8, b, length);
+                        value = readString(
+                            charsetStringType == CharsetModel.ASCII.getValue() ? StandardCharsets.ISO_8859_1 : StandardCharsets.UTF_8,
+                            b, length);
                         if (value == null) break loop;
                         break;
                     case JSON_OBJECT:
+                        if (!b.hasRemaining()) {
+                            b.position(position);
+                            break loop;
+                        }
+
+                        final byte charsetJsonType = b.get();
+
                         length = readStringLength(b, position, 4, (buff) -> buff.getInt());
                         if (length < 0 || length > b.remaining()) {
                             b.position(position);
                             break loop;
                         }
-                        value = readString(StandardCharsets.UTF_8, b, length);
+                        value = readString(
+                            charsetJsonType == CharsetModel.ASCII.getValue() ? StandardCharsets.ISO_8859_1 : StandardCharsets.UTF_8, b,
+                            length);
                         if (value == null) break loop;
                         try (JsonReader jsonReader = Json.createReader(new StringReader((String) value))) {
                             value = jsonReader.readObject();
@@ -422,7 +453,7 @@ public class PonySDKWebDriver implements WebDriver {
                     return;
                 }
             }
-            length += 5;
+            length += 6; //6 == Max prefix length == Model(1) + Charset(1) + Length(4)
             if (b == message && b.hasRemaining()) {
                 if (buffer.capacity() < length) {
                     buffer = ByteBuffer.allocate(Math.max(buffer.capacity() << 1, length));
@@ -565,6 +596,10 @@ public class PonySDKWebDriver implements WebDriver {
 
     public void clear() {
         elements.clear();
+    }
+
+    public boolean isHandleImplicitCommunication() {
+        return handleImplicitCommunication;
     }
 
 }

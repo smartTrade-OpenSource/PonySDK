@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import javax.json.JsonObject;
 
@@ -35,7 +36,10 @@ import org.eclipse.jetty.websocket.api.WriteCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ponysdk.core.model.BooleanModel;
+import com.ponysdk.core.model.CharsetModel;
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.model.ValueTypeModel;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.AutoFlushedBuffer;
 
@@ -43,11 +47,8 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
 
     private static final Logger log = LoggerFactory.getLogger(WebSocketPusher.class);
 
-    private static final byte TRUE = 1;
-    private static final byte FALSE = 0;
-
-    private static final Charset STANDARD_CHARSET = Charset.forName("ISO-8859-1");
-    private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
+    private static final Charset ASCII_CHARSET = StandardCharsets.ISO_8859_1;
+    private static final Charset UTF8_CHARSET = StandardCharsets.UTF_8;
 
     private static final int MAX_UNSIGNED_BYTE_VALUE = Byte.MAX_VALUE * 2 + 1;
     private static final int MAX_UNSIGNED_SHORT_VALUE = Short.MAX_VALUE * 2 + 1;
@@ -120,11 +121,9 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
                 case DOUBLE:
                     write(model, (double) value);
                     break;
+                case STRING_ASCII:
                 case STRING:
-                    write(model, (String) value, STANDARD_CHARSET);
-                    break;
-                case STRING_UTF8:
-                    write(model, (String) value, UTF8_CHARSET);
+                    write(model, (String) value);
                     break;
                 case JSON_OBJECT:
                     write(model, (JsonObject) value);
@@ -144,7 +143,7 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
     }
 
     private void write(final ServerToClientModel model, final boolean value) throws IOException {
-        write(model, value ? TRUE : FALSE);
+        write(model, value ? BooleanModel.TRUE.getValue() : BooleanModel.FALSE.getValue());
     }
 
     private void write(final ServerToClientModel model, final byte value) throws IOException {
@@ -168,7 +167,7 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
         putModelKey(model);
 
         try {
-            final byte[] bytes = value.getBytes(STANDARD_CHARSET);
+            final byte[] bytes = value.getBytes(ASCII_CHARSET);
             final int length = bytes.length;
             if (length <= MAX_UNSIGNED_BYTE_VALUE) {
                 putUnsignedByte((short) length);
@@ -188,7 +187,7 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
         putModelKey(model);
 
         try {
-            final byte[] bytes = value.getBytes(STANDARD_CHARSET);
+            final byte[] bytes = value.getBytes(ASCII_CHARSET);
             final int length = bytes.length;
             if (length <= MAX_UNSIGNED_BYTE_VALUE) {
                 putUnsignedByte((short) length);
@@ -202,14 +201,21 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
         }
     }
 
-    private void write(final ServerToClientModel model, final String value, final Charset encodingCharset) throws IOException {
+    private void write(final ServerToClientModel model, final String value) throws IOException {
         putModelKey(model);
 
         try {
             if (value != null) {
-                final byte[] bytes = value.getBytes(encodingCharset);
+                final byte[] bytes = value
+                    .getBytes(model.getTypeModel() == ValueTypeModel.STRING_ASCII ? ASCII_CHARSET : UTF8_CHARSET);
+
                 final int length = bytes.length;
                 if (length <= MAX_UNSIGNED_SHORT_VALUE) {
+                    if (model.getTypeModel() == ValueTypeModel.STRING) {
+                        if (length == value.length()) put(CharsetModel.ASCII.getValue());
+                        else put(CharsetModel.UTF8.getValue());
+                    }
+
                     putUnsignedShort(length);
                     put(bytes);
                 } else {
@@ -217,6 +223,7 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
                             + "), use a JsonObject instead : " + value.substring(0, Math.min(value.length(), 100)) + "...");
                 }
             } else {
+                if (model.getTypeModel() == ValueTypeModel.STRING) put(CharsetModel.ASCII.getValue());
                 putUnsignedShort(0);
             }
         } catch (final UnsupportedEncodingException e) {
@@ -232,9 +239,14 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
         try {
             if (value != null) {
                 final byte[] bytes = value.getBytes(UTF8_CHARSET);
+
+                if (bytes.length == value.length()) put(CharsetModel.ASCII.getValue());
+                else put(CharsetModel.UTF8.getValue());
+
                 putInt(bytes.length);
                 put(bytes);
             } else {
+                if (model.getTypeModel() == ValueTypeModel.STRING) put(CharsetModel.ASCII.getValue());
                 putInt(0);
             }
         } catch (final UnsupportedEncodingException e) {

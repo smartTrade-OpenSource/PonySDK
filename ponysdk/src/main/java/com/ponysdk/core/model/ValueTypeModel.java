@@ -32,8 +32,8 @@ public enum ValueTypeModel {
     INTEGER(ValueTypeModel.INTEGER_SIZE),
     LONG(ValueTypeModel.LONG_SIZE),
     DOUBLE(ValueTypeModel.DOUBLE_SIZE),
+    STRING_ASCII(ValueTypeModel.STRING_SIZE),
     STRING(ValueTypeModel.STRING_SIZE),
-    STRING_UTF8(ValueTypeModel.STRING_SIZE),
     JSON_OBJECT(ValueTypeModel.JSON_OBJECT_SIZE);
 
     public static final int NULL_SIZE = 0;

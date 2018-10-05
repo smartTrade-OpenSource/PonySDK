@@ -55,18 +55,19 @@ import com.ponysdk.core.terminal.ui.PTWindowManager;
 
 import elemental.client.Browser;
 import elemental.html.Uint8Array;
-import elemental.js.util.JsMapFromIntTo;
-import elemental.js.util.JsMapFromStringTo;
+import elemental.util.Collections;
+import elemental.util.MapFromIntTo;
+import elemental.util.MapFromStringTo;
 
 public class UIBuilder {
 
     private static final Logger log = Logger.getLogger(UIBuilder.class.getName());
 
     private final UIFactory uiFactory = new UIFactory();
-    private final JsMapFromIntTo<PTObject> objectByID = JsMapFromIntTo.create();
+    private final MapFromIntTo<PTObject> objectByID = Collections.mapFromIntTo();
     private final Map<UIObject, Integer> objectIDByWidget = new HashMap<>();
-    private final JsMapFromIntTo<UIObject> widgetIDByObjectID = JsMapFromIntTo.create();
-    private final JsMapFromStringTo<JavascriptAddOnFactory> javascriptAddOnFactories = JsMapFromStringTo.create();
+    private final MapFromIntTo<UIObject> widgetIDByObjectID = Collections.mapFromIntTo();
+    private final MapFromStringTo<JavascriptAddOnFactory> javascriptAddOnFactories = Collections.mapFromStringTo();
 
     private final ReaderBuffer readerBuffer = new ReaderBuffer();
 
@@ -456,8 +457,8 @@ public class UIBuilder {
         this.javascriptAddOnFactories.put(signature, javascriptAddOnFactory);
     }
 
-    public JsMapFromStringTo<JavascriptAddOnFactory> getJavascriptAddOnFactory() {
-        return javascriptAddOnFactories;
+    public JavascriptAddOnFactory getJavascriptAddOnFactory(final String signature) {
+        return javascriptAddOnFactories.get(signature);
     }
 
     void setReadyWindow(final int windowID) {

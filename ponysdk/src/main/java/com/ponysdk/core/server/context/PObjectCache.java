@@ -36,6 +36,7 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.ui.basic.PObject;
 import com.ponysdk.core.ui.basic.PWindow;
+import com.ponysdk.core.ui.basic.PWindowManager;
 import com.ponysdk.core.writer.ModelWriter;
 
 public class PObjectCache {
@@ -65,17 +66,18 @@ public class PObjectCache {
         while ((reference = (PObjectWeakReference) queue.poll()) != null) {
             final int objectID = reference.getObjectID();
             referenceByObjectID.remove(objectID);
-            if (log.isDebugEnabled()) log.debug("Removing reference on object #{}", objectID);
+
+            final int windowID = reference.getWindowID();
+            final int frameID = reference.getFrameID();
+            if (log.isDebugEnabled()) log.debug("Removing reference on object #{} in window #{}", objectID, windowID);
+
+            // No need to send to the terminal if the window doesn't exist any more
+            if (PWindowManager.getWindow(windowID) == null) continue;
 
             final ModelWriter writer = Txn.get().getWriter();
             writer.beginObject();
-
-            final PWindow window = reference.getWindow();
-            if (PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
-
-            final int frameID = reference.getFrameID();
+            if (windowID != -1 && PWindow.getMain().getID() != windowID) writer.write(ServerToClientModel.WINDOW_ID, windowID);
             if (frameID != -1) writer.write(ServerToClientModel.FRAME_ID, frameID);
-
             writer.write(ServerToClientModel.TYPE_GC, objectID);
             writer.endObject();
         }
@@ -84,13 +86,13 @@ public class PObjectCache {
     private static class PObjectWeakReference extends WeakReference<PObject> {
 
         private final int objectID;
-        private final PWindow window;
+        private final int windowID;
         private final int frameID;
 
         public PObjectWeakReference(final PObject pObject, final ReferenceQueue<? super PObject> queue) {
             super(pObject, queue);
             objectID = pObject.getID();
-            window = pObject.getWindow();
+            windowID = pObject.getWindow() != null ? pObject.getWindow().getID() : -1;
             frameID = pObject.getFrame() != null ? pObject.getFrame().getID() : -1;
         }
 
@@ -98,8 +100,8 @@ public class PObjectCache {
             return objectID;
         }
 
-        public PWindow getWindow() {
-            return window;
+        public int getWindowID() {
+            return windowID;
         }
 
         public int getFrameID() {

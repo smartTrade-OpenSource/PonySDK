@@ -26,6 +26,8 @@ package com.ponysdk.core.terminal.model;
 import com.google.gwt.json.client.JSONException;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
+import com.ponysdk.core.model.BooleanModel;
+import com.ponysdk.core.model.CharsetModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.ValueTypeModel;
 
@@ -37,7 +39,6 @@ import elemental.html.Window;
 public class ReaderBuffer {
 
     public static final int NOT_FULL_BUFFER_POSITION = -1;
-    private static final byte TRUE = 1;
 
     private final BinaryModel currentBinaryModel;
 
@@ -102,21 +103,25 @@ public class ReaderBuffer {
         if (ValueTypeModel.INTEGER == typeModel) {
             size += ValueTypeModel.INTEGER_SIZE;
             currentBinaryModel.init(key, getInt(), size);
-        } else if (ValueTypeModel.STRING == typeModel) {
+        } else if (ValueTypeModel.STRING_ASCII == typeModel) {
             size += ValueTypeModel.SHORT_SIZE;
             final int messageSize = getUnsignedShort();
             size += messageSize;
             currentBinaryModel.init(key, getString(messageSize), size);
-        } else if (ValueTypeModel.STRING_UTF8 == typeModel) {
+        } else if (ValueTypeModel.STRING == typeModel) {
+            size += ValueTypeModel.BYTE_SIZE;
+            final byte charsetType = getByte();
             size += ValueTypeModel.SHORT_SIZE;
             final int messageSize = getUnsignedShort();
             size += messageSize;
-            currentBinaryModel.init(key, getStringUTF8(messageSize), size);
+            currentBinaryModel.init(key, getStringUTF8(charsetType, messageSize), size);
         } else if (ValueTypeModel.JSON_OBJECT == typeModel) {
+            size += ValueTypeModel.BYTE_SIZE;
+            final byte charsetType = getByte();
             size += ValueTypeModel.INTEGER_SIZE;
             final int jsonSize = getInt();
             size += jsonSize;
-            currentBinaryModel.init(key, getJson(jsonSize), size);
+            currentBinaryModel.init(key, getJson(charsetType, jsonSize), size);
         } else if (ValueTypeModel.NULL == typeModel) {
             currentBinaryModel.init(key, size);
         } else if (ValueTypeModel.BOOLEAN == typeModel) {
@@ -151,7 +156,7 @@ public class ReaderBuffer {
     }
 
     private boolean getBoolean() {
-        if (hasEnoughRemainingBytes(ValueTypeModel.BOOLEAN_SIZE)) return buffer.intAt(position++) == TRUE;
+        if (hasEnoughRemainingBytes(ValueTypeModel.BOOLEAN_SIZE)) return buffer.intAt(position++) == BooleanModel.TRUE_TYPE;
         else throw new ArrayIndexOutOfBoundsException();
     }
 
@@ -208,10 +213,11 @@ public class ReaderBuffer {
         }
     }
 
-    private String getStringUTF8(final int size) {
+    private String getStringUTF8(final byte charset, final int size) {
         if (size != 0) {
             if (hasEnoughRemainingBytes(size)) {
-                final String result = decode(buffer, position, position + size);
+                final String result = charset == CharsetModel.ASCII_TYPE ? fromCharCode(buffer.subarray(position, position + size))
+                        : decode(buffer, position, position + size);
                 position += size;
                 return result;
             } else {
@@ -222,8 +228,8 @@ public class ReaderBuffer {
         }
     }
 
-    private JSONObject getJson(final int msgSize) {
-        final String s = getStringUTF8(msgSize);
+    private JSONObject getJson(final byte charset, final int jsonSize) {
+        final String s = getStringUTF8(charset, jsonSize);
         try {
             return s != null ? JSONParser.parseStrict(s).isObject() : null;
         } catch (final JSONException e) {
@@ -280,13 +286,15 @@ public class ReaderBuffer {
 
         if (ValueTypeModel.INTEGER == typeModel) {
             position += ValueTypeModel.INTEGER_SIZE;
-        } else if (ValueTypeModel.STRING == typeModel) {
+        } else if (ValueTypeModel.STRING_ASCII == typeModel) {
             final int stringSize = getUnsignedShort();
             position += stringSize;
-        } else if (ValueTypeModel.STRING_UTF8 == typeModel) {
+        } else if (ValueTypeModel.STRING == typeModel) {
+            getByte(); // Read charset
             final int stringSize = getUnsignedShort();
             position += stringSize;
         } else if (ValueTypeModel.JSON_OBJECT == typeModel) {
+            getByte(); // Read charset
             final int jsonSize = getInt();
             position += jsonSize;
         } else if (ValueTypeModel.NULL == typeModel) {
