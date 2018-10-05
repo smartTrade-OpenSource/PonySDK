@@ -55,6 +55,7 @@ import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ponysdk.core.model.CharsetModel;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.ValueTypeModel;
@@ -380,7 +381,7 @@ public class PonySDKWebDriver implements WebDriver {
                         if (value == null) break loop;
                         value = Double.parseDouble((String) value);
                         break;
-                    case STRING:
+                    case STRING_ASCII:
                         length = readStringLength(b, position, 2, PonySDKWebDriver::readUnsignedShort);
                         if (length < 0 || length > b.remaining()) {
                             b.position(position);
@@ -389,22 +390,40 @@ public class PonySDKWebDriver implements WebDriver {
                         value = readString(StandardCharsets.ISO_8859_1, b, length);
                         if (value == null) break loop;
                         break;
-                    case STRING_UTF8:
+                    case STRING:
+                        if (!b.hasRemaining()) {
+                            b.position(position);
+                            break loop;
+                        }
+
+                        final byte charsetStringType = b.get();
+
                         length = readStringLength(b, position, 2, PonySDKWebDriver::readUnsignedShort);
                         if (length < 0 || length > b.remaining()) {
                             b.position(position);
                             break loop;
                         }
-                        value = readString(StandardCharsets.UTF_8, b, length);
+                        value = readString(
+                            charsetStringType == CharsetModel.ASCII.getValue() ? StandardCharsets.ISO_8859_1 : StandardCharsets.UTF_8,
+                            b, length);
                         if (value == null) break loop;
                         break;
                     case JSON_OBJECT:
+                        if (!b.hasRemaining()) {
+                            b.position(position);
+                            break loop;
+                        }
+
+                        final byte charsetJsonType = b.get();
+
                         length = readStringLength(b, position, 4, (buff) -> buff.getInt());
                         if (length < 0 || length > b.remaining()) {
                             b.position(position);
                             break loop;
                         }
-                        value = readString(StandardCharsets.UTF_8, b, length);
+                        value = readString(
+                            charsetJsonType == CharsetModel.ASCII.getValue() ? StandardCharsets.ISO_8859_1 : StandardCharsets.UTF_8, b,
+                            length);
                         if (value == null) break loop;
                         try (JsonReader jsonReader = Json.createReader(new StringReader((String) value))) {
                             value = jsonReader.readObject();
