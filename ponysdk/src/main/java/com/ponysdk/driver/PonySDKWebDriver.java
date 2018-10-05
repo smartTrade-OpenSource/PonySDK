@@ -453,7 +453,7 @@ public class PonySDKWebDriver implements WebDriver {
                     return;
                 }
             }
-            length += 5;
+            length += 6; //6 == Max prefix length == Model(1) + Charset(1) + Length(4)
             if (b == message && b.hasRemaining()) {
                 if (buffer.capacity() < length) {
                     buffer = ByteBuffer.allocate(Math.max(buffer.capacity() << 1, length));
