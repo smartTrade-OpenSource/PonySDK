@@ -23,7 +23,6 @@
 
 package com.ponysdk.core.ui.form.formfield;
 
-import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PWidget.TabindexMode;
@@ -46,7 +45,7 @@ public class TextBoxFormField<T> extends AbstractFormField<T, PTextBox> {
 
     public TextBoxFormField(final PTextBox widget, final DataConverter<String, T> dataProvider, final boolean dirtyMode) {
         super(widget, dataProvider, dirtyMode);
-        if (UIContext.get().getConfiguration().isTabindexOnlyFormField()) widget.setTabindex(TabindexMode.TABULABLE);
+        widget.setTabindex(TabindexMode.TABULABLE);
     }
 
     @Override

@@ -57,7 +57,7 @@ public abstract class PFocusWidget extends PWidget
     private boolean showLoadingOnRequest;
 
     protected PFocusWidget() {
-        if (UIContext.get().getConfiguration().isTabindexOnlyFormField()) tabindex = -1;
+        if (UIContext.get().getConfiguration().isTabindexOnlyFormField()) tabindex = TabindexMode.FOCUSABLE.getTabIndex();
     }
 
     public void showLoadingOnRequest(final boolean showLoadingOnRequest) {

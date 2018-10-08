@@ -23,7 +23,6 @@
 
 package com.ponysdk.core.ui.form.formfield;
 
-import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PCheckBox;
 import com.ponysdk.core.ui.basic.PWidget.TabindexMode;
@@ -45,7 +44,7 @@ public class CheckBoxFormField extends AbstractFormField<Boolean, PCheckBox> {
 
     public CheckBoxFormField(final PCheckBox widget, final boolean dirtyMode) {
         super(widget, null, dirtyMode);
-        if (UIContext.get().getConfiguration().isTabindexOnlyFormField()) widget.setTabindex(TabindexMode.TABULABLE);
+        widget.setTabindex(TabindexMode.TABULABLE);
     }
 
     @Override
