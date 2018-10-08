@@ -135,7 +135,7 @@ public class PonySDK implements UncaughtExceptionHandler {
 
             xhr.setOnload(evt -> callback.setAjaxResponse(xhr.getResponseText()));
 
-            xhr.open("GET", MappingPath.AJAX);
+            xhr.open("GET", MappingPath.AJAX.toString());
             xhr.setRequestHeader(ClientToServerModel.UI_CONTEXT_ID.name(), String.valueOf(contextId));
             xhr.setRequestHeader(ClientToServerModel.OBJECT_ID.name(), String.valueOf(ptObject.getObjectID()));
 

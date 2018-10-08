@@ -156,7 +156,7 @@ public class ReaderBuffer {
     }
 
     private boolean getBoolean() {
-        if (hasEnoughRemainingBytes(ValueTypeModel.BOOLEAN_SIZE)) return buffer.intAt(position++) == BooleanModel.TRUE_TYPE;
+        if (hasEnoughRemainingBytes(ValueTypeModel.BOOLEAN_SIZE)) return buffer.intAt(position++) == BooleanModel.TRUE.ordinal();
         else throw new ArrayIndexOutOfBoundsException();
     }
 
@@ -216,7 +216,8 @@ public class ReaderBuffer {
     private String getStringUTF8(final byte charset, final int size) {
         if (size != 0) {
             if (hasEnoughRemainingBytes(size)) {
-                final String result = charset == CharsetModel.ASCII_TYPE ? fromCharCode(buffer.subarray(position, position + size))
+                final String result = charset == CharsetModel.ASCII.ordinal()
+                        ? fromCharCode(buffer.subarray(position, position + size))
                         : decode(buffer, position, position + size);
                 position += size;
                 return result;

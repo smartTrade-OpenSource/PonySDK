@@ -25,30 +25,11 @@ package com.ponysdk.core.model;
 
 public enum BooleanModel {
 
-    FALSE(BooleanModel.FALSE_TYPE),
-    TRUE(BooleanModel.TRUE_TYPE);
+    FALSE,
+    TRUE;
 
-    public static final int FALSE_TYPE = 0;
-    public static final int TRUE_TYPE = 1;
-
-    private static final BooleanModel[] VALUES = BooleanModel.values();
-
-    private final int size;
-
-    private BooleanModel(final int size) {
-        this.size = size;
-    }
-
-    public final int getSize() {
-        return size;
-    }
-
-    public final byte getValue() {
+    public byte getValue() {
         return (byte) ordinal();
-    }
-
-    public static BooleanModel fromRawValue(final byte rawValue) {
-        return VALUES[rawValue];
     }
 
 }
