@@ -37,6 +37,7 @@ import javax.json.JsonObject;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.ui.basic.PListBox.ListItem;
 import com.ponysdk.core.ui.basic.event.HasPChangeHandlers;
 import com.ponysdk.core.ui.basic.event.PChangeEvent;
 import com.ponysdk.core.ui.basic.event.PChangeHandler;
@@ -49,7 +50,7 @@ import com.ponysdk.core.ui.basic.event.PChangeHandler;
  * <li>.gwt-ListBox { }</li>
  * </ul>
  */
-public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChangeHandler {
+public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChangeHandler, Iterable<ListItem> {
 
     private static final String EMPTY = "";
 
@@ -313,6 +314,11 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     public String getItem(final int index) {
         return items.get(index).label;
+    }
+
+    @Override
+    public Iterator<ListItem> iterator() {
+        return items.iterator();
     }
 
     private void checkItem(final String label) {
