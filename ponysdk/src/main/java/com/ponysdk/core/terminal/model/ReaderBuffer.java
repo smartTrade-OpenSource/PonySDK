@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.terminal.model;
 
+import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.json.client.JSONException;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
@@ -216,9 +217,15 @@ public class ReaderBuffer {
     private String getStringUTF8(final byte charset, final int size) {
         if (size != 0) {
             if (hasEnoughRemainingBytes(size)) {
-                final String result = charset == CharsetModel.ASCII.ordinal()
-                        ? fromCharCode(buffer.subarray(position, position + size))
-                        : decode(buffer, position, position + size);
+                String result;
+                try {
+                    result = size < 100000 && charset == CharsetModel.ASCII.ordinal()
+                            ? fromCharCode(buffer.subarray(position, position + size))
+                            : decode(buffer, position, position + size);
+                } catch (final JavaScriptException jse) {
+                    // String#fromCharCode can throw RangeError if the message is too big, so fallback to #decode method in this case
+                    result = decode(buffer, position, position + size);
+                }
                 position += size;
                 return result;
             } else {
