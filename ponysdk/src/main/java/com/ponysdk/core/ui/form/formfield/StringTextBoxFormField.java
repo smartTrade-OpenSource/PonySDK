@@ -34,7 +34,15 @@ public class StringTextBoxFormField extends TextBoxFormField<String> {
     }
 
     public StringTextBoxFormField(final PTextBox textBox) {
-        super(textBox, IdentityConverter.STRING);
+        this(textBox, false);
+    }
+
+    public StringTextBoxFormField(final boolean dirtyMode) {
+        this(Element.newPTextBox(), dirtyMode);
+    }
+
+    public StringTextBoxFormField(final PTextBox textBox, final boolean dirtyMode) {
+        super(textBox, IdentityConverter.STRING, dirtyMode);
     }
 
     @Override

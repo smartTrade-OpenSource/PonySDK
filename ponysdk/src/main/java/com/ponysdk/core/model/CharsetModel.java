@@ -25,30 +25,11 @@ package com.ponysdk.core.model;
 
 public enum CharsetModel {
 
-    ASCII(CharsetModel.ASCII_TYPE),
-    UTF8(CharsetModel.UTF8_TYPE);
+    ASCII,
+    UTF8;
 
-    public static final int ASCII_TYPE = 0;
-    public static final int UTF8_TYPE = 1;
-
-    private static final CharsetModel[] VALUES = CharsetModel.values();
-
-    private final int size;
-
-    private CharsetModel(final int size) {
-        this.size = size;
-    }
-
-    public final int getSize() {
-        return size;
-    }
-
-    public final byte getValue() {
+    public byte getValue() {
         return (byte) ordinal();
-    }
-
-    public static CharsetModel fromRawValue(final byte rawValue) {
-        return VALUES[rawValue];
     }
 
 }

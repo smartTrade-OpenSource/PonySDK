@@ -23,10 +23,21 @@
 
 package com.ponysdk.core.model;
 
-public interface MappingPath {
+public enum MappingPath {
 
-    String WEBSOCKET = "ws";
-    String STREAM = "stream";
-    String AJAX = "ajax";
+    WEBSOCKET("ws"),
+    STREAM("stream"),
+    AJAX("ajax");
+
+    private String value;
+
+    private MappingPath(final String value) {
+        this.value = value;
+    }
+
+    @Override
+    public String toString() {
+        return value;
+    }
 
 }
