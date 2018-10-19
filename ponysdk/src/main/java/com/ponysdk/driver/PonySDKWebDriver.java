@@ -241,6 +241,11 @@ public class PonySDKWebDriver implements WebDriver {
             if (element == null) return;
             element.enabled = (boolean) frame.value;
         });
+        onMessageSwitch.put(ServerToClientModel.FUNCTION_ARGS, (message, frame) -> {
+            final PonyWebElement element = findElement(message);
+            if (element == null) return;
+            element.text = Arrays.toString((Object[]) frame.value);
+        });
     }
 
     @Override
