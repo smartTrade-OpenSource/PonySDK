@@ -26,8 +26,8 @@ package com.ponysdk.core.model;
 public enum ArrayValueModel {
 
     NULL(ValueTypeModel.NULL_SIZE),
-    BOOLEAN_FALSE(ValueTypeModel.BOOLEAN_SIZE),
-    BOOLEAN_TRUE(ValueTypeModel.BOOLEAN_SIZE),
+    BOOLEAN_FALSE(ArrayValueModel.BOOLEAN_SIZE),
+    BOOLEAN_TRUE(ArrayValueModel.BOOLEAN_SIZE),
     BYTE(ValueTypeModel.BYTE_SIZE),
     SHORT(ValueTypeModel.SHORT_SIZE),
     INTEGER(ValueTypeModel.INTEGER_SIZE),
@@ -37,6 +37,7 @@ public enum ArrayValueModel {
     STRING_ASCII(ArrayValueModel.STRING_MIN_SIZE),
     STRING_UTF8(ArrayValueModel.STRING_MIN_SIZE);
 
+    private static final int BOOLEAN_SIZE = 0;
     private static final int STRING_MIN_SIZE = 2;
 
     private final int minSize;
