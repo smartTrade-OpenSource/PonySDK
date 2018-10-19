@@ -440,4 +440,14 @@ public class DefaultElementFactory implements ElementFactory {
         return new PFrame(url);
     }
 
+    @Override
+    public PFunctionalLabel newPFunctionalLabel(final PFunction function) {
+        return new PFunctionalLabel(function);
+    }
+
+    @Override
+    public PFunctionalLabel newPFunctionalLabel(final PFunction function, final Object... args) {
+        return new PFunctionalLabel(function, args);
+    }
+
 }

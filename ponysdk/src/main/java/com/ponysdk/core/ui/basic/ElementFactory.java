@@ -193,4 +193,8 @@ public interface ElementFactory {
 
     PFrame newPFrame(final String url);
 
+    PFunctionalLabel newPFunctionalLabel(final PFunction function);
+
+    PFunctionalLabel newPFunctionalLabel(final PFunction function, final Object... args);
+
 }

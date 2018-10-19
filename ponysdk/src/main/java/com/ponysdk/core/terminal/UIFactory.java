@@ -46,6 +46,8 @@ import com.ponysdk.core.terminal.ui.PTFlexTable;
 import com.ponysdk.core.terminal.ui.PTFlowPanel;
 import com.ponysdk.core.terminal.ui.PTFocusPanel;
 import com.ponysdk.core.terminal.ui.PTFrame;
+import com.ponysdk.core.terminal.ui.PTFunction;
+import com.ponysdk.core.terminal.ui.PTFunctionalLabel;
 import com.ponysdk.core.terminal.ui.PTGrid;
 import com.ponysdk.core.terminal.ui.PTHTML;
 import com.ponysdk.core.terminal.ui.PTHeaderPanel;
@@ -112,6 +114,8 @@ class UIFactory {
         else if (WidgetType.HTML == widgetType) return new PTHTML();
         else if (WidgetType.IMAGE == widgetType) return new PTImage();
         else if (WidgetType.LABEL == widgetType) return new PTLabel<>();
+        else if (WidgetType.FUNCTIONAL_LABEL == widgetType) return new PTFunctionalLabel();
+        else if (WidgetType.FUNCTION == widgetType) return new PTFunction();
         else if (WidgetType.LAYOUT_PANEL == widgetType) return new PTLayoutPanel();
         else if (WidgetType.LISTBOX == widgetType) return new PTListBox();
         else if (WidgetType.MENU_BAR == widgetType) return new PTMenuBar();

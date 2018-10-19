@@ -57,6 +57,8 @@ public class PWindow extends PObject {
 
     private Map<String, PRootPanel> panelByZone = new HashMap<>(8);
 
+    private Map<TextFunction, PFunction> functions;
+
     private PWindow parent;
 
     PWindow() {
@@ -360,6 +362,23 @@ public class PWindow extends PObject {
 
     public PWindow getParent() {
         return parent;
+    }
+
+    private Map<TextFunction, PFunction> safeFunctions() {
+        if (functions == null) {
+            functions = new HashMap<>();
+        }
+        return functions;
+    }
+
+    public PFunction getPFunction(final TextFunction function) {
+        return safeFunctions().computeIfAbsent(function, this::createPFunction);
+    }
+
+    private PFunction createPFunction(final TextFunction function) {
+        final PFunction pf = new PFunction(function);
+        pf.attach(this, null);
+        return pf;
     }
 
     @Override

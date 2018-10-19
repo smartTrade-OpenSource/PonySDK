@@ -228,6 +228,14 @@ public class Element {
         return f.newPLabel(text);
     }
 
+    public static final PFunctionalLabel newPFunctionalLabel(final PFunction function) {
+        return f.newPFunctionalLabel(function);
+    }
+
+    public static final PFunctionalLabel newPFunctionalLabel(final PFunction function, final Object... args) {
+        return f.newPFunctionalLabel(function, args);
+    }
+
     public static final PLayoutPanel newPLayoutPanel() {
         return f.newPLayoutPanel();
     }
