@@ -364,15 +364,15 @@ public class PWindow extends PObject {
         return parent;
     }
 
+    PFunction getPFunction(final TextFunction function) {
+        return safeFunctions().computeIfAbsent(function, this::createPFunction);
+    }
+
     private Map<TextFunction, PFunction> safeFunctions() {
         if (functions == null) {
             functions = new HashMap<>();
         }
         return functions;
-    }
-
-    public PFunction getPFunction(final TextFunction function) {
-        return safeFunctions().computeIfAbsent(function, this::createPFunction);
     }
 
     private PFunction createPFunction(final TextFunction function) {

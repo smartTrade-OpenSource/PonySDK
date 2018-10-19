@@ -65,22 +65,23 @@ import com.ponysdk.core.writer.ModelWriter;
 public class PFunctionalLabel extends PWidget implements HasPClickHandlers, HasPDoubleClickHandlers, HasPDragEndHandlers,
         HasPDragEnterHandlers, HasPDragStartHandlers, HasPDragLeaveHandlers, HasPDragOverHandlers, HasPDropHandlers {
 
-    private final PFunction function;
+    private final TextFunction textFunction;
+    private PFunction pFunction;
     private Object[] args;
 
-    PFunctionalLabel(final PFunction function) {
-        this.function = function;
+    PFunctionalLabel(final TextFunction textFunction) {
+        this.textFunction = textFunction;
     }
 
-    PFunctionalLabel(final PFunction function, final Object... args) {
-        this.function = function;
+    PFunctionalLabel(final TextFunction textFunction, final Object... args) {
+        this.textFunction = textFunction;
         this.args = args;
     }
 
     @Override
     protected void enrichForCreation(final ModelWriter writer) {
         super.enrichForCreation(writer);
-        writer.write(ServerToClientModel.FUNCTION_ID, this.function.getID());
+        writer.write(ServerToClientModel.FUNCTION_ID, this.pFunction.getID());
     }
 
     @Override
@@ -90,16 +91,22 @@ public class PFunctionalLabel extends PWidget implements HasPClickHandlers, HasP
     }
 
     @Override
+    protected boolean attach(final PWindow window, final PFrame frame) {
+        this.pFunction = window.getPFunction(textFunction);
+        return super.attach(window, frame);
+    }
+
+    @Override
     protected WidgetType getWidgetType() {
         return WidgetType.FUNCTIONAL_LABEL;
     }
 
     public String getText() {
-        return function != null && args != null ? function.getFunction().getJavaFunction().apply(args) : null;
+        return args != null ? textFunction.getJavaFunction().apply(args) : null;
     }
 
-    public PFunction getFunction() {
-        return function;
+    public TextFunction getTextFunction() {
+        return textFunction;
     }
 
     public Object[] getArgs() {
@@ -154,7 +161,7 @@ public class PFunctionalLabel extends PWidget implements HasPClickHandlers, HasP
 
     @Override
     public String toString() {
-        return super.toString() + ", function=" + function + ", args=" + Arrays.toString(args);
+        return super.toString() + ", textFunction=" + textFunction + ", args=" + Arrays.toString(args);
     }
 
 }

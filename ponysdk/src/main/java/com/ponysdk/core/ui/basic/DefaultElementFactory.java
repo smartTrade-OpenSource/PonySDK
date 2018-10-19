@@ -441,13 +441,13 @@ public class DefaultElementFactory implements ElementFactory {
     }
 
     @Override
-    public PFunctionalLabel newPFunctionalLabel(final PFunction function) {
-        return new PFunctionalLabel(function);
+    public PFunctionalLabel newPFunctionalLabel(final TextFunction textFunction) {
+        return new PFunctionalLabel(textFunction);
     }
 
     @Override
-    public PFunctionalLabel newPFunctionalLabel(final PFunction function, final Object... args) {
-        return new PFunctionalLabel(function, args);
+    public PFunctionalLabel newPFunctionalLabel(final TextFunction textFunction, final Object... args) {
+        return new PFunctionalLabel(textFunction, args);
     }
 
 }
