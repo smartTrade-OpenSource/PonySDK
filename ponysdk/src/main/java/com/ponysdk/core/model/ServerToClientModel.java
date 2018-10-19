@@ -238,6 +238,10 @@ public enum ServerToClientModel {
     PADDON_ARGUMENTS(ValueTypeModel.JSON_OBJECT),
     DESTROY(ValueTypeModel.NULL),
 
+    FUNCTION_CREATION(ValueTypeModel.STRING),
+    FUNCTION_ID(ValueTypeModel.INTEGER),
+    FUNCTION_ARGS(ValueTypeModel.ARRAY),
+
     // Old, useless or not used
     POPUP_GLASS_STYLE_NAME(ValueTypeModel.INTEGER),
     DISCLOSURE_PANEL_OPEN_IMG(ValueTypeModel.INTEGER),

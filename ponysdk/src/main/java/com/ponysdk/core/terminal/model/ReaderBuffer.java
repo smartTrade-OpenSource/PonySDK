@@ -98,9 +98,9 @@ public class ReaderBuffer {
     private static final native DataView newDataView(ArrayBuffer buffer, int byteOffset,
                                                      int length) /*-{ return new DataView(buffer, byteOffset, length); }-*/;
 
-    private static final native short getUint8(DataView dataView, int position) /*-{ return dataView.getUint8(position); }-*/;
+    private static final native int getUint8(DataView dataView, int position) /*-{ return dataView.getUint8(position); }-*/;
 
-    private static final native byte getInt8(DataView dataView, int position) /*-{ return dataView.getInt8(position); }-*/;
+    private static final native int getInt8(DataView dataView, int position) /*-{ return dataView.getInt8(position); }-*/;
 
     public int getPosition() {
         return position;
@@ -193,7 +193,7 @@ public class ReaderBuffer {
 
     private int getShort() {
         checkRemainingBytes(ValueTypeModel.SHORT_SIZE);
-        final short result = dataView.getInt16(position);
+        final int result = dataView.getInt16(position);
         position += ValueTypeModel.SHORT_SIZE;
         return result;
     }

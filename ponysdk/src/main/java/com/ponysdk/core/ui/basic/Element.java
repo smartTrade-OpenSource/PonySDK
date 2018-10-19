@@ -26,6 +26,7 @@ package com.ponysdk.core.ui.basic;
 import java.text.SimpleDateFormat;
 
 import com.ponysdk.core.model.PUnit;
+import com.ponysdk.core.ui.formatter.TextFunction;
 
 public class Element {
 
@@ -226,6 +227,14 @@ public class Element {
 
     public static final PLabel newPLabel(final String text) {
         return f.newPLabel(text);
+    }
+
+    public static final PFunctionalLabel newPFunctionalLabel(final TextFunction textFunction) {
+        return f.newPFunctionalLabel(textFunction);
+    }
+
+    public static final PFunctionalLabel newPFunctionalLabel(final TextFunction textFunction, final Object... args) {
+        return f.newPFunctionalLabel(textFunction, args);
     }
 
     public static final PLayoutPanel newPLayoutPanel() {

@@ -64,6 +64,7 @@ import com.ponysdk.core.ui.basic.PDockLayoutPanel;
 import com.ponysdk.core.ui.basic.PFileUpload;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PFrame;
+import com.ponysdk.core.ui.basic.PFunctionalLabel;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PListBox;
 import com.ponysdk.core.ui.basic.PMenuBar;
@@ -86,6 +87,7 @@ import com.ponysdk.core.ui.datagrid.dynamic.Configuration;
 import com.ponysdk.core.ui.datagrid.dynamic.DynamicDataGrid;
 import com.ponysdk.core.ui.datagrid.impl.PLabelCellRenderer;
 import com.ponysdk.core.ui.eventbus2.EventBus.EventHandler;
+import com.ponysdk.core.ui.formatter.TextFunction;
 import com.ponysdk.core.ui.grid.AbstractGridWidget;
 import com.ponysdk.core.ui.grid.GridTableWidget;
 import com.ponysdk.core.ui.list.DataGridColumnDescriptor;
@@ -118,7 +120,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
         createReconnectingPanel();
 
-        mainLabel = Element.newPLabel("Can be modified by anybody");
+        mainLabel = Element.newPLabel("Can be modified by anybody : ₲ῳ₸");
+        mainLabel.setTitle("String ASCII");
         PWindow.getMain().add(mainLabel);
 
         testPerf();
@@ -138,6 +141,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         testUIDelegator();
 
         testNewGrid();
+
+        createFunctionalLabel();
 
         PWindow.getMain().add(createGrid());
 
@@ -257,6 +262,16 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         POptionPane.showConfirmDialog(PWindow.getMain(), null, "BBB");
 
         // uiContext.getHistory().newItem("", false);
+    }
+
+    private void createFunctionalLabel() {
+        final TextFunction textFunction = new TextFunction(args -> {
+            System.out.println(args[0] + " " + args[1]);
+            return (String) args[0];
+        }, "console.log(args[0] + \" \" + args[1]); return args[0];");
+        final PFunctionalLabel newPFunctionalLabel = Element.newPFunctionalLabel(textFunction);
+        PWindow.getMain().add(newPFunctionalLabel);
+        newPFunctionalLabel.setArgs("A", "B");
     }
 
     public PFlowPanel createPFileUpload() {
