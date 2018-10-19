@@ -28,6 +28,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 import javax.json.JsonObject;
 
@@ -36,6 +37,7 @@ import org.eclipse.jetty.websocket.api.WriteCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ponysdk.core.model.ArrayValueModel;
 import com.ponysdk.core.model.BooleanModel;
 import com.ponysdk.core.model.CharsetModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -121,12 +123,18 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
                 case DOUBLE:
                     write(model, (double) value);
                     break;
+                case FLOAT:
+                    write(model, (float) value);
+                    break;
                 case STRING_ASCII:
                 case STRING:
                     write(model, (String) value);
                     break;
                 case JSON_OBJECT:
                     write(model, (JsonObject) value);
+                    break;
+                case ARRAY:
+                    write(model, (Object[]) value);
                     break;
                 default:
                     log.error("Unknow model type : {}", model.getTypeModel());
@@ -162,42 +170,114 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
     }
 
     private void write(final ServerToClientModel model, final long longValue) throws IOException {
-        final String value = String.valueOf(longValue);
-
         putModelKey(model);
-
-        try {
-            final byte[] bytes = value.getBytes(ASCII_CHARSET);
-            final int length = bytes.length;
-            if (length <= MAX_UNSIGNED_BYTE_VALUE) {
-                putUnsignedByte((short) length);
-                put(bytes);
-            } else {
-                throw new IllegalArgumentException("Message too big (" + value.length() + " > " + MAX_UNSIGNED_BYTE_VALUE
-                        + "), use a String instead : " + value.substring(0, Math.min(value.length(), 100)) + "...");
-            }
-        } catch (final UnsupportedEncodingException e) {
-            throw new IllegalArgumentException("Cannot convert message : " + value);
-        }
+        putLong(longValue);
     }
 
     private void write(final ServerToClientModel model, final double doubleValue) throws IOException {
-        final String value = String.valueOf(doubleValue);
-
         putModelKey(model);
+        putDouble(doubleValue);
+    }
 
-        try {
-            final byte[] bytes = value.getBytes(ASCII_CHARSET);
+    private void write(final ServerToClientModel model, final float floatValue) throws IOException {
+        putModelKey(model);
+        putFloat(floatValue);
+    }
+
+    private void write(final ServerToClientModel model, final Object[] value) throws IOException {
+        putModelKey(model);
+        if (value.length > MAX_UNSIGNED_BYTE_VALUE) {
+            throw new IllegalArgumentException("Array is too big (" + value.length + " > " + MAX_UNSIGNED_BYTE_VALUE
+                    + "), use a Json Object instead : " + Arrays.toString(value).substring(0, 100) + "...");
+        }
+        putUnsignedByte((short) value.length);
+        for (final Object o : value) {
+            putArrayElement(o);
+        }
+    }
+
+    private void putCompressedLong(final long value) throws IOException {
+        if (value >= Byte.MIN_VALUE && value <= Byte.MAX_VALUE) {
+            put(ArrayValueModel.BYTE.getValue());
+            put((byte) value);
+        } else if (value >= Short.MIN_VALUE && value <= Short.MAX_VALUE) {
+            put(ArrayValueModel.SHORT.getValue());
+            putShort((short) value);
+        } else if (value >= Integer.MIN_VALUE && value <= Integer.MAX_VALUE) {
+            put(ArrayValueModel.INTEGER.getValue());
+            putInt((int) value);
+        } else {
+            put(ArrayValueModel.LONG.getValue());
+            putLong(value);
+        }
+    }
+
+    private void putCompressedInt(final int value) throws IOException {
+        if (value >= Byte.MIN_VALUE && value <= Byte.MAX_VALUE) {
+            put(ArrayValueModel.BYTE.getValue());
+            put((byte) value);
+        } else if (value >= Short.MIN_VALUE && value <= Short.MAX_VALUE) {
+            put(ArrayValueModel.SHORT.getValue());
+            putShort((short) value);
+        } else {
+            put(ArrayValueModel.INTEGER.getValue());
+            putInt(value);
+        }
+    }
+
+    private void putCompressedShort(final short value) throws IOException {
+        if (value >= Byte.MIN_VALUE && value <= Byte.MAX_VALUE) {
+            put(ArrayValueModel.BYTE.getValue());
+            put((byte) value);
+        } else {
+            put(ArrayValueModel.SHORT.getValue());
+            putShort(value);
+        }
+    }
+
+    private void putCompressedDouble(final double value) throws IOException {
+        final float f = (float) value;
+        if (f == value) { //value can fit in a float without losing precision
+            put(ArrayValueModel.FLOAT.getValue());
+            putFloat(f);
+        } else {
+            put(ArrayValueModel.DOUBLE.getValue());
+            putDouble(value);
+        }
+    }
+
+    private void putArrayElement(final Object o) throws IOException {
+        if (o == null) {
+            put(ArrayValueModel.NULL.getValue());
+        } else if (o instanceof Integer) {
+            putCompressedInt((int) o);
+        } else if (o instanceof String) {
+            final String s = (String) o;
+            final byte[] bytes = s.getBytes(UTF8_CHARSET);
             final int length = bytes.length;
-            if (length <= MAX_UNSIGNED_BYTE_VALUE) {
-                putUnsignedByte((short) length);
-                put(bytes);
-            } else {
-                throw new IllegalArgumentException("Message too big (" + value.length() + " > " + MAX_UNSIGNED_BYTE_VALUE
-                        + "), use a String instead : " + value.substring(0, Math.min(value.length(), 100)) + "...");
+            if (length > MAX_UNSIGNED_SHORT_VALUE) {
+                throw new IllegalArgumentException("String array element too big (" + s.length() + " > " + MAX_UNSIGNED_BYTE_VALUE
+                        + "), use a Json Object instead : " + s.substring(0, 100) + "...");
             }
-        } catch (final UnsupportedEncodingException e) {
-            throw new IllegalArgumentException("Cannot convert message : " + value);
+            put(length == s.length() ? ArrayValueModel.STRING_ASCII.getValue() : ArrayValueModel.STRING_UTF8.getValue());
+            putUnsignedShort(length);
+            put(bytes);
+        } else if (o instanceof Byte) {
+            put(ArrayValueModel.BYTE.getValue());
+            put((byte) o);
+        } else if (o instanceof Short) {
+            putCompressedShort((short) o);
+        } else if (o instanceof Boolean) {
+            put(o.equals(Boolean.TRUE) ? ArrayValueModel.BOOLEAN_TRUE.getValue() : ArrayValueModel.BOOLEAN_FALSE.getValue());
+        } else if (o instanceof Long) {
+            putCompressedLong((long) o);
+        } else if (o instanceof Double) {
+            putCompressedDouble((double) o);
+        } else if (o instanceof Float) {
+            put(ArrayValueModel.FLOAT.getValue());
+            putFloat((float) o);
+        } else {
+            throw new IllegalArgumentException(o.getClass() + " is not supported as an array element type : " + o);
         }
     }
 
