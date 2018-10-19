@@ -48,7 +48,7 @@ public enum HandlerModel {
         return (byte) ordinal();
     }
 
-    public static HandlerModel fromRawValue(final byte rawValue) {
+    public static HandlerModel fromRawValue(final int rawValue) {
         return VALUES[rawValue];
     }
 

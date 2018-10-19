@@ -55,7 +55,7 @@ public enum DomHandlerType {
         return (byte) ordinal();
     }
 
-    public static DomHandlerType fromRawValue(final byte rawValue) {
+    public static DomHandlerType fromRawValue(final int rawValue) {
         return VALUES[rawValue];
     }
 

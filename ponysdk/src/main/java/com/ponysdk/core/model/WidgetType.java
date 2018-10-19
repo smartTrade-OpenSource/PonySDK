@@ -91,7 +91,7 @@ public enum WidgetType {
         return (byte) ordinal();
     }
 
-    public static WidgetType fromRawValue(final byte rawValue) {
+    public static WidgetType fromRawValue(final int rawValue) {
         return VALUES[rawValue];
     }
 

@@ -105,7 +105,7 @@ public abstract class PTHTMLTable<T extends HTMLTable> extends PTPanel<T> {
             uiObject.getCellFormatter().setStyleName(cellRow, cellColumn, value);
             return true;
         } else if (ServerToClientModel.VERTICAL_ALIGNMENT == model) {
-            final VerticalAlignmentConstant value = GWTConverter.asVerticalAlignmentConstant(binaryModel.getByteValue());
+            final VerticalAlignmentConstant value = GWTConverter.asVerticalAlignmentConstant(binaryModel.getIntValue());
             // ServerToClientModel.ROW
             final int cellRow = buffer.readBinaryModel().getIntValue();
             // ServerToClientModel.COLUMN
@@ -113,7 +113,7 @@ public abstract class PTHTMLTable<T extends HTMLTable> extends PTPanel<T> {
             uiObject.getCellFormatter().setVerticalAlignment(cellRow, cellColumn, value);
             return true;
         } else if (ServerToClientModel.HORIZONTAL_ALIGNMENT == model) {
-            final HorizontalAlignmentConstant value = GWTConverter.asHorizontalAlignmentConstant(binaryModel.getByteValue());
+            final HorizontalAlignmentConstant value = GWTConverter.asHorizontalAlignmentConstant(binaryModel.getIntValue());
             // ServerToClientModel.ROW
             final int cellRow = buffer.readBinaryModel().getIntValue();
             // ServerToClientModel.COLUMN

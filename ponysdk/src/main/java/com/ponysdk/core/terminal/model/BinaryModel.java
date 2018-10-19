@@ -35,8 +35,6 @@ public class BinaryModel {
     private int size;
 
     private boolean booleanValue;
-    private byte byteValue;
-    private short shortValue;
     private int intValue;
     private long longValue;
     private double doubleValue;
@@ -51,16 +49,6 @@ public class BinaryModel {
     public void init(final ServerToClientModel key, final boolean value, final int size) {
         init(key, size);
         this.booleanValue = value;
-    }
-
-    public void init(final ServerToClientModel key, final byte value, final int size) {
-        init(key, size);
-        this.byteValue = value;
-    }
-
-    public void init(final ServerToClientModel key, final short value, final int size) {
-        init(key, size);
-        this.shortValue = value;
     }
 
     public void init(final ServerToClientModel key, final int value, final int size) {
@@ -111,14 +99,6 @@ public class BinaryModel {
         return booleanValue;
     }
 
-    public byte getByteValue() {
-        return byteValue;
-    }
-
-    public short getShortValue() {
-        return shortValue;
-    }
-
     public int getIntValue() {
         return intValue;
     }
@@ -158,8 +138,8 @@ public class BinaryModel {
         final ValueTypeModel typeModel = model.getTypeModel();
         if (ValueTypeModel.NULL == typeModel) return String.valueOf(model);
         else if (ValueTypeModel.BOOLEAN == typeModel) return model + " => " + booleanValue;
-        else if (ValueTypeModel.BYTE == typeModel) return model + " => " + byteValue;
-        else if (ValueTypeModel.SHORT == typeModel) return model + " => " + shortValue;
+        else if (ValueTypeModel.BYTE == typeModel) return model + " => " + intValue;
+        else if (ValueTypeModel.SHORT == typeModel) return model + " => " + intValue;
         else if (ValueTypeModel.INTEGER == typeModel) return model + " => " + intValue;
         else if (ValueTypeModel.LONG == typeModel) return model + " => " + longValue;
         else if (ValueTypeModel.DOUBLE == typeModel) return model + " => " + doubleValue;

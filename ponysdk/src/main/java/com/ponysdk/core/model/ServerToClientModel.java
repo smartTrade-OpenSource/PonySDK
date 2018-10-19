@@ -263,7 +263,7 @@ public enum ServerToClientModel {
         return type;
     }
 
-    public static ServerToClientModel fromRawValue(final short rawValue) {
+    public static ServerToClientModel fromRawValue(final int rawValue) {
         return VALUES[rawValue];
     }
 

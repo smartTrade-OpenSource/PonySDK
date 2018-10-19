@@ -126,14 +126,14 @@ public class ReaderBuffer {
             currentBinaryModel.init(key, getStringAscii(messageSize), size);
         } else if (ValueTypeModel.STRING == typeModel) {
             size += ValueTypeModel.BYTE_SIZE;
-            final byte charsetType = getByte();
+            final int charsetType = getByte();
             size += ValueTypeModel.SHORT_SIZE;
             final int messageSize = getUnsignedShort();
             size += messageSize;
             currentBinaryModel.init(key, getString(charsetType, messageSize), size);
         } else if (ValueTypeModel.JSON_OBJECT == typeModel) {
             size += ValueTypeModel.BYTE_SIZE;
-            final byte charsetType = getByte();
+            final int charsetType = getByte();
             size += ValueTypeModel.INTEGER_SIZE;
             final int jsonSize = getInt();
             size += jsonSize;
@@ -181,17 +181,17 @@ public class ReaderBuffer {
         return buffer.intAt(position++) == BooleanModel.TRUE.ordinal();
     }
 
-    private byte getByte() {
+    private int getByte() {
         checkRemainingBytes(ValueTypeModel.BYTE_SIZE);
         return getInt8(dataView, position++);
     }
 
-    private short getUnsignedByte() {
+    private int getUnsignedByte() {
         checkRemainingBytes(ValueTypeModel.BYTE_SIZE);
         return getUint8(dataView, position++);
     }
 
-    private short getShort() {
+    private int getShort() {
         checkRemainingBytes(ValueTypeModel.SHORT_SIZE);
         final short result = dataView.getInt16(position);
         position += ValueTypeModel.SHORT_SIZE;
@@ -199,7 +199,10 @@ public class ReaderBuffer {
     }
 
     private int getUnsignedShort() {
-        return getShort() & 0xFFFF;
+        checkRemainingBytes(ValueTypeModel.SHORT_SIZE);
+        final int result = dataView.getUint16(position);
+        position += ValueTypeModel.SHORT_SIZE;
+        return result;
     }
 
     private int getInt() {
@@ -210,7 +213,10 @@ public class ReaderBuffer {
     }
 
     private long getUnsignedInt() {
-        return getInt() & 0xFFFFFFFFL;
+        checkRemainingBytes(ValueTypeModel.INTEGER_SIZE);
+        final int result = dataView.getUint32(position);
+        position += ValueTypeModel.INTEGER_SIZE;
+        return result;
     }
 
     private long getLong() {
@@ -243,7 +249,7 @@ public class ReaderBuffer {
         }
     }
 
-    private String getString(final byte charset, final int size) {
+    private String getString(final int charset, final int size) {
         if (size != 0) {
             return size < 100000 && charset == CharsetModel.ASCII.ordinal() ? decodeStringAscii(size) : decodeStringUTF8(size);
         } else {
@@ -251,7 +257,7 @@ public class ReaderBuffer {
         }
     }
 
-    private JSONObject getJson(final byte charset, final int jsonSize) {
+    private JSONObject getJson(final int charset, final int jsonSize) {
         final String s = getString(charset, jsonSize);
         try {
             return s != null ? JSONParser.parseStrict(s).isObject() : null;

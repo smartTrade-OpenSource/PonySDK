@@ -55,7 +55,7 @@ public enum ArrayValueModel {
         return (byte) ordinal();
     }
 
-    public static ArrayValueModel fromRawValue(final byte rawValue) {
+    public static ArrayValueModel fromRawValue(final int rawValue) {
         return VALUES[rawValue];
     }
 

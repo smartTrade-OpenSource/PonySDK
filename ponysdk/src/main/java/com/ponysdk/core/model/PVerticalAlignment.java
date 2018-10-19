@@ -38,7 +38,7 @@ public enum PVerticalAlignment {
         return (byte) ordinal();
     }
 
-    public static PVerticalAlignment fromRawValue(final byte rawValue) {
+    public static PVerticalAlignment fromRawValue(final int rawValue) {
         return VALUES[rawValue];
     }
 }

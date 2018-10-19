@@ -38,7 +38,7 @@ public enum PCheckBoxState {
         return (byte) ordinal();
     }
 
-    public static PCheckBoxState fromRawValue(final byte rawValue) {
+    public static PCheckBoxState fromRawValue(final int rawValue) {
         return VALUES[rawValue];
     }
 

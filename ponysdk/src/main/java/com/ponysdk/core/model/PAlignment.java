@@ -52,7 +52,7 @@ public enum PAlignment {
         return (byte) ordinal();
     }
 
-    public static PAlignment fromRawValue(final byte rawValue) {
+    public static PAlignment fromRawValue(final int rawValue) {
         return VALUES[rawValue];
     }
 

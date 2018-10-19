@@ -39,13 +39,13 @@ public abstract class PTCellPanel<W extends CellPanel> extends PTComplexPanel<W>
         final ServerToClientModel model = binaryModel.getModel();
         if (ServerToClientModel.WIDGET_HORIZONTAL_ALIGNMENT == model) {
             final HorizontalAlignmentConstant horizontalAlignment = GWTConverter
-                .asHorizontalAlignmentConstant(binaryModel.getByteValue());
+                .asHorizontalAlignmentConstant(binaryModel.getIntValue());
             // ServerToClientModel.WIDGET_ID
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
             uiObject.setCellHorizontalAlignment(w, horizontalAlignment);
             return true;
         } else if (ServerToClientModel.WIDGET_VERTICAL_ALIGNMENT == model) {
-            final VerticalAlignmentConstant verticalAlignment = GWTConverter.asVerticalAlignmentConstant(binaryModel.getByteValue());
+            final VerticalAlignmentConstant verticalAlignment = GWTConverter.asVerticalAlignmentConstant(binaryModel.getIntValue());
             // ServerToClientModel.WIDGET_ID
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
             uiObject.setCellVerticalAlignment(w, verticalAlignment);

@@ -88,10 +88,10 @@ public class PTRichTextArea extends PTFocusWidget<RichTextArea> implements BlurH
             uiObject.getFormatter().setFontName(binaryModel.getStringValue());
             return true;
         } else if (ServerToClientModel.FONT_SIZE == model) {
-            uiObject.getFormatter().setFontSize(GWTConverter.asFontSize(binaryModel.getByteValue()));
+            uiObject.getFormatter().setFontSize(GWTConverter.asFontSize(binaryModel.getIntValue()));
             return true;
         } else if (ServerToClientModel.JUSTIFICATION == model) {
-            uiObject.getFormatter().setJustification(GWTConverter.asJustification(binaryModel.getByteValue()));
+            uiObject.getFormatter().setJustification(GWTConverter.asJustification(binaryModel.getIntValue()));
             return true;
         } else {
             return super.update(buffer, binaryModel);

@@ -218,7 +218,7 @@ public class UIBuilder {
 
     private void processCreate(final ReaderBuffer buffer, final int objectID) {
         // ServerToClientModel.WIDGET_TYPE
-        final WidgetType widgetType = WidgetType.fromRawValue(buffer.readBinaryModel().getByteValue());
+        final WidgetType widgetType = WidgetType.fromRawValue(buffer.readBinaryModel().getIntValue());
 
         final PTObject ptObject = uiFactory.newUIObject(widgetType);
         if (ptObject != null) {
@@ -294,7 +294,7 @@ public class UIBuilder {
 
     private void processAddHandler(final ReaderBuffer buffer, final int objectID) {
         // ServerToClientModel.HANDLER_TYPE
-        final HandlerModel handlerModel = HandlerModel.fromRawValue(buffer.readBinaryModel().getByteValue());
+        final HandlerModel handlerModel = HandlerModel.fromRawValue(buffer.readBinaryModel().getIntValue());
 
         if (HandlerModel.HANDLER_STREAM_REQUEST == handlerModel) {
             new PTStreamResource().addHandler(buffer, handlerModel);
@@ -315,7 +315,7 @@ public class UIBuilder {
         final PTObject ptObject = getPTObject(objectID);
         if (ptObject != null) {
             // ServerToClientModel.HANDLER_TYPE
-            final HandlerModel handlerModel = HandlerModel.fromRawValue(buffer.readBinaryModel().getByteValue());
+            final HandlerModel handlerModel = HandlerModel.fromRawValue(buffer.readBinaryModel().getIntValue());
             ptObject.removeHandler(buffer, handlerModel);
             buffer.readBinaryModel(); // Read ServerToClientModel.END element
         } else {

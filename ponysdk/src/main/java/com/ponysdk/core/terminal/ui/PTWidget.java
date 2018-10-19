@@ -98,7 +98,7 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
     public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
         if (HandlerModel.HANDLER_DOM == handlerModel) {
             // ServerToClientModel.DOM_HANDLER_CODE
-            final DomHandlerType domHandlerType = DomHandlerType.fromRawValue(buffer.readBinaryModel().getByteValue());
+            final DomHandlerType domHandlerType = DomHandlerType.fromRawValue(buffer.readBinaryModel().getIntValue());
             addDomHandler(buffer, domHandlerType);
         } else {
             super.addHandler(buffer, handlerModel);

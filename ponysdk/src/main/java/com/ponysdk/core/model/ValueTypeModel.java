@@ -66,7 +66,7 @@ public enum ValueTypeModel {
         return (byte) ordinal();
     }
 
-    public static ValueTypeModel fromRawValue(final byte rawValue) {
+    public static ValueTypeModel fromRawValue(final int rawValue) {
         return VALUES[rawValue];
     }
 
