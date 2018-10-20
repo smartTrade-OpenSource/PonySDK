@@ -24,49 +24,93 @@
 package com.ponysdk.core.ui.datagrid;
 
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.function.Function;
+import java.util.function.BiConsumer;
 
-public class DataGridTreeSet<E> extends TreeSet<E> {
+public class DataGridTreeSet<E> {
 
-    private final Function<E, ?> keyProvider;
+    private TreeSet<E> set;
+    private final Map<E, Integer> indexByObject = new TreeMap<>();
+    private final Map<Integer, E> objectByIndex = new TreeMap<>();
 
-    private final Map<Object, E> map = new HashMap<>();
-
-    public DataGridTreeSet(final Comparator<E> comparator, final Function<E, ?> keyProvider) {
-        super((o1, o2) -> {
+    public DataGridTreeSet(final Comparator<E> comparator) {
+        set = new TreeSet<>((o1, o2) -> {
             final int compare = comparator.compare(o1, o2);
             if (compare != 0) return compare;
-            return Integer.compare(keyProvider.apply(o1).hashCode(), keyProvider.apply(o2).hashCode());
+            return Integer.compare(o1.hashCode(), o2.hashCode());
         });
-        this.keyProvider = keyProvider;
     }
 
     public int getPosition(final E e) {
-        return headSet(e).size();
+        return indexByObject.get(e);
     }
 
-    @Override
-    public boolean add(final E e) {
-        map.put(keyProvider.apply(e), e);
-        return super.add(e);
+
+    public void put(E e, BiConsumer<Integer, E> consumer) {
+        Integer initialPosition = Integer.MAX_VALUE;
+        if (set.remove(e)) {
+            initialPosition = indexByObject.get(e);
+        }
+        set.add(e);
+
+        int newSize = set.headSet(e).size();
+
+        if (newSize == initialPosition) return DELTA.UPDATED;
+
+
+        int index = Math.min(set.headSet(e).size(), initialPosition);
+        E old;
+        do {
+            old = objectByIndex.put(index, e);
+            indexByObject.put(e, index);
+            consumer.accept(index, e);
+            e = old;
+            index++;
+        } while (old != null);
+
+        return true;
     }
 
-    @Override
-    public boolean remove(final Object e) {
-        map.remove(keyProvider.apply((E) e));
-        return super.remove(e);
+    public boolean remove(E e, BiConsumer<Integer, E> consumer) {
+        boolean removed = set.remove(e);
+        if (removed) {
+            Integer index = indexByObject.remove(e);
+            E old;
+            for (int i = index; i < objectByIndex.size(); i++) {
+                old = objectByIndex.get(i + 1);
+                objectByIndex.put(i, old);
+                indexByObject.put(old, i);
+                consumer.accept(i, old);
+            }
+
+            objectByIndex.remove(objectByIndex.size() - 1);
+        }
+
+        return removed;
     }
 
-    public boolean containsData(final E e) {
-        return map.containsKey(keyProvider.apply(e));
+
+    public boolean contains(final E e) {
+        return set.contains(e);
     }
 
-    @Override
     public void clear() {
-        super.clear();
-        map.clear();
+        set.clear();
+        objectByIndex.clear();
+        indexByObject.clear();
+    }
+
+    TreeSet<E> asSet() {
+        return set;
+    }
+
+    public int size() {
+        return set.size();
+    }
+
+    enum DELTA {
+        NEW, UPDATED, MOVE;
     }
 }

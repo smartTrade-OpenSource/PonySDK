@@ -29,41 +29,44 @@ import com.ponysdk.core.model.PUnit;
 
 public class Element {
 
-    public static final String E_A = "a";
-    public static final String E_B = "b";
-    public static final String E_H1 = "h1";
-    public static final String E_H2 = "h2";
-    public static final String E_H3 = "h3";
-    public static final String E_H4 = "h4";
-    public static final String E_H5 = "h5";
-    public static final String E_HR = "hr";
-    public static final String E_UL = "ul";
-    public static final String E_LI = "li";
-    public static final String E_DIV = "div";
-    public static final String E_SPAN = "span";
-    public static final String E_P = "p";
-    public static final String E_SMALL = "small";
-    public static final String E_BLOCKQUOTE = "blockquote";
-    public static final String E_TABLE = "table";
-    public static final String E_TBODY = "tbody";
-    public static final String E_THEAD = "thead";
-    public static final String E_TH = "th";
-    public static final String E_TR = "tr";
-    public static final String E_TD = "td";
-    public static final String E_FORM = "form";
-    public static final String E_INPUT = "input";
-    public static final String E_LABEL = "label";
-    public static final String E_BUTTON = "button";
-    public static final String E_SELECT = "select";
-    public static final String E_IFRAME = "iframe";
-    public static final String E_SVG = "svg";
-    public static final String E_LINE = "line";
-    public static final String E_CIRCLE = "circle";
-    public static final String E_ELLIPSE = "ellipse";
-    public static final String E_TEXT = "text";
-    public static final String E_CANVAS = "canvas";
-    public static final String E_SCRIPT = "script";
-    public static final String E_STYLE = "style";
+    public static final String A = "a";
+    public static final String B = "b";
+    public static final String I = "i";
+    public static final String H1 = "h1";
+    public static final String H2 = "h2";
+    public static final String H3 = "h3";
+    public static final String H4 = "h4";
+    public static final String H5 = "h5";
+    public static final String H6 = "h6";
+    public static final String HR = "hr";
+    public static final String UL = "ul";
+    public static final String LI = "li";
+    public static final String DIV = "div";
+    public static final String SPAN = "span";
+    public static final String P = "p";
+    public static final String SMALL = "small";
+    public static final String BLOCKQUOTE = "blockquote";
+    public static final String TABLE = "table";
+    public static final String TBODY = "tbody";
+    public static final String THEAD = "thead";
+    public static final String TFOOT = "tfoot";
+    public static final String TH = "th";
+    public static final String TR = "tr";
+    public static final String TD = "td";
+    public static final String FORM = "form";
+    public static final String INPUT = "input";
+    public static final String LABEL = "label";
+    public static final String BUTTON = "button";
+    public static final String SELECT = "select";
+    public static final String IFRAME = "iframe";
+    public static final String SVG = "svg";
+    public static final String LINE = "line";
+    public static final String CIRCLE = "circle";
+    public static final String ELLIPSE = "ellipse";
+    public static final String TEXT = "text";
+    public static final String CANVAS = "canvas";
+    public static final String SCRIPT = "script";
+    public static final String STYLE = "style";
 
     public static ElementFactory f = new DefaultElementFactory();
 
@@ -422,143 +425,155 @@ public class Element {
     }
 
     public static final PElement newA() {
-        return newPElement(E_A);
+        return newPElement(A);
     }
 
     public static final PElement newB() {
-        return newPElement(E_B);
+        return newPElement(B);
+    }
+
+    public static final PElement newI() {
+        return newPElement(I);
     }
 
     public static final PElement newH1() {
-        return newPElement(E_H1);
+        return newPElement(H1);
     }
 
     public static final PElement newH2() {
-        return newPElement(E_H2);
+        return newPElement(H2);
     }
 
     public static final PElement newH3() {
-        return newPElement(E_H3);
+        return newPElement(H3);
     }
 
     public static final PElement newH4() {
-        return newPElement(E_H4);
+        return newPElement(H4);
     }
 
     public static final PElement newH5() {
-        return newPElement(E_H5);
+        return newPElement(H5);
+    }
+
+    public static final PElement newH6() {
+        return newPElement(H6);
     }
 
     public static final PElement newHr() {
-        return newPElement(E_HR);
+        return newPElement(HR);
     }
 
     public static final PElement newUl() {
-        return newPElement(E_UL);
+        return newPElement(UL);
     }
 
     public static final PElement newLi() {
-        return newPElement(E_LI);
+        return newPElement(LI);
     }
 
     public static final PElement newDiv() {
-        return newPElement(E_DIV);
+        return newPElement(DIV);
     }
 
     public static final PElement newSpan() {
-        return newPElement(E_SPAN);
+        return newPElement(SPAN);
     }
 
     public static final PElement newP() {
-        return newPElement(E_P);
+        return newPElement(P);
     }
 
     public static final PElement newSmall() {
-        return newPElement(E_SMALL);
+        return newPElement(SMALL);
     }
 
     public static final PElement newBlockquote() {
-        return newPElement(E_BLOCKQUOTE);
+        return newPElement(BLOCKQUOTE);
     }
 
     public static final PElement newTable() {
-        return newPElement(E_TABLE);
+        return newPElement(TABLE);
     }
 
     public static final PElement newThead() {
-        return newPElement(E_THEAD);
+        return newPElement(THEAD);
+    }
+
+    public static final PElement newTfoot() {
+        return newPElement(TFOOT);
     }
 
     public static final PElement newTh() {
-        return newPElement(E_TH);
+        return newPElement(TH);
     }
 
     public static final PElement newTbody() {
-        return newPElement(E_TBODY);
+        return newPElement(TBODY);
     }
 
     public static final PElement newTr() {
-        return newPElement(E_TR);
+        return newPElement(TR);
     }
 
     public static final PElement newTd() {
-        return newPElement(E_TD);
+        return newPElement(TD);
     }
 
     public static final PElement newForm() {
-        return newPElement(E_FORM);
+        return newPElement(FORM);
     }
 
     public static final PElement newInput() {
-        return newPElement(E_INPUT);
+        return newPElement(INPUT);
     }
 
     public static final PElement newSelect() {
-        return newPElement(E_SELECT);
+        return newPElement(SELECT);
     }
 
     public static final PElement newLabel() {
-        return newPElement(E_LABEL);
+        return newPElement(LABEL);
     }
 
     public static final PElement newButton() {
-        return newPElement(E_BUTTON);
+        return newPElement(BUTTON);
     }
 
     public static final PElement newIframe() {
-        return newPElement(E_IFRAME);
+        return newPElement(IFRAME);
     }
 
     public static final PElement newSvg() {
-        return newPElement(E_SVG);
+        return newPElement(SVG);
     }
 
     public static final PElement newLine() {
-        return newPElement(E_LINE);
+        return newPElement(LINE);
     }
 
     public static final PElement newCircle() {
-        return newPElement(E_CIRCLE);
+        return newPElement(CIRCLE);
     }
 
     public static final PElement newEllipse() {
-        return newPElement(E_ELLIPSE);
+        return newPElement(ELLIPSE);
     }
 
     public static final PElement newText() {
-        return newPElement(E_TEXT);
+        return newPElement(TEXT);
     }
 
     public static final PElement newCanvas() {
-        return newPElement(E_CANVAS);
+        return newPElement(CANVAS);
     }
 
     public static final PElement newScript() {
-        return newPElement(E_SCRIPT);
+        return newPElement(SCRIPT);
     }
 
     public static final PElement newStyle() {
-        return newPElement(E_STYLE);
+        return newPElement(STYLE);
     }
 
 }

@@ -258,7 +258,8 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     }
 
     public void removeStyleProperty(final String name) {
-        if (safeStyleProperties().remove(name) != null) saveUpdate(writer -> writer.write(ServerToClientModel.REMOVE_STYLE_KEY, name));
+        if (safeStyleProperties().remove(name) != null)
+            saveUpdate(writer -> writer.write(ServerToClientModel.REMOVE_STYLE_KEY, name));
     }
 
     public void setProperty(final String name, final String value) {
@@ -326,12 +327,6 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         return true;
     }
 
-    public void addStyleName(final String styleName) {
-        if (styleName != null && !styleName.isEmpty() && doAddStyleName(styleName) && initialized) {
-            saveUpdate(writer -> writer.write(ServerToClientModel.ADD_STYLE_NAME, styleName));
-        }
-    }
-
     private boolean doRemoveStyleName(final String styleName) {
         final SetPool<String>.ImmutableSet s = styleNames.getRemove(styleName);
         if (s == styleNames) return false;
@@ -339,10 +334,18 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         return true;
     }
 
-    public void removeStyleName(final String styleName) {
+    public PWidget addStyleName(final String styleName) {
+        if (styleName != null && !styleName.isEmpty() && doAddStyleName(styleName) && initialized) {
+            saveUpdate(writer -> writer.write(ServerToClientModel.ADD_STYLE_NAME, styleName));
+        }
+        return this;
+    }
+
+    public PWidget removeStyleName(final String styleName) {
         if (styleName != null && !styleName.isEmpty() && doRemoveStyleName(styleName) && initialized) {
             saveUpdate(writer -> writer.write(ServerToClientModel.REMOVE_STYLE_NAME, styleName));
         }
+        return this;
     }
 
     public boolean hasStyleName(final String styleName) {
@@ -423,7 +426,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         if (pool != oneTimeHandlerCreation) {
             oneTimeHandlerCreation = pool;
             final ServerBinaryModel binaryModel1 = new ServerBinaryModel(ServerToClientModel.DOM_HANDLER_CODE,
-                type.getDomHandlerType().getValue());
+                    type.getDomHandlerType().getValue());
             final ModelWriterCallback callback = writer -> {
                 writer.write(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_DOM.getValue());
                 writer.write(binaryModel1.getKey(), binaryModel1.getValue());
@@ -445,15 +448,15 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
             switch (domHandler) {
                 case KEY_PRESS:
                     fireKeyEvent(instruction,
-                        new PKeyPressEvent(this, instruction.getInt(ClientToServerModel.VALUE_KEY.toStringValue())));
+                            new PKeyPressEvent(this, instruction.getInt(ClientToServerModel.VALUE_KEY.toStringValue())));
                     break;
                 case KEY_UP:
                     fireKeyEvent(instruction,
-                        new PKeyUpEvent(this, instruction.getInt(ClientToServerModel.VALUE_KEY.toStringValue())));
+                            new PKeyUpEvent(this, instruction.getInt(ClientToServerModel.VALUE_KEY.toStringValue())));
                     break;
                 case KEY_DOWN:
                     fireKeyEvent(instruction,
-                        new PKeyDownEvent(this, instruction.getInt(ClientToServerModel.VALUE_KEY.toStringValue())));
+                            new PKeyDownEvent(this, instruction.getInt(ClientToServerModel.VALUE_KEY.toStringValue())));
                     break;
                 case CLICK:
                     fireMouseEvent(instruction, new PClickEvent(this));
@@ -631,8 +634,8 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     }
 
     /**
-     * @deprecated Use {@link #getAddons()} instead
      * @return First binded addon
+     * @deprecated Use {@link #getAddons()} instead
      */
     @Deprecated
     public PAddOn getAddon() {

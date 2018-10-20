@@ -23,14 +23,23 @@
 
 package com.ponysdk.core.ui.datagrid.impl;
 
-import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.PFlexTable;
-import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.core.ui.datagrid.View;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class DefaultView implements View {
 
-    private final PFlexTable table = Element.newPFlexTable();
+    private final PFlowPanel table = Element.newPFlowPanel();
+    private final PFlowPanel headers = Element.newPFlowPanel();
+    private final PFlowPanel rows = Element.newPFlowPanel();
+
+
+    public DefaultView() {
+        table.add(headers);
+        table.add(rows);
+    }
 
     @Override
     public PWidget asWidget() {
@@ -38,28 +47,42 @@ public class DefaultView implements View {
     }
 
     @Override
-    public void setHeader(final int c, final PWidget w) {
-        table.setWidget(0, c, w);
+    public PSimplePanel addHeader() {
+        PSimplePanel th = Element.newPSimplePanel();
+        th.addStyleName("th");
+        headers.add(th);
+        return th;
     }
 
     @Override
     public PWidget getHeader(final int c) {
-        return table.getWidget(0, c);
+        return headers.getWidget(c);
     }
 
     @Override
     public PWidget getCell(final int r, final int c) {
-        return table.getWidget(r + 1, c);
+        PFlowPanel row = (PFlowPanel) rows.getWidget(r);
+        return row.getWidget(c);
     }
 
     @Override
     public int getRowCount() {
-        return table.getRowCount() - 1;
+        return rows.getWidgetCount();
     }
 
     @Override
-    public void setCell(final int r, final int c, final PWidget w) {
-        table.setWidget(r + 1, c, w);
+    public void addRow() {
+        PFlowPanel row = Element.newPFlowPanel();
+        row.addStyleName("r");
+        rows.add(row);
+    }
+
+    @Override
+    public PSimplePanel addCell(int r) {
+        PFlowPanel row = (PFlowPanel) rows.getWidget(r);
+        PSimplePanel cell = Element.newPSimplePanel();
+        row.add(cell);
+        return cell;
     }
 
 }

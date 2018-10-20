@@ -23,19 +23,22 @@
 
 package com.ponysdk.core.ui.datagrid;
 
-import com.ponysdk.core.ui.basic.IsPWidget;
-import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.basic.*;
 
 public interface View extends IsPWidget {
 
-    void setHeader(int c, PWidget w);
+    PSimplePanel addHeader();
 
-    void setCell(int r, int c, PWidget w);
+    void addRow();
+
+    PSimplePanel addCell(int r);
 
     int getRowCount();
 
-    PWidget getHeader(int r);
+    PSimplePanel getHeader(int column);
 
-    PWidget getCell(int r, int c);
+    PFlowPanel getRow(int row);
+
+    PSimplePanel getCell(int r, int c);
 
 }

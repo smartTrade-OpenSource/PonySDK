@@ -34,7 +34,6 @@ import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -82,8 +81,6 @@ import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
 import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
 import com.ponysdk.core.ui.datagrid.ColumnDescriptor;
 import com.ponysdk.core.ui.datagrid.DataGrid;
-import com.ponysdk.core.ui.datagrid.dynamic.Configuration;
-import com.ponysdk.core.ui.datagrid.dynamic.DynamicDataGrid;
 import com.ponysdk.core.ui.datagrid.impl.PLabelCellRenderer;
 import com.ponysdk.core.ui.eventbus2.EventBus.EventHandler;
 import com.ponysdk.core.ui.grid.AbstractGridWidget;
@@ -297,7 +294,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final BufferedReader reader = new BufferedReader(new InputStreamReader(item.getInputStream(), "UTF-8"));
         final StringBuilder value = new StringBuilder();
         final char[] buffer = new char[1024];
-        for (int length = 0; (length = reader.read(buffer)) > 0;) {
+        for (int length = 0; (length = reader.read(buffer)) > 0; ) {
             value.append(buffer, 0, length);
         }
         System.out.println(value.toString());
@@ -334,12 +331,30 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     }
 
     private void createNewGridSystem() {
+        DataGrid<Pojo> grid = new DataGrid<>();
+
+        grid.addColumnDescriptor(ColumnDescriptor.newDefault("Name", Pojo::getCoucou));
+        grid.addColumnDescriptor(ColumnDescriptor.newDefault("Name", Pojo::getCoucou));
+        grid.addColumnDescriptor(ColumnDescriptor.newDefault("Name", Pojo::getCoucou));
+        grid.addColumnDescriptor(ColumnDescriptor.newDefault("Name", Pojo::getCoucou));
+        grid.addColumnDescriptor(ColumnDescriptor.newDefault("Name", Pojo::getCoucou));
+        grid.addColumnDescriptor(ColumnDescriptor.newDefault("Name", Pojo::getCoucou));
+        grid.addColumnDescriptor(ColumnDescriptor.newDefault("Name", Pojo::getCoucou));
+
+
+
+
+        //Collection<ColumnDescriptor> columnsDescriptors = ColumnUtils.generateColumn(Pojo.class,filter,);
+        //grid.addColumnDescriptor(columnsDescriptors);
+
+
+
         //        final DataGrid<Pojo> grid = new DataGrid<>((a, b) -> a.bid.compareTo(b.bid));
 
-        final Configuration<Pojo> configuration = new Configuration<>(Pojo.class);
+        //final Configuration<Pojo> configuration = new Configuration<>(Pojo.class);
         //configuration.setFilter(method -> method.getName().contains("COUCOU"));
 
-        final DataGrid<Pojo> grid = new DynamicDataGrid<>(configuration, Comparator.comparing(Pojo::getBid));
+        //final DataGrid<Pojo> grid = new ColumnHelper<>(configuration, Comparator.comparing(Pojo::getBid));
 
         PWindow.getMain().add(grid);
 
@@ -480,7 +495,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     private void createNewEvent() {
         final EventHandler<PClickEvent> handler = UIContext.getNewEventBus().subscribe(PClickEvent.class,
-            event -> System.err.println("B " + event));
+                event -> System.err.println("B " + event));
         UIContext.getNewEventBus().post(new PClickEvent(this));
         UIContext.getNewEventBus().post(new PClickEvent(this));
         UIContext.getNewEventBus().unsubscribe(handler);
@@ -599,7 +614,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         windowContainer.add(button1);
         button1.addClickHandler(event -> {
             final PWindow newPWindow = Element.newPWindow(w, "Sub Window 1 " + i.incrementAndGet(),
-                "resizable=yes,location=0,status=0,scrollbars=0");
+                    "resizable=yes,location=0,status=0,scrollbars=0");
             newPWindow.add(Element.newPLabel("Sub window"));
             newPWindow.open();
         });
@@ -608,7 +623,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         windowContainer.add(button2);
         button2.addClickHandler(event -> {
             final PWindow newPWindow = Element.newPWindow("Not Sub Window 1 " + i.incrementAndGet(),
-                "resizable=yes,location=0,status=0,scrollbars=0");
+                    "resizable=yes,location=0,status=0,scrollbars=0");
             newPWindow.add(Element.newPLabel("Sub window"));
             newPWindow.open();
         });
@@ -744,7 +759,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
             @Override
             public PKeyCodes[] getFilteredKeys() {
-                return new PKeyCodes[] { PKeyCodes.ENTER };
+                return new PKeyCodes[]{PKeyCodes.ENTER};
             }
         });
         return pTextBox;
@@ -810,8 +825,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         }
 
         /**
-         * @param security
-         *            the security to set
+         * @param security the security to set
          */
         public void setSecurity(final String security) {
             this.security = security;
@@ -825,8 +839,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         }
 
         /**
-         * @param classe
-         *            the classe to set
+         * @param classe the classe to set
          */
         public void setClasse(final String classe) {
             this.classe = classe;
@@ -840,8 +853,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         }
 
         /**
-         * @param bid
-         *            the bid to set
+         * @param bid the bid to set
          */
         public void setBid(final Double bid) {
             this.bid = bid;
@@ -855,8 +867,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         }
 
         /**
-         * @param offer
-         *            the offer to set
+         * @param offer the offer to set
          */
         public void setOffer(final Double offer) {
             this.offer = offer;
@@ -870,8 +881,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         }
 
         /**
-         * @param spread
-         *            the spread to set
+         * @param spread the spread to set
          */
         public void setSpread(final Double spread) {
             this.spread = spread;
@@ -885,8 +895,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         }
 
         /**
-         * @param coucou
-         *            the coucou to set
+         * @param coucou the coucou to set
          */
         public void setCoucou(final String coucou) {
             this.coucou = coucou;
@@ -900,8 +909,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         }
 
         /**
-         * @param coucou1
-         *            the coucou1 to set
+         * @param coucou1 the coucou1 to set
          */
         public void setCoucou1(final String coucou1) {
             this.coucou1 = coucou1;
@@ -915,8 +923,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         }
 
         /**
-         * @param coucou2
-         *            the coucou2 to set
+         * @param coucou2 the coucou2 to set
          */
         public void setCoucou2(final String coucou2) {
             this.coucou2 = coucou2;
@@ -930,8 +937,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         }
 
         /**
-         * @param coucou3
-         *            the coucou3 to set
+         * @param coucou3 the coucou3 to set
          */
         public void setCoucou3(final String coucou3) {
             this.coucou3 = coucou3;
@@ -945,8 +951,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         }
 
         /**
-         * @param coucou4
-         *            the coucou4 to set
+         * @param coucou4 the coucou4 to set
          */
         public void setCoucou4(final String coucou4) {
             this.coucou4 = coucou4;
