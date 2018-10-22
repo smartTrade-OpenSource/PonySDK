@@ -271,18 +271,12 @@ public class ReaderBuffer {
         for (int i = 0; i < array.length; i++) {
             final ArrayValueModel arrayValueModel = ArrayValueModel.fromRawValue(getByte());
             size += arrayValueModel.getMinSize();
-            if (arrayValueModel == ArrayValueModel.NULL) {
+            if (arrayValueModel.isDynamicSize()) {
+                array[i] = getDynamicSizeArrayElement(array, i, arrayValueModel);
+            } else if (arrayValueModel == ArrayValueModel.NULL) {
                 array[i] = null;
             } else if (arrayValueModel == ArrayValueModel.INTEGER) {
                 array[i] = getInt();
-            } else if (arrayValueModel == ArrayValueModel.STRING_ASCII) {
-                final int messageSize = getUnsignedShort();
-                size += messageSize;
-                array[i] = decodeStringAscii(messageSize);
-            } else if (arrayValueModel == ArrayValueModel.STRING_UTF8) {
-                final int messageSize = getUnsignedShort();
-                size += messageSize;
-                array[i] = decodeStringUTF8(messageSize);
             } else if (arrayValueModel == ArrayValueModel.SHORT) {
                 array[i] = getShort();
             } else if (arrayValueModel == ArrayValueModel.BOOLEAN_FALSE) {
@@ -302,6 +296,22 @@ public class ReaderBuffer {
             }
         }
         return size;
+    }
+
+    private Object getDynamicSizeArrayElement(final Object[] array, final int i, final ArrayValueModel arrayValueModel) {
+        final int msgSize = getArrayElementDynamicSize(arrayValueModel.getMinSize());
+        boolean ascii;
+        if (arrayValueModel == ArrayValueModel.STRING_ASCII_UINT8_LENGTH
+                || arrayValueModel == ArrayValueModel.STRING_ASCII_UINT16_LENGTH) {
+            ascii = true;
+        } else if (arrayValueModel == ArrayValueModel.STRING_UTF8_UINT8_LENGTH
+                || arrayValueModel == ArrayValueModel.STRING_UTF8_UINT16_LENGTH
+                || arrayValueModel == ArrayValueModel.STRING_UTF8_INT32_LENGTH) {
+            ascii = false;
+        } else {
+            throw new IllegalArgumentException("Unsupported ArrayValueModel " + arrayValueModel);
+        }
+        return ascii ? decodeStringAscii(msgSize) : decodeStringUTF8(msgSize);
     }
 
     private String decodeStringAscii(final int size) {
@@ -405,18 +415,24 @@ public class ReaderBuffer {
     private void shiftArray(final int arrayLength) {
         for (int i = 0; i < arrayLength; i++) {
             final ArrayValueModel arrayValueModel = ArrayValueModel.fromRawValue(getByte());
-            if (arrayValueModel == ArrayValueModel.STRING_ASCII || arrayValueModel == ArrayValueModel.STRING_UTF8) {
-                final int msgLength = getUnsignedShort();
+            if (arrayValueModel.isDynamicSize()) {
+                final int msgLength = getArrayElementDynamicSize(arrayValueModel.getMinSize());
                 position += msgLength;
-            } else if (arrayValueModel == ArrayValueModel.NULL || arrayValueModel == ArrayValueModel.INTEGER
-                    || arrayValueModel == ArrayValueModel.SHORT || arrayValueModel == ArrayValueModel.BOOLEAN_FALSE
-                    || arrayValueModel == ArrayValueModel.BOOLEAN_TRUE || arrayValueModel == ArrayValueModel.DOUBLE
-                    || arrayValueModel == ArrayValueModel.LONG || arrayValueModel == ArrayValueModel.FLOAT
-                    || arrayValueModel == ArrayValueModel.BYTE) {
-                position += arrayValueModel.getMinSize();
             } else {
-                throw new IllegalArgumentException("Unsupported ArrayValueModel " + arrayValueModel);
+                position += arrayValueModel.getMinSize();
             }
+        }
+    }
+
+    private int getArrayElementDynamicSize(final int lengthOfSize) {
+        if (lengthOfSize == 1) {
+            return getUnsignedByte();
+        } else if (lengthOfSize == 2) {
+            return getUnsignedShort();
+        } else if (lengthOfSize == 4) {
+            return getInt();
+        } else {
+            throw new IllegalArgumentException("Invalid Array element lengthOfSize " + lengthOfSize);
         }
     }
 
