@@ -252,16 +252,7 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
         } else if (o instanceof Integer) {
             putCompressedInt((int) o);
         } else if (o instanceof String) {
-            final String s = (String) o;
-            final byte[] bytes = s.getBytes(UTF8_CHARSET);
-            final int length = bytes.length;
-            if (length > MAX_UNSIGNED_SHORT_VALUE) {
-                throw new IllegalArgumentException("String array element too big (" + s.length() + " > " + MAX_UNSIGNED_BYTE_VALUE
-                        + "), use a Json Object instead : " + s.substring(0, 100) + "...");
-            }
-            put(length == s.length() ? ArrayValueModel.STRING_ASCII.getValue() : ArrayValueModel.STRING_UTF8.getValue());
-            putUnsignedShort(length);
-            put(bytes);
+            putArrayStringElement(o);
         } else if (o instanceof Byte) {
             put(ArrayValueModel.BYTE.getValue());
             put((byte) o);
@@ -279,6 +270,29 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
         } else {
             throw new IllegalArgumentException(o.getClass() + " is not supported as an array element type : " + o);
         }
+    }
+
+    private void putArrayStringElement(final Object o) throws IOException {
+        final String s = (String) o;
+        final byte[] bytes = s.getBytes(UTF8_CHARSET);
+        final int length = bytes.length;
+
+        if (length <= MAX_UNSIGNED_BYTE_VALUE) {
+            put(length == s.length() ? ArrayValueModel.STRING_ASCII_UINT8_LENGTH.getValue()
+                    : ArrayValueModel.STRING_UTF8_UINT8_LENGTH.getValue());
+            putUnsignedByte((short) length);
+
+        } else if (length <= MAX_UNSIGNED_SHORT_VALUE) {
+            put(length == s.length() ? ArrayValueModel.STRING_ASCII_UINT16_LENGTH.getValue()
+                    : ArrayValueModel.STRING_UTF8_UINT16_LENGTH.getValue());
+            putUnsignedShort(length);
+
+        } else {
+            put(ArrayValueModel.STRING_UTF8_INT32_LENGTH.getValue());
+            putInt(length);
+        }
+
+        put(bytes);
     }
 
     private void write(final ServerToClientModel model, final String value) throws IOException {

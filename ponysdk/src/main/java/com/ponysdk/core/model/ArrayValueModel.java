@@ -25,27 +25,36 @@ package com.ponysdk.core.model;
 
 public enum ArrayValueModel {
 
-    NULL(ValueTypeModel.NULL_SIZE),
-    BOOLEAN_FALSE(ArrayValueModel.BOOLEAN_SIZE),
-    BOOLEAN_TRUE(ArrayValueModel.BOOLEAN_SIZE),
-    BYTE(ValueTypeModel.BYTE_SIZE),
-    SHORT(ValueTypeModel.SHORT_SIZE),
-    INTEGER(ValueTypeModel.INTEGER_SIZE),
-    LONG(ValueTypeModel.LONG_SIZE),
-    DOUBLE(ValueTypeModel.DOUBLE_SIZE),
-    FLOAT(ValueTypeModel.FLOAT_SIZE),
-    STRING_ASCII(ArrayValueModel.STRING_MIN_SIZE),
-    STRING_UTF8(ArrayValueModel.STRING_MIN_SIZE);
+    NULL(ValueTypeModel.NULL_SIZE, false),
+    BOOLEAN_FALSE(ArrayValueModel.BOOLEAN_SIZE, false),
+    BOOLEAN_TRUE(ArrayValueModel.BOOLEAN_SIZE, false),
+    BYTE(ValueTypeModel.BYTE_SIZE, false),
+    SHORT(ValueTypeModel.SHORT_SIZE, false),
+    INTEGER(ValueTypeModel.INTEGER_SIZE, false),
+    LONG(ValueTypeModel.LONG_SIZE, false),
+    DOUBLE(ValueTypeModel.DOUBLE_SIZE, false),
+    FLOAT(ValueTypeModel.FLOAT_SIZE, false),
+
+    STRING_ASCII_UINT8_LENGTH(ArrayValueModel.STRING_UINT8_LENGTH_MIN_SIZE, true),
+    STRING_ASCII_UINT16_LENGTH(ArrayValueModel.STRING_UINT16_LENGTH_SIZE, true),
+
+    STRING_UTF8_UINT8_LENGTH(ArrayValueModel.STRING_UINT8_LENGTH_MIN_SIZE, true),
+    STRING_UTF8_UINT16_LENGTH(ArrayValueModel.STRING_UINT16_LENGTH_SIZE, true),
+    STRING_UTF8_INT32_LENGTH(ArrayValueModel.STRING_INT32_LENGTH_MIN_SIZE, true);
 
     private static final int BOOLEAN_SIZE = 0;
-    private static final int STRING_MIN_SIZE = 2;
+    private static final int STRING_UINT8_LENGTH_MIN_SIZE = 1;
+    private static final int STRING_UINT16_LENGTH_SIZE = 2;
+    private static final int STRING_INT32_LENGTH_MIN_SIZE = 4;
 
     private final int minSize;
+    private final boolean dynamicSize;
 
     private static final ArrayValueModel[] VALUES = ArrayValueModel.values();
 
-    private ArrayValueModel(final int minSize) {
+    private ArrayValueModel(final int minSize, final boolean dynamicSize) {
         this.minSize = minSize;
+        this.dynamicSize = dynamicSize;
     }
 
     public int getMinSize() {
@@ -54,6 +63,10 @@ public enum ArrayValueModel {
 
     public byte getValue() {
         return (byte) ordinal();
+    }
+
+    public boolean isDynamicSize() {
+        return dynamicSize;
     }
 
     public static ArrayValueModel fromRawValue(final int rawValue) {

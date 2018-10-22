@@ -42,6 +42,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.ToIntFunction;
 
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
@@ -344,17 +345,10 @@ public class PonySDKWebDriver implements WebDriver {
         return function.apply(b);
     }
 
-    private Object getStringAscii(final ByteBuffer b) {
-        return getString(b, StandardCharsets.ISO_8859_1);
-    }
-
-    private Object getStringUTF8(final ByteBuffer b) {
-        return getString(b, StandardCharsets.UTF_8);
-    }
-
-    private Object getString(final ByteBuffer b) {
+    private Object getString(final ByteBuffer b, final ToIntFunction<ByteBuffer> readStringLength) {
         final byte charsetStringType = b.get();
-        return getString(b, charsetStringType == CharsetModel.ASCII.getValue() ? StandardCharsets.ISO_8859_1 : StandardCharsets.UTF_8);
+        return getString(b, charsetStringType == CharsetModel.ASCII.getValue() ? StandardCharsets.ISO_8859_1 : StandardCharsets.UTF_8,
+            readStringLength);
     }
 
     private Object getJsonObject(final ByteBuffer b) {
@@ -371,8 +365,8 @@ public class PonySDKWebDriver implements WebDriver {
         }
     }
 
-    private Object getString(final ByteBuffer b, final Charset charset) {
-        final int strLength = readUnsignedShort(b);
+    private Object getString(final ByteBuffer b, final Charset charset, final ToIntFunction<ByteBuffer> readStringLength) {
+        final int strLength = readStringLength.applyAsInt(b);
         length += strLength;
         return getString(charset, b, strLength);
     }
@@ -408,10 +402,16 @@ public class PonySDKWebDriver implements WebDriver {
                 return b.getDouble();
             case FLOAT:
                 return b.getFloat();
-            case STRING_ASCII:
-                return getStringAscii(b);
-            case STRING_UTF8:
-                return getStringUTF8(b);
+            case STRING_ASCII_UINT8_LENGTH:
+                return getString(b, StandardCharsets.ISO_8859_1, PonySDKWebDriver::readUnsignedByte);
+            case STRING_ASCII_UINT16_LENGTH:
+                return getString(b, StandardCharsets.ISO_8859_1, PonySDKWebDriver::readUnsignedShort);
+            case STRING_UTF8_UINT8_LENGTH:
+                return getString(b, StandardCharsets.UTF_8, PonySDKWebDriver::readUnsignedByte);
+            case STRING_UTF8_UINT16_LENGTH:
+                return getString(b, StandardCharsets.UTF_8, PonySDKWebDriver::readUnsignedShort);
+            case STRING_UTF8_INT32_LENGTH:
+                return getString(b, StandardCharsets.UTF_8, ByteBuffer::getInt);
             default:
                 throw new IllegalArgumentException("ArrayValueModel " + model + " is not supported");
         }
@@ -436,9 +436,9 @@ public class PonySDKWebDriver implements WebDriver {
             case FLOAT:
                 return readValue(b, 4, ByteBuffer::getFloat);
             case STRING_ASCII:
-                return readValue(b, 2, this::getStringAscii);
+                return readValue(b, 2, buff -> getString(buff, StandardCharsets.ISO_8859_1, PonySDKWebDriver::readUnsignedShort));
             case STRING:
-                return readValue(b, 3, this::getString);
+                return readValue(b, 2, buff -> getString(buff, PonySDKWebDriver::readUnsignedShort));
             case JSON_OBJECT:
                 return readValue(b, 5, this::getJsonObject);
             case ARRAY:
@@ -567,8 +567,8 @@ public class PonySDKWebDriver implements WebDriver {
         return ArrayValueModel.fromRawValue(buffer.get());
     }
 
-    private static short readUnsignedByte(final ByteBuffer buffer) {
-        return (short) (buffer.get() & 0xFF);
+    private static int readUnsignedByte(final ByteBuffer buffer) {
+        return buffer.get() & 0xFF;
     }
 
     private static int readUnsignedShort(final ByteBuffer buffer) {
