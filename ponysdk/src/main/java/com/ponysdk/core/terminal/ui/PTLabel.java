@@ -47,8 +47,8 @@ public class PTLabel<T extends Label> extends PTWidget<T> {
         }
     }
 
-    private static final native void setText(Element element, String text) /*-{
-                                                                           element.textContent = text;
-                                                                           }-*/;
+    protected static final native void setText(Element element, String text) /*-{
+                                                                             element.textContent = text;
+                                                                             }-*/;
 
 }

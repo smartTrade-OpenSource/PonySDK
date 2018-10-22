@@ -2,8 +2,8 @@
  * Copyright (c) 2018 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
@@ -23,18 +23,13 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import java.util.logging.Logger;
-
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.Label;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
-public class PTFunctionalLabel extends PTWidget<Label> {
-
-    private static final Logger log = Logger.getLogger(PTFunctionalLabel.class.getName());
+public class PTFunctionalLabel extends PTLabel<Label> {
 
     private PTFunction function;
 
@@ -60,8 +55,4 @@ public class PTFunctionalLabel extends PTWidget<Label> {
             return super.update(buffer, binaryModel);
         }
     }
-
-    private static final native void setText(Element element, String text) /*-{
-                                                                           element.textContent = text;
-                                                                           }-*/;
 }
