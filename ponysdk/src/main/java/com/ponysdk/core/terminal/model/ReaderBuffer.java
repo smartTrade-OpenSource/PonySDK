@@ -272,7 +272,7 @@ public class ReaderBuffer {
             final ArrayValueModel arrayValueModel = ArrayValueModel.fromRawValue(getByte());
             size += arrayValueModel.getMinSize();
             if (arrayValueModel.isDynamicSize()) {
-                array[i] = getDynamicSizeArrayElement(array, i, arrayValueModel);
+                array[i] = getDynamicSizeArrayElement(arrayValueModel);
             } else if (arrayValueModel == ArrayValueModel.NULL) {
                 array[i] = null;
             } else if (arrayValueModel == ArrayValueModel.INTEGER) {
@@ -298,7 +298,7 @@ public class ReaderBuffer {
         return size;
     }
 
-    private Object getDynamicSizeArrayElement(final Object[] array, final int i, final ArrayValueModel arrayValueModel) {
+    private Object getDynamicSizeArrayElement(final ArrayValueModel arrayValueModel) {
         final int msgSize = getArrayElementDynamicSize(arrayValueModel.getMinSize());
         boolean ascii;
         if (arrayValueModel == ArrayValueModel.STRING_ASCII_UINT8_LENGTH
