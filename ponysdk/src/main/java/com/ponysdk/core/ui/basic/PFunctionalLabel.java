@@ -27,44 +27,19 @@ import java.util.Arrays;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.ui.basic.event.HasPClickHandlers;
-import com.ponysdk.core.ui.basic.event.HasPDoubleClickHandlers;
-import com.ponysdk.core.ui.basic.event.HasPDragEndHandlers;
-import com.ponysdk.core.ui.basic.event.HasPDragEnterHandlers;
-import com.ponysdk.core.ui.basic.event.HasPDragLeaveHandlers;
-import com.ponysdk.core.ui.basic.event.HasPDragOverHandlers;
-import com.ponysdk.core.ui.basic.event.HasPDragStartHandlers;
-import com.ponysdk.core.ui.basic.event.HasPDropHandlers;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
-import com.ponysdk.core.ui.basic.event.PDoubleClickEvent;
-import com.ponysdk.core.ui.basic.event.PDoubleClickHandler;
-import com.ponysdk.core.ui.basic.event.PDragEndEvent;
-import com.ponysdk.core.ui.basic.event.PDragEndHandler;
-import com.ponysdk.core.ui.basic.event.PDragEnterEvent;
-import com.ponysdk.core.ui.basic.event.PDragEnterHandler;
-import com.ponysdk.core.ui.basic.event.PDragLeaveEvent;
-import com.ponysdk.core.ui.basic.event.PDragLeaveHandler;
-import com.ponysdk.core.ui.basic.event.PDragOverEvent;
-import com.ponysdk.core.ui.basic.event.PDragOverHandler;
-import com.ponysdk.core.ui.basic.event.PDragStartEvent;
-import com.ponysdk.core.ui.basic.event.PDragStartHandler;
-import com.ponysdk.core.ui.basic.event.PDropEvent;
-import com.ponysdk.core.ui.basic.event.PDropHandler;
-import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 import com.ponysdk.core.ui.formatter.TextFunction;
 import com.ponysdk.core.writer.ModelWriter;
 
 /**
- * A widget that contains a text that is calculated using a PFunction and and an array of arguments, <i>not</i>
- * interpreted as HTML. This widget uses a &lt;div&gt; element, causing it to be displayed with block layout.
+ * A PLabel that contains a text, <i>not</i> interpreted as HTML, that can be either forced using
+ * <code>setText(String)</code> or calculated using a <code>PFunction</code> and an array of arguments. This widget
+ * uses a &lt;div&gt; element, causing it to be displayed with block layout.
  * <h3>CSS Style Rules</h3>
  * <ul class='css'>
  * <li>.gwt-Label { }</li>
  * </ul>
  */
-public class PFunctionalLabel extends PWidget implements HasPClickHandlers, HasPDoubleClickHandlers, HasPDragEndHandlers,
-        HasPDragEnterHandlers, HasPDragStartHandlers, HasPDragLeaveHandlers, HasPDragOverHandlers, HasPDropHandlers {
+public class PFunctionalLabel extends PLabel {
 
     private final TextFunction textFunction;
     private PFunction pFunction;
@@ -102,8 +77,9 @@ public class PFunctionalLabel extends PWidget implements HasPClickHandlers, HasP
         return WidgetType.FUNCTIONAL_LABEL;
     }
 
+    @Override
     public String getText() {
-        return args != null ? textFunction.getJavaFunction().apply(args) : null;
+        return text != null ? text : args != null ? textFunction.getJavaFunction().apply(args) : null;
     }
 
     public TextFunction getTextFunction() {
@@ -115,54 +91,21 @@ public class PFunctionalLabel extends PWidget implements HasPClickHandlers, HasP
     }
 
     public void setArgs(final Object... args) {
+        this.text = null;
         if (Arrays.equals(this.args, args)) return;
         this.args = args;
         if (initialized) saveUpdate(ServerToClientModel.FUNCTION_ARGS, this.args);
     }
 
     @Override
-    public HandlerRegistration addClickHandler(final PClickHandler handler) {
-        return addDomHandler(handler, PClickEvent.TYPE);
-    }
-
-    @Override
-    public HandlerRegistration addDoubleClickHandler(final PDoubleClickHandler handler) {
-        return addDomHandler(handler, PDoubleClickEvent.TYPE);
-    }
-
-    @Override
-    public HandlerRegistration addDragEndHandler(final PDragEndHandler handler) {
-        return addDomHandler(handler, PDragEndEvent.TYPE);
-    }
-
-    @Override
-    public HandlerRegistration addDragEnterHandler(final PDragEnterHandler handler) {
-        return addDomHandler(handler, PDragEnterEvent.TYPE);
-    }
-
-    @Override
-    public HandlerRegistration addDragStartHandler(final PDragStartHandler handler) {
-        return addDomHandler(handler, PDragStartEvent.TYPE);
-    }
-
-    @Override
-    public HandlerRegistration addDragLeaveHandler(final PDragLeaveHandler handler) {
-        return addDomHandler(handler, PDragLeaveEvent.TYPE);
-    }
-
-    @Override
-    public HandlerRegistration addDragOverHandler(final PDragOverHandler handler) {
-        return addDomHandler(handler, PDragOverEvent.TYPE);
-    }
-
-    @Override
-    public HandlerRegistration addDropHandler(final PDropHandler handler) {
-        return addDomHandler(handler, PDropEvent.TYPE);
+    public void setText(final String text) {
+        this.args = null;
+        super.setText(text);
     }
 
     @Override
     public String toString() {
-        return super.toString() + ", textFunction=" + textFunction + ", args=" + Arrays.toString(args);
+        return super.toString() + ", text=" + text + ", textFunction=" + textFunction + ", args=" + Arrays.toString(args);
     }
 
 }
