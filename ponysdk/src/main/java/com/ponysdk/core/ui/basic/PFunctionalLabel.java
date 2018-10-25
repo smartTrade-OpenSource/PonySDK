@@ -24,6 +24,7 @@
 package com.ponysdk.core.ui.basic;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
@@ -41,7 +42,7 @@ import com.ponysdk.core.writer.ModelWriter;
  */
 public class PFunctionalLabel extends PLabel {
 
-    private final TextFunction textFunction;
+    private TextFunction textFunction;
     private PFunction pFunction;
     private Object[] args;
 
@@ -55,14 +56,9 @@ public class PFunctionalLabel extends PLabel {
     }
 
     @Override
-    protected void enrichForCreation(final ModelWriter writer) {
-        super.enrichForCreation(writer);
-        writer.write(ServerToClientModel.FUNCTION_ID, this.pFunction.getID());
-    }
-
-    @Override
     protected void enrichForUpdate(final ModelWriter writer) {
         super.enrichForUpdate(writer);
+        writer.write(ServerToClientModel.FUNCTION_ID, this.pFunction.getID());
         if (this.args != null) writer.write(ServerToClientModel.FUNCTION_ARGS, this.args);
     }
 
@@ -97,6 +93,15 @@ public class PFunctionalLabel extends PLabel {
         if (initialized) saveUpdate(ServerToClientModel.FUNCTION_ARGS, this.args);
     }
 
+    public void setTextFunction(final TextFunction textFunction) {
+        if (Objects.equals(this.textFunction, textFunction)) return;
+        this.textFunction = textFunction;
+        final PWindow window = getWindow();
+        if (window == null) return;
+        this.pFunction = window.getPFunction(textFunction);
+        if (initialized) saveUpdate(ServerToClientModel.FUNCTION_ID, this.pFunction.getID());
+    }
+
     @Override
     public void setText(final String text) {
         this.args = null;
@@ -105,7 +110,7 @@ public class PFunctionalLabel extends PLabel {
 
     @Override
     public String toString() {
-        return super.toString() + ", text=" + text + ", textFunction=" + textFunction + ", args=" + Arrays.toString(args);
+        return super.toString() + ", textFunction=" + textFunction + ", args=" + Arrays.toString(args);
     }
 
 }

@@ -25,7 +25,6 @@ package com.ponysdk.core.terminal.ui;
 
 import com.google.gwt.user.client.ui.Label;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
@@ -39,17 +38,13 @@ public class PTFunctionalLabel extends PTLabel<Label> {
     }
 
     @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
-        super.create(buffer, objectId, uiBuilder);
-        final BinaryModel model = buffer.readBinaryModel();
-        function = (PTFunction) uiBuilder.getPTObject(model.getIntValue());
-    }
-
-    @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         final ServerToClientModel model = binaryModel.getModel();
         if (ServerToClientModel.FUNCTION_ARGS == model) {
             setText(uiObject.getElement(), function.getFunction().apply(binaryModel.getArrayValue()));
+            return true;
+        } else if (ServerToClientModel.FUNCTION_ID == model) {
+            function = (PTFunction) uiBuilder.getPTObject(binaryModel.getIntValue());
             return true;
         } else {
             return super.update(buffer, binaryModel);
