@@ -60,6 +60,8 @@ public abstract class AbstractFormField<T, W extends IsPWidget> implements FormF
 
     public AbstractFormField() {
         this(null);
+        // If no widget, no error will be showed
+        this.showError = false;
     }
 
     public AbstractFormField(final W widget) {
@@ -122,7 +124,7 @@ public abstract class AbstractFormField<T, W extends IsPWidget> implements FormF
 
     @Override
     public void reset() {
-        resetError();
+        if (showError) resetError();
         reset0();
         dirty = false;
         fireAfterReset();
