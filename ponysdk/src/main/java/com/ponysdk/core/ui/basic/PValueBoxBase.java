@@ -69,10 +69,13 @@ public abstract class PValueBoxBase extends PFocusWidget implements PHasText {
     }
 
     public void select(final int startPosition, final int rangeLength) {
-        saveUpdate(writer -> {
-            writer.write(ServerToClientModel.SELECTION_RANGE_START, startPosition);
-            writer.write(ServerToClientModel.SELECTION_RANGE_LENGTH, rangeLength);
-        });
+        final int textLength = getText().length();
+        if (startPosition < textLength) {
+            saveUpdate(writer -> {
+                writer.write(ServerToClientModel.SELECTION_RANGE_START, startPosition);
+                writer.write(ServerToClientModel.SELECTION_RANGE_LENGTH, Math.min(startPosition + rangeLength, textLength));
+            });
+        }
     }
 
     /**
@@ -127,6 +130,10 @@ public abstract class PValueBoxBase extends PFocusWidget implements PHasText {
         } else {
             super.onClientData(instruction);
         }
+    }
+
+    public boolean isEmpty() {
+        return text.isEmpty();
     }
 
     @Override
