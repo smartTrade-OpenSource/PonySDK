@@ -264,7 +264,8 @@ public class UIBuilder {
             } while (result && buffer.hasEnoughKeyBytes());
 
             if (!result && ServerToClientModel.END != binaryModel.getModel()) {
-                log.warning("Update PObject #" + objectID + " with key : " + binaryModel + " doesn't exist");
+                log.warning("Update " + ptObject.getClass().getSimpleName() + " #" + objectID + " with key : " + binaryModel
+                        + " doesn't exist");
                 buffer.shiftNextBlock(false);
             }
         } else {

@@ -23,29 +23,16 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.terminal.model.BinaryModel;
+import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 import elemental.client.Browser;
 
-public class PTBrowser extends AbstractPTObject {
+public class PTBrowser extends PTAbstractWindow {
 
     @Override
-    public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
-        final ServerToClientModel model = binaryModel.getModel();
-        if (ServerToClientModel.WINDOW_LOCATION_REPLACE == model) {
-            Browser.getWindow().getLocation().replace(binaryModel.getStringValue());
-            return true;
-        } else if (ServerToClientModel.PRINT == model) {
-            Browser.getWindow().print();
-            return true;
-        } else if (ServerToClientModel.WINDOW_TITLE == model) {
-            Browser.getDocument().setTitle(binaryModel.getStringValue());
-            return true;
-        } else {
-            return super.update(buffer, binaryModel);
-        }
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
+        window = Browser.getWindow();
     }
 
 }

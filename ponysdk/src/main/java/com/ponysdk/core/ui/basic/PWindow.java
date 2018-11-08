@@ -236,6 +236,15 @@ public class PWindow extends PObject {
     }
 
     /**
+     * The Location.reload() method reloads the resource from the current URL
+     *
+     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Location/reload">MDN</a>
+     */
+    public void reload() {
+        saveUpdate(writer -> writer.write(ServerToClientModel.RELOAD));
+    }
+
+    /**
      * The Window.close() method closes the current window, or the window on which it was called.
      *
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/close">MDN</a>
