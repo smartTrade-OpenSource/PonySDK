@@ -73,7 +73,7 @@ public abstract class PValueBoxBase extends PFocusWidget implements PHasText {
         if (startPosition < textLength) {
             saveUpdate(writer -> {
                 writer.write(ServerToClientModel.SELECTION_RANGE_START, startPosition);
-                writer.write(ServerToClientModel.SELECTION_RANGE_LENGTH, Math.min(startPosition + rangeLength, textLength));
+                writer.write(ServerToClientModel.SELECTION_RANGE_LENGTH, Math.min(rangeLength, textLength - startPosition));
             });
         }
     }
