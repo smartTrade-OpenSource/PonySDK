@@ -59,7 +59,6 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.model.ArrayValueModel;
 import com.ponysdk.core.model.BooleanModel;
-import com.ponysdk.core.model.CharsetModel;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.ValueTypeModel;
@@ -345,18 +344,44 @@ public class PonySDKWebDriver implements WebDriver {
         return function.apply(b);
     }
 
-    private Object getString(final ByteBuffer b, final ToIntFunction<ByteBuffer> readStringLength) {
-        final byte charsetStringType = b.get();
-        return getString(b, charsetStringType == CharsetModel.ASCII.getValue() ? StandardCharsets.ISO_8859_1 : StandardCharsets.UTF_8,
-            readStringLength);
+    private String getString(final ByteBuffer b) {
+        int stringLength = readUnsignedByte(b);
+        boolean ascii = true;
+        if (stringLength > ValueTypeModel.STRING_ASCII_UINT8_MAX_LENGTH) {
+            switch (stringLength) {
+                case ValueTypeModel.STRING_ASCII_UINT16:
+                    length += 2;
+                    stringLength = readUnsignedShort(b);
+                    break;
+                case ValueTypeModel.STRING_ASCII_INT32:
+                    length += 4;
+                    stringLength = b.getInt();
+                    break;
+                case ValueTypeModel.STRING_UTF8_UINT8:
+                    length += 1;
+                    stringLength = readUnsignedByte(b);
+                    ascii = false;
+                    break;
+                case ValueTypeModel.STRING_UTF8_UINT16:
+                    length += 2;
+                    stringLength = readUnsignedShort(b);
+                    ascii = false;
+                    break;
+                case ValueTypeModel.STRING_UTF8_INT32:
+                    length += 4;
+                    stringLength = b.getInt();
+                    ascii = false;
+                    break;
+                default:
+                    assert false; //unreachable
+            }
+        }
+        length += stringLength;
+        return getString(ascii ? StandardCharsets.ISO_8859_1 : StandardCharsets.UTF_8, b, stringLength);
     }
 
     private Object getJsonObject(final ByteBuffer b) {
-        final byte charsetJsonType = b.get();
-        final int strLength = b.getInt();
-        length += strLength;
-        final String str = getString(
-            charsetJsonType == CharsetModel.ASCII.getValue() ? StandardCharsets.ISO_8859_1 : StandardCharsets.UTF_8, b, strLength);
+        final String str = getString(b);
         try (JsonReader jsonReader = Json.createReader(new StringReader(str))) {
             return jsonReader.readObject();
         } catch (final JsonParsingException e) {
@@ -435,12 +460,10 @@ public class PonySDKWebDriver implements WebDriver {
                 return readValue(b, 8, ByteBuffer::getDouble);
             case FLOAT:
                 return readValue(b, 4, ByteBuffer::getFloat);
-            case STRING_ASCII:
-                return readValue(b, 2, buff -> getString(buff, StandardCharsets.ISO_8859_1, PonySDKWebDriver::readUnsignedShort));
             case STRING:
-                return readValue(b, 2, buff -> getString(buff, PonySDKWebDriver::readUnsignedShort));
+                return readValue(b, 1, this::getString);
             case JSON_OBJECT:
-                return readValue(b, 5, this::getJsonObject);
+                return readValue(b, 1, this::getJsonObject);
             case ARRAY:
                 return readValue(b, 1, this::getArray);
             default:

@@ -26,7 +26,6 @@ package com.ponysdk.core.server.websocket;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
@@ -39,7 +38,6 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.model.ArrayValueModel;
 import com.ponysdk.core.model.BooleanModel;
-import com.ponysdk.core.model.CharsetModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.ValueTypeModel;
 import com.ponysdk.core.server.application.UIContext;
@@ -48,9 +46,6 @@ import com.ponysdk.core.server.concurrent.AutoFlushedBuffer;
 public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback {
 
     private static final Logger log = LoggerFactory.getLogger(WebSocketPusher.class);
-
-    private static final Charset ASCII_CHARSET = StandardCharsets.ISO_8859_1;
-    private static final Charset UTF8_CHARSET = StandardCharsets.UTF_8;
 
     private static final int MAX_UNSIGNED_BYTE_VALUE = Byte.MAX_VALUE * 2 + 1;
     private static final int MAX_UNSIGNED_SHORT_VALUE = Short.MAX_VALUE * 2 + 1;
@@ -126,7 +121,6 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
                 case FLOAT:
                     write(model, (float) value);
                     break;
-                case STRING_ASCII:
                 case STRING:
                     write(model, (String) value);
                     break;
@@ -274,7 +268,7 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
 
     private void putArrayStringElement(final Object o) throws IOException {
         final String s = (String) o;
-        final byte[] bytes = s.getBytes(UTF8_CHARSET);
+        final byte[] bytes = s.getBytes(StandardCharsets.UTF_8);
         final int length = bytes.length;
 
         if (length <= MAX_UNSIGNED_BYTE_VALUE) {
@@ -299,52 +293,55 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
         putModelKey(model);
 
         try {
-            if (value != null) {
-                final byte[] bytes = value
-                    .getBytes(model.getTypeModel() == ValueTypeModel.STRING_ASCII ? ASCII_CHARSET : UTF8_CHARSET);
-
-                final int length = bytes.length;
-                if (length <= MAX_UNSIGNED_SHORT_VALUE) {
-                    if (model.getTypeModel() == ValueTypeModel.STRING) {
-                        if (length == value.length()) put(CharsetModel.ASCII.getValue());
-                        else put(CharsetModel.UTF8.getValue());
-                    }
-
-                    putUnsignedShort(length);
-                    put(bytes);
-                } else {
-                    throw new IllegalArgumentException("Message too big (" + value.length() + " > " + MAX_UNSIGNED_SHORT_VALUE
-                            + "), use a JsonObject instead : " + value.substring(0, Math.min(value.length(), 100)) + "...");
-                }
-            } else {
-                if (model.getTypeModel() == ValueTypeModel.STRING) put(CharsetModel.ASCII.getValue());
-                putUnsignedShort(0);
-            }
+            putString(value);
         } catch (final UnsupportedEncodingException e) {
             throw new IllegalArgumentException("Cannot convert message : " + value);
         }
     }
 
     private void write(final ServerToClientModel model, final JsonObject jsonObject) throws IOException {
-        final String value = jsonObject.toString();
-
         putModelKey(model);
 
         try {
-            if (value != null) {
-                final byte[] bytes = value.getBytes(UTF8_CHARSET);
-
-                if (bytes.length == value.length()) put(CharsetModel.ASCII.getValue());
-                else put(CharsetModel.UTF8.getValue());
-
-                putInt(bytes.length);
-                put(bytes);
-            } else {
-                put(CharsetModel.ASCII.getValue());
-                putInt(0);
-            }
+            putString(jsonObject == null ? null : jsonObject.toString());
         } catch (final UnsupportedEncodingException e) {
-            throw new IllegalArgumentException("Cannot convert message : " + value);
+            throw new IllegalArgumentException("Cannot convert message : " + jsonObject);
+        }
+    }
+
+    private void putString(final String value) throws IOException {
+        if (value != null) {
+            final byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
+            final int length = bytes.length;
+
+            if (value.length() == length) { //ASCII
+                if (length <= ValueTypeModel.STRING_ASCII_UINT8_MAX_LENGTH) { // 0 -> 250 (The MOST common case)
+                    putUnsignedByte((short) length);
+                } else if (length <= MAX_UNSIGNED_SHORT_VALUE) { // 251 -> 65,535
+                    putUnsignedByte(ValueTypeModel.STRING_ASCII_UINT16);
+                    putUnsignedShort(length);
+                } else { // 65,536 -> 2,147,483,647
+                    putUnsignedByte(ValueTypeModel.STRING_ASCII_INT32);
+                    putInt(length);
+                }
+
+            } else { //UTF8
+                if (length <= MAX_UNSIGNED_BYTE_VALUE) { // 0 -> 255
+                    putUnsignedByte(ValueTypeModel.STRING_UTF8_UINT8);
+                    putUnsignedByte((short) length);
+                } else if (length <= MAX_UNSIGNED_SHORT_VALUE) { // 256 -> 65,535
+                    putUnsignedByte(ValueTypeModel.STRING_UTF8_UINT16);
+                    putUnsignedShort(length);
+                } else { // 65,536 -> 2,147,483,647
+                    putUnsignedByte(ValueTypeModel.STRING_UTF8_INT32);
+                    putInt(length);
+                }
+            }
+
+            put(bytes);
+
+        } else {
+            putUnsignedByte((short) 0);
         }
     }
 

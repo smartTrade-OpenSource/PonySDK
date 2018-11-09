@@ -28,7 +28,6 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.ponysdk.core.model.ArrayValueModel;
 import com.ponysdk.core.model.BooleanModel;
-import com.ponysdk.core.model.CharsetModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.ValueTypeModel;
 
@@ -52,6 +51,8 @@ public class ReaderBuffer {
     private Uint8Array buffer;
 
     private int position;
+
+    private int modelSize;
 
     private int size;
 
@@ -112,58 +113,39 @@ public class ReaderBuffer {
 
     public BinaryModel readBinaryModel() {
         final ServerToClientModel key = getModelKey();
-        int size = getModelKeySize();
+        modelSize = getModelKeySize();
 
         final ValueTypeModel typeModel = key.getTypeModel();
 
         if (ValueTypeModel.INTEGER == typeModel) {
-            size += ValueTypeModel.INTEGER_SIZE;
-            currentBinaryModel.init(key, getInt(), size);
-        } else if (ValueTypeModel.STRING_ASCII == typeModel) {
-            size += ValueTypeModel.SHORT_SIZE;
-            final int messageSize = getUnsignedShort();
-            size += messageSize;
-            currentBinaryModel.init(key, getStringAscii(messageSize), size);
+            modelSize += ValueTypeModel.INTEGER_SIZE;
+            currentBinaryModel.init(key, getInt(), modelSize);
         } else if (ValueTypeModel.STRING == typeModel) {
-            size += ValueTypeModel.BYTE_SIZE;
-            final int charsetType = getByte();
-            size += ValueTypeModel.SHORT_SIZE;
-            final int messageSize = getUnsignedShort();
-            size += messageSize;
-            currentBinaryModel.init(key, getString(charsetType, messageSize), size);
+            currentBinaryModel.init(key, readStringModelValue(), modelSize);
         } else if (ValueTypeModel.JSON_OBJECT == typeModel) {
-            size += ValueTypeModel.BYTE_SIZE;
-            final int charsetType = getByte();
-            size += ValueTypeModel.INTEGER_SIZE;
-            final int jsonSize = getInt();
-            size += jsonSize;
-            currentBinaryModel.init(key, getJson(charsetType, jsonSize), size);
+            currentBinaryModel.init(key, readJsonModelValue(), modelSize);
         } else if (ValueTypeModel.NULL == typeModel) {
-            currentBinaryModel.init(key, size);
+            currentBinaryModel.init(key, modelSize);
         } else if (ValueTypeModel.BOOLEAN == typeModel) {
-            size += ValueTypeModel.BOOLEAN_SIZE;
-            currentBinaryModel.init(key, getBoolean(), size);
+            modelSize += ValueTypeModel.BOOLEAN_SIZE;
+            currentBinaryModel.init(key, getBoolean(), modelSize);
         } else if (ValueTypeModel.BYTE == typeModel) {
-            size += ValueTypeModel.BYTE_SIZE;
-            currentBinaryModel.init(key, getByte(), size);
+            modelSize += ValueTypeModel.BYTE_SIZE;
+            currentBinaryModel.init(key, getByte(), modelSize);
         } else if (ValueTypeModel.SHORT == typeModel) {
-            size += ValueTypeModel.SHORT_SIZE;
-            currentBinaryModel.init(key, getShort(), size);
+            modelSize += ValueTypeModel.SHORT_SIZE;
+            currentBinaryModel.init(key, getShort(), modelSize);
         } else if (ValueTypeModel.DOUBLE == typeModel) {
-            size += ValueTypeModel.DOUBLE_SIZE;
-            currentBinaryModel.init(key, getDouble(), size);
+            modelSize += ValueTypeModel.DOUBLE_SIZE;
+            currentBinaryModel.init(key, getDouble(), modelSize);
         } else if (ValueTypeModel.LONG == typeModel) {
-            size += ValueTypeModel.LONG_SIZE;
-            currentBinaryModel.init(key, getLong(), size);
+            modelSize += ValueTypeModel.LONG_SIZE;
+            currentBinaryModel.init(key, getLong(), modelSize);
         } else if (ValueTypeModel.FLOAT == typeModel) {
-            size += ValueTypeModel.FLOAT_SIZE;
-            currentBinaryModel.init(key, getFloat(), size);
+            modelSize += ValueTypeModel.FLOAT_SIZE;
+            currentBinaryModel.init(key, getFloat(), modelSize);
         } else if (ValueTypeModel.ARRAY == typeModel) {
-            size += ValueTypeModel.BYTE_SIZE; //array size
-            final Object[] array = new Object[getUnsignedByte()];
-            size += array.length; //array elements types
-            size += getArray(array);
-            currentBinaryModel.init(key, array, size);
+            currentBinaryModel.init(key, readArrayModelValue(), modelSize);
         } else {
             // Never have to happen
             throw new IllegalArgumentException("Unknown type model : " + typeModel);
@@ -241,24 +223,37 @@ public class ReaderBuffer {
         return value;
     }
 
-    private String getStringAscii(final int size) {
-        if (size != 0) {
-            return decodeStringAscii(size);
-        } else {
-            return null;
+    private String readStringModelValue() {
+        modelSize += ValueTypeModel.BYTE_SIZE;
+        int stringLength = getUnsignedByte();
+        boolean ascii = true;
+        if (stringLength > ValueTypeModel.STRING_ASCII_UINT8_MAX_LENGTH) {
+            if (stringLength == ValueTypeModel.STRING_ASCII_UINT16) {
+                modelSize += ValueTypeModel.SHORT_SIZE;
+                stringLength = getUnsignedShort();
+            } else if (stringLength == ValueTypeModel.STRING_ASCII_INT32) {
+                modelSize += ValueTypeModel.INTEGER_SIZE;
+                stringLength = getInt();
+            } else {
+                ascii = false;
+                if (stringLength == ValueTypeModel.STRING_UTF8_UINT8) {
+                    modelSize += ValueTypeModel.BYTE_SIZE;
+                    stringLength = getUnsignedByte();
+                } else if (stringLength == ValueTypeModel.STRING_UTF8_UINT16) {
+                    modelSize += ValueTypeModel.SHORT_SIZE;
+                    stringLength = getUnsignedShort();
+                } else {
+                    modelSize += ValueTypeModel.INTEGER_SIZE;
+                    stringLength = getInt();
+                }
+            }
         }
+        modelSize += stringLength;
+        return getString(ascii, stringLength);
     }
 
-    private String getString(final int charset, final int size) {
-        if (size != 0) {
-            return size < 100000 && charset == CharsetModel.ASCII.ordinal() ? decodeStringAscii(size) : decodeStringUTF8(size);
-        } else {
-            return null;
-        }
-    }
-
-    private JSONObject getJson(final int charset, final int jsonSize) {
-        final String s = getString(charset, jsonSize);
+    private JSONObject readJsonModelValue() {
+        final String s = readStringModelValue();
         try {
             return s != null ? JSONParser.parseStrict(s).isObject() : null;
         } catch (final JSONException e) {
@@ -266,11 +261,13 @@ public class ReaderBuffer {
         }
     }
 
-    private int getArray(final Object[] array) {
-        int size = 0;
+    private Object[] readArrayModelValue() {
+        modelSize += ValueTypeModel.BYTE_SIZE; //array size
+        final Object[] array = new Object[getUnsignedByte()];
+        modelSize += array.length; //array elements types
         for (int i = 0; i < array.length; i++) {
             final ArrayValueModel arrayValueModel = ArrayValueModel.fromRawValue(getByte());
-            size += arrayValueModel.getMinSize();
+            modelSize += arrayValueModel.getMinSize();
             if (arrayValueModel.isDynamicSize()) {
                 array[i] = getDynamicSizeArrayElement(arrayValueModel);
             } else if (arrayValueModel == ArrayValueModel.NULL) {
@@ -295,7 +292,7 @@ public class ReaderBuffer {
                 throw new IllegalArgumentException("Unsupported ArrayValueModel " + arrayValueModel);
             }
         }
-        return size;
+        return array;
     }
 
     private Object getDynamicSizeArrayElement(final ArrayValueModel arrayValueModel) {
@@ -312,6 +309,22 @@ public class ReaderBuffer {
             throw new IllegalArgumentException("Unsupported ArrayValueModel " + arrayValueModel);
         }
         return ascii ? decodeStringAscii(msgSize) : decodeStringUTF8(msgSize);
+    }
+
+    private String getStringAscii(final int size) {
+        if (size != 0) {
+            return decodeStringAscii(size);
+        } else {
+            return null;
+        }
+    }
+
+    private String getString(final boolean ascii, final int size) {
+        if (size != 0) {
+            return size < 100_000 && ascii ? decodeStringAscii(size) : decodeStringUTF8(size);
+        } else {
+            return null;
+        }
     }
 
     private String decodeStringAscii(final int size) {
@@ -377,17 +390,8 @@ public class ReaderBuffer {
 
         if (ValueTypeModel.INTEGER == typeModel) {
             position += ValueTypeModel.INTEGER_SIZE;
-        } else if (ValueTypeModel.STRING_ASCII == typeModel) {
-            final int stringSize = getUnsignedShort();
-            position += stringSize;
-        } else if (ValueTypeModel.STRING == typeModel) {
-            getByte(); // Read charset
-            final int stringSize = getUnsignedShort();
-            position += stringSize;
-        } else if (ValueTypeModel.JSON_OBJECT == typeModel) {
-            getByte(); // Read charset
-            final int jsonSize = getInt();
-            position += jsonSize;
+        } else if (ValueTypeModel.STRING == typeModel || ValueTypeModel.JSON_OBJECT == typeModel) {
+            shiftString();
         } else if (ValueTypeModel.NULL == typeModel) {
             // Nothing to do
         } else if (ValueTypeModel.BOOLEAN == typeModel) {
@@ -403,8 +407,7 @@ public class ReaderBuffer {
         } else if (ValueTypeModel.FLOAT == typeModel) {
             position += ValueTypeModel.FLOAT_SIZE;
         } else if (ValueTypeModel.ARRAY == typeModel) {
-            final int arrayLength = getUnsignedByte();
-            shiftArray(arrayLength);
+            shiftArray();
         } else {
             throw new IllegalArgumentException("Unknown type model : " + typeModel);
         }
@@ -412,7 +415,22 @@ public class ReaderBuffer {
         return key;
     }
 
-    private void shiftArray(final int arrayLength) {
+    private void shiftString() {
+        int messageSize = getUnsignedByte();
+        if (messageSize > ValueTypeModel.STRING_ASCII_UINT8_MAX_LENGTH) {
+            if (messageSize == ValueTypeModel.STRING_UTF8_UINT8) {
+                messageSize = getUnsignedByte();
+            } else if (messageSize == ValueTypeModel.STRING_ASCII_UINT16 || messageSize == ValueTypeModel.STRING_UTF8_UINT16) {
+                messageSize = getUnsignedShort();
+            } else {
+                messageSize = getInt();
+            }
+        }
+        position += messageSize;
+    }
+
+    private void shiftArray() {
+        final int arrayLength = getUnsignedByte();
         for (int i = 0; i < arrayLength; i++) {
             final ArrayValueModel arrayValueModel = ArrayValueModel.fromRawValue(getByte());
             if (arrayValueModel.isDynamicSize()) {
