@@ -143,7 +143,6 @@ public class BinaryModel {
         else if (ValueTypeModel.INTEGER == typeModel) return model + " => " + intValue;
         else if (ValueTypeModel.LONG == typeModel) return model + " => " + longValue;
         else if (ValueTypeModel.DOUBLE == typeModel) return model + " => " + doubleValue;
-        else if (ValueTypeModel.STRING_ASCII == typeModel) return model + " => " + stringValue;
         else if (ValueTypeModel.STRING == typeModel) return model + " => " + stringValue;
         else if (ValueTypeModel.JSON_OBJECT == typeModel) return model + " => " + jsonObject;
         else if (ValueTypeModel.FLOAT == typeModel) return model + " => " + jsonObject;
