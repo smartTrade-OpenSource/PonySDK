@@ -99,7 +99,7 @@ public class PTWindow extends PTAbstractWindow implements PostMessageHandler {
             close(false);
             return true;
         } else {
-            return false;
+            return super.update(buffer, binaryModel);
         }
     }
 
