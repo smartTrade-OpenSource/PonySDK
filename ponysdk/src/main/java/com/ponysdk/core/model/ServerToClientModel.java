@@ -236,7 +236,7 @@ public enum ServerToClientModel {
     RELOAD(ValueTypeModel.NULL),
     PADDON_CREATION(ValueTypeModel.JSON_OBJECT),
     PADDON_METHOD(ValueTypeModel.STRING),
-    PADDON_ARGUMENTS(ValueTypeModel.JSON_OBJECT),
+    PADDON_ARGUMENTS(ValueTypeModel.ARRAY),
     DESTROY(ValueTypeModel.NULL),
 
     FUNCTION_CREATION(ValueTypeModel.STRING),

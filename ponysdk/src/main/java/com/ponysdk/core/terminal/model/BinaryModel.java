@@ -23,11 +23,12 @@
 
 package com.ponysdk.core.terminal.model;
 
-import java.util.Arrays;
-
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.json.client.JSONObject;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.ValueTypeModel;
+
+import elemental.util.ArrayOf;
 
 public class BinaryModel {
 
@@ -41,7 +42,7 @@ public class BinaryModel {
     private float floatValue;
     private String stringValue;
     private JSONObject jsonObject;
-    private Object[] arrayValue;
+    private ArrayOf<JavaScriptObject> arrayValue;
 
     protected BinaryModel() {
     }
@@ -81,7 +82,7 @@ public class BinaryModel {
         this.jsonObject = value;
     }
 
-    public void init(final ServerToClientModel key, final Object[] value, final int size) {
+    public void init(final ServerToClientModel key, final ArrayOf<JavaScriptObject> value, final int size) {
         init(key, size);
         this.arrayValue = value;
     }
@@ -123,7 +124,7 @@ public class BinaryModel {
         return jsonObject;
     }
 
-    public Object[] getArrayValue() {
+    public ArrayOf<JavaScriptObject> getArrayValue() {
         return arrayValue;
     }
 
@@ -146,7 +147,7 @@ public class BinaryModel {
         else if (ValueTypeModel.STRING == typeModel) return model + " => " + stringValue;
         else if (ValueTypeModel.JSON_OBJECT == typeModel) return model + " => " + jsonObject;
         else if (ValueTypeModel.FLOAT == typeModel) return model + " => " + jsonObject;
-        else if (ValueTypeModel.ARRAY == typeModel) return model + " => " + Arrays.toString(arrayValue);
+        else if (ValueTypeModel.ARRAY == typeModel) return model + " => " + arrayValue;
         else throw new IllegalArgumentException("No model type configured : " + typeModel);
     }
 

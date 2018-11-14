@@ -23,20 +23,14 @@
 
 package com.ponysdk.core.ui.basic;
 
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.writer.ModelWriter;
-
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonValue;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.Collection;
 import java.util.Map;
 import java.util.logging.Level;
+
+import javax.json.JsonObject;
+
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.writer.ModelWriter;
 
 /**
  * AddOn are used to bind server side with javascript browser
@@ -122,52 +116,12 @@ public abstract class PAddOn extends PObject {
      * @param methodName
      *            the method name
      * @param args
-     *            the arguments
+     *            the arguments : An array that can contain primitives, String, JsonValue
      */
     protected void callTerminalMethod(final String methodName, final Object... args) {
-        final JsonObject arguments;
-        if (args.length > 0) {
-            final JsonArrayBuilder arrayBuilder = UIContext.get().getJsonProvider().createArrayBuilder();
-            for (final Object object : args) {
-                if (object != null) {
-                    if (object instanceof JsonValue) {
-                        arrayBuilder.add((JsonValue) object);
-                    } else if (object instanceof Number) {
-                        final Number number = (Number) object;
-                        if (object instanceof Byte || object instanceof Short || object instanceof Integer)
-                            arrayBuilder.add(number.intValue());
-                        else if (object instanceof Long) arrayBuilder.add(number.longValue());
-                        else if (object instanceof Float || object instanceof Double) arrayBuilder.add(number.doubleValue());
-                        else if (object instanceof BigInteger) arrayBuilder.add((BigInteger) object);
-                        else if (object instanceof BigDecimal) arrayBuilder.add((BigDecimal) object);
-                        else arrayBuilder.add(number.doubleValue());
-                    } else if (object instanceof Boolean) {
-                        arrayBuilder.add((Boolean) object);
-                    } else if (object instanceof JsonArrayBuilder) {
-                        arrayBuilder.add(((JsonArrayBuilder) object).build());
-                    } else if (object instanceof JsonObjectBuilder) {
-                        arrayBuilder.add(((JsonObjectBuilder) object).build());
-                    } else if (object instanceof Collection) {
-                        throw new IllegalArgumentException(
-                            "Collections are not supported for PAddOn, you need to convert it to JsonArray on primitive array");
-                    } else {
-                        arrayBuilder.add(object.toString());
-                    }
-                } else {
-                    arrayBuilder.addNull();
-                }
-            }
-
-            final JsonObjectBuilder argumentsBuilder = UIContext.get().getJsonProvider().createObjectBuilder();
-            argumentsBuilder.add("arg", arrayBuilder.build());
-            arguments = argumentsBuilder.build();
-        } else {
-            arguments = null;
-        }
-
         saveUpdate(writer -> {
             writer.write(ServerToClientModel.PADDON_METHOD, methodName);
-            if (arguments != null) writer.write(ServerToClientModel.PADDON_ARGUMENTS, arguments);
+            if (args.length > 0) writer.write(ServerToClientModel.PADDON_ARGUMENTS, args);
         });
     }
 

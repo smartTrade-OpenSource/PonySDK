@@ -30,6 +30,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import javax.json.JsonObject;
+import javax.json.JsonValue;
 
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WriteCallback;
@@ -261,6 +262,8 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
         } else if (o instanceof Float) {
             put(ArrayValueModel.FLOAT.getValue());
             putFloat((float) o);
+        } else if (o instanceof JsonValue) {
+            putArrayStringElement(o.toString());
         } else {
             throw new IllegalArgumentException(o.getClass() + " is not supported as an array element type : " + o);
         }

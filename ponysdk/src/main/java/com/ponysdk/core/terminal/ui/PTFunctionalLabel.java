@@ -23,11 +23,14 @@
 
 package com.ponysdk.core.terminal.ui;
 
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.user.client.ui.Label;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
+
+import elemental.util.ArrayOf;
 
 public class PTFunctionalLabel extends PTLabel<Label> {
 
@@ -49,7 +52,13 @@ public class PTFunctionalLabel extends PTLabel<Label> {
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         final ServerToClientModel model = binaryModel.getModel();
         if (ServerToClientModel.FUNCTION_ARGS == model) {
-            setText(uiObject.getElement(), function.getFunction().apply(binaryModel.getArrayValue()));
+            final ArrayOf<JavaScriptObject> arrayValue = binaryModel.getArrayValue();
+            final int length = arrayValue.length();
+            final Object[] arrays = new Object[length];
+            for (int i = 0; i < length; i++) {
+                arrays[i] = arrayValue.get(i);
+            }
+            setText(uiObject.getElement(), function.getFunction().apply(arrays));
             return true;
         } else {
             return super.update(buffer, binaryModel);

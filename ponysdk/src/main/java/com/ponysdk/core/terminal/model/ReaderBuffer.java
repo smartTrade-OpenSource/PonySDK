@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.terminal.model;
 
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.json.client.JSONException;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
@@ -37,6 +38,11 @@ import elemental.html.ArrayBufferView;
 import elemental.html.DataView;
 import elemental.html.Uint8Array;
 import elemental.html.Window;
+import elemental.json.Json;
+import elemental.json.JsonException;
+import elemental.json.JsonValue;
+import elemental.util.ArrayOf;
+import elemental.util.Collections;
 
 public class ReaderBuffer {
 
@@ -261,41 +267,52 @@ public class ReaderBuffer {
         }
     }
 
-    private Object[] readArrayModelValue() {
+    private ArrayOf<JavaScriptObject> readArrayModelValue() {
         modelSize += ValueTypeModel.BYTE_SIZE; //array size
-        final Object[] array = new Object[getUnsignedByte()];
-        modelSize += array.length; //array elements types
-        for (int i = 0; i < array.length; i++) {
+        final int arraySize = getUnsignedByte();
+        final ArrayOf<JavaScriptObject> array = Collections.arrayOf();
+        modelSize += arraySize; //array elements types
+        for (int i = 0; i < arraySize; i++) {
             final ArrayValueModel arrayValueModel = ArrayValueModel.fromRawValue(getByte());
             modelSize += arrayValueModel.getMinSize();
+            JsonValue value;
             if (arrayValueModel.isDynamicSize()) {
-                array[i] = getDynamicSizeArrayElement(arrayValueModel);
+                final String stringValue = getDynamicSizeArrayElement(arrayValueModel);
+                try {
+                    if (!stringValue.isEmpty() && (stringValue.charAt(0) == '{' || stringValue.charAt(0) == '['))
+                        value = Json.parse(stringValue);
+                    else value = Json.create(stringValue);
+                } catch (final JsonException e) {
+                    value = Json.create(stringValue);
+                }
             } else if (arrayValueModel == ArrayValueModel.NULL) {
-                array[i] = null;
+                value = null;
             } else if (arrayValueModel == ArrayValueModel.INTEGER) {
-                array[i] = getInt();
+                value = Json.create(getInt());
             } else if (arrayValueModel == ArrayValueModel.SHORT) {
-                array[i] = getShort();
+                value = Json.create(getShort());
             } else if (arrayValueModel == ArrayValueModel.BOOLEAN_FALSE) {
-                array[i] = false;
+                value = Json.create(false);
             } else if (arrayValueModel == ArrayValueModel.BOOLEAN_TRUE) {
-                array[i] = true;
+                value = Json.create(true);
             } else if (arrayValueModel == ArrayValueModel.LONG) {
-                array[i] = getLong();
+                value = Json.create(getLong());
             } else if (arrayValueModel == ArrayValueModel.BYTE) {
-                array[i] = getByte();
+                value = Json.create(getByte());
             } else if (arrayValueModel == ArrayValueModel.DOUBLE) {
-                array[i] = getDouble();
+                value = Json.create(getDouble());
             } else if (arrayValueModel == ArrayValueModel.FLOAT) {
-                array[i] = getFloat();
+                value = Json.create(getFloat());
             } else {
                 throw new IllegalArgumentException("Unsupported ArrayValueModel " + arrayValueModel);
             }
+
+            array.push((JavaScriptObject) value);
         }
         return array;
     }
 
-    private Object getDynamicSizeArrayElement(final ArrayValueModel arrayValueModel) {
+    private String getDynamicSizeArrayElement(final ArrayValueModel arrayValueModel) {
         final int msgSize = getArrayElementDynamicSize(arrayValueModel.getMinSize());
         boolean ascii;
         if (arrayValueModel == ArrayValueModel.STRING_ASCII_UINT8_LENGTH

@@ -37,6 +37,8 @@ import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
+import elemental.util.ArrayOf;
+
 public class PTAddOn extends AbstractPTObject {
 
     private static final Logger log = Logger.getLogger(PTAddOn.class.getName());
@@ -84,7 +86,7 @@ public class PTAddOn extends AbstractPTObject {
             final String methodName = binaryModel.getStringValue();
             final BinaryModel arguments = buffer.readBinaryModel();
             if (ServerToClientModel.PADDON_ARGUMENTS == arguments.getModel()) {
-                doUpdate(methodName, arguments.getJsonObject().getJavaScriptObject());
+                doUpdate(methodName, arguments.getArrayValue());
             } else {
                 buffer.rewind(arguments);
                 doUpdate(methodName, null);
@@ -98,10 +100,10 @@ public class PTAddOn extends AbstractPTObject {
         }
     }
 
-    protected void doUpdate(final String methodName, final JavaScriptObject arguments) {
+    protected void doUpdate(final String methodName, final ArrayOf<JavaScriptObject> arguments) {
         try {
             if (!destroyed) addOn.update(methodName, arguments);
-            else log.warning("PTAddOn #" + getObjectID() + " destroyed, so updates will be discarded : " + arguments.toString());
+            else log.warning("PTAddOn #" + getObjectID() + " destroyed, so updates will be discarded : " + arguments);
         } catch (final JavaScriptException e) {
             log.log(Level.SEVERE, e.getMessage(), e);
         }

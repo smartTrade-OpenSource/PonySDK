@@ -103,9 +103,8 @@ AbstractAddon.prototype.update = function(methodName, arguments) {
 
   try {
     if (arguments != null) {
-      var args = arguments['arg'];
-      if (this.logLevel > 1) this.log(methodName, args);
-      this[methodName].apply(this, args);
+      if (this.logLevel > 1) this.log(methodName, arguments);
+      this[methodName].apply(this, arguments);
     } else {
       if (this.logLevel > 1) this.log(methodName);
       this[methodName].call(this);

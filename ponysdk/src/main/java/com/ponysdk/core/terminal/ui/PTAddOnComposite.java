@@ -41,6 +41,8 @@ import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
+import elemental.util.ArrayOf;
+
 public class PTAddOnComposite extends PTAddOn {
 
     private static final Logger log = Logger.getLogger(PTAddOnComposite.class.getName());
@@ -97,7 +99,7 @@ public class PTAddOnComposite extends PTAddOn {
     }
 
     @Override
-    protected void doUpdate(final String methodName, final JavaScriptObject arguments) {
+    protected void doUpdate(final String methodName, final ArrayOf<JavaScriptObject> arguments) {
         if (!destroyed) {
             if (initialized && widget.isAttached()) {
                 flushPendingUpdates();
@@ -130,9 +132,9 @@ public class PTAddOnComposite extends PTAddOn {
     private static final class PAddOnExecution {
 
         private final String methodName;
-        private final JavaScriptObject arguments;
+        private final ArrayOf<JavaScriptObject> arguments;
 
-        public PAddOnExecution(final String methodName, final JavaScriptObject arguments) {
+        public PAddOnExecution(final String methodName, final ArrayOf<JavaScriptObject> arguments) {
             this.methodName = methodName;
             this.arguments = arguments;
         }
@@ -141,7 +143,7 @@ public class PTAddOnComposite extends PTAddOn {
             return methodName;
         }
 
-        public JavaScriptObject getArguments() {
+        public ArrayOf<JavaScriptObject> getArguments() {
             return arguments;
         }
     }
