@@ -28,7 +28,6 @@ import java.util.function.Consumer;
 import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.event.dom.client.KeyEvent;
 import com.google.gwt.event.dom.client.MouseEvent;
-import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.ponysdk.core.model.DomHandlerType;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -87,7 +86,7 @@ public abstract class PTFocusWidget<T extends FocusWidget> extends PTWidget<T> {
     }
 
     @Override
-    protected void triggerKeyEvent(final DomHandlerType domHandlerType, final KeyEvent<?> event, final JSONArray keyFilter) {
+    protected void triggerKeyEvent(final DomHandlerType domHandlerType, final KeyEvent<?> event, final int[] keyFilter) {
         if (enabled) super.triggerKeyEvent(domHandlerType, event, keyFilter);
     }
 

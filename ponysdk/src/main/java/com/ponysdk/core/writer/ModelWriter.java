@@ -42,6 +42,9 @@ public class ModelWriter {
         write(model, null);
     }
 
+    /**
+     * @param value The type can be primitives, String or Object[]
+     */
     public void write(final ServerToClientModel model, final Object value) {
         encoder.encode(model, value);
     }

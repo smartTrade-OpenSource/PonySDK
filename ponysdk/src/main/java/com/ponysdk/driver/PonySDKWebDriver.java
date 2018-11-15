@@ -24,7 +24,6 @@
 package com.ponysdk.driver;
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URI;
@@ -47,8 +46,6 @@ import java.util.function.ToIntFunction;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
-import javax.json.JsonReader;
-import javax.json.stream.JsonParsingException;
 import javax.websocket.MessageHandler;
 
 import org.openqa.selenium.By;
@@ -380,16 +377,6 @@ public class PonySDKWebDriver implements WebDriver {
         return getString(ascii ? StandardCharsets.ISO_8859_1 : StandardCharsets.UTF_8, b, stringLength);
     }
 
-    private Object getJsonObject(final ByteBuffer b) {
-        final String str = getString(b);
-        try (JsonReader jsonReader = Json.createReader(new StringReader(str))) {
-            return jsonReader.readObject();
-        } catch (final JsonParsingException e) {
-            log.error("Invalid json object : {}", str, e);
-            return null;
-        }
-    }
-
     private Object getString(final ByteBuffer b, final Charset charset, final ToIntFunction<ByteBuffer> readStringLength) {
         final int strLength = readStringLength.applyAsInt(b);
         length += strLength;
@@ -462,8 +449,6 @@ public class PonySDKWebDriver implements WebDriver {
                 return readValue(b, 4, ByteBuffer::getFloat);
             case STRING:
                 return readValue(b, 1, this::getString);
-            case JSON_OBJECT:
-                return readValue(b, 1, this::getJsonObject);
             case ARRAY:
                 return readValue(b, 1, this::getArray);
             default:

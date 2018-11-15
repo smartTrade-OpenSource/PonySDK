@@ -29,9 +29,6 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-import javax.json.JsonObject;
-import javax.json.JsonValue;
-
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WriteCallback;
 import org.slf4j.Logger;
@@ -94,6 +91,9 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
         onFlushCompletion();
     }
 
+    /**
+     * @param value The type can be primitives, String or Object[]
+     */
     protected void encode(final ServerToClientModel model, final Object value) {
         if (log.isDebugEnabled()) log.debug("Writing in the buffer : {} => {}", model, value);
         try {
@@ -124,9 +124,6 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
                     break;
                 case STRING:
                     write(model, (String) value);
-                    break;
-                case JSON_OBJECT:
-                    write(model, (JsonObject) value);
                     break;
                 case ARRAY:
                     write(model, (Object[]) value);
@@ -262,10 +259,8 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
         } else if (o instanceof Float) {
             put(ArrayValueModel.FLOAT.getValue());
             putFloat((float) o);
-        } else if (o instanceof JsonValue) {
-            putArrayStringElement(o.toString());
         } else {
-            throw new IllegalArgumentException(o.getClass() + " is not supported as an array element type : " + o);
+            putArrayStringElement(o.toString());
         }
     }
 
@@ -299,16 +294,6 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
             putString(value);
         } catch (final UnsupportedEncodingException e) {
             throw new IllegalArgumentException("Cannot convert message : " + value);
-        }
-    }
-
-    private void write(final ServerToClientModel model, final JsonObject jsonObject) throws IOException {
-        putModelKey(model);
-
-        try {
-            putString(jsonObject == null ? null : jsonObject.toString());
-        } catch (final UnsupportedEncodingException e) {
-            throw new IllegalArgumentException("Cannot convert message : " + jsonObject);
         }
     }
 

@@ -24,6 +24,7 @@
 package com.ponysdk.core.terminal;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.Element;
 
 import jsinterop.annotations.JsFunction;
 
@@ -31,6 +32,6 @@ import jsinterop.annotations.JsFunction;
 @JsFunction
 public interface JavascriptAddOnFactory {
 
-    JavascriptAddOn newAddOn(JavaScriptObject params);
+    JavascriptAddOn newAddOn(int id, JavaScriptObject arguments, String widgetID, Element element);
 
 }

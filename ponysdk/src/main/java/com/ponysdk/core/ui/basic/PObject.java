@@ -197,7 +197,7 @@ public abstract class PObject {
         if (destroy) return;
         if (nativeBindingFunction == null) throw new IllegalAccessError("Object not bind to a native function");
 
-        saveUpdate(writer -> writer.write(ServerToClientModel.NATIVE, data));
+        saveUpdate(writer -> writer.write(ServerToClientModel.NATIVE, data.toString()));
     }
 
     public void setTerminalHandler(final PTerminalEvent.Handler terminalHandler) {

@@ -28,6 +28,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -64,6 +65,9 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
+
+import elemental.json.JsonNumber;
+import elemental.util.ArrayOf;
 
 public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implements IsWidget {
 
@@ -140,13 +144,13 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
         } else if (DomHandlerType.FOCUS == domHandlerType) {
             uiObject.addDomHandler(event -> triggerDomEvent(domHandlerType, event), FocusEvent.getType());
         } else if (DomHandlerType.KEY_PRESS == domHandlerType) {
-            final JSONArray keyFilter = extractKeyFilter(buffer);
+            final int[] keyFilter = extractKeyFilter(buffer);
             uiObject.addDomHandler(event -> triggerKeyEvent(domHandlerType, event, keyFilter), KeyPressEvent.getType());
         } else if (DomHandlerType.KEY_DOWN == domHandlerType) {
-            final JSONArray keyFilter = extractKeyFilter(buffer);
+            final int[] keyFilter = extractKeyFilter(buffer);
             uiObject.addDomHandler(event -> triggerKeyEvent(domHandlerType, event, keyFilter), KeyDownEvent.getType());
         } else if (DomHandlerType.KEY_UP == domHandlerType) {
-            final JSONArray keyFilter = extractKeyFilter(buffer);
+            final int[] keyFilter = extractKeyFilter(buffer);
             uiObject.addDomHandler(event -> triggerKeyUpEvent(domHandlerType, event, keyFilter), KeyUpEvent.getType());
         } else if (DomHandlerType.DRAG_START == domHandlerType) {
             uiObject.getElement().setDraggable(Element.DRAGGABLE_TRUE);
@@ -247,13 +251,12 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
         });
     }
 
-    protected void triggerKeyEvent(final DomHandlerType domHandlerType, final KeyEvent<?> event, final JSONArray keyFilter) {
+    protected void triggerKeyEvent(final DomHandlerType domHandlerType, final KeyEvent<?> event, final int[] keyFilter) {
         boolean needToBeSent = false;
         final int nativeKeyCode = event.getNativeEvent().getKeyCode();
         if (keyFilter != null) {
-            for (int i = 0; i < keyFilter.size(); i++) {
-                final JSONNumber keyCode = keyFilter.get(i).isNumber();
-                if (keyCode.doubleValue() == nativeKeyCode) {
+            for (final int keyCode : keyFilter) {
+                if (keyCode == nativeKeyCode) {
                     needToBeSent = true;
                     break;
                 }
@@ -271,7 +274,7 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
         preventOrStopEvent(event);
     }
 
-    protected void triggerKeyUpEvent(final DomHandlerType domHandlerType, final KeyUpEvent event, final JSONArray keyFilter) {
+    protected void triggerKeyUpEvent(final DomHandlerType domHandlerType, final KeyUpEvent event, final int[] keyFilter) {
         triggerKeyEvent(domHandlerType, event, keyFilter);
     }
 
@@ -294,16 +297,20 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
         }
     }
 
-    private static final JSONArray extractKeyFilter(final ReaderBuffer buffer) {
+    private static final int[] extractKeyFilter(final ReaderBuffer buffer) {
         final BinaryModel binaryModel = buffer.readBinaryModel();
-        final JSONArray keyFilter;
         if (ServerToClientModel.KEY_FILTER == binaryModel.getModel()) {
-            keyFilter = binaryModel.getJsonObject().get(ClientToServerModel.KEY_FILTER.toStringValue()).isArray();
+            final ArrayOf<JavaScriptObject> keys = binaryModel.getArrayValue();
+            final int length = keys.length();
+            final int[] keyCodes = new int[length];
+            for (int i = 0; i < length; i++) {
+                keyCodes[i] = (int) ((JsonNumber) keys.get(i)).getNumber();
+            }
+            return keyCodes;
         } else {
             buffer.rewind(binaryModel);
-            keyFilter = null;
+            return null;
         }
-        return keyFilter;
     }
 
 }

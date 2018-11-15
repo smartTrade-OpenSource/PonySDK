@@ -389,7 +389,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
 
     @Override
     public HandlerRegistration addKeyPressHandler(final PKeyPressHandler handler) {
-        final JsonObject filteredKeys = handler.getJsonFilteredKeys();
+        final Integer[] filteredKeys = handler.getJsonFilteredKeys();
         if (filteredKeys != null)
             return addDomHandler(handler, PKeyPressEvent.TYPE, new ServerBinaryModel(ServerToClientModel.KEY_FILTER, filteredKeys));
         else return addDomHandler(handler, PKeyPressEvent.TYPE);
@@ -397,14 +397,14 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
 
     @Override
     public HandlerRegistration addKeyUpHandler(final PKeyUpHandler handler) {
-        final JsonObject filteredKeys = handler.getJsonFilteredKeys();
+        final Integer[] filteredKeys = handler.getJsonFilteredKeys();
         if (filteredKeys != null)
             return addDomHandler(handler, PKeyUpEvent.TYPE, new ServerBinaryModel(ServerToClientModel.KEY_FILTER, filteredKeys));
         else return addDomHandler(handler, PKeyUpEvent.TYPE);
     }
 
     public HandlerRegistration addKeyDownHandler(final PKeyDownHandler handler) {
-        final JsonObject filteredKeys = handler.getJsonFilteredKeys();
+        final Integer[] filteredKeys = handler.getJsonFilteredKeys();
         if (filteredKeys != null)
             return addDomHandler(handler, PKeyDownEvent.TYPE, new ServerBinaryModel(ServerToClientModel.KEY_FILTER, filteredKeys));
         else return addDomHandler(handler, PKeyDownEvent.TYPE);

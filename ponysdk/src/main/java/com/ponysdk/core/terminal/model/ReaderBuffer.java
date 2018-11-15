@@ -24,9 +24,6 @@
 package com.ponysdk.core.terminal.model;
 
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.json.client.JSONException;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
 import com.ponysdk.core.model.ArrayValueModel;
 import com.ponysdk.core.model.BooleanModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -128,8 +125,6 @@ public class ReaderBuffer {
             currentBinaryModel.init(key, getInt(), modelSize);
         } else if (ValueTypeModel.STRING == typeModel) {
             currentBinaryModel.init(key, readStringModelValue(), modelSize);
-        } else if (ValueTypeModel.JSON_OBJECT == typeModel) {
-            currentBinaryModel.init(key, readJsonModelValue(), modelSize);
         } else if (ValueTypeModel.NULL == typeModel) {
             currentBinaryModel.init(key, modelSize);
         } else if (ValueTypeModel.BOOLEAN == typeModel) {
@@ -256,15 +251,6 @@ public class ReaderBuffer {
         }
         modelSize += stringLength;
         return getString(ascii, stringLength);
-    }
-
-    private JSONObject readJsonModelValue() {
-        final String s = readStringModelValue();
-        try {
-            return s != null ? JSONParser.parseStrict(s).isObject() : null;
-        } catch (final JSONException e) {
-            throw new JSONException(e.getMessage() + " : " + s, e);
-        }
     }
 
     private ArrayOf<JavaScriptObject> readArrayModelValue() {
@@ -407,7 +393,7 @@ public class ReaderBuffer {
 
         if (ValueTypeModel.INTEGER == typeModel) {
             position += ValueTypeModel.INTEGER_SIZE;
-        } else if (ValueTypeModel.STRING == typeModel || ValueTypeModel.JSON_OBJECT == typeModel) {
+        } else if (ValueTypeModel.STRING == typeModel) {
             shiftString();
         } else if (ValueTypeModel.NULL == typeModel) {
             // Nothing to do

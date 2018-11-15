@@ -24,10 +24,11 @@
 package com.ponysdk.core.terminal.model;
 
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.json.client.JSONObject;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.ValueTypeModel;
 
+import elemental.json.Json;
+import elemental.json.JsonObject;
 import elemental.util.ArrayOf;
 
 public class BinaryModel {
@@ -38,10 +39,9 @@ public class BinaryModel {
     private boolean booleanValue;
     private int intValue;
     private long longValue;
-    private double doubleValue;
     private float floatValue;
+    private double doubleValue;
     private String stringValue;
-    private JSONObject jsonObject;
     private ArrayOf<JavaScriptObject> arrayValue;
 
     protected BinaryModel() {
@@ -75,11 +75,6 @@ public class BinaryModel {
     public void init(final ServerToClientModel key, final String value, final int size) {
         init(key, size);
         this.stringValue = value;
-    }
-
-    public void init(final ServerToClientModel key, final JSONObject value, final int size) {
-        init(key, size);
-        this.jsonObject = value;
     }
 
     public void init(final ServerToClientModel key, final ArrayOf<JavaScriptObject> value, final int size) {
@@ -120,8 +115,8 @@ public class BinaryModel {
         return stringValue;
     }
 
-    public JSONObject getJsonObject() {
-        return jsonObject;
+    public JsonObject getJsonObject() {
+        return Json.parse(stringValue);
     }
 
     public ArrayOf<JavaScriptObject> getArrayValue() {
@@ -145,8 +140,7 @@ public class BinaryModel {
         else if (ValueTypeModel.LONG == typeModel) return model + " => " + longValue;
         else if (ValueTypeModel.DOUBLE == typeModel) return model + " => " + doubleValue;
         else if (ValueTypeModel.STRING == typeModel) return model + " => " + stringValue;
-        else if (ValueTypeModel.JSON_OBJECT == typeModel) return model + " => " + jsonObject;
-        else if (ValueTypeModel.FLOAT == typeModel) return model + " => " + jsonObject;
+        else if (ValueTypeModel.FLOAT == typeModel) return model + " => " + floatValue;
         else if (ValueTypeModel.ARRAY == typeModel) return model + " => " + arrayValue;
         else throw new IllegalArgumentException("No model type configured : " + typeModel);
     }

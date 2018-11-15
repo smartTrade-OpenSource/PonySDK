@@ -91,7 +91,7 @@ public abstract class PAddOn extends PObject {
         super.enrichForCreation(writer);
         writer.write(ServerToClientModel.FACTORY, getSignature());
         if (args != null) {
-            writer.write(ServerToClientModel.PADDON_CREATION, args);
+            writer.write(ServerToClientModel.PADDON_CREATION, args.toString());
             args = null;
         }
     }

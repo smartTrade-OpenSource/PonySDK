@@ -28,8 +28,6 @@ import java.util.logging.Logger;
 
 import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.json.client.JSONNumber;
-import com.google.gwt.json.client.JSONObject;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.JavascriptAddOn;
 import com.ponysdk.core.terminal.JavascriptAddOnFactory;
@@ -37,6 +35,7 @@ import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
+import elemental.json.JsonObject;
 import elemental.util.ArrayOf;
 
 public class PTAddOn extends AbstractPTObject {
@@ -58,15 +57,17 @@ public class PTAddOn extends AbstractPTObject {
         final String signature = buffer.readBinaryModel().getStringValue();
         final JavascriptAddOnFactory factory = getFactory(uiBuilder, signature);
 
-        final JSONObject params = new JSONObject();
-        params.put("id", new JSONNumber(objectId));
-
+        final JsonObject arguments;
         final BinaryModel binaryModel = buffer.readBinaryModel();
-        if (ServerToClientModel.PADDON_CREATION == binaryModel.getModel()) params.put("args", binaryModel.getJsonObject());
-        else buffer.rewind(binaryModel);
+        if (ServerToClientModel.PADDON_CREATION == binaryModel.getModel()) {
+            arguments = binaryModel.getJsonObject();
+        } else {
+            arguments = null;
+            buffer.rewind(binaryModel);
+        }
 
         try {
-            addOn = factory.newAddOn(params.getJavaScriptObject());
+            addOn = factory.newAddOn(objectId, (JavaScriptObject) arguments, null, null);
             addOn.onInit();
         } catch (final JavaScriptException e) {
             log.log(Level.SEVERE, "PTAddOn #" + getObjectID() + " (" + signature + ") " + e.getMessage(), e);

@@ -23,14 +23,10 @@
 
 package com.ponysdk.core.ui.basic.event;
 
-import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.server.application.UIContext;
+import java.util.Arrays;
+
 import com.ponysdk.core.ui.eventbus.EventHandler;
 import com.ponysdk.core.ui.model.PKeyCodes;
-
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
 
 public interface PKeyFilterHandler extends EventHandler {
 
@@ -38,23 +34,9 @@ public interface PKeyFilterHandler extends EventHandler {
         return null;
     }
 
-    default JsonObject getJsonFilteredKeys() {
+    default Integer[] getJsonFilteredKeys() {
         final PKeyCodes[] listeningKeys = getFilteredKeys();
-
-        if (listeningKeys != null) {
-            final JsonArrayBuilder builder = UIContext.get().getJsonProvider().createArrayBuilder();
-
-            for (final PKeyCodes code : listeningKeys) {
-                builder.add(code.getCode());
-            }
-
-            final JsonObjectBuilder jsonObjectBuilder = UIContext.get().getJsonProvider().createObjectBuilder();
-            jsonObjectBuilder.add(ClientToServerModel.KEY_FILTER.toStringValue(), builder.build());
-
-            return jsonObjectBuilder.build();
-        }
-
-        return null;
+        return listeningKeys != null ? Arrays.stream(listeningKeys).map(PKeyCodes::getCode).toArray(Integer[]::new) : null;
     }
 
 }

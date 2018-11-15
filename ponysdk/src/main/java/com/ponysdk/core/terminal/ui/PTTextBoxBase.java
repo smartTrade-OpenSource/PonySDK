@@ -26,8 +26,6 @@ package com.ponysdk.core.terminal.ui;
 import java.util.Objects;
 
 import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.user.client.ui.TextBoxBase;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.DomHandlerType;
@@ -65,13 +63,12 @@ public abstract class PTTextBoxBase<T extends TextBoxBase> extends PTValueBoxBas
     }
 
     @Override
-    protected void triggerKeyUpEvent(final DomHandlerType domHandlerType, final KeyUpEvent event, final JSONArray keyFilter) {
+    protected void triggerKeyUpEvent(final DomHandlerType domHandlerType, final KeyUpEvent event, final int[] keyFilter) {
         if (!enabled) return;
         final int nativeKeyCode = event.getNativeKeyCode();
         if (keyFilter != null) {
-            for (int i = 0; i < keyFilter.size(); i++) {
-                final JSONNumber keyCode = keyFilter.get(i).isNumber();
-                if (keyCode.doubleValue() == nativeKeyCode) {
+            for (final int keyCode : keyFilter) {
+                if (keyCode == nativeKeyCode) {
                     final String newValue = uiObject.getText();
                     if (!Objects.equals(newValue, this.lastValue)) {
                         this.lastValue = newValue;

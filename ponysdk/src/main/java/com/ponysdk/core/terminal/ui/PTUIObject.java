@@ -25,13 +25,13 @@ package com.ponysdk.core.terminal.ui;
 
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.ui.UIObject;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
+
+import elemental.json.JsonObject;
 
 public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
 
@@ -105,8 +105,8 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
             nativeObject = bind(binaryModel.getStringValue(), objectID, uiObject.getElement());
             return true;
         } else if (ServerToClientModel.NATIVE == model) {
-            final JSONObject object = JSONParser.parseStrict(binaryModel.getStringValue()).isObject();
-            sendToNative(objectID, nativeObject, object.getJavaScriptObject());
+            final JsonObject object = binaryModel.getJsonObject();
+            sendToNative(objectID, nativeObject, (JavaScriptObject) object);
             return true;
         } else if (ServerToClientModel.TABINDEX == model) {
             uiObject.getElement().setTabIndex(binaryModel.getIntValue());

@@ -45,17 +45,15 @@ function decode(arrayBufferView, byteOffset, byteLength) {
 if (typeof module !== 'undefined' && module.hasOwnProperty('exports')) module.exports.decode = decode;
 else window['decode'] = decode;
 
-function AbstractAddon(params) {
-  this.id = params.id;
-  this.widgetID = params.widgetID;
+function AbstractAddon(id, args, widgetID, element) {
+  this.id = id;
+  this.widgetID = widgetID;
   this.logLevel = 0;
 
-  if (params.widgetElement) {
-    this.element = params.widgetElement;
-  }
+  if (element) this.element = element;
 
   // Java constructor parameters
-  this.options = params.args || {};
+  this.options = args || {};
   this.initialized = false;
   this.attached = false;
 };
@@ -126,11 +124,9 @@ AbstractAddon.defineAddon = function(name, propertiesObj) {
 
   var SuperClass = propertiesObj.extend || AbstractAddon;
 
-  var JsClass = function(params) {
-    SuperClass.apply(this, [params]);
-    if (propertiesObj.ctor) {
-      propertiesObj.ctor.call(this, params);
-    }
+  var JsClass = function(id, args, widgetID, element) {
+    SuperClass.apply(this, [id, args, widgetID, element]);
+    if (propertiesObj.ctor) propertiesObj.ctor.call(this, id, args, widgetID, element);
   };
 
   JsClass.prototype = Object.create(SuperClass.prototype, mapProperties(SuperClass, propertiesObj));
@@ -142,8 +138,8 @@ AbstractAddon.defineAddon = function(name, propertiesObj) {
   AbstractAddon[name] = JsClass;
 
   // Wrap the constructor method since GWT uses the function as a method and not a constructor
-  var wrap = function(params) {
-    return new JsClass(params);
+  var wrap = function(id, args, widgetID, element) {
+    return new JsClass(id, args, widgetID, element);
   }
 
   if (document.ponyLoaded) {
