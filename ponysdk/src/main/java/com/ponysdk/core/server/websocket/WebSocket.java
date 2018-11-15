@@ -60,6 +60,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     private TxnContext context;
     private Session session;
     private UIContext uiContext;
+    private Listener listener;
 
     public WebSocket() {
     }
@@ -71,6 +72,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         // 1K for max chunk size and 1M for total buffer size
         // Don't set max chunk size > 8K because when using Jetty Websocket compression, the chunks are limited to 8K
         this.websocketPusher = new WebSocketPusher(session, 1 << 20, 1 << 12, TimeUnit.SECONDS.toMillis(60));
+        this.websocketPusher.setWebSocketListener(listener);
 
         try {
             uiContext = new UIContext(this, context, applicationManager.getConfiguration(), request);
@@ -117,6 +119,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
      */
     @Override
     public void onWebSocketText(final String message) {
+        if (this.listener != null) listener.onIncomingText(message);
         if (isAlive()) {
             try {
                 uiContext.onMessageReceived();
@@ -269,6 +272,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     @Override
     public void encode(final ServerToClientModel model, final Object value) {
         websocketPusher.encode(model, value);
+        if (listener != null) listener.onOutgoingFrame(model, value);
     }
 
     private static enum NiceStatusCode {
@@ -336,4 +340,17 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         this.context = context;
     }
 
+    public void setListener(final Listener listener) {
+        this.listener = listener;
+        if (this.websocketPusher != null) this.websocketPusher.setWebSocketListener(listener);
+    }
+
+    public static interface Listener {
+
+        void onOutgoingFrame(ServerToClientModel model, Object value);
+
+        void onOutgoingBytes(int bytes);
+
+        void onIncomingText(String text);
+    }
 }

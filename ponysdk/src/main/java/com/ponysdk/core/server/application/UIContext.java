@@ -476,7 +476,7 @@ public class UIContext {
     public void registerObject(final PObject pObject) {
         pObjectCache.add(pObject);
     }
-
+    
     /**
      * Gets the {@link PObject} with a specific object ID
      *
@@ -799,6 +799,10 @@ public class UIContext {
         return context.getId();
     }
 
+    public void setWebSocketListener(final WebSocket.Listener listener) {
+        socket.setListener(listener);
+    }
+
     /**
      * Gets the {@link Application} of the UIContext
      *
@@ -822,7 +826,7 @@ public class UIContext {
 
     @Override
     public int hashCode() {
-        return Objects.hash(ID);
+    	return Objects.hash(ID);
     }
 
     @Override
