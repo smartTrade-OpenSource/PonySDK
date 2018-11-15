@@ -437,16 +437,29 @@ public class WebSocketStats {
         }
     }
 
-    public static interface Record extends Comparable<Record> {
+    public abstract static class Record implements Comparable<Record> {
 
-        int getMetaBytes();
+        private final int metaBytes;
+        private final int dataBytes;
 
-        int getDataBytes();
+        public Record(final int metaBytes, final int dataBytes) {
+            super();
+            this.metaBytes = metaBytes;
+            this.dataBytes = dataBytes;
+        }
 
-        int getCount();
+        public int getMetaBytes() {
+            return metaBytes;
+        }
+
+        public int getDataBytes() {
+            return dataBytes;
+        }
+
+        public abstract int getCount();
 
         @Override
-        public default int compareTo(final Record o) {
+        public int compareTo(final Record o) {
             final long otherValue = o == null ? 0L : o.getCount() * ((long) o.getMetaBytes() + o.getDataBytes());
             final long difference = getCount() * ((long) getMetaBytes() + getDataBytes()) - otherValue;
             if (difference > Integer.MAX_VALUE) return Integer.MAX_VALUE;
@@ -487,27 +500,13 @@ public class WebSocketStats {
             .append(bandwidth.getData() * 100 / summaryBandwidth.getTotal()).append("%).\n");
     }
 
-    private static class ImmutableRecord implements Record {
+    private static class ImmutableRecord extends Record {
 
-        private final int metaBytes;
-        private final int dataBytes;
         private final int count;
 
         private ImmutableRecord(final int metaBytes, final int dataBytes, final int count) {
-            super();
-            this.metaBytes = metaBytes;
-            this.dataBytes = dataBytes;
+            super(metaBytes, dataBytes);
             this.count = count;
-        }
-
-        @Override
-        public int getMetaBytes() {
-            return metaBytes;
-        }
-
-        @Override
-        public int getDataBytes() {
-            return dataBytes;
         }
 
         @Override

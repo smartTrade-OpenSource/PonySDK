@@ -41,16 +41,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.application.Application;
+import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.servlet.SessionManager;
 import com.ponysdk.core.util.Pair;
 
 class WebSocketStatsRecorder {
 
+    private static final String KEY = WebSocketStatsRecorder.class.toString();
     private static final Logger log = LoggerFactory.getLogger(WebSocketStatsRecorder.class);
     private static final ServerToClientModel[] MODELS = ServerToClientModel.values();
-    private volatile ThreadLocal<AtomicReferenceArray<Map<Object, MutableRecord>>> localStats = null;
-    private volatile Collection<AtomicReferenceArray<Map<Object, MutableRecord>>> allStats = null;
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-    private LocalDateTime startTime;
+    private volatile LocalDateTime startTime;
     private WebSocketStats summary;
     private final Consumer<WebSocketStats> listener;
     private final BiFunction<ServerToClientModel, Object, String> groupBy;
@@ -68,17 +70,21 @@ class WebSocketStatsRecorder {
 
     public <T> void record(final ServerToClientModel model, final T value, final int metaBytes, final int dataBytes,
                            final Function<T, Object> valueConverter) {
-        final ThreadLocal<AtomicReferenceArray<Map<Object, MutableRecord>>> localStats = this.localStats;
-        if (localStats == null) return;
-        Object v = valueConverter == null ? value : valueConverter.apply(value);
-        if (groupBy != null) v = new Pair<>(v, groupBy.apply(model, value));
-        final AtomicReferenceArray<Map<Object, MutableRecord>> stats = localStats.get();
-        Map<Object, MutableRecord> records = stats.get(modelToIndex(model));
+        if (startTime == null) return;
+        final UIContext context = UIContext.get();
+        AtomicReferenceArray<Map<Object, VolatileRecord>> stats = context.getAttribute(KEY);
+        if (stats == null) {
+            stats = new AtomicReferenceArray<>(MODELS.length + 1);
+            context.setAttribute(KEY, stats);
+        }
+        Map<Object, VolatileRecord> records = stats.get(modelToIndex(model));
         if (records == null) {
             records = new ConcurrentHashMap<>();
             stats.set(modelToIndex(model), records);
         }
-        records.computeIfAbsent(v, vv -> new MutableRecord(metaBytes, dataBytes)).count++;
+        Object v = valueConverter == null ? value : valueConverter.apply(value);
+        if (groupBy != null) v = new Pair<>(v, groupBy.apply(model, value));
+        records.computeIfAbsent(v, vv -> new VolatileRecord(metaBytes, dataBytes)).count++;
     }
 
     public <T> void record(final ServerToClientModel model, final T value, final int metaBytes, final int dataBytes) {
@@ -86,10 +92,8 @@ class WebSocketStatsRecorder {
     }
 
     public synchronized boolean start(final long timeout, final TimeUnit unit) {
-        if (localStats != null || summary != null) return false; //started OR stopped
+        if (startTime != null || summary != null) return false; //started OR stopped
         startTime = LocalDateTime.now();
-        localStats = ThreadLocal.withInitial(this::newStats);
-        allStats = ConcurrentHashMap.newKeySet();
         scheduler.schedule(this::stop, timeout, unit);
         log.info("Start recording for {} {}", timeout, unit);
         return true;
@@ -99,59 +103,69 @@ class WebSocketStatsRecorder {
         return model == null ? MODELS.length : model.ordinal();
     }
 
-    private AtomicReferenceArray<Map<Object, MutableRecord>> newStats() {
-        final AtomicReferenceArray<Map<Object, MutableRecord>> stats = new AtomicReferenceArray<>(MODELS.length + 1);
-        final Collection<AtomicReferenceArray<Map<Object, MutableRecord>>> allStats = this.allStats;
-        if (allStats != null) allStats.add(stats);
-        return stats;
+    private static void forEachUIContext(final Consumer<UIContext> consumer) {
+        for (final Application app : SessionManager.get().getApplications()) {
+            for (final UIContext context : app.getUIContexts()) {
+                context.execute(() -> {
+                    consumer.accept(context);
+                });
+            }
+        }
     }
 
     public boolean isStarted() {
-        return localStats != null;
+        return startTime != null;
     }
 
     public synchronized WebSocketStats stop() {
-        if (localStats == null || summary != null) return null; //not started OR stopped
-        localStats = null;
+        if (this.startTime == null || summary != null) return null; //not started OR stopped
+        final LocalDateTime startTime = this.startTime;
+        this.startTime = null;
         final LocalDateTime endTime = LocalDateTime.now();
         scheduler.shutdownNow();
-        final Collection<AtomicReferenceArray<Map<Object, MutableRecord>>> allStats = this.allStats;
-        this.allStats = null;
-        final Map<ServerToClientModel, Map<Object, MutableRecord>> stats = new EnumMap<>(ServerToClientModel.class);
-        for (final AtomicReferenceArray<Map<Object, MutableRecord>> s : allStats) {
+        final Collection<AtomicReferenceArray<Map<Object, VolatileRecord>>> allStats = ConcurrentHashMap.newKeySet();
+        forEachUIContext(context -> {
+            final AtomicReferenceArray<Map<Object, VolatileRecord>> stats = context.getAttribute(KEY);
+            if (stats == null) return;
+            context.removeAttribute(KEY);
+            allStats.add(stats);
+        });
+        final Map<ServerToClientModel, Map<Object, MutableRecord>> aggStats = aggregateStats(allStats);
+        summary = new WebSocketStats(aggStats, startTime, endTime, groupBy != null);
+        if (listener != null) listener.accept(summary);
+        log.info("Recording stopped, Statistics Summary: {}", summary);
+        return summary;
+    }
+
+    private Map<ServerToClientModel, Map<Object, MutableRecord>> aggregateStats(final Collection<AtomicReferenceArray<Map<Object, VolatileRecord>>> allStats) {
+        final Map<ServerToClientModel, Map<Object, MutableRecord>> aggStats = new EnumMap<>(ServerToClientModel.class);
+        for (final AtomicReferenceArray<Map<Object, VolatileRecord>> s : allStats) {
             for (int i = 0; i < s.length(); i++) {
                 final ServerToClientModel model = i >= MODELS.length ? null : MODELS[i];
-                final Map<Object, MutableRecord> records = s.get(i);
+                final Map<Object, VolatileRecord> records = s.get(i);
                 if (records != null) {
-                    for (final Map.Entry<Object, MutableRecord> recordEntry : records.entrySet()) {
+                    for (final Map.Entry<Object, VolatileRecord> recordEntry : records.entrySet()) {
                         final Object value = recordEntry.getKey();
-                        final MutableRecord record = recordEntry.getValue();
-                        stats.computeIfAbsent(model, m -> new HashMap<>()).computeIfAbsent(value,
-                            o -> new MutableRecord(record.metaBytes, record.dataBytes)).count += record.count;
+                        final VolatileRecord record = recordEntry.getValue();
+                        aggStats.computeIfAbsent(model, m -> new HashMap<>()).computeIfAbsent(value,
+                            o -> new MutableRecord(record.getMetaBytes(), record.getDataBytes())).count += record.count;
                     }
                 }
             }
         }
-        summary = new WebSocketStats(stats, startTime, endTime, groupBy != null);
-        if (listener != null) listener.accept(summary);
-        log.info("Recording stopped, Statistics Summary: {}", summary);
-        return summary;
+        return aggStats;
     }
 
     public synchronized WebSocketStats getSummary() {
         return summary;
     }
 
-    private static class MutableRecord implements WebSocketStats.Record {
+    private static class VolatileRecord extends WebSocketStats.Record {
 
-        private final int metaBytes;
-        private final int dataBytes;
-        private int count = 0;
+        private volatile int count = 0;
 
-        private MutableRecord(final int metaBytes, final int dataBytes) {
-            super();
-            this.metaBytes = metaBytes;
-            this.dataBytes = dataBytes;
+        private VolatileRecord(final int metaBytes, final int dataBytes) {
+            super(metaBytes, dataBytes);
         }
 
         @Override
@@ -159,14 +173,19 @@ class WebSocketStatsRecorder {
             return count;
         }
 
-        @Override
-        public int getMetaBytes() {
-            return metaBytes;
+    }
+
+    private static class MutableRecord extends WebSocketStats.Record {
+
+        private int count = 0;
+
+        private MutableRecord(final int metaBytes, final int dataBytes) {
+            super(metaBytes, dataBytes);
         }
 
         @Override
-        public int getDataBytes() {
-            return dataBytes;
+        public int getCount() {
+            return count;
         }
 
     }
