@@ -304,7 +304,7 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
             final int length = keys.length();
             final int[] keyCodes = new int[length];
             for (int i = 0; i < length; i++) {
-                keyCodes[i] = (int) ((JsonNumber) keys.get(i)).getNumber();
+                keyCodes[i] = (int) ((JsonNumber) keys.get(i)).asNumber();
             }
             return keyCodes;
         } else {

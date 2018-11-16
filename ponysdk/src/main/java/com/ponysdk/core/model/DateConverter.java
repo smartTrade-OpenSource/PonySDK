@@ -25,37 +25,25 @@ package com.ponysdk.core.model;
 
 import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
 
 public final class DateConverter {
 
     private static final int EMPTY_TIMESTAMP = -1;
-    private static final String DATE_SEPARATOR = ",";
 
     private DateConverter() {
     }
 
-    public static String encode(final Collection<Date> dates) {
-        if (dates != null && !dates.isEmpty()) {
-            final StringBuilder asString = new StringBuilder();
-            final Iterator<Date> it = dates.iterator();
-            while (it.hasNext()) {
-                asString.append(encode(it.next()));
-                if (it.hasNext()) asString.append(DATE_SEPARATOR);
-            }
-            return asString.toString();
-        } else {
-            return null;
-        }
+    public static Long[] encode(final Collection<Date> dates) {
+        return dates != null && !dates.isEmpty() ? dates.stream().map(DateConverter::encode).toArray(Long[]::new) : null;
     }
 
-    public static String encode(final Date date) {
-        return date != null ? String.valueOf(date.getTime()) : null;
+    public static Long encode(final Date date) {
+        return date != null ? date.getTime() : null;
     }
 
-    public static Date decode(final String timestamp) {
+    public static Date decode(final long timestamp) {
         try {
-            return new Date(Long.parseLong(timestamp));
+            return new Date(timestamp);
         } catch (final NumberFormatException e) {
             return null;
         }

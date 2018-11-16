@@ -113,11 +113,8 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
         items.forEach(item -> this.items.add(new ListItem(item, item)));
 
-        final String itemsTextual = items.toString();
-        final String s = itemsTextual.substring(1, itemsTextual.length() - 1).replaceAll(",", ";").replaceAll(" ", EMPTY);
-
         saveUpdate(writer -> {
-            writer.write(ServerToClientModel.ITEM_ADD, s);
+            writer.write(ServerToClientModel.ITEM_ADD, items.toArray(new String[items.size()]));
             writer.write(ServerToClientModel.ITEM_GROUP, group);
         });
     }

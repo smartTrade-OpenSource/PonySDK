@@ -658,6 +658,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         pListBox.addItem("A");
         pListBox.addItem("B");
         pListBox.insertItem("C", 1);
+        pListBox.addItemsInGroup("sport", "Baseball", "Basketball", "Football", "Hockey", "Water Polo");
         return pListBox;
     }
 
