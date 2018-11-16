@@ -28,6 +28,10 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WriteCallback;
@@ -47,8 +51,14 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
 
     private static final int MAX_UNSIGNED_BYTE_VALUE = Byte.MAX_VALUE * 2 + 1;
     private static final int MAX_UNSIGNED_SHORT_VALUE = Short.MAX_VALUE * 2 + 1;
+    private static final int MODEL_KEY_SIZE = 1;
 
     private final Session session;
+
+    private static volatile WebSocketStatsRecorder statsRecorder;
+    private int metaBytes;
+
+    private WebSocket.Listener listener;
 
     public WebSocketPusher(final Session session, final int bufferSize, final int maxChunkSize, final long timeoutMillis) {
         super(bufferSize, true, maxChunkSize, 0.25f, timeoutMillis);
@@ -67,7 +77,9 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
 
     @Override
     protected void doFlush(final ByteBuffer bufferToFlush) {
+        final int bytes = bufferToFlush.remaining();
         session.getRemote().sendBytes(bufferToFlush, this);
+        if (listener != null) listener.onOutgoingBytes(bytes);
     }
 
     @Override
@@ -140,6 +152,7 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
 
     private void write(final ServerToClientModel model) throws IOException {
         putModelKey(model);
+        record(model, null, MODEL_KEY_SIZE, 0);
     }
 
     private void write(final ServerToClientModel model, final boolean value) throws IOException {
@@ -149,31 +162,37 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
     private void write(final ServerToClientModel model, final byte value) throws IOException {
         putModelKey(model);
         put(value);
+        record(model, value, MODEL_KEY_SIZE, Byte.BYTES);
     }
 
     private void write(final ServerToClientModel model, final short value) throws IOException {
         putModelKey(model);
         putShort(value);
+        record(model, value, MODEL_KEY_SIZE, Short.BYTES);
     }
 
     private void write(final ServerToClientModel model, final int value) throws IOException {
         putModelKey(model);
         putInt(value);
+        record(model, value, MODEL_KEY_SIZE, Integer.BYTES);
     }
 
     private void write(final ServerToClientModel model, final long longValue) throws IOException {
         putModelKey(model);
         putLong(longValue);
+        record(model, longValue, MODEL_KEY_SIZE, Long.BYTES);
     }
 
     private void write(final ServerToClientModel model, final double doubleValue) throws IOException {
         putModelKey(model);
         putDouble(doubleValue);
+        record(model, doubleValue, MODEL_KEY_SIZE, Double.BYTES);
     }
 
     private void write(final ServerToClientModel model, final float floatValue) throws IOException {
         putModelKey(model);
         putFloat(floatValue);
+        record(model, floatValue, MODEL_KEY_SIZE, Float.BYTES);
     }
 
     private void write(final ServerToClientModel model, final Object[] value) throws IOException {
@@ -182,89 +201,108 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
             throw new IllegalArgumentException("Array is too big (" + value.length + " > " + MAX_UNSIGNED_BYTE_VALUE
                     + "), use a Json Object instead : " + Arrays.toString(value).substring(0, 100) + "...");
         }
+        metaBytes = MODEL_KEY_SIZE + 1;
+        int dataBytes = 0;
         putUnsignedByte((short) value.length);
         for (final Object o : value) {
-            putArrayElement(o);
+            dataBytes += putArrayElement(o);
         }
+        record(model, value, metaBytes, dataBytes, Arrays::toString);
     }
 
-    private void putCompressedLong(final long value) throws IOException {
+    private int putCompressedLong(final long value) throws IOException {
         if (value >= Byte.MIN_VALUE && value <= Byte.MAX_VALUE) {
             put(ArrayValueModel.BYTE.getValue());
             put((byte) value);
+            return Byte.BYTES;
         } else if (value >= Short.MIN_VALUE && value <= Short.MAX_VALUE) {
             put(ArrayValueModel.SHORT.getValue());
             putShort((short) value);
+            return Short.BYTES;
         } else if (value >= Integer.MIN_VALUE && value <= Integer.MAX_VALUE) {
             put(ArrayValueModel.INTEGER.getValue());
             putInt((int) value);
+            return Integer.BYTES;
         } else {
             put(ArrayValueModel.LONG.getValue());
             putLong(value);
+            return Long.BYTES;
         }
     }
 
-    private void putCompressedInt(final int value) throws IOException {
+    private int putCompressedInt(final int value) throws IOException {
         if (value >= Byte.MIN_VALUE && value <= Byte.MAX_VALUE) {
             put(ArrayValueModel.BYTE.getValue());
             put((byte) value);
+            return Byte.BYTES;
         } else if (value >= Short.MIN_VALUE && value <= Short.MAX_VALUE) {
             put(ArrayValueModel.SHORT.getValue());
             putShort((short) value);
+            return Short.BYTES;
         } else {
             put(ArrayValueModel.INTEGER.getValue());
             putInt(value);
+            return Integer.BYTES;
         }
     }
 
-    private void putCompressedShort(final short value) throws IOException {
+    private int putCompressedShort(final short value) throws IOException {
         if (value >= Byte.MIN_VALUE && value <= Byte.MAX_VALUE) {
             put(ArrayValueModel.BYTE.getValue());
             put((byte) value);
+            return Byte.BYTES;
         } else {
             put(ArrayValueModel.SHORT.getValue());
             putShort(value);
+            return Short.BYTES;
         }
     }
 
-    private void putCompressedDouble(final double value) throws IOException {
+    private int putCompressedDouble(final double value) throws IOException {
         final float f = (float) value;
         if (f == value) { //value can fit in a float without losing precision
             put(ArrayValueModel.FLOAT.getValue());
             putFloat(f);
+            return Float.BYTES;
         } else {
             put(ArrayValueModel.DOUBLE.getValue());
             putDouble(value);
+            return Double.BYTES;
         }
     }
 
-    private void putArrayElement(final Object o) throws IOException {
+    private int putArrayElement(final Object o) throws IOException {
+        metaBytes++;
         if (o == null) {
             put(ArrayValueModel.NULL.getValue());
+            return 0;
         } else if (o instanceof Integer) {
-            putCompressedInt((int) o);
+            return putCompressedInt((int) o);
         } else if (o instanceof String) {
-            putArrayStringElement(o);
+            return putArrayStringElement(o);
         } else if (o instanceof Byte) {
             put(ArrayValueModel.BYTE.getValue());
             put((byte) o);
+            return Byte.BYTES;
         } else if (o instanceof Short) {
-            putCompressedShort((short) o);
+            return putCompressedShort((short) o);
         } else if (o instanceof Boolean) {
             put(o.equals(Boolean.TRUE) ? ArrayValueModel.BOOLEAN_TRUE.getValue() : ArrayValueModel.BOOLEAN_FALSE.getValue());
+            return 0;
         } else if (o instanceof Long) {
-            putCompressedLong((long) o);
+            return putCompressedLong((long) o);
         } else if (o instanceof Double) {
-            putCompressedDouble((double) o);
+            return putCompressedDouble((double) o);
         } else if (o instanceof Float) {
             put(ArrayValueModel.FLOAT.getValue());
             putFloat((float) o);
+            return Float.BYTES;
         } else {
-            putArrayStringElement(o.toString());
+            return putArrayStringElement(o.toString());
         }
     }
 
-    private void putArrayStringElement(final Object o) throws IOException {
+    private int putArrayStringElement(final Object o) throws IOException {
         final String s = (String) o;
         final byte[] bytes = s.getBytes(StandardCharsets.UTF_8);
         final int length = bytes.length;
@@ -273,64 +311,76 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
             put(length == s.length() ? ArrayValueModel.STRING_ASCII_UINT8_LENGTH.getValue()
                     : ArrayValueModel.STRING_UTF8_UINT8_LENGTH.getValue());
             putUnsignedByte((short) length);
-
+            metaBytes++;
         } else if (length <= MAX_UNSIGNED_SHORT_VALUE) {
             put(length == s.length() ? ArrayValueModel.STRING_ASCII_UINT16_LENGTH.getValue()
                     : ArrayValueModel.STRING_UTF8_UINT16_LENGTH.getValue());
             putUnsignedShort(length);
-
+            metaBytes += 2;
         } else {
             put(ArrayValueModel.STRING_UTF8_INT32_LENGTH.getValue());
             putInt(length);
+            metaBytes += 4;
         }
 
         put(bytes);
+
+        return bytes.length;
     }
 
     private void write(final ServerToClientModel model, final String value) throws IOException {
         putModelKey(model);
 
         try {
-            putString(value);
+            putString(model, value);
         } catch (final UnsupportedEncodingException e) {
             throw new IllegalArgumentException("Cannot convert message : " + value);
         }
     }
 
-    private void putString(final String value) throws IOException {
+    private void putString(final ServerToClientModel model, final String value) throws IOException {
+        int metaBytes = MODEL_KEY_SIZE;
+        int dataBytes;
         if (value != null) {
             final byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
             final int length = bytes.length;
-
             if (value.length() == length) { //ASCII
                 if (length <= ValueTypeModel.STRING_ASCII_UINT8_MAX_LENGTH) { // 0 -> 250 (The MOST common case)
                     putUnsignedByte((short) length);
+                    metaBytes += 1;
                 } else if (length <= MAX_UNSIGNED_SHORT_VALUE) { // 251 -> 65,535
                     putUnsignedByte(ValueTypeModel.STRING_ASCII_UINT16);
                     putUnsignedShort(length);
+                    metaBytes += 3;
                 } else { // 65,536 -> 2,147,483,647
                     putUnsignedByte(ValueTypeModel.STRING_ASCII_INT32);
                     putInt(length);
+                    metaBytes += 5;
                 }
 
             } else { //UTF8
                 if (length <= MAX_UNSIGNED_BYTE_VALUE) { // 0 -> 255
                     putUnsignedByte(ValueTypeModel.STRING_UTF8_UINT8);
                     putUnsignedByte((short) length);
+                    metaBytes += 2;
                 } else if (length <= MAX_UNSIGNED_SHORT_VALUE) { // 256 -> 65,535
                     putUnsignedByte(ValueTypeModel.STRING_UTF8_UINT16);
                     putUnsignedShort(length);
+                    metaBytes += 3;
                 } else { // 65,536 -> 2,147,483,647
                     putUnsignedByte(ValueTypeModel.STRING_UTF8_INT32);
                     putInt(length);
+                    metaBytes += 5;
                 }
             }
-
             put(bytes);
-
+            dataBytes = length;
         } else {
             putUnsignedByte((short) 0);
+            metaBytes += 1;
+            dataBytes = 0;
         }
+        record(model, value, metaBytes, dataBytes);
     }
 
     private void putModelKey(final ServerToClientModel model) throws IOException {
@@ -349,4 +399,41 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
         putInt((int) (longValue & 0xFFFFFF));
     }
 
+    public static synchronized boolean startRecordingStats(final long timeout, final TimeUnit unit,
+                                                           final Consumer<WebSocketStats> listener,
+                                                           final BiFunction<ServerToClientModel, Object, String> groupBy) {
+        if (statsRecorder != null) return false;
+        statsRecorder = new WebSocketStatsRecorder(stats -> {
+            synchronized (WebSocketPusher.class) {
+                statsRecorder = null;
+            }
+            if (listener != null) listener.accept(stats);
+        }, groupBy);
+        return statsRecorder.start(timeout, unit);
+    }
+
+    public static boolean isRecordingStats() {
+        final WebSocketStatsRecorder recorder = statsRecorder;
+        return recorder != null ? recorder.isStarted() : false;
+    }
+
+    public static WebSocketStats stopRecordingStats() {
+        final WebSocketStatsRecorder recorder = statsRecorder;
+        return recorder != null ? recorder.stop() : null;
+    }
+
+    private static <T> void record(final ServerToClientModel model, final T value, final int metaBytes, final int dataBytes,
+                                   final Function<T, Object> valueConverter) {
+        final WebSocketStatsRecorder recorder = statsRecorder;
+        if (recorder != null) recorder.record(model, value, metaBytes, dataBytes, valueConverter);
+    }
+
+    private static <T> void record(final ServerToClientModel model, final T value, final int metaBytes, final int dataBytes) {
+        final WebSocketStatsRecorder recorder = statsRecorder;
+        if (recorder != null) recorder.record(model, value, metaBytes, dataBytes);
+    }
+
+    void setWebSocketListener(final WebSocket.Listener listener) {
+        this.listener = listener;
+    }
 }

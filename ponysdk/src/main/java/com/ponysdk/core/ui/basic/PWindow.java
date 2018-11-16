@@ -337,6 +337,10 @@ public class PWindow extends PObject {
         return url;
     }
 
+    public String getName() {
+        return name;
+    }
+
     public void clear() {
         panelByZone.forEach((key, value) -> value.clear());
     }
