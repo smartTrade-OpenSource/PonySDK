@@ -25,9 +25,10 @@ package com.ponysdk.core.terminal.ui;
 
 import java.util.Date;
 
-import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.datepicker.client.DatePicker;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.DateConverter;
@@ -36,9 +37,6 @@ import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
-
-import elemental.json.JsonNumber;
-import elemental.util.ArrayOf;
 
 public class PTDatePicker extends PTWidget<DatePicker> {
 
@@ -84,33 +82,33 @@ public class PTDatePicker extends PTWidget<DatePicker> {
             uiObject.setCurrentMonth(DateConverter.fromTimestamp(binaryModel.getLongValue()));
             return true;
         } else if (ServerToClientModel.DATE_ENABLED == model) {
-            final ArrayOf<JavaScriptObject> dates = binaryModel.getArrayValue();
+            final JSONArray dates = binaryModel.getArrayValue();
             // ServerToClientModel.ENABLED
             final boolean enabled = buffer.readBinaryModel().getBooleanValue();
-            for (int i = 0; i < dates.length(); i++) {
-                final JsonNumber rawObject = (JsonNumber) dates.get(i);
-                final Date date = DateConverter.decode((long) rawObject.asNumber());
+            for (int i = 0; i < dates.size(); i++) {
+                final JSONValue rawObject = dates.get(i);
+                final Date date = DateConverter.decode((long) rawObject.isNumber().doubleValue());
                 if (date.after(uiObject.getFirstDate()) && date.before(uiObject.getLastDate())) {
                     uiObject.setTransientEnabledOnDates(enabled, date);
                 }
             }
             return true;
         } else if (ServerToClientModel.ADD_DATE_STYLE == model) {
-            final ArrayOf<JavaScriptObject> dates = binaryModel.getArrayValue();
+            final JSONArray dates = binaryModel.getArrayValue();
             // ServerToClientModel.STYLE_NAME
             final String style = buffer.readBinaryModel().getStringValue();
-            for (int i = 0; i < dates.length(); i++) {
-                final JsonNumber rawObject = (JsonNumber) dates.get(i);
-                uiObject.addStyleToDates(style, DateConverter.decode((long) rawObject.asNumber()));
+            for (int i = 0; i < dates.size(); i++) {
+                final JSONValue rawObject = dates.get(i);
+                uiObject.addStyleToDates(style, DateConverter.decode((long) rawObject.isNumber().doubleValue()));
             }
             return true;
         } else if (ServerToClientModel.REMOVE_DATE_STYLE == model) {
-            final ArrayOf<JavaScriptObject> dates = binaryModel.getArrayValue();
+            final JSONArray dates = binaryModel.getArrayValue();
             // ServerToClientModel.STYLE_NAME
             final String style = buffer.readBinaryModel().getStringValue();
-            for (int i = 0; i < dates.length(); i++) {
-                final JsonNumber rawObject = (JsonNumber) dates.get(i);
-                uiObject.removeStyleFromDates(style, DateConverter.decode((long) rawObject.asNumber()));
+            for (int i = 0; i < dates.size(); i++) {
+                final JSONValue rawObject = dates.get(i);
+                uiObject.removeStyleFromDates(style, DateConverter.decode((long) rawObject.isNumber().doubleValue()));
             }
             return true;
         } else if (ServerToClientModel.YEAR_ARROWS_VISIBLE == model) {

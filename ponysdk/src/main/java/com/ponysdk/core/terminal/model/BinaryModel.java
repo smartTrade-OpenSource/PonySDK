@@ -23,13 +23,12 @@
 
 package com.ponysdk.core.terminal.model;
 
-import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.json.client.JSONArray;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.ValueTypeModel;
 
 import elemental.json.Json;
 import elemental.json.JsonObject;
-import elemental.util.ArrayOf;
 
 public class BinaryModel {
 
@@ -42,7 +41,7 @@ public class BinaryModel {
     private float floatValue;
     private double doubleValue;
     private String stringValue;
-    private ArrayOf<JavaScriptObject> arrayValue;
+    private JSONArray arrayValue;
 
     protected BinaryModel() {
     }
@@ -77,7 +76,7 @@ public class BinaryModel {
         this.stringValue = value;
     }
 
-    public void init(final ServerToClientModel key, final ArrayOf<JavaScriptObject> value, final int size) {
+    public void init(final ServerToClientModel key, final JSONArray value, final int size) {
         init(key, size);
         this.arrayValue = value;
     }
@@ -119,7 +118,7 @@ public class BinaryModel {
         return Json.parse(stringValue);
     }
 
-    public ArrayOf<JavaScriptObject> getArrayValue() {
+    public JSONArray getArrayValue() {
         return arrayValue;
     }
 

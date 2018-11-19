@@ -23,7 +23,13 @@
 
 package com.ponysdk.core.terminal.model;
 
-import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONBoolean;
+import com.google.gwt.json.client.JSONException;
+import com.google.gwt.json.client.JSONNumber;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONString;
+import com.google.gwt.json.client.JSONValue;
 import com.ponysdk.core.model.ArrayValueModel;
 import com.ponysdk.core.model.BooleanModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -35,11 +41,6 @@ import elemental.html.ArrayBufferView;
 import elemental.html.DataView;
 import elemental.html.Uint8Array;
 import elemental.html.Window;
-import elemental.json.Json;
-import elemental.json.JsonException;
-import elemental.json.JsonValue;
-import elemental.util.ArrayOf;
-import elemental.util.Collections;
 
 public class ReaderBuffer {
 
@@ -253,47 +254,47 @@ public class ReaderBuffer {
         return getString(ascii, stringLength);
     }
 
-    private ArrayOf<JavaScriptObject> readArrayModelValue() {
+    private JSONArray readArrayModelValue() {
         modelSize += ValueTypeModel.BYTE_SIZE; //array size
         final int arraySize = getUnsignedByte();
-        final ArrayOf<JavaScriptObject> array = Collections.arrayOf();
+        final JSONArray array = new JSONArray();
         modelSize += arraySize; //array elements types
         for (int i = 0; i < arraySize; i++) {
             final ArrayValueModel arrayValueModel = ArrayValueModel.fromRawValue(getByte());
             modelSize += arrayValueModel.getMinSize();
-            JsonValue value;
+            JSONValue value;
             if (arrayValueModel.isDynamicSize()) {
                 final String stringValue = getDynamicSizeArrayElement(arrayValueModel);
                 try {
                     if (!stringValue.isEmpty() && (stringValue.charAt(0) == '{' || stringValue.charAt(0) == '['))
-                        value = Json.parse(stringValue);
-                    else value = Json.create(stringValue);
-                } catch (final JsonException e) {
-                    value = Json.create(stringValue);
+                        value = JSONParser.parseStrict(stringValue);
+                    else value = new JSONString(stringValue);
+                } catch (final JSONException e) {
+                    value = new JSONString(stringValue);
                 }
             } else if (arrayValueModel == ArrayValueModel.NULL) {
                 value = null;
             } else if (arrayValueModel == ArrayValueModel.INTEGER) {
-                value = Json.create(getInt());
+                value = new JSONNumber(getInt());
             } else if (arrayValueModel == ArrayValueModel.SHORT) {
-                value = Json.create(getShort());
+                value = new JSONNumber(getShort());
             } else if (arrayValueModel == ArrayValueModel.BOOLEAN_FALSE) {
-                value = Json.create(false);
+                value = JSONBoolean.getInstance(false);
             } else if (arrayValueModel == ArrayValueModel.BOOLEAN_TRUE) {
-                value = Json.create(true);
+                value = JSONBoolean.getInstance(true);
             } else if (arrayValueModel == ArrayValueModel.LONG) {
-                value = Json.create(getLong());
+                value = new JSONNumber(getLong());
             } else if (arrayValueModel == ArrayValueModel.BYTE) {
-                value = Json.create(getByte());
+                value = new JSONNumber(getByte());
             } else if (arrayValueModel == ArrayValueModel.DOUBLE) {
-                value = Json.create(getDouble());
+                value = new JSONNumber(getDouble());
             } else if (arrayValueModel == ArrayValueModel.FLOAT) {
-                value = Json.create(getFloat());
+                value = new JSONNumber(getFloat());
             } else {
                 throw new IllegalArgumentException("Unsupported ArrayValueModel " + arrayValueModel);
             }
 
-            array.push((JavaScriptObject) value);
+            array.set(i, value);
         }
         return array;
     }

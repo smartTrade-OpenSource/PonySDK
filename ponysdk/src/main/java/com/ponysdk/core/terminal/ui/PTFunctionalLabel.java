@@ -41,7 +41,7 @@ public class PTFunctionalLabel extends PTLabel<Label> {
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         final ServerToClientModel model = binaryModel.getModel();
         if (ServerToClientModel.FUNCTION_ARGS == model) {
-            setText(uiObject.getElement(), function.getFunction().apply(binaryModel.getArrayValue()));
+            setText(uiObject.getElement(), function.getFunction().apply(binaryModel.getArrayValue().getJavaScriptObject()));
             return true;
         } else if (ServerToClientModel.FUNCTION_ID == model) {
             function = (PTFunction) uiBuilder.getPTObject(binaryModel.getIntValue());

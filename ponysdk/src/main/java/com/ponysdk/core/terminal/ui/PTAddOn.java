@@ -36,7 +36,6 @@ import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 import elemental.json.JsonObject;
-import elemental.util.ArrayOf;
 
 public class PTAddOn extends AbstractPTObject {
 
@@ -87,7 +86,7 @@ public class PTAddOn extends AbstractPTObject {
             final String methodName = binaryModel.getStringValue();
             final BinaryModel arguments = buffer.readBinaryModel();
             if (ServerToClientModel.PADDON_ARGUMENTS == arguments.getModel()) {
-                doUpdate(methodName, arguments.getArrayValue());
+                doUpdate(methodName, arguments.getArrayValue().getJavaScriptObject());
             } else {
                 buffer.rewind(arguments);
                 doUpdate(methodName, null);
@@ -101,7 +100,7 @@ public class PTAddOn extends AbstractPTObject {
         }
     }
 
-    protected void doUpdate(final String methodName, final ArrayOf<JavaScriptObject> arguments) {
+    protected void doUpdate(final String methodName, final JavaScriptObject arguments) {
         try {
             if (!destroyed) addOn.update(methodName, arguments);
             else log.warning("PTAddOn #" + getObjectID() + " destroyed, so updates will be discarded : " + arguments);

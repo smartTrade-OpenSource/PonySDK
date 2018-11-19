@@ -25,12 +25,11 @@ package com.ponysdk.core.terminal.ui;
 
 import com.google.gwt.core.client.JavaScriptObject;
 
-import elemental.util.ArrayOf;
 import jsinterop.annotations.JsFunction;
 
 @JsFunction
 public interface JsTextFunction {
 
-    String apply(ArrayOf<JavaScriptObject> args);
+    String apply(JavaScriptObject args);
 
 }

@@ -25,15 +25,12 @@ package com.ponysdk.core.terminal;
 
 import com.google.gwt.core.client.JavaScriptObject;
 
-import elemental.util.ArrayOf;
-
 public class JavascriptAddOn extends JavaScriptObject {
 
     protected JavascriptAddOn() {
     }
 
-    public final native void update(String methodName,
-                                    ArrayOf<JavaScriptObject> arguments) /*-{ this.update(methodName, arguments); }-*/;
+    public final native void update(String methodName, JavaScriptObject arguments) /*-{ this.update(methodName, arguments); }-*/;
 
     public final native void onInit() /*-{ this.onInit(); }-*/;
 

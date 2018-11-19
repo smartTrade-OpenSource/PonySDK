@@ -23,11 +23,11 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.OptGroupElement;
 import com.google.gwt.dom.client.OptionElement;
 import com.google.gwt.dom.client.SelectElement;
+import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.user.client.ui.ListBox;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -35,8 +35,6 @@ import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
-
-import elemental.util.ArrayOf;
 
 public class PTListBox extends PTFocusWidget<ListBox> {
 
@@ -94,7 +92,7 @@ public class PTListBox extends PTFocusWidget<ListBox> {
             }
             return true;
         } else if (ServerToClientModel.ITEM_ADD == model) {
-            final ArrayOf<JavaScriptObject> items = binaryModel.getArrayValue();
+            final JSONArray items = binaryModel.getArrayValue();
             // ServerToClientModel.ITEM_GROUP
             final String groupName = buffer.readBinaryModel().getStringValue();
             final SelectElement select = uiObject.getElement().cast();
@@ -102,10 +100,9 @@ public class PTListBox extends PTFocusWidget<ListBox> {
             final OptGroupElement groupElement = Document.get().createOptGroupElement();
             groupElement.setLabel(groupName);
 
-            for (int i = 0; i < items.length(); i++) {
+            for (int i = 0; i < items.size(); i++) {
                 final OptionElement optElement = Document.get().createOptionElement();
-                final Object item = items.get(i);
-                optElement.setInnerText(item.toString());
+                optElement.setInnerText(items.get(i).isString().stringValue());
                 groupElement.appendChild(optElement);
             }
             select.appendChild(groupElement);

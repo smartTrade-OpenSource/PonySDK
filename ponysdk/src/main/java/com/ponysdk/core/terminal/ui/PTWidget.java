@@ -28,7 +28,6 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
-import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -65,9 +64,6 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
-
-import elemental.json.JsonNumber;
-import elemental.util.ArrayOf;
 
 public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implements IsWidget {
 
@@ -300,11 +296,11 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
     private static final int[] extractKeyFilter(final ReaderBuffer buffer) {
         final BinaryModel binaryModel = buffer.readBinaryModel();
         if (ServerToClientModel.KEY_FILTER == binaryModel.getModel()) {
-            final ArrayOf<JavaScriptObject> keys = binaryModel.getArrayValue();
-            final int length = keys.length();
+            final JSONArray keys = binaryModel.getArrayValue();
+            final int length = keys.size();
             final int[] keyCodes = new int[length];
             for (int i = 0; i < length; i++) {
-                keyCodes[i] = (int) ((JsonNumber) keys.get(i)).asNumber();
+                keyCodes[i] = (int) keys.get(i).isNumber().doubleValue();
             }
             return keyCodes;
         } else {
