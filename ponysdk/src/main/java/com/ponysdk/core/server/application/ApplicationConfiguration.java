@@ -48,8 +48,6 @@ public class ApplicationConfiguration {
 
     private int sessionTimeout = 15; // minutes
 
-    private String communicationErrorFunction;
-
     private Set<String> meta;
     private Map<String, String> style;
     private Set<String> javascript;
@@ -110,7 +108,7 @@ public class ApplicationConfiguration {
     }
 
     public void setHeartBeatPeriod(final long heartBeatPeriod) {
-        this.heartBeatPeriod = heartBeatPeriod;
+        setHeartBeatPeriod(heartBeatPeriod, TimeUnit.MILLISECONDS);
     }
 
     public TimeUnit getHeartBeatPeriodTimeUnit() {
@@ -147,14 +145,6 @@ public class ApplicationConfiguration {
 
     public void setMeta(final Set<String> meta) {
         this.meta = meta;
-    }
-
-    public String getCommunicationErrorFunction() {
-        return communicationErrorFunction;
-    }
-
-    public void setCommunicationErrorFunction(final String communicationErrorFunction) {
-        this.communicationErrorFunction = communicationErrorFunction;
     }
 
     public Class<? extends EntryPoint> getEntryPointClass() {

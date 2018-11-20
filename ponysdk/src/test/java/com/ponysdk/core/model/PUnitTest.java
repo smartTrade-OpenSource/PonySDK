@@ -1,13 +1,13 @@
 /*
- * Copyright (c) 2011 PonySDK
+ * Copyright (c) 2018 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -21,19 +21,21 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.list.valueprovider;
+package com.ponysdk.core.model;
 
-public class BooleanValueProvider<D> implements ValueProvider<D, Boolean> {
+import static org.junit.Assert.assertEquals;
 
-    private final boolean value;
+import org.junit.Test;
 
-    public BooleanValueProvider(final boolean value) {
-        this.value = value;
-    }
+public class PUnitTest {
 
-    @Override
-    public Boolean getValue(final D data) {
-        return value;
+    /**
+     * Test method for {@link com.ponysdk.core.model.PUnit#fromRawValue(int)}.
+     */
+    @Test
+    public void testFromRawValue() {
+        final PUnit expected = PUnit.MM;
+        assertEquals(expected, PUnit.fromRawValue(expected.getByteValue()));
     }
 
 }

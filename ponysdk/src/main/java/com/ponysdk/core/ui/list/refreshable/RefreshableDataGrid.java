@@ -68,7 +68,7 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
         for (final DataGridColumnDescriptor descriptor : columnDescriptors) {
             final Cell<D, IsPWidget> cell = new Cell<>();
             cell.setData(data);
-            final IsPWidget widget = descriptor.getCellRenderer().render(rowIndex, descriptor.getValueProvider().getValue(data));
+            final IsPWidget widget = descriptor.getCellRenderer().render(rowIndex, descriptor.getValueProvider().apply(data));
             cell.setWidget(widget);
             map.put(descriptor, cell);
             view.addWidget(cell.getWidget(), col++, rowIndex + 1, 1);
@@ -108,7 +108,7 @@ public class RefreshableDataGrid<K, D> extends DataGridActivity<D> {
         final Map<DataGridColumnDescriptor<D, ?>, Cell<D, ? extends IsPWidget>> map = cells.get(rowIndex);
         for (final DataGridColumnDescriptor descriptor : columnDescriptors) {
             final Cell<D, ? extends IsPWidget> current = map.get(descriptor);
-            descriptor.getCellRenderer().update(descriptor.getValueProvider().getValue(data), current);
+            descriptor.getCellRenderer().update(descriptor.getValueProvider().apply(data), current);
             current.setData(data);
         }
     }

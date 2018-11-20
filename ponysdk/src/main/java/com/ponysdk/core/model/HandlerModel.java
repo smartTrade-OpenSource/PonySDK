@@ -71,12 +71,12 @@ public enum HandlerModel {
         return (byte) ordinal();
     }
 
-    public static HandlerModel fromRawValue(final int rawValue) {
-        return VALUES[rawValue];
-    }
-
     public boolean isDomHandler() {
         return domHandler;
+    }
+
+    public static HandlerModel fromRawValue(final int rawValue) {
+        return VALUES[rawValue];
     }
 
 }

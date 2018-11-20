@@ -38,7 +38,6 @@ public class PonyServiceRegistry {
     private static final Map<Class<?>, PonyService> registeredServices = new ConcurrentHashMap<>();
 
     public static void registerPonyService(final PonyService service) {
-
         final Set<Class<?>> classes = new HashSet<>();
 
         getGeneralizations(service.getClass(), classes);
@@ -66,10 +65,7 @@ public class PonyServiceRegistry {
 
     public static <T extends PonyService> T getPonyService(final Class<T> clazz) {
         final T ponyService = (T) registeredServices.get(clazz);
-        if (ponyService != null) {
-            return ponyService;
-        } else {
-            throw new IllegalArgumentException("Service not registered #" + clazz.getCanonicalName());
-        }
+        if (ponyService != null) return ponyService;
+        else throw new IllegalArgumentException("Service not registered #" + clazz.getCanonicalName());
     }
 }

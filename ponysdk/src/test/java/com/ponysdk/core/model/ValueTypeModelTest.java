@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 PonySDK
+ * Copyright (c) 2018 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
@@ -21,17 +21,21 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.list;
+package com.ponysdk.core.model;
 
-import java.util.function.Function;
+import static org.junit.Assert.assertEquals;
 
-/**
- * By default an IdentityDataGridColumnDescriptor has an IdentityValueProvider
- */
-public class IdentityDataGridColumnDescriptor<D> extends DataGridColumnDescriptor<D, D> {
+import org.junit.Test;
 
-    public IdentityDataGridColumnDescriptor() {
-        this.valueProvider = Function.identity();
+public class ValueTypeModelTest {
+
+    /**
+     * Test method for {@link com.ponysdk.core.model.ValueTypeModel#fromRawValue(int)}.
+     */
+    @Test
+    public void testFromRawValue() {
+        final ValueTypeModel expected = ValueTypeModel.SHORT;
+        assertEquals(expected, ValueTypeModel.fromRawValue(expected.getValue()));
     }
 
 }

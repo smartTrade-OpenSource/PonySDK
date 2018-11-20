@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 PonySDK
+ * Copyright (c) 2018 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
@@ -21,23 +21,36 @@
  * the License.
  */
 
-package com.ponysdk.core.server.service.query;
+package com.ponysdk.core.server.context;
 
-public enum SortingType {
+import static org.junit.Assert.assertEquals;
 
-    NONE,
-    DESCENDING,
-    ASCENDING;
+import org.junit.Before;
+import org.junit.Test;
 
-    public static boolean isNone(final SortingType type) {
-        return NONE == type;
+import com.ponysdk.core.ui.basic.Element;
+import com.ponysdk.core.ui.basic.PObject;
+import com.ponysdk.core.ui.basic.PSuite;
+
+public class PObjectCacheTest extends PSuite {
+
+    private PObjectCache cache;
+
+    @Before
+    public void setUp() {
+        cache = new PObjectCache();
     }
 
-    public static boolean isDescending(final SortingType type) {
-        return DESCENDING == type;
+    /**
+     * Test method for {@link com.ponysdk.core.server.context.PObjectCache#add(com.ponysdk.core.ui.basic.PObject)}.
+     */
+    @Test
+    public void testAdd() {
+        final PObject uiObject1 = Element.newButton();
+        final int uiObjectId1 = uiObject1.getID();
+
+        cache.add(uiObject1);
+        assertEquals(uiObject1, cache.get(uiObjectId1));
     }
 
-    public static boolean isAscending(final SortingType type) {
-        return ASCENDING == type;
-    }
 }

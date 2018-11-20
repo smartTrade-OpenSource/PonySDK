@@ -57,8 +57,7 @@ public class PObjectCache {
     public PObject get(final int objectID) {
         expungeStaleEntries();
         final Reference<PObject> value = referenceByObjectID.get(objectID);
-        if (value == null) return null;
-        return value.get();
+        return value != null ? value.get() : null;
     }
 
     private void expungeStaleEntries() {
