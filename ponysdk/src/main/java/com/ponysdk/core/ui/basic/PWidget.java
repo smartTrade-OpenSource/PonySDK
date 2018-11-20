@@ -39,8 +39,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.DomHandlerConverter;
 import com.ponysdk.core.model.DomHandlerType;
-import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.stm.Txn;
@@ -382,8 +382,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         writer.beginObject();
         if (!PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
         writer.write(ServerToClientModel.TYPE_REMOVE_HANDLER, ID);
-        writer.write(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_DOM.getValue());
-        writer.write(ServerToClientModel.DOM_HANDLER_CODE, type.getDomHandlerType().getValue());
+        writer.write(ServerToClientModel.HANDLER_TYPE, DomHandlerConverter.convert(type.getDomHandlerType()).getValue());
         writer.endObject();
     }
 
@@ -422,11 +421,8 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         final SetPool<Type>.ImmutableSet pool = oneTimeHandlerCreation.getAdd(type);
         if (pool != oneTimeHandlerCreation) {
             oneTimeHandlerCreation = pool;
-            final ServerBinaryModel binaryModel1 = new ServerBinaryModel(ServerToClientModel.DOM_HANDLER_CODE,
-                type.getDomHandlerType().getValue());
             final ModelWriterCallback callback = writer -> {
-                writer.write(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_DOM.getValue());
-                writer.write(binaryModel1.getKey(), binaryModel1.getValue());
+                writer.write(ServerToClientModel.HANDLER_TYPE, DomHandlerConverter.convert(type.getDomHandlerType()).getValue());
                 if (binaryModel != null) writer.write(binaryModel.getKey(), binaryModel.getValue());
             };
             if (initialized) writeAddHandler(callback);

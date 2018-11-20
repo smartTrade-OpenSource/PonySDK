@@ -25,23 +25,46 @@ package com.ponysdk.core.model;
 
 public enum HandlerModel {
 
-    HANDLER_DOM,
-    HANDLER_EMBEDED_STREAM_REQUEST,
-    HANDLER_CHANGE,
-    HANDLER_POPUP_POSITION,
-    HANDLER_RESIZE,
-    HANDLER_STRING_VALUE_CHANGE,
-    HANDLER_COMMAND,
-    HANDLER_BEFORE_SELECTION,
-    HANDLER_SELECTION,
-    HANDLER_STRING_SELECTION,
-    HANDLER_STREAM_REQUEST,
-    HANDLER_SCROLL,
-    HANDLER_PASTE;
+    HANDLER_DOM_BLUR(true),
+    HANDLER_DOM_CHANGE_HANDLER(true),
+    HANDLER_DOM_CLICK(true),
+    HANDLER_DOM_CONTEXT_MENU(true),
+    HANDLER_DOM_DOUBLE_CLICK(true),
+    HANDLER_DOM_DRAG_END(true),
+    HANDLER_DOM_DRAG_ENTER(true),
+    HANDLER_DOM_DRAG_LEAVE(true),
+    HANDLER_DOM_DRAG_OVER(true),
+    HANDLER_DOM_DRAG_START(true),
+    HANDLER_DOM_DROP(true),
+    HANDLER_DOM_FOCUS(true),
+    HANDLER_DOM_KEY_DOWN(true),
+    HANDLER_DOM_KEY_PRESS(true),
+    HANDLER_DOM_KEY_UP(true),
+    HANDLER_DOM_MOUSE_DOWN(true),
+    HANDLER_DOM_MOUSE_OUT(true),
+    HANDLER_DOM_MOUSE_OVER(true),
+    HANDLER_DOM_MOUSE_UP(true),
+    HANDLER_DOM_MOUSE_WHELL(true),
+
+    HANDLER_EMBEDED_STREAM_REQUEST(false),
+    HANDLER_CHANGE(false),
+    HANDLER_POPUP_POSITION(false),
+    HANDLER_RESIZE(false),
+    HANDLER_STRING_VALUE_CHANGE(false),
+    HANDLER_COMMAND(false),
+    HANDLER_BEFORE_SELECTION(false),
+    HANDLER_SELECTION(false),
+    HANDLER_STRING_SELECTION(false),
+    HANDLER_STREAM_REQUEST(false),
+    HANDLER_SCROLL(false),
+    HANDLER_PASTE(false);
 
     private static final HandlerModel[] VALUES = HandlerModel.values();
 
-    private HandlerModel() {
+    private boolean domHandler;
+
+    private HandlerModel(final boolean domHandler) {
+        this.domHandler = domHandler;
     }
 
     public final byte getValue() {
@@ -50,6 +73,10 @@ public enum HandlerModel {
 
     public static HandlerModel fromRawValue(final int rawValue) {
         return VALUES[rawValue];
+    }
+
+    public boolean isDomHandler() {
+        return domHandler;
     }
 
 }

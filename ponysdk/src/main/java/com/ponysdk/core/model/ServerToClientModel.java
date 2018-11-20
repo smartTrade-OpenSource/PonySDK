@@ -194,7 +194,6 @@ public enum ServerToClientModel {
     END_OF_PROCESSING(ValueTypeModel.NULL),
     FOCUS(ValueTypeModel.BOOLEAN),
     HANDLER_TYPE(ValueTypeModel.BYTE),
-    DOM_HANDLER_CODE(ValueTypeModel.BYTE),
     HISTORY_FIRE_EVENTS(ValueTypeModel.BOOLEAN),
     LOADING_ON_REQUEST(ValueTypeModel.BOOLEAN),
     SET_COL_SPAN(ValueTypeModel.INTEGER),

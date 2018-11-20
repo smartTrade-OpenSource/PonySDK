@@ -25,26 +25,26 @@ package com.ponysdk.core.model;
 
 public enum DomHandlerType {
 
-    CLICK,
-    DOUBLE_CLICK,
-    MOUSE_OVER,
-    KEY_PRESS,
-    KEY_UP,
-    KEY_DOWN,
-    MOUSE_OUT,
-    MOUSE_DOWN,
-    MOUSE_UP,
-    MOUSE_WHELL,
-    FOCUS,
     BLUR,
-    DRAG_ENTER,
+    CHANGE_HANDLER,
+    CLICK,
+    CONTEXT_MENU,
+    DOUBLE_CLICK,
     DRAG_END,
-    DRAG_START,
+    DRAG_ENTER,
     DRAG_LEAVE,
     DRAG_OVER,
+    DRAG_START,
     DROP,
-    CONTEXT_MENU,
-    CHANGE_HANDLER;
+    FOCUS,
+    KEY_DOWN,
+    KEY_PRESS,
+    KEY_UP,
+    MOUSE_DOWN,
+    MOUSE_OUT,
+    MOUSE_OVER,
+    MOUSE_UP,
+    MOUSE_WHELL;
 
     private static final DomHandlerType[] VALUES = DomHandlerType.values();
 

@@ -58,6 +58,7 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.DomHandlerConverter;
 import com.ponysdk.core.model.DomHandlerType;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -96,10 +97,8 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
 
     @Override
     public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
-        if (HandlerModel.HANDLER_DOM == handlerModel) {
-            // ServerToClientModel.DOM_HANDLER_CODE
-            final DomHandlerType domHandlerType = DomHandlerType.fromRawValue(buffer.readBinaryModel().getIntValue());
-            addDomHandler(buffer, domHandlerType);
+        if (handlerModel.isDomHandler()) {
+            addDomHandler(buffer, DomHandlerConverter.convert(handlerModel));
         } else {
             super.addHandler(buffer, handlerModel);
         }
@@ -107,9 +106,9 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
 
     @Override
     public void removeHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
-        if (HandlerModel.HANDLER_DOM == handlerModel) {
+        if (handlerModel.isDomHandler()) {
             // TODO Remove HANDLER_DOM
-            // removeDomHandler(DomHandlerType.fromByte(buffer.readBinaryModel().getByteValue()));
+            // removeDomHandler(DomHandlerConverter.convert(handlerModel));
         } else {
             super.removeHandler(buffer, handlerModel);
         }
