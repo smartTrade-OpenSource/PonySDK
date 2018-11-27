@@ -32,6 +32,7 @@ public class PTBrowser extends PTAbstractWindow {
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
+        super.create(buffer, objectId, uiBuilder);
         window = Browser.getWindow();
     }
 
