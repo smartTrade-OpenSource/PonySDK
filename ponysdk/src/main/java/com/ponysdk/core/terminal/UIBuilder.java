@@ -256,18 +256,20 @@ public class UIBuilder {
         final PTObject ptObject = getPTObject(objectID);
         if (ptObject != null) {
             BinaryModel binaryModel;
-            boolean result = false;
             do {
                 binaryModel = buffer.readBinaryModel();
-                final ServerToClientModel model = binaryModel.getModel();
-                if (model != null) result = ServerToClientModel.END != model ? ptObject.update(buffer, binaryModel) : false;
-            } while (result && buffer.hasEnoughKeyBytes());
-
-            if (!result && ServerToClientModel.END != binaryModel.getModel()) {
-                log.warning("Update " + ptObject.getClass().getSimpleName() + " #" + objectID + " with key : " + binaryModel
-                        + " doesn't exist");
-                buffer.shiftNextBlock(false);
-            }
+                if (ServerToClientModel.END.getValue() != binaryModel.getModel().getValue()) {
+                    final boolean result = ptObject.update(buffer, binaryModel);
+                    if (!result) {
+                        log.warning("Update " + ptObject.getClass().getSimpleName() + " #" + objectID + " with key : " + binaryModel
+                                + " doesn't exist");
+                        buffer.shiftNextBlock(false);
+                        break;
+                    }
+                } else {
+                    break;
+                }
+            } while (buffer.hasEnoughKeyBytes());
         } else {
             log.warning("Update on a null PTObject #" + objectID + ", so we will consume all the buffer of this object");
             buffer.shiftNextBlock(false);
