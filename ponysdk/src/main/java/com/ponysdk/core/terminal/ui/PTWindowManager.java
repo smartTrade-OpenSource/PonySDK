@@ -28,8 +28,9 @@ import java.util.logging.Logger;
 
 import com.google.gwt.core.client.Scheduler;
 
-import elemental.js.util.JsArrayOf;
-import elemental.js.util.JsMapFromIntTo;
+import elemental.util.ArrayOf;
+import elemental.util.Collections;
+import elemental.util.MapFromIntTo;
 
 public class PTWindowManager {
 
@@ -39,7 +40,8 @@ public class PTWindowManager {
 
     private static final PTWindowManager instance = new PTWindowManager();
 
-    private final JsMapFromIntTo<PTWindow> windows = JsMapFromIntTo.create();
+    private int mainWindowId;
+    private final MapFromIntTo<PTWindow> windows = Collections.mapFromIntTo();
 
     private PTWindowManager() {
         checkWindowsAlive();
@@ -49,7 +51,11 @@ public class PTWindowManager {
         return instance;
     }
 
-    public static JsArrayOf<PTWindow> getWindows() {
+    public static int getMainWindowId() {
+        return get().mainWindowId;
+    }
+
+    public static ArrayOf<PTWindow> getWindows() {
         return get().windows.values();
     }
 
@@ -58,7 +64,7 @@ public class PTWindowManager {
     }
 
     public static void closeAll() {
-        final JsArrayOf<PTWindow> windows = get().windows.values();
+        final ArrayOf<PTWindow> windows = get().windows.values();
         for (int i = windows.length() - 1; i >= 0; i--) {
             final PTWindow window = windows.get(i);
             if (window != null) {
@@ -69,6 +75,10 @@ public class PTWindowManager {
                 }
             }
         }
+    }
+
+    public void setMainWindowId(final int mainWindowId) {
+        this.mainWindowId = mainWindowId;
     }
 
     public void register(final PTWindow window) {
@@ -83,7 +93,7 @@ public class PTWindowManager {
     private void checkWindowsAlive() {
         Scheduler.get().scheduleFixedDelay(() -> {
             try {
-                final JsArrayOf<PTWindow> windows = get().windows.values();
+                final ArrayOf<PTWindow> windows = get().windows.values();
                 for (int i = windows.length() - 1; i >= 0; i--) {
                     final PTWindow window = windows.get(i);
                     if (window != null && window.isClosed()) window.onClose();
@@ -94,4 +104,5 @@ public class PTWindowManager {
             return true;
         }, IS_ALIVE_WINDOWS_TIMER);
     }
+
 }

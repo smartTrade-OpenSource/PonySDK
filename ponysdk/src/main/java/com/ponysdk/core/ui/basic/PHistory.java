@@ -70,7 +70,7 @@ public class PHistory {
         this.token = token;
 
         final ModelWriter writer = Txn.get().getWriter();
-        writer.beginObject();
+        writer.beginObject(PWindow.getMain().getID());
         writer.write(ServerToClientModel.TYPE_HISTORY, token);
         writer.write(ServerToClientModel.HISTORY_FIRE_EVENTS, fireEvents);
         writer.endObject();

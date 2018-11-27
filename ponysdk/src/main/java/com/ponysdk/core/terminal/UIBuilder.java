@@ -73,6 +73,8 @@ public class UIBuilder {
 
     private RequestBuilder requestBuilder;
 
+    private int currentWindowId = -1;
+
     public void init(final RequestBuilder requestBuilder) {
         if (log.isLoggable(Level.INFO)) log.info("Init graphical system");
 
@@ -104,42 +106,7 @@ public class UIBuilder {
             final BinaryModel binaryModel = readerBuffer.readBinaryModel();
             final ServerToClientModel model = binaryModel.getModel();
 
-            if (ServerToClientModel.WINDOW_ID == model) {
-                // Event on a specific window
-                final int requestedId = binaryModel.getIntValue();
-                // Main terminal, we need to dispatch the eventbus
-                final PTWindow window = PTWindowManager.getWindow(requestedId);
-                if (window != null && window.isReady()) {
-                    final int startPosition = readerBuffer.getPosition();
-                    int endPosition = nextBlockPosition;
-
-                    // Concat multiple messages for the same window
-                    readerBuffer.setPosition(endPosition);
-                    while (readerBuffer.hasEnoughKeyBytes()) {
-                        final int nextBlockPosition1 = readerBuffer.shiftNextBlock(true);
-                        if (nextBlockPosition1 != ReaderBuffer.NOT_FULL_BUFFER_POSITION) {
-                            final BinaryModel newBinaryModel = readerBuffer.readBinaryModel();
-                            if (ServerToClientModel.WINDOW_ID == newBinaryModel.getModel()
-                                    && requestedId == newBinaryModel.getIntValue()) {
-                                endPosition = nextBlockPosition1;
-                                readerBuffer.setPosition(endPosition);
-                            } else {
-                                break;
-                            }
-                        } else {
-                            break;
-                        }
-                    }
-
-                    window.postMessage(readerBuffer.slice(startPosition, endPosition));
-                } else {
-                    readerBuffer.shiftNextBlock(false);
-                }
-            } else if (ServerToClientModel.FRAME_ID == model) {
-                final int requestedId = binaryModel.getIntValue();
-                final PTFrame frame = (PTFrame) getPTObject(requestedId);
-                frame.postMessage(readerBuffer.slice(readerBuffer.getPosition(), nextBlockPosition));
-            } else if (ServerToClientModel.PING_SERVER == model) {
+            if (ServerToClientModel.PING_SERVER == model) {
                 final PTInstruction requestData = new PTInstruction();
                 requestData.put(ClientToServerModel.PING_SERVER, binaryModel.getLongValue());
                 requestBuilder.send(requestData);
@@ -155,7 +122,55 @@ public class UIBuilder {
                 destroy();
                 readerBuffer.readBinaryModel(); // Read ServerToClientModel.END element
             } else {
-                update(binaryModel, readerBuffer);
+                final int oldCurrentWindowId = currentWindowId;
+                if (ServerToClientModel.WINDOW_ID == model) currentWindowId = binaryModel.getIntValue();
+
+                if (currentWindowId == PTWindowManager.getMainWindowId() || oldCurrentWindowId == -1) {
+                    BinaryModel binaryModel2;
+                    if (ServerToClientModel.WINDOW_ID == model) binaryModel2 = readerBuffer.readBinaryModel();
+                    else binaryModel2 = binaryModel;
+
+                    final ServerToClientModel model2 = binaryModel.getModel();
+                    if (ServerToClientModel.FRAME_ID == model2) {
+                        final int frameId = binaryModel2.getIntValue();
+                        final PTFrame frame = (PTFrame) getPTObject(frameId);
+                        frame.postMessage(readerBuffer.slice(readerBuffer.getPosition(), nextBlockPosition));
+                    } else {
+                        update(binaryModel, readerBuffer);
+                    }
+                } else {
+                    if (ServerToClientModel.WINDOW_ID != model) readerBuffer.rewind(binaryModel);
+
+                    final PTWindow window = PTWindowManager.getWindow(currentWindowId);
+                    if (window != null && window.isReady()) {
+                        final int startPosition = readerBuffer.getPosition();
+                        int endPosition = nextBlockPosition;
+
+                        // Concat multiple messages for the same window
+                        readerBuffer.setPosition(endPosition);
+                        while (readerBuffer.hasEnoughKeyBytes()) {
+                            final int nextBlockPosition1 = readerBuffer.shiftNextBlock(true);
+                            if (nextBlockPosition1 != ReaderBuffer.NOT_FULL_BUFFER_POSITION) {
+                                final BinaryModel newBinaryModel = readerBuffer.readBinaryModel();
+                                final ServerToClientModel model2 = newBinaryModel.getModel();
+                                if (ServerToClientModel.WINDOW_ID != model2 && ServerToClientModel.PING_SERVER != model2
+                                        && ServerToClientModel.HEARTBEAT != model2 && ServerToClientModel.CREATE_CONTEXT != model2
+                                        && ServerToClientModel.DESTROY_CONTEXT != model2) {
+                                    endPosition = nextBlockPosition1;
+                                    readerBuffer.setPosition(endPosition);
+                                } else {
+                                    break;
+                                }
+                            } else {
+                                break;
+                            }
+                        }
+
+                        window.postMessage(readerBuffer.slice(startPosition, endPosition));
+                    } else {
+                        readerBuffer.shiftNextBlock(false);
+                    }
+                }
             }
         }
     }
@@ -165,9 +180,7 @@ public class UIBuilder {
 
         while (readerBuffer.hasEnoughKeyBytes()) {
             // Detect if the message is not for the window but for a specific frame
-            BinaryModel binaryModel = readerBuffer.readBinaryModel();
-
-            if (ServerToClientModel.WINDOW_ID == binaryModel.getModel()) binaryModel = readerBuffer.readBinaryModel();
+            final BinaryModel binaryModel = readerBuffer.readBinaryModel();
 
             if (ServerToClientModel.FRAME_ID == binaryModel.getModel()) {
                 final int requestedId = binaryModel.getIntValue();

@@ -45,7 +45,7 @@ public class ModelWriterTest {
      */
     @Test
     public void testBeginObject() {
-        modelWriter.beginObject();
+        modelWriter.beginObject(-1);
         Mockito.verify(websocketEncoder).beginObject();
     }
 

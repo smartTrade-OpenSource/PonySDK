@@ -61,7 +61,7 @@ public class PCookies {
 
     public String removeCookie(final String name, final String path) {
         final ModelWriter writer = Txn.get().getWriter();
-        writer.beginObject();
+        writer.beginObject(PWindow.getMain().getID());
         writer.write(ServerToClientModel.TYPE_UPDATE, ID);
         writer.write(ServerToClientModel.REMOVE_COOKIE, name);
         if (path != null) writer.write(ServerToClientModel.COOKIE_PATH, path);
@@ -91,7 +91,7 @@ public class PCookies {
         cachedCookies.put(name, value);
 
         final ModelWriter writer = Txn.get().getWriter();
-        writer.beginObject();
+        writer.beginObject(PWindow.getMain().getID());
         writer.write(ServerToClientModel.TYPE_UPDATE, ID);
         writer.write(ServerToClientModel.ADD_COOKIE, name);
         writer.write(ServerToClientModel.VALUE, value);

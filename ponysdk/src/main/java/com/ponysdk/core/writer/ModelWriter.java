@@ -30,12 +30,19 @@ public class ModelWriter {
 
     private final WebsocketEncoder encoder;
 
+    private int currentWindowId = -1;
+
     public ModelWriter(final WebsocketEncoder encoder) {
         this.encoder = encoder;
     }
 
-    public void beginObject() {
+    public void beginObject(final int windowId) {
         encoder.beginObject();
+
+        if (currentWindowId != windowId) {
+            currentWindowId = windowId;
+            encoder.encode(ServerToClientModel.WINDOW_ID, currentWindowId);
+        }
     }
 
     public void write(final ServerToClientModel model) {
@@ -51,6 +58,10 @@ public class ModelWriter {
 
     public void endObject() {
         encoder.endObject();
+    }
+
+    public int getCurrentWindowId() {
+        return currentWindowId;
     }
 
 }
