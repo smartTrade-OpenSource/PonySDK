@@ -82,6 +82,7 @@ public abstract class AbstractGridWidget extends PElement implements SimpleListV
         final int maxCellIndex = newRow.getWidgetCount() - 1;
         if (column > maxCellIndex) {
             newCell = createTableCell();
+            newCell.addStyleName("ptc");
             newRow.add(newCell);
         } else {
             newCell = (PComplexPanel) newRow.getWidget(column);
@@ -89,7 +90,6 @@ public abstract class AbstractGridWidget extends PElement implements SimpleListV
         }
 
         newCell.add(widget);
-        newCell.addStyleName("ptc");
 
         if (colspan > 1) newCell.setAttribute("colspan", colspan + "");
     }
@@ -112,6 +112,7 @@ public abstract class AbstractGridWidget extends PElement implements SimpleListV
         final int maxCellIndex = newRow.getWidgetCount() - 1;
         if (column > maxCellIndex) {
             newCell = createTableHeaderCell();
+            newCell.addStyleName("ptc");
             newRow.add(newCell);
         } else {
             newCell = (PComplexPanel) newRow.getWidget(column);
@@ -119,7 +120,6 @@ public abstract class AbstractGridWidget extends PElement implements SimpleListV
         }
 
         newCell.add(widget);
-        newCell.addStyleName("ptc");
 
         if (colspan > 1) newCell.setAttribute("colspan", colspan + "");
     }
