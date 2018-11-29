@@ -225,8 +225,16 @@ public class Element {
         return f.newPLabel();
     }
 
+    public static final PLabel newPLabel(final boolean titleLinkedToText) {
+        return f.newPLabel(titleLinkedToText);
+    }
+
     public static final PLabel newPLabel(final String text) {
         return f.newPLabel(text);
+    }
+
+    public static final PLabel newPLabel(final boolean titleLinkedToText, final String text) {
+        return f.newPLabel(titleLinkedToText, text);
     }
 
     public static final PFunctionalLabel newPFunctionalLabel(final TextFunction textFunction) {

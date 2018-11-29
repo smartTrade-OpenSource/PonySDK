@@ -66,13 +66,30 @@ import com.ponysdk.core.writer.ModelWriter;
 public class PLabel extends PWidget implements PHasText, HasPClickHandlers, HasPDoubleClickHandlers, HasPDragEndHandlers,
         HasPDragEnterHandlers, HasPDragStartHandlers, HasPDragLeaveHandlers, HasPDragOverHandlers, HasPDropHandlers {
 
+    private final boolean titleLinkedToText;
     protected String text;
 
     protected PLabel() {
+        this(false);
+    }
+
+    protected PLabel(final boolean titleLinkedToText) {
+        this(titleLinkedToText, null);
     }
 
     protected PLabel(final String text) {
+        this(false, text);
+    }
+
+    protected PLabel(final boolean titleLinkedToText, final String text) {
+        this.titleLinkedToText = titleLinkedToText;
         this.text = text;
+    }
+
+    @Override
+    protected void enrichForCreation(final ModelWriter writer) {
+        super.enrichForCreation(writer);
+        if (this.titleLinkedToText) writer.write(ServerToClientModel.TITLE_LINKED_TO_TEXT, this.titleLinkedToText);
     }
 
     @Override

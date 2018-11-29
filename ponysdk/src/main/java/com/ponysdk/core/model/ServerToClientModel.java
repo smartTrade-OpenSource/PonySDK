@@ -57,6 +57,7 @@ public enum ServerToClientModel {
     REMOVE_STYLE_NAME(ValueTypeModel.STRING),
     HREF(ValueTypeModel.STRING),
     TEXT(ValueTypeModel.STRING),
+    TITLE_LINKED_TO_TEXT(ValueTypeModel.BOOLEAN),
     HTML(ValueTypeModel.STRING),
     WIDGET_ID(ValueTypeModel.INTEGER),
     WIDGET(ValueTypeModel.NULL),

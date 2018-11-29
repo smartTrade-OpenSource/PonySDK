@@ -106,7 +106,11 @@ public interface ElementFactory {
 
     PLabel newPLabel();
 
+    PLabel newPLabel(final boolean titleLinkedToText);
+
     PLabel newPLabel(final String text);
+
+    PLabel newPLabel(boolean titleLinkedToText, final String text);
 
     PLayoutPanel newPLayoutPanel();
 

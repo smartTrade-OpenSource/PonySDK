@@ -221,8 +221,18 @@ public class DefaultElementFactory implements ElementFactory {
     }
 
     @Override
+    public PLabel newPLabel(final boolean titleLinkedToText) {
+        return new PLabel(titleLinkedToText);
+    }
+
+    @Override
     public PLabel newPLabel(final String text) {
         return new PLabel(text);
+    }
+
+    @Override
+    public PLabel newPLabel(final boolean titleLinkedToText, final String text) {
+        return new PLabel(titleLinkedToText, text);
     }
 
     @Override

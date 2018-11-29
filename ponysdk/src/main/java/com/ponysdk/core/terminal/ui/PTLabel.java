@@ -26,10 +26,22 @@ package com.ponysdk.core.terminal.ui;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.Label;
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public class PTLabel<T extends Label> extends PTWidget<T> {
+
+    private boolean titleLinkedToText;
+
+    @Override
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
+        final BinaryModel binaryModel = buffer.readBinaryModel();
+        if (ServerToClientModel.TITLE_LINKED_TO_TEXT == binaryModel.getModel()) this.titleLinkedToText = binaryModel.getBooleanValue();
+        else buffer.rewind(binaryModel);
+
+        super.create(buffer, objectId, uiBuilder);
+    }
 
     @Override
     protected T createUIObject() {
@@ -40,7 +52,9 @@ public class PTLabel<T extends Label> extends PTWidget<T> {
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         final ServerToClientModel model = binaryModel.getModel();
         if (ServerToClientModel.TEXT == model) {
-            setText(uiObject.getElement(), binaryModel.getStringValue());
+            final String value = binaryModel.getStringValue();
+            setText(uiObject.getElement(), value);
+            if (titleLinkedToText) uiObject.setTitle(value);
             return true;
         } else {
             return super.update(buffer, binaryModel);
