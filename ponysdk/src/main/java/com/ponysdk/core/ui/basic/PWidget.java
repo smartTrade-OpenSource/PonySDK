@@ -261,6 +261,13 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         if (safeStyleProperties().remove(name) != null) saveUpdate(writer -> writer.write(ServerToClientModel.REMOVE_STYLE_KEY, name));
     }
 
+    public void forceDomId() {
+        final String idValue = String.valueOf(ID);
+        if (!Objects.equals(safeElementProperties().put("id", idValue), idValue)) {
+            saveUpdate(ServerToClientModel.FORCE_DOM_ID, null);
+        }
+    }
+
     public void setProperty(final String name, final String value) {
         if (!Objects.equals(safeElementProperties().put(name, value), value)) {
             saveUpdate(writer -> {
@@ -623,15 +630,6 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
 
     public int getTabindex() {
         return tabindex;
-    }
-
-    /**
-     * @deprecated Use {@link #getAddons()} instead
-     * @return First binded addon
-     */
-    @Deprecated
-    public PAddOn getAddon() {
-        return addons != null && !addons.isEmpty() ? addons.iterator().next() : null;
     }
 
     /**

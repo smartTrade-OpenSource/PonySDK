@@ -92,6 +92,9 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
         } else if (ServerToClientModel.REMOVE_STYLE_KEY == model) {
             uiObject.getElement().getStyle().clearProperty(binaryModel.getStringValue());
             return true;
+        } else if (ServerToClientModel.FORCE_DOM_ID == model) {
+            uiObject.getElement().setId(getObjectID() + "");
+            return true;
         } else if (ServerToClientModel.FOCUS == model) {
             if (binaryModel.getBooleanValue()) uiObject.getElement().focus();
             else uiObject.getElement().blur();

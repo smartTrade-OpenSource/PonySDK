@@ -220,6 +220,7 @@ public enum ServerToClientModel {
     BORDER_WIDTH(ValueTypeModel.INTEGER),
     SPACING(ValueTypeModel.INTEGER),
     NAME(ValueTypeModel.STRING),
+    FORCE_DOM_ID(ValueTypeModel.NULL),
     WIDGET_FULL_SIZE(ValueTypeModel.NULL),
     WINDOW_TITLE(ValueTypeModel.STRING),
     WINDOW_LOCATION_REPLACE(ValueTypeModel.STRING),
