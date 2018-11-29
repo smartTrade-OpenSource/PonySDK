@@ -145,6 +145,11 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         if (!styleNames.isEmpty()) {
             writer.write(ServerToClientModel.ADD_STYLE_NAME, styleNames.stream().collect(Collectors.joining(" ")));
         }
+        if (this.title != null) writer.write(ServerToClientModel.WIDGET_TITLE, this.title);
+        if (!this.visible) writer.write(ServerToClientModel.WIDGET_VISIBLE, this.visible);
+        if (this.height != null) writer.write(ServerToClientModel.WIDGET_HEIGHT, this.height);
+        if (this.width != null) writer.write(ServerToClientModel.WIDGET_WIDTH, this.width);
+        if (this.debugID != null) writer.write(ServerToClientModel.ENSURE_DEBUG_ID, this.debugID);
     }
 
     static PWidget asWidgetOrNull(final IsPWidget w) {
@@ -170,7 +175,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         if (UIContext.get().getConfiguration().isDebugMode()) {
             if (Objects.equals(this.debugID, debugID)) return;
             this.debugID = debugID;
-            saveUpdate(writer -> writer.write(ServerToClientModel.ENSURE_DEBUG_ID, debugID));
+            if (initialized) saveUpdate(writer -> writer.write(ServerToClientModel.ENSURE_DEBUG_ID, debugID));
         }
     }
 
@@ -181,7 +186,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     public void setTitle(final String title) {
         if (Objects.equals(this.title, title)) return;
         this.title = title;
-        saveUpdate(ServerToClientModel.WIDGET_TITLE, title);
+        if (initialized) saveUpdate(ServerToClientModel.WIDGET_TITLE, title);
     }
 
     public boolean isVisible() {
@@ -191,7 +196,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     public void setVisible(final boolean visible) {
         if (Objects.equals(this.visible, visible)) return;
         this.visible = visible;
-        saveUpdate(ServerToClientModel.WIDGET_VISIBLE, visible);
+        if (initialized) saveUpdate(ServerToClientModel.WIDGET_VISIBLE, visible);
     }
 
     public String getWidth() {
@@ -201,7 +206,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     public void setWidth(final String width) {
         if (Objects.equals(this.width, width)) return;
         this.width = width;
-        saveUpdate(ServerToClientModel.WIDGET_WIDTH, width);
+        if (initialized) saveUpdate(ServerToClientModel.WIDGET_WIDTH, width);
     }
 
     public String getHeight() {
@@ -211,7 +216,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     public void setHeight(final String height) {
         if (Objects.equals(this.height, height)) return;
         this.height = height;
-        saveUpdate(ServerToClientModel.WIDGET_HEIGHT, height);
+        if (initialized) saveUpdate(ServerToClientModel.WIDGET_HEIGHT, height);
     }
 
     public String getStyleName() {
