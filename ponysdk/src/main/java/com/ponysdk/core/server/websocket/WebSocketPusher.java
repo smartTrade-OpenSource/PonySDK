@@ -79,7 +79,7 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
     protected void doFlush(final ByteBuffer bufferToFlush) {
         final int bytes = bufferToFlush.remaining();
         session.getRemote().sendBytes(bufferToFlush, this);
-        if (listener != null) listener.onOutgoingBytes(bytes);
+        if (listener != null) listener.onOutgoingPonyFramesBytes(bytes);
     }
 
     @Override

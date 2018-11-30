@@ -35,6 +35,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.UTFDataFormatException;
 import java.text.NumberFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -69,11 +70,9 @@ public class WebSocketStats {
     private static final byte STRING_VALUE = 8;
 
     private static final Logger log = LoggerFactory.getLogger(WebSocketStats.class);
-    private static final NumberFormat NUMBER_FORMAT = NumberFormat.getNumberInstance();
-
-    private final Map<ValueTypeModel, DetailedBandwidth> bandwidthPerValueType = new EnumMap<>(ValueTypeModel.class);
     private final Map<ServerToClientModel, ? extends Map<Object, ? extends Record>> stats;
     private final Bandwidth summaryBandwidth;
+    private final long summaryCount;
     private final LocalDateTime startTime;
     private final LocalDateTime endTime;
     private final boolean grouped;
@@ -84,79 +83,36 @@ public class WebSocketStats {
         this.startTime = startTime;
         this.endTime = endTime;
         this.stats = stats;
-        this.summaryBandwidth = initBandwidthPerValueType(grouped);
         this.grouped = grouped;
-    }
-
-    private WebSocketStats(final Map<ServerToClientModel, Map<Object, Record>> stats, final LocalDateTime startTime,
-            final LocalDateTime endTime, final boolean grouped, final Bandwidth summaryBandwidth) {
-        super();
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.stats = stats;
-        this.summaryBandwidth = summaryBandwidth;
-        this.grouped = grouped;
-        initBandwidthPerValueType(grouped);
-    }
-
-    private Bandwidth initBandwidthPerValueType(final boolean grouped) {
         long summaryMeta = 0L;
         long summaryData = 0L;
+        long count = 0L;
         for (final Entry<ServerToClientModel, ? extends Map<Object, ? extends Record>> entry : stats.entrySet()) {
-            long meta = 0L;
-            long data = 0L;
             for (final Record record : entry.getValue().values()) {
-                meta += (long) record.getMetaBytes() * record.getCount();
-                data += (long) record.getDataBytes() * record.getCount();
+                count += record.getCount();
+                summaryMeta += (long) record.getMetaBytes() * record.getCount();
+                summaryData += (long) record.getDataBytes() * record.getCount();
             }
-            bandwidthPerValueType.computeIfAbsent(modelToValueType(entry.getKey()), v -> new DetailedBandwidth()).add(entry.getKey(),
-                meta, data);
-            summaryMeta += meta;
-            summaryData += data;
         }
-        return new Bandwidth(summaryMeta, summaryData);
+        this.summaryBandwidth = new Bandwidth(Math.max(1L, summaryMeta), Math.max(1L, summaryData));
+        this.summaryCount = count;
     }
 
     public void toCsv(final File file, final char separator, final Predicate<Object> valueFilter,
                       final Predicate<ServerToClientModel> modelFilter)
             throws IOException {
         try (final BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-            writer.write("TYPE");
-            writer.write(separator);
-            writer.write("VALUE TYPE");
-            writer.write(separator);
-            writer.write("VALUE");
-            writer.write(separator);
-            writer.write("COUNT");
-            writer.write(separator);
-            writer.write("META SIZE");
-            writer.write(separator);
-            writer.write("DATA SIZE");
-            writer.write(separator);
-            writer.write("BANDWIDTH");
+            writeCsvHeader(separator, writer);
             Stream<? extends Entry<ServerToClientModel, ? extends Map<Object, ? extends Record>>> s = stats.entrySet().stream();
             if (modelFilter != null) s = s.filter(e -> modelFilter.test(e.getKey()));
+
             Stream<Pair<ServerToClientModel, ? extends Entry<Object, ? extends Record>>> s2 = s
                 .flatMap(e -> e.getValue().entrySet().stream().map(ee -> new Pair<>(e.getKey(), ee)));
             if (valueFilter != null) s2 = s2.filter(p -> valueFilter.test(p.getSecond().getKey()));
+
             s2.sorted((p1, p2) -> p2.getSecond().getValue().compareTo(p1.getSecond().getValue())).forEach(p -> {
                 try {
-                    final Record record = p.getSecond().getValue();
-                    writer.write('\n');
-                    writer.write(Objects.toString(p.getFirst()));
-                    writer.write(separator);
-                    writer.write(Objects.toString(modelToValueType(p.getFirst())));
-                    writer.write(separator);
-                    writer.write(Objects.toString(p.getSecond().getKey().toString()).replace('\n', ' ').replace('\r', ' ')
-                        .replace(separator, ' '));
-                    writer.write(separator);
-                    writer.write(Integer.toString(record.getCount()));
-                    writer.write(separator);
-                    writer.write(Integer.toString(record.getMetaBytes()));
-                    writer.write(separator);
-                    writer.write(Integer.toString(record.getDataBytes()));
-                    writer.write(separator);
-                    writer.write(Long.toString(record.getCount() * ((long) record.getMetaBytes() + record.getDataBytes())));
+                    writeCsvLine(separator, writer, p);
                 } catch (final IOException e) {
                     throw new IllegalStateException(e);
                 }
@@ -168,13 +124,73 @@ public class WebSocketStats {
         }
     }
 
+    private void writeCsvLine(final char separator, final BufferedWriter writer,
+                              final Pair<ServerToClientModel, ? extends Entry<Object, ? extends Record>> p)
+            throws IOException {
+        final NumberFormat format = NumberFormat.getInstance();
+        format.setMaximumFractionDigits(4);
+
+                    final Record record = p.getSecond().getValue();
+                    writer.write('\n');
+                    writer.write(Objects.toString(p.getFirst()));
+                    writer.write(separator);
+                    writer.write(Objects.toString(modelToValueType(p.getFirst())));
+                    writer.write(separator);
+        Object v = p.getSecond().getKey();
+        if (isGrouped()) {
+            final Pair<?, ?> pair = (Pair<?, ?>) v;
+            writer.write(Objects.toString(pair.getSecond()));
+            writer.write(separator);
+            v = pair.getFirst();
+        }
+        writer.write(writeableValue(Objects.toString(v), separator));
+                    writer.write(separator);
+                    writer.write(Integer.toString(record.getCount()));
+                    writer.write(separator);
+                    writer.write(Integer.toString(record.getMetaBytes()));
+                    writer.write(separator);
+                    writer.write(Integer.toString(record.getDataBytes()));
+                    writer.write(separator);
+        final long bandwidth = record.getCount() * ((long) record.getMetaBytes() + record.getDataBytes());
+        writer.write(Long.toString(bandwidth));
+        writer.write(separator);
+        writer.write(format.format((double) bandwidth / summaryBandwidth.getTotal()));
+                }
+
+    private String writeableValue(String s, final char separator) {
+        if (s.length() > 512) {
+            s = s.substring(0, 512);
+        }
+        return s.replace('\n', ' ').replace('\r', ' ').replace(separator, ' ');
+        }
+
+    private void writeCsvHeader(final char separator, final BufferedWriter writer) throws IOException {
+        writer.write("MODEL");
+        writer.write(separator);
+        writer.write("VALUE TYPE");
+        writer.write(separator);
+        if (isGrouped()) {
+            writer.write("GROUP");
+            writer.write(separator);
+        }
+        writer.write("VALUE");
+        writer.write(separator);
+        writer.write("COUNT");
+        writer.write(separator);
+        writer.write("META SIZE");
+        writer.write(separator);
+        writer.write("DATA SIZE");
+        writer.write(separator);
+        writer.write("BANDWIDTH");
+        writer.write(separator);
+        writer.write("BANDWIDTH %");
+    }
+
     public void encode(final File file) throws IOException {
         try (DataOutputStream outputStream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)))) {
             outputStream.writeBoolean(grouped);
             outputStream.writeLong(startTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
             outputStream.writeLong(endTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
-            outputStream.writeLong(summaryBandwidth.meta);
-            outputStream.writeLong(summaryBandwidth.data);
             outputStream.writeInt(stats.size());
             for (final Entry<ServerToClientModel, ? extends Map<Object, ? extends Record>> entry : stats.entrySet()) {
                 outputStream.writeUTF(entry.getKey().name());
@@ -227,7 +243,11 @@ public class WebSocketStats {
         else if (s.length() >= MAX_STRING_SIZE) {
             s = s.substring(0, MAX_STRING_SIZE);
         }
+        try {
         outputStream.writeUTF(s);
+        } catch (final UTFDataFormatException e) {
+            outputStream.writeUTF(s.substring(0, MAX_STRING_SIZE / 3));
+        }
     }
 
     public static class DecodeException extends Exception {
@@ -249,16 +269,18 @@ public class WebSocketStats {
                 ZoneId.systemDefault());
             final LocalDateTime endTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(inputStream.readLong()),
                 ZoneId.systemDefault());
-            final Bandwidth summaryBandwidth = new Bandwidth(inputStream.readLong(), inputStream.readLong());
             final Map<ServerToClientModel, Map<Object, Record>> stats = new EnumMap<>(ServerToClientModel.class);
             final int nbModels = inputStream.readInt();
             for (int i = 0; i < nbModels; i++) {
                 final String modelName = inputStream.readUTF();
+                ServerToClientModel model = null;
                 try {
-                    final ServerToClientModel model = ServerToClientModel.valueOf(modelName);
+                    model = ServerToClientModel.valueOf(modelName);
+                } catch (final IllegalArgumentException e) {
+                    log.warn("Unrecognized ServerToClientModel value {} (possibly deprecated)", modelName);
+                }
                     final int nbRecords = inputStream.readInt();
-                    final Map<Object, Record> records = new HashMap<>(nbRecords);
-                    stats.put(model, records);
+                final Map<Object, Record> records = stats.computeIfAbsent(model, m -> new HashMap<>(nbRecords));
                     for (int j = 0; j < nbRecords; j++) {
                         Object value = decodeValue(inputStream);
                         if (grouped) {
@@ -266,11 +288,8 @@ public class WebSocketStats {
                         }
                         records.put(value, new ImmutableRecord(inputStream.readInt(), inputStream.readInt(), inputStream.readInt()));
                     }
-                } catch (final IllegalArgumentException e) {
-                    log.warn("Unrecognized ServerToClientModel value {} (possibly deprecated)", modelName);
-                }
             }
-            return new WebSocketStats(stats, startTime, endTime, grouped, summaryBandwidth);
+            return new WebSocketStats(stats, startTime, endTime, grouped);
         } catch (final EOFException e) {
             throw new DecodeException(e);
         }
@@ -302,7 +321,8 @@ public class WebSocketStats {
     }
 
     public Bandwidth getBandwidthForPattern(final Pattern pattern, final Predicate<ServerToClientModel> modelFilter) {
-        return getBandwidthFor(v -> pattern.matcher(Objects.toString(v)).find(), modelFilter);
+        return getBandwidthFor(v -> pattern.matcher(Objects.toString(isGrouped() ? ((Pair<?, ?>) v).getFirst() : v)).find(),
+            modelFilter);
     }
 
     public Bandwidth getBandwidthFor(final Predicate<Object> valueFilter, final Predicate<ServerToClientModel> modelFilter) {
@@ -322,20 +342,29 @@ public class WebSocketStats {
         return new Bandwidth(meta, data);
     }
 
-    public Map<ValueTypeModel, DetailedBandwidth> getBandwidthPerValueType() {
-        return bandwidthPerValueType;
+    public Map<ValueTypeModel, Bandwidth> getBandwidthPerValueType() {
+        final Map<ValueTypeModel, Bandwidth> map = new EnumMap<>(ValueTypeModel.class);
+        for (final Entry<ServerToClientModel, ? extends Map<Object, ? extends Record>> entry : stats.entrySet()) {
+            for (final Entry<Object, ? extends Record> recordEntry : entry.getValue().entrySet()) {
+                final Record record = recordEntry.getValue();
+                final ValueTypeModel valueType = modelToValueType(entry.getKey());
+                map.computeIfAbsent(valueType, vt -> new Bandwidth(0L, 0L)).add((long) record.getCount() * record.getMetaBytes(),
+                    (long) record.getCount() * record.getDataBytes());
+            }
+        }
+        return map;
     }
 
-    public Map<Pair<ValueTypeModel, String>, DetailedBandwidth> getBandwidthPerValueTypePerGroup() {
+    public Map<Pair<ValueTypeModel, String>, Bandwidth> getBandwidthPerValueTypePerGroup() {
         if (!grouped) return null;
-        final Map<Pair<ValueTypeModel, String>, DetailedBandwidth> map = new HashMap<>();
+        final Map<Pair<ValueTypeModel, String>, Bandwidth> map = new HashMap<>();
         for (final Entry<ServerToClientModel, ? extends Map<Object, ? extends Record>> entry : stats.entrySet()) {
             for (final Entry<Object, ? extends Record> recordEntry : entry.getValue().entrySet()) {
                 final Record record = recordEntry.getValue();
                 final String groupName = ((Pair<Object, String>) recordEntry.getKey()).getSecond();
                 final Pair<ValueTypeModel, String> pair = new Pair<>(modelToValueType(entry.getKey()), groupName);
-                map.computeIfAbsent(pair, p -> new DetailedBandwidth()).add(entry.getKey(),
-                    (long) record.getCount() * record.getMetaBytes(), (long) record.getCount() * record.getDataBytes());
+                map.computeIfAbsent(pair, p -> new Bandwidth(0L, 0L)).add((long) record.getCount() * record.getMetaBytes(),
+                    (long) record.getCount() * record.getDataBytes());
             }
         }
         return map;
@@ -356,6 +385,35 @@ public class WebSocketStats {
         return map;
     }
 
+    public Map<Pair<ServerToClientModel, String>, Bandwidth> getBandwidthPerServerToClientModelPerGroup() {
+        if (!grouped) return null;
+        final Map<Pair<ServerToClientModel, String>, Bandwidth> map = new HashMap<>();
+        for (final Entry<ServerToClientModel, ? extends Map<Object, ? extends Record>> entry : stats.entrySet()) {
+            for (final Entry<Object, ? extends Record> recordEntry : entry.getValue().entrySet()) {
+                final Record record = recordEntry.getValue();
+                final String groupName = ((Pair<Object, String>) recordEntry.getKey()).getSecond();
+                final Pair<ServerToClientModel, String> pair = new Pair<>(entry.getKey(), groupName);
+                map.computeIfAbsent(pair, p -> new Bandwidth(0L, 0L)).add((long) record.getCount() * record.getMetaBytes(),
+                    (long) record.getCount() * record.getDataBytes());
+            }
+        }
+        return map;
+    }
+
+    public Map<String, Bandwidth> getBandwidthPerGroup() {
+        if (!grouped) return null;
+        final Map<String, Bandwidth> map = new HashMap<>();
+        for (final Entry<ServerToClientModel, ? extends Map<Object, ? extends Record>> entry : stats.entrySet()) {
+            for (final Entry<Object, ? extends Record> recordEntry : entry.getValue().entrySet()) {
+                final Record record = recordEntry.getValue();
+                final String groupName = ((Pair<Object, String>) recordEntry.getKey()).getSecond();
+                map.computeIfAbsent(groupName, g -> new Bandwidth(0L, 0L)).add((long) record.getCount() * record.getMetaBytes(),
+                    (long) record.getCount() * record.getDataBytes());
+            }
+        }
+        return map;
+    }
+
     private static ValueTypeModel modelToValueType(final ServerToClientModel model) {
         return model == null ? null : model.getTypeModel();
     }
@@ -372,24 +430,8 @@ public class WebSocketStats {
         return summaryBandwidth;
     }
 
-    public static class DetailedBandwidth extends Bandwidth {
-
-        private final Map<ServerToClientModel, Bandwidth> bandwidthPerModel = new EnumMap<>(ServerToClientModel.class);
-
-        private DetailedBandwidth() {
-            super(0L, 0L);
-        }
-
-        private void add(final ServerToClientModel model, final long meta, final long data) {
-            this.meta += meta;
-            this.data += data;
-            bandwidthPerModel.put(model, new Bandwidth(meta, data));
-        }
-
-        public Map<ServerToClientModel, Bandwidth> getBandwidthPerModel() {
-            return bandwidthPerModel;
-        }
-
+    public long getSummaryCount() {
+        return summaryCount;
     }
 
     public static class Bandwidth implements Comparable<Bandwidth> {
@@ -401,6 +443,11 @@ public class WebSocketStats {
             super();
             this.meta = meta;
             this.data = data;
+        }
+
+        void add(final long meta, final long data) {
+            this.meta += meta;
+            this.data += data;
         }
 
         public long getTotal() {
@@ -479,25 +526,15 @@ public class WebSocketStats {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
-        sb.append("Web socket stats recording from ").append(startTime).append(" to ").append(endTime).append('\n');
-        appendBandwidth("SUMMARY", sb, summaryBandwidth);
-        for (final Map.Entry<ValueTypeModel, DetailedBandwidth> entry : bandwidthPerValueType.entrySet()) {
-            appendBandwidth(entry.getKey().name(), sb, entry.getValue());
-        }
+        final NumberFormat numberFormat = NumberFormat.getNumberInstance();
+        sb.append("Web socket stats recording from ").append(startTime).append(" to ").append(endTime);
+        sb.append(": Total bandwidth=").append(numberFormat.format(summaryBandwidth.getTotal()));
+        sb.append(", Meta bandwidth=").append(numberFormat.format(summaryBandwidth.meta));
+        sb.append(" (").append(String.format("%.2f", 100.0 * summaryBandwidth.meta / summaryBandwidth.getTotal())).append("%)");
+        sb.append(", Data bandwidth=").append(numberFormat.format(summaryBandwidth.data));
+        sb.append(" (").append(String.format("%.2f", 100.0 * summaryBandwidth.data / summaryBandwidth.getTotal())).append("%)");
+        sb.append(", Frame count=").append(numberFormat.format(summaryCount));
         return sb.toString();
-    }
-
-    private void appendBandwidth(final String key, final StringBuilder sb, final Bandwidth bandwidth) {
-        sb.append(">> ").append(key);
-        sb.append(": Total=");
-        sb.append(NUMBER_FORMAT.format(bandwidth.getTotal())).append(" (")
-            .append(bandwidth.getTotal() * 100 / summaryBandwidth.getTotal()).append("%)");
-        sb.append(", Meta=");
-        sb.append(NUMBER_FORMAT.format(bandwidth.getMeta())).append(" (")
-            .append(bandwidth.getMeta() * 100 / summaryBandwidth.getTotal()).append("%)");
-        sb.append(", Data=");
-        sb.append(NUMBER_FORMAT.format(bandwidth.getData())).append(" (")
-            .append(bandwidth.getData() * 100 / summaryBandwidth.getTotal()).append("%).\n");
     }
 
     private static class ImmutableRecord extends Record {

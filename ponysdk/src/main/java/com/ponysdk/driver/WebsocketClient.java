@@ -38,6 +38,7 @@ import javax.websocket.ClientEndpointConfig.Configurator;
 import javax.websocket.CloseReason;
 import javax.websocket.Endpoint;
 import javax.websocket.EndpointConfig;
+import javax.websocket.Extension;
 import javax.websocket.HandshakeResponse;
 import javax.websocket.MessageHandler;
 import javax.websocket.MessageHandler.Whole;
@@ -45,6 +46,7 @@ import javax.websocket.Session;
 
 import org.glassfish.tyrus.client.ClientManager;
 import org.glassfish.tyrus.client.ClientProperties;
+import org.glassfish.tyrus.ext.extension.deflate.PerMessageDeflateExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,6 +57,7 @@ public class WebsocketClient implements AutoCloseable {
     private volatile Session session;
 
     private final static List<String> USER_AGENT = List.of("PonyDriver");
+    private final static List<Extension> EXTENSIONS = List.of(new PerMessageDeflateExtension());
     private final static Configurator configurator = new Configurator() {
 
         @Override
@@ -80,7 +83,8 @@ public class WebsocketClient implements AutoCloseable {
 
     public void connect(final URI uri) throws Exception {
         if (session != null) session.close();
-        final ClientEndpointConfig cec = ClientEndpointConfig.Builder.create().configurator(configurator).build();
+        final ClientEndpointConfig cec = ClientEndpointConfig.Builder.create().configurator(configurator).extensions(EXTENSIONS)
+            .build();
         final ClientManager client = ClientManager.createClient();
         client.getProperties().put(ClientProperties.REDIRECT_ENABLED, true);
         final Lock lock = new ReentrantLock();

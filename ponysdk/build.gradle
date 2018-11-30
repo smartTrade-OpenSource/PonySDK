@@ -74,6 +74,7 @@ dependencies {
             'org.seleniumhq.selenium:selenium-java:' + seleniumVersion,
             'javax.websocket:javax.websocket-client-api:1.1',
             'org.glassfish.tyrus:tyrus-client:' + tyrusVersion,
+            'org.glassfish.tyrus.ext:tyrus-extension-deflate:' + tyrusVersion
     )
 
     testCompile(

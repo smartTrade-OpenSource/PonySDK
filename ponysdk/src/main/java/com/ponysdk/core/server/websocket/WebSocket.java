@@ -33,9 +33,11 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
+import org.eclipse.jetty.util.component.Container;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
 import org.eclipse.jetty.websocket.api.WebSocketListener;
+import org.eclipse.jetty.websocket.common.extensions.ExtensionStack;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -271,7 +273,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     @Override
     public void encode(final ServerToClientModel model, final Object value) {
         websocketPusher.encode(model, value);
-        if (listener != null) listener.onOutgoingFrame(model, value);
+        if (listener != null) listener.onOutgoingPonyFrame(model, value);
     }
 
     private static enum NiceStatusCode {
@@ -341,15 +343,35 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
     public void setListener(final Listener listener) {
         this.listener = listener;
-        if (this.websocketPusher != null) this.websocketPusher.setWebSocketListener(listener);
+        this.websocketPusher.setWebSocketListener(listener);
+        if (!(session instanceof Container)) {
+            log.warn("Unrecognized session type {} for {}", session == null ? null : session.getClass(), uiContext);
+            return;
+        }
+        final ExtensionStack extensionStack = ((Container) session).getBean(ExtensionStack.class);
+        if (extensionStack == null) {
+            log.warn("No Extension Stack for {}", uiContext);
+            return;
+        }
+        final PonyPerMessageDeflateExtension extension = extensionStack.getBean(PonyPerMessageDeflateExtension.class);
+        if (extension == null) {
+            log.warn("Missing PonyPerMessageDeflateExtension from Extension Stack for {}", uiContext);
+            return;
+        }
+        extension.setWebSocketListener(listener);
     }
 
     public static interface Listener {
 
-        void onOutgoingFrame(ServerToClientModel model, Object value);
+        void onOutgoingPonyFrame(ServerToClientModel model, Object value);
 
-        void onOutgoingBytes(int bytes);
+        void onOutgoingPonyFramesBytes(int bytes);
+
+        void onOutgoingWebSocketFrame(int headerLength, int payloadLength);
 
         void onIncomingText(String text);
+
+        void onIncomingWebSocketFrame(int headerLength, int payloadLength);
+
     }
 }
