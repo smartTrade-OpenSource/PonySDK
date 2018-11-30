@@ -119,6 +119,8 @@ public class UIContext {
 
     private final JsonProvider jsonProvider;
 
+    private final ModelWriter modelWriter;
+
     public UIContext(final WebSocket socket, final TxnContext context, final ApplicationConfiguration configuration,
             final ServletUpgradeRequest request) {
         this.ID = uiContextCount.incrementAndGet();
@@ -126,6 +128,7 @@ public class UIContext {
         this.configuration = configuration;
         this.request = request;
         this.context = context;
+        this.modelWriter = context.getWriter();
 
         JsonProvider provider;
         try {
@@ -135,16 +138,6 @@ public class UIContext {
         }
 
         jsonProvider = provider;
-    }
-
-    @Deprecated(forRemoval = true, since = "v2.8.1")
-    public UIContext(final WebSocket socket, final TxnContext context, final ApplicationConfiguration configuration) {
-        this(socket, context, configuration, socket.getRequest());
-    }
-
-    @Deprecated(forRemoval = true, since = "v2.8.0")
-    public UIContext(final TxnContext context) {
-        this(context.getSocket(), context, context.getApplication().getOptions());
     }
 
     /**
@@ -504,7 +497,7 @@ public class UIContext {
     public void stackStreamRequest(final StreamHandler streamListener, final PWindow window) {
         final int streamRequestID = nextStreamRequestID();
 
-        final ModelWriter writer = Txn.get().getWriter();
+        final ModelWriter writer = getWriter();
         writer.beginObject(window.getID());
         writer.write(ServerToClientModel.TYPE_ADD_HANDLER, -1);
         writer.write(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_STREAM_REQUEST.getValue());
@@ -524,7 +517,7 @@ public class UIContext {
     public void stackEmbeddedStreamRequest(final StreamHandler streamListener, final PObject pObject) {
         final int streamRequestID = nextStreamRequestID();
 
-        final ModelWriter writer = Txn.get().getWriter();
+        final ModelWriter writer = getWriter();
         writer.beginObject(pObject.getWindow().getID());
         if (pObject.getFrame() != null) writer.write(ServerToClientModel.FRAME_ID, pObject.getFrame().getID());
         writer.write(ServerToClientModel.TYPE_ADD_HANDLER, pObject.getID());
@@ -806,6 +799,10 @@ public class UIContext {
      */
     public Application getApplication() {
         return context.getApplication();
+    }
+
+    public ModelWriter getWriter() {
+        return modelWriter;
     }
 
     public JsonProvider getJsonProvider() {

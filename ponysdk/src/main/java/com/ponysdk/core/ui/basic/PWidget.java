@@ -43,7 +43,6 @@ import com.ponysdk.core.model.DomHandlerConverter;
 import com.ponysdk.core.model.DomHandlerType;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.ui.basic.event.HasPHandlers;
 import com.ponysdk.core.ui.basic.event.HasPKeyPressHandlers;
 import com.ponysdk.core.ui.basic.event.HasPKeyUpHandlers;
@@ -390,7 +389,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
 
     private void executeRemoveDomHandler(final PDomEvent.Type type) {
         if (destroy) return;
-        final ModelWriter writer = Txn.get().getWriter();
+        final ModelWriter writer = UIContext.get().getWriter();
         writer.beginObject(window.getID());
         writer.write(ServerToClientModel.TYPE_REMOVE_HANDLER, ID);
         writer.write(ServerToClientModel.HANDLER_TYPE, DomHandlerConverter.convert(type.getDomHandlerType()).getValue());

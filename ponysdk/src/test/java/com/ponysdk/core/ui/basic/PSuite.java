@@ -45,7 +45,6 @@ public class PSuite {
 
         final TxnContext context = Mockito.spy(new TxnContext(socket));
         final ModelWriter mw = Mockito.mock(ModelWriter.class);
-        Mockito.when(context.getWriter()).thenReturn(mw);
 
         final Application application = Mockito.mock(Application.class, Mockito.RETURNS_MOCKS);
         Mockito.when(context.getApplication()).thenReturn(application);
@@ -54,6 +53,7 @@ public class PSuite {
 
         Txn.get().begin(context);
         final UIContext uiContext = Mockito.spy(new UIContext(socket, context, configuration, request));
+        Mockito.when(uiContext.getWriter()).thenReturn(mw);
         UIContext.setCurrent(uiContext);
     }
 
