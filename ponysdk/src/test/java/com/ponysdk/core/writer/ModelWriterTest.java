@@ -28,8 +28,10 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.ponysdk.core.server.websocket.WebsocketEncoder;
+import com.ponysdk.core.ui.basic.Element;
+import com.ponysdk.core.ui.basic.PSuite;
 
-public class ModelWriterTest {
+public class ModelWriterTest extends PSuite {
 
     private ModelWriter modelWriter;
     private WebsocketEncoder websocketEncoder;
@@ -41,11 +43,11 @@ public class ModelWriterTest {
     }
 
     /**
-     * Test method for {@link com.ponysdk.core.writer.ModelWriter#beginObject()}.
+     * Test method for {@link com.ponysdk.core.writer.ModelWriter#beginObject(com.ponysdk.core.ui.basic.PWindow)}.
      */
     @Test
     public void testBeginObject() {
-        modelWriter.beginObject(-1);
+        modelWriter.beginObject(Element.newPWindow(null, null));
         Mockito.verify(websocketEncoder).beginObject();
     }
 

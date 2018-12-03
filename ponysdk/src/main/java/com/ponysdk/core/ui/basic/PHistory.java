@@ -70,7 +70,7 @@ public class PHistory {
         this.token = token;
 
         final ModelWriter writer = UIContext.get().getWriter();
-        writer.beginObject(PWindow.getMain().getID());
+        writer.beginObject(PWindow.getMain());
         writer.write(ServerToClientModel.TYPE_HISTORY, token);
         writer.write(ServerToClientModel.HISTORY_FIRE_EVENTS, fireEvents);
         writer.endObject();

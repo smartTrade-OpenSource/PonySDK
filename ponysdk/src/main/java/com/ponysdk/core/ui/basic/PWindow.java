@@ -131,7 +131,7 @@ public class PWindow extends PObject {
         if (destroy) return;
         if (!initialized) {
             final ModelWriter writer = UIContext.get().getWriter();
-            writer.beginObject(window.getID());
+            writer.beginObject(window);
             writer.write(ServerToClientModel.TYPE_CREATE, ID);
             writer.write(ServerToClientModel.WIDGET_TYPE, getWidgetType().getValue());
             enrichForCreation(writer);
@@ -520,7 +520,7 @@ public class PWindow extends PObject {
         @Override
         final void init() {
             final ModelWriter writer = UIContext.get().getWriter();
-            writer.beginObject(window.getID());
+            writer.beginObject(window);
             writer.write(ServerToClientModel.TYPE_CREATE, ID);
             writer.write(ServerToClientModel.WIDGET_TYPE, getWidgetType().getValue());
             writer.endObject();

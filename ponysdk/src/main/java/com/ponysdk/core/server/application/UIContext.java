@@ -499,7 +499,7 @@ public class UIContext {
         final int streamRequestID = nextStreamRequestID();
 
         final ModelWriter writer = getWriter();
-        writer.beginObject(window.getID());
+        writer.beginObject(window);
         writer.write(ServerToClientModel.TYPE_ADD_HANDLER, -1);
         writer.write(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_STREAM_REQUEST.getValue());
         writer.write(ServerToClientModel.STREAM_REQUEST_ID, streamRequestID);
@@ -519,7 +519,7 @@ public class UIContext {
         final int streamRequestID = nextStreamRequestID();
 
         final ModelWriter writer = getWriter();
-        writer.beginObject(pObject.getWindow().getID());
+        writer.beginObject(pObject.getWindow());
         if (pObject.getFrame() != null) writer.write(ServerToClientModel.FRAME_ID, pObject.getFrame().getID());
         writer.write(ServerToClientModel.TYPE_ADD_HANDLER, pObject.getID());
         writer.write(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST.getValue());

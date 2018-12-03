@@ -23,25 +23,28 @@
 
 package com.ponysdk.core.writer;
 
+import java.lang.ref.WeakReference;
+
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.websocket.WebsocketEncoder;
+import com.ponysdk.core.ui.basic.PWindow;
 
 public class ModelWriter {
 
     private final WebsocketEncoder encoder;
 
-    private int currentWindowId = -1;
+    private WeakReference<PWindow> currentWindow;
 
     public ModelWriter(final WebsocketEncoder encoder) {
         this.encoder = encoder;
     }
 
-    public void beginObject(final int windowId) {
+    public void beginObject(final PWindow window) {
         encoder.beginObject();
 
-        if (currentWindowId != windowId) {
-            currentWindowId = windowId;
-            encoder.encode(ServerToClientModel.WINDOW_ID, currentWindowId);
+        if (currentWindow == null || !window.equals(currentWindow.get())) {
+            currentWindow = new WeakReference<>(window);
+            encoder.encode(ServerToClientModel.WINDOW_ID, window.getID());
         }
     }
 
@@ -60,8 +63,8 @@ public class ModelWriter {
         encoder.endObject();
     }
 
-    public int getCurrentWindowId() {
-        return currentWindowId;
+    public PWindow getCurrentWindow() {
+        return currentWindow != null ? currentWindow.get() : null;
     }
 
 }

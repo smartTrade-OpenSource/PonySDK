@@ -35,6 +35,8 @@ import org.slf4j.LoggerFactory;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.PObject;
+import com.ponysdk.core.ui.basic.PWindow;
+import com.ponysdk.core.ui.basic.PWindowManager;
 import com.ponysdk.core.writer.ModelWriter;
 
 public class PObjectCache {
@@ -68,11 +70,14 @@ public class PObjectCache {
             final int frameID = reference.getFrameID();
             if (log.isDebugEnabled()) log.debug("Removing reference on object #{} in window #{}", objectID, windowID);
 
-            final ModelWriter writer = UIContext.get().getWriter();
-            writer.beginObject(windowID);
-            if (frameID != -1) writer.write(ServerToClientModel.FRAME_ID, frameID);
-            writer.write(ServerToClientModel.TYPE_GC, objectID);
-            writer.endObject();
+            final PWindow window = windowID == PWindow.getMain().getID() ? PWindow.getMain() : PWindowManager.getWindow(windowID);
+            if (window != null) {
+                final ModelWriter writer = UIContext.get().getWriter();
+                writer.beginObject(window);
+                if (frameID != -1) writer.write(ServerToClientModel.FRAME_ID, frameID);
+                writer.write(ServerToClientModel.TYPE_GC, objectID);
+                writer.endObject();
+            }
         }
     }
 

@@ -104,7 +104,7 @@ public abstract class PObject {
 
     protected void applyInit() {
         final ModelWriter writer = UIContext.get().getWriter();
-        writer.beginObject(window.getID());
+        writer.beginObject(window);
         if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
         writer.write(ServerToClientModel.TYPE_CREATE, ID);
         writer.write(ServerToClientModel.WIDGET_TYPE, getWidgetType().getValue());
@@ -239,7 +239,7 @@ public abstract class PObject {
         if (destroy) return;
 
         final ModelWriter writer = UIContext.get().getWriter();
-        writer.beginObject(window.getID());
+        writer.beginObject(window);
         if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
         writer.write(ServerToClientModel.TYPE_UPDATE, ID);
 
@@ -271,7 +271,7 @@ public abstract class PObject {
         if (destroy) return;
 
         final ModelWriter writer = UIContext.get().getWriter();
-        writer.beginObject(window.getID());
+        writer.beginObject(window);
         if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
 
         callback.doWrite(writer);
@@ -290,7 +290,7 @@ public abstract class PObject {
         if (destroy) return;
 
         final ModelWriter writer = UIContext.get().getWriter();
-        writer.beginObject(window.getID());
+        writer.beginObject(window);
         if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
         writer.write(ServerToClientModel.TYPE_ADD_HANDLER, ID);
 
@@ -313,7 +313,7 @@ public abstract class PObject {
         if (destroy) return;
 
         final ModelWriter writer = UIContext.get().getWriter();
-        writer.beginObject(window.getID());
+        writer.beginObject(window);
         if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
 
         callback.doWrite(writer);
@@ -335,7 +335,7 @@ public abstract class PObject {
         if (destroy) return;
 
         final ModelWriter writer = UIContext.get().getWriter();
-        writer.beginObject(window.getID());
+        writer.beginObject(window);
         if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
 
         callback.doWrite(writer);
