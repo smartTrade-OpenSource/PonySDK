@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.server.application;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -863,11 +864,7 @@ public class UIContext {
         }
 
         public double getValue() {
-            double average = 0;
-            for (final long value : values) {
-                average += value;
-            }
-            return average;
+            return Arrays.stream(values).average().orElse(0);
         }
     }
 
