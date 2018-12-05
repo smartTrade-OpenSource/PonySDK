@@ -136,8 +136,10 @@ javadoc {
     exclude '**/terminal/**'
 }
 
-task createGWTProdBuildDir << {
-    mkdir new File(gwtOutputDirName, "prod")
+task createGWTProdBuildDir {
+    doLast {
+        mkdir new File(gwtOutputDirName, "prod")
+    }
 }
 
 task gwtc(dependsOn: 'classes', type: JavaExec) {
@@ -167,8 +169,10 @@ task gwtc(dependsOn: 'classes', type: JavaExec) {
     maxHeapSize = '512M'
 }
 
-task createGWTDebugBuildDir << {
-    mkdir new File(gwtOutputDirName, "debug")
+task createGWTDebugBuildDir {
+    doLast {
+        mkdir new File(gwtOutputDirName, "debug")
+    }
 }
 
 task gwtcDebug(dependsOn: classes, type: JavaExec) {
