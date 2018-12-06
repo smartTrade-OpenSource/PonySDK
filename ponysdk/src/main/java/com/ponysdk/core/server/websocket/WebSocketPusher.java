@@ -122,6 +122,9 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
                 case SHORT:
                     write(model, (short) value);
                     break;
+                case UINT31:
+                    writeUint31(model, (int) value);
+                    break;
                 case INTEGER:
                     write(model, (int) value);
                     break;
@@ -141,7 +144,7 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
                     write(model, (Object[]) value);
                     break;
                 default:
-                    log.error("Unknow model type : {}", model.getTypeModel());
+                    log.error("Unknown model type : {}", model.getTypeModel());
                     break;
             }
         } catch (final IOException e) {
@@ -208,6 +211,24 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
             dataBytes += putArrayElement(o);
         }
         record(model, value, metaBytes, dataBytes, Arrays::toString);
+    }
+
+    private void writeUint31(final ServerToClientModel model, final int value) throws IOException {
+        putModelKey(model);
+        final int bytes = putUint31(value);
+        record(model, value, MODEL_KEY_SIZE, bytes);
+    }
+
+    private int putUint31(final int value) throws IOException {
+        if (value < 0) {
+            throw new IllegalArgumentException("Invalid UINT31 value : " + value + " must be unsigned");
+        } else if (value <= Short.MAX_VALUE) {
+            putShort((short) value);
+            return Short.BYTES;
+        } else {
+            putInt(value | 0x80_00_00_00);
+            return Integer.BYTES;
+        }
     }
 
     private int putCompressedLong(final long value) throws IOException {
