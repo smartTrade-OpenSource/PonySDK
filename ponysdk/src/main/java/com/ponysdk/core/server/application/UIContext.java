@@ -500,7 +500,7 @@ public class UIContext {
 
         final ModelWriter writer = getWriter();
         writer.beginObject(window);
-        writer.write(ServerToClientModel.TYPE_ADD_HANDLER, -1);
+        writer.write(ServerToClientModel.TYPE_ADD_HANDLER, 0);
         writer.write(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_STREAM_REQUEST.getValue());
         writer.write(ServerToClientModel.STREAM_REQUEST_ID, streamRequestID);
         writer.endObject();

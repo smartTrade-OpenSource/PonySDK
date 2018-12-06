@@ -393,6 +393,13 @@ public class PonySDKWebDriver implements WebDriver {
         return array;
     }
 
+    private int getUint31(final ByteBuffer buffer) {
+        final int value = buffer.getShort();
+        if (value >= 0) return value;
+        length += Short.BYTES;
+        return (value << 16 | readUnsignedShort(buffer)) & 0x7F_FF_FF_FF;
+    }
+
     private Object readArrayElementValue(final ByteBuffer b, final ArrayValueModel model) {
         length += model.getMinSize();
         switch (model) {
@@ -451,6 +458,8 @@ public class PonySDKWebDriver implements WebDriver {
                 return readValue(b, 1, this::getString);
             case ARRAY:
                 return readValue(b, 1, this::getArray);
+            case UINT31:
+                return readValue(b, 2, this::getUint31);
             default:
                 throw new IllegalArgumentException("ValueTypeModel " + type + " is not supported");
         }

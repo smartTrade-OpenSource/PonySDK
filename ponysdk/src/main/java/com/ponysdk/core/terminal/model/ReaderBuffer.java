@@ -121,13 +121,15 @@ public class ReaderBuffer {
 
         final ValueTypeModel typeModel = key.getTypeModel();
 
-        if (ValueTypeModel.INTEGER == typeModel) {
-            modelSize += ValueTypeModel.INTEGER_SIZE;
-            currentBinaryModel.init(key, getInt(), modelSize);
-        } else if (ValueTypeModel.STRING == typeModel) {
+        if (ValueTypeModel.STRING == typeModel) {
             currentBinaryModel.init(key, readStringModelValue(), modelSize);
         } else if (ValueTypeModel.NULL == typeModel) {
             currentBinaryModel.init(key, modelSize);
+        } else if (ValueTypeModel.UINT31 == typeModel) {
+            currentBinaryModel.init(key, getUint31(), modelSize);
+        } else if (ValueTypeModel.INTEGER == typeModel) {
+            modelSize += ValueTypeModel.INTEGER_SIZE;
+            currentBinaryModel.init(key, getInt(), modelSize);
         } else if (ValueTypeModel.BOOLEAN == typeModel) {
             modelSize += ValueTypeModel.BOOLEAN_SIZE;
             currentBinaryModel.init(key, getBoolean(), modelSize);
@@ -158,6 +160,15 @@ public class ReaderBuffer {
 
     private void checkRemainingBytes(final int bytes) {
         if (!hasEnoughRemainingBytes(bytes)) throw new ArrayIndexOutOfBoundsException();
+    }
+
+    private int getUint31() {
+        int value = getShort();
+        modelSize += Short.BYTES;
+        if (value >= 0) return value;
+        value = value << 16 | getUnsignedShort();
+        modelSize += Short.BYTES;
+        return value & 0x7F_FF_FF_FF;
     }
 
     private boolean getBoolean() {
@@ -392,12 +403,14 @@ public class ReaderBuffer {
 
         final ValueTypeModel typeModel = key.getTypeModel();
 
-        if (ValueTypeModel.INTEGER == typeModel) {
-            position += ValueTypeModel.INTEGER_SIZE;
-        } else if (ValueTypeModel.STRING == typeModel) {
+        if (ValueTypeModel.STRING == typeModel) {
             shiftString();
         } else if (ValueTypeModel.NULL == typeModel) {
             // Nothing to do
+        } else if (ValueTypeModel.UINT31 == typeModel) {
+            shiftUint31();
+        } else if (ValueTypeModel.INTEGER == typeModel) {
+            position += ValueTypeModel.INTEGER_SIZE;
         } else if (ValueTypeModel.BOOLEAN == typeModel) {
             position += ValueTypeModel.BOOLEAN_SIZE;
         } else if (ValueTypeModel.BYTE == typeModel) {
@@ -417,6 +430,11 @@ public class ReaderBuffer {
         }
 
         return key;
+    }
+
+    private void shiftUint31() {
+        final int value = getShort();
+        if (value < 0) position += Short.BYTES;
     }
 
     private void shiftString() {

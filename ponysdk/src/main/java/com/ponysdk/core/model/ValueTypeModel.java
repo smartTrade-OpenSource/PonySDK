@@ -34,7 +34,8 @@ public enum ValueTypeModel {
     DOUBLE(ValueTypeModel.DOUBLE_SIZE),
     FLOAT(ValueTypeModel.FLOAT_SIZE),
     STRING(ValueTypeModel.STRING_SIZE),
-    ARRAY(ValueTypeModel.ARRAY_SIZE);
+    ARRAY(ValueTypeModel.ARRAY_SIZE),
+    UINT31(ValueTypeModel.UINT31_SIZE);
 
     public static final int NULL_SIZE = 0;
     public static final int BOOLEAN_SIZE = 1;
@@ -46,6 +47,7 @@ public enum ValueTypeModel {
     public static final int FLOAT_SIZE = 4;
     public static final int STRING_SIZE = -1;
     public static final int ARRAY_SIZE = -1;
+    public static final int UINT31_SIZE = -1;
 
     public static final short STRING_UTF8_INT32 = 255;
     public static final short STRING_UTF8_UINT16 = 254;
