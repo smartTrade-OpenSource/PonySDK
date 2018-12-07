@@ -145,7 +145,6 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
             writer.write(ServerToClientModel.ADD_STYLE_NAME, styleNames.stream().collect(Collectors.joining(" ")));
         }
         if (this.title != null) writer.write(ServerToClientModel.WIDGET_TITLE, this.title);
-        if (!this.visible) writer.write(ServerToClientModel.WIDGET_VISIBLE, this.visible);
         if (this.height != null) writer.write(ServerToClientModel.WIDGET_HEIGHT, this.height);
         if (this.width != null) writer.write(ServerToClientModel.WIDGET_WIDTH, this.width);
         if (this.debugID != null) writer.write(ServerToClientModel.ENSURE_DEBUG_ID, this.debugID);
@@ -195,7 +194,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     public void setVisible(final boolean visible) {
         if (Objects.equals(this.visible, visible)) return;
         this.visible = visible;
-        if (initialized) saveUpdate(ServerToClientModel.WIDGET_VISIBLE, visible);
+        saveUpdate(ServerToClientModel.WIDGET_VISIBLE, visible);
     }
 
     public String getWidth() {
