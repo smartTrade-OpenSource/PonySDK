@@ -53,6 +53,7 @@ import com.ponysdk.core.ui.basic.event.PDropEvent;
 import com.ponysdk.core.ui.basic.event.PDropHandler;
 import com.ponysdk.core.ui.basic.event.PHasText;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
+import com.ponysdk.core.util.Incubation;
 import com.ponysdk.core.writer.ModelWriter;
 
 /**
@@ -66,35 +67,27 @@ import com.ponysdk.core.writer.ModelWriter;
 public class PLabel extends PWidget implements PHasText, HasPClickHandlers, HasPDoubleClickHandlers, HasPDragEndHandlers,
         HasPDragEnterHandlers, HasPDragStartHandlers, HasPDragLeaveHandlers, HasPDragOverHandlers, HasPDropHandlers {
 
-    private final boolean titleLinkedToText;
     protected String text;
+    private String attributeLinkedToValue;
 
     protected PLabel() {
-        this(false);
-    }
-
-    protected PLabel(final boolean titleLinkedToText) {
-        this(titleLinkedToText, null);
+        this(null);
     }
 
     protected PLabel(final String text) {
-        this(false, text);
-    }
-
-    protected PLabel(final boolean titleLinkedToText, final String text) {
-        this.titleLinkedToText = titleLinkedToText;
         this.text = text;
     }
 
     @Override
     protected void enrichForCreation(final ModelWriter writer) {
         super.enrichForCreation(writer);
-        if (this.titleLinkedToText) writer.write(ServerToClientModel.TITLE_LINKED_TO_TEXT, this.titleLinkedToText);
     }
 
     @Override
     protected void enrichForUpdate(final ModelWriter writer) {
         super.enrichForUpdate(writer);
+        if (this.attributeLinkedToValue != null)
+            writer.write(ServerToClientModel.ATTRIBUTE_LINKED_TO_VALUE, this.attributeLinkedToValue);
         if (this.text != null) writer.write(ServerToClientModel.TEXT, this.text);
     }
 
@@ -113,6 +106,20 @@ public class PLabel extends PWidget implements PHasText, HasPClickHandlers, HasP
         if (Objects.equals(this.text, text)) return;
         this.text = text;
         if (initialized) saveUpdate(ServerToClientModel.TEXT, this.text);
+    }
+
+    public String getAttributeLinkedToValue() {
+        return attributeLinkedToValue;
+    }
+
+    /**
+     * Link an HTML attribute (like "data-title") directly to the value.
+     */
+    @Incubation(since = "2.8.11")
+    public void setAttributeLinkedToValue(final String attributeLinkedToValue) {
+        if (Objects.equals(this.attributeLinkedToValue, attributeLinkedToValue)) return;
+        this.attributeLinkedToValue = attributeLinkedToValue;
+        if (initialized) saveUpdate(ServerToClientModel.ATTRIBUTE_LINKED_TO_VALUE, this.attributeLinkedToValue);
     }
 
     @Override
