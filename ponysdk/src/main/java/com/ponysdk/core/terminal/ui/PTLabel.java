@@ -26,22 +26,12 @@ package com.ponysdk.core.terminal.ui;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.Label;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public class PTLabel<T extends Label> extends PTWidget<T> {
 
-    private boolean titleLinkedToText;
-
-    @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
-        final BinaryModel binaryModel = buffer.readBinaryModel();
-        if (ServerToClientModel.TITLE_LINKED_TO_TEXT == binaryModel.getModel()) this.titleLinkedToText = binaryModel.getBooleanValue();
-        else buffer.rewind(binaryModel);
-
-        super.create(buffer, objectId, uiBuilder);
-    }
+    private String attributeLinkedToValue;
 
     @Override
     protected T createUIObject() {
@@ -54,7 +44,12 @@ public class PTLabel<T extends Label> extends PTWidget<T> {
         if (ServerToClientModel.TEXT == model) {
             final String value = binaryModel.getStringValue();
             setText(uiObject.getElement(), value);
-            if (titleLinkedToText) uiObject.setTitle(value);
+            if (attributeLinkedToValue != null) uiObject.getElement().setAttribute(attributeLinkedToValue, value);
+            return true;
+        } else if (ServerToClientModel.ATTRIBUTE_LINKED_TO_VALUE == model) {
+            this.attributeLinkedToValue = binaryModel.getStringValue();
+            final String text = uiObject.getText();
+            if (text != null && !text.isEmpty()) uiObject.getElement().setAttribute(attributeLinkedToValue, text);
             return true;
         } else {
             return super.update(buffer, binaryModel);

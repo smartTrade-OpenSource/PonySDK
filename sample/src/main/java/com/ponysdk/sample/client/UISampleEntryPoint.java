@@ -121,6 +121,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         createReconnectingPanel();
 
         mainLabel = Element.newPLabel("Can be modified by anybody : ₲ῳ₸");
+        mainLabel.setAttributeLinkedToValue("data-title");
         mainLabel.setTitle("String ASCII");
         PWindow.getMain().add(mainLabel);
 
