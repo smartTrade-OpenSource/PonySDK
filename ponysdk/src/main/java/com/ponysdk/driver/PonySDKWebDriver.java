@@ -84,6 +84,14 @@ public class PonySDKWebDriver implements WebDriver {
         @Override
         public void onReceive(final int bytes) {
         }
+
+        @Override
+        public void onSendCompressed(final int bytes) {
+        }
+
+        @Override
+        public void onReceiveCompressed(final int bytes) {
+        }
     };
 
     private static final BiConsumer<List<PonyFrame>, PonyFrame> DO_NOTHING_WITH_FRAME = (message, frame) -> {
@@ -94,7 +102,7 @@ public class PonySDKWebDriver implements WebDriver {
         false);
     private final MessageHandler.Whole<ByteBuffer> messageHandler = this::onMessage;
     private final Map<String, String> cookies = new ConcurrentHashMap<>();
-    private final WebsocketClient client = new WebsocketClient(messageHandler);
+    private final WebsocketClient client;
     private final List<PonyFrame> messageInConstruction = new ArrayList<>();
     private final PonyMessageListener messageListener;
     private final PonyBandwithListener bandwithListener;
@@ -124,7 +132,7 @@ public class PonySDKWebDriver implements WebDriver {
         this.handleImplicitCommunication = handleImplicitCommunication;
         this.messageListener = messageListener == null ? INDIFFERENT_MSG_LISTENER : messageListener;
         this.bandwithListener = bandwithListener == null ? INDIFFERENT_BANDWITH_LISTENER : bandwithListener;
-
+        this.client = new WebsocketClient(messageHandler, bandwithListener);
         onMessageSwitch.put(ServerToClientModel.CREATE_CONTEXT, (message, frame) -> {
             log.info("UI Context created with ID {}", contextId = (int) frame.value);
             if (handleImplicitCommunication) sendCookies();

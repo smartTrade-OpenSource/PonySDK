@@ -46,7 +46,6 @@ import javax.websocket.Session;
 
 import org.glassfish.tyrus.client.ClientManager;
 import org.glassfish.tyrus.client.ClientProperties;
-import org.glassfish.tyrus.ext.extension.deflate.PerMessageDeflateExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,33 +56,34 @@ public class WebsocketClient implements AutoCloseable {
     private volatile Session session;
 
     private final static List<String> USER_AGENT = List.of("PonyDriver");
-    private final static List<Extension> EXTENSIONS = List.of(new PerMessageDeflateExtension());
     private final static Configurator configurator = new Configurator() {
 
         @Override
         public void afterResponse(final HandshakeResponse hr) {
             super.afterResponse(hr);
-            log.info("Response Headers : {}", hr.getHeaders());
+            log.debug("Response Headers : {}", hr.getHeaders());
         }
 
         @Override
         public void beforeRequest(final Map<String, List<String>> headers) {
             super.beforeRequest(headers);
             headers.put("User-Agent", USER_AGENT);
-            log.info("Request Headers : {}", headers);
+            log.debug("Request Headers : {}", headers);
         }
     };
 
     private final MessageHandler.Whole<ByteBuffer> handler;
+    private final List<Extension> extensions;
 
-    public WebsocketClient(final Whole<ByteBuffer> handler) {
+    public WebsocketClient(final Whole<ByteBuffer> handler, final PonyBandwithListener listener) {
         super();
         this.handler = handler;
+        this.extensions = List.of(new PonyDriverPerMessageDeflateExtension(listener));
     }
 
     public void connect(final URI uri) throws Exception {
         if (session != null) session.close();
-        final ClientEndpointConfig cec = ClientEndpointConfig.Builder.create().configurator(configurator).extensions(EXTENSIONS)
+        final ClientEndpointConfig cec = ClientEndpointConfig.Builder.create().configurator(configurator).extensions(extensions)
             .build();
         final ClientManager client = ClientManager.createClient();
         client.getProperties().put(ClientProperties.REDIRECT_ENABLED, true);
@@ -106,7 +106,7 @@ public class WebsocketClient implements AutoCloseable {
             @Override
             public void onClose(final Session session, final CloseReason closeReason) {
                 super.onClose(session, closeReason);
-                log.info("Session {} closed : {} {}", session.getId(), closeReason.getCloseCode(), closeReason.getReasonPhrase());
+                log.debug("Session {} closed : {} {}", session.getId(), closeReason.getCloseCode(), closeReason.getReasonPhrase());
             }
 
             @Override
@@ -125,7 +125,7 @@ public class WebsocketClient implements AutoCloseable {
         } finally {
             lock.unlock();
         }
-        log.info("Connected to {} with session ID {}", uri, session.getId());
+        log.debug("Connected to {} with session ID {}", uri, session.getId());
     }
 
     public void sendMessage(final String message) throws IOException {
