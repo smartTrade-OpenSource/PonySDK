@@ -53,6 +53,7 @@ import com.ponysdk.core.ui.basic.event.PDropEvent;
 import com.ponysdk.core.ui.basic.event.PDropHandler;
 import com.ponysdk.core.ui.basic.event.PHasText;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
+import com.ponysdk.core.util.Incubation;
 import com.ponysdk.core.writer.ModelWriter;
 
 /**
@@ -111,6 +112,10 @@ public class PLabel extends PWidget implements PHasText, HasPClickHandlers, HasP
         return attributeLinkedToValue;
     }
 
+    /**
+     * Link an HTML attribute (like "data-title") directly to the value.
+     */
+    @Incubation(since = "2.8.11")
     public void setAttributeLinkedToValue(final String attributeLinkedToValue) {
         if (Objects.equals(this.attributeLinkedToValue, attributeLinkedToValue)) return;
         this.attributeLinkedToValue = attributeLinkedToValue;

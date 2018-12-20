@@ -44,7 +44,11 @@ public class PTLabel<T extends Label> extends PTWidget<T> {
         if (ServerToClientModel.TEXT == model) {
             final String value = binaryModel.getStringValue();
             setText(uiObject.getElement(), value);
-            if (attributeLinkedToValue != null) uiObject.getElement().setAttribute(attributeLinkedToValue, value);
+            if (attributeLinkedToValue != null) {
+                final Element element = uiObject.getElement();
+                if (value != null && !value.isEmpty()) element.setAttribute(attributeLinkedToValue, value);
+                else element.removeAttribute(attributeLinkedToValue);
+            }
             return true;
         } else if (ServerToClientModel.ATTRIBUTE_LINKED_TO_VALUE == model) {
             this.attributeLinkedToValue = binaryModel.getStringValue();
