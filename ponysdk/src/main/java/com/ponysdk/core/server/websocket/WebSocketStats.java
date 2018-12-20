@@ -77,7 +77,7 @@ public class WebSocketStats {
     private final LocalDateTime endTime;
     private final boolean grouped;
 
-    WebSocketStats(final Map<ServerToClientModel, ? extends Map<Object, ? extends Record>> stats, final LocalDateTime startTime,
+    public WebSocketStats(final Map<ServerToClientModel, ? extends Map<Object, ? extends Record>> stats, final LocalDateTime startTime,
             final LocalDateTime endTime, final boolean grouped) {
         super();
         this.startTime = startTime;
@@ -130,12 +130,12 @@ public class WebSocketStats {
         final NumberFormat format = NumberFormat.getInstance();
         format.setMaximumFractionDigits(4);
 
-                    final Record record = p.getSecond().getValue();
-                    writer.write('\n');
-                    writer.write(Objects.toString(p.getFirst()));
-                    writer.write(separator);
-                    writer.write(Objects.toString(modelToValueType(p.getFirst())));
-                    writer.write(separator);
+        final Record record = p.getSecond().getValue();
+        writer.write('\n');
+        writer.write(Objects.toString(p.getFirst()));
+        writer.write(separator);
+        writer.write(Objects.toString(modelToValueType(p.getFirst())));
+        writer.write(separator);
         Object v = p.getSecond().getKey();
         if (isGrouped()) {
             final Pair<?, ?> pair = (Pair<?, ?>) v;
@@ -144,25 +144,25 @@ public class WebSocketStats {
             v = pair.getFirst();
         }
         writer.write(writeableValue(Objects.toString(v), separator));
-                    writer.write(separator);
-                    writer.write(Integer.toString(record.getCount()));
-                    writer.write(separator);
-                    writer.write(Integer.toString(record.getMetaBytes()));
-                    writer.write(separator);
-                    writer.write(Integer.toString(record.getDataBytes()));
-                    writer.write(separator);
+        writer.write(separator);
+        writer.write(Integer.toString(record.getCount()));
+        writer.write(separator);
+        writer.write(Integer.toString(record.getMetaBytes()));
+        writer.write(separator);
+        writer.write(Integer.toString(record.getDataBytes()));
+        writer.write(separator);
         final long bandwidth = record.getCount() * ((long) record.getMetaBytes() + record.getDataBytes());
         writer.write(Long.toString(bandwidth));
         writer.write(separator);
         writer.write(format.format((double) bandwidth / summaryBandwidth.getTotal()));
-                }
+    }
 
     private String writeableValue(String s, final char separator) {
         if (s.length() > 512) {
             s = s.substring(0, 512);
         }
         return s.replace('\n', ' ').replace('\r', ' ').replace(separator, ' ');
-        }
+    }
 
     private void writeCsvHeader(final char separator, final BufferedWriter writer) throws IOException {
         writer.write("MODEL");
@@ -244,7 +244,7 @@ public class WebSocketStats {
             s = s.substring(0, MAX_STRING_SIZE);
         }
         try {
-        outputStream.writeUTF(s);
+            outputStream.writeUTF(s);
         } catch (final UTFDataFormatException e) {
             outputStream.writeUTF(s.substring(0, MAX_STRING_SIZE / 3));
         }
@@ -279,15 +279,15 @@ public class WebSocketStats {
                 } catch (final IllegalArgumentException e) {
                     log.warn("Unrecognized ServerToClientModel value {} (possibly deprecated)", modelName);
                 }
-                    final int nbRecords = inputStream.readInt();
+                final int nbRecords = inputStream.readInt();
                 final Map<Object, Record> records = stats.computeIfAbsent(model, m -> new HashMap<>(nbRecords));
-                    for (int j = 0; j < nbRecords; j++) {
-                        Object value = decodeValue(inputStream);
-                        if (grouped) {
-                            value = new Pair<>(value, inputStream.readUTF());
-                        }
-                        records.put(value, new ImmutableRecord(inputStream.readInt(), inputStream.readInt(), inputStream.readInt()));
+                for (int j = 0; j < nbRecords; j++) {
+                    Object value = decodeValue(inputStream);
+                    if (grouped) {
+                        value = new Pair<>(value, inputStream.readUTF());
                     }
+                    records.put(value, new ImmutableRecord(inputStream.readInt(), inputStream.readInt(), inputStream.readInt()));
+                }
             }
             return new WebSocketStats(stats, startTime, endTime, grouped);
         } catch (final EOFException e) {

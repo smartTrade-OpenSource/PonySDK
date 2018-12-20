@@ -32,4 +32,8 @@ public interface PonyBandwithListener {
      *            The number of sent bytes is only approximate
      */
     public void onSend(int bytes);
+
+    public void onReceiveCompressed(int bytes);
+
+    public void onSendCompressed(int bytes);
 }
