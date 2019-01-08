@@ -225,16 +225,13 @@ public class PonySDKWebDriver implements WebDriver {
                 sendCookies();
             }
         });
-        onMessageSwitch.put(ServerToClientModel.PING_SERVER, (message, frame) -> {
+        onMessageSwitch.put(ServerToClientModel.ROUNDTRIP_LATENCY, (message, frame) -> {
             if (handleImplicitCommunication) {
                 final JsonObject json = Json.createObjectBuilder() //
-                    .add(ClientToServerModel.PING_SERVER.toStringValue(), (long) frame.value) //
+                    .add(ClientToServerModel.TERMINAL_LATENCY.toStringValue(), 0) //
                     .build();
                 sendMessage(json);
             }
-        });
-        onMessageSwitch.put(ServerToClientModel.HEARTBEAT, (message, frame) -> {
-            if (handleImplicitCommunication) sendMessage("0");
         });
         onMessageSwitch.put(ServerToClientModel.WIDGET_VISIBLE, (message, frame) -> {
             final PonyWebElement element = findElement(message);

@@ -49,7 +49,7 @@ public class PTInstruction extends JSONObject {
     }
 
     public void put(final ClientToServerModel key) {
-        put(key, "");
+        put(key.toStringValue(), new JSONNumber(0)); // Use 0 instead of "" or null for performance purpose
     }
 
     public void put(final ClientToServerModel key, final boolean value) {
