@@ -29,15 +29,25 @@ import java.util.List;
 public enum OperatingSystem {
 
     // the order is important since the agent string is being compared with the aliases
+    XBOX_360(Manufacturer.MICROSOFT, null, 1, "Xbox 360", new String[] { "Xbox" }, null, DeviceType.GAME_CONSOLE, null),
+    XBOX_ONE(Manufacturer.MICROSOFT, OperatingSystem.XBOX_360, 1, "Xbox One", new String[] { "Xbox One" }, null,
+            DeviceType.GAME_CONSOLE, null),
+
     /**
      * Windows Mobile / Windows CE. Exact version unknown.
      */
     WINDOWS(Manufacturer.MICROSOFT, null, 1, "Windows", new String[] { "Windows" }, new String[] { "Palm" }, DeviceType.COMPUTER,
             null), // catch the rest of older Windows systems (95, NT,...)
+    WINDOWS_10(Manufacturer.MICROSOFT, OperatingSystem.WINDOWS, 24, "Windows 10", new String[] { "Windows NT 10.0" }, null,
+            DeviceType.COMPUTER, null),
+    WINDOWS_8_1(Manufacturer.MICROSOFT, OperatingSystem.WINDOWS, 23, "Windows 8.1", new String[] { "Windows NT 6.3" }, null,
+            DeviceType.COMPUTER, null),
+    WINDOWS_8(Manufacturer.MICROSOFT, OperatingSystem.WINDOWS, 22, "Windows 8", new String[] { "Windows NT 6.2" }, null,
+            DeviceType.COMPUTER, null),
     WINDOWS_7(Manufacturer.MICROSOFT, OperatingSystem.WINDOWS, 21, "Windows 7", new String[] { "Windows NT 6.1" }, null,
-            DeviceType.COMPUTER, null), // before Win, yes, Windows 7 is called 6.1 LOL
-    WINDOWS_VISTA(Manufacturer.MICROSOFT, OperatingSystem.WINDOWS, 20, "Windows Vista", new String[] { "Windows NT 6" }, null,
-            DeviceType.COMPUTER, null), // before
+            DeviceType.COMPUTER, null),
+    WINDOWS_VISTA(Manufacturer.MICROSOFT, OperatingSystem.WINDOWS, 20, "Windows Vista",
+            new String[] { "Windows NT 6", "Windows NT 6.0" }, null, DeviceType.COMPUTER, null),
     // Win
     WINDOWS_2000(Manufacturer.MICROSOFT, OperatingSystem.WINDOWS, 15, "Windows 2000", new String[] { "Windows NT 5.0" }, null,
             DeviceType.COMPUTER, null), // before
@@ -91,12 +101,12 @@ public enum OperatingSystem {
     MAC_OS_X_IPOD(Manufacturer.APPLE, OperatingSystem.IOS, 30, "Mac OS X (iPod)", new String[] { "iPod" }, null, DeviceType.MOBILE,
             null), // before Mac OS X
 
-    MAC_OS_X(Manufacturer.APPLE, null, 10, "Mac OS X", new String[] { "Mac OS X", "CFNetwork" }, null, DeviceType.COMPUTER, null), // before Mac
+    MAC_OS_X(Manufacturer.APPLE, null, 10, "Mac OSX", new String[] { "Mac OS X", "CFNetwork" }, null, DeviceType.COMPUTER, null), // before Mac
 
     /**
      * Older Mac OS systems before Mac OS X
      */
-    MAC_OS(Manufacturer.APPLE, null, 1, "Mac OS", new String[] { "Mac" }, null, DeviceType.COMPUTER, null), // older Mac OS systems
+    MAC_OS(Manufacturer.APPLE, null, 1, "Mac OS Classic", new String[] { "Mac" }, null, DeviceType.COMPUTER, null), // older Mac OS systems
 
     /**
      * Linux based Maemo software platform by Nokia. Used in the N900 phone.
@@ -113,6 +123,7 @@ public enum OperatingSystem {
      * Google TV uses Android 2.x or 3.x but doesn't identify itself as Android.
      */
     GOOGLE_TV(Manufacturer.GOOGLE, null, 100, "Android (Google TV)", new String[] { "GoogleTV" }, null, DeviceType.DMR, null),
+    CHROME_OS(Manufacturer.GOOGLE, null, 1, "ChromeOS", new String[] { "CrOS" }, null, DeviceType.COMPUTER, null),
 
     /**
      * Various Linux based operating systems.
@@ -123,6 +134,7 @@ public enum OperatingSystem {
     KINDLE2(Manufacturer.AMAZON, OperatingSystem.KINDLE, 20, "Linux (Kindle 2)", new String[] { "Kindle/2" }, null, DeviceType.TABLET,
             null),
     LINUX(Manufacturer.OTHER, null, 2, "Linux", new String[] { "Linux", "CamelHttpStream" }, null, DeviceType.COMPUTER, null), // CamelHttpStream is being used by Evolution, an email client for Linux
+    BSD(Manufacturer.OTHER, null, 1, "BSD", new String[] { "FreeBSD" }, null, DeviceType.COMPUTER, null),
 
     /**
      * Other Symbian OS versions
@@ -162,11 +174,21 @@ public enum OperatingSystem {
     SONY_ERICSSON(Manufacturer.SONY_ERICSSON, null, 1, "Sony Ericsson", new String[] { "SonyEricsson" }, null, DeviceType.MOBILE,
             null), // after symbian, some SE phones use symbian
     SUN_OS(Manufacturer.SUN, null, 1, "SunOS", new String[] { "SunOS" }, null, DeviceType.COMPUTER, null),
-    PSP(Manufacturer.SONY, null, 1, "Sony Playstation", new String[] { "Playstation" }, null, DeviceType.GAME_CONSOLE, null),
+
+    PLAYSTATION_3(Manufacturer.SONY, null, 1, "PlayStation 3", new String[] { "PLAYSTATION 3" }, null, DeviceType.GAME_CONSOLE, null),
+    PLAYSTATION_4(Manufacturer.SONY, null, 1, "PlayStation 4", new String[] { "PLAYSTATION 4" }, null, DeviceType.GAME_CONSOLE, null),
+    PSP(Manufacturer.SONY, null, 1, "PlayStation Portable", new String[] { "PlayStation Portable" }, null, DeviceType.GAME_CONSOLE,
+            null),
+    PS_VITA(Manufacturer.SONY, null, 1, "PlayStation Vita", new String[] { "PlayStation Vita" }, null, DeviceType.GAME_CONSOLE, null),
+
     /**
-     * Nintendo Wii game console.
+     * Nintendo game console.
      */
-    WII(Manufacturer.NINTENDO, null, 1, "Nintendo Wii", new String[] { "Wii" }, null, DeviceType.GAME_CONSOLE, null),
+    WII_U(Manufacturer.NINTENDO, null, 1, "Nintendo Wii U", new String[] { "Nintendo WiiU" }, null, DeviceType.GAME_CONSOLE, null),
+    WII(Manufacturer.NINTENDO, null, 1, "Nintendo Wii", new String[] { "Nintendo Wii" }, null, DeviceType.GAME_CONSOLE, null),
+    NINTENDO_3DS(Manufacturer.NINTENDO, null, 1, "Nintendo 3DS", new String[] { "Nintendo 3DS" }, null, DeviceType.GAME_CONSOLE, null),
+    NINTENDO_DSI(Manufacturer.NINTENDO, null, 1, "Nintendo DSi", new String[] { "Nintendo DSi" }, null, DeviceType.GAME_CONSOLE, null),
+
     /**
      * BlackBerryOS. The BlackBerryOS exists in different version. How relevant
      * those versions are, is not clear.
@@ -181,7 +203,9 @@ public enum OperatingSystem {
             DeviceType.TABLET, null),
 
     ROKU(Manufacturer.ROKU, null, 1, "Roku OS", new String[] { "Roku" }, null, DeviceType.DMR, null),
-    UNKNOWN(Manufacturer.OTHER, null, 1, "Unknown", new String[0], null, DeviceType.UNKNOWN, null);
+    DTV(Manufacturer.OTHER, null, 1, "DigitalTV", new String[] { "DTV" }, null, DeviceType.DMR, null),
+
+    UNKNOWN(Manufacturer.OTHER, null, 1, "UNKNOWN", new String[0], null, DeviceType.UNKNOWN, null);
 
     private final short id;
     private final String name;
@@ -215,14 +239,8 @@ public enum OperatingSystem {
      */
     public static OperatingSystem parseUserAgentString(final String agentString) {
         for (final OperatingSystem operatingSystem : OperatingSystem.values()) {
-            // only check top level objects
-            if (operatingSystem.parent == null) {
-                final OperatingSystem match = operatingSystem.checkUserAgent(agentString);
-                if (match != null) {
-                    return match; // either current operatingSystem or a child
-                    // object
-                }
-            }
+            final OperatingSystem match = operatingSystem.checkUserAgent(agentString);
+            if (match != null) return match; // either current operatingSystem or a child object
         }
         return OperatingSystem.UNKNOWN;
     }
