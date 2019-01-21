@@ -25,8 +25,6 @@ package com.ponysdk.core.model;
 
 public enum ClientToServerModel {
 
-    HEARTBEAT("0"),
-
     OBJECT_ID("1"),
 
     UI_CONTEXT_ID("2"),
@@ -51,7 +49,7 @@ public enum ClientToServerModel {
     EVENT_INFO("g"),
     DOM_HANDLER_TYPE("h"),
 
-    PING_SERVER("i"),
+    TERMINAL_LATENCY("i"),
     APPLICATION_ID("j"),
 
     PARENT_OBJECT_ID("k"),

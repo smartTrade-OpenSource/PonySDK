@@ -64,6 +64,8 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     private UIContext uiContext;
     private Listener listener;
 
+    private long lastSentPing;
+
     public WebSocket() {
     }
 
@@ -126,29 +128,25 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
                 uiContext.onMessageReceived();
                 if (monitor != null) monitor.onMessageReceived(WebSocket.this, message);
 
-                if (ClientToServerModel.HEARTBEAT.toStringValue().equals(message)) {
-                    processHeartbeat();
-                } else {
-                    final JsonObject jsonObject;
-
-                    try (final JsonReader reader = uiContext.getJsonProvider().createReader(new StringReader(message))) {
-                        jsonObject = reader.readObject();
-                    }
-
-                    if (jsonObject.containsKey(ClientToServerModel.PING_SERVER.toStringValue())) {
-                        processPing(jsonObject);
-                    } else if (jsonObject.containsKey(ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue())) {
-                        processInstructions(jsonObject);
-                    } else if (jsonObject.containsKey(ClientToServerModel.ERROR_MSG.toStringValue())) {
-                        processTerminalLog(jsonObject, ClientToServerModel.ERROR_MSG);
-                    } else if (jsonObject.containsKey(ClientToServerModel.WARN_MSG.toStringValue())) {
-                        processTerminalLog(jsonObject, ClientToServerModel.WARN_MSG);
-                    } else if (jsonObject.containsKey(ClientToServerModel.INFO_MSG.toStringValue())) {
-                        processTerminalLog(jsonObject, ClientToServerModel.INFO_MSG);
-                    } else {
-                        log.error("Unknow message from terminal #{} : {}", uiContext.getID(), message);
-                    }
+                final JsonObject jsonObject;
+                try (final JsonReader reader = uiContext.getJsonProvider().createReader(new StringReader(message))) {
+                    jsonObject = reader.readObject();
                 }
+
+                if (jsonObject.containsKey(ClientToServerModel.TERMINAL_LATENCY.toStringValue())) {
+                    processRoundtripLatency(jsonObject);
+                } else if (jsonObject.containsKey(ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue())) {
+                    processInstructions(jsonObject);
+                } else if (jsonObject.containsKey(ClientToServerModel.ERROR_MSG.toStringValue())) {
+                    processTerminalLog(jsonObject, ClientToServerModel.ERROR_MSG);
+                } else if (jsonObject.containsKey(ClientToServerModel.WARN_MSG.toStringValue())) {
+                    processTerminalLog(jsonObject, ClientToServerModel.WARN_MSG);
+                } else if (jsonObject.containsKey(ClientToServerModel.INFO_MSG.toStringValue())) {
+                    processTerminalLog(jsonObject, ClientToServerModel.INFO_MSG);
+                } else {
+                    log.error("Unknow message from terminal #{} : {}", uiContext.getID(), message);
+                }
+
                 if (monitor != null) monitor.onMessageProcessed(this, message);
             } catch (final Throwable e) {
                 log.error("Cannot process message from terminal  #" + uiContext.getID() + " : " + message, e);
@@ -160,15 +158,18 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         }
     }
 
-    private void processHeartbeat() {
-        if (log.isDebugEnabled()) log.debug("Heartbeat received from terminal #{}", uiContext.getID());
-    }
-
-    private void processPing(final JsonObject jsonObject) {
-        final long start = jsonObject.getJsonNumber(ClientToServerModel.PING_SERVER.toStringValue()).longValue();
-        final long end = System.currentTimeMillis();
-        if (log.isDebugEnabled()) log.debug("Ping measurement : {} ms from terminal #{}", end - start, uiContext.getID());
-        uiContext.addPingValue(end - start);
+    private void processRoundtripLatency(final JsonObject jsonObject) {
+        final long roundtripLatency = TimeUnit.MILLISECONDS.convert(System.nanoTime() - lastSentPing, TimeUnit.NANOSECONDS);
+        final long terminalLatency = jsonObject.getJsonNumber(ClientToServerModel.TERMINAL_LATENCY.toStringValue()).longValue();
+        final long networkLatency = roundtripLatency - terminalLatency;
+        if (log.isDebugEnabled()) {
+            log.debug("Roundtrip measurement : {} ms from terminal #{}", roundtripLatency, uiContext.getID());
+            log.debug("Network measurement : {} ms from terminal #{}", networkLatency, uiContext.getID());
+            log.debug("Terminal measurement : {} ms from terminal #{}", terminalLatency, uiContext.getID());
+        }
+        uiContext.addRoundtripLatencyValue(roundtripLatency);
+        uiContext.addNetworkLatencyValue(networkLatency);
+        uiContext.addTerminalLatencyValue(terminalLatency);
     }
 
     private void processInstructions(final JsonObject jsonObject) {
@@ -214,24 +215,13 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     }
 
     /**
-     * Send heart beat to the client
-     */
-    public void sendHeartBeat() {
-        if (isAlive() && isSessionOpen()) {
-            beginObject();
-            encode(ServerToClientModel.HEARTBEAT, null);
-            endObject();
-            flush0();
-        }
-    }
-
-    /**
      * Send round trip to the client
      */
     public void sendRoundTrip() {
         if (isAlive() && isSessionOpen()) {
+            lastSentPing = System.nanoTime();
             beginObject();
-            encode(ServerToClientModel.PING_SERVER, System.currentTimeMillis());
+            encode(ServerToClientModel.ROUNDTRIP_LATENCY, null);
             endObject();
             flush0();
         }

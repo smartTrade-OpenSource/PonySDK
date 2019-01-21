@@ -26,8 +26,6 @@ package com.ponysdk.core.terminal.socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.gwt.core.client.Scheduler;
-import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.terminal.ReconnectionChecker;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.request.WebSocketRequestBuilder;
@@ -53,16 +51,7 @@ public class WebSocketClient {
 
         webSocket.setOnopen(event -> {
             uiBuilder.init(new WebSocketRequestBuilder(WebSocketClient.this));
-
             if (log.isLoggable(Level.INFO)) log.info("WebSocket connected");
-            //TODO nciaravola send ping block processs ?
-            Scheduler.get().scheduleFixedDelay(() -> {
-                if (webSocket.getReadyState() == WebSocket.OPEN) {
-                    if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Heart beat sent");
-                    send(ClientToServerModel.HEARTBEAT.toStringValue());
-                }
-                return true;
-            }, 1000);
         });
 
         webSocket.setOnclose(event -> {

@@ -110,7 +110,9 @@ public class UIContext {
 
     private boolean alive = true;
 
-    private final Latency latency = new Latency(10);
+    private final Latency roundtripLatency = new Latency(10);
+    private final Latency networkLatency = new Latency(10);
+    private final Latency terminalLatency = new Latency(10);
 
     private final ApplicationConfiguration configuration;
     private final WebSocket socket;
@@ -680,22 +682,6 @@ public class UIContext {
     }
 
     /**
-     * Sends the heart beat
-     * <p>
-     * This method locks the UIContext
-     */
-    public void sendHeartBeat() {
-        acquire();
-        try {
-            socket.sendHeartBeat();
-        } catch (final Throwable e) {
-            log.error("Cannot send server heart beat to UIContext #" + getID(), e);
-        } finally {
-            release();
-        }
-    }
-
-    /**
      * Sends the round trip
      * <p>
      * This method locks the UIContext
@@ -829,21 +815,68 @@ public class UIContext {
     }
 
     /**
-     * Adds a ping value
-     *
-     * @param pingValue the ping value
-     */
-    public void addPingValue(final long pingValue) {
-        latency.add(pingValue);
-    }
-
-    /**
      * Gets an average latency from the last 10 measurements
      *
      * @return the lantency
+     * @deprecated Use {@link #getRoundtripLatency()} directly
      */
+    @Deprecated(since = "v2.8.11", forRemoval = true)
     public double getLatency() {
-        return latency.getValue();
+        return getRoundtripLatency();
+    }
+
+    /**
+     * Adds a roundtrip latency value
+     *
+     * @param value the value
+     */
+    public void addRoundtripLatencyValue(final long value) {
+        roundtripLatency.add(value);
+    }
+
+    /**
+     * Gets an average roundtrip latency from the last 10 measurements
+     *
+     * @return the lantency
+     */
+    public double getRoundtripLatency() {
+        return roundtripLatency.getValue();
+    }
+
+    /**
+     * Adds a network latency value
+     *
+     * @param value the value
+     */
+    public void addNetworkLatencyValue(final long value) {
+        networkLatency.add(value);
+    }
+
+    /**
+     * Gets an average network latency from the last 10 measurements
+     *
+     * @return the lantency
+     */
+    public double getNetworkLatency() {
+        return networkLatency.getValue();
+    }
+
+    /**
+     * Adds a terminal latency value
+     *
+     * @param value the ping value
+     */
+    public void addTerminalLatencyValue(final long value) {
+        terminalLatency.add(value);
+    }
+
+    /**
+     * Gets an average terminal latency from the last 10 measurements
+     *
+     * @return the lantency
+     */
+    public double getTerminalLatency() {
+        return terminalLatency.getValue();
     }
 
     private static final class Latency {
@@ -853,9 +886,7 @@ public class UIContext {
 
         private Latency(final int size) {
             values = new long[size];
-            for (int i = 0; i < values.length; i++) {
-                values[i] = 0L;
-            }
+            Arrays.fill(values, 0);
         }
 
         public void add(final long value) {

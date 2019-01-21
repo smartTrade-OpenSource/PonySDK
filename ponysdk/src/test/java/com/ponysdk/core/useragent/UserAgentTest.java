@@ -53,7 +53,7 @@ public class UserAgentTest {
 
     @Test
     public void testWindowsXPIEUserAgent() {
-        final UserAgent userAgent = UserAgent.valueOf("WINDOWS_XP-IE10");
+        final UserAgent userAgent = UserAgent.parseUserAgentString("Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 5.1; Trident/6.0)");
         assertEquals(Browser.IE10, userAgent.getBrowser());
         assertEquals(BrowserType.WEB_BROWSER, userAgent.getBrowser().getBrowserType());
         assertEquals(Manufacturer.MICROSOFT, userAgent.getBrowser().getManufacturer());
@@ -63,11 +63,23 @@ public class UserAgentTest {
 
     @Test
     public void testMacFirefoxUserAgent() {
-        final UserAgent userAgent = UserAgent.valueOf("MAC_OS-FIREFOX");
+        final UserAgent userAgent = UserAgent
+            .parseUserAgentString("Mozilla/5.0 (Macintosh; Intel Mac OS X x.y; rv:10.0) Gecko/20100101 Firefox/10.0");
         assertEquals(Browser.FIREFOX, userAgent.getBrowser());
         assertEquals(BrowserType.WEB_BROWSER, userAgent.getBrowser().getBrowserType());
         assertEquals(Manufacturer.MOZILLA, userAgent.getBrowser().getManufacturer());
-        assertEquals(OperatingSystem.MAC_OS, userAgent.getOperatingSystem());
+        assertEquals(OperatingSystem.MAC_OS_X, userAgent.getOperatingSystem());
+        assertEquals(DeviceType.COMPUTER, userAgent.getOperatingSystem().getDeviceType());
+    }
+
+    @Test
+    public void testWindows10EdgeUserAgent() {
+        final String userAgentString = "Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.10136";
+        final UserAgent userAgent = UserAgent.parseUserAgentString(userAgentString);
+        assertEquals(Browser.EDGE, userAgent.getBrowser());
+        assertEquals(BrowserType.WEB_BROWSER, userAgent.getBrowser().getBrowserType());
+        assertEquals(Manufacturer.MICROSOFT, userAgent.getBrowser().getManufacturer());
+        assertEquals(OperatingSystem.WINDOWS_10, userAgent.getOperatingSystem());
         assertEquals(DeviceType.COMPUTER, userAgent.getOperatingSystem().getDeviceType());
     }
 

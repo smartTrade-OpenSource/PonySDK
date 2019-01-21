@@ -75,6 +75,8 @@ public class UIBuilder {
 
     private int currentWindowId = -1;
 
+    private long lastReceivedMessage;
+
     public void init(final RequestBuilder requestBuilder) {
         if (log.isLoggable(Level.INFO)) log.info("Init graphical system");
 
@@ -96,6 +98,8 @@ public class UIBuilder {
     }
 
     public void updateMainTerminal(final Uint8Array buffer) {
+        lastReceivedMessage = System.currentTimeMillis();
+
         readerBuffer.init(buffer);
 
         while (readerBuffer.hasEnoughKeyBytes()) {
@@ -106,12 +110,10 @@ public class UIBuilder {
             final BinaryModel binaryModel = readerBuffer.readBinaryModel();
             final ServerToClientModel model = binaryModel.getModel();
 
-            if (ServerToClientModel.PING_SERVER == model) {
+            if (ServerToClientModel.ROUNDTRIP_LATENCY == model) {
                 final PTInstruction requestData = new PTInstruction();
-                requestData.put(ClientToServerModel.PING_SERVER, binaryModel.getLongValue());
+                requestData.put(ClientToServerModel.TERMINAL_LATENCY, System.currentTimeMillis() - lastReceivedMessage);
                 requestBuilder.send(requestData);
-                readerBuffer.readBinaryModel(); // Read ServerToClientModel.END element
-            } else if (ServerToClientModel.HEARTBEAT == model) {
                 readerBuffer.readBinaryModel(); // Read ServerToClientModel.END element
             } else if (ServerToClientModel.CREATE_CONTEXT == model) {
                 PonySDK.get().setContextId(binaryModel.getIntValue());
@@ -153,8 +155,8 @@ public class UIBuilder {
                             if (nextBlockPosition1 != ReaderBuffer.NOT_FULL_BUFFER_POSITION) {
                                 final BinaryModel newBinaryModel = readerBuffer.readBinaryModel();
                                 final ServerToClientModel model2 = newBinaryModel.getModel();
-                                if (ServerToClientModel.WINDOW_ID != model2 && ServerToClientModel.PING_SERVER != model2
-                                        && ServerToClientModel.HEARTBEAT != model2 && ServerToClientModel.CREATE_CONTEXT != model2
+                                if (ServerToClientModel.WINDOW_ID != model2 && ServerToClientModel.ROUNDTRIP_LATENCY != model2
+                                        && ServerToClientModel.CREATE_CONTEXT != model2
                                         && ServerToClientModel.DESTROY_CONTEXT != model2) {
                                     endPosition = nextBlockPosition1;
                                     readerBuffer.setPosition(endPosition);
