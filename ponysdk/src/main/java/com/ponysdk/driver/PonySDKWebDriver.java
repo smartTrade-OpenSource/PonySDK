@@ -46,7 +46,9 @@ import java.util.function.ToIntFunction;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
+import javax.websocket.CloseReason;
 import javax.websocket.MessageHandler;
+import javax.websocket.Session;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -65,38 +67,6 @@ public class PonySDKWebDriver implements WebDriver {
 
     private final static Logger log = LoggerFactory.getLogger(PonySDKWebDriver.class);
     private final static ThreadLocal<byte[]> byteArrays = ThreadLocal.withInitial(() -> new byte[32]);
-    private final static PonyMessageListener INDIFFERENT_MSG_LISTENER = new PonyMessageListener() {
-
-        @Override
-        public void onSendMessage(final JsonObject message) {
-        }
-
-        @Override
-        public void onReceiveMessage(final List<PonyFrame> message) {
-        }
-    };
-    private final static PonyBandwithListener INDIFFERENT_BANDWITH_LISTENER = new PonyBandwithListener() {
-
-        @Override
-        public void onSend(final int bytes) {
-        }
-
-        @Override
-        public void onReceive(final int bytes) {
-        }
-
-        @Override
-        public void onSendCompressed(final int bytes) {
-        }
-
-        @Override
-        public void onReceiveCompressed(final int bytes) {
-        }
-    };
-
-    private static final BiConsumer<List<PonyFrame>, PonyFrame> DO_NOTHING_WITH_FRAME = (message, frame) -> {
-    };
-
     private final ConcurrentHashMap<Integer, PonyWebElement> elements = new ConcurrentHashMap<>();
     private final PonySearchContext globalContext = new PonySearchContext(Collections.unmodifiableCollection(elements.values()),
         false);
@@ -123,16 +93,17 @@ public class PonySDKWebDriver implements WebDriver {
     private int length = 0;
 
     public PonySDKWebDriver() {
-        this(null, null, true);
+        this(null, null, null, true);
     }
 
     public PonySDKWebDriver(final PonyMessageListener messageListener, final PonyBandwithListener bandwithListener,
-            final boolean handleImplicitCommunication) {
+            PonySessionListener sessionListener, final boolean handleImplicitCommunication) {
         super();
         this.handleImplicitCommunication = handleImplicitCommunication;
         this.messageListener = messageListener == null ? INDIFFERENT_MSG_LISTENER : messageListener;
         this.bandwithListener = bandwithListener == null ? INDIFFERENT_BANDWITH_LISTENER : bandwithListener;
-        this.client = new WebsocketClient(messageHandler, bandwithListener);
+        sessionListener = sessionListener == null ? INDIFFERENT_SESSION_LISTENER : sessionListener;
+        this.client = new WebsocketClient(messageHandler, bandwithListener, sessionListener);
         onMessageSwitch.put(ServerToClientModel.CREATE_CONTEXT, (message, frame) -> {
             log.info("UI Context created with ID {}", contextId = (int) frame.value);
             if (handleImplicitCommunication) sendCookies();
@@ -659,4 +630,51 @@ public class PonySDKWebDriver implements WebDriver {
         return handleImplicitCommunication;
     }
 
+    private final static PonyMessageListener INDIFFERENT_MSG_LISTENER = new PonyMessageListener() {
+
+        @Override
+        public void onSendMessage(final JsonObject message) {
+        }
+
+        @Override
+        public void onReceiveMessage(final List<PonyFrame> message) {
+        }
+    };
+
+    private final static PonyBandwithListener INDIFFERENT_BANDWITH_LISTENER = new PonyBandwithListener() {
+
+        @Override
+        public void onSend(final int bytes) {
+        }
+
+        @Override
+        public void onReceive(final int bytes) {
+        }
+
+        @Override
+        public void onSendCompressed(final int bytes) {
+        }
+
+        @Override
+        public void onReceiveCompressed(final int bytes) {
+        }
+    };
+
+    private static final BiConsumer<List<PonyFrame>, PonyFrame> DO_NOTHING_WITH_FRAME = (message, frame) -> {
+    };
+
+    private static final PonySessionListener INDIFFERENT_SESSION_LISTENER = new PonySessionListener() {
+
+        @Override
+        public void onOpen(final Session session) {
+        }
+
+        @Override
+        public void onError(final Session session, final Throwable thr) {
+        }
+
+        @Override
+        public void onClose(final Session session, final CloseReason closeReason) {
+        }
+    };
 }
