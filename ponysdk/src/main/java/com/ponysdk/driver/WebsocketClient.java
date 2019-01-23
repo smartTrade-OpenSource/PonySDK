@@ -49,7 +49,7 @@ import org.glassfish.tyrus.client.ClientProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class WebsocketClient implements AutoCloseable {
+class WebsocketClient implements AutoCloseable {
 
     private final static Logger log = LoggerFactory.getLogger(PonySDKWebDriver.class);
 
@@ -74,11 +74,14 @@ public class WebsocketClient implements AutoCloseable {
 
     private final MessageHandler.Whole<ByteBuffer> handler;
     private final List<Extension> extensions;
+    private final PonySessionListener sessionListener;
 
-    public WebsocketClient(final Whole<ByteBuffer> handler, final PonyBandwithListener listener) {
+    public WebsocketClient(final Whole<ByteBuffer> handler, final PonyBandwithListener bandwidthListener,
+            final PonySessionListener sessionListener) {
         super();
         this.handler = handler;
-        this.extensions = List.of(new PonyDriverPerMessageDeflateExtension(listener));
+        this.extensions = List.of(new PonyDriverPerMessageDeflateExtension(bandwidthListener));
+        this.sessionListener = sessionListener;
     }
 
     public void connect(final URI uri) throws Exception {
@@ -101,18 +104,21 @@ public class WebsocketClient implements AutoCloseable {
                 } finally {
                     lock.unlock();
                 }
+                sessionListener.onOpen(session);
             }
 
             @Override
             public void onClose(final Session session, final CloseReason closeReason) {
                 super.onClose(session, closeReason);
                 log.debug("Session {} closed : {} {}", session.getId(), closeReason.getCloseCode(), closeReason.getReasonPhrase());
+                sessionListener.onClose(session, closeReason);
             }
 
             @Override
             public void onError(final Session session, final Throwable thr) {
                 super.onError(session, thr);
                 log.error("Session {} error", session.getId(), thr);
+                sessionListener.onError(session, thr);
             }
 
         }, cec, uri);
