@@ -33,7 +33,7 @@ public class ColumnDescriptor<D> {
     private HeaderRenderer headerRenderer;
     private CellRenderer<D> cellRenderer;
 
-    HeaderRenderer getHeaderRenderer() {
+    public HeaderRenderer getHeaderRenderer() {
         return headerRenderer;
     }
 
@@ -41,7 +41,7 @@ public class ColumnDescriptor<D> {
         this.headerRenderer = headerCellRender;
     }
 
-    CellRenderer<D> getCellRenderer() {
+    public CellRenderer<D> getCellRenderer() {
         return cellRenderer;
     }
 
