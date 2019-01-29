@@ -28,6 +28,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -65,6 +66,9 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
+import com.ponysdk.core.terminal.ui.w3c.api.IntersectionObserver;
+
+import elemental.client.Browser;
 
 public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implements IsWidget {
 
@@ -74,6 +78,8 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
 
     private Set<Integer> preventedEvents;
     private Set<Integer> stoppedEvents;
+
+    private IntersectionObserver intersectionObserver;
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
@@ -99,9 +105,31 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
     public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
         if (handlerModel.isDomHandler()) {
             addDomHandler(buffer, DomHandlerConverter.convert(handlerModel));
+        } else if (HandlerModel.HANDLER_VISIBILITY == handlerModel) {
+            intersectionObserver = createIntersectionObserver();
+            if (intersectionObserver != null)
+                Scheduler.get().scheduleDeferred(() -> intersectionObserver.observe(uiObject.getElement()));
+            else sendWidgetVisibility(true); // If Intersection Observer is not available, we force visibility to true
         } else {
             super.addHandler(buffer, handlerModel);
         }
+    }
+
+    private final IntersectionObserver createIntersectionObserver() {
+        if (PTAbstractWindow.isIntersectionObserverAPI(Browser.getWindow())) {
+            return new IntersectionObserver((entries, observer) -> {
+                if (entries == null || entries.length == 0) return;
+                sendWidgetVisibility(entries[0].isIsIntersecting());
+            });
+        } else {
+            return null;
+        }
+    }
+
+    private void sendWidgetVisibility(final boolean visible) {
+        final PTInstruction eventInstruction = new PTInstruction(objectID);
+        eventInstruction.put(ClientToServerModel.HANDLER_WIDGET_VISIBILITY, visible);
+        uiBuilder.sendDataToServer(uiObject, eventInstruction);
     }
 
     @Override
@@ -109,6 +137,8 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
         if (handlerModel.isDomHandler()) {
             // TODO Remove HANDLER_DOM
             // removeDomHandler(DomHandlerConverter.convert(handlerModel));
+        } else if (HandlerModel.HANDLER_VISIBILITY == handlerModel) {
+            if (intersectionObserver != null) intersectionObserver.unobserve(uiObject.getElement());
         } else {
             super.removeHandler(buffer, handlerModel);
         }

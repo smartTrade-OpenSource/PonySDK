@@ -57,7 +57,8 @@ public enum HandlerModel {
     HANDLER_STRING_SELECTION(false),
     HANDLER_STREAM_REQUEST(false),
     HANDLER_SCROLL(false),
-    HANDLER_PASTE(false);
+    HANDLER_PASTE(false),
+    HANDLER_VISIBILITY(false);
 
     private static final HandlerModel[] VALUES = HandlerModel.values();
 

@@ -23,13 +23,16 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.json.JsonObject;
 
 import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.UIContext;
@@ -38,6 +41,8 @@ import com.ponysdk.core.ui.basic.event.PCloseEvent;
 import com.ponysdk.core.ui.basic.event.PCloseHandler;
 import com.ponysdk.core.ui.basic.event.POpenEvent;
 import com.ponysdk.core.ui.basic.event.POpenHandler;
+import com.ponysdk.core.ui.basic.event.PVisibilityEvent;
+import com.ponysdk.core.ui.basic.event.PVisibilityEvent.PVisibilityHandler;
 import com.ponysdk.core.ui.formatter.TextFunction;
 import com.ponysdk.core.util.SetUtils;
 import com.ponysdk.core.writer.ModelWriter;
@@ -61,6 +66,9 @@ public class PWindow extends PObject {
     private Map<TextFunction, PFunction> functions;
 
     private PWindow parent;
+
+    private List<PVisibilityHandler> visibilityHandlers;
+    private boolean shown = true;
 
     PWindow() {
         this.location = new Location(this);
@@ -287,6 +295,12 @@ public class PWindow extends PObject {
             onDestroy();
         } else if (event.containsKey(ClientToServerModel.HANDLER_DESTROY.toStringValue())) {
             onDestroy();
+        } else if (event.containsKey(ClientToServerModel.HANDLER_DOCUMENT_VISIBILITY.toStringValue())) {
+            shown = event.getBoolean(ClientToServerModel.HANDLER_DOCUMENT_VISIBILITY.toStringValue());
+            if (visibilityHandlers != null) {
+                final PVisibilityEvent visibilityEvent = new PVisibilityEvent(this, shown);
+                visibilityHandlers.forEach(handler -> handler.onVisibility(visibilityEvent));
+            }
         } else {
             super.onClientData(event);
         }
@@ -392,6 +406,38 @@ public class PWindow extends PObject {
         final PFunction pf = new PFunction(function);
         pf.attach(this, null);
         return pf;
+    }
+
+    /**
+     * Add visibility handler
+     *
+     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/Events/visibilitychange">MDN</a>
+     */
+    public void addVisibilityHandler(final PVisibilityHandler visibilityHandler) {
+        if (visibilityHandlers == null) visibilityHandlers = new ArrayList<>();
+        visibilityHandlers.add(visibilityHandler);
+    }
+
+    /**
+     * Remove visibility handler
+     *
+     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/Events/visibilitychange">MDN</a>
+     */
+    public void removeVisibilityHandler(final PVisibilityHandler visibilityHandler) {
+        if (visibilityHandlers != null) {
+            visibilityHandlers.remove(visibilityHandler);
+            if (visibilityHandlers.isEmpty()) saveRemoveHandler(HandlerModel.HANDLER_VISIBILITY);
+        }
+    }
+
+    /**
+     * The opposite of document.hidden property that returns a Boolean value indicating if the page is considered hidden
+     * or not.
+     *
+     * @see <a href="https://developer.mozilla.org/fr/docs/Web/API/Document/hidden">MDN</a>
+     */
+    public boolean isShown() {
+        return shown;
     }
 
     @Override
