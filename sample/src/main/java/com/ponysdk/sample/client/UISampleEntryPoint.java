@@ -70,6 +70,7 @@ import com.ponysdk.core.ui.basic.PListBox;
 import com.ponysdk.core.ui.basic.PMenuBar;
 import com.ponysdk.core.ui.basic.PRichTextArea;
 import com.ponysdk.core.ui.basic.PScript;
+import com.ponysdk.core.ui.basic.PScrollPanel;
 import com.ponysdk.core.ui.basic.PSimplePanel;
 import com.ponysdk.core.ui.basic.PStackLayoutPanel;
 import com.ponysdk.core.ui.basic.PTabLayoutPanel;
@@ -124,6 +125,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         mainLabel.setAttributeLinkedToValue("data-title");
         mainLabel.setTitle("String ASCII");
         PWindow.getMain().add(mainLabel);
+
+        testVisibilityHandler(PWindow.getMain());
 
         testPerf();
 
@@ -265,6 +268,65 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         // uiContext.getHistory().newItem("", false);
     }
 
+    private void testVisibilityHandler(final PWindow window) {
+        final PLabel liveVisibility = Element.newPLabel("Live Visibility : Unknown");
+        window.add(liveVisibility);
+
+        final PButton button = Element.newPButton("Check visibility");
+        window.add(button);
+
+        final PLabel visibilityLabel = Element.newPLabel("Visibility : Unknown");
+        window.add(visibilityLabel);
+
+        final PScrollPanel frame = Element.newPScrollPanel();
+        frame.setHeight("200px");
+        frame.setWidth("300px");
+        window.add(frame);
+
+        final PFlowPanel panel = Element.newPFlowPanel();
+        panel.setHeight("2000px");
+        frame.add(panel);
+
+        final PFlowPanel subPanel = Element.newPFlowPanel();
+        subPanel.setStyleProperty("backgroundColor", "red");
+        subPanel.setHeight("125px");
+        subPanel.setWidth("200px");
+        panel.add(subPanel);
+
+        final PLabel label = Element.newPLabel("Increment : " + a++);
+        subPanel.add(label);
+
+        PScheduler.scheduleAtFixedRate(() -> {
+            a++;
+            if (subPanel.isShown() && subPanel.getWindow().isShown()) updateLabel(label, String.valueOf(a));
+        }, Duration.ofSeconds(1));
+
+        subPanel.getWindow().addVisibilityHandler(event -> {
+            if (event.getData()) {
+                System.err.println("Force refresh, because window became visible");
+                updateLabel(label, String.valueOf(a));
+            } else {
+                System.err.println("Window became not visible");
+            }
+        });
+
+        liveVisibility.setText("Live Visibility : " + subPanel.isShown());
+        visibilityLabel.setText("Visibility : " + subPanel.isShown());
+        subPanel.addVisibilityHandler(event -> {
+            liveVisibility.setText("Live Visibility : " + event.getData());
+            if (event.getData()) {
+                System.err.println("Force refresh, because panel became visible");
+                updateLabel(label, String.valueOf(a));
+            }
+        });
+        button.addClickHandler(event -> visibilityLabel.setText("Visibility : " + subPanel.isShown()));
+    }
+
+    private static void updateLabel(final PLabel label, final String text) {
+        System.out.println("Update label " + text);
+        label.setText("Increment : " + text);
+    }
+
     private void createFunctionalLabel() {
         final TextFunction textFunction = new TextFunction(args -> {
             System.out.println(args[0] + " " + args[1]);
@@ -383,7 +445,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             pojo.coucou10 = random.nextDouble() * i + "";
             map.put("security" + i, pojo);
             grid.addData(pojo);
-
         }
 
         Txn.get().flush();

@@ -23,6 +23,9 @@
 
 package com.ponysdk.core.ui.basic;
 
+import javax.json.JsonObject;
+
+import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.UIContext;
@@ -54,4 +57,14 @@ public class PRootPanel extends PAbsolutePanel {
     protected WidgetType getWidgetType() {
         return WidgetType.ROOT_PANEL;
     }
+
+    @Override
+    public void onClientData(final JsonObject instruction) {
+        if (instruction.containsKey(ClientToServerModel.HANDLER_DOCUMENT_VISIBILITY.toStringValue())) {
+            if (id == null) getWindow().onClientData(instruction);
+        } else {
+            super.onClientData(instruction);
+        }
+    }
+
 }

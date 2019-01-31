@@ -23,8 +23,10 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -41,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.DomHandlerConverter;
 import com.ponysdk.core.model.DomHandlerType;
+import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.event.HasPHandlers;
@@ -73,6 +76,8 @@ import com.ponysdk.core.ui.basic.event.PMouseOutEvent;
 import com.ponysdk.core.ui.basic.event.PMouseOverEvent;
 import com.ponysdk.core.ui.basic.event.PMouseUpEvent;
 import com.ponysdk.core.ui.basic.event.PMouseWhellEvent;
+import com.ponysdk.core.ui.basic.event.PVisibilityEvent;
+import com.ponysdk.core.ui.basic.event.PVisibilityEvent.PVisibilityHandler;
 import com.ponysdk.core.ui.eventbus.Event;
 import com.ponysdk.core.ui.eventbus.EventHandler;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
@@ -113,11 +118,14 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     private String debugID;
     private boolean focused;
     protected int tabindex = -Integer.MAX_VALUE;
+    private List<PVisibilityHandler> visibilityHandlers;
 
     private Set<PAddOn> addons;
 
     // WORKAROUND Remove handler only server side
     private SetPool<PDomEvent.Type>.ImmutableSet oneTimeHandlerCreation = oneTimeHandlerCreationSetPool.emptyImmutableSet();
+
+    private boolean shown;
 
     public enum TabindexMode {
 
@@ -519,9 +527,19 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
                     log.error("Dom Handler not implemented: {}", domHandler);
                     break;
             }
+        } else if (instruction.containsKey(ClientToServerModel.HANDLER_WIDGET_VISIBILITY.toStringValue())) {
+            shown = instruction.getBoolean(ClientToServerModel.HANDLER_WIDGET_VISIBILITY.toStringValue());
+            if (visibilityHandlers != null) {
+                final PVisibilityEvent visibilityEvent = new PVisibilityEvent(this, shown);
+                visibilityHandlers.forEach(handler -> handler.onVisibility(visibilityEvent));
+            }
         } else {
             super.onClientData(instruction);
         }
+    }
+
+    public boolean isShown() {
+        return shown;
     }
 
     public void fireKeyEvent(final JsonObject instruction, final PKeyEvent<? extends EventHandler> event) {
@@ -633,6 +651,21 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
 
     public int getTabindex() {
         return tabindex;
+    }
+
+    public void addVisibilityHandler(final PVisibilityHandler visibilityHandler) {
+        if (visibilityHandlers == null) {
+            visibilityHandlers = new ArrayList<>();
+            saveAddHandler(HandlerModel.HANDLER_VISIBILITY);
+        }
+        visibilityHandlers.add(visibilityHandler);
+    }
+
+    public void removeVisibilityHandler(final PVisibilityHandler visibilityHandler) {
+        if (visibilityHandlers != null) {
+            visibilityHandlers.remove(visibilityHandler);
+            if (visibilityHandlers.isEmpty()) saveRemoveHandler(HandlerModel.HANDLER_VISIBILITY);
+        }
     }
 
     /**
