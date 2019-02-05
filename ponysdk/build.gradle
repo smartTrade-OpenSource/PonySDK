@@ -3,9 +3,9 @@ ext {
     gwtOutputDirName = buildDir.name + "/gwt"
     buildInfoOutputDirName = buildDir.name + "/buildinfo"
     javadocResources = "src/main/javadoc"
-    
+
     jsinteropVersion = '1.0.2'
-    
+
     javaxServletVersion = '3.1.0'
     glassfishVersion = '1.1.2'
     jsonVersion = '1.1.2'
@@ -69,7 +69,7 @@ dependencies {
             'javax.servlet:javax.servlet-api:' + javaxServletVersion,
             'javax.json:javax.json-api:' + jsonVersion,
             'org.glassfish:javax.json:' + glassfishVersion,
-            
+
             'org.seleniumhq.selenium:selenium-api:' + seleniumVersion,
             'org.seleniumhq.selenium:selenium-java:' + seleniumVersion,
             'javax.websocket:javax.websocket-client-api:1.1',
@@ -93,7 +93,7 @@ dependencies {
             'org.apache.logging.log4j:log4j-api:' + log4jVersion,
             'org.apache.logging.log4j:log4j-core:' + log4jVersion,
             'org.apache.logging.log4j:log4j-slf4j-impl:' + log4jVersion,
-            
+
             'org.glassfish.tyrus:tyrus-container-grizzly-client:' + tyrusVersion
     )
 }
@@ -235,6 +235,15 @@ task sourcesJar(type: Jar, dependsOn: classes) {
         attributes("Date": timestamp + " / " + new Date().toGMTString())
     }
 }
+
+task testsJar(type: Jar) {
+    classifier = 'tests'
+    from sourceSets.test.output
+}
+
+publish.dependsOn('sourcesJar')
+publish.dependsOn('jar')
+publish.dependsOn('testsJar')
 
 test {
     classpath = files(resourcesCoreTest, gwtOutputDirName) + classpath
