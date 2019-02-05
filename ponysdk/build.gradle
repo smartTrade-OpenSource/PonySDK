@@ -244,6 +244,13 @@ task testsJar(type: Jar) {
 publish.dependsOn('sourcesJar')
 publish.dependsOn('jar')
 publish.dependsOn('testsJar')
+publish.finalizedBy('publishInfo')
+
+task publishInfo {
+    doLast {
+        println 'You need to deploy manually new built jars in your favorite artifacts management server'
+    }
+}
 
 test {
     classpath = files(resourcesCoreTest, gwtOutputDirName) + classpath
