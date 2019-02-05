@@ -101,6 +101,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
             communicationSanityChecker.start();
         } catch (final Exception e) {
             log.error("Cannot process WebSocket instructions", e);
+            e.printStackTrace(); // WORKAROUND The logger doesn't seem to work here
         }
     }
 
@@ -154,7 +155,8 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
                 if (monitor != null) monitor.onMessageUnprocessed(this, message);
             }
         } else {
-            log.info("UI Context #{} is destroyed, message dropped from terminal : {}", uiContext.getID(), message);
+            log.info("UI Context #{} is destroyed, message dropped from terminal : {}", uiContext != null ? uiContext.getID() : -1,
+                message);
         }
     }
 
