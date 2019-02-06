@@ -110,6 +110,8 @@ public class PWindow extends PObject {
 
         panelByZone.forEach((key, value) -> value.attach(this, null));
         if (initializeListeners != null) initializeListeners.forEach(listener -> listener.onInitialize(this));
+
+        UIContext.get().addContextDestroyListener(uiContext -> onDestroy());
     }
 
     public static PWindow getMain() {
