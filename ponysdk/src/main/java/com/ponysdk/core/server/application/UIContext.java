@@ -177,7 +177,7 @@ public class UIContext {
      * @see #fireEvent(Event)
      */
     public static HandlerRegistration addHandler(final Event.Type type, final EventHandler handler) {
-        return getRootEventBus().addHandler(type, handler);
+        return get().rootEventBus.addHandler(type, handler);
     }
 
     /**
@@ -188,7 +188,15 @@ public class UIContext {
      * @see #addHandler(BroadcastEventHandler)
      */
     public static void fireEvent(final Event<? extends EventHandler> event) {
-        getRootEventBus().fireEvent(event);
+        get().fireEvent0(event);
+    }
+
+    public void executeFireEvent(final Event<? extends EventHandler> event) {
+        execute(() -> fireEvent0(event));
+    }
+
+    private void fireEvent0(final Event<? extends EventHandler> event) {
+        rootEventBus.fireEvent(event);
     }
 
     /**
@@ -199,7 +207,7 @@ public class UIContext {
      * @see #addHandler(com.ponysdk.core.ui.eventbus.Event.Type, EventHandler)
      */
     public static void removeHandler(final Event.Type type, final EventHandler handler) {
-        getRootEventBus().removeHandler(type, handler);
+        get().rootEventBus.removeHandler(type, handler);
     }
 
     /**
@@ -213,7 +221,7 @@ public class UIContext {
      * @see #fireEventFromSource(Event, Object)
      */
     public static HandlerRegistration addHandlerToSource(final Event.Type type, final Object source, final EventHandler handler) {
-        return getRootEventBus().addHandlerToSource(type, source, handler);
+        return get().rootEventBus.addHandlerToSource(type, source, handler);
     }
 
     /**
@@ -225,7 +233,7 @@ public class UIContext {
      * @see #addHandlerToSource(com.ponysdk.core.ui.eventbus.Event.Type, Object, EventHandler)
      */
     public static void fireEventFromSource(final Event<? extends EventHandler> event, final Object source) {
-        getRootEventBus().fireEventFromSource(event, source);
+        get().rootEventBus.fireEventFromSource(event, source);
     }
 
     /**
@@ -237,7 +245,7 @@ public class UIContext {
      * @see #addHandlerToSource(com.ponysdk.core.ui.eventbus.Event.Type, Object, EventHandler)
      */
     public static void removeHandlerFromSource(final Event.Type type, final Object source, final EventHandler handler) {
-        getRootEventBus().removeHandlerFromSource(type, source, handler);
+        get().rootEventBus.removeHandlerFromSource(type, source, handler);
     }
 
     /**
@@ -251,7 +259,7 @@ public class UIContext {
      * @see #fireEventFromSource(Event, Object)
      */
     public static void addHandler(final BroadcastEventHandler handler) {
-        getRootEventBus().addHandler(handler);
+        get().rootEventBus.addHandler(handler);
     }
 
     /**
@@ -261,7 +269,7 @@ public class UIContext {
      * @see #addHandler(BroadcastEventHandler)
      */
     public static void removeHandler(final BroadcastEventHandler handler) {
-        getRootEventBus().removeHandler(handler);
+        get().rootEventBus.removeHandler(handler);
     }
 
     /**

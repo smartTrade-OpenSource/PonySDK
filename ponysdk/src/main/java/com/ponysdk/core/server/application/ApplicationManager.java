@@ -45,7 +45,7 @@ public abstract class ApplicationManager {
                 entryPoint.start(uiContext);
             } catch (final Exception e) {
                 log.error("Cannot start UIContext", e);
-                e.printStackTrace(); // WORKAROUND The logger doesn't to work here
+                e.printStackTrace(); // WORKAROUND The logger doesn't seem to work here
                 // TODO nciaravola destroy if exception ?
             }
         });

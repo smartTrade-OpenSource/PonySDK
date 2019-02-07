@@ -47,7 +47,7 @@ public class PSuite {
         final ModelWriter mw = Mockito.mock(ModelWriter.class);
 
         final Application application = Mockito.mock(Application.class, Mockito.RETURNS_MOCKS);
-        Mockito.when(context.getApplication()).thenReturn(application);
+        context.setApplication(application);
 
         final ApplicationConfiguration configuration = Mockito.mock(ApplicationConfiguration.class);
 
