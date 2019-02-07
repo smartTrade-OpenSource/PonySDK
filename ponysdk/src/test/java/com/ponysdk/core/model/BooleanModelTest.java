@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 2011 PonySDK
+ * Copyright (c) 2019 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
@@ -21,20 +21,21 @@
  * the License.
  */
 
-package com.ponysdk.impl.java.server;
+package com.ponysdk.core.model;
 
-import com.ponysdk.core.server.application.ApplicationManager;
-import com.ponysdk.core.server.servlet.ApplicationLoader;
+import static org.junit.Assert.assertEquals;
 
-/**
- * @deprecated Use {@link com.ponysdk.impl.java.server.JavaApplicationManager} directly
- */
-@Deprecated(forRemoval = true, since = "v2.8.1")
-public class JavaApplicationLoader extends ApplicationLoader {
+import org.junit.Test;
 
-    @Override
-    public ApplicationManager createApplicationManager() {
-        return new JavaApplicationManager();
+public class BooleanModelTest {
+
+    /**
+     * Test method for {@link com.ponysdk.core.model.BooleanModel#getValue()}.
+     */
+    @Test
+    public void testGetValue() {
+        final BooleanModel expected = BooleanModel.TRUE;
+        assertEquals(expected.ordinal(), expected.getValue());
     }
 
 }

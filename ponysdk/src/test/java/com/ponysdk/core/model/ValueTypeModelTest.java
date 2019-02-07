@@ -38,4 +38,12 @@ public class ValueTypeModelTest {
         assertEquals(expected, ValueTypeModel.fromRawValue(expected.getValue()));
     }
 
+    /**
+     * Test method for {@link com.ponysdk.core.model.ValueTypeModel#getSize()}.
+     */
+    @Test
+    public void testGetSize() {
+        assertEquals(2, ValueTypeModel.SHORT.getSize());
+    }
+
 }

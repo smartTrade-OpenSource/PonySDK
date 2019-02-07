@@ -25,6 +25,7 @@ package com.ponysdk.core.server.application;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import javax.servlet.http.HttpSession;
 
@@ -87,6 +88,11 @@ public class ApplicationTest {
         assertEquals(1, application.countUIContexts());
         assertEquals(1, application.getUIContexts().size());
         assertEquals(uiContext1, application.getUIContext(uiContextID1));
+
+        application.deregisterUIContext(uiContext1.getID());
+
+        assertEquals(0, application.countUIContexts());
+        assertTrue(application.getUIContexts().isEmpty());
     }
 
     /**

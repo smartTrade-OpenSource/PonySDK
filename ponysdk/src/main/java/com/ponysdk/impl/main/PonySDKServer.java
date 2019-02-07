@@ -42,7 +42,6 @@ import com.ponysdk.core.model.MappingPath;
 import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.ApplicationManager;
 import com.ponysdk.core.server.servlet.AjaxServlet;
-import com.ponysdk.core.server.servlet.ApplicationLoader;
 import com.ponysdk.core.server.servlet.BootstrapServlet;
 import com.ponysdk.core.server.servlet.StreamServiceServlet;
 import com.ponysdk.core.server.websocket.WebSocketServlet;
@@ -245,14 +244,6 @@ public class PonySDKServer {
 
     public ApplicationConfiguration getApplicationConfiguration() {
         return applicationManager.getConfiguration();
-    }
-
-    /**
-     * @deprecated Use {@link #setApplicationManager(ApplicationManager)} instead
-     */
-    @Deprecated(forRemoval = true, since = "v2.8.1")
-    public void setApplicationLoader(final ApplicationLoader applicationLoader) {
-        setApplicationManager(applicationLoader.getApplicationManager());
     }
 
 }

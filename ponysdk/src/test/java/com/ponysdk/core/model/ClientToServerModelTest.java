@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 PonySDK
+ * Copyright (c) 2019 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
@@ -21,12 +21,20 @@
  * the License.
  */
 
-package com.ponysdk.spring.servlet;
+package com.ponysdk.core.model;
 
-/**
- * @deprecated Use {@link com.ponysdk.impl.spring.server.SpringApplicationLoader} instead
- */
-@Deprecated(forRemoval = true, since = "v6.2.0.0")
-public class SpringApplicationLoader extends com.ponysdk.impl.spring.server.SpringApplicationLoader {
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
+
+public class ClientToServerModelTest {
+
+    /**
+     * Test method for {@link com.ponysdk.core.model.ClientToServerModel#toStringValue()}.
+     */
+    @Test
+    public void testToStringValue() {
+        assertEquals(ClientToServerModel.DRAG_SRC.toStringValue(), ClientToServerModel.APPLICATION_ID.toStringValue());
+    }
 
 }

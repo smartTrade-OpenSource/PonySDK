@@ -42,11 +42,7 @@ public final class DateConverter {
     }
 
     public static Date decode(final long timestamp) {
-        try {
-            return new Date(timestamp);
-        } catch (final NumberFormatException e) {
-            return null;
-        }
+        return new Date(timestamp);
     }
 
     public static long toTimestamp(final Date date) {

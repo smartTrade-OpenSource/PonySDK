@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 2011 PonySDK
+ * Copyright (c) 2019 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
@@ -21,12 +21,20 @@
  * the License.
  */
 
-package com.ponysdk.core.server.application;
+package com.ponysdk.core.model;
 
-/**
- * Use {@link com.ponysdk.core.server.application.ApplicationConfiguration} instead
- */
-@Deprecated(forRemoval = true, since = "v2.8.1")
-public class ApplicationManagerOption extends com.ponysdk.core.server.application.ApplicationConfiguration {
+import static org.junit.Assert.assertNotNull;
+
+import org.junit.Test;
+
+public class MappingPathTest {
+
+    /**
+     * Test method for {@link com.ponysdk.core.model.MappingPath#toString()}.
+     */
+    @Test
+    public void testToString() {
+        assertNotNull(MappingPath.AJAX.toString());
+    }
 
 }

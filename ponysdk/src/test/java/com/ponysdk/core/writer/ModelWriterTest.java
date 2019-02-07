@@ -23,13 +23,19 @@
 
 package com.ponysdk.core.writer;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Matchers;
 import org.mockito.Mockito;
 
+import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.websocket.WebsocketEncoder;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PSuite;
+import com.ponysdk.core.ui.basic.PWindow;
 
 public class ModelWriterTest extends PSuite {
 
@@ -40,6 +46,7 @@ public class ModelWriterTest extends PSuite {
     public void setUp() {
         websocketEncoder = Mockito.mock(WebsocketEncoder.class);
         modelWriter = new ModelWriter(websocketEncoder);
+        assertNull(modelWriter.getCurrentWindow());
     }
 
     /**
@@ -47,8 +54,17 @@ public class ModelWriterTest extends PSuite {
      */
     @Test
     public void testBeginObject() {
-        modelWriter.beginObject(Element.newPWindow(null, null));
-        Mockito.verify(websocketEncoder).beginObject();
+        final PWindow window1 = Element.newPWindow(null, null);
+        modelWriter.beginObject(window1);
+
+        modelWriter.beginObject(window1);
+
+        final PWindow window2 = Element.newPWindow(null, null);
+        modelWriter.beginObject(window2);
+
+        Mockito.verify(websocketEncoder, Mockito.times(3)).beginObject();
+        Mockito.verify(websocketEncoder, Mockito.times(2)).encode(Matchers.eq(ServerToClientModel.WINDOW_ID), Matchers.any());
+        assertEquals(window2, modelWriter.getCurrentWindow());
     }
 
     /**

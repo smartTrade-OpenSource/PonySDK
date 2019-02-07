@@ -24,6 +24,8 @@
 package com.ponysdk.core.model;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -36,6 +38,15 @@ public class HandlerModelTest {
     public void testFromRawValue() {
         final HandlerModel expected = HandlerModel.HANDLER_DOM_DRAG_LEAVE;
         assertEquals(expected, HandlerModel.fromRawValue(expected.getValue()));
+    }
+
+    /**
+     * Test method for {@link com.ponysdk.core.model.HandlerModel#isDomHandler()}.
+     */
+    @Test
+    public void testIsDomHandler() {
+        assertTrue(HandlerModel.HANDLER_DOM_DRAG_LEAVE.isDomHandler());
+        assertFalse(HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST.isDomHandler());
     }
 
 }

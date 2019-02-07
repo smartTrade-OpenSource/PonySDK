@@ -24,6 +24,8 @@
 package com.ponysdk.core.model;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -36,6 +38,15 @@ public class ArrayValueModelTest {
     public void testFromRawValue() {
         final ArrayValueModel expected = ArrayValueModel.DOUBLE;
         assertEquals(expected, ArrayValueModel.fromRawValue(expected.getValue()));
+    }
+
+    /**
+     * Test method for {@link com.ponysdk.core.model.ArrayValueModel#isDynamicSize()}.
+     */
+    @Test
+    public void testIsDynamicSize() {
+        assertFalse(ArrayValueModel.DOUBLE.isDynamicSize());
+        assertTrue(ArrayValueModel.STRING_UTF8_UINT8_LENGTH.isDynamicSize());
     }
 
 }

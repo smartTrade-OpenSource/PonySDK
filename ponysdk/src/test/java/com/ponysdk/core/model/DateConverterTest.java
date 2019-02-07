@@ -24,6 +24,7 @@
 package com.ponysdk.core.model;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.util.Date;
 import java.util.List;
@@ -44,6 +45,9 @@ public class DateConverterTest {
         assertEquals(dates.size(), timestamp.length);
         assertEquals(firstTimestamp, (long) timestamp[0]);
         assertEquals(lastTimestamp, (long) timestamp[1]);
+
+        assertNull(DateConverter.encode((List<Date>) null));
+        assertNull(DateConverter.encode(List.of()));
     }
 
     /**
@@ -54,6 +58,8 @@ public class DateConverterTest {
         final int expectedTimestamp = 123;
         final long timestamp = DateConverter.encode(new Date(expectedTimestamp));
         assertEquals(expectedTimestamp, timestamp);
+
+        assertNull(DateConverter.encode((Date) null));
     }
 
     /**
@@ -74,6 +80,8 @@ public class DateConverterTest {
         final int expectedTimestamp = 123;
         final long timestamp = DateConverter.toTimestamp(new Date(expectedTimestamp));
         assertEquals(expectedTimestamp, timestamp);
+
+        assertEquals(-1, DateConverter.toTimestamp(null));
     }
 
     /**
@@ -84,6 +92,8 @@ public class DateConverterTest {
         final int expectedTimestamp = 123;
         final Date date = DateConverter.fromTimestamp(expectedTimestamp);
         assertEquals(new Date(expectedTimestamp), date);
+
+        assertNull(DateConverter.fromTimestamp(-1));
     }
 
 }

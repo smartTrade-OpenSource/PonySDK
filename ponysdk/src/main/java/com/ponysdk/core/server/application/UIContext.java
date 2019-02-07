@@ -734,7 +734,7 @@ public class UIContext {
 
     public String getHistoryToken() {
         final List<String> historyTokens = this.request.getParameterMap().get(ClientToServerModel.TYPE_HISTORY.toStringValue());
-        return !historyTokens.isEmpty() ? historyTokens.get(0) : null;
+        return historyTokens != null && !historyTokens.isEmpty() ? historyTokens.get(0) : null;
     }
 
     /**

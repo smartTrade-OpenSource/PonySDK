@@ -38,4 +38,12 @@ public class ServerToClientModelTest {
         assertEquals(expected, ServerToClientModel.fromRawValue(expected.getValue()));
     }
 
+    /**
+     * Test method for {@link com.ponysdk.core.model.ServerToClientModel#getTypeModel()}.
+     */
+    @Test
+    public void testGetTypeModel() {
+        assertEquals(ValueTypeModel.STRING, ServerToClientModel.BACK_COLOR.getTypeModel());
+    }
+
 }

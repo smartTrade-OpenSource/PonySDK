@@ -24,6 +24,7 @@
 package com.ponysdk.core.model;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 import org.junit.Test;
 
@@ -36,6 +37,14 @@ public class PUnitTest {
     public void testFromRawValue() {
         final PUnit expected = PUnit.MM;
         assertEquals(expected, PUnit.fromRawValue(expected.getByteValue()));
+    }
+
+    /**
+     * Test method for {@link com.ponysdk.core.model.PUnit#getValue()}.
+     */
+    @Test
+    public void testGetValue() {
+        assertNotEquals(PUnit.MM.getValue(), PUnit.CM.getValue());
     }
 
 }
