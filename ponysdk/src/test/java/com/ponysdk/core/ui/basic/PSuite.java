@@ -23,6 +23,9 @@
 
 package com.ponysdk.core.ui.basic;
 
+import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.websocket.WebsocketEncoder;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -35,8 +38,13 @@ import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.server.stm.TxnContext;
 import com.ponysdk.core.server.websocket.WebSocket;
 import com.ponysdk.core.writer.ModelWriter;
+import org.mockito.stubbing.OngoingStubbing;
+
+import javax.json.Json;
+import javax.json.JsonObject;
 
 public class PSuite {
+
 
     @BeforeClass
     public static void beforeClass() {
@@ -44,7 +52,7 @@ public class PSuite {
         final ServletUpgradeRequest request = Mockito.mock(ServletUpgradeRequest.class);
 
         final TxnContext context = Mockito.spy(new TxnContext(socket));
-        final ModelWriter mw = Mockito.mock(ModelWriter.class);
+        ModelWriter modelWriter = new ModelWriterForTest();
 
         final Application application = Mockito.mock(Application.class, Mockito.RETURNS_MOCKS);
         context.setApplication(application);
@@ -53,7 +61,7 @@ public class PSuite {
 
         Txn.get().begin(context);
         final UIContext uiContext = Mockito.spy(new UIContext(socket, context, configuration, request));
-        Mockito.when(uiContext.getWriter()).thenReturn(mw);
+        Mockito.when(uiContext.getWriter()).thenReturn(modelWriter);
         UIContext.setCurrent(uiContext);
     }
 

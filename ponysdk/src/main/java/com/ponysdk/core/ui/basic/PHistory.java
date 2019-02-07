@@ -24,6 +24,7 @@
 package com.ponysdk.core.ui.basic;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.ponysdk.core.model.ServerToClientModel;
@@ -67,11 +68,13 @@ public class PHistory {
     }
 
     public void newItem(final String token, final boolean fireEvents) {
+        if (Objects.equals(this.token, token)) return;
         this.token = token;
 
         final ModelWriter writer = UIContext.get().getWriter();
         writer.beginObject(PWindow.getMain());
         writer.write(ServerToClientModel.TYPE_HISTORY, token);
+        //TODO nciaravola pas besoin de boolean if false
         writer.write(ServerToClientModel.HISTORY_FIRE_EVENTS, fireEvents);
         writer.endObject();
     }

@@ -23,11 +23,7 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.json.JsonObject;
 
@@ -280,19 +276,28 @@ public class PWindow extends PObject {
 
             if (openHandlers != null) {
                 final POpenEvent e = new POpenEvent(this);
-                openHandlers.forEach(handler -> handler.onOpen(e));
-                openHandlers.clear();
+                for (Iterator<POpenHandler> iter = openHandlers.iterator(); iter.hasNext(); ) {
+                    POpenHandler handler = iter.next();
+                    iter.remove();
+                    handler.onOpen(e);
+                }
             }
         } else if (event.containsKey(ClientToServerModel.HANDLER_CLOSE.toStringValue())) {
             PWindowManager.unregisterWindow(this);
             if (subWindows != null) {
-                subWindows.forEach(PWindow::close);
-                subWindows.clear();
+                for (Iterator<PWindow> iter = subWindows.iterator(); iter.hasNext(); ) {
+                    PWindow window = iter.next();
+                    iter.remove();
+                    window.close();
+                }
             }
             if (closeHandlers != null) {
                 final PCloseEvent e = new PCloseEvent(this);
-                closeHandlers.forEach(handler -> handler.onClose(e));
-                closeHandlers.clear();
+                for (Iterator<PCloseHandler> iter = closeHandlers.iterator(); iter.hasNext(); ) {
+                    PCloseHandler handler = iter.next();
+                    iter.remove();
+                    handler.onClose(e);
+                }
             }
             onDestroy();
         } else if (event.containsKey(ClientToServerModel.HANDLER_DESTROY.toStringValue())) {
@@ -381,7 +386,6 @@ public class PWindow extends PObject {
 
     private void addWindow(final PWindow window) {
         if (subWindows == null) subWindows = SetUtils.newArraySet(4);
-        window.addCloseHandler(event -> removeWindow(window));
         subWindows.add(window);
     }
 

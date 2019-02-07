@@ -37,14 +37,23 @@ public class PButtonTest extends PSuite {
 
     @Test
     public void testInit() {
-        final PButton widget = new PButton();
+        final PButton widget = Element.newPButton();
         assertEquals(WidgetType.BUTTON, widget.getWidgetType());
         assertNotNull(widget.toString());
     }
 
     @Test
+    public void testAttach() {
+        final PButton button = Element.newPButton();
+        PWindow.getMain().add(button);
+        assertEquals(PWindow.getMain().getPRootPanel().getWidgetCount(), 1);
+        button.removeFromParent();
+        assertEquals(PWindow.getMain().getPRootPanel().getWidgetCount(), 0);
+    }
+
+    @Test
     public void testSetText() {
-        final PButton widget = new PButton("", "HTML");
+        final PButton widget = Element.newPButton("", "HTML");
         assertEquals("", widget.getText());
         assertEquals("HTML", widget.getHTML());
         widget.setText("Text");
@@ -54,7 +63,7 @@ public class PButtonTest extends PSuite {
 
     @Test
     public void testSetHtml() {
-        final PButton widget = new PButton("Text");
+        final PButton widget = Element.newPButton("Text");
         assertEquals("Text", widget.getText());
         assertNull(widget.getHTML());
         widget.setHTML("HTML");
@@ -64,7 +73,7 @@ public class PButtonTest extends PSuite {
 
     @Test
     public void testSetEnabled() {
-        final PButton widget = new PButton();
+        final PButton widget = Element.newPButton();
         assertTrue(widget.isEnabled());
         widget.setEnabled(false);
         assertFalse(widget.isEnabled());
@@ -74,7 +83,7 @@ public class PButtonTest extends PSuite {
 
     @Test
     public void testSetEnabledOnRequest() {
-        final PButton widget = new PButton();
+        final PButton widget = Element.newPButton();
         assertFalse(widget.isEnabledOnRequest());
         widget.setEnabledOnRequest(false);
         assertFalse(widget.isEnabledOnRequest());
@@ -84,7 +93,7 @@ public class PButtonTest extends PSuite {
 
     @Test
     public void testShowLoadingOnRequest() {
-        final PButton widget = new PButton();
+        final PButton widget = Element.newPButton();
         assertFalse(widget.isShowLoadingOnRequest());
         widget.showLoadingOnRequest(false);
         assertFalse(widget.isShowLoadingOnRequest());
