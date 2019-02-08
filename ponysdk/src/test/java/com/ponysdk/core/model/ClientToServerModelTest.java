@@ -23,7 +23,7 @@
 
 package com.ponysdk.core.model;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 import org.junit.Test;
 
@@ -34,7 +34,7 @@ public class ClientToServerModelTest {
      */
     @Test
     public void testToStringValue() {
-        assertEquals(ClientToServerModel.DRAG_SRC.toStringValue(), ClientToServerModel.APPLICATION_ID.toStringValue());
+        assertNotEquals(ClientToServerModel.DRAG_SRC.toStringValue(), ClientToServerModel.APPLICATION_ID.toStringValue());
     }
 
 }
