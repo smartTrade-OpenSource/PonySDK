@@ -24,11 +24,13 @@
 package com.ponysdk.core.server.application;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -104,7 +106,7 @@ public class UIContext {
     private final Set<ContextDestroyListener> destroyListeners = new HashSet<>();
     @Deprecated(forRemoval = true, since = "v2.8.0")
     private final TxnContext context;
-    private final Set<DataListener> listeners = new HashSet<>();
+    private final Set<DataListener> listeners = Collections.newSetFromMap(new ConcurrentHashMap<DataListener, Boolean>());
 
     private TerminalDataReceiver terminalDataReceiver;
 
