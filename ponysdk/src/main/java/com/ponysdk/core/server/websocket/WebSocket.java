@@ -71,13 +71,14 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
     @Override
     public void onWebSocketConnect(final Session session) {
-        this.session = session;
-
-        // 1K for max chunk size and 1M for total buffer size
-        // Don't set max chunk size > 8K because when using Jetty Websocket compression, the chunks are limited to 8K
-        this.websocketPusher = new WebSocketPusher(session, 1 << 20, 1 << 12, TimeUnit.SECONDS.toMillis(60));
-
         try {
+            if (!session.isOpen()) throw new IllegalStateException("Session already closed");
+            this.session = session;
+
+            // 1K for max chunk size and 1M for total buffer size
+            // Don't set max chunk size > 8K because when using Jetty Websocket compression, the chunks are limited to 8K
+
+            this.websocketPusher = new WebSocketPusher(session, 1 << 20, 1 << 12, TimeUnit.SECONDS.toMillis(60));
             uiContext = new UIContext(this, context, applicationManager.getConfiguration(), request);
             log.info("Creating a new {}", uiContext);
 
@@ -90,7 +91,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
                 encode(ServerToClientModel.CREATE_CONTEXT, uiContext.getID()); // TODO nciaravola integer ?
                 encode(ServerToClientModel.OPTION_FORMFIELD_TABULATION, uiContext.getConfiguration().isTabindexOnlyFormField());
                 endObject();
-                if (isAlive() && isSessionOpen()) flush0();
+                if (isAlive()) flush0();
             } catch (final Throwable e) {
                 log.error("Cannot send server heart beat to client", e);
             } finally {
@@ -113,8 +114,8 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
     @Override
     public void onWebSocketClose(final int statusCode, final String reason) {
-        if (log.isInfoEnabled()) log.info("WebSocket closed on UIContext #{} : {}, reason : {}", uiContext.getID(),
-            NiceStatusCode.getMessage(statusCode), reason != null ? reason : "");
+        log.info("WebSocket closed on UIContext #{} : {}, reason : {}", uiContext.getID(), NiceStatusCode.getMessage(statusCode),
+            reason != null ? reason : "");
         uiContext.onDestroy();
     }
 
@@ -162,16 +163,16 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
     private void processRoundtripLatency(final JsonObject jsonObject) {
         final long roundtripLatency = TimeUnit.MILLISECONDS.convert(System.nanoTime() - lastSentPing, TimeUnit.NANOSECONDS);
-        final long terminalLatency = jsonObject.getJsonNumber(ClientToServerModel.TERMINAL_LATENCY.toStringValue()).longValue();
-        final long networkLatency = roundtripLatency - terminalLatency;
-        if (log.isDebugEnabled()) {
-            log.debug("Roundtrip measurement : {} ms from terminal #{}", roundtripLatency, uiContext.getID());
-            log.debug("Network measurement : {} ms from terminal #{}", networkLatency, uiContext.getID());
-            log.debug("Terminal measurement : {} ms from terminal #{}", terminalLatency, uiContext.getID());
-        }
+        log.debug("Roundtrip measurement : {} ms from terminal #{}", roundtripLatency, uiContext.getID());
         uiContext.addRoundtripLatencyValue(roundtripLatency);
-        uiContext.addNetworkLatencyValue(networkLatency);
+
+        final long terminalLatency = jsonObject.getJsonNumber(ClientToServerModel.TERMINAL_LATENCY.toStringValue()).longValue();
+        log.debug("Terminal measurement : {} ms from terminal #{}", terminalLatency, uiContext.getID());
         uiContext.addTerminalLatencyValue(terminalLatency);
+
+        final long networkLatency = roundtripLatency - terminalLatency;
+        log.debug("Network measurement : {} ms from terminal #{}", networkLatency, uiContext.getID());
+        uiContext.addNetworkLatencyValue(networkLatency);
     }
 
     private void processInstructions(final JsonObject jsonObject) {
@@ -233,7 +234,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         if (isAlive() && isSessionOpen()) flush0();
     }
 
-    private void flush0() {
+    void flush0() {
         websocketPusher.flush();
     }
 
