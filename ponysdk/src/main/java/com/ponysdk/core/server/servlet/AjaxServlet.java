@@ -41,6 +41,24 @@ public class AjaxServlet extends HttpServlet {
 
     private static final Logger log = LoggerFactory.getLogger(AjaxServlet.class);
 
+    @Override
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        try {
+            process(req, resp);
+        } catch (final IOException e) {
+            log.error("Cannot stream request", e);
+        }
+    }
+
+    @Override
+    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        try {
+            process(req, resp);
+        } catch (final IOException e) {
+            log.error("Cannot stream request", e);
+        }
+    }
+
     private void process(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         try {
             final Integer uiContextID = Integer.parseInt(req.getHeader(ClientToServerModel.UI_CONTEXT_ID.name()));
@@ -70,21 +88,4 @@ public class AjaxServlet extends HttpServlet {
         }
     }
 
-    @Override
-    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        try {
-            process(req, resp);
-        } catch (final IOException e) {
-            log.error("Cannot stream request", e);
-        }
-    }
-
-    @Override
-    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        try {
-            process(req, resp);
-        } catch (final IOException e) {
-            log.error("Cannot stream request", e);
-        }
-    }
 }
