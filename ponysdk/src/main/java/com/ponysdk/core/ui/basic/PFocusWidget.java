@@ -29,11 +29,6 @@ import javax.json.JsonObject;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.ui.basic.event.HasPBlurHandlers;
-import com.ponysdk.core.ui.basic.event.HasPClickHandlers;
-import com.ponysdk.core.ui.basic.event.HasPDoubleClickHandlers;
-import com.ponysdk.core.ui.basic.event.HasPFocusHandlers;
-import com.ponysdk.core.ui.basic.event.HasPMouseOverHandlers;
 import com.ponysdk.core.ui.basic.event.PBlurEvent;
 import com.ponysdk.core.ui.basic.event.PBlurHandler;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
@@ -43,14 +38,12 @@ import com.ponysdk.core.ui.basic.event.PDoubleClickHandler;
 import com.ponysdk.core.ui.basic.event.PFocusEvent;
 import com.ponysdk.core.ui.basic.event.PFocusHandler;
 import com.ponysdk.core.ui.basic.event.PMouseOverEvent;
-import com.ponysdk.core.ui.basic.event.PMouseOverHandler;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 
 /**
  * Abstract base class for most widgets that can receive keyboard focus.
  */
-public abstract class PFocusWidget extends PWidget
-        implements Focusable, HasPClickHandlers, HasPDoubleClickHandlers, HasPMouseOverHandlers, HasPFocusHandlers, HasPBlurHandlers {
+public abstract class PFocusWidget extends PWidget implements Focusable {
 
     private boolean enabled = true;
     private boolean enabledOnRequest = false;
@@ -101,22 +94,18 @@ public abstract class PFocusWidget extends PWidget
         saveUpdate(ServerToClientModel.ENABLED_ON_REQUEST, enabledOnRequest);
     }
 
-    @Override
-    public HandlerRegistration addMouseOverHandler(final PMouseOverHandler handler) {
+    public HandlerRegistration addMouseOverHandler(final PMouseOverEvent.Handler handler) {
         return addDomHandler(handler, PMouseOverEvent.TYPE);
     }
 
-    @Override
     public HandlerRegistration addFocusHandler(final PFocusHandler handler) {
         return addDomHandler(handler, PFocusEvent.TYPE);
     }
 
-    @Override
     public HandlerRegistration addBlurHandler(final PBlurHandler handler) {
         return addDomHandler(handler, PBlurEvent.TYPE);
     }
 
-    @Override
     public HandlerRegistration addClickHandler(final PClickHandler handler) {
         if (showLoadingOnRequest || !enabledOnRequest) {
             return addDomHandler((PClickHandler) event -> {
@@ -131,7 +120,6 @@ public abstract class PFocusWidget extends PWidget
         }
     }
 
-    @Override
     public HandlerRegistration addDoubleClickHandler(final PDoubleClickHandler handler) {
         if (showLoadingOnRequest || !enabledOnRequest) {
             final PDoubleClickHandler clickHandler = event -> {

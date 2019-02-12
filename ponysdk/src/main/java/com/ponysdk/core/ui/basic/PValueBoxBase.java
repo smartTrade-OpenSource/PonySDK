@@ -32,12 +32,11 @@ import javax.json.JsonObject;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.ui.basic.event.PHasText;
 import com.ponysdk.core.ui.basic.event.PPasteEvent;
 import com.ponysdk.core.ui.basic.event.PPasteEvent.PPasteHandler;
 import com.ponysdk.core.writer.ModelWriter;
 
-public abstract class PValueBoxBase extends PFocusWidget implements PHasText {
+public abstract class PValueBoxBase extends PFocusWidget {
 
     protected static final String EMPTY = "";
 
@@ -90,12 +89,10 @@ public abstract class PValueBoxBase extends PFocusWidget implements PHasText {
         saveUpdate(ServerToClientModel.CURSOR_POSITION, Math.min(cursorPosition, this.text.length()));
     }
 
-    @Override
     public String getText() {
         return text;
     }
 
-    @Override
     public void setText(String text) {
         if (text == null) text = EMPTY; // null not send over json
         if (Objects.equals(this.text, text)) return;

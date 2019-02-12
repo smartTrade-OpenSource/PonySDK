@@ -27,7 +27,6 @@ import java.util.Objects;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.ui.basic.event.PHasHTML;
 import com.ponysdk.core.writer.ModelWriter;
 
 /**
@@ -39,7 +38,7 @@ import com.ponysdk.core.writer.ModelWriter;
  *
  * @see com.google.gwt.user.client.ui.Anchor
  */
-public class PAnchor extends PFocusWidget implements PHasHTML {
+public class PAnchor extends PFocusWidget {
 
     private String text;
     private String html;
@@ -113,12 +112,10 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
         if (initialized) saveUpdate(ServerToClientModel.HREF, href);
     }
 
-    @Override
     public String getText() {
         return text;
     }
 
-    @Override
     public void setText(final String text) {
         if (Objects.equals(this.text, text)) return;
         this.text = text;
@@ -126,12 +123,10 @@ public class PAnchor extends PFocusWidget implements PHasHTML {
         if (initialized) saveUpdate(ServerToClientModel.TEXT, text);
     }
 
-    @Override
     public String getHTML() {
         return html;
     }
 
-    @Override
     public void setHTML(final String html) {
         if (Objects.equals(this.html, html)) return;
         this.html = html;

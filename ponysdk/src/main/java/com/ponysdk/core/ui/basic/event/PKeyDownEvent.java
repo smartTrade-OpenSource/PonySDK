@@ -25,9 +25,16 @@ package com.ponysdk.core.ui.basic.event;
 
 import com.ponysdk.core.model.DomHandlerType;
 
-public class PKeyDownEvent extends PKeyEvent<PKeyDownHandler> {
+public class PKeyDownEvent extends PKeyEvent<PKeyDownEvent.Handler> {
 
     public static final PDomEvent.Type TYPE = new PDomEvent.Type(DomHandlerType.KEY_DOWN);
+
+    @FunctionalInterface
+    public interface Handler extends PKeyFilterHandler {
+
+        void onKeyDown(PKeyDownEvent keyDownEvent);
+
+    }
 
     public PKeyDownEvent(final Object sourceComponent, final int keyCode) {
         super(sourceComponent, keyCode);
@@ -39,7 +46,7 @@ public class PKeyDownEvent extends PKeyEvent<PKeyDownHandler> {
     }
 
     @Override
-    protected void dispatch(final PKeyDownHandler handler) {
+    protected void dispatch(final PKeyDownEvent.Handler handler) {
         handler.onKeyDown(this);
     }
 

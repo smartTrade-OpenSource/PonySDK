@@ -31,7 +31,6 @@ import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.event.PDragEnterEvent;
 import com.ponysdk.core.ui.basic.event.PDragEnterHandler;
 import com.ponysdk.core.ui.basic.event.PDragLeaveEvent;
-import com.ponysdk.core.ui.basic.event.PDragLeaveHandler;
 import com.ponysdk.core.ui.basic.event.PDragStartEvent;
 import com.ponysdk.core.ui.basic.event.PDragStartHandler;
 import com.ponysdk.core.ui.basic.event.PDropEvent;
@@ -88,7 +87,7 @@ public class DragAndDropPageActivity extends SamplePageActivity {
 
         box.addDomHandler((PDragEnterHandler) event -> box.addStyleName("dragenter"), PDragEnterEvent.TYPE);
 
-        box.addDomHandler((PDragLeaveHandler) event -> box.removeStyleName("dragenter"), PDragLeaveEvent.TYPE);
+        box.addDomHandler((PDragLeaveEvent.Handler) event -> box.removeStyleName("dragenter"), PDragLeaveEvent.TYPE);
 
         return box;
     }

@@ -46,9 +46,6 @@ import com.ponysdk.core.model.DomHandlerType;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.ui.basic.event.HasPHandlers;
-import com.ponysdk.core.ui.basic.event.HasPKeyPressHandlers;
-import com.ponysdk.core.ui.basic.event.HasPKeyUpHandlers;
 import com.ponysdk.core.ui.basic.event.HasPWidgets;
 import com.ponysdk.core.ui.basic.event.PBlurEvent;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
@@ -64,7 +61,6 @@ import com.ponysdk.core.ui.basic.event.PDragStartEvent;
 import com.ponysdk.core.ui.basic.event.PDropEvent;
 import com.ponysdk.core.ui.basic.event.PFocusEvent;
 import com.ponysdk.core.ui.basic.event.PKeyDownEvent;
-import com.ponysdk.core.ui.basic.event.PKeyDownHandler;
 import com.ponysdk.core.ui.basic.event.PKeyEvent;
 import com.ponysdk.core.ui.basic.event.PKeyPressEvent;
 import com.ponysdk.core.ui.basic.event.PKeyPressHandler;
@@ -93,7 +89,7 @@ import com.ponysdk.core.writer.ModelWriterCallback;
  * support for receiving events from the browser and being added directly to
  * {@link PPanel panels}.
  */
-public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers, HasPKeyPressHandlers, HasPKeyUpHandlers {
+public abstract class PWidget extends PObject implements IsPWidget {
 
     private static final Logger log = LoggerFactory.getLogger(PWidget.class);
     private static final SetPool<String> styleNamesSetPool = new SetPool<>();
@@ -403,7 +399,6 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         writer.endObject();
     }
 
-    @Override
     public HandlerRegistration addKeyPressHandler(final PKeyPressHandler handler) {
         final Integer[] filteredKeys = handler.getJsonFilteredKeys();
         if (filteredKeys != null)
@@ -411,7 +406,6 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         else return addDomHandler(handler, PKeyPressEvent.TYPE);
     }
 
-    @Override
     public HandlerRegistration addKeyUpHandler(final PKeyUpHandler handler) {
         final Integer[] filteredKeys = handler.getJsonFilteredKeys();
         if (filteredKeys != null)
@@ -419,7 +413,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         else return addDomHandler(handler, PKeyUpEvent.TYPE);
     }
 
-    public HandlerRegistration addKeyDownHandler(final PKeyDownHandler handler) {
+    public HandlerRegistration addKeyDownHandler(final PKeyDownEvent.Handler handler) {
         final Integer[] filteredKeys = handler.getJsonFilteredKeys();
         if (filteredKeys != null)
             return addDomHandler(handler, PKeyDownEvent.TYPE, new ServerBinaryModel(ServerToClientModel.KEY_FILTER, filteredKeys));
@@ -601,7 +595,6 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         fireEvent(event);
     }
 
-    @Override
     public void fireEvent(final Event<? extends EventHandler> event) {
         UIContext.fireEventFromSource(event, this);
     }
