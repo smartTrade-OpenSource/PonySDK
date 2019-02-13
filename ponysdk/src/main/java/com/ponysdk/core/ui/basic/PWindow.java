@@ -23,7 +23,12 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.json.JsonObject;
 
@@ -276,8 +281,8 @@ public class PWindow extends PObject {
 
             if (openHandlers != null) {
                 final POpenEvent e = new POpenEvent(this);
-                for (Iterator<POpenHandler> iter = openHandlers.iterator(); iter.hasNext(); ) {
-                    POpenHandler handler = iter.next();
+                for (final Iterator<POpenHandler> iter = openHandlers.iterator(); iter.hasNext();) {
+                    final POpenHandler handler = iter.next();
                     iter.remove();
                     handler.onOpen(e);
                 }
@@ -285,16 +290,16 @@ public class PWindow extends PObject {
         } else if (event.containsKey(ClientToServerModel.HANDLER_CLOSE.toStringValue())) {
             PWindowManager.unregisterWindow(this);
             if (subWindows != null) {
-                for (Iterator<PWindow> iter = subWindows.iterator(); iter.hasNext(); ) {
-                    PWindow window = iter.next();
+                for (final Iterator<PWindow> iter = subWindows.iterator(); iter.hasNext();) {
+                    final PWindow window = iter.next();
                     iter.remove();
                     window.close();
                 }
             }
             if (closeHandlers != null) {
                 final PCloseEvent e = new PCloseEvent(this);
-                for (Iterator<PCloseHandler> iter = closeHandlers.iterator(); iter.hasNext(); ) {
-                    PCloseHandler handler = iter.next();
+                for (final Iterator<PCloseHandler> iter = closeHandlers.iterator(); iter.hasNext();) {
+                    final PCloseHandler handler = iter.next();
                     iter.remove();
                     handler.onClose(e);
                 }
@@ -368,8 +373,10 @@ public class PWindow extends PObject {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        panelByZone.forEach((key, value) -> value.onDestroy());
-        panelByZone = null;
+        if (panelByZone != null) {
+            panelByZone.forEach((key, value) -> value.onDestroy());
+            panelByZone = null;
+        }
     }
 
     public PRootPanel getPRootPanel() {
