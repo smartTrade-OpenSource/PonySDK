@@ -135,7 +135,6 @@ public enum ServerToClientModel {
     WIDGET_WIDTH(ValueTypeModel.STRING),
     WIDGET_HEIGHT(ValueTypeModel.STRING),
     WIDGET_TITLE(ValueTypeModel.STRING),
-    STYLE_PRIMARY_NAME(ValueTypeModel.STRING),
     ENSURE_DEBUG_ID(ValueTypeModel.STRING),
     ITEM_INSERTED(ValueTypeModel.STRING),
     ITEM_UPDATED(ValueTypeModel.STRING),

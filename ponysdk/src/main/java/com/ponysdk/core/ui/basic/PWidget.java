@@ -110,7 +110,6 @@ public abstract class PWidget extends PObject implements IsPWidget {
     private String width;
     private String height;
     private String styleName;
-    private String stylePrimaryName;
     private String debugID;
     private boolean focused;
     protected int tabindex = -Integer.MAX_VALUE;
@@ -235,16 +234,6 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     public String getDebugID() {
         return debugID;
-    }
-
-    public String getStylePrimaryName() {
-        return stylePrimaryName;
-    }
-
-    public void setStylePrimaryName(final String stylePrimaryName) {
-        if (Objects.equals(this.stylePrimaryName, stylePrimaryName)) return;
-        this.stylePrimaryName = stylePrimaryName;
-        saveUpdate(ServerToClientModel.STYLE_PRIMARY_NAME, stylePrimaryName);
     }
 
     public IsPWidget getParent() {

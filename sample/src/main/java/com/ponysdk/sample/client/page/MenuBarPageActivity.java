@@ -56,7 +56,7 @@ public class MenuBarPageActivity extends SamplePageActivity {
         panel.add(Element.newPLabel("Vertical Menu Bar [Toolbar Style]"));
         panel.add(menuBar4);
 
-        menuBar2.setStylePrimaryName("samplePopup");
+        menuBar2.addStyleName("samplePopup");
         // menuBar3.addStyleName(PonySDKTheme.MENUBAR_LIGHT);
         menuBar4.setStyleName("pony-ActionToolbar");
 

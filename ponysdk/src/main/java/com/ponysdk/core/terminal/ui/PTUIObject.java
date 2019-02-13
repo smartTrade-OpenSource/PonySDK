@@ -83,9 +83,6 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
         } else if (ServerToClientModel.STYLE_NAME == model) {
             uiObject.setStyleName(binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.STYLE_PRIMARY_NAME == model) {
-            uiObject.setStylePrimaryName(binaryModel.getStringValue());
-            return true;
         } else if (ServerToClientModel.REMOVE_ATTRIBUTE_KEY == model) {
             uiObject.getElement().removeAttribute(binaryModel.getStringValue());
             return true;
@@ -93,7 +90,7 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
             uiObject.getElement().getStyle().clearProperty(binaryModel.getStringValue());
             return true;
         } else if (ServerToClientModel.FORCE_DOM_ID == model) {
-            uiObject.getElement().setId(getObjectID() + "");
+            uiObject.getElement().setId(String.valueOf(getObjectID()));
             return true;
         } else if (ServerToClientModel.FOCUS == model) {
             if (binaryModel.getBooleanValue()) uiObject.getElement().focus();
