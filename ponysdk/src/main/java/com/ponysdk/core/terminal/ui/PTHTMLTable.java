@@ -80,6 +80,12 @@ public abstract class PTHTMLTable<T extends HTMLTable> extends PTPanel<T> {
             final int row = buffer.readBinaryModel().getIntValue();
             uiObject.getRowFormatter().removeStyleName(row, value);
             return true;
+        } else if (ServerToClientModel.ROW_FORMATTER_SHOW_ROW == model) {
+            uiObject.getRowFormatter().setVisible(binaryModel.getIntValue(), true);
+            return true;
+        } else if (ServerToClientModel.ROW_FORMATTER_HIDE_ROW == model) {
+            uiObject.getRowFormatter().setVisible(binaryModel.getIntValue(), false);
+            return true;
         } else if (ServerToClientModel.CELL_FORMATTER_ADD_STYLE_NAME == model) {
             final String value = binaryModel.getStringValue();
             // ServerToClientModel.ROW
