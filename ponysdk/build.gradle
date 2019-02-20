@@ -9,7 +9,7 @@ ext {
     javaxServletVersion = '4.0.1'
     glassfishVersion = '1.1.4'
     jsonVersion = '1.1.4'
-    javaxValidationVersion = '2.0.1.Final'
+    javaxValidationVersion = '1.0.0.GA'
     seleniumVersion = '3.14.0'
     junitVersion = '4.12'
     tyrusVersion = '1.15'
