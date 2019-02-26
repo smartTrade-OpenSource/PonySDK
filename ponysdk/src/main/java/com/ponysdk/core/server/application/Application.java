@@ -33,7 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.server.servlet.SessionManager;
-import com.ponysdk.core.useragent.UserAgent;
 
 /**
  * Wrapper of the HTTPSession, and contains the UIContexts.
@@ -56,15 +55,6 @@ public class Application {
         this.id = id;
         this.session = session;
         this.configuration = configuration;
-    }
-
-    /**
-     * @deprecated Use {@link #Application(String, HttpSession, ApplicationManagerOption)} directly
-     */
-    @Deprecated(forRemoval = true, since = "v2.8.1")
-    public Application(final String id, final HttpSession session, final ApplicationConfiguration configuration,
-            final UserAgent userAgent) {
-        this(id, session, configuration);
     }
 
     public void registerUIContext(final UIContext uiContext) {
@@ -108,7 +98,7 @@ public class Application {
 
     public void pushToClients(final Object message) {
         for (final UIContext uiContext : getUIContexts()) {
-            if (log.isDebugEnabled()) log.debug("Pushing to {}", uiContext);
+            log.debug("Pushing to {}", uiContext);
             try {
                 uiContext.pushToClient(message);
             } catch (final Throwable throwable) {

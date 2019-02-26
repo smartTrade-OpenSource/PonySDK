@@ -37,6 +37,7 @@ public class Result<T> implements Serializable {
     private Duration executionDuration;
 
     public Result() {
+        this(null);
     }
 
     public Result(final T data) {
@@ -66,4 +67,5 @@ public class Result<T> implements Serializable {
     public void setExecutionDuration(final Duration executionTime) {
         this.executionDuration = executionTime;
     }
+
 }

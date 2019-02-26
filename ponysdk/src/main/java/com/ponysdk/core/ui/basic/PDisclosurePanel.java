@@ -34,7 +34,6 @@ import javax.json.JsonObject;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.ui.basic.event.HasPAnimation;
 import com.ponysdk.core.ui.basic.event.HasPWidgets;
 import com.ponysdk.core.ui.basic.event.PCloseEvent;
 import com.ponysdk.core.ui.basic.event.PCloseHandler;
@@ -58,7 +57,7 @@ import com.ponysdk.core.writer.ModelWriter;
  * .gwt-DisclosurePanel-open .header { ... }
  * </p>
  */
-public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimation, PAcceptsOneWidget {
+public class PDisclosurePanel extends PWidget implements HasPWidgets, PAcceptsOneWidget {
 
     private final List<PCloseHandler> closeHandlers = new ArrayList<>();
     private final List<POpenHandler> openHandlers = new ArrayList<>();
@@ -189,12 +188,10 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, HasPAnimat
         else saveUpdate(ServerToClientModel.CLOSE, isOpen);
     }
 
-    @Override
     public boolean isAnimationEnabled() {
         return animationEnabled;
     }
 
-    @Override
     public void setAnimationEnabled(final boolean animationEnabled) {
         if (Objects.equals(this.animationEnabled, animationEnabled)) return;
         this.animationEnabled = animationEnabled;

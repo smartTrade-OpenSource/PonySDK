@@ -27,7 +27,7 @@ import com.ponysdk.core.ui.eventbus.EventHandler;
 
 public abstract class PMouseEvent<H extends EventHandler> extends PHumanInputEvent<H> {
 
-    private int nativeButton;
+    private NativeButton nativeButton;
     private int x;
     private int y;
     private int clientX;
@@ -94,12 +94,12 @@ public abstract class PMouseEvent<H extends EventHandler> extends PHumanInputEve
         this.sourceOffsetWidth = sourceOffsetWidth;
     }
 
-    public int getNativeButton() {
+    public NativeButton getNativeButton() {
         return nativeButton;
     }
 
     public void setNativeButton(final int nativeButton) {
-        this.nativeButton = nativeButton;
+        this.nativeButton = NativeButton.fromValue(nativeButton);
     }
 
     public int getX() {
@@ -155,6 +155,26 @@ public abstract class PMouseEvent<H extends EventHandler> extends PHumanInputEve
         return super.toString() + " ; x = " + x + " ; y = " + y + " ; nativeButton = " + nativeButton + " ; clientX = " + clientX
                 + " ; clientY = " + clientY + " ; sourceAbsoluteLeft = " + sourceAbsoluteLeft + " ; sourceAbsoluteTop = "
                 + sourceAbsoluteTop + " ; sourceOffsetHeight = " + sourceOffsetHeight + " ; sourceOffsetWidth = " + sourceOffsetWidth;
+    }
+
+    public enum NativeButton {
+
+        BUTTON_LEFT(1),
+        BUTTON_MIDDLE(4),
+        BUTTON_RIGHT(2);
+
+        private int value;
+
+        private NativeButton(final int value) {
+            this.value = value;
+        }
+
+        public static final NativeButton fromValue(final int value) {
+            for (final NativeButton button : values()) {
+                if (button.value == value) return button;
+            }
+            throw new IllegalArgumentException("No button with this value : " + value);
+        }
     }
 
 }

@@ -25,7 +25,6 @@ package com.ponysdk.core.ui.basic;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -38,20 +37,17 @@ import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.ui.basic.event.PLayoutResizeEvent;
-import com.ponysdk.core.ui.basic.event.PLayoutResizeHandler;
+import com.ponysdk.core.util.SetUtils;
 
 /**
- * A panel that adds user-positioned splitters between each of its child
- * widgets.
+ * A panel that adds user-positioned splitters between each of its child widgets.
  * <p>
- * This panel is used in the same way as {@link PDockLayoutPanel}, except that
- * its children's sizes are always specified in {@link PUnit#PX} units, and each
- * pair of child widgets has a splitter between them that the user can drag.
+ * This panel is used in the same way as {@link PDockLayoutPanel}, except that its children's sizes are always specified
+ * in {@link PUnit#PX} units, and each pair of child widgets has a splitter between them that the user can drag.
  * </p>
  * <p>
- * This widget will <em>only</em> work in standards mode, which requires that
- * the HTML page in which it is run have an explicit &lt;!DOCTYPE&gt;
- * declaration.
+ * This widget will <em>only</em> work in standards mode, which requires that the HTML page in which it is run have an
+ * explicit &lt;!DOCTYPE&gt; declaration.
  * </p>
  * <h3>CSS Style Rules</h3>
  * <ul class='css'>
@@ -64,7 +60,7 @@ import com.ponysdk.core.ui.basic.event.PLayoutResizeHandler;
  */
 public class PSplitLayoutPanel extends PDockLayoutPanel {
 
-    private final Set<PLayoutResizeHandler> handlers = new HashSet<>(4);
+    private final Set<PLayoutResizeEvent.Handler> handlers = SetUtils.newArraySet(4);
     private final Map<PWidget, SplitInfoHolder> splitInfoByWidget = new HashMap<>(4);
 
     protected PSplitLayoutPanel() {
@@ -171,22 +167,22 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
     }
 
     private void fireLayoutResize(final PLayoutResizeEvent event) {
-        for (final PLayoutResizeHandler h : handlers) {
+        for (final PLayoutResizeEvent.Handler h : handlers) {
             h.onLayoutResize(event);
         }
     }
 
-    public void addLayoutResizeHandler(final PLayoutResizeHandler resizeHandler) {
+    public void addLayoutResizeHandler(final PLayoutResizeEvent.Handler resizeHandler) {
         if (handlers.isEmpty()) saveAddHandler(HandlerModel.HANDLER_RESIZE);
         handlers.add(resizeHandler);
     }
 
-    public void removeLayoutResizeHandler(final PLayoutResizeHandler resizeHandler) {
+    public void removeLayoutResizeHandler(final PLayoutResizeEvent.Handler resizeHandler) {
         handlers.remove(resizeHandler);
         if (handlers.isEmpty()) saveRemoveHandler(HandlerModel.HANDLER_RESIZE);
     }
 
-    public Collection<PLayoutResizeHandler> getResizeHandlers() {
+    public Collection<PLayoutResizeEvent.Handler> getResizeHandlers() {
         return handlers;
     }
 

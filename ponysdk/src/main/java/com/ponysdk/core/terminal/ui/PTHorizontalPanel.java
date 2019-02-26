@@ -57,10 +57,10 @@ public class PTHorizontalPanel extends PTCellPanel<HorizontalPanel> {
             uiObject.setSpacing(binaryModel.getIntValue());
             return true;
         } else if (ServerToClientModel.HORIZONTAL_ALIGNMENT == model) {
-            uiObject.setHorizontalAlignment(GWTConverter.asHorizontalAlignmentConstant(binaryModel.getByteValue()));
+            uiObject.setHorizontalAlignment(GWTConverter.asHorizontalAlignmentConstant(binaryModel.getIntValue()));
             return true;
         } else if (ServerToClientModel.VERTICAL_ALIGNMENT == model) {
-            uiObject.setVerticalAlignment(GWTConverter.asVerticalAlignmentConstant(binaryModel.getByteValue()));
+            uiObject.setVerticalAlignment(GWTConverter.asVerticalAlignmentConstant(binaryModel.getIntValue()));
             return true;
         } else {
             return super.update(buffer, binaryModel);

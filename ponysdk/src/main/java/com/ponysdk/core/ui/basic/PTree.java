@@ -36,8 +36,6 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.ui.basic.event.HasPAnimation;
-import com.ponysdk.core.ui.basic.event.HasPSelectionHandlers;
 import com.ponysdk.core.ui.basic.event.PSelectionEvent;
 import com.ponysdk.core.ui.basic.event.PSelectionHandler;
 
@@ -54,7 +52,7 @@ import com.ponysdk.core.ui.basic.event.PSelectionHandler;
  * <dd>a selected tree item</dd>
  * </dl>
  */
-public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, HasPAnimation, Iterable<PTreeItem> {
+public class PTree extends PWidget implements Iterable<PTreeItem> {
 
     private final Map<PWidget, PTreeItem> childWidgets = new HashMap<>();
 
@@ -80,14 +78,12 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
         return WidgetType.TREE;
     }
 
-    @Override
     public void setAnimationEnabled(final boolean animationEnabled) {
         if (Objects.equals(this.animationEnabled, animationEnabled)) return;
         this.animationEnabled = animationEnabled;
         saveUpdate(ServerToClientModel.ANIMATION, animationEnabled);
     }
 
-    @Override
     public boolean isAnimationEnabled() {
         return animationEnabled;
     }
@@ -154,13 +150,11 @@ public class PTree extends PWidget implements HasPSelectionHandlers<PTreeItem>, 
         }
     }
 
-    @Override
     public void addSelectionHandler(final PSelectionHandler<PTreeItem> handler) {
         if (selectionHandlers == null) selectionHandlers = new ArrayList<>();
         selectionHandlers.add(handler);
     }
 
-    @Override
     public void removeSelectionHandler(final PSelectionHandler<PTreeItem> handler) {
         if (selectionHandlers != null) selectionHandlers.remove(handler);
     }

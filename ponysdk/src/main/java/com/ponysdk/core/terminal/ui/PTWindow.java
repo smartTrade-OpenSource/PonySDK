@@ -37,15 +37,13 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 import elemental.client.Browser;
 import elemental.html.Uint8Array;
-import elemental.html.Window;
 
-public class PTWindow extends AbstractPTObject implements PostMessageHandler {
+public class PTWindow extends PTAbstractWindow implements PostMessageHandler {
 
     private static final Logger log = Logger.getLogger(PTWindow.class.getName());
 
     private static final String EMPTY = "";
 
-    private Window window;
     private String url = EMPTY;
     private String name = EMPTY;
     private String features;
@@ -97,44 +95,11 @@ public class PTWindow extends AbstractPTObject implements PostMessageHandler {
                 uiBuilder.sendWarningMessageToServer("Can't open PTWindow #" + objectID + ". Check the browser's settings", objectID);
             }
             return true;
-        } else if (ServerToClientModel.PRINT == model) {
-            window.print();
-            return true;
-        } else if (ServerToClientModel.WINDOW_TITLE == model) {
-            setTitle(binaryModel.getStringValue(), window);
-            return true;
-        } else if (ServerToClientModel.WINDOW_LOCATION_REPLACE == model) {
-            window.getLocation().replace(binaryModel.getStringValue());
-            return true;
-        } else if (ServerToClientModel.RESIZE_BY_X == model) {
-            final float x = (float) binaryModel.getDoubleValue();
-            final float y = (float) buffer.readBinaryModel().getDoubleValue();
-            window.resizeBy(x, y);
-            return true;
-        } else if (ServerToClientModel.RESIZE_TO_WIDTH == model) {
-            final int width = binaryModel.getIntValue();
-            final int height = buffer.readBinaryModel().getIntValue();
-            window.resizeTo(width, height);
-            return true;
-        } else if (ServerToClientModel.MOVE_BY_X == model) {
-            final float x = (float) binaryModel.getDoubleValue();
-            final float y = (float) buffer.readBinaryModel().getDoubleValue();
-            window.moveBy(x, y);
-            return true;
-        } else if (ServerToClientModel.MOVE_TO_X == model) {
-            final float x = (float) binaryModel.getDoubleValue();
-            final float y = (float) buffer.readBinaryModel().getDoubleValue();
-            window.moveTo(x, y);
-            return true;
-        } else if (ServerToClientModel.FOCUS == model) {
-            if (binaryModel.getBooleanValue()) window.focus();
-            else window.blur();
-            return true;
         } else if (ServerToClientModel.CLOSE == model) {
             close(false);
             return true;
         } else {
-            return false;
+            return super.update(buffer, binaryModel);
         }
     }
 
@@ -163,10 +128,6 @@ public class PTWindow extends AbstractPTObject implements PostMessageHandler {
     public boolean isReady() {
         return ready;
     }
-
-    public final native void setTitle(String title, Window window) /*-{
-                                                                   window.document.title = title;
-                                                                   }-*/;
 
     protected void onClose() {
         if (ready && window != null) {

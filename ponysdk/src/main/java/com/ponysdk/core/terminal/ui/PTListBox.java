@@ -27,6 +27,7 @@ import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.OptGroupElement;
 import com.google.gwt.dom.client.OptionElement;
 import com.google.gwt.dom.client.SelectElement;
+import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.user.client.ui.ListBox;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -91,7 +92,7 @@ public class PTListBox extends PTFocusWidget<ListBox> {
             }
             return true;
         } else if (ServerToClientModel.ITEM_ADD == model) {
-            final String items = binaryModel.getStringValue();
+            final JSONArray items = binaryModel.getArrayValue();
             // ServerToClientModel.ITEM_GROUP
             final String groupName = buffer.readBinaryModel().getStringValue();
             final SelectElement select = uiObject.getElement().cast();
@@ -99,11 +100,9 @@ public class PTListBox extends PTFocusWidget<ListBox> {
             final OptGroupElement groupElement = Document.get().createOptGroupElement();
             groupElement.setLabel(groupName);
 
-            final String[] tokens = items.split(";");
-
-            for (final String token : tokens) {
+            for (int i = 0; i < items.size(); i++) {
                 final OptionElement optElement = Document.get().createOptionElement();
-                optElement.setInnerText(token);
+                optElement.setInnerText(items.get(i).isString().stringValue());
                 groupElement.appendChild(optElement);
             }
             select.appendChild(groupElement);

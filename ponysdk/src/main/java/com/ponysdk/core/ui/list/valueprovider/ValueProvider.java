@@ -23,6 +23,8 @@
 
 package com.ponysdk.core.ui.list.valueprovider;
 
+import java.util.function.Function;
+
 import com.ponysdk.core.ui.list.DataGridActivity;
 import com.ponysdk.core.ui.list.DataGridColumnDescriptor;
 
@@ -38,9 +40,18 @@ import com.ponysdk.core.ui.list.DataGridColumnDescriptor;
  *            type of data managed by a given {@link DataGridActivity}
  * @param <V>
  *            type of the rendered object for a given cell
+ * @deprecated Use {@link Function} directly instead
+ * @since v2.8.10
  */
+@Deprecated(forRemoval = true, since = "v2.8.10")
 @FunctionalInterface
-public interface ValueProvider<D, V> {
+public interface ValueProvider<D, V> extends Function<D, V> {
 
     V getValue(D data);
+
+    @Override
+    default V apply(final D data) {
+        return getValue(data);
+    }
+
 }

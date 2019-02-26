@@ -35,7 +35,6 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.event.HasPChangeHandlers;
-import com.ponysdk.core.ui.basic.event.HasPSubmitCompleteHandlers;
 import com.ponysdk.core.ui.basic.event.PChangeEvent;
 import com.ponysdk.core.ui.basic.event.PChangeHandler;
 import com.ponysdk.core.ui.basic.event.PSubmitCompleteHandler;
@@ -44,7 +43,7 @@ import com.ponysdk.core.ui.eventbus.StreamHandler;
 /**
  * A widget that wraps the HTML &lt;input type='file'&gt; element.
  */
-public class PFileUpload extends PWidget implements HasPChangeHandlers, HasPSubmitCompleteHandlers {
+public class PFileUpload extends PWidget implements HasPChangeHandlers {
 
     private final List<PChangeHandler> changeHandlers = new ArrayList<>();
 
@@ -94,7 +93,7 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, HasPSubm
     }
 
     public void submit() {
-        UIContext.get().stackEmbeddedStreamRequest(streamHandler, getID());
+        UIContext.get().stackEmbeddedStreamRequest(streamHandler, this);
     }
 
     public String getName() {
@@ -152,7 +151,6 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers, HasPSubm
         this.streamHandler = streamHandler;
     }
 
-    @Override
     public void addSubmitCompleteHandler(final PSubmitCompleteHandler handler) {
         submitCompleteHandlers.add(handler);
     }

@@ -37,6 +37,7 @@ import javax.json.JsonObject;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.ui.basic.PListBox.ListItem;
 import com.ponysdk.core.ui.basic.event.HasPChangeHandlers;
 import com.ponysdk.core.ui.basic.event.PChangeEvent;
 import com.ponysdk.core.ui.basic.event.PChangeHandler;
@@ -49,7 +50,7 @@ import com.ponysdk.core.ui.basic.event.PChangeHandler;
  * <li>.gwt-ListBox { }</li>
  * </ul>
  */
-public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChangeHandler {
+public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChangeHandler, Iterable<ListItem> {
 
     private static final String EMPTY = "";
 
@@ -81,7 +82,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     @Override
     public void onClientData(final JsonObject jsonObject) {
-        if (!isVisible()) return;
+        if (!isVisible() || !isEnabled()) return;
         if (jsonObject.containsKey(ClientToServerModel.HANDLER_CHANGE.toStringValue())) {
             final String data = jsonObject.getString(ClientToServerModel.HANDLER_CHANGE.toStringValue());
             final String[] tokens = data.split(COMMA);
@@ -112,11 +113,8 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
         items.forEach(item -> this.items.add(new ListItem(item, item)));
 
-        final String itemsTextual = items.toString();
-        final String s = itemsTextual.substring(1, itemsTextual.length() - 1).replaceAll(",", ";").replaceAll(" ", EMPTY);
-
         saveUpdate(writer -> {
-            writer.write(ServerToClientModel.ITEM_ADD, s);
+            writer.write(ServerToClientModel.ITEM_ADD, items.toArray(new String[items.size()]));
             writer.write(ServerToClientModel.ITEM_GROUP, group);
         });
     }
@@ -313,6 +311,11 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     public String getItem(final int index) {
         return items.get(index).label;
+    }
+
+    @Override
+    public Iterator<ListItem> iterator() {
+        return items.iterator();
     }
 
     private void checkItem(final String label) {

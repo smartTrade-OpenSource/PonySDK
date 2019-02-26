@@ -23,6 +23,10 @@
 
 package com.ponysdk.core.ui.basic.event;
 
+/**
+ * @deprecated Useless
+ */
+@Deprecated(since = "v2.8.12", forRemoval = true)
 public interface HasPSelectionHandlers<T> {
 
     void addSelectionHandler(PSelectionHandler<T> handler);

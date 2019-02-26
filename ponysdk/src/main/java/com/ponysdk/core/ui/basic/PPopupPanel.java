@@ -38,7 +38,6 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.ui.basic.event.HasPAnimation;
 import com.ponysdk.core.ui.basic.event.PCloseEvent;
 import com.ponysdk.core.ui.basic.event.PCloseHandler;
 import com.ponysdk.core.writer.ModelWriter;
@@ -71,7 +70,7 @@ import com.ponysdk.core.writer.ModelWriter;
  * <dd>the glass background behind the popup</dd>
  * </dl>
  */
-public class PPopupPanel extends PSimplePanel implements HasPAnimation {
+public class PPopupPanel extends PSimplePanel {
 
     private static final Logger log = LoggerFactory.getLogger(PPopupPanel.class);
 
@@ -138,12 +137,10 @@ public class PPopupPanel extends PSimplePanel implements HasPAnimation {
         removeFromParent();
     }
 
-    @Override
     public boolean isAnimationEnabled() {
         return animationEnabled;
     }
 
-    @Override
     public void setAnimationEnabled(final boolean animationEnabled) {
         if (Objects.equals(this.animationEnabled, animationEnabled)) return;
         this.animationEnabled = animationEnabled;

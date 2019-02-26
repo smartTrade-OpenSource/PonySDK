@@ -32,14 +32,13 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.ui.basic.event.HasPScrollHandlers;
 import com.ponysdk.core.ui.basic.event.PScrollEvent;
 import com.ponysdk.core.ui.basic.event.PScrollEvent.PScrollHandler;
 
 /**
  * A simple panel that wraps its contents in a scrollable area.
  */
-public class PScrollPanel extends PSimplePanel implements HasPScrollHandlers {
+public class PScrollPanel extends PSimplePanel {
 
     private List<PScrollHandler> scrollHandlers;
 
@@ -79,7 +78,6 @@ public class PScrollPanel extends PSimplePanel implements HasPScrollHandlers {
         saveUpdate(writer -> writer.write(ServerToClientModel.SCROLL_TO, type.ordinal()));
     }
 
-    @Override
     public void addScrollHandler(final PScrollHandler handler) {
         if (scrollHandlers == null) {
             scrollHandlers = new ArrayList<>();
@@ -88,7 +86,6 @@ public class PScrollPanel extends PSimplePanel implements HasPScrollHandlers {
         scrollHandlers.add(handler);
     }
 
-    @Override
     public void removeScrollHandler(final PScrollHandler handler) {
         if (scrollHandlers != null) {
             scrollHandlers.remove(handler);

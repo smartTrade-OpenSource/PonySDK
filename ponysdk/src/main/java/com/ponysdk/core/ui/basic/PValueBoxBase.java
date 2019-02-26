@@ -32,12 +32,11 @@ import javax.json.JsonObject;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.ui.basic.event.PHasText;
 import com.ponysdk.core.ui.basic.event.PPasteEvent;
 import com.ponysdk.core.ui.basic.event.PPasteEvent.PPasteHandler;
 import com.ponysdk.core.writer.ModelWriter;
 
-public abstract class PValueBoxBase extends PFocusWidget implements PHasText {
+public abstract class PValueBoxBase extends PFocusWidget {
 
     protected static final String EMPTY = "";
 
@@ -68,23 +67,32 @@ public abstract class PValueBoxBase extends PFocusWidget implements PHasText {
         saveUpdate(writer -> writer.write(ServerToClientModel.SELECT_ALL));
     }
 
+    public void select(final int startPosition, final int rangeLength) {
+        final int textLength = getText().length();
+        if (startPosition < textLength) {
+            saveUpdate(writer -> {
+                writer.write(ServerToClientModel.SELECTION_RANGE_START, startPosition);
+                writer.write(ServerToClientModel.SELECTION_RANGE_LENGTH, Math.min(rangeLength, textLength - startPosition));
+            });
+        }
+    }
+
+    /**
+     * @deprecated Use {@link #select(int, int)} instead
+     */
+    @Deprecated(forRemoval = true, since = "v2.8.0")
+    public void setSelectionRange(final int startPosition, final int rangeLength) {
+        select(startPosition, rangeLength);
+    }
+
     public void setCursorPosition(final int cursorPosition) {
         saveUpdate(ServerToClientModel.CURSOR_POSITION, Math.min(cursorPosition, this.text.length()));
     }
 
-    public void setSelectionRange(final int startPosition, final int rangeLength) {
-        saveUpdate(writer -> {
-            writer.write(ServerToClientModel.SELECTION_RANGE_START, startPosition);
-            writer.write(ServerToClientModel.SELECTION_RANGE_LENGTH, rangeLength);
-        });
-    }
-
-    @Override
     public String getText() {
         return text;
     }
 
-    @Override
     public void setText(String text) {
         if (text == null) text = EMPTY; // null not send over json
         if (Objects.equals(this.text, text)) return;
@@ -109,7 +117,7 @@ public abstract class PValueBoxBase extends PFocusWidget implements PHasText {
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (!isVisible()) return;
+        if (!isVisible() || !isEnabled()) return;
         if (instruction.containsKey(ClientToServerModel.HANDLER_PASTE.toStringValue())) {
             if (pasteHandlers != null) {
                 final String data = instruction.getString(ClientToServerModel.HANDLER_PASTE.toStringValue());
@@ -119,6 +127,10 @@ public abstract class PValueBoxBase extends PFocusWidget implements PHasText {
         } else {
             super.onClientData(instruction);
         }
+    }
+
+    public boolean isEmpty() {
+        return text.isEmpty();
     }
 
     @Override

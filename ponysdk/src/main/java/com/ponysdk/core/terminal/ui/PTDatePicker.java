@@ -27,6 +27,8 @@ import java.util.Date;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.datepicker.client.DatePicker;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.DateConverter;
@@ -37,8 +39,6 @@ import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public class PTDatePicker extends PTWidget<DatePicker> {
-
-    private static final String DATE_SEPARATOR = ",";
 
     private DateTimeFormat format;
 
@@ -82,30 +82,33 @@ public class PTDatePicker extends PTWidget<DatePicker> {
             uiObject.setCurrentMonth(DateConverter.fromTimestamp(binaryModel.getLongValue()));
             return true;
         } else if (ServerToClientModel.DATE_ENABLED == model) {
-            final String[] dates = binaryModel.getStringValue().split(DATE_SEPARATOR);
+            final JSONArray dates = binaryModel.getArrayValue();
             // ServerToClientModel.ENABLED
             final boolean enabled = buffer.readBinaryModel().getBooleanValue();
-            for (final String rawDate : dates) {
-                final Date date = DateConverter.decode(rawDate);
+            for (int i = 0; i < dates.size(); i++) {
+                final JSONValue rawObject = dates.get(i);
+                final Date date = DateConverter.decode((long) rawObject.isNumber().doubleValue());
                 if (date.after(uiObject.getFirstDate()) && date.before(uiObject.getLastDate())) {
                     uiObject.setTransientEnabledOnDates(enabled, date);
                 }
             }
             return true;
         } else if (ServerToClientModel.ADD_DATE_STYLE == model) {
-            final String[] dates = binaryModel.getStringValue().split(DATE_SEPARATOR);
+            final JSONArray dates = binaryModel.getArrayValue();
             // ServerToClientModel.STYLE_NAME
             final String style = buffer.readBinaryModel().getStringValue();
-            for (final String date : dates) {
-                uiObject.addStyleToDates(style, DateConverter.decode(date));
+            for (int i = 0; i < dates.size(); i++) {
+                final JSONValue rawObject = dates.get(i);
+                uiObject.addStyleToDates(style, DateConverter.decode((long) rawObject.isNumber().doubleValue()));
             }
             return true;
         } else if (ServerToClientModel.REMOVE_DATE_STYLE == model) {
-            final String[] dates = binaryModel.getStringValue().split(DATE_SEPARATOR);
+            final JSONArray dates = binaryModel.getArrayValue();
             // ServerToClientModel.STYLE_NAME
             final String style = buffer.readBinaryModel().getStringValue();
-            for (final String date : dates) {
-                uiObject.removeStyleFromDates(style, DateConverter.decode(date));
+            for (int i = 0; i < dates.size(); i++) {
+                final JSONValue rawObject = dates.get(i);
+                uiObject.removeStyleFromDates(style, DateConverter.decode((long) rawObject.isNumber().doubleValue()));
             }
             return true;
         } else if (ServerToClientModel.YEAR_ARROWS_VISIBLE == model) {

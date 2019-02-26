@@ -26,6 +26,7 @@ package com.ponysdk.core.ui.basic;
 import java.text.SimpleDateFormat;
 
 import com.ponysdk.core.model.PUnit;
+import com.ponysdk.core.ui.formatter.TextFunction;
 
 public class DefaultElementFactory implements ElementFactory {
 
@@ -438,6 +439,16 @@ public class DefaultElementFactory implements ElementFactory {
     @Override
     public PFrame newPFrame(final String url) {
         return new PFrame(url);
+    }
+
+    @Override
+    public PFunctionalLabel newPFunctionalLabel(final TextFunction textFunction) {
+        return new PFunctionalLabel(textFunction);
+    }
+
+    @Override
+    public PFunctionalLabel newPFunctionalLabel(final TextFunction textFunction, final Object... args) {
+        return new PFunctionalLabel(textFunction, args);
     }
 
 }

@@ -81,7 +81,7 @@ public class CommunicationSanityChecker {
     }
 
     public void start() {
-        if (!isStarted()) {
+        if (!isStarted() && heartBeatPeriod > 0) {
             currentState = CommunicationState.OK;
             sanityChecker = (RunnableScheduledFuture<?>) sanityCheckerTimer.scheduleWithFixedDelay(() -> {
                 try {
@@ -109,7 +109,6 @@ public class CommunicationSanityChecker {
 
     public void setHeartBeatPeriod(final long heartbeat, final TimeUnit timeUnit) {
         heartBeatPeriod = TimeUnit.MILLISECONDS.convert(heartbeat, timeUnit);
-        if (heartBeatPeriod <= 0) throw new IllegalArgumentException("'HeartBeatPeriod' parameter must be gretter than 0");
     }
 
     private boolean isCommunicationSuspectedToBeNonFunctional(final long now) {
@@ -117,7 +116,7 @@ public class CommunicationSanityChecker {
         return now - uiContext.getLastReceivedTime() >= heartBeatPeriod;
     }
 
-    protected void checkCommunicationState() {
+    private void checkCommunicationState() {
         final long now = System.currentTimeMillis();
         switch (currentState) {
             case OK:
@@ -127,7 +126,6 @@ public class CommunicationSanityChecker {
                     if (log.isDebugEnabled()) log.debug(
                         "No message have been received on UIContext #{}, communication suspected to be non functional, sending heartbeat...",
                         uiContext.getID());
-                    //uiContext.sendHeartBeat();
                 }
                 break;
             case SUSPECT:
@@ -152,7 +150,6 @@ public class CommunicationSanityChecker {
                 break;
         }
 
-        //uiContext.sendHeartBeat(); // Useless ?
         uiContext.sendRoundTrip();
     }
 

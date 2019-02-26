@@ -24,10 +24,18 @@
 package com.ponysdk.core.ui.basic.event;
 
 import com.ponysdk.core.model.DomHandlerType;
+import com.ponysdk.core.ui.eventbus.EventHandler;
 
-public class PDragOverEvent extends PDomEvent<PDragOverHandler> {
+public class PDragOverEvent extends PDomEvent<PDragOverEvent.Handler> {
 
     public static final PDomEvent.Type TYPE = new PDomEvent.Type(DomHandlerType.DRAG_OVER);
+
+    @FunctionalInterface
+    public interface Handler extends EventHandler {
+
+        void onDragOver(PDragOverEvent event);
+
+    }
 
     public PDragOverEvent(final Object sourceComponent) {
         super(sourceComponent);
@@ -39,7 +47,7 @@ public class PDragOverEvent extends PDomEvent<PDragOverHandler> {
     }
 
     @Override
-    protected void dispatch(final PDragOverHandler handler) {
+    protected void dispatch(final PDragOverEvent.Handler handler) {
         handler.onDragOver(this);
     }
 

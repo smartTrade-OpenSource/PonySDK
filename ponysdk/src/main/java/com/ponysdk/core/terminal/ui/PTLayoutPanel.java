@@ -43,19 +43,19 @@ public class PTLayoutPanel extends PTComplexPanel<LayoutPanel> {
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         final ServerToClientModel model = binaryModel.getModel();
         if (ServerToClientModel.WIDGET_HORIZONTAL_ALIGNMENT == model) {
-            final Alignment alignment = GWTConverter.asAlignment(binaryModel.getByteValue());
+            final Alignment alignment = GWTConverter.asAlignment(binaryModel.getIntValue());
             // ServerToClientModel.WIDGET_ID
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
             uiObject.setWidgetHorizontalPosition(w, alignment);
             return true;
         } else if (ServerToClientModel.WIDGET_VERTICAL_ALIGNMENT == model) {
-            final Alignment alignment = GWTConverter.asAlignment(binaryModel.getByteValue());
+            final Alignment alignment = GWTConverter.asAlignment(binaryModel.getIntValue());
             // ServerToClientModel.WIDGET_ID
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
             uiObject.setWidgetVerticalPosition(w, alignment);
             return true;
         } else if (ServerToClientModel.UNIT == model) {
-            final Unit unit = GWTConverter.asUnit(binaryModel.getByteValue());
+            final Unit unit = GWTConverter.asUnit(binaryModel.getIntValue());
             // ServerToClientModel.WIDGET_ID
             final Widget w = asWidget(buffer.readBinaryModel().getIntValue(), uiBuilder);
 

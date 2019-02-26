@@ -23,9 +23,10 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -40,19 +41,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.DomHandlerConverter;
 import com.ponysdk.core.model.DomHandlerType;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.server.stm.Txn;
-import com.ponysdk.core.ui.basic.event.HasPHandlers;
-import com.ponysdk.core.ui.basic.event.HasPKeyPressHandlers;
-import com.ponysdk.core.ui.basic.event.HasPKeyUpHandlers;
 import com.ponysdk.core.ui.basic.event.HasPWidgets;
 import com.ponysdk.core.ui.basic.event.PBlurEvent;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PContextMenuEvent;
 import com.ponysdk.core.ui.basic.event.PDomEvent;
+import com.ponysdk.core.ui.basic.event.PDomEvent.Type;
 import com.ponysdk.core.ui.basic.event.PDoubleClickEvent;
 import com.ponysdk.core.ui.basic.event.PDragEndEvent;
 import com.ponysdk.core.ui.basic.event.PDragEnterEvent;
@@ -62,7 +61,6 @@ import com.ponysdk.core.ui.basic.event.PDragStartEvent;
 import com.ponysdk.core.ui.basic.event.PDropEvent;
 import com.ponysdk.core.ui.basic.event.PFocusEvent;
 import com.ponysdk.core.ui.basic.event.PKeyDownEvent;
-import com.ponysdk.core.ui.basic.event.PKeyDownHandler;
 import com.ponysdk.core.ui.basic.event.PKeyEvent;
 import com.ponysdk.core.ui.basic.event.PKeyPressEvent;
 import com.ponysdk.core.ui.basic.event.PKeyPressHandler;
@@ -74,13 +72,15 @@ import com.ponysdk.core.ui.basic.event.PMouseOutEvent;
 import com.ponysdk.core.ui.basic.event.PMouseOverEvent;
 import com.ponysdk.core.ui.basic.event.PMouseUpEvent;
 import com.ponysdk.core.ui.basic.event.PMouseWhellEvent;
+import com.ponysdk.core.ui.basic.event.PVisibilityEvent;
+import com.ponysdk.core.ui.basic.event.PVisibilityEvent.PVisibilityHandler;
 import com.ponysdk.core.ui.eventbus.Event;
-import com.ponysdk.core.ui.eventbus.EventBus;
 import com.ponysdk.core.ui.eventbus.EventHandler;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
-import com.ponysdk.core.ui.eventbus.SimpleEventBus;
 import com.ponysdk.core.ui.model.PEventType;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
+import com.ponysdk.core.util.SetPool;
+import com.ponysdk.core.util.SetUtils;
 import com.ponysdk.core.writer.ModelWriter;
 import com.ponysdk.core.writer.ModelWriterCallback;
 
@@ -89,18 +89,20 @@ import com.ponysdk.core.writer.ModelWriterCallback;
  * support for receiving events from the browser and being added directly to
  * {@link PPanel panels}.
  */
-public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers, HasPKeyPressHandlers, HasPKeyUpHandlers {
+public abstract class PWidget extends PObject implements IsPWidget {
 
     private static final Logger log = LoggerFactory.getLogger(PWidget.class);
+    private static final SetPool<String> styleNamesSetPool = new SetPool<>();
+    private static final SetPool<PEventType> preventOrStopEventsSetPool = new SetPool<>();
+    private static final SetPool<PDomEvent.Type> oneTimeHandlerCreationSetPool = new SetPool<>();
 
     private static final String HUNDRED_PERCENT = "100%";
 
     boolean visible = true;
     private IsPWidget parent;
-    private Set<String> styleNames;
-    private Set<PEventType> preventEvents;
-    private Set<PEventType> stopEvents;
-    private EventBus eventBus;
+    private SetPool<String>.ImmutableSet styleNames = styleNamesSetPool.emptyImmutableSet();
+    private SetPool<PEventType>.ImmutableSet preventEvents = preventOrStopEventsSetPool.emptyImmutableSet();
+    private SetPool<PEventType>.ImmutableSet stopEvents = preventOrStopEventsSetPool.emptyImmutableSet();
     private Map<String, String> styleProperties;
     private Map<String, String> elementProperties;
     private Map<String, String> elementAttributes;
@@ -108,15 +110,17 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     private String width;
     private String height;
     private String styleName;
-    private String stylePrimaryName;
     private String debugID;
     private boolean focused;
     protected int tabindex = -Integer.MAX_VALUE;
+    private List<PVisibilityHandler> visibilityHandlers;
 
     private Set<PAddOn> addons;
 
     // WORKAROUND Remove handler only server side
-    private Set<PDomEvent.Type> oneTimeHandlerCreation;
+    private SetPool<PDomEvent.Type>.ImmutableSet oneTimeHandlerCreation = oneTimeHandlerCreationSetPool.emptyImmutableSet();
+
+    private boolean shown;
 
     public enum TabindexMode {
 
@@ -140,28 +144,17 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     @Override
     protected void enrichForUpdate(final ModelWriter writer) {
         super.enrichForUpdate(writer);
-        if (styleNames != null && !styleNames.isEmpty()) {
+        if (!styleNames.isEmpty()) {
             writer.write(ServerToClientModel.ADD_STYLE_NAME, styleNames.stream().collect(Collectors.joining(" ")));
         }
+        if (this.title != null) writer.write(ServerToClientModel.WIDGET_TITLE, this.title);
+        if (this.height != null) writer.write(ServerToClientModel.WIDGET_HEIGHT, this.height);
+        if (this.width != null) writer.write(ServerToClientModel.WIDGET_WIDTH, this.width);
+        if (this.debugID != null) writer.write(ServerToClientModel.ENSURE_DEBUG_ID, this.debugID);
     }
 
     static PWidget asWidgetOrNull(final IsPWidget w) {
         return w == null ? null : w.asWidget();
-    }
-
-    private Set<String> safeStyleName() {
-        if (styleNames == null) styleNames = new HashSet<>(8);
-        return styleNames;
-    }
-
-    private Set<PEventType> safePreventEvents() {
-        if (preventEvents == null) preventEvents = new HashSet<>(4);
-        return preventEvents;
-    }
-
-    private Set<PEventType> safeStopEvents() {
-        if (stopEvents == null) stopEvents = new HashSet<>(4);
-        return stopEvents;
     }
 
     private Map<String, String> safeStyleProperties() {
@@ -183,7 +176,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         if (UIContext.get().getConfiguration().isDebugMode()) {
             if (Objects.equals(this.debugID, debugID)) return;
             this.debugID = debugID;
-            saveUpdate(writer -> writer.write(ServerToClientModel.ENSURE_DEBUG_ID, debugID));
+            if (initialized) saveUpdate(writer -> writer.write(ServerToClientModel.ENSURE_DEBUG_ID, debugID));
         }
     }
 
@@ -194,7 +187,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     public void setTitle(final String title) {
         if (Objects.equals(this.title, title)) return;
         this.title = title;
-        saveUpdate(ServerToClientModel.WIDGET_TITLE, title);
+        if (initialized) saveUpdate(ServerToClientModel.WIDGET_TITLE, title);
     }
 
     public boolean isVisible() {
@@ -214,7 +207,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     public void setWidth(final String width) {
         if (Objects.equals(this.width, width)) return;
         this.width = width;
-        saveUpdate(ServerToClientModel.WIDGET_WIDTH, width);
+        if (initialized) saveUpdate(ServerToClientModel.WIDGET_WIDTH, width);
     }
 
     public String getHeight() {
@@ -224,7 +217,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     public void setHeight(final String height) {
         if (Objects.equals(this.height, height)) return;
         this.height = height;
-        saveUpdate(ServerToClientModel.WIDGET_HEIGHT, height);
+        if (initialized) saveUpdate(ServerToClientModel.WIDGET_HEIGHT, height);
     }
 
     public String getStyleName() {
@@ -233,7 +226,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
 
     public void setStyleName(final String styleName) {
         if (Objects.equals(this.styleName, styleName)) return;
-        if (styleName != null && !styleName.isEmpty() && safeStyleName().add(styleName) && initialized) {
+        if (styleName != null && !styleName.isEmpty() && doAddStyleName(styleName) && initialized) {
             this.styleName = styleName;
             saveUpdate(ServerToClientModel.STYLE_NAME, styleName);
         }
@@ -241,16 +234,6 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
 
     public String getDebugID() {
         return debugID;
-    }
-
-    public String getStylePrimaryName() {
-        return stylePrimaryName;
-    }
-
-    public void setStylePrimaryName(final String stylePrimaryName) {
-        if (Objects.equals(this.stylePrimaryName, stylePrimaryName)) return;
-        this.stylePrimaryName = stylePrimaryName;
-        saveUpdate(ServerToClientModel.STYLE_PRIMARY_NAME, stylePrimaryName);
     }
 
     public IsPWidget getParent() {
@@ -272,6 +255,13 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
 
     public void removeStyleProperty(final String name) {
         if (safeStyleProperties().remove(name) != null) saveUpdate(writer -> writer.write(ServerToClientModel.REMOVE_STYLE_KEY, name));
+    }
+
+    public void forceDomId() {
+        final String idValue = String.valueOf(ID);
+        if (!Objects.equals(safeElementProperties().put("id", idValue), idValue)) {
+            saveUpdate(ServerToClientModel.FORCE_DOM_ID, null);
+        }
     }
 
     public void setProperty(final String name, final String value) {
@@ -317,27 +307,49 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     }
 
     public void preventEvent(final PEventType e) {
-        if (safePreventEvents().add(e)) saveUpdate(writer -> writer.write(ServerToClientModel.PREVENT_EVENT, e.getCode()));
+        final SetPool<PEventType>.ImmutableSet pool = preventEvents.getAdd(e);
+        if (pool != preventEvents) {
+            preventEvents = pool;
+            saveUpdate(writer -> writer.write(ServerToClientModel.PREVENT_EVENT, e.getCode()));
+        }
     }
 
     public void stopEvent(final PEventType e) {
-        if (safeStopEvents().add(e)) saveUpdate(writer -> writer.write(ServerToClientModel.STOP_EVENT, e.getCode()));
+        final SetPool<PEventType>.ImmutableSet pool = stopEvents.getAdd(e);
+        if (pool != stopEvents) {
+            stopEvents = pool;
+            saveUpdate(writer -> writer.write(ServerToClientModel.STOP_EVENT, e.getCode()));
+        }
+    }
+
+    private boolean doAddStyleName(final String styleName) {
+        final SetPool<String>.ImmutableSet s = styleNames.getAdd(styleName);
+        if (s == styleNames) return false;
+        styleNames = s;
+        return true;
     }
 
     public void addStyleName(final String styleName) {
-        if (styleName != null && !styleName.isEmpty() && safeStyleName().add(styleName) && initialized) {
+        if (styleName != null && !styleName.isEmpty() && doAddStyleName(styleName) && initialized) {
             saveUpdate(writer -> writer.write(ServerToClientModel.ADD_STYLE_NAME, styleName));
         }
     }
 
+    private boolean doRemoveStyleName(final String styleName) {
+        final SetPool<String>.ImmutableSet s = styleNames.getRemove(styleName);
+        if (s == styleNames) return false;
+        styleNames = s;
+        return true;
+    }
+
     public void removeStyleName(final String styleName) {
-        if (styleNames != null && styleName != null && !styleName.isEmpty() && styleNames.remove(styleName) && initialized) {
+        if (styleName != null && !styleName.isEmpty() && doRemoveStyleName(styleName) && initialized) {
             saveUpdate(writer -> writer.write(ServerToClientModel.REMOVE_STYLE_NAME, styleName));
         }
     }
 
     public boolean hasStyleName(final String styleName) {
-        return styleNames != null && !styleName.isEmpty() && styleNames.contains(styleName);
+        return !styleName.isEmpty() && styleNames.contains(styleName);
     }
 
     @Override
@@ -353,19 +365,15 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
 
     public void removeDomHandler(final EventHandler handler, final PDomEvent.Type type) {
         if (destroy) return;
-        if (eventBus != null) {
-            final Collection<EventHandler> handlers = eventBus.getHandlers(type, this);
-            if (handlers.contains(handler)) {
-                eventBus.removeHandlerFromSource(type, this, handler);
-                // TODO Handle remove DOM handler
-                // if (eventBus.getHandlers(type, this).isEmpty()) {
-                //     executeRemoveDomHandler(type);
-                //     if (initialized) executeRemoveDomHandler(type);
-                //     else safeStackedInstructions().add(() -> executeRemoveDomHandler(type));
-                // }
-            } else {
-                log.warn("No event handler of type {} found for {}", type, this);
-            }
+        final Collection<EventHandler> handlers = UIContext.getRootEventBus().getHandlers(type, this);
+        if (handlers.contains(handler)) {
+            UIContext.removeHandlerFromSource(type, this, handler);
+            // TODO Handle remove DOM handler
+            // if (eventBus.getHandlers(type, this).isEmpty()) {
+            //     executeRemoveDomHandler(type);
+            //     if (initialized) executeRemoveDomHandler(type);
+            //     else safeStackedInstructions().add(() -> executeRemoveDomHandler(type));
+            // }
         } else {
             log.warn("No event handler of type {} found for {}", type, this);
         }
@@ -373,33 +381,29 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
 
     private void executeRemoveDomHandler(final PDomEvent.Type type) {
         if (destroy) return;
-        final ModelWriter writer = Txn.get().getWriter();
-        writer.beginObject();
-        if (!PWindow.isMain(window)) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
+        final ModelWriter writer = UIContext.get().getWriter();
+        writer.beginObject(window);
         writer.write(ServerToClientModel.TYPE_REMOVE_HANDLER, ID);
-        writer.write(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_DOM.getValue());
-        writer.write(ServerToClientModel.DOM_HANDLER_CODE, type.getDomHandlerType().getValue());
+        writer.write(ServerToClientModel.HANDLER_TYPE, DomHandlerConverter.convert(type.getDomHandlerType()).getValue());
         writer.endObject();
     }
 
-    @Override
     public HandlerRegistration addKeyPressHandler(final PKeyPressHandler handler) {
-        final JsonObject filteredKeys = handler.getJsonFilteredKeys();
+        final Integer[] filteredKeys = handler.getJsonFilteredKeys();
         if (filteredKeys != null)
             return addDomHandler(handler, PKeyPressEvent.TYPE, new ServerBinaryModel(ServerToClientModel.KEY_FILTER, filteredKeys));
         else return addDomHandler(handler, PKeyPressEvent.TYPE);
     }
 
-    @Override
     public HandlerRegistration addKeyUpHandler(final PKeyUpHandler handler) {
-        final JsonObject filteredKeys = handler.getJsonFilteredKeys();
+        final Integer[] filteredKeys = handler.getJsonFilteredKeys();
         if (filteredKeys != null)
             return addDomHandler(handler, PKeyUpEvent.TYPE, new ServerBinaryModel(ServerToClientModel.KEY_FILTER, filteredKeys));
         else return addDomHandler(handler, PKeyUpEvent.TYPE);
     }
 
-    public HandlerRegistration addKeyDownHandler(final PKeyDownHandler handler) {
-        final JsonObject filteredKeys = handler.getJsonFilteredKeys();
+    public HandlerRegistration addKeyDownHandler(final PKeyDownEvent.Handler handler) {
+        final Integer[] filteredKeys = handler.getJsonFilteredKeys();
         if (filteredKeys != null)
             return addDomHandler(handler, PKeyDownEvent.TYPE, new ServerBinaryModel(ServerToClientModel.KEY_FILTER, filteredKeys));
         else return addDomHandler(handler, PKeyDownEvent.TYPE);
@@ -412,17 +416,13 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     private HandlerRegistration addDomHandler(final EventHandler handler, final PDomEvent.Type type,
                                               final ServerBinaryModel binaryModel) {
         if (destroy) return null;
-        final HandlerRegistration handlerRegistration = ensureEventBus().addHandlerToSource(type, this, handler);
+        final HandlerRegistration handlerRegistration = UIContext.addHandlerToSource(type, this, handler);
 
-        if (oneTimeHandlerCreation == null) oneTimeHandlerCreation = new HashSet<>(8);
-
-        if (!oneTimeHandlerCreation.contains(type)) {
-            oneTimeHandlerCreation.add(type);
-            final ServerBinaryModel binaryModel1 = new ServerBinaryModel(ServerToClientModel.DOM_HANDLER_CODE,
-                type.getDomHandlerType().getValue());
+        final SetPool<Type>.ImmutableSet pool = oneTimeHandlerCreation.getAdd(type);
+        if (pool != oneTimeHandlerCreation) {
+            oneTimeHandlerCreation = pool;
             final ModelWriterCallback callback = writer -> {
-                writer.write(ServerToClientModel.HANDLER_TYPE, HandlerModel.HANDLER_DOM.getValue());
-                writer.write(binaryModel1.getKey(), binaryModel1.getValue());
+                writer.write(ServerToClientModel.HANDLER_TYPE, DomHandlerConverter.convert(type.getDomHandlerType()).getValue());
                 if (binaryModel != null) writer.write(binaryModel.getKey(), binaryModel.getValue());
             };
             if (initialized) writeAddHandler(callback);
@@ -510,14 +510,19 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
                     log.error("Dom Handler not implemented: {}", domHandler);
                     break;
             }
+        } else if (instruction.containsKey(ClientToServerModel.HANDLER_WIDGET_VISIBILITY.toStringValue())) {
+            shown = instruction.getBoolean(ClientToServerModel.HANDLER_WIDGET_VISIBILITY.toStringValue());
+            if (visibilityHandlers != null) {
+                final PVisibilityEvent visibilityEvent = new PVisibilityEvent(this, shown);
+                visibilityHandlers.forEach(handler -> handler.onVisibility(visibilityEvent));
+            }
         } else {
             super.onClientData(instruction);
         }
     }
 
-    private EventBus ensureEventBus() {
-        if (eventBus == null) eventBus = new SimpleEventBus();
-        return eventBus;
+    public boolean isShown() {
+        return shown;
     }
 
     public void fireKeyEvent(final JsonObject instruction, final PKeyEvent<? extends EventHandler> event) {
@@ -579,9 +584,8 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         fireEvent(event);
     }
 
-    @Override
     public void fireEvent(final Event<? extends EventHandler> event) {
-        if (eventBus != null) eventBus.fireEvent(event);
+        UIContext.fireEventFromSource(event, this);
     }
 
     public void removeFromParent() {
@@ -590,7 +594,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
     }
 
     void bindAddon(final PAddOn addon) {
-        if (this.addons == null) this.addons = new HashSet<>(4);
+        if (this.addons == null) this.addons = SetUtils.newArraySet(4);
         this.addons.add(addon);
     }
 
@@ -612,8 +616,7 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         focus(false);
     }
 
-    protected void focus(final boolean focused) {
-        //if (Objects.equals(this.focused, focused)) return;
+    private void focus(final boolean focused) {
         this.focused = focused;
         saveUpdate(ServerToClientModel.FOCUS, focused);
     }
@@ -632,13 +635,19 @@ public abstract class PWidget extends PObject implements IsPWidget, HasPHandlers
         return tabindex;
     }
 
-    /**
-     * @deprecated Use {@link #getAddons()} instead
-     * @return First binded addon
-     */
-    @Deprecated
-    public PAddOn getAddon() {
-        return addons != null && !addons.isEmpty() ? addons.iterator().next() : null;
+    public void addVisibilityHandler(final PVisibilityHandler visibilityHandler) {
+        if (visibilityHandlers == null) {
+            visibilityHandlers = new ArrayList<>();
+            saveAddHandler(HandlerModel.HANDLER_VISIBILITY);
+        }
+        visibilityHandlers.add(visibilityHandler);
+    }
+
+    public void removeVisibilityHandler(final PVisibilityHandler visibilityHandler) {
+        if (visibilityHandlers != null) {
+            visibilityHandlers.remove(visibilityHandler);
+            if (visibilityHandlers.isEmpty()) saveRemoveHandler(HandlerModel.HANDLER_VISIBILITY);
+        }
     }
 
     /**

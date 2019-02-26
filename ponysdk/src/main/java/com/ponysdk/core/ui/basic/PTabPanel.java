@@ -27,7 +27,6 @@ import java.util.Objects;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.ui.basic.event.HasPAnimation;
 
 /**
  * A panel that represents a tabbed set of pages, each of which contains another widget. Its child
@@ -47,7 +46,7 @@ import com.ponysdk.core.ui.basic.event.HasPAnimation;
  *
  * @see PTabLayoutPanel
  */
-public class PTabPanel extends PTabLayoutPanel implements HasPAnimation {
+public class PTabPanel extends PTabLayoutPanel {
 
     private boolean animationEnabled = false;
 
@@ -59,12 +58,10 @@ public class PTabPanel extends PTabLayoutPanel implements HasPAnimation {
         return WidgetType.TAB_PANEL;
     }
 
-    @Override
     public boolean isAnimationEnabled() {
         return animationEnabled;
     }
 
-    @Override
     public void setAnimationEnabled(final boolean animationEnabled) {
         if (Objects.equals(this.animationEnabled, animationEnabled)) return;
         this.animationEnabled = animationEnabled;

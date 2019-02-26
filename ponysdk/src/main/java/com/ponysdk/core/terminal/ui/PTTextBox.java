@@ -54,7 +54,7 @@ public class PTTextBox extends PTTextBoxBase<TextBox> implements KeyPressHandler
             @Override
             public void onBrowserEvent(final Event event) {
                 super.onBrowserEvent(event);
-                if (Event.ONPASTE == event.getTypeInt()) {
+                if (Event.ONPASTE == event.getTypeInt() && enabled) {
                     filterText();
                     if (handlePasteEnabled) Scheduler.get().scheduleDeferred(() -> sendPasteEvent(event));
                 }

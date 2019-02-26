@@ -29,7 +29,7 @@ import com.ponysdk.core.ui.basic.PComplexPanel;
 public class GridTableWidget extends AbstractGridWidget {
 
     public GridTableWidget() {
-        super("table");
+        super(Element.E_TABLE);
     }
 
     @Override

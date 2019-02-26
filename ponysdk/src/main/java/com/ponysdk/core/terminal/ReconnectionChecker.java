@@ -59,6 +59,7 @@ public class ReconnectionChecker {
         connectionRequest = window.newXMLHttpRequest();
         connectionRequest.setOnreadystatechange(evt -> {
             if (connectionRequest.getReadyState() == XMLHttpRequest.DONE) {
+                if (errorDetected) return;
                 if (connectionRequest.getStatus() == HTTP_STATUS_CODE_OK) {
                     // We reschedule the next check (we wait to avoid spaming)
                     Scheduler.get().scheduleFixedDelay(() -> {

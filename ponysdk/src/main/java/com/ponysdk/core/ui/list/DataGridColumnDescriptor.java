@@ -23,17 +23,18 @@
 
 package com.ponysdk.core.ui.list;
 
+import java.util.function.Function;
+
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.list.renderer.cell.CellRenderer;
 import com.ponysdk.core.ui.list.renderer.header.HeaderCellRenderer;
-import com.ponysdk.core.ui.list.valueprovider.ValueProvider;
 
 public class DataGridColumnDescriptor<D, V> {
 
     protected HeaderCellRenderer headerCellRenderer;
     protected CellRenderer<V, ? extends IsPWidget> cellRenderer;
     protected CellRenderer<V, ? extends IsPWidget> subCellRenderer;
-    protected ValueProvider<D, V> valueProvider;
+    protected Function<D, V> valueProvider;
 
     public HeaderCellRenderer getHeaderCellRenderer() {
         return headerCellRenderer;
@@ -51,11 +52,11 @@ public class DataGridColumnDescriptor<D, V> {
         this.cellRenderer = cellRenderer;
     }
 
-    public ValueProvider<D, V> getValueProvider() {
+    public Function<D, V> getValueProvider() {
         return valueProvider;
     }
 
-    public void setValueProvider(final ValueProvider<D, V> valueProvider) {
+    public void setValueProvider(final Function<D, V> valueProvider) {
         this.valueProvider = valueProvider;
     }
 
@@ -70,13 +71,13 @@ public class DataGridColumnDescriptor<D, V> {
     public IsPWidget renderCell(final int row, final D data) {
         if (cellRenderer == null) throw new IllegalArgumentException("CellRenderer is required");
         if (valueProvider == null) throw new IllegalArgumentException("ValueProvider is required");
-        return cellRenderer.render(row, valueProvider.getValue(data));
+        return cellRenderer.render(row, valueProvider.apply(data));
     }
 
     public IsPWidget renderSubCell(final int row, final D data) {
         if (subCellRenderer == null) throw new IllegalArgumentException("SubCellRenderer is required");
         if (valueProvider == null) throw new IllegalArgumentException("ValueProvider is required");
-        return subCellRenderer.render(row, valueProvider.getValue(data));
+        return subCellRenderer.render(row, valueProvider.apply(data));
     }
 
 }

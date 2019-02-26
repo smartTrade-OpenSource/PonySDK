@@ -31,6 +31,8 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public class PTLabel<T extends Label> extends PTWidget<T> {
 
+    private String attributeLinkedToValue;
+
     @Override
     protected T createUIObject() {
         return (T) new Label();
@@ -40,15 +42,26 @@ public class PTLabel<T extends Label> extends PTWidget<T> {
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         final ServerToClientModel model = binaryModel.getModel();
         if (ServerToClientModel.TEXT == model) {
-            setText(uiObject.getElement(), binaryModel.getStringValue());
+            final String value = binaryModel.getStringValue();
+            setText(uiObject.getElement(), value);
+            if (attributeLinkedToValue != null) {
+                final Element element = uiObject.getElement();
+                if (value != null && !value.isEmpty()) element.setAttribute(attributeLinkedToValue, value);
+                else element.removeAttribute(attributeLinkedToValue);
+            }
+            return true;
+        } else if (ServerToClientModel.ATTRIBUTE_LINKED_TO_VALUE == model) {
+            this.attributeLinkedToValue = binaryModel.getStringValue();
+            final String text = uiObject.getText();
+            if (text != null && !text.isEmpty()) uiObject.getElement().setAttribute(attributeLinkedToValue, text);
             return true;
         } else {
             return super.update(buffer, binaryModel);
         }
     }
 
-    private static final native void setText(Element element, String text) /*-{
-                                                                           element.textContent = text;
-                                                                           }-*/;
+    protected static final native void setText(Element element, String text) /*-{
+                                                                             element.textContent = text;
+                                                                             }-*/;
 
 }

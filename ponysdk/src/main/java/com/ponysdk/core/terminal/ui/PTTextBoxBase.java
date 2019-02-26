@@ -23,8 +23,12 @@
 
 package com.ponysdk.core.terminal.ui;
 
+import java.util.Objects;
+
+import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.user.client.ui.TextBoxBase;
 import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.DomHandlerType;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
@@ -33,17 +37,17 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public abstract class PTTextBoxBase<T extends TextBoxBase> extends PTValueBoxBase<T, String> {
 
-    @Override
-    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
-        super.create(buffer, objectId, uiService);
-        addHandler(uiService);
-    }
+    private String lastValue;
 
-    private void addHandler(final UIBuilder uiService) {
+    @Override
+    public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
+        super.create(buffer, objectId, uiBuilder);
+
         uiObject.addValueChangeHandler(event -> {
+            this.lastValue = event.getValue();
             final PTInstruction eventInstruction = new PTInstruction(getObjectID());
-            eventInstruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE, event.getValue());
-            uiService.sendDataToServer(uiObject, eventInstruction);
+            eventInstruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE, lastValue);
+            uiBuilder.sendDataToServer(uiObject, eventInstruction);
         });
     }
 
@@ -56,6 +60,44 @@ public abstract class PTTextBoxBase<T extends TextBoxBase> extends PTValueBoxBas
         } else {
             return super.update(buffer, binaryModel);
         }
+    }
+
+    @Override
+    protected void triggerKeyUpEvent(final DomHandlerType domHandlerType, final KeyUpEvent event, final int[] keyFilter) {
+        if (!enabled) return;
+        final int nativeKeyCode = event.getNativeKeyCode();
+        if (keyFilter != null) {
+            for (final int keyCode : keyFilter) {
+                if (keyCode == nativeKeyCode) {
+                    final String newValue = uiObject.getText();
+                    if (!Objects.equals(newValue, this.lastValue)) {
+                        this.lastValue = newValue;
+                        final PTInstruction changeHandlerInstruction = new PTInstruction(getObjectID());
+                        changeHandlerInstruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE, this.lastValue);
+                        uiBuilder.sendDataToServer(changeHandlerInstruction);
+                    }
+
+                    final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
+                    eventInstruction.put(ClientToServerModel.VALUE_KEY, nativeKeyCode);
+                    uiBuilder.sendDataToServer(eventInstruction);
+
+                    break;
+                }
+            }
+        } else {
+            final String newValue = uiObject.getText();
+            if (!Objects.equals(newValue, this.lastValue)) {
+                this.lastValue = newValue;
+                final PTInstruction changeHandlerInstruction = new PTInstruction(getObjectID());
+                changeHandlerInstruction.put(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE, this.lastValue);
+                uiBuilder.sendDataToServer(changeHandlerInstruction);
+            }
+
+            final PTInstruction eventInstruction = buildEventInstruction(domHandlerType);
+            eventInstruction.put(ClientToServerModel.VALUE_KEY, nativeKeyCode);
+            uiBuilder.sendDataToServer(eventInstruction);
+        }
+        preventOrStopEvent(event);
     }
 
 }

@@ -38,7 +38,7 @@ public enum PHorizontalAlignment {
         return (byte) ordinal();
     }
 
-    public static PHorizontalAlignment fromRawValue(final byte rawValue) {
+    public static PHorizontalAlignment fromRawValue(final int rawValue) {
         return VALUES[rawValue];
     }
 

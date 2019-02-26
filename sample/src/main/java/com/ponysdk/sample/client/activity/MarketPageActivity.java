@@ -43,7 +43,6 @@ import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.event.PDragEnterEvent;
 import com.ponysdk.core.ui.basic.event.PDragEnterHandler;
 import com.ponysdk.core.ui.basic.event.PDragLeaveEvent;
-import com.ponysdk.core.ui.basic.event.PDragLeaveHandler;
 import com.ponysdk.core.ui.basic.event.PDragStartEvent;
 import com.ponysdk.core.ui.basic.event.PDragStartHandler;
 import com.ponysdk.core.ui.basic.event.PDropEvent;
@@ -221,7 +220,7 @@ public class MarketPageActivity extends PageActivity {
             }
         }, PDragEnterEvent.TYPE);
 
-        box.addDomHandler((PDragLeaveHandler) event -> {
+        box.addDomHandler((PDragLeaveEvent.Handler) event -> {
             if (!currentDrag.equals(box)) {
                 box.removeStyleName("dragenter");
             }

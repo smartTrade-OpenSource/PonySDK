@@ -64,6 +64,14 @@ public class Query {
         this.pageNum = pageNum;
     }
 
+    public QueryMode getQueryMode() {
+        return queryMode;
+    }
+
+    public void setQueryMode(final QueryMode queryMode) {
+        this.queryMode = queryMode;
+    }
+
     public void addCriterion(final Criterion criterion) {
         this.criteria.add(criterion);
     }
@@ -76,25 +84,20 @@ public class Query {
         return this.criteria;
     }
 
-    public void setCriteria(final List<Criterion> criteria) {
-        criteria.forEach(this::addCriterion);
-    }
-
     public Criterion getCriterion(final String pojoProperty) {
         for (final Criterion criterion : criteria) {
-            if (criterion.getPojoProperty().equals(pojoProperty)) {
-                return criterion;
-            }
+            if (criterion.getPojoProperty().equals(pojoProperty)) return criterion;
         }
         return null;
     }
 
-    public QueryMode getQueryMode() {
-        return queryMode;
-    }
-
-    public void setQueryMode(final QueryMode queryMode) {
-        this.queryMode = queryMode;
+    /**
+     * @deprecated Use {@link #addCriteria(List)} instead
+     * @since v2.8.10
+     */
+    @Deprecated(forRemoval = true, since = "v2.8.10")
+    public void setCriteria(final List<Criterion> criteria) {
+        addCriteria(criteria);
     }
 
 }

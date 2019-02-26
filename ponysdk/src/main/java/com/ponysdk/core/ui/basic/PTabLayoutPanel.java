@@ -34,10 +34,7 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.ui.basic.event.HasPBeforeSelectionHandlers;
-import com.ponysdk.core.ui.basic.event.HasPSelectionHandlers;
 import com.ponysdk.core.ui.basic.event.PBeforeSelectionEvent;
-import com.ponysdk.core.ui.basic.event.PBeforeSelectionHandler;
 import com.ponysdk.core.ui.basic.event.PSelectionEvent;
 import com.ponysdk.core.ui.basic.event.PSelectionHandler;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
@@ -67,10 +64,9 @@ import com.ponysdk.core.ui.model.ServerBinaryModel;
  * Each tab can have one widget child and one of two types of header elements.
  * A header element can hold html, or a customHeader element can hold a widget.
  */
-public class PTabLayoutPanel extends PComplexPanel
-        implements HasPBeforeSelectionHandlers<Integer>, HasPSelectionHandlers<Integer>, PSelectionHandler<Integer>, PAnimatedLayout {
+public class PTabLayoutPanel extends PComplexPanel implements PSelectionHandler<Integer>, PAnimatedLayout {
 
-    private final List<PBeforeSelectionHandler<Integer>> beforeSelectionHandlers = new ArrayList<>();
+    private final List<PBeforeSelectionEvent.Handler<Integer>> beforeSelectionHandlers = new ArrayList<>();
     private final List<PSelectionHandler<Integer>> selectionHandlers = new ArrayList<>();
 
     private Integer selectedItemIndex;
@@ -162,23 +158,19 @@ public class PTabLayoutPanel extends PComplexPanel
         throw new UnsupportedOperationException("A tabText parameter must be specified with add().");
     }
 
-    @Override
-    public void addBeforeSelectionHandler(final PBeforeSelectionHandler<Integer> handler) {
+    public void addBeforeSelectionHandler(final PBeforeSelectionEvent.Handler<Integer> handler) {
         beforeSelectionHandlers.add(handler);
         saveAddHandler(HandlerModel.HANDLER_BEFORE_SELECTION);
     }
 
-    @Override
-    public void removeBeforeSelectionHandler(final PBeforeSelectionHandler<Integer> handler) {
+    public void removeBeforeSelectionHandler(final PBeforeSelectionEvent.Handler<Integer> handler) {
         beforeSelectionHandlers.remove(handler);
     }
 
-    @Override
     public void addSelectionHandler(final PSelectionHandler<Integer> handler) {
         selectionHandlers.add(handler);
     }
 
-    @Override
     public void removeSelectionHandler(final PSelectionHandler<Integer> handler) {
         selectionHandlers.remove(handler);
     }
@@ -192,7 +184,7 @@ public class PTabLayoutPanel extends PComplexPanel
                     new PSelectionEvent<>(this, instruction.getInt(ClientToServerModel.HANDLER_SELECTION.toStringValue())));
             }
         } else if (instruction.containsKey(ClientToServerModel.HANDLER_BEFORE_SELECTION.toStringValue())) {
-            for (final PBeforeSelectionHandler<Integer> handler : beforeSelectionHandlers) {
+            for (final PBeforeSelectionEvent.Handler<Integer> handler : beforeSelectionHandlers) {
                 handler.onBeforeSelection(new PBeforeSelectionEvent<>(this,
                     instruction.getInt(ClientToServerModel.HANDLER_BEFORE_SELECTION.toStringValue())));
             }

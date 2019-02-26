@@ -51,6 +51,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
     @Override
     public void configure(final WebSocketServletFactory factory) {
         factory.getPolicy().setIdleTimeout(maxIdleTime);
+        factory.getExtensionFactory().register(PonyPerMessageDeflateExtension.NAME, PonyPerMessageDeflateExtension.class);
         factory.setCreator((request, response) -> {
             final WebSocket webSocket = new WebSocket();
             webSocket.setRequest(request);

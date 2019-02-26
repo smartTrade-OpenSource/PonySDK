@@ -41,7 +41,7 @@ public class PTStackLayoutPanel extends PTWidget<StackLayoutPanel> {
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
         // ServerToClientModel.UNIT
-        unit = Unit.values()[buffer.readBinaryModel().getByteValue()];
+        unit = Unit.values()[buffer.readBinaryModel().getIntValue()];
         super.create(buffer, objectId, uiBuilder);
     }
 

@@ -24,11 +24,19 @@
 package com.ponysdk.core.ui.basic.event;
 
 import com.ponysdk.core.ui.eventbus.Event;
+import com.ponysdk.core.ui.eventbus.EventHandler;
 
-public class PBeforeSelectionEvent<T> extends Event<PBeforeSelectionHandler<T>> {
+public class PBeforeSelectionEvent<T> extends Event<PBeforeSelectionEvent.Handler<T>> {
 
     public static final Type TYPE = new Type();
     private T selectedItem;
+
+    @FunctionalInterface
+    public interface Handler<T> extends EventHandler {
+
+        void onBeforeSelection(PBeforeSelectionEvent<T> event);
+
+    }
 
     public PBeforeSelectionEvent(final Object source, final T selectedItem) {
         super(source);
@@ -49,7 +57,8 @@ public class PBeforeSelectionEvent<T> extends Event<PBeforeSelectionHandler<T>> 
     }
 
     @Override
-    protected void dispatch(final PBeforeSelectionHandler<T> handler) {
+    protected void dispatch(final PBeforeSelectionEvent.Handler<T> handler) {
         handler.onBeforeSelection(this);
     }
+
 }

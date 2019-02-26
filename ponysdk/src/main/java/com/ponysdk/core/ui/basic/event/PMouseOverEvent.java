@@ -24,10 +24,17 @@
 package com.ponysdk.core.ui.basic.event;
 
 import com.ponysdk.core.model.DomHandlerType;
+import com.ponysdk.core.ui.eventbus.EventHandler;
 
-public class PMouseOverEvent extends PMouseEvent<PMouseOverHandler> {
+public class PMouseOverEvent extends PMouseEvent<PMouseOverEvent.Handler> {
 
     public static final PDomEvent.Type TYPE = new PDomEvent.Type(DomHandlerType.MOUSE_OVER);
+
+    @FunctionalInterface
+    public interface Handler extends EventHandler {
+
+        void onMouseOver(PMouseOverEvent mouseOverEvent);
+    }
 
     public PMouseOverEvent(final Object sourceComponent) {
         super(sourceComponent);
@@ -39,7 +46,7 @@ public class PMouseOverEvent extends PMouseEvent<PMouseOverHandler> {
     }
 
     @Override
-    protected void dispatch(final PMouseOverHandler handler) {
+    protected void dispatch(final PMouseOverEvent.Handler handler) {
         handler.onMouseOver(this);
     }
 

@@ -34,7 +34,6 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.ui.basic.event.HasPSelectionHandlers;
 import com.ponysdk.core.ui.basic.event.PSelectionEvent;
 import com.ponysdk.core.ui.basic.event.PSelectionHandler;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
@@ -79,8 +78,8 @@ import com.ponysdk.core.writer.ModelWriter;
  * @see PMultiWordSuggestOracle
  * @see PTextBoxBase
  */
-public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHandlers<String>,
-        PSelectionHandler<PSuggestOracle.PSuggestion>, HasPSelectionHandlers<PSuggestOracle.PSuggestion> {
+public class PSuggestBox extends PWidget
+        implements Focusable, HasPValueChangeHandlers<String>, PSelectionHandler<PSuggestOracle.PSuggestion> {
 
     private final PSuggestOracle suggestOracle;
     private List<PSelectionHandler<PSuggestOracle.PSuggestion>> selectionHandler;
@@ -210,19 +209,13 @@ public class PSuggestBox extends PWidget implements Focusable, HasPValueChangeHa
         return suggestOracle;
     }
 
-    @Override
     public void addSelectionHandler(final PSelectionHandler<PSuggestOracle.PSuggestion> handler) {
-        if (selectionHandler == null) {
-            selectionHandler = new ArrayList<>(0);
-        }
+        if (selectionHandler == null) selectionHandler = new ArrayList<>();
         this.selectionHandler.add(handler);
     }
 
-    @Override
     public void removeSelectionHandler(final PSelectionHandler<PSuggestOracle.PSuggestion> handler) {
-        if (selectionHandler != null) {
-            this.selectionHandler.remove(handler);
-        }
+        if (selectionHandler != null) this.selectionHandler.remove(handler);
     }
 
     public static class MultiWordSuggestion implements PSuggestOracle.PSuggestion {

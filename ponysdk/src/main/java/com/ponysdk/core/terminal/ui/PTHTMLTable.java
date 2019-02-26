@@ -80,6 +80,12 @@ public abstract class PTHTMLTable<T extends HTMLTable> extends PTPanel<T> {
             final int row = buffer.readBinaryModel().getIntValue();
             uiObject.getRowFormatter().removeStyleName(row, value);
             return true;
+        } else if (ServerToClientModel.ROW_FORMATTER_SHOW_ROW == model) {
+            uiObject.getRowFormatter().setVisible(binaryModel.getIntValue(), true);
+            return true;
+        } else if (ServerToClientModel.ROW_FORMATTER_HIDE_ROW == model) {
+            uiObject.getRowFormatter().setVisible(binaryModel.getIntValue(), false);
+            return true;
         } else if (ServerToClientModel.CELL_FORMATTER_ADD_STYLE_NAME == model) {
             final String value = binaryModel.getStringValue();
             // ServerToClientModel.ROW
@@ -105,7 +111,7 @@ public abstract class PTHTMLTable<T extends HTMLTable> extends PTPanel<T> {
             uiObject.getCellFormatter().setStyleName(cellRow, cellColumn, value);
             return true;
         } else if (ServerToClientModel.VERTICAL_ALIGNMENT == model) {
-            final VerticalAlignmentConstant value = GWTConverter.asVerticalAlignmentConstant(binaryModel.getByteValue());
+            final VerticalAlignmentConstant value = GWTConverter.asVerticalAlignmentConstant(binaryModel.getIntValue());
             // ServerToClientModel.ROW
             final int cellRow = buffer.readBinaryModel().getIntValue();
             // ServerToClientModel.COLUMN
@@ -113,7 +119,7 @@ public abstract class PTHTMLTable<T extends HTMLTable> extends PTPanel<T> {
             uiObject.getCellFormatter().setVerticalAlignment(cellRow, cellColumn, value);
             return true;
         } else if (ServerToClientModel.HORIZONTAL_ALIGNMENT == model) {
-            final HorizontalAlignmentConstant value = GWTConverter.asHorizontalAlignmentConstant(binaryModel.getByteValue());
+            final HorizontalAlignmentConstant value = GWTConverter.asHorizontalAlignmentConstant(binaryModel.getIntValue());
             // ServerToClientModel.ROW
             final int cellRow = buffer.readBinaryModel().getIntValue();
             // ServerToClientModel.COLUMN

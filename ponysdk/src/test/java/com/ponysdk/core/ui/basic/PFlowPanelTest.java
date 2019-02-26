@@ -1,13 +1,11 @@
 
 package com.ponysdk.core.ui.basic;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
 import org.junit.Test;
 
 import com.ponysdk.core.model.WidgetType;
+
+import static org.junit.Assert.*;
 
 public class PFlowPanelTest extends PSuite {
 
@@ -50,10 +48,27 @@ public class PFlowPanelTest extends PSuite {
         flowPanel.add(widget);
         assertEquals(1, flowPanel.getWidgetCount());
 
-        flowPanel.remove(widget);
+        assertTrue(flowPanel.remove(widget));
+        assertNull(flowPanel.getChild(widget.getID()));
+        assertEquals(0, flowPanel.getWidgetCount());
+
+        assertFalse(flowPanel.remove(widget));
+    }
+
+    @Test
+    public void testRemoveIndex() {
+        final PFlowPanel flowPanel = new PFlowPanel();
+        assertEquals(0, flowPanel.getWidgetCount());
+
+        final PWidget widget = new PFlowPanel();
+        flowPanel.add(widget);
+        assertEquals(1, flowPanel.getWidgetCount());
+
+        flowPanel.remove(0);
         assertNull(flowPanel.getChild(widget.getID()));
         assertEquals(0, flowPanel.getWidgetCount());
     }
+
 
     @Test
     public void testInsertPWidget() {

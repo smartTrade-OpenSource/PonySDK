@@ -24,12 +24,16 @@
 package com.ponysdk.impl.webapplication.menu;
 
 import com.ponysdk.core.ui.basic.IsPWidget;
-import com.ponysdk.core.ui.basic.event.HasPSelectionHandlers;
+import com.ponysdk.core.ui.basic.event.PSelectionHandler;
 
-public interface MenuView extends IsPWidget, HasPSelectionHandlers<MenuItem> {
+public interface MenuView extends IsPWidget {
 
     void addItem(MenuItem item);
 
     void selectItem(MenuItem item);
+
+    void addSelectionHandler(PSelectionHandler<MenuItem> handler);
+
+    void removeSelectionHandler(PSelectionHandler<MenuItem> handler);
 
 }

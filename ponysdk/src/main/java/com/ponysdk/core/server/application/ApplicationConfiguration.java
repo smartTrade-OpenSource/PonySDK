@@ -27,12 +27,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-
 import com.ponysdk.core.ui.main.EntryPoint;
 
-public class ApplicationConfiguration implements ApplicationContextAware {
+public class ApplicationConfiguration {
 
     public static final String APPLICATION_ID = "ponysdk.application.id";
     public static final String APPLICATION_NAME = "ponysdk.application.name";
@@ -42,8 +39,6 @@ public class ApplicationConfiguration implements ApplicationContextAware {
     public static final String JAVASCRIPTS = "ponysdk.application.javascripts";
     public static final String POINTCLASS = "ponysdk.entry.point.class";
 
-    private ApplicationContext context;
-
     private String applicationID;
     private String applicationName;
     private String applicationDescription;
@@ -52,8 +47,6 @@ public class ApplicationConfiguration implements ApplicationContextAware {
     private TimeUnit heartBeatPeriodTimeUnit = TimeUnit.MILLISECONDS;
 
     private int sessionTimeout = 15; // minutes
-
-    private String communicationErrorFunction;
 
     private Set<String> meta;
     private Map<String, String> style;
@@ -115,7 +108,7 @@ public class ApplicationConfiguration implements ApplicationContextAware {
     }
 
     public void setHeartBeatPeriod(final long heartBeatPeriod) {
-        this.heartBeatPeriod = heartBeatPeriod;
+        setHeartBeatPeriod(heartBeatPeriod, TimeUnit.MILLISECONDS);
     }
 
     public TimeUnit getHeartBeatPeriodTimeUnit() {
@@ -154,14 +147,6 @@ public class ApplicationConfiguration implements ApplicationContextAware {
         this.meta = meta;
     }
 
-    public String getCommunicationErrorFunction() {
-        return communicationErrorFunction;
-    }
-
-    public void setCommunicationErrorFunction(final String communicationErrorFunction) {
-        this.communicationErrorFunction = communicationErrorFunction;
-    }
-
     public Class<? extends EntryPoint> getEntryPointClass() {
         return entryPointClass;
     }
@@ -192,15 +177,6 @@ public class ApplicationConfiguration implements ApplicationContextAware {
 
     public void setTabindexOnlyFormField(final boolean tabindexOnlyFormField) {
         this.tabindexOnlyFormField = tabindexOnlyFormField;
-    }
-
-    public ApplicationContext getApplicationContext() {
-        return context;
-    }
-
-    @Override
-    public void setApplicationContext(final ApplicationContext context) {
-        this.context = context;
     }
 
     @Override

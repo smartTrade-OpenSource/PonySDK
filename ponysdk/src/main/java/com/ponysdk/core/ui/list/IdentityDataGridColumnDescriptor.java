@@ -23,7 +23,7 @@
 
 package com.ponysdk.core.ui.list;
 
-import com.ponysdk.core.ui.list.valueprovider.IdentityValueProvider;
+import java.util.function.Function;
 
 /**
  * By default an IdentityDataGridColumnDescriptor has an IdentityValueProvider
@@ -31,7 +31,7 @@ import com.ponysdk.core.ui.list.valueprovider.IdentityValueProvider;
 public class IdentityDataGridColumnDescriptor<D> extends DataGridColumnDescriptor<D, D> {
 
     public IdentityDataGridColumnDescriptor() {
-        this.valueProvider = new IdentityValueProvider<>();
+        this.valueProvider = Function.identity();
     }
 
 }

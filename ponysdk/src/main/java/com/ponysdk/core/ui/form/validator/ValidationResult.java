@@ -30,17 +30,30 @@ public class ValidationResult {
 
     private boolean valid;
     private String errorMessage;
+    private Object data;
 
     public static ValidationResult newOKValidationResult() {
-        final ValidationResult validationResult = new ValidationResult();
-        validationResult.setValid(true);
-        return validationResult;
+        return newOKValidationResult(null);
+    }
+
+    public static ValidationResult newOKValidationResult(final Object data) {
+        return newValidationResult(true, data);
     }
 
     public static ValidationResult newFailedValidationResult(final String errorMessage) {
-        final ValidationResult validationResult = new ValidationResult();
-        validationResult.setValid(false);
+        return newFailedValidationResult(errorMessage, null);
+    }
+
+    public static ValidationResult newFailedValidationResult(final String errorMessage, final Object data) {
+        final ValidationResult validationResult = newValidationResult(false, data);
         validationResult.setErrorMessage(errorMessage);
+        return validationResult;
+    }
+
+    public static ValidationResult newValidationResult(final boolean valid, final Object data) {
+        final ValidationResult validationResult = new ValidationResult();
+        validationResult.setValid(valid);
+        validationResult.setData(data);
         return validationResult;
     }
 
@@ -59,4 +72,18 @@ public class ValidationResult {
     public void setValid(final boolean valid) {
         this.valid = valid;
     }
+
+    public Object getData() {
+        return data;
+    }
+
+    public void setData(final Object data) {
+        this.data = data;
+    }
+
+    @Override
+    public String toString() {
+        return "valid : " + valid + (data != null ? " ; data : " + data : "") + (valid ? " ; " + errorMessage : "");
+    }
+
 }

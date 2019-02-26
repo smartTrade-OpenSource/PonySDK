@@ -23,12 +23,6 @@
 
 package com.ponysdk.core.server.service.query;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 public enum ComparatorType {
 
     EQ("="),
@@ -42,24 +36,10 @@ public enum ComparatorType {
     IS_NULL("IS NULL"),
     IS_NOT_NULL("IS NOT NULL");
 
-    private static final Map<ComparatorType, String> names = Arrays.stream(ComparatorType.values())
-        .collect(Collectors.toMap(Function.identity(), ComparatorType::name));
-
-    private static final Map<String, ComparatorType> comparatorTypeByName = Arrays.stream(ComparatorType.values())
-        .collect(Collectors.toMap(ComparatorType::name, Function.identity()));
-
     private String name;
 
     ComparatorType(final String name) {
         this.name = name;
-    }
-
-    public static Collection<String> getNames() {
-        return names.values();
-    }
-
-    public static ComparatorType fromName(final String name) {
-        return comparatorTypeByName.get(name);
     }
 
     public String getName() {

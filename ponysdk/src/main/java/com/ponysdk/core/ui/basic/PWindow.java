@@ -23,14 +23,17 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.json.JsonObject;
 
 import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.UIContext;
@@ -39,9 +42,15 @@ import com.ponysdk.core.ui.basic.event.PCloseEvent;
 import com.ponysdk.core.ui.basic.event.PCloseHandler;
 import com.ponysdk.core.ui.basic.event.POpenEvent;
 import com.ponysdk.core.ui.basic.event.POpenHandler;
+import com.ponysdk.core.ui.basic.event.PVisibilityEvent;
+import com.ponysdk.core.ui.basic.event.PVisibilityEvent.PVisibilityHandler;
+import com.ponysdk.core.ui.formatter.TextFunction;
+import com.ponysdk.core.util.SetUtils;
 import com.ponysdk.core.writer.ModelWriter;
 
 public class PWindow extends PObject {
+
+    private static final String CANONICAL_NAME = PWindow.class.getCanonicalName();
 
     private Set<POpenHandler> openHandlers;
     private Set<PCloseHandler> closeHandlers;
@@ -55,7 +64,12 @@ public class PWindow extends PObject {
 
     private Map<String, PRootPanel> panelByZone = new HashMap<>(8);
 
+    private Map<TextFunction, PFunction> functions;
+
     private PWindow parent;
+
+    private List<PVisibilityHandler> visibilityHandlers;
+    private boolean shown = true;
 
     PWindow() {
         this.location = new Location(this);
@@ -97,13 +111,15 @@ public class PWindow extends PObject {
 
         panelByZone.forEach((key, value) -> value.attach(this, null));
         if (initializeListeners != null) initializeListeners.forEach(listener -> listener.onInitialize(this));
+
+        UIContext.get().addContextDestroyListener(uiContext -> onDestroy());
     }
 
     public static PWindow getMain() {
-        PWindow mainWindow = UIContext.get().getAttribute(PWindow.class.getCanonicalName());
+        PWindow mainWindow = UIContext.get().getAttribute(CANONICAL_NAME);
         if (mainWindow == null) {
             mainWindow = new PMainWindow();
-            UIContext.get().setAttribute(PWindow.class.getCanonicalName(), mainWindow);
+            UIContext.get().setAttribute(CANONICAL_NAME, mainWindow);
         }
         return mainWindow;
     }
@@ -125,9 +141,8 @@ public class PWindow extends PObject {
     public void open() {
         if (destroy) return;
         if (!initialized) {
-            final ModelWriter writer = Txn.get().getWriter();
-            writer.beginObject();
-            if (window != PWindow.getMain()) writer.write(ServerToClientModel.WINDOW_ID, window.getID());
+            final ModelWriter writer = UIContext.get().getWriter();
+            writer.beginObject(window);
             writer.write(ServerToClientModel.TYPE_CREATE, ID);
             writer.write(ServerToClientModel.WIDGET_TYPE, getWidgetType().getValue());
             enrichForCreation(writer);
@@ -231,6 +246,15 @@ public class PWindow extends PObject {
     }
 
     /**
+     * The Location.reload() method reloads the resource from the current URL
+     *
+     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Location/reload">MDN</a>
+     */
+    public void reload() {
+        saveUpdate(writer -> writer.write(ServerToClientModel.RELOAD));
+    }
+
+    /**
      * The Window.close() method closes the current window, or the window on which it was called.
      *
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/close">MDN</a>
@@ -257,30 +281,45 @@ public class PWindow extends PObject {
 
             if (openHandlers != null) {
                 final POpenEvent e = new POpenEvent(this);
-                openHandlers.forEach(handler -> handler.onOpen(e));
-                openHandlers.clear();
+                for (final Iterator<POpenHandler> iter = openHandlers.iterator(); iter.hasNext();) {
+                    final POpenHandler handler = iter.next();
+                    iter.remove();
+                    handler.onOpen(e);
+                }
             }
         } else if (event.containsKey(ClientToServerModel.HANDLER_CLOSE.toStringValue())) {
             PWindowManager.unregisterWindow(this);
             if (subWindows != null) {
-                subWindows.forEach(PWindow::close);
-                subWindows.clear();
+                for (final Iterator<PWindow> iter = subWindows.iterator(); iter.hasNext();) {
+                    final PWindow window = iter.next();
+                    iter.remove();
+                    window.close();
+                }
             }
             if (closeHandlers != null) {
                 final PCloseEvent e = new PCloseEvent(this);
-                closeHandlers.forEach(handler -> handler.onClose(e));
-                closeHandlers.clear();
+                for (final Iterator<PCloseHandler> iter = closeHandlers.iterator(); iter.hasNext();) {
+                    final PCloseHandler handler = iter.next();
+                    iter.remove();
+                    handler.onClose(e);
+                }
             }
             onDestroy();
         } else if (event.containsKey(ClientToServerModel.HANDLER_DESTROY.toStringValue())) {
             onDestroy();
+        } else if (event.containsKey(ClientToServerModel.HANDLER_DOCUMENT_VISIBILITY.toStringValue())) {
+            shown = event.getBoolean(ClientToServerModel.HANDLER_DOCUMENT_VISIBILITY.toStringValue());
+            if (visibilityHandlers != null) {
+                final PVisibilityEvent visibilityEvent = new PVisibilityEvent(this, shown);
+                visibilityHandlers.forEach(handler -> handler.onVisibility(visibilityEvent));
+            }
         } else {
             super.onClientData(event);
         }
     }
 
     public void addOpenHandler(final POpenHandler handler) {
-        if (openHandlers == null) openHandlers = new HashSet<>(4);
+        if (openHandlers == null) openHandlers = SetUtils.newArraySet(4);
         openHandlers.add(handler);
     }
 
@@ -289,7 +328,7 @@ public class PWindow extends PObject {
     }
 
     public void addCloseHandler(final PCloseHandler handler) {
-        if (closeHandlers == null) closeHandlers = new HashSet<>(4);
+        if (closeHandlers == null) closeHandlers = SetUtils.newArraySet(4);
         closeHandlers.add(handler);
     }
 
@@ -323,6 +362,10 @@ public class PWindow extends PObject {
         return url;
     }
 
+    public String getName() {
+        return name;
+    }
+
     public void clear() {
         panelByZone.forEach((key, value) -> value.clear());
     }
@@ -330,8 +373,10 @@ public class PWindow extends PObject {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        panelByZone.forEach((key, value) -> value.onDestroy());
-        panelByZone = null;
+        if (panelByZone != null) {
+            panelByZone.forEach((key, value) -> value.onDestroy());
+            panelByZone = null;
+        }
     }
 
     public PRootPanel getPRootPanel() {
@@ -347,8 +392,7 @@ public class PWindow extends PObject {
     }
 
     private void addWindow(final PWindow window) {
-        if (subWindows == null) subWindows = new HashSet<>(4);
-        window.addCloseHandler(event -> removeWindow(window));
+        if (subWindows == null) subWindows = SetUtils.newArraySet(4);
         subWindows.add(window);
     }
 
@@ -358,6 +402,55 @@ public class PWindow extends PObject {
 
     public PWindow getParent() {
         return parent;
+    }
+
+    PFunction getPFunction(final TextFunction function) {
+        return safeFunctions().computeIfAbsent(function, this::createPFunction);
+    }
+
+    private Map<TextFunction, PFunction> safeFunctions() {
+        if (functions == null) {
+            functions = new HashMap<>();
+        }
+        return functions;
+    }
+
+    private PFunction createPFunction(final TextFunction function) {
+        final PFunction pf = new PFunction(function);
+        pf.attach(this, null);
+        return pf;
+    }
+
+    /**
+     * Add visibility handler
+     *
+     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/Events/visibilitychange">MDN</a>
+     */
+    public void addVisibilityHandler(final PVisibilityHandler visibilityHandler) {
+        if (visibilityHandlers == null) visibilityHandlers = new ArrayList<>();
+        visibilityHandlers.add(visibilityHandler);
+    }
+
+    /**
+     * Remove visibility handler
+     *
+     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/Events/visibilitychange">MDN</a>
+     */
+    public void removeVisibilityHandler(final PVisibilityHandler visibilityHandler) {
+        if (visibilityHandlers != null) {
+            visibilityHandlers.remove(visibilityHandler);
+            if (visibilityHandlers.isEmpty()) saveRemoveHandler(HandlerModel.HANDLER_VISIBILITY);
+        }
+    }
+
+    /**
+     * The opposite of document.hidden property that returns a Boolean value indicating if the page is considered hidden
+     * or not.
+     *
+     * @see <a href="https://developer.mozilla.org/fr/docs/Web/API/Document/hidden">MDN</a>
+     */
+    public boolean isShown() {
+        return shown;
     }
 
     @Override
@@ -485,8 +578,8 @@ public class PWindow extends PObject {
 
         @Override
         final void init() {
-            final ModelWriter writer = Txn.get().getWriter();
-            writer.beginObject();
+            final ModelWriter writer = UIContext.get().getWriter();
+            writer.beginObject(window);
             writer.write(ServerToClientModel.TYPE_CREATE, ID);
             writer.write(ServerToClientModel.WIDGET_TYPE, getWidgetType().getValue());
             writer.endObject();

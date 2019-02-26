@@ -24,10 +24,18 @@
 package com.ponysdk.core.ui.basic.event;
 
 import com.ponysdk.core.model.DomHandlerType;
+import com.ponysdk.core.ui.eventbus.EventHandler;
 
-public class PContextMenuEvent extends PDomEvent<PContextMenuHandler> {
+public class PContextMenuEvent extends PDomEvent<PContextMenuEvent.Handler> {
 
     public static final PDomEvent.Type TYPE = new PDomEvent.Type(DomHandlerType.CONTEXT_MENU);
+
+    @FunctionalInterface
+    public interface Handler extends EventHandler {
+
+        void onContextMenu(PContextMenuEvent event);
+
+    }
 
     public PContextMenuEvent(final Object sourceComponent) {
         super(sourceComponent);
@@ -39,7 +47,7 @@ public class PContextMenuEvent extends PDomEvent<PContextMenuHandler> {
     }
 
     @Override
-    protected void dispatch(final PContextMenuHandler handler) {
+    protected void dispatch(final PContextMenuEvent.Handler handler) {
         handler.onContextMenu(this);
     }
 

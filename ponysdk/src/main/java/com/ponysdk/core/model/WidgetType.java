@@ -80,7 +80,9 @@ public enum WidgetType {
     BROWSER,
     HEADER_PANEL,
     SUGGESTBOX,
-    MULTIWORD_SUGGEST_ORACLE;
+    MULTIWORD_SUGGEST_ORACLE,
+    FUNCTION,
+    FUNCTIONAL_LABEL;
 
     private static final WidgetType[] VALUES = WidgetType.values();
 
@@ -91,7 +93,7 @@ public enum WidgetType {
         return (byte) ordinal();
     }
 
-    public static WidgetType fromRawValue(final byte rawValue) {
+    public static WidgetType fromRawValue(final int rawValue) {
         return VALUES[rawValue];
     }
 

@@ -26,7 +26,6 @@ package com.ponysdk.core.ui.basic;
 import java.util.Objects;
 
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.ui.basic.event.PHasHTML;
 import com.ponysdk.core.writer.ModelWriter;
 
 /**
@@ -34,7 +33,7 @@ import com.ponysdk.core.writer.ModelWriter;
  *
  * @see com.google.gwt.user.client.ui.ButtonBase
  */
-abstract class PButtonBase extends PFocusWidget implements PHasHTML {
+abstract class PButtonBase extends PFocusWidget {
 
     private String text;
 
@@ -76,12 +75,10 @@ abstract class PButtonBase extends PFocusWidget implements PHasHTML {
         if (html != null) writer.write(ServerToClientModel.HTML, html);
     }
 
-    @Override
     public String getHTML() {
         return html;
     }
 
-    @Override
     public void setHTML(final String html) {
         if (Objects.equals(this.html, html)) return;
         this.html = html;
@@ -89,12 +86,10 @@ abstract class PButtonBase extends PFocusWidget implements PHasHTML {
         if (initialized) saveUpdate(ServerToClientModel.HTML, html);
     }
 
-    @Override
     public String getText() {
         return text;
     }
 
-    @Override
     public void setText(final String text) {
         if (Objects.equals(this.text, text)) return;
         this.text = text;

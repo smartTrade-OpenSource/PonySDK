@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.server.websocket;
 
+import java.io.StringReader;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -30,10 +31,13 @@ import java.util.stream.Collectors;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.json.JsonReader;
 
+import org.eclipse.jetty.util.component.Container;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
 import org.eclipse.jetty.websocket.api.WebSocketListener;
+import org.eclipse.jetty.websocket.common.extensions.ExtensionStack;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +49,6 @@ import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.context.CommunicationSanityChecker;
 import com.ponysdk.core.server.stm.TxnContext;
 import com.ponysdk.core.ui.basic.PObject;
-import com.ponysdk.core.util.JsonUtil;
 
 public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
@@ -59,19 +62,23 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     private TxnContext context;
     private Session session;
     private UIContext uiContext;
+    private Listener listener;
+
+    private long lastSentPing;
 
     public WebSocket() {
     }
 
     @Override
     public void onWebSocketConnect(final Session session) {
-        this.session = session;
-
-        // 1K for max chunk size and 1M for total buffer size
-        // Don't set max chunk size > 8K because when using Jetty Websocket compression, the chunks are limited to 8K
-        this.websocketPusher = new WebSocketPusher(session, 1 << 20, 1 << 12, TimeUnit.SECONDS.toMillis(60));
-
         try {
+            if (!session.isOpen()) throw new IllegalStateException("Session already closed");
+            this.session = session;
+
+            // 1K for max chunk size and 1M for total buffer size
+            // Don't set max chunk size > 8K because when using Jetty Websocket compression, the chunks are limited to 8K
+
+            this.websocketPusher = new WebSocketPusher(session, 1 << 20, 1 << 12, TimeUnit.SECONDS.toMillis(60));
             uiContext = new UIContext(this, context, applicationManager.getConfiguration(), request);
             log.info("Creating a new {}", uiContext);
 
@@ -84,7 +91,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
                 encode(ServerToClientModel.CREATE_CONTEXT, uiContext.getID()); // TODO nciaravola integer ?
                 encode(ServerToClientModel.OPTION_FORMFIELD_TABULATION, uiContext.getConfiguration().isTabindexOnlyFormField());
                 endObject();
-                if (isAlive() && isSessionOpen()) flush0();
+                if (isAlive()) flush0();
             } catch (final Throwable e) {
                 log.error("Cannot send server heart beat to client", e);
             } finally {
@@ -95,6 +102,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
             communicationSanityChecker.start();
         } catch (final Exception e) {
             log.error("Cannot process WebSocket instructions", e);
+            e.printStackTrace(); // WORKAROUND The logger doesn't seem to work here
         }
     }
 
@@ -106,8 +114,8 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
     @Override
     public void onWebSocketClose(final int statusCode, final String reason) {
-        if (log.isInfoEnabled()) log.info("WebSocket closed on UIContext #{} : {}, reason : {}", uiContext.getID(),
-            NiceStatusCode.getMessage(statusCode), reason != null ? reason : "");
+        log.info("WebSocket closed on UIContext #{} : {}, reason : {}", uiContext.getID(), NiceStatusCode.getMessage(statusCode),
+            reason != null ? reason : "");
         uiContext.onDestroy();
     }
 
@@ -116,29 +124,31 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
      */
     @Override
     public void onWebSocketText(final String message) {
+        if (this.listener != null) listener.onIncomingText(message);
         if (isAlive()) {
             try {
                 uiContext.onMessageReceived();
                 if (monitor != null) monitor.onMessageReceived(WebSocket.this, message);
 
-                if (ClientToServerModel.HEARTBEAT.toStringValue().equals(message)) {
-                    processHeartbeat();
-                } else {
-                    final JsonObject jsonObject = JsonUtil.readObject(message);
-                    if (jsonObject.containsKey(ClientToServerModel.PING_SERVER.toStringValue())) {
-                        processPing(jsonObject);
-                    } else if (jsonObject.containsKey(ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue())) {
-                        processInstructions(jsonObject);
-                    } else if (jsonObject.containsKey(ClientToServerModel.ERROR_MSG.toStringValue())) {
-                        processTerminalLog(jsonObject, ClientToServerModel.ERROR_MSG);
-                    } else if (jsonObject.containsKey(ClientToServerModel.WARN_MSG.toStringValue())) {
-                        processTerminalLog(jsonObject, ClientToServerModel.WARN_MSG);
-                    } else if (jsonObject.containsKey(ClientToServerModel.INFO_MSG.toStringValue())) {
-                        processTerminalLog(jsonObject, ClientToServerModel.INFO_MSG);
-                    } else {
-                        log.error("Unknow message from terminal #{} : {}", uiContext.getID(), message);
-                    }
+                final JsonObject jsonObject;
+                try (final JsonReader reader = uiContext.getJsonProvider().createReader(new StringReader(message))) {
+                    jsonObject = reader.readObject();
                 }
+
+                if (jsonObject.containsKey(ClientToServerModel.TERMINAL_LATENCY.toStringValue())) {
+                    processRoundtripLatency(jsonObject);
+                } else if (jsonObject.containsKey(ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue())) {
+                    processInstructions(jsonObject);
+                } else if (jsonObject.containsKey(ClientToServerModel.ERROR_MSG.toStringValue())) {
+                    processTerminalLog(jsonObject, ClientToServerModel.ERROR_MSG);
+                } else if (jsonObject.containsKey(ClientToServerModel.WARN_MSG.toStringValue())) {
+                    processTerminalLog(jsonObject, ClientToServerModel.WARN_MSG);
+                } else if (jsonObject.containsKey(ClientToServerModel.INFO_MSG.toStringValue())) {
+                    processTerminalLog(jsonObject, ClientToServerModel.INFO_MSG);
+                } else {
+                    log.error("Unknow message from terminal #{} : {}", uiContext.getID(), message);
+                }
+
                 if (monitor != null) monitor.onMessageProcessed(this, message);
             } catch (final Throwable e) {
                 log.error("Cannot process message from terminal  #" + uiContext.getID() + " : " + message, e);
@@ -146,19 +156,23 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
                 if (monitor != null) monitor.onMessageUnprocessed(this, message);
             }
         } else {
-            log.info("UI Context #{} is destroyed, message dropped from terminal : {}", uiContext.getID(), message);
+            log.info("UI Context #{} is destroyed, message dropped from terminal : {}", uiContext != null ? uiContext.getID() : -1,
+                message);
         }
     }
 
-    private void processHeartbeat() {
-        if (log.isDebugEnabled()) log.debug("Heartbeat received from terminal #{}", uiContext.getID());
-    }
+    private void processRoundtripLatency(final JsonObject jsonObject) {
+        final long roundtripLatency = TimeUnit.MILLISECONDS.convert(System.nanoTime() - lastSentPing, TimeUnit.NANOSECONDS);
+        log.debug("Roundtrip measurement : {} ms from terminal #{}", roundtripLatency, uiContext.getID());
+        uiContext.addRoundtripLatencyValue(roundtripLatency);
 
-    private void processPing(final JsonObject jsonObject) {
-        final long start = jsonObject.getJsonNumber(ClientToServerModel.PING_SERVER.toStringValue()).longValue();
-        final long end = System.currentTimeMillis();
-        if (log.isDebugEnabled()) log.debug("Ping measurement : {} ms from terminal #{}", end - start, uiContext.getID());
-        uiContext.addPingValue(end - start);
+        final long terminalLatency = jsonObject.getJsonNumber(ClientToServerModel.TERMINAL_LATENCY.toStringValue()).longValue();
+        log.debug("Terminal measurement : {} ms from terminal #{}", terminalLatency, uiContext.getID());
+        uiContext.addTerminalLatencyValue(terminalLatency);
+
+        final long networkLatency = roundtripLatency - terminalLatency;
+        log.debug("Network measurement : {} ms from terminal #{}", networkLatency, uiContext.getID());
+        uiContext.addNetworkLatencyValue(networkLatency);
     }
 
     private void processInstructions(final JsonObject jsonObject) {
@@ -204,24 +218,13 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     }
 
     /**
-     * Send heart beat to the client
-     */
-    public void sendHeartBeat() {
-        if (isAlive() && isSessionOpen()) {
-            beginObject();
-            encode(ServerToClientModel.HEARTBEAT, null);
-            endObject();
-            flush0();
-        }
-    }
-
-    /**
      * Send round trip to the client
      */
     public void sendRoundTrip() {
         if (isAlive() && isSessionOpen()) {
+            lastSentPing = System.nanoTime();
             beginObject();
-            encode(ServerToClientModel.PING_SERVER, System.currentTimeMillis());
+            encode(ServerToClientModel.ROUNDTRIP_LATENCY, null);
             endObject();
             flush0();
         }
@@ -231,13 +234,13 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         if (isAlive() && isSessionOpen()) flush0();
     }
 
-    private void flush0() {
+    void flush0() {
         websocketPusher.flush();
     }
 
     public void close() {
         if (isSessionOpen()) {
-            log.info("Closing websocket programaticly");
+            log.info("Closing websocket programmatically");
             session.close();
         }
     }
@@ -263,6 +266,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     @Override
     public void encode(final ServerToClientModel model, final Object value) {
         websocketPusher.encode(model, value);
+        if (listener != null) listener.onOutgoingPonyFrame(model, value);
     }
 
     private static enum NiceStatusCode {
@@ -330,4 +334,37 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         this.context = context;
     }
 
+    public void setListener(final Listener listener) {
+        this.listener = listener;
+        this.websocketPusher.setWebSocketListener(listener);
+        if (!(session instanceof Container)) {
+            log.warn("Unrecognized session type {} for {}", session == null ? null : session.getClass(), uiContext);
+            return;
+        }
+        final ExtensionStack extensionStack = ((Container) session).getBean(ExtensionStack.class);
+        if (extensionStack == null) {
+            log.warn("No Extension Stack for {}", uiContext);
+            return;
+        }
+        final PonyPerMessageDeflateExtension extension = extensionStack.getBean(PonyPerMessageDeflateExtension.class);
+        if (extension == null) {
+            log.warn("Missing PonyPerMessageDeflateExtension from Extension Stack for {}", uiContext);
+            return;
+        }
+        extension.setWebSocketListener(listener);
+    }
+
+    public static interface Listener {
+
+        void onOutgoingPonyFrame(ServerToClientModel model, Object value);
+
+        void onOutgoingPonyFramesBytes(int bytes);
+
+        void onOutgoingWebSocketFrame(int headerLength, int payloadLength);
+
+        void onIncomingText(String text);
+
+        void onIncomingWebSocketFrame(int headerLength, int payloadLength);
+
+    }
 }

@@ -63,7 +63,7 @@ public class PTCheckBox<T extends CheckBox> extends PTButtonBase<T> {
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         final ServerToClientModel model = binaryModel.getModel();
         if (ServerToClientModel.VALUE_CHECKBOX == model) {
-            final PCheckBoxState state = PCheckBoxState.fromRawValue(binaryModel.getByteValue());
+            final PCheckBoxState state = PCheckBoxState.fromRawValue(binaryModel.getIntValue());
             final boolean indeterminate = PCheckBoxState.INDETERMINATE == state;
             if (!indeterminate) uiObject.setValue(PCheckBoxState.CHECKED == state);
             setIndeterminate(inputElement, indeterminate);

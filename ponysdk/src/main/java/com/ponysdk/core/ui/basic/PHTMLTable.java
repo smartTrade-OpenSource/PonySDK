@@ -357,6 +357,14 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
             });
         }
 
+        public void showRow(final int row) {
+            saveUpdate(writer -> writer.write(ServerToClientModel.ROW_FORMATTER_SHOW_ROW, row));
+        }
+
+        public void hideRow(final int row) {
+            saveUpdate(writer -> writer.write(ServerToClientModel.ROW_FORMATTER_HIDE_ROW, row));
+        }
+
         protected void insertRowStyle(final int row) {
             final Map<Integer, Set<String>> temp = new HashMap<>();
             for (final Entry<Integer, Set<String>> entry : styleNames.entrySet()) {

@@ -3,17 +3,17 @@ ext {
     gwtOutputDirName = buildDir.name + "/gwt"
     buildInfoOutputDirName = buildDir.name + "/buildinfo"
     javadocResources = "src/main/javadoc"
-    
+
     jsinteropVersion = '1.0.2'
-    
-    javaxServletVersion = '3.1.0'
-    glassfishVersion = '1.1.2'
-    jsonVersion = '1.1.2'
+
+    javaxServletVersion = '4.0.1'
+    glassfishVersion = '1.1.4'
+    jsonVersion = '1.1.4'
     javaxValidationVersion = '1.0.0.GA'
-    seleniumVersion = '3.9.1'
+    seleniumVersion = '3.14.0'
     junitVersion = '4.12'
-    tyrusVersion = '1.13.1'
-    mockitoVersion = '1.10.19'
+    tyrusVersion = '1.15'
+    mockitoVersion = '2.24.0'
 }
 
 configurations {
@@ -38,57 +38,59 @@ dependencies {
     }
 
     compile(
-            'com.google.gwt:gwt-user:' + gwtVersion,
-            'com.google.gwt:gwt-elemental:' + gwtVersion,
-            'com.google.jsinterop:jsinterop:' + jsinteropVersion,
-            'com.google.jsinterop:jsinterop-annotations:' + jsinteropVersion,
+        'com.google.gwt:gwt-user:' + gwtVersion,
+        'com.google.gwt:gwt-elemental:' + gwtVersion,
+        'com.google.jsinterop:jsinterop:' + jsinteropVersion,
+        'com.google.jsinterop:jsinterop-annotations:' + jsinteropVersion,
 
-            'org.eclipse.jetty:jetty-server:' + jettyVersion,
-            'org.eclipse.jetty:jetty-servlet:' + jettyVersion,
-            'org.eclipse.jetty:jetty-webapp:' + jettyVersion,
-            'org.eclipse.jetty:jetty-servlets:' + jettyVersion,
-            'org.eclipse.jetty:jetty-client:' + jettyVersion,
-            'org.eclipse.jetty:jetty-io:' + jettyVersion,
-            'org.eclipse.jetty:jetty-util:' + jettyVersion,
-            'org.eclipse.jetty:jetty-http:' + jettyVersion,
-            'org.eclipse.jetty:jetty-security:' + jettyVersion,
-            'org.eclipse.jetty:jetty-continuation:' + jettyVersion,
-            'org.eclipse.jetty.websocket:websocket-api:' + jettyVersion,
-            'org.eclipse.jetty.websocket:websocket-common:' + jettyVersion,
-            'org.eclipse.jetty.websocket:websocket-server:' + jettyVersion,
-            'org.eclipse.jetty.websocket:websocket-servlet:' + jettyVersion,
-            'org.eclipse.jetty.websocket:javax-websocket-server-impl:' + jettyVersion,
+        'org.eclipse.jetty:jetty-server:' + jettyVersion,
+        'org.eclipse.jetty:jetty-servlet:' + jettyVersion,
+        'org.eclipse.jetty:jetty-webapp:' + jettyVersion,
+        'org.eclipse.jetty:jetty-servlets:' + jettyVersion,
+        'org.eclipse.jetty:jetty-client:' + jettyVersion,
+        'org.eclipse.jetty:jetty-io:' + jettyVersion,
+        'org.eclipse.jetty:jetty-util:' + jettyVersion,
+        'org.eclipse.jetty:jetty-http:' + jettyVersion,
+        'org.eclipse.jetty:jetty-security:' + jettyVersion,
+        'org.eclipse.jetty:jetty-continuation:' + jettyVersion,
+        'org.eclipse.jetty.websocket:websocket-api:' + jettyVersion,
+        'org.eclipse.jetty.websocket:websocket-common:' + jettyVersion,
+        'org.eclipse.jetty.websocket:websocket-server:' + jettyVersion,
+        'org.eclipse.jetty.websocket:websocket-servlet:' + jettyVersion,
+        'org.eclipse.jetty.websocket:javax-websocket-server-impl:' + jettyVersion,
 
-            'org.springframework:spring-core:' + springVersion,
-            'org.springframework:spring-web:' + springVersion,
-            'org.springframework:spring-beans:' + springVersion,
-            'org.springframework:spring-context:' + springVersion,
+        'org.springframework:spring-core:' + springVersion,
+        'org.springframework:spring-web:' + springVersion,
+        'org.springframework:spring-beans:' + springVersion,
+        'org.springframework:spring-context:' + springVersion,
 
-            'org.slf4j:slf4j-api:' + slf4jVersion,
+        'org.slf4j:slf4j-api:' + slf4jVersion,
 
-            'javax.servlet:javax.servlet-api:' + javaxServletVersion,
-            'javax.json:javax.json-api:' + jsonVersion,
-            'org.glassfish:javax.json:' + glassfishVersion
+        'javax.servlet:javax.servlet-api:' + javaxServletVersion,
+        'javax.json:javax.json-api:' + jsonVersion,
+        'org.glassfish:javax.json:' + glassfishVersion,
+
+        'org.seleniumhq.selenium:selenium-api:' + seleniumVersion,
+        'org.glassfish.tyrus:tyrus-client:' + tyrusVersion,
+        'org.glassfish.tyrus.ext:tyrus-extension-deflate:' + tyrusVersion
     )
 
     testCompile(
-            'junit:junit:' + junitVersion,
-            'org.mockito:mockito-all:' + mockitoVersion,
-            'org.seleniumhq.selenium:selenium-api:' + seleniumVersion,
-            'org.seleniumhq.selenium:selenium-java:' + seleniumVersion,
-            'javax.websocket:javax.websocket-client-api:1.1',
-            'org.glassfish.tyrus:tyrus-client:' + tyrusVersion
+        'junit:junit:' + junitVersion,
+
+        'org.mockito:mockito-core:' + mockitoVersion,
+
+        'org.seleniumhq.selenium:selenium-java:' + seleniumVersion,
+        'javax.websocket:javax.websocket-client-api:1.1'
     )
 
     testRuntime(
-            'org.slf4j:jcl-over-slf4j:' + slf4jVersion,
-            'org.slf4j:log4j-over-slf4j:' + slf4jVersion,
-            'org.slf4j:jul-to-slf4j:' + slf4jVersion,
-            'org.apache.logging.log4j:log4j-api:' + log4jVersion,
-            'org.apache.logging.log4j:log4j-core:' + log4jVersion,
-            'org.apache.logging.log4j:log4j-slf4j-impl:' + log4jVersion,
-            
-            'org.glassfish.tyrus:tyrus-container-grizzly-client:' + tyrusVersion
+        'org.slf4j:jcl-over-slf4j:' + slf4jVersion,
+        'org.slf4j:log4j-over-slf4j:' + slf4jVersion,
+        'org.slf4j:jul-to-slf4j:' + slf4jVersion,
+        'org.apache.logging.log4j:log4j-slf4j-impl:' + log4jVersion,
+
+        'org.glassfish.tyrus:tyrus-container-grizzly-client:' + tyrusVersion
     )
 }
 
@@ -130,8 +132,10 @@ javadoc {
     exclude '**/terminal/**'
 }
 
-task createGWTProdBuildDir << {
-    mkdir new File(gwtOutputDirName, "prod")
+task createGWTProdBuildDir {
+    doLast {
+        mkdir new File(gwtOutputDirName, "prod")
+    }
 }
 
 task gwtc(dependsOn: 'classes', type: JavaExec) {
@@ -161,8 +165,10 @@ task gwtc(dependsOn: 'classes', type: JavaExec) {
     maxHeapSize = '512M'
 }
 
-task createGWTDebugBuildDir << {
-    mkdir new File(gwtOutputDirName, "debug")
+task createGWTDebugBuildDir {
+    doLast {
+        mkdir new File(gwtOutputDirName, "debug")
+    }
 }
 
 task gwtcDebug(dependsOn: classes, type: JavaExec) {
@@ -223,6 +229,22 @@ task sourcesJar(type: Jar, dependsOn: classes) {
         attributes("Revision": revision)
         attributes("Classifier": "sources")
         attributes("Date": timestamp + " / " + new Date().toGMTString())
+    }
+}
+
+task testsJar(type: Jar) {
+    classifier = 'tests'
+    from sourceSets.test.output
+}
+
+publish.dependsOn('sourcesJar')
+publish.dependsOn('jar')
+publish.dependsOn('testsJar')
+publish.finalizedBy('publishInfo')
+
+task publishInfo {
+    doLast {
+        println 'You need to deploy manually new built jars in your favorite artifacts management server'
     }
 }
 

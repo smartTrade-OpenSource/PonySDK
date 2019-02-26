@@ -23,20 +23,25 @@
 
 package com.ponysdk.core.terminal.ui;
 
+import java.util.function.Consumer;
+
+import com.google.gwt.event.dom.client.DomEvent;
+import com.google.gwt.event.dom.client.KeyEvent;
 import com.google.gwt.event.dom.client.MouseEvent;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.ponysdk.core.model.DomHandlerType;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.PonySDK;
 import com.ponysdk.core.terminal.UIBuilder;
+import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public abstract class PTFocusWidget<T extends FocusWidget> extends PTWidget<T> {
 
+    protected boolean enabled = true;
     private boolean showLoadingOnRequest = false;
     private boolean enabledOnRequest = false;
-    private boolean enabled = true;
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
@@ -67,10 +72,22 @@ public abstract class PTFocusWidget<T extends FocusWidget> extends PTWidget<T> {
     }
 
     @Override
-    protected void triggerMouseEvent(final DomHandlerType domHandlerType, final MouseEvent<?> event) {
+    protected void triggerDomEvent(final DomHandlerType domHandlerType, final DomEvent<?> event,
+                                   final Consumer<PTInstruction> enricher) {
+        if (enabled) super.triggerDomEvent(domHandlerType, event, enricher);
+    }
+
+    @Override
+    protected void triggerMouseClickEvent(final DomHandlerType domHandlerType, final MouseEvent<?> event) {
+        if (!enabled) return;
         if (!enabledOnRequest) uiObject.setEnabled(false);
         if (showLoadingOnRequest) uiObject.addStyleName("pony-Loading");
         super.triggerMouseEvent(domHandlerType, event);
+    }
+
+    @Override
+    protected void triggerKeyEvent(final DomHandlerType domHandlerType, final KeyEvent<?> event, final int[] keyFilter) {
+        if (enabled) super.triggerKeyEvent(domHandlerType, event, keyFilter);
     }
 
 }

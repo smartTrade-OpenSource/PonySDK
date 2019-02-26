@@ -46,6 +46,7 @@ public class PTStreamResource extends AbstractPTObject {
             final String action = GWT.getHostPageBaseURL() + MappingPath.STREAM + "?"
                     + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "=" + PonySDK.get().getContextId() + "&"
                     + ClientToServerModel.STREAM_REQUEST_ID.toStringValue() + "=" + streamRequestId;
+
             frame = new Frame();
             frame.setWidth("0px");
             frame.setHeight("0px");
@@ -54,6 +55,8 @@ public class PTStreamResource extends AbstractPTObject {
             RootPanel.get().add(frame);
 
             Scheduler.get().scheduleDeferred(() -> frame.setUrl(action));
+
+            // TODO Find a way to remove the frame after download is completed
         } else {
             super.addHandler(buffer, handlerModel);
         }

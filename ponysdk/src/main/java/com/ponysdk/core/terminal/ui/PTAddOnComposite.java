@@ -30,16 +30,14 @@ import java.util.logging.Logger;
 
 import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.json.client.JSONNumber;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.ui.Widget;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.JavascriptAddOnFactory;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
+
+import elemental.json.JsonObject;
 
 public class PTAddOnComposite extends PTAddOn {
 
@@ -57,21 +55,18 @@ public class PTAddOnComposite extends PTAddOn {
         final String signature = buffer.readBinaryModel().getStringValue();
         final JavascriptAddOnFactory factory = getFactory(uiBuilder, signature);
 
-        final JSONObject params = new JSONObject();
-        params.put("id", new JSONNumber(objectId));
-
+        final JsonObject arguments;
         BinaryModel binaryModel = buffer.readBinaryModel();
         if (ServerToClientModel.PADDON_CREATION == binaryModel.getModel()) {
-            params.put("args", binaryModel.getJsonObject());
+            arguments = binaryModel.getJsonObject();
             binaryModel = buffer.readBinaryModel();
+        } else {
+            arguments = null;
         }
 
         final int widgetID = binaryModel.getIntValue();
         final PTWidget<?> object = (PTWidget<?>) uiBuilder.getPTObject(widgetID);
         widget = object.uiObject;
-        final Element element = widget.getElement();
-        params.put("widgetID", new JSONString(String.valueOf(widgetID)));
-        params.put("widgetElement", new JSONObject(element));
 
         widget.addAttachHandler(event -> {
             try {
@@ -87,7 +82,7 @@ public class PTAddOnComposite extends PTAddOn {
         });
 
         try {
-            addOn = factory.newAddOn(params.getJavaScriptObject());
+            addOn = factory.newAddOn(objectId, (JavaScriptObject) arguments, String.valueOf(widgetID), widget.getElement());
             addOn.onInit();
             if (widget.isAttached()) addOn.onAttached();
             initialized = true;

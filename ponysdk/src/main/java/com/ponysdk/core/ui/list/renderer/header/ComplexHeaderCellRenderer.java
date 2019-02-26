@@ -25,7 +25,6 @@ package com.ponysdk.core.ui.list.renderer.header;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -49,13 +48,14 @@ import com.ponysdk.core.ui.list.Resetable;
 import com.ponysdk.core.ui.list.Sortable;
 import com.ponysdk.core.ui.list.Validable;
 import com.ponysdk.core.ui.model.PKeyCodes;
+import com.ponysdk.core.util.SetUtils;
 
 public class ComplexHeaderCellRenderer
         implements Queriable, HeaderCellRenderer, Resetable, HasCriteria, Sortable, Validable, FormFieldListener, HasFilterListeners {
 
     protected final FormField formField;
     protected final String key;
-    protected final Set<FilterListener> filterListeners = new HashSet<>();
+    protected final Set<FilterListener> filterListeners = SetUtils.newArraySet();
     protected PGrid panel;
     protected PLabel caption;
     protected SortingType sortingType = SortingType.NONE;

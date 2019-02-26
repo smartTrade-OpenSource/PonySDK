@@ -28,7 +28,6 @@ import com.ponysdk.core.ui.basic.PCheckBox;
 import com.ponysdk.core.ui.basic.PHTML;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
 import com.ponysdk.core.ui.basic.event.PContextMenuEvent;
-import com.ponysdk.core.ui.basic.event.PContextMenuHandler;
 import com.ponysdk.core.ui.basic.event.PMouseEvent;
 import com.ponysdk.core.ui.model.PEventType;
 import com.ponysdk.core.ui.rich.PNotificationManager;
@@ -58,7 +57,7 @@ public class HTMLPageActivity extends SamplePageActivity {
         final PHTML htmlWithContextMenu = Element.newPHTML(
             "<span style='cursor: pointer;border: 1px solid black;color:white;background-color:gray;margin:5px;padding:10px'>context menu on me!</span> using HTML and CSS");
         htmlWithContextMenu.preventEvent(PEventType.ONCONTEXTMENU);
-        htmlWithContextMenu.addDomHandler((PContextMenuHandler) event -> PNotificationManager
+        htmlWithContextMenu.addDomHandler((PContextMenuEvent.Handler) event -> PNotificationManager
             .showHumanizedNotification(getView().asWidget().getWindow(), "Context menu triggered"), PContextMenuEvent.TYPE);
 
         final PCheckBox checkBox = Element.newPCheckBox();

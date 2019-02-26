@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -24,17 +24,20 @@
 package com.ponysdk.core.server.service.query;
 
 public enum SortingType {
-    NONE, DESCENDING, ASCENDING;
 
-    public static boolean isNone(SortingType type) {
+    NONE,
+    DESCENDING,
+    ASCENDING;
+
+    public static boolean isNone(final SortingType type) {
         return NONE == type;
     }
 
-    public static boolean isDescending(SortingType type) {
+    public static boolean isDescending(final SortingType type) {
         return DESCENDING == type;
     }
 
-    public static boolean isAscending(SortingType type) {
+    public static boolean isAscending(final SortingType type) {
         return ASCENDING == type;
     }
 }

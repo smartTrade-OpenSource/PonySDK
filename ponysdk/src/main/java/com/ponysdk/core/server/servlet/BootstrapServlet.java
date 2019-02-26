@@ -154,7 +154,7 @@ public class BootstrapServlet extends HttpServlet {
         if (inputStream == null) {
             // Try to load from jar
             final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-            final String jarPath = path.substring(1, path.length());
+            final String jarPath = path.substring(1);
             inputStream = classLoader.getResourceAsStream(jarPath);
             if (inputStream == null && childClassLoader != null) inputStream = childClassLoader.getResourceAsStream(jarPath);
         }

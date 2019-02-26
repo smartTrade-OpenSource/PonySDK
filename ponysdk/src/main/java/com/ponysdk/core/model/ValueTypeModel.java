@@ -32,9 +32,10 @@ public enum ValueTypeModel {
     INTEGER(ValueTypeModel.INTEGER_SIZE),
     LONG(ValueTypeModel.LONG_SIZE),
     DOUBLE(ValueTypeModel.DOUBLE_SIZE),
+    FLOAT(ValueTypeModel.FLOAT_SIZE),
     STRING(ValueTypeModel.STRING_SIZE),
-    STRING_UTF8(ValueTypeModel.STRING_SIZE),
-    JSON_OBJECT(ValueTypeModel.JSON_OBJECT_SIZE);
+    ARRAY(ValueTypeModel.ARRAY_SIZE),
+    UINT31(ValueTypeModel.UINT31_SIZE);
 
     public static final int NULL_SIZE = 0;
     public static final int BOOLEAN_SIZE = 1;
@@ -42,9 +43,18 @@ public enum ValueTypeModel {
     public static final int SHORT_SIZE = 2;
     public static final int INTEGER_SIZE = 4;
     public static final int LONG_SIZE = 8;
-    public static final int DOUBLE_SIZE = 16;
+    public static final int DOUBLE_SIZE = 8;
+    public static final int FLOAT_SIZE = 4;
     public static final int STRING_SIZE = -1;
-    public static final int JSON_OBJECT_SIZE = -1;
+    public static final int ARRAY_SIZE = -1;
+    public static final int UINT31_SIZE = -1;
+
+    public static final short STRING_UTF8_INT32 = 255;
+    public static final short STRING_UTF8_UINT16 = 254;
+    public static final short STRING_UTF8_UINT8 = 253;
+    public static final short STRING_ASCII_INT32 = 252;
+    public static final short STRING_ASCII_UINT16 = 251;
+    public static final short STRING_ASCII_UINT8_MAX_LENGTH = 250;
 
     private static final ValueTypeModel[] VALUES = ValueTypeModel.values();
 
@@ -62,7 +72,7 @@ public enum ValueTypeModel {
         return (byte) ordinal();
     }
 
-    public static ValueTypeModel fromRawValue(final byte rawValue) {
+    public static ValueTypeModel fromRawValue(final int rawValue) {
         return VALUES[rawValue];
     }
 

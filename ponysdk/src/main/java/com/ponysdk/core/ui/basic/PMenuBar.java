@@ -30,7 +30,6 @@ import java.util.Objects;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.ui.basic.event.HasPAnimation;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.writer.ModelWriter;
 
@@ -96,7 +95,7 @@ import com.ponysdk.core.writer.ModelWriter;
  * elements as children. MenuItems may contain HTML and MenuBars.
  * </p>
  */
-public class PMenuBar extends PWidget implements HasPAnimation, Iterable<PMenuSubElement> {
+public class PMenuBar extends PWidget implements Iterable<PMenuSubElement> {
 
     // TODO warning : gwt contains 2 list 1 all items (with separator) + 1 menuItem only
     private final List<PMenuSubElement> items = new ArrayList<>();
@@ -195,12 +194,10 @@ public class PMenuBar extends PWidget implements HasPAnimation, Iterable<PMenuSu
         return vertical;
     }
 
-    @Override
     public boolean isAnimationEnabled() {
         return animationEnabled;
     }
 
-    @Override
     public void setAnimationEnabled(final boolean animationEnabled) {
         if (Objects.equals(this.animationEnabled, animationEnabled)) return;
         this.animationEnabled = animationEnabled;

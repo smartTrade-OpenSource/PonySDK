@@ -39,7 +39,7 @@ public enum PJustification {
         return (byte) ordinal();
     }
 
-    public static PJustification fromRawValue(final byte rawValue) {
+    public static PJustification fromRawValue(final int rawValue) {
         return VALUES[rawValue];
     }
 

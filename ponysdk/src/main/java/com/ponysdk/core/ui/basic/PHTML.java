@@ -27,7 +27,6 @@ import java.util.Objects;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.ui.basic.event.PHasHTML;
 import com.ponysdk.core.writer.ModelWriter;
 
 /**
@@ -43,7 +42,7 @@ import com.ponysdk.core.writer.ModelWriter;
  * <li>.gwt-HTML { }</li>
  * </ul>
  */
-public class PHTML extends PLabel implements PHasHTML {
+public class PHTML extends PLabel {
 
     private String html;
     private boolean wordWrap = false;
@@ -74,12 +73,10 @@ public class PHTML extends PLabel implements PHasHTML {
         return WidgetType.HTML;
     }
 
-    @Override
     public String getHTML() {
         return html;
     }
 
-    @Override
     public void setHTML(final String html) {
         if (Objects.equals(this.html, html)) return;
         this.html = html;

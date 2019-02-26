@@ -46,7 +46,25 @@ public class StreamServiceServlet extends HttpServlet {
 
     private static final Logger log = LoggerFactory.getLogger(StreamServiceServlet.class);
 
-    private static void streamRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+    @Override
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        try {
+            process(req, resp);
+        } catch (final IOException e) {
+            log.error("Cannot stream request", e);
+        }
+    }
+
+    @Override
+    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        try {
+            process(req, resp);
+        } catch (final IOException e) {
+            log.error("Cannot stream request", e);
+        }
+    }
+
+    private static void process(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         try {
             final Integer uiContextID = Integer.parseInt(req.getParameter(ClientToServerModel.UI_CONTEXT_ID.toStringValue()));
             final UIContext uiContext = SessionManager.get().getUIContext(uiContextID);
@@ -56,24 +74,6 @@ public class StreamServiceServlet extends HttpServlet {
         } catch (final Exception e) {
             log.error("Cannot stream request", e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-        }
-    }
-
-    @Override
-    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        try {
-            streamRequest(req, resp);
-        } catch (final IOException e) {
-            log.error("Cannot stream request", e);
-        }
-    }
-
-    @Override
-    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        try {
-            streamRequest(req, resp);
-        } catch (final IOException e) {
-            log.error("Cannot stream request", e);
         }
     }
 

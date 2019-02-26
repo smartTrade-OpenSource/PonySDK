@@ -25,6 +25,10 @@ package com.ponysdk.core.ui.basic.event;
 
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 
+/**
+ * @deprecated Useless
+ */
+@Deprecated(since = "v2.8.12", forRemoval = true)
 @FunctionalInterface
 public interface HasPKeyPressHandlers {
 

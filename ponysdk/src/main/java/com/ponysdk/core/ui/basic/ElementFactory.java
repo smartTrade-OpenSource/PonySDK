@@ -26,6 +26,7 @@ package com.ponysdk.core.ui.basic;
 import java.text.SimpleDateFormat;
 
 import com.ponysdk.core.model.PUnit;
+import com.ponysdk.core.ui.formatter.TextFunction;
 
 public interface ElementFactory {
 
@@ -192,5 +193,9 @@ public interface ElementFactory {
     PWindow newPWindow(final PWindow parentWindow, final boolean relative, final String url, final String name, final String features);
 
     PFrame newPFrame(final String url);
+
+    PFunctionalLabel newPFunctionalLabel(final TextFunction textFunction);
+
+    PFunctionalLabel newPFunctionalLabel(final TextFunction textFunction, final Object... args);
 
 }

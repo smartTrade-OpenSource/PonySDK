@@ -24,10 +24,15 @@
 package com.ponysdk.core.terminal.ui;
 
 import com.google.gwt.user.client.ui.RootPanel;
+import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.UIBuilder;
+import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
+
+import elemental.client.Browser;
+import elemental.dom.Document;
 
 public class PTRootPanel extends PTAbsolutePanel {
 
@@ -40,11 +45,23 @@ public class PTRootPanel extends PTAbsolutePanel {
         else buffer.rewind(binaryModel);
 
         super.create(buffer, objectId, uiService);
+
+        final Document document = Browser.getWindow().getDocument();
+        if (PTAbstractWindow.isPageVisibilityAPI(document)) {
+            document.addEventListener("visibilitychange", event -> sendDocumentVisibility(document));
+            sendDocumentVisibility(document);
+        }
     }
 
     @Override
     protected RootPanel createUIObject() {
         return rootId != null ? RootPanel.get(rootId) : RootPanel.get();
+    }
+
+    private void sendDocumentVisibility(final Document document) {
+        final PTInstruction eventInstruction = new PTInstruction(objectID);
+        eventInstruction.put(ClientToServerModel.HANDLER_DOCUMENT_VISIBILITY, PTAbstractWindow.isDocumentVisible(document));
+        uiBuilder.sendDataToServer(eventInstruction);
     }
 
 }

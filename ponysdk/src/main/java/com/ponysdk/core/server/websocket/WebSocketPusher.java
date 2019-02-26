@@ -26,16 +26,22 @@ package com.ponysdk.core.server.websocket;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-
-import javax.json.JsonObject;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WriteCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ponysdk.core.model.ArrayValueModel;
+import com.ponysdk.core.model.BooleanModel;
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.model.ValueTypeModel;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.AutoFlushedBuffer;
 
@@ -43,16 +49,16 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
 
     private static final Logger log = LoggerFactory.getLogger(WebSocketPusher.class);
 
-    private static final byte TRUE = 1;
-    private static final byte FALSE = 0;
-
-    private static final Charset STANDARD_CHARSET = Charset.forName("ISO-8859-1");
-    private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
-
     private static final int MAX_UNSIGNED_BYTE_VALUE = Byte.MAX_VALUE * 2 + 1;
     private static final int MAX_UNSIGNED_SHORT_VALUE = Short.MAX_VALUE * 2 + 1;
+    private static final int MODEL_KEY_SIZE = 1;
 
     private final Session session;
+
+    private static volatile WebSocketStatsRecorder statsRecorder;
+    private int metaBytes;
+
+    private WebSocket.Listener listener;
 
     public WebSocketPusher(final Session session, final int bufferSize, final int maxChunkSize, final long timeoutMillis) {
         super(bufferSize, true, maxChunkSize, 0.25f, timeoutMillis);
@@ -71,7 +77,9 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
 
     @Override
     protected void doFlush(final ByteBuffer bufferToFlush) {
+        final int bytes = bufferToFlush.remaining();
         session.getRemote().sendBytes(bufferToFlush, this);
+        if (listener != null) listener.onOutgoingPonyFramesBytes(bytes);
     }
 
     @Override
@@ -95,6 +103,9 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
         onFlushCompletion();
     }
 
+    /**
+     * @param value The type can be primitives, String or Object[]
+     */
     protected void encode(final ServerToClientModel model, final Object value) {
         if (log.isDebugEnabled()) log.debug("Writing in the buffer : {} => {}", model, value);
         try {
@@ -111,6 +122,9 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
                 case SHORT:
                     write(model, (short) value);
                     break;
+                case UINT31:
+                    writeUint31(model, (int) value);
+                    break;
                 case INTEGER:
                     write(model, (int) value);
                     break;
@@ -120,17 +134,17 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
                 case DOUBLE:
                     write(model, (double) value);
                     break;
+                case FLOAT:
+                    write(model, (float) value);
+                    break;
                 case STRING:
-                    write(model, (String) value, STANDARD_CHARSET);
+                    write(model, (String) value);
                     break;
-                case STRING_UTF8:
-                    write(model, (String) value, UTF8_CHARSET);
-                    break;
-                case JSON_OBJECT:
-                    write(model, (JsonObject) value);
+                case ARRAY:
+                    write(model, (Object[]) value);
                     break;
                 default:
-                    log.error("Unknow model type : {}", model.getTypeModel());
+                    log.error("Unknown model type : {}", model.getTypeModel());
                     break;
             }
         } catch (final IOException e) {
@@ -141,105 +155,253 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
 
     private void write(final ServerToClientModel model) throws IOException {
         putModelKey(model);
+        record(model, null, MODEL_KEY_SIZE, 0);
     }
 
     private void write(final ServerToClientModel model, final boolean value) throws IOException {
-        write(model, value ? TRUE : FALSE);
+        write(model, value ? BooleanModel.TRUE.getValue() : BooleanModel.FALSE.getValue());
     }
 
     private void write(final ServerToClientModel model, final byte value) throws IOException {
         putModelKey(model);
         put(value);
+        record(model, value, MODEL_KEY_SIZE, Byte.BYTES);
     }
 
     private void write(final ServerToClientModel model, final short value) throws IOException {
         putModelKey(model);
         putShort(value);
+        record(model, value, MODEL_KEY_SIZE, Short.BYTES);
     }
 
     private void write(final ServerToClientModel model, final int value) throws IOException {
         putModelKey(model);
         putInt(value);
+        record(model, value, MODEL_KEY_SIZE, Integer.BYTES);
     }
 
     private void write(final ServerToClientModel model, final long longValue) throws IOException {
-        final String value = String.valueOf(longValue);
-
         putModelKey(model);
-
-        try {
-            final byte[] bytes = value.getBytes(STANDARD_CHARSET);
-            final int length = bytes.length;
-            if (length <= MAX_UNSIGNED_BYTE_VALUE) {
-                putUnsignedByte((short) length);
-                put(bytes);
-            } else {
-                throw new IllegalArgumentException("Message too big (" + value.length() + " > " + MAX_UNSIGNED_BYTE_VALUE
-                        + "), use a String instead : " + value.substring(0, Math.min(value.length(), 100)) + "...");
-            }
-        } catch (final UnsupportedEncodingException e) {
-            throw new IllegalArgumentException("Cannot convert message : " + value);
-        }
+        putLong(longValue);
+        record(model, longValue, MODEL_KEY_SIZE, Long.BYTES);
     }
 
     private void write(final ServerToClientModel model, final double doubleValue) throws IOException {
-        final String value = String.valueOf(doubleValue);
+        putModelKey(model);
+        putDouble(doubleValue);
+        record(model, doubleValue, MODEL_KEY_SIZE, Double.BYTES);
+    }
 
+    private void write(final ServerToClientModel model, final float floatValue) throws IOException {
+        putModelKey(model);
+        putFloat(floatValue);
+        record(model, floatValue, MODEL_KEY_SIZE, Float.BYTES);
+    }
+
+    private void write(final ServerToClientModel model, final Object[] value) throws IOException {
+        putModelKey(model);
+        if (value.length > MAX_UNSIGNED_BYTE_VALUE) {
+            throw new IllegalArgumentException("Array is too big (" + value.length + " > " + MAX_UNSIGNED_BYTE_VALUE
+                    + "), use a Json Object instead : " + Arrays.toString(value).substring(0, 100) + "...");
+        }
+        metaBytes = MODEL_KEY_SIZE + 1;
+        int dataBytes = 0;
+        putUnsignedByte((short) value.length);
+        for (final Object o : value) {
+            dataBytes += putArrayElement(o);
+        }
+        record(model, value, metaBytes, dataBytes, Arrays::toString);
+    }
+
+    private void writeUint31(final ServerToClientModel model, final int value) throws IOException {
+        putModelKey(model);
+        final int bytes = putUint31(value);
+        record(model, value, MODEL_KEY_SIZE, bytes);
+    }
+
+    private int putUint31(final int value) throws IOException {
+        if (value < 0) {
+            throw new IllegalArgumentException("Invalid UINT31 value : " + value + " must be unsigned");
+        } else if (value <= Short.MAX_VALUE) {
+            putShort((short) value);
+            return Short.BYTES;
+        } else {
+            putInt(value | 0x80_00_00_00);
+            return Integer.BYTES;
+        }
+    }
+
+    private int putCompressedLong(final long value) throws IOException {
+        if (value >= Byte.MIN_VALUE && value <= Byte.MAX_VALUE) {
+            put(ArrayValueModel.BYTE.getValue());
+            put((byte) value);
+            return Byte.BYTES;
+        } else if (value >= Short.MIN_VALUE && value <= Short.MAX_VALUE) {
+            put(ArrayValueModel.SHORT.getValue());
+            putShort((short) value);
+            return Short.BYTES;
+        } else if (value >= Integer.MIN_VALUE && value <= Integer.MAX_VALUE) {
+            put(ArrayValueModel.INTEGER.getValue());
+            putInt((int) value);
+            return Integer.BYTES;
+        } else {
+            put(ArrayValueModel.LONG.getValue());
+            putLong(value);
+            return Long.BYTES;
+        }
+    }
+
+    private int putCompressedInt(final int value) throws IOException {
+        if (value >= Byte.MIN_VALUE && value <= Byte.MAX_VALUE) {
+            put(ArrayValueModel.BYTE.getValue());
+            put((byte) value);
+            return Byte.BYTES;
+        } else if (value >= Short.MIN_VALUE && value <= Short.MAX_VALUE) {
+            put(ArrayValueModel.SHORT.getValue());
+            putShort((short) value);
+            return Short.BYTES;
+        } else {
+            put(ArrayValueModel.INTEGER.getValue());
+            putInt(value);
+            return Integer.BYTES;
+        }
+    }
+
+    private int putCompressedShort(final short value) throws IOException {
+        if (value >= Byte.MIN_VALUE && value <= Byte.MAX_VALUE) {
+            put(ArrayValueModel.BYTE.getValue());
+            put((byte) value);
+            return Byte.BYTES;
+        } else {
+            put(ArrayValueModel.SHORT.getValue());
+            putShort(value);
+            return Short.BYTES;
+        }
+    }
+
+    private int putCompressedDouble(final double value) throws IOException {
+        final float f = (float) value;
+        if (f == value) { //value can fit in a float without losing precision
+            put(ArrayValueModel.FLOAT.getValue());
+            putFloat(f);
+            return Float.BYTES;
+        } else {
+            put(ArrayValueModel.DOUBLE.getValue());
+            putDouble(value);
+            return Double.BYTES;
+        }
+    }
+
+    private int putArrayElement(final Object o) throws IOException {
+        metaBytes++;
+        if (o == null) {
+            put(ArrayValueModel.NULL.getValue());
+            return 0;
+        } else if (o instanceof Integer) {
+            return putCompressedInt((int) o);
+        } else if (o instanceof String) {
+            return putArrayStringElement(o);
+        } else if (o instanceof Byte) {
+            put(ArrayValueModel.BYTE.getValue());
+            put((byte) o);
+            return Byte.BYTES;
+        } else if (o instanceof Short) {
+            return putCompressedShort((short) o);
+        } else if (o instanceof Boolean) {
+            put(o.equals(Boolean.TRUE) ? ArrayValueModel.BOOLEAN_TRUE.getValue() : ArrayValueModel.BOOLEAN_FALSE.getValue());
+            return 0;
+        } else if (o instanceof Long) {
+            return putCompressedLong((long) o);
+        } else if (o instanceof Double) {
+            return putCompressedDouble((double) o);
+        } else if (o instanceof Float) {
+            put(ArrayValueModel.FLOAT.getValue());
+            putFloat((float) o);
+            return Float.BYTES;
+        } else {
+            return putArrayStringElement(o.toString());
+        }
+    }
+
+    private int putArrayStringElement(final Object o) throws IOException {
+        final String s = (String) o;
+        final byte[] bytes = s.getBytes(StandardCharsets.UTF_8);
+        final int length = bytes.length;
+
+        if (length <= MAX_UNSIGNED_BYTE_VALUE) {
+            put(length == s.length() ? ArrayValueModel.STRING_ASCII_UINT8_LENGTH.getValue()
+                    : ArrayValueModel.STRING_UTF8_UINT8_LENGTH.getValue());
+            putUnsignedByte((short) length);
+            metaBytes++;
+        } else if (length <= MAX_UNSIGNED_SHORT_VALUE) {
+            put(length == s.length() ? ArrayValueModel.STRING_ASCII_UINT16_LENGTH.getValue()
+                    : ArrayValueModel.STRING_UTF8_UINT16_LENGTH.getValue());
+            putUnsignedShort(length);
+            metaBytes += 2;
+        } else {
+            put(ArrayValueModel.STRING_UTF8_INT32_LENGTH.getValue());
+            putInt(length);
+            metaBytes += 4;
+        }
+
+        put(bytes);
+
+        return bytes.length;
+    }
+
+    private void write(final ServerToClientModel model, final String value) throws IOException {
         putModelKey(model);
 
         try {
-            final byte[] bytes = value.getBytes(STANDARD_CHARSET);
+            putString(model, value);
+        } catch (final UnsupportedEncodingException e) {
+            throw new IllegalArgumentException("Cannot convert message : " + value);
+        }
+    }
+
+    private void putString(final ServerToClientModel model, final String value) throws IOException {
+        int metaBytes = MODEL_KEY_SIZE;
+        int dataBytes;
+        if (value != null) {
+            final byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
             final int length = bytes.length;
-            if (length <= MAX_UNSIGNED_BYTE_VALUE) {
-                putUnsignedByte((short) length);
-                put(bytes);
-            } else {
-                throw new IllegalArgumentException("Message too big (" + value.length() + " > " + MAX_UNSIGNED_BYTE_VALUE
-                        + "), use a String instead : " + value.substring(0, Math.min(value.length(), 100)) + "...");
-            }
-        } catch (final UnsupportedEncodingException e) {
-            throw new IllegalArgumentException("Cannot convert message : " + value);
-        }
-    }
-
-    private void write(final ServerToClientModel model, final String value, final Charset encodingCharset) throws IOException {
-        putModelKey(model);
-
-        try {
-            if (value != null) {
-                final byte[] bytes = value.getBytes(encodingCharset);
-                final int length = bytes.length;
-                if (length <= MAX_UNSIGNED_SHORT_VALUE) {
+            if (value.length() == length) { //ASCII
+                if (length <= ValueTypeModel.STRING_ASCII_UINT8_MAX_LENGTH) { // 0 -> 250 (The MOST common case)
+                    putUnsignedByte((short) length);
+                    metaBytes += 1;
+                } else if (length <= MAX_UNSIGNED_SHORT_VALUE) { // 251 -> 65,535
+                    putUnsignedByte(ValueTypeModel.STRING_ASCII_UINT16);
                     putUnsignedShort(length);
-                    put(bytes);
-                } else {
-                    throw new IllegalArgumentException("Message too big (" + value.length() + " > " + MAX_UNSIGNED_SHORT_VALUE
-                            + "), use a JsonObject instead : " + value.substring(0, Math.min(value.length(), 100)) + "...");
+                    metaBytes += 3;
+                } else { // 65,536 -> 2,147,483,647
+                    putUnsignedByte(ValueTypeModel.STRING_ASCII_INT32);
+                    putInt(length);
+                    metaBytes += 5;
                 }
-            } else {
-                putUnsignedShort(0);
+
+            } else { //UTF8
+                if (length <= MAX_UNSIGNED_BYTE_VALUE) { // 0 -> 255
+                    putUnsignedByte(ValueTypeModel.STRING_UTF8_UINT8);
+                    putUnsignedByte((short) length);
+                    metaBytes += 2;
+                } else if (length <= MAX_UNSIGNED_SHORT_VALUE) { // 256 -> 65,535
+                    putUnsignedByte(ValueTypeModel.STRING_UTF8_UINT16);
+                    putUnsignedShort(length);
+                    metaBytes += 3;
+                } else { // 65,536 -> 2,147,483,647
+                    putUnsignedByte(ValueTypeModel.STRING_UTF8_INT32);
+                    putInt(length);
+                    metaBytes += 5;
+                }
             }
-        } catch (final UnsupportedEncodingException e) {
-            throw new IllegalArgumentException("Cannot convert message : " + value);
+            put(bytes);
+            dataBytes = length;
+        } else {
+            putUnsignedByte((short) 0);
+            metaBytes += 1;
+            dataBytes = 0;
         }
-    }
-
-    private void write(final ServerToClientModel model, final JsonObject jsonObject) throws IOException {
-        final String value = jsonObject.toString();
-
-        putModelKey(model);
-
-        try {
-            if (value != null) {
-                final byte[] bytes = value.getBytes(UTF8_CHARSET);
-                putInt(bytes.length);
-                put(bytes);
-            } else {
-                putInt(0);
-            }
-        } catch (final UnsupportedEncodingException e) {
-            throw new IllegalArgumentException("Cannot convert message : " + value);
-        }
+        record(model, value, metaBytes, dataBytes);
     }
 
     private void putModelKey(final ServerToClientModel model) throws IOException {
@@ -258,4 +420,41 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
         putInt((int) (longValue & 0xFFFFFF));
     }
 
+    public static synchronized boolean startRecordingStats(final long timeout, final TimeUnit unit,
+                                                           final Consumer<WebSocketStats> listener,
+                                                           final BiFunction<ServerToClientModel, Object, String> groupBy) {
+        if (statsRecorder != null) return false;
+        statsRecorder = new WebSocketStatsRecorder(stats -> {
+            synchronized (WebSocketPusher.class) {
+                statsRecorder = null;
+            }
+            if (listener != null) listener.accept(stats);
+        }, groupBy);
+        return statsRecorder.start(timeout, unit);
+    }
+
+    public static boolean isRecordingStats() {
+        final WebSocketStatsRecorder recorder = statsRecorder;
+        return recorder != null ? recorder.isStarted() : false;
+    }
+
+    public static WebSocketStats stopRecordingStats() {
+        final WebSocketStatsRecorder recorder = statsRecorder;
+        return recorder != null ? recorder.stop() : null;
+    }
+
+    private static <T> void record(final ServerToClientModel model, final T value, final int metaBytes, final int dataBytes,
+                                   final Function<T, Object> valueConverter) {
+        final WebSocketStatsRecorder recorder = statsRecorder;
+        if (recorder != null) recorder.record(model, value, metaBytes, dataBytes, valueConverter);
+    }
+
+    private static <T> void record(final ServerToClientModel model, final T value, final int metaBytes, final int dataBytes) {
+        final WebSocketStatsRecorder recorder = statsRecorder;
+        if (recorder != null) recorder.record(model, value, metaBytes, dataBytes);
+    }
+
+    void setWebSocketListener(final WebSocket.Listener listener) {
+        this.listener = listener;
+    }
 }

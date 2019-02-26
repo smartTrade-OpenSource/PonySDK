@@ -28,12 +28,19 @@ import java.util.List;
 
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.eventbus.Event;
+import com.ponysdk.core.ui.eventbus.EventHandler;
 
-public class PLayoutResizeEvent extends Event<PLayoutResizeHandler> {
+public class PLayoutResizeEvent extends Event<PLayoutResizeEvent.Handler> {
 
     public static final Type TYPE = new Type();
 
     private final List<LayoutResizeData> layoutResizeData = new ArrayList<>();
+
+    @FunctionalInterface
+    public interface Handler extends EventHandler {
+
+        void onLayoutResize(PLayoutResizeEvent resizeEvent);
+    }
 
     public PLayoutResizeEvent(final Object sourceComponent) {
         super(sourceComponent);
@@ -49,7 +56,7 @@ public class PLayoutResizeEvent extends Event<PLayoutResizeHandler> {
     }
 
     @Override
-    protected void dispatch(final PLayoutResizeHandler handler) {
+    protected void dispatch(final PLayoutResizeEvent.Handler handler) {
         handler.onLayoutResize(this);
     }
 

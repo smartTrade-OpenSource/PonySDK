@@ -30,7 +30,7 @@ import com.ponysdk.core.ui.basic.PFlowPanel;
 public class GridDivWidget extends AbstractGridWidget {
 
     public GridDivWidget() {
-        super("div");
+        super(Element.E_DIV);
         setStyleProperty("display", "table");
     }
 

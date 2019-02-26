@@ -24,10 +24,18 @@
 package com.ponysdk.core.ui.basic.event;
 
 import com.ponysdk.core.model.DomHandlerType;
+import com.ponysdk.core.ui.eventbus.EventHandler;
 
-public class PDragLeaveEvent extends PDomEvent<PDragLeaveHandler> {
+public class PDragLeaveEvent extends PDomEvent<PDragLeaveEvent.Handler> {
 
     public static final PDomEvent.Type TYPE = new PDomEvent.Type(DomHandlerType.DRAG_LEAVE);
+
+    @FunctionalInterface
+    public interface Handler extends EventHandler {
+
+        void onDragLeave(PDragLeaveEvent event);
+
+    }
 
     public PDragLeaveEvent(final Object sourceComponent) {
         super(sourceComponent);
@@ -39,7 +47,7 @@ public class PDragLeaveEvent extends PDomEvent<PDragLeaveHandler> {
     }
 
     @Override
-    protected void dispatch(final PDragLeaveHandler handler) {
+    protected void dispatch(final PDragLeaveEvent.Handler handler) {
         handler.onDragLeave(this);
     }
 

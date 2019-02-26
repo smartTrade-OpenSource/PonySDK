@@ -39,7 +39,7 @@ public class PTDockLayoutPanel<T extends DockLayoutPanel> extends PTComplexPanel
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
         // ServerToClientModel.UNIT
-        unit = Unit.values()[buffer.readBinaryModel().getByteValue()];
+        unit = Unit.values()[buffer.readBinaryModel().getIntValue()];
         super.create(buffer, objectId, uiBuilder);
     }
 
@@ -52,7 +52,7 @@ public class PTDockLayoutPanel<T extends DockLayoutPanel> extends PTComplexPanel
     public void add(final ReaderBuffer buffer, final PTObject ptObject) {
         final Widget w = asWidget(ptObject);
         // ServerToClientModel.DIRECTION
-        final PDirection direction = PDirection.fromRawValue(buffer.readBinaryModel().getByteValue());
+        final PDirection direction = PDirection.fromRawValue(buffer.readBinaryModel().getIntValue());
 
         // ServerToClientModel.SIZE
         final double size = buffer.readBinaryModel().getDoubleValue();

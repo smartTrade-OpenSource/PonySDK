@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -36,6 +36,7 @@ public class CompositeFieldValidator implements FieldValidator {
         final ValidationResult validationResult = ValidationResult.newOKValidationResult();
         for (final FieldValidator fieldValidator : fieldValidators) {
             final ValidationResult result = fieldValidator.isValid(value);
+            if (result.getData() != null) validationResult.setData(result.getData());
             if (!result.isValid()) {
                 validationResult.setValid(false);
                 validationResult.setErrorMessage(result.getErrorMessage());

@@ -36,23 +36,20 @@ import com.ponysdk.core.model.PFontSize;
 import com.ponysdk.core.model.PJustification;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.ui.basic.event.PHasHTML;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 
 /**
- * A rich text editor that allows complex styling and formatting.there is a
- * formatter interface, accessed via {@link #getFormatter()}. A browser that
- * does not support rich text editing at all will return <code>null</code> for
- * both of these, while one that supports only the basic functionality will
- * return <code>null</code> for the latter.
+ * A rich text editor that allows complex styling and formatting.there is a formatter interface, accessed via
+ * {@link #getFormatter()}. A browser that does not support rich text editing at all will return <code>null</code> for
+ * both of these, while one that supports only the basic functionality will return <code>null</code> for the latter.
  * <h3>CSS Style Rules</h3>
  * <dl>
  * <dt>.gwt-RichTextArea</dt>
  * <dd>Applied to the rich text element.</dd>
  * </dl>
  */
-public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueChangeHandlers<String> {
+public class PRichTextArea extends PFocusWidget implements HasPValueChangeHandlers<String> {
 
     private List<PValueChangeHandler<String>> handlers;
     private final Formatter formatter = new Formatter();
@@ -67,12 +64,10 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
         return WidgetType.RICH_TEXT_AREA;
     }
 
-    @Override
     public String getText() {
         return text;
     }
 
-    @Override
     public void setText(final String text) {
         if (Objects.equals(this.text, text)) return;
         this.text = text;
@@ -80,12 +75,10 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
         saveUpdate(ServerToClientModel.TEXT, text);
     }
 
-    @Override
     public String getHTML() {
         return html;
     }
 
-    @Override
     public void setHTML(final String html) {
         if (Objects.equals(this.html, html)) return;
         this.html = html;
@@ -99,7 +92,7 @@ public class PRichTextArea extends PFocusWidget implements PHasHTML, HasPValueCh
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (!isVisible()) return;
+        if (!isVisible() || !isEnabled()) return;
         if (instruction.containsKey(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE.toStringValue())) {
             fireOnValueChange(
                 new PValueChangeEvent<>(this, instruction.getString(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE.toStringValue())));

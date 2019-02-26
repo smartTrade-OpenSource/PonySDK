@@ -51,7 +51,7 @@ public enum PUnit {
         return value;
     }
 
-    public static PUnit fromRawValue(final byte rawValue) {
+    public static PUnit fromRawValue(final int rawValue) {
         return VALUES[rawValue];
     }
 

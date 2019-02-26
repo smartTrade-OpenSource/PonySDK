@@ -36,10 +36,8 @@ import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.ui.basic.event.HasPBeforeSelectionHandlers;
-import com.ponysdk.core.ui.basic.event.HasPSelectionHandlers;
 import com.ponysdk.core.ui.basic.event.HasPWidgets;
-import com.ponysdk.core.ui.basic.event.PBeforeSelectionHandler;
+import com.ponysdk.core.ui.basic.event.PBeforeSelectionEvent;
 import com.ponysdk.core.ui.basic.event.PSelectionHandler;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.writer.ModelWriter;
@@ -64,14 +62,13 @@ import com.ponysdk.core.writer.ModelWriter;
  * <dd>applied to each child widget
  * </dl>
  */
-public class PStackLayoutPanel extends PWidget
-        implements HasPWidgets, HasPSelectionHandlers<Integer>, HasPBeforeSelectionHandlers<Integer>, PAnimatedLayout {
+public class PStackLayoutPanel extends PWidget implements HasPWidgets, PAnimatedLayout {
 
     private static final Logger log = LoggerFactory.getLogger(PStackLayoutPanel.class);
 
     private final PWidgetCollection children = new PWidgetCollection(this);
 
-    private final List<PBeforeSelectionHandler<Integer>> beforeSelectionHandlers = new ArrayList<>();
+    private final List<PBeforeSelectionEvent.Handler<Integer>> beforeSelectionHandlers = new ArrayList<>();
     private final List<PSelectionHandler<Integer>> selectionHandlers = new ArrayList<>();
 
     private final PUnit unit;
@@ -151,24 +148,20 @@ public class PStackLayoutPanel extends PWidget
         else throw new IllegalStateException("Can't adopt an widget attached to another parent");
     }
 
-    @Override
-    public void addBeforeSelectionHandler(final PBeforeSelectionHandler<Integer> handler) {
+    public void addBeforeSelectionHandler(final PBeforeSelectionEvent.Handler<Integer> handler) {
         beforeSelectionHandlers.add(handler);
         saveAddHandler(HandlerModel.HANDLER_BEFORE_SELECTION);
     }
 
-    @Override
-    public void removeBeforeSelectionHandler(final PBeforeSelectionHandler<Integer> handler) {
+    public void removeBeforeSelectionHandler(final PBeforeSelectionEvent.Handler<Integer> handler) {
         beforeSelectionHandlers.remove(handler);
     }
 
-    @Override
     public void addSelectionHandler(final PSelectionHandler<Integer> handler) {
         selectionHandlers.add(handler);
         saveAddHandler(HandlerModel.HANDLER_SELECTION);
     }
 
-    @Override
     public void removeSelectionHandler(final PSelectionHandler<Integer> handler) {
         selectionHandlers.remove(handler);
     }

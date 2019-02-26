@@ -31,15 +31,13 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.ui.basic.event.PHasHTML;
 import com.ponysdk.core.writer.ModelWriter;
 
 /**
- * An entry in a {@link PMenuBar}. Menu items can either fire a {@link Runnable} when they are
- * clicked, or open a cascading sub-menu. Each menu item is
- * assigned a unique DOM id in order to support ARIA.
+ * An entry in a {@link PMenuBar}. Menu items can either fire a {@link Runnable} when they are clicked, or open a
+ * cascading sub-menu. Each menu item is assigned a unique DOM id in order to support ARIA.
  */
-public class PMenuItem extends PMenuSubElement implements PHasHTML {
+public class PMenuItem extends PMenuSubElement {
 
     private String text;
 
@@ -98,12 +96,10 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
         return WidgetType.MENU_ITEM;
     }
 
-    @Override
     public String getText() {
         return text;
     }
 
-    @Override
     public void setText(final String text) {
         if (Objects.equals(this.text, text)) return;
         this.text = text;
@@ -111,12 +107,10 @@ public class PMenuItem extends PMenuSubElement implements PHasHTML {
         if (initialized) saveUpdate(ServerToClientModel.TEXT, text);
     }
 
-    @Override
     public String getHTML() {
         return html;
     }
 
-    @Override
     public void setHTML(final String html) {
         if (Objects.equals(this.html, html)) return;
         this.html = html;
