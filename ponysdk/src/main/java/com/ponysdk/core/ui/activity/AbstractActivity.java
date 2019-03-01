@@ -95,28 +95,8 @@ public abstract class AbstractActivity<T extends IsPWidget> implements Activity 
         UIContext.removeHandler(type, handler);
     }
 
-    public HandlerRegistration addHandlerToSource(final Event.Type type, final Object source, final EventHandler handler) {
-        return UIContext.addHandlerToSource(type, source, handler);
-    }
-
-    public void removeHandlerFromSource(final Event.Type type, final Object source, final EventHandler handler) {
-        UIContext.removeHandlerFromSource(type, source, handler);
-    }
-
-    public HandlerRegistration addHandlerToSource(final Event.Type type, final Object source) {
-        return addHandlerToSource(type, source, (EventHandler) this);
-    }
-
-    public void removeHandlerFromSource(final Event.Type type, final Object source) {
-        removeHandlerFromSource(type, source, (EventHandler) this);
-    }
-
     public void fireEvent(final Event<? extends EventHandler> event) {
         UIContext.fireEvent(event);
-    }
-
-    public void fireEventFromSource(final Event<? extends EventHandler> event, final Object source) {
-        UIContext.fireEventFromSource(event, source);
     }
 
     public void addHandler(final BroadcastEventHandler handler) {

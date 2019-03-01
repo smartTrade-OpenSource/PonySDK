@@ -25,21 +25,11 @@ package com.ponysdk.core.ui.eventbus;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Queue;
 import java.util.Set;
-import java.util.WeakHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.ui.eventbus.Event.Type;
 import com.ponysdk.core.util.SetUtils;
 
 public class EventBus {
@@ -48,170 +38,82 @@ public class EventBus {
 
     private Set<BroadcastEventHandler> broadcastHandlerManager;
 
-    private final Map<Event.Type, Map<Object, Set<EventHandler>>> map = new HashMap<>();
-    private Queue<Event<? extends EventHandler>> eventQueue;
-    private List<HandlerContext> pendingHandlerRegistration;
-    private boolean firing = false;
+    private final EventSource globalEventSource = new EventSource();
 
     public HandlerRegistration addHandler(final Event.Type type, final EventHandler handler) {
-        if (type == null) throw new NullPointerException("Cannot add a handler with a null type");
-        else if (handler == null) throw new NullPointerException("Cannot add a null handler");
-        else return doAdd(type, null, handler);
+        return globalEventSource.addHandler(type, handler);
     }
 
-    public HandlerRegistration addHandlerToSource(final Event.Type type, final Object source, final EventHandler handler) {
-        if (type == null) throw new NullPointerException("Cannot add a handler with a null type");
-        else if (source == null) throw new NullPointerException("Cannot add a handler with a null source");
-        else if (handler == null) throw new NullPointerException("Cannot add a null handler");
-        else return doAdd(type, source, handler);
+    public boolean removeHandler(final Event.Type type, final EventHandler handler) {
+        return globalEventSource.removeHandler(type, handler);
     }
 
-    private HandlerRegistration doAdd(final Event.Type type, final Object source, final EventHandler handler) {
-        if (!firing) doAddNow(type, source, handler);
-        else defferedAdd(type, source, handler);
-
-        return () -> doRemove(type, source, handler);
+    public void fireEvent(final Event<?> event) {
+        if (event == null) throw new NullPointerException("Cannot fire null event");
+        doFire(event, null);
     }
 
-    private void doAddNow(final Event.Type type, final Object source, final EventHandler handler) {
-        final Map<Object, Set<EventHandler>> sourceMap = map.computeIfAbsent(type, eventType -> new WeakHashMap<>());
-
-        // safe, we control the puts.
-        final Set<EventHandler> handlers = sourceMap.computeIfAbsent(source, eventSource -> new HashSet<>());
-
-        handlers.add(handler);
+    public void fireEventFromSource(final Event<?> event, final EventSource source) {
+        if (event == null) throw new NullPointerException("Cannot fire null event");
+        if (source == null) throw new NullPointerException("Cannot fire from a null source");
+        doFire(event, source);
     }
 
-    private void defferedAdd(final Event.Type type, final Object source, final EventHandler handler) {
-        final HandlerContext context = new HandlerContext(type, source, handler, true);
-        if (pendingHandlerRegistration == null) pendingHandlerRegistration = new ArrayList<>(4);
-        pendingHandlerRegistration.add(context);
+    private Collection<EventHandler> getIterableHandlers(final EventSource eventSource, final Event.Type eventType) {
+        if (eventSource == null) return null;
+        final Collection<EventHandler> handlers = eventSource.getEventHandlers(eventType);
+        if (handlers.isEmpty()) return null;
+        return new ArrayList<>(handlers);
     }
 
-    public void removeHandler(final Event.Type type, final EventHandler handler) {
-        doRemove(type, null, handler);
-    }
+    private void doFire(final Event<?> event, final EventSource source) {
+        Collection<Throwable> causes = null;
+        final Event.Type eventType = event.getAssociatedType();
 
-    public void removeHandlerFromSource(final Event.Type type, final Object source, final EventHandler handler) {
-        doRemove(type, source, handler);
-    }
+        final Collection<EventHandler> specificHandlers = getIterableHandlers(source, eventType);
+        final Collection<EventHandler> globalHandlers = getIterableHandlers(globalEventSource, eventType);
+        final Collection<BroadcastEventHandler> broadcastHandlers = broadcastHandlerManager == null ? null
+                : new ArrayList<>(broadcastHandlerManager);
 
-    private void doRemove(final Event.Type type, final Object source, final EventHandler handler) {
-        if (!firing) doRemoveNow(type, source, handler);
-        else defferedRemove(type, source, handler);
-    }
-
-    private void doRemoveNow(final Event.Type type, final Object source, final EventHandler handler) {
-        final Map<Object, Set<EventHandler>> sourceMap = map.get(type);
-        if (sourceMap == null) return;
-
-        final Set<EventHandler> handlers = sourceMap.get(source);
-        if (handlers == null) return;
-
-        final boolean removed = handlers.remove(handler);
-        if (!removed) log.warn("Useless remove call : {}", handler);
-
-        if (removed && handlers.isEmpty()) {
-            final Set<EventHandler> pruned = sourceMap.remove(source);
-
-            if (pruned != null) {
-                if (!pruned.isEmpty()) log.info("Pruned unempty list! {}", pruned);
-                if (sourceMap.isEmpty()) map.remove(type);
-            } else {
-                if (log.isInfoEnabled()) log.info("Can't prune what wasn't there {}", source);
+        if (specificHandlers != null) {
+            for (final EventHandler handler : specificHandlers) {
+                causes = dispatchEvent(event, eventType, handler, causes);
             }
         }
-    }
 
-    private void defferedRemove(final Event.Type type, final Object source, final EventHandler handler) {
-        if (pendingHandlerRegistration != null) {
-            final HandlerContext context = new HandlerContext(type, source, handler, false);
-            final boolean removed = pendingHandlerRegistration.remove(context);
-            if (!removed) pendingHandlerRegistration.add(context);
+        if (globalHandlers != null) {
+            for (final EventHandler handler : globalHandlers) {
+                causes = dispatchEvent(event, eventType, handler, causes);
+            }
         }
+
+        if (broadcastHandlers != null) {
+            for (final BroadcastEventHandler handler : broadcastHandlers) {
+                log.debug("broadcast eventbus #{}", event);
+                try {
+                    handler.onEvent(event);
+                } catch (final Throwable t) {
+                    log.error("Cannot broadcast fired eventbus #{}", eventType, t);
+                    if (causes == null) causes = new ArrayList<>();
+                    causes.add(t);
+                }
+            }
+        }
+
+        if (causes != null) throw new UmbrellaException(causes);
     }
 
-    public void fireEvent(final Event<? extends EventHandler> event) {
-        if (event == null) throw new NullPointerException("Cannot fire null eventbus");
-        else doFire(event, null);
-    }
-
-    public void fireEventFromSource(final Event<? extends EventHandler> event, final Object source) {
-        if (event == null) throw new NullPointerException("Cannot fire null eventbus");
-        else if (source == null) throw new NullPointerException("Cannot fire from a null source");
-        else doFire(event, source);
-    }
-
-    private void doFire(final Event<? extends EventHandler> event, final Object source) {
-        if (source != null) event.setSource(source);
-
-        if (eventQueue == null) eventQueue = new LinkedList<>();
-        eventQueue.add(event);
-
-        if (firing) return;
-
-        firing = true;
-
+    private Collection<Throwable> dispatchEvent(final Event<?> event, final Event.Type eventType, final EventHandler handler,
+                                                Collection<Throwable> causes) {
         try {
-            Event e;
-            Collection<Throwable> causes = null;
-
-            while ((e = eventQueue.poll()) != null) {
-                final Object eventSource = e.getSource();
-                final Type eventType = e.getAssociatedType();
-                final Collection<? extends EventHandler> handlers;
-                final Collection<EventHandler> directHandlers = getHandlers(eventType, eventSource);
-                if (eventSource != null) {
-                    final Collection<EventHandler> globalHandlers = getHandlers(eventType, null);
-                    final Set<EventHandler> rtn = SetUtils.newArraySet(directHandlers);
-                    rtn.addAll(globalHandlers);
-                    handlers = rtn;
-                } else {
-                    handlers = directHandlers;
-                }
-
-                for (final EventHandler handler1 : handlers) {
-                    try {
-                        if (log.isDebugEnabled()) log.debug("dispatch eventbus #{}", e);
-                        e.dispatch(handler1);
-                    } catch (final Throwable t) {
-                        log.error("Cannot process fired eventbus #" + eventType, t);
-                        if (causes == null) causes = new ArrayList<>();
-                        causes.add(t);
-                    }
-                }
-
-                if (broadcastHandlerManager != null) {
-                    for (final BroadcastEventHandler handler : broadcastHandlerManager) {
-                        if (log.isDebugEnabled()) log.debug("broadcast eventbus #{}", e);
-                        handler.onEvent(e);
-                    }
-                }
-            }
-
-            if (pendingHandlerRegistration != null) {
-                for (final HandlerContext context : pendingHandlerRegistration) {
-                    if (context.add) doAddNow(context.type, context.source, context.handler);
-                    else doRemoveNow(context.type, context.source, context.handler);
-                }
-
-                pendingHandlerRegistration.clear();
-            }
-
-            if (causes != null) throw new UmbrellaException(causes);
-        } finally {
-            firing = false;
+            log.debug("dispatch eventbus #{}", event);
+            ((Event) event).dispatch(handler);
+        } catch (final Throwable t) {
+            log.error("Cannot process fired eventbus #{}", eventType, t);
+            if (causes == null) causes = new ArrayList<>();
+            causes.add(t);
         }
-    }
-
-    public Collection<EventHandler> getHandlers(final Event.Type type, final Object source) {
-        final Map<Object, Set<EventHandler>> sourceMap = map.get(type);
-        if (sourceMap == null) return Collections.emptySet();
-
-        // safe, we control the puts.
-        final Set<EventHandler> handlers = sourceMap.get(source);
-        if (handlers != null) return SetUtils.newArraySet(handlers);
-        else return Collections.emptySet();
+        return causes;
     }
 
     public void addHandler(final BroadcastEventHandler handler) {
@@ -220,38 +122,8 @@ public class EventBus {
     }
 
     public void removeHandler(final BroadcastEventHandler handler) {
-        if (broadcastHandlerManager != null) broadcastHandlerManager.remove(handler);
-    }
-
-    private static final class HandlerContext {
-
-        private final Event.Type type;
-        private final Object source;
-        private final EventHandler handler;
-        private final boolean add;
-
-        public HandlerContext(final Type type, final Object source, final EventHandler handler, final boolean add) {
-            this.type = type;
-            this.source = source;
-            this.handler = handler;
-            this.add = add;
-        }
-
-        @Override
-        public boolean equals(final Object o) {
-            if (this == o) return true;
-            else if (o == null || getClass() != o.getClass()) return false;
-            else {
-                final HandlerContext that = (HandlerContext) o;
-                return add == that.add && Objects.equals(type, that.type) && Objects.equals(source, that.source)
-                        && Objects.equals(handler, that.handler);
-            }
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(add, type, source, handler);
-        }
+        if (broadcastHandlerManager == null) return;
+        broadcastHandlerManager.remove(handler);
     }
 
 }
