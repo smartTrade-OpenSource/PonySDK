@@ -155,4 +155,9 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers {
         submitCompleteHandlers.add(handler);
     }
 
+
+    @Override
+    protected String dumpDOM() {
+        return "<upload></upload>";
+    }
 }

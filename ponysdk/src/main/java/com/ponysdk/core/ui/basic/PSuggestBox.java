@@ -148,8 +148,8 @@ public class PSuggestBox extends PWidget
     }
 
     /**
-     * @deprecated Use {@link #focus()} or {@link #blur()}
      * @since v2.7.16
+     * @deprecated Use {@link #focus()} or {@link #blur()}
      */
     @Deprecated
     @Override
@@ -216,6 +216,11 @@ public class PSuggestBox extends PWidget
 
     public void removeSelectionHandler(final PSelectionHandler<PSuggestOracle.PSuggestion> handler) {
         if (selectionHandler != null) this.selectionHandler.remove(handler);
+    }
+
+    @Override
+    protected String dumpDOM() {
+        return textBox.dumpDOM();
     }
 
     public static class MultiWordSuggestion implements PSuggestOracle.PSuggestion {

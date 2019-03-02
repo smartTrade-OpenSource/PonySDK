@@ -23,10 +23,7 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
@@ -215,4 +212,16 @@ public class PMenuBar extends PWidget implements Iterable<PMenuSubElement> {
         return items.iterator();
     }
 
+    @Override
+    protected String dumpDOM() {
+        String DOM = "<ul>";
+
+        for (PMenuSubElement item : items) {
+            DOM += item.dumpDOM();
+        }
+
+        DOM += "</ul>";
+
+        return DOM;
+    }
 }

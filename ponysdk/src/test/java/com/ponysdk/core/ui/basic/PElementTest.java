@@ -24,6 +24,8 @@
 package com.ponysdk.core.ui.basic;
 
 import com.ponysdk.core.model.WidgetType;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -65,6 +67,16 @@ public class PElementTest extends PSuite {
         w.setInnerHTML("<span>test</span>");
         assertEquals("<span>test</span>", w.getInnerHTML());
         assertNull(w.getInnerText());
+    }
+
+    @Test
+    public void testDumpDOM() {
+        final PElement w = new PElement("span");
+        w.setStyleName("t");
+        w.setInnerText("test");
+        PWindow.getMain().add(w);
+        Document document = Jsoup.parse(w.dumpDOM());
+        assertEquals("test", document.getElementsByClass("t").get(0).text());
     }
 
 }

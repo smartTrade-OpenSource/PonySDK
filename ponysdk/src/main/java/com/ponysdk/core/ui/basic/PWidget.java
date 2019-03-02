@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.json.JsonArray;
 import javax.json.JsonNumber;
@@ -254,7 +255,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public void removeStyleProperty(final String name) {
-        if (safeStyleProperties().remove(name) != null) saveUpdate(writer -> writer.write(ServerToClientModel.REMOVE_STYLE_KEY, name));
+        if (safeStyleProperties().remove(name) != null)
+            saveUpdate(writer -> writer.write(ServerToClientModel.REMOVE_STYLE_KEY, name));
     }
 
     public void forceDomId() {
@@ -379,15 +381,6 @@ public abstract class PWidget extends PObject implements IsPWidget {
         }
     }
 
-    private void executeRemoveDomHandler(final PDomEvent.Type type) {
-        if (destroy) return;
-        final ModelWriter writer = UIContext.get().getWriter();
-        writer.beginObject(window);
-        writer.write(ServerToClientModel.TYPE_REMOVE_HANDLER, ID);
-        writer.write(ServerToClientModel.HANDLER_TYPE, DomHandlerConverter.convert(type.getDomHandlerType()).getValue());
-        writer.endObject();
-    }
-
     public HandlerRegistration addKeyPressHandler(final PKeyPressHandler handler) {
         final Integer[] filteredKeys = handler.getJsonFilteredKeys();
         if (filteredKeys != null)
@@ -440,16 +433,16 @@ public abstract class PWidget extends PObject implements IsPWidget {
             final DomHandlerType domHandler = DomHandlerType.fromRawValue((byte) instruction.getInt(domHandlerType));
             switch (domHandler) {
                 case KEY_PRESS:
-                    fireKeyEvent(instruction,
-                        new PKeyPressEvent(this, instruction.getInt(ClientToServerModel.VALUE_KEY.toStringValue())));
+                    fireKeyEvent(
+                            new PKeyPressEvent(this, instruction.getInt(ClientToServerModel.VALUE_KEY.toStringValue())));
                     break;
                 case KEY_UP:
-                    fireKeyEvent(instruction,
-                        new PKeyUpEvent(this, instruction.getInt(ClientToServerModel.VALUE_KEY.toStringValue())));
+                    fireKeyEvent(
+                            new PKeyUpEvent(this, instruction.getInt(ClientToServerModel.VALUE_KEY.toStringValue())));
                     break;
                 case KEY_DOWN:
-                    fireKeyEvent(instruction,
-                        new PKeyDownEvent(this, instruction.getInt(ClientToServerModel.VALUE_KEY.toStringValue())));
+                    fireKeyEvent(
+                            new PKeyDownEvent(this, instruction.getInt(ClientToServerModel.VALUE_KEY.toStringValue())));
                     break;
                 case CLICK:
                     fireMouseEvent(instruction, new PClickEvent(this));
@@ -525,7 +518,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
         return shown;
     }
 
-    public void fireKeyEvent(final JsonObject instruction, final PKeyEvent<? extends EventHandler> event) {
+    public void fireKeyEvent(final PKeyEvent<? extends EventHandler> event) {
         fireEvent(event);
     }
 
@@ -650,6 +643,10 @@ public abstract class PWidget extends PObject implements IsPWidget {
         }
     }
 
+    public Stream<String> getStyleNames() {
+        return styleNames.stream();
+    }
+
     /**
      * @deprecated Add a FocusHandler if you want to know the focused state
      */
@@ -657,5 +654,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     public boolean isFocused() {
         return focused;
     }
+
+    protected abstract String dumpDOM();
 
 }

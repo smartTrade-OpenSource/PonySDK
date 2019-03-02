@@ -168,11 +168,8 @@ public class PWindow extends PObject {
     /**
      * Resizes the current window by a certain amount.
      *
-     * @param xDelta
-     *            is the number of pixels to grow the window horizontally.
-     * @param yDelta
-     *            is the number of pixels to grow the window vertically.
-     *
+     * @param xDelta is the number of pixels to grow the window horizontally.
+     * @param yDelta is the number of pixels to grow the window vertically.
      * @see <a href="https://developer.mozilla.org/fr/docs/Web/API/Window/resizeBy">MDN</a>
      */
     public void resizeBy(final float xDelta, final float yDelta) {
@@ -185,13 +182,10 @@ public class PWindow extends PObject {
     /**
      * Dynamically resizes window.
      *
-     * @param width
-     *            is an integer representing the new outerWidth in pixels (including scroll bars,
-     *            title bars, etc).
-     * @param height
-     *            is an integer value representing the new outerHeight in pixels (including scroll
-     *            bars, title bars, etc).
-     *
+     * @param width  is an integer representing the new outerWidth in pixels (including scroll bars,
+     *               title bars, etc).
+     * @param height is an integer value representing the new outerHeight in pixels (including scroll
+     *               bars, title bars, etc).
      * @see <a href="https://developer.mozilla.org/fr/docs/Web/API/Window/resizeTo">MDN</a>
      */
     public void resizeTo(final int width, final int height) {
@@ -204,11 +198,8 @@ public class PWindow extends PObject {
     /**
      * Moves the current window by a specified amount.
      *
-     * @param deltaX
-     *            is the amount of pixels to move the window horizontally.
-     * @param deltaY
-     *            is the amount of pixels to move the window vertically.
-     *
+     * @param deltaX is the amount of pixels to move the window horizontally.
+     * @param deltaY is the amount of pixels to move the window vertically.
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/window/moveBy">MDN</a>
      */
     public void moveBy(final float deltaX, final float deltaY) {
@@ -221,11 +212,8 @@ public class PWindow extends PObject {
     /**
      * Moves the window to the specified coordinates.
      *
-     * @param x
-     *            is the horizontal coordinate to be moved to.
-     * @param y
-     *            is the vertical coordinate to be moved to.
-     *
+     * @param x is the horizontal coordinate to be moved to.
+     * @param y is the vertical coordinate to be moved to.
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/window/moveTo">MDN</a>
      */
     public void moveTo(final float x, final float y) {
@@ -604,6 +592,15 @@ public class PWindow extends PObject {
             return WidgetType.BROWSER;
         }
 
+    }
+
+    protected String dumpDOM() {
+        String DOM = "<body>";
+        for (PRootPanel panel : panelByZone.values()) {
+            DOM += panel.dumpDOM();
+        }
+        DOM += "</body>";
+        return DOM;
     }
 
 }

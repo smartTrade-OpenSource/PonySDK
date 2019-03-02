@@ -23,36 +23,23 @@
 
 package com.ponysdk.driver;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.function.Predicate;
-
+import com.ponysdk.core.model.WidgetType;
 import org.openqa.selenium.By;
-import org.openqa.selenium.By.ByClassName;
-import org.openqa.selenium.By.ByCssSelector;
-import org.openqa.selenium.By.ById;
-import org.openqa.selenium.By.ByName;
-import org.openqa.selenium.By.ByTagName;
+import org.openqa.selenium.By.*;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.internal.FindsByClassName;
-import org.openqa.selenium.internal.FindsByCssSelector;
-import org.openqa.selenium.internal.FindsById;
-import org.openqa.selenium.internal.FindsByName;
-import org.openqa.selenium.internal.FindsByTagName;
+import org.openqa.selenium.internal.*;
 
-import com.ponysdk.core.model.WidgetType;
+import java.util.*;
+import java.util.function.Predicate;
 
 class PonySearchContext implements FindsById, FindsByName, FindsByClassName, FindsByCssSelector, FindsByTagName, SearchContext {
 
-    private final static ThreadLocal<MultipleElementsConsumer> multipleElementsConsumers = ThreadLocal
-        .withInitial(() -> new MultipleElementsConsumer());
-    private final static ThreadLocal<SingleElementConsumer> singleElementConsumers = ThreadLocal
-        .withInitial(() -> new SingleElementConsumer());
-    private final static Comparator<PonyWebElement> elementsComparator = (e1, e2) -> e1.objectID - e2.objectID;
+    private static final ThreadLocal<MultipleElementsConsumer> multipleElementsConsumers = ThreadLocal
+            .withInitial(MultipleElementsConsumer::new);
+    private static final ThreadLocal<SingleElementConsumer> singleElementConsumers = ThreadLocal
+            .withInitial(SingleElementConsumer::new);
+    private static final Comparator<PonyWebElement> elementsComparator = (e1, e2) -> e1.objectID - e2.objectID;
 
     private final Collection<PonyWebElement> elements;
     private final boolean diveable;
@@ -66,7 +53,6 @@ class PonySearchContext implements FindsById, FindsByName, FindsByClassName, Fin
             list.add(t);
             return true;
         }
-
     }
 
     private static class SingleElementConsumer implements Predicate<PonyWebElement> {
@@ -81,7 +67,7 @@ class PonySearchContext implements FindsById, FindsByName, FindsByClassName, Fin
 
     }
 
-    private static enum FindBy {
+    private enum FindBy {
         ID,
         NAME,
         CLASS_NAME,
@@ -236,7 +222,7 @@ class PonySearchContext implements FindsById, FindsByName, FindsByClassName, Fin
             final int wordStart = usingIndex;
             final int wordEnd = wordEnd(using, usingIndex);
             if (wordEnd == wordStart) throw new IllegalArgumentException(
-                "Invalid css selector '" + using + "' at " + usingIndex + ", a widget type or class name is expected");
+                    "Invalid css selector '" + using + "' at " + usingIndex + ", a widget type or class name is expected");
             widgetType = WidgetType.valueOf(using.substring(wordStart, wordEnd));
             usingIndex = wordEnd;
         }
@@ -247,7 +233,7 @@ class PonySearchContext implements FindsById, FindsByName, FindsByClassName, Fin
             final int wordStart = usingIndex + 1;
             final int wordEnd = wordEnd(using, wordStart);
             if (wordEnd == wordStart) throw new IllegalArgumentException(
-                "Invalid css selector '" + using + "' at " + usingIndex + ", a class name is expected after '.'");
+                    "Invalid css selector '" + using + "' at " + usingIndex + ", a class name is expected after '.'");
             styles.add(using.substring(wordStart, wordEnd));
             usingIndex = wordEnd;
         }
@@ -269,7 +255,8 @@ class PonySearchContext implements FindsById, FindsByName, FindsByClassName, Fin
 
         if (dive) {
             for (final PonyWebElement e : elements) {
-                if (!e.context.findElementByCssSelector(widgetType, using, usingIndex, styles, true, consumer)) return false;
+                if (!e.context.findElementByCssSelector(widgetType, using, usingIndex, styles, true, consumer))
+                    return false;
             }
         }
 
@@ -284,7 +271,7 @@ class PonySearchContext implements FindsById, FindsByName, FindsByClassName, Fin
                 return findElementsByCssSelector(using, usingIndex + 1, false, consumer);
             default:
                 throw new IllegalArgumentException(
-                    "Invalid css selector '" + using + "' at " + usingIndex + ", character ' ' or '>' is expected");
+                        "Invalid css selector '" + using + "' at " + usingIndex + ", character ' ' or '>' is expected");
         }
     }
 

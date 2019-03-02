@@ -197,4 +197,8 @@ public class PTree extends PWidget implements Iterable<PTreeItem> {
         root.onDestroy();
     }
 
+    @Override
+    protected String dumpDOM() {
+        return "<div>" + root.dumpDOM() + "</div>";
+    }
 }

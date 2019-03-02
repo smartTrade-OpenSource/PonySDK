@@ -200,4 +200,17 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
         forEach(PObject::onDestroy);
     }
 
+    protected String dumpDOM() {
+        String DOM = "<div item=\"" + text + "\">";
+
+        Iterator<PTreeItem> iter = children.iterator();
+        while (iter.hasNext()) {
+            DOM += iter.next().dumpDOM();
+        }
+
+        DOM += "</div>";
+
+        return DOM;
+    }
+
 }

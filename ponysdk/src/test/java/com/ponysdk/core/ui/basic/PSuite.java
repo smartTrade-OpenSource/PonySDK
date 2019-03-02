@@ -54,7 +54,7 @@ public class PSuite {
         final TxnContext context = Mockito.spy(new TxnContext(socket));
         ModelWriter modelWriter = new ModelWriterForTest();
 
-        final Application application = Mockito.mock(Application.class, Mockito.RETURNS_MOCKS);
+        final Application application = Mockito.mock(Application.class);
         context.setApplication(application);
 
         final ApplicationConfiguration configuration = Mockito.mock(ApplicationConfiguration.class);

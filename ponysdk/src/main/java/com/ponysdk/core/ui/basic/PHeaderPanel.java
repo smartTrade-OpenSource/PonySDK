@@ -133,4 +133,8 @@ public class PHeaderPanel extends PPanel {
         return widgets.iterator();
     }
 
+    @Override
+    protected String dumpDOM() {
+        return "<div>" + header.dumpDOM() + content.dumpDOM() + footer.dumpDOM() + "</div >";
+    }
 }

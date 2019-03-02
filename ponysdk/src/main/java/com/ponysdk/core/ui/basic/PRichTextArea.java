@@ -95,7 +95,7 @@ public class PRichTextArea extends PFocusWidget implements HasPValueChangeHandle
         if (!isVisible() || !isEnabled()) return;
         if (instruction.containsKey(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE.toStringValue())) {
             fireOnValueChange(
-                new PValueChangeEvent<>(this, instruction.getString(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE.toStringValue())));
+                    new PValueChangeEvent<>(this, instruction.getString(ClientToServerModel.HANDLER_STRING_VALUE_CHANGE.toStringValue())));
         } else {
             super.onClientData(instruction);
         }
@@ -120,6 +120,11 @@ public class PRichTextArea extends PFocusWidget implements HasPValueChangeHandle
     @Override
     public Collection<PValueChangeHandler<String>> getValueChangeHandlers() {
         return handlers != null ? Collections.unmodifiableCollection(handlers) : Collections.emptyList();
+    }
+
+    @Override
+    protected String dumpDOM() {
+        return "<input>" + text != null ? text : html + "</input>";
     }
 
     public class Formatter {
@@ -207,6 +212,7 @@ public class PRichTextArea extends PFocusWidget implements HasPValueChangeHandle
         public void selectAll() {
             saveUpdate(writer -> writer.write(ServerToClientModel.SELECT_ALL));
         }
+
     }
 
 }
