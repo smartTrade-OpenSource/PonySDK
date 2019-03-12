@@ -1,0 +1,16 @@
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/asciidoctor.js/1.5.5-5/asciidoctor.min.js"></script>
+
+</head>
+
+<body>
+<script>
+    var asciidoctor = Asciidoctor();
+    var content = "http://asciidoctor.org[*Asciidoctor*] " +
+    "running on https://opalrb.com[_Opal_] " +
+    "brings AsciiDoc to the browser!";
+var html = asciidoctor.convert(content);
+document.body.append(html);
+
+</script>
+</body>
