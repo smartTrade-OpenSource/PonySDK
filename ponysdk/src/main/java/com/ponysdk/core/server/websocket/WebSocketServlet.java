@@ -23,23 +23,20 @@
 
 package com.ponysdk.core.server.websocket;
 
-import javax.servlet.http.HttpSession;
-
+import com.ponysdk.core.server.application.Application;
+import com.ponysdk.core.server.application.ApplicationManager;
+import com.ponysdk.core.server.servlet.SessionManager;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.server.application.Application;
-import com.ponysdk.core.server.application.ApplicationManager;
-import com.ponysdk.core.server.servlet.SessionManager;
-import com.ponysdk.core.server.stm.TxnContext;
+import javax.servlet.http.HttpSession;
 
 public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSocketServlet {
 
     private static final Logger log = LoggerFactory.getLogger(WebSocketServlet.class);
 
-    private static final long serialVersionUID = 1L;
     private int maxIdleTime = 1000000;
     private final ApplicationManager applicationManager;
     private WebsocketMonitor monitor;
@@ -58,18 +55,15 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
             webSocket.setApplicationManager(applicationManager);
             webSocket.setMonitor(monitor);
 
-            final TxnContext context = new TxnContext(webSocket);
-            webSocket.setContext(context);
-
             if (request.getHttpServletRequest().getServletContext().getSessionCookieConfig() != null) {
-                configureWithSession(request, context);
+                configureWithSession(request, webSocket);
             }
 
             return webSocket;
         });
     }
 
-    protected void configureWithSession(final ServletUpgradeRequest request, final TxnContext context) {
+    protected void configureWithSession(final ServletUpgradeRequest request, WebSocket webSocket) {
         // Force session creation if there is no session
         request.getHttpServletRequest().getSession(true);
         final HttpSession httpSession = request.getSession();
@@ -81,7 +75,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
                 application = new Application(applicationId, httpSession, applicationManager.getConfiguration());
                 SessionManager.get().registerApplication(application);
             }
-            context.setApplication(application);
+            webSocket.setApplication(application);
         } else {
             log.error("No HTTP session found");
             throw new IllegalStateException("No HTTP session found");

@@ -40,8 +40,6 @@ public class ModelWriter {
     }
 
     public void beginObject(final PWindow window) {
-        encoder.beginObject();
-
         if (currentWindow == null || !window.equals(currentWindow.get())) {
             currentWindow = new WeakReference<>(window);
             encoder.encode(ServerToClientModel.WINDOW_ID, window.getID());

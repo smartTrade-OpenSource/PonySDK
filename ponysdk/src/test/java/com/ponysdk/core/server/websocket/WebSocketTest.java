@@ -46,7 +46,6 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.ApplicationManager;
 import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.server.stm.TxnContext;
 
 public class WebSocketTest {
 
@@ -71,7 +70,6 @@ public class WebSocketTest {
 
         final ServletUpgradeRequest request = Mockito.mock(ServletUpgradeRequest.class);
         webSocket.setRequest(request);
-        webSocket.setContext(Mockito.mock(TxnContext.class));
 
         final ApplicationManager applicationManager = Mockito.mock(ApplicationManager.class);
         final ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration();
@@ -119,8 +117,8 @@ public class WebSocketTest {
             webSocket.onWebSocketText(job.build().toString());
         }
 
-        assertEquals(1, uiContext.getTerminalLatency(), 0.01);
-        assertEquals(uiContext.getRoundtripLatency(), uiContext.getTerminalLatency() + uiContext.getNetworkLatency(), 0.01);
+        assertEquals(1, uiContext.getMonitor().getTerminalLatency(), 0.01);
+        assertEquals(uiContext.getMonitor().getRoundtripLatency(), uiContext.getMonitor().getTerminalLatency() + uiContext.getMonitor().getNetworkLatency(), 0.01);
     }
 
     /**

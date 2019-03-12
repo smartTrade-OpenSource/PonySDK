@@ -72,7 +72,8 @@ dependencies {
 
             'org.seleniumhq.selenium:selenium-api:' + seleniumVersion,
             'org.glassfish.tyrus:tyrus-client:' + tyrusVersion,
-            'org.glassfish.tyrus.ext:tyrus-extension-deflate:' + tyrusVersion
+            'org.glassfish.tyrus.ext:tyrus-extension-deflate:' + tyrusVersion,
+            'com.hazelcast:hazelcast:3.11.2',
     )
 
     testCompile(

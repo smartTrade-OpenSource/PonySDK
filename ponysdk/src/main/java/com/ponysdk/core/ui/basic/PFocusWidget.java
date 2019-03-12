@@ -50,7 +50,8 @@ public abstract class PFocusWidget extends PWidget implements Focusable {
     private boolean showLoadingOnRequest;
 
     protected PFocusWidget() {
-        if (UIContext.get().getConfiguration().isTabindexOnlyFormField()) tabindex = TabindexMode.FOCUSABLE.getTabIndex();
+        if (UIContext.get().getApplication().getConfiguration().isTabindexOnlyFormField())
+            tabindex = TabindexMode.FOCUSABLE.getTabIndex();
     }
 
     public void showLoadingOnRequest(final boolean showLoadingOnRequest) {
@@ -60,8 +61,8 @@ public abstract class PFocusWidget extends PWidget implements Focusable {
     }
 
     /**
-     * @deprecated Use {@link #focus()} or {@link #blur()}
      * @since v2.7.16
+     * @deprecated Use {@link #focus()} or {@link #blur()}
      */
     @Deprecated
     @Override

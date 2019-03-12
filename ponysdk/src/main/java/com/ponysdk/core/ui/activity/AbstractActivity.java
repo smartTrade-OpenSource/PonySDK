@@ -24,7 +24,6 @@
 package com.ponysdk.core.ui.activity;
 
 import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PAcceptsOneWidget;
 import com.ponysdk.core.ui.eventbus.BroadcastEventHandler;
@@ -48,14 +47,9 @@ public abstract class AbstractActivity<T extends IsPWidget> implements Activity 
     @Override
     public void start(final PAcceptsOneWidget world, final Place place) {
         this.world = world;
-        this.started = true;
+        started = true;
 
-        final T view2 = getView();
-        view2.asWidget().addStyleName("pony-LoadingBox");
-        this.world.setWidget(view2);
-
-        // Force flush to show the Loading information
-        Txn.get().flush();
+        world.setWidget(getView());
 
         if (firstStart) {
             buildView();
@@ -63,7 +57,6 @@ public abstract class AbstractActivity<T extends IsPWidget> implements Activity 
         }
 
         updateView(place);
-        view2.asWidget().removeStyleName("pony-LoadingBox");
     }
 
     public T getView() {

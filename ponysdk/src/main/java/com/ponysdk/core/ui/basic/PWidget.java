@@ -174,7 +174,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public void ensureDebugId(final String debugID) {
-        if (UIContext.get().getConfiguration().isDebugMode()) {
+        if (UIContext.get().getApplication().getConfiguration().isDebugMode()) {
             if (Objects.equals(this.debugID, debugID)) return;
             this.debugID = debugID;
             if (initialized) saveUpdate(writer -> writer.write(ServerToClientModel.ENSURE_DEBUG_ID, debugID));

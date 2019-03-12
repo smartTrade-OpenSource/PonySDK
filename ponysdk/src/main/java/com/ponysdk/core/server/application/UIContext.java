@@ -23,16 +23,23 @@
 
 package com.ponysdk.core.server.application;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.ReentrantLock;
+import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.HandlerModel;
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.AlreadyDestroyedApplication;
+import com.ponysdk.core.server.context.PObjectCache;
+import com.ponysdk.core.server.monitoring.Monitor;
+import com.ponysdk.core.server.websocket.WebSocket;
+import com.ponysdk.core.ui.basic.PCookies;
+import com.ponysdk.core.ui.basic.PHistory;
+import com.ponysdk.core.ui.basic.PObject;
+import com.ponysdk.core.ui.basic.PWindow;
+import com.ponysdk.core.ui.eventbus.*;
+import com.ponysdk.core.ui.statistic.TerminalDataReceiver;
+import com.ponysdk.core.useragent.UserAgent;
+import com.ponysdk.core.writer.ModelWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.json.JsonNumber;
 import javax.json.JsonObject;
@@ -41,31 +48,10 @@ import javax.json.JsonValue;
 import javax.json.JsonValue.ValueType;
 import javax.json.spi.JsonProvider;
 import javax.servlet.http.HttpSession;
-
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.model.HandlerModel;
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.AlreadyDestroyedApplication;
-import com.ponysdk.core.server.context.PObjectCache;
-import com.ponysdk.core.server.stm.Txn;
-import com.ponysdk.core.server.stm.TxnContext;
-import com.ponysdk.core.server.websocket.WebSocket;
-import com.ponysdk.core.ui.basic.PCookies;
-import com.ponysdk.core.ui.basic.PHistory;
-import com.ponysdk.core.ui.basic.PObject;
-import com.ponysdk.core.ui.basic.PWindow;
-import com.ponysdk.core.ui.eventbus.BroadcastEventHandler;
-import com.ponysdk.core.ui.eventbus.Event;
-import com.ponysdk.core.ui.eventbus.EventHandler;
-import com.ponysdk.core.ui.eventbus.HandlerRegistration;
-import com.ponysdk.core.ui.eventbus.StreamHandler;
-import com.ponysdk.core.ui.statistic.TerminalDataReceiver;
-import com.ponysdk.core.useragent.UserAgent;
-import com.ponysdk.core.writer.ModelWriter;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * <p>
@@ -86,12 +72,13 @@ public class UIContext {
     private static final AtomicInteger uiContextCount = new AtomicInteger();
     private static final String DEFAULT_PROVIDER = "org.glassfish.json.JsonProviderImpl";
 
-    private final int ID;
+    private final int id;
 
     private final ReentrantLock lock = new ReentrantLock();
     private final Map<String, Object> attributes = new HashMap<>();
 
     private final PObjectCache pObjectCache = new PObjectCache();
+    private final Application application;
     private int objectCounter = 1;
 
     private Map<Integer, StreamHandler> streamListenerByID;
@@ -104,46 +91,33 @@ public class UIContext {
     private final PCookies cookies = new PCookies();
 
     private final Set<ContextDestroyListener> destroyListeners = new HashSet<>();
-    @Deprecated(forRemoval = true, since = "v2.8.0")
-    private final TxnContext context;
     private final Set<DataListener> listeners = Collections.newSetFromMap(new ConcurrentHashMap<DataListener, Boolean>());
 
     private TerminalDataReceiver terminalDataReceiver;
 
     private boolean alive = true;
 
-    private final Latency roundtripLatency = new Latency(10);
-    private final Latency networkLatency = new Latency(10);
-    private final Latency terminalLatency = new Latency(10);
+    private final Monitor monitor = new Monitor();
 
-    private final ApplicationConfiguration configuration;
     private final WebSocket socket;
-    private final ServletUpgradeRequest request;
 
     private long lastReceivedTime = System.currentTimeMillis();
 
-    private final JsonProvider jsonProvider;
+    private JsonProvider jsonProvider;
 
     private final ModelWriter modelWriter;
 
-    public UIContext(final WebSocket socket, final TxnContext context, final ApplicationConfiguration configuration,
-                     final ServletUpgradeRequest request) {
-        this.ID = uiContextCount.incrementAndGet();
+    public UIContext(final WebSocket socket, Application application) {
+        this.id = uiContextCount.incrementAndGet();
         this.socket = socket;
-        this.configuration = configuration;
-        this.request = request;
-        this.context = context;
-        this.modelWriter = context.getWriter();
+        this.modelWriter = new ModelWriter(socket);
+        this.application = application;
 
-
-        JsonProvider provider;
         try {
-            provider = (JsonProvider) Class.forName(DEFAULT_PROVIDER).getDeclaredConstructor().newInstance();
-        } catch (final Throwable t) {
-            provider = JsonProvider.provider();
+            jsonProvider = (JsonProvider) Class.forName(DEFAULT_PROVIDER).getDeclaredConstructor().newInstance();
+        } catch (final Exception t) {
+            jsonProvider = JsonProvider.provider();
         }
-
-        jsonProvider = provider;
     }
 
     /**
@@ -159,18 +133,10 @@ public class UIContext {
         return uiContext;
     }
 
-    /**
-     * Removed the current UIContext
-     */
-    public static void remove() {
+    private static void remove() {
         currentContext.remove();
     }
 
-    /**
-     * Sets the current UIContext
-     *
-     * @param uiContext the UIContext
-     */
     public static void setCurrent(final UIContext uiContext) {
         currentContext.set(uiContext);
     }
@@ -303,7 +269,7 @@ public class UIContext {
      * @return the ID
      */
     public int getID() {
-        return ID;
+        return id;
     }
 
     /**
@@ -337,17 +303,14 @@ public class UIContext {
         if (UIContext.get() != this) {
             acquire();
             try {
-                final Txn txn = Txn.get();
-                txn.begin(context);
-                try {
-                    runnable.run();
-                    txn.commit();
-                    return true;
-                } catch (final Throwable e) {
-                    log.error("Cannot process client instruction", e);
-                    txn.rollback();
-                    return false;
-                }
+                runnable.run();
+
+                //TODO nciaravola
+                //flush();
+                return true;
+            } catch (final Exception e) {
+                log.error("Cannot process client instruction", e);
+                return false;
             } finally {
                 release();
             }
@@ -367,7 +330,7 @@ public class UIContext {
             return execute(() -> {
                 try {
                     listeners.forEach(listener -> data.forEach(listener::onData));
-                } catch (final Throwable e) {
+                } catch (final Exception e) {
                     log.error("Cannot send data", e);
                 }
             });
@@ -570,7 +533,6 @@ public class UIContext {
      * Closes the current UIContext
      */
     public void close() {
-        socket.beginObject();
         socket.encode(ServerToClientModel.DESTROY_CONTEXT, null);
         socket.endObject();
     }
@@ -621,7 +583,7 @@ public class UIContext {
         acquire();
         try {
             doDestroy();
-            context.deregisterUIContext(ID);
+            application.deregisterUIContext(id);
         } finally {
             release();
         }
@@ -653,7 +615,7 @@ public class UIContext {
         acquire();
         try {
             doDestroy();
-            context.deregisterUIContext(ID);
+            application.deregisterUIContext(id);
             socket.close();
         } finally {
             release();
@@ -705,8 +667,6 @@ public class UIContext {
         acquire();
         try {
             socket.sendRoundTrip();
-        } catch (final Throwable e) {
-            log.error("Cannot send server round trip to UIContext #" + getID(), e);
         } finally {
             release();
         }
@@ -722,15 +682,6 @@ public class UIContext {
     }
 
     /**
-     * Gets the {@link ApplicationManagerOption} of the UIContext
-     *
-     * @return The ApplicationManagerOption
-     */
-    public ApplicationConfiguration getConfiguration() {
-        return configuration;
-    }
-
-    /**
      * Gets the {@link PHistory} of the UIContext
      *
      * @return the PHistory
@@ -740,7 +691,7 @@ public class UIContext {
     }
 
     public String getHistoryToken() {
-        final List<String> historyTokens = this.request.getParameterMap().get(ClientToServerModel.TYPE_HISTORY.toStringValue());
+        final List<String> historyTokens = socket.getRequest().getParameterMap().get(ClientToServerModel.TYPE_HISTORY.toStringValue());
         return historyTokens != null && !historyTokens.isEmpty() ? historyTokens.get(0) : null;
     }
 
@@ -771,36 +722,24 @@ public class UIContext {
     }
 
     public UserAgent getUserAgent() {
-        return UserAgent.parseUserAgentString(request.getHeader("User-Agent"));
+
+        return UserAgent.parseUserAgentString(socket.getRequest().getHeader("User-Agent"));
     }
 
     public HttpSession getSession() {
-        return request.getSession();
+        return socket.getRequest().getSession();
     }
 
     public <T> T getApplicationAttribute(final String name) {
-        return context.getAttribute(name);
-    }
-
-    public void setApplicationAttribute(final String name, final Object value) {
-        context.setAttribute(name, value);
-    }
-
-    public String getApplicationId() {
-        return context.getId();
+        return application.getAttribute(name);
     }
 
     public void setWebSocketListener(final WebSocket.Listener listener) {
         socket.setListener(listener);
     }
 
-    /**
-     * Gets the {@link Application} of the UIContext
-     *
-     * @return The Application
-     */
     public Application getApplication() {
-        return context.getApplication();
+        return application;
     }
 
     public ModelWriter getWriter() {
@@ -811,107 +750,26 @@ public class UIContext {
         return jsonProvider;
     }
 
+    public Monitor getMonitor() {
+        return monitor;
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         final UIContext uiContext = (UIContext) o;
-        return ID == uiContext.ID;
+        return id == uiContext.id;
     }
 
     @Override
     public int hashCode() {
-        return ID;
+        return id;
     }
 
     @Override
     public String toString() {
-        return "UIContext [ID=" + ID + ", alive=" + alive + "]";
-    }
-
-    /**
-     * Gets an average latency from the last 10 measurements
-     *
-     * @return the lantency
-     * @deprecated Use {@link #getRoundtripLatency()} directly
-     */
-    @Deprecated(since = "v2.8.11", forRemoval = true)
-    public double getLatency() {
-        return getRoundtripLatency();
-    }
-
-    /**
-     * Adds a roundtrip latency value
-     *
-     * @param value the value
-     */
-    public void addRoundtripLatencyValue(final long value) {
-        roundtripLatency.add(value);
-    }
-
-    /**
-     * Gets an average roundtrip latency from the last 10 measurements
-     *
-     * @return the lantency
-     */
-    public double getRoundtripLatency() {
-        return roundtripLatency.getValue();
-    }
-
-    /**
-     * Adds a network latency value
-     *
-     * @param value the value
-     */
-    public void addNetworkLatencyValue(final long value) {
-        networkLatency.add(value);
-    }
-
-    /**
-     * Gets an average network latency from the last 10 measurements
-     *
-     * @return the lantency
-     */
-    public double getNetworkLatency() {
-        return networkLatency.getValue();
-    }
-
-    /**
-     * Adds a terminal latency value
-     *
-     * @param value the ping value
-     */
-    public void addTerminalLatencyValue(final long value) {
-        terminalLatency.add(value);
-    }
-
-    /**
-     * Gets an average terminal latency from the last 10 measurements
-     *
-     * @return the lantency
-     */
-    public double getTerminalLatency() {
-        return terminalLatency.getValue();
-    }
-
-    private static final class Latency {
-
-        private int index = 0;
-        private final long[] values;
-
-        private Latency(final int size) {
-            values = new long[size];
-            Arrays.fill(values, 0);
-        }
-
-        public void add(final long value) {
-            values[index++] = value;
-            if (index >= values.length) index = 0;
-        }
-
-        public double getValue() {
-            return Arrays.stream(values).average().orElse(0);
-        }
+        return "UIContext [id=" + id + ", alive=" + alive + "]";
     }
 
 }

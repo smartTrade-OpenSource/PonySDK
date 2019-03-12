@@ -37,7 +37,6 @@ import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.ui.basic.event.PCloseEvent;
 import com.ponysdk.core.ui.basic.event.PCloseHandler;
 import com.ponysdk.core.ui.basic.event.POpenEvent;
@@ -152,7 +151,9 @@ public class PWindow extends PObject {
             PWindowManager.preregisterWindow(this);
 
             writeUpdate(callback -> callback.write(ServerToClientModel.OPEN));
-            Txn.get().flush();
+
+            //TODO nciaravola
+            //Txn.get().flush();
         }
     }
 

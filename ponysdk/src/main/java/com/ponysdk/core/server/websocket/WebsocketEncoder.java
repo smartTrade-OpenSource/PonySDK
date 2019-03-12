@@ -27,12 +27,6 @@ import com.ponysdk.core.model.ServerToClientModel;
 
 public interface WebsocketEncoder {
 
-    void beginObject();
-
-    /**
-     * @param model
-     * @param value The type can be primitives, String or Object[]
-     */
     void encode(final ServerToClientModel model, final Object value);
 
     void endObject();

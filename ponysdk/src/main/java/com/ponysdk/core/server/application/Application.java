@@ -29,6 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpSession;
 
+import com.ponysdk.core.server.websocket.WebSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,8 +58,11 @@ public class Application {
         this.configuration = configuration;
     }
 
-    public void registerUIContext(final UIContext uiContext) {
+    public UIContext createUIContext(WebSocket socket) {
+        UIContext uiContext = new UIContext(socket, this);
         uiContexts.put(uiContext.getID(), uiContext);
+        log.info("Creating a new UIContext:{}", uiContext);
+        return uiContext;
     }
 
     public void deregisterUIContext(final int uiContextID) {
@@ -115,7 +119,7 @@ public class Application {
         return (T) attributes.get(name);
     }
 
-    public ApplicationConfiguration getOptions() {
+    public ApplicationConfiguration getConfiguration() {
         return configuration;
     }
 

@@ -101,7 +101,7 @@ public class PDateBox extends PWidget implements Focusable, HasPValue<Date>, PVa
     }
 
     protected PDateBox(final PDatePicker picker, final SimpleDateFormat dateFormat, final boolean keepDayTimeNeeded) {
-        if (UIContext.get().getConfiguration().isTabindexOnlyFormField())
+        if (UIContext.get().getApplication().getConfiguration().isTabindexOnlyFormField())
             tabindex = TabindexMode.FOCUSABLE.getTabIndex();
         this.datePicker = picker;
         this.dateFormat = dateFormat;

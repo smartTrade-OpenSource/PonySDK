@@ -23,20 +23,19 @@
 
 package com.ponysdk.core.server.servlet;
 
-import java.io.IOException;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.server.application.Application;
+import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.websocket.WebsocketEncoder;
+import com.ponysdk.core.ui.basic.PObject;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.server.application.Application;
-import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.ui.basic.PObject;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 public class AjaxServletTest {
 
@@ -56,11 +55,11 @@ public class AjaxServletTest {
         Mockito.when(request.getHeader(ClientToServerModel.OBJECT_ID.name())).thenReturn(String.valueOf(pObjectID));
 
         final Application application = new Application("0", null, null);
-        final UIContext uiContext = Mockito.mock(UIContext.class);
+        final Websocket websocket = Mockito.mock(WebsocketEncoder.class);
         Mockito.when(uiContext.getID()).thenReturn(uiContextID);
         Mockito.when(uiContext.isAlive()).thenReturn(true);
         Mockito.when(uiContext.execute(ArgumentMatchers.any(Runnable.class))).thenCallRealMethod();
-        application.registerUIContext(uiContext);
+        application.createUIContext(websocket);
         SessionManager.get().registerApplication(application);
 
         final PObject pObject = Mockito.mock(PObject.class);

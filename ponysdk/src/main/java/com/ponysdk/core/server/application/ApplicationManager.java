@@ -34,19 +34,18 @@ public abstract class ApplicationManager {
 
     protected ApplicationConfiguration configuration;
 
-    public void startApplication(final UIContext uiContext) throws Exception {
+    public void startApplication(final UIContext uiContext) {
         uiContext.execute(() -> {
             try {
                 final EntryPoint entryPoint = initializeEntryPoint();
                 final String historyToken = uiContext.getHistoryToken();
 
-                if (historyToken != null && !historyToken.isEmpty()) uiContext.getHistory().newItem(historyToken, false);
+                if (historyToken != null && !historyToken.isEmpty())
+                    uiContext.getHistory().newItem(historyToken, false);
 
                 entryPoint.start(uiContext);
             } catch (final Exception e) {
                 log.error("Cannot start UIContext", e);
-                e.printStackTrace(); // WORKAROUND The logger doesn't seem to work here
-                // TODO nciaravola destroy if exception ?
             }
         });
     }

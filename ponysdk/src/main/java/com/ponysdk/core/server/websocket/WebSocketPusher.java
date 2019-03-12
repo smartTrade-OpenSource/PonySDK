@@ -151,6 +151,8 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
             log.error("Can't write on the websocket, so we destroy the application", e);
             UIContext.get().onDestroy();
         }
+
+        if (listener != null) listener.onOutgoingPonyFrame(model, value);
     }
 
     private void write(final ServerToClientModel model) throws IOException {

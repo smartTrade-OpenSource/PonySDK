@@ -43,7 +43,7 @@ public class ApplicationTest {
         final ApplicationConfiguration configuration = Mockito.mock(ApplicationConfiguration.class);
         application = new Application(id, Mockito.mock(HttpSession.class), configuration);
         assertEquals(id, application.getId());
-        assertEquals(configuration, application.getOptions());
+        assertEquals(configuration, application.getConfiguration());
         assertNotNull(application.toString());
     }
 

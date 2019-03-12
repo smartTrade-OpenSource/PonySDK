@@ -23,16 +23,13 @@
 
 package com.ponysdk.core.server.websocket;
 
-import java.io.StringReader;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-
+import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.application.Application;
+import com.ponysdk.core.server.application.ApplicationManager;
+import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.context.CommunicationSanityChecker;
+import com.ponysdk.core.ui.basic.PObject;
 import org.eclipse.jetty.util.component.Container;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
@@ -42,68 +39,66 @@ import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.application.ApplicationManager;
-import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.server.context.CommunicationSanityChecker;
-import com.ponysdk.core.server.stm.TxnContext;
-import com.ponysdk.core.ui.basic.PObject;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import java.io.StringReader;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
     private static final Logger log = LoggerFactory.getLogger(WebSocket.class);
+
+    private static final String INFO_MESSAGE = "Message received from terminal : UIContext #{} on {} : {}";
+    private static final String WARN_MESSAGE = "Message received from terminal : UIContext #{} on {} : {}";
+    private static final String ERROR_MESSAGE = "Message received from terminal : UIContext #{} on {} : {}";
 
     private ServletUpgradeRequest request;
     private WebsocketMonitor monitor;
     private WebSocketPusher websocketPusher;
     private ApplicationManager applicationManager;
 
-    private TxnContext context;
     private Session session;
     private UIContext uiContext;
-    private Listener listener;
 
-    private long lastSentPing;
+    private Application application;
 
-    public WebSocket() {
-    }
-
+    /**
+     * Initialise and start a new UIContext
+     *
+     *
+     * <p>
+     * <b>WebSocketPusher</b>
+     * 1K for max chunk size and 1M for total buffer size
+     * Don't set max chunk size > 8K because when using Jetty Websocket compression, the chunks are limited to 8K
+     * </p>
+     *
+     * @param session
+     */
     @Override
     public void onWebSocketConnect(final Session session) {
+        this.session = session;
+
+        application.createUIContext(this);
+        websocketPusher = new WebSocketPusher(session, 1 << 20, 1 << 12, TimeUnit.SECONDS.toMillis(60));
+
+        final CommunicationSanityChecker communicationSanityChecker = new CommunicationSanityChecker(uiContext);
+
+        uiContext.acquire();
         try {
-            if (!session.isOpen()) throw new IllegalStateException("Session already closed");
-            this.session = session;
-
-            // 1K for max chunk size and 1M for total buffer size
-            // Don't set max chunk size > 8K because when using Jetty Websocket compression, the chunks are limited to 8K
-
-            this.websocketPusher = new WebSocketPusher(session, 1 << 20, 1 << 12, TimeUnit.SECONDS.toMillis(60));
-            uiContext = new UIContext(this, context, applicationManager.getConfiguration(), request);
-            log.info("Creating a new {}", uiContext);
-
-            final CommunicationSanityChecker communicationSanityChecker = new CommunicationSanityChecker(uiContext);
-            context.registerUIContext(uiContext);
-
-            uiContext.acquire();
-            try {
-                beginObject();
-                encode(ServerToClientModel.CREATE_CONTEXT, uiContext.getID()); // TODO nciaravola integer ?
-                encode(ServerToClientModel.OPTION_FORMFIELD_TABULATION, uiContext.getConfiguration().isTabindexOnlyFormField());
-                endObject();
-                if (isAlive()) flush0();
-            } catch (final Throwable e) {
-                log.error("Cannot send server heart beat to client", e);
-            } finally {
-                uiContext.release();
-            }
-
-            applicationManager.startApplication(uiContext);
-            communicationSanityChecker.start();
-        } catch (final Exception e) {
-            log.error("Cannot process WebSocket instructions", e);
-            e.printStackTrace(); // WORKAROUND The logger doesn't seem to work here
+            encode(ServerToClientModel.CREATE_CONTEXT, uiContext.getID());
+            encode(ServerToClientModel.OPTION_FORMFIELD_TABULATION, uiContext.getApplication().getConfiguration().isTabindexOnlyFormField());
+            endObject();
+            flush0();
+        } finally {
+            uiContext.release();
         }
+
+        applicationManager.startApplication(uiContext);
+        communicationSanityChecker.start();
     }
 
     @Override
@@ -114,8 +109,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
     @Override
     public void onWebSocketClose(final int statusCode, final String reason) {
-        log.info("WebSocket closed on UIContext #{} : {}, reason : {}", uiContext.getID(), NiceStatusCode.getMessage(statusCode),
-            reason != null ? reason : "");
+        log.info("WebSocket closed on UIContext #{} : {}, reason : {}", uiContext.getID(), NiceStatusCode.getMessage(statusCode), reason);
         uiContext.onDestroy();
     }
 
@@ -124,7 +118,9 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
      */
     @Override
     public void onWebSocketText(final String message) {
-        if (this.listener != null) listener.onIncomingText(message);
+        //TODO nciaravola
+
+        //if (this.listener != null) listener.onIncomingText(message);
         if (isAlive()) {
             try {
                 uiContext.onMessageReceived();
@@ -136,7 +132,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
                 }
 
                 if (jsonObject.containsKey(ClientToServerModel.TERMINAL_LATENCY.toStringValue())) {
-                    processRoundtripLatency(jsonObject);
+                    //processRoundtripLatency(jsonObject);
                 } else if (jsonObject.containsKey(ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue())) {
                     processInstructions(jsonObject);
                 } else if (jsonObject.containsKey(ClientToServerModel.ERROR_MSG.toStringValue())) {
@@ -150,31 +146,32 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
                 }
 
                 if (monitor != null) monitor.onMessageProcessed(this, message);
-            } catch (final Throwable e) {
+            } catch (final Exception e) {
                 log.error("Cannot process message from terminal  #" + uiContext.getID() + " : " + message, e);
             } finally {
                 if (monitor != null) monitor.onMessageUnprocessed(this, message);
             }
         } else {
             log.info("UI Context #{} is destroyed, message dropped from terminal : {}", uiContext != null ? uiContext.getID() : -1,
-                message);
+                    message);
         }
     }
 
-    private void processRoundtripLatency(final JsonObject jsonObject) {
-        final long roundtripLatency = TimeUnit.MILLISECONDS.convert(System.nanoTime() - lastSentPing, TimeUnit.NANOSECONDS);
-        log.debug("Roundtrip measurement : {} ms from terminal #{}", roundtripLatency, uiContext.getID());
-        uiContext.addRoundtripLatencyValue(roundtripLatency);
-
-        final long terminalLatency = jsonObject.getJsonNumber(ClientToServerModel.TERMINAL_LATENCY.toStringValue()).longValue();
-        log.debug("Terminal measurement : {} ms from terminal #{}", terminalLatency, uiContext.getID());
-        uiContext.addTerminalLatencyValue(terminalLatency);
-
-        final long networkLatency = roundtripLatency - terminalLatency;
-        log.debug("Network measurement : {} ms from terminal #{}", networkLatency, uiContext.getID());
-        uiContext.addNetworkLatencyValue(networkLatency);
-    }
-
+    /**
+     * private void processRoundtripLatency(final JsonObject jsonObject) {
+     * final long roundtripLatency = TimeUnit.MILLISECONDS.convert(System.nanoTime() - lastSentPing, TimeUnit.NANOSECONDS);
+     * log.debug("Roundtrip measurement : {} ms from terminal #{}", roundtripLatency, uiContext.getID());
+     * uiContext.addRoundtripLatencyValue(roundtripLatency);
+     * <p>
+     * final long terminalLatency = jsonObject.getJsonNumber(ClientToServerModel.TERMINAL_LATENCY.toStringValue()).longValue();
+     * log.debug("Terminal measurement : {} ms from terminal #{}", terminalLatency, uiContext.getID());
+     * uiContext.addTerminalLatencyValue(terminalLatency);
+     * <p>
+     * final long networkLatency = roundtripLatency - terminalLatency;
+     * log.debug("Network measurement : {} ms from terminal #{}", networkLatency, uiContext.getID());
+     * uiContext.addNetworkLatencyValue(networkLatency);
+     * }
+     **/
     private void processInstructions(final JsonObject jsonObject) {
         final String applicationInstructions = ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue();
         uiContext.execute(() -> {
@@ -196,13 +193,13 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
         switch (level) {
             case INFO_MSG:
-                log.info("Message received from terminal : UIContext #{} on {} : {}", uiContext.getID(), objectInformation, message);
+                log.info(INFO_MESSAGE, uiContext.getID(), objectInformation, message);
                 break;
             case WARN_MSG:
-                log.warn("Message received from terminal : UIContext #{} on {} : {}", uiContext.getID(), objectInformation, message);
+                log.warn(WARN_MESSAGE, uiContext.getID(), objectInformation, message);
                 break;
             case ERROR_MSG:
-                log.error("Message received from terminal : UIContext #{} on {} : {}", uiContext.getID(), objectInformation, message);
+                log.error(ERROR_MESSAGE, uiContext.getID(), objectInformation, message);
                 break;
             default:
                 log.error("Unknown log level during terminal log processing : {}", level);
@@ -222,8 +219,8 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
      */
     public void sendRoundTrip() {
         if (isAlive() && isSessionOpen()) {
-            lastSentPing = System.nanoTime();
-            beginObject();
+            //TODO nciaravola
+            //lastSentPing = System.nanoTime();
             encode(ServerToClientModel.ROUNDTRIP_LATENCY, null);
             endObject();
             flush0();
@@ -240,8 +237,8 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
     public void close() {
         if (isSessionOpen()) {
-            log.info("Closing websocket programmatically");
-            session.close();
+            log.info("Closing websocket programmatically on UIcontext: {}", uiContext.getID());
+            websocketPusher.close();
         }
     }
 
@@ -254,11 +251,6 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     }
 
     @Override
-    public void beginObject() {
-        // Nothing to do
-    }
-
-    @Override
     public void endObject() {
         encode(ServerToClientModel.END, null);
     }
@@ -266,10 +258,9 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     @Override
     public void encode(final ServerToClientModel model, final Object value) {
         websocketPusher.encode(model, value);
-        if (listener != null) listener.onOutgoingPonyFrame(model, value);
     }
 
-    private static enum NiceStatusCode {
+    private enum NiceStatusCode {
 
         NORMAL(StatusCode.NORMAL, "Normal closure"),
         SHUTDOWN(StatusCode.SHUTDOWN, "Shutdown"),
@@ -298,7 +289,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
         public static String getMessage(final int statusCode) {
             final List<NiceStatusCode> codes = Arrays.stream(values())
-                .filter(niceStatusCode -> niceStatusCode.statusCode == statusCode).collect(Collectors.toList());
+                    .filter(niceStatusCode -> niceStatusCode.statusCode == statusCode).collect(Collectors.toList());
             if (!codes.isEmpty()) {
                 return codes.get(0).toString();
             } else {
@@ -330,12 +321,11 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         this.monitor = monitor;
     }
 
-    public void setContext(final TxnContext context) {
-        this.context = context;
+    public void setApplication(Application application) {
+        this.application = application;
     }
 
     public void setListener(final Listener listener) {
-        this.listener = listener;
         this.websocketPusher.setWebSocketListener(listener);
         if (!(session instanceof Container)) {
             log.warn("Unrecognized session type {} for {}", session == null ? null : session.getClass(), uiContext);

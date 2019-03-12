@@ -23,25 +23,14 @@
 
 package com.ponysdk.core.ui.basic;
 
-import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.websocket.WebsocketEncoder;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.mockito.Mockito;
-
 import com.ponysdk.core.server.application.Application;
 import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.server.stm.Txn;
-import com.ponysdk.core.server.stm.TxnContext;
 import com.ponysdk.core.server.websocket.WebSocket;
 import com.ponysdk.core.writer.ModelWriter;
-import org.mockito.stubbing.OngoingStubbing;
-
-import javax.json.Json;
-import javax.json.JsonObject;
+import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
+import org.junit.BeforeClass;
+import org.mockito.Mockito;
 
 public class PSuite {
 
@@ -50,24 +39,15 @@ public class PSuite {
     public static void beforeClass() {
         final WebSocket socket = Mockito.mock(WebSocket.class);
         final ServletUpgradeRequest request = Mockito.mock(ServletUpgradeRequest.class);
-
-        final TxnContext context = Mockito.spy(new TxnContext(socket));
-        ModelWriter modelWriter = new ModelWriterForTest();
-
+        final ModelWriter modelWriter = new ModelWriterForTest();
         final Application application = Mockito.mock(Application.class);
-        context.setApplication(application);
-
         final ApplicationConfiguration configuration = Mockito.mock(ApplicationConfiguration.class);
+        final UIContext uiContext = Mockito.spy(new UIContext(socket, application));
 
-        Txn.get().begin(context);
-        final UIContext uiContext = Mockito.spy(new UIContext(socket, context, configuration, request));
+        Mockito.when(application.createUIContext(socket)).thenReturn(uiContext);
         Mockito.when(uiContext.getWriter()).thenReturn(modelWriter);
-        UIContext.setCurrent(uiContext);
-    }
 
-    @AfterClass
-    public static void afterClass() {
-        Txn.get().commit();
+        UIContext.setCurrent(uiContext);
     }
 
 }
