@@ -24,7 +24,6 @@
 package com.ponysdk.core.ui.basic;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,7 +76,9 @@ import com.ponysdk.core.ui.basic.event.PVisibilityEvent;
 import com.ponysdk.core.ui.basic.event.PVisibilityEvent.PVisibilityHandler;
 import com.ponysdk.core.ui.eventbus.Event;
 import com.ponysdk.core.ui.eventbus.EventHandler;
+import com.ponysdk.core.ui.eventbus.EventSource;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
+import com.ponysdk.core.ui.eventbus.TinyEventSource;
 import com.ponysdk.core.ui.model.PEventType;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.util.SetPool;
@@ -115,6 +116,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     private boolean focused;
     protected int tabindex = -Integer.MAX_VALUE;
     private List<PVisibilityHandler> visibilityHandlers;
+    private EventSource eventSource;
 
     private Set<PAddOn> addons;
 
@@ -367,18 +369,22 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     public void removeDomHandler(final EventHandler handler, final PDomEvent.Type type) {
         if (destroy) return;
-        final Collection<EventHandler> handlers = UIContext.getRootEventBus().getHandlers(type, this);
-        if (handlers.contains(handler)) {
-            UIContext.removeHandlerFromSource(type, this, handler);
-            // TODO Handle remove DOM handler
-            // if (eventBus.getHandlers(type, this).isEmpty()) {
-            //     executeRemoveDomHandler(type);
-            //     if (initialized) executeRemoveDomHandler(type);
-            //     else safeStackedInstructions().add(() -> executeRemoveDomHandler(type));
-            // }
-        } else {
+        if (!doRemoveDomHandler(handler, type)) {
             log.warn("No event handler of type {} found for {}", type, this);
         }
+        //else{
+        // TODO Handle remove DOM handler
+        // if (eventBus.getHandlers(type, this).isEmpty()) {
+        //     executeRemoveDomHandler(type);
+        //     if (initialized) executeRemoveDomHandler(type);
+        //     else safeStackedInstructions().add(() -> executeRemoveDomHandler(type));
+        // }
+        //}
+    }
+
+    private boolean doRemoveDomHandler(final EventHandler handler, final PDomEvent.Type type) {
+        if (eventSource == null) return false;
+        return eventSource.removeHandler(type, handler);
     }
 
     public HandlerRegistration addKeyPressHandler(final PKeyPressHandler handler) {
@@ -409,7 +415,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
     private HandlerRegistration addDomHandler(final EventHandler handler, final PDomEvent.Type type,
                                               final ServerBinaryModel binaryModel) {
         if (destroy) return null;
-        final HandlerRegistration handlerRegistration = UIContext.addHandlerToSource(type, this, handler);
+        if (eventSource == null) eventSource = new TinyEventSource();
+        final HandlerRegistration handlerRegistration = eventSource.addHandler(type, handler);
 
         final SetPool<Type>.ImmutableSet pool = oneTimeHandlerCreation.getAdd(type);
         if (pool != oneTimeHandlerCreation) {
@@ -578,7 +585,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public void fireEvent(final Event<? extends EventHandler> event) {
-        UIContext.fireEventFromSource(event, this);
+        if (eventSource == null) return;
+        UIContext.fireEventFromSource(event, eventSource);
     }
 
     public void removeFromParent() {
