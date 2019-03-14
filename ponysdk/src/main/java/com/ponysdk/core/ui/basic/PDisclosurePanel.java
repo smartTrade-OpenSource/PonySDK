@@ -198,4 +198,8 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, PAcceptsOn
         saveUpdate(ServerToClientModel.ANIMATION, animationEnabled);
     }
 
+    @Override
+    protected String dumpDOM() {
+        return "<div><div>" + headerText + "</div>" + content.dumpDOM() + "</div>";
+    }
 }

@@ -85,7 +85,7 @@ public abstract class PObject {
             return true;
         } else if (this.window != window) {
             throw new IllegalAccessError(
-                "Widget already attached to an other window, current window : #" + this.window + ", new window : #" + window);
+                    "Widget already attached to an other window, current window : #" + this.window + ", new window : #" + window);
         }
 
         return false;
@@ -129,8 +129,7 @@ public abstract class PObject {
     /**
      * Enrichs on the initialization for the creation
      *
-     * @param writer
-     *            the writer
+     * @param writer the writer
      */
     protected void enrichForCreation(final ModelWriter writer) {
     }
@@ -138,8 +137,7 @@ public abstract class PObject {
     /**
      * Enrichs on the initialization for the update
      *
-     * @param writer
-     *            the writer
+     * @param writer the writer
      */
     protected void enrichForUpdate(final ModelWriter writer) {
     }
@@ -424,5 +422,6 @@ public abstract class PObject {
 
         void onDestroy(PObject object);
     }
+
 
 }

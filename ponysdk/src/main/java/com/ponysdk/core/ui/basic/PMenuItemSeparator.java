@@ -38,4 +38,9 @@ public class PMenuItemSeparator extends PMenuSubElement {
         return WidgetType.MENU_ITEM_SEPARATOR;
     }
 
+    @Override
+    protected String dumpDOM() {
+        return "<li separator></li>";
+    }
+
 }

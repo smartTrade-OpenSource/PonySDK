@@ -91,4 +91,13 @@ public class PFrame extends PWidget {
         }
     }
 
+    protected String dumpDOM() {
+        String DOM = "<frame>";
+        for (PRootPanel panel : panelByZone.values()) {
+            DOM += panel.dumpDOM();
+        }
+        DOM += "</frame>";
+        return DOM;
+    }
+
 }

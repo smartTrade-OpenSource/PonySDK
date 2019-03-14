@@ -20,6 +20,8 @@ So, with PonySDK, you will be able to write standard Java code for creating your
 
 [Installation](#installation)
 
+[Pony Driver](#pony-driver)
+
 [Demo](#demo)
 
 [Frequently asked questions](#frequently-asked-questions)
@@ -40,6 +42,64 @@ So, with PonySDK, you will be able to write standard Java code for creating your
 Git version : https://github.com/Nciaravola/PonySDK.git
 Latest version : https://github.com/Nciaravola/PonySDK/archive/master.zip
 Released version : https://github.com/Nciaravola/PonySDK/releases
+```
+
+## Pony Driver
+
+Pony Driver is a low level Selenium-compatible terminal that can connect to a Pony server using only WebSocket protocol (unlike the web client that depends on both HTTP and WebSocket protocols).
+The communication is based only on Pony protocol and is unaware of HTML, JavaScript, or any other web language. 
+The driver can be found in the same jar as PonySDK, and can only be used to connect to a Pony server that is based on the exact same version.
+
+### Dependencies
+
+```gradle
+compile 'com.ponysdk:ponysdk:2.8.12'
+compile 'org.seleniumhq.selenium:selenium-api:3.14.0'
+compile 'org.seleniumhq.selenium:selenium-java:3.14.0'
+compile 'javax.websocket:javax.websocket-client-api:1.1'
+
+runtime 'javax.json:javax.json-api:1.1.4'
+runtime 'org.slf4j:slf4j-api:1.7.25'
+runtime 'org.glassfish.tyrus:tyrus-client:1.15'
+runtime 'org.glassfish.tyrus:tyrus-container-grizzly-client:1.15'
+runtime 'org.glassfish.tyrus.ext:tyrus-extension-deflate:1.15'
+```
+
+### Usage
+
+An instance of PonySDKWebDriver can be used to connect to a Pony server.
+```java
+PonySDKWebDriver driver = new PonySDKWebDriver();
+driver.get("ws://localhost:8081/sample/ws");
+```
+
+Once connected, a WebDriverWait can be used to wait for certain widgets to become ready before proceeding to action.
+```java
+WebDriverWait wait = new WebDriverWait(driver, 10L); //10 == timeOut in seconds
+```
+
+To select one or multiple widgets from the tree of available elements, the following find criteria can be used :
+
+**id** : matches the id attribute.
+
+**name** : matches the name attribute.
+
+**class name** : all given class names (space separated) must belong to the class names of the widget.
+
+**tag name** : matches the widget type as defined by Pony in WidgetType enum (doesn't necessarily match the html tag name).
+
+**css selector** : matches the widget type and/or the class names. Class names must be preceeded with a dot character. The space character can be used to select descendant widgets. The > character can be used to select direct children widgets.
+```java
+wait.until(webDriver -> webDriver.findElement(By.className("arrow left")));
+wait.until(webDriver -> webDriver.findElement(By.cssSelector(".main .auth>TEXTBOX.login"))).sendKeys("admin");
+wait.until(webDriver -> webDriver.findElement(By.tagName("BUTTON"))).click();
+```
+
+An xml file contaning the entire tree of available elements can be generated. It can be useful for dubugging purposes.
+```java
+try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File("pony_tree.xml")) {
+	driver.printAsXml(writer);
+}
 ```
 
 ## Demo

@@ -220,7 +220,7 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
             // Physical attach.
             widget.attach(window, frame);
             widget.saveAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.ROW, row),
-                new ServerBinaryModel(ServerToClientModel.COLUMN, column));
+                    new ServerBinaryModel(ServerToClientModel.COLUMN, column));
 
         }
     }
@@ -419,4 +419,21 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
         }
     }
 
+
+    @Override
+    protected String dumpDOM() {
+        String DOM = "<table>";
+
+        for (Entry<Row, TreeMap<Integer, PWidget>> entry : columnByRow.entrySet()) {
+            DOM += "<tr row = \"" + entry.getKey().value + "\">";
+            for (Entry<Integer, PWidget> td : entry.getValue().entrySet()) {
+                DOM += "<td col = \"" + td.getKey() + "\">" + td.getValue().dumpDOM() + "</td>";
+            }
+            DOM += "</tr>";
+        }
+
+        DOM += "</table>";
+
+        return DOM;
+    }
 }

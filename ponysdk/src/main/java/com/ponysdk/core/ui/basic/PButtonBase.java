@@ -24,6 +24,7 @@
 package com.ponysdk.core.ui.basic;
 
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.writer.ModelWriter;
@@ -48,8 +49,7 @@ abstract class PButtonBase extends PFocusWidget {
     /**
      * Instantiates a new PButtonBase
      *
-     * @param text
-     *            the text
+     * @param text the text
      */
     PButtonBase(final String text) {
         this.text = text;
@@ -58,10 +58,8 @@ abstract class PButtonBase extends PFocusWidget {
     /**
      * Instantiates a new PButtonBase
      *
-     * @param text
-     *            the text
-     * @param html
-     *            the html
+     * @param text the text
+     * @param html the html
      */
     PButtonBase(final String text, final String html) {
         this.text = text;
@@ -100,5 +98,10 @@ abstract class PButtonBase extends PFocusWidget {
     @Override
     public String toString() {
         return super.toString() + ", text=" + text + ", html=" + html;
+    }
+
+    @Override
+    protected String dumpDOM() {
+        return "<button class=\"" + getStyleNames().collect(Collectors.joining(" ")) + "\">" + text != null ? text : html + "</button>";
     }
 }

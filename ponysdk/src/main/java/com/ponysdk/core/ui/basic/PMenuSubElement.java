@@ -27,5 +27,4 @@ public abstract class PMenuSubElement extends PWidget {
 
     protected PMenuSubElement() {
     }
-
 }

@@ -157,4 +157,16 @@ public class PMenuItem extends PMenuSubElement {
         saveUpdate(ServerToClientModel.ENABLED, enabled);
     }
 
+    @Override
+    protected String dumpDOM() {
+        String DOM = "<li>" + text != null ? text : html;
+
+        if (subMenu != null) {
+            DOM += subMenu.dumpDOM();
+        }
+
+        DOM += "</li>";
+
+        return DOM;
+    }
 }

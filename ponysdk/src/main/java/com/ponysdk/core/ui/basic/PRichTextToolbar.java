@@ -50,4 +50,8 @@ public class PRichTextToolbar extends PWidget {
         return richTextArea;
     }
 
+    @Override
+    protected String dumpDOM() {
+        return richTextArea.dumpDOM();
+    }
 }

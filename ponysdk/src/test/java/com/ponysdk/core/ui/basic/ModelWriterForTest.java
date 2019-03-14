@@ -1,5 +1,6 @@
 package com.ponysdk.core.ui.basic;
 
+import com.google.gwt.json.client.JSONObject;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.UIContext;
@@ -69,6 +70,11 @@ public class ModelWriterForTest extends ModelWriter {
 
     public static void simulateValueChange(PObject object, boolean value) {
         JsonObject jsonObject = Json.createObjectBuilder().add(ClientToServerModel.HANDLER_BOOLEAN_VALUE_CHANGE.toStringValue(), value).build();
+        object.onClientData(jsonObject);
+    }
+
+    public static void simulateAddon(PObject object, JSONObject value) {
+        JsonObject jsonObject = Json.createObjectBuilder().add(ClientToServerModel.NATIVE.toStringValue(), "NATIVE").add("NATIVE", value.toString()).build();
         object.onClientData(jsonObject);
     }
 }

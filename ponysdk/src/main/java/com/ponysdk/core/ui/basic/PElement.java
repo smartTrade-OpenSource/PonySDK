@@ -24,6 +24,7 @@
 package com.ponysdk.core.ui.basic;
 
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
@@ -80,5 +81,22 @@ public class PElement extends PComplexPanel {
         this.innerHTML = innerHTML;
         this.innerText = null;
         saveUpdate(ServerToClientModel.HTML, this.innerHTML);
+    }
+
+    @Override
+    protected String dumpDOM() {
+        if (getWidgetCount() == 0) {
+            return "<" + tagName + " class=\"" + getStyleNames().collect(Collectors.joining(" ")) + "\">" + (innerText != null ? innerText : innerHTML) + "</" + tagName + ">";
+        } else {
+            return "<" + tagName + " class=\"" + getStyleNames().collect(Collectors.joining(" ")) + "\">" + dumpChildDOM() + "</" + tagName + ">";
+        }
+    }
+
+    private String dumpChildDOM() {
+        String DOM = "";
+        for (PWidget w : children) {
+            DOM += w.dumpDOM();
+        }
+        return DOM;
     }
 }

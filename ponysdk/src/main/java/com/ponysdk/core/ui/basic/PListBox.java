@@ -180,7 +180,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     public void removeItem(final String label) {
         checkItem(label);
         int currentIndex = 0;
-        for (final Iterator<ListItem> iterator = items.iterator(); iterator.hasNext();) {
+        for (final Iterator<ListItem> iterator = items.iterator(); iterator.hasNext(); ) {
             final ListItem item = iterator.next();
             if (Objects.equals(item.label, label)) {
                 selectedIndexes.remove(currentIndex);
@@ -194,7 +194,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
 
     public void removeValue(final Object value) {
         int currentIndex = 0;
-        for (final Iterator<ListItem> iterator = items.iterator(); iterator.hasNext();) {
+        for (final Iterator<ListItem> iterator = items.iterator(); iterator.hasNext(); ) {
             final ListItem item = iterator.next();
             if (Objects.equals(item.value, value)) {
                 selectedIndexes.remove(currentIndex);
@@ -376,7 +376,6 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         public Object getValue() {
             return value;
         }
-
     }
 
     private static class ListGroupItem extends ListItem {
@@ -386,4 +385,17 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         }
     }
 
+    @Override
+    protected String dumpDOM() {
+        String DOM = "<select>";
+
+        for (int i = 0; i < items.size(); i++) {
+            ListItem item = items.get(0);
+            DOM += "<option  value=\"" + i + "\" " + (selectedIndex == i ? "selected" : "") + ">" + item.label + "</option>";
+        }
+
+        DOM += "</select>";
+
+        return DOM;
+    }
 }

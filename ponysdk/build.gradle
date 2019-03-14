@@ -22,7 +22,7 @@ configurations {
 
 dependencies {
     gwtdev(
-        'com.google.gwt:gwt-dev:' + gwtVersion
+            'com.google.gwt:gwt-dev:' + gwtVersion
     )
 
     compile('javax.validation:validation-api:' + javaxValidationVersion) {
@@ -38,59 +38,60 @@ dependencies {
     }
 
     compile(
-        'com.google.gwt:gwt-user:' + gwtVersion,
-        'com.google.gwt:gwt-elemental:' + gwtVersion,
-        'com.google.jsinterop:jsinterop:' + jsinteropVersion,
-        'com.google.jsinterop:jsinterop-annotations:' + jsinteropVersion,
+            'com.google.gwt:gwt-user:' + gwtVersion,
+            'com.google.gwt:gwt-elemental:' + gwtVersion,
+            'com.google.jsinterop:jsinterop:' + jsinteropVersion,
+            'com.google.jsinterop:jsinterop-annotations:' + jsinteropVersion,
 
-        'org.eclipse.jetty:jetty-server:' + jettyVersion,
-        'org.eclipse.jetty:jetty-servlet:' + jettyVersion,
-        'org.eclipse.jetty:jetty-webapp:' + jettyVersion,
-        'org.eclipse.jetty:jetty-servlets:' + jettyVersion,
-        'org.eclipse.jetty:jetty-client:' + jettyVersion,
-        'org.eclipse.jetty:jetty-io:' + jettyVersion,
-        'org.eclipse.jetty:jetty-util:' + jettyVersion,
-        'org.eclipse.jetty:jetty-http:' + jettyVersion,
-        'org.eclipse.jetty:jetty-security:' + jettyVersion,
-        'org.eclipse.jetty:jetty-continuation:' + jettyVersion,
-        'org.eclipse.jetty.websocket:websocket-api:' + jettyVersion,
-        'org.eclipse.jetty.websocket:websocket-common:' + jettyVersion,
-        'org.eclipse.jetty.websocket:websocket-server:' + jettyVersion,
-        'org.eclipse.jetty.websocket:websocket-servlet:' + jettyVersion,
-        'org.eclipse.jetty.websocket:javax-websocket-server-impl:' + jettyVersion,
+            'org.eclipse.jetty:jetty-server:' + jettyVersion,
+            'org.eclipse.jetty:jetty-servlet:' + jettyVersion,
+            'org.eclipse.jetty:jetty-webapp:' + jettyVersion,
+            'org.eclipse.jetty:jetty-servlets:' + jettyVersion,
+            'org.eclipse.jetty:jetty-client:' + jettyVersion,
+            'org.eclipse.jetty:jetty-io:' + jettyVersion,
+            'org.eclipse.jetty:jetty-util:' + jettyVersion,
+            'org.eclipse.jetty:jetty-http:' + jettyVersion,
+            'org.eclipse.jetty:jetty-security:' + jettyVersion,
+            'org.eclipse.jetty:jetty-continuation:' + jettyVersion,
+            'org.eclipse.jetty.websocket:websocket-api:' + jettyVersion,
+            'org.eclipse.jetty.websocket:websocket-common:' + jettyVersion,
+            'org.eclipse.jetty.websocket:websocket-server:' + jettyVersion,
+            'org.eclipse.jetty.websocket:websocket-servlet:' + jettyVersion,
+            'org.eclipse.jetty.websocket:javax-websocket-server-impl:' + jettyVersion,
 
-        'org.springframework:spring-core:' + springVersion,
-        'org.springframework:spring-web:' + springVersion,
-        'org.springframework:spring-beans:' + springVersion,
-        'org.springframework:spring-context:' + springVersion,
+            'org.springframework:spring-core:' + springVersion,
+            'org.springframework:spring-web:' + springVersion,
+            'org.springframework:spring-beans:' + springVersion,
+            'org.springframework:spring-context:' + springVersion,
 
-        'org.slf4j:slf4j-api:' + slf4jVersion,
+            'org.slf4j:slf4j-api:' + slf4jVersion,
 
-        'javax.servlet:javax.servlet-api:' + javaxServletVersion,
-        'javax.json:javax.json-api:' + jsonVersion,
-        'org.glassfish:javax.json:' + glassfishVersion,
+            'javax.servlet:javax.servlet-api:' + javaxServletVersion,
+            'javax.json:javax.json-api:' + jsonVersion,
+            'org.glassfish:javax.json:' + glassfishVersion,
 
-        'org.seleniumhq.selenium:selenium-api:' + seleniumVersion,
-        'org.glassfish.tyrus:tyrus-client:' + tyrusVersion,
-        'org.glassfish.tyrus.ext:tyrus-extension-deflate:' + tyrusVersion
+            'org.seleniumhq.selenium:selenium-api:' + seleniumVersion,
+            'org.glassfish.tyrus:tyrus-client:' + tyrusVersion,
+            'org.glassfish.tyrus.ext:tyrus-extension-deflate:' + tyrusVersion
     )
 
     testCompile(
-        'junit:junit:' + junitVersion,
+            'junit:junit:' + junitVersion,
 
-        'org.mockito:mockito-core:' + mockitoVersion,
+            'org.mockito:mockito-core:' + mockitoVersion,
 
-        'org.seleniumhq.selenium:selenium-java:' + seleniumVersion,
-        'javax.websocket:javax.websocket-client-api:1.1'
+            'org.seleniumhq.selenium:selenium-java:' + seleniumVersion,
+            'javax.websocket:javax.websocket-client-api:1.1',
+            'org.jsoup:jsoup:1.11.3'
     )
 
     testRuntime(
-        'org.slf4j:jcl-over-slf4j:' + slf4jVersion,
-        'org.slf4j:log4j-over-slf4j:' + slf4jVersion,
-        'org.slf4j:jul-to-slf4j:' + slf4jVersion,
-        'org.apache.logging.log4j:log4j-slf4j-impl:' + log4jVersion,
+            'org.slf4j:jcl-over-slf4j:' + slf4jVersion,
+            'org.slf4j:log4j-over-slf4j:' + slf4jVersion,
+            'org.slf4j:jul-to-slf4j:' + slf4jVersion,
+            'org.apache.logging.log4j:log4j-slf4j-impl:' + log4jVersion,
 
-        'org.glassfish.tyrus:tyrus-container-grizzly-client:' + tyrusVersion
+            'org.glassfish.tyrus:tyrus-container-grizzly-client:' + tyrusVersion
     )
 }
 

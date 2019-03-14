@@ -23,18 +23,18 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
-import javax.json.JsonObject;
-
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.ui.basic.event.PPasteEvent;
 import com.ponysdk.core.ui.basic.event.PPasteEvent.PPasteHandler;
 import com.ponysdk.core.writer.ModelWriter;
+
+import javax.json.JsonObject;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public abstract class PValueBoxBase extends PFocusWidget {
 
@@ -50,13 +50,13 @@ public abstract class PValueBoxBase extends PFocusWidget {
 
     protected PValueBoxBase(final String text) {
         super();
-        this.text = text != null ? text : EMPTY;
+        if (text != null) this.text = text;
     }
 
     @Override
     protected void enrichForUpdate(final ModelWriter writer) {
         super.enrichForUpdate(writer);
-        if (!EMPTY.equals(text)) writer.write(ServerToClientModel.TEXT, this.text);
+        if (!EMPTY.equals(text)) writer.write(ServerToClientModel.TEXT, text);
     }
 
     /**
@@ -138,4 +138,8 @@ public abstract class PValueBoxBase extends PFocusWidget {
         return super.toString() + ", text=" + text;
     }
 
+    @Override
+    protected String dumpDOM() {
+        return "<input class=\"" + getStyleNames().collect(Collectors.joining(" ")) + "\">" + text + "</input>";
+    }
 }

@@ -61,6 +61,7 @@ import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.eventbus.BroadcastEventHandler;
 import com.ponysdk.core.ui.eventbus.Event;
 import com.ponysdk.core.ui.eventbus.EventHandler;
+import com.ponysdk.core.ui.eventbus.EventSource;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 import com.ponysdk.core.ui.eventbus.StreamHandler;
 import com.ponysdk.core.ui.statistic.TerminalDataReceiver;
@@ -151,7 +152,11 @@ public class UIContext {
      * @return The current UIContext
      */
     public static UIContext get() {
-        return currentContext.get();
+        UIContext uiContext = currentContext.get();
+        if (uiContext == null) {
+            throw new RuntimeException("PScheduler should be used when an application thread needs to update the GUI.");
+        }
+        return uiContext;
     }
 
     /**
@@ -173,7 +178,7 @@ public class UIContext {
     /**
      * Adds {@link EventHandler} to the {@link com.ponysdk.core.ui.eventbus.EventBus}
      *
-     * @param type the event type
+     * @param type    the event type
      * @param handler the event handler
      * @return the HandlerRegistration in order to remove the EventHandler
      * @see #fireEvent(Event)
@@ -194,17 +199,17 @@ public class UIContext {
     }
 
     public void executeFireEvent(final Event<? extends EventHandler> event) {
-        execute(() -> fireEvent0(event));
+    	execute(() -> fireEvent0(event));
     }
 
     private void fireEvent0(final Event<? extends EventHandler> event) {
-        rootEventBus.fireEvent(event);
+    	rootEventBus.fireEvent(event);
     }
 
     /**
      * Removes {@link EventHandler} from the {@link com.ponysdk.core.ui.eventbus.EventBus}
      *
-     * @param type the event type
+     * @param type    the event type
      * @param handler the event handler
      * @see #addHandler(com.ponysdk.core.ui.eventbus.Event.Type, EventHandler)
      */
@@ -213,52 +218,26 @@ public class UIContext {
     }
 
     /**
-     * Adds {@link EventHandler} to the {@link com.ponysdk.core.ui.eventbus.EventBus} with a specific source
-     * Use {@link #fireEventFromSource(Event, Object)} to stimulate this event handler
-     *
-     * @param type the event type
-     * @param source the source
-     * @param handler the event handler
-     * @return the {@link HandlerRegistration} in order to remove the {@link EventHandler}
-     * @see #fireEventFromSource(Event, Object)
-     */
-    public static HandlerRegistration addHandlerToSource(final Event.Type type, final Object source, final EventHandler handler) {
-        return get().rootEventBus.addHandlerToSource(type, source, handler);
-    }
-
-    /**
      * Fires an {@link Event} on the {@link com.ponysdk.core.ui.eventbus.EventBus} with a specific source
      * Only {@link EventHandler}s added before fires event will be stimulated
      *
-     * @param event the fired event
+     * @param event  the fired event
      * @param source the source
-     * @see #addHandlerToSource(com.ponysdk.core.ui.eventbus.Event.Type, Object, EventHandler)
      */
-    public static void fireEventFromSource(final Event<? extends EventHandler> event, final Object source) {
+    public static void fireEventFromSource(final Event<? extends EventHandler> event, final EventSource source) {
         get().rootEventBus.fireEventFromSource(event, source);
-    }
-
-    /**
-     * Removes handler from the {@link com.ponysdk.core.ui.eventbus.EventBus} with a specific source
-     *
-     * @param type the event type
-     * @param source the source
-     * @param handler the event handler
-     * @see #addHandlerToSource(com.ponysdk.core.ui.eventbus.Event.Type, Object, EventHandler)
-     */
-    public static void removeHandlerFromSource(final Event.Type type, final Object source, final EventHandler handler) {
-        get().rootEventBus.removeHandlerFromSource(type, source, handler);
     }
 
     /**
      * Adds a {@link BroadcastEventHandler} to the {@link com.ponysdk.core.ui.eventbus.EventBus} that receive all the
      * events
-     * All call to {@link #fireEvent(Event)} or {@link #fireEventFromSource(Event, Object)} will stimulate this event
+     * All call to {@link #fireEvent(Event)} or {@link #fireEventFromSource(Event, EventSource)} will stimulate this
+     * event
      * handler
      *
      * @param handler the broadcast event handler
      * @see #fireEvent(Event)
-     * @see #fireEventFromSource(Event, Object)
+     * @see #fireEventFromSource(Event, EventSource)
      */
     public static void addHandler(final BroadcastEventHandler handler) {
         get().rootEventBus.addHandler(handler);
@@ -423,7 +402,7 @@ public class UIContext {
 
                     if (jsonObject.containsKey(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())) {
                         final int parentObjectID = jsonObject.getJsonNumber(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())
-                            .intValue();
+                                .intValue();
                         final PObject gcObject = getObject(parentObjectID);
                         if (log.isWarnEnabled()) log.warn(String.valueOf(gcObject));
                     }
@@ -525,7 +504,7 @@ public class UIContext {
      * Registers a {@link StreamHandler} that will be called on a specific {@link com.ponysdk.core.terminal.ui.PTObject}
      *
      * @param streamListener the stream handler
-     * @param pObject the {@link PObject}
+     * @param pObject        the {@link PObject}
      */
     public void stackEmbeddedStreamRequest(final StreamHandler streamListener, final PObject pObject) {
         final int streamRequestID = nextStreamRequestID();
@@ -576,7 +555,7 @@ public class UIContext {
      * <p>
      * If the value passed in is null, this has the same effect as calling {@link #removeAttribute(String)}.
      *
-     * @param name the name to which the object is bound; cannot be null
+     * @param name  the name to which the object is bound; cannot be null
      * @param value the object to be bound
      */
     public void setAttribute(final String name, final Object value) {
@@ -822,17 +801,6 @@ public class UIContext {
     @Override
     public String toString() {
         return "UIContext [ID=" + ID + ", alive=" + alive + "]";
-    }
-
-    /**
-     * Gets an average latency from the last 10 measurements
-     *
-     * @return the lantency
-     * @deprecated Use {@link #getRoundtripLatency()} directly
-     */
-    @Deprecated(since = "v2.8.11", forRemoval = true)
-    public double getLatency() {
-        return getRoundtripLatency();
     }
 
     /**

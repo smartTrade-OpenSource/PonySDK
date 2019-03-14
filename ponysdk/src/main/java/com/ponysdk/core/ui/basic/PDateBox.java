@@ -101,7 +101,8 @@ public class PDateBox extends PWidget implements Focusable, HasPValue<Date>, PVa
     }
 
     protected PDateBox(final PDatePicker picker, final SimpleDateFormat dateFormat, final boolean keepDayTimeNeeded) {
-        if (UIContext.get().getConfiguration().isTabindexOnlyFormField()) tabindex = TabindexMode.FOCUSABLE.getTabIndex();
+        if (UIContext.get().getConfiguration().isTabindexOnlyFormField())
+            tabindex = TabindexMode.FOCUSABLE.getTabIndex();
         this.datePicker = picker;
         this.dateFormat = dateFormat;
         this.keepDayTimeNeeded = keepDayTimeNeeded;
@@ -205,8 +206,8 @@ public class PDateBox extends PWidget implements Focusable, HasPValue<Date>, PVa
     }
 
     /**
-     * @deprecated Use {@link #focus()} or {@link #blur()}
      * @since v2.7.16
+     * @deprecated Use {@link #focus()} or {@link #blur()}
      */
     @Deprecated
     @Override
@@ -245,4 +246,8 @@ public class PDateBox extends PWidget implements Focusable, HasPValue<Date>, PVa
         return addDomHandler(handler, PDoubleClickEvent.TYPE);
     }
 
+    @Override
+    protected String dumpDOM() {
+        return "<input format=\"" + dateFormat.toPattern() + "\">" + date + "</input>";
+    }
 }

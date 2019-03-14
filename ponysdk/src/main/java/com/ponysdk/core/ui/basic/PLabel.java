@@ -24,6 +24,7 @@
 package com.ponysdk.core.ui.basic;
 
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
@@ -145,4 +146,8 @@ public class PLabel extends PWidget {
         return super.toString() + ", text=" + text;
     }
 
+    @Override
+    protected String dumpDOM() {
+        return "<label class=\"" + getStyleNames().collect(Collectors.joining(" ")) + "\">" + text + "</label>";
+    }
 }

@@ -171,4 +171,8 @@ public class PImage extends PWidget {
         }
     }
 
+    @Override
+    protected String dumpDOM() {
+        return "<img url=\"" + url + "\">" + "</img>";
+    }
 }

@@ -136,4 +136,8 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
         };
     }
 
+    @Override
+    protected String dumpDOM() {
+        return "<div>" + widget.dumpDOM() + "</div>";
+    }
 }

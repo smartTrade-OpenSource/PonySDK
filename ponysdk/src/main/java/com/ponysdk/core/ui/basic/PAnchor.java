@@ -24,6 +24,7 @@
 package com.ponysdk.core.ui.basic;
 
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
@@ -53,8 +54,7 @@ public class PAnchor extends PFocusWidget {
     /**
      * Instantiates a new PAnchor with its text specified.
      *
-     * @param text
-     *            the anchor's text
+     * @param text the anchor's text
      */
     protected PAnchor(final String text) {
         this(text, null);
@@ -63,10 +63,8 @@ public class PAnchor extends PFocusWidget {
     /**
      * Instantiates a new PAnchor with its text and href (target URL) specified.
      *
-     * @param text
-     *            the anchor's text
-     * @param href
-     *            the url to which it will link
+     * @param text the anchor's text
+     * @param href the url to which it will link
      */
     protected PAnchor(final String text, final String href) {
         this.text = text;
@@ -103,8 +101,7 @@ public class PAnchor extends PFocusWidget {
     /**
      * Sets the anchor's href (the url to which it links).
      *
-     * @param href
-     *            the anchor's href
+     * @param href the anchor's href
      */
     public void setHref(final String href) {
         if (Objects.equals(this.href, href)) return;
@@ -132,6 +129,11 @@ public class PAnchor extends PFocusWidget {
         this.html = html;
         this.text = null;
         if (initialized) saveUpdate(ServerToClientModel.HTML, html);
+    }
+
+    @Override
+    protected String dumpDOM() {
+        return "<a class=\"" + getStyleNames().collect(Collectors.joining(" ")) + "\">" + (text != null ? text : html) + "</a>";
     }
 
 }
