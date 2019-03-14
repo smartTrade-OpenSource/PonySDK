@@ -20,11 +20,11 @@ So, with PonySDK, you will be able to write standard Java code for creating your
 
 [Installation](#installation)
 
+[Pony Driver](#pony-driver)
+
 [Demo](#demo)
 
 [Frequently asked questions](#frequently-asked-questions)
-
-[Pony Driver](#pony-driver)
 
 ----
 
@@ -43,30 +43,6 @@ Git version : https://github.com/Nciaravola/PonySDK.git
 Latest version : https://github.com/Nciaravola/PonySDK/archive/master.zip
 Released version : https://github.com/Nciaravola/PonySDK/releases
 ```
-
-## Demo
-
-For testing PonySDK, there is a sample that launched an embedded Jetty Server and served a demo page.
-
-Follow the steps :
-
-```sh
-$ git clone https://github.com/Nciaravola/PonySDK.git
-$ cd PonySDK
-$ gradlew runSampleSpring
-```
-
-Wait a little and you will have on the console, logs like this :
-
-```
-INFO  [ContextHandler] Started o.e.j.s.ServletContextHandler@6440112d{/sample,null,AVAILABLE}
-INFO  [AbstractConnector] Started ServerConnector@4239156f{HTTP/1.1,[http/1.1]}{0.0.0.0:8081}
-INFO  [AbstractConnector] Started ServerConnector@5a7fe64f{SSL,[ssl, http/1.1]}{0.0.0.0:8082}
-```
-
-Now you can go on http://localhost:8081/sample/ or https://localhost:8081/sample/ (SSL is activated by default)
-
-## [Frequently asked questions](https://github.com/Nciaravola/PonySDK/wiki)
 
 ## Pony Driver
 
@@ -103,11 +79,16 @@ WebDriverWait wait = new WebDriverWait(driver, 10L); //10 == timeOut in seconds
 ```
 
 To select one or multiple widgets from the tree of available elements, the following find criteria can be used :
-- id : matches the id attribute.
-- name : matches the name attribute.
-- class name : all given class names (space separated) must belong to the class names of the widget.
-- tag name : matches the widget type as defined by Pony in WidgetType enum (doesn't necessarily match the html tag name).
-- css selector : matches the widget type and/or the class names. Class names must be preceeded with a dot character. The space character can be used to select descendant widgets. The > character can be used to select direct children widgets.
+
+**id** : matches the id attribute.
+
+**name** : matches the name attribute.
+
+**class name** : all given class names (space separated) must belong to the class names of the widget.
+
+**tag name** : matches the widget type as defined by Pony in WidgetType enum (doesn't necessarily match the html tag name).
+
+**css selector** : matches the widget type and/or the class names. Class names must be preceeded with a dot character. The space character can be used to select descendant widgets. The > character can be used to select direct children widgets.
 ```java
 wait.until(webDriver -> webDriver.findElement(By.className("arrow left")));
 wait.until(webDriver -> webDriver.findElement(By.cssSelector(".main .auth>TEXTBOX.login"))).sendKeys("admin");
@@ -120,3 +101,27 @@ try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File("pony_tr
 	driver.printAsXml(writer);
 }
 ```
+
+## Demo
+
+For testing PonySDK, there is a sample that launched an embedded Jetty Server and served a demo page.
+
+Follow the steps :
+
+```sh
+$ git clone https://github.com/Nciaravola/PonySDK.git
+$ cd PonySDK
+$ gradlew runSampleSpring
+```
+
+Wait a little and you will have on the console, logs like this :
+
+```
+INFO  [ContextHandler] Started o.e.j.s.ServletContextHandler@6440112d{/sample,null,AVAILABLE}
+INFO  [AbstractConnector] Started ServerConnector@4239156f{HTTP/1.1,[http/1.1]}{0.0.0.0:8081}
+INFO  [AbstractConnector] Started ServerConnector@5a7fe64f{SSL,[ssl, http/1.1]}{0.0.0.0:8082}
+```
+
+Now you can go on http://localhost:8081/sample/ or https://localhost:8081/sample/ (SSL is activated by default)
+
+## [Frequently asked questions](https://github.com/Nciaravola/PonySDK/wiki)
