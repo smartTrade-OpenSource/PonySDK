@@ -33,6 +33,7 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import com.ponysdk.core.server.context.UIContextImpl;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WriteCallback;
 import org.slf4j.Logger;
@@ -42,7 +43,6 @@ import com.ponysdk.core.model.ArrayValueModel;
 import com.ponysdk.core.model.BooleanModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.ValueTypeModel;
-import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.AutoFlushedBuffer;
 
 public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback {
@@ -71,7 +71,7 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
             super.flush();
         } catch (final IOException e) {
             log.error("Can't write on the websocket, so we destroy the application", e);
-            UIContext.get().onDestroy();
+            UIContextImpl.get().onDestroy();
         }
     }
 
@@ -149,7 +149,7 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
             }
         } catch (final IOException e) {
             log.error("Can't write on the websocket, so we destroy the application", e);
-            UIContext.get().onDestroy();
+            UIContextImpl.get().onDestroy();
         }
 
         if (listener != null) listener.onOutgoingPonyFrame(model, value);

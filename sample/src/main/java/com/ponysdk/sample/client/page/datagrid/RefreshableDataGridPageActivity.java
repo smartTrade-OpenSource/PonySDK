@@ -26,7 +26,7 @@ package com.ponysdk.sample.client.page.datagrid;
 import java.util.Arrays;
 
 import com.ponysdk.core.server.application.DataListener;
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PFlexTable;
 import com.ponysdk.core.ui.basic.PFlowPanel;
@@ -68,7 +68,7 @@ public class RefreshableDataGridPageActivity extends SamplePageActivity implemen
 
         examplePanel.setWidget(scroll);
 
-        UIContext.get().addDataListener(this);
+        UIContextImpl.get().addDataListener(this);
     }
 
     @Override

@@ -23,9 +23,7 @@
 
 package com.ponysdk.core.ui.basic;
 
-import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.ui.basic.event.PCloseHandler;
+import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 import org.junit.Test;
 
@@ -34,31 +32,31 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 
-public class PHistoryTest extends PSuite {
+public class HistoryTest extends PSuite {
 
     @Test
     public void test() {
-        assertNull(UIContext.get().getHistory().getToken());
+        assertNull(UIContextImpl.get().getHistory().getToken());
 
         AtomicInteger handlerFiredCount = new AtomicInteger(0);
         PValueChangeHandler<String> handler = e -> handlerFiredCount.incrementAndGet();
-        UIContext.get().getHistory().addValueChangeHandler(handler);
-        UIContext.get().getHistory().newItem("token1", false);
+        UIContextImpl.get().getHistory().addValueChangeHandler(handler);
+        UIContextImpl.get().getHistory().newItem("token1", false);
 
         assertEquals(0, handlerFiredCount.get());
-        assertEquals("token1", UIContext.get().getHistory().getToken());
+        assertEquals("token1", UIContextImpl.get().getHistory().getToken());
 
-        UIContext.get().getHistory().newItem("token2", true);
+        UIContextImpl.get().getHistory().newItem("token2", true);
         assertEquals(1, handlerFiredCount.get());
-        assertEquals("token2", UIContext.get().getHistory().getToken());
+        assertEquals("token2", UIContextImpl.get().getHistory().getToken());
 
-        UIContext.get().getHistory().newItem("token2");
+        UIContextImpl.get().getHistory().newItem("token2");
         assertEquals(1, handlerFiredCount.get());
-        assertEquals("token2", UIContext.get().getHistory().getToken());
+        assertEquals("token2", UIContextImpl.get().getHistory().getToken());
 
-        UIContext.get().getHistory().newItem("token3");
+        UIContextImpl.get().getHistory().newItem("token3");
         assertEquals(2, handlerFiredCount.get());
-        assertEquals("token3", UIContext.get().getHistory().getToken());
+        assertEquals("token3", UIContextImpl.get().getHistory().getToken());
     }
 
 }

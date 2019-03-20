@@ -21,14 +21,14 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.basic;
+package com.ponysdk.core.server.context;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 import com.ponysdk.core.writer.ModelWriter;
@@ -53,11 +53,15 @@ import com.ponysdk.core.writer.ModelWriter;
  * <li>;,/?:@&amp;=+$-_.!~*()</li>
  * </ul>
  */
-public class PHistory {
+public class History {
 
     private final List<PValueChangeHandler<String>> handlers = new CopyOnWriteArrayList<>();
 
     private String token;
+
+    History(String token) {
+        this.token = token;
+    }
 
     public void addValueChangeHandler(final PValueChangeHandler<String> handler) {
         handlers.add(handler);
@@ -71,11 +75,10 @@ public class PHistory {
         if (Objects.equals(this.token, token)) return;
         this.token = token;
 
-        final ModelWriter writer = UIContext.get().getWriter();
+        final ModelWriter writer = UIContextImpl.get().getWriter();
         writer.beginObject(PWindow.getMain());
         writer.write(ServerToClientModel.TYPE_HISTORY, token);
-        //TODO nciaravola pas besoin de boolean if false
-        writer.write(ServerToClientModel.HISTORY_FIRE_EVENTS, fireEvents);
+        if (fireEvents) writer.write(ServerToClientModel.HISTORY_FIRE_EVENTS);
         writer.endObject();
     }
 

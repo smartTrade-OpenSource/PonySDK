@@ -37,12 +37,12 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import com.ponysdk.core.server.context.UIContextImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.Application;
-import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.servlet.SessionManager;
 import com.ponysdk.core.util.Pair;
 
@@ -91,7 +91,7 @@ class WebSocketStatsRecorder {
     }
 
     private AtomicReferenceArray<Map<Object, VolatileRecord>> getLocalStats() {
-        final UIContext context = UIContext.get();
+        final UIContextImpl context = UIContextImpl.get();
         AtomicReferenceArray<Map<Object, VolatileRecord>> stats = context.getAttribute(KEY);
         if (stats == null) {
             stats = new AtomicReferenceArray<>(MODELS.length + 1);
@@ -123,9 +123,9 @@ class WebSocketStatsRecorder {
         return model == null ? MODELS.length : model.ordinal();
     }
 
-    private static void forEachUIContext(final Consumer<UIContext> consumer) {
+    private static void forEachUIContext(final Consumer<UIContextImpl> consumer) {
         for (final Application app : SessionManager.get().getApplications()) {
-            for (final UIContext context : app.getUIContexts()) {
+            for (final UIContextImpl context : app.getUIContexts()) {
                 context.execute(() -> {
                     consumer.accept(context);
                 });

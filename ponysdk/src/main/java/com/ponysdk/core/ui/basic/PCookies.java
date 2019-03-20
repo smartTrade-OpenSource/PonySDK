@@ -33,7 +33,7 @@ import javax.json.JsonObject;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.writer.ModelWriter;
 
 public class PCookies {
@@ -60,7 +60,7 @@ public class PCookies {
     }
 
     public String removeCookie(final String name, final String path) {
-        final ModelWriter writer = UIContext.get().getWriter();
+        final ModelWriter writer = UIContextImpl.get().getWriter();
         writer.beginObject(PWindow.getMain());
         writer.write(ServerToClientModel.TYPE_UPDATE, ID);
         writer.write(ServerToClientModel.REMOVE_COOKIE, name);
@@ -90,7 +90,7 @@ public class PCookies {
                           final boolean secure) {
         cachedCookies.put(name, value);
 
-        final ModelWriter writer = UIContext.get().getWriter();
+        final ModelWriter writer = UIContextImpl.get().getWriter();
         writer.beginObject(PWindow.getMain());
         writer.write(ServerToClientModel.TYPE_UPDATE, ID);
         writer.write(ServerToClientModel.ADD_COOKIE, name);

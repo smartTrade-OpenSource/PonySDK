@@ -23,7 +23,7 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PHorizontalPanel;
@@ -45,12 +45,12 @@ public class CookiesPageActivity extends SamplePageActivity {
         final PTextBox value = Element.newPTextBox();
         name.setPlaceholder("Cookie value");
         final PButton add = Element.newPButton("Add");
-        add.addClickHandler(event -> UIContext.get().getCookies().setCookie(name.getValue(), value.getValue()));
+        add.addClickHandler(event -> UIContextImpl.get().getCookies().setCookie(name.getValue(), value.getValue()));
 
         final PTextBox name2 = Element.newPTextBox();
         name2.setPlaceholder("Cookie name");
         final PButton remove = Element.newPButton("Remove");
-        remove.addClickHandler(event -> UIContext.get().getCookies().removeCookie(name2.getValue()));
+        remove.addClickHandler(event -> UIContextImpl.get().getCookies().removeCookie(name2.getValue()));
 
         final PHorizontalPanel addPanel = Element.newPHorizontalPanel();
         addPanel.add(name);

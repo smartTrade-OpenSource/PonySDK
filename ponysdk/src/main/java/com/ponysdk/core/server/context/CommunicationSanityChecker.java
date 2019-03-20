@@ -23,128 +23,74 @@
 
 package com.ponysdk.core.server.context;
 
-import java.util.concurrent.RunnableScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-
+import com.ponysdk.core.server.websocket.WebSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.server.application.ApplicationConfiguration;
-import com.ponysdk.core.server.application.UIContext;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class CommunicationSanityChecker {
 
     private static final Logger log = LoggerFactory.getLogger(CommunicationSanityChecker.class);
+    private static final int DELAY = 1;
 
-    private static final int CHECK_PERIOD = 1000;
-    private static final int MAX_THREAD_CHECKER = Integer.parseInt(
-            System.getProperty("communication.sanity.checker.thread.count", String.valueOf(Runtime.getRuntime().availableProcessors())));
-    private static final ScheduledThreadPoolExecutor sanityCheckerTimer = new ScheduledThreadPoolExecutor(MAX_THREAD_CHECKER,
-            new ThreadFactory() {
+    private final ScheduledExecutorService checker = Executors.newSingleThreadScheduledExecutor();
+    private Duration heartBeatPeriod;
 
-                private int i = 0;
+    private Map<String, WebSocket> sockets = new ConcurrentHashMap<>();
 
-                @Override
-                public Thread newThread(final Runnable r) {
-                    final Thread t = new Thread(r);
-                    t.setName(CommunicationSanityChecker.class.getName() + "-" + i++);
-                    t.setDaemon(true);
-                    return t;
-                }
-            });
-
-    protected final AtomicBoolean started = new AtomicBoolean(false);
-    private final UIContext uiContext;
-    private long heartBeatPeriod;
-    private RunnableScheduledFuture<?> sanityChecker;
-    private CommunicationState currentState;
-    private long suspectTime = -1;
-
-    private enum CommunicationState {
-        OK,
-        SUSPECT,
-        KO
+    public CommunicationSanityChecker(Duration duration) {
+        this.heartBeatPeriod = duration;
     }
 
-    public CommunicationSanityChecker(final UIContext uiContext) {
-        this.uiContext = uiContext;
-        this.uiContext.addContextDestroyListener(context -> stop());
-        final ApplicationConfiguration configuration = uiContext.getApplication().getConfiguration();
-        setHeartBeatPeriod(configuration.getHeartBeatPeriod(), configuration.getHeartBeatPeriodTimeUnit());
+    public void registerSession(WebSocket socket) {
+        sockets.put(socket.getSessionID(), socket);
     }
 
     public void start() {
-        if (!started.get() && heartBeatPeriod > 0) {
-            currentState = CommunicationState.OK;
-            sanityChecker = (RunnableScheduledFuture<?>) sanityCheckerTimer.scheduleWithFixedDelay(() -> {
-                try {
-                    checkCommunicationState();
-                } catch (final Throwable e) {
-                    log.error("Error while checking communication state on UIContext #{}", uiContext.getID(), e);
-                }
-            }, 10, CHECK_PERIOD, TimeUnit.MILLISECONDS);
-            started.set(true);
-            log.info("Start communication sanity checker on UIContext #{} with period: {} ms", uiContext.getID(), heartBeatPeriod);
-        }
+        checker.scheduleWithFixedDelay(this::check, 0, DELAY, TimeUnit.SECONDS);
+        log.info("Communication sanity checker is now started, period : {} seconds", DELAY);
+    }
+
+    private void check() {
+        sockets.forEach(this::checkCommunicationState);
     }
 
     public void stop() {
-        if (started.get()) {
-            log.info("Stop commu    nication sanity checker on UIContext #{}", uiContext.getID());
-            sanityChecker.cancel(false);
-            sanityCheckerTimer.remove(sanityChecker);
-            sanityChecker = null;
-            started.set(false);
+        checker.shutdownNow();
+        log.info("Communication sanity checker is now terminated");
+    }
+
+    private void checkCommunicationState(String ID, WebSocket socket) {
+        try {
+            if (socket.isSessionOpen()) {
+                final Duration duration = Duration.between(socket.getLastReceivedTime(), Instant.now()).abs();
+                if (heartBeatPeriod.compareTo(duration) < 0) {
+                    log.info("Session {} will be closed, no message received for {} seconds", socket, heartBeatPeriod.getSeconds());
+                    closeSession(socket);
+                }
+            }
+        } catch (final Exception e) {
+            log.error("Error while checking communication state on session {}", socket, e);
+            closeSession(socket);
         }
     }
 
-    public void setHeartBeatPeriod(final long heartbeat, final TimeUnit timeUnit) {
-        heartBeatPeriod = TimeUnit.MILLISECONDS.convert(heartbeat, timeUnit);
-    }
-
-    private boolean isCommunicationSuspectedToBeNonFunctional(final long now) {
-        // No message have been received or sent during the HeartbeatPeriod
-        return now - uiContext.getLastReceivedTime() >= heartBeatPeriod;
-    }
-
-    private void checkCommunicationState() {
-        final long now = System.currentTimeMillis();
-        switch (currentState) {
-            case OK:
-                if (isCommunicationSuspectedToBeNonFunctional(now)) {
-                    suspectTime = now;
-                    currentState = CommunicationState.SUSPECT;
-                    if (log.isDebugEnabled()) log.debug(
-                            "No message have been received on UIContext #{}, communication suspected to be non functional, sending heartbeat...",
-                            uiContext.getID());
-                }
-                break;
-            case SUSPECT:
-                if (uiContext.getLastReceivedTime() < suspectTime) {
-                    if (now - suspectTime >= heartBeatPeriod) {
-                        // No message have been received since we suspected the
-                        // communication to be non functional
-                        log.info(
-                                "No message have been received on UIContext #{} since we suspected the communication to be non functional, context will be destroyed",
-                                uiContext.getID());
-                        currentState = CommunicationState.KO;
-                        stop();
-                        uiContext.destroy();
-                    }
-                } else {
-                    currentState = CommunicationState.OK;
-                    suspectTime = -1;
-                }
-                break;
-            case KO:
-            default:
-                break;
+    private void closeSession(WebSocket socket) {
+        if (socket == null) return;
+        try {
+            socket.close();
+        } catch (Exception t) {
+            log.error("Cannot close the session {}", socket, t);
+        } finally {
+            sockets.remove(socket.getSessionID());
         }
-
-        uiContext.sendRoundTrip();
     }
 
 }

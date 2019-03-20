@@ -36,7 +36,7 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.ui.basic.event.PTerminalEvent;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.util.SetUtils;
@@ -48,7 +48,7 @@ import com.ponysdk.core.writer.ModelWriterCallback;
  */
 public abstract class PObject {
 
-    protected final int ID = UIContext.get().nextID();
+    protected final int ID = UIContextImpl.get().nextID();
     protected PWindow window;
     protected PFrame frame;
     protected Set<InitializeListener> initializeListeners;
@@ -103,7 +103,7 @@ public abstract class PObject {
     }
 
     protected void applyInit() {
-        final ModelWriter writer = UIContext.get().getWriter();
+        final ModelWriter writer = UIContextImpl.get().getWriter();
         writer.beginObject(window);
         if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
         writer.write(ServerToClientModel.TYPE_CREATE, ID);
@@ -112,7 +112,7 @@ public abstract class PObject {
         enrichForUpdate(writer);
         writer.endObject();
 
-        UIContext.get().registerObject(this);
+        UIContextImpl.get().registerObject(this);
 
         init0();
 
@@ -236,7 +236,7 @@ public abstract class PObject {
     void writeUpdate(final ModelWriterCallback callback) {
         if (destroy) return;
 
-        final ModelWriter writer = UIContext.get().getWriter();
+        final ModelWriter writer = UIContextImpl.get().getWriter();
         writer.beginObject(window);
         if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
         writer.write(ServerToClientModel.TYPE_UPDATE, ID);
@@ -268,7 +268,7 @@ public abstract class PObject {
     private void writeAdd(final ModelWriterCallback callback) {
         if (destroy) return;
 
-        final ModelWriter writer = UIContext.get().getWriter();
+        final ModelWriter writer = UIContextImpl.get().getWriter();
         writer.beginObject(window);
         if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
 
@@ -287,7 +287,7 @@ public abstract class PObject {
     void writeAddHandler(final ModelWriterCallback callback) {
         if (destroy) return;
 
-        final ModelWriter writer = UIContext.get().getWriter();
+        final ModelWriter writer = UIContextImpl.get().getWriter();
         writer.beginObject(window);
         if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
         writer.write(ServerToClientModel.TYPE_ADD_HANDLER, ID);
@@ -310,7 +310,7 @@ public abstract class PObject {
     private void writeRemoveHandler(final ModelWriterCallback callback) {
         if (destroy) return;
 
-        final ModelWriter writer = UIContext.get().getWriter();
+        final ModelWriter writer = UIContextImpl.get().getWriter();
         writer.beginObject(window);
         if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
 
@@ -332,7 +332,7 @@ public abstract class PObject {
     private void writeRemove(final ModelWriterCallback callback) {
         if (destroy) return;
 
-        final ModelWriter writer = UIContext.get().getWriter();
+        final ModelWriter writer = UIContextImpl.get().getWriter();
         writer.beginObject(window);
         if (frame != null) writer.write(ServerToClientModel.FRAME_ID, frame.getID());
 

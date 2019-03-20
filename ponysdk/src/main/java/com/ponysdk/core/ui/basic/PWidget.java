@@ -38,6 +38,7 @@ import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
 
+import com.ponysdk.core.server.context.UIContextImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +47,6 @@ import com.ponysdk.core.model.DomHandlerConverter;
 import com.ponysdk.core.model.DomHandlerType;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.event.HasPWidgets;
 import com.ponysdk.core.ui.basic.event.PBlurEvent;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
@@ -174,7 +174,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public void ensureDebugId(final String debugID) {
-        if (UIContext.get().getApplication().getConfiguration().isDebugMode()) {
+        if (UIContextImpl.get().getApplication().getConfiguration().isDebugMode()) {
             if (Objects.equals(this.debugID, debugID)) return;
             this.debugID = debugID;
             if (initialized) saveUpdate(writer -> writer.write(ServerToClientModel.ENSURE_DEBUG_ID, debugID));
@@ -367,9 +367,9 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     public void removeDomHandler(final EventHandler handler, final PDomEvent.Type type) {
         if (destroy) return;
-        final Collection<EventHandler> handlers = UIContext.getRootEventBus().getHandlers(type, this);
+        final Collection<EventHandler> handlers = UIContextImpl.getRootEventBus().getHandlers(type, this);
         if (handlers.contains(handler)) {
-            UIContext.removeHandlerFromSource(type, this, handler);
+            UIContextImpl.removeHandlerFromSource(type, this, handler);
             // TODO Handle remove DOM handler
             // if (eventBus.getHandlers(type, this).isEmpty()) {
             //     executeRemoveDomHandler(type);
@@ -409,7 +409,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     private HandlerRegistration addDomHandler(final EventHandler handler, final PDomEvent.Type type,
                                               final ServerBinaryModel binaryModel) {
         if (destroy) return null;
-        final HandlerRegistration handlerRegistration = UIContext.addHandlerToSource(type, this, handler);
+        final HandlerRegistration handlerRegistration = UIContextImpl.addHandlerToSource(type, this, handler);
 
         final SetPool<Type>.ImmutableSet pool = oneTimeHandlerCreation.getAdd(type);
         if (pool != oneTimeHandlerCreation) {
@@ -490,7 +490,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
                     final PDropEvent dropEvent = new PDropEvent(this);
                     final String dragSrc = ClientToServerModel.DRAG_SRC.toStringValue();
                     if (instruction.containsKey(dragSrc)) {
-                        final PWidget source = (PWidget) UIContext.get().getObject(instruction.getJsonNumber(dragSrc).intValue());
+                        final PWidget source = (PWidget) UIContextImpl.get().getObject(instruction.getJsonNumber(dragSrc).intValue());
                         dropEvent.setDragSource(source);
                     }
                     fireEvent(dropEvent);
@@ -578,7 +578,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public void fireEvent(final Event<? extends EventHandler> event) {
-        UIContext.fireEventFromSource(event, this);
+        UIContextImpl.fireEventFromSource(event, this);
     }
 
     public void removeFromParent() {
@@ -645,14 +645,6 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     public Stream<String> getStyleNames() {
         return styleNames.stream();
-    }
-
-    /**
-     * @deprecated Add a FocusHandler if you want to know the focused state
-     */
-    @Deprecated
-    public boolean isFocused() {
-        return focused;
     }
 
     protected abstract String dumpDOM();

@@ -25,11 +25,11 @@ package com.ponysdk.impl.java.server;
 
 import static org.junit.Assert.assertEquals;
 
+import com.ponysdk.core.server.context.UIContextImpl;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.ponysdk.core.server.application.ApplicationConfiguration;
-import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.PSuite;
 import com.ponysdk.core.ui.main.EntryPoint;
 
@@ -41,7 +41,7 @@ public class JavaApplicationManagerTest extends PSuite {
     public static final class SampleEntryPoint implements EntryPoint {
 
         @Override
-        public void start(final UIContext uiContext) {
+        public void start(final UIContextImpl uiContext) {
         }
     }
 
@@ -55,12 +55,12 @@ public class JavaApplicationManagerTest extends PSuite {
 
     /**
      * Test method for
-     * {@link com.ponysdk.core.server.application.ApplicationManager#startApplication(com.ponysdk.core.server.application.UIContext)}.
+     * {@link com.ponysdk.core.server.application.ApplicationManager#startApplication(UIContextImpl)}.
      */
     @Test
     public void testStartApplication() throws Exception {
         configuration.setEntryPointClass(SampleEntryPoint.class);
-        applicationManager.startApplication(UIContext.get());
+        applicationManager.startApplication(UIContextImpl.get());
 
         assertEquals(SampleEntryPoint.class, applicationManager.initializeEntryPoint().getClass());
     }

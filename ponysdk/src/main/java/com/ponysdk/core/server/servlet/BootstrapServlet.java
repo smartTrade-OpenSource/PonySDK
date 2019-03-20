@@ -121,7 +121,7 @@ public class BootstrapServlet extends HttpServlet {
 
         if (inputStream != null) {
             try (ReadableByteChannel inputChannel = Channels.newChannel(inputStream);
-                    WritableByteChannel outputChannel = Channels.newChannel(response.getOutputStream())) {
+                 WritableByteChannel outputChannel = Channels.newChannel(response.getOutputStream())) {
                 final ByteBuffer buffer = ByteBuffer.allocateDirect(16 * 1024);
                 while (inputChannel.read(buffer) != -1) {
                     buffer.flip();
@@ -156,7 +156,8 @@ public class BootstrapServlet extends HttpServlet {
             final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
             final String jarPath = path.substring(1);
             inputStream = classLoader.getResourceAsStream(jarPath);
-            if (inputStream == null && childClassLoader != null) inputStream = childClassLoader.getResourceAsStream(jarPath);
+            if (inputStream == null && childClassLoader != null)
+                inputStream = childClassLoader.getResourceAsStream(jarPath);
         }
         return inputStream;
     }
@@ -275,8 +276,8 @@ public class BootstrapServlet extends HttpServlet {
 
         sb.append("<noscript>").append(NEW_LINE);
         sb.append(
-            "<div style=\"width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px;\">")
-            .append(NEW_LINE);
+                "<div style=\"width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px;\">")
+                .append(NEW_LINE);
         sb.append("Your web browser must have JavaScript enabled").append(NEW_LINE);
         sb.append("in order for this application to display correctly.").append(NEW_LINE);
         sb.append("</div>").append(NEW_LINE);
@@ -287,14 +288,6 @@ public class BootstrapServlet extends HttpServlet {
 
     public void setConfiguration(final ApplicationConfiguration configuration) {
         this.configuration = configuration;
-    }
-
-    /**
-     * @deprecated Use {@link #setConfiguration(ApplicationConfiguration)} directly
-     */
-    @Deprecated(forRemoval = true, since = "v2.8.1")
-    public void setApplication(final ApplicationConfiguration application) {
-        setConfiguration(application);
     }
 
     public void setRootPath(final String rootPath) {

@@ -27,11 +27,10 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.Application;
 import com.ponysdk.core.server.application.ApplicationManager;
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.context.UIContext;
 import com.ponysdk.core.server.context.CommunicationSanityChecker;
 import com.ponysdk.core.ui.basic.PObject;
 import org.eclipse.jetty.util.component.Container;
-import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
 import org.eclipse.jetty.websocket.api.WebSocketListener;
 import org.eclipse.jetty.websocket.common.extensions.ExtensionStack;
@@ -42,19 +41,24 @@ import org.slf4j.LoggerFactory;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
+import javax.websocket.EndpointConfig;
+import javax.websocket.OnOpen;
+import javax.websocket.server.ServerEndpoint;
 import java.io.StringReader;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import javax.websocket.*;
 import java.util.stream.Collectors;
 
-public class WebSocket implements WebSocketListener, WebsocketEncoder {
+@ServerEndpoint(value = "/ws")
+public class WebSocket implements WebsocketEncoder {
 
     private static final Logger log = LoggerFactory.getLogger(WebSocket.class);
 
-    private static final String INFO_MESSAGE = "Message received from terminal : UIContext #{} on {} : {}";
-    private static final String WARN_MESSAGE = "Message received from terminal : UIContext #{} on {} : {}";
-    private static final String ERROR_MESSAGE = "Message received from terminal : UIContext #{} on {} : {}";
+    private static final String INFO_MESSAGE = "Message received from terminal : UIContextImpl #{} on {} : {}";
+    private static final String WARN_MESSAGE = "Message received from terminal : UIContextImpl #{} on {} : {}";
+    private static final String ERROR_MESSAGE = "Message received from terminal : UIContextImpl #{} on {} : {}";
 
     private ServletUpgradeRequest request;
     private WebsocketMonitor monitor;
@@ -65,6 +69,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     private UIContext uiContext;
 
     private Application application;
+    private CommunicationSanityChecker communicationSanityChecker;
 
     /**
      * Initialise and start a new UIContext
@@ -78,19 +83,18 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
      *
      * @param session
      */
-    @Override
-    public void onWebSocketConnect(final Session session) {
+    @OnOpen
+    public void onOpen(final Session session, EndpointConfig config) {
         this.session = session;
 
-        application.createUIContext(this);
+        uiContext = application.createUIContext(this);
         websocketPusher = new WebSocketPusher(session, 1 << 20, 1 << 12, TimeUnit.SECONDS.toMillis(60));
-
-        final CommunicationSanityChecker communicationSanityChecker = new CommunicationSanityChecker(uiContext);
+        communicationSanityChecker.registerSession(this);
 
         uiContext.acquire();
         try {
             encode(ServerToClientModel.CREATE_CONTEXT, uiContext.getID());
-            encode(ServerToClientModel.OPTION_FORMFIELD_TABULATION, uiContext.getApplication().getConfiguration().isTabindexOnlyFormField());
+            encode(ServerToClientModel.OPTION_FORMFIELD_TABULATION, application.getConfiguration().isTabindexOnlyFormField());
             endObject();
             flush0();
         } finally {
@@ -98,26 +102,22 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         }
 
         applicationManager.startApplication(uiContext);
-        communicationSanityChecker.start();
     }
 
-    @Override
-    public void onWebSocketError(final Throwable throwable) {
+    @OnError
+    public void onError(final Throwable throwable) {
         log.error("WebSocket Error", throwable);
         uiContext.onDestroy();
     }
 
-    @Override
-    public void onWebSocketClose(final int statusCode, final String reason) {
-        log.info("WebSocket closed on UIContext #{} : {}, reason : {}", uiContext.getID(), NiceStatusCode.getMessage(statusCode), reason);
+    @OnClose
+    public void onClose(final int statusCode, final String reason) {
+        log.info("WebSocket closed on UIContextImpl #{} : {}, reason : {}", uiContext.getID(), NiceStatusCode.getMessage(statusCode), reason);
         uiContext.onDestroy();
     }
 
-    /**
-     * Receive from the terminal
-     */
-    @Override
-    public void onWebSocketText(final String message) {
+    @OnMessage
+    public void onMessage(final String message) {
         //TODO nciaravola
 
         //if (this.listener != null) listener.onIncomingText(message);
@@ -207,14 +207,6 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     }
 
     /**
-     * Receive from the terminal
-     */
-    @Override
-    public void onWebSocketBinary(final byte[] payload, final int offset, final int len) {
-        // Can't receive binary data from terminal (GWT limitation)
-    }
-
-    /**
      * Send round trip to the client
      */
     public void sendRoundTrip() {
@@ -229,6 +221,10 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
     public void flush() {
         if (isAlive() && isSessionOpen()) flush0();
+    }
+
+    public String getSessionID() {
+        return session.getId();
     }
 
     void flush0() {
@@ -315,6 +311,10 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
     public void setApplicationManager(final ApplicationManager applicationManager) {
         this.applicationManager = applicationManager;
+    }
+
+    public void setCommunicationSanityChecker(CommunicationSanityChecker communicationSanityChecker) {
+        this.communicationSanityChecker = communicationSanityChecker;
     }
 
     public void setMonitor(final WebsocketMonitor monitor) {

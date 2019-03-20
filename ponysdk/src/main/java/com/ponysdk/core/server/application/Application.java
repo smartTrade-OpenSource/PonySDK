@@ -29,6 +29,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpSession;
 
+import com.ponysdk.core.server.context.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.server.websocket.WebSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +44,7 @@ public class Application {
 
     private static final Logger log = LoggerFactory.getLogger(Application.class);
 
-    private final Map<Integer, UIContext> uiContexts = new ConcurrentHashMap<>();
+    private final Map<Integer, UIContextImpl> uiContexts = new ConcurrentHashMap<>();
 
     private final Map<String, Object> attributes = new ConcurrentHashMap<>();
 
@@ -59,9 +61,9 @@ public class Application {
     }
 
     public UIContext createUIContext(WebSocket socket) {
-        UIContext uiContext = new UIContext(socket, this);
+        UIContextImpl uiContext = new UIContextImpl(socket, this);
         uiContexts.put(uiContext.getID(), uiContext);
-        log.info("Creating a new UIContext:{}", uiContext);
+        log.info("Creating a new UIContextImpl:{}", uiContext);
         return uiContext;
     }
 
@@ -78,7 +80,7 @@ public class Application {
             try {
                 uiContext.destroyFromApplication();
             } catch (final Exception e) {
-                log.error("Can't destroy the UIContext #" + uiContext.getID() + " on Application #" + id, e);
+                log.error("Can't destroy the UIContextImpl #" + uiContext.getID() + " on Application #" + id, e);
             }
         });
         uiContexts.clear();
@@ -92,23 +94,12 @@ public class Application {
         SessionManager.get().unregisterApplication(this);
     }
 
-    public UIContext getUIContext(final int uiContextID) {
+    public UIContextImpl getUIContext(final int uiContextID) {
         return uiContexts.get(uiContextID);
     }
 
-    public Collection<UIContext> getUIContexts() {
+    public Collection<UIContextImpl> getUIContexts() {
         return uiContexts.values();
-    }
-
-    public void pushToClients(final Object message) {
-        for (final UIContext uiContext : getUIContexts()) {
-            log.debug("Pushing to {}", uiContext);
-            try {
-                uiContext.pushToClient(message);
-            } catch (final Throwable throwable) {
-                log.error("Cannot flush message on the session {}", uiContext, throwable);
-            }
-        }
     }
 
     public void setAttribute(final String name, final Object value) {

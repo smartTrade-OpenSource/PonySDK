@@ -23,7 +23,7 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.server.service.query.Query;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PAnchor;
@@ -52,7 +52,7 @@ public class TreePageActivity extends SamplePageActivity {
 
         tree.addSelectionHandler(event -> {
             final String msg = "Selected item : name = " + event.getSelectedItem();
-            UIContext.getRootEventBus().fireEvent(new DemoBusinessEvent(msg));
+            UIContextImpl.getRootEventBus().fireEvent(new DemoBusinessEvent(msg));
         });
 
         final PTreeItem firstItem = Element.newPTreeItem("First item");

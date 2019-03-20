@@ -77,14 +77,6 @@ public abstract class PValueBoxBase extends PFocusWidget {
         }
     }
 
-    /**
-     * @deprecated Use {@link #select(int, int)} instead
-     */
-    @Deprecated(forRemoval = true, since = "v2.8.0")
-    public void setSelectionRange(final int startPosition, final int rangeLength) {
-        select(startPosition, rangeLength);
-    }
-
     public void setCursorPosition(final int cursorPosition) {
         saveUpdate(ServerToClientModel.CURSOR_POSITION, Math.min(cursorPosition, this.text.length()));
     }

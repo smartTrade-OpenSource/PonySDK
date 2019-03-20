@@ -32,7 +32,7 @@ import javax.json.JsonObject;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 
 /**
  * This class allows to execute native Java-script code.
@@ -50,7 +50,7 @@ public class PScript extends PObject {
 
     private static PScript get(final PWindow window) {
         if (window != null) {
-            final UIContext uiContext = UIContext.get();
+            final UIContextImpl uiContext = UIContextImpl.get();
             final String key = SCRIPT_KEY + window.getID();
             final PScript script = uiContext.getAttribute(SCRIPT_KEY + window.getID());
             if (script == null) {
@@ -76,7 +76,7 @@ public class PScript extends PObject {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        UIContext.get().removeAttribute(key);
+        UIContextImpl.get().removeAttribute(key);
     }
 
     public static void execute(final PWindow window, final String js) {

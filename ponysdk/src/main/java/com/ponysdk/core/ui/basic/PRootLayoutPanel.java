@@ -27,7 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 
 public class PRootLayoutPanel extends PLayoutPanel {
 
@@ -56,7 +56,7 @@ public class PRootLayoutPanel extends PLayoutPanel {
     }
 
     private static Map<String, PRootLayoutPanel> ensureChilds(final PWindow window) {
-        final UIContext session = UIContext.get();
+        final UIContextImpl session = UIContextImpl.get();
 
         final String key = KEY + window.getID();
 

@@ -21,17 +21,18 @@
  * the License.
  */
 
-package com.ponysdk.core.server.application;
+package com.ponysdk.core.server.context;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.AlreadyDestroyedApplication;
-import com.ponysdk.core.server.context.PObjectCache;
+import com.ponysdk.core.server.application.Application;
+import com.ponysdk.core.server.concurrent.ScheduledTaskHandler;
+import com.ponysdk.core.server.concurrent.Scheduler;
+import com.ponysdk.core.server.concurrent.SchedulingContext;
 import com.ponysdk.core.server.monitoring.Monitor;
 import com.ponysdk.core.server.websocket.WebSocket;
 import com.ponysdk.core.ui.basic.PCookies;
-import com.ponysdk.core.ui.basic.PHistory;
 import com.ponysdk.core.ui.basic.PObject;
 import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.eventbus.*;
@@ -48,50 +49,52 @@ import javax.json.JsonValue;
 import javax.json.JsonValue.ValueType;
 import javax.json.spi.JsonProvider;
 import javax.servlet.http.HttpSession;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
-/**
- * <p>
- * Provides a way to identify a user across more than one page request or visit to a Web site and to
- * store information about that user.
- * </p>
- * <p>
- * There is ONE unique UIContext for each screen displayed. Each UIContext is bound to the current
- * {@link Application} .
- * </p>
- */
-public class UIContext {
+public class UIContextImpl implements UIContext {
 
     private static final int INITIAL_STREAM_MAP_CAPACITY = 2;
 
-    private static final Logger log = LoggerFactory.getLogger(UIContext.class);
-    private static final ThreadLocal<UIContext> currentContext = new ThreadLocal<>();
+    private static final Logger log = LoggerFactory.getLogger(UIContextImpl.class);
+    private static final ThreadLocal<UIContextImpl> currentContext = new ThreadLocal<>();
     private static final AtomicInteger uiContextCount = new AtomicInteger();
     private static final String DEFAULT_PROVIDER = "org.glassfish.json.JsonProviderImpl";
 
     private final int id;
 
     private final ReentrantLock lock = new ReentrantLock();
-    private final Map<String, Object> attributes = new HashMap<>();
+    private final Map<String, Object> attributes = new ConcurrentHashMap<>();
 
     private final PObjectCache pObjectCache = new PObjectCache();
     private final Application application;
+    private final SchedulingContext schedulingContext;
     private int objectCounter = 1;
 
     private Map<Integer, StreamHandler> streamListenerByID;
     private int streamRequestCounter = 0;
 
-    private final PHistory history = new PHistory();
+    private final History history;
     private final com.ponysdk.core.ui.eventbus.EventBus rootEventBus = new com.ponysdk.core.ui.eventbus.EventBus();
     private final com.ponysdk.core.ui.eventbus2.EventBus newEventBus = new com.ponysdk.core.ui.eventbus2.EventBus();
 
     private final PCookies cookies = new PCookies();
 
     private final Set<ContextDestroyListener> destroyListeners = new HashSet<>();
-    private final Set<DataListener> listeners = Collections.newSetFromMap(new ConcurrentHashMap<DataListener, Boolean>());
+
+    private static Scheduler scheduler;
+
+    static {
+        AtomicInteger count = new AtomicInteger();
+        int threadCount = Integer.parseInt(System.getProperty("PONY_SCHEDULER_THREAD_POOL", "4"));
+        ThreadFactory threadFactory = r -> new Thread(r, "P_SCHEDULER-" + count.getAndIncrement());
+        scheduler = new Scheduler(threadCount, threadFactory);
+    }
+
 
     private TerminalDataReceiver terminalDataReceiver;
 
@@ -107,28 +110,34 @@ public class UIContext {
 
     private final ModelWriter modelWriter;
 
-    public UIContext(final WebSocket socket, Application application) {
+    public UIContextImpl(final WebSocket socket, Application application) {
         this.id = uiContextCount.incrementAndGet();
         this.socket = socket;
         this.modelWriter = new ModelWriter(socket);
         this.application = application;
+        this.schedulingContext = scheduler.createContext(Long.toString(id));
 
         try {
             jsonProvider = (JsonProvider) Class.forName(DEFAULT_PROVIDER).getDeclaredConstructor().newInstance();
         } catch (final Exception t) {
             jsonProvider = JsonProvider.provider();
         }
+
+
+        final List<String> historyTokens = socket.getRequest().getParameterMap().get(ClientToServerModel.TYPE_HISTORY.toStringValue());
+        final String historyToken = historyTokens != null && !historyTokens.isEmpty() ? historyTokens.get(0) : null;
+        history = new History(historyToken);
     }
 
     /**
-     * Returns the current UIContext
+     * Returns the current UIContextImpl
      *
-     * @return The current UIContext
+     * @return The current UIContextImpl
      */
-    public static UIContext get() {
-        UIContext uiContext = currentContext.get();
+    public static UIContextImpl get() {
+        UIContextImpl uiContext = currentContext.get();
         if (uiContext == null) {
-            throw new RuntimeException("PScheduler should be used when an application thread needs to update the GUI.");
+            throw new IllegalMonitorStateException("PScheduler should be used when an application thread needs to update the GUI.");
         }
         return uiContext;
     }
@@ -137,7 +146,7 @@ public class UIContext {
         currentContext.remove();
     }
 
-    public static void setCurrent(final UIContext uiContext) {
+    public static void setCurrent(final UIContextImpl uiContext) {
         currentContext.set(uiContext);
     }
 
@@ -160,12 +169,8 @@ public class UIContext {
      * @param event the fired event
      * @see #addHandler(BroadcastEventHandler)
      */
-    public static void fireEvent(final Event<? extends EventHandler> event) {
+    public void fireEvent(final Event<? extends EventHandler> event) {
         get().fireEvent0(event);
-    }
-
-    public void executeFireEvent(final Event<? extends EventHandler> event) {
-        execute(() -> fireEvent0(event));
     }
 
     private void fireEvent0(final Event<? extends EventHandler> event) {
@@ -205,7 +210,7 @@ public class UIContext {
      * @param source the source
      * @see #addHandlerToSource(com.ponysdk.core.ui.eventbus.Event.Type, Object, EventHandler)
      */
-    public static void fireEventFromSource(final Event<? extends EventHandler> event, final Object source) {
+    public void fireEventFromSource(final Event<? extends EventHandler> event, final Object source) {
         get().rootEventBus.fireEventFromSource(event, source);
     }
 
@@ -263,99 +268,8 @@ public class UIContext {
         return get().newEventBus;
     }
 
-    /**
-     * Gets the ID of the UIContext
-     *
-     * @return the ID
-     */
     public int getID() {
         return id;
-    }
-
-    /**
-     * Adds a {@link DataListener} to the UIContext
-     *
-     * @param listener the data listener
-     */
-    public boolean addDataListener(final DataListener listener) {
-        return listeners.add(listener);
-    }
-
-    /**
-     * Removes the {@link DataListener} from UIContext
-     *
-     * @param listener the data listener
-     */
-    public boolean removeDataListener(final DataListener listener) {
-        return listeners.remove(listener);
-    }
-
-    /**
-     * Executes a {@link Runnable} that represents a task in a graphical context
-     * <p>
-     * This method locks the UIContext
-     *
-     * @param runnable the tasks
-     */
-    public boolean execute(final Runnable runnable) {
-        if (!isAlive()) return false;
-        if (log.isDebugEnabled()) log.debug("Pushing to #{}", this);
-        if (UIContext.get() != this) {
-            acquire();
-            try {
-                runnable.run();
-
-                //TODO nciaravola
-                //flush();
-                return true;
-            } catch (final Exception e) {
-                log.error("Cannot process client instruction", e);
-                return false;
-            } finally {
-                release();
-            }
-        } else {
-            runnable.run();
-            return false;
-        }
-    }
-
-    /**
-     * Stimulates all {@link DataListener} with a list of object
-     *
-     * @param data list of object
-     */
-    public boolean pushToClient(final List<Object> data) {
-        if (isAlive() && data != null && !listeners.isEmpty()) {
-            return execute(() -> {
-                try {
-                    listeners.forEach(listener -> data.forEach(listener::onData));
-                } catch (final Exception e) {
-                    log.error("Cannot send data", e);
-                }
-            });
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * Stimulates all {@link DataListener} with an object
-     *
-     * @param data the object
-     */
-    public boolean pushToClient(final Object data) {
-        if (isAlive() && data != null && !listeners.isEmpty()) {
-            return execute(() -> {
-                try {
-                    listeners.forEach(listener -> listener.onData(data));
-                } catch (final Throwable e) {
-                    log.error("Cannot send data", e);
-                }
-            });
-        } else {
-            return false;
-        }
     }
 
     /**
@@ -416,18 +330,15 @@ public class UIContext {
     }
 
     /**
-     * Locks the current UIContext
+     * Locks the current UIContextImpl
      */
-    public void acquire() {
+    private void acquire() {
         lock.lock();
         currentContext.set(this);
     }
 
-    /**
-     * Unlock the current UIContext
-     */
-    public void release() {
-        UIContext.remove();
+    private void release() {
+        UIContextImpl.remove();
         lock.unlock();
     }
 
@@ -441,7 +352,7 @@ public class UIContext {
     }
 
     /**
-     * Registers a {@link PObject} in the UIContext
+     * Registers a {@link PObject} in the UIContextImpl
      *
      * @param pObject the pObject
      * @see #getObject(int)
@@ -520,7 +431,7 @@ public class UIContext {
     }
 
     /**
-     * Removes the {@link StreamHandler} with a specific ID in the current UIContext
+     * Removes the {@link StreamHandler} with a specific ID in the current UIContextImpl
      *
      * @param streamID the stream ID
      * @return the removed stream handler or null if not found
@@ -530,7 +441,7 @@ public class UIContext {
     }
 
     /**
-     * Closes the current UIContext
+     * Closes the current UIContextImpl
      */
     public void close() {
         socket.encode(ServerToClientModel.DESTROY_CONTEXT, null);
@@ -574,12 +485,15 @@ public class UIContext {
     }
 
     /**
-     * Destroys the current UIContext when the {@link com.ponysdk.core.server.websocket.WebSocket} is closed
+     * Destroys the current UIContextImpl when the {@link com.ponysdk.core.server.websocket.WebSocket} is closed
      * <p>
-     * This method locks the UIContext
+     * This method locks the UIContextImpl
      */
     public void onDestroy() {
         if (!isAlive()) return;
+
+        schedulingContext.destroy();
+
         acquire();
         try {
             doDestroy();
@@ -590,9 +504,9 @@ public class UIContext {
     }
 
     /**
-     * Destroys the current UIContext when the {@link Application} is destroyed
+     * Destroys the current UIContextImpl when the {@link Application} is destroyed
      * <p>
-     * This method locks the UIContext
+     * This method locks the UIContextImpl
      */
     void destroyFromApplication() {
         if (!isAlive()) return;
@@ -606,9 +520,9 @@ public class UIContext {
     }
 
     /**
-     * Destroys the UIContext
+     * Destroys the UIContextImpl
      * <p>
-     * This method locks the UIContext
+     * This method locks the UIContextImpl
      */
     public void destroy() {
         if (!isAlive()) return;
@@ -623,23 +537,21 @@ public class UIContext {
     }
 
     /**
-     * Destroys effectively the UIContext
+     * Destroys effectively the UIContextImpl
      */
     private void doDestroy() {
         alive = false;
         destroyListeners.forEach(listener -> {
             try {
                 listener.onBeforeDestroy(this);
-            } catch (final AlreadyDestroyedApplication e) {
-                if (log.isDebugEnabled()) log.debug("Exception while destroying UIContext #" + getID(), e);
             } catch (final Exception e) {
-                log.error("Exception while destroying UIContext #" + getID(), e);
+                log.error("Exception while destroying UIContextImpl #" + getID(), e);
             }
         });
     }
 
     /**
-     * Adds a {@link ContextDestroyListener} that will be stimulated when the UIContext is destroyed
+     * Adds a {@link ContextDestroyListener} that will be stimulated when the UIContextImpl is destroyed
      *
      * @param listener the context destroy listener
      * @since {@link #destroy()}
@@ -661,7 +573,7 @@ public class UIContext {
     /**
      * Sends the round trip
      * <p>
-     * This method locks the UIContext
+     * This method locks the UIContextImpl
      */
     public void sendRoundTrip() {
         acquire();
@@ -673,7 +585,7 @@ public class UIContext {
     }
 
     /**
-     * Returns the alive state of the current UIContext
+     * Returns the alive state of the current UIContextImpl
      *
      * @return the alive state
      */
@@ -682,21 +594,16 @@ public class UIContext {
     }
 
     /**
-     * Gets the {@link PHistory} of the UIContext
+     * Gets the {@link History} of the UIContextImpl
      *
-     * @return the PHistory
+     * @return the History
      */
-    public PHistory getHistory() {
+    public History getHistory() {
         return history;
     }
 
-    public String getHistoryToken() {
-        final List<String> historyTokens = socket.getRequest().getParameterMap().get(ClientToServerModel.TYPE_HISTORY.toStringValue());
-        return historyTokens != null && !historyTokens.isEmpty() ? historyTokens.get(0) : null;
-    }
-
     /**
-     * Gets the {@link PCookies} of the UIContext
+     * Gets the {@link PCookies} of the UIContextImpl
      *
      * @return the PCookies
      */
@@ -705,7 +612,7 @@ public class UIContext {
     }
 
     /**
-     * Get a cookie from the {@link PCookies} of the UIContext
+     * Get a cookie from the {@link PCookies} of the UIContextImpl
      *
      * @return the cookie
      */
@@ -746,6 +653,10 @@ public class UIContext {
         return modelWriter;
     }
 
+    public SchedulingContext getSchedulingContext() {
+        return schedulingContext;
+    }
+
     public JsonProvider getJsonProvider() {
         return jsonProvider;
     }
@@ -758,7 +669,7 @@ public class UIContext {
     public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        final UIContext uiContext = (UIContext) o;
+        final UIContextImpl uiContext = (UIContextImpl) o;
         return id == uiContext.id;
     }
 
@@ -769,7 +680,36 @@ public class UIContext {
 
     @Override
     public String toString() {
-        return "UIContext [id=" + id + ", alive=" + alive + "]";
+        return "UIContextImpl [id=" + id + ", alive=" + alive + "]";
     }
 
+
+    public static SchedulingContext createContext(UIContextImpl uiContext) {
+        return scheduler.createContext(Long.toString(uiContext.getID()));
+    }
+
+    public void execute(final Runnable task) {
+        schedulingContext.execute(() -> run(task));
+    }
+
+    public ScheduledTaskHandler execute(final Runnable task, Duration delay) {
+        return schedulingContext.executeLater(delay.toMillis(), () -> run(task));
+    }
+
+    public ScheduledTaskHandler repeat(final Runnable task, Duration period) {
+        return schedulingContext.schedule(period.toMillis(), () -> run(task));
+    }
+
+
+    private void run(Runnable task) {
+        acquire();
+        try {
+            task.run();
+
+            //TODO nciaravola
+            //flush();
+        } finally {
+            release();
+        }
+    }
 }

@@ -3,8 +3,7 @@ package com.ponysdk.core.ui.basic;
 import com.google.gwt.json.client.JSONObject;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.server.websocket.WebsocketEncoder;
+import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.writer.ModelWriter;
 
 import javax.json.Json;
@@ -42,18 +41,18 @@ public class ModelWriterForTest extends ModelWriter {
         if (model == ServerToClientModel.TYPE_CREATE || model == ServerToClientModel.TYPE_UPDATE) {
             lastObjectID = (int) value;
         } else if (model == ServerToClientModel.OPEN) {
-            PObject object = UIContext.get().getObject(lastObjectID);
+            PObject object = UIContextImpl.get().getObject(lastObjectID);
             if (object instanceof PWindow) {
                 simulateWindowOpened(object);
             }
         } else if (model == ServerToClientModel.CLOSE) {
-            PObject object = UIContext.get().getObject(lastObjectID);
+            PObject object = UIContextImpl.get().getObject(lastObjectID);
             if (object instanceof PWindow) {
                 simulateWindowClosed(object);
             }
         } else if (model == ServerToClientModel.HISTORY_FIRE_EVENTS) {
             if (Boolean.TRUE.equals(value)) {
-                UIContext.get().getHistory().fireHistoryChanged(UIContext.get().getHistory().getToken());
+                UIContextImpl.get().getHistory().fireHistoryChanged(UIContextImpl.get().getHistory().getToken());
             }
         }
     }

@@ -23,7 +23,7 @@
 
 package com.ponysdk.core.ui.main;
 
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.context.UIContext;
 
 /**
  * The Entry Point of the Application

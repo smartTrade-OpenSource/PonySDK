@@ -24,7 +24,6 @@
 package com.ponysdk.impl.spring.server;
 
 import com.ponysdk.core.server.application.ApplicationManager;
-import com.ponysdk.core.ui.activity.InitializingActivity;
 import com.ponysdk.core.ui.main.EntryPoint;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -35,7 +34,6 @@ import org.springframework.util.StringUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 public class SpringApplicationManager extends ApplicationManager implements ApplicationContextAware {
 
@@ -61,13 +59,7 @@ public class SpringApplicationManager extends ApplicationManager implements Appl
         try (ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext(configurations)) {
             final String[] serverActiveProfiles = serverApplicationContext.getEnvironment().getActiveProfiles();
             Arrays.stream(serverActiveProfiles).forEach(profile -> applicationContext.getEnvironment().addActiveProfile(profile));
-
-            final EntryPoint entryPoint = applicationContext.getBean(EntryPoint.class);
-
-            final Map<String, InitializingActivity> initializingPages = applicationContext.getBeansOfType(InitializingActivity.class);
-            initializingPages.values().forEach(InitializingActivity::afterContextInitialized);
-
-            return entryPoint;
+            return applicationContext.getBean(EntryPoint.class);
         }
     }
 

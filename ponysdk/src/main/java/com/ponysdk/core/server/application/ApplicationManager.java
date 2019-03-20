@@ -23,34 +23,23 @@
 
 package com.ponysdk.core.server.application;
 
+import com.ponysdk.core.server.context.UIContext;
+import com.ponysdk.core.ui.main.EntryPoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.ui.main.EntryPoint;
-
 public abstract class ApplicationManager {
-
-    private static final Logger log = LoggerFactory.getLogger(ApplicationManager.class);
 
     protected ApplicationConfiguration configuration;
 
     public void startApplication(final UIContext uiContext) {
         uiContext.execute(() -> {
-            try {
-                final EntryPoint entryPoint = initializeEntryPoint();
-                final String historyToken = uiContext.getHistoryToken();
-
-                if (historyToken != null && !historyToken.isEmpty())
-                    uiContext.getHistory().newItem(historyToken, false);
-
-                entryPoint.start(uiContext);
-            } catch (final Exception e) {
-                log.error("Cannot start UIContext", e);
-            }
+            final EntryPoint entryPoint = initializeEntryPoint();
+            entryPoint.start(uiContext);
         });
     }
 
-    protected abstract EntryPoint initializeEntryPoint() throws Exception;
+    protected abstract EntryPoint initializeEntryPoint();
 
     public ApplicationConfiguration getConfiguration() {
         return configuration;

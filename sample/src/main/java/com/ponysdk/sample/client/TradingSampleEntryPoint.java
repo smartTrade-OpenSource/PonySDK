@@ -23,7 +23,7 @@
 
 package com.ponysdk.sample.client;
 
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PElement;
 import com.ponysdk.core.ui.basic.PSimpleLayoutPanel;
@@ -41,12 +41,12 @@ public class TradingSampleEntryPoint implements EntryPoint {
     public static final String USER = "user";
 
     @Override
-    public void start(final UIContext uiContext) {
+    public void start(final UIContextImpl uiContext) {
         if (uiContext.getApplication().getAttribute(USER) == null) uiContext.getHistory().newItem("", false);
         final PSimpleLayoutPanel panel = Element.newPSimpleLayoutPanel();
         PWindow.getMain().add(panel);
 
-        final EventBus eventBus = UIContext.getRootEventBus();
+        final EventBus eventBus = UIContextImpl.getRootEventBus();
 
         final PlaceHistoryMapper historyMapper = new DefaultPlaceHistoryMapper(eventBus);
         final PlaceController placeController = new PlaceController(uiContext.getHistory(), eventBus);

@@ -25,7 +25,7 @@ package com.ponysdk.core.ui.basic;
 
 import com.ponysdk.core.server.application.Application;
 import com.ponysdk.core.server.application.ApplicationConfiguration;
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.server.websocket.WebSocket;
 import com.ponysdk.core.writer.ModelWriter;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
@@ -42,12 +42,12 @@ public class PSuite {
         final ModelWriter modelWriter = new ModelWriterForTest();
         final Application application = Mockito.mock(Application.class);
         final ApplicationConfiguration configuration = Mockito.mock(ApplicationConfiguration.class);
-        final UIContext uiContext = Mockito.spy(new UIContext(socket, application));
+        final UIContextImpl uiContext = Mockito.spy(new UIContextImpl(socket, application));
 
         Mockito.when(application.createUIContext(socket)).thenReturn(uiContext);
         Mockito.when(uiContext.getWriter()).thenReturn(modelWriter);
 
-        UIContext.setCurrent(uiContext);
+        UIContextImpl.setCurrent(uiContext);
     }
 
 }

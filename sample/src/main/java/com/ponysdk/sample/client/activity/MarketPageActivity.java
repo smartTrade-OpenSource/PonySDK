@@ -26,11 +26,11 @@ package com.ponysdk.sample.client.activity;
 import java.util.Arrays;
 import java.util.List;
 
+import com.ponysdk.core.server.context.UIContextImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.server.application.DataListener;
-import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PAnchor;
 import com.ponysdk.core.ui.basic.PElement;
@@ -226,7 +226,7 @@ public class MarketPageActivity extends PageActivity {
             }
         }, PDragLeaveEvent.TYPE);
 
-        UIContext.get().addDataListener(new DataListener() {
+        UIContextImpl.get().addDataListener(new DataListener() {
 
             private int lastBuy;
             private int lastSell;

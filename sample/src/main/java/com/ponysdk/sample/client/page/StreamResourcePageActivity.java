@@ -27,7 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PFlowPanel;
@@ -46,7 +46,7 @@ public class StreamResourcePageActivity extends SamplePageActivity {
 
         final PButton downloadImageButton = Element.newPButton("Download Pony image");
 
-        downloadImageButton.addClickHandler(event -> UIContext.get().stackStreamRequest((request, response, uiContext) -> {
+        downloadImageButton.addClickHandler(event -> UIContextImpl.get().stackStreamRequest((request, response, uiContext) -> {
             response.reset();
             response.setContentType("image/png");
             response.setHeader("Content-Disposition", "attachment; filename=pony_image.png");

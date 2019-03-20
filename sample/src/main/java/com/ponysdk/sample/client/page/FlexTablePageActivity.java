@@ -55,7 +55,7 @@ public class FlexTablePageActivity extends SamplePageActivity {
         }
 
         /*
-         * UIContext.get().addConnectionListener(new ConnectionListener() {
+         * UIContextImpl.get().addConnectionListener(new ConnectionListener() {
          *
          * final Timer timer = new Timer();
          *
@@ -66,7 +66,7 @@ public class FlexTablePageActivity extends SamplePageActivity {
          *
          * @Override
          * public void run() {
-         * UIContext.get().execute(new Runnable() {
+         * UIContextImpl.get().execute(new Runnable() {
          *
          * @Override
          * public void run() {

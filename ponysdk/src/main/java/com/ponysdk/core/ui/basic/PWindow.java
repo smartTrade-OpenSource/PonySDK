@@ -36,7 +36,7 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.ui.basic.event.PCloseEvent;
 import com.ponysdk.core.ui.basic.event.PCloseHandler;
 import com.ponysdk.core.ui.basic.event.POpenEvent;
@@ -111,14 +111,14 @@ public class PWindow extends PObject {
         panelByZone.forEach((key, value) -> value.attach(this, null));
         if (initializeListeners != null) initializeListeners.forEach(listener -> listener.onInitialize(this));
 
-        UIContext.get().addContextDestroyListener(uiContext -> onDestroy());
+        UIContextImpl.get().addContextDestroyListener(uiContext -> onDestroy());
     }
 
     public static PWindow getMain() {
-        PWindow mainWindow = UIContext.get().getAttribute(CANONICAL_NAME);
+        PWindow mainWindow = UIContextImpl.get().getAttribute(CANONICAL_NAME);
         if (mainWindow == null) {
             mainWindow = new PMainWindow();
-            UIContext.get().setAttribute(CANONICAL_NAME, mainWindow);
+            UIContextImpl.get().setAttribute(CANONICAL_NAME, mainWindow);
         }
         return mainWindow;
     }
@@ -140,13 +140,13 @@ public class PWindow extends PObject {
     public void open() {
         if (destroy) return;
         if (!initialized) {
-            final ModelWriter writer = UIContext.get().getWriter();
+            final ModelWriter writer = UIContextImpl.get().getWriter();
             writer.beginObject(window);
             writer.write(ServerToClientModel.TYPE_CREATE, ID);
             writer.write(ServerToClientModel.WIDGET_TYPE, getWidgetType().getValue());
             enrichForCreation(writer);
             writer.endObject();
-            UIContext.get().registerObject(this);
+            UIContextImpl.get().registerObject(this);
 
             PWindowManager.preregisterWindow(this);
 
@@ -567,15 +567,15 @@ public class PWindow extends PObject {
 
         @Override
         final void init() {
-            final ModelWriter writer = UIContext.get().getWriter();
+            final ModelWriter writer = UIContextImpl.get().getWriter();
             writer.beginObject(window);
             writer.write(ServerToClientModel.TYPE_CREATE, ID);
             writer.write(ServerToClientModel.WIDGET_TYPE, getWidgetType().getValue());
             writer.endObject();
-            UIContext.get().registerObject(this);
+            UIContextImpl.get().registerObject(this);
             initialized = true;
 
-            UIContext.get().addContextDestroyListener(uiContext -> onDestroy());
+            UIContextImpl.get().addContextDestroyListener(uiContext -> onDestroy());
         }
 
         @Override

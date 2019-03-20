@@ -23,34 +23,25 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Objects;
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.context.UIContextImpl;
+import com.ponysdk.core.ui.basic.event.*;
+import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 
 import javax.json.JsonObject;
-
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.ui.basic.event.PBlurEvent;
-import com.ponysdk.core.ui.basic.event.PBlurHandler;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
-import com.ponysdk.core.ui.basic.event.PDoubleClickEvent;
-import com.ponysdk.core.ui.basic.event.PDoubleClickHandler;
-import com.ponysdk.core.ui.basic.event.PFocusEvent;
-import com.ponysdk.core.ui.basic.event.PFocusHandler;
-import com.ponysdk.core.ui.basic.event.PMouseOverEvent;
-import com.ponysdk.core.ui.eventbus.HandlerRegistration;
+import java.util.Objects;
 
 /**
  * Abstract base class for most widgets that can receive keyboard focus.
  */
-public abstract class PFocusWidget extends PWidget implements Focusable {
+public abstract class PFocusWidget extends PWidget {
 
     private boolean enabled = true;
     private boolean enabledOnRequest = false;
     private boolean showLoadingOnRequest;
 
     protected PFocusWidget() {
-        if (UIContext.get().getApplication().getConfiguration().isTabindexOnlyFormField())
+        if (UIContextImpl.get().getApplication().getConfiguration().isTabindexOnlyFormField())
             tabindex = TabindexMode.FOCUSABLE.getTabIndex();
     }
 
@@ -58,17 +49,6 @@ public abstract class PFocusWidget extends PWidget implements Focusable {
         if (Objects.equals(this.showLoadingOnRequest, showLoadingOnRequest)) return;
         this.showLoadingOnRequest = showLoadingOnRequest;
         saveUpdate(writer -> writer.write(ServerToClientModel.LOADING_ON_REQUEST, showLoadingOnRequest));
-    }
-
-    /**
-     * @since v2.7.16
-     * @deprecated Use {@link #focus()} or {@link #blur()}
-     */
-    @Deprecated
-    @Override
-    public void setFocus(final boolean focused) {
-        if (focused) focus();
-        else blur();
     }
 
     public boolean isEnabled() {

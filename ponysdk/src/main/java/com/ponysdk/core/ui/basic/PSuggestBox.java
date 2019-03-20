@@ -30,6 +30,7 @@ import java.util.Objects;
 
 import javax.json.JsonObject;
 
+import com.google.gwt.user.client.ui.Focusable;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -79,7 +80,7 @@ import com.ponysdk.core.writer.ModelWriter;
  * @see PTextBoxBase
  */
 public class PSuggestBox extends PWidget
-        implements Focusable, HasPValueChangeHandlers<String>, PSelectionHandler<PSuggestOracle.PSuggestion> {
+        implements HasPValueChangeHandlers<String>, PSelectionHandler<PSuggestOracle.PSuggestion> {
 
     private final PSuggestOracle suggestOracle;
     private List<PSelectionHandler<PSuggestOracle.PSuggestion>> selectionHandler;
@@ -145,17 +146,6 @@ public class PSuggestBox extends PWidget
     @Override
     protected WidgetType getWidgetType() {
         return WidgetType.SUGGESTBOX;
-    }
-
-    /**
-     * @since v2.7.16
-     * @deprecated Use {@link #focus()} or {@link #blur()}
-     */
-    @Deprecated
-    @Override
-    public void setFocus(final boolean focused) {
-        if (focused) focus();
-        else blur();
     }
 
     @Override

@@ -2,12 +2,12 @@
  * Copyright (c) 2011 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -21,14 +21,10 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.place;
+package com.ponysdk.core.server.context;
 
-import com.ponysdk.core.server.application.UIContext;
+@FunctionalInterface
+public interface ContextDestroyListener {
 
-public class PlaceChangeRequest {
-
-    public static void fire(final Object source, final Place newPlace) {
-        UIContext.fireEvent(new PlaceChangeEvent(source, newPlace));
-    }
-
+    void onBeforeDestroy(UIContext uiContext);
 }

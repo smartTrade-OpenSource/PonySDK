@@ -23,7 +23,7 @@
 
 package com.ponysdk.impl.java;
 
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PElement;
@@ -36,7 +36,7 @@ public class BasicEntryPoint implements EntryPoint {
     final PButton button = Element.newPButton(" => Button");
 
     @Override
-    public void start(final UIContext uiContext) {
+    public void start(final UIContextImpl uiContext) {
         uiContext.setTerminalDataReceiver((object, instruction) -> System.err.println(object + "" + instruction));
 
         // PRootPanel.get().clear(true);

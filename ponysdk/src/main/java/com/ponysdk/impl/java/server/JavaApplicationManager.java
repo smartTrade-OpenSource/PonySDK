@@ -26,6 +26,8 @@ package com.ponysdk.impl.java.server;
 import com.ponysdk.core.server.application.ApplicationManager;
 import com.ponysdk.core.ui.main.EntryPoint;
 
+import java.lang.reflect.InvocationTargetException;
+
 public class JavaApplicationManager extends ApplicationManager {
 
     @Override
@@ -34,9 +36,13 @@ public class JavaApplicationManager extends ApplicationManager {
     }
 
     @Override
-    protected EntryPoint initializeEntryPoint() throws Exception {
+    protected EntryPoint initializeEntryPoint() {
         final Class<? extends EntryPoint> entryPointClassName = configuration.getEntryPointClass();
-        return entryPointClassName.getDeclaredConstructor().newInstance();
+        try {
+            return entryPointClassName.getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
     }
 
 }

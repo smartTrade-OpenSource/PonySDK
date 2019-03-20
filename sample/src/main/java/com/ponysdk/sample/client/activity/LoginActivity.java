@@ -81,7 +81,7 @@ public class LoginActivity extends AbstractActivity<DefaultLoginPageView> {
         user.setName(view.getLogin());
         user.setPassword(view.getPassword());
 
-        // UIContext.get().setApplicationAttribute(UISampleEntryPoint.USER, user);
+        // UIContextImpl.get().setApplicationAttribute(UISampleEntryPoint.USER, user);
 
         final UserLoggedInEvent loggedInEvent = new UserLoggedInEvent(LoginActivity.this, user);
         loggedInEvent.setBusinessMessage(view.getLogin() + " is now connected");

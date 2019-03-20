@@ -26,10 +26,10 @@ package com.ponysdk.core.ui.eventbus;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 
 @FunctionalInterface
 public interface StreamHandler {
 
-    void onStream(HttpServletRequest request, HttpServletResponse response, UIContext uiContext);
+    void onStream(HttpServletRequest request, HttpServletResponse response, UIContextImpl uiContext);
 }

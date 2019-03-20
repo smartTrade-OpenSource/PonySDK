@@ -25,7 +25,7 @@ package com.ponysdk.core.server.servlet;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.server.application.Application;
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.server.websocket.WebsocketEncoder;
 import com.ponysdk.core.ui.basic.PObject;
 import org.junit.Test;
@@ -67,11 +67,11 @@ public class AjaxServletTest {
 
         final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
 
-        UIContext.setCurrent(uiContext);
+        UIContextImpl.setCurrent(uiContext);
         ajaxServlet.doGet(request, response);
 
         SessionManager.get().unregisterApplication(application);
-        UIContext.setCurrent(null);
+        UIContextImpl.setCurrent(null);
     }
 
     /**

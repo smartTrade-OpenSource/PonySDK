@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
@@ -130,7 +130,7 @@ public class PImage extends PWidget {
     }
 
     public void setStream(final StreamHandler streamListener) {
-        UIContext.get().stackEmbeddedStreamRequest(streamListener, this);
+        UIContextImpl.get().stackEmbeddedStreamRequest(streamListener, this);
     }
 
     public HandlerRegistration addClickHandler(final PClickHandler handler) {

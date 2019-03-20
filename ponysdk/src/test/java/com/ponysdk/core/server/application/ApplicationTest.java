@@ -29,6 +29,7 @@ import static org.junit.Assert.assertTrue;
 
 import javax.servlet.http.HttpSession;
 
+import com.ponysdk.core.server.context.UIContextImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -49,17 +50,17 @@ public class ApplicationTest {
 
     /**
      * Test method for
-     * {@link com.ponysdk.core.server.application.Application#registerUIContext(com.ponysdk.core.server.application.UIContext)}.
+     * {@link com.ponysdk.core.server.application.Application#registerUIContext(UIContextImpl)}.
      */
     @Test
     public void testRegisterUIContext() {
         final int uiContextID1 = 1;
-        final UIContext uiContext1 = Mockito.mock(UIContext.class);
+        final UIContextImpl uiContext1 = Mockito.mock(UIContextImpl.class);
         Mockito.when(uiContext1.getID()).thenReturn(uiContextID1);
         application.registerUIContext(uiContext1);
 
         final int uiContextID2 = 2;
-        final UIContext uiContext2 = Mockito.mock(UIContext.class);
+        final UIContextImpl uiContext2 = Mockito.mock(UIContextImpl.class);
         Mockito.when(uiContext2.getID()).thenReturn(uiContextID2);
         application.registerUIContext(uiContext2);
 
@@ -75,12 +76,12 @@ public class ApplicationTest {
     @Test
     public void testDeregisterUIContext() {
         final int uiContextID1 = 1;
-        final UIContext uiContext1 = Mockito.mock(UIContext.class);
+        final UIContextImpl uiContext1 = Mockito.mock(UIContextImpl.class);
         Mockito.when(uiContext1.getID()).thenReturn(uiContextID1);
         application.registerUIContext(uiContext1);
 
         final int uiContextID2 = 2;
-        final UIContext uiContext2 = Mockito.mock(UIContext.class);
+        final UIContextImpl uiContext2 = Mockito.mock(UIContextImpl.class);
         Mockito.when(uiContext2.getID()).thenReturn(uiContextID2);
         application.registerUIContext(uiContext2);
         application.deregisterUIContext(uiContext2.getID());
@@ -101,7 +102,7 @@ public class ApplicationTest {
     @Test
     public void testDestroy() {
         final int uiContextID1 = 1;
-        final UIContext uiContext1 = Mockito.mock(UIContext.class);
+        final UIContextImpl uiContext1 = Mockito.mock(UIContextImpl.class);
         Mockito.when(uiContext1.getID()).thenReturn(uiContextID1);
         application.registerUIContext(uiContext1);
 
@@ -117,7 +118,7 @@ public class ApplicationTest {
     @Test
     public void testPushToClients() {
         final int uiContextID1 = 1;
-        final UIContext uiContext1 = Mockito.mock(UIContext.class);
+        final UIContextImpl uiContext1 = Mockito.mock(UIContextImpl.class);
         Mockito.when(uiContext1.getID()).thenReturn(uiContextID1);
         application.registerUIContext(uiContext1);
 

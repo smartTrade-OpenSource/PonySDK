@@ -23,37 +23,20 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-
-import javax.json.JsonObject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.ui.basic.event.PBlurEvent;
-import com.ponysdk.core.ui.basic.event.PBlurHandler;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
-import com.ponysdk.core.ui.basic.event.PDoubleClickEvent;
-import com.ponysdk.core.ui.basic.event.PDoubleClickHandler;
-import com.ponysdk.core.ui.basic.event.PFocusEvent;
-import com.ponysdk.core.ui.basic.event.PFocusHandler;
-import com.ponysdk.core.ui.basic.event.PMouseOverEvent;
-import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
-import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
+import com.ponysdk.core.server.context.UIContextImpl;
+import com.ponysdk.core.ui.basic.event.*;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 import com.ponysdk.core.writer.ModelWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.json.JsonObject;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * A text box that shows a {@link PDatePicker} when the user focuses on it.
@@ -67,7 +50,7 @@ import com.ponysdk.core.writer.ModelWriter;
  * <dd>Default style for when the date box has bad input.</dd>
  * </dl>
  */
-public class PDateBox extends PWidget implements Focusable, HasPValue<Date>, PValueChangeHandler<Date> {
+public class PDateBox extends PWidget implements HasPValue<Date>, PValueChangeHandler<Date> {
 
     private static final Logger log = LoggerFactory.getLogger(PDateBox.class);
 
@@ -101,7 +84,7 @@ public class PDateBox extends PWidget implements Focusable, HasPValue<Date>, PVa
     }
 
     protected PDateBox(final PDatePicker picker, final SimpleDateFormat dateFormat, final boolean keepDayTimeNeeded) {
-        if (UIContext.get().getApplication().getConfiguration().isTabindexOnlyFormField())
+        if (UIContextImpl.get().getApplication().getConfiguration().isTabindexOnlyFormField())
             tabindex = TabindexMode.FOCUSABLE.getTabIndex();
         this.datePicker = picker;
         this.dateFormat = dateFormat;
@@ -203,17 +186,6 @@ public class PDateBox extends PWidget implements Focusable, HasPValue<Date>, PVa
 
     public String getRawValue() {
         return rawValue;
-    }
-
-    /**
-     * @since v2.7.16
-     * @deprecated Use {@link #focus()} or {@link #blur()}
-     */
-    @Deprecated
-    @Override
-    public void setFocus(final boolean focused) {
-        if (focused) focus();
-        else blur();
     }
 
     public boolean isEnabled() {

@@ -24,7 +24,7 @@
 package com.ponysdk.sample.client.page;
 
 import com.ponysdk.core.model.PUnit;
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PSimplePanel;
 import com.ponysdk.core.ui.basic.PStackLayoutPanel;
@@ -61,7 +61,7 @@ public class StackLayoutPanelPageActivity extends SamplePageActivity {
 
         stackLayoutPanel.addSelectionHandler(event -> {
             final String msg = "On selection : " + event.getSelectedItem();
-            UIContext.getRootEventBus().fireEvent(new DemoBusinessEvent(msg));
+            UIContextImpl.getRootEventBus().fireEvent(new DemoBusinessEvent(msg));
         });
 
         panel.add(stackLayoutPanel);

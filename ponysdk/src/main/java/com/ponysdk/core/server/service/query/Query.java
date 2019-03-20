@@ -91,13 +91,4 @@ public class Query {
         return null;
     }
 
-    /**
-     * @deprecated Use {@link #addCriteria(List)} instead
-     * @since v2.8.10
-     */
-    @Deprecated(forRemoval = true, since = "v2.8.10")
-    public void setCriteria(final List<Criterion> criteria) {
-        addCriteria(criteria);
-    }
-
 }

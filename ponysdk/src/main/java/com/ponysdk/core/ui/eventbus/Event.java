@@ -55,15 +55,6 @@ public abstract class Event<H extends EventHandler> {
         return getClass().getSimpleName() + " with data : " + data;
     }
 
-    /**
-     * @deprecated Useless
-     * @since v2.7.3
-     */
-    @Deprecated
-    public long getEventID() {
-        return 0;
-    }
-
     public abstract Type getAssociatedType();
 
     protected abstract void dispatch(H handler);

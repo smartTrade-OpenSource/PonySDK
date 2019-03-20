@@ -27,7 +27,7 @@ import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 
 public class PString {
 
@@ -40,7 +40,7 @@ public class PString {
     }
 
     private static PString get() {
-        final UIContext session = UIContext.get();
+        final UIContextImpl session = UIContextImpl.get();
         PString s = session.getAttribute(PString.class.getName());
         if (s == null) {
             s = new PString();

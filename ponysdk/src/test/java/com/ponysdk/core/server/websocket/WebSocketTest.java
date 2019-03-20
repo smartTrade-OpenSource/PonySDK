@@ -33,6 +33,7 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
 import javax.json.spi.JsonProvider;
 
+import com.ponysdk.core.server.context.UIContextImpl;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
@@ -45,12 +46,11 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.ApplicationManager;
-import com.ponysdk.core.server.application.UIContext;
 
 public class WebSocketTest {
 
     private WebSocket webSocket;
-    private UIContext uiContext;
+    private UIContextImpl uiContext;
     private Session session;
 
     @Before
@@ -81,7 +81,7 @@ public class WebSocketTest {
         Mockito.when(session.isOpen()).thenReturn(true);
         webSocket.onWebSocketConnect(session);
 
-        final ArgumentCaptor<UIContext> uiContextCaptor = ArgumentCaptor.forClass(UIContext.class);
+        final ArgumentCaptor<UIContextImpl> uiContextCaptor = ArgumentCaptor.forClass(UIContextImpl.class);
         Mockito.verify(applicationManager, Mockito.times(1)).startApplication(uiContextCaptor.capture());
         uiContext = uiContextCaptor.getValue();
 

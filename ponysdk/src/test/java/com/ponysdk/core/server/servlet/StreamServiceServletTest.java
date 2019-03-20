@@ -29,13 +29,13 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.ponysdk.core.server.context.UIContextImpl;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.server.application.Application;
-import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.PObject;
 import com.ponysdk.core.ui.eventbus.StreamHandler;
 
@@ -58,7 +58,7 @@ public class StreamServiceServletTest {
             .thenReturn(String.valueOf(streamRequestID));
 
         final Application application = new Application("0", null, null);
-        final UIContext uiContext = Mockito.mock(UIContext.class);
+        final UIContextImpl uiContext = Mockito.mock(UIContextImpl.class);
         Mockito.when(uiContext.getID()).thenReturn(uiContextID);
         final StreamHandler streamListener = Mockito.mock(StreamHandler.class);
         Mockito.when(uiContext.removeStreamListener(streamRequestID)).thenReturn(streamListener);
@@ -89,7 +89,7 @@ public class StreamServiceServletTest {
         Mockito.when(request.getParameter(ClientToServerModel.STREAM_REQUEST_ID.toStringValue())).thenReturn("2");
 
         final Application application = new Application("0", null, null);
-        final UIContext uiContext = Mockito.mock(UIContext.class);
+        final UIContextImpl uiContext = Mockito.mock(UIContextImpl.class);
         Mockito.when(uiContext.getID()).thenReturn(uiContextID);
         application.registerUIContext(uiContext);
         SessionManager.get().registerApplication(application);

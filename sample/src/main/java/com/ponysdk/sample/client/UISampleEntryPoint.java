@@ -23,62 +23,11 @@
 
 package com.ponysdk.sample.client;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.text.SimpleDateFormat;
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
-
 import com.ponysdk.core.model.PUnit;
-import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.PScheduler;
+import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.server.stm.Txn;
-import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.PAbsolutePanel;
-import com.ponysdk.core.ui.basic.PAnchor;
-import com.ponysdk.core.ui.basic.PButton;
-import com.ponysdk.core.ui.basic.PCookies;
-import com.ponysdk.core.ui.basic.PDateBox;
-import com.ponysdk.core.ui.basic.PDockLayoutPanel;
-import com.ponysdk.core.ui.basic.PFileUpload;
-import com.ponysdk.core.ui.basic.PFlowPanel;
-import com.ponysdk.core.ui.basic.PFrame;
-import com.ponysdk.core.ui.basic.PFunctionalLabel;
-import com.ponysdk.core.ui.basic.PLabel;
-import com.ponysdk.core.ui.basic.PListBox;
-import com.ponysdk.core.ui.basic.PMenuBar;
-import com.ponysdk.core.ui.basic.PRichTextArea;
-import com.ponysdk.core.ui.basic.PScript;
-import com.ponysdk.core.ui.basic.PScrollPanel;
-import com.ponysdk.core.ui.basic.PSimplePanel;
-import com.ponysdk.core.ui.basic.PStackLayoutPanel;
-import com.ponysdk.core.ui.basic.PTabLayoutPanel;
-import com.ponysdk.core.ui.basic.PTextBox;
-import com.ponysdk.core.ui.basic.PTree;
-import com.ponysdk.core.ui.basic.PTreeItem;
-import com.ponysdk.core.ui.basic.PWidget;
-import com.ponysdk.core.ui.basic.PWindow;
+import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
 import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
@@ -105,6 +54,18 @@ import com.ponysdk.core.ui.rich.PTwinListBox;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
 import com.ponysdk.sample.client.event.UserLoggedOutHandler;
 import com.ponysdk.sample.client.page.addon.LoggerAddOn;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
@@ -116,7 +77,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     private static int counter;
 
     @Override
-    public void start(final UIContext uiContext) {
+    public void start(final UIContextImpl uiContext) {
         uiContext.setTerminalDataReceiver((object, instruction) -> System.err.println(object + " : " + instruction));
 
         createReconnectingPanel();
@@ -159,7 +120,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
         PWindow.getMain().add(Element.newA());
 
-        // PWindow.getMain().add(new PHistory());
+        // PWindow.getMain().add(new History());
         // PWindow.getMain().add(new PNotificationManager());
         // PWindow.getMain().add(new PSuggestBox());
 
@@ -200,7 +161,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         PWindow.getMain().add(Element.newPGrid());
         PWindow.getMain().add(Element.newPGrid(2, 3));
         PWindow.getMain().add(Element.newPHeaderPanel());
-        // PWindow.getMain().add(new PHistory());
+        // PWindow.getMain().add(new History());
         PWindow.getMain().add(Element.newPHorizontalPanel());
         PWindow.getMain().add(Element.newPHTML());
         PWindow.getMain().add(Element.newPHTML("Html"));
@@ -473,7 +434,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     private void downloadFile() {
         final PButton downloadImageButton = Element.newPButton("Download Pony image");
-        downloadImageButton.addClickHandler(event -> UIContext.get().stackStreamRequest((request, response, uiContext1) -> {
+        downloadImageButton.addClickHandler(event -> UIContextImpl.get().stackStreamRequest((request, response, uiContext1) -> {
             response.reset();
             response.setContentType("image/png");
             response.setHeader("Content-Disposition", "attachment; filename=pony_image.png");
@@ -556,12 +517,12 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     }
 
     private void createNewEvent() {
-        final EventHandler<PClickEvent> handler = UIContext.getNewEventBus().subscribe(PClickEvent.class,
+        final EventHandler<PClickEvent> handler = UIContextImpl.getNewEventBus().subscribe(PClickEvent.class,
             event -> System.err.println("B " + event));
-        UIContext.getNewEventBus().post(new PClickEvent(this));
-        UIContext.getNewEventBus().post(new PClickEvent(this));
-        UIContext.getNewEventBus().unsubscribe(handler);
-        UIContext.getNewEventBus().post(new PClickEvent(this));
+        UIContextImpl.getNewEventBus().post(new PClickEvent(this));
+        UIContextImpl.getNewEventBus().post(new PClickEvent(this));
+        UIContextImpl.getNewEventBus().unsubscribe(handler);
+        UIContextImpl.getNewEventBus().post(new PClickEvent(this));
     }
 
     private static final class Data {
@@ -706,7 +667,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     @Override
     public void onUserLoggedOut(final UserLoggedOutEvent event) {
-        UIContext.get().close();
+        UIContextImpl.get().close();
     }
 
     private static final PStackLayoutPanel createStackLayoutPanel() {

@@ -34,7 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.ui.eventbus.StreamHandler;
 
 /**
@@ -67,7 +67,7 @@ public class StreamServiceServlet extends HttpServlet {
     private static void process(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         try {
             final Integer uiContextID = Integer.parseInt(req.getParameter(ClientToServerModel.UI_CONTEXT_ID.toStringValue()));
-            final UIContext uiContext = SessionManager.get().getUIContext(uiContextID);
+            final UIContextImpl uiContext = SessionManager.get().getUIContext(uiContextID);
             final StreamHandler streamHandler = uiContext
                 .removeStreamListener(Integer.parseInt(req.getParameter(ClientToServerModel.STREAM_REQUEST_ID.toStringValue())));
             streamHandler.onStream(req, resp, uiContext);

@@ -31,7 +31,7 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.ponysdk.core.server.application.Application;
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 
 public class SessionManager {
 
@@ -67,7 +67,7 @@ public class SessionManager {
         listeners.add(listener);
     }
 
-    public UIContext getUIContext(final int id) {
+    public UIContextImpl getUIContext(final int id) {
         return applications.values().stream().map(app -> app.getUIContext(id)).filter(Objects::nonNull).findFirst().orElse(null);
     }
 

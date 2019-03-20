@@ -226,14 +226,6 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
         return day;
     }
 
-    /**
-     * @deprecated Useless
-     */
-    @Deprecated(forRemoval = true, since = "2.8.2")
-    public void setMonth(final int month) {
-        // To be removed
-    }
-
     @Override
     protected String dumpDOM() {
         return "<date year=\"" + year + "\" month=\"" + month + "\" day=\"" + day + "\"></date>";
