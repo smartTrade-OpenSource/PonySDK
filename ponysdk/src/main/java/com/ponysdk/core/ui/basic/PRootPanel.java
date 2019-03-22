@@ -60,6 +60,7 @@ public class PRootPanel extends PAbsolutePanel {
 
     @Override
     public void onClientData(final JsonObject instruction) {
+        if (destroy) return;
         if (instruction.containsKey(ClientToServerModel.HANDLER_DOCUMENT_VISIBILITY.toStringValue())) {
             if (id == null) getWindow().onClientData(instruction);
         } else {
