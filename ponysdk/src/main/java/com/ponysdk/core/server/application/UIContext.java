@@ -152,11 +152,7 @@ public class UIContext {
      * @return The current UIContext
      */
     public static UIContext get() {
-        UIContext uiContext = currentContext.get();
-        if (uiContext == null) {
-            throw new RuntimeException("PScheduler should be used when an application thread needs to update the GUI.");
-        }
-        return uiContext;
+        return currentContext.get();
     }
 
     /**
@@ -178,7 +174,7 @@ public class UIContext {
     /**
      * Adds {@link EventHandler} to the {@link com.ponysdk.core.ui.eventbus.EventBus}
      *
-     * @param type    the event type
+     * @param type the event type
      * @param handler the event handler
      * @return the HandlerRegistration in order to remove the EventHandler
      * @see #fireEvent(Event)
@@ -199,17 +195,17 @@ public class UIContext {
     }
 
     public void executeFireEvent(final Event<? extends EventHandler> event) {
-    	execute(() -> fireEvent0(event));
+        execute(() -> fireEvent0(event));
     }
 
     private void fireEvent0(final Event<? extends EventHandler> event) {
-    	rootEventBus.fireEvent(event);
+        rootEventBus.fireEvent(event);
     }
 
     /**
      * Removes {@link EventHandler} from the {@link com.ponysdk.core.ui.eventbus.EventBus}
      *
-     * @param type    the event type
+     * @param type the event type
      * @param handler the event handler
      * @see #addHandler(com.ponysdk.core.ui.eventbus.Event.Type, EventHandler)
      */
@@ -221,7 +217,7 @@ public class UIContext {
      * Fires an {@link Event} on the {@link com.ponysdk.core.ui.eventbus.EventBus} with a specific source
      * Only {@link EventHandler}s added before fires event will be stimulated
      *
-     * @param event  the fired event
+     * @param event the fired event
      * @param source the source
      */
     public static void fireEventFromSource(final Event<? extends EventHandler> event, final EventSource source) {
@@ -402,7 +398,7 @@ public class UIContext {
 
                     if (jsonObject.containsKey(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())) {
                         final int parentObjectID = jsonObject.getJsonNumber(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())
-                                .intValue();
+                            .intValue();
                         final PObject gcObject = getObject(parentObjectID);
                         if (log.isWarnEnabled()) log.warn(String.valueOf(gcObject));
                     }
@@ -504,7 +500,7 @@ public class UIContext {
      * Registers a {@link StreamHandler} that will be called on a specific {@link com.ponysdk.core.terminal.ui.PTObject}
      *
      * @param streamListener the stream handler
-     * @param pObject        the {@link PObject}
+     * @param pObject the {@link PObject}
      */
     public void stackEmbeddedStreamRequest(final StreamHandler streamListener, final PObject pObject) {
         final int streamRequestID = nextStreamRequestID();
@@ -555,7 +551,7 @@ public class UIContext {
      * <p>
      * If the value passed in is null, this has the same effect as calling {@link #removeAttribute(String)}.
      *
-     * @param name  the name to which the object is bound; cannot be null
+     * @param name the name to which the object is bound; cannot be null
      * @param value the object to be bound
      */
     public void setAttribute(final String name, final Object value) {
