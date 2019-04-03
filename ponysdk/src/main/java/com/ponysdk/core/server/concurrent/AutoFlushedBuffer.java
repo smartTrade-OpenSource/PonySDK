@@ -61,7 +61,7 @@ public abstract class AutoFlushedBuffer implements Closeable {
     /**
      * Release resources associated to the flushing mechanism. Will be called at most once.
      */
-    protected abstract void closeFlusher();
+    protected abstract void closeFlusher() throws IOException;
 
     // the ringbuffer that holds data
     // invariant : the range [position, limit[ is always available for write, it cannot contains pending data

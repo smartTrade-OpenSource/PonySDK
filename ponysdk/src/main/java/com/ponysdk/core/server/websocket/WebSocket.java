@@ -27,12 +27,11 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.Application;
 import com.ponysdk.core.server.application.ApplicationManager;
-import com.ponysdk.core.server.context.UIContext;
 import com.ponysdk.core.server.context.CommunicationSanityChecker;
+import com.ponysdk.core.server.context.UIContext;
 import com.ponysdk.core.ui.basic.PObject;
 import org.eclipse.jetty.util.component.Container;
 import org.eclipse.jetty.websocket.api.StatusCode;
-import org.eclipse.jetty.websocket.api.WebSocketListener;
 import org.eclipse.jetty.websocket.common.extensions.ExtensionStack;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.slf4j.Logger;
@@ -41,14 +40,12 @@ import org.slf4j.LoggerFactory;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
-import javax.websocket.EndpointConfig;
-import javax.websocket.OnOpen;
+import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 import java.io.StringReader;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import javax.websocket.*;
 import java.util.stream.Collectors;
 
 @ServerEndpoint(value = "/ws")
@@ -91,15 +88,10 @@ public class WebSocket implements WebsocketEncoder {
         websocketPusher = new WebSocketPusher(session, 1 << 20, 1 << 12, TimeUnit.SECONDS.toMillis(60));
         communicationSanityChecker.registerSession(this);
 
-        uiContext.acquire();
-        try {
-            encode(ServerToClientModel.CREATE_CONTEXT, uiContext.getID());
-            encode(ServerToClientModel.OPTION_FORMFIELD_TABULATION, application.getConfiguration().isTabindexOnlyFormField());
-            endObject();
-            flush0();
-        } finally {
-            uiContext.release();
-        }
+        encode(ServerToClientModel.CREATE_CONTEXT, uiContext.getID());
+        encode(ServerToClientModel.OPTION_FORMFIELD_TABULATION, application.getConfiguration().isTabindexOnlyFormField());
+        endObject();
+        flush0();
 
         applicationManager.startApplication(uiContext);
     }
@@ -127,7 +119,7 @@ public class WebSocket implements WebsocketEncoder {
                 if (monitor != null) monitor.onMessageReceived(WebSocket.this, message);
 
                 final JsonObject jsonObject;
-                try (final JsonReader reader = uiContext.getJsonProvider().createReader(new StringReader(message))) {
+                try (final JsonReontext.getJsonProvider().createReadader reader = uiCer(new StringReader(message))) {
                     jsonObject = reader.readObject();
                 }
 

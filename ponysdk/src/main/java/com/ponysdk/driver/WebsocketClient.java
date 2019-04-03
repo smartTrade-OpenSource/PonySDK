@@ -143,7 +143,7 @@ class WebsocketClient implements AutoCloseable {
         if (session != null) {
             final String id = session.getId();
             try {
-                session.close();
+                session.    close();
             } catch (final IOException e) {
                 log.error("Failed to close session {}", id, e);
             }

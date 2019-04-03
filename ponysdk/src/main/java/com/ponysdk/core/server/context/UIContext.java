@@ -39,9 +39,11 @@ public interface UIContext {
 
     <T> T getAttribute(final String name);
 
-    public PCookies getCookies();
+    public PCookies getCookies(); //Browser
 
     public Monitor getMonitor();
 
-    public History getHistory();
+    public History getHistory();    //Browser
+
+
 }

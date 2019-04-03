@@ -23,6 +23,18 @@
 
 package com.ponysdk.core.server.websocket;
 
+import com.ponysdk.core.model.ArrayValueModel;
+import com.ponysdk.core.model.BooleanModel;
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.model.ValueTypeModel;
+import com.ponysdk.core.server.concurrent.AutoFlushedBuffer;
+import com.ponysdk.core.server.context.UIContextImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.websocket.SendHandler;
+import javax.websocket.SendResult;
+import javax.websocket.Session;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
@@ -33,19 +45,7 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import com.ponysdk.core.server.context.UIContextImpl;
-import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.WriteCallback;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ponysdk.core.model.ArrayValueModel;
-import com.ponysdk.core.model.BooleanModel;
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.model.ValueTypeModel;
-import com.ponysdk.core.server.concurrent.AutoFlushedBuffer;
-
-public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback {
+public class WebSocketPusher extends AutoFlushedBuffer implements SendHandler {
 
     private static final Logger log = LoggerFactory.getLogger(WebSocketPusher.class);
 
@@ -78,29 +78,13 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
     @Override
     protected void doFlush(final ByteBuffer bufferToFlush) {
         final int bytes = bufferToFlush.remaining();
-        session.getRemote().sendBytes(bufferToFlush, this);
+        session.getAsyncRemote().sendBinary(bufferToFlush, this);
         if (listener != null) listener.onOutgoingPonyFramesBytes(bytes);
     }
 
     @Override
-    protected void closeFlusher() {
+    protected void closeFlusher() throws IOException {
         session.close();
-    }
-
-    @Override
-    public void writeFailed(final Throwable t) {
-        if (t instanceof Exception) {
-            onFlushFailure((Exception) t);
-        } else {
-            // wrap error into a generic exception to notify producer thread and rethrow the original throwable
-            onFlushFailure(new IOException(t));
-            throw (RuntimeException) t;
-        }
-    }
-
-    @Override
-    public void writeSuccess() {
-        onFlushCompletion();
     }
 
     /**
@@ -458,5 +442,21 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
 
     void setWebSocketListener(final WebSocket.Listener listener) {
         this.listener = listener;
+    }
+
+    @Override
+    public void onResult(SendResult result) {
+        if (result.isOK()) {
+            onFlushCompletion();
+        } else {
+            Throwable t = result.getException();
+            if (t instanceof Exception) {
+                onFlushFailure((Exception) t);
+            } else {
+                // wrap error into a generic exception to notify producer thread and rethrow the original throwable
+                onFlushFailure(new IOException(t));
+                throw (RuntimeException) t;
+            }
+        }
     }
 }
