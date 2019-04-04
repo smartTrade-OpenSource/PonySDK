@@ -29,6 +29,7 @@ import java.util.logging.Logger;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
@@ -63,6 +64,10 @@ public class PonySDK implements UncaughtExceptionHandler {
 
     private boolean tabindexOnlyFormField;
 
+    //Communication SanityChecker
+    private long lastHeartBeatFail = 0L;
+    private ReconnectionChecker reconnectionChecker;
+
     public PonySDK() {
         if (INSTANCE != null) throw new RuntimeException("Cannot instanciate PonySDK twice");
         INSTANCE = this;
@@ -84,6 +89,7 @@ public class PonySDK implements UncaughtExceptionHandler {
             else startChildContext();
 
             started = true;
+            log.info("started");
         } catch (final Throwable e) {
             log.log(Level.SEVERE, "Loading application has failed #" + e.getMessage(), e);
         }
@@ -93,10 +99,8 @@ public class PonySDK implements UncaughtExceptionHandler {
         Window.addCloseHandler(event -> close());
         final String builder = GWT.getHostPageBaseURL().replaceFirst("http", "ws") + MappingPath.WEBSOCKET + "?"
                 + ClientToServerModel.TYPE_HISTORY.toStringValue() + "=" + History.getToken();
-        final ReconnectionChecker reconnectionChecker = new ReconnectionChecker();
+        reconnectionChecker = new ReconnectionChecker();
         socketClient = new WebSocketClient(builder, uiBuilder, reconnectionChecker);
-
-        reconnectionChecker.checkConnection();
     }
 
     private void startChildContext() {
@@ -200,6 +204,32 @@ public class PonySDK implements UncaughtExceptionHandler {
 
     public void setTabindexOnlyFormField(final boolean tabindexOnlyFormField) {
         this.tabindexOnlyFormField = tabindexOnlyFormField;
+    }
+
+    public void setHeartBeatPeriod(final int heartBeatInseconds) {
+        final int heartBeatInMilli = heartBeatInseconds * 1000;
+        Scheduler.get().scheduleFixedDelay(() -> {
+            final long now = System.currentTimeMillis();
+            final long lastMessageTime = socketClient.getLastMessageTime();
+            if (lastMessageTime != lastHeartBeatFail) {
+                if (now - lastMessageTime > heartBeatInMilli) {
+                    lastHeartBeatFail = lastMessageTime;
+                    final PTInstruction requestData = new PTInstruction();
+                    requestData.put(ClientToServerModel.HEARTBEAT_REQUEST);
+                    socketClient.send(requestData.toString());
+                }
+            } else {
+                if (now - lastMessageTime > heartBeatInMilli) {
+                    socketClient.close(1000, "server did not respond");
+                    reconnectionChecker.detectConnectionFailure();
+                    //stop the scheduling
+                    return false;
+                } else {
+                    lastHeartBeatFail = 0L;
+                }
+            }
+            return true;
+        }, heartBeatInMilli);
     }
 
 }

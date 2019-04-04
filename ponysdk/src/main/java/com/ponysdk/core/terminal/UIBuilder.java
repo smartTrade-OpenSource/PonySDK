@@ -119,9 +119,12 @@ public class UIBuilder {
                 PonySDK.get().setContextId(binaryModel.getIntValue());
                 // Read ServerToClientModel.OPTION_FORMFIELD_TABULATION element
                 PonySDK.get().setTabindexOnlyFormField(readerBuffer.readBinaryModel().getBooleanValue());
+                PonySDK.get().setHeartBeatPeriod(readerBuffer.readBinaryModel().getIntValue());
                 readerBuffer.readBinaryModel(); // Read ServerToClientModel.END element
             } else if (ServerToClientModel.DESTROY_CONTEXT == model) {
                 destroy();
+                readerBuffer.readBinaryModel(); // Read ServerToClientModel.END element
+            } else if (ServerToClientModel.HEARTBEAT == model) {
                 readerBuffer.readBinaryModel(); // Read ServerToClientModel.END element
             } else {
                 final int oldCurrentWindowId = currentWindowId;

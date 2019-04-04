@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.ApplicationManager;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.context.CommunicationSanityChecker;
@@ -88,8 +89,13 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
             uiContext.acquire();
             try {
                 beginObject();
+                final ApplicationConfiguration configuration = uiContext.getConfiguration();
+                final TimeUnit heartBeatPeriodTimeUnit = configuration.getHeartBeatPeriodTimeUnit();
+
                 encode(ServerToClientModel.CREATE_CONTEXT, uiContext.getID()); // TODO nciaravola integer ?
-                encode(ServerToClientModel.OPTION_FORMFIELD_TABULATION, uiContext.getConfiguration().isTabindexOnlyFormField());
+                encode(ServerToClientModel.OPTION_FORMFIELD_TABULATION, configuration.isTabindexOnlyFormField());
+                encode(ServerToClientModel.HEARTBEAT_PERIOD,
+                    (int) heartBeatPeriodTimeUnit.toSeconds(configuration.getHeartBeatPeriod()));
                 endObject();
                 if (isAlive()) flush0();
             } catch (final Throwable e) {
@@ -122,6 +128,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     /**
      * Receive from the terminal
      */
+
     @Override
     public void onWebSocketText(final String message) {
         if (this.listener != null) listener.onIncomingText(message);
@@ -135,7 +142,9 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
                     jsonObject = reader.readObject();
                 }
 
-                if (jsonObject.containsKey(ClientToServerModel.TERMINAL_LATENCY.toStringValue())) {
+                if (jsonObject.containsKey(ClientToServerModel.HEARTBEAT_REQUEST.toStringValue())) {
+                    sendHeartbeat();
+                } else if (jsonObject.containsKey(ClientToServerModel.TERMINAL_LATENCY.toStringValue())) {
                     processRoundtripLatency(jsonObject);
                 } else if (jsonObject.containsKey(ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue())) {
                     processInstructions(jsonObject);
@@ -228,6 +237,14 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
             endObject();
             flush0();
         }
+    }
+    
+    private void sendHeartbeat() {
+        if (!isAlive() || !isSessionOpen()) return;
+        beginObject();
+        encode(ServerToClientModel.HEARTBEAT, null);
+        endObject();
+        flush0();
     }
 
     public void flush() {

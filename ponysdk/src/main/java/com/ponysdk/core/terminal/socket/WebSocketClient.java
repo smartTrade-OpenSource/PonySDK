@@ -44,6 +44,8 @@ public class WebSocketClient {
     private final Window window;
     private final WebSocket webSocket;
 
+    private long lastMessageTime = -1;
+
     public WebSocketClient(final String url, final UIBuilder uiBuilder, final ReconnectionChecker reconnectionChecker) {
         this.window = Browser.getWindow();
         this.webSocket = window.newWebSocket(url);
@@ -52,6 +54,7 @@ public class WebSocketClient {
         webSocket.setOnopen(event -> {
             uiBuilder.init(new WebSocketRequestBuilder(WebSocketClient.this));
             if (log.isLoggable(Level.INFO)) log.info("WebSocket connected");
+            lastMessageTime = System.currentTimeMillis();
         });
 
         webSocket.setOnclose(event -> {
@@ -67,8 +70,12 @@ public class WebSocketClient {
             }
         });
 
-        webSocket.setOnerror(event -> log.severe("WebSocket error : " + event));
+        webSocket.setOnerror(event -> {
+            log.severe("WebSocket error : " + event);
+        });
         webSocket.setOnmessage(event -> {
+            lastMessageTime = System.currentTimeMillis();
+
             final Object data = ((MessageEvent) event).getData();
             if (data instanceof ArrayBuffer) {
                 final ArrayBuffer buffer = (ArrayBuffer) data; //TODO nciaravola avoid cast ?
@@ -87,6 +94,17 @@ public class WebSocketClient {
 
     public void close() {
         webSocket.close();
+    }
+
+    public void close(final int code, final String reason) {
+        webSocket.close(code, reason);
+    }
+
+    /**
+     * @return the lastMessageTime
+     */
+    public long getLastMessageTime() {
+        return lastMessageTime;
     }
 
 }
