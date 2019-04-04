@@ -48,29 +48,12 @@ public class ReconnectionChecker {
 
     private final Window window;
 
-    private final XMLHttpRequest connectionRequest;
     private final XMLHttpRequest reconnectionRequest;
 
     private boolean errorDetected;
 
     public ReconnectionChecker() {
         window = Browser.getWindow();
-
-        connectionRequest = window.newXMLHttpRequest();
-        connectionRequest.setOnreadystatechange(evt -> {
-            if (connectionRequest.getReadyState() == XMLHttpRequest.DONE) {
-                if (errorDetected) return;
-                if (connectionRequest.getStatus() == HTTP_STATUS_CODE_OK) {
-                    // We reschedule the next check (we wait to avoid spaming)
-                    Scheduler.get().scheduleFixedDelay(() -> {
-                        checkConnection();
-                        return false;
-                    }, CHECK_PERIOD);
-                } else {
-                    detectConnectionFailure();
-                }
-            }
-        });
 
         reconnectionRequest = window.newXMLHttpRequest();
         reconnectionRequest.setOnreadystatechange(evt -> {
@@ -87,12 +70,6 @@ public class ReconnectionChecker {
                 }
             }
         });
-    }
-
-    protected void checkConnection() {
-        connectionRequest.open("GET", getPingUrl() + "&check");
-        setHTTPRequestTimeout(connectionRequest, CHECK_TIMEOUT);
-        connectionRequest.send();
     }
 
     public void detectConnectionFailure() {

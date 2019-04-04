@@ -27,10 +27,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
 import javax.json.spi.JsonProvider;
 
 import org.eclipse.jetty.websocket.api.Session;
@@ -47,12 +50,15 @@ import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.ApplicationManager;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.stm.TxnContext;
+import com.ponysdk.core.util.Pair;
 
 public class WebSocketTest {
 
     private WebSocket webSocket;
     private UIContext uiContext;
     private Session session;
+
+    private final List<Pair<ServerToClientModel, Object>> encodedValues = new ArrayList<>();
 
     @Before
     public void setUp() throws Exception {
@@ -65,9 +71,11 @@ public class WebSocketTest {
 
             @Override
             public void encode(final ServerToClientModel model, final Object value) {
-                // Nothing to do
+                encodedValues.add(new Pair<>(model, value));
             }
         };
+
+        encodedValues.clear();
 
         final ServletUpgradeRequest request = Mockito.mock(ServletUpgradeRequest.class);
         webSocket.setRequest(request);
@@ -75,7 +83,7 @@ public class WebSocketTest {
 
         final ApplicationManager applicationManager = Mockito.mock(ApplicationManager.class);
         final ApplicationConfiguration applicationConfiguration = new ApplicationConfiguration();
-        applicationConfiguration.setHeartBeatPeriod(-1, TimeUnit.SECONDS);
+        applicationConfiguration.setHeartBeatPeriod(0, TimeUnit.SECONDS);
         Mockito.when(applicationManager.getConfiguration()).thenReturn(applicationConfiguration);
         webSocket.setApplicationManager(applicationManager);
 
@@ -124,6 +132,28 @@ public class WebSocketTest {
     }
 
     /**
+     * Test method for {@link com.ponysdk.core.server.websocket.WebSocket#onWebSocketText(java.lang.String)}
+     */
+    @Test
+    public void testOnWebSocketTextRoundTripLatency() {
+        encodedValues.clear();
+        final JsonObjectBuilder job = JsonProvider.provider().createObjectBuilder();
+        job.add(ClientToServerModel.ROUNDTRIP_LATENCY.toStringValue(), JsonValue.NULL);
+        webSocket.onWebSocketText(job.build().toString());
+        assertEquals(encodedValues, List.of(new Pair<>(ServerToClientModel.TERMINAL_LATENCY, null)));
+    }
+
+    /**
+     * Test method for {@link com.ponysdk.core.server.websocket.WebSocket#onWebSocketConnect(Session)}
+     */
+    @Test
+    public void testOnWebSocketConnect() {
+        assertEquals(encodedValues.get(0), new Pair<>(ServerToClientModel.CREATE_CONTEXT, uiContext.getID()));
+        assertEquals(encodedValues.get(1), new Pair<>(ServerToClientModel.OPTION_FORMFIELD_TABULATION, false));
+        assertEquals(encodedValues.get(2), new Pair<>(ServerToClientModel.HEART_BEAT_PERIOD, (byte) 0));
+    }
+
+    /**
      * Test method for {@link com.ponysdk.core.server.websocket.WebSocket#onWebSocketText(java.lang.String)}.
      */
     @Test
@@ -161,7 +191,6 @@ public class WebSocketTest {
      */
     @Test
     public void testUnknowMessage() {
-        webSocket.setListener(null);
         webSocket.setMonitor(new WebsocketMonitor() {
 
             @Override
