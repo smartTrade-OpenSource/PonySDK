@@ -214,6 +214,8 @@ public class PonyWebElement implements WebElement {
         sb.append('<').append(widgetType).append(" id='").append(objectID).append('\'');
         if (!styles.isEmpty()) sb.append(" class='").append(styles).append('\'');
         if (!attributes.isEmpty()) sb.append(" attributes='").append(attributes).append('\'');
+        if (!displayed) sb.append(" displayed='false'");
+        if (!enabled) sb.append(" enabled='false'");
         sb.append(" >");
         if (text != null) sb.append(text);
 
