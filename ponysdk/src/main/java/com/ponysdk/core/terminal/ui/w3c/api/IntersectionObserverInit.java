@@ -24,7 +24,6 @@
 package com.ponysdk.core.terminal.ui.w3c.api;
 
 import com.google.gwt.dom.client.Element;
-
 import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsProperty;

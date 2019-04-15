@@ -343,7 +343,7 @@ public abstract class AutoFlushedBuffer implements Closeable {
      * already closed.
      */
     @Override
-    public synchronized final void close() {
+    public synchronized final void close() throws IOException {
         //FIXME: wait for flush on close ? or javadoc data may be lost
         if (!closed) {
             closed = true;
@@ -448,7 +448,7 @@ public abstract class AutoFlushedBuffer implements Closeable {
                 //however waiting for that without synchronization will be optimized by the JIT
                 //and become an infinite loop
                 //=> we wait for consumerIndex to be in the same buffer iteration than producer index instead.
-                waitForConsumer(producerIndex & ~(bufferSize - 1));
+                waitForConsumer(producerIndex & -bufferSize);
                 paddingIndex = producerIndex;
                 producerIndex += paddingSize;
                 tryStartFlush(); //flush until buffer end
@@ -489,7 +489,7 @@ public abstract class AutoFlushedBuffer implements Closeable {
     }
 
     //update the data structure after a write to the buffer. Triggers flush automatically if needed
-    private void notifyWrite(final int length) throws IOException {
+    private void notifyWrite(final int length) {
         producerIndex += length;
 
         //auto-flush if more than maxChunkSize data

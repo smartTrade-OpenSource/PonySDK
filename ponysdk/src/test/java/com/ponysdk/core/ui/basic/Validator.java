@@ -23,11 +23,10 @@
 
 package com.ponysdk.core.ui.basic;
 
-import org.junit.Assert;
-import org.junit.Test;
-
 import com.ponysdk.core.ui.form.formfield.StringListBoxFormField;
 import com.ponysdk.core.ui.form.validator.NotEmptyFieldValidator;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class Validator extends PSuite {
 

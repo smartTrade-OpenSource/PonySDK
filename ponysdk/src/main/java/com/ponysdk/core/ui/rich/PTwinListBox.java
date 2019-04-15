@@ -23,9 +23,6 @@
 
 package com.ponysdk.core.ui.rich;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.ponysdk.core.model.PHorizontalAlignment;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
@@ -35,6 +32,9 @@ import com.ponysdk.core.ui.basic.PListBox.ListItem;
 import com.ponysdk.core.ui.basic.event.HasPChangeHandlers;
 import com.ponysdk.core.ui.basic.event.PChangeEvent;
 import com.ponysdk.core.ui.basic.event.PChangeHandler;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class PTwinListBox<T> extends PFlexTable implements HasPChangeHandlers {
 

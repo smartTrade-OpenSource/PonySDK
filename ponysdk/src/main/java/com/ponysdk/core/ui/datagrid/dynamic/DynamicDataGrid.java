@@ -23,16 +23,16 @@
 
 package com.ponysdk.core.ui.datagrid.dynamic;
 
+import com.ponysdk.core.ui.datagrid.ColumnDescriptor;
+import com.ponysdk.core.ui.datagrid.DataGrid;
+import com.ponysdk.core.ui.datagrid.View;
+import com.ponysdk.core.ui.datagrid.impl.DefaultView;
+
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.function.Function;
 import java.util.function.Predicate;
-
-import com.ponysdk.core.ui.datagrid.ColumnDescriptor;
-import com.ponysdk.core.ui.datagrid.DataGrid;
-import com.ponysdk.core.ui.datagrid.View;
-import com.ponysdk.core.ui.datagrid.impl.DefaultView;
 
 public class DynamicDataGrid<DataType> extends DataGrid<DataType> {
 

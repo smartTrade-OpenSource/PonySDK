@@ -23,13 +23,13 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Arrays;
-import java.util.Objects;
-
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.ui.formatter.TextFunction;
 import com.ponysdk.core.writer.ModelWriter;
+
+import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * A PLabel that contains a text, <i>not</i> interpreted as HTML, that can be either forced using

@@ -27,15 +27,12 @@ import com.ponysdk.core.server.application.Application;
 import com.ponysdk.core.server.application.ApplicationManager;
 import com.ponysdk.core.server.servlet.SessionManager;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
+import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpSession;
 
 public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSocketServlet {
-
-    private static final Logger log = LoggerFactory.getLogger(WebSocketServlet.class);
 
     private int maxIdleTime = 1000000;
     private final ApplicationManager applicationManager;
@@ -49,37 +46,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
     public void configure(final WebSocketServletFactory factory) {
         factory.getPolicy().setIdleTimeout(maxIdleTime);
         factory.getExtensionFactory().register(PonyPerMessageDeflateExtension.NAME, PonyPerMessageDeflateExtension.class);
-        factory.setCreator((request, response) -> {
-            final WebSocket webSocket = new WebSocket();
-            webSocket.setRequest(request);
-            webSocket.setApplicationManager(applicationManager);
-            webSocket.setMonitor(monitor);
-
-            if (request.getHttpServletRequest().getServletContext().getSessionCookieConfig() != null) {
-                configureWithSession(request, webSocket);
-            }
-
-            return webSocket;
-        });
-    }
-
-    protected void configureWithSession(final ServletUpgradeRequest request, WebSocket webSocket) {
-        // Force session creation if there is no session
-        request.getHttpServletRequest().getSession(true);
-        final HttpSession httpSession = request.getSession();
-        if (httpSession != null) {
-            final String applicationId = httpSession.getId();
-
-            Application application = SessionManager.get().getApplication(applicationId);
-            if (application == null) {
-                application = new Application(applicationId, httpSession, applicationManager.getConfiguration());
-                SessionManager.get().registerApplication(application);
-            }
-            webSocket.setApplication(application);
-        } else {
-            log.error("No HTTP session found");
-            throw new IllegalStateException("No HTTP session found");
-        }
+        factory.setCreator(this::createWebSocket);
     }
 
     public void setMaxIdleTime(final int maxIdleTime) {
@@ -90,4 +57,22 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         this.monitor = monitor;
     }
 
+    private WebSocket createWebSocket(ServletUpgradeRequest request, ServletUpgradeResponse response) {
+        final WebSocket webSocket = new WebSocket();
+        webSocket.setRequest(request);
+        webSocket.setApplicationManager(applicationManager);
+        webSocket.setMonitor(monitor);
+        // Force session creation if there is no session
+        final HttpSession httpSession = request.getHttpServletRequest().getSession(true);
+        final String applicationId = httpSession.getId();
+
+        Application application = SessionManager.get().register(applicationId);
+        if (application == null) {
+            application = new Application(applicationId, httpSession, applicationManager.getConfiguration());
+            SessionManager.get().registerApplication(application);
+        }
+        webSocket.setApplication(application);
+
+        return webSocket;
+    }
 }

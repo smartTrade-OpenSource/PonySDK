@@ -23,8 +23,8 @@
 
 package com.ponysdk.core.ui.selenium;
 
-import static org.junit.Assert.assertNotNull;
-
+import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.driver.PonySDKWebDriver;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -33,8 +33,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.driver.PonySDKWebDriver;
+import static org.junit.Assert.assertNotNull;
 
 @Ignore
 public class PonySDKWebDriverTest {

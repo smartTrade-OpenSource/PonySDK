@@ -23,12 +23,6 @@
 
 package com.ponysdk.core.terminal;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
@@ -45,19 +39,18 @@ import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 import com.ponysdk.core.terminal.request.RequestBuilder;
-import com.ponysdk.core.terminal.ui.PTCookies;
-import com.ponysdk.core.terminal.ui.PTFrame;
-import com.ponysdk.core.terminal.ui.PTHistory;
-import com.ponysdk.core.terminal.ui.PTObject;
-import com.ponysdk.core.terminal.ui.PTStreamResource;
-import com.ponysdk.core.terminal.ui.PTWindow;
-import com.ponysdk.core.terminal.ui.PTWindowManager;
-
+import com.ponysdk.core.terminal.ui.*;
 import elemental.client.Browser;
 import elemental.html.Uint8Array;
 import elemental.util.Collections;
 import elemental.util.MapFromIntTo;
 import elemental.util.MapFromStringTo;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class UIBuilder {
 
@@ -385,7 +378,8 @@ public class UIBuilder {
         if (log.isLoggable(Level.FINE)) {
             if (widget != null) {
                 final Element source = widget.getElement();
-                if (source != null) log.fine("Action triggered, Instruction [" + instruction + "] , " + source.getInnerHTML());
+                if (source != null)
+                    log.fine("Action triggered, Instruction [" + instruction + "] , " + source.getInnerHTML());
             }
         }
         sendDataToServer(instruction);
@@ -409,7 +403,7 @@ public class UIBuilder {
     public void sendExceptionMessageToServer(final Throwable t) {
         log.log(Level.SEVERE, "PonySDK has encountered an internal error : ", t);
         sendErrorMessageToServer(
-            t.getClass().getCanonicalName() + " : " + t.getMessage() + " : " + Arrays.toString(t.getStackTrace()));
+                t.getClass().getCanonicalName() + " : " + t.getMessage() + " : " + Arrays.toString(t.getStackTrace()));
     }
 
     public void sendErrorMessageToServer(final String message) {
@@ -488,7 +482,7 @@ public class UIBuilder {
     void setReadyFrame(final int frameID) {
         final PTFrame frame = (PTFrame) getPTObject(frameID);
         if (frame != null) frame.setReady();
-        else log.warning("Frame " + frame + " doesn't exist");
+        else log.warning("Frame doesn't exist");
     }
 
 }

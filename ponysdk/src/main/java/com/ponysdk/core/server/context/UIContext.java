@@ -21,6 +21,8 @@ public interface UIContext {
 
     int getID();
 
+    void close();
+
     void execute(final Runnable task);
 
     ScheduledTaskHandler execute(final Runnable task, Duration delay);
@@ -39,11 +41,10 @@ public interface UIContext {
 
     <T> T getAttribute(final String name);
 
-    public PCookies getCookies(); //Browser
+    PCookies getCookies(); //Browser
 
-    public Monitor getMonitor();
+    Monitor getMonitor();
 
-    public History getHistory();    //Browser
-
+    History getHistory();    //Browser
 
 }

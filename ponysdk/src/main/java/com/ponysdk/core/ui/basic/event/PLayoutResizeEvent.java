@@ -23,12 +23,12 @@
 
 package com.ponysdk.core.ui.basic.event;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.eventbus.Event;
 import com.ponysdk.core.ui.eventbus.EventHandler;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class PLayoutResizeEvent extends Event<PLayoutResizeEvent.Handler> {
 

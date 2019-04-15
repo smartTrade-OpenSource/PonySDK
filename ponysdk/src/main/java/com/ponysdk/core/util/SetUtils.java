@@ -23,11 +23,7 @@
 
 package com.ponysdk.core.util;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.ListIterator;
-import java.util.Set;
+import java.util.*;
 
 public class SetUtils {
 

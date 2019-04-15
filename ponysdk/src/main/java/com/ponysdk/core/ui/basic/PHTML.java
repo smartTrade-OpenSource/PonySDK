@@ -23,11 +23,11 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Objects;
-
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.writer.ModelWriter;
+
+import java.util.Objects;
 
 /**
  * A widget that can contain arbitrary HTML. This widget uses a &lt;div&gt;
@@ -65,7 +65,7 @@ public class PHTML extends PLabel {
     protected void enrichForUpdate(final ModelWriter writer) {
         super.enrichForUpdate(writer);
         if (html != null) writer.write(ServerToClientModel.HTML, html);
-        if (wordWrap) writer.write(ServerToClientModel.WORD_WRAP, wordWrap);
+        if (wordWrap) writer.write(ServerToClientModel.WORD_WRAP, true);
     }
 
     @Override

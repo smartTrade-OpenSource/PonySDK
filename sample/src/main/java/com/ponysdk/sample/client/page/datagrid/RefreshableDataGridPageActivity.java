@@ -23,20 +23,16 @@
 
 package com.ponysdk.sample.client.page.datagrid;
 
-import java.util.Arrays;
-
 import com.ponysdk.core.server.application.DataListener;
 import com.ponysdk.core.server.context.UIContextImpl;
-import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.PFlexTable;
-import com.ponysdk.core.ui.basic.PFlowPanel;
-import com.ponysdk.core.ui.basic.PScrollPanel;
-import com.ponysdk.core.ui.basic.PSimplePanel;
+import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.core.ui.list.IdentityDataGridColumnDescriptor;
 import com.ponysdk.core.ui.list.renderer.cell.HtmlCellRenderer;
 import com.ponysdk.core.ui.list.renderer.header.StringHeaderCellRenderer;
 import com.ponysdk.sample.client.datamodel.PonyStock;
 import com.ponysdk.sample.client.page.SamplePageActivity;
+
+import java.util.Arrays;
 
 public class RefreshableDataGridPageActivity extends SamplePageActivity implements DataListener {
 

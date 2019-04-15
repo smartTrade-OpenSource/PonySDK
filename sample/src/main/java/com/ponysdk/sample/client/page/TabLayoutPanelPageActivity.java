@@ -23,21 +23,13 @@
 
 package com.ponysdk.sample.client.page;
 
-import java.time.Duration;
-import java.util.Arrays;
-
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.model.PVerticalAlignment;
-import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.PButton;
-import com.ponysdk.core.ui.basic.PDockLayoutPanel;
-import com.ponysdk.core.ui.basic.PHorizontalPanel;
-import com.ponysdk.core.ui.basic.PLabel;
-import com.ponysdk.core.ui.basic.PSimpleLayoutPanel;
-import com.ponysdk.core.ui.basic.PSimplePanel;
-import com.ponysdk.core.ui.basic.PTabLayoutPanel;
-import com.ponysdk.core.ui.basic.PTextBox;
+import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.core.ui.rich.PNotificationManager;
+
+import java.time.Duration;
+import java.util.Arrays;
 
 public class TabLayoutPanelPageActivity extends SamplePageActivity {
 

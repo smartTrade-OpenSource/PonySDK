@@ -23,9 +23,6 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -34,8 +31,10 @@ import com.ponysdk.core.terminal.JavascriptAddOnFactory;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
-
 import elemental.json.JsonObject;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class PTAddOn extends AbstractPTObject {
 
@@ -73,7 +72,7 @@ public class PTAddOn extends AbstractPTObject {
         }
     }
 
-    protected static final JavascriptAddOnFactory getFactory(final UIBuilder uiBuilder, final String signature) {
+    protected static JavascriptAddOnFactory getFactory(final UIBuilder uiBuilder, final String signature) {
         final JavascriptAddOnFactory factory = uiBuilder.getJavascriptAddOnFactory(signature);
         if (factory != null) return factory;
         else throw new IllegalArgumentException("AddOn factory not found for signature: " + signature);

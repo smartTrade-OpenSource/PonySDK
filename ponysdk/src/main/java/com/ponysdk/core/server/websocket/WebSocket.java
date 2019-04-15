@@ -31,35 +31,27 @@ import com.ponysdk.core.server.context.CommunicationSanityChecker;
 import com.ponysdk.core.server.context.UIContext;
 import com.ponysdk.core.ui.basic.PObject;
 import org.eclipse.jetty.util.component.Container;
-import org.eclipse.jetty.websocket.api.StatusCode;
 import org.eclipse.jetty.websocket.common.extensions.ExtensionStack;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.json.JsonArray;
 import javax.json.JsonObject;
-import javax.json.JsonReader;
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
-import java.io.StringReader;
-import java.util.Arrays;
-import java.util.List;
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
-@ServerEndpoint(value = "/ws")
-public class WebSocket implements WebsocketEncoder {
+@ServerEndpoint("/ws")
+public class WebSocket {
 
     private static final Logger log = LoggerFactory.getLogger(WebSocket.class);
 
-    private static final String INFO_MESSAGE = "Message received from terminal : UIContextImpl #{} on {} : {}";
-    private static final String WARN_MESSAGE = "Message received from terminal : UIContextImpl #{} on {} : {}";
-    private static final String ERROR_MESSAGE = "Message received from terminal : UIContextImpl #{} on {} : {}";
+    private static final String MESSAGE_PATTERN = "Message received from terminal : UIContextImpl #{} on {} : {}";
 
     private ServletUpgradeRequest request;
     private WebsocketMonitor monitor;
-    private WebSocketPusher websocketPusher;
+    private WebsocketEncoder encoder;
     private ApplicationManager applicationManager;
 
     private Session session;
@@ -68,60 +60,41 @@ public class WebSocket implements WebsocketEncoder {
     private Application application;
     private CommunicationSanityChecker communicationSanityChecker;
 
-    /**
-     * Initialise and start a new UIContext
-     *
-     *
-     * <p>
-     * <b>WebSocketPusher</b>
-     * 1K for max chunk size and 1M for total buffer size
-     * Don't set max chunk size > 8K because when using Jetty Websocket compression, the chunks are limited to 8K
-     * </p>
-     *
-     * @param session
-     */
     @OnOpen
-    public void onOpen(final Session session, EndpointConfig config) {
+    public void onOpen(final Session session, EndpointConfig config) throws IOException {
         this.session = session;
 
         uiContext = application.createUIContext(this);
-        websocketPusher = new WebSocketPusher(session, 1 << 20, 1 << 12, TimeUnit.SECONDS.toMillis(60));
         communicationSanityChecker.registerSession(this);
 
-        encode(ServerToClientModel.CREATE_CONTEXT, uiContext.getID());
-        encode(ServerToClientModel.OPTION_FORMFIELD_TABULATION, application.getConfiguration().isTabindexOnlyFormField());
-        endObject();
-        flush0();
+        encoder = new WebSocketPusher(session, 1 << 20, 1 << 12, TimeUnit.SECONDS.toMillis(60));
+        encoder.encode(ServerToClientModel.CREATE_CONTEXT, uiContext.getID());
+        encoder.encode(ServerToClientModel.END, null);
+        encoder.flush();
 
         applicationManager.startApplication(uiContext);
     }
 
     @OnError
     public void onError(final Throwable throwable) {
-        log.error("WebSocket Error", throwable);
-        uiContext.onDestroy();
+        log.error("WebSocket Error on UIContext : {}", uiContext.getID(), throwable);
+        uiContext.close();
     }
 
     @OnClose
     public void onClose(final int statusCode, final String reason) {
-        log.info("WebSocket closed on UIContextImpl #{} : {}, reason : {}", uiContext.getID(), NiceStatusCode.getMessage(statusCode), reason);
-        uiContext.onDestroy();
+        log.info("WebSocket closed on UIContext : {}, code : {}, reason : {}", uiContext.getID(), statusCode, reason);
+        uiContext.close();
     }
 
     @OnMessage
     public void onMessage(final String message) {
-        //TODO nciaravola
-
-        //if (this.listener != null) listener.onIncomingText(message);
+        if (this.listener != null) listener.onIncomingText(message);
         if (isAlive()) {
             try {
                 uiContext.onMessageReceived();
                 if (monitor != null) monitor.onMessageReceived(WebSocket.this, message);
 
-                final JsonObject jsonObject;
-                try (final JsonReontext.getJsonProvider().createReadader reader = uiCer(new StringReader(message))) {
-                    jsonObject = reader.readObject();
-                }
 
                 if (jsonObject.containsKey(ClientToServerModel.TERMINAL_LATENCY.toStringValue())) {
                     //processRoundtripLatency(jsonObject);
@@ -164,15 +137,6 @@ public class WebSocket implements WebsocketEncoder {
      * uiContext.addNetworkLatencyValue(networkLatency);
      * }
      **/
-    private void processInstructions(final JsonObject jsonObject) {
-        final String applicationInstructions = ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue();
-        uiContext.execute(() -> {
-            final JsonArray appInstructions = jsonObject.getJsonArray(applicationInstructions);
-            for (int i = 0; i < appInstructions.size(); i++) {
-                uiContext.fireClientData(appInstructions.getJsonObject(i));
-            }
-        });
-    }
 
     private void processTerminalLog(final JsonObject json, final ClientToServerModel level) {
         final String message = json.getJsonString(level.toStringValue()).getString();
@@ -185,13 +149,13 @@ public class WebSocket implements WebsocketEncoder {
 
         switch (level) {
             case INFO_MSG:
-                log.info(INFO_MESSAGE, uiContext.getID(), objectInformation, message);
+                log.info(MESSAGE_PATTERN, uiContext.getID(), objectInformation, message);
                 break;
             case WARN_MSG:
-                log.warn(WARN_MESSAGE, uiContext.getID(), objectInformation, message);
+                log.warn(MESSAGE_PATTERN, uiContext.getID(), objectInformation, message);
                 break;
             case ERROR_MSG:
-                log.error(ERROR_MESSAGE, uiContext.getID(), objectInformation, message);
+                log.error(MESSAGE_PATTERN, uiContext.getID(), objectInformation, message);
                 break;
             default:
                 log.error("Unknown log level during terminal log processing : {}", level);
@@ -219,14 +183,10 @@ public class WebSocket implements WebsocketEncoder {
         return session.getId();
     }
 
-    void flush0() {
-        websocketPusher.flush();
-    }
-
     public void close() {
         if (isSessionOpen()) {
             log.info("Closing websocket programmatically on UIcontext: {}", uiContext.getID());
-            websocketPusher.close();
+            encoder.close();
         }
     }
 
@@ -236,61 +196,6 @@ public class WebSocket implements WebsocketEncoder {
 
     private boolean isSessionOpen() {
         return session != null && session.isOpen();
-    }
-
-    @Override
-    public void endObject() {
-        encode(ServerToClientModel.END, null);
-    }
-
-    @Override
-    public void encode(final ServerToClientModel model, final Object value) {
-        websocketPusher.encode(model, value);
-    }
-
-    private enum NiceStatusCode {
-
-        NORMAL(StatusCode.NORMAL, "Normal closure"),
-        SHUTDOWN(StatusCode.SHUTDOWN, "Shutdown"),
-        PROTOCOL(StatusCode.PROTOCOL, "Protocol error"),
-        BAD_DATA(StatusCode.BAD_DATA, "Received bad data"),
-        UNDEFINED(StatusCode.UNDEFINED, "Undefined"),
-        NO_CODE(StatusCode.NO_CODE, "No code present"),
-        NO_CLOSE(StatusCode.NO_CLOSE, "Abnormal connection closed"),
-        ABNORMAL(StatusCode.ABNORMAL, "Abnormal connection closed"),
-        BAD_PAYLOAD(StatusCode.BAD_PAYLOAD, "Not consistent message"),
-        POLICY_VIOLATION(StatusCode.POLICY_VIOLATION, "Received message violates policy"),
-        MESSAGE_TOO_LARGE(StatusCode.MESSAGE_TOO_LARGE, "Message too big"),
-        REQUIRED_EXTENSION(StatusCode.REQUIRED_EXTENSION, "Required extension not sent"),
-        SERVER_ERROR(StatusCode.SERVER_ERROR, "Server error"),
-        SERVICE_RESTART(StatusCode.SERVICE_RESTART, "Server restart"),
-        TRY_AGAIN_LATER(StatusCode.TRY_AGAIN_LATER, "Server overload"),
-        FAILED_TLS_HANDSHAKE(StatusCode.POLICY_VIOLATION, "Failure handshake");
-
-        private final int statusCode;
-        private final String message;
-
-        private NiceStatusCode(final int statusCode, final String message) {
-            this.statusCode = statusCode;
-            this.message = message;
-        }
-
-        public static String getMessage(final int statusCode) {
-            final List<NiceStatusCode> codes = Arrays.stream(values())
-                    .filter(niceStatusCode -> niceStatusCode.statusCode == statusCode).collect(Collectors.toList());
-            if (!codes.isEmpty()) {
-                return codes.get(0).toString();
-            } else {
-                log.error("No matching status code found for {}", statusCode);
-                return String.valueOf(statusCode);
-            }
-        }
-
-        @Override
-        public String toString() {
-            return message + " (" + statusCode + ")";
-        }
-
     }
 
     public ServletUpgradeRequest getRequest() {
@@ -318,7 +223,7 @@ public class WebSocket implements WebsocketEncoder {
     }
 
     public void setListener(final Listener listener) {
-        this.websocketPusher.setWebSocketListener(listener);
+        this.encoder.setWebSocketListener(listener);
         if (!(session instanceof Container)) {
             log.warn("Unrecognized session type {} for {}", session == null ? null : session.getClass(), uiContext);
             return;
@@ -336,7 +241,7 @@ public class WebSocket implements WebsocketEncoder {
         extension.setWebSocketListener(listener);
     }
 
-    public static interface Listener {
+    public interface Listener {
 
         void onOutgoingPonyFrame(ServerToClientModel model, Object value);
 

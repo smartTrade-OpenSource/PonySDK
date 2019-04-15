@@ -23,17 +23,12 @@
 
 package com.ponysdk.core.ui.basic;
 
+import com.ponysdk.core.model.PCheckBoxState;
+import com.ponysdk.core.ui.basic.event.*;
+import com.ponysdk.core.ui.model.PKeyCodes;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import com.ponysdk.core.model.PCheckBoxState;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
-import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
-import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
-import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
-import com.ponysdk.core.ui.model.PKeyCodes;
 
 public class BasicUITest extends PSuite {
 

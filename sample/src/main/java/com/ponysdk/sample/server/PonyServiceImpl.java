@@ -1,6 +1,13 @@
 
 package com.ponysdk.sample.server;
 
+import com.ponysdk.core.server.application.Application;
+import com.ponysdk.core.server.servlet.SessionManager;
+import com.ponysdk.sample.client.datamodel.Pony;
+import com.ponysdk.sample.client.datamodel.PonyStock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -9,14 +16,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ponysdk.core.server.application.Application;
-import com.ponysdk.core.server.servlet.SessionManager;
-import com.ponysdk.sample.client.datamodel.Pony;
-import com.ponysdk.sample.client.datamodel.PonyStock;
 
 public class PonyServiceImpl {
 

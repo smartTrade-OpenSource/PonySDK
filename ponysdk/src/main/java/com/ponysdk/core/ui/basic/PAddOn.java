@@ -23,14 +23,13 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Map;
-import java.util.logging.Level;
-
-import javax.json.JsonObject;
-
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.writer.ModelWriter;
+
+import javax.json.JsonObject;
+import java.util.Map;
+import java.util.logging.Level;
 
 /**
  * AddOn are used to bind server side with javascript browser

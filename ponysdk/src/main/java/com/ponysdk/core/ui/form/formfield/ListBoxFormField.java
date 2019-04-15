@@ -23,14 +23,14 @@
 
 package com.ponysdk.core.ui.form.formfield;
 
-import java.util.Map;
-import java.util.Map.Entry;
-
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PListBox;
 import com.ponysdk.core.ui.basic.PWidget.TabindexMode;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 import com.ponysdk.core.ui.form.dataconverter.DataConverter;
+
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class ListBoxFormField<T> extends AbstractFormField<T, PListBox> {
 

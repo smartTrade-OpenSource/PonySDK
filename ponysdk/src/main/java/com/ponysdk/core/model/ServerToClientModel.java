@@ -29,7 +29,6 @@ public enum ServerToClientModel {
     CREATE_CONTEXT(ValueTypeModel.UINT31),
     DESTROY_CONTEXT(ValueTypeModel.NULL),
     END(ValueTypeModel.NULL),
-    OPTION_FORMFIELD_TABULATION(ValueTypeModel.BOOLEAN),
 
     TYPE_CREATE(ValueTypeModel.UINT31),
     TYPE_UPDATE(ValueTypeModel.UINT31),
@@ -257,7 +256,7 @@ public enum ServerToClientModel {
 
     private final ValueTypeModel type;
 
-    private ServerToClientModel(final ValueTypeModel size) {
+    ServerToClientModel(final ValueTypeModel size) {
         this.type = size;
     }
 

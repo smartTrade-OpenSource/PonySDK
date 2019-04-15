@@ -23,14 +23,13 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.google.gwt.core.client.Scheduler;
-
 import elemental.util.ArrayOf;
 import elemental.util.Collections;
 import elemental.util.MapFromIntTo;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class PTWindowManager {
 

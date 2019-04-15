@@ -23,34 +23,19 @@
 
 package com.ponysdk.sample.client.activity;
 
-import java.util.Arrays;
-import java.util.List;
-
-import com.ponysdk.core.server.context.UIContextImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ponysdk.core.server.application.DataListener;
-import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.PAnchor;
-import com.ponysdk.core.ui.basic.PElement;
-import com.ponysdk.core.ui.basic.PFlowPanel;
-import com.ponysdk.core.ui.basic.PHTML;
-import com.ponysdk.core.ui.basic.PLabel;
-import com.ponysdk.core.ui.basic.PScrollPanel;
-import com.ponysdk.core.ui.basic.PTextBox;
-import com.ponysdk.core.ui.basic.PWidget;
-import com.ponysdk.core.ui.basic.event.PDragEnterEvent;
-import com.ponysdk.core.ui.basic.event.PDragEnterHandler;
-import com.ponysdk.core.ui.basic.event.PDragLeaveEvent;
-import com.ponysdk.core.ui.basic.event.PDragStartEvent;
-import com.ponysdk.core.ui.basic.event.PDragStartHandler;
-import com.ponysdk.core.ui.basic.event.PDropEvent;
-import com.ponysdk.core.ui.basic.event.PDropHandler;
+import com.ponysdk.core.server.context.UIContextImpl;
+import com.ponysdk.core.ui.basic.*;
+import com.ponysdk.core.ui.basic.event.*;
 import com.ponysdk.core.ui.place.Place;
 import com.ponysdk.core.ui.rich.PNotificationManager;
 import com.ponysdk.impl.webapplication.page.PageActivity;
 import com.ponysdk.sample.server.TradingServiceImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class MarketPageActivity extends PageActivity {
 

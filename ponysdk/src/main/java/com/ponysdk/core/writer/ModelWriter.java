@@ -23,11 +23,11 @@
 
 package com.ponysdk.core.writer;
 
-import java.lang.ref.WeakReference;
-
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.websocket.WebsocketEncoder;
 import com.ponysdk.core.ui.basic.PWindow;
+
+import java.lang.ref.WeakReference;
 
 public class ModelWriter {
 
@@ -58,7 +58,7 @@ public class ModelWriter {
     }
 
     public void endObject() {
-        encoder.endObject();
+        encoder.encode(ServerToClientModel.END, null);
     }
 
     public PWindow getCurrentWindow() {

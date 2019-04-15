@@ -23,10 +23,10 @@
 
 package com.ponysdk.core.ui.datagrid.impl;
 
-import java.util.function.Function;
-
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PLabel;
+
+import java.util.function.Function;
 
 public class PLabelCellRenderer<DataType> extends TypedCellRenderer<DataType, PLabel> {
 

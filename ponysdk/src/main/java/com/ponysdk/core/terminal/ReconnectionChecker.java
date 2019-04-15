@@ -23,16 +23,15 @@
 
 package com.ponysdk.core.terminal;
 
-import java.util.logging.Logger;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
-
 import elemental.client.Browser;
 import elemental.dom.Document;
 import elemental.dom.Element;
 import elemental.html.Window;
 import elemental.xml.XMLHttpRequest;
+
+import java.util.logging.Logger;
 
 public class ReconnectionChecker {
 
@@ -144,11 +143,11 @@ public class ReconnectionChecker {
         reconnectionRequest.send();
     }
 
-    private static final native void setHTTPRequestTimeout(XMLHttpRequest xmlHTTPRequest, int timeout) /*-{
+    private static native void setHTTPRequestTimeout(XMLHttpRequest xmlHTTPRequest, int timeout) /*-{
                                                                                                        xmlHTTPRequest.timeout = timeout;
                                                                                                        }-*/;
 
-    private static final String getPingUrl() {
+    private static String getPingUrl() {
         return GWT.getHostPageBaseURL() + "?ping=" + System.currentTimeMillis();
     }
 

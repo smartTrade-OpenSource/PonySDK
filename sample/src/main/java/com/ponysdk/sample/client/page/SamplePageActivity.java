@@ -23,29 +23,22 @@
 
 package com.ponysdk.sample.client.page;
 
+import com.ponysdk.core.ui.basic.*;
+import com.ponysdk.core.ui.place.Place;
+import com.ponysdk.impl.webapplication.page.DefaultPageView;
+import com.ponysdk.impl.webapplication.page.PageActivity;
+import de.java2html.converter.JavaSource2HTMLConverter;
+import de.java2html.javasource.JavaSource;
+import de.java2html.javasource.JavaSourceParser;
+import de.java2html.options.JavaSourceConversionOptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.Collection;
 import java.util.Collections;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.PHTML;
-import com.ponysdk.core.ui.basic.PScrollPanel;
-import com.ponysdk.core.ui.basic.PSimpleLayoutPanel;
-import com.ponysdk.core.ui.basic.PTabLayoutPanel;
-import com.ponysdk.core.ui.basic.PWidget;
-import com.ponysdk.core.ui.place.Place;
-import com.ponysdk.impl.webapplication.page.DefaultPageView;
-import com.ponysdk.impl.webapplication.page.PageActivity;
-
-import de.java2html.converter.JavaSource2HTMLConverter;
-import de.java2html.javasource.JavaSource;
-import de.java2html.javasource.JavaSourceParser;
-import de.java2html.options.JavaSourceConversionOptions;
 
 public class SamplePageActivity extends PageActivity {
 

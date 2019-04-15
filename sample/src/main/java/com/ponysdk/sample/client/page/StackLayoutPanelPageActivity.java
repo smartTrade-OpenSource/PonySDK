@@ -25,11 +25,7 @@ package com.ponysdk.sample.client.page;
 
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.server.context.UIContextImpl;
-import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.PSimplePanel;
-import com.ponysdk.core.ui.basic.PStackLayoutPanel;
-import com.ponysdk.core.ui.basic.PVerticalPanel;
-import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.sample.client.event.DemoBusinessEvent;
 
 public class StackLayoutPanelPageActivity extends SamplePageActivity {

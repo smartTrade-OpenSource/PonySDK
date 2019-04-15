@@ -23,15 +23,14 @@
 
 package com.ponysdk.sample.client.page;
 
-import java.io.IOException;
-
-import javax.servlet.http.HttpServletResponse;
-
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PFileUpload;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
 import com.ponysdk.core.ui.rich.PNotificationManager;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 public class FileUploadPageActivity extends SamplePageActivity {
 

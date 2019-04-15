@@ -23,11 +23,7 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.PButton;
-import com.ponysdk.core.ui.basic.PHorizontalPanel;
-import com.ponysdk.core.ui.basic.PTextBox;
-import com.ponysdk.core.ui.basic.PVerticalPanel;
+import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.core.ui.eventbus.BusinessEvent.Level;
 import com.ponysdk.core.ui.rich.PNotificationManager;
 import com.ponysdk.core.ui.rich.PNotificationManager.Notification;

@@ -23,18 +23,17 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.writer.ModelWriter;
+
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class PCookies {
 

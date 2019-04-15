@@ -23,52 +23,26 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.function.Consumer;
-import java.util.logging.Logger;
-
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.event.dom.client.BlurEvent;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ContextMenuEvent;
-import com.google.gwt.event.dom.client.DomEvent;
-import com.google.gwt.event.dom.client.DoubleClickEvent;
-import com.google.gwt.event.dom.client.DragEndEvent;
-import com.google.gwt.event.dom.client.DragEnterEvent;
-import com.google.gwt.event.dom.client.DragLeaveEvent;
-import com.google.gwt.event.dom.client.DragOverEvent;
-import com.google.gwt.event.dom.client.DragStartEvent;
-import com.google.gwt.event.dom.client.DropEvent;
-import com.google.gwt.event.dom.client.FocusEvent;
-import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.dom.client.KeyEvent;
-import com.google.gwt.event.dom.client.KeyPressEvent;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.MouseDownEvent;
-import com.google.gwt.event.dom.client.MouseEvent;
-import com.google.gwt.event.dom.client.MouseOutEvent;
-import com.google.gwt.event.dom.client.MouseOverEvent;
-import com.google.gwt.event.dom.client.MouseUpEvent;
-import com.google.gwt.event.dom.client.MouseWheelEvent;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONBoolean;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
-import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.model.DomHandlerConverter;
-import com.ponysdk.core.model.DomHandlerType;
-import com.ponysdk.core.model.HandlerModel;
-import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.model.*;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 import com.ponysdk.core.terminal.ui.w3c.api.IntersectionObserver;
-
 import elemental.client.Browser;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.logging.Logger;
 
 public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implements IsWidget {
 
@@ -322,7 +296,7 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
         }
     }
 
-    private static final int[] extractKeyFilter(final ReaderBuffer buffer) {
+    private static int[] extractKeyFilter(final ReaderBuffer buffer) {
         final BinaryModel binaryModel = buffer.readBinaryModel();
         if (ServerToClientModel.KEY_FILTER == binaryModel.getModel()) {
             final JSONArray keys = binaryModel.getArrayValue();

@@ -23,11 +23,7 @@
 
 package com.ponysdk.sample.client.page;
 
-import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.PFlowPanel;
-import com.ponysdk.core.ui.basic.PHeaderPanel;
-import com.ponysdk.core.ui.basic.PScrollPanel;
-import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.basic.*;
 
 public class HeaderPanelPageActivity extends SamplePageActivity {
 

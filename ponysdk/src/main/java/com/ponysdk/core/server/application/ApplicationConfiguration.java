@@ -23,11 +23,11 @@
 
 package com.ponysdk.core.server.application;
 
+import com.ponysdk.core.ui.main.EntryPoint;
+
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-
-import com.ponysdk.core.ui.main.EntryPoint;
 
 public class ApplicationConfiguration {
 
@@ -57,8 +57,6 @@ public class ApplicationConfiguration {
     private String clientConfigFile;
 
     private boolean debugMode;
-
-    private boolean tabindexOnlyFormField;
 
     public ApplicationConfiguration() {
         applicationID = System.getProperty(APPLICATION_ID);
@@ -169,14 +167,6 @@ public class ApplicationConfiguration {
 
     public void setDebugMode(final boolean debugMode) {
         this.debugMode = debugMode;
-    }
-
-    public boolean isTabindexOnlyFormField() {
-        return tabindexOnlyFormField;
-    }
-
-    public void setTabindexOnlyFormField(final boolean tabindexOnlyFormField) {
-        this.tabindexOnlyFormField = tabindexOnlyFormField;
     }
 
     @Override

@@ -23,20 +23,19 @@
 
 package com.ponysdk.core.ui.basic;
 
-import javax.json.JsonObject;
-
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.writer.ModelWriter;
+
+import javax.json.JsonObject;
 
 /**
  * The panel to which all other widgets must ultimately be added. RootPanels are never created directly. Rather, they
  * are accessed via {@link PWindow#getPRootPanel(String)} .
  * <p>
  * Most applications will add widgets to the default root panel in their
- * {@link com.ponysdk.core.ui.main.EntryPoint#start(UIContextImpl)} methods.
+ * {@link com.ponysdk.core.ui.main.EntryPoint#start(com.ponysdk.core.server.context.UIContext)} methods.
  * </p>
  */
 public class PRootPanel extends PAbsolutePanel {

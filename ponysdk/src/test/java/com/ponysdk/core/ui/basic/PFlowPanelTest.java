@@ -1,9 +1,8 @@
 
 package com.ponysdk.core.ui.basic;
 
-import org.junit.Test;
-
 import com.ponysdk.core.model.WidgetType;
+import org.junit.Test;
 
 import static org.junit.Assert.*;
 

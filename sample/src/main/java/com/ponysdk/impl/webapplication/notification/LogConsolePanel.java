@@ -23,14 +23,10 @@
 
 package com.ponysdk.impl.webapplication.notification;
 
+import com.ponysdk.core.ui.basic.*;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-
-import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.PAnchor;
-import com.ponysdk.core.ui.basic.PHorizontalPanel;
-import com.ponysdk.core.ui.basic.PScrollPanel;
-import com.ponysdk.core.ui.basic.PVerticalPanel;
 
 public class LogConsolePanel extends PScrollPanel {
 

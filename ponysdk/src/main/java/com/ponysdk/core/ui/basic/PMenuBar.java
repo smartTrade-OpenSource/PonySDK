@@ -23,12 +23,15 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.*;
-
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.writer.ModelWriter;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * A standard menu bar widget. A menu bar can contain any number of menu items,

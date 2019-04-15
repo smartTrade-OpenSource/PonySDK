@@ -23,9 +23,9 @@
 
 package com.ponysdk.core.useragent;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class UserAgentTest {
 

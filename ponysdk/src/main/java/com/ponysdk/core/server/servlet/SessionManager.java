@@ -23,15 +23,12 @@
 
 package com.ponysdk.core.server.servlet;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
-
 import com.ponysdk.core.server.application.Application;
 import com.ponysdk.core.server.context.UIContextImpl;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 public class SessionManager {
 
@@ -53,21 +50,28 @@ public class SessionManager {
         return applications.get(id);
     }
 
-    public void registerApplication(final Application application) {
-        applications.put(application.getId(), application);
-        listeners.forEach(listener -> listener.onApplicationCreated(application));
+    public Application register(String appID, Supplier<Application> supplier) {
+        return applications.computeIfAbsent(appID, id -> {
+            Application application = supplier.get();
+            fireApplicationCreated();
+            return application;
+        });
     }
 
-    public void unregisterApplication(final Application application) {
+    public void unregister(final Application application) {
         applications.remove(application.getId());
         listeners.forEach(listener -> listener.onApplicationDestroyed(application));
+    }
+
+    private void fireApplicationCreated(Application application) {
+        listeners.forEach(listener -> listener.onApplicationCreated(application));
     }
 
     public void addApplicationListener(final ApplicationListener listener) {
         listeners.add(listener);
     }
 
-    public UIContextImpl getUIContext(final int id) {
+    public UIContextImpl getUIContext(final Integer id) {
         return applications.values().stream().map(app -> app.getUIContext(id)).filter(Objects::nonNull).findFirst().orElse(null);
     }
 

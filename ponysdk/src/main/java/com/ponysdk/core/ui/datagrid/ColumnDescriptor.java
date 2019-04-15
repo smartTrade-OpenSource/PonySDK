@@ -23,10 +23,10 @@
 
 package com.ponysdk.core.ui.datagrid;
 
-import java.util.function.Function;
-
 import com.ponysdk.core.ui.datagrid.impl.PLabelCellRenderer;
 import com.ponysdk.core.ui.datagrid.impl.PLabelHeaderRenderer;
+
+import java.util.function.Function;
 
 public class ColumnDescriptor<D> {
 

@@ -45,7 +45,7 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class WebSocketPusher extends AutoFlushedBuffer implements SendHandler {
+public class WebSocketPusher extends AutoFlushedBuffer implements SendHandler, WebsocketEncoder {
 
     private static final Logger log = LoggerFactory.getLogger(WebSocketPusher.class);
 
@@ -66,16 +66,6 @@ public class WebSocketPusher extends AutoFlushedBuffer implements SendHandler {
     }
 
     @Override
-    public void flush() {
-        try {
-            super.flush();
-        } catch (final IOException e) {
-            log.error("Can't write on the websocket, so we destroy the application", e);
-            UIContextImpl.get().onDestroy();
-        }
-    }
-
-    @Override
     protected void doFlush(final ByteBuffer bufferToFlush) {
         final int bytes = bufferToFlush.remaining();
         session.getAsyncRemote().sendBinary(bufferToFlush, this);
@@ -90,7 +80,8 @@ public class WebSocketPusher extends AutoFlushedBuffer implements SendHandler {
     /**
      * @param value The type can be primitives, String or Object[]
      */
-    protected void encode(final ServerToClientModel model, final Object value) {
+    @Override
+    public void encode(final ServerToClientModel model, final Object value) throws IOException {
         if (log.isDebugEnabled()) log.debug("Writing in the buffer : {} => {}", model, value);
         try {
             switch (model.getTypeModel()) {
@@ -131,12 +122,9 @@ public class WebSocketPusher extends AutoFlushedBuffer implements SendHandler {
                     log.error("Unknown model type : {}", model.getTypeModel());
                     break;
             }
-        } catch (final IOException e) {
-            log.error("Can't write on the websocket, so we destroy the application", e);
-            UIContextImpl.get().onDestroy();
+        } finally {
+            if (listener != null) listener.onOutgoingPonyFrame(model, value);
         }
-
-        if (listener != null) listener.onOutgoingPonyFrame(model, value);
     }
 
     private void write(final ServerToClientModel model) throws IOException {

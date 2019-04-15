@@ -23,15 +23,14 @@
 
 package com.ponysdk.core.server.service.query;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.List;
-
+import com.ponysdk.core.server.service.query.Query.QueryMode;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.ponysdk.core.server.service.query.Query.QueryMode;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
 
 public class QueryTest {
 

@@ -23,10 +23,10 @@
 
 package com.ponysdk.core.terminal;
 
+import com.google.gwt.core.client.EntryPoint;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import com.google.gwt.core.client.EntryPoint;
 
 public class CommunicationEntryPoint implements EntryPoint {
 

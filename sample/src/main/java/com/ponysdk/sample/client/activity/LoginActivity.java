@@ -23,9 +23,6 @@
 
 package com.ponysdk.sample.client.activity;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ponysdk.core.ui.activity.AbstractActivity;
 import com.ponysdk.core.ui.basic.event.PKeyPressEvent;
 import com.ponysdk.core.ui.basic.event.PKeyPressHandler;
@@ -34,6 +31,8 @@ import com.ponysdk.impl.webapplication.login.DefaultLoginPageView;
 import com.ponysdk.impl.webapplication.page.place.PagePlace;
 import com.ponysdk.sample.client.datamodel.User;
 import com.ponysdk.sample.client.event.UserLoggedInEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LoginActivity extends AbstractActivity<DefaultLoginPageView> {
 

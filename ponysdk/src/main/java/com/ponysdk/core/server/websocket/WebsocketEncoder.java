@@ -25,10 +25,12 @@ package com.ponysdk.core.server.websocket;
 
 import com.ponysdk.core.model.ServerToClientModel;
 
+import java.io.IOException;
+
 public interface WebsocketEncoder {
 
-    void encode(final ServerToClientModel model, final Object value);
+    void encode(final ServerToClientModel model, final Object value) throws IOException;
 
-    void endObject();
+    void flush() throws IOException;
 
 }

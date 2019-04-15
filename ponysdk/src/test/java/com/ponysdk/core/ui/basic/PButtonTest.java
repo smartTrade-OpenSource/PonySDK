@@ -23,15 +23,10 @@
 
 package com.ponysdk.core.ui.basic;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
+import com.ponysdk.core.model.WidgetType;
 import org.junit.Test;
 
-import com.ponysdk.core.model.WidgetType;
+import static org.junit.Assert.*;
 
 public class PButtonTest extends PSuite {
 

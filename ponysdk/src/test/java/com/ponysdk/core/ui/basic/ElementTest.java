@@ -1,12 +1,11 @@
 
 package com.ponysdk.core.ui.basic;
 
-import static org.junit.Assert.assertEquals;
-
+import com.ponysdk.core.model.WidgetType;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.ponysdk.core.model.WidgetType;
+import static org.junit.Assert.assertEquals;
 
 public class ElementTest extends PSuite {
 

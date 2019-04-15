@@ -23,9 +23,9 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Iterator;
-
 import com.ponysdk.core.ui.basic.event.HasPWidgets;
+
+import java.util.Iterator;
 
 /**
  * Abstract base class for all panels, which are widgets that can contain other widgets.

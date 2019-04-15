@@ -23,10 +23,10 @@
 
 package com.ponysdk.core.ui.basic.event;
 
-import java.util.Arrays;
-
 import com.ponysdk.core.ui.eventbus.EventHandler;
 import com.ponysdk.core.ui.model.PKeyCodes;
+
+import java.util.Arrays;
 
 public interface PKeyFilterHandler extends EventHandler {
 

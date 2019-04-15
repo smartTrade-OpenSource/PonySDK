@@ -23,12 +23,12 @@
 
 package com.ponysdk.core.server.service.query;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.time.Duration;
 
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 public class ResultTest {
 

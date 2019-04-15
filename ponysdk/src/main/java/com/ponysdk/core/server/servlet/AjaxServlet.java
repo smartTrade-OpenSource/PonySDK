@@ -23,54 +23,45 @@
 
 package com.ponysdk.core.server.servlet;
 
-import java.io.IOException;
+import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.server.context.UIContextImpl;
+import com.ponysdk.core.ui.basic.PObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import com.ponysdk.core.server.context.UIContextImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.ui.basic.PObject;
+import java.io.IOException;
 
 public class AjaxServlet extends HttpServlet {
 
     private static final Logger log = LoggerFactory.getLogger(AjaxServlet.class);
+    private static final String ERROR_MSG = "Cannot stream request";
 
     @Override
-    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        try {
-            process(req, resp);
-        } catch (final IOException e) {
-            log.error("Cannot stream request", e);
-        }
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+        process(req, resp);
     }
 
     @Override
-    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        try {
-            process(req, resp);
-        } catch (final IOException e) {
-            log.error("Cannot stream request", e);
-        }
+    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+        process(req, resp);
     }
 
     private void process(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         try {
-            final Integer uiContextID = Integer.parseInt(req.getHeader(ClientToServerModel.UI_CONTEXT_ID.name()));
+            final Integer uiContextID = Integer.valueOf(req.getHeader(ClientToServerModel.UI_CONTEXT_ID.name()));
             final UIContextImpl uiContext = SessionManager.get().getUIContext(uiContextID);
             if (uiContext != null) {
-                final Integer objectID = Integer.parseInt(req.getHeader(ClientToServerModel.OBJECT_ID.name()));
+                final Integer objectID = Integer.valueOf(req.getHeader(ClientToServerModel.OBJECT_ID.name()));
                 uiContext.execute(() -> {
                     try {
                         final PObject pObject = uiContext.getObject(objectID);
                         pObject.handleAjaxRequest(req, resp);
                     } catch (ServletException | IOException e) {
-                        log.error("Cannot stream request", e);
+                        log.error(ERROR_MSG, e);
                         try {
                             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
                         } catch (final IOException e1) {
@@ -83,7 +74,7 @@ public class AjaxServlet extends HttpServlet {
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "UI Context #" + uiContextID + " not found");
             }
         } catch (final Exception e) {
-            log.error("Cannot stream request", e);
+            log.error(ERROR_MSG, e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }

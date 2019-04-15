@@ -24,11 +24,7 @@
 package com.ponysdk.sample.client.page;
 
 import com.ponysdk.core.server.context.UIContextImpl;
-import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.PButton;
-import com.ponysdk.core.ui.basic.PHorizontalPanel;
-import com.ponysdk.core.ui.basic.PTextBox;
-import com.ponysdk.core.ui.basic.PVerticalPanel;
+import com.ponysdk.core.ui.basic.*;
 
 public class CookiesPageActivity extends SamplePageActivity {
 

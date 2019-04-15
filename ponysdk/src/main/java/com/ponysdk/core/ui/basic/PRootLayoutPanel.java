@@ -23,11 +23,11 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.context.UIContextImpl;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class PRootLayoutPanel extends PLayoutPanel {
 

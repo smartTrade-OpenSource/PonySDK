@@ -23,11 +23,7 @@
 
 package com.ponysdk.core.util;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Objects;
-import java.util.Set;
-import java.util.Spliterator;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -47,8 +43,7 @@ import java.util.stream.Stream;
  * copy, of the original set, that contains the newly added element).<br/>
  * <b>IMPORTANT:</b> Objects contained in the sets of this pool must be immutable.
  *
- * @param <E>
- *            The type of objects contained in the sets of this pool, MUST be immutable
+ * @param <E> The type of objects contained in the sets of this pool, MUST be immutable
  */
 public class SetPool<E> {
 
@@ -69,13 +64,13 @@ public class SetPool<E> {
 
     private static final int DEFAULT_INITIAL_CAPACITY = 16;
     private final ImmutableSet emptySet;
-    private final ThreadLocal<AddElementSet> addElementSetLocals = ThreadLocal.withInitial(() -> new AddElementSet());
-    private final ThreadLocal<RemoveElementSet> removeElementSetLocals = ThreadLocal.withInitial(() -> new RemoveElementSet());
-    private final ThreadLocal<AddAllElementsSet> addAllElementsSetLocals = ThreadLocal.withInitial(() -> new AddAllElementsSet());
+    private final ThreadLocal<AddElementSet> addElementSetLocals = ThreadLocal.withInitial(AddElementSet::new);
+    private final ThreadLocal<RemoveElementSet> removeElementSetLocals = ThreadLocal.withInitial(RemoveElementSet::new);
+    private final ThreadLocal<AddAllElementsSet> addAllElementsSetLocals = ThreadLocal.withInitial(AddAllElementsSet::new);
     private final ThreadLocal<RemoveAllElementsSet> removeAllElementsSetLocals = ThreadLocal
-        .withInitial(() -> new RemoveAllElementsSet());
+            .withInitial(RemoveAllElementsSet::new);
     private final ThreadLocal<RetainAllElementsSet> retainAllElementsSetLocals = ThreadLocal
-        .withInitial(() -> new RetainAllElementsSet());
+            .withInitial(RetainAllElementsSet::new);
 
     private final SynchronizedWeakCache<ImmutableSet> cache;
     private final Function<Integer, Set<E>> setFactory;
@@ -91,9 +86,8 @@ public class SetPool<E> {
     /**
      * Constructs an empty {@code SetPool} with the specified Set factory and the default initial capacity (16)
      *
-     * @param setFactory
-     *            the factory used to create new Sets that are used internally in the {@code ImmutableSet}s, the
-     *            factory's integer parameter is a hint about the expected size of the Set to create
+     * @param setFactory the factory used to create new Sets that are used internally in the {@code ImmutableSet}s, the
+     *                   factory's integer parameter is a hint about the expected size of the Set to create
      */
     public SetPool(final Function<Integer, Set<E>> setFactory) {
         this(setFactory, DEFAULT_INITIAL_CAPACITY);
@@ -102,11 +96,9 @@ public class SetPool<E> {
     /**
      * Constructs an empty {@code SetPool} with the specified Set factory and initial capacity
      *
-     * @param setFactory
-     *            the factory used to create new Sets that are used internally in the {@code ImmutableSet}s, the
-     *            factory's integer parameter is a hint about the expected size of the Set to create
-     * @param initialCapacity
-     *            the initial capacity of the internal hash map
+     * @param setFactory      the factory used to create new Sets that are used internally in the {@code ImmutableSet}s, the
+     *                        factory's integer parameter is a hint about the expected size of the Set to create
+     * @param initialCapacity the initial capacity of the internal hash map
      */
     public SetPool(final Function<Integer, Set<E>> setFactory, final int initialCapacity) {
         emptySet = new ImmutableSet(setFactory.apply(0), 0);
@@ -137,7 +129,7 @@ public class SetPool<E> {
 
     /**
      * @return an {@code ImmutableSet} that is equivalent to <code>(original UNION {e})</code>, or {@code original}
-     *         itself if {@code e} already belongs to it
+     * itself if {@code e} already belongs to it
      */
     public ImmutableSet add(final ImmutableSet original, final E e) {
         return find(original, e, addElementSetLocals.get());
@@ -145,7 +137,7 @@ public class SetPool<E> {
 
     /**
      * @return an {@code ImmutableSet} that is equivalent to <code>(original MINUS {o})</code>, or {@code original}
-     *         itself if {@code o} doesn't belong to it
+     * itself if {@code o} doesn't belong to it
      */
     public ImmutableSet remove(final ImmutableSet original, final Object o) {
         return find(original, o, removeElementSetLocals.get());
@@ -153,7 +145,7 @@ public class SetPool<E> {
 
     /**
      * @return an {@code ImmutableSet} that is equivalent to <code>(original UNION c)</code>, or {@code original}
-     *         itself if {@code c} is a subset of it
+     * itself if {@code c} is a subset of it
      */
     public ImmutableSet addAll(final ImmutableSet original, final Set<? extends E> c) {
         return find(original, c, addAllElementsSetLocals.get());
@@ -161,7 +153,7 @@ public class SetPool<E> {
 
     /**
      * @return an {@code ImmutableSet} that is equivalent to <code>(original INTERSECT c)</code>, or {@code original}
-     *         itself if it is a subset of {@code c}
+     * itself if it is a subset of {@code c}
      */
     public ImmutableSet retainAll(final ImmutableSet original, final Set<?> c) {
         return find(original, c, retainAllElementsSetLocals.get());
@@ -169,7 +161,7 @@ public class SetPool<E> {
 
     /**
      * @return an {@code ImmutableSet} that is equivalent to <code>(original MINUS c)</code>, or {@code original}
-     *         itself if {@code c} has no intersection with it
+     * itself if {@code c} has no intersection with it
      */
     public ImmutableSet removeAll(final ImmutableSet original, final Set<?> c) {
         return find(original, c, removeAllElementsSetLocals.get());
@@ -259,7 +251,7 @@ public class SetPool<E> {
 
         /**
          * @return from the {@code SetPool}, an {@code ImmutableSet} that is equivalent to
-         *         <code>(this UNION {e})</code>, or {@code this} if {@code e} already belongs to it
+         * <code>(this UNION {e})</code>, or {@code this} if {@code e} already belongs to it
          */
         public ImmutableSet getAdd(final E e) {
             return SetPool.this.add(this, e);
@@ -275,7 +267,7 @@ public class SetPool<E> {
 
         /**
          * @return from the {@code SetPool}, an {@code ImmutableSet} that is equivalent to
-         *         <code>(this MINUS {e})</code>, or {@code this} if {@code o} doesn't belong to it
+         * <code>(this MINUS {e})</code>, or {@code this} if {@code o} doesn't belong to it
          */
         public ImmutableSet getRemove(final Object o) {
             return SetPool.this.remove(this, o);
@@ -288,7 +280,7 @@ public class SetPool<E> {
 
         /**
          * @return from the {@code SetPool}, an {@code ImmutableSet} that is equivalent to <code>(this UNION c)</code>,
-         *         or {@code this} if {@code c} is a subset of it
+         * or {@code this} if {@code c} is a subset of it
          */
         public ImmutableSet getAddAll(final Set<? extends E> c) {
             return SetPool.this.addAll(this, c);
@@ -304,7 +296,7 @@ public class SetPool<E> {
 
         /**
          * @return from the {@code SetPool}, an {@code ImmutableSet} that is equivalent to
-         *         <code>(this INTERSECT c)</code>, or {@code this} if it is a subset of {@code c}
+         * <code>(this INTERSECT c)</code>, or {@code this} if it is a subset of {@code c}
          */
         public ImmutableSet getRetainAll(final Set<?> c) {
             return SetPool.this.retainAll(this, c);
@@ -320,7 +312,7 @@ public class SetPool<E> {
 
         /**
          * @return from the {@code SetPool}, an {@code ImmutableSet} that is equivalent to <code>(this MINUS c)</code>,
-         *         or {@code this} if {@code c} has no intersection with it
+         * or {@code this} if {@code c} has no intersection with it
          */
         public ImmutableSet getRemoveAll(final Set<?> c) {
             return SetPool.this.removeAll(this, c);

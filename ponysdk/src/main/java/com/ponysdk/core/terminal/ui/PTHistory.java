@@ -11,7 +11,7 @@ public class PTHistory {
     private PTHistory(final UIBuilder uiBuilder) {
     }
 
-    public static final void addValueChangeHandler(final UIBuilder uiBuilder) {
+    public static void addValueChangeHandler(final UIBuilder uiBuilder) {
         History.addValueChangeHandler(event -> {
             if (event.getValue() != null && !event.getValue().isEmpty()) {
                 final PTInstruction eventInstruction = new PTInstruction();

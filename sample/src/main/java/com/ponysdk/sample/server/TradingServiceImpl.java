@@ -1,15 +1,11 @@
 
 package com.ponysdk.sample.server;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
-
 import com.ponysdk.core.server.application.Application;
 import com.ponysdk.core.server.servlet.SessionManager;
 import com.ponysdk.sample.client.activity.MarketData;
+
+import java.util.*;
 
 public class TradingServiceImpl {
 

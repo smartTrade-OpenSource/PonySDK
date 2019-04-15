@@ -23,9 +23,8 @@
 
 package com.ponysdk.impl.spring;
 
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-
 import com.ponysdk.impl.spring.server.SpringApplicationManager;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class MainSpring {
 

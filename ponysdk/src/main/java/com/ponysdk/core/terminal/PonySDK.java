@@ -23,9 +23,6 @@
 
 package com.ponysdk.core.terminal;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -43,10 +40,12 @@ import com.ponysdk.core.terminal.request.WindowRequestBuilder;
 import com.ponysdk.core.terminal.socket.WebSocketClient;
 import com.ponysdk.core.terminal.ui.PTObject;
 import com.ponysdk.core.terminal.ui.PTWindowManager;
-
 import elemental.client.Browser;
 import elemental.xml.XMLHttpRequest;
 import jsinterop.annotations.JsType;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @JsType
 public class PonySDK implements UncaughtExceptionHandler {
@@ -68,7 +67,7 @@ public class PonySDK implements UncaughtExceptionHandler {
         INSTANCE = this;
     }
 
-    public static final PonySDK get() {
+    public static PonySDK get() {
         return INSTANCE;
     }
 

@@ -23,15 +23,14 @@
 
 package com.ponysdk.core.ui.basic;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import com.ponysdk.core.model.WidgetType;
+import org.junit.Test;
 
 import javax.json.Json;
 import javax.json.JsonObject;
 
-import org.junit.Test;
-
-import com.ponysdk.core.model.WidgetType;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class PAddOnTest extends PSuite {
 

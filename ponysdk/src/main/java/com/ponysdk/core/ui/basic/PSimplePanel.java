@@ -23,13 +23,12 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-
+import com.ponysdk.core.model.WidgetType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.model.WidgetType;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  * Base class for panels that contain only one widget.

@@ -23,6 +23,13 @@
 
 package com.ponysdk.driver;
 
+import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.DomHandlerType;
+import com.ponysdk.core.model.WidgetType;
+import org.openqa.selenium.*;
+
+import javax.json.Json;
+import javax.json.JsonValue;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Collection;
@@ -30,21 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-import javax.json.Json;
-import javax.json.JsonValue;
-
-import org.openqa.selenium.By;
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.Point;
-import org.openqa.selenium.Rectangle;
-import org.openqa.selenium.WebDriverException;
-import org.openqa.selenium.WebElement;
-
-import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.model.DomHandlerType;
-import com.ponysdk.core.model.WidgetType;
 
 public class PonyWebElement implements WebElement {
 

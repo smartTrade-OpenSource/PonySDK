@@ -23,15 +23,15 @@
 
 package com.ponysdk.core.terminal.ui.widget.mask;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.user.client.ui.TextBox;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class TextBoxMaskedDecorator {
 

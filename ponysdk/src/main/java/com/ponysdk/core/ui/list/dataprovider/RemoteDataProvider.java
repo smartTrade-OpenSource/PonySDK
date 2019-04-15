@@ -23,21 +23,15 @@
 
 package com.ponysdk.core.ui.list.dataprovider;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.ponysdk.core.server.service.query.Query;
 import com.ponysdk.core.server.service.query.Query.QueryMode;
 import com.ponysdk.core.server.service.query.SortingType;
-import com.ponysdk.core.ui.list.FilterListener;
-import com.ponysdk.core.ui.list.HasCriteria;
-import com.ponysdk.core.ui.list.HasPData;
-import com.ponysdk.core.ui.list.Queriable;
-import com.ponysdk.core.ui.list.Resetable;
-import com.ponysdk.core.ui.list.Sortable;
-import com.ponysdk.core.ui.list.Validable;
+import com.ponysdk.core.ui.list.*;
 import com.ponysdk.core.ui.list.paging.Pager;
 import com.ponysdk.core.ui.list.paging.PagerListener;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class RemoteDataProvider<T> implements PagerListener, FilterListener {
 

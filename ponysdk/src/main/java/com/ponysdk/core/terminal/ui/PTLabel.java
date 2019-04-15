@@ -60,7 +60,7 @@ public class PTLabel<T extends Label> extends PTWidget<T> {
         }
     }
 
-    protected static final native void setText(Element element, String text) /*-{
+    protected static native void setText(Element element, String text) /*-{
                                                                              element.textContent = text;
                                                                              }-*/;
 

@@ -23,17 +23,11 @@
 
 package com.ponysdk.sample.client.page;
 
-import java.time.Duration;
-
 import com.ponysdk.core.model.PVerticalAlignment;
 import com.ponysdk.core.server.concurrent.PScheduler;
-import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.PButton;
-import com.ponysdk.core.ui.basic.PCheckBox;
-import com.ponysdk.core.ui.basic.PHorizontalPanel;
-import com.ponysdk.core.ui.basic.PTextArea;
-import com.ponysdk.core.ui.basic.PTextBox;
-import com.ponysdk.core.ui.basic.PVerticalPanel;
+import com.ponysdk.core.ui.basic.*;
+
+import java.time.Duration;
 
 public class BasicTextBoxPageActivity extends SamplePageActivity {
 

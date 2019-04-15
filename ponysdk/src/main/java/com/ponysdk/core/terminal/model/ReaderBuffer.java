@@ -23,24 +23,13 @@
 
 package com.ponysdk.core.terminal.model;
 
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONBoolean;
-import com.google.gwt.json.client.JSONException;
-import com.google.gwt.json.client.JSONNumber;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONString;
-import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.json.client.*;
 import com.ponysdk.core.model.ArrayValueModel;
 import com.ponysdk.core.model.BooleanModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.ValueTypeModel;
-
 import elemental.client.Browser;
-import elemental.html.ArrayBuffer;
-import elemental.html.ArrayBufferView;
-import elemental.html.DataView;
-import elemental.html.Uint8Array;
-import elemental.html.Window;
+import elemental.html.*;
 
 public class ReaderBuffer {
 
@@ -88,24 +77,24 @@ public class ReaderBuffer {
     }
 
     // WORKAROUND : No setElements on Uint8Array but Elemental need it, create a passthrough
-    private static final native void createSetElementsMethodOnUint8Array() /*-{
+    private static native void createSetElementsMethodOnUint8Array() /*-{
                                                                            Uint8Array.prototype.setElements = function(array, offset) { this.set(array, offset) };
                                                                            }-*/;
 
-    private static final native String decode(ArrayBufferView buffer, int position, int size) /*-{
+    private static native String decode(ArrayBufferView buffer, int position, int size) /*-{
                                                                                                     return $wnd.decode(buffer, position, size);
                                                                                                     }-*/;
 
-    private static final native String fromCharCode(Uint8Array buffer) /*-{
+    private static native String fromCharCode(Uint8Array buffer) /*-{
                                                                        return String.fromCharCode.apply(null, buffer);
                                                                        }-*/;
 
-    private static final native DataView newDataView(ArrayBuffer buffer, int byteOffset,
-                                                     int length) /*-{ return new DataView(buffer, byteOffset, length); }-*/;
+    private static native DataView newDataView(ArrayBuffer buffer, int byteOffset,
+                                               int length) /*-{ return new DataView(buffer, byteOffset, length); }-*/;
 
-    private static final native int getUint8(DataView dataView, int position) /*-{ return dataView.getUint8(position); }-*/;
+    private static native int getUint8(DataView dataView, int position) /*-{ return dataView.getUint8(position); }-*/;
 
-    private static final native int getInt8(DataView dataView, int position) /*-{ return dataView.getInt8(position); }-*/;
+    private static native int getInt8(DataView dataView, int position) /*-{ return dataView.getInt8(position); }-*/;
 
     public int getPosition() {
         return position;
@@ -486,7 +475,7 @@ public class ReaderBuffer {
     /**
      * Get the model key size
      */
-    private static final int getModelKeySize() {
+    private static int getModelKeySize() {
         return ValueTypeModel.BYTE_SIZE;
     }
 

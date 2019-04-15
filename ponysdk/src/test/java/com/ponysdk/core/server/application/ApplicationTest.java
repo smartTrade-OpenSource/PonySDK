@@ -23,16 +23,14 @@
 
 package com.ponysdk.core.server.application;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import javax.servlet.http.HttpSession;
-
 import com.ponysdk.core.server.context.UIContextImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import javax.servlet.http.HttpSession;
+
+import static org.junit.Assert.*;
 
 public class ApplicationTest {
 

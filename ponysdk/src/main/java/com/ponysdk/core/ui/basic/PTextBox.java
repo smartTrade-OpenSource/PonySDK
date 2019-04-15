@@ -23,9 +23,9 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Objects;
-
 import com.ponysdk.core.model.ServerToClientModel;
+
+import java.util.Objects;
 
 /**
  * A standard single-line text box.

@@ -23,15 +23,6 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -41,6 +32,12 @@ import com.ponysdk.core.ui.basic.event.PBeforeSelectionEvent;
 import com.ponysdk.core.ui.basic.event.PSelectionHandler;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.writer.ModelWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.Duration;
+import java.util.Iterator;
+import java.util.Objects;
 
 /**
  * A panel that stacks its children vertically, displaying only one at a time,
@@ -68,14 +65,11 @@ public class PStackLayoutPanel extends PWidget implements HasPWidgets, PAnimated
 
     private final PWidgetCollection children = new PWidgetCollection(this);
 
-    private final List<PBeforeSelectionEvent.Handler<Integer>> beforeSelectionHandlers = new ArrayList<>();
-    private final List<PSelectionHandler<Integer>> selectionHandlers = new ArrayList<>();
-
     private final PUnit unit;
 
     private Duration animationDuration;
 
-    protected PStackLayoutPanel(final PUnit unit) {
+    private PStackLayoutPanel(final PUnit unit) {
         super();
         this.unit = unit;
     }
@@ -149,21 +143,12 @@ public class PStackLayoutPanel extends PWidget implements HasPWidgets, PAnimated
     }
 
     public void addBeforeSelectionHandler(final PBeforeSelectionEvent.Handler<Integer> handler) {
-        beforeSelectionHandlers.add(handler);
         saveAddHandler(HandlerModel.HANDLER_BEFORE_SELECTION);
     }
 
-    public void removeBeforeSelectionHandler(final PBeforeSelectionEvent.Handler<Integer> handler) {
-        beforeSelectionHandlers.remove(handler);
-    }
 
     public void addSelectionHandler(final PSelectionHandler<Integer> handler) {
-        selectionHandlers.add(handler);
         saveAddHandler(HandlerModel.HANDLER_SELECTION);
-    }
-
-    public void removeSelectionHandler(final PSelectionHandler<Integer> handler) {
-        selectionHandlers.remove(handler);
     }
 
     public void showWidget(final PWidget widget) {

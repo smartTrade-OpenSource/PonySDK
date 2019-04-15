@@ -169,7 +169,7 @@ public abstract class PMouseEvent<H extends EventHandler> extends PHumanInputEve
             this.value = value;
         }
 
-        public static final NativeButton fromValue(final int value) {
+        public static NativeButton fromValue(final int value) {
             for (final NativeButton button : values()) {
                 if (button.value == value) return button;
             }

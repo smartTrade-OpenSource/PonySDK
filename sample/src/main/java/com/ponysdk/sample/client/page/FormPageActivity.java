@@ -35,12 +35,7 @@ import com.ponysdk.core.ui.form.formfield.CheckBoxFormField;
 import com.ponysdk.core.ui.form.formfield.DateBoxFormField;
 import com.ponysdk.core.ui.form.formfield.StringListBoxFormField;
 import com.ponysdk.core.ui.form.formfield.StringTextBoxFormField;
-import com.ponysdk.core.ui.form.validator.CompositeFieldValidator;
-import com.ponysdk.core.ui.form.validator.DoubleFieldValidator;
-import com.ponysdk.core.ui.form.validator.EmailFieldValidator;
-import com.ponysdk.core.ui.form.validator.NotEmptyFieldValidator;
-import com.ponysdk.core.ui.form.validator.TwinFieldValidator;
-import com.ponysdk.core.ui.form.validator.UncheckedFieldValidator;
+import com.ponysdk.core.ui.form.validator.*;
 import com.ponysdk.core.ui.rich.PNotificationManager;
 
 public class FormPageActivity extends SamplePageActivity {

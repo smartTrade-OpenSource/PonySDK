@@ -24,12 +24,7 @@
 package com.ponysdk.core.terminal.ui.w3c.api;
 
 import com.google.gwt.dom.client.Element;
-
-import jsinterop.annotations.JsConstructor;
-import jsinterop.annotations.JsMethod;
-import jsinterop.annotations.JsPackage;
-import jsinterop.annotations.JsProperty;
-import jsinterop.annotations.JsType;
+import jsinterop.annotations.*;
 
 /**
  * The IntersectionObserver interface of the Intersection Observer API provides a way to asynchronously observe changes

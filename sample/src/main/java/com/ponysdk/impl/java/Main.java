@@ -23,14 +23,14 @@
 
 package com.ponysdk.impl.java;
 
-import java.util.Arrays;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.ui.main.EntryPoint;
 import com.ponysdk.impl.java.server.JavaApplicationManager;
 import com.ponysdk.impl.main.PonySDKServer;
+
+import java.util.Arrays;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class Main {
 

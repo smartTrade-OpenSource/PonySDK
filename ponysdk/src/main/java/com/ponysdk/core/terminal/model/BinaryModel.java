@@ -26,7 +26,6 @@ package com.ponysdk.core.terminal.model;
 import com.google.gwt.json.client.JSONArray;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.ValueTypeModel;
-
 import elemental.json.Json;
 import elemental.json.JsonObject;
 

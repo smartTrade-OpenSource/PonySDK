@@ -23,18 +23,12 @@
 
 package com.ponysdk.sample.client.page;
 
-import java.time.Duration;
-
 import com.ponysdk.core.server.concurrent.PScheduler;
 import com.ponysdk.core.server.concurrent.PScheduler.UIRunnable;
-import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.PButton;
-import com.ponysdk.core.ui.basic.PFlexTable;
-import com.ponysdk.core.ui.basic.PLabel;
-import com.ponysdk.core.ui.basic.PScrollPanel;
-import com.ponysdk.core.ui.basic.PTextBox;
-import com.ponysdk.core.ui.basic.PVerticalPanel;
+import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.core.ui.place.Place;
+
+import java.time.Duration;
 
 public class FlexTableForBenchPageActivity extends SamplePageActivity {
 

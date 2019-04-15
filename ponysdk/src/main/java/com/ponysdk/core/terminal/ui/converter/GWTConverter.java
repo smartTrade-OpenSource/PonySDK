@@ -31,16 +31,11 @@ import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment.VerticalAlignmentConstant;
 import com.google.gwt.user.client.ui.RichTextArea.FontSize;
 import com.google.gwt.user.client.ui.RichTextArea.Justification;
-import com.ponysdk.core.model.PAlignment;
-import com.ponysdk.core.model.PFontSize;
-import com.ponysdk.core.model.PHorizontalAlignment;
-import com.ponysdk.core.model.PJustification;
-import com.ponysdk.core.model.PUnit;
-import com.ponysdk.core.model.PVerticalAlignment;
+import com.ponysdk.core.model.*;
 
 public final class GWTConverter {
 
-    public static final HorizontalAlignmentConstant asHorizontalAlignmentConstant(final int rawValue) {
+    public static HorizontalAlignmentConstant asHorizontalAlignmentConstant(final int rawValue) {
         final PHorizontalAlignment alignment = PHorizontalAlignment.fromRawValue(rawValue);
         if (PHorizontalAlignment.ALIGN_LEFT == alignment) return HasHorizontalAlignment.ALIGN_LEFT;
         else if (PHorizontalAlignment.ALIGN_CENTER == alignment) return HasHorizontalAlignment.ALIGN_CENTER;
@@ -48,7 +43,7 @@ public final class GWTConverter {
         else throw new IllegalArgumentException("Undefined alignement : " + rawValue);
     }
 
-    public static final VerticalAlignmentConstant asVerticalAlignmentConstant(final int rawValue) {
+    public static VerticalAlignmentConstant asVerticalAlignmentConstant(final int rawValue) {
         final PVerticalAlignment alignment = PVerticalAlignment.fromRawValue(rawValue);
         if (PVerticalAlignment.ALIGN_TOP == alignment) return HasVerticalAlignment.ALIGN_TOP;
         else if (PVerticalAlignment.ALIGN_MIDDLE == alignment) return HasVerticalAlignment.ALIGN_MIDDLE;
@@ -56,7 +51,7 @@ public final class GWTConverter {
         else throw new IllegalArgumentException("Undefined alignement : " + rawValue);
     }
 
-    public static final Alignment asAlignment(final int rawValue) {
+    public static Alignment asAlignment(final int rawValue) {
         final PAlignment alignment = PAlignment.fromRawValue(rawValue);
         if (PAlignment.BEGIN == alignment) return Alignment.BEGIN;
         else if (PAlignment.END == alignment) return Alignment.END;
@@ -64,7 +59,7 @@ public final class GWTConverter {
         else throw new IllegalArgumentException("Undefined alignement : " + rawValue);
     }
 
-    public static final FontSize asFontSize(final int rawValue) {
+    public static FontSize asFontSize(final int rawValue) {
         final PFontSize fontSize = PFontSize.fromRawValue(rawValue);
         if (PFontSize.XX_LARGE == fontSize) return FontSize.XX_LARGE;
         else if (PFontSize.X_LARGE == fontSize) return FontSize.X_LARGE;
@@ -76,7 +71,7 @@ public final class GWTConverter {
         else throw new IllegalArgumentException("Undefined font size : " + rawValue);
     }
 
-    public static final Justification asJustification(final int rawValue) {
+    public static Justification asJustification(final int rawValue) {
         final PJustification justification = PJustification.fromRawValue(rawValue);
         if (PJustification.CENTER == justification) return Justification.CENTER;
         else if (PJustification.FULL == justification) return Justification.FULL;
@@ -85,7 +80,7 @@ public final class GWTConverter {
         else throw new IllegalArgumentException("Undefined justification : " + rawValue);
     }
 
-    public static final Unit asUnit(final int rawValue) {
+    public static Unit asUnit(final int rawValue) {
         final PUnit unit = PUnit.fromRawValue(rawValue);
         if (PUnit.PX == unit) return Unit.PX;
         else if (PUnit.EM == unit) return Unit.EM;

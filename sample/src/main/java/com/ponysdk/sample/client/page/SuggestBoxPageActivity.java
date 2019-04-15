@@ -25,11 +25,7 @@ package com.ponysdk.sample.client.page;
 
 import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.server.service.query.Query;
-import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.PListBox;
-import com.ponysdk.core.ui.basic.PMultiWordSuggestOracle;
-import com.ponysdk.core.ui.basic.PSuggestBox;
-import com.ponysdk.core.ui.basic.PVerticalPanel;
+import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.sample.client.event.DemoBusinessEvent;
 
 public class SuggestBoxPageActivity extends SamplePageActivity {

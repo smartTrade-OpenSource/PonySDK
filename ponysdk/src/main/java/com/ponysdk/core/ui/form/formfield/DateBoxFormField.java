@@ -23,15 +23,15 @@
 
 package com.ponysdk.core.ui.form.formfield;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PDateBox;
 import com.ponysdk.core.ui.basic.PWidget.TabindexMode;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 import com.ponysdk.core.ui.form.dataconverter.DataConverter;
 import com.ponysdk.core.ui.form.dataconverter.DateConverter;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class DateBoxFormField extends AbstractFormField<Date, PDateBox> {
 

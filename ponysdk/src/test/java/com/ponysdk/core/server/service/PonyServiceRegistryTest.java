@@ -23,10 +23,10 @@
 
 package com.ponysdk.core.server.service;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import static org.junit.Assert.assertEquals;
 
 public class PonyServiceRegistryTest {
 

@@ -30,7 +30,6 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
-
 import elemental.json.JsonObject;
 
 public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {

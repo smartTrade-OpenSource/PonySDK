@@ -23,10 +23,10 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Objects;
-
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
+
+import java.util.Objects;
 
 /**
  * A panel that represents a tabbed set of pages, each of which contains another widget. Its child

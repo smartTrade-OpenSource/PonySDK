@@ -23,10 +23,10 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Collection;
-
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
+
+import java.util.Collection;
 
 public class PMultiWordSuggestOracle extends PSuggestOracle {
 

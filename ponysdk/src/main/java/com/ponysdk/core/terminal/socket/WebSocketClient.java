@@ -23,19 +23,18 @@
 
 package com.ponysdk.core.terminal.socket;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.ponysdk.core.terminal.ReconnectionChecker;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.request.WebSocketRequestBuilder;
-
 import elemental.client.Browser;
 import elemental.events.CloseEvent;
 import elemental.events.MessageEvent;
 import elemental.html.ArrayBuffer;
 import elemental.html.WebSocket;
 import elemental.html.Window;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class WebSocketClient {
 

@@ -23,21 +23,16 @@
 
 package com.ponysdk.core.ui.basic;
 
+import com.ponysdk.core.model.*;
+import com.ponysdk.core.ui.basic.event.PLayoutResizeEvent;
+import com.ponysdk.core.util.SetUtils;
+
+import javax.json.JsonArray;
+import javax.json.JsonObject;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-
-import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.model.HandlerModel;
-import com.ponysdk.core.model.PUnit;
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.ui.basic.event.PLayoutResizeEvent;
-import com.ponysdk.core.util.SetUtils;
 
 /**
  * A panel that adds user-positioned splitters between each of its child widgets.

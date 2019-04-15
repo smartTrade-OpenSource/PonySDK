@@ -24,11 +24,7 @@
 package com.ponysdk.impl.java;
 
 import com.ponysdk.core.server.context.UIContextImpl;
-import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.PButton;
-import com.ponysdk.core.ui.basic.PElement;
-import com.ponysdk.core.ui.basic.PFlowPanel;
-import com.ponysdk.core.ui.basic.PWindow;
+import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.core.ui.main.EntryPoint;
 
 public class BasicEntryPoint implements EntryPoint {

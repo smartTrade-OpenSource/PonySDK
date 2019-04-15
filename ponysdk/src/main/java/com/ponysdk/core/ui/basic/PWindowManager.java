@@ -23,11 +23,11 @@
 
 package com.ponysdk.core.ui.basic;
 
+import com.ponysdk.core.server.context.UIContextImpl;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.ponysdk.core.server.context.UIContextImpl;
 
 public class PWindowManager {
 
@@ -35,7 +35,6 @@ public class PWindowManager {
 
     private static final String ROOT = "WindowManager";
 
-    private final Map<Integer, PWindow> preregisteredWindows = new HashMap<>(INITIAL_WINDOW_MAP_CAPACITY);
     private final Map<Integer, PWindow> registeredWindows = new HashMap<>(INITIAL_WINDOW_MAP_CAPACITY);
 
     private PWindowManager() {
@@ -51,10 +50,6 @@ public class PWindowManager {
         return windowManager;
     }
 
-    public static void preregisterWindow(final PWindow pWindow) {
-        get().preregisteredWindows.put(pWindow.getID(), pWindow);
-    }
-
     static void registerWindow(final PWindow window) {
         get().registerWindow0(window);
     }
@@ -67,28 +62,25 @@ public class PWindowManager {
         get().closeAll0();
     }
 
-    public static final Collection<PWindow> getWindows() {
+    public static Collection<PWindow> getWindows() {
         return get().registeredWindows.values();
     }
 
-    public static final PWindow getWindow(final int windowID) {
+    public static PWindow getWindow(final int windowID) {
         return get().registeredWindows.get(windowID);
     }
 
     private void registerWindow0(final PWindow window) {
-        preregisteredWindows.remove(window.getID());
         registeredWindows.put(window.getID(), window);
     }
 
     private void unregisterWindow0(final PWindow window) {
-        preregisteredWindows.remove(window.getID());
         registeredWindows.remove(window.getID());
     }
 
     private void closeAll0() {
         registeredWindows.forEach((id, window) -> window.close());
         registeredWindows.clear();
-        preregisteredWindows.clear();
     }
 
 }

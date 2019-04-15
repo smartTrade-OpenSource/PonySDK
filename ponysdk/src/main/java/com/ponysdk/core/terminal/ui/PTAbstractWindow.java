@@ -26,7 +26,6 @@ package com.ponysdk.core.terminal.ui;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
-
 import elemental.dom.Document;
 import elemental.html.Window;
 
@@ -78,19 +77,19 @@ public abstract class PTAbstractWindow extends AbstractPTObject {
         }
     }
 
-    public static final native void setTitle(String title, Window window) /*-{
+    public static native void setTitle(String title, Window window) /*-{
                                                                           window.document.title = title;
                                                                           }-*/;
 
-    public static final native boolean isIntersectionObserverAPI(Window window) /*-{
+    public static native boolean isIntersectionObserverAPI(Window window) /*-{
                                                                                  return window.IntersectionObserver !== undefined;
                                                                                  }-*/;
 
-    public static final native boolean isPageVisibilityAPI(Document document) /*-{
+    public static native boolean isPageVisibilityAPI(Document document) /*-{
                                                                                return document.hidden !== undefined;
                                                                                }-*/;
 
-    public static final native boolean isDocumentVisible(final Document document) /*-{
+    public static native boolean isDocumentVisible(final Document document) /*-{
                                                                                    return !document.hidden;
                                                                                    }-*/;
 

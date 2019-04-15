@@ -23,14 +23,13 @@
 
 package com.ponysdk.core.server.context;
 
-import static org.junit.Assert.assertEquals;
-
-import org.junit.Before;
-import org.junit.Test;
-
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PObject;
 import com.ponysdk.core.ui.basic.PSuite;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class PObjectCacheTest extends PSuite {
 

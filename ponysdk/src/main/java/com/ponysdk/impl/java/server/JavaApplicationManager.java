@@ -26,8 +26,6 @@ package com.ponysdk.impl.java.server;
 import com.ponysdk.core.server.application.ApplicationManager;
 import com.ponysdk.core.ui.main.EntryPoint;
 
-import java.lang.reflect.InvocationTargetException;
-
 public class JavaApplicationManager extends ApplicationManager {
 
     @Override

@@ -25,7 +25,6 @@ package com.ponysdk.core.terminal.ui;
 
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
-
 import elemental.client.Browser;
 
 public class PTBrowser extends PTAbstractWindow {

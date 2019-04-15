@@ -42,12 +42,6 @@ import com.ponysdk.core.writer.ModelWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.json.JsonNumber;
-import javax.json.JsonObject;
-import javax.json.JsonString;
-import javax.json.JsonValue;
-import javax.json.JsonValue.ValueType;
-import javax.json.spi.JsonProvider;
 import javax.servlet.http.HttpSession;
 import java.time.Duration;
 import java.util.*;
@@ -63,7 +57,6 @@ public class UIContextImpl implements UIContext {
     private static final Logger log = LoggerFactory.getLogger(UIContextImpl.class);
     private static final ThreadLocal<UIContextImpl> currentContext = new ThreadLocal<>();
     private static final AtomicInteger uiContextCount = new AtomicInteger();
-    private static final String DEFAULT_PROVIDER = "org.glassfish.json.JsonProviderImpl";
 
     private final int id;
 
@@ -95,7 +88,6 @@ public class UIContextImpl implements UIContext {
         scheduler = new Scheduler(threadCount, threadFactory);
     }
 
-
     private TerminalDataReceiver terminalDataReceiver;
 
     private boolean alive = true;
@@ -106,8 +98,6 @@ public class UIContextImpl implements UIContext {
 
     private long lastReceivedTime = System.currentTimeMillis();
 
-    private JsonProvider jsonProvider;
-
     private final ModelWriter modelWriter;
 
     public UIContextImpl(final WebSocket socket, Application application) {
@@ -117,11 +107,7 @@ public class UIContextImpl implements UIContext {
         this.application = application;
         this.schedulingContext = scheduler.createContext(Long.toString(id));
 
-        try {
-            jsonProvider = (JsonProvider) Class.forName(DEFAULT_PROVIDER).getDeclaredConstructor().newInstance();
-        } catch (final Exception t) {
-            jsonProvider = JsonProvider.provider();
-        }
+
 
 
         final List<String> historyTokens = socket.getRequest().getParameterMap().get(ClientToServerModel.TYPE_HISTORY.toStringValue());
@@ -270,54 +256,6 @@ public class UIContextImpl implements UIContext {
 
     public int getID() {
         return id;
-    }
-
-    /**
-     * Sends data to the targeted {@link PObject} from {@link JsonObject} instruction
-     * Called from terminal side
-     *
-     * @param jsonObject the JSON instructions
-     */
-    public void fireClientData(final JsonObject jsonObject) {
-        if (jsonObject.containsKey(ClientToServerModel.TYPE_HISTORY.toStringValue())) {
-            history.fireHistoryChanged(jsonObject.getString(ClientToServerModel.TYPE_HISTORY.toStringValue()));
-        } else {
-            final JsonValue jsonValue = jsonObject.get(ClientToServerModel.OBJECT_ID.toStringValue());
-            int objectID;
-            final ValueType valueType = jsonValue.getValueType();
-            if (ValueType.NUMBER == valueType) {
-                objectID = ((JsonNumber) jsonValue).intValue();
-            } else if (ValueType.STRING == valueType) {
-                objectID = Integer.parseInt(((JsonString) jsonValue).getString());
-            } else {
-                log.error("unknown reference from the browser. Unable to execute instruction: {}", jsonObject);
-                return;
-            }
-
-            //Cookies
-            if (objectID == 0) {
-                cookies.onClientData(jsonObject);
-            } else {
-                final PObject object = getObject(objectID);
-
-                if (object == null) {
-                    log.error("unknown reference from the browser. Unable to execute instruction: {}", jsonObject);
-
-                    if (jsonObject.containsKey(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())) {
-                        final int parentObjectID = jsonObject.getJsonNumber(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())
-                                .intValue();
-                        final PObject gcObject = getObject(parentObjectID);
-                        if (log.isWarnEnabled()) log.warn(String.valueOf(gcObject));
-                    }
-
-                    return;
-                }
-
-                if (terminalDataReceiver != null) terminalDataReceiver.onDataReceived(object, jsonObject);
-
-                object.onClientData(jsonObject);
-            }
-        }
     }
 
     /**
@@ -655,10 +593,6 @@ public class UIContextImpl implements UIContext {
 
     public SchedulingContext getSchedulingContext() {
         return schedulingContext;
-    }
-
-    public JsonProvider getJsonProvider() {
-        return jsonProvider;
     }
 
     public Monitor getMonitor() {

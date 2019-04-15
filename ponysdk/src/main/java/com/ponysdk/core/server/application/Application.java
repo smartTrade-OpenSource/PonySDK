@@ -23,19 +23,17 @@
 
 package com.ponysdk.core.server.application;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.servlet.http.HttpSession;
-
 import com.ponysdk.core.server.context.UIContext;
 import com.ponysdk.core.server.context.UIContextImpl;
+import com.ponysdk.core.server.servlet.SessionManager;
 import com.ponysdk.core.server.websocket.WebSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.server.servlet.SessionManager;
+import javax.servlet.http.HttpSession;
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Wrapper of the HTTPSession, and contains the UIContexts.
@@ -94,7 +92,7 @@ public class Application {
         SessionManager.get().unregisterApplication(this);
     }
 
-    public UIContextImpl getUIContext(final int uiContextID) {
+    public UIContextImpl getUIContext(final Integer uiContextID) {
         return uiContexts.get(uiContextID);
     }
 

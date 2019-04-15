@@ -23,8 +23,6 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import java.util.Objects;
-
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.user.client.ui.TextBoxBase;
 import com.ponysdk.core.model.ClientToServerModel;
@@ -34,6 +32,8 @@ import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
+
+import java.util.Objects;
 
 public abstract class PTTextBoxBase<T extends TextBoxBase> extends PTValueBoxBase<T, String> {
 

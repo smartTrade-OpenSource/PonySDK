@@ -23,18 +23,13 @@
 
 package com.ponysdk.core.ui.datagrid;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.function.Consumer;
-import java.util.function.Function;
-
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.datagrid.impl.DefaultView;
+
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class DataGrid<T> implements IsPWidget {
 

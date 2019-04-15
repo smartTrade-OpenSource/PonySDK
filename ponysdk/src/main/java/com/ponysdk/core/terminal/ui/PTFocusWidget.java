@@ -23,8 +23,6 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import java.util.function.Consumer;
-
 import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.event.dom.client.KeyEvent;
 import com.google.gwt.event.dom.client.MouseEvent;
@@ -36,6 +34,8 @@ import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
+
+import java.util.function.Consumer;
 
 public abstract class PTFocusWidget<T extends FocusWidget> extends PTWidget<T> {
 

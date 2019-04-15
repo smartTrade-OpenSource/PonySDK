@@ -23,21 +23,12 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-
-import javax.json.JsonObject;
-
-import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.model.PFontSize;
-import com.ponysdk.core.model.PJustification;
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.model.*;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
+
+import javax.json.JsonObject;
+import java.util.*;
 
 /**
  * A rich text editor that allows complex styling and formatting.there is a formatter interface, accessed via
@@ -124,7 +115,7 @@ public class PRichTextArea extends PFocusWidget implements HasPValueChangeHandle
 
     @Override
     protected String dumpDOM() {
-        return "<input>" + text != null ? text : html + "</input>";
+        return "<input>" + (text != null ? text : html) + "</input>";
     }
 
     public class Formatter {

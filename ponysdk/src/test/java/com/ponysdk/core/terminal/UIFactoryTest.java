@@ -23,68 +23,12 @@
 
 package com.ponysdk.core.terminal;
 
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
+import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.terminal.ui.*;
 import org.junit.Test;
 
-import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.terminal.ui.PTAbsolutePanel;
-import com.ponysdk.core.terminal.ui.PTAddOn;
-import com.ponysdk.core.terminal.ui.PTAddOnComposite;
-import com.ponysdk.core.terminal.ui.PTAnchor;
-import com.ponysdk.core.terminal.ui.PTBrowser;
-import com.ponysdk.core.terminal.ui.PTButton;
-import com.ponysdk.core.terminal.ui.PTCheckBox;
-import com.ponysdk.core.terminal.ui.PTDateBox;
-import com.ponysdk.core.terminal.ui.PTDatePicker;
-import com.ponysdk.core.terminal.ui.PTDecoratedPopupPanel;
-import com.ponysdk.core.terminal.ui.PTDecoratorPanel;
-import com.ponysdk.core.terminal.ui.PTDialogBox;
-import com.ponysdk.core.terminal.ui.PTDisclosurePanel;
-import com.ponysdk.core.terminal.ui.PTDockLayoutPanel;
-import com.ponysdk.core.terminal.ui.PTElement;
-import com.ponysdk.core.terminal.ui.PTFileUpload;
-import com.ponysdk.core.terminal.ui.PTFlexTable;
-import com.ponysdk.core.terminal.ui.PTFlowPanel;
-import com.ponysdk.core.terminal.ui.PTFocusPanel;
-import com.ponysdk.core.terminal.ui.PTFrame;
-import com.ponysdk.core.terminal.ui.PTGrid;
-import com.ponysdk.core.terminal.ui.PTHTML;
-import com.ponysdk.core.terminal.ui.PTHeaderPanel;
-import com.ponysdk.core.terminal.ui.PTHorizontalPanel;
-import com.ponysdk.core.terminal.ui.PTImage;
-import com.ponysdk.core.terminal.ui.PTLabel;
-import com.ponysdk.core.terminal.ui.PTLayoutPanel;
-import com.ponysdk.core.terminal.ui.PTListBox;
-import com.ponysdk.core.terminal.ui.PTMenuBar;
-import com.ponysdk.core.terminal.ui.PTMenuItem;
-import com.ponysdk.core.terminal.ui.PTMenuItemSeparator;
-import com.ponysdk.core.terminal.ui.PTMultiWordSuggestOracle;
-import com.ponysdk.core.terminal.ui.PTObject;
-import com.ponysdk.core.terminal.ui.PTPasswordTextBox;
-import com.ponysdk.core.terminal.ui.PTPopupPanel;
-import com.ponysdk.core.terminal.ui.PTPushButton;
-import com.ponysdk.core.terminal.ui.PTRadioButton;
-import com.ponysdk.core.terminal.ui.PTRichTextArea;
-import com.ponysdk.core.terminal.ui.PTRichTextToolbar;
-import com.ponysdk.core.terminal.ui.PTRootLayoutPanel;
-import com.ponysdk.core.terminal.ui.PTRootPanel;
-import com.ponysdk.core.terminal.ui.PTScript;
-import com.ponysdk.core.terminal.ui.PTScrollPanel;
-import com.ponysdk.core.terminal.ui.PTSimpleLayoutPanel;
-import com.ponysdk.core.terminal.ui.PTSimplePanel;
-import com.ponysdk.core.terminal.ui.PTSplitLayoutPanel;
-import com.ponysdk.core.terminal.ui.PTStackLayoutPanel;
-import com.ponysdk.core.terminal.ui.PTSuggestBox;
-import com.ponysdk.core.terminal.ui.PTTabLayoutPanel;
-import com.ponysdk.core.terminal.ui.PTTabPanel;
-import com.ponysdk.core.terminal.ui.PTTextArea;
-import com.ponysdk.core.terminal.ui.PTTextBox;
-import com.ponysdk.core.terminal.ui.PTTree;
-import com.ponysdk.core.terminal.ui.PTTreeItem;
-import com.ponysdk.core.terminal.ui.PTVerticalPanel;
-import com.ponysdk.core.terminal.ui.PTWindow;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class UIFactoryTest {
 

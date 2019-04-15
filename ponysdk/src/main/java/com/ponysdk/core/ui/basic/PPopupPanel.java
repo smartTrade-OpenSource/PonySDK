@@ -23,17 +23,6 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
-import javax.json.JsonArray;
-import javax.json.JsonNumber;
-import javax.json.JsonObject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -41,6 +30,15 @@ import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.ui.basic.event.PCloseEvent;
 import com.ponysdk.core.ui.basic.event.PCloseHandler;
 import com.ponysdk.core.writer.ModelWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.json.JsonArray;
+import javax.json.JsonNumber;
+import javax.json.JsonObject;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * A panel that can "pop up" over other widgets. It overlays the browser's client area (and any
@@ -93,7 +91,7 @@ public class PPopupPanel extends PSimplePanel {
     @Override
     protected void enrichForCreation(final ModelWriter writer) {
         super.enrichForCreation(writer);
-        if (autoHide) writer.write(ServerToClientModel.POPUP_AUTO_HIDE, autoHide);
+        if (autoHide) writer.write(ServerToClientModel.POPUP_AUTO_HIDE, true);
     }
 
     @Override

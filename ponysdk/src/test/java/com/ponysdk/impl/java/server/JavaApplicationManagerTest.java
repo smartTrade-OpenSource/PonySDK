@@ -23,15 +23,14 @@
 
 package com.ponysdk.impl.java.server;
 
-import static org.junit.Assert.assertEquals;
-
+import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.context.UIContextImpl;
+import com.ponysdk.core.ui.basic.PSuite;
+import com.ponysdk.core.ui.main.EntryPoint;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.ponysdk.core.server.application.ApplicationConfiguration;
-import com.ponysdk.core.ui.basic.PSuite;
-import com.ponysdk.core.ui.main.EntryPoint;
+import static org.junit.Assert.assertEquals;
 
 public class JavaApplicationManagerTest extends PSuite {
 
