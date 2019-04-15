@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.ApplicationManager;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.context.CommunicationSanityChecker;
@@ -88,8 +89,13 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
             uiContext.acquire();
             try {
                 beginObject();
+                final ApplicationConfiguration configuration = uiContext.getConfiguration();
+                final TimeUnit heartBeatPeriodTimeUnit = configuration.getHeartBeatPeriodTimeUnit();
+
                 encode(ServerToClientModel.CREATE_CONTEXT, uiContext.getID()); // TODO nciaravola integer ?
-                encode(ServerToClientModel.OPTION_FORMFIELD_TABULATION, uiContext.getConfiguration().isTabindexOnlyFormField());
+                encode(ServerToClientModel.OPTION_FORMFIELD_TABULATION, configuration.isTabindexOnlyFormField());
+                encode(ServerToClientModel.HEART_BEAT_PERIOD,
+                    (byte) heartBeatPeriodTimeUnit.toSeconds(configuration.getHeartBeatPeriod()));
                 endObject();
                 if (isAlive()) flush0();
             } catch (final Throwable e) {
@@ -135,7 +141,9 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
                     jsonObject = reader.readObject();
                 }
 
-                if (jsonObject.containsKey(ClientToServerModel.TERMINAL_LATENCY.toStringValue())) {
+                if (jsonObject.containsKey(ClientToServerModel.ROUNDTRIP_LATENCY.toStringValue())) {
+                    encode(ServerToClientModel.TERMINAL_LATENCY, null);
+                } else if (jsonObject.containsKey(ClientToServerModel.TERMINAL_LATENCY.toStringValue())) {
                     processRoundtripLatency(jsonObject);
                 } else if (jsonObject.containsKey(ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue())) {
                     processInstructions(jsonObject);
