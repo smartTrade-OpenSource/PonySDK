@@ -48,6 +48,7 @@ public class Element {
     public static final String E_TABLE = "table";
     public static final String E_TBODY = "tbody";
     public static final String E_THEAD = "thead";
+    public static final String E_TFOOT = "tfoot";
     public static final String E_TH = "th";
     public static final String E_TR = "tr";
     public static final String E_TD = "td";
@@ -492,6 +493,10 @@ public class Element {
 
     public static final PElement newTable() {
         return newPElement(E_TABLE);
+    }
+
+    public static final PElement newTfoot() {
+        return newPElement(E_TFOOT);
     }
 
     public static final PElement newThead() {

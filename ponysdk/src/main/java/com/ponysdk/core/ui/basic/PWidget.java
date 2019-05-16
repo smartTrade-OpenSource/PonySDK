@@ -257,8 +257,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public void removeStyleProperty(final String name) {
-        if (safeStyleProperties().remove(name) != null)
-            saveUpdate(writer -> writer.write(ServerToClientModel.REMOVE_STYLE_KEY, name));
+        if (safeStyleProperties().remove(name) != null) saveUpdate(writer -> writer.write(ServerToClientModel.REMOVE_STYLE_KEY, name));
     }
 
     public void forceDomId() {
@@ -440,16 +439,13 @@ public abstract class PWidget extends PObject implements IsPWidget {
             final DomHandlerType domHandler = DomHandlerType.fromRawValue((byte) instruction.getInt(domHandlerType));
             switch (domHandler) {
                 case KEY_PRESS:
-                    fireKeyEvent(
-                            new PKeyPressEvent(this, instruction.getInt(ClientToServerModel.VALUE_KEY.toStringValue())));
+                    fireKeyEvent(new PKeyPressEvent(this, instruction.getInt(ClientToServerModel.VALUE_KEY.toStringValue())));
                     break;
                 case KEY_UP:
-                    fireKeyEvent(
-                            new PKeyUpEvent(this, instruction.getInt(ClientToServerModel.VALUE_KEY.toStringValue())));
+                    fireKeyEvent(new PKeyUpEvent(this, instruction.getInt(ClientToServerModel.VALUE_KEY.toStringValue())));
                     break;
                 case KEY_DOWN:
-                    fireKeyEvent(
-                            new PKeyDownEvent(this, instruction.getInt(ClientToServerModel.VALUE_KEY.toStringValue())));
+                    fireKeyEvent(new PKeyDownEvent(this, instruction.getInt(ClientToServerModel.VALUE_KEY.toStringValue())));
                     break;
                 case CLICK:
                     fireMouseEvent(instruction, new PClickEvent(this));
@@ -615,6 +611,11 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     public void blur() {
         focus(false);
+    }
+
+    public void focusPreventScroll() {
+        this.focused = true;
+        saveUpdate(ServerToClientModel.FOCUS_PREVENT_SCROLL, null);
     }
 
     private void focus(final boolean focused) {

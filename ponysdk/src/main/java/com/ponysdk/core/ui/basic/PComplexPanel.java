@@ -55,7 +55,7 @@ public abstract class PComplexPanel extends PPanel {
             return true;
         } else if (this.window != window) {
             throw new IllegalAccessError(
-                    "Widget already attached to an other window, current window : #" + this.window + ", new window : #" + window);
+                "Widget already attached to an other window, current window : #" + this.window + ", new window : #" + window);
         }
 
         return false;
@@ -78,7 +78,7 @@ public abstract class PComplexPanel extends PPanel {
         } else {
             if (initialized) {
                 throw new IllegalAccessError(
-                        "Can't attach widget " + child + " to window #" + window + " because it's already attached to window #" + child);
+                    "Can't attach widget " + child + " to window #" + window + " because it's already attached to window #" + child);
             } else {
                 throw new IllegalAccessError("Can't only attach widget " + child + " to window #" + child.getWindow()
                         + ". Need to attach the new parent to the same window before");
@@ -160,7 +160,7 @@ public abstract class PComplexPanel extends PPanel {
     protected String dumpDOM() {
         String DOM = "<div>";
 
-        Iterator<PWidget> iter = children.iterator();
+        final Iterator<PWidget> iter = children.iterator();
         while (iter.hasNext()) {
             DOM += iter.next().dumpDOM();
         }

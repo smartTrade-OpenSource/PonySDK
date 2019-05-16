@@ -492,3 +492,320 @@ if (typeof module !== 'undefined' && module.hasOwnProperty('exports')) {
     window['UTF8'] = UTF8;
 }
 _UTF8 = undefined;
+
+(function() {
+  "use strict";
+
+  AbstractAddon.defineAddon("com.ponysdk.core.ui.datagrid2.SimpleDataGridView.Addon", {
+	
+    initDom: function() {
+		var that = this;
+        this.heightLimit = 20000000;
+        this.programmaticScroll = false;
+		this.body = this.jqelement.find('div.pony-grid-body')[0];
+        this.subBody = this.jqelement.find('div.pony-grid-sub-body')[0];
+        this.pinnedBody = this.jqelement.find('div.pony-grid-pinned-body')[0];
+        this.unpinnedBody = this.jqelement.find('div.pony-grid-unpinned-body')[0];
+        this.pinnedHeader = this.jqelement.find('div.pony-grid-pinned-header')[0];
+        this.unpinnedHeader = this.jqelement.find('div.pony-grid-unpinned-header')[0];
+        this.pinnedFooter = this.jqelement.find('div.pony-grid-pinned-footer')[0];
+        this.unpinnedFooter = this.jqelement.find('div.pony-grid-unpinned-footer')[0];
+        this.header = this.jqelement.find('div.pony-grid-header')[0];
+        this.loadingData = this.jqelement.find('div.pony-grid-loading-data')[0];
+        this.ratio = 1.0;
+        
+        if('IntersectionObserver' in window){
+            this.intersectionObserver = new IntersectionObserver(function(entries){
+                var columns = [];
+                var visibility = [];
+                entries.forEach(function(e){
+                    columns.push(parseInt(e.target.getAttribute('data-column-id')));
+                    visibility.push(e.isIntersecting);
+                });
+                this.sendDataToServer({
+                    col: columns,
+                    cv: visibility
+                });
+            }.bind(this), {
+              root: this.header,
+              rootMargin: '0px',
+              threshold: 0.0
+            });
+        }
+        
+		this.absRowCount = 0;
+		this.rowHeight = 0;
+		this.relRowCount = 0;
+		this.firstRowIndex = 0;
+		this.headerHeight = 0;
+		this.footerHeight = 0;
+		this.scrollRatio = 0;
+      	this.viewHeight = 0;
+        this.subBodyWidth = 0;
+      	this.resizeChecker = setInterval(this.checkHeight.bind(this), 250);
+        
+        this.unpinnedFooter.addEventListener("scroll", function(){
+            var scrollLeft = that.unpinnedFooter.scrollLeft;
+            if(scrollLeft != that.unpinnedHeader.scrollLeft)
+                that.unpinnedHeader.scrollLeft = scrollLeft;
+            if(scrollLeft != that.unpinnedBody.scrollLeft)
+                that.unpinnedBody.scrollLeft = scrollLeft;
+        });
+        this.unpinnedHeader.addEventListener("scroll", function(){
+            var scrollLeft = that.unpinnedHeader.scrollLeft;
+            if(scrollLeft != that.unpinnedFooter.scrollLeft)
+                that.unpinnedFooter.scrollLeft = scrollLeft;
+            if(scrollLeft != that.unpinnedBody.scrollLeft)
+                that.unpinnedBody.scrollLeft = scrollLeft;
+        });
+        this.unpinnedBody.addEventListener("scroll", function(){
+            var scrollLeft = that.unpinnedBody.scrollLeft;
+            if(scrollLeft != that.unpinnedHeader.scrollLeft)
+                that.unpinnedHeader.scrollLeft = scrollLeft;
+            if(scrollLeft != that.unpinnedFooter.scrollLeft)
+                that.unpinnedFooter.scrollLeft = scrollLeft;
+        });
+        this.unpinnedHeader.scrollLeft = 0;
+      	this.body.addEventListener("scroll", $.debounce(100, this.checkPosition.bind(this)));
+        
+		window.onresize = function(e) {
+			var rows = $(that.pinnedBody).children('div').length;
+			for(var i=0;i<rows;i++){
+				that.updateRowHeight(i);
+			}
+    		that.refreshVerticalMargins();
+            that.refreshScrollBarMargins();
+			var bodyHeight = $(that.pinnedBody).height();
+			var scroll = that.scrollRatio * $(that.subBody).height();
+    		$(that.body).scrollTop(scroll);
+		};
+        
+        $(this.pinnedBody).on('mouseenter', '.pony-grid-row', this.onRowMouseEnter.bind(this));
+      	$(this.pinnedBody).on('mouseleave', '.pony-grid-row', this.onRowMouseLeave.bind(this));
+      	$(this.unpinnedBody).on('mouseenter', '.pony-grid-row', this.onRowMouseEnter.bind(this));
+      	$(this.unpinnedBody).on('mouseleave', '.pony-grid-row', this.onRowMouseLeave.bind(this));
+    },
+    
+    destroy: function() {
+    	clearInterval(this.resizeChecker);
+        if('IntersectionObserver' in window){
+            this.intersectionObserver.disconnect();
+        }
+    },
+      
+    onRowMouseEnter: function(event) {
+        var row = event.currentTarget;
+        row.setAttribute('pony-hovered', '');
+        this.getOppositeRow(row).setAttribute('pony-hovered', '');
+    },
+      
+    onRowMouseLeave: function(event) {
+        var row = event.currentTarget;
+        row.removeAttribute('pony-hovered');
+        this.getOppositeRow(row).removeAttribute('pony-hovered');
+    },
+      
+    getOppositeRow: function(r) {
+        var row = $(r);
+        var index = row.index();
+        if(row.parent().is(this.pinnedBody)) {
+            return $(this.unpinnedBody).children('.pony-grid-row').eq(index)[0];
+        } else {
+            return $(this.pinnedBody).children('.pony-grid-row').eq(index)[0];
+        }
+    },
+    
+    checkHeight: function(){
+        var visibleHeight = $(this.body).height();
+  		if(Math.abs(visibleHeight - this.viewHeight)<this.viewHeight*0.01) return;
+		if(this.rowHeight == 0) return;
+        this.loadingData.style.display = null;
+		this.viewHeight = visibleHeight;
+		var c = ((visibleHeight/this.rowHeight)|0)*3;
+		this.sendDataToServer({
+          	rc: c
+        });
+    },
+
+    checkPosition: function(){
+    	var marginTop = parseFloat(this.subBody.style.marginTop);
+		var marginBottom = parseFloat(this.subBody.style.marginBottom);
+		var pos = this.body.scrollTop;
+        var contentHeight = $(this.subBody).height();
+        var visibleHeight = $(this.body).height();
+        var fullHeight = contentHeight + marginTop + marginBottom;
+		this.scrollRatio = pos / fullHeight;
+		if((pos <= marginTop + contentHeight * 0.1 && this.firstRowIndex > 0) ||
+			((pos + visibleHeight >= marginTop + contentHeight * 0.9 ) &&
+				(this.firstRowIndex < this.absRowCount - this.relRowCount) )){
+            this.loadingData.style.display = null;
+			var r = Math.max(0, (this.absRowCount * this.scrollRatio) - this.relRowCount/3) | 0;
+			this.sendDataToServer({
+				row: r
+			});
+		}
+    },
+    
+    updateRowHeight: function(index){
+    	var pinnedRow = $(this.pinnedBody).children('div').eq(index)[0];
+    	var unpinnedRow = $(this.unpinnedBody).children('div').eq(index)[0];
+    	if(this.rowHeight <= 0){
+    		this.rowHeight = this.adjustHeight(pinnedRow, unpinnedRow);
+    	} else {
+    		$(pinnedRow).height(this.rowHeight);
+    		$(unpinnedRow).height(this.rowHeight);
+    	}
+    },
+    
+    updateExtendedRowHeight: function(index){
+    	var pinnedRow = $(this.pinnedBody).children('div').eq(index)[0];
+    	var unpinnedRow = $(this.unpinnedBody).children('div').eq(index)[0];
+    	this.adjustHeight(pinnedRow, unpinnedRow);
+    },
+    
+    adjustHeight: function(pinnedRow, unpinnedRow){
+    	pinnedRow.style.height = null;
+    	unpinnedRow.style.height = null;
+    	var pinnedHeight = $(pinnedRow).height();
+    	var unpinnedHeight = $(unpinnedRow).height();
+    	var maxHeight = Math.max(pinnedHeight, unpinnedHeight);
+    	$(unpinnedRow).height(maxHeight);
+    	$(pinnedRow).height(maxHeight);
+    	return maxHeight;
+    },
+    
+    onRowUpdated: function(index) {
+    	this.updateRowHeight(index);
+    },
+    
+    onDataUpdated: function(absRowCount, relRowCount, firstRowIndex) {
+    	if(this.absRowCount != absRowCount || this.firstRowIndex != firstRowIndex || this.relRowCount != relRowCount){
+			this.relRowCount = relRowCount;
+			this.absRowCount = absRowCount;
+			this.firstRowIndex = firstRowIndex;
+			this.refreshVerticalMargins();
+		}
+        this.refreshScrollBarMargins();
+    },
+      
+    onColumnAdded: function(id, colMinWidth, colMaxWidth, pinned){
+		var e = $(this.header).find("[data-column-id="+id+"]")[0];
+        if('IntersectionObserver' in window){
+            this.intersectionObserver.observe(e);
+        }
+        var resizerDiv = e.getElementsByClassName('pony-grid-col-resizer')[0];
+        if(resizerDiv){
+            var pageX, curColWidth;
+            resizerDiv.addEventListener('mousedown', function (event) {
+                pageX = event.pageX;
+                curColWidth = e.offsetWidth;
+            });
+            document.addEventListener('mousemove', function(event) {
+                if(pageX != undefined){
+                    var diff = event.pageX - pageX;
+                    e.style.width = Math.min(colMaxWidth,Math.max(colMinWidth,(curColWidth + diff)))+'px';
+                }
+            });
+            document.addEventListener('mouseup', function(event) {
+                if(pageX != undefined){
+                    this.sendDataToServer({
+                        col: parseInt(id),
+                        cw: parseInt(e.offsetWidth)
+                    });
+                    pageX = undefined; 
+                    curColWidth = undefined;
+                }
+            }.bind(this));
+        }
+        if(!pinned){
+            var draggableElement = e.getElementsByClassName('pony-grid-draggable-col')[0];
+            if(draggableElement){
+                draggableElement.draggable = true;
+                draggableElement.ondragover = function(event){
+                    event.preventDefault();
+                    console.log("ondragover="+id);
+                };
+                draggableElement.ondragstart = function(event){
+                    event.dataTransfer.setData('col-id', id);
+                    console.log("ondragstart="+id);
+                };
+                draggableElement.ondrop = function(event){
+                    event.preventDefault();
+                    var data = event.dataTransfer.getData('col-id');
+                    if(data == undefined) return;
+                    console.log("ondrop="+data);
+                    this.sendDataToServer({
+                        col: parseInt(data),
+                        to: parseInt(id)
+                    });
+                }.bind(this);
+            }
+        }
+    },        
+      
+    scrollToTop: function(){
+		$(this.body).scrollTop(0);
+    },
+      
+    refreshScrollBarMargins: function(){
+        var w = $(this.subBody).width();
+        if(this.subBodyWidth == w) return;
+        this.subBodyWidth = w;
+        var scrollBarWidth = ($(this.body).width() - w)+"px";
+        this.unpinnedFooter.style.marginRight = scrollBarWidth;
+        this.unpinnedHeader.style.marginRight = scrollBarWidth;
+    },
+    
+    refreshVerticalMargins: function(){
+		var marginTop = this.firstRowIndex * this.rowHeight * this.ratio;
+		var marginBottom = Math.max(0, (this.absRowCount - (this.firstRowIndex + this.relRowCount))*this.rowHeight) * this.ratio;
+        var scroll = false;
+        if(marginTop + marginBottom > this.heightLimit){
+            while(marginTop + marginBottom > this.heightLimit){
+                marginTop *= 0.5;
+                marginBottom *= 0.5;
+                this.ratio *= 0.5;
+            }
+            scroll = true;
+        } else if(this.ratio <= 0.5 && ((marginTop+marginBottom)*2.0 < this.heightLimit)) {
+            while(this.ratio <= 0.5 && ((marginTop+marginBottom)*2.0 < this.heightLimit)){
+                marginTop *= 2.0;
+                marginBottom *= 2.0;
+                this.ratio *= 2.0;
+            }
+            scroll = true;
+        }
+        var marginTopPx = marginTop + "px";
+		this.subBody.style.marginTop = marginTopPx;
+        var marginBottomPx = marginBottom + "px";
+		this.subBody.style.marginBottom = marginBottomPx;
+        if(scroll && marginTop > 0){
+            var scrollTop = marginTop+$(this.subBody).height()/3;
+            $(this.body).scrollTop(scrollTop);
+        }
+    }
+
+  });
+
+})();
+
+(function() {
+  "use strict";
+
+  AbstractAddon.defineAddon("com.ponysdk.core.ui.datagrid2.SimpleDataGridView.HideScrollBarAddon", {
+	
+    initDom: function() {        
+        var styles = '.pony-grid-hidden-scrollbar::-webkit-scrollbar { display: none; }\n' +
+            '.pony-grid-hidden-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }';
+        var styleTag = document.createElement('style'); 
+        styleTag.type = 'text/css';
+        if (styleTag.styleSheet)  
+            styleTag.styleSheet.cssText = styles; 
+        else  
+            styleTag.appendChild(document.createTextNode(styles)); 
+        this.jqelement[0].appendChild(styleTag);
+    }
+
+  });
+
+})();

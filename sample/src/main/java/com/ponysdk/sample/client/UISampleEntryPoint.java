@@ -49,15 +49,19 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.PScheduler;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.ui.basic.Element;
+import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PAbsolutePanel;
 import com.ponysdk.core.ui.basic.PAnchor;
 import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PComplexPanel;
 import com.ponysdk.core.ui.basic.PCookies;
 import com.ponysdk.core.ui.basic.PDateBox;
 import com.ponysdk.core.ui.basic.PDockLayoutPanel;
@@ -87,6 +91,17 @@ import com.ponysdk.core.ui.datagrid.DataGrid;
 import com.ponysdk.core.ui.datagrid.dynamic.Configuration;
 import com.ponysdk.core.ui.datagrid.dynamic.DynamicDataGrid;
 import com.ponysdk.core.ui.datagrid.impl.PLabelCellRenderer;
+import com.ponysdk.core.ui.datagrid2.ColumnDefinition;
+import com.ponysdk.core.ui.datagrid2.ColumnVisibilitySelectorDataGridView;
+import com.ponysdk.core.ui.datagrid2.ConfigSelectorDataGridView;
+import com.ponysdk.core.ui.datagrid2.DataGridAdapter;
+import com.ponysdk.core.ui.datagrid2.DataGridModel;
+import com.ponysdk.core.ui.datagrid2.DataGridView;
+import com.ponysdk.core.ui.datagrid2.DataGridView.DecodeException;
+import com.ponysdk.core.ui.datagrid2.RowAction;
+import com.ponysdk.core.ui.datagrid2.RowSelectorColumnDataGridView;
+import com.ponysdk.core.ui.datagrid2.SimpleColumnDefinition;
+import com.ponysdk.core.ui.datagrid2.SimpleDataGridView;
 import com.ponysdk.core.ui.eventbus2.EventBus.EventHandler;
 import com.ponysdk.core.ui.formatter.TextFunction;
 import com.ponysdk.core.ui.grid.AbstractGridWidget;
@@ -108,6 +123,8 @@ import com.ponysdk.sample.client.page.addon.LoggerAddOn;
 
 public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
+    private static final Logger log = LoggerFactory.getLogger(UISampleEntryPoint.class);
+
     private PLabel mainLabel;
 
     // HighChartsStackedColumnAddOn highChartsStackedColumnAddOn;
@@ -126,11 +143,13 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         mainLabel.setTitle("String ASCII");
         PWindow.getMain().add(mainLabel);
 
+        //testSimpleDataGridView();
+
+        if (true) return;
+
         testVisibilityHandler(PWindow.getMain());
 
         testPerf();
-
-        if (true) return;
 
         createNewGridSystem();
 
@@ -266,6 +285,251 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         POptionPane.showConfirmDialog(PWindow.getMain(), null, "BBB");
 
         // uiContext.getHistory().newItem("", false);
+    }
+
+    private static class MyModel {
+
+        private final int id;
+        private Map<String, String> map;
+
+        public MyModel(final int id) {
+            super();
+            this.id = id;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public void putValue(final String key, final String value) {
+            if (map == null) map = new HashMap<>();
+            map.put(key, value);
+        }
+
+        public String getValue(final String key) {
+            if (map != null) {
+                final String v = map.get(key);
+                if (v != null) return v;
+            }
+            return key + String.format("%09d", id);
+        }
+
+        @Override
+        public MyModel clone() {
+            final MyModel model = new MyModel(id);
+            if (map == null) return model;
+            model.map = new HashMap<>(map);
+            return model;
+        }
+
+        @Override
+        public String toString() {
+            return "SampleModel [id=" + id + "]";
+        }
+
+    }
+
+    private static MyModel createMyModel(final int index) {
+        return new MyModel(index);
+    }
+
+    private void testSimpleDataGridView() {
+        final DataGridView<Integer, MyModel> simpleGridView = new SimpleDataGridView<>();
+        final ColumnVisibilitySelectorDataGridView<Integer, MyModel> columnVisibilitySelectorDataGridView = new ColumnVisibilitySelectorDataGridView<>(
+            simpleGridView);
+        final RowSelectorColumnDataGridView<Integer, MyModel> rowSelectorColumnDataGridView = new RowSelectorColumnDataGridView<>(
+            columnVisibilitySelectorDataGridView);
+        //        final ColumnFilterFooterDataGridView<Integer, MyModel> columnFilterFooterDataGridView = new ColumnFilterFooterDataGridView<>(
+        //            rowSelectorColumnDataGridView);
+        final ConfigSelectorDataGridView<Integer, MyModel> configSelectorDataGridView = new ConfigSelectorDataGridView<>(
+            rowSelectorColumnDataGridView, "DEFAULT");
+
+        final DataGridView<Integer, MyModel> gridView = configSelectorDataGridView;
+        gridView.setAdapter(new DataGridAdapter<Integer, UISampleEntryPoint.MyModel>() {
+
+            private final List<ColumnDefinition<MyModel>> columns = new ArrayList<>();
+
+            {
+                for (char c = 'a'; c <= 'z'; c++) {
+                    final String ss = c + "";
+                    columns.add(new SimpleColumnDefinition<>(ss, v -> v.getValue(ss), (v, s) -> {
+                        v.putValue(ss, s);
+                    }));
+                }
+                for (char c = 'A'; c <= 'Z'; c++) {
+                    final String ss = c + "";
+                    columns.add(new SimpleColumnDefinition<>(ss, v -> v.getValue(ss), (v, s) -> {
+                        v.putValue(ss, s);
+                    }));
+                }
+            }
+
+            @Override
+            public void onUnselectRow(final IsPWidget rowWidget) {
+                rowWidget.asWidget().removeStyleName("selected-row");
+            }
+
+            @Override
+            public void onSelectRow(final IsPWidget rowWidget) {
+                rowWidget.asWidget().addStyleName("selected-row");
+            }
+
+            @Override
+            public boolean isAscendingSortByInsertionOrder() {
+                return false;
+            }
+
+            @Override
+            public Integer getKey(final MyModel v) {
+                return v.id;
+            }
+
+            @Override
+            public List<ColumnDefinition<MyModel>> getColumnDefinitions() {
+                return columns;
+            }
+
+            @Override
+            public int compareDefault(final MyModel v1, final MyModel v2) {
+                return 0;
+            }
+
+            @Override
+            public void onCreateHeaderRow(final IsPWidget rowWidget) {
+                rowWidget.asWidget().getParent().asWidget().setStyleProperty("background", "aliceblue");
+            }
+
+            @Override
+            public void onCreateFooterRow(final IsPWidget rowWidget) {
+                rowWidget.asWidget().getParent().asWidget().setStyleProperty("background", "aliceblue");
+            }
+
+            @Override
+            public void onCreateRow(final IsPWidget rowWidget) {
+            }
+
+            @Override
+            public boolean hasHeader() {
+                return true;
+            }
+
+            @Override
+            public boolean hasFooter() {
+                return false;
+            }
+
+            @Override
+            public IsPWidget createLoadingDataWidget() {
+                final PComplexPanel div = Element.newDiv();
+                div.setWidth("100%");
+                div.setHeight("100%");
+                div.setStyleProperty("background-color", "#FFFFFF7F");
+                return div;
+            }
+
+            @Override
+            public void onCreateColumnResizer(final IsPWidget resizer) {
+            }
+        });
+        gridView.setPollingDelayMillis(250L);
+        final DataGridModel<Integer, MyModel> model = gridView.getModel();
+        gridView.asWidget().setHeight("500px");
+        gridView.asWidget().setWidth("1000px");
+        gridView.asWidget().setStyleProperty("resize", "both");
+        gridView.asWidget().setStyleProperty("overflow", "hidden");
+        final PTextBox pollingDelay = Element.newPTextBox();
+        final PButton changePollingDelay = Element.newPButton("Change polling delay (ms)");
+        PWindow.getMain().add(pollingDelay);
+        PWindow.getMain().add(changePollingDelay);
+        changePollingDelay.addClickHandler((e) -> {
+            gridView.setPollingDelayMillis(Integer.parseInt(pollingDelay.getText().trim()));
+        });
+        PWindow.getMain().add(gridView);
+
+        final PButton clearSortsButton = Element.newPButton("Clear Sorts");
+        clearSortsButton.addClickHandler(e -> {
+            gridView.clearSorts();
+        });
+        PWindow.getMain().add(clearSortsButton);
+        PWindow.getMain().add(columnVisibilitySelectorDataGridView.getDecoratorWidget());
+        PWindow.getMain().add(configSelectorDataGridView.getDecoratorWidget());
+
+        final PTextBox addConfigTextBox = Element.newPTextBox();
+        final PButton addConfigButton = Element.newPButton("Add Config");
+        final PLabel addConfigLabel = Element.newPLabel();
+        addConfigLabel.setStyleProperty("color", "red");
+
+        PWindow.getMain().add(addConfigTextBox);
+        PWindow.getMain().add(addConfigButton);
+        addConfigButton.addClickHandler(e -> {
+            final String key = addConfigTextBox.getText();
+            if (!configSelectorDataGridView.addConfigEntry(key, configSelectorDataGridView.getCurrentConfig())) {
+                addConfigLabel.setText(key + " config already exists");
+                return;
+            }
+            addConfigLabel.setText("");
+            addConfigTextBox.setText("");
+            configSelectorDataGridView.selectConfig(key);
+        });
+
+        final PTextBox exportConfigTextBox = Element.newPTextBox();
+        final PButton exportConfigButton = Element.newPButton("Export Configs");
+        exportConfigButton.addClickHandler(e -> {
+            exportConfigTextBox.setText(configSelectorDataGridView.encodeConfigEntries(configSelectorDataGridView.getConfigEntries()));
+        });
+        final PTextBox importConfigTextBox = Element.newPTextBox();
+        final PButton importConfigButton = Element.newPButton("Import Configs");
+        importConfigButton.addClickHandler(e -> {
+            try {
+                configSelectorDataGridView
+                    .setConfigEntries(configSelectorDataGridView.decodeConfigEntries(importConfigTextBox.getText()));
+            } catch (final DecodeException e1) {
+                e1.printStackTrace();
+            }
+        });
+        PWindow.getMain().add(exportConfigTextBox);
+        PWindow.getMain().add(exportConfigButton);
+        PWindow.getMain().add(importConfigTextBox);
+        PWindow.getMain().add(importConfigButton);
+        model.setBound(false);
+        for (int i = 0; i < 1_000; i++) {
+            if (i % 500_000 == 0) log.info("i: {}", i);
+            model.setData(createMyModel(i));
+        }
+        model.setBound(true);
+        gridView.addRowAction(UISampleEntryPoint.class, new RowAction<>() {
+
+            @Override
+            public boolean testRow(final MyModel t, final int index) {
+                return (index & 1) == 0;
+            }
+
+            @Override
+            public void cancel(final IsPWidget row) {
+                row.asWidget().removeStyleName("unpair-row");
+            }
+
+            @Override
+            public void apply(final IsPWidget row) {
+                row.asWidget().addStyleName("unpair-row");
+            }
+        });
+        //        final AtomicInteger ii = new AtomicInteger(1_000);
+        //        final AtomicBoolean reverse = new AtomicBoolean(false);
+        //        PScheduler.scheduleAtFixedRate(() -> {
+        //            if (ii.get() % 10_000 == 0) log.info("ii : {}", ii);
+        //            if (reverse.get()) {
+        //                final int i = ii.getAndDecrement();
+        //                model.removeData(i);
+        //            } else {
+        //                final int i = ii.getAndIncrement();
+        //                model.setData(createMyModel(i));
+        //                if (i == 1_000_000) {
+        //                    log.info("Start reversing");
+        //                    reverse.set(true);
+        //                }
+        //            }
+        //        }, Duration.ofMillis(10L));
     }
 
     private void testVisibilityHandler(final PWindow window) {
