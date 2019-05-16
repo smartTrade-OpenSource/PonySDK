@@ -71,7 +71,7 @@ public class WebSocketClient {
                 final int statusCode = closeEvent.getCode();
                 if (log.isLoggable(Level.INFO)) log.info("WebSocket disconnected : " + statusCode);
                 // If it's a not normal disconnection
-                if (statusCode != 1000) reconnectionChecker.detectConnectionFailure();
+                reconnectionChecker.detectConnectionFailure();
             } else {
                 log.severe("WebSocket disconnected : " + event);
                 reconnectionChecker.detectConnectionFailure();
