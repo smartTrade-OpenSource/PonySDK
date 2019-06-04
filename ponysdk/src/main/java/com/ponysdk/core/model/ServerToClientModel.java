@@ -26,8 +26,8 @@ package com.ponysdk.core.model;
 public enum ServerToClientModel {
 
     ROUNDTRIP_LATENCY(ValueTypeModel.NULL),
-    TERMINAL_LATENCY(ValueTypeModel.NULL),
-    HEART_BEAT_PERIOD(ValueTypeModel.BYTE),
+    HEARTBEAT(ValueTypeModel.NULL),
+    HEARTBEAT_PERIOD(ValueTypeModel.INTEGER),
 
     CREATE_CONTEXT(ValueTypeModel.UINT31),
     DESTROY_CONTEXT(ValueTypeModel.NULL),

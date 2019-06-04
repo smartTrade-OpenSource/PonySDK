@@ -94,8 +94,8 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
                 encode(ServerToClientModel.CREATE_CONTEXT, uiContext.getID()); // TODO nciaravola integer ?
                 encode(ServerToClientModel.OPTION_FORMFIELD_TABULATION, configuration.isTabindexOnlyFormField());
-                encode(ServerToClientModel.HEART_BEAT_PERIOD,
-                    (byte) heartBeatPeriodTimeUnit.toSeconds(configuration.getHeartBeatPeriod()));
+                encode(ServerToClientModel.HEARTBEAT_PERIOD,
+                    (int) heartBeatPeriodTimeUnit.toSeconds(configuration.getHeartBeatPeriod()));
                 endObject();
                 if (isAlive()) flush0();
             } catch (final Throwable e) {
@@ -128,6 +128,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     /**
      * Receive from the terminal
      */
+
     @Override
     public void onWebSocketText(final String message) {
         if (this.listener != null) listener.onIncomingText(message);
@@ -141,8 +142,8 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
                     jsonObject = reader.readObject();
                 }
 
-                if (jsonObject.containsKey(ClientToServerModel.ROUNDTRIP_LATENCY.toStringValue())) {
-                    encode(ServerToClientModel.TERMINAL_LATENCY, null);
+                if (jsonObject.containsKey(ClientToServerModel.HEARTBEAT_REQUEST.toStringValue())) {
+                    sendHeartbeat();
                 } else if (jsonObject.containsKey(ClientToServerModel.TERMINAL_LATENCY.toStringValue())) {
                     processRoundtripLatency(jsonObject);
                 } else if (jsonObject.containsKey(ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue())) {
@@ -236,6 +237,14 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
             endObject();
             flush0();
         }
+    }
+    
+    private void sendHeartbeat() {
+        if (!isAlive() || !isSessionOpen()) return;
+        beginObject();
+        encode(ServerToClientModel.HEARTBEAT, null);
+        endObject();
+        flush0();
     }
 
     public void flush() {

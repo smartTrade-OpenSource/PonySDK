@@ -38,9 +38,6 @@ public class ReconnectionChecker {
 
     private static final int HTTP_STATUS_CODE_OK = 200;
 
-    private static final int CHECK_TIMEOUT = 5000; // 5 seconds
-    private static final int CHECK_PERIOD = 2000; // 2 seconds
-
     private static final int RETRY_TIMEOUT = 30000; // 30 seconds
     private static final int RETRY_PERIOD = 2000; // 2 seconds
 

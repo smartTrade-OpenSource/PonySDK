@@ -65,7 +65,7 @@ public class PonySDK implements UncaughtExceptionHandler {
     private boolean tabindexOnlyFormField;
 
     //Communication SanityChecker
-    private boolean connectionOk = true;
+    private long lastHeartBeatFail = 0L;
     private ReconnectionChecker reconnectionChecker;
 
     public PonySDK() {
@@ -211,10 +211,12 @@ public class PonySDK implements UncaughtExceptionHandler {
         Scheduler.get().scheduleFixedDelay(() -> {
             final long now = System.currentTimeMillis();
             final long lastMessageTime = socketClient.getLastMessageTime();
-            if (connectionOk) {
+            if (lastMessageTime != lastHeartBeatFail) {
                 if (now - lastMessageTime > heartBeatInMilli) {
-                    connectionOk = false;
-                    socketClient.send(ClientToServerModel.ROUNDTRIP_LATENCY.toStringValue());
+                    lastHeartBeatFail = lastMessageTime;
+                    final PTInstruction requestData = new PTInstruction();
+                    requestData.put(ClientToServerModel.HEARTBEAT_REQUEST);
+                    socketClient.send(requestData.toString());
                 }
             } else {
                 if (now - lastMessageTime > heartBeatInMilli) {
@@ -223,11 +225,11 @@ public class PonySDK implements UncaughtExceptionHandler {
                     //stop the scheduling
                     return false;
                 } else {
-                    connectionOk = false;
+                    lastHeartBeatFail = 0L;
                 }
             }
             return true;
-        }, heartBeatInMilli * 1000);
+        }, heartBeatInMilli);
     }
 
 }

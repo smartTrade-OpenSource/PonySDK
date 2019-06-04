@@ -138,9 +138,10 @@ public class WebSocketTest {
     public void testOnWebSocketTextRoundTripLatency() {
         encodedValues.clear();
         final JsonObjectBuilder job = JsonProvider.provider().createObjectBuilder();
-        job.add(ClientToServerModel.ROUNDTRIP_LATENCY.toStringValue(), JsonValue.NULL);
+        job.add(ClientToServerModel.HEARTBEAT_REQUEST.toStringValue(), JsonValue.NULL);
         webSocket.onWebSocketText(job.build().toString());
-        assertEquals(encodedValues, List.of(new Pair<>(ServerToClientModel.TERMINAL_LATENCY, null)));
+        assertEquals(encodedValues,
+            List.of(new Pair<>(ServerToClientModel.HEARTBEAT, null), new Pair<>(ServerToClientModel.END, null)));
     }
 
     /**
@@ -150,7 +151,7 @@ public class WebSocketTest {
     public void testOnWebSocketConnect() {
         assertEquals(encodedValues.get(0), new Pair<>(ServerToClientModel.CREATE_CONTEXT, uiContext.getID()));
         assertEquals(encodedValues.get(1), new Pair<>(ServerToClientModel.OPTION_FORMFIELD_TABULATION, false));
-        assertEquals(encodedValues.get(2), new Pair<>(ServerToClientModel.HEART_BEAT_PERIOD, (byte) 0));
+        assertEquals(encodedValues.get(2), new Pair<>(ServerToClientModel.HEARTBEAT_PERIOD, 0));
     }
 
     /**

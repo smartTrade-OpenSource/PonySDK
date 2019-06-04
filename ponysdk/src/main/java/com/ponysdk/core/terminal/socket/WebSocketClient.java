@@ -72,9 +72,6 @@ public class WebSocketClient {
 
         webSocket.setOnerror(event -> {
             log.severe("WebSocket error : " + event);
-            if (lastMessageTime == -1) {
-                reconnectionChecker.detectConnectionFailure();
-            }
         });
         webSocket.setOnmessage(event -> {
             lastMessageTime = System.currentTimeMillis();

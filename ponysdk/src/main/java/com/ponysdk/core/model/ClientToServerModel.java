@@ -66,7 +66,7 @@ public enum ClientToServerModel {
 
     OPTION_TABINDEX_ACTIVATED("u"),
 
-    ROUNDTRIP_LATENCY("v"),
+    HEARTBEAT_REQUEST("v"),
 
     HANDLER_BOOLEAN_VALUE_CHANGE("A"),
     HANDLER_DATE_VALUE_CHANGE("B"),
