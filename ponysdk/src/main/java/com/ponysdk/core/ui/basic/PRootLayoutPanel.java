@@ -24,7 +24,7 @@
 package com.ponysdk.core.ui.basic;
 
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.context.UIContextImpl;
+import com.ponysdk.core.server.context.impl.UIContextImpl;
 
 import java.util.HashMap;
 import java.util.Map;

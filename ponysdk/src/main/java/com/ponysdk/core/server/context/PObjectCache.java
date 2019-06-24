@@ -24,6 +24,7 @@
 package com.ponysdk.core.server.context;
 
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.context.impl.UIContextImpl;
 import com.ponysdk.core.ui.basic.PObject;
 import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.basic.PWindowManager;

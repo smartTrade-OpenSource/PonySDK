@@ -27,7 +27,7 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.ApplicationManager;
-import com.ponysdk.core.server.context.UIContextImpl;
+import com.ponysdk.core.server.context.impl.UIContextImpl;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;

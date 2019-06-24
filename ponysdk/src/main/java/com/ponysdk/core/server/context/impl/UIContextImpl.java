@@ -21,15 +21,18 @@
  * the License.
  */
 
-package com.ponysdk.core.server.context;
+package com.ponysdk.core.server.context.impl;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.application.Application;
 import com.ponysdk.core.server.concurrent.ScheduledTaskHandler;
 import com.ponysdk.core.server.concurrent.Scheduler;
 import com.ponysdk.core.server.concurrent.SchedulingContext;
+import com.ponysdk.core.server.context.api.ContextDestroyListener;
+import com.ponysdk.core.server.context.History;
+import com.ponysdk.core.server.context.PObjectCache;
+import com.ponysdk.core.server.context.api.UIContext;
 import com.ponysdk.core.server.monitoring.Monitor;
 import com.ponysdk.core.server.websocket.WebSocket;
 import com.ponysdk.core.ui.basic.PCookies;
@@ -64,7 +67,6 @@ public class UIContextImpl implements UIContext {
     private final Map<String, Object> attributes = new ConcurrentHashMap<>();
 
     private final PObjectCache pObjectCache = new PObjectCache();
-    private final Application application;
     private final SchedulingContext schedulingContext;
     private int objectCounter = 1;
 
@@ -96,18 +98,13 @@ public class UIContextImpl implements UIContext {
 
     private final WebSocket socket;
 
-    private long lastReceivedTime = System.currentTimeMillis();
-
     private final ModelWriter modelWriter;
 
-    public UIContextImpl(final WebSocket socket, Application application) {
+    public UIContextImpl(final WebSocket socket) {
         this.id = uiContextCount.incrementAndGet();
         this.socket = socket;
         this.modelWriter = new ModelWriter(socket);
-        this.application = application;
         this.schedulingContext = scheduler.createContext(Long.toString(id));
-
-
 
 
         final List<String> historyTokens = socket.getRequest().getParameterMap().get(ClientToServerModel.TYPE_HISTORY.toStringValue());
@@ -435,23 +432,6 @@ public class UIContextImpl implements UIContext {
         acquire();
         try {
             doDestroy();
-            application.deregisterUIContext(id);
-        } finally {
-            release();
-        }
-    }
-
-    /**
-     * Destroys the current UIContextImpl when the {@link Application} is destroyed
-     * <p>
-     * This method locks the UIContextImpl
-     */
-    void destroyFromApplication() {
-        if (!isAlive()) return;
-        acquire();
-        try {
-            doDestroy();
-            socket.close();
         } finally {
             release();
         }
@@ -467,7 +447,6 @@ public class UIContextImpl implements UIContext {
         acquire();
         try {
             doDestroy();
-            application.deregisterUIContext(id);
             socket.close();
         } finally {
             release();
@@ -558,14 +537,6 @@ public class UIContextImpl implements UIContext {
         return getCookies().getCookie(name);
     }
 
-    public void onMessageReceived() {
-        lastReceivedTime = System.currentTimeMillis();
-    }
-
-    public long getLastReceivedTime() {
-        return lastReceivedTime;
-    }
-
     public UserAgent getUserAgent() {
 
         return UserAgent.parseUserAgentString(socket.getRequest().getHeader("User-Agent"));
@@ -581,10 +552,6 @@ public class UIContextImpl implements UIContext {
 
     public void setWebSocketListener(final WebSocket.Listener listener) {
         socket.setListener(listener);
-    }
-
-    public Application getApplication() {
-        return application;
     }
 
     public ModelWriter getWriter() {

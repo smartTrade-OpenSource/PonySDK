@@ -25,7 +25,7 @@ package com.ponysdk.core.ui.basic;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.context.UIContextImpl;
+import com.ponysdk.core.server.context.impl.UIContextImpl;
 import com.ponysdk.core.writer.ModelWriter;
 
 import javax.json.JsonArray;

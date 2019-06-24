@@ -1,7 +1,7 @@
 package com.ponysdk.core.server.websocket;
 
 import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.server.context.UIContext;
+import com.ponysdk.core.server.context.api.UIContext;
 import com.ponysdk.core.ui.basic.PObject;
 
 import javax.json.*;
@@ -32,7 +32,7 @@ public class WebSocketDecoderImpl implements WebsocketDecoder {
         uiContext.execute(() -> {
             final JsonArray appInstructions = jsonObject.getJsonArray(applicationInstructions);
             for (int i = 0; i < appInstructions.size(); i++) {
-                appInstructions.getJsonObject(i)
+               //TODO  appInstructions.getJsonObject(i);
 
                 if (jsonObject.containsKey(ClientToServerModel.TYPE_HISTORY.toStringValue())) {
                     history.fireHistoryChanged(jsonObject.getString(ClientToServerModel.TYPE_HISTORY.toStringValue()));

@@ -23,7 +23,7 @@
 
 package com.ponysdk.core.ui.basic;
 
-import com.ponysdk.core.server.context.UIContextImpl;
+import com.ponysdk.core.server.context.impl.UIContextImpl;
 
 import java.util.Collection;
 import java.util.HashMap;

@@ -28,7 +28,6 @@ import com.ponysdk.core.model.BooleanModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.ValueTypeModel;
 import com.ponysdk.core.server.concurrent.AutoFlushedBuffer;
-import com.ponysdk.core.server.context.UIContextImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

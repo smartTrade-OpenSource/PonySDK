@@ -25,7 +25,7 @@ package com.ponysdk.core.server.websocket;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.Application;
-import com.ponysdk.core.server.context.UIContextImpl;
+import com.ponysdk.core.server.context.impl.UIContextImpl;
 import com.ponysdk.core.server.servlet.SessionManager;
 import com.ponysdk.core.util.Pair;
 import org.slf4j.Logger;

@@ -25,10 +25,10 @@ package com.ponysdk.core.server.websocket;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.application.Application;
 import com.ponysdk.core.server.application.ApplicationManager;
 import com.ponysdk.core.server.context.CommunicationSanityChecker;
-import com.ponysdk.core.server.context.UIContext;
+import com.ponysdk.core.server.context.api.UIContext;
+import com.ponysdk.core.server.context.impl.UIContextImpl;
 import com.ponysdk.core.ui.basic.PObject;
 import org.eclipse.jetty.util.component.Container;
 import org.eclipse.jetty.websocket.common.extensions.ExtensionStack;
@@ -57,14 +57,13 @@ public class WebSocket {
     private Session session;
     private UIContext uiContext;
 
-    private Application application;
     private CommunicationSanityChecker communicationSanityChecker;
 
     @OnOpen
     public void onOpen(final Session session, EndpointConfig config) throws IOException {
         this.session = session;
 
-        uiContext = application.createUIContext(this);
+        uiContext = new UIContextImpl(this);
         communicationSanityChecker.registerSession(this);
 
         encoder = new WebSocketPusher(session, 1 << 20, 1 << 12, TimeUnit.SECONDS.toMillis(60));
@@ -93,7 +92,7 @@ public class WebSocket {
         if (isAlive()) {
             try {
                 uiContext.onMessageReceived();
-                if (monitor != null) monitor.onMessageReceived(WebSocket.this, message);
+                if (monitor != null) monitor.onMessageReceived(this, message);
 
 
                 if (jsonObject.containsKey(ClientToServerModel.TERMINAL_LATENCY.toStringValue())) {
@@ -216,10 +215,6 @@ public class WebSocket {
 
     public void setMonitor(final WebsocketMonitor monitor) {
         this.monitor = monitor;
-    }
-
-    public void setApplication(Application application) {
-        this.application = application;
     }
 
     public void setListener(final Listener listener) {

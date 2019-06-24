@@ -24,7 +24,7 @@
 package com.ponysdk.sample.client.page.datagrid;
 
 import com.ponysdk.core.server.application.DataListener;
-import com.ponysdk.core.server.context.UIContextImpl;
+import com.ponysdk.core.server.context.impl.UIContextImpl;
 import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.core.ui.list.IdentityDataGridColumnDescriptor;
 import com.ponysdk.core.ui.list.renderer.cell.HtmlCellRenderer;

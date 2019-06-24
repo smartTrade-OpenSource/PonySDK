@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.core.server.context;
+package com.ponysdk.core.server.context.api;
 
 @FunctionalInterface
 public interface ContextDestroyListener {

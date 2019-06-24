@@ -25,7 +25,7 @@ package com.ponysdk.core.server.servlet;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.server.application.Application;
-import com.ponysdk.core.server.context.UIContextImpl;
+import com.ponysdk.core.server.context.impl.UIContextImpl;
 import com.ponysdk.core.server.websocket.WebsocketEncoder;
 import com.ponysdk.core.ui.basic.PObject;
 import org.junit.Test;

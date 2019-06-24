@@ -23,7 +23,7 @@
 
 package com.ponysdk.core.ui.rich;
 
-import com.ponysdk.core.server.context.UIContext;
+import com.ponysdk.core.server.context.api.UIContext;
 import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;

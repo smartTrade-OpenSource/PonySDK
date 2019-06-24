@@ -24,7 +24,7 @@
 package com.ponysdk.impl.java.server;
 
 import com.ponysdk.core.server.application.ApplicationConfiguration;
-import com.ponysdk.core.server.context.UIContextImpl;
+import com.ponysdk.core.server.context.impl.UIContextImpl;
 import com.ponysdk.core.ui.basic.PSuite;
 import com.ponysdk.core.ui.main.EntryPoint;
 import org.junit.Before;

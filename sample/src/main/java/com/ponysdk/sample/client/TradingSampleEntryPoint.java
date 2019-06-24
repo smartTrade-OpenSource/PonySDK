@@ -23,7 +23,7 @@
 
 package com.ponysdk.sample.client;
 
-import com.ponysdk.core.server.context.UIContextImpl;
+import com.ponysdk.core.server.context.impl.UIContextImpl;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PElement;
 import com.ponysdk.core.ui.basic.PSimpleLayoutPanel;

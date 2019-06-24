@@ -24,7 +24,7 @@
 package com.ponysdk.core.ui.basic;
 
 import com.ponysdk.core.model.*;
-import com.ponysdk.core.server.context.UIContextImpl;
+import com.ponysdk.core.server.context.impl.UIContextImpl;
 import com.ponysdk.core.ui.basic.event.*;
 import com.ponysdk.core.ui.basic.event.PDomEvent.Type;
 import com.ponysdk.core.ui.basic.event.PVisibilityEvent.PVisibilityHandler;

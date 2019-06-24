@@ -1,7 +1,7 @@
-package com.ponysdk.core.server.context;
+package com.ponysdk.core.server.context.api;
 
-import com.ponysdk.core.server.application.Application;
 import com.ponysdk.core.server.concurrent.ScheduledTaskHandler;
+import com.ponysdk.core.server.context.History;
 import com.ponysdk.core.server.monitoring.Monitor;
 import com.ponysdk.core.ui.basic.PCookies;
 import com.ponysdk.core.ui.basic.PObject;
@@ -15,7 +15,7 @@ import java.time.Duration;
  * Provides a way to identify a user across more than one page request or visit to a Web site and to
  * store information about that user.
  * </p>
- * <p>There is ONE unique UIContext for each screen displayed. Each UIContext is bound to the current {@link Application}.</p>
+ * <p>There is ONE unique UIContext for each screen displayed.</p>
  */
 public interface UIContext {
 

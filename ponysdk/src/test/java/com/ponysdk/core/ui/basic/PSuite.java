@@ -25,7 +25,7 @@ package com.ponysdk.core.ui.basic;
 
 import com.ponysdk.core.server.application.Application;
 import com.ponysdk.core.server.application.ApplicationConfiguration;
-import com.ponysdk.core.server.context.UIContextImpl;
+import com.ponysdk.core.server.context.impl.UIContextImpl;
 import com.ponysdk.core.server.websocket.WebSocket;
 import com.ponysdk.core.writer.ModelWriter;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;

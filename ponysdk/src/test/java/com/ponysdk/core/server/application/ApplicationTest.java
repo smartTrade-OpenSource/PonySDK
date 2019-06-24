@@ -23,7 +23,7 @@
 
 package com.ponysdk.core.server.application;
 
-import com.ponysdk.core.server.context.UIContextImpl;
+import com.ponysdk.core.server.context.impl.UIContextImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;

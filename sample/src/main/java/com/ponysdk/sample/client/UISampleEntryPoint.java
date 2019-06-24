@@ -25,7 +25,7 @@ package com.ponysdk.sample.client;
 
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.server.concurrent.PScheduler;
-import com.ponysdk.core.server.context.UIContextImpl;
+import com.ponysdk.core.server.context.impl.UIContextImpl;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.core.ui.basic.event.PClickEvent;

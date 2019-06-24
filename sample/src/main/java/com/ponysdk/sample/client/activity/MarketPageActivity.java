@@ -24,7 +24,7 @@
 package com.ponysdk.sample.client.activity;
 
 import com.ponysdk.core.server.application.DataListener;
-import com.ponysdk.core.server.context.UIContextImpl;
+import com.ponysdk.core.server.context.impl.UIContextImpl;
 import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.core.ui.basic.event.*;
 import com.ponysdk.core.ui.place.Place;

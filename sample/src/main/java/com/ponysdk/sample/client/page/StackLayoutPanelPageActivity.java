@@ -24,7 +24,7 @@
 package com.ponysdk.sample.client.page;
 
 import com.ponysdk.core.model.PUnit;
-import com.ponysdk.core.server.context.UIContextImpl;
+import com.ponysdk.core.server.context.impl.UIContextImpl;
 import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.sample.client.event.DemoBusinessEvent;
 
