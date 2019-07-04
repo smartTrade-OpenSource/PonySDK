@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.server.websocket;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.util.Arrays;
 import java.util.List;
@@ -238,7 +239,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
             flush0();
         }
     }
-    
+
     private void sendHeartbeat() {
         if (!isAlive() || !isSessionOpen()) return;
         beginObject();
@@ -257,8 +258,21 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
     public void close() {
         if (isSessionOpen()) {
-            log.info("Closing websocket programmatically");
+            final UIContext context = this.uiContext;
+            log.info("Closing websocket programmatically for UIContext #{}", context == null ? null : context.getID());
             session.close();
+        }
+    }
+
+    public void disconnect() {
+        if (isSessionOpen()) {
+            final UIContext context = this.uiContext;
+            log.info("Disconnecting websocket programmatically for UIContext #{}", context == null ? null : context.getID());
+            try {
+                session.disconnect();
+            } catch (final IOException e) {
+                log.error("Unable to disconnect session for UIContext #{}", context == null ? null : context.getID(), e);
+            }
         }
     }
 
