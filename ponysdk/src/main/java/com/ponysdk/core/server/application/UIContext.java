@@ -631,6 +631,23 @@ public class UIContext {
     }
 
     /**
+     * Disconnects and destroys the UIContext
+     * <p>
+     * This method locks the UIContext
+     */
+    public void disconnect() {
+        if (!isAlive()) return;
+        acquire();
+        try {
+            doDestroy();
+            context.deregisterUIContext(ID);
+            socket.disconnect();
+        } finally {
+            release();
+        }
+    }
+
+    /**
      * Destroys effectively the UIContext
      */
     private void doDestroy() {
