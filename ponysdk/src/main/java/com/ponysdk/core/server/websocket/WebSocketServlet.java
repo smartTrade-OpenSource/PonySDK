@@ -23,7 +23,6 @@
 
 package com.ponysdk.core.server.websocket;
 
-import com.ponysdk.core.server.application.Application;
 import com.ponysdk.core.server.application.ApplicationManager;
 import com.ponysdk.core.server.servlet.SessionManager;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
