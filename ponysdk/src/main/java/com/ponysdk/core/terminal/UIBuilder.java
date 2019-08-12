@@ -53,7 +53,6 @@ import com.ponysdk.core.terminal.ui.PTStreamResource;
 import com.ponysdk.core.terminal.ui.PTWindow;
 import com.ponysdk.core.terminal.ui.PTWindowManager;
 
-import elemental.client.Browser;
 import elemental.html.Uint8Array;
 import elemental.util.Collections;
 import elemental.util.MapFromIntTo;
@@ -381,7 +380,7 @@ public class UIBuilder {
 
     private void destroy() {
         PTWindowManager.closeAll();
-        Browser.getWindow().getLocation().reload();
+        ReconnectionChecker.reloadWindow();
     }
 
     public void sendDataToServer(final Widget widget, final PTInstruction instruction) {
