@@ -173,7 +173,7 @@ public abstract class AbstractFormField<T, W extends IsPWidget> implements FormF
 
     @Override
     public Collection<PValueChangeHandler<T>> getValueChangeHandlers() {
-        return Collections.unmodifiableCollection(handlers);
+        return handlers == null ? Collections.emptyList() : Collections.unmodifiableCollection(handlers);
     }
 
     protected void fireValueChange(final T value) {

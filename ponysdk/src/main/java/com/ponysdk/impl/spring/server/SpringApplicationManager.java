@@ -23,19 +23,20 @@
 
 package com.ponysdk.impl.spring.server;
 
-import com.ponysdk.core.server.application.ApplicationManager;
-import com.ponysdk.core.ui.activity.InitializingActivity;
-import com.ponysdk.core.ui.main.EntryPoint;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.util.StringUtils;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.support.GenericXmlApplicationContext;
+import org.springframework.util.StringUtils;
+
+import com.ponysdk.core.server.application.ApplicationManager;
+import com.ponysdk.core.ui.activity.InitializingActivity;
+import com.ponysdk.core.ui.main.EntryPoint;
 
 public class SpringApplicationManager extends ApplicationManager implements ApplicationContextAware {
 
@@ -58,9 +59,10 @@ public class SpringApplicationManager extends ApplicationManager implements Appl
 
     @Override
     protected EntryPoint initializeEntryPoint() {
-        try (ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext(configurations)) {
-            final String[] serverActiveProfiles = serverApplicationContext.getEnvironment().getActiveProfiles();
-            Arrays.stream(serverActiveProfiles).forEach(profile -> applicationContext.getEnvironment().addActiveProfile(profile));
+        try (GenericXmlApplicationContext applicationContext = new GenericXmlApplicationContext()) {
+            applicationContext.getEnvironment().setActiveProfiles(serverApplicationContext.getEnvironment().getActiveProfiles());
+            applicationContext.load(configurations);
+            applicationContext.refresh();
 
             final EntryPoint entryPoint = applicationContext.getBean(EntryPoint.class);
 
@@ -72,7 +74,7 @@ public class SpringApplicationManager extends ApplicationManager implements Appl
     }
 
     @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+    public void setApplicationContext(final ApplicationContext applicationContext) throws BeansException {
         this.serverApplicationContext = applicationContext;
     }
 }
