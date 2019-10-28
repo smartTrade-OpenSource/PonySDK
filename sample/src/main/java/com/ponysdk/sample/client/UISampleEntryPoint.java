@@ -23,62 +23,11 @@
 
 package com.ponysdk.sample.client;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.text.SimpleDateFormat;
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
-
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.PScheduler;
 import com.ponysdk.core.server.stm.Txn;
-import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.PAbsolutePanel;
-import com.ponysdk.core.ui.basic.PAnchor;
-import com.ponysdk.core.ui.basic.PButton;
-import com.ponysdk.core.ui.basic.PCookies;
-import com.ponysdk.core.ui.basic.PDateBox;
-import com.ponysdk.core.ui.basic.PDockLayoutPanel;
-import com.ponysdk.core.ui.basic.PFileUpload;
-import com.ponysdk.core.ui.basic.PFlowPanel;
-import com.ponysdk.core.ui.basic.PFrame;
-import com.ponysdk.core.ui.basic.PFunctionalLabel;
-import com.ponysdk.core.ui.basic.PLabel;
-import com.ponysdk.core.ui.basic.PListBox;
-import com.ponysdk.core.ui.basic.PMenuBar;
-import com.ponysdk.core.ui.basic.PRichTextArea;
-import com.ponysdk.core.ui.basic.PScript;
-import com.ponysdk.core.ui.basic.PScrollPanel;
-import com.ponysdk.core.ui.basic.PSimplePanel;
-import com.ponysdk.core.ui.basic.PStackLayoutPanel;
-import com.ponysdk.core.ui.basic.PTabLayoutPanel;
-import com.ponysdk.core.ui.basic.PTextBox;
-import com.ponysdk.core.ui.basic.PTree;
-import com.ponysdk.core.ui.basic.PTreeItem;
-import com.ponysdk.core.ui.basic.PWidget;
-import com.ponysdk.core.ui.basic.PWindow;
+import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
 import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
@@ -105,6 +54,21 @@ import com.ponysdk.core.ui.rich.PTwinListBox;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
 import com.ponysdk.sample.client.event.UserLoggedOutHandler;
 import com.ponysdk.sample.client.page.addon.LoggerAddOn;
+import com.ponysdk.core.ui.scene.AbstractScene;
+import com.ponysdk.core.ui.scene.Router;
+import com.ponysdk.core.ui.scene.Scene;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
@@ -117,42 +81,31 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     @Override
     public void start(final UIContext uiContext) {
+
         uiContext.setTerminalDataReceiver((object, instruction) -> System.err.println(object + " : " + instruction));
 
-        createReconnectingPanel();
+        //createReconnectingPanel();
 
-        mainLabel = Element.newPLabel("Can be modified by anybody : ₲ῳ₸");
+        mainLabel = Element.newPLabel("Can be dd by anybody : ₲ῳ₸");
         mainLabel.setAttributeLinkedToValue("data-title");
         mainLabel.setTitle("String ASCII");
-        PWindow.getMain().add(mainLabel);
+        //PWindow.getMain().add(mainLabel);
+        //testVisibilityHandler(PWindow.getMain());
+        //testPerf();
+        //testScene();
+        //if (true) return;
+        //createNewGridSystem();
+        //testPAddon();
+        //createWindow().open();
+        //downloadFile();
+        //createNewEvent();
+        //testUIDelegator();
+        //testNewGrid();
+        //createFunctionalLabel();
+        //PWindow.getMain().add(createGrid());
+        //       testPAddon();
 
-        testVisibilityHandler(PWindow.getMain());
-
-        testPerf();
-
-        if (true) return;
-
-        createNewGridSystem();
-
-        testPAddon();
-
-        createWindow().open();
-
-        downloadFile();
-
-        createNewEvent();
-
-        testUIDelegator();
-
-        testNewGrid();
-
-        createFunctionalLabel();
-
-        PWindow.getMain().add(createGrid());
-
-        testPAddon();
-
-        PScript.execute(PWindow.getMain(), "alert('coucou Main');");
+        //PScript.execute(PWindow.getMain(), "alert('coucou Main');");
 
         final PWindow window = createWindow();
         window.open();
@@ -268,6 +221,32 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         // uiContext.getHistory().newItem("", false);
     }
 
+    private void testScene() {
+        Scene scene1 = new AbstractScene("scene1", "Scene 1", "scene1") {
+            @Override
+            public PWidget buildGUI() {
+                return Element.newPLabel("Scene1 Started");
+            }
+        };
+
+        Scene scene2 = new AbstractScene("scene2", "Scene 2", "scene2") {
+            @Override
+            public PWidget buildGUI() {
+                return Element.newPLabel("Scene2 Started");
+            }
+        };
+
+        PSimplePanel layout = Element.newPSimplePanel();
+        Router router = new Router("sample");
+        router.setLayout(layout);
+        router.push(scene1);
+        router.push(scene2);
+
+        PWindow.getMain().add(layout);
+
+        router.go("scene2");
+    }
+
     private void testVisibilityHandler(final PWindow window) {
         final PLabel liveVisibility = Element.newPLabel("Live Visibility : Unknown");
         window.add(liveVisibility);
@@ -319,7 +298,9 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
                 updateLabel(label, String.valueOf(a));
             }
         });
-        button.addClickHandler(event -> visibilityLabel.setText("Visibility : " + subPanel.isShown()));
+        button.addClickHandler(event -> {
+            visibilityLabel.setText("Visibility : " + subPanel.isShown());
+        });
     }
 
     private static void updateLabel(final PLabel label, final String text) {
@@ -375,7 +356,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final BufferedReader reader = new BufferedReader(new InputStreamReader(item.getInputStream(), "UTF-8"));
         final StringBuilder value = new StringBuilder();
         final char[] buffer = new char[1024];
-        for (int length = 0; (length = reader.read(buffer)) > 0;) {
+        for (int length = 0; (length = reader.read(buffer)) > 0; ) {
             value.append(buffer, 0, length);
         }
         System.out.println(value.toString());
@@ -557,7 +538,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     private void createNewEvent() {
         final EventHandler<PClickEvent> handler = UIContext.getNewEventBus().subscribe(PClickEvent.class,
-            event -> System.err.println("B " + event));
+                event -> System.err.println("B " + event));
         UIContext.getNewEventBus().post(new PClickEvent(this));
         UIContext.getNewEventBus().post(new PClickEvent(this));
         UIContext.getNewEventBus().unsubscribe(handler);
@@ -676,7 +657,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         windowContainer.add(button1);
         button1.addClickHandler(event -> {
             final PWindow newPWindow = Element.newPWindow(w, "Sub Window 1 " + i.incrementAndGet(),
-                "resizable=yes,location=0,status=0,scrollbars=0");
+                    "resizable=yes,location=0,status=0,scrollbars=0");
             newPWindow.add(Element.newPLabel("Sub window"));
             newPWindow.open();
         });
@@ -685,7 +666,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         windowContainer.add(button2);
         button2.addClickHandler(event -> {
             final PWindow newPWindow = Element.newPWindow("Not Sub Window 1 " + i.incrementAndGet(),
-                "resizable=yes,location=0,status=0,scrollbars=0");
+                    "resizable=yes,location=0,status=0,scrollbars=0");
             newPWindow.add(Element.newPLabel("Sub window"));
             newPWindow.open();
         });
@@ -822,7 +803,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
             @Override
             public PKeyCodes[] getFilteredKeys() {
-                return new PKeyCodes[] { PKeyCodes.ENTER };
+                return new PKeyCodes[]{PKeyCodes.ENTER};
             }
         });
         return pTextBox;
@@ -888,8 +869,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         }
 
         /**
-         * @param security
-         *            the security to set
+         * @param security the security to set
          */
         public void setSecurity(final String security) {
             this.security = security;
@@ -903,8 +883,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         }
 
         /**
-         * @param classe
-         *            the classe to set
+         * @param classe the classe to set
          */
         public void setClasse(final String classe) {
             this.classe = classe;
@@ -918,8 +897,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         }
 
         /**
-         * @param bid
-         *            the bid to set
+         * @param bid the bid to set
          */
         public void setBid(final Double bid) {
             this.bid = bid;
@@ -933,8 +911,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         }
 
         /**
-         * @param offer
-         *            the offer to set
+         * @param offer the offer to set
          */
         public void setOffer(final Double offer) {
             this.offer = offer;
@@ -948,8 +925,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         }
 
         /**
-         * @param spread
-         *            the spread to set
+         * @param spread the spread to set
          */
         public void setSpread(final Double spread) {
             this.spread = spread;
@@ -963,8 +939,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         }
 
         /**
-         * @param coucou
-         *            the coucou to set
+         * @param coucou the coucou to set
          */
         public void setCoucou(final String coucou) {
             this.coucou = coucou;
@@ -978,8 +953,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         }
 
         /**
-         * @param coucou1
-         *            the coucou1 to set
+         * @param coucou1 the coucou1 to set
          */
         public void setCoucou1(final String coucou1) {
             this.coucou1 = coucou1;
@@ -993,8 +967,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         }
 
         /**
-         * @param coucou2
-         *            the coucou2 to set
+         * @param coucou2 the coucou2 to set
          */
         public void setCoucou2(final String coucou2) {
             this.coucou2 = coucou2;
@@ -1008,8 +981,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         }
 
         /**
-         * @param coucou3
-         *            the coucou3 to set
+         * @param coucou3 the coucou3 to set
          */
         public void setCoucou3(final String coucou3) {
             this.coucou3 = coucou3;
@@ -1023,8 +995,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         }
 
         /**
-         * @param coucou4
-         *            the coucou4 to set
+         * @param coucou4 the coucou4 to set
          */
         public void setCoucou4(final String coucou4) {
             this.coucou4 = coucou4;

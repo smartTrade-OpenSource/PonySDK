@@ -23,15 +23,14 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Objects;
-
-import javax.json.JsonObject;
-
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.writer.ModelWriter;
+
+import javax.json.JsonObject;
+import java.util.Objects;
 
 /**
  * An entry in a {@link PMenuBar}. Menu items can either fire a {@link Runnable} when they are clicked, or open a
@@ -159,7 +158,7 @@ public class PMenuItem extends PMenuSubElement {
 
     @Override
     protected String dumpDOM() {
-        String DOM = "<li>" + text != null ? text : html;
+        String DOM = "<li pid=\"" + ID + "\">" + (text != null ? text : html);
 
         if (subMenu != null) {
             DOM += subMenu.dumpDOM();

@@ -26,6 +26,8 @@ package com.ponysdk.core.ui.basic;
 import com.ponysdk.core.model.PCheckBoxState;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
+import com.ponysdk.test.PEmulator;
+import com.ponysdk.test.PSuite;
 import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -94,9 +96,29 @@ public class PCheckBoxTest extends PSuite {
         w1.addValueChangeHandler(handler);
         assertEquals(w1.getValueChangeHandlers().size(), 1);
 
-        ModelWriterForTest.simulateValueChange(w1, true);
+        PEmulator.valueChange(w1, true);
         assertEquals(handlerFiredCount.get(), 1);
-        ModelWriterForTest.simulateValueChange(w1, false);
+        PEmulator.valueChange(w1, false);
         assertEquals(handlerFiredCount.get(), 2);
+    }
+
+    @Test
+    public void testDumDOM() {
+        final PCheckBox checkBox = Element.newPCheckBox();
+        String ID = String.valueOf(checkBox.getID());
+
+        assertEquals("<input type=\"checkbox\" pid=\"" + ID + "\" class=\"\"></input>", checkBox.dumpDOM());
+
+        checkBox.setHTML("<a>html</a>");
+        assertEquals("<input type=\"checkbox\" pid=\"" + ID + "\" class=\"\"><a>html</a></input>", checkBox.dumpDOM());
+
+        checkBox.setHTML("text");
+        assertEquals("<input type=\"checkbox\" pid=\"" + ID + "\" class=\"\">text</input>", checkBox.dumpDOM());
+
+        checkBox.addStyleName("style");
+        assertEquals("<input type=\"checkbox\" pid=\"" + ID + "\" class=\"style\">text</input>", checkBox.dumpDOM());
+
+        checkBox.setState(PCheckBoxState.CHECKED);
+        assertEquals("<input type=\"checkbox\" pid=\"" + ID + "\" checked class=\"style\">text</input>", checkBox.dumpDOM());
     }
 }

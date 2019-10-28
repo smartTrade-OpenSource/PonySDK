@@ -23,12 +23,6 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
-import javax.json.JsonObject;
-
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -39,6 +33,11 @@ import com.ponysdk.core.ui.basic.event.PChangeEvent;
 import com.ponysdk.core.ui.basic.event.PChangeHandler;
 import com.ponysdk.core.ui.basic.event.PSubmitCompleteHandler;
 import com.ponysdk.core.ui.eventbus.StreamHandler;
+
+import javax.json.JsonObject;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * A widget that wraps the HTML &lt;input type='file'&gt; element.
@@ -78,10 +77,9 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers {
     public void onClientData(final JsonObject jsonObject) {
         if (!isVisible()) return;
         if (jsonObject.containsKey(ClientToServerModel.HANDLER_CHANGE.toStringValue())) {
-            final String fileName = jsonObject.getString(ClientToServerModel.HANDLER_CHANGE.toStringValue());
-            if (fileName != null) setFileName(fileName);
-            final int fileSize = jsonObject.getInt(ClientToServerModel.SIZE.toStringValue());
-            setFileSize(fileSize);
+            final String fName = jsonObject.getString(ClientToServerModel.HANDLER_CHANGE.toStringValue());
+            if (fName != null) setFileName(fName);
+            setFileSize(jsonObject.getInt(ClientToServerModel.SIZE.toStringValue()));
 
             final PChangeEvent event = new PChangeEvent(this);
             changeHandlers.forEach(handler -> handler.onChange(event));
@@ -158,6 +156,6 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers {
 
     @Override
     protected String dumpDOM() {
-        return "<upload></upload>";
+        return "<upload pid=\"" + ID + "\"></upload>";
     }
 }

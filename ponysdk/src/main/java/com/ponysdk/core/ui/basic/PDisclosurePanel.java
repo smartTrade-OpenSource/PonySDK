@@ -23,23 +23,14 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
-
-import javax.json.JsonObject;
-
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.ui.basic.event.HasPWidgets;
-import com.ponysdk.core.ui.basic.event.PCloseEvent;
-import com.ponysdk.core.ui.basic.event.PCloseHandler;
-import com.ponysdk.core.ui.basic.event.POpenEvent;
-import com.ponysdk.core.ui.basic.event.POpenHandler;
+import com.ponysdk.core.ui.basic.event.*;
 import com.ponysdk.core.writer.ModelWriter;
+
+import javax.json.JsonObject;
+import java.util.*;
 
 /**
  * A widget that consists of a header and a content panel that discloses the content when a user clicks on the header.
@@ -166,7 +157,6 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, PAcceptsOn
     private void adopt(final PWidget child) {
         if (child.getParent() == null) child.setParent(this);
         else throw new IllegalStateException("Can't adopt an already widget attached to a parent");
-
     }
 
     public void addCloseHandler(final PCloseHandler handler) {
@@ -184,8 +174,8 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, PAcceptsOn
     public void setOpen(final boolean isOpen) {
         if (Objects.equals(this.isOpen, isOpen)) return;
         this.isOpen = isOpen;
-        if (isOpen) saveUpdate(ServerToClientModel.OPEN, isOpen);
-        else saveUpdate(ServerToClientModel.CLOSE, isOpen);
+        if (isOpen) saveUpdate(ServerToClientModel.OPEN, true);
+        else saveUpdate(ServerToClientModel.CLOSE, false);
     }
 
     public boolean isAnimationEnabled() {
@@ -200,6 +190,6 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, PAcceptsOn
 
     @Override
     protected String dumpDOM() {
-        return "<div><div>" + headerText + "</div>" + content.dumpDOM() + "</div>";
+        return "<div pid=\"" + ID + "\"><div>" + headerText + "</div>" + content.dumpDOM() + "</div>";
     }
 }

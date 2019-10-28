@@ -23,11 +23,11 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Collections;
-import java.util.Iterator;
-
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
+
+import java.util.Collections;
+import java.util.Iterator;
 
 /**
  * Abstract base class for panels that can contain multiple child widgets.
@@ -158,7 +158,7 @@ public abstract class PComplexPanel extends PPanel {
 
     @Override
     protected String dumpDOM() {
-        String DOM = "<div>";
+        String DOM = "<div pid=\"" + ID + "\">";
 
         Iterator<PWidget> iter = children.iterator();
         while (iter.hasNext()) {

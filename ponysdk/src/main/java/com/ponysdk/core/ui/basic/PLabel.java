@@ -23,28 +23,15 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Objects;
-import java.util.stream.Collectors;
-
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
-import com.ponysdk.core.ui.basic.event.PDoubleClickEvent;
-import com.ponysdk.core.ui.basic.event.PDoubleClickHandler;
-import com.ponysdk.core.ui.basic.event.PDragEndEvent;
-import com.ponysdk.core.ui.basic.event.PDragEndHandler;
-import com.ponysdk.core.ui.basic.event.PDragEnterEvent;
-import com.ponysdk.core.ui.basic.event.PDragEnterHandler;
-import com.ponysdk.core.ui.basic.event.PDragLeaveEvent;
-import com.ponysdk.core.ui.basic.event.PDragOverEvent;
-import com.ponysdk.core.ui.basic.event.PDragStartEvent;
-import com.ponysdk.core.ui.basic.event.PDragStartHandler;
-import com.ponysdk.core.ui.basic.event.PDropEvent;
-import com.ponysdk.core.ui.basic.event.PDropHandler;
+import com.ponysdk.core.ui.basic.event.*;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 import com.ponysdk.core.util.Incubation;
 import com.ponysdk.core.writer.ModelWriter;
+
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * A widget that contains arbitrary text, <i>not</i> interpreted as HTML. This widget uses a &lt;div&gt; element,
@@ -148,6 +135,6 @@ public class PLabel extends PWidget {
 
     @Override
     protected String dumpDOM() {
-        return "<label class=\"" + getStyleNames().collect(Collectors.joining(" ")) + "\">" + text + "</label>";
+        return "<label pid=\"" + ID + "\" class=\"" + getStyleNames().collect(Collectors.joining(" ")) + "\">" + text + "</label>";
     }
 }

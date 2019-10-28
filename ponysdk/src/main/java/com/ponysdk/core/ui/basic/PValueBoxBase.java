@@ -140,6 +140,6 @@ public abstract class PValueBoxBase extends PFocusWidget {
 
     @Override
     protected String dumpDOM() {
-        return "<input class=\"" + getStyleNames().collect(Collectors.joining(" ")) + "\">" + text + "</input>";
+        return "<input pid=\"" + ID + "\" class=\"" + getStyleNames().collect(Collectors.joining(" ")) + "\">" + text + "</input>";
     }
 }

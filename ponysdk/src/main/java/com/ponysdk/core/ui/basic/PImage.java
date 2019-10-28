@@ -23,15 +23,6 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Objects;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.UIContext;
@@ -40,6 +31,15 @@ import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 import com.ponysdk.core.ui.eventbus.StreamHandler;
 import com.ponysdk.core.writer.ModelWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 /**
  * A widget that displays the image at a given URL. The image can be in 'unclipped' mode (the
@@ -154,7 +154,7 @@ public class PImage extends PWidget {
                     while (in.read(buffer) != -1) {
                         out.write(buffer);
                     }
-                    imageToBase64 = new String(out.toByteArray(), "UTF-8");
+                    imageToBase64 = new String(out.toByteArray(), StandardCharsets.UTF_8);
                 }
             } catch (final IOException e) {
                 log.error("Cannot load resource from " + this, e);
@@ -173,6 +173,6 @@ public class PImage extends PWidget {
 
     @Override
     protected String dumpDOM() {
-        return "<img url=\"" + url + "\">" + "</img>";
+        return "<img pid=\"" + ID + "\" url=\"" + url + "\">" + "</img>";
     }
 }

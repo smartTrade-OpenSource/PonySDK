@@ -23,14 +23,11 @@
 
 package com.ponysdk.core.ui.basic;
 
-import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.test.PSuite;
 import com.ponysdk.core.ui.basic.event.PCloseHandler;
-import com.ponysdk.core.ui.basic.event.POpenEvent;
 import com.ponysdk.core.ui.basic.event.POpenHandler;
 import org.junit.Test;
-import org.mockito.Mockito;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.*;

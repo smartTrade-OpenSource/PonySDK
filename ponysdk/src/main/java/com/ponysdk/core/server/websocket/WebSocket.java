@@ -23,17 +23,14 @@
 
 package com.ponysdk.core.server.websocket;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-
+import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.application.ApplicationConfiguration;
+import com.ponysdk.core.server.application.ApplicationManager;
+import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.context.CommunicationSanityChecker;
+import com.ponysdk.core.server.stm.TxnContext;
+import com.ponysdk.core.ui.basic.PObject;
 import org.eclipse.jetty.util.component.Container;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
@@ -43,14 +40,16 @@ import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.application.ApplicationConfiguration;
-import com.ponysdk.core.server.application.ApplicationManager;
-import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.server.context.CommunicationSanityChecker;
-import com.ponysdk.core.server.stm.TxnContext;
-import com.ponysdk.core.ui.basic.PObject;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
@@ -96,7 +95,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
                 encode(ServerToClientModel.CREATE_CONTEXT, uiContext.getID()); // TODO nciaravola integer ?
                 encode(ServerToClientModel.OPTION_FORMFIELD_TABULATION, configuration.isTabindexOnlyFormField());
                 encode(ServerToClientModel.HEARTBEAT_PERIOD,
-                    (int) heartBeatPeriodTimeUnit.toSeconds(configuration.getHeartBeatPeriod()));
+                        (int) heartBeatPeriodTimeUnit.toSeconds(configuration.getHeartBeatPeriod()));
                 endObject();
                 if (isAlive()) flush0();
             } catch (final Throwable e) {
@@ -122,14 +121,13 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     @Override
     public void onWebSocketClose(final int statusCode, final String reason) {
         log.info("WebSocket closed on UIContext #{} : {}, reason : {}", uiContext.getID(), NiceStatusCode.getMessage(statusCode),
-            reason != null ? reason : "");
+                Objects.requireNonNullElse(reason, ""));
         uiContext.onDestroy();
     }
 
     /**
      * Receive from the terminal
      */
-
     @Override
     public void onWebSocketText(final String message) {
         if (this.listener != null) listener.onIncomingText(message);
@@ -156,7 +154,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
                 } else if (jsonObject.containsKey(ClientToServerModel.INFO_MSG.toStringValue())) {
                     processTerminalLog(jsonObject, ClientToServerModel.INFO_MSG);
                 } else {
-                    log.error("Unknow message from terminal #{} : {}", uiContext.getID(), message);
+                    log.error("Unknown message from terminal #{} : {}", uiContext.getID(), message);
                 }
 
                 if (monitor != null) monitor.onMessageProcessed(this, message);
@@ -167,7 +165,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
             }
         } else {
             log.info("UI Context #{} is destroyed, message dropped from terminal : {}", uiContext != null ? uiContext.getID() : -1,
-                message);
+                    message);
         }
     }
 
@@ -300,7 +298,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         if (listener != null) listener.onOutgoingPonyFrame(model, value);
     }
 
-    private static enum NiceStatusCode {
+    private enum NiceStatusCode {
 
         NORMAL(StatusCode.NORMAL, "Normal closure"),
         SHUTDOWN(StatusCode.SHUTDOWN, "Shutdown"),
@@ -329,7 +327,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
         public static String getMessage(final int statusCode) {
             final List<NiceStatusCode> codes = Arrays.stream(values())
-                .filter(niceStatusCode -> niceStatusCode.statusCode == statusCode).collect(Collectors.toList());
+                    .filter(niceStatusCode -> niceStatusCode.statusCode == statusCode).collect(Collectors.toList());
             if (!codes.isEmpty()) {
                 return codes.get(0).toString();
             } else {

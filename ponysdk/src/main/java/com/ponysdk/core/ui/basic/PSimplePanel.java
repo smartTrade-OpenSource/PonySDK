@@ -23,13 +23,12 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-
+import com.ponysdk.core.model.WidgetType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.model.WidgetType;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  * Base class for panels that contain only one widget.
@@ -107,7 +106,7 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
 
     @Override
     public Iterator<PWidget> iterator() {
-        return new Iterator<PWidget>() {
+        return new Iterator<>() {
 
             boolean hasElement = widget != null;
 
@@ -138,6 +137,6 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
 
     @Override
     protected String dumpDOM() {
-        return "<div>" + widget.dumpDOM() + "</div>";
+        return "<div pid=\"" + ID + "\">" + widget.dumpDOM() + "</div>";
     }
 }

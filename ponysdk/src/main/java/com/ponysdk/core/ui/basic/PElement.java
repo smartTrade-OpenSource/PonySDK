@@ -23,12 +23,12 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Objects;
-import java.util.stream.Collectors;
-
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.writer.ModelWriter;
+
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * All HTML element interfaces derive from this class.Useful to create native
@@ -86,9 +86,9 @@ public class PElement extends PComplexPanel {
     @Override
     protected String dumpDOM() {
         if (getWidgetCount() == 0) {
-            return "<" + tagName + " class=\"" + getStyleNames().collect(Collectors.joining(" ")) + "\">" + (innerText != null ? innerText : innerHTML) + "</" + tagName + ">";
+            return "<" + tagName + "pid=\"" + ID + "\" class=\"" + getStyleNames().collect(Collectors.joining(" ")) + "\">" + (innerText != null ? innerText : innerHTML) + "</" + tagName + ">";
         } else {
-            return "<" + tagName + " class=\"" + getStyleNames().collect(Collectors.joining(" ")) + "\">" + dumpChildDOM() + "</" + tagName + ">";
+            return "<" + tagName + "pid=\"" + ID + "\" class=\"" + getStyleNames().collect(Collectors.joining(" ")) + "\">" + dumpChildDOM() + "</" + tagName + ">";
         }
     }
 

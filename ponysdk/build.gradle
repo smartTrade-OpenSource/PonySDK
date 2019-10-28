@@ -72,14 +72,13 @@ dependencies {
 
             'org.seleniumhq.selenium:selenium-api:' + seleniumVersion,
             'org.glassfish.tyrus:tyrus-client:' + tyrusVersion,
-            'org.glassfish.tyrus.ext:tyrus-extension-deflate:' + tyrusVersion
+            'org.glassfish.tyrus.ext:tyrus-extension-deflate:' + tyrusVersion,
+
+            'junit:junit:' + junitVersion,
+            'org.mockito:mockito-core:' + mockitoVersion
     )
 
     testCompile(
-            'junit:junit:' + junitVersion,
-
-            'org.mockito:mockito-core:' + mockitoVersion,
-
             'org.seleniumhq.selenium:selenium-java:' + seleniumVersion,
             'javax.websocket:javax.websocket-client-api:1.1',
             'org.jsoup:jsoup:1.11.3'

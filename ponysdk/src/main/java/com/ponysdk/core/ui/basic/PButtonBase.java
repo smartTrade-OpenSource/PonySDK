@@ -23,11 +23,11 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Objects;
-import java.util.stream.Collectors;
-
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.writer.ModelWriter;
+
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Abstract base class for {@link PButton}, {@link PCheckBox}.
@@ -102,6 +102,14 @@ abstract class PButtonBase extends PFocusWidget {
 
     @Override
     protected String dumpDOM() {
-        return "<button class=\"" + getStyleNames().collect(Collectors.joining(" ")) + "\">" + text != null ? text : html + "</button>";
+        StringBuilder DOM = new StringBuilder();
+        DOM.append("<button");
+        DOM.append(" pid=\"" + ID + "\"");
+        DOM.append(" class=\"" + getStyleNames().collect(Collectors.joining(" ")) + "\"");
+        DOM.append(">");
+        if (getText() != null) DOM.append(getText());
+        if (getHTML() != null) DOM.append(getHTML());
+        DOM.append("</button>");
+        return DOM.toString();
     }
 }
