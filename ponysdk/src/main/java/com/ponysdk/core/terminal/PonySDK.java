@@ -207,6 +207,7 @@ public class PonySDK implements UncaughtExceptionHandler {
     }
 
     public void setHeartBeatPeriod(final int heartBeatInseconds) {
+        if (heartBeatInseconds == 0) return;
         final int heartBeatInMilli = heartBeatInseconds * 1000;
         Scheduler.get().scheduleFixedDelay(() -> {
             final long now = System.currentTimeMillis();

@@ -91,12 +91,15 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
             try {
                 beginObject();
                 final ApplicationConfiguration configuration = uiContext.getConfiguration();
+                final boolean enableClientToServerHeartBeat = configuration.isEnableClientToServerHeartBeat();
                 final TimeUnit heartBeatPeriodTimeUnit = configuration.getHeartBeatPeriodTimeUnit();
-
+                final int heartBeatPeriod = enableClientToServerHeartBeat
+                        ? (int) heartBeatPeriodTimeUnit.toSeconds(configuration.getHeartBeatPeriod())
+                        : 0;
+                        
                 encode(ServerToClientModel.CREATE_CONTEXT, uiContext.getID()); // TODO nciaravola integer ?
                 encode(ServerToClientModel.OPTION_FORMFIELD_TABULATION, configuration.isTabindexOnlyFormField());
-                encode(ServerToClientModel.HEARTBEAT_PERIOD,
-                    (int) heartBeatPeriodTimeUnit.toSeconds(configuration.getHeartBeatPeriod()));
+                encode(ServerToClientModel.HEARTBEAT_PERIOD, heartBeatPeriod);
                 endObject();
                 if (isAlive()) flush0();
             } catch (final Throwable e) {

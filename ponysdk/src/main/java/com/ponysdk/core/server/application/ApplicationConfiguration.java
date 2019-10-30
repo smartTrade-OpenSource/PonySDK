@@ -45,6 +45,7 @@ public class ApplicationConfiguration {
     private String applicationContextName = "sample";
     private long heartBeatPeriod = 5000;// ms
     private TimeUnit heartBeatPeriodTimeUnit = TimeUnit.MILLISECONDS;
+    private boolean enableClientToServerHeartBeat = true;
 
     private int sessionTimeout = 15; // minutes
 
@@ -182,6 +183,20 @@ public class ApplicationConfiguration {
     @Override
     public String toString() {
         return "ApplicationManagerOption [heartBeatPeriod=" + heartBeatPeriod + " " + heartBeatPeriodTimeUnit + "]";
+    }
+
+    /**
+     * @return the enableClientToServerHeartBeat
+     */
+    public boolean isEnableClientToServerHeartBeat() {
+        return enableClientToServerHeartBeat;
+    }
+
+    /**
+     * @param enableClientToServerHeartBeat the enableClientToServerHeartBeat to set
+     */
+    public void setEnableClientToServerHeartBeat(final boolean enableClientToServerHeartBeat) {
+        this.enableClientToServerHeartBeat = enableClientToServerHeartBeat;
     }
 
 }
