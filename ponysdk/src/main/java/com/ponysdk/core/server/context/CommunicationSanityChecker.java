@@ -41,7 +41,7 @@ public class CommunicationSanityChecker {
 
     private static final int CHECK_PERIOD = 1000;
     private static final int MAX_THREAD_CHECKER = Integer.parseInt(
-        System.getProperty("communication.sanity.checker.thread.count", String.valueOf(Runtime.getRuntime().availableProcessors())));
+        System.getProperty("communication.sanity.checker.thread.count", String.valueOf(Math.min(4, Runtime.getRuntime().availableProcessors()))));
     protected static final ScheduledThreadPoolExecutor sanityCheckerTimer = new ScheduledThreadPoolExecutor(MAX_THREAD_CHECKER,
         new ThreadFactory() {
 
