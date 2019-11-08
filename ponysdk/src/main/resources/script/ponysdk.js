@@ -12,6 +12,10 @@ document.onConnectionLost = function(callback) {
     document.onConnectionLostListeners.push(callback);
 };
 
+document.doReload = function() {
+    document.location.reload();
+};
+
 function onPonySDKModuleLoaded() {
     console.log("onPonySDKModuleLoaded");
 

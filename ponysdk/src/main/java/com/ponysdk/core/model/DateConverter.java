@@ -28,13 +28,27 @@ import java.util.Date;
 
 public final class DateConverter {
 
+    private static final int MAX_ARRAY_SIZE = Byte.MAX_VALUE * 2 + 1;
     private static final int EMPTY_TIMESTAMP = -1;
 
     private DateConverter() {
     }
 
-    public static Long[] encode(final Collection<Date> dates) {
-        return dates != null && !dates.isEmpty() ? dates.stream().map(DateConverter::encode).toArray(Long[]::new) : null;
+    public static Long[][] encode(final Collection<Date> dates) {
+        if (dates == null || dates.isEmpty()) return null;
+        final int remainder = dates.size() % MAX_ARRAY_SIZE;
+        final int nbArrays = dates.size() / MAX_ARRAY_SIZE + (remainder == 0 ? 0 : 1);
+        final Long[][] arrays = new Long[nbArrays][];
+        for (int i = 0; i < arrays.length - 1; i++) {
+            arrays[i] = new Long[MAX_ARRAY_SIZE];
+        }
+        arrays[arrays.length - 1] = new Long[remainder == 0 ? MAX_ARRAY_SIZE : remainder];
+        int i = 0;
+        for (final Date date : dates) {
+            arrays[i / MAX_ARRAY_SIZE][i % MAX_ARRAY_SIZE] = encode(date);
+            i++;
+        }
+        return arrays;
     }
 
     public static Long encode(final Date date) {

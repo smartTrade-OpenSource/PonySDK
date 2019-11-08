@@ -26,8 +26,10 @@ package com.ponysdk.core.model;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.junit.Test;
 
@@ -38,14 +40,20 @@ public class DateConverterTest {
      */
     @Test
     public void testEncodeDates() {
-        final int firstTimestamp = 0;
-        final int lastTimestamp = 1000;
-        final List<Date> dates = List.of(new Date(firstTimestamp), new Date(lastTimestamp));
-        final Long[] timestamp = DateConverter.encode(dates);
-        assertEquals(dates.size(), timestamp.length);
-        assertEquals(firstTimestamp, (long) timestamp[0]);
-        assertEquals(lastTimestamp, (long) timestamp[1]);
-
+        final List<Long> timestamps = new ArrayList<>();
+        for (int i = 0; i < 256; i++) {
+            timestamps.add(i * 1000L);
+        }
+        final Long[][] encoded = DateConverter.encode(timestamps.stream().map(Date::new).collect(Collectors.toList()));
+        assertEquals(encoded.length, 2);
+        assertEquals(encoded[0].length, 255);
+        assertEquals(encoded[1].length, 1);
+        int i = 0;
+        for (final Long[] part : encoded) {
+            for (final Long v : part) {
+                assertEquals("Index: " + i, v, timestamps.get(i++));
+            }
+        }
         assertNull(DateConverter.encode((List<Date>) null));
         assertNull(DateConverter.encode(List.of()));
     }

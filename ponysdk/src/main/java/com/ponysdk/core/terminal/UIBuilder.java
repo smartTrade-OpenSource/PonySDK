@@ -53,7 +53,6 @@ import com.ponysdk.core.terminal.ui.PTStreamResource;
 import com.ponysdk.core.terminal.ui.PTWindow;
 import com.ponysdk.core.terminal.ui.PTWindowManager;
 
-import elemental.client.Browser;
 import elemental.html.Uint8Array;
 import elemental.util.Collections;
 import elemental.util.MapFromIntTo;
@@ -119,9 +118,12 @@ public class UIBuilder {
                 PonySDK.get().setContextId(binaryModel.getIntValue());
                 // Read ServerToClientModel.OPTION_FORMFIELD_TABULATION element
                 PonySDK.get().setTabindexOnlyFormField(readerBuffer.readBinaryModel().getBooleanValue());
+                PonySDK.get().setHeartBeatPeriod(readerBuffer.readBinaryModel().getIntValue());
                 readerBuffer.readBinaryModel(); // Read ServerToClientModel.END element
             } else if (ServerToClientModel.DESTROY_CONTEXT == model) {
                 destroy();
+                readerBuffer.readBinaryModel(); // Read ServerToClientModel.END element
+            } else if (ServerToClientModel.HEARTBEAT == model) {
                 readerBuffer.readBinaryModel(); // Read ServerToClientModel.END element
             } else {
                 final int oldCurrentWindowId = currentWindowId;
@@ -378,7 +380,7 @@ public class UIBuilder {
 
     private void destroy() {
         PTWindowManager.closeAll();
-        Browser.getWindow().getLocation().reload();
+        ReconnectionChecker.reloadWindow();
     }
 
     public void sendDataToServer(final Widget widget, final PTInstruction instruction) {

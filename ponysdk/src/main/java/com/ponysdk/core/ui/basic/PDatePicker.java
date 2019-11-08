@@ -175,12 +175,14 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
      * next time the DatePicker is refreshed.
      */
     public final void setTransientEnabledOnDates(final boolean enabled, final Collection<Date> dates) {
-        final Long[] encodedDates = DateConverter.encode(dates);
-        if (encodedDates != null && encodedDates.length > 0) {
-            saveUpdate(writer -> {
-                writer.write(ServerToClientModel.DATE_ENABLED, encodedDates);
-                writer.write(ServerToClientModel.ENABLED, enabled);
-            });
+        final Long[][] encodedDates = DateConverter.encode(dates);
+        if (encodedDates != null) {
+            for (final Long[] part : encodedDates) {
+                saveUpdate(writer -> {
+                    writer.write(ServerToClientModel.DATE_ENABLED, part);
+                    writer.write(ServerToClientModel.ENABLED, enabled);
+                });
+            }
         }
     }
 
@@ -188,12 +190,14 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
      * Add a style name to the given dates.
      */
     public void addStyleToDates(final String styleName, final Collection<Date> dates) {
-        final Long[] encodedDates = DateConverter.encode(dates);
-        if (encodedDates != null && encodedDates.length > 0) {
-            saveUpdate(writer -> {
-                writer.write(ServerToClientModel.ADD_DATE_STYLE, encodedDates);
-                writer.write(ServerToClientModel.STYLE_NAME, styleName);
-            });
+        final Long[][] encodedDates = DateConverter.encode(dates);
+        if (encodedDates != null) {
+            for (final Long[] part : encodedDates) {
+                saveUpdate(writer -> {
+                    writer.write(ServerToClientModel.ADD_DATE_STYLE, part);
+                    writer.write(ServerToClientModel.STYLE_NAME, styleName);
+                });
+            }
         }
     }
 
@@ -201,12 +205,14 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
      * Removes the styleName from the given dates (even if it is transient).
      */
     public void removeStyleFromDates(final String styleName, final Collection<Date> dates) {
-        final Long[] encodedDates = DateConverter.encode(dates);
-        if (encodedDates != null && encodedDates.length > 0) {
-            saveUpdate(writer -> {
-                writer.write(ServerToClientModel.REMOVE_DATE_STYLE, encodedDates);
-                writer.write(ServerToClientModel.STYLE_NAME, styleName);
-            });
+        final Long[][] encodedDates = DateConverter.encode(dates);
+        if (encodedDates != null) {
+            for (final Long[] part : encodedDates) {
+                saveUpdate(writer -> {
+                    writer.write(ServerToClientModel.REMOVE_DATE_STYLE, part);
+                    writer.write(ServerToClientModel.STYLE_NAME, styleName);
+                });
+            }
         }
     }
 

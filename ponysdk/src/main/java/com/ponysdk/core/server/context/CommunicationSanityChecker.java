@@ -138,7 +138,7 @@ public class CommunicationSanityChecker {
                             uiContext.getID());
                         currentState = CommunicationState.KO;
                         stop();
-                        uiContext.destroy();
+                        uiContext.disconnect();
                     }
                 } else {
                     currentState = CommunicationState.OK;
