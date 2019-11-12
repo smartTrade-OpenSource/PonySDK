@@ -62,9 +62,12 @@ public class Application {
     }
 
     public void deregisterUIContext(final int uiContextID) {
-        uiContexts.remove(uiContextID);
-        if (uiContexts.isEmpty()) {
-            session.invalidate();
+        if (uiContexts.remove(uiContextID) != null && uiContexts.isEmpty()) {
+            try {
+                session.invalidate();
+            } catch (final IllegalStateException e) {
+                log.warn("Issue when unregistering UIContext #{} : Session {} already invalidated", uiContextID, session.getId());
+            }
             SessionManager.get().unregisterApplication(this);
         }
     }
