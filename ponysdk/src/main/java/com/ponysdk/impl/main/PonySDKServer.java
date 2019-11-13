@@ -32,6 +32,7 @@ import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
+import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
@@ -149,7 +150,10 @@ public class PonySDKServer {
         final ApplicationConfiguration configuration = applicationManager.getConfiguration();
         log.info("Adding application #{}", configuration.getApplicationContextName());
 
+        final SessionHandler sessionHandler = new SessionHandler();
+        sessionHandler.setMaxInactiveInterval(30 * 60); //30 minutes
         final ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        context.setSessionHandler(sessionHandler);
         context.setContextPath("/" + configuration.getApplicationContextName());
 
         context.addServlet(new ServletHolder(createBootstrapServlet()), MAPPING_BOOTSTRAP);
