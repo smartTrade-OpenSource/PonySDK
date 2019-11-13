@@ -240,11 +240,11 @@ public class ReaderBuffer {
         modelSize += ValueTypeModel.BYTE_SIZE;
         int stringLength = getUnsignedByte();
         boolean ascii = true;
-        if (stringLength > ValueTypeModel.STRING_ASCII_UINT8_MAX_LENGTH) {
+        if (stringLength > ValueTypeModel.STRING_ASCII_UINT8) {
             if (stringLength == ValueTypeModel.STRING_ASCII_UINT16) {
                 modelSize += ValueTypeModel.SHORT_SIZE;
                 stringLength = getUnsignedShort();
-            } else if (stringLength == ValueTypeModel.STRING_ASCII_INT32) {
+            } else if (stringLength == ValueTypeModel.STRING_ASCII_UINT32) {
                 modelSize += ValueTypeModel.INTEGER_SIZE;
                 stringLength = getInt();
             } else {
@@ -318,7 +318,7 @@ public class ReaderBuffer {
             ascii = true;
         } else if (arrayValueModel == ArrayValueModel.STRING_UTF8_UINT8_LENGTH
                 || arrayValueModel == ArrayValueModel.STRING_UTF8_UINT16_LENGTH
-                || arrayValueModel == ArrayValueModel.STRING_UTF8_INT32_LENGTH) {
+                || arrayValueModel == ArrayValueModel.STRING_UTF8_UINT32_LENGTH) {
             ascii = false;
         } else {
             throw new IllegalArgumentException("Unsupported ArrayValueModel " + arrayValueModel);
@@ -439,7 +439,7 @@ public class ReaderBuffer {
 
     private void shiftString() {
         int messageSize = getUnsignedByte();
-        if (messageSize > ValueTypeModel.STRING_ASCII_UINT8_MAX_LENGTH) {
+        if (messageSize > ValueTypeModel.STRING_ASCII_UINT8) {
             if (messageSize == ValueTypeModel.STRING_UTF8_UINT8) {
                 messageSize = getUnsignedByte();
             } else if (messageSize == ValueTypeModel.STRING_ASCII_UINT16 || messageSize == ValueTypeModel.STRING_UTF8_UINT16) {

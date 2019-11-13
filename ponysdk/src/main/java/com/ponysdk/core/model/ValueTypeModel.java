@@ -52,9 +52,9 @@ public enum ValueTypeModel {
     public static final short STRING_UTF8_INT32 = 255;
     public static final short STRING_UTF8_UINT16 = 254;
     public static final short STRING_UTF8_UINT8 = 253;
-    public static final short STRING_ASCII_INT32 = 252;
+    public static final short STRING_ASCII_UINT8 = 250;
     public static final short STRING_ASCII_UINT16 = 251;
-    public static final short STRING_ASCII_UINT8_MAX_LENGTH = 250;
+    public static final short STRING_ASCII_UINT32 = 252;
 
     private static final ValueTypeModel[] VALUES = ValueTypeModel.values();
 

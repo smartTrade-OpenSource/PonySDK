@@ -23,6 +23,17 @@
 
 package com.ponysdk.core.server.websocket;
 
+import com.ponysdk.core.model.ArrayValueModel;
+import com.ponysdk.core.model.BooleanModel;
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.model.ValueTypeModel;
+import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.concurrent.AutoFlushedBuffer;
+import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.WriteCallback;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
@@ -32,18 +43,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
-import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.WriteCallback;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ponysdk.core.model.ArrayValueModel;
-import com.ponysdk.core.model.BooleanModel;
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.model.ValueTypeModel;
-import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.server.concurrent.AutoFlushedBuffer;
 
 public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback {
 
@@ -339,7 +338,7 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
             putUnsignedShort(length);
             metaBytes += 2;
         } else {
-            put(ArrayValueModel.STRING_UTF8_INT32_LENGTH.getValue());
+            put(ArrayValueModel.STRING_UTF8_UINT32_LENGTH.getValue());
             putInt(length);
             metaBytes += 4;
         }
@@ -366,7 +365,7 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
             final byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
             final int length = bytes.length;
             if (value.length() == length) { //ASCII
-                if (length <= ValueTypeModel.STRING_ASCII_UINT8_MAX_LENGTH) { // 0 -> 250 (The MOST common case)
+                if (length <= ValueTypeModel.STRING_ASCII_UINT8) { // 0 -> 250 (The MOST common case)
                     putUnsignedByte((short) length);
                     metaBytes += 1;
                 } else if (length <= MAX_UNSIGNED_SHORT_VALUE) { // 251 -> 65,535
@@ -374,7 +373,7 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
                     putUnsignedShort(length);
                     metaBytes += 3;
                 } else { // 65,536 -> 2,147,483,647
-                    putUnsignedByte(ValueTypeModel.STRING_ASCII_INT32);
+                    putUnsignedByte(ValueTypeModel.STRING_ASCII_UINT32);
                     putInt(length);
                     metaBytes += 5;
                 }
