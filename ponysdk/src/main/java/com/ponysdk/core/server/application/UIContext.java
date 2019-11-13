@@ -587,14 +587,9 @@ public class UIContext {
      * This method locks the UIContext
      */
     public void onDestroy() {
-        if (!isAlive()) return;
-        acquire();
-        try {
-            doDestroy();
-            context.deregisterUIContext(ID);
-        } finally {
-            release();
-        }
+    	//we used to avoid calling socket.close() there, but sometimes jetty does not close the WS 
+    	//when there is an exception in a listener => always call close since it is a no-op on a closed WS
+    	destroy(); 
     }
 
     /**

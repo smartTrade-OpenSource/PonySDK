@@ -96,7 +96,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
                 final int heartBeatPeriod = enableClientToServerHeartBeat
                         ? (int) heartBeatPeriodTimeUnit.toSeconds(configuration.getHeartBeatPeriod())
                         : 0;
-                        
+
                 encode(ServerToClientModel.CREATE_CONTEXT, uiContext.getID()); // TODO nciaravola integer ?
                 encode(ServerToClientModel.OPTION_FORMFIELD_TABULATION, configuration.isTabindexOnlyFormField());
                 encode(ServerToClientModel.HEARTBEAT_PERIOD, heartBeatPeriod);
@@ -118,7 +118,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
     @Override
     public void onWebSocketError(final Throwable throwable) {
-        log.error("WebSocket Error", throwable);
+        log.error("WebSocket Error on UIContext #{}", uiContext.getID(), throwable);
         uiContext.onDestroy();
     }
 
@@ -256,7 +256,12 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     }
 
     void flush0() {
-        websocketPusher.flush();
+        try {
+            websocketPusher.flush();
+        } catch (final IOException e) {
+            log.error("Can't write on the websocket for #{}, so we destroy the application", uiContext.getID(), e);
+            uiContext.onDestroy();
+        }
     }
 
     public void close() {
@@ -299,8 +304,13 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
     @Override
     public void encode(final ServerToClientModel model, final Object value) {
-        websocketPusher.encode(model, value);
-        if (listener != null) listener.onOutgoingPonyFrame(model, value);
+        try {
+            websocketPusher.encode(model, value);
+            if (listener != null) listener.onOutgoingPonyFrame(model, value);
+        } catch (final IOException e) {
+            log.error("Can't write on the websocket for UIContext #{}, so we destroy the application", uiContext.getID(), e);
+            uiContext.destroy();
+        }
     }
 
     private static enum NiceStatusCode {
