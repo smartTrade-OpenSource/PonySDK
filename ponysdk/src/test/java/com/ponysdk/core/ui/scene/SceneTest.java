@@ -45,7 +45,6 @@ public class SceneTest extends PSuite {
         assertEquals("name", scene.getName());
         assertEquals("token", scene.getToken());
         assertFalse(scene.isStarted());
-        assertFalse(scene.isDestroyed());
     }
 
     @Test
@@ -67,34 +66,25 @@ public class SceneTest extends PSuite {
         assertEquals(1, listener4Test.startedCount);
         assertEquals(0, listener4Test.stoppingCount);
         assertEquals(0, listener4Test.stoppedCount);
-        assertEquals(0, listener4Test.destroyingCount);
-        assertEquals(0, listener4Test.destroyedCount);
         assertTrue(scene.isStarted());
         scene.stop();
         assertEquals(1, listener4Test.startingCount);
         assertEquals(1, listener4Test.startedCount);
         assertEquals(1, listener4Test.stoppingCount);
         assertEquals(1, listener4Test.stoppedCount);
-        assertEquals(0, listener4Test.destroyingCount);
-        assertEquals(0, listener4Test.destroyedCount);
         assertFalse(scene.isStarted());
         scene.start();
         assertEquals(2, listener4Test.startingCount);
         assertEquals(2, listener4Test.startedCount);
         assertEquals(1, listener4Test.stoppingCount);
         assertEquals(1, listener4Test.stoppedCount);
-        assertEquals(0, listener4Test.destroyingCount);
-        assertEquals(0, listener4Test.destroyedCount);
         assertTrue(scene.isStarted());
-        scene.destroy();
+        scene.stop();
         assertEquals(2, listener4Test.startingCount);
         assertEquals(2, listener4Test.startedCount);
         assertEquals(2, listener4Test.stoppingCount);
         assertEquals(2, listener4Test.stoppedCount);
-        assertEquals(1, listener4Test.destroyingCount);
-        assertEquals(1, listener4Test.destroyedCount);
         assertFalse(scene.isStarted());
-        assertTrue(scene.isDestroyed());
     }
 
     private class SceneListener4Test implements Scene.Listener {
@@ -102,8 +92,6 @@ public class SceneTest extends PSuite {
         int startedCount = 0;
         int stoppingCount = 0;
         int stoppedCount = 0;
-        int destroyingCount = 0;
-        int destroyedCount = 0;
 
         @Override
         public void starting(Scene source) {
@@ -125,23 +113,12 @@ public class SceneTest extends PSuite {
             stoppedCount++;
         }
 
-        @Override
-        public void destroying(Scene source) {
-            destroyingCount++;
-        }
-
-        @Override
-        public void destroyed(Scene source) {
-            destroyedCount++;
-        }
 
         public void reset() {
             startingCount = 0;
             startedCount = 0;
             stoppingCount = 0;
             stoppedCount = 0;
-            destroyingCount = 0;
-            destroyedCount = 0;
         }
     }
 

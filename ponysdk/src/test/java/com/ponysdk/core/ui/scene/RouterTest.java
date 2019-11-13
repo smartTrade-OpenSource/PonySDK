@@ -150,23 +150,4 @@ public class RouterTest extends PSuite {
         assertTrue(scene2.isStarted());
     }
 
-    @Test
-    public void testDestroyScene() {
-        final Router router = new Router("testDestroyScene");
-        AbstractScene scene = new AbstractScene("id", "name", "destroy") {
-            @Override
-            public PWidget buildGUI() {
-                return Element.newPLabel("test");
-            }
-        };
-        router.push(scene);
-        final PSimplePanel layout = Element.newPSimplePanel();
-        router.setLayout(layout);
-        PWindow.getMain().add(layout);
-        router.go("destroy");
-
-        assertTrue(scene.isStarted());
-        scene.destroy();
-        assertFalse(scene.isStarted());
-    }
 }
