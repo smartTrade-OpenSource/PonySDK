@@ -15,11 +15,7 @@ public interface Scene extends IsPWidget {
 
     void stop();
 
-    void destroy();
-
     boolean isStarted();
-
-    boolean isDestroyed();
 
     void addLifeCycleListener(Scene.Listener listener);
 
@@ -33,9 +29,5 @@ public interface Scene extends IsPWidget {
         void stopping(Scene source);
 
         void stopped(Scene source);
-
-        void destroying(Scene source);
-
-        void destroyed(Scene source);
     }
 }

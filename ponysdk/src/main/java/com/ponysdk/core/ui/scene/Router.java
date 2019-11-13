@@ -91,16 +91,5 @@ public class Router implements PValueChangeHandler<String> {
         @Override
         public void stopped(Scene source) {
         }
-
-        @Override
-        public void destroying(Scene source) {
-
-        }
-
-        @Override
-        public void destroyed(Scene source) {
-            source.removeLifeCycleListener(SceneListener.this);
-            scenes.remove(source.getToken());
-        }
     }
 }
