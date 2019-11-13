@@ -2,10 +2,19 @@ package com.ponysdk.core.ui.form2;
 
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PTextBox;
+import com.ponysdk.core.ui.basic.PWidget;
 
 public class StringTextBoxFormField extends FormField<String, PTextBox> {
+    public StringTextBoxFormField() {
+        super();
+    }
+
     public StringTextBoxFormField(String caption) {
         super(caption);
+    }
+
+    public StringTextBoxFormField(boolean required) {
+        super(required);
     }
 
     public StringTextBoxFormField(String caption, boolean required) {
@@ -15,6 +24,13 @@ public class StringTextBoxFormField extends FormField<String, PTextBox> {
     @Override
     protected PTextBox createInnerWidget() {
         return Element.newPTextBox();
+    }
+
+    @Override
+    protected void afterInitGUI() {
+        innerWidget.setTabindex(PWidget.TabindexMode.TABULABLE);
+        innerWidget.addBlurHandler((e) -> validate());
+        innerWidget.addValueChangeHandler((e) -> validate());
     }
 
     @Override
@@ -40,5 +56,7 @@ public class StringTextBoxFormField extends FormField<String, PTextBox> {
     @Override
     public void setValue(String value) {
         innerWidget.setText(value);
+        checkDiff();//??
     }
+
 }

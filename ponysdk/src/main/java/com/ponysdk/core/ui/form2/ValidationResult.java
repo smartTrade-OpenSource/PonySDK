@@ -2,7 +2,7 @@ package com.ponysdk.core.ui.form2;
 
 public class ValidationResult {
 
-    private static final ValidationResult OK_RESULT = OK();
+    private static final ValidationResult OK_RESULT = new ValidationResult(true, null, null);
 
     private boolean valid;
     private String errorMessage;
@@ -15,7 +15,7 @@ public class ValidationResult {
     }
 
     public static ValidationResult OK() {
-        return OK(null);
+        return OK_RESULT;
     }
 
     public static ValidationResult OK(final Object data) {
@@ -31,7 +31,7 @@ public class ValidationResult {
     }
 
     public static ValidationResult newValidationResult(final boolean valid, String errorMessage, final Object data) {
-        return new ValidationResult(valid, null, data);
+        return new ValidationResult(valid, errorMessage, data);
     }
 
     public String getErrorMessage() {
@@ -48,7 +48,10 @@ public class ValidationResult {
 
     @Override
     public String toString() {
-        return "valid : " + valid + (data != null ? " ; data : " + data : "") + (valid ? " ; " + errorMessage : "");
+        return "ValidationResult{" +
+                "valid=" + valid +
+                ", errorMessage='" + errorMessage + '\'' +
+                ", data=" + data +
+                '}';
     }
-
 }

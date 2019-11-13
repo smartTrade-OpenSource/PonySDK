@@ -1,27 +1,39 @@
 package com.ponysdk.core.ui.form2;
 
 import com.ponysdk.core.ui.basic.*;
-import com.ponysdk.core.ui.basic.PWidget.TabindexMode;
 
 import java.util.Objects;
 
 public abstract class FormField<V, W extends PWidget> implements IsPWidget {
 
-    protected static String TITLE = "error-msg";
-    protected static String HAS_ERROR = "has-error";
-    protected static String HAS_DIFF = "has-diff";
+    private static String STYLE_FORM_FIELD = "form-field";
+    private static String STYLE_CAPTION = "caption";
+    private static String STYLE_INNER_WIDGET = "inner-widget";
 
-    private static ValidationResult OK = ValidationResult.OK();
-    private static ValidationResult KO = ValidationResult.KO("Required Field");
+    private static String ATTR_REQUIRED = "required";
+    private static String ATTR_ERROR = "error";
+    private static String ATTR_DIFF = "diff";
+
+    private static ValidationResult OK_RESULT = ValidationResult.OK();
+    public static ValidationResult REQUIRED_RESULT = ValidationResult.KO("Required Field");
+
+    protected W innerWidget;
+    protected V initialValue;
+
+    private String caption;
+    private boolean required;
+    private PElement captionSpan;
 
     protected PFlowPanel widget;
-    protected W innerWidget;
-
-    protected V initialValue;
     protected FieldValidator validator;
 
-    protected String caption;
-    private boolean required;
+    public FormField() {
+        this(null, false);
+    }
+
+    public FormField(final boolean required) {
+        this(null, required);
+    }
 
     public FormField(final String caption) {
         this(caption, false);
@@ -32,60 +44,78 @@ public abstract class FormField<V, W extends PWidget> implements IsPWidget {
         this.required = required;
     }
 
-    public ValidationResult isValid() {
+    public ValidationResult validate() {
         if (!isEnabled()) {
-            removeErrorMessage();
-            return OK;
+            clean();
+            return OK_RESULT;
         }
 
-        ValidationResult result = OK;
+        ValidationResult result = OK_RESULT;
 
         final String stringValue = getStringValue();
 
         if (required && Objects.requireNonNullElse(stringValue, "").isEmpty()) {
-            result = KO;
+            result = REQUIRED_RESULT;
         } else if (validator != null) {
             result = validator.isValid(stringValue);
         }
 
         if (result.isValid()) {
-            removeErrorMessage();
+            cleanError();
         } else {
-            setErrorMessage(result.getErrorMessage());
+            error(result.getErrorMessage());
         }
+
+        checkDiff();
 
         return result;
     }
 
+    public boolean hasDiff() {
+        return widget.hasAttribute(ATTR_DIFF);
+    }
+
+    private void clean() {
+        cleanError();
+        cleanDiff();
+    }
+
     public void reset() {
-        removeErrorMessage();
+        clean();
         afterReset();
     }
 
-    protected void setErrorMessage(final String message) {
-        widget.addStyleName(HAS_ERROR);
-        widget.setAttribute(TITLE, message);
+    protected void error(final String message) {
+        widget.setAttribute(ATTR_ERROR, message);
     }
 
-    protected void removeErrorMessage() {
-        widget.removeStyleName(HAS_ERROR);
-        widget.removeAttribute(TITLE);
+    protected void cleanError() {
+        widget.removeAttribute(ATTR_ERROR);
     }
 
-    protected void afterReset() {
+    private void diff() {
+        widget.setAttribute(ATTR_DIFF);
+    }
+
+    protected void cleanDiff() {
+        widget.removeAttribute(ATTR_DIFF);
+    }
+
+    private void afterReset() {
         setValue(initialValue);
-        checkInitialValue();
+        checkDiff();
     }
 
-    protected void checkInitialValue() {
-        if (initialValue != null) {
-            if (!initialValue.equals(getValue())) {
-                widget.addStyleName(HAS_DIFF);
-            } else {
-                widget.removeStyleName("has-diff");
-            }
+    protected void checkDiff() {
+        if (initialValue == null) {
+            cleanDiff();
+            return;
+        }
+
+        if (!initialValue.equals(getValue())) {
+            diff();
         } else {
-            widget.removeStyleName("has-diff");
+            cleanDiff();
         }
     }
 
@@ -95,55 +125,74 @@ public abstract class FormField<V, W extends PWidget> implements IsPWidget {
 
     public void setInitialValue(final V initialValue) {
         this.initialValue = initialValue;
-        checkInitialValue();
+        checkDiff();
     }
 
-    public void setValue(final V value, final boolean init) {
+    public V getInitialValue() {
+        return initialValue;
+    }
+
+    public void setValue(final V value, final boolean isInitialValue) {
         setValue(value);
-        if (init) {
+        if (isInitialValue) {
             setInitialValue(value);
         }
     }
 
-    public W getFieldWidget() {
+    public W getInnerWidget() {
         return innerWidget;
     }
 
-    protected PFlowPanel create() {
-        return Element.newPFlowPanel();
+    private void initGUI() {
+        widget.addStyleName(STYLE_FORM_FIELD);
+        if (required) widget.setAttribute(ATTR_REQUIRED);
+
+        updateCaption();
+
+        innerWidget = createInnerWidget();
+        innerWidget.addStyleName(STYLE_INNER_WIDGET);
+        widget.add(innerWidget);
     }
 
-    protected void init() {
-        widget.addStyleName("form-field");
-        if (caption != null) {
-            final PElement captionSpan = Element.newSpan();
-            captionSpan.setInnerText(caption);
-            captionSpan.addStyleName("caption");
-            if (required) captionSpan.addStyleName("required");
+    private void updateCaption() {
+        if (caption == null && captionSpan == null) {
+            return;
+        }
+
+        if (caption == null) {
+            captionSpan.setVisible(false);
+            return;
+        }
+
+        if (captionSpan == null) {
+            captionSpan = Element.newSpan();
+            captionSpan.addStyleName(STYLE_CAPTION);
             widget.add(captionSpan);
         }
 
-        innerWidget = createInnerWidget();
+        captionSpan.setInnerText(caption);
+        captionSpan.setVisible(true);
 
-        widget.add(innerWidget);
-
-        initFieldWidget();
     }
 
-    protected void initFieldWidget() {
-        innerWidget.addStyleName("field");
-        innerWidget.setTabindex(TabindexMode.TABULABLE);
+    protected void afterInitGUI() {
     }
 
-    protected void afterInit() {
+    public void setCaption(String caption) {
+        this.caption = caption;
+        updateCaption();
+    }
+
+    public String getCaption() {
+        return caption;
     }
 
     @Override
     public PWidget asWidget() {
         if (widget == null) {
-            widget = create();
-            init();
-            afterInit();
+            widget = Element.newPFlowPanel();
+            initGUI();
+            afterInitGUI();
         }
         return widget;
     }
