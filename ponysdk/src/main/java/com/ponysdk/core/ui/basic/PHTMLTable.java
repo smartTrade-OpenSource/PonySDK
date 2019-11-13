@@ -404,7 +404,7 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
 
 
     @Override
-    protected String dumpDOM() {
+    public String dumpDOM() {
         String DOM = "<table pid=\"" + ID + "\">";
 
         for (Entry<Row, TreeMap<Integer, PWidget>> entry : columnByRow.entrySet()) {

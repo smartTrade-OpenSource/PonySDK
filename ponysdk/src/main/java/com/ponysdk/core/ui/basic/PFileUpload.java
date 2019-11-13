@@ -155,7 +155,7 @@ public class PFileUpload extends PWidget implements HasPChangeHandlers {
 
 
     @Override
-    protected String dumpDOM() {
+    public String dumpDOM() {
         return "<upload pid=\"" + ID + "\"></upload>";
     }
 }

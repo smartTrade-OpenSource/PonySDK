@@ -132,7 +132,7 @@ public class PAnchor extends PFocusWidget {
     }
 
     @Override
-    protected String dumpDOM() {
+    public String dumpDOM() {
         StringBuilder DOM = new StringBuilder();
         DOM.append("<a");
         DOM.append(" pid=\"" + ID + "\"");

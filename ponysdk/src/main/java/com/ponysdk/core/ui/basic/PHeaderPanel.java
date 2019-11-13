@@ -134,7 +134,7 @@ public class PHeaderPanel extends PPanel {
     }
 
     @Override
-    protected String dumpDOM() {
+    public String dumpDOM() {
         return "<div pid=\"" + ID + "\">" + header.dumpDOM() + content.dumpDOM() + footer.dumpDOM() + "</div>";
     }
 }

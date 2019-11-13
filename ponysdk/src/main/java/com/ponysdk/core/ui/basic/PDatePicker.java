@@ -234,7 +234,7 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     }
 
     @Override
-    protected String dumpDOM() {
+    public String dumpDOM() {
         return "<date pid=\"" + ID + "\" year=\"" + year + "\" month=\"" + month + "\" day=\"" + day + "\"></date>";
     }
 }

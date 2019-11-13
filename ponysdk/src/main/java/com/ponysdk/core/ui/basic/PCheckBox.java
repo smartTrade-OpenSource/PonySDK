@@ -145,7 +145,7 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
     }
 
     @Override
-    protected String dumpDOM() {
+    public String dumpDOM() {
         StringBuilder DOM = new StringBuilder();
         DOM.append("<input type=\"checkbox\"");
         DOM.append(" pid=\"" + ID + "\"");

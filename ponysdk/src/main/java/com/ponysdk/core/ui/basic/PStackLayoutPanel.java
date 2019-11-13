@@ -194,7 +194,7 @@ public class PStackLayoutPanel extends PWidget implements HasPWidgets, PAnimated
     }
 
     @Override
-    protected String dumpDOM() {
+    public String dumpDOM() {
         String DOM = "<div pid=\"" + ID + "\">";
 
         for (PWidget child : children) {

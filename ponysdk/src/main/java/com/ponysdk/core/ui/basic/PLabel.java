@@ -134,7 +134,15 @@ public class PLabel extends PWidget {
     }
 
     @Override
-    protected String dumpDOM() {
-        return "<label pid=\"" + ID + "\" class=\"" + getStyleNames().collect(Collectors.joining(" ")) + "\">" + text + "</label>";
+    public String dumpDOM() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("<label");
+        builder.append(" pid=\"" + ID + "\"");
+        if (!isVisible()) builder.append(" hidden");
+        builder.append(" class=\"" + getStyleNames().collect(Collectors.joining(" ")) + "\"");
+        builder.append(">");
+        builder.append(text);
+        builder.append("</label>");
+        return builder.toString();
     }
 }

@@ -189,7 +189,7 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, PAcceptsOn
     }
 
     @Override
-    protected String dumpDOM() {
+    public String dumpDOM() {
         return "<div pid=\"" + ID + "\"><div>" + headerText + "</div>" + content.dumpDOM() + "</div>";
     }
 }

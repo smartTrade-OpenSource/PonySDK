@@ -172,7 +172,7 @@ public class PImage extends PWidget {
     }
 
     @Override
-    protected String dumpDOM() {
+    public String dumpDOM() {
         return "<img pid=\"" + ID + "\" url=\"" + url + "\">" + "</img>";
     }
 }

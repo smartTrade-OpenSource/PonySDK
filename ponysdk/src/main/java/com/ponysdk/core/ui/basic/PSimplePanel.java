@@ -136,7 +136,7 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
     }
 
     @Override
-    protected String dumpDOM() {
+    public String dumpDOM() {
         return "<div pid=\"" + ID + "\">" + widget.dumpDOM() + "</div>";
     }
 }

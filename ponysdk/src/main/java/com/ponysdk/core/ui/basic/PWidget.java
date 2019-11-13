@@ -23,68 +23,28 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import javax.json.JsonArray;
-import javax.json.JsonNumber;
-import javax.json.JsonObject;
-import javax.json.JsonValue;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.model.DomHandlerConverter;
-import com.ponysdk.core.model.DomHandlerType;
-import com.ponysdk.core.model.HandlerModel;
-import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.model.*;
 import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.ui.basic.event.HasPWidgets;
-import com.ponysdk.core.ui.basic.event.PBlurEvent;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PContextMenuEvent;
-import com.ponysdk.core.ui.basic.event.PDomEvent;
+import com.ponysdk.core.ui.basic.event.*;
 import com.ponysdk.core.ui.basic.event.PDomEvent.Type;
-import com.ponysdk.core.ui.basic.event.PDoubleClickEvent;
-import com.ponysdk.core.ui.basic.event.PDragEndEvent;
-import com.ponysdk.core.ui.basic.event.PDragEnterEvent;
-import com.ponysdk.core.ui.basic.event.PDragLeaveEvent;
-import com.ponysdk.core.ui.basic.event.PDragOverEvent;
-import com.ponysdk.core.ui.basic.event.PDragStartEvent;
-import com.ponysdk.core.ui.basic.event.PDropEvent;
-import com.ponysdk.core.ui.basic.event.PFocusEvent;
-import com.ponysdk.core.ui.basic.event.PKeyDownEvent;
-import com.ponysdk.core.ui.basic.event.PKeyEvent;
-import com.ponysdk.core.ui.basic.event.PKeyPressEvent;
-import com.ponysdk.core.ui.basic.event.PKeyPressHandler;
-import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
-import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
-import com.ponysdk.core.ui.basic.event.PMouseDownEvent;
-import com.ponysdk.core.ui.basic.event.PMouseEvent;
-import com.ponysdk.core.ui.basic.event.PMouseOutEvent;
-import com.ponysdk.core.ui.basic.event.PMouseOverEvent;
-import com.ponysdk.core.ui.basic.event.PMouseUpEvent;
-import com.ponysdk.core.ui.basic.event.PMouseWhellEvent;
-import com.ponysdk.core.ui.basic.event.PVisibilityEvent;
 import com.ponysdk.core.ui.basic.event.PVisibilityEvent.PVisibilityHandler;
-import com.ponysdk.core.ui.eventbus.Event;
-import com.ponysdk.core.ui.eventbus.EventHandler;
-import com.ponysdk.core.ui.eventbus.EventSource;
-import com.ponysdk.core.ui.eventbus.HandlerRegistration;
-import com.ponysdk.core.ui.eventbus.TinyEventSource;
+import com.ponysdk.core.ui.eventbus.*;
 import com.ponysdk.core.ui.model.PEventType;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.util.SetPool;
 import com.ponysdk.core.util.SetUtils;
 import com.ponysdk.core.writer.ModelWriter;
 import com.ponysdk.core.writer.ModelWriterCallback;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.json.JsonArray;
+import javax.json.JsonNumber;
+import javax.json.JsonObject;
+import javax.json.JsonValue;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * The base class for the majority of user-interface objects. Widget adds
@@ -284,15 +244,12 @@ public abstract class PWidget extends PObject implements IsPWidget {
     public void setAttribute(final String name, final String value) {
         if (name == null) return;
 
-        // HTML specs is the value is equals to the name if value is null or empty
-        final String newValue = value != null && !value.isEmpty() ? value : name.toLowerCase();
-
-        if (!safeElementAttributes().containsKey(name)) safeElementAttributes().put(name, newValue);
-        else if (Objects.equals(safeElementAttributes().put(name, newValue), newValue)) return;
+        if (!safeElementAttributes().containsKey(name)) safeElementAttributes().put(name, value);
+        else if (Objects.equals(safeElementAttributes().put(name, value), value)) return;
 
         saveUpdate(writer -> {
             writer.write(ServerToClientModel.PUT_ATTRIBUTE_KEY, name);
-            writer.write(ServerToClientModel.ATTRIBUTE_VALUE, newValue);
+            writer.write(ServerToClientModel.ATTRIBUTE_VALUE, value);
         });
     }
 
@@ -304,6 +261,10 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     public String getProperty(final String key) {
         return elementProperties != null ? elementProperties.get(key) : null;
+    }
+
+    public boolean hasAttribute(final String key) {
+        return elementAttributes != null ? elementAttributes.containsKey(key) : false;
     }
 
     public String getAttribute(final String key) {
@@ -663,6 +624,6 @@ public abstract class PWidget extends PObject implements IsPWidget {
         return focused;
     }
 
-    protected abstract String dumpDOM();
+    public abstract String dumpDOM();
 
 }

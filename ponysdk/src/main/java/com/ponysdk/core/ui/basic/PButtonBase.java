@@ -101,7 +101,7 @@ abstract class PButtonBase extends PFocusWidget {
     }
 
     @Override
-    protected String dumpDOM() {
+    public String dumpDOM() {
         StringBuilder DOM = new StringBuilder();
         DOM.append("<button");
         DOM.append(" pid=\"" + ID + "\"");

@@ -114,7 +114,7 @@ public class PRichTextArea extends PFocusWidget implements HasPValueChangeHandle
     }
 
     @Override
-    protected String dumpDOM() {
+    public String dumpDOM() {
         return "<input pid=\"" + ID + "\">" + (text != null ? text : html) + "</input>";
     }
 

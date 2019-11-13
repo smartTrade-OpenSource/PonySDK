@@ -157,7 +157,7 @@ public class PMenuItem extends PMenuSubElement {
     }
 
     @Override
-    protected String dumpDOM() {
+    public String dumpDOM() {
         String DOM = "<li pid=\"" + ID + "\">" + (text != null ? text : html);
 
         if (subMenu != null) {

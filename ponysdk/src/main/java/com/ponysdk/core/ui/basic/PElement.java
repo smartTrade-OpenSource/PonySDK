@@ -84,12 +84,22 @@ public class PElement extends PComplexPanel {
     }
 
     @Override
-    protected String dumpDOM() {
+    public String dumpDOM() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("<");
+        builder.append(tagName);
+        builder.append(" pid=\"" + ID + "\"");
+        if (!isVisible()) builder.append(" hidden");
+        builder.append(" class=\"" + getStyleNames().collect(Collectors.joining(" ")) + "\"");
+        builder.append(">");
         if (getWidgetCount() == 0) {
-            return "<" + tagName + "pid=\"" + ID + "\" class=\"" + getStyleNames().collect(Collectors.joining(" ")) + "\">" + (innerText != null ? innerText : innerHTML) + "</" + tagName + ">";
+            if (innerText != null) builder.append(innerText);
+            else builder.append(innerHTML);
         } else {
-            return "<" + tagName + "pid=\"" + ID + "\" class=\"" + getStyleNames().collect(Collectors.joining(" ")) + "\">" + dumpChildDOM() + "</" + tagName + ">";
+            builder.append(dumpChildDOM());
         }
+        builder.append("</" + tagName + ">");
+        return builder.toString();
     }
 
     private String dumpChildDOM() {

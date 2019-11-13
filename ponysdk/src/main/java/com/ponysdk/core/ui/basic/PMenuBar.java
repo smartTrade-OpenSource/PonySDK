@@ -216,7 +216,7 @@ public class PMenuBar extends PWidget implements Iterable<PMenuSubElement> {
     }
 
     @Override
-    protected String dumpDOM() {
+    public String dumpDOM() {
         String DOM = "<ul pid=\"" + ID + "\">";
 
         for (PMenuSubElement item : items) {

@@ -39,7 +39,7 @@ public class PMenuItemSeparator extends PMenuSubElement {
     }
 
     @Override
-    protected String dumpDOM() {
+    public String dumpDOM() {
         return "<li pid=\"" + ID + "\" separator></li>";
     }
 

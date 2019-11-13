@@ -157,7 +157,7 @@ public abstract class PComplexPanel extends PPanel {
     }
 
     @Override
-    protected String dumpDOM() {
+    public String dumpDOM() {
         String DOM = "<div pid=\"" + ID + "\">";
 
         Iterator<PWidget> iter = children.iterator();

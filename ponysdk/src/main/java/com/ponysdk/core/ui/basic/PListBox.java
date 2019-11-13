@@ -379,7 +379,7 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
     }
 
     @Override
-    protected String dumpDOM() {
+    public String dumpDOM() {
         String DOM = "<select pid=\"" + ID + "\">";
 
         for (int i = 0; i < items.size(); i++) {

@@ -230,7 +230,7 @@ public class PDateBox extends PWidget implements Focusable, HasPValue<Date>, PVa
     }
 
     @Override
-    protected String dumpDOM() {
+    public String dumpDOM() {
         return "<input pid=\"" + ID + "\" format=\"" + dateFormat.toPattern() + "\">" + (date == null ? "" : date) + "</input>";
     }
 }

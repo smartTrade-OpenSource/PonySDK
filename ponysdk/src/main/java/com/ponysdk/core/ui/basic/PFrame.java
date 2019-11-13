@@ -90,7 +90,7 @@ public class PFrame extends PWidget {
         }
     }
 
-    protected String dumpDOM() {
+    public String dumpDOM() {
         String DOM = "<frame pid=\"" + ID + "\">";
         for (PRootPanel panel : panelByZone.values()) {
             DOM += panel.dumpDOM();
