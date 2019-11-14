@@ -255,7 +255,12 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     }
 
     void flush0() {
+        try {
         websocketPusher.flush();
+        } catch (final IOException e) {
+            log.error("Can't write on the websocket for #{}, so we destroy the application", uiContext.getID(), e);
+            uiContext.onDestroy();
+        }
     }
 
     public void close() {
