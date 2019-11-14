@@ -1,6 +1,7 @@
 
 package com.ponysdk.core.ui.basic;
 
+import com.ponysdk.test.PSuite;
 import org.junit.Test;
 
 import com.ponysdk.core.model.WidgetType;

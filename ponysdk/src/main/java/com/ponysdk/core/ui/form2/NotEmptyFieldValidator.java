@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 PonySDK
+ * Copyright (c) 2011 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
@@ -21,35 +21,27 @@
  * the License.
  */
 
-package com.ponysdk.core.server.context;
+package com.ponysdk.core.ui.form2;
 
-import com.ponysdk.test.PSuite;
-import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.PObject;
-import org.junit.Before;
-import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import java.util.Objects;
 
-public class PObjectCacheTest extends PSuite {
+public class NotEmptyFieldValidator implements FieldValidator {
 
-    private PObjectCache cache;
+    private final String errorMessage;
 
-    @Before
-    public void setUp() {
-        cache = new PObjectCache();
+    public NotEmptyFieldValidator() {
+        this("Empty Field");
     }
 
-    /**
-     * Test method for {@link com.ponysdk.core.server.context.PObjectCache#add(com.ponysdk.core.ui.basic.PObject)}.
-     */
-    @Test
-    public void testAdd() {
-        final PObject uiObject1 = Element.newButton();
-        final int uiObjectId1 = uiObject1.getID();
+    public NotEmptyFieldValidator(final String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
 
-        cache.add(uiObject1);
-        assertEquals(uiObject1, cache.get(uiObjectId1));
+    @Override
+    public ValidationResult isValid(final String value) {
+        if (!Objects.requireNonNullElse(value, "").isEmpty()) return ValidationResult.OK();
+        return ValidationResult.KO(errorMessage);
     }
 
 }

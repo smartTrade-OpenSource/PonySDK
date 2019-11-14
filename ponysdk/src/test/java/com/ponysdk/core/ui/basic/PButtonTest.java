@@ -23,15 +23,11 @@
 
 package com.ponysdk.core.ui.basic;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
+import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.test.PSuite;
 import org.junit.Test;
 
-import com.ponysdk.core.model.WidgetType;
+import static org.junit.Assert.*;
 
 public class PButtonTest extends PSuite {
 
@@ -99,6 +95,23 @@ public class PButtonTest extends PSuite {
         assertFalse(widget.isShowLoadingOnRequest());
         widget.showLoadingOnRequest(true);
         assertTrue(widget.isShowLoadingOnRequest());
+    }
+
+    @Test
+    public void testDumDOM() {
+        final PButton button = Element.newPButton();
+        String ID = String.valueOf(button.getID());
+
+        assertEquals("<button pid=\"" + ID + "\" class=\"\"></button>", button.dumpDOM());
+
+        button.setHTML("<a>html</a>");
+        assertEquals("<button pid=\"" + ID + "\" class=\"\"><a>html</a></button>", button.dumpDOM());
+
+        button.setHTML("text");
+        assertEquals("<button pid=\"" + ID + "\" class=\"\">text</button>", button.dumpDOM());
+
+        button.addStyleName("style");
+        assertEquals("<button pid=\"" + ID + "\" class=\"style\">text</button>", button.dumpDOM());
     }
 
 }

@@ -3,6 +3,7 @@ package com.ponysdk.core.ui.basic;
 
 import static org.junit.Assert.assertEquals;
 
+import com.ponysdk.test.PSuite;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

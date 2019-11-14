@@ -21,11 +21,8 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.basic;
+package com.ponysdk.test;
 
-import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.websocket.WebsocketEncoder;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -38,10 +35,6 @@ import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.server.stm.TxnContext;
 import com.ponysdk.core.server.websocket.WebSocket;
 import com.ponysdk.core.writer.ModelWriter;
-import org.mockito.stubbing.OngoingStubbing;
-
-import javax.json.Json;
-import javax.json.JsonObject;
 
 public class PSuite {
 

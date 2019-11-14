@@ -23,15 +23,6 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -41,6 +32,14 @@ import com.ponysdk.core.ui.basic.event.PBeforeSelectionEvent;
 import com.ponysdk.core.ui.basic.event.PSelectionHandler;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.writer.ModelWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * A panel that stacks its children vertically, displaying only one at a time,
@@ -195,12 +194,11 @@ public class PStackLayoutPanel extends PWidget implements HasPWidgets, PAnimated
     }
 
     @Override
-    protected String dumpDOM() {
-        String DOM = "<div>";
+    public String dumpDOM() {
+        String DOM = "<div pid=\"" + ID + "\">";
 
-        Iterator<PWidget> iter = children.iterator();
-        while (iter.hasNext()) {
-            DOM += iter.next().dumpDOM();
+        for (PWidget child : children) {
+            DOM += child.dumpDOM();
         }
         DOM += "</div>";
         return DOM;

@@ -47,6 +47,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -123,7 +124,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     @Override
     public void onWebSocketClose(final int statusCode, final String reason) {
         log.info("WebSocket closed on UIContext #{} : {}, reason : {}", uiContext.getID(), NiceStatusCode.getMessage(statusCode),
-            reason != null ? reason : "");
+                Objects.requireNonNullElse(reason, ""));
         uiContext.onDestroy();
     }
 
@@ -157,7 +158,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
                 } else if (jsonObject.containsKey(ClientToServerModel.INFO_MSG.toStringValue())) {
                     processTerminalLog(jsonObject, ClientToServerModel.INFO_MSG);
                 } else {
-                    log.error("Unknow message from terminal #{} : {}", uiContext.getID(), message);
+                    log.error("Unknown message from terminal #{} : {}", uiContext.getID(), message);
                 }
 
                 if (monitor != null) monitor.onMessageProcessed(this, message);
@@ -168,7 +169,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
             }
         } else {
             log.info("UI Context #{} is destroyed, message dropped from terminal : {}", uiContext != null ? uiContext.getID() : -1,
-                message);
+                    message);
         }
     }
 
@@ -254,12 +255,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     }
 
     void flush0() {
-        try {
-            websocketPusher.flush();
-        } catch (final IOException e) {
-            log.error("Can't write on the websocket for #{}, so we destroy the application", uiContext.getID(), e);
-            uiContext.onDestroy();
-        }
+        websocketPusher.flush();
     }
 
     public void close() {
@@ -311,7 +307,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         }
     }
 
-    private static enum NiceStatusCode {
+    private enum NiceStatusCode {
 
         NORMAL(StatusCode.NORMAL, "Normal closure"),
         SHUTDOWN(StatusCode.SHUTDOWN, "Shutdown"),
@@ -340,7 +336,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
         public static String getMessage(final int statusCode) {
             final List<NiceStatusCode> codes = Arrays.stream(values())
-                .filter(niceStatusCode -> niceStatusCode.statusCode == statusCode).collect(Collectors.toList());
+                    .filter(niceStatusCode -> niceStatusCode.statusCode == statusCode).collect(Collectors.toList());
             if (!codes.isEmpty()) {
                 return codes.get(0).toString();
             } else {

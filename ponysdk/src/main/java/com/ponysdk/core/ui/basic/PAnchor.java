@@ -23,12 +23,12 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Objects;
-import java.util.stream.Collectors;
-
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.writer.ModelWriter;
+
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * A widget that represents a simple &lt;a&gt; element.
@@ -132,8 +132,17 @@ public class PAnchor extends PFocusWidget {
     }
 
     @Override
-    protected String dumpDOM() {
-        return "<a class=\"" + getStyleNames().collect(Collectors.joining(" ")) + "\">" + (text != null ? text : html) + "</a>";
+    public String dumpDOM() {
+        StringBuilder DOM = new StringBuilder();
+        DOM.append("<a");
+        DOM.append(" pid=\"" + ID + "\"");
+        DOM.append(" class=\"" + getStyleNames().collect(Collectors.joining(" ")) + "\"");
+        if (href != null) DOM.append(" href=\"" + href + "\"");
+        DOM.append(">");
+        if (getText() != null) DOM.append(getText());
+        if (getHTML() != null) DOM.append(getHTML());
+        DOM.append("</a>");
+        return DOM.toString();
     }
 
 }

@@ -9,7 +9,6 @@ ext {
 }
 
 allprojects{
-    apply plugin: 'eclipse'
     apply plugin: 'jacoco'
 
     repositories {

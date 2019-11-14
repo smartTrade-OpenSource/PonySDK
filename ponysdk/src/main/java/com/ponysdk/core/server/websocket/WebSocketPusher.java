@@ -42,6 +42,7 @@ import com.ponysdk.core.model.ArrayValueModel;
 import com.ponysdk.core.model.BooleanModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.ValueTypeModel;
+import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.AutoFlushedBuffer;
 
 public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback {
@@ -62,6 +63,16 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
     public WebSocketPusher(final Session session, final int bufferSize, final int maxChunkSize, final long timeoutMillis) {
         super(bufferSize, true, maxChunkSize, 0.25f, timeoutMillis);
         this.session = session;
+    }
+
+    @Override
+    public void flush() {
+        try {
+            super.flush();
+        } catch (final IOException e) {
+            log.error("Can't write on the websocket, so we destroy the application", e);
+            UIContext.get().onDestroy();
+        }
     }
 
     @Override
@@ -95,45 +106,50 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
     /**
      * @param value The type can be primitives, String or Object[]
      */
-    void encode(final ServerToClientModel model, final Object value) throws IOException {
+    protected void encode(final ServerToClientModel model, final Object value) {
         if (log.isDebugEnabled()) log.debug("Writing in the buffer : {} => {}", model, value);
-        switch (model.getTypeModel()) {
-            case NULL:
-                write(model);
-                break;
-            case BOOLEAN:
-                write(model, (boolean) value);
-                break;
-            case BYTE:
-                write(model, (byte) value);
-                break;
-            case SHORT:
-                write(model, (short) value);
-                break;
-            case UINT31:
-                writeUint31(model, (int) value);
-                break;
-            case INTEGER:
-                write(model, (int) value);
-                break;
-            case LONG:
-                write(model, (long) value);
-                break;
-            case DOUBLE:
-                write(model, (double) value);
-                break;
-            case FLOAT:
-                write(model, (float) value);
-                break;
-            case STRING:
-                write(model, (String) value);
-                break;
-            case ARRAY:
-                write(model, (Object[]) value);
-                break;
-            default:
-                log.error("Unknown model type : {}", model.getTypeModel());
-                break;
+        try {
+            switch (model.getTypeModel()) {
+                case NULL:
+                    write(model);
+                    break;
+                case BOOLEAN:
+                    write(model, (boolean) value);
+                    break;
+                case BYTE:
+                    write(model, (byte) value);
+                    break;
+                case SHORT:
+                    write(model, (short) value);
+                    break;
+                case UINT31:
+                    writeUint31(model, (int) value);
+                    break;
+                case INTEGER:
+                    write(model, (int) value);
+                    break;
+                case LONG:
+                    write(model, (long) value);
+                    break;
+                case DOUBLE:
+                    write(model, (double) value);
+                    break;
+                case FLOAT:
+                    write(model, (float) value);
+                    break;
+                case STRING:
+                    write(model, (String) value);
+                    break;
+                case ARRAY:
+                    write(model, (Object[]) value);
+                    break;
+                default:
+                    log.error("Unknown model type : {}", model.getTypeModel());
+                    break;
+            }
+        } catch (final IOException e) {
+            log.error("Can't write on the websocket, so we destroy the application", e);
+            UIContext.get().onDestroy();
         }
     }
 

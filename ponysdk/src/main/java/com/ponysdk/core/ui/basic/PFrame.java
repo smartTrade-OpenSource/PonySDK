@@ -23,15 +23,14 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.json.JsonObject;
-
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.writer.ModelWriter;
+
+import javax.json.JsonObject;
+import java.util.HashMap;
+import java.util.Map;
 
 public class PFrame extends PWidget {
 
@@ -91,8 +90,8 @@ public class PFrame extends PWidget {
         }
     }
 
-    protected String dumpDOM() {
-        String DOM = "<frame>";
+    public String dumpDOM() {
+        String DOM = "<frame pid=\"" + ID + "\">";
         for (PRootPanel panel : panelByZone.values()) {
             DOM += panel.dumpDOM();
         }

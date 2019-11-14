@@ -23,21 +23,6 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-
-import javax.json.JsonObject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.DateConverter;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -46,6 +31,14 @@ import com.ponysdk.core.ui.basic.event.PShowRangeEvent;
 import com.ponysdk.core.ui.basic.event.PShowRangeHandler;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.json.JsonObject;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 // FIXME Need to manipulate LocalDate instead of Date to avoid timezone issues
 public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChangeHandler<Date> {
@@ -241,7 +234,7 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     }
 
     @Override
-    protected String dumpDOM() {
-        return "<date year=\"" + year + "\" month=\"" + month + "\" day=\"" + day + "\"></date>";
+    public String dumpDOM() {
+        return "<date pid=\"" + ID + "\" year=\"" + year + "\" month=\"" + month + "\" day=\"" + day + "\"></date>";
     }
 }

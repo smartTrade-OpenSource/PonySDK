@@ -24,6 +24,7 @@
 package com.ponysdk.core.ui.basic;
 
 import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.test.PSuite;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -108,6 +109,26 @@ public class PAnchorTest extends PSuite {
         assertFalse(anchor.isShowLoadingOnRequest());
         anchor.showLoadingOnRequest(true);
         assertTrue(anchor.isShowLoadingOnRequest());
+    }
+
+    @Test
+    public void testDumDOM() {
+        final PAnchor a = Element.newPAnchor();
+        String ID = String.valueOf(a.getID());
+
+        assertEquals("<a pid=\"" + ID + "\" class=\"\"></a>", a.dumpDOM());
+
+        a.setHTML("<a>html</a>");
+        assertEquals("<a pid=\"" + ID + "\" class=\"\"><a>html</a></a>", a.dumpDOM());
+
+        a.setHTML("text");
+        assertEquals("<a pid=\"" + ID + "\" class=\"\">text</a>", a.dumpDOM());
+
+        a.addStyleName("style");
+        assertEquals("<a pid=\"" + ID + "\" class=\"style\">text</a>", a.dumpDOM());
+
+        a.setHref("href");
+        assertEquals("<a pid=\"" + ID + "\" class=\"style\" href=\"href\">text</a>", a.dumpDOM());
     }
 
 }

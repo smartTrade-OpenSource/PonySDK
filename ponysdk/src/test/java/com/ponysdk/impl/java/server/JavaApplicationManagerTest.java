@@ -30,7 +30,7 @@ import org.junit.Test;
 
 import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.ui.basic.PSuite;
+import com.ponysdk.test.PSuite;
 import com.ponysdk.core.ui.main.EntryPoint;
 
 public class JavaApplicationManagerTest extends PSuite {

@@ -23,11 +23,9 @@
 
 package com.ponysdk.core.model;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class ArrayValueModelTest {
 
@@ -49,4 +47,24 @@ public class ArrayValueModelTest {
         assertTrue(ArrayValueModel.STRING_UTF8_UINT8_LENGTH.isDynamicSize());
     }
 
+    /**
+     * Test method for {@link com.ponysdk.core.model.ArrayValueModel#isDynamicSize()}.
+     */
+    @Test
+    public void testMinSize() {
+        assertEquals(0, ArrayValueModel.BOOLEAN_FALSE.getMinSize());
+        assertEquals(0, ArrayValueModel.BOOLEAN_FALSE.getMinSize());
+        assertEquals(0, ArrayValueModel.NULL.getMinSize());
+        assertEquals(1, ArrayValueModel.STRING_UTF8_UINT8_LENGTH.getMinSize());
+        assertEquals(2, ArrayValueModel.STRING_UTF8_UINT16_LENGTH.getMinSize());
+        assertEquals(4, ArrayValueModel.STRING_UTF8_UINT32_LENGTH.getMinSize());
+        assertEquals(1, ArrayValueModel.STRING_ASCII_UINT8_LENGTH.getMinSize());
+        assertEquals(2, ArrayValueModel.STRING_ASCII_UINT16_LENGTH.getMinSize());
+        assertEquals(1, ArrayValueModel.BYTE.getMinSize());
+        assertEquals(2, ArrayValueModel.SHORT.getMinSize());
+        assertEquals(4, ArrayValueModel.INTEGER.getMinSize());
+        assertEquals(4, ArrayValueModel.FLOAT.getMinSize());
+        assertEquals(8, ArrayValueModel.DOUBLE.getMinSize());
+        assertEquals(8, ArrayValueModel.LONG.getMinSize());
+    }
 }

@@ -23,6 +23,19 @@
 
 package com.ponysdk.driver;
 
+import com.ponysdk.core.model.*;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.websocket.CloseReason;
+import javax.websocket.MessageHandler;
+import javax.websocket.Session;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -31,37 +44,11 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.ToIntFunction;
-
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
-import javax.websocket.CloseReason;
-import javax.websocket.MessageHandler;
-import javax.websocket.Session;
-
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ponysdk.core.model.ArrayValueModel;
-import com.ponysdk.core.model.BooleanModel;
-import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.model.ValueTypeModel;
-import com.ponysdk.core.model.WidgetType;
 
 public class PonySDKWebDriver implements WebDriver {
 
@@ -320,13 +307,13 @@ public class PonySDKWebDriver implements WebDriver {
     private String getString(final ByteBuffer b) {
         int stringLength = readUnsignedByte(b);
         boolean ascii = true;
-        if (stringLength > ValueTypeModel.STRING_ASCII_UINT8_MAX_LENGTH) {
+        if (stringLength > ValueTypeModel.STRING_ASCII_UINT8) {
             switch (stringLength) {
                 case ValueTypeModel.STRING_ASCII_UINT16:
                     length += 2;
                     stringLength = readUnsignedShort(b);
                     break;
-                case ValueTypeModel.STRING_ASCII_INT32:
+                case ValueTypeModel.STRING_ASCII_UINT32:
                     length += 4;
                     stringLength = b.getInt();
                     break;
@@ -405,7 +392,7 @@ public class PonySDKWebDriver implements WebDriver {
                 return getString(b, StandardCharsets.UTF_8, PonySDKWebDriver::readUnsignedByte);
             case STRING_UTF8_UINT16_LENGTH:
                 return getString(b, StandardCharsets.UTF_8, PonySDKWebDriver::readUnsignedShort);
-            case STRING_UTF8_INT32_LENGTH:
+            case STRING_UTF8_UINT32_LENGTH:
                 return getString(b, StandardCharsets.UTF_8, ByteBuffer::getInt);
             default:
                 throw new IllegalArgumentException("ArrayValueModel " + model + " is not supported");

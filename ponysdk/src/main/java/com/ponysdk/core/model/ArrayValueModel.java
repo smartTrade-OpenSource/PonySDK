@@ -40,19 +40,19 @@ public enum ArrayValueModel {
 
     STRING_UTF8_UINT8_LENGTH(ArrayValueModel.STRING_UINT8_LENGTH_MIN_SIZE, true),
     STRING_UTF8_UINT16_LENGTH(ArrayValueModel.STRING_UINT16_LENGTH_SIZE, true),
-    STRING_UTF8_INT32_LENGTH(ArrayValueModel.STRING_INT32_LENGTH_MIN_SIZE, true);
+    STRING_UTF8_UINT32_LENGTH(ArrayValueModel.STRING_UINT32_LENGTH_MIN_SIZE, true);
 
     private static final int BOOLEAN_SIZE = 0;
     private static final int STRING_UINT8_LENGTH_MIN_SIZE = 1;
     private static final int STRING_UINT16_LENGTH_SIZE = 2;
-    private static final int STRING_INT32_LENGTH_MIN_SIZE = 4;
+    private static final int STRING_UINT32_LENGTH_MIN_SIZE = 4;
 
     private final int minSize;
     private final boolean dynamicSize;
 
     private static final ArrayValueModel[] VALUES = ArrayValueModel.values();
 
-    private ArrayValueModel(final int minSize, final boolean dynamicSize) {
+    ArrayValueModel(final int minSize, final boolean dynamicSize) {
         this.minSize = minSize;
         this.dynamicSize = dynamicSize;
     }

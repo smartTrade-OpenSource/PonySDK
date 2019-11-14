@@ -23,12 +23,12 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Objects;
-import java.util.stream.Collectors;
-
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.writer.ModelWriter;
+
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * All HTML element interfaces derive from this class.Useful to create native
@@ -84,12 +84,22 @@ public class PElement extends PComplexPanel {
     }
 
     @Override
-    protected String dumpDOM() {
+    public String dumpDOM() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("<");
+        builder.append(tagName);
+        builder.append(" pid=\"" + ID + "\"");
+        if (!isVisible()) builder.append(" hidden");
+        builder.append(" class=\"" + getStyleNames().collect(Collectors.joining(" ")) + "\"");
+        builder.append(">");
         if (getWidgetCount() == 0) {
-            return "<" + tagName + " class=\"" + getStyleNames().collect(Collectors.joining(" ")) + "\">" + (innerText != null ? innerText : innerHTML) + "</" + tagName + ">";
+            if (innerText != null) builder.append(innerText);
+            else builder.append(innerHTML);
         } else {
-            return "<" + tagName + " class=\"" + getStyleNames().collect(Collectors.joining(" ")) + "\">" + dumpChildDOM() + "</" + tagName + ">";
+            builder.append(dumpChildDOM());
         }
+        builder.append("</" + tagName + ">");
+        return builder.toString();
     }
 
     private String dumpChildDOM() {
