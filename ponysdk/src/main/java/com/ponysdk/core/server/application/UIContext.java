@@ -23,29 +23,6 @@
 
 package com.ponysdk.core.server.application;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.ReentrantLock;
-
-import javax.json.JsonNumber;
-import javax.json.JsonObject;
-import javax.json.JsonString;
-import javax.json.JsonValue;
-import javax.json.JsonValue.ValueType;
-import javax.json.spi.JsonProvider;
-import javax.servlet.http.HttpSession;
-
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -58,15 +35,25 @@ import com.ponysdk.core.ui.basic.PCookies;
 import com.ponysdk.core.ui.basic.PHistory;
 import com.ponysdk.core.ui.basic.PObject;
 import com.ponysdk.core.ui.basic.PWindow;
-import com.ponysdk.core.ui.eventbus.BroadcastEventHandler;
-import com.ponysdk.core.ui.eventbus.Event;
-import com.ponysdk.core.ui.eventbus.EventHandler;
-import com.ponysdk.core.ui.eventbus.EventSource;
-import com.ponysdk.core.ui.eventbus.HandlerRegistration;
-import com.ponysdk.core.ui.eventbus.StreamHandler;
+import com.ponysdk.core.ui.eventbus.*;
 import com.ponysdk.core.ui.statistic.TerminalDataReceiver;
 import com.ponysdk.core.useragent.UserAgent;
 import com.ponysdk.core.writer.ModelWriter;
+import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.json.JsonNumber;
+import javax.json.JsonObject;
+import javax.json.JsonString;
+import javax.json.JsonValue;
+import javax.json.JsonValue.ValueType;
+import javax.json.spi.JsonProvider;
+import javax.servlet.http.HttpSession;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * <p>
@@ -587,14 +574,9 @@ public class UIContext {
      * This method locks the UIContext
      */
     public void onDestroy() {
-        if (!isAlive()) return;
-        acquire();
-        try {
-            doDestroy();
-            context.deregisterUIContext(ID);
-        } finally {
-            release();
-        }
+    	//we used to avoid calling socket.close() there, but sometimes jetty does not close the WS 
+    	//when there is an exception in a listener => always call close since it is a no-op on a closed WS
+    	destroy(); 
     }
 
     /**

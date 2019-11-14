@@ -23,16 +23,14 @@
 
 package com.ponysdk.core.server.application;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.servlet.http.HttpSession;
-
+import com.ponysdk.core.server.servlet.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.server.servlet.SessionManager;
+import javax.servlet.http.HttpSession;
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Wrapper of the HTTPSession, and contains the UIContexts.
@@ -62,9 +60,12 @@ public class Application {
     }
 
     public void deregisterUIContext(final int uiContextID) {
-        uiContexts.remove(uiContextID);
-        if (uiContexts.isEmpty()) {
-            session.invalidate();
+        if (uiContexts.remove(uiContextID) != null && uiContexts.isEmpty()) {
+            try {
+                session.invalidate();
+            } catch (final IllegalStateException e) {
+                log.warn("Issue when unregistering UIContext #{} : Session {} already invalidated", uiContextID, session.getId());
+            }
             SessionManager.get().unregisterApplication(this);
         }
     }

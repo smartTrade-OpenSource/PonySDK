@@ -23,17 +23,14 @@
 
 package com.ponysdk.core.server.websocket;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-
+import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.application.ApplicationConfiguration;
+import com.ponysdk.core.server.application.ApplicationManager;
+import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.context.CommunicationSanityChecker;
+import com.ponysdk.core.server.stm.TxnContext;
+import com.ponysdk.core.ui.basic.PObject;
 import org.eclipse.jetty.util.component.Container;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
@@ -43,14 +40,15 @@ import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.application.ApplicationConfiguration;
-import com.ponysdk.core.server.application.ApplicationManager;
-import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.server.context.CommunicationSanityChecker;
-import com.ponysdk.core.server.stm.TxnContext;
-import com.ponysdk.core.ui.basic.PObject;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
@@ -118,7 +116,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
     @Override
     public void onWebSocketError(final Throwable throwable) {
-        log.error("WebSocket Error", throwable);
+        log.error("WebSocket Error on UIContext #{}", uiContext.getID(), throwable);
         uiContext.onDestroy();
     }
 
@@ -256,7 +254,12 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     }
 
     void flush0() {
-        websocketPusher.flush();
+        try {
+            websocketPusher.flush();
+        } catch (final IOException e) {
+            log.error("Can't write on the websocket for #{}, so we destroy the application", uiContext.getID(), e);
+            uiContext.onDestroy();
+        }
     }
 
     public void close() {
@@ -299,8 +302,13 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
     @Override
     public void encode(final ServerToClientModel model, final Object value) {
-        websocketPusher.encode(model, value);
-        if (listener != null) listener.onOutgoingPonyFrame(model, value);
+        try {
+            websocketPusher.encode(model, value);
+            if (listener != null) listener.onOutgoingPonyFrame(model, value);
+        } catch (final IOException e) {
+            log.error("Can't write on the websocket for UIContext #{}, so we destroy the application", uiContext.getID(), e);
+            uiContext.destroy();
+        }
     }
 
     private static enum NiceStatusCode {
