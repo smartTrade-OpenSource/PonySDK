@@ -48,7 +48,7 @@ public class SetUtils {
     }
 
     /**
-     * ArraySet<E> is private to prevent using it as a List
+     * ArraySet&lt; E&gt; is private to prevent using it as a List
      */
     private static class ArraySet<E> extends ArrayList<E> implements Set<E> {
 

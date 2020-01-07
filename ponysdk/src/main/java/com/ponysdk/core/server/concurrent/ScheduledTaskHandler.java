@@ -7,12 +7,10 @@ import java.util.concurrent.ScheduledFuture;
  * A wrapper around the ScheduledFuture owned by the Scheduler internal
  * executor.<br>
  * This wrapper only allows cancelling a future or periodic task.<br>
- *
- * @implNote this wrapper use weak reference to make sure that the task
+ * This wrapper use weak reference to make sure that the task
  * submitted to the executor cannot be source of a memory leak once the task is
  * executed or cancelled
  * @author amaire
- *
  */
 
 public class ScheduledTaskHandler {

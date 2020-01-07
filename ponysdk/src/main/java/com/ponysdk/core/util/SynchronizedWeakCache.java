@@ -49,7 +49,7 @@ public class SynchronizedWeakCache<E> {
 
     /**
      * If there is an instance equivalent to {@code key} present in the cache, return it. Otherwise, use the
-     * {@code mappingFuction} to create a new instance based on the {@code key}, put it in the cache and return it.<br/>
+     * {@code mappingFuction} to create a new instance based on the {@code key}, put it in the cache and return it.
      * <i><b>NB :</b> If the {@code mappingFunction} is applied, its result is not guaranteed to be inserted in the
      * cache.</i>
      *

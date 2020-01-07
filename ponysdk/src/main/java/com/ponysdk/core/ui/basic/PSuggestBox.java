@@ -50,8 +50,6 @@ import java.util.Objects;
  * its oracle. Below we show how a {@link PMultiWordSuggestOracle} can be
  * configured:
  * </p>
- * <p>
- *
  * <pre>
  * PMultiWordSuggestOracle oracle = new PMultiWordSuggestOracle();
  * oracle.add(&quot;Cat&quot;);
@@ -66,6 +64,8 @@ import java.util.Objects;
  * oracle will configure the suggestions with the "Cat" and "Canary"
  * suggestions. Specifically, whenever the user types a key into the text
  * widget, the value is submitted to the <code>PMultiWordSuggestOracle</code>.
+ * </p>
+ *
  * <h3>CSS Style Rules</h3>
  * <dl>
  * <dt>.gwt-SuggestBox</dt>

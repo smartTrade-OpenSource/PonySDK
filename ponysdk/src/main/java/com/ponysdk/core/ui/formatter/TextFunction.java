@@ -38,12 +38,12 @@ public class TextFunction {
     /**
      * Sample :
      * <ul>
-     * <li>javaFunction : args -> { System.out.println(args[0] + " " + args[1]); return (String) args[0]; }</li>
+     * <li><pre>javaFunction : args -&#62; { System.out.println(args[0] + " " + args[1]); return (String) args[0]; }</pre></li>
      * <li>jsFunction : console.log(args[0] + \" \" + args[1]); return args[0]</li>
      * </ul>
      *
      * @param javaFunction The java function.
-     * @param jsFunction The js function.
+     * @param jsFunction   The js function.
      */
     public TextFunction(final Function<Object[], String> javaFunction, final String jsFunction) {
         super();

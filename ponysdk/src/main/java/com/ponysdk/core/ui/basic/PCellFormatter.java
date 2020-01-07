@@ -29,8 +29,6 @@ import com.ponysdk.core.model.ServerToClientModel;
 
 /**
  * This class contains methods used to format a table's cells.
- *
- * @ee com.google.gwt.user.client.ui.HTMLTable.CellFormatter
  */
 public class PCellFormatter {
 

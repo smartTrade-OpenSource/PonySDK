@@ -88,8 +88,8 @@ java {
 }
 
 javadoc {
+    classpath += configurations.gwtdev
     exclude '**/terminal/**'
-    exclude '**/terminal/**.gwt.xml'
 }
 
 jar {

@@ -69,7 +69,7 @@ public interface SchedulingContext {
 	 * the one that has been denied execution for the longest time will be triggered
 	 * before the others
 	 * 
-	 * @param delayMillis the delay before actually submitting the task
+	 * @param periodMillis the delay before actually submitting the task
 	 * @param task the periodic task to execute
 	 * @return a ScheduledTaskHandler that allow this task to be cancelled
 	 */
@@ -84,7 +84,7 @@ public interface SchedulingContext {
 	 * 
 	 * Wait for the context to shutdown properly up to the specified delay
 	 * 
-	 * @param timeoutMillis the maximum delay to wait (in millisecond)
+	 * @param timeoutInMillis the maximum delay to wait (in millisecond)
 	 * @return true if the context is terminated (no more relative tasks are
 	 * running, queued or scheduled), false otherwise
 	 */
