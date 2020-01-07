@@ -23,6 +23,13 @@
 
 package com.ponysdk.core.server.servlet;
 
+import com.ponysdk.core.server.application.ApplicationConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -33,15 +40,6 @@ import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ponysdk.core.server.application.ApplicationConfiguration;
 
 public class BootstrapServlet extends HttpServlet {
 
@@ -230,9 +228,7 @@ public class BootstrapServlet extends HttpServlet {
     protected String addScript(final HttpServletRequest request) {
         final StringBuilder sb = new StringBuilder();
 
-        String ponyTerminalJsFileName;
-        if (configuration.isDebugMode()) ponyTerminalJsFileName = "ponyterminaldebug/ponyterminaldebug.nocache.js";
-        else ponyTerminalJsFileName = "ponyterminal/ponyterminal.nocache.js";
+        String ponyTerminalJsFileName = "ponyterminal/ponyterminal.nocache.js";
 
         sb.append(String.format(SCRIPT_PATTERN, rootPath + ponyTerminalJsFileName)).append(NEW_LINE);
         sb.append(String.format(SCRIPT_PATTERN, rootPath + "script/ponysdk.js")).append(NEW_LINE);

@@ -89,6 +89,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         mainLabel = Element.newPLabel("Can be dd by anybody : ₲ῳ₸");
         mainLabel.setAttributeLinkedToValue("data-title");
         mainLabel.setTitle("String ASCII");
+
         //PWindow.getMain().add(mainLabel);
         //testVisibilityHandler(PWindow.getMain());
         //testPerf();

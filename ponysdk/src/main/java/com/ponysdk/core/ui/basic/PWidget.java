@@ -238,7 +238,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public void setAttribute(final String name) {
-        setAttribute(name, null);
+        setAttribute(name, "");
     }
 
     public void setAttribute(final String name, final String value) {

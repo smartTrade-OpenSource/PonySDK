@@ -1,59 +1,13 @@
-ext {
-    gwtVersion = '2.8.2'
-    
-    jettyVersion = '9.4.14.v20181114'
-    springVersion = '5.1.3.RELEASE'
-    
-    slf4jVersion = '1.8.0-alpha2'
-    log4jVersion = '2.10.0'
-}
-
-allprojects{
-    apply plugin: 'jacoco'
+subprojects {
+    apply plugin: 'java'
+    version = '2.8.19'
+    sourceCompatibility = JavaVersion.VERSION_1_9
+    targetCompatibility = JavaVersion.VERSION_1_9
 
     repositories {
         mavenCentral()
-    }
-}
-
-subprojects {
-    apply plugin: 'java'
-    apply plugin: 'maven'
-    apply plugin: 'maven-publish'
-
-    sourceCompatibility = 9
-    targetCompatibility = 9
-
-    def suffix = project.hasProperty('BUILD_RELEASE') ? "" : "-SNAPSHOT"
-    version = '2.8.18' + suffix
-
-    publishing {
-        publications {
-            maven(MavenPublication) {
-                groupId 'com.ponysdk'
-                artifactId project.name
-                from components.java
-            }
+        maven {
+            url "https://oss.sonatype.org/content/repositories/snapshots"
         }
     }
 }
-
-task codeCoverageReport(type: JacocoReport) {
-    executionData fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec")
-
-    subprojects.each {
-        sourceSets it.sourceSets.main
-    }
-
-    reports {
-        xml.enabled true
-        xml.destination file("${buildDir}/reports/jacoco/report.xml")
-        html.enabled false
-        csv.enabled false
-    }
-}
-
-codeCoverageReport.dependsOn {
-    subprojects*.test
-}
-

@@ -1,48 +1,43 @@
-repositories {
-    mavenCentral()
-    maven {
-        url "https://github.com/PonySDK/Maven/raw/master/ext"
-    }
-    maven {
-        url "http://oss.sonatype.org/content/repositories/snapshots"
-    }
-}
-
 ext {
     java2htmlVersion = '5.0'
     commonsBeanutilsVersion = '1.9.3'
     commonsIoVersion = '2.6'
     commonsFileuploadVersion = '1.3.3'
+    gwtVersion = '2.8.2'
+    jettyVersion = '9.4.14.v20181114'
+    springVersion = '5.1.3.RELEASE'
+    javaxServletVersion = '4.0.1'
+    slf4jVersion = '1.8.0-alpha2'
+    log4jVersion = '2.10.0'
+    jsonVersion = '1.1.4'
 }
 
 dependencies {
-    compile (
-        project(':ponysdk'),
-
-        'de.java2html:java2html:' + java2htmlVersion,
-
-        'org.eclipse.jetty.websocket:websocket-client:' + jettyVersion,
-
-        'commons-beanutils:commons-beanutils:' + commonsBeanutilsVersion,
-
-        'commons-io:commons-io:' + commonsIoVersion,
-        'commons-fileupload:commons-fileupload:' + commonsFileuploadVersion
+    implementation(
+            project(path: ':ponysdk', configuration: 'default'),
+            'org.springframework:spring-context:' + springVersion,
+            'javax.json:javax.json-api:' + jsonVersion,
+            'javax.servlet:javax.servlet-api:' + javaxServletVersion,
+            'org.slf4j:slf4j-api:' + slf4jVersion,
+            'de.java2html:java2html:' + java2htmlVersion,
+            'org.eclipse.jetty.websocket:websocket-client:' + jettyVersion,
+            'commons-beanutils:commons-beanutils:' + commonsBeanutilsVersion,
+            'commons-io:commons-io:' + commonsIoVersion,
+            'commons-fileupload:commons-fileupload:' + commonsFileuploadVersion,
+            'com.google.code.gson:gson:2.8.6'
     )
 
-    runtime (
-        'com.google.gwt:gwt-codeserver:' + gwtVersion,
-
-        'de.java2html:java2html:' + java2htmlVersion,
-
-        'org.springframework:spring-aop:' + springVersion,
-        'org.springframework:spring-expression:' + springVersion,
-
-        'org.slf4j:jcl-over-slf4j:' + slf4jVersion,
-        'org.slf4j:log4j-over-slf4j:' + slf4jVersion,
-        'org.slf4j:jul-to-slf4j:' + slf4jVersion,
-        'org.apache.logging.log4j:log4j-api:' + log4jVersion,
-        'org.apache.logging.log4j:log4j-core:' + log4jVersion,
-        'org.apache.logging.log4j:log4j-slf4j-impl:' + log4jVersion,
+    runtimeOnly(
+            'com.google.gwt:gwt-codeserver:' + gwtVersion,
+            'de.java2html:java2html:' + java2htmlVersion,
+            'org.springframework:spring-aop:' + springVersion,
+            'org.springframework:spring-expression:' + springVersion,
+            'org.slf4j:jcl-over-slf4j:' + slf4jVersion,
+            'org.slf4j:log4j-over-slf4j:' + slf4jVersion,
+            'org.slf4j:jul-to-slf4j:' + slf4jVersion,
+            'org.apache.logging.log4j:log4j-api:' + log4jVersion,
+            'org.apache.logging.log4j:log4j-core:' + log4jVersion,
+            'org.apache.logging.log4j:log4j-slf4j-impl:' + log4jVersion,
     )
 }
 
@@ -51,31 +46,30 @@ task runCodeServer(type: JavaExec) {
     classpath += sourceSets.main.runtimeClasspath
     main = 'com.google.gwt.dev.codeserver.CodeServer'
     args = [
-        '-src', '../ponysdk/src/main/java',
-        '-generateJsInteropExports', '-noincremental',
-        '-style', 'DETAILED',
-        'com.ponysdk.core.PonyTerminalDebug'
+            '-src', '../ponysdk/src/main/java',
+            '-generateJsInteropExports', '-noincremental',
+            '-style', 'DETAILED',
+            'com.ponysdk.core.PonyTerminalDebug'
     ]
     jvmArgs = ['-server', '-Xmx1024m']
 }
 
 task runSampleSpring(type: JavaExec) {
-  classpath = sourceSets.main.runtimeClasspath
-  classpath += files(buildDir.getAbsolutePath() + '/gwt/debug/gwt')
-  classpath += files(buildDir.getAbsolutePath() + '/gwt/prod/gwt')
-  classpath += files(buildDir.getAbsolutePath() + '/resources')
-  classpath += files(buildDir.getAbsolutePath() + '/resources/main')
-  main = 'com.ponysdk.impl.spring.MainSpring'
-  jvmArgs = ['-server', '-Xmx512m', '-Dlog4j.configurationFile=etc/log4j2.xml', '-agentlib:jdwp=transport=dt_socket,server=y,address=8888,suspend=n']
+    classpath = sourceSets.main.runtimeClasspath
+    classpath += files(buildDir.getAbsolutePath() + '/gwt/gwt')
+    classpath += files(buildDir.getAbsolutePath() + '/resources')
+    classpath += files(buildDir.getAbsolutePath() + '/resources/main')
+    main = 'com.ponysdk.impl.spring.MainSpring'
+    jvmArgs = ['-server', '-Xmx512m', '-Dlog4j.configurationFile=etc/log4j2.xml', '-agentlib:jdwp=transport=dt_socket,server=y,address=8888,suspend=n']
 }
 
 task runSampleTrading(type: JavaExec) {
-  classpath = sourceSets.main.runtimeClasspath
-  classpath += files(buildDir.getAbsolutePath() + '/gwt/debug/gwt')
-  classpath += files(buildDir.getAbsolutePath() + '/gwt/prod/gwt')
-  classpath += files(buildDir.getAbsolutePath() + '/resources/etc')
-  main = 'com.ponysdk.impl.java.Main'
-  jvmArgs = ['-server', '-Xmx512m', '-Dponysdk.application.id=trading', '-Dponysdk.application.name="Trading sample"', '-Dponysdk.application.description="Trading Sample"',
-             '-Dponysdk.application.context.name=trading', '-Dponysdk.entry.point.class=com.ponysdk.sample.client.TradingSampleEntryPoint',
-             '-Dponysdk.application.javascripts=script/ponysdk.js;script/widget.js;script/sample.js;script/less.js', '-Dponysdk.application.stylesheets=css/sample.less;css/ponysdk.less' ]
+    classpath = sourceSets.main.runtimeClasspath
+    classpath += files(buildDir.getAbsolutePath() + '/gwt/debug/gwt')
+    classpath += files(buildDir.getAbsolutePath() + '/gwt/prod/gwt')
+    classpath += files(buildDir.getAbsolutePath() + '/resources/etc')
+    main = 'com.ponysdk.impl.java.Main'
+    jvmArgs = ['-server', '-Xmx512m', '-Dponysdk.application.id=trading', '-Dponysdk.application.name="Trading sample"', '-Dponysdk.application.description="Trading Sample"',
+               '-Dponysdk.application.context.name=trading', '-Dponysdk.entry.point.class=com.ponysdk.sample.client.TradingSampleEntryPoint',
+               '-Dponysdk.application.javascripts=script/ponysdk.js;script/widget.js;script/sample.js;script/less.js', '-Dponysdk.application.stylesheets=css/sample.less;css/ponysdk.less']
 }
