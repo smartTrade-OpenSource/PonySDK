@@ -23,15 +23,6 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.Set;
-
-import javax.json.JsonObject;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -42,6 +33,14 @@ import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.util.SetUtils;
 import com.ponysdk.core.writer.ModelWriter;
 import com.ponysdk.core.writer.ModelWriterCallback;
+
+import javax.json.JsonObject;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Set;
 
 /**
  * The superclass for all PonySDK objects.
@@ -158,18 +157,15 @@ public abstract class PObject {
     }
 
     /**
-     * Bind to a Terminal function, usefull to link the objectID and the widget
+     * Bind to a Terminal function, useful to link the objectID and the widget
      * reference
-     * <p>
      * <h2>Example :</h2>
-     * <p>
      *
      * <pre>
      * --- Java ---
      *
      * bindTerminalFunction("myFunction")
      * </pre>
-     * <p>
      *
      * <pre>
      * --- JavaScript ---

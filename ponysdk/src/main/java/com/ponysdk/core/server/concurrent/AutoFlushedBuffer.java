@@ -316,13 +316,13 @@ public abstract class AutoFlushedBuffer implements Closeable {
      *            the byte array to write
      * @param offset
      *            the offset within the array of the first byte to write;
-     *            must be non-negative and no larger than <tt>bytes.length</tt>
+     *            must be non-negative and no larger than bytes.length
      * @param length
      *            the number of bytes to write;
-     *            must be non-negative and no larger than <tt>bytes.length - offset</tt>
+     *            must be non-negative and no larger than bytes.length - offset
      * @return this buffer
      * @throws IndexOutOfBoundsException
-     *             if the preconditions on the <tt>offset</tt> and <tt>length</tt> parameters do not
+     *             if the preconditions on the offset and length parameters do not
      *             hold
      * @throws InterruptedIOException
      *             if the current thread is interrupted
@@ -393,7 +393,7 @@ public abstract class AutoFlushedBuffer implements Closeable {
     /**
      * Tells whether or not this buffer is closed.
      *
-     * @return <tt>true</tt> if, and only if, this buffer is closed
+     * @return true if, and only if, this buffer is closed
      */
     public final boolean isClosed() {
         return closed;
@@ -402,7 +402,7 @@ public abstract class AutoFlushedBuffer implements Closeable {
     /**
      * Callback that should be called by the flushing logic when it successfully flushed the data.
      * We expect that {@code flushBuffer.limit()} has not been modified by the flushing logic and
-     * {@code flushBuffer.hasRemaining()} to return <tt>false</tt>.
+     * {@code flushBuffer.hasRemaining()} to return false.
      *
      * @see AutoFlushedBuffer#doFlush(ByteBuffer)
      */

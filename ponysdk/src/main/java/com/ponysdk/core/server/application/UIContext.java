@@ -276,6 +276,7 @@ public class UIContext {
      * Removes the {@link DataListener} from UIContext
      *
      * @param listener the data listener
+     * @return {@code true} if this set contained the specified element
      */
     public boolean removeDataListener(final DataListener listener) {
         return listeners.remove(listener);
@@ -283,7 +284,6 @@ public class UIContext {
 
     /**
      * Executes a {@link Runnable} that represents a task in a graphical context
-     * <p>
      * This method locks the UIContext
      *
      * @param runnable the tasks
@@ -574,9 +574,9 @@ public class UIContext {
      * This method locks the UIContext
      */
     public void onDestroy() {
-    	//we used to avoid calling socket.close() there, but sometimes jetty does not close the WS 
-    	//when there is an exception in a listener => always call close since it is a no-op on a closed WS
-    	destroy(); 
+        //we used to avoid calling socket.close() there, but sometimes jetty does not close the WS
+        //when there is an exception in a listener => always call close since it is a no-op on a closed WS
+        destroy();
     }
 
     /**
