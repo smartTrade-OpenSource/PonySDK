@@ -1,4 +1,3 @@
-[![Build Status](https://travis-ci.org/Nciaravola/PonySDK.svg?branch=master)](https://travis-ci.org/Nciaravola/PonySDK)
 [![codecov](https://codecov.io/gh/Nciaravola/PonySDK/branch/master/graph/badge.svg)](https://codecov.io/gh/Nciaravola/PonySDK)
 [![Actions Status](https://github.com/Nciaravola/PonySDK/workflows/CI/badge.svg)](https://github.com/Nciaravola/PonySDK/actions)
 
