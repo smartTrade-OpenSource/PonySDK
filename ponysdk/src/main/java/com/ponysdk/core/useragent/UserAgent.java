@@ -58,6 +58,7 @@ public class UserAgent implements Serializable {
 
     /**
      * Returns UserAgent based on specified unique id
+     * @param id
      */
     public static UserAgent valueOf(final int id) {
         final OperatingSystem operatingSystem = OperatingSystem.valueOf((short) (id >> 16));

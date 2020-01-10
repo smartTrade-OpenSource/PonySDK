@@ -54,13 +54,14 @@ public abstract class AutoFlushedBuffer implements Closeable {
      * {@link AutoFlushedBuffer#onFlushCompletion() onFlushCompletion} or
      * {@link AutoFlushedBuffer#onFlushFailure(Exception) onFlushFailed} afterwards.
      *
-     * @param bufferToFlush
-     *            a ready to read {@link ByteBuffer} that contains the data to flush.
+     * @param bufferToFlush a ready to read {@link ByteBuffer} that contains the data to flush.
      */
     protected abstract void doFlush(ByteBuffer bufferToFlush);
 
     /**
      * Release resources associated to the flushing mechanism. Will be called at most once.
+     *
+     * @throws IOException
      */
     protected abstract void closeFlusher() throws IOException;
 
@@ -108,27 +109,21 @@ public abstract class AutoFlushedBuffer implements Closeable {
     }
 
     /**
-     *
-     * @param bufferSize
-     *            the size of the underlying buffer to allocate. Must be a power of 2 and greater
-     *            than 32
-     * @param useDirectBuffer
-     *            should the underlying buffer be allocated off heap. Should be true if there are
-     *            real IO operations underneath, can be false for debugging purpose
-     * @param maxChunkSize
-     *            the maximum size of pending data before triggering a flush automatically, must be
-     *            between 8 and {@code bufferSize / 4}
-     * @param urgentMessageReservedRatio
-     *            used by {@link AutoFlushedBuffer#shouldOnlyWriteUrgentMessages()
-     *            shouldOnlyWriteUrgentMessages}.
-     *            If the free space ratio in the buffer is less than this value, that method should
-     *            returns {@code true}
-     * @param timeoutMillis
-     *            the timeout period in millisecond. If write to the buffer are blocked for longer
-     *            than this, it will be automatically closed
+     * @param bufferSize                 the size of the underlying buffer to allocate. Must be a power of 2 and greater
+     *                                   than 32
+     * @param useDirectBuffer            should the underlying buffer be allocated off heap. Should be true if there are
+     *                                   real IO operations underneath, can be false for debugging purpose
+     * @param maxChunkSize               the maximum size of pending data before triggering a flush automatically, must be
+     *                                   between 8 and {@code bufferSize / 4}
+     * @param urgentMessageReservedRatio used by {@link AutoFlushedBuffer#shouldOnlyWriteUrgentMessages()
+     *                                   shouldOnlyWriteUrgentMessages}.
+     *                                   If the free space ratio in the buffer is less than this value, that method should
+     *                                   returns {@code true}
+     * @param timeoutMillis              the timeout period in millisecond. If write to the buffer are blocked for longer
+     *                                   than this, it will be automatically closed
      */
     protected AutoFlushedBuffer(final int bufferSize, final boolean useDirectBuffer, final int maxChunkSize,
-            final float urgentMessageReservedRatio, final long timeoutMillis) {
+                                final float urgentMessageReservedRatio, final long timeoutMillis) {
         if ((bufferSize & bufferSize - 1) != 0) {
             throw new IllegalArgumentException("bufferSize must be a power of 2");
         }
@@ -150,14 +145,11 @@ public abstract class AutoFlushedBuffer implements Closeable {
      * Writes a {@code byte} in the buffer. This method may block up to the configured timeout
      * period if the buffer is already full
      *
-     * @param b
-     *            the byte to write
+     * @param b the byte to write
      * @return this buffer
-     * @throws InterruptedIOException
-     *             if the current thread is interrupted
-     * @throws IOException
-     *             if a timeout occurs or this buffer is already closed or the underlying flushing
-     *             mechanism reported an issue
+     * @throws InterruptedIOException if the current thread is interrupted
+     * @throws IOException            if a timeout occurs or this buffer is already closed or the underlying flushing
+     *                                mechanism reported an issue
      */
     public final AutoFlushedBuffer put(final byte b) throws IOException {
         ensureCapacity(1);
@@ -170,14 +162,11 @@ public abstract class AutoFlushedBuffer implements Closeable {
      * Writes a {@code short} in the buffer. This method may block up to the configured timeout
      * period if the buffer is already full
      *
-     * @param s
-     *            the short to write
+     * @param s the short to write
      * @return this buffer
-     * @throws InterruptedIOException
-     *             if the current thread is interrupted
-     * @throws IOException
-     *             if a timeout occurs or this buffer is already closed or the underlying flushing
-     *             mechanism reported an issue
+     * @throws InterruptedIOException if the current thread is interrupted
+     * @throws IOException            if a timeout occurs or this buffer is already closed or the underlying flushing
+     *                                mechanism reported an issue
      */
     public final AutoFlushedBuffer putShort(final short s) throws IOException {
         ensureCapacity(2);
@@ -190,14 +179,11 @@ public abstract class AutoFlushedBuffer implements Closeable {
      * Writes an {@code int} in the buffer. This method may block up to the configured timeout
      * period if the buffer is already full
      *
-     * @param i
-     *            the int to write
+     * @param i the int to write
      * @return this buffer
-     * @throws InterruptedIOException
-     *             if the current thread is interrupted
-     * @throws IOException
-     *             if a timeout occurs or this buffer is already closed or the underlying flushing
-     *             mechanism reported an issue
+     * @throws InterruptedIOException if the current thread is interrupted
+     * @throws IOException            if a timeout occurs or this buffer is already closed or the underlying flushing
+     *                                mechanism reported an issue
      */
     public final AutoFlushedBuffer putInt(final int i) throws IOException {
         ensureCapacity(4);
@@ -210,14 +196,11 @@ public abstract class AutoFlushedBuffer implements Closeable {
      * Writes a {@code long} in the buffer. This method may block up to the configured timeout
      * period if the buffer is already full
      *
-     * @param l
-     *            the long to write
+     * @param l the long to write
      * @return this buffer
-     * @throws InterruptedIOException
-     *             if the current thread is interrupted
-     * @throws IOException
-     *             if a timeout occurs or this buffer is already closed or the underlying flushing
-     *             mechanism reported an issue
+     * @throws InterruptedIOException if the current thread is interrupted
+     * @throws IOException            if a timeout occurs or this buffer is already closed or the underlying flushing
+     *                                mechanism reported an issue
      */
     public final AutoFlushedBuffer putLong(final long l) throws IOException {
         ensureCapacity(8);
@@ -230,14 +213,11 @@ public abstract class AutoFlushedBuffer implements Closeable {
      * Writes a {@code char} in the buffer. This method may block up to the configured timeout
      * period if the buffer is already full
      *
-     * @param c
-     *            the char to write
+     * @param c the char to write
      * @return this buffer
-     * @throws InterruptedIOException
-     *             if the current thread is interrupted
-     * @throws IOException
-     *             if a timeout occurs or this buffer is already closed or the underlying flushing
-     *             mechanism reported an issue
+     * @throws InterruptedIOException if the current thread is interrupted
+     * @throws IOException            if a timeout occurs or this buffer is already closed or the underlying flushing
+     *                                mechanism reported an issue
      */
     public final AutoFlushedBuffer putChar(final char c) throws IOException {
         ensureCapacity(2);
@@ -250,14 +230,11 @@ public abstract class AutoFlushedBuffer implements Closeable {
      * Writes a {@code float} in the buffer. This method may block up to the configured timeout
      * period if the buffer is already full
      *
-     * @param f
-     *            the float to write
+     * @param f the float to write
      * @return this buffer
-     * @throws InterruptedIOException
-     *             if the current thread is interrupted
-     * @throws IOException
-     *             if a timeout occurs or this buffer is already closed or the underlying flushing
-     *             mechanism reported an issue
+     * @throws InterruptedIOException if the current thread is interrupted
+     * @throws IOException            if a timeout occurs or this buffer is already closed or the underlying flushing
+     *                                mechanism reported an issue
      */
     public final AutoFlushedBuffer putFloat(final float f) throws IOException {
         ensureCapacity(4);
@@ -270,14 +247,11 @@ public abstract class AutoFlushedBuffer implements Closeable {
      * Writes a {@code double} in the buffer. This method may block up to the configured timeout
      * period if the buffer is already full
      *
-     * @param d
-     *            the double to write
+     * @param d the double to write
      * @return this buffer
-     * @throws InterruptedIOException
-     *             if the current thread is interrupted
-     * @throws IOException
-     *             if a timeout occurs or this buffer is already closed or the underlying flushing
-     *             mechanism reported an issue
+     * @throws InterruptedIOException if the current thread is interrupted
+     * @throws IOException            if a timeout occurs or this buffer is already closed or the underlying flushing
+     *                                mechanism reported an issue
      */
     public final AutoFlushedBuffer putDouble(final double d) throws IOException {
         ensureCapacity(8);
@@ -295,14 +269,11 @@ public abstract class AutoFlushedBuffer implements Closeable {
      * put(bytes, 0, bytes.length)
      * </pre>
      *
-     * @param bytes
-     *            the byte array to write
+     * @param bytes the byte array to write
      * @return this buffer
-     * @throws InterruptedIOException
-     *             if the current thread is interrupted
-     * @throws IOException
-     *             if a timeout occurs or this buffer is already closed or the underlying flushing
-     *             mechanism reported an issue
+     * @throws InterruptedIOException if the current thread is interrupted
+     * @throws IOException            if a timeout occurs or this buffer is already closed or the underlying flushing
+     *                                mechanism reported an issue
      */
     public final AutoFlushedBuffer put(final byte[] bytes) throws IOException {
         return put(bytes, 0, bytes.length);
@@ -312,23 +283,17 @@ public abstract class AutoFlushedBuffer implements Closeable {
      * Writes a part of a {@code byte} array in the buffer. This method may block up to the
      * configured timeout period if the buffer is already full.
      *
-     * @param bytes
-     *            the byte array to write
-     * @param offset
-     *            the offset within the array of the first byte to write;
-     *            must be non-negative and no larger than bytes.length
-     * @param length
-     *            the number of bytes to write;
-     *            must be non-negative and no larger than bytes.length - offset
+     * @param bytes  the byte array to write
+     * @param offset the offset within the array of the first byte to write;
+     *               must be non-negative and no larger than bytes.length
+     * @param length the number of bytes to write;
+     *               must be non-negative and no larger than bytes.length - offset
      * @return this buffer
-     * @throws IndexOutOfBoundsException
-     *             if the preconditions on the offset and length parameters do not
-     *             hold
-     * @throws InterruptedIOException
-     *             if the current thread is interrupted
-     * @throws IOException
-     *             if a timeout occurs or this buffer is already closed or the underlying flushing
-     *             mechanism reported an issue
+     * @throws IndexOutOfBoundsException if the preconditions on the offset and length parameters do not
+     *                                   hold
+     * @throws InterruptedIOException    if the current thread is interrupted
+     * @throws IOException               if a timeout occurs or this buffer is already closed or the underlying flushing
+     *                                   mechanism reported an issue
      */
     public final AutoFlushedBuffer put(final byte[] bytes, int offset, int length) throws IOException {
         while (length > 0) {
@@ -366,8 +331,7 @@ public abstract class AutoFlushedBuffer implements Closeable {
      * Trigger an asynchronous flush. This method does not block. If there is already a flush in
      * progress, the actual flush will occurs on current flush completion.
      *
-     * @throws IOException
-     *             if already closed or if the flushing logic already reported an issue
+     * @throws IOException if already closed or if the flushing logic already reported an issue
      */
     public void flush() throws IOException {
         checkLiveness();

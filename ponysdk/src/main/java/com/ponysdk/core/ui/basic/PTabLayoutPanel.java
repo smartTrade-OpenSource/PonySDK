@@ -23,13 +23,6 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
-import javax.json.JsonObject;
-
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -38,6 +31,12 @@ import com.ponysdk.core.ui.basic.event.PBeforeSelectionEvent;
 import com.ponysdk.core.ui.basic.event.PSelectionEvent;
 import com.ponysdk.core.ui.basic.event.PSelectionHandler;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
+
+import javax.json.JsonObject;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * A panel that represents a tabbed set of pages, each of which contains another widget. Its child widgets are shown as
@@ -107,7 +106,7 @@ public class PTabLayoutPanel extends PComplexPanel implements PSelectionHandler<
             tabWidget.attach(window, frame);
             child.attach(window, frame);
             child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.TAB_WIDGET, tabWidget.getID()),
-                new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex));
+                    new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex));
         } else {
             throw new IllegalAccessError("Widget " + child + " already attached to an other window, current window : "
                     + child.getWindow() + ", new window : " + window);
@@ -124,7 +123,7 @@ public class PTabLayoutPanel extends PComplexPanel implements PSelectionHandler<
             adopt(child);
             child.attach(window, frame);
             child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.TAB_TEXT, tabText),
-                new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex));
+                    new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex));
         } else {
             throw new IllegalAccessError("Widget " + child + " already attached to an other window, current window : "
                     + child.getWindow() + ", new window : " + window);
@@ -181,12 +180,12 @@ public class PTabLayoutPanel extends PComplexPanel implements PSelectionHandler<
         if (instruction.containsKey(ClientToServerModel.HANDLER_SELECTION.toStringValue())) {
             for (final PSelectionHandler<Integer> handler : selectionHandlers) {
                 handler.onSelection(
-                    new PSelectionEvent<>(this, instruction.getInt(ClientToServerModel.HANDLER_SELECTION.toStringValue())));
+                        new PSelectionEvent<>(this, instruction.getInt(ClientToServerModel.HANDLER_SELECTION.toStringValue())));
             }
         } else if (instruction.containsKey(ClientToServerModel.HANDLER_BEFORE_SELECTION.toStringValue())) {
             for (final PBeforeSelectionEvent.Handler<Integer> handler : beforeSelectionHandlers) {
                 handler.onBeforeSelection(new PBeforeSelectionEvent<>(this,
-                    instruction.getInt(ClientToServerModel.HANDLER_BEFORE_SELECTION.toStringValue())));
+                        instruction.getInt(ClientToServerModel.HANDLER_BEFORE_SELECTION.toStringValue())));
             }
         } else {
             super.onClientData(instruction);
@@ -205,8 +204,7 @@ public class PTabLayoutPanel extends PComplexPanel implements PSelectionHandler<
     /**
      * Set whether or not transitions slide in vertically or horizontally.
      *
-     * @param isVertical
-     *            true for vertical transitions, false for horizontal
+     * @param isVertical true for vertical transitions, false for horizontal
      */
     public void setAnimationVertical(final boolean isVertical) {
         saveUpdate(ServerToClientModel.VERTICAL, isVertical);
@@ -223,6 +221,8 @@ public class PTabLayoutPanel extends PComplexPanel implements PSelectionHandler<
 
     /**
      * Set the duration of the animated transition between tabs.
+     *
+     * @param duration
      */
     public void setAnimationDuration(final Duration duration) {
         if (Objects.equals(this.animationDuration, duration)) return;

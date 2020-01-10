@@ -132,8 +132,8 @@ public class SetPool<E> {
     }
 
     /**
-     * @param original The original Set
-     * @param e
+     * @param original The original set
+     * @param e        Object to add
      * @return an {@code ImmutableSet} that is equivalent to <code>(original UNION {e})</code>, or {@code original}
      * itself if {@code e} already belongs to it
      */
@@ -142,8 +142,8 @@ public class SetPool<E> {
     }
 
     /**
-     * @param original
-     * @param o
+     * @param original Original Set
+     * @param o        Object to remove
      * @return an {@code ImmutableSet} that is equivalent to <code>(original MINUS {o})</code>, or {@code original}
      * itself if {@code o} doesn't belong to it
      */
@@ -170,6 +170,8 @@ public class SetPool<E> {
     }
 
     /**
+     * @param original original set
+     * @param c        set to remove from original
      * @return an {@code ImmutableSet} that is equivalent to <code>(original MINUS c)</code>, or {@code original}
      * itself if {@code c} has no intersection with it
      */
@@ -259,6 +261,7 @@ public class SetPool<E> {
         }
 
         /**
+         * @param e
          * @return from the {@code SetPool}, an {@code ImmutableSet} that is equivalent to
          * <code>(this UNION {e})</code>, or {@code this} if {@code e} already belongs to it
          */
@@ -275,6 +278,7 @@ public class SetPool<E> {
         }
 
         /**
+         * @param o Object to remove
          * @return from the {@code SetPool}, an {@code ImmutableSet} that is equivalent to
          * <code>(this MINUS {e})</code>, or {@code this} if {@code o} doesn't belong to it
          */
@@ -288,6 +292,7 @@ public class SetPool<E> {
         }
 
         /**
+         * @param c set to add
          * @return from the {@code SetPool}, an {@code ImmutableSet} that is equivalent to <code>(this UNION c)</code>,
          * or {@code this} if {@code c} is a subset of it
          */
@@ -304,6 +309,7 @@ public class SetPool<E> {
         }
 
         /**
+         * @param c
          * @return from the {@code SetPool}, an {@code ImmutableSet} that is equivalent to
          * <code>(this INTERSECT c)</code>, or {@code this} if it is a subset of {@code c}
          */
@@ -320,6 +326,7 @@ public class SetPool<E> {
         }
 
         /**
+         * @param c set to remove
          * @return from the {@code SetPool}, an {@code ImmutableSet} that is equivalent to <code>(this MINUS c)</code>,
          * or {@code this} if {@code c} has no intersection with it
          */

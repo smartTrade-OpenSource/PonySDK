@@ -198,6 +198,8 @@ public abstract class PObject {
 
     /**
      * JSON received from the Terminal using pony.sendDataToServer(objectID, JSON)
+     *
+     * @param event Json received from the terminal
      */
     public void onClientData(final JsonObject event) {
         if (destroy) return;

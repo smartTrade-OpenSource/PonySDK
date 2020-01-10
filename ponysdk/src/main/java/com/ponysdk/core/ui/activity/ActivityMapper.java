@@ -35,8 +35,8 @@ public interface ActivityMapper {
     /**
      * Returns the activity to run for the given {@link Place}, or null.
      *
-     * @param place
-     *            a Place
+     * @param place a Place
+     * @return The activity linked to the place
      */
     Activity getActivity(Place place);
 }

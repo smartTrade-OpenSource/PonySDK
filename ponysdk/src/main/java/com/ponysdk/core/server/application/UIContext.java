@@ -267,6 +267,7 @@ public class UIContext {
      * Adds a {@link DataListener} to the UIContext
      *
      * @param listener the data listener
+     * @return {@code true} if this set did not already contain the specified element
      */
     public boolean addDataListener(final DataListener listener) {
         return listeners.add(listener);
@@ -468,6 +469,7 @@ public class UIContext {
      * Registers a {@link StreamHandler} that will be called on the terminal side
      *
      * @param streamListener the stream handler
+     * @param window         Window target
      */
     public void stackStreamRequest(final StreamHandler streamListener, final PWindow window) {
         final int streamRequestID = nextStreamRequestID();

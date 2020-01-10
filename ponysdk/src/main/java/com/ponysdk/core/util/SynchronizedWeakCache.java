@@ -30,10 +30,8 @@ import java.util.function.Function;
 /**
  * A thread-safe cache that weakly references the objects that it contains
  *
+ * @param <E> MUST be immutable
  * @see WeakReference
- *
- * @param <E>
- *            MUST be immutable
  */
 public class SynchronizedWeakCache<E> {
 
@@ -53,6 +51,8 @@ public class SynchronizedWeakCache<E> {
      * <i><b>NB :</b> If the {@code mappingFunction} is applied, its result is not guaranteed to be inserted in the
      * cache.</i>
      *
+     * @param key             mappingFunction key
+     * @param mappingFunction mappingFunction ref
      * @return an existing instance, or a newly created one if absent
      */
     public <T> E getOrCompute(final T key, final Function<T, E> mappingFunction) {

@@ -30,7 +30,7 @@ public interface WebsocketEncoder {
     void beginObject();
 
     /**
-     * @param model
+     * @param model Model to encode
      * @param value The type can be primitives, String or Object[]
      */
     void encode(final ServerToClientModel model, final Object value);
