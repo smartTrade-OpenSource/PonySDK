@@ -146,10 +146,15 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         unpinnedTable = new UnpinnedTable(headerUnpinnedDiv, bodyUnpinnedDiv, footerUnpinnedDiv);
     }
 
+    //Added
+    public void setDataSource(final DataGridSource<K, V> dataSrc) {
+        ((SimpleDataGridController<K, V>) controller).setDataSource(dataSrc);
+    }
+    //----//
+
     private PComplexPanel prepareBodyDiv(final PComplexPanel subBodyDiv) {
         final PComplexPanel bodyDiv = Element.newDiv();
         bodyDiv.setStyleProperty("flex", "auto");
-        bodyDiv.setStyleProperty("overflow-y", "auto");
         bodyDiv.setStyleProperty("overflow-x", "hidden");
         bodyDiv.addStyleName("pony-grid-body");
         bodyDiv.add(subBodyDiv);
@@ -207,10 +212,20 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         return modelWrapper;
     }
 
+    // when we scroll and we need new data
     private void onScroll(final int row) {
         showLoadingDataView();
         firstRowIndex = row;
+
+        final int size = unpinnedTable.body.getWidgetCount();
+        System.out.println();
+        System.out.println("#-#-#-#-#-#  OnSCROLLLLLLLL    #-#-#-#-#-#");
+        // Ask for the next data to draw on the screen
+        //        ((SimpleDataGridController<K, V>) controller).prepareLiveDataOnScreen(firstRowIndex, size); //FIXME
+
+        // set from = 0  to = liveData.size()
         onUpdateRows(0, controller.getRowCount());
+        // Update rows on screen
         draw();
     }
 
@@ -325,6 +340,7 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
      * Draws rows from index {@code from} to index {@code to}
      */
     private void draw() {
+
         try {
             if (from >= to) return;
             final int absoluteRowCount = controller.getRowCount();
@@ -335,7 +351,11 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
             } else {
                 start = Math.max(0, from - firstRowIndex);
             }
-            for (int i = start; i < unpinnedTable.body.getWidgetCount(); i++) {
+            final int size = unpinnedTable.body.getWidgetCount();
+            System.out.println("#-#-#-#-#-# Prepare onDraw -> row : " + firstRowIndex + "   size : " + size + "     #-#-#-#-#-#");
+            System.out.println();
+            ((SimpleDataGridController<K, V>) controller).prepareLiveDataOnScreen(firstRowIndex, size); //FIXME
+            for (int i = start; i < size; i++) {
                 updateRow(rows.get(i), absoluteRowCount);
             }
             addon.onDataUpdated(absoluteRowCount, this.rows.size(), firstRowIndex);
@@ -359,11 +379,15 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         row.show();
         final K previousKey = row.key;
         final int absoluteIndex = row.getAbsoluteIndex();
-        final V rowData = controller.getRowData(absoluteIndex);
+
+        //        final V rowData = controller.getRowData(absoluteIndex);
+        final V rowData = controller.getRowData(row.getRelativeIndex());
+
         row.key = adapter.getKey(rowData);
         final boolean selected = controller.isSelected(row.key);
         row.extended = false;
 
+        // update row cells for different columns
         updateRowCells(row, row.unpinnedCells, unpinnedTable.columns, selected, previousKey);
         updateRowCells(row, row.pinnedCells, pinnedTable.columns, selected, previousKey);
 
@@ -445,7 +469,9 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
                                 final K previousKey, final PComplexPanel td) {
         td.removeAttribute(EXTENDED_ATTRIBUTE);
         cell.asWidget().setVisible(true);
-        controller.renderCell(columnView.column, row.getAbsoluteIndex(), cell);
+        // Index
+        //        controller.renderCell(columnView.column, row.getAbsoluteIndex(), cell);
+        controller.renderCell(columnView.column, row.getRelativeIndex(), cell);
         if (td.getWidgetCount() > 2) {
             final ExtendedCellHandler previousExtendedCellHandler = columnView.extendedCells.get(previousKey);
             if (previousExtendedCellHandler != null && previousExtendedCellHandler.cell.asWidget().getParent() != null) {
@@ -471,6 +497,8 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
     public void setAdapter(final DataGridAdapter<K, V> adapter) {
         if (this.adapter != null) throw new IllegalStateException("DataGridAdapter is already set");
         controller.setAdapter(adapter);
+        //Added
+        //model.setAdapter(adapter);
         this.adapter = adapter;
         if (adapter.hasHeader()) {
             adapter.onCreateHeaderRow(pinnedTable.header);
@@ -658,8 +686,7 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
     public void selectAllLiveData() {
         checkAdapter();
         controller.selectAllLiveData();
-        for (int i = 0; i < rows.size(); i++) {
-            final Row row = rows.get(i);
+        for (final SimpleDataGridView<K, V>.Row row : rows) {
             if (row.pinnedRow.isVisible()) row.select();
         }
         for (final ColumnView column : columnViews.values()) {
@@ -673,8 +700,7 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
     public void unselectAllData() {
         checkAdapter();
         controller.unselectAllData();
-        for (int i = 0; i < rows.size(); i++) {
-            final Row row = rows.get(i);
+        for (final SimpleDataGridView<K, V>.Row row : rows) {
             row.unselect();
         }
         for (final ColumnView column : columnViews.values()) {
@@ -847,6 +873,7 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         for (final Row row : rows) {
             if (row.key == null) continue;
             final int absoluteIndex = row.getAbsoluteIndex();
+            //            final V data = controller.getRowData(absoluteIndex, 0, 0, null);
             final V data = controller.getRowData(absoluteIndex);
             if (data == null || !old.testRow(data, absoluteIndex)) continue;
             old.cancel(row.pinnedRow);
@@ -893,6 +920,10 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
             init(unpinnedTable, unpinnedRow, unpinnedCells, false);
             init(pinnedTable, pinnedRow, pinnedCells, true);
             hide();
+        }
+
+        int getRelativeIndex() {
+            return relativeIndex;
         }
 
         void init(final Table table, final PComplexPanel row, final List<Cell<V>> cells, final boolean pinned) {
@@ -1400,7 +1431,6 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
             }
             return v;
         }
-
     }
 
     private static class HideScrollBarAddon extends PAddOnComposite<PComplexPanel> {

@@ -25,7 +25,6 @@ package com.ponysdk.core.ui.datagrid2;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -66,6 +65,7 @@ public interface DataGridModel<K, V> {
      * or {@code null} if this model contains no mapping for the key.
      */
     V getData(K k);
+    //    Row<V> getData(K k);
 
     /**
      * Removes the value identified by the key {@code k} from this model if it is present
@@ -76,12 +76,12 @@ public interface DataGridModel<K, V> {
      * Performs the given action for each entry in this map until all entries
      * have been processed or the action throws an exception. There is no guarantee on the order of elements
      */
-    void forEach(BiConsumer<K, V> action);
+    //    void forEach(BiConsumer<K, V> action);
 
     /**
      * @return the number of key-value mappings in this model
      */
-    int size();
+    //    int size();
 
     /**
      * If {@code bound} is true (default), the view is notified when the model is updated. Otherwise, the view is not

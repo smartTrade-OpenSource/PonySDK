@@ -143,7 +143,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         mainLabel.setTitle("String ASCII");
         PWindow.getMain().add(mainLabel);
 
-        //testSimpleDataGridView();
+        testSimpleDataGridView();
 
         if (true) return;
 

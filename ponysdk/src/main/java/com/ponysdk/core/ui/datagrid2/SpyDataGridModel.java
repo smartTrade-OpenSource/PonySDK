@@ -25,7 +25,6 @@ package com.ponysdk.core.ui.datagrid2;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -76,15 +75,15 @@ public abstract class SpyDataGridModel<K, V> implements DataGridModel<K, V> {
         return v;
     }
 
-    @Override
-    public void forEach(final BiConsumer<K, V> action) {
-        model.forEach(action);
-    }
+    //    @Override
+    //    public void forEach(final BiConsumer<K, V> action) {
+    //        model.forEach(action);
+    //    }
 
-    @Override
-    public int size() {
-        return model.size();
-    }
+    //    @Override
+    //    public int size() {
+    //        return model.size();
+    //    }
 
     @Override
     public void setBound(final boolean bound) {

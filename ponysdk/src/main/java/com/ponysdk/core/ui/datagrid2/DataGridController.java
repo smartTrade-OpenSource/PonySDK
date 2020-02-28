@@ -87,4 +87,5 @@ interface DataGridController<K, V> {
     int getRowCount();
 
     void enrichConfigBuilder(DataGridConfigBuilder<V> builder);
+
 }
