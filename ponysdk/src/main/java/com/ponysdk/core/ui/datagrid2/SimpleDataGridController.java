@@ -55,7 +55,7 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
     private final RenderingHelpersCache<V> renderingHelpersCache = new RenderingHelpersCache<>();
 
     //    private List<V> liveDataOnScreen = new ArrayList<>();
-    private List<Row<V>> liveDataOnScreen = new ArrayList<>();
+    private final List<Row<V>> liveDataOnScreen = new ArrayList<>();
 
     private final Map<ColumnDefinition<V>, Column<V>> columns = new HashMap<>();
     private DataGridControllerListener<V> listener;
@@ -320,16 +320,22 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
 
     //Prepare the corresponding data for onScroll
     public void prepareLiveDataOnScreen(final int row, final int size) {
-        //        if (absoluteIndex == row && size == liveDataOnScreen.size()) return;
-        if (absoluteIndex == row && size != liveDataOnScreen.size()) {
-            System.out.println(row + liveDataOnScreen.size());
-            System.out.println(size - liveDataOnScreen.size());
-            liveDataOnScreen.addAll(dataSource.getNeededRowsForScroll(row + liveDataOnScreen.size(), size - liveDataOnScreen.size()));
-        } else if (liveDataOnScreen != null) {
-            liveDataOnScreen.clear();
-            liveDataOnScreen = dataSource.getNeededRowsForScroll(row, size);
+        if (absoluteIndex == row && size == liveDataOnScreen.size()) {
+            return;
         }
 
+        //        if (absoluteIndex == row && size != liveDataOnScreen.size()) {
+        //            System.out.println(row + liveDataOnScreen.size());
+        //            System.out.println(size - liveDataOnScreen.size());
+        //            liveDataOnScreen.addAll(dataSource.getNeededRowsForScroll(row + liveDataOnScreen.size(), size - liveDataOnScreen.size()));
+        //        } else if (liveDataOnScreen != null) {
+        //            liveDataOnScreen.clear();
+        //            liveDataOnScreen = dataSource.getNeededRowsForScroll(row, size);
+        //        }
+        //
+
+        liveDataOnScreen.clear();
+        liveDataOnScreen.addAll(dataSource.getNeededRowsForScroll(row, size));
         absoluteIndex = row;
     }
 
