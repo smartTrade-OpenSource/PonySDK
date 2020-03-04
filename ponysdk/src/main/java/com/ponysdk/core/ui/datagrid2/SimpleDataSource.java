@@ -54,7 +54,7 @@ public abstract class SimpleDataSource<K, V> implements DataGridSource<K, V> {
     protected DataGridAdapter<K, V> adapter;
     protected final List<Row<V>> liveSelectedData = new ArrayList<>();
     protected final Set<K> selectedKeys = new HashSet<>();
-    protected final List<Row<V>> liveData = new ArrayList<>(); // FIXME : liveData is to be private
+    protected final List<Row<V>> liveData = new ArrayList<>();
     protected int rowCounter = 0;
 
     //----------------------------------------------------------------------------------------------------------//
@@ -148,8 +148,8 @@ public abstract class SimpleDataSource<K, V> implements DataGridSource<K, V> {
         final Row<V> row = cache.remove(k);
         final boolean selected = selectedKeys.remove(k);
         if (row.accepted) {
-            final int oldLiveDataSize = liveData.size();
-            final int rowIndex = removeRow(liveData, row);
+            //            final int oldLiveDataSize = liveData.size();
+            //            final int rowIndex = removeRow(liveData, row);
             if (selected) {
                 removeRow(liveSelectedData, row);
             }
@@ -162,7 +162,7 @@ public abstract class SimpleDataSource<K, V> implements DataGridSource<K, V> {
     private Interval insertData(final K k, final V data) {
         final Row<V> row = new Row<>(rowCounter++, data);
         row.accepted = accept(row);
-        putRow(k, row); //FIXME
+        cache.put(k, row);
         if (!row.accepted) return null;
         final int rowIndex = insertRow(liveData, row);
         return new Interval(rowIndex, liveData.size());
@@ -374,5 +374,28 @@ public abstract class SimpleDataSource<K, V> implements DataGridSource<K, V> {
     @Override
     public Collection<AbstractFilter<V>> getFilters() {
         return filters.values();
+    }
+
+    //----------------------------------------------------------------------------------------------------------//
+    //----------------------------------------------- Selecting ------------------------------------------------//
+    //----------------------------------------------------------------------------------------------------------//
+
+    @Override
+    public boolean isSelected(final K k) {
+        return selectedKeys.contains(k);
+    }
+
+    @Override
+    public void select(final K k) {
+        final Row<V> row = cache.get(k);
+        if (row == null || !selectedKeys.add(k) || !row.accepted) return;
+        insertRow(liveSelectedData, row);
+    }
+
+    @Override
+    public void unselect(final K k) {
+        final Row<V> row = cache.get(k);
+        if (row == null || !selectedKeys.remove(k) || !row.accepted) return;
+        removeRow(liveSelectedData, row);
     }
 }

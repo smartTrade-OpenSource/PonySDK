@@ -217,7 +217,7 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         showLoadingDataView();
         firstRowIndex = row;
 
-        final int size = unpinnedTable.body.getWidgetCount();
+        //        final int size = unpinnedTable.body.getWidgetCount();
         System.out.println();
         System.out.println("#-#-#-#-#-#  OnSCROLLLLLLLL    #-#-#-#-#-#");
         // Ask for the next data to draw on the screen

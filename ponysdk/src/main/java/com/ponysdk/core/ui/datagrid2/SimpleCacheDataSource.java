@@ -11,7 +11,7 @@ import com.ponysdk.core.ui.datagrid2.SimpleDataGridController.Row;
 /**
  *
  */
-public class SimpleCacheDataGridSource<K, V> extends SimpleDataSource<K, V> {
+public class SimpleCacheDataSource<K, V> extends SimpleDataSource<K, V> {
 
     //    public final List<Row<V>> liveData = new ArrayList<>(); // FIXME : liveData is to be private
     //    private int rowCounter = 0;
@@ -27,7 +27,7 @@ public class SimpleCacheDataGridSource<K, V> extends SimpleDataSource<K, V> {
     //        return tmp;
     //    }
     @Override
-    public List<Row<V>> getNeededRowsForScroll(final int index, int size) {
+    public List<Row<V>> getRows(final int index, int size) {
         // Reset size so that it doesn't exceed boundaries
         size = index + size > liveData.size() ? liveData.size() - index : size;
         final List<Row<V>> tmp = new ArrayList<>();
@@ -42,36 +42,17 @@ public class SimpleCacheDataGridSource<K, V> extends SimpleDataSource<K, V> {
         return liveData.size();
     }
 
-    @Override
-    public V getRowData(final int rowIndex) {
-        final V v = rowIndex < liveData.size() ? liveData.get(rowIndex).data : null;
-        if (v == null) {
-            System.out.println("this is null !! ");
-            //            v = getNeededRowsForScroll(row, 1).get(0);
-            //            setData(v);
-            return getNeededRowsForScroll(rowIndex, 1).get(0).getData();
-        }
-        return v;
-    }
-
-    @Override
-    public boolean isSelected(final K k) {
-        return selectedKeys.contains(k);
-    }
-
-    @Override
-    public void select(final K k) {
-        final Row<V> row = cache.get(k);
-        if (row == null || !selectedKeys.add(k) || !row.accepted) return;
-        insertRow(liveSelectedData, row);
-    }
-
-    @Override
-    public void unselect(final K k) {
-        final Row<V> row = cache.get(k);
-        if (row == null || !selectedKeys.remove(k) || !row.accepted) return;
-        removeRow(liveSelectedData, row);
-    }
+    //    @Override
+    //    public V getRowData(final int rowIndex) {
+    //        final V v = rowIndex < liveData.size() ? liveData.get(rowIndex).data : null;
+    //        if (v == null) {
+    //            System.out.println("this is null !! ");
+    //            //            v = getNeededRowsForScroll(row, 1).get(0);
+    //            //            setData(v);
+    //            return getRows(rowIndex, 1).get(0).getData();
+    //        }
+    //        return v;
+    //    }
 
     @Override
     public void selectAllLiveData() {
@@ -309,10 +290,10 @@ public class SimpleCacheDataGridSource<K, V> extends SimpleDataSource<K, V> {
         //        refreshRows(0, liveData.size());
     }
 
-    @Override
-    public List<V> getNewSortData() {
-        return null;
-    }
+    //    @Override
+    //    public List<V> getNewSortData() {
+    //        return null;
+    //    }
 
     @Override
     public String toString() {
@@ -339,10 +320,11 @@ public class SimpleCacheDataGridSource<K, V> extends SimpleDataSource<K, V> {
 
     @Override
     public void setFilter(final Object key, final boolean reinforcing, final AbstractFilter<V> filter) {
-        final AbstractFilter<V> oldFilter = putFilter(key, filter);
+        final AbstractFilter<V> oldFilter = filters.put(key, filter);
         if (oldFilter == null || reinforcing) {
             //            final int oldLiveDataSize = liveData.size();
-            final int from = reinforceFilter(liveData, filter);
+            //                        final int from = reinforceFilter(liveData, filter);
+            reinforceFilter(liveData, filter);
             reinforceFilter(liveSelectedData, filter);
             //            if (from >= 0) {
             //                refreshRows(from, oldLiveDataSize);

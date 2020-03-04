@@ -55,7 +55,7 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
     private final RenderingHelpersCache<V> renderingHelpersCache = new RenderingHelpersCache<>();
 
     //    private List<V> liveDataOnScreen = new ArrayList<>();
-    private final List<Row<V>> liveDataOnScreen = new ArrayList<>();
+    private List<Row<V>> liveDataOnScreen = new ArrayList<>();
 
     private final Map<ColumnDefinition<V>, Column<V>> columns = new HashMap<>();
     private DataGridControllerListener<V> listener;
@@ -69,7 +69,7 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
     //Represents the position index of liveDataOnScreen in relation with the ovrall dataGrid
     private int absoluteIndex = 0;
     // ToDo datasource has to be injected by spring
-    private DataGridSource<K, V> dataSource = new SimpleCacheDataGridSource<>();
+    private DataGridSource<K, V> dataSource = new SimpleCacheDataSource<>();
 
     // Constructor
     SimpleDataGridController() {
@@ -139,6 +139,7 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
         Objects.requireNonNull(column);
         dataSource.clearFilters(column);
         resetLiveData();
+        prepareLiveDataOnScreen();
     }
 
     @Override
@@ -146,6 +147,7 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
         checkAdapter();
         dataSource.clearFilters();
         resetLiveData();
+        prepareLiveDataOnScreen();
     }
 
     // refresh and update the rows (from-to)
@@ -258,7 +260,15 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
         checkAdapter();
         final Column<V> column = getColumn(colDef);
         dataSource.addSort(column, new ColumnControllerSort(column, asc), asc);
-        prepareLiveDataOnScreen(0, liveDataOnScreen.size());
+        prepareLiveDataOnScreen();
+        refreshRows(0, dataSource.getRowCount());
+    }
+
+    @Override
+    public void addSort(final Object key, final Comparator<V> comparator) {
+        checkAdapter();
+        dataSource.addSort(key, new GeneralControllerSort(comparator));
+        prepareLiveDataOnScreen();
         refreshRows(0, dataSource.getRowCount());
     }
 
@@ -268,6 +278,7 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
         final Column<V> column = getColumn(colDef);
         if (dataSource.clearSort(column) == null) return;
         dataSource.sort();
+        prepareLiveDataOnScreen();
         refreshRows(0, dataSource.getRowCount());
     }
 
@@ -275,6 +286,7 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
     public void clearSorts() {
         checkAdapter();
         dataSource.clearSorts();
+        prepareLiveDataOnScreen();
         refreshRows(0, dataSource.getRowCount());
     }
 
@@ -284,6 +296,7 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
         final int oldLiveDataSize = dataSource.getRowCount();
         checkAdapter();
         dataSource.setFilter(key, reinforcing, new ColumnFilter(colDef, biPredicate));
+        prepareLiveDataOnScreen();
         refreshRows(0, oldLiveDataSize);
     }
 
@@ -292,6 +305,7 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
         checkAdapter();
         final int oldLiveDataSize = dataSource.getRowCount();
         dataSource.setFilter(key, reinforcing, new GeneralFilter(predicate));
+        prepareLiveDataOnScreen();
         refreshRows(0, oldLiveDataSize);
     }
 
@@ -301,13 +315,7 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
         final AbstractFilter<V> oldFilter = dataSource.clearFilter(key);
         if (oldFilter == null) return;
         resetLiveData();
-    }
-
-    @Override
-    public void addSort(final Object key, final Comparator<V> comparator) {
-        checkAdapter();
-        dataSource.addSort(key, new GeneralControllerSort(comparator));
-        refreshRows(0, dataSource.getRowCount());
+        prepareLiveDataOnScreen();
     }
 
     @Override
@@ -318,35 +326,33 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
         refreshRows(0, dataSource.getRowCount());
     }
 
-    //Prepare the corresponding data for onScroll
+    //Prepare the corresponding data for the onScroll method
     public void prepareLiveDataOnScreen(final int row, final int size) {
-        if (absoluteIndex == row && size == liveDataOnScreen.size()) {
-            return;
-        }
 
-        //        if (absoluteIndex == row && size != liveDataOnScreen.size()) {
+        // If we have already the data in liveDataOnScreen then return
+        if (absoluteIndex == row && size == liveDataOnScreen.size()) return;
+
+        // If we have already some of the data then ask only for what we don't have
+        //        if (absoluteIndex == row && size >= liveDataOnScreen.size()) {
         //            System.out.println(row + liveDataOnScreen.size());
         //            System.out.println(size - liveDataOnScreen.size());
-        //            liveDataOnScreen.addAll(dataSource.getNeededRowsForScroll(row + liveDataOnScreen.size(), size - liveDataOnScreen.size()));
-        //        } else if (liveDataOnScreen != null) {
-        //            liveDataOnScreen.clear();
-        //            liveDataOnScreen = dataSource.getNeededRowsForScroll(row, size);
+        //            liveDataOnScreen.addAll(dataSource.getRows(row + liveDataOnScreen.size(), size - liveDataOnScreen.size()));
         //        }
-        //
+        // If the demanded data is different from what we have then overwite it with the new data
+        if (liveDataOnScreen != null) {
+            liveDataOnScreen.clear();
+            liveDataOnScreen = dataSource.getRows(row, size);
+        }
 
-        liveDataOnScreen.clear();
-        liveDataOnScreen.addAll(dataSource.getNeededRowsForScroll(row, size));
         absoluteIndex = row;
     }
 
-    // Prepare the corresponding data for onNewSort
-    //    public void prepareLiveDataOnScreen() {
-    //        if (liveDataOnScreen != null) liveDataOnScreen.clear();
-    //        liveDataOnScreen = dataSource.getNewSortData();
-    //        if (liveDataOnScreen != null) {
-    //            setData(liveDataOnScreen);
-    //        }
-    //    }
+    //Prepare new data onNewSort
+    public void prepareLiveDataOnScreen() {
+        final int size = liveDataOnScreen.size();
+        if (liveDataOnScreen != null) liveDataOnScreen.clear();
+        liveDataOnScreen = dataSource.getRows(0, size);
+    }
 
     @Override
     public V getRowData(final int rowIndex) {
@@ -354,7 +360,7 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
         final V v = rowIndex < liveDataOnScreen.size() ? liveDataOnScreen.get(rowIndex).getData() : null;
         if (v == null) {
             System.out.println("this is null !! ");
-            return dataSource.getNeededRowsForScroll(rowIndex, 1).get(0).getData();
+            return dataSource.getRows(rowIndex, 1).get(0).getData();
         }
         return v;
     }
@@ -458,7 +464,7 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
 
     @Override
     public Collection<V> getLiveSelectedData() {
-        final List<Row<V>> liveSelectedData = ((SimpleCacheDataGridSource) dataSource).liveSelectedData;
+        final List<Row<V>> liveSelectedData = ((SimpleCacheDataSource) dataSource).liveSelectedData;
         return new MappedList<>(liveSelectedData, Row::getData);
     }
 
@@ -614,8 +620,8 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
     public static class Row<V> {
 
         final int id;
-        V data;
-        boolean accepted;
+        public V data;
+        public boolean accepted;
 
         public Row(final int id, final V data) {
             super();

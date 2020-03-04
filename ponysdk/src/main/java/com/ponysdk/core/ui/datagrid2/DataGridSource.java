@@ -66,12 +66,12 @@ public interface DataGridSource<K, V> {
      * Returns all rows rows needed for the scroll
      */
     //    List<V> getNeededRowsForScroll(int index, int size);
-    List<Row<V>> getNeededRowsForScroll(int index, int size);
+    List<Row<V>> getRows(int index, int size);
 
     /**
      * Returns the first page of data for the new sort
      */
-    List<V> getNewSortData();
+    //    List<V> getNewSortData();
 
     /**
      * Returns filtered number of row that could be drawn
@@ -166,7 +166,7 @@ public interface DataGridSource<K, V> {
 
     V removeData(final K k);
 
-    V getRowData(final int row);
+    //    V getRowData(final int row);
 
     boolean isSelected(final K k);
 
