@@ -329,6 +329,7 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
             liveDataOnScreen.clear();
             liveDataOnScreen = dataSource.getNeededRowsForScroll(row, size);
         }
+
         absoluteIndex = row;
     }
 
