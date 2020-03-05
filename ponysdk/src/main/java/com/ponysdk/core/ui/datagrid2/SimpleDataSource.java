@@ -51,29 +51,19 @@ public abstract class SimpleDataSource<K, V> implements DataGridSource<K, V> {
     protected final Map<K, Row<V>> cache = new HashMap<>();
     protected final LinkedHashMap<Object, Comparator<Row<V>>> sorts = new LinkedHashMap<>();
     protected final Map<Object, AbstractFilter<V>> filters = new HashMap<>();
-    protected DataGridAdapter<K, V> adapter;
+    protected final List<Row<V>> liveData = new ArrayList<>();
     protected final List<Row<V>> liveSelectedData = new ArrayList<>();
     protected final Set<K> selectedKeys = new HashSet<>();
-    protected final List<Row<V>> liveData = new ArrayList<>();
+    protected DataGridAdapter<K, V> adapter;
     protected int rowCounter = 0;
 
     //----------------------------------------------------------------------------------------------------------//
-    //--------------------------------------- Cache getters & setters ------------------------------------------//
+    //----------------------------------------- Cache getters --------------------------------------------------//
     //----------------------------------------------------------------------------------------------------------//
 
     @Override
     public Row<V> getRow(final K k) {
         return cache.get(k);
-    }
-
-    @Override
-    public void putRow(final K k, final Row<V> row) {
-        cache.put(k, row);
-    }
-
-    @Override
-    public Row<V> removeRow(final K k) {
-        return cache.remove(k);
     }
 
     @Override
@@ -197,7 +187,7 @@ public abstract class SimpleDataSource<K, V> implements DataGridSource<K, V> {
     }
 
     private boolean accept(final Row<V> row) {
-        for (final AbstractFilter<V> filter : getFilters()) {
+        for (final AbstractFilter<V> filter : filters.values()) {
             if (!filter.test(row)) return false;
         }
         return true;
@@ -351,10 +341,10 @@ public abstract class SimpleDataSource<K, V> implements DataGridSource<K, V> {
         return filters.remove(key);
     }
 
-    @Override
-    public AbstractFilter<V> putFilter(final Object key, final AbstractFilter<V> filter) {
-        return filters.put(key, filter);
-    }
+    //    @Override
+    //    public AbstractFilter<V> putFilter(final Object key, final AbstractFilter<V> filter) {
+    //        return filters.put(key, filter);
+    //    }
 
     @Override
     public void clearFilters(final ColumnDefinition<V> column) {
@@ -371,10 +361,10 @@ public abstract class SimpleDataSource<K, V> implements DataGridSource<K, V> {
         filters.clear();
     }
 
-    @Override
-    public Collection<AbstractFilter<V>> getFilters() {
-        return filters.values();
-    }
+    //    @Override
+    //    public Collection<AbstractFilter<V>> getFilters() {
+    //        return filters.values();
+    //    }
 
     //----------------------------------------------------------------------------------------------------------//
     //----------------------------------------------- Selecting ------------------------------------------------//

@@ -54,7 +54,6 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
     private int columnCounter = 0;
     private final RenderingHelpersCache<V> renderingHelpersCache = new RenderingHelpersCache<>();
 
-    //    private List<V> liveDataOnScreen = new ArrayList<>();
     private List<Row<V>> liveDataOnScreen = new ArrayList<>();
 
     private final Map<ColumnDefinition<V>, Column<V>> columns = new HashMap<>();
@@ -78,7 +77,6 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
 
     public void setDataSource(final DataGridSource<K, V> dataSrc) {
         dataSource = dataSrc;
-        //        dataSource.setAdapter(adapter);
     }
 
     // The adapter is used to set up and initialize the DataGridView
@@ -172,7 +170,6 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
      */
     @Override
     public final void setData(final V v) {
-        //        final Interval interval = setData0(v);
         final Interval interval = dataSource.setData(v);
         if (interval != null) refreshRows(interval.from, interval.to);
     }
@@ -182,7 +179,6 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
         int from = Integer.MAX_VALUE;
         int to = 0;
         for (final V v : c) {
-            //            final Interval interval = setData0(v);
             final Interval interval = dataSource.setData(v);
             if (interval == null) continue;
             from = Math.min(from, interval.from);
@@ -196,7 +192,6 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
         int from = Integer.MAX_VALUE;
         int to = 0;
         for (final Map.Entry<K, Consumer<V>> entry : updaters.entrySet()) {
-            // added
             final Row<V> row = dataSource.getRow(entry.getKey());
             clearRenderingHelpers(row);
             final Interval interval = dataSource.updateData(entry.getKey(), entry.getValue());
@@ -233,8 +228,6 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
 
     @Override
     public final V getData(final K k) {
-        //Modified
-        //        final Row<V> row = cache.get(k);
         final Row<V> row = dataSource.getRow(k);
         if (row == null) return null;
         return row.data;
@@ -401,7 +394,6 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
 
     @Override
     public Collection<V> getLiveData() {
-        //        final List<Row<V>> liveData = liveData;
         //        return new MappedList<>(liveData, Row::getData);
         return new MappedList<>(liveDataOnScreen, Row::getData);
     }
@@ -487,69 +479,6 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
     public void unselectAllData() {
         dataSource.unselectAllData();
     }
-
-    //----------------------------------------------------------------------------------------------------------//
-    //------------------------------- BinarySearch insertion, removal, findIndex -------------------------------//
-    //----------------------------------------------------------------------------------------------------------//
-    //    private int insertRow(final List<Row<V>> rows, final Row<V> row) {
-    //        if (rows.size() == 0) {
-    //            rows.add(row);
-    //            return 0;
-    //        }
-    //        if (compare(row, rows.get(0)) < 0) { //common case
-    //            rows.add(0, row);
-    //            return 0;
-    //        }
-    //        int left = 1;
-    //        int right = rows.size() - 1;
-    //        int index = left;
-    //        int diff = 1;
-    //        while (left <= right) {
-    //            index = left + right >> 1;
-    //            final Row<V> middleRow = rows.get(index);
-    //            diff = compare(middleRow, row);
-    //            if (diff < 0) left = index + 1;
-    //            else if (diff > 0) right = index - 1;
-    //            else throw new IllegalArgumentException(
-    //                "Cannot insert an already existing row : existing=" + middleRow.data + ", new=" + row.data);
-    //        }
-    //        if (diff < 0) index++;
-    //        rows.add(index, row);
-    //        return index;
-    //    }
-    //
-    //    private int removeRow(final List<Row<V>> rows, final Row<V> row) {
-    //        final int rowIndex = findRowIndex(rows, row);
-    //        if (rowIndex < 0) return rowIndex;
-    //        rows.remove(rowIndex);
-    //        return rowIndex;
-    //    }
-
-    //    private int findRowIndex(final List<Row<V>> rows, final Row<V> row) {
-    //        int left = 0;
-    //        int right = rows.size() - 1;
-    //        while (left <= right) {
-    //            final int middle = left + right >> 1;
-    //            final Row<V> r = rows.get(middle);
-    //            final int diff = compare(r, row);
-    //            if (diff < 0) left = middle + 1;
-    //            else if (diff > 0) right = middle - 1;
-    //            else return middle;
-    //        }
-    //        return -1;
-    //    }
-
-    //    private final int compare(final Row<V> r1, final Row<V> r2) {
-    //
-    //        for (final Comparator<Row<V>> sort : dataSource.getSorts()) {
-    //            final int diff = sort.compare(r1, r2);
-    //            if (diff != 0) return diff;
-    //        }
-    //        final int diff = adapter.compareDefault(r1.data, r2.data);
-    //        if (diff != 0) return diff;
-    //
-    //        return adapter.isAscendingSortByInsertionOrder() ? r1.id - r2.id : r2.id - r1.id;
-    //    }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////// Nested Classes /////////////////////////////////////////////
@@ -694,7 +623,6 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
 
     }
 
-    //jb
     //    private static interface AbstractFilter<V> extends Predicate<Row<V>> {
     //
     //        abstract ColumnDefinition<V> getColumnDefinition();

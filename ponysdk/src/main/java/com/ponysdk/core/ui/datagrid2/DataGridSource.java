@@ -48,45 +48,30 @@ public interface DataGridSource<K, V> {
     Row<V> getRow(final K k);
 
     /**
-     * Insert or replace the value
-     */
-    void putRow(final K k, final Row<V> row);
-
-    /**
-     * Removes the value identified by the key {@code k} from this model if it is present
-     */
-    Row<V> removeRow(final K k);
-
-    /**
-     * Returns all values
+     * Returns all rows in the cash
      */
     Collection<Row<V>> getRows();
 
     /**
-     * Returns all rows rows needed for the scroll
+     * Returns the needed rows for the view
      */
-    //    List<V> getNeededRowsForScroll(int index, int size);
     List<Row<V>> getRows(int index, int size);
 
     /**
-     * Returns the first page of data for the new sort
-     */
-    //    List<V> getNewSortData();
-
-    /**
-     * Returns filtered number of row that could be drawn
+     * Returns the total number of rows that could be drawn in the view
+     * after applying filters
      */
     int getRowCount();
-
-    /**
-     * Resets liveData and draw data corresponding to sort
-     */
-    void sort();
 
     /**
      * Adapter setter
      */
     void setAdapter(DataGridAdapter<K, V> adapter);
+
+    /**
+     * Sorts our data when necessary
+     */
+    void sort();
 
     /**
      * Adds a sort
@@ -135,46 +120,58 @@ public interface DataGridSource<K, V> {
     void clearFilters();
 
     /**
-     * Get filters values
-     */
-    Collection<AbstractFilter<V>> getFilters();
-
-    /**
-     * Put a filter in filters
-     */
-    public AbstractFilter<V> putFilter(final Object key, final AbstractFilter<V> filter);
-
-    /**
      * Performs the given action for each entry in this map until all entries
      * have been processed or the action throws an exception. There is no guarantee on the order of elements
      */
     void forEach(BiConsumer<K, V> action);
 
     /**
-     * Returns data to be added to liveSelectedData
-     */
-    List<V> onSelectAllLiveData();
-
-    /**
-     * Insert or updates data in cache
+     * Insert or updates data in cash and liveData
      */
     Interval setData(final V v);
 
+    /**
+     * Updates data in cash and liveData
+     */
     Interval updateData(final K k, final Consumer<V> updater);
 
-    void resetLiveData();
-
+    /**
+     * Removes data from cash and liveData
+     */
     V removeData(final K k);
 
-    //    V getRowData(final int row);
+    /**
+     * Clears and resets liveData content
+     */
+    void resetLiveData();
 
-    boolean isSelected(final K k);
-
+    /**
+     * Selects a row from the view
+     */
     void select(final K k);
 
+    /**
+     * Unselects a row from the view
+     */
     void unselect(final K k);
 
+    /**
+     * Selects all rows in the dataGrid
+     */
     void selectAllLiveData();
 
+    /**
+     * Unselects all rows in the dataGrid
+     */
     void unselectAllData();
+
+    /**
+     * Returns if a row is selcted or not
+     */
+    boolean isSelected(final K k);
+
+    //    /**
+    //     * Returns data to be added to liveSelectedData
+    //     */
+    //    List<V> onSelectAllLiveData();
 }

@@ -378,8 +378,7 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         final boolean mustUpdateRowHeight = row.extended || !row.isShown();
         row.show();
         final K previousKey = row.key;
-        final int absoluteIndex = row.getAbsoluteIndex();
-
+        //        final int absoluteIndex = row.getAbsoluteIndex();
         //        final V rowData = controller.getRowData(absoluteIndex);
         final V rowData = controller.getRowData(row.getRelativeIndex());
 
