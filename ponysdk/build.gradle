@@ -17,6 +17,17 @@ ext {
     jsonVersion = '1.1.4'
 }
 
+apply plugin: 'jacoco'
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        xml.destination file("${buildDir}/reports/jacoco/report.xml")
+        html.enabled false
+        csv.enabled false
+    }
+}
+
 configurations {
     gwt
     gwtdev
@@ -148,21 +159,6 @@ test {
     }
 }
 
-task codeCoverageReport(type: JacocoReport) {
-    executionData fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec")
-
-    subprojects.each {
-        sourceSets it.sourceSets.main
-    }
-
-    reports {
-        xml.enabled true
-        xml.destination file("${buildDir}/reports/jacoco/report.xml")
-        html.enabled false
-        csv.enabled false
-    }
-}
-
-codeCoverageReport.dependsOn('test')
-gwtc.dependsOn('classes')
-jar.dependsOn('gwtc')
+check.dependsOn jacocoTestReport
+gwtc.dependsOn classes
+jar.dependsOn gwtc
