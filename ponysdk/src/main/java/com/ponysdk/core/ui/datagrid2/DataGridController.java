@@ -88,4 +88,7 @@ interface DataGridController<K, V> {
 
     void enrichConfigBuilder(DataGridConfigBuilder<V> builder);
 
+    void setHorizontalScroll(boolean isHorizontalScroll);
+
+    void prepareLiveDataOnScreen(int rowIndex, int size);
 }

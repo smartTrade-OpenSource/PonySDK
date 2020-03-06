@@ -34,6 +34,7 @@ import java.util.function.Consumer;
 import com.ponysdk.core.ui.datagrid2.SimpleDataGridController.Column;
 import com.ponysdk.core.ui.datagrid2.SimpleDataGridController.ColumnControllerSort;
 import com.ponysdk.core.ui.datagrid2.SimpleDataGridController.Interval;
+import com.ponysdk.core.ui.datagrid2.SimpleDataGridController.RenderingHelpersCache;
 import com.ponysdk.core.ui.datagrid2.SimpleDataGridController.Row;
 
 /**
@@ -69,6 +70,11 @@ public interface DataGridSource<K, V> {
     void setAdapter(DataGridAdapter<K, V> adapter);
 
     /**
+     * RenderingHelpersCache setter
+     */
+    void setRenderingHelpersCache(final RenderingHelpersCache<V> renderingHelpersCache);
+
+    /**
      * Sorts our data when necessary
      */
     void sort();
@@ -91,11 +97,6 @@ public interface DataGridSource<K, V> {
      * Clears all sorting
      */
     void clearSorts();
-
-    /**
-     * Get sorts values
-     */
-    Collection<Comparator<Row<V>>> getSorts();
 
     /**
      * Get sorts entry set

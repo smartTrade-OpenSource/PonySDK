@@ -212,20 +212,11 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         return modelWrapper;
     }
 
-    // when we scroll and we need new data
     private void onScroll(final int row) {
         showLoadingDataView();
         firstRowIndex = row;
-
-        //        final int size = unpinnedTable.body.getWidgetCount();
-        System.out.println();
-        System.out.println("#-#-#-#-#-#  OnSCROLLLLLLLL    #-#-#-#-#-#");
-        // Ask for the next data to draw on the screen
-        //        ((SimpleDataGridController<K, V>) controller).prepareLiveDataOnScreen(firstRowIndex, size); //FIXME
-
-        // set from = 0  to = liveData.size()
         onUpdateRows(0, controller.getRowCount());
-        // Update rows on screen
+        // In draw() we ask for data from the controller who in his turn asks the dataSource
         draw();
     }
 
@@ -255,7 +246,9 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
             columnView.visible = visible;
         }
         onUpdateRows(0, controller.getRowCount());
+        controller.setHorizontalScroll(true);
         draw();
+        controller.setHorizontalScroll(false);
     }
 
     private void onColumnResized(final int column, final int width) {
@@ -340,7 +333,6 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
      * Draws rows from index {@code from} to index {@code to}
      */
     private void draw() {
-
         try {
             if (from >= to) return;
             final int absoluteRowCount = controller.getRowCount();
@@ -352,9 +344,11 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
                 start = Math.max(0, from - firstRowIndex);
             }
             final int size = unpinnedTable.body.getWidgetCount();
-            System.out.println("#-#-#-#-#-# Prepare onDraw -> row : " + firstRowIndex + "   size : " + size + "     #-#-#-#-#-#");
             System.out.println();
+            System.out.println();
+            System.out.println("#-View-# Prepare onDraw -> row : " + firstRowIndex + "   size : " + size);
             ((SimpleDataGridController<K, V>) controller).prepareLiveDataOnScreen(firstRowIndex, size); //FIXME
+
             for (int i = start; i < size; i++) {
                 updateRow(rows.get(i), absoluteRowCount);
             }
