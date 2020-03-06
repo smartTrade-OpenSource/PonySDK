@@ -332,15 +332,15 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
         /*
          * If we have already some of the data then ask only for what we don't have
          * Use Case: Window resize
-         */
-        if (absoluteIndex == rowIndex && size > liveDataOnScreen.size() && !liveDataOnScreen.isEmpty()) {
-            System.out.println("#-Ctrl-# We prepare in+ -> row: " + (rowIndex + liveDataOnScreen.size()) + "   size: "
-                    + (size - liveDataOnScreen.size()));
-            final List<Row<V>> tmp = dataSource.getRows(rowIndex + liveDataOnScreen.size(), size - liveDataOnScreen.size());
-            liveDataOnScreen.addAll(tmp);
-            absoluteIndex = rowIndex;
-            return;
-        }
+         */ //FIXME
+        //        if (absoluteIndex == rowIndex && size > liveDataOnScreen.size() && !liveDataOnScreen.isEmpty()) {
+        //            System.out.println("#-Ctrl-# We prepare in+ -> row: " + (rowIndex + liveDataOnScreen.size()) + "   size: "
+        //                    + (size - liveDataOnScreen.size()));
+        //            final List<Row<V>> tmp = dataSource.getRows(rowIndex + liveDataOnScreen.size(), size - liveDataOnScreen.size());
+        //            liveDataOnScreen.addAll(tmp);
+        //            absoluteIndex = rowIndex;
+        //            return;
+        //        }
         /*
          * If the demanded data is different from what we have then overwite it with the new data
          * Use Case: Sort / Filter / Scroll Vertical
@@ -349,7 +349,6 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
             liveDataOnScreen.clear();
             System.out.println("#-Ctrl-# We clean then prepare -> row: " + (rowIndex + liveDataOnScreen.size()) + "   size: "
                     + (size - liveDataOnScreen.size()));
-            final List<Row<V>> debugVar = dataSource.getRows(rowIndex, size);
             liveDataOnScreen.addAll(dataSource.getRows(rowIndex, size));
             absoluteIndex = rowIndex;
             return;

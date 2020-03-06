@@ -206,15 +206,6 @@ public class SimpleCacheDataSource<K, V> extends SimpleDataSource<K, V> {
         }
     }
 
-    //    @Override
-    //    public List<V> onSelectAllLiveData() {
-    //        final List<V> tmp = new ArrayList<>();
-    //        for (final Row<V> element : liveData) {
-    //            tmp.add(element.data);
-    //        }
-    //        return tmp;
-    //    }
-
     //----------------------------------------------------------------------------------------------------------//
     //----------------------------------------------- Filtering ------------------------------------------------//
     //----------------------------------------------------------------------------------------------------------//
