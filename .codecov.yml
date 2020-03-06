@@ -1,3 +1,5 @@
 ignore:
     - "sample/"  # ignore sample project
+    - "ponysdk/src/main/java/com/ponysdk/test"
+    - "ponysdk/src/main/java/com/ponysdk/core/terminal"
 
