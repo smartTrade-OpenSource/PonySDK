@@ -1,3 +1,7 @@
+plugins {
+    id 'jacoco'
+}
+
 ext {
     resourcesCoreTest = "src/test/resources"
     gwtOutputDirName = buildDir.name + "/gwt"
@@ -17,7 +21,25 @@ ext {
     jsonVersion = '1.1.4'
 }
 
-apply plugin: 'jacoco'
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+            // Include any other artifacts here, like javadocs
+        }
+    }
+
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/Nciaravola/PonySDK")
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
+}
 
 jacocoTestReport {
     reports {
@@ -162,3 +184,4 @@ test {
 check.dependsOn jacocoTestReport
 gwtc.dependsOn classes
 jar.dependsOn gwtc
+publish.dependsOn check

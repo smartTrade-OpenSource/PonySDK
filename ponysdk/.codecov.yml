@@ -1,0 +1,4 @@
+ignore:
+    - "src/main/java/com/ponysdk/test"
+    - "src/main/java/com/ponysdk/core/terminal"
+
