@@ -21,9 +21,13 @@ ext {
     jsonVersion = '1.1.4'
 }
 
+group = 'com.ponysdk'
+version = '2.8.21-SNAPSHOT'
+
 publishing {
     publications {
         maven(MavenPublication) {
+            artifactId = 'ponysdk'
             from components.java
             // Include any other artifacts here, like javadocs
         }
