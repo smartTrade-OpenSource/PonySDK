@@ -119,6 +119,7 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
     public SimpleDataGridView() {
         new HideScrollBarAddon(root);
         controller.setListener(this::onUpdateRows);
+
         root.addStyleName("pony-grid");
         root.setStyleProperty("display", "flex");
         root.setStyleProperty("flex-direction", "column");
@@ -216,7 +217,6 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         showLoadingDataView();
         firstRowIndex = row;
         onUpdateRows(0, controller.getRowCount());
-        // In draw() we ask for data from the controller who in his turn asks the dataSource
         draw();
     }
 
@@ -380,7 +380,6 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         final boolean selected = controller.isSelected(row.key);
         row.extended = false;
 
-        // update row cells for different columns
         updateRowCells(row, row.unpinnedCells, unpinnedTable.columns, selected, previousKey);
         updateRowCells(row, row.pinnedCells, pinnedTable.columns, selected, previousKey);
 
@@ -462,7 +461,6 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
                                 final K previousKey, final PComplexPanel td) {
         td.removeAttribute(EXTENDED_ATTRIBUTE);
         cell.asWidget().setVisible(true);
-        // Index
         //        controller.renderCell(columnView.column, row.getAbsoluteIndex(), cell);
         controller.renderCell(columnView.column, row.getRelativeIndex(), cell);
         if (td.getWidgetCount() > 2) {
@@ -490,8 +488,6 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
     public void setAdapter(final DataGridAdapter<K, V> adapter) {
         if (this.adapter != null) throw new IllegalStateException("DataGridAdapter is already set");
         controller.setAdapter(adapter);
-        //Added
-        //model.setAdapter(adapter);
         this.adapter = adapter;
         if (adapter.hasHeader()) {
             adapter.onCreateHeaderRow(pinnedTable.header);

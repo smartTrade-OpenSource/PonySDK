@@ -188,11 +188,6 @@ public abstract class SimpleDataSource<K, V> implements DataGridSource<K, V> {
         return filters.remove(key);
     }
 
-    //    @Override
-    //    public AbstractFilter<V> putFilter(final Object key, final AbstractFilter<V> filter) {
-    //        return filters.put(key, filter);
-    //    }
-
     @Override
     public void clearFilters(final ColumnDefinition<V> column) {
         final Iterator<AbstractFilter<V>> iterator = filters.values().iterator();
@@ -208,11 +203,6 @@ public abstract class SimpleDataSource<K, V> implements DataGridSource<K, V> {
         filters.clear();
     }
 
-    //    @Override
-    //    public Collection<AbstractFilter<V>> getFilters() {
-    //        return filters.values();
-    //    }
-
     //----------------------------------------------------------------------------------------------------------//
     //----------------------------------------------- Selecting ------------------------------------------------//
     //----------------------------------------------------------------------------------------------------------//
@@ -220,13 +210,6 @@ public abstract class SimpleDataSource<K, V> implements DataGridSource<K, V> {
     @Override
     public boolean isSelected(final K k) {
         return selectedKeys.contains(k);
-    }
-
-    protected boolean accept(final Row<V> row) {
-        for (final AbstractFilter<V> filter : filters.values()) {
-            if (!filter.test(row)) return false;
-        }
-        return true;
     }
 
     @Override
