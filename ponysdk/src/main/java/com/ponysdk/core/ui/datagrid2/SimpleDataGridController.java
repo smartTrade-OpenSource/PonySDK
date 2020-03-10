@@ -324,6 +324,7 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
             System.out.println("#-Ctrl-# We prepare nothing");
             return;
         }
+        //Commented because it's a problem for the DB
         /*
          * If we have already some of the data then ask only for what we don't have
          * Use Case: Window resize
@@ -387,13 +388,10 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
         return dataSource.getRowCount();
     }
 
-    //    @Override
-    //    public String toString() {
-    //        //Modified
-    //        //        return "DefaultDataGridController [cache=" + cache + ", liveData=" + liveData + "]";
-    //
-    ////        return "DefaultDataGridController [cache=" + dataSource + ", liveData=" + liveData + "]";
-    //    }
+    @Override
+    public String toString() {
+        return "DefaultDataGridController liveDataOnScreen=" + liveDataOnScreen + "]";
+    }
 
     @Override
     public Collection<V> getLiveData() {
@@ -458,7 +456,7 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
 
     @Override
     public Collection<V> getLiveSelectedData() {
-        final List<Row<V>> liveSelectedData = ((SimpleDataSource) dataSource).liveSelectedData; //FIXME
+        final List<Row<V>> liveSelectedData = ((SimpleDataSource) dataSource).liveSelectedData;
         return new MappedList<>(liveSelectedData, Row::getData);
     }
 

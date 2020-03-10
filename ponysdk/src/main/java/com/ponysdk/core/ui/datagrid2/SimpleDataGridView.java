@@ -347,7 +347,7 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
             System.out.println();
             System.out.println();
             System.out.println("#-View-# Prepare onDraw -> row : " + firstRowIndex + "   size : " + size);
-            ((SimpleDataGridController<K, V>) controller).prepareLiveDataOnScreen(firstRowIndex, size); //FIXME
+            controller.prepareLiveDataOnScreen(firstRowIndex, size); //FIXME
 
             for (int i = start; i < size; i++) {
                 updateRow(rows.get(i), absoluteRowCount);

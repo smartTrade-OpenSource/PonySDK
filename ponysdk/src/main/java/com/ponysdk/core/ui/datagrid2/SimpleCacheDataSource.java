@@ -238,7 +238,7 @@ public class SimpleCacheDataSource<K, V> extends SimpleDataSource<K, V> {
         final AbstractFilter<V> oldFilter = filters.put(key, filter);
         if (oldFilter == null || reinforcing) {
             //            final int oldLiveDataSize = liveData.size();
-            //                        final int from = reinforceFilter(liveData, filter);
+            //            final int from = reinforceFilter(liveData, filter);
             reinforceFilter(liveData, filter);
             reinforceFilter(liveSelectedData, filter);
             //            if (from >= 0) {
