@@ -782,6 +782,10 @@ public class UIContext {
         return jsonProvider;
     }
 
+    public ServletUpgradeRequest getRequest() {
+        return request;
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
