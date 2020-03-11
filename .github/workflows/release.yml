@@ -12,15 +12,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@master
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@latest
+      - name: Build and Publish
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          body: |
-            Release : https://github.com/Nciaravola/PonySDK/releases/tag/${{ github.ref }}
-          draft: false
-          prerelease: false
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            ./gradlew -Pversion=${{ github.ref }} publish
