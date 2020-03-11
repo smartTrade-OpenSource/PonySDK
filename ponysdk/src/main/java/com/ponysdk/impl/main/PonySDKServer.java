@@ -23,21 +23,6 @@
 
 package com.ponysdk.impl.main;
 
-import java.net.InetAddress;
-import java.net.URL;
-
-import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.HttpConfiguration;
-import org.eclipse.jetty.server.HttpConnectionFactory;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.handler.gzip.GzipHandler;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.util.ssl.SslContextFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ponysdk.core.model.MappingPath;
 import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.ApplicationManager;
@@ -45,6 +30,16 @@ import com.ponysdk.core.server.servlet.AjaxServlet;
 import com.ponysdk.core.server.servlet.BootstrapServlet;
 import com.ponysdk.core.server.servlet.StreamServiceServlet;
 import com.ponysdk.core.server.websocket.WebSocketServlet;
+import org.eclipse.jetty.server.*;
+import org.eclipse.jetty.server.handler.gzip.GzipHandler;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.net.InetAddress;
+import java.net.URL;
 
 public class PonySDKServer {
 
@@ -71,7 +66,7 @@ public class PonySDKServer {
     private String sslTrustStorePassphrase;
     private String sslTrustStoreType = "JKS";
     private boolean needClientAuth = false;
-    private String[] enabledProtocols = new String[] { "TLSv1", "TLSv1.1", "TLSv1.2" };
+    private String[] enabledProtocols = new String[]{"TLSv1", "TLSv1.1", "TLSv1.2"};
     private String enabledCipherSuites;
 
     public PonySDKServer() {
@@ -113,22 +108,26 @@ public class PonySDKServer {
         if (keyStore == null) keyStore = getClass().getClassLoader().getResource(sslKeyStoreFile);
 
         if (keyStore == null) throw new RuntimeException("KeyStore not found #" + sslKeyStoreFile);
-        final SslContextFactory sslContextFactory = new SslContextFactory(keyStore.toExternalForm());
-        sslContextFactory.setKeyStorePassword(sslKeyStorePassphrase);
-        sslContextFactory.setKeyStoreType(sslKeyStoreType);
-        sslContextFactory.setIncludeProtocols(enabledProtocols);
-        if (enabledCipherSuites != null) sslContextFactory.setIncludeCipherSuites(enabledCipherSuites);
+
+        SslContextFactory.Server factory = new SslContextFactory.Server();
+
+        factory.setTrustAll(false);
+        factory.setKeyStorePath(keyStore.toExternalForm());
+        factory.setKeyStorePassword(sslKeyStorePassphrase);
+        factory.setKeyStoreType(sslKeyStoreType);
+        factory.setIncludeProtocols(enabledProtocols);
+        if (enabledCipherSuites != null) factory.setIncludeCipherSuites(enabledCipherSuites);
 
         if (needClientAuth) {
-            sslContextFactory.setNeedClientAuth(needClientAuth);
+            factory.setNeedClientAuth(true);
             if (sslTrustStoreFile != null) {
-                sslContextFactory.setTrustStorePath(sslTrustStoreFile);
-                sslContextFactory.setTrustStorePassword(sslTrustStorePassphrase);
-                sslContextFactory.setTrustStoreType(sslTrustStoreType);
+                factory.setTrustStorePath(sslTrustStoreFile);
+                factory.setTrustStorePassword(sslTrustStorePassphrase);
+                factory.setTrustStoreType(sslTrustStoreType);
             }
         }
 
-        final ServerConnector serverConnector = new ServerConnector(server, sslContextFactory);
+        final ServerConnector serverConnector = new ServerConnector(server, factory);
         serverConnector.setPort(sslPort);
         serverConnector.setHost(host);
         serverConnector.setReuseAddress(true);
