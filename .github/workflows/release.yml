@@ -15,4 +15,5 @@ jobs:
       - name: Build and Publish
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run:
             ./gradlew -Pversion=${{ github.ref }} publish
