@@ -334,6 +334,7 @@ public class UIContext {
         }
     }
 
+
     /**
      * Stimulates all {@link DataListener} with an object
      *
