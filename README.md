@@ -1,6 +1,6 @@
 [![codecov](https://codecov.io/gh/Nciaravola/PonySDK/branch/master/graph/badge.svg)](https://codecov.io/gh/Nciaravola/PonySDK)
 [![Actions Status](https://github.com/Nciaravola/PonySDK/workflows/CI/badge.svg)](https://github.com/Nciaravola/PonySDK/actions)
-[![Release](https://github.com/Nciaravola/PonySDK/workflows/Release/badge.svg)]
+[![Release](https://github.com/Nciaravola/PonySDK/workflows/Release/badge.svg)](https://github.com/Nciaravola/PonySDK/actions)
 
 # PonySDK
 PonySDK is an open source project and application that uses open source tools built on the Java platform to help you develop Web applications quickly and efficiently
