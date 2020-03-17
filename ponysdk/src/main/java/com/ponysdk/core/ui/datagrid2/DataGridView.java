@@ -44,6 +44,9 @@ public interface DataGridView<K, V> extends IsPWidget {
      */
     void setAdapter(DataGridAdapter<K, V> adapter);
 
+    //ADDED
+    void setDataSource(DataGridSource src);
+
     /**
      * Sets the delay (in milliseconds) that will be used between consecutive draws of the view.<br/>
      * This delay is only respected for draws triggered by an update in the {@link DataGridModel}. For draws that are
@@ -89,7 +92,10 @@ public interface DataGridView<K, V> extends IsPWidget {
      *            values that we already know will not be accepted. If this filter is not replacing an existing one, the
      *            value of the {@code reinforcing} argument has no impact.
      */
-    void setFilter(Object key, Predicate<V> filter, boolean reinforcing);
+    void setFilter(Object key, String id, Predicate<V> filter, boolean reinforcing);
+
+    //ADDED
+    //    void setFilter(Object key, final String id, final Predicate<V> filter, final boolean reinforcing);
 
     /**
      * Adds/replaces a sorting criterion for the view.

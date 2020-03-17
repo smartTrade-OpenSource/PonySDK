@@ -43,18 +43,19 @@ import com.ponysdk.core.ui.datagrid2.SimpleDataGridController.Row;
 public interface DataGridSource<K, V> {
 
     /**
-     * Returns the value to which the specified key is mapped,
-     * or {@code null} if this model contains no mapping for the key.
+     * @param k
+     * @return the value to which the specified key is mapped
+     *         or {@code null} if it doesn't exist in the dataSource
      */
     Row<V> getRow(final K k);
 
     /**
-     * Returns all rows in the cash
+     * @return all rows in the dataSource
      */
     Collection<Row<V>> getRows();
 
     /**
-     * Returns the needed rows for the view
+     * @return the needed rows for the view
      */
     List<Row<V>> getRows(int index, int size);
 
@@ -63,6 +64,11 @@ public interface DataGridSource<K, V> {
      * after applying filters
      */
     int getRowCount();
+
+    /**
+     * Returns liveSelecteData
+     */
+    List<Row<V>> getLiveSelectedData();
 
     /**
      * Adapter setter
@@ -106,7 +112,7 @@ public interface DataGridSource<K, V> {
     /**
      * Sets a filter
      */
-    void setFilter(final Object key, final boolean reinforcing, final AbstractFilter<V> filter);
+    void setFilter(final Object key, String id, final boolean reinforcing, final AbstractFilter<V> filter);
 
     /**
      * Clears a filter
@@ -170,9 +176,4 @@ public interface DataGridSource<K, V> {
      * Returns if a row is selcted or not
      */
     boolean isSelected(final K k);
-
-    //    /**
-    //     * Returns data to be added to liveSelectedData
-    //     */
-    //    List<V> onSelectAllLiveData();
 }

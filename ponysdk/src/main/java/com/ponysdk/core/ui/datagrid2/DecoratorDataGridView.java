@@ -88,8 +88,8 @@ public class DecoratorDataGridView<K, V> implements DataGridView<K, V> {
     }
 
     @Override
-    public void setFilter(final Object key, final Predicate<V> filter, final boolean reinforcing) {
-        view.setFilter(key, filter, reinforcing);
+    public void setFilter(final Object key, final String id, final Predicate<V> filter, final boolean reinforcing) {
+        view.setFilter(key, id, filter, reinforcing);
     }
 
     @Override
@@ -166,5 +166,17 @@ public class DecoratorDataGridView<K, V> implements DataGridView<K, V> {
     public void removeDrawListener(final DrawListener drawListener) {
         view.removeDrawListener(drawListener);
     }
+
+    //ADDED
+    @Override
+    public void setDataSource(final DataGridSource src) {
+        view.setDataSource(src);
+    }
+
+    //ADDED
+    //    @Override
+    //    public void setFilter(final Object key, final String id, final Predicate<V> filter, final boolean reinforcing) {
+    //        view.setFilter(key, id, filter, reinforcing);
+    //    }
 
 }

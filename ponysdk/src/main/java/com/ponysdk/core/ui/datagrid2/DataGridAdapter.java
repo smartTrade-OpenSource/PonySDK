@@ -115,4 +115,7 @@ public interface DataGridAdapter<K, V> {
      */
     boolean hasFooter();
 
+    //ADDED
+    ColumnDefinition<V> getColumnDefinition(String id);
+
 }

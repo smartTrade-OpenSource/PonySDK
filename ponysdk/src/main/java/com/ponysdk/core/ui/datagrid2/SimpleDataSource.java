@@ -54,17 +54,17 @@ public abstract class SimpleDataSource<K, V> implements DataGridSource<K, V> {
     protected int rowCounter = 0;
 
     //----------------------------------------------------------------------------------------------------------//
-    //---------------------------------------- Adapter / RenderingCache ----------------------------------------//
+    //------------------------------------------- Getters / Setters --------------------------------------------//
     //----------------------------------------------------------------------------------------------------------//
+
+    @Override
+    public List<Row<V>> getLiveSelectedData() {
+        return liveSelectedData;
+    }
 
     @Override
     public void setAdapter(final DataGridAdapter<K, V> adapter) {
         this.adapter = adapter;
-    }
-
-    @Override
-    public void sort() {
-        liveSelectedData.sort(this::compare);
     }
 
     @Override
@@ -169,10 +169,10 @@ public abstract class SimpleDataSource<K, V> implements DataGridSource<K, V> {
         sort();
     }
 
-    //    @Override
-    //    public Collection<Comparator<Row<V>>> getSorts() {
-    //        return sorts.values();
-    //    }
+    @Override
+    public void sort() {
+        liveSelectedData.sort(this::compare);
+    }
 
     @Override
     public Set<Entry<Object, Comparator<Row<V>>>> getSortsEntry() {

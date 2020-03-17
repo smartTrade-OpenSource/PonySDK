@@ -115,6 +115,7 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
     private final DataGridModelWrapper modelWrapper = new DataGridModelWrapper(controller.getModel());
     private final LinkedHashMap<Object, RowAction<V>> rowActions = new LinkedHashMap<>();
     private int firstRowIndex = 0;
+    private boolean isHorizontalScroll = false;
 
     public SimpleDataGridView() {
         new HideScrollBarAddon(root);
@@ -148,7 +149,8 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
     }
 
     //Added
-    public void setDataSource(final DataGridSource<K, V> dataSrc) {
+    @Override
+    public void setDataSource(final DataGridSource dataSrc) {
         ((SimpleDataGridController<K, V>) controller).setDataSource(dataSrc);
     }
     //----//
@@ -246,9 +248,11 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
             columnView.visible = visible;
         }
         onUpdateRows(0, controller.getRowCount());
-        controller.setHorizontalScroll(true);
+        //        controller.setHorizontalScroll(true);
+        isHorizontalScroll = true;
         draw();
-        controller.setHorizontalScroll(false);
+        isHorizontalScroll = false;
+        //        controller.setHorizontalScroll(false);
     }
 
     private void onColumnResized(final int column, final int width) {
@@ -335,6 +339,11 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
     private void draw() {
         try {
             if (from >= to) return;
+            final int size = unpinnedTable.body.getWidgetCount();
+            System.out.println();
+            System.out.println();
+            System.out.println("#-View-# Prepare onDraw -> row : " + firstRowIndex + "   size : " + size);
+            controller.prepareLiveDataOnScreen(firstRowIndex, size, isHorizontalScroll);
             final int absoluteRowCount = controller.getRowCount();
             int start;
             if (firstRowIndex > absoluteRowCount - rows.size()) {
@@ -343,11 +352,6 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
             } else {
                 start = Math.max(0, from - firstRowIndex);
             }
-            final int size = unpinnedTable.body.getWidgetCount();
-            System.out.println();
-            System.out.println();
-            System.out.println("#-View-# Prepare onDraw -> row : " + firstRowIndex + "   size : " + size);
-            controller.prepareLiveDataOnScreen(firstRowIndex, size); //FIXME
 
             for (int i = start; i < size; i++) {
                 updateRow(rows.get(i), absoluteRowCount);
@@ -629,11 +633,21 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
     }
 
     @Override
-    public void setFilter(final Object key, final Predicate<V> filter, final boolean reinforcing) {
+    public void setFilter(final Object key, final String id, final Predicate<V> filter, final boolean reinforcing) {
         showLoadingDataView();
-        controller.setFilter(key, filter, reinforcing);
+        controller.setFilter(key, id, filter, reinforcing);
         draw();
     }
+
+    //ADDED
+    //    @Override
+    //    public void setFilter(final Object key, final String id, final Predicate<V> filter, final boolean reinforcing) {
+    //        showLoadingDataView();
+    //        final ColumnDefinition<V> colDef = adapter.getColumnDefinition(id);
+    //        controller.setFilter(key, colDef, filter, reinforcing);
+    //        //        controller.setFilter(key, filter, reinforcing);
+    //        draw();
+    //    }
 
     @Override
     public void clearFilter(final Object key) {

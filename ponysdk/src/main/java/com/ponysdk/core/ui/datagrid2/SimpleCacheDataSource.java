@@ -234,7 +234,8 @@ public class SimpleCacheDataSource<K, V> extends SimpleDataSource<K, V> {
     //----------------------------------------------------------------------------------------------------------//
 
     @Override
-    public void setFilter(final Object key, final boolean reinforcing, final AbstractFilter<V> filter) {
+    public void setFilter(Object key, final String id, final boolean reinforcing, final AbstractFilter<V> filter) {
+        key = key.toString();
         final AbstractFilter<V> oldFilter = filters.put(key, filter);
         if (oldFilter == null || reinforcing) {
             //            final int oldLiveDataSize = liveData.size();

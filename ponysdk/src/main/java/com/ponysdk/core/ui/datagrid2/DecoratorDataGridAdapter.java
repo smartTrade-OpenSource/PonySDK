@@ -110,4 +110,10 @@ public class DecoratorDataGridAdapter<K, V> implements DataGridAdapter<K, V> {
         adapter.onCreateColumnResizer(resizer);
     }
 
+    //ADDED
+    @Override
+    public ColumnDefinition<V> getColumnDefinition(final String id) {
+        return adapter.getColumnDefinition(id);
+    }
+
 }
