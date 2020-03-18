@@ -725,15 +725,6 @@ public class UIContext {
         return cookies;
     }
 
-    /**
-     * Get a cookie from the {@link PCookies} of the UIContext
-     *
-     * @return the cookie
-     */
-    public String getCookie(final String name) {
-        return getCookies().getCookie(name);
-    }
-
     public void onMessageReceived() {
         lastReceivedTime = System.currentTimeMillis();
     }

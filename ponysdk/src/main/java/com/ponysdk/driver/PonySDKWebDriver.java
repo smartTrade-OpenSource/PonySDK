@@ -31,7 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.json.Json;
-import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.websocket.CloseReason;
 import javax.websocket.MessageHandler;
@@ -56,9 +55,9 @@ public class PonySDKWebDriver implements WebDriver {
     private final static ThreadLocal<byte[]> byteArrays = ThreadLocal.withInitial(() -> new byte[32]);
     private final ConcurrentHashMap<Integer, PonyWebElement> elements = new ConcurrentHashMap<>();
     private final PonySearchContext globalContext = new PonySearchContext(Collections.unmodifiableCollection(elements.values()),
-        false);
+            false);
     private final MessageHandler.Whole<ByteBuffer> messageHandler = this::onMessage;
-    private final Map<String, String> cookies = new ConcurrentHashMap<>();
+    private String cookies;
     private final WebsocketClient client;
     private final List<PonyFrame> messageInConstruction = new ArrayList<>();
     private final PonyMessageListener messageListener;
@@ -70,7 +69,7 @@ public class PonySDKWebDriver implements WebDriver {
      * switch invocation causing enormous garbage
      */
     private final EnumMap<ServerToClientModel, BiConsumer<List<PonyFrame>, PonyFrame>> onMessageSwitch = new EnumMap<>(
-        ServerToClientModel.class);
+            ServerToClientModel.class);
 
     private volatile String typeHistory;
     private volatile String url;
@@ -84,7 +83,7 @@ public class PonySDKWebDriver implements WebDriver {
     }
 
     public PonySDKWebDriver(final PonyMessageListener messageListener, final PonyBandwithListener bandwithListener,
-            PonySessionListener sessionListener, final boolean handleImplicitCommunication) {
+                            PonySessionListener sessionListener, final boolean handleImplicitCommunication) {
         super();
         this.handleImplicitCommunication = handleImplicitCommunication;
         this.messageListener = messageListener == null ? INDIFFERENT_MSG_LISTENER : messageListener;
@@ -123,12 +122,7 @@ public class PonySDKWebDriver implements WebDriver {
             element.parent = null;
         });
         onMessageSwitch.put(ServerToClientModel.ADD_COOKIE, (message, frame) -> {
-            final String value = (String) findValueForModel(message, ServerToClientModel.VALUE);
-            if (value == null) return;
-            cookies.put((String) frame.value, value);
-        });
-        onMessageSwitch.put(ServerToClientModel.REMOVE_COOKIE, (message, frame) -> {
-            cookies.remove(frame.value);
+            cookies = (String) findValueForModel(message, ServerToClientModel.VALUE);
         });
         onMessageSwitch.put(ServerToClientModel.TYPE_CREATE, (message, frame) -> {
             final Byte widget = (Byte) findValueForModel(message, ServerToClientModel.WIDGET_TYPE);
@@ -186,8 +180,8 @@ public class PonySDKWebDriver implements WebDriver {
         onMessageSwitch.put(ServerToClientModel.ROUNDTRIP_LATENCY, (message, frame) -> {
             if (handleImplicitCommunication) {
                 final JsonObject json = Json.createObjectBuilder() //
-                    .add(ClientToServerModel.TERMINAL_LATENCY.toStringValue(), 0) //
-                    .build();
+                        .add(ClientToServerModel.TERMINAL_LATENCY.toStringValue(), 0) //
+                        .build();
                 sendMessage(json);
             }
         });
@@ -433,7 +427,8 @@ public class PonySDKWebDriver implements WebDriver {
         while (message.hasRemaining()) {
             final ByteBuffer b = prepareBuffer(message);
 
-            loop: while (b.hasRemaining()) {
+            loop:
+            while (b.hasRemaining()) {
 
                 final int position = b.position();
                 final ServerToClientModel model = readModel(b);
@@ -560,24 +555,19 @@ public class PonySDKWebDriver implements WebDriver {
     }
 
     public void sendCookies() {
-        final JsonArrayBuilder builder = Json.createArrayBuilder();
-        for (final Map.Entry<String, String> entry : cookies.entrySet()) {
-            builder.add(Json.createObjectBuilder() //
-                .add(ClientToServerModel.COOKIE_NAME.toStringValue(), entry.getKey())
-                .add(ClientToServerModel.COOKIE_VALUE.toStringValue(), entry.getValue()) //
-                .build());
-        }
+        if (cookies == null) return;
+
         sendApplicationInstruction(Json.createObjectBuilder() //
-            .add(ClientToServerModel.OBJECT_ID.toStringValue(), 0) //
-            .add(ClientToServerModel.COOKIES.toStringValue(), builder.build())//
-            .build());
+                .add(ClientToServerModel.OBJECT_ID.toStringValue(), 0) //
+                .add(ClientToServerModel.COOKIES.toStringValue(), cookies)//
+                .build());
     }
 
     public void sendApplicationInstruction(final JsonObject instruction) {
         final JsonObject json = Json.createObjectBuilder()
-            .add(ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue(), Json.createArrayBuilder() //
-                .add(instruction).build() //
-            ).build();
+                .add(ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue(), Json.createArrayBuilder() //
+                        .add(instruction).build() //
+                ).build();
         sendMessage(json);
     }
 

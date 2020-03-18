@@ -23,19 +23,13 @@
 
 package com.ponysdk.core.server.websocket;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonValue;
-import javax.json.spi.JsonProvider;
-
+import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.application.ApplicationConfiguration;
+import com.ponysdk.core.server.application.ApplicationManager;
+import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.stm.TxnContext;
+import com.ponysdk.core.util.Pair;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
@@ -44,13 +38,15 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.application.ApplicationConfiguration;
-import com.ponysdk.core.server.application.ApplicationManager;
-import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.server.stm.TxnContext;
-import com.ponysdk.core.util.Pair;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
+import javax.json.spi.JsonProvider;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import static org.junit.Assert.*;
 
 public class WebSocketTest {
 
@@ -141,7 +137,7 @@ public class WebSocketTest {
         job.add(ClientToServerModel.HEARTBEAT_REQUEST.toStringValue(), JsonValue.NULL);
         webSocket.onWebSocketText(job.build().toString());
         assertEquals(encodedValues,
-            List.of(new Pair<>(ServerToClientModel.HEARTBEAT, null), new Pair<>(ServerToClientModel.END, null)));
+                List.of(new Pair<>(ServerToClientModel.HEARTBEAT, null), new Pair<>(ServerToClientModel.END, null)));
     }
 
     /**
@@ -208,7 +204,6 @@ public class WebSocketTest {
         });
 
         final JsonObjectBuilder job = JsonProvider.provider().createObjectBuilder();
-        job.add(ClientToServerModel.COOKIE_NAME.toStringValue(), 0);
         webSocket.onWebSocketText(job.build().toString());
     }
 

@@ -1,7 +1,6 @@
 
 package com.ponysdk.core.ui.scene;
 
-import com.ponysdk.core.ui.basic.PObject;
 import com.ponysdk.core.ui.basic.PWidget;
 
 import java.util.ArrayList;
@@ -58,7 +57,7 @@ public abstract class AbstractScene implements Scene {
         fireStarted();
     }
 
-    private void onInit(PObject w) {
+    private void onInit(Object w) {
         onFirstStart();
         initHandlers();
         started();

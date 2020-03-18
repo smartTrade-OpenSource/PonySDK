@@ -26,6 +26,11 @@ public class PEmulator {
         object.onClientData(jsonObject);
     }
 
+    public static void cookies(String value) {
+        JsonObject jsonObject = Json.createObjectBuilder().add(ClientToServerModel.COOKIES.toStringValue(), value).build();
+        UIContext.get().getCookies().onClientData(jsonObject);
+    }
+
     public static void click(int objectID) {
         click(UIContext.get().getObject(objectID));
     }

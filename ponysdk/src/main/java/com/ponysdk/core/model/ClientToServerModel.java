@@ -39,34 +39,32 @@ public enum ClientToServerModel {
     INFO_MSG("8"),
 
     COOKIES("9"),
-    COOKIE_NAME("a"),
-    COOKIE_VALUE("b"),
 
-    TYPE_HISTORY("c"),
+    TYPE_HISTORY("b"),
 
-    WIDGET_POSITION("d"),
-    POPUP_POSITION("e"),
-    EVENT_INFO("f"),
-    DOM_HANDLER_TYPE("g"),
+    WIDGET_POSITION("c"),
+    POPUP_POSITION("d"),
+    EVENT_INFO("e"),
+    DOM_HANDLER_TYPE("f"),
 
-    TERMINAL_LATENCY("h"),
-    APPLICATION_ID("i"),
+    TERMINAL_LATENCY("g"),
+    APPLICATION_ID("h"),
 
-    PARENT_OBJECT_ID("j"),
-    VALUE_KEY("k"),
-    REPLACEMENT_STRING("l"),
-    COMMAND_ID("m"),
-    STREAM_REQUEST_ID("n"),
-    SIZE("o"),
-    DRAG_SRC("p"),
-    START_DATE("q"),
-    END_DATE("r"),
-    KEY_FILTER("s"),
-    RESULT("t"),
+    PARENT_OBJECT_ID("i"),
+    VALUE_KEY("j"),
+    REPLACEMENT_STRING("k"),
+    COMMAND_ID("l"),
+    STREAM_REQUEST_ID("m"),
+    SIZE("n"),
+    DRAG_SRC("o"),
+    START_DATE("p"),
+    END_DATE("q"),
+    KEY_FILTER("r"),
+    RESULT("s"),
 
-    OPTION_TABINDEX_ACTIVATED("u"),
+    OPTION_TABINDEX_ACTIVATED("t"),
 
-    HEARTBEAT_REQUEST("v"),
+    HEARTBEAT_REQUEST("u"),
 
     HANDLER_BOOLEAN_VALUE_CHANGE("A"),
     HANDLER_DATE_VALUE_CHANGE("B"),
@@ -93,7 +91,7 @@ public enum ClientToServerModel {
 
     private String key;
 
-    private ClientToServerModel(final String key) {
+    ClientToServerModel(final String key) {
         this.key = key;
     }
 

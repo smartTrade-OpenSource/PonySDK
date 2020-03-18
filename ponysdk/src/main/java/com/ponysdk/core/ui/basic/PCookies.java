@@ -23,112 +23,75 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
+import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
+import com.ponysdk.core.util.SetUtils;
 import com.ponysdk.core.writer.ModelWriter;
+
+import javax.json.JsonObject;
+import java.util.Objects;
+import java.util.Set;
 
 public class PCookies {
 
     private static final int ID = 0; // reserved
 
-    private final Map<String, String> cachedCookies = new HashMap<>(4);
+    private boolean isInitialized;
 
-    private boolean isInitialized = false;
+    private String value;
 
-    public interface CookiesListener {
+    private Set<PValueChangeHandler<String>> valueChangeHandlers;
 
-        void onInitialized();
+    private Set<PObject.InitializeListener> initializeListeners;
+
+    public String get() {
+        return value;
     }
 
-    private CookiesListener listener;
+    public void set(final String value) {
+        if (Objects.equals(this.value, value)) return;
 
-    public String getCookie(final String name) {
-        return cachedCookies.get(name);
-    }
-
-    public String removeCookie(final String name) {
-        return removeCookie(name, null);
-    }
-
-    public String removeCookie(final String name, final String path) {
-        final ModelWriter writer = UIContext.get().getWriter();
-        writer.beginObject(PWindow.getMain());
-        writer.write(ServerToClientModel.TYPE_UPDATE, ID);
-        writer.write(ServerToClientModel.REMOVE_COOKIE, name);
-        if (path != null) writer.write(ServerToClientModel.COOKIE_PATH, path);
-        writer.endObject();
-
-        return cachedCookies.remove(name);
-    }
-
-    public void setCookie(final String name, final String value) {
-        setCookie(name, value, null, null);
-    }
-
-    public void setCookie(final String name, final String value, final String path) {
-        setCookie(name, value, null, path);
-    }
-
-    public void setCookie(final String name, final String value, final Date expires) {
-        setCookie(name, value, expires, null);
-    }
-
-    public void setCookie(final String name, final String value, final Date expires, final String path) {
-        setCookie(name, value, expires, path, null, false);
-    }
-
-    public void setCookie(final String name, final String value, final Date expires, final String domain, final String path,
-                          final boolean secure) {
-        cachedCookies.put(name, value);
+        this.value = value;
 
         final ModelWriter writer = UIContext.get().getWriter();
         writer.beginObject(PWindow.getMain());
         writer.write(ServerToClientModel.TYPE_UPDATE, ID);
-        writer.write(ServerToClientModel.ADD_COOKIE, name);
-        writer.write(ServerToClientModel.VALUE, value);
-        if (expires != null) writer.write(ServerToClientModel.COOKIE_EXPIRE, expires.getTime());
-        if (domain != null) writer.write(ServerToClientModel.COOKIE_DOMAIN, domain);
-        if (path != null) writer.write(ServerToClientModel.COOKIE_PATH, path);
-        if (secure) writer.write(ServerToClientModel.COOKIE_SECURE, secure);
+        writer.write(ServerToClientModel.ADD_COOKIE, value);
         writer.endObject();
     }
 
     public void onClientData(final JsonObject event) {
-        final JsonArray cookies = event.getJsonArray(ClientToServerModel.COOKIES.toStringValue());
-
-        for (int i = 0; i < cookies.size(); i++) {
-            final JsonObject object = cookies.getJsonObject(i);
-
-            final String key = object.getString(ClientToServerModel.COOKIE_NAME.toStringValue());
-            final String value = object.getString(ClientToServerModel.COOKIE_VALUE.toStringValue());
-
-            cachedCookies.put(key, value);
-        }
-
         if (!isInitialized) {
             isInitialized = true;
-            if (listener != null) listener.onInitialized();
+            if (initializeListeners != null) initializeListeners.forEach(listener -> listener.onInitialize(this));
         }
+
+        String value = event.getJsonString(ClientToServerModel.COOKIES.toStringValue()).getString();
+
+        if (Objects.equals(value, this.value)) return;
+
+        this.value = value;
+
+        if (valueChangeHandlers != null) {
+            valueChangeHandlers.forEach(h -> h.onValueChange(new PValueChangeEvent<String>(this, value)));
+        }
+
     }
 
     public boolean isInitialized() {
         return isInitialized;
     }
 
-    public void setListener(final CookiesListener listener) {
-        this.listener = listener;
+    public void addInitializeListener(final PObject.InitializeListener listener) {
+        if (initializeListeners == null) initializeListeners = SetUtils.newArraySet(4);
+        initializeListeners.add(listener);
     }
 
-    public Collection<String> getNames() {
-        return cachedCookies.keySet();
+    public void addValueChangeHandler(final PValueChangeHandler<String> handler) {
+        if (valueChangeHandlers == null) valueChangeHandlers = SetUtils.newArraySet(4);
+        this.valueChangeHandlers.add(handler);
     }
 }

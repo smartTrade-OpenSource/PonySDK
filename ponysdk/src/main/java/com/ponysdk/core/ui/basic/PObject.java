@@ -403,7 +403,7 @@ public abstract class PObject {
     }
 
     @FunctionalInterface
-    public static interface AjaxHandler {
+    public interface AjaxHandler {
 
         void handleAjaxRequest(final HttpServletRequest request, final HttpServletResponse response)
                 throws ServletException, IOException;
@@ -412,13 +412,13 @@ public abstract class PObject {
     @FunctionalInterface
     public interface InitializeListener {
 
-        void onInitialize(PObject object);
+        void onInitialize(Object source);
     }
 
     @FunctionalInterface
     public interface DestroyListener {
 
-        void onDestroy(PObject object);
+        void onDestroy(Object object);
     }
 
 
