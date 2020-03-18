@@ -1,4 +1,4 @@
 ignore:
-    - "src/main/java/com/ponysdk/test"
-    - "src/main/java/com/ponysdk/core/terminal"
+  - "src/test/java/**/*"
+  - "src/main/java/com/ponysdk/core/terminal/**/*"
 
