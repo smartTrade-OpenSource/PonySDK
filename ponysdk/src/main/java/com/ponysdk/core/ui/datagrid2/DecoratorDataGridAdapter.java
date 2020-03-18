@@ -109,11 +109,4 @@ public class DecoratorDataGridAdapter<K, V> implements DataGridAdapter<K, V> {
     public void onCreateColumnResizer(final IsPWidget resizer) {
         adapter.onCreateColumnResizer(resizer);
     }
-
-    //ADDED
-    @Override
-    public ColumnDefinition<V> getColumnDefinition(final String id) {
-        return adapter.getColumnDefinition(id);
-    }
-
 }

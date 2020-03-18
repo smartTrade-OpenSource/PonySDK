@@ -114,8 +114,4 @@ public interface DataGridAdapter<K, V> {
      * @return {@code true} if the {@link DataGridView} must have a footer, {@code false} otherwise
      */
     boolean hasFooter();
-
-    //ADDED
-    ColumnDefinition<V> getColumnDefinition(String id);
-
 }

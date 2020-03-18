@@ -140,14 +140,9 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
         resetLiveData();
     }
 
-    // refresh and update the rows (from-to)
     private void refreshRows(final int from, final int to) {
         this.from = Math.min(this.from, from);
         this.to = Math.max(this.to, to);
-        //FIXME
-        if (this.to == this.from && this.to == 0) {
-            this.to = 1;
-        }
         if (bound) doRefreshRows();
     }
 
@@ -160,10 +155,6 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
         }
     }
 
-    /*
-     * If the row corresponding to this value is found in the dataSource update it, if not found
-     * insert it
-     */
     @Override
     public final void setData(final V v) {
         final Interval interval = dataSource.setData(v);
@@ -293,16 +284,6 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
         refreshRows(0, oldLiveDataSize);
     }
 
-    //ADDED
-    //    @Override
-    //    public void setFilter(final Object key, final ColumnDefinition<V> colDef, final Predicate<V> predicate,
-    //                          final boolean reinforcing) {
-    //        checkAdapter();
-    //        final int oldLiveDataSize = dataSource.getRowCount();
-    //        dataSource.setFilter(key, colDef, reinforcing, new GeneralFilter(predicate));
-    //        refreshRows(0, oldLiveDataSize);
-    //    }
-
     @Override
     public void clearFilter(final Object key) {
         checkAdapter();
@@ -359,16 +340,9 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
     @Override
     public V getRowData(final int rowIndex) {
         checkAdapter();
-        V v = rowIndex < liveDataOnScreen.size() ? liveDataOnScreen.get(rowIndex).getData() : null;
+        final V v = rowIndex < liveDataOnScreen.size() ? liveDataOnScreen.get(rowIndex).getData() : null;
         if (v == null) {
             System.out.println("Row " + rowIndex + " is null ! ");
-            final List<Row<V>> rows = dataSource.getRows(rowIndex, 1);
-            final Row<V> row;
-            if (rows != null) {
-                row = rows.get(0);
-                liveDataOnScreen.add(row);
-                v = row.getData();
-            }
         }
         return v;
     }
@@ -491,6 +465,7 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
     ///////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////// Nested Classes /////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////////////////////////////
+    //FIXME : modified accessors
 
     public static class Interval {
 
@@ -534,7 +509,6 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
         }
     }
 
-    // Modified private
     public static class Column<V> {
 
         private final ColumnDefinition<V> def;
@@ -553,7 +527,6 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
 
     }
 
-    // Modified accessor
     public static class Row<V> {
 
         final int id;
@@ -597,11 +570,9 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
         }
     }
 
-    //Modified private
     public class ColumnControllerSort implements Comparator<Row<V>> {
 
         private final Column<V> column;
-        //Modified private
         public final boolean asc;
 
         public ColumnControllerSort(final Column<V> column, final boolean asc) {
@@ -630,12 +601,6 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
 
     }
 
-    //    private static interface AbstractFilter<V> extends Predicate<Row<V>> {
-    //
-    //        abstract ColumnDefinition<V> getColumnDefinition();
-    //
-    //    }
-
     public class GeneralFilter implements AbstractFilter<V> {
 
         private final Predicate<V> filter;
@@ -655,28 +620,6 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
             return null;
         }
     }
-
-    //    public class GeneralFilter implements AbstractFilter<V> {
-    //
-    //        private final Column<V> column;
-    //        private final Predicate<V> filter;
-    //
-    //        public GeneralFilter(final ColumnDefinition<V> colDef, final Predicate<V> filter) {
-    //            super();
-    //            this.column = getColumn(colDef);
-    //            this.filter = filter;
-    //        }
-    //
-    //        @Override
-    //        public boolean test(final Row<V> row) {
-    //            return filter.test(row.data);
-    //        }
-    //
-    //        @Override
-    //        public ColumnDefinition<V> getColumnDefinition() {
-    //            return column.def;
-    //        }
-    //    }
 
     public class ColumnFilter implements AbstractFilter<V> {
 

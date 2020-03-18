@@ -148,12 +148,11 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         unpinnedTable = new UnpinnedTable(headerUnpinnedDiv, bodyUnpinnedDiv, footerUnpinnedDiv);
     }
 
-    //Added
+    //FIXME : to be injected via spring and not setted
     @Override
     public void setDataSource(final DataGridSource dataSrc) {
         ((SimpleDataGridController<K, V>) controller).setDataSource(dataSrc);
     }
-    //----//
 
     private PComplexPanel prepareBodyDiv(final PComplexPanel subBodyDiv) {
         final PComplexPanel bodyDiv = Element.newDiv();
@@ -339,11 +338,6 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
     private void draw() {
         try {
             if (from >= to) return;
-            final int size = unpinnedTable.body.getWidgetCount();
-            System.out.println();
-            System.out.println();
-            System.out.println("#-View-# Prepare onDraw -> row : " + firstRowIndex + "   size : " + size);
-            controller.prepareLiveDataOnScreen(firstRowIndex, size, isHorizontalScroll);
             final int absoluteRowCount = controller.getRowCount();
             int start;
             if (firstRowIndex > absoluteRowCount - rows.size()) {
@@ -352,6 +346,12 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
             } else {
                 start = Math.max(0, from - firstRowIndex);
             }
+
+            final int size = unpinnedTable.body.getWidgetCount();
+            System.out.println();
+            System.out.println();
+            System.out.println("#-View-# Prepare onDraw -> row : " + firstRowIndex + "   size : " + size);
+            controller.prepareLiveDataOnScreen(firstRowIndex, size, isHorizontalScroll);
 
             for (int i = start; i < size; i++) {
                 updateRow(rows.get(i), absoluteRowCount);
@@ -638,16 +638,6 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         controller.setFilter(key, id, filter, reinforcing);
         draw();
     }
-
-    //ADDED
-    //    @Override
-    //    public void setFilter(final Object key, final String id, final Predicate<V> filter, final boolean reinforcing) {
-    //        showLoadingDataView();
-    //        final ColumnDefinition<V> colDef = adapter.getColumnDefinition(id);
-    //        controller.setFilter(key, colDef, filter, reinforcing);
-    //        //        controller.setFilter(key, filter, reinforcing);
-    //        draw();
-    //    }
 
     @Override
     public void clearFilter(final Object key) {

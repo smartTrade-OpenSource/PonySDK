@@ -66,9 +66,6 @@ interface DataGridController<K, V> {
 
     void setFilter(Object key, String id, Predicate<V> filter, boolean reinforcing);
 
-    //ADDED
-    //    void setFilter(final Object key, final ColumnDefinition<V> colDef, final Predicate<V> predicate, final boolean reinforcing);
-
     void clearFilter(Object key);
 
     void clearFilters(ColumnDefinition<V> column);
