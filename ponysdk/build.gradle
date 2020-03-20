@@ -33,6 +33,9 @@ publishing {
         }
     }
 
+    print("############# GITHUB_ACTOR" + System.getenv("GITHUB_ACTOR"))
+    print("############# GITHUB_TOKEN " + System.getenv("GITHUB_TOKEN"))
+
     repositories {
         maven {
             name = "GitHubPackages"
