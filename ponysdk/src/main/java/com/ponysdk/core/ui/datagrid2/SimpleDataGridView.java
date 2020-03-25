@@ -148,6 +148,14 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         unpinnedTable = new UnpinnedTable(headerUnpinnedDiv, bodyUnpinnedDiv, footerUnpinnedDiv);
     }
 
+    //ADDED
+
+    public DataGridAdapter<K, V> getAdapter() {
+        return adapter;
+    }
+
+    //---------//
+
     //FIXME : to be injected via spring and not setted
     @Override
     public void setDataSource(final DataGridSource dataSrc) {
@@ -1413,7 +1421,9 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
 
         @Override
         protected void onDataUpdate() {
-            if (delayedDrawRunnable == null) draw();
+            if (delayedDrawRunnable == null) {
+                draw();
+            }
         }
 
         @Override

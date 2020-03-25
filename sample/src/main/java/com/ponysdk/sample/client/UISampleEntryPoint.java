@@ -40,6 +40,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletResponse;
@@ -138,12 +142,15 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
         createReconnectingPanel();
 
-        mainLabel = Element.newPLabel("Can be modified by anybody : ₲ῳ₸");
-        mainLabel.setAttributeLinkedToValue("data-title");
-        mainLabel.setTitle("String ASCII");
-        PWindow.getMain().add(mainLabel);
+        //        mainLabel = Element.newPLabel("Can be modified by anybody : ₲ῳ₸");
+        //        mainLabel.setAttributeLinkedToValue("data-title");
+        //        mainLabel.setTitle("String ASCII");
+        //        PWindow.getMain().add(mainLabel);
 
-        testSimpleDataGridView();
+        //FIXME
+        //        testSimpleDataGridView();
+        //        testSimpleDataGridViewOnly();
+        testNewGrid();
 
         if (true) return;
 
@@ -287,6 +294,314 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         // uiContext.getHistory().newItem("", false);
     }
 
+    //-------------------------------------------------------------------------------------------//
+    //--------------------------- Functional / performance tests --------------------------------//
+    //-------------------------------------------------------------------------------------------//
+
+    private static class MyRow {
+
+        private final int id;
+        private Map<String, String> map;
+
+        public MyRow(final int id) {
+            super();
+            this.id = id;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public void putValue(final String key, final String value) {
+            if (map == null) map = new HashMap<>();
+            map.put(key, value);
+        }
+
+        public String getValue(final String key) {
+            if (map != null) {
+                final String v = map.get(key);
+                if (v != null) return v;
+            }
+            return key + String.format("%09d", id);
+        }
+
+        @Override
+        public MyRow clone() {
+            final MyRow model = new MyRow(id);
+            if (map == null) return model;
+            model.map = new HashMap<>(map);
+            return model;
+        }
+
+        @Override
+        public String toString() {
+            return "SampleModel [id=" + id + "]";
+        }
+    }
+
+    private MyRow createMyRow(final int index) {
+        return new MyRow(index);
+    }
+
+    private void testSimpleDataGridViewOnly() { //FIXME
+        final DataGridView<Integer, MyRow> simpleGridView = new SimpleDataGridView<>();
+        final ColumnVisibilitySelectorDataGridView<Integer, MyRow> columnVisibilitySelectorDataGridView = new ColumnVisibilitySelectorDataGridView<>(
+            simpleGridView);
+        final RowSelectorColumnDataGridView<Integer, MyRow> rowSelectorColumnDataGridView = new RowSelectorColumnDataGridView<>(
+            columnVisibilitySelectorDataGridView);
+        final ConfigSelectorDataGridView<Integer, MyRow> configSelectorDataGridView = new ConfigSelectorDataGridView<>(
+            rowSelectorColumnDataGridView, "DEFAULT");
+
+        final DataGridView<Integer, MyRow> gridView = configSelectorDataGridView;
+        gridView.setAdapter(new DataGridAdapter<Integer, MyRow>() {
+
+            private final List<ColumnDefinition<MyRow>> columns = new ArrayList<>();
+
+            {
+                for (char c = 'a'; c <= 'z'; c++) {
+                    final String ss = c + "";
+                    columns.add(new SimpleColumnDefinition<>(ss, v -> v.getValue(ss), (v, s) -> {
+                        v.putValue(ss, s);
+                    }));
+                }
+            }
+
+            @Override
+            public void onUnselectRow(final IsPWidget rowWidget) {
+                rowWidget.asWidget().removeStyleName("selected-row");
+            }
+
+            @Override
+            public void onSelectRow(final IsPWidget rowWidget) {
+                rowWidget.asWidget().addStyleName("selected-row");
+            }
+
+            @Override
+            public boolean isAscendingSortByInsertionOrder() {
+                return false;
+            }
+
+            @Override
+            public Integer getKey(final MyRow v) {
+                return v.id;
+            }
+
+            @Override
+            public List<ColumnDefinition<MyRow>> getColumnDefinitions() {
+                return columns;
+            }
+
+            @Override
+            public int compareDefault(final MyRow v1, final MyRow v2) {
+                return 0;
+            }
+
+            @Override
+            public void onCreateHeaderRow(final IsPWidget rowWidget) {
+                rowWidget.asWidget().getParent().asWidget().setStyleProperty("background", "aliceblue");
+            }
+
+            @Override
+            public void onCreateFooterRow(final IsPWidget rowWidget) {
+                rowWidget.asWidget().getParent().asWidget().setStyleProperty("background", "aliceblue");
+            }
+
+            @Override
+            public void onCreateRow(final IsPWidget rowWidget) {
+            }
+
+            @Override
+            public boolean hasHeader() {
+                return true;
+            }
+
+            @Override
+            public boolean hasFooter() {
+                return false;
+            }
+
+            @Override
+            public IsPWidget createLoadingDataWidget() {
+                final PComplexPanel div = Element.newDiv();
+                div.setWidth("100%");
+                div.setHeight("100%");
+                div.setStyleProperty("background-color", "#FFFFFF7F");
+                return div;
+            }
+
+            @Override
+            public void onCreateColumnResizer(final IsPWidget resizer) {
+            }
+        });
+        gridView.setPollingDelayMillis(250L);
+        final DataGridModel<Integer, MyRow> model = gridView.getModel();
+        gridView.asWidget().setHeight("500px");
+        gridView.asWidget().setWidth("1000px");
+        gridView.asWidget().setStyleProperty("resize", "both");
+        gridView.asWidget().setStyleProperty("overflow", "hidden");
+
+        PWindow.getMain().add(gridView);
+        PWindow.getMain().add(configSelectorDataGridView.getDecoratorWidget());
+
+        model.setBound(false);
+        for (int i = 0; i < 1_000; i++) {
+            if (i % 500_000 == 0) log.info("i: {}", i);
+            model.setData(createMyRow(i));
+        }
+        model.setBound(true);
+        gridView.addRowAction(UISampleEntryPoint.class, new RowAction<>() {
+
+            @Override
+            public boolean testRow(final MyRow t, final int index) {
+                return (index & 1) == 0;
+            }
+
+            @Override
+            public void cancel(final IsPWidget row) {
+                row.asWidget().removeStyleName("unpair-row");
+            }
+
+            @Override
+            public void apply(final IsPWidget row) {
+                row.asWidget().addStyleName("unpair-row");
+            }
+        });
+
+        //        final PButton update = Element.newPButton("Update all data");
+        //        PWindow.getMain().add(update);
+        //        update.addClickHandler(event -> updateData(model));
+        //
+        //        final PButton add = Element.newPButton("Create new data");
+        //        PWindow.getMain().add(add);
+        //        add.addClickHandler(event -> addData(model));
+        //
+        //        final PButton modifyVisible = Element.newPButton("Modify visible data (col d)");
+        //        PWindow.getMain().add(modifyVisible);
+        //        modifyVisible.addClickHandler(event -> updateVisibleColumnData(model));
+        //
+        //        final PButton modifyUnvisible = Element.newPButton("Modify unvisible data (col z)");
+        //        PWindow.getMain().add(modifyUnvisible);
+        //        modifyUnvisible.addClickHandler(event -> updateUnvisibleColumnData(model));
+
+        testPerformance(model);
+    }
+
+    void testPerformance(final DataGridModel<Integer, MyRow> model) {
+
+        final Runnable updateData = () -> {
+            for (int i = 0; i < 1_000; i++) {
+                model.setData(createMyRow(i));
+            }
+            System.out.println("\n" + "########## updateData ##########" + "\n");
+        };
+
+        final Runnable updateVisibleColumnData = () -> {
+            for (int i = 0; i < 1_000; i++) {
+                final MyRow v = createMyRow(i);
+                v.putValue("b", "TOTO");
+                model.setData(v);
+            }
+            System.out.println("\n" + "########## updateVisibleColumnData ##########" + "\n");
+        };
+
+        final Runnable updateUnvisibleColumnData = () -> {
+            for (int i = 0; i < 1_000; i++) {
+                final MyRow v = createMyRow(i);
+                v.putValue("z", "TOTO");
+                model.setData(v);
+            }
+            System.out.println("\n" + "########## updateUnvisibleColumnData ##########" + "\n");
+        };
+
+        final int[] from = { 0 };
+        // An array is created and not an int so we can modify the value inside of the lambda expression
+        final Runnable addData = () -> {
+            for (int i = from[0]; i < from[0] + 1000; i++) {
+                model.setData(createMyRow(i));
+            }
+            System.out.println("\n" + "########## addData ##########" + "\n");
+            from[0] += 1000;
+        };
+
+        final ScheduledExecutorService updateDataExecutor = Executors.newSingleThreadScheduledExecutor();
+        updateDataExecutor.scheduleAtFixedRate(updateData, 0, 5, TimeUnit.SECONDS);
+
+        final ScheduledExecutorService updateVisibleColumnDataExecutor = Executors.newSingleThreadScheduledExecutor();
+        updateVisibleColumnDataExecutor.scheduleAtFixedRate(updateVisibleColumnData, 1, 5, TimeUnit.SECONDS);
+
+        final ScheduledExecutorService updateUnvisibleColumnDataExecutor = Executors.newSingleThreadScheduledExecutor();
+        updateUnvisibleColumnDataExecutor.scheduleAtFixedRate(updateUnvisibleColumnData, 2, 5, TimeUnit.SECONDS);
+
+        final ScheduledExecutorService addDataExecutor = Executors.newSingleThreadScheduledExecutor();
+        addDataExecutor.scheduleAtFixedRate(addData, 18, 2, TimeUnit.SECONDS);
+
+        final ScheduledExecutorService shutdownExecutor = Executors.newSingleThreadScheduledExecutor();
+        shutdownExecutor.submit(() -> {
+            wait(17);
+            shutdown(updateDataExecutor);
+            shutdown(updateVisibleColumnDataExecutor);
+            shutdown(updateUnvisibleColumnDataExecutor);
+            wait(10);
+            shutdown(addDataExecutor);
+        });
+    }
+
+    private void wait(final int seconds) {
+        try {
+            TimeUnit.SECONDS.sleep(seconds);
+        } catch (final InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void shutdown(final ExecutorService executor) {
+        try {
+            System.out.println("attempt to shutdown executor");
+            executor.shutdown();
+            executor.awaitTermination(5, TimeUnit.SECONDS);
+        } catch (final InterruptedException e) {
+            System.err.println("tasks interrupted");
+        } finally {
+            if (!executor.isTerminated()) {
+                System.err.println("cancel non-finished tasks");
+            }
+            executor.shutdownNow();
+            System.out.println("shutdown finished");
+        }
+    }
+
+    //    private void updateData(final DataGridModel<Integer, MyRow> model) {
+    //        for (int i = 0; i < 1_000; i++) {
+    //            model.setData(createMyRow(i));
+    //        }
+    //    }
+    //
+    //    private void addData(final DataGridModel<Integer, MyRow> model) {
+    //        for (int i = 1_000; i < 2_000; i++) {
+    //            model.setData(createMyRow(i));
+    //        }
+    //    }
+    //
+    //    private void updateVisibleColumnData(final DataGridModel<Integer, MyRow> model) {
+    //        for (int i = 0; i < 1_000; i++) {
+    //            final MyRow v = createMyRow(i);
+    //            v.putValue("b", "TOTO");
+    //            model.setData(v);
+    //        }
+    //    }
+    //
+    //    private void updateUnvisibleColumnData(final DataGridModel<Integer, MyRow> model) {
+    //        for (int i = 0; i < 1_000; i++) {
+    //            final MyRow v = createMyRow(i);
+    //            v.putValue("z", "TOTO");
+    //            model.setData(v);
+    //        }
+    //    }
+
+    //--------------------------------------------------------------------------------------------//
+    //--------------------------------------------------------------------------------------------//
+    //--------------------------------------------------------------------------------------------//
+
     private static class MyModel {
 
         private final int id;
@@ -326,7 +641,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         public String toString() {
             return "SampleModel [id=" + id + "]";
         }
-
     }
 
     private static MyModel createMyModel(final int index) {

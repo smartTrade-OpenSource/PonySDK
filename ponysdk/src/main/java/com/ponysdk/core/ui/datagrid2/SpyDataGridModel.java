@@ -42,7 +42,9 @@ public abstract class SpyDataGridModel<K, V> implements DataGridModel<K, V> {
     @Override
     public void setData(final V v) {
         model.setData(v);
-        if (model.getBound()) onDataUpdate();
+        if (model.getBound()) {
+            onDataUpdate();
+        }
     }
 
     @Override

@@ -148,7 +148,6 @@ public class SimpleCacheDataSource<K, V> extends SimpleDataSource<K, V> {
         row.accepted = accept(row);
         cache.put(k, row);
         if (!row.accepted) return null;
-        //        System.out.println(sorts);
         final int rowIndex = insertRow(liveData, row);
         return new Interval(rowIndex, liveData.size());
     }
