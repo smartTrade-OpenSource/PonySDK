@@ -205,6 +205,12 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
 
     @Override
     public final V removeData(final K k) {
+        //        final Row<V> row = dataSource.getRow(k);
+        //        if (row == null) return null;
+        //        renderingHelpersCache.remove(row);
+        //        final V v = dataSource.removeData(k);
+        //        refreshRows(0, dataSource.getRowCount());
+        //        return v;
         final Row<V> row = dataSource.getRow(k);
         if (row == null) return null;
         renderingHelpersCache.remove(row);

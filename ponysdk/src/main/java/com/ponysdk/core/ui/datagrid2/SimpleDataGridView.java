@@ -356,9 +356,7 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
             }
 
             final int size = unpinnedTable.body.getWidgetCount();
-            System.out.println();
-            System.out.println();
-            System.out.println("#-View-# Prepare onDraw -> row : " + firstRowIndex + "   size : " + size);
+            System.out.println("\n\n" + "#-View-# Prepare onDraw -> row : " + firstRowIndex + "   size : " + size);
             controller.prepareLiveDataOnScreen(firstRowIndex, size, isHorizontalScroll);
 
             for (int i = start; i < size; i++) {

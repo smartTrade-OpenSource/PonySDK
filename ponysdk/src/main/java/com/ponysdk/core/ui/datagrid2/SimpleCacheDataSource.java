@@ -134,6 +134,7 @@ public class SimpleCacheDataSource<K, V> extends SimpleDataSource<K, V> {
         if (row.accepted) {
             //            final int oldLiveDataSize = liveData.size();
             //            final int rowIndex = removeRow(liveData, row);
+            removeRow(liveData, row);
             if (selected) {
                 removeRow(liveSelectedData, row);
             }

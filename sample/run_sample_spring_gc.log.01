@@ -1,0 +1,276 @@
+[2020-03-27T15:40:55.245+0100][0.014s][info][gc,heap] Heap region size: 1M
+[2020-03-27T15:40:55.278+0100][0.047s][info][gc     ] Using G1
+[2020-03-27T15:40:55.278+0100][0.047s][info][gc,heap,coops] Heap address: 0x0000000080000000, size: 2048 MB, Compressed Oops mode: 32-bit
+[2020-03-27T15:40:55.379+0100][0.148s][info][safepoint    ] Total time for which application threads were stopped: 0.0000562 seconds, Stopping threads took: 0.0000106 seconds
+[2020-03-27T15:40:55.387+0100][0.155s][info][safepoint    ] Application time: 0.0050615 seconds
+[2020-03-27T15:40:55.387+0100][0.155s][info][safepoint    ] Total time for which application threads were stopped: 0.0000329 seconds, Stopping threads took: 0.0000085 seconds
+[2020-03-27T15:40:55.450+0100][0.219s][info][safepoint    ] Application time: 0.0618134 seconds
+[2020-03-27T15:40:55.450+0100][0.219s][info][safepoint    ] Total time for which application threads were stopped: 0.0000710 seconds, Stopping threads took: 0.0000272 seconds
+[2020-03-27T15:40:55.488+0100][0.257s][info][safepoint    ] Application time: 0.0376428 seconds
+[2020-03-27T15:40:55.488+0100][0.257s][info][safepoint    ] Total time for which application threads were stopped: 0.0000743 seconds, Stopping threads took: 0.0000164 seconds
+[2020-03-27T15:40:55.784+0100][0.552s][info][safepoint    ] Application time: 0.2952912 seconds
+[2020-03-27T15:40:55.784+0100][0.553s][info][safepoint    ] Total time for which application threads were stopped: 0.0001718 seconds, Stopping threads took: 0.0000923 seconds
+[2020-03-27T15:40:55.882+0100][0.651s][info][safepoint    ] Application time: 0.0982620 seconds
+[2020-03-27T15:40:55.882+0100][0.651s][info][safepoint    ] Total time for which application threads were stopped: 0.0001591 seconds, Stopping threads took: 0.0000146 seconds
+[2020-03-27T15:40:56.021+0100][0.790s][info][safepoint    ] Application time: 0.1388458 seconds
+[2020-03-27T15:40:56.021+0100][0.790s][info][safepoint    ] Total time for which application threads were stopped: 0.0001431 seconds, Stopping threads took: 0.0000109 seconds
+[2020-03-27T15:40:56.046+0100][0.815s][info][safepoint    ] Application time: 0.0245254 seconds
+[2020-03-27T15:40:56.046+0100][0.815s][info][safepoint    ] Total time for which application threads were stopped: 0.0001442 seconds, Stopping threads took: 0.0000140 seconds
+[2020-03-27T15:40:56.111+0100][0.880s][info][safepoint    ] Application time: 0.0648422 seconds
+[2020-03-27T15:40:56.111+0100][0.880s][info][gc,start     ] GC(0) Pause Initial Mark (Metadata GC Threshold)
+[2020-03-27T15:40:56.111+0100][0.880s][info][gc,task      ] GC(0) Using 8 workers of 8 for evacuation
+[2020-03-27T15:40:56.111+0100][0.880s][debug][gc,age       ] GC(0) Desired survivor size 6815744 bytes, new threshold 15 (max threshold 15)
+[2020-03-27T15:40:56.119+0100][0.888s][trace][gc,age       ] GC(0) Age table with threshold 15 (max threshold 15)
+[2020-03-27T15:40:56.119+0100][0.888s][trace][gc,age       ] GC(0) - age   1:   13393960 bytes,   13393960 total
+[2020-03-27T15:40:56.120+0100][0.888s][info ][gc,phases    ] GC(0)   Pre Evacuate Collection Set: 0.0ms
+[2020-03-27T15:40:56.120+0100][0.888s][info ][gc,phases    ] GC(0)   Evacuate Collection Set: 4.3ms
+[2020-03-27T15:40:56.120+0100][0.888s][info ][gc,phases    ] GC(0)   Post Evacuate Collection Set: 4.0ms
+[2020-03-27T15:40:56.120+0100][0.888s][info ][gc,phases    ] GC(0)   Other: 0.2ms
+[2020-03-27T15:40:56.120+0100][0.888s][info ][gc,heap      ] GC(0) Eden regions: 80->0(89)
+[2020-03-27T15:40:56.120+0100][0.888s][info ][gc,heap      ] GC(0) Survivor regions: 0->13(13)
+[2020-03-27T15:40:56.120+0100][0.888s][info ][gc,heap      ] GC(0) Old regions: 0->1
+[2020-03-27T15:40:56.120+0100][0.888s][info ][gc,heap      ] GC(0) Humongous regions: 3->3
+[2020-03-27T15:40:56.120+0100][0.888s][info ][gc,metaspace ] GC(0) Metaspace: 20277K->20277K(1069056K)
+[2020-03-27T15:40:56.120+0100][0.888s][info ][gc           ] GC(0) Pause Initial Mark (Metadata GC Threshold) 82M->16M(2048M) 8.628ms
+[2020-03-27T15:40:56.120+0100][0.888s][info ][gc,cpu       ] GC(0) User=0.02s Sys=0.02s Real=0.01s
+[2020-03-27T15:40:56.120+0100][0.888s][info ][safepoint    ] Total time for which application threads were stopped: 0.0088020 seconds, Stopping threads took: 0.0000286 seconds
+[2020-03-27T15:40:56.120+0100][0.888s][info ][gc           ] GC(1) Concurrent Cycle
+[2020-03-27T15:40:56.120+0100][0.888s][info ][gc,marking   ] GC(1) Concurrent Clear Claimed Marks
+[2020-03-27T15:40:56.120+0100][0.888s][info ][gc,marking   ] GC(1) Concurrent Clear Claimed Marks 0.026ms
+[2020-03-27T15:40:56.120+0100][0.888s][info ][gc,marking   ] GC(1) Concurrent Scan Root Regions
+[2020-03-27T15:40:56.122+0100][0.890s][info ][gc,marking   ] GC(1) Concurrent Scan Root Regions 1.825ms
+[2020-03-27T15:40:56.122+0100][0.890s][info ][gc,marking   ] GC(1) Concurrent Mark (0.890s)
+[2020-03-27T15:40:56.122+0100][0.890s][info ][gc,marking   ] GC(1) Concurrent Mark From Roots
+[2020-03-27T15:40:56.122+0100][0.890s][info ][gc,task      ] GC(1) Using 2 workers of 2 for marking
+[2020-03-27T15:40:56.122+0100][0.891s][info ][gc,marking   ] GC(1) Concurrent Mark From Roots 0.399ms
+[2020-03-27T15:40:56.122+0100][0.891s][info ][gc,marking   ] GC(1) Concurrent Mark (0.890s, 0.891s) 0.426ms
+[2020-03-27T15:40:56.122+0100][0.891s][info ][safepoint    ] Application time: 0.0023978 seconds
+[2020-03-27T15:40:56.122+0100][0.891s][info ][gc,start     ] GC(1) Pause Remark
+[2020-03-27T15:40:56.124+0100][0.893s][info ][gc,stringtable] GC(1) Cleaned string and symbol table, strings: 9002 processed, 0 removed, symbols: 67781 processed, 44 removed
+[2020-03-27T15:40:56.124+0100][0.893s][info ][gc            ] GC(1) Pause Remark 17M->17M(2048M) 1.921ms
+[2020-03-27T15:40:56.124+0100][0.893s][info ][gc,cpu        ] GC(1) User=0.00s Sys=0.00s Real=0.00s
+[2020-03-27T15:40:56.124+0100][0.893s][info ][safepoint     ] Total time for which application threads were stopped: 0.0019984 seconds, Stopping threads took: 0.0000264 seconds
+[2020-03-27T15:40:56.124+0100][0.893s][info ][gc,marking    ] GC(1) Concurrent Create Live Data
+[2020-03-27T15:40:56.125+0100][0.893s][info ][gc,marking    ] GC(1) Concurrent Create Live Data 0.215ms
+[2020-03-27T15:40:56.125+0100][0.893s][info ][safepoint     ] Application time: 0.0003221 seconds
+[2020-03-27T15:40:56.125+0100][0.894s][info ][gc,start      ] GC(1) Pause Cleanup
+[2020-03-27T15:40:56.126+0100][0.894s][info ][gc            ] GC(1) Pause Cleanup 17M->17M(2048M) 0.690ms
+[2020-03-27T15:40:56.126+0100][0.894s][info ][gc,cpu        ] GC(1) User=0.00s Sys=0.00s Real=0.00s
+[2020-03-27T15:40:56.126+0100][0.894s][info ][safepoint     ] Total time for which application threads were stopped: 0.0010876 seconds, Stopping threads took: 0.0003533 seconds
+[2020-03-27T15:40:56.126+0100][0.894s][info ][gc,marking    ] GC(1) Concurrent Cleanup for Next Mark
+[2020-03-27T15:40:56.128+0100][0.897s][info ][gc,marking    ] GC(1) Concurrent Cleanup for Next Mark 2.396ms
+[2020-03-27T15:40:56.128+0100][0.897s][info ][gc            ] GC(1) Concurrent Cycle 8.374ms
+[2020-03-27T15:40:56.181+0100][0.949s][info ][safepoint     ] Application time: 0.0550265 seconds
+[2020-03-27T15:40:56.181+0100][0.950s][info ][safepoint     ] Total time for which application threads were stopped: 0.0001479 seconds, Stopping threads took: 0.0000135 seconds
+[2020-03-27T15:40:56.200+0100][0.969s][info ][safepoint     ] Application time: 0.0195861 seconds
+[2020-03-27T15:40:56.200+0100][0.969s][info ][safepoint     ] Total time for which application threads were stopped: 0.0001556 seconds, Stopping threads took: 0.0000139 seconds
+[2020-03-27T15:40:56.237+0100][1.006s][info ][safepoint     ] Application time: 0.0368707 seconds
+[2020-03-27T15:40:56.237+0100][1.006s][info ][safepoint     ] Total time for which application threads were stopped: 0.0001688 seconds, Stopping threads took: 0.0000131 seconds
+[2020-03-27T15:40:56.334+0100][1.103s][info ][safepoint     ] Application time: 0.0969119 seconds
+[2020-03-27T15:40:56.334+0100][1.103s][info ][safepoint     ] Total time for which application threads were stopped: 0.0001607 seconds, Stopping threads took: 0.0000116 seconds
+[2020-03-27T15:40:56.349+0100][1.118s][info ][safepoint     ] Application time: 0.0140211 seconds
+[2020-03-27T15:40:56.349+0100][1.118s][info ][safepoint     ] Total time for which application threads were stopped: 0.0001787 seconds, Stopping threads took: 0.0000288 seconds
+[2020-03-27T15:40:56.382+0100][1.151s][info ][safepoint     ] Application time: 0.0329127 seconds
+[2020-03-27T15:40:56.382+0100][1.151s][info ][safepoint     ] Total time for which application threads were stopped: 0.0001868 seconds, Stopping threads took: 0.0000161 seconds
+[2020-03-27T15:40:56.540+0100][1.310s][info ][safepoint     ] Application time: 0.1587561 seconds
+[2020-03-27T15:40:56.541+0100][1.310s][info ][safepoint     ] Total time for which application threads were stopped: 0.0001857 seconds, Stopping threads took: 0.0000139 seconds
+[2020-03-27T15:40:57.027+0100][1.796s][info ][safepoint     ] Application time: 0.4857623 seconds
+[2020-03-27T15:40:57.027+0100][1.796s][info ][safepoint     ] Total time for which application threads were stopped: 0.0002380 seconds, Stopping threads took: 0.0000282 seconds
+[2020-03-27T15:40:57.147+0100][1.916s][info ][safepoint     ] Application time: 0.1198074 seconds
+[2020-03-27T15:40:57.147+0100][1.916s][info ][safepoint     ] Total time for which application threads were stopped: 0.0002760 seconds, Stopping threads took: 0.0000272 seconds
+[2020-03-27T15:40:57.266+0100][2.035s][info ][safepoint     ] Application time: 0.1190863 seconds
+[2020-03-27T15:40:57.266+0100][2.035s][info ][gc,start      ] GC(2) Pause Full (System.gc())
+[2020-03-27T15:40:57.267+0100][2.036s][info ][gc,phases,start] GC(2) Phase 1: Mark live objects
+[2020-03-27T15:40:57.282+0100][2.051s][info ][gc,stringtable ] GC(2) Cleaned string and symbol table, strings: 14657 processed, 133 removed, symbols: 98345 processed, 48 removed
+[2020-03-27T15:40:57.282+0100][2.052s][info ][gc,phases      ] GC(2) Phase 1: Mark live objects 15.585ms
+[2020-03-27T15:40:57.282+0100][2.052s][info ][gc,phases,start] GC(2) Phase 2: Compute new object addresses
+[2020-03-27T15:40:57.297+0100][2.066s][info ][gc,phases      ] GC(2) Phase 2: Compute new object addresses 14.248ms
+[2020-03-27T15:40:57.297+0100][2.066s][info ][gc,phases,start] GC(2) Phase 3: Adjust pointers
+[2020-03-27T15:40:57.308+0100][2.077s][info ][gc,phases      ] GC(2) Phase 3: Adjust pointers 11.234ms
+[2020-03-27T15:40:57.308+0100][2.077s][info ][gc,phases,start] GC(2) Phase 4: Move objects
+[2020-03-27T15:40:57.321+0100][2.090s][info ][gc,phases      ] GC(2) Phase 4: Move objects 12.907ms
+[2020-03-27T15:40:57.324+0100][2.093s][info ][gc,task        ] GC(2) Using 8 workers of 8 to rebuild remembered set
+[2020-03-27T15:40:57.327+0100][2.097s][info ][gc,heap        ] GC(2) Eden regions: 63->0(102)
+[2020-03-27T15:40:57.328+0100][2.097s][info ][gc,heap        ] GC(2) Survivor regions: 13->0(13)
+[2020-03-27T15:40:57.328+0100][2.097s][info ][gc,heap        ] GC(2) Old regions: 1->16
+[2020-03-27T15:40:57.328+0100][2.097s][info ][gc,heap        ] GC(2) Humongous regions: 3->3
+[2020-03-27T15:40:57.328+0100][2.097s][info ][gc,metaspace   ] GC(2) Metaspace: 31003K->31003K(1077248K)
+[2020-03-27T15:40:57.328+0100][2.097s][info ][gc             ] GC(2) Pause Full (System.gc()) 79M->18M(2048M) 61.386ms
+[2020-03-27T15:40:57.328+0100][2.097s][info ][gc,cpu         ] GC(2) User=0.17s Sys=0.02s Real=0.06s
+[2020-03-27T15:40:57.328+0100][2.097s][info ][safepoint      ] Total time for which application threads were stopped: 0.0616069 seconds, Stopping threads took: 0.0000586 seconds
+[2020-03-27T15:40:58.328+0100][3.097s][info ][safepoint      ] Application time: 1.0000770 seconds
+[2020-03-27T15:40:58.328+0100][3.097s][info ][safepoint      ] Total time for which application threads were stopped: 0.0002435 seconds, Stopping threads took: 0.0000407 seconds
+[2020-03-27T15:40:59.329+0100][4.097s][info ][safepoint      ] Application time: 1.0000247 seconds
+[2020-03-27T15:40:59.329+0100][4.098s][info ][safepoint      ] Total time for which application threads were stopped: 0.0003117 seconds, Stopping threads took: 0.0000577 seconds
+[2020-03-27T15:40:59.438+0100][4.207s][info ][safepoint      ] Application time: 0.1089786 seconds
+[2020-03-27T15:40:59.438+0100][4.207s][info ][safepoint      ] Total time for which application threads were stopped: 0.0002248 seconds, Stopping threads took: 0.0000297 seconds
+[2020-03-27T15:41:00.439+0100][5.208s][info ][safepoint      ] Application time: 1.0006172 seconds
+[2020-03-27T15:41:00.439+0100][5.208s][info ][safepoint      ] Total time for which application threads were stopped: 0.0000557 seconds, Stopping threads took: 0.0000164 seconds
+[2020-03-27T15:41:01.440+0100][6.209s][info ][safepoint      ] Application time: 1.0007977 seconds
+[2020-03-27T15:41:01.440+0100][6.209s][info ][safepoint      ] Total time for which application threads were stopped: 0.0000653 seconds, Stopping threads took: 0.0000323 seconds
+[2020-03-27T15:41:02.441+0100][7.210s][info ][safepoint      ] Application time: 1.0008638 seconds
+[2020-03-27T15:41:02.441+0100][7.210s][info ][safepoint      ] Total time for which application threads were stopped: 0.0002269 seconds, Stopping threads took: 0.0000592 seconds
+[2020-03-27T15:41:04.441+0100][9.210s][info ][safepoint      ] Application time: 2.0000803 seconds
+[2020-03-27T15:41:04.441+0100][9.210s][info ][safepoint      ] Total time for which application threads were stopped: 0.0002389 seconds, Stopping threads took: 0.0000646 seconds
+[2020-03-27T15:41:06.443+0100][11.212s][info ][safepoint      ] Application time: 2.0010323 seconds
+[2020-03-27T15:41:06.443+0100][11.212s][info ][safepoint      ] Total time for which application threads were stopped: 0.0002109 seconds, Stopping threads took: 0.0000548 seconds
+[2020-03-27T15:41:07.444+0100][12.212s][info ][safepoint      ] Application time: 1.0002513 seconds
+[2020-03-27T15:41:07.444+0100][12.212s][info ][safepoint      ] Total time for which application threads were stopped: 0.0001004 seconds, Stopping threads took: 0.0000357 seconds
+[2020-03-27T15:41:09.445+0100][14.213s][info ][safepoint      ] Application time: 2.0010410 seconds
+[2020-03-27T15:41:09.445+0100][14.214s][info ][safepoint      ] Total time for which application threads were stopped: 0.0001323 seconds, Stopping threads took: 0.0000794 seconds
+[2020-03-27T15:41:10.445+0100][15.214s][info ][safepoint      ] Application time: 1.0003113 seconds
+[2020-03-27T15:41:10.445+0100][15.214s][info ][safepoint      ] Total time for which application threads were stopped: 0.0002175 seconds, Stopping threads took: 0.0001243 seconds
+[2020-03-27T15:41:11.446+0100][16.215s][info ][safepoint      ] Application time: 1.0008384 seconds
+[2020-03-27T15:41:11.446+0100][16.215s][info ][gc,start       ] GC(3) Pause Young (G1 Evacuation Pause)
+[2020-03-27T15:41:11.446+0100][16.215s][info ][gc,task        ] GC(3) Using 8 workers of 8 for evacuation
+[2020-03-27T15:41:11.446+0100][16.215s][debug][gc,age         ] GC(3) Desired survivor size 6815744 bytes, new threshold 1 (max threshold 15)
+[2020-03-27T15:41:11.468+0100][16.237s][trace][gc,age         ] GC(3) Age table with threshold 1 (max threshold 15)
+[2020-03-27T15:41:11.468+0100][16.237s][trace][gc,age         ] GC(3) - age   1:   13628840 bytes,   13628840 total
+[2020-03-27T15:41:11.469+0100][16.237s][info ][gc,phases      ] GC(3)   Pre Evacuate Collection Set: 0.1ms
+[2020-03-27T15:41:11.469+0100][16.237s][info ][gc,phases      ] GC(3)   Evacuate Collection Set: 21.0ms
+[2020-03-27T15:41:11.469+0100][16.237s][info ][gc,phases      ] GC(3)   Post Evacuate Collection Set: 0.8ms
+[2020-03-27T15:41:11.469+0100][16.237s][info ][gc,phases      ] GC(3)   Other: 0.2ms
+[2020-03-27T15:41:11.469+0100][16.237s][info ][gc,heap        ] GC(3) Eden regions: 102->0(89)
+[2020-03-27T15:41:11.469+0100][16.237s][info ][gc,heap        ] GC(3) Survivor regions: 0->13(13)
+[2020-03-27T15:41:11.469+0100][16.237s][info ][gc,heap        ] GC(3) Old regions: 16->27
+[2020-03-27T15:41:11.469+0100][16.237s][info ][gc,heap        ] GC(3) Humongous regions: 11->11
+[2020-03-27T15:41:11.469+0100][16.237s][info ][gc,metaspace   ] GC(3) Metaspace: 31540K->31540K(1079296K)
+[2020-03-27T15:41:11.469+0100][16.237s][info ][gc             ] GC(3) Pause Young (G1 Evacuation Pause) 128M->49M(2048M) 22.248ms
+[2020-03-27T15:41:11.469+0100][16.237s][info ][gc,cpu         ] GC(3) User=0.13s Sys=0.00s Real=0.02s
+[2020-03-27T15:41:11.469+0100][16.238s][info ][safepoint      ] Total time for which application threads were stopped: 0.0224473 seconds, Stopping threads took: 0.0000808 seconds
+[2020-03-27T15:41:12.469+0100][17.238s][info ][safepoint      ] Application time: 1.0000844 seconds
+[2020-03-27T15:41:12.469+0100][17.238s][info ][safepoint      ] Total time for which application threads were stopped: 0.0002020 seconds, Stopping threads took: 0.0001427 seconds
+[2020-03-27T15:41:13.469+0100][18.238s][info ][safepoint      ] Application time: 1.0000276 seconds
+[2020-03-27T15:41:13.469+0100][18.238s][info ][safepoint      ] Total time for which application threads were stopped: 0.0001173 seconds, Stopping threads took: 0.0000637 seconds
+[2020-03-27T15:41:14.470+0100][19.238s][info ][safepoint      ] Application time: 1.0001261 seconds
+[2020-03-27T15:41:14.470+0100][19.238s][info ][safepoint      ] Total time for which application threads were stopped: 0.0000999 seconds, Stopping threads took: 0.0000440 seconds
+[2020-03-27T15:41:18.471+0100][23.239s][info ][safepoint      ] Application time: 4.0009080 seconds
+[2020-03-27T15:41:18.471+0100][23.239s][info ][safepoint      ] Total time for which application threads were stopped: 0.0001032 seconds, Stopping threads took: 0.0000487 seconds
+[2020-03-27T15:41:19.471+0100][24.240s][info ][safepoint      ] Application time: 1.0006765 seconds
+[2020-03-27T15:41:19.471+0100][24.240s][info ][safepoint      ] Total time for which application threads were stopped: 0.0001402 seconds, Stopping threads took: 0.0000553 seconds
+[2020-03-27T15:41:20.472+0100][25.240s][info ][safepoint      ] Application time: 1.0000543 seconds
+[2020-03-27T15:41:20.472+0100][25.241s][info ][safepoint      ] Total time for which application threads were stopped: 0.0001994 seconds, Stopping threads took: 0.0001428 seconds
+[2020-03-27T15:41:20.634+0100][25.403s][info ][safepoint      ] Application time: 0.1624610 seconds
+[2020-03-27T15:41:20.634+0100][25.403s][info ][gc,start       ] GC(4) Pause Young (G1 Evacuation Pause)
+[2020-03-27T15:41:20.634+0100][25.403s][info ][gc,task        ] GC(4) Using 8 workers of 8 for evacuation
+[2020-03-27T15:41:20.634+0100][25.403s][debug][gc,age         ] GC(4) Desired survivor size 6815744 bytes, new threshold 1 (max threshold 15)
+[2020-03-27T15:41:20.656+0100][25.425s][trace][gc,age         ] GC(4) Age table with threshold 1 (max threshold 15)
+[2020-03-27T15:41:20.656+0100][25.426s][trace][gc,age         ] GC(4) - age   1:   13168256 bytes,   13168256 total
+[2020-03-27T15:41:20.656+0100][25.426s][info ][gc,phases      ] GC(4)   Pre Evacuate Collection Set: 0.0ms
+[2020-03-27T15:41:20.656+0100][25.426s][info ][gc,phases      ] GC(4)   Evacuate Collection Set: 21.8ms
+[2020-03-27T15:41:20.656+0100][25.426s][info ][gc,phases      ] GC(4)   Post Evacuate Collection Set: 0.5ms
+[2020-03-27T15:41:20.656+0100][25.426s][info ][gc,phases      ] GC(4)   Other: 0.2ms
+[2020-03-27T15:41:20.656+0100][25.426s][info ][gc,heap        ] GC(4) Eden regions: 89->0(89)
+[2020-03-27T15:41:20.656+0100][25.426s][info ][gc,heap        ] GC(4) Survivor regions: 13->13(13)
+[2020-03-27T15:41:20.656+0100][25.426s][info ][gc,heap        ] GC(4) Old regions: 27->41
+[2020-03-27T15:41:20.656+0100][25.426s][info ][gc,heap        ] GC(4) Humongous regions: 13->13
+[2020-03-27T15:41:20.656+0100][25.426s][info ][gc,metaspace   ] GC(4) Metaspace: 31581K->31581K(1079296K)
+[2020-03-27T15:41:20.656+0100][25.426s][info ][gc             ] GC(4) Pause Young (G1 Evacuation Pause) 140M->66M(2048M) 22.646ms
+[2020-03-27T15:41:20.656+0100][25.426s][info ][gc,cpu         ] GC(4) User=0.13s Sys=0.00s Real=0.02s
+[2020-03-27T15:41:20.657+0100][25.426s][info ][safepoint      ] Total time for which application threads were stopped: 0.0227567 seconds, Stopping threads took: 0.0000167 seconds
+[2020-03-27T15:41:21.658+0100][26.426s][info ][safepoint      ] Application time: 1.0004910 seconds
+[2020-03-27T15:41:21.658+0100][26.427s][info ][safepoint      ] Total time for which application threads were stopped: 0.0001736 seconds, Stopping threads took: 0.0001307 seconds
+[2020-03-27T15:41:23.658+0100][28.427s][info ][safepoint      ] Application time: 2.0004130 seconds
+[2020-03-27T15:41:23.658+0100][28.427s][info ][safepoint      ] Total time for which application threads were stopped: 0.0001462 seconds, Stopping threads took: 0.0000952 seconds
+[2020-03-27T15:41:26.659+0100][31.428s][info ][safepoint      ] Application time: 3.0007901 seconds
+[2020-03-27T15:41:26.659+0100][31.428s][info ][safepoint      ] Total time for which application threads were stopped: 0.0001595 seconds, Stopping threads took: 0.0001197 seconds
+[2020-03-27T15:41:27.660+0100][32.428s][info ][safepoint      ] Application time: 1.0001173 seconds
+[2020-03-27T15:41:27.660+0100][32.429s][info ][safepoint      ] Total time for which application threads were stopped: 0.0001697 seconds, Stopping threads took: 0.0001000 seconds
+[2020-03-27T15:41:29.135+0100][33.904s][info ][safepoint      ] Application time: 1.4756045 seconds
+[2020-03-27T15:41:29.135+0100][33.904s][info ][gc,start       ] GC(5) Pause Young (G1 Evacuation Pause)
+[2020-03-27T15:41:29.135+0100][33.904s][info ][gc,task        ] GC(5) Using 8 workers of 8 for evacuation
+[2020-03-27T15:41:29.136+0100][33.904s][debug][gc,age         ] GC(5) Desired survivor size 6815744 bytes, new threshold 1 (max threshold 15)
+[2020-03-27T15:41:29.153+0100][33.922s][trace][gc,age         ] GC(5) Age table with threshold 1 (max threshold 15)
+[2020-03-27T15:41:29.153+0100][33.922s][trace][gc,age         ] GC(5) - age   1:   11983000 bytes,   11983000 total
+[2020-03-27T15:41:29.153+0100][33.922s][info ][gc,phases      ] GC(5)   Pre Evacuate Collection Set: 0.0ms
+[2020-03-27T15:41:29.153+0100][33.922s][info ][gc,phases      ] GC(5)   Evacuate Collection Set: 17.2ms
+[2020-03-27T15:41:29.153+0100][33.922s][info ][gc,phases      ] GC(5)   Post Evacuate Collection Set: 0.6ms
+[2020-03-27T15:41:29.153+0100][33.922s][info ][gc,phases      ] GC(5)   Other: 0.1ms
+[2020-03-27T15:41:29.153+0100][33.922s][info ][gc,heap        ] GC(5) Eden regions: 89->0(89)
+[2020-03-27T15:41:29.153+0100][33.922s][info ][gc,heap        ] GC(5) Survivor regions: 13->13(13)
+[2020-03-27T15:41:29.153+0100][33.922s][info ][gc,heap        ] GC(5) Old regions: 41->54
+[2020-03-27T15:41:29.153+0100][33.922s][info ][gc,heap        ] GC(5) Humongous regions: 21->21
+[2020-03-27T15:41:29.153+0100][33.922s][info ][gc,metaspace   ] GC(5) Metaspace: 31622K->31622K(1079296K)
+[2020-03-27T15:41:29.153+0100][33.922s][info ][gc             ] GC(5) Pause Young (G1 Evacuation Pause) 163M->87M(2048M) 17.998ms
+[2020-03-27T15:41:29.154+0100][33.922s][info ][gc,cpu         ] GC(5) User=0.13s Sys=0.00s Real=0.02s
+[2020-03-27T15:41:29.154+0100][33.922s][info ][safepoint      ] Total time for which application threads were stopped: 0.0181132 seconds, Stopping threads took: 0.0000207 seconds
+[2020-03-27T15:41:31.154+0100][35.923s][info ][safepoint      ] Application time: 2.0006603 seconds
+[2020-03-27T15:41:31.154+0100][35.923s][info ][safepoint      ] Total time for which application threads were stopped: 0.0002236 seconds, Stopping threads took: 0.0001694 seconds
+[2020-03-27T15:41:33.266+0100][38.035s][info ][safepoint      ] Application time: 2.1117275 seconds
+[2020-03-27T15:41:33.267+0100][38.036s][info ][safepoint      ] Total time for which application threads were stopped: 0.0003454 seconds, Stopping threads took: 0.0002318 seconds
+[2020-03-27T15:41:34.267+0100][39.036s][info ][safepoint      ] Application time: 1.0002703 seconds
+[2020-03-27T15:41:34.267+0100][39.036s][info ][safepoint      ] Total time for which application threads were stopped: 0.0000895 seconds, Stopping threads took: 0.0000473 seconds
+[2020-03-27T15:41:37.947+0100][42.716s][info ][safepoint      ] Application time: 3.6804720 seconds
+[2020-03-27T15:41:37.947+0100][42.717s][info ][gc,start       ] GC(6) Pause Young (G1 Evacuation Pause)
+[2020-03-27T15:41:37.947+0100][42.717s][info ][gc,task        ] GC(6) Using 8 workers of 8 for evacuation
+[2020-03-27T15:41:37.947+0100][42.717s][debug][gc,age         ] GC(6) Desired survivor size 6815744 bytes, new threshold 1 (max threshold 15)
+[2020-03-27T15:41:37.963+0100][42.732s][trace][gc,age         ] GC(6) Age table with threshold 1 (max threshold 15)
+[2020-03-27T15:41:37.963+0100][42.732s][trace][gc,age         ] GC(6) - age   1:   10127872 bytes,   10127872 total
+[2020-03-27T15:41:37.963+0100][42.733s][info ][gc,phases      ] GC(6)   Pre Evacuate Collection Set: 0.0ms
+[2020-03-27T15:41:37.963+0100][42.733s][info ][gc,phases      ] GC(6)   Evacuate Collection Set: 15.5ms
+[2020-03-27T15:41:37.963+0100][42.733s][info ][gc,phases      ] GC(6)   Post Evacuate Collection Set: 0.6ms
+[2020-03-27T15:41:37.964+0100][42.733s][info ][gc,phases      ] GC(6)   Other: 0.2ms
+[2020-03-27T15:41:37.964+0100][42.733s][info ][gc,heap        ] GC(6) Eden regions: 89->0(91)
+[2020-03-27T15:41:37.964+0100][42.733s][info ][gc,heap        ] GC(6) Survivor regions: 13->11(13)
+[2020-03-27T15:41:37.964+0100][42.733s][info ][gc,heap        ] GC(6) Old regions: 54->66
+[2020-03-27T15:41:37.964+0100][42.733s][info ][gc,heap        ] GC(6) Humongous regions: 25->25
+[2020-03-27T15:41:37.964+0100][42.733s][info ][gc,metaspace   ] GC(6) Metaspace: 31637K->31637K(1079296K)
+[2020-03-27T15:41:37.964+0100][42.733s][info ][gc             ] GC(6) Pause Young (G1 Evacuation Pause) 180M->101M(2048M) 16.382ms
+[2020-03-27T15:41:37.964+0100][42.733s][info ][gc,cpu         ] GC(6) User=0.13s Sys=0.00s Real=0.02s
+[2020-03-27T15:41:37.964+0100][42.733s][info ][safepoint      ] Total time for which application threads were stopped: 0.0165441 seconds, Stopping threads took: 0.0000368 seconds
+[2020-03-27T15:41:38.964+0100][43.733s][info ][safepoint      ] Application time: 1.0002253 seconds
+[2020-03-27T15:41:38.964+0100][43.733s][info ][safepoint      ] Total time for which application threads were stopped: 0.0002246 seconds, Stopping threads took: 0.0001622 seconds
+[2020-03-27T15:41:39.965+0100][44.734s][info ][safepoint      ] Application time: 1.0000712 seconds
+[2020-03-27T15:41:39.965+0100][44.734s][info ][safepoint      ] Total time for which application threads were stopped: 0.0001714 seconds, Stopping threads took: 0.0001172 seconds
+[2020-03-27T15:41:44.966+0100][49.735s][info ][safepoint      ] Application time: 5.0014030 seconds
+[2020-03-27T15:41:44.966+0100][49.735s][info ][safepoint      ] Total time for which application threads were stopped: 0.0000903 seconds, Stopping threads took: 0.0000487 seconds
+[2020-03-27T15:41:45.966+0100][50.736s][info ][safepoint      ] Application time: 1.0001757 seconds
+[2020-03-27T15:41:45.966+0100][50.736s][info ][safepoint      ] Total time for which application threads were stopped: 0.0001914 seconds, Stopping threads took: 0.0001326 seconds
+[2020-03-27T15:41:47.449+0100][52.218s][info ][safepoint      ] Application time: 1.4818123 seconds
+[2020-03-27T15:41:47.449+0100][52.218s][info ][gc,start       ] GC(7) Pause Young (G1 Evacuation Pause)
+[2020-03-27T15:41:47.449+0100][52.218s][info ][gc,task        ] GC(7) Using 8 workers of 8 for evacuation
+[2020-03-27T15:41:47.449+0100][52.218s][debug][gc,age         ] GC(7) Desired survivor size 6815744 bytes, new threshold 1 (max threshold 15)
+[2020-03-27T15:41:47.460+0100][52.230s][trace][gc,age         ] GC(7) Age table with threshold 1 (max threshold 15)
+[2020-03-27T15:41:47.460+0100][52.230s][trace][gc,age         ] GC(7) - age   1:    8870240 bytes,    8870240 total
+[2020-03-27T15:41:47.460+0100][52.230s][info ][gc,phases      ] GC(7)   Pre Evacuate Collection Set: 0.1ms
+[2020-03-27T15:41:47.462+0100][52.231s][info ][gc,phases      ] GC(7)   Evacuate Collection Set: 11.9ms
+[2020-03-27T15:41:47.462+0100][52.231s][info ][gc,phases      ] GC(7)   Post Evacuate Collection Set: 0.7ms
+[2020-03-27T15:41:47.462+0100][52.231s][info ][gc,phases      ] GC(7)   Other: 0.2ms
+[2020-03-27T15:41:47.462+0100][52.231s][info ][gc,heap        ] GC(7) Eden regions: 91->0(119)
+[2020-03-27T15:41:47.462+0100][52.231s][info ][gc,heap        ] GC(7) Survivor regions: 11->10(13)
+[2020-03-27T15:41:47.462+0100][52.231s][info ][gc,heap        ] GC(7) Old regions: 66->76
+[2020-03-27T15:41:47.462+0100][52.231s][info ][gc,heap        ] GC(7) Humongous regions: 25->25
+[2020-03-27T15:41:47.462+0100][52.231s][info ][gc,metaspace   ] GC(7) Metaspace: 31656K->31656K(1079296K)
+[2020-03-27T15:41:47.462+0100][52.231s][info ][gc             ] GC(7) Pause Young (G1 Evacuation Pause) 192M->109M(2048M) 12.832ms
+[2020-03-27T15:41:47.462+0100][52.231s][info ][gc,cpu         ] GC(7) User=0.13s Sys=0.00s Real=0.01s
+[2020-03-27T15:41:47.462+0100][52.231s][info ][safepoint      ] Total time for which application threads were stopped: 0.0129897 seconds, Stopping threads took: 0.0000423 seconds
+[2020-03-27T15:41:50.462+0100][55.232s][info ][safepoint      ] Application time: 3.0008869 seconds
+[2020-03-27T15:41:50.462+0100][55.232s][info ][safepoint      ] Total time for which application threads were stopped: 0.0001328 seconds, Stopping threads took: 0.0000769 seconds
+[2020-03-27T15:41:51.463+0100][56.232s][info ][safepoint      ] Application time: 1.0001507 seconds
+[2020-03-27T15:41:51.463+0100][56.232s][info ][safepoint      ] Total time for which application threads were stopped: 0.0002197 seconds, Stopping threads took: 0.0001602 seconds
+[2020-03-27T15:41:52.463+0100][57.232s][info ][safepoint      ] Application time: 1.0000104 seconds
+[2020-03-27T15:41:52.463+0100][57.232s][info ][safepoint      ] Total time for which application threads were stopped: 0.0001682 seconds, Stopping threads took: 0.0001262 seconds
+[2020-03-27T15:41:55.464+0100][60.233s][info ][safepoint      ] Application time: 3.0007667 seconds
+[2020-03-27T15:41:55.464+0100][60.233s][info ][safepoint      ] Total time for which application threads were stopped: 0.0001394 seconds, Stopping threads took: 0.0000975 seconds
+[2020-03-27T15:41:57.836+0100][62.605s][info ][safepoint      ] Application time: 2.3716761 seconds
+[2020-03-27T15:41:57.836+0100][62.605s][info ][gc,start       ] GC(8) Pause Full (System.gc())
+[2020-03-27T15:41:57.837+0100][62.606s][info ][gc,phases,start] GC(8) Phase 1: Mark live objects
+[2020-03-27T15:41:57.893+0100][62.662s][info ][gc,stringtable ] GC(8) Cleaned string and symbol table, strings: 14923 processed, 4 removed, symbols: 98678 processed, 0 removed
+[2020-03-27T15:41:57.893+0100][62.662s][info ][gc,phases      ] GC(8) Phase 1: Mark live objects 55.906ms
+[2020-03-27T15:41:57.893+0100][62.662s][info ][gc,phases,start] GC(8) Phase 2: Compute new object addresses
+[2020-03-27T15:41:57.950+0100][62.720s][info ][gc,phases      ] GC(8) Phase 2: Compute new object addresses 58.480ms
+[2020-03-27T15:41:57.950+0100][62.720s][info ][gc,phases,start] GC(8) Phase 3: Adjust pointers
+[2020-03-27T15:41:57.988+0100][62.758s][info ][gc,phases      ] GC(8) Phase 3: Adjust pointers 37.638ms
+[2020-03-27T15:41:57.988+0100][62.758s][info ][gc,phases,start] GC(8) Phase 4: Move objects
+[2020-03-27T15:41:58.023+0100][62.793s][info ][gc,phases      ] GC(8) Phase 4: Move objects 34.535ms
+[2020-03-27T15:41:58.027+0100][62.796s][info ][gc,task        ] GC(8) Using 8 workers of 8 to rebuild remembered set
+[2020-03-27T15:41:58.039+0100][62.808s][info ][gc,heap        ] GC(8) Eden regions: 97->0(139)
+[2020-03-27T15:41:58.039+0100][62.808s][info ][gc,heap        ] GC(8) Survivor regions: 10->0(13)
+[2020-03-27T15:41:58.039+0100][62.808s][info ][gc,heap        ] GC(8) Old regions: 76->82
+[2020-03-27T15:41:58.039+0100][62.808s][info ][gc,heap        ] GC(8) Humongous regions: 25->12
+[2020-03-27T15:41:58.039+0100][62.808s][info ][gc,metaspace   ] GC(8) Metaspace: 31665K->31665K(1079296K)
+[2020-03-27T15:41:58.039+0100][62.808s][info ][gc             ] GC(8) Pause Full (System.gc()) 206M->92M(2048M) 203.078ms
+[2020-03-27T15:41:58.039+0100][62.808s][info ][gc,cpu         ] GC(8) User=0.20s Sys=0.00s Real=0.20s
+[2020-03-27T15:41:58.039+0100][62.808s][info ][safepoint      ] Total time for which application threads were stopped: 0.2033957 seconds, Stopping threads took: 0.0001895 seconds
+[2020-03-27T15:42:01.040+0100][65.809s][info ][safepoint      ] Application time: 3.0007903 seconds
+[2020-03-27T15:42:01.040+0100][65.810s][info ][safepoint      ] Total time for which application threads were stopped: 0.0002548 seconds, Stopping threads took: 0.0002136 seconds
