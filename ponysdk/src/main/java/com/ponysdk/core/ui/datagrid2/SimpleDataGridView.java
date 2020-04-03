@@ -102,7 +102,8 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
     private final UnpinnedTable unpinnedTable;
     private Addon addon;
     private final List<Row> rows = new ArrayList<>();
-    private final DataGridController<K, V> controller = new SimpleDataGridController<>();
+    //Modified accessors
+    public final DataGridController<K, V> controller = new SimpleDataGridController<>();
     private DataGridAdapter<K, V> adapter;
     private long pollingDelayMillis;
     private UIRunnable delayedDrawRunnable;
