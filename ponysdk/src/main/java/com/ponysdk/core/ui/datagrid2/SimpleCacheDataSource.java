@@ -44,10 +44,6 @@ public class SimpleCacheDataSource<K, V> extends SimpleDataSource<K, V> {
     protected final Map<K, Row<V>> cache = new HashMap<>();
     private final List<Row<V>> liveData = new ArrayList<>();
 
-    //----------------------------------------------------------------------------------------------------------//
-    //------------------------------------------ Row Getters --------------------------------------------------//
-    //----------------------------------------------------------------------------------------------------------//
-
     @Override
     public Row<V> getRow(final K k) {
         return cache.get(k);
@@ -74,11 +70,6 @@ public class SimpleCacheDataSource<K, V> extends SimpleDataSource<K, V> {
         return liveData.size();
     }
 
-    //----------------------------------------------------------------------------------------------------------//
-    //-------------------------------------- Gestion de cahce, liveData ----------------------------------------//
-    //----------------------------------------------------------------------------------------------------------//
-
-    // Insert data in the cache or update it if it already exists
     @Override
     public Interval setData(final V v) {
         Objects.requireNonNull(v);
@@ -94,7 +85,6 @@ public class SimpleCacheDataSource<K, V> extends SimpleDataSource<K, V> {
         return interval;
     }
 
-    // Rows are updated when they already exist
     private Interval updateData(final K k, final Row<V> row, final V newV) {
         if (row.accepted) {
             final int oldLiveDataSize = liveData.size();
@@ -143,7 +133,6 @@ public class SimpleCacheDataSource<K, V> extends SimpleDataSource<K, V> {
         return row.data;
     }
 
-    // Here rows are created and inserted in liveData
     private Interval insertData(final K k, final V data) {
         final Row<V> row = new Row<>(rowCounter++, data);
         row.accepted = accept(row);
@@ -200,10 +189,6 @@ public class SimpleCacheDataSource<K, V> extends SimpleDataSource<K, V> {
         }
     }
 
-    //----------------------------------------------------------------------------------------------------------//
-    //------------------------------------------------ Sorting -------------------------------------------------//
-    //----------------------------------------------------------------------------------------------------------//
-
     @Override
     public void sort() {
         super.sort();
@@ -229,22 +214,13 @@ public class SimpleCacheDataSource<K, V> extends SimpleDataSource<K, V> {
         }
     }
 
-    //----------------------------------------------------------------------------------------------------------//
-    //----------------------------------------------- Filtering ------------------------------------------------//
-    //----------------------------------------------------------------------------------------------------------//
-
     @Override
     public void setFilter(Object key, final String id, final boolean reinforcing, final AbstractFilter<V> filter) {
         key = key.toString();
         final AbstractFilter<V> oldFilter = filters.put(key, filter);
         if (oldFilter == null || reinforcing) {
-            //            final int oldLiveDataSize = liveData.size();
-            //            final int from = reinforceFilter(liveData, filter);
             reinforceFilter(liveData, filter);
             reinforceFilter(liveSelectedData, filter);
-            //            if (from >= 0) {
-            //                refreshRows(from, oldLiveDataSize);
-            //            }
         } else {
             resetLiveData();
         }
@@ -271,9 +247,6 @@ public class SimpleCacheDataSource<K, V> extends SimpleDataSource<K, V> {
         return true;
     }
 
-    //----------------------------------------------------------------------------------------------------------//
-    //----------------------------------------------- Selecting ------------------------------------------------//
-    //----------------------------------------------------------------------------------------------------------//
     @Override
     public void select(final K k) {
         final Row<V> row = cache.get(k);

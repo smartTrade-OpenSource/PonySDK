@@ -102,8 +102,7 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
     private final UnpinnedTable unpinnedTable;
     private Addon addon;
     private final List<Row> rows = new ArrayList<>();
-    //Modified accessors
-    public final DataGridController<K, V> controller = new SimpleDataGridController<>();
+    private final DataGridController<K, V> controller = new SimpleDataGridController<>();
     private DataGridAdapter<K, V> adapter;
     private long pollingDelayMillis;
     private UIRunnable delayedDrawRunnable;
@@ -149,13 +148,13 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         unpinnedTable = new UnpinnedTable(headerUnpinnedDiv, bodyUnpinnedDiv, footerUnpinnedDiv);
     }
 
-    //ADDED
-
     public DataGridAdapter<K, V> getAdapter() {
         return adapter;
     }
 
-    //---------//
+    public DataGridController<K, V> getController() {
+        return controller;
+    }
 
     //FIXME : to be injected via spring and not setted
     @Override
@@ -256,11 +255,9 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
             columnView.visible = visible;
         }
         onUpdateRows(0, controller.getRowCount());
-        //        controller.setHorizontalScroll(true);
         isHorizontalScroll = true;
         draw();
         isHorizontalScroll = false;
-        //        controller.setHorizontalScroll(false);
     }
 
     private void onColumnResized(final int column, final int width) {
@@ -300,30 +297,24 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
 
     private void onColumnMoved(final int from, final int to) {
         if (from == to) return;
-
         final ColumnDefinition<V> fromCol = adapter.getColumnDefinitions().get(from);
         if (fromCol.getDraggableHeaderElement() == null) return;
         final ColumnView fromColumnView = getColumnView(fromCol);
         final int fromIndex = unpinnedTable.columns.indexOf(fromColumnView);
         if (fromIndex < 0) return;
-
         final ColumnDefinition<V> toCol = adapter.getColumnDefinitions().get(to);
         if (toCol.getDraggableHeaderElement() == null) return;
         final ColumnView toColumnView = getColumnView(toCol);
         final int toIndex = unpinnedTable.columns.indexOf(toColumnView);
         if (toIndex < 0) return;
-
         unpinnedTable.columns.remove(fromIndex);
         unpinnedTable.columns.add(toIndex, fromColumnView);
-
         final PWidget header = unpinnedTable.header.getWidget(fromIndex);
         unpinnedTable.header.remove(fromIndex);
         unpinnedTable.header.insert(header, toIndex);
-
         final PWidget footer = unpinnedTable.footer.getWidget(fromIndex);
         unpinnedTable.footer.remove(fromIndex);
         unpinnedTable.footer.insert(footer, toIndex);
-
         for (final Row row : rows) {
             row.unpinnedCells.add(toIndex, row.unpinnedCells.remove(fromIndex));
             final PWidget widget = row.unpinnedRow.getWidget(fromIndex);
@@ -355,11 +346,9 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
             } else {
                 start = Math.max(0, from - firstRowIndex);
             }
-
             final int size = unpinnedTable.body.getWidgetCount();
             System.out.println("\n\n" + "#-View-# Prepare onDraw -> row : " + firstRowIndex + "   size : " + size);
             controller.prepareLiveDataOnScreen(firstRowIndex, size, isHorizontalScroll);
-
             for (int i = start; i < size; i++) {
                 updateRow(rows.get(i), absoluteRowCount);
             }
@@ -383,20 +372,14 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         final boolean mustUpdateRowHeight = row.extended || !row.isShown();
         row.show();
         final K previousKey = row.key;
-        //        final int absoluteIndex = row.getAbsoluteIndex();
-        //        final V rowData = controller.getRowData(absoluteIndex);
         final V rowData = controller.getRowData(row.getRelativeIndex());
-
         row.key = adapter.getKey(rowData);
         final boolean selected = controller.isSelected(row.key);
         row.extended = false;
-
         updateRowCells(row, row.unpinnedCells, unpinnedTable.columns, selected, previousKey);
         updateRowCells(row, row.pinnedCells, pinnedTable.columns, selected, previousKey);
-
         if (row.extended) addon.updateExtendedRowHeight(row.relativeIndex);
         else if (mustUpdateRowHeight) addon.updateRowHeight(row.relativeIndex);
-
         if (selected) {
             adapter.onSelectRow(row.unpinnedRow);
             row.unpinnedRow.setAttribute(SELECTED_ATTRIBUTE);
@@ -408,7 +391,6 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
             adapter.onUnselectRow(row.pinnedRow);
             row.pinnedRow.removeAttribute(SELECTED_ATTRIBUTE);
         }
-
         applyRowActions(row, rowData);
     }
 
@@ -448,7 +430,6 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
                 showExtendedCellWidget(row, cell, td, extendedCellHandler);
             }
         }
-
     }
 
     private void showExtendedCellWidget(final Row row, final Cell<V> cell, final PComplexPanel td,

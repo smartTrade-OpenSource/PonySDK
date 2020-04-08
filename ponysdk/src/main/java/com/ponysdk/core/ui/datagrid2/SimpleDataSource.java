@@ -53,9 +53,6 @@ public abstract class SimpleDataSource<K, V> implements DataGridSource<K, V> {
     protected RenderingHelpersCache<V> renderingHelpersCache; //FIXME : listener de dataSource
     protected int rowCounter = 0;
 
-    //---------------------------------------//
-    //------------ Getters/Setters ----------//
-    //---------------------------------------//
     @Override
     public List<Row<V>> getLiveSelectedData() {
         return liveSelectedData;
@@ -71,9 +68,6 @@ public abstract class SimpleDataSource<K, V> implements DataGridSource<K, V> {
         this.renderingHelpersCache = renderingHelpersCache;
     }
 
-    //------------------------------------------------//
-    //-- BinarySearch insertion, removal, findIndex --//
-    //------------------------------------------------//
     protected int insertRow(final List<Row<V>> rows, final Row<V> row) {
         if (rows.size() == 0) {
             rows.add(row);
@@ -134,9 +128,6 @@ public abstract class SimpleDataSource<K, V> implements DataGridSource<K, V> {
         return adapter.isAscendingSortByInsertionOrder() ? r1.id - r2.id : r2.id - r1.id;
     }
 
-    //------------------------------------//
-    //------------- Sorting --------------//
-    //------------------------------------//
     @Override
     public void addSort(final Column<V> column, final ColumnControllerSort colSort, final boolean asc) {
         final ColumnControllerSort tmpColSort = (ColumnControllerSort) sorts.get(column);
@@ -177,9 +168,6 @@ public abstract class SimpleDataSource<K, V> implements DataGridSource<K, V> {
         return sorts.entrySet();
     }
 
-    //------------------------//
-    //------- Filtering ------//
-    //------------------------//
     @Override
     public AbstractFilter<V> clearFilter(final Object key) {
         return filters.remove(key);
@@ -200,9 +188,6 @@ public abstract class SimpleDataSource<K, V> implements DataGridSource<K, V> {
         filters.clear();
     }
 
-    //------------------------//
-    //------ Selecting -------//
-    //------------------------//
     @Override
     public boolean isSelected(final K k) {
         return selectedKeys.contains(k);

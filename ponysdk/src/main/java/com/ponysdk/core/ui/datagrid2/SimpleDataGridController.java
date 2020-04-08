@@ -74,7 +74,6 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
         dataSource.setRenderingHelpersCache(renderingHelpersCache);
     }
 
-    // The adapter is used to set up and initialize the DataGridView
     @Override
     public void setAdapter(final DataGridAdapter<K, V> adapter) {
         if (this.adapter != null) throw new IllegalStateException("DataGridAdapter is already set");
@@ -102,7 +101,6 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
         return null;
     }
 
-    // To prevent recalculating on some data we stock them in renderingHelpersCache
     private Object getRenderingHelper(final Row<V> row, final Column<V> column) {
         final Object[] renderingHelpers = renderingHelpersCache.computeIfAbsent(row, r -> new Object[columns.size()]);
         Object helper = renderingHelpers[column.id];
@@ -124,7 +122,6 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
         renderingHelpers[column.id] = null;
     }
 
-    // clears the Map filters then resets data
     @Override
     public void clearFilters(final ColumnDefinition<V> column) {
         checkAdapter();
@@ -302,31 +299,12 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
 
     @Override
     public void prepareLiveDataOnScreen(final int rowIndex, final int size, final boolean isHorizontalScroll) {
-        /*
-         * If we have already the data in liveDataOnScreen then return
-         * Use Case: Horizontal Scroll / Pin / Unpin / Delete-Move column
-         */
+        //If we have already the data in liveDataOnScreen then return (Horizontal Scroll/Pin/Unpin/Delete-Move column)
         if (absoluteIndex == rowIndex && size == liveDataOnScreen.size() && isHorizontalScroll) {
             System.out.println("#-Ctrl-# We prepare nothing");
             return;
         }
-        //Commented because it's a problem for the DB
-        /*
-         * If we have already some of the data then ask only for what we don't have
-         * Use Case: Window resize
-         */
-        //        if (absoluteIndex == rowIndex && size > liveDataOnScreen.size() && !liveDataOnScreen.isEmpty()) {
-        //            System.out.println("#-Ctrl-# We prepare in+ -> row: " + (rowIndex + liveDataOnScreen.size()) + "   size: "
-        //                    + (size - liveDataOnScreen.size()));
-        //            final List<Row<V>> tmp = dataSource.getRows(rowIndex + liveDataOnScreen.size(), size - liveDataOnScreen.size());
-        //            liveDataOnScreen.addAll(tmp);
-        //            absoluteIndex = rowIndex;
-        //            return;
-        //        }
-        /*
-         * If the demanded data is different from what we have then overwite it with the new data
-         * Use Case: Sort / Filter / Scroll Vertical
-         */
+        //If the demanded data is different from what we have (Sort/Filter/Vertical Scroll)
         if (liveDataOnScreen != null) {
             liveDataOnScreen.clear();
             System.out.println("#-Ctrl-# We clean then prepare -> row: " + (rowIndex + liveDataOnScreen.size()) + "   size: "
@@ -384,10 +362,8 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
     @Override
     public void setConfig(final DataGridConfig<V> config) {
         checkAdapter();
-
         dataSource.clearSorts();
         dataSource.clearFilters();
-
         for (final Sort<V> s : config.getSorts()) {
             if (s == null) continue;
             if (s instanceof ColumnSort) {
@@ -395,7 +371,6 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
                 final Column<V> column = getColumn(sort.getColumnId());
                 if (column == null) continue;
                 dataSource.addSort(column, new ColumnControllerSort(column, sort.isAsc()));
-
             } else { // s instanceof GeneralSort
                 final GeneralSort<V> sort = (GeneralSort<V>) s;
                 dataSource.addSort(sort.getKey(), new GeneralControllerSort(sort.getComparator()));
@@ -462,11 +437,7 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
         dataSource.unselectAllData();
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////// Nested Classes /////////////////////////////////////////////
-    ///////////////////////////////////////////////////////////////////////////////////////////////////
     //FIXME : modified accessors
-
     public static class Interval {
 
         private final int from;
@@ -520,7 +491,6 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
             this.def = def;
         }
 
-        //Added
         public ColumnDefinition<V> getColDef() {
             return def;
         }

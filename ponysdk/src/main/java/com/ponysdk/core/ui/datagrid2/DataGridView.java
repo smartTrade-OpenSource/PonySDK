@@ -44,8 +44,11 @@ public interface DataGridView<K, V> extends IsPWidget {
      */
     void setAdapter(DataGridAdapter<K, V> adapter);
 
-    //ADDED
-    void setDataSource(DataGridSource src);
+    /**
+     * FIXME : to be injected otherwise
+     * Sets the db dataSource in the controller
+     */
+    void setDataSource(DataGridSource<K, V> src);
 
     /**
      * Sets the delay (in milliseconds) that will be used between consecutive draws of the view.<br/>
@@ -93,9 +96,6 @@ public interface DataGridView<K, V> extends IsPWidget {
      *            value of the {@code reinforcing} argument has no impact.
      */
     void setFilter(Object key, String id, Predicate<V> filter, boolean reinforcing);
-
-    //ADDED
-    //    void setFilter(Object key, final String id, final Predicate<V> filter, final boolean reinforcing);
 
     /**
      * Adds/replaces a sorting criterion for the view.
