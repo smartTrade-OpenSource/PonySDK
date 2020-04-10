@@ -41,7 +41,7 @@ import com.ponysdk.core.ui.datagrid2.SimpleDataGridController.Row;
  */
 public class SimpleCacheDataSource<K, V> extends SimpleDataSource<K, V> {
 
-    protected final Map<K, Row<V>> cache = new HashMap<>();
+    private final Map<K, Row<V>> cache = new HashMap<>();
     private final List<Row<V>> liveData = new ArrayList<>();
 
     @Override
