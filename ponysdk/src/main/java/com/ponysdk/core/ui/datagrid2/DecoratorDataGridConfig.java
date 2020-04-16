@@ -26,6 +26,9 @@ package com.ponysdk.core.ui.datagrid2;
 import java.util.List;
 import java.util.Map;
 
+import com.ponysdk.core.ui.datagrid2.DataGridConfig.ColumnConfig;
+import com.ponysdk.core.ui.datagrid2.DataGridConfig.Sort;
+
 /**
  * @author mbagdouri
  */

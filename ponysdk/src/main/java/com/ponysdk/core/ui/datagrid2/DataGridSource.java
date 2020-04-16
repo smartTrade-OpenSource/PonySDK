@@ -31,11 +31,7 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-import com.ponysdk.core.ui.datagrid2.SimpleDataGridController.Column;
-import com.ponysdk.core.ui.datagrid2.SimpleDataGridController.ColumnControllerSort;
-import com.ponysdk.core.ui.datagrid2.SimpleDataGridController.Interval;
 import com.ponysdk.core.ui.datagrid2.SimpleDataGridController.RenderingHelpersCache;
-import com.ponysdk.core.ui.datagrid2.SimpleDataGridController.Row;
 
 /**
  *
@@ -88,7 +84,7 @@ public interface DataGridSource<K, V> {
     /**
      * Adds a sort
      */
-    void addSort(final Column<V> column, final ColumnControllerSort colSort, final boolean asc);
+    void addSort(final Column<V> column, final SimpleDataGridController<K, V>.ColumnControllerSort colSort, final boolean asc);
 
     void addSort(Object key, Comparator<Row<V>> comparator);
 

@@ -37,10 +37,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.ui.datagrid2.SimpleDataGridController.Column;
-import com.ponysdk.core.ui.datagrid2.SimpleDataGridController.ColumnControllerSort;
 import com.ponysdk.core.ui.datagrid2.SimpleDataGridController.RenderingHelpersCache;
-import com.ponysdk.core.ui.datagrid2.SimpleDataGridController.Row;
 
 public abstract class SimpleDataSource<K, V> implements DataGridSource<K, V> {
 
@@ -88,7 +85,7 @@ public abstract class SimpleDataSource<K, V> implements DataGridSource<K, V> {
             if (diff < 0) left = index + 1;
             else if (diff > 0) right = index - 1;
             else throw new IllegalArgumentException(
-                "Cannot insert an already existing row : existing=" + middleRow.data + ", new=" + row.data);
+                "Cannot insert an already existing row : existing=" + middleRow.getData() + ", new=" + row.getData());
         }
         if (diff < 0) index++;
         rows.add(index, row);
@@ -122,15 +119,16 @@ public abstract class SimpleDataSource<K, V> implements DataGridSource<K, V> {
             final int diff = sort.compare(r1, r2);
             if (diff != 0) return diff;
         }
-        final int diff = adapter.compareDefault(r1.data, r2.data);
+        final int diff = adapter.compareDefault(r1.getData(), r2.getData());
         if (diff != 0) return diff;
 
-        return adapter.isAscendingSortByInsertionOrder() ? r1.id - r2.id : r2.id - r1.id;
+        return adapter.isAscendingSortByInsertionOrder() ? r1.getID() - r2.getID() : r2.getID() - r1.getID();
     }
 
     @Override
-    public void addSort(final Column<V> column, final ColumnControllerSort colSort, final boolean asc) {
-        final ColumnControllerSort tmpColSort = (ColumnControllerSort) sorts.get(column);
+    public void addSort(final Column<V> column, final SimpleDataGridController<K, V>.ColumnControllerSort colSort, final boolean asc) {
+        final SimpleDataGridController<K, V>.ColumnControllerSort tmpColSort = (SimpleDataGridController<K, V>.ColumnControllerSort) sorts
+            .get(column);
         if (tmpColSort != null && tmpColSort.asc == asc) return;
         sorts.put(column, colSort);
         sort();

@@ -32,7 +32,7 @@ import java.util.function.Supplier;
 /**
  * @author mbagdouri
  */
-//ADDED accessor
+
 public interface DataGridController<K, V> {
 
     void renderCell(ColumnDefinition<V> column, int row, Cell<V> widget);

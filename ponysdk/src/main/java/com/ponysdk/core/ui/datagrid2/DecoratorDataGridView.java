@@ -29,6 +29,8 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.datagrid2.DataGridView.DecodeException;
+import com.ponysdk.core.ui.datagrid2.DataGridView.DrawListener;
 
 /**
  * @author mbagdouri
@@ -167,16 +169,8 @@ public class DecoratorDataGridView<K, V> implements DataGridView<K, V> {
         view.removeDrawListener(drawListener);
     }
 
-    //ADDED
     @Override
-    public void setDataSource(final DataGridSource src) {
+    public void setDataSource(final DataGridSource<K, V> src) {
         view.setDataSource(src);
     }
-
-    //ADDED
-    //    @Override
-    //    public void setFilter(final Object key, final String id, final Predicate<V> filter, final boolean reinforcing) {
-    //        view.setFilter(key, id, filter, reinforcing);
-    //    }
-
 }

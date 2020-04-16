@@ -26,7 +26,7 @@ package com.ponysdk.core.ui.datagrid2;
 /**
  * @author mbagdouri
  */
-interface DataGridControllerListener<V> {
+public interface DataGridControllerListener<V> {
 
     void onUpdateRows(int from, int to);
 }

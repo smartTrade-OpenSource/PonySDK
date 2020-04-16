@@ -56,6 +56,7 @@ import com.ponysdk.core.ui.datagrid2.DataGridConfig.ColumnConfig;
 import com.ponysdk.core.ui.datagrid2.DataGridConfig.ColumnSort;
 import com.ponysdk.core.ui.datagrid2.DataGridConfig.GeneralSort;
 import com.ponysdk.core.ui.datagrid2.DataGridConfig.Sort;
+import com.ponysdk.core.ui.datagrid2.DataGridView.DrawListener;
 import com.ponysdk.core.util.SetUtils;
 
 /**
@@ -158,7 +159,7 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
 
     //FIXME : to be injected via spring and not setted
     @Override
-    public void setDataSource(final DataGridSource dataSrc) {
+    public void setDataSource(final DataGridSource<K, V> dataSrc) {
         ((SimpleDataGridController<K, V>) controller).setDataSource(dataSrc);
     }
 
@@ -326,7 +327,8 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
     /**
      * Updates the indexes of the rows that must be redrawn
      */
-    private void onUpdateRows(final int from, final int to) {
+    //    private void onUpdateRows(final int from, final int to) {
+    public void onUpdateRows(final int from, final int to) {
         if (from >= to) return;
         this.from = Math.min(this.from, from);
         this.to = Math.max(this.to, to);

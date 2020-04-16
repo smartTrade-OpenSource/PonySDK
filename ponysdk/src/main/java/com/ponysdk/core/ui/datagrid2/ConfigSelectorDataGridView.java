@@ -42,6 +42,7 @@ import com.ponysdk.core.ui.datagrid2.ColumnDefinition.State;
 import com.ponysdk.core.ui.datagrid2.DataGridConfig.ColumnConfig;
 import com.ponysdk.core.ui.datagrid2.DataGridConfig.ColumnSort;
 import com.ponysdk.core.ui.datagrid2.DataGridConfig.Sort;
+import com.ponysdk.core.ui.datagrid2.DataGridView.DecodeException;
 
 /**
  * @author mbagdouri

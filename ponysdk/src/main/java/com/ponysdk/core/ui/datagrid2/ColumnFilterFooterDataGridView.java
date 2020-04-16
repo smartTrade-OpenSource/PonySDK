@@ -33,6 +33,7 @@ import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
+import com.ponysdk.core.ui.datagrid2.DataGridView.DecodeException;
 import com.ponysdk.core.util.StringUtils;
 
 /**

@@ -96,14 +96,13 @@ import com.ponysdk.core.ui.datagrid2.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.ColumnVisibilitySelectorDataGridView;
 import com.ponysdk.core.ui.datagrid2.ConfigSelectorDataGridView;
 import com.ponysdk.core.ui.datagrid2.DataGridAdapter;
-import com.ponysdk.core.ui.datagrid2.DataGridController;
 import com.ponysdk.core.ui.datagrid2.DataGridModel;
 import com.ponysdk.core.ui.datagrid2.DataGridView;
-import com.ponysdk.core.ui.datagrid2.DataGridView.DecodeException;
 import com.ponysdk.core.ui.datagrid2.RowAction;
 import com.ponysdk.core.ui.datagrid2.RowSelectorColumnDataGridView;
 import com.ponysdk.core.ui.datagrid2.SimpleColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.SimpleDataGridView;
+import com.ponysdk.core.ui.datagrid2.DataGridView.DecodeException;
 import com.ponysdk.core.ui.eventbus2.EventBus.EventHandler;
 import com.ponysdk.core.ui.formatter.TextFunction;
 import com.ponysdk.core.ui.grid.AbstractGridWidget;
@@ -135,8 +134,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     private static int counter;
 
     // These 3 variables are added for the performnace test
-    private int rowCounter = 0;
-    private int actionCounter = 0;
+    private final int rowCounter = 0;
+    private final int actionCounter = 0;
     private final Map<Character, SimpleColumnDefinition> colDefs = new HashMap<>();
 
     @Override
@@ -150,8 +149,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         mainLabel.setTitle("String ASCII");
         PWindow.getMain().add(mainLabel);
 
-        testSimpleDataGridViewOnly();
-        //        testSimpleDataGridViewOnly();
+        testSimpleDataGridView();
 
         if (true) return;
 
@@ -295,260 +293,16 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         // uiContext.getHistory().newItem("", false);
     }
 
-    //--------------------------- Functional / performance tests --------------------------------//
-
-    private void testSimpleDataGridViewOnly() {
-        final DataGridView<Integer, MyRow> simpleGridView = new SimpleDataGridView<>();
-        final ColumnVisibilitySelectorDataGridView<Integer, MyRow> columnVisibilitySelectorDataGridView = new ColumnVisibilitySelectorDataGridView<>(
-            simpleGridView);
-        final RowSelectorColumnDataGridView<Integer, MyRow> rowSelectorColumnDataGridView = new RowSelectorColumnDataGridView<>(
-            columnVisibilitySelectorDataGridView);
-        final ConfigSelectorDataGridView<Integer, MyRow> configSelectorDataGridView = new ConfigSelectorDataGridView<>(
-            rowSelectorColumnDataGridView, "DEFAULT");
-
-        final DataGridView<Integer, MyRow> gridView = configSelectorDataGridView;
-        gridView.setAdapter(new DataGridAdapter<Integer, MyRow>() {
-
-            private final List<ColumnDefinition<MyRow>> columns = new ArrayList<>();
-
-            {
-                for (char c = 'a'; c <= 'z'; c++) {
-                    final String ss = c + "";
-                    final SimpleColumnDefinition<MyRow> colDef = new SimpleColumnDefinition<>(ss, v -> v.getValue(ss), (v, s) -> {
-                        v.putValue(ss, s);
-                    });
-                    colDefs.put(c, colDef);
-                    columns.add(colDef);
-                }
-            }
-
-            @Override
-            public void onUnselectRow(final IsPWidget rowWidget) {
-                rowWidget.asWidget().removeStyleName("selected-row");
-            }
-
-            @Override
-            public void onSelectRow(final IsPWidget rowWidget) {
-                rowWidget.asWidget().addStyleName("selected-row");
-            }
-
-            @Override
-            public boolean isAscendingSortByInsertionOrder() {
-                return false;
-            }
-
-            @Override
-            public Integer getKey(final MyRow v) {
-                return v.id;
-            }
-
-            @Override
-            public List<ColumnDefinition<MyRow>> getColumnDefinitions() {
-                return columns;
-            }
-
-            @Override
-            public int compareDefault(final MyRow v1, final MyRow v2) {
-                return 0;
-            }
-
-            @Override
-            public void onCreateHeaderRow(final IsPWidget rowWidget) {
-                rowWidget.asWidget().getParent().asWidget().setStyleProperty("background", "aliceblue");
-            }
-
-            @Override
-            public void onCreateFooterRow(final IsPWidget rowWidget) {
-                rowWidget.asWidget().getParent().asWidget().setStyleProperty("background", "aliceblue");
-            }
-
-            @Override
-            public void onCreateRow(final IsPWidget rowWidget) {
-            }
-
-            @Override
-            public boolean hasHeader() {
-                return true;
-            }
-
-            @Override
-            public boolean hasFooter() {
-                return false;
-            }
-
-            @Override
-            public IsPWidget createLoadingDataWidget() {
-                final PComplexPanel div = Element.newDiv();
-                div.setWidth("100%");
-                div.setHeight("100%");
-                div.setStyleProperty("background-color", "#FFFFFF7F");
-                return div;
-            }
-
-            @Override
-            public void onCreateColumnResizer(final IsPWidget resizer) {
-            }
-        });
-        gridView.setPollingDelayMillis(250L);
-        final DataGridModel<Integer, MyRow> model = gridView.getModel();
-        final DataGridController<Integer, MyRow> controller = ((SimpleDataGridView) simpleGridView).getController();
-        gridView.asWidget().setHeight("950px");
-        gridView.asWidget().setWidth("1900px");
-        gridView.asWidget().setStyleProperty("resize", "both");
-        gridView.asWidget().setStyleProperty("overflow", "hidden");
-
-        PWindow.getMain().add(gridView);
-        PWindow.getMain().add(configSelectorDataGridView.getDecoratorWidget());
-
-        model.setBound(false);
-        for (int i = 0; i < 50_000; i++) {
-            if (i % 500_000 == 0) log.info("i: {}", i);
-            model.setData(createMyRow(i));
-            rowCounter++;
-        }
-        model.setBound(true);
-        gridView.addRowAction(UISampleEntryPoint.class, new RowAction<>() {
-
-            @Override
-            public boolean testRow(final MyRow t, final int index) {
-                return (index & 1) == 0;
-            }
-
-            @Override
-            public void cancel(final IsPWidget row) {
-                row.asWidget().removeStyleName("unpair-row");
-            }
-
-            @Override
-            public void apply(final IsPWidget row) {
-                row.asWidget().addStyleName("unpair-row");
-            }
-        });
-
-        final TestAction addDataAction = (i) -> {
-            i = rowCounter++;
-            model.setData(createMyRow(i));
-        };
-
-        final TestAction removeDataAction = (i) -> {
-            i = --rowCounter;
-            model.removeData(i);
-        };
-
-        final TestAction updateDataAction = (i) -> {
-            i %= rowCounter;
-            if (i == 0) {
-                actionCounter++;
-            }
-            final MyRow v = createMyRow(i);
-
-            for (char column = 'a'; column < 'e'; column++) {
-                if (column == 'a') {
-                    int updatedValue = i;
-                    for (int j = 0; j < actionCounter; j++) {
-                        updatedValue *= 0.99;
-                    }
-                    v.putValue("a", String.format("a" + "%09d", updatedValue));
-                } else if (column == 'b') {
-                    int updatedValue = i;
-                    for (int j = 0; j < actionCounter; j++) {
-                        updatedValue *= 1.1;
-                    }
-                    v.putValue("b", String.format("b" + "%09d", updatedValue));
-                } else if (column == 'c') {
-                    int updatedValue = i;
-                    for (int j = 0; j < actionCounter; j++) {
-                        updatedValue *= 1.15;
-                    }
-                    v.putValue("c", String.format("c" + "%09d", updatedValue));
-                } else if (column == 'd') {
-                    int updatedValue = i;
-                    for (int j = 0; j < actionCounter; j++) {
-                        updatedValue *= 1.2;
-                    }
-                    v.putValue("d", String.format("d" + "%09d", updatedValue));
-                }
-            }
-            model.setData(v);
-        };
-
-        final TestAction sortDataAction = (i) -> {
-            controller.addSort(colDefs.get('a'), true);
-            controller.addSort(colDefs.get('b'), false);
-            controller.addSort(colDefs.get('c'), true);
-        };
-
-        final TestAction filterDataAction = (i) -> {
-            controller.setFilter(0, "", (row) -> {
-                if (row.getId() % 2 == 0) return true;
-                return false;
-            }, true);
-        };
-
-        //FIXME : somtimes the update action throws a concurrency exception
-        //Test 1
-        //        addFilter(controller);
-        //        addSort(controller);
-        //        testPerformanceBench(rowCounter, 60, updateDataAction);
-
-        //Test 2
-        //        testPerformanceBench(rowCounter, 60, addDataAction);
-
-        //Test 3
-        //        testPerformanceBench(rowCounter, 1, removeDataAction);
-    }
-
-    private void addFilter(final DataGridController<Integer, MyRow> controller) {
-        controller.setFilter(0, "", (row) -> {
-            if (row.getId() % 2 == 0) return true;
-            return false;
-        }, true);
-    }
-
-    private void addSort(final DataGridController<Integer, MyRow> controller) {
-        controller.addSort(colDefs.get('a'), true);
-        controller.addSort(colDefs.get('b'), false);
-        controller.addSort(colDefs.get('c'), true);
-    }
-
-    /**
-     * This function tests an action by measuring the duration of the execution of this action.
-     * It is destined to be called when the wanted action will dure all the test. The objectif is
-     * not to measure the performance of an action alone but to compare it with another optimal case.
-     *
-     * @param nbOfActionPerIteration
-     *            Define how many actions you need to perform, ex: how many updates if you want to update your rows.
-     *            The maximum logical number is your rowCount in this case
-     * @param nbOfIterations
-     *            Define how many iterations you want to perform, ex: how many times you want to update each row.
-     *            The greater this value the longer the test
-     * @param testAction
-     *            Lambda expression that defines what you will execute on a single row
-     */
-    private void testPerformanceBench(final int nbOfActionPerIteration, final int nbOfIterations, final TestAction testAction) {
-        final Runnable testPerfBench = () -> {
-            int index = 0;
-            System.gc();
-            final long time_before = System.nanoTime();
-            while (index < nbOfActionPerIteration * nbOfIterations)
-                testAction.execute(index++);
-            final long time_after = System.nanoTime();
-            final long duration = time_after - time_before;
-            System.out.print("\n\n\n\n\n\nTestDuration = " + duration + "\n\n\n\n\n\n");
-            System.gc();
-        };
-        final Thread thread = new Thread(testPerfBench, "Test thread");
-        thread.start();
-    }
-
     private static class MyRow {
 
         private final int id;
         private Map<String, String> map;
+        private final String format;
 
         public MyRow(final int id) {
             super();
             this.id = id;
+            format = String.format("%09d", id);
         }
 
         public int getId() {
@@ -565,8 +319,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
                 final String v = map.get(key);
                 if (v != null) return v;
             }
-            // if (10 <= id && id <= 15) return key + String.format("%09d", 10);
-            return key + String.format("%09d", id);
+            return key + format;
         }
 
         @Override
@@ -1551,9 +1304,4 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     }
 
-}
-
-interface TestAction {
-
-    void execute(int id);
 }

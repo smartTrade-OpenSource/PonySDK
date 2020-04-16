@@ -23,12 +23,25 @@
 
 package com.ponysdk.core.ui.datagrid2;
 
-import java.util.function.Predicate;
-
 /**
  *
  */
-public interface AbstractFilter<V> extends Predicate<Row<V>> {
+public class Column<V> {
 
-    abstract ColumnDefinition<V> getColumnDefinition();
+    private final ColumnDefinition<V> def;
+    private final int id;
+
+    public Column(final int id, final ColumnDefinition<V> def) {
+        super();
+        this.id = id;
+        this.def = def;
+    }
+
+    public ColumnDefinition<V> getColDef() {
+        return def;
+    }
+
+    public int getID() {
+        return id;
+    }
 }

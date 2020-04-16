@@ -23,12 +23,17 @@
 
 package com.ponysdk.core.ui.datagrid2;
 
-import java.util.function.Predicate;
-
 /**
  *
  */
-public interface AbstractFilter<V> extends Predicate<Row<V>> {
+public class Interval {
 
-    abstract ColumnDefinition<V> getColumnDefinition();
+    public final int from;
+    public final int to;
+
+    public Interval(final int from, final int to) {
+        super();
+        this.from = from;
+        this.to = to;
+    }
 }
