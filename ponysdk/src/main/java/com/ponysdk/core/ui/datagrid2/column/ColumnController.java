@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.datagrid2;
+package com.ponysdk.core.ui.datagrid2.column;
 
 import java.util.function.BiPredicate;
 import java.util.function.Supplier;

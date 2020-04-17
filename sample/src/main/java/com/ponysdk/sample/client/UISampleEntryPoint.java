@@ -92,17 +92,17 @@ import com.ponysdk.core.ui.datagrid.DataGrid;
 import com.ponysdk.core.ui.datagrid.dynamic.Configuration;
 import com.ponysdk.core.ui.datagrid.dynamic.DynamicDataGrid;
 import com.ponysdk.core.ui.datagrid.impl.PLabelCellRenderer;
-import com.ponysdk.core.ui.datagrid2.ColumnDefinition;
-import com.ponysdk.core.ui.datagrid2.ColumnVisibilitySelectorDataGridView;
-import com.ponysdk.core.ui.datagrid2.ConfigSelectorDataGridView;
-import com.ponysdk.core.ui.datagrid2.DataGridAdapter;
-import com.ponysdk.core.ui.datagrid2.DataGridModel;
-import com.ponysdk.core.ui.datagrid2.DataGridView;
-import com.ponysdk.core.ui.datagrid2.RowAction;
-import com.ponysdk.core.ui.datagrid2.RowSelectorColumnDataGridView;
-import com.ponysdk.core.ui.datagrid2.SimpleColumnDefinition;
-import com.ponysdk.core.ui.datagrid2.SimpleDataGridView;
-import com.ponysdk.core.ui.datagrid2.DataGridView.DecodeException;
+import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
+import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
+import com.ponysdk.core.ui.datagrid2.column.SimpleColumnDefinition;
+import com.ponysdk.core.ui.datagrid2.data.RowAction;
+import com.ponysdk.core.ui.datagrid2.model.DataGridModel;
+import com.ponysdk.core.ui.datagrid2.view.ColumnVisibilitySelectorDataGridView;
+import com.ponysdk.core.ui.datagrid2.view.ConfigSelectorDataGridView;
+import com.ponysdk.core.ui.datagrid2.view.DataGridView;
+import com.ponysdk.core.ui.datagrid2.view.DataGridView.DecodeException;
+import com.ponysdk.core.ui.datagrid2.view.RowSelectorColumnDataGridView;
+import com.ponysdk.core.ui.datagrid2.view.SimpleDataGridView;
 import com.ponysdk.core.ui.eventbus2.EventBus.EventHandler;
 import com.ponysdk.core.ui.formatter.TextFunction;
 import com.ponysdk.core.ui.grid.AbstractGridWidget;
@@ -132,11 +132,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     int a = 0;
 
     private static int counter;
-
-    // These 3 variables are added for the performnace test
-    private final int rowCounter = 0;
-    private final int actionCounter = 0;
-    private final Map<Character, SimpleColumnDefinition> colDefs = new HashMap<>();
 
     @Override
     public void start(final UIContext uiContext) {

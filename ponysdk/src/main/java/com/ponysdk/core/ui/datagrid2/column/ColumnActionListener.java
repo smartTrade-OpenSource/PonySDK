@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.datagrid2;
+package com.ponysdk.core.ui.datagrid2.column;
 
 import java.util.function.BiPredicate;
 import java.util.function.Supplier;
@@ -76,7 +76,7 @@ public interface ColumnActionListener<V> {
     /**
      * Called when this column's state is changed
      * 
-     * @see ColumnController#setState(com.ponysdk.core.ui.datagrid2.ColumnDefinition.State)
+     * @see ColumnController#setState(com.ponysdk.core.ui.datagrid2.column.ColumnDefinition.State)
      */
     void onStateChanged(ColumnDefinition.State state);
 

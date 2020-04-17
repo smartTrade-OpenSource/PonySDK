@@ -21,13 +21,15 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.datagrid2;
+package com.ponysdk.core.ui.datagrid2.config;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-import com.ponysdk.core.ui.datagrid2.ColumnDefinition.State;
+import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
+import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition.State;
+import com.ponysdk.core.ui.datagrid2.view.DataGridView;
 
 /**
  * {@code DataGridConfig} is a configuration of the {@link DataGridView} that can be changed multiple times on the view

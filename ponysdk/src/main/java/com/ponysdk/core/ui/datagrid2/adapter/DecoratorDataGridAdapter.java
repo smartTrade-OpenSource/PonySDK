@@ -21,12 +21,13 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.datagrid2;
+package com.ponysdk.core.ui.datagrid2.adapter;
 
 import java.util.List;
 import java.util.Objects;
 
 import com.ponysdk.core.ui.basic.IsPWidget;
+import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 
 /**
  * @author mbagdouri

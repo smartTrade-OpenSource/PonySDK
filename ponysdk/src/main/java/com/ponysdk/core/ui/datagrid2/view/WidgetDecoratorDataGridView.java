@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.datagrid2;
+package com.ponysdk.core.ui.datagrid2.view;
 
 import com.ponysdk.core.ui.basic.PWidget;
 

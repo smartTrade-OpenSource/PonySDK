@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.datagrid2;
+package com.ponysdk.core.ui.datagrid2.controller;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,9 +36,22 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import com.ponysdk.core.ui.datagrid2.DataGridConfig.ColumnSort;
-import com.ponysdk.core.ui.datagrid2.DataGridConfig.GeneralSort;
-import com.ponysdk.core.ui.datagrid2.DataGridConfig.Sort;
+import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
+import com.ponysdk.core.ui.datagrid2.cell.Cell;
+import com.ponysdk.core.ui.datagrid2.cell.ExtendedCell;
+import com.ponysdk.core.ui.datagrid2.column.Column;
+import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
+import com.ponysdk.core.ui.datagrid2.config.DataGridConfig;
+import com.ponysdk.core.ui.datagrid2.config.DataGridConfig.ColumnSort;
+import com.ponysdk.core.ui.datagrid2.config.DataGridConfig.GeneralSort;
+import com.ponysdk.core.ui.datagrid2.config.DataGridConfig.Sort;
+import com.ponysdk.core.ui.datagrid2.config.DataGridConfigBuilder;
+import com.ponysdk.core.ui.datagrid2.data.AbstractFilter;
+import com.ponysdk.core.ui.datagrid2.data.Interval;
+import com.ponysdk.core.ui.datagrid2.data.Row;
+import com.ponysdk.core.ui.datagrid2.datasource.DataGridSource;
+import com.ponysdk.core.ui.datagrid2.datasource.SimpleCacheDataSource;
+import com.ponysdk.core.ui.datagrid2.model.DataGridModel;
 import com.ponysdk.core.util.MappedList;
 
 /**
@@ -51,7 +64,8 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
     private static final int RENDERING_HELPERS_CACHE_CAPACITY = 512;
     private int columnCounter = 0;
     private final RenderingHelpersCache<V> renderingHelpersCache = new RenderingHelpersCache<>();
-    private final List<Row<V>> liveDataOnScreen = new ArrayList<>();
+    //FIXME
+    public final List<Row<V>> liveDataOnScreen = new ArrayList<>();
     private final Map<ColumnDefinition<V>, Column<V>> columns = new HashMap<>();
     private DataGridControllerListener<V> listener;
     private DataGridAdapter<K, V> adapter;
@@ -61,16 +75,19 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
     private final RenderingHelperSupplier renderingHelperSupplier1 = new RenderingHelperSupplier();
     private final RenderingHelperSupplier renderingHelperSupplier2 = new RenderingHelperSupplier();
     private int absoluteIndex = 0; //Represents the position index of liveDataOnScreen in the overall dataGrid
-    private DataGridSource<K, V> dataSource = new SimpleCacheDataSource<>(); //FIXME : ToDo datasource has to be injected by spring
+    private DataGridSource<K, V> dataSource;
 
     public SimpleDataGridController() {
-        super();
-        setDataSource(dataSource);
+        this(new SimpleCacheDataSource<>());
+    }
+
+    public SimpleDataGridController(final DataGridSource<K, V> dataSource) {
+        this.dataSource = dataSource;
+        dataSource.setRenderingHelpersCache(renderingHelpersCache);
     }
 
     public void setDataSource(final DataGridSource<K, V> dataSrc) {
-        dataSource = dataSrc;
-        dataSource.setRenderingHelpersCache(renderingHelpersCache);
+        this.dataSource = dataSrc;
     }
 
     @Override
@@ -306,8 +323,6 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
         //If the demanded data is different from what we have (Sort/Filter/Vertical Scroll)
         if (liveDataOnScreen != null) {
             liveDataOnScreen.clear();
-            System.out.println("#-Ctrl-# We clean then prepare -> row: " + (rowIndex + liveDataOnScreen.size()) + "   size: "
-                    + (size - liveDataOnScreen.size()));
             liveDataOnScreen.addAll(dataSource.getRows(rowIndex, size));
             absoluteIndex = rowIndex;
             return;

@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.datagrid2;
+package com.ponysdk.core.ui.datagrid2.datasource;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,6 +32,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+
+import com.ponysdk.core.ui.datagrid2.data.AbstractFilter;
+import com.ponysdk.core.ui.datagrid2.data.Interval;
+import com.ponysdk.core.ui.datagrid2.data.Row;
 
 /**
  *

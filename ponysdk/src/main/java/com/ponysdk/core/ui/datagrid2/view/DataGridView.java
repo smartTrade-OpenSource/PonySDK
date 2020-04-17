@@ -21,13 +21,19 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.datagrid2;
+package com.ponysdk.core.ui.datagrid2.view;
 
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.function.Predicate;
 
 import com.ponysdk.core.ui.basic.IsPWidget;
+import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
+import com.ponysdk.core.ui.datagrid2.column.ColumnActionListener;
+import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
+import com.ponysdk.core.ui.datagrid2.config.DataGridConfig;
+import com.ponysdk.core.ui.datagrid2.data.RowAction;
+import com.ponysdk.core.ui.datagrid2.model.DataGridModel;
 
 /**
  * @author mbagdouri
@@ -43,12 +49,6 @@ public interface DataGridView<K, V> extends IsPWidget {
      * Sets a {@link DataGridAdapter} on this view
      */
     void setAdapter(DataGridAdapter<K, V> adapter);
-
-    /**
-     * FIXME : to be injected otherwise
-     * Sets the db dataSource in the controller
-     */
-    void setDataSource(DataGridSource<K, V> src);
 
     /**
      * Sets the delay (in milliseconds) that will be used between consecutive draws of the view.<br/>

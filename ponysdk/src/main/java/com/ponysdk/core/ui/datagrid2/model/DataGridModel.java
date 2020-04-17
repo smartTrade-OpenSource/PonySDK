@@ -21,11 +21,13 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.datagrid2;
+package com.ponysdk.core.ui.datagrid2.model;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Consumer;
+
+import com.ponysdk.core.ui.datagrid2.view.DataGridView;
 
 /**
  * The data model for the {@link DataGridView}. It can be used to update/read the data available for the view.

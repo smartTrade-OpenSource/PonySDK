@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.datagrid2;
+package com.ponysdk.core.ui.datagrid2.view;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -51,12 +51,27 @@ import com.ponysdk.core.ui.basic.PComplexPanel;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
-import com.ponysdk.core.ui.datagrid2.ColumnDefinition.State;
-import com.ponysdk.core.ui.datagrid2.DataGridConfig.ColumnConfig;
-import com.ponysdk.core.ui.datagrid2.DataGridConfig.ColumnSort;
-import com.ponysdk.core.ui.datagrid2.DataGridConfig.GeneralSort;
-import com.ponysdk.core.ui.datagrid2.DataGridConfig.Sort;
-import com.ponysdk.core.ui.datagrid2.DataGridView.DrawListener;
+import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
+import com.ponysdk.core.ui.datagrid2.cell.Cell;
+import com.ponysdk.core.ui.datagrid2.cell.CellController;
+import com.ponysdk.core.ui.datagrid2.cell.ExtendedCell;
+import com.ponysdk.core.ui.datagrid2.cell.ExtendedCellController;
+import com.ponysdk.core.ui.datagrid2.column.ColumnActionListener;
+import com.ponysdk.core.ui.datagrid2.column.ColumnController;
+import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
+import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition.State;
+import com.ponysdk.core.ui.datagrid2.config.DataGridConfig;
+import com.ponysdk.core.ui.datagrid2.config.DataGridConfig.ColumnConfig;
+import com.ponysdk.core.ui.datagrid2.config.DataGridConfig.ColumnSort;
+import com.ponysdk.core.ui.datagrid2.config.DataGridConfig.GeneralSort;
+import com.ponysdk.core.ui.datagrid2.config.DataGridConfig.Sort;
+import com.ponysdk.core.ui.datagrid2.config.DataGridConfigBuilder;
+import com.ponysdk.core.ui.datagrid2.controller.DataGridController;
+import com.ponysdk.core.ui.datagrid2.controller.SimpleDataGridController;
+import com.ponysdk.core.ui.datagrid2.data.RowAction;
+import com.ponysdk.core.ui.datagrid2.datasource.DataGridSource;
+import com.ponysdk.core.ui.datagrid2.model.DataGridModel;
+import com.ponysdk.core.ui.datagrid2.model.SpyDataGridModel;
 import com.ponysdk.core.util.SetUtils;
 
 /**
@@ -103,24 +118,30 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
     private final UnpinnedTable unpinnedTable;
     private Addon addon;
     private final List<Row> rows = new ArrayList<>();
-    private final DataGridController<K, V> controller = new SimpleDataGridController<>();
+    //    private final DataGridController<K, V> controller = new SimpleDataGridController<>(); //FIXME: passer en constructor
+    private final DataGridController<K, V> controller; //FIXME: passer en constructor
     private DataGridAdapter<K, V> adapter;
     private long pollingDelayMillis;
     private UIRunnable delayedDrawRunnable;
     private int from = Integer.MAX_VALUE;
     private int to = 0;
     private final Set<DrawListener> drawListeners = SetUtils.newArraySet();
-    private final Collection<V> dataView = controller.getLiveData();
-    private final Collection<V> selectedDataView = controller.getLiveSelectedData();
+    //    private final Collection<V> dataView = controller.getLiveData();
+    private final Collection<V> dataView;
+    private final Collection<V> selectedDataView;
     private final Map<ColumnDefinition<V>, ColumnView> columnViews = new HashMap<>();
-    private final DataGridModelWrapper modelWrapper = new DataGridModelWrapper(controller.getModel());
+    private final DataGridModelWrapper modelWrapper;
     private final LinkedHashMap<Object, RowAction<V>> rowActions = new LinkedHashMap<>();
     private int firstRowIndex = 0;
     private boolean isHorizontalScroll = false;
 
     public SimpleDataGridView() {
         new HideScrollBarAddon(root);
+        controller = new SimpleDataGridController<>();
         controller.setListener(this::onUpdateRows);
+        dataView = controller.getLiveData();
+        selectedDataView = controller.getLiveSelectedData();
+        modelWrapper = new DataGridModelWrapper(controller.getModel());
 
         root.addStyleName("pony-grid");
         root.setStyleProperty("display", "flex");
@@ -149,6 +170,11 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         unpinnedTable = new UnpinnedTable(headerUnpinnedDiv, bodyUnpinnedDiv, footerUnpinnedDiv);
     }
 
+    public SimpleDataGridView(final DataGridSource<K, V> dataSource) {
+        this();
+        setDataSource(dataSource);
+    }
+
     public DataGridAdapter<K, V> getAdapter() {
         return adapter;
     }
@@ -157,9 +183,7 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         return controller;
     }
 
-    //FIXME : to be injected via spring and not setted
-    @Override
-    public void setDataSource(final DataGridSource<K, V> dataSrc) {
+    private void setDataSource(final DataGridSource<K, V> dataSrc) {
         ((SimpleDataGridController<K, V>) controller).setDataSource(dataSrc);
     }
 
@@ -351,6 +375,9 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
             final int size = unpinnedTable.body.getWidgetCount();
             System.out.println("\n\n" + "#-View-# Prepare onDraw -> row : " + firstRowIndex + "   size : " + size);
             controller.prepareLiveDataOnScreen(firstRowIndex, size, isHorizontalScroll);
+            //            while (((SimpleDataGridController) controller).liveDataOnScreen.isEmpty()) {
+            //                hideLoadingDataView();
+            //            }
             for (int i = start; i < size; i++) {
                 updateRow(rows.get(i), absoluteRowCount);
             }

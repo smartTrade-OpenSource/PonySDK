@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.datagrid2;
+package com.ponysdk.core.ui.datagrid2.column;
 
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
@@ -32,6 +32,8 @@ import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PComplexPanel;
 import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.datagrid2.cell.Cell;
+import com.ponysdk.core.ui.datagrid2.cell.LabelCell;
 
 /**
  * @author mbagdouri

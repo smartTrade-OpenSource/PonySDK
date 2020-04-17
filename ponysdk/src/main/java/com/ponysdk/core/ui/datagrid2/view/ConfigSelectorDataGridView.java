@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.datagrid2;
+package com.ponysdk.core.ui.datagrid2.view;
 
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -38,11 +38,13 @@ import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PComplexPanel;
 import com.ponysdk.core.ui.basic.PWidget;
-import com.ponysdk.core.ui.datagrid2.ColumnDefinition.State;
-import com.ponysdk.core.ui.datagrid2.DataGridConfig.ColumnConfig;
-import com.ponysdk.core.ui.datagrid2.DataGridConfig.ColumnSort;
-import com.ponysdk.core.ui.datagrid2.DataGridConfig.Sort;
-import com.ponysdk.core.ui.datagrid2.DataGridView.DecodeException;
+import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
+import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition.State;
+import com.ponysdk.core.ui.datagrid2.config.DataGridConfig;
+import com.ponysdk.core.ui.datagrid2.config.DataGridConfig.ColumnConfig;
+import com.ponysdk.core.ui.datagrid2.config.DataGridConfig.ColumnSort;
+import com.ponysdk.core.ui.datagrid2.config.DataGridConfig.Sort;
+import com.ponysdk.core.ui.datagrid2.config.DataGridConfigBuilder;
 
 /**
  * @author mbagdouri

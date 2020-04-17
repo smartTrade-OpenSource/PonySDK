@@ -21,13 +21,10 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.datagrid2;
+package com.ponysdk.core.ui.datagrid2.config;
 
 import java.util.List;
 import java.util.Map;
-
-import com.ponysdk.core.ui.datagrid2.DataGridConfig.ColumnConfig;
-import com.ponysdk.core.ui.datagrid2.DataGridConfig.Sort;
 
 /**
  * @author mbagdouri

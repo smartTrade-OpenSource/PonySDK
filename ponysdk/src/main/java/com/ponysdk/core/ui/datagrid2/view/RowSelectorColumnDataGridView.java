@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.datagrid2;
+package com.ponysdk.core.ui.datagrid2.view;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,7 +36,15 @@ import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PCheckBox;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
-import com.ponysdk.core.ui.datagrid2.DataGridConfig.ColumnConfig;
+import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
+import com.ponysdk.core.ui.datagrid2.adapter.DecoratorDataGridAdapter;
+import com.ponysdk.core.ui.datagrid2.cell.Cell;
+import com.ponysdk.core.ui.datagrid2.cell.CellController;
+import com.ponysdk.core.ui.datagrid2.column.ColumnController;
+import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
+import com.ponysdk.core.ui.datagrid2.config.DataGridConfig;
+import com.ponysdk.core.ui.datagrid2.config.DataGridConfig.ColumnConfig;
+import com.ponysdk.core.ui.datagrid2.config.DecoratorDataGridConfig;
 
 /**
  * @author mbagdouri

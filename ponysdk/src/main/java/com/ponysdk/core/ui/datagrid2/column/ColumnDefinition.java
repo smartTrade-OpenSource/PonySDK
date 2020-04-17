@@ -21,11 +21,14 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.datagrid2;
+package com.ponysdk.core.ui.datagrid2.column;
 
 import java.util.function.Supplier;
 
 import com.ponysdk.core.ui.basic.IsPWidget;
+import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
+import com.ponysdk.core.ui.datagrid2.cell.Cell;
+import com.ponysdk.core.ui.datagrid2.view.DataGridView;
 
 /**
  * Used to define and manage a column in a {@link DataGridView}.

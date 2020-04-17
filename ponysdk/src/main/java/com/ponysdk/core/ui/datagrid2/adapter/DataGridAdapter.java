@@ -21,11 +21,14 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.datagrid2;
+package com.ponysdk.core.ui.datagrid2.adapter;
 
 import java.util.List;
 
 import com.ponysdk.core.ui.basic.IsPWidget;
+import com.ponysdk.core.ui.datagrid2.column.ColumnController;
+import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
+import com.ponysdk.core.ui.datagrid2.view.DataGridView;
 
 /**
  * {@code DataGridAdapter} is used to set up and initialize the {@link DataGridView}.

@@ -21,9 +21,10 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.datagrid2;
+package com.ponysdk.core.ui.datagrid2.cell;
 
 import com.ponysdk.core.ui.basic.IsPWidget;
+import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 
 /**
  * {@code ExtendedCell} is created when a {@link Cell} is switched to mode extended. {@code ExtendedCell} will be always

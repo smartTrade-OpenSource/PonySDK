@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.datagrid2;
+package com.ponysdk.core.ui.datagrid2.view;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -29,8 +29,12 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 import com.ponysdk.core.ui.basic.PWidget;
-import com.ponysdk.core.ui.datagrid2.DataGridView.DecodeException;
-import com.ponysdk.core.ui.datagrid2.DataGridView.DrawListener;
+import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
+import com.ponysdk.core.ui.datagrid2.column.ColumnActionListener;
+import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
+import com.ponysdk.core.ui.datagrid2.config.DataGridConfig;
+import com.ponysdk.core.ui.datagrid2.data.RowAction;
+import com.ponysdk.core.ui.datagrid2.model.DataGridModel;
 
 /**
  * @author mbagdouri
@@ -167,10 +171,5 @@ public class DecoratorDataGridView<K, V> implements DataGridView<K, V> {
     @Override
     public void removeDrawListener(final DrawListener drawListener) {
         view.removeDrawListener(drawListener);
-    }
-
-    @Override
-    public void setDataSource(final DataGridSource<K, V> src) {
-        view.setDataSource(src);
     }
 }

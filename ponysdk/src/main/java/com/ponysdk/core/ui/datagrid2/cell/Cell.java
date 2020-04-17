@@ -21,10 +21,11 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.datagrid2;
+package com.ponysdk.core.ui.datagrid2.cell;
 
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 
 /**
  * {@code Cell} is a widget that will be part of a {@code DataGridView} column body. It can be recycled

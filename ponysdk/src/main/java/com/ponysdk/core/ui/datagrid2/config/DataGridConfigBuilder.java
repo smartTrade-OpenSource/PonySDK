@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.datagrid2;
+package com.ponysdk.core.ui.datagrid2.config;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,8 +29,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.ponysdk.core.ui.datagrid2.DataGridConfig.ColumnConfig;
-import com.ponysdk.core.ui.datagrid2.DataGridConfig.Sort;
+import com.ponysdk.core.ui.datagrid2.config.DataGridConfig.ColumnConfig;
+import com.ponysdk.core.ui.datagrid2.config.DataGridConfig.Sort;
 
 /**
  * @author mbagdouri
