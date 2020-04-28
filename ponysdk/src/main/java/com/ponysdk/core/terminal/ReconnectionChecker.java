@@ -54,18 +54,16 @@ public class ReconnectionChecker {
 
         reconnectionRequest = window.newXMLHttpRequest();
         reconnectionRequest.setOnreadystatechange(evt -> {
-            if (reconnectionRequest.getReadyState() == XMLHttpRequest.DONE) {
-                if (reconnectionRequest.getStatus() == HTTP_STATUS_CODE_OK) {
-                    errorDetected = false;
-                    window.getLocation().reload();
-                } else {
-                    // We reschedule the next check (we wait to avoid spaming)
-                    Scheduler.get().scheduleFixedDelay(() -> {
-                        retryConnection();
-                        return false;
-                    }, RETRY_PERIOD);
-                }
+            if (reconnectionRequest.getReadyState() == XMLHttpRequest.DONE //
+                    && reconnectionRequest.getStatus() == HTTP_STATUS_CODE_OK) {
+                errorDetected = false;
+                reloadWindow();
+                return;
             }
+            Scheduler.get().scheduleFixedDelay(() -> {
+                retryConnection();
+                return false;
+            }, RETRY_PERIOD);
         });
     }
 
@@ -92,6 +90,10 @@ public class ReconnectionChecker {
             return false;
         }, RETRY_PERIOD);
     }
+
+    public static final native void reloadWindow() /*-{
+                                                   $wnd.document.doReload();
+                                                   }-*/;
 
     private final native void notifyConnectionLostListeners() /*-{
                                                               for(var i = 0 ; i < $wnd.document.onConnectionLostListeners.length ; i++) {
