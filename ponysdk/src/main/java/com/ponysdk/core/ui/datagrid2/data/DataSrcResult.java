@@ -23,14 +23,28 @@
 
 package com.ponysdk.core.ui.datagrid2.data;
 
-import java.util.function.Predicate;
-
-import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
+import java.util.List;
 
 /**
  *
  */
-public interface AbstractFilter<V> extends Predicate<SimpleRow<V>> {
+public class DataSrcResult<T> {
 
-    abstract ColumnDefinition<V> getColumnDefinition();
+    public int firstRowIndex;
+    public int absoluteRowCount;
+    public int size;
+    public int from;
+    public int to;
+    public int start;
+    public List<SimpleRow<T>> liveData;
+
+    public DataSrcResult(final int fri, final int arc, final int size, final int from, final int to, final int start,
+            final List<SimpleRow<T>> liveData) {
+        this.firstRowIndex = fri;
+        this.absoluteRowCount = arc;
+        this.size = size;
+        this.from = from;
+        this.to = to;
+        this.liveData = liveData;
+    }
 }

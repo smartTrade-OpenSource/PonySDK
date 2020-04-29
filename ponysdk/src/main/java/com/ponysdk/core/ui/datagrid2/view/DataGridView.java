@@ -67,6 +67,8 @@ public interface DataGridView<K, V> extends IsPWidget {
      */
     Collection<V> getLiveData();
 
+    int getLiveDataRowCount();
+
     /**
      * Returns an immutable {@link Collection} view of the selected data that is shown to the user (i.e. sorting and
      * filters are taken into account). The collection is backed by the view, so changes to the view are reflected

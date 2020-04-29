@@ -172,4 +172,9 @@ public class DecoratorDataGridView<K, V> implements DataGridView<K, V> {
     public void removeDrawListener(final DrawListener drawListener) {
         view.removeDrawListener(drawListener);
     }
+
+    @Override
+    public int getLiveDataRowCount() {
+        return view.getLiveDataRowCount();
+    }
 }

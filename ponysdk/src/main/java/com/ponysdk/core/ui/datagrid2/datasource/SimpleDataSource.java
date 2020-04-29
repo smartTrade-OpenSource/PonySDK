@@ -43,21 +43,21 @@ import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.controller.SimpleDataGridController;
 import com.ponysdk.core.ui.datagrid2.controller.SimpleDataGridController.RenderingHelpersCache;
 import com.ponysdk.core.ui.datagrid2.data.AbstractFilter;
-import com.ponysdk.core.ui.datagrid2.data.Row;
+import com.ponysdk.core.ui.datagrid2.data.SimpleRow;
 
 public abstract class SimpleDataSource<K, V> implements DataGridSource<K, V> {
 
     protected static final Logger log = LoggerFactory.getLogger(SimpleDataSource.class);
-    protected final LinkedHashMap<Object, Comparator<Row<V>>> sorts = new LinkedHashMap<>();
+    protected final LinkedHashMap<Object, Comparator<SimpleRow<V>>> sorts = new LinkedHashMap<>();
     protected final Map<Object, AbstractFilter<V>> filters = new HashMap<>();
-    protected final List<Row<V>> liveSelectedData = new ArrayList<>();
+    protected final List<SimpleRow<V>> liveSelectedData = new ArrayList<>();
     protected final Set<K> selectedKeys = new HashSet<>();
     protected DataGridAdapter<K, V> adapter;
     protected RenderingHelpersCache<V> renderingHelpersCache; //FIXME : listener de dataSource
     protected int rowCounter = 0;
 
     @Override
-    public List<Row<V>> getLiveSelectedData() {
+    public List<SimpleRow<V>> getLiveSelectedData() {
         return liveSelectedData;
     }
 
@@ -71,7 +71,7 @@ public abstract class SimpleDataSource<K, V> implements DataGridSource<K, V> {
         this.renderingHelpersCache = renderingHelpersCache;
     }
 
-    protected int insertRow(final List<Row<V>> rows, final Row<V> row) {
+    protected int insertRow(final List<SimpleRow<V>> rows, final SimpleRow<V> row) {
         if (rows.size() == 0) {
             rows.add(row);
             return 0;
@@ -86,7 +86,7 @@ public abstract class SimpleDataSource<K, V> implements DataGridSource<K, V> {
         int diff = 1;
         while (left <= right) {
             index = left + right >> 1;
-            final Row<V> middleRow = rows.get(index);
+            final SimpleRow<V> middleRow = rows.get(index);
             diff = compare(middleRow, row);
             if (diff < 0) left = index + 1;
             else if (diff > 0) right = index - 1;
@@ -98,19 +98,19 @@ public abstract class SimpleDataSource<K, V> implements DataGridSource<K, V> {
         return index;
     }
 
-    protected int removeRow(final List<Row<V>> rows, final Row<V> row) {
+    protected int removeRow(final List<SimpleRow<V>> rows, final SimpleRow<V> row) {
         final int rowIndex = findRowIndex(rows, row);
         if (rowIndex < 0) return rowIndex;
         rows.remove(rowIndex);
         return rowIndex;
     }
 
-    private int findRowIndex(final List<Row<V>> rows, final Row<V> row) {
+    private int findRowIndex(final List<SimpleRow<V>> rows, final SimpleRow<V> row) {
         int left = 0;
         int right = rows.size() - 1;
         while (left <= right) {
             final int middle = left + right >> 1;
-            final Row<V> r = rows.get(middle);
+            final SimpleRow<V> r = rows.get(middle);
             final int diff = compare(r, row);
             if (diff < 0) left = middle + 1;
             else if (diff > 0) right = middle - 1;
@@ -119,9 +119,9 @@ public abstract class SimpleDataSource<K, V> implements DataGridSource<K, V> {
         return -1;
     }
 
-    protected final int compare(final Row<V> r1, final Row<V> r2) {
+    protected final int compare(final SimpleRow<V> r1, final SimpleRow<V> r2) {
 
-        for (final Comparator<Row<V>> sort : sorts.values()) {
+        for (final Comparator<SimpleRow<V>> sort : sorts.values()) {
             final int diff = sort.compare(r1, r2);
             if (diff != 0) return diff;
         }
@@ -141,18 +141,18 @@ public abstract class SimpleDataSource<K, V> implements DataGridSource<K, V> {
     }
 
     @Override
-    public void addSort(final Object key, final Comparator<Row<V>> comparator) {
+    public void addSort(final Object key, final Comparator<SimpleRow<V>> comparator) {
         sorts.put(key, comparator);
         sort();
     }
 
     @Override
-    public Comparator<Row<V>> clearSort(final Column<V> column) {
+    public Comparator<SimpleRow<V>> clearSort(final Column<V> column) {
         return sorts.remove(column);
     }
 
     @Override
-    public Comparator<Row<V>> clearSort(final Object key) {
+    public Comparator<SimpleRow<V>> clearSort(final Object key) {
         return sorts.remove(key);
     }
 
@@ -168,7 +168,7 @@ public abstract class SimpleDataSource<K, V> implements DataGridSource<K, V> {
     }
 
     @Override
-    public Set<Entry<Object, Comparator<Row<V>>>> getSortsEntry() {
+    public Set<Entry<Object, Comparator<SimpleRow<V>>>> getSortsEntry() {
         return sorts.entrySet();
     }
 

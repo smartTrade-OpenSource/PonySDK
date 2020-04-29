@@ -37,8 +37,9 @@ import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.controller.SimpleDataGridController;
 import com.ponysdk.core.ui.datagrid2.controller.SimpleDataGridController.RenderingHelpersCache;
 import com.ponysdk.core.ui.datagrid2.data.AbstractFilter;
+import com.ponysdk.core.ui.datagrid2.data.DataSrcResult;
 import com.ponysdk.core.ui.datagrid2.data.Interval;
-import com.ponysdk.core.ui.datagrid2.data.Row;
+import com.ponysdk.core.ui.datagrid2.data.SimpleRow;
 
 /**
  *
@@ -50,17 +51,18 @@ public interface DataGridSource<K, V> {
      * @return the value to which the specified key is mapped
      *         or {@code null} if it doesn't exist in the dataSource
      */
-    Row<V> getRow(final K k);
+    SimpleRow<V> getRow(final K k);
 
     /**
      * @return all rows in the dataSource
      */
-    Collection<Row<V>> getRows();
+    Collection<SimpleRow<V>> getRows();
 
     /**
      * @return the needed rows for the view
      */
-    List<Row<V>> getRows(int index, int size);
+    //    List<SimpleRow<V>> getRows(int index, int size);
+    DataSrcResult<V> getRows(DataSrcResult<V> dataSrcResult);
 
     /**
      * Returns the total number of rows that could be drawn in the view
@@ -71,7 +73,7 @@ public interface DataGridSource<K, V> {
     /**
      * Returns liveSelecteData
      */
-    List<Row<V>> getLiveSelectedData();
+    List<SimpleRow<V>> getLiveSelectedData();
 
     /**
      * Adapter setter
@@ -93,14 +95,14 @@ public interface DataGridSource<K, V> {
      */
     void addSort(final Column<V> column, final SimpleDataGridController<K, V>.ColumnControllerSort colSort, final boolean asc);
 
-    void addSort(Object key, Comparator<Row<V>> comparator);
+    void addSort(Object key, Comparator<SimpleRow<V>> comparator);
 
     /**
      * Removes a sort
      */
-    Comparator<Row<V>> clearSort(Column<V> column);
+    Comparator<SimpleRow<V>> clearSort(Column<V> column);
 
-    Comparator<Row<V>> clearSort(Object key);
+    Comparator<SimpleRow<V>> clearSort(Object key);
 
     /**
      * Clears all sorting
@@ -110,7 +112,7 @@ public interface DataGridSource<K, V> {
     /**
      * Get sorts entry set
      */
-    Set<Entry<Object, Comparator<Row<V>>>> getSortsEntry();
+    Set<Entry<Object, Comparator<SimpleRow<V>>>> getSortsEntry();
 
     /**
      * Sets a filter

@@ -21,16 +21,14 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.datagrid2.data;
+package com.ponysdk.core.ui.datagrid2;
 
-import java.util.function.Predicate;
+import java.util.function.Consumer;
 
-import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
+import com.ponysdk.core.ui.datagrid2.data.DataSrcResult;
 
-/**
- *
- */
-public interface AbstractFilter<V> extends Predicate<SimpleRow<V>> {
+public interface DataGetterService<K, V> {
 
-    abstract ColumnDefinition<V> getColumnDefinition();
+    //    void prepareData(int row, int size, boolean horizontalScroll, Consumer<Integer> consumer);
+    void prepareData(DataSrcResult<V> dataSrcResult, Consumer<DataSrcResult<V>> consumer);
 }

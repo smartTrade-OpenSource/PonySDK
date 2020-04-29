@@ -26,13 +26,13 @@ package com.ponysdk.core.ui.datagrid2.data;
 /**
  *
  */
-public class Row<V> {
+public class SimpleRow<V> {
 
     private final int id;
     private V data;
     private boolean accepted;
 
-    public Row(final int id, final V data) {
+    public SimpleRow(final int id, final V data) {
         super();
         this.id = id;
         this.data = data;

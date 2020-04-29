@@ -148,7 +148,9 @@ public class RowSelectorColumnDataGridView<K, V> extends DecoratorDataGridView<K
             if (header == null) return;
             final int selected = getView().getLiveSelectedData().size();
             if (selected == 0) header.setState(PCheckBoxState.UNCHECKED);
-            else if (selected == getView().getLiveData().size()) header.setState(PCheckBoxState.CHECKED);
+            //FIXME : make sure of the getLiveData().size that is no more
+            //            else if (selected == getView().getLiveData().size()) header.setState(PCheckBoxState.CHECKED);
+            else if (selected == getView().getLiveDataRowCount()) header.setState(PCheckBoxState.CHECKED);
             else header.setState(PCheckBoxState.INDETERMINATE);
         }
 

@@ -35,6 +35,7 @@ import com.ponysdk.core.ui.datagrid2.cell.ExtendedCell;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfig;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfigBuilder;
+import com.ponysdk.core.ui.datagrid2.data.DataSrcResult;
 import com.ponysdk.core.ui.datagrid2.model.DataGridModel;
 
 /**
@@ -43,7 +44,9 @@ import com.ponysdk.core.ui.datagrid2.model.DataGridModel;
 
 public interface DataGridController<K, V> {
 
-    void renderCell(ColumnDefinition<V> column, int row, Cell<V> widget);
+    //FIXME
+    //    void renderCell(ColumnDefinition<V> column, int row, Cell<V> widget);
+    void renderCell(ColumnDefinition<V> column, int row, Cell<V> widget, DataSrcResult<V> result);
 
     void setValueOnExtendedCell(int row, ExtendedCell<V> widget);
 
@@ -97,5 +100,8 @@ public interface DataGridController<K, V> {
 
     void enrichConfigBuilder(DataGridConfigBuilder<V> builder);
 
-    void prepareLiveDataOnScreen(int rowIndex, int size, boolean isHorizontalScroll);
+    //FIXME
+    //    void prepareLiveDataOnScreen(int rowIndex, int size, boolean horizontalScroll);
+    //    List<SimpleRow<V>> prepareLiveDataOnScreen(int rowIndex, int size, boolean horizontalScroll);
+    DataSrcResult<V> prepareLiveDataOnScreen(DataSrcResult<V> dataSrcResult);
 }
