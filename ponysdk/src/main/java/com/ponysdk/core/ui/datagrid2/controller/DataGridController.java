@@ -25,6 +25,7 @@ package com.ponysdk.core.ui.datagrid2.controller;
 
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -35,7 +36,8 @@ import com.ponysdk.core.ui.datagrid2.cell.ExtendedCell;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfig;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfigBuilder;
-import com.ponysdk.core.ui.datagrid2.data.DataSrcResult;
+import com.ponysdk.core.ui.datagrid2.data.SimpleRow;
+import com.ponysdk.core.ui.datagrid2.data.ViewLiveData;
 import com.ponysdk.core.ui.datagrid2.model.DataGridModel;
 
 /**
@@ -44,11 +46,9 @@ import com.ponysdk.core.ui.datagrid2.model.DataGridModel;
 
 public interface DataGridController<K, V> {
 
-    //FIXME
-    //    void renderCell(ColumnDefinition<V> column, int row, Cell<V> widget);
-    void renderCell(ColumnDefinition<V> column, int row, Cell<V> widget, DataSrcResult<V> result);
+    void renderCell(ColumnDefinition<V> column, int row, Cell<V> widget, ViewLiveData<V> result);
 
-    void setValueOnExtendedCell(int row, ExtendedCell<V> widget);
+    void setValueOnExtendedCell(int row, ExtendedCell<V> widget, ViewLiveData<V> result);
 
     V getRowData(int row);
 
@@ -100,8 +100,7 @@ public interface DataGridController<K, V> {
 
     void enrichConfigBuilder(DataGridConfigBuilder<V> builder);
 
-    //FIXME
-    //    void prepareLiveDataOnScreen(int rowIndex, int size, boolean horizontalScroll);
-    //    List<SimpleRow<V>> prepareLiveDataOnScreen(int rowIndex, int size, boolean horizontalScroll);
-    DataSrcResult<V> prepareLiveDataOnScreen(DataSrcResult<V> dataSrcResult);
+    ViewLiveData<V> prepareLiveDataOnScreen(ViewLiveData<V> dataSrcResult);
+
+    public void updateLiveDataOnScreen(List<SimpleRow<V>> liveDataOnScreen);
 }

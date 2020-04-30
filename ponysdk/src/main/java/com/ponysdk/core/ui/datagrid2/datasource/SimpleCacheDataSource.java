@@ -34,7 +34,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import com.ponysdk.core.ui.datagrid2.data.AbstractFilter;
-import com.ponysdk.core.ui.datagrid2.data.DataSrcResult;
+import com.ponysdk.core.ui.datagrid2.data.ViewLiveData;
 import com.ponysdk.core.ui.datagrid2.data.Interval;
 import com.ponysdk.core.ui.datagrid2.data.SimpleRow;
 
@@ -67,7 +67,7 @@ public class SimpleCacheDataSource<K, V> extends SimpleDataSource<K, V> {
     //        return tmp;
     //    }
     @Override
-    public synchronized DataSrcResult<V> getRows(final DataSrcResult<V> dataSrcResult) {
+    public ViewLiveData<V> getRows(final ViewLiveData<V> dataSrcResult) {
         final int index = dataSrcResult.firstRowIndex;
         int size = dataSrcResult.size;
         size = index + size > liveData.size() ? liveData.size() - index : size;

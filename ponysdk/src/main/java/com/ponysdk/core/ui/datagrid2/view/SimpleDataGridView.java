@@ -33,8 +33,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -53,7 +52,6 @@ import com.ponysdk.core.ui.basic.PComplexPanel;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
-import com.ponysdk.core.ui.datagrid2.DataGetterServiceImpl;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.cell.Cell;
 import com.ponysdk.core.ui.datagrid2.cell.CellController;
@@ -71,9 +69,9 @@ import com.ponysdk.core.ui.datagrid2.config.DataGridConfig.Sort;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfigBuilder;
 import com.ponysdk.core.ui.datagrid2.controller.DataGridController;
 import com.ponysdk.core.ui.datagrid2.controller.SimpleDataGridController;
-import com.ponysdk.core.ui.datagrid2.data.DataSrcResult;
 import com.ponysdk.core.ui.datagrid2.data.RowAction;
 import com.ponysdk.core.ui.datagrid2.data.SimpleRow;
+import com.ponysdk.core.ui.datagrid2.data.ViewLiveData;
 import com.ponysdk.core.ui.datagrid2.datasource.DataGridSource;
 import com.ponysdk.core.ui.datagrid2.datasource.SimpleCacheDataSource;
 import com.ponysdk.core.ui.datagrid2.model.DataGridModel;
@@ -139,12 +137,8 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
     private final LinkedHashMap<Object, RowAction<V>> rowActions = new LinkedHashMap<>();
     private int firstRowIndex = 0;
 
-    private boolean horizontalScroll = false;
-    private boolean scrolling = false;
-    Lock lock = new ReentrantLock();
-    private int count = 0;
-
-    private DataGetterServiceImpl<K, V> dataGetterService;
+    private final Map<Integer, Integer> sorts = new HashMap<>();
+    private final Set<Integer> filters = new HashSet<>();
 
     public SimpleDataGridView() {
         this(new SimpleCacheDataSource<K, V>());
@@ -155,7 +149,6 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         new HideScrollBarAddon(root);
         controller = new SimpleDataGridController<>(dataSource);
         controller.setListener(this::onUpdateRows);
-        dataGetterService = new DataGetterServiceImpl<>(dataSource);
         dataView = controller.getLiveData();
         selectedDataView = controller.getLiveSelectedData();
         modelWrapper = new DataGridModelWrapper(controller.getModel());
@@ -259,9 +252,7 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         showLoadingDataView();
         firstRowIndex = row;
         onUpdateRows(0, controller.getRowCount());
-        scrolling = true;
         draw();
-        scrolling = false;
     }
 
     private void onRelativeRowCountUpdated(int relRowCount) {
@@ -290,9 +281,7 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
             columnView.visible = visible;
         }
         onUpdateRows(0, controller.getRowCount());
-        horizontalScroll = true;
         draw();
-        horizontalScroll = false;
     }
 
     private void onColumnResized(final int column, final int width) {
@@ -358,10 +347,6 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         }
     }
 
-    /**
-     * Updates the indexes of the rows that must be redrawn
-     */
-    //    private void onUpdateRows(final int from, final int to) {
     public void onUpdateRows(final int from, final int to) {
         if (from >= to) return;
         this.from = Math.min(this.from, from);
@@ -373,98 +358,48 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         return controller.getRowCount();
     }
 
-    /**
-     * Draws rows from index {@code from} to index {@code to}
-     */
-    //    private void draw() {
-    //        try {
-    //            if (from >= to) return;
-    //            final int absoluteRowCount = controller.getRowCount();
-    //            int start;
-    //            if (firstRowIndex > absoluteRowCount - rows.size()) {
-    //                firstRowIndex = Math.max(0, absoluteRowCount - rows.size());
-    //                start = 0;
-    //            } else {
-    //                start = Math.max(0, from - firstRowIndex);
-    //            }
-    //            final int size = unpinnedTable.body.getWidgetCount();
-    //            System.out.println("\n\n" + "#-View-# Prepare onDraw -> row : " + firstRowIndex + "   size : " + size);
-    //            controller.prepareLiveDataOnScreen(firstRowIndex, size, horizontalScroll);
-    //            for (int i = start; i < size; i++) {
-    //                updateRow(rows.get(i), absoluteRowCount);
-    //            }
-    //            addon.onDataUpdated(absoluteRowCount, this.rows.size(), firstRowIndex);
-    //        } finally {
-    //            from = Integer.MAX_VALUE;
-    //            to = 0;
-    //            for (final DrawListener drawListener : drawListeners) {
-    //                drawListener.onDraw();
-    //            }
-    //            hideLoadingDataView();
-    //        }
-    //    }
-    private synchronized void draw() {
+    private void draw() {
         try {
             if (from >= to) return;
-
-            final int start;
-            int absoluteRowCount = 0;
-            if (scrolling || horizontalScroll) {
-                absoluteRowCount = controller.getRowCount();
-                if (firstRowIndex > absoluteRowCount - rows.size()) {
-                    firstRowIndex = Math.max(0, absoluteRowCount - rows.size());
-                    start = 0;
-                } else {
-                    start = Math.max(0, from - firstRowIndex);
-                }
-            } else {
-                firstRowIndex = 0;
+            final int absoluteRowCount = controller.getRowCount();
+            int start;
+            if (firstRowIndex > absoluteRowCount - rows.size()) {
+                firstRowIndex = Math.max(0, absoluteRowCount - rows.size());
                 start = 0;
-                absoluteRowCount = 1;
+            } else {
+                start = Math.max(0, from - firstRowIndex);
             }
-
-            //            final int absoluteRowCount = controller.getRowCount();
-            //            int start;
-            //            if (firstRowIndex > absoluteRowCount - rows.size()) {
-            //                firstRowIndex = Math.max(0, absoluteRowCount - rows.size());
-            //                start = 0;
-            //            } else {
-            //                start = Math.max(0, from - firstRowIndex);
-            //            }
 
             final int size = unpinnedTable.body.getWidgetCount();
             if (rows.size() != size) {
                 System.out.println();
             }
-            System.out.println("\n\n" + "#-View-# Prepare onDraw -> row : " + firstRowIndex + "   size : " + size + " in the thread: "
-                    + Thread.currentThread().getId());
-            final DataSrcResult<V> dataSrcResult = new DataSrcResult<>(firstRowIndex, absoluteRowCount, size, from, to, start,
-                new ArrayList<SimpleRow<V>>());
-            //FIXME
-            dataGetterService.prepareData(dataSrcResult, PScheduler.delegate(this::draw)); //result -> draw(result)
+            System.out.println("\n\n" + "#-View-# Prepare onDraw -> row : " + firstRowIndex + "   size : " + size);
+            final ViewLiveData<V> viewLiveData = new ViewLiveData<>(firstRowIndex, absoluteRowCount, size, start,
+                new ArrayList<SimpleRow<V>>(), sorts, filters);
+            final Consumer<ViewLiveData<V>> consumer = PScheduler.delegate(this::updateView);
+            CompletableFuture.supplyAsync(() -> controller.prepareLiveDataOnScreen(viewLiveData)).thenAccept(consumer::accept);
         } catch (final Exception e) {
             e.printStackTrace();
         }
     }
 
-    //    private void draw(final int result) {
-    private synchronized void draw(final DataSrcResult<V> result) {
+    private void updateView(final ViewLiveData<V> result) {
         try {
-            count++;
-            System.out.println("we read the prepared data in the thread: " + Thread.currentThread().getId());
+
+            if (firstRowIndex != result.firstRowIndex || !filters.equals(result.filters) || !sorts.equals(result.sorts)
+                    || result.size != rows.size()) {
+                return;
+            }
+            controller.updateLiveDataOnScreen(result.liveData);
+            System.out.println("we read the returned data to update the view");
 
             for (int i = result.start; i < result.size; i++) {
-                //FIXME
-                //                updateRow(rows.get(i), absoluteRowCount);
-                if (rows == null) {
-                    System.out.println("this is null");
-                }
                 try {
-                    rows.get(i);
+                    updateRow(rows.get(i), result);
                 } catch (final Exception e) {
                     System.out.println("this is null");
                 }
-                updateRow(rows.get(i), result.absoluteRowCount, result);
             }
             addon.onDataUpdated(result.absoluteRowCount, this.rows.size(), result.firstRowIndex);
         } finally {
@@ -477,33 +412,19 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         }
     }
 
-    //FIXME
-    //    private void updateRow(final Row row, final int absoluteRowCount) {
-    private void updateRow(final Row row, final int absoluteRowCount, final DataSrcResult<V> result) {
-        if (row.getAbsoluteIndex() >= absoluteRowCount) {
+    private void updateRow(final Row row, final ViewLiveData<V> result) {
+        if (row.getAbsoluteIndex() >= result.absoluteRowCount) {
             row.hide();
             row.key = null;
             return;
         }
-        //FIXME
-        try {
-            result.liveData.get(i);
-        } catch (final Exception e) {
-            System.out.println("there's a null here !");
-        }
-
         final boolean mustUpdateRowHeight = row.extended || !row.isShown();
         row.show();
         final K previousKey = row.key;
-        //FIXME
-        //        final V rowData = controller.getRowData(row.getRelativeIndex());
         final V rowData = getRowData(row.getRelativeIndex(), result);
         row.key = adapter.getKey(rowData);
         final boolean selected = controller.isSelected(row.key);
         row.extended = false;
-        //FIXME
-        //        updateRowCells(row, row.unpinnedCells, unpinnedTable.columns, selected, previousKey);
-        //        updateRowCells(row, row.pinnedCells, pinnedTable.columns, selected, previousKey);
         updateRowCells(row, row.unpinnedCells, unpinnedTable.columns, selected, previousKey, result);
         updateRowCells(row, row.pinnedCells, pinnedTable.columns, selected, previousKey, result);
         if (row.extended) addon.updateExtendedRowHeight(row.relativeIndex);
@@ -522,8 +443,8 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         applyRowActions(row, rowData);
     }
 
-    //FIXME
-    public synchronized V getRowData(final int rowIndex, final DataSrcResult<V> result) {
+    //FIXME : this method exists in the controller
+    private V getRowData(final int rowIndex, final ViewLiveData<V> result) {
         checkAdapter();
         final V v = rowIndex < result.liveData.size() ? result.liveData.get(rowIndex).getData() : null;
         if (v == null) {
@@ -544,17 +465,8 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         }
     }
 
-    //FIXME
-    //    private void updateRowCells(final Row row, final List<Cell<V>> cells, final List<ColumnView> columns, final boolean selected,
-    //                                final K previousKey) {
-    //        for (int c = 0; c < cells.size(); c++) {
-    //            final Cell<V> cell = cells.get(c);
-    //            final ColumnView column = columns.get(c);
-    //            updateRowCell(row, cell, column, selected, previousKey);
-    //        }
-    //    }
     private void updateRowCells(final Row row, final List<Cell<V>> cells, final List<ColumnView> columns, final boolean selected,
-                                final K previousKey, final DataSrcResult<V> result) {
+                                final K previousKey, final ViewLiveData<V> result) {
         for (int c = 0; c < cells.size(); c++) {
             final Cell<V> cell = cells.get(c);
             final ColumnView column = columns.get(c);
@@ -562,25 +474,8 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         }
     }
 
-    //FIXME
-    //    private void updateRowCell(final Row row, final Cell<V> cell, final ColumnView columnView, final boolean selected,
-    //                               final K previousKey) {
-    //        final PComplexPanel td = (PComplexPanel) cell.asWidget().getParent();
-    //        final ExtendedCellHandler extendedCellHandler = columnView.extendedCells.get(row.key);
-    //        if (!columnView.visible && extendedCellHandler == null) {
-    //            showPendingWidget(cell, selected, td);
-    //        } else {
-    //            td.removeAttribute(PENDING_ATTRIBUTE);
-    //            cell.asPendingWidget().setVisible(false);
-    //            if (extendedCellHandler == null) {
-    //                showCellWidget(row, cell, columnView, selected, previousKey, td);
-    //            } else {
-    //                showExtendedCellWidget(row, cell, td, extendedCellHandler);
-    //            }
-    //        }
-    //    }
     private void updateRowCell(final Row row, final Cell<V> cell, final ColumnView columnView, final boolean selected,
-                               final K previousKey, final DataSrcResult<V> result) {
+                               final K previousKey, final ViewLiveData<V> result) {
         final PComplexPanel td = (PComplexPanel) cell.asWidget().getParent();
         final ExtendedCellHandler extendedCellHandler = columnView.extendedCells.get(row.key);
         if (!columnView.visible && extendedCellHandler == null) {
@@ -591,13 +486,13 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
             if (extendedCellHandler == null) {
                 showCellWidget(row, cell, columnView, selected, previousKey, td, result);
             } else {
-                showExtendedCellWidget(row, cell, td, extendedCellHandler);
+                showExtendedCellWidget(row, cell, td, extendedCellHandler, result);
             }
         }
     }
 
     private void showExtendedCellWidget(final Row row, final Cell<V> cell, final PComplexPanel td,
-                                        final ExtendedCellHandler extendedCellHandler) {
+                                        final ExtendedCellHandler extendedCellHandler, final ViewLiveData<V> result) {
         td.setAttribute(EXTENDED_ATTRIBUTE);
         extendedCellHandler.row = row;
         row.extended = true;
@@ -610,32 +505,13 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
             td.add(extendedCellHandler.cell);
             extendedCellHandler.cell.afterAdd();
         }
-        controller.setValueOnExtendedCell(row.getAbsoluteIndex(), extendedCellHandler.cell);
+        controller.setValueOnExtendedCell(row.getAbsoluteIndex(), extendedCellHandler.cell, result);
     }
 
-    //FIXME
-    //    private void showCellWidget(final Row row, final Cell<V> cell, final ColumnView columnView, final boolean selected,
-    //                                final K previousKey, final PComplexPanel td) {
-    //        td.removeAttribute(EXTENDED_ATTRIBUTE);
-    //        cell.asWidget().setVisible(true);
-    //        //FIXME
-    //        controller.renderCell(columnView.column, row.getAbsoluteIndex(), cell);
-    //        if (td.getWidgetCount() > 2) {
-    //            final ExtendedCellHandler previousExtendedCellHandler = columnView.extendedCells.get(previousKey);
-    //            if (previousExtendedCellHandler != null && previousExtendedCellHandler.cell.asWidget().getParent() != null) {
-    //                previousExtendedCellHandler.cell.beforeRemove();
-    //            }
-    //            td.remove(2);
-    //        }
-    //        if (selected) cell.select();
-    //        else cell.unselect();
-    //    }
     private void showCellWidget(final Row row, final Cell<V> cell, final ColumnView columnView, final boolean selected,
-                                final K previousKey, final PComplexPanel td, final DataSrcResult<V> result) {
+                                final K previousKey, final PComplexPanel td, final ViewLiveData<V> result) {
         td.removeAttribute(EXTENDED_ATTRIBUTE);
         cell.asWidget().setVisible(true);
-        //FIXME
-        //        controller.renderCell(columnView.column, row.getAbsoluteIndex(), cell);
         controller.renderCell(columnView.column, row.getRelativeIndex(), cell, result);
         if (td.getWidgetCount() > 2) {
             final ExtendedCellHandler previousExtendedCellHandler = columnView.extendedCells.get(previousKey);
@@ -794,19 +670,18 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         if (pollingDelayMillis == 0L) {
             delayedDrawRunnable = null;
             draw();
-            //FIXME
         } else delayedDrawRunnable = PScheduler.scheduleAtFixedRate(this::draw, Duration.ofMillis(pollingDelayMillis));
     }
 
     @Override
     public Collection<V> getLiveData() {
-        //        return dataView;
-        return null;
+        return dataView;
     }
 
     @Override
     public void setFilter(final Object key, final String id, final Predicate<V> filter, final boolean reinforcing) {
         showLoadingDataView();
+        filters.add(key.hashCode());
         controller.setFilter(key, id, filter, reinforcing);
         draw();
     }
@@ -814,6 +689,7 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
     @Override
     public void clearFilter(final Object key) {
         showLoadingDataView();
+        filters.remove(key.hashCode());
         controller.clearFilter(key);
         draw();
     }
@@ -821,6 +697,7 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
     @Override
     public void clearFilters() {
         showLoadingDataView();
+        filters.clear();
         controller.clearFilters();
         draw();
     }
@@ -1038,7 +915,6 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         for (final Row row : rows) {
             if (row.key == null) continue;
             final int absoluteIndex = row.getAbsoluteIndex();
-            //            final V data = controller.getRowData(absoluteIndex, 0, 0, null);
             final V data = controller.getRowData(absoluteIndex);
             if (data == null || !old.testRow(data, absoluteIndex)) continue;
             old.cancel(row.pinnedRow);
@@ -1056,6 +932,7 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         drawListeners.remove(drawListener);
     }
 
+    //FIXME : not called when adding a sort
     @Override
     public void addSort(final Object key, final Comparator<V> comparator) {
         showLoadingDataView();
@@ -1458,6 +1335,7 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         public void sort(final boolean asc) {
             if (!columnView.column.isSortable()) return;
             showLoadingDataView();
+            sorts.put(i, asc ? 1 : 0);
             controller.addSort(columnView.column, asc);
             draw();
             for (final ColumnActionListener<V> listener : columnView.listeners) {
@@ -1469,6 +1347,7 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         public void clearSort() {
             if (!columnView.column.isSortable()) return;
             showLoadingDataView();
+            sorts.clear();
             controller.clearSort(columnView.column);
             draw();
             for (final ColumnActionListener<V> listener : columnView.listeners) {

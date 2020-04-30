@@ -37,9 +37,9 @@ import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.controller.SimpleDataGridController;
 import com.ponysdk.core.ui.datagrid2.controller.SimpleDataGridController.RenderingHelpersCache;
 import com.ponysdk.core.ui.datagrid2.data.AbstractFilter;
-import com.ponysdk.core.ui.datagrid2.data.DataSrcResult;
 import com.ponysdk.core.ui.datagrid2.data.Interval;
 import com.ponysdk.core.ui.datagrid2.data.SimpleRow;
+import com.ponysdk.core.ui.datagrid2.data.ViewLiveData;
 
 /**
  *
@@ -61,8 +61,7 @@ public interface DataGridSource<K, V> {
     /**
      * @return the needed rows for the view
      */
-    //    List<SimpleRow<V>> getRows(int index, int size);
-    DataSrcResult<V> getRows(DataSrcResult<V> dataSrcResult);
+    ViewLiveData<V> getRows(ViewLiveData<V> dataSrcResult);
 
     /**
      * Returns the total number of rows that could be drawn in the view

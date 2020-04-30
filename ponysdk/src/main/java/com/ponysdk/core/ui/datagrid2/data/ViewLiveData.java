@@ -23,28 +23,33 @@
 
 package com.ponysdk.core.ui.datagrid2.data;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  *
  */
-public class DataSrcResult<T> {
+public class ViewLiveData<V> {
 
     public int firstRowIndex;
     public int absoluteRowCount;
     public int size;
-    public int from;
-    public int to;
     public int start;
-    public List<SimpleRow<T>> liveData;
+    public List<SimpleRow<V>> liveData;
+    public Map<Integer, Integer> sorts;
+    public Set<Integer> filters = new HashSet<>();
 
-    public DataSrcResult(final int fri, final int arc, final int size, final int from, final int to, final int start,
-            final List<SimpleRow<T>> liveData) {
+    public ViewLiveData(final int fri, final int arc, final int size, final int start, final List<SimpleRow<V>> liveData,
+            final Map<Integer, Integer> sorts, final Set<Integer> filters) {
         this.firstRowIndex = fri;
         this.absoluteRowCount = arc;
         this.size = size;
-        this.from = from;
-        this.to = to;
-        this.liveData = liveData;
+        this.liveData = new ArrayList<>(liveData);
+        this.sorts = new HashMap<>(sorts);
+        this.filters = new HashSet<>(filters);
     }
 }
