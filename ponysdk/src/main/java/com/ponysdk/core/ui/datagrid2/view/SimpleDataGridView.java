@@ -130,13 +130,12 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
     private int from = Integer.MAX_VALUE;
     private int to = 0;
     private final Set<DrawListener> drawListeners = SetUtils.newArraySet();
-    private final Collection<V> dataView;
     private final Collection<V> selectedDataView;
     private final Map<ColumnDefinition<V>, ColumnView> columnViews = new HashMap<>();
     private final DataGridModelWrapper modelWrapper;
     private final LinkedHashMap<Object, RowAction<V>> rowActions = new LinkedHashMap<>();
     private int firstRowIndex = 0;
-
+    private int rowCount = 0;
     private final Map<Integer, Integer> sorts = new HashMap<>();
     private final Set<Integer> filters = new HashSet<>();
 
@@ -149,7 +148,6 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         new HideScrollBarAddon(root);
         controller = new SimpleDataGridController<>(dataSource);
         controller.setListener(this::onUpdateRows);
-        dataView = controller.getLiveData();
         selectedDataView = controller.getLiveSelectedData();
         modelWrapper = new DataGridModelWrapper(controller.getModel());
 
@@ -355,7 +353,7 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
 
     @Override
     public int getLiveDataRowCount() {
-        return controller.getRowCount();
+        return rowCount;
     }
 
     private void draw() {
@@ -371,29 +369,23 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
             }
 
             final int size = unpinnedTable.body.getWidgetCount();
-            if (rows.size() != size) {
-                System.out.println();
-            }
             System.out.println("\n\n" + "#-View-# Prepare onDraw -> row : " + firstRowIndex + "   size : " + size);
             final ViewLiveData<V> viewLiveData = new ViewLiveData<>(firstRowIndex, absoluteRowCount, size, start,
                 new ArrayList<SimpleRow<V>>(), sorts, filters);
             final Consumer<ViewLiveData<V>> consumer = PScheduler.delegate(this::updateView);
             CompletableFuture.supplyAsync(() -> controller.prepareLiveDataOnScreen(viewLiveData)).thenAccept(consumer::accept);
         } catch (final Exception e) {
-            e.printStackTrace();
         }
     }
 
     private void updateView(final ViewLiveData<V> result) {
         try {
-
             if (firstRowIndex != result.firstRowIndex || !filters.equals(result.filters) || !sorts.equals(result.sorts)
                     || result.size != rows.size()) {
                 return;
             }
-            controller.updateLiveDataOnScreen(result.liveData);
+            rowCount = result.absoluteRowCount;
             System.out.println("we read the returned data to update the view");
-
             for (int i = result.start; i < result.size; i++) {
                 try {
                     updateRow(rows.get(i), result);
@@ -422,6 +414,7 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         row.show();
         final K previousKey = row.key;
         final V rowData = getRowData(row.getRelativeIndex(), result);
+        row.setData(rowData);
         row.key = adapter.getKey(rowData);
         final boolean selected = controller.isSelected(row.key);
         row.extended = false;
@@ -443,7 +436,6 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         applyRowActions(row, rowData);
     }
 
-    //FIXME : this method exists in the controller
     private V getRowData(final int rowIndex, final ViewLiveData<V> result) {
         checkAdapter();
         final V v = rowIndex < result.liveData.size() ? result.liveData.get(rowIndex).getData() : null;
@@ -674,11 +666,6 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
     }
 
     @Override
-    public Collection<V> getLiveData() {
-        return dataView;
-    }
-
-    @Override
     public void setFilter(final Object key, final String id, final Predicate<V> filter, final boolean reinforcing) {
         showLoadingDataView();
         filters.add(key.hashCode());
@@ -898,7 +885,8 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         for (final Row row : rows) {
             if (row.key == null) continue;
             final int absoluteIndex = row.getAbsoluteIndex();
-            final V data = controller.getRowData(absoluteIndex);
+            final int relativeIndex = row.getRelativeIndex();
+            final V data = rows.get(relativeIndex).getData();
             if (data == null || !rowAction.testRow(data, absoluteIndex)) continue;
             rowAction.apply(row.pinnedRow);
             rowAction.apply(row.unpinnedRow);
@@ -915,7 +903,8 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         for (final Row row : rows) {
             if (row.key == null) continue;
             final int absoluteIndex = row.getAbsoluteIndex();
-            final V data = controller.getRowData(absoluteIndex);
+            final int relativeIndex = row.getRelativeIndex();
+            final V data = rows.get(relativeIndex).getData();
             if (data == null || !old.testRow(data, absoluteIndex)) continue;
             old.cancel(row.pinnedRow);
             old.cancel(row.unpinnedRow);
@@ -951,6 +940,7 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
 
         private final int relativeIndex;
         private K key;
+        private V data;
         private final PComplexPanel unpinnedRow = Element.newDiv();
         private final PComplexPanel pinnedRow = Element.newDiv();
         private final List<Cell<V>> unpinnedCells = new ArrayList<>(unpinnedTable.columns.size());
@@ -966,6 +956,14 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
 
         int getRelativeIndex() {
             return relativeIndex;
+        }
+
+        V getData() {
+            return data;
+        }
+
+        void setData(final V data) {
+            this.data = data;
         }
 
         void init(final Table table, final PComplexPanel row, final List<Cell<V>> cells, final boolean pinned) {

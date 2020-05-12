@@ -57,12 +57,8 @@ import com.ponysdk.sample.client.event.UserLoggedOutHandler;
 public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler {
 
     private static final Logger log = LoggerFactory.getLogger(UISampleTestPerformance.class);
-
     private PLabel mainLabel;
-
-    // HighChartsStackedColumnAddOn highChartsStackedColumnAddOn;
     int a = 0;
-
     private int rowCounter = 0;
     private int actionCounter = 0;
     private final Map<Character, SimpleColumnDefinition<MyRow>> colDefs = new HashMap<>();
@@ -186,7 +182,7 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
         PWindow.getMain().add(configSelectorDataGridView.getDecoratorWidget());
 
         model.setBound(false);
-        for (int i = 0; i < 10_000; i++) {
+        for (int i = 0; i < 50_000; i++) {
             if (i % 500_000 == 0) log.info("i: {}", i);
             model.setData(createMyRow(i));
             rowCounter++;
@@ -257,7 +253,6 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
             model.setData(v);
         };
 
-        if (true) return;
         //FIXME : somtimes the update action throws a concurrency exception
         //Test 1
         addFilter(controller);
@@ -265,10 +260,10 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
         testPerformanceBench(rowCounter, 60, updateDataAction);
 
         //Test 2
-        testPerformanceBench(rowCounter, 60, addDataAction);
+        //        testPerformanceBench(rowCounter, 60, addDataAction);
 
         //Test 3
-        testPerformanceBench(rowCounter, 1, removeDataAction);
+        //        testPerformanceBench(rowCounter, 1, removeDataAction);
     }
 
     private void addFilter(final DataGridController<Integer, MyRow> controller) {

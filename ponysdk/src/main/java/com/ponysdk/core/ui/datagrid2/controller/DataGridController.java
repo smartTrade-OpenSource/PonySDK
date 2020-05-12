@@ -25,7 +25,6 @@ package com.ponysdk.core.ui.datagrid2.controller;
 
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.List;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -36,7 +35,6 @@ import com.ponysdk.core.ui.datagrid2.cell.ExtendedCell;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfig;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfigBuilder;
-import com.ponysdk.core.ui.datagrid2.data.SimpleRow;
 import com.ponysdk.core.ui.datagrid2.data.ViewLiveData;
 import com.ponysdk.core.ui.datagrid2.model.DataGridModel;
 
@@ -49,8 +47,6 @@ public interface DataGridController<K, V> {
     void renderCell(ColumnDefinition<V> column, int row, Cell<V> widget, ViewLiveData<V> result);
 
     void setValueOnExtendedCell(int row, ExtendedCell<V> widget, ViewLiveData<V> result);
-
-    V getRowData(int row);
 
     boolean isSelected(K k);
 
@@ -94,13 +90,11 @@ public interface DataGridController<K, V> {
 
     void clearRenderingHelpers(ColumnDefinition<V> column);
 
-    Collection<V> getLiveData();
+    //    Collection<V> getLiveData();
 
     int getRowCount();
 
     void enrichConfigBuilder(DataGridConfigBuilder<V> builder);
 
     ViewLiveData<V> prepareLiveDataOnScreen(ViewLiveData<V> dataSrcResult);
-
-    public void updateLiveDataOnScreen(List<SimpleRow<V>> liveDataOnScreen);
 }

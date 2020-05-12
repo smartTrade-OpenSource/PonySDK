@@ -65,7 +65,7 @@ public interface DataGridView<K, V> extends IsPWidget {
      * taken into account). The collection is backed by the view, so changes to the view are reflected in the
      * collection.
      */
-    Collection<V> getLiveData();
+    //    Collection<V> getLiveData();
 
     int getLiveDataRowCount();
 

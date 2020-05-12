@@ -74,11 +74,6 @@ public class DecoratorDataGridView<K, V> implements DataGridView<K, V> {
     }
 
     @Override
-    public Collection<V> getLiveData() {
-        return view.getLiveData();
-    }
-
-    @Override
     public Collection<V> getLiveSelectedData() {
         return view.getLiveSelectedData();
     }

@@ -130,7 +130,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     // HighChartsStackedColumnAddOn highChartsStackedColumnAddOn;
     int a = 0;
-
     private static int counter;
 
     @Override
@@ -298,10 +297,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             super();
             this.id = id;
             format = String.format("%09d", id);
-        }
-
-        public int getId() {
-            return id;
         }
 
         public void putValue(final String key, final String value) {
@@ -500,6 +495,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             model.setData(createMyRow(i));
         }
         model.setBound(true);
+
         gridView.addRowAction(UISampleEntryPoint.class, new RowAction<>() {
 
             @Override

@@ -23,7 +23,6 @@
 
 package com.ponysdk.core.ui.datagrid2.controller;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -64,7 +63,6 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
     private static final int RENDERING_HELPERS_CACHE_CAPACITY = 512;
     private int columnCounter = 0;
     private final RenderingHelpersCache<V> renderingHelpersCache = new RenderingHelpersCache<>();
-    private final List<SimpleRow<V>> liveDataOnScreen = new ArrayList<>();
     private final Map<ColumnDefinition<V>, Column<V>> columns = new HashMap<>();
     private DataGridControllerListener<V> listener;
     private DataGridAdapter<K, V> adapter;
@@ -115,7 +113,7 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
         return null;
     }
 
-    private Object getRenderingHelper(final SimpleRow<V> row, final Column<V> column) {
+    private synchronized Object getRenderingHelper(final SimpleRow<V> row, final Column<V> column) {
         final Object[] renderingHelpers = renderingHelpersCache.computeIfAbsent(row, r -> new Object[columns.size()]);
         Object helper = renderingHelpers[column.getID()];
         if (helper == NO_RENDERING_HELPER) return null;
@@ -319,21 +317,6 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
     }
 
     @Override
-    public void updateLiveDataOnScreen(List<SimpleRow<V>> liveDataOnScreen) {
-        liveDataOnScreen = new ArrayList<>(liveDataOnScreen);
-    }
-
-    @Override
-    public V getRowData(final int rowIndex) {
-        checkAdapter();
-        final V v = rowIndex < liveDataOnScreen.size() ? liveDataOnScreen.get(rowIndex).getData() : null;
-        if (v == null) {
-            System.out.println("Row " + rowIndex + " is null ! in the thread: " + Thread.currentThread().getId());
-        }
-        return v;
-    }
-
-    @Override
     public DataGridModel<K, V> getModel() {
         return this;
     }
@@ -355,11 +338,6 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
     @Override
     public int getRowCount() {
         return dataSource.getRowCount();
-    }
-
-    @Override
-    public Collection<V> getLiveData() {
-        return new MappedList<>(liveDataOnScreen, SimpleRow::getData);
     }
 
     @Override
