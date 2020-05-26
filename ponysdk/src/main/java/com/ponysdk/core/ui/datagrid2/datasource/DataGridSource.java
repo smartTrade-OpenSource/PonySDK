@@ -34,11 +34,11 @@ import java.util.function.Consumer;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.column.Column;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
-import com.ponysdk.core.ui.datagrid2.controller.SimpleDataGridController;
-import com.ponysdk.core.ui.datagrid2.controller.SimpleDataGridController.RenderingHelpersCache;
+import com.ponysdk.core.ui.datagrid2.controller.DefaultDataGridController;
+import com.ponysdk.core.ui.datagrid2.controller.DefaultDataGridController.RenderingHelpersCache;
 import com.ponysdk.core.ui.datagrid2.data.AbstractFilter;
 import com.ponysdk.core.ui.datagrid2.data.Interval;
-import com.ponysdk.core.ui.datagrid2.data.SimpleRow;
+import com.ponysdk.core.ui.datagrid2.data.DefaultRow;
 import com.ponysdk.core.ui.datagrid2.data.ViewLiveData;
 
 /**
@@ -51,12 +51,12 @@ public interface DataGridSource<K, V> {
      * @return the value to which the specified key is mapped
      *         or {@code null} if it doesn't exist in the dataSource
      */
-    SimpleRow<V> getRow(final K k);
+    DefaultRow<V> getRow(final K k);
 
     /**
      * @return all rows in the dataSource
      */
-    Collection<SimpleRow<V>> getRows();
+    Collection<DefaultRow<V>> getRows();
 
     /**
      * @return the needed rows for the view
@@ -72,7 +72,7 @@ public interface DataGridSource<K, V> {
     /**
      * Returns liveSelecteData
      */
-    List<SimpleRow<V>> getLiveSelectedData();
+    List<DefaultRow<V>> getLiveSelectedData();
 
     /**
      * Adapter setter
@@ -92,16 +92,16 @@ public interface DataGridSource<K, V> {
     /**
      * Adds a sort
      */
-    void addSort(final Column<V> column, final SimpleDataGridController<K, V>.ColumnControllerSort colSort, final boolean asc);
+    void addSort(final Column<V> column, final DefaultDataGridController<K, V>.ColumnControllerSort colSort, final boolean asc);
 
-    void addSort(Object key, Comparator<SimpleRow<V>> comparator);
+    void addSort(Object key, Comparator<DefaultRow<V>> comparator);
 
     /**
      * Removes a sort
      */
-    Comparator<SimpleRow<V>> clearSort(Column<V> column);
+    Comparator<DefaultRow<V>> clearSort(Column<V> column);
 
-    Comparator<SimpleRow<V>> clearSort(Object key);
+    Comparator<DefaultRow<V>> clearSort(Object key);
 
     /**
      * Clears all sorting
@@ -111,7 +111,7 @@ public interface DataGridSource<K, V> {
     /**
      * Get sorts entry set
      */
-    Set<Entry<Object, Comparator<SimpleRow<V>>>> getSortsEntry();
+    Set<Entry<Object, Comparator<DefaultRow<V>>>> getSortsEntry();
 
     /**
      * Sets a filter

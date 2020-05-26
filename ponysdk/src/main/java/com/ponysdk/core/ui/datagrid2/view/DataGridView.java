@@ -61,12 +61,8 @@ public interface DataGridView<K, V> extends IsPWidget {
     void setPollingDelayMillis(long pollingDelayMillis);
 
     /**
-     * Returns an immutable {@link Collection} view of the data as it is shown to the user (i.e. sorting and filters are
-     * taken into account). The collection is backed by the view, so changes to the view are reflected in the
-     * collection.
+     * Returns an the number of data that can be shown on the screen for a given filter
      */
-    //    Collection<V> getLiveData();
-
     int getLiveDataRowCount();
 
     /**

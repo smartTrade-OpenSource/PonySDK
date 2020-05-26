@@ -38,7 +38,7 @@ import com.ponysdk.core.ui.datagrid2.cell.LabelCell;
 /**
  * @author mbagdouri
  */
-public class SimpleColumnDefinition<V> implements ColumnDefinition<V> {
+public class DefaultColumnDefinition<V> implements ColumnDefinition<V> {
 
     private final String columnName;
     private final Function<V, Object> columnValueFn;
@@ -51,7 +51,7 @@ public class SimpleColumnDefinition<V> implements ColumnDefinition<V> {
     private Boolean sort;
     private State state = getDefaultState();
 
-    public SimpleColumnDefinition(final String columnName, final Function<V, Object> columnValueFn,
+    public DefaultColumnDefinition(final String columnName, final Function<V, Object> columnValueFn,
             final BiConsumer<V, String> columnEditFn) {
         super();
         this.columnName = columnName;

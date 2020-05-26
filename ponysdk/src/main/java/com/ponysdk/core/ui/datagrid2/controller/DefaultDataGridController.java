@@ -30,6 +30,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -46,18 +47,19 @@ import com.ponysdk.core.ui.datagrid2.config.DataGridConfig.GeneralSort;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfig.Sort;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfigBuilder;
 import com.ponysdk.core.ui.datagrid2.data.AbstractFilter;
+import com.ponysdk.core.ui.datagrid2.data.DefaultRow;
 import com.ponysdk.core.ui.datagrid2.data.Interval;
-import com.ponysdk.core.ui.datagrid2.data.SimpleRow;
 import com.ponysdk.core.ui.datagrid2.data.ViewLiveData;
 import com.ponysdk.core.ui.datagrid2.datasource.DataGridSource;
 import com.ponysdk.core.ui.datagrid2.model.DataGridModel;
+import com.ponysdk.core.ui.datagrid2.view.DataGridSnapshot;
 import com.ponysdk.core.util.MappedList;
 
 /**
  * @author mbagdouri
  */
 
-public class SimpleDataGridController<K, V> implements DataGridController<K, V>, DataGridModel<K, V> {
+public class DefaultDataGridController<K, V> implements DataGridController<K, V>, DataGridModel<K, V> {
 
     private static final Object NO_RENDERING_HELPER = new Object();
     private static final int RENDERING_HELPERS_CACHE_CAPACITY = 512;
@@ -72,18 +74,21 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
     private final RenderingHelperSupplier renderingHelperSupplier1 = new RenderingHelperSupplier();
     private final RenderingHelperSupplier renderingHelperSupplier2 = new RenderingHelperSupplier();
     private DataGridSource<K, V> dataSource;
+    //FIXME
+    //    private int threadCounter = 0;
+    //    private final int firstRowIndex = 0;
+    //    private Map<Integer, Integer> sorts;
+    //    private Set<Integer> filters;
+    //    private final int size = 0;
+    DataGridSnapshot viewSnapshot;
 
-    public SimpleDataGridController() {
+    public DefaultDataGridController() {
         super();
     }
 
-    public SimpleDataGridController(final DataGridSource<K, V> dataSource) {
+    public DefaultDataGridController(final DataGridSource<K, V> dataSource) {
         this.dataSource = dataSource;
         dataSource.setRenderingHelpersCache(renderingHelpersCache);
-    }
-
-    public void setDataSource(final DataGridSource<K, V> dataSrc) {
-        this.dataSource = dataSrc;
     }
 
     @Override
@@ -113,7 +118,7 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
         return null;
     }
 
-    private synchronized Object getRenderingHelper(final SimpleRow<V> row, final Column<V> column) {
+    private synchronized Object getRenderingHelper(final DefaultRow<V> row, final Column<V> column) {
         final Object[] renderingHelpers = renderingHelpersCache.computeIfAbsent(row, r -> new Object[columns.size()]);
         Object helper = renderingHelpers[column.getID()];
         if (helper == NO_RENDERING_HELPER) return null;
@@ -124,11 +129,11 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
         return helper;
     }
 
-    private void clearRenderingHelpers(final SimpleRow<V> row) {
+    private void clearRenderingHelpers(final DefaultRow<V> row) {
         renderingHelpersCache.remove(row);
     }
 
-    private void clearRenderingHelper(final SimpleRow<V> row, final Column<V> column) {
+    private void clearRenderingHelper(final DefaultRow<V> row, final Column<V> column) {
         final Object[] renderingHelpers = renderingHelpersCache.get(row);
         if (renderingHelpers == null) return;
         renderingHelpers[column.getID()] = null;
@@ -188,7 +193,7 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
         int from = Integer.MAX_VALUE;
         int to = 0;
         for (final Map.Entry<K, Consumer<V>> entry : updaters.entrySet()) {
-            final SimpleRow<V> row = dataSource.getRow(entry.getKey());
+            final DefaultRow<V> row = dataSource.getRow(entry.getKey());
             clearRenderingHelpers(row);
             final Interval interval = dataSource.updateData(entry.getKey(), entry.getValue());
             if (interval == null) continue;
@@ -200,7 +205,7 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
 
     @Override
     public void updateData(final K k, final Consumer<V> updater) {
-        final SimpleRow<V> row = dataSource.getRow(k);
+        final DefaultRow<V> row = dataSource.getRow(k);
         clearRenderingHelpers(row);
         final Interval interval = dataSource.updateData(k, updater);
         if (interval != null) refreshRows(interval.from, interval.to);
@@ -216,7 +221,7 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
 
     @Override
     public final V removeData(final K k) {
-        final SimpleRow<V> row = dataSource.getRow(k);
+        final DefaultRow<V> row = dataSource.getRow(k);
         if (row == null) return null;
         renderingHelpersCache.remove(row);
         final V v = dataSource.removeData(k);
@@ -226,7 +231,7 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
 
     @Override
     public final V getData(final K k) {
-        final SimpleRow<V> row = dataSource.getRow(k);
+        final DefaultRow<V> row = dataSource.getRow(k);
         if (row == null) return null;
         return row.getData();
     }
@@ -235,14 +240,14 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
     public void renderCell(final ColumnDefinition<V> colDef, final int row, final Cell<V> cell, final ViewLiveData<V> result) {
         checkAdapter();
         final Column<V> column = getColumn(colDef);
-        final SimpleRow<V> r = result.liveData.get(row);
+        final DefaultRow<V> r = result.liveData.get(row);
         cell.render(r.getData(), getRenderingHelper(r, column));
     }
 
     @Override
     public void setValueOnExtendedCell(final int row, final ExtendedCell<V> extendedCell, final ViewLiveData<V> result) {
         checkAdapter();
-        final SimpleRow<V> r = result.liveData.get(row);
+        final DefaultRow<V> r = result.liveData.get(row);
         extendedCell.setValue(r.getData());
     }
 
@@ -311,9 +316,38 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
         refreshRows(0, dataSource.getRowCount());
     }
 
+    //    public void setDataGridSnapshot(final int[] fri, final Map<Integer, Integer> sorts, final Set<Integer> filters, final int[] size) {
+    //        this.firstRowIndex = fri;
+    //        this.sorts = sorts;
+    //        this.filters = filters;
+    //        this.size = size;
+    //    }
+    public void setDataGridSnapshot(final DataGridSnapshot snapshot) {
+        this.viewSnapshot = snapshot;
+    }
+
     @Override
-    public ViewLiveData<V> prepareLiveDataOnScreen(final ViewLiveData<V> dataSrcResult) {
-        return dataSource.getRows(dataSrcResult);
+    public void prepareLiveDataOnScreen(final ViewLiveData<V> dataSrcResult, final Consumer<ViewLiveData<V>> consumer) {
+        //        threadCounter = dataSrcResult.ID;
+        //        firstRowIndex = dataSrcResult.firstRowIndex;
+        //        sorts = dataSrcResult.sorts;
+        //        filters = dataSrcResult.filters;
+        //        size = dataSrcResult.size;
+
+        final CompletableFuture<ViewLiveData<V>> completableFuture = CompletableFuture
+            .supplyAsync(() -> dataSource.getRows(dataSrcResult));
+        completableFuture.thenAccept(s -> checkThread(s, completableFuture, consumer));
+    }
+
+    private void checkThread(final ViewLiveData<V> viewLiveData, final CompletableFuture<ViewLiveData<V>> completableFuture,
+                             final Consumer<ViewLiveData<V>> consumer) {
+        if (!viewSnapshot.equals(viewLiveData.stateSnapshot)) {
+            System.out.println("#------- Failed --------#");
+            completableFuture.cancel(false); // completableFuture.get() throws a CancellationException
+        } else {
+            System.out.println("#-------  Pass  --------#");
+            completableFuture.thenAccept(consumer::accept);
+        }
     }
 
     @Override
@@ -330,7 +364,7 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
     public void clearRenderingHelpers(final ColumnDefinition<V> colDef) {
         checkAdapter();
         final Column<V> column = getColumn(colDef);
-        for (final SimpleRow<V> row : dataSource.getRows()) {
+        for (final DefaultRow<V> row : dataSource.getRows()) {
             clearRenderingHelper(row, column);
         }
     }
@@ -363,8 +397,8 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
     @Override
     public void enrichConfigBuilder(final DataGridConfigBuilder<V> builder) {
         checkAdapter();
-        for (final Map.Entry<Object, Comparator<SimpleRow<V>>> entry : dataSource.getSortsEntry()) {
-            if (entry.getValue() instanceof SimpleDataGridController.ColumnControllerSort) {
+        for (final Map.Entry<Object, Comparator<DefaultRow<V>>> entry : dataSource.getSortsEntry()) {
+            if (entry.getValue() instanceof DefaultDataGridController.ColumnControllerSort) {
                 final ColumnControllerSort sort = (ColumnControllerSort) entry.getValue();
                 builder.addSort(new ColumnSort<>(sort.column.getColDef().getId(), sort.asc));
             } else { // instanceof GeneralControllerSort
@@ -394,8 +428,8 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
 
     @Override
     public Collection<V> getLiveSelectedData() {
-        final List<SimpleRow<V>> liveSelectedData = dataSource.getLiveSelectedData();
-        return new MappedList<>(liveSelectedData, SimpleRow::getData);
+        final List<DefaultRow<V>> liveSelectedData = dataSource.getLiveSelectedData();
+        return new MappedList<>(liveSelectedData, DefaultRow::getData);
     }
 
     @Override
@@ -420,10 +454,10 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
 
     private class RenderingHelperSupplier implements Supplier<Object> {
 
-        private SimpleRow<V> row;
+        private DefaultRow<V> row;
         private Column<V> column;
 
-        private void set(final SimpleRow<V> row, final Column<V> column) {
+        private void set(final DefaultRow<V> row, final Column<V> column) {
             this.row = row;
             this.column = column;
         }
@@ -440,15 +474,15 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
 
     }
 
-    public static class RenderingHelpersCache<V> extends LinkedHashMap<SimpleRow<V>, Object[]> {
+    public static class RenderingHelpersCache<V> extends LinkedHashMap<DefaultRow<V>, Object[]> {
 
         @Override
-        protected boolean removeEldestEntry(final Map.Entry<SimpleRow<V>, Object[]> eldest) {
+        protected boolean removeEldestEntry(final Map.Entry<DefaultRow<V>, Object[]> eldest) {
             return size() > RENDERING_HELPERS_CACHE_CAPACITY;
         }
     }
 
-    private class GeneralControllerSort implements Comparator<SimpleRow<V>> {
+    private class GeneralControllerSort implements Comparator<DefaultRow<V>> {
 
         private final Comparator<V> comparator;
 
@@ -458,12 +492,12 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
         }
 
         @Override
-        public int compare(final SimpleRow<V> r1, final SimpleRow<V> r2) {
+        public int compare(final DefaultRow<V> r1, final DefaultRow<V> r2) {
             return comparator.compare(r1.getData(), r2.getData());
         }
     }
 
-    public class ColumnControllerSort implements Comparator<SimpleRow<V>> {
+    public class ColumnControllerSort implements Comparator<DefaultRow<V>> {
 
         private final Column<V> column;
         public final boolean asc;
@@ -475,7 +509,7 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
         }
 
         @Override
-        public int compare(final SimpleRow<V> r1, final SimpleRow<V> r2) {
+        public int compare(final DefaultRow<V> r1, final DefaultRow<V> r2) {
             try {
                 renderingHelperSupplier1.set(r1, column);
                 renderingHelperSupplier2.set(r2, column);
@@ -505,7 +539,7 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
         }
 
         @Override
-        public boolean test(final SimpleRow<V> row) {
+        public boolean test(final DefaultRow<V> row) {
             return filter.test(row.getData());
         }
 
@@ -527,7 +561,7 @@ public class SimpleDataGridController<K, V> implements DataGridController<K, V>,
         }
 
         @Override
-        public boolean test(final SimpleRow<V> row) {
+        public boolean test(final DefaultRow<V> row) {
             try {
                 renderingHelperSupplier1.set(row, column);
                 return filter.test(row.getData(), renderingHelperSupplier1);

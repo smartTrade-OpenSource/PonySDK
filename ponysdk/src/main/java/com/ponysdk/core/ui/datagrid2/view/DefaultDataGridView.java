@@ -33,7 +33,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -68,12 +67,12 @@ import com.ponysdk.core.ui.datagrid2.config.DataGridConfig.GeneralSort;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfig.Sort;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfigBuilder;
 import com.ponysdk.core.ui.datagrid2.controller.DataGridController;
-import com.ponysdk.core.ui.datagrid2.controller.SimpleDataGridController;
+import com.ponysdk.core.ui.datagrid2.controller.DefaultDataGridController;
+import com.ponysdk.core.ui.datagrid2.data.DefaultRow;
 import com.ponysdk.core.ui.datagrid2.data.RowAction;
-import com.ponysdk.core.ui.datagrid2.data.SimpleRow;
 import com.ponysdk.core.ui.datagrid2.data.ViewLiveData;
 import com.ponysdk.core.ui.datagrid2.datasource.DataGridSource;
-import com.ponysdk.core.ui.datagrid2.datasource.SimpleCacheDataSource;
+import com.ponysdk.core.ui.datagrid2.datasource.DefaultCacheDataSource;
 import com.ponysdk.core.ui.datagrid2.model.DataGridModel;
 import com.ponysdk.core.ui.datagrid2.model.SpyDataGridModel;
 import com.ponysdk.core.util.SetUtils;
@@ -81,7 +80,7 @@ import com.ponysdk.core.util.SetUtils;
 /**
  * @author mbagdouri
  */
-public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
+public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 
     //Addon
     private static final String ADDON_ROW_KEY = "row";
@@ -134,19 +133,22 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
     private final Map<ColumnDefinition<V>, ColumnView> columnViews = new HashMap<>();
     private final DataGridModelWrapper modelWrapper;
     private final LinkedHashMap<Object, RowAction<V>> rowActions = new LinkedHashMap<>();
-    private int firstRowIndex = 0;
     private int rowCount = 0;
-    private final Map<Integer, Integer> sorts = new HashMap<>();
-    private final Set<Integer> filters = new HashSet<>();
+    //    private int firstRowIndex = 0;
+    //    private final Map<Integer, Integer> sorts = new HashMap<>();
+    //    private final Set<Integer> filters = new HashSet<>();
+    //    private int size = 0;
+    private int threadCounter = 0;
+    private final DataGridSnapshot viewStateSnapshot = new DataGridSnapshot(0, 0, new HashMap<>(), new HashSet<>());
 
-    public SimpleDataGridView() {
-        this(new SimpleCacheDataSource<K, V>());
+    public DefaultDataGridView() {
+        this(new DefaultCacheDataSource<K, V>());
     }
 
-    public SimpleDataGridView(final DataGridSource<K, V> dataSource) {
+    public DefaultDataGridView(final DataGridSource<K, V> dataSource) {
 
         new HideScrollBarAddon(root);
-        controller = new SimpleDataGridController<>(dataSource);
+        controller = new DefaultDataGridController<>(dataSource);
         controller.setListener(this::onUpdateRows);
         selectedDataView = controller.getLiveSelectedData();
         modelWrapper = new DataGridModelWrapper(controller.getModel());
@@ -176,6 +178,9 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
 
         pinnedTable = new PinnedTable(headerPinnedDiv, bodyPinnedDiv, footerPinnedDiv);
         unpinnedTable = new UnpinnedTable(headerUnpinnedDiv, bodyUnpinnedDiv, footerUnpinnedDiv);
+
+        //FIXME
+        ((DefaultDataGridController) controller).setDataGridSnapshot(viewStateSnapshot);
     }
 
     public DataGridAdapter<K, V> getAdapter() {
@@ -248,7 +253,7 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
 
     private void onScroll(final int row) {
         showLoadingDataView();
-        firstRowIndex = row;
+        viewStateSnapshot.firstRowIndex = row;
         onUpdateRows(0, controller.getRowCount());
         draw();
     }
@@ -361,39 +366,54 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
             if (from >= to) return;
             final int absoluteRowCount = controller.getRowCount();
             int start;
-            if (firstRowIndex > absoluteRowCount - rows.size()) {
-                firstRowIndex = Math.max(0, absoluteRowCount - rows.size());
+            int fri = viewStateSnapshot.firstRowIndex;
+            if (fri > absoluteRowCount - rows.size()) {
+                fri = Math.max(0, absoluteRowCount - rows.size());
                 start = 0;
             } else {
-                start = Math.max(0, from - firstRowIndex);
+                start = Math.max(0, from - fri);
             }
-
-            final int size = unpinnedTable.body.getWidgetCount();
-            System.out.println("\n\n" + "#-View-# Prepare onDraw -> row : " + firstRowIndex + "   size : " + size);
-            final ViewLiveData<V> viewLiveData = new ViewLiveData<>(firstRowIndex, absoluteRowCount, size, start,
-                new ArrayList<SimpleRow<V>>(), sorts, filters);
+            //            size = rows.size();
+            //            final int size = unpinnedTable.body.getWidgetCount();
+            viewStateSnapshot.size = unpinnedTable.body.getWidgetCount();
+            System.out.println("\n\n" + "#-View-# Prepare onDraw -> row : " + fri + "   size : " + viewStateSnapshot.size);
+            //FIXME : threadCounter
+            //            final ViewLiveData<V> viewLiveData = new ViewLiveData<>(++threadCounter, fri, absoluteRowCount, viewStateSnapshot.size,
+            //                start, new ArrayList<DefaultRow<V>>(), viewStateSnapshot.sorts, viewStateSnapshot.filters);
+            final ViewLiveData<V> viewLiveData = new ViewLiveData<>(++threadCounter, start, absoluteRowCount,
+                new ArrayList<DefaultRow<V>>(), viewStateSnapshot);
             final Consumer<ViewLiveData<V>> consumer = PScheduler.delegate(this::updateView);
-            CompletableFuture.supplyAsync(() -> controller.prepareLiveDataOnScreen(viewLiveData)).thenAccept(consumer::accept);
+            controller.prepareLiveDataOnScreen(viewLiveData, consumer);
         } catch (final Exception e) {
+            //FIXME
         }
     }
 
     private void updateView(final ViewLiveData<V> result) {
         try {
-            if (firstRowIndex != result.firstRowIndex || !filters.equals(result.filters) || !sorts.equals(result.sorts)
-                    || result.size != rows.size()) {
+            //            if (firstRowIndex != result.firstRowIndex || !filters.equals(result.filters) || !sorts.equals(result.sorts)
+            //                    || result.size != rows.size()) {
+            //                return;
+            //            }
+
+            if (!viewStateSnapshot.equals(result.stateSnapshot)) {
                 return;
             }
+            //FIXME
+            //            if (threadCounter != result.getId()) {
+            //                return;
+            //            }
+
             rowCount = result.absoluteRowCount;
             System.out.println("we read the returned data to update the view");
-            for (int i = result.start; i < result.size; i++) {
+            for (int i = result.start; i < result.stateSnapshot.size; i++) {
                 try {
                     updateRow(rows.get(i), result);
                 } catch (final Exception e) {
-                    System.out.println("this is null");
+                    e.printStackTrace();
                 }
             }
-            addon.onDataUpdated(result.absoluteRowCount, this.rows.size(), result.firstRowIndex);
+            addon.onDataUpdated(result.absoluteRowCount, this.rows.size(), result.stateSnapshot.firstRowIndex);
         } finally {
             from = Integer.MAX_VALUE;
             to = 0;
@@ -420,8 +440,11 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         row.extended = false;
         updateRowCells(row, row.unpinnedCells, unpinnedTable.columns, selected, previousKey, result);
         updateRowCells(row, row.pinnedCells, pinnedTable.columns, selected, previousKey, result);
-        if (row.extended) addon.updateExtendedRowHeight(row.relativeIndex);
-        else if (mustUpdateRowHeight) addon.updateRowHeight(row.relativeIndex);
+        if (row.extended) {
+            addon.updateExtendedRowHeight(row.relativeIndex);
+        } else if (mustUpdateRowHeight) {
+            addon.updateRowHeight(row.relativeIndex);
+        }
         if (selected) {
             adapter.onSelectRow(row.unpinnedRow);
             row.unpinnedRow.setAttribute(SELECTED_ATTRIBUTE);
@@ -481,6 +504,7 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
                 showExtendedCellWidget(row, cell, td, extendedCellHandler, result);
             }
         }
+
     }
 
     private void showExtendedCellWidget(final Row row, final Cell<V> cell, final PComplexPanel td,
@@ -497,7 +521,8 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
             td.add(extendedCellHandler.cell);
             extendedCellHandler.cell.afterAdd();
         }
-        controller.setValueOnExtendedCell(row.getAbsoluteIndex(), extendedCellHandler.cell, result);
+        //        controller.setValueOnExtendedCell(row.getAbsoluteIndex(), extendedCellHandler.cell, result);
+        controller.setValueOnExtendedCell(row.getRelativeIndex(), extendedCellHandler.cell, result);
     }
 
     private void showCellWidget(final Row row, final Cell<V> cell, final ColumnView columnView, final boolean selected,
@@ -668,7 +693,7 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
     @Override
     public void setFilter(final Object key, final String id, final Predicate<V> filter, final boolean reinforcing) {
         showLoadingDataView();
-        filters.add(key.hashCode());
+        viewStateSnapshot.filters.add(key.hashCode());
         controller.setFilter(key, id, filter, reinforcing);
         draw();
     }
@@ -676,7 +701,7 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
     @Override
     public void clearFilter(final Object key) {
         showLoadingDataView();
-        filters.remove(key.hashCode());
+        viewStateSnapshot.filters.remove(key.hashCode());
         controller.clearFilter(key);
         draw();
     }
@@ -684,7 +709,7 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
     @Override
     public void clearFilters() {
         showLoadingDataView();
-        filters.clear();
+        viewStateSnapshot.filters.clear();
         controller.clearFilters();
         draw();
     }
@@ -715,7 +740,7 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
     public void selectAllLiveData() {
         checkAdapter();
         controller.selectAllLiveData();
-        for (final SimpleDataGridView<K, V>.Row row : rows) {
+        for (final DefaultDataGridView<K, V>.Row row : rows) {
             if (row.pinnedRow.isVisible()) row.select();
         }
         for (final ColumnView column : columnViews.values()) {
@@ -729,7 +754,7 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
     public void unselectAllData() {
         checkAdapter();
         controller.unselectAllData();
-        for (final SimpleDataGridView<K, V>.Row row : rows) {
+        for (final DefaultDataGridView<K, V>.Row row : rows) {
             row.unselect();
         }
         for (final ColumnView column : columnViews.values()) {
@@ -1014,7 +1039,7 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         }
 
         int getAbsoluteIndex() {
-            return relativeIndex + firstRowIndex;
+            return relativeIndex + viewStateSnapshot.firstRowIndex;
         }
 
         boolean isShown() {
@@ -1091,14 +1116,14 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         }
 
         @Override
-        protected PComplexPanel addFooterCell(final SimpleDataGridView<K, V>.ColumnView columnView) {
+        protected PComplexPanel addFooterCell(final DefaultDataGridView<K, V>.ColumnView columnView) {
             final PComplexPanel footer = super.addFooterCell(columnView);
             footer.setAttribute(PINNED_ATTRIBUTE);
             return footer;
         }
 
         @Override
-        protected PComplexPanel addHeaderCell(final SimpleDataGridView<K, V>.ColumnView columnView) {
+        protected PComplexPanel addHeaderCell(final DefaultDataGridView<K, V>.ColumnView columnView) {
             final PComplexPanel header = super.addHeaderCell(columnView);
             header.setAttribute(PINNED_ATTRIBUTE);
             return header;
@@ -1242,7 +1267,7 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         private final Row row;
         private final ColumnView columnView;
 
-        SimpleCellController(final SimpleDataGridView<K, V>.Row row, final ColumnView column) {
+        SimpleCellController(final DefaultDataGridView<K, V>.Row row, final ColumnView column) {
             super();
             this.row = row;
             this.columnView = column;
@@ -1333,7 +1358,7 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         public void sort(final boolean asc) {
             if (!columnView.column.isSortable()) return;
             showLoadingDataView();
-            sorts.put(i, asc ? 1 : 0);
+            viewStateSnapshot.sorts.put(i, asc ? 1 : 0);
             controller.addSort(columnView.column, asc);
             draw();
             for (final ColumnActionListener<V> listener : columnView.listeners) {
@@ -1345,7 +1370,7 @@ public final class SimpleDataGridView<K, V> implements DataGridView<K, V> {
         public void clearSort() {
             if (!columnView.column.isSortable()) return;
             showLoadingDataView();
-            sorts.clear();
+            viewStateSnapshot.sorts.clear();
             controller.clearSort(columnView.column);
             draw();
             for (final ColumnActionListener<V> listener : columnView.listeners) {

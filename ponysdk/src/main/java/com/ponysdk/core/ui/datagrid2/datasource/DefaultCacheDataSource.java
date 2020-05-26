@@ -34,44 +34,37 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import com.ponysdk.core.ui.datagrid2.data.AbstractFilter;
-import com.ponysdk.core.ui.datagrid2.data.ViewLiveData;
+import com.ponysdk.core.ui.datagrid2.data.DefaultRow;
 import com.ponysdk.core.ui.datagrid2.data.Interval;
-import com.ponysdk.core.ui.datagrid2.data.SimpleRow;
+import com.ponysdk.core.ui.datagrid2.data.ViewLiveData;
 
-/**
- *
- */
-public class SimpleCacheDataSource<K, V> extends SimpleDataSource<K, V> {
+public class DefaultCacheDataSource<K, V> extends AbstractDataSource<K, V> {
 
-    private final Map<K, SimpleRow<V>> cache = new HashMap<>();
-    private final List<SimpleRow<V>> liveData = new ArrayList<>();
+    private final Map<K, DefaultRow<V>> cache = new HashMap<>();
+    private final List<DefaultRow<V>> liveData = new ArrayList<>();
 
     @Override
-    public SimpleRow<V> getRow(final K k) {
+    public DefaultRow<V> getRow(final K k) {
         return cache.get(k);
     }
 
     @Override
-    public Collection<SimpleRow<V>> getRows() {
+    public Collection<DefaultRow<V>> getRows() {
         return cache.values();
     }
 
-    //    @Override
-    //    public synchronized List<SimpleRow<V>> getRows(final int index, int size) {
-    //        // Reset size so that it doesn't exceed boundaries
-    //        size = index + size > liveData.size() ? liveData.size() - index : size;
-    //        final List<SimpleRow<V>> tmp = new ArrayList<>();
-    //        for (int i = index; i < index + size; i++) {
-    //            tmp.add(liveData.get(i));
-    //        }
-    //        return tmp;
-    //    }
     @Override
     public ViewLiveData<V> getRows(final ViewLiveData<V> dataSrcResult) {
-        final int index = dataSrcResult.firstRowIndex;
-        int size = dataSrcResult.size;
+        //FIXME
+        //        try {
+        //            Thread.sleep(1000);
+        //        } catch (final Exception e) {
+        //            // TODO: handle exception
+        //        }
+        final int index = dataSrcResult.stateSnapshot.firstRowIndex;
+        int size = dataSrcResult.stateSnapshot.size;
         size = index + size > liveData.size() ? liveData.size() - index : size;
-        final List<SimpleRow<V>> tmp = new ArrayList<>();
+        final List<DefaultRow<V>> tmp = new ArrayList<>();
         for (int i = index; i < index + size; i++) {
             tmp.add(liveData.get(i));
         }
@@ -89,7 +82,7 @@ public class SimpleCacheDataSource<K, V> extends SimpleDataSource<K, V> {
     public Interval setData(final V v) {
         Objects.requireNonNull(v);
         final K k = adapter.getKey(v);
-        final SimpleRow<V> row = cache.get(k);
+        final DefaultRow<V> row = cache.get(k);
         Interval interval;
         if (row != null) {
             if (row.getData() == v) return null;
@@ -100,7 +93,7 @@ public class SimpleCacheDataSource<K, V> extends SimpleDataSource<K, V> {
         return interval;
     }
 
-    private Interval updateData(final K k, final SimpleRow<V> row, final V newV) {
+    private Interval updateData(final K k, final DefaultRow<V> row, final V newV) {
         if (row.isAccepted()) {
             final int oldLiveDataSize = liveData.size();
             final int oldRowIndex = removeRow(liveData, row);
@@ -116,7 +109,7 @@ public class SimpleCacheDataSource<K, V> extends SimpleDataSource<K, V> {
 
     @Override
     public Interval updateData(final K k, final Consumer<V> updater) {
-        final SimpleRow<V> row = cache.get(k);
+        final DefaultRow<V> row = cache.get(k);
         if (row == null) return null;
         if (row.isAccepted()) {
             final int oldLiveDataSize = liveData.size();
@@ -134,7 +127,7 @@ public class SimpleCacheDataSource<K, V> extends SimpleDataSource<K, V> {
     @Override
     public V removeData(final K k) {
 
-        final SimpleRow<V> row = cache.remove(k);
+        final DefaultRow<V> row = cache.remove(k);
         final boolean selected = selectedKeys.remove(k);
         if (row.isAccepted()) {
             removeRow(liveData, row);
@@ -146,7 +139,7 @@ public class SimpleCacheDataSource<K, V> extends SimpleDataSource<K, V> {
     }
 
     private Interval insertData(final K k, final V data) {
-        final SimpleRow<V> row = new SimpleRow<>(rowCounter++, data);
+        final DefaultRow<V> row = new DefaultRow<>(rowCounter++, data);
         row.setAcceptance(accept(row));
         cache.put(k, row);
         if (!row.isAccepted()) return null;
@@ -154,7 +147,7 @@ public class SimpleCacheDataSource<K, V> extends SimpleDataSource<K, V> {
         return new Interval(rowIndex, liveData.size());
     }
 
-    private Interval onWasAcceptedAndRemoved(final boolean selected, final SimpleRow<V> row, final int oldLiveDataSize,
+    private Interval onWasAcceptedAndRemoved(final boolean selected, final DefaultRow<V> row, final int oldLiveDataSize,
                                              final int oldRowIndex) {
         clearRenderingHelpers(row);
         if (accept(row)) {
@@ -171,7 +164,7 @@ public class SimpleCacheDataSource<K, V> extends SimpleDataSource<K, V> {
         }
     }
 
-    private Interval onWasNotAccepted(final K k, final SimpleRow<V> row) {
+    private Interval onWasNotAccepted(final K k, final DefaultRow<V> row) {
         clearRenderingHelpers(row);
         if (accept(row)) {
             row.setAcceptance(true);
@@ -182,7 +175,7 @@ public class SimpleCacheDataSource<K, V> extends SimpleDataSource<K, V> {
         return null;
     }
 
-    private void clearRenderingHelpers(final SimpleRow<V> row) {
+    private void clearRenderingHelpers(final DefaultRow<V> row) {
         renderingHelpersCache.remove(row);
     }
 
@@ -190,7 +183,7 @@ public class SimpleCacheDataSource<K, V> extends SimpleDataSource<K, V> {
     public void resetLiveData() {
         liveSelectedData.clear();
         liveData.clear();
-        for (final SimpleRow<V> row : cache.values()) {
+        for (final DefaultRow<V> row : cache.values()) {
             row.setAcceptance(accept(row));
             if (row.isAccepted()) {
                 insertRow(liveData, row);
@@ -220,7 +213,7 @@ public class SimpleCacheDataSource<K, V> extends SimpleDataSource<K, V> {
     @Override
     public void selectAllLiveData() {
         liveSelectedData.clear();
-        for (final SimpleRow<V> row : liveData) {
+        for (final DefaultRow<V> row : liveData) {
             liveSelectedData.add(row);
             selectedKeys.add(adapter.getKey(row.getData()));
         }
@@ -238,11 +231,11 @@ public class SimpleCacheDataSource<K, V> extends SimpleDataSource<K, V> {
         }
     }
 
-    private int reinforceFilter(final List<SimpleRow<V>> rows, final AbstractFilter<V> filter) {
-        final Iterator<SimpleRow<V>> iterator = rows.iterator();
+    private int reinforceFilter(final List<DefaultRow<V>> rows, final AbstractFilter<V> filter) {
+        final Iterator<DefaultRow<V>> iterator = rows.iterator();
         int from = -1;
         for (int i = 0; iterator.hasNext(); i++) {
-            final SimpleRow<V> row = iterator.next();
+            final DefaultRow<V> row = iterator.next();
             if (!filter.test(row)) {
                 row.setAcceptance(false);
                 iterator.remove();
@@ -252,7 +245,7 @@ public class SimpleCacheDataSource<K, V> extends SimpleDataSource<K, V> {
         return from;
     }
 
-    private boolean accept(final SimpleRow<V> row) {
+    private boolean accept(final DefaultRow<V> row) {
         for (final AbstractFilter<V> filter : filters.values()) {
             if (!filter.test(row)) return false;
         }
@@ -261,14 +254,14 @@ public class SimpleCacheDataSource<K, V> extends SimpleDataSource<K, V> {
 
     @Override
     public void select(final K k) {
-        final SimpleRow<V> row = cache.get(k);
+        final DefaultRow<V> row = cache.get(k);
         if (row == null || !selectedKeys.add(k) || !row.isAccepted()) return;
         insertRow(liveSelectedData, row);
     }
 
     @Override
     public void unselect(final K k) {
-        final SimpleRow<V> row = cache.get(k);
+        final DefaultRow<V> row = cache.get(k);
         if (row == null || !selectedKeys.remove(k) || !row.isAccepted()) return;
         removeRow(liveSelectedData, row);
     }

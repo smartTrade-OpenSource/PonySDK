@@ -94,7 +94,7 @@ import com.ponysdk.core.ui.datagrid.dynamic.DynamicDataGrid;
 import com.ponysdk.core.ui.datagrid.impl.PLabelCellRenderer;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
-import com.ponysdk.core.ui.datagrid2.column.SimpleColumnDefinition;
+import com.ponysdk.core.ui.datagrid2.column.DefaultColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.data.RowAction;
 import com.ponysdk.core.ui.datagrid2.model.DataGridModel;
 import com.ponysdk.core.ui.datagrid2.view.ColumnVisibilitySelectorDataGridView;
@@ -102,7 +102,7 @@ import com.ponysdk.core.ui.datagrid2.view.ConfigSelectorDataGridView;
 import com.ponysdk.core.ui.datagrid2.view.DataGridView;
 import com.ponysdk.core.ui.datagrid2.view.DataGridView.DecodeException;
 import com.ponysdk.core.ui.datagrid2.view.RowSelectorColumnDataGridView;
-import com.ponysdk.core.ui.datagrid2.view.SimpleDataGridView;
+import com.ponysdk.core.ui.datagrid2.view.DefaultDataGridView;
 import com.ponysdk.core.ui.eventbus2.EventBus.EventHandler;
 import com.ponysdk.core.ui.formatter.TextFunction;
 import com.ponysdk.core.ui.grid.AbstractGridWidget;
@@ -332,7 +332,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     }
 
     private void testSimpleDataGridView() {
-        final DataGridView<Integer, MyRow> simpleGridView = new SimpleDataGridView<>();
+        final DataGridView<Integer, MyRow> simpleGridView = new DefaultDataGridView<>();
         final ColumnVisibilitySelectorDataGridView<Integer, MyRow> columnVisibilitySelectorDataGridView = new ColumnVisibilitySelectorDataGridView<>(
             simpleGridView);
         final RowSelectorColumnDataGridView<Integer, MyRow> rowSelectorColumnDataGridView = new RowSelectorColumnDataGridView<>(
@@ -350,13 +350,13 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             {
                 for (char c = 'a'; c <= 'z'; c++) {
                     final String ss = c + "";
-                    columns.add(new SimpleColumnDefinition<>(ss, v -> v.getValue(ss), (v, s) -> {
+                    columns.add(new DefaultColumnDefinition<>(ss, v -> v.getValue(ss), (v, s) -> {
                         v.putValue(ss, s);
                     }));
                 }
                 for (char c = 'A'; c <= 'Z'; c++) {
                     final String ss = c + "";
-                    columns.add(new SimpleColumnDefinition<>(ss, v -> v.getValue(ss), (v, s) -> {
+                    columns.add(new DefaultColumnDefinition<>(ss, v -> v.getValue(ss), (v, s) -> {
                         v.putValue(ss, s);
                     }));
                 }

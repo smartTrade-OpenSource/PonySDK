@@ -26,6 +26,7 @@ package com.ponysdk.core.ui.datagrid2.controller;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.function.BiPredicate;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -90,11 +91,10 @@ public interface DataGridController<K, V> {
 
     void clearRenderingHelpers(ColumnDefinition<V> column);
 
-    //    Collection<V> getLiveData();
-
     int getRowCount();
 
     void enrichConfigBuilder(DataGridConfigBuilder<V> builder);
 
-    ViewLiveData<V> prepareLiveDataOnScreen(ViewLiveData<V> dataSrcResult);
+    //    ViewLiveData<V> prepareLiveDataOnScreen(final ViewLiveData<V> dataSrcResult);
+    void prepareLiveDataOnScreen(ViewLiveData<V> dataSrcResult, Consumer<ViewLiveData<V>> consumer);
 }

@@ -24,32 +24,43 @@
 package com.ponysdk.core.ui.datagrid2.data;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
+import com.ponysdk.core.ui.datagrid2.view.DataGridSnapshot;
 
 /**
  *
  */
 public class ViewLiveData<V> {
 
-    public int firstRowIndex;
-    public int absoluteRowCount;
-    public int size;
-    public int start;
-    public List<SimpleRow<V>> liveData;
-    public Map<Integer, Integer> sorts;
-    public Set<Integer> filters = new HashSet<>();
+    //    public int firstRowIndex;
+    //    public int size;
+    //    public Map<Integer, Integer> sorts;
+    //    public Set<Integer> filters = new HashSet<>();
 
-    public ViewLiveData(final int fri, final int arc, final int size, final int start, final List<SimpleRow<V>> liveData,
-            final Map<Integer, Integer> sorts, final Set<Integer> filters) {
-        this.firstRowIndex = fri;
+    //    public ViewLiveData(final int id, final int fri, final int arc, final int size, final int start,
+    //            final List<DefaultRow<V>> liveData, final Map<Integer, Integer> sorts, final Set<Integer> filters) {
+    //        this.firstRowIndex = fri;
+    //        this.absoluteRowCount = arc;
+    //        this.size = size;
+    //        this.liveData = new ArrayList<>(liveData);
+    //        this.sorts = new HashMap<>(sorts);
+    //        this.filters = new HashSet<>(filters);
+    //        this.ID = id;
+    //    }
+    public int start;
+    public final int ID;
+    public int absoluteRowCount;
+    public List<DefaultRow<V>> liveData;
+    public DataGridSnapshot stateSnapshot;
+
+    public ViewLiveData(final int id, final int start, final int arc, final List<DefaultRow<V>> liveData,
+            final DataGridSnapshot stateSnapshot) {
         this.absoluteRowCount = arc;
-        this.size = size;
         this.liveData = new ArrayList<>(liveData);
-        this.sorts = new HashMap<>(sorts);
-        this.filters = new HashSet<>(filters);
+        this.ID = id;
+        this.stateSnapshot = new DataGridSnapshot(stateSnapshot);
+        this.start = start;
     }
+
 }

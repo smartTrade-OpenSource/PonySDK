@@ -41,15 +41,15 @@ import com.ponysdk.core.ui.basic.PSimplePanel;
 import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
-import com.ponysdk.core.ui.datagrid2.column.SimpleColumnDefinition;
+import com.ponysdk.core.ui.datagrid2.column.DefaultColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.controller.DataGridController;
 import com.ponysdk.core.ui.datagrid2.data.RowAction;
 import com.ponysdk.core.ui.datagrid2.model.DataGridModel;
 import com.ponysdk.core.ui.datagrid2.view.ColumnVisibilitySelectorDataGridView;
 import com.ponysdk.core.ui.datagrid2.view.ConfigSelectorDataGridView;
 import com.ponysdk.core.ui.datagrid2.view.DataGridView;
+import com.ponysdk.core.ui.datagrid2.view.DefaultDataGridView;
 import com.ponysdk.core.ui.datagrid2.view.RowSelectorColumnDataGridView;
-import com.ponysdk.core.ui.datagrid2.view.SimpleDataGridView;
 import com.ponysdk.core.ui.main.EntryPoint;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
 import com.ponysdk.sample.client.event.UserLoggedOutHandler;
@@ -61,7 +61,7 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
     int a = 0;
     private int rowCounter = 0;
     private int actionCounter = 0;
-    private final Map<Character, SimpleColumnDefinition<MyRow>> colDefs = new HashMap<>();
+    private final Map<Character, DefaultColumnDefinition<MyRow>> colDefs = new HashMap<>();
 
     @Override
     public void start(final UIContext uiContext) {
@@ -79,7 +79,7 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
     }
 
     private void testSimpleDataGridViewOnly() {
-        final DataGridView<Integer, MyRow> simpleGridView = new SimpleDataGridView<>();
+        final DataGridView<Integer, MyRow> simpleGridView = new DefaultDataGridView<>();
         final ColumnVisibilitySelectorDataGridView<Integer, MyRow> columnVisibilitySelectorDataGridView = new ColumnVisibilitySelectorDataGridView<>(
             simpleGridView);
         final RowSelectorColumnDataGridView<Integer, MyRow> rowSelectorColumnDataGridView = new RowSelectorColumnDataGridView<>(
@@ -95,7 +95,7 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
             {
                 for (char c = 'a'; c <= 'z'; c++) {
                     final String ss = c + "";
-                    final SimpleColumnDefinition<MyRow> colDef = new SimpleColumnDefinition<>(ss, v -> v.getValue(ss), (v, s) -> {
+                    final DefaultColumnDefinition<MyRow> colDef = new DefaultColumnDefinition<>(ss, v -> v.getValue(ss), (v, s) -> {
                         v.putValue(ss, s);
                     });
                     colDefs.put(c, colDef);
@@ -172,7 +172,7 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
         });
         gridView.setPollingDelayMillis(250L);
         final DataGridModel<Integer, MyRow> model = gridView.getModel();
-        final DataGridController<Integer, MyRow> controller = ((SimpleDataGridView<Integer, MyRow>) simpleGridView).getController();
+        final DataGridController<Integer, MyRow> controller = ((DefaultDataGridView<Integer, MyRow>) simpleGridView).getController();
         gridView.asWidget().setHeight("950px");
         gridView.asWidget().setWidth("1900px");
         gridView.asWidget().setStyleProperty("resize", "both");
@@ -182,7 +182,7 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
         PWindow.getMain().add(configSelectorDataGridView.getDecoratorWidget());
 
         model.setBound(false);
-        for (int i = 0; i < 50_000; i++) {
+        for (int i = 0; i < 10_000; i++) {
             if (i % 500_000 == 0) log.info("i: {}", i);
             model.setData(createMyRow(i));
             rowCounter++;
@@ -255,12 +255,12 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
 
         //FIXME : somtimes the update action throws a concurrency exception
         //Test 1
-        addFilter(controller);
-        addSort(controller);
-        testPerformanceBench(rowCounter, 60, updateDataAction);
+        //        addFilter(controller);
+        //        addSort(controller);
+        //        testPerformanceBench(rowCounter, 60, updateDataAction);
 
         //Test 2
-        //        testPerformanceBench(rowCounter, 60, addDataAction);
+        testPerformanceBench(rowCounter, 60, addDataAction);
 
         //Test 3
         //        testPerformanceBench(rowCounter, 1, removeDataAction);

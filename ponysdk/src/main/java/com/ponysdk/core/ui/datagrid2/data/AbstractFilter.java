@@ -30,7 +30,7 @@ import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 /**
  *
  */
-public interface AbstractFilter<V> extends Predicate<SimpleRow<V>> {
+public interface AbstractFilter<V> extends Predicate<DefaultRow<V>> {
 
     abstract ColumnDefinition<V> getColumnDefinition();
 }
