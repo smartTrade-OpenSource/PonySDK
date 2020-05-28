@@ -54,23 +54,17 @@ public class DefaultCacheDataSource<K, V> extends AbstractDataSource<K, V> {
     }
 
     @Override
-    public ViewLiveData<V> getRows(final ViewLiveData<V> dataSrcResult) {
-        //FIXME
-        //        try {
-        //            Thread.sleep(1000);
-        //        } catch (final Exception e) {
-        //            // TODO: handle exception
-        //        }
-        final int index = dataSrcResult.stateSnapshot.firstRowIndex;
-        int size = dataSrcResult.stateSnapshot.size;
+    public ViewLiveData<V> getRows(final ViewLiveData<V> viewLiveData) {
+        final int index = viewLiveData.stateSnapshot.firstRowIndex;
+        int size = viewLiveData.stateSnapshot.size;
         size = index + size > liveData.size() ? liveData.size() - index : size;
         final List<DefaultRow<V>> tmp = new ArrayList<>();
         for (int i = index; i < index + size; i++) {
             tmp.add(liveData.get(i));
         }
-        dataSrcResult.absoluteRowCount = getRowCount();
-        dataSrcResult.liveData = tmp;
-        return dataSrcResult;
+        viewLiveData.absoluteRowCount = getRowCount();
+        viewLiveData.liveData = tmp;
+        return viewLiveData;
     }
 
     @Override

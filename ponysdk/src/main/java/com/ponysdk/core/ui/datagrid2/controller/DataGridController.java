@@ -25,6 +25,7 @@ package com.ponysdk.core.ui.datagrid2.controller;
 
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Map;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -37,7 +38,6 @@ import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfig;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfigBuilder;
 import com.ponysdk.core.ui.datagrid2.data.ViewLiveData;
-import com.ponysdk.core.ui.datagrid2.model.DataGridModel;
 
 /**
  * @author mbagdouri
@@ -85,7 +85,7 @@ public interface DataGridController<K, V> {
 
     void setAdapter(DataGridAdapter<K, V> adapter);
 
-    DataGridModel<K, V> getModel();
+    DataGridController<K, V> getController();
 
     void setListener(DataGridControllerListener<V> listener);
 
@@ -95,6 +95,55 @@ public interface DataGridController<K, V> {
 
     void enrichConfigBuilder(DataGridConfigBuilder<V> builder);
 
-    //    ViewLiveData<V> prepareLiveDataOnScreen(final ViewLiveData<V> dataSrcResult);
+    /**
+     * Send a partially filled object to the dataSource. The object will return filled
+     * with the needed data for the view, and with updated fields sometimes
+     */
     void prepareLiveDataOnScreen(ViewLiveData<V> dataSrcResult, Consumer<ViewLiveData<V>> consumer);
+
+    /**
+     * Insert or replace the value
+     */
+    void setData(V v);
+
+    /**
+     * Insert or replace the collection of values
+     *
+     * @param c
+     */
+    void setData(Collection<V> c);
+
+    /**
+     * Update an existing value identified by key {@code k}, if it is present, using the {@code updater}
+     */
+    void updateData(K k, Consumer<V> updater);
+
+    /**
+     * Update existing values identified by the key, if they are present, using the {@code updaters}
+     */
+    void updateData(Map<K, Consumer<V>> updaters);
+
+    /**
+     * Returns the value to which the specified key is mapped,
+     * or {@code null} if this model contains no mapping for the key.
+     */
+    V getData(K k);
+
+    /**
+     * Removes the value identified by the key {@code k} from this model if it is present
+     */
+    V removeData(K k);
+
+    /**
+     * If {@code bound} is true (default), the view is notified when the model is updated. Otherwise, the view is not
+     * notified but it will continue to see the most recent version of the model
+     *
+     * @param bound
+     */
+    void setBound(boolean bound);
+
+    /**
+     * Whether the model is bound to the view.
+     */
+    boolean getBound();
 }

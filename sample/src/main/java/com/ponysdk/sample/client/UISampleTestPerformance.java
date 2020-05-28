@@ -44,7 +44,6 @@ import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.column.DefaultColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.controller.DataGridController;
 import com.ponysdk.core.ui.datagrid2.data.RowAction;
-import com.ponysdk.core.ui.datagrid2.model.DataGridModel;
 import com.ponysdk.core.ui.datagrid2.view.ColumnVisibilitySelectorDataGridView;
 import com.ponysdk.core.ui.datagrid2.view.ConfigSelectorDataGridView;
 import com.ponysdk.core.ui.datagrid2.view.DataGridView;
@@ -171,7 +170,6 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
             }
         });
         gridView.setPollingDelayMillis(250L);
-        final DataGridModel<Integer, MyRow> model = gridView.getModel();
         final DataGridController<Integer, MyRow> controller = ((DefaultDataGridView<Integer, MyRow>) simpleGridView).getController();
         gridView.asWidget().setHeight("950px");
         gridView.asWidget().setWidth("1900px");
@@ -181,13 +179,13 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
         PWindow.getMain().add(gridView);
         PWindow.getMain().add(configSelectorDataGridView.getDecoratorWidget());
 
-        model.setBound(false);
+        controller.setBound(false);
         for (int i = 0; i < 10_000; i++) {
             if (i % 500_000 == 0) log.info("i: {}", i);
-            model.setData(createMyRow(i));
+            controller.setData(createMyRow(i));
             rowCounter++;
         }
-        model.setBound(true);
+        controller.setBound(true);
         gridView.addRowAction(UISampleTestPerformance.class, new RowAction<>() {
 
             @Override
@@ -208,12 +206,12 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
 
         final TestAction addDataAction = (i) -> {
             i = rowCounter++;
-            model.setData(createMyRow(i));
+            controller.setData(createMyRow(i));
         };
 
         final TestAction removeDataAction = (i) -> {
             i = --rowCounter;
-            model.removeData(i);
+            controller.removeData(i);
         };
 
         final TestAction updateDataAction = (i) -> {
@@ -250,17 +248,17 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
                     v.putValue("d", String.format("d" + "%09d", updatedValue));
                 }
             }
-            model.setData(v);
+            controller.setData(v);
         };
 
         //FIXME : somtimes the update action throws a concurrency exception
         //Test 1
-        //        addFilter(controller);
-        //        addSort(controller);
-        //        testPerformanceBench(rowCounter, 60, updateDataAction);
+        addFilter(controller);
+        addSort(controller);
+        testPerformanceBench(rowCounter, 60, updateDataAction);
 
         //Test 2
-        testPerformanceBench(rowCounter, 60, addDataAction);
+        //        testPerformanceBench(rowCounter, 60, addDataAction);
 
         //Test 3
         //        testPerformanceBench(rowCounter, 1, removeDataAction);

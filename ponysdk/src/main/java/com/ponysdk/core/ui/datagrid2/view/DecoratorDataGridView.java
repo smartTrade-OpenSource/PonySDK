@@ -33,8 +33,8 @@ import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.column.ColumnActionListener;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfig;
+import com.ponysdk.core.ui.datagrid2.controller.DataGridController;
 import com.ponysdk.core.ui.datagrid2.data.RowAction;
-import com.ponysdk.core.ui.datagrid2.model.DataGridModel;
 
 /**
  * @author mbagdouri
@@ -59,8 +59,8 @@ public class DecoratorDataGridView<K, V> implements DataGridView<K, V> {
     }
 
     @Override
-    public DataGridModel<K, V> getModel() {
-        return view.getModel();
+    public DataGridController<K, V> getController() {
+        return view.getController();
     }
 
     @Override

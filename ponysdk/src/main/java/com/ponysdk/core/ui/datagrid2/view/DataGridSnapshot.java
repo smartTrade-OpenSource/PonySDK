@@ -29,8 +29,9 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- *
+ * @author mabbas
  */
+
 public class DataGridSnapshot {
 
     public int firstRowIndex;

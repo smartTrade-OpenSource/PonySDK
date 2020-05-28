@@ -68,13 +68,12 @@ import com.ponysdk.core.ui.datagrid2.config.DataGridConfig.Sort;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfigBuilder;
 import com.ponysdk.core.ui.datagrid2.controller.DataGridController;
 import com.ponysdk.core.ui.datagrid2.controller.DefaultDataGridController;
+import com.ponysdk.core.ui.datagrid2.controller.SpyDataGridController;
 import com.ponysdk.core.ui.datagrid2.data.DefaultRow;
 import com.ponysdk.core.ui.datagrid2.data.RowAction;
 import com.ponysdk.core.ui.datagrid2.data.ViewLiveData;
 import com.ponysdk.core.ui.datagrid2.datasource.DataGridSource;
 import com.ponysdk.core.ui.datagrid2.datasource.DefaultCacheDataSource;
-import com.ponysdk.core.ui.datagrid2.model.DataGridModel;
-import com.ponysdk.core.ui.datagrid2.model.SpyDataGridModel;
 import com.ponysdk.core.util.SetUtils;
 
 /**
@@ -131,14 +130,9 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
     private final Set<DrawListener> drawListeners = SetUtils.newArraySet();
     private final Collection<V> selectedDataView;
     private final Map<ColumnDefinition<V>, ColumnView> columnViews = new HashMap<>();
-    private final DataGridModelWrapper modelWrapper;
+    private final DataGridControllerWrapper controllerWrapper;
     private final LinkedHashMap<Object, RowAction<V>> rowActions = new LinkedHashMap<>();
     private int rowCount = 0;
-    //    private int firstRowIndex = 0;
-    //    private final Map<Integer, Integer> sorts = new HashMap<>();
-    //    private final Set<Integer> filters = new HashSet<>();
-    //    private int size = 0;
-    private int threadCounter = 0;
     private final DataGridSnapshot viewStateSnapshot = new DataGridSnapshot(0, 0, new HashMap<>(), new HashSet<>());
 
     public DefaultDataGridView() {
@@ -151,7 +145,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
         controller = new DefaultDataGridController<>(dataSource);
         controller.setListener(this::onUpdateRows);
         selectedDataView = controller.getLiveSelectedData();
-        modelWrapper = new DataGridModelWrapper(controller.getModel());
+        controllerWrapper = new DataGridControllerWrapper(controller.getController());
 
         root.addStyleName("pony-grid");
         root.setStyleProperty("display", "flex");
@@ -179,16 +173,11 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
         pinnedTable = new PinnedTable(headerPinnedDiv, bodyPinnedDiv, footerPinnedDiv);
         unpinnedTable = new UnpinnedTable(headerUnpinnedDiv, bodyUnpinnedDiv, footerUnpinnedDiv);
 
-        //FIXME
-        ((DefaultDataGridController) controller).setDataGridSnapshot(viewStateSnapshot);
+        ((DefaultDataGridController<K, V>) controller).setDataGridSnapshot(viewStateSnapshot);
     }
 
     public DataGridAdapter<K, V> getAdapter() {
         return adapter;
-    }
-
-    public DataGridController<K, V> getController() {
-        return controller;
     }
 
     private PComplexPanel prepareBodyDiv(final PComplexPanel subBodyDiv) {
@@ -247,8 +236,8 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
     }
 
     @Override
-    public DataGridModel<K, V> getModel() {
-        return modelWrapper;
+    public DataGridController<K, V> getController() {
+        return controllerWrapper;
     }
 
     private void onScroll(final int row) {
@@ -373,47 +362,26 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
             } else {
                 start = Math.max(0, from - fri);
             }
-            //            size = rows.size();
-            //            final int size = unpinnedTable.body.getWidgetCount();
             viewStateSnapshot.size = unpinnedTable.body.getWidgetCount();
             System.out.println("\n\n" + "#-View-# Prepare onDraw -> row : " + fri + "   size : " + viewStateSnapshot.size);
-            //FIXME : threadCounter
-            //            final ViewLiveData<V> viewLiveData = new ViewLiveData<>(++threadCounter, fri, absoluteRowCount, viewStateSnapshot.size,
-            //                start, new ArrayList<DefaultRow<V>>(), viewStateSnapshot.sorts, viewStateSnapshot.filters);
-            final ViewLiveData<V> viewLiveData = new ViewLiveData<>(++threadCounter, start, absoluteRowCount,
-                new ArrayList<DefaultRow<V>>(), viewStateSnapshot);
+            final ViewLiveData<V> viewLiveData = new ViewLiveData<>(start, absoluteRowCount, new ArrayList<DefaultRow<V>>(),
+                new DataGridSnapshot(viewStateSnapshot));
             final Consumer<ViewLiveData<V>> consumer = PScheduler.delegate(this::updateView);
             controller.prepareLiveDataOnScreen(viewLiveData, consumer);
         } catch (final Exception e) {
-            //FIXME
+            e.printStackTrace();
         }
     }
 
     private void updateView(final ViewLiveData<V> result) {
         try {
-            //            if (firstRowIndex != result.firstRowIndex || !filters.equals(result.filters) || !sorts.equals(result.sorts)
-            //                    || result.size != rows.size()) {
-            //                return;
-            //            }
-
-            if (!viewStateSnapshot.equals(result.stateSnapshot)) {
-                return;
-            }
-            //FIXME
-            //            if (threadCounter != result.getId()) {
-            //                return;
-            //            }
-
             rowCount = result.absoluteRowCount;
-            System.out.println("we read the returned data to update the view");
             for (int i = result.start; i < result.stateSnapshot.size; i++) {
-                try {
-                    updateRow(rows.get(i), result);
-                } catch (final Exception e) {
-                    e.printStackTrace();
-                }
+                updateRow(rows.get(i), result);
             }
             addon.onDataUpdated(result.absoluteRowCount, this.rows.size(), result.stateSnapshot.firstRowIndex);
+        } catch (final Exception e) {
+            e.printStackTrace();
         } finally {
             from = Integer.MAX_VALUE;
             to = 0;
@@ -462,9 +430,6 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
     private V getRowData(final int rowIndex, final ViewLiveData<V> result) {
         checkAdapter();
         final V v = rowIndex < result.liveData.size() ? result.liveData.get(rowIndex).getData() : null;
-        if (v == null) {
-            System.out.println("Row " + rowIndex + " is null ! in the thread: " + Thread.currentThread().getId());
-        }
         return v;
     }
 
@@ -521,7 +486,6 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
             td.add(extendedCellHandler.cell);
             extendedCellHandler.cell.afterAdd();
         }
-        //        controller.setValueOnExtendedCell(row.getAbsoluteIndex(), extendedCellHandler.cell, result);
         controller.setValueOnExtendedCell(row.getRelativeIndex(), extendedCellHandler.cell, result);
     }
 
@@ -1334,13 +1298,13 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 
         @Override
         public void updateValue(final V newV) {
-            getModel().setData(newV);
+            getController().setData(newV);
             draw();
         }
 
         @Override
         public void updateValue(final Consumer<V> action) {
-            getModel().updateData(key, action);
+            getController().updateData(key, action);
             draw();
         }
 
@@ -1479,10 +1443,10 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
         }
     }
 
-    private class DataGridModelWrapper extends SpyDataGridModel<K, V> {
+    private class DataGridControllerWrapper extends SpyDataGridController<K, V> {
 
-        DataGridModelWrapper(final DataGridModel<K, V> model) {
-            super(model);
+        DataGridControllerWrapper(final DataGridController<K, V> controller) {
+            super(controller);
         }
 
         @Override

@@ -45,6 +45,9 @@ import com.ponysdk.core.ui.datagrid2.controller.DefaultDataGridController.Render
 import com.ponysdk.core.ui.datagrid2.data.AbstractFilter;
 import com.ponysdk.core.ui.datagrid2.data.DefaultRow;
 
+/**
+ * @author mabbas
+ */
 public abstract class AbstractDataSource<K, V> implements DataGridSource<K, V> {
 
     protected static final Logger log = LoggerFactory.getLogger(AbstractDataSource.class);
@@ -53,7 +56,6 @@ public abstract class AbstractDataSource<K, V> implements DataGridSource<K, V> {
     protected final List<DefaultRow<V>> liveSelectedData = new ArrayList<>();
     protected final Set<K> selectedKeys = new HashSet<>();
     protected DataGridAdapter<K, V> adapter;
-    //FIXME : Vérifier l'utilité de ce cache ici
     protected RenderingHelpersCache<V> renderingHelpersCache;
     protected int rowCounter = 0;
 

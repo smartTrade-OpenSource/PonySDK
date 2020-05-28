@@ -51,7 +51,6 @@ import com.ponysdk.core.ui.datagrid2.data.DefaultRow;
 import com.ponysdk.core.ui.datagrid2.data.Interval;
 import com.ponysdk.core.ui.datagrid2.data.ViewLiveData;
 import com.ponysdk.core.ui.datagrid2.datasource.DataGridSource;
-import com.ponysdk.core.ui.datagrid2.model.DataGridModel;
 import com.ponysdk.core.ui.datagrid2.view.DataGridSnapshot;
 import com.ponysdk.core.util.MappedList;
 
@@ -59,7 +58,7 @@ import com.ponysdk.core.util.MappedList;
  * @author mbagdouri
  */
 
-public class DefaultDataGridController<K, V> implements DataGridController<K, V>, DataGridModel<K, V> {
+public class DefaultDataGridController<K, V> implements DataGridController<K, V>/* , DataGridModel<K, V> */ {
 
     private static final Object NO_RENDERING_HELPER = new Object();
     private static final int RENDERING_HELPERS_CACHE_CAPACITY = 512;
@@ -74,13 +73,7 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     private final RenderingHelperSupplier renderingHelperSupplier1 = new RenderingHelperSupplier();
     private final RenderingHelperSupplier renderingHelperSupplier2 = new RenderingHelperSupplier();
     private DataGridSource<K, V> dataSource;
-    //FIXME
-    //    private int threadCounter = 0;
-    //    private final int firstRowIndex = 0;
-    //    private Map<Integer, Integer> sorts;
-    //    private Set<Integer> filters;
-    //    private final int size = 0;
-    DataGridSnapshot viewSnapshot;
+    private DataGridSnapshot viewSnapshot;
 
     public DefaultDataGridController() {
         super();
@@ -316,24 +309,12 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
         refreshRows(0, dataSource.getRowCount());
     }
 
-    //    public void setDataGridSnapshot(final int[] fri, final Map<Integer, Integer> sorts, final Set<Integer> filters, final int[] size) {
-    //        this.firstRowIndex = fri;
-    //        this.sorts = sorts;
-    //        this.filters = filters;
-    //        this.size = size;
-    //    }
     public void setDataGridSnapshot(final DataGridSnapshot snapshot) {
         this.viewSnapshot = snapshot;
     }
 
     @Override
     public void prepareLiveDataOnScreen(final ViewLiveData<V> dataSrcResult, final Consumer<ViewLiveData<V>> consumer) {
-        //        threadCounter = dataSrcResult.ID;
-        //        firstRowIndex = dataSrcResult.firstRowIndex;
-        //        sorts = dataSrcResult.sorts;
-        //        filters = dataSrcResult.filters;
-        //        size = dataSrcResult.size;
-
         final CompletableFuture<ViewLiveData<V>> completableFuture = CompletableFuture
             .supplyAsync(() -> dataSource.getRows(dataSrcResult));
         completableFuture.thenAccept(s -> checkThread(s, completableFuture, consumer));
@@ -342,16 +323,16 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     private void checkThread(final ViewLiveData<V> viewLiveData, final CompletableFuture<ViewLiveData<V>> completableFuture,
                              final Consumer<ViewLiveData<V>> consumer) {
         if (!viewSnapshot.equals(viewLiveData.stateSnapshot)) {
-            System.out.println("#------- Failed --------#");
-            completableFuture.cancel(false); // completableFuture.get() throws a CancellationException
+            System.out.println("#-Ctrl-# checkThread -> Failed");
+            completableFuture.cancel(false);
         } else {
-            System.out.println("#-------  Pass  --------#");
+            System.out.println("#-Ctrl-# checkThread -> Pass");
             completableFuture.thenAccept(consumer::accept);
         }
     }
 
     @Override
-    public DataGridModel<K, V> getModel() {
+    public DataGridController<K, V> getController() {
         return this;
     }
 

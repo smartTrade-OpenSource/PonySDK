@@ -32,8 +32,8 @@ import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.column.ColumnActionListener;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfig;
+import com.ponysdk.core.ui.datagrid2.controller.DataGridController;
 import com.ponysdk.core.ui.datagrid2.data.RowAction;
-import com.ponysdk.core.ui.datagrid2.model.DataGridModel;
 
 /**
  * @author mbagdouri
@@ -43,7 +43,7 @@ public interface DataGridView<K, V> extends IsPWidget {
     /**
      * @return the {@code DataGridModel} corresponding to this view
      */
-    DataGridModel<K, V> getModel();
+    DataGridController<K, V> getController();
 
     /**
      * Sets a {@link DataGridAdapter} on this view

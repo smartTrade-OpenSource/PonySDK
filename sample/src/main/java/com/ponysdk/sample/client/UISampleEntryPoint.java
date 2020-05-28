@@ -95,14 +95,14 @@ import com.ponysdk.core.ui.datagrid.impl.PLabelCellRenderer;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.column.DefaultColumnDefinition;
+import com.ponysdk.core.ui.datagrid2.controller.DataGridController;
 import com.ponysdk.core.ui.datagrid2.data.RowAction;
-import com.ponysdk.core.ui.datagrid2.model.DataGridModel;
 import com.ponysdk.core.ui.datagrid2.view.ColumnVisibilitySelectorDataGridView;
 import com.ponysdk.core.ui.datagrid2.view.ConfigSelectorDataGridView;
 import com.ponysdk.core.ui.datagrid2.view.DataGridView;
 import com.ponysdk.core.ui.datagrid2.view.DataGridView.DecodeException;
-import com.ponysdk.core.ui.datagrid2.view.RowSelectorColumnDataGridView;
 import com.ponysdk.core.ui.datagrid2.view.DefaultDataGridView;
+import com.ponysdk.core.ui.datagrid2.view.RowSelectorColumnDataGridView;
 import com.ponysdk.core.ui.eventbus2.EventBus.EventHandler;
 import com.ponysdk.core.ui.formatter.TextFunction;
 import com.ponysdk.core.ui.grid.AbstractGridWidget;
@@ -430,7 +430,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             }
         });
         gridView.setPollingDelayMillis(250L);
-        final DataGridModel<Integer, MyRow> model = gridView.getModel();
+        final DataGridController<Integer, MyRow> controller = gridView.getController();
         gridView.asWidget().setHeight("500px");
         gridView.asWidget().setWidth("1000px");
         gridView.asWidget().setStyleProperty("resize", "both");
@@ -489,12 +489,12 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         PWindow.getMain().add(exportConfigButton);
         PWindow.getMain().add(importConfigTextBox);
         PWindow.getMain().add(importConfigButton);
-        model.setBound(false);
+        controller.setBound(false);
         for (int i = 0; i < 1_000; i++) {
             if (i % 500_000 == 0) log.info("i: {}", i);
-            model.setData(createMyRow(i));
+            controller.setData(createMyRow(i));
         }
-        model.setBound(true);
+        controller.setBound(true);
 
         gridView.addRowAction(UISampleEntryPoint.class, new RowAction<>() {
 
