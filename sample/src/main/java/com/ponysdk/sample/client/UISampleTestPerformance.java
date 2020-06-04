@@ -169,7 +169,9 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
             public void onCreateColumnResizer(final IsPWidget resizer) {
             }
         });
-        gridView.setPollingDelayMillis(250L);
+
+        //        gridView.setPollingDelayMillis(250L);
+        gridView.setPollingDelayMillis(300000L);
         final DataGridController<Integer, MyRow> controller = ((DefaultDataGridView<Integer, MyRow>) simpleGridView).getController();
         gridView.asWidget().setHeight("950px");
         gridView.asWidget().setWidth("1900px");
@@ -253,12 +255,13 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
 
         //FIXME : somtimes the update action throws a concurrency exception
         //Test 1
-        addFilter(controller);
-        addSort(controller);
-        testPerformanceBench(rowCounter, 60, updateDataAction);
+        //        addFilter(controller);
+        //        addSort(controller);
+        //        testPerformanceBench(rowCounter, 60, updateDataAction);
 
         //Test 2
-        //        testPerformanceBench(rowCounter, 60, addDataAction);
+
+        testPerformanceBench(rowCounter, 60, addDataAction);
 
         //Test 3
         //        testPerformanceBench(rowCounter, 1, removeDataAction);
@@ -300,7 +303,10 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
                 testAction.execute(index++);
             final long time_after = System.nanoTime();
             final long duration = time_after - time_before;
-            System.out.print("\n\n\n\n\n\nTestDuration = " + duration + "\n\n\n\n\n\n");
+            System.out.println("\n\n\n\n\n\nTestDuration = " + duration);
+            System.out.println("Nb of draw   =" + DefaultDataGridView.draw);
+            System.out.println("Nb of update =" + DefaultDataGridView.update + "\n\n\n\n\n\n");
+
             System.gc();
         };
         final Thread thread = new Thread(testPerfBench, "Test thread");

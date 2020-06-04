@@ -34,6 +34,7 @@ import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfig;
 import com.ponysdk.core.ui.datagrid2.controller.DataGridController;
 import com.ponysdk.core.ui.datagrid2.data.RowAction;
+import com.ponysdk.core.ui.datagrid2.datasource.DataGridSource;
 
 /**
  * @author mbagdouri
@@ -52,7 +53,7 @@ public interface DataGridView<K, V> extends IsPWidget {
 
     /**
      * Sets the delay (in milliseconds) that will be used between consecutive draws of the view.<br/>
-     * This delay is only respected for draws triggered by an update in the {@link DataGridModel}. For draws that are
+     * This delay is only respected for draws triggered by an update in the {@link DataGridSource}. For draws that are
      * triggered by a user action, this delay is not respected and the draw is immediate.<br/>
      * This delay can be useful for throttling draw instructions sent to the terminal.<br/>
      * This delay can be changed multiple times during the life-cycle of this view.<br/>

@@ -44,6 +44,11 @@ public class DefaultRow<V> {
     }
 
     @Override
+    public boolean equals(final Object obj) {
+        return ((DefaultRow<V>) obj).getData().equals(data) && ((DefaultRow<V>) obj).isAccepted() == accepted;
+    }
+
+    @Override
     public String toString() {
         return "Row [id=" + id + ", data=" + data + ", accepted=" + accepted + "]";
     }
@@ -68,4 +73,8 @@ public class DefaultRow<V> {
         this.accepted = accepted;
     }
 
+    public boolean equals(final DefaultRow<V> row) {
+        if (data == row.getData() && id == row.getID() && accepted == row.isAccepted()) return true;
+        return false;
+    }
 }
