@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path="ponysdk/src/main/java"/>
+	<classpathentry kind="src" path="ponysdk/src/test/java"/>
+	<classpathentry kind="src" path="sample/src/main/java"/>
+	<classpathentry kind="lib" path="gradle/wrapper/gradle-wrapper.jar"/>
+	<classpathentry kind="lib" path="ponysdk/build/libs/ponysdk-2.8.15-SNAPSHOT-sources.jar"/>
+	<classpathentry kind="lib" path="ponysdk/build/libs/ponysdk-2.8.15-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="ponysdk/build/libs/ponysdk-2.8.20-javadoc.jar"/>
+	<classpathentry kind="lib" path="ponysdk/build/libs/ponysdk-2.8.20-sources.jar"/>
+	<classpathentry kind="lib" path="ponysdk/build/libs/ponysdk-2.8.20.jar"/>
+	<classpathentry kind="lib" path="ponysdk/build/tmp/expandedArchives/org.jacoco.agent-0.8.2.jar_2aca8b620b19ecd063f63feff8caaa38/jacocoagent.jar"/>
+	<classpathentry kind="lib" path="sample/build/libs/sample-2.8.15-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="sample/build/libs/sample-2.8.20.jar"/>
+	<classpathentry kind="output" path="ponysdk/bin/main"/>
+</classpath>

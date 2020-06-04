@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 2011 PonySDK
+ * Copyright (c) 2020 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
@@ -21,20 +21,19 @@
  * the License.
  */
 
-package com.ponysdk.impl.spring;
+package com.ponysdk.core.ui.datagrid2.data;
 
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+/**
+ *
+ */
+public class Interval {
 
-import com.ponysdk.impl.spring.server.SpringApplicationManager;
+    public final int from;
+    public final int to;
 
-public class MainSpring {
-
-    public static void main(final String[] args) {
-
-        final String serverConfigLocation = System.getProperty(SpringApplicationManager.SERVER_CONFIG_LOCATION,
-            "classpath:etc/server_application.xml");
-
-        new ClassPathXmlApplicationContext(serverConfigLocation);
+    public Interval(final int from, final int to) {
+        super();
+        this.from = from;
+        this.to = to;
     }
-
 }

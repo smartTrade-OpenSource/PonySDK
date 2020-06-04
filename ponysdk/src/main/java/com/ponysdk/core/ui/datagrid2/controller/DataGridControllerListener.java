@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 2011 PonySDK
+ * Copyright (c) 2019 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
@@ -21,20 +21,12 @@
  * the License.
  */
 
-package com.ponysdk.impl.spring;
+package com.ponysdk.core.ui.datagrid2.controller;
 
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+/**
+ * @author mbagdouri
+ */
+public interface DataGridControllerListener<V> {
 
-import com.ponysdk.impl.spring.server.SpringApplicationManager;
-
-public class MainSpring {
-
-    public static void main(final String[] args) {
-
-        final String serverConfigLocation = System.getProperty(SpringApplicationManager.SERVER_CONFIG_LOCATION,
-            "classpath:etc/server_application.xml");
-
-        new ClassPathXmlApplicationContext(serverConfigLocation);
-    }
-
+    void onUpdateRows(int from, int to);
 }
