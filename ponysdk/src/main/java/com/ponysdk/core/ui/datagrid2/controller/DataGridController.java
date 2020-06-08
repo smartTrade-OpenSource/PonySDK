@@ -99,7 +99,7 @@ public interface DataGridController<K, V> {
      * Send a partially filled object to the dataSource. The object will return filled
      * with the needed data for the view, and with updated fields sometimes
      */
-    void prepareLiveDataOnScreen(ViewLiveData<V> dataSrcResult, Consumer<ViewLiveData<V>> consumer);
+    void prepareLiveDataOnScreen(ViewLiveData<V> viewLiveData, Consumer<DefaultDataGridController<K, V>.MySupplier> consumer);
 
     /**
      * Insert or replace the value

@@ -42,7 +42,7 @@ import com.ponysdk.core.ui.datagrid2.datasource.DataGridSource;
 public interface DataGridView<K, V> extends IsPWidget {
 
     /**
-     * @return the {@code DataGridModel} corresponding to this view
+     * @return the {@code DataGridController} corresponding to this view
      */
     DataGridController<K, V> getController();
 

@@ -170,8 +170,8 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
             }
         });
 
-        //        gridView.setPollingDelayMillis(250L);
-        gridView.setPollingDelayMillis(300000L);
+        gridView.setPollingDelayMillis(250L);
+        //        gridView.setPollingDelayMillis(300000L);
         final DataGridController<Integer, MyRow> controller = ((DefaultDataGridView<Integer, MyRow>) simpleGridView).getController();
         gridView.asWidget().setHeight("950px");
         gridView.asWidget().setWidth("1900px");
@@ -261,7 +261,7 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
 
         //Test 2
 
-        testPerformanceBench(rowCounter, 60, addDataAction);
+        //        testPerformanceBench(rowCounter, 60, addDataAction);
 
         //Test 3
         //        testPerformanceBench(rowCounter, 1, removeDataAction);

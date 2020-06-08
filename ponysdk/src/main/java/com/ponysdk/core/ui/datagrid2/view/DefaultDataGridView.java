@@ -135,8 +135,8 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
     private int rowCount = 0;
     private final DataGridSnapshot viewStateSnapshot = new DataGridSnapshot(0, 0, new HashMap<>(), new HashSet<>());
     //FIXME : delete me, i exist for test reasons
-    public static int draw = 0;
-    public static int update = 0;
+    //    public static int draw = 0;
+    //    public static int update = 0;
 
     public DefaultDataGridView() {
         this(new DefaultCacheDataSource<K, V>());
@@ -241,6 +241,11 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
     @Override
     public DataGridController<K, V> getController() {
         return controllerWrapper;
+    }
+
+    //FIXME : dangerous accessor ?
+    public List<Row> getRows() {
+        return rows;
     }
 
     private void onScroll(final int row) {
@@ -356,7 +361,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
     private void draw() {
         try {
             if (from >= to) return;
-            draw++;
+            //            draw++;
             final int absoluteRowCount = controller.getRowCount();
             int start;
             int fri = viewStateSnapshot.firstRowIndex;
@@ -370,28 +375,25 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
             System.out.println("\n\n" + "#-View-# Prepare onDraw -> row : " + fri + "   size : " + viewStateSnapshot.size);
             final ViewLiveData<V> viewLiveData = new ViewLiveData<>(start, absoluteRowCount, new ArrayList<DefaultRow<V>>(),
                 new DataGridSnapshot(viewStateSnapshot));
-            final Consumer<ViewLiveData<V>> consumer = PScheduler.delegate(this::updateView);
+            //            final Consumer<ViewLiveData<V>> consumer = PScheduler.delegate(this::updateView);
+            final Consumer<DefaultDataGridController<K, V>.MySupplier> consumer = PScheduler.delegate(this::updateView);
             controller.prepareLiveDataOnScreen(viewLiveData, consumer);
         } catch (final Exception e) {
             e.printStackTrace();
         }
     }
 
-    private synchronized void updateView(final ViewLiveData<V> result) {
+    //    private synchronized void updateView(final ViewLiveData<V> result) {
+    private synchronized void updateView(final DefaultDataGridController<K, V>.MySupplier dataSrcResult) {
         try {
+            final ViewLiveData<V> result = dataSrcResult.viewLiveData;
             rowCount = result.absoluteRowCount;
-            update++;
-            //FIXME
-            //            for (int i = result.start; i < result.stateSnapshot.size; i++) {
+            //            update++;
             for (int i = result.start; i < rows.size(); i++) {
                 updateRow(rows.get(i), result);
             }
             addon.onDataUpdated(result.absoluteRowCount, this.rows.size(), result.stateSnapshot.firstRowIndex);
         } catch (final Exception e) {
-            System.out.println("The size of liveData : " + result.liveData.size());
-            System.out.println("The size of snapshot : " + result.stateSnapshot.size);
-            System.out.println("The size of rows     : " + rows.size());
-            System.out.println("The actual size      : " + unpinnedTable.body.getWidgetCount());
             e.printStackTrace();
         } finally {
             from = Integer.MAX_VALUE;
@@ -938,7 +940,8 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
         draw();
     }
 
-    private class Row {
+    //FIXME : private
+    public class Row {
 
         private final int relativeIndex;
         private K key;

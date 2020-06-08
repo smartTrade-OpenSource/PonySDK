@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -58,7 +59,7 @@ import com.ponysdk.core.util.MappedList;
  * @author mbagdouri
  */
 
-public class DefaultDataGridController<K, V> implements DataGridController<K, V>/* , DataGridModel<K, V> */ {
+public class DefaultDataGridController<K, V> implements DataGridController<K, V> {
 
     private static final Object NO_RENDERING_HELPER = new Object();
     private static final int RENDERING_HELPERS_CACHE_CAPACITY = 512;
@@ -74,6 +75,8 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     private final RenderingHelperSupplier renderingHelperSupplier2 = new RenderingHelperSupplier();
     private DataGridSource<K, V> dataSource;
     private DataGridSnapshot viewSnapshot;
+    private final AtomicLong count = new AtomicLong();
+    private long lastProcessedID;
 
     public DefaultDataGridController() {
         super();
@@ -313,21 +316,51 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
         this.viewSnapshot = snapshot;
     }
 
-    @Override
-    public void prepareLiveDataOnScreen(final ViewLiveData<V> dataSrcResult, final Consumer<ViewLiveData<V>> consumer) {
-        final CompletableFuture<ViewLiveData<V>> completableFuture = CompletableFuture
-            .supplyAsync(() -> dataSource.getRows(dataSrcResult));
-        completableFuture.thenAccept(s -> checkThread(s, completableFuture, consumer));
+    public class MySupplier implements Supplier<ViewLiveData<V>> {
+
+        Supplier<ViewLiveData<V>> inner;
+        public long id = count.incrementAndGet();
+        public ViewLiveData<V> viewLiveData;
+
+        MySupplier(final Supplier<ViewLiveData<V>> inner) {
+            this.inner = inner;
+            get();
+        }
+
+        @Override
+        public ViewLiveData<V> get() {
+            viewLiveData = inner.get();
+            return viewLiveData;
+        }
     }
 
-    private void checkThread(final ViewLiveData<V> viewLiveData, final CompletableFuture<ViewLiveData<V>> completableFuture,
-                             final Consumer<ViewLiveData<V>> consumer) {
-        if (!viewSnapshot.equals(viewLiveData.stateSnapshot)) {
-            System.out.println("#-Ctrl-# checkThread -> Failed");
-            completableFuture.cancel(false);
-        } else {
-            System.out.println("#-Ctrl-# checkThread -> Pass");
+    @Override
+    public void prepareLiveDataOnScreen(final ViewLiveData<V> viewLiveData, final Consumer<MySupplier> consumer) {
+        final CompletableFuture<MySupplier> completableFuture = CompletableFuture
+            .supplyAsync(() -> new MySupplier(() -> dataSource.getRows(viewLiveData)));
+
+        final CompletableFuture<Void> threadAcceptanceByID = completableFuture.thenAccept(mySupplier -> {
+            if (mySupplier.id < lastProcessedID) {
+                mySupplier.id = -1;
+            } else {
+                lastProcessedID = mySupplier.id;
+            }
+        });
+
+        //thenAcceptBoth used to garentee this CompletableFuture execution before the prev one
+        completableFuture.thenAcceptBoth(threadAcceptanceByID, (mySupplier, ignored) -> {
+            threadAcceptanceBySnapshot(mySupplier, completableFuture, consumer);
+        });
+    }
+
+    private void threadAcceptanceBySnapshot(final MySupplier supplierRresult, final CompletableFuture<MySupplier> completableFuture,
+                                            final Consumer<MySupplier> consumer) {
+        if (viewSnapshot.equals(supplierRresult.viewLiveData.stateSnapshot) && supplierRresult.id >= 0) {
+            System.out.println("#-Ctrl-# checkThread snapshot -> Pass");
             completableFuture.thenAccept(consumer::accept);
+        } else {
+            System.out.println("#-Ctrl-# checkThread snapshot -> Failed");
+            System.out.println("Id : " + supplierRresult.id);
         }
     }
 
