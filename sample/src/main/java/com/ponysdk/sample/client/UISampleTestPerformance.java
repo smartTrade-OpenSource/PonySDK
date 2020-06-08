@@ -261,7 +261,7 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
 
         //Test 2
 
-        //        testPerformanceBench(rowCounter, 60, addDataAction);
+        testPerformanceBench(rowCounter, 120, addDataAction);
 
         //Test 3
         //        testPerformanceBench(rowCounter, 1, removeDataAction);

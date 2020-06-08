@@ -135,8 +135,8 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
     private int rowCount = 0;
     private final DataGridSnapshot viewStateSnapshot = new DataGridSnapshot(0, 0, new HashMap<>(), new HashSet<>());
     //FIXME : delete me, i exist for test reasons
-    //    public static int draw = 0;
-    //    public static int update = 0;
+    public static int draw = 0;
+    public static int update = 0;
 
     public DefaultDataGridView() {
         this(new DefaultCacheDataSource<K, V>());
@@ -361,7 +361,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
     private void draw() {
         try {
             if (from >= to) return;
-            //            draw++;
+            draw++;
             final int absoluteRowCount = controller.getRowCount();
             int start;
             int fri = viewStateSnapshot.firstRowIndex;
@@ -388,7 +388,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
         try {
             final ViewLiveData<V> result = dataSrcResult.viewLiveData;
             rowCount = result.absoluteRowCount;
-            //            update++;
+            update++;
             for (int i = result.start; i < rows.size(); i++) {
                 updateRow(rows.get(i), result);
             }
