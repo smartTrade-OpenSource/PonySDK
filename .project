@@ -1,17 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>PonySDK</name>
+	<name>Nico_PonySDK</name>
 	<comment></comment>
 	<projects/>
-	<natures>
-		<nature>org.eclipse.jdt.core.javanature</nature>
-	</natures>
-	<buildSpec>
-		<buildCommand>
-			<name>org.eclipse.jdt.core.javabuilder</name>
-			<arguments/>
-		</buildCommand>
-	</buildSpec>
+	<natures/>
+	<buildSpec/>
 	<linkedResources/>
 	<filteredResources/>
 </projectDescription>
