@@ -31,57 +31,57 @@ import java.util.function.Supplier;
  */
 public interface ColumnActionListener<V> {
 
-    /**
-     * Called when a sorting criterion for this column is added/replaced
-     * 
-     * @see ColumnController#sort(boolean)
-     */
-    void onSort(boolean asc);
+	/**
+	 * Called when a sorting criterion for this column is added/replaced
+	 *
+	 * @see ColumnController#sort(boolean)
+	 */
+	void onSort(boolean asc);
 
-    /**
-     * Called when a sorting criterion for this column is cancelled
-     * 
-     * @see ColumnController#clearSort()
-     */
-    void onClearSort();
+	/**
+	 * Called when a sorting criterion for this column is cancelled
+	 *
+	 * @see ColumnController#clearSort()
+	 */
+	void onClearSort();
 
-    /**
-     * Called when this column is filtered
-     * 
-     * @see ColumnController#filter(Object, BiPredicate, boolean)
-     */
-    void onFilter(Object key, BiPredicate<V, Supplier<Object>> filter, boolean reinforcing);
+	/**
+	 * Called when this column is filtered
+	 *
+	 * @see ColumnController#filter(Object, BiPredicate, boolean)
+	 */
+	void onFilter(Object key, BiPredicate<V, Supplier<Object>> filter, boolean reinforcing);
 
-    /**
-     * Called when this column's filter with {@code key} is cancelled
-     * 
-     * @see ColumnController#clearFilter(Object)
-     */
-    void onClearFilter(Object key);
+	/**
+	 * Called when this column's filter with {@code key} is cancelled
+	 *
+	 * @see ColumnController#clearFilter(Object)
+	 */
+	void onClearFilter(Object key);
 
-    /**
-     * Called when all this column filters are cleared
-     * 
-     * @see ColumnController#clearFilters()
-     */
-    void onClearFilters();
+	/**
+	 * Called when all this column filters are cleared
+	 *
+	 * @see ColumnController#clearFilters()
+	 */
+	void onClearFilters();
 
-    /**
-     * Called when this column is redrawn
-     * 
-     * @see ColumnController#redraw(boolean)
-     */
-    void onRedraw(boolean clearRenderingHelpers);
+	/**
+	 * Called when this column is redrawn
+	 *
+	 * @see ColumnController#redraw(boolean)
+	 */
+	void onRedraw(boolean clearRenderingHelpers);
 
-    /**
-     * Called when this column's state is changed
-     * 
-     * @see ColumnController#setState(com.ponysdk.core.ui.datagrid2.column.ColumnDefinition.State)
-     */
-    void onStateChanged(ColumnDefinition.State state);
+	/**
+	 * Called when this column's state is changed
+	 *
+	 * @see ColumnController#setState(com.ponysdk.core.ui.datagrid2.column.ColumnDefinition.State)
+	 */
+	void onStateChanged(ColumnDefinition.State state);
 
-    /**
-     * Called when this column's width is changed
-     */
-    void onResized(int width);
+	/**
+	 * Called when this column's width is changed
+	 */
+	void onResized(int width);
 }

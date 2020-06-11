@@ -30,10 +30,10 @@ import com.ponysdk.core.ui.basic.PWidget;
  */
 public abstract class WidgetDecoratorDataGridView<K, V> extends DecoratorDataGridView<K, V> {
 
-    protected WidgetDecoratorDataGridView(final DataGridView<K, V> view) {
-        super(view);
-    }
+	protected WidgetDecoratorDataGridView(final DataGridView<K, V> view) {
+		super(view);
+	}
 
-    public abstract PWidget getDecoratorWidget();
+	public abstract PWidget getDecoratorWidget();
 
 }

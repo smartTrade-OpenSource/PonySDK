@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
+<<<<<<< HEAD
 	<name>PonySDK</name>
 	<comment></comment>
 	<projects/>
@@ -12,6 +13,13 @@
 			<arguments/>
 		</buildCommand>
 	</buildSpec>
+=======
+	<name>Nico_PonySDK</name>
+	<comment></comment>
+	<projects/>
+	<natures/>
+	<buildSpec/>
+>>>>>>> e7b4c0a8aa9b5214422ac668787b0fd05ac9e8f5
 	<linkedResources/>
 	<filteredResources/>
 </projectDescription>

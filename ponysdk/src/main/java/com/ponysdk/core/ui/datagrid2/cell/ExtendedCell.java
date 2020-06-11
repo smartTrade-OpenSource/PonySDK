@@ -27,48 +27,50 @@ import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 
 /**
- * {@code ExtendedCell} is created when a {@link Cell} is switched to mode extended. {@code ExtendedCell} will be always
- * bound to the same key, but its data might change in case the model is updated.<br/>
- * The {@link IsPWidget#asWidget()} method must always return the same instance of the main widget that will be used for
- * the rendering of the value.
+ * {@code ExtendedCell} is created when a {@link Cell} is switched to mode
+ * extended. {@code ExtendedCell} will be always bound to the same key, but its
+ * data might change in case the model is updated.<br/>
+ * The {@link IsPWidget#asWidget()} method must always return the same instance
+ * of the main widget that will be used for the rendering of the value.
  *
  * @author mbagdouri
  * @see CellController#extendedMode(ExtendedCell)
  */
 public interface ExtendedCell<V> extends IsPWidget {
 
-    /**
-     * Sets the most recent value on this cell. This value can be the same as the value previously set
-     * (i.e. when this method is called, it is not guaranteed that the value has changed)
-     */
-    void setValue(V v);
+	/**
+	 * Sets the most recent value on this cell. This value can be the same as
+	 * the value previously set (i.e. when this method is called, it is not
+	 * guaranteed that the value has changed)
+	 */
+	void setValue(V v);
 
-    /**
-     * Sets a {@link ExtendedCellController} that can be used to make cell/row related actions. It will be set as soon
-     * as the
-     * {@link ColumnDefinition#createCell()} is called.
-     *
-     * @param cellController
-     */
-    void setController(ExtendedCellController<V> extendedCellController);
+	/**
+	 * Sets a {@link ExtendedCellController} that can be used to make cell/row
+	 * related actions. It will be set as soon as the
+	 * {@link ColumnDefinition#createCell()} is called.
+	 *
+	 * @param cellController
+	 */
+	void setController(ExtendedCellController<V> extendedCellController);
 
-    /**
-     * Called when the row that this cell belongs to is selected
-     */
-    void select();
+	/**
+	 * Called when the row that this cell belongs to is selected
+	 */
+	void select();
 
-    /**
-     * Called when the row that this cell belongs to is unselected
-     */
-    void unselect();
+	/**
+	 * Called when the row that this cell belongs to is unselected
+	 */
+	void unselect();
 
-    /**
-     * Called before each time this cell is removed from its parent
-     */
-    void beforeRemove();
+	/**
+	 * Called before each time this cell is removed from its parent
+	 */
+	void beforeRemove();
 
-    /**
-     * Called after each time this cell is added to a parent widget
-     */
-    void afterAdd();
+	/**
+	 * Called after each time this cell is added to a parent widget
+	 */
+	void afterAdd();
 }

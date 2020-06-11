@@ -1,12 +1,9 @@
 /*
- * Copyright (c) 2019 PonySDK
- *  Owners:
- *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ * Copyright (c) 2019 PonySDK Owners: Luciano Broussal <luciano.broussal AT
+ * gmail.com> Mathieu Barbier <mathieu.barbier AT gmail.com> Nicolas Ciaravola
+ * <nicolas.ciaravola.pro AT gmail.com>
  *
- *  WebSite:
- *  http://code.google.com/p/pony-sdk/
+ * WebSite: http://code.google.com/p/pony-sdk/
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -37,82 +34,81 @@ import com.ponysdk.core.ui.datagrid2.config.DataGridConfig.Sort;
  */
 public class DataGridConfigBuilder<V> {
 
-    private boolean built = false;
-    private final List<Sort<V>> sorts = new ArrayList<>();
-    private final List<ColumnConfig<V>> columnConfigs = new ArrayList<>();
-    private final Map<String, Object> customValues = new HashMap<>();
+	private boolean built = false;
+	private final List<Sort<V>> sorts = new ArrayList<>();
+	private final List<ColumnConfig<V>> columnConfigs = new ArrayList<>();
+	private final Map<String, Object> customValues = new HashMap<>();
 
-    public DataGridConfigBuilder() {
-    }
+	public DataGridConfigBuilder() {
+	}
 
-    void checkBuilt() {
-        if (built)
-            throw new IllegalArgumentException("A " + DataGridConfig.class + " object has already been built using this builder");
-    }
+	void checkBuilt() {
+		if (built) throw new IllegalArgumentException(
+			"A " + DataGridConfig.class + " object has already been built using this builder");
+	}
 
-    public DataGridConfig<V> build() {
-        checkBuilt();
-        built = true;
-        return new BuilderDataGridConfig<>(sorts, columnConfigs, customValues);
-    }
+	public DataGridConfig<V> build() {
+		checkBuilt();
+		built = true;
+		return new BuilderDataGridConfig<>(sorts, columnConfigs, customValues);
+	}
 
-    public DataGridConfigBuilder<V> addSort(final Sort<V> sort) {
-        checkBuilt();
-        sorts.add(sort);
-        return this;
-    }
+	public DataGridConfigBuilder<V> addSort(final Sort<V> sort) {
+		checkBuilt();
+		sorts.add(sort);
+		return this;
+	}
 
-    public DataGridConfigBuilder<V> addColumnConfig(final ColumnConfig<V> config) {
-        checkBuilt();
-        columnConfigs.add(config);
-        return this;
-    }
+	public DataGridConfigBuilder<V> addColumnConfig(final ColumnConfig<V> config) {
+		checkBuilt();
+		columnConfigs.add(config);
+		return this;
+	}
 
-    public DataGridConfigBuilder<V> addCustomValue(final String key, final Object value) {
-        checkBuilt();
-        customValues.put(key, value);
-        return this;
-    }
+	public DataGridConfigBuilder<V> addCustomValue(final String key, final Object value) {
+		checkBuilt();
+		customValues.put(key, value);
+		return this;
+	}
 
-    private static class BuilderDataGridConfig<V> implements DataGridConfig<V> {
+	private static class BuilderDataGridConfig<V> implements DataGridConfig<V> {
 
-        private final List<Sort<V>> sorts;
-        private final List<ColumnConfig<V>> columnConfigs;
-        private final Map<String, Object> customValues;
-        private final Map<String, Object> unmodifiableCustomValues;
+		private final List<Sort<V>> sorts;
+		private final List<ColumnConfig<V>> columnConfigs;
+		private final Map<String, Object> customValues;
+		private final Map<String, Object> unmodifiableCustomValues;
 
-        private BuilderDataGridConfig(final List<Sort<V>> sorts, final List<ColumnConfig<V>> columnConfigs,
-                final Map<String, Object> customValues) {
-            this.sorts = Collections.unmodifiableList(sorts);
-            this.columnConfigs = Collections.unmodifiableList(columnConfigs);
-            this.customValues = customValues;
-            this.unmodifiableCustomValues = Collections.unmodifiableMap(customValues);
-        }
+		private BuilderDataGridConfig(final List<Sort<V>> sorts, final List<ColumnConfig<V>> columnConfigs,
+				final Map<String, Object> customValues) {
+			this.sorts = Collections.unmodifiableList(sorts);
+			this.columnConfigs = Collections.unmodifiableList(columnConfigs);
+			this.customValues = customValues;
+			this.unmodifiableCustomValues = Collections.unmodifiableMap(customValues);
+		}
 
-        @Override
-        public List<Sort<V>> getSorts() {
-            return sorts;
-        }
+		@Override
+		public List<Sort<V>> getSorts() {
+			return sorts;
+		}
 
-        @Override
-        public void setCustomValue(final String key, final Object value) {
-            customValues.put(key, value);
-        }
+		@Override
+		public void setCustomValue(final String key, final Object value) {
+			customValues.put(key, value);
+		}
 
-        @Override
-        public Map<String, Object> getReadOnlyCustomValues() {
-            return unmodifiableCustomValues;
-        }
+		@Override
+		public Map<String, Object> getReadOnlyCustomValues() {
+			return unmodifiableCustomValues;
+		}
 
-        @Override
-        public List<ColumnConfig<V>> getColumnConfigs() {
-            return columnConfigs;
-        }
+		@Override
+		public List<ColumnConfig<V>> getColumnConfigs() {
+			return columnConfigs;
+		}
 
-        @Override
-        public <T> T getCustomValue(final String key) {
-            return (T) customValues.get(key);
-        }
-
-    }
+		@Override
+		public <T> T getCustomValue(final String key) {
+			return (T) customValues.get(key);
+		}
+	}
 }

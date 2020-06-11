@@ -40,185 +40,186 @@ import com.ponysdk.core.ui.datagrid2.cell.LabelCell;
  */
 public class DefaultColumnDefinition<V> implements ColumnDefinition<V> {
 
-    private final String columnName;
-    private final Function<V, Object> columnValueFn;
-    private final BiConsumer<V, String> columnEditFn;
-    private final PComplexPanel header = Element.newDiv();
-    private final PLabel columnNameLabel = Element.newPLabel();
-    private final PLabel pinLabel = Element.newPLabel();
-    private final PLabel hideLabel = Element.newPLabel();
-    private ColumnController<V> columnController;
-    private Boolean sort;
-    private State state = getDefaultState();
+	private final String columnName;
+	private final Function<V, Object> columnValueFn;
+	private final BiConsumer<V, String> columnEditFn;
+	private final PComplexPanel header = Element.newDiv();
+	private final PLabel columnNameLabel = Element.newPLabel();
+	private final PLabel pinLabel = Element.newPLabel();
+	private final PLabel hideLabel = Element.newPLabel();
+	private ColumnController<V> columnController;
+	private Boolean sort;
+	private State state = getDefaultState();
 
-    public DefaultColumnDefinition(final String columnName, final Function<V, Object> columnValueFn,
-            final BiConsumer<V, String> columnEditFn) {
-        super();
-        this.columnName = columnName;
-        this.columnValueFn = columnValueFn;
-        this.columnEditFn = columnEditFn;
-        initHeader();
-    }
+	public DefaultColumnDefinition(final String columnName, final Function<V, Object> columnValueFn,
+			final BiConsumer<V, String> columnEditFn) {
+		super();
+		this.columnName = columnName;
+		this.columnValueFn = columnValueFn;
+		this.columnEditFn = columnEditFn;
+		initHeader();
+	}
 
-    private void initHeader() {
-        columnNameLabel.setText(columnName);
-        columnNameLabel.addClickHandler(e -> {
-            if (columnController == null) return;
-            columnController.sort(sort == null || !sort);
-        });
-        this.header.add(columnNameLabel);
+	private void initHeader() {
+		columnNameLabel.setText(columnName);
+		columnNameLabel.addClickHandler(e -> {
+			if (columnController == null) return;
+			columnController.sort(sort == null || !sort);
+		});
+		this.header.add(columnNameLabel);
 
-        if (isPinSwitchable()) {
-            this.pinLabel.setText(state.isPinned() ? "[unpin me]" : "[pin me]");
-            this.pinLabel.addClickHandler(e -> {
-                if (columnController == null) return;
-                columnController.setState(state.isPinned() ? state.onUnpin() : state.onPin());
-            });
-        }
-        this.header.add(pinLabel);
+		if (isPinSwitchable()) {
+			this.pinLabel.setText(state.isPinned() ? "[unpin me]" : "[pin me]");
+			this.pinLabel.addClickHandler(e -> {
+				if (columnController == null) return;
+				columnController.setState(state.isPinned() ? state.onUnpin() : state.onPin());
+			});
+		}
+		this.header.add(pinLabel);
 
-        if (isVisibilitySwitchable()) {
-            this.hideLabel.setText("[hide me]");
-            this.hideLabel.addClickHandler(e -> {
-                if (columnController == null) return;
-                columnController.setState(state.isShown() ? state.onHide() : state.onShow());
-            });
-        }
-        this.header.add(hideLabel);
-    }
+		if (isVisibilitySwitchable()) {
+			this.hideLabel.setText("[hide me]");
+			this.hideLabel.addClickHandler(e -> {
+				if (columnController == null) return;
+				columnController.setState(state.isShown() ? state.onHide() : state.onShow());
+			});
+		}
+		this.header.add(hideLabel);
+	}
 
-    @Override
-    public PComplexPanel getHeader() {
-        return header;
-    }
+	@Override
+	public PComplexPanel getHeader() {
+		return header;
+	}
 
-    @Override
-    public Cell<V> createCell() {
-        return new LabelCell<>(columnEditFn, (int) (getDefaultWidth() * 0.8));
-    }
+	@Override
+	public Cell<V> createCell() {
+		return new LabelCell<>(columnEditFn, (int) (getDefaultWidth() * 0.8));
+	}
 
-    @Override
-    public Object getRenderingHelper(final V data) {
-        return columnValueFn.apply(data).toString();
-    }
+	@Override
+	public Object getRenderingHelper(final V data) {
+		return columnValueFn.apply(data).toString();
+	}
 
-    @Override
-    public int compare(final V v1, final Supplier<Object> renderingHelper1, final V v2, final Supplier<Object> renderingHelper2) {
-        return renderingHelper1.get().toString().compareTo(renderingHelper2.get().toString());
-    }
+	@Override
+	public int compare(final V v1, final Supplier<Object> renderingHelper1, final V v2,
+			final Supplier<Object> renderingHelper2) {
+		return renderingHelper1.get().toString().compareTo(renderingHelper2.get().toString());
+	}
 
-    @Override
-    public String toString() {
-        return "SimpleColumnDefinition [columnName=" + columnName + "]";
-    }
+	@Override
+	public String toString() {
+		return "SimpleColumnDefinition [columnName=" + columnName + "]";
+	}
 
-    @Override
-    public void setController(final ColumnController<V> columnController) {
-        this.columnController = columnController;
-    }
+	@Override
+	public void setController(final ColumnController<V> columnController) {
+		this.columnController = columnController;
+	}
 
-    @Override
-    public ColumnController<V> getController() {
-        return columnController;
-    }
+	@Override
+	public ColumnController<V> getController() {
+		return columnController;
+	}
 
-    @Override
-    public IsPWidget getFooter() {
-        return null;
-    }
+	@Override
+	public IsPWidget getFooter() {
+		return null;
+	}
 
-    @Override
-    public boolean isVisibilitySwitchable() {
-        return true;
-    }
+	@Override
+	public boolean isVisibilitySwitchable() {
+		return true;
+	}
 
-    @Override
-    public String getId() {
-        return columnName;
-    }
+	@Override
+	public String getId() {
+		return columnName;
+	}
 
-    @Override
-    public void onSort(final boolean asc) {
-        sort = asc;
+	@Override
+	public void onSort(final boolean asc) {
+		sort = asc;
 
-    }
+	}
 
-    @Override
-    public void onClearSort() {
-        sort = null;
-    }
+	@Override
+	public void onClearSort() {
+		sort = null;
+	}
 
-    @Override
-    public void onFilter(final Object key, final BiPredicate<V, Supplier<Object>> filter, final boolean reinforcing) {
-    }
+	@Override
+	public void onFilter(final Object key, final BiPredicate<V, Supplier<Object>> filter, final boolean reinforcing) {
+	}
 
-    @Override
-    public void onClearFilter(final Object key) {
-        if (key != this) return;
-        onClearFilters();
-    }
+	@Override
+	public void onClearFilter(final Object key) {
+		if (key != this) return;
+		onClearFilters();
+	}
 
-    @Override
-    public void onClearFilters() {
-    }
+	@Override
+	public void onClearFilters() {
+	}
 
-    @Override
-    public void onRedraw(final boolean clearRenderingHelpers) {
-    }
+	@Override
+	public void onRedraw(final boolean clearRenderingHelpers) {
+	}
 
-    @Override
-    public boolean isPinSwitchable() {
-        return true;
-    }
+	@Override
+	public boolean isPinSwitchable() {
+		return true;
+	}
 
-    @Override
-    public boolean isFilterable() {
-        return true;
-    }
+	@Override
+	public boolean isFilterable() {
+		return true;
+	}
 
-    @Override
-    public int getDefaultWidth() {
-        return 140;
-    }
+	@Override
+	public int getDefaultWidth() {
+		return 140;
+	}
 
-    @Override
-    public void onStateChanged(final State state) {
-        this.state = state;
-        pinLabel.setText(state.isPinned() ? "[unpin me]" : "[pin me]");
-    }
+	@Override
+	public void onStateChanged(final State state) {
+		this.state = state;
+		pinLabel.setText(state.isPinned() ? "[unpin me]" : "[pin me]");
+	}
 
-    @Override
-    public State getDefaultState() {
-        return State.UNPINNED_SHOWN;
-    }
+	@Override
+	public State getDefaultState() {
+		return State.UNPINNED_SHOWN;
+	}
 
-    @Override
-    public boolean isSortable() {
-        return true;
-    }
+	@Override
+	public boolean isSortable() {
+		return true;
+	}
 
-    @Override
-    public void onResized(final int width) {
-    }
+	@Override
+	public void onResized(final int width) {
+	}
 
-    @Override
-    public boolean isResizable() {
-        return true;
-    }
+	@Override
+	public boolean isResizable() {
+		return true;
+	}
 
-    @Override
-    public int getMinWidth() {
-        return 50;
-    }
+	@Override
+	public int getMinWidth() {
+		return 50;
+	}
 
-    @Override
-    public int getMaxWidth() {
-        return Integer.MAX_VALUE;
-    }
+	@Override
+	public int getMaxWidth() {
+		return Integer.MAX_VALUE;
+	}
 
-    @Override
-    public IsPWidget getDraggableHeaderElement() {
-        return columnNameLabel;
-    }
+	@Override
+	public IsPWidget getDraggableHeaderElement() {
+		return columnNameLabel;
+	}
 
 }

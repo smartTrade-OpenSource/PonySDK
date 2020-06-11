@@ -1,12 +1,9 @@
 /*
- * Copyright (c) 2019 PonySDK
- *  Owners:
- *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ * Copyright (c) 2019 PonySDK Owners: Luciano Broussal <luciano.broussal AT
+ * gmail.com> Mathieu Barbier <mathieu.barbier AT gmail.com> Nicolas Ciaravola
+ * <nicolas.ciaravola.pro AT gmail.com>
  *
- *  WebSite:
- *  http://code.google.com/p/pony-sdk/
+ * WebSite: http://code.google.com/p/pony-sdk/
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -45,105 +42,111 @@ import com.ponysdk.core.ui.datagrid2.data.ViewLiveData;
 
 public interface DataGridController<K, V> {
 
-    void renderCell(ColumnDefinition<V> column, int row, Cell<V> widget, ViewLiveData<V> result);
+	void renderCell(ColumnDefinition<V> column, int row, Cell<V> widget, ViewLiveData<V> result);
 
-    void setValueOnExtendedCell(int row, ExtendedCell<V> widget, ViewLiveData<V> result);
+	void setValueOnExtendedCell(int row, ExtendedCell<V> widget, ViewLiveData<V> result);
 
-    boolean isSelected(K k);
+	boolean isSelected(K k);
 
-    Collection<V> getLiveSelectedData();
+	Collection<V> getLiveSelectedData();
 
-    void select(K k);
+	void select(K k);
 
-    void unselect(K k);
+	void unselect(K k);
 
-    void selectAllLiveData();
+	void selectAllLiveData();
 
-    void unselectAllData();
+	void unselectAllData();
 
-    void addSort(ColumnDefinition<V> column, boolean asc);
+	void addSort(ColumnDefinition<V> column, boolean asc);
 
-    void addSort(Object key, Comparator<V> comparator);
+	void addSort(Object key, Comparator<V> comparator);
 
-    void clearSort(Object key);
+	void clearSort(Object key);
 
-    void clearSort(ColumnDefinition<V> column);
+	void clearSort(ColumnDefinition<V> column);
 
-    void clearSorts();
+	void clearSorts();
 
-    void setFilter(Object key, ColumnDefinition<V> column, BiPredicate<V, Supplier<Object>> filter, boolean reinforcing);
+	void setFilter(Object key, ColumnDefinition<V> column, BiPredicate<V, Supplier<Object>> filter,
+			boolean reinforcing);
 
-    void setFilter(Object key, String id, Predicate<V> filter, boolean reinforcing);
+	void setFilter(Object key, String id, Predicate<V> filter, boolean reinforcing);
 
-    void clearFilter(Object key);
+	void clearFilter(Object key);
 
-    void clearFilters(ColumnDefinition<V> column);
+	void clearFilters(ColumnDefinition<V> column);
 
-    void clearFilters();
+	void clearFilters();
 
-    void setConfig(DataGridConfig<V> config);
+	void setConfig(DataGridConfig<V> config);
 
-    void setAdapter(DataGridAdapter<K, V> adapter);
+	void setAdapter(DataGridAdapter<K, V> adapter);
 
-    DataGridController<K, V> getController();
+	DataGridController<K, V> getController();
 
-    void setListener(DataGridControllerListener<V> listener);
+	void setListener(DataGridControllerListener<V> listener);
 
-    void clearRenderingHelpers(ColumnDefinition<V> column);
+	void clearRenderingHelpers(ColumnDefinition<V> column);
 
-    int getRowCount();
+	int getRowCount();
 
-    void enrichConfigBuilder(DataGridConfigBuilder<V> builder);
+	void enrichConfigBuilder(DataGridConfigBuilder<V> builder);
 
-    /**
-     * Send a partially filled object to the dataSource. The object will return filled
-     * with the needed data for the view, and with updated fields sometimes
-     */
-    void prepareLiveDataOnScreen(ViewLiveData<V> viewLiveData, Consumer<DefaultDataGridController<K, V>.MySupplier> consumer);
+	/**
+	 * Send a partially filled object to the dataSource. The object will return
+	 * filled with the needed data for the view, and with updated fields
+	 * sometimes
+	 */
+	void prepareLiveDataOnScreen(ViewLiveData<V> dataSrcResult, Consumer<ViewLiveData<V>> consumer);
 
-    /**
-     * Insert or replace the value
-     */
-    void setData(V v);
+	/**
+	 * Insert or replace the value
+	 */
+	void setData(V v);
 
-    /**
-     * Insert or replace the collection of values
-     *
-     * @param c
-     */
-    void setData(Collection<V> c);
+	/**
+	 * Insert or replace the collection of values
+	 *
+	 * @param c
+	 */
+	void setData(Collection<V> c);
 
-    /**
-     * Update an existing value identified by key {@code k}, if it is present, using the {@code updater}
-     */
-    void updateData(K k, Consumer<V> updater);
+	/**
+	 * Update an existing value identified by key {@code k}, if it is present,
+	 * using the {@code updater}
+	 */
+	void updateData(K k, Consumer<V> updater);
 
-    /**
-     * Update existing values identified by the key, if they are present, using the {@code updaters}
-     */
-    void updateData(Map<K, Consumer<V>> updaters);
+	/**
+	 * Update existing values identified by the key, if they are present, using
+	 * the {@code updaters}
+	 */
+	void updateData(Map<K, Consumer<V>> updaters);
 
-    /**
-     * Returns the value to which the specified key is mapped,
-     * or {@code null} if this model contains no mapping for the key.
-     */
-    V getData(K k);
+	/**
+	 * Returns the value to which the specified key is mapped, or {@code null}
+	 * if this model contains no mapping for the key.
+	 */
+	V getData(K k);
 
-    /**
-     * Removes the value identified by the key {@code k} from this model if it is present
-     */
-    V removeData(K k);
+	/**
+	 * Removes the value identified by the key {@code k} from this model if it
+	 * is present
+	 */
+	V removeData(K k);
 
-    /**
-     * If {@code bound} is true (default), the view is notified when the model is updated. Otherwise, the view is not
-     * notified but it will continue to see the most recent version of the model
-     *
-     * @param bound
-     */
-    void setBound(boolean bound);
+	/**
+	 * If {@code bound} is true (default), the view is notified when the model
+	 * is updated. Otherwise, the view is not notified but it will continue to
+	 * see the most recent version of the model
+	 *
+	 * @param bound
+	 */
+	void setBound(boolean bound);
 
-    /**
-     * Whether the model is bound to the view.
-     */
-    boolean getBound();
+	/**
+	 * Whether the model is bound to the view.
+	 */
+	boolean getBound();
 }

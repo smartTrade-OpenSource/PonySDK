@@ -30,44 +30,44 @@ import com.ponysdk.core.ui.basic.PWidget;
  */
 public class DecoratorCell<V> implements Cell<V> {
 
-    private final Cell<V> cell;
+	private final Cell<V> cell;
 
-    public DecoratorCell(final Cell<V> cell) {
-        super();
-        this.cell = cell;
-    }
+	public DecoratorCell(final Cell<V> cell) {
+		super();
+		this.cell = cell;
+	}
 
-    @Override
-    public PWidget asWidget() {
-        return cell.asWidget();
-    }
+	@Override
+	public PWidget asWidget() {
+		return cell.asWidget();
+	}
 
-    @Override
-    public PWidget asPendingWidget() {
-        return cell.asPendingWidget();
-    }
+	@Override
+	public PWidget asPendingWidget() {
+		return cell.asPendingWidget();
+	}
 
-    @Override
-    public void render(final V data, final Object renderingHelper) {
-        cell.render(data, renderingHelper);
-    }
+	@Override
+	public void render(final V data, final Object renderingHelper) {
+		cell.render(data, renderingHelper);
+	}
 
-    @Override
-    public void setController(final CellController<V> cellController) {
-        cell.setController(cellController);
-    }
+	@Override
+	public void setController(final CellController<V> cellController) {
+		cell.setController(cellController);
+	}
 
-    @Override
-    public void select() {
-        cell.select();
-    }
+	@Override
+	public void select() {
+		cell.select();
+	}
 
-    @Override
-    public void unselect() {
-        cell.unselect();
-    }
+	@Override
+	public void unselect() {
+		cell.unselect();
+	}
 
-    protected Cell<V> getCell() {
-        return cell;
-    }
+	protected Cell<V> getCell() {
+		return cell;
+	}
 }

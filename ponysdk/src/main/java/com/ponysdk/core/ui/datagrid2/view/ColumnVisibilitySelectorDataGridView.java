@@ -1,12 +1,9 @@
 /*
- * Copyright (c) 2019 PonySDK
- *  Owners:
- *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ * Copyright (c) 2019 PonySDK Owners: Luciano Broussal <luciano.broussal AT
+ * gmail.com> Mathieu Barbier <mathieu.barbier AT gmail.com> Nicolas Ciaravola
+ * <nicolas.ciaravola.pro AT gmail.com>
  *
- *  WebSite:
- *  http://code.google.com/p/pony-sdk/
+ * WebSite: http://code.google.com/p/pony-sdk/
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -51,238 +48,240 @@ import com.ponysdk.core.util.StringUtils;
  */
 public class ColumnVisibilitySelectorDataGridView<K, V> extends WidgetDecoratorDataGridView<K, V> {
 
-    private final PWidget layout;
-    private final PComplexPanel columnsWidget;
-    private final List<ColumnHandler<V>> handlers = new ArrayList<>();
+	private final PWidget layout;
+	private final PComplexPanel columnsWidget;
+	private final List<ColumnHandler<V>> handlers = new ArrayList<>();
 
-    public ColumnVisibilitySelectorDataGridView(final DataGridView<K, V> view) {
-        super(view);
-        columnsWidget = createColumnsWidget();
+	public ColumnVisibilitySelectorDataGridView(final DataGridView<K, V> view) {
+		super(view);
+		columnsWidget = createColumnsWidget();
 
-        final PWidget applyWidget = initApplyWidget();
+		final PWidget applyWidget = initApplyWidget();
 
-        final PWidget cancelWidget = initCancelWidget();
+		final PWidget cancelWidget = initCancelWidget();
 
-        final PWidget restoreWidget = initRestoreWidget();
+		final PWidget restoreWidget = initRestoreWidget();
 
-        final PTextBox searchWidget = initSearchWidget();
+		final PTextBox searchWidget = initSearchWidget();
 
-        layout = createLayout(columnsWidget, applyWidget, cancelWidget, restoreWidget, searchWidget);
-    }
+		layout = createLayout(columnsWidget, applyWidget, cancelWidget, restoreWidget, searchWidget);
+	}
 
-    private PTextBox initSearchWidget() {
-        final PTextBox searchWidget = createSearchWidget();
-        searchWidget.addValueChangeHandler(e -> {
-            for (final ColumnHandler<V> handler : handlers) {
-                handler.wrapperWidget.setVisible(StringUtils.containsIgnoreCase(handler.column.getId(), e.getData().trim()));
-            }
-        });
-        //only to receive value change events on every key
-        searchWidget.addKeyUpHandler(e -> {
-            //do nothing
-        });
-        return searchWidget;
-    }
+	private PTextBox initSearchWidget() {
+		final PTextBox searchWidget = createSearchWidget();
+		searchWidget.addValueChangeHandler(e -> {
+			for (final ColumnHandler<V> handler : handlers) {
+				handler.wrapperWidget
+					.setVisible(StringUtils.containsIgnoreCase(handler.column.getId(), e.getData().trim()));
+			}
+		});
+		// only to receive value change events on every key
+		searchWidget.addKeyUpHandler(e -> {
+			// do nothing
+		});
+		return searchWidget;
+	}
 
-    private PWidget initRestoreWidget() {
-        final PWidget restoreWidget = createRestoreWidget();
-        restoreWidget.addDomHandler((PClickHandler) e -> {
-            clearSelection();
-            for (final ColumnHandler<V> handler : handlers) {
-                if (!handler.checkBox.isEnabled()) continue;
-                final boolean shownByDefault = handler.column.getDefaultState().isShown();
-                if (shownByDefault != handler.checkBox.getValue()) {
-                    handler.checkBox.setValue(shownByDefault);
-                    handler.valueChanged = true;
-                }
-            }
-            onRestore();
-        }, PClickEvent.TYPE);
-        return restoreWidget;
-    }
+	private PWidget initRestoreWidget() {
+		final PWidget restoreWidget = createRestoreWidget();
+		restoreWidget.addDomHandler((PClickHandler) e -> {
+			clearSelection();
+			for (final ColumnHandler<V> handler : handlers) {
+				if (!handler.checkBox.isEnabled()) continue;
+				final boolean shownByDefault = handler.column.getDefaultState().isShown();
+				if (shownByDefault != handler.checkBox.getValue()) {
+					handler.checkBox.setValue(shownByDefault);
+					handler.valueChanged = true;
+				}
+			}
+			onRestore();
+		}, PClickEvent.TYPE);
+		return restoreWidget;
+	}
 
-    private PWidget initCancelWidget() {
-        final PWidget cancelWidget = createCancelWidget();
-        cancelWidget.addDomHandler((PClickHandler) e -> {
-            clearSelection();
-            onCancel();
-        }, PClickEvent.TYPE);
-        return cancelWidget;
-    }
+	private PWidget initCancelWidget() {
+		final PWidget cancelWidget = createCancelWidget();
+		cancelWidget.addDomHandler((PClickHandler) e -> {
+			clearSelection();
+			onCancel();
+		}, PClickEvent.TYPE);
+		return cancelWidget;
+	}
 
-    private PWidget initApplyWidget() {
-        final PWidget applyWidget = createApplyWidget();
-        applyWidget.addDomHandler((PClickHandler) e -> {
-            for (final ColumnHandler<V> handler : handlers) {
-                if (!handler.valueChanged) continue;
-                try {
-                    final ColumnController<V> grip = handler.column.getController();
-                    if (grip == null) continue;
-                    if (handler.checkBox.getValue()) {
-                        grip.setState(handler.state.onShow());
-                    } else {
-                        grip.setState(handler.state.onHide());
-                    }
-                } finally {
-                    handler.valueChanged = false;
-                }
-            }
-            onApply();
-        }, PClickEvent.TYPE);
-        return applyWidget;
-    }
+	private PWidget initApplyWidget() {
+		final PWidget applyWidget = createApplyWidget();
+		applyWidget.addDomHandler((PClickHandler) e -> {
+			for (final ColumnHandler<V> handler : handlers) {
+				if (!handler.valueChanged) continue;
+				try {
+					final ColumnController<V> grip = handler.column.getController();
+					if (grip == null) continue;
+					if (handler.checkBox.getValue()) {
+						grip.setState(handler.state.onShow());
+					} else {
+						grip.setState(handler.state.onHide());
+					}
+				} finally {
+					handler.valueChanged = false;
+				}
+			}
+			onApply();
+		}, PClickEvent.TYPE);
+		return applyWidget;
+	}
 
-    private void clearSelection() {
-        for (final ColumnHandler<V> handler : handlers) {
-            if (!handler.valueChanged) continue;
-            handler.checkBox.setValue(!handler.checkBox.getValue());
-            handler.valueChanged = false;
-        }
-    }
+	private void clearSelection() {
+		for (final ColumnHandler<V> handler : handlers) {
+			if (!handler.valueChanged) continue;
+			handler.checkBox.setValue(!handler.checkBox.getValue());
+			handler.valueChanged = false;
+		}
+	}
 
-    protected void onApply() {
+	protected void onApply() {
 
-    }
+	}
 
-    protected void onCancel() {
+	protected void onCancel() {
 
-    }
+	}
 
-    protected void onRestore() {
+	protected void onRestore() {
 
-    }
+	}
 
-    protected PComplexPanel createColumnSelectorWidget(final ColumnDefinition<V> column) {
-        return Element.newLi();
-    }
+	protected PComplexPanel createColumnSelectorWidget(final ColumnDefinition<V> column) {
+		return Element.newLi();
+	}
 
-    protected PComplexPanel createColumnsWidget() {
-        return Element.newUl();
-    }
+	protected PComplexPanel createColumnsWidget() {
+		return Element.newUl();
+	}
 
-    protected PWidget createApplyWidget() {
-        final PButton button = Element.newPButton();
-        button.setEnabledOnRequest(true);
-        button.setText("Apply");
-        return button;
-    }
+	protected PWidget createApplyWidget() {
+		final PButton button = Element.newPButton();
+		button.setEnabledOnRequest(true);
+		button.setText("Apply");
+		return button;
+	}
 
-    protected PWidget createCancelWidget() {
-        final PButton button = Element.newPButton();
-        button.setEnabledOnRequest(true);
-        button.setText("Cancel");
-        return button;
-    }
+	protected PWidget createCancelWidget() {
+		final PButton button = Element.newPButton();
+		button.setEnabledOnRequest(true);
+		button.setText("Cancel");
+		return button;
+	}
 
-    protected PWidget createRestoreWidget() {
-        final PButton button = Element.newPButton();
-        button.setEnabledOnRequest(true);
-        button.setText("Restore default settings");
-        return button;
-    }
+	protected PWidget createRestoreWidget() {
+		final PButton button = Element.newPButton();
+		button.setEnabledOnRequest(true);
+		button.setText("Restore default settings");
+		return button;
+	}
 
-    protected PTextBox createSearchWidget() {
-        return Element.newPTextBox();
-    }
+	protected PTextBox createSearchWidget() {
+		return Element.newPTextBox();
+	}
 
-    protected PWidget createLayout(final PComplexPanel columnsWidget, final PWidget applyWidget, final PWidget cancelWidget,
-                                   final PWidget restoreWidget, final PTextBox searchWidget) {
-        final PComplexPanel div = Element.newDiv();
-        div.add(searchWidget);
-        div.add(applyWidget);
-        div.add(cancelWidget);
-        div.add(restoreWidget);
-        div.add(columnsWidget);
-        return div;
-    }
+	protected PWidget createLayout(final PComplexPanel columnsWidget, final PWidget applyWidget,
+			final PWidget cancelWidget, final PWidget restoreWidget, final PTextBox searchWidget) {
+		final PComplexPanel div = Element.newDiv();
+		div.add(searchWidget);
+		div.add(applyWidget);
+		div.add(cancelWidget);
+		div.add(restoreWidget);
+		div.add(columnsWidget);
+		return div;
+	}
 
-    @Override
-    public final void setAdapter(final DataGridAdapter<K, V> adapter) {
-        super.setAdapter(adapter);
-        final List<ColumnDefinition<V>> columns = new ArrayList<>(adapter.getColumnDefinitions());
-        final Iterator<ColumnDefinition<V>> iterator = columns.iterator();
-        while (iterator.hasNext()) {
-            final ColumnDefinition<V> column = iterator.next();
-            if (!column.isVisibilitySwitchable()) iterator.remove();
-        }
-        columns.sort(this::compare);
-        for (final ColumnDefinition<V> column : columns) {
-            final PComplexPanel wrapperWidget = createColumnSelectorWidget(column);
-            final ColumnHandler<V> handler = new ColumnHandler<>(wrapperWidget, column);
-            handlers.add(handler);
-            addColumnActionListener(column, handler);
-            columnsWidget.add(wrapperWidget);
-        }
-    }
+	@Override
+	public final void setAdapter(final DataGridAdapter<K, V> adapter) {
+		super.setAdapter(adapter);
+		final List<ColumnDefinition<V>> columns = new ArrayList<>(adapter.getColumnDefinitions());
+		final Iterator<ColumnDefinition<V>> iterator = columns.iterator();
+		while (iterator.hasNext()) {
+			final ColumnDefinition<V> column = iterator.next();
+			if (!column.isVisibilitySwitchable()) iterator.remove();
+		}
+		columns.sort(this::compare);
+		for (final ColumnDefinition<V> column : columns) {
+			final PComplexPanel wrapperWidget = createColumnSelectorWidget(column);
+			final ColumnHandler<V> handler = new ColumnHandler<>(wrapperWidget, column);
+			handlers.add(handler);
+			addColumnActionListener(column, handler);
+			columnsWidget.add(wrapperWidget);
+		}
+	}
 
-    protected int compare(final ColumnDefinition<V> c1, final ColumnDefinition<V> c2) {
-        return c1.getId().compareTo(c2.getId());
-    }
+	protected int compare(final ColumnDefinition<V> c1, final ColumnDefinition<V> c2) {
+		return c1.getId().compareTo(c2.getId());
+	}
 
-    private static class ColumnHandler<V> implements ColumnActionListener<V>, PValueChangeHandler<Boolean> {
+	private static class ColumnHandler<V> implements ColumnActionListener<V>, PValueChangeHandler<Boolean> {
 
-        private final ColumnDefinition<V> column;
-        private final PCheckBox checkBox;
-        private final PComplexPanel wrapperWidget;
-        private State state;
-        private boolean valueChanged = false;
+		private final ColumnDefinition<V> column;
+		private final PCheckBox checkBox;
+		private final PComplexPanel wrapperWidget;
+		private State state;
+		private boolean valueChanged = false;
 
-        ColumnHandler(final PComplexPanel wrapperWidget, final ColumnDefinition<V> column) {
-            super();
-            this.column = column;
-            this.wrapperWidget = wrapperWidget;
-            this.checkBox = Element.newPCheckBox(column.getId());
-            checkBox.addValueChangeHandler(this);
-            onStateChanged(column.getDefaultState());
-            wrapperWidget.add(checkBox);
-        }
+		ColumnHandler(final PComplexPanel wrapperWidget, final ColumnDefinition<V> column) {
+			super();
+			this.column = column;
+			this.wrapperWidget = wrapperWidget;
+			this.checkBox = Element.newPCheckBox(column.getId());
+			checkBox.addValueChangeHandler(this);
+			onStateChanged(column.getDefaultState());
+			wrapperWidget.add(checkBox);
+		}
 
-        @Override
-        public void onSort(final boolean asc) {
-        }
+		@Override
+		public void onSort(final boolean asc) {
+		}
 
-        @Override
-        public void onClearSort() {
-        }
+		@Override
+		public void onClearSort() {
+		}
 
-        @Override
-        public void onFilter(final Object key, final BiPredicate<V, Supplier<Object>> filter, final boolean reinforcing) {
-        }
+		@Override
+		public void onFilter(final Object key, final BiPredicate<V, Supplier<Object>> filter,
+				final boolean reinforcing) {
+		}
 
-        @Override
-        public void onClearFilter(final Object key) {
-        }
+		@Override
+		public void onClearFilter(final Object key) {
+		}
 
-        @Override
-        public void onClearFilters() {
-        }
+		@Override
+		public void onClearFilters() {
+		}
 
-        @Override
-        public void onRedraw(final boolean clearRenderingHelpers) {
-        }
+		@Override
+		public void onRedraw(final boolean clearRenderingHelpers) {
+		}
 
-        @Override
-        public void onValueChange(final PValueChangeEvent<Boolean> event) {
-            valueChanged = !valueChanged;
-        }
+		@Override
+		public void onValueChange(final PValueChangeEvent<Boolean> event) {
+			valueChanged = !valueChanged;
+		}
 
-        @Override
-        public void onStateChanged(final State state) {
-            this.state = state;
-            checkBox.setValue(state.isShown());
-            checkBox.setEnabled(!state.isPinned());
-            valueChanged = false;
-        }
+		@Override
+		public void onStateChanged(final State state) {
+			this.state = state;
+			checkBox.setValue(state.isShown());
+			checkBox.setEnabled(!state.isPinned());
+			valueChanged = false;
+		}
 
-        @Override
-        public void onResized(final int width) {
-        }
+		@Override
+		public void onResized(final int width) {
+		}
 
-    }
+	}
 
-    @Override
-    public PWidget getDecoratorWidget() {
-        return layout;
-    }
+	@Override
+	public PWidget getDecoratorWidget() {
+		return layout;
+	}
 
 }

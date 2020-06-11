@@ -30,33 +30,36 @@ import java.util.function.Consumer;
  */
 public interface ExtendedCellController<V> {
 
-    /**
-     * Switched back from extended mode to normal mode and removes the {@link ExtendedCell} from the view
-     *
-     * @see CellController#extendedMode(ExtendedCell)
-     */
-    void cancelExtendedMode();
+	/**
+	 * Switched back from extended mode to normal mode and removes the
+	 * {@link ExtendedCell} from the view
+	 *
+	 * @see CellController#extendedMode(ExtendedCell)
+	 */
+	void cancelExtendedMode();
 
-    /**
-     * Selects the row that this cell belongs to
-     */
-    void selectRow();
+	/**
+	 * Selects the row that this cell belongs to
+	 */
+	void selectRow();
 
-    /**
-     * Selects the row that this cell belongs to
-     */
-    void unselectRow();
+	/**
+	 * Selects the row that this cell belongs to
+	 */
+	void unselectRow();
 
-    /**
-     * Replaces the value in the model, corresponding to this cell's key, with {@code newV}. <br/>
-     * Can be useful for an editable {@link ExtendedCell}.
-     */
-    void updateValue(V newV);
+	/**
+	 * Replaces the value in the model, corresponding to this cell's key, with
+	 * {@code newV}. <br/>
+	 * Can be useful for an editable {@link ExtendedCell}.
+	 */
+	void updateValue(V newV);
 
-    /**
-     * Updates the value corresponding to this cell using the {@code updater}. <br/>
-     * Can be useful for an editable {@link ExtendedCell}.
-     */
-    void updateValue(Consumer<V> updater);
+	/**
+	 * Updates the value corresponding to this cell using the {@code updater}.
+	 * <br/>
+	 * Can be useful for an editable {@link ExtendedCell}.
+	 */
+	void updateValue(Consumer<V> updater);
 
 }

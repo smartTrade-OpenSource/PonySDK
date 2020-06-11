@@ -31,53 +31,63 @@ import java.util.function.Supplier;
  */
 public interface ColumnController<V> {
 
-    /**
-     * Adds/replaces a sorting criterion on the view based on this column
-     *
-     * @param asc
-     */
-    void sort(boolean asc);
+	/**
+	 * Adds/replaces a sorting criterion on the view based on this column
+	 *
+	 * @param asc
+	 */
+	void sort(boolean asc);
 
-    /**
-     * Cancels the sorting criterion of this column from the view
-     */
-    void clearSort();
+	/**
+	 * Cancels the sorting criterion of this column from the view
+	 */
+	void clearSort();
 
-    /**
-     * Adds/replaces a filter that accepts only data that meet the condition of the {@link BiPredicate} {@code filter}.
-     *
-     * @param key an object that can be used to uniquely identify a filter, so that it can be replaced or removed
-     * @param filter a {@code BiPredicate} that decides whether a value is accepted or filtered. The {@code BiPredicate}
-     *            arguments are the model value and a {@code Supplier} that provides the rendering helper that was
-     *            supplied by {@link ColumnDefinition#getRenderingHelper(Object)}
-     * @param reinforcing {@code true} if the predicate is at least as intolerant as the replaced predicate of the same
-     *            key (i.e. the predicate doesn't accept any value that was not accepted by the replaced predicate),
-     *            {@code false} otherwise. This is an optimization that allows us to avoid applying the predicate on
-     *            values that we already know will not be accepted. If this filter is not replacing an existing one, the
-     *            value of the {@code reinforcing} argument has no impact.
-     */
-    void filter(Object key, BiPredicate<V, Supplier<Object>> filter, boolean reinforcing);
+	/**
+	 * Adds/replaces a filter that accepts only data that meet the condition of
+	 * the {@link BiPredicate} {@code filter}.
+	 *
+	 * @param key         an object that can be used to uniquely identify a
+	 *                    filter, so that it can be replaced or removed
+	 * @param filter      a {@code BiPredicate} that decides whether a value is
+	 *                    accepted or filtered. The {@code BiPredicate}
+	 *                    arguments are the model value and a {@code Supplier}
+	 *                    that provides the rendering helper that was supplied
+	 *                    by {@link ColumnDefinition#getRenderingHelper(Object)}
+	 * @param reinforcing {@code true} if the predicate is at least as
+	 *                    intolerant as the replaced predicate of the same key
+	 *                    (i.e. the predicate doesn't accept any value that was
+	 *                    not accepted by the replaced predicate), {@code false}
+	 *                    otherwise. This is an optimization that allows us to
+	 *                    avoid applying the predicate on values that we already
+	 *                    know will not be accepted. If this filter is not
+	 *                    replacing an existing one, the value of the
+	 *                    {@code reinforcing} argument has no impact.
+	 */
+	void filter(Object key, BiPredicate<V, Supplier<Object>> filter, boolean reinforcing);
 
-    /**
-     * Cancels the filter, corresponding to {@code key}, from the view
-     */
-    void clearFilter(Object key);
+	/**
+	 * Cancels the filter, corresponding to {@code key}, from the view
+	 */
+	void clearFilter(Object key);
 
-    /**
-     * Cancels all filters, corresponding to this column, from the view
-     */
-    void clearFilters();
+	/**
+	 * Cancels all filters, corresponding to this column, from the view
+	 */
+	void clearFilters();
 
-    /**
-     * Redraws all the cells of this column
-     *
-     * @param clearRenderingHelpers {@code true} if all the rendering helpers for this column must be cleared and thus
-     *            recalculated before drawing, {@code false} otherwise
-     */
-    void redraw(boolean clearRenderingHelpers);
+	/**
+	 * Redraws all the cells of this column
+	 *
+	 * @param clearRenderingHelpers {@code true} if all the rendering helpers
+	 *                              for this column must be cleared and thus
+	 *                              recalculated before drawing, {@code false}
+	 *                              otherwise
+	 */
+	void redraw(boolean clearRenderingHelpers);
 
-    /**
-     * Changes the current state of this column
-     */
-    void setState(ColumnDefinition.State state);
+	/**
+	 * Changes the current state of this column
+	 */
+	void setState(ColumnDefinition.State state);
 }

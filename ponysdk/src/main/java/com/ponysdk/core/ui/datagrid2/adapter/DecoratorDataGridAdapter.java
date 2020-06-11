@@ -34,80 +34,80 @@ import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
  */
 public class DecoratorDataGridAdapter<K, V> implements DataGridAdapter<K, V> {
 
-    private final DataGridAdapter<K, V> adapter;
+	private final DataGridAdapter<K, V> adapter;
 
-    protected DecoratorDataGridAdapter(final DataGridAdapter<K, V> adapter) {
-        super();
-        Objects.requireNonNull(adapter);
-        this.adapter = adapter;
-    }
+	protected DecoratorDataGridAdapter(final DataGridAdapter<K, V> adapter) {
+		super();
+		Objects.requireNonNull(adapter);
+		this.adapter = adapter;
+	}
 
-    @Override
-    public List<ColumnDefinition<V>> getColumnDefinitions() {
-        return adapter.getColumnDefinitions();
-    }
+	@Override
+	public List<ColumnDefinition<V>> getColumnDefinitions() {
+		return adapter.getColumnDefinitions();
+	}
 
-    @Override
-    public K getKey(final V v) {
-        return adapter.getKey(v);
-    }
+	@Override
+	public K getKey(final V v) {
+		return adapter.getKey(v);
+	}
 
-    @Override
-    public boolean isAscendingSortByInsertionOrder() {
-        return adapter.isAscendingSortByInsertionOrder();
-    }
+	@Override
+	public boolean isAscendingSortByInsertionOrder() {
+		return adapter.isAscendingSortByInsertionOrder();
+	}
 
-    @Override
-    public int compareDefault(final V v1, final V v2) {
-        return adapter.compareDefault(v1, v2);
-    }
+	@Override
+	public int compareDefault(final V v1, final V v2) {
+		return adapter.compareDefault(v1, v2);
+	}
 
-    @Override
-    public void onCreateHeaderRow(final IsPWidget rowWidget) {
-        adapter.onCreateHeaderRow(rowWidget);
-    }
+	@Override
+	public void onCreateHeaderRow(final IsPWidget rowWidget) {
+		adapter.onCreateHeaderRow(rowWidget);
+	}
 
-    @Override
-    public void onCreateFooterRow(final IsPWidget rowWidget) {
-        adapter.onCreateFooterRow(rowWidget);
-    }
+	@Override
+	public void onCreateFooterRow(final IsPWidget rowWidget) {
+		adapter.onCreateFooterRow(rowWidget);
+	}
 
-    @Override
-    public void onCreateRow(final IsPWidget rowWidget) {
-        adapter.onCreateRow(rowWidget);
-    }
+	@Override
+	public void onCreateRow(final IsPWidget rowWidget) {
+		adapter.onCreateRow(rowWidget);
+	}
 
-    @Override
-    public void onSelectRow(final IsPWidget rowWidget) {
-        adapter.onSelectRow(rowWidget);
-    }
+	@Override
+	public void onSelectRow(final IsPWidget rowWidget) {
+		adapter.onSelectRow(rowWidget);
+	}
 
-    @Override
-    public void onUnselectRow(final IsPWidget rowWidget) {
-        adapter.onUnselectRow(rowWidget);
-    }
+	@Override
+	public void onUnselectRow(final IsPWidget rowWidget) {
+		adapter.onUnselectRow(rowWidget);
+	}
 
-    @Override
-    public boolean hasHeader() {
-        return adapter.hasHeader();
-    }
+	@Override
+	public boolean hasHeader() {
+		return adapter.hasHeader();
+	}
 
-    @Override
-    public boolean hasFooter() {
-        return adapter.hasFooter();
-    }
+	@Override
+	public boolean hasFooter() {
+		return adapter.hasFooter();
+	}
 
-    protected DataGridAdapter<K, V> getAdapter() {
-        return adapter;
-    }
+	protected DataGridAdapter<K, V> getAdapter() {
+		return adapter;
+	}
 
-    @Override
-    public IsPWidget createLoadingDataWidget() {
-        return adapter.createLoadingDataWidget();
-    }
+	@Override
+	public IsPWidget createLoadingDataWidget() {
+		return adapter.createLoadingDataWidget();
+	}
 
-    @Override
-    public void onCreateColumnResizer(final IsPWidget resizer) {
-        adapter.onCreateColumnResizer(resizer);
-    }
+	@Override
+	public void onCreateColumnResizer(final IsPWidget resizer) {
+		adapter.onCreateColumnResizer(resizer);
+	}
 }

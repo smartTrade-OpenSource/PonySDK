@@ -38,72 +38,72 @@ import com.ponysdk.core.ui.model.PKeyCodes;
  */
 public class TextBoxExtendedCell<V> implements ExtendedCell<V>, PBlurHandler {
 
-    private final PTextBox textBox = Element.newPTextBox();
-    private ExtendedCellController<V> extendedCellController;
-    private boolean focused = false;
+	private final PTextBox textBox = Element.newPTextBox();
+	private ExtendedCellController<V> extendedCellController;
+	private boolean focused = false;
 
-    public TextBoxExtendedCell(final String text, final BiConsumer<V, String> columnEditFn, final int width) {
-        textBox.setText(text);
-        textBox.addBlurHandler(e -> {
-            if (extendedCellController == null) return;
-            extendedCellController.cancelExtendedMode();
-        });
-        textBox.addClickHandler(e -> {
+	public TextBoxExtendedCell(final String text, final BiConsumer<V, String> columnEditFn, final int width) {
+		textBox.setText(text);
+		textBox.addBlurHandler(e -> {
+			if (extendedCellController == null) return;
+			extendedCellController.cancelExtendedMode();
+		});
+		textBox.addClickHandler(e -> {
 
-        });
-        textBox.stopEvent(PEventType.ONCLICK);
-        textBox.setEnabledOnRequest(true);
-        textBox.addKeyUpHandler(e -> {
-            if (extendedCellController == null) return;
-            if (e.getKeyCode() == PKeyCodes.ENTER.getCode()) {
-                extendedCellController.cancelExtendedMode();
-                extendedCellController.updateValue((v) -> columnEditFn.accept(v, textBox.getText()));
-            } else if (e.getKeyCode() == PKeyCodes.ESCAPE.getCode()) {
-                extendedCellController.cancelExtendedMode();
-            }
-        });
-        textBox.addFocusHandler(e -> {
-            focused = true;
-        });
-        textBox.setWidth(width + "px");
-    }
+		});
+		textBox.stopEvent(PEventType.ONCLICK);
+		textBox.setEnabledOnRequest(true);
+		textBox.addKeyUpHandler(e -> {
+			if (extendedCellController == null) return;
+			if (e.getKeyCode() == PKeyCodes.ENTER.getCode()) {
+				extendedCellController.cancelExtendedMode();
+				extendedCellController.updateValue((v) -> columnEditFn.accept(v, textBox.getText()));
+			} else if (e.getKeyCode() == PKeyCodes.ESCAPE.getCode()) {
+				extendedCellController.cancelExtendedMode();
+			}
+		});
+		textBox.addFocusHandler(e -> {
+			focused = true;
+		});
+		textBox.setWidth(width + "px");
+	}
 
-    @Override
-    public PWidget asWidget() {
-        return textBox;
-    }
+	@Override
+	public PWidget asWidget() {
+		return textBox;
+	}
 
-    @Override
-    public void setController(final ExtendedCellController<V> extendedCellController) {
-        this.extendedCellController = extendedCellController;
-    }
+	@Override
+	public void setController(final ExtendedCellController<V> extendedCellController) {
+		this.extendedCellController = extendedCellController;
+	}
 
-    @Override
-    public void select() {
-    }
+	@Override
+	public void select() {
+	}
 
-    @Override
-    public void unselect() {
-    }
+	@Override
+	public void unselect() {
+	}
 
-    @Override
-    public void setValue(final V v) {
-    }
+	@Override
+	public void setValue(final V v) {
+	}
 
-    @Override
-    public void beforeRemove() {
-        textBox.removeDomHandler(this, PBlurEvent.TYPE);
-    }
+	@Override
+	public void beforeRemove() {
+		textBox.removeDomHandler(this, PBlurEvent.TYPE);
+	}
 
-    @Override
-    public void afterAdd() {
-        if (focused) textBox.focusPreventScroll();
-        textBox.addBlurHandler(this);
-    }
+	@Override
+	public void afterAdd() {
+		if (focused) textBox.focusPreventScroll();
+		textBox.addBlurHandler(this);
+	}
 
-    @Override
-    public void onBlur(final PBlurEvent event) {
-        focused = false;
-    }
+	@Override
+	public void onBlur(final PBlurEvent event) {
+		focused = false;
+	}
 
 }

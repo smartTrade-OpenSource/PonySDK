@@ -34,145 +34,146 @@ import com.ponysdk.core.ui.datagrid2.cell.Cell;
  */
 public class DecoratorColumnDefinition<V> implements ColumnDefinition<V> {
 
-    private final ColumnDefinition<V> column;
+	private final ColumnDefinition<V> column;
 
-    protected DecoratorColumnDefinition(final ColumnDefinition<V> column) {
-        super();
-        this.column = column;
-    }
+	protected DecoratorColumnDefinition(final ColumnDefinition<V> column) {
+		super();
+		this.column = column;
+	}
 
-    protected ColumnDefinition<V> getColumn() {
-        return column;
-    }
+	protected ColumnDefinition<V> getColumn() {
+		return column;
+	}
 
-    @Override
-    public void onSort(final boolean asc) {
-        column.onSort(asc);
-    }
+	@Override
+	public void onSort(final boolean asc) {
+		column.onSort(asc);
+	}
 
-    @Override
-    public void onClearSort() {
-        column.onClearSort();
-    }
+	@Override
+	public void onClearSort() {
+		column.onClearSort();
+	}
 
-    @Override
-    public void onFilter(final Object key, final BiPredicate<V, Supplier<Object>> filter, final boolean reinforcing) {
-        column.onFilter(key, filter, reinforcing);
-    }
+	@Override
+	public void onFilter(final Object key, final BiPredicate<V, Supplier<Object>> filter, final boolean reinforcing) {
+		column.onFilter(key, filter, reinforcing);
+	}
 
-    @Override
-    public void onClearFilter(final Object key) {
-        column.onClearFilter(key);
-    }
+	@Override
+	public void onClearFilter(final Object key) {
+		column.onClearFilter(key);
+	}
 
-    @Override
-    public void onClearFilters() {
-        column.onClearFilters();
-    }
+	@Override
+	public void onClearFilters() {
+		column.onClearFilters();
+	}
 
-    @Override
-    public void onRedraw(final boolean clearRenderingHelpers) {
-        column.onRedraw(clearRenderingHelpers);
-    }
+	@Override
+	public void onRedraw(final boolean clearRenderingHelpers) {
+		column.onRedraw(clearRenderingHelpers);
+	}
 
-    @Override
-    public void onStateChanged(final State state) {
-        column.onStateChanged(state);
-    }
+	@Override
+	public void onStateChanged(final State state) {
+		column.onStateChanged(state);
+	}
 
-    @Override
-    public IsPWidget getHeader() {
-        return column.getHeader();
-    }
+	@Override
+	public IsPWidget getHeader() {
+		return column.getHeader();
+	}
 
-    @Override
-    public IsPWidget getFooter() {
-        return column.getFooter();
-    }
+	@Override
+	public IsPWidget getFooter() {
+		return column.getFooter();
+	}
 
-    @Override
-    public Cell<V> createCell() {
-        return column.createCell();
-    }
+	@Override
+	public Cell<V> createCell() {
+		return column.createCell();
+	}
 
-    @Override
-    public Object getRenderingHelper(final V data) {
-        return column.getRenderingHelper(data);
-    }
+	@Override
+	public Object getRenderingHelper(final V data) {
+		return column.getRenderingHelper(data);
+	}
 
-    @Override
-    public int compare(final V v1, final Supplier<Object> renderingHelper1, final V v2, final Supplier<Object> renderingHelper2) {
-        return column.compare(v1, renderingHelper1, v2, renderingHelper2);
-    }
+	@Override
+	public int compare(final V v1, final Supplier<Object> renderingHelper1, final V v2,
+			final Supplier<Object> renderingHelper2) {
+		return column.compare(v1, renderingHelper1, v2, renderingHelper2);
+	}
 
-    @Override
-    public State getDefaultState() {
-        return column.getDefaultState();
-    }
+	@Override
+	public State getDefaultState() {
+		return column.getDefaultState();
+	}
 
-    @Override
-    public boolean isVisibilitySwitchable() {
-        return column.isVisibilitySwitchable();
-    }
+	@Override
+	public boolean isVisibilitySwitchable() {
+		return column.isVisibilitySwitchable();
+	}
 
-    @Override
-    public boolean isPinSwitchable() {
-        return column.isPinSwitchable();
-    }
+	@Override
+	public boolean isPinSwitchable() {
+		return column.isPinSwitchable();
+	}
 
-    @Override
-    public boolean isFilterable() {
-        return column.isFilterable();
-    }
+	@Override
+	public boolean isFilterable() {
+		return column.isFilterable();
+	}
 
-    @Override
-    public String getId() {
-        return column.getId();
-    }
+	@Override
+	public String getId() {
+		return column.getId();
+	}
 
-    @Override
-    public int getDefaultWidth() {
-        return column.getDefaultWidth();
-    }
+	@Override
+	public int getDefaultWidth() {
+		return column.getDefaultWidth();
+	}
 
-    @Override
-    public void setController(final ColumnController<V> columnController) {
-        column.setController(columnController);
-    }
+	@Override
+	public void setController(final ColumnController<V> columnController) {
+		column.setController(columnController);
+	}
 
-    @Override
-    public ColumnController<V> getController() {
-        return column.getController();
-    }
+	@Override
+	public ColumnController<V> getController() {
+		return column.getController();
+	}
 
-    @Override
-    public boolean isSortable() {
-        return column.isSortable();
-    }
+	@Override
+	public boolean isSortable() {
+		return column.isSortable();
+	}
 
-    @Override
-    public void onResized(final int width) {
-        column.onResized(width);
-    }
+	@Override
+	public void onResized(final int width) {
+		column.onResized(width);
+	}
 
-    @Override
-    public boolean isResizable() {
-        return column.isResizable();
-    }
+	@Override
+	public boolean isResizable() {
+		return column.isResizable();
+	}
 
-    @Override
-    public int getMinWidth() {
-        return column.getMinWidth();
-    }
+	@Override
+	public int getMinWidth() {
+		return column.getMinWidth();
+	}
 
-    @Override
-    public int getMaxWidth() {
-        return column.getMaxWidth();
-    }
+	@Override
+	public int getMaxWidth() {
+		return column.getMaxWidth();
+	}
 
-    @Override
-    public IsPWidget getDraggableHeaderElement() {
-        return column.getDraggableHeaderElement();
-    }
+	@Override
+	public IsPWidget getDraggableHeaderElement() {
+		return column.getDraggableHeaderElement();
+	}
 
 }

@@ -1,12 +1,9 @@
 /*
- * Copyright (c) 2019 PonySDK
- *  Owners:
- *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ * Copyright (c) 2019 PonySDK Owners: Luciano Broussal <luciano.broussal AT
+ * gmail.com> Mathieu Barbier <mathieu.barbier AT gmail.com> Nicolas Ciaravola
+ * <nicolas.ciaravola.pro AT gmail.com>
  *
- *  WebSite:
- *  http://code.google.com/p/pony-sdk/
+ * WebSite: http://code.google.com/p/pony-sdk/
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -28,5 +25,5 @@ package com.ponysdk.core.ui.datagrid2.controller;
  */
 public interface DataGridControllerListener<V> {
 
-    void onUpdateRows(int from, int to);
+	void onUpdateRows(int from, int to);
 }

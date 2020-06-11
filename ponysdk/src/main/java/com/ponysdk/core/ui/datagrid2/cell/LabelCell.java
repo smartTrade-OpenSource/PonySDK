@@ -34,42 +34,43 @@ import com.ponysdk.core.ui.basic.PWidget;
  */
 public class LabelCell<V> implements Cell<V> {
 
-    private final PLabel label = Element.newPLabel();
-    private final PLabel pendingLabel = Element.newPLabel("...");
-    private CellController<V> cellController;
+	private final PLabel label = Element.newPLabel();
+	private final PLabel pendingLabel = Element.newPLabel("...");
+	private CellController<V> cellController;
 
-    public LabelCell(final BiConsumer<V, String> columnEditFn, final int width) {
-        label.addDoubleClickHandler(e -> {
-            if (cellController != null) cellController.extendedMode(new TextBoxExtendedCell<>(label.getText(), columnEditFn, width));
-        });
-    }
+	public LabelCell(final BiConsumer<V, String> columnEditFn, final int width) {
+		label.addDoubleClickHandler(e -> {
+			if (cellController != null)
+				cellController.extendedMode(new TextBoxExtendedCell<>(label.getText(), columnEditFn, width));
+		});
+	}
 
-    @Override
-    public PLabel asWidget() {
-        return label;
-    }
+	@Override
+	public PLabel asWidget() {
+		return label;
+	}
 
-    @Override
-    public PWidget asPendingWidget() {
-        return pendingLabel;
-    }
+	@Override
+	public PWidget asPendingWidget() {
+		return pendingLabel;
+	}
 
-    @Override
-    public void render(final V data, final Object renderingHelper) {
-        label.setText(renderingHelper.toString());
-    }
+	@Override
+	public void render(final V data, final Object renderingHelper) {
+		label.setText(renderingHelper.toString());
+	}
 
-    @Override
-    public void setController(final CellController<V> cellController) {
-        this.cellController = cellController;
-    }
+	@Override
+	public void setController(final CellController<V> cellController) {
+		this.cellController = cellController;
+	}
 
-    @Override
-    public void select() {
-    }
+	@Override
+	public void select() {
+	}
 
-    @Override
-    public void unselect() {
-    }
+	@Override
+	public void unselect() {
+	}
 
 }
