@@ -1,9 +1,12 @@
 /*
- * Copyright (c) 2019 PonySDK Owners: Luciano Broussal <luciano.broussal AT
- * gmail.com> Mathieu Barbier <mathieu.barbier AT gmail.com> Nicolas Ciaravola
- * <nicolas.ciaravola.pro AT gmail.com>
+ * Copyright (c) 2019 PonySDK
+ *  Owners:
+ *  Luciano Broussal  <luciano.broussal AT gmail.com>
+ *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *
- * WebSite: http://code.google.com/p/pony-sdk/
+ *  WebSite:
+ *  http://code.google.com/p/pony-sdk/
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -35,6 +38,7 @@ import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfig;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfigBuilder;
 import com.ponysdk.core.ui.datagrid2.data.ViewLiveData;
+import com.ponysdk.core.ui.datagrid2.view.DataGridSnapshot;
 
 /**
  * @author mbagdouri
@@ -228,7 +232,9 @@ public abstract class SpyDataGridController<K, V> implements DataGridController<
 	}
 
 	@Override
-	public void prepareLiveDataOnScreen(final ViewLiveData<V> dataSrcResult, final Consumer<ViewLiveData<V>> consumer) {
-		controller.prepareLiveDataOnScreen(dataSrcResult, consumer);
+	public void prepareLiveDataOnScreen(final int dataSrcRowIndex, final int dataSize, final int start,
+			final DataGridSnapshot threadSnapshot,
+			final Consumer<DefaultDataGridController<K, V>.DataRequest> consumer) {
+		controller.prepareLiveDataOnScreen(dataSrcRowIndex, dataSize, start, threadSnapshot, consumer);
 	}
 }

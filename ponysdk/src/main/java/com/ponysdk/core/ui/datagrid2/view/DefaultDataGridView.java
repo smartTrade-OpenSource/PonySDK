@@ -1,9 +1,12 @@
 /*
- * Copyright (c) 2019 PonySDK Owners: Luciano Broussal <luciano.broussal AT
- * gmail.com> Mathieu Barbier <mathieu.barbier AT gmail.com> Nicolas Ciaravola
- * <nicolas.ciaravola.pro AT gmail.com>
+ * Copyright (c) 2019 PonySDK
+ *  Owners:
+ *  Luciano Broussal  <luciano.broussal AT gmail.com>
+ *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *
- * WebSite: http://code.google.com/p/pony-sdk/
+ *  WebSite:
+ *  http://code.google.com/p/pony-sdk/
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -66,7 +69,6 @@ import com.ponysdk.core.ui.datagrid2.config.DataGridConfigBuilder;
 import com.ponysdk.core.ui.datagrid2.controller.DataGridController;
 import com.ponysdk.core.ui.datagrid2.controller.DefaultDataGridController;
 import com.ponysdk.core.ui.datagrid2.controller.SpyDataGridController;
-import com.ponysdk.core.ui.datagrid2.data.DefaultRow;
 import com.ponysdk.core.ui.datagrid2.data.RowAction;
 import com.ponysdk.core.ui.datagrid2.data.ViewLiveData;
 import com.ponysdk.core.ui.datagrid2.datasource.DataGridSource;
@@ -129,11 +131,11 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 	private final Map<ColumnDefinition<V>, ColumnView> columnViews = new HashMap<>();
 	private final DataGridControllerWrapper controllerWrapper;
 	private final LinkedHashMap<Object, RowAction<V>> rowActions = new LinkedHashMap<>();
-	private int rowCount = 0;
-	private final DataGridSnapshot viewStateSnapshot = new DataGridSnapshot(0, 0, new HashMap<>(), new HashSet<>());
-	// FIXME : delete me, i exist for test reasons
-	public static int draw = 0;
-	public static int update = 0;
+	// private final DataGridSnapshot viewStateSnapshot = new
+	// DataGridSnapshot(0, 0, new HashMap<>(), new HashSet<>());
+	private int firstRowIndex;
+	private final Map<Integer, Integer> sorts = new HashMap<>();
+	private final Set<Integer> filters = new HashSet<>();
 
 	public DefaultDataGridView() {
 		this(new DefaultCacheDataSource<K, V>());
@@ -173,7 +175,6 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 		pinnedTable = new PinnedTable(headerPinnedDiv, bodyPinnedDiv, footerPinnedDiv);
 		unpinnedTable = new UnpinnedTable(headerUnpinnedDiv, bodyUnpinnedDiv, footerUnpinnedDiv);
 
-		((DefaultDataGridController<K, V>) controller).setDataGridSnapshot(viewStateSnapshot);
 	}
 
 	public DataGridAdapter<K, V> getAdapter() {
@@ -243,8 +244,9 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 	}
 
 	private void onScroll(final int row) {
+		System.out.println("\n\n" + "onScroll");
 		showLoadingDataView();
-		viewStateSnapshot.firstRowIndex = row;
+		firstRowIndex = row;
 		onUpdateRows(0, controller.getRowCount());
 		draw();
 	}
@@ -349,49 +351,42 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 
 	@Override
 	public int getLiveDataRowCount() {
-		return rowCount;
+		return rows.size();
 	}
 
 	private void draw() {
 		try {
 			if (from >= to) return;
-			draw++;
-			final int absoluteRowCount = controller.getRowCount();
-			int start;
-			int fri = viewStateSnapshot.firstRowIndex;
-			if (fri > absoluteRowCount - rows.size()) {
-				fri = Math.max(0, absoluteRowCount - rows.size());
-				start = 0;
-			} else {
-				start = Math.max(0, from - fri);
-			}
-			viewStateSnapshot.size = unpinnedTable.body.getWidgetCount();
-			System.out
-				.println("\n\n" + "#-View-# Prepare onDraw -> row : " + fri + "   size : " + viewStateSnapshot.size);
-			final ViewLiveData<V> viewLiveData = new ViewLiveData<>(start, absoluteRowCount,
-				new ArrayList<DefaultRow<V>>(), new DataGridSnapshot(viewStateSnapshot));
-			final Consumer<ViewLiveData<V>> consumer = PScheduler.delegate(this::updateView);
-			controller.prepareLiveDataOnScreen(viewLiveData, consumer);
+			// final int absoluteRowCount = controller.getRowCount();
+			// if (fri > absoluteRowCount - rows.size()) {
+			// fri = Math.max(0, absoluteRowCount - rows.size());
+			// start = 0;
+			// } else {
+			final int start = Math.max(0, from - firstRowIndex);
+			// }
+			final int size = unpinnedTable.body.getWidgetCount();
+			System.out.println("\n" + "#-View-# Prepare onDraw -> row : " + firstRowIndex + "   size : " + size);
+			final DataGridSnapshot viewStateSnapshot = new DataGridSnapshot(firstRowIndex, size, sorts, filters);
+			final Consumer<DefaultDataGridController<K, V>.DataRequest> consumer = PScheduler
+				.delegate(this::updateView);
+			controller.prepareLiveDataOnScreen(firstRowIndex, size, start, viewStateSnapshot, consumer);
 		} catch (final Exception e) {
+			// FIXME:log
 			e.printStackTrace();
 		}
 	}
 
-	private synchronized void updateView(final ViewLiveData<V> result) {
+	private synchronized void updateView(final DefaultDataGridController<K, V>.DataRequest dataResponse) {
 		try {
-			rowCount = result.absoluteRowCount;
-			update++;
-			// FIXME
-			// for (int i = result.start; i < result.stateSnapshot.size; i++) {
-			for (int i = result.start; i < rows.size(); i++) {
+			final ViewLiveData<V> result = dataResponse.viewLiveData;
+			// System.out.println("Start : " + dataResponse.start);
+			System.out.println("FirstRowIndex : " + dataResponse.firstRowIndex);
+			// rowCount = result.fullDataSize;
+			for (int i = dataResponse.start; i < rows.size(); i++) {
 				updateRow(rows.get(i), result);
 			}
-			addon.onDataUpdated(result.absoluteRowCount, this.rows.size(), result.stateSnapshot.firstRowIndex);
+			addon.onDataUpdated(result.fullDataSize, rows.size(), dataResponse.firstRowIndex);
 		} catch (final Exception e) {
-			System.out.println("The size of liveData : " + result.liveData.size());
-			System.out.println("The size of snapshot : " + result.stateSnapshot.size);
-			System.out.println("The size of rows     : " + rows.size());
-			System.out.println("The actual size      : " + unpinnedTable.body.getWidgetCount());
 			e.printStackTrace();
 		} finally {
 			from = Integer.MAX_VALUE;
@@ -404,7 +399,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 	}
 
 	private void updateRow(final Row row, final ViewLiveData<V> result) {
-		if (row.getAbsoluteIndex() >= result.absoluteRowCount) {
+		if (row.getAbsoluteIndex() >= result.fullDataSize) {
 			row.hide();
 			row.key = null;
 			return;
@@ -670,25 +665,30 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 
 	@Override
 	public void setFilter(final Object key, final String id, final Predicate<V> filter, final boolean reinforcing) {
+		System.out.println("\n\n" + "setFilter");
 		showLoadingDataView();
-		viewStateSnapshot.filters.add(key.hashCode());
+		filters.add(key.hashCode());
 		controller.setFilter(key, id, filter, reinforcing);
+		addon.scrollToTop();
 		draw();
 	}
 
 	@Override
 	public void clearFilter(final Object key) {
 		showLoadingDataView();
-		viewStateSnapshot.filters.remove(key.hashCode());
+		filters.remove(key.hashCode());
 		controller.clearFilter(key);
+		addon.scrollToTop();
 		draw();
 	}
 
 	@Override
 	public void clearFilters() {
+		System.out.println("\n\n" + "clearFilters");
 		showLoadingDataView();
-		viewStateSnapshot.filters.clear();
+		filters.clear();
 		controller.clearFilters();
+		addon.scrollToTop();
 		draw();
 	}
 
@@ -939,6 +939,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 		draw();
 	}
 
+	// FIXME : private
 	private class Row {
 
 		private final int relativeIndex;
@@ -1017,7 +1018,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 		}
 
 		int getAbsoluteIndex() {
-			return relativeIndex + viewStateSnapshot.firstRowIndex;
+			return relativeIndex + firstRowIndex;
 		}
 
 		boolean isShown() {
@@ -1336,8 +1337,9 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 		public void sort(final boolean asc) {
 			if (!columnView.column.isSortable()) return;
 			showLoadingDataView();
-			viewStateSnapshot.sorts.put(i, asc ? 1 : 0);
+			sorts.put(i, asc ? 1 : 0);
 			controller.addSort(columnView.column, asc);
+			addon.scrollToTop();
 			draw();
 			for (final ColumnActionListener<V> listener : columnView.listeners) {
 				listener.onSort(asc);
@@ -1348,7 +1350,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 		public void clearSort() {
 			if (!columnView.column.isSortable()) return;
 			showLoadingDataView();
-			viewStateSnapshot.sorts.clear();
+			sorts.clear();
 			controller.clearSort(columnView.column);
 			draw();
 			for (final ColumnActionListener<V> listener : columnView.listeners) {

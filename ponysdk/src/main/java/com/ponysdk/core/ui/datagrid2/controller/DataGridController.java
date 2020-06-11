@@ -1,9 +1,12 @@
 /*
- * Copyright (c) 2019 PonySDK Owners: Luciano Broussal <luciano.broussal AT
- * gmail.com> Mathieu Barbier <mathieu.barbier AT gmail.com> Nicolas Ciaravola
- * <nicolas.ciaravola.pro AT gmail.com>
+ * Copyright (c) 2019 PonySDK
+ *  Owners:
+ *  Luciano Broussal  <luciano.broussal AT gmail.com>
+ *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *
- * WebSite: http://code.google.com/p/pony-sdk/
+ *  WebSite:
+ *  http://code.google.com/p/pony-sdk/
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -35,6 +38,7 @@ import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfig;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfigBuilder;
 import com.ponysdk.core.ui.datagrid2.data.ViewLiveData;
+import com.ponysdk.core.ui.datagrid2.view.DataGridSnapshot;
 
 /**
  * @author mbagdouri
@@ -98,7 +102,8 @@ public interface DataGridController<K, V> {
 	 * filled with the needed data for the view, and with updated fields
 	 * sometimes
 	 */
-	void prepareLiveDataOnScreen(ViewLiveData<V> dataSrcResult, Consumer<ViewLiveData<V>> consumer);
+	void prepareLiveDataOnScreen(int dataSrcRowIndex, int dataSize, int start, DataGridSnapshot threadSnapshot,
+			Consumer<DefaultDataGridController<K, V>.DataRequest> consumer);
 
 	/**
 	 * Insert or replace the value

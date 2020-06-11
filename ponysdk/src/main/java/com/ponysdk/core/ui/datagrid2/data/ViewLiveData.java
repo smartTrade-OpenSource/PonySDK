@@ -24,9 +24,8 @@
 package com.ponysdk.core.ui.datagrid2.data;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-
-import com.ponysdk.core.ui.datagrid2.view.DataGridSnapshot;
 
 /**
  * @author mabbas
@@ -34,15 +33,11 @@ import com.ponysdk.core.ui.datagrid2.view.DataGridSnapshot;
 
 public class ViewLiveData<V> {
 
-    public int start;
-    public int absoluteRowCount;
-    public List<DefaultRow<V>> liveData;
-    public DataGridSnapshot stateSnapshot;
+	public int fullDataSize;
+	public List<DefaultRow<V>> liveData;
 
-    public ViewLiveData(final int start, final int arc, final List<DefaultRow<V>> liveData, final DataGridSnapshot stateSnapshot) {
-        this.absoluteRowCount = arc;
-        this.liveData = new ArrayList<>(liveData);
-        this.stateSnapshot = stateSnapshot;
-        this.start = start;
-    }
+	public ViewLiveData(final int fullDataSize, final Collection<DefaultRow<V>> liveData) {
+		this.fullDataSize = fullDataSize;
+		this.liveData = new ArrayList<>(liveData);
+	}
 }

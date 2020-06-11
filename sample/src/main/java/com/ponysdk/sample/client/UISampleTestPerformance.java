@@ -172,6 +172,7 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
 		});
 
 		gridView.setPollingDelayMillis(250L);
+		// gridView.setPollingDelayMillis(300000L);
 		final DataGridController<Integer, MyRow> controller = ((DefaultDataGridView<Integer, MyRow>) simpleGridView)
 			.getController();
 		gridView.asWidget().setHeight("950px");
@@ -217,7 +218,7 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
 			controller.removeData(i);
 		};
 
-		final TestAction updateDataAction = (i) -> {
+		final TestAction updateDataAction_Version_1 = (i) -> {
 			i %= rowCounter;
 			if (i == 0) {
 				actionCounter++;
@@ -254,15 +255,27 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
 			controller.setData(v);
 		};
 
+		final TestAction updateDataAction_Version_2 = (i) -> {
+			i %= rowCounter;
+			if (i == 0) {
+				actionCounter++;
+			}
+			final MyRow v = createMyRow(i);
+			int updatedValue = i;
+			updatedValue *= Math.random() + 1;
+			v.putValue("b", String.format("b" + "%09d", updatedValue));
+			controller.setData(v);
+		};
+
 		// FIXME : somtimes the update action throws a concurrency exception
 		// Test 1
 		// addFilter(controller);
-		// addSort(controller);
-		// testPerformanceBench(rowCounter, 60, updateDataAction);
+		addSort(controller);
+		testPerformanceBench(rowCounter, 60, updateDataAction_Version_2);
 
 		// Test 2
 
-		testPerformanceBench(rowCounter, 120, addDataAction);
+		// testPerformanceBench(rowCounter, 120, addDataAction);
 
 		// Test 3
 		// testPerformanceBench(rowCounter, 1, removeDataAction);
@@ -276,9 +289,10 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
 	}
 
 	private void addSort(final DataGridController<Integer, MyRow> controller) {
-		controller.addSort(colDefs.get('a'), true);
-		controller.addSort(colDefs.get('b'), false);
-		controller.addSort(colDefs.get('c'), true);
+		// controller.addSort(colDefs.get('a'), true);
+		// controller.addSort(colDefs.get('b'), false);
+		// controller.addSort(colDefs.get('c'), true);
+		controller.addSort(colDefs.get('b'), true);
 	}
 
 	/**
@@ -301,15 +315,16 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
 			int index = 0;
 			System.gc();
 			final long time_before = System.nanoTime();
-			while (index < nbOfActionPerIteration * nbOfIterations)
+			// FIXME
+			// while (index < nbOfActionPerIteration * nbOfIterations)
+			// testAction.execute(index++);
+			while (true)
 				testAction.execute(index++);
-			final long time_after = System.nanoTime();
-			final long duration = time_after - time_before;
-			System.out.println("\n\n\n\n\n\nTestDuration = " + duration);
-			System.out.println("Nb of draw   =" + DefaultDataGridView.draw);
-			System.out.println("Nb of update =" + DefaultDataGridView.update + "\n\n\n\n\n\n");
 
-			System.gc();
+			// final long time_after = System.nanoTime();
+			// final long duration = time_after - time_before;
+			// System.out.println("\n\n\n\n\n\nTestDuration = " + duration);
+			// System.gc();
 		};
 		final Thread thread = new Thread(testPerfBench, "Test thread");
 		thread.start();
@@ -327,7 +342,7 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
 			format = String.format("%09d", id);
 		}
 
-		public int getId() {
+		int getId() {
 			return id;
 		}
 

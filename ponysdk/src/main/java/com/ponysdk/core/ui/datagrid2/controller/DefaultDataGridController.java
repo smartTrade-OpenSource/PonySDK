@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -58,8 +59,7 @@ import com.ponysdk.core.util.MappedList;
  * @author mbagdouri
  */
 
-public class DefaultDataGridController<K, V>
-		implements DataGridController<K, V>/* , DataGridModel<K, V> */ {
+public class DefaultDataGridController<K, V> implements DataGridController<K, V> {
 
 	private static final Object NO_RENDERING_HELPER = new Object();
 	private static final int RENDERING_HELPERS_CACHE_CAPACITY = 512;
@@ -75,6 +75,8 @@ public class DefaultDataGridController<K, V>
 	private final RenderingHelperSupplier renderingHelperSupplier2 = new RenderingHelperSupplier();
 	private DataGridSource<K, V> dataSource;
 	private DataGridSnapshot viewSnapshot;
+	private final AtomicLong count = new AtomicLong();
+	private long lastProcessedID;
 
 	public DefaultDataGridController() {
 		super();
@@ -313,25 +315,60 @@ public class DefaultDataGridController<K, V>
 		refreshRows(0, dataSource.getRowCount());
 	}
 
-	public void setDataGridSnapshot(final DataGridSnapshot snapshot) {
-		this.viewSnapshot = snapshot;
+	public class DataRequest implements Supplier<DataRequest> {
+
+		public long id = count.incrementAndGet();
+		public ViewLiveData<V> viewLiveData;
+		public int start;
+		public int firstRowIndex;
+		DataGridSnapshot threadSnapshot;
+		Supplier<ViewLiveData<V>> dataSupplier;
+
+		DataRequest(final Supplier<ViewLiveData<V>> inner, final DataGridSnapshot threadSnapshot, final int start,
+				final int firstRowIndex) {
+			this.dataSupplier = inner;
+			this.threadSnapshot = threadSnapshot;
+			this.start = start;
+			this.firstRowIndex = firstRowIndex;
+		}
+
+		@Override
+		public DataRequest get() {
+			viewLiveData = dataSupplier.get();
+			return this;
+		}
 	}
 
 	@Override
-	public void prepareLiveDataOnScreen(final ViewLiveData<V> dataSrcResult, final Consumer<ViewLiveData<V>> consumer) {
-		final CompletableFuture<ViewLiveData<V>> completableFuture = CompletableFuture
-			.supplyAsync(() -> dataSource.getRows(dataSrcResult));
-		completableFuture.thenAccept(s -> checkThread(s, completableFuture, consumer));
+	public void prepareLiveDataOnScreen(final int dataSrcRowIndex, final int dataSize, final int start,
+			final DataGridSnapshot threadSnapshot, final Consumer<DataRequest> consumer) {
+		viewSnapshot = new DataGridSnapshot(threadSnapshot);
+		final CompletableFuture<DataRequest> completableFuture = CompletableFuture.supplyAsync(new DataRequest(
+			() -> dataSource.getRows(dataSrcRowIndex, dataSize), threadSnapshot, start, dataSrcRowIndex));
+
+		final CompletableFuture<DataRequest> threadAcceptanceByID = completableFuture.thenApply(dataResponse -> {
+			if (dataResponse.id < lastProcessedID) {
+				dataResponse.id = -1;
+			} else {
+				lastProcessedID = dataResponse.id;
+			}
+			return dataResponse;
+		});
+
+		threadAcceptanceByID.thenAccept(dataResponse -> {
+			threadAcceptanceBySnapshot(dataResponse, threadAcceptanceByID, consumer);
+		});
 	}
 
-	private void checkThread(final ViewLiveData<V> viewLiveData,
-			final CompletableFuture<ViewLiveData<V>> completableFuture, final Consumer<ViewLiveData<V>> consumer) {
-		if (!viewSnapshot.equals(viewLiveData.stateSnapshot)) {
-			System.out.println("#-Ctrl-# checkThread -> Failed");
-			completableFuture.cancel(false);
-		} else {
-			System.out.println("#-Ctrl-# checkThread -> Pass");
+	private void threadAcceptanceBySnapshot(final DataRequest result,
+			final CompletableFuture<DataRequest> completableFuture, final Consumer<DataRequest> consumer) {
+		if (viewSnapshot.equals(result.threadSnapshot) && result.id >= 0) {
+			System.out.println("#-Ctrl-# checkThread snapshot -> Pass");
+			// FIXME : renvoyer un truc plus simple
 			completableFuture.thenAccept(consumer::accept);
+		} else {
+			System.out.println("#-Ctrl-# checkThread snapshot -> Failed");
+			System.out.println("Id : " + result.id);
 		}
 	}
 
