@@ -38,135 +38,135 @@ import com.ponysdk.core.ui.datagrid2.data.RowAction;
  */
 public class DecoratorDataGridView<K, V> implements DataGridView<K, V> {
 
-    private final DataGridView<K, V> view;
+	private final DataGridView<K, V> view;
 
-    protected DecoratorDataGridView(final DataGridView<K, V> view) {
-        super();
-        Objects.requireNonNull(view);
-        this.view = view;
-    }
+	protected DecoratorDataGridView(final DataGridView<K, V> view) {
+		super();
+		Objects.requireNonNull(view);
+		this.view = view;
+	}
 
-    protected final DataGridView<K, V> getView() {
-        return view;
-    }
+	protected final DataGridView<K, V> getView() {
+		return view;
+	}
 
-    @Override
-    public PWidget asWidget() {
-        return view.asWidget();
-    }
+	@Override
+	public PWidget asWidget() {
+		return view.asWidget();
+	}
 
-    @Override
-    public DataGridController<K, V> getController() {
-        return view.getController();
-    }
+	@Override
+	public DataGridController<K, V> getController() {
+		return view.getController();
+	}
 
-    @Override
-    public void setAdapter(final DataGridAdapter<K, V> adapter) {
-        view.setAdapter(adapter);
-    }
+	@Override
+	public void setAdapter(final DataGridAdapter<K, V> adapter) {
+		view.setAdapter(adapter);
+	}
 
-    @Override
-    public void setPollingDelayMillis(final long pollingDelayMillis) {
-        view.setPollingDelayMillis(pollingDelayMillis);
-    }
+	@Override
+	public void setPollingDelayMillis(final long pollingDelayMillis) {
+		view.setPollingDelayMillis(pollingDelayMillis);
+	}
 
-    @Override
-    public Collection<V> getLiveSelectedData() {
-        return view.getLiveSelectedData();
-    }
+	@Override
+	public Collection<V> getLiveSelectedData() {
+		return view.getLiveSelectedData();
+	}
 
-    @Override
-    public void unselectAllData() {
-        view.unselectAllData();
-    }
+	@Override
+	public void unselectAllData() {
+		view.unselectAllData();
+	}
 
-    @Override
-    public void selectAllLiveData() {
-        view.selectAllLiveData();
-    }
+	@Override
+	public void selectAllLiveData() {
+		view.selectAllLiveData();
+	}
 
-    @Override
-    public void setFilter(final Object key, final String id, final Predicate<V> filter, final boolean reinforcing) {
-        view.setFilter(key, id, filter, reinforcing);
-    }
+	@Override
+	public void setFilter(final Object key, final String id, final Predicate<V> filter, final boolean reinforcing) {
+		view.setFilter(key, id, filter, reinforcing);
+	}
 
-    @Override
-    public void clearFilter(final Object key) {
-        view.clearFilter(key);
-    }
+	@Override
+	public void clearFilter(final Object key) {
+		view.clearFilter(key);
+	}
 
-    @Override
-    public void clearFilters() {
-        view.clearFilters();
-    }
+	@Override
+	public void clearFilters() {
+		view.clearFilters();
+	}
 
-    @Override
-    public void clearSorts() {
-        view.clearSorts();
-    }
+	@Override
+	public void clearSorts() {
+		view.clearSorts();
+	}
 
-    @Override
-    public void addColumnActionListener(final ColumnDefinition<V> column, final ColumnActionListener<V> listener) {
-        view.addColumnActionListener(column, listener);
-    }
+	@Override
+	public void addColumnActionListener(final ColumnDefinition<V> column, final ColumnActionListener<V> listener) {
+		view.addColumnActionListener(column, listener);
+	}
 
-    @Override
-    public void removeColumnActionListener(final ColumnDefinition<V> column, final ColumnActionListener<V> listener) {
-        view.removeColumnActionListener(column, listener);
-    }
+	@Override
+	public void removeColumnActionListener(final ColumnDefinition<V> column, final ColumnActionListener<V> listener) {
+		view.removeColumnActionListener(column, listener);
+	}
 
-    @Override
-    public String encodeConfigCustomValue(final String key, final Object value) {
-        return view.encodeConfigCustomValue(key, value);
-    }
+	@Override
+	public String encodeConfigCustomValue(final String key, final Object value) {
+		return view.encodeConfigCustomValue(key, value);
+	}
 
-    @Override
-    public Object decodeConfigCustomValue(final String key, final String value) throws DecodeException {
-        return view.decodeConfigCustomValue(key, value);
-    }
+	@Override
+	public Object decodeConfigCustomValue(final String key, final String value) throws DecodeException {
+		return view.decodeConfigCustomValue(key, value);
+	}
 
-    @Override
-    public DataGridConfig<V> getConfig() {
-        return view.getConfig();
-    }
+	@Override
+	public DataGridConfig<V> getConfig() {
+		return view.getConfig();
+	}
 
-    @Override
-    public void setConfig(final DataGridConfig<V> config) {
-        view.setConfig(config);
-    }
+	@Override
+	public void setConfig(final DataGridConfig<V> config) {
+		view.setConfig(config);
+	}
 
-    @Override
-    public void addDrawListener(final DrawListener drawListener) {
-        view.addDrawListener(drawListener);
-    }
+	@Override
+	public void addDrawListener(final DrawListener drawListener) {
+		view.addDrawListener(drawListener);
+	}
 
-    @Override
-    public void addSort(final Object key, final Comparator<V> comparator) {
-        view.addSort(key, comparator);
-    }
+	@Override
+	public void addSort(final Object key, final Comparator<V> comparator) {
+		view.addSort(key, comparator);
+	}
 
-    @Override
-    public void clearSort(final Object key) {
-        view.clearSort(key);
-    }
+	@Override
+	public void clearSort(final Object key) {
+		view.clearSort(key);
+	}
 
-    @Override
-    public void addRowAction(final Object key, final RowAction<V> rowHighlighter) {
-        view.addRowAction(key, rowHighlighter);
-    }
+	@Override
+	public void addRowAction(final Object key, final RowAction<V> rowHighlighter) {
+		view.addRowAction(key, rowHighlighter);
+	}
 
-    @Override
-    public void clearRowAction(final Object key) {
-        view.clearRowAction(key);
-    }
+	@Override
+	public void clearRowAction(final Object key) {
+		view.clearRowAction(key);
+	}
 
-    @Override
-    public void removeDrawListener(final DrawListener drawListener) {
-        view.removeDrawListener(drawListener);
-    }
+	@Override
+	public void removeDrawListener(final DrawListener drawListener) {
+		view.removeDrawListener(drawListener);
+	}
 
-    @Override
-    public int getLiveDataRowCount() {
-        return view.getLiveDataRowCount();
-    }
-}>>>>>>>e7b4c0a8aa9b5214422ac668787b0fd05ac9e8f5:ponysdk/src/main/java/com/ponysdk/core/ui/datagrid2/DecoratorDataGridView.java
+	@Override
+	public int getLiveDataRowCount() {
+		return view.getLiveDataRowCount();
+	}
+}
