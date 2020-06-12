@@ -210,8 +210,7 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
 	private void resetLiveData() {
 		final int oldLiveDataSize = dataSource.getRowCount();
 		dataSource.resetLiveData();
-		// FIXME : this modification is to prevent not refreshing in a db filter
-		// case
+		// FIXME : this is to prevent not refreshing in a db filter case
 		// refreshRows(0, Math.max(oldLiveDataSize, dataSource.getRowCount()));
 		refreshRows(0, Math.max(oldLiveDataSize, 1));
 	}
@@ -319,16 +318,14 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
 
 		public long id = count.incrementAndGet();
 		public ViewLiveData<V> viewLiveData;
-		public int start;
 		public int firstRowIndex;
 		DataGridSnapshot threadSnapshot;
 		Supplier<ViewLiveData<V>> dataSupplier;
 
-		DataGetterFromSrc(final Supplier<ViewLiveData<V>> inner, final DataGridSnapshot threadSnapshot, final int start,
+		DataGetterFromSrc(final Supplier<ViewLiveData<V>> inner, final DataGridSnapshot threadSnapshot,
 				final int firstRowIndex) {
 			this.dataSupplier = inner;
 			this.threadSnapshot = threadSnapshot;
-			this.start = start;
 			this.firstRowIndex = firstRowIndex;
 		}
 
@@ -342,24 +339,22 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
 	public class DataSrcResult {
 
 		public ViewLiveData<V> viewLiveData;
-		public int start;
 		public int firstRowIndex;
 
-		public DataSrcResult(final ViewLiveData<V> viewLiveData, final int start, final int firstRowIndex) {
+		public DataSrcResult(final ViewLiveData<V> viewLiveData, final int firstRowIndex) {
 			this.viewLiveData = viewLiveData;
-			this.start = start;
 			this.firstRowIndex = firstRowIndex;
 		}
 
 	}
 
 	@Override
-	public void prepareLiveDataOnScreen(final int dataSrcRowIndex, final int dataSize, final int start,
+	public void prepareLiveDataOnScreen(final int dataSrcRowIndex, final int dataSize,
 			final DataGridSnapshot threadSnapshot, final Consumer<DataSrcResult> consumer) {
 		viewSnapshot = new DataGridSnapshot(threadSnapshot);
 		final CompletableFuture<DataGetterFromSrc> completableFuture = CompletableFuture
 			.supplyAsync(new DataGetterFromSrc(() -> dataSource.getRows(dataSrcRowIndex, dataSize), threadSnapshot,
-				start, dataSrcRowIndex));
+				dataSrcRowIndex));
 
 		final CompletableFuture<DataGetterFromSrc> threadAcceptanceByID = completableFuture.thenApply(dataResponse -> {
 			if (dataResponse.id < lastProcessedID) {
@@ -371,17 +366,16 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
 		});
 
 		threadAcceptanceByID.thenAccept(dataResponse -> {
-			threadAcceptanceBySnapshot(dataResponse, threadAcceptanceByID, consumer);
+			threadAcceptance(dataResponse, threadAcceptanceByID, consumer);
 		});
 	}
 
-	private void threadAcceptanceBySnapshot(final DataGetterFromSrc result,
+	private void threadAcceptance(final DataGetterFromSrc result,
 			final CompletableFuture<DataGetterFromSrc> completableFuture, final Consumer<DataSrcResult> consumer) {
 		if (viewSnapshot.equals(result.threadSnapshot) && result.id >= 0) {
 			System.out.println("#-Ctrl-# checkThread    -> Pass");
-			// completableFuture.thenAccept(consumer::accept);
 			final CompletableFuture<DataSrcResult> passResultToView = completableFuture.thenApply(dataResponse -> {
-				return new DataSrcResult(dataResponse.viewLiveData, dataResponse.start, dataResponse.firstRowIndex);
+				return new DataSrcResult(dataResponse.viewLiveData, dataResponse.firstRowIndex);
 			});
 			passResultToView.thenAccept(consumer::accept);
 		} else {

@@ -232,9 +232,9 @@ public abstract class SpyDataGridController<K, V> implements DataGridController<
 	}
 
 	@Override
-	public void prepareLiveDataOnScreen(final int dataSrcRowIndex, final int dataSize, final int start,
+	public void prepareLiveDataOnScreen(final int dataSrcRowIndex, final int dataSize,
 			final DataGridSnapshot threadSnapshot,
 			final Consumer<DefaultDataGridController<K, V>.DataSrcResult> consumer) {
-		controller.prepareLiveDataOnScreen(dataSrcRowIndex, dataSize, start, threadSnapshot, consumer);
+		controller.prepareLiveDataOnScreen(dataSrcRowIndex, dataSize, threadSnapshot, consumer);
 	}
 }

@@ -102,7 +102,7 @@ public interface DataGridController<K, V> {
 	 * filled with the needed data for the view, and with updated fields
 	 * sometimes
 	 */
-	void prepareLiveDataOnScreen(int dataSrcRowIndex, int dataSize, int start, DataGridSnapshot threadSnapshot,
+	void prepareLiveDataOnScreen(int dataSrcRowIndex, int dataSize, DataGridSnapshot threadSnapshot,
 			Consumer<DefaultDataGridController<K, V>.DataSrcResult> consumer);
 
 	/**

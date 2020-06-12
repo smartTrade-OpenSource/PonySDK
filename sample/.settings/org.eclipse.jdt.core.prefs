@@ -1,5 +1,5 @@
 #
-#Thu Jun 11 18:02:40 CEST 2020
+#Fri Jun 12 14:11:41 CEST 2020
 =\=\=\=\=\=\=
 org.eclipse.jdt.core.formatter.insert_space_after_ellipsis=insert
 org.eclipse.jdt.core.formatter.insert_space_after_comma_in_enum_declarations=insert
@@ -13,21 +13,21 @@ org.eclipse.jdt.core.compiler.problem.unusedTypeParameter=ignore
 org.eclipse.jdt.core.formatter.insert_space_after_comma_in_constructor_declaration_parameters=insert
 org.eclipse.jdt.core.formatter.comment.insert_new_line_for_parameter=do not insert
 org.eclipse.jdt.core.formatter.insert_new_line_after_annotation_on_package=insert
-org.eclipse.jdt.core.formatter.insert_space_between_empty_parens_in_enum_constant=do not insert
 org.eclipse.jdt.core.formatter.parentheses_positions_in_method_invocation=common_lines
+org.eclipse.jdt.core.formatter.insert_space_between_empty_parens_in_enum_constant=do not insert
 org.eclipse.jdt.core.compiler.problem.forbiddenReference=warning
 org.eclipse.jdt.core.formatter.blank_lines_after_imports=1
 org.eclipse.jdt.core.formatter.insert_space_before_closing_paren_in_while=do not insert
-org.eclipse.jdt.core.formatter.insert_space_between_empty_parens_in_annotation_type_member_declaration=do not insert
 org.eclipse.jdt.core.formatter.comment.insert_new_line_before_root_tags=insert
+org.eclipse.jdt.core.formatter.insert_space_between_empty_parens_in_annotation_type_member_declaration=do not insert
 org.eclipse.jdt.core.compiler.problem.missingEnumCaseDespiteDefault=disabled
 org.eclipse.jdt.core.formatter.insert_space_before_comma_in_method_declaration_throws=do not insert
 org.eclipse.jdt.core.compiler.problem.unusedParameterIncludeDocCommentReference=enabled
 org.eclipse.jdt.core.formatter.parentheses_positions_in_switch_statement=common_lines
-org.eclipse.jdt.core.formatter.comment.format_javadoc_comments=true
 org.eclipse.jdt.core.compiler.problem.annotationSuperInterface=warning
-org.eclipse.jdt.core.formatter.indentation.size=4
+org.eclipse.jdt.core.formatter.comment.format_javadoc_comments=true
 org.eclipse.jdt.core.formatter.insert_space_after_postfix_operator=do not insert
+org.eclipse.jdt.core.formatter.indentation.size=4
 org.eclipse.jdt.core.formatter.parentheses_positions_in_enum_constant_declaration=common_lines
 org.eclipse.jdt.core.formatter.insert_space_after_comma_in_for_increments=insert
 org.eclipse.jdt.core.formatter.insert_space_after_comma_in_type_arguments=insert
