@@ -315,7 +315,7 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
 		refreshRows(0, dataSource.getRowCount());
 	}
 
-	public class DataRequest implements Supplier<DataRequest> {
+	private class DataGetterFromSrc implements Supplier<DataGetterFromSrc> {
 
 		public long id = count.incrementAndGet();
 		public ViewLiveData<V> viewLiveData;
@@ -324,7 +324,7 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
 		DataGridSnapshot threadSnapshot;
 		Supplier<ViewLiveData<V>> dataSupplier;
 
-		DataRequest(final Supplier<ViewLiveData<V>> inner, final DataGridSnapshot threadSnapshot, final int start,
+		DataGetterFromSrc(final Supplier<ViewLiveData<V>> inner, final DataGridSnapshot threadSnapshot, final int start,
 				final int firstRowIndex) {
 			this.dataSupplier = inner;
 			this.threadSnapshot = threadSnapshot;
@@ -333,20 +333,35 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
 		}
 
 		@Override
-		public DataRequest get() {
+		public DataGetterFromSrc get() {
 			viewLiveData = dataSupplier.get();
 			return this;
 		}
 	}
 
+	public class DataSrcResult {
+
+		public ViewLiveData<V> viewLiveData;
+		public int start;
+		public int firstRowIndex;
+
+		public DataSrcResult(final ViewLiveData<V> viewLiveData, final int start, final int firstRowIndex) {
+			this.viewLiveData = viewLiveData;
+			this.start = start;
+			this.firstRowIndex = firstRowIndex;
+		}
+
+	}
+
 	@Override
 	public void prepareLiveDataOnScreen(final int dataSrcRowIndex, final int dataSize, final int start,
-			final DataGridSnapshot threadSnapshot, final Consumer<DataRequest> consumer) {
+			final DataGridSnapshot threadSnapshot, final Consumer<DataSrcResult> consumer) {
 		viewSnapshot = new DataGridSnapshot(threadSnapshot);
-		final CompletableFuture<DataRequest> completableFuture = CompletableFuture.supplyAsync(new DataRequest(
-			() -> dataSource.getRows(dataSrcRowIndex, dataSize), threadSnapshot, start, dataSrcRowIndex));
+		final CompletableFuture<DataGetterFromSrc> completableFuture = CompletableFuture
+			.supplyAsync(new DataGetterFromSrc(() -> dataSource.getRows(dataSrcRowIndex, dataSize), threadSnapshot,
+				start, dataSrcRowIndex));
 
-		final CompletableFuture<DataRequest> threadAcceptanceByID = completableFuture.thenApply(dataResponse -> {
+		final CompletableFuture<DataGetterFromSrc> threadAcceptanceByID = completableFuture.thenApply(dataResponse -> {
 			if (dataResponse.id < lastProcessedID) {
 				dataResponse.id = -1;
 			} else {
@@ -360,15 +375,17 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
 		});
 	}
 
-	private void threadAcceptanceBySnapshot(final DataRequest result,
-			final CompletableFuture<DataRequest> completableFuture, final Consumer<DataRequest> consumer) {
+	private void threadAcceptanceBySnapshot(final DataGetterFromSrc result,
+			final CompletableFuture<DataGetterFromSrc> completableFuture, final Consumer<DataSrcResult> consumer) {
 		if (viewSnapshot.equals(result.threadSnapshot) && result.id >= 0) {
-			System.out.println("#-Ctrl-# checkThread snapshot -> Pass");
-			// FIXME : renvoyer un truc plus simple
-			completableFuture.thenAccept(consumer::accept);
+			System.out.println("#-Ctrl-# checkThread    -> Pass");
+			// completableFuture.thenAccept(consumer::accept);
+			final CompletableFuture<DataSrcResult> passResultToView = completableFuture.thenApply(dataResponse -> {
+				return new DataSrcResult(dataResponse.viewLiveData, dataResponse.start, dataResponse.firstRowIndex);
+			});
+			passResultToView.thenAccept(consumer::accept);
 		} else {
-			System.out.println("#-Ctrl-# checkThread snapshot -> Failed");
-			System.out.println("Id : " + result.id);
+			System.out.println("#-Ctrl-# checkThread -> Failed");
 		}
 	}
 

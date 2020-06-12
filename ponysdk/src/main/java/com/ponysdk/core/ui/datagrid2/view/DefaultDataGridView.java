@@ -357,17 +357,11 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 	private void draw() {
 		try {
 			if (from >= to) return;
-			// final int absoluteRowCount = controller.getRowCount();
-			// if (fri > absoluteRowCount - rows.size()) {
-			// fri = Math.max(0, absoluteRowCount - rows.size());
-			// start = 0;
-			// } else {
 			final int start = Math.max(0, from - firstRowIndex);
-			// }
 			final int size = unpinnedTable.body.getWidgetCount();
 			System.out.println("\n" + "#-View-# Prepare onDraw -> row : " + firstRowIndex + "   size : " + size);
 			final DataGridSnapshot viewStateSnapshot = new DataGridSnapshot(firstRowIndex, size, sorts, filters);
-			final Consumer<DefaultDataGridController<K, V>.DataRequest> consumer = PScheduler
+			final Consumer<DefaultDataGridController<K, V>.DataSrcResult> consumer = PScheduler
 				.delegate(this::updateView);
 			controller.prepareLiveDataOnScreen(firstRowIndex, size, start, viewStateSnapshot, consumer);
 		} catch (final Exception e) {
@@ -376,16 +370,13 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 		}
 	}
 
-	private synchronized void updateView(final DefaultDataGridController<K, V>.DataRequest dataResponse) {
+	private synchronized void updateView(final DefaultDataGridController<K, V>.DataSrcResult dataSrcResult) {
 		try {
-			final ViewLiveData<V> result = dataResponse.viewLiveData;
-			// System.out.println("Start : " + dataResponse.start);
-			System.out.println("FirstRowIndex : " + dataResponse.firstRowIndex);
-			// rowCount = result.fullDataSize;
-			for (int i = dataResponse.start; i < rows.size(); i++) {
-				updateRow(rows.get(i), result);
+			final ViewLiveData<V> resultLiveData = dataSrcResult.viewLiveData;
+			for (int i = dataSrcResult.start; i < rows.size(); i++) {
+				updateRow(rows.get(i), resultLiveData);
 			}
-			addon.onDataUpdated(result.fullDataSize, rows.size(), dataResponse.firstRowIndex);
+			addon.onDataUpdated(resultLiveData.absoluteRowCount, rows.size(), dataSrcResult.firstRowIndex);
 		} catch (final Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -399,7 +390,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 	}
 
 	private void updateRow(final Row row, final ViewLiveData<V> result) {
-		if (row.getAbsoluteIndex() >= result.fullDataSize) {
+		if (row.getAbsoluteIndex() >= result.absoluteRowCount) {
 			row.hide();
 			row.key = null;
 			return;
@@ -939,7 +930,6 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 		draw();
 	}
 
-	// FIXME : private
 	private class Row {
 
 		private final int relativeIndex;

@@ -103,7 +103,7 @@ public interface DataGridController<K, V> {
 	 * sometimes
 	 */
 	void prepareLiveDataOnScreen(int dataSrcRowIndex, int dataSize, int start, DataGridSnapshot threadSnapshot,
-			Consumer<DefaultDataGridController<K, V>.DataRequest> consumer);
+			Consumer<DefaultDataGridController<K, V>.DataSrcResult> consumer);
 
 	/**
 	 * Insert or replace the value
