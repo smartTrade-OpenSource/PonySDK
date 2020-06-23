@@ -41,6 +41,9 @@ import java.util.function.Supplier;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ponysdk.core.server.concurrent.PScheduler;
 import com.ponysdk.core.server.concurrent.PScheduler.UIRunnable;
 import com.ponysdk.core.server.stm.Txn;
@@ -110,6 +113,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 	 */
 	public static final String HOVERED_ATTRIBUTE = "pony-hovered";
 
+	private static final Logger log = LoggerFactory.getLogger(DefaultDataGridView.class);
 	private final int i = 0;
 	// State
 	private static final int MIN_RELATIVE_ROW_COUNT = 9;
@@ -131,11 +135,10 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 	private final Map<ColumnDefinition<V>, ColumnView> columnViews = new HashMap<>();
 	private final DataGridControllerWrapper controllerWrapper;
 	private final LinkedHashMap<Object, RowAction<V>> rowActions = new LinkedHashMap<>();
-	// private final DataGridSnapshot viewStateSnapshot = new
-	// DataGridSnapshot(0, 0, new HashMap<>(), new HashSet<>());
 	private int firstRowIndex;
 	private final Map<Integer, Integer> sorts = new HashMap<>();
 	private final Set<Integer> filters = new HashSet<>();
+	// FIXME not needed
 
 	public DefaultDataGridView() {
 		this(new DefaultCacheDataSource<K, V>());
@@ -147,7 +150,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 		controller = new DefaultDataGridController<>(dataSource);
 		controller.setListener(this::onUpdateRows);
 		selectedDataView = controller.getLiveSelectedData();
-		controllerWrapper = new DataGridControllerWrapper(controller.getController());
+		controllerWrapper = new DataGridControllerWrapper(controller.get());
 
 		root.addStyleName("pony-grid");
 		root.setStyleProperty("display", "flex");
@@ -179,6 +182,11 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 
 	public DataGridAdapter<K, V> getAdapter() {
 		return adapter;
+	}
+
+	// FIXME
+	public List<Row> getRows() {
+		return rows;
 	}
 
 	private PComplexPanel prepareBodyDiv(final PComplexPanel subBodyDiv) {
@@ -244,7 +252,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 	}
 
 	private void onScroll(final int row) {
-		System.out.println("\n\n" + "onScroll");
+		// System.out.println("\n\n" + "onScroll");
 		showLoadingDataView();
 		firstRowIndex = row;
 		onUpdateRows(0, controller.getRowCount());
@@ -358,14 +366,14 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 		try {
 			if (from >= to) return;
 			final int size = unpinnedTable.body.getWidgetCount();
-			System.out.println("\n" + "#-View-# Prepare onDraw -> row : " + firstRowIndex + "   size : " + size);
 			final DataGridSnapshot viewStateSnapshot = new DataGridSnapshot(firstRowIndex, size, sorts, filters);
 			final Consumer<DefaultDataGridController<K, V>.DataSrcResult> consumer = PScheduler
 				.delegate(this::updateView);
+			// System.out.println("#View - prepare data index : " +
+			// firstRowIndex + " size : " + size);
 			controller.prepareLiveDataOnScreen(firstRowIndex, size, viewStateSnapshot, consumer);
 		} catch (final Exception e) {
-			// FIXME:log
-			e.printStackTrace();
+			log.error("Cannot draw data from data source", e);
 		}
 	}
 
@@ -378,7 +386,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 			}
 			addon.onDataUpdated(resultLiveData.absoluteRowCount, rows.size(), dataSrcResult.firstRowIndex);
 		} catch (final Exception e) {
-			e.printStackTrace();
+			log.error("Problem occured while updating the view", e);
 		} finally {
 			from = Integer.MAX_VALUE;
 			to = 0;
@@ -656,7 +664,6 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 
 	@Override
 	public void setFilter(final Object key, final String id, final Predicate<V> filter, final boolean reinforcing) {
-		System.out.println("\n\n" + "setFilter");
 		showLoadingDataView();
 		filters.add(key.hashCode());
 		controller.setFilter(key, id, filter, reinforcing);
@@ -675,7 +682,6 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 
 	@Override
 	public void clearFilters() {
-		System.out.println("\n\n" + "clearFilters");
 		showLoadingDataView();
 		filters.clear();
 		controller.clearFilters();
@@ -930,7 +936,8 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 		draw();
 	}
 
-	private class Row {
+	// FIXME : private
+	public class Row {
 
 		private final int relativeIndex;
 		private K key;
@@ -952,7 +959,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 			return relativeIndex;
 		}
 
-		V getData() {
+		public V getData() {
 			return data;
 		}
 

@@ -50,4 +50,9 @@ public interface RowAction<V> {
 	 * {@code row} widget.<br/>
 	 */
 	void cancel(IsPWidget row);
+
+	/**
+	 * Returns a boolean that determines if an action is applied for a row
+	 */
+	boolean isActionApplied(final IsPWidget row);
 }

@@ -207,8 +207,8 @@ public abstract class SpyDataGridController<K, V> implements DataGridController<
 	}
 
 	@Override
-	public DataGridController<K, V> getController() {
-		return controller.getController();
+	public DataGridController<K, V> get() {
+		return controller.get();
 	}
 
 	@Override

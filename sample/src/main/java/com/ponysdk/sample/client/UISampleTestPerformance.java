@@ -52,6 +52,7 @@ import com.ponysdk.core.ui.datagrid2.view.RowSelectorColumnDataGridView;
 import com.ponysdk.core.ui.main.EntryPoint;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
 import com.ponysdk.sample.client.event.UserLoggedOutHandler;
+import com.smarttrade.util.memory.MemoryCleaner;
 
 public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler {
 
@@ -171,8 +172,8 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
 			}
 		});
 
-		gridView.setPollingDelayMillis(250L);
-		// gridView.setPollingDelayMillis(300000L);
+		// gridView.setPollingDelayMillis(250L);
+		// gridView.setPollingDelayMillis(3600000L);
 		final DataGridController<Integer, MyRow> controller = ((DefaultDataGridView<Integer, MyRow>) simpleGridView)
 			.getController();
 		gridView.asWidget().setHeight("950px");
@@ -205,6 +206,11 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
 			@Override
 			public void apply(final IsPWidget row) {
 				row.asWidget().addStyleName("unpair-row");
+			}
+
+			@Override
+			public boolean isActionApplied(final IsPWidget row) {
+				return row.asWidget().hasStyleName("unpair-row");
 			}
 		});
 
@@ -267,15 +273,17 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
 			controller.setData(v);
 		};
 
+		testPerformanceAfterWarmUp(rowCounter, 140, addDataAction, removeDataAction);
+
 		// FIXME : somtimes the update action throws a concurrency exception
 		// Test 1
 		// addFilter(controller);
-		addSort(controller);
-		testPerformanceBench(rowCounter, 60, updateDataAction_Version_2);
+		// addSort(controller);
+		// testPerformanceBench(rowCounter, 60, updateDataAction_Version_2);
 
 		// Test 2
 
-		// testPerformanceBench(rowCounter, 120, addDataAction);
+		// testPerformanceBench(rowCounter, 140, addDataAction);
 
 		// Test 3
 		// testPerformanceBench(rowCounter, 1, removeDataAction);
@@ -295,6 +303,35 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
 		controller.addSort(colDefs.get('b'), true);
 	}
 
+	private void testPerformanceAfterWarmUp(final int nbOfActionPerIteration, final int nbOfIterations,
+			final TestAction addDataAction, final TestAction removeDataAction) {
+
+		final Runnable addDataWarmUp = () -> {
+			System.gc();
+			for (int i = 0; i < 2; i++) {
+				log.info("START testPerformanceWarmUp addData");
+				int index = 0;
+				while (index < nbOfActionPerIteration * nbOfIterations)
+					addDataAction.execute(index++);
+
+				log.info("START testPerformanceWarmUp removeData");
+				index = rowCounter;
+				while (index > 10_000) {
+					removeDataAction.execute(index--);
+				}
+			}
+			try {
+				log.info("\n\n\n\n\n\n START Recording (4min record) ..... \n\n\n\n\n\n");
+				Thread.sleep(20_000);
+			} catch (final InterruptedException e) {
+				e.printStackTrace();
+			}
+			testPerformanceBench(rowCounter, nbOfIterations, addDataAction);
+		};
+		final Thread thread = new Thread(addDataWarmUp, "Test thread");
+		thread.start();
+	}
+
 	/**
 	 * This function tests an action by measuring the duration of the execution of this action.
 	 * It is destined to be called when the wanted action will dure all the test. The objectif is
@@ -311,23 +348,35 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
 	 */
 	private void testPerformanceBench(final int nbOfActionPerIteration, final int nbOfIterations,
 			final TestAction testAction) {
-		final Runnable testPerfBench = () -> {
-			int index = 0;
-			System.gc();
-			final long time_before = System.nanoTime();
-			// FIXME
-			// while (index < nbOfActionPerIteration * nbOfIterations)
-			// testAction.execute(index++);
-			while (true)
-				testAction.execute(index++);
 
-			// final long time_after = System.nanoTime();
-			// final long duration = time_after - time_before;
-			// System.out.println("\n\n\n\n\n\nTestDuration = " + duration);
-			// System.gc();
-		};
-		final Thread thread = new Thread(testPerfBench, "Test thread");
-		thread.start();
+		// final Runnable testPerfBench = () -> {
+		// log.info("\nSTART testPerformanceBench (waiting 1 minute)");
+		// try {
+		// Thread.sleep(60000);
+		// } catch (final Exception e) {
+		// e.printStackTrace();
+		// }
+		log.info("START testPerformanceBench");
+		int index = 0;
+		System.gc();
+		final long time_before = System.nanoTime();
+		while (index < nbOfActionPerIteration * nbOfIterations)
+			testAction.execute(index++);
+		final long time_after = System.nanoTime();
+		final long duration = time_after - time_before;
+		log.info("TestDuration = " + duration);
+		MemoryCleaner.cleanMemory(true, false);
+		System.gc();
+		// log.info("STOP testPerformanceBench (waiting 1 minute)");
+		// try {
+		// Thread.sleep(60000);
+		// } catch (final Exception e) {
+		// e.printStackTrace();
+		// }
+		log.info("STOP testPerformanceBench");
+		// };
+		// final Thread thread = new Thread(testPerfBench, "Test thread");
+		// thread.start();
 	}
 
 	private static class MyRow {
@@ -339,7 +388,19 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
 		public MyRow(final int id) {
 			super();
 			this.id = id;
-			format = String.format("%09d", id);
+			format = toto(id);
+		}
+
+		private static String toto(final int id) {
+			if (id < 10) return "00000000" + id;
+			if (id < 100) return "0000000" + id;
+			if (id < 1000) return "000000" + id;
+			if (id < 10000) return "00000" + id;
+			if (id < 100000) return "0000" + id;
+			if (id < 1000000) return "000" + id;
+			if (id < 10000000) return "00" + id;
+			if (id < 100000000) return "0" + id;
+			return Integer.toString(id);
 		}
 
 		int getId() {

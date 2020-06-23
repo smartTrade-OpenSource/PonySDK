@@ -87,7 +87,7 @@ public interface DataGridController<K, V> {
 
 	void setAdapter(DataGridAdapter<K, V> adapter);
 
-	DataGridController<K, V> getController();
+	DataGridController<K, V> get();
 
 	void setListener(DataGridControllerListener<V> listener);
 

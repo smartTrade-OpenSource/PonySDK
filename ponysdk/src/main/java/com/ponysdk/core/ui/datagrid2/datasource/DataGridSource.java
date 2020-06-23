@@ -59,7 +59,8 @@ public interface DataGridSource<K, V> {
 	Collection<DefaultRow<V>> getRows();
 
 	/**
-	 * @return the same parameter object but with the needed rows for the view
+	 * @return ViewLiveData object that contains the demanded data and
+	 *         absoluteRowCount
 	 */
 	ViewLiveData<V> getRows(final int dataSrcRowIndex, final int dataSize);
 
