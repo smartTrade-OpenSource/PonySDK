@@ -7,6 +7,6 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 
 	<context:annotation-config />
 
-	<bean name="entryPoint" class="com.ponysdk.sample.client.UISampleTestPerformance" />
+	<bean name="entryPoint" class="com.ponysdk.sample.client.UISampleEntryPoint" />
 
 </beans>

@@ -85,11 +85,11 @@ import com.ponysdk.core.ui.datagrid2.view.RowSelectorColumnDataGridView;
  */
 class DefaultDataGridTester {
 
-	private static Map<Character, DefaultColumnDefinition<MyRow>> colDefs;
-	private static DataGridView<Integer, MyRow> gridView;
-	private static DataGridController<Integer, MyRow> controller;
-	private static DataGridSource<Integer, MyRow> dataSource;
-	private static DataGridView<Integer, MyRow> simpleGridView;
+	private Map<Character, DefaultColumnDefinition<MyRow>> colDefs;
+	private DataGridView<Integer, MyRow> gridView;
+	private DataGridController<Integer, MyRow> controller;
+	private DataGridSource<Integer, MyRow> dataSource;
+	private DataGridView<Integer, MyRow> simpleGridView;
 
 	@BeforeAll
 	static void setUpPony() {
@@ -101,11 +101,12 @@ class DefaultDataGridTester {
 
 	@BeforeEach
 	void beforeEach() {
+		// This method initialize this class fields
 		createDefaultDataGrid();
 	}
 
 	@Nested
-	@DisplayName("Data Source")
+	@DisplayName("Data Manipulation")
 	public class DataManipulation {
 
 		@Test
@@ -216,6 +217,15 @@ class DefaultDataGridTester {
 		}
 
 		@Test
+		void forEach() {
+			dataSource.forEach(this::action);
+		}
+
+		private void action(final Integer key, final MyRow value) {
+			assertTrue(key != null && value != null);
+		}
+
+		@Test
 		void updateNotAcceptedData() {
 			filterOddData();
 			final MyRow v = createMyRow(6);
@@ -229,6 +239,9 @@ class DefaultDataGridTester {
 		void removeData() {
 			final Collection<MyRow> liveSelectedData = controller.getLiveSelectedData();
 			final Set<Integer> selectedKeys = getSelectedKeys();
+
+			// Non existing
+			assertEquals(null, controller.removeData(15));
 
 			// Accepted, not selected
 			assertEquals(3, controller.removeData(3).getId());
@@ -347,7 +360,16 @@ class DefaultDataGridTester {
 		}
 
 		@Test
+		void clearSorts() {
+			controller.clearSorts();
+			final Set<Entry<Object, Comparator<DefaultRow<MyRow>>>> sortsEntry = dataSource.getSortsEntry();
+			assertTrue(sortsEntry.isEmpty());
+		}
+
+		@Test
 		void onSortReturnsSortedData() {
+			controller.addSort(colDefs.get('a'), false);
+			controller.addSort(colDefs.get('b'), true);
 			controller.addSort(colDefs.get('a'), true);
 			final ViewLiveData<MyRow> viewLiveData = dataSource.getRows(0, 8);
 			for (int i = 0; i < 7; i++) {
@@ -366,9 +388,24 @@ class DefaultDataGridTester {
 			int oldSize = 0;
 			final Map<Object, AbstractFilter<MyRow>> filters = getFilters();
 			oldSize = filters.size();
-			controller.setFilter(0, "", (row) -> {
+			controller.setFilter("TestDummyFilter", "", (row) -> {
 				return false;
 			}, true);
+			assertTrue(filters.size() - oldSize == 1);
+		}
+
+		@Test
+		void addNotNullFilter() {
+			int oldSize = 0;
+			final Map<Object, AbstractFilter<MyRow>> filters = getFilters();
+			oldSize = filters.size();
+			controller.setFilter("TestDummyFilter", "", (row) -> {
+				return true;
+			}, false);
+			//Add the filter with same id
+			controller.setFilter("TestDummyFilter", "", (row) -> {
+				return false;
+			}, false);
 			assertTrue(filters.size() - oldSize == 1);
 		}
 
@@ -401,6 +438,11 @@ class DefaultDataGridTester {
 			final int afterClearFilter = filters.size();
 			assertTrue(afterAddFilter - beforeAddFilter == 2);
 			assertTrue(afterAddFilter - afterClearFilter == 2);
+		}
+
+		@Test
+		void clearFiltersColumnn() {
+			controller.clearFilters(colDefs.get('a'));
 		}
 
 		@Test
@@ -503,9 +545,6 @@ class DefaultDataGridTester {
 				e.printStackTrace();
 			}
 			return true;
-
-			// FIXME
-			// Apply
 		}
 
 		private boolean verifyRowActionCanceled(final LinkedHashMap<Object, RowAction<MyRow>> rowActionsContainer,
@@ -525,7 +564,7 @@ class DefaultDataGridTester {
 		}
 	}
 
-	private static void createDefaultDataGrid() {
+	private void createDefaultDataGrid() {
 		colDefs = new HashMap<>();
 		dataSource = new DefaultCacheDataSource<>();
 		simpleGridView = new DefaultDataGridView<>(dataSource);
