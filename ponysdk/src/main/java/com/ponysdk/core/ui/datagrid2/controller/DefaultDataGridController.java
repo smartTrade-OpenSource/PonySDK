@@ -373,13 +373,10 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
 	private void threadAcceptance(final DataGetterFromSrc result,
 			final CompletableFuture<DataGetterFromSrc> completableFuture, final Consumer<DataSrcResult> consumer) {
 		if (viewSnapshot.equals(result.threadSnapshot) && result.id >= 0) {
-			// System.out.println("#-Ctrl-# checkThread -> Pass");
 			final CompletableFuture<DataSrcResult> passResultToView = completableFuture.thenApply(dataResponse -> {
 				return new DataSrcResult(dataResponse.viewLiveData, dataResponse.firstRowIndex);
 			});
 			passResultToView.thenAccept(consumer::accept);
-		} else {
-			// System.out.println("#-Ctrl-# checkThread -> Failed");
 		}
 	}
 

@@ -138,7 +138,6 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 	private int firstRowIndex;
 	private final Map<Integer, Integer> sorts = new HashMap<>();
 	private final Set<Integer> filters = new HashSet<>();
-	// FIXME not needed
 
 	public DefaultDataGridView() {
 		this(new DefaultCacheDataSource<K, V>());
@@ -182,11 +181,6 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 
 	public DataGridAdapter<K, V> getAdapter() {
 		return adapter;
-	}
-
-	// FIXME
-	public List<Row> getRows() {
-		return rows;
 	}
 
 	private PComplexPanel prepareBodyDiv(final PComplexPanel subBodyDiv) {
@@ -252,7 +246,6 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 	}
 
 	private void onScroll(final int row) {
-		// System.out.println("\n\n" + "onScroll");
 		showLoadingDataView();
 		firstRowIndex = row;
 		onUpdateRows(0, controller.getRowCount());
@@ -369,8 +362,6 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 			final DataGridSnapshot viewStateSnapshot = new DataGridSnapshot(firstRowIndex, size, sorts, filters);
 			final Consumer<DefaultDataGridController<K, V>.DataSrcResult> consumer = PScheduler
 				.delegate(this::updateView);
-			// System.out.println("#View - prepare data index : " +
-			// firstRowIndex + " size : " + size);
 			controller.prepareLiveDataOnScreen(firstRowIndex, size, viewStateSnapshot, consumer);
 		} catch (final Exception e) {
 			log.error("Cannot draw data from data source", e);
@@ -936,7 +927,6 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 		draw();
 	}
 
-	// FIXME : private
 	public class Row {
 
 		private final int relativeIndex;

@@ -166,7 +166,6 @@ public class DefaultCacheDataSource<K, V> extends AbstractDataSource<K, V> {
 	}
 
 	private void clearRenderingHelpers(final DefaultRow<V> row) {
-		// FIXME
 		if (renderingHelpersCache.get(row) != null) {
 			renderingHelpersCache.remove(row);
 		}
