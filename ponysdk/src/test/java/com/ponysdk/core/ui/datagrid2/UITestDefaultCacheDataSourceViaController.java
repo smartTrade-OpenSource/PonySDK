@@ -23,6 +23,7 @@
 package com.ponysdk.core.ui.datagrid2;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -47,13 +48,17 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
+import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.stm.TxnContext;
@@ -67,6 +72,7 @@ import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.column.DefaultColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.controller.DataGridController;
 import com.ponysdk.core.ui.datagrid2.controller.DefaultDataGridController;
+import com.ponysdk.core.ui.datagrid2.controller.DefaultDataGridController.RenderingHelpersCache;
 import com.ponysdk.core.ui.datagrid2.data.AbstractFilter;
 import com.ponysdk.core.ui.datagrid2.data.DefaultRow;
 import com.ponysdk.core.ui.datagrid2.data.RowAction;
@@ -83,7 +89,7 @@ import com.ponysdk.core.ui.datagrid2.view.RowSelectorColumnDataGridView;
 /**
  * @author mabbas
  */
-class DefaultDataGridTester {
+class UITestDefaultCacheDataSourceViaController {
 
 	private Map<Character, DefaultColumnDefinition<MyRow>> colDefs;
 	private DataGridView<Integer, MyRow> gridView;
@@ -117,7 +123,7 @@ class DefaultDataGridTester {
 
 		@Test
 		@DisplayName("getRows(index, size)")
-		void getRows() {
+		void getRowsForSrc() {
 			ViewLiveData<MyRow> viewLiveData = dataSource.getRows(0, 2);
 			assertEquals(2, viewLiveData.liveData.size());
 			viewLiveData = dataSource.getRows(4, 9);
@@ -136,6 +142,14 @@ class DefaultDataGridTester {
 			filterOddData();
 			myRow = createMyRow(11);
 			assertNull(dataSource.setData(myRow));
+		}
+
+		@Test
+		void addDataCollection() {
+			final List<DefaultRow<MyRow>> rows = getLiveData();
+			final List<MyRow> dataCollection = List.of(createMyRow(9), createMyRow(10), createMyRow(11));
+			controller.setData(dataCollection);
+			assertEquals(9 + 3, rows.size());
 		}
 
 		@Test
@@ -189,31 +203,45 @@ class DefaultDataGridTester {
 			final Set<Integer> selectedKeys = getSelectedKeys();
 
 			// null
-			assertNull(dataSource.updateData(15, this::updater));
+			assertNull(dataSource.updateData(15, this::updater1));
 
 			// Accepted, not selected
-			controller.updateData(4, this::updater);
+			controller.updateData(4, this::updater1);
 			assertEquals("updatedValue", controller.getData(4).getValue("a"));
 			assertTrue(liveSelectedData.isEmpty() && selectedKeys.isEmpty());
 
 			// Not Accepted, selected
 			filterOddData();
 			controller.select(5);
-			controller.updateData(5, this::updater);
+			controller.updateData(5, this::updater1);
 			assertEquals("updatedValue", controller.getData(5).getValue("a"));
 			assertTrue(liveSelectedData.isEmpty());
 			assertTrue(selectedKeys.contains(5));
 
 			// Accepted, selected
 			controller.select(6);
-			controller.updateData(6, this::updater);
+			controller.updateData(6, this::updater1);
 			assertEquals("updatedValue", controller.getData(6).getValue("a"));
 			assertEquals(1, liveSelectedData.size());
 			assertTrue(selectedKeys.contains(6));
 		}
 
-		private void updater(final MyRow myRow) {
+		@Test
+		void updateDataViaConsumersMap() {
+			final Map<Integer, Consumer<MyRow>> updaters = Map.of(1, this::updater1, 2, this::updater2);
+			// Accepted, not selected
+			controller.updateData(updaters);
+			assertEquals("updatedValue", controller.getData(1).getValue("a"));
+			assertEquals("updatedValue", controller.getData(2).getValue("b"));
+			assertFalse("updatedValue".equals(controller.getData(3).getValue("b")));
+		}
+
+		private void updater1(final MyRow myRow) {
 			myRow.putValue("a", "updatedValue");
+		}
+
+		private void updater2(final MyRow myRow) {
+			myRow.putValue("b", "updatedValue");
 		}
 
 		@Test
@@ -333,9 +361,30 @@ class DefaultDataGridTester {
 	@DisplayName("Data Sorting")
 	public class DataSorting {
 
+		final Comparator<MyRow> comparator = (row1, row2) -> {
+			final int id1 = row1.id;
+			final int id2 = row2.id;
+			if (id1 > id2) return -1;
+			else if (id1 < id2) return 1;
+			else return 0;
+		};
+
 		@Test
-		void addSort() {
+		void addColDefSort() {
 			controller.addSort(colDefs.get('a'), false);
+			final Set<Entry<Object, Comparator<DefaultRow<MyRow>>>> sortsEntry = dataSource.getSortsEntry();
+			for (final Entry<Object, Comparator<DefaultRow<MyRow>>> entry : sortsEntry) {
+				if (entry.getValue() instanceof DefaultDataGridController.ColumnControllerSort) {
+					final DefaultDataGridController<Integer, MyRow>.ColumnControllerSort sort = (DefaultDataGridController<Integer, MyRow>.ColumnControllerSort) entry
+						.getValue();
+					assertEquals("a", sort.getcolumn().getColDef().getId());
+				}
+			}
+		}
+
+		@Test
+		void addComparatorSort() {
+			controller.addSort(colDefs.get('a'), comparator);
 			final Set<Entry<Object, Comparator<DefaultRow<MyRow>>>> sortsEntry = dataSource.getSortsEntry();
 			for (final Entry<Object, Comparator<DefaultRow<MyRow>>> entry : sortsEntry) {
 				if (entry.getValue() instanceof DefaultDataGridController.ColumnControllerSort) {
@@ -360,6 +409,15 @@ class DefaultDataGridTester {
 		}
 
 		@Test
+		void clearSortByObjectKey() {
+			final Set<Entry<Object, Comparator<DefaultRow<MyRow>>>> sortsEntry = dataSource.getSortsEntry();
+			controller.addSort("key", comparator);
+			assertEquals(1, sortsEntry.size());
+			controller.clearSort("key");
+			assertEquals(0, sortsEntry.size());
+		}
+
+		@Test
 		void clearSorts() {
 			controller.clearSorts();
 			final Set<Entry<Object, Comparator<DefaultRow<MyRow>>>> sortsEntry = dataSource.getSortsEntry();
@@ -367,12 +425,22 @@ class DefaultDataGridTester {
 		}
 
 		@Test
-		void onSortReturnsSortedData() {
+		void onColSortReturnsSortedData() {
 			controller.addSort(colDefs.get('a'), false);
 			controller.addSort(colDefs.get('b'), true);
 			controller.addSort(colDefs.get('a'), true);
-			final ViewLiveData<MyRow> viewLiveData = dataSource.getRows(0, 8);
-			for (int i = 0; i < 7; i++) {
+			final ViewLiveData<MyRow> viewLiveData = dataSource.getRows(0, 9);
+			for (int i = 0; i < 8; i++) {
+				assertTrue(Math.abs(viewLiveData.liveData.get(i).getData().id
+						- viewLiveData.liveData.get(i + 1).getData().id) == 1);
+			}
+		}
+
+		@Test
+		void onComparatorSortReturnsSortedData() {
+			controller.addSort(colDefs.get('a'), comparator);
+			final ViewLiveData<MyRow> viewLiveData = dataSource.getRows(0, 9);
+			for (int i = 0; i < 8; i++) {
 				assertTrue(Math.abs(viewLiveData.liveData.get(i).getData().id
 						- viewLiveData.liveData.get(i + 1).getData().id) == 1);
 			}
@@ -384,74 +452,128 @@ class DefaultDataGridTester {
 	public class DataFiltering {
 
 		@Test
-		void addFilter() {
+		void addGeneralFilter() {
 			int oldSize = 0;
 			final Map<Object, AbstractFilter<MyRow>> filters = getFilters();
 			oldSize = filters.size();
-			controller.setFilter("TestDummyFilter", "", (row) -> {
+			controller.setFilter("TestDummyGeneralFilter", "", (row) -> {
 				return false;
 			}, true);
 			assertTrue(filters.size() - oldSize == 1);
 		}
 
 		@Test
-		void addNotNullFilter() {
+		void addColumnFilter() {
 			int oldSize = 0;
 			final Map<Object, AbstractFilter<MyRow>> filters = getFilters();
 			oldSize = filters.size();
-			controller.setFilter("TestDummyFilter", "", (row) -> {
+			controller.setFilter("TestDummyColumnFilter", colDefs.get('a'), (row, supplier) -> {
+				return false;
+			}, true);
+			assertTrue(filters.size() - oldSize == 1);
+		}
+
+		@Test
+		void addSimilarIDGeneralFilter() {
+			final Map<Object, AbstractFilter<MyRow>> filters = getFilters();
+			controller.setFilter("TestDummyGeneralFilter", "", (row) -> {
 				return true;
 			}, false);
-			//Add the filter with same id
-			controller.setFilter("TestDummyFilter", "", (row) -> {
+			// Add a filter with the same id
+			controller.setFilter("TestDummyGeneralFilter", "", (row) -> {
 				return false;
 			}, false);
-			assertTrue(filters.size() - oldSize == 1);
+			assertEquals(1, filters.size());
 		}
 
 		@Test
-		void clearFilter() {
+		void addSimilarIDColumnFilter() {
 			final Map<Object, AbstractFilter<MyRow>> filters = getFilters();
-			final int beforeAddFilter = filters.size();
-			controller.setFilter("TestDummyFilter", "", (row) -> {
+			controller.setFilter("TestDummyColumnFilter", colDefs.get('a'), (row, supplier) -> {
 				return false;
 			}, true);
-			final int afterAddFilter = filters.size();
-			controller.clearFilter("TestDummyFilter");
-			final int afterClearFilter = filters.size();
-			assertTrue(afterAddFilter - beforeAddFilter == 1);
-			assertTrue(afterAddFilter - afterClearFilter == 1);
+			controller.setFilter("TestDummyColumnFilter", colDefs.get('a'), (row, supplier) -> {
+				return true;
+			}, true);
+			assertEquals(1, filters.size());
+		}
+
+		@Test
+		void clearFilterByID() {
+			final Map<Object, AbstractFilter<MyRow>> filters = getFilters();
+			controller.setFilter("TestDummyGeneralFilter", "", (row) -> {
+				return false;
+			}, true);
+			controller.setFilter("TestDummyColumnFilter", colDefs.get('a'), (row, supplier) -> {
+				return false;
+			}, true);
+			assertEquals(2, filters.size());
+			controller.clearFilter("TestDummyGeneralFilter");
+			assertNull(filters.get("TestDummyGeneralFilter"));
+			assertEquals(1, filters.size());
+			controller.clearFilter("TestDummyColumnFilter");
+			assertNull(filters.get("TestDummyColumnFilter"));
+			assertEquals(0, filters.size());
+		}
+
+		@Test
+		void clearGeneralFiltersByColDef() {
+			final Map<Object, AbstractFilter<MyRow>> filters = getFilters();
+			controller.setFilter("TestDummyGeneralFilter", "", (row) -> {
+				return true;
+			}, true);
+			assertEquals(1, filters.size());
+			// This filter has no associated colDef so nothing msut be cleared
+			controller.clearFilters(colDefs.get('a'));
+			assertEquals(1, filters.size());
+		}
+
+		@Test
+		void clearColumnFiltersByColDef() {
+			final Map<Object, AbstractFilter<MyRow>> filters = getFilters();
+			controller.setFilter("TestDummyColumnFilter", colDefs.get('a'), (row, supplier) -> {
+				return false;
+			}, true);
+			assertEquals(1, filters.size());
+			controller.clearFilters(colDefs.get('a'));
+			assertEquals(0, filters.size());
 		}
 
 		@Test
 		void clearFilters() {
 			final Map<Object, AbstractFilter<MyRow>> filters = getFilters();
-			final int beforeAddFilter = filters.size();
 			controller.setFilter("TestDummyFilter1", "", (row) -> {
 				return false;
 			}, true);
-			controller.setFilter("TestDummyFilter2", "", (row) -> {
-				return true;
+			controller.setFilter("TestDummyColumnFilter", colDefs.get('a'), (row, supplier) -> {
+				return false;
 			}, true);
-			final int afterAddFilter = filters.size();
+			assertEquals(2, filters.size());
 			controller.clearFilters();
-			final int afterClearFilter = filters.size();
-			assertTrue(afterAddFilter - beforeAddFilter == 2);
-			assertTrue(afterAddFilter - afterClearFilter == 2);
+			assertEquals(0, filters.size());
 		}
 
 		@Test
-		void clearFiltersColumnn() {
-			controller.clearFilters(colDefs.get('a'));
-		}
-
-		@Test
-		void onFilterReturnFilteredData() {
+		void onGeneralFilterReturnFilteredData() {
 			filterOddData();
 			final ViewLiveData<MyRow> viewLiveData = dataSource.getRows(0, 9);
 			for (int i = 0; i < 4; i++) {
 				assertTrue(Math.abs(viewLiveData.liveData.get(i).getData().id
 						- viewLiveData.liveData.get(i + 1).getData().id) == 2);
+			}
+		}
+
+		@Test
+		void onColumnFilterReturnFilteredData() {
+			controller.setFilter("ColumnFilterColumnA", colDefs.get('a'), (row, supplier) -> {
+				return row.getId() % 2 == 0 ? true : false;
+			}, true);
+			final ViewLiveData<MyRow> viewLiveData = dataSource.getRows(0, 9);
+			for (int i = 0; i < 4; i++) {
+				final int currentRowId = viewLiveData.liveData.get(i).getData().getId();
+				final int nextRowId = viewLiveData.liveData.get(i + 1).getData().getId();
+				assertTrue(Math.abs(currentRowId - nextRowId) == 2);
+				assertTrue(currentRowId % 2 == 0);
 			}
 		}
 	}
@@ -485,36 +607,12 @@ class DefaultDataGridTester {
 
 		@Test
 		void addRowAction() {
-			// final MyRow myRow = new MyRow(50);
-			// myRow.map = null;
-			// controller.setData(myRow);
-			// final LinkedHashMap<Object, RowAction<V>> rowActions
-
 			final LinkedHashMap<Object, RowAction<MyRow>> rowActions = getRowActions();
 			final List<DefaultDataGridView<Integer, MyRow>.Row> rows = getRows();
-
-			final Callable<Boolean> waitForRowsContent = () -> {
-				boolean ready = false;
-				while (ready) {
-					for (final DefaultDataGridView<Integer, MyRow>.Row row : rows)
-						if (row == null) {
-							ready = false;
-							break;
-						} else ready = true;
-				}
-				return ready;
-			};
-
-			final ExecutorService executor = Executors.newSingleThreadExecutor();
-			final Future<Boolean> future = executor.submit(waitForRowsContent);
-			try {
-				if (future.get(5, TimeUnit.SECONDS)) {
-					gridView.addRowAction("OnOffRowAction", testRowAction);
-					assertEquals(1, rowActions.size());
-					assertTrue(verifyRowActionCoherence(rowActions, rows));
-				}
-			} catch (final Exception e) {
-				e.printStackTrace();
+			if (isReady(waitForListContent(rows, 9))) {
+				gridView.addRowAction("OnOffRowAction", testRowAction);
+				assertEquals(1, rowActions.size());
+				assertTrue(verifyRowActionCoherence(rowActions, rows));
 			}
 		}
 
@@ -530,19 +628,10 @@ class DefaultDataGridTester {
 
 		private boolean verifyRowActionCoherence(final LinkedHashMap<Object, RowAction<MyRow>> rowActionsContainer,
 				final List<DefaultDataGridView<Integer, MyRow>.Row> rows) {
-			try {
-				int i = 9;
-				for (final DefaultDataGridView<Integer, MyRow>.Row row : rows) {
-					i--;
-					final PComplexPanel unpinnedRow;
-					final Field privateField = DefaultDataGridView.Row.class.getDeclaredField("unpinnedRow");
-					privateField.setAccessible(true);
-					unpinnedRow = (PComplexPanel) privateField.get(row);
-					if (testRowAction.testRow(row.getData(), i) != testRowAction.isActionApplied(unpinnedRow))
-						return false;
-				}
-			} catch (final Exception e) {
-				e.printStackTrace();
+			for (int i = 8; i >= 0; i--) {
+				final PComplexPanel unpinnedRow = getUnpinnedRow(rows.get(i));
+				if (testRowAction.testRow(rows.get(i).getData(), i) != testRowAction.isActionApplied(unpinnedRow))
+					return false;
 			}
 			return true;
 		}
@@ -562,6 +651,82 @@ class DefaultDataGridTester {
 			}
 			return true;
 		}
+	}
+
+	@Nested
+	@DisplayName("RenderingHelpersCache")
+	public class RenderingHelperCache {
+
+		@Test
+		void RenderingHelperInitialization() {
+			final RenderingHelpersCache<MyRow> renderingHelpersCache = getRenderingHelpersCache();
+			final List<DefaultDataGridView<Integer, MyRow>.Row> rows = getRows();
+			if (isReady(waitForListContent(rows, 9))) {
+				assertEquals(9, renderingHelpersCache.size());
+			}
+		}
+
+		@Test
+		void RenderingHelperClear() {
+			final RenderingHelpersCache<MyRow> renderingHelpersCache = getRenderingHelpersCache();
+			final List<DefaultDataGridView<Integer, MyRow>.Row> rows = getRows();
+			// clearRenderingHelpers(..) method is called by the update method
+			if (isReady(waitForListContent(rows, 9))) {
+				assertEquals(9, renderingHelpersCache.size());
+				controller.updateData(4, (x) -> {
+				});
+				controller.updateData(5, (x) -> {
+				});
+				assertEquals(7, renderingHelpersCache.size());
+			}
+		}
+
+		// @Test
+		// void RenderingHelperAddData() {
+		// final RenderingHelpersCache<MyRow> renderingHelpersCache =
+		// getRenderingHelpersCache();
+		// final List<DefaultDataGridView<Integer, MyRow>.Row> rows = getRows();
+		// controller.setData(createMyRow(9));
+		// if (isReady(waitForListContent(rows, 10))) {
+		// assertEquals(10, renderingHelpersCache.size());
+		// }
+		// }
+
+		@Test
+		void RenderingHelperClearData() {
+			final RenderingHelpersCache<MyRow> renderingHelpersCache = getRenderingHelpersCache();
+			final List<DefaultDataGridView<Integer, MyRow>.Row> rows = getRows();
+			if (isReady(waitForListContent(rows, 9))) {
+				assertEquals(9, renderingHelpersCache.size());
+			}
+			controller.removeData(8);
+			controller.removeData(7);
+			if (isReady(waitForListContent(rows, 7))) {
+				assertEquals(7, renderingHelpersCache.size());
+			}
+		}
+
+		@RepeatedTest(20)
+		@Test
+		void RenderingHelperClearColDef() {
+			final RenderingHelpersCache<MyRow> renderingHelpersCache = getRenderingHelpersCache();
+			final List<DefaultDataGridView<Integer, MyRow>.Row> rows = getRows();
+			if (isReady(waitForMapContent(renderingHelpersCache, 9))) {
+				assertEquals(9, renderingHelpersCache.size());
+			}
+			controller.clearRenderingHelpers(colDefs.get('a'));
+			for (final Object[] o : renderingHelpersCache.values()) {
+				assertNull(o[1]);
+				assertEquals('b', ((String) o[2]).charAt(0));
+			}
+		}
+	}
+
+	// FIXME
+	@Nested
+	@DisplayName("Configuration")
+	public class Configuration {
+
 	}
 
 	private void createDefaultDataGrid() {
@@ -725,8 +890,7 @@ class DefaultDataGridTester {
 
 	private void filterOddData() {
 		controller.setFilter(0, "", (row) -> {
-			if (row.getId() % 2 == 0) return true;
-			return false;
+			return row.getId() % 2 == 0 ? true : false;
 		}, true);
 	}
 
@@ -787,4 +951,112 @@ class DefaultDataGridTester {
 		return rows;
 	}
 
+	private List<DefaultRow<MyRow>> getLiveData() {
+		List<DefaultRow<MyRow>> liveData = new ArrayList<>();
+		try {
+			final Field privateField = DefaultCacheDataSource.class.getDeclaredField("liveData");
+			privateField.setAccessible(true);
+			liveData = (List<DefaultRow<MyRow>>) privateField.get(dataSource);
+		} catch (final Exception e) {
+			e.printStackTrace();
+		}
+		return liveData;
+	}
+
+	private PComplexPanel getUnpinnedRow(final DefaultDataGridView.Row row) {
+		PComplexPanel unpinnedRow = new PComplexPanel() {
+
+			@Override
+			protected WidgetType getWidgetType() {
+				return null;
+			}
+		};
+
+		try {
+			final Field privateField = DefaultDataGridView.Row.class.getDeclaredField("unpinnedRow");
+			privateField.setAccessible(true);
+			unpinnedRow = (PComplexPanel) privateField.get(row);
+		} catch (final Exception e) {
+			e.printStackTrace();
+		}
+		return unpinnedRow;
+	}
+
+	private RenderingHelpersCache<MyRow> getRenderingHelpersCache() {
+		RenderingHelpersCache<MyRow> renderingHelpersCache = new RenderingHelpersCache<>();
+		try {
+			final Field privateField = AbstractDataSource.class.getDeclaredField("renderingHelpersCache");
+			privateField.setAccessible(true);
+			renderingHelpersCache = (RenderingHelpersCache<MyRow>) privateField.get(dataSource);
+		} catch (final Exception e) {
+			e.printStackTrace();
+		}
+		return renderingHelpersCache;
+	}
+
+	@SuppressWarnings("finally")
+	private int getViewRowKey(final List<DefaultDataGridView<Integer, MyRow>.Row> list, final int i) {
+		int key = -1;
+		try {
+			final Field privateField = DefaultDataGridView.Row.class.getDeclaredField("key");
+			privateField.setAccessible(true);
+			key = (int) privateField.get(list.get(i));
+		} catch (final Exception e) {
+			// Do nothing since we expect here null pointer
+		} finally {
+			return key;
+		}
+	}
+
+	private Future<Boolean> waitForListContent(final List<DefaultDataGridView<Integer, MyRow>.Row> list,
+			final int size) {
+		final Callable<Boolean> waitForListContent = () -> {
+			final boolean ready = false;
+			outerloop: while (!ready) {
+				for (int i = 0; i < size; i++) {
+					if (getViewRowKey(list, i) < 0) {
+						continue outerloop;
+					}
+				}
+				return true;
+			}
+		};
+
+		final ExecutorService executor = Executors.newSingleThreadExecutor();
+		return executor.submit(waitForListContent);
+	}
+
+	private Future<Boolean> waitForMapContent(final RenderingHelpersCache<MyRow> cache, final int size) {
+		final Callable<Boolean> waitForMapContent = () -> {
+			final boolean ready = false;
+			outerloop: while (!ready) {
+				if (cache.size() == 9) {
+					for (final Object[] o : cache.values()) {
+						if (o[1] == null || o[2] == null || size != cache.size()) {
+							continue outerloop;
+						}
+					}
+					return true;
+				} else {
+					LockSupport.parkNanos(10);
+					continue;
+				}
+			}
+		};
+
+		final ExecutorService executor = Executors.newSingleThreadExecutor();
+		return executor.submit(waitForMapContent);
+	}
+
+	private boolean isReady(final Future<Boolean> future) {
+		try {
+			if (future.get(5, TimeUnit.SECONDS)) {
+				return true;
+			}
+			return false;
+		} catch (final Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
 }
