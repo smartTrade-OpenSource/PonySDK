@@ -54,6 +54,11 @@ public class DefaultCacheDataSource<K, V> extends AbstractDataSource<K, V> {
 	}
 
 	@Override
+	public int getRowCount() {
+		return liveData.size();
+	}
+
+	@Override
 	public ViewLiveData<V> getRows(final int dataSrcRowIndex, int dataSize) {
 		dataSize = dataSrcRowIndex + dataSize > liveData.size() ? liveData.size() - dataSrcRowIndex : dataSize;
 		final List<DefaultRow<V>> liveDataOnScreen = new ArrayList<>();
@@ -61,11 +66,6 @@ public class DefaultCacheDataSource<K, V> extends AbstractDataSource<K, V> {
 			liveDataOnScreen.add(liveData.get(i));
 		}
 		return new ViewLiveData<>(getRowCount(), liveDataOnScreen);
-	}
-
-	@Override
-	public int getRowCount() {
-		return liveData.size();
 	}
 
 	@Override
@@ -121,9 +121,7 @@ public class DefaultCacheDataSource<K, V> extends AbstractDataSource<K, V> {
 		final boolean selected = selectedKeys.remove(k);
 		if (row.isAccepted()) {
 			removeRow(liveData, row);
-			if (selected) {
-				removeRow(liveSelectedData, row);
-			}
+			if (selected) removeRow(liveSelectedData, row);
 		}
 		return row.getData();
 	}

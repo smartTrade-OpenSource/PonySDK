@@ -359,7 +359,8 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 		try {
 			if (from >= to) return;
 			final int size = unpinnedTable.body.getWidgetCount();
-			final DataGridSnapshot viewStateSnapshot = new DataGridSnapshot(firstRowIndex, size, sorts, filters);
+			final int start = Math.max(0, from - firstRowIndex);
+			final DataGridSnapshot viewStateSnapshot = new DataGridSnapshot(firstRowIndex, size, start, sorts, filters);
 			final Consumer<DefaultDataGridController<K, V>.DataSrcResult> consumer = PScheduler
 				.delegate(this::updateView);
 			controller.prepareLiveDataOnScreen(firstRowIndex, size, viewStateSnapshot, consumer);
@@ -368,11 +369,10 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 		}
 	}
 
-	private synchronized void updateView(final DefaultDataGridController<K, V>.DataSrcResult dataSrcResult) {
+	private void updateView(final DefaultDataGridController<K, V>.DataSrcResult dataSrcResult) {
 		try {
 			final ViewLiveData<V> resultLiveData = dataSrcResult.viewLiveData;
-			final int start = Math.max(0, from - firstRowIndex);
-			for (int i = start; i < rows.size(); i++) {
+			for (int i = dataSrcResult.start; i < rows.size(); i++) {
 				updateRow(rows.get(i), resultLiveData);
 			}
 			addon.onDataUpdated(resultLiveData.absoluteRowCount, rows.size(), dataSrcResult.firstRowIndex);

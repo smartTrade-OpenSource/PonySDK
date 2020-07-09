@@ -36,12 +36,14 @@ public class DataGridSnapshot {
 
     public int firstRowIndex;
     public int size;
+    public int start;
     public Map<Integer, Integer> sorts;
     public Set<Integer> filters;
 
-    public DataGridSnapshot(final int firstRowIndex, final int size, final Map<Integer, Integer> sorts, final Set<Integer> filters) {
+    public DataGridSnapshot(final int firstRowIndex, final int size, final int start, final Map<Integer, Integer> sorts, final Set<Integer> filters) {
         this.firstRowIndex = firstRowIndex;
         this.size = size;
+        this.start = start;
         this.sorts = sorts;
         this.filters = filters;
     }

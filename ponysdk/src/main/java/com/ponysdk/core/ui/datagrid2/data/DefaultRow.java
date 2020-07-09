@@ -23,58 +23,59 @@
 
 package com.ponysdk.core.ui.datagrid2.data;
 
+import java.util.Objects;
+
 /**
  *
  */
 public class DefaultRow<V> {
 
-    private final int id;
-    private V data;
-    private boolean accepted;
+	private final int id;
+	private V data;
+	private boolean accepted;
 
-    public DefaultRow(final int id, final V data) {
-        super();
-        this.id = id;
-        this.data = data;
-    }
+	public DefaultRow(final int id, final V data) {
+		this.id = id;
+		this.data = Objects.requireNonNull(data);
+	}
 
-    @Override
-    public int hashCode() {
-        return id;
-    }
+	@Override
+	public int hashCode() {
+		// FIXME : This fix was implemented to avoid duplicated keys
+		// (only different id) in DB dataSrc
+		return data.hashCode();
+		// return id;
+	}
 
-    @Override
-    public boolean equals(final Object obj) {
-        return ((DefaultRow<V>) obj).getData().equals(data) && ((DefaultRow<V>) obj).isAccepted() == accepted;
-    }
+	@Override
+	public boolean equals(final Object obj) {
+		if (obj instanceof DefaultRow)
+			return ((DefaultRow<V>) obj).getData().equals(data) && ((DefaultRow<V>) obj).isAccepted() == accepted;
+		else return false;
+	}
 
-    @Override
-    public String toString() {
-        return "Row [id=" + id + ", data=" + data + ", accepted=" + accepted + "]";
-    }
+	@Override
+	public String toString() {
+		return "Row [id=" + id + ", data=" + data + ", accepted=" + accepted + "]";
+	}
 
-    public V getData() {
-        return data;
-    }
+	public V getData() {
+		return data;
+	}
 
-    public void setData(final V data) {
-        this.data = data;
-    }
+	public void setData(final V data) {
+		this.data = data;
+	}
 
-    public int getID() {
-        return id;
-    }
+	public int getID() {
+		return id;
+	}
 
-    public boolean isAccepted() {
-        return accepted;
-    }
+	public boolean isAccepted() {
+		return accepted;
+	}
 
-    public void setAcceptance(final boolean accepted) {
-        this.accepted = accepted;
-    }
-
-    public boolean equals(final DefaultRow<V> row) {
-        if (data == row.getData() && id == row.getID() && accepted == row.isAccepted()) return true;
-        return false;
-    }
+	public void setAcceptance(final boolean accepted) {
+		this.accepted = accepted;
+	}
 }

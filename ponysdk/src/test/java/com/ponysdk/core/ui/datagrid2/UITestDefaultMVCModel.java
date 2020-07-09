@@ -55,7 +55,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 import com.ponysdk.core.model.WidgetType;
@@ -89,7 +88,7 @@ import com.ponysdk.core.ui.datagrid2.view.RowSelectorColumnDataGridView;
 /**
  * @author mabbas
  */
-class UITestDefaultCacheDataSourceViaController {
+class UITestDefaultMVCModel {
 
 	private Map<Character, DefaultColumnDefinition<MyRow>> colDefs;
 	private DataGridView<Integer, MyRow> gridView;
@@ -112,7 +111,8 @@ class UITestDefaultCacheDataSourceViaController {
 	}
 
 	@Nested
-	@DisplayName("Data Manipulation")
+	@DisplayName("DataSrc.DataManipulation")
+	// Test cache data source via Controller
 	public class DataManipulation {
 
 		@Test
@@ -313,7 +313,8 @@ class UITestDefaultCacheDataSourceViaController {
 	}
 
 	@Nested
-	@DisplayName("Data selection")
+	@DisplayName("DataSrc.DataSelection")
+	// Test data source selection feature via controller
 	public class DataSelection {
 
 		@Test
@@ -358,7 +359,7 @@ class UITestDefaultCacheDataSourceViaController {
 	}
 
 	@Nested
-	@DisplayName("Data Sorting")
+	@DisplayName("DataSrc.DataSorting")
 	public class DataSorting {
 
 		final Comparator<MyRow> comparator = (row1, row2) -> {
@@ -448,7 +449,7 @@ class UITestDefaultCacheDataSourceViaController {
 	}
 
 	@Nested
-	@DisplayName("Data Filtering")
+	@DisplayName("DataSrc.DataFiltering")
 	public class DataFiltering {
 
 		@Test
@@ -579,7 +580,7 @@ class UITestDefaultCacheDataSourceViaController {
 	}
 
 	@Nested
-	@DisplayName("Row actions")
+	@DisplayName("View.RowActions")
 	public class RowActionAdder {
 
 		RowAction<MyRow> testRowAction = new RowAction<>() {
@@ -654,14 +655,13 @@ class UITestDefaultCacheDataSourceViaController {
 	}
 
 	@Nested
-	@DisplayName("RenderingHelpersCache")
+	@DisplayName("Controller.RenderingHelpersCache")
 	public class RenderingHelperCache {
 
 		@Test
 		void RenderingHelperInitialization() {
 			final RenderingHelpersCache<MyRow> renderingHelpersCache = getRenderingHelpersCache();
-			final List<DefaultDataGridView<Integer, MyRow>.Row> rows = getRows();
-			if (isReady(waitForListContent(rows, 9))) {
+			if (isReady(waitForMapContent(renderingHelpersCache, 9))) {
 				assertEquals(9, renderingHelpersCache.size());
 			}
 		}
@@ -669,9 +669,8 @@ class UITestDefaultCacheDataSourceViaController {
 		@Test
 		void RenderingHelperClear() {
 			final RenderingHelpersCache<MyRow> renderingHelpersCache = getRenderingHelpersCache();
-			final List<DefaultDataGridView<Integer, MyRow>.Row> rows = getRows();
 			// clearRenderingHelpers(..) method is called by the update method
-			if (isReady(waitForListContent(rows, 9))) {
+			if (isReady(waitForMapContent(renderingHelpersCache, 9))) {
 				assertEquals(9, renderingHelpersCache.size());
 				controller.updateData(4, (x) -> {
 				});
@@ -681,36 +680,22 @@ class UITestDefaultCacheDataSourceViaController {
 			}
 		}
 
-		// @Test
-		// void RenderingHelperAddData() {
-		// final RenderingHelpersCache<MyRow> renderingHelpersCache =
-		// getRenderingHelpersCache();
-		// final List<DefaultDataGridView<Integer, MyRow>.Row> rows = getRows();
-		// controller.setData(createMyRow(9));
-		// if (isReady(waitForListContent(rows, 10))) {
-		// assertEquals(10, renderingHelpersCache.size());
-		// }
-		// }
-
 		@Test
 		void RenderingHelperClearData() {
 			final RenderingHelpersCache<MyRow> renderingHelpersCache = getRenderingHelpersCache();
-			final List<DefaultDataGridView<Integer, MyRow>.Row> rows = getRows();
-			if (isReady(waitForListContent(rows, 9))) {
+			if (isReady(waitForMapContent(renderingHelpersCache, 9))) {
 				assertEquals(9, renderingHelpersCache.size());
 			}
 			controller.removeData(8);
 			controller.removeData(7);
-			if (isReady(waitForListContent(rows, 7))) {
+			if (isReady(waitForMapContent(renderingHelpersCache, 7))) {
 				assertEquals(7, renderingHelpersCache.size());
 			}
 		}
 
-		@RepeatedTest(20)
 		@Test
 		void RenderingHelperClearColDef() {
 			final RenderingHelpersCache<MyRow> renderingHelpersCache = getRenderingHelpersCache();
-			final List<DefaultDataGridView<Integer, MyRow>.Row> rows = getRows();
 			if (isReady(waitForMapContent(renderingHelpersCache, 9))) {
 				assertEquals(9, renderingHelpersCache.size());
 			}
@@ -720,13 +705,6 @@ class UITestDefaultCacheDataSourceViaController {
 				assertEquals('b', ((String) o[2]).charAt(0));
 			}
 		}
-	}
-
-	// FIXME
-	@Nested
-	@DisplayName("Configuration")
-	public class Configuration {
-
 	}
 
 	private void createDefaultDataGrid() {
@@ -894,15 +872,7 @@ class UITestDefaultCacheDataSourceViaController {
 		}, true);
 	}
 
-	// private Field accessPrivateField(final Class<?> cls, final String
-	// varName) {
-	// final cls var = cls.getDeclaredConstructor().newInstance();
-	// final Field field = AbstractDataSource.class.getDeclaredField(varName);
-	// field.setAccessible(true);
-	// var = (cls) field.get(gridView);
-	// return var;
-	// }
-
+	@SuppressWarnings("unchecked")
 	private Set<Integer> getSelectedKeys() {
 		Set<Integer> selectedKeys = new HashSet<>();
 		try {
@@ -915,6 +885,7 @@ class UITestDefaultCacheDataSourceViaController {
 		return selectedKeys;
 	}
 
+	@SuppressWarnings("unchecked")
 	private Map<Object, AbstractFilter<MyRow>> getFilters() {
 		Map<Object, AbstractFilter<MyRow>> filtersContainer = new HashMap<>();
 		try {
@@ -927,6 +898,7 @@ class UITestDefaultCacheDataSourceViaController {
 		return filtersContainer;
 	}
 
+	@SuppressWarnings("unchecked")
 	private LinkedHashMap<Object, RowAction<MyRow>> getRowActions() {
 		LinkedHashMap<Object, RowAction<MyRow>> rowActionsContainer = new LinkedHashMap<>();
 		try {
@@ -939,6 +911,7 @@ class UITestDefaultCacheDataSourceViaController {
 		return rowActionsContainer;
 	}
 
+	@SuppressWarnings("unchecked")
 	private List<DefaultDataGridView<Integer, MyRow>.Row> getRows() {
 		List<DefaultDataGridView<Integer, MyRow>.Row> rows = new ArrayList<>();
 		try {
@@ -951,6 +924,7 @@ class UITestDefaultCacheDataSourceViaController {
 		return rows;
 	}
 
+	@SuppressWarnings("unchecked")
 	private List<DefaultRow<MyRow>> getLiveData() {
 		List<DefaultRow<MyRow>> liveData = new ArrayList<>();
 		try {
@@ -963,7 +937,7 @@ class UITestDefaultCacheDataSourceViaController {
 		return liveData;
 	}
 
-	private PComplexPanel getUnpinnedRow(final DefaultDataGridView.Row row) {
+	private PComplexPanel getUnpinnedRow(final DefaultDataGridView<Integer, MyRow>.Row row) {
 		PComplexPanel unpinnedRow = new PComplexPanel() {
 
 			@Override
@@ -982,6 +956,7 @@ class UITestDefaultCacheDataSourceViaController {
 		return unpinnedRow;
 	}
 
+	@SuppressWarnings("unchecked")
 	private RenderingHelpersCache<MyRow> getRenderingHelpersCache() {
 		RenderingHelpersCache<MyRow> renderingHelpersCache = new RenderingHelpersCache<>();
 		try {
@@ -1013,12 +988,14 @@ class UITestDefaultCacheDataSourceViaController {
 		final Callable<Boolean> waitForListContent = () -> {
 			final boolean ready = false;
 			outerloop: while (!ready) {
-				for (int i = 0; i < size; i++) {
-					if (getViewRowKey(list, i) < 0) {
-						continue outerloop;
+				if (list.size() == size) {
+					for (int i = 0; i < size; i++) {
+						if (getViewRowKey(list, i) < 0) {
+							continue outerloop;
+						}
 					}
-				}
-				return true;
+					return true;
+				} else continue;
 			}
 		};
 
@@ -1030,7 +1007,7 @@ class UITestDefaultCacheDataSourceViaController {
 		final Callable<Boolean> waitForMapContent = () -> {
 			final boolean ready = false;
 			outerloop: while (!ready) {
-				if (cache.size() == 9) {
+				if (cache.size() == size) {
 					for (final Object[] o : cache.values()) {
 						if (o[1] == null || o[2] == null || size != cache.size()) {
 							continue outerloop;
@@ -1038,7 +1015,7 @@ class UITestDefaultCacheDataSourceViaController {
 					}
 					return true;
 				} else {
-					LockSupport.parkNanos(10);
+					LockSupport.parkNanos(TimeUnit.MICROSECONDS.toNanos(10));
 					continue;
 				}
 			}
