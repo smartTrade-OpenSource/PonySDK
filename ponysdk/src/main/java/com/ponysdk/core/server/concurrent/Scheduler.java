@@ -1,3 +1,4 @@
+
 package com.ponysdk.core.server.concurrent;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -24,85 +25,83 @@ import java.util.concurrent.TimeUnit;
  */
 public final class Scheduler {
 
-	private final ScheduledExecutorService executor;
-	private final ConcurrentLinkedQueue<SchedulingContextImpl> realtimeContexts = new ConcurrentLinkedQueue<>();
+    private final ScheduledExecutorService executor;
+    private final ConcurrentLinkedQueue<SchedulingContextImpl> realtimeContexts = new ConcurrentLinkedQueue<>();
 
-	public Scheduler(final int poolSize) {
-		executor = Executors.newScheduledThreadPool(poolSize);
-	}
+    public Scheduler(final int poolSize) {
+        executor = Executors.newScheduledThreadPool(poolSize);
+    }
 
-	public Scheduler(final int poolSize, final ThreadFactory factory) {
-		executor = Executors.newScheduledThreadPool(poolSize, factory);
-	}
+    public Scheduler(final int poolSize, final ThreadFactory factory) {
+        executor = Executors.newScheduledThreadPool(poolSize, factory);
+    }
 
-	/**
-	 * Create a new {@link SchedulingContext} that can be used to submit new tasks
-	 */
-	public SchedulingContext createContext(final String name) {
-		return new SchedulingContextImpl(name, this);
-	}
+    /**
+     * Create a new {@link SchedulingContext} that can be used to submit new tasks
+     */
+    public SchedulingContext createContext(final String name) {
+        return new SchedulingContextImpl(name, this);
+    }
 
-	/**
-	 * Shutdown the scheduler, trying to cancel all pending tasks as fast as
-	 * possible.<br>
-	 */
-	public void shutdown() {
-		for (final Runnable r : executor.shutdownNow()) {
-			if (r instanceof SchedulingContext) {
-				((SchedulingContext) r).destroy();
-			}
-		}
+    /**
+     * Shutdown the scheduler, trying to cancel all pending tasks as fast as
+     * possible.<br>
+     */
+    public void shutdown() {
+        for (final Runnable r : executor.shutdownNow()) {
+            if (r instanceof SchedulingContext) {
+                ((SchedulingContext) r).destroy();
+            }
+        }
 
-		realtimeContexts.clear();
-	}
+        realtimeContexts.clear();
+    }
 
-	/**
-	 * Wait for the Scheduler to shutdown properly up to the specify delay
-	 * 
-	 * @param timeoutMillis the maximum delay to wait (in millisecond)
-	 * @return true if the Scheduler is terminated, false otherwise
-	 */
-	public boolean awaitTermination(final long timeoutMillis) throws InterruptedException {
-		return executor.awaitTermination(timeoutMillis, TimeUnit.MILLISECONDS);
-	}
+    /**
+     * Wait for the Scheduler to shutdown properly up to the specify delay
+     * 
+     * @param timeoutMillis the maximum delay to wait (in millisecond)
+     * @return true if the Scheduler is terminated, false otherwise
+     */
+    public boolean awaitTermination(final long timeoutMillis) throws InterruptedException {
+        return executor.awaitTermination(timeoutMillis, TimeUnit.MILLISECONDS);
+    }
 
-	////////////////////////////////////////
+    ////////////////////////////////////////
 
-	boolean isShutdown() {
-		return executor.isShutdown();
-	}
+    boolean isShutdown() {
+        return executor.isShutdown();
+    }
 
-	ScheduledFuture<?> executeLater(final long delayMillis, final SchedulingContextImpl context, final Runnable task) {
-		try {
-			return executor.schedule(task, delayMillis, MILLISECONDS);
-		} catch (final RejectedExecutionException e) {
-			context.destroy();
-			throw e;
-		}
-	}
+    ScheduledFuture<?> executeLater(final long delayMillis, final SchedulingContextImpl context, final Runnable task) {
+        try {
+            return executor.schedule(task, delayMillis, MILLISECONDS);
+        } catch (final RejectedExecutionException e) {
+            context.destroy();
+            throw e;
+        }
+    }
 
-	ScheduledFuture<?> schedulePeriodicTask(final long periodMillis, final SchedulingContextImpl context,
-			final Runnable task) {
-		try {
-			return executor.scheduleWithFixedDelay(task, periodMillis, periodMillis, MILLISECONDS);
-		} catch (final RejectedExecutionException e) {
-			context.destroy();
-			throw e;
-		}
-	}
+    ScheduledFuture<?> schedulePeriodicTask(final long periodMillis, final SchedulingContextImpl context, final Runnable task) {
+        try {
+            return executor.scheduleWithFixedDelay(task, periodMillis, periodMillis, MILLISECONDS);
+        } catch (final RejectedExecutionException e) {
+            context.destroy();
+            throw e;
+        }
+    }
 
-	void executeContext(final SchedulingContextImpl context, final boolean realtime) {
-		try {
-			executor.execute(context);
-			if (realtime)
-				realtimeContexts.offer(context);
-		} catch (final RejectedExecutionException e) {
-			context.destroy();
-		}
-	}
+    void executeContext(final SchedulingContextImpl context, final boolean realtime) {
+        try {
+            executor.execute(context);
+            if (realtime) realtimeContexts.offer(context);
+        } catch (final RejectedExecutionException e) {
+            context.destroy();
+        }
+    }
 
-	SchedulingContextImpl pollRealtimeContext() {
-		return realtimeContexts.poll();
-	}
+    SchedulingContextImpl pollRealtimeContext() {
+        return realtimeContexts.poll();
+    }
 
 }

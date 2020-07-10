@@ -40,6 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletResponse;
@@ -91,17 +92,17 @@ import com.ponysdk.core.ui.datagrid.DataGrid;
 import com.ponysdk.core.ui.datagrid.dynamic.Configuration;
 import com.ponysdk.core.ui.datagrid.dynamic.DynamicDataGrid;
 import com.ponysdk.core.ui.datagrid.impl.PLabelCellRenderer;
-import com.ponysdk.core.ui.datagrid2.ColumnDefinition;
-import com.ponysdk.core.ui.datagrid2.ColumnVisibilitySelectorDataGridView;
-import com.ponysdk.core.ui.datagrid2.ConfigSelectorDataGridView;
-import com.ponysdk.core.ui.datagrid2.DataGridAdapter;
-import com.ponysdk.core.ui.datagrid2.DataGridModel;
-import com.ponysdk.core.ui.datagrid2.DataGridView;
-import com.ponysdk.core.ui.datagrid2.DataGridView.DecodeException;
-import com.ponysdk.core.ui.datagrid2.RowAction;
-import com.ponysdk.core.ui.datagrid2.RowSelectorColumnDataGridView;
-import com.ponysdk.core.ui.datagrid2.SimpleColumnDefinition;
-import com.ponysdk.core.ui.datagrid2.SimpleDataGridView;
+import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
+import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
+import com.ponysdk.core.ui.datagrid2.column.DefaultColumnDefinition;
+import com.ponysdk.core.ui.datagrid2.controller.DataGridController;
+import com.ponysdk.core.ui.datagrid2.data.RowAction;
+import com.ponysdk.core.ui.datagrid2.view.ColumnVisibilitySelectorDataGridView;
+import com.ponysdk.core.ui.datagrid2.view.ConfigSelectorDataGridView;
+import com.ponysdk.core.ui.datagrid2.view.DataGridView;
+import com.ponysdk.core.ui.datagrid2.view.DataGridView.DecodeException;
+import com.ponysdk.core.ui.datagrid2.view.DefaultDataGridView;
+import com.ponysdk.core.ui.datagrid2.view.RowSelectorColumnDataGridView;
 import com.ponysdk.core.ui.eventbus2.EventBus.EventHandler;
 import com.ponysdk.core.ui.formatter.TextFunction;
 import com.ponysdk.core.ui.grid.AbstractGridWidget;
@@ -129,7 +130,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     // HighChartsStackedColumnAddOn highChartsStackedColumnAddOn;
     int a = 0;
-
     private static int counter;
 
     @Override
@@ -143,7 +143,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         mainLabel.setTitle("String ASCII");
         PWindow.getMain().add(mainLabel);
 
-        //testSimpleDataGridView();
+        testSimpleDataGridView();
 
         if (true) return;
 
@@ -287,22 +287,20 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         // uiContext.getHistory().newItem("", false);
     }
 
-    private static class MyModel {
+    private static class MyRow {
 
         private final int id;
         private Map<String, String> map;
+        private final String format;
 
-        public MyModel(final int id) {
+        public MyRow(final int id) {
             super();
             this.id = id;
-        }
-
-        public int getId() {
-            return id;
+            format = String.format("%09d", id);
         }
 
         public void putValue(final String key, final String value) {
-            if (map == null) map = new HashMap<>();
+            if (map == null) map = new ConcurrentHashMap<>();
             map.put(key, value);
         }
 
@@ -311,12 +309,12 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
                 final String v = map.get(key);
                 if (v != null) return v;
             }
-            return key + String.format("%09d", id);
+            return key + format;
         }
 
         @Override
-        public MyModel clone() {
-            final MyModel model = new MyModel(id);
+        public MyRow clone() {
+            final MyRow model = new MyRow(id);
             if (map == null) return model;
             model.map = new HashMap<>(map);
             return model;
@@ -329,36 +327,37 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     }
 
-    private static MyModel createMyModel(final int index) {
-        return new MyModel(index);
+    private static MyRow createMyRow(final int index) {
+        return new MyRow(index);
     }
 
     private void testSimpleDataGridView() {
-        final DataGridView<Integer, MyModel> simpleGridView = new SimpleDataGridView<>();
-        final ColumnVisibilitySelectorDataGridView<Integer, MyModel> columnVisibilitySelectorDataGridView = new ColumnVisibilitySelectorDataGridView<>(
+        final DataGridView<Integer, MyRow> simpleGridView = new DefaultDataGridView<>();
+        final ColumnVisibilitySelectorDataGridView<Integer, MyRow> columnVisibilitySelectorDataGridView = new ColumnVisibilitySelectorDataGridView<>(
             simpleGridView);
-        final RowSelectorColumnDataGridView<Integer, MyModel> rowSelectorColumnDataGridView = new RowSelectorColumnDataGridView<>(
+        final RowSelectorColumnDataGridView<Integer, MyRow> rowSelectorColumnDataGridView = new RowSelectorColumnDataGridView<>(
             columnVisibilitySelectorDataGridView);
-        //        final ColumnFilterFooterDataGridView<Integer, MyModel> columnFilterFooterDataGridView = new ColumnFilterFooterDataGridView<>(
-        //            rowSelectorColumnDataGridView);
-        final ConfigSelectorDataGridView<Integer, MyModel> configSelectorDataGridView = new ConfigSelectorDataGridView<>(
+        // final ColumnFilterFooterDataGridView<Integer, MyRow> columnFilterFooterDataGridView = new
+        // ColumnFilterFooterDataGridView<>(
+        // rowSelectorColumnDataGridView);
+        final ConfigSelectorDataGridView<Integer, MyRow> configSelectorDataGridView = new ConfigSelectorDataGridView<>(
             rowSelectorColumnDataGridView, "DEFAULT");
 
-        final DataGridView<Integer, MyModel> gridView = configSelectorDataGridView;
-        gridView.setAdapter(new DataGridAdapter<Integer, UISampleEntryPoint.MyModel>() {
+        final DataGridView<Integer, MyRow> gridView = configSelectorDataGridView;
+        gridView.setAdapter(new DataGridAdapter<Integer, UISampleEntryPoint.MyRow>() {
 
-            private final List<ColumnDefinition<MyModel>> columns = new ArrayList<>();
+            private final List<ColumnDefinition<MyRow>> columns = new ArrayList<>();
 
             {
                 for (char c = 'a'; c <= 'z'; c++) {
                     final String ss = c + "";
-                    columns.add(new SimpleColumnDefinition<>(ss, v -> v.getValue(ss), (v, s) -> {
+                    columns.add(new DefaultColumnDefinition<>(ss, v -> v.getValue(ss), (v, s) -> {
                         v.putValue(ss, s);
                     }));
                 }
                 for (char c = 'A'; c <= 'Z'; c++) {
                     final String ss = c + "";
-                    columns.add(new SimpleColumnDefinition<>(ss, v -> v.getValue(ss), (v, s) -> {
+                    columns.add(new DefaultColumnDefinition<>(ss, v -> v.getValue(ss), (v, s) -> {
                         v.putValue(ss, s);
                     }));
                 }
@@ -380,17 +379,17 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             }
 
             @Override
-            public Integer getKey(final MyModel v) {
+            public Integer getKey(final MyRow v) {
                 return v.id;
             }
 
             @Override
-            public List<ColumnDefinition<MyModel>> getColumnDefinitions() {
+            public List<ColumnDefinition<MyRow>> getColumnDefinitions() {
                 return columns;
             }
 
             @Override
-            public int compareDefault(final MyModel v1, final MyModel v2) {
+            public int compareDefault(final MyRow v1, final MyRow v2) {
                 return 0;
             }
 
@@ -432,7 +431,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             }
         });
         gridView.setPollingDelayMillis(250L);
-        final DataGridModel<Integer, MyModel> model = gridView.getModel();
+        final DataGridController<Integer, MyRow> controller = gridView.getController();
         gridView.asWidget().setHeight("500px");
         gridView.asWidget().setWidth("1000px");
         gridView.asWidget().setStyleProperty("resize", "both");
@@ -491,16 +490,17 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         PWindow.getMain().add(exportConfigButton);
         PWindow.getMain().add(importConfigTextBox);
         PWindow.getMain().add(importConfigButton);
-        model.setBound(false);
+        controller.setBound(false);
         for (int i = 0; i < 1_000; i++) {
             if (i % 500_000 == 0) log.info("i: {}", i);
-            model.setData(createMyModel(i));
+            controller.setData(createMyRow(i));
         }
-        model.setBound(true);
+        controller.setBound(true);
+
         gridView.addRowAction(UISampleEntryPoint.class, new RowAction<>() {
 
             @Override
-            public boolean testRow(final MyModel t, final int index) {
+            public boolean testRow(final MyRow t, final int index) {
                 return (index & 1) == 0;
             }
 
@@ -513,23 +513,28 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             public void apply(final IsPWidget row) {
                 row.asWidget().addStyleName("unpair-row");
             }
+
+            @Override
+            public boolean isActionApplied(final IsPWidget row) {
+                return row.asWidget().hasStyleName("unpair-row");
+            }
         });
-        //        final AtomicInteger ii = new AtomicInteger(1_000);
-        //        final AtomicBoolean reverse = new AtomicBoolean(false);
-        //        PScheduler.scheduleAtFixedRate(() -> {
-        //            if (ii.get() % 10_000 == 0) log.info("ii : {}", ii);
-        //            if (reverse.get()) {
-        //                final int i = ii.getAndDecrement();
-        //                model.removeData(i);
-        //            } else {
-        //                final int i = ii.getAndIncrement();
-        //                model.setData(createMyModel(i));
-        //                if (i == 1_000_000) {
-        //                    log.info("Start reversing");
-        //                    reverse.set(true);
-        //                }
-        //            }
-        //        }, Duration.ofMillis(10L));
+        // final AtomicInteger ii = new AtomicInteger(1_000);
+        // final AtomicBoolean reverse = new AtomicBoolean(false);
+        // PScheduler.scheduleAtFixedRate(() -> {
+        // if (ii.get() % 10_000 == 0) log.info("ii : {}", ii);
+        // if (reverse.get()) {
+        // final int i = ii.getAndDecrement();
+        // model.removeData(i);
+        // } else {
+        // final int i = ii.getAndIncrement();
+        // model.setData(createMyRow(i));
+        // if (i == 1_000_000) {
+        // log.info("Start reversing");
+        // reverse.set(true);
+        // }
+        // }
+        // }, Duration.ofMillis(10L));
     }
 
     private void testVisibilityHandler(final PWindow window) {
@@ -676,10 +681,10 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     }
 
     private void createNewGridSystem() {
-        //        final DataGrid<Pojo> grid = new DataGrid<>((a, b) -> a.bid.compareTo(b.bid));
+        // final DataGrid<Pojo> grid = new DataGrid<>((a, b) -> a.bid.compareTo(b.bid));
 
         final Configuration<Pojo> configuration = new Configuration<>(Pojo.class);
-        //configuration.setFilter(method -> method.getName().contains("COUCOU"));
+        // configuration.setFilter(method -> method.getName().contains("COUCOU"));
 
         final DataGrid<Pojo> grid = new DynamicDataGrid<>(configuration, Comparator.comparing(Pojo::getBid));
 
@@ -796,9 +801,9 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         }
         final PTextBox textBox = Element.newPTextBox();
 
-        //        final PButton add = Element.newPButton("add");
-        //        add.addClickHandler(e -> grid.setData(Integer.valueOf(textBox.getText())));
-        //        PWindow.getMain().add(add);
+        // final PButton add = Element.newPButton("add");
+        // add.addClickHandler(e -> grid.setData(Integer.valueOf(textBox.getText())));
+        // PWindow.getMain().add(add);
 
         PWindow.getMain().add(textBox);
         PWindow.getMain().add(grid);

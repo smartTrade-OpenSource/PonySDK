@@ -86,9 +86,11 @@ public class PElement extends PComplexPanel {
     @Override
     protected String dumpDOM() {
         if (getWidgetCount() == 0) {
-            return "<" + tagName + " class=\"" + getStyleNames().collect(Collectors.joining(" ")) + "\">" + (innerText != null ? innerText : innerHTML) + "</" + tagName + ">";
+            return "<" + tagName + " class=\"" + getStyleNames().collect(Collectors.joining(" ")) + "\">"
+                    + (innerText != null ? innerText : innerHTML) + "</" + tagName + ">";
         } else {
-            return "<" + tagName + " class=\"" + getStyleNames().collect(Collectors.joining(" ")) + "\">" + dumpChildDOM() + "</" + tagName + ">";
+            return "<" + tagName + " class=\"" + getStyleNames().collect(Collectors.joining(" ")) + "\">" + dumpChildDOM() + "</"
+                    + tagName + ">";
         }
     }
 

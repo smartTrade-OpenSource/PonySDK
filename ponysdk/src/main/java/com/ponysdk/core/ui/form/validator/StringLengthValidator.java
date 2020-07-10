@@ -38,8 +38,10 @@ public class StringLengthValidator implements FieldValidator {
     @Override
     public ValidationResult isValid(final String value) {
         if (value == null || value.isEmpty()) return ValidationResult.newOKValidationResult();
-        if (value.length() < minLength) return ValidationResult.newFailedValidationResult(PString.get("validator.error.minlength", minLength));
-        if (value.length() > maxLength) return ValidationResult.newFailedValidationResult(PString.get("validator.error.maxlength", maxLength));
+        if (value.length() < minLength)
+            return ValidationResult.newFailedValidationResult(PString.get("validator.error.minlength", minLength));
+        if (value.length() > maxLength)
+            return ValidationResult.newFailedValidationResult(PString.get("validator.error.maxlength", maxLength));
         return ValidationResult.newOKValidationResult();
     }
 }

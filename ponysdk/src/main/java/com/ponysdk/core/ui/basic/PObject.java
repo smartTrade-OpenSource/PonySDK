@@ -85,7 +85,7 @@ public abstract class PObject {
             return true;
         } else if (this.window != window) {
             throw new IllegalAccessError(
-                    "Widget already attached to an other window, current window : #" + this.window + ", new window : #" + window);
+                "Widget already attached to an other window, current window : #" + this.window + ", new window : #" + window);
         }
 
         return false;
@@ -422,6 +422,5 @@ public abstract class PObject {
 
         void onDestroy(PObject object);
     }
-
 
 }

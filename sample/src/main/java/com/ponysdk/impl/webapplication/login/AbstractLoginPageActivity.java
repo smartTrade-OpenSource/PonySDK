@@ -53,9 +53,7 @@ public abstract class AbstractLoginPageActivity extends AbstractActivity<LoginPa
 
             @Override
             public PKeyCodes[] getFilteredKeys() {
-                return new PKeyCodes[] {
-                        PKeyCodes.ENTER
-                };
+                return new PKeyCodes[] { PKeyCodes.ENTER };
             }
         };
         view.addLoginShortcutListener(keyPressHandler);

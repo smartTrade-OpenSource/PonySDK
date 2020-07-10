@@ -102,6 +102,7 @@ abstract class PButtonBase extends PFocusWidget {
 
     @Override
     protected String dumpDOM() {
-        return "<button class=\"" + getStyleNames().collect(Collectors.joining(" ")) + "\">" + text != null ? text : html + "</button>";
+        return "<button class=\"" + getStyleNames().collect(Collectors.joining(" ")) + "\">" + text != null ? text
+                : html + "</button>";
     }
 }

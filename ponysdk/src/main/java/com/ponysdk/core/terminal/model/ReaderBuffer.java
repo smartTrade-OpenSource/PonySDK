@@ -319,10 +319,10 @@ public class ReaderBuffer {
         } else if (arrayValueModel == ArrayValueModel.STRING_UTF8_UINT8_LENGTH
                 || arrayValueModel == ArrayValueModel.STRING_UTF8_UINT16_LENGTH
                 || arrayValueModel == ArrayValueModel.STRING_UTF8_INT32_LENGTH) {
-            ascii = false;
-        } else {
-            throw new IllegalArgumentException("Unsupported ArrayValueModel " + arrayValueModel);
-        }
+                    ascii = false;
+                } else {
+                    throw new IllegalArgumentException("Unsupported ArrayValueModel " + arrayValueModel);
+                }
         return ascii ? decodeStringAscii(msgSize) : decodeStringUTF8(msgSize);
     }
 

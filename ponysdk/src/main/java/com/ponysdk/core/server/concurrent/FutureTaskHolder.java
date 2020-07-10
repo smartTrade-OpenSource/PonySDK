@@ -1,3 +1,4 @@
+
 package com.ponysdk.core.server.concurrent;
 
 import java.util.Objects;
@@ -7,26 +8,25 @@ import java.util.concurrent.ScheduledFuture;
 //strongly referenced until executed. Needed to forbid SchedulingContextImpl.scheduledTasks to drop weak references
 class FutureTaskHolder {
 
-	static FutureTaskHolder scheduleFutureTask(final SchedulingContextImpl context, final long delayMillis,
-			final Runnable task) {
-		final FutureTaskHolder holder = new FutureTaskHolder(task);
-		holder.future = context.getScheduler().executeLater(delayMillis, context, holder::run);
-		return holder;
-	}
+    static FutureTaskHolder scheduleFutureTask(final SchedulingContextImpl context, final long delayMillis, final Runnable task) {
+        final FutureTaskHolder holder = new FutureTaskHolder(task);
+        holder.future = context.getScheduler().executeLater(delayMillis, context, holder::run);
+        return holder;
+    }
 
-	private final Runnable task;
-	private ScheduledFuture<?> future;
+    private final Runnable task;
+    private ScheduledFuture<?> future;
 
-	private FutureTaskHolder(final Runnable task) {
-		Objects.requireNonNull(task);
-		this.task = task;
-	}
+    private FutureTaskHolder(final Runnable task) {
+        Objects.requireNonNull(task);
+        this.task = task;
+    }
 
-	private void run() {
-		task.run();
-	}
+    private void run() {
+        task.run();
+    }
 
-	ScheduledFuture<?> getFuture() {
-		return future;
-	}
+    ScheduledFuture<?> getFuture() {
+        return future;
+    }
 }

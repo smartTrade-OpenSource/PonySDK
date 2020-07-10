@@ -98,7 +98,7 @@ public class PStackLayoutPanel extends PWidget implements HasPWidgets, PAnimated
 
         child.attach(window, frame);
         child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.HTML, header),
-                new ServerBinaryModel(ServerToClientModel.SIZE, headerSize));
+            new ServerBinaryModel(ServerToClientModel.SIZE, headerSize));
     }
 
     @Override
@@ -121,7 +121,7 @@ public class PStackLayoutPanel extends PWidget implements HasPWidgets, PAnimated
     public void add(final PWidget w) {
         log.error("Use #add(final PWidget child, final String header, final boolean asHtml, final double headerSize) instead");
         throw new UnsupportedOperationException(
-                "Use #add(final PWidget child, final String header, final boolean asHtml, final double headerSize) instead");
+            "Use #add(final PWidget child, final String header, final boolean asHtml, final double headerSize) instead");
     }
 
     @Override

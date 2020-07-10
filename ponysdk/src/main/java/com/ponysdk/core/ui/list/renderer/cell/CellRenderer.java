@@ -35,7 +35,7 @@ import com.ponysdk.core.ui.list.refreshable.Cell;
  * <p>
  * Defined in a {@link DataGridColumnDescriptor}
  * </p>
-
+ * 
  */
 public interface CellRenderer<D, W extends IsPWidget> {
 

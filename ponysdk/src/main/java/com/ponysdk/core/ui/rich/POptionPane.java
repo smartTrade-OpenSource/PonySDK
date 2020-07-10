@@ -130,6 +130,7 @@ public class POptionPane implements IsPWidget {
     }
 
     public enum POption {
+
         CANCEL_OPTION("CANCEL"),
         CLOSED_OPTION("CLOSED"),
         NO_OPTION("NO"),
@@ -159,6 +160,7 @@ public class POptionPane implements IsPWidget {
     }
 
     public enum PMessageType {
+
         PLAIN_MESSAGE(""),
         ERROR_MESSAGE("Error"),
         INFORMATION_MESSAGE("Info"),

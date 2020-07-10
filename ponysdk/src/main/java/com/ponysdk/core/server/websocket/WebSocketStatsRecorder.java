@@ -97,10 +97,10 @@ class WebSocketStatsRecorder {
             stats = new AtomicReferenceArray<>(MODELS.length + 1);
             final Collection<AtomicReferenceArray<Map<Object, VolatileRecord>>> allStats = this.allStats;
             if (allStats != null) {
-            context.setAttribute(KEY, stats);
+                context.setAttribute(KEY, stats);
                 allStats.add(stats);
                 return stats;
-        }
+            }
             return null;
         }
         return stats;
@@ -140,15 +140,15 @@ class WebSocketStatsRecorder {
     public synchronized WebSocketStats stop() {
         if (this.startTime == null || summary != null) return null; //not started OR stopped
         try {
-        final LocalDateTime startTime = this.startTime;
-        this.startTime = null;
-        final LocalDateTime endTime = LocalDateTime.now();
-        scheduler.shutdownNow();
+            final LocalDateTime startTime = this.startTime;
+            this.startTime = null;
+            final LocalDateTime endTime = LocalDateTime.now();
+            scheduler.shutdownNow();
             final Map<ServerToClientModel, Map<Object, MutableRecord>> aggStats = aggregateStats();
-        summary = new WebSocketStats(aggStats, startTime, endTime, groupBy != null);
-        if (listener != null) listener.accept(summary);
-        log.info("Recording stopped, Statistics Summary: {}", summary);
-        return summary;
+            summary = new WebSocketStats(aggStats, startTime, endTime, groupBy != null);
+            if (listener != null) listener.accept(summary);
+            log.info("Recording stopped, Statistics Summary: {}", summary);
+            return summary;
         } finally {
             forEachUIContext(uiContext -> uiContext.removeAttribute(KEY));
         }

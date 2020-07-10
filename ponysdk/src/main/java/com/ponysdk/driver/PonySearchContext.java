@@ -36,9 +36,9 @@ import java.util.function.Predicate;
 class PonySearchContext implements FindsById, FindsByName, FindsByClassName, FindsByCssSelector, FindsByTagName, SearchContext {
 
     private static final ThreadLocal<MultipleElementsConsumer> multipleElementsConsumers = ThreadLocal
-            .withInitial(MultipleElementsConsumer::new);
+        .withInitial(MultipleElementsConsumer::new);
     private static final ThreadLocal<SingleElementConsumer> singleElementConsumers = ThreadLocal
-            .withInitial(SingleElementConsumer::new);
+        .withInitial(SingleElementConsumer::new);
     private static final Comparator<PonyWebElement> elementsComparator = (e1, e2) -> e1.objectID - e2.objectID;
 
     private final Collection<PonyWebElement> elements;
@@ -222,7 +222,7 @@ class PonySearchContext implements FindsById, FindsByName, FindsByClassName, Fin
             final int wordStart = usingIndex;
             final int wordEnd = wordEnd(using, usingIndex);
             if (wordEnd == wordStart) throw new IllegalArgumentException(
-                    "Invalid css selector '" + using + "' at " + usingIndex + ", a widget type or class name is expected");
+                "Invalid css selector '" + using + "' at " + usingIndex + ", a widget type or class name is expected");
             widgetType = WidgetType.valueOf(using.substring(wordStart, wordEnd));
             usingIndex = wordEnd;
         }
@@ -233,7 +233,7 @@ class PonySearchContext implements FindsById, FindsByName, FindsByClassName, Fin
             final int wordStart = usingIndex + 1;
             final int wordEnd = wordEnd(using, wordStart);
             if (wordEnd == wordStart) throw new IllegalArgumentException(
-                    "Invalid css selector '" + using + "' at " + usingIndex + ", a class name is expected after '.'");
+                "Invalid css selector '" + using + "' at " + usingIndex + ", a class name is expected after '.'");
             styles.add(using.substring(wordStart, wordEnd));
             usingIndex = wordEnd;
         }
@@ -255,8 +255,7 @@ class PonySearchContext implements FindsById, FindsByName, FindsByClassName, Fin
 
         if (dive) {
             for (final PonyWebElement e : elements) {
-                if (!e.context.findElementByCssSelector(widgetType, using, usingIndex, styles, true, consumer))
-                    return false;
+                if (!e.context.findElementByCssSelector(widgetType, using, usingIndex, styles, true, consumer)) return false;
             }
         }
 
@@ -271,7 +270,7 @@ class PonySearchContext implements FindsById, FindsByName, FindsByClassName, Fin
                 return findElementsByCssSelector(using, usingIndex + 1, false, consumer);
             default:
                 throw new IllegalArgumentException(
-                        "Invalid css selector '" + using + "' at " + usingIndex + ", character ' ' or '>' is expected");
+                    "Invalid css selector '" + using + "' at " + usingIndex + ", character ' ' or '>' is expected");
         }
     }
 

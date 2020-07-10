@@ -30,14 +30,10 @@ public class HeaderSortingHelper {
     public static SortingType getNextSortingType(final SortingType sortingType) {
         SortingType newSortingType;
 
-        if (sortingType == SortingType.NONE)
-            newSortingType = SortingType.ASCENDING;
-        else if (sortingType == SortingType.DESCENDING)
-            newSortingType = SortingType.ASCENDING;
-        else if (sortingType == SortingType.ASCENDING)
-            newSortingType = SortingType.DESCENDING;
-        else
-            newSortingType = SortingType.NONE;
+        if (sortingType == SortingType.NONE) newSortingType = SortingType.ASCENDING;
+        else if (sortingType == SortingType.DESCENDING) newSortingType = SortingType.ASCENDING;
+        else if (sortingType == SortingType.ASCENDING) newSortingType = SortingType.DESCENDING;
+        else newSortingType = SortingType.NONE;
 
         return newSortingType;
     }

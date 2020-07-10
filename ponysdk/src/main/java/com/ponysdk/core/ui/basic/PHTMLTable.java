@@ -220,7 +220,7 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
             // Physical attach.
             widget.attach(window, frame);
             widget.saveAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.ROW, row),
-                    new ServerBinaryModel(ServerToClientModel.COLUMN, column));
+                new ServerBinaryModel(ServerToClientModel.COLUMN, column));
 
         }
     }
@@ -418,7 +418,6 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
             });
         }
     }
-
 
     @Override
     protected String dumpDOM() {

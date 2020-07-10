@@ -29,7 +29,8 @@ public class UncheckedFieldValidator implements FieldValidator {
 
     @Override
     public ValidationResult isValid(final String value) {
-        if (value == null || value.isEmpty()) return ValidationResult.newFailedValidationResult(PString.get("validator.error.unchecked"));
+        if (value == null || value.isEmpty())
+            return ValidationResult.newFailedValidationResult(PString.get("validator.error.unchecked"));
         if (Boolean.valueOf(value)) return ValidationResult.newOKValidationResult();
         return ValidationResult.newFailedValidationResult(PString.get("validator.error.unchecked"));
     }

@@ -238,7 +238,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
             flush0();
         }
     }
-    
+
     private void sendHeartbeat() {
         if (!isAlive() || !isSessionOpen()) return;
         beginObject();

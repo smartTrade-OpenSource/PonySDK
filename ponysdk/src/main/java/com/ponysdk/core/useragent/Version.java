@@ -55,9 +55,8 @@ public class Version {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Version version1 = (Version) o;
-        return Objects.equals(version, version1.version) &&
-                Objects.equals(majorVersion, version1.majorVersion) &&
-                Objects.equals(minorVersion, version1.minorVersion);
+        return Objects.equals(version, version1.version) && Objects.equals(majorVersion, version1.majorVersion)
+                && Objects.equals(minorVersion, version1.minorVersion);
     }
 
     @Override
@@ -67,10 +66,7 @@ public class Version {
 
     @Override
     public String toString() {
-        return "Version{" +
-                "version='" + version + '\'' +
-                ", majorVersion='" + majorVersion + '\'' +
-                ", minorVersion='" + minorVersion + '\'' +
-                '}';
+        return "Version{" + "version='" + version + '\'' + ", majorVersion='" + majorVersion + '\'' + ", minorVersion='" + minorVersion
+                + '\'' + '}';
     }
 }

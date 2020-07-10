@@ -28,10 +28,8 @@ import com.ponysdk.core.ui.basic.PAddOn;
 public class LoggerAddOn extends PAddOn {
 
     public void log(final String value) {
-        if (value != null)
-            callTerminalMethod("logWithText", value);
-        else
-            callTerminalMethod("log");
+        if (value != null) callTerminalMethod("logWithText", value);
+        else callTerminalMethod("log");
     }
 
 }

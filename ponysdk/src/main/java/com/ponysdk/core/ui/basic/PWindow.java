@@ -182,10 +182,10 @@ public class PWindow extends PObject {
     /**
      * Dynamically resizes window.
      *
-     * @param width  is an integer representing the new outerWidth in pixels (including scroll bars,
-     *               title bars, etc).
+     * @param width is an integer representing the new outerWidth in pixels (including scroll bars,
+     *            title bars, etc).
      * @param height is an integer value representing the new outerHeight in pixels (including scroll
-     *               bars, title bars, etc).
+     *            bars, title bars, etc).
      * @see <a href="https://developer.mozilla.org/fr/docs/Web/API/Window/resizeTo">MDN</a>
      */
     public void resizeTo(final int width, final int height) {

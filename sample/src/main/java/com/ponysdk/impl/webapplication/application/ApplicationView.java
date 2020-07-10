@@ -23,7 +23,6 @@
 
 package com.ponysdk.impl.webapplication.application;
 
-
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PSimplePanel;
 

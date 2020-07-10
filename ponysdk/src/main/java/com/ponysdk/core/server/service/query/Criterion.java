@@ -70,7 +70,8 @@ public class Criterion {
 
     @Override
     public String toString() {
-        return "CriteriaField [pojoProperty=" + pojoProperty + ", value=" + value + ", comparator=" + comparator + ", sortingType=" + sortingType + "]";
+        return "CriteriaField [pojoProperty=" + pojoProperty + ", value=" + value + ", comparator=" + comparator + ", sortingType="
+                + sortingType + "]";
     }
 
 }

@@ -27,7 +27,10 @@ import javax.websocket.CloseReason;
 import javax.websocket.Session;
 
 public interface PonySessionListener {
+
     public void onOpen(final Session session);
+
     public void onClose(final Session session, final CloseReason closeReason);
+
     public void onError(final Session session, final Throwable thr);
 }

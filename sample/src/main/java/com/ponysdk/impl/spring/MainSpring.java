@@ -30,6 +30,7 @@ import com.ponysdk.impl.spring.server.SpringApplicationManager;
 public class MainSpring {
 
     public static void main(final String[] args) {
+
         final String serverConfigLocation = System.getProperty(SpringApplicationManager.SERVER_CONFIG_LOCATION,
             "classpath:etc/server_application.xml");
 

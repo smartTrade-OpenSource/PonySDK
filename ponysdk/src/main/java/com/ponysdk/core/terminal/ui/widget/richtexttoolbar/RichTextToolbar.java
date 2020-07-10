@@ -52,9 +52,13 @@ import com.google.gwt.user.client.ui.Widget;
 @SuppressWarnings("deprecation")
 public class RichTextToolbar extends Composite {
 
-    private static final RichTextArea.FontSize[] fontSizesConstants = new RichTextArea.FontSize[]{RichTextArea.FontSize.XX_SMALL,
-            RichTextArea.FontSize.X_SMALL, RichTextArea.FontSize.SMALL, RichTextArea.FontSize.MEDIUM,
-            RichTextArea.FontSize.LARGE, RichTextArea.FontSize.X_LARGE, RichTextArea.FontSize.XX_LARGE};
+    private static final RichTextArea.FontSize[] fontSizesConstants = new RichTextArea.FontSize[] { RichTextArea.FontSize.XX_SMALL,
+                                                                                                    RichTextArea.FontSize.X_SMALL,
+                                                                                                    RichTextArea.FontSize.SMALL,
+                                                                                                    RichTextArea.FontSize.MEDIUM,
+                                                                                                    RichTextArea.FontSize.LARGE,
+                                                                                                    RichTextArea.FontSize.X_LARGE,
+                                                                                                    RichTextArea.FontSize.XX_LARGE };
     private final Strings strings = (Strings) GWT.create(Strings.class);
     private final EventHandler handler = new EventHandler();
     private final RichTextArea richText;
@@ -82,6 +86,7 @@ public class RichTextToolbar extends Composite {
     private ListBox foreColors;
     private ListBox fonts;
     private ListBox fontSizes;
+
     /**
      * Creates a new toolbar that drives the given rich text area.
      *
