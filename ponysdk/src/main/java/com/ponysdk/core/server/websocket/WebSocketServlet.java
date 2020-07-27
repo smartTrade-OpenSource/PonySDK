@@ -26,6 +26,7 @@ package com.ponysdk.core.server.websocket;
 import javax.servlet.http.HttpSession;
 
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
+import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,21 +53,23 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
     public void configure(final WebSocketServletFactory factory) {
         factory.getPolicy().setIdleTimeout(maxIdleTime);
         factory.getExtensionFactory().register(PonyPerMessageDeflateExtension.NAME, PonyPerMessageDeflateExtension.class);
-        factory.setCreator((request, response) -> {
-            final WebSocket webSocket = new WebSocket();
-            webSocket.setRequest(request);
-            webSocket.setApplicationManager(applicationManager);
-            webSocket.setMonitor(monitor);
+        factory.setCreator(this::createWebsocket);
+    }
 
-            final TxnContext context = new TxnContext(webSocket);
-            webSocket.setContext(context);
+    protected WebSocket createWebsocket(final ServletUpgradeRequest request, final ServletUpgradeResponse response) {
+        final WebSocket webSocket = new WebSocket();
+        webSocket.setRequest(request);
+        webSocket.setApplicationManager(applicationManager);
+        webSocket.setMonitor(monitor);
 
-            if (request.getHttpServletRequest().getServletContext().getSessionCookieConfig() != null) {
-                configureWithSession(request, context);
-            }
+        final TxnContext context = new TxnContext(webSocket);
+        webSocket.setContext(context);
 
-            return webSocket;
-        });
+        if (request.getHttpServletRequest().getServletContext().getSessionCookieConfig() != null) {
+            configureWithSession(request, context);
+        }
+
+        return webSocket;
     }
 
     protected void configureWithSession(final ServletUpgradeRequest request, final TxnContext context) {
