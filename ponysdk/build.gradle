@@ -101,7 +101,11 @@ dependencies {
             'org.glassfish.tyrus:tyrus-client:' + tyrusVersion,
             'org.glassfish.tyrus.ext:tyrus-extension-deflate:' + tyrusVersion,
             'junit:junit:' + junitVersion,
-            'org.mockito:mockito-core:' + mockitoVersion
+            'org.mockito:mockito-core:' + mockitoVersion,
+            'org.junit.jupiter:junit-jupiter-api:5.7.0',
+            'org.junit.jupiter:junit-jupiter-engine:5.7.0',
+            'org.junit.platform:junit-platform-engine:1.7.0',
+			'org.junit.platform:junit-platform-launcher:1.7.0',
     )
 
     testImplementation(

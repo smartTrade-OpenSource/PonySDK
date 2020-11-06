@@ -2295,3 +2295,15 @@ ul.pony-MultiSelectListBox-ItemsSelectionPanel a:hover {
         opacity: 0.5;
     }
 }
+
+[pony-hovered]{
+    background-color: red !important;
+}
+
+div.selected-row {
+    background-color: yellow !important;
+}
+
+div.unpair-row {
+    background-color: lightgoldenrodyellow;
+}
