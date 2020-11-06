@@ -193,6 +193,7 @@ public enum ServerToClientModel {
     TABINDEX(ValueTypeModel.INTEGER),
     END_OF_PROCESSING(ValueTypeModel.NULL),
     FOCUS(ValueTypeModel.BOOLEAN),
+    FOCUS_PREVENT_SCROLL(ValueTypeModel.NULL),
     HANDLER_TYPE(ValueTypeModel.BYTE),
     HISTORY_FIRE_EVENTS(ValueTypeModel.BOOLEAN),
     LOADING_ON_REQUEST(ValueTypeModel.BOOLEAN),
