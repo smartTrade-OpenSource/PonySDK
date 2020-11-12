@@ -96,6 +96,9 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
             if (binaryModel.getBooleanValue()) uiObject.getElement().focus();
             else uiObject.getElement().blur();
             return true;
+        } else if (ServerToClientModel.FOCUS_PREVENT_SCROLL == model) {
+            focusPreventScroll(uiObject.getElement());
+            return true;
         } else if (ServerToClientModel.WIDGET_WIDTH == model) {
             uiObject.setWidth(binaryModel.getStringValue());
             return true;
@@ -138,5 +141,9 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
     private native void sendToNative(int objectID, Object nativeObject, JavaScriptObject data) /*-{
                                                                                                nativeObject.update(data);
                                                                                                }-*/;
+
+    private native void focusPreventScroll(Element element) /*-{
+                                                            element.focus({preventScroll: true});
+                                                            }-*/;
 
 }

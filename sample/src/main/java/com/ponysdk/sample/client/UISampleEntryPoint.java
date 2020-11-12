@@ -23,6 +23,22 @@
 
 package com.ponysdk.sample.client;
 
+import java.io.*;
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.PScheduler;
@@ -36,6 +52,18 @@ import com.ponysdk.core.ui.datagrid.DataGrid;
 import com.ponysdk.core.ui.datagrid.dynamic.Configuration;
 import com.ponysdk.core.ui.datagrid.dynamic.DynamicDataGrid;
 import com.ponysdk.core.ui.datagrid.impl.PLabelCellRenderer;
+import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
+import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
+import com.ponysdk.core.ui.datagrid2.column.DefaultColumnDefinition;
+import com.ponysdk.core.ui.datagrid2.controller.DataGridController;
+import com.ponysdk.core.ui.datagrid2.data.RowAction;
+import com.ponysdk.core.ui.datagrid2.view.ColumnFilterFooterDataGridView;
+import com.ponysdk.core.ui.datagrid2.view.ColumnVisibilitySelectorDataGridView;
+import com.ponysdk.core.ui.datagrid2.view.ConfigSelectorDataGridView;
+import com.ponysdk.core.ui.datagrid2.view.DataGridView;
+import com.ponysdk.core.ui.datagrid2.view.DataGridView.DecodeException;
+import com.ponysdk.core.ui.datagrid2.view.DefaultDataGridView;
+import com.ponysdk.core.ui.datagrid2.view.RowSelectorColumnDataGridView;
 import com.ponysdk.core.ui.eventbus2.EventBus.EventHandler;
 import com.ponysdk.core.ui.formatter.TextFunction;
 import com.ponysdk.core.ui.grid.AbstractGridWidget;
@@ -51,32 +79,21 @@ import com.ponysdk.core.ui.rich.PConfirmDialog;
 import com.ponysdk.core.ui.rich.POptionPane;
 import com.ponysdk.core.ui.rich.PToolbar;
 import com.ponysdk.core.ui.rich.PTwinListBox;
-import com.ponysdk.sample.client.event.UserLoggedOutEvent;
-import com.ponysdk.sample.client.event.UserLoggedOutHandler;
-import com.ponysdk.sample.client.page.addon.LoggerAddOn;
 import com.ponysdk.core.ui.scene.AbstractScene;
 import com.ponysdk.core.ui.scene.Router;
 import com.ponysdk.core.ui.scene.Scene;
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
-
-import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.text.SimpleDateFormat;
-import java.time.Duration;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import com.ponysdk.sample.client.event.UserLoggedOutEvent;
+import com.ponysdk.sample.client.event.UserLoggedOutHandler;
+import com.ponysdk.sample.client.page.addon.LoggerAddOn;
 
 public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(UISampleEntryPoint.class);
 
     private PLabel mainLabel;
 
     // HighChartsStackedColumnAddOn highChartsStackedColumnAddOn;
     int a = 0;
-
     private static int counter;
 
     @Override
@@ -105,6 +122,13 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         //createFunctionalLabel();
         //PWindow.getMain().add(createGrid());
         //       testPAddon();
+
+        // Test of the new data grid
+        //
+        //testSimpleDataGridView();
+        //if (true) return;
+
+        testVisibilityHandler(PWindow.getMain());
 
         //PScript.execute(PWindow.getMain(), "alert('coucou Main');");
 
@@ -223,22 +247,24 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     }
 
     private void testScene() {
-        Scene scene1 = new AbstractScene("scene1", "Scene 1", "scene1") {
+        final Scene scene1 = new AbstractScene("scene1", "Scene 1", "scene1") {
+
             @Override
             public PWidget buildGUI() {
                 return Element.newPLabel("Scene1 Started");
             }
         };
 
-        Scene scene2 = new AbstractScene("scene2", "Scene 2", "scene2") {
+        final Scene scene2 = new AbstractScene("scene2", "Scene 2", "scene2") {
+
             @Override
             public PWidget buildGUI() {
                 return Element.newPLabel("Scene2 Started");
             }
         };
 
-        PSimplePanel layout = Element.newPSimplePanel();
-        Router router = new Router("sample");
+        final PSimplePanel layout = Element.newPSimplePanel();
+        final Router router = new Router("sample");
         router.setLayout(layout);
         router.push(scene1);
         router.push(scene2);
@@ -246,6 +272,239 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         PWindow.getMain().add(layout);
 
         router.go("scene2");
+    }
+
+    private static class MyRow {
+
+        private final int id;
+        private Map<String, String> map;
+        private final String format;
+
+        public MyRow(final int id) {
+            super();
+            this.id = id;
+            format = String.format("%09d", id);
+        }
+
+        public void putValue(final String key, final String value) {
+            if (map == null) map = new ConcurrentHashMap<>();
+            map.put(key, value);
+        }
+
+        public String getValue(final String key) {
+            if (map != null) {
+                final String v = map.get(key);
+                if (v != null) return v;
+            }
+            return key + format;
+        }
+
+        @Override
+        public MyRow clone() {
+            final MyRow model = new MyRow(id);
+            if (map == null) return model;
+            model.map = new HashMap<>(map);
+            return model;
+        }
+
+        @Override
+        public String toString() {
+            return "SampleModel [id=" + id + "]";
+        }
+
+    }
+
+    private static MyRow createMyRow(final int index) {
+        return new MyRow(index);
+    }
+
+    private void testSimpleDataGridView() {
+        final DataGridView<Integer, MyRow> simpleGridView = new DefaultDataGridView<>();
+        final ColumnVisibilitySelectorDataGridView<Integer, MyRow> columnVisibilitySelectorDataGridView = new ColumnVisibilitySelectorDataGridView<>(
+            simpleGridView);
+        final RowSelectorColumnDataGridView<Integer, MyRow> rowSelectorColumnDataGridView = new RowSelectorColumnDataGridView<>(
+            columnVisibilitySelectorDataGridView);
+        final ColumnFilterFooterDataGridView<Integer, MyRow> columnFilterFooterDataGridView = new ColumnFilterFooterDataGridView<>(
+            rowSelectorColumnDataGridView);
+        final ConfigSelectorDataGridView<Integer, MyRow> configSelectorDataGridView = new ConfigSelectorDataGridView<>(
+            columnFilterFooterDataGridView, "DEFAULT");
+
+        final DataGridView<Integer, MyRow> gridView = configSelectorDataGridView;
+        gridView.setAdapter(new DataGridAdapter<Integer, UISampleEntryPoint.MyRow>() {
+
+            private final List<ColumnDefinition<MyRow>> columns = new ArrayList<>();
+
+            {
+                for (char c = 'a'; c <= 'z'; c++) {
+                    final String ss = c + "";
+                    columns.add(new DefaultColumnDefinition<>(ss, v -> v.getValue(ss), (v, s) -> {
+                        v.putValue(ss, s);
+                    }));
+                }
+                for (char c = 'A'; c <= 'Z'; c++) {
+                    final String ss = c + "";
+                    columns.add(new DefaultColumnDefinition<>(ss, v -> v.getValue(ss), (v, s) -> {
+                        v.putValue(ss, s);
+                    }));
+                }
+            }
+
+            @Override
+            public void onUnselectRow(final IsPWidget rowWidget) {
+                rowWidget.asWidget().removeStyleName("selected-row");
+            }
+
+            @Override
+            public void onSelectRow(final IsPWidget rowWidget) {
+                rowWidget.asWidget().addStyleName("selected-row");
+            }
+
+            @Override
+            public boolean isAscendingSortByInsertionOrder() {
+                return false;
+            }
+
+            @Override
+            public Integer getKey(final MyRow v) {
+                return v.id;
+            }
+
+            @Override
+            public List<ColumnDefinition<MyRow>> getColumnDefinitions() {
+                return columns;
+            }
+
+            @Override
+            public int compareDefault(final MyRow v1, final MyRow v2) {
+                return 0;
+            }
+
+            @Override
+            public void onCreateHeaderRow(final IsPWidget rowWidget) {
+                rowWidget.asWidget().getParent().asWidget().setStyleProperty("background", "aliceblue");
+            }
+
+            @Override
+            public void onCreateFooterRow(final IsPWidget rowWidget) {
+                rowWidget.asWidget().getParent().asWidget().setStyleProperty("background", "aliceblue");
+            }
+
+            @Override
+            public void onCreateRow(final IsPWidget rowWidget) {
+            }
+
+            @Override
+            public boolean hasHeader() {
+                return true;
+            }
+
+            @Override
+            public boolean hasFooter() {
+                return false;
+            }
+
+            @Override
+            public IsPWidget createLoadingDataWidget() {
+                final PComplexPanel div = Element.newDiv();
+                div.setWidth("100%");
+                div.setHeight("100%");
+                div.setStyleProperty("background-color", "#FFFFFF7F");
+                return div;
+            }
+
+            @Override
+            public void onCreateColumnResizer(final IsPWidget resizer) {
+            }
+        });
+        gridView.setPollingDelayMillis(250L);
+        final DataGridController<Integer, MyRow> controller = gridView.getController();
+        gridView.asWidget().setHeight("500px");
+        gridView.asWidget().setWidth("1000px");
+        gridView.asWidget().setStyleProperty("resize", "both");
+        gridView.asWidget().setStyleProperty("overflow", "hidden");
+        final PTextBox pollingDelay = Element.newPTextBox();
+        final PButton changePollingDelay = Element.newPButton("Change polling delay (ms)");
+        PWindow.getMain().add(pollingDelay);
+        PWindow.getMain().add(changePollingDelay);
+        changePollingDelay.addClickHandler((e) -> {
+            gridView.setPollingDelayMillis(Integer.parseInt(pollingDelay.getText().trim()));
+        });
+        PWindow.getMain().add(gridView);
+
+        final PButton clearSortsButton = Element.newPButton("Clear Sorts");
+        clearSortsButton.addClickHandler(e -> {
+            gridView.clearSorts();
+        });
+        PWindow.getMain().add(clearSortsButton);
+        PWindow.getMain().add(columnVisibilitySelectorDataGridView.getDecoratorWidget());
+        PWindow.getMain().add(configSelectorDataGridView.getDecoratorWidget());
+
+        final PTextBox addConfigTextBox = Element.newPTextBox();
+        final PButton addConfigButton = Element.newPButton("Add Config");
+        final PLabel addConfigLabel = Element.newPLabel();
+        addConfigLabel.setStyleProperty("color", "red");
+
+        PWindow.getMain().add(addConfigTextBox);
+        PWindow.getMain().add(addConfigButton);
+        addConfigButton.addClickHandler(e -> {
+            final String key = addConfigTextBox.getText();
+            if (!configSelectorDataGridView.addConfigEntry(key, configSelectorDataGridView.getCurrentConfig())) {
+                addConfigLabel.setText(key + " config already exists");
+                return;
+            }
+            addConfigLabel.setText("");
+            addConfigTextBox.setText("");
+            configSelectorDataGridView.selectConfig(key);
+        });
+
+        final PTextBox exportConfigTextBox = Element.newPTextBox();
+        final PButton exportConfigButton = Element.newPButton("Export Configs");
+        exportConfigButton.addClickHandler(e -> {
+            exportConfigTextBox.setText(configSelectorDataGridView.encodeConfigEntries(configSelectorDataGridView.getConfigEntries()));
+        });
+        final PTextBox importConfigTextBox = Element.newPTextBox();
+        final PButton importConfigButton = Element.newPButton("Import Configs");
+        importConfigButton.addClickHandler(e -> {
+            try {
+                configSelectorDataGridView
+                    .setConfigEntries(configSelectorDataGridView.decodeConfigEntries(importConfigTextBox.getText()));
+            } catch (final DecodeException e1) {
+                e1.printStackTrace();
+            }
+        });
+        PWindow.getMain().add(exportConfigTextBox);
+        PWindow.getMain().add(exportConfigButton);
+        PWindow.getMain().add(importConfigTextBox);
+        PWindow.getMain().add(importConfigButton);
+        controller.setBound(false);
+        for (int i = 0; i < 1_000; i++) {
+            if (i % 500_000 == 0) log.info("i: {}", i);
+            controller.setData(createMyRow(i));
+        }
+        controller.setBound(true);
+
+        gridView.addRowAction(UISampleEntryPoint.class, new RowAction<>() {
+
+            @Override
+            public boolean testRow(final MyRow t, final int index) {
+                return (index & 1) == 0;
+            }
+
+            @Override
+            public void cancel(final IsPWidget row) {
+                row.asWidget().removeStyleName("unpair-row");
+            }
+
+            @Override
+            public void apply(final IsPWidget row) {
+                row.asWidget().addStyleName("unpair-row");
+            }
+
+            @Override
+            public boolean isActionApplied(final IsPWidget row) {
+                return row.asWidget().hasStyleName("unpair-row");
+            }
+        });
     }
 
     private void testVisibilityHandler(final PWindow window) {
@@ -357,7 +616,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final BufferedReader reader = new BufferedReader(new InputStreamReader(item.getInputStream(), "UTF-8"));
         final StringBuilder value = new StringBuilder();
         final char[] buffer = new char[1024];
-        for (int length = 0; (length = reader.read(buffer)) > 0; ) {
+        for (int length = 0; (length = reader.read(buffer)) > 0;) {
             value.append(buffer, 0, length);
         }
         System.out.println(value.toString());
@@ -394,10 +653,10 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     }
 
     private void createNewGridSystem() {
-        //        final DataGrid<Pojo> grid = new DataGrid<>((a, b) -> a.bid.compareTo(b.bid));
+        // final DataGrid<Pojo> grid = new DataGrid<>((a, b) -> a.bid.compareTo(b.bid));
 
         final Configuration<Pojo> configuration = new Configuration<>(Pojo.class);
-        //configuration.setFilter(method -> method.getName().contains("COUCOU"));
+        // configuration.setFilter(method -> method.getName().contains("COUCOU"));
 
         final DataGrid<Pojo> grid = new DynamicDataGrid<>(configuration, Comparator.comparing(Pojo::getBid));
 
@@ -514,9 +773,9 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         }
         final PTextBox textBox = Element.newPTextBox();
 
-        //        final PButton add = Element.newPButton("add");
-        //        add.addClickHandler(e -> grid.setData(Integer.valueOf(textBox.getText())));
-        //        PWindow.getMain().add(add);
+        // final PButton add = Element.newPButton("add");
+        // add.addClickHandler(e -> grid.setData(Integer.valueOf(textBox.getText())));
+        // PWindow.getMain().add(add);
 
         PWindow.getMain().add(textBox);
         PWindow.getMain().add(grid);
@@ -539,7 +798,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     private void createNewEvent() {
         final EventHandler<PClickEvent> handler = UIContext.getNewEventBus().subscribe(PClickEvent.class,
-                event -> System.err.println("B " + event));
+            event -> System.err.println("B " + event));
         UIContext.getNewEventBus().post(new PClickEvent(this));
         UIContext.getNewEventBus().post(new PClickEvent(this));
         UIContext.getNewEventBus().unsubscribe(handler);
@@ -658,7 +917,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         windowContainer.add(button1);
         button1.addClickHandler(event -> {
             final PWindow newPWindow = Element.newPWindow(w, "Sub Window 1 " + i.incrementAndGet(),
-                    "resizable=yes,location=0,status=0,scrollbars=0");
+                "resizable=yes,location=0,status=0,scrollbars=0");
             newPWindow.add(Element.newPLabel("Sub window"));
             newPWindow.open();
         });
@@ -667,7 +926,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         windowContainer.add(button2);
         button2.addClickHandler(event -> {
             final PWindow newPWindow = Element.newPWindow("Not Sub Window 1 " + i.incrementAndGet(),
-                    "resizable=yes,location=0,status=0,scrollbars=0");
+                "resizable=yes,location=0,status=0,scrollbars=0");
             newPWindow.add(Element.newPLabel("Sub window"));
             newPWindow.open();
         });
@@ -804,7 +1063,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
             @Override
             public PKeyCodes[] getFilteredKeys() {
-                return new PKeyCodes[]{PKeyCodes.ENTER};
+                return new PKeyCodes[] { PKeyCodes.ENTER };
             }
         });
         return pTextBox;
