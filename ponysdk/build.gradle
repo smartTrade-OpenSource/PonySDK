@@ -101,17 +101,17 @@ dependencies {
             'org.glassfish.tyrus:tyrus-client:' + tyrusVersion,
             'org.glassfish.tyrus.ext:tyrus-extension-deflate:' + tyrusVersion,
             'junit:junit:' + junitVersion,
-            'org.mockito:mockito-core:' + mockitoVersion,
-            'org.junit.jupiter:junit-jupiter-api:5.7.0',
-            'org.junit.jupiter:junit-jupiter-engine:5.7.0',
-            'org.junit.platform:junit-platform-engine:1.7.0',
-			'org.junit.platform:junit-platform-launcher:1.7.0',
+            'org.mockito:mockito-core:' + mockitoVersion
     )
 
     testImplementation(
             'org.seleniumhq.selenium:selenium-java:' + seleniumVersion,
             'javax.websocket:javax.websocket-client-api:1.1',
-            'org.jsoup:jsoup:1.11.3'
+            'org.jsoup:jsoup:1.11.3',
+            'org.junit.jupiter:junit-jupiter-api:5.7.0',
+            'org.junit.jupiter:junit-jupiter-engine:5.7.0',
+            'org.junit.platform:junit-platform-engine:1.7.0',
+            'org.junit.platform:junit-platform-launcher:1.7.0'
     )
 
     testRuntimeOnly(

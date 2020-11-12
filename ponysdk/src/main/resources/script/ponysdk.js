@@ -500,7 +500,7 @@ _UTF8 = undefined;
 (function() {
   "use strict";
 
-  AbstractAddon.defineAddon("com.ponysdk.core.ui.datagrid2.view.DefaultDataGridView.Addon", {
+  AbstractAddon.defineAddon("com.ponysdk.core.ui.datagrid.view.DefaultDataGridView.Addon", {
 	
     initDom: function() {
 		var that = this;
@@ -796,7 +796,7 @@ _UTF8 = undefined;
 (function() {
   "use strict";
 
-  AbstractAddon.defineAddon("com.ponysdk.core.ui.datagrid2.view.DefaultDataGridView.HideScrollBarAddon", {
+  AbstractAddon.defineAddon("com.ponysdk.core.ui.datagrid.view.DefaultDataGridView.HideScrollBarAddon", {
 	
     initDom: function() {        
         var styles = '.pony-grid-hidden-scrollbar::-webkit-scrollbar { display: none; }\n' +

@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.ponysdk.core.server.concurrent.PScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,16 +40,16 @@ import com.ponysdk.core.ui.basic.PComplexPanel;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PSimplePanel;
 import com.ponysdk.core.ui.basic.PWindow;
-import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
-import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
-import com.ponysdk.core.ui.datagrid2.column.DefaultColumnDefinition;
-import com.ponysdk.core.ui.datagrid2.controller.DataGridController;
-import com.ponysdk.core.ui.datagrid2.data.RowAction;
-import com.ponysdk.core.ui.datagrid2.view.ColumnVisibilitySelectorDataGridView;
-import com.ponysdk.core.ui.datagrid2.view.ConfigSelectorDataGridView;
-import com.ponysdk.core.ui.datagrid2.view.DataGridView;
-import com.ponysdk.core.ui.datagrid2.view.DefaultDataGridView;
-import com.ponysdk.core.ui.datagrid2.view.RowSelectorColumnDataGridView;
+import com.ponysdk.core.ui.datagrid.adapter.DataGridAdapter;
+import com.ponysdk.core.ui.datagrid.column.ColumnDefinition;
+import com.ponysdk.core.ui.datagrid.column.DefaultColumnDefinition;
+import com.ponysdk.core.ui.datagrid.controller.DataGridController;
+import com.ponysdk.core.ui.datagrid.data.RowAction;
+import com.ponysdk.core.ui.datagrid.view.ColumnVisibilitySelectorDataGridView;
+import com.ponysdk.core.ui.datagrid.view.ConfigSelectorDataGridView;
+import com.ponysdk.core.ui.datagrid.view.DataGridView;
+import com.ponysdk.core.ui.datagrid.view.DefaultDataGridView;
+import com.ponysdk.core.ui.datagrid.view.RowSelectorColumnDataGridView;
 import com.ponysdk.core.ui.main.EntryPoint;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
 import com.ponysdk.sample.client.event.UserLoggedOutHandler;
@@ -214,7 +215,7 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
 
         final TestAction addDataAction = (i) -> {
             i = rowCounter++;
-            controller.setData(createMyRow(i));
+            controller.setData(createMyRow(rowCounter));
         };
 
         final TestAction removeDataAction = (i) -> {
@@ -268,7 +269,8 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
             int updatedValue = i;
             updatedValue *= Math.random() + 1;
             v.putValue("b", String.format("b" + "%09d", updatedValue));
-            controller.setData(v);
+
+            UIContext.get().execute(() -> controller.setData(v));
         };
 
         testPerformanceAfterWarmUp(rowCounter, 140, addDataAction, removeDataAction);
@@ -326,8 +328,8 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
             }
             testPerformanceBench(rowCounter, nbOfIterations, addDataAction);
         };
-        final Thread thread = new Thread(addDataWarmUp, "Test thread");
-        thread.start();
+
+        //addDataWarmUp.run();
     }
 
     /**

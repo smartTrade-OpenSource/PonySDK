@@ -23,47 +23,20 @@
 
 package com.ponysdk.sample.client;
 
-import java.io.*;
-import java.text.SimpleDateFormat;
-import java.time.Duration;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.PScheduler;
-import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
 import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
-import com.ponysdk.core.ui.datagrid.ColumnDescriptor;
-import com.ponysdk.core.ui.datagrid.DataGrid;
-import com.ponysdk.core.ui.datagrid.dynamic.Configuration;
-import com.ponysdk.core.ui.datagrid.dynamic.DynamicDataGrid;
-import com.ponysdk.core.ui.datagrid.impl.PLabelCellRenderer;
-import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
-import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
-import com.ponysdk.core.ui.datagrid2.column.DefaultColumnDefinition;
-import com.ponysdk.core.ui.datagrid2.controller.DataGridController;
-import com.ponysdk.core.ui.datagrid2.data.RowAction;
-import com.ponysdk.core.ui.datagrid2.view.ColumnFilterFooterDataGridView;
-import com.ponysdk.core.ui.datagrid2.view.ColumnVisibilitySelectorDataGridView;
-import com.ponysdk.core.ui.datagrid2.view.ConfigSelectorDataGridView;
-import com.ponysdk.core.ui.datagrid2.view.DataGridView;
-import com.ponysdk.core.ui.datagrid2.view.DataGridView.DecodeException;
-import com.ponysdk.core.ui.datagrid2.view.DefaultDataGridView;
-import com.ponysdk.core.ui.datagrid2.view.RowSelectorColumnDataGridView;
+import com.ponysdk.core.ui.datagrid.adapter.DataGridAdapter;
+import com.ponysdk.core.ui.datagrid.column.ColumnDefinition;
+import com.ponysdk.core.ui.datagrid.column.DefaultColumnDefinition;
+import com.ponysdk.core.ui.datagrid.controller.DataGridController;
+import com.ponysdk.core.ui.datagrid.data.RowAction;
+import com.ponysdk.core.ui.datagrid.view.*;
+import com.ponysdk.core.ui.datagrid.view.DataGridView.DecodeException;
 import com.ponysdk.core.ui.eventbus2.EventBus.EventHandler;
 import com.ponysdk.core.ui.formatter.TextFunction;
 import com.ponysdk.core.ui.grid.AbstractGridWidget;
@@ -85,6 +58,21 @@ import com.ponysdk.core.ui.scene.Scene;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
 import com.ponysdk.sample.client.event.UserLoggedOutHandler;
 import com.ponysdk.sample.client.page.addon.LoggerAddOn;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
@@ -125,8 +113,11 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
         // Test of the new data grid
         //
-        //testSimpleDataGridView();
-        //if (true) return;
+        //
+        testSimpleDataGridView();
+        if (true) return;
+
+
 
         testVisibilityHandler(PWindow.getMain());
 
@@ -219,6 +210,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         PWindow.getMain().add(createTree());
         PWindow.getMain().add(new PTwinListBox<>());
         PWindow.getMain().add(Element.newPVerticalPanel());
+
 
         mainLabel = Element.newPLabel("Label2");
         mainLabel.addClickHandler(event -> System.out.println("bbbbb"));
@@ -320,6 +312,9 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     private void testSimpleDataGridView() {
         final DataGridView<Integer, MyRow> simpleGridView = new DefaultDataGridView<>();
+
+        //TODO 2 implementation (1 simple & 1 full => surrement coté core ui, recheck et discuter avec JB)
+
         final ColumnVisibilitySelectorDataGridView<Integer, MyRow> columnVisibilitySelectorDataGridView = new ColumnVisibilitySelectorDataGridView<>(
             simpleGridView);
         final RowSelectorColumnDataGridView<Integer, MyRow> rowSelectorColumnDataGridView = new RowSelectorColumnDataGridView<>(
@@ -330,7 +325,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             columnFilterFooterDataGridView, "DEFAULT");
 
         final DataGridView<Integer, MyRow> gridView = configSelectorDataGridView;
-        gridView.setAdapter(new DataGridAdapter<Integer, UISampleEntryPoint.MyRow>() {
+        gridView.setAdapter(new DataGridAdapter<>() {
 
             private final List<ColumnDefinition<MyRow>> columns = new ArrayList<>();
 
@@ -417,6 +412,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             }
         });
         gridView.setPollingDelayMillis(250L);
+
         final DataGridController<Integer, MyRow> controller = gridView.getController();
         gridView.asWidget().setHeight("500px");
         gridView.asWidget().setWidth("1000px");
@@ -477,7 +473,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         PWindow.getMain().add(importConfigTextBox);
         PWindow.getMain().add(importConfigButton);
         controller.setBound(false);
-        for (int i = 0; i < 1_000; i++) {
+        for (int i = 0; i < 1_0000; i++) {
             if (i % 500_000 == 0) log.info("i: {}", i);
             controller.setData(createMyRow(i));
         }
@@ -652,57 +648,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         }, Duration.ofMillis(20));
     }
 
-    private void createNewGridSystem() {
-        // final DataGrid<Pojo> grid = new DataGrid<>((a, b) -> a.bid.compareTo(b.bid));
-
-        final Configuration<Pojo> configuration = new Configuration<>(Pojo.class);
-        // configuration.setFilter(method -> method.getName().contains("COUCOU"));
-
-        final DataGrid<Pojo> grid = new DynamicDataGrid<>(configuration, Comparator.comparing(Pojo::getBid));
-
-        PWindow.getMain().add(grid);
-
-        final Random random = new Random();
-
-        final Map<String, Pojo> map = new HashMap<>();
-
-        for (int i = 0; i < 40; i++) {
-            final Pojo pojo = new Pojo();
-            pojo.security = "security" + i;
-            pojo.classe = "class" + i;
-            pojo.bid = random.nextDouble() * i;
-            pojo.offer = random.nextDouble() * i;
-            pojo.spread = random.nextDouble() * i;
-            pojo.coucou = random.nextDouble() * i + "";
-            pojo.coucou1 = random.nextDouble() * i + "";
-            pojo.coucou2 = random.nextDouble() * i + "";
-            pojo.coucou3 = random.nextDouble() * i + "";
-            pojo.coucou4 = random.nextDouble() * i + "";
-            pojo.coucou5 = random.nextDouble() * i + "";
-            pojo.coucou6 = random.nextDouble() * i + "";
-            pojo.coucou7 = random.nextDouble() * i + "";
-            pojo.coucou8 = random.nextDouble() * i + "";
-            pojo.coucou9 = random.nextDouble() * i + "";
-            pojo.coucou10 = random.nextDouble() * i + "";
-            map.put("security" + i, pojo);
-            grid.addData(pojo);
-        }
-
-        Txn.get().flush();
-
-        PScheduler.scheduleAtFixedRate(() -> {
-            for (int i = 0; i < 40; i++) {
-                final Pojo pojo = map.get("security" + i);
-                grid.update(pojo, p -> {
-                    p.bid = random.nextDouble();
-                    p.offer = random.nextDouble();
-                    p.spread = random.nextDouble();
-                    return p;
-                });
-            }
-        }, Duration.ofMillis(300));
-    }
-
     private void createReconnectingPanel() {
         final PSimplePanel reconnectionPanel = Element.newPSimplePanel();
         reconnectionPanel.setAttribute("id", "reconnection");
@@ -756,44 +701,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         // final PElementAddOn elementAddOn2 = new PElementAddOn();
         // elementAddOn2.setInnerText("Coucou dans window");
         // a.add(elementAddOn2);
-    }
-
-    private void testNewGrid() {
-        final AtomicInteger i = new AtomicInteger();
-
-        final DataGrid<Integer> grid = new DataGrid<>();
-
-        for (int cpt = 0; cpt < 20; cpt++) {
-            final ColumnDescriptor<Integer> column = new ColumnDescriptor<>();
-            final PAnchor anchor = Element.newPAnchor("Header " + i.incrementAndGet());
-            anchor.addClickHandler(e -> grid.removeColumn(column));
-            column.setCellRenderer(new PLabelCellRenderer<>(from -> a + ""));
-            column.setHeaderRenderer(() -> anchor);
-            grid.addColumnDescriptor(column);
-        }
-        final PTextBox textBox = Element.newPTextBox();
-
-        // final PButton add = Element.newPButton("add");
-        // add.addClickHandler(e -> grid.setData(Integer.valueOf(textBox.getText())));
-        // PWindow.getMain().add(add);
-
-        PWindow.getMain().add(textBox);
-        PWindow.getMain().add(grid);
-
-        /**
-         * PScheduler.scheduleAtFixedRate(() -> { grid.setData((int)
-         * (Math.random() * 50)); grid.removeData((int) (Math.random() * 50));
-         * grid.removeColumn(grid.getColumns().get((int) (Math.random() *
-         * grid.getColumns().size() - 1)));
-         *
-         * final ColumnDescriptor<Integer> column = new ColumnDescriptor<>();
-         * final PAnchor anchor = new PAnchor("Header " + id.incrementAndGet());
-         * anchor.addClickHandler(click -> grid.removeColumn(column));
-         * column.setCellRenderer(new PLabelCellRenderer<>(from -> (int)
-         * (Math.random() * 1000) + "")); column.setHeaderRenderer(() ->
-         * anchor); grid.addColumnDescriptor(column); },
-         * Duration.ofMillis(2000));
-         **/
     }
 
     private void createNewEvent() {
