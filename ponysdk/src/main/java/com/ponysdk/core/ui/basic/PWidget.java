@@ -264,11 +264,15 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public boolean hasAttribute(final String key) {
-        return elementAttributes != null ? elementAttributes.containsKey(key) : false;
+        return elementAttributes != null && elementAttributes.containsKey(key);
     }
 
     public String getAttribute(final String key) {
         return elementAttributes != null ? elementAttributes.get(key) : null;
+    }
+
+    public Set<Map.Entry<String, String>> getAttributes() {
+        return elementAttributes == null ? Collections.emptySet() : Collections.unmodifiableSet(elementAttributes.entrySet());
     }
 
     public void preventEvent(final PEventType e) {
