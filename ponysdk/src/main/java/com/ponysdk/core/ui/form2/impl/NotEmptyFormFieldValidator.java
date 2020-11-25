@@ -21,20 +21,26 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.form2;
+package com.ponysdk.core.ui.form2.impl;
 
+
+import com.ponysdk.core.ui.form2.api.FormFieldValidator;
+import com.ponysdk.core.ui.form2.api.FormField;
+import com.ponysdk.core.ui.form2.api.ValidationResult;
 
 import java.util.Objects;
 
-public class NotEmptyFieldValidator implements FieldValidator {
+public class NotEmptyFormFieldValidator implements FormFieldValidator {
+
+    private static String ATTR_REQUIRED = "required";
 
     private final String errorMessage;
 
-    public NotEmptyFieldValidator() {
+    public NotEmptyFormFieldValidator() {
         this("Empty Field");
     }
 
-    public NotEmptyFieldValidator(final String errorMessage) {
+    public NotEmptyFormFieldValidator(final String errorMessage) {
         this.errorMessage = errorMessage;
     }
 
@@ -44,4 +50,13 @@ public class NotEmptyFieldValidator implements FieldValidator {
         return ValidationResult.KO(errorMessage);
     }
 
+    @Override
+    public void bindFormField(FormField<?> formField) {
+        formField.asWidget().addStyleName(ATTR_REQUIRED);
+    }
+
+    @Override
+    public void unbindFormField(FormField<?> formField) {
+        formField.asWidget().removeStyleName(ATTR_REQUIRED);
+    }
 }

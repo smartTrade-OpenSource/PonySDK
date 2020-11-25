@@ -1,8 +1,9 @@
-package com.ponysdk.core.ui.form2;
+package com.ponysdk.core.ui.form2.api;
 
 public class ValidationResult {
 
     private static final ValidationResult OK_RESULT = new ValidationResult(true, null, null);
+    private static final ValidationResult KO_RESULT = new ValidationResult(false, "Validation failed", null);
 
     private boolean valid;
     private String errorMessage;
@@ -19,19 +20,23 @@ public class ValidationResult {
     }
 
     public static ValidationResult OK(final Object data) {
-        return newValidationResult(true, null, data);
+        return new ValidationResult(true, null, data);
+    }
+
+    public static ValidationResult OK(final String message, final Object data) {
+        return new ValidationResult(true, message, data);
+    }
+
+    public static ValidationResult KO() {
+        return KO_RESULT;
     }
 
     public static ValidationResult KO(final String errorMessage) {
-        return KO(errorMessage, null);
+        return new ValidationResult(false, errorMessage, null);
     }
 
     public static ValidationResult KO(final String errorMessage, final Object data) {
         return new ValidationResult(false, errorMessage, data);
-    }
-
-    public static ValidationResult newValidationResult(final boolean valid, String errorMessage, final Object data) {
-        return new ValidationResult(valid, errorMessage, data);
     }
 
     public String getErrorMessage() {

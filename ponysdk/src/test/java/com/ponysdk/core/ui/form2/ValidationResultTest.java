@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.ui.form2;
 
+import com.ponysdk.core.ui.form2.api.ValidationResult;
 import com.ponysdk.test.PSuite;
 import org.junit.Assert;
 import org.junit.Test;
@@ -31,7 +32,7 @@ public class ValidationResultTest extends PSuite {
 
     @Test
     public void testValidationResult() {
-        final ValidationResult result = ValidationResult.newValidationResult(true, "Message", "Data");
+        final ValidationResult result = ValidationResult.OK("Message", "Data");
         Assert.assertTrue(result.isValid());
         Assert.assertEquals("Message", result.getErrorMessage());
         Assert.assertEquals("Data", result.getData());

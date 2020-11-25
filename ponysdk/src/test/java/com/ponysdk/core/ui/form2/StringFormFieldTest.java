@@ -24,51 +24,43 @@
 package com.ponysdk.core.ui.form2;
 
 import com.ponysdk.core.ui.basic.PWindow;
+import com.ponysdk.core.ui.form2.api.ValidationResult;
+import com.ponysdk.core.ui.form2.impl.NotEmptyFormFieldValidator;
+import com.ponysdk.core.ui.form2.impl.StringTextBoxFormField;
 import com.ponysdk.test.PSuite;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
-import org.junit.Assert;
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 public class StringFormFieldTest extends PSuite {
 
     @Test
     public void testDefaultValidation() {
-        final StringTextBoxFormField formField = new StringTextBoxFormField();
+        final StringTextBoxFormField formField = new StringTextBoxFormField("Caption");
         PWindow.getMain().add(formField);
-        Assert.assertEquals(ValidationResult.OK(), formField.validate());
-    }
-
-    @Test
-    public void testRequired() {
-        final StringTextBoxFormField formField = new StringTextBoxFormField(true);
-        PWindow.getMain().add(formField);
-        Assert.assertEquals(FormField.REQUIRED_RESULT, formField.validate());
-
-        final StringTextBoxFormField formField2 = new StringTextBoxFormField("Test", true);
-        PWindow.getMain().add(formField2);
-        Assert.assertEquals(FormField.REQUIRED_RESULT, formField2.validate());
+        assertEquals(ValidationResult.OK(), formField.validate());
     }
 
     @Test
     public void testValidator() {
-        final StringTextBoxFormField formField = new StringTextBoxFormField();
+        final StringTextBoxFormField formField = new StringTextBoxFormField("Caption");
         PWindow.getMain().add(formField);
-        formField.setValidator(new NotEmptyFieldValidator("Custom Message"));
-        Assert.assertEquals("Custom Message", formField.validate().getErrorMessage());
+        formField.setValidator(new NotEmptyFormFieldValidator("Custom Message"));
+        assertEquals("Custom Message", formField.validate().getErrorMessage());
 
-        final StringTextBoxFormField formField2 = new StringTextBoxFormField();
+        final StringTextBoxFormField formField2 = new StringTextBoxFormField("Caption");
         PWindow.getMain().add(formField2);
-        formField2.setValidator(new NotEmptyFieldValidator());
-        Assert.assertEquals("Empty Field", formField2.validate().getErrorMessage());
+        formField2.setValidator(new NotEmptyFormFieldValidator());
+        assertEquals("Empty Field", formField2.validate().getErrorMessage());
     }
 
     @Test
     public void testValidatorAndRequired() {
-        final StringTextBoxFormField formField = new StringTextBoxFormField(true);
+        final StringTextBoxFormField formField = new StringTextBoxFormField("Caption");
         PWindow.getMain().add(formField);
-        formField.setValidator(new NotEmptyFieldValidator("Empty Field"));
-        Assert.assertEquals(FormField.REQUIRED_RESULT.getErrorMessage(), formField.validate().getErrorMessage());
+        formField.setValidator(new NotEmptyFormFieldValidator("Empty Field"));
+        assertEquals("Empty Field", formField.validate().getErrorMessage());
     }
 
     @Test
@@ -76,71 +68,67 @@ public class StringFormFieldTest extends PSuite {
         final StringTextBoxFormField formField = new StringTextBoxFormField("Caption");
         PWindow.getMain().add(formField);
         int id = formField.asWidget().getID();
-        Assert.assertEquals("Caption", formField.getCaption());
+        assertEquals("Caption", formField.getCaption());
         final Element e1 = Jsoup.parse(formField.asWidget().dumpDOM()).getElementsByAttributeValue("pid", id + "").first().child(0);
-        Assert.assertFalse(e1.hasAttr("hidden"));
+        assertFalse(e1.hasAttr("hidden"));
 
         formField.setCaption("Caption2");
-        Assert.assertEquals("Caption2", formField.getCaption());
+        assertEquals("Caption2", formField.getCaption());
 
         formField.setCaption(null);
-        Assert.assertNull(formField.getCaption());
+        assertNull(formField.getCaption());
         final Element e2 = Jsoup.parse(formField.asWidget().dumpDOM()).getElementsByAttributeValue("pid", id + "").first().child(0);
-        Assert.assertTrue(e2.hasAttr("hidden"));
+        assertTrue(e2.hasAttr("hidden"));
     }
 
     @Test
     public void testValidationWhenDisabled() {
-        final StringTextBoxFormField formField = new StringTextBoxFormField();
+        final StringTextBoxFormField formField = new StringTextBoxFormField("Caption");
         PWindow.getMain().add(formField);
-        formField.setValidator(new NotEmptyFieldValidator("Empty Field"));
-        formField.setEnabled(false);
-        Assert.assertEquals(ValidationResult.OK(), formField.validate());
-        formField.setEnabled(true);
-        Assert.assertEquals("Empty Field", formField.validate().getErrorMessage());
+        formField.setValidator(new NotEmptyFormFieldValidator("Empty Field"));
+        formField.disable();
+        assertEquals(ValidationResult.OK(), formField.validate());
+        formField.enable();
+        assertEquals("Empty Field", formField.validate().getErrorMessage());
     }
 
     @Test
     public void testDirty() {
-        final StringTextBoxFormField formField = new StringTextBoxFormField();
+        final StringTextBoxFormField formField = new StringTextBoxFormField("Caption");
         PWindow.getMain().add(formField);
-        formField.setInitialValue("Initial");
-        Assert.assertTrue(formField.hasDiff());
+        formField.commit();
         formField.setValue("Initial");
-        Assert.assertFalse(formField.hasDiff());
+        assertTrue(formField.isDirty());
+        formField.commit();
+        formField.setValue("Initial");
+        assertFalse(formField.isDirty());
         formField.setValue("Diff");
-        Assert.assertTrue(formField.hasDiff());
+        assertTrue(formField.isDirty());
+        formField.validate();
+        System.err.println(formField.asWidget().dumpDOM());
+        assertTrue(formField.asWidget().dumpDOM().contains("dirty"));
         formField.reset();
-        Assert.assertFalse(formField.hasDiff());
-
-        formField.setValue("Initial2", true);
-        Assert.assertFalse(formField.hasDiff());
-    }
-
-    @Test
-    public void testInnerWidget() {
-        final StringTextBoxFormField formField = new StringTextBoxFormField();
-        PWindow.getMain().add(formField);
-        Assert.assertNotNull(formField.getInnerWidget());
-        Assert.assertTrue(formField.getInnerWidget().hasStyleName("inner-widget"));
+        assertFalse(formField.isDirty());
+        formField.setValue("Initial2");
+        assertTrue(formField.isDirty());
     }
 
     @Test
     public void testEnabled() {
-        final StringTextBoxFormField formField = new StringTextBoxFormField();
+        final StringTextBoxFormField formField = new StringTextBoxFormField("Caption");
         PWindow.getMain().add(formField);
-        Assert.assertTrue(formField.isEnabled());
-        formField.setEnabled(false);
-        Assert.assertFalse(formField.isEnabled());
+        assertTrue(formField.isEnabled());
+        formField.disable();
+        assertFalse(formField.isEnabled());
     }
 
     @Test
     public void testValue() {
-        final StringTextBoxFormField formField = new StringTextBoxFormField();
+        final StringTextBoxFormField formField = new StringTextBoxFormField("Caption");
         PWindow.getMain().add(formField);
         formField.setValue("Test");
-        Assert.assertEquals("Test", formField.getValue());
+        assertEquals("Test", formField.getValue());
         formField.reset();
-        Assert.assertEquals("", formField.getValue());
+        assertEquals("", formField.getValue());
     }
 }
