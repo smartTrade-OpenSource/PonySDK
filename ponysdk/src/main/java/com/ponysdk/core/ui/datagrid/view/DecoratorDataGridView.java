@@ -169,4 +169,9 @@ public class DecoratorDataGridView<K, V> implements DataGridView<K, V> {
     public int getLiveDataRowCount() {
         return view.getLiveDataRowCount();
     }
+
+    @Override
+    public DataGridAdapter<K, V> getAdapter() {
+        return view.getAdapter();
+    }
 }

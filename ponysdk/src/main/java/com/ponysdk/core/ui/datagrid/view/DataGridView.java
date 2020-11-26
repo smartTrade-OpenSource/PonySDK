@@ -49,6 +49,11 @@ public interface DataGridView<K, V> extends IsPWidget {
     void setAdapter(DataGridAdapter<K, V> adapter);
 
     /**
+     * @return the {@link DataGridAdapter} corresponding to this view
+     */
+    DataGridAdapter<K, V> getAdapter();
+
+    /**
      * Sets the delay (in milliseconds) that will be used between consecutive
      * draws of the view.<br/>
      * This delay is only respected for draws triggered by an update in the

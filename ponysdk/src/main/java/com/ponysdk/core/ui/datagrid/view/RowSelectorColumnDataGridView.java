@@ -217,7 +217,7 @@ public class RowSelectorColumnDataGridView<K, V> extends DecoratorDataGridView<K
         }
 
         @Override
-        public boolean isPinSwitchable() {
+        public boolean isPinnable() {
             return false;
         }
 

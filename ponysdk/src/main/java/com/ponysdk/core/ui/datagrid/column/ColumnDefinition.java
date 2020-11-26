@@ -154,7 +154,7 @@ public interface ColumnDefinition<V> extends ColumnActionListener<V> {
      *         {@code false} if it must remain in its default pin state
      * @see #getDefaultState()
      */
-    boolean isPinSwitchable();
+    boolean isPinnable();
 
     /**
      * @return {@code true} if data can be filtered based on this column,
