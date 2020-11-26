@@ -150,6 +150,11 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
         resetLiveData();
     }
 
+    @Override
+    public void refresh() {
+        refreshRows(0, dataSource.getRowCount());
+    }
+
     private void refreshRows(final int from, final int to) {
         this.from = Math.min(this.from, from);
         this.to = Math.max(this.to, to);
@@ -221,7 +226,7 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
         if (row == null) return null;
         renderingHelpersCache.remove(row);
         final V v = dataSource.removeData(k);
-        refreshRows(0, dataSource.getRowCount());
+        refresh();
         return v;
     }
 
@@ -252,14 +257,14 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
         checkAdapter();
         final Column<V> column = getColumn(colDef);
         dataSource.addSort(column, new ColumnControllerSort(column, asc), asc);
-        refreshRows(0, dataSource.getRowCount());
+        refresh();
     }
 
     @Override
     public void addSort(final Object key, final Comparator<V> comparator) {
         checkAdapter();
         dataSource.addSort(key, new GeneralControllerSort(comparator));
-        refreshRows(0, dataSource.getRowCount());
+        refresh();
     }
 
     @Override
@@ -268,14 +273,14 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
         final Column<V> column = getColumn(colDef);
         if (dataSource.clearSort(column) == null) return;
         dataSource.sort();
-        refreshRows(0, dataSource.getRowCount());
+        refresh();
     }
 
     @Override
     public void clearSorts() {
         checkAdapter();
         dataSource.clearSorts();
-        refreshRows(0, dataSource.getRowCount());
+        refresh();
     }
 
     @Override
@@ -308,7 +313,7 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
         checkAdapter();
         if (dataSource.clearSort(key) == null) return;
         dataSource.sort();
-        refreshRows(0, dataSource.getRowCount());
+        refresh();
     }
 
     private class DataGetterFromSrc implements Supplier<DataGetterFromSrc> {

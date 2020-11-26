@@ -235,4 +235,9 @@ public abstract class SpyDataGridController<K, V> implements DataGridController<
                                         final Consumer<DefaultDataGridController<K, V>.DataSrcResult> consumer) {
         controller.prepareLiveDataOnScreen(dataSrcRowIndex, dataSize, threadSnapshot, consumer);
     }
+
+    @Override
+    public void refresh() {
+        controller.refresh();
+    }
 }

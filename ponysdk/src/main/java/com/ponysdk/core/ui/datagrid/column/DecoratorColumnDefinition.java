@@ -116,8 +116,8 @@ public class DecoratorColumnDefinition<V> implements ColumnDefinition<V> {
     }
 
     @Override
-    public boolean isPinSwitchable() {
-        return column.isPinSwitchable();
+    public boolean isPinnable() {
+        return column.isPinnable();
     }
 
     @Override

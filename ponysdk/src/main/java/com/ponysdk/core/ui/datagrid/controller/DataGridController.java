@@ -96,6 +96,8 @@ public interface DataGridController<K, V> {
 
     void enrichConfigBuilder(DataGridConfigBuilder<V> builder);
 
+    void refresh();
+
     /**
      * Send a partially filled object to the dataSource. The object will return
      * filled with the needed data for the view, and with updated fields

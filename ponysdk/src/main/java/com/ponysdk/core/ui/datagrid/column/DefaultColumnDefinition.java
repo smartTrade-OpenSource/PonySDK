@@ -68,7 +68,7 @@ public class DefaultColumnDefinition<V> implements ColumnDefinition<V> {
         });
         this.header.add(columnNameLabel);
 
-        if (isPinSwitchable()) {
+        if (isPinnable()) {
             this.pinLabel.setText(state.isPinned() ? "[unpin me]" : "[pin me]");
             this.pinLabel.addClickHandler(e -> {
                 if (columnController == null) return;
@@ -166,7 +166,7 @@ public class DefaultColumnDefinition<V> implements ColumnDefinition<V> {
     }
 
     @Override
-    public boolean isPinSwitchable() {
+    public boolean isPinnable() {
         return true;
     }
 
