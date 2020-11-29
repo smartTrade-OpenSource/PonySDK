@@ -5,9 +5,9 @@ public class ValidationResult {
     private static final ValidationResult OK_RESULT = new ValidationResult(true, null, null);
     private static final ValidationResult KO_RESULT = new ValidationResult(false, "Validation failed", null);
 
-    private boolean valid;
-    private String errorMessage;
-    private Object data;
+    private final boolean valid;
+    private final String errorMessage;
+    private final Object data;
 
     private ValidationResult(boolean valid, String errorMessage, Object data) {
         this.valid = valid;

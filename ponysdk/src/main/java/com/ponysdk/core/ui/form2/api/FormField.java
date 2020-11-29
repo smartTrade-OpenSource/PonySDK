@@ -1,6 +1,7 @@
 package com.ponysdk.core.ui.form2.api;
 
-import com.ponysdk.core.ui.basic.*;
+import com.ponysdk.core.ui.basic.IsPWidget;
+import com.ponysdk.core.ui.basic.PWidget;
 
 import java.util.Objects;
 
@@ -64,11 +65,13 @@ public abstract class FormField<V> implements IsPWidget {
     public void commit() {
         initialValue = getValue();
         panel.removeDirtyStyle();
+        System.err.println("Commit value : " + initialValue);
     }
 
     public void reset() {
         panel.removeErrorStyle();
         setValue(getInitialValue());
+        System.err.println("Reset value : " + initialValue);
         panel.removeDirtyStyle();
     }
 
@@ -85,6 +88,7 @@ public abstract class FormField<V> implements IsPWidget {
     public PWidget asWidget() {
         if (panel == null) {
             panel = new FormFieldPanel();
+            panel.setCaption(caption);
             panel.addInnerWidget(createInnerWidget());
             afterInitialisation();
         }

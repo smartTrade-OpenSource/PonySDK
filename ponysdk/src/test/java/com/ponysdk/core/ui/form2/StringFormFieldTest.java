@@ -25,8 +25,8 @@ package com.ponysdk.core.ui.form2;
 
 import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.form2.api.ValidationResult;
-import com.ponysdk.core.ui.form2.impl.NotEmptyFormFieldValidator;
-import com.ponysdk.core.ui.form2.impl.StringTextBoxFormField;
+import com.ponysdk.core.ui.form2.impl.validator.NotEmptyFormFieldValidator;
+import com.ponysdk.core.ui.form2.impl.formfield.StringTextBoxFormField;
 import com.ponysdk.test.PSuite;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;

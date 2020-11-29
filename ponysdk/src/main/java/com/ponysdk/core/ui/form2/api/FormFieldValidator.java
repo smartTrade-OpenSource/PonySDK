@@ -4,8 +4,10 @@ public interface FormFieldValidator {
 
     ValidationResult isValid(String value);
 
-    void bindFormField(FormField<?> formField);
+    default void bindFormField(FormField<?> formField) {
+    }
 
-    void unbindFormField(FormField<?> formField);
+    default void unbindFormField(FormField<?> formField) {
+    }
 
 }

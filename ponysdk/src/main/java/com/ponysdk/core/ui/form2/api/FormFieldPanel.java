@@ -6,8 +6,8 @@ import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PWidget;
 
 public class FormFieldPanel extends PFlowPanel {
-    private static String ATTR_ERROR = "error";
-    private static String ATTR_DIFF = "dirty";
+    private static final String ATTR_ERROR = "error";
+    private static final String ATTR_DIFF = "dirty";
 
     private final PElement captionSpan;
 
@@ -35,7 +35,7 @@ public class FormFieldPanel extends PFlowPanel {
     }
 
     void applyDirtyStyle() {
-        setAttribute(ATTR_DIFF);
+        setAttribute(ATTR_DIFF,"true");
     }
 
     void removeDirtyStyle() {

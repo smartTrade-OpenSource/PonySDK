@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.core.ui.form2.impl;
+package com.ponysdk.core.ui.form2.impl.validator;
 
 
 import com.ponysdk.core.ui.form2.api.FormFieldValidator;
@@ -32,7 +32,7 @@ import java.util.Objects;
 
 public class NotEmptyFormFieldValidator implements FormFieldValidator {
 
-    private static String ATTR_REQUIRED = "required";
+    private static final String ATTR_REQUIRED = "required";
 
     private final String errorMessage;
 
