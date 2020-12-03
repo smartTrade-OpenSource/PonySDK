@@ -30,7 +30,6 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
-
 import elemental.json.JsonObject;
 
 public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
@@ -118,6 +117,10 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
         } else if (ServerToClientModel.ENSURE_DEBUG_ID == model) {
             uiObject.getElement().setAttribute(PID_KEY, binaryModel.getStringValue());
             return true;
+        } else if (ServerToClientModel.EVAL == model) {
+            final String script = binaryModel.getStringValue();
+            eval(uiObject.getElement(), script);
+            return true;
         } else {
             return super.update(buffer, binaryModel);
         }
@@ -131,6 +134,11 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
         if (ptObject instanceof PTUIObject) return ((PTUIObject<WIDGET_TYPE>) ptObject).uiObject;
         else throw new IllegalStateException("This object is not an UIObject");
     }
+
+
+    private static native void eval(Element element, String scriptlet) /*-{
+                                                                          return (new Function('element', 'return ' + scriptlet))(element);
+                                                                                   }-*/;
 
     private native Object bind(String functionName, int objectID, Element element) /*-{
                                                                                    var self = this;

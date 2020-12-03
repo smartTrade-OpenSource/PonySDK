@@ -185,6 +185,10 @@ public abstract class PObject {
         saveUpdate(writer -> writer.write(ServerToClientModel.BIND, functionName));
     }
 
+    public void evalTerminalScript(final String script) {
+        saveUpdate(writer -> writer.write(ServerToClientModel.EVAL, script));
+    }
+
     public void sendToNative(final JsonObject data) {
         if (destroy) return;
         if (nativeBindingFunction == null) throw new IllegalAccessError("Object not bind to a native function");

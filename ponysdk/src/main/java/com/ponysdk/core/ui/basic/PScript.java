@@ -23,16 +23,15 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.json.JsonObject;
-
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.UIContext;
+
+import javax.json.JsonObject;
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class allows to execute native Java-script code.
@@ -117,14 +116,16 @@ public class PScript extends PObject {
         if (instruction.containsKey(ClientToServerModel.ERROR_MSG.toStringValue())) {
             if (callbacksByID != null) {
                 final ExecutionCallback callback = callbacksByID
-                    .remove(instruction.getJsonNumber(ClientToServerModel.COMMAND_ID.toStringValue()).longValue());
-                if (callback != null) callback.onFailure(instruction.getString(ClientToServerModel.ERROR_MSG.toStringValue()));
+                        .remove(instruction.getJsonNumber(ClientToServerModel.COMMAND_ID.toStringValue()).longValue());
+                if (callback != null)
+                    callback.onFailure(instruction.getString(ClientToServerModel.ERROR_MSG.toStringValue()));
             }
         } else if (instruction.containsKey(ClientToServerModel.RESULT.toStringValue())) {
             if (callbacksByID != null) {
                 final ExecutionCallback callback = callbacksByID
-                    .remove(instruction.getJsonNumber(ClientToServerModel.COMMAND_ID.toStringValue()).longValue());
-                if (callback != null) callback.onSuccess(instruction.getString(ClientToServerModel.RESULT.toStringValue()));
+                        .remove(instruction.getJsonNumber(ClientToServerModel.COMMAND_ID.toStringValue()).longValue());
+                if (callback != null)
+                    callback.onSuccess(instruction.getString(ClientToServerModel.RESULT.toStringValue()));
             }
         } else {
             super.onClientData(instruction);
