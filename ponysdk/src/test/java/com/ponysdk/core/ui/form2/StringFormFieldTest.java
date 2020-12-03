@@ -105,7 +105,6 @@ public class StringFormFieldTest extends PSuite {
         formField.setValue("Diff");
         assertTrue(formField.isDirty());
         formField.validate();
-        System.err.println(formField.asWidget().dumpDOM());
         assertTrue(formField.asWidget().dumpDOM().contains("dirty"));
         formField.reset();
         assertFalse(formField.isDirty());

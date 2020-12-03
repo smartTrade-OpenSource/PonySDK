@@ -65,13 +65,11 @@ public abstract class FormField<V> implements IsPWidget {
     public void commit() {
         initialValue = getValue();
         panel.removeDirtyStyle();
-        System.err.println("Commit value : " + initialValue);
     }
 
     public void reset() {
         panel.removeErrorStyle();
         setValue(getInitialValue());
-        System.err.println("Reset value : " + initialValue);
         panel.removeDirtyStyle();
     }
 

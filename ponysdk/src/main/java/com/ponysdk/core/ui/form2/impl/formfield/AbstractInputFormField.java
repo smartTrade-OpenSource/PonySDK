@@ -39,7 +39,7 @@ public abstract class AbstractInputFormField<V> extends FormField<V> {
 
     @Override
     public boolean isEnabled() {
-        return input.hasAttribute("disabled");
+        return !input.hasAttribute("disabled");
     }
 
     @Override
