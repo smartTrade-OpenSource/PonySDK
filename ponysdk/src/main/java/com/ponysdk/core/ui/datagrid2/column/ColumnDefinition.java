@@ -106,15 +106,15 @@ public interface ColumnDefinition<V> extends ColumnActionListener<V> {
 
     /**
      * Compares {@code v1} and {@code v2} from the perspective of this
-     * column.<br/>
+     * column.
      * Rendering helpers corresponding to both values can be retrieved via the
      * {@link Supplier} arguments to be used for the comparison.
      * {@code renderingHelper1} corresponds to {@code v1} while
-     * {@code renderingHelper2} corresponds to {@code v2}.<br/>
+     * {@code renderingHelper2} corresponds to {@code v2}.
      * Returns a negative integer, zero, or a positive integer as {@code v1} is
-     * less than, equal to, or greater than {@code v2}.<br/>
+     * less than, equal to, or greater than {@code v2}.
      * Returns {@code 0} or any other arbitrary value when this column is not
-     * sortable.<br/>
+     * sortable.
      *
      * @see ColumnDefinition#isSortable()
      * @see ColumnDefinition#getRenderingHelper(Object)
@@ -200,8 +200,7 @@ public interface ColumnDefinition<V> extends ColumnActionListener<V> {
     int getMaxWidth();
 
     /**
-     * The state of a column regarding its visibility and pinning.<br/>
-     * <br/>
+     * The state of a column regarding its visibility and pinning.
      * There are only 3 possible states : {@link #UNPINNED_SHOWN},
      * {@link #UNPINNED_HIDDEN} and {@link #PINNED_SHOWN}. A column cannot be
      * pinned and hidden.

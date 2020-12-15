@@ -55,15 +55,15 @@ public interface DataGridView<K, V> extends IsPWidget {
 
     /**
      * Sets the delay (in milliseconds) that will be used between consecutive
-     * draws of the view.<br/>
+     * draws of the view.
      * This delay is only respected for draws triggered by an update in the
      * {@link DataGridSource}. For draws that are triggered by a user action,
-     * this delay is not respected and the draw is immediate.<br/>
+     * this delay is not respected and the draw is immediate.
      * This delay can be useful for throttling draw instructions sent to the
-     * terminal.<br/>
+     * terminal.
      * This delay can be changed multiple times during the life-cycle of this
-     * view.<br/>
-     * The default value of this delay is 0 (no delay).<br/>
+     * view.
+     * The default value of this delay is 0 (no delay).
      */
     void setPollingDelayMillis(long pollingDelayMillis);
 
