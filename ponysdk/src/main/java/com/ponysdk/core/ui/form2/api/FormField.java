@@ -8,6 +8,7 @@ import java.util.Objects;
 public abstract class FormField<V> implements IsPWidget {
 
     private String caption;
+    private String description;
 
     protected FormFieldPanel panel;
     protected FormFieldValidator validator;
@@ -15,6 +16,10 @@ public abstract class FormField<V> implements IsPWidget {
 
     public FormField(final String caption) {
         this.caption = caption;
+        panel = new FormFieldPanel();
+        panel.setCaption(caption);
+        panel.addInnerWidget(createInnerWidget());
+        afterInitialisation();
     }
 
     private void checkDirty() {
@@ -73,6 +78,11 @@ public abstract class FormField<V> implements IsPWidget {
         panel.removeDirtyStyle();
     }
 
+    public void setDescription(String description) {
+        this.description = description;
+        panel.setDescription(description);
+    }
+
     public void setCaption(String caption) {
         this.caption = caption;
         panel.setCaption(caption);
@@ -82,14 +92,12 @@ public abstract class FormField<V> implements IsPWidget {
         return caption;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
     @Override
     public PWidget asWidget() {
-        if (panel == null) {
-            panel = new FormFieldPanel();
-            panel.setCaption(caption);
-            panel.addInnerWidget(createInnerWidget());
-            afterInitialisation();
-        }
         return panel;
     }
 

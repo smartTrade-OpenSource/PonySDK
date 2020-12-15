@@ -82,6 +82,23 @@ public class StringFormFieldTest extends PSuite {
     }
 
     @Test
+    public void testDescription() {
+        final StringTextBoxFormField formField = new StringTextBoxFormField("");
+        formField.setDescription("Description");
+        PWindow.getMain().add(formField);
+        int id = formField.asWidget().getID();
+        assertEquals("Description", formField.getDescription());
+        final Element e1 = Jsoup.parse(formField.asWidget().dumpDOM()).getElementsByAttributeValue("pid", id + "").first().child(0);
+        assertFalse(e1.hasAttr("hidden"));
+
+        formField.setDescription("Description2");
+        assertEquals("Description2", formField.getDescription());
+
+        formField.setDescription(null);
+        assertNull(formField.getDescription());
+    }
+
+    @Test
     public void testValidationWhenDisabled() {
         final StringTextBoxFormField formField = new StringTextBoxFormField("Caption");
         PWindow.getMain().add(formField);

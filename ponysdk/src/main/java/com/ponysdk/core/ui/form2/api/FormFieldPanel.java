@@ -10,6 +10,7 @@ public class FormFieldPanel extends PFlowPanel {
     private static final String ATTR_DIFF = "dirty";
 
     private final PElement captionSpan;
+    private final PElement descriptionSpan;
 
     protected PWidget innerWidget;
 
@@ -17,7 +18,11 @@ public class FormFieldPanel extends PFlowPanel {
         addStyleName("form-field");
         captionSpan = Element.newSpan();
         captionSpan.addStyleName("caption");
-        add(captionSpan);
+
+        descriptionSpan = Element.newSpan();
+        descriptionSpan.addStyleName("description");
+
+        add(captionSpan,descriptionSpan);
     }
 
     void addInnerWidget(PWidget innerWidget) {
@@ -49,5 +54,14 @@ public class FormFieldPanel extends PFlowPanel {
         }
         captionSpan.setInnerText(caption);
         captionSpan.setVisible(true);
+    }
+
+    void setDescription(String description){
+        if (description == null) {
+            descriptionSpan.setVisible(false);
+            return;
+        }
+        descriptionSpan.setInnerText(description);
+        descriptionSpan.setVisible(true);
     }
 }
