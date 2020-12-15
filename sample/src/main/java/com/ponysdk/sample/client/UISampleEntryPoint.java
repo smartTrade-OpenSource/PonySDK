@@ -30,14 +30,17 @@ import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
 import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
-import com.ponysdk.core.ui.datagrid.adapter.DataGridAdapter;
-import com.ponysdk.core.ui.datagrid.column.ColumnDefinition;
-import com.ponysdk.core.ui.datagrid.column.DefaultColumnDefinition;
-import com.ponysdk.core.ui.datagrid.controller.DataGridController;
-import com.ponysdk.core.ui.datagrid.data.RowAction;
-import com.ponysdk.core.ui.datagrid.view.*;
-import com.ponysdk.core.ui.datagrid.view.DataGridView.DecodeException;
+import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
+import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
+import com.ponysdk.core.ui.datagrid2.column.DefaultColumnDefinition;
+import com.ponysdk.core.ui.datagrid2.controller.DataGridController;
+import com.ponysdk.core.ui.datagrid2.data.RowAction;
+import com.ponysdk.core.ui.datagrid2.view.*;
+import com.ponysdk.core.ui.datagrid2.view.DataGridView.DecodeException;
 import com.ponysdk.core.ui.eventbus2.EventBus.EventHandler;
+import com.ponysdk.core.ui.form2.impl.formfield.ColorInputFormField;
+import com.ponysdk.core.ui.form2.impl.formfield.NumberInputFormField;
+import com.ponysdk.core.ui.form2.impl.formfield.StringTextBoxFormField;
 import com.ponysdk.core.ui.formatter.TextFunction;
 import com.ponysdk.core.ui.grid.AbstractGridWidget;
 import com.ponysdk.core.ui.grid.GridTableWidget;
@@ -86,6 +89,35 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     @Override
     public void start(final UIContext uiContext) {
+        PElement input = Element.newInput();
+        input.setAttribute("type", "checkbox");
+        input.evalTerminalScript("element.checked = true");
+
+        PButton button = Element.newPButton("add");
+        button.addClickHandler(e -> PWindow.getMain().add(input));
+        PWindow.getMain().add(button);
+
+        if(true) return;
+
+        StringTextBoxFormField formField = new StringTextBoxFormField("String Formfield");
+        PWindow.getMain().add(formField);
+        ColorInputFormField colorInputFormField = new ColorInputFormField("Color FormField");
+        PWindow.getMain().add(colorInputFormField);
+        NumberInputFormField<Long> longNumberInputFormField = new NumberInputFormField<Long>("Color FormField") {
+            @Override
+            public Long getValue() {
+                return null;
+            }
+
+            @Override
+            public void setValue(Long value) {
+
+            }
+        };
+        PWindow.getMain().add(colorInputFormField);
+
+        if (true) return;
+
 
         uiContext.setTerminalDataReceiver((object, instruction) -> System.err.println(object + " : " + instruction));
 
@@ -116,7 +148,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         //
         testSimpleDataGridView();
         if (true) return;
-
 
 
         testVisibilityHandler(PWindow.getMain());
@@ -316,13 +347,13 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         //TODO 2 implementation (1 simple & 1 full => surrement coté core ui, recheck et discuter avec JB)
 
         final ColumnVisibilitySelectorDataGridView<Integer, MyRow> columnVisibilitySelectorDataGridView = new ColumnVisibilitySelectorDataGridView<>(
-            simpleGridView);
+                simpleGridView);
         final RowSelectorColumnDataGridView<Integer, MyRow> rowSelectorColumnDataGridView = new RowSelectorColumnDataGridView<>(
-            columnVisibilitySelectorDataGridView);
+                columnVisibilitySelectorDataGridView);
         final ColumnFilterFooterDataGridView<Integer, MyRow> columnFilterFooterDataGridView = new ColumnFilterFooterDataGridView<>(
-            rowSelectorColumnDataGridView);
+                rowSelectorColumnDataGridView);
         final ConfigSelectorDataGridView<Integer, MyRow> configSelectorDataGridView = new ConfigSelectorDataGridView<>(
-            columnFilterFooterDataGridView, "DEFAULT");
+                columnFilterFooterDataGridView, "DEFAULT");
 
         final DataGridView<Integer, MyRow> gridView = configSelectorDataGridView;
         gridView.setAdapter(new DataGridAdapter<>() {
@@ -463,7 +494,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         importConfigButton.addClickHandler(e -> {
             try {
                 configSelectorDataGridView
-                    .setConfigEntries(configSelectorDataGridView.decodeConfigEntries(importConfigTextBox.getText()));
+                        .setConfigEntries(configSelectorDataGridView.decodeConfigEntries(importConfigTextBox.getText()));
             } catch (final DecodeException e1) {
                 e1.printStackTrace();
             }
@@ -612,7 +643,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final BufferedReader reader = new BufferedReader(new InputStreamReader(item.getInputStream(), "UTF-8"));
         final StringBuilder value = new StringBuilder();
         final char[] buffer = new char[1024];
-        for (int length = 0; (length = reader.read(buffer)) > 0;) {
+        for (int length = 0; (length = reader.read(buffer)) > 0; ) {
             value.append(buffer, 0, length);
         }
         System.out.println(value.toString());
@@ -705,7 +736,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     private void createNewEvent() {
         final EventHandler<PClickEvent> handler = UIContext.getNewEventBus().subscribe(PClickEvent.class,
-            event -> System.err.println("B " + event));
+                event -> System.err.println("B " + event));
         UIContext.getNewEventBus().post(new PClickEvent(this));
         UIContext.getNewEventBus().post(new PClickEvent(this));
         UIContext.getNewEventBus().unsubscribe(handler);
@@ -824,7 +855,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         windowContainer.add(button1);
         button1.addClickHandler(event -> {
             final PWindow newPWindow = Element.newPWindow(w, "Sub Window 1 " + i.incrementAndGet(),
-                "resizable=yes,location=0,status=0,scrollbars=0");
+                    "resizable=yes,location=0,status=0,scrollbars=0");
             newPWindow.add(Element.newPLabel("Sub window"));
             newPWindow.open();
         });
@@ -833,7 +864,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         windowContainer.add(button2);
         button2.addClickHandler(event -> {
             final PWindow newPWindow = Element.newPWindow("Not Sub Window 1 " + i.incrementAndGet(),
-                "resizable=yes,location=0,status=0,scrollbars=0");
+                    "resizable=yes,location=0,status=0,scrollbars=0");
             newPWindow.add(Element.newPLabel("Sub window"));
             newPWindow.open();
         });
@@ -927,9 +958,24 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     private static final PFlowPanel createDateBox() {
         final PFlowPanel flowPanel = Element.newPFlowPanel();
-        final PDateBox dateBox = Element.newPDateBox();
-        dateBox.setValue(new Date(0));
+
+        PDatePicker datePicker = Element.newPDatePicker();
+        Date a = new Date();
+        System.err.println(new Date(a.getYear(), a.getMonth(), 26));
+        System.err.println(new Date());
+
+        datePicker.setTransientEnabledOnDates(false, List.of(new Date(), new Date(a.getYear(), a.getMonth(), 26)));
+        datePicker.addStyleToDates("toto", List.of(new Date()));
+
+        final PDateBox dateBox = Element.newPDateBox(datePicker, new SimpleDateFormat("dd/MM/yyyy"));
+        //dateBox.setValue(new Date(0));
         flowPanel.add(dateBox);
+        datePicker.addShowRangeHandler(e -> {
+            datePicker.setTransientEnabledOnDates(false, List.of(new Date(), new Date(a.getYear(), a.getMonth(), 26)));
+            datePicker.addStyleToDates("toto", List.of(new Date()));
+        });
+
+
         final PButton button = Element.newPButton("reset");
         button.addClickHandler(event -> dateBox.setValue(null));
         flowPanel.add(button);
@@ -970,7 +1016,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
             @Override
             public PKeyCodes[] getFilteredKeys() {
-                return new PKeyCodes[] { PKeyCodes.ENTER };
+                return new PKeyCodes[]{PKeyCodes.ENTER};
             }
         });
         return pTextBox;

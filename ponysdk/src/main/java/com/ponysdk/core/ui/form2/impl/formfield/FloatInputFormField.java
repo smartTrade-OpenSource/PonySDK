@@ -7,6 +7,7 @@ public class FloatInputFormField extends NumberInputFormField<Float> {
 
     @Override
     public Float getValue() {
+        if (input.getText().isEmpty()) return null;
         return Float.valueOf(input.getText());
     }
 }

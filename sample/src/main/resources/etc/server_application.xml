@@ -19,7 +19,7 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
         <property name="debugMode" value="true" />
         <property name="clientConfigFile" value="etc/client_application.xml" />
         <property name="sessionTimeout" value="20" />
-        <property name="entryPointClass" value="com.ponysdk.sample.client.UISampleTestPerformance" />
+        <property name="entryPointClass" value="com.ponysdk.sample.client.UISampleEntryPoint" />
         <property name="javascript">
             <list>
                 <value>script/jquery-3.0.0.min.js</value>

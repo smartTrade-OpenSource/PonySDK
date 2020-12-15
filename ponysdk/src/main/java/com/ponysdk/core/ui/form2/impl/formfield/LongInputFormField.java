@@ -7,6 +7,7 @@ public class LongInputFormField extends NumberInputFormField<Long> {
 
     @Override
     public Long getValue() {
+        if (input.getText().isEmpty()) return null;
         return Long.valueOf(input.getText());
     }
 }

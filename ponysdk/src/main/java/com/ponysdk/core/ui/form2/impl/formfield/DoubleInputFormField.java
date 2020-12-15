@@ -7,6 +7,7 @@ public class DoubleInputFormField extends NumberInputFormField<Double> {
 
     @Override
     public Double getValue() {
+        if (input.getText().isEmpty()) return null;
         return Double.valueOf(input.getText());
     }
 }

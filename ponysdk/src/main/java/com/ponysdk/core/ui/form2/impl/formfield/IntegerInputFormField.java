@@ -7,6 +7,7 @@ public class IntegerInputFormField extends NumberInputFormField<Integer> {
 
     @Override
     public Integer getValue() {
+        if (input.getText().isEmpty()) return null;
         return Integer.valueOf(input.getText());
     }
 }
