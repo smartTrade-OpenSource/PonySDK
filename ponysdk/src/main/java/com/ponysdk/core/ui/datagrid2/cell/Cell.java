@@ -29,7 +29,7 @@ import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 
 /**
  * {@code Cell} is a widget that will be part of a {@code DataGridView} column
- * body. It can be recycled to be used with different model values.<br/>
+ * body. It can be recycled to be used with different model values.
  * The {@link IsPWidget#asWidget()} method must always return the same instance
  * of the main widget that will be used for the rendering of the value.
  *

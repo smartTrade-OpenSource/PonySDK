@@ -49,7 +49,7 @@ public interface ColumnDefinition<V> extends ColumnActionListener<V> {
     IsPWidget getHeader();
 
     /**
-     * Must always return the same instance.<br/>
+     * Must always return the same instance.
      * Returns the same instance as {@link #getHeader()} if the whole header is
      * draggable
      *
@@ -79,27 +79,23 @@ public interface ColumnDefinition<V> extends ColumnActionListener<V> {
 
     /**
      * Returns an intermediate object that will be cached in order to be used
-     * when rendering {@code data} in a {@link Cell}.<br/>
-     * <br/>
+     * when rendering {@code data} in a {@link Cell}.
      * The returned object will be handed to
-     * {@link Cell#render(Object, Object)}.<br/>
+     * {@link Cell#render(Object, Object)}.
      * It can also be retrieved via a {@link Supplier} either in
      * {@link ColumnDefinition#compare(Object, Supplier, Object, Supplier)} to
      * be used for sorting purposes, or inside the {@code BiPredicate} argument
      * of
      * {@link ColumnController#filter(Object, java.util.function.BiPredicate, boolean)}
-     * to be used for filtering purposes.<br/>
-     * <br/>
+     * to be used for filtering purposes.
      * For example: for a date column, this method can return a formatted
      * {@code String} of the date value, to avoid recalculating the
-     * {@code String} each time the value is rendered in a {@link Cell}.<br/>
-     * <br/>
+     * {@code String} each time the value is rendered in a {@link Cell}.
      * Another example: for an {@code enum}-based column, whose values are
      * rendered differently depending on the user's language, this method can
      * return an i18n {@code String} value of the {@code enum} value that can be
      * used for rendering, but can also be used for sorting and filtering on
-     * this column.<br/>
-     * <br/>
+     * this column.
      * Can return {@code null} if no intermediate object is necessary.
      */
     Object getRenderingHelper(V data);

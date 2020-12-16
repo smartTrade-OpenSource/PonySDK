@@ -57,7 +57,6 @@ public interface ExtendedCellController<V> {
 
     /**
      * Updates the value corresponding to this cell using the {@code updater}.
-     * <br/>
      * Can be useful for an editable {@link ExtendedCell}.
      */
     void updateValue(Consumer<V> updater);

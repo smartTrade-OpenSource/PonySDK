@@ -67,7 +67,7 @@ public interface DataGridAdapter<K, V> {
 
     /**
      * Returns a negative integer, zero, or a positive integer as {@code v1} is
-     * less than, equal to, or greater than {@code v2}.<br/>
+     * less than, equal to, or greater than {@code v2}.
      * Returns always zero if there is no default criterion of comparison.
      */
     int compareDefault(V v1, V v2);

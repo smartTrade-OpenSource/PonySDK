@@ -39,7 +39,7 @@ public interface RowAction<V> {
     boolean testRow(V value, int index);
 
     /**
-     * Applies an action on the {@code row} widget.<br/>
+     * Applies an action on the {@code row} widget.
      * <b>MUST NOT modify the dimensions (width or height) of the row since they
      * can be dynamically calculated.</b>
      */
@@ -47,7 +47,7 @@ public interface RowAction<V> {
 
     /**
      * Reverts the changes applied by {@link #apply(IsPWidget)} on the
-     * {@code row} widget.<br/>
+     * {@code row} widget.
      */
     void cancel(IsPWidget row);
 

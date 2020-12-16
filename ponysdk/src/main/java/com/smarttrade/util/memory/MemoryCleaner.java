@@ -24,9 +24,7 @@ import com.sun.management.HotSpotDiagnosticMXBean;
 /**
  * The objective of this class is to trigger a Full GC. One of the idea behind
  * this behavior is to promote static data (like cache for providers) to the Old
- * space, thus enhancing minor GCs after a JVM start.<br/>
- * This class is a mostly copy/paste from
- * {@link com.smarttrade.util.HeapDumper}.
+ * space, thus enhancing minor GCs after a JVM start.
  *
  * @see <a href=
  *      "https://developer.smart-trade.net/jira/browse/DVLPT-7768">DVLPT-7768</a>
