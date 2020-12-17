@@ -29,7 +29,7 @@ import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 /**
  * {@code ExtendedCell} is created when a {@link Cell} is switched to mode
  * extended. {@code ExtendedCell} will be always bound to the same key, but its
- * data might change in case the model is updated.<br/>
+ * data might change in case the model is updated.
  * The {@link IsPWidget#asWidget()} method must always return the same instance
  * of the main widget that will be used for the rendering of the value.
  *

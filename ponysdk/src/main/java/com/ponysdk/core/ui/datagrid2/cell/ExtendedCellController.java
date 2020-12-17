@@ -50,7 +50,7 @@ public interface ExtendedCellController<V> {
 
     /**
      * Replaces the value in the model, corresponding to this cell's key, with
-     * {@code newV}. <br/>
+     * {@code newV}.
      * Can be useful for an editable {@link ExtendedCell}.
      */
     void updateValue(V newV);
