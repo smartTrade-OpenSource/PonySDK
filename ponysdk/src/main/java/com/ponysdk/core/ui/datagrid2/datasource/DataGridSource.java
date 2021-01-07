@@ -125,7 +125,7 @@ public interface DataGridSource<K, V> {
     /**
      * Get sorts entry set
      */
-    Set<Entry<Object, Comparator<DefaultRow<V>>>> getSortsEntry();
+    Set<Entry<Object, Comparator<DefaultRow<V>>>> getSortsEntries();
 
     /**
      * Set a filter

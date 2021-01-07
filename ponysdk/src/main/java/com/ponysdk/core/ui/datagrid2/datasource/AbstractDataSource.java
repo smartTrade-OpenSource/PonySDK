@@ -172,7 +172,7 @@ public abstract class AbstractDataSource<K, V> implements DataGridSource<K, V> {
     }
 
     @Override
-    public Set<Entry<Object, Comparator<DefaultRow<V>>>> getSortsEntry() {
+    public Set<Entry<Object, Comparator<DefaultRow<V>>>> getSortsEntries() {
         return sorts.entrySet();
     }
 

@@ -431,7 +431,7 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     @Override
     public void enrichConfigBuilder(final DataGridConfigBuilder<V> builder) {
         checkAdapter();
-        for (final Map.Entry<Object, Comparator<DefaultRow<V>>> entry : dataSource.getSortsEntry()) {
+        for (final Map.Entry<Object, Comparator<DefaultRow<V>>> entry : dataSource.getSortsEntries()) {
             if (entry.getValue() instanceof DefaultDataGridController.ColumnControllerSort) {
                 final ColumnControllerSort sort = (ColumnControllerSort) entry.getValue();
                 builder.addSort(new ColumnSort<>(sort.column.getColDef().getId(), sort.asc));
