@@ -2,32 +2,31 @@ package com.ponysdk.core.ui.form2.api;
 
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
+import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
 
 import java.util.Objects;
 
 public abstract class FormField<V> implements IsPWidget {
 
+    private boolean initialized;
     private String caption;
     private String description;
+    private V initialValue;
 
-    protected FormFieldPanel panel;
-    protected FormFieldValidator validator;
-    protected V initialValue;
+    private final Behavior behavior;
+    private final FormFieldPanel panel = new FormFieldPanel();
+
+    private FormFieldValidator validator;
 
     public FormField(final String caption) {
-        this.caption = caption;
-        panel = new FormFieldPanel();
-        panel.setCaption(caption);
-        panel.addInnerWidget(createInnerWidget());
-        afterInitialisation();
+        this(caption, new Behavior());
+        behavior.setEnterKeyUp(PKeyUpHandler.newEnterKeyUp(e -> this.commit()));
     }
 
-    private void checkDirty() {
-        if (isDirty()) {
-            panel.applyDirtyStyle();
-        } else {
-            panel.removeDirtyStyle();
-        }
+    public FormField(final String caption, Behavior behavior) {
+        setCaption(caption);
+        this.behavior = behavior;
     }
 
     public boolean isDirty() {
@@ -98,14 +97,28 @@ public abstract class FormField<V> implements IsPWidget {
 
     @Override
     public PWidget asWidget() {
+        if (!initialized) {
+            initialized = true;
+            final PWidget innerWidget = createInnerWidget();
+            if (behavior.getEnterKeyUp() != null) {
+                innerWidget.addDomHandler(behavior.getEnterKeyUp(), PKeyUpEvent.TYPE);
+            }
+            panel.addInnerWidget(innerWidget);
+            commit(); //set initial value
+        }
         return panel;
+    }
+
+    private void checkDirty() {
+        if (isDirty()) {
+            panel.applyDirtyStyle();
+        } else {
+            panel.removeDirtyStyle();
+        }
     }
 
     private V getInitialValue() {
         return initialValue;
-    }
-
-    protected void afterInitialisation() {
     }
 
     protected abstract PWidget createInnerWidget();
@@ -121,5 +134,18 @@ public abstract class FormField<V> implements IsPWidget {
     public abstract V getValue();
 
     public abstract void setValue(V value);
+
+    public static class Behavior {
+        private PKeyUpHandler enterKeyUp;
+
+        public PKeyUpHandler getEnterKeyUp() {
+            return enterKeyUp;
+        }
+
+        public void setEnterKeyUp(PKeyUpHandler enterKeyUp) {
+            this.enterKeyUp = enterKeyUp;
+        }
+
+    }
 
 }

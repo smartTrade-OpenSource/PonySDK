@@ -22,12 +22,6 @@ public abstract class AbstractInputFormField<V> extends FormField<V> {
     }
 
     @Override
-    protected void afterInitialisation() {
-        super.afterInitialisation();
-        commit(); //commit the default value
-    }
-
-    @Override
     public void enable() {
         input.removeAttribute("disabled");
     }

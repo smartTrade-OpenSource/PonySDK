@@ -23,9 +23,28 @@
 
 package com.ponysdk.core.ui.basic.event;
 
+import com.ponysdk.core.ui.model.PKeyCodes;
+
+import java.util.function.Consumer;
+
 @FunctionalInterface
 public interface PKeyUpHandler extends PKeyFilterHandler {
 
     void onKeyUp(PKeyUpEvent keyUpEvent);
+
+    static PKeyUpHandler newEnterKeyUp(Consumer<PKeyUpEvent> consumer) {
+        return new PKeyUpHandler() {
+
+            @Override
+            public void onKeyUp(final PKeyUpEvent event) {
+                consumer.accept(event);
+            }
+
+            @Override
+            public PKeyCodes[] getFilteredKeys() {
+                return new PKeyCodes[]{PKeyCodes.ENTER};
+            }
+        };
+    }
 
 }
