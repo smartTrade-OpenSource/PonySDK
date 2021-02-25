@@ -23,12 +23,17 @@
 
 package com.ponysdk.sample.client;
 
+import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.sun.management.HotSpotDiagnosticMXBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +57,8 @@ import com.ponysdk.core.ui.datagrid2.view.RowSelectorColumnDataGridView;
 import com.ponysdk.core.ui.main.EntryPoint;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
 import com.ponysdk.sample.client.event.UserLoggedOutHandler;
-import com.smarttrade.util.memory.MemoryCleaner;
+
+import javax.management.MBeanServer;
 
 public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler {
 
@@ -363,7 +369,7 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
             final long time_after = System.nanoTime();
             final long duration = time_after - time_before;
             log.info("TestDuration = " + duration);
-            MemoryCleaner.cleanMemory(true, false);
+            cleanMemory(true, false);
             System.gc();
             log.info("STOP testPerformanceBench (waiting 1 minute)");
             try {
@@ -449,6 +455,39 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
     @Override
     public void onUserLoggedOut(final UserLoggedOutEvent event) {
         UIContext.get().close();
+    }
+
+    public static void cleanMemory(final boolean cleanWithHeapDump, final boolean deleteHeapDump) {
+        boolean heapDumped = false;
+        if (cleanWithHeapDump) {
+            try {
+                final MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+                final HotSpotDiagnosticMXBean mbean = ManagementFactory.newPlatformMXBeanProxy(server,
+                        "com.sun.management:type=HotSpotDiagnostic", HotSpotDiagnosticMXBean.class);
+                final String fileName = "memory_cleaner_" + System.currentTimeMillis() + "_live.hprof";
+                try {
+                    mbean.dumpHeap(fileName, true);
+                    log.info("The MemoryCleaner heap dump '{}' has been successfully generated", fileName);
+                    heapDumped = true;
+
+                    if (deleteHeapDump) {
+                        try {
+                            Files.delete(Paths.get(fileName));
+                            log.info("The hprof '{}' was successfully deleted", fileName);
+                        } catch (final IOException e) {
+                            log.error("Could not delete the generated hprof " + fileName, e);
+                        }
+                    }
+                } catch (IOException | RuntimeException e) {
+                    log.error("Cannot dump heap (MemoryCleaner) through HotspotDiagnostic MBean", e);
+                }
+            } catch (final IOException | RuntimeException e) {
+                log.error("Cannot find HotspotDiagnostic MBean for the MemoryCleaner heap dump", e);
+            }
+        }
+
+        // If heap dump failed, at least try to call an explicit GC
+        if (!heapDumped) System.gc();
     }
 }
 
