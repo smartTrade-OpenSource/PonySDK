@@ -1,6 +1,8 @@
 subprojects {
     apply plugin: 'java'
-    apply plugin: 'maven-publish'
+    apply plugin: 'maven-publish'	
+    apply plugin: 'eclipse'
+    //version = '2.8.20'
     sourceCompatibility = JavaVersion.VERSION_1_9
     targetCompatibility = JavaVersion.VERSION_1_9
 

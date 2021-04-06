@@ -813,3 +813,200 @@ _UTF8 = undefined;
   });
 
 })();
+
+(function() {
+  "use strict"
+
+  /**
+   * TODO add fake rows
+   * show more rows then it could be shown
+   */
+  AbstractAddon.defineAddon("com.ponysdk.core.ui.infinitescroll.InfiniteScroll", {
+    initDom:function() {
+      window.test = this;
+
+      this.scrollableBody = this.jqelement;
+      this.table = this.jqelement.find(".container");
+      this.tbody = this.jqelement.find(".item-body");
+      //this.tbody = document.getElementsByClassName("t-body");
+      
+      this.scrollableBody.width("100%");
+      this.scrollableBody.height("100%");
+      this.scrollableBody.css("overflow-y", "overlay");
+      this.scrollableBody.css("overflow-x", "hidden");
+      this.scrollableBody.css("position", "relative");
+
+      this.table.css("width", "100%");
+      
+  
+
+      this.size = 0; //size of the data
+      this.beginIndex = 0; //start of the viewport for the server
+      this.throtleRows = 5; //nb row to scroll before update view
+      this.started = false;
+    
+      
+      //prevent to much call 
+      //this.updateTableHeight = this.updateTableHeight.bind(this);
+      //this.updateView = $.debounce(250, this.updateView.bind(this)).bind(this);
+
+      //force compute size t
+      this.invalid = true;
+      this.firstStart = true;
+    },
+    
+    start:function() {
+      this.started = true;
+      
+    
+
+      
+      // default row height
+      // will be update by adding rows
+      this.rowHeight = 15; 
+      
+      if(this.firstStart){
+        this.firstStart = false;
+
+        //add handlers
+        window.addEventListener("resize", function(){
+          if(this.started){
+            this.updateTableHeight();
+          } else {
+            this.invalid = true;
+          }
+        }.bind(this));
+        this.scrollableBody.scroll(this.onScroll.bind(this));
+        
+        var observer = new MutationObserver(function(e){
+          var trs = []
+          for(var i = 0; i < e.length; i++){
+            if(e[i].addedNodes){
+              for(var j = 0; j < e[i].addedNodes.length; j++)
+              trs.push(e[i].addedNodes[j]);
+            }
+          }
+          if(trs.length > 0)
+          this.updateTableHeight(trs);
+        }.bind(this));
+        observer.observe(this.tbody[0], {childList: true});
+      }
+
+      if(this.invalid){
+        this.invalid = false;
+        this.updateTableHeight();
+      }
+    },
+    
+    stop:function(){
+      this.started = false;
+    },
+    
+    /**
+     * Update table height
+     * Called after a window resize event
+     * Or after adding a row
+     */
+    updateTableHeight:function(addedNodes) {
+      if(!this.started) return;
+      if(!addedNodes){
+        console.log(this.tbody);
+        var trs = this.tbody.children(".item");
+        console.log(trs);
+      }   
+      else 
+        var trs = $(addedNodes);
+
+      
+      var height = trs.height();
+      if( height != null && height != this.rowHeight ) {
+        this.rowHeight = height;
+      }
+
+      this.viewportHeightPx = this.scrollableBody.height() ;
+      this.visualMaxVisibleItem = Math.ceil( this.viewportHeightPx / this.rowHeight);
+      this.throtleRows = Math.floor(this.visualMaxVisibleItem / 2 ) + this.visualMaxVisibleItem % 2;
+      this.maxVisibleItem = this.visualMaxVisibleItem + 2 * this.throtleRows;
+
+      this.updateView(true);
+    },
+    
+    /**
+     * update the amount of data
+     */
+    setSize:function(size) {
+      this.size = size;
+      //force redraw
+      this.marginTopPx = undefined;
+      this.updateView();
+    },
+    
+    sendInformations:function() {
+      if( this.lastBeginIndex != this.beginIndex || this.lastMaxVisibleItem != this.maxVisibleItem ) {
+        this.lastBeginIndex = this.beginIndex;
+        this.lastMaxVisibleItem = this.maxVisibleItem;
+        this.scrollableBody.addClass("widget-circle-loading")
+        this.sendDataToServer({
+          beginIndex: this.beginIndex,
+          maxVisibleItem: this.maxVisibleItem,
+        });
+      }
+    },
+    
+    onScroll: function() {
+      this.updateView();
+    },
+    
+    updateView:function(forceUpdate) {
+      if(!this.start)
+      return;
+      //TODO use dummy rows
+      //TODO store next scrolls positions before update
+
+      var scrollTopPx = this.scrollableBody[0].scrollTop;
+      
+      var topIndex = Math.round(scrollTopPx / this.rowHeight) - this.throtleRows;
+      var bottomIndex = topIndex + this.maxVisibleItem;
+      if(bottomIndex >= this.size){
+        topIndex -= bottomIndex - this.size;
+        bottomIndex = this.size;
+      }
+      if(topIndex < 0){
+        bottomIndex -= topIndex;
+        topIndex = 0;
+      }
+      
+      var topPositionPx = topIndex * this.rowHeight;
+      var marginTopPx = topPositionPx ;
+      var marginBottomPx = (this.size - bottomIndex) * this.rowHeight;
+
+      //if size < available space
+      if(marginBottomPx < 0) {
+        marginBottomPx = 0;
+      }
+
+      //prevent too much drawing
+      if(forceUpdate || this.marginBottomPx ==  undefined ||
+        Math.abs(this.beginIndex - topIndex) >= this.throtleRows ||
+        topIndex == 0 && this.beginIndex != 0 ||
+        bottomIndex == this.size && this.marginBottomPx != 0) {
+
+        this.beginIndex = topIndex;
+        this.marginTopPx = marginTopPx;
+        this.marginBottomPx = marginBottomPx;
+
+        this.table.css("margin-top", marginTopPx + "px");
+        this.table.css("margin-bottom",  marginBottomPx +"px");
+
+
+        //even odd pb
+        this.sendInformations();
+      }
+    },
+
+    //callback from server
+    onDraw:function() {
+      this.scrollableBody.removeClass("widget-circle-loading")
+    }
+  });
+})();

@@ -23,10 +23,65 @@
 
 package com.ponysdk.sample.client;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.PScheduler;
-import com.ponysdk.core.ui.basic.*;
+import com.ponysdk.core.ui.basic.Element;
+import com.ponysdk.core.ui.basic.IsPWidget;
+import com.ponysdk.core.ui.basic.PAbsolutePanel;
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PComplexPanel;
+import com.ponysdk.core.ui.basic.PCookies;
+import com.ponysdk.core.ui.basic.PDateBox;
+import com.ponysdk.core.ui.basic.PDatePicker;
+import com.ponysdk.core.ui.basic.PDockLayoutPanel;
+import com.ponysdk.core.ui.basic.PElement;
+import com.ponysdk.core.ui.basic.PFileUpload;
+import com.ponysdk.core.ui.basic.PFlowPanel;
+import com.ponysdk.core.ui.basic.PFrame;
+import com.ponysdk.core.ui.basic.PFunctionalLabel;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PListBox;
+import com.ponysdk.core.ui.basic.PMenuBar;
+import com.ponysdk.core.ui.basic.PRichTextArea;
+import com.ponysdk.core.ui.basic.PScript;
+import com.ponysdk.core.ui.basic.PScrollPanel;
+import com.ponysdk.core.ui.basic.PSimplePanel;
+import com.ponysdk.core.ui.basic.PStackLayoutPanel;
+import com.ponysdk.core.ui.basic.PTabLayoutPanel;
+import com.ponysdk.core.ui.basic.PTextBox;
+import com.ponysdk.core.ui.basic.PTree;
+import com.ponysdk.core.ui.basic.PTreeItem;
+import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
 import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
@@ -35,8 +90,13 @@ import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.column.DefaultColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.controller.DataGridController;
 import com.ponysdk.core.ui.datagrid2.data.RowAction;
-import com.ponysdk.core.ui.datagrid2.view.*;
+import com.ponysdk.core.ui.datagrid2.view.ColumnFilterFooterDataGridView;
+import com.ponysdk.core.ui.datagrid2.view.ColumnVisibilitySelectorDataGridView;
+import com.ponysdk.core.ui.datagrid2.view.ConfigSelectorDataGridView;
+import com.ponysdk.core.ui.datagrid2.view.DataGridView;
 import com.ponysdk.core.ui.datagrid2.view.DataGridView.DecodeException;
+import com.ponysdk.core.ui.datagrid2.view.DefaultDataGridView;
+import com.ponysdk.core.ui.datagrid2.view.RowSelectorColumnDataGridView;
 import com.ponysdk.core.ui.eventbus2.EventBus.EventHandler;
 import com.ponysdk.core.ui.form2.impl.formfield.ColorInputFormField;
 import com.ponysdk.core.ui.form2.impl.formfield.NumberInputFormField;
@@ -44,6 +104,8 @@ import com.ponysdk.core.ui.form2.impl.formfield.StringTextBoxFormField;
 import com.ponysdk.core.ui.formatter.TextFunction;
 import com.ponysdk.core.ui.grid.AbstractGridWidget;
 import com.ponysdk.core.ui.grid.GridTableWidget;
+import com.ponysdk.core.ui.infinitescroll.InfiniteScroll;
+import com.ponysdk.core.ui.infinitescroll.InfiniteScrollProvider;
 import com.ponysdk.core.ui.list.DataGridColumnDescriptor;
 import com.ponysdk.core.ui.list.refreshable.Cell;
 import com.ponysdk.core.ui.list.refreshable.RefreshableDataGrid;
@@ -61,21 +123,6 @@ import com.ponysdk.core.ui.scene.Scene;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
 import com.ponysdk.sample.client.event.UserLoggedOutHandler;
 import com.ponysdk.sample.client.page.addon.LoggerAddOn;
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.text.SimpleDateFormat;
-import java.time.Duration;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
@@ -87,37 +134,75 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     int a = 0;
     private static int counter;
 
+    private void tabletBlotter() {
+        final InfiniteScroll<Integer> tabletBlotter = new InfiniteScroll<>(new InfiniteScrollProvider<Integer>() {
+
+            @Override
+            public List<Integer> getData(final int beginIndex, final int size) {
+                final ArrayList<Integer> arrayList = new ArrayList<>(size);
+                for (int i = beginIndex; i < beginIndex + size; i++) {
+                    arrayList.add(i);
+                }
+                return arrayList;
+            }
+
+            @Override
+            public long getSize() {
+                return 200000;
+            }
+
+            @Override
+            public IsPWidget buildRow(final Integer data) {
+                return Element.newPLabel(data.toString());
+            }
+
+            @Override
+            public void updateRow(final int row, final Integer data, final IsPWidget widget) {
+                ((PLabel) widget).setText(data.toString());
+            }
+
+        });
+        PWindow.getMain().add(tabletBlotter);
+        tabletBlotter.asWidget().setStyleProperty("height", "1000px");
+        tabletBlotter.start();
+    }
+
     @Override
     public void start(final UIContext uiContext) {
-        PElement input = Element.newInput();
+
+        tabletBlotter();
+        //testSimpleDataGridView();
+        if (true) return;
+        if (true) return;
+        final PElement input = Element.newInput();
         input.setAttribute("type", "checkbox");
         input.evalTerminalScript("element.checked = true");
 
-        PButton button = Element.newPButton("add");
+        final PButton button = Element.newPButton("add");
         button.addClickHandler(e -> PWindow.getMain().add(input));
         PWindow.getMain().add(button);
 
-        if(true) return;
+        if (true) return;
 
-        StringTextBoxFormField formField = new StringTextBoxFormField("String Formfield");
+        final StringTextBoxFormField formField = new StringTextBoxFormField("String Formfield");
         PWindow.getMain().add(formField);
-        ColorInputFormField colorInputFormField = new ColorInputFormField("Color FormField");
+        final ColorInputFormField colorInputFormField = new ColorInputFormField("Color FormField");
         PWindow.getMain().add(colorInputFormField);
-        NumberInputFormField<Long> longNumberInputFormField = new NumberInputFormField<Long>("Color FormField") {
+        final NumberInputFormField<Long> longNumberInputFormField = new NumberInputFormField<>("Color FormField") {
+
             @Override
             public Long getValue() {
                 return null;
             }
 
             @Override
-            public void setValue(Long value) {
+            public void setValue(final Long value) {
 
             }
         };
         PWindow.getMain().add(colorInputFormField);
 
-        if (true) return;
-
+        //if (true) return;
 
         uiContext.setTerminalDataReceiver((object, instruction) -> System.err.println(object + " : " + instruction));
 
@@ -146,9 +231,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         // Test of the new data grid
         //
         //
-        testSimpleDataGridView();
-        if (true) return;
 
+        if (true) return;
 
         testVisibilityHandler(PWindow.getMain());
 
@@ -241,7 +325,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         PWindow.getMain().add(createTree());
         PWindow.getMain().add(new PTwinListBox<>());
         PWindow.getMain().add(Element.newPVerticalPanel());
-
 
         mainLabel = Element.newPLabel("Label2");
         mainLabel.addClickHandler(event -> System.out.println("bbbbb"));
@@ -347,13 +430,13 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         //TODO 2 implementation (1 simple & 1 full => surrement coté core ui, recheck et discuter avec JB)
 
         final ColumnVisibilitySelectorDataGridView<Integer, MyRow> columnVisibilitySelectorDataGridView = new ColumnVisibilitySelectorDataGridView<>(
-                simpleGridView);
+            simpleGridView);
         final RowSelectorColumnDataGridView<Integer, MyRow> rowSelectorColumnDataGridView = new RowSelectorColumnDataGridView<>(
-                columnVisibilitySelectorDataGridView);
+            columnVisibilitySelectorDataGridView);
         final ColumnFilterFooterDataGridView<Integer, MyRow> columnFilterFooterDataGridView = new ColumnFilterFooterDataGridView<>(
-                rowSelectorColumnDataGridView);
+            rowSelectorColumnDataGridView);
         final ConfigSelectorDataGridView<Integer, MyRow> configSelectorDataGridView = new ConfigSelectorDataGridView<>(
-                columnFilterFooterDataGridView, "DEFAULT");
+            columnFilterFooterDataGridView, "DEFAULT");
 
         final DataGridView<Integer, MyRow> gridView = configSelectorDataGridView;
         gridView.setAdapter(new DataGridAdapter<>() {
@@ -362,6 +445,12 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
             {
                 for (char c = 'a'; c <= 'z'; c++) {
+                    final String ss = c + "";
+                    columns.add(new DefaultColumnDefinition<>(ss, v -> v.getValue(ss), (v, s) -> {
+                        v.putValue(ss, s);
+                    }));
+                }
+                for (int c = 0; c <= 1000; c++) {
                     final String ss = c + "";
                     columns.add(new DefaultColumnDefinition<>(ss, v -> v.getValue(ss), (v, s) -> {
                         v.putValue(ss, s);
@@ -494,7 +583,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         importConfigButton.addClickHandler(e -> {
             try {
                 configSelectorDataGridView
-                        .setConfigEntries(configSelectorDataGridView.decodeConfigEntries(importConfigTextBox.getText()));
+                    .setConfigEntries(configSelectorDataGridView.decodeConfigEntries(importConfigTextBox.getText()));
             } catch (final DecodeException e1) {
                 e1.printStackTrace();
             }
@@ -643,7 +732,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final BufferedReader reader = new BufferedReader(new InputStreamReader(item.getInputStream(), "UTF-8"));
         final StringBuilder value = new StringBuilder();
         final char[] buffer = new char[1024];
-        for (int length = 0; (length = reader.read(buffer)) > 0; ) {
+        for (int length = 0; (length = reader.read(buffer)) > 0;) {
             value.append(buffer, 0, length);
         }
         System.out.println(value.toString());
@@ -736,7 +825,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     private void createNewEvent() {
         final EventHandler<PClickEvent> handler = UIContext.getNewEventBus().subscribe(PClickEvent.class,
-                event -> System.err.println("B " + event));
+            event -> System.err.println("B " + event));
         UIContext.getNewEventBus().post(new PClickEvent(this));
         UIContext.getNewEventBus().post(new PClickEvent(this));
         UIContext.getNewEventBus().unsubscribe(handler);
@@ -855,7 +944,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         windowContainer.add(button1);
         button1.addClickHandler(event -> {
             final PWindow newPWindow = Element.newPWindow(w, "Sub Window 1 " + i.incrementAndGet(),
-                    "resizable=yes,location=0,status=0,scrollbars=0");
+                "resizable=yes,location=0,status=0,scrollbars=0");
             newPWindow.add(Element.newPLabel("Sub window"));
             newPWindow.open();
         });
@@ -864,7 +953,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         windowContainer.add(button2);
         button2.addClickHandler(event -> {
             final PWindow newPWindow = Element.newPWindow("Not Sub Window 1 " + i.incrementAndGet(),
-                    "resizable=yes,location=0,status=0,scrollbars=0");
+                "resizable=yes,location=0,status=0,scrollbars=0");
             newPWindow.add(Element.newPLabel("Sub window"));
             newPWindow.open();
         });
@@ -959,8 +1048,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     private static final PFlowPanel createDateBox() {
         final PFlowPanel flowPanel = Element.newPFlowPanel();
 
-        PDatePicker datePicker = Element.newPDatePicker();
-        Date a = new Date();
+        final PDatePicker datePicker = Element.newPDatePicker();
+        final Date a = new Date();
         System.err.println(new Date(a.getYear(), a.getMonth(), 26));
         System.err.println(new Date());
 
@@ -974,7 +1063,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             datePicker.setTransientEnabledOnDates(false, List.of(new Date(), new Date(a.getYear(), a.getMonth(), 26)));
             datePicker.addStyleToDates("toto", List.of(new Date()));
         });
-
 
         final PButton button = Element.newPButton("reset");
         button.addClickHandler(event -> dateBox.setValue(null));
@@ -1016,7 +1104,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
             @Override
             public PKeyCodes[] getFilteredKeys() {
-                return new PKeyCodes[]{PKeyCodes.ENTER};
+                return new PKeyCodes[] { PKeyCodes.ENTER };
             }
         });
         return pTextBox;
