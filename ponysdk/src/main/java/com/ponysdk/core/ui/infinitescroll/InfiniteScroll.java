@@ -63,11 +63,7 @@ public class InfiniteScroll<D> extends PAddOnComposite<PPanel> {
         super(Element.newPFlowPanel());
         this.dataProvider = dataProvider;
 
-        //widget.addStyleName("tablet-blotter");
-        //        widget.setStyleProperty("width", "100%");
-        //        widget.setStyleProperty("height", "100%");
-
-        // TABLE
+        // Container
         final PPanel container = Element.newPFlowPanel();
         container.addStyleName("container");
         widget.add(container);
@@ -92,7 +88,6 @@ public class InfiniteScroll<D> extends PAddOnComposite<PPanel> {
         callTerminalMethod("start");
         setSize(dataProvider.getSize());
         started = true;
-        //if (shouldDrawOnStart) draw();
     }
 
     public void stop() {

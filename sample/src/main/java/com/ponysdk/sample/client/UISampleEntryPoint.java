@@ -134,8 +134,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     int a = 0;
     private static int counter;
 
-    private void tabletBlotter() {
-        final InfiniteScroll<Integer> tabletBlotter = new InfiniteScroll<>(new InfiniteScrollProvider<Integer>() {
+    private void infiniteScroll() {
+        final InfiniteScroll<Integer> infiniteScroll = new InfiniteScroll<>(new InfiniteScrollProvider<Integer>() {
 
             @Override
             public List<Integer> getData(final int beginIndex, final int size) {
@@ -162,15 +162,15 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             }
 
         });
-        PWindow.getMain().add(tabletBlotter);
-        tabletBlotter.asWidget().setStyleProperty("height", "1000px");
-        tabletBlotter.start();
+        PWindow.getMain().add(infiniteScroll);
+        infiniteScroll.asWidget().setStyleProperty("height", "1000px");
+        infiniteScroll.start();
     }
 
     @Override
     public void start(final UIContext uiContext) {
 
-        tabletBlotter();
+        infiniteScroll();
         //testSimpleDataGridView();
         if (true) return;
         if (true) return;

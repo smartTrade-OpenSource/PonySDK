@@ -826,9 +826,9 @@ _UTF8 = undefined;
       window.test = this;
 
       this.scrollableBody = this.jqelement;
-      this.table = this.jqelement.find(".container");
+      this.container = this.jqelement.find(".container");
       this.tbody = this.jqelement.find(".item-body");
-      //this.tbody = document.getElementsByClassName("t-body");
+
       
       this.scrollableBody.width("100%");
       this.scrollableBody.height("100%");
@@ -836,7 +836,7 @@ _UTF8 = undefined;
       this.scrollableBody.css("overflow-x", "hidden");
       this.scrollableBody.css("position", "relative");
 
-      this.table.css("width", "100%");
+      this.container.css("width", "100%");
       
   
 
@@ -857,10 +857,7 @@ _UTF8 = undefined;
     
     start:function() {
       this.started = true;
-      
     
-
-      
       // default row height
       // will be update by adding rows
       this.rowHeight = 15; 
@@ -871,7 +868,7 @@ _UTF8 = undefined;
         //add handlers
         window.addEventListener("resize", function(){
           if(this.started){
-            this.updateTableHeight();
+            this.updateContainerHeight();
           } else {
             this.invalid = true;
           }
@@ -887,14 +884,14 @@ _UTF8 = undefined;
             }
           }
           if(trs.length > 0)
-          this.updateTableHeight(trs);
+          this.updateContainerHeight(trs);
         }.bind(this));
         observer.observe(this.tbody[0], {childList: true});
       }
 
       if(this.invalid){
         this.invalid = false;
-        this.updateTableHeight();
+        this.updateContainerHeight();
       }
     },
     
@@ -907,7 +904,7 @@ _UTF8 = undefined;
      * Called after a window resize event
      * Or after adding a row
      */
-    updateTableHeight:function(addedNodes) {
+    updateContainerHeight:function(addedNodes) {
       if(!this.started) return;
       if(!addedNodes){
         console.log(this.tbody);
@@ -995,8 +992,8 @@ _UTF8 = undefined;
         this.marginTopPx = marginTopPx;
         this.marginBottomPx = marginBottomPx;
 
-        this.table.css("margin-top", marginTopPx + "px");
-        this.table.css("margin-bottom",  marginBottomPx +"px");
+        this.container.css("margin-top", marginTopPx + "px");
+        this.container.css("margin-bottom",  marginBottomPx +"px");
 
 
         //even odd pb
