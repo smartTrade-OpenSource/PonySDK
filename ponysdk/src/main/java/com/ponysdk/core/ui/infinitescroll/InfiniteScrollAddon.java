@@ -24,8 +24,9 @@
 package com.ponysdk.core.ui.infinitescroll;
 
 /**
- *
- */
+ * @author mzoughagh
+ *  InfiniteScroll Addon
+ *  */
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,40 +39,31 @@ import com.ponysdk.core.ui.basic.PAddOnComposite;
 import com.ponysdk.core.ui.basic.PPanel;
 import com.ponysdk.core.ui.basic.PWidget;
 
-public class InfiniteScroll<D> extends PAddOnComposite<PPanel> {
+public class InfiniteScrollAddon<D> extends PAddOnComposite<PPanel> {
 
     // visual elements
-    private final PPanel body;
-    // rows
-    private final List<PWidget> rows = new ArrayList<>();
+    private final PPanel container;
+    // items
+    private final List<PWidget> items = new ArrayList<>();
 
     // used for drawing
     private int i = 0;
     private int beginIndex = 0;
-    private int maxVisibleItem = 0;
-
-    // TXN
-    private final boolean drawScheduled = false;
+    private int maxVisibleItem = 20;
 
     private final InfiniteScrollProvider<D> dataProvider;
 
-    private boolean started;
-    private boolean shouldDrawOnStart;
     private long size;
 
-    public InfiniteScroll(final InfiniteScrollProvider<D> dataProvider) {
+    public InfiniteScrollAddon(final InfiniteScrollProvider<D> dataProvider) {
         super(Element.newPFlowPanel());
         this.dataProvider = dataProvider;
 
+        widget.addStyleName("is-viewport");
         // Container
-        final PPanel container = Element.newPFlowPanel();
-        container.addStyleName("container");
+        container = Element.newPFlowPanel();
+        container.addStyleName("is-container");
         widget.add(container);
-
-        // BODY
-        body = Element.newPFlowPanel();
-        body.addStyleName("item-body");
-        container.add(body);
 
         // HANDLER
         this.setTerminalHandler((event) -> {
@@ -84,52 +76,60 @@ public class InfiniteScroll<D> extends PAddOnComposite<PPanel> {
         });
     }
 
+    /**
+     * calling start method js and setting the size
+     */
     public void start() {
         callTerminalMethod("start");
         setSize(dataProvider.getSize());
-        started = true;
+
     }
+
+    /**
+     * calling stop method js
+     */
 
     public void stop() {
         callTerminalMethod("stop");
-        started = false;
     }
 
+    /**
+     * calling setSize method js
+     */
     public void setSize(final long l) {
         this.size = l;
         callTerminalMethod("setSize", String.valueOf(l));
         draw();
     }
 
+    /**
+     * Add items in DOM by using draw(D), maxVisibleItem and beginIndex.
+     */
     public void draw() {
-        shouldDrawOnStart = false;
         i = 0;
         final int maxItem = (int) Math.min(maxVisibleItem, size);
         final List<D> data = dataProvider.getData(beginIndex, maxItem);
         for (; i < data.size(); i++) {
             draw(data.get(i));
         }
-        for (; i < rows.size(); i++) {
-            rows.get(i).setVisible(false);
+        for (; i < items.size(); i++) {
+            items.get(i).setVisible(false);
         }
         callTerminalMethod("onDraw");
     }
 
     private void draw(final D data) {
-        IsPWidget row;
-        if (rows.size() <= i) {
+        IsPWidget item;
+        if (items.size() <= i) {
             // create row if needed
-            row = dataProvider.buildRow(data);
-            rows.add(row.asWidget());
-            row.asWidget().addStyleName("item");
-            row.asWidget().setStyleProperty("border", "3px solid black");
-            row.asWidget().setStyleProperty("padding", "3px");
-            row.asWidget().setStyleProperty("margin", "3px");
-            body.add(row);
+            item = dataProvider.buildItem(data);
+            items.add(item.asWidget());
+            item.asWidget().addStyleName("item");
+            container.add(item);
         } else {
-            row = rows.get(i);
-            row.asWidget().setVisible(true);
-            dataProvider.updateRow(i, data, row);
+            item = items.get(i);
+            item.asWidget().setVisible(true);
+            dataProvider.updateItem(i, data, item);
         }
     }
 

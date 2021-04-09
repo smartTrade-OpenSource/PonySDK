@@ -104,7 +104,7 @@ import com.ponysdk.core.ui.form2.impl.formfield.StringTextBoxFormField;
 import com.ponysdk.core.ui.formatter.TextFunction;
 import com.ponysdk.core.ui.grid.AbstractGridWidget;
 import com.ponysdk.core.ui.grid.GridTableWidget;
-import com.ponysdk.core.ui.infinitescroll.InfiniteScroll;
+import com.ponysdk.core.ui.infinitescroll.InfiniteScrollAddon;
 import com.ponysdk.core.ui.infinitescroll.InfiniteScrollProvider;
 import com.ponysdk.core.ui.list.DataGridColumnDescriptor;
 import com.ponysdk.core.ui.list.refreshable.Cell;
@@ -135,7 +135,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     private static int counter;
 
     private void infiniteScroll() {
-        final InfiniteScroll<Integer> infiniteScroll = new InfiniteScroll<>(new InfiniteScrollProvider<Integer>() {
+        final InfiniteScrollAddon<Integer> infiniteScroll = new InfiniteScrollAddon<>(new InfiniteScrollProvider<Integer>() {
 
             @Override
             public List<Integer> getData(final int beginIndex, final int size) {
@@ -152,18 +152,21 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             }
 
             @Override
-            public IsPWidget buildRow(final Integer data) {
+            public IsPWidget buildItem(final Integer data) {
                 return Element.newPLabel(data.toString());
             }
 
             @Override
-            public void updateRow(final int row, final Integer data, final IsPWidget widget) {
+            public void updateItem(final int row, final Integer data, final IsPWidget widget) {
                 ((PLabel) widget).setText(data.toString());
+                final int color = 255 - data % 5 * 10;
+                final String prop = String.format("rgb(%s,%s,%s)", color, color, color);
+                widget.asWidget().setStyleProperty("background", prop);
             }
 
         });
         PWindow.getMain().add(infiniteScroll);
-        infiniteScroll.asWidget().setStyleProperty("height", "1000px");
+        infiniteScroll.asWidget().setStyleProperty("height", "500px");
         infiniteScroll.start();
     }
 

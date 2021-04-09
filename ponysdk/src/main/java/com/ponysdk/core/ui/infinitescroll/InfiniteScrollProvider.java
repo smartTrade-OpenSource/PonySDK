@@ -37,8 +37,8 @@ public interface InfiniteScrollProvider<D> {
 
     long getSize();
 
-    IsPWidget buildRow(D data);
+    IsPWidget buildItem(D data);
 
-    void updateRow(int row, D data, IsPWidget widget);
+    void updateItem(int row, D data, IsPWidget widget);
 
 }

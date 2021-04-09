@@ -821,35 +821,24 @@ _UTF8 = undefined;
    * TODO add fake rows
    * show more rows then it could be shown
    */
-  AbstractAddon.defineAddon("com.ponysdk.core.ui.infinitescroll.InfiniteScroll", {
+  AbstractAddon.defineAddon("com.ponysdk.core.ui.infinitescroll.InfiniteScrollAddon", {
     initDom:function() {
       window.test = this;
 
       this.scrollableBody = this.jqelement;
-      this.container = this.jqelement.find(".container");
-      this.tbody = this.jqelement.find(".item-body");
-
-      
+      this.container = this.jqelement.find(".is-container");
+  
       this.scrollableBody.width("100%");
       this.scrollableBody.height("100%");
       this.scrollableBody.css("overflow-y", "overlay");
       this.scrollableBody.css("overflow-x", "hidden");
       this.scrollableBody.css("position", "relative");
 
-      this.container.css("width", "100%");
-      
-  
-
       this.size = 0; //size of the data
       this.beginIndex = 0; //start of the viewport for the server
       this.throtleRows = 5; //nb row to scroll before update view
       this.started = false;
     
-      
-      //prevent to much call 
-      //this.updateTableHeight = this.updateTableHeight.bind(this);
-      //this.updateView = $.debounce(250, this.updateView.bind(this)).bind(this);
-
       //force compute size t
       this.invalid = true;
       this.firstStart = true;
@@ -860,7 +849,7 @@ _UTF8 = undefined;
     
       // default row height
       // will be update by adding rows
-      this.rowHeight = 15; 
+      this.rowHeight = Math.floor(this.container.height()/20); 
       
       if(this.firstStart){
         this.firstStart = false;
@@ -886,7 +875,7 @@ _UTF8 = undefined;
           if(trs.length > 0)
           this.updateContainerHeight(trs);
         }.bind(this));
-        observer.observe(this.tbody[0], {childList: true});
+        observer.observe(this.container[0], {childList: true});
       }
 
       if(this.invalid){
@@ -900,22 +889,20 @@ _UTF8 = undefined;
     },
     
     /**
-     * Update table height
+     * Update container height
      * Called after a window resize event
      * Or after adding a row
      */
     updateContainerHeight:function(addedNodes) {
       if(!this.started) return;
       if(!addedNodes){
-        console.log(this.tbody);
-        var trs = this.tbody.children(".item");
-        console.log(trs);
+        var trs = this.container.children(".item");
       }   
       else 
         var trs = $(addedNodes);
 
       
-      var height = trs.height();
+      var height = trs.outerHeight();
       if( height != null && height != this.rowHeight ) {
         this.rowHeight = height;
       }
