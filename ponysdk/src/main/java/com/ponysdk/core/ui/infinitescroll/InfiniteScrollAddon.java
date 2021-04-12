@@ -118,6 +118,27 @@ public class InfiniteScrollAddon<D> extends PAddOnComposite<PPanel> {
         callTerminalMethod("onDraw");
     }
 
+    /**
+     * Add one item in DOM
+     */
+    public void addItem(final D data) {
+        IsPWidget item;
+        item = dataProvider.buildItem(data);
+        items.add(item.asWidget());
+        item.asWidget().addStyleName("item");
+        container.add(item);
+    }
+
+    /**
+     * Remove one item from DOM
+     */
+    public void removeElement(final int index) {
+        IsPWidget item;
+        item = items.get(index);
+        //item.asWidget().setVisible(false);
+        items.remove(index);
+    }
+
     private void draw(final D data) {
         IsPWidget item;
         if (items.size() <= i) {
