@@ -155,19 +155,28 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
                 }
 
                 @Override
-                public PLabel handleUI(final int index, final Integer data, final PLabel widget) {
-                    if (widget != null) {
-                        return widget;
-                    } else {
-                        final PLabel w = Element.newPLabel();
-                        return w;
+                public PLabel handleUI(final int row, final Integer data, PLabel widget) {
+                    if (widget == null) widget = Element.newPLabel();
+                    widget.setText(data + "");
+                    switch (row % 3) {
+                        case 0:
+                            widget.setStyleProperty("background-color", "red");
+                            break;
+                        case 1:
+                            widget.setStyleProperty("background-color", "green");
+                            break;
+                        case 2:
+                            widget.setStyleProperty("background-color", "blue");
+                            break;
                     }
-
+                    widget.setStyleProperty("height", row % 7 * 10 + "px");
+                    return widget;
                 }
             });
 
         PWindow.getMain().add(infiniteScroll);
         infiniteScroll.asWidget().setStyleProperty("height", "500px");
+        infiniteScroll.refresh();
 
     }
 
