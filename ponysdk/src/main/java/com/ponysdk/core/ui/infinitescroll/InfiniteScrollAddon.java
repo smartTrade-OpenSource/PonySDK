@@ -34,17 +34,16 @@ import java.util.List;
 import javax.json.JsonObject;
 
 import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PAddOnComposite;
 import com.ponysdk.core.ui.basic.PPanel;
-import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.infinitescroll.InfiniteScrollProvider.Wrapper;
 
 public class InfiniteScrollAddon<D> extends PAddOnComposite<PPanel> {
 
     // visual elements
     private final PPanel container;
     // items
-    private final List<PWidget> items = new ArrayList<>();
+    private final List<Wrapper> items = new ArrayList<>();
 
     // used for drawing
     private int i = 0;
@@ -58,7 +57,9 @@ public class InfiniteScrollAddon<D> extends PAddOnComposite<PPanel> {
     public InfiniteScrollAddon(final InfiniteScrollProvider<D> dataProvider) {
         super(Element.newPFlowPanel());
         this.dataProvider = dataProvider;
-
+        dataProvider.addHandler(e -> {
+            this.setSize(dataProvider.getSize());
+        });
         widget.addStyleName("is-viewport");
         // Container
         container = Element.newPFlowPanel();
@@ -109,6 +110,7 @@ public class InfiniteScrollAddon<D> extends PAddOnComposite<PPanel> {
         i = 0;
         final int maxItem = (int) Math.min(maxVisibleItem, size);
         final List<D> data = dataProvider.getData(beginIndex, maxItem);
+        System.err.println("beginIndex " + beginIndex + "maxItem" + maxItem + "data.size()" + data.size());
         for (; i < data.size(); i++) {
             draw(data.get(i));
         }
@@ -121,10 +123,10 @@ public class InfiniteScrollAddon<D> extends PAddOnComposite<PPanel> {
     /**
      * Add one item in DOM
      */
-    public void addItem(final D data) {
-        IsPWidget item;
+    private void addItem(final D data) {
+        Wrapper item;
         item = dataProvider.buildItem(data);
-        items.add(item.asWidget());
+        items.add(item);
         item.asWidget().addStyleName("item");
         container.add(item);
     }
@@ -132,19 +134,13 @@ public class InfiniteScrollAddon<D> extends PAddOnComposite<PPanel> {
     /**
      * Remove one item from DOM
      */
-    public void removeElement(final int index) {
-        IsPWidget item;
-        item = items.get(index);
-        //item.asWidget().setVisible(false);
-        items.remove(index);
-    }
 
     private void draw(final D data) {
-        IsPWidget item;
+        Wrapper item;
         if (items.size() <= i) {
             // create row if needed
             item = dataProvider.buildItem(data);
-            items.add(item.asWidget());
+            items.add(item);
             item.asWidget().addStyleName("item");
             container.add(item);
         } else {
