@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path="ponysdk/src/main/java"/>
+	<classpathentry kind="src" path="ponysdk/src/test/java"/>
+	<classpathentry kind="src" path="sample/src/main/java"/>
+	<classpathentry kind="lib" path="gradle/wrapper/gradle-wrapper.jar"/>
+	<classpathentry kind="lib" path="ponysdk/build/libs/ponysdk-2.8.33.jar"/>
+	<classpathentry kind="lib" path="ponysdk/build/libs/ponysdk-2.9.0.jar"/>
+	<classpathentry kind="lib" path="sample/build/libs/sample.jar"/>
+	<classpathentry kind="output" path="ponysdk/build/classes/java/main"/>
+</classpath>

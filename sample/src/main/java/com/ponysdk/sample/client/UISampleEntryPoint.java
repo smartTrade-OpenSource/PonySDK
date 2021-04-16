@@ -40,7 +40,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -137,73 +136,39 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     private void infiniteScroll() {
 
-        final int maxSize = 100;
-        final ArrayList<Integer> arrayList = new ArrayList<>(maxSize);
-        for (int i = 0; i < maxSize; i++) {
-            arrayList.add(i);
-        }
-        final PFlowPanel panel = Element.newPFlowPanel();
-        final PTextBox textBox = Element.newPTextBox();
-        final PButton button = Element.newPButton("Add new Item");
-        panel.add(textBox);
-        panel.add(button);
-        final InfiniteScrollAddon<Integer> infiniteScroll = new InfiniteScrollAddon<>(new InfiniteScrollProvider<Integer>() {
+        final InfiniteScrollAddon<Integer, PLabel> infiniteScroll = new InfiniteScrollAddon<>(
+            new InfiniteScrollProvider<Integer, PLabel>() {
 
-            final ArrayList<Consumer<Integer>> handlers = new ArrayList<>();
-
-            @Override
-            public List<Integer> getData(final int beginIndex, final int size) {
-                //arrayList = new ArrayList<>(size);
-
-                return arrayList.subList(beginIndex, beginIndex + size);
-            }
-
-            @Override
-            public long getSize() {
-                return arrayList.size();
-            }
-
-            @Override
-            public Wrapper buildItem(final Integer data) {
-                final Wrapper wrapper = new Wrapper();
-                wrapper.setData(data);
-                wrapper.addClickerHandler(e -> {
-                    arrayList.remove(wrapper.getData());
-                    for (final Consumer<Integer> handler : handlers) {
-                        handler.accept((Integer) wrapper.getData());
-
+                @Override
+                public List<Integer> getData(final int beginIndex, final int size) {
+                    final ArrayList<Integer> arraylist = new ArrayList<>(size);
+                    for (int i = beginIndex; i < beginIndex + size; i++) {
+                        arraylist.add(i);
                     }
-                    System.out.println("remove " + wrapper.getData());
 
-                });
+                    return arraylist;
+                }
 
-                return wrapper;
-            }
+                @Override
+                public int getFullSize() {
+                    return 100;
+                }
 
-            @Override
-            public void updateItem(final int row, final Integer data, final Wrapper widget) {
-                widget.setData(data);
+                @Override
+                public PLabel handleUI(final int index, final Integer data, final PLabel widget) {
+                    if (widget != null) {
+                        return widget;
+                    } else {
+                        final PLabel w = Element.newPLabel();
+                        return w;
+                    }
 
-            }
+                }
+            });
 
-            @Override
-            public void addHandler(final Consumer<Integer> handler) {
-                handlers.add(handler);
-            }
-        });
-        PWindow.getMain().add(panel);
-
-        button.addClickHandler(e -> {
-            if (!textBox.getValue().isEmpty()) {
-                arrayList.add(Integer.valueOf(textBox.getValue()));
-                infiniteScroll.setSize(arrayList.size());
-                textBox.setValue("");
-
-            }
-        });
         PWindow.getMain().add(infiniteScroll);
         infiniteScroll.asWidget().setStyleProperty("height", "500px");
-        infiniteScroll.start();
+
     }
 
     @Override

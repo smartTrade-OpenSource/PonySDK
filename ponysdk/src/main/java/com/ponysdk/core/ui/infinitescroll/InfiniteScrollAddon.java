@@ -23,45 +23,39 @@
 
 package com.ponysdk.core.ui.infinitescroll;
 
-/**
- * @author mzoughagh
- *  InfiniteScroll Addon
- *  */
-
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.json.JsonObject;
 
 import com.ponysdk.core.ui.basic.Element;
+import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PAddOnComposite;
+import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PPanel;
-import com.ponysdk.core.ui.infinitescroll.InfiniteScrollProvider.Wrapper;
 
-public class InfiniteScrollAddon<D> extends PAddOnComposite<PPanel> {
+public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite<PPanel> {
 
-    // visual elements
-    private final PPanel container;
-    // items
-    private final List<Wrapper> items = new ArrayList<>();
+    //UI
+    private final PFlowPanel container;
+
+    // widgets
+    private final List<W> rows = new ArrayList<>();
 
     // used for drawing
-    private int i = 0;
     private int beginIndex = 0;
     private int maxVisibleItem = 20;
 
-    private final InfiniteScrollProvider<D> dataProvider;
+    private final InfiniteScrollProvider<D, W> dataProvider;
+    private int fullSize;
 
-    private long size;
-
-    public InfiniteScrollAddon(final InfiniteScrollProvider<D> dataProvider) {
+    public InfiniteScrollAddon(final InfiniteScrollProvider<D, W> dataProvider) {
         super(Element.newPFlowPanel());
         this.dataProvider = dataProvider;
-        dataProvider.addHandler(e -> {
-            this.setSize(dataProvider.getSize());
-        });
+
         widget.addStyleName("is-viewport");
-        // Container
+
         container = Element.newPFlowPanel();
         container.addStyleName("is-container");
         widget.add(container);
@@ -70,84 +64,78 @@ public class InfiniteScrollAddon<D> extends PAddOnComposite<PPanel> {
         this.setTerminalHandler((event) -> {
             final JsonObject jsonObj = event.getData();
             beginIndex = jsonObj.getInt("beginIndex");
-            System.err.println(beginIndex);
             maxVisibleItem = jsonObj.getInt("maxVisibleItem");
-            System.err.println(maxVisibleItem);
             draw();
         });
+
+        setFullSize(dataProvider.getFullSize());
     }
 
-    /**
-     * calling start method js and setting the size
-     */
-    public void start() {
-        callTerminalMethod("start");
-        setSize(dataProvider.getSize());
-
-    }
-
-    /**
-     * calling stop method js
-     */
-
-    public void stop() {
-        callTerminalMethod("stop");
-    }
-
-    /**
-     * calling setSize method js
-     */
-    public void setSize(final long l) {
-        this.size = l;
-        callTerminalMethod("setSize", String.valueOf(l));
+    private void setFullSize(final int fullSize) {
+        this.fullSize = fullSize;
         draw();
+        callTerminalMethod("setSize", fullSize);
     }
 
-    /**
-     * Add items in DOM by using draw(D), maxVisibleItem and beginIndex.
-     */
+    public void refresh() {
+        setFullSize(dataProvider.getFullSize());
+    }
+
     public void draw() {
-        i = 0;
-        final int maxItem = (int) Math.min(maxVisibleItem, size);
-        final List<D> data = dataProvider.getData(beginIndex, maxItem);
-        System.err.println("beginIndex " + beginIndex + "maxItem" + maxItem + "data.size()" + data.size());
-        for (; i < data.size(); i++) {
-            draw(data.get(i));
+        final int size = Math.min(maxVisibleItem, fullSize);
+        final List<D> data;
+        if (size > 0) {
+            data = dataProvider.getData(beginIndex, size);
+            if (data.size() != size) {
+                throw new IllegalStateException();
+            }
+        } else {
+            data = Collections.emptyList();
         }
-        for (; i < items.size(); i++) {
-            items.get(i).setVisible(false);
+
+        System.err.println(String.format("draw : beginIndex : %s, maxVisibleItem %s, dataSize %s, last index %s", beginIndex,
+            maxVisibleItem, data.size(), beginIndex + data.size()));
+
+        int fullDataIndex = beginIndex;
+        int index = 0;
+        //update existing widget
+        while (index < Math.min(data.size(), rows.size())) {
+            final W currentWidget = rows.get(index);
+            final W newWidget = dataProvider.handleUI(fullDataIndex, data.get(index), currentWidget);
+            if (currentWidget != newWidget) {
+                removeWidgetFromContainer(currentWidget);
+                rows.set(index, newWidget);
+                addWidgetToContainer(index, newWidget);
+            }
+            index++;
+            fullDataIndex++;
         }
+
+        // create missing widget
+        while (rows.size() < data.size()) {
+            final W newWidget = dataProvider.handleUI(fullDataIndex, data.get(index), null);
+            rows.add(newWidget);
+            addWidgetToContainer(index, newWidget);
+            index++;
+            fullDataIndex++;
+        }
+
+        // delete unused widget
+        while (data.size() < rows.size()) {
+            removeWidgetFromContainer(rows.remove(index));
+        }
+
         callTerminalMethod("onDraw");
     }
 
-    /**
-     * Add one item in DOM
-     */
-    private void addItem(final D data) {
-        Wrapper item;
-        item = dataProvider.buildItem(data);
-        items.add(item);
-        item.asWidget().addStyleName("item");
-        container.add(item);
+    private void addWidgetToContainer(final int index, final W widget) {
+        container.insert(widget.asWidget(), index);
+        widget.asWidget().addStyleName("item");
     }
 
-    /**
-     * Remove one item from DOM
-     */
-
-    private void draw(final D data) {
-        Wrapper item;
-        if (items.size() <= i) {
-            // create row if needed
-            item = dataProvider.buildItem(data);
-            items.add(item);
-            item.asWidget().addStyleName("item");
-            container.add(item);
-        } else {
-            item = items.get(i);
-            item.asWidget().setVisible(true);
-            dataProvider.updateItem(i, data, item);
-        }
+    private void removeWidgetFromContainer(final W widget) {
+        widget.asWidget().removeFromParent();
+        widget.asWidget().onDestroy();
     }
 
 }

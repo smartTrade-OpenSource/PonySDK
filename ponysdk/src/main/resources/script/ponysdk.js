@@ -816,181 +816,142 @@ _UTF8 = undefined;
 
 (function() {
   "use strict"
-
-  /**
-   * TODO add fake rows
-   * show more rows then it could be shown
-   */
-  AbstractAddon.defineAddon("com.ponysdk.core.ui.infinitescroll.InfiniteScrollAddon", {
+AbstractAddon.defineAddon("com.ponysdk.core.ui.infinitescroll.InfiniteScrollAddon", {
     initDom:function() {
-      window.test = this;
+        window.test = this;
 
-      this.scrollableBody = this.jqelement;
-      this.container = this.jqelement.find(".is-container");
-  
-      this.scrollableBody.width("100%");
-      this.scrollableBody.height("100%");
-      this.scrollableBody.css("overflow-y", "overlay");
-      this.scrollableBody.css("overflow-x", "hidden");
-      this.scrollableBody.css("position", "relative");
+        this.jqelement.width("100%");
+        this.jqelement.height("100%");
+        this.jqelement.css("overflow-y", "overlay");
+        this.jqelement.css("overflow-x", "hidden");
+        this.jqelement.css("position", "relative");
 
-      this.size = 0; //size of the data
-      this.beginIndex = 0; //start of the viewport for the server
-      this.throtleRows = 5; //nb row to scroll before update view
-      this.started = false;
-    
-      //force compute size t
-      this.invalid = true;
-      this.firstStart = true;
-    },
-    
-    start:function() {
-      this.started = true;
-    
-      // default row height
-      // will be update by adding rows
-      this.rowHeight = Math.floor(this.container.height()/20); 
-      
-      if(this.firstStart){
-        this.firstStart = false;
+        this.container = this.jqelement.find(".is-container");
+        this.container.css("width", "100%");
 
-        //add handlers
-        window.addEventListener("resize", function(){
-          if(this.started){
-            this.updateContainerHeight();
-          } else {
-            this.invalid = true;
-          }
-        }.bind(this));
-        this.scrollableBody.scroll(this.onScroll.bind(this));
-        
-        var observer = new MutationObserver(function(e){
-          var trs = []
-          for(var i = 0; i < e.length; i++){
-            if(e[i].addedNodes){
-              for(var j = 0; j < e[i].addedNodes.length; j++)
-              trs.push(e[i].addedNodes[j]);
-            }
-          }
-          if(trs.length > 0)
-          this.updateContainerHeight(trs);
-        }.bind(this));
-        observer.observe(this.container[0], {childList: true});
-      }
-
-      if(this.invalid){
-        this.invalid = false;
-        this.updateContainerHeight();
-      }
-    },
-    
-    stop:function(){
-      this.started = false;
-    },
-    
-    /**
-     * Update container height
-     * Called after a window resize event
-     * Or after adding a row
-     */
-    updateContainerHeight:function(addedNodes) {
-      if(!this.started) return;
-      if(!addedNodes){
-        var trs = this.container.children(".item");
-      }   
-      else 
-        var trs = $(addedNodes);
-
-      
-      var height = trs.outerHeight();
-      if( height != null && height != this.rowHeight ) {
-        this.rowHeight = height;
-      }
-
-      this.viewportHeightPx = this.scrollableBody.height() ;
-      this.visualMaxVisibleItem = Math.ceil( this.viewportHeightPx / this.rowHeight);
-      this.throtleRows = Math.floor(this.visualMaxVisibleItem / 2 ) + this.visualMaxVisibleItem % 2;
-      this.maxVisibleItem = this.visualMaxVisibleItem + 2 * this.throtleRows;
-
-      this.updateView(true);
-    },
-    
-    /**
-     * update the amount of data
-     */
-    setSize:function(size) {
-      this.size = size;
-      //force redraw
-      this.marginTopPx = undefined;
-      this.updateView();
-    },
-    
-    sendInformations:function() {
-      if( this.lastBeginIndex != this.beginIndex || this.lastMaxVisibleItem != this.maxVisibleItem ) {
-        this.lastBeginIndex = this.beginIndex;
-        this.lastMaxVisibleItem = this.maxVisibleItem;
-        this.scrollableBody.addClass("widget-circle-loading")
-        this.sendDataToServer({
-          beginIndex: this.beginIndex,
-          maxVisibleItem: this.maxVisibleItem,
+        this.size = 0; //size of the data
+        this.beginIndex = 0; //start of the viewport for the server
+        this.jqelement.scroll(e => {
+            //avoid multiple call
+            if(this.timeout) window.clearTimeout(this.timeout);
+            this.timeout = window.setTimeout(() => this.updateView(), 40);
         });
-      }
     },
-    
-    onScroll: function() {
-      this.updateView();
+
+    getTopPosition(element){
+        let $element = $(element);
+        return $element.position().top;
     },
-    
-    updateView:function(forceUpdate) {
-      if(!this.start)
-      return;
-      //TODO use dummy rows
-      //TODO store next scrolls positions before update
+    getBottomPosition(element){
+        let $element = $(element);
+        return this.getTopPosition(element) + $element.outerHeight(true) - $element.height() + $element[0].scrollHeight;
+    },
 
-      var scrollTopPx = this.scrollableBody[0].scrollTop;
-      
-      var topIndex = Math.round(scrollTopPx / this.rowHeight) - this.throtleRows;
-      var bottomIndex = topIndex + this.maxVisibleItem;
-      if(bottomIndex >= this.size){
-        topIndex -= bottomIndex - this.size;
-        bottomIndex = this.size;
-      }
-      if(topIndex < 0){
-        bottomIndex -= topIndex;
-        topIndex = 0;
-      }
-      
-      var topPositionPx = topIndex * this.rowHeight;
-      var marginTopPx = topPositionPx ;
-      var marginBottomPx = (this.size - bottomIndex) * this.rowHeight;
+    setSize:function(size) {
+        this.size = size;
+        this.updateView(true);
+    },
 
-      //if size < available space
-      if(marginBottomPx < 0) {
-        marginBottomPx = 0;
-      }
+    updateView:function(changeFullSize) {
+        let children = this.container.children();
+        if(children.length === 0 || this.preventUpdate) return;
 
-      //prevent too much drawing
-      if(forceUpdate || this.marginBottomPx ==  undefined ||
-        Math.abs(this.beginIndex - topIndex) >= this.throtleRows ||
-        topIndex == 0 && this.beginIndex != 0 ||
-        bottomIndex == this.size && this.marginBottomPx != 0) {
+        let topPosition = this.getTopPosition(children.first());
+        let bottomPosition = this.getBottomPosition(children.last());
+        let itemsSize = Math.abs(bottomPosition - topPosition);
 
-        this.beginIndex = topIndex;
-        this.marginTopPx = marginTopPx;
-        this.marginBottomPx = marginBottomPx;
+        let height = this.jqelement.height();
+
+        //rounding issue
+        let marginOfError = 2;
+        if(topPosition - marginOfError <= 0 && bottomPosition + marginOfError >= height || children.length === this.size ) {
+            if(changeFullSize && children.length > 0) {
+                let averageItemSize = itemsSize / children.length;
+                let marginBottomPx = Math.max(0, (this.size - this.beginIndex - children.length) * averageItemSize);
+                this.container.css("margin-bottom",  marginBottomPx +"px");
+            }
+            return;
+        }
+
+        let scrollBottom = topPosition > 0;
+        let averageItemSize = itemsSize / this.container.children().length;
+        let deltaItems = 0
+
+        if( scrollBottom && topPosition > height || !scrollBottom && bottomPosition < 0 ) {
+            //TODO scroll to bottom must show the last value
+            //this is not the case with differents size
+            let scrollPosition = this.jqelement.scrollTop();
+            this.beginIndex = Math.round(scrollPosition / averageItemSize - children.length / 4);
+            this.forcePosition = null;
+        } else if(scrollBottom){
+            let child = children.first();
+            let topPosition = this.getTopPosition(child);
+            this.forcePosition = {
+                index: this.beginIndex,
+                topPosition: topPosition,
+            }
+            for(let i = children.length - 1 ; i >= 0; i--){
+                deltaItems++;
+                let child = children.get(i);
+                let topPosition = this.getTopPosition(child);
+                if( topPosition <= height ) {
+                    break;
+                }
+            }
+        } else {
+            let child = children.last();
+            let topPosition = this.getTopPosition(child);
+            this.forcePosition = {
+                index: this.beginIndex + children.length - 1,
+                topPosition: topPosition,
+            }
+            for(let i = 0; i < children.length; i++){
+                let child = children.get(i);
+                deltaItems--;
+                let bottomPosition = this.getBottomPosition(child);
+                if( bottomPosition >= 0 ) {
+                    break;
+                }
+            }
+        }
+
+        deltaItems = Math.round(deltaItems / 2);
+        if(this.preventUpdate) return;
+
+        let visibleItems = Math.ceil(height / averageItemSize * 2 / 5) * 5;
+        this.beginIndex = Math.max(0, this.beginIndex - deltaItems);
+        this.beginIndex = Math.min(this.size - visibleItems, this.beginIndex);
+
+
+        //TODO after drawing instead before
+        let marginTopPx = this.beginIndex === 0 ? 0 : this.beginIndex * averageItemSize;
+        let marginBottomPx = (this.size - this.beginIndex - visibleItems) * averageItemSize;
 
         this.container.css("margin-top", marginTopPx + "px");
         this.container.css("margin-bottom",  marginBottomPx +"px");
 
-
-        //even odd pb
-        this.sendInformations();
-      }
+        this.preventUpdate = true;
+        this.sendDataToServer({
+            beginIndex: this.beginIndex,
+            maxVisibleItem: visibleItems
+        });
     },
 
     //callback from server
     onDraw:function() {
-      this.scrollableBody.removeClass("widget-circle-loading")
+        if(this.forcePosition) {
+            let child = this.container.children().get(this.forcePosition.index - this.beginIndex);
+            if(child) {
+                let topPosition = this.getTopPosition(child);
+                this.jqelement.scrollTop(this.jqelement.scrollTop() + topPosition - this.forcePosition.topPosition);
+            }
+            this.forcePosition = null;
+        }
+        window.setTimeout(() => {
+            this.timeout = null;
+            this.preventUpdate = false;
+            this.updateView();
+        }, 50);
     }
   });
 })();
