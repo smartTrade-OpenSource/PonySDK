@@ -34,12 +34,15 @@ import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -135,45 +138,104 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     private static int counter;
 
     private void infiniteScroll() {
+        final int maxSize = 100;
+        final ArrayList<Integer> arrayList = new ArrayList<>(maxSize);
+        for (int i = 0; i < maxSize; i++) {
+            arrayList.add(i);
+        }
+        final PFlowPanel panel = Element.newPFlowPanel();
+        final PTextBox textBox = Element.newPTextBox();
+        final PButton button = Element.newPButton("Add new Item");
+        final PButton buttonGoTo = Element.newPButton("Back");
+        final PButton buttonPair = Element.newPButton("Pair Items");
+        final PButton buttonImpair = Element.newPButton("Impair Items");
+        panel.add(buttonGoTo);
+        panel.add(buttonPair);
+        panel.add(buttonImpair);
+        panel.add(textBox);
+        panel.add(button);
+        final InfiniteScrollAddon<Integer> infiniteScroll = new InfiniteScrollAddon<>(new InfiniteScrollProvider<Integer>() {
 
-        final InfiniteScrollAddon<Integer, PLabel> infiniteScroll = new InfiniteScrollAddon<>(
-            new InfiniteScrollProvider<Integer, PLabel>() {
+            final ArrayList<Consumer<Integer>> handlers = new ArrayList<>();
 
-                @Override
-                public List<Integer> getData(final int beginIndex, final int size) {
-                    final ArrayList<Integer> arraylist = new ArrayList<>(size);
-                    for (int i = beginIndex; i < beginIndex + size; i++) {
-                        arraylist.add(i);
+            @Override
+            public List<Integer> getData(final int beginIndex, final int size) {
+
+                return arrayList.subList(beginIndex, beginIndex + size);
+            }
+
+            @Override
+            public int getFullSize() {
+                return arrayList.size();
+            }
+
+            @Override
+            public Wrapper handleUI(final int row, final Integer data, Wrapper widget) {
+                if (widget == null) widget = new Wrapper();
+                widget.setData(data + "");
+                final Integer value = Integer.parseInt((String) widget.getData());
+                System.out.println("remove 2 " + value);
+                widget.addClickerHandler(e -> {
+                    arrayList.removeIf(n -> n == value);
+                    for (final Consumer<Integer> handler : handlers) {
+                        handler.accept(value);
+
                     }
+                    System.out.println("remove " + value);
+                    System.out.println(Arrays.toString(arrayList.toArray()));
+                });
+                //                switch (row % 3) {
+                //                    case 0:
+                //                        widget.setStyleProperty("background-color", "red");
+                //                        break;
+                //                    case 1:
+                //                        widget.setStyleProperty("background-color", "green");
+                //                        break;
+                //                    case 2:
+                //                        widget.setStyleProperty("background-color", "blue");
+                //                        break;
+                //                }
+                final Random rand = new Random();
+                final int randomNum = rand.nextInt(50 - 20 + 1) + 20;
+                widget.setStyleProperty("height", randomNum + "px");
+                return widget;
+            }
 
-                    return arraylist;
-                }
+            @Override
+            public void addHandler(final Consumer<Integer> handler) {
+                handlers.add(handler);
+            }
+        });
+        PWindow.getMain().add(panel);
 
-                @Override
-                public int getFullSize() {
-                    return 100;
-                }
+        button.addClickHandler(e -> {
+            if (!textBox.getValue().isEmpty()) {
+                arrayList.add(0, Integer.valueOf(textBox.getValue()));
+                infiniteScroll.refresh();
+                textBox.setValue("");
 
-                @Override
-                public PLabel handleUI(final int row, final Integer data, PLabel widget) {
-                    if (widget == null) widget = Element.newPLabel();
-                    widget.setText(data + "");
-                    switch (row % 3) {
-                        case 0:
-                            widget.setStyleProperty("background-color", "red");
-                            break;
-                        case 1:
-                            widget.setStyleProperty("background-color", "green");
-                            break;
-                        case 2:
-                            widget.setStyleProperty("background-color", "blue");
-                            break;
-                    }
-                    widget.setStyleProperty("height", row % 7 * 10 + "px");
-                    return widget;
-                }
-            });
+            }
+        });
+        buttonGoTo.addClickHandler(e -> {
 
+            infiniteScroll.setbeginIndex(0);
+            infiniteScroll.setmaxItemVisible();
+            infiniteScroll.setScrollTop();
+            infiniteScroll.refresh();
+
+        });
+        buttonPair.addClickHandler(e -> {
+
+            arrayList.removeIf(n -> n % 2 == 1);
+            infiniteScroll.refresh();
+
+        });
+        buttonImpair.addClickHandler(e -> {
+
+            arrayList.removeIf(n -> n % 2 == 0);
+            infiniteScroll.refresh();
+
+        });
         PWindow.getMain().add(infiniteScroll);
         infiniteScroll.asWidget().setStyleProperty("height", "500px");
         infiniteScroll.refresh();

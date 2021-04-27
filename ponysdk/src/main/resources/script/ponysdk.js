@@ -842,6 +842,10 @@ AbstractAddon.defineAddon("com.ponysdk.core.ui.infinitescroll.InfiniteScrollAddo
         let $element = $(element);
         return $element.position().top;
     },
+    setScrollTop:function(){
+      this.jqelement.scrollTop(0);
+    },
+
     getBottomPosition(element){
         let $element = $(element);
         return this.getTopPosition(element) + $element.outerHeight(true) - $element.height() + $element[0].scrollHeight;
@@ -943,10 +947,15 @@ AbstractAddon.defineAddon("com.ponysdk.core.ui.infinitescroll.InfiniteScrollAddo
             let child = this.container.children().get(this.forcePosition.index - this.beginIndex);
             if(child) {
                 let topPosition = this.getTopPosition(child);
+
                 this.jqelement.scrollTop(this.jqelement.scrollTop() + topPosition - this.forcePosition.topPosition);
             }
             this.forcePosition = null;
         }
+        console.log("TopPosition Children 0 : " + this.getTopPosition(this.container.children().get(0)));
+        console.log("TopPosition  Last Children  : " + this.getTopPosition(this.container.children().get(this.container.children().length-1)));
+        console.log("Margin Top : " + this.container.css("margin-top"));
+        console.log("Margin bottom : " + this.container.css("margin-bottom"));
         window.setTimeout(() => {
             this.timeout = null;
             this.preventUpdate = false;
