@@ -55,7 +55,7 @@ public class InfiniteScrollAddon<D> extends PAddOnComposite<PPanel> {
         super(Element.newPFlowPanel());
         this.dataProvider = dataProvider;
         dataProvider.addHandler(e -> {
-            //this.setFullSize(dataProvider.getFullSize());
+            this.maxVisibleItem = this.maxVisibleItem - 1;
             this.refresh();
         });
 
@@ -103,6 +103,7 @@ public class InfiniteScrollAddon<D> extends PAddOnComposite<PPanel> {
         final List<D> data;
         if (size > 0) {
             data = dataProvider.getData(beginIndex, size);
+            System.out.println("Size est : " + size);
             if (data.size() != size) {
                 throw new IllegalStateException();
             }

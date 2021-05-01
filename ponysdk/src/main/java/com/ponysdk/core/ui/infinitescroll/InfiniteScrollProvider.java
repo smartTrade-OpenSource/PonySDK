@@ -53,7 +53,6 @@ public interface InfiniteScrollProvider<D> {
             button.addStyleName("btn");
             button.addStyleName("fa fa-trash");
 
-            //this.button.addClickHandler(e -> System.err.println(t));
         }
 
         @Override

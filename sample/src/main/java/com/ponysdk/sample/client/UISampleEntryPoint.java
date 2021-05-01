@@ -61,6 +61,7 @@ import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PAbsolutePanel;
 import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PCheckBox;
 import com.ponysdk.core.ui.basic.PComplexPanel;
 import com.ponysdk.core.ui.basic.PCookies;
 import com.ponysdk.core.ui.basic.PDateBox;
@@ -147,11 +148,11 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PTextBox textBox = Element.newPTextBox();
         final PButton button = Element.newPButton("Add new Item");
         final PButton buttonGoTo = Element.newPButton("Back");
-        final PButton buttonPair = Element.newPButton("Pair Items");
-        final PButton buttonImpair = Element.newPButton("Impair Items");
+        final PCheckBox boxPair = Element.newPCheckBox("Pair Items");
+        final PCheckBox boxImpair = Element.newPCheckBox("Impair Items");
         panel.add(buttonGoTo);
-        panel.add(buttonPair);
-        panel.add(buttonImpair);
+        panel.add(boxPair);
+        panel.add(boxImpair);
         panel.add(textBox);
         panel.add(button);
         final InfiniteScrollAddon<Integer> infiniteScroll = new InfiniteScrollAddon<>(new InfiniteScrollProvider<Integer>() {
@@ -171,30 +172,23 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
             @Override
             public Wrapper handleUI(final int row, final Integer data, Wrapper widget) {
-                if (widget == null) widget = new Wrapper();
+                widget = new Wrapper();
                 widget.setData(data + "");
-                final Integer value = Integer.parseInt((String) widget.getData());
-                System.out.println("remove 2 " + value);
                 widget.addClickerHandler(e -> {
-                    arrayList.removeIf(n -> n == value);
-                    for (final Consumer<Integer> handler : handlers) {
-                        handler.accept(value);
+                    try {
+                        arrayList.remove(data);
+                        System.out.println("remove " + data);
+                        for (final Consumer<Integer> handler : handlers) {
 
+                            handler.accept(data);
+
+                        }
+
+                        System.out.println(Arrays.toString(arrayList.toArray()));
+                    } catch (final Exception ex) {
+                        ex.printStackTrace();
                     }
-                    System.out.println("remove " + value);
-                    System.out.println(Arrays.toString(arrayList.toArray()));
                 });
-                //                switch (row % 3) {
-                //                    case 0:
-                //                        widget.setStyleProperty("background-color", "red");
-                //                        break;
-                //                    case 1:
-                //                        widget.setStyleProperty("background-color", "green");
-                //                        break;
-                //                    case 2:
-                //                        widget.setStyleProperty("background-color", "blue");
-                //                        break;
-                //                }
                 final Random rand = new Random();
                 final int randomNum = rand.nextInt(50 - 20 + 1) + 20;
                 widget.setStyleProperty("height", randomNum + "px");
@@ -224,16 +218,30 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             infiniteScroll.refresh();
 
         });
-        buttonPair.addClickHandler(e -> {
-
-            arrayList.removeIf(n -> n % 2 == 1);
-            infiniteScroll.refresh();
+        boxPair.addClickHandler(e -> {
+            if (boxPair.getValue() == true) {
+                arrayList.removeIf(n -> n % 2 == 1);
+                infiniteScroll.refresh();
+            } else {
+                arrayList.removeIf(n -> n % 2 == 0);
+                for (int i = 0; i < maxSize; i++) {
+                    arrayList.add(i);
+                }
+                infiniteScroll.refresh();
+            }
 
         });
-        buttonImpair.addClickHandler(e -> {
-
-            arrayList.removeIf(n -> n % 2 == 0);
-            infiniteScroll.refresh();
+        boxImpair.addClickHandler(e -> {
+            if (boxPair.getValue() == true) {
+                arrayList.removeIf(n -> n % 2 == 0);
+                infiniteScroll.refresh();
+            } else {
+                arrayList.removeIf(n -> n % 2 == 1);
+                for (int i = 0; i < maxSize; i++) {
+                    arrayList.add(i);
+                }
+                infiniteScroll.refresh();
+            }
 
         });
         PWindow.getMain().add(infiniteScroll);
