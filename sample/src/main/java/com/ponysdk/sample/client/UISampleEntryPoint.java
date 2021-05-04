@@ -34,7 +34,6 @@ import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -42,6 +41,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 
 import javax.servlet.http.HttpServletResponse;
@@ -87,6 +87,7 @@ import com.ponysdk.core.ui.basic.PTreeItem;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
 import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
@@ -138,14 +139,63 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     int a = 0;
     private static int counter;
 
+    class Wrapper<T> implements IsPWidget {
+
+        final PFlowPanel label = Element.newPFlowPanel();
+        final PTextBox textBox = Element.newPTextBox();
+        final PButton button = Element.newPButton();
+        private T t;
+
+        public Wrapper() {
+            label.add(textBox);
+            label.add(button);
+            button.addStyleName("btn");
+            button.addStyleName("fa fa-trash");
+
+        }
+
+        @Override
+        public PWidget asWidget() {
+            return label;
+        }
+
+        public void setData(final T t) {
+            this.t = t;
+            textBox.setText(t.toString());
+
+        }
+
+        public void setVisible(final boolean b) {
+            label.setVisible(b);
+        }
+
+        public void addClickerHandler(final PClickHandler pClickHandler) {
+            this.button.addClickHandler(pClickHandler);
+        }
+
+        public T getData() {
+            return t;
+        }
+
+        public void setStyleProperty(final String attribut, final String name) {
+            label.setStyleProperty(attribut, name);
+            textBox.setStyleProperty(attribut, name);
+        }
+
+    }
+
     private void infiniteScroll() {
         final int maxSize = 100;
         final ArrayList<Integer> arrayList = new ArrayList<>(maxSize);
+        final ArrayList<Integer> arrayListBackUp = new ArrayList<>(maxSize);
         for (int i = 0; i < maxSize; i++) {
             arrayList.add(i);
+            arrayListBackUp.add(i);
         }
+
         final PFlowPanel panel = Element.newPFlowPanel();
-        final PTextBox textBox = Element.newPTextBox();
+        final PTextBox textBoxAdd = Element.newPTextBox();
+        final PTextBox textBoxFilter = Element.newPTextBox();
         final PButton button = Element.newPButton("Add new Item");
         final PButton buttonGoTo = Element.newPButton("Back");
         final PCheckBox boxPair = Element.newPCheckBox("Pair Items");
@@ -153,60 +203,85 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         panel.add(buttonGoTo);
         panel.add(boxPair);
         panel.add(boxImpair);
-        panel.add(textBox);
+        panel.add(textBoxAdd);
         panel.add(button);
-        final InfiniteScrollAddon<Integer> infiniteScroll = new InfiniteScrollAddon<>(new InfiniteScrollProvider<Integer>() {
+        panel.add(textBoxFilter);
 
-            final ArrayList<Consumer<Integer>> handlers = new ArrayList<>();
+        final InfiniteScrollAddon<Integer, Wrapper> infiniteScroll = new InfiniteScrollAddon<>(
+            new InfiniteScrollProvider<Integer, Wrapper>() {
 
-            @Override
-            public List<Integer> getData(final int beginIndex, final int size) {
+                final ArrayList<Consumer<Integer>> handlers = new ArrayList<>();
 
-                return arrayList.subList(beginIndex, beginIndex + size);
-            }
+                @Override
+                public List<Integer> getData(final int beginIndex, final int size) {
 
-            @Override
-            public int getFullSize() {
-                return arrayList.size();
-            }
+                    return arrayList.subList(beginIndex, beginIndex + size);
+                }
 
-            @Override
-            public Wrapper handleUI(final int row, final Integer data, Wrapper widget) {
-                widget = new Wrapper();
-                widget.setData(data + "");
-                widget.addClickerHandler(e -> {
-                    try {
-                        arrayList.remove(data);
-                        System.out.println("remove " + data);
-                        for (final Consumer<Integer> handler : handlers) {
+                @Override
+                public int getFullSize() {
+                    return arrayList.size();
+                }
 
-                            handler.accept(data);
+                @Override
+                public Wrapper handleUI(final int row, final Integer data, Wrapper widget) {
+                    widget = new Wrapper();
+                    widget.setData(data + "");
+                    widget.addClickerHandler(e -> {
+                        try {
+                            arrayList.remove(data);
+                            arrayListBackUp.remove(data);
 
+                            for (final Consumer<Integer> handler : handlers) {
+
+                                handler.accept(data);
+
+                            }
+
+                        } catch (final Exception ex) {
+                            ex.printStackTrace();
                         }
+                    });
+                    final Random rand = new Random();
+                    final int randomNum = rand.nextInt(50 - 20 + 1) + 20;
+                    widget.setStyleProperty("height", randomNum + "px");
+                    return widget;
+                }
 
-                        System.out.println(Arrays.toString(arrayList.toArray()));
-                    } catch (final Exception ex) {
-                        ex.printStackTrace();
-                    }
-                });
-                final Random rand = new Random();
-                final int randomNum = rand.nextInt(50 - 20 + 1) + 20;
-                widget.setStyleProperty("height", randomNum + "px");
-                return widget;
-            }
-
-            @Override
-            public void addHandler(final Consumer<Integer> handler) {
-                handlers.add(handler);
-            }
-        });
+                @Override
+                public void addHandler(final Consumer<Integer> handler) {
+                    handlers.add(handler);
+                }
+            });
         PWindow.getMain().add(panel);
-
-        button.addClickHandler(e -> {
-            if (!textBox.getValue().isEmpty()) {
-                arrayList.add(0, Integer.valueOf(textBox.getValue()));
+        final BiPredicate<PCheckBox, Integer> filter = (widget, i) -> {
+            if (widget.getValue() == true) {
+                arrayList.removeIf(n -> n % 2 == i);
                 infiniteScroll.refresh();
-                textBox.setValue("");
+            } else {
+                arrayList.clear();
+                arrayList.addAll(arrayListBackUp);
+                infiniteScroll.refresh();
+            }
+            return false;
+
+        };
+        textBoxFilter.addKeyUpHandler(e -> {
+            if (!textBoxFilter.getValue().isEmpty()) {
+                arrayList.removeIf(n -> n != Integer.valueOf(textBoxFilter.getValue()));
+                infiniteScroll.refresh();
+            } else {
+                arrayList.clear();
+                arrayList.addAll(arrayListBackUp);
+                infiniteScroll.refresh();
+            }
+
+        });
+        button.addClickHandler(e -> {
+            if (!textBoxAdd.getValue().isEmpty()) {
+                arrayList.add(0, Integer.valueOf(textBoxAdd.getValue()));
+                infiniteScroll.refresh();
+                textBoxAdd.setValue("");
 
             }
         });
@@ -219,31 +294,14 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
         });
         boxPair.addClickHandler(e -> {
-            if (boxPair.getValue() == true) {
-                arrayList.removeIf(n -> n % 2 == 1);
-                infiniteScroll.refresh();
-            } else {
-                arrayList.removeIf(n -> n % 2 == 0);
-                for (int i = 0; i < maxSize; i++) {
-                    arrayList.add(i);
-                }
-                infiniteScroll.refresh();
-            }
+            filter.test(boxPair, 1);
 
         });
         boxImpair.addClickHandler(e -> {
-            if (boxPair.getValue() == true) {
-                arrayList.removeIf(n -> n % 2 == 0);
-                infiniteScroll.refresh();
-            } else {
-                arrayList.removeIf(n -> n % 2 == 1);
-                for (int i = 0; i < maxSize; i++) {
-                    arrayList.add(i);
-                }
-                infiniteScroll.refresh();
-            }
+            filter.test(boxImpair, 0);
 
         });
+
         PWindow.getMain().add(infiniteScroll);
         infiniteScroll.asWidget().setStyleProperty("height", "500px");
         infiniteScroll.refresh();
