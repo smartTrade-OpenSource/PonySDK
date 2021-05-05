@@ -882,8 +882,6 @@ AbstractAddon.defineAddon("com.ponysdk.core.ui.infinitescroll.InfiniteScrollAddo
         let deltaItems = 0
 
         if( scrollBottom && topPosition > height || !scrollBottom && bottomPosition < 0 ) {
-            //TODO scroll to bottom must show the last value
-            //this is not the case with differents size
             let scrollPosition = this.jqelement.scrollTop();
             this.beginIndex = Math.round(scrollPosition / averageItemSize - children.length / 4);
             this.forcePosition = null;
@@ -927,7 +925,7 @@ AbstractAddon.defineAddon("com.ponysdk.core.ui.infinitescroll.InfiniteScrollAddo
         this.beginIndex = Math.min(this.size - visibleItems, this.beginIndex);
 
 
-        //TODO after drawing instead before
+
         let marginTopPx = this.beginIndex === 0 ? 0 : this.beginIndex * averageItemSize;
         let marginBottomPx = (this.size - this.beginIndex - visibleItems) * averageItemSize;
 
@@ -941,21 +939,17 @@ AbstractAddon.defineAddon("com.ponysdk.core.ui.infinitescroll.InfiniteScrollAddo
         });
     },
 
-    //callback from server
+
     onDraw:function() {
         if(this.forcePosition) {
             let child = this.container.children().get(this.forcePosition.index - this.beginIndex);
             if(child) {
                 let topPosition = this.getTopPosition(child);
-
                 this.jqelement.scrollTop(this.jqelement.scrollTop() + topPosition - this.forcePosition.topPosition);
             }
             this.forcePosition = null;
         }
-        console.log("TopPosition Children 0 : " + this.getTopPosition(this.container.children().get(0)));
-        console.log("TopPosition  Last Children  : " + this.getTopPosition(this.container.children().get(this.container.children().length-1)));
-        console.log("Margin Top : " + this.container.css("margin-top"));
-        console.log("Margin bottom : " + this.container.css("margin-bottom"));
+      
         window.setTimeout(() => {
             this.timeout = null;
             this.preventUpdate = false;

@@ -27,17 +27,40 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- *
+ * @author mzoughagh
+ * @param <D> type of data
+ * @param <W> type of widget
  */
 
 public interface InfiniteScrollProvider<D, W> {
 
+    /**
+     *
+     * @param beginIndex the beginning index to recuperate data from provider list
+     * @param maxSize the last index to recuperate data from provider list
+     * @return data by taking into consideration beginIndex and maxSize
+     */
     List<D> getData(int beginIndex, int maxSize);
 
+    /**
+     * @return current length of provider list
+     */
     int getFullSize();
 
+    /**
+     *
+     * @param index the index of the widget
+     * @param data the assigned data to the widget
+     * @param w the widget
+     * @return the widget after updating
+     */
     W handleUI(int index, D data, W w);
 
+    /**
+     * Adding handler to widgets
+     *
+     * @param handler to add
+     */
     void addHandler(Consumer<D> handler);
 
 }

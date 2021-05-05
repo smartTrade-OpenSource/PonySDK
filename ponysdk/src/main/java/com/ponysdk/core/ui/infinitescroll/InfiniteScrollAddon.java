@@ -35,6 +35,12 @@ import com.ponysdk.core.ui.basic.PAddOnComposite;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PPanel;
 
+/**
+ * @author mzoughagh
+ * @param <D> type of data
+ * @param <W> type of widget
+ */
+
 public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite<PPanel> {
 
     //UI
@@ -50,6 +56,12 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
 
     private final InfiniteScrollProvider<D, W> dataProvider;
     private int fullSize;
+
+    /**
+     * Creates an infiniteScrollAddon with the specified dataProvier
+     *
+     * @param dataProvider infiniteScrollAddon's dataProvier
+     */
 
     public InfiniteScrollAddon(final InfiniteScrollProvider<D, W> dataProvider) {
         super(Element.newPFlowPanel());
@@ -82,22 +94,44 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
         callTerminalMethod("setSize", fullSize);
     }
 
+    /**
+     * Redrawing the items after modifying parameters
+     * like beginIndex and maxvisibleItem or length dataProvider's list
+     */
+
     public void refresh() {
         setFullSize(dataProvider.getFullSize());
     }
+
+    /**
+     * Calling setScrollTop method js
+     */
 
     public void setScrollTop() {
         callTerminalMethod("setScrollTop");
     }
 
+    /**
+     * @param index to set beginIndex
+     */
     public void setbeginIndex(final int index) {
         this.beginIndex = index;
     }
 
+    /**
+     * Setting maxItemVisibleItem with the initial value
+     */
     public void setmaxItemVisible() {
         this.maxVisibleItem = initmaxVisibleItem;
     }
 
+    /**
+     * Adding widgets to our DOM by taking into consideration
+     * the number of widget (maxVisibleItem) and the beginning
+     * index (beginIndex).
+     * After adding, it updates existing widgets and removes
+     * unused widgets.
+     */
     public void draw() {
         final int size = Math.min(maxVisibleItem, fullSize);
         final List<D> data;
