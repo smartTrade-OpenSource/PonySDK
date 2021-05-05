@@ -35,6 +35,7 @@ import java.util.function.Consumer;
 public interface InfiniteScrollProvider<D, W> {
 
     /**
+     * Recuperes data from provider list
      *
      * @param beginIndex the beginning index to recuperate data from provider list
      * @param maxSize the last index to recuperate data from provider list
@@ -48,6 +49,7 @@ public interface InfiniteScrollProvider<D, W> {
     int getFullSize();
 
     /**
+     * Uptades widgets and assigning data to them
      *
      * @param index the index of the widget
      * @param data the assigned data to the widget
