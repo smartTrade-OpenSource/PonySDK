@@ -958,3 +958,18 @@ AbstractAddon.defineAddon("com.ponysdk.core.ui.infinitescroll.InfiniteScrollAddo
     }
   });
 })();
+
+(function() {
+  "use strict";
+
+  AbstractAddon.defineAddon("com.ponysdk.core.ui.listbox.ListBox", {
+  
+    initDom: function() {        
+        
+    }
+
+  });
+
+})();
+
+

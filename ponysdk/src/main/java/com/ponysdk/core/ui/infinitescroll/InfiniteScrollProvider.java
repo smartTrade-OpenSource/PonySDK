@@ -41,15 +41,15 @@ public interface InfiniteScrollProvider<D, W> {
      * @param maxSize the last index to recuperate data from provider list
      * @return data by taking into consideration beginIndex and maxSize
      */
-    List<D> getData(int beginIndex, int maxSize);
+    void getData(int beginIndex, int maxSize, Consumer<List<D>> callback);
 
     /**
      * @return current length of provider list
      */
-    int getFullSize();
+    void getFullSize(Consumer<Integer> callback);
 
     /**
-     * Uptades widgets and assigning data to them
+     * Uptades widgets and assigns data to them
      *
      * @param index the index of the widget
      * @param data the assigned data to the widget

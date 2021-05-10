@@ -116,6 +116,7 @@ import com.ponysdk.core.ui.list.refreshable.Cell;
 import com.ponysdk.core.ui.list.refreshable.RefreshableDataGrid;
 import com.ponysdk.core.ui.list.renderer.cell.CellRenderer;
 import com.ponysdk.core.ui.list.valueprovider.IdentityValueProvider;
+import com.ponysdk.core.ui.listbox.ListBox;
 import com.ponysdk.core.ui.main.EntryPoint;
 import com.ponysdk.core.ui.model.PKeyCodes;
 import com.ponysdk.core.ui.rich.PConfirmDialog;
@@ -213,14 +214,15 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
                 final ArrayList<Consumer<Integer>> handlers = new ArrayList<>();
 
                 @Override
-                public List<Integer> getData(final int beginIndex, final int size) {
+                public void getData(final int beginIndex, final int size, final Consumer<List<Integer>> callback) {
 
-                    return arrayList.subList(beginIndex, beginIndex + size);
+                    callback.accept(arrayList.subList(beginIndex, beginIndex + size));
+
                 }
 
                 @Override
-                public int getFullSize() {
-                    return arrayList.size();
+                public void getFullSize(final Consumer<Integer> callback) {
+                    callback.accept(arrayList.size());
                 }
 
                 @Override
@@ -303,15 +305,95 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         });
 
         PWindow.getMain().add(infiniteScroll);
-        infiniteScroll.asWidget().setStyleProperty("height", "500px");
+        infiniteScroll.setStyleProperty("width", "90%");
+        infiniteScroll.setStyleProperty("height", "100%");
+        infiniteScroll.asWidget().setStyleProperty("height", "100%");
         infiniteScroll.refresh();
+
+    }
+
+    private void listBox() {
+        final int maxSize = 100;
+        final ArrayList<Integer> arrayList = new ArrayList<>(maxSize);
+        final ArrayList<Integer> arrayListBackUp = new ArrayList<>(maxSize);
+        for (int i = 0; i < maxSize; i++) {
+            arrayList.add(i);
+            arrayListBackUp.add(i);
+        }
+
+        final ListBox<Integer> listBox = new ListBox<>(new InfiniteScrollAddon<>(new InfiniteScrollProvider<Integer, Wrapper>() {
+
+            final ArrayList<Consumer<Integer>> handlers = new ArrayList<>();
+
+            @Override
+            public void getData(final int beginIndex, final int size, final Consumer<List<Integer>> callback) {
+                final Consumer<List<Integer>> delegate = PScheduler.delegate(callback);
+                new Thread(() -> {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (final InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    delegate.accept(arrayList.subList(beginIndex, beginIndex + size));
+                }).start();
+
+            }
+
+            @Override
+            public void getFullSize(final Consumer<Integer> callback) {
+
+                final Consumer<Integer> delegate = PScheduler.delegate(callback);
+                new Thread(() -> {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (final InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    delegate.accept(arrayList.size());
+                }).start();
+
+            }
+
+            @Override
+            public Wrapper handleUI(final int row, final Integer data, Wrapper widget) {
+                widget = new Wrapper();
+                widget.setData(data + "");
+                widget.addClickerHandler(e -> {
+                    try {
+                        arrayList.remove(data);
+                        arrayListBackUp.remove(data);
+
+                        for (final Consumer<Integer> handler : handlers) {
+
+                            handler.accept(data);
+
+                        }
+
+                    } catch (final Exception ex) {
+                        ex.printStackTrace();
+                    }
+                });
+                final Random rand = new Random();
+                final int randomNum = rand.nextInt(50 - 20 + 1) + 20;
+                widget.setStyleProperty("height", randomNum + "px");
+                return widget;
+            }
+
+            @Override
+            public void addHandler(final Consumer<Integer> handler) {
+                handlers.add(handler);
+            }
+        }));
+
+        PWindow.getMain().add(listBox);
 
     }
 
     @Override
     public void start(final UIContext uiContext) {
 
-        infiniteScroll();
+        //infiniteScroll();
+        listBox();
         //testSimpleDataGridView();
         if (true) return;
         if (true) return;

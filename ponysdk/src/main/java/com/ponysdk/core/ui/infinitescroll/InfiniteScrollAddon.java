@@ -51,8 +51,8 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
 
     // used for drawing
     private int beginIndex = 0;
-    private int maxVisibleItem = 20;
-    private final int initmaxVisibleItem = 20;
+    private int maxVisibleItem = 5;
+    private final int initmaxVisibleItem = 5;
 
     private final InfiniteScrollProvider<D, W> dataProvider;
     private int fullSize;
@@ -82,10 +82,11 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
             final JsonObject jsonObj = event.getData();
             beginIndex = jsonObj.getInt("beginIndex");
             maxVisibleItem = jsonObj.getInt("maxVisibleItem");
+            System.out.println(beginIndex + " " + maxVisibleItem);
             draw();
         });
 
-        setFullSize(dataProvider.getFullSize());
+        dataProvider.getFullSize(this::setFullSize);
     }
 
     private void setFullSize(final int fullSize) {
@@ -100,7 +101,7 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
      */
 
     public void refresh() {
-        setFullSize(dataProvider.getFullSize());
+        dataProvider.getFullSize(this::setFullSize);
     }
 
     /**
@@ -136,12 +137,49 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
         final int size = Math.min(maxVisibleItem, fullSize);
         final List<D> data;
         if (size > 0) {
-            data = dataProvider.getData(beginIndex, size);
-            if (data.size() != size) {
-                throw new IllegalStateException();
-            }
+            widget.addStyleName("loading");
+            dataProvider.getData(beginIndex, size, this::draw);
+
         } else {
-            data = Collections.emptyList();
+            this.draw(Collections.emptyList());
+        }
+
+    }
+
+    private void addWidgetToContainer(final int index, final W widget) {
+        container.insert(widget.asWidget(), index);
+        widget.asWidget().addStyleName("item");
+    }
+
+    private void removeWidgetFromContainer(final W widget) {
+        widget.asWidget().removeFromParent();
+        widget.asWidget().onDestroy();
+    }
+
+    public void setVisible(final boolean visible) {
+        if (visible) {
+
+            widget.setVisible(true);
+
+        } else {
+            widget.setVisible(false);
+        }
+
+    }
+
+    public boolean isVisible() {
+        return widget.isVisible();
+    }
+
+    public void setStyleProperty(final String name, final String value) {
+        widget.setStyleProperty(name, value);
+    }
+
+    public void draw(final List<D> data) {
+        final int size = Math.min(maxVisibleItem, fullSize);
+
+        if (data.size() != size) {
+            throw new IllegalStateException();
         }
 
         int fullDataIndex = beginIndex;
@@ -172,18 +210,9 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
         while (data.size() < rows.size()) {
             removeWidgetFromContainer(rows.remove(index));
         }
-
+        widget.removeStyleName("loading");
         callTerminalMethod("onDraw");
-    }
 
-    private void addWidgetToContainer(final int index, final W widget) {
-        container.insert(widget.asWidget(), index);
-        widget.asWidget().addStyleName("item");
-    }
-
-    private void removeWidgetFromContainer(final W widget) {
-        widget.asWidget().removeFromParent();
-        widget.asWidget().onDestroy();
     }
 
 }
