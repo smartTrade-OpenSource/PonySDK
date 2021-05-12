@@ -41,14 +41,16 @@ import com.ponysdk.core.ui.infinitescroll.InfiniteScrollAddon;
 public class ListBox<D> extends PAddOnComposite<PPanel> {
 
     private final InfiniteScrollAddon<D, IsPWidget> infiniteScroll;
+    private final ListBoxProvider<D, IsPWidget> dataProvider;
     private final PSimplePanel overlay;
     private final PButton button;
     private final PTextBox textBox;
     private final PFlowPanel container;
 
-    public ListBox(final InfiniteScrollAddon infiniteScrollAddon) {
+    public ListBox(final ListBoxProvider dataProvider) {
         super(Element.newPFlowPanel());
-        this.infiniteScroll = infiniteScrollAddon;
+        this.dataProvider = dataProvider;
+        this.infiniteScroll = new InfiniteScrollAddon(dataProvider);
         overlay = Element.newPSimplePanel();
         container = Element.newPFlowPanel();
         textBox = Element.newPTextBox();
@@ -61,13 +63,20 @@ public class ListBox<D> extends PAddOnComposite<PPanel> {
         widget.add(button);
         infiniteScroll.setStyleProperty("height", "500px");
         infiniteScroll.setStyleProperty("width", "250px");
+        infiniteScroll.refresh();
         container.add(textBox);
         container.add(infiniteScroll);
         widget.add(container);
         button.addClickHandler(event -> container.setVisible(!container.isVisible()));
-        //textBox.addKeyUpHandler(event -> checkBoxPanel.filter(textBox.getText()));
-        infiniteScroll.refresh();
+        textBox.addKeyUpHandler(event -> addNewElement(textBox.getText()));
 
+    }
+
+    private void addNewElement(final String data) {
+        if (data != null || !data.isEmpty()) {
+            dataProvider.addNewElement(data);
+            this.infiniteScroll.refresh();
+        }
     }
 
 }

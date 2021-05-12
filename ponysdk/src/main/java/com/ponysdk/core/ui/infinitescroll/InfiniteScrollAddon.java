@@ -82,7 +82,6 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
             final JsonObject jsonObj = event.getData();
             beginIndex = jsonObj.getInt("beginIndex");
             maxVisibleItem = jsonObj.getInt("maxVisibleItem");
-            System.out.println(beginIndex + " " + maxVisibleItem);
             draw();
         });
 
@@ -175,7 +174,7 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
         widget.setStyleProperty(name, value);
     }
 
-    public void draw(final List<D> data) {
+    private void draw(final List<D> data) {
         final int size = Math.min(maxVisibleItem, fullSize);
 
         if (data.size() != size) {
