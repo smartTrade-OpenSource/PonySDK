@@ -97,6 +97,7 @@ public enum ServerToClientModel {
     COOKIE_DOMAIN(ValueTypeModel.STRING),
     COOKIE_PATH(ValueTypeModel.STRING),
     COOKIE_SECURE(ValueTypeModel.NULL),
+    COOKIE_SAMESITE(ValueTypeModel.STRING),
     TIME(ValueTypeModel.LONG),
     ANIMATION(ValueTypeModel.BOOLEAN),
     CURSOR_POSITION(ValueTypeModel.INTEGER),

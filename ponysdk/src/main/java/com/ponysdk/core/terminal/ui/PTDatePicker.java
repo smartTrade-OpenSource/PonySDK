@@ -23,8 +23,6 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import java.util.Date;
-
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.json.client.JSONArray;
@@ -37,6 +35,8 @@ import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
+
+import java.util.Date;
 
 public class PTDatePicker extends PTWidget<DatePicker> {
 
@@ -68,7 +68,7 @@ public class PTDatePicker extends PTWidget<DatePicker> {
     protected void triggerEvent(final DatePicker picker, final UIBuilder uiService, final ValueChangeEvent<Date> event) {
         final PTInstruction instruction = new PTInstruction(getObjectID());
         instruction.put(ClientToServerModel.HANDLER_DATE_VALUE_CHANGE,
-            event.getValue() != null ? format.format(event.getValue()) : null);
+                event.getValue() != null ? format.format(event.getValue()) : null);
         uiService.sendDataToServer(picker, instruction);
     }
 
@@ -88,7 +88,7 @@ public class PTDatePicker extends PTWidget<DatePicker> {
             for (int i = 0; i < dates.size(); i++) {
                 final JSONValue rawObject = dates.get(i);
                 final Date date = DateConverter.decode((long) rawObject.isNumber().doubleValue());
-                if (date.after(uiObject.getFirstDate()) && date.before(uiObject.getLastDate())) {
+                if (date.equals(uiObject.getFirstDate()) || date.equals(uiObject.getLastDate()) || (date.after(uiObject.getFirstDate()) && date.before(uiObject.getLastDate()))) {
                     uiObject.setTransientEnabledOnDates(enabled, date);
                 }
             }

@@ -24,20 +24,32 @@
 package com.ponysdk.core.ui.form2;
 
 import com.ponysdk.core.ui.basic.PWindow;
+import com.ponysdk.core.ui.form2.api.FormFieldValidator;
 import com.ponysdk.core.ui.form2.api.ValidationResult;
-import com.ponysdk.core.ui.form2.impl.validator.NotEmptyFormFieldValidator;
 import com.ponysdk.core.ui.form2.impl.formfield.StringTextBoxFormField;
+import com.ponysdk.core.ui.form2.impl.validator.NotEmptyFormFieldValidator;
 import com.ponysdk.test.PSuite;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
-import static org.junit.Assert.*;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class StringFormFieldTest extends PSuite {
 
     @Test
     public void testDefaultValidation() {
         final StringTextBoxFormField formField = new StringTextBoxFormField("Caption");
+        formField.setValidator(new FormFieldValidator() {
+            @Override
+            public ValidationResult isValid(String value) {
+                if (value.length() < 3) return ValidationResult.OK();
+                return ValidationResult.KO("TOOOOO LOONG");
+            }
+        });
+        formField.setValue("Toto", false);
+
+
         PWindow.getMain().add(formField);
         assertEquals(ValidationResult.OK(), formField.validate());
     }

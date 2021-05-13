@@ -23,18 +23,17 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.writer.ModelWriter;
+
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class PCookies {
 
@@ -83,11 +82,11 @@ public class PCookies {
     }
 
     public void setCookie(final String name, final String value, final Date expires, final String path) {
-        setCookie(name, value, expires, path, null, false);
+        setCookie(name, value, expires, path, null, false, null);
     }
 
     public void setCookie(final String name, final String value, final Date expires, final String domain, final String path,
-                          final boolean secure) {
+                          final boolean secure, String sameSite) {
         cachedCookies.put(name, value);
 
         final ModelWriter writer = UIContext.get().getWriter();
@@ -98,7 +97,8 @@ public class PCookies {
         if (expires != null) writer.write(ServerToClientModel.COOKIE_EXPIRE, expires.getTime());
         if (domain != null) writer.write(ServerToClientModel.COOKIE_DOMAIN, domain);
         if (path != null) writer.write(ServerToClientModel.COOKIE_PATH, path);
-        if (secure) writer.write(ServerToClientModel.COOKIE_SECURE, secure);
+        if (secure) writer.write(ServerToClientModel.COOKIE_SECURE, true);
+        if (sameSite != null) writer.write(ServerToClientModel.COOKIE_SAMESITE, sameSite);
         writer.endObject();
     }
 

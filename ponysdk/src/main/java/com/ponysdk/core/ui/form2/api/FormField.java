@@ -4,6 +4,7 @@ import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PWidget;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 
 public abstract class FormField<V> implements IsPWidget {
 
@@ -11,6 +12,9 @@ public abstract class FormField<V> implements IsPWidget {
     private String caption;
     private String description;
     private V initialValue;
+    private V value;
+
+    private Consumer<V> valueChangeHandler;
 
     private final FormFieldPanel panel = new FormFieldPanel();
 
@@ -24,6 +28,10 @@ public abstract class FormField<V> implements IsPWidget {
         return !Objects.equals(getInitialValue(), getValue());
     }
 
+    public void setValueChangeHandler(Consumer<V> handler) {
+        this.valueChangeHandler = handler;
+    }
+
     public ValidationResult validate() {
         if (!isEnabled()) {
             panel.removeErrorStyle();
@@ -31,11 +39,7 @@ public abstract class FormField<V> implements IsPWidget {
             return ValidationResult.OK();
         }
 
-        ValidationResult result = ValidationResult.OK();
-
-        if (validator != null) {
-            result = validator.isValid(getStringToValidate());
-        }
+        ValidationResult result = doValidation(validator, value);
 
         if (result.isValid()) {
             panel.removeErrorStyle();
@@ -64,7 +68,7 @@ public abstract class FormField<V> implements IsPWidget {
 
     public void reset() {
         panel.removeErrorStyle();
-        setValue(getInitialValue());
+        value = getInitialValue();
         panel.removeDirtyStyle();
     }
 
@@ -109,6 +113,18 @@ public abstract class FormField<V> implements IsPWidget {
         return initialValue;
     }
 
+    public void show() {
+        panel.setVisible(true);
+    }
+
+    public void hide() {
+        panel.setVisible(false);
+    }
+
+    public boolean isVisible() {
+        return panel.isVisible();
+    }
+
     protected abstract PWidget createInnerWidget();
 
     public abstract void enable();
@@ -117,10 +133,26 @@ public abstract class FormField<V> implements IsPWidget {
 
     public abstract boolean isEnabled();
 
-    public abstract String getStringToValidate();
+    public V getValue() {
+        return value;
+    }
 
-    public abstract V getValue();
+    public boolean setValue(V value) {
+        return setValue(value, false);
+    }
 
-    public abstract void setValue(V value);
+    public boolean setValue(V value, boolean fireEvent) {
+        if (!doValidation(validator, value).isValid()) return false;
+        doSetValue(value);
+        this.value = value;
+        if (valueChangeHandler != null && fireEvent) valueChangeHandler.accept(value);
+        return false;
+    }
+
+    protected abstract void doSetValue(V value);
+
+    public abstract void focus();
+
+    protected abstract ValidationResult doValidation(FormFieldValidator validator, V value);
 
 }

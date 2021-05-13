@@ -40,7 +40,7 @@ public class DateInputFormField extends AbstractInputFormField<Date> {
     }
 
     @Override
-    public void setValue(Date date) {
+    public void doSetValue(Date date) {
         input.setText(dateFormat.format(date));
     }
 

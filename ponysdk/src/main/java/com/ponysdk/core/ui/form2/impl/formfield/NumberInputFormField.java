@@ -14,9 +14,4 @@ public abstract class NumberInputFormField<T extends Number> extends AbstractInp
         return input;
     }
 
-    @Override
-    public void setValue(T value) {
-        input.setText(value.toString());
-    }
-
 }

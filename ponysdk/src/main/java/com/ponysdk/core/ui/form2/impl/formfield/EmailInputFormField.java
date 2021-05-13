@@ -18,12 +18,7 @@ public class EmailInputFormField extends AbstractInputFormField<String> {
     }
 
     @Override
-    public String getValue() {
-        return input.getText();
-    }
-
-    @Override
-    public void setValue(String email) {
+    public void doSetValue(String email) {
         input.setText(email);
     }
 
