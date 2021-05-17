@@ -117,6 +117,7 @@ import com.ponysdk.core.ui.list.refreshable.RefreshableDataGrid;
 import com.ponysdk.core.ui.list.renderer.cell.CellRenderer;
 import com.ponysdk.core.ui.list.valueprovider.IdentityValueProvider;
 import com.ponysdk.core.ui.listbox.ListBox;
+import com.ponysdk.core.ui.listbox.ListBoxProvider;
 import com.ponysdk.core.ui.main.EntryPoint;
 import com.ponysdk.core.ui.model.PKeyCodes;
 import com.ponysdk.core.ui.rich.PConfirmDialog;
@@ -185,6 +186,43 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     }
 
+    class W<T> implements IsPWidget {
+
+        final PFlowPanel label = Element.newPFlowPanel();
+        final PTextBox textBox = Element.newPTextBox();
+        private T t;
+
+        public W() {
+            label.add(textBox);
+
+        }
+
+        @Override
+        public PWidget asWidget() {
+            return label;
+        }
+
+        public void setData(final T t) {
+            this.t = t;
+            textBox.setText(t.toString());
+
+        }
+
+        public void setVisible(final boolean b) {
+            label.setVisible(b);
+        }
+
+        public T getData() {
+            return t;
+        }
+
+        public void setStyleProperty(final String attribut, final String name) {
+            label.setStyleProperty(attribut, name);
+            textBox.setStyleProperty(attribut, name);
+        }
+
+    }
+
     private void infiniteScroll() {
         final int maxSize = 100;
         final ArrayList<Integer> arrayList = new ArrayList<>(maxSize);
@@ -217,12 +255,30 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
                 public void getData(final int beginIndex, final int size, final Consumer<List<Integer>> callback) {
 
                     callback.accept(arrayList.subList(beginIndex, beginIndex + size));
+                    //                    final Consumer<List<Integer>> delegate = PScheduler.delegate(callback);
+                    //                    new Thread(() -> {
+                    //                        try {
+                    //                            Thread.sleep(1000);
+                    //                        } catch (final InterruptedException e) {
+                    //                            e.printStackTrace();
+                    //                        }
+                    //                        delegate.accept(arrayList.subList(beginIndex, beginIndex + size));
+                    //                    }).start();
 
                 }
 
                 @Override
                 public void getFullSize(final Consumer<Integer> callback) {
                     callback.accept(arrayList.size());
+                    //                    final Consumer<Integer> delegate = PScheduler.delegate(callback);
+                    //                    new Thread(() -> {
+                    //                        try {
+                    //                            Thread.sleep(1000);
+                    //                        } catch (final InterruptedException e) {
+                    //                            e.printStackTrace();
+                    //                        }
+                    //                        delegate.accept(arrayList.size());
+                    //                    }).start();
                 }
 
                 @Override
@@ -307,7 +363,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         PWindow.getMain().add(infiniteScroll);
         infiniteScroll.setStyleProperty("width", "90%");
         infiniteScroll.setStyleProperty("height", "100%");
-        infiniteScroll.asWidget().setStyleProperty("height", "100%");
+        infiniteScroll.asWidget().setStyleProperty("height", "80%");
         infiniteScroll.refresh();
 
     }
@@ -320,59 +376,24 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             arrayList.add(i);
             arrayListBackUp.add(i);
         }
-
-        final ListBox<Integer> listBox = new ListBox<>(new InfiniteScrollAddon<>(new InfiniteScrollProvider<Integer, Wrapper>() {
-
-            final ArrayList<Consumer<Integer>> handlers = new ArrayList<>();
+        final ArrayList<Consumer<Integer>> handlers = new ArrayList<>();
+        final ListBox<Integer> listBox = new ListBox<>(new ListBoxProvider<Integer, W>() {
 
             @Override
-            public void getData(final int beginIndex, final int size, final Consumer<List<Integer>> callback) {
-                final Consumer<List<Integer>> delegate = PScheduler.delegate(callback);
-                new Thread(() -> {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (final InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    delegate.accept(arrayList.subList(beginIndex, beginIndex + size));
-                }).start();
-
+            public void getData(final int beginIndex, final int size, final Consumer callback) {
+                callback.accept(arrayList.subList(beginIndex, beginIndex + size));
             }
 
             @Override
-            public void getFullSize(final Consumer<Integer> callback) {
-
-                final Consumer<Integer> delegate = PScheduler.delegate(callback);
-                new Thread(() -> {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (final InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    delegate.accept(arrayList.size());
-                }).start();
-
+            public void getFullSize(final Consumer callback) {
+                callback.accept(arrayList.size());
             }
 
             @Override
-            public Wrapper handleUI(final int row, final Integer data, Wrapper widget) {
-                widget = new Wrapper();
+            public W handleUI(final int index, final Integer data, W widget) {
+                widget = new W();
                 widget.setData(data + "");
-                widget.addClickerHandler(e -> {
-                    try {
-                        arrayList.remove(data);
-                        arrayListBackUp.remove(data);
 
-                        for (final Consumer<Integer> handler : handlers) {
-
-                            handler.accept(data);
-
-                        }
-
-                    } catch (final Exception ex) {
-                        ex.printStackTrace();
-                    }
-                });
                 final Random rand = new Random();
                 final int randomNum = rand.nextInt(50 - 20 + 1) + 20;
                 widget.setStyleProperty("height", randomNum + "px");
@@ -380,11 +401,21 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             }
 
             @Override
-            public void addHandler(final Consumer<Integer> handler) {
+            public void addHandler(final Consumer handler) {
                 handlers.add(handler);
             }
-        }));
 
+            @Override
+            public void addNewElement(final String data) {
+                final int i = Integer.parseInt(data);
+                arrayList.add(0, i);
+            }
+
+            @Override
+            public void setFilter(final Integer data) {
+            }
+
+        });
         PWindow.getMain().add(listBox);
 
     }

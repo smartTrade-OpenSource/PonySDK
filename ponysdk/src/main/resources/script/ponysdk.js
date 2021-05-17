@@ -934,6 +934,7 @@ AbstractAddon.defineAddon("com.ponysdk.core.ui.infinitescroll.InfiniteScrollAddo
         deltaItems = Math.round(deltaItems / 2);
         if(this.preventUpdate) return;
         
+        
         let visibleItems = Math.ceil(height / averageItemSize * 2 / 5) * 5;
         this.beginIndex = Math.max(0, this.beginIndex - deltaItems);
         this.beginIndex = Math.min(this.size - visibleItems, this.beginIndex);
@@ -945,10 +946,12 @@ AbstractAddon.defineAddon("com.ponysdk.core.ui.infinitescroll.InfiniteScrollAddo
 
 
         this.preventUpdate = true;
-        this.sendDataToServer({
-            beginIndex: this.beginIndex,
-            maxVisibleItem: visibleItems
-        });
+        if(this.beginIndex != -Infinity && visibleItems != Infinity){
+            this.sendDataToServer({
+                beginIndex: this.beginIndex,
+                maxVisibleItem: visibleItems
+            });
+      }
         
     },
 
@@ -982,7 +985,7 @@ AbstractAddon.defineAddon("com.ponysdk.core.ui.infinitescroll.InfiniteScrollAddo
   AbstractAddon.defineAddon("com.ponysdk.core.ui.listbox.ListBox", {
   
     initDom: function() {        
-      
+      this.jqelement.css("position", "relative");
     }
 
   });

@@ -58,8 +58,11 @@ public class ListBox<D> extends PAddOnComposite<PPanel> {
         overlay.setStyleProperty("overflow", "auto");
         overlay.setStyleProperty("position", "fixed");
         widget.add(overlay);
-        overlay.addDomHandler((PClickHandler) e -> container.setVisible(false), PClickEvent.TYPE);
-        overlay.setVisible(false);
+        overlay.addDomHandler((PClickHandler) e -> {
+            //infiniteScroll.setVisible(true);
+            container.setVisible(true);
+        }, PClickEvent.TYPE);
+        overlay.setVisible(true);
         widget.add(button);
         infiniteScroll.setStyleProperty("height", "500px");
         infiniteScroll.setStyleProperty("width", "250px");
@@ -67,7 +70,11 @@ public class ListBox<D> extends PAddOnComposite<PPanel> {
         container.add(textBox);
         container.add(infiniteScroll);
         widget.add(container);
-        button.addClickHandler(event -> container.setVisible(!container.isVisible()));
+        button.addClickHandler(event -> {
+            container.setVisible(!container.isVisible());
+            this.infiniteScroll.refresh();
+
+        });
         textBox.addKeyUpHandler(event -> addNewElement(textBox.getText()));
 
     }
