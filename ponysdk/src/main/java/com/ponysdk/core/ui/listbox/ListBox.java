@@ -59,7 +59,6 @@ public class ListBox<D> extends PAddOnComposite<PPanel> {
         overlay.setStyleProperty("position", "fixed");
         widget.add(overlay);
         overlay.addDomHandler((PClickHandler) e -> {
-            //infiniteScroll.setVisible(true);
             container.setVisible(true);
         }, PClickEvent.TYPE);
         overlay.setVisible(true);
@@ -72,11 +71,26 @@ public class ListBox<D> extends PAddOnComposite<PPanel> {
         widget.add(container);
         button.addClickHandler(event -> {
             container.setVisible(!container.isVisible());
+            textBox.setText(null);
+            this.infiniteScroll.setbeginIndex(0);
+            this.infiniteScroll.setmaxItemVisible();
+            this.infiniteScroll.setScrollTop();
             this.infiniteScroll.refresh();
 
         });
-        textBox.addKeyUpHandler(event -> addNewElement(textBox.getText()));
+        textBox.addKeyUpHandler(event -> filter(textBox.getText()));
 
+    }
+
+    private void filter(final String filter) {
+        if (filter == null || filter.isEmpty()) {
+            dataProvider.setFilter(null);
+
+        } else {
+            final String text = filter.toLowerCase();
+            dataProvider.setFilter((D) text);
+        }
+        this.infiniteScroll.refresh();
     }
 
     private void addNewElement(final String data) {

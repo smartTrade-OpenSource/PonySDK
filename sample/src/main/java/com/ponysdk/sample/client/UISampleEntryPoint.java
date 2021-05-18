@@ -34,6 +34,7 @@ import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -369,15 +370,22 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     }
 
     private void listBox() {
-        final int maxSize = 100;
-        final ArrayList<Integer> arrayList = new ArrayList<>(maxSize);
-        final ArrayList<Integer> arrayListBackUp = new ArrayList<>(maxSize);
-        for (int i = 0; i < maxSize; i++) {
-            arrayList.add(i);
-            arrayListBackUp.add(i);
-        }
-        final ArrayList<Consumer<Integer>> handlers = new ArrayList<>();
-        final ListBox<Integer> listBox = new ListBox<>(new ListBoxProvider<Integer, W>() {
+        final ArrayList<String> arrayList = new ArrayList<>(Arrays.asList("Oliver", "Jake", "Connor", "Harry", "Oscar", "Damian",
+            "Daniel", "Joseph", "Thomas", "Charles", "Richard", "David", "William", "David", "Robert", "Noah", "George", "isla",
+            "Samantha", "Emma", "Jennifer", "Ava", "Mia", "Sarah", "Charlotte", "Sophie", "Jessica", "Lily", "Alexander", "Reece",
+            "Brown", "Smith", "Jones", "Garcia", "Rodriguez", "Murphy", "Martin", "Lee", "Wang", "Taylor", "Roy", "Gelbero", "Bethany",
+            "Margaret", "Poppy", "Jones", "Kyle", "Rhys", "Miller", "Walsh", "Byrne", "Margaret", "Patricia", "Elizabeth", "Ethan",
+            "Anderson", "Singh", "Tremblay", "Dan", "Aidan", "Paul", "Jimmy", "Hector", "Tristin", "Scott"));
+        final ArrayList<String> arrayListBackUp = new ArrayList<>(Arrays.asList("Oliver", "Jake", "Connor", "Harry", "Oscar", "Damian",
+            "Daniel", "Joseph", "Thomas", "Charles", "Richard", "David", "William", "David", "Robert", "Noah", "George", "isla",
+            "Samantha", "Emma", "Jennifer", "Ava", "Mia", "Sarah", "Charlotte", "Sophie", "Jessica", "Lily", "Alexander", "Reece",
+            "Brown", "Smith", "Jones", "Garcia", "Rodriguez", "Murphy", "Martin", "Lee", "Wang", "Taylor", "Roy", "Gelbero", "Bethany",
+            "Margaret", "Poppy", "Jones", "Kyle", "Rhys", "Miller", "Walsh", "Byrne", "Margaret", "Patricia", "Elizabeth", "Ethan",
+            "Anderson", "Singh", "Tremblay", "Dan", "Aidan", "Paul", "Jimmy", "Hector", "Tristin", "Scott"));
+        final int maxSize = arrayList.size();
+
+        final ArrayList<Consumer<String>> handlers = new ArrayList<>();
+        final ListBox<String> listBox = new ListBox<>(new ListBoxProvider<String, W>() {
 
             @Override
             public void getData(final int beginIndex, final int size, final Consumer callback) {
@@ -390,7 +398,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             }
 
             @Override
-            public W handleUI(final int index, final Integer data, W widget) {
+            public W handleUI(final int index, final String data, W widget) {
                 widget = new W();
                 widget.setData(data + "");
 
@@ -407,12 +415,16 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
             @Override
             public void addNewElement(final String data) {
-                final int i = Integer.parseInt(data);
-                arrayList.add(0, i);
+                arrayList.add(0, data);
             }
 
             @Override
-            public void setFilter(final Integer data) {
+            public void setFilter(final String data) {
+                arrayList.clear();
+                arrayList.addAll(arrayListBackUp);
+                if (data != null) {
+                    arrayList.removeIf(s -> !s.toLowerCase().contains(data));
+                }
             }
 
         });
