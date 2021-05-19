@@ -118,6 +118,7 @@ import com.ponysdk.core.ui.list.refreshable.RefreshableDataGrid;
 import com.ponysdk.core.ui.list.renderer.cell.CellRenderer;
 import com.ponysdk.core.ui.list.valueprovider.IdentityValueProvider;
 import com.ponysdk.core.ui.listbox.ListBox;
+import com.ponysdk.core.ui.listbox.ListBoxItem;
 import com.ponysdk.core.ui.listbox.ListBoxProvider;
 import com.ponysdk.core.ui.main.EntryPoint;
 import com.ponysdk.core.ui.model.PKeyCodes;
@@ -187,14 +188,12 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     }
 
-    class W<T> implements IsPWidget {
+    class W<T> implements ListBoxItem<T> {
 
-        final PFlowPanel label = Element.newPFlowPanel();
-        final PTextBox textBox = Element.newPTextBox();
+        final PLabel label = Element.newPLabel();
         private T t;
 
         public W() {
-            label.add(textBox);
 
         }
 
@@ -203,9 +202,9 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             return label;
         }
 
-        public void setData(final T t) {
+        public void setValue(final T t) {
             this.t = t;
-            textBox.setText(t.toString());
+            label.setText(t.toString());
 
         }
 
@@ -213,13 +212,14 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             label.setVisible(b);
         }
 
-        public T getData() {
-            return t;
-        }
-
         public void setStyleProperty(final String attribut, final String name) {
             label.setStyleProperty(attribut, name);
-            textBox.setStyleProperty(attribut, name);
+
+        }
+
+        @Override
+        public T getValue() {
+            return t;
         }
 
     }
@@ -385,22 +385,22 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final int maxSize = arrayList.size();
 
         final ArrayList<Consumer<String>> handlers = new ArrayList<>();
-        final ListBox<String> listBox = new ListBox<>(new ListBoxProvider<String, W>() {
+        final ListBox<String, W<String>> listBox = new ListBox<>(new ListBoxProvider<>() {
 
             @Override
-            public void getData(final int beginIndex, final int size, final Consumer callback) {
+            public void getData(final int beginIndex, final int size, final Consumer<List<String>> callback) {
                 callback.accept(arrayList.subList(beginIndex, beginIndex + size));
             }
 
             @Override
-            public void getFullSize(final Consumer callback) {
+            public void getFullSize(final Consumer<Integer> callback) {
                 callback.accept(arrayList.size());
             }
 
             @Override
-            public W handleUI(final int index, final String data, W widget) {
-                widget = new W();
-                widget.setData(data + "");
+            public W<String> handleUI(final int index, final String data, W<String> widget) {
+                widget = new W<>();
+                widget.setValue(data + "");
 
                 final Random rand = new Random();
                 final int randomNum = rand.nextInt(50 - 20 + 1) + 20;
@@ -409,7 +409,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             }
 
             @Override
-            public void addHandler(final Consumer handler) {
+            public void addHandler(final Consumer<String> handler) {
                 handlers.add(handler);
             }
 

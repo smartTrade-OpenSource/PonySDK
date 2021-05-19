@@ -823,7 +823,7 @@ AbstractAddon.defineAddon("com.ponysdk.core.ui.infinitescroll.InfiniteScrollAddo
 
         this.jqelement.css("overflow-y", "overlay");
         this.jqelement.css("overflow-x", "hidden");
-        this.jqelement.css("position", "absolute");
+        //this.jqelement.css("position", "absolute");
 
         this.container = this.jqelement.find(".is-container");
         this.container.css("width", "100%");
@@ -839,17 +839,24 @@ AbstractAddon.defineAddon("com.ponysdk.core.ui.infinitescroll.InfiniteScrollAddo
     },
     updateViewport:function(){
         var timeout;
+
         const o = new ResizeObserver(e => {
-            if(timeout)
-                clearTimeout(timeout);  
-            timeout = setTimeout(this.updateView(),150);
+            
+            window.requestAnimationFrame(() => {
+              if(timeout)
+                clearTimeout(timeout);
+
+              timeout = setTimeout(this.updateView(),150);
+            });
+    
+            
         });
         o.observe(this.element);
     },
      
     getTopPosition(element){
         let $element = $(element);
-        return $element.position().top;
+        return $element.position().top - this.jqelement.position().top;
     },
     setScrollTop:function(){
       this.jqelement.scrollTop(0);
@@ -871,6 +878,10 @@ AbstractAddon.defineAddon("com.ponysdk.core.ui.infinitescroll.InfiniteScrollAddo
     updateView:function(changeFullSize) {
 
         let children = this.container.children();
+        if(children.length === 0){
+          this.container.css("margin-top", 0 + "px");
+        this.container.css("margin-bottom",  0 +"px");
+        }
         if(children.length === 0 || this.preventUpdate) return;
 
         let topPosition = this.getTopPosition(children.first());
@@ -938,21 +949,24 @@ AbstractAddon.defineAddon("com.ponysdk.core.ui.infinitescroll.InfiniteScrollAddo
         let visibleItems = Math.ceil(height / averageItemSize * 2 / 5) * 5;
         this.beginIndex = Math.max(0, this.beginIndex - deltaItems);
         this.beginIndex = Math.min(this.size - visibleItems, this.beginIndex);
-
-
-
+        
+        //Widget is not visible due to items size
+        if(this.beginIndex == -Infinity || visibleItems == Infinity) return ;
+        if(this.beginIndex<0){
+          this.beginIndex = 0;
+        }
+  
         this.marginTopPx = this.beginIndex === 0 ? 0 : this.beginIndex * averageItemSize;
         this.marginBottomPx = (this.size - this.beginIndex - visibleItems) * averageItemSize;
 
 
         this.preventUpdate = true;
-        if(this.beginIndex != -Infinity && visibleItems != Infinity){
-            this.sendDataToServer({
-                beginIndex: this.beginIndex,
-                maxVisibleItem: visibleItems
-            });
-      }
+        console.log(this.jqelement.height());
         
+        this.sendDataToServer({
+            beginIndex: this.beginIndex,
+            maxVisibleItem: visibleItems
+        });    
     },
 
 

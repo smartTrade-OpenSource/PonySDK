@@ -23,8 +23,10 @@
 
 package com.ponysdk.core.ui.listbox;
 
+import java.util.List;
+import java.util.function.Consumer;
+
 import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PAddOnComposite;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PFlowPanel;
@@ -34,45 +36,102 @@ import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.infinitescroll.InfiniteScrollAddon;
+import com.ponysdk.core.ui.infinitescroll.InfiniteScrollProvider;
 
 /**
  *
  */
-public class ListBox<D> extends PAddOnComposite<PPanel> {
+public class ListBox<D, W extends ListBoxItem<D>> extends PAddOnComposite<PPanel> {
 
-    private final InfiniteScrollAddon<D, IsPWidget> infiniteScroll;
-    private final ListBoxProvider<D, IsPWidget> dataProvider;
+    private final InfiniteScrollAddon<D, W> infiniteScroll;
+    private final ListBoxProvider<D, W> dataProvider;
     private final PSimplePanel overlay;
     private final PButton button;
     private final PTextBox textBox;
     private final PFlowPanel container;
 
-    public ListBox(final ListBoxProvider dataProvider) {
+    private class ListBoxISProvider implements InfiniteScrollProvider<D, W> {
+
+        @Override
+        public void getData(final int beginIndex, final int maxSize, final Consumer<List<D>> callback) {
+            dataProvider.getData(beginIndex, maxSize, callback);
+        }
+
+        @Override
+        public void getFullSize(final Consumer<Integer> callback) {
+            dataProvider.getFullSize(callback);
+        }
+
+        @Override
+        public W handleUI(final int index, final D data, final W oldWidget) {
+            final W newWidget = dataProvider.handleUI(index, data, oldWidget);
+            if (newWidget != oldWidget) {
+                newWidget.addSelectionHandler(() -> this.onSelectItem(newWidget.getValue()));
+            }
+            return newWidget;
+        }
+
+        private void onSelectItem(final D value) {
+            button.setText(value.toString());
+            System.err.println(value);
+        }
+
+        @Override
+        public void addHandler(final Consumer<D> handler) {
+            dataProvider.addHandler(handler);
+        }
+
+    }
+
+    public ListBox(final ListBoxProvider<D, W> dataProvider) {
         super(Element.newPFlowPanel());
         this.dataProvider = dataProvider;
-        this.infiniteScroll = new InfiniteScrollAddon(dataProvider);
+        this.infiniteScroll = new InfiniteScrollAddon<>(new ListBoxISProvider());
         overlay = Element.newPSimplePanel();
         container = Element.newPFlowPanel();
         textBox = Element.newPTextBox();
         button = Element.newPButton();
         overlay.setStyleProperty("overflow", "auto");
         overlay.setStyleProperty("position", "fixed");
-        widget.add(overlay);
+        overlay.setStyleProperty("top", "0");
+        overlay.setStyleProperty("left", "0");
+        overlay.setStyleProperty("bottom", "0");
+        overlay.setStyleProperty("right", "0");
+        overlay.setStyleProperty("z-index", "-1");
+        container.setStyleProperty("position", "absolute");
+        container.setStyleProperty("max-height", "170px");
+        container.setStyleProperty("border", "5px solid black");
+        container.setStyleProperty("display", "flex");
+        container.setStyleProperty("overflow", "hidden");
+        container.setStyleProperty("flex-direction", "column");
+        //container.setStyleProperty("padding", "5px");
+        container.setStyleProperty("z-index", "1000");
+        infiniteScroll.setStyleProperty("z-index", "1");
+        container.setStyleProperty("font-family", "webappsdk");
+        container.add(overlay);
         overlay.addDomHandler((PClickHandler) e -> {
-            container.setVisible(true);
+            container.setVisible(false);
+
         }, PClickEvent.TYPE);
-        overlay.setVisible(true);
+        //overlay.setVisible(false);
+        container.setVisible(false);
         widget.add(button);
-        infiniteScroll.setStyleProperty("height", "500px");
-        infiniteScroll.setStyleProperty("width", "250px");
+
+        infiniteScroll.setStyleProperty("width", "168px");
         infiniteScroll.refresh();
         container.add(textBox);
         container.add(infiniteScroll);
         widget.add(container);
         button.addClickHandler(event -> {
+            //overlay.setVisible(!container.isVisible());
             container.setVisible(!container.isVisible());
+            if (container.isVisible()) {
+                //TODO use CSS
+                container.setStyleProperty("display", "block");
+                container.setStyleProperty("display", "flex");
+            }
+            this.dataProvider.setFilter(null);
             textBox.setText(null);
-            this.infiniteScroll.setbeginIndex(0);
             this.infiniteScroll.setmaxItemVisible();
             this.infiniteScroll.setScrollTop();
             this.infiniteScroll.refresh();

@@ -23,14 +23,18 @@
 
 package com.ponysdk.core.ui.listbox;
 
-import com.ponysdk.core.ui.infinitescroll.InfiniteScrollProvider;
+import com.ponysdk.core.ui.basic.IsPWidget;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
 
 /**
  *
  */
-public interface ListBoxProvider<D, W extends ListBoxItem<D>> extends InfiniteScrollProvider<D, W> {
+public interface ListBoxItem<D> extends IsPWidget {
 
-    void addNewElement(String data);
+    D getValue();
 
-    void setFilter(D data);
+    default void addSelectionHandler(final Runnable runnable) {
+        asWidget().addDomHandler((PClickHandler) event -> runnable.run(), PClickEvent.TYPE);
+    }
 }

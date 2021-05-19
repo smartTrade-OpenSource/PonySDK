@@ -133,8 +133,7 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
      * unused widgets.
      */
     public void draw() {
-        final int size = Math.min(maxVisibleItem, fullSize);
-        final List<D> data;
+        final int size = Math.min(maxVisibleItem, fullSize - beginIndex);
         if (size > 0) {
             widget.addStyleName("is-loading");
             dataProvider.getData(beginIndex, size, this::draw);
@@ -175,7 +174,7 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
     }
 
     private void draw(final List<D> data) {
-        final int size = Math.min(maxVisibleItem, fullSize);
+        final int size = Math.min(maxVisibleItem, fullSize - beginIndex);
 
         if (data.size() != size) {
             throw new IllegalStateException();
