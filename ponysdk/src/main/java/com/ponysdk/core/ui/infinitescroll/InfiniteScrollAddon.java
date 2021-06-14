@@ -154,6 +154,11 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
         widget.asWidget().onDestroy();
     }
 
+    /**
+     * Setting Infinite Scroll visibility
+     *
+     * @param visible boolean
+     */
     public void setVisible(final boolean visible) {
         if (visible) {
 
@@ -165,6 +170,11 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
 
     }
 
+    /**
+     * Get Infinite Scroll visibility
+     *
+     * @return boolean
+     */
     public boolean isVisible() {
         return widget.isVisible();
     }
@@ -177,7 +187,7 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
         final int size = Math.min(maxVisibleItem, fullSize - beginIndex);
 
         if (data.size() != size) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("data size doesnt match expected :" + size + " actual : " + data.size());
         }
 
         int fullDataIndex = beginIndex;

@@ -961,7 +961,7 @@ AbstractAddon.defineAddon("com.ponysdk.core.ui.infinitescroll.InfiniteScrollAddo
 
 
         this.preventUpdate = true;
-        console.log(this.jqelement.height());
+
         
         this.sendDataToServer({
             beginIndex: this.beginIndex,

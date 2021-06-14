@@ -23,12 +23,58 @@
 
 package com.ponysdk.core.ui.listbox;
 
-import com.ponysdk.core.ui.infinitescroll.InfiniteScrollProvider;
+import java.util.List;
 
 /**
  *
  */
-public interface ListBoxProvider<D, W extends ListBoxItem<D>> extends InfiniteScrollProvider<D, W> {
+public class GroupItem<D> {
 
-    void setFilter(String data);
+    private String name;
+    private List<D> data;
+
+    /**
+     * @param name
+     * @param data
+     */
+    public GroupItem(final String name, final List<D> data) {
+        super();
+        this.name = name;
+        this.data = data;
+
+    }
+
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * @param name the name to set
+     */
+    public void setName(final String name) {
+        this.name = name;
+    }
+
+    /**
+     * @return the data
+     */
+    public List<D> getData() {
+        return data;
+    }
+
+    /**
+     * @param data the data to set
+     */
+    public void setData(final List<D> data) {
+        this.data = data;
+    }
+
+    public void addElement(final D d) {
+        data.add(0, d);
+
+    }
+
 }

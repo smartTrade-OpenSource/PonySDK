@@ -73,7 +73,6 @@ public class ListBox<D, W extends ListBoxItem<D>> extends PAddOnComposite<PPanel
 
         private void onSelectItem(final D value) {
             button.setText(value.toString());
-            System.err.println(value);
         }
 
         @Override
@@ -104,7 +103,6 @@ public class ListBox<D, W extends ListBoxItem<D>> extends PAddOnComposite<PPanel
         container.setStyleProperty("display", "flex");
         container.setStyleProperty("overflow", "hidden");
         container.setStyleProperty("flex-direction", "column");
-        //container.setStyleProperty("padding", "5px");
         container.setStyleProperty("z-index", "1000");
         infiniteScroll.setStyleProperty("z-index", "1");
         container.setStyleProperty("font-family", "webappsdk");
@@ -113,7 +111,6 @@ public class ListBox<D, W extends ListBoxItem<D>> extends PAddOnComposite<PPanel
             container.setVisible(false);
 
         }, PClickEvent.TYPE);
-        //overlay.setVisible(false);
         container.setVisible(false);
         widget.add(button);
 
@@ -123,14 +120,13 @@ public class ListBox<D, W extends ListBoxItem<D>> extends PAddOnComposite<PPanel
         container.add(infiniteScroll);
         widget.add(container);
         button.addClickHandler(event -> {
-            //overlay.setVisible(!container.isVisible());
             container.setVisible(!container.isVisible());
             if (container.isVisible()) {
                 //TODO use CSS
                 container.setStyleProperty("display", "block");
                 container.setStyleProperty("display", "flex");
             }
-            this.dataProvider.setFilter(null);
+            this.dataProvider.setFilter("");
             textBox.setText(null);
             this.infiniteScroll.setmaxItemVisible();
             this.infiniteScroll.setScrollTop();
@@ -147,16 +143,11 @@ public class ListBox<D, W extends ListBoxItem<D>> extends PAddOnComposite<PPanel
 
         } else {
             final String text = filter.toLowerCase();
-            dataProvider.setFilter((D) text);
+            dataProvider.setFilter(text);
         }
+        this.infiniteScroll.setmaxItemVisible();
+        this.infiniteScroll.setScrollTop();
         this.infiniteScroll.refresh();
-    }
-
-    private void addNewElement(final String data) {
-        if (data != null || !data.isEmpty()) {
-            dataProvider.addNewElement(data);
-            this.infiniteScroll.refresh();
-        }
     }
 
 }
