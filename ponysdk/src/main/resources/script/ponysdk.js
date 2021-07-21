@@ -952,12 +952,16 @@ AbstractAddon.defineAddon("com.ponysdk.core.ui.infinitescroll.InfiniteScrollAddo
         
         //Widget is not visible due to items size
         if(this.beginIndex == -Infinity || visibleItems == Infinity) return ;
-        if(this.beginIndex<0){
+        if(this.beginIndex < 0 ){
           this.beginIndex = 0;
         }
   
         this.marginTopPx = this.beginIndex === 0 ? 0 : this.beginIndex * averageItemSize;
         this.marginBottomPx = (this.size - this.beginIndex - visibleItems) * averageItemSize;
+
+        if(this.marginBottomPx < 0 ){
+          this.marginBottomPx = 0;
+        }
 
 
         this.preventUpdate = true;

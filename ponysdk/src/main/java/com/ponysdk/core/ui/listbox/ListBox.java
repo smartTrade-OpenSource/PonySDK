@@ -49,6 +49,7 @@ public class ListBox<D, W extends ListBoxItem<D>> extends PAddOnComposite<PPanel
     private final PButton button;
     private final PTextBox textBox;
     private final PFlowPanel container;
+    private final PFlowPanel containerSelect;
 
     private class ListBoxISProvider implements InfiniteScrollProvider<D, W> {
 
@@ -66,13 +67,28 @@ public class ListBox<D, W extends ListBoxItem<D>> extends PAddOnComposite<PPanel
         public W handleUI(final int index, final D data, final W oldWidget) {
             final W newWidget = dataProvider.handleUI(index, data, oldWidget);
             if (newWidget != oldWidget) {
-                newWidget.addSelectionHandler(() -> this.onSelectItem(newWidget.getValue()));
+                newWidget.addSelectionHandler(() -> this.onSelectItem(newWidget.getValue(), newWidget.getString()));
             }
             return newWidget;
         }
 
-        private void onSelectItem(final D value) {
-            button.setText(value.toString());
+        private void onSelectItem(final D value, final String element) {
+            final PButton buttonS = Element.newPButton();
+            buttonS.setText(element);
+
+            dataProvider.selectedItem(value);
+            infiniteScroll.setmaxItemVisible();
+            infiniteScroll.setScrollTop();
+            infiniteScroll.refresh();
+            containerSelect.add(buttonS);
+            buttonS.addClickHandler(event -> {
+                containerSelect.remove(buttonS);
+                dataProvider.removeSelectedItem(value);
+                infiniteScroll.setmaxItemVisible();
+                infiniteScroll.setScrollTop();
+                infiniteScroll.refresh();
+
+            });
         }
 
         @Override
@@ -88,8 +104,10 @@ public class ListBox<D, W extends ListBoxItem<D>> extends PAddOnComposite<PPanel
         this.infiniteScroll = new InfiniteScrollAddon<>(new ListBoxISProvider());
         overlay = Element.newPSimplePanel();
         container = Element.newPFlowPanel();
+        containerSelect = Element.newPFlowPanel();
         textBox = Element.newPTextBox();
-        button = Element.newPButton();
+        button = Element.newPButton("Button");
+        containerSelect.add(button);
         overlay.setStyleProperty("overflow", "auto");
         overlay.setStyleProperty("position", "fixed");
         overlay.setStyleProperty("top", "0");
@@ -98,26 +116,26 @@ public class ListBox<D, W extends ListBoxItem<D>> extends PAddOnComposite<PPanel
         overlay.setStyleProperty("right", "0");
         overlay.setStyleProperty("z-index", "-1");
         container.setStyleProperty("position", "absolute");
-        container.setStyleProperty("max-height", "170px");
+        container.setStyleProperty("max-height", "500px");
         container.setStyleProperty("border", "5px solid black");
         container.setStyleProperty("display", "flex");
         container.setStyleProperty("overflow", "hidden");
         container.setStyleProperty("flex-direction", "column");
         container.setStyleProperty("z-index", "1000");
         infiniteScroll.setStyleProperty("z-index", "1");
-        container.setStyleProperty("font-family", "webappsdk");
-        container.add(overlay);
+
         overlay.addDomHandler((PClickHandler) e -> {
             container.setVisible(false);
 
         }, PClickEvent.TYPE);
         container.setVisible(false);
-        widget.add(button);
 
         infiniteScroll.setStyleProperty("width", "168px");
         infiniteScroll.refresh();
+        widget.add(overlay);
         container.add(textBox);
         container.add(infiniteScroll);
+        widget.add(containerSelect);
         widget.add(container);
         button.addClickHandler(event -> {
             container.setVisible(!container.isVisible());
@@ -138,16 +156,15 @@ public class ListBox<D, W extends ListBoxItem<D>> extends PAddOnComposite<PPanel
     }
 
     private void filter(final String filter) {
-        if (filter == null || filter.isEmpty()) {
-            dataProvider.setFilter(null);
-
-        } else {
+        if (filter != null || !filter.isEmpty()) {
             final String text = filter.toLowerCase();
             dataProvider.setFilter(text);
+            this.infiniteScroll.setmaxItemVisible();
+            this.infiniteScroll.setScrollTop();
+            this.infiniteScroll.refresh();
+
         }
-        this.infiniteScroll.setmaxItemVisible();
-        this.infiniteScroll.setScrollTop();
-        this.infiniteScroll.refresh();
+
     }
 
 }

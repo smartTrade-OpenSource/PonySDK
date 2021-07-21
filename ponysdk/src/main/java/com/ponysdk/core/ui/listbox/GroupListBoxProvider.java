@@ -24,8 +24,10 @@
 package com.ponysdk.core.ui.listbox;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Random;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -38,14 +40,16 @@ import com.ponysdk.core.util.Pair;
 /**
  *
  */
-public class GroupListBoxProvider<D> implements ListBoxProvider<Pair<D, String>, ListBoxItemImpl<Pair<D, String>>> {
+public class GroupListBoxProvider<D> implements ListBoxProvider<Pair<D, String>, ListBoxItemImpl<D>> {
 
-    public static class ListBoxItemImpl<D> implements ListBoxItem<D> {
+    public static class ListBoxItemImpl<D> implements ListBoxItem<Pair<D, String>> {
 
-        final PButton button = Element.newPButton();
-        private D d;
+        private final PButton button = Element.newPButton();
+        private Pair<D, String> d;
+        private final Function<D, String> displayer;
 
-        public ListBoxItemImpl() {
+        public ListBoxItemImpl(final Function<D, String> displayer) {
+            this.displayer = displayer;
             button.setStyleProperty("width", "100%");
         }
 
@@ -55,42 +59,36 @@ public class GroupListBoxProvider<D> implements ListBoxProvider<Pair<D, String>,
         }
 
         @Override
-        public D getValue() {
+        public Pair<D, String> getValue() {
             return d;
         }
 
-        public void setValue(final D d, final String caption) {
+        public void setValue(final Pair<D, String> d) {
             this.d = d;
-            button.setText(caption);
-            button.removeStyleName("group");
-            button.setEnabled(true);
+            if (d.getFirst() == null) {
+                button.setText(d.getSecond());
+                button.addStyleName("group");
+                button.setEnabled(false);
+            } else {
+                button.setText(displayer.apply(d.getFirst()));
+                button.removeStyleName("group");
+                button.setEnabled(true);
+            }
 
         }
 
-        public void setGroup(final String s) {
-            this.d = null;
-            button.setText(s);
-            //            this.setStyleProperty("font-weight", "bold");
-            //            this.setStyleProperty("pointer-events", "none");
-            button.addStyleName("group");
-            button.setEnabled(false);
-
-        }
-
-        public void setVisible(final boolean b) {
-            button.setVisible(b);
-        }
-
-        public void setStyleProperty(final String attribut, final String name) {
-            button.setStyleProperty(attribut, name);
-
+        @Override
+        public String getString() {
+            return d.getFirst().toString();
         }
 
     }
 
-    private final List<GroupItem<D>> groupList = new ArrayList<>();
-    private final List<GroupItem<D>> filterGroupList = new ArrayList<>();
+    private final Map<String, Map<String, D>> map = new LinkedHashMap<>();
+    private final Map<String, Map<String, D>> copyMap = new LinkedHashMap<>();
+    private final List<Pair<D, String>> selectedValue = new ArrayList<>();
     private final Function<D, String> displayer;
+    private String filter;
 
     public GroupListBoxProvider(final Function<D, String> displayer) {
         this.displayer = displayer;
@@ -98,55 +96,48 @@ public class GroupListBoxProvider<D> implements ListBoxProvider<Pair<D, String>,
 
     @Override
     public void getData(final int beginIndex, final int maxSize, final Consumer<List<Pair<D, String>>> callback) {
-        final List<Pair<D, String>> arrayL = new ArrayList<>();
+        final List<Pair<D, String>> data = new ArrayList<>();
         int globalPosition = 0;
-        for (final GroupItem<D> g : filterGroupList) {
-            if (maxSize == arrayL.size()) break;
+        for (final Entry<String, Map<String, D>> entry : copyMap.entrySet()) {
+            if (maxSize == data.size()) break;
 
-            if (globalPosition + g.getData().size() + 1 <= beginIndex) {
-                globalPosition += g.getData().size() + 1;
+            if (globalPosition + entry.getValue().size() + 1 <= beginIndex) {
+                globalPosition += entry.getValue().size() + 1;
             } else {
                 if (globalPosition >= beginIndex) {
-                    arrayL.add(new Pair<>(null, g.getName()));
+                    data.add(new Pair<>(null, entry.getKey()));
                 }
                 globalPosition++;
-                for (int i = Math.max(0, beginIndex - globalPosition); i < g.getData().size() && arrayL.size() < maxSize; i++) {
-
-                    final D element = g.getData().get(i);
-                    arrayL.add(new Pair<>(element, displayer.apply(element)));
-
+                int i = Math.max(0, beginIndex - globalPosition);
+                for (final D element : entry.getValue().values()) {
+                    if (i >= entry.getValue().size() || data.size() >= maxSize) {
+                        break;
+                    }
+                    data.add(new Pair<>(element, entry.getKey()));
+                    i++;
                 }
-                globalPosition += g.getData().size();
+                globalPosition += entry.getValue().size() + 1;
 
             }
         }
-        callback.accept(arrayL);
+
+        callback.accept(data);
     }
 
     @Override
     public void getFullSize(final Consumer<Integer> callback) {
         int fullSize = 0;
-        for (final GroupItem<D> groupItem : filterGroupList) {
-            fullSize += 1 + groupItem.getData().size();
+        for (final Entry<String, Map<String, D>> entry : copyMap.entrySet()) {
+            fullSize += 1 + entry.getValue().size();
 
         }
         callback.accept(fullSize);
     }
 
     @Override
-    public ListBoxItemImpl<Pair<D, String>> handleUI(final int index, final Pair<D, String> data,
-                                                     ListBoxItemImpl<Pair<D, String>> widget) {
-        if (widget == null) widget = new ListBoxItemImpl<>();
-        if (data.getFirst() == null) {
-            widget.setGroup(data.getSecond());
-
-        } else {
-            widget.setValue(data, data.getSecond());
-        }
-
-        final Random rand = new Random();
-        final int randomNum = rand.nextInt(50 - 20 + 1) + 20;
-        widget.setStyleProperty("height", randomNum + "px");
+    public ListBoxItemImpl<D> handleUI(final int index, final Pair<D, String> data, ListBoxItemImpl<D> widget) {
+        if (widget == null) widget = new ListBoxItemImpl<>(displayer);
+        widget.setValue(data);
         return widget;
     }
 
@@ -156,28 +147,37 @@ public class GroupListBoxProvider<D> implements ListBoxProvider<Pair<D, String>,
 
     @Override
     public void setFilter(final String filter) {
-        filterGroupList.clear();
-        if (filter == null) {
-            filterGroupList.addAll(groupList);
-        } else {
-            for (final GroupItem<D> groupItem : groupList) {
-                final List<D> filterList = new ArrayList<>();
-                for (final D d : groupItem.getData()) {
+        this.filter = filter;
+        copyMap.clear();
 
-                    if (d.toString().toLowerCase().contains(filter) || filter.isEmpty()) {
-                        filterList.add(d);
-                    }
+        for (final Entry<String, Map<String, D>> entry : map.entrySet()) {
+            final Map<String, D> groupitem = new LinkedHashMap<>();
+            for (final Entry<String, D> entryValue : entry.getValue().entrySet()) {
+                final Pair<D, String> element = new Pair<>(entryValue.getValue(), entry.getKey());
+                if (!selectedValue.contains(element) && entryValue.getValue().toString().toLowerCase().contains(filter)) {
+                    groupitem.put(entryValue.getKey(), entryValue.getValue());
                 }
-                if (!filterList.isEmpty()) {
-                    filterGroupList.add(new GroupItem<>(groupItem.getName(), filterList));
-                }
+            }
+            if (!groupitem.isEmpty()) {
+                copyMap.put(entry.getKey(), groupitem);
             }
         }
     }
 
-    public void addGroup(final String name, final List<D> data) {
-        final GroupItem<D> group = new GroupItem<>(name, data);
-        groupList.add(group);
+    public void addGroup(final String groupName, final List<D> data) {
+        for (final D element : data) {
+            addItemInGroup(groupName, element);
+        }
+
+    }
+
+    public void addItemInGroup(final String groupName, final D data) {
+        Map<String, D> groupItem = map.get(groupName);
+        if (groupItem == null) {
+            groupItem = new LinkedHashMap<>();
+            map.put(groupName, groupItem);
+        }
+        groupItem.put(displayer.apply(data), data);
 
     }
 
@@ -185,19 +185,32 @@ public class GroupListBoxProvider<D> implements ListBoxProvider<Pair<D, String>,
         setFilter("");
     }
 
-    public void addElement(final String name, final D d) {
-        for (final GroupItem<D> g : groupList) {
-            if (g.getName().equals(name)) {
-                g.addElement(d);
+    @Override
+    public void selectedItem(final Pair<D, String> data) {
+        selectedValue.add(data);
+        this.filterOnSelectedItem();
+    }
+
+    public void filterOnSelectedItem() {
+        copyMap.clear();
+        for (final Entry<String, Map<String, D>> entry : map.entrySet()) {
+            final Map<String, D> groupitem = new LinkedHashMap<>();
+            for (final Entry<String, D> entryValue : entry.getValue().entrySet()) {
+                final Pair<D, String> element = new Pair<>(entryValue.getValue(), entry.getKey());
+                if (!selectedValue.contains(element)) {
+                    groupitem.put(entryValue.getKey(), entryValue.getValue());
+                }
+            }
+            if (!groupitem.isEmpty()) {
+                copyMap.put(entry.getKey(), groupitem);
             }
         }
     }
 
-    /**
-     * @return the groupList
-     */
-    public List<GroupItem<D>> getGroupList() {
-        return groupList;
+    @Override
+    public void removeSelectedItem(final Pair<D, String> data) {
+        selectedValue.remove(data);
+        this.setFilter(this.filter);
     }
 
 }

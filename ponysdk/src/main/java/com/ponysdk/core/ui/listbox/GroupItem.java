@@ -73,7 +73,7 @@ public class GroupItem<D> {
     }
 
     public void addElement(final D d) {
-        data.add(0, d);
+        data.add(d);
 
     }
 

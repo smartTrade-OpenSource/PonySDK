@@ -39,11 +39,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiPredicate;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -62,7 +60,6 @@ import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PAbsolutePanel;
 import com.ponysdk.core.ui.basic.PButton;
-import com.ponysdk.core.ui.basic.PCheckBox;
 import com.ponysdk.core.ui.basic.PComplexPanel;
 import com.ponysdk.core.ui.basic.PCookies;
 import com.ponysdk.core.ui.basic.PDateBox;
@@ -88,7 +85,6 @@ import com.ponysdk.core.ui.basic.PTreeItem;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
 import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
@@ -110,16 +106,13 @@ import com.ponysdk.core.ui.form2.impl.formfield.StringTextBoxFormField;
 import com.ponysdk.core.ui.formatter.TextFunction;
 import com.ponysdk.core.ui.grid.AbstractGridWidget;
 import com.ponysdk.core.ui.grid.GridTableWidget;
-import com.ponysdk.core.ui.infinitescroll.InfiniteScrollAddon;
-import com.ponysdk.core.ui.infinitescroll.InfiniteScrollProvider;
 import com.ponysdk.core.ui.list.DataGridColumnDescriptor;
 import com.ponysdk.core.ui.list.refreshable.Cell;
 import com.ponysdk.core.ui.list.refreshable.RefreshableDataGrid;
 import com.ponysdk.core.ui.list.renderer.cell.CellRenderer;
 import com.ponysdk.core.ui.list.valueprovider.IdentityValueProvider;
+import com.ponysdk.core.ui.listbox.GroupListBoxProvider;
 import com.ponysdk.core.ui.listbox.ListBox;
-import com.ponysdk.core.ui.listbox.ListBoxItem;
-import com.ponysdk.core.ui.listbox.ListBoxProvider;
 import com.ponysdk.core.ui.main.EntryPoint;
 import com.ponysdk.core.ui.model.PKeyCodes;
 import com.ponysdk.core.ui.rich.PConfirmDialog;
@@ -143,291 +136,15 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     int a = 0;
     private static int counter;
 
-    class Wrapper<T> implements IsPWidget {
-
-        final PFlowPanel label = Element.newPFlowPanel();
-        final PTextBox textBox = Element.newPTextBox();
-        final PButton button = Element.newPButton();
-        private T t;
-
-        public Wrapper() {
-            label.add(textBox);
-            label.add(button);
-            button.addStyleName("btn");
-            button.addStyleName("fa fa-trash");
-
-        }
-
-        @Override
-        public PWidget asWidget() {
-            return label;
-        }
-
-        public void setData(final T t) {
-            this.t = t;
-            textBox.setText(t.toString());
-
-        }
-
-        public void setVisible(final boolean b) {
-            label.setVisible(b);
-        }
-
-        public void addClickerHandler(final PClickHandler pClickHandler) {
-            this.button.addClickHandler(pClickHandler);
-        }
-
-        public T getData() {
-            return t;
-        }
-
-        public void setStyleProperty(final String attribut, final String name) {
-            label.setStyleProperty(attribut, name);
-            textBox.setStyleProperty(attribut, name);
-        }
-
-    }
-
-    class W<T> implements ListBoxItem<T> {
-
-        final PLabel label = Element.newPLabel();
-        private T t;
-
-        public W() {
-
-        }
-
-        @Override
-        public PWidget asWidget() {
-            return label;
-        }
-
-        public void setValue(final T t) {
-            this.t = t;
-            label.setText(t.toString());
-
-        }
-
-        public void setVisible(final boolean b) {
-            label.setVisible(b);
-        }
-
-        public void setStyleProperty(final String attribut, final String name) {
-            label.setStyleProperty(attribut, name);
-
-        }
-
-        @Override
-        public T getValue() {
-            return t;
-        }
-
-    }
-
-    private void infiniteScroll() {
-        final int maxSize = 100;
-        final ArrayList<Integer> arrayList = new ArrayList<>(maxSize);
-        final ArrayList<Integer> arrayListBackUp = new ArrayList<>(maxSize);
-        for (int i = 0; i < maxSize; i++) {
-            arrayList.add(i);
-            arrayListBackUp.add(i);
-        }
-
-        final PFlowPanel panel = Element.newPFlowPanel();
-        final PTextBox textBoxAdd = Element.newPTextBox();
-        final PTextBox textBoxFilter = Element.newPTextBox();
-        final PButton button = Element.newPButton("Add new Item");
-        final PButton buttonGoTo = Element.newPButton("Back");
-        final PCheckBox boxPair = Element.newPCheckBox("Pair Items");
-        final PCheckBox boxImpair = Element.newPCheckBox("Impair Items");
-        panel.add(buttonGoTo);
-        panel.add(boxPair);
-        panel.add(boxImpair);
-        panel.add(textBoxAdd);
-        panel.add(button);
-        panel.add(textBoxFilter);
-
-        final InfiniteScrollAddon<Integer, Wrapper> infiniteScroll = new InfiniteScrollAddon<>(
-            new InfiniteScrollProvider<Integer, Wrapper>() {
-
-                final ArrayList<Consumer<Integer>> handlers = new ArrayList<>();
-
-                @Override
-                public void getData(final int beginIndex, final int size, final Consumer<List<Integer>> callback) {
-
-                    callback.accept(arrayList.subList(beginIndex, beginIndex + size));
-                    //                    final Consumer<List<Integer>> delegate = PScheduler.delegate(callback);
-                    //                    new Thread(() -> {
-                    //                        try {
-                    //                            Thread.sleep(1000);
-                    //                        } catch (final InterruptedException e) {
-                    //                            e.printStackTrace();
-                    //                        }
-                    //                        delegate.accept(arrayList.subList(beginIndex, beginIndex + size));
-                    //                    }).start();
-
-                }
-
-                @Override
-                public void getFullSize(final Consumer<Integer> callback) {
-                    callback.accept(arrayList.size());
-                    //                    final Consumer<Integer> delegate = PScheduler.delegate(callback);
-                    //                    new Thread(() -> {
-                    //                        try {
-                    //                            Thread.sleep(1000);
-                    //                        } catch (final InterruptedException e) {
-                    //                            e.printStackTrace();
-                    //                        }
-                    //                        delegate.accept(arrayList.size());
-                    //                    }).start();
-                }
-
-                @Override
-                public Wrapper handleUI(final int row, final Integer data, Wrapper widget) {
-                    widget = new Wrapper();
-                    widget.setData(data + "");
-                    widget.addClickerHandler(e -> {
-                        try {
-                            arrayList.remove(data);
-                            arrayListBackUp.remove(data);
-
-                            for (final Consumer<Integer> handler : handlers) {
-
-                                handler.accept(data);
-
-                            }
-
-                        } catch (final Exception ex) {
-                            ex.printStackTrace();
-                        }
-                    });
-                    final Random rand = new Random();
-                    final int randomNum = rand.nextInt(50 - 20 + 1) + 20;
-                    widget.setStyleProperty("height", randomNum + "px");
-                    return widget;
-                }
-
-                @Override
-                public void addHandler(final Consumer<Integer> handler) {
-                    handlers.add(handler);
-                }
-            });
-        PWindow.getMain().add(panel);
-        final BiPredicate<PCheckBox, Integer> filter = (widget, i) -> {
-            if (widget.getValue() == true) {
-                arrayList.removeIf(n -> n % 2 == i);
-                infiniteScroll.refresh();
-            } else {
-                arrayList.clear();
-                arrayList.addAll(arrayListBackUp);
-                infiniteScroll.refresh();
-            }
-            return false;
-
-        };
-        textBoxFilter.addKeyUpHandler(e -> {
-            if (!textBoxFilter.getValue().isEmpty()) {
-                arrayList.removeIf(n -> n != Integer.valueOf(textBoxFilter.getValue()));
-                infiniteScroll.refresh();
-            } else {
-                arrayList.clear();
-                arrayList.addAll(arrayListBackUp);
-                infiniteScroll.refresh();
-            }
-
-        });
-        button.addClickHandler(e -> {
-            if (!textBoxAdd.getValue().isEmpty()) {
-                arrayList.add(0, Integer.valueOf(textBoxAdd.getValue()));
-                infiniteScroll.refresh();
-                textBoxAdd.setValue("");
-
-            }
-        });
-        buttonGoTo.addClickHandler(e -> {
-
-            infiniteScroll.setbeginIndex(0);
-            infiniteScroll.setmaxItemVisible();
-            infiniteScroll.setScrollTop();
-            infiniteScroll.refresh();
-
-        });
-        boxPair.addClickHandler(e -> {
-            filter.test(boxPair, 1);
-
-        });
-        boxImpair.addClickHandler(e -> {
-            filter.test(boxImpair, 0);
-
-        });
-
-        PWindow.getMain().add(infiniteScroll);
-        infiniteScroll.setStyleProperty("width", "90%");
-        infiniteScroll.setStyleProperty("height", "100%");
-        infiniteScroll.asWidget().setStyleProperty("height", "80%");
-        infiniteScroll.refresh();
-
-    }
-
     private void listBox() {
-        final ArrayList<String> arrayList = new ArrayList<>(Arrays.asList("Oliver", "Jake", "Connor", "Harry", "Oscar", "Damian",
-            "Daniel", "Joseph", "Thomas", "Charles", "Richard", "David", "William", "David", "Robert", "Noah", "George", "isla",
-            "Samantha", "Emma", "Jennifer", "Ava", "Mia", "Sarah", "Charlotte", "Sophie", "Jessica", "Lily", "Alexander", "Reece",
-            "Brown", "Smith", "Jones", "Garcia", "Rodriguez", "Murphy", "Martin", "Lee", "Wang", "Taylor", "Roy", "Gelbero", "Bethany",
-            "Margaret", "Poppy", "Jones", "Kyle", "Rhys", "Miller", "Walsh", "Byrne", "Margaret", "Patricia", "Elizabeth", "Ethan",
-            "Anderson", "Singh", "Tremblay", "Dan", "Aidan", "Paul", "Jimmy", "Hector", "Tristin", "Scott"));
-        final ArrayList<String> arrayListBackUp = new ArrayList<>(Arrays.asList("Oliver", "Jake", "Connor", "Harry", "Oscar", "Damian",
-            "Daniel", "Joseph", "Thomas", "Charles", "Richard", "David", "William", "David", "Robert", "Noah", "George", "isla",
-            "Samantha", "Emma", "Jennifer", "Ava", "Mia", "Sarah", "Charlotte", "Sophie", "Jessica", "Lily", "Alexander", "Reece",
-            "Brown", "Smith", "Jones", "Garcia", "Rodriguez", "Murphy", "Martin", "Lee", "Wang", "Taylor", "Roy", "Gelbero", "Bethany",
-            "Margaret", "Poppy", "Jones", "Kyle", "Rhys", "Miller", "Walsh", "Byrne", "Margaret", "Patricia", "Elizabeth", "Ethan",
-            "Anderson", "Singh", "Tremblay", "Dan", "Aidan", "Paul", "Jimmy", "Hector", "Tristin", "Scott"));
-        final int maxSize = arrayList.size();
-
-        final ArrayList<Consumer<String>> handlers = new ArrayList<>();
-        final ListBox<String, W<String>> listBox = new ListBox<>(new ListBoxProvider<>() {
-
-            @Override
-            public void getData(final int beginIndex, final int size, final Consumer<List<String>> callback) {
-                callback.accept(arrayList.subList(beginIndex, beginIndex + size));
-            }
-
-            @Override
-            public void getFullSize(final Consumer<Integer> callback) {
-                callback.accept(arrayList.size());
-            }
-
-            @Override
-            public W<String> handleUI(final int index, final String data, W<String> widget) {
-                widget = new W<>();
-                widget.setValue(data + "");
-
-                final Random rand = new Random();
-                final int randomNum = rand.nextInt(50 - 20 + 1) + 20;
-                widget.setStyleProperty("height", randomNum + "px");
-                return widget;
-            }
-
-            @Override
-            public void addHandler(final Consumer<String> handler) {
-                handlers.add(handler);
-            }
-
-            @Override
-            public void addNewElement(final String data) {
-                arrayList.add(0, data);
-            }
-
-            @Override
-            public void setFilter(final String data) {
-                arrayList.clear();
-                arrayList.addAll(arrayListBackUp);
-                if (data != null) {
-                    arrayList.removeIf(s -> !s.toLowerCase().contains(data));
-                }
-            }
-
-        });
+        final ArrayList<String> arrayList = new ArrayList<>(Arrays.asList("Oliver", "Jake", "Connor", "Harry", "Oscar", "Damian"));
+        final GroupListBoxProvider<String> groupListBoxProvider = new GroupListBoxProvider<>(Function.identity());
+        groupListBoxProvider.addGroup("Boys", arrayList);
+        groupListBoxProvider.addGroup("Girls", arrayList);
+        groupListBoxProvider.addGroup("Gogo", arrayList);
+        groupListBoxProvider.addGroup("olf", arrayList);
+        groupListBoxProvider.init();
+        final ListBox<?, ?> listBox = new ListBox<>(groupListBoxProvider);
         PWindow.getMain().add(listBox);
 
     }
@@ -435,7 +152,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     @Override
     public void start(final UIContext uiContext) {
 
-        //infiniteScroll();
         listBox();
         //testSimpleDataGridView();
         if (true) return;

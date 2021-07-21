@@ -37,4 +37,10 @@ public interface ListBoxItem<D> extends IsPWidget {
     default void addSelectionHandler(final Runnable runnable) {
         asWidget().addDomHandler((PClickHandler) event -> runnable.run(), PClickEvent.TYPE);
     }
+
+    /**
+     * @return
+     */
+    String getString();
+
 }

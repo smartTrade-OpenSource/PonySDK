@@ -31,4 +31,8 @@ import com.ponysdk.core.ui.infinitescroll.InfiniteScrollProvider;
 public interface ListBoxProvider<D, W extends ListBoxItem<D>> extends InfiniteScrollProvider<D, W> {
 
     void setFilter(String data);
+
+    void selectedItem(D data);
+
+    void removeSelectedItem(D data);
 }
