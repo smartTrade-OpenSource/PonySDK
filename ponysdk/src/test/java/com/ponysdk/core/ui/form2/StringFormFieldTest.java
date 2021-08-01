@@ -24,6 +24,7 @@
 package com.ponysdk.core.ui.form2;
 
 import com.ponysdk.core.ui.basic.PWindow;
+import com.ponysdk.core.ui.form2.api.FormFieldValidator;
 import com.ponysdk.core.ui.form2.api.ValidationResult;
 import com.ponysdk.core.ui.form2.impl.formfield.StringTextBoxFormField;
 import com.ponysdk.core.ui.form2.impl.validator.NotEmptyFormFieldValidator;
@@ -39,11 +40,14 @@ public class StringFormFieldTest extends PSuite {
     @Test
     public void testDefaultValidation() {
         final StringTextBoxFormField formField = new StringTextBoxFormField("Caption");
-        formField.setValidator(value -> {
-            if (value.length() < 3) return ValidationResult.OK();
-            return ValidationResult.KO("TOOOOO LOONG");
+        formField.setValidator(new FormFieldValidator() {
+            @Override
+            public ValidationResult isValid(String value) {
+                if (value.length() < 3) return ValidationResult.OK();
+                return ValidationResult.KO("TOOOOO LOONG");
+            }
         });
-        formField.setValue("To");
+        formField.setValue("Toto", false);
 
 
         PWindow.getMain().add(formField);
@@ -153,6 +157,6 @@ public class StringFormFieldTest extends PSuite {
         formField.setValue("Test");
         assertEquals("Test", formField.getValue());
         formField.reset();
-        assertEquals(null, formField.getValue());
+        assertEquals("", formField.getValue());
     }
 }

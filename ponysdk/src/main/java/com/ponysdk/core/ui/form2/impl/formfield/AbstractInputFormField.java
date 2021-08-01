@@ -25,7 +25,6 @@ public abstract class AbstractInputFormField<V> extends FormField<V> {
     @Override
     protected ValidationResult doValidation(FormFieldValidator validator, V value) {
         if (validator == null) return ValidationResult.OK();
-        if(input == null) asWidget();
         return validator.isValid(input.getText());
     }
 
