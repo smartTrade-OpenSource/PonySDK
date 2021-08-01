@@ -34,6 +34,7 @@ import elemental.client.Browser;
 import elemental.events.CloseEvent;
 import elemental.events.MessageEvent;
 import elemental.html.ArrayBuffer;
+import elemental.html.Performance;
 import elemental.html.WebSocket;
 import elemental.html.Window;
 
@@ -89,6 +90,9 @@ public class WebSocketClient {
     }
 
     public void send(final String message) {
+
+
+
         webSocket.send(message);
     }
 

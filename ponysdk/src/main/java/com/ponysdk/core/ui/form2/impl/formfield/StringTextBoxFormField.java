@@ -6,4 +6,13 @@ public class StringTextBoxFormField extends AbstractInputFormField<String> {
         super(caption);
     }
 
+    @Override
+    public String getValue() {
+        return input.getText();
+    }
+
+    @Override
+    public void setValue(String value) {
+        input.setText(value);
+    }
 }

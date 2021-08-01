@@ -12,8 +12,8 @@ pre {
 body {
     color: #333333;
     margin: 10px;
-    border: 0px;
-    padding: 0px;
+    border: 0;
+    padding: 0;
     background: #ffffff;
     direction: ltr;
 }
@@ -36,7 +36,7 @@ a:hover,a:visited:hover {
 
 input,select {
     border: 1px solid #999999;
-    margin: 0px 2px;
+    margin: 0 2px;
     padding: 6px 4px;
     background: #ffffff;
     color: #000000;
@@ -56,7 +56,7 @@ input[disabled],select[disabled] {
 
 .gwt-MenuBarPopup {
     background: #ffffff;
-    margin: 0px 0px 0px 3px;
+    margin: 0 0 0 3px;
     border: 1px solid #999999;
 }
 
@@ -72,9 +72,6 @@ input[disabled],select[disabled] {
     background: #eeeeee;
     border: 1px solid #999999;
     border-radius: 3px;
-    -moz-border-radius: 3px;
-    -khtml-border-radius: 3px;
-    -webkit-border-radius: 3px;
 }
 
 .gwt-MenuBar-horizontal .gwt-MenuItem {
@@ -86,9 +83,9 @@ input[disabled],select[disabled] {
 
 .gwt-MenuBar-horizontal .gwt-MenuItemSeparator {
     width: 1px;
-    padding: 0px;
-    margin: 0px;
-    border: 0px;
+    padding: 0;
+    margin: 0;
+    border: 0;
     border-left: 1px solid #999999;
     background: white;
 }
@@ -100,13 +97,13 @@ input[disabled],select[disabled] {
 }
 
 .gwt-MenuBar-vertical .gwt-MenuItemSeparator {
-    padding: 2px 0px;
+    padding: 2px 0;
 }
 
 .gwt-MenuBar-vertical .gwt-MenuItemSeparator .menuSeparatorInner {
     height: 1px;
-    padding: 0px;
-    border: 0px;
+    padding: 0;
+    border: 0;
     border-top: 1px solid #ccc;
     overflow: hidden;
 }
@@ -133,7 +130,7 @@ input[disabled],select[disabled] {
     height: 18px;
     line-height: 18px;
     font-size: 1.1em;
-    padding-bottom: 0px;
+    padding-bottom: 0;
     padding-left: 22px;
     padding-right: 7px;
     padding-top: 0px;
@@ -150,9 +147,6 @@ input[disabled],select[disabled] {
     border: 1px solid #999999;
     background: #ffffff;
     border-radius: 3px;
-    -moz-border-radius: 3px;
-    -khtml-border-radius: 3px;
-    -webkit-border-radius: 3px;
 }
 
 .gwt-SuggestBoxPopup .item {
@@ -169,9 +163,6 @@ input[disabled],select[disabled] {
 .gwt-DecoratorPanel {
     border: 1px solid #999999;
     border-radius: 3px;
-    -moz-border-radius: 3px;
-    -khtml-border-radius: 3px;
-    -webkit-border-radius: 3px;
 }
 
 .gwt-Tree table {
@@ -197,7 +188,7 @@ input[disabled],select[disabled] {
 
 .gwt-Tree .gwt-TreeItem {
     padding: 1px 0px;
-    margin: 0px;
+    margin: 0;
     white-space: nowrap;
     cursor: pointer;
 }
@@ -230,12 +221,12 @@ input[disabled],select[disabled] {
 .gwt-TabLayoutPanel .gwt-TabLayoutPanelContentContainer {
     border-color: #eeeeee;
     border-style: solid;
-    border-width: 0px 1px 1px;
+    border-width: 0 1px 1px;
 }
 
 .gwt-TabLayoutPanel .gwt-TabLayoutPanelContent {
     overflow: hidden;
-    padding: 0px;
+    padding: 0;
 }
 
 .gwt-TabLayoutPanel .gwt-TabLayoutPanelTab {
@@ -247,10 +238,7 @@ input[disabled],select[disabled] {
     font-weight: normal;
     text-align: center;
     background: #999999;
-    border-radius: 3px 3px 0px 0px;
-    -moz-border-radius: 3px 3px 0px 0px;
-    -khtml-border-radius: 3px 3px 0px 0px;
-    -webkit-border-radius: 3px 3px 0px 0px;
+    border-radius: 3px 3px 0 0;
 }
 
 .gwt-TabLayoutPanel .gwt-TabLayoutPanelTab-selected {
@@ -272,15 +260,11 @@ input[disabled],select[disabled] {
 .gwt-TabBar .gwt-TabBarItem {
     margin-left: 4px;
     padding: 4px 8px 4px 8px;
-    cursor: pointer;
     cursor: hand;
     color: #ffffff;
     text-align: center;
     background: #999999;
     border-radius: 3px 3px 0px 0px;
-    -moz-border-radius: 3px 3px 0px 0px;
-    -khtml-border-radius: 3px 3px 0px 0px;
-    -webkit-border-radius: 3px 3px 0px 0px;
 }
 
 .gwt-TabBar .gwt-TabBarItem-selected {
@@ -319,10 +303,6 @@ input[disabled],select[disabled] {
     border-radius: 3px;
     border: 1px solid #555555;
     color: #ffffff;
-    -webkit-transition: background-color 0.15s linear 0s, border-color 0.15s linear 0s, color 0.15s linear 0s;
-    -moz-transition: background-color 0.15s linear 0s, border-color 0.15s linear 0s, color 0.15s linear 0s;
-    -ms-transition: background-color 0.15s linear 0s, border-color 0.15s linear 0s, color 0.15s linear 0s;
-    -o-transition: background-color 0.15s linear 0s, border-color 0.15s linear 0s, color 0.15s linear 0s;
     transition: background-color 0.15s linear 0s, border-color 0.15s linear 0s, color 0.15s linear 0s;
     background-color: #7e7e7e;
     background-image: -moz-linear-gradient(top, #999999, #555555);
@@ -341,8 +321,8 @@ input[disabled],select[disabled] {
     font-size: 11px;
     height: 18px;
     line-height: 18px;
-    margin: 2px 0px 2px 0px;
-    padding: 0px 5px 0px 5px;
+    margin: 2px 0 2px 0;
+    padding: 0 5px 0 5px;
     border: 1px solid #ffffff;
 }
 
@@ -351,10 +331,6 @@ input[disabled],select[disabled] {
     background-color: #eeeeee;
     border: 1px solid #eeeeee;
     color: #333333;
-    -webkit-transition: background-color 0.25s linear 0s, border-color 0.25s linear 0s, color 0.25s linear 0s;
-    -moz-transition: background-color 0.25s linear 0s, border-color 0.25s linear 0s, color 0.25s linear 0s;
-    -ms-transition: background-color 0.25s linear 0s, border-color 0.25s linear 0s, color 0.25s linear 0s;
-    -o-transition: background-color 0.25s linear 0s, border-color 0.25s linear 0s, color 0.25s linear 0s;
     transition: background-color 0.25s linear 0s, border-color 0.25s linear 0s, color 0.25s linear 0s;
 }
 
@@ -409,7 +385,7 @@ input[disabled],select[disabled] {
 
 .datePickerWeekdayLabel,.datePickerWeekendLabel {
     background: #ffffff;
-    padding: 0px 4px 2px;
+    padding: 0 4px 2px;
     cursor: default;
     color: #999999;
     font-size: 70%;
@@ -418,7 +394,6 @@ input[disabled],select[disabled] {
 
 .datePickerDay {
     padding: 4px 7px;
-    cursor: hand;
     cursor: pointer;
 }
 
@@ -473,10 +448,9 @@ td.datePickerMonth {
     font-size: 120%;
     line-height: 1em;
     color: #7373b3;
-    cursor: hand;
     cursor: pointer;
     font-weight: bold;
-    padding: 0px 4px;
+    padding: 0 4px;
     outline: none;
 }
 
@@ -499,14 +473,9 @@ td.datePickerMonth {
     text-decoration: none;
     font-size: 14px;
     line-height: 27px;
-    padding: 0em 0.6em;
+    padding: 0 0.6em;
     border-radius: 0.2em;
-    -moz-border-radius: 0.2em;
-    -khtml-border-radius: 0.2em;
-    -webkit-border-radius: 0.2em;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
-    -moz-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
-    -webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
 }
 
 .pony-PButton:hover {
@@ -1055,10 +1024,7 @@ td.datePickerMonth {
     color: #ffffff;
     text-decoration: none;
     padding: .1em 0 .1em 5px;
-    border-radius: 0.5em 0.5em 0px 0px;
-    -moz-border-radius: 0.5em 0.5em 0px 0px;
-    -khtml-border-radius: 0.5em 0.5em 0px 0px;
-    -webkit-border-radius: 0.5em 0.5em 0px 0px;
+    border-radius: 0.5em 0.5em 0 0;
     background-color: #7e7e7e;
     background-image: -moz-linear-gradient(top, #999999, #555555);
     background-image: -ms-linear-gradient(top, #999999, #555555);
@@ -1092,13 +1058,8 @@ td.datePickerMonth {
     height: .5em;
     margin-bottom: 5px;
     padding: 5px;
-    border-radius: 0px 0px 0.5em 0.5em;
-    -moz-border-radius: 0px 0px 0.5em 0.5em;
-    -khtml-border-radius: 0px 0px 0.5em 0.5em;
-    -webkit-border-radius: 0px 0px 0.5em 0.5em;
+    border-radius: 0 0 0.5em 0.5em;
     box-shadow: 0 3px 2px rgba(0, 0, 0, 0.2);
-    -moz-box-shadow: 0 3px 2px rgba(0, 0, 0, 0.2);
-    -webkit-box-shadow: 0 3px 2px rgba(0, 0, 0, 0.2);
 }
 
 .pony-closable-dialog-box {
@@ -1106,12 +1067,7 @@ td.datePickerMonth {
     border: 1px solid #555555;
     background-color: white;
     border-radius: 0.5em 0.5em 0.5em 0.5em;
-    -moz-border-radius: 0.5em 0.5em 0.5em 0.5em;
-    -khtml-border-radius: 0.5em 0.5em 0.5em 0.5em;
-    -webkit-border-radius: 0.5em 0.5em 0.5em 0.5em;
     box-shadow: 0 3px 2px rgba(0, 0, 0, 0.2);
-    -moz-box-shadow: 0 3px 2px rgba(0, 0, 0, 0.2);
-    -webkit-box-shadow: 0 3px 2px rgba(0, 0, 0, 0.2);
 }
 
 .pony-closable-dialog-box .header {
@@ -1165,9 +1121,6 @@ td.datePickerMonth {
     font-weight: bold;
     opacity: 0.9;
     border-radius: 4px;
-    -moz-border-radius: 4px;
-    -khtml-border-radius: 4px;
-    -webkit-border-radius: 4px;
 }
 
 .pony-notification.humanized {
@@ -1214,20 +1167,14 @@ td.datePickerMonth {
 
 .pony-notification.humanized.closing {
     animation-delay: 1000ms;
-    -moz-animation-delay: 1000ms;
-    -webkit-animation-delay: 1000ms;
 }
 
 .pony-notification.warning.closing {
     animation-delay: 2000ms;
-    -moz-animation-delay: 2000ms;
-    -webkit-animation-delay: 2000ms;
 }
 
 .pony-notification.tray.closing {
     animation-delay: 2000ms;
-    -moz-animation-delay: 2000ms;
-    -webkit-animation-delay: 2000ms;
 }
 
 @keyframes notificationFadeOut {
@@ -1262,43 +1209,43 @@ td.datePickerMonth {
 
 @keyframes boxPulse {
     from {
-        box-shadow: 0px 0px 0px #0099ff;
+        box-shadow: 0 0 0 #0099ff;
     }
 
     50% {
-        box-shadow: 0px 0px 15px #0099ff;
+        box-shadow: 0 0 15px #0099ff;
     }
 
     to {
-        box-shadow: 0px 0px 0px #0099ff;
+        box-shadow: 0 0 0 #0099ff;
     }
 }
 
 @-moz-keyframes boxPulse {
     0% {
-        -moz-box-shadow: 0px 0px 0px #0099ff;
+        -moz-box-shadow: 0 0 0 #0099ff;
     }
 
     50% {
-        -moz-box-shadow: 0px 0px 15px #0099ff;
+        -moz-box-shadow: 0 0 15px #0099ff;
     }
 
     100% {
-        -moz-box-shadow: 0px 0px 0px #0099ff;
+        -moz-box-shadow: 0 0 0 #0099ff;
     }
 }
 
 @-webkit-keyframes boxPulse {
     from {
-        -webkit-box-shadow: 0px 0px 0px #0099ff;
+        -webkit-box-shadow: 0 0px 0 #0099ff;
     }
 
     50% {
-        -webkit-box-shadow: 0px 0px 15px #0099ff;
+        -webkit-box-shadow: 0 0 15px #0099ff;
     }
 
     to {
-        -webkit-box-shadow: 0px 0px 0px #0099ff;
+        -webkit-box-shadow: 0 0 0 #0099ff;
     }
 }
 
@@ -1310,13 +1257,8 @@ td.datePickerMonth {
 .htooltip span {
     text-align: left;
     background-color: #555555;
-    border-radius: 15px 15px 15px 0px;
-    -moz-border-radius: 15px 15px 15px 0px;
-    -khtml-border-radius: 15px 15px 15px 0px;
-    -webkit-border-radius: 15px 15px 15px 0px;
+    border-radius: 15px 15px 15px 0;
     box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.5);
-    -moz-box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.5);
-    -webkit-box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.5);
     color: #ffffff;
     margin-left: 2px;
     margin-top: -30px;
@@ -1583,12 +1525,7 @@ td.datePickerMonth {
     text-decoration: none;
     font: 14px/100% Arial,Helvetica,sans-serif;
     border-radius: 0.2em;
-    -moz-border-radius: 0.2em;
-    -khtml-border-radius: 0.2em;
-    -webkit-border-radius: 0.2em;
-    box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.2);
-    -moz-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.2);
-    -webkit-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
     background-color: #f8f8f8;
     background-image: -moz-linear-gradient(top, #ffffff, #eeeeee);
     background-image: -ms-linear-gradient(top, #ffffff, #eeeeee);
@@ -1608,21 +1545,16 @@ td.datePickerMonth {
 
 .pony-ActionToolbar .gwt-MenuItemSeparator {
     width: 1px;
-    padding: 0px;
-    margin: 0px;
-    border: 0px;
+    padding: 0;
+    margin: 0;
+    border: 0;
     border-left: 1px solid #b3b3b3;
     background: #ffffff;
 }
 
 .pony-ActionToolbar .gwt-MenuItem-selected {
     border-radius: 0.2em;
-    -moz-border-radius: 0.2em;
-    -khtml-border-radius: 0.2em;
-    -webkit-border-radius: 0.2em;
-    box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.2);
-    -moz-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.2);
-    -webkit-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
     background-color: #ebebeb;
     background-image: -moz-linear-gradient(top, #ffffff, #cccccc);
     background-image: -ms-linear-gradient(top, #ffffff, #cccccc);
@@ -1657,12 +1589,7 @@ td.datePickerMonth {
     text-decoration: none;
     font: 14px/100% Arial,Helvetica,sans-serif;
     border-radius: 0.2em;
-    -moz-border-radius: 0.2em;
-    -khtml-border-radius: 0.2em;
-    -webkit-border-radius: 0.2em;
     box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.2);
-    -moz-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.2);
-    -webkit-box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.2);
     background-color: #f8f8f8;
     background-image: -moz-linear-gradient(top, #ffffff, #eeeeee);
     background-image: -ms-linear-gradient(top, #ffffff, #eeeeee);
@@ -1687,7 +1614,7 @@ td.datePickerMonth {
 .pony-Page-Navigation .gwt-MenuItemSeparator {
     cursor: default;
     width: 1px;
-    padding: 0px;
+    padding: 0;
     margin: 0px;
     border: 0px;
     border-left: 1px solid #b3b3b3;

@@ -351,7 +351,10 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 
     private void draw() {
         try {
-            if (from >= to) return;
+            if (from >= to) {
+                hideLoadingDataView();
+                return;
+            }
             final int size = unpinnedTable.body.getWidgetCount();
             final int start = Math.max(0, from - firstRowIndex);
             final DataGridSnapshot viewStateSnapshot = new DataGridSnapshot(firstRowIndex, size, start, sorts, filters);
@@ -538,7 +541,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
         addon = new Addon();
         for (final ColumnView columnView : columnViews.values()) {
             addon.onColumnAdded(columnView.id, columnView.column.getMinWidth(), columnView.column.getMaxWidth(),
-                columnView.state.isPinned());
+                    columnView.state.isPinned());
         }
     }
 
@@ -1148,8 +1151,9 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
             addHeaderCell(columnView);
             addFooterCell(columnView);
 
-            if (addon != null) addon.onColumnAdded(columnView.id, columnView.column.getMinWidth(), columnView.column.getMaxWidth(),
-                columnView.state.isPinned());
+            if (addon != null)
+                addon.onColumnAdded(columnView.id, columnView.column.getMinWidth(), columnView.column.getMaxWidth(),
+                        columnView.state.isPinned());
         }
 
         protected PComplexPanel addFooterCell(final ColumnView columnView) {
@@ -1482,7 +1486,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
                     onColumnVisibilityChanged(json.getJsonArray(ADDON_COLUMN_ID), json.getJsonArray(ADDON_COLUMN_VISIBILITY));
                 } else if (json.containsKey(ADDON_COLUMN_WIDTH)) {
                     onColumnResized(json.getInt(ADDON_COLUMN_ID), //
-                        json.getInt(ADDON_COLUMN_WIDTH));
+                            json.getInt(ADDON_COLUMN_WIDTH));
                 } else if (json.containsKey(ADDON_COLUMN_TO)) {
                     onColumnMoved(json.getInt(ADDON_COLUMN_ID), json.getInt(ADDON_COLUMN_TO));
                 }

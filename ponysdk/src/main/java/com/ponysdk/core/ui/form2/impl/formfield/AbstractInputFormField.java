@@ -4,8 +4,6 @@ import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.form2.api.FormField;
-import com.ponysdk.core.ui.form2.api.FormFieldValidator;
-import com.ponysdk.core.ui.form2.api.ValidationResult;
 
 public abstract class AbstractInputFormField<V> extends FormField<V> {
     protected PTextBox input;
@@ -18,18 +16,9 @@ public abstract class AbstractInputFormField<V> extends FormField<V> {
     protected PTextBox createInnerWidget() {
         input = Element.newPTextBox();
         input.setTabindex(PWidget.TabindexMode.TABULABLE);
-        configureBehaviour();
-        return input;
-    }
-
-    @Override
-    protected ValidationResult doValidation(FormFieldValidator validator, V value) {
-        if (validator == null) return ValidationResult.OK();
-        return validator.isValid(input.getText());
-    }
-
-    protected void configureBehaviour() {
+        input.addBlurHandler(e -> validate());
         input.addValueChangeHandler(e -> validate());
+        return input;
     }
 
     @Override
@@ -48,12 +37,8 @@ public abstract class AbstractInputFormField<V> extends FormField<V> {
     }
 
     @Override
-    public void focus() {
-        input.focus();
+    public String getStringToValidate() {
+        return input.getText();
     }
 
-    @Override
-    public void doSetValue(V value) {
-        input.setText(value.toString());
-    }
 }

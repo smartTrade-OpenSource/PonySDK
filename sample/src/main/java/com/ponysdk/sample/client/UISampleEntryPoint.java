@@ -38,7 +38,9 @@ import com.ponysdk.core.ui.datagrid2.data.RowAction;
 import com.ponysdk.core.ui.datagrid2.view.*;
 import com.ponysdk.core.ui.datagrid2.view.DataGridView.DecodeException;
 import com.ponysdk.core.ui.eventbus2.EventBus.EventHandler;
-import com.ponysdk.core.ui.form2.impl.formfield.*;
+import com.ponysdk.core.ui.form2.impl.formfield.ColorInputFormField;
+import com.ponysdk.core.ui.form2.impl.formfield.NumberInputFormField;
+import com.ponysdk.core.ui.form2.impl.formfield.StringTextBoxFormField;
 import com.ponysdk.core.ui.formatter.TextFunction;
 import com.ponysdk.core.ui.grid.AbstractGridWidget;
 import com.ponysdk.core.ui.grid.GridTableWidget;
@@ -69,7 +71,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.*;
@@ -82,6 +83,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     private PLabel mainLabel;
 
+    // HighChartsStackedColumnAddOn highChartsStackedColumnAddOn;
     int a = 0;
     private static int counter;
 
@@ -95,23 +97,24 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         button.addClickHandler(e -> PWindow.getMain().add(input));
         PWindow.getMain().add(button);
 
-        PScheduler.schedule(() -> {
-            UIContext.get().getCookies().setCookie("test", "value", null, null, null, true, "Strict");
-        });
-
+        if(true) return;
 
         StringTextBoxFormField formField = new StringTextBoxFormField("String Formfield");
         PWindow.getMain().add(formField);
         ColorInputFormField colorInputFormField = new ColorInputFormField("Color FormField");
         PWindow.getMain().add(colorInputFormField);
-        NumberInputFormField<Long> longInput = new LongInputFormField("Long FormField");
-        PWindow.getMain().add(longInput);
-        NumberInputFormField<Integer> integerInput = new IntegerInputFormField("Integer FormField");
-        PWindow.getMain().add(integerInput);
-        NumberInputFormField<Float> floatInput = new FloatInputFormField("Float FormField");
-        PWindow.getMain().add(floatInput);
-        NumberInputFormField<BigDecimal> bigDecimal = new BigDecimalInputFormField("BigDecimal FormField");
-        PWindow.getMain().add(bigDecimal);
+        NumberInputFormField<Long> longNumberInputFormField = new NumberInputFormField<Long>("Color FormField") {
+            @Override
+            public Long getValue() {
+                return null;
+            }
+
+            @Override
+            public void setValue(Long value) {
+
+            }
+        };
+        PWindow.getMain().add(colorInputFormField);
 
         if (true) return;
 
@@ -717,6 +720,18 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         // final PElementAddOn elementAddOn = new PElementAddOn();
         // elementAddOn.setInnerText("Coucou");
         // flowPanel.add(elementAddOn);
+
+        // highChartsStackedColumnAddOn = new HighChartsStackedColumnAddOn();
+        // PWindow.getMain().add(highChartsStackedColumnAddOn);
+        // highChartsStackedColumnAddOn.setSeries("");
+
+        // final HighChartsStackedColumnAddOn h2 = new
+        // HighChartsStackedColumnAddOn();
+        // a.add(h2);
+        // h2.setSeries("");
+        // final PElementAddOn elementAddOn2 = new PElementAddOn();
+        // elementAddOn2.setInnerText("Coucou dans window");
+        // a.add(elementAddOn2);
     }
 
     private void createNewEvent() {
