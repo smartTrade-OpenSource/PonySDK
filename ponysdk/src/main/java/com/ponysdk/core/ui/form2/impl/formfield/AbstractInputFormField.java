@@ -3,10 +3,17 @@ package com.ponysdk.core.ui.form2.impl.formfield;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
+import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 import com.ponysdk.core.ui.form2.api.FormField;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public abstract class AbstractInputFormField<V> extends FormField<V> {
     protected PTextBox input;
+
+    private final Set<PValueChangeHandler<V>> handlers = new HashSet<>();
 
     public AbstractInputFormField(String caption) {
         super(caption);
@@ -17,8 +24,15 @@ public abstract class AbstractInputFormField<V> extends FormField<V> {
         input = Element.newPTextBox();
         input.setTabindex(PWidget.TabindexMode.TABULABLE);
         input.addBlurHandler(e -> validate());
-        input.addValueChangeHandler(e -> validate());
+        input.addValueChangeHandler(e -> onChanged());
         return input;
+    }
+
+    private void onChanged() {
+        validate();
+        for (PValueChangeHandler<V> handler : handlers) {
+            handler.onValueChange(new PValueChangeEvent<>(this, getValue()));
+        }
     }
 
     @Override
@@ -39,6 +53,14 @@ public abstract class AbstractInputFormField<V> extends FormField<V> {
     @Override
     public String getStringToValidate() {
         return input.getText();
+    }
+
+    public void addValueChangeHandler(PValueChangeHandler<V> handler) {
+        handlers.add(handler);
+    }
+
+    public boolean removeValueChangeHandler(final PValueChangeHandler<V> handler) {
+        return handlers != null && handlers.remove(handler);
     }
 
 }

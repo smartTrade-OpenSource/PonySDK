@@ -21,7 +21,7 @@ ext {
 }
 
 group = 'com.ponysdk'
-version = '2.8.35'
+version = '2.8.37'
 
 publishing {
     publications {
