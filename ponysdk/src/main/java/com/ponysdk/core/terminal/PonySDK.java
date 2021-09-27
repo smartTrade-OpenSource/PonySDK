@@ -23,9 +23,6 @@
 
 package com.ponysdk.core.terminal;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -44,10 +41,12 @@ import com.ponysdk.core.terminal.request.WindowRequestBuilder;
 import com.ponysdk.core.terminal.socket.WebSocketClient;
 import com.ponysdk.core.terminal.ui.PTObject;
 import com.ponysdk.core.terminal.ui.PTWindowManager;
-
-import elemental.client.Browser;
-import elemental.xml.XMLHttpRequest;
+import elemental2.dom.DomGlobal;
+import elemental2.dom.XMLHttpRequest;
 import jsinterop.annotations.JsType;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @JsType
 public class PonySDK implements UncaughtExceptionHandler {
@@ -97,10 +96,18 @@ public class PonySDK implements UncaughtExceptionHandler {
 
     private void startMainContext() {
         Window.addCloseHandler(event -> close());
-        final String builder = GWT.getHostPageBaseURL().replaceFirst("http", "ws") + MappingPath.WEBSOCKET + "?"
+
+        final String protocol = DomGlobal.window.location.protocol.replace("http", "ws");
+        final String server = DomGlobal.window.location.host;
+        final String pathName = DomGlobal.window.location.pathname;
+        final String search = DomGlobal.window.location.search.replace('?', '&');
+        final String wsMappingPath = MappingPath.WEBSOCKET + "?"
                 + ClientToServerModel.TYPE_HISTORY.toStringValue() + "=" + History.getToken();
+
+        String newUrl = protocol + "//" + server + pathName + wsMappingPath + search;
+
         reconnectionChecker = new ReconnectionChecker();
-        socketClient = new WebSocketClient(builder, uiBuilder, reconnectionChecker);
+        socketClient = new WebSocketClient(newUrl, uiBuilder, reconnectionChecker);
     }
 
     private void startChildContext() {
@@ -109,7 +116,7 @@ public class PonySDK implements UncaughtExceptionHandler {
 
         contextId = Integer.parseInt(Window.Location.getParameter(ClientToServerModel.UI_CONTEXT_ID.toStringValue()));
         final String tabindexOnlyFormFieldRaw = Window.Location
-            .getParameter(ClientToServerModel.OPTION_TABINDEX_ACTIVATED.toStringValue());
+                .getParameter(ClientToServerModel.OPTION_TABINDEX_ACTIVATED.toStringValue());
         if (tabindexOnlyFormFieldRaw != null) tabindexOnlyFormField = Boolean.parseBoolean(tabindexOnlyFormFieldRaw);
 
         uiBuilder.init(windowId != null ? new WindowRequestBuilder(windowId, buffer -> uiBuilder.updateWindowTerminal(buffer))
@@ -133,12 +140,11 @@ public class PonySDK implements UncaughtExceptionHandler {
             instruction.put(ClientToServerModel.NATIVE, jsObject);
             uiBuilder.sendDataToServer(instruction);
         } else {
-            final XMLHttpRequest xhr = Browser.getWindow().newXMLHttpRequest();
+            XMLHttpRequest xhr = new XMLHttpRequest();
 
             final PTObject ptObject = uiBuilder.getPTObject(Integer.parseInt(objectID.toString()));
 
-            xhr.setOnload(evt -> callback.setAjaxResponse(xhr.getResponseText()));
-
+            xhr.onload = evt -> callback.setAjaxResponse(xhr.responseText);
             xhr.open("GET", MappingPath.AJAX.toString());
             xhr.setRequestHeader(ClientToServerModel.UI_CONTEXT_ID.name(), String.valueOf(contextId));
             xhr.setRequestHeader(ClientToServerModel.OBJECT_ID.name(), String.valueOf(ptObject.getObjectID()));

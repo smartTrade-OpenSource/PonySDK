@@ -3,6 +3,7 @@
 	<inherits name='com.google.gwt.user.User' />
 	<inherits name="com.google.gwt.http.HTTP" />
 	<inherits name="elemental.Elemental" />
+	<inherits name="elemental2.dom.Dom" />
 
 	<entry-point class='com.ponysdk.core.terminal.CommunicationEntryPoint' />
 	<source path='terminal' />
