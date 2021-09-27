@@ -252,5 +252,9 @@ public class ColumnFilterFooterDataGridView<K, V> extends DecoratorDataGridView<
             super.onStateChanged(state);
         }
 
+        @Override
+        public void onMoved() {
+            super.onMoved();
+        }
     }
 }

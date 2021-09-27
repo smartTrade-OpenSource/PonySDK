@@ -105,6 +105,8 @@ public interface DataGridSource<K, V> {
 
     void addSort(Object key, Comparator<DefaultRow<V>> comparator);
 
+    void addPrimarySort(Object key, Comparator<DefaultRow<V>> comparator);
+
     /**
      * Remove a sort
      */

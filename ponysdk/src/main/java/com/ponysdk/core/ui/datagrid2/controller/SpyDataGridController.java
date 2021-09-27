@@ -155,6 +155,11 @@ public abstract class SpyDataGridController<K, V> implements DataGridController<
     }
 
     @Override
+    public void addPrimarySort(final Object key, final Comparator<V> comparator) {
+        controller.addPrimarySort(key, comparator);
+    }
+
+    @Override
     public void clearSort(final Object key) {
         controller.clearSort(key);
     }

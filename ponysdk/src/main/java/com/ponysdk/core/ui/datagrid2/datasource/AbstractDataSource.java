@@ -151,6 +151,16 @@ public abstract class AbstractDataSource<K, V> implements DataGridSource<K, V> {
     }
 
     @Override
+    public void addPrimarySort(final Object key, final Comparator<DefaultRow<V>> comparator) {
+        final Map<Object, Comparator<DefaultRow<V>>> tmpSorts = new LinkedHashMap<>();
+        tmpSorts.put(key, comparator);
+        tmpSorts.putAll(sorts);
+        sorts.clear();
+        sorts.putAll(tmpSorts);
+        sort();
+    }
+
+    @Override
     public Comparator<DefaultRow<V>> clearSort(final Column<V> column) {
         return sorts.remove(column);
     }

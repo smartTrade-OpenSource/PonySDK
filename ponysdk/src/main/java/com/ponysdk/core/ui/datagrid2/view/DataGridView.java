@@ -142,7 +142,7 @@ public interface DataGridView<K, V> extends IsPWidget {
      * {@link DataGridAdapter#compareDefault(Object, Object)} and insertion
      * order)
      */
-    void clearSorts();
+    void clearSorts(boolean notify);
 
     /**
      * Adds/replaces a {@link RowAction}, identified by {@code key}, that will

@@ -268,6 +268,13 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     }
 
     @Override
+    public void addPrimarySort(final Object key, final Comparator<V> comparator) {
+        checkAdapter();
+        dataSource.addPrimarySort(key, new GeneralControllerSort(comparator));
+        refresh();
+    }
+
+    @Override
     public void clearSort(final ColumnDefinition<V> colDef) {
         checkAdapter();
         final Column<V> column = getColumn(colDef);
@@ -286,18 +293,16 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     @Override
     public void setFilter(final Object key, final ColumnDefinition<V> colDef, final BiPredicate<V, Supplier<Object>> biPredicate,
                           final boolean reinforcing) {
-        final int oldLiveDataSize = dataSource.getRowCount();
         checkAdapter();
         dataSource.setFilter(key, null, reinforcing, new ColumnFilter(colDef, biPredicate));
-        refreshRows(0, oldLiveDataSize);
+        resetLiveData();
     }
 
     @Override
     public void setFilter(final Object key, final String id, final Predicate<V> predicate, final boolean reinforcing) {
         checkAdapter();
-        final int oldLiveDataSize = dataSource.getRowCount();
         dataSource.setFilter(key, id, reinforcing, new GeneralFilter(predicate));
-        refreshRows(0, oldLiveDataSize);
+        resetLiveData();
     }
 
     @Override

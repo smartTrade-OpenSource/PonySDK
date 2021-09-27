@@ -175,4 +175,8 @@ public class DecoratorColumnDefinition<V> implements ColumnDefinition<V> {
         return column.getDraggableHeaderElement();
     }
 
+    @Override
+    public void onMoved() {
+        column.onMoved();
+    }
 }
