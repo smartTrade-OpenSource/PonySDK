@@ -101,8 +101,8 @@ public class DecoratorDataGridView<K, V> implements DataGridView<K, V> {
     }
 
     @Override
-    public void clearSorts() {
-        view.clearSorts();
+    public void clearSorts(final boolean notify) {
+        view.clearSorts(notify);
     }
 
     @Override

@@ -319,6 +319,8 @@ public class RowSelectorColumnDataGridView<K, V> extends DecoratorDataGridView<K
             return null;
         }
 
+        @Override
+        public void onMoved() {
+        }
     }
-
 }

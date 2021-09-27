@@ -275,6 +275,9 @@ public class ColumnVisibilitySelectorDataGridView<K, V> extends WidgetDecoratorD
         public void onResized(final int width) {
         }
 
+        @Override
+        public void onMoved() {
+        }
     }
 
     @Override

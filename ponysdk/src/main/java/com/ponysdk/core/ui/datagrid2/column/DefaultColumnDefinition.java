@@ -220,4 +220,7 @@ public class DefaultColumnDefinition<V> implements ColumnDefinition<V> {
         return columnNameLabel;
     }
 
+    @Override
+    public void onMoved() {
+    }
 }

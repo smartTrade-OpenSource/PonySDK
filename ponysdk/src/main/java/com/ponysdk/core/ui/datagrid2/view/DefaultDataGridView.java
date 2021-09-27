@@ -175,6 +175,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 
     }
 
+    @Override
     public DataGridAdapter<K, V> getAdapter() {
         return adapter;
     }
@@ -336,6 +337,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
             row.unpinnedRow.remove(fromIndex);
             row.unpinnedRow.insert(widget, toIndex);
         }
+        fromColumnView.notifyMovedListeners();
     }
 
     public void onUpdateRows(final int from, final int to) {
@@ -676,13 +678,15 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
     }
 
     @Override
-    public void clearSorts() {
+    public void clearSorts(final boolean notify) {
         showLoadingDataView();
         controller.clearSorts();
         draw();
-        for (final ColumnView columnView : columnViews.values()) {
-            for (final ColumnActionListener<V> listener : columnView.listeners) {
-                listener.onClearSort();
+        if (notify) {
+            for (final ColumnView columnView : columnViews.values()) {
+                for (final ColumnActionListener<V> listener : columnView.listeners) {
+                    listener.onClearSort();
+                }
             }
         }
     }
@@ -1319,7 +1323,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
         public void sort(final boolean asc) {
             if (!columnView.column.isSortable()) return;
             showLoadingDataView();
-            int i = 0;
+            final int i = 0;
             sorts.put(i, asc ? 1 : 0);
             controller.addSort(columnView.column, asc);
             addon.scrollToTop();
@@ -1393,7 +1397,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
                 show(columnView);
             } else if (!state.isShown() && columnView.state.isShown()) {
                 hide(columnView);
-                clearFilters();
+                clearSort();
             }
 
             if (state.isPinned() && !columnView.state.isPinned()) {
@@ -1438,6 +1442,12 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
         void notifyResizedListeners() {
             for (final ColumnActionListener<V> listener : listeners) {
                 listener.onResized(width);
+            }
+        }
+
+        void notifyMovedListeners() {
+            for (final ColumnActionListener<V> listener : listeners) {
+                listener.onMoved();
             }
         }
     }

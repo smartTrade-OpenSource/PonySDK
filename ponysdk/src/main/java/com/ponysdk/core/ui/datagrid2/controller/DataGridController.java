@@ -23,6 +23,14 @@
 
 package com.ponysdk.core.ui.datagrid2.controller;
 
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.function.BiPredicate;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.cell.Cell;
 import com.ponysdk.core.ui.datagrid2.cell.ExtendedCell;
@@ -31,14 +39,6 @@ import com.ponysdk.core.ui.datagrid2.config.DataGridConfig;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfigBuilder;
 import com.ponysdk.core.ui.datagrid2.data.LiveDataView;
 import com.ponysdk.core.ui.datagrid2.view.DataGridSnapshot;
-
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Map;
-import java.util.function.BiPredicate;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 /**
  * @author mbagdouri
@@ -65,6 +65,9 @@ public interface DataGridController<K, V> {
     void addSort(ColumnDefinition<V> column, boolean asc);
 
     void addSort(Object key, Comparator<V> comparator);
+
+    // FIXME a better solution can be an insert with a specified index
+    void addPrimarySort(Object key, Comparator<V> comparator);
 
     void clearSort(Object key);
 

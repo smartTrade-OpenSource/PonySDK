@@ -84,4 +84,9 @@ public interface ColumnActionListener<V> {
      * Called when this column's width is changed
      */
     void onResized(int width);
+
+    /**
+     * Called when this column is moved from an index to an other
+     */
+    void onMoved();
 }
