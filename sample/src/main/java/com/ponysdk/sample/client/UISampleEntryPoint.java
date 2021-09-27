@@ -464,7 +464,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
         final PButton clearSortsButton = Element.newPButton("Clear Sorts");
         clearSortsButton.addClickHandler(e -> {
-            gridView.clearSorts();
+            gridView.clearSorts(false);
         });
         PWindow.getMain().add(clearSortsButton);
         PWindow.getMain().add(columnVisibilitySelectorDataGridView.getDecoratorWidget());
