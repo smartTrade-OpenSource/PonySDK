@@ -813,3 +813,169 @@ _UTF8 = undefined;
   });
 
 })();
+
+(function() {
+  "use strict"
+  AbstractAddon.defineAddon("com.ponysdk.core.ui.infinitescroll.InfiniteScrollAddon", {
+
+    initDom:function() {
+        window.test = this;
+        this.jqelement.css("overflow-y", "overlay");
+        this.jqelement.css("overflow-x", "hidden");
+        this.container = this.jqelement.find(".is-container");
+        this.container.css("width", "100%");
+        this.size = 0; // Size of the data
+        this.beginIndex = 0; // Start of the viewport for the server
+        this.previousBeginIndex = 0;
+        this.previousVisibleItems = 0;
+        this.jqelement.scroll(e => {
+            // Avoid multiple call
+            if(this.timeout) window.clearTimeout(this.timeout);
+            this.timeout = window.setTimeout(() => this.updateView(), 40);
+        });
+        this.updateViewport();
+    },
+    updateViewport:function() {
+        var timeout;
+        const o = new ResizeObserver(e => {
+            window.requestAnimationFrame(() => {
+              if(timeout) clearTimeout(timeout);
+              timeout = setTimeout(this.updateView(), 150);
+            });
+        });
+        o.observe(this.element);
+    },
+
+    getTopPosition(element) {
+        let $element = $(element);
+        return $element.position().top - this.jqelement.position().top;
+    },
+    setScrollTop:function() {
+      this.jqelement.scrollTop(0);
+    },
+
+    getBottomPosition(element) {
+        let $element = $(element);
+        return this.getTopPosition(element) + $element.outerHeight(true) - $element.height() + $element[0].scrollHeight;
+    },
+
+    setSize:function(size) {
+        this.size = size;
+        if(this.container.children().length>0) {
+          this.updateView(true);
+        }
+    },
+
+    updateView:function(changeFullSize) {
+        let children = this.container.children();
+        if(children.length === 0) {
+            this.container.css("margin-top", 0 + "px");
+            this.container.css("margin-bottom",  0 + "px");
+        }
+        if(children.length === 0) return;
+
+        let topPosition = this.getTopPosition(children.first());
+        let bottomPosition = this.getBottomPosition(children.last());
+        let itemsSize = Math.abs(bottomPosition - topPosition);
+        let height = this.jqelement.height();
+
+        //rounding issue
+        let marginOfError = 2;
+        if(topPosition - marginOfError <= 0 && bottomPosition + marginOfError >= height || children.length === this.size) {
+            if(changeFullSize && children.length > 0) {
+                let averageItemSize = itemsSize / children.length;
+                let marginBottomPx = Math.max(0, (this.size - this.beginIndex - children.length) * averageItemSize);
+                this.container.css("margin-bottom",  marginBottomPx +"px");
+            }
+            return;
+        }
+
+        let scrollBottom = topPosition > 0;
+        let averageItemSize = itemsSize / this.container.children().length;
+        let deltaItems = 0
+
+        if(scrollBottom && topPosition > height || !scrollBottom && bottomPosition < 0) {
+            let scrollPosition = this.jqelement.scrollTop();
+            this.beginIndex = Math.round(scrollPosition / averageItemSize - children.length / 4);
+            this.forcePosition = null;
+        } else if(scrollBottom) {
+            let child = children.first();
+            let topPosition = this.getTopPosition(child);
+            this.forcePosition = {
+                index: this.beginIndex,
+                topPosition: topPosition,
+            }
+            for(let i = children.length - 1 ; i >= 0; i--) {
+                deltaItems++;
+                let child = children.get(i);
+                let topPosition = this.getTopPosition(child);
+                if(topPosition <= height) {
+                    break;
+                }
+            }
+        } else {
+            let child = children.last();
+            let topPosition = this.getTopPosition(child);
+            this.forcePosition = {
+                index: this.beginIndex + children.length - 1,
+                topPosition: topPosition,
+            }
+            for(let i = 0; i < children.length; i++) {
+                let child = children.get(i);
+                deltaItems--;
+                let bottomPosition = this.getBottomPosition(child);
+                if(bottomPosition >= 0) {
+                    break;
+                }
+            }
+        }
+
+        deltaItems = Math.round(deltaItems / 2);
+
+        let visibleItems = Math.ceil(height / averageItemSize * 2 / 5) * 5;
+        this.beginIndex = Math.max(0, this.beginIndex - deltaItems);
+        this.beginIndex = Math.min(this.size - visibleItems, this.beginIndex);
+
+        // Widget is not visible due to items size
+        if(this.beginIndex == -Infinity || visibleItems == Infinity) return ;
+        if(this.beginIndex < 0) {
+            this.beginIndex = 0;
+        }
+  
+        this.marginTopPx = this.beginIndex === 0 ? 0 : this.beginIndex * averageItemSize;
+        this.marginBottomPx = (this.size - this.beginIndex - visibleItems) * averageItemSize;
+
+        if(this.marginBottomPx < 0) {
+          this.marginBottomPx = 0;
+        }
+        if(this.previousBeginIndex == this.beginIndex && this.previousVisibleItems == visibleItems) return;
+        this.previousBeginIndex = this.beginIndex;
+        this.previousVisibleItems = visibleItems;
+        this.sendDataToServer({
+            beginIndex: this.beginIndex,
+            maxVisibleItem: visibleItems
+        });    
+    },
+
+    onDraw:function() {
+        if(this.marginTopPx != null) {
+            this.container.css("margin-top", this.marginTopPx + "px");
+            this.container.css("margin-bottom",  this.marginBottomPx +"px");
+        }
+        if(this.forcePosition) {
+            let child = this.container.children().get(this.forcePosition.index - this.beginIndex);
+            if(child) {
+                let topPosition = this.getTopPosition(child);
+                this.jqelement.scrollTop(this.jqelement.scrollTop() + topPosition - this.forcePosition.topPosition);
+            }
+            this.forcePosition = null;
+        }
+        window.setTimeout(() => {
+            this.timeout = null;
+            this.updateView();
+        }, 50);
+    }
+
+  });
+
+})();
