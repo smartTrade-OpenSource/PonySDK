@@ -112,10 +112,6 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
         callTerminalMethod(FUNCTION_SET_SCROLL_TOP);
     }
 
-    public void setBeginIndex(final int index) {
-        this.beginIndex = index;
-    }
-
     public void setMaxItemVisible(final int maxVisibleItems) {
         this.maxVisibleItems = maxVisibleItems;
     }
@@ -164,9 +160,16 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
     }
 
     private void setFullSize(final int fullSize) {
-        this.fullSize = fullSize;
-        draw();
-        callTerminalMethod(FUNCTION_SET_SIZE, fullSize);
+        if (this.fullSize != fullSize) {
+            this.fullSize = fullSize;
+            if (this.fullSize < maxVisibleItems) {
+                this.beginIndex = 0;
+                draw();
+            }
+            callTerminalMethod(FUNCTION_SET_SIZE, fullSize);
+        } else {
+            draw();
+        }
     }
 
     private void addWidgetToContainer(final int index, final W widget) {
