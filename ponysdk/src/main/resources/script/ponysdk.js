@@ -861,18 +861,18 @@ _UTF8 = undefined;
 
     setSize:function(size) {
         this.size = size;
-        if(this.container.children().length>0) {
-          this.updateView(true);
-        }
+        this.updateView(true);
     },
 
     updateView:function(changeFullSize) {
         let children = this.container.children();
+
         if(children.length === 0) {
             this.container.css("margin-top", 0 + "px");
-            this.container.css("margin-bottom",  0 + "px");
+            this.container.css("margin-bottom", 0 + "px");
+            this.beginIndex = 0;
+            return;
         }
-        if(children.length === 0) return;
 
         let topPosition = this.getTopPosition(children.first());
         let bottomPosition = this.getBottomPosition(children.last());
@@ -881,17 +881,15 @@ _UTF8 = undefined;
 
         //rounding issue
         let marginOfError = 2;
-        if(topPosition - marginOfError <= 0 && bottomPosition + marginOfError >= height || children.length === this.size) {
-            if(changeFullSize && children.length > 0) {
-                let averageItemSize = itemsSize / children.length;
-                let marginBottomPx = Math.max(0, (this.size - this.beginIndex - children.length) * averageItemSize);
-                this.container.css("margin-bottom",  marginBottomPx +"px");
-            }
-            return;
+        if(topPosition - marginOfError <= 0 && bottomPosition + marginOfError >= height) {
+            if(!changeFullSize) return;
+            let averageItemSize = itemsSize / children.length;
+            let marginBottomPx = Math.max(0, (this.size - this.beginIndex - children.length) * averageItemSize);
+            this.container.css("margin-bottom",  marginBottomPx +"px");
         }
 
         let scrollBottom = topPosition > 0;
-        let averageItemSize = itemsSize / this.container.children().length;
+        let averageItemSize = itemsSize / children.length;
         let deltaItems = 0
 
         if(scrollBottom && topPosition > height || !scrollBottom && bottomPosition < 0) {
@@ -941,20 +939,20 @@ _UTF8 = undefined;
         if(this.beginIndex < 0) {
             this.beginIndex = 0;
         }
-  
+
         this.marginTopPx = this.beginIndex === 0 ? 0 : this.beginIndex * averageItemSize;
         this.marginBottomPx = (this.size - this.beginIndex - visibleItems) * averageItemSize;
 
         if(this.marginBottomPx < 0) {
-          this.marginBottomPx = 0;
+            this.marginBottomPx = 0;
         }
-        if(this.previousBeginIndex == this.beginIndex && this.previousVisibleItems == visibleItems) return;
+        if(!changeFullSize && this.previousBeginIndex == this.beginIndex && this.previousVisibleItems == visibleItems) return;
         this.previousBeginIndex = this.beginIndex;
         this.previousVisibleItems = visibleItems;
         this.sendDataToServer({
             beginIndex: this.beginIndex,
             maxVisibleItem: visibleItems
-        });    
+        });
     },
 
     onDraw:function() {
