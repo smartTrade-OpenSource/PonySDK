@@ -161,8 +161,9 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
 
     private void setFullSize(final int fullSize) {
         if (this.fullSize != fullSize) {
+            final boolean forceDraw = this.fullSize == 0 || this.fullSize < maxVisibleItems;
             this.fullSize = fullSize;
-            if (this.fullSize < maxVisibleItems) {
+            if (forceDraw) {
                 this.beginIndex = 0;
                 draw();
             }

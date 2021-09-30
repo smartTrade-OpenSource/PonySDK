@@ -870,6 +870,7 @@ _UTF8 = undefined;
         if(children.length === 0) {
             this.container.css("margin-top", 0 + "px");
             this.container.css("margin-bottom", 0 + "px");
+            this.beginIndex = 0;
             return;
         }
 
