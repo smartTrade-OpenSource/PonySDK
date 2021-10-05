@@ -23,10 +23,9 @@
 
 package com.ponysdk.core.server.application;
 
+import com.ponysdk.core.ui.main.EntryPoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.ponysdk.core.ui.main.EntryPoint;
 
 public abstract class ApplicationManager {
 
@@ -34,24 +33,20 @@ public abstract class ApplicationManager {
 
     protected ApplicationConfiguration configuration;
 
-    public void startApplication(final UIContext uiContext) throws Exception {
+    public void startApplication(final UIContext uiContext) {
         uiContext.execute(() -> {
-            try {
-                final EntryPoint entryPoint = initializeEntryPoint();
-                final String historyToken = uiContext.getHistoryToken();
+            final EntryPoint entryPoint = initializeEntryPoint();
+            final String historyToken = uiContext.getHistoryToken();
 
-                if (historyToken != null && !historyToken.isEmpty()) uiContext.getHistory().newItem(historyToken, false);
-
-                entryPoint.start(uiContext);
-            } catch (final Exception e) {
-                log.error("Cannot start UIContext", e);
-                e.printStackTrace(); // WORKAROUND The logger doesn't seem to work here
-                // TODO nciaravola destroy if exception ?
+            if (historyToken != null && !historyToken.isEmpty()) {
+                uiContext.getHistory().newItem(historyToken, false);
             }
+
+            entryPoint.start(uiContext);
         });
     }
 
-    protected abstract EntryPoint initializeEntryPoint() throws Exception;
+    protected abstract EntryPoint initializeEntryPoint();
 
     public ApplicationConfiguration getConfiguration() {
         return configuration;

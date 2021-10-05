@@ -185,16 +185,10 @@ public class ApplicationConfiguration {
         return "ApplicationManagerOption [heartBeatPeriod=" + heartBeatPeriod + " " + heartBeatPeriodTimeUnit + "]";
     }
 
-    /**
-     * @return the enableClientToServerHeartBeat
-     */
     public boolean isEnableClientToServerHeartBeat() {
         return enableClientToServerHeartBeat;
     }
 
-    /**
-     * @param enableClientToServerHeartBeat the enableClientToServerHeartBeat to set
-     */
     public void setEnableClientToServerHeartBeat(final boolean enableClientToServerHeartBeat) {
         this.enableClientToServerHeartBeat = enableClientToServerHeartBeat;
     }

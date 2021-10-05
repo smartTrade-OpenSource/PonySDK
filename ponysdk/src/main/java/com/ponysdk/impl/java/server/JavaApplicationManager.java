@@ -34,9 +34,13 @@ public class JavaApplicationManager extends ApplicationManager {
     }
 
     @Override
-    protected EntryPoint initializeEntryPoint() throws Exception {
+    protected EntryPoint initializeEntryPoint() {
         final Class<? extends EntryPoint> entryPointClassName = configuration.getEntryPointClass();
-        return entryPointClassName.getDeclaredConstructor().newInstance();
+        try {
+            return entryPointClassName.getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
 }

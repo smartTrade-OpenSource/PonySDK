@@ -23,29 +23,15 @@
 
 package com.ponysdk.core.model;
 
-/**
- * Used to specify the alignment of child elements within a layer.
- */
 public enum PAlignment {
 
-    /**
-     * Positions an element at the beginning of a given axis.
-     */
     BEGIN,
-
-    /**
-     * Positions an element at the beginning of a given axis.
-     */
     END,
-
-    /**
-     * Stretches an element to fill the layer on a given axis.
-     */
     STRETCH;
 
     private static final PAlignment[] VALUES = PAlignment.values();
 
-    private PAlignment() {
+    PAlignment() {
     }
 
     public final byte getValue() {

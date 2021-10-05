@@ -36,7 +36,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -67,7 +67,7 @@ public class BootstrapServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+    protected void doGet(final HttpServletRequest request, final HttpServletResponse response) {
         try {
             handlePonyResource(request, response);
         } catch (final IOException e) {
@@ -76,7 +76,7 @@ public class BootstrapServlet extends HttpServlet {
     }
 
     @Override
-    public void doPost(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+    public void doPost(final HttpServletRequest request, final HttpServletResponse response) {
         try {
             handlePonyResource(request, response);
         } catch (final IOException e) {
@@ -119,7 +119,7 @@ public class BootstrapServlet extends HttpServlet {
 
         if (inputStream != null) {
             try (ReadableByteChannel inputChannel = Channels.newChannel(inputStream);
-                    WritableByteChannel outputChannel = Channels.newChannel(response.getOutputStream())) {
+                 WritableByteChannel outputChannel = Channels.newChannel(response.getOutputStream())) {
                 final ByteBuffer buffer = ByteBuffer.allocateDirect(16 * 1024);
                 while (inputChannel.read(buffer) != -1) {
                     buffer.flip();
@@ -135,7 +135,7 @@ public class BootstrapServlet extends HttpServlet {
         } else {
             if (path.equals(INDEX_URL)) {
                 try (final WritableByteChannel outputChannel = Channels.newChannel(response.getOutputStream())) {
-                    final ByteBuffer buffer = ByteBuffer.wrap(buildIndexHTML(request).getBytes(Charset.forName("UTF8")));
+                    final ByteBuffer buffer = ByteBuffer.wrap(buildIndexHTML(request).getBytes(StandardCharsets.UTF_8));
                     outputChannel.write(buffer);
                 }
             } else {
@@ -154,7 +154,8 @@ public class BootstrapServlet extends HttpServlet {
             final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
             final String jarPath = path.substring(1);
             inputStream = classLoader.getResourceAsStream(jarPath);
-            if (inputStream == null && childClassLoader != null) inputStream = childClassLoader.getResourceAsStream(jarPath);
+            if (inputStream == null && childClassLoader != null)
+                inputStream = childClassLoader.getResourceAsStream(jarPath);
         }
         return inputStream;
     }
@@ -271,8 +272,8 @@ public class BootstrapServlet extends HttpServlet {
 
         sb.append("<noscript>").append(NEW_LINE);
         sb.append(
-            "<div style=\"width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px;\">")
-            .append(NEW_LINE);
+                        "<div style=\"width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px;\">")
+                .append(NEW_LINE);
         sb.append("Your web browser must have JavaScript enabled").append(NEW_LINE);
         sb.append("in order for this application to display correctly.").append(NEW_LINE);
         sb.append("</div>").append(NEW_LINE);

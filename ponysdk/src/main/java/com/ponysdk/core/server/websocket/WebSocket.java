@@ -111,7 +111,6 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
             communicationSanityChecker.start();
         } catch (final Exception e) {
             log.error("Cannot process WebSocket instructions", e);
-            e.printStackTrace(); // WORKAROUND The logger doesn't seem to work here
         }
     }
 
@@ -334,7 +333,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         private final int statusCode;
         private final String message;
 
-        private NiceStatusCode(final int statusCode, final String message) {
+        NiceStatusCode(final int statusCode, final String message) {
             this.statusCode = statusCode;
             this.message = message;
         }
@@ -397,7 +396,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         extension.setWebSocketListener(listener);
     }
 
-    public static interface Listener {
+    public interface Listener {
 
         void onOutgoingPonyFrame(ServerToClientModel model, Object value);
 

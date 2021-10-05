@@ -25,7 +25,7 @@ package com.ponysdk.core.model;
 
 public class DomHandlerConverter {
 
-    public static final HandlerModel convert(final DomHandlerType type) {
+    public static HandlerModel convert(final DomHandlerType type) {
         if (DomHandlerType.BLUR == type) return HandlerModel.HANDLER_DOM_BLUR;
         else if (DomHandlerType.CHANGE_HANDLER == type) return HandlerModel.HANDLER_DOM_CHANGE_HANDLER;
         else if (DomHandlerType.CLICK == type) return HandlerModel.HANDLER_DOM_CLICK;
@@ -49,7 +49,7 @@ public class DomHandlerConverter {
         else throw new IllegalArgumentException("Undefined DomHandlerType : " + type);
     }
 
-    public static final DomHandlerType convert(final HandlerModel type) {
+    public static DomHandlerType convert(final HandlerModel type) {
         if (HandlerModel.HANDLER_DOM_BLUR == type) return DomHandlerType.BLUR;
         else if (HandlerModel.HANDLER_DOM_CHANGE_HANDLER == type) return DomHandlerType.CHANGE_HANDLER;
         else if (HandlerModel.HANDLER_DOM_CLICK == type) return DomHandlerType.CLICK;

@@ -23,10 +23,10 @@
 
 package com.ponysdk.core.terminal;
 
+import com.google.gwt.core.client.EntryPoint;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import com.google.gwt.core.client.EntryPoint;
 
 public class CommunicationEntryPoint implements EntryPoint {
 
@@ -40,7 +40,7 @@ public class CommunicationEntryPoint implements EntryPoint {
             onModuleLoaded();
         } else {
             if (log.isLoggable(Level.INFO)) log.info("Create PonySDK using the default entry point");
-            final PonySDK ponysdk = new PonySDK();
+            final PonySDK ponysdk = PonySDK.get();
             ponysdk.start();
         }
     }

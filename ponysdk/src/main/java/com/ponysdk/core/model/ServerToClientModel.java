@@ -262,7 +262,7 @@ public enum ServerToClientModel {
 
     private final ValueTypeModel type;
 
-    private ServerToClientModel(final ValueTypeModel size) {
+    ServerToClientModel(final ValueTypeModel size) {
         this.type = size;
     }
 

@@ -101,8 +101,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         PWindow.getMain().add(url);
 
 
-        if (true) return;
-
         StringTextBoxFormField formField = new StringTextBoxFormField("String Formfield");
         PWindow.getMain().add(formField);
         ColorInputFormField colorInputFormField = new ColorInputFormField("Color FormField");
@@ -119,8 +117,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             }
         };
         PWindow.getMain().add(colorInputFormField);
-
-        if (true) return;
 
 
         uiContext.setTerminalDataReceiver((object, instruction) -> System.err.println(object + " : " + instruction));
@@ -151,7 +147,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         //
         //
         testSimpleDataGridView();
-        if (true) return;
 
 
         testVisibilityHandler(PWindow.getMain());
@@ -245,6 +240,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         PWindow.getMain().add(createTree());
         PWindow.getMain().add(new PTwinListBox<>());
         PWindow.getMain().add(Element.newPVerticalPanel());
+
+        if (true) return;
 
 
         mainLabel = Element.newPLabel("Label2");

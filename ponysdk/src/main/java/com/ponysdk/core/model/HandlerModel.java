@@ -64,7 +64,7 @@ public enum HandlerModel {
 
     private boolean domHandler;
 
-    private HandlerModel(final boolean domHandler) {
+    HandlerModel(final boolean domHandler) {
         this.domHandler = domHandler;
     }
 

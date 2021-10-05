@@ -91,9 +91,9 @@ public enum ClientToServerModel {
     HANDLER_DOCUMENT_VISIBILITY("U"),
     HANDLER_DESTROY("V");
 
-    private String key;
+    private final String key;
 
-    private ClientToServerModel(final String key) {
+    ClientToServerModel(final String key) {
         this.key = key;
     }
 

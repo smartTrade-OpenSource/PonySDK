@@ -86,7 +86,7 @@ public enum WidgetType {
 
     private static final WidgetType[] VALUES = WidgetType.values();
 
-    private WidgetType() {
+    WidgetType() {
     }
 
     public final byte getValue() {

@@ -31,7 +31,7 @@ public enum PVerticalAlignment {
 
     private static final PVerticalAlignment[] VALUES = PVerticalAlignment.values();
 
-    private PVerticalAlignment() {
+    PVerticalAlignment() {
     }
 
     public final byte getValue() {

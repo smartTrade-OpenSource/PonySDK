@@ -19,7 +19,7 @@ document.doReload = function() {
 function onPonySDKModuleLoaded() {
     console.log("onPonySDKModuleLoaded");
 
-    pony = new com.ponysdk.core.terminal.PonySDK();
+    pony = com.ponysdk.core.terminal.PonySDK.get();
     if (typeof module !== 'undefined' && module.hasOwnProperty('exports')) module.exports.pony = pony;
     else window['pony'] = pony;
 

@@ -31,7 +31,7 @@ public enum PHorizontalAlignment {
 
     private static final PHorizontalAlignment[] VALUES = PHorizontalAlignment.values();
 
-    private PHorizontalAlignment() {
+    PHorizontalAlignment() {
     }
 
     public final byte getValue() {

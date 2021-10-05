@@ -418,7 +418,7 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
 
     public static boolean isRecordingStats() {
         final WebSocketStatsRecorder recorder = statsRecorder;
-        return recorder != null ? recorder.isStarted() : false;
+        return recorder != null && recorder.isStarted();
     }
 
     public static WebSocketStats stopRecordingStats() {

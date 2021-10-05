@@ -39,7 +39,7 @@ public enum PUnit {
 
     private final String value;
 
-    private PUnit(final String unit) {
+    PUnit(final String unit) {
         this.value = unit;
     }
 

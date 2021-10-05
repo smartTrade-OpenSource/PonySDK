@@ -45,15 +45,13 @@ import elemental2.dom.DomGlobal;
 import elemental2.dom.XMLHttpRequest;
 import jsinterop.annotations.JsType;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @JsType
 public class PonySDK implements UncaughtExceptionHandler {
 
     private static final Logger log = Logger.getLogger(PonySDK.class.getName());
-
-    private static PonySDK INSTANCE;
+    private static PonySDK INSTANCE = new PonySDK();
 
     private final UIBuilder uiBuilder = new UIBuilder();
 
@@ -63,16 +61,14 @@ public class PonySDK implements UncaughtExceptionHandler {
 
     private boolean tabindexOnlyFormField;
 
-    //Communication SanityChecker
     private long lastHeartBeatFail = 0L;
     private ReconnectionChecker reconnectionChecker;
 
-    public PonySDK() {
-        if (INSTANCE != null) throw new RuntimeException("Cannot instanciate PonySDK twice");
+    private PonySDK() {
         INSTANCE = this;
     }
 
-    public static final PonySDK get() {
+    public static PonySDK get() {
         return INSTANCE;
     }
 
@@ -81,17 +77,17 @@ public class PonySDK implements UncaughtExceptionHandler {
 
         GWT.setUncaughtExceptionHandler(this);
 
-        try {
-            final String child = Window.Location.getParameter(ClientToServerModel.UI_CONTEXT_ID.toStringValue());
+        final String child = Window.Location.getParameter(ClientToServerModel.UI_CONTEXT_ID.toStringValue());
 
-            if (child == null) startMainContext();
-            else startChildContext();
-
-            started = true;
-            log.info("started");
-        } catch (final Throwable e) {
-            log.log(Level.SEVERE, "Loading application has failed #" + e.getMessage(), e);
+        if (child == null) {
+            startMainContext();
+            log.info("PonySDK engine is started");
+        } else {
+            startChildContext();
+            log.info("PonySDK engine is started for child window context");
         }
+
+        started = true;
     }
 
     private void startMainContext() {
@@ -119,24 +115,17 @@ public class PonySDK implements UncaughtExceptionHandler {
                 .getParameter(ClientToServerModel.OPTION_TABINDEX_ACTIVATED.toStringValue());
         if (tabindexOnlyFormFieldRaw != null) tabindexOnlyFormField = Boolean.parseBoolean(tabindexOnlyFormFieldRaw);
 
-        uiBuilder.init(windowId != null ? new WindowRequestBuilder(windowId, buffer -> uiBuilder.updateWindowTerminal(buffer))
-                : new FrameRequestBuilder(frameId, buffer -> uiBuilder.updateFrameTerminal(buffer)));
+        uiBuilder.init(windowId != null ? new WindowRequestBuilder(windowId, uiBuilder::updateWindowTerminal)
+                : new FrameRequestBuilder(frameId, uiBuilder::updateFrameTerminal));
     }
 
-    /**
-     * From other terminal to the server
-     */
     public void sendDataToServerFromWindow(final String jsObject) {
         uiBuilder.sendDataToServer(JSONParser.parseStrict(jsObject));
     }
 
-    /**
-     * From Main terminal to the server
-     * Ajax implementation
-     */
     public void sendDataToServer(final Object objectID, final JavaScriptObject jsObject, final AjaxCallback callback) {
         if (callback == null) {
-            final PTInstruction instruction = new PTInstruction(Integer.valueOf(objectID.toString()));
+            final PTInstruction instruction = new PTInstruction(Integer.parseInt(objectID.toString()));
             instruction.put(ClientToServerModel.NATIVE, jsObject);
             uiBuilder.sendDataToServer(instruction);
         } else {

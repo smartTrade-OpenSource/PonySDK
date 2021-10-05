@@ -48,7 +48,7 @@ public enum DomHandlerType {
 
     private static final DomHandlerType[] VALUES = DomHandlerType.values();
 
-    private DomHandlerType() {
+    DomHandlerType() {
     }
 
     public final byte getValue() {

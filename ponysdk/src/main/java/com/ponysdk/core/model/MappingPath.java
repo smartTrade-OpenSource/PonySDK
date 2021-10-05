@@ -29,9 +29,9 @@ public enum MappingPath {
     STREAM("stream"),
     AJAX("ajax");
 
-    private String value;
+    private final String value;
 
-    private MappingPath(final String value) {
+    MappingPath(final String value) {
         this.value = value;
     }
 

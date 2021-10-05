@@ -35,7 +35,7 @@ public enum PFontSize {
 
     private static final PFontSize[] VALUES = PFontSize.values();
 
-    private PFontSize() {
+    PFontSize() {
     }
 
     public final byte getValue() {
