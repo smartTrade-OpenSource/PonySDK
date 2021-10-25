@@ -225,6 +225,10 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
         return day;
     }
 
+    public void setTimeZone(final TimeZone timeZone) {
+        this.dateFormat.setTimeZone(timeZone);
+    }
+
     /**
      * @deprecated Useless
      */

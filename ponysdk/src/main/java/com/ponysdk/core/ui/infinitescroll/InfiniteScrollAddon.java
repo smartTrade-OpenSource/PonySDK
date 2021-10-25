@@ -62,8 +62,7 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
 
     // used for drawing
     private int beginIndex = 0;
-    private int maxVisibleItems = 5;
-    private final int initmaxVisibleItem = 5;
+    private int maxVisibleItems = 10;
 
     private final InfiniteScrollProvider<D, W> dataProvider;
     private int fullSize;
@@ -96,8 +95,6 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
             maxVisibleItems = jsonObj.getInt(KEY_MAX_VISIBLE_ITEM);
             draw();
         });
-
-        dataProvider.getFullSize(this::setFullSize);
     }
 
     /**
