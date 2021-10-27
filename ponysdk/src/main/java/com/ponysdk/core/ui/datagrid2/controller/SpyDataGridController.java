@@ -226,6 +226,11 @@ public abstract class SpyDataGridController<K, V> implements DataGridController<
     }
 
     @Override
+    public void clearRenderingHelper(final ColumnDefinition<V> column, final K key) {
+        controller.clearRenderingHelper(column, key);
+    }
+
+    @Override
     public int getRowCount() {
         return controller.getRowCount();
     }

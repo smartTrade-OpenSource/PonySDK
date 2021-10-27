@@ -400,6 +400,13 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     }
 
     @Override
+    public void clearRenderingHelper(final ColumnDefinition<V> colDef, final K key) {
+        checkAdapter();
+        final DefaultRow<V> row = dataSource.getRow(key);
+        if (colDef != null && row != null) clearRenderingHelper(row, getColumn(colDef));
+    }
+
+    @Override
     public void clearRenderingHelpers(final ColumnDefinition<V> colDef) {
         checkAdapter();
         final Column<V> column = getColumn(colDef);

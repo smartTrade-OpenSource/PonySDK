@@ -95,6 +95,8 @@ public interface DataGridController<K, V> {
 
     void clearRenderingHelpers(ColumnDefinition<V> column);
 
+    void clearRenderingHelper(ColumnDefinition<V> column, final K key);
+
     int getRowCount();
 
     void enrichConfigBuilder(DataGridConfigBuilder<V> builder);
