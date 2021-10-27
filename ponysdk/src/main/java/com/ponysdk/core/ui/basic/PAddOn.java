@@ -1,26 +1,3 @@
-/*
- * Copyright (c) 2017 PonySDK
- *  Owners:
- *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *
- *  WebSite:
- *  http://code.google.com/p/pony-sdk/
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
-
 package com.ponysdk.core.ui.basic;
 
 import java.util.Map;
@@ -33,7 +10,7 @@ import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.writer.ModelWriter;
 
 /**
- * AddOn are used to bind server side with javascript browser
+ * AddOn is used to bind server side class with a custom javascript script
  */
 public abstract class PAddOn extends PObject {
 
@@ -43,29 +20,13 @@ public abstract class PAddOn extends PObject {
 
     private JsonObject args;
 
-    /**
-     * Instantiate a new PAddOn
-     */
     protected PAddOn() {
     }
 
-    /**
-     * Instantiate a new PAddOn
-     *
-     * @param args
-     *            the JsonObject arguments
-     */
     protected PAddOn(final JsonObject args) {
         this.args = args;
     }
 
-    /**
-     * Attach the PAddOn to a window
-     *
-     * @param window
-     *            the window
-     * @return true, if successful
-     */
     public boolean attach(final PWindow window) {
         return attach(window, null);
     }
@@ -96,11 +57,6 @@ public abstract class PAddOn extends PObject {
         }
     }
 
-    /**
-     * Get the signature
-     *
-     * @return the signature
-     */
     public String getSignature() {
         return getClass().getCanonicalName();
     }
@@ -125,19 +81,10 @@ public abstract class PAddOn extends PObject {
         });
     }
 
-    /**
-     * Set the log level
-     *
-     * @param logLevel
-     *            the new log level
-     */
     public void setLogLevel(final Level logLevel) {
         callTerminalMethod("setLogLevel", LOG_LEVEL.get(logLevel));
     }
 
-    /**
-     * Destroy
-     */
     public void destroy() {
         saveUpdate(writer -> writer.write(ServerToClientModel.DESTROY));
     }

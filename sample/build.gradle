@@ -19,25 +19,25 @@ dependencies {
             'javax.json:javax.json-api:' + jsonVersion,
             'javax.servlet:javax.servlet-api:' + javaxServletVersion,
             'org.slf4j:slf4j-api:' + slf4jVersion,
-        'de.java2html:java2html:' + java2htmlVersion,
-        'org.eclipse.jetty.websocket:websocket-client:' + jettyVersion,
-        'commons-beanutils:commons-beanutils:' + commonsBeanutilsVersion,
-        'commons-io:commons-io:' + commonsIoVersion,
+            'de.java2html:java2html:' + java2htmlVersion,
+            'org.eclipse.jetty.websocket:websocket-client:' + jettyVersion,
+            'commons-beanutils:commons-beanutils:' + commonsBeanutilsVersion,
+            'commons-io:commons-io:' + commonsIoVersion,
             'commons-fileupload:commons-fileupload:' + commonsFileuploadVersion,
-            'com.google.code.gson:gson:2.8.6'
+            'com.google.code.gson:gson:2.8.8'
     )
 
     runtimeOnly(
-        'com.google.gwt:gwt-codeserver:' + gwtVersion,
-        'de.java2html:java2html:' + java2htmlVersion,
-        'org.springframework:spring-aop:' + springVersion,
-        'org.springframework:spring-expression:' + springVersion,
-        'org.slf4j:jcl-over-slf4j:' + slf4jVersion,
-        'org.slf4j:log4j-over-slf4j:' + slf4jVersion,
-        'org.slf4j:jul-to-slf4j:' + slf4jVersion,
-        'org.apache.logging.log4j:log4j-api:' + log4jVersion,
-        'org.apache.logging.log4j:log4j-core:' + log4jVersion,
-        'org.apache.logging.log4j:log4j-slf4j-impl:' + log4jVersion,
+            'com.google.gwt:gwt-codeserver:' + gwtVersion,
+            'de.java2html:java2html:' + java2htmlVersion,
+            'org.springframework:spring-aop:' + springVersion,
+            'org.springframework:spring-expression:' + springVersion,
+            'org.slf4j:jcl-over-slf4j:' + slf4jVersion,
+            'org.slf4j:log4j-over-slf4j:' + slf4jVersion,
+            'org.slf4j:jul-to-slf4j:' + slf4jVersion,
+            'org.apache.logging.log4j:log4j-api:' + log4jVersion,
+            'org.apache.logging.log4j:log4j-core:' + log4jVersion,
+            'org.apache.logging.log4j:log4j-slf4j-impl:' + log4jVersion,
     )
 }
 
@@ -46,31 +46,31 @@ task runCodeServer(type: JavaExec) {
     classpath += sourceSets.main.runtimeClasspath
     main = 'com.google.gwt.dev.codeserver.CodeServer'
     args = [
-        '-src', '../ponysdk/src/main/java',
-        '-generateJsInteropExports', '-noincremental',
-        '-style', 'DETAILED',
-        'com.ponysdk.core.PonyTerminalDebug'
+            '-src', '../ponysdk/src/main/java',
+            '-generateJsInteropExports', '-noincremental',
+            '-style', 'DETAILED',
+            'com.ponysdk.core.PonyTerminalDebug'
     ]
     jvmArgs = ['-server', '-Xmx1024m']
 }
 
 task runSampleSpring(type: JavaExec) {
-  classpath = sourceSets.main.runtimeClasspath
+    classpath = sourceSets.main.runtimeClasspath
     classpath += files(buildDir.getAbsolutePath() + '/gwt/gwt')
-  classpath += files(buildDir.getAbsolutePath() + '/resources')
-  classpath += files(buildDir.getAbsolutePath() + '/resources/main')
-  main = 'com.ponysdk.impl.spring.MainSpring'
-  //jvmArgs = ['-server', '-Xmx512m', '-Dlog4j.configurationFile=etc/log4j2.xml', '-agentlib:jdwp=transport=dt_socket,server=y,address=8888,suspend=n']
-  jvmArgs = ['-Xmx8g', '-Xms8g', '-XX:-DisableExplicitGC', '-Xlog:safepoint=info,gc*=info,gc+age=trace:file=run_sample_spring_gc.log:time,uptime,level,tags:filesize=10M,filecount=100', '-Dlog4j.configurationFile=etc/log4j2.xml', '-agentlib:jdwp=transport=dt_socket,server=y,address=8888,suspend=n', '-XX:+UseConcMarkSweepGC', '-Xmn7500M', '-XX:+UseCMSInitiatingOccupancyOnly', '-XX:CMSInitiatingOccupancyFraction=80']
+    classpath += files(buildDir.getAbsolutePath() + '/resources')
+    classpath += files(buildDir.getAbsolutePath() + '/resources/main')
+    main = 'com.ponysdk.impl.spring.MainSpring'
+    //jvmArgs = ['-server', '-Xmx512m', '-Dlog4j.configurationFile=etc/log4j2.xml', '-agentlib:jdwp=transport=dt_socket,server=y,address=8888,suspend=n']
+    jvmArgs = ['-Xmx8g', '-Xms8g', '-XX:-DisableExplicitGC', '-Xlog:safepoint=info,gc*=info,gc+age=trace:file=run_sample_spring_gc.log:time,uptime,level,tags:filesize=10M,filecount=100', '-Dlog4j.configurationFile=etc/log4j2.xml', '-agentlib:jdwp=transport=dt_socket,server=y,address=8888,suspend=n', '-XX:+UseConcMarkSweepGC', '-Xmn7500M', '-XX:+UseCMSInitiatingOccupancyOnly', '-XX:CMSInitiatingOccupancyFraction=80']
 }
 
 task runSampleTrading(type: JavaExec) {
-  classpath = sourceSets.main.runtimeClasspath
-  classpath += files(buildDir.getAbsolutePath() + '/gwt/debug/gwt')
-  classpath += files(buildDir.getAbsolutePath() + '/gwt/prod/gwt')
-  classpath += files(buildDir.getAbsolutePath() + '/resources/etc')
-  main = 'com.ponysdk.impl.java.Main'
-  jvmArgs = ['-server', '-Xmx512m', '-Dponysdk.application.id=trading', '-Dponysdk.application.name="Trading sample"', '-Dponysdk.application.description="Trading Sample"',
-             '-Dponysdk.application.context.name=trading', '-Dponysdk.entry.point.class=com.ponysdk.sample.client.TradingSampleEntryPoint',
-             '-Dponysdk.application.javascripts=script/ponysdk.js;script/widget.js;script/sample.js;script/less.js', '-Dponysdk.application.stylesheets=css/sample.less;css/ponysdk.less' ]
+    classpath = sourceSets.main.runtimeClasspath
+    classpath += files(buildDir.getAbsolutePath() + '/gwt/debug/gwt')
+    classpath += files(buildDir.getAbsolutePath() + '/gwt/prod/gwt')
+    classpath += files(buildDir.getAbsolutePath() + '/resources/etc')
+    main = 'com.ponysdk.impl.java.Main'
+    jvmArgs = ['-server', '-Xmx512m', '-Dponysdk.application.id=trading', '-Dponysdk.application.name="Trading sample"', '-Dponysdk.application.description="Trading Sample"',
+               '-Dponysdk.application.context.name=trading', '-Dponysdk.entry.point.class=com.ponysdk.sample.client.TradingSampleEntryPoint',
+               '-Dponysdk.application.javascripts=script/ponysdk.js;script/widget.js;script/sample.js;script/less.js', '-Dponysdk.application.stylesheets=css/sample.less;css/ponysdk.less']
 }

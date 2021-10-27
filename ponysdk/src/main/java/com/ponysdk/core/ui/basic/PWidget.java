@@ -90,9 +90,9 @@ public abstract class PWidget extends PObject implements IsPWidget {
         FOCUSABLE(-1),
         TABULABLE(0);
 
-        private int tabIndex;
+        private final int tabIndex;
 
-        private TabindexMode(final int tabIndex) {
+        TabindexMode(final int tabIndex) {
             this.tabIndex = tabIndex;
         }
 

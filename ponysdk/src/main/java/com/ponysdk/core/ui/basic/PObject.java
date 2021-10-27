@@ -68,6 +68,7 @@ public abstract class PObject {
     PObject() {
     }
 
+
     /**
      * Gets the widget type
      *
