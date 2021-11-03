@@ -125,6 +125,11 @@ public abstract class SpyDataGridController<K, V> implements DataGridController<
     }
 
     @Override
+    public Collection<V> getLiveData(final int from, final int dataSize) {
+        return controller.getLiveData(from, dataSize);
+    }
+
+    @Override
     public void select(final K k) {
         controller.select(k);
     }

@@ -82,6 +82,14 @@ public interface DataGridView<K, V> extends IsPWidget {
     Collection<V> getLiveSelectedData();
 
     /**
+     * Returns a {@link Collection} view of data with sorting and filters taken into account.
+     *
+     * @param from index starting from which the data is retrieved
+     * @param dataSize size of the data to retrieve
+     */
+    Collection<V> getLiveData(int from, int dataSize);
+
+    /**
      * Unselects all data of the model.
      */
     void unselectAllData();

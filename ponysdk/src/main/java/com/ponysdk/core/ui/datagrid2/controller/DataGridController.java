@@ -54,6 +54,8 @@ public interface DataGridController<K, V> {
 
     Collection<V> getLiveSelectedData();
 
+    Collection<V> getLiveData(int from, int dataSize);
+
     void select(K k);
 
     void unselect(K k);

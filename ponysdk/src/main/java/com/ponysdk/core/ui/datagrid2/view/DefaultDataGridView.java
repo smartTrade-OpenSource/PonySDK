@@ -702,6 +702,12 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
     }
 
     @Override
+    public Collection<V> getLiveData(final int from, final int dataSize) {
+        checkAdapter();
+        return controller.getLiveData(from, dataSize);
+    }
+
+    @Override
     public void selectAllLiveData() {
         checkAdapter();
         controller.selectAllLiveData();
