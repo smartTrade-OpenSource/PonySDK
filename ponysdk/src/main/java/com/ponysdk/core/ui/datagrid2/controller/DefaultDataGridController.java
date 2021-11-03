@@ -479,6 +479,12 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     }
 
     @Override
+    public Collection<V> getLiveData(final int from, final int dataSize) {
+        final LiveDataView<V> liveData = dataSource.getRows(from, dataSize);
+        return new MappedList<>(liveData.getLiveData(), DefaultRow::getData);
+    }
+
+    @Override
     public void select(final K k) {
         dataSource.select(k);
     }
