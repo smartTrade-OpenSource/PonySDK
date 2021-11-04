@@ -977,3 +977,99 @@ _UTF8 = undefined;
   });
 
 })();
+
+(function() {
+  "use strict"
+
+  AbstractAddon.defineAddon("com.ponysdk.core.ui.dropdown.DropDownContainerAddon", {
+
+    init: function() {
+        this.parentId = this.options.parentId;
+        this.visible = false;
+        var that = this;
+        this.resizeEventListener = function(event) {
+            if(that.visible) {
+                that.sendDataToServer({
+                  'windowEvent': 'resize'
+                });
+                that.removeListeners();
+            }
+        }
+        this.scrollEventListener = function(event) {
+            if(that.visible) {
+                var rect = that.element.getBoundingClientRect();
+                if (event.clientX >= rect.left && event.clientX <= rect.right &&
+                    event.clientY >= rect.top && event.clientY <= rect.bottom) {
+                    // Inside element, nothing to do
+                } else {
+                    that.sendDataToServer({
+                      'windowEvent': 'scroll'
+                    });
+                    that.removeListeners();
+                }
+            }
+        }
+        this.clickEventListener = function(event) {
+            if(that.visible) {
+                if(!that.parentElement) that.parentElement = document.getElementById(that.parentId);
+                var parentRect = that.parentElement.getBoundingClientRect();
+                var rect = that.element.getBoundingClientRect();
+                if (event.clientX >= rect.left && event.clientX <= rect.right &&
+                    event.clientY >= rect.top && event.clientY <= rect.bottom ||
+                    event.clientX >= parentRect.left && event.clientX <= parentRect.right &&
+                    event.clientY >= parentRect.top && event.clientY <= parentRect.bottom) {
+                    // Inside element or parent, nothing to do
+                } else {
+                    that.sendDataToServer({
+                      'windowEvent': 'click'
+                    });
+                    that.removeListeners();
+                }
+            }
+        }
+    },
+
+    addListeners: function() {
+        window.addEventListener('resize', this.resizeEventListener);
+        window.addEventListener('wheel', this.scrollEventListener, true);
+        window.addEventListener('click', this.clickEventListener, true);
+    },
+
+    removeListeners: function() {
+        window.removeEventListener('resize', this.resizeEventListener);
+        window.removeEventListener('wheel', this.scrollEventListener, true);
+        window.removeEventListener('click', this.clickEventListener, true);
+    },
+
+    updatePosition: function() {
+        if(!this.parentElement) this.parentElement = document.getElementById(this.parentId);
+        var offsets = this.parentElement.getBoundingClientRect();
+        this.element.style.width =  offsets.width + 'px';
+        // Down or top display
+        var windowBot = window.innerHeight - offsets.top - offsets.height;
+        if(windowBot < this.element.offsetHeight && offsets.top > this.element.offsetHeight) {
+            this.element.style.top = offsets.top - this.element.offsetHeight + 'px';
+        } else {
+            this.element.style.top = offsets.top + offsets.height + 'px';
+        }
+        // Right or left display
+        var windowRight = window.innerWidth - offsets.left - offsets.width;
+        if(windowRight < this.element.offsetWidth && offsets.left > this.element.offsetWidth) {
+            this.element.style.left =  offsets.left + offsets.width - this.element.offsetWidth + 'px';
+        } else {
+            this.element.style.left =  offsets.left + 'px';
+        }
+    },
+
+    setVisible: function(visible) {
+        this.visible = visible;
+        if(visible) {
+            this.addListeners();
+        } else {
+            this.removeListeners();
+        }
+    }
+
+  });
+
+})();
