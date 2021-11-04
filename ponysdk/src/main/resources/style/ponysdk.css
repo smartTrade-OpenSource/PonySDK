@@ -1,0 +1,150 @@
+/* DROP DOWN CONTAINER */
+.dd-container-widget {
+  position: relative;
+  display: flex;
+  padding: 0 5px;
+}
+
+.dd-container-widget.dd-container-opened .dd-container-state::after {
+    border-bottom: 5px solid;
+    border-top: none;
+}
+
+.dd-container-widget.dd-container-clear-disabled .dd-container-button::after {
+  right: 3px;
+}
+
+.dd-container-widget .dd-container-button {
+  flex-grow: 1;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.dd-container-widget .dd-container-state {
+  position: relative;
+  height: 100%;
+  width: 15px;
+  background-color: transparent;
+  border: none;
+  margin: 0px;
+  padding: 0px;
+  font-size: 14px;
+}
+
+.dd-container-widget .dd-container-state::after {
+    content: ' ';
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid;
+    border-bottom: none;
+    position: absolute;
+    top: calc(50% - 2px);
+    left: calc(50% - 5px);
+}
+
+.dd-container-widget .dd-container-clear {
+  height: 100%;
+  width: 15px;
+  background-color: transparent;
+  border: none;
+  margin: 0px;
+  padding: 0px;
+  font-size: 14px;
+}
+
+.dd-container-widget .dd-container-clear::after {
+  content: '\00D7';
+  font-weight: 800;
+}
+
+.dd-container-addon {
+  display: flex;
+  min-width: fit-content;
+  padding: 5px;
+  border-radius: 0 0 4px 4px;
+  z-index: 10000;
+}
+
+.dd-container-addon .dd-container-default {
+  position: relative;
+  flex-grow: 1;
+}
+
+/* LIST BOX */
+.dd-listbox.dd-listbox-multi .dd-listbox-button {
+  width: calc(100% - 16px);
+}
+
+.dd-listbox-container.dd-listbox-multi .dd-listbox-clear-multi {
+  border: none;
+  margin: 0;
+  padding: 0;
+  text-decoration: underline;
+  background-color: transparent;
+}
+
+.dd-listbox-container.dd-listbox-multi .dd-listbox-clear-multi[disabled] {
+  opacity: 0.7;
+}
+
+.dd-listbox-container.dd-listbox-multi .is-viewport .is-container .is-item .gwt-Label {
+  padding-left: 20px;
+}
+
+.dd-listbox-container.dd-listbox-group .is-container .is-item:not(.dd-listbox-item-group) {
+  padding-left: 10px;
+}
+
+.dd-listbox-container .dd-container-default .dd-listbox-filter {
+  position: relative;
+  display: block;
+}
+
+.dd-listbox-container .dd-container-default .dd-listbox-filter input[type="text"] {
+  width: 100%;
+}
+
+.dd-listbox-container .dd-container-default .is-viewport {
+  max-height: 150px;
+}
+
+.dd-listbox-container .dd-container-default .is-viewport .is-container {
+  width: 100%;
+}
+
+.dd-listbox-container .dd-container-default .is-viewport .is-container .is-item {
+  position: relative;
+  height: 25px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.dd-listbox-container .dd-container-default .is-viewport .is-container .is-item .gwt-CheckBox {
+  position: absolute;
+  left: 2px;
+  height: 100%;
+  padding-top: 3px;
+  pointer-events: none;
+}
+
+.dd-listbox-container .dd-container-default .is-viewport .is-container .is-item .gwt-Label {
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+  padding-top: 3px;
+}
+
+.dd-listbox-container .dd-container-default .is-viewport .is-container .is-item.dd-listbox-item-group {
+  font-weight: bold;
+  cursor: default;
+}
