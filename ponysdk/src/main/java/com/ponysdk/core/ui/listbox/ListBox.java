@@ -164,6 +164,12 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         }
     }
 
+    public void clear() {
+        this.items.clear();
+        this.visibleItems.clear();
+        if (itemContainer != null) itemContainer.refresh();
+    }
+
     /**
      * Returns the selected data in single selection mode and the first selected data in multi selection mode.
      *
