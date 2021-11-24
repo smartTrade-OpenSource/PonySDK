@@ -163,8 +163,8 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
     }
 
     public void setEnabled(final boolean enabled) {
-        if (enabled) widget.addStyleName(STYLE_CONTAINER_DISABLED);
-        else widget.removeStyleName(STYLE_CONTAINER_DISABLED);
+        if (enabled) widget.removeStyleName(STYLE_CONTAINER_DISABLED);
+        else widget.addStyleName(STYLE_CONTAINER_DISABLED);
     }
 
     public void setClearTitleButtonVisible(final boolean visible) {
