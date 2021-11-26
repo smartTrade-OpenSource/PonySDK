@@ -506,14 +506,17 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
             if (PKeyCodes.UP.getCode() == e.getKeyCode()) {
                 if (index > 0) {
                     index--;
-                    if (configuration.isGroupEnabled() && items.get(index) instanceof GroupListBoxItem) {
+                    if (configuration.isGroupEnabled() && visibleItems.get(index) instanceof GroupListBoxItem) {
                         index--;
                     }
+                }
+                if (index <= 0 && configuration.isGroupEnabled()) {
+                    initIndex();
                 }
             } else if (PKeyCodes.DOWN.getCode() == e.getKeyCode()) {
                 if (index < itemContainer.getFullSize() - 1) {
                     index++;
-                    if (configuration.isGroupEnabled() && items.get(index) instanceof GroupListBoxItem) {
+                    if (configuration.isGroupEnabled() && visibleItems.get(index) instanceof GroupListBoxItem) {
                         index++;
                     }
                 }

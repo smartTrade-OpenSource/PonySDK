@@ -75,7 +75,7 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
     public PWidget asWidget() {
         if (!initialized) {
             widget.setTabindex(TabindexMode.TABULABLE);
-            widget.addKeyDownHandler(e -> {
+            widget.addKeyUpHandler(e -> {
                 if (e.getKeyCode() == PKeyCodes.ENTER.getCode()) {
                     setContainerVisible(!container.isVisible());
                 } else if (e.getKeyCode() == PKeyCodes.TAB.getCode() && isOpen()) {

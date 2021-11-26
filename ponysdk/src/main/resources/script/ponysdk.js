@@ -982,7 +982,19 @@ _UTF8 = undefined;
         } else {
             var child = children[index - this.beginIndex];
             if(child) {
-                child.scrollIntoView();
+                var jqeTop = this.jqelement.offset().top;
+                var jqc = $(child);
+                var jqcTop = jqc.offset().top - jqeTop;
+                var jqeScroll = this.jqelement.scrollTop();
+                if(jqcTop < 0) {
+                    this.jqelement.scrollTop(jqeScroll - jqc.height());
+                } else {
+                    var jqcBot = jqcTop + jqc.height();
+                    var jqeBot = jqeScroll + this.jqelement.height();
+                    if(jqcBot + jqeScroll >= jqeBot - 2) {
+                        this.jqelement.scrollTop(jqeScroll + jqc.height());
+                    }
+                }
             }
         }
     }
