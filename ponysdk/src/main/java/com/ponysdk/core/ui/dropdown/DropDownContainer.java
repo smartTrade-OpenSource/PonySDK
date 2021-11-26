@@ -84,6 +84,7 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
             });
             mainButton = Element.newPButton(configuration.getTitle());
             mainButton.addStyleName(STYLE_CONTAINER_BUTTON);
+            mainButton.setTabindex(TabindexMode.FOCUSABLE);
             if (configuration.isTitleDisplayed() && configuration.isTitlePlaceHolder()) {
                 mainButton.addStyleName(STYLE_CONTAINER_BUTTON_PLACEHOLDER);
             }
@@ -91,6 +92,7 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
 
             stateButton = Element.newPButton();
             stateButton.addStyleName(STYLE_CONTAINER_STATE);
+            stateButton.setTabindex(TabindexMode.FOCUSABLE);
             widget.add(stateButton);
 
             if (configuration.isClearTitleButtonEnabled()) {
@@ -163,8 +165,13 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
     }
 
     public void setEnabled(final boolean enabled) {
-        if (enabled) widget.removeStyleName(STYLE_CONTAINER_DISABLED);
-        else widget.addStyleName(STYLE_CONTAINER_DISABLED);
+        if (enabled) {
+            widget.removeStyleName(STYLE_CONTAINER_DISABLED);
+            widget.setTabindex(TabindexMode.TABULABLE);
+        } else {
+            widget.addStyleName(STYLE_CONTAINER_DISABLED);
+            widget.setTabindex(TabindexMode.FOCUSABLE);
+        }
     }
 
     public void setClearTitleButtonVisible(final boolean visible) {
@@ -209,6 +216,10 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
     }
 
     protected void afterContainerVisible() {
+        // Nothing to do by default
+    }
+
+    protected void afterContainerClose() {
         // Nothing to do by default
     }
 
@@ -281,6 +292,7 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
             container.removeStyleName(STYLE_CONTAINER_WIDGET_OPENED);
             container.hide();
             updateTitle(getValue());
+            afterContainerClose();
             listeners.forEach(l -> l.onClose());
         }
     }
