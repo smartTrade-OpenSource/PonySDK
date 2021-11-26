@@ -31,7 +31,9 @@ import com.ponysdk.core.ui.basic.PPanel;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.PWidget.TabindexMode;
+import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.dropdown.DropDownContainer;
+import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 import com.ponysdk.core.ui.infinitescroll.InfiniteScrollAddon;
 import com.ponysdk.core.ui.infinitescroll.InfiniteScrollProvider;
 import com.ponysdk.core.ui.listbox.ListBox.ListBoxItem;
@@ -90,12 +92,19 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
 
     private ListBoxItem<D> lastSelectedItem;
     private boolean shiftPressed;
+    private HandlerRegistration upDownKeyHandler;
+    private int index;
+    private boolean forceIndex;
 
     private final List<ListBoxItem<D>> items;
     private final ListBoxDataProvider<D> dataProvider;
     private final List<ListBoxItem<D>> visibleItems;
     private final Map<String, GroupListBoxItem<D>> groupItems;
     private final List<ListBoxItem<D>> selectedDataItems;
+
+    public ListBox(final ListBoxConfiguration configuration) {
+        this(configuration, List.of());
+    }
 
     public ListBox(final ListBoxConfiguration configuration, final Collection<? extends ListBoxItem<D>> items) {
         super(configuration);
@@ -142,13 +151,25 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
 
     public void addItem(final ListBoxItem<D> item) {
         if (dataProvider != null) throw new IllegalCallerException("Not supported in DataProvider mode");
-        this.items.add(item);
+        if (configuration.isGroupEnabled() && ListBoxItemType.GROUP.equals(item.getType())) {
+            addGroup(items, (GroupListBoxItem<D>) item);
+        } else {
+            this.items.add(item);
+        }
         if (isInitialized()) updateVisibleItems();
     }
 
-    public void addItems(final Collection<ListBoxItem<D>> items) {
+    public void addItems(final Collection<ListBoxItem<D>> newItems) {
         if (dataProvider != null) throw new IllegalCallerException("Not supported in DataProvider mode");
-        this.items.addAll(items);
+        if (configuration.isGroupEnabled()) {
+            for (final ListBoxItem<D> item : newItems) {
+                if (ListBoxItemType.GROUP.equals(item.getType())) {
+                    addGroup(items, (GroupListBoxItem<D>) item);
+                }
+            }
+        } else {
+            this.items.addAll(newItems);
+        }
         updateVisibleItems();
     }
 
@@ -357,6 +378,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
                 e.getKeyCode() != PKeyCodes.PAGE_UP.getCode() && //
                 e.getKeyCode() != PKeyCodes.PAGE_DOWN.getCode() && //
                 e.getKeyCode() != PKeyCodes.END.getCode() && //
+                e.getKeyCode() != PKeyCodes.ENTER.getCode() && //
                 e.getKeyCode() != PKeyCodes.HOME.getCode() && //
                 e.getKeyCode() != PKeyCodes.LEFT.getCode() && //
                 e.getKeyCode() != PKeyCodes.UP.getCode() && //
@@ -380,7 +402,19 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         }
         itemContainer = new InfiniteScrollAddon<>(new ListBoxInfiniteScrollProvider());
         defaultContainer.add(itemContainer);
-
+        itemContainer.addListener(beginIndex -> {
+            if (!forceIndex) {
+                index = beginIndex;
+                if (index == 0) {
+                    initIndex();
+                }
+            }
+            forceIndex = false;
+        });
+        if (configuration.isGroupEnabled()) {
+            initIndex();
+            itemContainer.setStartIndex(1);
+        }
         updateTitle(getSelectedItems());
 
         addStyleName(STYLE_LISTBOX);
@@ -453,6 +487,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
 
     @Override
     protected void beforeContainerVisible() {
+        initIndex();
         if (textBox != null) {
             textBox.setText(null);
         }
@@ -467,6 +502,37 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
             onFocusWhenOpened();
         }
         if (clearMultiButton != null) clearMultiButton.setEnabled(!getSelectedItems().isEmpty());
+        upDownKeyHandler = PWindow.getMain().getPRootPanel().addKeyDownHandler(e -> {
+            if (PKeyCodes.UP.getCode() == e.getKeyCode()) {
+                if (index > 0) {
+                    index--;
+                    if (configuration.isGroupEnabled() && items.get(index) instanceof GroupListBoxItem) {
+                        index--;
+                    }
+                }
+            } else if (PKeyCodes.DOWN.getCode() == e.getKeyCode()) {
+                if (index < itemContainer.getFullSize() - 1) {
+                    index++;
+                    if (configuration.isGroupEnabled() && items.get(index) instanceof GroupListBoxItem) {
+                        index++;
+                    }
+                }
+            } else if (PKeyCodes.ENTER.getCode() == e.getKeyCode()) {
+                final ListBoxItemWidget listBoxItemWidget = itemContainer.getCurrentItemIndex();
+                if (listBoxItemWidget != null) {
+                    listBoxItemWidget.select();
+                }
+            }
+            forceIndex = true;
+            itemContainer.showIndex(index);
+        });
+    }
+
+    @Override
+    protected void afterContainerClose() {
+        if (upDownKeyHandler != null) {
+            upDownKeyHandler.removeHandler();
+        }
     }
 
     @Override
@@ -475,16 +541,19 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     }
 
     private Collection<ListBoxItem<D>> initializeGroupItems(final Collection<? extends ListBoxItem<D>> groupItems) {
-        final List<ListBoxItem<D>> items = new ArrayList<>();
-        for (final ListBoxItem<D> item : groupItems) {
-            if (ListBoxItemType.GROUP.equals(item.getType())) {
-                final GroupListBoxItem<D> groupItem = (GroupListBoxItem<D>) item;
-                items.add(groupItem);
-                items.addAll(groupItem.getGroupItems());
-                this.groupItems.put(groupItem.getGroupName(), groupItem);
+        final List<ListBoxItem<D>> newItems = new ArrayList<>();
+        for (final ListBoxItem<D> currentItem : groupItems) {
+            if (ListBoxItemType.GROUP.equals(currentItem.getType())) {
+                addGroup(newItems, (GroupListBoxItem<D>) currentItem);
             }
         }
-        return items;
+        return newItems;
+    }
+
+    private void addGroup(final List<ListBoxItem<D>> newItems, final GroupListBoxItem<D> groupItem) {
+        newItems.add(groupItem);
+        newItems.addAll(groupItem.getGroupItems());
+        this.groupItems.put(groupItem.getGroupName(), groupItem);
     }
 
     private void clearSelection() {
@@ -596,6 +665,24 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
 
     private String getFilter() {
         return textBox != null ? textBox.getText() : null;
+    }
+
+    private void applyCloseOnClickMode() {
+        switch (configuration.getCloseOnClickMode()) {
+            case DEFAULT:
+                if (!configuration.isMultiSelectionEnabled()) close();
+                break;
+            case TRUE:
+                close();
+                break;
+            case FALSE:
+                if (!configuration.isMultiSelectionEnabled()) itemContainer.refresh();
+                break;
+        }
+    }
+
+    private void initIndex() {
+        index = configuration.isGroupEnabled() ? 1 : 0;
     }
 
     //
@@ -759,24 +846,18 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
                     if (multiSelect && !isSelectionAllowed(null)) {
                         return;
                     }
-                    if (checkBox != null) checkBox.setValue(!checkBox.getValue());
-                    onSelectionChange(item, checkBox != null ? checkBox.getValue() : true);
-                    switch (configuration.getCloseOnClickMode()) {
-                        case DEFAULT:
-                            if (!configuration.isMultiSelectionEnabled()) close();
-                            break;
-                        case TRUE:
-                            close();
-                            break;
-                        case FALSE:
-                            if (!configuration.isMultiSelectionEnabled()) itemContainer.refresh();
-                            break;
-                    }
+                    select();
                     onFocusWhenOpened();
                 });
                 built = true;
             }
             return panel;
+        }
+
+        void select() {
+            if (checkBox != null) checkBox.setValue(!checkBox.getValue());
+            onSelectionChange(item, checkBox != null ? checkBox.getValue() : true);
+            applyCloseOnClickMode();
         }
 
         void setItem(final ListBoxItem<D> item) {

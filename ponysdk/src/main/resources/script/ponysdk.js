@@ -972,6 +972,19 @@ _UTF8 = undefined;
             this.timeout = null;
             this.updateView();
         }, 50);
+    },
+
+    showIndex:function(index) {
+        let children = this.container.children();
+        if(index < this.beginIndex || index >= this.beginIndex + children.length) {
+            this.beginIndex = index;
+            this.updateView(true);
+        } else {
+            var child = children[index - this.beginIndex];
+            if(child) {
+                child.scrollIntoView();
+            }
+        }
     }
 
   });
