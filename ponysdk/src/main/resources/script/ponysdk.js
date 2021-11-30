@@ -1010,6 +1010,7 @@ _UTF8 = undefined;
 
     init: function() {
         this.parentId = this.options.parentId;
+        this.stickLeft = this.options.stickLeft;
         this.visible = false;
         var that = this;
         this.resizeEventListener = function(event) {
@@ -1069,20 +1070,31 @@ _UTF8 = undefined;
     updatePosition: function() {
         if(!this.parentElement) this.parentElement = document.getElementById(this.parentId);
         var offsets = this.parentElement.getBoundingClientRect();
-        this.element.style.width =  offsets.width + 'px';
+        this.element.style.width = offsets.width + 'px';
         // Down or top display
         var windowBot = window.innerHeight - offsets.top - offsets.height;
+        var windowScrollTop = $(window).scrollTop();
         if(windowBot < this.element.offsetHeight && offsets.top > this.element.offsetHeight) {
-            this.element.style.top = offsets.top - this.element.offsetHeight + 'px';
+            this.element.style.top = offsets.top - this.element.offsetHeight + windowScrollTop + 'px';
         } else {
-            this.element.style.top = offsets.top + offsets.height + 'px';
+            this.element.style.top = offsets.top + offsets.height + windowScrollTop + 'px';
         }
         // Right or left display
-        var windowRight = window.innerWidth - offsets.left - offsets.width;
-        if(windowRight < this.element.offsetWidth && offsets.left > this.element.offsetWidth) {
-            this.element.style.left =  offsets.left + offsets.width - this.element.offsetWidth + 'px';
+        var windowScrollLeft = $(window).scrollLeft();
+        if (this.stickLeft) {
+            var windowRight = window.innerWidth - offsets.left - offsets.width;
+            if(windowRight < this.element.offsetWidth && offsets.left > this.element.offsetWidth) {
+                this.element.style.left = offsets.left + offsets.width - this.element.offsetWidth + windowScrollLeft + 'px';
+            } else {
+                this.element.style.left = offsets.left + windowScrollLeft + 'px';
+            }
         } else {
-            this.element.style.left =  offsets.left + 'px';
+            var windowLeft = offsets.left;
+            if(windowLeft < this.element.offsetWidth && window.innerWidth - offsets.right > this.element.offsetWidth) {
+                this.element.style.right = window.innerWidth - offsets.right + offsets.width - this.element.offsetWidth - windowScrollLeft + 'px';
+            } else {
+                this.element.style.right = window.innerWidth - offsets.right - windowScrollLeft + 'px';
+            }
         }
     },
 

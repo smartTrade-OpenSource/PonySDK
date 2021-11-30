@@ -32,9 +32,11 @@ public class DropDownContainerAddon extends PAddOnComposite<PPanel> {
     private static final String PROPERTY_ABSOLUTE = "absolute";
     private static final String PROPERTY_TOP = "top";
     private static final String PROPERTY_LEFT = "left";
+    private static final String PROPERTY_RIGHT = "right";
     private static final String PROPERTY_0 = "0";
 
     private static final String PARENT_ID = "parentId";
+    private static final String STICK_LEFT = "stickLeft";
     private static final String UPDATE_POSITION = "updatePosition";
     private static final String SET_VISIBLE = "setVisible";
     private static final String WINDOW_EVENT = "windowEvent";
@@ -47,10 +49,18 @@ public class DropDownContainerAddon extends PAddOnComposite<PPanel> {
     private final Set<DropDownContainerAddonListener> listeners;
 
     public DropDownContainerAddon(final String parentId) {
-        super(Element.newPFlowPanel(), createJsonObject(parentId));
+        this(parentId, true);
+    }
+
+    public DropDownContainerAddon(final String parentId, final boolean stickLeft) {
+        super(Element.newPFlowPanel(), createJsonObject(parentId, stickLeft));
         widget.setStyleProperty(PROPERTY_POSITION, PROPERTY_ABSOLUTE);
         widget.setStyleProperty(PROPERTY_TOP, PROPERTY_0);
-        widget.setStyleProperty(PROPERTY_LEFT, PROPERTY_0);
+        if (stickLeft) {
+            widget.setStyleProperty(PROPERTY_LEFT, PROPERTY_0);
+        } else {
+            widget.setStyleProperty(PROPERTY_RIGHT, PROPERTY_0);
+        }
         this.listeners = new HashSet<>();
         setTerminalHandler(event -> {
             final JsonObject jsonObject = event.getData();
@@ -120,9 +130,10 @@ public class DropDownContainerAddon extends PAddOnComposite<PPanel> {
         this.listeners.remove(listener);
     }
 
-    private static JsonObject createJsonObject(final String parentId) {
+    private static JsonObject createJsonObject(final String parentId, final boolean stickLeft) {
         final JsonObjectBuilder builder = UIContext.get().getJsonProvider().createObjectBuilder();
         builder.add(PARENT_ID, parentId);
+        builder.add(STICK_LEFT, stickLeft);
         return builder.build();
     }
 
