@@ -31,7 +31,6 @@ import com.ponysdk.core.ui.basic.PPanel;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.PWidget.TabindexMode;
-import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.dropdown.DropDownContainer;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 import com.ponysdk.core.ui.infinitescroll.InfiniteScrollAddon;
@@ -142,11 +141,6 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         } else {
             setSelectedItems(value);
         }
-    }
-
-    @Override
-    public void onFocusWhenOpened() {
-        if (textBox != null) textBox.focus();
     }
 
     public void addItem(final ListBoxItem<D> item) {
@@ -364,8 +358,6 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
                 }
                 if (shiftPressed && e.getKeyCode() == PKeyCodes.TAB.getCode()) {
                     focus();
-                } else if (e.getKeyCode() == PKeyCodes.ESCAPE.getCode()) {
-                    close();
                 }
             });
             textBox.addKeyUpHandler(e -> {
@@ -498,20 +490,22 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     @Override
     protected void afterContainerVisible() {
         itemContainer.setScrollTop();
-        if (textBox != null) {
-            onFocusWhenOpened();
-        }
+        if (textBox != null) textBox.focus();
         if (clearMultiButton != null) clearMultiButton.setEnabled(!getSelectedItems().isEmpty());
-        upDownKeyHandler = PWindow.getMain().getPRootPanel().addKeyDownHandler(e -> {
+        upDownKeyHandler = asWidget().getWindow().getPRootPanel().addKeyDownHandler(e -> {
             if (PKeyCodes.UP.getCode() == e.getKeyCode()) {
                 if (index > 0) {
                     index--;
-                    if (configuration.isGroupEnabled() && visibleItems.get(index) instanceof GroupListBoxItem) {
+                    if (index > 0 && configuration.isGroupEnabled() && visibleItems.get(index) instanceof GroupListBoxItem) {
                         index--;
                     }
                 }
                 if (index <= 0 && configuration.isGroupEnabled()) {
+                    final int previous = index;
                     initIndex();
+                    if (previous != index) {
+                        itemContainer.showIndex(previous);
+                    }
                 }
             } else if (PKeyCodes.DOWN.getCode() == e.getKeyCode()) {
                 if (index < itemContainer.getFullSize() - 1) {
@@ -525,6 +519,8 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
                 if (listBoxItemWidget != null) {
                     listBoxItemWidget.select();
                 }
+            } else if (PKeyCodes.ESCAPE.getCode() == e.getKeyCode()) {
+                close();
             }
             forceIndex = true;
             itemContainer.showIndex(index);
@@ -533,6 +529,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
 
     @Override
     protected void afterContainerClose() {
+        super.afterContainerClose();
         if (upDownKeyHandler != null) {
             upDownKeyHandler.removeHandler();
         }
@@ -541,6 +538,15 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     @Override
     protected boolean isValueEmpty(final List<ListBoxItem<D>> value) {
         return value.isEmpty();
+    }
+
+    @Override
+    protected void onBlur() {
+        if (isOpen() && textBox != null) {
+            textBox.focus();
+        } else {
+            super.onBlur();
+        }
     }
 
     private Collection<ListBoxItem<D>> initializeGroupItems(final Collection<? extends ListBoxItem<D>> groupItems) {
@@ -850,7 +856,6 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
                         return;
                     }
                     select();
-                    onFocusWhenOpened();
                 });
                 built = true;
             }
@@ -860,6 +865,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         void select() {
             if (checkBox != null) checkBox.setValue(!checkBox.getValue());
             onSelectionChange(item, checkBox != null ? checkBox.getValue() : true);
+            blur();
             applyCloseOnClickMode();
         }
 

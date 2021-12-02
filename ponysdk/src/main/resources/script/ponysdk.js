@@ -1052,6 +1052,13 @@ _UTF8 = undefined;
                     that.removeListeners();
                 }
             }
+        },
+        this.keyDownEventListener = function(event) {
+            if(that.visible) {
+                if(["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(event.code) > -1) {
+                    event.preventDefault();
+                }
+            }
         }
     },
 
@@ -1059,12 +1066,14 @@ _UTF8 = undefined;
         window.addEventListener('resize', this.resizeEventListener);
         window.addEventListener('wheel', this.scrollEventListener, true);
         window.addEventListener('click', this.clickEventListener, true);
+        window.addEventListener('keydown', this.keyDownEventListener, true);
     },
 
     removeListeners: function() {
         window.removeEventListener('resize', this.resizeEventListener);
         window.removeEventListener('wheel', this.scrollEventListener, true);
         window.removeEventListener('click', this.clickEventListener, true);
+        window.removeEventListener('keydown', this.keyDownEventListener, true);
     },
 
     updatePosition: function() {

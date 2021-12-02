@@ -18,7 +18,16 @@ import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PPanel;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.PWidget.TabindexMode;
+import com.ponysdk.core.ui.basic.event.PBlurEvent;
+import com.ponysdk.core.ui.basic.event.PBlurHandler;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.basic.event.PCloseEvent;
+import com.ponysdk.core.ui.basic.event.PCloseHandler;
+import com.ponysdk.core.ui.basic.event.PFocusEvent;
+import com.ponysdk.core.ui.basic.event.PFocusHandler;
+import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
+import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
+import com.ponysdk.core.ui.model.PEventType;
 import com.ponysdk.core.ui.model.PKeyCodes;
 
 public abstract class DropDownContainer<V, C extends DropDownContainerConfiguration> implements IsPWidget {
@@ -54,10 +63,14 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
 
     private final PPanel widget;
     private final DropDownContainerAddon container;
+    private final Set<PValueChangeHandler<V>> valueChangeHandlers;
+    private final Set<PCloseHandler> closeHandlers;
     private final Set<DropDownContainerListener> listeners;
 
     public DropDownContainer(final C configuration) {
         this.configuration = configuration;
+        this.valueChangeHandlers = new HashSet<>();
+        this.closeHandlers = new HashSet<>();
         this.listeners = new HashSet<>();
         this.widget = Element.newPFlowPanel();
         this.widget.addStyleName(STYLE_CONTAINER_WIDGET);
@@ -71,15 +84,26 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
 
     public abstract void setValue(V value);
 
+    private boolean focused;
+
     @Override
     public PWidget asWidget() {
         if (!initialized) {
             widget.setTabindex(TabindexMode.TABULABLE);
+            widget.stopEvent(PEventType.KEYEVENTS);
+            widget.addDomHandler((PFocusHandler) event -> {
+                focused = true;
+                onFocus();
+            }, PFocusEvent.TYPE);
+            widget.addDomHandler((PBlurHandler) event -> {
+                focused = false;
+                onBlur();
+            }, PBlurEvent.TYPE);
             widget.addKeyUpHandler(e -> {
-                if (e.getKeyCode() == PKeyCodes.ENTER.getCode()) {
+                if (focused && e.getKeyCode() == PKeyCodes.ENTER.getCode()) {
                     setContainerVisible(!container.isVisible());
-                } else if (e.getKeyCode() == PKeyCodes.TAB.getCode() && isOpen()) {
-                    onFocusWhenOpened();
+                } else if (e.getKeyCode() == PKeyCodes.ESCAPE.getCode()) {
+                    close();
                 }
             });
             mainButton = Element.newPButton(configuration.getTitle());
@@ -133,11 +157,20 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
             container.addListener(() -> setContainerVisible(false));
             initialized = true;
         }
+        widget.addDestroyListener(e -> {
+            valueChangeHandlers.clear();
+            closeHandlers.clear();
+            listeners.clear();
+        });
         return widget;
     }
 
     public void focus() {
         widget.focus();
+    }
+
+    public void blur() {
+        widget.blur();
     }
 
     public C getConfiguration() {
@@ -186,6 +219,10 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
         return widget.hasStyleName(STYLE_CONTAINER_OPENED);
     }
 
+    public boolean isFocused() {
+        return focused;
+    }
+
     public void addStyleName(final String styleName) {
         widget.addStyleName(styleName);
     }
@@ -203,24 +240,24 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
         this.customContainer = customContainer;
     }
 
-    public void onFocusWhenOpened() {
-        // Nothing to do by default
-    }
-
     public void setDefaultContainerEnabled(final boolean enabled) {
         // Nothing to do by default
     }
 
-    protected void beforeContainerVisible() {
-        // Nothing to do by default
+    public void addValueChangeHandler(final PValueChangeHandler<V> handler) {
+        valueChangeHandlers.add(handler);
     }
 
-    protected void afterContainerVisible() {
-        // Nothing to do by default
+    public void removeValueChangeHandler(final PValueChangeHandler<V> handler) {
+        valueChangeHandlers.remove(handler);
     }
 
-    protected void afterContainerClose() {
-        // Nothing to do by default
+    public void addCloseHandler(final PCloseHandler handler) {
+        closeHandlers.add(handler);
+    }
+
+    public void removeCloseHandler(final PCloseHandler handler) {
+        closeHandlers.remove(handler);
     }
 
     public void addListener(final DropDownContainerListener listener) {
@@ -276,7 +313,28 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
     }
 
     protected void onValueChange() {
-        listeners.forEach(l -> l.onValueChange());
+        final PValueChangeEvent<V> event = new PValueChangeEvent<>(this, getValue());
+        valueChangeHandlers.forEach(l -> l.onValueChange(event));
+    }
+
+    protected void beforeContainerVisible() {
+        // Nothing to do by default
+    }
+
+    protected void afterContainerVisible() {
+        // Nothing to do by default
+    }
+
+    protected void afterContainerClose() {
+        // Nothing to do by default
+    }
+
+    protected void onFocus() {
+        // Nothing to do by default
+    }
+
+    protected void onBlur() {
+        close();
     }
 
     private void setContainerVisible(final boolean visible) {
@@ -293,7 +351,8 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
             container.hide();
             updateTitle(getValue());
             afterContainerClose();
-            listeners.forEach(l -> l.onClose());
+            final PCloseEvent event = new PCloseEvent(this);
+            closeHandlers.forEach(l -> l.onClose(event));
         }
     }
 
@@ -301,11 +360,7 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
 
     public interface DropDownContainerListener {
 
-        void onValueChange();
-
         void onClearTitleClicked();
-
-        void onClose();
 
     }
 }
