@@ -3,6 +3,7 @@
   position: relative;
   display: flex;
   padding: 0 5px;
+  cursor: pointer;
 }
 
 .dd-container-widget.dd-container-opened .dd-container-state::after {
@@ -12,6 +13,14 @@
 
 .dd-container-widget.dd-container-clear-disabled .dd-container-button::after {
   right: 3px;
+}
+
+.dd-container-widget.dd-container-disabled, .dd-container-widget.dd-container-disabled .dd-container-button, .dd-container-widget.dd-container-disabled .dd-container-state, .dd-container-widget.dd-container-disabled .dd-container-clear {
+    cursor: default;
+}
+
+.dd-container-widget .dd-container-state, .dd-container-widget .dd-container-clear {
+    cursor: pointer;
 }
 
 .dd-container-widget .dd-container-button {
@@ -28,6 +37,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   user-select: none;
+  cursor: pointer;
 }
 
 .dd-container-widget .dd-container-state {
@@ -95,6 +105,10 @@
 
 .dd-listbox-container.dd-listbox-multi .dd-listbox-clear-multi[disabled] {
   opacity: 0.7;
+}
+
+.dd-listbox-container.dd-listbox-multi .dd-listbox-clear-multi:not([disabled]) {
+    cursor: pointer;
 }
 
 .dd-listbox-container.dd-listbox-multi .is-viewport .is-container .is-item .gwt-Label {
