@@ -333,8 +333,20 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
         // Nothing to do by default
     }
 
+    protected void focusContainer() {
+        // Nothing to do by default
+    }
+
     protected void onBlur() {
-        close();
+        if (isOpen() && isContainerFocusable()) {
+            focusContainer();
+        } else {
+            close();
+        }
+    }
+
+    protected boolean isContainerFocusable() {
+        return false;
     }
 
     private void setContainerVisible(final boolean visible) {

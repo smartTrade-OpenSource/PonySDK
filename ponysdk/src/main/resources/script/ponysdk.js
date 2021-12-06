@@ -1040,10 +1040,18 @@ _UTF8 = undefined;
                 if(!that.parentElement) that.parentElement = document.getElementById(that.parentId);
                 var parentRect = that.parentElement.getBoundingClientRect();
                 var rect = that.element.getBoundingClientRect();
-                if (event.clientX >= rect.left && event.clientX <= rect.right &&
-                    event.clientY >= rect.top && event.clientY <= rect.bottom ||
-                    event.clientX >= parentRect.left && event.clientX <= parentRect.right &&
-                    event.clientY >= parentRect.top && event.clientY <= parentRect.bottom) {
+                var x = event.clientX;
+                var y = event.clientY;
+                // In select option, event position is 0 so get target position
+                if(x == 0 && y == 0) {
+                  var targetBounds = event.target.getBoundingClientRect();
+                  var x = targetBounds.left;
+                  var y = targetBounds.top;
+                }
+                if (x >= rect.left && x <= rect.right &&
+                    y >= rect.top && y <= rect.bottom ||
+                    x >= parentRect.left && x <= parentRect.right &&
+                    y >= parentRect.top && y <= parentRect.bottom) {
                     // Inside element or parent, nothing to do
                 } else {
                     that.sendDataToServer({

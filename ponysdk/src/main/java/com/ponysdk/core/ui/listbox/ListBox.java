@@ -182,6 +182,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     public void clear() {
         this.items.clear();
         this.visibleItems.clear();
+        updateTitle(List.of());
         if (itemContainer != null) itemContainer.refresh();
     }
 
@@ -541,12 +542,13 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     }
 
     @Override
-    protected void onBlur() {
-        if (isOpen() && textBox != null) {
-            textBox.focus();
-        } else {
-            super.onBlur();
-        }
+    protected boolean isContainerFocusable() {
+        return textBox != null;
+    }
+
+    @Override
+    protected void focusContainer() {
+        textBox.focus();
     }
 
     private Collection<ListBoxItem<D>> initializeGroupItems(final Collection<? extends ListBoxItem<D>> groupItems) {
