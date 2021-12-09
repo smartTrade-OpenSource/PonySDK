@@ -382,6 +382,8 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
             });
             panel.add(textBox);
             defaultContainer.add(panel);
+        } else {
+            disableSpaceWhenOpened();
         }
         if (configuration.isMultiSelectionEnabled()) {
             clearMultiButton = Element.newPButton(configuration.getClearLabel());

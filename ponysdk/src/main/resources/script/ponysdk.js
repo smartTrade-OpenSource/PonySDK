@@ -1011,6 +1011,7 @@ _UTF8 = undefined;
     init: function() {
         this.parentId = this.options.parentId;
         this.stickLeft = this.options.stickLeft;
+        this.spaceAuthorized = true;
         this.visible = false;
         var that = this;
         this.resizeEventListener = function(event) {
@@ -1063,7 +1064,8 @@ _UTF8 = undefined;
         },
         this.keyDownEventListener = function(event) {
             if(that.visible) {
-                if(["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(event.code) > -1) {
+                if(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(event.code) > -1 ||
+                    "Space" == event.code && !that.spaceAuthorized) {
                     event.preventDefault();
                 }
             }
@@ -1122,6 +1124,10 @@ _UTF8 = undefined;
         } else {
             this.removeListeners();
         }
+    },
+
+    disableSpaceWhenOpened: function() {
+        this.spaceAuthorized = false;
     }
 
   });

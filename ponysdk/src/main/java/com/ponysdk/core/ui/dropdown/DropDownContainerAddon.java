@@ -39,6 +39,7 @@ public class DropDownContainerAddon extends PAddOnComposite<PPanel> {
     private static final String STICK_LEFT = "stickLeft";
     private static final String UPDATE_POSITION = "updatePosition";
     private static final String SET_VISIBLE = "setVisible";
+    private static final String DISABLE_SPACE_WHEN_OPENED = "disableSpaceWhenOpened";
     private static final String WINDOW_EVENT = "windowEvent";
     private static final String RESIZE = "resize";
     private static final String SCROLL = "scroll";
@@ -108,6 +109,10 @@ public class DropDownContainerAddon extends PAddOnComposite<PPanel> {
 
     public void updatePosition() {
         callTerminalMethod(UPDATE_POSITION);
+    }
+
+    public void disableSpaceWhenOpened() {
+        callTerminalMethod(DISABLE_SPACE_WHEN_OPENED);
     }
 
     public boolean isVisible() {

@@ -189,6 +189,10 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
         container.updatePosition();
     }
 
+    public void disableSpaceWhenOpened() {
+        container.disableSpaceWhenOpened();
+    }
+
     public void forceUpdateTitle() {
         updateTitle(getValue());
     }
