@@ -295,6 +295,11 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
         refresh();
     }
 
+    public void sort() {
+        dataSource.sort();
+        refresh();
+    }
+
     @Override
     public void setFilter(final Object key, final ColumnDefinition<V> colDef, final BiPredicate<V, Supplier<Object>> biPredicate,
                           final boolean reinforcing) {

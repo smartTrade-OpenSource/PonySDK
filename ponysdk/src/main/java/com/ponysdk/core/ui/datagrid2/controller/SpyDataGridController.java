@@ -180,6 +180,11 @@ public abstract class SpyDataGridController<K, V> implements DataGridController<
     }
 
     @Override
+    public void sort() {
+        controller.sort();
+    }
+
+    @Override
     public void setFilter(final Object key, final ColumnDefinition<V> column, final BiPredicate<V, Supplier<Object>> filter,
                           final boolean reinforcing) {
         controller.setFilter(key, column, filter, reinforcing);
