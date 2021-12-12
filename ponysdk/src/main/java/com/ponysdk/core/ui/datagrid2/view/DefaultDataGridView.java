@@ -70,8 +70,8 @@ import com.ponysdk.core.ui.datagrid2.config.DataGridConfig.GeneralSort;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfig.Sort;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfigBuilder;
 import com.ponysdk.core.ui.datagrid2.controller.DataGridController;
+import com.ponysdk.core.ui.datagrid2.controller.DataGridControllerWrapper;
 import com.ponysdk.core.ui.datagrid2.controller.DefaultDataGridController;
-import com.ponysdk.core.ui.datagrid2.controller.SpyDataGridController;
 import com.ponysdk.core.ui.datagrid2.data.DefaultRow;
 import com.ponysdk.core.ui.datagrid2.data.LiveDataView;
 import com.ponysdk.core.ui.datagrid2.data.RowAction;
@@ -129,7 +129,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
     private final Set<DrawListener> drawListeners = SetUtils.newArraySet();
     private final Collection<V> selectedDataView;
     private final Map<ColumnDefinition<V>, ColumnView> columnViews = new HashMap<>();
-    private final DataGridControllerWrapper controllerWrapper;
+    private final DataGridControllerWrapper<K, V> controllerWrapper;
     private final LinkedHashMap<Object, RowAction<V>> rowActions = new LinkedHashMap<>();
     private int firstRowIndex;
     private final Map<Integer, Integer> sorts = new HashMap<>();
@@ -145,7 +145,10 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
         controller = new DefaultDataGridController<>(dataSource);
         controller.setListener(this::onUpdateRows);
         selectedDataView = controller.getLiveSelectedData();
-        controllerWrapper = new DataGridControllerWrapper(controller.get());
+        controllerWrapper = new DataGridControllerWrapper<>(//
+            controller.get(), //
+            this::onDataUpdated, //
+            this::onDataRemoved);
 
         root.addStyleName("pony-grid");
         root.setStyleProperty("display", "flex");
@@ -543,7 +546,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
         addon = new Addon();
         for (final ColumnView columnView : columnViews.values()) {
             addon.onColumnAdded(columnView.id, columnView.column.getMinWidth(), columnView.column.getMaxWidth(),
-                    columnView.state.isPinned());
+                columnView.state.isPinned());
         }
     }
 
@@ -931,6 +934,16 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
         draw();
     }
 
+    private void onDataUpdated() {
+        if (delayedDrawRunnable == null) draw();
+    }
+
+    private void onDataRemoved(final K k) {
+        for (final ColumnView columnView : columnViews.values()) {
+            columnView.extendedCells.remove(k);
+        }
+    }
+
     public class Row {
 
         private final int relativeIndex;
@@ -1161,9 +1174,8 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
             addHeaderCell(columnView);
             addFooterCell(columnView);
 
-            if (addon != null)
-                addon.onColumnAdded(columnView.id, columnView.column.getMinWidth(), columnView.column.getMaxWidth(),
-                        columnView.state.isPinned());
+            if (addon != null) addon.onColumnAdded(columnView.id, columnView.column.getMinWidth(), columnView.column.getMaxWidth(),
+                columnView.state.isPinned());
         }
 
         protected PComplexPanel addFooterCell(final ColumnView columnView) {
@@ -1458,29 +1470,6 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
         }
     }
 
-    private class DataGridControllerWrapper extends SpyDataGridController<K, V> {
-
-        DataGridControllerWrapper(final DataGridController<K, V> controller) {
-            super(controller);
-        }
-
-        @Override
-        protected void onDataUpdate() {
-            if (delayedDrawRunnable == null) {
-                draw();
-            }
-        }
-
-        @Override
-        public V removeData(final K k) {
-            final V v = super.removeData(k);
-            for (final ColumnView columnView : columnViews.values()) {
-                columnView.extendedCells.remove(k);
-            }
-            return v;
-        }
-    }
-
     private static class HideScrollBarAddon extends PAddOnComposite<PComplexPanel> {
 
         HideScrollBarAddon(final PComplexPanel root) {
@@ -1502,7 +1491,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
                     onColumnVisibilityChanged(json.getJsonArray(ADDON_COLUMN_ID), json.getJsonArray(ADDON_COLUMN_VISIBILITY));
                 } else if (json.containsKey(ADDON_COLUMN_WIDTH)) {
                     onColumnResized(json.getInt(ADDON_COLUMN_ID), //
-                            json.getInt(ADDON_COLUMN_WIDTH));
+                        json.getInt(ADDON_COLUMN_WIDTH));
                 } else if (json.containsKey(ADDON_COLUMN_TO)) {
                     onColumnMoved(json.getInt(ADDON_COLUMN_ID), json.getInt(ADDON_COLUMN_TO));
                 }
