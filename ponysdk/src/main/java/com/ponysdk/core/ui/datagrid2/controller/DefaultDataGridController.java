@@ -37,6 +37,9 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.cell.Cell;
 import com.ponysdk.core.ui.datagrid2.cell.ExtendedCell;
@@ -59,6 +62,8 @@ import com.ponysdk.core.util.MappedList;
  * @author mbagdouri
  */
 public class DefaultDataGridController<K, V> implements DataGridController<K, V> {
+	
+	private static final Logger log = LoggerFactory.getLogger(DefaultDataGridController.class);
 
     private static final Object NO_RENDERING_HELPER = new Object();
     private static final int RENDERING_HELPERS_CACHE_CAPACITY = 512;
@@ -375,20 +380,20 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
         });
 
         threadAcceptanceByID.thenAccept(dataResponse -> {
-            threadAcceptance(dataResponse, threadAcceptanceByID, consumer);
+            threadAcceptance(dataResponse, consumer);
+        }).exceptionally(e -> {
+            log.error("Cannot display data", e);
+            return null;
         });
     }
 
-    private void threadAcceptance(final DataGetterFromSrc result, final CompletableFuture<DataGetterFromSrc> completableFuture,
-                                  final Consumer<DataSrcResult> consumer) {
-        if (viewSnapshot.equals(result.threadSnapshot) && result.id >= 0) {
-            final CompletableFuture<DataSrcResult> passResultToView = completableFuture.thenApply(dataResponse -> {
-                return new DataSrcResult(dataResponse.liveDataView, dataResponse.firstRowIndex, dataResponse.start);
-            });
-            passResultToView.thenAccept(consumer::accept);
+    private void threadAcceptance(final DataGetterFromSrc dataResponse, final Consumer<DataSrcResult> consumer) {
+        if (viewSnapshot.equals(dataResponse.threadSnapshot) && dataResponse.id >= 0) {
+            final DataSrcResult result = new DataSrcResult(dataResponse.liveDataView, dataResponse.firstRowIndex, dataResponse.start);
+            consumer.accept(result);
         }
     }
-
+    
     @Override
     public DataGridController<K, V> get() {
         return this;
