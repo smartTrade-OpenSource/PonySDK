@@ -186,9 +186,13 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         if (dataProvider != null) throw new IllegalCallerException("Not supported in DataProvider mode");
         final ListBoxItem<D> removedItem = this.items.stream().findFirst().orElse(null);
         if (removedItem != null) {
+            final ListBoxItem<D> selectedItem = getSelectedItem();
             this.items.remove(removedItem);
             this.visibleItems.remove(removedItem);
-            if (itemContainer != null) itemContainer.refresh();
+            if (removedItem.equals(selectedItem)) {
+                setSelected(null);
+            }
+            if (itemContainer != null && isOpen()) itemContainer.refresh();
         } else {
             log.warn("Item to remove not found {}", itemLabel);
         }
@@ -198,7 +202,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         this.items.clear();
         this.visibleItems.clear();
         updateTitle(List.of());
-        if (itemContainer != null) itemContainer.refresh();
+        if (itemContainer != null && isOpen()) itemContainer.refresh();
     }
 
     /**
