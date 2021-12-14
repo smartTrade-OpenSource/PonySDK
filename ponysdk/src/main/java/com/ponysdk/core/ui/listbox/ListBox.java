@@ -79,6 +79,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
             if (compareToGroup != 0) return compareToGroup;
         }
         if (i1.data == null) return -1;
+        if (i2.data == null) return 1;
         try {
             if (dataComparator != null) return dataComparator.compare(i1.data, i2.data);
         } catch (final Exception e) {
