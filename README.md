@@ -8,7 +8,6 @@ PonySDK is an open source project and application that uses open source tools bu
 It encapsulates a Web server (for now, Jetty) on the backend side, and use GWT on the frontend side.
 So, with PonySDK, you will be able to write standard Java code for creating your Web application.
 
-## Version 2 Features
 
 - Use Websocket to communicate between the Jetty Web Server and HTML5 Browser compliant
 - Be able to use all Javascript frameworks using PAddons
