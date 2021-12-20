@@ -71,11 +71,17 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     private PButton clearMultiButton;
     private InfiniteScrollAddon<ListBoxItem<D>, ListBoxItemWidget> itemContainer;
 
+    private Comparator<ListBoxItem<D>> groupComparator;
     private Comparator<D> dataComparator;
     private final Comparator<ListBoxItem<D>> comparator = (i1, i2) -> {
         if (i1.groupName != null) {
             if (i2.groupName == null) return -1;
-            final int compareToGroup = i1.groupName.compareTo(i2.groupName);
+            final int compareToGroup;
+            if (groupComparator != null) {
+                compareToGroup = groupComparator.compare(i1, i2);
+            } else {
+                compareToGroup = i1.groupName.compareTo(i2.groupName);
+            }
             if (compareToGroup != 0) return compareToGroup;
         }
         if (i1.data == null) return -1;
@@ -360,6 +366,10 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
 
     public void setComparator(final Comparator<D> dataComparator) {
         this.dataComparator = dataComparator;
+    }
+
+    public void setGroupComparator(final Comparator<ListBoxItem<D>> groupComparator) {
+        this.groupComparator = groupComparator;
     }
 
     @Override
@@ -759,7 +769,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
             this.selected = selected;
         }
 
-        String getGroupName() {
+        public String getGroupName() {
             return groupName;
         }
 
