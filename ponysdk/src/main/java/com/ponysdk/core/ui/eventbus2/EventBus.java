@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +39,7 @@ public class EventBus {
     private static final Logger log = LoggerFactory.getLogger(EventBus.class);
 
     private final Map<Class<?>, Set<EventHandler<?>>> handlersByType = new HashMap<>();
+    private final Map<Class<?>, Supplier<?>> initialByType = new HashMap<>();
 
     public static final class EventHandler<T> implements Consumer<Object> {
 
@@ -69,6 +71,7 @@ public class EventBus {
         if (type == null) return null;
         final EventHandler<T> handler = register(type);
         handler.subscribe(function);
+        if(initialByType.containsKey(type)) handler.accept(initialByType.get(type).get());
         return handler;
     }
 
@@ -92,4 +95,8 @@ public class EventBus {
         else log.error("No subscribed handlers for {}", event.getClass());
     }
 
+    public <T> void startWith(Class<T> type, Supplier<T> supplier) {
+    	if (supplier == null) return;
+    	initialByType.put(type, supplier);
+    }
 }
