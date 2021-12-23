@@ -820,7 +820,7 @@ _UTF8 = undefined;
 
     initDom:function() {
         window.test = this;
-        this.jqelement.css("overflow-y", "overlay");
+        this.jqelement.css("overflow-y", "auto");
         this.jqelement.css("overflow-x", "hidden");
         this.container = this.jqelement.find(".is-container");
         this.container.css("width", "100%");
