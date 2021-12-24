@@ -23,14 +23,15 @@
 
 package com.ponysdk.impl.main;
 
-import com.ponysdk.core.model.MappingPath;
-import com.ponysdk.core.server.application.ApplicationConfiguration;
-import com.ponysdk.core.server.application.ApplicationManager;
-import com.ponysdk.core.server.servlet.AjaxServlet;
-import com.ponysdk.core.server.servlet.BootstrapServlet;
-import com.ponysdk.core.server.servlet.StreamServiceServlet;
-import com.ponysdk.core.server.websocket.WebSocketServlet;
-import org.eclipse.jetty.server.*;
+import java.net.InetAddress;
+import java.net.URL;
+
+import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.HttpConfiguration;
+import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -38,8 +39,13 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetAddress;
-import java.net.URL;
+import com.ponysdk.core.model.MappingPath;
+import com.ponysdk.core.server.application.ApplicationConfiguration;
+import com.ponysdk.core.server.application.ApplicationManager;
+import com.ponysdk.core.server.servlet.AjaxServlet;
+import com.ponysdk.core.server.servlet.BootstrapServlet;
+import com.ponysdk.core.server.servlet.StreamServiceServlet;
+import com.ponysdk.core.server.websocket.WebSocketServlet;
 
 public class PonySDKServer {
 
@@ -56,7 +62,6 @@ public class PonySDKServer {
 
     protected String host = "0.0.0.0";
     protected int port = 80;
-
     private boolean useSSL = true;
     private int sslPort = 443;
     private String sslKeyStoreFile;
@@ -66,7 +71,7 @@ public class PonySDKServer {
     private String sslTrustStorePassphrase;
     private String sslTrustStoreType = "JKS";
     private boolean needClientAuth = false;
-    private String[] enabledProtocols = new String[]{"TLSv1", "TLSv1.1", "TLSv1.2"};
+    private String[] enabledProtocols = new String[] { "TLSv1", "TLSv1.1", "TLSv1.2" };
     private String enabledCipherSuites;
 
     public PonySDKServer() {
@@ -87,15 +92,12 @@ public class PonySDKServer {
     }
 
     protected ServerConnector createHttpConnector() {
-        final ServerConnector serverConnector;
+        final HttpConfiguration httpConfiguration = createHttpConfiguration();
         if (useSSL) {
-            final HttpConfiguration httpConfiguration = new HttpConfiguration();
             httpConfiguration.setSecurePort(sslPort);
-            serverConnector = new ServerConnector(server, new HttpConnectionFactory(httpConfiguration));
-        } else {
-            serverConnector = new ServerConnector(server);
         }
 
+        final ServerConnector serverConnector = new ServerConnector(server, new HttpConnectionFactory(httpConfiguration));
         serverConnector.setPort(port);
         serverConnector.setHost(host);
         serverConnector.setReuseAddress(true);
@@ -107,31 +109,40 @@ public class PonySDKServer {
         URL keyStore = getClass().getResource(sslKeyStoreFile);
         if (keyStore == null) keyStore = getClass().getClassLoader().getResource(sslKeyStoreFile);
 
-        if (keyStore == null) throw new RuntimeException("KeyStore not found #" + sslKeyStoreFile);
+        if (keyStore == null) throw new IllegalArgumentException("KeyStore not found #" + sslKeyStoreFile);
 
-        SslContextFactory.Server factory = new SslContextFactory.Server();
+        final SslContextFactory.Server sslFactory = new SslContextFactory.Server();
 
-        factory.setTrustAll(false);
-        factory.setKeyStorePath(keyStore.toExternalForm());
-        factory.setKeyStorePassword(sslKeyStorePassphrase);
-        factory.setKeyStoreType(sslKeyStoreType);
-        factory.setIncludeProtocols(enabledProtocols);
-        if (enabledCipherSuites != null) factory.setIncludeCipherSuites(enabledCipherSuites);
+        sslFactory.setTrustAll(false);
+        sslFactory.setKeyStorePath(keyStore.toExternalForm());
+        sslFactory.setKeyStorePassword(sslKeyStorePassphrase);
+        sslFactory.setKeyStoreType(sslKeyStoreType);
+        sslFactory.setIncludeProtocols(enabledProtocols);
+        if (enabledCipherSuites != null) sslFactory.setIncludeCipherSuites(enabledCipherSuites);
 
         if (needClientAuth) {
-            factory.setNeedClientAuth(true);
+            sslFactory.setNeedClientAuth(true);
             if (sslTrustStoreFile != null) {
-                factory.setTrustStorePath(sslTrustStoreFile);
-                factory.setTrustStorePassword(sslTrustStorePassphrase);
-                factory.setTrustStoreType(sslTrustStoreType);
+                sslFactory.setTrustStorePath(sslTrustStoreFile);
+                sslFactory.setTrustStorePassword(sslTrustStorePassphrase);
+                sslFactory.setTrustStoreType(sslTrustStoreType);
             }
         }
 
-        final ServerConnector serverConnector = new ServerConnector(server, factory);
+        final HttpConfiguration httpConfiguration = createHttpConfiguration();
+
+        final ServerConnector serverConnector = new ServerConnector(server, sslFactory, new HttpConnectionFactory(httpConfiguration));
         serverConnector.setPort(sslPort);
         serverConnector.setHost(host);
         serverConnector.setReuseAddress(true);
         return serverConnector;
+    }
+
+    protected HttpConfiguration createHttpConfiguration() {
+        final HttpConfiguration httpConfiguration = new HttpConfiguration();
+        httpConfiguration.setSendServerVersion(false);
+        httpConfiguration.setSendDateHeader(false);
+        return httpConfiguration;
     }
 
     protected Handler createMainHandler() {
@@ -144,18 +155,28 @@ public class PonySDKServer {
         return createWebApp();
     }
 
+    protected ErrorHandler createErrorHandler() {
+        final ErrorHandler errorHandler = new ErrorHandler();
+        errorHandler.setShowMessageInTitle(false);
+        errorHandler.setShowServlet(false);
+        errorHandler.setShowStacks(false);
+        return errorHandler;
+    }
+
     protected ServletContextHandler createWebApp() {
         final ApplicationConfiguration configuration = applicationManager.getConfiguration();
         log.info("Adding application #{}", configuration.getApplicationContextName());
 
         final ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/" + configuration.getApplicationContextName());
+        context.setErrorHandler(createErrorHandler());
+        context.getSessionHandler().getSessionCookieConfig().setSecure(true);
+        context.getSessionHandler().getSessionCookieConfig().setHttpOnly(true);
 
         context.addServlet(new ServletHolder(createBootstrapServlet()), MAPPING_BOOTSTRAP);
         context.addServlet(new ServletHolder(createStreamServiceServlet()), MAPPING_STREAM);
         context.addServlet(new ServletHolder(createAjaxServlet()), MAPPING_AJAX);
         context.addServlet(new ServletHolder(createWebSocketServlet()), MAPPING_WS);
-
         return context;
     }
 
