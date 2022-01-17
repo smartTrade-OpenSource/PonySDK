@@ -51,7 +51,7 @@ public class ActivityManager implements PlaceChangeHandler {
     public ActivityManager(final ActivityMapper mapper) {
         this.mapper = mapper;
 
-        UIContext.getRootEventBus().addHandler(PlaceChangeEvent.TYPE, this);
+        UIContext.get().getRootEventBus().addHandler(PlaceChangeEvent.TYPE, this);
     }
 
     public ActivityManager(final ActivityMapper mapper, final EventBus eventBus) {

@@ -61,7 +61,7 @@ public class StackLayoutPanelPageActivity extends SamplePageActivity {
 
         stackLayoutPanel.addSelectionHandler(event -> {
             final String msg = "On selection : " + event.getSelectedItem();
-            UIContext.getRootEventBus().fireEvent(new DemoBusinessEvent(msg));
+            UIContext.get().getRootEventBus().fireEvent(new DemoBusinessEvent(msg));
         });
 
         panel.add(stackLayoutPanel);

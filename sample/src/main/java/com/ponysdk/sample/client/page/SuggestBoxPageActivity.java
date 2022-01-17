@@ -54,7 +54,7 @@ public class SuggestBoxPageActivity extends SamplePageActivity {
         final PMultiWordSuggestOracle suggestOracle = (PMultiWordSuggestOracle) suggestBox.getSuggestOracle();
         suggestBox.addSelectionHandler(event -> {
             final String msg = "Selected item : " + event.getSelectedItem().getReplacementString();
-            UIContext.getRootEventBus().fireEvent(new DemoBusinessEvent(msg));
+            UIContext.get().getRootEventBus().fireEvent(new DemoBusinessEvent(msg));
         });
 
         final Query query = new Query();
@@ -86,7 +86,7 @@ public class SuggestBoxPageActivity extends SamplePageActivity {
             if (item.equals(0)) {
                 suggestBox.setText("Friesian horse");
             } else if (item.equals(1)) {
-                UIContext.getRootEventBus().fireEvent(new DemoBusinessEvent("Text content: " + suggestBox.getText()));
+                UIContext.get().getRootEventBus().fireEvent(new DemoBusinessEvent("Text content: " + suggestBox.getText()));
             } else if (item.equals(2)) {
                 suggestBox.getTextBox().setEnabled(!suggestBox.getTextBox().isEnabled());
             } else if (item.equals(3)) {

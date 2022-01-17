@@ -94,7 +94,7 @@ public class UIContext {
     private final Set<ContextDestroyListener> destroyListeners = new HashSet<>();
     @Deprecated(forRemoval = true, since = "v2.8.0")
     private final TxnContext context;
-    private final Set<DataListener> listeners = Collections.newSetFromMap(new ConcurrentHashMap<DataListener, Boolean>());
+    private final Set<DataListener> listeners = ConcurrentHashMap.newKeySet();
 
     private TerminalDataReceiver terminalDataReceiver;
 
@@ -159,90 +159,12 @@ public class UIContext {
     }
 
     /**
-     * Adds {@link EventHandler} to the {@link com.ponysdk.core.ui.eventbus.EventBus}
-     *
-     * @param type    the event type
-     * @param handler the event handler
-     * @return the HandlerRegistration in order to remove the EventHandler
-     * @see #fireEvent(Event)
-     */
-    public static HandlerRegistration addHandler(final Event.Type type, final EventHandler handler) {
-        return get().rootEventBus.addHandler(type, handler);
-    }
-
-    /**
-     * Fires an {@link Event} on the {@link com.ponysdk.core.ui.eventbus.EventBus}
-     * Only {@link EventHandler}s added before fires event will be stimulated
-     *
-     * @param event the fired event
-     * @see #addHandler(BroadcastEventHandler)
-     */
-    public static void fireEvent(final Event<? extends EventHandler> event) {
-        get().fireEvent0(event);
-    }
-
-    public void executeFireEvent(final Event<? extends EventHandler> event) {
-        execute(() -> fireEvent0(event));
-    }
-
-    private void fireEvent0(final Event<? extends EventHandler> event) {
-        rootEventBus.fireEvent(event);
-    }
-
-    /**
-     * Removes {@link EventHandler} from the {@link com.ponysdk.core.ui.eventbus.EventBus}
-     *
-     * @param type    the event type
-     * @param handler the event handler
-     * @see #addHandler(com.ponysdk.core.ui.eventbus.Event.Type, EventHandler)
-     */
-    public static void removeHandler(final Event.Type type, final EventHandler handler) {
-        get().rootEventBus.removeHandler(type, handler);
-    }
-
-    /**
-     * Fires an {@link Event} on the {@link com.ponysdk.core.ui.eventbus.EventBus} with a specific source
-     * Only {@link EventHandler}s added before fires event will be stimulated
-     *
-     * @param event  the fired event
-     * @param source the source
-     */
-    public static void fireEventFromSource(final Event<? extends EventHandler> event, final EventSource source) {
-        get().rootEventBus.fireEventFromSource(event, source);
-    }
-
-    /**
-     * Adds a {@link BroadcastEventHandler} to the {@link com.ponysdk.core.ui.eventbus.EventBus} that receive all the
-     * events
-     * All call to {@link #fireEvent(Event)} or {@link #fireEventFromSource(Event, EventSource)} will stimulate this
-     * event
-     * handler
-     *
-     * @param handler the broadcast event handler
-     * @see #fireEvent(Event)
-     * @see #fireEventFromSource(Event, EventSource)
-     */
-    public static void addHandler(final BroadcastEventHandler handler) {
-        get().rootEventBus.addHandler(handler);
-    }
-
-    /**
-     * Removes broadcast handler from the {@link com.ponysdk.core.ui.eventbus.EventBus}
-     *
-     * @param handler the broadcast event handler
-     * @see #addHandler(BroadcastEventHandler)
-     */
-    public static void removeHandler(final BroadcastEventHandler handler) {
-        get().rootEventBus.removeHandler(handler);
-    }
-
-    /**
      * Gets the default {@link com.ponysdk.core.ui.eventbus.EventBus}
      *
      * @return the root event bus
      */
-    public static com.ponysdk.core.ui.eventbus.EventBus getRootEventBus() {
-        return get().rootEventBus;
+    public com.ponysdk.core.ui.eventbus.EventBus getRootEventBus() {
+        return rootEventBus;
     }
 
     /**
@@ -250,8 +172,8 @@ public class UIContext {
      *
      * @return the new event bus
      */
-    public static com.ponysdk.core.ui.eventbus2.EventBus getNewEventBus() {
-        return get().newEventBus;
+    public com.ponysdk.core.ui.eventbus2.EventBus getNewEventBus() {
+        return newEventBus;
     }
 
     /**

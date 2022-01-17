@@ -548,7 +548,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     public void fireEvent(final Event<? extends EventHandler> event) {
         if (eventSource == null) return;
-        UIContext.fireEventFromSource(event, eventSource);
+        UIContext.get().getRootEventBus().fireEventFromSource(event, eventSource);
     }
 
     public void removeFromParent() {

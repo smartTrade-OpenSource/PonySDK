@@ -46,7 +46,7 @@ public class TradingSampleEntryPoint implements EntryPoint {
         final PSimpleLayoutPanel panel = Element.newPSimpleLayoutPanel();
         PWindow.getMain().add(panel);
 
-        final EventBus eventBus = UIContext.getRootEventBus();
+        final EventBus eventBus = UIContext.get().getRootEventBus();
 
         final PlaceHistoryMapper historyMapper = new DefaultPlaceHistoryMapper(eventBus);
         final PlaceController placeController = new PlaceController(uiContext.getHistory(), eventBus);

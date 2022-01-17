@@ -39,7 +39,7 @@ public class EventBus {
     private static final Logger log = LoggerFactory.getLogger(EventBus.class);
 
     private final Map<Class<?>, Set<EventHandler<?>>> handlersByType = new HashMap<>();
-    private final Map<Class<?>, Supplier<?>> initialByType = new HashMap<>();
+    private final Map<Class<?>, Supplier<?>> initialValueByType = new HashMap<>();
 
     public static final class EventHandler<T> implements Consumer<Object> {
 
@@ -60,18 +60,23 @@ public class EventBus {
         }
     }
 
-    private <T> EventHandler<T> register(final Class<T> type) {
-        final EventHandler<T> handler = new EventHandler<>(type);
-        final Set<EventHandler<?>> handlers = handlersByType.computeIfAbsent(type, t -> SetUtils.newArraySet(4));
-        handlers.add(handler);
-        return handler;
-    }
-
     public <T> EventHandler<T> subscribe(final Class<T> type, final Consumer<T> function) {
         if (type == null) return null;
         final EventHandler<T> handler = register(type);
         handler.subscribe(function);
-        if(initialByType.containsKey(type)) handler.accept(initialByType.get(type).get());
+
+        final Supplier<?> supplier = initialValueByType.get(type);
+        if (supplier != null) {
+            handler.accept(supplier.get());
+        }
+
+        return handler;
+    }
+
+    private <T> EventHandler<T> register(final Class<T> type) {
+        final EventHandler<T> handler = new EventHandler<>(type);
+        final Set<EventHandler<?>> handlers = handlersByType.computeIfAbsent(type, t -> SetUtils.newArraySet(4));
+        handlers.add(handler);
         return handler;
     }
 
@@ -95,8 +100,8 @@ public class EventBus {
         else log.error("No subscribed handlers for {}", event.getClass());
     }
 
-    public <T> void startWith(Class<T> type, Supplier<T> supplier) {
-    	if (supplier == null) return;
-    	initialByType.put(type, supplier);
+    public <T> void setInitialValueByType(Class<T> type, Supplier<T> supplier) {
+        if (supplier == null) throw new IllegalArgumentException();
+        initialValueByType.put(type, supplier);
     }
 }

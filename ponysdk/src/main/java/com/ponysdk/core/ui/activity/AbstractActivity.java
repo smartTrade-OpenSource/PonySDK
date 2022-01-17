@@ -88,23 +88,23 @@ public abstract class AbstractActivity<T extends IsPWidget> implements Activity 
     }
 
     public HandlerRegistration addHandler(final Event.Type type, final EventHandler handler) {
-        return UIContext.addHandler(type, handler);
+        return UIContext.get().getRootEventBus().addHandler(type, handler);
     }
 
     public void removeHandler(final Event.Type type, final EventHandler handler) {
-        UIContext.removeHandler(type, handler);
+        UIContext.get().getRootEventBus().removeHandler(type, handler);
     }
 
     public void fireEvent(final Event<? extends EventHandler> event) {
-        UIContext.fireEvent(event);
+        UIContext.get().getRootEventBus().fireEvent(event);
     }
 
     public void addHandler(final BroadcastEventHandler handler) {
-        UIContext.addHandler(handler);
+        UIContext.get().getRootEventBus().addHandler(handler);
     }
 
     public void removeHandler(final BroadcastEventHandler handler) {
-        UIContext.removeHandler(handler);
+        UIContext.get().getRootEventBus().removeHandler(handler);
     }
 
 }

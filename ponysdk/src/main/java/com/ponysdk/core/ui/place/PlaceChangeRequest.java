@@ -28,7 +28,7 @@ import com.ponysdk.core.server.application.UIContext;
 public class PlaceChangeRequest {
 
     public static void fire(final Object source, final Place newPlace) {
-        UIContext.fireEvent(new PlaceChangeEvent(source, newPlace));
+        UIContext.get().getRootEventBus().fireEvent(new PlaceChangeEvent(source, newPlace));
     }
 
 }

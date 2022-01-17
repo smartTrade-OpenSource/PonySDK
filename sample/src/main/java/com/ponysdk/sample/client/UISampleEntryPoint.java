@@ -736,12 +736,12 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     }
 
     private void createNewEvent() {
-        final EventHandler<PClickEvent> handler = UIContext.getNewEventBus().subscribe(PClickEvent.class,
+        final EventHandler<PClickEvent> handler = UIContext.get().getNewEventBus().subscribe(PClickEvent.class,
                 event -> System.err.println("B " + event));
-        UIContext.getNewEventBus().post(new PClickEvent(this));
-        UIContext.getNewEventBus().post(new PClickEvent(this));
-        UIContext.getNewEventBus().unsubscribe(handler);
-        UIContext.getNewEventBus().post(new PClickEvent(this));
+        UIContext.get().getNewEventBus().post(new PClickEvent(this));
+        UIContext.get().getNewEventBus().post(new PClickEvent(this));
+        UIContext.get().getNewEventBus().unsubscribe(handler);
+        UIContext.get().getNewEventBus().post(new PClickEvent(this));
     }
 
     private static final class Data {

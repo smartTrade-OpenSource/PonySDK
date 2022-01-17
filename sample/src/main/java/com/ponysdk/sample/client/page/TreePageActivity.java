@@ -52,7 +52,7 @@ public class TreePageActivity extends SamplePageActivity {
 
         tree.addSelectionHandler(event -> {
             final String msg = "Selected item : name = " + event.getSelectedItem();
-            UIContext.getRootEventBus().fireEvent(new DemoBusinessEvent(msg));
+            UIContext.get().getRootEventBus().fireEvent(new DemoBusinessEvent(msg));
         });
 
         final PTreeItem firstItem = Element.newPTreeItem("First item");
