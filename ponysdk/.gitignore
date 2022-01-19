@@ -4,3 +4,5 @@ bin
 /javadoc.xml
 .classpath
 /ponysdk.iml
+.project
+/.settings
