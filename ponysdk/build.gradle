@@ -22,7 +22,7 @@ ext {
 }
 
 group = 'com.ponysdk'
-version = '2.8.44-SNAPSHOT'
+version = '2.8.44'
 
 publishing {
     publications {
