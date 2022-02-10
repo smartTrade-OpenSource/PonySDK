@@ -179,4 +179,9 @@ public class DecoratorDataGridView<K, V> implements DataGridView<K, V> {
     public DataGridAdapter<K, V> getAdapter() {
         return view.getAdapter();
     }
+
+    @Override
+    public void scrollTo(int index) {
+        view.scrollTo(index);
+    }
 }
