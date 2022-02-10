@@ -750,6 +750,15 @@ _UTF8 = undefined;
     scrollToTop: function(){
 		$(this.body).scrollTop(0);
     },
+
+    scrollTo: function(index, total){
+        var visibleHeight = $(this.body).height();
+        var lineHeight = $(this.subBody).outerHeight(true) / total;
+        if ((total - index) * lineHeight < visibleHeight / 2)
+            $(this.body).scrollTop(lineHeight * index);
+        else
+            $(this.body).scrollTop(lineHeight * index - visibleHeight / 2);
+    },
       
     refreshScrollBarMargins: function(){
         var w = $(this.subBody).width();

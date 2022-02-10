@@ -243,6 +243,11 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
         return controllerWrapper;
     }
 
+    @Override
+    public void scrollTo(int index) {
+        addon.scrollTo(index, controller.getRowCount());
+    }
+    
     private void onScroll(final int row) {
         showLoadingDataView();
         firstRowIndex = row;
@@ -1516,6 +1521,10 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 
         public void scrollToTop() {
             callTerminalMethod("scrollToTop");
+        }
+
+        public void scrollTo(int index, int total) {
+            callTerminalMethod("scrollTo", index, total);
         }
 
         public void checkPosition() {

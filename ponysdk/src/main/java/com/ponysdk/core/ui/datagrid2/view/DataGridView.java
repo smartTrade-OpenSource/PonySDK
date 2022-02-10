@@ -206,6 +206,15 @@ public interface DataGridView<K, V> extends IsPWidget {
     void addDrawListener(DrawListener drawListener);
 
     /**
+     * Scrolls up or down to the row at the provided index.
+     * Tries to show the row in the center of visible area.
+     *
+     * @param index
+     *            position of the row to scroll to
+     */
+    void scrollTo(int index);
+    
+    /**
      * Removes a {@link DrawListener}
      */
     void removeDrawListener(DrawListener drawListener);
