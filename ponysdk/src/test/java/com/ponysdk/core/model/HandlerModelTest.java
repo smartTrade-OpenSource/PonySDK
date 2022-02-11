@@ -46,7 +46,7 @@ public class HandlerModelTest {
     @Test
     public void testIsDomHandler() {
         assertTrue(HandlerModel.HANDLER_DOM_DRAG_LEAVE.isDomHandler());
-        assertFalse(HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST.isDomHandler());
+        assertFalse(HandlerModel.HANDLER_EMBEDDED_STREAM_REQUEST.isDomHandler());
     }
 
 }

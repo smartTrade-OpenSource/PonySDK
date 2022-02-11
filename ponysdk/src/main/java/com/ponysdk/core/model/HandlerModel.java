@@ -46,7 +46,7 @@ public enum HandlerModel {
     HANDLER_DOM_MOUSE_UP(true),
     HANDLER_DOM_MOUSE_WHELL(true),
 
-    HANDLER_EMBEDED_STREAM_REQUEST(false),
+    HANDLER_EMBEDDED_STREAM_REQUEST(false),
     HANDLER_CHANGE(false),
     HANDLER_POPUP_POSITION(false),
     HANDLER_RESIZE(false),
@@ -62,7 +62,7 @@ public enum HandlerModel {
 
     private static final HandlerModel[] VALUES = HandlerModel.values();
 
-    private boolean domHandler;
+    private final boolean domHandler;
 
     HandlerModel(final boolean domHandler) {
         this.domHandler = domHandler;

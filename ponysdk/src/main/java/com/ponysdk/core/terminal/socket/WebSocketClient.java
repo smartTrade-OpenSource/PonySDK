@@ -23,20 +23,18 @@
 
 package com.ponysdk.core.terminal.socket;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.ponysdk.core.terminal.ReconnectionChecker;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.request.WebSocketRequestBuilder;
-
 import elemental.client.Browser;
 import elemental.events.CloseEvent;
 import elemental.events.MessageEvent;
 import elemental.html.ArrayBuffer;
-import elemental.html.Performance;
 import elemental.html.WebSocket;
 import elemental.html.Window;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class WebSocketClient {
 
@@ -64,7 +62,7 @@ public class WebSocketClient {
                 final int statusCode = closeEvent.getCode();
                 if (log.isLoggable(Level.INFO)) log.info("WebSocket disconnected : " + statusCode);
                 // If it's a not normal disconnection
-                if (statusCode != 1000) reconnectionChecker.detectConnectionFailure();
+                if (statusCode != 1000) ReconnectionChecker.reloadWindow();
             } else {
                 log.severe("WebSocket disconnected : " + event);
                 reconnectionChecker.detectConnectionFailure();
@@ -90,7 +88,6 @@ public class WebSocketClient {
     }
 
     public void send(final String message) {
-
 
 
         webSocket.send(message);

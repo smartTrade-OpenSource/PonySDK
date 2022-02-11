@@ -44,6 +44,7 @@ import javax.websocket.MessageHandler;
 import javax.websocket.MessageHandler.Whole;
 import javax.websocket.Session;
 
+import com.ponysdk.core.useragent.Browser;
 import org.glassfish.tyrus.client.ClientManager;
 import org.glassfish.tyrus.client.ClientProperties;
 import org.slf4j.Logger;

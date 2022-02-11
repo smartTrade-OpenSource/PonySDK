@@ -82,7 +82,7 @@ public class PTImage extends PTWidget<Image> {
 
     @Override
     public void addHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
-        if (HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST == handlerModel) {
+        if (HandlerModel.HANDLER_EMBEDDED_STREAM_REQUEST == handlerModel) {
             // ServerToClientModel.STREAM_REQUEST_ID
             final int streamRequestId = buffer.readBinaryModel().getIntValue();
 

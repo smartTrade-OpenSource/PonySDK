@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpSession;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -71,15 +72,18 @@ public class Application {
     }
 
     public void destroy() {
-        uiContexts.values().forEach(uiContext -> {
-            try {
-                uiContext.destroyFromApplication();
-            } catch (final Exception e) {
-                log.error("Can't destroy the UIContext #" + uiContext.getID() + " on Application #" + id, e);
-            }
-        });
-        uiContexts.clear();
+        final Iterator<UIContext> iterator = uiContexts.values().iterator();
 
+        while (iterator.hasNext()) {
+            UIContext context = iterator.next();
+            iterator.remove();
+            try {
+                context.destroyFromApplication();
+            } catch (final Throwable e) {
+                log.error("Can't destroy the UIContext #" + context.getID() + " on Application #" + id, e);
+            }
+        }
+        
         try {
             log.info("Invalidate session on Application #{} because all ui contexts have been destroyed", id);
             session.invalidate();

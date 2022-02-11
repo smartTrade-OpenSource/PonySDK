@@ -105,7 +105,7 @@ public class PTFileUpload extends PTWidget<FormPanel> {
                 eventInstruction.put(ClientToServerModel.SIZE, getFileSize(fileUpload.getElement()));
                 uiBuilder.sendDataToServer(fileUpload, eventInstruction);
             });
-        } else if (HandlerModel.HANDLER_EMBEDED_STREAM_REQUEST == handlerModel) {
+        } else if (HandlerModel.HANDLER_EMBEDDED_STREAM_REQUEST == handlerModel) {
             // ServerToClientModel.STREAM_REQUEST_ID
             final int streamRequestId = buffer.readBinaryModel().getIntValue();
 
