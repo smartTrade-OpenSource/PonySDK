@@ -52,6 +52,8 @@ public interface DataGridController<K, V> {
 
     boolean isSelected(K k);
 
+    boolean isSelectable(K k);
+
     Collection<V> getLiveSelectedData();
 
     Collection<V> getLiveData(int from, int dataSize);

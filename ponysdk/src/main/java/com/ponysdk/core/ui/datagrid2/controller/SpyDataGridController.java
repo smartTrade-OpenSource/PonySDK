@@ -120,6 +120,11 @@ public abstract class SpyDataGridController<K, V> implements DataGridController<
     }
 
     @Override
+    public boolean isSelectable(K k) {
+        return controller.isSelectable(k);
+    }
+    
+    @Override
     public Collection<V> getLiveSelectedData() {
         return controller.getLiveSelectedData();
     }

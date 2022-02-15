@@ -212,6 +212,11 @@ public abstract class AbstractDataSource<K, V> implements DataGridSource<K, V> {
     }
 
     @Override
+    public boolean isSelectable(final K k) {
+        return true;
+    }
+
+    @Override
     public void unselectAllData() {
         liveSelectedData.clear();
         selectedKeys.clear();

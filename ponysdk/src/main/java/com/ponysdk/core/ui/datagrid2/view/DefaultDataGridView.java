@@ -987,7 +987,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
                 if (pinned) div.setAttribute(PINNED_ATTRIBUTE);
             }
             row.addDomHandler((PClickHandler) event -> {
-                if (key == null) return;
+                if (key == null || !controller.isSelectable(key)) return;
                 if (controller.isSelected(key)) {
                     unselect();
                 } else {
@@ -1045,7 +1045,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
         }
 
         void select() {
-            if (key == null) return;
+            if (key == null || !controller.isSelectable(key)) return;
             controller.select(key);
             adapter.onSelectRow(unpinnedRow);
             unpinnedRow.setAttribute(SELECTED_ATTRIBUTE);
@@ -1067,7 +1067,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
         }
 
         void unselect() {
-            if (key == null) return;
+            if (key == null || !controller.isSelectable(key)) return;
             controller.unselect(key);
             adapter.onUnselectRow(unpinnedRow);
             unpinnedRow.removeAttribute(SELECTED_ATTRIBUTE);
