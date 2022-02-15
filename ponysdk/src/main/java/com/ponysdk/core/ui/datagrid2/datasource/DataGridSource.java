@@ -179,7 +179,12 @@ public interface DataGridSource<K, V> {
     void unselectAllData();
 
     /**
-     * @return if a row is selcted or not
+     * @return if a row is selected or not
      */
     boolean isSelected(final K k);
+
+    /**
+     * @return if a row is selectable or not
+     */
+    boolean isSelectable(final K k);
 }

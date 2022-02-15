@@ -483,6 +483,11 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     }
 
     @Override
+    public boolean isSelectable(K k) {
+        return dataSource.isSelectable(k);
+    }
+
+    @Override
     public Collection<V> getLiveSelectedData() {
         final List<DefaultRow<V>> liveSelectedData = dataSource.getLiveSelectedData();
         return new MappedList<>(liveSelectedData, DefaultRow::getData);
