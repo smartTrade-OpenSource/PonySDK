@@ -349,7 +349,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
     }
 
     public void onUpdateRows(final int from, final int to) {
-        if (from >= to) return;
+        if (from > to) return;
         this.from = Math.min(this.from, from);
         this.to = Math.max(this.to, to);
     }
@@ -361,7 +361,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 
     private void draw() {
         try {
-            if (from >= to) {
+            if (from > to) {
                 hideLoadingDataView();
                 return;
             }
