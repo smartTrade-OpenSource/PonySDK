@@ -172,6 +172,7 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
             initialized = true;
         }
         widget.addDestroyListener(e -> {
+            container.asWidget().removeFromParent();
             valueChangeHandlers.clear();
             closeHandlers.clear();
             listeners.clear();
