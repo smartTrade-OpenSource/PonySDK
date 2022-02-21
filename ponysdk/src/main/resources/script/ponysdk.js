@@ -1045,7 +1045,7 @@ _UTF8 = undefined;
                 }
             }
         }
-        this.clickEventListener = function(event) {
+        this.mouseDownEventListener = function(event) {
             if(that.visible) {
                 if(!that.parentElement) that.parentElement = document.getElementById(that.parentId);
                 var parentRect = that.parentElement.getBoundingClientRect();
@@ -1084,14 +1084,14 @@ _UTF8 = undefined;
     addListeners: function() {
         window.addEventListener('resize', this.resizeEventListener);
         window.addEventListener('wheel', this.scrollEventListener, true);
-        window.addEventListener('click', this.clickEventListener, true);
+        window.addEventListener('mousedown', this.mouseDownEventListener, true);
         window.addEventListener('keydown', this.keyDownEventListener, true);
     },
 
     removeListeners: function() {
         window.removeEventListener('resize', this.resizeEventListener);
         window.removeEventListener('wheel', this.scrollEventListener, true);
-        window.removeEventListener('click', this.clickEventListener, true);
+        window.removeEventListener('mousedown', this.mouseDownEventListener, true);
         window.removeEventListener('keydown', this.keyDownEventListener, true);
     },
 
