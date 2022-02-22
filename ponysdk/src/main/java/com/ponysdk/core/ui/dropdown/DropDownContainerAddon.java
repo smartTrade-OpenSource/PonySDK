@@ -41,6 +41,7 @@ import com.ponysdk.core.ui.model.PEventType;
 public class DropDownContainerAddon extends PAddOnComposite<PPanel> {
 
     private static final String PROPERTY_VISIBILITY = "visibility";
+    private static final String PROPERTY_VISIBLE = "visible";
     private static final String PROPERTY_HIDDEN = "hidden";
     private static final String PROPERTY_POSITION = "position";
     private static final String PROPERTY_ABSOLUTE = "absolute";
@@ -110,7 +111,7 @@ public class DropDownContainerAddon extends PAddOnComposite<PPanel> {
     public void show() {
         visible = true;
         updatePosition();
-        widget.setStyleProperty(PROPERTY_VISIBILITY, null);
+        widget.setStyleProperty(PROPERTY_VISIBILITY, PROPERTY_VISIBLE);
         callTerminalMethod(SET_VISIBLE, true);
 
     }
