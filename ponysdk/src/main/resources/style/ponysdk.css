@@ -42,7 +42,6 @@
 
 .dd-container-widget .dd-container-state {
   position: relative;
-  height: 100%;
   width: 15px;
   background-color: transparent;
   border: none;
@@ -78,6 +77,7 @@
 }
 
 .dd-container-addon {
+  position: absolute;
   display: flex;
   min-width: fit-content;
   padding: 5px;

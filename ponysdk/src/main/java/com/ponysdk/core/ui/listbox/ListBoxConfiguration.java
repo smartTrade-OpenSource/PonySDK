@@ -149,8 +149,8 @@ public final class ListBoxConfiguration extends DefaultDropDownContainerConfigur
     }
 
     @Override
-    public ListBoxConfiguration setClearLabel(final String clearLabel) {
-        super.setClearLabel(clearLabel);
+    public ListBoxConfiguration enableMultiSelectionClear(final String clearLabel) {
+        super.enableMultiSelectionClear(clearLabel);
         return this;
     }
 

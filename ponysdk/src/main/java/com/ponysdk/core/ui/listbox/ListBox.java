@@ -23,7 +23,28 @@
 
 package com.ponysdk.core.ui.listbox;
 
-import com.ponysdk.core.ui.basic.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ponysdk.core.ui.basic.Element;
+import com.ponysdk.core.ui.basic.IsPWidget;
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PCheckBox;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PPanel;
+import com.ponysdk.core.ui.basic.PTextBox;
+import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.PWidget.TabindexMode;
 import com.ponysdk.core.ui.dropdown.DropDownContainer;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
@@ -32,13 +53,6 @@ import com.ponysdk.core.ui.infinitescroll.InfiniteScrollProvider;
 import com.ponysdk.core.ui.listbox.ListBox.ListBoxItem;
 import com.ponysdk.core.ui.listbox.ListBox.ListBoxItem.ListBoxItemType;
 import com.ponysdk.core.ui.model.PKeyCodes;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxConfiguration> {
 
@@ -230,8 +244,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     }
 
     public void setSelected(final D selectedData) {
-        if (configuration.isMultiSelectionEnabled())
-            throw new IllegalArgumentException("Use setSelected(Collection) method instead");
+        if (configuration.isMultiSelectionEnabled()) throw new IllegalArgumentException("Use setSelected(Collection) method instead");
         if (dataProvider == null) {
             if (selectedData == null) {
                 clearSelection();
@@ -254,8 +267,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     }
 
     public void setMultiSelected(final Collection<D> selectedData) {
-        if (!configuration.isMultiSelectionEnabled())
-            throw new IllegalArgumentException("Use setSelected(D) method instead");
+        if (!configuration.isMultiSelectionEnabled()) throw new IllegalArgumentException("Use setSelected(D) method instead");
         if (dataProvider == null) {
             if (selectedData == null || selectedData.isEmpty()) {
                 clearSelection();
@@ -309,8 +321,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     public void removeFromSelection(final D unselectedData) {
         if (unselectedData == null) return;
         if (dataProvider != null) throw new IllegalArgumentException("Only available without a ListBoxDataProvider");
-        if (!configuration.isMultiSelectionEnabled())
-            throw new IllegalArgumentException("Only available in multi selection mode");
+        if (!configuration.isMultiSelectionEnabled()) throw new IllegalArgumentException("Only available in multi selection mode");
         final List<ListBoxItem<D>> selectedItems = getSelectedItems();
         final Iterator<ListBoxItem<D>> iterator = selectedItems.iterator();
         while (iterator.hasNext()) {
@@ -334,8 +345,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
 
     public void setSelectedId(final Object id) {
         if (dataProvider == null) throw new IllegalArgumentException("Only available with a ListBoxDataProvider");
-        if (configuration.isMultiSelectionEnabled())
-            throw new IllegalArgumentException("Use setSelectedIds(...) method instead");
+        if (configuration.isMultiSelectionEnabled()) throw new IllegalArgumentException("Use setSelectedIds(...) method instead");
         clearSelection();
         if (id != null) selectedDataItems.addAll(dataProvider.getDataByIds(List.of(id)));
         updateTitle(selectedDataItems);
@@ -344,8 +354,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
 
     public void setSelectedIds(final Collection<Object> ids) {
         if (dataProvider == null) throw new IllegalArgumentException("Only available with a ListBoxDataProvider");
-        if (!configuration.isMultiSelectionEnabled())
-            throw new IllegalArgumentException("Use setSelectedId(...) method instead");
+        if (!configuration.isMultiSelectionEnabled()) throw new IllegalArgumentException("Use setSelectedId(...) method instead");
         clearSelection();
         if (ids != null && !ids.isEmpty()) {
             if (isSelectionAllowed(ids)) {
@@ -372,7 +381,9 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
             final PPanel panel = Element.newPSimplePanel();
             panel.addStyleName(STYLE_LISTBOX_FILTER);
             textBox = Element.newPTextBox();
-            textBox.setPlaceholder(configuration.getPlaceholder());
+            if (configuration.getPlaceholder() != null) {
+                textBox.setPlaceholder(configuration.getPlaceholder());
+            }
             textBox.setTabindex(TabindexMode.TABULABLE);
             textBox.addKeyDownHandler(e -> {
                 if (e.getKeyCode() == PKeyCodes.SHIFT.getCode()) {
@@ -386,18 +397,18 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
                 if (e.getKeyCode() == PKeyCodes.SHIFT.getCode()) {
                     shiftPressed = false;
                 } else if (e.getKeyCode() != PKeyCodes.TAB.getCode() && //
-                        e.getKeyCode() != PKeyCodes.TAB.getCode() && //
-                        e.getKeyCode() != PKeyCodes.CTRL.getCode() && //
-                        e.getKeyCode() != PKeyCodes.ALT.getCode() && //
-                        e.getKeyCode() != PKeyCodes.PAGE_UP.getCode() && //
-                        e.getKeyCode() != PKeyCodes.PAGE_DOWN.getCode() && //
-                        e.getKeyCode() != PKeyCodes.END.getCode() && //
-                        e.getKeyCode() != PKeyCodes.ENTER.getCode() && //
-                        e.getKeyCode() != PKeyCodes.HOME.getCode() && //
-                        e.getKeyCode() != PKeyCodes.LEFT.getCode() && //
-                        e.getKeyCode() != PKeyCodes.UP.getCode() && //
-                        e.getKeyCode() != PKeyCodes.RIGHT.getCode() && //
-                        e.getKeyCode() != PKeyCodes.DOWN.getCode()) {
+                e.getKeyCode() != PKeyCodes.TAB.getCode() && //
+                e.getKeyCode() != PKeyCodes.CTRL.getCode() && //
+                e.getKeyCode() != PKeyCodes.ALT.getCode() && //
+                e.getKeyCode() != PKeyCodes.PAGE_UP.getCode() && //
+                e.getKeyCode() != PKeyCodes.PAGE_DOWN.getCode() && //
+                e.getKeyCode() != PKeyCodes.END.getCode() && //
+                e.getKeyCode() != PKeyCodes.ENTER.getCode() && //
+                e.getKeyCode() != PKeyCodes.HOME.getCode() && //
+                e.getKeyCode() != PKeyCodes.LEFT.getCode() && //
+                e.getKeyCode() != PKeyCodes.UP.getCode() && //
+                e.getKeyCode() != PKeyCodes.RIGHT.getCode() && //
+                e.getKeyCode() != PKeyCodes.DOWN.getCode()) {
                     updateVisibleItems();
                 }
             });
@@ -406,7 +417,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         } else {
             disableSpaceWhenOpened();
         }
-        if (configuration.isMultiSelectionEnabled()) {
+        if (configuration.isMultiSelectionEnabled() && configuration.getClearLabel() != null) {
             clearMultiButton = Element.newPButton(configuration.getClearLabel());
             clearMultiButton.addStyleName(STYLE_LISTBOX_CLEAR_MULTI);
             clearMultiButton.addClickHandler(e -> {
@@ -453,13 +464,13 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         String title = "";
         if (configuration.isTitleDisplayed()) {
             if (configuration.isTitlePlaceHolder()) {
-                if (selectedItems.isEmpty()) {
+                if (selectedItems.isEmpty() && configuration.getTitle() != null) {
                     mainButton.addStyleName(STYLE_CONTAINER_BUTTON_PLACEHOLDER);
                     text.append(configuration.getTitle());
                 } else {
                     mainButton.removeStyleName(STYLE_CONTAINER_BUTTON_PLACEHOLDER);
                 }
-            } else {
+            } else if (configuration.getTitle() != null) {
                 text.append(configuration.getTitle());
             }
         }
@@ -471,7 +482,9 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
                     text.append(configuration.getTitleSeparator());
                     text.append(STRING_SPACE);
                 }
-                text.append(configuration.getAllLabel());
+                if (configuration.getAllLabel() != null) {
+                    text.append(configuration.getAllLabel());
+                }
             }
             mainButton.setText(text.toString());
             mainButton.setTitle(title);
@@ -659,7 +672,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
                     }
                 } else {
                     this.visibleItems.addAll(
-                            this.items.stream().filter(i -> i.getLabel().toLowerCase().contains(filter)).collect(Collectors.toList()));
+                        this.items.stream().filter(i -> i.getLabel().toLowerCase().contains(filter)).collect(Collectors.toList()));
                 }
             } else {
                 this.visibleItems.addAll(items);
@@ -818,7 +831,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
             return new ListBoxItem<>(label, data, selected);
         }
 
-        public static <D> List<ListBoxItem<D>> of(List<D> data, Function<D, String> labelMapper) {
+        public static <D> List<ListBoxItem<D>> of(final List<D> data, final Function<D, String> labelMapper) {
             return data.stream().map(t -> ListBox.ListBoxItem.of(labelMapper.apply(t), t)).collect(Collectors.toList());
         }
 

@@ -88,9 +88,8 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
         this.listeners = new HashSet<>();
         this.widget = Element.newPFlowPanel();
         this.widget.addStyleName(STYLE_CONTAINER_WIDGET);
-        final String parentId = widget.getID() + "";
-        this.widget.setAttribute(ATTRIBUTE_ID, parentId);
-        this.container = new DropDownContainerAddon(parentId);
+        this.widget.setAttribute(ATTRIBUTE_ID, widget.getID() + "");
+        this.container = new DropDownContainerAddon(widget);
         this.container.addStyleName(STYLE_CONTAINER_ADDON);
     }
 
@@ -150,7 +149,6 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
                 widget.addStyleName(STYLE_CONTAINER_CLEAR_DISABLED);
             }
             widget.addInitializeListener(e -> {
-                widget.getWindow().getPRootPanel().add(container);
                 updateTitle(getValue());
             });
 

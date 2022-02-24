@@ -34,6 +34,7 @@ import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PAddOnComposite;
 import com.ponysdk.core.ui.basic.PPanel;
+import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.event.PDomEvent.Type;
 import com.ponysdk.core.ui.eventbus.EventHandler;
 import com.ponysdk.core.ui.model.PEventType;
@@ -62,14 +63,16 @@ public class DropDownContainerAddon extends PAddOnComposite<PPanel> {
 
     private boolean visible;
 
+    private final PWidget parent;
     private final Set<DropDownContainerAddonListener> listeners;
 
-    public DropDownContainerAddon(final String parentId) {
-        this(parentId, true);
+    public DropDownContainerAddon(final PWidget parent) {
+        this(parent, true);
     }
 
-    public DropDownContainerAddon(final String parentId, final boolean stickLeft) {
-        super(Element.newPFlowPanel(), createJsonObject(parentId, stickLeft));
+    public DropDownContainerAddon(final PWidget parent, final boolean stickLeft) {
+        super(Element.newPFlowPanel(), createJsonObject(parent.getID(), stickLeft));
+        this.parent = parent;
         widget.setStyleProperty(PROPERTY_POSITION, PROPERTY_ABSOLUTE);
         widget.setStyleProperty(PROPERTY_TOP, PROPERTY_0);
         if (stickLeft) {
@@ -110,16 +113,17 @@ public class DropDownContainerAddon extends PAddOnComposite<PPanel> {
 
     public void show() {
         visible = true;
+        parent.getWindow().getPRootPanel().add(widget);
         updatePosition();
         widget.setStyleProperty(PROPERTY_VISIBILITY, PROPERTY_VISIBLE);
         callTerminalMethod(SET_VISIBLE, true);
-
     }
 
     public void hide() {
         visible = false;
         widget.setStyleProperty(PROPERTY_VISIBILITY, PROPERTY_HIDDEN);
         callTerminalMethod(SET_VISIBLE, false);
+        widget.removeFromParent();
     }
 
     public void updatePosition() {
@@ -150,7 +154,7 @@ public class DropDownContainerAddon extends PAddOnComposite<PPanel> {
         this.listeners.remove(listener);
     }
 
-    private static JsonObject createJsonObject(final String parentId, final boolean stickLeft) {
+    private static JsonObject createJsonObject(final int parentId, final boolean stickLeft) {
         final JsonObjectBuilder builder = UIContext.get().getJsonProvider().createObjectBuilder();
         builder.add(PARENT_ID, parentId);
         builder.add(STICK_LEFT, stickLeft);

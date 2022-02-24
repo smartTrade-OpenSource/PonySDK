@@ -112,7 +112,7 @@ public class DefaultDropDownContainerConfiguration implements DropDownContainerC
     }
 
     @Override
-    public DropDownContainerConfiguration setClearLabel(final String clearLabel) {
+    public DropDownContainerConfiguration enableMultiSelectionClear(final String clearLabel) {
         this.clearLabel = clearLabel;
         return this;
     }

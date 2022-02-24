@@ -64,7 +64,7 @@ public interface DropDownContainerConfiguration {
 
     String getClearLabel();
 
-    DropDownContainerConfiguration setClearLabel(final String clearLabel);
+    DropDownContainerConfiguration enableMultiSelectionClear(final String clearLabel);
 
     boolean isSelectionDisplayed();
 
