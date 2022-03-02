@@ -191,7 +191,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
 
     public void removeItem(final String itemLabel) {
         if (dataProvider != null) throw new IllegalCallerException("Not supported in DataProvider mode");
-        final ListBoxItem<D> removedItem = this.items.stream().findFirst().orElse(null);
+        final ListBoxItem<D> removedItem = this.items.stream().filter(i -> i.label.equals(itemLabel)).findFirst().orElse(null);
         if (removedItem != null) {
             final ListBoxItem<D> selectedItem = getSelectedItem();
             this.items.remove(removedItem);
