@@ -24,6 +24,7 @@
 package com.ponysdk.core.ui.dropdown;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import com.ponysdk.core.ui.basic.*;
@@ -69,6 +70,8 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
     private final Set<PCloseHandler> closeHandlers;
     private final Set<POpenHandler> openHandlers;
     private final Set<DropDownContainerListener> listeners;
+
+    private V previousValue;
 
     public DropDownContainer(final C configuration) {
         this.configuration = configuration;
@@ -334,7 +337,12 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
     }
 
     protected void onValueChange() {
-        onValueChange(getValue());
+    	final V value = getValue();
+        final V previous = previousValue;
+        previousValue = value;
+        if (!Objects.equals(value, previous)) {
+        	onValueChange(getValue());
+        }
     }
 
 

@@ -232,7 +232,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     }
 
     public List<ListBoxItem<D>> getSelectedItems() {
-        if (dataProvider != null) return selectedDataItems;
+        if (dataProvider != null) return new ArrayList<>(selectedDataItems);
         return items.stream().filter(ListBoxItem::isSelected).collect(Collectors.toList());
     }
 
