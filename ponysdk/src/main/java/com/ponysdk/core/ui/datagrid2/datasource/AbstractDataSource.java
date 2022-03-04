@@ -122,7 +122,7 @@ public abstract class AbstractDataSource<K, V> implements DataGridSource<K, V> {
         return -1;
     }
 
-    protected final int compare(final DefaultRow<V> r1, final DefaultRow<V> r2) {
+    protected int compare(final DefaultRow<V> r1, final DefaultRow<V> r2) {
 
         for (final Comparator<DefaultRow<V>> sort : sorts.values()) {
             final int diff = sort.compare(r1, r2);
