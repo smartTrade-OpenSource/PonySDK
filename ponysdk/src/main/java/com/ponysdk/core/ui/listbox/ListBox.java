@@ -365,12 +365,44 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         updateVisibleItems();
     }
 
+    public void setSelectedIndex(final int index) {
+        clearSelection();
+        if (dataProvider == null) {
+            try {
+                final ListBoxItem<D> listBoxItem = items.get(index);
+                if (configuration.isMultiSelectionEnabled()) {
+                    setSelectedItems(List.of(listBoxItem));
+                } else {
+                    setSelectedItem(listBoxItem);
+                }
+            } catch (final Exception e) {
+                log.debug("Cannot select index {} ", index, e);
+            }
+        } else {
+            final List<ListBoxItem<D>> data = dataProvider.getData(index, 0, null);
+            if (data != null && !data.isEmpty()) {
+                if (configuration.isMultiSelectionEnabled()) {
+                    setMultiSelected(List.of(data.get(0).data));
+                } else {
+                    setSelected(data.get(0).data);
+                }
+            }
+        }
+    }
+
     public void setComparator(final Comparator<D> dataComparator) {
         this.dataComparator = dataComparator;
     }
 
     public void setGroupComparator(final Comparator<ListBoxItem<D>> groupComparator) {
         this.groupComparator = groupComparator;
+    }
+
+    public int getSize() {
+        if (dataProvider != null) {
+            return dataProvider.getFullDataSize(null);
+        }
+        return items.size();
     }
 
     @Override
