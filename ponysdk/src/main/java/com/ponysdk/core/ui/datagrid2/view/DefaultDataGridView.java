@@ -135,6 +135,8 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
     private final Map<Integer, Integer> sorts = new HashMap<>();
     private final Set<Integer> filters = new HashSet<>();
 
+    private boolean shouldDraw = true;
+
     public DefaultDataGridView() {
         this(new DefaultCacheDataSource<>());
     }
@@ -244,10 +246,10 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
     }
 
     @Override
-    public void scrollTo(int index) {
+    public void scrollTo(final int index) {
         addon.scrollTo(index, controller.getRowCount());
     }
-    
+
     private void onScroll(final int row) {
         showLoadingDataView();
         firstRowIndex = row;
@@ -273,15 +275,19 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
     }
 
     private void onColumnVisibilityChanged(final JsonArray columns, final JsonArray visiblity) {
+        boolean changed = false;
         for (int i = 0; i < columns.size(); i++) {
             final int column = columns.getInt(i);
             final boolean visible = visiblity.getBoolean(i);
             final ColumnDefinition<V> c = adapter.getColumnDefinitions().get(column);
             final ColumnView columnView = getColumnView(c);
+            changed = changed || columnView.visible != visible;
             columnView.visible = visible;
         }
-        onUpdateRows(0, controller.getRowCount());
-        draw();
+        if (changed) {
+            onUpdateRows(0, controller.getRowCount());
+            draw();
+        }
     }
 
     private void onColumnResized(final int column, final int width) {
@@ -361,6 +367,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 
     private void draw() {
         try {
+        	if(!shouldDraw) return;
             if (from > to) {
                 hideLoadingDataView();
                 return;
@@ -654,7 +661,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
             delayedDrawRunnable = null;
             draw();
         } else {
-            delayedDrawRunnable = PScheduler.scheduleAtFixedRate(this::draw, Duration.ofMillis(pollingDelayMillis));
+            delayedDrawRunnable = PScheduler.scheduleWithFixedDelay(this::draw, Duration.ZERO, Duration.ofMillis(pollingDelayMillis));
         }
     }
 
@@ -948,6 +955,16 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
             columnView.extendedCells.remove(k);
         }
     }
+    
+    @Override
+	public void resume() {
+		shouldDraw = true;
+	}
+
+	@Override
+	public void pause() {
+		shouldDraw = false;
+	}
 
     public class Row {
 
@@ -1523,7 +1540,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
             callTerminalMethod("scrollToTop");
         }
 
-        public void scrollTo(int index, int total) {
+        public void scrollTo(final int index, final int total) {
             callTerminalMethod("scrollTo", index, total);
         }
 

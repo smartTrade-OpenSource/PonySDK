@@ -44,6 +44,16 @@ public interface DataGridView<K, V> extends IsPWidget {
     DataGridController<K, V> getController();
 
     /**
+     * Enable draws for this {@link DataGridView}.
+     */
+    void resume();
+    
+    /**
+     * Disable draws for this {@link DataGridView}.
+     */
+    void pause();
+
+    /**
      * Sets a {@link DataGridAdapter} on this view
      */
     void setAdapter(DataGridAdapter<K, V> adapter);
@@ -213,7 +223,7 @@ public interface DataGridView<K, V> extends IsPWidget {
      *            position of the row to scroll to
      */
     void scrollTo(int index);
-    
+
     /**
      * Removes a {@link DrawListener}
      */
