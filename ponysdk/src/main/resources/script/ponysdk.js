@@ -622,7 +622,10 @@ _UTF8 = undefined;
     checkHeight: function(){
         var visibleHeight = $(this.body).height();
   		if(Math.abs(visibleHeight - this.viewHeight)<this.viewHeight*0.01) return;
-		if(this.rowHeight == 0) return;
+		if(this.rowHeight == 0) {
+		    this.updateRowHeight(0); // Initialize rowHeight...
+		    if(this.rowHeight == 0) return;
+		}
         this.loadingData.style.display = null;
 		this.viewHeight = visibleHeight;
 		var c = ((visibleHeight/this.rowHeight)|0)*3;

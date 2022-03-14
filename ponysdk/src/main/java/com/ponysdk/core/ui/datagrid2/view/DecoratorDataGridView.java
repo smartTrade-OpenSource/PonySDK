@@ -181,7 +181,18 @@ public class DecoratorDataGridView<K, V> implements DataGridView<K, V> {
     }
 
     @Override
-    public void scrollTo(int index) {
+    public void scrollTo(final int index) {
         view.scrollTo(index);
     }
+
+    @Override
+    public void resume() {
+		view.resume();
+	}
+
+    @Override
+    public void pause() {
+		view.pause();
+	}
+
 }
