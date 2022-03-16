@@ -37,7 +37,6 @@ import com.ponysdk.core.ui.datagrid2.cell.ExtendedCell;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfig;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfigBuilder;
-import com.ponysdk.core.ui.datagrid2.data.LiveDataView;
 import com.ponysdk.core.ui.datagrid2.view.DataGridSnapshot;
 
 /**
@@ -105,13 +104,13 @@ public abstract class SpyDataGridController<K, V> implements DataGridController<
     protected abstract void onDataUpdate();
 
     @Override
-    public void renderCell(final ColumnDefinition<V> column, final int row, final Cell<V> widget, final LiveDataView<V> result) {
-        controller.renderCell(column, row, widget, result);
+    public void renderCell(final ColumnDefinition<V> column, final Cell<V> widget, final V data) {
+        controller.renderCell(column, widget, data);
     }
 
     @Override
-    public void setValueOnExtendedCell(final int row, final ExtendedCell<V> widget, final LiveDataView<V> result) {
-        setValueOnExtendedCell(row, widget, result);
+    public void setValueOnExtendedCell(final ExtendedCell<V> widget, final V data) {
+        setValueOnExtendedCell(widget, data);
     }
 
     @Override
@@ -120,7 +119,7 @@ public abstract class SpyDataGridController<K, V> implements DataGridController<
     }
 
     @Override
-    public boolean isSelectable(K k) {
+    public boolean isSelectable(final K k) {
         return controller.isSelectable(k);
     }
     

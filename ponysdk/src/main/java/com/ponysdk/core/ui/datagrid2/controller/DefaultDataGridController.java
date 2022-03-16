@@ -118,13 +118,13 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
         return null;
     }
 
-    private synchronized Object getRenderingHelper(final DefaultRow<V> row, final Column<V> column) {
+    private synchronized Object getRenderingHelper(final V data, final Column<V> column) {
         // FIXME : possible performance optimisation
-        final Object[] renderingHelpers = renderingHelpersCache.computeIfAbsent(row, r -> new Object[columns.size()]);
+        final Object[] renderingHelpers = renderingHelpersCache.computeIfAbsent(data, r -> new Object[columns.size()]);
         Object helper = renderingHelpers[column.getID()];
         if (helper == NO_RENDERING_HELPER) return null;
         if (helper == null) {
-            helper = column.getColDef().getRenderingHelper(row.getData());
+            helper = column.getColDef().getRenderingHelper(data);
             renderingHelpers[column.getID()] = helper == null ? NO_RENDERING_HELPER : helper;
         }
         return helper;
@@ -243,18 +243,16 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     }
 
     @Override
-    public void renderCell(final ColumnDefinition<V> colDef, final int row, final Cell<V> cell, final LiveDataView<V> result) {
+    public void renderCell(final ColumnDefinition<V> colDef, final Cell<V> cell, final V data) {
         checkAdapter();
         final Column<V> column = getColumn(colDef);
-        final DefaultRow<V> r = result.getLiveData().get(row);
-        cell.render(r.getData(), getRenderingHelper(r, column));
+        cell.render(data, getRenderingHelper(data, column));
     }
 
     @Override
-    public void setValueOnExtendedCell(final int row, final ExtendedCell<V> extendedCell, final LiveDataView<V> result) {
+    public void setValueOnExtendedCell(final ExtendedCell<V> extendedCell, final V data) {
         checkAdapter();
-        final DefaultRow<V> r = result.getLiveData().get(row);
-        extendedCell.setValue(r.getData());
+        extendedCell.setValue(data);
     }
 
     @Override
@@ -295,6 +293,7 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
         refresh();
     }
 
+    @Override
     public void sort() {
         dataSource.sort();
         refresh();
@@ -483,7 +482,7 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     }
 
     @Override
-    public boolean isSelectable(K k) {
+    public boolean isSelectable(final K k) {
         return dataSource.isSelectable(k);
     }
 
@@ -536,15 +535,15 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
 
         @Override
         public Object get() {
-            return getRenderingHelper(row, column);
+            return getRenderingHelper(row.getData(), column);
         }
 
     }
 
-    public static class RenderingHelpersCache<V> extends LinkedHashMap<DefaultRow<V>, Object[]> {
+    public static class RenderingHelpersCache<V> extends LinkedHashMap<V, Object[]> {
 
         @Override
-        protected boolean removeEldestEntry(final Map.Entry<DefaultRow<V>, Object[]> eldest) {
+        protected boolean removeEldestEntry(final Map.Entry<V, Object[]> eldest) {
             return size() > RENDERING_HELPERS_CACHE_CAPACITY;
         }
     }

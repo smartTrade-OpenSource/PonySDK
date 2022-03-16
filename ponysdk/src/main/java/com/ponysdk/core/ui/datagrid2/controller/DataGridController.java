@@ -37,7 +37,6 @@ import com.ponysdk.core.ui.datagrid2.cell.ExtendedCell;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfig;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfigBuilder;
-import com.ponysdk.core.ui.datagrid2.data.LiveDataView;
 import com.ponysdk.core.ui.datagrid2.view.DataGridSnapshot;
 
 /**
@@ -46,9 +45,9 @@ import com.ponysdk.core.ui.datagrid2.view.DataGridSnapshot;
 
 public interface DataGridController<K, V> {
 
-    void renderCell(ColumnDefinition<V> column, int row, Cell<V> widget, LiveDataView<V> result);
+    void renderCell(ColumnDefinition<V> column, Cell<V> widget, V data);
 
-    void setValueOnExtendedCell(int row, ExtendedCell<V> widget, LiveDataView<V> result);
+    void setValueOnExtendedCell(ExtendedCell<V> widget, V data);
 
     boolean isSelected(K k);
 

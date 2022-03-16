@@ -473,43 +473,54 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
             td.removeAttribute(PENDING_ATTRIBUTE);
             cell.asPendingWidget().setVisible(false);
             if (extendedCellHandler == null) {
-                showCellWidget(row, cell, columnView, selected, previousKey, td, result);
+                showCellWidget(cell, columnView, selected, previousKey, row.data);
             } else {
-                showExtendedCellWidget(row, cell, td, extendedCellHandler, result);
+                showExtendedCellWidget(row, cell, columnView, previousKey, extendedCellHandler, row.data);
             }
         }
 
     }
 
-    private void showExtendedCellWidget(final Row row, final Cell<V> cell, final PComplexPanel td,
-                                        final ExtendedCellHandler extendedCellHandler, final LiveDataView<V> result) {
+    private void showExtendedCellWidget(final Row row, final Cell<V> cell, final ColumnView columnView, final K previousKey,
+                                        final ExtendedCellHandler extendedCellHandler, final V data) {
+        final PComplexPanel td = (PComplexPanel) cell.asWidget().getParent();
         td.setAttribute(EXTENDED_ATTRIBUTE);
         extendedCellHandler.row = row;
         row.extended = true;
         cell.asWidget().setVisible(false);
-        if (extendedCellHandler.cell.asWidget().getParent() != td) {
-            if (extendedCellHandler.cell.asWidget().getParent() != null) {
-                extendedCellHandler.cell.beforeRemove();
-                extendedCellHandler.cell.asWidget().removeFromParent();
+        if (extendedCellHandler.extendedCell.asWidget().getParent() != td) {
+            if (extendedCellHandler.extendedCell.asWidget().getParent() != null) {
+                extendedCellHandler.extendedCell.beforeRemove();
+                extendedCellHandler.extendedCell.asWidget().removeFromParent();
             }
-            td.add(extendedCellHandler.cell);
-            extendedCellHandler.cell.afterAdd();
+            td.add(extendedCellHandler.extendedCell);
+            extendedCellHandler.extendedCell.afterAdd();
         }
-        controller.setValueOnExtendedCell(row.getRelativeIndex(), extendedCellHandler.cell, result);
-    }
-
-    private void showCellWidget(final Row row, final Cell<V> cell, final ColumnView columnView, final boolean selected,
-                                final K previousKey, final PComplexPanel td, final LiveDataView<V> result) {
-        td.removeAttribute(EXTENDED_ATTRIBUTE);
-        cell.asWidget().setVisible(true);
-        controller.renderCell(columnView.column, row.getRelativeIndex(), cell, result);
-        if (td.getWidgetCount() > 2) {
+        if (td.getWidgetCount() > 3) {
+            // If this TD still contains an old cell content, we need to remove it
             final ExtendedCellHandler previousExtendedCellHandler = columnView.extendedCells.get(previousKey);
-            if (previousExtendedCellHandler != null && previousExtendedCellHandler.cell.asWidget().getParent() != null) {
-                previousExtendedCellHandler.cell.beforeRemove();
+            if (previousExtendedCellHandler != null && previousExtendedCellHandler.extendedCell.asWidget().getParent() != null) {
+                previousExtendedCellHandler.extendedCell.beforeRemove();
             }
             td.remove(2);
         }
+        controller.setValueOnExtendedCell(extendedCellHandler.extendedCell, data);
+    }
+
+    private void showCellWidget(final Cell<V> cell, final ColumnView columnView, final boolean selected, final K previousKey,
+                                final V data) {
+        final PComplexPanel td = (PComplexPanel) cell.asWidget().getParent();
+        td.removeAttribute(EXTENDED_ATTRIBUTE);
+        cell.asWidget().setVisible(true);
+        if (td.getWidgetCount() > 2) {
+            // If this TD still contains an old cell content, we need to remove it
+            final ExtendedCellHandler previousExtendedCellHandler = columnView.extendedCells.get(previousKey);
+            if (previousExtendedCellHandler != null && previousExtendedCellHandler.extendedCell.asWidget().getParent() != null) {
+                previousExtendedCellHandler.extendedCell.beforeRemove();
+            }
+            td.remove(2);
+        }
+        controller.renderCell(columnView.column, cell, data);
         if (selected) cell.select();
         else cell.unselect();
     }
@@ -731,7 +742,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
         }
         for (final ColumnView column : columnViews.values()) {
             for (final Map.Entry<K, ExtendedCellHandler> entry : column.extendedCells.entrySet()) {
-                if (controller.isSelected(entry.getKey())) entry.getValue().cell.select();
+                if (controller.isSelected(entry.getKey())) entry.getValue().extendedCell.select();
             }
         }
     }
@@ -745,7 +756,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
         }
         for (final ColumnView column : columnViews.values()) {
             for (final ExtendedCellHandler handler : column.extendedCells.values()) {
-                handler.cell.unselect();
+                handler.extendedCell.unselect();
             }
         }
     }
@@ -955,7 +966,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
             columnView.extendedCells.remove(k);
         }
     }
-    
+
     @Override
     public void resume() {
         shouldDraw = true;
@@ -1031,7 +1042,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
             div.setStyleProperty("vertical-align", "top");
 
             final Cell<V> cell = columnView.column.createCell();
-            cell.setController(new SimpleCellController(this, columnView));
+            cell.setController(new SimpleCellController(cell, this, columnView));
             div.add(cell);
             cell.asWidget().setVisible(columnView.visible);
 
@@ -1078,7 +1089,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
                 for (final ColumnView column : columnViews.values()) {
                     final ExtendedCellHandler handler = column.extendedCells.get(key);
                     if (handler == null) continue;
-                    handler.cell.select();
+                    handler.extendedCell.select();
                 }
             }
         }
@@ -1100,7 +1111,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
                 for (final ColumnView column : columnViews.values()) {
                     final ExtendedCellHandler handler = column.extendedCells.get(key);
                     if (handler == null) continue;
-                    handler.cell.unselect();
+                    handler.extendedCell.unselect();
                 }
             }
         }
@@ -1269,11 +1280,12 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 
     private class SimpleCellController implements CellController<V> {
 
+        private final Cell<V> cell;
         private final Row row;
         private final ColumnView columnView;
 
-        SimpleCellController(final DefaultDataGridView<K, V>.Row row, final ColumnView column) {
-            super();
+        SimpleCellController(final Cell<V> cell, final DefaultDataGridView<K, V>.Row row, final ColumnView column) {
+            this.cell = cell;
             this.row = row;
             this.columnView = column;
         }
@@ -1281,7 +1293,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
         @Override
         public void extendedMode(final ExtendedCell<V> extendedCell) {
             if (row.key == null) return;
-            final ExtendedCellHandler handler = new ExtendedCellHandler(extendedCell, columnView, row);
+            final ExtendedCellHandler handler = new ExtendedCellHandler(cell, extendedCell, columnView, row);
             columnView.extendedCells.put(row.key, handler);
             extendedCell.setController(handler);
 
@@ -1289,7 +1301,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
             else extendedCell.unselect();
 
             onUpdateRows(row.getAbsoluteIndex(), row.getAbsoluteIndex() + 1);
-            draw();
+            showExtendedCellWidget(row, cell, columnView, null, handler, row.data);
         }
 
         @Override
@@ -1306,14 +1318,15 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 
     private class ExtendedCellHandler implements ExtendedCellController<V> {
 
-        private final ExtendedCell<V> cell;
+        private final Cell<V> cell;
+        private final ExtendedCell<V> extendedCell;
         private final ColumnView column;
         private final K key;
         private Row row;
 
-        ExtendedCellHandler(final ExtendedCell<V> cell, final ColumnView column, final Row row) {
-            super();
+        ExtendedCellHandler(final Cell<V> cell, final ExtendedCell<V> extendedCell, final ColumnView column, final Row row) {
             this.cell = cell;
+            this.extendedCell = extendedCell;
             this.key = row.key;
             this.column = column;
             this.row = row;
@@ -1324,7 +1337,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
             column.extendedCells.remove(key);
             if (row == null) return;
             onUpdateRows(row.getAbsoluteIndex(), row.getAbsoluteIndex() + 1);
-            draw();
+            showCellWidget(cell, column, false, null, row.data); // FIXME: selection
         }
 
         @Override
