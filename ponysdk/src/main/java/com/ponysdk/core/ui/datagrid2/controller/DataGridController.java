@@ -33,7 +33,6 @@ import java.util.function.Supplier;
 
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.cell.Cell;
-import com.ponysdk.core.ui.datagrid2.cell.ExtendedCell;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfig;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfigBuilder;
@@ -45,9 +44,7 @@ import com.ponysdk.core.ui.datagrid2.view.DataGridSnapshot;
 
 public interface DataGridController<K, V> {
 
-    void renderCell(ColumnDefinition<V> column, Cell<V> widget, V data);
-
-    void setValueOnExtendedCell(ExtendedCell<V> widget, V data);
+    void renderCell(ColumnDefinition<V> column, Cell<V, ?> widget, V data);
 
     boolean isSelected(K k);
 

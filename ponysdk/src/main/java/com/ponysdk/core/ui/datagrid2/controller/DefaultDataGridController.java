@@ -42,7 +42,6 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.cell.Cell;
-import com.ponysdk.core.ui.datagrid2.cell.ExtendedCell;
 import com.ponysdk.core.ui.datagrid2.column.Column;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfig;
@@ -243,16 +242,10 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     }
 
     @Override
-    public void renderCell(final ColumnDefinition<V> colDef, final Cell<V> cell, final V data) {
+    public void renderCell(final ColumnDefinition<V> colDef, final Cell<V, ?> cell, final V data) {
         checkAdapter();
         final Column<V> column = getColumn(colDef);
         cell.render(data, getRenderingHelper(data, column));
-    }
-
-    @Override
-    public void setValueOnExtendedCell(final ExtendedCell<V> extendedCell, final V data) {
-        checkAdapter();
-        extendedCell.setValue(data);
     }
 
     @Override

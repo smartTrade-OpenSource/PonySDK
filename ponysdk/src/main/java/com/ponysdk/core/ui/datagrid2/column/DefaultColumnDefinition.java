@@ -32,8 +32,8 @@ import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PComplexPanel;
 import com.ponysdk.core.ui.basic.PLabel;
-import com.ponysdk.core.ui.datagrid2.cell.Cell;
 import com.ponysdk.core.ui.datagrid2.cell.LabelCell;
+import com.ponysdk.core.ui.datagrid2.cell.PrimaryCell;
 
 /**
  * @author mbagdouri
@@ -93,7 +93,7 @@ public class DefaultColumnDefinition<V> implements ColumnDefinition<V> {
     }
 
     @Override
-    public Cell<V> createCell() {
+    public PrimaryCell<V> createCell() {
         return new LabelCell<>(columnEditFn, (int) (getDefaultWidth() * 0.8));
     }
 

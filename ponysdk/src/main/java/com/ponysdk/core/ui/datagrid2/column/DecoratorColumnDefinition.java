@@ -27,7 +27,7 @@ import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 
 import com.ponysdk.core.ui.basic.IsPWidget;
-import com.ponysdk.core.ui.datagrid2.cell.Cell;
+import com.ponysdk.core.ui.datagrid2.cell.PrimaryCell;
 
 /**
  * @author mbagdouri
@@ -91,7 +91,7 @@ public class DecoratorColumnDefinition<V> implements ColumnDefinition<V> {
     }
 
     @Override
-    public Cell<V> createCell() {
+    public PrimaryCell<V> createCell() {
         return column.createCell();
     }
 

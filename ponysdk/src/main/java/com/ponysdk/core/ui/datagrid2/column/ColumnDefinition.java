@@ -28,6 +28,7 @@ import java.util.function.Supplier;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.cell.Cell;
+import com.ponysdk.core.ui.datagrid2.cell.PrimaryCell;
 import com.ponysdk.core.ui.datagrid2.view.DataGridView;
 
 /**
@@ -75,7 +76,7 @@ public interface ColumnDefinition<V> extends ColumnActionListener<V> {
      * @return a new widget that will be used as a cell in the body of the
      *         {@link DataGridView} for this column.
      */
-    Cell<V> createCell();
+    PrimaryCell<V> createCell();
 
     /**
      * Returns an intermediate object that will be cached in order to be used

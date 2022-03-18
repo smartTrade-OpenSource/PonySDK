@@ -28,25 +28,22 @@ import java.util.function.BiConsumer;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PWidget;
-import com.ponysdk.core.ui.basic.event.PBlurEvent;
-import com.ponysdk.core.ui.basic.event.PBlurHandler;
 import com.ponysdk.core.ui.model.PEventType;
 import com.ponysdk.core.ui.model.PKeyCodes;
 
 /**
  * @author mbagdouri
  */
-public class TextBoxExtendedCell<V> implements ExtendedCell<V>, PBlurHandler {
+public class TextBoxExtendedCell<V> implements ExtendedCell<V> {
 
     private final PTextBox textBox = Element.newPTextBox();
     private ExtendedCellController<V> extendedCellController;
-    private boolean focused = false;
 
     public TextBoxExtendedCell(final String text, final BiConsumer<V, String> columnEditFn, final int width) {
         textBox.setText(text);
         textBox.addBlurHandler(e -> {
             if (extendedCellController == null) return;
-            extendedCellController.cancelExtendedMode();
+            extendedCellController.setPrimaryMode();
         });
         textBox.addClickHandler(e -> {
 
@@ -56,14 +53,11 @@ public class TextBoxExtendedCell<V> implements ExtendedCell<V>, PBlurHandler {
         textBox.addKeyUpHandler(e -> {
             if (extendedCellController == null) return;
             if (e.getKeyCode() == PKeyCodes.ENTER.getCode()) {
-                extendedCellController.cancelExtendedMode();
+                extendedCellController.setPrimaryMode();
                 extendedCellController.updateValue((v) -> columnEditFn.accept(v, textBox.getText()));
             } else if (e.getKeyCode() == PKeyCodes.ESCAPE.getCode()) {
-                extendedCellController.cancelExtendedMode();
+                extendedCellController.setPrimaryMode();
             }
-        });
-        textBox.addFocusHandler(e -> {
-            focused = true;
         });
         textBox.setWidth(width + "px");
     }
@@ -86,24 +80,7 @@ public class TextBoxExtendedCell<V> implements ExtendedCell<V>, PBlurHandler {
     public void unselect() {
     }
 
-    @Override
-    public void setValue(final V v) {
-    }
-
-    @Override
-    public void beforeRemove() {
-        textBox.removeDomHandler(this, PBlurEvent.TYPE);
-    }
-
-    @Override
-    public void afterAdd() {
-        if (focused) textBox.focusPreventScroll();
-        textBox.addBlurHandler(this);
-    }
-
-    @Override
-    public void onBlur(final PBlurEvent event) {
-        focused = false;
-    }
-
+	@Override
+	public void render(V data, Object renderingHelper) {
+	}
 }

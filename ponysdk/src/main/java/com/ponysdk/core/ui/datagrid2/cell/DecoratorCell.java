@@ -23,17 +23,18 @@
 
 package com.ponysdk.core.ui.datagrid2.cell;
 
+import java.util.Optional;
+
 import com.ponysdk.core.ui.basic.PWidget;
 
 /**
  * @author mbagdouri
  */
-public class DecoratorCell<V> implements Cell<V> {
+public class DecoratorCell<V, DELEGATE extends PrimaryCell<V>> implements PrimaryCell<V> {
 
-    private final Cell<V> cell;
+    private final DELEGATE cell;
 
-    public DecoratorCell(final Cell<V> cell) {
-        super();
+    public DecoratorCell(final DELEGATE cell) {
         this.cell = cell;
     }
 
@@ -48,12 +49,17 @@ public class DecoratorCell<V> implements Cell<V> {
     }
 
     @Override
+    public Optional<ExtendedCell<V>> genExtended() {
+        return cell.genExtended();
+    }
+
+    @Override
     public void render(final V data, final Object renderingHelper) {
         cell.render(data, renderingHelper);
     }
 
     @Override
-    public void setController(final CellController<V> cellController) {
+    public void setController(final PrimaryCellController<V> cellController) {
         cell.setController(cellController);
     }
 
@@ -67,7 +73,7 @@ public class DecoratorCell<V> implements Cell<V> {
         cell.unselect();
     }
 
-    protected Cell<V> getCell() {
+    public DELEGATE getDelegate() {
         return cell;
     }
 }

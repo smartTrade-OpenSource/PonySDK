@@ -33,7 +33,6 @@ import java.util.function.Supplier;
 
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.cell.Cell;
-import com.ponysdk.core.ui.datagrid2.cell.ExtendedCell;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfig;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfigBuilder;
@@ -104,13 +103,8 @@ public abstract class SpyDataGridController<K, V> implements DataGridController<
     protected abstract void onDataUpdate();
 
     @Override
-    public void renderCell(final ColumnDefinition<V> column, final Cell<V> widget, final V data) {
+    public void renderCell(final ColumnDefinition<V> column, final Cell<V, ?> widget, final V data) {
         controller.renderCell(column, widget, data);
-    }
-
-    @Override
-    public void setValueOnExtendedCell(final ExtendedCell<V> widget, final V data) {
-        setValueOnExtendedCell(widget, data);
     }
 
     @Override
