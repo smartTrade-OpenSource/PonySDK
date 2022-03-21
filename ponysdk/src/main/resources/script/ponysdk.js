@@ -1107,8 +1107,10 @@ _UTF8 = undefined;
         var windowScrollTop = $(window).scrollTop();
         if(windowBot < this.element.offsetHeight && offsets.top > this.element.offsetHeight) {
             this.element.style.top = offsets.top - this.element.offsetHeight + windowScrollTop + 'px';
+            this.element.setAttribute('vertical-position', 'top');
         } else {
             this.element.style.top = offsets.top + offsets.height + windowScrollTop + 'px';
+            this.element.setAttribute('vertical-position', 'down');
         }
         // Right or left display
         var windowScrollLeft = $(window).scrollLeft();
@@ -1116,15 +1118,19 @@ _UTF8 = undefined;
             var windowRight = window.innerWidth - offsets.left - offsets.width;
             if(windowRight < this.element.offsetWidth && offsets.left > this.element.offsetWidth) {
                 this.element.style.left = offsets.left + offsets.width - this.element.offsetWidth + windowScrollLeft + 'px';
+                this.element.setAttribute('horizontal-position', 'right');
             } else {
                 this.element.style.left = offsets.left + windowScrollLeft + 'px';
+                this.element.setAttribute('horizontal-position', 'left');
             }
         } else {
             var windowLeft = offsets.left;
             if(windowLeft < this.element.offsetWidth && window.innerWidth - offsets.right > this.element.offsetWidth) {
                 this.element.style.right = window.innerWidth - offsets.right + offsets.width - this.element.offsetWidth - windowScrollLeft + 'px';
+                this.element.setAttribute('horizontal-position', 'left');
             } else {
                 this.element.style.right = window.innerWidth - offsets.right - windowScrollLeft + 'px';
+                this.element.setAttribute('horizontal-position', 'right');
             }
         }
     },
