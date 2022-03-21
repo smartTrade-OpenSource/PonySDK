@@ -35,6 +35,7 @@ public class DefaultDropDownContainerConfiguration implements DropDownContainerC
     private boolean selectionDisplayed = true;
     private DropDownCloseOnClickMode closeOnClickMode = DropDownCloseOnClickMode.DEFAULT;
     private boolean clearTitleButtonEnabled = true;
+    private boolean eventOnlyEnabled;
 
     public DefaultDropDownContainerConfiguration() {
         super();
@@ -147,6 +148,15 @@ public class DefaultDropDownContainerConfiguration implements DropDownContainerC
     @Override
     public DropDownContainerConfiguration disableClearTitleButton() {
         this.clearTitleButtonEnabled = false;
+        return this;
+    }
+
+    public boolean isEventOnlyEnabled(){
+        return this.eventOnlyEnabled;
+    }
+
+    public DropDownContainerConfiguration enabledEventOnly(){
+        this.eventOnlyEnabled = true;
         return this;
     }
 }

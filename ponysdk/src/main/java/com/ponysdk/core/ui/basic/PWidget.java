@@ -244,8 +244,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     public void setAttribute(final String name, final String value) {
         if (name == null) return;
 
-        if (!safeElementAttributes().containsKey(name)) safeElementAttributes().put(name, value);
-        else if (Objects.equals(safeElementAttributes().put(name, value), value)) return;
+        if(Objects.equals(safeElementAttributes().put(name, value), value)) return;
 
         saveUpdate(writer -> {
             writer.write(ServerToClientModel.PUT_ATTRIBUTE_KEY, name);

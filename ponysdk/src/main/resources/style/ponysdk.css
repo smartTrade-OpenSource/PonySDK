@@ -158,6 +158,11 @@
   padding-top: 3px;
 }
 
+.dd-listbox-container .dd-container-default .is-viewport .is-container .is-item .gwt-Label[disabled] {
+  cursor: not-allowed;
+  opacity: .60;
+}
+
 .dd-listbox-container .dd-container-default .is-viewport .is-container .is-item.dd-listbox-item-group {
   font-weight: bold;
   cursor: default;

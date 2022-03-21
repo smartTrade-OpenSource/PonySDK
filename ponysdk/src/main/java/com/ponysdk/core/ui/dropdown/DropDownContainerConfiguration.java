@@ -23,6 +23,8 @@
 
 package com.ponysdk.core.ui.dropdown;
 
+import com.ponysdk.core.ui.listbox.ListBoxConfiguration;
+
 public interface DropDownContainerConfiguration {
 
     public enum DropDownCloseOnClickMode {
@@ -77,4 +79,8 @@ public interface DropDownContainerConfiguration {
     boolean isClearTitleButtonEnabled();
 
     DropDownContainerConfiguration disableClearTitleButton();
+
+    boolean isEventOnlyEnabled();
+
+    DropDownContainerConfiguration enabledEventOnly();
 }

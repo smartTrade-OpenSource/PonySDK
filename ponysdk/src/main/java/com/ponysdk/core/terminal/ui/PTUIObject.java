@@ -69,7 +69,9 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
         } else if (ServerToClientModel.PUT_ATTRIBUTE_KEY == model) {
             final String value = binaryModel.getStringValue();
             // ServerToClientModel.ATTRIBUTE_VALUE
-            uiObject.getElement().setAttribute(value, buffer.readBinaryModel().getStringValue());
+            String attrValue = buffer.readBinaryModel().getStringValue();
+            if(attrValue == null) attrValue = "";
+            uiObject.getElement().setAttribute(value, attrValue);
             return true;
         } else if (ServerToClientModel.PUT_STYLE_KEY == model) {
             final String value = binaryModel.getStringValue();

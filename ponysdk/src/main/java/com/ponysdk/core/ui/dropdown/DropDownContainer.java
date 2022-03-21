@@ -26,21 +26,9 @@ package com.ponysdk.core.ui.dropdown;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.IsPWidget;
-import com.ponysdk.core.ui.basic.PButton;
-import com.ponysdk.core.ui.basic.PPanel;
-import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.core.ui.basic.PWidget.TabindexMode;
-import com.ponysdk.core.ui.basic.event.PBlurEvent;
-import com.ponysdk.core.ui.basic.event.PBlurHandler;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
-import com.ponysdk.core.ui.basic.event.PCloseEvent;
-import com.ponysdk.core.ui.basic.event.PCloseHandler;
-import com.ponysdk.core.ui.basic.event.PFocusEvent;
-import com.ponysdk.core.ui.basic.event.PFocusHandler;
-import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
-import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
+import com.ponysdk.core.ui.basic.event.*;
 import com.ponysdk.core.ui.model.PEventType;
 import com.ponysdk.core.ui.model.PKeyCodes;
 
@@ -75,16 +63,18 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
 
     protected final C configuration;
 
-    private final PPanel widget;
+    private final PFlowPanel widget;
     private final DropDownContainerAddon container;
     private final Set<PValueChangeHandler<V>> valueChangeHandlers;
     private final Set<PCloseHandler> closeHandlers;
+    private final Set<POpenHandler> openHandlers;
     private final Set<DropDownContainerListener> listeners;
 
     public DropDownContainer(final C configuration) {
         this.configuration = configuration;
         this.valueChangeHandlers = new HashSet<>();
         this.closeHandlers = new HashSet<>();
+        this.openHandlers = new HashSet<>();
         this.listeners = new HashSet<>();
         this.widget = Element.newPFlowPanel();
         this.widget.addStyleName(STYLE_CONTAINER_WIDGET);
@@ -100,7 +90,7 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
     private boolean focused;
 
     @Override
-    public PWidget asWidget() {
+    public PFlowPanel asWidget() {
         if (!initialized) {
             widget.setTabindex(TabindexMode.TABULABLE);
             widget.stopEvent(PEventType.KEYEVENTS);
@@ -148,9 +138,12 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
             } else {
                 widget.addStyleName(STYLE_CONTAINER_CLEAR_DISABLED);
             }
-            widget.addInitializeListener(e -> {
-                updateTitle(getValue());
-            });
+
+            if(!configuration.isEventOnlyEnabled()){
+                widget.addInitializeListener(e -> {
+                    updateTitle(getValue());
+                });
+            }
 
             if (customContainer != null) {
                 container.add(customContainer);
@@ -173,6 +166,7 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
             container.asWidget().removeFromParent();
             valueChangeHandlers.clear();
             closeHandlers.clear();
+            openHandlers.clear();
             listeners.clear();
         });
         return widget;
@@ -277,6 +271,15 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
         closeHandlers.remove(handler);
     }
 
+    public void addOpenHandler(final POpenHandler handler) {
+        openHandlers.add(handler);
+    }
+
+    public void removeOpenHandler(final POpenHandler handler) {
+        openHandlers.remove(handler);
+    }
+
+
     public void addListener(final DropDownContainerListener listener) {
         listeners.add(listener);
     }
@@ -291,6 +294,7 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
 
     protected void updateTitle(final V value) {
         if (!isInitialized()) return;
+        if(configuration.isEventOnlyEnabled()) return;
         final StringBuilder text = new StringBuilder();
         if (configuration.isTitleDisplayed()) {
             if (configuration.isTitlePlaceHolder()) {
@@ -330,7 +334,12 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
     }
 
     protected void onValueChange() {
-        final PValueChangeEvent<V> event = new PValueChangeEvent<>(this, getValue());
+        onValueChange(getValue());
+    }
+
+
+    protected void onValueChange(V value) {
+        final PValueChangeEvent<V> event = new PValueChangeEvent<>(this, value);
         valueChangeHandlers.forEach(l -> l.onValueChange(event));
     }
 
@@ -374,6 +383,8 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
             beforeContainerVisible();
             container.show();
             afterContainerVisible();
+            final POpenEvent event = new POpenEvent(this);
+            openHandlers.forEach(l -> l.onOpen(event));
         } else if (!visible && isOpen()) {
             widget.removeStyleName(STYLE_CONTAINER_OPENED);
             container.removeStyleName(STYLE_CONTAINER_WIDGET_OPENED);

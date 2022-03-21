@@ -35,7 +35,8 @@ public final class ListBoxConfiguration extends DefaultDropDownContainerConfigur
     private Integer selectionLimit;
     private Integer displaySelectionLimit;
     private String displaySelectionLabel;
-    private boolean groupEnabled = false;
+    private boolean groupEnabled;
+    private boolean eventOnlyEnabled;
 
     public String getNoMatchesLabel() {
         return noMatchesLabel;
