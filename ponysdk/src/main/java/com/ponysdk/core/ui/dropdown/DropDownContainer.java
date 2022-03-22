@@ -397,7 +397,7 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
             widget.removeStyleName(STYLE_CONTAINER_OPENED);
             container.removeStyleName(STYLE_CONTAINER_WIDGET_OPENED);
             container.hide();
-            updateTitle(getValue());
+            if(!configuration.isEventOnlyEnabled())updateTitle(getValue());
             afterContainerClose();
             final PCloseEvent event = new PCloseEvent(this);
             closeHandlers.forEach(l -> l.onClose(event));
