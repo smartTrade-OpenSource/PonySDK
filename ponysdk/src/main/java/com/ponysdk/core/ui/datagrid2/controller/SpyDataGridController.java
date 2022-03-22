@@ -255,7 +255,12 @@ public abstract class SpyDataGridController<K, V> implements DataGridController<
     }
 
     @Override
+    public void refreshOnNextDraw() {
+        controller.refreshOnNextDraw();
+    }
+    
+    @Override
     public void refresh() {
-        controller.refresh();
+    	controller.refresh();
     }
 }

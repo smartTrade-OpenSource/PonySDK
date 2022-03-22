@@ -44,6 +44,7 @@ import com.ponysdk.core.ui.datagrid2.controller.DefaultDataGridController;
 import com.ponysdk.core.ui.datagrid2.controller.DefaultDataGridController.RenderingHelpersCache;
 import com.ponysdk.core.ui.datagrid2.data.AbstractFilter;
 import com.ponysdk.core.ui.datagrid2.data.DefaultRow;
+import com.ponysdk.core.util.MappedList;
 
 /**
  * @author mabbas
@@ -60,8 +61,8 @@ public abstract class AbstractDataSource<K, V> implements DataGridSource<K, V> {
     protected int rowCounter = 0;
 
     @Override
-    public List<DefaultRow<V>> getLiveSelectedData() {
-        return liveSelectedData;
+    public List<V> getLiveSelectedData() {
+        return new MappedList<>(liveSelectedData, DefaultRow::getData);
     }
 
     @Override
@@ -161,13 +162,13 @@ public abstract class AbstractDataSource<K, V> implements DataGridSource<K, V> {
     }
 
     @Override
-    public Comparator<DefaultRow<V>> clearSort(final Column<V> column) {
-        return sorts.remove(column);
+    public boolean clearSort(final Column<V> column) {
+        return sorts.remove(column) != null;
     }
 
     @Override
-    public Comparator<DefaultRow<V>> clearSort(final Object key) {
-        return sorts.remove(key);
+    public boolean clearSort(final Object key) {
+        return sorts.remove(key) != null;
     }
 
     @Override
@@ -187,8 +188,8 @@ public abstract class AbstractDataSource<K, V> implements DataGridSource<K, V> {
     }
 
     @Override
-    public AbstractFilter<V> clearFilter(final Object key) {
-        return filters.remove(key);
+    public boolean clearFilter(final Object key) {
+        return filters.remove(key) != null;
     }
 
     @Override

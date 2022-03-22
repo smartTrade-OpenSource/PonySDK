@@ -27,7 +27,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -72,6 +71,11 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     private DataGridControllerListener<V> listener;
     private DataGridAdapter<K, V> adapter;
     private boolean bound = true;
+    
+    /**
+     * Data is split in 2 zones: a constant one and a variable one. 
+     * The variable zone is the only one that gets refreshed during a draw and it is constantly narrowed down for better performance.
+     */
     private int from = Integer.MAX_VALUE;
     private int to = 0;
     private final RenderingHelperSupplier renderingHelperSupplier1 = new RenderingHelperSupplier();
@@ -156,9 +160,19 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
 
     @Override
     public void refresh() {
-        refreshRows(0, dataSource.getRowCount());
+        listener.refresh();
+    }
+    
+    public void refreshOnNextDraw() {
+    	refreshRows(0, dataSource.getRowCount());
     }
 
+    /**
+     * Extends the variable zone (which is refreshed during a draw from the view) using from/to as data offsets.
+     * 
+     * @param from the beginning offset of the variable zone
+     * @param to the ending offset of the variable zone
+     */
     private void refreshRows(final int from, final int to) {
         this.from = Math.min(this.from, from);
         this.to = Math.max(this.to, to);
@@ -230,7 +244,7 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
         if (row == null) return null;
         renderingHelpersCache.remove(row);
         final V v = dataSource.removeData(k);
-        refresh();
+        refreshOnNextDraw();
         return v;
     }
 
@@ -253,43 +267,43 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
         checkAdapter();
         final Column<V> column = getColumn(colDef);
         dataSource.addSort(column, new ColumnControllerSort(column, asc), asc);
-        refresh();
+        refreshOnNextDraw();
     }
 
     @Override
     public void addSort(final Object key, final Comparator<V> comparator) {
         checkAdapter();
         dataSource.addSort(key, new GeneralControllerSort(comparator));
-        refresh();
+        refreshOnNextDraw();
     }
 
     @Override
     public void addPrimarySort(final Object key, final Comparator<V> comparator) {
         checkAdapter();
         dataSource.addPrimarySort(key, new GeneralControllerSort(comparator));
-        refresh();
+        refreshOnNextDraw();
     }
 
     @Override
     public void clearSort(final ColumnDefinition<V> colDef) {
         checkAdapter();
         final Column<V> column = getColumn(colDef);
-        if (dataSource.clearSort(column) == null) return;
+        if (!dataSource.clearSort(column)) return;
         dataSource.sort();
-        refresh();
+        refreshOnNextDraw();
     }
 
     @Override
     public void clearSorts() {
         checkAdapter();
         dataSource.clearSorts();
-        refresh();
+        refreshOnNextDraw();
     }
 
     @Override
     public void sort() {
         dataSource.sort();
-        refresh();
+        refreshOnNextDraw();
     }
 
     @Override
@@ -310,17 +324,16 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     @Override
     public void clearFilter(final Object key) {
         checkAdapter();
-        final AbstractFilter<V> oldFilter = dataSource.clearFilter(key);
-        if (oldFilter == null) return;
+        if (!dataSource.clearFilter(key)) return;
         resetLiveData();
     }
 
     @Override
     public void clearSort(final Object key) {
         checkAdapter();
-        if (dataSource.clearSort(key) == null) return;
+        if (!dataSource.clearSort(key)) return;
         dataSource.sort();
-        refresh();
+        refreshOnNextDraw();
     }
 
     private class DataGetterFromSrc implements Supplier<DataGetterFromSrc> {
@@ -481,8 +494,7 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
 
     @Override
     public Collection<V> getLiveSelectedData() {
-        final List<DefaultRow<V>> liveSelectedData = dataSource.getLiveSelectedData();
-        return new MappedList<>(liveSelectedData, DefaultRow::getData);
+        return dataSource.getLiveSelectedData();
     }
 
     @Override
@@ -562,7 +574,6 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
         private final boolean asc;
 
         public ColumnControllerSort(final Column<V> column, final boolean asc) {
-            super();
             this.column = column;
             this.asc = asc;
         }
@@ -589,6 +600,23 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
         public Column<V> getColumn() {
             return column;
         }
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(asc, column);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			ColumnControllerSort other = (ColumnControllerSort) obj;
+			return asc == other.asc && Objects.equals(column, other.column);
+		}
     }
 
     private class GeneralFilter implements AbstractFilter<V> {

@@ -71,6 +71,7 @@ import com.ponysdk.core.ui.datagrid2.config.DataGridConfig.GeneralSort;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfig.Sort;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfigBuilder;
 import com.ponysdk.core.ui.datagrid2.controller.DataGridController;
+import com.ponysdk.core.ui.datagrid2.controller.DataGridControllerListener;
 import com.ponysdk.core.ui.datagrid2.controller.DataGridControllerWrapper;
 import com.ponysdk.core.ui.datagrid2.controller.DefaultDataGridController;
 import com.ponysdk.core.ui.datagrid2.data.DefaultRow;
@@ -83,7 +84,7 @@ import com.ponysdk.core.util.SetUtils;
 /**
  * @author mbagdouri
  */
-public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
+public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, DataGridControllerListener<V> {
 
     // Addon
     private static final String ADDON_ROW_KEY = "row";
@@ -146,7 +147,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
 
         new HideScrollBarAddon(root);
         controller = new DefaultDataGridController<>(dataSource);
-        controller.setListener(this::onUpdateRows);
+        controller.setListener(this);
         selectedDataView = controller.getLiveSelectedData();
         controllerWrapper = new DataGridControllerWrapper<>(//
             controller.get(), //
@@ -254,8 +255,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
     private void onScroll(final int row) {
         showLoadingDataView();
         firstRowIndex = row;
-        onUpdateRows(0, controller.getRowCount());
-        draw();
+        refresh();
     }
 
     private void onRelativeRowCountUpdated(int relRowCount) {
@@ -270,8 +270,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
         } else do {
             rows.get(rows.size() - 1).destroy();
         } while (rows.size() > relRowCount);
-        onUpdateRows(0, controller.getRowCount());
-        draw();
+        refresh();
         addon.checkPosition();
     }
 
@@ -285,10 +284,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
             changed = changed || columnView.visible != visible;
             columnView.visible = visible;
         }
-        if (changed) {
-            onUpdateRows(0, controller.getRowCount());
-            draw();
-        }
+        if (changed) refresh();
     }
 
     private void onColumnResized(final int column, final int width) {
@@ -354,7 +350,14 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
         }
         fromColumnView.notifyMovedListeners();
     }
-
+    
+    @Override
+    public void refresh() {
+    	onUpdateRows(0, controller.getRowCount());
+    	draw();
+    }
+    
+    @Override
     public void onUpdateRows(final int from, final int to) {
         if (from > to) return;
         this.from = Math.min(this.from, from);
@@ -753,9 +756,8 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
         for (int i = 0; i < relativeRowCount; i++) {
             rows.add(new Row(i));
         }
-        onUpdateRows(0, controller.getRowCount());
+        refresh();
         addon.scrollToTop();
-        draw();
 
         notifyListeners(config, columnById);
     }
@@ -1298,8 +1300,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V> {
         public void redraw(final boolean clearRenderingHelpers) {
             showLoadingDataView();
             if (clearRenderingHelpers) controller.clearRenderingHelpers(columnView.column);
-            onUpdateRows(0, controller.getRowCount());
-            draw();
+            refresh();
             for (final ColumnActionListener<V> listener : columnView.listeners) {
                 listener.onRedraw(clearRenderingHelpers);
             }

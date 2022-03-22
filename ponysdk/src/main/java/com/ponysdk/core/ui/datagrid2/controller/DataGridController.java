@@ -37,6 +37,7 @@ import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfig;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfigBuilder;
 import com.ponysdk.core.ui.datagrid2.view.DataGridSnapshot;
+import com.ponysdk.core.ui.datagrid2.view.DataGridView;
 
 /**
  * @author mbagdouri
@@ -103,7 +104,20 @@ public interface DataGridController<K, V> {
 
     void enrichConfigBuilder(DataGridConfigBuilder<V> builder);
 
+    /** 
+     * Performs a full refresh; i.e. same as {@link #refreshOnNextDraw()} but with a forced redraw on {@link DataGridView} afterwards.
+     */
     void refresh();
+    
+    /**
+     * Ensures that all data will be refreshed during the next draw performed on {@link DataGridView} but without performing it immediately.<br><br>
+     * Indeed, a performance mechanism limits the rows which gets refreshed during a draw and this refresh ensures the whole dataset will be refreshed.<br><br>
+     * 
+     *  splits the data in 2 zones: a constant one and a variable one. 
+     * The variable zone is the only one that gets updated during a draw and it is constantly narrowed down for better performance.<br><br>
+     * This refresh will grow the variable zone on the whole dataset so that it gets updated next time but it will not force any redraw.
+     */
+    void refreshOnNextDraw();
 
     /**
      * Send a partially filled object to the dataSource. The object will return
