@@ -134,11 +134,11 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     }
 
     private void clearRenderingHelpers(final DefaultRow<V> row) {
-        renderingHelpersCache.remove(row);
+        renderingHelpersCache.remove(row.getData());
     }
 
     private void clearRenderingHelper(final DefaultRow<V> row, final Column<V> column) {
-        final Object[] renderingHelpers = renderingHelpersCache.get(row);
+        final Object[] renderingHelpers = renderingHelpersCache.get(row.getData());
         if (renderingHelpers == null) return;
         renderingHelpers[column.getID()] = null;
     }
@@ -242,7 +242,7 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     public final V removeData(final K k) {
         final DefaultRow<V> row = dataSource.getRow(k);
         if (row == null) return null;
-        renderingHelpersCache.remove(row);
+        renderingHelpersCache.remove(row.getData());
         final V v = dataSource.removeData(k);
         refreshOnNextDraw();
         return v;
