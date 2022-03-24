@@ -24,12 +24,25 @@
 package com.ponysdk.core.ui.dropdown;
 
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
-import com.ponysdk.core.ui.basic.*;
+import com.ponysdk.core.ui.basic.Element;
+import com.ponysdk.core.ui.basic.IsPWidget;
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PFlowPanel;
+import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.PWidget.TabindexMode;
-import com.ponysdk.core.ui.basic.event.*;
+import com.ponysdk.core.ui.basic.event.PBlurEvent;
+import com.ponysdk.core.ui.basic.event.PBlurHandler;
+import com.ponysdk.core.ui.basic.event.PClickHandler;
+import com.ponysdk.core.ui.basic.event.PCloseEvent;
+import com.ponysdk.core.ui.basic.event.PCloseHandler;
+import com.ponysdk.core.ui.basic.event.PFocusEvent;
+import com.ponysdk.core.ui.basic.event.PFocusHandler;
+import com.ponysdk.core.ui.basic.event.POpenEvent;
+import com.ponysdk.core.ui.basic.event.POpenHandler;
+import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
+import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 import com.ponysdk.core.ui.model.PEventType;
 import com.ponysdk.core.ui.model.PKeyCodes;
 
@@ -70,8 +83,6 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
     private final Set<PCloseHandler> closeHandlers;
     private final Set<POpenHandler> openHandlers;
     private final Set<DropDownContainerListener> listeners;
-
-    private V previousValue;
 
     public DropDownContainer(final C configuration) {
         this.configuration = configuration;
@@ -142,7 +153,7 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
                 widget.addStyleName(STYLE_CONTAINER_CLEAR_DISABLED);
             }
 
-            if(!configuration.isEventOnlyEnabled()){
+            if (!configuration.isEventOnlyEnabled()) {
                 widget.addInitializeListener(e -> {
                     updateTitle(getValue());
                 });
@@ -282,7 +293,6 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
         openHandlers.remove(handler);
     }
 
-
     public void addListener(final DropDownContainerListener listener) {
         listeners.add(listener);
     }
@@ -297,7 +307,7 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
 
     protected void updateTitle(final V value) {
         if (!isInitialized()) return;
-        if(configuration.isEventOnlyEnabled()) return;
+        if (configuration.isEventOnlyEnabled()) return;
         final StringBuilder text = new StringBuilder();
         if (configuration.isTitleDisplayed()) {
             if (configuration.isTitlePlaceHolder()) {
@@ -337,16 +347,10 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
     }
 
     protected void onValueChange() {
-    	final V value = getValue();
-        final V previous = previousValue;
-        previousValue = value;
-        if (!Objects.equals(value, previous)) {
-        	onValueChange(getValue());
-        }
+        onValueChange(getValue());
     }
 
-
-    protected void onValueChange(V value) {
+    protected void onValueChange(final V value) {
         final PValueChangeEvent<V> event = new PValueChangeEvent<>(this, value);
         valueChangeHandlers.forEach(l -> l.onValueChange(event));
     }
@@ -397,7 +401,7 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
             widget.removeStyleName(STYLE_CONTAINER_OPENED);
             container.removeStyleName(STYLE_CONTAINER_WIDGET_OPENED);
             container.hide();
-            if(!configuration.isEventOnlyEnabled())updateTitle(getValue());
+            if (!configuration.isEventOnlyEnabled()) updateTitle(getValue());
             afterContainerClose();
             final PCloseEvent event = new PCloseEvent(this);
             closeHandlers.forEach(l -> l.onClose(event));
