@@ -29,16 +29,6 @@ package com.ponysdk.core.ui.datagrid2.cell;
 public interface CellController<V> {
 
     /**
-     * Switches to an extended mode that can be used to have a richer cell not
-     * constrained by the dimensions of the original cell. The
-     * {@link ExtendedCell} can be used, for example, for the edit mode or for
-     * having a more detailed view.
-     *
-     * @see ExtendedCellController#cancelExtendedMode()
-     */
-    void extendedMode(ExtendedCell<V> extendedCell);
-
-    /**
      * Selects the row that this cell belongs to
      */
     void selectRow();

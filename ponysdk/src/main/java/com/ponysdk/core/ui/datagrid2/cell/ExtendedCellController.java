@@ -28,25 +28,14 @@ import java.util.function.Consumer;
 /**
  * @author mbagdouri
  */
-public interface ExtendedCellController<V> {
+public interface ExtendedCellController<V> extends CellController<V> {
 
     /**
-     * Switched back from extended mode to normal mode and removes the
-     * {@link ExtendedCell} from the view
+     * Switches back from extended mode to primary mode ({@link ExtendedCell} become invisible in the view).
      *
-     * @see CellController#extendedMode(ExtendedCell)
+     * @see PrimaryCellController#setExtendedMode()
      */
-    void cancelExtendedMode();
-
-    /**
-     * Selects the row that this cell belongs to
-     */
-    void selectRow();
-
-    /**
-     * Selects the row that this cell belongs to
-     */
-    void unselectRow();
+    void setPrimaryMode();
 
     /**
      * Replaces the value in the model, corresponding to this cell's key, with

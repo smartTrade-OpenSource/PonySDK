@@ -24,7 +24,6 @@
 package com.ponysdk.core.ui.datagrid2.cell;
 
 import com.ponysdk.core.ui.basic.IsPWidget;
-import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 
 /**
@@ -35,25 +34,7 @@ import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
  *
  * @author mbagdouri
  */
-public interface Cell<V> extends IsPWidget {
-
-    /**
-     * Must always return the same instance and cannot be {@code null} or the
-     * same as the main widget.
-     *
-     * @return a widget that will replace the main widget when the value for
-     *         this cell is not available
-     */
-    PWidget asPendingWidget();
-
-    /**
-     * Renders the value in the main widget.
-     *
-     * @param data the value to be rendered
-     * @param renderingHelper the intermediate object supplied in
-     *            {@link ColumnDefinition#getRenderingHelper(Object)}
-     */
-    void render(V data, Object renderingHelper);
+public interface Cell<V, C extends CellController<V>> extends IsPWidget {
 
     /**
      * Sets a {@link CellController} that can be used to make cell/row related
@@ -62,7 +43,18 @@ public interface Cell<V> extends IsPWidget {
      *
      * @param cellController
      */
-    void setController(CellController<V> cellController);
+    void setController(C cellController);
+
+    /**
+     * Renders the value in the main widget.
+     *
+     * @param data
+     *            the value to be rendered
+     * @param renderingHelper
+     *            the intermediate object supplied in
+     *            {@link ColumnDefinition#getRenderingHelper(Object)}
+     */
+    void render(V data, Object renderingHelper);
 
     /**
      * Called when the row that this cell belongs to is selected

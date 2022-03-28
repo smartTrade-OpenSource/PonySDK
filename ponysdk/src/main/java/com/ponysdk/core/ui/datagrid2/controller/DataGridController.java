@@ -33,12 +33,11 @@ import java.util.function.Supplier;
 
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.cell.Cell;
-import com.ponysdk.core.ui.datagrid2.cell.ExtendedCell;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfig;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfigBuilder;
-import com.ponysdk.core.ui.datagrid2.data.LiveDataView;
 import com.ponysdk.core.ui.datagrid2.view.DataGridSnapshot;
+import com.ponysdk.core.ui.datagrid2.view.DataGridView;
 
 /**
  * @author mbagdouri
@@ -46,9 +45,7 @@ import com.ponysdk.core.ui.datagrid2.view.DataGridSnapshot;
 
 public interface DataGridController<K, V> {
 
-    void renderCell(ColumnDefinition<V> column, int row, Cell<V> widget, LiveDataView<V> result);
-
-    void setValueOnExtendedCell(int row, ExtendedCell<V> widget, LiveDataView<V> result);
+    void renderCell(ColumnDefinition<V> column, Cell<V, ?> widget, V data);
 
     boolean isSelected(K k);
 
@@ -107,7 +104,20 @@ public interface DataGridController<K, V> {
 
     void enrichConfigBuilder(DataGridConfigBuilder<V> builder);
 
+    /** 
+     * Performs a full refresh; i.e. same as {@link #refreshOnNextDraw()} but with a forced redraw on {@link DataGridView} afterwards.
+     */
     void refresh();
+    
+    /**
+     * Ensures that all data will be refreshed during the next draw performed on {@link DataGridView} but without performing it immediately.<br><br>
+     * Indeed, a performance mechanism limits the rows which gets refreshed during a draw and this refresh ensures the whole dataset will be refreshed.<br><br>
+     * 
+     *  splits the data in 2 zones: a constant one and a variable one. 
+     * The variable zone is the only one that gets updated during a draw and it is constantly narrowed down for better performance.<br><br>
+     * This refresh will grow the variable zone on the whole dataset so that it gets updated next time but it will not force any redraw.
+     */
+    void refreshOnNextDraw();
 
     /**
      * Send a partially filled object to the dataSource. The object will return

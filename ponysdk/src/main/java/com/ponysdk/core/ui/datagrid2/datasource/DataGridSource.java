@@ -86,7 +86,7 @@ public interface DataGridSource<K, V> {
     /**
      * @return the list that contains selected data
      */
-    List<DefaultRow<V>> getLiveSelectedData();
+    List<V> getLiveSelectedData();
 
     /**
      * Adapter setter
@@ -107,12 +107,11 @@ public interface DataGridSource<K, V> {
 
     void addPrimarySort(Object key, Comparator<DefaultRow<V>> comparator);
 
-    /**
-     * Remove a sort
-     */
-    Comparator<DefaultRow<V>> clearSort(Column<V> column);
+    /** @return true iff a sort has been removed */
+    boolean clearSort(Column<V> column);
 
-    Comparator<DefaultRow<V>> clearSort(Object key);
+    /** @return true iff a sort has been removed */
+    boolean clearSort(Object key);
 
     /**
      * Clear all sorting
@@ -134,10 +133,8 @@ public interface DataGridSource<K, V> {
      */
     void setFilter(final Object key, String id, final boolean reinforcing, final AbstractFilter<V> filter);
 
-    /**
-     * Clear a filter
-     */
-    AbstractFilter<V> clearFilter(Object key);
+    /** @return true iff a filter has been removed */
+    boolean clearFilter(Object key);
 
     void clearFilters(ColumnDefinition<V> column);
 

@@ -23,7 +23,9 @@
 
 package com.ponysdk.core.ui.datagrid2.cell;
 
+import java.util.Optional;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PLabel;
@@ -32,16 +34,23 @@ import com.ponysdk.core.ui.basic.PWidget;
 /**
  * @author mbagdouri
  */
-public class LabelCell<V> implements Cell<V> {
+public class LabelCell<V> implements PrimaryCell<V> {
 
     private final PLabel label = Element.newPLabel();
     private final PLabel pendingLabel = Element.newPLabel("...");
-    private CellController<V> cellController;
+    private PrimaryCellController<V> cellController;
+    private Supplier<ExtendedCell<V>> instantiator;
 
     public LabelCell(final BiConsumer<V, String> columnEditFn, final int width) {
+    	instantiator = () -> new TextBoxExtendedCell<>(label.getText(), columnEditFn, width);
         label.addDoubleClickHandler(e -> {
-            if (cellController != null) cellController.extendedMode(new TextBoxExtendedCell<>(label.getText(), columnEditFn, width));
+            if (cellController != null) cellController.setExtendedMode();
         });
+    }
+    
+    @Override
+    public Optional<ExtendedCell<V>> genExtended() {
+    	return Optional.of(instantiator.get());
     }
 
     @Override
@@ -60,7 +69,7 @@ public class LabelCell<V> implements Cell<V> {
     }
 
     @Override
-    public void setController(final CellController<V> cellController) {
+    public void setController(final PrimaryCellController<V> cellController) {
         this.cellController = cellController;
     }
 

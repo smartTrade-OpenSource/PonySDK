@@ -164,8 +164,8 @@ public class DefaultCacheDataSource<K, V> extends AbstractDataSource<K, V> {
     }
 
     private void clearRenderingHelpers(final DefaultRow<V> row) {
-        if (renderingHelpersCache.get(row) != null) {
-            renderingHelpersCache.remove(row);
+        if (renderingHelpersCache.get(row.getData()) != null) {
+            renderingHelpersCache.remove(row.getData());
         }
     }
 

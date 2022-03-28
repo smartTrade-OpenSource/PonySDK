@@ -38,8 +38,8 @@ import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.adapter.DecoratorDataGridAdapter;
-import com.ponysdk.core.ui.datagrid2.cell.Cell;
-import com.ponysdk.core.ui.datagrid2.cell.CellController;
+import com.ponysdk.core.ui.datagrid2.cell.PrimaryCell;
+import com.ponysdk.core.ui.datagrid2.cell.PrimaryCellController;
 import com.ponysdk.core.ui.datagrid2.column.ColumnController;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfig;
@@ -187,7 +187,7 @@ public class RowSelectorColumnDataGridView<K, V> extends DecoratorDataGridView<K
         }
 
         @Override
-        public Cell<V> createCell() {
+        public PrimaryCell<V> createCell() {
             return new RowSelectorColumnCell();
         }
 
@@ -278,7 +278,7 @@ public class RowSelectorColumnDataGridView<K, V> extends DecoratorDataGridView<K
             refreshHeader();
         }
 
-        private class RowSelectorColumnCell implements Cell<V> {
+        private class RowSelectorColumnCell implements PrimaryCell<V> {
 
             private final PCheckBox checkBox = Element.newPCheckBox();
             private final PWidget pending = Element.newSpan();
@@ -293,7 +293,7 @@ public class RowSelectorColumnDataGridView<K, V> extends DecoratorDataGridView<K
             }
 
             @Override
-            public void setController(final CellController<V> cellController) {
+            public void setController(final PrimaryCellController<V> cellController) {
             }
 
             @Override
