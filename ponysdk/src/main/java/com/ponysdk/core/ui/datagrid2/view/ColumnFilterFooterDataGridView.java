@@ -66,7 +66,7 @@ public class ColumnFilterFooterDataGridView<K, V> extends DecoratorDataGridView<
         addDrawListener(this::enableFooter);
     }
 
-    private void enableFooter() {
+    private void enableFooter(int rowCount) {
         if (disabledFooter == null) return;
         disabledFooter.setEnabled(true);
         disabledFooter.focus();

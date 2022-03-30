@@ -38,6 +38,7 @@ import com.ponysdk.core.ui.datagrid2.config.DataGridConfig;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfigBuilder;
 import com.ponysdk.core.ui.datagrid2.view.DataGridSnapshot;
 import com.ponysdk.core.ui.datagrid2.view.DataGridView;
+import com.ponysdk.core.util.Pair;
 
 /**
  * @author mbagdouri
@@ -125,7 +126,7 @@ public interface DataGridController<K, V> {
      * sometimes
      */
     void prepareLiveDataOnScreen(int dataSrcRowIndex, int dataSize, DataGridSnapshot threadSnapshot,
-                                 Consumer<DefaultDataGridController<K, V>.DataSrcResult> consumer);
+    		Consumer<Pair<DefaultDataGridController<K, V>.DataSrcResult, Throwable>> consumer);
 
     /**
      * Insert or replace the value

@@ -22,6 +22,7 @@ package com.ponysdk.core.ui.datagrid2.view;
 
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import com.ponysdk.core.ui.basic.IsPWidget;
@@ -228,6 +229,8 @@ public interface DataGridView<K, V> extends IsPWidget {
      * Removes a {@link DrawListener}
      */
     void removeDrawListener(DrawListener drawListener);
+    
+    void setExceptionHandler(Function<Throwable, String> handler);
 
     public static class DecodeException extends Exception {
 
@@ -256,6 +259,6 @@ public interface DataGridView<K, V> extends IsPWidget {
 
     public interface DrawListener {
 
-        void onDraw();
+        void onDraw(int rowCount);
     }
 }
