@@ -159,6 +159,11 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
                 });
             }
 
+            if (configuration.isStopClickEventEnabled()) {
+                mainButton.stopEvent(PEventType.ONCLICK);
+                stateButton.stopEvent(PEventType.ONCLICK);
+            }
+
             if (customContainer != null) {
                 container.add(customContainer);
                 customContainer.asWidget().addStyleName(STYLE_CONTAINER_CUSTOM);

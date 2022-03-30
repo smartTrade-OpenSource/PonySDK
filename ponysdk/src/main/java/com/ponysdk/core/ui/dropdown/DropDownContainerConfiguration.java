@@ -23,8 +23,6 @@
 
 package com.ponysdk.core.ui.dropdown;
 
-import com.ponysdk.core.ui.listbox.ListBoxConfiguration;
-
 public interface DropDownContainerConfiguration {
 
     public enum DropDownCloseOnClickMode {
@@ -83,4 +81,8 @@ public interface DropDownContainerConfiguration {
     boolean isEventOnlyEnabled();
 
     DropDownContainerConfiguration enabledEventOnly();
+
+    boolean isStopClickEventEnabled();
+
+    DropDownContainerConfiguration enableStopClickEvent();
 }
