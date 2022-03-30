@@ -55,6 +55,7 @@ import com.ponysdk.core.ui.datagrid2.data.LiveDataView;
 import com.ponysdk.core.ui.datagrid2.datasource.DataGridSource;
 import com.ponysdk.core.ui.datagrid2.view.DataGridSnapshot;
 import com.ponysdk.core.util.MappedList;
+import com.ponysdk.core.util.Pair;
 
 /**
  * @author mbagdouri
@@ -375,12 +376,12 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
 
     @Override
     public void prepareLiveDataOnScreen(final int dataSrcRowIndex, final int dataSize, final DataGridSnapshot threadSnapshot,
-                                        final Consumer<DataSrcResult> consumer) {
+                                        final Consumer<Pair<DataSrcResult, Throwable>> consumer) {
         viewSnapshot = new DataGridSnapshot(threadSnapshot);
-        final CompletableFuture<DataGetterFromSrc> completableFuture = CompletableFuture.supplyAsync(new DataGetterFromSrc(
+        CompletableFuture<DataGetterFromSrc> completableFuture = CompletableFuture.supplyAsync(new DataGetterFromSrc(
             () -> dataSource.getRows(dataSrcRowIndex, dataSize), threadSnapshot, dataSrcRowIndex, threadSnapshot.start));
 
-        final CompletableFuture<DataGetterFromSrc> threadAcceptanceByID = completableFuture.thenApply(dataResponse -> {
+        completableFuture = completableFuture.thenApply(dataResponse -> {
             if (dataResponse.id < lastProcessedID) {
                 dataResponse.id = -1;
             } else {
@@ -389,19 +390,16 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
             return dataResponse;
         });
 
-        threadAcceptanceByID.thenAccept(dataResponse -> {
-            threadAcceptance(dataResponse, consumer);
-        }).exceptionally(e -> {
-            log.error("Cannot display data", e);
-            return null;
+        completableFuture.whenComplete((response, ex) -> {
+        	if(ex != null) {
+        		log.error("Cannot display data", ex);
+        		consumer.accept(new Pair<>(null, ex));}
+        	else {
+        	if (viewSnapshot.equals(response.threadSnapshot) && response.id >= 0) {
+                final DataSrcResult result = new DataSrcResult(response.liveDataView, response.firstRowIndex, response.start);
+                consumer.accept(new Pair<>(result, null));
+            }}
         });
-    }
-
-    private void threadAcceptance(final DataGetterFromSrc dataResponse, final Consumer<DataSrcResult> consumer) {
-        if (viewSnapshot.equals(dataResponse.threadSnapshot) && dataResponse.id >= 0) {
-            final DataSrcResult result = new DataSrcResult(dataResponse.liveDataView, dataResponse.firstRowIndex, dataResponse.start);
-            consumer.accept(result);
-        }
     }
     
     @Override

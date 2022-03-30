@@ -37,6 +37,7 @@ import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfig;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfigBuilder;
 import com.ponysdk.core.ui.datagrid2.view.DataGridSnapshot;
+import com.ponysdk.core.util.Pair;
 
 /**
  * @author mbagdouri
@@ -250,7 +251,7 @@ public abstract class SpyDataGridController<K, V> implements DataGridController<
 
     @Override
     public void prepareLiveDataOnScreen(final int dataSrcRowIndex, final int dataSize, final DataGridSnapshot threadSnapshot,
-                                        final Consumer<DefaultDataGridController<K, V>.DataSrcResult> consumer) {
+                                        final Consumer<Pair<DefaultDataGridController<K, V>.DataSrcResult, Throwable>> consumer) {
         controller.prepareLiveDataOnScreen(dataSrcRowIndex, dataSize, threadSnapshot, consumer);
     }
 

@@ -64,7 +64,7 @@ public class RowSelectorColumnDataGridView<K, V> extends DecoratorDataGridView<K
         decoratorAdapter = new RowSelectorColumnDataGridAdapter(adapter);
         super.setAdapter(decoratorAdapter);
         decoratorAdapter.addColumnActionListeners();
-        addDrawListener(() -> decoratorAdapter.rowSelectorColumn.refreshHeader());
+        addDrawListener(count -> decoratorAdapter.rowSelectorColumn.refreshHeader());
     }
 
     @Override

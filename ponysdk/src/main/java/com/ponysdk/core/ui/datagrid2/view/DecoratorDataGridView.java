@@ -23,6 +23,7 @@ package com.ponysdk.core.ui.datagrid2.view;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import com.ponysdk.core.ui.basic.PWidget;
@@ -193,6 +194,11 @@ public class DecoratorDataGridView<K, V> implements DataGridView<K, V> {
     @Override
     public void pause() {
 		view.pause();
+	}
+
+	@Override
+	public void setExceptionHandler(Function<Throwable, String> handler) {
+		view.setExceptionHandler(handler);
 	}
 
 }

@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -51,6 +52,7 @@ import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PAddOnComposite;
 import com.ponysdk.core.ui.basic.PComplexPanel;
+import com.ponysdk.core.ui.basic.PElement;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
@@ -79,6 +81,7 @@ import com.ponysdk.core.ui.datagrid2.data.LiveDataView;
 import com.ponysdk.core.ui.datagrid2.data.RowAction;
 import com.ponysdk.core.ui.datagrid2.datasource.DataGridSource;
 import com.ponysdk.core.ui.datagrid2.datasource.DefaultCacheDataSource;
+import com.ponysdk.core.util.Pair;
 import com.ponysdk.core.util.SetUtils;
 
 /**
@@ -118,6 +121,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
     private int columnViewSequence = 0;
     private final PComplexPanel root = Element.newDiv();
     private final PComplexPanel loadingDataDiv;
+    private final PComplexPanel errorMsgDiv;
     private final PinnedTable pinnedTable;
     private final UnpinnedTable unpinnedTable;
     private Addon addon;
@@ -136,6 +140,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
     private int firstRowIndex;
     private final Map<Integer, Integer> sorts = new HashMap<>();
     private final Set<Integer> filters = new HashSet<>();
+    private Function<Throwable, String> exceptionHandler;
 
     private boolean shouldDraw = true;
 
@@ -168,6 +173,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         final PComplexPanel bodyUnpinnedDiv = Element.newDiv();
         final PComplexPanel subBodyDiv = prepareSubBodyDiv(bodyPinnedDiv, bodyUnpinnedDiv);
         loadingDataDiv = prepareLoadingDataDiv();
+        errorMsgDiv = prepareErrorMsgDiv();
 
         final PComplexPanel bodyDiv = prepareBodyDiv(subBodyDiv);
         root.add(bodyDiv);
@@ -194,6 +200,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         bodyDiv.addStyleName("pony-grid-body");
         bodyDiv.add(subBodyDiv);
         bodyDiv.add(loadingDataDiv);
+        bodyDiv.add(errorMsgDiv);
         return bodyDiv;
     }
 
@@ -235,6 +242,17 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         loadingDataDiv.setStyleProperty("width", "100%");
         loadingDataDiv.setStyleProperty("height", "100%");
         return loadingDataDiv;
+    }
+    
+    private static PComplexPanel prepareErrorMsgDiv() {
+        final PComplexPanel result = Element.newDiv();
+        result.addStyleName("pony-grid-error-msg");
+        result.setStyleProperty("position", "absolute");
+        result.setStyleProperty("top", "0px");
+        result.setStyleProperty("left", "0px");
+        result.setStyleProperty("width", "100%");
+        result.setStyleProperty("height", "100%");
+        return result;
     }
 
     @Override
@@ -356,7 +374,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
     	onUpdateRows(0, controller.getRowCount());
     	draw();
     }
-    
+
     @Override
     public void onUpdateRows(final int from, final int to) {
         if (from > to) return;
@@ -379,29 +397,35 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             final int size = unpinnedTable.body.getWidgetCount();
             final int start = Math.max(0, from - firstRowIndex);
             final DataGridSnapshot viewStateSnapshot = new DataGridSnapshot(firstRowIndex, size, start, sorts, filters);
-            final Consumer<DefaultDataGridController<K, V>.DataSrcResult> consumer = PScheduler.delegate(this::updateView);
+            final Consumer<Pair<DefaultDataGridController<K, V>.DataSrcResult, Throwable>> consumer = PScheduler
+                    .delegate(this::updateView);
             controller.prepareLiveDataOnScreen(firstRowIndex, size, viewStateSnapshot, consumer);
         } catch (final Exception e) {
             log.error("Cannot draw data from data source", e);
         }
     }
 
-    private void updateView(final DefaultDataGridController<K, V>.DataSrcResult dataSrcResult) {
-        try {
-            final LiveDataView<V> resultLiveData = dataSrcResult.liveDataView;
-            for (int i = dataSrcResult.start; i < rows.size(); i++) {
-                updateRow(rows.get(i), resultLiveData);
+    private void updateView(final Pair<DefaultDataGridController<K, V>.DataSrcResult, Throwable> result) {
+        if (result.getSecond() != null) {
+            showErrorMsg(exceptionHandler == null ? "" : exceptionHandler.apply(result.getSecond()));
+        } else {
+            final LiveDataView<V> resultLiveData = result.getFirst().liveDataView;
+            try {
+                for (int i = result.getFirst().start; i < rows.size(); i++) {
+                    updateRow(rows.get(i), resultLiveData);
+                }
+                addon.onDataUpdated(resultLiveData.getAbsoluteRowCount(), rows.size(), result.getFirst().firstRowIndex);
+            } catch (final Exception e) {
+                log.error("Problem occured while updating the view", e);
+                showErrorMsg(exceptionHandler == null ? "" : exceptionHandler.apply(result.getSecond()));
+            } finally {
+                from = Integer.MAX_VALUE;
+                to = 0;
+                for (final DrawListener drawListener : drawListeners) {
+                    drawListener.onDraw(resultLiveData.getAbsoluteRowCount());
+                }
+                hideLoadingDataView();
             }
-            addon.onDataUpdated(resultLiveData.getAbsoluteRowCount(), rows.size(), dataSrcResult.firstRowIndex);
-        } catch (final Exception e) {
-            log.error("Problem occured while updating the view", e);
-        } finally {
-            from = Integer.MAX_VALUE;
-            to = 0;
-            for (final DrawListener drawListener : drawListeners) {
-                drawListener.onDraw();
-            }
-            hideLoadingDataView();
         }
     }
 
@@ -821,11 +845,23 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
 
     private void showLoadingDataView() {
         loadingDataDiv.setVisible(true);
+        errorMsgDiv.setVisible(false);
         // must be sent immediately
         Txn.get().flush(); // FIXME use Txn.get() ???
     }
 
     private void hideLoadingDataView() {
+        loadingDataDiv.setVisible(false);
+        // must be sent immediately
+        Txn.get().flush(); // FIXME use Txn.get() ???
+    }
+    
+    private void showErrorMsg(String msg) {
+        errorMsgDiv.setVisible(true);
+        errorMsgDiv.clear();
+        PElement div = Element.newDiv();
+        div.setInnerText(msg);
+        errorMsgDiv.add(div);
         loadingDataDiv.setVisible(false);
         // must be sent immediately
         Txn.get().flush(); // FIXME use Txn.get() ???
@@ -903,6 +939,11 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
     @Override
     public void pause() {
         shouldDraw = false;
+    }
+    
+    @Override
+    public void setExceptionHandler(Function<Throwable, String> handler) {
+        exceptionHandler = handler;
     }
 
     public class Row {
