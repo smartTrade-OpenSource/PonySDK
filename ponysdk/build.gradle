@@ -21,8 +21,9 @@ ext {
     jsonVersion = '1.1.4'
 }
 
+def versionSuffix = project.hasProperty('BUILD_RELEASE') ? "" : "-SNAPSHOT"
 group = 'com.ponysdk'
-version = '2.8.53'
+version = '2.8.54' +  versionSuffix
 
 publishing {
     publications {
