@@ -371,8 +371,9 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
     
     @Override
     public void refresh() {
-    	onUpdateRows(0, controller.getRowCount());
-    	draw();
+        showLoadingDataView();
+        onUpdateRows(0, controller.getRowCount());
+        draw();
     }
 
     @Override
