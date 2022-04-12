@@ -1025,6 +1025,7 @@ _UTF8 = undefined;
         this.stickLeft = this.options.stickLeft;
         this.spaceAuthorized = true;
         this.visible = false;
+        this.mobile = this.isMobile(); 
         var that = this;
         this.resizeEventListener = function(event) {
             if(that.visible) {
@@ -1085,14 +1086,14 @@ _UTF8 = undefined;
     },
 
     addListeners: function() {
-        window.addEventListener('resize', this.resizeEventListener);
+        if(!this.mobile) window.addEventListener('resize', this.resizeEventListener);
         window.addEventListener('wheel', this.scrollEventListener, true);
         window.addEventListener('mousedown', this.mouseDownEventListener, true);
         window.addEventListener('keydown', this.keyDownEventListener, true);
     },
 
     removeListeners: function() {
-        window.removeEventListener('resize', this.resizeEventListener);
+        if(!this.mobile) window.removeEventListener('resize', this.resizeEventListener);
         window.removeEventListener('wheel', this.scrollEventListener, true);
         window.removeEventListener('mousedown', this.mouseDownEventListener, true);
         window.removeEventListener('keydown', this.keyDownEventListener, true);
@@ -1146,6 +1147,21 @@ _UTF8 = undefined;
 
     disableSpaceWhenOpened: function() {
         this.spaceAuthorized = false;
+    },
+    
+    isMobile: function() {
+        const toMatch = [
+            /Android/i,
+            /webOS/i,
+            /iPhone/i,
+            /iPad/i,
+            /iPod/i,
+            /BlackBerry/i,
+            /Windows Phone/i
+        ];
+        return toMatch.some((toMatchItem) => {
+            return navigator.userAgent.match(toMatchItem);
+        });
     }
 
   });
