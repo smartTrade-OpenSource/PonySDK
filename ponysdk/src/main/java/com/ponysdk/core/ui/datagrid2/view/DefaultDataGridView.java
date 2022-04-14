@@ -1041,35 +1041,11 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         void select() {
             if (key == null || !controller.isSelectable(key)) return;
             controller.select(key);
-            adapter.onSelectRow(unpinnedRow);
-            unpinnedRow.setAttribute(SELECTED_ATTRIBUTE);
-            adapter.onSelectRow(pinnedRow);
-            pinnedRow.setAttribute(SELECTED_ATTRIBUTE);
-            for (final CellManager<V> cell : pinnedCells) {
-                cell.primary.select();
-                if (extended && cell.extended != null) cell.extended.select();
-            }
-            for (final CellManager<V> cell : unpinnedCells) {
-                cell.primary.select();
-                if (extended && cell.extended != null) cell.extended.select();
-            }
         }
 
         void unselect() {
             if (key == null || !controller.isSelectable(key)) return;
             controller.unselect(key);
-            adapter.onUnselectRow(unpinnedRow);
-            unpinnedRow.removeAttribute(SELECTED_ATTRIBUTE);
-            adapter.onUnselectRow(pinnedRow);
-            pinnedRow.removeAttribute(SELECTED_ATTRIBUTE);
-            for (final CellManager<V> cell : pinnedCells) {
-                cell.primary.unselect();
-                if (extended && cell.extended != null) cell.extended.select();
-            }
-            for (final CellManager<V> cell : unpinnedCells) {
-                cell.primary.unselect();
-                if (extended && cell.extended != null) cell.extended.select();
-            }
         }
 
     }

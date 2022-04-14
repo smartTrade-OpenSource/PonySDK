@@ -243,16 +243,18 @@ public class DefaultCacheDataSource<K, V> extends AbstractDataSource<K, V> {
     }
 
     @Override
-    public void select(final K k) {
+    public Interval select(final K k) {
         final DefaultRow<V> row = cache.get(k);
-        if (row == null || !selectedKeys.add(k) || !row.isAccepted()) return;
-        insertRow(liveSelectedData, row);
+        if (row == null || !selectedKeys.add(k) || !row.isAccepted()) return null;
+        int i = insertRow(liveSelectedData, row);
+        return new Interval(i, i);
     }
 
     @Override
-    public void unselect(final K k) {
+    public Interval unselect(final K k) {
         final DefaultRow<V> row = cache.get(k);
-        if (row == null || !selectedKeys.remove(k) || !row.isAccepted()) return;
-        removeRow(liveSelectedData, row);
+        if (row == null || !selectedKeys.remove(k) || !row.isAccepted()) return null;
+        int i = removeRow(liveSelectedData, row);
+        return new Interval(i, i);
     }
 }
