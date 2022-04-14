@@ -158,12 +158,12 @@ public interface DataGridSource<K, V> {
     /**
      * Selects a row
      */
-    void select(final K k);
+    Interval select(final K k);
 
     /**
      * Unselects a row
      */
-    void unselect(final K k);
+    Interval unselect(final K k);
 
     /**
      * Selects all rows in the dataGrid

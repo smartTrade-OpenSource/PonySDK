@@ -503,12 +503,14 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
 
     @Override
     public void select(final K k) {
-        dataSource.select(k);
+        final Interval interval = dataSource.select(k);
+        if (interval != null) refreshRows(interval.from, interval.to);
     }
 
     @Override
     public void unselect(final K k) {
-        dataSource.unselect(k);
+        final Interval interval = dataSource.unselect(k);
+        if (interval != null) refreshRows(interval.from, interval.to);
     }
 
     @Override
