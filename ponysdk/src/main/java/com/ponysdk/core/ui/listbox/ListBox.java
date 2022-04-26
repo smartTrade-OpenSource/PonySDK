@@ -23,7 +23,14 @@
 
 package com.ponysdk.core.ui.listbox;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -64,7 +71,6 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
 
     private static final String DISABLED = "disabled";
 
-
     private PTextBox textBox;
     private PButton clearMultiButton;
     private InfiniteScrollAddon<ListBoxItem<D>, ListBoxItemWidget> itemContainer;
@@ -96,7 +102,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         } else if (i2.label == null) {
             return 1;
         }
-        return i1.label.compareTo(i2.label);
+        return i1.label.compareToIgnoreCase(i2.label);
     };
     private final Comparator<ListBoxItem<D>> selectionComparator = (i1, i2) -> (i2.isSelected() ? 1 : 0) - (i1.isSelected() ? 1 : 0);
 
@@ -121,10 +127,9 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         if (configuration.isMultiSelectionEnabled() && configuration.isGroupEnabled()) {
             throw new IllegalStateException("Group mode cannot be enabled in multi selection mode.");
         }
-        if(configuration.isMultiSelectionEnabled() && configuration.isEventOnlyEnabled()){
+        if (configuration.isMultiSelectionEnabled() && configuration.isEventOnlyEnabled()) {
             throw new IllegalStateException("Multi selection cannot be activated in event only mode");
         }
-
 
         this.groupItems = new HashMap<>();
         if (configuration.isGroupEnabled()) this.items = new ArrayList<>(initializeGroupItems(items));
@@ -187,7 +192,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
 
     public void removeItem(final String itemLabel) {
         if (dataProvider != null) throw new IllegalCallerException("Not supported in DataProvider mode");
-        this.items.stream().filter(i -> i.label.equals(itemLabel)).findFirst().ifPresentOrElse( removedItem -> {
+        this.items.stream().filter(i -> i.label.equals(itemLabel)).findFirst().ifPresentOrElse(removedItem -> {
             final ListBoxItem<D> selectedItem = getSelectedItem();
             this.items.remove(removedItem);
             this.visibleItems.remove(removedItem);
@@ -395,10 +400,10 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         }
     }
 
-    public void setDataEnabled(final D value, boolean enabled){
+    public void setDataEnabled(final D value, final boolean enabled) {
         Objects.requireNonNull(value);
         if (dataProvider != null) throw new UnsupportedOperationException("Only available with a ListBoxDataProvider");
-        this.items.stream().filter(item -> item.getData().equals(value)).findFirst().ifPresent( item -> {
+        this.items.stream().filter(item -> item.getData().equals(value)).findFirst().ifPresent(item -> {
             item.setEnabled(enabled);
             if (isOpen()) itemContainer.refresh();
         });
@@ -825,7 +830,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
             return enabled;
         }
 
-        public void setEnabled(boolean enabled) {
+        public void setEnabled(final boolean enabled) {
             this.enabled = enabled;
         }
 
@@ -948,7 +953,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
                 panel.add(label);
                 label.addClickHandler(e -> {
                     if (ListBoxItemType.GROUP.equals(item.getType())) return;
-                    if(!item.isEnabled()) return;
+                    if (!item.isEnabled()) return;
                     final boolean multiSelect = checkBox != null && Boolean.TRUE.equals(!checkBox.getValue());
                     if (multiSelect && !isSelectionAllowed(null)) {
                         return;
@@ -962,7 +967,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
 
         void select() {
             if (checkBox != null) checkBox.setValue(!checkBox.getValue());
-            if(configuration.isEventOnlyEnabled()){
+            if (configuration.isEventOnlyEnabled()) {
                 onValueChange(List.of(item));
             } else {
                 onSelectionChange(item, checkBox != null ? checkBox.getValue() : true);
@@ -989,7 +994,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
             }
             label.setText(item.getLabel());
             label.setTitle(item.getLabel());
-            if(item.isEnabled()) label.removeAttribute(DISABLED);
+            if (item.isEnabled()) label.removeAttribute(DISABLED);
             else label.setAttribute(DISABLED);
         }
     }
