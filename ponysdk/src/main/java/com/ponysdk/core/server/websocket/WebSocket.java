@@ -25,6 +25,7 @@ package com.ponysdk.core.server.websocket;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.model.ValueTypeModel;
 import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.ApplicationManager;
 import com.ponysdk.core.server.application.UIContext;
@@ -53,7 +54,10 @@ import java.util.stream.Collectors;
 
 public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
+    private static final String MSG_RECEIVED = "Message received from terminal : UIContext #{} on {} : {}";
     private static final Logger log = LoggerFactory.getLogger(WebSocket.class);
+    private static final Logger LOGGER_IN = LoggerFactory.getLogger("WebSocket-IN");
+    private static final Logger LOGGER_OUT = LoggerFactory.getLogger("WebSocket-OUT");
 
     private ServletUpgradeRequest request;
     private WebsocketMonitor monitor;
@@ -175,20 +179,21 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
     private void processRoundtripLatency(final JsonObject jsonObject) {
         final long roundtripLatency = TimeUnit.MILLISECONDS.convert(System.nanoTime() - lastSentPing, TimeUnit.NANOSECONDS);
-        log.debug("Roundtrip measurement : {} ms from terminal #{}", roundtripLatency, uiContext.getID());
+        log.trace("Roundtrip measurement : {} ms from terminal #{}", roundtripLatency, uiContext.getID());
         uiContext.addRoundtripLatencyValue(roundtripLatency);
 
         final long terminalLatency = jsonObject.getJsonNumber(ClientToServerModel.TERMINAL_LATENCY.toStringValue()).longValue();
-        log.debug("Terminal measurement : {} ms from terminal #{}", terminalLatency, uiContext.getID());
+        log.trace("Terminal measurement : {} ms from terminal #{}", terminalLatency, uiContext.getID());
         uiContext.addTerminalLatencyValue(terminalLatency);
 
         final long networkLatency = roundtripLatency - terminalLatency;
-        log.debug("Network measurement : {} ms from terminal #{}", networkLatency, uiContext.getID());
+        log.trace("Network measurement : {} ms from terminal #{}", networkLatency, uiContext.getID());
         uiContext.addNetworkLatencyValue(networkLatency);
     }
 
     private void processInstructions(final JsonObject jsonObject) {
         final String applicationInstructions = ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue();
+        LOGGER_IN.trace("UIContext #{} : {}", this.uiContext.getID(), jsonObject);
         uiContext.execute(() -> {
             final JsonArray appInstructions = jsonObject.getJsonArray(applicationInstructions);
             for (int i = 0; i < appInstructions.size(); i++) {
@@ -208,13 +213,13 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
         switch (level) {
             case INFO_MSG:
-                log.info("Message received from terminal : UIContext #{} on {} : {}", uiContext.getID(), objectInformation, message);
+                log.info(MSG_RECEIVED, uiContext.getID(), objectInformation, message);
                 break;
             case WARN_MSG:
-                log.warn("Message received from terminal : UIContext #{} on {} : {}", uiContext.getID(), objectInformation, message);
+                log.warn(MSG_RECEIVED, uiContext.getID(), objectInformation, message);
                 break;
             case ERROR_MSG:
-                log.error("Message received from terminal : UIContext #{} on {} : {}", uiContext.getID(), objectInformation, message);
+                log.error(MSG_RECEIVED, uiContext.getID(), objectInformation, message);
                 break;
             default:
                 log.error("Unknown log level during terminal log processing : {}", level);
@@ -304,6 +309,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     @Override
     public void encode(final ServerToClientModel model, final Object value) {
         try {
+            LOGGER_OUT.trace("UIContext #{} : {} {}", this.uiContext.getID(), model, value);
             websocketPusher.encode(model, value);
             if (listener != null) listener.onOutgoingPonyFrame(model, value);
         } catch (final IOException e) {

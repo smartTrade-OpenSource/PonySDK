@@ -92,6 +92,10 @@ public class PonyWebElement implements WebElement {
         sendApplicationInstruction(ClientToServerModel.DOM_HANDLER_TYPE, DomHandlerType.CLICK.getValue());
     }
 
+    public void doubleClick() {
+        sendApplicationInstruction(ClientToServerModel.DOM_HANDLER_TYPE, DomHandlerType.DOUBLE_CLICK.getValue());
+    }
+
     @Override
     public void submit() {
         throw new UnsupportedOperationException();

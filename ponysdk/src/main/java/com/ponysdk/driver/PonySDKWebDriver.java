@@ -51,8 +51,12 @@ import java.util.function.ToIntFunction;
 
 public class PonySDKWebDriver implements WebDriver {
 
-    private final static Logger log = LoggerFactory.getLogger(PonySDKWebDriver.class);
-    private final static ThreadLocal<byte[]> byteArrays = ThreadLocal.withInitial(() -> new byte[32]);
+    private static final Logger log = LoggerFactory.getLogger(PonySDKWebDriver.class);
+    private static final Logger LOGGER_IN = LoggerFactory.getLogger("PonySDKWebDriver-IN");
+    private static final Logger LOGGER_OUT = LoggerFactory.getLogger("PonySDKWebDriver-OUT");
+
+    private static final ThreadLocal<byte[]> byteArrays = ThreadLocal.withInitial(() -> new byte[32]);
+
     private final ConcurrentHashMap<Integer, PonyWebElement> elements = new ConcurrentHashMap<>();
     private final PonySearchContext globalContext = new PonySearchContext(Collections.unmodifiableCollection(elements.values()),
             false);
@@ -499,7 +503,7 @@ public class PonySDKWebDriver implements WebDriver {
     }
 
     private void onMessage(final List<PonyFrame> message) {
-        log.debug("IN : {}", message);
+        LOGGER_IN.trace("{}", message);
         for (final PonyFrame frame : message) {
             onMessageSwitch.getOrDefault(frame.getModel(), DO_NOTHING_WITH_FRAME).accept(message, frame);
         }
@@ -573,7 +577,7 @@ public class PonySDKWebDriver implements WebDriver {
 
     public void sendMessage(final JsonObject json) {
         final String str = json.toString();
-        log.debug("OUT : {}", str);
+        LOGGER_OUT.trace("{}", str);
         sendMessage(str);
         messageListener.onSendMessage(json);
     }
