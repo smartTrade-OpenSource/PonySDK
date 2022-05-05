@@ -56,8 +56,8 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
     private static final String MSG_RECEIVED = "Message received from terminal : UIContext #{} on {} : {}";
     private static final Logger log = LoggerFactory.getLogger(WebSocket.class);
-    private static final Logger LOGGER_IN = LoggerFactory.getLogger("WebSocket-IN");
-    private static final Logger LOGGER_OUT = LoggerFactory.getLogger("WebSocket-OUT");
+    private static final Logger logger_in = LoggerFactory.getLogger("WebSocket-IN");
+    private static final Logger logger_out = LoggerFactory.getLogger("WebSocket-OUT");
 
     private ServletUpgradeRequest request;
     private WebsocketMonitor monitor;
@@ -193,7 +193,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
     private void processInstructions(final JsonObject jsonObject) {
         final String applicationInstructions = ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue();
-        LOGGER_IN.trace("UIContext #{} : {}", this.uiContext.getID(), jsonObject);
+        logger_in.trace("UIContext #{} : {}", this.uiContext.getID(), jsonObject);
         uiContext.execute(() -> {
             final JsonArray appInstructions = jsonObject.getJsonArray(applicationInstructions);
             for (int i = 0; i < appInstructions.size(); i++) {
@@ -309,7 +309,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     @Override
     public void encode(final ServerToClientModel model, final Object value) {
         try {
-            LOGGER_OUT.trace("UIContext #{} : {} {}", this.uiContext.getID(), model, value);
+            logger_out.trace("UIContext #{} : {} {}", this.uiContext.getID(), model, value);
             websocketPusher.encode(model, value);
             if (listener != null) listener.onOutgoingPonyFrame(model, value);
         } catch (final IOException e) {
