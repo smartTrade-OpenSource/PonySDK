@@ -95,45 +95,45 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
      * @param value The type can be primitives, String or Object[]
      */
     void encode(final ServerToClientModel model, final Object value) throws IOException {
-        if (log.isDebugEnabled()) log.debug("Writing in the buffer : {} => {}", model, value);
-            switch (model.getTypeModel()) {
-                case NULL:
-                    write(model);
-                    break;
-                case BOOLEAN:
-                    write(model, (boolean) value);
-                    break;
-                case BYTE:
-                    write(model, (byte) value);
-                    break;
-                case SHORT:
-                    write(model, (short) value);
-                    break;
-                case UINT31:
-                    writeUint31(model, (int) value);
-                    break;
-                case INTEGER:
-                    write(model, (int) value);
-                    break;
-                case LONG:
-                    write(model, (long) value);
-                    break;
-                case DOUBLE:
-                    write(model, (double) value);
-                    break;
-                case FLOAT:
-                    write(model, (float) value);
-                    break;
-                case STRING:
-                    write(model, (String) value);
-                    break;
-                case ARRAY:
-                    write(model, (Object[]) value);
-                    break;
-                default:
-                    log.error("Unknown model type : {}", model.getTypeModel());
-                    break;
-            }
+        log.debug("Writing in the buffer : {} => {}", model, value);
+        switch (model.getTypeModel()) {
+            case NULL:
+                write(model);
+                break;
+            case BOOLEAN:
+                write(model, (boolean) value);
+                break;
+            case BYTE:
+                write(model, (byte) value);
+                break;
+            case SHORT:
+                write(model, (short) value);
+                break;
+            case UINT31:
+                writeUint31(model, (int) value);
+                break;
+            case INTEGER:
+                write(model, (int) value);
+                break;
+            case LONG:
+                write(model, (long) value);
+                break;
+            case DOUBLE:
+                write(model, (double) value);
+                break;
+            case FLOAT:
+                write(model, (float) value);
+                break;
+            case STRING:
+                write(model, (String) value);
+                break;
+            case ARRAY:
+                write(model, (Object[]) value);
+                break;
+            default:
+                log.error("Unknown model type : {}", model.getTypeModel());
+                break;
+        }
     }
 
     private void write(final ServerToClientModel model) throws IOException {
