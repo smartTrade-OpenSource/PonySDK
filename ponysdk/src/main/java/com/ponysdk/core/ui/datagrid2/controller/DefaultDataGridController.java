@@ -39,6 +39,7 @@ import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ponysdk.core.server.service.query.PResultSet;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.cell.Cell;
 import com.ponysdk.core.ui.datagrid2.column.Column;
@@ -61,8 +62,8 @@ import com.ponysdk.core.util.Pair;
  * @author mbagdouri
  */
 public class DefaultDataGridController<K, V> implements DataGridController<K, V> {
-	
-	private static final Logger log = LoggerFactory.getLogger(DefaultDataGridController.class);
+
+    private static final Logger log = LoggerFactory.getLogger(DefaultDataGridController.class);
 
     private static final Object NO_RENDERING_HELPER = new Object();
     private static final int RENDERING_HELPERS_CACHE_CAPACITY = 512;
@@ -72,10 +73,11 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     private DataGridControllerListener<V> listener;
     private DataGridAdapter<K, V> adapter;
     private boolean bound = true;
-    
+
     /**
-     * Data is split in 2 zones: a constant one and a variable one. 
-     * The variable zone is the only one that gets refreshed during a draw and it is constantly narrowed down for better performance.
+     * Data is split in 2 zones: a constant one and a variable one.
+     * The variable zone is the only one that gets refreshed during a draw and it is constantly narrowed down for better
+     * performance.
      */
     private int from = Integer.MAX_VALUE;
     private int to = 0;
@@ -163,16 +165,19 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     public void refresh() {
         listener.refresh();
     }
-    
+
+    @Override
     public void refreshOnNextDraw() {
-    	refreshRows(0, dataSource.getRowCount());
+        refreshRows(0, dataSource.getRowCount());
     }
 
     /**
      * Extends the variable zone (which is refreshed during a draw from the view) using from/to as data offsets.
-     * 
-     * @param from the beginning offset of the variable zone
-     * @param to the ending offset of the variable zone
+     *
+     * @param from
+     *            the beginning offset of the variable zone
+     * @param to
+     *            the ending offset of the variable zone
      */
     private void refreshRows(final int from, final int to) {
         this.from = Math.min(this.from, from);
@@ -182,7 +187,10 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
 
     private void doRefreshRows() {
         try {
-            if (listener != null) listener.onUpdateRows(from, to);
+            if (listener != null) {
+                listener.onUpdateRows(from, to);
+                listener.refresh();
+            }
         } finally {
             from = Integer.MAX_VALUE;
             to = 0;
@@ -391,17 +399,18 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
         });
 
         completableFuture.whenComplete((response, ex) -> {
-        	if(ex != null) {
-        		log.error("Cannot display data", ex);
-        		consumer.accept(new Pair<>(null, ex));}
-        	else {
-        	if (viewSnapshot.equals(response.threadSnapshot) && response.id >= 0) {
-                final DataSrcResult result = new DataSrcResult(response.liveDataView, response.firstRowIndex, response.start);
-                consumer.accept(new Pair<>(result, null));
-            }}
+            if (ex != null) {
+                log.error("Cannot display data", ex);
+                consumer.accept(new Pair<>(null, ex));
+            } else {
+                if (viewSnapshot.equals(response.threadSnapshot) && response.id >= 0) {
+                    final DataSrcResult result = new DataSrcResult(response.liveDataView, response.firstRowIndex, response.start);
+                    consumer.accept(new Pair<>(result, null));
+                }
+            }
         });
     }
-    
+
     @Override
     public DataGridController<K, V> get() {
         return this;
@@ -491,8 +500,18 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     }
 
     @Override
-    public Collection<V> getLiveSelectedData() {
+    public PResultSet<V> getFilteredData() {
+        return dataSource.getFilteredData();
+    }
+
+    @Override
+    public PResultSet<V> getLiveSelectedData() {
         return dataSource.getLiveSelectedData();
+    }
+
+    @Override
+    public int getLiveSelectedDataCount() {
+        return dataSource.getlLiveSelectedDataCount();
     }
 
     @Override
@@ -601,22 +620,19 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
             return column;
         }
 
-		@Override
-		public int hashCode() {
-			return Objects.hash(asc, column);
-		}
+        @Override
+        public int hashCode() {
+            return Objects.hash(asc, column);
+        }
 
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			ColumnControllerSort other = (ColumnControllerSort) obj;
-			return asc == other.asc && Objects.equals(column, other.column);
-		}
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) return true;
+            if (obj == null) return false;
+            if (getClass() != obj.getClass()) return false;
+            final ColumnControllerSort other = (ColumnControllerSort) obj;
+            return asc == other.asc && Objects.equals(column, other.column);
+        }
     }
 
     private class GeneralFilter implements AbstractFilter<V> {

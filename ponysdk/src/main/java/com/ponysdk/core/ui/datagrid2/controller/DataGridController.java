@@ -31,6 +31,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import com.ponysdk.core.server.service.query.PResultSet;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.cell.Cell;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
@@ -52,7 +53,15 @@ public interface DataGridController<K, V> {
 
     boolean isSelectable(K k);
 
-    Collection<V> getLiveSelectedData();
+    public PResultSet<V> getFilteredData();
+
+    public PResultSet<V> getLiveSelectedData();
+
+    /**
+     *
+     * @return the number of selected data
+     */
+    int getLiveSelectedDataCount();
 
     Collection<V> getLiveData(int from, int dataSize);
 
@@ -105,18 +114,26 @@ public interface DataGridController<K, V> {
 
     void enrichConfigBuilder(DataGridConfigBuilder<V> builder);
 
-    /** 
-     * Performs a full refresh; i.e. same as {@link #refreshOnNextDraw()} but with a forced redraw on {@link DataGridView} afterwards.
+    /**
+     * Performs a full refresh; i.e. same as {@link #refreshOnNextDraw()} but with a forced redraw on
+     * {@link DataGridView} afterwards.
      */
     void refresh();
-    
+
     /**
-     * Ensures that all data will be refreshed during the next draw performed on {@link DataGridView} but without performing it immediately.<br><br>
-     * Indeed, a performance mechanism limits the rows which gets refreshed during a draw and this refresh ensures the whole dataset will be refreshed.<br><br>
-     * 
-     *  splits the data in 2 zones: a constant one and a variable one. 
-     * The variable zone is the only one that gets updated during a draw and it is constantly narrowed down for better performance.<br><br>
-     * This refresh will grow the variable zone on the whole dataset so that it gets updated next time but it will not force any redraw.
+     * Ensures that all data will be refreshed during the next draw performed on {@link DataGridView} but without
+     * performing it immediately.<br>
+     * <br>
+     * Indeed, a performance mechanism limits the rows which gets refreshed during a draw and this refresh ensures the
+     * whole dataset will be refreshed.<br>
+     * <br>
+     *
+     * splits the data in 2 zones: a constant one and a variable one.
+     * The variable zone is the only one that gets updated during a draw and it is constantly narrowed down for better
+     * performance.<br>
+     * <br>
+     * This refresh will grow the variable zone on the whole dataset so that it gets updated next time but it will not
+     * force any redraw.
      */
     void refreshOnNextDraw();
 
@@ -126,7 +143,7 @@ public interface DataGridController<K, V> {
      * sometimes
      */
     void prepareLiveDataOnScreen(int dataSrcRowIndex, int dataSize, DataGridSnapshot threadSnapshot,
-    		Consumer<Pair<DefaultDataGridController<K, V>.DataSrcResult, Throwable>> consumer);
+                                 Consumer<Pair<DefaultDataGridController<K, V>.DataSrcResult, Throwable>> consumer);
 
     /**
      * Insert or replace the value
@@ -177,4 +194,5 @@ public interface DataGridController<K, V> {
      * Whether the model is bound to the view.
      */
     boolean getBound();
+
 }
