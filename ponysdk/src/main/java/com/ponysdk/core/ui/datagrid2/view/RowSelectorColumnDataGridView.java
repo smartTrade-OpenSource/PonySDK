@@ -122,10 +122,9 @@ public class RowSelectorColumnDataGridView<K, V> extends DecoratorDataGridView<K
                 addColumnActionListener(column, rowSelectorColumn);
             }
         }
-
     }
 
-    private class RowSelectorColumnDefinition implements ColumnDefinition<V> {
+    public class RowSelectorColumnDefinition implements ColumnDefinition<V> {
 
         private final PCheckBox header;
         private final PCheckBox footer;
@@ -146,7 +145,7 @@ public class RowSelectorColumnDataGridView<K, V> extends DecoratorDataGridView<K
 
         private void refreshHeader() {
             if (header == null) return;
-            final int selected = getView().getLiveSelectedData().size();
+            final int selected = getView().getLiveSelectedDataCount();
             if (selected == 0) header.setState(PCheckBoxState.UNCHECKED);
             else if (selected == getView().getController().getRowCount()) header.setState(PCheckBoxState.CHECKED);
             else header.setState(PCheckBoxState.INDETERMINATE);
@@ -278,7 +277,7 @@ public class RowSelectorColumnDataGridView<K, V> extends DecoratorDataGridView<K
             refreshHeader();
         }
 
-        private class RowSelectorColumnCell implements PrimaryCell<V> {
+        protected class RowSelectorColumnCell implements PrimaryCell<V> {
 
             private final PCheckBox checkBox = Element.newPCheckBox();
             private final PWidget pending = Element.newSpan();

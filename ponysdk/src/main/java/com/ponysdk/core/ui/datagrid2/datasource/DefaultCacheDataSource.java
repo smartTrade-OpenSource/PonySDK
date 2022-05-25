@@ -33,15 +33,23 @@ import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+import com.ponysdk.core.server.service.query.PResultSet;
 import com.ponysdk.core.ui.datagrid2.data.AbstractFilter;
 import com.ponysdk.core.ui.datagrid2.data.DefaultRow;
 import com.ponysdk.core.ui.datagrid2.data.Interval;
 import com.ponysdk.core.ui.datagrid2.data.LiveDataView;
+import com.ponysdk.core.util.MappedList;
 
 public class DefaultCacheDataSource<K, V> extends AbstractDataSource<K, V> {
 
     private final Map<K, DefaultRow<V>> cache = new HashMap<>();
     private final List<DefaultRow<V>> liveData = new ArrayList<>();
+
+    @Override
+    public PResultSet<V> getFilteredData() {
+        //return a copy to avoid concurrent modification exception
+        return PResultSet.of(new MappedList<>(new ArrayList<>(liveData), DefaultRow::getData));
+    }
 
     @Override
     public DefaultRow<V> getRow(final K k) {
@@ -246,7 +254,7 @@ public class DefaultCacheDataSource<K, V> extends AbstractDataSource<K, V> {
     public Interval select(final K k) {
         final DefaultRow<V> row = cache.get(k);
         if (row == null || !selectedKeys.add(k) || !row.isAccepted()) return null;
-        int i = insertRow(liveSelectedData, row);
+        final int i = insertRow(liveSelectedData, row);
         return new Interval(i, i);
     }
 
@@ -254,7 +262,7 @@ public class DefaultCacheDataSource<K, V> extends AbstractDataSource<K, V> {
     public Interval unselect(final K k) {
         final DefaultRow<V> row = cache.get(k);
         if (row == null || !selectedKeys.remove(k) || !row.isAccepted()) return null;
-        int i = removeRow(liveSelectedData, row);
+        final int i = removeRow(liveSelectedData, row);
         return new Interval(i, i);
     }
 }

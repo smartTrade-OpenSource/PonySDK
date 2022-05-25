@@ -25,12 +25,12 @@ package com.ponysdk.core.ui.datagrid2.datasource;
 
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+import com.ponysdk.core.server.service.query.PResultSet;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.column.Column;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
@@ -84,9 +84,22 @@ public interface DataGridSource<K, V> {
     V removeData(final K k);
 
     /**
-     * @return the list that contains selected data
+     * this method can be asynchronous and called few times till the end of the data
+     * True is passed into parameter if it reach the last selected data
      */
-    List<V> getLiveSelectedData();
+    PResultSet<V> getFilteredData();
+
+    /**
+     * this method can be asynchronous and called few times till the end of the data
+     * True is passed into parameter if it reach the last selected data
+     */
+    PResultSet<V> getLiveSelectedData();
+
+    /**
+     *
+     * @return the total number of selected data
+     */
+    int getlLiveSelectedDataCount();
 
     /**
      * Adapter setter

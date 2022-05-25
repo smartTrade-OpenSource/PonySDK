@@ -25,6 +25,7 @@ import java.util.Comparator;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import com.ponysdk.core.server.service.query.PResultSet;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.column.ColumnActionListener;
@@ -48,7 +49,7 @@ public interface DataGridView<K, V> extends IsPWidget {
      * Enable draws for this {@link DataGridView}.
      */
     void resume();
-    
+
     /**
      * Disable draws for this {@link DataGridView}.
      */
@@ -85,18 +86,30 @@ public interface DataGridView<K, V> extends IsPWidget {
     int getLiveDataRowCount();
 
     /**
-     * Returns an immutable {@link Collection} view of the selected data that is
-     * shown to the user (i.e. sorting and filters are taken into account). The
-     * collection is backed by the view, so changes to the view are reflected in
-     * the collection.
+     * Returns a {@link PResultSet} of the selected data that is
+     * shown to the user (i.e. sorting and filters are taken into account).
      */
-    Collection<V> getLiveSelectedData();
+    public PResultSet<V> getFilteredData();
+
+    /**
+     * Returns a {@link PResultSet} of the selected data that is
+     * shown to the user (i.e. sorting and filters are taken into account).
+     */
+    public PResultSet<V> getLiveSelectedData();
+
+    /**
+     *
+     * @return the number of selected data
+     */
+    int getLiveSelectedDataCount();
 
     /**
      * Returns a {@link Collection} view of data with sorting and filters taken into account.
      *
-     * @param from index starting from which the data is retrieved
-     * @param dataSize size of the data to retrieve
+     * @param from
+     *            index starting from which the data is retrieved
+     * @param dataSize
+     *            size of the data to retrieve
      */
     Collection<V> getLiveData(int from, int dataSize);
 
@@ -114,11 +127,14 @@ public interface DataGridView<K, V> extends IsPWidget {
      * Adds/replaces a filter that accepts only data that meet the condition of
      * the {@link Predicate} {@code filter}.
      *
-     * @param key an object that can be used to uniquely identify a
+     * @param key
+     *            an object that can be used to uniquely identify a
      *            filter, so that it can be replaced or removed
-     * @param filter a predicate that decides whether a value is accepted
+     * @param filter
+     *            a predicate that decides whether a value is accepted
      *            or filtered
-     * @param reinforcing {@code true} if the predicate is at least as
+     * @param reinforcing
+     *            {@code true} if the predicate is at least as
      *            intolerant as the replaced predicate of the same key
      *            (i.e. the predicate doesn't accept any value that was
      *            not accepted by the replaced predicate), {@code false}
@@ -133,10 +149,12 @@ public interface DataGridView<K, V> extends IsPWidget {
     /**
      * Adds/replaces a sorting criterion for the view.
      *
-     * @param key an object that can be used to uniquely identify a
+     * @param key
+     *            an object that can be used to uniquely identify a
      *            sorting criterion, so that it can be replaced or
      *            removed
-     * @param comparator compares two values of the model
+     * @param comparator
+     *            compares two values of the model
      */
     void addSort(Object key, Comparator<V> comparator);
 
@@ -206,7 +224,8 @@ public interface DataGridView<K, V> extends IsPWidget {
     /**
      * @return a deserialized object built from the String value, or
      *         {@code null} if it doesn't recognize the {@code key}
-     * @throws DecodeException if it fails to decode the value
+     * @throws DecodeException
+     *             if it fails to decode the value
      */
     Object decodeConfigCustomValue(String key, String value) throws DecodeException;
 
@@ -229,7 +248,7 @@ public interface DataGridView<K, V> extends IsPWidget {
      * Removes a {@link DrawListener}
      */
     void removeDrawListener(DrawListener drawListener);
-    
+
     void setExceptionHandler(Function<Throwable, String> handler);
 
     public static class DecodeException extends Exception {
@@ -261,4 +280,5 @@ public interface DataGridView<K, V> extends IsPWidget {
 
         void onDraw(int rowCount);
     }
+
 }

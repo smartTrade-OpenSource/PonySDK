@@ -31,6 +31,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import com.ponysdk.core.server.service.query.PResultSet;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.cell.Cell;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
@@ -117,10 +118,20 @@ public abstract class SpyDataGridController<K, V> implements DataGridController<
     public boolean isSelectable(final K k) {
         return controller.isSelectable(k);
     }
-    
+
     @Override
-    public Collection<V> getLiveSelectedData() {
+    public PResultSet<V> getFilteredData() {
+        return controller.getFilteredData();
+    }
+
+    @Override
+    public PResultSet<V> getLiveSelectedData() {
         return controller.getLiveSelectedData();
+    }
+
+    @Override
+    public int getLiveSelectedDataCount() {
+        return controller.getLiveSelectedDataCount();
     }
 
     @Override
@@ -259,9 +270,9 @@ public abstract class SpyDataGridController<K, V> implements DataGridController<
     public void refreshOnNextDraw() {
         controller.refreshOnNextDraw();
     }
-    
+
     @Override
     public void refresh() {
-    	controller.refresh();
+        controller.refresh();
     }
 }

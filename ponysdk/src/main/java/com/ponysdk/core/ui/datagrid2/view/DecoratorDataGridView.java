@@ -26,6 +26,7 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import com.ponysdk.core.server.service.query.PResultSet;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.column.ColumnActionListener;
@@ -72,8 +73,18 @@ public class DecoratorDataGridView<K, V> implements DataGridView<K, V> {
     }
 
     @Override
-    public Collection<V> getLiveSelectedData() {
+    public PResultSet<V> getFilteredData() {
+        return view.getFilteredData();
+    }
+
+    @Override
+    public PResultSet<V> getLiveSelectedData() {
         return view.getLiveSelectedData();
+    }
+
+    @Override
+    public int getLiveSelectedDataCount() {
+        return view.getLiveSelectedDataCount();
     }
 
     @Override
@@ -188,17 +199,17 @@ public class DecoratorDataGridView<K, V> implements DataGridView<K, V> {
 
     @Override
     public void resume() {
-		view.resume();
-	}
+        view.resume();
+    }
 
     @Override
     public void pause() {
-		view.pause();
-	}
+        view.pause();
+    }
 
-	@Override
-	public void setExceptionHandler(Function<Throwable, String> handler) {
-		view.setExceptionHandler(handler);
-	}
+    @Override
+    public void setExceptionHandler(final Function<Throwable, String> handler) {
+        view.setExceptionHandler(handler);
+    }
 
 }

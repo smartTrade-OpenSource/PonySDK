@@ -47,6 +47,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.server.concurrent.PScheduler;
 import com.ponysdk.core.server.concurrent.PScheduler.UIRunnable;
+import com.ponysdk.core.server.service.query.PResultSet;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
@@ -133,7 +134,6 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
     private int from = Integer.MAX_VALUE;
     private int to = 0;
     private final Set<DrawListener> drawListeners = SetUtils.newArraySet();
-    private final Collection<V> selectedDataView;
     private final Map<ColumnDefinition<V>, ColumnView> columnViews = new HashMap<>();
     private final DataGridControllerWrapper<K, V> controllerWrapper;
     private final LinkedHashMap<Object, RowAction<V>> rowActions = new LinkedHashMap<>();
@@ -153,7 +153,6 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         new HideScrollBarAddon(root);
         controller = new DefaultDataGridController<>(dataSource);
         controller.setListener(this);
-        selectedDataView = controller.getLiveSelectedData();
         controllerWrapper = new DataGridControllerWrapper<>(//
             controller.get(), //
             this::onDataUpdated, //
@@ -243,7 +242,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         loadingDataDiv.setStyleProperty("height", "100%");
         return loadingDataDiv;
     }
-    
+
     private static PComplexPanel prepareErrorMsgDiv() {
         final PComplexPanel result = Element.newDiv();
         result.addStyleName("pony-grid-error-msg");
@@ -368,7 +367,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         }
         fromColumnView.notifyMovedListeners();
     }
-    
+
     @Override
     public void refresh() {
         showLoadingDataView();
@@ -399,7 +398,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             final int start = Math.max(0, from - firstRowIndex);
             final DataGridSnapshot viewStateSnapshot = new DataGridSnapshot(firstRowIndex, size, start, sorts, filters);
             final Consumer<Pair<DefaultDataGridController<K, V>.DataSrcResult, Throwable>> consumer = PScheduler
-                    .delegate(this::updateView);
+                .delegate(this::updateView);
             controller.prepareLiveDataOnScreen(firstRowIndex, size, viewStateSnapshot, consumer);
         } catch (final Exception e) {
             log.error("Cannot draw data from data source", e);
@@ -408,7 +407,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
 
     private void updateView(final Pair<DefaultDataGridController<K, V>.DataSrcResult, Throwable> result) {
         if (result.getSecond() != null) {
-            showErrorMsg(exceptionHandler == null ? "" : exceptionHandler.apply(result.getSecond()));
+            showErrorMessage(exceptionHandler == null ? "" : exceptionHandler.apply(result.getSecond()));
         } else {
             final LiveDataView<V> resultLiveData = result.getFirst().liveDataView;
             try {
@@ -418,7 +417,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
                 addon.onDataUpdated(resultLiveData.getAbsoluteRowCount(), rows.size(), result.getFirst().firstRowIndex);
             } catch (final Exception e) {
                 log.error("Problem occured while updating the view", e);
-                showErrorMsg(exceptionHandler == null ? "" : exceptionHandler.apply(result.getSecond()));
+                showErrorMessage(exceptionHandler == null ? "" : exceptionHandler.apply(result.getSecond()));
             } finally {
                 from = Integer.MAX_VALUE;
                 to = 0;
@@ -689,9 +688,21 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
     }
 
     @Override
-    public Collection<V> getLiveSelectedData() {
+    public PResultSet<V> getFilteredData() {
         checkAdapter();
-        return selectedDataView;
+        return controller.getFilteredData();
+    }
+
+    @Override
+    public PResultSet<V> getLiveSelectedData() {
+        checkAdapter();
+        return controller.getLiveSelectedData();
+    }
+
+    @Override
+    public int getLiveSelectedDataCount() {
+        checkAdapter();
+        return controller.getLiveSelectedDataCount();
     }
 
     @Override
@@ -704,18 +715,14 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
     public void selectAllLiveData() {
         checkAdapter();
         controller.selectAllLiveData();
-        for (final DefaultDataGridView<K, V>.Row row : rows) {
-            if (row.pinnedRow.isVisible()) row.select();
-        }
+        refresh();
     }
 
     @Override
     public void unselectAllData() {
         checkAdapter();
         controller.unselectAllData();
-        for (final DefaultDataGridView<K, V>.Row row : rows) {
-            row.unselect();
-        }
+        refresh();
     }
 
     @Override
@@ -856,11 +863,11 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         // must be sent immediately
         Txn.get().flush(); // FIXME use Txn.get() ???
     }
-    
-    private void showErrorMsg(String msg) {
+
+    private void showErrorMessage(final String msg) {
         errorMsgDiv.setVisible(true);
         errorMsgDiv.clear();
-        PElement div = Element.newDiv();
+        final PElement div = Element.newDiv();
         div.setInnerText(msg);
         errorMsgDiv.add(div);
         loadingDataDiv.setVisible(false);
@@ -941,9 +948,9 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
     public void pause() {
         shouldDraw = false;
     }
-    
+
     @Override
-    public void setExceptionHandler(Function<Throwable, String> handler) {
+    public void setExceptionHandler(final Function<Throwable, String> handler) {
         exceptionHandler = handler;
     }
 
@@ -1041,11 +1048,15 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         void select() {
             if (key == null || !controller.isSelectable(key)) return;
             controller.select(key);
+            pinnedCells.forEach(CellManager::select);
+            unpinnedCells.forEach(CellManager::select);
         }
 
         void unselect() {
             if (key == null || !controller.isSelectable(key)) return;
             controller.unselect(key);
+            pinnedCells.forEach(CellManager::unselect);
+            unpinnedCells.forEach(CellManager::unselect);
         }
 
     }

@@ -37,6 +37,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ponysdk.core.server.service.query.PResultSet;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.column.Column;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
@@ -61,8 +62,14 @@ public abstract class AbstractDataSource<K, V> implements DataGridSource<K, V> {
     protected int rowCounter = 0;
 
     @Override
-    public List<V> getLiveSelectedData() {
-        return new MappedList<>(liveSelectedData, DefaultRow::getData);
+    public PResultSet<V> getLiveSelectedData() {
+        //return a copy to avoid concurrent modification exception
+        return PResultSet.of(new MappedList<>(new ArrayList<>(liveSelectedData), DefaultRow::getData));
+    }
+
+    @Override
+    public int getlLiveSelectedDataCount() {
+        return liveSelectedData.size();
     }
 
     @Override
