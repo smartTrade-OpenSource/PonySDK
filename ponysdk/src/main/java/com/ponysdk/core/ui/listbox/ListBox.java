@@ -441,6 +441,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
 
     public void replaceItems(final Collection<? extends ListBoxItem<D>> items) {
         if (dataProvider != null) throw new IllegalArgumentException("Only available without a ListBoxDataProvider");
+        if(this.items.equals(items)) return;
         clearSelection();
         this.items.clear();
         this.items.addAll(items);
