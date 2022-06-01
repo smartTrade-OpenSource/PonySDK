@@ -846,6 +846,10 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     public void refresh() {
         if (isOpen()) itemContainer.refresh();
     }
+    
+    public void refresh() {
+    	if (isOpen()) itemContainer.refresh();
+    }
 
     private void setSelectedItem(final ListBoxItem<D> selectedItem) {
         clearSelection();
