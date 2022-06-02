@@ -69,7 +69,7 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
 
     // used for drawing
     private int beginIndex = 0;
-    private int maxVisibleItems = 15;
+    private int maxVisibleItems = 10;
 
     private final InfiniteScrollProvider<D, W> dataProvider;
     private int fullSize;

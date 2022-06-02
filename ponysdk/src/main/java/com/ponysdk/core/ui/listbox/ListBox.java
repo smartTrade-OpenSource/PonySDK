@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -65,13 +66,13 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     private static final String STYLE_LISTBOX_CONTAINER = "dd-listbox-container";
     private static final String STYLE_LISTBOX_FILTER = "dd-listbox-filter";
     private static final String STYLE_LISTBOX_CLEAR_MULTI = "dd-listbox-clear-multi";
-    private static final String STYLE_LISTBOX_ITEM_SELECTED = "dd-listbox-item-selected";
-    private static final String STYLE_LISTBOX_ITEM_LAST_SELECTED = "dd-listbox-item-last-selected";
-    private static final String STYLE_LISTBOX_ITEM_GROUP = "dd-listbox-item-group";
+    protected static final String STYLE_LISTBOX_ITEM_SELECTED = "dd-listbox-item-selected";
+    protected static final String STYLE_LISTBOX_ITEM_LAST_SELECTED = "dd-listbox-item-last-selected";
+    protected static final String STYLE_LISTBOX_ITEM_GROUP = "dd-listbox-item-group";
 
-    private static final String DISABLED = "disabled";
+    protected static final String DISABLED = "disabled";
 
-    private PTextBox textBox;
+    private ListBoxTextBox textBox;
     private PButton clearMultiButton;
     private InfiniteScrollAddon<ListBoxItem<D>, ListBoxItemWidget> itemContainer;
 
@@ -107,7 +108,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     private final Comparator<ListBoxItem<D>> selectionComparator = (i1, i2) -> (i2.isSelected() ? 1 : 0)
             - (i1.isSelected() ? 1 : 0);
 
-    private ListBoxItem<D> lastSelectedItem;
+    protected ListBoxItem<D> lastSelectedItem;
     private boolean shiftPressed;
     private HandlerRegistration upDownKeyHandler;
     private int index;
@@ -119,8 +120,10 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     protected final Map<String, GroupListBoxItem<D>> groupItems;
     protected final List<ListBoxItem<D>> selectedDataItems;
 
+    
     public ListBox(final ListBoxConfiguration configuration) {
         this(configuration, List.of());
+
     }
 
     public ListBox(final ListBoxConfiguration configuration, final Collection<? extends ListBoxItem<D>> items) {
@@ -148,6 +151,8 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         this.dataProvider = dataProvider;
         this.selectedDataItems = new ArrayList<>();
     }
+    
+
 
     @Override
     public List<ListBoxItem<D>> getValue() {
@@ -441,7 +446,6 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
 
     public void replaceItems(final Collection<? extends ListBoxItem<D>> items) {
         if (dataProvider != null) throw new IllegalArgumentException("Only available without a ListBoxDataProvider");
-        if(this.items.equals(items)) return;
         clearSelection();
         this.items.clear();
         this.items.addAll(items);
@@ -536,7 +540,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         if (configuration.isSearchEnabled()) {
             final PPanel panel = Element.newPSimplePanel();
             panel.addStyleName(STYLE_LISTBOX_FILTER);
-            textBox = Element.newPTextBox();
+            textBox = buildTextBox();
             if (configuration.getPlaceholder() != null) {
                 textBox.setPlaceholder(configuration.getPlaceholder());
             }
@@ -613,11 +617,22 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         return defaultContainer;
     }
 
+
     protected InfiniteScrollAddon<ListBoxItem<D>, ListBox<D>.ListBoxItemWidget> buildInfiniteScrollAddon() {
         return new InfiniteScrollAddon<>(new ListBoxInfiniteScrollProvider());
     }
 
     @Override
+    protected ListBoxTextBox buildTextBox() {
+		return new DefaultTextBox();
+	}
+    
+    protected Supplier<ListBoxLabel> getItemWidgetLabel() {
+    	return () -> new DefaultListBoxLabel();
+    }
+
+
+	@Override
     protected void updateTitle(final List<ListBoxItem<D>> selectedItems) {
         if (!isInitialized()) return;
         final StringBuilder text = new StringBuilder();
@@ -870,7 +885,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         updateVisibleItems();
     }
 
-    private boolean isSelectionAllowed(Collection<?> selectedItems) {
+    protected boolean isSelectionAllowed(Collection<?> selectedItems) {
         if (selectedItems == null) selectedItems = getSelectedItems();
         final Integer selectionLimit = configuration.getSelectionLimit();
         if (configuration.isMultiSelectionEnabled() && selectionLimit != null
@@ -880,12 +895,13 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         }
         return true;
     }
+    
 
     protected String getFilter() {
         return textBox != null ? textBox.getText() : null;
     }
 
-    private void applyCloseOnClickMode() {
+    protected void applyCloseOnClickMode() {
         switch (configuration.getCloseOnClickMode()) {
         case DEFAULT:
             if (!configuration.isMultiSelectionEnabled()) close();
@@ -901,6 +917,9 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
 
     private void initIndex() {
         index = configuration.isGroupEnabled() ? 1 : 0;
+    }
+    protected ListBoxDataProvider<D> getDataProvider(){
+    	return dataProvider;
     }
 
     //
@@ -923,7 +942,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         private boolean selected;
         private boolean enabled = true;
         private String groupName;
-
+        
         private ListBoxItem(final String label, final D data, final boolean selected) {
             this.label = label;
             this.data = data;
@@ -931,7 +950,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         }
 
         public String getLabel() {
-            return label;
+        	return label;
         }
 
         public void setLabel(final String label) {
@@ -1063,22 +1082,23 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
 
         private final PPanel panel;
         private PCheckBox checkBox;
-        private final PLabel label;
+        private final ListBoxLabel label;
 
         private boolean built;
         private ListBoxItem<D> item;
-
-        public ListBoxItemWidget() {
-            panel = Element.newPFlowPanel();
+        
+        ListBoxItemWidget(Supplier<ListBoxLabel> labelFactory){
+        	panel = Element.newPFlowPanel();
             if (configuration.isMultiSelectionEnabled()) checkBox = Element.newPCheckBox();
-            label = Element.newPLabel();
+            label = labelFactory.get();
         }
-
+        
         @Override
         public PWidget asWidget() {
             if (!built) {
                 if (checkBox != null) panel.add(checkBox);
                 panel.add(label);
+                
                 label.addClickHandler(e -> {
                     if (ListBoxItemType.GROUP.equals(item.getType())) return;
                     if (!item.isEnabled()) return;
@@ -1121,9 +1141,9 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
                 else panel.removeStyleName(STYLE_LISTBOX_ITEM_GROUP);
             }
             label.setText(item.getLabel());
-            label.setTitle(item.getLabel());
-            if (item.isEnabled()) label.removeAttribute(DISABLED);
-            else label.setAttribute(DISABLED);
+            label.asWidget().setTitle(item.getLabel());
+            if (item.isEnabled()) label.asWidget().removeAttribute(DISABLED);
+            else label.asWidget().setAttribute(DISABLED);
         }
     }
 
@@ -1149,7 +1169,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
 
         @Override
         public ListBoxItemWidget handleUI(final int index, final ListBoxItem<D> item, ListBoxItemWidget widget) {
-            if (widget == null) widget = new ListBoxItemWidget();
+            if (widget == null) widget = new ListBoxItemWidget(getItemWidgetLabel());
             widget.setItem(item);
             return widget;
         }
