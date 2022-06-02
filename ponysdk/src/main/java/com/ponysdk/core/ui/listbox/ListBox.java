@@ -341,7 +341,6 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
 
     public void replaceItems(final Collection<? extends ListBoxItem<D>> items) {
         if (dataProvider != null) throw new IllegalArgumentException("Only available without a ListBoxDataProvider");
-        if(this.items.equals(items)) return;
         clearSelection();
         this.items.clear();
         this.items.addAll(items);
@@ -406,7 +405,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         if (dataProvider != null) throw new UnsupportedOperationException("Only available with a ListBoxDataProvider");
         this.items.stream().filter(item -> item.getData().equals(value)).findFirst().ifPresent(item -> {
             item.setEnabled(enabled);
-            if (isOpen()) itemContainer.refresh();
+            refresh();
         });
     }
 
@@ -730,7 +729,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
                 this.visibleItems.addAll(items);
             }
         }
-        if (isOpen()) itemContainer.refresh();
+        refresh();
     }
     
     public void refresh() {
