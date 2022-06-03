@@ -405,7 +405,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         if (dataProvider != null) throw new UnsupportedOperationException("Only available with a ListBoxDataProvider");
         this.items.stream().filter(item -> item.getData().equals(value)).findFirst().ifPresent(item -> {
             item.setEnabled(enabled);
-            if (isOpen()) itemContainer.refresh();
+            refresh();
         });
     }
 
@@ -729,7 +729,11 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
                 this.visibleItems.addAll(items);
             }
         }
-        if (isOpen()) itemContainer.refresh();
+        refresh();
+    }
+    
+    public void refresh() {
+    	if (isOpen()) itemContainer.refresh();
     }
 
     private void setSelectedItem(final ListBoxItem<D> selectedItem) {
