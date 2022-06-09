@@ -65,6 +65,7 @@ public abstract class PTFocusWidget<T extends FocusWidget> extends PTWidget<T> {
         } else if (ServerToClientModel.ENABLED == model) {
             this.enabled = binaryModel.getBooleanValue();
             uiObject.setEnabled(enabled);
+            uiObject.getElement().setAttribute("aria-hidden", String.valueOf(!enabled));
             return true;
         } else {
             return super.update(buffer, binaryModel);

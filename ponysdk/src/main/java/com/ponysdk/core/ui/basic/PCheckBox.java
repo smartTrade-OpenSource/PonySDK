@@ -53,6 +53,8 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
 
     protected PCheckBoxState state = PCheckBoxState.UNCHECKED;
 
+    private Map<String, String> inputAttributes;
+    
     /**
      * Creates a check box with no label.
      */
@@ -99,6 +101,22 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
         return state;
     }
 
+    public void setInputAttribute(final String name, final String value) {
+        if (name == null) return;
+
+        if(Objects.equals(safeInputAttributes().put(name, value), value)) return;
+
+        saveUpdate(writer -> {
+            writer.write(ServerToClientModel.PUT_INPUT_ATTRIBUTE_KEY, name);
+            writer.write(ServerToClientModel.INPUT_ATTRIBUTE_VALUE, value);
+        });
+    }
+   
+    public void removeInputAttribute(final String name) {
+        if (safeInputAttributes().remove(name) != null) {
+            saveUpdate(writer -> writer.write(ServerToClientModel.REMOVE_INPUT_ATTRIBUTE_KEY, name));
+        }
+    }
     /**
      * Determines whether this check box is currently checked.
      *
@@ -156,5 +174,10 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
         if (getHTML() != null) DOM.append(getHTML());
         DOM.append("</input>");
         return DOM.toString();
+    }
+    
+    private Map<String, String> safeInputAttributes() {
+        if (inputAttributes == null) inputAttributes = new HashMap<>(8);
+        return inputAttributes;
     }
 }
