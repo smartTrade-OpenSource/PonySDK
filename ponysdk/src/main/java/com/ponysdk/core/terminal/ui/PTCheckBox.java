@@ -71,7 +71,17 @@ public class PTCheckBox<T extends CheckBox> extends PTButtonBase<T> {
         } else if (ServerToClientModel.TABINDEX == model) {
             inputElement.setTabIndex(binaryModel.getIntValue());
             return true;
-        } else {
+        } else if(ServerToClientModel.PUT_INPUT_ATTRIBUTE_KEY == model) {
+            final String value = binaryModel.getStringValue();
+            // ServerToClientModel.INPUT_ATTRIBUTE_VALUE
+            String attrValue = buffer.readBinaryModel().getStringValue();
+            if(attrValue == null) attrValue = "";
+            inputElement.setAttribute(value, attrValue);
+            return true;
+        } else if (ServerToClientModel.REMOVE_ATTRIBUTE_KEY == model) {
+        	inputElement.removeAttribute(binaryModel.getStringValue());
+            return true;
+        }else {
             return super.update(buffer, binaryModel);
         }
     }
