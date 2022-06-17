@@ -187,25 +187,106 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         } else {
             this.items.addAll(newItems);
         }
-        updateVisibleItems();
+        if (isInitialized()) updateVisibleItems();
+    }
+
+    public void addItemInGroup(final String groupName, final ListBoxItem<D> item) {
+        if (dataProvider != null) throw new IllegalCallerException("Not supported in DataProvider mode");
+        if (!configuration.isGroupEnabled()) throw new IllegalCallerException("Group mode must be enabled");
+        final GroupListBoxItem<D> groupItem = groupItems.get(groupName);
+        if (groupItem != null) {
+            groupItem.addItem(item);
+            items.add(item);
+            if (isInitialized()) updateVisibleItems();
+        }
     }
 
     public void removeItem(final String itemLabel) {
         if (dataProvider != null) throw new IllegalCallerException("Not supported in DataProvider mode");
         this.items.stream().filter(i -> i.label.equals(itemLabel)).findFirst().ifPresentOrElse(removedItem -> {
-            final ListBoxItem<D> selectedItem = getSelectedItem();
             this.items.remove(removedItem);
             this.visibleItems.remove(removedItem);
-            if (removedItem.equals(selectedItem)) {
+            if (configuration.isMultiSelectionEnabled()) {
+                setSelectedItems(getSelectedItems());
+            } else if (removedItem.isSelected()) {
                 setSelected(null);
             }
             if (itemContainer != null && isOpen()) itemContainer.refresh();
         }, () -> log.warn("Item to remove not found {}", itemLabel));
     }
 
+    public void removeItemFromGroup(final String groupName, final String itemLabel) {
+        if (dataProvider != null) throw new IllegalCallerException("Not supported in DataProvider mode");
+        if (!configuration.isGroupEnabled()) throw new IllegalCallerException("Group mode must be enabled");
+        final GroupListBoxItem<D> groupItem = groupItems.get(groupName);
+        if (groupItem != null) {
+            final ListBoxItem<D> removedItem = groupItem.getGroupItems().stream().filter(i -> i.getLabel().equals(itemLabel))
+                .findFirst().orElse(null);
+            if (removedItem != null) {
+                groupItem.getGroupItems().remove(removedItem);
+                this.items.remove(removedItem);
+                this.visibleItems.remove(removedItem);
+                if (removedItem.isSelected()) {
+                    setSelected(null);
+                }
+                if (itemContainer != null && isOpen()) itemContainer.refresh();
+            }
+        }
+    }
+
+    public void removeGroup(final String groupName) {
+        if (dataProvider != null) throw new IllegalCallerException("Not supported in DataProvider mode");
+        if (!configuration.isGroupEnabled()) throw new IllegalCallerException("Group mode must be enabled");
+        final GroupListBoxItem<D> groupItem = groupItems.remove(groupName);
+        if (groupItem != null) {
+            boolean removeSelection = false;
+            for (final ListBoxItem<D> item : groupItem.getGroupItems()) {
+                removeSelection |= item.isSelected();
+                this.items.remove(item);
+                this.visibleItems.remove(item);
+            }
+            if (removeSelection) {
+                setSelected(null);
+            }
+            if (itemContainer != null && isOpen()) itemContainer.refresh();
+        }
+    }
+
+    public void renameItem(final String oldLabel, final String newLabel) {
+        if (dataProvider != null) throw new IllegalCallerException("Not supported in DataProvider mode");
+        if (configuration.isGroupEnabled()) throw new IllegalCallerException("Group mode must not be enabled");
+        final ListBoxItem<D> item = this.items.stream().filter(i -> i.getLabel().equals(oldLabel)).findFirst().orElse(null);
+        if (item != null) {
+            item.setLabel(newLabel);
+            if (isInitialized()) {
+                updateVisibleItems();
+                updateTitle(getSelectedItems());
+            }
+        }
+    }
+
+    public void renameItemInGroup(final String groupName, final String oldLabel, final String newLabel) {
+        if (dataProvider != null) throw new IllegalCallerException("Not supported in DataProvider mode");
+        if (!configuration.isGroupEnabled()) throw new IllegalCallerException("Group mode must be enabled");
+        final GroupListBoxItem<D> groupItem = groupItems.get(groupName);
+        if (groupItem != null) {
+            final ListBoxItem<D> item = groupItem.getGroupItems().stream().filter(i -> i.getLabel().equals(oldLabel)).findFirst()
+                .orElse(null);
+            if (item != null) {
+                item.setLabel(newLabel);
+                if (isInitialized()) {
+                    updateVisibleItems();
+                    updateTitle(getSelectedItems());
+                }
+            }
+        }
+    }
+
     public void clear() {
         this.items.clear();
         this.visibleItems.clear();
+        this.groupItems.clear();
+        this.selectedDataItems.clear();
         updateTitle(List.of());
         if (itemContainer != null && isOpen()) itemContainer.refresh();
     }
@@ -731,9 +812,9 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         }
         refresh();
     }
-    
+
     public void refresh() {
-    	if (isOpen()) itemContainer.refresh();
+        if (isOpen()) itemContainer.refresh();
     }
 
     private void setSelectedItem(final ListBoxItem<D> selectedItem) {
@@ -802,7 +883,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
 
     public static class ListBoxItem<D> {
 
-        private final String label;
+        private String label;
         private final D data;
         private boolean selected;
         private boolean enabled = true;
@@ -816,6 +897,10 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
 
         public String getLabel() {
             return label;
+        }
+
+        public void setLabel(final String label) {
+            this.label = label;
         }
 
         public D getData() {
@@ -918,6 +1003,11 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
 
         public List<ListBoxItem<D>> getGroupItems() {
             return groupItems;
+        }
+
+        public void addItem(final ListBoxItem<D> item) {
+            item.setGroupName(getGroupName());
+            groupItems.add(item);
         }
 
         @Override
