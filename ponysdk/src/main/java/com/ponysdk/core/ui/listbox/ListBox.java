@@ -240,6 +240,8 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         final GroupListBoxItem<D> groupItem = groupItems.remove(groupName);
         if (groupItem != null) {
             boolean removeSelection = false;
+            this.items.remove(groupItem);
+            this.visibleItems.remove(groupItem);
             for (final ListBoxItem<D> item : groupItem.getGroupItems()) {
                 removeSelection |= item.isSelected();
                 this.items.remove(item);
