@@ -656,29 +656,25 @@ _UTF8 = undefined;
     updateRowHeight: function(index){
     	var pinnedRow = $(this.pinnedBody).children('div').eq(index)[0];
     	var unpinnedRow = $(this.unpinnedBody).children('div').eq(index)[0];
-    	if(this.rowHeight <= 0){
-    		this.rowHeight = this.adjustHeight(pinnedRow, unpinnedRow);
-    	} else {
-    		$(pinnedRow).height(this.rowHeight);
-    		$(unpinnedRow).height(this.rowHeight);
+    	if(this.rowHeight <= 0) {
+    		this.rowHeight = Math.max(pinnedRow ? this.getHeight(pinnedRow) : 0, unpinnedRow ? this.getHeight(unpinnedRow) : 0);
     	}
+    	$(pinnedRow).height(this.rowHeight);
+    	$(unpinnedRow).height(this.rowHeight);
     },
     
     updateExtendedRowHeight: function(index){
     	var pinnedRow = $(this.pinnedBody).children('div').eq(index)[0];
     	var unpinnedRow = $(this.unpinnedBody).children('div').eq(index)[0];
-    	this.adjustHeight(pinnedRow, unpinnedRow);
+    	var height = Math.max(pinnedRow ? this.getHeight(pinnedRow) : 0, unpinnedRow ? this.getHeight(unpinnedRow) : 0);
+    	$(pinnedRow).height(height);
+    	$(unpinnedRow).height(height);
     },
     
-    adjustHeight: function(pinnedRow, unpinnedRow){
-    	pinnedRow.style.height = null;
-    	unpinnedRow.style.height = null;
-    	var pinnedHeight = $(pinnedRow).height();
-    	var unpinnedHeight = $(unpinnedRow).height();
-    	var maxHeight = Math.max(pinnedHeight, unpinnedHeight);
-    	$(unpinnedRow).height(maxHeight);
-    	$(pinnedRow).height(maxHeight);
-    	return maxHeight;
+    getHeight: function(row) {
+    	row.style.height = null;
+    	var height = $(row).height();
+    	return height;
     },
     
     onRowUpdated: function(index) {
@@ -697,6 +693,7 @@ _UTF8 = undefined;
       
     onColumnAdded: function(id, colMinWidth, colMaxWidth, pinned){
 		var e = $(this.header).find("[data-column-id="+id+"]")[0];
+		if(!e) return; // If column is hidden, it won't appear in DOM
         if('IntersectionObserver' in window){
             this.intersectionObserver.observe(e);
         }
