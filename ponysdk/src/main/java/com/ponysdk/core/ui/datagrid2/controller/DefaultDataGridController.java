@@ -39,6 +39,8 @@ import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.concurrent.PScheduler;
 import com.ponysdk.core.server.service.query.PResultSet;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.cell.Cell;
@@ -85,8 +87,6 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     private final RenderingHelperSupplier renderingHelperSupplier2 = new RenderingHelperSupplier();
     private DataGridSource<K, V> dataSource;
     private DataGridSnapshot viewSnapshot;
-    private final AtomicLong count = new AtomicLong();
-    private long lastProcessedID;
 
     public DefaultDataGridController() {
         super();
@@ -345,30 +345,6 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
         refreshOnNextDraw();
     }
 
-    private class DataGetterFromSrc implements Supplier<DataGetterFromSrc> {
-
-        public long id = count.incrementAndGet();
-        public LiveDataView<V> liveDataView;
-        public int firstRowIndex;
-        public int start;
-        DataGridSnapshot threadSnapshot;
-        Supplier<LiveDataView<V>> dataSupplier;
-
-        DataGetterFromSrc(final Supplier<LiveDataView<V>> inner, final DataGridSnapshot threadSnapshot, final int firstRowIndex,
-                final int start) {
-            this.dataSupplier = inner;
-            this.threadSnapshot = threadSnapshot;
-            this.firstRowIndex = firstRowIndex;
-            this.start = start;
-        }
-
-        @Override
-        public DataGetterFromSrc get() {
-            liveDataView = dataSupplier.get();
-            return this;
-        }
-    }
-
     public class DataSrcResult {
 
         public LiveDataView<V> liveDataView;
@@ -383,30 +359,17 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     }
 
     @Override
-    public void prepareLiveDataOnScreen(final int dataSrcRowIndex, final int dataSize, final DataGridSnapshot threadSnapshot,
-                                        final Consumer<Pair<DataSrcResult, Throwable>> consumer) {
+    public void prepareLiveDataOnScreen(final int dataSrcRowIndex, final int dataSize, final DataGridSnapshot threadSnapshot, final Consumer<Pair<DataSrcResult, Throwable>> consumer) {
         viewSnapshot = new DataGridSnapshot(threadSnapshot);
-        CompletableFuture<DataGetterFromSrc> completableFuture = CompletableFuture.supplyAsync(new DataGetterFromSrc(
-            () -> dataSource.getRows(dataSrcRowIndex, dataSize), threadSnapshot, dataSrcRowIndex, threadSnapshot.start));
-
-        completableFuture = completableFuture.thenApply(dataResponse -> {
-            if (dataResponse.id < lastProcessedID) {
-                dataResponse.id = -1;
-            } else {
-                lastProcessedID = dataResponse.id;
-            }
-            return dataResponse;
-        });
-
-        completableFuture.whenComplete((response, ex) -> {
-            if (ex != null) {
-                log.error("Cannot display data", ex);
-                consumer.accept(new Pair<>(null, ex));
-            } else {
-                if (viewSnapshot.equals(response.threadSnapshot) && response.id >= 0) {
-                    final DataSrcResult result = new DataSrcResult(response.liveDataView, response.firstRowIndex, response.start);
+        PScheduler.schedule(() -> {
+            try {
+                if (viewSnapshot.equals(threadSnapshot)) {
+                    final DataSrcResult result = new DataSrcResult(dataSource.getRows(dataSrcRowIndex, dataSize), dataSrcRowIndex, threadSnapshot.start);
                     consumer.accept(new Pair<>(result, null));
                 }
+            } catch (Exception e) {
+                log.error("Cannot display data", e);
+                consumer.accept(new Pair<>(null, e));
             }
         });
     }
