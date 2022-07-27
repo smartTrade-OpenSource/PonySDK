@@ -358,13 +358,18 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
         }
     }
 
+    private final AtomicLong count = new AtomicLong();
+    private long lastProcessedID;
+
     @Override
     public void prepareLiveDataOnScreen(final int dataSrcRowIndex, final int dataSize, final DataGridSnapshot threadSnapshot, final Consumer<Pair<DataSrcResult, Throwable>> consumer) {
         viewSnapshot = new DataGridSnapshot(threadSnapshot);
+        long currentProcessID = count.get();
         PScheduler.schedule(() -> {
             try {
-                if (viewSnapshot.equals(threadSnapshot)) {
+                if (viewSnapshot.equals(threadSnapshot) && lastProcessedID <= currentProcessID) {
                     final DataSrcResult result = new DataSrcResult(dataSource.getRows(dataSrcRowIndex, dataSize), dataSrcRowIndex, threadSnapshot.start);
+                    lastProcessedID = count.incrementAndGet();
                     consumer.accept(new Pair<>(result, null));
                 }
             } catch (Exception e) {
