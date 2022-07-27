@@ -75,7 +75,7 @@ class WebsocketClient implements AutoCloseable {
 
     private final MessageHandler.Whole<ByteBuffer> handler;
     private final List<Extension> extensions;
-    private final PonySessionListener sessionListener;
+    private PonySessionListener sessionListener;
 
     public WebsocketClient(final Whole<ByteBuffer> handler, final PonyBandwithListener bandwidthListener,
             final PonySessionListener sessionListener) {
@@ -155,4 +155,7 @@ class WebsocketClient implements AutoCloseable {
         return session != null ? session.getId() : null;
     }
 
+    public void setSessionListener(PonySessionListener sessionListener){
+        this.sessionListener = sessionListener;
+    }
 }
