@@ -158,7 +158,6 @@ public class PScheduler {
     private void purge(final UIRunnable uiRunnable) {
         final Set<UIRunnable> uiRunnables = runnablesByUIContexts.get(uiRunnable.getUIContext());
         if (uiRunnables != null) uiRunnables.remove(uiRunnable);
-        executor.purge();
     }
 
     private void registerTask(final UIRunnable runnable) {
