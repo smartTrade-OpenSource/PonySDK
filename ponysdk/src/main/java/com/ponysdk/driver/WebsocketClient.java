@@ -52,7 +52,7 @@ import org.slf4j.LoggerFactory;
 
 class WebsocketClient implements AutoCloseable {
 
-    private final static Logger log = LoggerFactory.getLogger(PonySDKWebDriver.class);
+    private static final Logger log = LoggerFactory.getLogger(WebsocketClient.class);
 
     private volatile Session session;
 

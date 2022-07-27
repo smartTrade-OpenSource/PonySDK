@@ -126,8 +126,9 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
     @Override
     public void onWebSocketClose(final int statusCode, final String reason) {
-        log.info("WebSocket closed on UIContext #{} : {}, reason : {}", uiContext.getID(), NiceStatusCode.getMessage(statusCode),
-                Objects.requireNonNullElse(reason, ""));
+        if (log.isInfoEnabled())
+            log.info("WebSocket closed on UIContext #{} : {}, reason : {}", uiContext.getID(),
+                    NiceStatusCode.getMessage(statusCode), Objects.requireNonNullElse(reason, ""));
         uiContext.onDestroy();
     }
 
@@ -166,7 +167,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
                 if (monitor != null) monitor.onMessageProcessed(this, message);
             } catch (final Throwable e) {
-                log.error("Cannot process message from terminal  #" + uiContext.getID() + " : " + message, e);
+                log.error("Cannot process message from terminal  #{} : {}", uiContext.getID(), message, e);
             } finally {
                 if (monitor != null) monitor.onMessageUnprocessed(this, message);
             }
@@ -212,13 +213,16 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
         switch (level) {
             case INFO_MSG:
-                log.info(MSG_RECEIVED, uiContext.getID(), objectInformation, message);
+                if (log.isInfoEnabled())
+                    log.info(MSG_RECEIVED, uiContext.getID(), objectInformation, message); 
                 break;
             case WARN_MSG:
-                log.warn(MSG_RECEIVED, uiContext.getID(), objectInformation, message);
+                if (log.isWarnEnabled())
+                    log.warn(MSG_RECEIVED, uiContext.getID(), objectInformation, message);
                 break;
             case ERROR_MSG:
-                log.error(MSG_RECEIVED, uiContext.getID(), objectInformation, message);
+                if (log.isErrorEnabled())
+                    log.error(MSG_RECEIVED, uiContext.getID(), objectInformation, message);
                 break;
             default:
                 log.error("Unknown log level during terminal log processing : {}", level);
@@ -308,7 +312,8 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     @Override
     public void encode(final ServerToClientModel model, final Object value) {
         try {
-            loggerOut.trace("UIContext #{} : {} {}", this.uiContext.getID(), model, value);
+            if (loggerOut.isTraceEnabled())
+                loggerOut.trace("UIContext #{} : {} {}", this.uiContext.getID(), model, value);
             websocketPusher.encode(model, value);
             if (listener != null) listener.onOutgoingPonyFrame(model, value);
         } catch (final IOException e) {
