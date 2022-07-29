@@ -214,6 +214,10 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
     public void updateContainerPosition() {
         container.updatePosition();
     }
+    
+    public void adjustContainerPosition() {
+    	container.adjustPosition();
+    }
 
     public void disableSpaceWhenOpened() {
         container.disableSpaceWhenOpened();
@@ -392,7 +396,7 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
         return false;
     }
 
-    private void setContainerVisible(final boolean visible) {
+    protected void setContainerVisible(final boolean visible) {
         if (!isEnabled()) return;
         if (visible && !isOpen()) {
             widget.addStyleName(STYLE_CONTAINER_OPENED);
