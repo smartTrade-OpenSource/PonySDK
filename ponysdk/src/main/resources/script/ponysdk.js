@@ -1106,9 +1106,11 @@ _UTF8 = undefined;
         if(windowBot < this.element.offsetHeight && offsets.top > this.element.offsetHeight) {
             this.element.style.top = offsets.top - this.element.offsetHeight + windowScrollTop + 'px';
             this.element.setAttribute('vertical-position', 'top');
+            this.element.style.height = this.element.offsetHeight + 'px';
         } else {
             this.element.style.top = offsets.top + offsets.height + windowScrollTop + 'px';
             this.element.setAttribute('vertical-position', 'down');
+            this.element.style.height = 'auto';
         }
         // Right or left display
         var windowScrollLeft = $(window).scrollLeft();
@@ -1129,6 +1131,37 @@ _UTF8 = undefined;
             } else {
                 this.element.style.right = window.innerWidth - offsets.right - windowScrollLeft + 'px';
                 this.element.setAttribute('horizontal-position', 'right');
+            }
+        }
+    },
+    
+    adjustPosition: function() {
+        if(!this.parentElement) this.parentElement = document.getElementById(this.parentId);
+        var offsets = this.parentElement.getBoundingClientRect();
+        this.element.style.width = offsets.width + 'px';
+        // Down or top display
+        var windowBot = window.innerHeight - offsets.top - offsets.height;
+        var windowScrollTop = $(window).scrollTop();
+        if(this.element.getAttribute('vertical-position') == 'top') {
+            this.element.style.top = offsets.top - this.element.offsetHeight + windowScrollTop + 'px';
+        } else if (this.element.getAttribute('vertical-position') == 'down') {
+            this.element.style.top = offsets.top + offsets.height + windowScrollTop + 'px';
+        }
+        // Right or left display
+        var windowScrollLeft = $(window).scrollLeft();
+        if (this.stickLeft) {
+            var windowRight = window.innerWidth - offsets.left - offsets.width;
+            if(this.element.getAttribute('horizontal-position') == 'right') {
+                this.element.style.left = offsets.left + offsets.width - this.element.offsetWidth + windowScrollLeft + 'px';
+            } else if(this.element.getAttribute('horizontal-position') == 'left'){
+                this.element.style.left = offsets.left + windowScrollLeft + 'px';
+            }
+        } else {
+            var windowLeft = offsets.left;
+            if(this.element.getAttribute('horizontal-position') == 'left') {
+                this.element.style.right = window.innerWidth - offsets.right + offsets.width - this.element.offsetWidth - windowScrollLeft + 'px';
+            } else if(this.element.getAttribute('horizontal-position') == 'right'){
+                this.element.style.right = window.innerWidth - offsets.right - windowScrollLeft + 'px';
             }
         }
     },
