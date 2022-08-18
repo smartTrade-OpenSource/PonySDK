@@ -625,6 +625,11 @@ _UTF8 = undefined;
 		if(this.rowHeight == 0) {
 		    this.updateRowHeight(0); // Initialize rowHeight...
 		    if(this.rowHeight == 0) return;
+		    else { // We need to change the height of all already existing rows
+		        for(var i = 1; i < this.relRowCount; i++) {
+		            this.updateRowHeight(i);
+		        }
+		    }
 		}
         this.loadingData.style.display = null;
 		this.viewHeight = visibleHeight;
