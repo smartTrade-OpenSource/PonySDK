@@ -34,7 +34,7 @@ import elemental.util.MapFromIntTo;
 
 public class PTWindowManager {
 
-    private static final int IS_ALIVE_WINDOWS_TIMER = 10000; // 10 seconds
+    private static final int IS_ALIVE_WINDOWS_TIMER = 1000; // 1 seconds
 
     private static final Logger log = Logger.getLogger(PTWindowManager.class.getName());
 
