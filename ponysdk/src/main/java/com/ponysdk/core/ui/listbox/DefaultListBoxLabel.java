@@ -26,7 +26,6 @@ public class DefaultListBoxLabel implements ListBoxLabel{
 	
 	@Override
 	public void setText(String text) {
-		System.err.println(text);
 		label.setText(text);
 	}
 	

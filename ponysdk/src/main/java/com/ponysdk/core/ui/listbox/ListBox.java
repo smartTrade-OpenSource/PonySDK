@@ -622,7 +622,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         return new InfiniteScrollAddon<>(new ListBoxInfiniteScrollProvider());
     }
 
-    @Override
+
     protected ListBoxTextBox buildTextBox() {
 		return new DefaultTextBox();
 	}
@@ -862,10 +862,6 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         if (isOpen()) itemContainer.refresh();
     }
     
-    public void refresh() {
-    	if (isOpen()) itemContainer.refresh();
-    }
-
     private void setSelectedItem(final ListBoxItem<D> selectedItem) {
         clearSelection();
         final ListBoxItem<D> item = this.items.stream().filter(selectedItem::equals).findFirst().orElse(null);
