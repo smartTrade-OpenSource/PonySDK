@@ -186,6 +186,11 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         pinnedTable = new PinnedTable(headerPinnedDiv, bodyPinnedDiv, footerPinnedDiv);
         unpinnedTable = new UnpinnedTable(headerUnpinnedDiv, bodyUnpinnedDiv, footerUnpinnedDiv);
 
+        root.addDestroyListener(e -> onDestroy());
+    }
+    
+    private void onDestroy() {
+        if(delayedDrawRunnable != null) delayedDrawRunnable.cancel();
     }
 
     @Override

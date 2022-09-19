@@ -52,7 +52,7 @@ import org.slf4j.LoggerFactory;
 
 class WebsocketClient implements AutoCloseable {
 
-    private final static Logger log = LoggerFactory.getLogger(PonySDKWebDriver.class);
+    private static final Logger log = LoggerFactory.getLogger(WebsocketClient.class);
 
     private volatile Session session;
 
@@ -75,7 +75,7 @@ class WebsocketClient implements AutoCloseable {
 
     private final MessageHandler.Whole<ByteBuffer> handler;
     private final List<Extension> extensions;
-    private final PonySessionListener sessionListener;
+    private PonySessionListener sessionListener;
 
     public WebsocketClient(final Whole<ByteBuffer> handler, final PonyBandwithListener bandwidthListener,
             final PonySessionListener sessionListener) {
@@ -155,4 +155,7 @@ class WebsocketClient implements AutoCloseable {
         return session != null ? session.getId() : null;
     }
 
+    public void setSessionListener(PonySessionListener sessionListener){
+        this.sessionListener = sessionListener;
+    }
 }

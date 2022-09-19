@@ -26,6 +26,7 @@ package com.ponysdk.core.writer;
 import java.lang.ref.WeakReference;
 
 import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.websocket.WebsocketEncoder;
 import com.ponysdk.core.ui.basic.PWindow;
 
@@ -56,11 +57,15 @@ public class ModelWriter {
      * @param value The type can be primitives, String or Object[]
      */
     public void write(final ServerToClientModel model, final Object value) {
-        encoder.encode(model, value);
+        if (UIContext.get().isAlive()) {
+            encoder.encode(model, value);
+        }
     }
 
     public void endObject() {
-        encoder.endObject();
+        if (UIContext.get().isAlive()) {
+            encoder.endObject();
+        }
     }
 
     public PWindow getCurrentWindow() {

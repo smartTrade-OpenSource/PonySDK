@@ -621,6 +621,11 @@ public class PonySDKWebDriver implements WebDriver {
         return handleImplicitCommunication;
     }
 
+    public void ignoreSessionStatusChanges() {
+        this.client.setSessionListener(INDIFFERENT_SESSION_LISTENER);
+    }
+
+
     private final static PonyMessageListener INDIFFERENT_MSG_LISTENER = new PonyMessageListener() {
 
         @Override
