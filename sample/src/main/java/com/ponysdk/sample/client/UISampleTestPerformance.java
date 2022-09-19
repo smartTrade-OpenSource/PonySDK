@@ -33,7 +33,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.sun.management.HotSpotDiagnosticMXBean;
+import javax.management.MBeanServer;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,8 +58,7 @@ import com.ponysdk.core.ui.datagrid2.view.RowSelectorColumnDataGridView;
 import com.ponysdk.core.ui.main.EntryPoint;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
 import com.ponysdk.sample.client.event.UserLoggedOutHandler;
-
-import javax.management.MBeanServer;
+import com.sun.management.HotSpotDiagnosticMXBean;
 
 public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler {
 
@@ -85,7 +85,8 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
     }
 
     private void testSimpleDataGridViewOnly() {
-        final DataGridView<Integer, MyRow> simpleGridView = new DefaultDataGridView<>();
+        final DefaultDataGridView<Integer, MyRow> simpleGridView = new DefaultDataGridView<>();
+        simpleGridView.setRefreshOnColumnVisibilityChanged(true);
         final ColumnVisibilitySelectorDataGridView<Integer, MyRow> columnVisibilitySelectorDataGridView = new ColumnVisibilitySelectorDataGridView<>(
             simpleGridView);
         final RowSelectorColumnDataGridView<Integer, MyRow> rowSelectorColumnDataGridView = new RowSelectorColumnDataGridView<>(
@@ -179,7 +180,7 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
 
         // gridView.setPollingDelayMillis(250L);
         // gridView.setPollingDelayMillis(3600000L);
-        final DataGridController<Integer, MyRow> controller = ((DefaultDataGridView<Integer, MyRow>) simpleGridView).getController();
+        final DataGridController<Integer, MyRow> controller = simpleGridView.getController();
         gridView.asWidget().setHeight("950px");
         gridView.asWidget().setWidth("1900px");
         gridView.asWidget().setStyleProperty("resize", "both");
@@ -463,7 +464,7 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
             try {
                 final MBeanServer server = ManagementFactory.getPlatformMBeanServer();
                 final HotSpotDiagnosticMXBean mbean = ManagementFactory.newPlatformMXBeanProxy(server,
-                        "com.sun.management:type=HotSpotDiagnostic", HotSpotDiagnosticMXBean.class);
+                    "com.sun.management:type=HotSpotDiagnostic", HotSpotDiagnosticMXBean.class);
                 final String fileName = "memory_cleaner_" + System.currentTimeMillis() + "_live.hprof";
                 try {
                     mbean.dumpHeap(fileName, true);

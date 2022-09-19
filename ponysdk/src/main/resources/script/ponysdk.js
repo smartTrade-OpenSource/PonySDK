@@ -518,25 +518,6 @@ _UTF8 = undefined;
         this.loadingData = this.jqelement.find('div.pony-grid-loading-data')[0];
         this.ratio = 1.0;
         
-        if('IntersectionObserver' in window){
-            this.intersectionObserver = new IntersectionObserver(function(entries){
-                var columns = [];
-                var visibility = [];
-                entries.forEach(function(e){
-                    columns.push(parseInt(e.target.getAttribute('data-column-id')));
-                    visibility.push(e.isIntersecting);
-                });
-                this.sendDataToServer({
-                    col: columns,
-                    cv: visibility
-                });
-            }.bind(this), {
-              root: this.header,
-              rootMargin: '0px',
-              threshold: 0.0
-            });
-        }
-        
 		this.absRowCount = 0;
 		this.rowHeight = 0;
 		this.relRowCount = 0;
@@ -590,10 +571,36 @@ _UTF8 = undefined;
       	$(this.unpinnedBody).on('mouseleave', '.pony-grid-row', this.onRowMouseLeave.bind(this));
     },
     
+    listenOnColumnVisibility: function(value) {
+        if('IntersectionObserver' in window) {
+            if(value) {
+                this.intersectionObserver = new IntersectionObserver(function(entries){
+                    var columns = [];
+                    var visibility = [];
+                    entries.forEach(function(e){
+                        columns.push(parseInt(e.target.getAttribute('data-column-id')));
+                        visibility.push(e.isIntersecting);
+                    });
+                    this.sendDataToServer({
+                        col: columns,
+                        cv: visibility
+                    });
+                }.bind(this), {
+                  root: this.header,
+                  rootMargin: '0px',
+                  threshold: 0.0
+                });
+            } else if(this.intersectionObserver) {
+                this.intersectionObserver.disconnect();
+                this.intersectionObserver = null;
+            }
+        }
+    },
+    
     destroy: function() {
     	clearInterval(this.resizeChecker);
         if('IntersectionObserver' in window){
-            this.intersectionObserver.disconnect();
+            if(this.intersectionObserver) this.intersectionObserver.disconnect();
         }
     },
       
@@ -700,7 +707,7 @@ _UTF8 = undefined;
 		var e = $(this.header).find("[data-column-id="+id+"]")[0];
 		if(!e) return; // If column is hidden, it won't appear in DOM
         if('IntersectionObserver' in window){
-            this.intersectionObserver.observe(e);
+            if(this.intersectionObserver) this.intersectionObserver.observe(e);
         }
         var resizerDiv = e.getElementsByClassName('pony-grid-col-resizer')[0];
         if(resizerDiv){

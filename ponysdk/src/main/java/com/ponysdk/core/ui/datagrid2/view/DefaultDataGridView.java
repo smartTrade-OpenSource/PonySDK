@@ -143,6 +143,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
     private Function<Throwable, String> exceptionHandler;
 
     private boolean shouldDraw = true;
+    private boolean refreshOnColumnVisibilityChanged = false;
 
     public DefaultDataGridView() {
         this(new DefaultCacheDataSource<>());
@@ -538,6 +539,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             rows.add(new Row(i));
         }
         addon = new Addon();
+        addon.setListenOnColumnVisibility(refreshOnColumnVisibilityChanged);
         for (final ColumnView columnView : columnViews.values()) {
             addon.onColumnAdded(columnView.id, columnView.column.getMinWidth(), columnView.column.getMaxWidth(),
                 columnView.state.isPinned());
@@ -959,7 +961,12 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         exceptionHandler = handler;
     }
 
-    public class Row {
+    public void setRefreshOnColumnVisibilityChanged(boolean refreshOnColumnVisibilityChanged) {
+		this.refreshOnColumnVisibilityChanged = refreshOnColumnVisibilityChanged;
+		if(addon != null) addon.setListenOnColumnVisibility(refreshOnColumnVisibilityChanged);
+	}
+
+	public class Row {
 
         private final int relativeIndex;
         private K key;
@@ -1496,6 +1503,10 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
                     onColumnMoved(json.getInt(ADDON_COLUMN_ID), json.getInt(ADDON_COLUMN_TO));
                 }
             });
+        }
+        
+        public void setListenOnColumnVisibility(boolean value) {
+            callTerminalMethod("listenOnColumnVisibility", value);
         }
 
         public void updateRowHeight(final int index) {
