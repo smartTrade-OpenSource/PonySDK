@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -68,8 +69,6 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     private static final String STYLE_LISTBOX_ITEM_SELECTED = "dd-listbox-item-selected";
     private static final String STYLE_LISTBOX_ITEM_LAST_SELECTED = "dd-listbox-item-last-selected";
     private static final String STYLE_LISTBOX_ITEM_GROUP = "dd-listbox-item-group";
-
-    private static final String DISABLED = "disabled";
 
     private PTextBox textBox;
     private PButton clearMultiButton;
@@ -112,6 +111,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     private HandlerRegistration upDownKeyHandler;
     private int index;
     private boolean forceIndex;
+    private Supplier<ListBoxItemRenderer<D>> itemRendererSupplier;
 
     protected final List<ListBoxItem<D>> items;
     protected final ListBoxDataProvider<D> dataProvider;
@@ -1058,7 +1058,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
 
         private final PPanel panel;
         private PCheckBox checkBox;
-        private final PLabel label;
+        private final ListBoxItemRenderer<D> itemRenderer;
 
         private boolean built;
         private ListBoxItem<D> item;
@@ -1066,15 +1066,15 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         public ListBoxItemWidget() {
             panel = Element.newPFlowPanel();
             if (configuration.isMultiSelectionEnabled()) checkBox = Element.newPCheckBox();
-            label = Element.newPLabel();
+            itemRenderer = itemRendererSupplier != null ? itemRendererSupplier.get() : new LabelListBoxItemRenderer<>();
         }
 
         @Override
         public PWidget asWidget() {
             if (!built) {
                 if (checkBox != null) panel.add(checkBox);
-                panel.add(label);
-                label.addClickHandler(e -> {
+                panel.add(itemRenderer);
+                itemRenderer.addSelectionHandler(() -> {
                     if (ListBoxItemType.GROUP.equals(item.getType())) return;
                     if (!item.isEnabled()) return;
                     final boolean multiSelect = checkBox != null && Boolean.TRUE.equals(!checkBox.getValue());
@@ -1115,10 +1115,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
                 if (ListBoxItemType.GROUP.equals(item.getType())) panel.addStyleName(STYLE_LISTBOX_ITEM_GROUP);
                 else panel.removeStyleName(STYLE_LISTBOX_ITEM_GROUP);
             }
-            label.setText(item.getLabel());
-            label.setTitle(item.getLabel());
-            if (item.isEnabled()) label.removeAttribute(DISABLED);
-            else label.setAttribute(DISABLED);
+            itemRenderer.setItem(item);
         }
     }
 
