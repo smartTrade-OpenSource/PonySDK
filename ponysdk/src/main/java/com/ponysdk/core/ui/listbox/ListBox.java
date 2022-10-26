@@ -512,6 +512,14 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         return items.size();
     }
 
+    public void refresh() {
+        if (isOpen()) itemContainer.refresh();
+    }
+
+    public void setItemRendererSupplier(final Supplier<ListBoxItemRenderer<D>> itemRendererSupplier) {
+        this.itemRendererSupplier = itemRendererSupplier;
+    }
+
     @Override
     protected PWidget createDefaultContainer() {
         final PPanel defaultContainer = Element.newPFlowPanel();
@@ -594,10 +602,6 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
             addContainerStyleName(STYLE_LISTBOX_GROUP);
         }
         return defaultContainer;
-    }
-
-    protected InfiniteScrollAddon<ListBoxItem<D>, ListBox<D>.ListBoxItemWidget> buildInfiniteScrollAddon() {
-        return new InfiniteScrollAddon<>(new ListBoxInfiniteScrollProvider());
     }
 
     @Override
@@ -730,31 +734,8 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         textBox.focus();
     }
 
-    private Collection<ListBoxItem<D>> initializeGroupItems(final Collection<? extends ListBoxItem<D>> groupItems) {
-        final List<ListBoxItem<D>> newItems = new ArrayList<>();
-        for (final ListBoxItem<D> currentItem : groupItems) {
-            if (ListBoxItemType.GROUP.equals(currentItem.getType())) {
-                addGroup(newItems, (GroupListBoxItem<D>) currentItem);
-            }
-        }
-        return newItems;
-    }
-
-    private void addGroup(final List<ListBoxItem<D>> newItems, final GroupListBoxItem<D> groupItem) {
-        newItems.add(groupItem);
-        newItems.addAll(groupItem.getGroupItems());
-        this.groupItems.put(groupItem.getGroupName(), groupItem);
-    }
-
-    private void clearSelection() {
-        if (dataProvider != null) this.selectedDataItems.clear();
-        this.items.forEach(i -> i.setSelected(false));
-        setClearTitleButtonVisible(false);
-        if (clearMultiButton != null) clearMultiButton.setEnabled(false);
-    }
-
-    private void onSelectionChange() {
-        onSelectionChange(null, false);
+    protected InfiniteScrollAddon<ListBoxItem<D>, ListBox<D>.ListBoxItemWidget> buildInfiniteScrollAddon() {
+        return new InfiniteScrollAddon<>(new ListBoxInfiniteScrollProvider());
     }
 
     protected void onSelectionChange(final ListBoxItem<D> selectedItem, final boolean add) {
@@ -781,19 +762,6 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         }
         updateTitle(selectedItems);
         onValueChange();
-    }
-
-    private void sort() {
-        if (configuration.isSortingEnabled() && dataProvider == null) {
-            items.sort(comparator);
-            if (configuration.isMultiSelectionEnabled() && configuration.isSelectionSortingEnabled()) {
-                final List<ListBoxItem<D>> selectedItems = getSelectedItems();
-                if (!selectedItems.isEmpty()) {
-                    items.sort(selectionComparator);
-                    lastSelectedItem = selectedItems.get(selectedItems.size() - 1);
-                } else lastSelectedItem = null;
-            }
-        }
     }
 
     protected void updateVisibleItems() {
@@ -824,8 +792,48 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         refresh();
     }
 
-    public void refresh() {
-        if (isOpen()) itemContainer.refresh();
+    protected String getFilter() {
+        return textBox != null ? textBox.getText() : null;
+    }
+
+    private Collection<ListBoxItem<D>> initializeGroupItems(final Collection<? extends ListBoxItem<D>> groupItems) {
+        final List<ListBoxItem<D>> newItems = new ArrayList<>();
+        for (final ListBoxItem<D> currentItem : groupItems) {
+            if (ListBoxItemType.GROUP.equals(currentItem.getType())) {
+                addGroup(newItems, (GroupListBoxItem<D>) currentItem);
+            }
+        }
+        return newItems;
+    }
+
+    private void addGroup(final List<ListBoxItem<D>> newItems, final GroupListBoxItem<D> groupItem) {
+        newItems.add(groupItem);
+        newItems.addAll(groupItem.getGroupItems());
+        this.groupItems.put(groupItem.getGroupName(), groupItem);
+    }
+
+    private void clearSelection() {
+        if (dataProvider != null) this.selectedDataItems.clear();
+        this.items.forEach(i -> i.setSelected(false));
+        setClearTitleButtonVisible(false);
+        if (clearMultiButton != null) clearMultiButton.setEnabled(false);
+    }
+
+    private void onSelectionChange() {
+        onSelectionChange(null, false);
+    }
+
+    private void sort() {
+        if (configuration.isSortingEnabled() && dataProvider == null) {
+            items.sort(comparator);
+            if (configuration.isMultiSelectionEnabled() && configuration.isSelectionSortingEnabled()) {
+                final List<ListBoxItem<D>> selectedItems = getSelectedItems();
+                if (!selectedItems.isEmpty()) {
+                    items.sort(selectionComparator);
+                    lastSelectedItem = selectedItems.get(selectedItems.size() - 1);
+                } else lastSelectedItem = null;
+            }
+        }
     }
 
     private void setSelectedItem(final ListBoxItem<D> selectedItem) {
@@ -855,10 +863,6 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
             return false;
         }
         return true;
-    }
-
-    protected String getFilter() {
-        return textBox != null ? textBox.getText() : null;
     }
 
     private void applyCloseOnClickMode() {
