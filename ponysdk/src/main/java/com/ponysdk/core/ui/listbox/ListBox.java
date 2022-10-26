@@ -43,7 +43,6 @@ import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PCheckBox;
-import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PPanel;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PWidget;
@@ -103,8 +102,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         }
         return i1.label.compareToIgnoreCase(i2.label);
     };
-    private final Comparator<ListBoxItem<D>> selectionComparator = (i1, i2) -> (i2.isSelected() ? 1 : 0)
-            - (i1.isSelected() ? 1 : 0);
+    private final Comparator<ListBoxItem<D>> selectionComparator = (i1, i2) -> (i2.isSelected() ? 1 : 0) - (i1.isSelected() ? 1 : 0);
 
     private ListBoxItem<D> lastSelectedItem;
     private boolean shiftPressed;
@@ -151,15 +149,13 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
 
     @Override
     public List<ListBoxItem<D>> getValue() {
-        if (configuration.isEventOnlyEnabled())
-            throw new UnsupportedOperationException("Not available in event only mode");
+        if (configuration.isEventOnlyEnabled()) throw new UnsupportedOperationException("Not available in event only mode");
         return getSelectedItems();
     }
 
     @Override
     public void setValue(final List<ListBoxItem<D>> value) {
-        if (configuration.isEventOnlyEnabled())
-            throw new UnsupportedOperationException("Not available in event only mode");
+        if (configuration.isEventOnlyEnabled()) throw new UnsupportedOperationException("Not available in event only mode");
         if (value == null) {
             clearSelection();
             updateTitle(List.of());
@@ -227,8 +223,8 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         if (!configuration.isGroupEnabled()) throw new IllegalCallerException("Group mode must be enabled");
         final GroupListBoxItem<D> groupItem = groupItems.get(groupName);
         if (groupItem != null) {
-            final ListBoxItem<D> removedItem = groupItem.getGroupItems().stream()
-                    .filter(i -> i.getLabel().equals(itemLabel)).findFirst().orElse(null);
+            final ListBoxItem<D> removedItem = groupItem.getGroupItems().stream().filter(i -> i.getLabel().equals(itemLabel))
+                .findFirst().orElse(null);
             if (removedItem != null) {
                 groupItem.getGroupItems().remove(removedItem);
                 this.items.remove(removedItem);
@@ -264,8 +260,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     public void renameItem(final String oldLabel, final String newLabel) {
         if (dataProvider != null) throw new IllegalCallerException("Not supported in DataProvider mode");
         if (configuration.isGroupEnabled()) throw new IllegalCallerException("Group mode must not be enabled");
-        final ListBoxItem<D> item = this.items.stream().filter(i -> i.getLabel().equals(oldLabel)).findFirst()
-                .orElse(null);
+        final ListBoxItem<D> item = this.items.stream().filter(i -> i.getLabel().equals(oldLabel)).findFirst().orElse(null);
         if (item != null) {
             item.setLabel(newLabel);
             if (isInitialized()) {
@@ -280,8 +275,8 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         if (!configuration.isGroupEnabled()) throw new IllegalCallerException("Group mode must be enabled");
         final GroupListBoxItem<D> groupItem = groupItems.get(groupName);
         if (groupItem != null) {
-            final ListBoxItem<D> item = groupItem.getGroupItems().stream().filter(i -> i.getLabel().equals(oldLabel))
-                    .findFirst().orElse(null);
+            final ListBoxItem<D> item = groupItem.getGroupItems().stream().filter(i -> i.getLabel().equals(oldLabel)).findFirst()
+                .orElse(null);
             if (item != null) {
                 item.setLabel(newLabel);
                 if (isInitialized()) {
@@ -335,10 +330,8 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     }
 
     public void setSelected(final D selectedData) {
-        if (configuration.isMultiSelectionEnabled())
-            throw new IllegalArgumentException("Use setSelected(Collection) method instead");
-        if (configuration.isEventOnlyEnabled())
-            throw new UnsupportedOperationException("Not available in event only mode");
+        if (configuration.isMultiSelectionEnabled()) throw new IllegalArgumentException("Use setSelected(Collection) method instead");
+        if (configuration.isEventOnlyEnabled()) throw new UnsupportedOperationException("Not available in event only mode");
 
         if (dataProvider == null) {
             if (selectedData == null) {
@@ -362,10 +355,8 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     }
 
     public void setMultiSelected(final Collection<D> selectedData) {
-        if (!configuration.isMultiSelectionEnabled())
-            throw new IllegalArgumentException("Use setSelected(D) method instead");
-        if (configuration.isEventOnlyEnabled())
-            throw new UnsupportedOperationException("Not available in event only mode");
+        if (!configuration.isMultiSelectionEnabled()) throw new IllegalArgumentException("Use setSelected(D) method instead");
+        if (configuration.isEventOnlyEnabled()) throw new UnsupportedOperationException("Not available in event only mode");
         if (dataProvider == null) {
             if (selectedData == null || selectedData.isEmpty()) {
                 clearSelection();
@@ -403,8 +394,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     public void addToSelection(final D selectedData) {
         if (selectedData == null) return;
         if (dataProvider != null) throw new IllegalArgumentException("Only available without a ListBoxDataProvider");
-        if (configuration.isEventOnlyEnabled())
-            throw new UnsupportedOperationException("Not available in event only mode");
+        if (configuration.isEventOnlyEnabled()) throw new UnsupportedOperationException("Not available in event only mode");
 
         if (!configuration.isMultiSelectionEnabled()) setSelected(selectedData);
         final List<ListBoxItem<D>> selectedItems = getSelectedItems();
@@ -422,10 +412,8 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     public void removeFromSelection(final D unselectedData) {
         if (unselectedData == null) return;
         if (dataProvider != null) throw new IllegalArgumentException("Only available without a ListBoxDataProvider");
-        if (!configuration.isMultiSelectionEnabled())
-            throw new IllegalArgumentException("Only available in multi selection mode");
-        if (configuration.isEventOnlyEnabled())
-            throw new UnsupportedOperationException("Not available in event only mode");
+        if (!configuration.isMultiSelectionEnabled()) throw new IllegalArgumentException("Only available in multi selection mode");
+        if (configuration.isEventOnlyEnabled()) throw new UnsupportedOperationException("Not available in event only mode");
 
         final List<ListBoxItem<D>> selectedItems = getSelectedItems();
         final Iterator<ListBoxItem<D>> iterator = selectedItems.iterator();
@@ -450,10 +438,8 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
 
     public void setSelectedId(final Object id) {
         if (dataProvider == null) throw new IllegalArgumentException("Only available with a ListBoxDataProvider");
-        if (configuration.isMultiSelectionEnabled())
-            throw new IllegalArgumentException("Use setSelectedIds(...) method instead");
-        if (configuration.isEventOnlyEnabled())
-            throw new UnsupportedOperationException("Not available in event only mode");
+        if (configuration.isMultiSelectionEnabled()) throw new IllegalArgumentException("Use setSelectedIds(...) method instead");
+        if (configuration.isEventOnlyEnabled()) throw new UnsupportedOperationException("Not available in event only mode");
 
         clearSelection();
         if (id != null) selectedDataItems.addAll(dataProvider.getDataByIds(List.of(id)));
@@ -463,10 +449,8 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
 
     public void setSelectedIds(final Collection<Object> ids) {
         if (dataProvider == null) throw new IllegalArgumentException("Only available with a ListBoxDataProvider");
-        if (!configuration.isMultiSelectionEnabled())
-            throw new IllegalArgumentException("Use setSelectedId(...) method instead");
-        if (configuration.isEventOnlyEnabled())
-            throw new UnsupportedOperationException("Not available in event only mode");
+        if (!configuration.isMultiSelectionEnabled()) throw new IllegalArgumentException("Use setSelectedId(...) method instead");
+        if (configuration.isEventOnlyEnabled()) throw new UnsupportedOperationException("Not available in event only mode");
 
         clearSelection();
         if (ids != null && !ids.isEmpty()) {
@@ -552,20 +536,20 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
                 if (e.getKeyCode() == PKeyCodes.SHIFT.getCode()) {
                     shiftPressed = false;
                 } else if (e.getKeyCode() != PKeyCodes.TAB.getCode() && //
-                e.getKeyCode() != PKeyCodes.TAB.getCode() && //
-                e.getKeyCode() != PKeyCodes.CTRL.getCode() && //
-                e.getKeyCode() != PKeyCodes.ALT.getCode() && //
-                e.getKeyCode() != PKeyCodes.PAGE_UP.getCode() && //
-                e.getKeyCode() != PKeyCodes.PAGE_DOWN.getCode() && //
-                e.getKeyCode() != PKeyCodes.END.getCode() && //
-                e.getKeyCode() != PKeyCodes.ENTER.getCode() && //
-                e.getKeyCode() != PKeyCodes.HOME.getCode() && //
-                e.getKeyCode() != PKeyCodes.LEFT.getCode() && //
-                e.getKeyCode() != PKeyCodes.UP.getCode() && //
-                e.getKeyCode() != PKeyCodes.RIGHT.getCode() && //
-                e.getKeyCode() != PKeyCodes.DOWN.getCode()) {
-                    updateVisibleItems();
-                }
+                        e.getKeyCode() != PKeyCodes.TAB.getCode() && //
+                        e.getKeyCode() != PKeyCodes.CTRL.getCode() && //
+                        e.getKeyCode() != PKeyCodes.ALT.getCode() && //
+                        e.getKeyCode() != PKeyCodes.PAGE_UP.getCode() && //
+                        e.getKeyCode() != PKeyCodes.PAGE_DOWN.getCode() && //
+                        e.getKeyCode() != PKeyCodes.END.getCode() && //
+                        e.getKeyCode() != PKeyCodes.ENTER.getCode() && //
+                        e.getKeyCode() != PKeyCodes.HOME.getCode() && //
+                        e.getKeyCode() != PKeyCodes.LEFT.getCode() && //
+                        e.getKeyCode() != PKeyCodes.UP.getCode() && //
+                        e.getKeyCode() != PKeyCodes.RIGHT.getCode() && //
+                        e.getKeyCode() != PKeyCodes.DOWN.getCode()) {
+                            updateVisibleItems();
+                        }
             });
             panel.add(textBox);
             defaultContainer.add(panel);
@@ -692,8 +676,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
             if (PKeyCodes.UP.getCode() == e.getKeyCode()) {
                 if (index > 0) {
                     index--;
-                    if (index > 0 && configuration.isGroupEnabled()
-                            && visibleItems.get(index) instanceof GroupListBoxItem) {
+                    if (index > 0 && configuration.isGroupEnabled() && visibleItems.get(index) instanceof GroupListBoxItem) {
                         index--;
                     }
                 }
@@ -820,8 +803,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
             if (filter != null && !filter.isEmpty()) {
                 if (configuration.isGroupEnabled()) {
                     for (final ListBoxItem<D> item : items) {
-                        if (ListBoxItemType.ITEM.equals(item.getType())
-                                && item.getLabel().toLowerCase().contains(filter)) {
+                        if (ListBoxItemType.ITEM.equals(item.getType()) && item.getLabel().toLowerCase().contains(filter)) {
                             if (configuration.isGroupEnabled()) {
                                 final GroupListBoxItem<D> groupItem = groupItems.get(item.getGroupName());
                                 if (!this.visibleItems.contains(groupItem)) {
@@ -832,8 +814,8 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
                         }
                     }
                 } else {
-                    this.visibleItems.addAll(this.items.stream()
-                            .filter(i -> i.getLabel().toLowerCase().contains(filter)).collect(Collectors.toList()));
+                    this.visibleItems.addAll(
+                        this.items.stream().filter(i -> i.getLabel().toLowerCase().contains(filter)).collect(Collectors.toList()));
                 }
             } else {
                 this.visibleItems.addAll(items);
@@ -868,8 +850,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     private boolean isSelectionAllowed(Collection<?> selectedItems) {
         if (selectedItems == null) selectedItems = getSelectedItems();
         final Integer selectionLimit = configuration.getSelectionLimit();
-        if (configuration.isMultiSelectionEnabled() && selectionLimit != null
-                && selectedItems.size() >= selectionLimit) {
+        if (configuration.isMultiSelectionEnabled() && selectionLimit != null && selectedItems.size() >= selectionLimit) {
             log.debug("Selection limit reached ({})", selectionLimit);
             return false;
         }
@@ -882,15 +863,15 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
 
     private void applyCloseOnClickMode() {
         switch (configuration.getCloseOnClickMode()) {
-        case DEFAULT:
-            if (!configuration.isMultiSelectionEnabled()) close();
-            break;
-        case TRUE:
-            close();
-            break;
-        case FALSE:
-            if (!configuration.isMultiSelectionEnabled()) itemContainer.refresh();
-            break;
+            case DEFAULT:
+                if (!configuration.isMultiSelectionEnabled()) close();
+                break;
+            case TRUE:
+                close();
+                break;
+            case FALSE:
+                if (!configuration.isMultiSelectionEnabled()) itemContainer.refresh();
+                break;
         }
     }
 
@@ -1015,7 +996,8 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         }
 
         public enum ListBoxItemType {
-            ITEM, GROUP;
+            ITEM,
+            GROUP;
         }
     }
 
