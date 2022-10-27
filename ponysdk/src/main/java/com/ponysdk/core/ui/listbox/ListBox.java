@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -44,7 +45,6 @@ import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PCheckBox;
 import com.ponysdk.core.ui.basic.PPanel;
-import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.PWidget.TabindexMode;
 import com.ponysdk.core.ui.dropdown.DropDownContainer;
@@ -69,7 +69,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     private static final String STYLE_LISTBOX_ITEM_LAST_SELECTED = "dd-listbox-item-last-selected";
     private static final String STYLE_LISTBOX_ITEM_GROUP = "dd-listbox-item-group";
 
-    private PTextBox textBox;
+    private ListBoxFilterWidget filterWidget;
     private PButton clearMultiButton;
     private InfiniteScrollAddon<ListBoxItem<D>, ListBoxItemWidget> itemContainer;
 
@@ -109,7 +109,9 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     private HandlerRegistration upDownKeyHandler;
     private int index;
     private boolean forceIndex;
-    private Supplier<ListBoxItemRenderer<D>> itemRendererSupplier;
+    private Supplier<ListBoxItemRenderer<D>> itemRendererSupplier = () -> new LabelListBoxItemRenderer<>();
+    private Supplier<ListBoxFilterWidget> filterWidgetSupplier = () -> new TextListBoxFilterWidget();
+    private BiPredicate<ListBoxItem<D>, String> filterPredicate = (item, filter) -> item.getLabel().toLowerCase().contains(filter);
 
     protected final List<ListBoxItem<D>> items;
     protected final ListBoxDataProvider<D> dataProvider;
@@ -520,6 +522,14 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         this.itemRendererSupplier = itemRendererSupplier;
     }
 
+    public void setFilterWidgetSupplier(final Supplier<ListBoxFilterWidget> filterWidgetSupplier) {
+        this.filterWidgetSupplier = filterWidgetSupplier;
+    }
+
+    public void setFilterPredicate(final BiPredicate<ListBoxItem<D>, String> filterPredicate) {
+        this.filterPredicate = filterPredicate;
+    }
+
     @Override
     protected PWidget createDefaultContainer() {
         final PPanel defaultContainer = Element.newPFlowPanel();
@@ -527,39 +537,41 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         if (configuration.isSearchEnabled()) {
             final PPanel panel = Element.newPSimplePanel();
             panel.addStyleName(STYLE_LISTBOX_FILTER);
-            textBox = Element.newPTextBox();
+            filterWidget = filterWidgetSupplier.get();
             if (configuration.getPlaceholder() != null) {
-                textBox.setPlaceholder(configuration.getPlaceholder());
+                filterWidget.setPlaceholder(configuration.getPlaceholder());
             }
-            textBox.setTabindex(TabindexMode.TABULABLE);
-            textBox.addKeyDownHandler(e -> {
-                if (e.getKeyCode() == PKeyCodes.SHIFT.getCode()) {
+            filterWidget.setTabindex(TabindexMode.TABULABLE);
+            filterWidget.addKeyDownAction(keyCode -> {
+                final int code = keyCode.intValue();
+                if (code == PKeyCodes.SHIFT.getCode()) {
                     shiftPressed = true;
                 }
-                if (shiftPressed && e.getKeyCode() == PKeyCodes.TAB.getCode()) {
+                if (shiftPressed && code == PKeyCodes.TAB.getCode()) {
                     focus();
                 }
             });
-            textBox.addKeyUpHandler(e -> {
-                if (e.getKeyCode() == PKeyCodes.SHIFT.getCode()) {
+            filterWidget.addKeyUpAction(keyCode -> {
+                final int code = keyCode.intValue();
+                if (code == PKeyCodes.SHIFT.getCode()) {
                     shiftPressed = false;
-                } else if (e.getKeyCode() != PKeyCodes.TAB.getCode() && //
-                        e.getKeyCode() != PKeyCodes.TAB.getCode() && //
-                        e.getKeyCode() != PKeyCodes.CTRL.getCode() && //
-                        e.getKeyCode() != PKeyCodes.ALT.getCode() && //
-                        e.getKeyCode() != PKeyCodes.PAGE_UP.getCode() && //
-                        e.getKeyCode() != PKeyCodes.PAGE_DOWN.getCode() && //
-                        e.getKeyCode() != PKeyCodes.END.getCode() && //
-                        e.getKeyCode() != PKeyCodes.ENTER.getCode() && //
-                        e.getKeyCode() != PKeyCodes.HOME.getCode() && //
-                        e.getKeyCode() != PKeyCodes.LEFT.getCode() && //
-                        e.getKeyCode() != PKeyCodes.UP.getCode() && //
-                        e.getKeyCode() != PKeyCodes.RIGHT.getCode() && //
-                        e.getKeyCode() != PKeyCodes.DOWN.getCode()) {
+                } else if (code != PKeyCodes.TAB.getCode() && //
+                        code != PKeyCodes.TAB.getCode() && //
+                        code != PKeyCodes.CTRL.getCode() && //
+                        code != PKeyCodes.ALT.getCode() && //
+                        code != PKeyCodes.PAGE_UP.getCode() && //
+                        code != PKeyCodes.PAGE_DOWN.getCode() && //
+                        code != PKeyCodes.END.getCode() && //
+                        code != PKeyCodes.ENTER.getCode() && //
+                        code != PKeyCodes.HOME.getCode() && //
+                        code != PKeyCodes.LEFT.getCode() && //
+                        code != PKeyCodes.UP.getCode() && //
+                        code != PKeyCodes.RIGHT.getCode() && //
+                        code != PKeyCodes.DOWN.getCode()) {
                             updateVisibleItems();
                         }
             });
-            panel.add(textBox);
+            panel.add(filterWidget);
             defaultContainer.add(panel);
         } else {
             disableSpaceWhenOpened();
@@ -664,8 +676,8 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     @Override
     protected void beforeContainerVisible() {
         initIndex();
-        if (textBox != null) {
-            textBox.setText(null);
+        if (filterWidget != null) {
+            filterWidget.setFilter(null);
         }
         sort();
         updateVisibleItems();
@@ -674,7 +686,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     @Override
     protected void afterContainerVisible() {
         itemContainer.setScrollTop();
-        if (textBox != null) textBox.focus();
+        if (filterWidget != null) filterWidget.focus();
         if (clearMultiButton != null) clearMultiButton.setEnabled(!getSelectedItems().isEmpty());
         upDownKeyHandler = asWidget().getWindow().getPRootPanel().addKeyDownHandler(e -> {
             if (PKeyCodes.UP.getCode() == e.getKeyCode()) {
@@ -726,12 +738,12 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
 
     @Override
     protected boolean isContainerFocusable() {
-        return textBox != null;
+        return filterWidget != null;
     }
 
     @Override
     protected void focusContainer() {
-        textBox.focus();
+        filterWidget.focus();
     }
 
     protected InfiniteScrollAddon<ListBoxItem<D>, ListBox<D>.ListBoxItemWidget> buildInfiniteScrollAddon() {
@@ -771,7 +783,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
             if (filter != null && !filter.isEmpty()) {
                 if (configuration.isGroupEnabled()) {
                     for (final ListBoxItem<D> item : items) {
-                        if (ListBoxItemType.ITEM.equals(item.getType()) && item.getLabel().toLowerCase().contains(filter)) {
+                        if (ListBoxItemType.ITEM.equals(item.getType()) && filterPredicate.test(item, filter)) {
                             if (configuration.isGroupEnabled()) {
                                 final GroupListBoxItem<D> groupItem = groupItems.get(item.getGroupName());
                                 if (!this.visibleItems.contains(groupItem)) {
@@ -782,8 +794,8 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
                         }
                     }
                 } else {
-                    this.visibleItems.addAll(
-                        this.items.stream().filter(i -> i.getLabel().toLowerCase().contains(filter)).collect(Collectors.toList()));
+                    this.visibleItems
+                        .addAll(this.items.stream().filter(item -> filterPredicate.test(item, filter)).collect(Collectors.toList()));
                 }
             } else {
                 this.visibleItems.addAll(items);
@@ -793,7 +805,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     }
 
     protected String getFilter() {
-        return textBox != null ? textBox.getText() : null;
+        return filterWidget != null ? filterWidget.getFilter() : null;
     }
 
     private Collection<ListBoxItem<D>> initializeGroupItems(final Collection<? extends ListBoxItem<D>> groupItems) {
@@ -1052,7 +1064,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         public ListBoxItemWidget() {
             panel = Element.newPFlowPanel();
             if (configuration.isMultiSelectionEnabled()) checkBox = Element.newPCheckBox();
-            itemRenderer = itemRendererSupplier != null ? itemRendererSupplier.get() : new LabelListBoxItemRenderer<>();
+            itemRenderer = itemRendererSupplier.get();
         }
 
         @Override
