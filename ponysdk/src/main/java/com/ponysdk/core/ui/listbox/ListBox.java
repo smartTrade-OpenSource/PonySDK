@@ -34,6 +34,7 @@ import java.util.Objects;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.IntConsumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -543,31 +544,29 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
             }
             filterWidget.setTabindex(TabindexMode.TABULABLE);
             filterWidget.addKeyDownAction(keyCode -> {
-                final int code = keyCode.intValue();
-                if (code == PKeyCodes.SHIFT.getCode()) {
+                if (keyCode == PKeyCodes.SHIFT.getCode()) {
                     shiftPressed = true;
                 }
-                if (shiftPressed && code == PKeyCodes.TAB.getCode()) {
+                if (shiftPressed && keyCode == PKeyCodes.TAB.getCode()) {
                     focus();
                 }
             });
             filterWidget.addKeyUpAction(keyCode -> {
-                final int code = keyCode.intValue();
-                if (code == PKeyCodes.SHIFT.getCode()) {
+                if (keyCode == PKeyCodes.SHIFT.getCode()) {
                     shiftPressed = false;
-                } else if (code != PKeyCodes.TAB.getCode() && //
-                        code != PKeyCodes.TAB.getCode() && //
-                        code != PKeyCodes.CTRL.getCode() && //
-                        code != PKeyCodes.ALT.getCode() && //
-                        code != PKeyCodes.PAGE_UP.getCode() && //
-                        code != PKeyCodes.PAGE_DOWN.getCode() && //
-                        code != PKeyCodes.END.getCode() && //
-                        code != PKeyCodes.ENTER.getCode() && //
-                        code != PKeyCodes.HOME.getCode() && //
-                        code != PKeyCodes.LEFT.getCode() && //
-                        code != PKeyCodes.UP.getCode() && //
-                        code != PKeyCodes.RIGHT.getCode() && //
-                        code != PKeyCodes.DOWN.getCode()) {
+                } else if (keyCode != PKeyCodes.TAB.getCode() && //
+                        keyCode != PKeyCodes.TAB.getCode() && //
+                        keyCode != PKeyCodes.CTRL.getCode() && //
+                        keyCode != PKeyCodes.ALT.getCode() && //
+                        keyCode != PKeyCodes.PAGE_UP.getCode() && //
+                        keyCode != PKeyCodes.PAGE_DOWN.getCode() && //
+                        keyCode != PKeyCodes.END.getCode() && //
+                        keyCode != PKeyCodes.ENTER.getCode() && //
+                        keyCode != PKeyCodes.HOME.getCode() && //
+                        keyCode != PKeyCodes.LEFT.getCode() && //
+                        keyCode != PKeyCodes.UP.getCode() && //
+                        keyCode != PKeyCodes.RIGHT.getCode() && //
+                        keyCode != PKeyCodes.DOWN.getCode()) {
                             updateVisibleItems();
                         }
             });
@@ -1132,7 +1131,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         }
 
         @Override
-        public void getFullSize(final Consumer<Integer> callback) {
+        public void getFullSize(final IntConsumer callback) {
             if (dataProvider != null) callback.accept(dataProvider.getFullDataSize(getFilter()));
             else callback.accept(visibleItems.size());
         }

@@ -25,6 +25,7 @@ package com.ponysdk.core.ui.infinitescroll;
 
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 
 /**
  * @author mzoughagh
@@ -52,7 +53,7 @@ public interface InfiniteScrollProvider<D, W> {
      * @param callback
      *            return the size in the callback
      */
-    void getFullSize(Consumer<Integer> callback);
+    void getFullSize(IntConsumer callback);
 
     /**
      * Updating widgets and assigning data to them
