@@ -24,6 +24,7 @@
 package com.ponysdk.core.ui.listbox;
 
 import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PTextBox;
@@ -64,12 +65,12 @@ public class TextListBoxFilterWidget implements ListBoxFilterWidget {
     }
 
     @Override
-    public void addKeyDownAction(final Consumer<Integer> keyCodeAction) {
+    public void addKeyDownAction(final IntConsumer keyCodeAction) {
         textBox.addKeyDownHandler(e -> keyCodeAction.accept(e.getKeyCode()));
     }
 
     @Override
-    public void addKeyUpAction(final Consumer<Integer> keyCodeAction) {
+    public void addKeyUpAction(final IntConsumer keyCodeAction) {
         textBox.addKeyUpHandler(e -> keyCodeAction.accept(e.getKeyCode()));
     }
 

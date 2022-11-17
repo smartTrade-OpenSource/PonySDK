@@ -24,6 +24,7 @@
 package com.ponysdk.core.ui.listbox;
 
 import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PWidget.TabindexMode;
@@ -40,7 +41,7 @@ public interface ListBoxFilterWidget extends IsPWidget {
 
     void focus();
 
-    void addKeyDownAction(Consumer<Integer> keyCodeAction);
+    void addKeyDownAction(IntConsumer keyCodeAction);
 
-    void addKeyUpAction(Consumer<Integer> keyCodeAction);
+    void addKeyUpAction(IntConsumer keyCodeAction);
 }
