@@ -33,12 +33,16 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.writer.ModelWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An item that can be contained within a {@link PTree}. Each tree item is assigned a unique DOM id
  * in order to support ARIA.
  */
 public class PTreeItem extends PObject implements Iterable<PTreeItem> {
+
+    private static final Logger log = LoggerFactory.getLogger(PTreeItem.class);
 
     private PTree tree;
     private PTreeItem parent;
@@ -197,7 +201,15 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        forEach(PObject::onDestroy);
+        forEach(this::doDestroy);
+    }
+
+    private void doDestroy(PTreeItem child) {
+        try {
+            child.onDestroy();
+        } catch (Exception e) {
+            log.error("An error occurred while trying to process the destroy event", e);
+        }
     }
 
     protected String dumpDOM() {

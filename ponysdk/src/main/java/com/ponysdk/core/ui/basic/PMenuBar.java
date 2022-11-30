@@ -27,6 +27,8 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.writer.ModelWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -98,6 +100,8 @@ import java.util.Objects;
 public class PMenuBar extends PWidget implements Iterable<PMenuSubElement> {
 
     // TODO warning : gwt contains 2 list 1 all items (with separator) + 1 menuItem only
+    private static final Logger log = LoggerFactory.getLogger(PMenuBar.class);
+
     private final List<PMenuSubElement> items = new ArrayList<>();
     private final boolean vertical;
     private boolean animationEnabled = false;
@@ -207,7 +211,15 @@ public class PMenuBar extends PWidget implements Iterable<PMenuSubElement> {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        forEach(PObject::onDestroy);
+        forEach(this::doDestroy);
+    }
+
+    private void doDestroy(PMenuSubElement item) {
+        try {
+            item.onDestroy();
+        } catch (Exception e) {
+            log.error("An error occurred while trying to process the destroy event", e);
+        }
     }
 
     @Override

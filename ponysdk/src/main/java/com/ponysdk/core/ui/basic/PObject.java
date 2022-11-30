@@ -33,6 +33,8 @@ import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.util.SetUtils;
 import com.ponysdk.core.writer.ModelWriter;
 import com.ponysdk.core.writer.ModelWriterCallback;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.json.JsonObject;
 import javax.servlet.ServletException;
@@ -46,6 +48,8 @@ import java.util.Set;
  * The superclass for all PonySDK objects.
  */
 public abstract class PObject {
+
+    private static final Logger log = LoggerFactory.getLogger(PObject.class);
 
     protected final int ID = UIContext.get().nextID();
     protected PWindow window;
@@ -357,9 +361,19 @@ public abstract class PObject {
         destroy = true;
         terminalHandler = null;
         initializeListeners = null;
-        if (this.destroyListeners != null) this.destroyListeners.forEach(listener -> listener.onDestroy(this));
-        this.destroyListeners = null;
+        if (destroyListeners != null) {
+            destroyListeners.forEach(this::doDestroy);
+        }
+        destroyListeners = null;
         window = null;
+    }
+
+    private void doDestroy(DestroyListener listener) {
+        try {
+            listener.onDestroy(this);
+        } catch (Exception e) {
+            log.error("An error occurred while trying to process the destroy event", e);
+        }
     }
 
     public void setData(final Object data) {

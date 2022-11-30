@@ -244,7 +244,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     public void setAttribute(final String name, final String value) {
         if (name == null) return;
 
-        if(Objects.equals(safeElementAttributes().put(name, value), value)) return;
+        if (Objects.equals(safeElementAttributes().put(name, value), value)) return;
 
         saveUpdate(writer -> {
             writer.write(ServerToClientModel.PUT_ATTRIBUTE_KEY, name);
@@ -567,7 +567,18 @@ public abstract class PWidget extends PObject implements IsPWidget {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (addons != null) addons.forEach(PAddOn::onDestroy);
+
+        if (addons != null) {
+            addons.forEach(this::doDestroy);
+        }
+    }
+
+    private void doDestroy(PAddOn addon) {
+        try {
+            addon.onDestroy();
+        } catch (Exception e) {
+            log.error("An error occurred while trying to process the destroy event", e);
+        }
     }
 
     public void focus() {

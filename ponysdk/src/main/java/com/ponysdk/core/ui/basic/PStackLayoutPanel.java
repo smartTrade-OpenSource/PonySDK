@@ -190,7 +190,15 @@ public class PStackLayoutPanel extends PWidget implements HasPWidgets, PAnimated
     @Override
     public void onDestroy() {
         super.onDestroy();
-        forEach(PObject::onDestroy);
+        forEach(this::doDestroy);
+    }
+
+    private void doDestroy(PWidget child){
+        try {
+            child.onDestroy();
+        } catch (Exception e) {
+            log.error("An error occurred while trying to process the destroy event", e);
+        }
     }
 
     @Override

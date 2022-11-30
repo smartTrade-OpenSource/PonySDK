@@ -34,12 +34,15 @@ import com.ponysdk.core.ui.basic.event.PVisibilityEvent.PVisibilityHandler;
 import com.ponysdk.core.ui.formatter.TextFunction;
 import com.ponysdk.core.util.SetUtils;
 import com.ponysdk.core.writer.ModelWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.json.JsonObject;
 import java.util.*;
 
 public class PWindow extends PObject {
 
+    private static final Logger log = LoggerFactory.getLogger(PWindow.class);
     private static final String CANONICAL_NAME = PWindow.class.getCanonicalName();
 
     private Set<POpenHandler> openHandlers;
@@ -259,7 +262,7 @@ public class PWindow extends PObject {
 
             if (openHandlers != null) {
                 final POpenEvent e = new POpenEvent(this);
-                for (final Iterator<POpenHandler> iter = openHandlers.iterator(); iter.hasNext();) {
+                for (final Iterator<POpenHandler> iter = openHandlers.iterator(); iter.hasNext(); ) {
                     final POpenHandler handler = iter.next();
                     iter.remove();
                     handler.onOpen(e);
@@ -268,7 +271,7 @@ public class PWindow extends PObject {
         } else if (event.containsKey(ClientToServerModel.HANDLER_CLOSE.toStringValue())) {
             PWindowManager.unregisterWindow(this);
             if (subWindows != null) {
-                for (final Iterator<PWindow> iter = subWindows.iterator(); iter.hasNext();) {
+                for (final Iterator<PWindow> iter = subWindows.iterator(); iter.hasNext(); ) {
                     final PWindow window = iter.next();
                     iter.remove();
                     window.close();
@@ -276,7 +279,7 @@ public class PWindow extends PObject {
             }
             if (closeHandlers != null) {
                 final PCloseEvent e = new PCloseEvent(this);
-                for (final Iterator<PCloseHandler> iter = closeHandlers.iterator(); iter.hasNext();) {
+                for (final Iterator<PCloseHandler> iter = closeHandlers.iterator(); iter.hasNext(); ) {
                     final PCloseHandler handler = iter.next();
                     iter.remove();
                     handler.onClose(e);
@@ -352,8 +355,16 @@ public class PWindow extends PObject {
     public void onDestroy() {
         super.onDestroy();
         if (panelByZone != null) {
-            panelByZone.forEach((key, value) -> value.onDestroy());
+            panelByZone.forEach(this::doDestroy);
             panelByZone = null;
+        }
+    }
+
+    private void doDestroy(String key, PRootPanel panel) {
+        try {
+            panel.onDestroy();
+        } catch (Exception e) {
+            log.error("An error occurred while trying to process the destroy event", e);
         }
     }
 
@@ -425,8 +436,8 @@ public class PWindow extends PObject {
      * The opposite of document.hidden property that returns a Boolean value indicating if the page is considered hidden
      * or not.
      *
-     * @see <a href="https://developer.mozilla.org/fr/docs/Web/API/Document/hidden">MDN</a>
      * @return true if the window is shown
+     * @see <a href="https://developer.mozilla.org/fr/docs/Web/API/Document/hidden">MDN</a>
      */
     public boolean isShown() {
         return shown;
@@ -556,7 +567,7 @@ public class PWindow extends PObject {
     private static final class PMainWindow extends PWindow {
 
         @Override
-        final void init() {
+        void init() {
             final ModelWriter writer = UIContext.get().getWriter();
             writer.beginObject(window);
             writer.write(ServerToClientModel.TYPE_CREATE, ID);

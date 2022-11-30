@@ -26,11 +26,15 @@ package com.ponysdk.core.ui.basic;
 import java.util.Iterator;
 
 import com.ponysdk.core.ui.basic.event.HasPWidgets;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Abstract base class for all panels, which are widgets that can contain other widgets.
  */
 public abstract class PPanel extends PWidget implements HasPWidgets {
+
+    private static final Logger log = LoggerFactory.getLogger(PPanel.class);
 
     PPanel() {
     }
@@ -77,7 +81,15 @@ public abstract class PPanel extends PWidget implements HasPWidgets {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        forEach(PObject::onDestroy);
+        forEach(this::doDestroy);
+    }
+
+    private void doDestroy(PWidget child){
+        try {
+            child.onDestroy();
+        } catch (Exception e) {
+            log.error("An error occurred while trying to process the destroy event", e);
+        }
     }
 
 }
