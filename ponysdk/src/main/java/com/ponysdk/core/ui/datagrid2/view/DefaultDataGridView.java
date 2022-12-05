@@ -422,7 +422,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
                 }
                 addon.onDataUpdated(resultLiveData.getAbsoluteRowCount(), rows.size(), result.getFirst().firstRowIndex);
             } catch (final Exception e) {
-                log.error("Problem occured while updating the view", e);
+                log.error("Problem occured while updating the view for result {}, row nb {}", result.getFirst(), rows.size(), e);
                 showErrorMessage(exceptionHandler == null ? "" : exceptionHandler.apply(result.getSecond()));
             } finally {
                 from = Integer.MAX_VALUE;
@@ -442,10 +442,17 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             return;
         }
         final boolean mustUpdateRowHeight = row.extended || !row.isShown();
-        row.show();
         final V rowData = getRowData(row.getRelativeIndex(), result);
+        if (rowData == null) {
+            row.hide();
+            row.key = null;
+            row.data = null;
+            log.error("No data for row {}, actual row size is {}", row, rows.size());
+            return;
+        }
         row.setData(rowData);
         row.key = adapter.getKey(rowData);
+        row.show();
 
         final boolean selected = controller.isSelected(row.key);
         row.extended = false;
@@ -1070,6 +1077,12 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             pinnedCells.forEach(CellManager::unselect);
             unpinnedCells.forEach(CellManager::unselect);
         }
+
+		@Override
+		public String toString() {
+			return "Row [relativeIndex=" + relativeIndex + ", key=" + key + ", data=" + data + ", extended=" + extended
+					+ "]";
+		}
 
     }
 
