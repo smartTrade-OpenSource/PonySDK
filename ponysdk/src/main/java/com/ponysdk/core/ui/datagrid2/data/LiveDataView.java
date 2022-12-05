@@ -47,4 +47,11 @@ public class LiveDataView<V> {
     public List<DefaultRow<V>> getLiveData() {
         return liveData;
     }
+
+	@Override
+	public String toString() {
+		return "LiveDataView [absoluteRowCount=" + absoluteRowCount + ", liveData.size()=" + liveData.size() + "]";
+	}
+    
+    
 }

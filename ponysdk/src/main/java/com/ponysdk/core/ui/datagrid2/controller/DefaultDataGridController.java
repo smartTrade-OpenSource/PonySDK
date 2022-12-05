@@ -356,6 +356,14 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
             this.firstRowIndex = firstRowIndex;
             this.start = start;
         }
+
+		@Override
+		public String toString() {
+			return "DataSrcResult [liveDataView=" + liveDataView + ", firstRowIndex=" + firstRowIndex + ", start="
+					+ start + "]";
+		}
+        
+        
     }
 
     private final AtomicLong count = new AtomicLong();
