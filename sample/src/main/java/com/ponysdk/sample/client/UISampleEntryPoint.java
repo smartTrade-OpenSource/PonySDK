@@ -43,6 +43,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.ponysdk.core.ui.basic.*;
+import com.ponysdk.core.ui.rich.*;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
@@ -54,34 +56,6 @@ import org.slf4j.LoggerFactory;
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.PScheduler;
-import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.IsPWidget;
-import com.ponysdk.core.ui.basic.PAbsolutePanel;
-import com.ponysdk.core.ui.basic.PButton;
-import com.ponysdk.core.ui.basic.PComplexPanel;
-import com.ponysdk.core.ui.basic.PCookies;
-import com.ponysdk.core.ui.basic.PDateBox;
-import com.ponysdk.core.ui.basic.PDatePicker;
-import com.ponysdk.core.ui.basic.PDockLayoutPanel;
-import com.ponysdk.core.ui.basic.PElement;
-import com.ponysdk.core.ui.basic.PFileUpload;
-import com.ponysdk.core.ui.basic.PFlowPanel;
-import com.ponysdk.core.ui.basic.PFrame;
-import com.ponysdk.core.ui.basic.PFunctionalLabel;
-import com.ponysdk.core.ui.basic.PLabel;
-import com.ponysdk.core.ui.basic.PListBox;
-import com.ponysdk.core.ui.basic.PMenuBar;
-import com.ponysdk.core.ui.basic.PRichTextArea;
-import com.ponysdk.core.ui.basic.PScript;
-import com.ponysdk.core.ui.basic.PScrollPanel;
-import com.ponysdk.core.ui.basic.PSimplePanel;
-import com.ponysdk.core.ui.basic.PStackLayoutPanel;
-import com.ponysdk.core.ui.basic.PTabLayoutPanel;
-import com.ponysdk.core.ui.basic.PTextBox;
-import com.ponysdk.core.ui.basic.PTree;
-import com.ponysdk.core.ui.basic.PTreeItem;
-import com.ponysdk.core.ui.basic.PWidget;
-import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
 import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
@@ -111,10 +85,6 @@ import com.ponysdk.core.ui.list.renderer.cell.CellRenderer;
 import com.ponysdk.core.ui.list.valueprovider.IdentityValueProvider;
 import com.ponysdk.core.ui.main.EntryPoint;
 import com.ponysdk.core.ui.model.PKeyCodes;
-import com.ponysdk.core.ui.rich.PConfirmDialog;
-import com.ponysdk.core.ui.rich.POptionPane;
-import com.ponysdk.core.ui.rich.PToolbar;
-import com.ponysdk.core.ui.rich.PTwinListBox;
 import com.ponysdk.core.ui.scene.AbstractScene;
 import com.ponysdk.core.ui.scene.Router;
 import com.ponysdk.core.ui.scene.Scene;
@@ -134,6 +104,35 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     @Override
     public void start(final UIContext uiContext) {
+        PHTML template = Element.newPHTML("<template id='myTemplate'><table class=\"box-Multiple_issues plainlinks metadata ambox ambox-content ambox-multiple_issues compact-ambox\" role=\"presentation\"><tbody><tr><td class=\"mbox-image\"><div class=\"mbox-image-div\"><img alt=\"\" src=\"//upload.wikimedia.org/wikipedia/en/thumb/b/b4/Ambox_important.svg/40px-Ambox_important.svg.png\" decoding=\"async\" width=\"40\" height=\"40\" srcset=\"//upload.wikimedia.org/wikipedia/en/thumb/b/b4/Ambox_important.svg/60px-Ambox_important.svg.png 1.5x, //upload.wikimedia.org/wikipedia/en/thumb/b/b4/Ambox_important.svg/80px-Ambox_important.svg.png 2x\" data-file-width=\"40\" data-file-height=\"40\"></div></td><td class=\"mbox-text\"><div class=\"mbox-text-span\"><div class=\"multiple-issues-text mw-collapsible mw-made-collapsible\"><span class=\"mw-collapsible-toggle mw-collapsible-toggle-default\" role=\"button\" tabindex=\"0\" aria-expanded=\"true\"><a class=\"mw-collapsible-text\">hide</a></span><b>This article has multiple issues.</b> Please help <b><a class=\"external text\" href=\"https://en.wikipedia.org/w/index.php?title=JSFiddle&amp;action=edit\">improve it</a></b> or discuss these issues on the <b><a href=\"/w/index.php?title=Talk:JSFiddle&amp;action=edit&amp;redlink=1\" class=\"new\" title=\"Talk:JSFiddle (page does not exist)\">talk page</a></b>. <small><i>(<a href=\"/wiki/Help:Maintenance_template_removal\" title=\"Help:Maintenance template removal\">Learn how and when to remove these template messages</a>)</i></small>\n" +
+                "<div class=\"mw-collapsible-content\">\n" +
+                "      <link rel=\"mw-deduplicated-inline-style\" href=\"mw-data:TemplateStyles:r1097763485\"><table class=\"box-Notability plainlinks metadata ambox ambox-content ambox-Notability\" role=\"presentation\"><tbody><tr><td class=\"mbox-image\"><div class=\"mbox-image-div\"><img alt=\"\" src=\"//upload.wikimedia.org/wikipedia/en/thumb/b/b4/Ambox_important.svg/40px-Ambox_important.svg.png\" decoding=\"async\" width=\"40\" height=\"40\" srcset=\"//upload.wikimedia.org/wikipedia/en/thumb/b/b4/Ambox_important.svg/60px-Ambox_important.svg.png 1.5x, //upload.wikimedia.org/wikipedia/en/thumb/b/b4/Ambox_important.svg/80px-Ambox_important.svg.png 2x\" data-file-width=\"40\" data-file-height=\"40\"></div></td><td class=\"mbox-text\"><div class=\"mbox-text-span\">The topic of this article <strong>may not meet Wikipedia's <a href=\"/wiki/Wikipedia:Notability_(web)\" title=\"Wikipedia:Notability (web)\">notability guideline for web content</a></strong>.<span class=\"hide-when-compact\"> Please help to demonstrate the notability of the topic by citing <a href=\"/wiki/Wikipedia:Reliable_sources\" title=\"Wikipedia:Reliable sources\">reliable secondary sources</a> that are <a href=\"/wiki/Wikipedia:Identifying_and_using_independent_sources\" class=\"mw-redirect\" title=\"Wikipedia:Identifying and using independent sources\">independent</a> of the topic and provide significant coverage of it beyond a mere trivial mention. If notability cannot be shown, the article is likely to be <a href=\"/wiki/Wikipedia:Merging\" title=\"Wikipedia:Merging\">merged</a>, <a href=\"/wiki/Wikipedia:Redirect\" title=\"Wikipedia:Redirect\">redirected</a>, or <a href=\"/wiki/Wikipedia:Deletion_policy\" title=\"Wikipedia:Deletion policy\">deleted</a>.<br><small><span class=\"plainlinks\"><i>Find sources:</i>&nbsp;<a rel=\"nofollow\" class=\"external text\" href=\"//www.google.com/search?as_eq=wikipedia&amp;q=%22JSFiddle%22\">\"JSFiddle\"</a>&nbsp;–&nbsp;<a rel=\"nofollow\" class=\"external text\" href=\"//www.google.com/search?tbm=nws&amp;q=%22JSFiddle%22+-wikipedia&amp;tbs=ar:1\">news</a>&nbsp;<b>·</b> <a rel=\"nofollow\" class=\"external text\" href=\"//www.google.com/search?&amp;q=%22JSFiddle%22&amp;tbs=bkt:s&amp;tbm=bks\">newspapers</a>&nbsp;<b>·</b> <a rel=\"nofollow\" class=\"external text\" href=\"//www.google.com/search?tbs=bks:1&amp;q=%22JSFiddle%22+-wikipedia\">books</a>&nbsp;<b>·</b> <a rel=\"nofollow\" class=\"external text\" href=\"//scholar.google.com/scholar?q=%22JSFiddle%22\">scholar</a>&nbsp;<b>·</b> <a rel=\"nofollow\" class=\"external text\" href=\"https://www.jstor.org/action/doBasicSearch?Query=%22JSFiddle%22&amp;acc=on&amp;wc=on\">JSTOR</a></span></small></span>  <span class=\"date-container\"><i>(<span class=\"date\">July 2017</span>)</i></span><span class=\"hide-when-compact\"><i> (<small><a href=\"/wiki/Help:Maintenance_template_removal\" title=\"Help:Maintenance template removal\">Learn how and when to remove this template message</a></small>)</i></span></div></td></tr></tbody></table>\n" +
+                "<link rel=\"mw-deduplicated-inline-style\" href=\"mw-data:TemplateStyles:r1097763485\"><table class=\"box-One_source plainlinks metadata ambox ambox-content ambox-one_source\" role=\"presentation\"><tbody><tr><td class=\"mbox-image\"><div class=\"mbox-image-div\"><a href=\"/wiki/File:Question_book-new.svg\" class=\"image\"><img alt=\"Question book-new.svg\" src=\"//upload.wikimedia.org/wikipedia/en/thumb/9/99/Question_book-new.svg/50px-Question_book-new.svg.png\" decoding=\"async\" width=\"50\" height=\"39\" srcset=\"//upload.wikimedia.org/wikipedia/en/thumb/9/99/Question_book-new.svg/75px-Question_book-new.svg.png 1.5x, //upload.wikimedia.org/wikipedia/en/thumb/9/99/Question_book-new.svg/100px-Question_book-new.svg.png 2x\" data-file-width=\"512\" data-file-height=\"399\"></a></div></td><td class=\"mbox-text\"><div class=\"mbox-text-span\">This article <b>relies largely or entirely on a <a href=\"/wiki/Wikipedia:Articles_with_a_single_source\" title=\"Wikipedia:Articles with a single source\">single source</a></b>.<span class=\"hide-when-compact\"> Please help <a class=\"external text\" href=\"https://en.wikipedia.org/w/index.php?title=JSFiddle&amp;action=edit\">improve this article</a> by <a href=\"/wiki/Help:Referencing_for_beginners\" title=\"Help:Referencing for beginners\">introducing  citations to additional sources</a>.<br><small><span class=\"plainlinks\"><i>Find sources:</i>&nbsp;<a rel=\"nofollow\" class=\"external text\" href=\"//www.google.com/search?as_eq=wikipedia&amp;q=%22JSFiddle%22\">\"JSFiddle\"</a>&nbsp;–&nbsp;<a rel=\"nofollow\" class=\"external text\" href=\"//www.google.com/search?tbm=nws&amp;q=%22JSFiddle%22+-wikipedia&amp;tbs=ar:1\">news</a>&nbsp;<b>·</b> <a rel=\"nofollow\" class=\"external text\" href=\"//www.google.com/search?&amp;q=%22JSFiddle%22&amp;tbs=bkt:s&amp;tbm=bks\">newspapers</a>&nbsp;<b>·</b> <a rel=\"nofollow\" class=\"external text\" href=\"//www.google.com/search?tbs=bks:1&amp;q=%22JSFiddle%22+-wikipedia\">books</a>&nbsp;<b>·</b> <a rel=\"nofollow\" class=\"external text\" href=\"//scholar.google.com/scholar?q=%22JSFiddle%22\">scholar</a>&nbsp;<b>·</b> <a rel=\"nofollow\" class=\"external text\" href=\"https://www.jstor.org/action/doBasicSearch?Query=%22JSFiddle%22&amp;acc=on&amp;wc=on\">JSTOR</a></span></small></span>  <span class=\"date-container\"><i>(<span class=\"date\">July 2017</span>)</i></span></div></td></tr></tbody></table>\n" +
+                "    </div>\n" +
+                "</div><span class=\"hide-when-compact\"><i> (<small><a href=\"/wiki/Help:Maintenance_template_removal\" title=\"Help:Maintenance template removal\">Learn how and when to remove this template message</a></small>)</i></span></div></td></tr></tbody></table><h2>Pony Template</h2><div id='myButton'>Click</div></template>");
+        template.setTerminalHandler(e -> {
+            PNotificationManager.showWarningNotification(PWindow.getMain(), "Coucou");
+            System.err.println(e.getData());
+        });
+
+
+        PWindow.getMain().add(template);
+
+        PButton addTemplate = Element.newPButton("add template");
+
+
+        addTemplate.addClickHandler(event -> {
+            PScript.execute(PWindow.getMain(), "" +
+                    "  var clon = document.querySelector('#myTemplate').content.cloneNode(true);\n" +
+                    "  const newNode = document.importNode(clon, true);" +
+                    "  document.body.appendChild(newNode);");
+            PScript.execute(PWindow.getMain(), "document.querySelector('#myButton').addEventListener('click', function(){pony.sendDataToServer(" + template.getID() + ",{key:'test'})})");
+        });
+
+        PWindow.getMain().add(addTemplate);
+
+        if (true) return;
+
         final PElement input = Element.newInput();
         input.setAttribute("type", "checkbox");
         input.evalTerminalScript("element.checked = true");
@@ -391,13 +390,13 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         //TODO 2 implementation (1 simple & 1 full => surrement coté core ui, recheck et discuter avec JB)
 
         final ColumnVisibilitySelectorDataGridView<Integer, MyRow> columnVisibilitySelectorDataGridView = new ColumnVisibilitySelectorDataGridView<>(
-            simpleGridView);
+                simpleGridView);
         final RowSelectorColumnDataGridView<Integer, MyRow> rowSelectorColumnDataGridView = new RowSelectorColumnDataGridView<>(
-            columnVisibilitySelectorDataGridView);
+                columnVisibilitySelectorDataGridView);
         final ColumnFilterFooterDataGridView<Integer, MyRow> columnFilterFooterDataGridView = new ColumnFilterFooterDataGridView<>(
-            rowSelectorColumnDataGridView);
+                rowSelectorColumnDataGridView);
         final ConfigSelectorDataGridView<Integer, MyRow> configSelectorDataGridView = new ConfigSelectorDataGridView<>(
-            columnFilterFooterDataGridView, "DEFAULT");
+                columnFilterFooterDataGridView, "DEFAULT");
 
         final DataGridView<Integer, MyRow> gridView = configSelectorDataGridView;
         gridView.setAdapter(new DataGridAdapter<>() {
@@ -538,7 +537,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         importConfigButton.addClickHandler(e -> {
             try {
                 configSelectorDataGridView
-                    .setConfigEntries(configSelectorDataGridView.decodeConfigEntries(importConfigTextBox.getText()));
+                        .setConfigEntries(configSelectorDataGridView.decodeConfigEntries(importConfigTextBox.getText()));
             } catch (final DecodeException e1) {
                 e1.printStackTrace();
             }
@@ -687,7 +686,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final BufferedReader reader = new BufferedReader(new InputStreamReader(item.getInputStream(), "UTF-8"));
         final StringBuilder value = new StringBuilder();
         final char[] buffer = new char[1024];
-        for (int length = 0; (length = reader.read(buffer)) > 0;) {
+        for (int length = 0; (length = reader.read(buffer)) > 0; ) {
             value.append(buffer, 0, length);
         }
         System.out.println(value.toString());
@@ -780,7 +779,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     private void createNewEvent() {
         final EventHandler<PClickEvent> handler = UIContext.get().getNewEventBus().subscribe(PClickEvent.class,
-            event -> System.err.println("B " + event));
+                event -> System.err.println("B " + event));
         UIContext.get().getNewEventBus().post(new PClickEvent(this));
         UIContext.get().getNewEventBus().post(new PClickEvent(this));
         UIContext.get().getNewEventBus().unsubscribe(handler);
@@ -899,7 +898,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         windowContainer.add(button1);
         button1.addClickHandler(event -> {
             final PWindow newPWindow = Element.newPWindow(w, "Sub Window 1 " + i.incrementAndGet(),
-                "resizable=yes,location=0,status=0,scrollbars=0");
+                    "resizable=yes,location=0,status=0,scrollbars=0");
             newPWindow.add(Element.newPLabel("Sub window"));
             newPWindow.open();
         });
@@ -908,7 +907,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         windowContainer.add(button2);
         button2.addClickHandler(event -> {
             final PWindow newPWindow = Element.newPWindow("Not Sub Window 1 " + i.incrementAndGet(),
-                "resizable=yes,location=0,status=0,scrollbars=0");
+                    "resizable=yes,location=0,status=0,scrollbars=0");
             newPWindow.add(Element.newPLabel("Sub window"));
             newPWindow.open();
         });
@@ -1059,7 +1058,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
             @Override
             public PKeyCodes[] getFilteredKeys() {
-                return new PKeyCodes[] { PKeyCodes.ENTER };
+                return new PKeyCodes[]{PKeyCodes.ENTER};
             }
         });
         return pTextBox;
