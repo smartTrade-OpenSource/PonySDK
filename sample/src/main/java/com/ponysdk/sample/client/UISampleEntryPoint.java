@@ -485,6 +485,11 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             @Override
             public void onCreateColumnResizer(final IsPWidget resizer) {
             }
+
+            @Override
+            public boolean isSelectionEnabled() {
+                return true;
+            }
         });
         gridView.setPollingDelayMillis(250L);
 

@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
@@ -39,7 +38,6 @@ import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.PScheduler;
 import com.ponysdk.core.server.service.query.PResultSet;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
@@ -87,10 +85,6 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     private final RenderingHelperSupplier renderingHelperSupplier2 = new RenderingHelperSupplier();
     private DataGridSource<K, V> dataSource;
     private DataGridSnapshot viewSnapshot;
-
-    public DefaultDataGridController() {
-        super();
-    }
 
     public DefaultDataGridController(final DataGridSource<K, V> dataSource) {
         this.dataSource = dataSource;
@@ -472,7 +466,7 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
 
     @Override
     public boolean isSelectable(final K k) {
-        return dataSource.isSelectable(k);
+        return adapter.isSelectionEnabled() && dataSource.isSelectable(k);
     }
 
     @Override

@@ -124,4 +124,10 @@ public interface DataGridAdapter<K, V> {
      *         {@code false} otherwise
      */
     boolean hasFooter();
+
+    /**
+     * @return {@code true} if the blotter can select new value,
+     *         {@code false} if the blotter cannot select new value
+     */
+    boolean isSelectionEnabled();
 }

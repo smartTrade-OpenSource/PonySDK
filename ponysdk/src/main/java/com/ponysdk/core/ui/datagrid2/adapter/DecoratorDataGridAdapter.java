@@ -110,4 +110,9 @@ public class DecoratorDataGridAdapter<K, V> implements DataGridAdapter<K, V> {
     public void onCreateColumnResizer(final IsPWidget resizer) {
         adapter.onCreateColumnResizer(resizer);
     }
+
+    @Override
+    public boolean isSelectionEnabled() {
+        return adapter.isSelectionEnabled();
+    }
 }

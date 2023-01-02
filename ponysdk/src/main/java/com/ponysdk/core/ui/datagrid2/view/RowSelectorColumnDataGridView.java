@@ -304,6 +304,7 @@ public class RowSelectorColumnDataGridView<K, V> extends DecoratorDataGridView<K
             @Override
             public void unselect() {
                 checkBox.setValue(false);
+                checkBox.setEnabled(decoratorAdapter.isSelectionEnabled());
                 refreshHeader();
             }
 
