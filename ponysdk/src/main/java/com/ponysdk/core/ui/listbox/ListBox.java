@@ -470,7 +470,10 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         if (dataProvider == null) {
             try {
                 sort();
-                final ListBoxItem<D> listBoxItem = items.get(index);
+                ListBoxItem<D> listBoxItem = items.get(index);
+                if (ListBoxItemType.GROUP.equals(listBoxItem.getType())) {
+                    listBoxItem = items.get(index + 1);
+                }
                 if (configuration.isMultiSelectionEnabled()) {
                     setSelectedItems(List.of(listBoxItem));
                 } else {
