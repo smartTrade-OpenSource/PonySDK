@@ -39,10 +39,12 @@ import com.ponysdk.core.ui.basic.event.PCloseEvent;
 import com.ponysdk.core.ui.basic.event.PCloseHandler;
 import com.ponysdk.core.ui.basic.event.PFocusEvent;
 import com.ponysdk.core.ui.basic.event.PFocusHandler;
+import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
 import com.ponysdk.core.ui.basic.event.POpenEvent;
 import com.ponysdk.core.ui.basic.event.POpenHandler;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
+import com.ponysdk.core.ui.dropdown.DropDownContainerConfiguration.DropDownPosition;
 import com.ponysdk.core.ui.model.PEventType;
 import com.ponysdk.core.ui.model.PKeyCodes;
 
@@ -84,7 +86,7 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
     private final Set<POpenHandler> openHandlers;
     private final Set<DropDownContainerListener> listeners;
 
-    public DropDownContainer(final C configuration) {
+    protected DropDownContainer(final C configuration) {
         this.configuration = configuration;
         this.valueChangeHandlers = new HashSet<>();
         this.closeHandlers = new HashSet<>();
@@ -93,7 +95,8 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
         this.widget = Element.newPFlowPanel();
         this.widget.addStyleName(STYLE_CONTAINER_WIDGET);
         this.widget.setAttribute(ATTRIBUTE_ID, widget.getID() + "");
-        this.container = new DropDownContainerAddon(widget);
+        boolean stick = configuration.getPosition() == DropDownPosition.OUTSIDE;
+        this.container = new DropDownContainerAddon(widget, stick, stick);
         this.container.addStyleName(STYLE_CONTAINER_ADDON);
     }
 
@@ -116,6 +119,7 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
                 focused = false;
                 onBlur();
             }, PBlurEvent.TYPE);
+            
             widget.addKeyUpHandler(e -> {
                 if (focused && e.getKeyCode() == PKeyCodes.ENTER.getCode()) {
                     setContainerVisible(!container.isVisible());
@@ -216,7 +220,7 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
     }
     
     public void adjustContainerPosition() {
-    	container.adjustPosition();
+        container.adjustPosition();
     }
 
     public void disableSpaceWhenOpened() {
@@ -282,6 +286,10 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
         valueChangeHandlers.add(handler);
     }
 
+    public Set<PValueChangeHandler<V>> getValueChangeHandlers() {
+        return valueChangeHandlers;
+    }
+
     public void removeValueChangeHandler(final PValueChangeHandler<V> handler) {
         valueChangeHandlers.remove(handler);
     }
@@ -308,6 +316,10 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
 
     public void removeListener(final DropDownContainerListener listener) {
         listeners.remove(listener);
+    }
+
+    public void defineAsMultiLevelParent(final DropDownContainer<?,?> dropdown) {
+        container.defineAsMultiLevelParent(dropdown.container);
     }
 
     protected abstract PWidget createDefaultContainer();
