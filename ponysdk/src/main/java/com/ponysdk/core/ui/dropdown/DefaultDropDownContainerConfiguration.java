@@ -37,6 +37,7 @@ public class DefaultDropDownContainerConfiguration implements DropDownContainerC
     private boolean clearTitleButtonEnabled = true;
     private boolean eventOnlyEnabled;
     private boolean isStopClickEvent;
+    private DropDownPosition position = DropDownPosition.INSIDE;
 
     public DefaultDropDownContainerConfiguration() {
         super();
@@ -169,6 +170,17 @@ public class DefaultDropDownContainerConfiguration implements DropDownContainerC
     @Override
     public DropDownContainerConfiguration enableStopClickEvent() {
         this.isStopClickEvent = true;
-        return null;
+        return this;
+    }
+
+    @Override
+    public DropDownPosition getPosition() {
+        return position;
+    }
+
+    @Override
+    public DropDownContainerConfiguration setPosition(DropDownPosition position) {
+        this.position = position;
+        return this;
     }
 }

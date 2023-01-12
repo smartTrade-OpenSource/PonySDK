@@ -36,6 +36,7 @@ import com.ponysdk.core.ui.basic.PAddOnComposite;
 import com.ponysdk.core.ui.basic.PPanel;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.event.PDomEvent.Type;
+import com.ponysdk.core.ui.dropdown.DropDownContainerConfiguration.DropDownPosition;
 import com.ponysdk.core.ui.eventbus.EventHandler;
 import com.ponysdk.core.ui.model.PEventType;
 
@@ -50,6 +51,7 @@ public class DropDownContainerAddon extends PAddOnComposite<PPanel> {
 
     private static final String PARENT_ID = "parentId";
     private static final String STICK_LEFT = "stickLeft";
+    private static final String STICK_OUTSIDE = "stickOutside";
     private static final String UPDATE_POSITION = "updatePosition";
     private static final String ADJUST_POSITION = "adjustPosition";
     private static final String SET_VISIBLE = "setVisible";
@@ -65,16 +67,18 @@ public class DropDownContainerAddon extends PAddOnComposite<PPanel> {
     private final Set<DropDownContainerAddonListener> listeners;
 
     public DropDownContainerAddon(final PWidget parent) {
-        this(parent, true);
+        this(parent, true, false);
     }
 
-    public DropDownContainerAddon(final PWidget parent, final boolean stickLeft) {
-        super(Element.newPFlowPanel(), createJsonObject(parent.getID(), stickLeft));
+    public DropDownContainerAddon(final PWidget parent, final boolean stickLeft, final boolean stickOutside) {
+        super(Element.newPFlowPanel(), createJsonObject(parent.getID(), stickLeft, stickOutside));
         this.parent = parent;
         widget.setStyleProperty(PROPERTY_POSITION, PROPERTY_ABSOLUTE);
         widget.setStyleProperty(PROPERTY_TOP, PROPERTY_0);
         if (stickLeft) {
-            widget.setStyleProperty(PROPERTY_LEFT, PROPERTY_0);
+            if (!stickOutside) {
+                widget.setStyleProperty(PROPERTY_LEFT, PROPERTY_0);
+            }
         } else {
             widget.setStyleProperty(PROPERTY_RIGHT, PROPERTY_0);
         }
@@ -153,10 +157,21 @@ public class DropDownContainerAddon extends PAddOnComposite<PPanel> {
         this.listeners.remove(listener);
     }
 
-    private static JsonObject createJsonObject(final int parentId, final boolean stickLeft) {
+    /**
+     * Set the attribute {@code multilvl-parent} on the given DropDownContainerAddon element.<br>
+     * Server side we will be able to determine if the element is a parent without any DOM boundaries.<br>
+     * 
+     * @param dropdown the element which we attach the attribute
+     */
+    public void defineAsMultiLevelParent(DropDownContainerAddon dropdown) {
+        dropdown.asWidget().setAttribute("multilvl-parent", String.valueOf(widget.getID()));
+    }
+
+    private static JsonObject createJsonObject(final int parentId, final boolean stickLeft, final boolean stickOutside) {
         final JsonObjectBuilder builder = UIContext.get().getJsonProvider().createObjectBuilder();
         builder.add(PARENT_ID, parentId);
         builder.add(STICK_LEFT, stickLeft);
+        builder.add(STICK_OUTSIDE, stickOutside);
         return builder.build();
     }
 

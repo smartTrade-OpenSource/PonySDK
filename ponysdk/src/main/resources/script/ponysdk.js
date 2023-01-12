@@ -1032,6 +1032,8 @@ _UTF8 = undefined;
     init: function() {
         this.parentId = this.options.parentId;
         this.stickLeft = this.options.stickLeft;
+        // stickOutside at true means stickLeft at true
+        this.stickOutside = this.options.stickOutside;
         this.spaceAuthorized = true;
         this.visible = false;
         this.mobile = this.isMobile(); 
@@ -1046,6 +1048,10 @@ _UTF8 = undefined;
         }
         this.scrollEventListener = function(event) {
             if(that.visible) {
+                // Cancel event if the target is a nested dropdown
+                // 5 is an optimization to start to loop after : window, document, html, body
+                if(isNested(event.path[event.path.length-5])) return;
+
                 var rect = that.element.getBoundingClientRect();
                 if (event.clientX >= rect.left && event.clientX <= rect.right &&
                     event.clientY >= rect.top && event.clientY <= rect.bottom) {
@@ -1058,8 +1064,22 @@ _UTF8 = undefined;
                 }
             }
         }
+        // Return true if the element is a child of that
+        // Else return false
+        let isNested = function(element) {
+            while (element && element.getAttribute('multilvl-parent')) {
+                element = document.getElementById(element.getAttribute('multilvl-parent'));
+                if(!element) break;
+                if(element.id === that.element.id) return true;
+            }
+            return false;
+        }
         this.mouseDownEventListener = function(event) {
             if(that.visible) {
+                // Cancel event if the target is a nested dropdown
+                // 5 is an optimization to start to loop after : window, document, html, body
+                if(isNested(event.path[event.path.length-5])) return;
+
                 if(!that.parentElement) that.parentElement = document.getElementById(that.parentId);
                 var parentRect = that.parentElement.getBoundingClientRect();
                 var rect = that.element.getBoundingClientRect();
@@ -1086,6 +1106,10 @@ _UTF8 = undefined;
         },
         this.keyDownEventListener = function(event) {
             if(that.visible) {
+                // Cancel event if the target is a nested dropdown
+                // 5 is an optimization to start to loop after : window, document, html, body
+                if(isNested(event.path[event.path.length-5])) return;
+
                 if(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(event.code) > -1 ||
                     "Space" == event.code && !that.spaceAuthorized) {
                     event.preventDefault();
@@ -1116,26 +1140,56 @@ _UTF8 = undefined;
         var windowBot = window.innerHeight - offsets.top - offsets.height;
         var windowScrollTop = $(window).scrollTop();
         if(windowBot < this.element.offsetHeight && offsets.top > this.element.offsetHeight) {
-            this.element.style.top = offsets.top - this.element.offsetHeight + windowScrollTop + 'px';
+            // Element takes place above the parent
+            let computedTop = offsets.top - this.element.offsetHeight + windowScrollTop;
+            if (this.stickOutside) {
+                // If the element sticks outside of the ofset, we align the element bottom border with the offset bottom border
+                computedTop += offsets.height;
+            }
+            this.element.style.top = computedTop + 'px';
             this.element.setAttribute('vertical-position', 'top');
             this.element.style.height = this.element.offsetHeight + 'px';
         } else {
-            this.element.style.top = offsets.top + offsets.height + windowScrollTop + 'px';
+            // Element takes place beneath the parent
+            let computedTop = offsets.top + offsets.height + windowScrollTop;
+            if (this.stickOutside) {
+                // If the element sticks outside of the ofset, we align the element top border with the offset top border
+                computedTop -= offsets.height;
+            }
+            this.element.style.top = computedTop + 'px';
             this.element.setAttribute('vertical-position', 'down');
             this.element.style.height = 'auto';
         }
         // Right or left display
         var windowScrollLeft = $(window).scrollLeft();
         if (this.stickLeft) {
+            // Element position led by its left absolute position
+            // windowRight defines the remaining space at the right of the parent
             var windowRight = window.innerWidth - offsets.left - offsets.width;
+            if (this.stickOutside) {
+                // if stickOutside, maring and padding of the new element should be taken into account in the remaining space
+                windowRight = windowRight - this.element.style.marginLeft -  this.element.style.paddingLeft;
+            }
             if(windowRight < this.element.offsetWidth && offsets.left > this.element.offsetWidth) {
-                this.element.style.left = offsets.left + offsets.width - this.element.offsetWidth + windowScrollLeft + 'px';
+                let computedLeft =  offsets.left + offsets.width - this.element.offsetWidth + windowScrollLeft;
+                if (this.stickOutside) {
+                    // if stickOutside, element takes place at the left of the parent
+                    computedLeft = computedLeft - offsets.width - this.element.style.marginRight - this.element.style.paddingRight;
+                }
+                this.element.style.left = computedLeft + 'px';
                 this.element.setAttribute('horizontal-position', 'right');
             } else {
-                this.element.style.left = offsets.left + windowScrollLeft + 'px';
+                let computedLeft =  offsets.left + windowScrollLeft;
+                if (this.stickOutside) {
+                    // if stickOutside, element takes place at the right of the parent
+                    computedLeft = computedLeft + offsets.width + this.element.style.marginLeft + this.element.style.paddingLeft;
+                }
+                this.element.style.left = computedLeft + 'px';
                 this.element.setAttribute('horizontal-position', 'left');
             }
         } else {
+            // Element position led by its right absolute position
+            // windowLeft defines the remaining space at the left of the parent
             var windowLeft = offsets.left;
             if(windowLeft < this.element.offsetWidth && window.innerWidth - offsets.right > this.element.offsetWidth) {
                 this.element.style.right = window.innerWidth - offsets.right + offsets.width - this.element.offsetWidth - windowScrollLeft + 'px';
