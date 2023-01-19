@@ -1050,7 +1050,8 @@ _UTF8 = undefined;
             if(that.visible) {
                 // Cancel event if the target is a nested dropdown
                 // 5 is an optimization to start to loop after : window, document, html, body
-                if(isNested(event.path[event.path.length-5])) return;
+                let path = event.composedPath();
+                if(isNested(path[path.length-5])) return;
 
                 var rect = that.element.getBoundingClientRect();
                 if (event.clientX >= rect.left && event.clientX <= rect.right &&
@@ -1078,7 +1079,8 @@ _UTF8 = undefined;
             if(that.visible) {
                 // Cancel event if the target is a nested dropdown
                 // 5 is an optimization to start to loop after : window, document, html, body
-                if(isNested(event.path[event.path.length-5])) return;
+                let path = event.composedPath();
+                if(isNested(path[path.length-5])) return;
 
                 if(!that.parentElement) that.parentElement = document.getElementById(that.parentId);
                 var parentRect = that.parentElement.getBoundingClientRect();
@@ -1108,7 +1110,8 @@ _UTF8 = undefined;
             if(that.visible) {
                 // Cancel event if the target is a nested dropdown
                 // 5 is an optimization to start to loop after : window, document, html, body
-                if(isNested(event.path[event.path.length-5])) return;
+                let path = event.composedPath();
+                if(isNested(path[path.length-5])) return;
 
                 if(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(event.code) > -1 ||
                     "Space" == event.code && !that.spaceAuthorized) {
