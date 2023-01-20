@@ -144,6 +144,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
 
     private boolean shouldDraw = true;
     private boolean refreshOnColumnVisibilityChanged = false;
+    private boolean drawOnResume;
 
     public DefaultDataGridView() {
         this(new DefaultCacheDataSource<>());
@@ -395,7 +396,10 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
 
     private void draw() {
         try {
-            if (!shouldDraw) return;
+            if (!shouldDraw) {
+                drawOnResume = true;
+                return;
+            }
             if (from > to) {
                 hideLoadingDataView();
                 return;
@@ -956,6 +960,10 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
     @Override
     public void resume() {
         shouldDraw = true;
+        if(drawOnResume) {
+            drawOnResume = false;
+            draw();
+        }
     }
 
     @Override
