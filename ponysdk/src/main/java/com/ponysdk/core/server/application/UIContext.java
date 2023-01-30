@@ -458,6 +458,13 @@ public class UIContext {
     }
 
     /**
+     * force flush instructions to the server
+     */
+    public void flush() {
+        if(isAlive()) socket.flush();
+    }
+
+    /**
      * Binds an object to this session, using the name specified. If an object of the same name is already bound to the
      * session, the object is replaced.
      * <p>

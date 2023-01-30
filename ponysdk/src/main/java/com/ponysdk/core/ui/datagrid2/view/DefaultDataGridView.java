@@ -42,6 +42,7 @@ import java.util.function.Supplier;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 
+import com.ponysdk.core.server.application.UIContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -283,10 +284,10 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
     }
 
     private void onRelativeRowCountUpdated(int relRowCount) {
-        showLoadingDataView();
         final int mod = relRowCount % 3;
         relRowCount = Math.max(mod == 0 ? relRowCount : relRowCount - mod + 3, MIN_RELATIVE_ROW_COUNT);
         if (this.rows.size() == relRowCount) return;
+        showLoadingDataView();
         if (this.rows.size() < relRowCount) {
             for (int i = this.rows.size(); i < relRowCount; i++) {
                 rows.add(new Row(i));
@@ -870,16 +871,14 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
     }
 
     private void showLoadingDataView() {
-        loadingDataDiv.setVisible(true);
+        addon.showLoadingPanel();
         errorMsgDiv.setVisible(false);
-        // must be sent immediately
-        Txn.get().flush(); // FIXME use Txn.get() ???
+        // show immediately the loadingPanel
+        UIContext.get().flush();
     }
 
     private void hideLoadingDataView() {
-        loadingDataDiv.setVisible(false);
-        // must be sent immediately
-        Txn.get().flush(); // FIXME use Txn.get() ???
+        addon.hideLoadingPanel();
     }
 
     private void showErrorMessage(final String msg) {
@@ -890,7 +889,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         errorMsgDiv.add(div);
         loadingDataDiv.setVisible(false);
         // must be sent immediately
-        Txn.get().flush(); // FIXME use Txn.get() ???
+        UIContext.get().flush();
     }
 
     @Override
@@ -1556,6 +1555,14 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
 
         public void checkPosition() {
             callTerminalMethod("checkPosition");
+        }
+
+        public void showLoadingPanel() {
+            callTerminalMethod("showLoading");
+        }
+
+        public void hideLoadingPanel() {
+            callTerminalMethod("hideLoading");
         }
     }
 }
