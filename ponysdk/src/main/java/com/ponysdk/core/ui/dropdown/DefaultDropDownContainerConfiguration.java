@@ -38,6 +38,7 @@ public class DefaultDropDownContainerConfiguration implements DropDownContainerC
     private boolean eventOnlyEnabled;
     private boolean isStopClickEvent;
     private DropDownPosition position = DropDownPosition.INSIDE;
+    private boolean isMultilevel;
 
     public DefaultDropDownContainerConfiguration() {
         super();
@@ -181,6 +182,17 @@ public class DefaultDropDownContainerConfiguration implements DropDownContainerC
     @Override
     public DropDownContainerConfiguration setPosition(DropDownPosition position) {
         this.position = position;
+        return this;
+    }
+
+    @Override
+    public boolean isMultilevel() {
+        return isMultilevel;
+    }
+
+    @Override
+    public DropDownContainerConfiguration setMultilevel(boolean isMultilevel) {
+        this.isMultilevel = isMultilevel;
         return this;
     }
 }

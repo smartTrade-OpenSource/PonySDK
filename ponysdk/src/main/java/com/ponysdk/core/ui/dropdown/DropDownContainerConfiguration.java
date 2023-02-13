@@ -94,4 +94,8 @@ public interface DropDownContainerConfiguration {
     DropDownPosition getPosition();
 
     DropDownContainerConfiguration setPosition(final DropDownPosition position);
+
+    public boolean isMultilevel();
+
+    public DropDownContainerConfiguration setMultilevel(boolean isMultilevel);
 }

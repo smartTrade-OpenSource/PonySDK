@@ -1029,6 +1029,29 @@ _UTF8 = undefined;
 
 (function () {
     "use strict"
+    function simulateMouseDown(element, pointerX, pointerY) {
+        var oEvent;
+        if (document.createEvent) {
+            var oEvent = new MouseEvent('mousedown', {
+                bubbles: true,
+                cancelable: true,
+                view: window,
+                screenXArg: pointerX, 
+                screenYArg: pointerY, 
+                clientXArg: pointerX, 
+                clientYArg: pointerY
+            });
+            element.dispatchEvent(oEvent);
+        }
+        else { // For IE 6, 7, 8
+            options.clientX = pointerX;
+            options.clientY = pointerY;
+            var evt = document.createEventObject();
+            oEvent = extend(evt, options);
+            element.fireEvent('on' + eventName, oEvent);
+        }
+        return element;
+    }
 
     AbstractAddon.defineAddon("com.ponysdk.core.ui.dropdown.DropDownContainerAddon", {
 
@@ -1037,6 +1060,7 @@ _UTF8 = undefined;
             this.stickLeft = this.options.stickLeft;
             // stickOutside at true means stickLeft at true
             this.stickOutside = this.options.stickOutside;
+            this.multiLevel = this.options.multiLevel;
             this.spaceAuthorized = true;
             this.visible = false;
             this.mobile = this.isMobile();
@@ -1096,10 +1120,10 @@ _UTF8 = undefined;
                         var x = targetBounds.left;
                         var y = targetBounds.top;
                     }
-                    if (x >= rect.left && x <= rect.right &&
-                        y >= rect.top && y <= rect.bottom ||
-                        x >= parentRect.left && x <= parentRect.right &&
-                        y >= parentRect.top && y <= parentRect.bottom) {
+                    if (x > rect.left && x < rect.right &&
+                        y > rect.top && y < rect.bottom ||
+                        x > parentRect.left && x < parentRect.right &&
+                        y > parentRect.top && y < parentRect.bottom) {
                         // Inside element or parent, nothing to do
                     } else {
                         that.sendDataToServer({
@@ -1109,26 +1133,46 @@ _UTF8 = undefined;
                     }
                 }
             },
-                this.keyDownEventListener = function (event) {
-                    if (that.visible) {
-                        // Cancel event if the target is a nested dropdown
-                        // 5 is an optimization to start to loop after : window, document, html, body
-                        let path = event.composedPath();
-                        if (isNested(path[path.length - 5])) return;
+            this.keyDownEventListener = function (event) {
+                if (that.visible) {
+                    // Cancel event if the target is a nested dropdown
+                    // 5 is an optimization to start to loop after : window, document, html, body
+                    let path = event.composedPath();
+                    if (isNested(path[path.length - 5])) return;
 
-                        if (["ArrowUp", "ArrowDown"].indexOf(event.code) > -1 ||
-                            "Space" == event.code && !that.spaceAuthorized) {
-                            event.preventDefault();
-                        }
+                    if (["ArrowUp", "ArrowDown"].indexOf(event.code) > -1 ||
+                        "Space" == event.code && !that.spaceAuthorized) {
+                        event.preventDefault();
                     }
                 }
-        },
+            }
 
+            let timerDelay = 400;
+            let timer;
+  
+            this.mouseEnterEventListener = function (event) {                
+                timer = setTimeout(function() {             
+                  event.target.click()
+                  simulateMouseDown(event.target, event.clientX, event.clientY);
+                }, timerDelay);
+            }
+            
+            this.mouseLeaveEventListener = function (event) {
+                clearTimeout(timer);
+            }
+        },
+  
         addListeners: function () {
             if (!this.mobile) window.addEventListener('resize', this.resizeEventListener);
             window.addEventListener('wheel', this.scrollEventListener, true);
             window.addEventListener('mousedown', this.mouseDownEventListener, true);
             window.addEventListener('keydown', this.keyDownEventListener, true);
+            if (this.multiLevel) {
+              this.element.querySelectorAll('.dd-container-button').forEach(node => {
+                node.addEventListener('mouseenter', this.mouseEnterEventListener, true);
+                node.addEventListener('mouseleave', this.mouseLeaveEventListener, true);
+              });
+            }
         },
 
         removeListeners: function () {
@@ -1136,6 +1180,12 @@ _UTF8 = undefined;
             window.removeEventListener('wheel', this.scrollEventListener, true);
             window.removeEventListener('mousedown', this.mouseDownEventListener, true);
             window.removeEventListener('keydown', this.keyDownEventListener, true);
+            if (this.multiLevel) {
+              this.element.querySelectorAll('.dd-container-button').forEach(node => {
+                node.removeEventListener('mouseenter', this.mouseEnterEventListener, true);
+                node.removeEventListener('mouseleave', this.mouseLeaveEventListener, true);
+              });
+            }
         },
 
         updatePosition: function () {

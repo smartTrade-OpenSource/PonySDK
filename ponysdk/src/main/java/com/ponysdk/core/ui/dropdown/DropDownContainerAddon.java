@@ -52,6 +52,7 @@ public class DropDownContainerAddon extends PAddOnComposite<PPanel> {
     private static final String PARENT_ID = "parentId";
     private static final String STICK_LEFT = "stickLeft";
     private static final String STICK_OUTSIDE = "stickOutside";
+    private static final String MULTILEVEL = "multiLevel";
     private static final String UPDATE_POSITION = "updatePosition";
     private static final String ADJUST_POSITION = "adjustPosition";
     private static final String SET_VISIBLE = "setVisible";
@@ -67,11 +68,11 @@ public class DropDownContainerAddon extends PAddOnComposite<PPanel> {
     private final Set<DropDownContainerAddonListener> listeners;
 
     public DropDownContainerAddon(final PWidget parent) {
-        this(parent, true, false);
+        this(parent, true, false, false);
     }
 
-    public DropDownContainerAddon(final PWidget parent, final boolean stickLeft, final boolean stickOutside) {
-        super(Element.newPFlowPanel(), createJsonObject(parent.getID(), stickLeft, stickOutside));
+    public DropDownContainerAddon(final PWidget parent, final boolean stickLeft, final boolean stickOutside, final boolean multilevel) {
+        super(Element.newPFlowPanel(), createJsonObject(parent.getID(), stickLeft, stickOutside, multilevel));
         this.parent = parent;
         widget.setStyleProperty(PROPERTY_POSITION, PROPERTY_ABSOLUTE);
         widget.setStyleProperty(PROPERTY_TOP, PROPERTY_0);
@@ -167,11 +168,12 @@ public class DropDownContainerAddon extends PAddOnComposite<PPanel> {
         dropdown.asWidget().setAttribute("multilvl-parent", String.valueOf(widget.getID()));
     }
 
-    private static JsonObject createJsonObject(final int parentId, final boolean stickLeft, final boolean stickOutside) {
+    private static JsonObject createJsonObject(final int parentId, final boolean stickLeft, final boolean stickOutside, final boolean multiLevel) {
         final JsonObjectBuilder builder = UIContext.get().getJsonProvider().createObjectBuilder();
         builder.add(PARENT_ID, parentId);
         builder.add(STICK_LEFT, stickLeft);
         builder.add(STICK_OUTSIDE, stickOutside);
+        builder.add(MULTILEVEL, multiLevel);
         return builder.build();
     }
 

@@ -84,19 +84,19 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
     private final Set<PValueChangeHandler<V>> valueChangeHandlers;
     private final Set<PCloseHandler> closeHandlers;
     private final Set<POpenHandler> openHandlers;
-    private final Set<DropDownContainerListener> listeners;
+    private final Set<DropDownContainerListener> clearSelectionListeners;
 
     protected DropDownContainer(final C configuration) {
         this.configuration = configuration;
         this.valueChangeHandlers = new HashSet<>();
         this.closeHandlers = new HashSet<>();
         this.openHandlers = new HashSet<>();
-        this.listeners = new HashSet<>();
+        this.clearSelectionListeners = new HashSet<>();
         this.widget = Element.newPFlowPanel();
         this.widget.addStyleName(STYLE_CONTAINER_WIDGET);
         this.widget.setAttribute(ATTRIBUTE_ID, widget.getID() + "");
         boolean stick = configuration.getPosition() == DropDownPosition.OUTSIDE;
-        this.container = new DropDownContainerAddon(widget, stick, stick);
+        this.container = new DropDownContainerAddon(widget, stick, stick, configuration.isMultilevel());
         this.container.addStyleName(STYLE_CONTAINER_ADDON);
     }
 
@@ -147,7 +147,7 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
                 clearTitleButton.addClickHandler(e -> {
                     if (isEnabled()) {
                         setValue(null);
-                        listeners.forEach(l -> l.onClearTitleClicked());
+                        clearSelectionListeners.forEach(l -> l.onClearTitleClicked());
                         onValueChange();
                     }
                 });
@@ -190,7 +190,7 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
             valueChangeHandlers.clear();
             closeHandlers.clear();
             openHandlers.clear();
-            listeners.clear();
+            clearSelectionListeners.clear();
         });
         return widget;
     }
@@ -310,12 +310,12 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
         openHandlers.remove(handler);
     }
 
-    public void addListener(final DropDownContainerListener listener) {
-        listeners.add(listener);
+    public void addClearSelectionListener(final DropDownContainerListener listener) {
+        clearSelectionListeners.add(listener);
     }
 
-    public void removeListener(final DropDownContainerListener listener) {
-        listeners.remove(listener);
+    public void removeClearSelectionListener(final DropDownContainerListener listener) {
+        clearSelectionListeners.remove(listener);
     }
 
     public void defineAsMultiLevelParent(final DropDownContainer<?,?> dropdown) {
