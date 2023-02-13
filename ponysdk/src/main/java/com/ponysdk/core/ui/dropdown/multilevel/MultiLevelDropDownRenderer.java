@@ -129,6 +129,7 @@ public class MultiLevelDropDownRenderer<D> implements ListBoxItemRenderer<MultiL
         configuration.disableClearTitleButton();
         configuration.enableStopClickEvent();
         configuration.setPosition(DropDownPosition.OUTSIDE);
+        configuration.setMultilevel(true);
         configuration.disableSorting();
         configuration.disableSearch();
         configuration.enabledEventOnly();
