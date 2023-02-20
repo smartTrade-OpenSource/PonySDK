@@ -88,6 +88,11 @@ public interface DataGridSource<K, V> {
      * True is passed into parameter if it reach the last selected data
      */
     PResultSet<V> getFilteredData();
+    
+    /**
+     * Return the last requested data, i.e rows actually displayed.
+     */
+    PResultSet<V> getLastRequestedData();
 
     /**
      * this method can be asynchronous and called few times till the end of the data

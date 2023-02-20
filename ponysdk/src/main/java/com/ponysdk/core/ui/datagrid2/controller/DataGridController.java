@@ -56,6 +56,8 @@ public interface DataGridController<K, V> {
     public PResultSet<V> getFilteredData();
 
     public PResultSet<V> getLiveSelectedData();
+    
+    public PResultSet<V> getLastRequestedData();
 
     /**
      *

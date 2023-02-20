@@ -478,6 +478,11 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     public PResultSet<V> getLiveSelectedData() {
         return dataSource.getLiveSelectedData();
     }
+    
+    @Override
+    public PResultSet<V> getLastRequestedData() {
+    	return dataSource.getLastRequestedData();
+    }
 
     @Override
     public int getLiveSelectedDataCount() {
