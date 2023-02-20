@@ -128,6 +128,11 @@ public abstract class SpyDataGridController<K, V> implements DataGridController<
     public PResultSet<V> getLiveSelectedData() {
         return controller.getLiveSelectedData();
     }
+    
+    @Override
+    public PResultSet<V> getLastRequestedData() {
+        return controller.getLastRequestedData();
+    }
 
     @Override
     public int getLiveSelectedDataCount() {

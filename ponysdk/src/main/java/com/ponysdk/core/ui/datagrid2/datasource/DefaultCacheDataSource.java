@@ -44,11 +44,17 @@ public class DefaultCacheDataSource<K, V> extends AbstractDataSource<K, V> {
 
     private final Map<K, DefaultRow<V>> cache = new HashMap<>();
     private final List<DefaultRow<V>> liveData = new ArrayList<>();
-
+    private final List<DefaultRow<V>> lastRequestedData = new ArrayList<>();
+    
     @Override
     public PResultSet<V> getFilteredData() {
         //return a copy to avoid concurrent modification exception
         return PResultSet.of(new MappedList<>(new ArrayList<>(liveData), DefaultRow::getData));
+    }
+    
+    @Override
+    public PResultSet<V> getLastRequestedData() {
+    	return PResultSet.of(new MappedList<>(new ArrayList<>(lastRequestedData), DefaultRow::getData));
     }
 
     @Override
@@ -69,11 +75,11 @@ public class DefaultCacheDataSource<K, V> extends AbstractDataSource<K, V> {
     @Override
     public LiveDataView<V> getRows(final int dataSrcRowIndex, int dataSize) {
         dataSize = dataSrcRowIndex + dataSize > liveData.size() ? liveData.size() - dataSrcRowIndex : dataSize;
-        final List<DefaultRow<V>> liveDataOnScreen = new ArrayList<>();
+        lastRequestedData.clear();
         for (int i = dataSrcRowIndex; i < dataSrcRowIndex + dataSize; i++) {
-            liveDataOnScreen.add(liveData.get(i));
+        	lastRequestedData.add(liveData.get(i));
         }
-        return new LiveDataView<>(getRowCount(), liveDataOnScreen);
+        return new LiveDataView<>(getRowCount(), lastRequestedData);
     }
 
     @Override
