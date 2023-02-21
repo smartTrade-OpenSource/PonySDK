@@ -1116,7 +1116,7 @@ _UTF8 = undefined;
                         let path = event.composedPath();
                         if (isNested(path[path.length - 5])) return;
 
-                        if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(event.code) > -1 ||
+                        if (["ArrowUp", "ArrowDown"].indexOf(event.code) > -1 ||
                             "Space" == event.code && !that.spaceAuthorized) {
                             event.preventDefault();
                         }
