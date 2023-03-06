@@ -146,6 +146,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
     private boolean shouldDraw = true;
     private boolean refreshOnColumnVisibilityChanged = false;
     private boolean drawOnResume;
+    private boolean forceExtended;
 
     public DefaultDataGridView() {
         this(new DefaultCacheDataSource<>());
@@ -463,7 +464,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         row.extended = false;
         updateRowCells(row, row.unpinnedCells, unpinnedTable.columns, selected);
         updateRowCells(row, row.pinnedCells, pinnedTable.columns, selected);
-        if (row.extended) {
+        if (row.extended || forceExtended) {
             addon.updateExtendedRowHeight(row.relativeIndex);
         } else if (mustUpdateRowHeight) {
             addon.updateRowHeight(row.relativeIndex);
@@ -979,6 +980,10 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
 		this.refreshOnColumnVisibilityChanged = refreshOnColumnVisibilityChanged;
 		if(addon != null) addon.setListenOnColumnVisibility(refreshOnColumnVisibilityChanged);
 	}
+    
+    public void setForceExtended(final boolean forceExtended) {
+    	this.forceExtended = forceExtended;
+    }
 
 	public class Row {
 
