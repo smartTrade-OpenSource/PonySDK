@@ -39,7 +39,6 @@ import com.ponysdk.core.ui.basic.event.PCloseEvent;
 import com.ponysdk.core.ui.basic.event.PCloseHandler;
 import com.ponysdk.core.ui.basic.event.PFocusEvent;
 import com.ponysdk.core.ui.basic.event.PFocusHandler;
-import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
 import com.ponysdk.core.ui.basic.event.POpenEvent;
 import com.ponysdk.core.ui.basic.event.POpenHandler;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
@@ -96,7 +95,7 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
         this.widget.addStyleName(STYLE_CONTAINER_WIDGET);
         this.widget.setAttribute(ATTRIBUTE_ID, widget.getID() + "");
         boolean stick = configuration.getPosition() == DropDownPosition.OUTSIDE;
-        this.container = new DropDownContainerAddon(widget, stick, stick, configuration.isMultilevel());
+        this.container = new DropDownContainerAddon(widget, stick, stick, configuration.isMultilevelEnabled());
         this.container.addStyleName(STYLE_CONTAINER_ADDON);
     }
 

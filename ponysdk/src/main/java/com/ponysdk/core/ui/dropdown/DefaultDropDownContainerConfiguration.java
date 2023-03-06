@@ -36,9 +36,9 @@ public class DefaultDropDownContainerConfiguration implements DropDownContainerC
     private DropDownCloseOnClickMode closeOnClickMode = DropDownCloseOnClickMode.DEFAULT;
     private boolean clearTitleButtonEnabled = true;
     private boolean eventOnlyEnabled;
-    private boolean isStopClickEvent;
+    private boolean stopClickEvent;
     private DropDownPosition position = DropDownPosition.INSIDE;
-    private boolean isMultilevel;
+    private boolean multilevelEnabled;
 
     public DefaultDropDownContainerConfiguration() {
         super();
@@ -165,12 +165,12 @@ public class DefaultDropDownContainerConfiguration implements DropDownContainerC
 
     @Override
     public boolean isStopClickEventEnabled() {
-        return this.isStopClickEvent;
+        return this.stopClickEvent;
     }
 
     @Override
     public DropDownContainerConfiguration enableStopClickEvent() {
-        this.isStopClickEvent = true;
+        this.stopClickEvent = true;
         return this;
     }
 
@@ -186,13 +186,13 @@ public class DefaultDropDownContainerConfiguration implements DropDownContainerC
     }
 
     @Override
-    public boolean isMultilevel() {
-        return isMultilevel;
+    public boolean isMultilevelEnabled() {
+        return multilevelEnabled;
     }
 
     @Override
-    public DropDownContainerConfiguration setMultilevel(boolean isMultilevel) {
-        this.isMultilevel = isMultilevel;
+    public DropDownContainerConfiguration enableMultilevel() {
+        this.multilevelEnabled = true;
         return this;
     }
 }
