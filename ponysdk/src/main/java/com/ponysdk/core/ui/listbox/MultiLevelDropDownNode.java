@@ -1,5 +1,5 @@
 
-package com.ponysdk.core.ui.dropdown.multilevel;
+package com.ponysdk.core.ui.listbox;
 
 import java.util.Collection;
 
