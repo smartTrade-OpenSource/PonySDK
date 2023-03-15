@@ -63,6 +63,10 @@ public class PHistory {
         handlers.add(handler);
     }
 
+    public void removeValueChangeHandler(final PValueChangeHandler<String> handler) {
+        handlers.remove(handler);
+    }
+
     public void newItem(final String token) {
         newItem(token, true);
     }
