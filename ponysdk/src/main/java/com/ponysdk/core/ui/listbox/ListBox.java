@@ -690,8 +690,25 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         itemContainer.setScrollTop();
         if (filterWidget != null) filterWidget.focus();
         if (clearMultiButton != null) clearMultiButton.setEnabled(!getSelectedItems().isEmpty());
-        upDownKeyHandler = asWidget().getWindow().getPRootPanel().addKeyDownHandler(e -> {
-            if (PKeyCodes.UP.getCode() == e.getKeyCode()) {
+        addUpDownKeyHandler();
+    }
+
+    @Override
+    protected void afterContainerClose() {
+        super.afterContainerClose();
+        removeUpDownKeyHandler();
+    }
+
+    void removeUpDownKeyHandler() {
+        super.removeUppDownKeyHandler();
+        if (upDownKeyHandler != null) upDownKeyHandler.removeHandler();
+    }
+
+    void addUpDownKeyHandler() {
+        if (upDownKeyHandler != null) upDownKeyHandler.removeHandler();
+        upDownKeyHandler = super.addUppDownKeyHandler(e -> {
+            int keyCode = e.getKeyCode();
+            if (PKeyCodes.UP.getCode() == keyCode) {
                 if (index > 0) {
                     index--;
                     if (index > 0 && configuration.isGroupEnabled() && visibleItems.get(index) instanceof GroupListBoxItem) {
@@ -705,32 +722,35 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
                         itemContainer.showIndex(previous);
                     }
                 }
-            } else if (PKeyCodes.DOWN.getCode() == e.getKeyCode()) {
+            } else if (PKeyCodes.DOWN.getCode() == keyCode) {
                 if (index < itemContainer.getFullSize() - 1) {
                     index++;
                     if (configuration.isGroupEnabled() && visibleItems.get(index) instanceof GroupListBoxItem) {
                         index++;
                     }
                 }
-            } else if (PKeyCodes.ENTER.getCode() == e.getKeyCode()) {
+            } else if (PKeyCodes.ENTER.getCode() == keyCode) {
                 final ListBoxItemWidget listBoxItemWidget = itemContainer.getCurrentItemIndex();
                 if (listBoxItemWidget != null) {
                     listBoxItemWidget.select();
                 }
-            } else if (PKeyCodes.ESCAPE.getCode() == e.getKeyCode()) {
-                close();
-            }
+            } else if (configuration.isMultilevelEnabled() && PKeyCodes.RIGHT.getCode() == keyCode) {
+                final ListBoxItemWidget listBoxItemWidget = itemContainer.getCurrentItemIndex();
+                if (listBoxItemWidget != null) {
+                    listBoxItemWidget.openNested();
+                }
+            } else if (PKeyCodes.ESCAPE.getCode() == keyCode || //
+                    configuration.isMultilevelEnabled() && PKeyCodes.LEFT.getCode() == keyCode) {
+                        close();
+                    }
             forceIndex = true;
             itemContainer.showIndex(index);
         });
     }
 
-    @Override
-    protected void afterContainerClose() {
-        super.afterContainerClose();
-        if (upDownKeyHandler != null) {
-            upDownKeyHandler.removeHandler();
-        }
+    void showIndex(final ListBoxItem<D> i) {
+        index = visibleItems.indexOf(i);
+        itemContainer.showIndex(index);
     }
 
     @Override
@@ -1054,7 +1074,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         }
     }
 
-    public class ListBoxItemWidget implements IsPWidget {
+    private class ListBoxItemWidget implements IsPWidget {
 
         private final PPanel panel;
         private PCheckBox checkBox;
@@ -1096,7 +1116,17 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
                 onSelectionChange(item, checkBox != null ? checkBox.getValue() : true);
             }
             blur();
-            applyCloseOnClickMode();
+            if (itemRenderer instanceof MultiLevelDropDownRenderer) {
+                ((MultiLevelDropDownRenderer) itemRenderer).closeAll();
+            } else {
+                applyCloseOnClickMode();
+            }
+        }
+
+        void openNested() {
+            if (itemRenderer instanceof MultiLevelDropDownRenderer) {
+                ((MultiLevelDropDownRenderer) itemRenderer).openNested();
+            }
         }
 
         void setItem(final ListBoxItem<D> item) {

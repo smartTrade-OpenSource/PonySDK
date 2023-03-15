@@ -39,11 +39,13 @@ import com.ponysdk.core.ui.basic.event.PCloseEvent;
 import com.ponysdk.core.ui.basic.event.PCloseHandler;
 import com.ponysdk.core.ui.basic.event.PFocusEvent;
 import com.ponysdk.core.ui.basic.event.PFocusHandler;
+import com.ponysdk.core.ui.basic.event.PKeyDownEvent;
 import com.ponysdk.core.ui.basic.event.POpenEvent;
 import com.ponysdk.core.ui.basic.event.POpenHandler;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 import com.ponysdk.core.ui.dropdown.DropDownContainerConfiguration.DropDownPosition;
+import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 import com.ponysdk.core.ui.model.PEventType;
 import com.ponysdk.core.ui.model.PKeyCodes;
 
@@ -94,7 +96,7 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
         this.widget = Element.newPFlowPanel();
         this.widget.addStyleName(STYLE_CONTAINER_WIDGET);
         this.widget.setAttribute(ATTRIBUTE_ID, widget.getID() + "");
-        boolean stick = configuration.getPosition() == DropDownPosition.OUTSIDE;
+        final boolean stick = configuration.getPosition() == DropDownPosition.OUTSIDE;
         this.container = new DropDownContainerAddon(widget, stick, stick, configuration.isMultilevelEnabled());
         this.container.addStyleName(STYLE_CONTAINER_ADDON);
     }
@@ -118,7 +120,7 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
                 focused = false;
                 onBlur();
             }, PBlurEvent.TYPE);
-            
+
             widget.addKeyUpHandler(e -> {
                 if (focused && e.getKeyCode() == PKeyCodes.ENTER.getCode()) {
                     setContainerVisible(!container.isVisible());
@@ -217,7 +219,7 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
     public void updateContainerPosition() {
         container.updatePosition();
     }
-    
+
     public void adjustContainerPosition() {
         container.adjustPosition();
     }
@@ -317,7 +319,7 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
         clearSelectionListeners.remove(listener);
     }
 
-    public void defineAsMultiLevelParent(final DropDownContainer<?,?> dropdown) {
+    public void defineAsMultiLevelParent(final DropDownContainer<?, ?> dropdown) {
         container.defineAsMultiLevelParent(dropdown.container);
     }
 
@@ -394,11 +396,21 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
     protected void focusContainer() {
         // Nothing to do by default
     }
+    
+    protected HandlerRegistration addUppDownKeyHandler(final PKeyDownEvent.Handler handler) {
+        container.asWidget().setTabindex(TabindexMode.TABULABLE);
+        container.asWidget().focus();
+        return container.asWidget().addKeyDownHandler(handler);
+    }
+
+    protected void removeUppDownKeyHandler() {
+        container.asWidget().setTabindex(TabindexMode.FOCUSABLE);
+    }
 
     protected void onBlur() {
         if (isOpen() && isContainerFocusable()) {
             focusContainer();
-        } else {
+        } else if (!configuration.isMultilevelEnabled()) {
             close();
         }
     }
