@@ -1074,7 +1074,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         }
     }
 
-    private class ListBoxItemWidget implements IsPWidget {
+    public class ListBoxItemWidget implements IsPWidget {
 
         private final PPanel panel;
         private PCheckBox checkBox;
