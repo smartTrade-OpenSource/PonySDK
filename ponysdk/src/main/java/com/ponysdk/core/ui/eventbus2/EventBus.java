@@ -88,7 +88,7 @@ public class EventBus {
             if (handlers.isEmpty()) handlersByType.remove(handler.type);
             return remove;
         } else {
-            log.error("No subscribed handlers for {}", handler.type);
+            log.warn("No subscribed handlers for {}", handler.type);
             return false;
         }
     }
@@ -97,7 +97,7 @@ public class EventBus {
         if (event == null) return;
         final Set<EventHandler<?>> handlers = handlersByType.get(event.getClass());
         if (handlers != null) handlers.forEach(handler -> handler.accept(event));
-        else log.error("No subscribed handlers for {}", event.getClass());
+        else log.debug("No subscribed handlers for {}", event.getClass());
     }
 
     public <T> void setInitialValueByType(Class<T> type, Supplier<T> supplier) {
