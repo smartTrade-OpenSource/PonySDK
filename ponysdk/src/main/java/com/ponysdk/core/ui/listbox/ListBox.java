@@ -700,13 +700,13 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     }
 
     void removeUpDownKeyHandler() {
-        super.removeUppDownKeyHandler();
+        super.removeTabIndex();
         if (upDownKeyHandler != null) upDownKeyHandler.removeHandler();
     }
 
     void addUpDownKeyHandler() {
         if (upDownKeyHandler != null) upDownKeyHandler.removeHandler();
-        upDownKeyHandler = super.addUppDownKeyHandler(e -> {
+        upDownKeyHandler = super.addUppDownKeyHandler(!configuration.isSearchEnabled(), e -> {
             int keyCode = e.getKeyCode();
             if (PKeyCodes.UP.getCode() == keyCode) {
                 if (index > 0) {
