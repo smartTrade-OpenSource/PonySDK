@@ -123,10 +123,12 @@ public class MultiLevelDropDownRenderer<D> implements ListBoxItemRenderer<MultiL
     }
 
     private void renderAsLabel(final ListBoxItem<MultiLevelDropDownNode<D>> item) {
-        if (label == null) label = Element.newPLabel();
+        if (label == null) {
+            label = Element.newPLabel();
+            label.addDomHandler((PClickHandler) e -> r.run(), PClickEvent.TYPE);
+        }
         label.setText(item.getLabel());
         label.setTitle(item.getLabel());
-        label.addDomHandler((PClickHandler) e -> r.run(), PClickEvent.TYPE);
         if (item.isEnabled()) label.removeAttribute(ATTR_DISABLED);
         else label.setAttribute(ATTR_DISABLED);
         panel.setWidget(label);
