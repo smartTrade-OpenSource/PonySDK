@@ -2,7 +2,6 @@
 .dd-container-widget {
   position: relative;
   display: flex;
-  padding: 0 5px;
   cursor: pointer;
 }
 
@@ -30,7 +29,7 @@
   height: 100%;
   background-color: transparent;
   border: none;
-  padding: 0;
+  padding-left: 5px;
   margin: 0;
   overflow: hidden;
   text-align: left;
@@ -42,7 +41,7 @@
 
 .dd-container-widget .dd-container-state {
   position: relative;
-  width: 15px;
+  width: 20px;
   background-color: transparent;
   border: none;
   margin: 0px;
@@ -63,7 +62,7 @@
 
 .dd-container-widget .dd-container-clear {
   height: 100%;
-  width: 15px;
+  width: 20px;
   background-color: transparent;
   border: none;
   margin: 0px;
@@ -80,7 +79,6 @@
   position: absolute;
   display: flex;
   min-width: fit-content;
-  padding: 5px;
   border-radius: 0 0 4px 4px;
   z-index: 10000;
 }
@@ -139,13 +137,14 @@
 .dd-listbox-container .dd-container-default .is-viewport .is-container .is-item {
   position: relative;
   height: 25px;
+  padding: 1px 5px;
   cursor: pointer;
   user-select: none;
 }
 
 .dd-listbox-container .dd-container-default .is-viewport .is-container .is-item .gwt-CheckBox {
   position: absolute;
-  left: 2px;
+  left: 7px;
   height: 100%;
   padding-top: 3px;
   pointer-events: none;
