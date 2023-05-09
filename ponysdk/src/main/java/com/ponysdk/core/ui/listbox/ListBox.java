@@ -1085,7 +1085,10 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
 
         public ListBoxItemWidget() {
             panel = Element.newPFlowPanel();
-            if (configuration.isMultiSelectionEnabled()) checkBox = Element.newPCheckBox();
+            if (configuration.isMultiSelectionEnabled()) {
+                checkBox = Element.newPCheckBox();
+                checkBox.setTabindex(TabindexMode.FOCUSABLE);
+            }
             itemRenderer = itemRendererSupplier.get();
         }
 
