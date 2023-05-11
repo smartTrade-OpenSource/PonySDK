@@ -86,6 +86,8 @@
 .dd-container-addon .dd-container-default {
   position: relative;
   flex-grow: 1;
+  padding-bottom: 3px;
+  border-radius: 5px;
 }
 
 /* LIST BOX */
@@ -120,6 +122,7 @@
 .dd-listbox-container .dd-container-default .dd-listbox-filter {
   position: relative;
   display: block;
+  padding: 5px;
 }
 
 .dd-listbox-container .dd-container-default .dd-listbox-filter input[type="text"] {
