@@ -25,6 +25,7 @@ package com.ponysdk.core.ui.listbox;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -532,6 +533,10 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
 
     public void setFilterPredicate(final BiPredicate<ListBoxItem<D>, String> filterPredicate) {
         this.filterPredicate = filterPredicate;
+    }
+    
+    public List<ListBoxItem<D>> getItems() {
+    	return Collections.unmodifiableList(items);
     }
 
     @Override
