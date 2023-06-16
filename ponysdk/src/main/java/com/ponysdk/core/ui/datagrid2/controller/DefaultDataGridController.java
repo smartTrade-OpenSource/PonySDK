@@ -26,9 +26,11 @@ package com.ponysdk.core.ui.datagrid2.controller;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
@@ -70,7 +72,7 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     private int columnCounter = 0;
     private final RenderingHelpersCache<V> renderingHelpersCache = new RenderingHelpersCache<>();
     private final Map<ColumnDefinition<V>, Column<V>> columns = new HashMap<>();
-    private DataGridControllerListener<V> listener;
+    private final Set<DataGridControllerListener<V>> listeners = new HashSet<>();
     private DataGridAdapter<K, V> adapter;
     private boolean bound = true;
 
@@ -157,7 +159,9 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
 
     @Override
     public void refresh() {
-        listener.refresh();
+        for (final DataGridControllerListener<V> listener : listeners) {
+            listener.refresh();
+        }
     }
 
     @Override
@@ -181,7 +185,7 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
 
     private void doRefreshRows() {
         try {
-            if (listener != null) {
+            for (final DataGridControllerListener<V> listener : listeners) {
                 listener.onUpdateRows(from, to);
                 listener.refresh();
             }
@@ -388,7 +392,7 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
 
     @Override
     public void setListener(final DataGridControllerListener<V> listener) {
-        this.listener = listener;
+        this.listeners.add(listener);
     }
 
     @Override
