@@ -1150,10 +1150,12 @@ _UTF8 = undefined;
             let timerDelay = 400;
             let timer;
   
-            this.mouseEnterEventListener = function (event) {                
+            this.mouseEnterEventListener = function (event) {
                 timer = setTimeout(function() {             
-                  event.target.click()
-                  simulateMouseDown(event.target, event.clientX, event.clientY);
+                    let dropdown = event.target.parentNode;
+                    if(dropdown && dropdown.classList.contains("dd-container-opened")) return;          
+                    event.target.click()
+                    simulateMouseDown(event.target, event.clientX, event.clientY);
                 }, timerDelay);
             }
             

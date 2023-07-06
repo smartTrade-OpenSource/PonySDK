@@ -179,7 +179,13 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
             container.add(defaultContainer);
 
             final PClickHandler clickHandler = e -> {
-                setContainerVisible(!container.isVisible());
+                final boolean visible = !container.isVisible();
+                if (configuration.isMultilevelEnabled() && !visible && isOpen()) {
+                    // To enhance the user experience of the multilevel dropdown, we prevent hiding the sublevel on click.
+                    // Instead, the task of hiding the sublevel will be performed when the user hovers the mouse over it.
+                    return;
+                }
+                setContainerVisible(visible);
             };
             mainButton.addClickHandler(clickHandler);
             stateButton.addClickHandler(clickHandler);
