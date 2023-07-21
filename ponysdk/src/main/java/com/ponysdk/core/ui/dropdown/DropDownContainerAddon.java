@@ -36,7 +36,6 @@ import com.ponysdk.core.ui.basic.PAddOnComposite;
 import com.ponysdk.core.ui.basic.PPanel;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.event.PDomEvent.Type;
-import com.ponysdk.core.ui.dropdown.DropDownContainerConfiguration.DropDownPosition;
 import com.ponysdk.core.ui.eventbus.EventHandler;
 import com.ponysdk.core.ui.model.PEventType;
 
@@ -51,12 +50,12 @@ public class DropDownContainerAddon extends PAddOnComposite<PPanel> {
 
     private static final String PARENT_ID = "parentId";
     private static final String STICK_LEFT = "stickLeft";
-    private static final String STICK_OUTSIDE = "stickOutside";
     private static final String MULTILEVEL = "multiLevel";
     private static final String UPDATE_POSITION = "updatePosition";
     private static final String ADJUST_POSITION = "adjustPosition";
     private static final String SET_VISIBLE = "setVisible";
     private static final String DISABLE_SPACE_WHEN_OPENED = "disableSpaceWhenOpened";
+    private static final String POSITION_RIGHT = "setDropRight";
     private static final String WINDOW_EVENT = "windowEvent";
     private static final String RESIZE = "resize";
     private static final String SCROLL = "scroll";
@@ -67,17 +66,29 @@ public class DropDownContainerAddon extends PAddOnComposite<PPanel> {
     private final PWidget parent;
     private final Set<DropDownContainerAddonListener> listeners;
 
-    public DropDownContainerAddon(final PWidget parent) {
-        this(parent, true, false, false);
+    /**
+     * The multilevel dropdown is meant to be stuck to the left of the container.
+     * Use this static builder to ensure you create a multilevel instance with the right settings
+     * 
+     * @param parent
+     * @return
+     */
+    public static DropDownContainerAddon newMultilevelDopdown(final PWidget parent) {
+        return new DropDownContainerAddon(parent, true,  true);
     }
 
-    public DropDownContainerAddon(final PWidget parent, final boolean stickLeft, final boolean stickOutside, final boolean multilevel) {
-        super(Element.newPFlowPanel(), createJsonObject(parent.getID(), stickLeft, stickOutside, multilevel));
+    public DropDownContainerAddon(final PWidget parent) {
+        this(parent, true,  false);
+    }
+
+    private DropDownContainerAddon(final PWidget parent, final boolean stickLeft, final boolean multilevel) {
+        super(Element.newPFlowPanel(), createJsonObject(parent.getID(), stickLeft, multilevel));
         this.parent = parent;
         widget.setStyleProperty(PROPERTY_POSITION, PROPERTY_ABSOLUTE);
         widget.setStyleProperty(PROPERTY_TOP, PROPERTY_0);
         if (stickLeft) {
-            if (!stickOutside) {
+            if (!multilevel) {
+                // The multilevel dropdown is designed to open each new level next to the previous one, so it won't stick to the left of the container.
                 widget.setStyleProperty(PROPERTY_LEFT, PROPERTY_0);
             }
         } else {
@@ -138,6 +149,10 @@ public class DropDownContainerAddon extends PAddOnComposite<PPanel> {
         callTerminalMethod(DISABLE_SPACE_WHEN_OPENED);
     }
 
+    public void setDropRight() {
+        callTerminalMethod(POSITION_RIGHT);
+    }
+
     public boolean isVisible() {
         return visible;
     }
@@ -168,11 +183,10 @@ public class DropDownContainerAddon extends PAddOnComposite<PPanel> {
         dropdown.asWidget().setAttribute("multilvl-parent", String.valueOf(widget.getID()));
     }
 
-    private static JsonObject createJsonObject(final int parentId, final boolean stickLeft, final boolean stickOutside, final boolean multiLevel) {
+    private static JsonObject createJsonObject(final int parentId, final boolean stickLeft, final boolean multiLevel) {
         final JsonObjectBuilder builder = UIContext.get().getJsonProvider().createObjectBuilder();
         builder.add(PARENT_ID, parentId);
         builder.add(STICK_LEFT, stickLeft);
-        builder.add(STICK_OUTSIDE, stickOutside);
         builder.add(MULTILEVEL, multiLevel);
         return builder.build();
     }

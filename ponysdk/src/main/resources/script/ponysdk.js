@@ -1029,28 +1029,17 @@ _UTF8 = undefined;
 
 (function () {
     "use strict"
-    function simulateMouseDown(element, pointerX, pointerY) {
-        var oEvent;
-        if (document.createEvent) {
-            var oEvent = new MouseEvent('mousedown', {
-                bubbles: true,
-                cancelable: true,
-                view: window,
-                screenXArg: pointerX, 
-                screenYArg: pointerY, 
-                clientXArg: pointerX, 
-                clientYArg: pointerY
-            });
-            element.dispatchEvent(oEvent);
-        }
-        else { // For IE 6, 7, 8
-            options.clientX = pointerX;
-            options.clientY = pointerY;
-            var evt = document.createEventObject();
-            oEvent = extend(evt, options);
-            element.fireEvent('on' + eventName, oEvent);
-        }
-        return element;
+    function simulateMouseDown(targetElement , pointerX, pointerY) {
+        const oEvent = new MouseEvent('mousedown', {
+            bubbles: true,
+            cancelable: true,
+            view: window,
+            clientX: pointerX,
+            clientY: pointerY,
+            screenX: pointerX,
+            screenY: pointerY
+        });
+        targetElement.dispatchEvent(oEvent);
     }
 
     AbstractAddon.defineAddon("com.ponysdk.core.ui.dropdown.DropDownContainerAddon", {
@@ -1058,9 +1047,8 @@ _UTF8 = undefined;
         init: function () {
             this.parentId = this.options.parentId;
             this.stickLeft = this.options.stickLeft;
-            // stickOutside at true means stickLeft at true
-            this.stickOutside = this.options.stickOutside;
             this.multiLevel = this.options.multiLevel;
+            this.dropRight = false;
             this.spaceAuthorized = true;
             this.visible = false;
             this.mobile = this.isMobile();
@@ -1163,17 +1151,23 @@ _UTF8 = undefined;
                 clearTimeout(timer);
             }
         },
-  
+
+        setDropRight: function () {
+            this.dropRight = true;
+        },
+
         addListeners: function () {
             if (!this.mobile) window.addEventListener('resize', this.resizeEventListener);
             window.addEventListener('wheel', this.scrollEventListener, true);
             window.addEventListener('mousedown', this.mouseDownEventListener, true);
             window.addEventListener('keydown', this.keyDownEventListener, true);
+
             if (this.multiLevel) {
-              this.element.querySelectorAll('.dd-container-button').forEach(node => {
-                node.addEventListener('mouseenter', this.mouseEnterEventListener, true);
-                node.addEventListener('mouseleave', this.mouseLeaveEventListener, true);
-              });
+                // The multilevel dropdown will work with mouse clicks and mouse hovering.
+                this.element.querySelectorAll('.dd-container-button').forEach(node => {
+                    node.addEventListener('mouseenter', this.mouseEnterEventListener, true);
+                    node.addEventListener('mouseleave', this.mouseLeaveEventListener, true);
+                });
             }
         },
 
@@ -1182,11 +1176,12 @@ _UTF8 = undefined;
             window.removeEventListener('wheel', this.scrollEventListener, true);
             window.removeEventListener('mousedown', this.mouseDownEventListener, true);
             window.removeEventListener('keydown', this.keyDownEventListener, true);
+
             if (this.multiLevel) {
-              this.element.querySelectorAll('.dd-container-button').forEach(node => {
-                node.removeEventListener('mouseenter', this.mouseEnterEventListener, true);
-                node.removeEventListener('mouseleave', this.mouseLeaveEventListener, true);
-              });
+                this.element.querySelectorAll('.dd-container-button').forEach(node => {
+                    node.removeEventListener('mouseenter', this.mouseEnterEventListener, true);
+                    node.removeEventListener('mouseleave', this.mouseLeaveEventListener, true);
+                });
             }
         },
 
@@ -1198,20 +1193,20 @@ _UTF8 = undefined;
             var windowBot = window.innerHeight - offsets.top - offsets.height;
             var windowScrollTop = $(window).scrollTop();
             if (windowBot < this.element.offsetHeight && offsets.top > this.element.offsetHeight) {
-                // Element takes place above the parent
+                // The element takes its place above the parent
                 let computedTop = offsets.top - this.element.offsetHeight + windowScrollTop;
-                if (this.stickOutside) {
-                    // If the element sticks outside of the ofset, we align the element bottom border with the offset bottom border
+                if (this.dropRight) {
+                    // Each nested dropdown in the multilevel will be aligned with its parent's bottom border
                     computedTop += offsets.height;
                 }
                 this.element.style.top = computedTop + 'px';
                 this.element.setAttribute('vertical-position', 'top');
                 this.element.style.height = this.element.offsetHeight + 'px';
             } else {
-                // Element takes place beneath the parent
+                // The element takes its place below the parent
                 let computedTop = offsets.top + offsets.height + windowScrollTop;
-                if (this.stickOutside) {
-                    // If the element sticks outside of the ofset, we align the element top border with the offset top border
+                if (this.dropRight) {
+                    // Each nested dropdown in the multilevel will be aligned with its parent's top border
                     computedTop -= offsets.height;
                 }
                 this.element.style.top = computedTop + 'px';
@@ -1224,22 +1219,22 @@ _UTF8 = undefined;
                 // Element position led by its left absolute position
                 // windowRight defines the remaining space at the right of the parent
                 var windowRight = window.innerWidth - offsets.left - offsets.width;
-                if (this.stickOutside) {
-                    // if stickOutside, maring and padding of the new element should be taken into account in the remaining space
+                if (this.dropRight) {
+                    // If it's a multilevel dropdown, the margin and padding of the new element should be taken into account within the remaining space
                     windowRight = windowRight - this.element.style.marginLeft - this.element.style.paddingLeft;
                 }
                 if (windowRight < this.element.offsetWidth && offsets.left > this.element.offsetWidth) {
                     let computedLeft = offsets.left + offsets.width - this.element.offsetWidth + windowScrollLeft;
-                    if (this.stickOutside) {
-                        // if stickOutside, element takes place at the left of the parent
+                    if (this.dropRight) {
+                        // Each nested dropdown in the multilevel will be aligned with its parent's left border
                         computedLeft = computedLeft - offsets.width - this.element.style.marginRight - this.element.style.paddingRight;
                     }
                     this.element.style.left = computedLeft + 'px';
                     this.element.setAttribute('horizontal-position', 'right');
                 } else {
                     let computedLeft = offsets.left + windowScrollLeft;
-                    if (this.stickOutside) {
-                        // if stickOutside, element takes place at the right of the parent
+                    if (this.dropRight) {
+                        // Each nested dropdown in the multilevel will be aligned with its parent's right border
                         computedLeft = computedLeft + offsets.width + this.element.style.marginLeft + this.element.style.paddingLeft;
                     }
                     this.element.style.left = computedLeft + 'px';

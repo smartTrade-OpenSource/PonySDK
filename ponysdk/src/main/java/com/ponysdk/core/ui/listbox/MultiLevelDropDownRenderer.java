@@ -10,7 +10,6 @@ import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
-import com.ponysdk.core.ui.dropdown.DropDownContainerConfiguration.DropDownPosition;
 import com.ponysdk.core.ui.listbox.ListBox.ListBoxItem;
 import com.ponysdk.core.ui.listbox.ListBox.ListBoxItem.ListBoxItemType;
 
@@ -139,7 +138,6 @@ public class MultiLevelDropDownRenderer<D> implements ListBoxItemRenderer<MultiL
         configuration.enabledEventOnly();
         configuration.disableClearTitleButton();
         configuration.enableStopClickEvent();
-        configuration.setPosition(DropDownPosition.OUTSIDE);
         configuration.enableMultilevel();
         configuration.disableSorting();
         configuration.disableSearch();

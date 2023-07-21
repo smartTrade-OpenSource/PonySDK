@@ -36,10 +36,6 @@ public interface DropDownContainerConfiguration {
         FALSE
     }
 
-    enum DropDownPosition {
-        OUTSIDE,
-        INSIDE
-    }
 
     String DEFAULT_TITLE_SEPARATOR = ":";
 
@@ -91,11 +87,12 @@ public interface DropDownContainerConfiguration {
 
     DropDownContainerConfiguration enableStopClickEvent();
 
-    DropDownPosition getPosition();
+    boolean isPositionDropRight();
 
-    DropDownContainerConfiguration setPosition(final DropDownPosition position);
+    DropDownContainerConfiguration setPositionDropRight(final boolean dropRight);
 
     boolean isMultilevelEnabled();
 
     DropDownContainerConfiguration enableMultilevel();
+
 }
