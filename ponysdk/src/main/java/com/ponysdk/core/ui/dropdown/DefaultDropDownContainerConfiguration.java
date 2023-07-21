@@ -37,7 +37,7 @@ public class DefaultDropDownContainerConfiguration implements DropDownContainerC
     private boolean clearTitleButtonEnabled = true;
     private boolean eventOnlyEnabled;
     private boolean stopClickEvent;
-    private DropDownPosition position = DropDownPosition.INSIDE;
+    private boolean dropRight;
     private boolean multilevelEnabled;
 
     public DefaultDropDownContainerConfiguration() {
@@ -168,6 +168,7 @@ public class DefaultDropDownContainerConfiguration implements DropDownContainerC
         return this.stopClickEvent;
     }
 
+    
     @Override
     public DropDownContainerConfiguration enableStopClickEvent() {
         this.stopClickEvent = true;
@@ -175,13 +176,13 @@ public class DefaultDropDownContainerConfiguration implements DropDownContainerC
     }
 
     @Override
-    public DropDownPosition getPosition() {
-        return position;
+    public boolean isPositionDropRight() {
+        return this.dropRight;
     }
 
     @Override
-    public DropDownContainerConfiguration setPosition(DropDownPosition position) {
-        this.position = position;
+    public DropDownContainerConfiguration setPositionDropRight(final boolean dropRight) {
+        this.dropRight  = dropRight;
         return this;
     }
 
@@ -192,7 +193,9 @@ public class DefaultDropDownContainerConfiguration implements DropDownContainerC
 
     @Override
     public DropDownContainerConfiguration enableMultilevel() {
+        this.dropRight  = true;
         this.multilevelEnabled = true;
         return this;
     }
+
 }

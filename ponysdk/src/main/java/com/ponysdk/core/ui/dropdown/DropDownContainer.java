@@ -44,7 +44,6 @@ import com.ponysdk.core.ui.basic.event.POpenEvent;
 import com.ponysdk.core.ui.basic.event.POpenHandler;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
-import com.ponysdk.core.ui.dropdown.DropDownContainerConfiguration.DropDownPosition;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 import com.ponysdk.core.ui.model.PEventType;
 import com.ponysdk.core.ui.model.PKeyCodes;
@@ -96,9 +95,9 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
         this.widget = Element.newPFlowPanel();
         this.widget.addStyleName(STYLE_CONTAINER_WIDGET);
         this.widget.setAttribute(ATTRIBUTE_ID, widget.getID() + "");
-        final boolean stick = configuration.getPosition() == DropDownPosition.OUTSIDE;
-        this.container = new DropDownContainerAddon(widget, stick, stick, configuration.isMultilevelEnabled());
+        this.container =  configuration.isMultilevelEnabled() ? DropDownContainerAddon.newMultilevelDopdown(widget) : new DropDownContainerAddon(widget);
         this.container.addStyleName(STYLE_CONTAINER_ADDON);
+        if (configuration.isPositionDropRight()) container.setDropRight();
     }
 
     public abstract V getValue();
