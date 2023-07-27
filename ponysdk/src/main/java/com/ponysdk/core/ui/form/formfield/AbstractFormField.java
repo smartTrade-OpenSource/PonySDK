@@ -101,8 +101,7 @@ public abstract class AbstractFormField<T, W extends IsPWidget> implements FormF
             if (result.isValid()) {
                 resetError();
             } else {
-                widget.asWidget().addStyleName(CLASS_INVALID);
-                widget.asWidget().setAttribute(DATA_TITLE, result.getErrorMessage());
+                markInvalid(result.getErrorMessage());
             }
         }
 
@@ -204,4 +203,8 @@ public abstract class AbstractFormField<T, W extends IsPWidget> implements FormF
         this.showError = showError;
     }
 
-}
+    protected void markInvalid(final String errorMessage) {
+        widget.asWidget().addStyleName(CLASS_INVALID);
+        widget.asWidget().setAttribute(DATA_TITLE, errorMessage);
+    }
+} 
