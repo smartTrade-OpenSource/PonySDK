@@ -49,7 +49,6 @@ import org.slf4j.LoggerFactory;
 import com.ponysdk.core.server.concurrent.PScheduler;
 import com.ponysdk.core.server.concurrent.PScheduler.UIRunnable;
 import com.ponysdk.core.server.service.query.PResultSet;
-import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PAddOnComposite;
@@ -191,9 +190,9 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
 
         root.addDestroyListener(e -> onDestroy());
     }
-    
+
     private void onDestroy() {
-        if(delayedDrawRunnable != null) delayedDrawRunnable.cancel();
+        if (delayedDrawRunnable != null) delayedDrawRunnable.cancel();
     }
 
     @Override
@@ -287,7 +286,10 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
     private void onRelativeRowCountUpdated(int relRowCount) {
         final int mod = relRowCount % 3;
         relRowCount = Math.max(mod == 0 ? relRowCount : relRowCount - mod + 3, MIN_RELATIVE_ROW_COUNT);
-        if (this.rows.size() == relRowCount) return;
+        if (this.rows.size() == relRowCount) {
+            hideLoadingDataView();
+            return;
+        }
         showLoadingDataView();
         if (this.rows.size() < relRowCount) {
             for (int i = this.rows.size(); i < relRowCount; i++) {
@@ -960,7 +962,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
     @Override
     public void resume() {
         shouldDraw = true;
-        if(drawOnResume) {
+        if (drawOnResume) {
             drawOnResume = false;
             draw();
         }
@@ -976,16 +978,16 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         exceptionHandler = handler;
     }
 
-    public void setRefreshOnColumnVisibilityChanged(boolean refreshOnColumnVisibilityChanged) {
-		this.refreshOnColumnVisibilityChanged = refreshOnColumnVisibilityChanged;
-		if(addon != null) addon.setListenOnColumnVisibility(refreshOnColumnVisibilityChanged);
-	}
-    
-    public void setForceExtended(final boolean forceExtended) {
-    	this.forceExtended = forceExtended;
+    public void setRefreshOnColumnVisibilityChanged(final boolean refreshOnColumnVisibilityChanged) {
+        this.refreshOnColumnVisibilityChanged = refreshOnColumnVisibilityChanged;
+        if (addon != null) addon.setListenOnColumnVisibility(refreshOnColumnVisibilityChanged);
     }
 
-	public class Row {
+    public void setForceExtended(final boolean forceExtended) {
+        this.forceExtended = forceExtended;
+    }
+
+    public class Row {
 
         private final int relativeIndex;
         private K key;
@@ -1090,11 +1092,10 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             unpinnedCells.forEach(CellManager::unselect);
         }
 
-		@Override
-		public String toString() {
-			return "Row [relativeIndex=" + relativeIndex + ", key=" + key + ", data=" + data + ", extended=" + extended
-					+ "]";
-		}
+        @Override
+        public String toString() {
+            return "Row [relativeIndex=" + relativeIndex + ", key=" + key + ", data=" + data + ", extended=" + extended + "]";
+        }
 
     }
 
@@ -1529,8 +1530,8 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
                 }
             });
         }
-        
-        public void setListenOnColumnVisibility(boolean value) {
+
+        public void setListenOnColumnVisibility(final boolean value) {
             callTerminalMethod("listenOnColumnVisibility", value);
         }
 
