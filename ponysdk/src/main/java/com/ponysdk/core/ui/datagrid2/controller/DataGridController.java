@@ -25,6 +25,7 @@ package com.ponysdk.core.ui.datagrid2.controller;
 
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
@@ -90,9 +91,9 @@ public interface DataGridController<K, V> {
 
     void sort();
 
-    void setFilter(Object key, ColumnDefinition<V> column, BiPredicate<V, Supplier<Object>> filter, boolean reinforcing);
+    void setFilter(Object key, ColumnDefinition<V> column, BiPredicate<V, Supplier<Object>> filter, Supplier<List<Object>> values, boolean reinforcing);
 
-    void setFilter(Object key, String id, Predicate<V> filter, boolean reinforcing);
+    void setFilter(Object key, String id, Predicate<V> filter, Supplier<List<Object>> values, boolean reinforcing);
 
     void clearFilter(Object key);
 

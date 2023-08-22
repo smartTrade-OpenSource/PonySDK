@@ -22,8 +22,10 @@ package com.ponysdk.core.ui.datagrid2.view;
 
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import com.ponysdk.core.server.service.query.PResultSet;
 import com.ponysdk.core.ui.basic.IsPWidget;
@@ -133,6 +135,9 @@ public interface DataGridView<K, V> extends IsPWidget {
      * @param filter
      *            a predicate that decides whether a value is accepted
      *            or filtered
+     * @param values
+     * 			  a supplier that provide values used by filter to accept
+     * 			  or not
      * @param reinforcing
      *            {@code true} if the predicate is at least as
      *            intolerant as the replaced predicate of the same key
@@ -144,7 +149,7 @@ public interface DataGridView<K, V> extends IsPWidget {
      *            replacing an existing one, the value of the
      *            {@code reinforcing} argument has no impact.
      */
-    void setFilter(Object key, String id, Predicate<V> filter, boolean reinforcing);
+    void setFilter(Object key, String id, Predicate<V> filter, Supplier<List<Object>> values, boolean reinforcing);
 
     /**
      * Adds/replaces a sorting criterion for the view.

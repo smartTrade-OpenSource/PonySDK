@@ -225,7 +225,7 @@ public class ColumnFilterFooterDataGridView<K, V> extends DecoratorDataGridView<
             if (grip == null) return;
             if (filter.isEmpty()) grip.clearFilter(FilterFooterColumn.this);
             else grip.filter(FilterFooterColumn.this,
-                (data, helper) -> StringUtils.containsIgnoreCase(helper.get().toString(), newFilter), reinforcing);
+                (data, helper) -> StringUtils.containsIgnoreCase(helper.get().toString(), newFilter), null, reinforcing);
         }
 
         @Override

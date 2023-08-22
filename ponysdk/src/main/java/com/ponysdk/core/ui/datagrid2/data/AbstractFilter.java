@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.ui.datagrid2.data;
 
+import java.util.List;
 import java.util.function.Predicate;
 
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
@@ -30,4 +31,6 @@ import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 public interface AbstractFilter<V> extends Predicate<DefaultRow<V>> {
 
     ColumnDefinition<V> getColumnDefinition();
+    
+    List<Object> getFilterValues();
 }

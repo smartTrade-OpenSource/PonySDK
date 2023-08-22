@@ -25,6 +25,7 @@ package com.ponysdk.core.ui.datagrid2.controller;
 
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
@@ -201,13 +202,13 @@ public abstract class SpyDataGridController<K, V> implements DataGridController<
 
     @Override
     public void setFilter(final Object key, final ColumnDefinition<V> column, final BiPredicate<V, Supplier<Object>> filter,
-                          final boolean reinforcing) {
-        controller.setFilter(key, column, filter, reinforcing);
+    					  final Supplier<List<Object>> values, final boolean reinforcing) {
+        controller.setFilter(key, column, filter, values, reinforcing);
     }
 
     @Override
-    public void setFilter(final Object key, final String id, final Predicate<V> filter, final boolean reinforcing) {
-        controller.setFilter(key, id, filter, reinforcing);
+    public void setFilter(final Object key, final String id, final Predicate<V> filter, final Supplier<List<Object>> values, final boolean reinforcing) {
+        controller.setFilter(key, id, filter, values, reinforcing);
     }
 
     @Override

@@ -45,6 +45,7 @@ import com.ponysdk.core.ui.datagrid2.controller.DefaultDataGridController;
 import com.ponysdk.core.ui.datagrid2.controller.DefaultDataGridController.RenderingHelpersCache;
 import com.ponysdk.core.ui.datagrid2.data.AbstractFilter;
 import com.ponysdk.core.ui.datagrid2.data.DefaultRow;
+import com.ponysdk.core.ui.datagrid2.data.FilterGroupProvider;
 import com.ponysdk.core.util.MappedList;
 
 /**
@@ -55,10 +56,12 @@ public abstract class AbstractDataSource<K, V> implements DataGridSource<K, V> {
     protected static final Logger log = LoggerFactory.getLogger(AbstractDataSource.class);
     protected final LinkedHashMap<Object, Comparator<DefaultRow<V>>> sorts = new LinkedHashMap<>();
     protected final Map<Object, AbstractFilter<V>> filters = new HashMap<>();
+    protected final Map<AbstractFilter<V>, Object> keys = new HashMap<>();
     protected final List<DefaultRow<V>> liveSelectedData = new ArrayList<>();
     protected final Set<K> selectedKeys = new HashSet<>();
     protected DataGridAdapter<K, V> adapter;
     protected RenderingHelpersCache<V> renderingHelpersCache;
+    protected FilterGroupProvider filterGroupProvider;
     protected int rowCounter = 0;
 
     @Override
@@ -196,7 +199,9 @@ public abstract class AbstractDataSource<K, V> implements DataGridSource<K, V> {
 
     @Override
     public boolean clearFilter(final Object key) {
-        return filters.remove(key) != null;
+    	 AbstractFilter<V> removed = filters.remove(key);
+         keys.remove(removed);
+ 		return removed != null;
     }
 
     @Override
@@ -205,13 +210,17 @@ public abstract class AbstractDataSource<K, V> implements DataGridSource<K, V> {
         while (iterator.hasNext()) {
             final AbstractFilter<V> filter = iterator.next();
             final ColumnDefinition<V> filterColumn = filter.getColumnDefinition();
-            if (filterColumn != null && filterColumn == column) iterator.remove();
+            if (filterColumn != null && filterColumn == column) {
+            	iterator.remove();
+            	keys.remove(filter);
+            }
         }
     }
 
     @Override
     public void clearFilters() {
         filters.clear();
+        keys.clear();
     }
 
     @Override
@@ -228,5 +237,10 @@ public abstract class AbstractDataSource<K, V> implements DataGridSource<K, V> {
     public void unselectAllData() {
         liveSelectedData.clear();
         selectedKeys.clear();
+    }
+    
+    @Override
+    public void setFilterGroupProvider(FilterGroupProvider filterGroupProvider) {
+    	this.filterGroupProvider = filterGroupProvider;
     }
 }

@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
@@ -311,16 +312,16 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
 
     @Override
     public void setFilter(final Object key, final ColumnDefinition<V> colDef, final BiPredicate<V, Supplier<Object>> biPredicate,
-                          final boolean reinforcing) {
+                          final Supplier<List<Object>> supplier, final boolean reinforcing) {
         checkAdapter();
-        dataSource.setFilter(key, null, reinforcing, new ColumnFilter(colDef, biPredicate));
+        dataSource.setFilter(key, null, reinforcing, new ColumnFilter(colDef, biPredicate, supplier));
         resetLiveData();
     }
 
     @Override
-    public void setFilter(final Object key, final String id, final Predicate<V> predicate, final boolean reinforcing) {
+    public void setFilter(final Object key, final String id, final Predicate<V> predicate, final Supplier<List<Object>> supplier, final boolean reinforcing) {
         checkAdapter();
-        dataSource.setFilter(key, id, reinforcing, new GeneralFilter(predicate));
+        dataSource.setFilter(key, id, reinforcing, new GeneralFilter(predicate, supplier));
         resetLiveData();
     }
 
@@ -613,10 +614,12 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     private class GeneralFilter implements AbstractFilter<V> {
 
         private final Predicate<V> filter;
-
-        public GeneralFilter(final Predicate<V> filter) {
+        private final Supplier<List<Object>> values;
+        
+        public GeneralFilter(final Predicate<V> filter, final Supplier<List<Object>> values) {
             super();
             this.filter = filter;
+            this.values = values;
         }
 
         @Override
@@ -628,17 +631,24 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
         public ColumnDefinition<V> getColumnDefinition() {
             return null;
         }
+        
+        @Override
+        public List<Object> getFilterValues() {
+        	return values.get();
+        }
     }
 
     private class ColumnFilter implements AbstractFilter<V> {
 
         private final Column<V> column;
         private final BiPredicate<V, Supplier<Object>> filter;
-
-        ColumnFilter(final ColumnDefinition<V> colDef, final BiPredicate<V, Supplier<Object>> filter) {
+        private final Supplier<List<Object>> values;
+        
+        ColumnFilter(final ColumnDefinition<V> colDef, final BiPredicate<V, Supplier<Object>> filter, final Supplier<List<Object>> values) {
             super();
             this.column = getColumn(colDef);
             this.filter = filter;
+            this.values = values;
         }
 
         @Override
@@ -654,6 +664,11 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
         @Override
         public ColumnDefinition<V> getColumnDefinition() {
             return column.getColDef();
+        }
+        
+        @Override
+        public List<Object> getFilterValues() {
+        	return values.get();
         }
     }
 }

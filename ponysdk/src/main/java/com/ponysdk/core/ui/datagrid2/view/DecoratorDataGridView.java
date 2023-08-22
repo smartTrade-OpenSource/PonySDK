@@ -22,9 +22,11 @@ package com.ponysdk.core.ui.datagrid2.view;
 
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import com.ponysdk.core.server.service.query.PResultSet;
 import com.ponysdk.core.ui.basic.PWidget;
@@ -103,8 +105,8 @@ public class DecoratorDataGridView<K, V> implements DataGridView<K, V> {
     }
 
     @Override
-    public void setFilter(final Object key, final String id, final Predicate<V> filter, final boolean reinforcing) {
-        view.setFilter(key, id, filter, reinforcing);
+    public void setFilter(final Object key, final String id, final Predicate<V> filter, final Supplier<List<Object>> values, final boolean reinforcing) {
+        view.setFilter(key, id, filter, values, reinforcing);
     }
 
     @Override
