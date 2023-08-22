@@ -42,10 +42,10 @@ import java.util.function.Supplier;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 
-import com.ponysdk.core.server.application.UIContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.PScheduler;
 import com.ponysdk.core.server.concurrent.PScheduler.UIRunnable;
 import com.ponysdk.core.server.service.query.PResultSet;
@@ -118,7 +118,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
 
     private static final Logger log = LoggerFactory.getLogger(DefaultDataGridView.class);
     // State
-    private static final int MIN_RELATIVE_ROW_COUNT = 9;
+    private static final int MIN_RELATIVE_ROW_COUNT = 30;
     private int columnViewSequence = 0;
     private final PComplexPanel root = Element.newDiv();
     private final PComplexPanel loadingDataDiv;
