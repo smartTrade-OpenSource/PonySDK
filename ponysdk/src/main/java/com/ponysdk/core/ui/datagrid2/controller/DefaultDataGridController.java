@@ -63,597 +63,612 @@ import com.ponysdk.core.util.Pair;
  */
 public class DefaultDataGridController<K, V> implements DataGridController<K, V> {
 
-    private static final Logger log = LoggerFactory.getLogger(DefaultDataGridController.class);
+	private static final Logger log = LoggerFactory.getLogger(DefaultDataGridController.class);
 
-    private static final Object NO_RENDERING_HELPER = new Object();
-    private static final int RENDERING_HELPERS_CACHE_CAPACITY = 512;
-    private int columnCounter = 0;
-    private final RenderingHelpersCache<V> renderingHelpersCache = new RenderingHelpersCache<>();
-    private final Map<ColumnDefinition<V>, Column<V>> columns = new HashMap<>();
-    private DataGridControllerListener<V> listener;
-    private DataGridAdapter<K, V> adapter;
-    private boolean bound = true;
+	private static final Object NO_RENDERING_HELPER = new Object();
+	private static final int RENDERING_HELPERS_CACHE_CAPACITY = 512;
+	private int columnCounter = 0;
+	private final RenderingHelpersCache<V> renderingHelpersCache = new RenderingHelpersCache<>();
+	private final Map<ColumnDefinition<V>, Column<V>> columns = new HashMap<>();
+	private DataGridControllerListener<V> listener;
+	private DataGridAdapter<K, V> adapter;
+	private boolean bound = true;
 
-    /**
+	/**
      * Data is split in 2 zones: a constant one and a variable one.
      * The variable zone is the only one that gets refreshed during a draw and it is constantly narrowed down for better
      * performance.
-     */
-    private int from = Integer.MAX_VALUE;
-    private int to = 0;
-    private final RenderingHelperSupplier renderingHelperSupplier1 = new RenderingHelperSupplier();
-    private final RenderingHelperSupplier renderingHelperSupplier2 = new RenderingHelperSupplier();
-    private DataGridSource<K, V> dataSource;
-    private DataGridSnapshot viewSnapshot;
+	 */
+	private int from = Integer.MAX_VALUE;
+	private int to = 0;
+	private final RenderingHelperSupplier renderingHelperSupplier1 = new RenderingHelperSupplier();
+	private final RenderingHelperSupplier renderingHelperSupplier2 = new RenderingHelperSupplier();
+	private DataGridSource<K, V> dataSource;
+	private DataGridSnapshot viewSnapshot;
 
-    public DefaultDataGridController(final DataGridSource<K, V> dataSource) {
-        this.dataSource = dataSource;
-        dataSource.setRenderingHelpersCache(renderingHelpersCache);
-    }
+	public DefaultDataGridController(final DataGridSource<K, V> dataSource) {
+		this.dataSource = dataSource;
+		dataSource.setRenderingHelpersCache(renderingHelpersCache);
+	}
 
-    @Override
-    public void setAdapter(final DataGridAdapter<K, V> adapter) {
+	@Override
+	public void setAdapter(final DataGridAdapter<K, V> adapter) {
         if (this.adapter != null) throw new IllegalStateException("DataGridAdapter is already set");
-        this.adapter = adapter;
-        dataSource.setAdapter(adapter);
-        for (final ColumnDefinition<V> column : adapter.getColumnDefinitions()) {
-            columns.put(column, new Column<>(columnCounter++, column));
-        }
-    }
+		this.adapter = adapter;
+		dataSource.setAdapter(adapter);
+		for (final ColumnDefinition<V> column : adapter.getColumnDefinitions()) {
+			columns.put(column, new Column<>(columnCounter++, column));
+		}
+	}
 
-    private void checkAdapter() {
+	private void checkAdapter() {
         if (adapter == null) throw new IllegalStateException("A DataGridAdapter must be set");
-    }
+	}
 
-    private Column<V> getColumn(final ColumnDefinition<V> colDef) {
-        final Column<V> column = columns.get(colDef);
+	private Column<V> getColumn(final ColumnDefinition<V> colDef) {
+		final Column<V> column = columns.get(colDef);
         if (column == null) throw new IllegalArgumentException("Unknown ColumnDefinition " + colDef);
-        return column;
-    }
+		return column;
+	}
 
-    private Column<V> getColumn(final String columnId) {
-        for (final Column<V> column : columns.values()) {
+	private Column<V> getColumn(final String columnId) {
+		for (final Column<V> column : columns.values()) {
             if (columnId.equals(column.getColDef().getId())) return column;
-        }
-        return null;
-    }
+		}
+		return null;
+	}
 
-    private synchronized Object getRenderingHelper(final V data, final Column<V> column) {
-        // FIXME : possible performance optimisation
-        final Object[] renderingHelpers = renderingHelpersCache.computeIfAbsent(data, r -> new Object[columns.size()]);
-        Object helper = renderingHelpers[column.getID()];
+	private synchronized Object getRenderingHelper(final V data, final Column<V> column) {
+		// FIXME : possible performance optimisation
+		final Object[] renderingHelpers = renderingHelpersCache.computeIfAbsent(data, r -> new Object[columns.size()]);
+		Object helper = renderingHelpers[column.getID()];
         if (helper == NO_RENDERING_HELPER) return null;
-        if (helper == null) {
-            helper = column.getColDef().getRenderingHelper(data);
-            renderingHelpers[column.getID()] = helper == null ? NO_RENDERING_HELPER : helper;
-        }
-        return helper;
-    }
+		if (helper == null) {
+			helper = column.getColDef().getRenderingHelper(data);
+			renderingHelpers[column.getID()] = helper == null ? NO_RENDERING_HELPER : helper;
+		}
+		return helper;
+	}
 
-    private void clearRenderingHelpers(final DefaultRow<V> row) {
-        renderingHelpersCache.remove(row.getData());
-    }
+	private void clearRenderingHelpers(final DefaultRow<V> row) {
+		renderingHelpersCache.remove(row.getData());
+	}
 
-    private void clearRenderingHelper(final DefaultRow<V> row, final Column<V> column) {
-        final Object[] renderingHelpers = renderingHelpersCache.get(row.getData());
+	private void clearRenderingHelper(final DefaultRow<V> row, final Column<V> column) {
+		final Object[] renderingHelpers = renderingHelpersCache.get(row.getData());
         if (renderingHelpers == null) return;
-        renderingHelpers[column.getID()] = null;
-    }
+		renderingHelpers[column.getID()] = null;
+	}
 
-    @Override
-    public void clearFilters(final ColumnDefinition<V> column) {
-        checkAdapter();
-        Objects.requireNonNull(column);
-        dataSource.clearFilters(column);
-        resetLiveData();
-    }
+	@Override
+	public void clearFilters(final ColumnDefinition<V> column) {
+		checkAdapter();
+		Objects.requireNonNull(column);
+		dataSource.clearFilters(column);
+		resetLiveData();
+	}
 
-    @Override
-    public final void clearFilters() {
-        checkAdapter();
-        dataSource.clearFilters();
-        resetLiveData();
-    }
+	@Override
+	public final void clearFilters() {
+		checkAdapter();
+		dataSource.clearFilters();
+		resetLiveData();
+	}
 
-    @Override
-    public void refresh() {
-        listener.refresh();
-    }
+	@Override
+	public void refresh() {
+		listener.refresh();
+	}
 
-    @Override
-    public void refreshOnNextDraw() {
-        refreshRows(0, dataSource.getRowCount());
-    }
+	@Override
+	public void refreshOnNextDraw() {
+		refreshRows(0, dataSource.getRowCount());
+	}
 
-    /**
+	/**
      * Extends the variable zone (which is refreshed during a draw from the view) using from/to as data offsets.
-     *
+	 *
      * @param from
      *            the beginning offset of the variable zone
      * @param to
      *            the ending offset of the variable zone
-     */
-    private void refreshRows(final int from, final int to) {
-        this.from = Math.min(this.from, from);
-        this.to = Math.max(this.to, to);
+	 */
+	private void refreshRows(final int from, final int to) {
+		this.from = Math.min(this.from, from);
+		this.to = Math.max(this.to, to);
         if (bound) doRefreshRows();
-    }
+	}
 
-    private void doRefreshRows() {
-        try {
-            if (listener != null) {
-                listener.onUpdateRows(from, to);
-                listener.refresh();
-            }
-        } finally {
-            from = Integer.MAX_VALUE;
-            to = 0;
-        }
-    }
+	private void doRefreshRows() {
+		try {
+			if (listener != null) {
+				listener.onUpdateRows(from, to);
+				listener.refresh();
+			}
+		} finally {
+			from = Integer.MAX_VALUE;
+			to = 0;
+		}
+	}
 
-    @Override
-    public final void setData(final V v) {
-        final Interval interval = dataSource.setData(v);
+	@Override
+	public final void setData(final V v) {
+		final Interval interval = dataSource.setData(v);
         if (interval != null) refreshRows(interval.from, interval.to);
-    }
+	}
 
-    @Override
-    public void setData(final Collection<V> c) {
-        int from = Integer.MAX_VALUE;
-        int to = 0;
-        for (final V v : c) {
-            final Interval interval = dataSource.setData(v);
+	@Override
+	public void setData(final Collection<V> c) {
+		int from = Integer.MAX_VALUE;
+		int to = 0;
+		for (final V v : c) {
+			final Interval interval = dataSource.setData(v);
             if (interval == null) continue;
-            from = Math.min(from, interval.from);
-            to = Math.max(to, interval.to);
-        }
+			from = Math.min(from, interval.from);
+			to = Math.max(to, interval.to);
+		}
         if (from < to) refreshRows(from, to);
-    }
+	}
 
-    @Override
-    public void updateData(final Map<K, Consumer<V>> updaters) {
-        int from = Integer.MAX_VALUE;
-        int to = 0;
-        for (final Map.Entry<K, Consumer<V>> entry : updaters.entrySet()) {
-            final DefaultRow<V> row = dataSource.getRow(entry.getKey());
-            clearRenderingHelpers(row);
-            final Interval interval = dataSource.updateData(entry.getKey(), entry.getValue());
+	@Override
+	public void updateData(final Map<K, Consumer<V>> updaters) {
+		int from = Integer.MAX_VALUE;
+		int to = 0;
+		for (final Map.Entry<K, Consumer<V>> entry : updaters.entrySet()) {
+			final DefaultRow<V> row = dataSource.getRow(entry.getKey());
+			clearRenderingHelpers(row);
+			final Interval interval = dataSource.updateData(entry.getKey(), entry.getValue());
             if (interval == null) continue;
-            from = Math.min(from, interval.from);
-            to = Math.max(to, interval.to);
-        }
+			from = Math.min(from, interval.from);
+			to = Math.max(to, interval.to);
+		}
         if (from < to) refreshRows(from, to);
-    }
+	}
 
-    @Override
-    public void updateData(final K k, final Consumer<V> updater) {
-        final DefaultRow<V> row = dataSource.getRow(k);
-        clearRenderingHelpers(row);
-        final Interval interval = dataSource.updateData(k, updater);
+	@Override
+	public void updateData(final K k, final Consumer<V> updater) {
+		final DefaultRow<V> row = dataSource.getRow(k);
+		clearRenderingHelpers(row);
+		final Interval interval = dataSource.updateData(k, updater);
         if (interval != null) refreshRows(interval.from, interval.to);
-    }
+	}
 
-    private void resetLiveData() {
-        final int oldLiveDataSize = dataSource.getRowCount();
-        dataSource.resetLiveData();
-        // FIXME : this is to prevent not refreshing in a db filter case
-        // refreshRows(0, Math.max(oldLiveDataSize, dataSource.getRowCount()));
-        refreshRows(0, Math.max(oldLiveDataSize, 1));
-    }
+	private void resetLiveData() {
+		final int oldLiveDataSize = dataSource.getRowCount();
+		dataSource.resetLiveData();
+		// FIXME : this is to prevent not refreshing in a db filter case
+		// refreshRows(0, Math.max(oldLiveDataSize, dataSource.getRowCount()));
+		refreshRows(0, Math.max(oldLiveDataSize, 1));
+	}
 
-    @Override
-    public final V removeData(final K k) {
-        final DefaultRow<V> row = dataSource.getRow(k);
+	@Override
+	public final V removeData(final K k) {
+		final DefaultRow<V> row = dataSource.getRow(k);
         if (row == null) return null;
-        renderingHelpersCache.remove(row.getData());
-        final V v = dataSource.removeData(k);
-        refreshOnNextDraw();
-        return v;
-    }
+		renderingHelpersCache.remove(row.getData());
+		final V v = dataSource.removeData(k);
+		refreshOnNextDraw();
+		return v;
+	}
 
-    @Override
-    public final V getData(final K k) {
-        final DefaultRow<V> row = dataSource.getRow(k);
+	@Override
+	public final V getData(final K k) {
+		final DefaultRow<V> row = dataSource.getRow(k);
         if (row == null) return null;
-        return row.getData();
-    }
+		return row.getData();
+	}
 
-    @Override
-    public void renderCell(final ColumnDefinition<V> colDef, final Cell<V, ?> cell, final V data) {
-        checkAdapter();
-        final Column<V> column = getColumn(colDef);
-        cell.render(data, getRenderingHelper(data, column));
-    }
+	@Override
+	public void renderCell(final ColumnDefinition<V> colDef, final Cell<V, ?> cell, final V data) {
+		checkAdapter();
+		final Column<V> column = getColumn(colDef);
+		cell.render(data, getRenderingHelper(data, column));
+	}
 
-    @Override
-    public void addSort(final ColumnDefinition<V> colDef, final boolean asc) {
-        checkAdapter();
-        final Column<V> column = getColumn(colDef);
-        dataSource.addSort(column, new ColumnControllerSort(column, asc), asc);
-        refreshOnNextDraw();
-    }
+	@Override
+	public void addSort(final ColumnDefinition<V> colDef, final boolean asc) {
+		checkAdapter();
+		final Column<V> column = getColumn(colDef);
+		dataSource.addSort(column, new ColumnControllerSort(column, asc), asc);
+		refreshOnNextDraw();
+	}
 
-    @Override
-    public void addSort(final Object key, final Comparator<V> comparator) {
-        checkAdapter();
-        dataSource.addSort(key, new GeneralControllerSort(comparator));
-        refreshOnNextDraw();
-    }
+	@Override
+	public void addSort(final Object key, final Comparator<V> comparator) {
+		checkAdapter();
+		dataSource.addSort(key, new GeneralControllerSort(comparator));
+		refreshOnNextDraw();
+	}
 
-    @Override
-    public void addPrimarySort(final Object key, final Comparator<V> comparator) {
-        checkAdapter();
-        dataSource.addPrimarySort(key, new GeneralControllerSort(comparator));
-        refreshOnNextDraw();
-    }
+	@Override
+	public void addPrimarySort(final Object key, final Comparator<V> comparator) {
+		checkAdapter();
+		dataSource.addPrimarySort(key, new GeneralControllerSort(comparator));
+		refreshOnNextDraw();
+	}
 
-    @Override
-    public void clearSort(final ColumnDefinition<V> colDef) {
-        checkAdapter();
-        final Column<V> column = getColumn(colDef);
+	@Override
+	public void clearSort(final ColumnDefinition<V> colDef) {
+		checkAdapter();
+		final Column<V> column = getColumn(colDef);
         if (!dataSource.clearSort(column)) return;
-        dataSource.sort();
-        refreshOnNextDraw();
-    }
+		dataSource.sort();
+		refreshOnNextDraw();
+	}
 
-    @Override
-    public void clearSorts() {
-        checkAdapter();
-        dataSource.clearSorts();
-        refreshOnNextDraw();
-    }
+	@Override
+	public void clearSorts() {
+		checkAdapter();
+		dataSource.clearSorts();
+		refreshOnNextDraw();
+	}
 
-    @Override
-    public void sort() {
-        dataSource.sort();
-        refreshOnNextDraw();
-    }
+	@Override
+	public void sort() {
+		dataSource.sort();
+		refreshOnNextDraw();
+	}
 
-    @Override
-    public void setFilter(final Object key, final ColumnDefinition<V> colDef, final BiPredicate<V, Supplier<Object>> biPredicate,
-                          final boolean reinforcing) {
-        checkAdapter();
-        dataSource.setFilter(key, null, reinforcing, new ColumnFilter(colDef, biPredicate));
-        resetLiveData();
-    }
+	@Override
+	public void setFilter(final Object key, final ColumnDefinition<V> colDef,
+			final BiPredicate<V, Supplier<Object>> biPredicate, boolean isActive, final boolean reinforcing) {
+		checkAdapter();
+		dataSource.setFilter(key, null, reinforcing, new ColumnFilter(colDef, biPredicate, isActive));
+		resetLiveData();
+	}
 
-    @Override
-    public void setFilter(final Object key, final String id, final Predicate<V> predicate, final boolean reinforcing) {
-        checkAdapter();
-        dataSource.setFilter(key, id, reinforcing, new GeneralFilter(predicate));
-        resetLiveData();
-    }
+	@Override
+	public void setFilter(final Object key, final String id, final Predicate<V> predicate, boolean isActive,
+			final boolean reinforcing) {
+		checkAdapter();
+		dataSource.setFilter(key, id, reinforcing, new GeneralFilter(predicate, isActive));
+		resetLiveData();
+	}
 
-    @Override
-    public void clearFilter(final Object key) {
-        checkAdapter();
+	@Override
+	public void clearFilter(final Object key) {
+		checkAdapter();
         if (!dataSource.clearFilter(key)) return;
-        resetLiveData();
-    }
+		resetLiveData();
+	}
 
-    @Override
-    public void clearSort(final Object key) {
-        checkAdapter();
+	@Override
+	public void clearSort(final Object key) {
+		checkAdapter();
         if (!dataSource.clearSort(key)) return;
-        dataSource.sort();
-        refreshOnNextDraw();
-    }
+		dataSource.sort();
+		refreshOnNextDraw();
+	}
 
-    public class DataSrcResult {
+	public class DataSrcResult {
 
-        public LiveDataView<V> liveDataView;
-        public int firstRowIndex;
-        public int start;
+		public LiveDataView<V> liveDataView;
+		public int firstRowIndex;
+		public int start;
 
-        public DataSrcResult(final LiveDataView<V> liveDataView, final int firstRowIndex, final int start) {
-            this.liveDataView = liveDataView;
-            this.firstRowIndex = firstRowIndex;
-            this.start = start;
-        }
+		public DataSrcResult(final LiveDataView<V> liveDataView, final int firstRowIndex, final int start) {
+			this.liveDataView = liveDataView;
+			this.firstRowIndex = firstRowIndex;
+			this.start = start;
+		}
 
 		@Override
 		public String toString() {
 			return "DataSrcResult [liveDataView=" + liveDataView + ", firstRowIndex=" + firstRowIndex + ", start="
 					+ start + "]";
 		}
-        
-        
-    }
 
-    private final AtomicLong count = new AtomicLong();
-    private long lastProcessedID;
+	}
 
-    @Override
+	private final AtomicLong count = new AtomicLong();
+	private long lastProcessedID;
+
+	@Override
     public void prepareLiveDataOnScreen(final int dataSrcRowIndex, final int dataSize, final DataGridSnapshot threadSnapshot, final Consumer<Pair<DataSrcResult, Throwable>> consumer) {
-        viewSnapshot = new DataGridSnapshot(threadSnapshot);
-        long currentProcessID = count.get();
-        PScheduler.schedule(() -> {
-            try {
-                if (viewSnapshot.equals(threadSnapshot) && lastProcessedID <= currentProcessID) {
+		viewSnapshot = new DataGridSnapshot(threadSnapshot);
+		long currentProcessID = count.get();
+		PScheduler.schedule(() -> {
+			try {
+				if (viewSnapshot.equals(threadSnapshot) && lastProcessedID <= currentProcessID) {
                     final DataSrcResult result = new DataSrcResult(dataSource.getRows(dataSrcRowIndex, dataSize), dataSrcRowIndex, threadSnapshot.start);
-                    lastProcessedID = count.incrementAndGet();
-                    consumer.accept(new Pair<>(result, null));
-                }
-            } catch (Exception e) {
-                log.error("Cannot display data", e);
-                consumer.accept(new Pair<>(null, e));
-            }
-        });
-    }
+					lastProcessedID = count.incrementAndGet();
+					consumer.accept(new Pair<>(result, null));
+				}
+			} catch (Exception e) {
+				log.error("Cannot display data", e);
+				consumer.accept(new Pair<>(null, e));
+			}
+		});
+	}
 
-    @Override
-    public DataGridController<K, V> get() {
-        return this;
-    }
+	@Override
+	public DataGridController<K, V> get() {
+		return this;
+	}
 
-    @Override
-    public void setListener(final DataGridControllerListener<V> listener) {
-        this.listener = listener;
-    }
+	@Override
+	public void setListener(final DataGridControllerListener<V> listener) {
+		this.listener = listener;
+	}
 
-    @Override
-    public void clearRenderingHelper(final ColumnDefinition<V> colDef, final K key) {
-        checkAdapter();
-        final DefaultRow<V> row = dataSource.getRow(key);
+	@Override
+	public void clearRenderingHelper(final ColumnDefinition<V> colDef, final K key) {
+		checkAdapter();
+		final DefaultRow<V> row = dataSource.getRow(key);
         if (colDef != null && row != null) clearRenderingHelper(row, getColumn(colDef));
-    }
+	}
 
-    @Override
-    public void clearRenderingHelpers(final ColumnDefinition<V> colDef) {
-        checkAdapter();
-        final Column<V> column = getColumn(colDef);
-        for (final DefaultRow<V> row : dataSource.getRows()) {
-            clearRenderingHelper(row, column);
-        }
-    }
+	@Override
+	public void clearRenderingHelpers(final ColumnDefinition<V> colDef) {
+		checkAdapter();
+		final Column<V> column = getColumn(colDef);
+		for (final DefaultRow<V> row : dataSource.getRows()) {
+			clearRenderingHelper(row, column);
+		}
+	}
 
-    @Override
-    public int getRowCount() {
-        return dataSource.getRowCount();
-    }
+	@Override
+	public int getRowCount() {
+		return dataSource.getRowCount();
+	}
 
-    @Override
-    public void setConfig(final DataGridConfig<V> config) {
-        checkAdapter();
-        dataSource.clearSorts();
-        dataSource.clearFilters();
-        for (final Sort<V> s : config.getSorts()) {
+	@Override
+	public void setConfig(final DataGridConfig<V> config) {
+		checkAdapter();
+		dataSource.clearSorts();
+		dataSource.clearFilters();
+		for (final Sort<V> s : config.getSorts()) {
             if (s == null) continue;
-            if (s instanceof ColumnSort) {
-                final ColumnSort<V> sort = (ColumnSort<V>) s;
-                final Column<V> column = getColumn(sort.getColumnId());
+			if (s instanceof ColumnSort) {
+				final ColumnSort<V> sort = (ColumnSort<V>) s;
+				final Column<V> column = getColumn(sort.getColumnId());
                 if (column == null) continue;
-                dataSource.addSort(column, new ColumnControllerSort(column, sort.isAsc()));
-            } else { // s instanceof GeneralSort
-                final GeneralSort<V> sort = (GeneralSort<V>) s;
-                dataSource.addSort(sort.getKey(), new GeneralControllerSort(sort.getComparator()));
-            }
-        }
-        resetLiveData();
-    }
+				dataSource.addSort(column, new ColumnControllerSort(column, sort.isAsc()));
+			} else { // s instanceof GeneralSort
+				final GeneralSort<V> sort = (GeneralSort<V>) s;
+				dataSource.addSort(sort.getKey(), new GeneralControllerSort(sort.getComparator()));
+			}
+		}
+		resetLiveData();
+	}
 
-    @Override
-    public void enrichConfigBuilder(final DataGridConfigBuilder<V> builder) {
-        checkAdapter();
-        for (final Map.Entry<Object, Comparator<DefaultRow<V>>> entry : dataSource.getSortsEntry()) {
-            if (entry.getValue() instanceof DefaultDataGridController.ColumnControllerSort) {
-                final ColumnControllerSort sort = (ColumnControllerSort) entry.getValue();
-                builder.addSort(new ColumnSort<>(sort.column.getColDef().getId(), sort.asc));
-            } else { // instanceof GeneralControllerSort
-                final GeneralControllerSort sort = (GeneralControllerSort) entry.getValue();
-                builder.addSort(new GeneralSort<>(entry.getKey(), sort.comparator));
-            }
-        }
-    }
+	@Override
+	public void enrichConfigBuilder(final DataGridConfigBuilder<V> builder) {
+		checkAdapter();
+		for (final Map.Entry<Object, Comparator<DefaultRow<V>>> entry : dataSource.getSortsEntry()) {
+			if (entry.getValue() instanceof DefaultDataGridController.ColumnControllerSort) {
+				final ColumnControllerSort sort = (ColumnControllerSort) entry.getValue();
+				builder.addSort(new ColumnSort<>(sort.column.getColDef().getId(), sort.asc));
+			} else { // instanceof GeneralControllerSort
+				final GeneralControllerSort sort = (GeneralControllerSort) entry.getValue();
+				builder.addSort(new GeneralSort<>(entry.getKey(), sort.comparator));
+			}
+		}
+	}
 
-    @Override
-    public void setBound(final boolean bound) {
+	@Override
+	public void setBound(final boolean bound) {
         if (this.bound == bound) return;
-        this.bound = bound;
+		this.bound = bound;
         if (!bound || from >= to) return;
-        doRefreshRows();
-    }
+		doRefreshRows();
+	}
 
-    @Override
-    public boolean getBound() {
-        return bound;
-    }
+	@Override
+	public boolean getBound() {
+		return bound;
+	}
 
-    @Override
-    public boolean isSelected(final K k) {
-        return dataSource.isSelected(k);
-    }
+	@Override
+	public boolean isSelected(final K k) {
+		return dataSource.isSelected(k);
+	}
 
-    @Override
-    public boolean isSelectable(final K k) {
-        return adapter.isSelectionEnabled() && dataSource.isSelectable(k);
-    }
+	@Override
+	public boolean isSelectable(final K k) {
+		return adapter.isSelectionEnabled() && dataSource.isSelectable(k);
+	}
 
-    @Override
-    public PResultSet<V> getFilteredData() {
-        return dataSource.getFilteredData();
-    }
+	@Override
+	public PResultSet<V> getFilteredData() {
+		return dataSource.getFilteredData();
+	}
 
-    @Override
-    public PResultSet<V> getLiveSelectedData() {
-        return dataSource.getLiveSelectedData();
-    }
-    
-    @Override
-    public PResultSet<V> getLastRequestedData() {
-    	return dataSource.getLastRequestedData();
-    }
+	@Override
+	public PResultSet<V> getLiveSelectedData() {
+		return dataSource.getLiveSelectedData();
+	}
 
-    @Override
-    public int getLiveSelectedDataCount() {
-        return dataSource.getlLiveSelectedDataCount();
-    }
+	@Override
+	public PResultSet<V> getLastRequestedData() {
+		return dataSource.getLastRequestedData();
+	}
 
-    @Override
-    public Collection<V> getLiveData(final int from, final int dataSize) {
-        final LiveDataView<V> liveData = dataSource.getRows(from, dataSize);
-        return new MappedList<>(liveData.getLiveData(), DefaultRow::getData);
-    }
+	@Override
+	public int getLiveSelectedDataCount() {
+		return dataSource.getlLiveSelectedDataCount();
+	}
 
-    @Override
-    public void select(final K k) {
-        final Interval interval = dataSource.select(k);
+	@Override
+	public Collection<V> getLiveData(final int from, final int dataSize) {
+		final LiveDataView<V> liveData = dataSource.getRows(from, dataSize);
+		return new MappedList<>(liveData.getLiveData(), DefaultRow::getData);
+	}
+
+	@Override
+	public void select(final K k) {
+		final Interval interval = dataSource.select(k);
         if (interval != null) refreshRows(interval.from, interval.to);
-    }
+	}
 
-    @Override
-    public void unselect(final K k) {
-        final Interval interval = dataSource.unselect(k);
+	@Override
+	public void unselect(final K k) {
+		final Interval interval = dataSource.unselect(k);
         if (interval != null) refreshRows(interval.from, interval.to);
-    }
+	}
 
-    @Override
-    public void selectAllLiveData() {
-        dataSource.selectAllLiveData();
-    }
+	@Override
+	public void selectAllLiveData() {
+		dataSource.selectAllLiveData();
+	}
 
-    @Override
-    public void unselectAllData() {
-        dataSource.unselectAllData();
-    }
+	@Override
+	public void unselectAllData() {
+		dataSource.unselectAllData();
+	}
 
-    private class RenderingHelperSupplier implements Supplier<Object> {
+	private class RenderingHelperSupplier implements Supplier<Object> {
 
-        private DefaultRow<V> row;
-        private Column<V> column;
+		private DefaultRow<V> row;
+		private Column<V> column;
 
-        private void set(final DefaultRow<V> row, final Column<V> column) {
-            this.row = row;
-            this.column = column;
-        }
+		private void set(final DefaultRow<V> row, final Column<V> column) {
+			this.row = row;
+			this.column = column;
+		}
 
-        private void clear() {
-            this.row = null;
-            this.column = null;
-        }
+		private void clear() {
+			this.row = null;
+			this.column = null;
+		}
 
-        @Override
-        public Object get() {
-            return getRenderingHelper(row.getData(), column);
-        }
+		@Override
+		public Object get() {
+			return getRenderingHelper(row.getData(), column);
+		}
 
-    }
+	}
 
-    public static class RenderingHelpersCache<V> extends LinkedHashMap<V, Object[]> {
+	public static class RenderingHelpersCache<V> extends LinkedHashMap<V, Object[]> {
 
-        @Override
-        protected boolean removeEldestEntry(final Map.Entry<V, Object[]> eldest) {
-            return size() > RENDERING_HELPERS_CACHE_CAPACITY;
-        }
-    }
+		@Override
+		protected boolean removeEldestEntry(final Map.Entry<V, Object[]> eldest) {
+			return size() > RENDERING_HELPERS_CACHE_CAPACITY;
+		}
+	}
 
-    private class GeneralControllerSort implements Comparator<DefaultRow<V>> {
+	private class GeneralControllerSort implements Comparator<DefaultRow<V>> {
 
-        private final Comparator<V> comparator;
+		private final Comparator<V> comparator;
 
-        public GeneralControllerSort(final Comparator<V> comparator) {
-            super();
-            this.comparator = comparator;
-        }
+		public GeneralControllerSort(final Comparator<V> comparator) {
+			super();
+			this.comparator = comparator;
+		}
 
-        @Override
-        public int compare(final DefaultRow<V> r1, final DefaultRow<V> r2) {
-            return comparator.compare(r1.getData(), r2.getData());
-        }
-    }
+		@Override
+		public int compare(final DefaultRow<V> r1, final DefaultRow<V> r2) {
+			return comparator.compare(r1.getData(), r2.getData());
+		}
+	}
 
-    public class ColumnControllerSort implements Comparator<DefaultRow<V>> {
+	public class ColumnControllerSort implements Comparator<DefaultRow<V>> {
 
-        private final Column<V> column;
-        private final boolean asc;
+		private final Column<V> column;
+		private final boolean asc;
 
-        public ColumnControllerSort(final Column<V> column, final boolean asc) {
-            this.column = column;
-            this.asc = asc;
-        }
+		public ColumnControllerSort(final Column<V> column, final boolean asc) {
+			this.column = column;
+			this.asc = asc;
+		}
 
-        @Override
-        public int compare(final DefaultRow<V> r1, final DefaultRow<V> r2) {
-            try {
-                renderingHelperSupplier1.set(r1, column);
-                renderingHelperSupplier2.set(r2, column);
-                final int diff = asc
+		@Override
+		public int compare(final DefaultRow<V> r1, final DefaultRow<V> r2) {
+			try {
+				renderingHelperSupplier1.set(r1, column);
+				renderingHelperSupplier2.set(r2, column);
+				final int diff = asc
                         ? column.getColDef().compare(r1.getData(), renderingHelperSupplier1, r2.getData(), renderingHelperSupplier2)
                         : column.getColDef().compare(r2.getData(), renderingHelperSupplier2, r1.getData(), renderingHelperSupplier1);
-                return diff;
-            } finally {
-                renderingHelperSupplier1.clear();
-                renderingHelperSupplier2.clear();
-            }
-        }
+				return diff;
+			} finally {
+				renderingHelperSupplier1.clear();
+				renderingHelperSupplier2.clear();
+			}
+		}
 
-        public boolean getSortAsc() {
-            return asc;
-        }
+		public boolean getSortAsc() {
+			return asc;
+		}
 
-        public Column<V> getColumn() {
-            return column;
-        }
+		public Column<V> getColumn() {
+			return column;
+		}
 
-        @Override
-        public int hashCode() {
-            return Objects.hash(asc, column);
-        }
+		@Override
+		public int hashCode() {
+			return Objects.hash(asc, column);
+		}
 
-        @Override
-        public boolean equals(final Object obj) {
+		@Override
+		public boolean equals(final Object obj) {
             if (this == obj) return true;
             if (obj == null) return false;
             if (getClass() != obj.getClass()) return false;
-            final ColumnControllerSort other = (ColumnControllerSort) obj;
-            return asc == other.asc && Objects.equals(column, other.column);
-        }
-    }
+			final ColumnControllerSort other = (ColumnControllerSort) obj;
+			return asc == other.asc && Objects.equals(column, other.column);
+		}
+	}
 
-    private class GeneralFilter implements AbstractFilter<V> {
+	private class GeneralFilter implements AbstractFilter<V> {
 
-        private final Predicate<V> filter;
+		private final Predicate<V> filter;
+		private final boolean isActive;
 
-        public GeneralFilter(final Predicate<V> filter) {
-            super();
-            this.filter = filter;
-        }
+		public GeneralFilter(final Predicate<V> filter, boolean isActive) {
+			super();
+			this.filter = filter;
+			this.isActive = isActive;
+		}
 
-        @Override
-        public boolean test(final DefaultRow<V> row) {
-            return filter.test(row.getData());
-        }
+		@Override
+		public boolean test(final DefaultRow<V> row) {
+			return filter.test(row.getData());
+		}
 
-        @Override
-        public ColumnDefinition<V> getColumnDefinition() {
-            return null;
-        }
-    }
+		@Override
+		public ColumnDefinition<V> getColumnDefinition() {
+			return null;
+		}
 
-    private class ColumnFilter implements AbstractFilter<V> {
+		@Override
+		public boolean isActive() {
+			return isActive;
+		}
+	}
 
-        private final Column<V> column;
-        private final BiPredicate<V, Supplier<Object>> filter;
+	private class ColumnFilter implements AbstractFilter<V> {
 
-        ColumnFilter(final ColumnDefinition<V> colDef, final BiPredicate<V, Supplier<Object>> filter) {
-            super();
-            this.column = getColumn(colDef);
-            this.filter = filter;
-        }
+		private final Column<V> column;
+		private final BiPredicate<V, Supplier<Object>> filter;
+		private final boolean isActive;
 
-        @Override
-        public boolean test(final DefaultRow<V> row) {
-            try {
-                renderingHelperSupplier1.set(row, column);
-                return filter.test(row.getData(), renderingHelperSupplier1);
-            } finally {
-                renderingHelperSupplier1.clear();
-            }
-        }
+		ColumnFilter(final ColumnDefinition<V> colDef, final BiPredicate<V, Supplier<Object>> filter,
+				boolean isActive) {
+			super();
+			this.column = getColumn(colDef);
+			this.filter = filter;
+			this.isActive = isActive;
+		}
 
-        @Override
-        public ColumnDefinition<V> getColumnDefinition() {
-            return column.getColDef();
-        }
-    }
+		@Override
+		public boolean test(final DefaultRow<V> row) {
+			try {
+				renderingHelperSupplier1.set(row, column);
+				return filter.test(row.getData(), renderingHelperSupplier1);
+			} finally {
+				renderingHelperSupplier1.clear();
+			}
+		}
+
+		@Override
+		public ColumnDefinition<V> getColumnDefinition() {
+			return column.getColDef();
+		}
+
+		@Override
+		public boolean isActive() {
+			return isActive;
+		}
+	}
 }

@@ -38,6 +38,7 @@ import com.ponysdk.core.ui.datagrid2.controller.DefaultDataGridController;
 import com.ponysdk.core.ui.datagrid2.controller.DefaultDataGridController.RenderingHelpersCache;
 import com.ponysdk.core.ui.datagrid2.data.AbstractFilter;
 import com.ponysdk.core.ui.datagrid2.data.DefaultRow;
+import com.ponysdk.core.ui.datagrid2.data.FilterController;
 import com.ponysdk.core.ui.datagrid2.data.Interval;
 import com.ponysdk.core.ui.datagrid2.data.LiveDataView;
 
@@ -202,4 +203,9 @@ public interface DataGridSource<K, V> {
      * @return if a row is selectable or not
      */
     boolean isSelectable(final K k);
+    
+    /**
+     * Set a FilterGroupProvider
+     */
+    void setFilterController(final FilterController<V> filterProvider);
 }

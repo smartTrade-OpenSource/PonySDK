@@ -45,239 +45,240 @@ import com.ponysdk.core.util.Pair;
  */
 public abstract class SpyDataGridController<K, V> implements DataGridController<K, V> {
 
-    private final DataGridController<K, V> controller;
+	private final DataGridController<K, V> controller;
 
-    public SpyDataGridController(final DataGridController<K, V> controller) {
-        super();
-        this.controller = controller;
-    }
+	public SpyDataGridController(final DataGridController<K, V> controller) {
+		super();
+		this.controller = controller;
+	}
 
-    @Override
-    public void setData(final V v) {
-        controller.setData(v);
-        if (controller.getBound()) {
-            onDataUpdate();
-        }
-    }
+	@Override
+	public void setData(final V v) {
+		controller.setData(v);
+		if (controller.getBound()) {
+			onDataUpdate();
+		}
+	}
 
-    @Override
-    public void setData(final Collection<V> c) {
-        controller.setData(c);
+	@Override
+	public void setData(final Collection<V> c) {
+		controller.setData(c);
         if (controller.getBound()) onDataUpdate();
-    }
+	}
 
-    @Override
-    public void updateData(final K k, final Consumer<V> updater) {
-        controller.updateData(k, updater);
+	@Override
+	public void updateData(final K k, final Consumer<V> updater) {
+		controller.updateData(k, updater);
         if (controller.getBound()) onDataUpdate();
-    }
+	}
 
-    @Override
-    public void updateData(final Map<K, Consumer<V>> updaters) {
-        controller.updateData(updaters);
+	@Override
+	public void updateData(final Map<K, Consumer<V>> updaters) {
+		controller.updateData(updaters);
         if (controller.getBound()) onDataUpdate();
-    }
+	}
 
-    @Override
-    public V getData(final K k) {
-        return controller.getData(k);
-    }
+	@Override
+	public V getData(final K k) {
+		return controller.getData(k);
+	}
 
-    @Override
-    public V removeData(final K k) {
-        final V v = controller.removeData(k);
+	@Override
+	public V removeData(final K k) {
+		final V v = controller.removeData(k);
         if (controller.getBound()) onDataUpdate();
-        return v;
-    }
+		return v;
+	}
 
-    @Override
-    public void setBound(final boolean bound) {
-        final boolean wasBound = controller.getBound();
-        controller.setBound(bound);
+	@Override
+	public void setBound(final boolean bound) {
+		final boolean wasBound = controller.getBound();
+		controller.setBound(bound);
         if (!wasBound && controller.getBound()) onDataUpdate();
-    }
+	}
 
-    @Override
-    public boolean getBound() {
-        return controller.getBound();
-    }
+	@Override
+	public boolean getBound() {
+		return controller.getBound();
+	}
 
-    protected abstract void onDataUpdate();
+	protected abstract void onDataUpdate();
 
-    @Override
-    public void renderCell(final ColumnDefinition<V> column, final Cell<V, ?> widget, final V data) {
-        controller.renderCell(column, widget, data);
-    }
+	@Override
+	public void renderCell(final ColumnDefinition<V> column, final Cell<V, ?> widget, final V data) {
+		controller.renderCell(column, widget, data);
+	}
 
-    @Override
-    public boolean isSelected(final K k) {
-        return controller.isSelected(k);
-    }
+	@Override
+	public boolean isSelected(final K k) {
+		return controller.isSelected(k);
+	}
 
-    @Override
-    public boolean isSelectable(final K k) {
-        return controller.isSelectable(k);
-    }
+	@Override
+	public boolean isSelectable(final K k) {
+		return controller.isSelectable(k);
+	}
 
-    @Override
-    public PResultSet<V> getFilteredData() {
-        return controller.getFilteredData();
-    }
+	@Override
+	public PResultSet<V> getFilteredData() {
+		return controller.getFilteredData();
+	}
 
-    @Override
-    public PResultSet<V> getLiveSelectedData() {
-        return controller.getLiveSelectedData();
-    }
-    
-    @Override
-    public PResultSet<V> getLastRequestedData() {
-        return controller.getLastRequestedData();
-    }
+	@Override
+	public PResultSet<V> getLiveSelectedData() {
+		return controller.getLiveSelectedData();
+	}
 
-    @Override
-    public int getLiveSelectedDataCount() {
-        return controller.getLiveSelectedDataCount();
-    }
+	@Override
+	public PResultSet<V> getLastRequestedData() {
+		return controller.getLastRequestedData();
+	}
 
-    @Override
-    public Collection<V> getLiveData(final int from, final int dataSize) {
-        return controller.getLiveData(from, dataSize);
-    }
+	@Override
+	public int getLiveSelectedDataCount() {
+		return controller.getLiveSelectedDataCount();
+	}
 
-    @Override
-    public void select(final K k) {
-        controller.select(k);
-    }
+	@Override
+	public Collection<V> getLiveData(final int from, final int dataSize) {
+		return controller.getLiveData(from, dataSize);
+	}
 
-    @Override
-    public void unselect(final K k) {
-        controller.unselect(k);
-    }
+	@Override
+	public void select(final K k) {
+		controller.select(k);
+	}
 
-    @Override
-    public void selectAllLiveData() {
-        controller.selectAllLiveData();
-    }
+	@Override
+	public void unselect(final K k) {
+		controller.unselect(k);
+	}
 
-    @Override
-    public void unselectAllData() {
-        controller.unselectAllData();
-    }
+	@Override
+	public void selectAllLiveData() {
+		controller.selectAllLiveData();
+	}
 
-    @Override
-    public void addSort(final ColumnDefinition<V> column, final boolean asc) {
-        controller.addSort(column, asc);
-    }
+	@Override
+	public void unselectAllData() {
+		controller.unselectAllData();
+	}
 
-    @Override
-    public void addSort(final Object key, final Comparator<V> comparator) {
-        controller.addSort(key, comparator);
-    }
+	@Override
+	public void addSort(final ColumnDefinition<V> column, final boolean asc) {
+		controller.addSort(column, asc);
+	}
 
-    @Override
-    public void addPrimarySort(final Object key, final Comparator<V> comparator) {
-        controller.addPrimarySort(key, comparator);
-    }
+	@Override
+	public void addSort(final Object key, final Comparator<V> comparator) {
+		controller.addSort(key, comparator);
+	}
 
-    @Override
-    public void clearSort(final Object key) {
-        controller.clearSort(key);
-    }
+	@Override
+	public void addPrimarySort(final Object key, final Comparator<V> comparator) {
+		controller.addPrimarySort(key, comparator);
+	}
 
-    @Override
-    public void clearSort(final ColumnDefinition<V> column) {
-        controller.clearSort(column);
-    }
+	@Override
+	public void clearSort(final Object key) {
+		controller.clearSort(key);
+	}
 
-    @Override
-    public void clearSorts() {
-        controller.clearSorts();
-    }
+	@Override
+	public void clearSort(final ColumnDefinition<V> column) {
+		controller.clearSort(column);
+	}
 
-    @Override
-    public void sort() {
-        controller.sort();
-    }
+	@Override
+	public void clearSorts() {
+		controller.clearSorts();
+	}
 
-    @Override
-    public void setFilter(final Object key, final ColumnDefinition<V> column, final BiPredicate<V, Supplier<Object>> filter,
-                          final boolean reinforcing) {
-        controller.setFilter(key, column, filter, reinforcing);
-    }
+	@Override
+	public void sort() {
+		controller.sort();
+	}
 
-    @Override
-    public void setFilter(final Object key, final String id, final Predicate<V> filter, final boolean reinforcing) {
-        controller.setFilter(key, id, filter, reinforcing);
-    }
+	@Override
+	public void setFilter(final Object key, final ColumnDefinition<V> column,
+			final BiPredicate<V, Supplier<Object>> filter, boolean isActive, final boolean reinforcing) {
+		controller.setFilter(key, column, filter, isActive, reinforcing);
+	}
 
-    @Override
-    public void clearFilter(final Object key) {
-        controller.clearFilter(key);
-    }
+	@Override
+	public void setFilter(final Object key, final String id, final Predicate<V> filter, final boolean isActive,
+			final boolean reinforcing) {
+		controller.setFilter(key, id, filter, isActive, reinforcing);
+	}
 
-    @Override
-    public void clearFilters(final ColumnDefinition<V> column) {
-        controller.clearFilters(column);
-    }
+	@Override
+	public void clearFilter(final Object key) {
+		controller.clearFilter(key);
+	}
 
-    @Override
-    public void clearFilters() {
-        controller.clearFilters();
-    }
+	@Override
+	public void clearFilters(final ColumnDefinition<V> column) {
+		controller.clearFilters(column);
+	}
 
-    @Override
-    public void setConfig(final DataGridConfig<V> config) {
-        controller.setConfig(config);
-    }
+	@Override
+	public void clearFilters() {
+		controller.clearFilters();
+	}
 
-    @Override
-    public void setAdapter(final DataGridAdapter<K, V> adapter) {
-        controller.setAdapter(adapter);
-    }
+	@Override
+	public void setConfig(final DataGridConfig<V> config) {
+		controller.setConfig(config);
+	}
 
-    @Override
-    public DataGridController<K, V> get() {
-        return controller.get();
-    }
+	@Override
+	public void setAdapter(final DataGridAdapter<K, V> adapter) {
+		controller.setAdapter(adapter);
+	}
 
-    @Override
-    public void setListener(final DataGridControllerListener<V> listener) {
-        controller.setListener(listener);
-    }
+	@Override
+	public DataGridController<K, V> get() {
+		return controller.get();
+	}
 
-    @Override
-    public void clearRenderingHelpers(final ColumnDefinition<V> column) {
-        controller.clearRenderingHelpers(column);
-    }
+	@Override
+	public void setListener(final DataGridControllerListener<V> listener) {
+		controller.setListener(listener);
+	}
 
-    @Override
-    public void clearRenderingHelper(final ColumnDefinition<V> column, final K key) {
-        controller.clearRenderingHelper(column, key);
-    }
+	@Override
+	public void clearRenderingHelpers(final ColumnDefinition<V> column) {
+		controller.clearRenderingHelpers(column);
+	}
 
-    @Override
-    public int getRowCount() {
-        return controller.getRowCount();
-    }
+	@Override
+	public void clearRenderingHelper(final ColumnDefinition<V> column, final K key) {
+		controller.clearRenderingHelper(column, key);
+	}
 
-    @Override
-    public void enrichConfigBuilder(final DataGridConfigBuilder<V> builder) {
-        controller.enrichConfigBuilder(builder);
-    }
+	@Override
+	public int getRowCount() {
+		return controller.getRowCount();
+	}
 
-    @Override
+	@Override
+	public void enrichConfigBuilder(final DataGridConfigBuilder<V> builder) {
+		controller.enrichConfigBuilder(builder);
+	}
+
+	@Override
     public void prepareLiveDataOnScreen(final int dataSrcRowIndex, final int dataSize, final DataGridSnapshot threadSnapshot,
-                                        final Consumer<Pair<DefaultDataGridController<K, V>.DataSrcResult, Throwable>> consumer) {
-        controller.prepareLiveDataOnScreen(dataSrcRowIndex, dataSize, threadSnapshot, consumer);
-    }
+			final Consumer<Pair<DefaultDataGridController<K, V>.DataSrcResult, Throwable>> consumer) {
+		controller.prepareLiveDataOnScreen(dataSrcRowIndex, dataSize, threadSnapshot, consumer);
+	}
 
-    @Override
-    public void refreshOnNextDraw() {
-        controller.refreshOnNextDraw();
-    }
+	@Override
+	public void refreshOnNextDraw() {
+		controller.refreshOnNextDraw();
+	}
 
-    @Override
-    public void refresh() {
-        controller.refresh();
-    }
+	@Override
+	public void refresh() {
+		controller.refresh();
+	}
 }

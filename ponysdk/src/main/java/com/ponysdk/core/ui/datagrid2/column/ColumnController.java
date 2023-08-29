@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.ui.datagrid2.column;
 
+import java.util.List;
 import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 
@@ -54,6 +55,7 @@ public interface ColumnController<V> {
      *            arguments are the model value and a {@code Supplier}
      *            that provides the rendering helper that was supplied
      *            by {@link ColumnDefinition#getRenderingHelper(Object)}
+     * @param values a {@code Supplier} that provide values uses by filter
      * @param reinforcing {@code true} if the predicate is at least as
      *            intolerant as the replaced predicate of the same key
      *            (i.e. the predicate doesn't accept any value that was
@@ -64,7 +66,7 @@ public interface ColumnController<V> {
      *            replacing an existing one, the value of the
      *            {@code reinforcing} argument has no impact.
      */
-    void filter(Object key, BiPredicate<V, Supplier<Object>> filter, boolean reinforcing);
+    void filter(Object key, BiPredicate<V, Supplier<Object>> filter, boolean isActive, boolean reinforcing);
 
     /**
      * Cancels the filter, corresponding to {@code key}, from the view

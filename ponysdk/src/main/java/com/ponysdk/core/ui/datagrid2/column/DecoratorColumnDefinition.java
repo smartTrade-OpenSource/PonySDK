@@ -179,4 +179,9 @@ public class DecoratorColumnDefinition<V> implements ColumnDefinition<V> {
     public void onMoved() {
         column.onMoved();
     }
+
+	@Override
+	public String getGroup() {
+		return column.getGroup();
+	}
 }

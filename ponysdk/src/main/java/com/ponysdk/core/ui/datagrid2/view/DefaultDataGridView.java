@@ -665,10 +665,10 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
     }
 
     @Override
-    public void setFilter(final Object key, final String id, final Predicate<V> filter, final boolean reinforcing) {
+    public void setFilter(final Object key, final String id, final Predicate<V> filter, boolean isActive, final boolean reinforcing) {
         showLoadingDataView();
         filters.add(key.hashCode());
-        controller.setFilter(key, id, filter, reinforcing);
+        controller.setFilter(key, id, filter, isActive, reinforcing);
         addon.scrollToTop();
         draw();
     }
@@ -1342,10 +1342,10 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         }
 
         @Override
-        public void filter(final Object key, final BiPredicate<V, Supplier<Object>> filter, final boolean reinforcing) {
+        public void filter(final Object key, final BiPredicate<V, Supplier<Object>> filter,boolean isActive, final boolean reinforcing) {
             if (!columnView.column.isFilterable()) return;
             showLoadingDataView();
-            controller.setFilter(key, columnView.column, filter, reinforcing);
+            controller.setFilter(key, columnView.column, filter, isActive, reinforcing);
             draw();
             for (final ColumnActionListener<V> listener : columnView.listeners) {
                 listener.onFilter(key, filter, reinforcing);

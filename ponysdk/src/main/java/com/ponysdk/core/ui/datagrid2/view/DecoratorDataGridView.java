@@ -103,8 +103,8 @@ public class DecoratorDataGridView<K, V> implements DataGridView<K, V> {
     }
 
     @Override
-    public void setFilter(final Object key, final String id, final Predicate<V> filter, final boolean reinforcing) {
-        view.setFilter(key, id, filter, reinforcing);
+    public void setFilter(final Object key, final String id, final Predicate<V> filter, boolean isActive, final boolean reinforcing) {
+        view.setFilter(key, id, filter, isActive, reinforcing);
     }
 
     @Override

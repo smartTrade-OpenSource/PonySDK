@@ -133,6 +133,11 @@ public interface DataGridView<K, V> extends IsPWidget {
      * @param filter
      *            a predicate that decides whether a value is accepted
      *            or filtered
+     * @param isActive
+     *            specifies if filter is active (has values set) 
+     * @param values
+     * 			  a supplier that provide values used by filter to accept
+     * 			  or not
      * @param reinforcing
      *            {@code true} if the predicate is at least as
      *            intolerant as the replaced predicate of the same key
@@ -144,7 +149,7 @@ public interface DataGridView<K, V> extends IsPWidget {
      *            replacing an existing one, the value of the
      *            {@code reinforcing} argument has no impact.
      */
-    void setFilter(Object key, String id, Predicate<V> filter, boolean reinforcing);
+    void setFilter(Object key, String id, Predicate<V> filter, boolean isActive, boolean reinforcing);
 
     /**
      * Adds/replaces a sorting criterion for the view.

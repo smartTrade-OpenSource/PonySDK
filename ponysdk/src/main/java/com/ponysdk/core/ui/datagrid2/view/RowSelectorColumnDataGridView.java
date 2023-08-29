@@ -322,5 +322,10 @@ public class RowSelectorColumnDataGridView<K, V> extends DecoratorDataGridView<K
         @Override
         public void onMoved() {
         }
+
+		@Override
+		public String getGroup() {
+			return null;
+		}
     }
 }

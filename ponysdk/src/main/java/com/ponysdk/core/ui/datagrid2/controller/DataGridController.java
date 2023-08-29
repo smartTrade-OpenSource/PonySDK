@@ -47,154 +47,155 @@ import com.ponysdk.core.util.Pair;
 
 public interface DataGridController<K, V> {
 
-    void renderCell(ColumnDefinition<V> column, Cell<V, ?> widget, V data);
+	void renderCell(ColumnDefinition<V> column, Cell<V, ?> widget, V data);
 
-    boolean isSelected(K k);
+	boolean isSelected(K k);
 
-    boolean isSelectable(K k);
+	boolean isSelectable(K k);
 
-    public PResultSet<V> getFilteredData();
+	public PResultSet<V> getFilteredData();
 
-    public PResultSet<V> getLiveSelectedData();
-    
-    public PResultSet<V> getLastRequestedData();
+	public PResultSet<V> getLiveSelectedData();
 
-    /**
-     *
-     * @return the number of selected data
-     */
-    int getLiveSelectedDataCount();
+	public PResultSet<V> getLastRequestedData();
 
-    Collection<V> getLiveData(int from, int dataSize);
+	/**
+	 *
+	 * @return the number of selected data
+	 */
+	int getLiveSelectedDataCount();
 
-    void select(K k);
+	Collection<V> getLiveData(int from, int dataSize);
 
-    void unselect(K k);
+	void select(K k);
 
-    void selectAllLiveData();
+	void unselect(K k);
 
-    void unselectAllData();
+	void selectAllLiveData();
 
-    void addSort(ColumnDefinition<V> column, boolean asc);
+	void unselectAllData();
 
-    void addSort(Object key, Comparator<V> comparator);
+	void addSort(ColumnDefinition<V> column, boolean asc);
 
-    // FIXME a better solution can be an insert with a specified index
-    void addPrimarySort(Object key, Comparator<V> comparator);
+	void addSort(Object key, Comparator<V> comparator);
 
-    void clearSort(Object key);
+	// FIXME a better solution can be an insert with a specified index
+	void addPrimarySort(Object key, Comparator<V> comparator);
 
-    void clearSort(ColumnDefinition<V> column);
+	void clearSort(Object key);
 
-    void clearSorts();
+	void clearSort(ColumnDefinition<V> column);
 
-    void sort();
+	void clearSorts();
 
-    void setFilter(Object key, ColumnDefinition<V> column, BiPredicate<V, Supplier<Object>> filter, boolean reinforcing);
+	void sort();
 
-    void setFilter(Object key, String id, Predicate<V> filter, boolean reinforcing);
+	void setFilter(Object key, ColumnDefinition<V> column, BiPredicate<V, Supplier<Object>> filter, boolean isActive,
+			boolean reinforcing);
 
-    void clearFilter(Object key);
+	void setFilter(Object key, String id, Predicate<V> filter, boolean isActive, boolean reinforcing);
 
-    void clearFilters(ColumnDefinition<V> column);
+	void clearFilter(Object key);
 
-    void clearFilters();
+	void clearFilters(ColumnDefinition<V> column);
 
-    void setConfig(DataGridConfig<V> config);
+	void clearFilters();
 
-    void setAdapter(DataGridAdapter<K, V> adapter);
+	void setConfig(DataGridConfig<V> config);
 
-    DataGridController<K, V> get();
+	void setAdapter(DataGridAdapter<K, V> adapter);
 
-    void setListener(DataGridControllerListener<V> listener);
+	DataGridController<K, V> get();
 
-    void clearRenderingHelpers(ColumnDefinition<V> column);
+	void setListener(DataGridControllerListener<V> listener);
 
-    void clearRenderingHelper(ColumnDefinition<V> column, final K key);
+	void clearRenderingHelpers(ColumnDefinition<V> column);
 
-    int getRowCount();
+	void clearRenderingHelper(ColumnDefinition<V> column, final K key);
 
-    void enrichConfigBuilder(DataGridConfigBuilder<V> builder);
+	int getRowCount();
 
-    /**
-     * Performs a full refresh; i.e. same as {@link #refreshOnNextDraw()} but with a forced redraw on
-     * {@link DataGridView} afterwards.
-     */
-    void refresh();
+	void enrichConfigBuilder(DataGridConfigBuilder<V> builder);
 
-    /**
+	/**
+	 * Performs a full refresh; i.e. same as {@link #refreshOnNextDraw()} but with a
+	 * forced redraw on {@link DataGridView} afterwards.
+	 */
+	void refresh();
+
+	/**
      * Ensures that all data will be refreshed during the next draw performed on {@link DataGridView} but without
      * performing it immediately.<br>
-     * <br>
+	 * <br>
      * Indeed, a performance mechanism limits the rows which gets refreshed during a draw and this refresh ensures the
      * whole dataset will be refreshed.<br>
-     * <br>
-     *
+	 * <br>
+	 *
      * splits the data in 2 zones: a constant one and a variable one.
      * The variable zone is the only one that gets updated during a draw and it is constantly narrowed down for better
      * performance.<br>
-     * <br>
+	 * <br>
      * This refresh will grow the variable zone on the whole dataset so that it gets updated next time but it will not
      * force any redraw.
-     */
-    void refreshOnNextDraw();
+	 */
+	void refreshOnNextDraw();
 
-    /**
-     * Send a partially filled object to the dataSource. The object will return
+	/**
+	 * Send a partially filled object to the dataSource. The object will return
      * filled with the needed data for the view, and with updated fields
      * sometimes
-     */
-    void prepareLiveDataOnScreen(int dataSrcRowIndex, int dataSize, DataGridSnapshot threadSnapshot,
-                                 Consumer<Pair<DefaultDataGridController<K, V>.DataSrcResult, Throwable>> consumer);
+	 */
+	void prepareLiveDataOnScreen(int dataSrcRowIndex, int dataSize, DataGridSnapshot threadSnapshot,
+			Consumer<Pair<DefaultDataGridController<K, V>.DataSrcResult, Throwable>> consumer);
 
-    /**
-     * Insert or replace the value
-     */
-    void setData(V v);
+	/**
+	 * Insert or replace the value
+	 */
+	void setData(V v);
 
-    /**
-     * Insert or replace the collection of values
-     *
-     * @param c
-     */
-    void setData(Collection<V> c);
+	/**
+	 * Insert or replace the collection of values
+	 *
+	 * @param c
+	 */
+	void setData(Collection<V> c);
 
-    /**
+	/**
      * Update an existing value identified by key {@code k}, if it is present,
      * using the {@code updater}
-     */
-    void updateData(K k, Consumer<V> updater);
+	 */
+	void updateData(K k, Consumer<V> updater);
 
-    /**
+	/**
      * Update existing values identified by the key, if they are present, using
      * the {@code updaters}
-     */
-    void updateData(Map<K, Consumer<V>> updaters);
+	 */
+	void updateData(Map<K, Consumer<V>> updaters);
 
-    /**
+	/**
      * Returns the value to which the specified key is mapped, or {@code null}
      * if this model contains no mapping for the key.
-     */
-    V getData(K k);
+	 */
+	V getData(K k);
 
-    /**
+	/**
      * Removes the value identified by the key {@code k} from this model if it
      * is present
-     */
-    V removeData(K k);
+	 */
+	V removeData(K k);
 
-    /**
+	/**
      * If {@code bound} is true (default), the view is notified when the model
      * is updated. Otherwise, the view is not notified but it will continue to
      * see the most recent version of the model
-     *
-     * @param bound
-     */
-    void setBound(boolean bound);
+	 *
+	 * @param bound
+	 */
+	void setBound(boolean bound);
 
-    /**
-     * Whether the model is bound to the view.
-     */
-    boolean getBound();
+	/**
+	 * Whether the model is bound to the view.
+	 */
+	boolean getBound();
 
 }

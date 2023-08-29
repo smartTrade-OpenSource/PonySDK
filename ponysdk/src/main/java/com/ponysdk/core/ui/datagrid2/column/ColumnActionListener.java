@@ -48,7 +48,7 @@ public interface ColumnActionListener<V> {
     /**
      * Called when this column is filtered
      *
-     * @see ColumnController#filter(Object, BiPredicate, boolean)
+     * @see ColumnController#filter(Object, BiPredicate, Supplier, boolean)
      */
     void onFilter(Object key, BiPredicate<V, Supplier<Object>> filter, boolean reinforcing);
 
