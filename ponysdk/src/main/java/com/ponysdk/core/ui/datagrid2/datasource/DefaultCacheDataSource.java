@@ -23,16 +23,6 @@
 
 package com.ponysdk.core.ui.datagrid2.datasource;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-
 import com.ponysdk.core.server.service.query.PResultSet;
 import com.ponysdk.core.ui.datagrid2.data.AbstractFilter;
 import com.ponysdk.core.ui.datagrid2.data.DefaultRow;
@@ -40,21 +30,25 @@ import com.ponysdk.core.ui.datagrid2.data.Interval;
 import com.ponysdk.core.ui.datagrid2.data.LiveDataView;
 import com.ponysdk.core.util.MappedList;
 
+import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+
 public class DefaultCacheDataSource<K, V> extends AbstractDataSource<K, V> {
 
     private final Map<K, DefaultRow<V>> cache = new HashMap<>();
     private final List<DefaultRow<V>> liveData = new ArrayList<>();
     private final List<DefaultRow<V>> lastRequestedData = new ArrayList<>();
-    
+
     @Override
     public PResultSet<V> getFilteredData() {
-        //return a copy to avoid concurrent modification exception
+        // return a copy to avoid concurrent modification exception
         return PResultSet.of(new MappedList<>(new ArrayList<>(liveData), DefaultRow::getData));
     }
-    
+
     @Override
     public PResultSet<V> getLastRequestedData() {
-    	return PResultSet.of(new MappedList<>(new ArrayList<>(lastRequestedData), DefaultRow::getData));
+        return PResultSet.of(new MappedList<>(new ArrayList<>(lastRequestedData), DefaultRow::getData));
     }
 
     @Override
@@ -77,7 +71,7 @@ public class DefaultCacheDataSource<K, V> extends AbstractDataSource<K, V> {
         dataSize = dataSrcRowIndex + dataSize > liveData.size() ? liveData.size() - dataSrcRowIndex : dataSize;
         lastRequestedData.clear();
         for (int i = dataSrcRowIndex; i < dataSrcRowIndex + dataSize; i++) {
-        	lastRequestedData.add(liveData.get(i));
+            lastRequestedData.add(liveData.get(i));
         }
         return new LiveDataView<>(getRowCount(), lastRequestedData);
     }
@@ -149,8 +143,7 @@ public class DefaultCacheDataSource<K, V> extends AbstractDataSource<K, V> {
         return new Interval(rowIndex, liveData.size());
     }
 
-    private Interval onWasAcceptedAndRemoved(final boolean selected, final DefaultRow<V> row, final int oldLiveDataSize,
-                                             final int oldRowIndex) {
+    private Interval onWasAcceptedAndRemoved(final boolean selected, final DefaultRow<V> row, final int oldLiveDataSize, final int oldRowIndex) {
         clearRenderingHelpers(row);
         if (accept(row)) {
             final int rowIndex = insertRow(liveData, row);
@@ -225,35 +218,31 @@ public class DefaultCacheDataSource<K, V> extends AbstractDataSource<K, V> {
 
     @Override
     public void setFilter(Object key, final String id, final boolean reinforcing, final AbstractFilter<V> filter) {
-        key = key.toString();
-        final AbstractFilter<V> oldFilter = filters.put(key, filter);
+        final AbstractFilter<V> oldFilter = filterController.addFilter(key.toString(), filter);
         if (oldFilter == null || reinforcing) {
-            reinforceFilter(liveData, filter);
-            reinforceFilter(liveSelectedData, filter);
+            // We need to apply filter(s) on all rows because a single change on a filter
+            // can change the acceptance state of a row that is already rejected by the
+            // group,
+            // so we need to use cache instead of liveData
+            reinforceFilter(cache.values());
         } else {
             resetLiveData();
         }
     }
 
-    private int reinforceFilter(final List<DefaultRow<V>> rows, final AbstractFilter<V> filter) {
-        final Iterator<DefaultRow<V>> iterator = rows.iterator();
+    private int reinforceFilter(final Collection<DefaultRow<V>> collection) {
+        final Iterator<DefaultRow<V>> iterator = collection.iterator();
         int from = -1;
         for (int i = 0; iterator.hasNext(); i++) {
             final DefaultRow<V> row = iterator.next();
-            if (!filter.test(row)) {
+            if (!accept(row)) {
                 row.setAcceptance(false);
-                iterator.remove();
+                liveSelectedData.remove(row);
+                liveData.remove(row);
                 if (from < 0) from = i;
             }
         }
         return from;
-    }
-
-    private boolean accept(final DefaultRow<V> row) {
-        for (final AbstractFilter<V> filter : filters.values()) {
-            if (!filter.test(row)) return false;
-        }
-        return true;
     }
 
     @Override
@@ -271,4 +260,5 @@ public class DefaultCacheDataSource<K, V> extends AbstractDataSource<K, V> {
         final int i = removeRow(liveSelectedData, row);
         return new Interval(i, i);
     }
+
 }

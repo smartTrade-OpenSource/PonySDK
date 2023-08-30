@@ -23,46 +23,15 @@
 
 package com.ponysdk.core.ui.datagrid2.view;
 
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.BiPredicate;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
-
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.PScheduler;
 import com.ponysdk.core.server.concurrent.PScheduler.UIRunnable;
 import com.ponysdk.core.server.service.query.PResultSet;
-import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.IsPWidget;
-import com.ponysdk.core.ui.basic.PAddOnComposite;
-import com.ponysdk.core.ui.basic.PComplexPanel;
-import com.ponysdk.core.ui.basic.PElement;
-import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
-import com.ponysdk.core.ui.datagrid2.cell.Cell;
-import com.ponysdk.core.ui.datagrid2.cell.ExtendedCell;
-import com.ponysdk.core.ui.datagrid2.cell.ExtendedCellController;
-import com.ponysdk.core.ui.datagrid2.cell.PrimaryCell;
-import com.ponysdk.core.ui.datagrid2.cell.PrimaryCellController;
+import com.ponysdk.core.ui.datagrid2.cell.*;
 import com.ponysdk.core.ui.datagrid2.column.ColumnActionListener;
 import com.ponysdk.core.ui.datagrid2.column.ColumnController;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
@@ -84,6 +53,14 @@ import com.ponysdk.core.ui.datagrid2.datasource.DataGridSource;
 import com.ponysdk.core.ui.datagrid2.datasource.DefaultCacheDataSource;
 import com.ponysdk.core.util.Pair;
 import com.ponysdk.core.util.SetUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import java.time.Duration;
+import java.util.*;
+import java.util.function.*;
 
 /**
  * @author mbagdouri
@@ -665,10 +642,10 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
     }
 
     @Override
-    public void setFilter(final Object key, final String id, final Predicate<V> filter, final boolean reinforcing) {
+    public void setFilter(final Object key, final String id, final Predicate<V> filter, boolean isActive, final boolean reinforcing) {
         showLoadingDataView();
         filters.add(key.hashCode());
-        controller.setFilter(key, id, filter, reinforcing);
+        controller.setFilter(key, id, filter, isActive, reinforcing);
         addon.scrollToTop();
         draw();
     }
@@ -1342,10 +1319,10 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         }
 
         @Override
-        public void filter(final Object key, final BiPredicate<V, Supplier<Object>> filter, final boolean reinforcing) {
+        public void filter(final Object key, final BiPredicate<V, Supplier<Object>> filter, boolean isActive, final boolean reinforcing) {
             if (!columnView.column.isFilterable()) return;
             showLoadingDataView();
-            controller.setFilter(key, columnView.column, filter, reinforcing);
+            controller.setFilter(key, columnView.column, filter, isActive, reinforcing);
             draw();
             for (final ColumnActionListener<V> listener : columnView.listeners) {
                 listener.onFilter(key, filter, reinforcing);

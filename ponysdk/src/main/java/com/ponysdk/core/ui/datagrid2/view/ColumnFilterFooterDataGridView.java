@@ -23,11 +23,6 @@
 
 package com.ponysdk.core.ui.datagrid2.view;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
@@ -40,6 +35,11 @@ import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.column.DecoratorColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfig;
 import com.ponysdk.core.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author mbagdouri
@@ -225,7 +225,7 @@ public class ColumnFilterFooterDataGridView<K, V> extends DecoratorDataGridView<
             if (grip == null) return;
             if (filter.isEmpty()) grip.clearFilter(FilterFooterColumn.this);
             else grip.filter(FilterFooterColumn.this,
-                (data, helper) -> StringUtils.containsIgnoreCase(helper.get().toString(), newFilter), reinforcing);
+                    (data, helper) -> StringUtils.containsIgnoreCase(helper.get().toString(), newFilter), true, reinforcing);
         }
 
         @Override

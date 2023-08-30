@@ -23,14 +23,6 @@
 
 package com.ponysdk.core.ui.datagrid2.controller;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Map;
-import java.util.function.BiPredicate;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
-
 import com.ponysdk.core.server.service.query.PResultSet;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.cell.Cell;
@@ -40,6 +32,14 @@ import com.ponysdk.core.ui.datagrid2.config.DataGridConfigBuilder;
 import com.ponysdk.core.ui.datagrid2.view.DataGridSnapshot;
 import com.ponysdk.core.ui.datagrid2.view.DataGridView;
 import com.ponysdk.core.util.Pair;
+
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.function.BiPredicate;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /**
  * @author mbagdouri
@@ -53,14 +53,13 @@ public interface DataGridController<K, V> {
 
     boolean isSelectable(K k);
 
-    public PResultSet<V> getFilteredData();
+    PResultSet<V> getFilteredData();
 
-    public PResultSet<V> getLiveSelectedData();
-    
-    public PResultSet<V> getLastRequestedData();
+    PResultSet<V> getLiveSelectedData();
+
+    PResultSet<V> getLastRequestedData();
 
     /**
-     *
      * @return the number of selected data
      */
     int getLiveSelectedDataCount();
@@ -90,9 +89,10 @@ public interface DataGridController<K, V> {
 
     void sort();
 
-    void setFilter(Object key, ColumnDefinition<V> column, BiPredicate<V, Supplier<Object>> filter, boolean reinforcing);
+    void setFilter(Object key, ColumnDefinition<V> column, BiPredicate<V, Supplier<Object>> filter, boolean isActive,
+                   boolean reinforcing);
 
-    void setFilter(Object key, String id, Predicate<V> filter, boolean reinforcing);
+    void setFilter(Object key, String id, Predicate<V> filter, boolean isActive, boolean reinforcing);
 
     void clearFilter(Object key);
 
@@ -117,8 +117,8 @@ public interface DataGridController<K, V> {
     void enrichConfigBuilder(DataGridConfigBuilder<V> builder);
 
     /**
-     * Performs a full refresh; i.e. same as {@link #refreshOnNextDraw()} but with a forced redraw on
-     * {@link DataGridView} afterwards.
+     * Performs a full refresh; i.e. same as {@link #refreshOnNextDraw()} but with a
+     * forced redraw on {@link DataGridView} afterwards.
      */
     void refresh();
 
@@ -129,7 +129,7 @@ public interface DataGridController<K, V> {
      * Indeed, a performance mechanism limits the rows which gets refreshed during a draw and this refresh ensures the
      * whole dataset will be refreshed.<br>
      * <br>
-     *
+     * <p>
      * splits the data in 2 zones: a constant one and a variable one.
      * The variable zone is the only one that gets updated during a draw and it is constantly narrowed down for better
      * performance.<br>
@@ -184,6 +184,11 @@ public interface DataGridController<K, V> {
     V removeData(K k);
 
     /**
+     * Whether the model is bound to the view.
+     */
+    boolean getBound();
+
+    /**
      * If {@code bound} is true (default), the view is notified when the model
      * is updated. Otherwise, the view is not notified but it will continue to
      * see the most recent version of the model
@@ -191,10 +196,5 @@ public interface DataGridController<K, V> {
      * @param bound
      */
     void setBound(boolean bound);
-
-    /**
-     * Whether the model is bound to the view.
-     */
-    boolean getBound();
 
 }

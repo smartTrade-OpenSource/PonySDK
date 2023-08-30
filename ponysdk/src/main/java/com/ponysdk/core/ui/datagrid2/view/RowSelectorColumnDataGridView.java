@@ -23,13 +23,6 @@
 
 package com.ponysdk.core.ui.datagrid2.view;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.function.BiPredicate;
-import java.util.function.Supplier;
-
 import com.ponysdk.core.model.PCheckBoxState;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
@@ -45,6 +38,13 @@ import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfig;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfig.ColumnConfig;
 import com.ponysdk.core.ui.datagrid2.config.DecoratorDataGridConfig;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.function.BiPredicate;
+import java.util.function.Supplier;
 
 /**
  * @author mbagdouri
@@ -321,6 +321,11 @@ public class RowSelectorColumnDataGridView<K, V> extends DecoratorDataGridView<K
 
         @Override
         public void onMoved() {
+        }
+
+        @Override
+        public String getGroup() {
+            return null;
         }
     }
 }

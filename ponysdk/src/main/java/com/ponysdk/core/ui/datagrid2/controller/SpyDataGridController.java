@@ -23,14 +23,6 @@
 
 package com.ponysdk.core.ui.datagrid2.controller;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Map;
-import java.util.function.BiPredicate;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
-
 import com.ponysdk.core.server.service.query.PResultSet;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.cell.Cell;
@@ -39,6 +31,14 @@ import com.ponysdk.core.ui.datagrid2.config.DataGridConfig;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfigBuilder;
 import com.ponysdk.core.ui.datagrid2.view.DataGridSnapshot;
 import com.ponysdk.core.util.Pair;
+
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.function.BiPredicate;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /**
  * @author mbagdouri
@@ -91,15 +91,15 @@ public abstract class SpyDataGridController<K, V> implements DataGridController<
     }
 
     @Override
+    public boolean getBound() {
+        return controller.getBound();
+    }
+
+    @Override
     public void setBound(final boolean bound) {
         final boolean wasBound = controller.getBound();
         controller.setBound(bound);
         if (!wasBound && controller.getBound()) onDataUpdate();
-    }
-
-    @Override
-    public boolean getBound() {
-        return controller.getBound();
     }
 
     protected abstract void onDataUpdate();
@@ -128,7 +128,7 @@ public abstract class SpyDataGridController<K, V> implements DataGridController<
     public PResultSet<V> getLiveSelectedData() {
         return controller.getLiveSelectedData();
     }
-    
+
     @Override
     public PResultSet<V> getLastRequestedData() {
         return controller.getLastRequestedData();
@@ -200,14 +200,15 @@ public abstract class SpyDataGridController<K, V> implements DataGridController<
     }
 
     @Override
-    public void setFilter(final Object key, final ColumnDefinition<V> column, final BiPredicate<V, Supplier<Object>> filter,
-                          final boolean reinforcing) {
-        controller.setFilter(key, column, filter, reinforcing);
+    public void setFilter(final Object key, final ColumnDefinition<V> column,
+                          final BiPredicate<V, Supplier<Object>> filter, boolean isActive, final boolean reinforcing) {
+        controller.setFilter(key, column, filter, isActive, reinforcing);
     }
 
     @Override
-    public void setFilter(final Object key, final String id, final Predicate<V> filter, final boolean reinforcing) {
-        controller.setFilter(key, id, filter, reinforcing);
+    public void setFilter(final Object key, final String id, final Predicate<V> filter, final boolean isActive,
+                          final boolean reinforcing) {
+        controller.setFilter(key, id, filter, isActive, reinforcing);
     }
 
     @Override

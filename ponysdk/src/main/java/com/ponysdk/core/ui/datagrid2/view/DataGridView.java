@@ -20,11 +20,6 @@
 
 package com.ponysdk.core.ui.datagrid2.view;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.function.Function;
-import java.util.function.Predicate;
-
 import com.ponysdk.core.server.service.query.PResultSet;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
@@ -34,6 +29,11 @@ import com.ponysdk.core.ui.datagrid2.config.DataGridConfig;
 import com.ponysdk.core.ui.datagrid2.controller.DataGridController;
 import com.ponysdk.core.ui.datagrid2.data.RowAction;
 import com.ponysdk.core.ui.datagrid2.datasource.DataGridSource;
+
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * @author mbagdouri
@@ -127,24 +127,22 @@ public interface DataGridView<K, V> extends IsPWidget {
      * Adds/replaces a filter that accepts only data that meet the condition of
      * the {@link Predicate} {@code filter}.
      *
-     * @param key
-     *            an object that can be used to uniquely identify a
-     *            filter, so that it can be replaced or removed
-     * @param filter
-     *            a predicate that decides whether a value is accepted
-     *            or filtered
-     * @param reinforcing
-     *            {@code true} if the predicate is at least as
-     *            intolerant as the replaced predicate of the same key
-     *            (i.e. the predicate doesn't accept any value that was
-     *            not accepted by the replaced predicate), {@code false}
-     *            otherwise. This is an optimization that allows us to
-     *            avoid applying the predicate on values that we already
-     *            know will not be accepted. If this filter is not
-     *            replacing an existing one, the value of the
-     *            {@code reinforcing} argument has no impact.
+     * @param key         an object that can be used to uniquely identify a
+     *                    filter, so that it can be replaced or removed
+     * @param filter      a predicate that decides whether a value is accepted
+     *                    or filtered
+     * @param isActive    specifies if filter is active (has values set)
+     * @param reinforcing {@code true} if the predicate is at least as
+     *                    intolerant as the replaced predicate of the same key
+     *                    (i.e. the predicate doesn't accept any value that was
+     *                    not accepted by the replaced predicate), {@code false}
+     *                    otherwise. This is an optimization that allows us to
+     *                    avoid applying the predicate on values that we already
+     *                    know will not be accepted. If this filter is not
+     *                    replacing an existing one, the value of the
+     *                    {@code reinforcing} argument has no impact.
      */
-    void setFilter(Object key, String id, Predicate<V> filter, boolean reinforcing);
+    void setFilter(Object key, String id, Predicate<V> filter, boolean isActive, boolean reinforcing);
 
     /**
      * Adds/replaces a sorting criterion for the view.

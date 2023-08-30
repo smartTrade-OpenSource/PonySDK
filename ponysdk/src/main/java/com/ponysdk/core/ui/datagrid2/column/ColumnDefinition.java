@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.ui.datagrid2.column;
 
+import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 
 import com.ponysdk.core.ui.basic.IsPWidget;
@@ -87,7 +88,7 @@ public interface ColumnDefinition<V> extends ColumnActionListener<V> {
      * {@link ColumnDefinition#compare(Object, Supplier, Object, Supplier)} to
      * be used for sorting purposes, or inside the {@code BiPredicate} argument
      * of
-     * {@link ColumnController#filter(Object, java.util.function.BiPredicate, boolean)}
+     * {@link ColumnController#filter(Object, BiPredicate, boolean, boolean)}
      * to be used for filtering purposes.
      * For example: for a date column, this method can return a formatted
      * {@code String} of the date value, to avoid recalculating the
@@ -156,8 +157,7 @@ public interface ColumnDefinition<V> extends ColumnActionListener<V> {
     /**
      * @return {@code true} if data can be filtered based on this column,
      *         {@code false} otherwise
-     * @see ColumnController#filter(Object, java.util.function.BiPredicate,
-     *      boolean)
+     * @see ColumnController#filter(Object, BiPredicate, boolean, boolean) 
      */
     boolean isFilterable();
 
@@ -195,6 +195,11 @@ public interface ColumnDefinition<V> extends ColumnActionListener<V> {
      * @return the maximum width for this column
      */
     int getMaxWidth();
+    
+    /**
+     * @return the group that the column belongs to. Null if it is not affiliated with a group.
+     */
+    String getGroup();
 
     /**
      * The state of a column regarding its visibility and pinning.

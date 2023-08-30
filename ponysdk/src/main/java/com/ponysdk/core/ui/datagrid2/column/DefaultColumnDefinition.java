@@ -23,17 +23,17 @@
 
 package com.ponysdk.core.ui.datagrid2.column;
 
-import java.util.function.BiConsumer;
-import java.util.function.BiPredicate;
-import java.util.function.Function;
-import java.util.function.Supplier;
-
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PComplexPanel;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.datagrid2.cell.LabelCell;
 import com.ponysdk.core.ui.datagrid2.cell.PrimaryCell;
+
+import java.util.function.BiConsumer;
+import java.util.function.BiPredicate;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * @author mbagdouri
@@ -47,16 +47,21 @@ public class DefaultColumnDefinition<V> implements ColumnDefinition<V> {
     private final PLabel columnNameLabel = Element.newPLabel();
     private final PLabel pinLabel = Element.newPLabel();
     private final PLabel hideLabel = Element.newPLabel();
+    private final String group;
     private ColumnController<V> columnController;
     private Boolean sort;
     private State state = getDefaultState();
 
-    public DefaultColumnDefinition(final String columnName, final Function<V, Object> columnValueFn,
-            final BiConsumer<V, String> columnEditFn) {
+    public DefaultColumnDefinition(final String columnName, final Function<V, Object> columnValueFn, final BiConsumer<V, String> columnEditFn) {
+        this(columnName, columnValueFn, columnEditFn, null);
+    }
+
+    public DefaultColumnDefinition(final String columnName, final Function<V, Object> columnValueFn, final BiConsumer<V, String> columnEditFn, String group) {
         super();
         this.columnName = columnName;
         this.columnValueFn = columnValueFn;
         this.columnEditFn = columnEditFn;
+        this.group = group;
         initHeader();
     }
 
@@ -113,13 +118,13 @@ public class DefaultColumnDefinition<V> implements ColumnDefinition<V> {
     }
 
     @Override
-    public void setController(final ColumnController<V> columnController) {
-        this.columnController = columnController;
+    public ColumnController<V> getController() {
+        return columnController;
     }
 
     @Override
-    public ColumnController<V> getController() {
-        return columnController;
+    public void setController(final ColumnController<V> columnController) {
+        this.columnController = columnController;
     }
 
     @Override
@@ -222,5 +227,10 @@ public class DefaultColumnDefinition<V> implements ColumnDefinition<V> {
 
     @Override
     public void onMoved() {
+    }
+
+    @Override
+    public String getGroup() {
+        return group;
     }
 }

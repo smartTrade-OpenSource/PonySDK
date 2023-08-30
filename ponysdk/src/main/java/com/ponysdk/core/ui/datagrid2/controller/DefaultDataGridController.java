@@ -23,21 +23,6 @@
 
 package com.ponysdk.core.ui.datagrid2.controller;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.BiPredicate;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ponysdk.core.server.concurrent.PScheduler;
 import com.ponysdk.core.server.service.query.PResultSet;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
@@ -57,6 +42,15 @@ import com.ponysdk.core.ui.datagrid2.datasource.DataGridSource;
 import com.ponysdk.core.ui.datagrid2.view.DataGridSnapshot;
 import com.ponysdk.core.util.MappedList;
 import com.ponysdk.core.util.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.BiPredicate;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /**
  * @author mbagdouri
@@ -67,13 +61,15 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
 
     private static final Object NO_RENDERING_HELPER = new Object();
     private static final int RENDERING_HELPERS_CACHE_CAPACITY = 512;
-    private int columnCounter = 0;
     private final RenderingHelpersCache<V> renderingHelpersCache = new RenderingHelpersCache<>();
     private final Map<ColumnDefinition<V>, Column<V>> columns = new HashMap<>();
+    private final RenderingHelperSupplier renderingHelperSupplier1 = new RenderingHelperSupplier();
+    private final RenderingHelperSupplier renderingHelperSupplier2 = new RenderingHelperSupplier();
+    private final AtomicLong count = new AtomicLong();
+    private int columnCounter = 0;
     private DataGridControllerListener<V> listener;
     private DataGridAdapter<K, V> adapter;
     private boolean bound = true;
-
     /**
      * Data is split in 2 zones: a constant one and a variable one.
      * The variable zone is the only one that gets refreshed during a draw and it is constantly narrowed down for better
@@ -81,10 +77,9 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
      */
     private int from = Integer.MAX_VALUE;
     private int to = 0;
-    private final RenderingHelperSupplier renderingHelperSupplier1 = new RenderingHelperSupplier();
-    private final RenderingHelperSupplier renderingHelperSupplier2 = new RenderingHelperSupplier();
-    private DataGridSource<K, V> dataSource;
+    private final DataGridSource<K, V> dataSource;
     private DataGridSnapshot viewSnapshot;
+    private long lastProcessedID;
 
     public DefaultDataGridController(final DataGridSource<K, V> dataSource) {
         this.dataSource = dataSource;
@@ -168,10 +163,8 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     /**
      * Extends the variable zone (which is refreshed during a draw from the view) using from/to as data offsets.
      *
-     * @param from
-     *            the beginning offset of the variable zone
-     * @param to
-     *            the ending offset of the variable zone
+     * @param from the beginning offset of the variable zone
+     * @param to   the ending offset of the variable zone
      */
     private void refreshRows(final int from, final int to) {
         this.from = Math.min(this.from, from);
@@ -310,17 +303,18 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     }
 
     @Override
-    public void setFilter(final Object key, final ColumnDefinition<V> colDef, final BiPredicate<V, Supplier<Object>> biPredicate,
-                          final boolean reinforcing) {
+    public void setFilter(final Object key, final ColumnDefinition<V> colDef,
+                          final BiPredicate<V, Supplier<Object>> biPredicate, boolean isActive, final boolean reinforcing) {
         checkAdapter();
-        dataSource.setFilter(key, null, reinforcing, new ColumnFilter(colDef, biPredicate));
+        dataSource.setFilter(key, null, reinforcing, new ColumnFilter(colDef, biPredicate, isActive));
         resetLiveData();
     }
 
     @Override
-    public void setFilter(final Object key, final String id, final Predicate<V> predicate, final boolean reinforcing) {
+    public void setFilter(final Object key, final String id, final Predicate<V> predicate, boolean isActive,
+                          final boolean reinforcing) {
         checkAdapter();
-        dataSource.setFilter(key, id, reinforcing, new GeneralFilter(predicate));
+        dataSource.setFilter(key, id, reinforcing, new GeneralFilter(predicate, isActive));
         resetLiveData();
     }
 
@@ -338,30 +332,6 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
         dataSource.sort();
         refreshOnNextDraw();
     }
-
-    public class DataSrcResult {
-
-        public LiveDataView<V> liveDataView;
-        public int firstRowIndex;
-        public int start;
-
-        public DataSrcResult(final LiveDataView<V> liveDataView, final int firstRowIndex, final int start) {
-            this.liveDataView = liveDataView;
-            this.firstRowIndex = firstRowIndex;
-            this.start = start;
-        }
-
-		@Override
-		public String toString() {
-			return "DataSrcResult [liveDataView=" + liveDataView + ", firstRowIndex=" + firstRowIndex + ", start="
-					+ start + "]";
-		}
-        
-        
-    }
-
-    private final AtomicLong count = new AtomicLong();
-    private long lastProcessedID;
 
     @Override
     public void prepareLiveDataOnScreen(final int dataSrcRowIndex, final int dataSize, final DataGridSnapshot threadSnapshot, final Consumer<Pair<DataSrcResult, Throwable>> consumer) {
@@ -447,16 +417,16 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     }
 
     @Override
+    public boolean getBound() {
+        return bound;
+    }
+
+    @Override
     public void setBound(final boolean bound) {
         if (this.bound == bound) return;
         this.bound = bound;
         if (!bound || from >= to) return;
         doRefreshRows();
-    }
-
-    @Override
-    public boolean getBound() {
-        return bound;
     }
 
     @Override
@@ -478,10 +448,10 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     public PResultSet<V> getLiveSelectedData() {
         return dataSource.getLiveSelectedData();
     }
-    
+
     @Override
     public PResultSet<V> getLastRequestedData() {
-    	return dataSource.getLastRequestedData();
+        return dataSource.getLastRequestedData();
     }
 
     @Override
@@ -517,6 +487,34 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
         dataSource.unselectAllData();
     }
 
+    public static class RenderingHelpersCache<V> extends LinkedHashMap<V, Object[]> {
+
+        @Override
+        protected boolean removeEldestEntry(final Map.Entry<V, Object[]> eldest) {
+            return size() > RENDERING_HELPERS_CACHE_CAPACITY;
+        }
+    }
+
+    public class DataSrcResult {
+
+        public LiveDataView<V> liveDataView;
+        public int firstRowIndex;
+        public int start;
+
+        public DataSrcResult(final LiveDataView<V> liveDataView, final int firstRowIndex, final int start) {
+            this.liveDataView = liveDataView;
+            this.firstRowIndex = firstRowIndex;
+            this.start = start;
+        }
+
+        @Override
+        public String toString() {
+            return "DataSrcResult [liveDataView=" + liveDataView + ", firstRowIndex=" + firstRowIndex + ", start="
+                    + start + "]";
+        }
+
+    }
+
     private class RenderingHelperSupplier implements Supplier<Object> {
 
         private DefaultRow<V> row;
@@ -537,14 +535,6 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
             return getRenderingHelper(row.getData(), column);
         }
 
-    }
-
-    public static class RenderingHelpersCache<V> extends LinkedHashMap<V, Object[]> {
-
-        @Override
-        protected boolean removeEldestEntry(final Map.Entry<V, Object[]> eldest) {
-            return size() > RENDERING_HELPERS_CACHE_CAPACITY;
-        }
     }
 
     private class GeneralControllerSort implements Comparator<DefaultRow<V>> {
@@ -613,10 +603,12 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     private class GeneralFilter implements AbstractFilter<V> {
 
         private final Predicate<V> filter;
+        private final boolean isActive;
 
-        public GeneralFilter(final Predicate<V> filter) {
+        public GeneralFilter(final Predicate<V> filter, boolean isActive) {
             super();
             this.filter = filter;
+            this.isActive = isActive;
         }
 
         @Override
@@ -628,17 +620,25 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
         public ColumnDefinition<V> getColumnDefinition() {
             return null;
         }
+
+        @Override
+        public boolean isActive() {
+            return isActive;
+        }
     }
 
     private class ColumnFilter implements AbstractFilter<V> {
 
         private final Column<V> column;
         private final BiPredicate<V, Supplier<Object>> filter;
+        private final boolean isActive;
 
-        ColumnFilter(final ColumnDefinition<V> colDef, final BiPredicate<V, Supplier<Object>> filter) {
+        ColumnFilter(final ColumnDefinition<V> colDef, final BiPredicate<V, Supplier<Object>> filter,
+                     boolean isActive) {
             super();
             this.column = getColumn(colDef);
             this.filter = filter;
+            this.isActive = isActive;
         }
 
         @Override
@@ -654,6 +654,11 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
         @Override
         public ColumnDefinition<V> getColumnDefinition() {
             return column.getColDef();
+        }
+
+        @Override
+        public boolean isActive() {
+            return isActive;
         }
     }
 }

@@ -304,7 +304,7 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
         controller.setFilter(0, "", (row) -> {
             if (row.getId() % 2 == 0) return true;
             return false;
-        }, true);
+        }, true, true);
     }
 
     private void addSort(final DataGridController<Integer, MyRow> controller) {
@@ -413,7 +413,7 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
             return Integer.toString(id);
         }
 
-        int getId() {
+        protected int getId() {
             return id;
         }
 
