@@ -69,10 +69,10 @@ public interface InfiniteScrollProvider<D, W> {
     W handleUI(int index, D data, W w);
 
     /**
-     * Adding handler to widgets
+     * add callback to call when data change
      *
      * @param handler to add
      */
-    void addHandler(Consumer<D> handler);
+    void addHandler(Runnable handler);
 
 }
