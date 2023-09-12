@@ -73,6 +73,7 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
 
     private final InfiniteScrollProvider<D, W> dataProvider;
     private int fullSize;
+    private boolean forceDrawNextTime;
 
     /**
      * Creates an infiniteScrollAddon with the specified dataProvier
@@ -83,8 +84,8 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
     public InfiniteScrollAddon(final InfiniteScrollProvider<D, W> dataProvider) {
         super(Element.newPFlowPanel());
         this.dataProvider = dataProvider;
-        dataProvider.addHandler(e -> {
-            this.maxVisibleItems = this.maxVisibleItems - 1;
+        dataProvider.addHandler(() -> {
+        	forceDrawNextTime = true;
             this.refresh();
         });
 
@@ -183,7 +184,8 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
 
     private void setFullSize(final int fullSize) {
         if (this.fullSize != fullSize) {
-            final boolean forceDraw = this.fullSize == 0 || this.fullSize < maxVisibleItems;
+            final boolean forceDraw = forceDrawNextTime || this.fullSize == 0 || this.fullSize < maxVisibleItems;
+            forceDrawNextTime = false;
             this.fullSize = fullSize;
             if (forceDraw) {
                 this.beginIndex = 0;

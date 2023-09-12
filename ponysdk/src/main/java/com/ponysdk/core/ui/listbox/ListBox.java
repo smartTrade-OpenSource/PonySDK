@@ -1185,7 +1185,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         }
 
         @Override
-        public void addHandler(final Consumer<ListBoxItem<D>> handler) {
+        public void addHandler(Runnable handler) {
             // Nothing to do
         }
     }
