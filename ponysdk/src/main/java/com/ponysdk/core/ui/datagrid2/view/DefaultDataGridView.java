@@ -143,7 +143,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
     private Function<Throwable, String> exceptionHandler;
 
     private boolean shouldDraw = true;
-    private boolean refreshOnColumnVisibilityChanged = false;
+    private boolean refreshOnColumnVisibilityChanged = true;
     private boolean drawOnResume;
     private boolean forceExtended;
 
@@ -157,9 +157,9 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         controller = new DefaultDataGridController<>(dataSource);
         controller.setListener(this);
         controllerWrapper = new DataGridControllerWrapper<>(//
-                controller.get(), //
-                this::onDataUpdated, //
-                this::onDataRemoved);
+            controller.get(), //
+            this::onDataUpdated, //
+            this::onDataRemoved);
 
         root.addStyleName("pony-grid");
         root.setStyleProperty("display", "flex");
@@ -248,11 +248,6 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
     private static PComplexPanel prepareLoadingDataDiv() {
         final PComplexPanel loadingDataDiv = Element.newDiv();
         loadingDataDiv.addStyleName("pony-grid-loading-data");
-        loadingDataDiv.setStyleProperty("position", "absolute");
-        loadingDataDiv.setStyleProperty("top", "0px");
-        loadingDataDiv.setStyleProperty("left", "0px");
-        loadingDataDiv.setStyleProperty("width", "100%");
-        loadingDataDiv.setStyleProperty("height", "100%");
         return loadingDataDiv;
     }
 
@@ -283,7 +278,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
     }
 
     private void onScroll(final int row) {
-        showLoadingDataView();
+        hideErrorMessage();
         firstRowIndex = row;
         refresh();
     }
@@ -299,7 +294,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             hideLoadingDataView();
             return;
         }
-        showLoadingDataView();
+        hideErrorMessage();
         if (this.rows.size() < relRowCount) {
             for (int i = this.rows.size(); i < relRowCount; i++) {
                 rows.add(new Row(i));
@@ -321,7 +316,9 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             changed = changed || columnView.visible != visible;
             columnView.visible = visible;
         }
-        if (changed) refresh();
+        if (changed) {
+            onUpdateRows(0, rows.size());
+        }
     }
 
     private void onColumnResized(final int column, final int width) {
@@ -390,7 +387,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
 
     @Override
     public void refresh() {
-        showLoadingDataView();
+        hideErrorMessage();
         onUpdateRows(0, controller.getRowCount());
         draw();
     }
@@ -430,7 +427,8 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             final int size = unpinnedTable.body.getWidgetCount();
             final int start = Math.max(0, from - firstRowIndex);
             final DataGridSnapshot viewStateSnapshot = new DataGridSnapshot(firstRowIndex, size, start, sorts, filters);
-            final Consumer<Pair<DefaultDataGridController<K, V>.DataSrcResult, Throwable>> consumer = PScheduler.delegate(this::updateView);
+            final Consumer<Pair<DefaultDataGridController<K, V>.DataSrcResult, Throwable>> consumer = PScheduler
+                .delegate(this::updateView);
             controller.prepareLiveDataOnScreen(firstRowIndex, size, viewStateSnapshot, consumer);
         } catch (final Exception e) {
             log.error("Cannot draw data from data source", e);
@@ -466,7 +464,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             row.hide();
             row.key = null;
             row.data = null;
-            log.error("No data for row {}, actual row size is {}", row, rows.size());
+            log.debug("No data for row {}, actual row size is {}", row, rows.size());
             return;
         }
 
@@ -534,7 +532,8 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         }
     }
 
-    private void updateRowCells(final Row row, final List<CellManager<V>> cells, final List<ColumnView> columns, final boolean selected) {
+    private void updateRowCells(final Row row, final List<CellManager<V>> cells, final List<ColumnView> columns,
+                                final boolean selected) {
         for (int c = 0; c < cells.size(); c++) {
             final CellManager<V> cell = cells.get(c);
             final ColumnView column = columns.get(c);
@@ -586,7 +585,8 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         addon = new Addon();
         addon.setListenOnColumnVisibility(refreshOnColumnVisibilityChanged);
         for (final ColumnView columnView : columnViews.values()) {
-            addon.onColumnAdded(columnView.id, columnView.column.getMinWidth(), columnView.column.getMaxWidth(), columnView.state.isPinned());
+            addon.onColumnAdded(columnView.id, columnView.column.getMinWidth(), columnView.column.getMaxWidth(),
+                columnView.state.isPinned());
         }
     }
 
@@ -694,8 +694,9 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
     }
 
     @Override
-    public void setFilter(final Object key, final String id, final Predicate<V> filter, final boolean isActive, final boolean reinforcing) {
-        showLoadingDataView();
+    public void setFilter(final Object key, final String id, final Predicate<V> filter, final boolean isActive,
+                          final boolean reinforcing) {
+        hideErrorMessage();
         filters.add(key.hashCode());
         controller.setFilter(key, id, filter, isActive, reinforcing);
         addon.scrollToTop();
@@ -704,7 +705,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
 
     @Override
     public void clearFilter(final Object key) {
-        showLoadingDataView();
+        hideErrorMessage();
         filters.remove(key.hashCode());
         controller.clearFilter(key);
         addon.scrollToTop();
@@ -713,7 +714,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
 
     @Override
     public void clearFilters() {
-        showLoadingDataView();
+        hideErrorMessage();
         filters.clear();
         controller.clearFilters();
         addon.scrollToTop();
@@ -722,7 +723,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
 
     @Override
     public void clearSorts(final boolean notify) {
-        showLoadingDataView();
+        hideErrorMessage();
         controller.clearSorts();
         draw();
         if (notify) {
@@ -825,7 +826,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
     @Override
     public void setConfig(final DataGridConfig<V> config) {
         checkAdapter();
-        showLoadingDataView();
+        hideErrorMessage();
         final int relativeRowCount = rows.size();
         rows.clear();
         pinnedTable.clear();
@@ -902,11 +903,8 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
 
     }
 
-    private void showLoadingDataView() {
-        addon.showLoadingPanel();
+    private void hideErrorMessage() {
         errorMsgDiv.setVisible(false);
-        // show immediately the loadingPanel
-        UIContext.get().flush();
     }
 
     private void hideLoadingDataView() {
@@ -969,14 +967,14 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
 
     @Override
     public void addSort(final Object key, final Comparator<V> comparator) {
-        showLoadingDataView();
+        hideErrorMessage();
         controller.addSort(key, comparator);
         draw();
     }
 
     @Override
     public void clearSort(final Object key) {
-        showLoadingDataView();
+        hideErrorMessage();
         controller.clearSort(key);
         draw();
     }
@@ -1217,8 +1215,8 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             addHeaderCell(columnView);
             addFooterCell(columnView);
 
-            if (addon != null)
-                addon.onColumnAdded(columnView.id, columnView.column.getMinWidth(), columnView.column.getMaxWidth(), columnView.state.isPinned());
+            if (addon != null) addon.onColumnAdded(columnView.id, columnView.column.getMinWidth(), columnView.column.getMaxWidth(),
+                columnView.state.isPinned());
         }
 
         protected PComplexPanel addFooterCell(final ColumnView columnView) {
@@ -1347,7 +1345,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         @Override
         public void sort(final boolean asc) {
             if (!columnView.column.isSortable()) return;
-            showLoadingDataView();
+            hideErrorMessage();
             final int i = 0;
             sorts.put(i, asc ? 1 : 0);
             controller.addSort(columnView.column, asc);
@@ -1361,7 +1359,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         @Override
         public void clearSort() {
             if (!columnView.column.isSortable()) return;
-            showLoadingDataView();
+            hideErrorMessage();
             sorts.clear();
             controller.clearSort(columnView.column);
             draw();
@@ -1371,9 +1369,10 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         }
 
         @Override
-        public void filter(final Object key, final BiPredicate<V, Supplier<Object>> filter, final boolean isActive, final boolean reinforcing) {
+        public void filter(final Object key, final BiPredicate<V, Supplier<Object>> filter, final boolean isActive,
+                           final boolean reinforcing) {
             if (!columnView.column.isFilterable()) return;
-            showLoadingDataView();
+            hideErrorMessage();
             controller.setFilter(key, columnView.column, filter, isActive, reinforcing);
             draw();
             for (final ColumnActionListener<V> listener : columnView.listeners) {
@@ -1384,7 +1383,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         @Override
         public void clearFilter(final Object key) {
             if (!columnView.column.isFilterable()) return;
-            showLoadingDataView();
+            hideErrorMessage();
             controller.clearFilter(key);
             draw();
             for (final ColumnActionListener<V> listener : columnView.listeners) {
@@ -1394,7 +1393,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
 
         @Override
         public void redraw(final boolean clearRenderingHelpers) {
-            showLoadingDataView();
+            hideErrorMessage();
             if (clearRenderingHelpers) controller.clearRenderingHelpers(columnView.column);
             refresh();
             for (final ColumnActionListener<V> listener : columnView.listeners) {
@@ -1405,7 +1404,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         @Override
         public void clearFilters() {
             if (!columnView.column.isFilterable()) return;
-            showLoadingDataView();
+            hideErrorMessage();
             controller.clearFilters(columnView.column);
             draw();
             for (final ColumnActionListener<V> listener : columnView.listeners) {
@@ -1553,7 +1552,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
                     onColumnVisibilityChanged(json.getJsonArray(ADDON_COLUMN_ID), json.getJsonArray(ADDON_COLUMN_VISIBILITY));
                 } else if (json.containsKey(ADDON_COLUMN_WIDTH)) {
                     onColumnResized(json.getInt(ADDON_COLUMN_ID), //
-                            json.getInt(ADDON_COLUMN_WIDTH));
+                        json.getInt(ADDON_COLUMN_WIDTH));
                 } else if (json.containsKey(ADDON_COLUMN_TO)) {
                     onColumnMoved(json.getInt(ADDON_COLUMN_ID), json.getInt(ADDON_COLUMN_TO));
                 }

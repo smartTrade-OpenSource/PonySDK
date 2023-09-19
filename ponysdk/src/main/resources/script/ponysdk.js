@@ -529,21 +529,24 @@ _UTF8 = undefined;
             this.subBodyWidth = 0;
             this.resizeChecker = setInterval(this.checkHeight.bind(this), 250);
 
-            this.unpinnedFooter.addEventListener("scroll", function () {
+            this.unpinnedFooter.addEventListener("scroll", function (event) {
+                if(event == null) return;
                 var scrollLeft = that.unpinnedFooter.scrollLeft;
                 if (scrollLeft != that.unpinnedHeader.scrollLeft)
                     that.unpinnedHeader.scrollLeft = scrollLeft;
                 if (scrollLeft != that.unpinnedBody.scrollLeft)
                     that.unpinnedBody.scrollLeft = scrollLeft;
             });
-            this.unpinnedHeader.addEventListener("scroll", function () {
+            this.unpinnedHeader.addEventListener("scroll", function (event) {
+                if(event == null) return;
                 var scrollLeft = that.unpinnedHeader.scrollLeft;
                 if (scrollLeft != that.unpinnedFooter.scrollLeft)
                     that.unpinnedFooter.scrollLeft = scrollLeft;
                 if (scrollLeft != that.unpinnedBody.scrollLeft)
                     that.unpinnedBody.scrollLeft = scrollLeft;
             });
-            this.unpinnedBody.addEventListener("scroll", function () {
+            this.unpinnedBody.addEventListener("scroll", function (event) {
+                if(event == null) return;
                 var scrollLeft = that.unpinnedBody.scrollLeft;
                 if (scrollLeft != that.unpinnedHeader.scrollLeft)
                     that.unpinnedHeader.scrollLeft = scrollLeft;
@@ -603,7 +606,9 @@ _UTF8 = undefined;
         onRowMouseEnter: function (event) {
             var row = event.currentTarget;
             row.setAttribute('pony-hovered', '');
-            this.getOppositeRow(row).setAttribute('pony-hovered', '');
+            if(this.getOppositeRow(row) != undefined) {
+                this.getOppositeRow(row).setAttribute('pony-hovered', '');
+            }
         },
 
         onRowMouseLeave: function (event) {
@@ -624,9 +629,10 @@ _UTF8 = undefined;
 
         checkHeight: function () {
             var visibleHeight = $(this.body).height();
-            if (Math.abs(visibleHeight - this.viewHeight) < this.viewHeight * 0.01) {
+            if (visibleHeight == 0 || Math.abs(visibleHeight - this.viewHeight) < this.viewHeight * 0.01) {
                 return;
             }
+            this.showLoading(true);
             if (this.rowHeight == 0) {
                 this.updateRowHeight(0); // Initialize rowHeight...
                 if (this.rowHeight == 0) return;
@@ -636,7 +642,6 @@ _UTF8 = undefined;
                     }
                 }
             }
-            this.showLoading();
             this.viewHeight = visibleHeight;
             var c = ((visibleHeight / this.rowHeight) | 0) * 3;
             this.sendDataToServer({
@@ -644,7 +649,9 @@ _UTF8 = undefined;
             });
         },
 
-        checkPosition: function () {
+        checkPosition: function (event) {
+            if(event == null) return;
+            
             var marginTop = parseFloat(this.subBody.style.marginTop);
             var marginBottom = parseFloat(this.subBody.style.marginBottom);
             var pos = this.body.scrollTop;
@@ -652,10 +659,11 @@ _UTF8 = undefined;
             var visibleHeight = $(this.body).height();
             var fullHeight = contentHeight + marginTop + marginBottom;
             this.scrollRatio = pos / fullHeight;
-            if ((pos <= marginTop + contentHeight * 0.1 && this.firstRowIndex > 0) ||
-                ((pos + visibleHeight >= marginTop + contentHeight * 0.9) &&
-                    (this.firstRowIndex < this.absRowCount - this.relRowCount))) {
-                this.showLoading();
+            
+            let toTop = pos <= marginTop + contentHeight * 0.1 && this.firstRowIndex > 0;
+            let toBottom = (pos + visibleHeight >= marginTop + contentHeight * 0.9) && (this.firstRowIndex < this.absRowCount - this.relRowCount);
+            if (toBottom || toTop) {
+                this.showLoading(toBottom);
                 var r = Math.max(0, (this.absRowCount * this.scrollRatio) - this.relRowCount / 3) | 0;
                 this.sendDataToServer({
                     row: r
@@ -808,7 +816,14 @@ _UTF8 = undefined;
             }
         },
 
-        showLoading: function () {
+        showLoading: function (toBottom) {
+            if(toBottom) {
+                this.loadingData.classList.remove("pony-grid-loading-data-top");
+                this.loadingData.classList.add("pony-grid-loading-data-bottom");
+            } else {
+                this.loadingData.classList.add("pony-grid-loading-data-top");
+                this.loadingData.classList.remove("pony-grid-loading-data-bottom");
+            }
             this.loadingData.style.display = null;
         },
         hideLoading: function () {
