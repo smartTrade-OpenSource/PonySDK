@@ -477,7 +477,6 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             row.setData(rowData);
             row.key = adapter.getKey(rowData);
             row.show();
-
         }
 
         final boolean selected = controller.isSelected(row.key);

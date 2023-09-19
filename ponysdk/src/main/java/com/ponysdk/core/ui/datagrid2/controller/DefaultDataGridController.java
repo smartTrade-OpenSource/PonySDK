@@ -178,6 +178,12 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
         if (bound) doRefreshRows();
     }
 
+    private void updateRows(final int from, final int to) {
+        if (listener != null) {
+            listener.onUpdateRows(from, to);
+        }
+    }
+
     private void doRefreshRows() {
         try {
             if (listener != null) {
@@ -473,13 +479,13 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     @Override
     public void select(final K k) {
         final Interval interval = dataSource.select(k);
-        if (interval != null) refreshRows(interval.from, interval.to);
+        if (interval != null) updateRows(interval.from, interval.to);
     }
 
     @Override
     public void unselect(final K k) {
         final Interval interval = dataSource.unselect(k);
-        if (interval != null) refreshRows(interval.from, interval.to);
+        if (interval != null) updateRows(interval.from, interval.to);
     }
 
     @Override
