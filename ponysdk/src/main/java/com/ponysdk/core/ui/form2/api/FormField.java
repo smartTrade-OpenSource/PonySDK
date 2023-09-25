@@ -1,15 +1,19 @@
+
 package com.ponysdk.core.ui.form2.api;
+
+import java.util.Objects;
 
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PWidget;
 
-import java.util.Objects;
-
 public abstract class FormField<V> implements IsPWidget {
 
     private boolean initialized;
+
     private String caption;
+
     private String description;
+
     private V initialValue;
 
     private final FormFieldPanel panel = new FormFieldPanel();
@@ -90,9 +94,9 @@ public abstract class FormField<V> implements IsPWidget {
     public PWidget asWidget() {
         if (!initialized) {
             initialized = true;
-            final PWidget innerWidget = createInnerWidget();
+            final IsPWidget innerWidget = createInnerWidget();
             panel.addInnerWidget(innerWidget);
-            commit(); //set initial value
+            commit(); // set initial value
         }
         return panel;
     }
@@ -109,7 +113,7 @@ public abstract class FormField<V> implements IsPWidget {
         return initialValue;
     }
 
-    protected abstract PWidget createInnerWidget();
+    protected abstract IsPWidget createInnerWidget();
 
     public abstract void enable();
 
