@@ -36,7 +36,6 @@ import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import javax.json.JsonArray;
@@ -77,6 +76,7 @@ import com.ponysdk.core.ui.datagrid2.controller.DataGridController;
 import com.ponysdk.core.ui.datagrid2.controller.DataGridControllerListener;
 import com.ponysdk.core.ui.datagrid2.controller.DataGridControllerWrapper;
 import com.ponysdk.core.ui.datagrid2.controller.DefaultDataGridController;
+import com.ponysdk.core.ui.datagrid2.data.DataGridFilter;
 import com.ponysdk.core.ui.datagrid2.data.DefaultRow;
 import com.ponysdk.core.ui.datagrid2.data.LiveDataView;
 import com.ponysdk.core.ui.datagrid2.data.RowAction;
@@ -468,16 +468,15 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             return;
         }
 
-        final boolean mustUpdateRowHeight = (row.extended || !row.isShown()) && rowData != row.getData();
-
         final boolean dataHasChanged = row.getData() != rowData;
+        final boolean mustUpdateRowHeight = (row.extended || !row.isShown()) && rowData != row.getData();
+        final boolean selected = controller.isSelected(row.key);
+
         if (dataHasChanged) {
             row.setData(rowData);
             row.key = adapter.getKey(rowData);
-            row.show();
         }
-
-        final boolean selected = controller.isSelected(row.key);
+        row.show();
 
         updateRowCells(row, row.unpinnedCells, unpinnedTable.columns, selected);
         updateRowCells(row, row.pinnedCells, pinnedTable.columns, selected);
@@ -694,38 +693,59 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
     }
 
     @Override
-    public void setFilter(final Object key, final String id, final Predicate<V> filter, final boolean isActive,
-                          final boolean reinforcing) {
+    public void setFilter(final DataGridFilter<V> filter) {
         hideErrorMessage();
-        filters.add(key.hashCode());
-        controller.setFilter(key, id, filter, isActive, reinforcing);
+        filters.add(filter.getKey().hashCode());
+        controller.setBound(false);
+        controller.setFilter(filter);
         addon.scrollToTop();
-        draw();
+        controller.setBound(true);
+    }
+
+    @Override
+    public void setFilters(final Collection<DataGridFilter<V>> filters) {
+        hideErrorMessage();
+        filters.forEach(filter -> this.filters.add(filter.getKey().hashCode()));
+        controller.setBound(false);
+        controller.setFilters(filters);
+        addon.scrollToTop();
+        controller.setBound(true);
     }
 
     @Override
     public void clearFilter(final Object key) {
         hideErrorMessage();
         filters.remove(key.hashCode());
+        controller.setBound(false);
         controller.clearFilter(key);
         addon.scrollToTop();
-        draw();
+        controller.setBound(true);
+    }
+
+    @Override
+    public void clearFilters(final Collection<Object> keys) {
+        hideErrorMessage();
+        keys.forEach(key -> filters.remove(key.hashCode()));
+        controller.setBound(false);
+        controller.clearFilters(keys);
+        addon.scrollToTop();
+        controller.setBound(true);
     }
 
     @Override
     public void clearFilters() {
         hideErrorMessage();
         filters.clear();
+        controller.setBound(false);
         controller.clearFilters();
         addon.scrollToTop();
-        draw();
+        controller.setBound(true);
     }
 
     @Override
     public void clearSorts(final boolean notify) {
         hideErrorMessage();
         controller.clearSorts();
-        draw();
         if (notify) {
             for (final ColumnView columnView : columnViews.values()) {
                 for (final ColumnActionListener<V> listener : columnView.listeners) {
@@ -1331,7 +1351,6 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         public void updateValue(final Consumer<V> action) {
             getController().updateData(row.key, action);
         }
-
     }
 
     private class SimpleColumnController implements ColumnController<V> {
@@ -1348,9 +1367,10 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             hideErrorMessage();
             final int i = 0;
             sorts.put(i, asc ? 1 : 0);
+            controller.setBound(false);
             controller.addSort(columnView.column, asc);
             addon.scrollToTop();
-            draw();
+            controller.setBound(true);
             for (final ColumnActionListener<V> listener : columnView.listeners) {
                 listener.onSort(asc);
             }
@@ -1362,19 +1382,17 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             hideErrorMessage();
             sorts.clear();
             controller.clearSort(columnView.column);
-            draw();
             for (final ColumnActionListener<V> listener : columnView.listeners) {
                 listener.onClearSort();
             }
         }
 
         @Override
-        public void filter(final Object key, final BiPredicate<V, Supplier<Object>> filter, final boolean isActive,
+        public void filter(final Object key, final BiPredicate<V, Supplier<Object>> filter, final boolean active,
                            final boolean reinforcing) {
             if (!columnView.column.isFilterable()) return;
             hideErrorMessage();
-            controller.setFilter(key, columnView.column, filter, isActive, reinforcing);
-            draw();
+            controller.setFilter(key, columnView.column, filter, active, reinforcing);
             for (final ColumnActionListener<V> listener : columnView.listeners) {
                 listener.onFilter(key, filter, reinforcing);
             }
@@ -1385,7 +1403,6 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             if (!columnView.column.isFilterable()) return;
             hideErrorMessage();
             controller.clearFilter(key);
-            draw();
             for (final ColumnActionListener<V> listener : columnView.listeners) {
                 listener.onClearFilter(key);
             }
@@ -1406,7 +1423,6 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             if (!columnView.column.isFilterable()) return;
             hideErrorMessage();
             controller.clearFilters(columnView.column);
-            draw();
             for (final ColumnActionListener<V> listener : columnView.listeners) {
                 listener.onClearFilters();
             }

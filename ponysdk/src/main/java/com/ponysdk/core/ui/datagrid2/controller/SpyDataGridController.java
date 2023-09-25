@@ -23,22 +23,22 @@
 
 package com.ponysdk.core.ui.datagrid2.controller;
 
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.function.BiPredicate;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
 import com.ponysdk.core.server.service.query.PResultSet;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.cell.Cell;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfig;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfigBuilder;
+import com.ponysdk.core.ui.datagrid2.data.DataGridFilter;
 import com.ponysdk.core.ui.datagrid2.view.DataGridSnapshot;
 import com.ponysdk.core.util.Pair;
-
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Map;
-import java.util.function.BiPredicate;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 /**
  * @author mbagdouri
@@ -200,20 +200,29 @@ public abstract class SpyDataGridController<K, V> implements DataGridController<
     }
 
     @Override
-    public void setFilter(final Object key, final ColumnDefinition<V> column,
-                          final BiPredicate<V, Supplier<Object>> filter, boolean isActive, final boolean reinforcing) {
-        controller.setFilter(key, column, filter, isActive, reinforcing);
+    public void setFilter(final Object key, final ColumnDefinition<V> column, final BiPredicate<V, Supplier<Object>> filter,
+                          final boolean active, final boolean reinforcing) {
+        controller.setFilter(key, column, filter, active, reinforcing);
     }
 
     @Override
-    public void setFilter(final Object key, final String id, final Predicate<V> filter, final boolean isActive,
-                          final boolean reinforcing) {
-        controller.setFilter(key, id, filter, isActive, reinforcing);
+    public void setFilter(final DataGridFilter<V> filter) {
+        controller.setFilter(filter);
+    }
+
+    @Override
+    public void setFilters(final Collection<DataGridFilter<V>> filters) {
+        controller.setFilters(filters);
     }
 
     @Override
     public void clearFilter(final Object key) {
         controller.clearFilter(key);
+    }
+
+    @Override
+    public void clearFilters(final Collection<Object> keys) {
+        controller.clearFilters(keys);
     }
 
     @Override
@@ -280,5 +289,10 @@ public abstract class SpyDataGridController<K, V> implements DataGridController<
     @Override
     public void refresh() {
         controller.refresh();
+    }
+
+    @Override
+    public void updateCurrentRows() {
+        controller.updateCurrentRows();
     }
 }

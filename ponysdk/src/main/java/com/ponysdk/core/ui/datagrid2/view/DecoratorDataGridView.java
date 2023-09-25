@@ -20,6 +20,11 @@
 
 package com.ponysdk.core.ui.datagrid2.view;
 
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Objects;
+import java.util.function.Function;
+
 import com.ponysdk.core.server.service.query.PResultSet;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
@@ -27,13 +32,8 @@ import com.ponysdk.core.ui.datagrid2.column.ColumnActionListener;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfig;
 import com.ponysdk.core.ui.datagrid2.controller.DataGridController;
+import com.ponysdk.core.ui.datagrid2.data.DataGridFilter;
 import com.ponysdk.core.ui.datagrid2.data.RowAction;
-
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Objects;
-import java.util.function.Function;
-import java.util.function.Predicate;
 
 /**
  * @author mbagdouri
@@ -103,13 +103,23 @@ public class DecoratorDataGridView<K, V> implements DataGridView<K, V> {
     }
 
     @Override
-    public void setFilter(final Object key, final String id, final Predicate<V> filter, boolean isActive, final boolean reinforcing) {
-        view.setFilter(key, id, filter, isActive, reinforcing);
+    public void setFilter(final DataGridFilter<V> filter) {
+        view.setFilter(filter);
+    }
+
+    @Override
+    public void setFilters(final Collection<DataGridFilter<V>> filter) {
+        view.setFilters(filter);
     }
 
     @Override
     public void clearFilter(final Object key) {
         view.clearFilter(key);
+    }
+
+    @Override
+    public void clearFilters(final Collection<Object> keys) {
+        view.clearFilters(keys);
     }
 
     @Override

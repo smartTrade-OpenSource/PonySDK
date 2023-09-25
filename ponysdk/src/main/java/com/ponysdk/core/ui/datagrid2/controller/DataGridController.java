@@ -23,23 +23,23 @@
 
 package com.ponysdk.core.ui.datagrid2.controller;
 
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.function.BiPredicate;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
 import com.ponysdk.core.server.service.query.PResultSet;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.cell.Cell;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfig;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfigBuilder;
+import com.ponysdk.core.ui.datagrid2.data.DataGridFilter;
 import com.ponysdk.core.ui.datagrid2.view.DataGridSnapshot;
 import com.ponysdk.core.ui.datagrid2.view.DataGridView;
 import com.ponysdk.core.util.Pair;
-
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Map;
-import java.util.function.BiPredicate;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 /**
  * @author mbagdouri
@@ -89,12 +89,16 @@ public interface DataGridController<K, V> {
 
     void sort();
 
-    void setFilter(Object key, ColumnDefinition<V> column, BiPredicate<V, Supplier<Object>> filter, boolean isActive,
+    void setFilter(Object key, ColumnDefinition<V> column, BiPredicate<V, Supplier<Object>> filter, boolean active,
                    boolean reinforcing);
 
-    void setFilter(Object key, String id, Predicate<V> filter, boolean isActive, boolean reinforcing);
+    void setFilter(DataGridFilter<V> filter);
+
+    void setFilters(Collection<DataGridFilter<V>> filters);
 
     void clearFilter(Object key);
+
+    void clearFilters(Collection<Object> keys);
 
     void clearFilters(ColumnDefinition<V> column);
 
@@ -138,6 +142,11 @@ public interface DataGridController<K, V> {
      * force any redraw.
      */
     void refreshOnNextDraw();
+
+    /**
+     * Redraw current rows
+     */
+    void updateCurrentRows();
 
     /**
      * Send a partially filled object to the dataSource. The object will return

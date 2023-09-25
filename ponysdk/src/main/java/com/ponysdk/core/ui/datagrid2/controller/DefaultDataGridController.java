@@ -50,6 +50,7 @@ import com.ponysdk.core.ui.datagrid2.config.DataGridConfig.GeneralSort;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfig.Sort;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfigBuilder;
 import com.ponysdk.core.ui.datagrid2.data.AbstractFilter;
+import com.ponysdk.core.ui.datagrid2.data.DataGridFilter;
 import com.ponysdk.core.ui.datagrid2.data.DefaultRow;
 import com.ponysdk.core.ui.datagrid2.data.Interval;
 import com.ponysdk.core.ui.datagrid2.data.LiveDataView;
@@ -77,7 +78,8 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     private DataGridAdapter<K, V> adapter;
     private boolean bound = true;
     /**
-     * Data is split in 2 zones: a constant one and a variable one. The variable zone is the only one that gets refreshed during a draw and it is constantly narrowed down for better performance.
+     * Data is split in 2 zones: a constant one and a variable one. The variable zone is the only one that gets
+     * refreshed during a draw and it is constantly narrowed down for better performance.
      */
     private int from = Integer.MAX_VALUE;
     private int to = 0;
@@ -161,7 +163,12 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
 
     @Override
     public void refreshOnNextDraw() {
-        refreshRows(0, dataSource.getRowCount());
+        refreshRows(0, getRowCount());
+    }
+
+    @Override
+    public void updateCurrentRows() {
+        updateRows(0, getRowCount());
     }
 
     /**
@@ -314,17 +321,26 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     }
 
     @Override
-    public void setFilter(final Object key, final ColumnDefinition<V> colDef, final BiPredicate<V, Supplier<Object>> biPredicate, final boolean isActive,
-            final boolean reinforcing) {
+    public void setFilter(final Object key, final ColumnDefinition<V> colDef, final BiPredicate<V, Supplier<Object>> biPredicate,
+                          final boolean active, final boolean reinforcing) {
         checkAdapter();
-        dataSource.setFilter(key, null, reinforcing, new ColumnFilter(colDef, biPredicate, isActive));
+        dataSource.setFilter(key, null, reinforcing, new ColumnFilter(colDef, biPredicate, active));
         resetLiveData();
     }
 
     @Override
-    public void setFilter(final Object key, final String id, final Predicate<V> predicate, final boolean isActive, final boolean reinforcing) {
+    public void setFilter(final DataGridFilter<V> filter) {
         checkAdapter();
-        dataSource.setFilter(key, id, reinforcing, new GeneralFilter(predicate, isActive));
+        dataSource.setFilter(filter.getKey(), filter.getId(), filter.isReinforcing(),
+            new GeneralFilter(filter.getPredicate(), filter.isActive()));
+        resetLiveData();
+    }
+
+    @Override
+    public void setFilters(final Collection<DataGridFilter<V>> filters) {
+        checkAdapter();
+        filters.forEach(filter -> dataSource.setFilter(filter.getKey(), filter.getId(), filter.isReinforcing(),
+            new GeneralFilter(filter.getPredicate(), filter.isActive())));
         resetLiveData();
     }
 
@@ -333,6 +349,18 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
         checkAdapter();
         if (!dataSource.clearFilter(key)) return;
         resetLiveData();
+    }
+
+    @Override
+    public void clearFilters(final Collection<Object> keys) {
+        checkAdapter();
+        boolean reset = false;
+        for (final Object key : keys) {
+            reset |= dataSource.clearFilter(key);
+        }
+        if (reset) {
+            resetLiveData();
+        }
     }
 
     @Override
@@ -345,13 +373,14 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
 
     @Override
     public void prepareLiveDataOnScreen(final int dataSrcRowIndex, final int dataSize, final DataGridSnapshot threadSnapshot,
-            final Consumer<Pair<DataSrcResult, Throwable>> consumer) {
+                                        final Consumer<Pair<DataSrcResult, Throwable>> consumer) {
         viewSnapshot = new DataGridSnapshot(threadSnapshot);
         final long currentProcessID = count.get();
         PScheduler.schedule(() -> {
             try {
                 if (viewSnapshot.equals(threadSnapshot) && lastProcessedID <= currentProcessID) {
-                    final DataSrcResult result = new DataSrcResult(dataSource.getRows(dataSrcRowIndex, dataSize), dataSrcRowIndex, threadSnapshot.start);
+                    final DataSrcResult result = new DataSrcResult(dataSource.getRows(dataSrcRowIndex, dataSize), dataSrcRowIndex,
+                        threadSnapshot.start);
                     lastProcessedID = count.incrementAndGet();
                     consumer.accept(new Pair<>(result, null));
                 }
@@ -577,7 +606,8 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
             try {
                 renderingHelperSupplier1.set(r1, column);
                 renderingHelperSupplier2.set(r2, column);
-                final int diff = asc ? column.getColDef().compare(r1.getData(), renderingHelperSupplier1, r2.getData(), renderingHelperSupplier2)
+                final int diff = asc
+                        ? column.getColDef().compare(r1.getData(), renderingHelperSupplier1, r2.getData(), renderingHelperSupplier2)
                         : column.getColDef().compare(r2.getData(), renderingHelperSupplier2, r1.getData(), renderingHelperSupplier1);
                 return diff;
             } finally {
@@ -612,12 +642,12 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     private class GeneralFilter implements AbstractFilter<V> {
 
         private final Predicate<V> filter;
-        private final boolean isActive;
+        private final boolean active;
 
-        public GeneralFilter(final Predicate<V> filter, final boolean isActive) {
+        public GeneralFilter(final Predicate<V> filter, final boolean active) {
             super();
             this.filter = filter;
-            this.isActive = isActive;
+            this.active = active;
         }
 
         @Override
@@ -632,7 +662,7 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
 
         @Override
         public boolean isActive() {
-            return isActive;
+            return active;
         }
     }
 
@@ -640,13 +670,13 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
 
         private final Column<V> column;
         private final BiPredicate<V, Supplier<Object>> filter;
-        private final boolean isActive;
+        private final boolean active;
 
-        ColumnFilter(final ColumnDefinition<V> colDef, final BiPredicate<V, Supplier<Object>> filter, final boolean isActive) {
+        ColumnFilter(final ColumnDefinition<V> colDef, final BiPredicate<V, Supplier<Object>> filter, final boolean active) {
             super();
             this.column = getColumn(colDef);
             this.filter = filter;
-            this.isActive = isActive;
+            this.active = active;
         }
 
         @Override
@@ -666,7 +696,7 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
 
         @Override
         public boolean isActive() {
-            return isActive;
+            return active;
         }
     }
 }
