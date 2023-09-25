@@ -138,7 +138,7 @@ public interface DataGridView<K, V> extends IsPWidget {
      *
      * @param filters the filters collection to set
      */
-    void setFilters(Collection<DataGridFilter<V>> filter);
+    void setFilters(Collection<DataGridFilter<V>> filters);
 
     /**
      * Adds/replaces a sorting criterion for the view.
