@@ -87,7 +87,7 @@ public class Application {
         try {
             log.info("Invalidate session on Application #{} because all ui contexts have been destroyed", id);
             session.invalidate();
-        } catch (final IllegalArgumentException e) {
+        } catch (final IllegalStateException e) {
             log.error("The session is already invalid", e);
         }
         SessionManager.get().unregisterApplication(this);
