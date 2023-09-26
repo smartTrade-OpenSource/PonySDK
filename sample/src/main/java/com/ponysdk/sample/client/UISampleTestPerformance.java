@@ -49,6 +49,7 @@ import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.column.DefaultColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.controller.DataGridController;
+import com.ponysdk.core.ui.datagrid2.data.DataGridFilter;
 import com.ponysdk.core.ui.datagrid2.data.RowAction;
 import com.ponysdk.core.ui.datagrid2.view.ColumnVisibilitySelectorDataGridView;
 import com.ponysdk.core.ui.datagrid2.view.ConfigSelectorDataGridView;
@@ -301,10 +302,17 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
     }
 
     private void addFilter(final DataGridController<Integer, MyRow> controller) {
-        controller.setFilter(0, "", (row) -> {
+        final DataGridFilter<MyRow> dataGridFilter = new DataGridFilter<>();
+        dataGridFilter.setId("");
+        dataGridFilter.setKey(0);
+        dataGridFilter.setPredicate((row) -> {
             if (row.getId() % 2 == 0) return true;
             return false;
-        }, true, true);
+        });
+        dataGridFilter.setActive(true);
+        dataGridFilter.setReinforcing(true);
+
+        controller.setFilter(dataGridFilter);
     }
 
     private void addSort(final DataGridController<Integer, MyRow> controller) {
