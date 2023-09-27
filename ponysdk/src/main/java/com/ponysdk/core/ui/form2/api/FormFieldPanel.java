@@ -1,17 +1,20 @@
+
 package com.ponysdk.core.ui.form2.api;
 
 import com.ponysdk.core.ui.basic.Element;
+import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PElement;
 import com.ponysdk.core.ui.basic.PFlowPanel;
-import com.ponysdk.core.ui.basic.PWidget;
 
 public class FormFieldPanel extends PFlowPanel {
+
     private static final String ATTR_ERROR = "error";
+
     private static final String ATTR_DIFF = "dirty";
 
     private final PElement captionSpan;
 
-    protected PWidget innerWidget;
+    protected IsPWidget innerWidget;
 
     FormFieldPanel() {
         addStyleName("form-field");
@@ -20,9 +23,9 @@ public class FormFieldPanel extends PFlowPanel {
         add(captionSpan);
     }
 
-    void addInnerWidget(PWidget innerWidget) {
+    void addInnerWidget(IsPWidget innerWidget) {
         this.innerWidget = innerWidget;
-        innerWidget.addStyleName("inner-widget");
+        innerWidget.asWidget().addStyleName("inner-widget");
         add(innerWidget);
     }
 
