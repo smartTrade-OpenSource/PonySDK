@@ -322,7 +322,7 @@ if (!String.prototype.codePointAt) {
             // Get the first code unit
             var first = string.charCodeAt(index);
             var second;
-            if ( // check if it�s the start of a surrogate pair
+            if ( // check if it is the start of a surrogate pair
                 first >= 0xD800 && first <= 0xDBFF && // high surrogate
                 size > index + 1 // there is a next code unit
             ) {
@@ -499,6 +499,10 @@ _UTF8 = undefined;
 
 (function () {
     "use strict";
+    
+    const ponyHovered = 'pony-hovered';
+    const rowHoverLink = 'row-hover-link';
+    const linkedRow = 'linked-row';
 
     AbstractAddon.defineAddon("com.ponysdk.core.ui.datagrid2.view.DefaultDataGridView.Addon", {
 
@@ -605,16 +609,38 @@ _UTF8 = undefined;
 
         onRowMouseEnter: function (event) {
             var row = event.currentTarget;
-            row.setAttribute('pony-hovered', '');
+            row.setAttribute(ponyHovered, '');
             if(this.getOppositeRow(row) != undefined) {
-                this.getOppositeRow(row).setAttribute('pony-hovered', '');
+                this.getOppositeRow(row).setAttribute(ponyHovered, '');
+            }
+            // Row link
+            let link = row.getAttribute(rowHoverLink);
+            if(link != undefined) {
+                let el = document.querySelectorAll('[' + rowHoverLink + '=' + link + ']');
+                el.forEach(r => {
+                    r.setAttribute(linkedRow, '');
+                    if(this.getOppositeRow(r) != undefined) {
+                        this.getOppositeRow(r).setAttribute(linkedRow, '');
+                    }
+                });
             }
         },
 
         onRowMouseLeave: function (event) {
             var row = event.currentTarget;
-            row.removeAttribute('pony-hovered');
-            this.getOppositeRow(row).removeAttribute('pony-hovered');
+            row.removeAttribute(ponyHovered);
+            this.getOppositeRow(row).removeAttribute(ponyHovered);
+            // Row link
+            let link = row.getAttribute(rowHoverLink);
+            if(link != undefined) {
+                let el = document.querySelectorAll('[' + rowHoverLink + '=' + link + ']');
+                el.forEach(r => {
+                    r.removeAttribute(linkedRow);
+                    if(this.getOppositeRow(r) != undefined) {
+                        this.getOppositeRow(r).removeAttribute(linkedRow);
+                    }
+                });
+            }
         },
 
         getOppositeRow: function (r) {

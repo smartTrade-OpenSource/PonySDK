@@ -90,6 +90,8 @@ import com.ponysdk.core.util.SetUtils;
  */
 public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, DataGridControllerListener<V> {
 
+    public static final String ROW_HOVER_LINK = "row-hover-link";
+
     // Addon
     private static final String ADDON_ROW_KEY = "row";
     private static final String ADDON_ROW_COUNT_KEY = "rc";
