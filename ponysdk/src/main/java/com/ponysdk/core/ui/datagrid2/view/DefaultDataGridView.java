@@ -319,7 +319,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             columnView.visible = visible;
         }
         if (changed) {
-            onUpdateRows(0, rows.size());
+            onUpdateRows(0, controller.getRowCount());
         }
     }
 
@@ -665,7 +665,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             row.addCell(row.unpinnedRow, row.unpinnedCells, columnView);
             row.unpinnedRow.setWidth(unpinnedRowWidth);
         }
-        onUpdateRows(0, rows.size());
+        onUpdateRows(0, controller.getRowCount());
     }
 
     private void hide(final ColumnView columnView) {
@@ -789,14 +789,14 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
     public void selectAllLiveData() {
         checkAdapter();
         controller.selectAllLiveData();
-        onUpdateRows(0, rows.size());
+        onUpdateRows(0, controller.getRowCount());
     }
 
     @Override
     public void unselectAllData() {
         checkAdapter();
         controller.unselectAllData();
-        onUpdateRows(0, rows.size());
+        onUpdateRows(0, controller.getRowCount());
     }
 
     @Override
