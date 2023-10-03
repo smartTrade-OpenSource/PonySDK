@@ -472,13 +472,13 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
 
         final boolean dataHasChanged = row.getData() != rowData;
         final boolean mustUpdateRowHeight = (row.extended || !row.isShown()) && rowData != row.getData();
-        final boolean selected = controller.isSelected(row.key);
 
         if (dataHasChanged) {
             row.setData(rowData);
             row.key = adapter.getKey(rowData);
         }
         row.show();
+        final boolean selected = controller.isSelected(row.key);
 
         updateRowCells(row, row.unpinnedCells, unpinnedTable.columns, selected);
         updateRowCells(row, row.pinnedCells, pinnedTable.columns, selected);
@@ -510,6 +510,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         if (row.getAbsoluteIndex() >= result.getAbsoluteRowCount()) {
             row.hide();
             row.key = null;
+            row.data = null;
             return;
         }
         updateRow(row, getRowData(row.getRelativeIndex(), result));
