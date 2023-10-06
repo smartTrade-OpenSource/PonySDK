@@ -771,17 +771,14 @@ _UTF8 = undefined;
                     draggableElement.draggable = true;
                     draggableElement.ondragover = function (event) {
                         event.preventDefault();
-                        console.log("ondragover=" + id);
                     };
                     draggableElement.ondragstart = function (event) {
                         event.dataTransfer.setData('col-id', id);
-                        console.log("ondragstart=" + id);
                     };
                     draggableElement.ondrop = function (event) {
                         event.preventDefault();
                         var data = event.dataTransfer.getData('col-id');
                         if (data == undefined) return;
-                        console.log("ondrop=" + data);
                         this.sendDataToServer({
                             col: parseInt(data),
                             to: parseInt(id)
