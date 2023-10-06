@@ -127,5 +127,20 @@ public class PWindowTest extends PSuite {
         assertFalse(window.isOpened());
         assertFalse(subWindow.isOpened());
     }
+    
+    @Test
+    public void testSubWindowRemoved() {
+        final PWindow window = Element.newPWindow(PWindow.getMain(), "test", null);
+        window.open();
+        assertTrue(window.isOpened());
+
+        final PWindow subWindow = Element.newPWindow(window, "test", null);
+        subWindow.open();
+        assertFalse(window.getSubWindows().isEmpty());
+        assertEquals(subWindow, window.getSubWindows().iterator().next());
+
+        subWindow.close();
+        assertTrue(window.getSubWindows().isEmpty());
+    }
 
 }
