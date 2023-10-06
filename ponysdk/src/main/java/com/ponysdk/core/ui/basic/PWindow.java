@@ -358,6 +358,9 @@ public class PWindow extends PObject {
             panelByZone.forEach(this::doDestroy);
             panelByZone = null;
         }
+        if(parent!=null) {
+            parent.removeWindow(this);
+        }
     }
 
     private void doDestroy(String key, PRootPanel panel) {
@@ -387,6 +390,12 @@ public class PWindow extends PObject {
 
     private Object removeWindow(final PWindow window) {
         return subWindows != null && subWindows.remove(window);
+    }
+    
+    public Set<PWindow> getSubWindows() {
+        if(subWindows!=null)
+            return Collections.unmodifiableSet(subWindows); 
+        else return Collections.emptySet();
     }
 
     public PWindow getParent() {
