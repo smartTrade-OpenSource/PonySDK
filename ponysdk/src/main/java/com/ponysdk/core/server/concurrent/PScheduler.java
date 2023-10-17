@@ -47,18 +47,18 @@ public class PScheduler {
 
     static {
         final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(Runtime.getRuntime().availableProcessors(),
-            new ThreadFactory() {
+                new ThreadFactory() {
 
-                private int i = 0;
+                    private int i = 0;
 
-                @Override
-                public Thread newThread(final Runnable r) {
-                    final Thread t = new Thread(r);
-                    t.setName(PScheduler.class.getName() + "-" + i++);
-                    t.setDaemon(true);
-                    return t;
-                }
-            });
+                    @Override
+                    public Thread newThread(final Runnable r) {
+                        final Thread t = new Thread(r);
+                        t.setName(PScheduler.class.getName() + "-" + i++);
+                        t.setDaemon(true);
+                        return t;
+                    }
+                });
         INSTANCE = new PScheduler(executor);
     }
 
@@ -130,7 +130,7 @@ public class PScheduler {
                                                final long periodMillis) {
         final UIRunnable uiRunnable = new UIRunnable(context, this, runnable, true);
         final ScheduledFuture<?> future = executor.scheduleWithFixedDelay(uiRunnable, delayMillis, periodMillis,
-            TimeUnit.MILLISECONDS);
+                TimeUnit.MILLISECONDS);
         uiRunnable.setFuture(future);
         registerTask(uiRunnable);
 
@@ -162,14 +162,25 @@ public class PScheduler {
 
     private void registerTask(final UIRunnable runnable) {
         final UIContext uiContext = runnable.getUIContext();
-        Set<UIRunnable> runnables = runnablesByUIContexts.get(uiContext);
-        if (runnables == null) {
-            runnables = Collections.newSetFromMap(new ConcurrentHashMap<>());
-            runnables.add(runnable);
-            runnablesByUIContexts.put(uiContext, runnables);
-            uiContext.addContextDestroyListener(this::destroy);
-        } else {
-            runnables.add(runnable);
+        uiContext.acquire();
+        try {
+            if (uiContext.isAlive()) {
+                Set<UIRunnable> runnables = runnablesByUIContexts.get(uiContext);
+                if (runnables == null) {
+                    runnables = Collections.newSetFromMap(new ConcurrentHashMap<>());
+                    runnables.add(runnable);
+                    runnablesByUIContexts.put(uiContext, runnables);
+                    uiContext.addContextDestroyListener(this::destroy);
+                } else {
+                    runnables.add(runnable);
+                }
+            } else {
+                log.info("Task dropped, the UIContext {} is already dead", uiContext.getID());
+            }
+        } catch (Exception e) {
+            log.error("Cannot register the task", e);
+        } finally {
+            uiContext.release();
         }
     }
 
