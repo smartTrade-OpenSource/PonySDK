@@ -161,16 +161,18 @@ public class PScheduler {
     }
 
     private void registerTask(final UIRunnable runnable) {
-        final UIContext uiContext = runnable.getUIContext();
-        Set<UIRunnable> runnables = runnablesByUIContexts.get(uiContext);
-        if (runnables == null) {
-            runnables = Collections.newSetFromMap(new ConcurrentHashMap<>());
-            runnables.add(runnable);
-            runnablesByUIContexts.put(uiContext, runnables);
-            uiContext.addContextDestroyListener(this::destroy);
-        } else {
-            runnables.add(runnable);
-        }
+        runnablesByUIContexts.compute(runnable.uiContext, (uiContext, runnables) -> {
+            if(uiContext.isAlive()) {
+                if (runnables == null) {
+                    runnables = Collections.newSetFromMap(new ConcurrentHashMap<>());
+                    uiContext.addContextDestroyListener(this::destroy);
+                }
+                runnables.add(runnable);
+                return runnables;
+            }else {
+                return null;
+            }
+        });
     }
 
     public static final class UIRunnable implements Runnable {
