@@ -161,27 +161,41 @@ public class PScheduler {
     }
 
     private void registerTask(final UIRunnable runnable) {
+        UIContext currentContext = UIContext.get();
         final UIContext uiContext = runnable.getUIContext();
-        uiContext.acquire();
-        try {
-            if (uiContext.isAlive()) {
-                Set<UIRunnable> runnables = runnablesByUIContexts.get(uiContext);
-                if (runnables == null) {
-                    runnables = Collections.newSetFromMap(new ConcurrentHashMap<>());
-                    runnables.add(runnable);
-                    runnablesByUIContexts.put(uiContext, runnables);
-                    uiContext.addContextDestroyListener(this::destroy);
-                } else {
-                    runnables.add(runnable);
+        if(currentContext == uiContext) {
+           unsafeRegisterTask(runnable);
+        }else {
+            uiContext.acquire();
+            try {
+               unsafeRegisterTask(runnable);
+            } catch (Exception e) {
+                log.error("Cannot register the task", e);
+            } finally {
+                uiContext.release();
+                if(currentContext != null) {
+                    // this should not happen due to bad pattern but if this case exist we must reset the previous context
+                    currentContext.acquire();
                 }
-            } else {
-                log.info("Task dropped, the UIContext {} is already dead", uiContext.getID());
             }
-        } catch (Exception e) {
-            log.error("Cannot register the task", e);
-        } finally {
-            uiContext.release();
         }
+    }
+    
+    private void unsafeRegisterTask(final UIRunnable runnable) {
+        final UIContext uiContext = runnable.getUIContext();
+        if (uiContext.isAlive()) {
+             Set<UIRunnable> runnables = runnablesByUIContexts.get(uiContext);
+             if (runnables == null) {
+                 runnables = Collections.newSetFromMap(new ConcurrentHashMap<>());
+                 runnables.add(runnable);
+                 runnablesByUIContexts.put(uiContext, runnables);
+                 uiContext.addContextDestroyListener(this::destroy);
+             } else {
+                 runnables.add(runnable);
+             }
+         } else {
+             log.info("Task dropped, the UIContext {} is already dead", uiContext.getID());
+         }
     }
 
     public static final class UIRunnable implements Runnable {
