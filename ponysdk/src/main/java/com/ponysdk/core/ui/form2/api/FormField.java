@@ -127,4 +127,8 @@ public abstract class FormField<V> implements IsPWidget {
 
     public abstract void setValue(V value);
 
+    public abstract void focus();
+
+    public abstract void blur();
+
 }
