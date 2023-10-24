@@ -87,7 +87,7 @@ public interface DataGridController<K, V> {
 
     void clearSorts();
 
-    void sort();
+    void refreshWithSortingAndFilter();
 
     void setFilter(Object key, ColumnDefinition<V> column, BiPredicate<V, Supplier<Object>> filter, boolean active,
                    boolean reinforcing);
