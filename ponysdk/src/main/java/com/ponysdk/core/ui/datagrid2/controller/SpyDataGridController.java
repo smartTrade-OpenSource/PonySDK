@@ -195,8 +195,8 @@ public abstract class SpyDataGridController<K, V> implements DataGridController<
     }
 
     @Override
-    public void sort() {
-        controller.sort();
+    public void refreshWithSortingAndFilter() {
+        controller.refreshWithSortingAndFilter();
     }
 
     @Override

@@ -315,7 +315,8 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     }
 
     @Override
-    public void sort() {
+    public void refreshWithSortingAndFilter() {
+        dataSource.resetLiveData();
         dataSource.sort();
         refreshOnNextDraw();
     }
