@@ -194,6 +194,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         } else {
             this.items.addAll(newItems);
         }
+        sort();
         if (isInitialized()) updateVisibleItems();
     }
 

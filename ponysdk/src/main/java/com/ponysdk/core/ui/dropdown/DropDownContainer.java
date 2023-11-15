@@ -95,7 +95,8 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
         this.widget = Element.newPFlowPanel();
         this.widget.addStyleName(STYLE_CONTAINER_WIDGET);
         this.widget.setAttribute(ATTRIBUTE_ID, widget.getID() + "");
-        this.container =  configuration.isMultilevelEnabled() ? DropDownContainerAddon.newMultilevelDopdown(widget) : new DropDownContainerAddon(widget);
+        this.container = configuration.isMultilevelEnabled() ? DropDownContainerAddon.newMultilevelDopdown(widget)
+                : new DropDownContainerAddon(widget);
         this.container.addStyleName(STYLE_CONTAINER_ADDON);
         if (configuration.isPositionDropRight()) container.setDropRight();
     }
@@ -207,6 +208,14 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
 
     public void blur() {
         widget.blur();
+    }
+
+    public void isVisible() {
+        widget.isVisible();
+    }
+
+    public void setVisible(final boolean visible) {
+        widget.setVisible(visible);
     }
 
     public C getConfiguration() {
@@ -401,7 +410,7 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
     protected void focusContainer() {
         // Nothing to do by default
     }
-    
+
     protected HandlerRegistration addUppDownKeyHandler(final boolean forceFocus, final PKeyDownEvent.Handler handler) {
         if (forceFocus) {
             container.asWidget().setTabindex(TabindexMode.TABULABLE);
