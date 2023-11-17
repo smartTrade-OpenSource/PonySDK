@@ -34,7 +34,7 @@ public interface RowAction<V> {
      * @param value the value associated to the row
      * @param index the index of the row in the table
      * @return {@code true} if the action is to be applied on the row,
-     *         {@code false} otherwise
+     * {@code false} otherwise
      */
     boolean testRow(V value, int index);
 

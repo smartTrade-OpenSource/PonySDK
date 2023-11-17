@@ -30,12 +30,6 @@ public class PVisibilityEvent extends Event<PVisibilityEvent.PVisibilityHandler>
 
     public static final Type TYPE = new Type();
 
-    @FunctionalInterface
-    public interface PVisibilityHandler extends EventHandler {
-
-        void onVisibility(PVisibilityEvent event);
-    }
-
     public PVisibilityEvent(final Object source, final boolean data) {
         super(source);
         setData(data);
@@ -54,6 +48,12 @@ public class PVisibilityEvent extends Event<PVisibilityEvent.PVisibilityHandler>
     @Override
     protected void dispatch(final PVisibilityHandler handler) {
         handler.onVisibility(this);
+    }
+
+    @FunctionalInterface
+    public interface PVisibilityHandler extends EventHandler {
+
+        void onVisibility(PVisibilityEvent event);
     }
 
 }

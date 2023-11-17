@@ -23,7 +23,7 @@
 
 package com.ponysdk.core.ui.datagrid2.view;
 
-import com.ponysdk.core.server.stm.Txn;
+import com.ponysdk.core.server.concurrent.UIContext;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PTextBox;
@@ -70,26 +70,12 @@ public class ColumnFilterFooterDataGridView<K, V> extends DecoratorDataGridView<
         if (disabledFooter == null) return;
         disabledFooter.setEnabled(true);
         disabledFooter.focus();
-        // must be sent immediately
-        Txn.get().flush(); // FIXME use Txn.get() ???
+        UIContext.get().flush();
         disabledFooter = null;
     }
 
     private void checkAdapter() {
         if (adapter == null) throw new IllegalStateException("No " + DataGridAdapter.class + " has been set yet");
-    }
-
-    @Override
-    public void setConfig(final DataGridConfig<V> config) {
-        super.setConfig(config);
-        final Map<FilterFooterColumn, String> filters = config.getCustomValue(CONFIG_KEY);
-        if (filters == null) return;
-        for (final Map.Entry<FilterFooterColumn, String> entry : filters.entrySet()) {
-            if (entry.getKey().state.isShown()) {
-                entry.getKey().footer.setText(entry.getValue());
-                entry.getKey().filter(entry.getValue());
-            }
-        }
     }
 
     @Override
@@ -104,6 +90,19 @@ public class ColumnFilterFooterDataGridView<K, V> extends DecoratorDataGridView<
         if (filters.isEmpty()) return config;
         config.setCustomValue(CONFIG_KEY, filters);
         return config;
+    }
+
+    @Override
+    public void setConfig(final DataGridConfig<V> config) {
+        super.setConfig(config);
+        final Map<FilterFooterColumn, String> filters = config.getCustomValue(CONFIG_KEY);
+        if (filters == null) return;
+        for (final Map.Entry<FilterFooterColumn, String> entry : filters.entrySet()) {
+            if (entry.getKey().state.isShown()) {
+                entry.getKey().footer.setText(entry.getValue());
+                entry.getKey().filter(entry.getValue());
+            }
+        }
     }
 
     @Override
@@ -148,6 +147,10 @@ public class ColumnFilterFooterDataGridView<K, V> extends DecoratorDataGridView<
         return filters;
     }
 
+    protected void onCreateFooterWidget(final ColumnDefinition<V> column, final PTextBox footer) {
+        footer.setWidth(column.getDefaultWidth() * 0.8 + "px");
+    }
+
     private class ColumnFilterFooterDataGridAdapter extends DecoratorDataGridAdapter<K, V> {
 
         private final List<ColumnDefinition<V>> columns;
@@ -179,10 +182,6 @@ public class ColumnFilterFooterDataGridView<K, V> extends DecoratorDataGridView<
         }
     }
 
-    protected void onCreateFooterWidget(final ColumnDefinition<V> column, final PTextBox footer) {
-        footer.setWidth(column.getDefaultWidth() * 0.8 + "px");
-    }
-
     private class FilterFooterColumn extends DecoratorColumnDefinition<V> {
 
         private final PTextBox footer = Element.newPTextBox();
@@ -211,8 +210,7 @@ public class ColumnFilterFooterDataGridView<K, V> extends DecoratorDataGridView<
 
         private void onValueChange(final PValueChangeEvent<String> event) {
             footer.setEnabled(false);
-            // must be sent immediately
-            Txn.get().flush(); // FIXME use Txn.get() ???
+            UIContext.get().flush();
             disabledFooter = footer;
             filter(event.getData());
         }

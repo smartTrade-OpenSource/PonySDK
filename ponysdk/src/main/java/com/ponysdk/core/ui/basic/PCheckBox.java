@@ -29,8 +29,8 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
+import jakarta.json.JsonObject;
 
-import javax.json.JsonObject;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -54,7 +54,7 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
     protected PCheckBoxState state = PCheckBoxState.UNCHECKED;
 
     private Map<String, String> inputAttributes;
-    
+
     /**
      * Creates a check box with no label.
      */
@@ -91,32 +91,33 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
         return handlers != null ? Collections.unmodifiableCollection(handlers) : Collections.emptyList();
     }
 
+    public PCheckBoxState getState() {
+        return state;
+    }
+
     public void setState(final PCheckBoxState state) {
         if (Objects.equals(this.state, state)) return;
         this.state = state;
         saveUpdate(ServerToClientModel.VALUE_CHECKBOX, state.getValue());
     }
 
-    public PCheckBoxState getState() {
-        return state;
-    }
-
     public void setInputAttribute(final String name, final String value) {
         if (name == null) return;
 
-        if(Objects.equals(safeInputAttributes().put(name, value), value)) return;
+        if (Objects.equals(safeInputAttributes().put(name, value), value)) return;
 
         saveUpdate(writer -> {
             writer.write(ServerToClientModel.PUT_INPUT_ATTRIBUTE_KEY, name);
             writer.write(ServerToClientModel.INPUT_ATTRIBUTE_VALUE, value);
         });
     }
-   
+
     public void removeInputAttribute(final String name) {
         if (safeInputAttributes().remove(name) != null) {
             saveUpdate(writer -> writer.write(ServerToClientModel.REMOVE_INPUT_ATTRIBUTE_KEY, name));
         }
     }
+
     /**
      * Determines whether this check box is currently checked.
      *
@@ -175,7 +176,7 @@ public class PCheckBox extends PButtonBase implements HasPValue<Boolean>, PValue
         DOM.append("</input>");
         return DOM.toString();
     }
-    
+
     private Map<String, String> safeInputAttributes() {
         if (inputAttributes == null) inputAttributes = new HashMap<>(8);
         return inputAttributes;

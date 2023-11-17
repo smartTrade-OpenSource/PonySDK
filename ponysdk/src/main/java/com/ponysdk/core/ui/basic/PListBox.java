@@ -30,8 +30,8 @@ import com.ponysdk.core.ui.basic.PListBox.ListItem;
 import com.ponysdk.core.ui.basic.event.HasPChangeHandlers;
 import com.ponysdk.core.ui.basic.event.PChangeEvent;
 import com.ponysdk.core.ui.basic.event.PChangeHandler;
+import jakarta.json.JsonObject;
 
-import javax.json.JsonObject;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -351,6 +351,20 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         saveUpdate(ServerToClientModel.MULTISELECT, isMultipleSelect);
     }
 
+    @Override
+    public String dumpDOM() {
+        String DOM = "<select pid=\"" + ID + "\">";
+
+        for (int i = 0; i < items.size(); i++) {
+            ListItem item = items.get(0);
+            DOM += "<option value=\"" + i + "\" " + (selectedIndex == i ? "selected" : "") + ">" + item.label + "</option>";
+        }
+
+        DOM += "</select>";
+
+        return DOM;
+    }
+
     public static class ListItem {
 
         protected String label;
@@ -376,19 +390,5 @@ public class PListBox extends PFocusWidget implements HasPChangeHandlers, PChang
         ListGroupItem(final String group) {
             super(group, null);
         }
-    }
-
-    @Override
-    public String dumpDOM() {
-        String DOM = "<select pid=\"" + ID + "\">";
-
-        for (int i = 0; i < items.size(); i++) {
-            ListItem item = items.get(0);
-            DOM += "<option value=\"" + i + "\" " + (selectedIndex == i ? "selected" : "") + ">" + item.label + "</option>";
-        }
-
-        DOM += "</select>";
-
-        return DOM;
     }
 }

@@ -26,11 +26,11 @@ package com.ponysdk.core.ui.basic;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.concurrent.UIContext;
+import jakarta.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.json.JsonObject;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
@@ -68,6 +68,22 @@ public class PScript extends PObject {
         }
     }
 
+    public static void execute(final PWindow window, final String js) {
+        execute(window, js, null, null);
+    }
+
+    public static void execute(final PWindow window, final String js, final ExecutionCallback callback) {
+        execute(window, js, callback, null);
+    }
+
+    public static void execute(final PWindow window, final String js, final Duration period) {
+        execute(window, js, null, period);
+    }
+
+    public static void execute(final PWindow window, final String js, final ExecutionCallback callback, final Duration period) {
+        get(window).executeScript(js, callback, period);
+    }
+
     @Override
     protected boolean attach(final PWindow window, final PFrame frame) {
         final boolean result = super.attach(window, frame);
@@ -84,22 +100,6 @@ public class PScript extends PObject {
             log.error("An error occurred while trying to process the destroy event", e);
         }
 
-    }
-
-    public static void execute(final PWindow window, final String js) {
-        execute(window, js, null, null);
-    }
-
-    public static void execute(final PWindow window, final String js, final ExecutionCallback callback) {
-        execute(window, js, callback, null);
-    }
-
-    public static void execute(final PWindow window, final String js, final Duration period) {
-        execute(window, js, null, period);
-    }
-
-    public static void execute(final PWindow window, final String js, final ExecutionCallback callback, final Duration period) {
-        get(window).executeScript(js, callback, period);
     }
 
     @Override

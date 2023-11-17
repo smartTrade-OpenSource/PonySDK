@@ -38,12 +38,12 @@ public enum PDirection {
     PDirection() {
     }
 
-    public byte getValue() {
-        return (byte) ordinal();
-    }
-
     public static PDirection fromRawValue(final int rawValue) {
         return VALUES[rawValue];
+    }
+
+    public byte getValue() {
+        return (byte) ordinal();
     }
 
 }

@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -25,7 +25,6 @@ package com.ponysdk.core.terminal.ui;
 
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeUri;
-import com.google.gwt.user.client.ui.Image;
 
 class PImageResource implements ImageResource {
 
@@ -38,14 +37,6 @@ class PImageResource implements ImageResource {
     private final int left;
 
     private final int top;
-
-    public PImageResource(final Image image) {
-        this.uri = image.getUrl();
-        this.left = image.getOriginLeft();
-        this.top = image.getOriginTop();
-        this.width = image.getWidth();
-        this.height = image.getHeight();
-    }
 
     PImageResource(final String uri, final int left, final int top, final int width, final int height) {
         this.uri = uri;

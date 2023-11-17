@@ -23,13 +23,13 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Arrays;
-import java.util.Objects;
-
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.ui.formatter.TextFunction;
 import com.ponysdk.core.writer.ModelWriter;
+
+import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * A PLabel that contains a text, <i>not</i> interpreted as HTML, that can be either forced using
@@ -78,19 +78,14 @@ public class PFunctionalLabel extends PLabel {
         return text != null ? text : args != null ? textFunction.getJavaFunction().apply(args) : null;
     }
 
+    @Override
+    public void setText(final String text) {
+        this.args = null;
+        super.setText(text);
+    }
+
     public TextFunction getTextFunction() {
         return textFunction;
-    }
-
-    public Object[] getArgs() {
-        return args;
-    }
-
-    public void setArgs(final Object... args) {
-        this.text = null;
-        if (Arrays.equals(this.args, args)) return;
-        this.args = args;
-        if (initialized) saveUpdate(ServerToClientModel.FUNCTION_ARGS, this.args);
     }
 
     public void setTextFunction(final TextFunction textFunction) {
@@ -102,10 +97,15 @@ public class PFunctionalLabel extends PLabel {
         if (initialized) saveUpdate(ServerToClientModel.FUNCTION_ID, this.pFunction.getID());
     }
 
-    @Override
-    public void setText(final String text) {
-        this.args = null;
-        super.setText(text);
+    public Object[] getArgs() {
+        return args;
+    }
+
+    public void setArgs(final Object... args) {
+        this.text = null;
+        if (Arrays.equals(this.args, args)) return;
+        this.args = args;
+        if (initialized) saveUpdate(ServerToClientModel.FUNCTION_ARGS, this.args);
     }
 
     @Override

@@ -23,19 +23,19 @@
 
 package com.ponysdk.core.ui.datagrid2.adapter;
 
-import java.util.List;
-
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.datagrid2.column.ColumnController;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.view.DataGridView;
 
+import java.util.List;
+
 /**
  * {@code DataGridAdapter} is used to set up and initialize the
  * {@link DataGridView}.
  *
- * @see DataGridView#setAdapter(DataGridAdapter)
  * @author mbagdouri
+ * @see DataGridView#setAdapter(DataGridAdapter)
  */
 public interface DataGridAdapter<K, V> {
 
@@ -106,7 +106,7 @@ public interface DataGridAdapter<K, V> {
 
     /**
      * @return the widget that will cover the {@link DataGridView} when it is
-     *         loading data (cannot be {@code null})
+     * loading data (cannot be {@code null})
      */
     IsPWidget createLoadingDataWidget();
 
@@ -115,19 +115,19 @@ public interface DataGridAdapter<K, V> {
      * resized nor dragged</i>
      *
      * @return {@code true} if the {@link DataGridView} must have a header,
-     *         {@code false} otherwise
+     * {@code false} otherwise
      */
     boolean hasHeader();
 
     /**
      * @return {@code true} if the {@link DataGridView} must have a footer,
-     *         {@code false} otherwise
+     * {@code false} otherwise
      */
     boolean hasFooter();
 
     /**
      * @return {@code true} if the blotter can select new value,
-     *         {@code false} if the blotter cannot select new value
+     * {@code false} if the blotter cannot select new value
      */
     boolean isSelectionEnabled();
 }

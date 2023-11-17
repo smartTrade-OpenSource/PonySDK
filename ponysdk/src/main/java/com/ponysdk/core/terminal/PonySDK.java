@@ -62,7 +62,7 @@ public class PonySDK implements UncaughtExceptionHandler {
     private boolean tabindexOnlyFormField;
 
     private long lastHeartBeatFail = 0L;
-    private ReconnectionChecker reconnectionChecker;
+    //private ReconnectionChecker reconnectionChecker;
 
     private PonySDK() {
         INSTANCE = this;
@@ -102,8 +102,8 @@ public class PonySDK implements UncaughtExceptionHandler {
 
         String newUrl = protocol + "//" + server + pathName + wsMappingPath + search;
 
-        reconnectionChecker = new ReconnectionChecker();
-        socketClient = new WebSocketClient(newUrl, uiBuilder, reconnectionChecker);
+        socketClient = new WebSocketClient(newUrl, uiBuilder);
+        socketClient.connect();
     }
 
     private void startChildContext() {
@@ -217,7 +217,7 @@ public class PonySDK implements UncaughtExceptionHandler {
             } else {
                 if (now - lastMessageTime > heartBeatInMilli) {
                     socketClient.close(1000, "server did not respond");
-                    reconnectionChecker.detectConnectionFailure();
+                    //reconnectionChecker.detectConnectionFailure();
                     //stop the scheduling
                     return false;
                 } else {

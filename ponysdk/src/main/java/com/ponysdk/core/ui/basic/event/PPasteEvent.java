@@ -30,12 +30,6 @@ public class PPasteEvent extends Event<PPasteEvent.PPasteHandler> {
 
     public static final Type TYPE = new Type();
 
-    @FunctionalInterface
-    public interface PPasteHandler extends EventHandler {
-
-        void onPaste(PPasteEvent event);
-    }
-
     public PPasteEvent(final Object source, final String data) {
         super(source);
         setData(data);
@@ -54,6 +48,12 @@ public class PPasteEvent extends Event<PPasteEvent.PPasteHandler> {
     @Override
     protected void dispatch(final PPasteHandler handler) {
         handler.onPaste(this);
+    }
+
+    @FunctionalInterface
+    public interface PPasteHandler extends EventHandler {
+
+        void onPaste(PPasteEvent event);
     }
 
 }

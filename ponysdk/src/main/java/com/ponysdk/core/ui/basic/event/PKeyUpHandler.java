@@ -30,8 +30,6 @@ import java.util.function.Consumer;
 @FunctionalInterface
 public interface PKeyUpHandler extends PKeyFilterHandler {
 
-    void onKeyUp(PKeyUpEvent keyUpEvent);
-
     static PKeyUpHandler newEnterKeyUp(Consumer<PKeyUpEvent> consumer) {
         return new PKeyUpHandler() {
 
@@ -46,5 +44,7 @@ public interface PKeyUpHandler extends PKeyFilterHandler {
             }
         };
     }
+
+    void onKeyUp(PKeyUpEvent keyUpEvent);
 
 }

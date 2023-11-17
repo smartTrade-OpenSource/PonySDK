@@ -41,17 +41,17 @@ public final class ListBoxConfiguration extends DefaultDropDownContainerConfigur
         return noMatchesLabel;
     }
 
+    public ListBoxConfiguration setNoMatchesLabel(final String noMatchesLabel) {
+        this.noMatchesLabel = noMatchesLabel;
+        return this;
+    }
+
     public boolean isSearchEnabled() {
         return searchEnabled;
     }
 
     public ListBoxConfiguration disableSearch() {
         this.searchEnabled = false;
-        return this;
-    }
-
-    public ListBoxConfiguration setNoMatchesLabel(final String noMatchesLabel) {
-        this.noMatchesLabel = noMatchesLabel;
         return this;
     }
 

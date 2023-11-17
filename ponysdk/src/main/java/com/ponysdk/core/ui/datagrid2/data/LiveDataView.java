@@ -48,10 +48,10 @@ public class LiveDataView<V> {
         return liveData;
     }
 
-	@Override
-	public String toString() {
-		return "LiveDataView [absoluteRowCount=" + absoluteRowCount + ", liveData.size()=" + liveData.size() + "]";
-	}
-    
-    
+    @Override
+    public String toString() {
+        return "LiveDataView [absoluteRowCount=" + absoluteRowCount + ", liveData.size()=" + liveData.size() + "]";
+    }
+
+
 }

@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -27,9 +27,8 @@ package com.ponysdk.core.ui.basic;
  * An object that implements this interface should be a user input widget, where the user and programmer can
  * both set and get the object's value. It is intended to provide a unified interface to widgets with "atomic"
  * values, like Strings and Dates.
- * 
- * @param <T>
- *            the type of value
+ *
+ * @param <T> the type of value
  */
 public interface HasPValue<T> extends HasPValueChangeHandlers<T> {
 

@@ -23,7 +23,6 @@
 
 package com.ponysdk.core.ui.datagrid2.datasource;
 
-import com.ponysdk.core.server.service.query.PResultSet;
 import com.ponysdk.core.ui.datagrid2.data.AbstractFilter;
 import com.ponysdk.core.ui.datagrid2.data.DefaultRow;
 import com.ponysdk.core.ui.datagrid2.data.Interval;

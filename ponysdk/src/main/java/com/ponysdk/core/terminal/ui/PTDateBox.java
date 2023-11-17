@@ -23,8 +23,6 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import java.util.Date;
-
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.datepicker.client.DateBox;
@@ -38,6 +36,8 @@ import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 import com.ponysdk.core.terminal.ui.PTDateBox.MyDateBox;
+
+import java.util.Date;
 
 public class PTDateBox extends PTWidget<MyDateBox> {
 

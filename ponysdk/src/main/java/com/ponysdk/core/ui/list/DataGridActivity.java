@@ -23,15 +23,11 @@
 
 package com.ponysdk.core.ui.list;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PWidget;
+
+import java.util.*;
 
 /***
  * A Grid of data that supports paging and columns.
@@ -206,7 +202,8 @@ public class DataGridActivity<D> implements HasPData<D>, IsPWidget {
     }
 
     public void insertRow(final int row, final int column, final int colSpan, final PWidget widget) {
-        if (row > getRowCount() + 1) throw new IndexOutOfBoundsException("row (" + row + ") > size (" + getRowCount() + ")");
+        if (row > getRowCount() + 1)
+            throw new IndexOutOfBoundsException("row (" + row + ") > size (" + getRowCount() + ")");
 
         rows.add(row, null);
 

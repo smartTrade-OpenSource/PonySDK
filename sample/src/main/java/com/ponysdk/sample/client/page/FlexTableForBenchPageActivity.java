@@ -38,12 +38,9 @@ import com.ponysdk.core.ui.place.Place;
 
 public class FlexTableForBenchPageActivity extends SamplePageActivity {
 
-    protected long time = 0;
-
     private final PLabel[][] labels = new PLabel[100][6];
-
     private final PTextBox textBox = Element.newPTextBox();
-
+    protected long time = 0;
     private UIRunnable uiRunnable;
 
     public FlexTableForBenchPageActivity() {

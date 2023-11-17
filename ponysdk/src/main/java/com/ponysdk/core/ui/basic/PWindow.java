@@ -27,34 +27,30 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.server.stm.Txn;
+import com.ponysdk.core.server.concurrent.UIContext;
 import com.ponysdk.core.ui.basic.event.*;
 import com.ponysdk.core.ui.basic.event.PVisibilityEvent.PVisibilityHandler;
 import com.ponysdk.core.ui.formatter.TextFunction;
 import com.ponysdk.core.util.SetUtils;
 import com.ponysdk.core.writer.ModelWriter;
+import jakarta.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.json.JsonObject;
 import java.util.*;
 
 public class PWindow extends PObject {
 
     private static final Logger log = LoggerFactory.getLogger(PWindow.class);
     private static final String CANONICAL_NAME = PWindow.class.getCanonicalName();
-
+    private final Location location;
     private Set<POpenHandler> openHandlers;
     private Set<PCloseHandler> closeHandlers;
     private Set<PWindow> subWindows;
-
     private String url;
     private String name;
     private String features;
     private boolean relative = false;
-    private final Location location;
-
     private Map<String, PRootPanel> panelByZone = new HashMap<>(8);
 
     private Map<TextFunction, PFunction> functions;
@@ -91,6 +87,19 @@ public class PWindow extends PObject {
         }
     }
 
+    public static PWindow getMain() {
+        PWindow mainWindow = UIContext.get().getAttribute(CANONICAL_NAME);
+        if (mainWindow == null) {
+            mainWindow = new PMainWindow();
+            UIContext.get().setAttribute(CANONICAL_NAME, mainWindow);
+        }
+        return mainWindow;
+    }
+
+    public static boolean isMain(final PWindow window) {
+        return getMain() == window;
+    }
+
     @Override
     void init() {
         if (initialized) return;
@@ -105,16 +114,7 @@ public class PWindow extends PObject {
         panelByZone.forEach((key, value) -> value.attach(this, null));
         if (initializeListeners != null) initializeListeners.forEach(listener -> listener.onInitialize(this));
 
-        UIContext.get().addContextDestroyListener(uiContext -> onDestroy());
-    }
-
-    public static PWindow getMain() {
-        PWindow mainWindow = UIContext.get().getAttribute(CANONICAL_NAME);
-        if (mainWindow == null) {
-            mainWindow = new PMainWindow();
-            UIContext.get().setAttribute(CANONICAL_NAME, mainWindow);
-        }
-        return mainWindow;
+        UIContext.get().registerDestroyListener(uiContext -> onDestroy());
     }
 
     @Override
@@ -141,11 +141,9 @@ public class PWindow extends PObject {
             enrichForCreation(writer);
             writer.endObject();
             UIContext.get().registerObject(this);
-
             PWindowManager.preregisterWindow(this);
-
             writeUpdate(callback -> callback.write(ServerToClientModel.OPEN));
-            Txn.get().flush();
+            UIContext.get().flush();
         }
     }
 
@@ -165,10 +163,10 @@ public class PWindow extends PObject {
      * @param yDelta is the number of pixels to grow the window vertically.
      * @see <a href="https://developer.mozilla.org/fr/docs/Web/API/Window/resizeBy">MDN</a>
      */
-    public void resizeBy(final float xDelta, final float yDelta) {
+    public void resizeBy(final int xDelta, final int yDelta) {
         saveUpdate(writer -> {
-            writer.write(ServerToClientModel.RESIZE_BY_X, (double) xDelta);
-            writer.write(ServerToClientModel.RESIZE_BY_Y, (double) yDelta);
+            writer.write(ServerToClientModel.RESIZE_BY_X, xDelta);
+            writer.write(ServerToClientModel.RESIZE_BY_Y, yDelta);
         });
     }
 
@@ -209,10 +207,10 @@ public class PWindow extends PObject {
      * @param y is the vertical coordinate to be moved to.
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/window/moveTo">MDN</a>
      */
-    public void moveTo(final float x, final float y) {
+    public void moveTo(final int x, final int y) {
         saveUpdate(writer -> {
-            writer.write(ServerToClientModel.MOVE_TO_X, (double) x);
-            writer.write(ServerToClientModel.MOVE_TO_Y, (double) y);
+            writer.write(ServerToClientModel.MOVE_TO_X, x);
+            writer.write(ServerToClientModel.MOVE_TO_Y, y);
         });
     }
 
@@ -358,7 +356,7 @@ public class PWindow extends PObject {
             panelByZone.forEach(this::doDestroy);
             panelByZone = null;
         }
-        if(parent!=null) {
+        if (parent != null) {
             parent.removeWindow(this);
         }
     }
@@ -379,10 +377,6 @@ public class PWindow extends PObject {
         return ensureRootPanel(zoneID);
     }
 
-    public static boolean isMain(final PWindow window) {
-        return getMain() == window;
-    }
-
     private void addWindow(final PWindow window) {
         if (subWindows == null) subWindows = SetUtils.newArraySet(4);
         subWindows.add(window);
@@ -391,10 +385,10 @@ public class PWindow extends PObject {
     private Object removeWindow(final PWindow window) {
         return subWindows != null && subWindows.remove(window);
     }
-    
+
     public Set<PWindow> getSubWindows() {
-        if(subWindows!=null)
-            return Collections.unmodifiableSet(subWindows); 
+        if (subWindows != null)
+            return Collections.unmodifiableSet(subWindows);
         else return Collections.emptySet();
     }
 
@@ -455,6 +449,15 @@ public class PWindow extends PObject {
     @Override
     public String toString() {
         return super.toString() + ", name = " + name;
+    }
+
+    protected String dumpDOM() {
+        String DOM = "<body>";
+        for (PRootPanel panel : panelByZone.values()) {
+            DOM += panel.dumpDOM();
+        }
+        DOM += "</body>";
+        return DOM;
     }
 
     public static final class Location {
@@ -585,7 +588,7 @@ public class PWindow extends PObject {
             UIContext.get().registerObject(this);
             initialized = true;
 
-            UIContext.get().addContextDestroyListener(uiContext -> onDestroy());
+            UIContext.get().registerDestroyListener(uiContext -> onDestroy());
         }
 
         @Override
@@ -603,15 +606,6 @@ public class PWindow extends PObject {
             return WidgetType.BROWSER;
         }
 
-    }
-
-    protected String dumpDOM() {
-        String DOM = "<body>";
-        for (PRootPanel panel : panelByZone.values()) {
-            DOM += panel.dumpDOM();
-        }
-        DOM += "</body>";
-        return DOM;
     }
 
 }

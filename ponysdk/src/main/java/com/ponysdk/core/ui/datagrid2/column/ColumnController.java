@@ -23,7 +23,6 @@
 
 package com.ponysdk.core.ui.datagrid2.column;
 
-import java.util.List;
 import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 
@@ -48,23 +47,23 @@ public interface ColumnController<V> {
      * Adds/replaces a filter that accepts only data that meet the condition of
      * the {@link BiPredicate} {@code filter}.
      *
-     * @param key an object that can be used to uniquely identify a
-     *            filter, so that it can be replaced or removed
-     * @param filter a {@code BiPredicate} that decides whether a value is
-     *            accepted or filtered. The {@code BiPredicate}
-     *            arguments are the model value and a {@code Supplier}
-     *            that provides the rendering helper that was supplied
-     *            by {@link ColumnDefinition#getRenderingHelper(Object)}
-     * @param isActive a {@code Supplier} that provide values uses by filter
+     * @param key         an object that can be used to uniquely identify a
+     *                    filter, so that it can be replaced or removed
+     * @param filter      a {@code BiPredicate} that decides whether a value is
+     *                    accepted or filtered. The {@code BiPredicate}
+     *                    arguments are the model value and a {@code Supplier}
+     *                    that provides the rendering helper that was supplied
+     *                    by {@link ColumnDefinition#getRenderingHelper(Object)}
+     * @param isActive    a {@code Supplier} that provide values uses by filter
      * @param reinforcing {@code true} if the predicate is at least as
-     *            intolerant as the replaced predicate of the same key
-     *            (i.e. the predicate doesn't accept any value that was
-     *            not accepted by the replaced predicate), {@code false}
-     *            otherwise. This is an optimization that allows us to
-     *            avoid applying the predicate on values that we already
-     *            know will not be accepted. If this filter is not
-     *            replacing an existing one, the value of the
-     *            {@code reinforcing} argument has no impact.
+     *                    intolerant as the replaced predicate of the same key
+     *                    (i.e. the predicate doesn't accept any value that was
+     *                    not accepted by the replaced predicate), {@code false}
+     *                    otherwise. This is an optimization that allows us to
+     *                    avoid applying the predicate on values that we already
+     *                    know will not be accepted. If this filter is not
+     *                    replacing an existing one, the value of the
+     *                    {@code reinforcing} argument has no impact.
      */
     void filter(Object key, BiPredicate<V, Supplier<Object>> filter, boolean isActive, boolean reinforcing);
 
@@ -82,9 +81,9 @@ public interface ColumnController<V> {
      * Redraws all the cells of this column
      *
      * @param clearRenderingHelpers {@code true} if all the rendering helpers
-     *            for this column must be cleared and thus
-     *            recalculated before drawing, {@code false}
-     *            otherwise
+     *                              for this column must be cleared and thus
+     *                              recalculated before drawing, {@code false}
+     *                              otherwise
      */
     void redraw(boolean clearRenderingHelpers);
 

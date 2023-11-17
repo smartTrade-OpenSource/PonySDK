@@ -23,15 +23,14 @@
 
 package com.ponysdk.core.server.application;
 
+import com.ponysdk.core.ui.main.EntryPoint;
+
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import com.ponysdk.core.ui.main.EntryPoint;
-
 public class ApplicationConfiguration {
 
-    public static final String APPLICATION_ID = "ponysdk.application.id";
     public static final String APPLICATION_NAME = "ponysdk.application.name";
     public static final String APPLICATION_DESCRIPTION = "ponysdk.application.description";
     public static final String APPLICATION_CONTEXT_NAME = "ponysdk.application.context.name";
@@ -39,7 +38,6 @@ public class ApplicationConfiguration {
     public static final String JAVASCRIPTS = "ponysdk.application.javascripts";
     public static final String POINTCLASS = "ponysdk.entry.point.class";
 
-    private String applicationID;
     private String applicationName;
     private String applicationDescription;
     private String applicationContextName = "sample";
@@ -62,17 +60,8 @@ public class ApplicationConfiguration {
     private boolean tabindexOnlyFormField;
 
     public ApplicationConfiguration() {
-        applicationID = System.getProperty(APPLICATION_ID);
         applicationName = System.getProperty(APPLICATION_NAME);
         applicationDescription = System.getProperty(APPLICATION_DESCRIPTION);
-    }
-
-    public String getApplicationID() {
-        return applicationID;
-    }
-
-    public void setApplicationID(final String applicationID) {
-        this.applicationID = applicationID;
     }
 
     public String getApplicationName() {

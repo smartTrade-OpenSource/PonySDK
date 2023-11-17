@@ -20,12 +20,7 @@
 
 package com.ponysdk.core.ui.datagrid2.view;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.function.Function;
-import java.util.function.Predicate;
-
-import com.ponysdk.core.server.service.query.PResultSet;
+import com.ponysdk.core.ui.datagrid2.datasource.PResultSet;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.column.ColumnActionListener;
@@ -35,6 +30,11 @@ import com.ponysdk.core.ui.datagrid2.controller.DataGridController;
 import com.ponysdk.core.ui.datagrid2.data.DataGridFilter;
 import com.ponysdk.core.ui.datagrid2.data.RowAction;
 import com.ponysdk.core.ui.datagrid2.datasource.DataGridSource;
+
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * @author mbagdouri
@@ -57,14 +57,14 @@ public interface DataGridView<K, V> extends IsPWidget {
     void pause();
 
     /**
-     * Sets a {@link DataGridAdapter} on this view
-     */
-    void setAdapter(DataGridAdapter<K, V> adapter);
-
-    /**
      * @return the {@link DataGridAdapter} corresponding to this view
      */
     DataGridAdapter<K, V> getAdapter();
+
+    /**
+     * Sets a {@link DataGridAdapter} on this view
+     */
+    void setAdapter(DataGridAdapter<K, V> adapter);
 
     /**
      * Sets the delay (in milliseconds) that will be used between consecutive
@@ -99,7 +99,6 @@ public interface DataGridView<K, V> extends IsPWidget {
     public PResultSet<V> getLiveSelectedData();
 
     /**
-     *
      * @return the number of selected data
      */
     int getLiveSelectedDataCount();
@@ -107,10 +106,8 @@ public interface DataGridView<K, V> extends IsPWidget {
     /**
      * Returns a {@link Collection} view of data with sorting and filters taken into account.
      *
-     * @param from
-     *            index starting from which the data is retrieved
-     * @param dataSize
-     *            size of the data to retrieve
+     * @param from     index starting from which the data is retrieved
+     * @param dataSize size of the data to retrieve
      */
     Collection<V> getLiveData(int from, int dataSize);
 
@@ -143,12 +140,10 @@ public interface DataGridView<K, V> extends IsPWidget {
     /**
      * Adds/replaces a sorting criterion for the view.
      *
-     * @param key
-     *            an object that can be used to uniquely identify a
-     *            sorting criterion, so that it can be replaced or
-     *            removed
-     * @param comparator
-     *            compares two values of the model
+     * @param key        an object that can be used to uniquely identify a
+     *                   sorting criterion, so that it can be replaced or
+     *                   removed
+     * @param comparator compares two values of the model
      */
     void addSort(Object key, Comparator<V> comparator);
 
@@ -214,17 +209,16 @@ public interface DataGridView<K, V> extends IsPWidget {
 
     /**
      * @return a String representation of a custom value of a
-     *         {@link DataGridConfig} identified by {@code key}, that will be
-     *         used for the serialization of the configuration, or {@code null}
-     *         if it doesn't recognize the {@code key} or fails to encode
+     * {@link DataGridConfig} identified by {@code key}, that will be
+     * used for the serialization of the configuration, or {@code null}
+     * if it doesn't recognize the {@code key} or fails to encode
      */
     String encodeConfigCustomValue(String key, Object value);
 
     /**
      * @return a deserialized object built from the String value, or
-     *         {@code null} if it doesn't recognize the {@code key}
-     * @throws DecodeException
-     *             if it fails to decode the value
+     * {@code null} if it doesn't recognize the {@code key}
+     * @throws DecodeException if it fails to decode the value
      */
     Object decodeConfigCustomValue(String key, String value) throws DecodeException;
 
@@ -238,8 +232,7 @@ public interface DataGridView<K, V> extends IsPWidget {
      * Scrolls up or down to the row at the provided index.
      * Tries to show the row in the center of visible area.
      *
-     * @param index
-     *            position of the row to scroll to
+     * @param index position of the row to scroll to
      */
     void scrollTo(int index);
 
@@ -249,6 +242,11 @@ public interface DataGridView<K, V> extends IsPWidget {
     void removeDrawListener(DrawListener drawListener);
 
     void setExceptionHandler(Function<Throwable, String> handler);
+
+    public interface DrawListener {
+
+        void onDraw(int rowCount);
+    }
 
     public static class DecodeException extends Exception {
 
@@ -261,7 +259,7 @@ public interface DataGridView<K, V> extends IsPWidget {
         }
 
         public DecodeException(final String message, final Throwable cause, final boolean enableSuppression,
-                final boolean writableStackTrace) {
+                               final boolean writableStackTrace) {
             super(message, cause, enableSuppression, writableStackTrace);
         }
 
@@ -273,11 +271,6 @@ public interface DataGridView<K, V> extends IsPWidget {
             super(message);
         }
 
-    }
-
-    public interface DrawListener {
-
-        void onDraw(int rowCount);
     }
 
 }

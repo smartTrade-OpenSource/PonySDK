@@ -30,15 +30,15 @@ import jsinterop.annotations.JsFunction;
  *
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserver/IntersectionObserver">MDN</a>
  * @see <a href=
- *      "https://github.com/gwt-jelement/gwt-jelement/blob/master/src/main/java/gwt/jelement/dom/IntersectionObserverCallback.java">Source</a>
+ * "https://github.com/gwt-jelement/gwt-jelement/blob/master/src/main/java/gwt/jelement/dom/IntersectionObserverCallback.java">Source</a>
  */
 @JsFunction
 public interface IntersectionObserverCallback {
 
     /**
-     * @param entries A list of {@link IntersectionObserverEntry} objects, each representing one threshold which was
-     *            crossed,
-     *            either becoming more or less visible than the percentage specified by that threshold.
+     * @param entries  A list of {@link IntersectionObserverEntry} objects, each representing one threshold which was
+     *                 crossed,
+     *                 either becoming more or less visible than the percentage specified by that threshold.
      * @param observer The {@link IntersectionObserver} for which the callback is being invoked.
      */
     void callback(IntersectionObserverEntry[] entries, IntersectionObserver observer);

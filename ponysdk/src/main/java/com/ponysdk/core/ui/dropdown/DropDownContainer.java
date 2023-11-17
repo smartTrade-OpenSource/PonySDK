@@ -23,30 +23,15 @@
 
 package com.ponysdk.core.ui.dropdown;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.IsPWidget;
-import com.ponysdk.core.ui.basic.PButton;
-import com.ponysdk.core.ui.basic.PFlowPanel;
-import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.core.ui.basic.PWidget.TabindexMode;
-import com.ponysdk.core.ui.basic.event.PBlurEvent;
-import com.ponysdk.core.ui.basic.event.PBlurHandler;
-import com.ponysdk.core.ui.basic.event.PClickHandler;
-import com.ponysdk.core.ui.basic.event.PCloseEvent;
-import com.ponysdk.core.ui.basic.event.PCloseHandler;
-import com.ponysdk.core.ui.basic.event.PFocusEvent;
-import com.ponysdk.core.ui.basic.event.PFocusHandler;
-import com.ponysdk.core.ui.basic.event.PKeyDownEvent;
-import com.ponysdk.core.ui.basic.event.POpenEvent;
-import com.ponysdk.core.ui.basic.event.POpenHandler;
-import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
-import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
+import com.ponysdk.core.ui.basic.event.*;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 import com.ponysdk.core.ui.model.PEventType;
 import com.ponysdk.core.ui.model.PKeyCodes;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public abstract class DropDownContainer<V, C extends DropDownContainerConfiguration> implements IsPWidget {
 
@@ -68,23 +53,19 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
     private static final String STYLE_CONTAINER_DEFAULT = "dd-container-default";
 
     private static final String ATTRIBUTE_ID = "id";
-
-    protected PButton clearTitleButton;
-    protected PButton mainButton;
-    protected PButton stateButton;
-
-    private IsPWidget customContainer;
-
-    private boolean initialized;
-
     protected final C configuration;
-
     private final PFlowPanel widget;
     private final DropDownContainerAddon container;
     private final Set<PValueChangeHandler<V>> valueChangeHandlers;
     private final Set<PCloseHandler> closeHandlers;
     private final Set<POpenHandler> openHandlers;
     private final Set<DropDownContainerListener> clearSelectionListeners;
+    protected PButton clearTitleButton;
+    protected PButton mainButton;
+    protected PButton stateButton;
+    private IsPWidget customContainer;
+    private boolean initialized;
+    private boolean focused;
 
     protected DropDownContainer(final C configuration) {
         this.configuration = configuration;
@@ -95,7 +76,7 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
         this.widget = Element.newPFlowPanel();
         this.widget.addStyleName(STYLE_CONTAINER_WIDGET);
         this.widget.setAttribute(ATTRIBUTE_ID, widget.getID() + "");
-        this.container =  configuration.isMultilevelEnabled() ? DropDownContainerAddon.newMultilevelDopdown(widget) : new DropDownContainerAddon(widget);
+        this.container = configuration.isMultilevelEnabled() ? DropDownContainerAddon.newMultilevelDopdown(widget) : new DropDownContainerAddon(widget);
         this.container.addStyleName(STYLE_CONTAINER_ADDON);
         if (configuration.isPositionDropRight()) container.setDropRight();
     }
@@ -103,8 +84,6 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
     public abstract V getValue();
 
     public abstract void setValue(V value);
-
-    private boolean focused;
 
     @Override
     public PFlowPanel asWidget() {
@@ -352,7 +331,8 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
             }
         }
         if (value == null || isValueEmpty(value)) {
-            if (!configuration.isTitlePlaceHolder() && configuration.isSelectionDisplayed()) text.append(configuration.getAllLabel());
+            if (!configuration.isTitlePlaceHolder() && configuration.isSelectionDisplayed())
+                text.append(configuration.getAllLabel());
             final String display = text.toString();
             mainButton.setText(display);
             mainButton.setTitle(display);
@@ -401,7 +381,7 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
     protected void focusContainer() {
         // Nothing to do by default
     }
-    
+
     protected HandlerRegistration addUppDownKeyHandler(final boolean forceFocus, final PKeyDownEvent.Handler handler) {
         if (forceFocus) {
             container.asWidget().setTabindex(TabindexMode.TABULABLE);

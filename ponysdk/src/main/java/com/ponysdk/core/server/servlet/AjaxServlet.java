@@ -24,15 +24,15 @@
 package com.ponysdk.core.server.servlet;
 
 import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.concurrent.UIContext;
 import com.ponysdk.core.ui.basic.PObject;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public class AjaxServlet extends HttpServlet {
@@ -41,49 +41,56 @@ public class AjaxServlet extends HttpServlet {
 
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) {
-        try {
-            process(req, resp);
-        } catch (final IOException e) {
-            log.error("Cannot stream request", e);
-        }
+        process(req, resp);
     }
 
     @Override
     protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) {
-        try {
-            process(req, resp);
-        } catch (final IOException e) {
-            log.error("Cannot stream request", e);
-        }
+        process(req, resp);
     }
 
-    private void process(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+    private void process(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
-            final int uiContextID = Integer.parseInt(req.getHeader(ClientToServerModel.UI_CONTEXT_ID.name()));
-            final UIContext uiContext = SessionManager.get().getUIContext(uiContextID);
-            if (uiContext != null) {
-                final int objectID = Integer.parseInt(req.getHeader(ClientToServerModel.OBJECT_ID.name()));
-                uiContext.execute(() -> {
-                    try {
-                        final PObject pObject = uiContext.getObject(objectID);
-                        pObject.handleAjaxRequest(req, resp);
-                    } catch (ServletException | IOException e) {
-                        log.error("Cannot stream request", e);
-                        try {
-                            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-                        } catch (final IOException e1) {
-                            log.error("Cannot send error", e);
-                        }
-                    }
-                });
-            } else {
-                log.warn("Can't found UI Context #{}, already destroyed ?", uiContextID);
-                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "UI Context #" + uiContextID + " not found");
+            final int uiContextID = parseInt(req.getHeader(ClientToServerModel.UI_CONTEXT_ID.name()));
+            final UIContext uiContext = UIContext.get(uiContextID);
+
+            if (uiContext == null) {
+                throw new IllegalStateException("UI Context #" + uiContextID + " not found");
             }
+
+            final int objectID = parseInt(req.getHeader(ClientToServerModel.OBJECT_ID.name()));
+            uiContext.execute(() -> handleAjaxRequest(uiContext, objectID, req, resp));
         } catch (final Exception e) {
+            handleError(resp, e.getMessage());
             log.error("Cannot stream request", e);
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
+    private void handleAjaxRequest(UIContext uiContext, int objectID, HttpServletRequest req, HttpServletResponse resp) {
+        try {
+            final PObject pObject = uiContext.getObject(objectID);
+            if (pObject == null) {
+                throw new IllegalStateException("PObject #" + objectID + " not found in UIContext");
+            }
+            pObject.handleAjaxRequest(req, resp);
+        } catch (ServletException | IOException e) {
+            handleError(resp, e.getMessage());
+            log.error("Cannot handle Ajax request", e);
+        }
+    }
+
+    private int parseInt(String value) throws NumberFormatException {
+        if (value == null) {
+            throw new IllegalArgumentException("Value is null");
+        }
+        return Integer.parseInt(value);
+    }
+
+    private void handleError(HttpServletResponse resp, String message) {
+        try {
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message);
+        } catch (IOException e) {
+            log.error("Cannot send error", e);
+        }
+    }
 }

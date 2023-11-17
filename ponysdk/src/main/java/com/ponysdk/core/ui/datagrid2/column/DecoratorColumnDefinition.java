@@ -23,11 +23,11 @@
 
 package com.ponysdk.core.ui.datagrid2.column;
 
-import java.util.function.BiPredicate;
-import java.util.function.Supplier;
-
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.datagrid2.cell.PrimaryCell;
+
+import java.util.function.BiPredicate;
+import java.util.function.Supplier;
 
 /**
  * @author mbagdouri
@@ -136,13 +136,13 @@ public class DecoratorColumnDefinition<V> implements ColumnDefinition<V> {
     }
 
     @Override
-    public void setController(final ColumnController<V> columnController) {
-        column.setController(columnController);
+    public ColumnController<V> getController() {
+        return column.getController();
     }
 
     @Override
-    public ColumnController<V> getController() {
-        return column.getController();
+    public void setController(final ColumnController<V> columnController) {
+        column.setController(columnController);
     }
 
     @Override
@@ -180,8 +180,8 @@ public class DecoratorColumnDefinition<V> implements ColumnDefinition<V> {
         column.onMoved();
     }
 
-	@Override
-	public String getGroup() {
-		return column.getGroup();
-	}
+    @Override
+    public String getGroup() {
+        return column.getGroup();
+    }
 }

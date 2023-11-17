@@ -193,7 +193,7 @@ public class PStackLayoutPanel extends PWidget implements HasPWidgets, PAnimated
         forEach(this::doDestroy);
     }
 
-    private void doDestroy(PWidget child){
+    private void doDestroy(PWidget child) {
         try {
             child.onDestroy();
         } catch (Exception e) {

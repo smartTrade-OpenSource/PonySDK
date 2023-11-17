@@ -23,40 +23,19 @@
 
 package com.ponysdk.core.server.websocket;
 
-import java.nio.ByteBuffer;
-
-import org.eclipse.jetty.websocket.api.BatchMode;
-import org.eclipse.jetty.websocket.api.WriteCallback;
-import org.eclipse.jetty.websocket.api.extensions.Frame;
-import org.eclipse.jetty.websocket.common.Generator;
-import org.eclipse.jetty.websocket.common.extensions.compress.PerMessageDeflateExtension;
+import org.eclipse.jetty.util.Callback;
+import org.eclipse.jetty.websocket.core.Frame;
+import org.eclipse.jetty.websocket.core.internal.PerMessageDeflateExtension;
 
 public class PonyPerMessageDeflateExtension extends PerMessageDeflateExtension {
 
-    public static final String NAME = new PonyPerMessageDeflateExtension().getName();
     private WebSocket.Listener webSocketListener;
 
     public PonyPerMessageDeflateExtension() {
         super();
     }
 
-    @Override
-    public void incomingFrame(final Frame frame) {
-        if (webSocketListener != null)
-            webSocketListener.onIncomingWebSocketFrame(getFrameHeaderLength(frame), frame.getPayloadLength());
-        super.incomingFrame(frame);
-    }
-
-    @Override
-    protected void nextOutgoingFrame(final Frame frame, final WriteCallback callback, final BatchMode batchMode) {
-        if (webSocketListener != null)
-            webSocketListener.onOutgoingWebSocketFrame(getFrameHeaderLength(frame), frame.getPayloadLength());
-        super.nextOutgoingFrame(frame, callback, batchMode);
-    }
-
     /**
-     * Inspired by {@link Generator#generateHeaderBytes(Frame, ByteBuffer)}
-     *
      * <pre>
      *    0                   1                   2                   3
      *    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -84,14 +63,32 @@ public class PonyPerMessageDeflateExtension extends PerMessageDeflateExtension {
 
         // if length is over 65535 then its a 7 + 64 bit length
         if (payloadLength > 0xFF_FF) length += 9;
-        // if payload is greater that 126 we have a 7 + 16 bit length
+            // if payload is greater that 126 we have a 7 + 16 bit length
         else if (payloadLength >= 0x7E) length += 3;
-        // we have a 7 bit length
+            // we have a 7 bit length
         else length += 1;
 
         if (frame.isMasked()) length++;
 
         return length;
+    }
+
+    @Override
+    protected void nextIncomingFrame(Frame frame, Callback callback) {
+        if (webSocketListener != null) {
+            webSocketListener.onIncomingWebSocketFrame(getFrameHeaderLength(frame), frame.getPayloadLength());
+        }
+        super.nextIncomingFrame(frame, callback);
+    }
+
+
+    @Override
+    protected void nextOutgoingFrame(Frame frame, Callback callback, boolean batch) {
+        if (webSocketListener != null) {
+            webSocketListener.onOutgoingWebSocketFrame(getFrameHeaderLength(frame), frame.getPayloadLength());
+        }
+
+        super.nextOutgoingFrame(frame, callback, batch);
     }
 
     void setWebSocketListener(final WebSocket.Listener webSocketListener) {

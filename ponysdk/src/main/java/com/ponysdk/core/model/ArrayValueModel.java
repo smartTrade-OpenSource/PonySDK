@@ -46,15 +46,17 @@ public enum ArrayValueModel {
     private static final int STRING_UINT8_LENGTH_MIN_SIZE = 1;
     private static final int STRING_UINT16_LENGTH_SIZE = 2;
     private static final int STRING_UINT32_LENGTH_MIN_SIZE = 4;
-
+    private static final ArrayValueModel[] VALUES = ArrayValueModel.values();
     private final int minSize;
     private final boolean dynamicSize;
-
-    private static final ArrayValueModel[] VALUES = ArrayValueModel.values();
 
     ArrayValueModel(final int minSize, final boolean dynamicSize) {
         this.minSize = minSize;
         this.dynamicSize = dynamicSize;
+    }
+
+    public static ArrayValueModel fromRawValue(final int rawValue) {
+        return VALUES[rawValue];
     }
 
     public int getMinSize() {
@@ -67,10 +69,6 @@ public enum ArrayValueModel {
 
     public boolean isDynamicSize() {
         return dynamicSize;
-    }
-
-    public static ArrayValueModel fromRawValue(final int rawValue) {
-        return VALUES[rawValue];
     }
 
 }

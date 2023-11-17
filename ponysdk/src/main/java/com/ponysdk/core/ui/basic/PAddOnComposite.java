@@ -1,10 +1,9 @@
 package com.ponysdk.core.ui.basic;
 
-import javax.json.JsonObject;
-
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.writer.ModelWriter;
+import jakarta.json.JsonObject;
 
 public abstract class PAddOnComposite<T extends PWidget> extends PAddOn implements IsPWidget {
 
@@ -33,7 +32,7 @@ public abstract class PAddOnComposite<T extends PWidget> extends PAddOn implemen
             return true;
         } else if (this.window != window) {
             throw new IllegalAccessError(
-                "Widget already attached to an other window, current window : #" + this.window + ", new window : #" + window);
+                    "Widget already attached to an other window, current window : #" + this.window + ", new window : #" + window);
         }
         return false;
     }

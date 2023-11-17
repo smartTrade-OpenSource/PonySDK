@@ -1,4 +1,3 @@
-
 package com.ponysdk.sample.server;
 
 import java.util.ArrayList;

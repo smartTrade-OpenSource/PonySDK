@@ -30,9 +30,8 @@ import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
-
-import elemental.client.Browser;
-import elemental.dom.Document;
+import elemental2.dom.Document;
+import elemental2.dom.DomGlobal;
 
 public class PTRootPanel extends PTAbsolutePanel {
 
@@ -46,7 +45,7 @@ public class PTRootPanel extends PTAbsolutePanel {
 
         super.create(buffer, objectId, uiService);
 
-        final Document document = Browser.getWindow().getDocument();
+        final Document document = DomGlobal.document;
         if (PTAbstractWindow.isPageVisibilityAPI(document)) {
             document.addEventListener("visibilitychange", event -> sendDocumentVisibility(document));
             sendDocumentVisibility(document);

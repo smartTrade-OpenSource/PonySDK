@@ -31,7 +31,7 @@ import java.time.Duration;
  * The normal use pattern is to set all childrens' positions, then to call {@link #animate(Duration)} to
  * move them to their new positions over some period of time.
  * </p>
- * 
+ *
  * @see com.google.gwt.user.client.ui.AnimatedLayout
  */
 @FunctionalInterface

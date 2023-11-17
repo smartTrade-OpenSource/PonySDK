@@ -43,16 +43,16 @@ public enum PUnit {
         this.value = unit;
     }
 
+    public static PUnit fromRawValue(final int rawValue) {
+        return VALUES[rawValue];
+    }
+
     public final byte getByteValue() {
         return (byte) ordinal();
     }
 
     public final String getValue() {
         return value;
-    }
-
-    public static PUnit fromRawValue(final int rawValue) {
-        return VALUES[rawValue];
     }
 
 }

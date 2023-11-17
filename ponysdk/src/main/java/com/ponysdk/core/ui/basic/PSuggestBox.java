@@ -32,8 +32,8 @@ import com.ponysdk.core.ui.basic.event.PSelectionHandler;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 import com.ponysdk.core.writer.ModelWriter;
+import jakarta.json.JsonObject;
 
-import javax.json.JsonObject;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;

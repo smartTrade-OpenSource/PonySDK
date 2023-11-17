@@ -23,17 +23,16 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.json.JsonObject;
-
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.ui.basic.event.PScrollEvent;
 import com.ponysdk.core.ui.basic.event.PScrollEvent.PScrollHandler;
+import jakarta.json.JsonObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A simple panel that wraps its contents in a scrollable area.
@@ -102,7 +101,7 @@ public class PScrollPanel extends PSimplePanel {
                 final int width = instruction.getJsonNumber(ClientToServerModel.HANDLER_SCROLL_WIDTH.toStringValue()).intValue();
                 final int vertical = instruction.getJsonNumber(ClientToServerModel.HANDLER_SCROLL_VERTICAL.toStringValue()).intValue();
                 final int horizontal = instruction.getJsonNumber(ClientToServerModel.HANDLER_SCROLL_HORIZONTAL.toStringValue())
-                    .intValue();
+                        .intValue();
                 final PScrollEvent scrollEvent = new PScrollEvent(this, height, width, vertical, horizontal);
                 scrollHandlers.forEach(handler -> handler.onScroll(scrollEvent));
             }

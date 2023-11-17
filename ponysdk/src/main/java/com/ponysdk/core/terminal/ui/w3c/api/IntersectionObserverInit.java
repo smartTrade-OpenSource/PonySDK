@@ -24,7 +24,6 @@
 package com.ponysdk.core.terminal.ui.w3c.api;
 
 import com.google.gwt.dom.client.Element;
-
 import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsProperty;
@@ -35,7 +34,7 @@ import jsinterop.annotations.JsType;
  *
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserver/IntersectionObserver">MDN</a>
  * @see <a href=
- *      "https://github.com/gwt-jelement/gwt-jelement/blob/master/src/main/java/gwt/jelement/dom/IntersectionObserverInit.java">Source</a>
+ * "https://github.com/gwt-jelement/gwt-jelement/blob/master/src/main/java/gwt/jelement/dom/IntersectionObserverInit.java">Source</a>
  */
 @JsType(name = "Object", namespace = JsPackage.GLOBAL, isNative = true)
 public class IntersectionObserverInit {

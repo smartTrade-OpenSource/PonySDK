@@ -24,15 +24,7 @@
 package com.ponysdk.core.ui.rich;
 
 import com.ponysdk.core.model.PHorizontalAlignment;
-import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.IsPWidget;
-import com.ponysdk.core.ui.basic.PButton;
-import com.ponysdk.core.ui.basic.PDialogBox;
-import com.ponysdk.core.ui.basic.PHorizontalPanel;
-import com.ponysdk.core.ui.basic.PLabel;
-import com.ponysdk.core.ui.basic.PVerticalPanel;
-import com.ponysdk.core.ui.basic.PWidget;
-import com.ponysdk.core.ui.basic.PWindow;
+import com.ponysdk.core.ui.basic.*;
 
 /**
  * POptionPane makes it easy to pop up a standard dialog box that prompts users
@@ -107,13 +99,13 @@ public class POptionPane implements IsPWidget {
     private static String[] getOptions(final POptionType optionType) {
         switch (optionType) {
             case DEFAULT_OPTION:
-                return new String[] { POption.OK_OPTION.getName() };
+                return new String[]{POption.OK_OPTION.getName()};
             case OK_CANCEL_OPTION:
-                return new String[] { POption.OK_OPTION.getName(), POption.CANCEL_OPTION.getName() };
+                return new String[]{POption.OK_OPTION.getName(), POption.CANCEL_OPTION.getName()};
             case YES_NO_CANCEL_OPTION:
-                return new String[] { POption.YES_OPTION.getName(), POption.NO_OPTION.getName(), POption.CANCEL_OPTION.getName() };
+                return new String[]{POption.YES_OPTION.getName(), POption.NO_OPTION.getName(), POption.CANCEL_OPTION.getName()};
             case YES_NO_OPTION:
-                return new String[] { POption.YES_OPTION.getName(), POption.NO_OPTION.getName() };
+                return new String[]{POption.YES_OPTION.getName(), POption.NO_OPTION.getName()};
             default:
                 break;
         }

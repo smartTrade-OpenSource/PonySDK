@@ -24,8 +24,8 @@
 package com.ponysdk.core.ui.form2.impl.validator;
 
 
-import com.ponysdk.core.ui.form2.api.FormFieldValidator;
 import com.ponysdk.core.ui.form2.api.FormField;
+import com.ponysdk.core.ui.form2.api.FormFieldValidator;
 import com.ponysdk.core.ui.form2.api.ValidationResult;
 
 import java.util.Objects;

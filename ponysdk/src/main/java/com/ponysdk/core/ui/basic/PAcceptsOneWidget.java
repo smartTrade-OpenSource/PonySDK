@@ -32,8 +32,7 @@ public interface PAcceptsOneWidget {
     /**
      * Set the only widget of the receiver, replacing the previous widget if there was one.
      *
-     * @param w
-     *            the widget, or <code>null</code> to remove the widget
+     * @param w the widget, or <code>null</code> to remove the widget
      * @see PSimplePanel
      */
     void setWidget(IsPWidget w);

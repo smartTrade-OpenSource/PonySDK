@@ -1,7 +1,4 @@
-
 package com.ponysdk.core.ui.listbox;
-
-import java.util.List;
 
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PLabel;
@@ -12,6 +9,8 @@ import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 import com.ponysdk.core.ui.listbox.ListBox.ListBoxItem;
 import com.ponysdk.core.ui.listbox.ListBox.ListBoxItem.ListBoxItemType;
+
+import java.util.List;
 
 public class MultiLevelDropDownRenderer<D> implements ListBoxItemRenderer<MultiLevelDropDownNode<D>> {
 
@@ -33,7 +32,7 @@ public class MultiLevelDropDownRenderer<D> implements ListBoxItemRenderer<MultiL
     }
 
     private MultiLevelDropDownRenderer(final ListBox<MultiLevelDropDownNode<D>> parentContainer,
-            final MultiLevelDropDownRenderer<D> parent) {
+                                       final MultiLevelDropDownRenderer<D> parent) {
         this.parentContainer = parentContainer;
         this.parent = parent;
         panel.addStyleName(STYLE);
@@ -44,6 +43,18 @@ public class MultiLevelDropDownRenderer<D> implements ListBoxItemRenderer<MultiL
                 label.onDestroy();
             }
         });
+    }
+
+    public static ListBoxConfiguration getConfiguration() {
+        final ListBoxConfiguration configuration = new ListBoxConfiguration();
+        configuration.enabledEventOnly();
+        configuration.disableClearTitleButton();
+        configuration.enableStopClickEvent();
+        configuration.enableMultilevel();
+        configuration.disableSorting();
+        configuration.disableSearch();
+        configuration.enabledEventOnly();
+        return configuration;
     }
 
     @Override
@@ -109,7 +120,7 @@ public class MultiLevelDropDownRenderer<D> implements ListBoxItemRenderer<MultiL
         nestedListBox.setItemRendererSupplier(() -> new MultiLevelDropDownRenderer<>(nestedListBox, this));
 
         for (final PValueChangeHandler<List<ListBoxItem<MultiLevelDropDownNode<D>>>> handler : parentContainer
-            .getValueChangeHandlers()) {
+                .getValueChangeHandlers()) {
             nestedListBox.addValueChangeHandler(handler);
         }
     }
@@ -131,18 +142,6 @@ public class MultiLevelDropDownRenderer<D> implements ListBoxItemRenderer<MultiL
         if (item.isEnabled()) label.removeAttribute(ATTR_DISABLED);
         else label.setAttribute(ATTR_DISABLED);
         panel.setWidget(label);
-    }
-
-    public static ListBoxConfiguration getConfiguration() {
-        final ListBoxConfiguration configuration = new ListBoxConfiguration();
-        configuration.enabledEventOnly();
-        configuration.disableClearTitleButton();
-        configuration.enableStopClickEvent();
-        configuration.enableMultilevel();
-        configuration.disableSorting();
-        configuration.disableSearch();
-        configuration.enabledEventOnly();
-        return configuration;
     }
 
 }

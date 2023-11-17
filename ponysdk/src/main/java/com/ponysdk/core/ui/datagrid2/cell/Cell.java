@@ -48,11 +48,9 @@ public interface Cell<V, C extends CellController<V>> extends IsPWidget {
     /**
      * Renders the value in the main widget.
      *
-     * @param data
-     *            the value to be rendered
-     * @param renderingHelper
-     *            the intermediate object supplied in
-     *            {@link ColumnDefinition#getRenderingHelper(Object)}
+     * @param data            the value to be rendered
+     * @param renderingHelper the intermediate object supplied in
+     *                        {@link ColumnDefinition#getRenderingHelper(Object)}
      */
     void render(V data, Object renderingHelper);
 

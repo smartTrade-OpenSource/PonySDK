@@ -23,73 +23,68 @@
 
 package com.ponysdk.core.terminal.socket;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import com.ponysdk.core.terminal.ReconnectionChecker;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.request.WebSocketRequestBuilder;
+import elemental2.core.ArrayBuffer;
+import elemental2.core.Uint8Array;
+import elemental2.dom.*;
+import elemental2.dom.WebSocket.OnmessageFn.EventMessageEventTypeParameterUnionType;
 
-import elemental.client.Browser;
-import elemental.events.CloseEvent;
-import elemental.events.MessageEvent;
-import elemental.html.ArrayBuffer;
-import elemental.html.WebSocket;
-import elemental.html.Window;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class WebSocketClient {
 
     private static final Logger log = Logger.getLogger(WebSocketClient.class.getName());
 
-    private final Window window;
-    private final WebSocket webSocket;
-
+    private final String url;
+    private WebSocket webSocket;
+    private final UIBuilder uiBuilder;
     private long lastMessageTime = -1;
 
-    public WebSocketClient(final String url, final UIBuilder uiBuilder, final ReconnectionChecker reconnectionChecker) {
-        this.window = Browser.getWindow();
-        this.webSocket = window.newWebSocket(url);
-        this.webSocket.setBinaryType("arraybuffer");
+    public WebSocketClient(final String url, final UIBuilder uiBuilder) {
+        this.uiBuilder = uiBuilder;
+        this.url = url;
+    }
 
-        webSocket.setOnopen(event -> {
-            uiBuilder.init(new WebSocketRequestBuilder(WebSocketClient.this));
-            if (log.isLoggable(Level.INFO)) log.info("WebSocket connected");
-            lastMessageTime = System.currentTimeMillis();
-        });
+    public void connect() {
+        webSocket = new WebSocket(url);
+        webSocket.binaryType = "arraybuffer";
+        webSocket.onopen = this::onOpen;
+        webSocket.onclose = this::onClose;
+        webSocket.onerror = this::onError;
+        webSocket.onmessage = this::onMessage;
+    }
 
-        webSocket.setOnclose(event -> {
-            if (event instanceof CloseEvent) {
-                final CloseEvent closeEvent = (CloseEvent) event;
-                final int statusCode = closeEvent.getCode();
-                if (log.isLoggable(Level.INFO)) log.info("WebSocket disconnected : " + statusCode);
-                // If it's a not normal disconnection
-                if (statusCode != 1000) reconnectionChecker.detectConnectionFailure();
-            } else {
-                log.severe("WebSocket disconnected : " + event);
-                reconnectionChecker.detectConnectionFailure();
-            }
-        });
+    private void onOpen(Event event) {
+        log.info("WebSocket connected");
+        uiBuilder.init(new WebSocketRequestBuilder(WebSocketClient.this));
+        lastMessageTime = System.currentTimeMillis();
+    }
 
-        webSocket.setOnerror(event -> {
-            log.severe("WebSocket error : " + event);
-        });
-        webSocket.setOnmessage(event -> {
-            lastMessageTime = System.currentTimeMillis();
+    private void onClose(CloseEvent event) {
+        log.info("WebSocket disconnected: " + event.code);
+        DomGlobal.setTimeout(p0 -> {
+            log.info("Trying to reconnect");
+            connect();
+        }, 1000);
+    }
 
-            final Object data = ((MessageEvent) event).getData();
-            if (data instanceof ArrayBuffer) {
-                final ArrayBuffer buffer = (ArrayBuffer) data; //TODO nciaravola avoid cast ?
-                try {
-                    uiBuilder.updateMainTerminal(window.newUint8Array(buffer, 0, buffer.getByteLength()));
-                } catch (final Exception e) {
-                    log.log(Level.SEVERE, "Error while processing the " + buffer, e);
-                }
-            }
-        });
+    private void onError(Event event) {
+        log.severe("WebSocket error : " + event);
+    }
+
+    private void onMessage(MessageEvent<EventMessageEventTypeParameterUnionType> event) {
+        lastMessageTime = System.currentTimeMillis();
+        ArrayBuffer buffer = event.data.asArrayBuffer();
+        try {
+            uiBuilder.updateMainTerminal(new Uint8Array(buffer));
+        } catch (final Exception e) {
+            log.log(Level.SEVERE, "Error while processing the " + buffer, e);
+        }
     }
 
     public void send(final String message) {
-
         webSocket.send(message);
     }
 

@@ -23,11 +23,12 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import elemental.html.Uint8Array;
+
+import elemental2.core.TypedArray;
 
 public interface PostMessageHandler {
 
-    void postMessage(final Uint8Array buffer);
+    void postMessage(final TypedArray buffer);
 
     void setReady();
 

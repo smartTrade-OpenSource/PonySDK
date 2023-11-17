@@ -30,15 +30,15 @@ public class PTFunction extends AbstractPTObject {
 
     private JsTextFunction function;
 
+    public static native JsTextFunction eval(String code) /*-{
+                                                          return new Function('args',code);
+                                                          }-*/;
+
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
         super.create(buffer, objectId, uiBuilder);
         function = eval(buffer.readBinaryModel().getStringValue());
     }
-
-    public static native JsTextFunction eval(String code) /*-{
-                                                          return new Function('args',code);
-                                                          }-*/;
 
     public JsTextFunction getFunction() {
         return function;

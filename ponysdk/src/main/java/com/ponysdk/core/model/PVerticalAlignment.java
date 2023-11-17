@@ -34,11 +34,11 @@ public enum PVerticalAlignment {
     PVerticalAlignment() {
     }
 
-    public final byte getValue() {
-        return (byte) ordinal();
-    }
-
     public static PVerticalAlignment fromRawValue(final int rawValue) {
         return VALUES[rawValue];
+    }
+
+    public final byte getValue() {
+        return (byte) ordinal();
     }
 }

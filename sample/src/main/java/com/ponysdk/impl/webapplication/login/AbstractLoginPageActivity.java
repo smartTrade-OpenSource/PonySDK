@@ -53,7 +53,7 @@ public abstract class AbstractLoginPageActivity extends AbstractActivity<LoginPa
 
             @Override
             public PKeyCodes[] getFilteredKeys() {
-                return new PKeyCodes[] {
+                return new PKeyCodes[]{
                         PKeyCodes.ENTER
                 };
             }

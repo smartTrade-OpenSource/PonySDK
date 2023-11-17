@@ -35,10 +35,8 @@ import java.util.Set;
 public class EventBus {
 
     private static final Logger log = LoggerFactory.getLogger(EventBus.class);
-
-    private Set<BroadcastEventHandler> broadcastHandlerManager;
-
     private final EventSource globalEventSource = new EventSource();
+    private Set<BroadcastEventHandler> broadcastHandlerManager;
 
     public HandlerRegistration addHandler(final Event.Type type, final EventHandler handler) {
         return globalEventSource.addHandler(type, handler);

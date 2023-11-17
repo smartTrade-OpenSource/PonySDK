@@ -20,12 +20,7 @@
 
 package com.ponysdk.core.ui.datagrid2.view;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Objects;
-import java.util.function.Function;
-
-import com.ponysdk.core.server.service.query.PResultSet;
+import com.ponysdk.core.ui.datagrid2.datasource.PResultSet;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.column.ColumnActionListener;
@@ -34,6 +29,11 @@ import com.ponysdk.core.ui.datagrid2.config.DataGridConfig;
 import com.ponysdk.core.ui.datagrid2.controller.DataGridController;
 import com.ponysdk.core.ui.datagrid2.data.DataGridFilter;
 import com.ponysdk.core.ui.datagrid2.data.RowAction;
+
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * @author mbagdouri
@@ -60,11 +60,6 @@ public class DecoratorDataGridView<K, V> implements DataGridView<K, V> {
     @Override
     public DataGridController<K, V> getController() {
         return view.getController();
-    }
-
-    @Override
-    public void setAdapter(final DataGridAdapter<K, V> adapter) {
-        view.setAdapter(adapter);
     }
 
     @Override
@@ -200,6 +195,11 @@ public class DecoratorDataGridView<K, V> implements DataGridView<K, V> {
     @Override
     public DataGridAdapter<K, V> getAdapter() {
         return view.getAdapter();
+    }
+
+    @Override
+    public void setAdapter(final DataGridAdapter<K, V> adapter) {
+        view.setAdapter(adapter);
     }
 
     @Override

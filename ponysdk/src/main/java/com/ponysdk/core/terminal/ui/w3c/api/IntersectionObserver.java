@@ -24,12 +24,7 @@
 package com.ponysdk.core.terminal.ui.w3c.api;
 
 import com.google.gwt.dom.client.Element;
-
-import jsinterop.annotations.JsConstructor;
-import jsinterop.annotations.JsMethod;
-import jsinterop.annotations.JsPackage;
-import jsinterop.annotations.JsProperty;
-import jsinterop.annotations.JsType;
+import jsinterop.annotations.*;
 
 /**
  * The IntersectionObserver interface of the Intersection Observer API provides a way to asynchronously observe changes
@@ -37,7 +32,7 @@ import jsinterop.annotations.JsType;
  *
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserver">MDN</a>
  * @see <a href=
- *      "https://github.com/gwt-jelement/gwt-jelement/blob/master/src/main/java/gwt/jelement/dom/IntersectionObserver.java">Source</a>
+ * "https://github.com/gwt-jelement/gwt-jelement/blob/master/src/main/java/gwt/jelement/dom/IntersectionObserver.java">Source</a>
  */
 @JsType(namespace = JsPackage.GLOBAL, name = "IntersectionObserver", isNative = true)
 public class IntersectionObserver {
@@ -46,7 +41,7 @@ public class IntersectionObserver {
      * The IntersectionObserver() constructor creates and returns a new IntersectionObserver object.
      *
      * @param callback A function which is called when the percentage of the target element is visible crosses a
-     *            threshold.
+     *                 threshold.
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserver/IntersectionObserver">MDN</a>
      */
     @JsConstructor
@@ -57,8 +52,8 @@ public class IntersectionObserver {
      * The IntersectionObserver() constructor creates and returns a new IntersectionObserver object.
      *
      * @param callback A function which is called when the percentage of the target element is visible crosses a
-     *            threshold.
-     * @param options An optional object which customizes the observer.
+     *                 threshold.
+     * @param options  An optional object which customizes the observer.
      * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserver/IntersectionObserver">MDN</a>
      */
     @JsConstructor

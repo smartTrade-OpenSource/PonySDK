@@ -41,7 +41,7 @@ import com.ponysdk.core.ui.rich.PNotificationManager;
 
 public class TabLayoutPanelPageActivity extends SamplePageActivity {
 
-    private static final String[] colors = { "#F34A53", "#FAE3B4", "#AAC789", "#437356", "#1E4147" };
+    private static final String[] colors = {"#F34A53", "#FAE3B4", "#AAC789", "#437356", "#1E4147"};
     protected int tabCount = 0;
 
     public TabLayoutPanelPageActivity() {
@@ -61,9 +61,9 @@ public class TabLayoutPanelPageActivity extends SamplePageActivity {
         tabPanel.setAnimationDuration(Duration.ofMillis(1000));
 
         tabPanel.addBeforeSelectionHandler(event -> PNotificationManager.showTrayNotification(getView().asWidget().getWindow(),
-            "onBeforeSelection, tab index : " + event.getSelectedItem()));
+                "onBeforeSelection, tab index : " + event.getSelectedItem()));
         tabPanel.addSelectionHandler(event -> PNotificationManager.showTrayNotification(getView().asWidget().getWindow(),
-            "onSelection, tab index : " + event.getSelectedItem()));
+                "onSelection, tab index : " + event.getSelectedItem()));
 
         final PButton button = Element.newPButton("Add Tab");
         button.setStyleProperty("margin", "10px");

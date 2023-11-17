@@ -36,7 +36,7 @@ public class DataGridFilter<V> {
 
     /**
      * @return an object that can be used to uniquely identify a
-     *         filter, so that it can be replaced or removed
+     * filter, so that it can be replaced or removed
      */
     public Object getKey() {
         return key;
@@ -66,7 +66,7 @@ public class DataGridFilter<V> {
 
     /**
      * @return a predicate that decides whether a value is accepted
-     *         or filtered
+     * or filtered
      */
     public Predicate<V> getPredicate() {
         return predicate;
@@ -74,7 +74,7 @@ public class DataGridFilter<V> {
 
     /**
      * @param predicate a predicate that decides whether a value is accepted
-     *            or filtered
+     *                  or filtered
      */
     public void setPredicate(final Predicate<V> predicate) {
         this.predicate = predicate;
@@ -96,14 +96,14 @@ public class DataGridFilter<V> {
 
     /**
      * @return {@code true} if the predicate is at least as
-     *         intolerant as the replaced predicate of the same key
-     *         (i.e. the predicate doesn't accept any value that was
-     *         not accepted by the replaced predicate), {@code false}
-     *         otherwise. This is an optimization that allows us to
-     *         avoid applying the predicate on values that we already
-     *         know will not be accepted. If this filter is not
-     *         replacing an existing one, the value of the
-     *         {@code reinforcing} argument has no impact.
+     * intolerant as the replaced predicate of the same key
+     * (i.e. the predicate doesn't accept any value that was
+     * not accepted by the replaced predicate), {@code false}
+     * otherwise. This is an optimization that allows us to
+     * avoid applying the predicate on values that we already
+     * know will not be accepted. If this filter is not
+     * replacing an existing one, the value of the
+     * {@code reinforcing} argument has no impact.
      */
     public boolean isReinforcing() {
         return reinforcing;
@@ -111,14 +111,14 @@ public class DataGridFilter<V> {
 
     /**
      * @param reinforcing {@code true} if the predicate is at least as
-     *            intolerant as the replaced predicate of the same key
-     *            (i.e. the predicate doesn't accept any value that was
-     *            not accepted by the replaced predicate), {@code false}
-     *            otherwise. This is an optimization that allows us to
-     *            avoid applying the predicate on values that we already
-     *            know will not be accepted. If this filter is not
-     *            replacing an existing one, the value of the
-     *            {@code reinforcing} argument has no impact.
+     *                    intolerant as the replaced predicate of the same key
+     *                    (i.e. the predicate doesn't accept any value that was
+     *                    not accepted by the replaced predicate), {@code false}
+     *                    otherwise. This is an optimization that allows us to
+     *                    avoid applying the predicate on values that we already
+     *                    know will not be accepted. If this filter is not
+     *                    replacing an existing one, the value of the
+     *                    {@code reinforcing} argument has no impact.
      */
     public void setReinforcing(final boolean reinforcing) {
         this.reinforcing = reinforcing;

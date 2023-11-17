@@ -23,14 +23,13 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.google.gwt.core.client.Scheduler;
 
-import elemental.util.ArrayOf;
-import elemental.util.Collections;
-import elemental.util.MapFromIntTo;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class PTWindowManager {
 
@@ -39,9 +38,8 @@ public class PTWindowManager {
     private static final Logger log = Logger.getLogger(PTWindowManager.class.getName());
 
     private static final PTWindowManager instance = new PTWindowManager();
-
+    private final Map<Integer, PTWindow> windows = new HashMap<>();
     private int mainWindowId;
-    private final MapFromIntTo<PTWindow> windows = Collections.mapFromIntTo();
 
     private PTWindowManager() {
         checkWindowsAlive();
@@ -55,7 +53,11 @@ public class PTWindowManager {
         return get().mainWindowId;
     }
 
-    public static ArrayOf<PTWindow> getWindows() {
+    public void setMainWindowId(final int mainWindowId) {
+        this.mainWindowId = mainWindowId;
+    }
+
+    public static Collection<PTWindow> getWindows() {
         return get().windows.values();
     }
 
@@ -64,9 +66,8 @@ public class PTWindowManager {
     }
 
     public static void closeAll() {
-        final ArrayOf<PTWindow> windows = get().windows.values();
-        for (int i = windows.length() - 1; i >= 0; i--) {
-            final PTWindow window = windows.get(i);
+        final Collection<PTWindow> windows = get().windows.values();
+        for (PTWindow window : windows) {
             if (window != null) {
                 try {
                     window.close(true);
@@ -75,10 +76,6 @@ public class PTWindowManager {
                 }
             }
         }
-    }
-
-    public void setMainWindowId(final int mainWindowId) {
-        this.mainWindowId = mainWindowId;
     }
 
     public void register(final PTWindow window) {
@@ -93,9 +90,7 @@ public class PTWindowManager {
     private void checkWindowsAlive() {
         Scheduler.get().scheduleFixedDelay(() -> {
             try {
-                final ArrayOf<PTWindow> windows = get().windows.values();
-                for (int i = windows.length() - 1; i >= 0; i--) {
-                    final PTWindow window = windows.get(i);
+                for (PTWindow window : get().windows.values()) {
                     if (window != null && window.isClosed()) window.onClose();
                 }
             } catch (final Throwable t) {

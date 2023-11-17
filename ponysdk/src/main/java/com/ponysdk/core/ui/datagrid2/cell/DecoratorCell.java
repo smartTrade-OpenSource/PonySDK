@@ -23,9 +23,9 @@
 
 package com.ponysdk.core.ui.datagrid2.cell;
 
-import java.util.Optional;
-
 import com.ponysdk.core.ui.basic.PWidget;
+
+import java.util.Optional;
 
 /**
  * @author mbagdouri

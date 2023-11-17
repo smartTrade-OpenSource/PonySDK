@@ -1,4 +1,3 @@
-
 package com.ponysdk.core.terminal.ui;
 
 import com.google.gwt.user.client.History;

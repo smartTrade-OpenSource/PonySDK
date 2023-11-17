@@ -31,19 +31,16 @@ public interface HasPWidgets extends Iterable<PWidget> {
     /**
      * Adds a child widget.
      *
-     * @param w
-     *            the widget to be added
-     * @throws UnsupportedOperationException
-     *             if this method is not supported (most often this means that a specific overload must be
-     *             called)
+     * @param w the widget to be added
+     * @throws UnsupportedOperationException if this method is not supported (most often this means that a specific overload must be
+     *                                       called)
      */
     void add(PWidget w);
 
     /**
      * Adds a child widget
      *
-     * @param w
-     *            the widget to be added
+     * @param w the widget to be added
      */
     void add(IsPWidget w);
 
@@ -55,8 +52,7 @@ public interface HasPWidgets extends Iterable<PWidget> {
     /**
      * Removes a child widget.
      *
-     * @param w
-     *            the widget to be removed
+     * @param w the widget to be removed
      * @return <code>true</code> if the widget was present
      */
     boolean remove(PWidget w);

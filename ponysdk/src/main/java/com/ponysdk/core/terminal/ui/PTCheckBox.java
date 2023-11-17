@@ -37,6 +37,16 @@ public class PTCheckBox<T extends CheckBox> extends PTButtonBase<T> {
 
     private Element inputElement;
 
+    /**
+     * JavaScript to give an ID'd element in a form the focus
+     *
+     * @param checkbox      Element to manipulate
+     * @param indeterminate True if indeterminate, false if not
+     */
+    public static native void setIndeterminate(Element checkbox, boolean indeterminate) /*-{
+                                                                                        checkbox.indeterminate = indeterminate;
+                                                                                        }-*/;
+
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
         super.create(buffer, objectId, uiService);
@@ -71,17 +81,17 @@ public class PTCheckBox<T extends CheckBox> extends PTButtonBase<T> {
         } else if (ServerToClientModel.TABINDEX == model) {
             inputElement.setTabIndex(binaryModel.getIntValue());
             return true;
-        } else if(ServerToClientModel.PUT_INPUT_ATTRIBUTE_KEY == model) {
+        } else if (ServerToClientModel.PUT_INPUT_ATTRIBUTE_KEY == model) {
             final String value = binaryModel.getStringValue();
             // ServerToClientModel.INPUT_ATTRIBUTE_VALUE
             String attrValue = buffer.readBinaryModel().getStringValue();
-            if(attrValue == null) attrValue = "";
+            if (attrValue == null) attrValue = "";
             inputElement.setAttribute(value, attrValue);
             return true;
         } else if (ServerToClientModel.REMOVE_ATTRIBUTE_KEY == model) {
-        	inputElement.removeAttribute(binaryModel.getStringValue());
+            inputElement.removeAttribute(binaryModel.getStringValue());
             return true;
-        }else {
+        } else {
             return super.update(buffer, binaryModel);
         }
     }
@@ -93,17 +103,5 @@ public class PTCheckBox<T extends CheckBox> extends PTButtonBase<T> {
             uiService.sendDataToServer(uiObject, instruction);
         });
     }
-
-    /**
-     * JavaScript to give an ID'd element in a form the focus
-     *
-     * @param checkbox
-     *            Element to manipulate
-     * @param indeterminate
-     *            True if indeterminate, false if not
-     */
-    public static native void setIndeterminate(Element checkbox, boolean indeterminate) /*-{
-                                                                                        checkbox.indeterminate = indeterminate;
-                                                                                        }-*/;
 
 }

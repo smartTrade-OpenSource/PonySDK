@@ -57,7 +57,7 @@ public class LoginActivity extends AbstractActivity<DefaultLoginPageView> {
 
             @Override
             public PKeyCodes[] getFilteredKeys() {
-                return new PKeyCodes[] {
+                return new PKeyCodes[]{
                         PKeyCodes.ENTER
                 };
             }

@@ -23,13 +23,13 @@
 
 package com.ponysdk.core.ui.basic;
 
-import javax.json.JsonObject;
-
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.concurrent.UIContext;
 import com.ponysdk.core.writer.ModelWriter;
+import jakarta.json.JsonObject;
+
 
 /**
  * The panel to which all other widgets must ultimately be added. RootPanels are never created directly. Rather, they

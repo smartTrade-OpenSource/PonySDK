@@ -20,24 +20,20 @@
 
 package com.ponysdk.core.ui.datagrid2.config;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfig.ColumnConfig;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfig.Sort;
+
+import java.util.*;
 
 /**
  * @author mbagdouri
  */
 public class DataGridConfigBuilder<V> {
 
-    private boolean built = false;
     private final List<Sort<V>> sorts = new ArrayList<>();
     private final List<ColumnConfig<V>> columnConfigs = new ArrayList<>();
     private final Map<String, Object> customValues = new HashMap<>();
+    private boolean built = false;
 
     public DataGridConfigBuilder() {
     }
@@ -79,7 +75,7 @@ public class DataGridConfigBuilder<V> {
         private final Map<String, Object> unmodifiableCustomValues;
 
         private BuilderDataGridConfig(final List<Sort<V>> sorts, final List<ColumnConfig<V>> columnConfigs,
-                final Map<String, Object> customValues) {
+                                      final Map<String, Object> customValues) {
             this.sorts = Collections.unmodifiableList(sorts);
             this.columnConfigs = Collections.unmodifiableList(columnConfigs);
             this.customValues = customValues;

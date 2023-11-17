@@ -23,11 +23,6 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.user.client.ui.Widget;
@@ -37,7 +32,10 @@ import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
-import elemental.json.JsonObject;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class PTAddOnComposite extends PTAddOn {
 
@@ -55,7 +53,7 @@ public class PTAddOnComposite extends PTAddOn {
         final String signature = buffer.readBinaryModel().getStringValue();
         final JavascriptAddOnFactory factory = getFactory(uiBuilder, signature);
 
-        final JsonObject arguments;
+        final JavaScriptObject arguments;
         BinaryModel binaryModel = buffer.readBinaryModel();
         if (ServerToClientModel.PADDON_CREATION == binaryModel.getModel()) {
             arguments = binaryModel.getJsonObject();
@@ -82,7 +80,7 @@ public class PTAddOnComposite extends PTAddOn {
         });
 
         try {
-            addOn = factory.newAddOn(objectId, (JavaScriptObject) arguments, String.valueOf(widgetID), widget.getElement());
+            addOn = factory.newAddOn(objectId, arguments, String.valueOf(widgetID), widget.getElement());
             addOn.onInit();
             if (widget.isAttached()) addOn.onAttached();
             initialized = true;

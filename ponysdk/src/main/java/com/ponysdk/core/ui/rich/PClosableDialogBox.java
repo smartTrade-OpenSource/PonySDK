@@ -24,12 +24,7 @@
 package com.ponysdk.core.ui.rich;
 
 import com.ponysdk.core.model.PHorizontalAlignment;
-import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.IsPWidget;
-import com.ponysdk.core.ui.basic.PFlexTable;
-import com.ponysdk.core.ui.basic.PPopupPanel;
-import com.ponysdk.core.ui.basic.PSimplePanel;
-import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 
@@ -97,6 +92,6 @@ public class PClosableDialogBox extends PPopupPanel {
 
     public void displayAtCenter() {
         setPopupPositionAndShow((offsetWidth, offsetHeight, windowWidth, windowHeight) -> setPopupPosition(
-            (windowWidth - offsetWidth) / 2, (windowHeight - offsetHeight) / 2));
+                (windowWidth - offsetWidth) / 2, (windowHeight - offsetHeight) / 2));
     }
 }

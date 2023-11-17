@@ -44,14 +44,6 @@ public class Configuration<DataType> {
         this.filter = DEFAULT_FILTER;
     }
 
-    public void setCaptionTransform(final Function<String, String> captionTransform) {
-        this.captionTransform = captionTransform;
-    }
-
-    public void setFilter(final Predicate<Method> filter) {
-        this.filter = filter;
-    }
-
     public Class<DataType> getType() {
         return type;
     }
@@ -60,8 +52,16 @@ public class Configuration<DataType> {
         return captionTransform;
     }
 
+    public void setCaptionTransform(final Function<String, String> captionTransform) {
+        this.captionTransform = captionTransform;
+    }
+
     public Predicate<Method> getFilter() {
         return filter;
+    }
+
+    public void setFilter(final Predicate<Method> filter) {
+        this.filter = filter;
     }
 
 }

@@ -30,12 +30,6 @@ public class PMouseOverEvent extends PMouseEvent<PMouseOverEvent.Handler> {
 
     public static final PDomEvent.Type TYPE = new PDomEvent.Type(DomHandlerType.MOUSE_OVER);
 
-    @FunctionalInterface
-    public interface Handler extends EventHandler {
-
-        void onMouseOver(PMouseOverEvent mouseOverEvent);
-    }
-
     public PMouseOverEvent(final Object sourceComponent) {
         super(sourceComponent);
     }
@@ -48,6 +42,12 @@ public class PMouseOverEvent extends PMouseEvent<PMouseOverEvent.Handler> {
     @Override
     protected void dispatch(final PMouseOverEvent.Handler handler) {
         handler.onMouseOver(this);
+    }
+
+    @FunctionalInterface
+    public interface Handler extends EventHandler {
+
+        void onMouseOver(PMouseOverEvent mouseOverEvent);
     }
 
 }

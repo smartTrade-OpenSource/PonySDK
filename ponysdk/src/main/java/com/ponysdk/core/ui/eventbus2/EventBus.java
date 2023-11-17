@@ -23,16 +23,15 @@
 
 package com.ponysdk.core.ui.eventbus2;
 
+import com.ponysdk.core.util.SetUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ponysdk.core.util.SetUtils;
 
 public class EventBus {
 
@@ -40,25 +39,6 @@ public class EventBus {
 
     private final Map<Class<?>, Set<EventHandler<?>>> handlersByType = new HashMap<>();
     private final Map<Class<?>, Supplier<?>> initialValueByType = new HashMap<>();
-
-    public static final class EventHandler<T> implements Consumer<Object> {
-
-        private final Class<T> type;
-        private Consumer<T> function;
-
-        public EventHandler(final Class<T> type) {
-            this.type = type;
-        }
-
-        public void subscribe(final Consumer<T> function) {
-            this.function = function;
-        }
-
-        @Override
-        public void accept(final Object event) {
-            function.accept((T) event);
-        }
-    }
 
     public <T> EventHandler<T> subscribe(final Class<T> type, final Consumer<T> function) {
         if (type == null) return null;
@@ -103,5 +83,24 @@ public class EventBus {
     public <T> void setInitialValueByType(Class<T> type, Supplier<T> supplier) {
         if (supplier == null) throw new IllegalArgumentException();
         initialValueByType.put(type, supplier);
+    }
+
+    public static final class EventHandler<T> implements Consumer<Object> {
+
+        private final Class<T> type;
+        private Consumer<T> function;
+
+        public EventHandler(final Class<T> type) {
+            this.type = type;
+        }
+
+        public void subscribe(final Consumer<T> function) {
+            this.function = function;
+        }
+
+        @Override
+        public void accept(final Object event) {
+            function.accept((T) event);
+        }
     }
 }

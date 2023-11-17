@@ -23,11 +23,11 @@
 
 package com.ponysdk.core.ui.datagrid2.adapter;
 
-import java.util.List;
-import java.util.Objects;
-
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
+
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @author mbagdouri

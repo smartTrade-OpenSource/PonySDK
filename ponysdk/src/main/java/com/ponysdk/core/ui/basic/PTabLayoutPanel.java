@@ -31,8 +31,8 @@ import com.ponysdk.core.ui.basic.event.PBeforeSelectionEvent;
 import com.ponysdk.core.ui.basic.event.PSelectionEvent;
 import com.ponysdk.core.ui.basic.event.PSelectionHandler;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
+import jakarta.json.JsonObject;
 
-import javax.json.JsonObject;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;

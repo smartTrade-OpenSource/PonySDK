@@ -11,9 +11,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 public abstract class AbstractInputFormField<V> extends FormField<V> {
-    protected PTextBox input;
-
     private final Set<PValueChangeHandler<V>> handlers = new HashSet<>();
+    protected PTextBox input;
 
     public AbstractInputFormField(String caption) {
         super(caption);

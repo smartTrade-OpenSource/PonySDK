@@ -29,7 +29,7 @@ import java.util.function.Predicate;
 
 public interface AbstractFilter<V> extends Predicate<DefaultRow<V>> {
 
-	ColumnDefinition<V> getColumnDefinition();
+    ColumnDefinition<V> getColumnDefinition();
 
-	boolean isActive();
+    boolean isActive();
 }

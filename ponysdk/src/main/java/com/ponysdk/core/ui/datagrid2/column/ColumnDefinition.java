@@ -23,14 +23,14 @@
 
 package com.ponysdk.core.ui.datagrid2.column;
 
-import java.util.function.BiPredicate;
-import java.util.function.Supplier;
-
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.cell.Cell;
 import com.ponysdk.core.ui.datagrid2.cell.PrimaryCell;
 import com.ponysdk.core.ui.datagrid2.view.DataGridView;
+
+import java.util.function.BiPredicate;
+import java.util.function.Supplier;
 
 /**
  * Used to define and manage a column in a {@link DataGridView}. The same
@@ -45,8 +45,8 @@ public interface ColumnDefinition<V> extends ColumnActionListener<V> {
      * Must always return the same instance.
      *
      * @return the widget that will be used for the header of this column, or
-     *         {@code null} if the corresponding
-     *         {@link DataGridAdapter#hasHeader()} is {@code false}
+     * {@code null} if the corresponding
+     * {@link DataGridAdapter#hasHeader()} is {@code false}
      */
     IsPWidget getHeader();
 
@@ -56,9 +56,9 @@ public interface ColumnDefinition<V> extends ColumnActionListener<V> {
      * draggable
      *
      * @return the sub-widget of the header that will be draggable, or
-     *         {@code null} if the corresponding
-     *         {@link DataGridAdapter#hasHeader()} is {@code false} or this
-     *         column is not draggable.
+     * {@code null} if the corresponding
+     * {@link DataGridAdapter#hasHeader()} is {@code false} or this
+     * column is not draggable.
      */
     IsPWidget getDraggableHeaderElement();
 
@@ -66,8 +66,8 @@ public interface ColumnDefinition<V> extends ColumnActionListener<V> {
      * Must always return the same instance.
      *
      * @return the widget that will be used for the footer of this column, or
-     *         {@code null} if the corresponding
-     *         {@link DataGridAdapter#hasFooter()} is {@code false}
+     * {@code null} if the corresponding
+     * {@link DataGridAdapter#hasFooter()} is {@code false}
      */
     IsPWidget getFooter();
 
@@ -75,7 +75,7 @@ public interface ColumnDefinition<V> extends ColumnActionListener<V> {
      * Must always return a new instance but of the same kind and dimensions.
      *
      * @return a new widget that will be used as a cell in the body of the
-     *         {@link DataGridView} for this column.
+     * {@link DataGridView} for this column.
      */
     PrimaryCell<V> createCell();
 
@@ -120,14 +120,6 @@ public interface ColumnDefinition<V> extends ColumnActionListener<V> {
     int compare(V v1, Supplier<Object> renderingHelper1, V v2, Supplier<Object> renderingHelper2);
 
     /**
-     * Sets a {@link ColumnController} that can be used to make column related
-     * actions. It will be set as soon as the {@link DataGridAdapter} is set on
-     * the {@link DataGridView}. This {@link ColumnController} must be made
-     * available via the {@link ColumnDefinition#getController()} method.
-     */
-    void setController(ColumnController<V> columnController);
-
-    /**
      * Returns the {@link ColumnController} that can be used to make column
      * related actions. This {@link ColumnController} will be available
      * immediately after that the {@link DataGridAdapter} is set on the
@@ -136,48 +128,56 @@ public interface ColumnDefinition<V> extends ColumnActionListener<V> {
     ColumnController<V> getController();
 
     /**
+     * Sets a {@link ColumnController} that can be used to make column related
+     * actions. It will be set as soon as the {@link DataGridAdapter} is set on
+     * the {@link DataGridView}. This {@link ColumnController} must be made
+     * available via the {@link ColumnDefinition#getController()} method.
+     */
+    void setController(ColumnController<V> columnController);
+
+    /**
      * @return the default {@link State} for this column
      */
     State getDefaultState();
 
     /**
      * @return {@code true} if the visibility of this column can be switched,
-     *         {@code false} otherwise
+     * {@code false} otherwise
      * @see #getDefaultState()
      */
     boolean isVisibilitySwitchable();
 
     /**
      * @return {@code true} if this column can be pinned and unpinned,
-     *         {@code false} if it must remain in its default pin state
+     * {@code false} if it must remain in its default pin state
      * @see #getDefaultState()
      */
     boolean isPinnable();
 
     /**
      * @return {@code true} if data can be filtered based on this column,
-     *         {@code false} otherwise
-     * @see ColumnController#filter(Object, BiPredicate, boolean, boolean) 
+     * {@code false} otherwise
+     * @see ColumnController#filter(Object, BiPredicate, boolean, boolean)
      */
     boolean isFilterable();
 
     /**
      * @return {@code true} if data can be sorted based on this column,
-     *         {@code false} otherwise
+     * {@code false} otherwise
      * @see #compare(Object, Supplier, Object, Supplier)
      */
     boolean isSortable();
 
     /**
      * @return {@code true} if the width of this column can be changed,
-     *         {@code false} otherwise
+     * {@code false} otherwise
      * @see #getDefaultWidth()
      */
     boolean isResizable();
 
     /**
      * @return an ID that must be unique within the corresponding
-     *         {@link DataGridAdapter} and persistent
+     * {@link DataGridAdapter} and persistent
      */
     String getId();
 
@@ -195,7 +195,7 @@ public interface ColumnDefinition<V> extends ColumnActionListener<V> {
      * @return the maximum width for this column
      */
     int getMaxWidth();
-    
+
     /**
      * @return the group that the column belongs to. Null if it is not affiliated with a group.
      */
@@ -210,7 +210,6 @@ public interface ColumnDefinition<V> extends ColumnActionListener<V> {
     public static enum State {
 
         UNPINNED_SHOWN {
-
             @Override
             public State onHide() {
                 return UNPINNED_HIDDEN;
@@ -242,7 +241,6 @@ public interface ColumnDefinition<V> extends ColumnActionListener<V> {
             }
         },
         PINNED_SHOWN {
-
             @Override
             public State onHide() {
                 return PINNED_SHOWN;
@@ -274,7 +272,6 @@ public interface ColumnDefinition<V> extends ColumnActionListener<V> {
             }
         },
         UNPINNED_HIDDEN {
-
             @Override
             public State onHide() {
                 return UNPINNED_HIDDEN;

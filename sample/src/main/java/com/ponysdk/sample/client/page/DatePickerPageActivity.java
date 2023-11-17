@@ -62,7 +62,7 @@ public class DatePickerPageActivity extends SamplePageActivity {
         final Date middecember = dates("12/15/2013").get(0);
         datePicker.addShowRangeHandler(event -> {
             PNotificationManager.showTrayNotification(getView().asWidget().getWindow(),
-                "Range <" + event.getStart() + "," + event.getEnd() + ">");
+                    "Range <" + event.getStart() + "," + event.getEnd() + ">");
             if (middecember.after(event.getStart()) && middecember.before(event.getEnd())) {
                 datePicker.setTransientEnabledOnDates(false, dates("12/21/2013", "12/22/2013", "12/23/2013", "12/24/2013"));
             }

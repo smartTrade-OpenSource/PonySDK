@@ -25,96 +25,70 @@ package com.ponysdk.core.server.websocket;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.model.ValueTypeModel;
-import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.ApplicationManager;
-import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.server.context.CommunicationSanityChecker;
-import com.ponysdk.core.server.stm.TxnContext;
+import com.ponysdk.core.server.concurrent.UIContext;
 import com.ponysdk.core.ui.basic.PObject;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
+import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeRequest;
 import org.eclipse.jetty.util.component.Container;
+import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
-import org.eclipse.jetty.websocket.api.WebSocketListener;
-import org.eclipse.jetty.websocket.common.extensions.ExtensionStack;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
+import org.eclipse.jetty.websocket.core.Extension;
+import org.eclipse.jetty.websocket.core.ExtensionStack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
+import java.util.concurrent.atomic.AtomicLong;
 
-public class WebSocket implements WebSocketListener, WebsocketEncoder {
+public class WebSocket implements Session.Listener, WebsocketEncoder {
+
+    private static final AtomicLong ID_GENERATOR = new AtomicLong();
 
     private static final String MSG_RECEIVED = "Message received from terminal : UIContext #{} on {} : {}";
     private static final Logger log = LoggerFactory.getLogger(WebSocket.class);
     private static final Logger loggerIn = LoggerFactory.getLogger("WebSocket-IN");
     private static final Logger loggerOut = LoggerFactory.getLogger("WebSocket-OUT");
 
-    private ServletUpgradeRequest request;
+    private JettyServerUpgradeRequest request;
     private WebsocketMonitor monitor;
     private WebSocketPusher websocketPusher;
     private ApplicationManager applicationManager;
 
-    private TxnContext context;
     private Session session;
     private UIContext uiContext;
     private Listener listener;
 
     private long lastSentPing;
 
-    public WebSocket() {
+    private final long ID = ID_GENERATOR.incrementAndGet();
+
+    public long getID() {
+        return ID;
     }
 
     @Override
-    public void onWebSocketConnect(final Session session) {
+    public void onWebSocketOpen(final Session session) {
         try {
-            if (!session.isOpen()) throw new IllegalStateException("Session already closed");
+            log.info("New connection, creating new UIContext for the session {}", session);
             this.session = session;
+            websocketPusher = new WebSocketPusher(session, 1 << 20, 1 << 12, TimeUnit.SECONDS.toMillis(60));
+            uiContext = new UIContext(this, applicationManager, request);//TODO provider / factory for UIContext and Application
 
-            // 1K for max chunk size and 1M for total buffer size
-            // Don't set max chunk size > 8K because when using Jetty Websocket compression, the chunks are limited to 8K
+            applicationManager.startUIContext(uiContext);
 
-            this.websocketPusher = new WebSocketPusher(session, 1 << 20, 1 << 12, TimeUnit.SECONDS.toMillis(60));
-            uiContext = new UIContext(this, context, applicationManager.getConfiguration(), request);
-            log.info("Creating a new {}", uiContext);
-
-            final CommunicationSanityChecker communicationSanityChecker = new CommunicationSanityChecker(uiContext);
-            context.registerUIContext(uiContext);
-
-            uiContext.acquire();
-            try {
-                beginObject();
-                final ApplicationConfiguration configuration = uiContext.getConfiguration();
-                final boolean enableClientToServerHeartBeat = configuration.isEnableClientToServerHeartBeat();
-                final TimeUnit heartBeatPeriodTimeUnit = configuration.getHeartBeatPeriodTimeUnit();
-                final int heartBeatPeriod = enableClientToServerHeartBeat
-                        ? (int) heartBeatPeriodTimeUnit.toSeconds(configuration.getHeartBeatPeriod())
-                        : 0;
-
-                encode(ServerToClientModel.CREATE_CONTEXT, uiContext.getID()); // TODO nciaravola integer ?
-                encode(ServerToClientModel.OPTION_FORMFIELD_TABULATION, configuration.isTabindexOnlyFormField());
-                encode(ServerToClientModel.HEARTBEAT_PERIOD, heartBeatPeriod);
-                endObject();
-                if (isAlive()) flush0();
-            } catch (final Throwable e) {
-                log.error("Cannot send server heart beat to client", e);
-            } finally {
-                uiContext.release();
-            }
-
-            applicationManager.startApplication(uiContext);
-            communicationSanityChecker.start();
+            log.info("UIContext #{} created for the session {}", uiContext, session);
         } catch (final Exception e) {
-            log.error("Cannot process WebSocket instructions", e);
+            log.error("Cannot create UIContext", e);
         }
     }
 
@@ -126,15 +100,9 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
     @Override
     public void onWebSocketClose(final int statusCode, final String reason) {
-        if (log.isInfoEnabled())
-            log.info("WebSocket closed on UIContext #{} : {}, reason : {}", uiContext.getID(),
-                    NiceStatusCode.getMessage(statusCode), Objects.requireNonNullElse(reason, ""));
+        log.info("WebSocket closed on UIContext #{} : {}, reason : {}", uiContext.getID(), NiceStatusCode.getMessage(statusCode), Objects.requireNonNullElse(reason, ""));
         uiContext.onDestroy();
     }
-
-    /**
-     * Receive from the terminal
-     */
 
     @Override
     public void onWebSocketText(final String message) {
@@ -152,7 +120,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
                 if (jsonObject.containsKey(ClientToServerModel.HEARTBEAT_REQUEST.toStringValue())) {
                     sendHeartbeat();
                 } else if (jsonObject.containsKey(ClientToServerModel.TERMINAL_LATENCY.toStringValue())) {
-                    processRoundtripLatency(jsonObject);
+                    processRoundTripLatency(jsonObject);
                 } else if (jsonObject.containsKey(ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue())) {
                     processInstructions(jsonObject);
                 } else if (jsonObject.containsKey(ClientToServerModel.ERROR_MSG.toStringValue())) {
@@ -172,21 +140,24 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
                 if (monitor != null) monitor.onMessageUnprocessed(this, message);
             }
         } else {
-            log.info("UI Context #{} is destroyed, message dropped from terminal : {}", uiContext != null ? uiContext.getID() : -1,
-                    message);
+            log.info("UI Context #{} is destroyed, message dropped from terminal : {}", uiContext != null ? uiContext.getID() : -1, message);
         }
     }
 
-    private void processRoundtripLatency(final JsonObject jsonObject) {
-        final long roundtripLatency = TimeUnit.MILLISECONDS.convert(System.nanoTime() - lastSentPing, TimeUnit.NANOSECONDS);
-        log.trace("Roundtrip measurement : {} ms from terminal #{}", roundtripLatency, uiContext.getID());
-        uiContext.addRoundtripLatencyValue(roundtripLatency);
+    @Override
+    public void onWebSocketBinary(ByteBuffer payload, Callback callback) {
+    }
+
+    private void processRoundTripLatency(final JsonObject jsonObject) {
+        final long roundTripLatency = TimeUnit.MILLISECONDS.convert(System.nanoTime() - lastSentPing, TimeUnit.NANOSECONDS);
+        log.trace("RoundTrip measurement : {} ms from terminal #{}", roundTripLatency, uiContext.getID());
+        uiContext.addRoundtripLatencyValue(roundTripLatency);
 
         final long terminalLatency = jsonObject.getJsonNumber(ClientToServerModel.TERMINAL_LATENCY.toStringValue()).longValue();
         log.trace("Terminal measurement : {} ms from terminal #{}", terminalLatency, uiContext.getID());
         uiContext.addTerminalLatencyValue(terminalLatency);
 
-        final long networkLatency = roundtripLatency - terminalLatency;
+        final long networkLatency = roundTripLatency - terminalLatency;
         log.trace("Network measurement : {} ms from terminal #{}", networkLatency, uiContext.getID());
         uiContext.addNetworkLatencyValue(networkLatency);
     }
@@ -194,7 +165,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     private void processInstructions(final JsonObject jsonObject) {
         final String applicationInstructions = ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue();
         loggerIn.trace("UIContext #{} : {}", this.uiContext.getID(), jsonObject);
-        uiContext.execute(() -> {
+        uiContext.forceExecute(() -> {
             final JsonArray appInstructions = jsonObject.getJsonArray(applicationInstructions);
             for (int i = 0; i < appInstructions.size(); i++) {
                 uiContext.fireClientData(appInstructions.getJsonObject(i));
@@ -213,28 +184,17 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
         switch (level) {
             case INFO_MSG:
-                if (log.isInfoEnabled())
-                    log.info(MSG_RECEIVED, uiContext.getID(), objectInformation, message); 
+                if (log.isInfoEnabled()) log.info(MSG_RECEIVED, uiContext.getID(), objectInformation, message);
                 break;
             case WARN_MSG:
-                if (log.isWarnEnabled())
-                    log.warn(MSG_RECEIVED, uiContext.getID(), objectInformation, message);
+                if (log.isWarnEnabled()) log.warn(MSG_RECEIVED, uiContext.getID(), objectInformation, message);
                 break;
             case ERROR_MSG:
-                if (log.isErrorEnabled())
-                    log.error(MSG_RECEIVED, uiContext.getID(), objectInformation, message);
+                if (log.isErrorEnabled()) log.error(MSG_RECEIVED, uiContext.getID(), objectInformation, message);
                 break;
             default:
                 log.error("Unknown log level during terminal log processing : {}", level);
         }
-    }
-
-    /**
-     * Receive from the terminal
-     */
-    @Override
-    public void onWebSocketBinary(final byte[] payload, final int offset, final int len) {
-        // Can't receive binary data from terminal (GWT limitation)
     }
 
     /**
@@ -283,11 +243,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         if (isSessionOpen()) {
             final UIContext context = this.uiContext;
             log.info("Disconnecting websocket programmatically for UIContext #{}", context == null ? null : context.getID());
-            try {
-                session.disconnect();
-            } catch (final IOException e) {
-                log.error("Unable to disconnect session for UIContext #{}", context == null ? null : context.getID(), e);
-            }
+            session.disconnect();
         }
     }
 
@@ -322,56 +278,11 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         }
     }
 
-    private enum NiceStatusCode {
-
-        NORMAL(StatusCode.NORMAL, "Normal closure"),
-        SHUTDOWN(StatusCode.SHUTDOWN, "Shutdown"),
-        PROTOCOL(StatusCode.PROTOCOL, "Protocol error"),
-        BAD_DATA(StatusCode.BAD_DATA, "Received bad data"),
-        UNDEFINED(StatusCode.UNDEFINED, "Undefined"),
-        NO_CODE(StatusCode.NO_CODE, "No code present"),
-        NO_CLOSE(StatusCode.NO_CLOSE, "Abnormal connection closed"),
-        ABNORMAL(StatusCode.ABNORMAL, "Abnormal connection closed"),
-        BAD_PAYLOAD(StatusCode.BAD_PAYLOAD, "Not consistent message"),
-        POLICY_VIOLATION(StatusCode.POLICY_VIOLATION, "Received message violates policy"),
-        MESSAGE_TOO_LARGE(StatusCode.MESSAGE_TOO_LARGE, "Message too big"),
-        REQUIRED_EXTENSION(StatusCode.REQUIRED_EXTENSION, "Required extension not sent"),
-        SERVER_ERROR(StatusCode.SERVER_ERROR, "Server error"),
-        SERVICE_RESTART(StatusCode.SERVICE_RESTART, "Server restart"),
-        TRY_AGAIN_LATER(StatusCode.TRY_AGAIN_LATER, "Server overload"),
-        FAILED_TLS_HANDSHAKE(StatusCode.POLICY_VIOLATION, "Failure handshake");
-
-        private final int statusCode;
-        private final String message;
-
-        NiceStatusCode(final int statusCode, final String message) {
-            this.statusCode = statusCode;
-            this.message = message;
-        }
-
-        public static String getMessage(final int statusCode) {
-            final List<NiceStatusCode> codes = Arrays.stream(values())
-                    .filter(niceStatusCode -> niceStatusCode.statusCode == statusCode).collect(Collectors.toList());
-            if (!codes.isEmpty()) {
-                return codes.get(0).toString();
-            } else {
-                log.error("No matching status code found for {}", statusCode);
-                return String.valueOf(statusCode);
-            }
-        }
-
-        @Override
-        public String toString() {
-            return message + " (" + statusCode + ")";
-        }
-
-    }
-
-    public ServletUpgradeRequest getRequest() {
+    public JettyServerUpgradeRequest getRequest() {
         return request;
     }
 
-    public void setRequest(final ServletUpgradeRequest request) {
+    public void setRequest(final JettyServerUpgradeRequest request) {
         this.request = request;
     }
 
@@ -381,10 +292,6 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
     public void setMonitor(final WebsocketMonitor monitor) {
         this.monitor = monitor;
-    }
-
-    public void setContext(final TxnContext context) {
-        this.context = context;
     }
 
     public void setListener(final Listener listener) {
@@ -399,12 +306,50 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
             log.warn("No Extension Stack for {}", uiContext);
             return;
         }
-        final PonyPerMessageDeflateExtension extension = extensionStack.getBean(PonyPerMessageDeflateExtension.class);
-        if (extension == null) {
+
+        PonyPerMessageDeflateExtension ponyExtension = null;
+
+        for (Extension extension : extensionStack.getExtensions()) {
+            if (extension.getClass().equals(PonyPerMessageDeflateExtension.class)) {
+                ponyExtension = (PonyPerMessageDeflateExtension) extension;
+                break;
+            }
+        }
+
+        if (ponyExtension == null) {
             log.warn("Missing PonyPerMessageDeflateExtension from Extension Stack for {}", uiContext);
             return;
         }
-        extension.setWebSocketListener(listener);
+        ponyExtension.setWebSocketListener(listener);
+    }
+
+    private enum NiceStatusCode {
+
+        NORMAL(StatusCode.NORMAL, "Normal closure"), SHUTDOWN(StatusCode.SHUTDOWN, "Shutdown"), PROTOCOL(StatusCode.PROTOCOL, "Protocol error"), BAD_DATA(StatusCode.BAD_DATA, "Received bad data"), UNDEFINED(StatusCode.UNDEFINED, "Undefined"), NO_CODE(StatusCode.NO_CODE, "No code present"), NO_CLOSE(StatusCode.NO_CLOSE, "Abnormal connection closed"), ABNORMAL(StatusCode.ABNORMAL, "Abnormal connection closed"), BAD_PAYLOAD(StatusCode.BAD_PAYLOAD, "Not consistent message"), POLICY_VIOLATION(StatusCode.POLICY_VIOLATION, "Received message violates policy"), MESSAGE_TOO_LARGE(StatusCode.MESSAGE_TOO_LARGE, "Message too big"), REQUIRED_EXTENSION(StatusCode.REQUIRED_EXTENSION, "Required extension not sent"), SERVER_ERROR(StatusCode.SERVER_ERROR, "Server error"), SERVICE_RESTART(StatusCode.SERVICE_RESTART, "Server restart"), TRY_AGAIN_LATER(StatusCode.TRY_AGAIN_LATER, "Server overload"), FAILED_TLS_HANDSHAKE(StatusCode.POLICY_VIOLATION, "Failure handshake");
+
+        private final int statusCode;
+        private final String message;
+
+        NiceStatusCode(final int statusCode, final String message) {
+            this.statusCode = statusCode;
+            this.message = message;
+        }
+
+        public static String getMessage(final int statusCode) {
+            final List<NiceStatusCode> codes = Arrays.stream(values()).filter(niceStatusCode -> niceStatusCode.statusCode == statusCode).toList();
+            if (!codes.isEmpty()) {
+                return codes.get(0).toString();
+            } else {
+                log.error("No matching status code found for {}", statusCode);
+                return String.valueOf(statusCode);
+            }
+        }
+
+        @Override
+        public String toString() {
+            return message + " (" + statusCode + ")";
+        }
+
     }
 
     public interface Listener {

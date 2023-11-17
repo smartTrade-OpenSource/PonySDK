@@ -47,8 +47,7 @@ public class PButton extends PButtonBase {
     /**
      * Instantiates a new PButton
      *
-     * @param text
-     *            the text
+     * @param text the text
      */
     protected PButton(final String text) {
         super(text);
@@ -57,10 +56,8 @@ public class PButton extends PButtonBase {
     /**
      * Instantiates a new PButton
      *
-     * @param text
-     *            the text
-     * @param html
-     *            the html
+     * @param text the text
+     * @param html the html
      */
     protected PButton(final String text, final String html) {
         super(text, html);

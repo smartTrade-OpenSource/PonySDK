@@ -62,25 +62,6 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
         setWidget(w.asWidget());
     }
 
-    @Override
-    public boolean remove(final PWidget w) {
-        // Validate.
-        if (widget == null || widget != w) {
-            return false;
-        }
-
-        // Orphan.
-        try {
-            orphan(w);
-        } finally {
-            // Physical detach.
-            w.saveRemove(w.getID(), ID);
-            // Logical detach.
-            widget = null;
-        }
-        return true;
-    }
-
     public void setWidget(final PWidget w) {
         if (w == this) throw new UnsupportedOperationException("You cannot call setWidget with 'this' in parameter");
 
@@ -102,6 +83,25 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
 
         if (isInitialized()) w.attach(window, frame);
         w.saveAdd(w.getID(), ID);
+    }
+
+    @Override
+    public boolean remove(final PWidget w) {
+        // Validate.
+        if (widget == null || widget != w) {
+            return false;
+        }
+
+        // Orphan.
+        try {
+            orphan(w);
+        } finally {
+            // Physical detach.
+            w.saveRemove(w.getID(), ID);
+            // Logical detach.
+            widget = null;
+        }
+        return true;
     }
 
     @Override

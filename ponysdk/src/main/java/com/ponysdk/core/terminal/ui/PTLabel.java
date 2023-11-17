@@ -33,6 +33,10 @@ public class PTLabel<T extends Label> extends PTWidget<T> {
 
     private String attributeLinkedToValue;
 
+    protected static final native void setText(Element element, String text) /*-{
+                                                                             element.textContent = text;
+                                                                             }-*/;
+
     @Override
     protected T createUIObject() {
         return (T) new Label();
@@ -59,9 +63,5 @@ public class PTLabel<T extends Label> extends PTWidget<T> {
             return super.update(buffer, binaryModel);
         }
     }
-
-    protected static final native void setText(Element element, String text) /*-{
-                                                                             element.textContent = text;
-                                                                             }-*/;
 
 }

@@ -56,8 +56,8 @@ public abstract class Event<H extends EventHandler> {
     }
 
     /**
-     * @deprecated Useless
      * @since v2.7.3
+     * @deprecated Useless
      */
     @Deprecated
     public long getEventID() {

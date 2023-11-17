@@ -68,16 +68,16 @@ public enum HandlerModel {
         this.domHandler = domHandler;
     }
 
+    public static HandlerModel fromRawValue(final int rawValue) {
+        return VALUES[rawValue];
+    }
+
     public final byte getValue() {
         return (byte) ordinal();
     }
 
     public boolean isDomHandler() {
         return domHandler;
-    }
-
-    public static HandlerModel fromRawValue(final int rawValue) {
-        return VALUES[rawValue];
     }
 
 }

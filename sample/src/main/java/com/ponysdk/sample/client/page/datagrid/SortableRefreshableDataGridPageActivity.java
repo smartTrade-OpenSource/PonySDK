@@ -78,6 +78,14 @@ public class SortableRefreshableDataGridPageActivity extends RefreshableDataGrid
         //        dataGrid.setData(data.getId(), data);
     }
 
+    protected void removeColspanRow() {
+        dataGrid.remove(5);
+    }
+
+    protected void insertColspanRow() {
+        dataGrid.insertRow(5, 0, 4, Element.newPLabel("Hello " + System.currentTimeMillis()));
+    }
+
     private class SortableRefreshableDataGrid<K, D> extends RefreshableDataGrid<K, D> {
 
         private final List<D> datas = new ArrayList<>();
@@ -119,14 +127,6 @@ public class SortableRefreshableDataGridPageActivity extends RefreshableDataGrid
                 insertColspanRow();
             }
         }
-    }
-
-    protected void removeColspanRow() {
-        dataGrid.remove(5);
-    }
-
-    protected void insertColspanRow() {
-        dataGrid.insertRow(5, 0, 4, Element.newPLabel("Hello " + System.currentTimeMillis()));
     }
 
 }

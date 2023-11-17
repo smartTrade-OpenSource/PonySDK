@@ -57,6 +57,35 @@ public class PTCookies extends AbstractPTObject {
         uiBuilder.sendDataToServer(eventInstruction);
     }
 
+    public static void setCookie(String name, String value, Date expires,
+                                 String domain, String path, boolean secure, String sameSite) {
+        name = uriEncode(name);
+        value = uriEncode(value);
+        setCookieImpl(name, value, (expires == null) ? 0 : expires.getTime(),
+                domain, path, secure, sameSite);
+    }
+
+    private static native String uriEncode(String s) /*-{
+    return encodeURIComponent(s);
+  }-*/;
+
+    private static native void setCookieImpl(String name, String value,
+                                             double expires, String domain, String path, boolean secure, String sameSite) /*-{
+    var c = name + '=' + value;
+    if ( expires )
+      c += ';expires=' + (new Date(expires)).toGMTString();
+    if (domain)
+      c += ';domain=' + domain;
+    if (path)
+      c += ';path=' + path;
+    if (secure)
+      c += ';secure';
+    if (sameSite)
+      c += ';SameSite=' + sameSite;
+
+    $doc.cookie = c;
+  }-*/;
+
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         final ServerToClientModel model = binaryModel.getModel();
@@ -127,35 +156,5 @@ public class PTCookies extends AbstractPTObject {
             return super.update(buffer, binaryModel);
         }
     }
-
-
-    public static void setCookie(String name, String value, Date expires,
-                                 String domain, String path, boolean secure, String sameSite) {
-        name = uriEncode(name);
-        value = uriEncode(value);
-        setCookieImpl(name, value, (expires == null) ? 0 : expires.getTime(),
-                domain, path, secure, sameSite);
-    }
-
-    private static native String uriEncode(String s) /*-{
-    return encodeURIComponent(s);
-  }-*/;
-
-    private static native void setCookieImpl(String name, String value,
-                                             double expires, String domain, String path, boolean secure, String sameSite) /*-{
-    var c = name + '=' + value;
-    if ( expires )
-      c += ';expires=' + (new Date(expires)).toGMTString();
-    if (domain)
-      c += ';domain=' + domain;
-    if (path)
-      c += ';path=' + path;
-    if (secure)
-      c += ';secure';
-    if (sameSite)
-      c += ';SameSite=' + sameSite;
-
-    $doc.cookie = c;
-  }-*/;
 
 }

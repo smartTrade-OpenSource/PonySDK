@@ -23,13 +23,13 @@
 
 package com.ponysdk.core.ui.datagrid2.cell;
 
-import java.util.function.BiConsumer;
-
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.model.PEventType;
 import com.ponysdk.core.ui.model.PKeyCodes;
+
+import java.util.function.BiConsumer;
 
 /**
  * @author mbagdouri
@@ -80,7 +80,7 @@ public class TextBoxExtendedCell<V> implements ExtendedCell<V> {
     public void unselect() {
     }
 
-	@Override
-	public void render(V data, Object renderingHelper) {
-	}
+    @Override
+    public void render(V data, Object renderingHelper) {
+    }
 }

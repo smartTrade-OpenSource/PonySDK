@@ -23,29 +23,26 @@
 
 package com.ponysdk.impl.main;
 
-import java.net.InetAddress;
-import java.net.URL;
-
-import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.HttpConfiguration;
-import org.eclipse.jetty.server.HttpConnectionFactory;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.handler.ErrorHandler;
-import org.eclipse.jetty.server.handler.gzip.GzipHandler;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.util.ssl.SslContextFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ponysdk.core.model.MappingPath;
 import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.ApplicationManager;
 import com.ponysdk.core.server.servlet.AjaxServlet;
 import com.ponysdk.core.server.servlet.BootstrapServlet;
 import com.ponysdk.core.server.servlet.StreamServiceServlet;
-import com.ponysdk.core.server.websocket.WebSocketServlet;
+import com.ponysdk.core.server.servlet.WebSocketServlet;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.websocket.server.config.JettyWebSocketServletContainerInitializer;
+import org.eclipse.jetty.server.*;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
+import org.eclipse.jetty.server.handler.ErrorHandler;
+import org.eclipse.jetty.server.handler.gzip.GzipHandler;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.net.InetAddress;
+import java.net.URL;
 
 public class PonySDKServer {
 
@@ -71,7 +68,7 @@ public class PonySDKServer {
     private String sslTrustStorePassphrase;
     private String sslTrustStoreType = "JKS";
     private boolean needClientAuth = false;
-    private String[] enabledProtocols = new String[] { "TLSv1.2" };
+    private String[] enabledProtocols = new String[]{"TLSv1.2","TLSv1.3"};
     private String enabledCipherSuites;
 
     public PonySDKServer() {
@@ -82,10 +79,19 @@ public class PonySDKServer {
         server.addConnector(createHttpConnector());
         if (useSSL) server.addConnector(createHttpsConnector());
 
-        server.setHandler(createMainHandler());
 
+        ServletContextHandler contextHandler = createWebApp();
+
+        final GzipHandler gzip = new GzipHandler();
+        //gzip.setMinGzipSize(0);
+        //gzip.addIncludedMimeTypes("application/json");
+        gzip.setHandler(contextHandler);
+        final ContextHandlerCollection handlers = new ContextHandlerCollection();
+        handlers.setHandlers(gzip, contextHandler);
+        server.setHandler(handlers);
+
+        JettyWebSocketServletContainerInitializer.configure(contextHandler, null);
         applicationManager.start();
-
         server.start();
 
         log.info("Webserver started on: {}:{}", InetAddress.getLocalHost().getHostAddress(), port);
@@ -158,7 +164,6 @@ public class PonySDKServer {
     protected ErrorHandler createErrorHandler() {
         final ErrorHandler errorHandler = new ErrorHandler();
         errorHandler.setShowMessageInTitle(false);
-        errorHandler.setShowServlet(false);
         errorHandler.setShowStacks(false);
         return errorHandler;
     }
@@ -177,6 +182,7 @@ public class PonySDKServer {
         context.addServlet(new ServletHolder(createStreamServiceServlet()), MAPPING_STREAM);
         context.addServlet(new ServletHolder(createAjaxServlet()), MAPPING_AJAX);
         context.addServlet(new ServletHolder(createWebSocketServlet()), MAPPING_WS);
+
         return context;
     }
 
@@ -210,12 +216,12 @@ public class PonySDKServer {
         this.port = port;
     }
 
-    public void setUseSSL(final boolean useSSL) {
-        this.useSSL = useSSL;
-    }
-
     public boolean isUseSSL() {
         return useSSL;
+    }
+
+    public void setUseSSL(final boolean useSSL) {
+        this.useSSL = useSSL;
     }
 
     public void setSslKeyStoreFile(final String sslKeyStoreFile) {

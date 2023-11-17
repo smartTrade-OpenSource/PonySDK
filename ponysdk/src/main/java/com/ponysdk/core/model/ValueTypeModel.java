@@ -64,16 +64,16 @@ public enum ValueTypeModel {
         this.size = size;
     }
 
+    public static ValueTypeModel fromRawValue(final int rawValue) {
+        return VALUES[rawValue];
+    }
+
     public final int getSize() {
         return size;
     }
 
     public final byte getValue() {
         return (byte) ordinal();
-    }
-
-    public static ValueTypeModel fromRawValue(final int rawValue) {
-        return VALUES[rawValue];
     }
 
 }

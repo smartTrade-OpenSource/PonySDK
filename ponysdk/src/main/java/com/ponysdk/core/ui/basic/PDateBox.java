@@ -26,14 +26,14 @@ package com.ponysdk.core.ui.basic;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.concurrent.UIContext;
 import com.ponysdk.core.ui.basic.event.*;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 import com.ponysdk.core.writer.ModelWriter;
+import jakarta.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.json.JsonObject;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -57,11 +57,9 @@ public class PDateBox extends PWidget implements Focusable, HasPValue<Date>, PVa
     private static final String EMPTY = "";
 
     private final PDatePicker datePicker;
-
+    private final boolean keepDayTimeNeeded;
     private SimpleDateFormat dateFormat;
     private List<PValueChangeHandler<Date>> handlers;
-    private final boolean keepDayTimeNeeded;
-
     private String rawValue;
     private Date date;
     private boolean enabled = true;

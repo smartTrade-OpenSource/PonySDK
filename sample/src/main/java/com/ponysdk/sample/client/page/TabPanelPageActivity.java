@@ -56,9 +56,9 @@ public class TabPanelPageActivity extends SamplePageActivity {
         tabPanel.setSizeFull();
 
         tabPanel.addBeforeSelectionHandler(event -> PNotificationManager.showTrayNotification(getView().asWidget().getWindow(),
-            "onBeforeSelection, tab index : " + event.getSelectedItem()));
+                "onBeforeSelection, tab index : " + event.getSelectedItem()));
         tabPanel.addSelectionHandler(event -> PNotificationManager.showTrayNotification(getView().asWidget().getWindow(),
-            "onSelection, tab index : " + event.getSelectedItem()));
+                "onSelection, tab index : " + event.getSelectedItem()));
 
         final PButton button = Element.newPButton("Add Tab");
         button.setStyleProperty("margin", "10px");

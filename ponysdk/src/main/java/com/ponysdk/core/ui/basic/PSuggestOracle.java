@@ -90,7 +90,7 @@ public abstract class PSuggestOracle extends PObject {
          * selected, the replacement string will be entered into the PSuggestBox's text box.
          *
          * @return the string to be entered into the PSuggestBox's text box when this suggestion is
-         *         selected
+         * selected
          */
         String getReplacementString();
     }

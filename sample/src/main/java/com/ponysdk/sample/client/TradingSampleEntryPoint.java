@@ -52,7 +52,7 @@ public class TradingSampleEntryPoint implements EntryPoint {
         final PlaceController placeController = new PlaceController(uiContext.getHistory(), eventBus);
 
         final PlaceHistoryHandler historyHandler = new PlaceHistoryHandler(uiContext.getHistory(), historyMapper, placeController,
-            eventBus);
+                eventBus);
         historyHandler.setDefaultPlace(new LoginPlace());
         historyHandler.handleCurrentHistory();
 

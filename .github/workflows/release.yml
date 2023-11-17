@@ -19,5 +19,5 @@ jobs:
           distribution: 'adopt-openj9'
       - name: Build, check and publish
         env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew -PBUILD_RELEASE publish

@@ -1,4 +1,3 @@
-
 package com.ponysdk.core.ui.form2.impl.formfield;
 
 import com.ponysdk.core.ui.basic.PTextBox;

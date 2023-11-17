@@ -256,6 +256,23 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
         return rowFormatter;
     }
 
+    @Override
+    public String dumpDOM() {
+        String DOM = "<table pid=\"" + ID + "\">";
+
+        for (Entry<Row, TreeMap<Integer, PWidget>> entry : columnByRow.entrySet()) {
+            DOM += "<tr row = \"" + entry.getKey().value + "\">";
+            for (Entry<Integer, PWidget> td : entry.getValue().entrySet()) {
+                DOM += "<td col = \"" + td.getKey() + "\">" + td.getValue().dumpDOM() + "</td>";
+            }
+            DOM += "</tr>";
+        }
+
+        DOM += "</table>";
+
+        return DOM;
+    }
+
     static class Row implements Comparable<Row> {
 
         private int value;
@@ -400,23 +417,5 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
                 writer.write(ServerToClientModel.COLUMN, column);
             });
         }
-    }
-
-
-    @Override
-    public String dumpDOM() {
-        String DOM = "<table pid=\"" + ID + "\">";
-
-        for (Entry<Row, TreeMap<Integer, PWidget>> entry : columnByRow.entrySet()) {
-            DOM += "<tr row = \"" + entry.getKey().value + "\">";
-            for (Entry<Integer, PWidget> td : entry.getValue().entrySet()) {
-                DOM += "<td col = \"" + td.getKey() + "\">" + td.getValue().dumpDOM() + "</td>";
-            }
-            DOM += "</tr>";
-        }
-
-        DOM += "</table>";
-
-        return DOM;
     }
 }

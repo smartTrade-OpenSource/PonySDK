@@ -33,14 +33,20 @@ import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
-import elemental.js.util.JsMapFromIntTo;
+import java.util.HashMap;
+import java.util.Map;
 
 public class PTSuggestBox extends PTWidget<SuggestBox> {
 
-    private static JsMapFromIntTo<SuggestOracle> oracleByID;
+    private static Map<Integer,SuggestOracle> oracleByID;
 
     private PTTextBox ptTextBox;
     private SuggestOracle oracle;
+
+    public static void put(final int objectID, final SuggestOracle oracle) {
+        if (oracleByID == null) oracleByID = new HashMap<>();
+        oracleByID.put(objectID, oracle);
+    }
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
@@ -100,11 +106,6 @@ public class PTSuggestBox extends PTWidget<SuggestBox> {
         } else {
             super.removeHandler(buffer, handlerModel);
         }
-    }
-
-    public static void put(final int objectID, final SuggestOracle oracle) {
-        if (oracleByID == null) oracleByID = JsMapFromIntTo.create();
-        oracleByID.put(objectID, oracle);
     }
 
 }

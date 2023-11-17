@@ -23,10 +23,10 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.text.SimpleDateFormat;
-
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.ui.formatter.TextFunction;
+
+import java.text.SimpleDateFormat;
 
 public interface ElementFactory {
 

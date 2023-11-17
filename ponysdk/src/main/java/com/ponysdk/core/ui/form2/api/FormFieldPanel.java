@@ -1,4 +1,3 @@
-
 package com.ponysdk.core.ui.form2.api;
 
 import com.ponysdk.core.ui.basic.Element;

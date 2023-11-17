@@ -23,11 +23,11 @@
 
 package com.ponysdk.core.ui.list;
 
-import java.util.function.Function;
-
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.list.renderer.cell.CellRenderer;
 import com.ponysdk.core.ui.list.renderer.header.HeaderCellRenderer;
+
+import java.util.function.Function;
 
 public class DataGridColumnDescriptor<D, V> {
 

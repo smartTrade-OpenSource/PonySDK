@@ -23,11 +23,11 @@
 
 package com.ponysdk.core.ui.i18n;
 
+import com.ponysdk.core.server.concurrent.UIContext;
+
 import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.ResourceBundle;
-
-import com.ponysdk.core.server.application.UIContext;
 
 public class PString {
 

@@ -29,13 +29,6 @@ public class PKeyDownEvent extends PKeyEvent<PKeyDownEvent.Handler> {
 
     public static final PDomEvent.Type TYPE = new PDomEvent.Type(DomHandlerType.KEY_DOWN);
 
-    @FunctionalInterface
-    public interface Handler extends PKeyFilterHandler {
-
-        void onKeyDown(PKeyDownEvent keyDownEvent);
-
-    }
-
     public PKeyDownEvent(final Object sourceComponent, final int keyCode) {
         super(sourceComponent, keyCode);
     }
@@ -48,6 +41,13 @@ public class PKeyDownEvent extends PKeyEvent<PKeyDownEvent.Handler> {
     @Override
     protected void dispatch(final PKeyDownEvent.Handler handler) {
         handler.onKeyDown(this);
+    }
+
+    @FunctionalInterface
+    public interface Handler extends PKeyFilterHandler {
+
+        void onKeyDown(PKeyDownEvent keyDownEvent);
+
     }
 
 }

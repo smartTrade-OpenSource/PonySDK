@@ -104,8 +104,7 @@ public class PTTextBox extends PTTextBoxBase<TextBox> implements KeyPressHandler
     /**
      * Indicates if the character typed in the text box matches the regular expression.
      *
-     * @param key
-     *            the key character typed in the text box.
+     * @param key the key character typed in the text box.
      * @return true if the character matches the regular expression, false otherwise.
      */
     private boolean match(final char key) {

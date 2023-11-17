@@ -23,11 +23,10 @@
 
 package com.ponysdk.core.ui.listbox;
 
-import java.util.function.Consumer;
-import java.util.function.IntConsumer;
-
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PWidget.TabindexMode;
+
+import java.util.function.IntConsumer;
 
 public interface ListBoxFilterWidget extends IsPWidget {
 

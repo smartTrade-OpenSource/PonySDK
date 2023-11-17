@@ -23,31 +23,15 @@
 
 package com.ponysdk.core.ui.datagrid;
 
-import java.util.function.Function;
-
 import com.ponysdk.core.ui.datagrid.impl.PLabelCellRenderer;
 import com.ponysdk.core.ui.datagrid.impl.PLabelHeaderRenderer;
+
+import java.util.function.Function;
 
 public class ColumnDescriptor<D> {
 
     private HeaderRenderer headerRenderer;
     private CellRenderer<D> cellRenderer;
-
-    public HeaderRenderer getHeaderRenderer() {
-        return headerRenderer;
-    }
-
-    public void setHeaderRenderer(final HeaderRenderer headerCellRender) {
-        this.headerRenderer = headerCellRender;
-    }
-
-    public CellRenderer<D> getCellRenderer() {
-        return cellRenderer;
-    }
-
-    public void setCellRenderer(final CellRenderer<D> cellRenderer) {
-        this.cellRenderer = cellRenderer;
-    }
 
     public static <D> ColumnDescriptor<D> newDefault(final String caption, final Function<D, String> transform) {
         final ColumnDescriptor<D> descriptor = new ColumnDescriptor<>();
@@ -86,5 +70,21 @@ public class ColumnDescriptor<D> {
 
         descriptor.setCellRenderer(new PLabelCellRenderer<>(chainFunction));
         return descriptor;
+    }
+
+    public HeaderRenderer getHeaderRenderer() {
+        return headerRenderer;
+    }
+
+    public void setHeaderRenderer(final HeaderRenderer headerCellRender) {
+        this.headerRenderer = headerCellRender;
+    }
+
+    public CellRenderer<D> getCellRenderer() {
+        return cellRenderer;
+    }
+
+    public void setCellRenderer(final CellRenderer<D> cellRenderer) {
+        this.cellRenderer = cellRenderer;
     }
 }

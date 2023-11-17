@@ -42,8 +42,8 @@ import com.ponysdk.core.ui.rich.PNotificationManager;
 public class DockPanelPageActivity extends SamplePageActivity implements PClickHandler {
 
     final PDockLayoutPanel dockLayoutPanel = Element.newPDockLayoutPanel(PUnit.PX);
-    private final PTextBox headerSize = Element.newPTextBox();
     final PButton applySize = Element.newPButton("Apply Header Size");
+    private final PTextBox headerSize = Element.newPTextBox();
     private final PFlowPanel headerWidget = Element.newPFlowPanel();
 
     public DockPanelPageActivity() {
@@ -75,7 +75,7 @@ public class DockPanelPageActivity extends SamplePageActivity implements PClickH
         panel.setSizeFull();
         panel.setStyleProperty("backgroundColor", "#c17d7d");
         panel.setWidget(Element.newPLabel(
-            "This is some text to show how the contents on either side of the splitter flow. This is some text to show how the contents on either side of the splitter flow. This is some text to show how the contents on either side of the splitter flow. This is some text to show how the contents on either side of the splitter flow. This is some text to show how the contents on either side of the splitter flow. This is some text to show how the contents on either side of the splitter flow. This is some text to show how the contents on either side of the splitter flow. This is some text to show how the contents on either side of the splitter flow."));
+                "This is some text to show how the contents on either side of the splitter flow. This is some text to show how the contents on either side of the splitter flow. This is some text to show how the contents on either side of the splitter flow. This is some text to show how the contents on either side of the splitter flow. This is some text to show how the contents on either side of the splitter flow. This is some text to show how the contents on either side of the splitter flow. This is some text to show how the contents on either side of the splitter flow. This is some text to show how the contents on either side of the splitter flow."));
         return panel;
     }
 

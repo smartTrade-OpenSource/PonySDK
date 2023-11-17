@@ -37,8 +37,7 @@ public class PCellFormatter {
     /**
      * Instantiates a new PCellFormatter
      *
-     * @param table
-     *            the table
+     * @param table the table
      */
     protected PCellFormatter(final PHTMLTable<? extends PCellFormatter> table) {
         this.table = table;

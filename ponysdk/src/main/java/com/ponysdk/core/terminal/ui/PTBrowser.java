@@ -25,15 +25,14 @@ package com.ponysdk.core.terminal.ui;
 
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
-
-import elemental.client.Browser;
+import elemental2.dom.DomGlobal;
 
 public class PTBrowser extends PTAbstractWindow {
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
         super.create(buffer, objectId, uiBuilder);
-        window = Browser.getWindow();
+        window = DomGlobal.window;
 
         PTWindowManager.get().setMainWindowId(objectId);
     }

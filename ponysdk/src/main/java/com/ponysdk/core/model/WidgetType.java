@@ -89,12 +89,12 @@ public enum WidgetType {
     WidgetType() {
     }
 
-    public final byte getValue() {
-        return (byte) ordinal();
-    }
-
     public static WidgetType fromRawValue(final int rawValue) {
         return VALUES[rawValue];
+    }
+
+    public final byte getValue() {
+        return (byte) ordinal();
     }
 
 }

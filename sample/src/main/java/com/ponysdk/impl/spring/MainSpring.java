@@ -31,7 +31,7 @@ public class MainSpring {
 
     public static void main(final String[] args) {
         final String serverConfigLocation = System.getProperty(SpringApplicationManager.SERVER_CONFIG_LOCATION,
-            "classpath:etc/server_application.xml");
+                "classpath:etc/server_application.xml");
 
         new ClassPathXmlApplicationContext(serverConfigLocation);
     }

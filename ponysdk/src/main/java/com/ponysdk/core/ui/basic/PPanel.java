@@ -23,11 +23,11 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Iterator;
-
 import com.ponysdk.core.ui.basic.event.HasPWidgets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Iterator;
 
 /**
  * Abstract base class for all panels, which are widgets that can contain other widgets.
@@ -84,7 +84,7 @@ public abstract class PPanel extends PWidget implements HasPWidgets {
         forEach(this::doDestroy);
     }
 
-    private void doDestroy(PWidget child){
+    private void doDestroy(PWidget child) {
         try {
             child.onDestroy();
         } catch (Exception e) {

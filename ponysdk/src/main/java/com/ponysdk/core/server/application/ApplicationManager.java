@@ -23,17 +23,16 @@
 
 package com.ponysdk.core.server.application;
 
+import com.ponysdk.core.server.concurrent.Scheduler;
+import com.ponysdk.core.server.concurrent.UIContext;
 import com.ponysdk.core.ui.main.EntryPoint;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public abstract class ApplicationManager {
 
-    private static final Logger log = LoggerFactory.getLogger(ApplicationManager.class);
-
     protected ApplicationConfiguration configuration;
 
-    public void startApplication(final UIContext uiContext) {
+    public final void startUIContext(final UIContext uiContext) {
+        uiContext.start();
         uiContext.execute(() -> {
             final EntryPoint entryPoint = initializeEntryPoint();
             final String historyToken = uiContext.getHistoryToken();

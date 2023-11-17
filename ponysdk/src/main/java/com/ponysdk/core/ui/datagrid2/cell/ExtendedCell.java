@@ -26,7 +26,7 @@ package com.ponysdk.core.ui.datagrid2.cell;
 /**
  * {@link Cell} made visible when {@link PrimaryCellController#setExtendedMode()} is called.<br><br>
  * {@link ExtendedCell}'s height is not constrained as it is the case for a {@link PrimaryCell}.
- * 
+ *
  * @author mbagdouri
  * @see Cell
  * @see PrimaryCellController#setExtendedMode()

@@ -20,21 +20,7 @@
 
 package com.ponysdk.core.ui.datagrid2.view;
 
-import java.nio.BufferUnderflowException;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.IsPWidget;
-import com.ponysdk.core.ui.basic.PButton;
-import com.ponysdk.core.ui.basic.PComplexPanel;
-import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition.State;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfig;
@@ -42,6 +28,11 @@ import com.ponysdk.core.ui.datagrid2.config.DataGridConfig.ColumnConfig;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfig.ColumnSort;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfig.Sort;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfigBuilder;
+
+import java.nio.BufferUnderflowException;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 /**
  * @author mbagdouri
@@ -62,6 +53,97 @@ public class ConfigSelectorDataGridView<K, V> extends WidgetDecoratorDataGridVie
         this.defaultKey = defaultKey;
     }
 
+    private static <V> ColumnConfig<V> decodeColumnConfig(final ByteBuffer buffer) {
+        final String columnId = decodeString(buffer);
+        final State state = decodeState(buffer);
+        final int width = buffer.getInt();
+        return new ColumnConfig<>(columnId, state, width);
+    }
+
+    private static <V> ByteBuffer encodeColumnConfig(ByteBuffer buffer, final ColumnConfig<V> columnConfig) {
+        buffer = encodeString(buffer, columnConfig.getColumnId());
+        buffer = encodeString(buffer, columnConfig.getState().name());
+        buffer = encodeInt(buffer, columnConfig.getWidth());
+        return buffer;
+    }
+
+    private static State decodeState(final ByteBuffer buffer) {
+        try {
+            return State.valueOf(decodeString(buffer));
+        } catch (final IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    private static <V> Sort<V> decodeSort(final ByteBuffer buffer) {
+        final byte b = buffer.get();
+        if (b == COLUMN_SORT) return new ColumnSort<>(decodeString(buffer), decodeBoolean(buffer));
+        else return null;
+    }
+
+    private static <V> ByteBuffer encodeSort(ByteBuffer buffer, final Sort<V> sort) {
+        if (sort instanceof ColumnSort) {
+            buffer = encodeByte(buffer, COLUMN_SORT);
+            final ColumnSort<V> columnSort = (ColumnSort<V>) sort;
+            buffer = encodeString(buffer, columnSort.getColumnId());
+            buffer = encodeBoolean(buffer, columnSort.isAsc());
+        } else { // sort instanceof GeneralSort
+            buffer = encodeByte(buffer, GENERAL_SORT);
+        }
+        return buffer;
+    }
+
+    private static boolean decodeBoolean(final ByteBuffer buffer) {
+        return buffer.get() != 0;
+    }
+
+    private static ByteBuffer encodeBoolean(ByteBuffer buffer, final boolean value) {
+        buffer = ensureRemaining(buffer, 1);
+        buffer.put(value ? (byte) 1 : (byte) 0);
+        return buffer;
+    }
+
+    private static ByteBuffer encodeInt(ByteBuffer buffer, final int value) {
+        buffer = ensureRemaining(buffer, 4);
+        buffer.putInt(value);
+        return buffer;
+    }
+
+    private static ByteBuffer encodeByte(ByteBuffer buffer, final byte value) {
+        buffer = ensureRemaining(buffer, 1);
+        buffer.put(value);
+        return buffer;
+    }
+
+    private static String decodeString(final ByteBuffer buffer) {
+        final int length = buffer.getInt();
+        final int limit = buffer.limit();
+        buffer.limit(buffer.position() + length);
+        final String str = StandardCharsets.UTF_8.decode(buffer).toString();
+        buffer.limit(limit);
+        return str;
+    }
+
+    private static ByteBuffer encodeString(ByteBuffer buffer, final String value) {
+        final byte[] encoded = value.getBytes(StandardCharsets.UTF_8);
+        buffer = ensureRemaining(buffer, 4 + encoded.length);
+        buffer.putInt(encoded.length);
+        buffer.put(encoded);
+        return buffer;
+    }
+
+    private static ByteBuffer ensureRemaining(final ByteBuffer buffer, final int length) {
+        if (buffer.remaining() >= length) return buffer;
+        final ByteBuffer b = ByteBuffer.allocate(Math.max(buffer.capacity() * 2, buffer.capacity() + length));
+        buffer.flip();
+        b.put(buffer);
+        return b;
+    }
+
+    public static <V> ConfigEntry<V> e(final String key, final DataGridConfig<V> config) {
+        return new SimpleConfigEntry<>(key, config);
+    }
+
     private void checkAdapter() {
         if (adapter == null) throw new IllegalStateException("No " + DataGridAdapter.class + " has been set yet");
     }
@@ -74,22 +156,6 @@ public class ConfigSelectorDataGridView<K, V> extends WidgetDecoratorDataGridVie
         handlers.put(defaultKey, defaultHandler);
         current = defaultHandler;
         onSelectConfigWidget(defaultKey, current.widget);
-    }
-
-    public void setConfigEntries(final List<ConfigEntry<V>> entries) {
-        checkAdapter();
-        final DataGridConfig<V> defaultConfig = handlers.get(defaultKey).getConfig();
-        layout.clear();
-        handlers.clear();
-        if (entries.size() == 0 || !defaultKey.equals(entries.get(0).getKey())) {
-            handlers.put(defaultKey, new ConfigHandler(defaultKey, defaultConfig));
-        }
-        for (final ConfigEntry<V> entry : entries) {
-            addConfigEntry(entry.getKey(), entry.getConfig());
-        }
-        current = handlers.get(defaultKey);
-        onSelectConfigWidget(defaultKey, current.widget);
-        ConfigSelectorDataGridView.super.setConfig(current.config);
     }
 
     public List<ConfigEntry<V>> decodeConfigEntries(final String encodedConf) throws DecodeException {
@@ -182,93 +248,6 @@ public class ConfigSelectorDataGridView<K, V> extends WidgetDecoratorDataGridVie
         return buffer;
     }
 
-    private static <V> ColumnConfig<V> decodeColumnConfig(final ByteBuffer buffer) {
-        final String columnId = decodeString(buffer);
-        final State state = decodeState(buffer);
-        final int width = buffer.getInt();
-        return new ColumnConfig<>(columnId, state, width);
-    }
-
-    private static <V> ByteBuffer encodeColumnConfig(ByteBuffer buffer, final ColumnConfig<V> columnConfig) {
-        buffer = encodeString(buffer, columnConfig.getColumnId());
-        buffer = encodeString(buffer, columnConfig.getState().name());
-        buffer = encodeInt(buffer, columnConfig.getWidth());
-        return buffer;
-    }
-
-    private static State decodeState(final ByteBuffer buffer) {
-        try {
-            return State.valueOf(decodeString(buffer));
-        } catch (final IllegalArgumentException e) {
-            return null;
-        }
-    }
-
-    private static <V> Sort<V> decodeSort(final ByteBuffer buffer) {
-        final byte b = buffer.get();
-        if (b == COLUMN_SORT) return new ColumnSort<>(decodeString(buffer), decodeBoolean(buffer));
-        else return null;
-    }
-
-    private static <V> ByteBuffer encodeSort(ByteBuffer buffer, final Sort<V> sort) {
-        if (sort instanceof ColumnSort) {
-            buffer = encodeByte(buffer, COLUMN_SORT);
-            final ColumnSort<V> columnSort = (ColumnSort<V>) sort;
-            buffer = encodeString(buffer, columnSort.getColumnId());
-            buffer = encodeBoolean(buffer, columnSort.isAsc());
-        } else { // sort instanceof GeneralSort
-            buffer = encodeByte(buffer, GENERAL_SORT);
-        }
-        return buffer;
-    }
-
-    private static boolean decodeBoolean(final ByteBuffer buffer) {
-        return buffer.get() != 0;
-    }
-
-    private static ByteBuffer encodeBoolean(ByteBuffer buffer, final boolean value) {
-        buffer = ensureRemaining(buffer, 1);
-        buffer.put(value ? (byte) 1 : (byte) 0);
-        return buffer;
-    }
-
-    private static ByteBuffer encodeInt(ByteBuffer buffer, final int value) {
-        buffer = ensureRemaining(buffer, 4);
-        buffer.putInt(value);
-        return buffer;
-    }
-
-    private static ByteBuffer encodeByte(ByteBuffer buffer, final byte value) {
-        buffer = ensureRemaining(buffer, 1);
-        buffer.put(value);
-        return buffer;
-    }
-
-    private static String decodeString(final ByteBuffer buffer) {
-        final int length = buffer.getInt();
-        final int limit = buffer.limit();
-        buffer.limit(buffer.position() + length);
-        final String str = StandardCharsets.UTF_8.decode(buffer).toString();
-        buffer.limit(limit);
-        return str;
-    }
-
-    private static ByteBuffer encodeString(ByteBuffer buffer, final String value) {
-        final byte[] encoded = value.getBytes(StandardCharsets.UTF_8);
-        buffer = ensureRemaining(buffer, 4 + encoded.length);
-        buffer.putInt(encoded.length);
-        buffer.put(encoded);
-        return buffer;
-    }
-
-    private static ByteBuffer ensureRemaining(final ByteBuffer buffer, final int length) {
-        if (buffer.remaining() >= length) return buffer;
-        final ByteBuffer b = ByteBuffer.allocate(Math.max(buffer.capacity() * 2, buffer.capacity() + length));
-        buffer.flip();
-        b.put(buffer);
-        return b;
-    }
-
     public boolean addConfigEntry(final String key, final DataGridConfig<V> config) {
         checkAdapter();
         Objects.requireNonNull(config);
@@ -307,6 +286,22 @@ public class ConfigSelectorDataGridView<K, V> extends WidgetDecoratorDataGridVie
         return entries;
     }
 
+    public void setConfigEntries(final List<ConfigEntry<V>> entries) {
+        checkAdapter();
+        final DataGridConfig<V> defaultConfig = handlers.get(defaultKey).getConfig();
+        layout.clear();
+        handlers.clear();
+        if (entries.size() == 0 || !defaultKey.equals(entries.get(0).getKey())) {
+            handlers.put(defaultKey, new ConfigHandler(defaultKey, defaultConfig));
+        }
+        for (final ConfigEntry<V> entry : entries) {
+            addConfigEntry(entry.getKey(), entry.getConfig());
+        }
+        current = handlers.get(defaultKey);
+        onSelectConfigWidget(defaultKey, current.widget);
+        ConfigSelectorDataGridView.super.setConfig(current.config);
+    }
+
     protected PComplexPanel createLayout() {
         return Element.newDiv();
     }
@@ -318,14 +313,6 @@ public class ConfigSelectorDataGridView<K, V> extends WidgetDecoratorDataGridVie
     @Override
     public PWidget getDecoratorWidget() {
         return layout;
-    }
-
-    public static interface ConfigEntry<V> {
-
-        String getKey();
-
-        DataGridConfig<V> getConfig();
-
     }
 
     protected IsPWidget createWidget(final Object key, final ConfigSelectorDataGridView<?, V>.ConfigHandler handler) {
@@ -349,8 +336,35 @@ public class ConfigSelectorDataGridView<K, V> extends WidgetDecoratorDataGridVie
         ((PButton) ((PComplexPanel) configWidget.asWidget()).getWidget(0)).setEnabled(true);
     }
 
-    public static <V> ConfigEntry<V> e(final String key, final DataGridConfig<V> config) {
-        return new SimpleConfigEntry<>(key, config);
+    public static interface ConfigEntry<V> {
+
+        String getKey();
+
+        DataGridConfig<V> getConfig();
+
+    }
+
+    public static class SimpleConfigEntry<V> implements ConfigEntry<V> {
+
+        private final String key;
+        private final DataGridConfig<V> config;
+
+        public SimpleConfigEntry(final String key, final DataGridConfig<V> config) {
+            super();
+            this.key = key;
+            this.config = config;
+        }
+
+        @Override
+        public String getKey() {
+            return key;
+        }
+
+        @Override
+        public DataGridConfig<V> getConfig() {
+            return config;
+        }
+
     }
 
     protected class ConfigHandler {
@@ -388,29 +402,6 @@ public class ConfigSelectorDataGridView<K, V> extends WidgetDecoratorDataGridVie
             if (this == current) {
                 config = getView().getConfig();
             }
-            return config;
-        }
-
-    }
-
-    public static class SimpleConfigEntry<V> implements ConfigEntry<V> {
-
-        private final String key;
-        private final DataGridConfig<V> config;
-
-        public SimpleConfigEntry(final String key, final DataGridConfig<V> config) {
-            super();
-            this.key = key;
-            this.config = config;
-        }
-
-        @Override
-        public String getKey() {
-            return key;
-        }
-
-        @Override
-        public DataGridConfig<V> getConfig() {
             return config;
         }
 

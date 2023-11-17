@@ -23,6 +23,12 @@
 
 package com.ponysdk.core.server.websocket;
 
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.concurrent.UIContext;
+import com.ponysdk.core.util.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.EnumMap;
@@ -33,18 +39,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReferenceArray;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.application.Application;
-import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.server.servlet.SessionManager;
-import com.ponysdk.core.util.Pair;
 
 class WebSocketStatsRecorder {
 
@@ -52,14 +50,15 @@ class WebSocketStatsRecorder {
     private static final Logger log = LoggerFactory.getLogger(WebSocketStatsRecorder.class);
     private static final ServerToClientModel[] MODELS = ServerToClientModel.values();
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private final Consumer<WebSocketStats> listener;
+    private final BiFunction<ServerToClientModel, Object, String> groupBy;
     private volatile Collection<AtomicReferenceArray<Map<Object, VolatileRecord>>> allStats;
     private volatile LocalDateTime startTime;
     private WebSocketStats summary;
-    private final Consumer<WebSocketStats> listener;
-    private final BiFunction<ServerToClientModel, Object, String> groupBy;
+    private final ReentrantLock lock = new ReentrantLock();
 
     public WebSocketStatsRecorder(final Consumer<WebSocketStats> listener,
-            final BiFunction<ServerToClientModel, Object, String> groupBy) {
+                                  final BiFunction<ServerToClientModel, Object, String> groupBy) {
         super();
         this.listener = listener;
         this.groupBy = groupBy;
@@ -67,6 +66,10 @@ class WebSocketStatsRecorder {
 
     public WebSocketStatsRecorder(final Consumer<WebSocketStats> listener) {
         this(listener, null);
+    }
+
+    private static int modelToIndex(final ServerToClientModel model) {
+        return model == null ? MODELS.length : model.ordinal();
     }
 
     public <T> void record(final ServerToClientModel model, final T value, final int metaBytes, final int dataBytes,
@@ -97,10 +100,10 @@ class WebSocketStatsRecorder {
             stats = new AtomicReferenceArray<>(MODELS.length + 1);
             final Collection<AtomicReferenceArray<Map<Object, VolatileRecord>>> allStats = this.allStats;
             if (allStats != null) {
-            context.setAttribute(KEY, stats);
+                context.setAttribute(KEY, stats);
                 allStats.add(stats);
                 return stats;
-        }
+            }
             return null;
         }
         return stats;
@@ -110,26 +113,17 @@ class WebSocketStatsRecorder {
         record(model, value, metaBytes, dataBytes, null);
     }
 
-    public synchronized boolean start(final long timeout, final TimeUnit unit) {
-        if (startTime != null || summary != null) return false; //started OR stopped
-        startTime = LocalDateTime.now();
-        allStats = ConcurrentHashMap.newKeySet();
-        scheduler.schedule(this::stop, timeout, unit);
-        log.info("Start recording for {} {}", timeout, unit);
-        return true;
-    }
-
-    private static int modelToIndex(final ServerToClientModel model) {
-        return model == null ? MODELS.length : model.ordinal();
-    }
-
-    private static void forEachUIContext(final Consumer<UIContext> consumer) {
-        for (final Application app : SessionManager.get().getApplications()) {
-            for (final UIContext context : app.getUIContexts()) {
-                context.execute(() -> {
-                    consumer.accept(context);
-                });
-            }
+    public boolean start(final long timeout, final TimeUnit unit) {
+        lock.lock();
+        try {
+            if (startTime != null || summary != null) return false; //started OR stopped
+            startTime = LocalDateTime.now();
+            allStats = ConcurrentHashMap.newKeySet();
+            scheduler.schedule(this::stop, timeout, unit);
+            log.info("Start recording for {} {}", timeout, unit);
+            return true;
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -137,22 +131,28 @@ class WebSocketStatsRecorder {
         return startTime != null;
     }
 
-    public synchronized WebSocketStats stop() {
-        if (this.startTime == null || summary != null) return null; //not started OR stopped
+    public WebSocketStats stop() {
+        lock.lock();
         try {
-        final LocalDateTime startTime = this.startTime;
-        this.startTime = null;
-        final LocalDateTime endTime = LocalDateTime.now();
-        scheduler.shutdownNow();
-            final Map<ServerToClientModel, Map<Object, MutableRecord>> aggStats = aggregateStats();
-        summary = new WebSocketStats(aggStats, startTime, endTime, groupBy != null);
-        if (listener != null) listener.accept(summary);
-        log.info("Recording stopped, Statistics Summary: {}", summary);
-        return summary;
+            if (this.startTime == null || summary != null) return null; //not started OR stopped
+            try {
+                final LocalDateTime startTime = this.startTime;
+                this.startTime = null;
+                final LocalDateTime endTime = LocalDateTime.now();
+                scheduler.shutdownNow();
+                final Map<ServerToClientModel, Map<Object, MutableRecord>> aggStats = aggregateStats();
+                summary = new WebSocketStats(aggStats, startTime, endTime, groupBy != null);
+                if (listener != null) listener.accept(summary);
+                log.info("Recording stopped, Statistics Summary: {}", summary);
+                return summary;
+            } finally {
+                UIContext.getRegisteredContexts().forEach(c -> c.removeAttribute(KEY));
+            }
         } finally {
-            forEachUIContext(uiContext -> uiContext.removeAttribute(KEY));
+            lock.unlock();
         }
     }
+
 
     private Map<ServerToClientModel, Map<Object, MutableRecord>> aggregateStats() {
         final Map<ServerToClientModel, Map<Object, MutableRecord>> aggStats = new EnumMap<>(ServerToClientModel.class);
@@ -167,7 +167,7 @@ class WebSocketStatsRecorder {
                         final Object value = recordEntry.getKey();
                         final VolatileRecord record = recordEntry.getValue();
                         aggStats.computeIfAbsent(model, m -> new HashMap<>()).computeIfAbsent(value,
-                            o -> new MutableRecord(record.getMetaBytes(), record.getDataBytes())).count += record.count;
+                                o -> new MutableRecord(record.getMetaBytes(), record.getDataBytes())).count += record.count;
                     }
                 }
             }
@@ -175,7 +175,7 @@ class WebSocketStatsRecorder {
         return aggStats;
     }
 
-    public synchronized WebSocketStats getSummary() {
+    public WebSocketStats getSummary() {
         return summary;
     }
 

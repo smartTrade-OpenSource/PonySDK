@@ -33,7 +33,7 @@ public class FieldDescriptor {
     private String exportCaption;
 
     public FieldDescriptor(final String iD, final String key, final Class<?> type, final String listCaption, final String criteriaKey,
-            final String exportCaption) {
+                           final String exportCaption) {
         this.ID = iD;
         this.key = key;
         this.type = type;

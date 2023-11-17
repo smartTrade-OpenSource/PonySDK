@@ -23,10 +23,10 @@
 
 package com.ponysdk.core.ui.datagrid.impl;
 
-import java.util.function.Function;
-
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PHTML;
+
+import java.util.function.Function;
 
 public class PHTMLCellRenderer<DataType> extends TypedCellRenderer<DataType, PHTML> {
 

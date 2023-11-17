@@ -23,12 +23,12 @@
 
 package com.ponysdk.core.writer;
 
-import java.lang.ref.WeakReference;
-
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.concurrent.UIContext;
 import com.ponysdk.core.server.websocket.WebsocketEncoder;
 import com.ponysdk.core.ui.basic.PWindow;
+
+import java.lang.ref.WeakReference;
 
 public class ModelWriter {
 

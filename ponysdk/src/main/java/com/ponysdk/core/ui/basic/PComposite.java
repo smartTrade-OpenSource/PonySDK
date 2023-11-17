@@ -47,7 +47,8 @@ public abstract class PComposite<T extends PWidget> extends PWidget {
     }
 
     protected void initWidget(final T child) {
-        if (this.widget != null) throw new IllegalStateException("PComposite.initWidget() may only be " + "called once.");
+        if (this.widget != null)
+            throw new IllegalStateException("PComposite.initWidget() may only be " + "called once.");
 
         child.removeFromParent();
         this.widget = child;

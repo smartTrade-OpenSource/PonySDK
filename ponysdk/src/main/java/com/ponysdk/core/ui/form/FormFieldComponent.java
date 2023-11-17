@@ -45,13 +45,6 @@ public class FormFieldComponent extends PFlowPanel implements FormFieldListener,
 
     private CaptionOrientation captionOrientation;
 
-    public enum CaptionOrientation {
-        LEFT,
-        TOP,
-        RIGHT,
-        BOTTOM
-    }
-
     public FormFieldComponent(final FormField formField) {
         this(null, CaptionOrientation.TOP, formField);
     }
@@ -153,6 +146,13 @@ public class FormFieldComponent extends PFlowPanel implements FormFieldListener,
 
     public FormField getFormField() {
         return formField;
+    }
+
+    public enum CaptionOrientation {
+        LEFT,
+        TOP,
+        RIGHT,
+        BOTTOM
     }
 
 }

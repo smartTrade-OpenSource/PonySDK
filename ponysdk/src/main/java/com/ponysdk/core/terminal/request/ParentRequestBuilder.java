@@ -24,18 +24,18 @@
 package com.ponysdk.core.terminal.request;
 
 import com.google.gwt.json.client.JSONValue;
-
-import elemental.client.Browser;
-import elemental.events.MessageEvent;
-import elemental.html.Uint8Array;
+import elemental2.core.Uint8Array;
+import elemental2.dom.DomGlobal;
+import elemental2.dom.MessageEvent;
 
 public abstract class ParentRequestBuilder implements RequestBuilder {
 
     public ParentRequestBuilder(final String id, final RequestCallback callback) {
-        // From Main terminal to the matching window terminal
-        Browser.getWindow().setOnmessage(event -> {
-            final Object data = ((MessageEvent) event).getData();
-            if (data instanceof Uint8Array) callback.onDataReceived((Uint8Array) data);
+        // From the main window to the target window
+        DomGlobal.window.addEventListener("message", evt -> {
+            if (evt instanceof MessageEvent<?>) {
+                callback.onDataReceived((Uint8Array) ((MessageEvent<?>) evt).data);
+            }
         });
 
         setReady(id);

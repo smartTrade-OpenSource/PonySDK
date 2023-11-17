@@ -4,10 +4,10 @@
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
  *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
- *  
+ *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
@@ -29,7 +29,8 @@ public class UncheckedFieldValidator implements FieldValidator {
 
     @Override
     public ValidationResult isValid(final String value) {
-        if (value == null || value.isEmpty()) return ValidationResult.newFailedValidationResult(PString.get("validator.error.unchecked"));
+        if (value == null || value.isEmpty())
+            return ValidationResult.newFailedValidationResult(PString.get("validator.error.unchecked"));
         if (Boolean.valueOf(value)) return ValidationResult.newOKValidationResult();
         return ValidationResult.newFailedValidationResult(PString.get("validator.error.unchecked"));
     }

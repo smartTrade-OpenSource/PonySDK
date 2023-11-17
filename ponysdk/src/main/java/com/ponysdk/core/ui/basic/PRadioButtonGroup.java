@@ -23,12 +23,12 @@
 
 package com.ponysdk.core.ui.basic;
 
+import com.ponysdk.core.model.PCheckBoxState;
+import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import com.ponysdk.core.model.PCheckBoxState;
-import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 
 /**
  * A mutually-exclusive selection radio button widget. Fires
@@ -84,16 +84,16 @@ public class PRadioButtonGroup {
         if (buttons != null) buttons.remove(radioButton);
     }
 
+    public String getName() {
+        return name;
+    }
+
     public void setName(final String name) {
         if (Objects.equals(this.name, name)) return;
         this.name = name;
         for (final PRadioButton button : buttons) {
             button.setName(name);
         }
-    }
-
-    public String getName() {
-        return name;
     }
 
 }

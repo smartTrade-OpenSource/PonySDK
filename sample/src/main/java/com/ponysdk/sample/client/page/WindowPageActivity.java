@@ -116,6 +116,15 @@ public class WindowPageActivity extends SamplePageActivity implements PCloseHand
         examplePanel.setWidget(verticalPanel);
     }
 
+    @Override
+    public void onClose(final PCloseEvent closeEvent) {
+        final PWindow source = (PWindow) closeEvent.getSource();
+        final boolean remove = windows.remove(source);
+        if (remove) {
+            PNotificationManager.showTrayNotification(getView().asWidget().getWindow(), "Window #" + source.getID() + " closed.");
+        }
+    }
+
     private static class MyWindow extends PWindow {
 
         private int count = 1;
@@ -143,14 +152,5 @@ public class WindowPageActivity extends SamplePageActivity implements PCloseHand
             add(flow);
         }
 
-    }
-
-    @Override
-    public void onClose(final PCloseEvent closeEvent) {
-        final PWindow source = (PWindow) closeEvent.getSource();
-        final boolean remove = windows.remove(source);
-        if (remove) {
-            PNotificationManager.showTrayNotification(getView().asWidget().getWindow(), "Window #" + source.getID() + " closed.");
-        }
     }
 }

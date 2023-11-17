@@ -34,12 +34,12 @@ public enum PAlignment {
     PAlignment() {
     }
 
-    public final byte getValue() {
-        return (byte) ordinal();
-    }
-
     public static PAlignment fromRawValue(final int rawValue) {
         return VALUES[rawValue];
+    }
+
+    public final byte getValue() {
+        return (byte) ordinal();
     }
 
 }

@@ -24,12 +24,12 @@
 package com.ponysdk.core.server.servlet;
 
 import com.ponysdk.core.server.application.ApplicationConfiguration;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -43,14 +43,12 @@ import java.util.Set;
 
 public class BootstrapServlet extends HttpServlet {
 
-    private static final String INDEX_URL = "/index.html";
     protected static final String NEW_LINE = "\n";
-
     protected static final String TITLE_PATTERN = "<title>%s</title>";
     protected static final String META_PATTERN = "<meta %s>";
     protected static final String STYLE_PATTERN = "<link id=\"%s\" rel=\"stylesheet\" type=\"%s\" href=\"%s\"/>";
     protected static final String SCRIPT_PATTERN = "<script type=\"text/javascript\" src=\"%s\"></script>";
-
+    private static final String INDEX_URL = "/index.html";
     private static final Logger log = LoggerFactory.getLogger(BootstrapServlet.class);
 
     protected ApplicationConfiguration configuration;

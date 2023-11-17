@@ -23,19 +23,13 @@
 
 package com.ponysdk.core.server.websocket;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedWriter;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.EOFException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.UTFDataFormatException;
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.model.ValueTypeModel;
+import com.ponysdk.core.util.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.*;
 import java.text.NumberFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -48,13 +42,6 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.model.ValueTypeModel;
-import com.ponysdk.core.util.Pair;
 
 public class WebSocketStats {
 
@@ -78,7 +65,7 @@ public class WebSocketStats {
     private final boolean grouped;
 
     public WebSocketStats(final Map<ServerToClientModel, ? extends Map<Object, ? extends Record>> stats, final LocalDateTime startTime,
-            final LocalDateTime endTime, final boolean grouped) {
+                          final LocalDateTime endTime, final boolean grouped) {
         super();
         this.startTime = startTime;
         this.endTime = endTime;
@@ -98,6 +85,106 @@ public class WebSocketStats {
         this.summaryCount = count;
     }
 
+    private static void encodeValue(final DataOutputStream outputStream, final Object v) throws IOException {
+        if (v == null) {
+            outputStream.writeByte(NULL_VALUE);
+        } else if (v instanceof Boolean) {
+            outputStream.write(v.equals(Boolean.TRUE) ? TRUE_VALUE : FALSE_VALUE);
+        } else if (v instanceof Byte) {
+            outputStream.write(BYTE_VALUE);
+            outputStream.writeByte((byte) v);
+        } else if (v instanceof Short) {
+            outputStream.write(SHORT_VALUE);
+            outputStream.writeShort((short) v);
+        } else if (v instanceof Integer) {
+            outputStream.write(INT_VALUE);
+            outputStream.writeInt((int) v);
+        } else if (v instanceof Float) {
+            outputStream.write(FLOAT_VALUE);
+            outputStream.writeFloat((float) v);
+        } else if (v instanceof Double) {
+            outputStream.write(DOUBLE_VALUE);
+            outputStream.writeDouble((double) v);
+        } else {
+            outputStream.write(STRING_VALUE);
+            writeUTF(outputStream, v.toString());
+        }
+    }
+
+    private static void writeUTF(final DataOutputStream outputStream, String s) throws IOException {
+        if (s == null) s = "";
+        else if (s.length() >= MAX_STRING_SIZE) {
+            s = s.substring(0, MAX_STRING_SIZE);
+        }
+        try {
+            outputStream.writeUTF(s);
+        } catch (final UTFDataFormatException e) {
+            outputStream.writeUTF(s.substring(0, MAX_STRING_SIZE / 3));
+        }
+    }
+
+    public static WebSocketStats decode(final File file) throws FileNotFoundException, IOException, DecodeException {
+        try (DataInputStream inputStream = new DataInputStream(new BufferedInputStream(new FileInputStream(file)))) {
+            final boolean grouped = inputStream.readBoolean();
+            final LocalDateTime startTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(inputStream.readLong()),
+                    ZoneId.systemDefault());
+            final LocalDateTime endTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(inputStream.readLong()),
+                    ZoneId.systemDefault());
+            final Map<ServerToClientModel, Map<Object, Record>> stats = new EnumMap<>(ServerToClientModel.class);
+            final int nbModels = inputStream.readInt();
+            for (int i = 0; i < nbModels; i++) {
+                final String modelName = inputStream.readUTF();
+                ServerToClientModel model = null;
+                try {
+                    model = ServerToClientModel.valueOf(modelName);
+                } catch (final IllegalArgumentException e) {
+                    log.warn("Unrecognized ServerToClientModel value {} (possibly deprecated)", modelName);
+                }
+                final int nbRecords = inputStream.readInt();
+                final Map<Object, Record> records = stats.computeIfAbsent(model, m -> new HashMap<>(nbRecords));
+                for (int j = 0; j < nbRecords; j++) {
+                    Object value = decodeValue(inputStream);
+                    if (grouped) {
+                        value = new Pair<>(value, inputStream.readUTF());
+                    }
+                    records.put(value, new ImmutableRecord(inputStream.readInt(), inputStream.readInt(), inputStream.readInt()));
+                }
+            }
+            return new WebSocketStats(stats, startTime, endTime, grouped);
+        } catch (final EOFException e) {
+            throw new DecodeException(e);
+        }
+    }
+
+    private static Object decodeValue(final DataInputStream inputStream) throws IOException, DecodeException {
+        final byte valueType = inputStream.readByte();
+        switch (valueType) {
+            case NULL_VALUE:
+                return null;
+            case FALSE_VALUE:
+                return false;
+            case TRUE_VALUE:
+                return true;
+            case BYTE_VALUE:
+                return inputStream.readByte();
+            case SHORT_VALUE:
+                return inputStream.readShort();
+            case INT_VALUE:
+                return inputStream.readInt();
+            case FLOAT_VALUE:
+                return inputStream.readFloat();
+            case DOUBLE_VALUE:
+                return inputStream.readDouble();
+            case STRING_VALUE:
+                return inputStream.readUTF();
+        }
+        throw new DecodeException("Unrecognized value type " + valueType);
+    }
+
+    private static ValueTypeModel modelToValueType(final ServerToClientModel model) {
+        return model == null ? null : model.getTypeModel();
+    }
+
     public void toCsv(final File file, final char separator, final Predicate<Object> valueFilter,
                       final Predicate<ServerToClientModel> modelFilter)
             throws IOException {
@@ -107,7 +194,7 @@ public class WebSocketStats {
             if (modelFilter != null) s = s.filter(e -> modelFilter.test(e.getKey()));
 
             Stream<Pair<ServerToClientModel, ? extends Entry<Object, ? extends Record>>> s2 = s
-                .flatMap(e -> e.getValue().entrySet().stream().map(ee -> new Pair<>(e.getKey(), ee)));
+                    .flatMap(e -> e.getValue().entrySet().stream().map(ee -> new Pair<>(e.getKey(), ee)));
             if (valueFilter != null) s2 = s2.filter(p -> valueFilter.test(p.getSecond().getKey()));
 
             s2.sorted((p1, p2) -> p2.getSecond().getValue().compareTo(p1.getSecond().getValue())).forEach(p -> {
@@ -212,117 +299,9 @@ public class WebSocketStats {
         }
     }
 
-    private static void encodeValue(final DataOutputStream outputStream, final Object v) throws IOException {
-        if (v == null) {
-            outputStream.writeByte(NULL_VALUE);
-        } else if (v instanceof Boolean) {
-            outputStream.write(v.equals(Boolean.TRUE) ? TRUE_VALUE : FALSE_VALUE);
-        } else if (v instanceof Byte) {
-            outputStream.write(BYTE_VALUE);
-            outputStream.writeByte((byte) v);
-        } else if (v instanceof Short) {
-            outputStream.write(SHORT_VALUE);
-            outputStream.writeShort((short) v);
-        } else if (v instanceof Integer) {
-            outputStream.write(INT_VALUE);
-            outputStream.writeInt((int) v);
-        } else if (v instanceof Float) {
-            outputStream.write(FLOAT_VALUE);
-            outputStream.writeFloat((float) v);
-        } else if (v instanceof Double) {
-            outputStream.write(DOUBLE_VALUE);
-            outputStream.writeDouble((double) v);
-        } else {
-            outputStream.write(STRING_VALUE);
-            writeUTF(outputStream, v.toString());
-        }
-    }
-
-    private static void writeUTF(final DataOutputStream outputStream, String s) throws IOException {
-        if (s == null) s = "";
-        else if (s.length() >= MAX_STRING_SIZE) {
-            s = s.substring(0, MAX_STRING_SIZE);
-        }
-        try {
-            outputStream.writeUTF(s);
-        } catch (final UTFDataFormatException e) {
-            outputStream.writeUTF(s.substring(0, MAX_STRING_SIZE / 3));
-        }
-    }
-
-    public static class DecodeException extends Exception {
-
-        private DecodeException(final String message) {
-            super(message);
-        }
-
-        private DecodeException(final Throwable cause) {
-            super(cause);
-        }
-
-    }
-
-    public static WebSocketStats decode(final File file) throws FileNotFoundException, IOException, DecodeException {
-        try (DataInputStream inputStream = new DataInputStream(new BufferedInputStream(new FileInputStream(file)))) {
-            final boolean grouped = inputStream.readBoolean();
-            final LocalDateTime startTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(inputStream.readLong()),
-                ZoneId.systemDefault());
-            final LocalDateTime endTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(inputStream.readLong()),
-                ZoneId.systemDefault());
-            final Map<ServerToClientModel, Map<Object, Record>> stats = new EnumMap<>(ServerToClientModel.class);
-            final int nbModels = inputStream.readInt();
-            for (int i = 0; i < nbModels; i++) {
-                final String modelName = inputStream.readUTF();
-                ServerToClientModel model = null;
-                try {
-                    model = ServerToClientModel.valueOf(modelName);
-                } catch (final IllegalArgumentException e) {
-                    log.warn("Unrecognized ServerToClientModel value {} (possibly deprecated)", modelName);
-                }
-                final int nbRecords = inputStream.readInt();
-                final Map<Object, Record> records = stats.computeIfAbsent(model, m -> new HashMap<>(nbRecords));
-                for (int j = 0; j < nbRecords; j++) {
-                    Object value = decodeValue(inputStream);
-                    if (grouped) {
-                        value = new Pair<>(value, inputStream.readUTF());
-                    }
-                    records.put(value, new ImmutableRecord(inputStream.readInt(), inputStream.readInt(), inputStream.readInt()));
-                }
-            }
-            return new WebSocketStats(stats, startTime, endTime, grouped);
-        } catch (final EOFException e) {
-            throw new DecodeException(e);
-        }
-    }
-
-    private static Object decodeValue(final DataInputStream inputStream) throws IOException, DecodeException {
-        final byte valueType = inputStream.readByte();
-        switch (valueType) {
-            case NULL_VALUE:
-                return null;
-            case FALSE_VALUE:
-                return false;
-            case TRUE_VALUE:
-                return true;
-            case BYTE_VALUE:
-                return inputStream.readByte();
-            case SHORT_VALUE:
-                return inputStream.readShort();
-            case INT_VALUE:
-                return inputStream.readInt();
-            case FLOAT_VALUE:
-                return inputStream.readFloat();
-            case DOUBLE_VALUE:
-                return inputStream.readDouble();
-            case STRING_VALUE:
-                return inputStream.readUTF();
-        }
-        throw new DecodeException("Unrecognized value type " + valueType);
-    }
-
     public Bandwidth getBandwidthForPattern(final Pattern pattern, final Predicate<ServerToClientModel> modelFilter) {
         return getBandwidthFor(v -> pattern.matcher(Objects.toString(isGrouped() ? ((Pair<?, ?>) v).getFirst() : v)).find(),
-            modelFilter);
+                modelFilter);
     }
 
     public Bandwidth getBandwidthFor(final Predicate<Object> valueFilter, final Predicate<ServerToClientModel> modelFilter) {
@@ -349,7 +328,7 @@ public class WebSocketStats {
                 final Record record = recordEntry.getValue();
                 final ValueTypeModel valueType = modelToValueType(entry.getKey());
                 map.computeIfAbsent(valueType, vt -> new Bandwidth(0L, 0L)).add((long) record.getCount() * record.getMetaBytes(),
-                    (long) record.getCount() * record.getDataBytes());
+                        (long) record.getCount() * record.getDataBytes());
             }
         }
         return map;
@@ -364,7 +343,7 @@ public class WebSocketStats {
                 final String groupName = ((Pair<Object, String>) recordEntry.getKey()).getSecond();
                 final Pair<ValueTypeModel, String> pair = new Pair<>(modelToValueType(entry.getKey()), groupName);
                 map.computeIfAbsent(pair, p -> new Bandwidth(0L, 0L)).add((long) record.getCount() * record.getMetaBytes(),
-                    (long) record.getCount() * record.getDataBytes());
+                        (long) record.getCount() * record.getDataBytes());
             }
         }
         return map;
@@ -394,7 +373,7 @@ public class WebSocketStats {
                 final String groupName = ((Pair<Object, String>) recordEntry.getKey()).getSecond();
                 final Pair<ServerToClientModel, String> pair = new Pair<>(entry.getKey(), groupName);
                 map.computeIfAbsent(pair, p -> new Bandwidth(0L, 0L)).add((long) record.getCount() * record.getMetaBytes(),
-                    (long) record.getCount() * record.getDataBytes());
+                        (long) record.getCount() * record.getDataBytes());
             }
         }
         return map;
@@ -408,14 +387,10 @@ public class WebSocketStats {
                 final Record record = recordEntry.getValue();
                 final String groupName = ((Pair<Object, String>) recordEntry.getKey()).getSecond();
                 map.computeIfAbsent(groupName, g -> new Bandwidth(0L, 0L)).add((long) record.getCount() * record.getMetaBytes(),
-                    (long) record.getCount() * record.getDataBytes());
+                        (long) record.getCount() * record.getDataBytes());
             }
         }
         return map;
-    }
-
-    private static ValueTypeModel modelToValueType(final ServerToClientModel model) {
-        return model == null ? null : model.getTypeModel();
     }
 
     public boolean isGrouped() {
@@ -432,6 +407,40 @@ public class WebSocketStats {
 
     public long getSummaryCount() {
         return summaryCount;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public LocalDateTime getEndTime() {
+        return endTime;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        final NumberFormat numberFormat = NumberFormat.getNumberInstance();
+        sb.append("Web socket stats recording from ").append(startTime).append(" to ").append(endTime);
+        sb.append(": Total bandwidth=").append(numberFormat.format(summaryBandwidth.getTotal()));
+        sb.append(", Meta bandwidth=").append(numberFormat.format(summaryBandwidth.meta));
+        sb.append(" (").append(String.format("%.2f", 100.0 * summaryBandwidth.meta / summaryBandwidth.getTotal())).append("%)");
+        sb.append(", Data bandwidth=").append(numberFormat.format(summaryBandwidth.data));
+        sb.append(" (").append(String.format("%.2f", 100.0 * summaryBandwidth.data / summaryBandwidth.getTotal())).append("%)");
+        sb.append(", Frame count=").append(numberFormat.format(summaryCount));
+        return sb.toString();
+    }
+
+    public static class DecodeException extends Exception {
+
+        private DecodeException(final String message) {
+            super(message);
+        }
+
+        private DecodeException(final Throwable cause) {
+            super(cause);
+        }
+
     }
 
     public static class Bandwidth implements Comparable<Bandwidth> {
@@ -513,28 +522,6 @@ public class WebSocketStats {
             else if (difference < Integer.MIN_VALUE) return Integer.MIN_VALUE;
             else return (int) difference;
         }
-    }
-
-    public LocalDateTime getStartTime() {
-        return startTime;
-    }
-
-    public LocalDateTime getEndTime() {
-        return endTime;
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        final NumberFormat numberFormat = NumberFormat.getNumberInstance();
-        sb.append("Web socket stats recording from ").append(startTime).append(" to ").append(endTime);
-        sb.append(": Total bandwidth=").append(numberFormat.format(summaryBandwidth.getTotal()));
-        sb.append(", Meta bandwidth=").append(numberFormat.format(summaryBandwidth.meta));
-        sb.append(" (").append(String.format("%.2f", 100.0 * summaryBandwidth.meta / summaryBandwidth.getTotal())).append("%)");
-        sb.append(", Data bandwidth=").append(numberFormat.format(summaryBandwidth.data));
-        sb.append(" (").append(String.format("%.2f", 100.0 * summaryBandwidth.data / summaryBandwidth.getTotal())).append("%)");
-        sb.append(", Frame count=").append(numberFormat.format(summaryCount));
-        return sb.toString();
     }
 
     private static class ImmutableRecord extends Record {

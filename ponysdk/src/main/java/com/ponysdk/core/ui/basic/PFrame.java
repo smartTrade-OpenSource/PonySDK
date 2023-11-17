@@ -27,8 +27,8 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.writer.ModelWriter;
+import jakarta.json.JsonObject;
 
-import javax.json.JsonObject;
 import java.util.HashMap;
 import java.util.Map;
 

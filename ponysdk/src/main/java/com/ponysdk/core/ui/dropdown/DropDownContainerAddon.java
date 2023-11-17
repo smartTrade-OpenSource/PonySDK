@@ -23,21 +23,16 @@
 
 package com.ponysdk.core.ui.dropdown;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-
-import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.IsPWidget;
-import com.ponysdk.core.ui.basic.PAddOnComposite;
-import com.ponysdk.core.ui.basic.PPanel;
-import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.server.concurrent.UIContext;
+import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.core.ui.basic.event.PDomEvent.Type;
 import com.ponysdk.core.ui.eventbus.EventHandler;
 import com.ponysdk.core.ui.model.PEventType;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class DropDownContainerAddon extends PAddOnComposite<PPanel> {
 
@@ -60,25 +55,12 @@ public class DropDownContainerAddon extends PAddOnComposite<PPanel> {
     private static final String RESIZE = "resize";
     private static final String SCROLL = "scroll";
     private static final String CLICK = "click";
-
-    private boolean visible;
-
     private final PWidget parent;
     private final Set<DropDownContainerAddonListener> listeners;
-
-    /**
-     * The multilevel dropdown is meant to be stuck to the left of the container.
-     * Use this static builder to ensure you create a multilevel instance with the right settings
-     * 
-     * @param parent
-     * @return
-     */
-    public static DropDownContainerAddon newMultilevelDopdown(final PWidget parent) {
-        return new DropDownContainerAddon(parent, true,  true);
-    }
+    private boolean visible;
 
     public DropDownContainerAddon(final PWidget parent) {
-        this(parent, true,  false);
+        this(parent, true, false);
     }
 
     private DropDownContainerAddon(final PWidget parent, final boolean stickLeft, final boolean multilevel) {
@@ -106,6 +88,25 @@ public class DropDownContainerAddon extends PAddOnComposite<PPanel> {
             }
         });
         hide();
+    }
+
+    /**
+     * The multilevel dropdown is meant to be stuck to the left of the container.
+     * Use this static builder to ensure you create a multilevel instance with the right settings
+     *
+     * @param parent
+     * @return
+     */
+    public static DropDownContainerAddon newMultilevelDopdown(final PWidget parent) {
+        return new DropDownContainerAddon(parent, true, true);
+    }
+
+    private static JsonObject createJsonObject(final int parentId, final boolean stickLeft, final boolean multiLevel) {
+        final JsonObjectBuilder builder = UIContext.get().getJsonProvider().createObjectBuilder();
+        builder.add(PARENT_ID, parentId);
+        builder.add(STICK_LEFT, stickLeft);
+        builder.add(MULTILEVEL, multiLevel);
+        return builder.build();
     }
 
     public void add(final IsPWidget content) {
@@ -140,9 +141,9 @@ public class DropDownContainerAddon extends PAddOnComposite<PPanel> {
     public void updatePosition() {
         callTerminalMethod(UPDATE_POSITION);
     }
-    
+
     public void adjustPosition() {
-    	callTerminalMethod(ADJUST_POSITION);
+        callTerminalMethod(ADJUST_POSITION);
     }
 
     public void disableSpaceWhenOpened() {
@@ -176,19 +177,11 @@ public class DropDownContainerAddon extends PAddOnComposite<PPanel> {
     /**
      * Set the attribute {@code multilvl-parent} on the given DropDownContainerAddon element.<br>
      * Server side we will be able to determine if the element is a parent without any DOM boundaries.<br>
-     * 
+     *
      * @param dropdown the element which we attach the attribute
      */
     public void defineAsMultiLevelParent(DropDownContainerAddon dropdown) {
         dropdown.asWidget().setAttribute("multilvl-parent", String.valueOf(widget.getID()));
-    }
-
-    private static JsonObject createJsonObject(final int parentId, final boolean stickLeft, final boolean multiLevel) {
-        final JsonObjectBuilder builder = UIContext.get().getJsonProvider().createObjectBuilder();
-        builder.add(PARENT_ID, parentId);
-        builder.add(STICK_LEFT, stickLeft);
-        builder.add(MULTILEVEL, multiLevel);
-        return builder.build();
     }
 
     public interface DropDownContainerAddonListener {

@@ -23,14 +23,14 @@
 
 package com.ponysdk.core.ui.form.formfield;
 
-import java.util.Map;
-import java.util.Map.Entry;
-
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PListBox;
 import com.ponysdk.core.ui.basic.PWidget.TabindexMode;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 import com.ponysdk.core.ui.form.dataconverter.DataConverter;
+
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class ListBoxFormField<T> extends AbstractFormField<T, PListBox> {
 
@@ -92,6 +92,12 @@ public class ListBoxFormField<T> extends AbstractFormField<T, PListBox> {
     }
 
     @Override
+    public void setValue(final T value) {
+        if (dataProvider != null) widget.setSelectedItem(dataProvider.from(value));
+        else widget.setSelectedValue(value);
+    }
+
+    @Override
     protected String getStringValue() {
         return widget.getSelectedItem();
     }
@@ -100,12 +106,6 @@ public class ListBoxFormField<T> extends AbstractFormField<T, PListBox> {
     public void setEnabled(final boolean enabled) {
         super.setEnabled(enabled);
         widget.setEnabled(enabled);
-    }
-
-    @Override
-    public void setValue(final T value) {
-        if (dataProvider != null) widget.setSelectedItem(dataProvider.from(value));
-        else widget.setSelectedValue(value);
     }
 
 }

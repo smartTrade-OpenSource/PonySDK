@@ -35,12 +35,12 @@ public enum PJustification {
     PJustification() {
     }
 
-    public final byte getValue() {
-        return (byte) ordinal();
-    }
-
     public static PJustification fromRawValue(final int rawValue) {
         return VALUES[rawValue];
+    }
+
+    public final byte getValue() {
+        return (byte) ordinal();
     }
 
 }

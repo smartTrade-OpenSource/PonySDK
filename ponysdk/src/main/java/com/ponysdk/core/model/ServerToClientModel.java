@@ -269,16 +269,16 @@ public enum ServerToClientModel {
         this.type = size;
     }
 
+    public static ServerToClientModel fromRawValue(final int rawValue) {
+        return VALUES[rawValue];
+    }
+
     public final short getValue() {
         return (short) ordinal();
     }
 
     public final ValueTypeModel getTypeModel() {
         return type;
-    }
-
-    public static ServerToClientModel fromRawValue(final int rawValue) {
-        return VALUES[rawValue];
     }
 
 }

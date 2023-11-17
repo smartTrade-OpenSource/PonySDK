@@ -31,13 +31,6 @@ public class PBeforeSelectionEvent<T> extends Event<PBeforeSelectionEvent.Handle
     public static final Type TYPE = new Type();
     private T selectedItem;
 
-    @FunctionalInterface
-    public interface Handler<T> extends EventHandler {
-
-        void onBeforeSelection(PBeforeSelectionEvent<T> event);
-
-    }
-
     public PBeforeSelectionEvent(final Object source, final T selectedItem) {
         super(source);
         this.selectedItem = selectedItem;
@@ -59,6 +52,13 @@ public class PBeforeSelectionEvent<T> extends Event<PBeforeSelectionEvent.Handle
     @Override
     protected void dispatch(final PBeforeSelectionEvent.Handler<T> handler) {
         handler.onBeforeSelection(this);
+    }
+
+    @FunctionalInterface
+    public interface Handler<T> extends EventHandler {
+
+        void onBeforeSelection(PBeforeSelectionEvent<T> event);
+
     }
 
 }

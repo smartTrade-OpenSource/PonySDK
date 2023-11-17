@@ -28,9 +28,9 @@ import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
 /**
- * @author mzoughagh
  * @param <D> Data
  * @param <W> Widget
+ * @author mzoughagh
  */
 
 public interface InfiniteScrollProvider<D, W> {
@@ -38,32 +38,25 @@ public interface InfiniteScrollProvider<D, W> {
     /**
      * Get data from provider list
      *
-     * @param beginIndex
-     *            the beginning index to recuperate data from provider list
-     * @param maxSize
-     *            the last index to get data from provider list
-     * @param callback
-     *            return the list in the callback
+     * @param beginIndex the beginning index to recuperate data from provider list
+     * @param maxSize    the last index to get data from provider list
+     * @param callback   return the list in the callback
      */
     void getData(int beginIndex, int maxSize, Consumer<List<D>> callback);
 
     /**
      * Get full size
      *
-     * @param callback
-     *            return the size in the callback
+     * @param callback return the size in the callback
      */
     void getFullSize(IntConsumer callback);
 
     /**
      * Updating widgets and assigning data to them
      *
-     * @param index
-     *            the index of the widget
-     * @param data
-     *            the assigned data to the widget
-     * @param w
-     *            the widget
+     * @param index the index of the widget
+     * @param data  the assigned data to the widget
+     * @param w     the widget
      * @return the updated widget
      */
     W handleUI(int index, D data, W w);

@@ -42,12 +42,12 @@ public class Main {
         configuration.setApplicationContextName(System.getProperty(ApplicationConfiguration.APPLICATION_CONTEXT_NAME, ""));
         configuration.setSessionTimeout(1000);
         configuration.setEntryPointClass((Class<? extends EntryPoint>) Class
-            .forName(System.getProperty(ApplicationConfiguration.POINTCLASS, "com.ponysdk.impl.main.BasicEntryPoint")));
+                .forName(System.getProperty(ApplicationConfiguration.POINTCLASS, "com.ponysdk.impl.main.BasicEntryPoint")));
 
         final String styles = System.getProperty(ApplicationConfiguration.STYLESHEETS);
         if (styles != null && !styles.isEmpty()) {
             configuration
-                .setStyle(Arrays.stream(styles.trim().split(";")).collect(Collectors.toMap(Function.identity(), Function.identity())));
+                    .setStyle(Arrays.stream(styles.trim().split(";")).collect(Collectors.toMap(Function.identity(), Function.identity())));
         }
 
         final String scripts = System.getProperty(ApplicationConfiguration.JAVASCRIPTS);

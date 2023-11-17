@@ -23,16 +23,16 @@
 
 package com.ponysdk.core.ui.datagrid.dynamic;
 
+import com.ponysdk.core.ui.datagrid.ColumnDescriptor;
+import com.ponysdk.core.ui.datagrid.DataGrid;
+import com.ponysdk.core.ui.datagrid.View;
+import com.ponysdk.core.ui.datagrid.impl.DefaultView;
+
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.function.Function;
 import java.util.function.Predicate;
-
-import com.ponysdk.core.ui.datagrid.ColumnDescriptor;
-import com.ponysdk.core.ui.datagrid.DataGrid;
-import com.ponysdk.core.ui.datagrid.View;
-import com.ponysdk.core.ui.datagrid.impl.DefaultView;
 
 public class DynamicDataGrid<DataType> extends DataGrid<DataType> {
 
@@ -51,7 +51,7 @@ public class DynamicDataGrid<DataType> extends DataGrid<DataType> {
     }
 
     public DynamicDataGrid(final Configuration<DataType> configuration, final Function<DataType, ?> keyProvider,
-            final Comparator<DataType> comparator) {
+                           final Comparator<DataType> comparator) {
         this(configuration, new DefaultView(), keyProvider, comparator);
     }
 
@@ -60,7 +60,7 @@ public class DynamicDataGrid<DataType> extends DataGrid<DataType> {
     }
 
     public DynamicDataGrid(final Configuration<DataType> configuration, final View view, final Function<DataType, ?> keyProvider,
-            final Comparator<DataType> comparator) {
+                           final Comparator<DataType> comparator) {
         super(view, keyProvider, comparator);
         this.configuration = configuration;
         initColumnDescriptor();
@@ -75,7 +75,7 @@ public class DynamicDataGrid<DataType> extends DataGrid<DataType> {
         method.setAccessible(true);
         final Function<String, String> captionTransform = configuration.getCaptionTransform();
         final ColumnDescriptor<DataType> columnDescriptor = ColumnDescriptor.newDefault(captionTransform.apply(method.getName()),
-            data -> this.invoke(method, data));
+                data -> this.invoke(method, data));
         addColumnDescriptor(columnDescriptor);
     }
 

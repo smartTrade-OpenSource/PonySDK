@@ -23,7 +23,6 @@
 
 package com.ponysdk.core.ui.datagrid2.datasource;
 
-import com.ponysdk.core.server.service.query.PResultSet;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.column.Column;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
@@ -43,7 +42,7 @@ public interface DataGridSource<K, V> {
     /**
      * @param k
      * @return the value to which the specified key is mapped or {@code null} if
-     *         it doesn't exist in the Source
+     * it doesn't exist in the Source
      */
     DefaultRow<V> getRow(final K k);
 
@@ -54,7 +53,7 @@ public interface DataGridSource<K, V> {
 
     /**
      * @return LiveDataView object that contains the demanded data and
-     *         absoluteRowCount
+     * absoluteRowCount
      */
     LiveDataView<V> getRows(final int dataSrcRowIndex, final int dataSize);
 
@@ -85,7 +84,7 @@ public interface DataGridSource<K, V> {
      * True is passed into parameter if it reach the last selected data
      */
     PResultSet<V> getFilteredData();
-    
+
     /**
      * Return the last requested data, i.e rows actually displayed.
      */
@@ -98,7 +97,6 @@ public interface DataGridSource<K, V> {
     PResultSet<V> getLiveSelectedData();
 
     /**
-     *
      * @return the total number of selected data
      */
     int getlLiveSelectedDataCount();
@@ -122,10 +120,14 @@ public interface DataGridSource<K, V> {
 
     void addPrimarySort(Object key, Comparator<DefaultRow<V>> comparator);
 
-    /** @return true iff a sort has been removed */
+    /**
+     * @return true iff a sort has been removed
+     */
     boolean clearSort(Column<V> column);
 
-    /** @return true iff a sort has been removed */
+    /**
+     * @return true iff a sort has been removed
+     */
     boolean clearSort(Object key);
 
     /**
@@ -148,7 +150,9 @@ public interface DataGridSource<K, V> {
      */
     void setFilter(final Object key, String id, final boolean reinforcing, final AbstractFilter<V> filter);
 
-    /** @return true iff a filter has been removed */
+    /**
+     * @return true iff a filter has been removed
+     */
     boolean clearFilter(Object key);
 
     void clearFilters(ColumnDefinition<V> column);

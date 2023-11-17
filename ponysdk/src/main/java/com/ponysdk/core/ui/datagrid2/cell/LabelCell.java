@@ -23,13 +23,13 @@
 
 package com.ponysdk.core.ui.datagrid2.cell;
 
-import java.util.Optional;
-import java.util.function.BiConsumer;
-import java.util.function.Supplier;
-
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PWidget;
+
+import java.util.Optional;
+import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 /**
  * @author mbagdouri
@@ -42,15 +42,15 @@ public class LabelCell<V> implements PrimaryCell<V> {
     private Supplier<ExtendedCell<V>> instantiator;
 
     public LabelCell(final BiConsumer<V, String> columnEditFn, final int width) {
-    	instantiator = () -> new TextBoxExtendedCell<>(label.getText(), columnEditFn, width);
+        instantiator = () -> new TextBoxExtendedCell<>(label.getText(), columnEditFn, width);
         label.addDoubleClickHandler(e -> {
             if (cellController != null) cellController.setExtendedMode();
         });
     }
-    
+
     @Override
     public Optional<ExtendedCell<V>> genExtended() {
-    	return Optional.of(instantiator.get());
+        return Optional.of(instantiator.get());
     }
 
     @Override

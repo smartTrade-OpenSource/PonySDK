@@ -38,12 +38,12 @@ public enum PFontSize {
     PFontSize() {
     }
 
-    public final byte getValue() {
-        return (byte) ordinal();
-    }
-
     public static PFontSize fromRawValue(final int rawValue) {
         return VALUES[rawValue];
+    }
+
+    public final byte getValue() {
+        return (byte) ordinal();
     }
 
 }

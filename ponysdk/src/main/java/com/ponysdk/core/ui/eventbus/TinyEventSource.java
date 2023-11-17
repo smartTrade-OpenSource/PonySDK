@@ -23,12 +23,12 @@
 
 package com.ponysdk.core.ui.eventbus;
 
+import com.ponysdk.core.ui.eventbus.Event.Type;
+import com.ponysdk.core.util.SetUtils;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
-import com.ponysdk.core.ui.eventbus.Event.Type;
-import com.ponysdk.core.util.SetUtils;
 
 public class TinyEventSource extends EventSource {
 

@@ -30,11 +30,6 @@ import com.ponysdk.sample.client.event.DemoBusinessEvent.DemoBusinessEventHandle
 
 public class DemoBusinessEvent extends BusinessEvent<DemoBusinessEventHandler> {
 
-    public interface DemoBusinessEventHandler extends EventHandler {
-
-        void onEvent(DemoBusinessEvent event);
-    }
-
     public static final Event.Type TYPE = new Event.Type();
 
     public DemoBusinessEvent(final Object sourceComponent) {
@@ -54,6 +49,11 @@ public class DemoBusinessEvent extends BusinessEvent<DemoBusinessEventHandler> {
     @Override
     protected void dispatch(final DemoBusinessEventHandler handler) {
         handler.onEvent(this);
+    }
+
+    public interface DemoBusinessEventHandler extends EventHandler {
+
+        void onEvent(DemoBusinessEvent event);
     }
 
 }

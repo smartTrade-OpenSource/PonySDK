@@ -1,23 +1,17 @@
-
 package com.ponysdk.core.ui.form2.api;
-
-import java.util.Objects;
 
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PWidget;
 
+import java.util.Objects;
+
 public abstract class FormField<V> implements IsPWidget {
 
-    private boolean initialized;
-
-    private String caption;
-
-    private String description;
-
-    private V initialValue;
-
     private final FormFieldPanel panel = new FormFieldPanel();
-
+    private boolean initialized;
+    private String caption;
+    private String description;
+    private V initialValue;
     private FormFieldValidator validator;
 
     public FormField(final String caption) {
@@ -72,9 +66,8 @@ public abstract class FormField<V> implements IsPWidget {
         panel.removeDirtyStyle();
     }
 
-    public void setDescription(String description) {
-        this.description = description;
-        panel.setDescription(description);
+    public String getCaption() {
+        return caption;
     }
 
     public void setCaption(String caption) {
@@ -82,12 +75,13 @@ public abstract class FormField<V> implements IsPWidget {
         panel.setCaption(caption);
     }
 
-    public String getCaption() {
-        return caption;
-    }
-
     public String getDescription() {
         return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+        panel.setDescription(description);
     }
 
     @Override

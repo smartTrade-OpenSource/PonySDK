@@ -91,7 +91,7 @@ public class JavascriptPageActivity extends SamplePageActivity {
 
             @Override
             public PKeyCodes[] getFilteredKeys() {
-                return new PKeyCodes[] { PKeyCodes.ENTER, PKeyCodes.DOWN, PKeyCodes.UP };
+                return new PKeyCodes[]{PKeyCodes.ENTER, PKeyCodes.DOWN, PKeyCodes.UP};
             }
         });
 

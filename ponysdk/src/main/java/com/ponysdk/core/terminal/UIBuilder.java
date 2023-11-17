@@ -40,10 +40,7 @@ import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 import com.ponysdk.core.terminal.request.RequestBuilder;
 import com.ponysdk.core.terminal.ui.*;
-import elemental.html.Uint8Array;
-import elemental.util.Collections;
-import elemental.util.MapFromIntTo;
-import elemental.util.MapFromStringTo;
+import elemental2.core.Uint8Array;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -56,10 +53,10 @@ public class UIBuilder {
     private static final Logger log = Logger.getLogger(UIBuilder.class.getName());
 
     private final UIFactory uiFactory = new UIFactory();
-    private final MapFromIntTo<PTObject> objectByID = Collections.mapFromIntTo();
+    private final Map<Integer, PTObject> objectByID = new HashMap<>();
     private final Map<UIObject, Integer> objectIDByWidget = new HashMap<>();
-    private final MapFromIntTo<UIObject> widgetIDByObjectID = Collections.mapFromIntTo();
-    private final MapFromStringTo<JavascriptAddOnFactory> javascriptAddOnFactories = Collections.mapFromStringTo();
+    private final Map<Integer, UIObject> widgetIDByObjectID = new HashMap<>();
+    private final Map<String, JavascriptAddOnFactory> javascriptAddOnFactories = new HashMap<>();
 
     private final ReaderBuffer readerBuffer = new ReaderBuffer();
 
@@ -91,9 +88,7 @@ public class UIBuilder {
 
     public void updateMainTerminal(final Uint8Array buffer) {
         lastReceivedMessage = System.currentTimeMillis();
-
         readerBuffer.init(buffer);
-
         while (readerBuffer.hasEnoughKeyBytes()) {
             final int nextBlockPosition = readerBuffer.shiftNextBlock(true);
             if (nextBlockPosition == ReaderBuffer.NOT_FULL_BUFFER_POSITION) return;
@@ -373,7 +368,7 @@ public class UIBuilder {
 
     private void destroy() {
         PTWindowManager.closeAll();
-        ReconnectionChecker.reloadWindow();
+        //ReconnectionChecker.reloadWindow();
     }
 
     public void sendDataToServer(final Widget widget, final PTInstruction instruction) {

@@ -23,9 +23,6 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.google.gwt.core.client.GWT;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -34,9 +31,11 @@ import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
+import elemental2.core.TypedArray;
+import elemental2.dom.DomGlobal;
 
-import elemental.client.Browser;
-import elemental.html.Uint8Array;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class PTWindow extends PTAbstractWindow implements PostMessageHandler {
 
@@ -70,8 +69,9 @@ public class PTWindow extends PTAbstractWindow implements PostMessageHandler {
         if (relative) {
             url = GWT.getHostPageBaseURL() + url + "?" + ClientToServerModel.WINDOW_ID.toStringValue() + "=" + objectId + "&"
                     + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "=" + PonySDK.get().getContextId();
-            if (PonySDK.get().isTabindexOnlyFormField()) url += "&" + ClientToServerModel.OPTION_TABINDEX_ACTIVATED.toStringValue()
-                    + "=" + PonySDK.get().isTabindexOnlyFormField();
+            if (PonySDK.get().isTabindexOnlyFormField())
+                url += "&" + ClientToServerModel.OPTION_TABINDEX_ACTIVATED.toStringValue()
+                        + "=" + PonySDK.get().isTabindexOnlyFormField();
         }
 
         PTWindowManager.get().register(this);
@@ -81,10 +81,13 @@ public class PTWindow extends PTAbstractWindow implements PostMessageHandler {
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         final ServerToClientModel model = binaryModel.getModel();
         if (ServerToClientModel.OPEN == model) {
-            window = Browser.getWindow().open(url, name, features);
+            window = DomGlobal.window.open(url, name, features);
             // Window can be null if browser doesn't allow popup
             if (window != null) {
-                window.setOnunload(event -> onClose());
+                window.onunload = p0 -> {
+                    onClose();
+                    return true;
+                };
             } else {
                 log.log(Level.WARNING, "Can't open PTWindow #" + objectID + ". Check the browser's settings");
 
@@ -104,12 +107,12 @@ public class PTWindow extends PTAbstractWindow implements PostMessageHandler {
     }
 
     public void close(final boolean forced) {
-        if (ready && window != null && !window.isClosed()) window.close();
+        if (ready && window != null && !window.closed) window.close();
     }
 
     @Override
-    public void postMessage(final Uint8Array buffer) {
-        if (ready && window.isClosed()) onClose();
+    public void postMessage(final TypedArray buffer) {
+        if (ready && window.closed) onClose();
 
         if (ready) window.postMessage(buffer, "*");
     }
@@ -144,7 +147,7 @@ public class PTWindow extends PTAbstractWindow implements PostMessageHandler {
     }
 
     public boolean isClosed() {
-        return window == null || window.isClosed();
+        return window == null || window.closed;
     }
 
 }

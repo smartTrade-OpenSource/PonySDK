@@ -23,9 +23,6 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -35,7 +32,8 @@ import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
-import elemental.json.JsonObject;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class PTAddOn extends AbstractPTObject {
 
@@ -44,6 +42,12 @@ public class PTAddOn extends AbstractPTObject {
     protected boolean destroyed;
 
     JavascriptAddOn addOn;
+
+    protected static JavascriptAddOnFactory getFactory(final UIBuilder uiBuilder, final String signature) {
+        final JavascriptAddOnFactory factory = uiBuilder.getJavascriptAddOnFactory(signature);
+        if (factory != null) return factory;
+        else throw new IllegalArgumentException("AddOn factory not found for signature: " + signature);
+    }
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
@@ -56,7 +60,7 @@ public class PTAddOn extends AbstractPTObject {
         final String signature = buffer.readBinaryModel().getStringValue();
         final JavascriptAddOnFactory factory = getFactory(uiBuilder, signature);
 
-        final JsonObject arguments;
+        final JavaScriptObject arguments;
         final BinaryModel binaryModel = buffer.readBinaryModel();
         if (ServerToClientModel.PADDON_CREATION == binaryModel.getModel()) {
             arguments = binaryModel.getJsonObject();
@@ -66,17 +70,11 @@ public class PTAddOn extends AbstractPTObject {
         }
 
         try {
-            addOn = factory.newAddOn(objectId, (JavaScriptObject) arguments, null, null);
+            addOn = factory.newAddOn(objectId, arguments, null, null);
             addOn.onInit();
         } catch (final JavaScriptException e) {
             log.log(Level.SEVERE, "PTAddOn #" + getObjectID() + " (" + signature + ") " + e.getMessage(), e);
         }
-    }
-
-    protected static final JavascriptAddOnFactory getFactory(final UIBuilder uiBuilder, final String signature) {
-        final JavascriptAddOnFactory factory = uiBuilder.getJavascriptAddOnFactory(signature);
-        if (factory != null) return factory;
-        else throw new IllegalArgumentException("AddOn factory not found for signature: " + signature);
     }
 
     @Override

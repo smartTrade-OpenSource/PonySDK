@@ -23,23 +23,7 @@
 
 package com.ponysdk.core.ui.datagrid2.controller;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.BiPredicate;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ponysdk.core.server.concurrent.PScheduler;
-import com.ponysdk.core.server.service.query.PResultSet;
+import com.ponysdk.core.server.concurrent.UIContext;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.cell.Cell;
 import com.ponysdk.core.ui.datagrid2.column.Column;
@@ -49,15 +33,21 @@ import com.ponysdk.core.ui.datagrid2.config.DataGridConfig.ColumnSort;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfig.GeneralSort;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfig.Sort;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfigBuilder;
-import com.ponysdk.core.ui.datagrid2.data.AbstractFilter;
-import com.ponysdk.core.ui.datagrid2.data.DataGridFilter;
-import com.ponysdk.core.ui.datagrid2.data.DefaultRow;
-import com.ponysdk.core.ui.datagrid2.data.Interval;
-import com.ponysdk.core.ui.datagrid2.data.LiveDataView;
+import com.ponysdk.core.ui.datagrid2.data.*;
 import com.ponysdk.core.ui.datagrid2.datasource.DataGridSource;
+import com.ponysdk.core.ui.datagrid2.datasource.PResultSet;
 import com.ponysdk.core.ui.datagrid2.view.DataGridSnapshot;
 import com.ponysdk.core.util.MappedList;
 import com.ponysdk.core.util.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.BiPredicate;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /**
  * @author mbagdouri
@@ -73,6 +63,7 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     private final RenderingHelperSupplier renderingHelperSupplier1 = new RenderingHelperSupplier();
     private final RenderingHelperSupplier renderingHelperSupplier2 = new RenderingHelperSupplier();
     private final AtomicLong count = new AtomicLong();
+    private final DataGridSource<K, V> dataSource;
     private int columnCounter = 0;
     private DataGridControllerListener<V> listener;
     private DataGridAdapter<K, V> adapter;
@@ -83,7 +74,6 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
      */
     private int from = Integer.MAX_VALUE;
     private int to = 0;
-    private final DataGridSource<K, V> dataSource;
     private DataGridSnapshot viewSnapshot;
     private long lastProcessedID;
 
@@ -119,7 +109,7 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
         return null;
     }
 
-    private synchronized Object getRenderingHelper(final V data, final Column<V> column) {
+    private Object getRenderingHelper(final V data, final Column<V> column) {
         // FIXME : possible performance optimisation
         final Object[] renderingHelpers = renderingHelpersCache.computeIfAbsent(data, r -> new Object[columns.size()]);
         Object helper = renderingHelpers[column.getID()];
@@ -174,10 +164,8 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     /**
      * Extends the variable zone (which is refreshed during a draw from the view) using from/to as data offsets.
      *
-     * @param from
-     *            the beginning offset of the variable zone
-     * @param to
-     *            the ending offset of the variable zone
+     * @param from the beginning offset of the variable zone
+     * @param to   the ending offset of the variable zone
      */
     private void refreshRows(final int from, final int to) {
         this.from = Math.min(this.from, from);
@@ -332,7 +320,7 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     public void setFilter(final DataGridFilter<V> filter) {
         checkAdapter();
         dataSource.setFilter(filter.getKey(), filter.getId(), filter.isReinforcing(),
-            new GeneralFilter(filter.getPredicate(), filter.isActive()));
+                new GeneralFilter(filter.getPredicate(), filter.isActive()));
         resetLiveData();
     }
 
@@ -340,7 +328,7 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     public void setFilters(final Collection<DataGridFilter<V>> filters) {
         checkAdapter();
         filters.forEach(filter -> dataSource.setFilter(filter.getKey(), filter.getId(), filter.isReinforcing(),
-            new GeneralFilter(filter.getPredicate(), filter.isActive())));
+                new GeneralFilter(filter.getPredicate(), filter.isActive())));
         resetLiveData();
     }
 
@@ -376,11 +364,11 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
                                         final Consumer<Pair<DataSrcResult, Throwable>> consumer) {
         viewSnapshot = new DataGridSnapshot(threadSnapshot);
         final long currentProcessID = count.get();
-        PScheduler.schedule(() -> {
+        UIContext.get().execute(() -> {
             try {
                 if (viewSnapshot.equals(threadSnapshot) && lastProcessedID <= currentProcessID) {
                     final DataSrcResult result = new DataSrcResult(dataSource.getRows(dataSrcRowIndex, dataSize), dataSrcRowIndex,
-                        threadSnapshot.start);
+                            threadSnapshot.start);
                     lastProcessedID = count.incrementAndGet();
                     consumer.accept(new Pair<>(result, null));
                 }

@@ -31,10 +31,10 @@ import com.ponysdk.core.ui.basic.event.PShowRangeEvent;
 import com.ponysdk.core.ui.basic.event.PShowRangeHandler;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
+import jakarta.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.json.JsonObject;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -221,20 +221,20 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
         return month;
     }
 
-    public int getDay() {
-        return day;
-    }
-
-    public void setTimeZone(final TimeZone timeZone) {
-        this.dateFormat.setTimeZone(timeZone);
-    }
-
     /**
      * @deprecated Useless
      */
     @Deprecated(forRemoval = true, since = "2.8.2")
     public void setMonth(final int month) {
         // To be removed
+    }
+
+    public int getDay() {
+        return day;
+    }
+
+    public void setTimeZone(final TimeZone timeZone) {
+        this.dateFormat.setTimeZone(timeZone);
     }
 
     @Override

@@ -23,9 +23,6 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.ponysdk.core.model.ClientToServerModel;
@@ -35,8 +32,10 @@ import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
+import elemental2.core.TypedArray;
 
-import elemental.html.Uint8Array;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class PTFrame extends PTWidget<HTMLPanel> implements PostMessageHandler {
 
@@ -78,7 +77,7 @@ public class PTFrame extends PTWidget<HTMLPanel> implements PostMessageHandler {
     }
 
     @Override
-    public void postMessage(final Uint8Array buffer) {
+    public void postMessage(final TypedArray buffer) {
         postMessage(uiObject.getElement(), buffer);
     }
 
@@ -95,7 +94,7 @@ public class PTFrame extends PTWidget<HTMLPanel> implements PostMessageHandler {
         return ready;
     }
 
-    public native void postMessage(Element element, final Uint8Array buffer) /*-{
+    public native void postMessage(Element element, final TypedArray buffer) /*-{
                                                                              element.contentWindow.postMessage(buffer, '*');
                                                                              }-*/;
 

@@ -29,8 +29,8 @@ import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 import com.ponysdk.core.writer.ModelWriter;
+import jakarta.json.JsonObject;
 
-import javax.json.JsonObject;
 import java.util.*;
 
 public abstract class PTextBoxBase extends PValueBoxBase implements HasPValue<String> {

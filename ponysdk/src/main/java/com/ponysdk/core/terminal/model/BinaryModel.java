@@ -26,9 +26,8 @@ package com.ponysdk.core.terminal.model;
 import com.google.gwt.json.client.JSONArray;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.ValueTypeModel;
-
-import elemental.json.Json;
-import elemental.json.JsonObject;
+import elemental2.core.Global;
+import jsinterop.base.Js;
 
 public class BinaryModel {
 
@@ -114,8 +113,8 @@ public class BinaryModel {
         return stringValue;
     }
 
-    public JsonObject getJsonObject() {
-        return Json.parse(stringValue);
+    public <T> T getJsonObject() {
+        return Js.cast(Global.JSON.parse(stringValue));
     }
 
     public JSONArray getArrayValue() {

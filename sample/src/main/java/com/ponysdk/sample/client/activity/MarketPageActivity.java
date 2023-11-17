@@ -55,10 +55,8 @@ import com.ponysdk.sample.server.TradingServiceImpl;
 public class MarketPageActivity extends PageActivity {
 
     private static Logger log = LoggerFactory.getLogger(MarketPageActivity.class);
-
-    protected PFlowPanel currentDrag;
-
     protected final PFlowPanel boxContainer = Element.newPFlowPanel();
+    protected PFlowPanel currentDrag;
 
     public MarketPageActivity() {
         super("Markets", "Trading");
@@ -136,7 +134,7 @@ public class MarketPageActivity extends PageActivity {
         final PHTML buy = Element.newPHTML("<div></div>");
         buy.addStyleName("buy");
         buy.addClickHandler(
-            clickEvent -> PNotificationManager.showHumanizedNotification(getView().asWidget().getWindow(), "Buy clicked!"));
+                clickEvent -> PNotificationManager.showHumanizedNotification(getView().asWidget().getWindow(), "Buy clicked!"));
         box.add(buy);
 
         final PLabel buyPipHead = Element.newPLabel("buy");
@@ -162,7 +160,7 @@ public class MarketPageActivity extends PageActivity {
         final PHTML sell = Element.newPHTML("<div></div>");
         sell.addStyleName("sell");
         sell.addClickHandler(
-            event -> PNotificationManager.showHumanizedNotification(getView().asWidget().getWindow(), "Sell clicked!"));
+                event -> PNotificationManager.showHumanizedNotification(getView().asWidget().getWindow(), "Sell clicked!"));
         box.add(sell);
 
         final PLabel sellPipHead = Element.newPLabel("offer");

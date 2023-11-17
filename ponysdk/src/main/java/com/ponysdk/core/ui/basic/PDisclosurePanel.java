@@ -28,8 +28,8 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.ui.basic.event.*;
 import com.ponysdk.core.writer.ModelWriter;
+import jakarta.json.JsonObject;
 
-import javax.json.JsonObject;
 import java.util.*;
 
 /**
@@ -98,11 +98,6 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, PAcceptsOn
         return content;
     }
 
-    @Override
-    public void setWidget(final IsPWidget w) {
-        setContent(w.asWidget());
-    }
-
     public void setContent(final PWidget w) {
         // Validate
         if (w == content) return;
@@ -120,6 +115,11 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, PAcceptsOn
         // Physical attach.
         w.attach(window, frame);
         w.saveAdd(w.getID(), getID());
+    }
+
+    @Override
+    public void setWidget(final IsPWidget w) {
+        setContent(w.asWidget());
     }
 
     @Override

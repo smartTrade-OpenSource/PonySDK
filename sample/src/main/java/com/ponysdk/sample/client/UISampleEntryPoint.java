@@ -125,12 +125,185 @@ import com.ponysdk.sample.client.page.addon.LoggerAddOn;
 public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     private static final Logger log = LoggerFactory.getLogger(UISampleEntryPoint.class);
-
-    private PLabel mainLabel;
-
+    private static int counter;
     // HighChartsStackedColumnAddOn highChartsStackedColumnAddOn;
     int a = 0;
-    private static int counter;
+    private PLabel mainLabel;
+
+    private static MyRow createMyRow(final int index) {
+        return new MyRow(index);
+    }
+
+    private static void updateLabel(final PLabel label, final String text) {
+        System.out.println("Update label " + text);
+        label.setText("Increment : " + text);
+    }
+
+    private static final PStackLayoutPanel createStackLayoutPanel() {
+        final PStackLayoutPanel child = Element.newPStackLayoutPanel(PUnit.CM);
+        child.add(Element.newPLabel("Text"), "Text", false, 1.0);
+        return child;
+    }
+
+    private static final PListBox createListBox() {
+        final PListBox pListBox = Element.newPListBox(true);
+        pListBox.addItem("A");
+        pListBox.addItem("B");
+        pListBox.insertItem("C", 1);
+        pListBox.addItemsInGroup("sport", "Baseball", "Basketball", "Football", "Hockey", "Water Polo");
+        return pListBox;
+    }
+
+    private static final PTabLayoutPanel createTabLayoutPanel() {
+        final PTabLayoutPanel child = Element.newPTabLayoutPanel();
+        child.add(Element.newPLabel("text"), "text");
+        return child;
+    }
+
+    private static final PMenuBar createMenu() {
+        final PMenuBar pMenuBar = Element.newPMenuBar(true);
+        pMenuBar.addItem(Element.newPMenuItem("Menu 1", Element.newPMenuBar()));
+        pMenuBar.addItem(Element.newPMenuItem("Menu 2", true, Element.newPMenuBar()));
+        pMenuBar.addItem(Element.newPMenuItem("Menu 3", () -> System.err.println("Menu click")));
+        pMenuBar.addSeparator();
+        return pMenuBar;
+    }
+
+    private static final PFlowPanel createPFlowPanel() {
+        final PFlowPanel panel1 = Element.newPFlowPanel();
+        panel1.setAttribute("id", "panel1");
+        final PFlowPanel panel2_1 = Element.newPFlowPanel();
+        panel2_1.setAttribute("id", "panel2_1");
+        final PFlowPanel panel3_1_1 = Element.newPFlowPanel();
+        panel3_1_1.setAttribute("id", "panel3_1_1");
+        final PFlowPanel panel3_1_2 = Element.newPFlowPanel();
+        panel3_1_2.setAttribute("id", "panel3_1_2");
+        final PFlowPanel panel2_2 = Element.newPFlowPanel();
+        panel2_2.setAttribute("id", "panel2_2");
+        final PFlowPanel panel3_2_1 = Element.newPFlowPanel();
+        panel3_2_1.setAttribute("id", "panel3_2_1");
+        final PFlowPanel panel3_2_2 = Element.newPFlowPanel();
+        panel3_2_2.setAttribute("id", "panel3_2_2");
+
+        panel1.add(panel2_1);
+        panel2_1.add(panel3_1_1);
+        panel2_1.add(panel3_1_2);
+        panel1.add(panel2_2);
+        panel2_2.add(panel3_2_1);
+        panel2_2.add(panel3_2_2);
+
+        return panel1;
+    }
+
+    private static final PWidget createBlock(final PWidget child) {
+        final PFlowPanel panel = Element.newPFlowPanel();
+        panel.add(child);
+        return panel;
+    }
+
+    private static final PDockLayoutPanel createDockLayoutPanel() {
+        final PDockLayoutPanel pDockLayoutPanel = Element.newPDockLayoutPanel(PUnit.CM);
+        pDockLayoutPanel.addNorth(Element.newPLabel("LabelDock"), 1.5);
+        return pDockLayoutPanel;
+    }
+
+    private static final PFlowPanel createDateBox() {
+        final PFlowPanel flowPanel = Element.newPFlowPanel();
+
+        final PDatePicker datePicker = Element.newPDatePicker();
+        final Date a = new Date();
+        System.err.println(new Date(a.getYear(), a.getMonth(), 26));
+        System.err.println(new Date());
+
+        datePicker.setTransientEnabledOnDates(false, List.of(new Date(), new Date(a.getYear(), a.getMonth(), 26)));
+        datePicker.addStyleToDates("toto", List.of(new Date()));
+
+        final PDateBox dateBox = Element.newPDateBox(datePicker, new SimpleDateFormat("dd/MM/yyyy"));
+        //dateBox.setValue(new Date(0));
+        flowPanel.add(dateBox);
+        datePicker.addShowRangeHandler(e -> {
+            datePicker.setTransientEnabledOnDates(false, List.of(new Date(), new Date(a.getYear(), a.getMonth(), 26)));
+            datePicker.addStyleToDates("toto", List.of(new Date()));
+        });
+
+        final PButton button = Element.newPButton("reset");
+        button.addClickHandler(event -> dateBox.setValue(null));
+        flowPanel.add(button);
+        return flowPanel;
+    }
+
+    private static final LoggerAddOn createPAddOn() {
+        final LoggerAddOn labelPAddOn = new LoggerAddOn();
+        labelPAddOn.log("addon logger test");
+
+        labelPAddOn.setAjaxHandler((req, resp) -> {
+            final String header = req.getHeader("info");
+
+            if (header.equals("Get Data")) {
+                resp.setStatus(HttpServletResponse.SC_OK);
+                resp.setContentType("application/json");
+                resp.getWriter().print("{\"response\": \"" + header + "\"}");
+                resp.getWriter().flush();
+            } else {
+                resp.sendError(500);
+            }
+        });
+
+        labelPAddOn.setTerminalHandler(event -> System.err.println(event.toString()));
+
+        return labelPAddOn;
+    }
+
+    private static final PTextBox createPTextBox() {
+        final PTextBox pTextBox = Element.newPTextBox();
+
+        pTextBox.addKeyUpHandler(new PKeyUpHandler() {
+
+            @Override
+            public void onKeyUp(final PKeyUpEvent keyUpEvent) {
+                PScript.execute(PWindow.getMain(), "alert('" + keyUpEvent + "');");
+            }
+
+            @Override
+            public PKeyCodes[] getFilteredKeys() {
+                return new PKeyCodes[]{PKeyCodes.ENTER};
+            }
+        });
+        return pTextBox;
+    }
+
+    private static final PTree createTree() {
+        final PTree tree = Element.newPTree();
+
+        final PTreeItem firstFolder = tree.add("First");
+        firstFolder.add("2");
+        firstFolder.add(0, Element.newPTreeItem("1"));
+
+        firstFolder.setState(true);
+
+        final PTreeItem secondFolder = Element.newPTreeItem("Second");
+        final PTreeItem subItem = secondFolder.add(Element.newPTreeItem());
+        subItem.setText("3");
+        secondFolder.add(Element.newPTreeItem(Element.newPLabel("4")));
+        tree.add(secondFolder);
+
+        secondFolder.setSelected(true);
+
+        return tree;
+    }
+
+    private static final PAbsolutePanel createAbsolutePanel() {
+        final PAbsolutePanel pAbsolutePanel = Element.newPAbsolutePanel();
+        pAbsolutePanel.add(Element.newDiv());
+        pAbsolutePanel.add(Element.newP());
+        return pAbsolutePanel;
+    }
+
+    private static final PButton createButton() {
+        final PButton pButton = Element.newPButton("Button 1");
+        pButton.addClickHandler(handler -> pButton.setText("Button 1 clicked"));
+        return pButton;
+    }
 
     @Override
     public void start(final UIContext uiContext) {
@@ -340,50 +513,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         router.go("scene2");
     }
 
-    private static class MyRow {
-
-        private final int id;
-        private Map<String, String> map;
-        private final String format;
-
-        public MyRow(final int id) {
-            super();
-            this.id = id;
-            format = String.format("%09d", id);
-        }
-
-        public void putValue(final String key, final String value) {
-            if (map == null) map = new ConcurrentHashMap<>();
-            map.put(key, value);
-        }
-
-        public String getValue(final String key) {
-            if (map != null) {
-                final String v = map.get(key);
-                if (v != null) return v;
-            }
-            return key + format;
-        }
-
-        @Override
-        public MyRow clone() {
-            final MyRow model = new MyRow(id);
-            if (map == null) return model;
-            model.map = new HashMap<>(map);
-            return model;
-        }
-
-        @Override
-        public String toString() {
-            return "SampleModel [id=" + id + "]";
-        }
-
-    }
-
-    private static MyRow createMyRow(final int index) {
-        return new MyRow(index);
-    }
-
     private void testSimpleDataGridView() {
         final DefaultDataGridView<Integer, MyRow> simpleGridView = new DefaultDataGridView<>();
         simpleGridView.setRefreshOnColumnVisibilityChanged(true);
@@ -391,13 +520,13 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         //TODO 2 implementation (1 simple & 1 full => surrement coté core ui, recheck et discuter avec JB)
 
         final ColumnVisibilitySelectorDataGridView<Integer, MyRow> columnVisibilitySelectorDataGridView = new ColumnVisibilitySelectorDataGridView<>(
-            simpleGridView);
+                simpleGridView);
         final RowSelectorColumnDataGridView<Integer, MyRow> rowSelectorColumnDataGridView = new RowSelectorColumnDataGridView<>(
-            columnVisibilitySelectorDataGridView);
+                columnVisibilitySelectorDataGridView);
         final ColumnFilterFooterDataGridView<Integer, MyRow> columnFilterFooterDataGridView = new ColumnFilterFooterDataGridView<>(
-            rowSelectorColumnDataGridView);
+                rowSelectorColumnDataGridView);
         final ConfigSelectorDataGridView<Integer, MyRow> configSelectorDataGridView = new ConfigSelectorDataGridView<>(
-            columnFilterFooterDataGridView, "DEFAULT");
+                columnFilterFooterDataGridView, "DEFAULT");
 
         final DataGridView<Integer, MyRow> gridView = configSelectorDataGridView;
         gridView.setAdapter(new DataGridAdapter<>() {
@@ -543,7 +672,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         importConfigButton.addClickHandler(e -> {
             try {
                 configSelectorDataGridView
-                    .setConfigEntries(configSelectorDataGridView.decodeConfigEntries(importConfigTextBox.getText()));
+                        .setConfigEntries(configSelectorDataGridView.decodeConfigEntries(importConfigTextBox.getText()));
             } catch (final DecodeException e1) {
                 e1.printStackTrace();
             }
@@ -639,11 +768,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         });
     }
 
-    private static void updateLabel(final PLabel label, final String text) {
-        System.out.println("Update label " + text);
-        label.setText("Increment : " + text);
-    }
-
     private void createFunctionalLabel() {
         final TextFunction textFunction = new TextFunction(args -> {
             System.out.println(args[0] + " " + args[1]);
@@ -692,7 +816,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final BufferedReader reader = new BufferedReader(new InputStreamReader(item.getInputStream(), "UTF-8"));
         final StringBuilder value = new StringBuilder();
         final char[] buffer = new char[1024];
-        for (int length = 0; (length = reader.read(buffer)) > 0;) {
+        for (int length = 0; (length = reader.read(buffer)) > 0; ) {
             value.append(buffer, 0, length);
         }
         System.out.println(value.toString());
@@ -785,22 +909,11 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     private void createNewEvent() {
         final EventHandler<PClickEvent> handler = UIContext.get().getNewEventBus().subscribe(PClickEvent.class,
-            event -> System.err.println("B " + event));
+                event -> System.err.println("B " + event));
         UIContext.get().getNewEventBus().post(new PClickEvent(this));
         UIContext.get().getNewEventBus().post(new PClickEvent(this));
         UIContext.get().getNewEventBus().unsubscribe(handler);
         UIContext.get().getNewEventBus().post(new PClickEvent(this));
-    }
-
-    private static final class Data {
-
-        protected Integer key;
-        protected String value;
-
-        public Data(final Integer key, final String value) {
-            this.key = key;
-            this.value = value;
-        }
     }
 
     private RefreshableDataGrid<Integer, Data> createGrid() {
@@ -904,7 +1017,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         windowContainer.add(button1);
         button1.addClickHandler(event -> {
             final PWindow newPWindow = Element.newPWindow(w, "Sub Window 1 " + i.incrementAndGet(),
-                "resizable=yes,location=0,status=0,scrollbars=0");
+                    "resizable=yes,location=0,status=0,scrollbars=0");
             newPWindow.add(Element.newPLabel("Sub window"));
             newPWindow.open();
         });
@@ -913,7 +1026,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         windowContainer.add(button2);
         button2.addClickHandler(event -> {
             final PWindow newPWindow = Element.newPWindow("Not Sub Window 1 " + i.incrementAndGet(),
-                "resizable=yes,location=0,status=0,scrollbars=0");
+                    "resizable=yes,location=0,status=0,scrollbars=0");
             newPWindow.add(Element.newPLabel("Sub window"));
             newPWindow.open();
         });
@@ -937,170 +1050,55 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         UIContext.get().close();
     }
 
-    private static final PStackLayoutPanel createStackLayoutPanel() {
-        final PStackLayoutPanel child = Element.newPStackLayoutPanel(PUnit.CM);
-        child.add(Element.newPLabel("Text"), "Text", false, 1.0);
-        return child;
-    }
+    private static class MyRow {
 
-    private static final PListBox createListBox() {
-        final PListBox pListBox = Element.newPListBox(true);
-        pListBox.addItem("A");
-        pListBox.addItem("B");
-        pListBox.insertItem("C", 1);
-        pListBox.addItemsInGroup("sport", "Baseball", "Basketball", "Football", "Hockey", "Water Polo");
-        return pListBox;
-    }
+        private final int id;
+        private final String format;
+        private Map<String, String> map;
 
-    private static final PTabLayoutPanel createTabLayoutPanel() {
-        final PTabLayoutPanel child = Element.newPTabLayoutPanel();
-        child.add(Element.newPLabel("text"), "text");
-        return child;
-    }
+        public MyRow(final int id) {
+            super();
+            this.id = id;
+            format = String.format("%09d", id);
+        }
 
-    private static final PMenuBar createMenu() {
-        final PMenuBar pMenuBar = Element.newPMenuBar(true);
-        pMenuBar.addItem(Element.newPMenuItem("Menu 1", Element.newPMenuBar()));
-        pMenuBar.addItem(Element.newPMenuItem("Menu 2", true, Element.newPMenuBar()));
-        pMenuBar.addItem(Element.newPMenuItem("Menu 3", () -> System.err.println("Menu click")));
-        pMenuBar.addSeparator();
-        return pMenuBar;
-    }
+        public void putValue(final String key, final String value) {
+            if (map == null) map = new ConcurrentHashMap<>();
+            map.put(key, value);
+        }
 
-    private static final PFlowPanel createPFlowPanel() {
-        final PFlowPanel panel1 = Element.newPFlowPanel();
-        panel1.setAttribute("id", "panel1");
-        final PFlowPanel panel2_1 = Element.newPFlowPanel();
-        panel2_1.setAttribute("id", "panel2_1");
-        final PFlowPanel panel3_1_1 = Element.newPFlowPanel();
-        panel3_1_1.setAttribute("id", "panel3_1_1");
-        final PFlowPanel panel3_1_2 = Element.newPFlowPanel();
-        panel3_1_2.setAttribute("id", "panel3_1_2");
-        final PFlowPanel panel2_2 = Element.newPFlowPanel();
-        panel2_2.setAttribute("id", "panel2_2");
-        final PFlowPanel panel3_2_1 = Element.newPFlowPanel();
-        panel3_2_1.setAttribute("id", "panel3_2_1");
-        final PFlowPanel panel3_2_2 = Element.newPFlowPanel();
-        panel3_2_2.setAttribute("id", "panel3_2_2");
-
-        panel1.add(panel2_1);
-        panel2_1.add(panel3_1_1);
-        panel2_1.add(panel3_1_2);
-        panel1.add(panel2_2);
-        panel2_2.add(panel3_2_1);
-        panel2_2.add(panel3_2_2);
-
-        return panel1;
-    }
-
-    private static final PWidget createBlock(final PWidget child) {
-        final PFlowPanel panel = Element.newPFlowPanel();
-        panel.add(child);
-        return panel;
-    }
-
-    private static final PDockLayoutPanel createDockLayoutPanel() {
-        final PDockLayoutPanel pDockLayoutPanel = Element.newPDockLayoutPanel(PUnit.CM);
-        pDockLayoutPanel.addNorth(Element.newPLabel("LabelDock"), 1.5);
-        return pDockLayoutPanel;
-    }
-
-    private static final PFlowPanel createDateBox() {
-        final PFlowPanel flowPanel = Element.newPFlowPanel();
-
-        final PDatePicker datePicker = Element.newPDatePicker();
-        final Date a = new Date();
-        System.err.println(new Date(a.getYear(), a.getMonth(), 26));
-        System.err.println(new Date());
-
-        datePicker.setTransientEnabledOnDates(false, List.of(new Date(), new Date(a.getYear(), a.getMonth(), 26)));
-        datePicker.addStyleToDates("toto", List.of(new Date()));
-
-        final PDateBox dateBox = Element.newPDateBox(datePicker, new SimpleDateFormat("dd/MM/yyyy"));
-        //dateBox.setValue(new Date(0));
-        flowPanel.add(dateBox);
-        datePicker.addShowRangeHandler(e -> {
-            datePicker.setTransientEnabledOnDates(false, List.of(new Date(), new Date(a.getYear(), a.getMonth(), 26)));
-            datePicker.addStyleToDates("toto", List.of(new Date()));
-        });
-
-        final PButton button = Element.newPButton("reset");
-        button.addClickHandler(event -> dateBox.setValue(null));
-        flowPanel.add(button);
-        return flowPanel;
-    }
-
-    private static final LoggerAddOn createPAddOn() {
-        final LoggerAddOn labelPAddOn = new LoggerAddOn();
-        labelPAddOn.log("addon logger test");
-
-        labelPAddOn.setAjaxHandler((req, resp) -> {
-            final String header = req.getHeader("info");
-
-            if (header.equals("Get Data")) {
-                resp.setStatus(HttpServletResponse.SC_OK);
-                resp.setContentType("application/json");
-                resp.getWriter().print("{\"response\": \"" + header + "\"}");
-                resp.getWriter().flush();
-            } else {
-                resp.sendError(500);
+        public String getValue(final String key) {
+            if (map != null) {
+                final String v = map.get(key);
+                if (v != null) return v;
             }
-        });
+            return key + format;
+        }
 
-        labelPAddOn.setTerminalHandler(event -> System.err.println(event.toString()));
+        @Override
+        public MyRow clone() {
+            final MyRow model = new MyRow(id);
+            if (map == null) return model;
+            model.map = new HashMap<>(map);
+            return model;
+        }
 
-        return labelPAddOn;
+        @Override
+        public String toString() {
+            return "SampleModel [id=" + id + "]";
+        }
+
     }
 
-    private static final PTextBox createPTextBox() {
-        final PTextBox pTextBox = Element.newPTextBox();
+    private static final class Data {
 
-        pTextBox.addKeyUpHandler(new PKeyUpHandler() {
+        protected Integer key;
+        protected String value;
 
-            @Override
-            public void onKeyUp(final PKeyUpEvent keyUpEvent) {
-                PScript.execute(PWindow.getMain(), "alert('" + keyUpEvent + "');");
-            }
-
-            @Override
-            public PKeyCodes[] getFilteredKeys() {
-                return new PKeyCodes[] { PKeyCodes.ENTER };
-            }
-        });
-        return pTextBox;
-    }
-
-    private static final PTree createTree() {
-        final PTree tree = Element.newPTree();
-
-        final PTreeItem firstFolder = tree.add("First");
-        firstFolder.add("2");
-        firstFolder.add(0, Element.newPTreeItem("1"));
-
-        firstFolder.setState(true);
-
-        final PTreeItem secondFolder = Element.newPTreeItem("Second");
-        final PTreeItem subItem = secondFolder.add(Element.newPTreeItem());
-        subItem.setText("3");
-        secondFolder.add(Element.newPTreeItem(Element.newPLabel("4")));
-        tree.add(secondFolder);
-
-        secondFolder.setSelected(true);
-
-        return tree;
-    }
-
-    private static final PAbsolutePanel createAbsolutePanel() {
-        final PAbsolutePanel pAbsolutePanel = Element.newPAbsolutePanel();
-        pAbsolutePanel.add(Element.newDiv());
-        pAbsolutePanel.add(Element.newP());
-        return pAbsolutePanel;
-    }
-
-    private static final PButton createButton() {
-        final PButton pButton = Element.newPButton("Button 1");
-        pButton.addClickHandler(handler -> pButton.setText("Button 1 clicked"));
-        return pButton;
+        public Data(final Integer key, final String value) {
+            this.key = key;
+            this.value = value;
+        }
     }
 
     class Pojo {

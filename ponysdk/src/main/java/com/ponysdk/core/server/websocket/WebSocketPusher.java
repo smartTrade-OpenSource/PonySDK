@@ -28,8 +28,8 @@ import com.ponysdk.core.model.BooleanModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.ValueTypeModel;
 import com.ponysdk.core.server.concurrent.AutoFlushedBuffer;
+import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.WriteCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,34 +39,77 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback {
+public class WebSocketPusher extends AutoFlushedBuffer implements Callback {
 
     private static final Logger log = LoggerFactory.getLogger(WebSocketPusher.class);
 
     private static final int MAX_UNSIGNED_BYTE_VALUE = Byte.MAX_VALUE * 2 + 1;
     private static final int MAX_UNSIGNED_SHORT_VALUE = Short.MAX_VALUE * 2 + 1;
     private static final int MODEL_KEY_SIZE = 1;
-
+    private static WebSocketStatsRecorder statsRecorder;
     private final Session session;
-
-    private static volatile WebSocketStatsRecorder statsRecorder;
     private int metaBytes;
 
     private WebSocket.Listener listener;
+    private static final ReentrantLock lock = new ReentrantLock();
 
     public WebSocketPusher(final Session session, final int bufferSize, final int maxChunkSize, final long timeoutMillis) {
         super(bufferSize, true, maxChunkSize, 0.25f, timeoutMillis);
         this.session = session;
     }
 
+    public static boolean startRecordingStats(final long timeout, final TimeUnit unit,
+                                              final Consumer<WebSocketStats> listener,
+                                              final BiFunction<ServerToClientModel, Object, String> groupBy) {
+        lock.lock();
+        try {
+            if (statsRecorder != null) return false;
+            statsRecorder = new WebSocketStatsRecorder(stats -> {
+                lock.lock();
+                try {
+                    statsRecorder = null;
+                } finally {
+                    lock.unlock();
+                }
+                if (listener != null) listener.accept(stats);
+            }, groupBy);
+            return statsRecorder.start(timeout, unit);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+
+    public static boolean isRecordingStats() {
+        final WebSocketStatsRecorder recorder = statsRecorder;
+        return recorder != null && recorder.isStarted();
+    }
+
+    public static WebSocketStats stopRecordingStats() {
+        final WebSocketStatsRecorder recorder = statsRecorder;
+        return recorder != null ? recorder.stop() : null;
+    }
+
+    private static <T> void record(final ServerToClientModel model, final T value, final int metaBytes, final int dataBytes,
+                                   final Function<T, Object> valueConverter) {
+        final WebSocketStatsRecorder recorder = statsRecorder;
+        if (recorder != null) recorder.record(model, value, metaBytes, dataBytes, valueConverter);
+    }
+
+    private static <T> void record(final ServerToClientModel model, final T value, final int metaBytes, final int dataBytes) {
+        final WebSocketStatsRecorder recorder = statsRecorder;
+        if (recorder != null) recorder.record(model, value, metaBytes, dataBytes);
+    }
+
     @Override
     protected void doFlush(final ByteBuffer bufferToFlush) {
         final int bytes = bufferToFlush.remaining();
-        session.getRemote().sendBytes(bufferToFlush, this);
+        session.sendBinary(bufferToFlush, this);
         if (listener != null) listener.onOutgoingPonyFramesBytes(bytes);
     }
 
@@ -75,19 +118,20 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
         session.close();
     }
 
+
     @Override
-    public void writeFailed(final Throwable t) {
+    public void fail(Throwable t) {
         if (t instanceof Exception) {
             onFlushFailure((Exception) t);
         } else {
             // wrap error into a generic exception to notify producer thread and rethrow the original throwable
             onFlushFailure(new IOException(t));
-            throw (RuntimeException) t;
+            throw new RuntimeException(t);
         }
     }
 
     @Override
-    public void writeSuccess() {
+    public void succeed() {
         onFlushCompletion();
     }
 
@@ -400,40 +444,6 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
 
     public final void putUnsignedInteger(final long longValue) throws IOException {
         putInt((int) (longValue & 0xFFFFFF));
-    }
-
-    public static synchronized boolean startRecordingStats(final long timeout, final TimeUnit unit,
-                                                           final Consumer<WebSocketStats> listener,
-                                                           final BiFunction<ServerToClientModel, Object, String> groupBy) {
-        if (statsRecorder != null) return false;
-        statsRecorder = new WebSocketStatsRecorder(stats -> {
-            synchronized (WebSocketPusher.class) {
-                statsRecorder = null;
-            }
-            if (listener != null) listener.accept(stats);
-        }, groupBy);
-        return statsRecorder.start(timeout, unit);
-    }
-
-    public static boolean isRecordingStats() {
-        final WebSocketStatsRecorder recorder = statsRecorder;
-        return recorder != null && recorder.isStarted();
-    }
-
-    public static WebSocketStats stopRecordingStats() {
-        final WebSocketStatsRecorder recorder = statsRecorder;
-        return recorder != null ? recorder.stop() : null;
-    }
-
-    private static <T> void record(final ServerToClientModel model, final T value, final int metaBytes, final int dataBytes,
-                                   final Function<T, Object> valueConverter) {
-        final WebSocketStatsRecorder recorder = statsRecorder;
-        if (recorder != null) recorder.record(model, value, metaBytes, dataBytes, valueConverter);
-    }
-
-    private static <T> void record(final ServerToClientModel model, final T value, final int metaBytes, final int dataBytes) {
-        final WebSocketStatsRecorder recorder = statsRecorder;
-        if (recorder != null) recorder.record(model, value, metaBytes, dataBytes);
     }
 
     void setWebSocketListener(final WebSocket.Listener listener) {

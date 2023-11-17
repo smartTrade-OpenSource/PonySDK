@@ -23,10 +23,6 @@
 
 package com.ponysdk.core.ui.form.formfield;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
-
 import com.ponysdk.core.ui.basic.HasPValue;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PWidget;
@@ -36,6 +32,10 @@ import com.ponysdk.core.ui.form.dataconverter.DataConverter;
 import com.ponysdk.core.ui.form.validator.FieldValidator;
 import com.ponysdk.core.ui.form.validator.ValidationResult;
 import com.ponysdk.core.util.SetUtils;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * A field of a {@link com.ponysdk.core.ui.form.Form} that can be validated or reset
@@ -47,11 +47,10 @@ public abstract class AbstractFormField<T, W extends IsPWidget> implements FormF
     public static final String CLASS_INVALID = "invalid";
 
     protected final W widget;
-    private Set<FormFieldListener> listeners;
     protected DataConverter<String, T> dataProvider;
-    private FieldValidator validator;
     protected Set<PValueChangeHandler<T>> handlers;
-
+    private Set<FormFieldListener> listeners;
+    private FieldValidator validator;
     private boolean dirty = false;
     private PValueChangeHandler<T> dirtyModeHandler;
 

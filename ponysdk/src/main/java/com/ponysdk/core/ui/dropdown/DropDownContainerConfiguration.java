@@ -25,18 +25,6 @@ package com.ponysdk.core.ui.dropdown;
 
 public interface DropDownContainerConfiguration {
 
-    enum DropDownCloseOnClickMode {
-        /**
-         * <b>Default Mode</b><br>
-         * Single selection: <b>true</b><br>
-         * Multi selection: <b>false</b>
-         */
-        DEFAULT,
-        TRUE,
-        FALSE
-    }
-
-
     String DEFAULT_TITLE_SEPARATOR = ":";
 
     boolean isTitleDisplayed();
@@ -94,5 +82,16 @@ public interface DropDownContainerConfiguration {
     boolean isMultilevelEnabled();
 
     DropDownContainerConfiguration enableMultilevel();
+
+    enum DropDownCloseOnClickMode {
+        /**
+         * <b>Default Mode</b><br>
+         * Single selection: <b>true</b><br>
+         * Multi selection: <b>false</b>
+         */
+        DEFAULT,
+        TRUE,
+        FALSE
+    }
 
 }

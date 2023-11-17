@@ -23,16 +23,14 @@
 
 package com.ponysdk.core.terminal;
 
-import java.util.logging.Logger;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
+import elemental2.dom.Document;
+import elemental2.dom.DomGlobal;
+import elemental2.dom.HTMLElement;
+import elemental2.dom.XMLHttpRequest;
 
-import elemental.client.Browser;
-import elemental.dom.Document;
-import elemental.dom.Element;
-import elemental.html.Window;
-import elemental.xml.XMLHttpRequest;
+import java.util.logging.Logger;
 
 public class ReconnectionChecker {
 
@@ -43,28 +41,34 @@ public class ReconnectionChecker {
 
     private static final Logger log = Logger.getLogger(ReconnectionChecker.class.getName());
 
-    private final Window window;
 
     private final XMLHttpRequest reconnectionRequest;
 
     private boolean errorDetected;
 
     public ReconnectionChecker() {
-        window = Browser.getWindow();
-
-        reconnectionRequest = window.newXMLHttpRequest();
-        reconnectionRequest.setOnreadystatechange(evt -> {
-            if (reconnectionRequest.getReadyState() == XMLHttpRequest.DONE //
-                    && reconnectionRequest.getStatus() == HTTP_STATUS_CODE_OK) {
+        reconnectionRequest = new XMLHttpRequest();
+        reconnectionRequest.onreadystatechange = evt -> {
+            if (reconnectionRequest.readyState == XMLHttpRequest.DONE && reconnectionRequest.status == HTTP_STATUS_CODE_OK) {
                 errorDetected = false;
                 reloadWindow();
-                return;
+                return reconnectionRequest;
             }
             Scheduler.get().scheduleFixedDelay(() -> {
                 retryConnection();
                 return false;
             }, RETRY_PERIOD);
-        });
+            return reconnectionRequest;
+        };
+    }
+
+    public static native void reloadWindow() /*-{
+                                                   $wnd.document.doReload();
+                                                   }-*/;
+
+
+    private static String getPingUrl() {
+        return GWT.getHostPageBaseURL() + "?ping=" + System.currentTimeMillis();
     }
 
     public void detectConnectionFailure() {
@@ -77,12 +81,12 @@ public class ReconnectionChecker {
         if (isSpecificReconnectionInformation()) {
             showSpecificReconnectionInformation();
         } else {
-            final Document document = Browser.getDocument();
-            final Element reconnectionElement = document.getElementById("reconnection");
-            reconnectionElement.getStyle().setDisplay("block");
+            final Document document = DomGlobal.document;
+            final HTMLElement reconnectionElement = (HTMLElement) document.getElementById("reconnection");
+            reconnectionElement.style.display = "block";
 
-            final Element reconnectingElement = document.getElementById("reconnecting");
-            reconnectingElement.setInnerHTML("Connection to server lost<br>Reconnecting ...");
+            final HTMLElement reconnectingElement = (HTMLElement) document.getElementById("reconnecting");
+            reconnectingElement.innerHTML = "Connection to server lost<br>Reconnecting ...";
         }
 
         Scheduler.get().scheduleFixedDelay(() -> {
@@ -90,10 +94,6 @@ public class ReconnectionChecker {
             return false;
         }, RETRY_PERIOD);
     }
-
-    public static final native void reloadWindow() /*-{
-                                                   $wnd.document.doReload();
-                                                   }-*/;
 
     private final native void notifyConnectionLostListeners() /*-{
                                                               for(var i = 0 ; i < $wnd.document.onConnectionLostListeners.length ; i++) {
@@ -116,16 +116,7 @@ public class ReconnectionChecker {
 
     private void retryConnection() {
         reconnectionRequest.open("GET", getPingUrl() + "&retry");
-        setHTTPRequestTimeout(reconnectionRequest, RETRY_TIMEOUT);
         reconnectionRequest.send();
-    }
-
-    private static final native void setHTTPRequestTimeout(XMLHttpRequest xmlHTTPRequest, int timeout) /*-{
-                                                                                                       xmlHTTPRequest.timeout = timeout;
-                                                                                                       }-*/;
-
-    private static final String getPingUrl() {
-        return GWT.getHostPageBaseURL() + "?ping=" + System.currentTimeMillis();
     }
 
 }

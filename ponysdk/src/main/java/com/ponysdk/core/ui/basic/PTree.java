@@ -26,11 +26,11 @@ package com.ponysdk.core.ui.basic;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.concurrent.UIContext;
 import com.ponysdk.core.ui.basic.event.PSelectionEvent;
 import com.ponysdk.core.ui.basic.event.PSelectionHandler;
+import jakarta.json.JsonObject;
 
-import javax.json.JsonObject;
 import java.util.*;
 
 /**
@@ -72,14 +72,18 @@ public class PTree extends PWidget implements Iterable<PTreeItem> {
         return WidgetType.TREE;
     }
 
+    public boolean isAnimationEnabled() {
+        return animationEnabled;
+    }
+
     public void setAnimationEnabled(final boolean animationEnabled) {
         if (Objects.equals(this.animationEnabled, animationEnabled)) return;
         this.animationEnabled = animationEnabled;
         saveUpdate(ServerToClientModel.ANIMATION, animationEnabled);
     }
 
-    public boolean isAnimationEnabled() {
-        return animationEnabled;
+    public PTreeItem getSelectedItem() {
+        return selectedItem;
     }
 
     public void setSelectedItem(final PTreeItem selectedItem) {
@@ -90,10 +94,6 @@ public class PTree extends PWidget implements Iterable<PTreeItem> {
             final PSelectionEvent<PTreeItem> selectionEvent = new PSelectionEvent<>(this, selectedItem);
             selectionHandlers.forEach(handler -> handler.onSelection(selectionEvent));
         }
-    }
-
-    public PTreeItem getSelectedItem() {
-        return selectedItem;
     }
 
     public PTreeItem add(final String item) {

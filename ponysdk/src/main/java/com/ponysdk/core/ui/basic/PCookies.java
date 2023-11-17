@@ -25,11 +25,11 @@ package com.ponysdk.core.ui.basic;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.concurrent.UIContext;
 import com.ponysdk.core.writer.ModelWriter;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 
-import javax.json.JsonArray;
-import javax.json.JsonObject;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -42,12 +42,6 @@ public class PCookies {
     private final Map<String, String> cachedCookies = new HashMap<>(4);
 
     private boolean isInitialized = false;
-
-    public interface CookiesListener {
-
-        void onInitialized();
-    }
-
     private CookiesListener listener;
 
     public String getCookie(final String name) {
@@ -130,5 +124,10 @@ public class PCookies {
 
     public Collection<String> getNames() {
         return cachedCookies.keySet();
+    }
+
+    public interface CookiesListener {
+
+        void onInitialized();
     }
 }

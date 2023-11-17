@@ -30,13 +30,6 @@ public class PContextMenuEvent extends PDomEvent<PContextMenuEvent.Handler> {
 
     public static final PDomEvent.Type TYPE = new PDomEvent.Type(DomHandlerType.CONTEXT_MENU);
 
-    @FunctionalInterface
-    public interface Handler extends EventHandler {
-
-        void onContextMenu(PContextMenuEvent event);
-
-    }
-
     public PContextMenuEvent(final Object sourceComponent) {
         super(sourceComponent);
     }
@@ -49,6 +42,13 @@ public class PContextMenuEvent extends PDomEvent<PContextMenuEvent.Handler> {
     @Override
     protected void dispatch(final PContextMenuEvent.Handler handler) {
         handler.onContextMenu(this);
+    }
+
+    @FunctionalInterface
+    public interface Handler extends EventHandler {
+
+        void onContextMenu(PContextMenuEvent event);
+
     }
 
 }

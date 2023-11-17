@@ -1,4 +1,3 @@
-
 package com.ponysdk.core.ui.scene;
 
 import com.ponysdk.core.ui.basic.PObject;
@@ -10,16 +9,12 @@ import java.util.List;
 public abstract class AbstractScene implements Scene {
 
     private static final String STYLE = "scene";
-
-    private PWidget widget;
-
-    private boolean started = false;
-    private boolean firstStart = true;
-
     private final String id;
     private final String name;
     private final String token;
-
+    private PWidget widget;
+    private boolean started = false;
+    private boolean firstStart = true;
     private List<Listener> listeners;
 
     protected AbstractScene(final String id, final String name, String token) {

@@ -47,7 +47,7 @@ public class TwinListBoxPageActivity extends SamplePageActivity {
         leftListBox.addItem("Item5");
         leftListBox.setVisibleItemCount(10);
         leftListBox.addChangeHandler(event -> PNotificationManager.showTrayNotification(getView().asWidget().getWindow(),
-            "Item selected : " + leftListBox.getSelectedItem()));
+                "Item selected : " + leftListBox.getSelectedItem()));
 
         final PListBox rightListBox = twinListBox.getRightListBox();
         rightListBox.addItem("Item6");
@@ -56,10 +56,10 @@ public class TwinListBoxPageActivity extends SamplePageActivity {
         rightListBox.addItem("Item9");
         rightListBox.setVisibleItemCount(10);
         rightListBox.addChangeHandler(event -> PNotificationManager.showTrayNotification(getView().asWidget().getWindow(),
-            "Item selected : " + rightListBox.getSelectedItem()));
+                "Item selected : " + rightListBox.getSelectedItem()));
 
         twinListBox
-            .addChangeHandler(event -> PNotificationManager.showTrayNotification(getView().asWidget().getWindow(), "Item changed"));
+                .addChangeHandler(event -> PNotificationManager.showTrayNotification(getView().asWidget().getWindow(), "Item changed"));
 
         examplePanel.setWidget(twinListBox);
     }

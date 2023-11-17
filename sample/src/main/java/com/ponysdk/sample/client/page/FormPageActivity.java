@@ -130,7 +130,7 @@ public class FormPageActivity extends SamplePageActivity {
         validateButton.addClickHandler(clickEvent -> {
             final boolean isValid = form.isValid();
             PNotificationManager.showTrayNotification(getView().asWidget().getWindow(),
-                "The form is valid? " + (isValid ? "YES" : "NO"));
+                    "The form is valid? " + (isValid ? "YES" : "NO"));
         });
 
         final PButton resetButton = Element.newPButton("Reset");

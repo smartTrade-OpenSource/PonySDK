@@ -23,13 +23,12 @@
 
 package com.ponysdk.core.ui.listbox;
 
-import java.util.function.Consumer;
-import java.util.function.IntConsumer;
-
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.PWidget.TabindexMode;
+
+import java.util.function.IntConsumer;
 
 public class TextListBoxFilterWidget implements ListBoxFilterWidget {
 

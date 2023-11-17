@@ -30,13 +30,6 @@ public class PDragOverEvent extends PDomEvent<PDragOverEvent.Handler> {
 
     public static final PDomEvent.Type TYPE = new PDomEvent.Type(DomHandlerType.DRAG_OVER);
 
-    @FunctionalInterface
-    public interface Handler extends EventHandler {
-
-        void onDragOver(PDragOverEvent event);
-
-    }
-
     public PDragOverEvent(final Object sourceComponent) {
         super(sourceComponent);
     }
@@ -49,6 +42,13 @@ public class PDragOverEvent extends PDomEvent<PDragOverEvent.Handler> {
     @Override
     protected void dispatch(final PDragOverEvent.Handler handler) {
         handler.onDragOver(this);
+    }
+
+    @FunctionalInterface
+    public interface Handler extends EventHandler {
+
+        void onDragOver(PDragOverEvent event);
+
     }
 
 }

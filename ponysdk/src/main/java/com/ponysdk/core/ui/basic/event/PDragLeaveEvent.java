@@ -30,13 +30,6 @@ public class PDragLeaveEvent extends PDomEvent<PDragLeaveEvent.Handler> {
 
     public static final PDomEvent.Type TYPE = new PDomEvent.Type(DomHandlerType.DRAG_LEAVE);
 
-    @FunctionalInterface
-    public interface Handler extends EventHandler {
-
-        void onDragLeave(PDragLeaveEvent event);
-
-    }
-
     public PDragLeaveEvent(final Object sourceComponent) {
         super(sourceComponent);
     }
@@ -49,6 +42,13 @@ public class PDragLeaveEvent extends PDomEvent<PDragLeaveEvent.Handler> {
     @Override
     protected void dispatch(final PDragLeaveEvent.Handler handler) {
         handler.onDragLeave(this);
+    }
+
+    @FunctionalInterface
+    public interface Handler extends EventHandler {
+
+        void onDragLeave(PDragLeaveEvent event);
+
     }
 
 }

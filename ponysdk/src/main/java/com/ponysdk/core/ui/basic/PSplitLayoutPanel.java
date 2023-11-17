@@ -23,21 +23,16 @@
 
 package com.ponysdk.core.ui.basic;
 
+import com.ponysdk.core.model.*;
+import com.ponysdk.core.ui.basic.event.PLayoutResizeEvent;
+import com.ponysdk.core.util.SetUtils;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-
-import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.model.HandlerModel;
-import com.ponysdk.core.model.PUnit;
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.ui.basic.event.PLayoutResizeEvent;
-import com.ponysdk.core.util.SetUtils;
 
 /**
  * A panel that adds user-positioned splitters between each of its child widgets.
@@ -85,10 +80,8 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
      * has no effect for the {@link com.ponysdk.core.model.PDirection#CENTER} widget.
      * </p>
      *
-     * @param child
-     *            the child whose minimum size will be set
-     * @param minSize
-     *            the minimum size for this widget
+     * @param child   the child whose minimum size will be set
+     * @param minSize the minimum size for this widget
      */
     public void setWidgetMinSize(final PWidget child, final int minSize) {
         assertIsChild(child);
@@ -109,10 +102,8 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
      * This method has no effect for the {@link com.ponysdk.core.model.PDirection#CENTER} widget.
      * </p>
      *
-     * @param child
-     *            the child whose slider should snap closed
-     * @param snapClosedSize
-     *            the width below which the widget will close or -1 to disable.
+     * @param child          the child whose slider should snap closed
+     * @param snapClosedSize the width below which the widget will close or -1 to disable.
      */
     public void setWidgetSnapClosedSize(final PWidget child, final int snapClosedSize) {
         assertIsChild(child);
@@ -129,10 +120,8 @@ public class PSplitLayoutPanel extends PDockLayoutPanel {
      * Sets whether or not double-clicking on the splitter should toggle the
      * display of the widget.
      *
-     * @param child
-     *            the child whose display toggling will be allowed or not.
-     * @param allowed
-     *            whether or not display toggling is allowed for this widget
+     * @param child   the child whose display toggling will be allowed or not.
+     * @param allowed whether or not display toggling is allowed for this widget
      */
     public void setWidgetToggleDisplayAllowed(final PWidget child, final boolean allowed) {
         assertIsChild(child);

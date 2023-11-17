@@ -265,6 +265,11 @@ public enum PKeyCodes {
         this.code = code;
     }
 
+    public static PKeyCodes fromInt(final int code) {
+        final PKeyCodes keyCode = codesByKey.get(code);
+        return keyCode != null ? keyCode : PKeyCodes.UNKNOWN;
+    }
+
     public boolean equals(final int code) {
         return this.code == code;
     }
@@ -275,11 +280,6 @@ public enum PKeyCodes {
 
     public String getCodeToString() {
         return String.valueOf(this.code);
-    }
-
-    public static PKeyCodes fromInt(final int code) {
-        final PKeyCodes keyCode = codesByKey.get(code);
-        return keyCode != null ? keyCode : PKeyCodes.UNKNOWN;
     }
 
 }

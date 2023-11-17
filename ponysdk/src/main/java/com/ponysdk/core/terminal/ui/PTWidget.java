@@ -37,7 +37,7 @@ import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 import com.ponysdk.core.terminal.ui.w3c.api.IntersectionObserver;
-import elemental.client.Browser;
+import elemental2.dom.DomGlobal;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -54,6 +54,22 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
     private Set<Integer> stoppedEvents;
 
     private IntersectionObserver intersectionObserver;
+
+    private static int[] extractKeyFilter(final ReaderBuffer buffer) {
+        final BinaryModel binaryModel = buffer.readBinaryModel();
+        if (ServerToClientModel.KEY_FILTER == binaryModel.getModel()) {
+            final JSONArray keys = binaryModel.getArrayValue();
+            final int length = keys.size();
+            final int[] keyCodes = new int[length];
+            for (int i = 0; i < length; i++) {
+                keyCodes[i] = (int) keys.get(i).isNumber().doubleValue();
+            }
+            return keyCodes;
+        } else {
+            buffer.rewind(binaryModel);
+            return null;
+        }
+    }
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
@@ -89,8 +105,8 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
         }
     }
 
-    private final IntersectionObserver createIntersectionObserver() {
-        if (PTAbstractWindow.isIntersectionObserverAPI(Browser.getWindow())) {
+    private IntersectionObserver createIntersectionObserver() {
+        if (PTAbstractWindow.isIntersectionObserverAPI(DomGlobal.window)) {
             return new IntersectionObserver((entries, observer) -> {
                 if (entries == null || entries.length == 0) return;
                 sendWidgetVisibility(entries[0].isIsIntersecting());
@@ -294,22 +310,6 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
         if (stoppedEvents != null && !stoppedEvents.isEmpty()) {
             final int typeInt = Event.as(event.getNativeEvent()).getTypeInt();
             if (stoppedEvents.contains(typeInt)) event.stopPropagation();
-        }
-    }
-
-    private static final int[] extractKeyFilter(final ReaderBuffer buffer) {
-        final BinaryModel binaryModel = buffer.readBinaryModel();
-        if (ServerToClientModel.KEY_FILTER == binaryModel.getModel()) {
-            final JSONArray keys = binaryModel.getArrayValue();
-            final int length = keys.size();
-            final int[] keyCodes = new int[length];
-            for (int i = 0; i < length; i++) {
-                keyCodes[i] = (int) keys.get(i).isNumber().doubleValue();
-            }
-            return keyCodes;
-        } else {
-            buffer.rewind(binaryModel);
-            return null;
         }
     }
 

@@ -35,14 +35,8 @@ public class PScrollEvent extends Event<PScrollEvent.PScrollHandler> {
     private final int verticalPostion;
     private final int horizontalPosition;
 
-    @FunctionalInterface
-    public interface PScrollHandler extends EventHandler {
-
-        void onScroll(PScrollEvent event);
-    }
-
     public PScrollEvent(final Object source, final int height, final int width, final int verticalPostion,
-            final int horizontalPosition) {
+                        final int horizontalPosition) {
         super(source);
         this.height = height;
         this.width = width;
@@ -98,6 +92,12 @@ public class PScrollEvent extends Event<PScrollEvent.PScrollHandler> {
 
     public int getHorizontalPosition() {
         return horizontalPosition;
+    }
+
+    @FunctionalInterface
+    public interface PScrollHandler extends EventHandler {
+
+        void onScroll(PScrollEvent event);
     }
 
 }

@@ -1,25 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p" xmlns:context="http://www.springframework.org/schema/context"
-    xsi:schemaLocation="
-http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
-http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd">
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
 
     <bean name="applicationManager" class="com.ponysdk.impl.spring.server.SpringApplicationManager">
-        <property name="configuration" ref="configuration" />
+        <property name="configuration" ref="configuration"/>
     </bean>
 
     <bean name="configuration" class="com.ponysdk.core.server.application.ApplicationConfiguration">
-        <property name="applicationID" value="sample" />
-        <property name="applicationName" value="sample" />
-        <property name="applicationDescription" value="sample" />
-        <property name="applicationContextName" value="sample" />
-        <property name="debugMode" value="true" />
-        <property name="clientConfigFile" value="etc/client_application.xml" />
-        <property name="sessionTimeout" value="20" />
-        <property name="entryPointClass" value="com.ponysdk.sample.client.UISampleEntryPoint" />
+        <property name="applicationID" value="sample"/>
+        <property name="applicationName" value="sample"/>
+        <property name="applicationDescription" value="sample"/>
+        <property name="applicationContextName" value="sample"/>
+        <property name="debugMode" value="true"/>
+        <property name="clientConfigFile" value="etc/client_application.xml"/>
+        <property name="sessionTimeout" value="20"/>
+        <property name="entryPointClass" value="com.ponysdk.sample.client.UISampleEntryPoint"/>
         <property name="javascript">
             <list>
                 <value>script/jquery-3.0.0.min.js</value>
@@ -29,8 +26,8 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
         </property>
         <property name="style">
             <map>
-                <entry key="ponysdk" value="css/ponysdk.css" />
-                <entry key="sample" value="sample" />
+                <entry key="ponysdk" value="css/ponysdk.css"/>
+                <entry key="sample" value="sample"/>
             </map>
         </property>
     </bean>
@@ -40,7 +37,7 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
         <property name="host" value="0.0.0.0"/>
         <property name="applicationManager" ref="applicationManager"/>
 
-        <property name="sslPort" value="8082" />
+        <property name="sslPort" value="8082"/>
         <property name="sslKeyStoreFile" value="keystore"/>
         <property name="sslKeyStorePassphrase" value="strade"/>
         <property name="useSSL" value="true"/>

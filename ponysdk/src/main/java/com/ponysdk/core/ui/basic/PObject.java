@@ -27,19 +27,19 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.concurrent.UIContext;
 import com.ponysdk.core.ui.basic.event.PTerminalEvent;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.util.SetUtils;
 import com.ponysdk.core.writer.ModelWriter;
 import com.ponysdk.core.writer.ModelWriterCallback;
+import jakarta.json.JsonObject;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.json.JsonObject;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Set;
@@ -59,14 +59,11 @@ public abstract class PObject {
     protected Object data;
 
     protected LinkedHashMap<Integer, Runnable> stackedInstructions;
-    private String nativeBindingFunction;
-
-    private PTerminalEvent.Handler terminalHandler;
-
     protected boolean initialized = false;
     protected boolean destroy = false;
-
     protected int saveKey = ServerToClientModel.MAX_VALUE; // Has to be higher than all ordinal of ServerToClientModel
+    private String nativeBindingFunction;
+    private PTerminalEvent.Handler terminalHandler;
     private AjaxHandler ajaxHandler;
 
     PObject() {
@@ -376,12 +373,12 @@ public abstract class PObject {
         }
     }
 
-    public void setData(final Object data) {
-        this.data = data;
-    }
-
     public Object getData() {
         return data;
+    }
+
+    public void setData(final Object data) {
+        this.data = data;
     }
 
     public boolean isInitialized() {

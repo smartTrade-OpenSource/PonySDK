@@ -23,45 +23,14 @@
 
 package com.ponysdk.core.ui.datagrid2.view;
 
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.BiPredicate;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
-
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.server.concurrent.PScheduler;
-import com.ponysdk.core.server.concurrent.PScheduler.UIRunnable;
-import com.ponysdk.core.server.service.query.PResultSet;
-import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.IsPWidget;
-import com.ponysdk.core.ui.basic.PAddOnComposite;
-import com.ponysdk.core.ui.basic.PComplexPanel;
-import com.ponysdk.core.ui.basic.PElement;
-import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.server.concurrent.Scheduler;
+import com.ponysdk.core.server.concurrent.UIContext;
+import com.ponysdk.core.ui.datagrid2.datasource.PResultSet;
+import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
-import com.ponysdk.core.ui.datagrid2.cell.Cell;
-import com.ponysdk.core.ui.datagrid2.cell.ExtendedCell;
-import com.ponysdk.core.ui.datagrid2.cell.ExtendedCellController;
-import com.ponysdk.core.ui.datagrid2.cell.PrimaryCell;
-import com.ponysdk.core.ui.datagrid2.cell.PrimaryCellController;
+import com.ponysdk.core.ui.datagrid2.cell.*;
 import com.ponysdk.core.ui.datagrid2.column.ColumnActionListener;
 import com.ponysdk.core.ui.datagrid2.column.ColumnController;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
@@ -84,23 +53,23 @@ import com.ponysdk.core.ui.datagrid2.datasource.DataGridSource;
 import com.ponysdk.core.ui.datagrid2.datasource.DefaultCacheDataSource;
 import com.ponysdk.core.util.Pair;
 import com.ponysdk.core.util.SetUtils;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.Duration;
+import java.util.*;
+import java.util.function.BiPredicate;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * @author mbagdouri
  */
 public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, DataGridControllerListener<V> {
 
-    public static final String ROW_HOVER_LINK = "row-hover-link";
-
-    // Addon
-    private static final String ADDON_ROW_KEY = "row";
-    private static final String ADDON_ROW_COUNT_KEY = "rc";
-    private static final String ADDON_COLUMN_ID = "col";
-    private static final String ADDON_COLUMN_WIDTH = "cw";
-    private static final String ADDON_COLUMN_VISIBILITY = "cv";
-    private static final String ADDON_COLUMN_TO = "to";
-
-    // HTML Attributes
     /**
      * Set on a row widget when it is selected
      */
@@ -117,37 +86,45 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
      * Set on a cell widget of the body of the grid when it is in extended mode
      */
     public static final String EXTENDED_ATTRIBUTE = "pony-extended";
+    // Addon
+    private static final String ADDON_ROW_KEY = "row";
+    private static final String ADDON_ROW_COUNT_KEY = "rc";
 
+    // HTML Attributes
+    private static final String ADDON_COLUMN_ID = "col";
+    private static final String ADDON_COLUMN_WIDTH = "cw";
+    private static final String ADDON_COLUMN_VISIBILITY = "cv";
+    private static final String ADDON_COLUMN_TO = "to";
     private static final Logger log = LoggerFactory.getLogger(DefaultDataGridView.class);
     // State
     private static final int MIN_RELATIVE_ROW_COUNT = 30;
-    private int columnViewSequence = 0;
     private final PComplexPanel root = Element.newDiv();
     private final PComplexPanel loadingDataDiv;
     private final PComplexPanel errorMsgDiv;
     private final PinnedTable pinnedTable;
     private final UnpinnedTable unpinnedTable;
-    private Addon addon;
     private final List<Row> rows = new ArrayList<>();
     private final DataGridController<K, V> controller;
-    private DataGridAdapter<K, V> adapter;
-    private long pollingDelayMillis;
-    private UIRunnable delayedDrawRunnable;
-    private int from = Integer.MAX_VALUE;
-    private int to = 0;
     private final Set<DrawListener> drawListeners = SetUtils.newArraySet();
     private final Map<ColumnDefinition<V>, ColumnView> columnViews = new HashMap<>();
     private final DataGridControllerWrapper<K, V> controllerWrapper;
     private final LinkedHashMap<Object, RowAction<V>> rowActions = new LinkedHashMap<>();
-    private int firstRowIndex;
     private final Map<Integer, Integer> sorts = new HashMap<>();
     private final Set<Integer> filters = new HashSet<>();
+    private int columnViewSequence = 0;
+    private Addon addon;
+    private DataGridAdapter<K, V> adapter;
+    private long pollingDelayMillis;
+    private int from = Integer.MAX_VALUE;
+    private int to = 0;
+    private int firstRowIndex;
     private Function<Throwable, String> exceptionHandler;
 
     private boolean shouldDraw = true;
     private boolean refreshOnColumnVisibilityChanged = true;
     private boolean drawOnResume;
     private boolean forceExtended;
+    private Scheduler.ScheduledTaskHandler delayedDrawRunnable;
 
     public DefaultDataGridView() {
         this(new DefaultCacheDataSource<>());
@@ -159,9 +136,9 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         controller = new DefaultDataGridController<>(dataSource);
         controller.setListener(this);
         controllerWrapper = new DataGridControllerWrapper<>(//
-            controller.get(), //
-            this::onDataUpdated, //
-            this::onDataRemoved);
+                controller.get(), //
+                this::onDataUpdated, //
+                this::onDataRemoved);
 
         root.addStyleName("pony-grid");
         root.setStyleProperty("display", "flex");
@@ -191,40 +168,6 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         unpinnedTable = new UnpinnedTable(headerUnpinnedDiv, bodyUnpinnedDiv, footerUnpinnedDiv);
 
         root.addDestroyListener(e -> onDestroy());
-    }
-
-    private void onDestroy() {
-        if (delayedDrawRunnable != null) {
-            delayedDrawRunnable.cancel();
-        }
-        if (addon != null) {
-            addon.destroy();
-        }
-    }
-
-    @Override
-    public DataGridAdapter<K, V> getAdapter() {
-        return adapter;
-    }
-
-    private PComplexPanel prepareBodyDiv(final PComplexPanel subBodyDiv) {
-        final PComplexPanel bodyDiv = Element.newDiv();
-        bodyDiv.setStyleProperty("flex", "auto");
-        bodyDiv.setStyleProperty("overflow-x", "hidden");
-        bodyDiv.addStyleName("pony-grid-body");
-        bodyDiv.add(subBodyDiv);
-        bodyDiv.add(loadingDataDiv);
-        bodyDiv.add(errorMsgDiv);
-        return bodyDiv;
-    }
-
-    private PComplexPanel prepareSubBodyDiv(final PComplexPanel bodyPinnedDiv, final PComplexPanel bodyUnpinnedDiv) {
-        final PComplexPanel subBodyDiv = Element.newDiv();
-        subBodyDiv.setStyleProperty("display", "flex");
-        subBodyDiv.addStyleName("pony-grid-sub-body");
-        subBodyDiv.add(bodyPinnedDiv);
-        subBodyDiv.add(bodyUnpinnedDiv);
-        return subBodyDiv;
     }
 
     private static PComplexPanel prepareFooterDiv(final PComplexPanel footerPinnedDiv, final PComplexPanel footerUnpinnedDiv) {
@@ -262,6 +205,76 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         result.setStyleProperty("width", "100%");
         result.setStyleProperty("height", "100%");
         return result;
+    }
+
+    private void onDestroy() {
+        if (addon != null) {
+            addon.destroy();
+        }
+    }
+
+    @Override
+    public DataGridAdapter<K, V> getAdapter() {
+        return adapter;
+    }
+
+    @Override
+    public void setAdapter(final DataGridAdapter<K, V> adapter) {
+        if (this.adapter != null) throw new IllegalStateException("DataGridAdapter is already set");
+        controller.setAdapter(adapter);
+        this.adapter = adapter;
+        if (adapter.hasHeader()) {
+            adapter.onCreateHeaderRow(pinnedTable.header);
+            adapter.onCreateHeaderRow(unpinnedTable.header);
+        } else {
+            pinnedTable.header.setHeight("0px");
+            unpinnedTable.header.setHeight("0px");
+        }
+        if (adapter.hasFooter()) {
+            adapter.onCreateFooterRow(pinnedTable.footer);
+            adapter.onCreateFooterRow(unpinnedTable.footer);
+        }
+        loadingDataDiv.add(adapter.createLoadingDataWidget());
+        for (final ColumnDefinition<V> column : adapter.getColumnDefinitions()) {
+            final ColumnView columnView = columnViews.computeIfAbsent(column, ColumnView::new);
+            column.setController(new SimpleColumnController(columnView));
+            addColumnActionListener(column, column);
+            if (column.getDefaultState().isShown()) {
+                final Table table = column.getDefaultState().isPinned() ? pinnedTable : unpinnedTable;
+                table.addColumn(getColumnView(column));
+            }
+        }
+        pinnedTable.refreshWidth();
+        unpinnedTable.refreshWidth();
+        for (int i = 0; i < MIN_RELATIVE_ROW_COUNT; i++) {
+            rows.add(new Row(i));
+        }
+        addon = new Addon();
+        addon.setListenOnColumnVisibility(refreshOnColumnVisibilityChanged);
+        for (final ColumnView columnView : columnViews.values()) {
+            addon.onColumnAdded(columnView.id, columnView.column.getMinWidth(), columnView.column.getMaxWidth(),
+                    columnView.state.isPinned());
+        }
+    }
+
+    private PComplexPanel prepareBodyDiv(final PComplexPanel subBodyDiv) {
+        final PComplexPanel bodyDiv = Element.newDiv();
+        bodyDiv.setStyleProperty("flex", "auto");
+        bodyDiv.setStyleProperty("overflow-x", "hidden");
+        bodyDiv.addStyleName("pony-grid-body");
+        bodyDiv.add(subBodyDiv);
+        bodyDiv.add(loadingDataDiv);
+        bodyDiv.add(errorMsgDiv);
+        return bodyDiv;
+    }
+
+    private PComplexPanel prepareSubBodyDiv(final PComplexPanel bodyPinnedDiv, final PComplexPanel bodyUnpinnedDiv) {
+        final PComplexPanel subBodyDiv = Element.newDiv();
+        subBodyDiv.setStyleProperty("display", "flex");
+        subBodyDiv.addStyleName("pony-grid-sub-body");
+        subBodyDiv.add(bodyPinnedDiv);
+        subBodyDiv.add(bodyUnpinnedDiv);
+        return subBodyDiv;
     }
 
     @Override
@@ -429,9 +442,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             final int size = unpinnedTable.body.getWidgetCount();
             final int start = Math.max(0, from - firstRowIndex);
             final DataGridSnapshot viewStateSnapshot = new DataGridSnapshot(firstRowIndex, size, start, sorts, filters);
-            final Consumer<Pair<DefaultDataGridController<K, V>.DataSrcResult, Throwable>> consumer = PScheduler
-                .delegate(this::updateView);
-            controller.prepareLiveDataOnScreen(firstRowIndex, size, viewStateSnapshot, consumer);
+            controller.prepareLiveDataOnScreen(firstRowIndex, size, viewStateSnapshot, this::updateView);
         } catch (final Exception e) {
             log.error("Cannot draw data from data source", e);
         }
@@ -553,45 +564,6 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         else cell.unselect();
     }
 
-    @Override
-    public void setAdapter(final DataGridAdapter<K, V> adapter) {
-        if (this.adapter != null) throw new IllegalStateException("DataGridAdapter is already set");
-        controller.setAdapter(adapter);
-        this.adapter = adapter;
-        if (adapter.hasHeader()) {
-            adapter.onCreateHeaderRow(pinnedTable.header);
-            adapter.onCreateHeaderRow(unpinnedTable.header);
-        } else {
-            pinnedTable.header.setHeight("0px");
-            unpinnedTable.header.setHeight("0px");
-        }
-        if (adapter.hasFooter()) {
-            adapter.onCreateFooterRow(pinnedTable.footer);
-            adapter.onCreateFooterRow(unpinnedTable.footer);
-        }
-        loadingDataDiv.add(adapter.createLoadingDataWidget());
-        for (final ColumnDefinition<V> column : adapter.getColumnDefinitions()) {
-            final ColumnView columnView = columnViews.computeIfAbsent(column, ColumnView::new);
-            column.setController(new SimpleColumnController(columnView));
-            addColumnActionListener(column, column);
-            if (column.getDefaultState().isShown()) {
-                final Table table = column.getDefaultState().isPinned() ? pinnedTable : unpinnedTable;
-                table.addColumn(getColumnView(column));
-            }
-        }
-        pinnedTable.refreshWidth();
-        unpinnedTable.refreshWidth();
-        for (int i = 0; i < MIN_RELATIVE_ROW_COUNT; i++) {
-            rows.add(new Row(i));
-        }
-        addon = new Addon();
-        addon.setListenOnColumnVisibility(refreshOnColumnVisibilityChanged);
-        for (final ColumnView columnView : columnViews.values()) {
-            addon.onColumnAdded(columnView.id, columnView.column.getMinWidth(), columnView.column.getMaxWidth(),
-                columnView.state.isPinned());
-        }
-    }
-
     private void pin(final ColumnView columnView) {
         final int index = unpinnedTable.columns.indexOf(columnView);
         unpinnedTable.columns.remove(index);
@@ -691,7 +663,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             delayedDrawRunnable = null;
             draw();
         } else {
-            delayedDrawRunnable = PScheduler.scheduleWithFixedDelay(this::draw, Duration.ZERO, Duration.ofMillis(pollingDelayMillis));
+            delayedDrawRunnable = UIContext.get().schedule(Duration.ofMillis(pollingDelayMillis), this::draw);
         }
     }
 
@@ -842,10 +814,6 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         return builder.build();
     }
 
-    private ColumnView getColumnView(final ColumnDefinition<V> column) {
-        return columnViews.get(column);
-    }
-
     @Override
     public void setConfig(final DataGridConfig<V> config) {
         checkAdapter();
@@ -867,6 +835,10 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         addon.scrollToTop();
 
         notifyListeners(config, columnById);
+    }
+
+    private ColumnView getColumnView(final ColumnDefinition<V> column) {
+        return columnViews.get(column);
     }
 
     private Map<String, ColumnDefinition<V>> setColumnConfigs(final DataGridConfig<V> config) {
@@ -1037,15 +1009,79 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         this.forceExtended = forceExtended;
     }
 
+    private static class HideScrollBarAddon extends PAddOnComposite<PComplexPanel> {
+
+        HideScrollBarAddon(final PComplexPanel root) {
+            super(root);
+        }
+    }
+
+    private static class CellManager<V> {
+
+        private final PrimaryCell<V> primary;
+        private final ExtendedCell<V> extended;
+        private boolean extendedMode;
+
+        public CellManager(final PrimaryCell<V> primary) {
+            this.primary = primary;
+            this.extended = primary.genExtended().orElse(null);
+        }
+
+        public PComplexPanel getTableCell() {
+            return (PComplexPanel) primary.asWidget().getParent();
+        }
+
+        public void setTableCell(final PComplexPanel td) {
+            td.add(primary.asPendingWidget());
+            td.add(primary);
+            if (extended != null) td.add(extended);
+        }
+
+        public void setVisibility(final boolean columnVisible) {
+            primary.asPendingWidget().setVisible(!columnVisible);
+            primary.asWidget().setVisible(columnVisible && !extendedMode);
+            if (extended != null) extended.asWidget().setVisible(columnVisible && extendedMode);
+
+            final PComplexPanel td = getTableCell();
+            if (!columnVisible) {
+                td.setAttribute(PENDING_ATTRIBUTE);
+                td.removeAttribute(EXTENDED_ATTRIBUTE);
+            } else {
+                td.removeAttribute(PENDING_ATTRIBUTE);
+                if (extendedMode) td.setAttribute(EXTENDED_ATTRIBUTE);
+                else td.removeAttribute(EXTENDED_ATTRIBUTE);
+            }
+        }
+
+        public <T extends PrimaryCellController<V> & ExtendedCellController<V>> void setController(final T controller) {
+            primary.setController(controller);
+            if (extended != null) extended.setController(controller);
+        }
+
+        public void select() {
+            primary.select();
+            if (extended != null) extended.select();
+        }
+
+        public void unselect() {
+            primary.unselect();
+            if (extended != null) extended.unselect();
+        }
+
+        public Cell<V, ?> getCell() {
+            return extendedMode && extended != null ? extended : primary;
+        }
+    }
+
     public class Row {
 
         private final int relativeIndex;
-        private K key;
-        private V data;
         private final PComplexPanel unpinnedRow = Element.newDiv();
         private final PComplexPanel pinnedRow = Element.newDiv();
         private final List<CellManager<V>> unpinnedCells = new ArrayList<>(unpinnedTable.columns.size());
         private final List<CellManager<V>> pinnedCells = new ArrayList<>(pinnedTable.columns.size());
+        private K key;
+        private V data;
         private boolean extended = false;
 
         Row(final int index) {
@@ -1208,12 +1244,11 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
 
     private abstract class Table {
 
-        int width = 0;
         final PComplexPanel header;
         final PComplexPanel body;
         final PComplexPanel footer;
-
         final List<ColumnView> columns = new ArrayList<>();
+        int width = 0;
 
         Table(final PComplexPanel header, final PComplexPanel body, final PComplexPanel footer) {
             this.header = header;
@@ -1238,8 +1273,9 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             addHeaderCell(columnView);
             addFooterCell(columnView);
 
-            if (addon != null) addon.onColumnAdded(columnView.id, columnView.column.getMinWidth(), columnView.column.getMaxWidth(),
-                columnView.state.isPinned());
+            if (addon != null)
+                addon.onColumnAdded(columnView.id, columnView.column.getMinWidth(), columnView.column.getMaxWidth(),
+                        columnView.state.isPinned());
         }
 
         protected PComplexPanel addFooterCell(final ColumnView columnView) {
@@ -1458,10 +1494,10 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
 
         private final int id = columnViewSequence++;
         private final ColumnDefinition<V> column;
+        private final Set<ColumnActionListener<V>> listeners = new HashSet<>();
         private int width;
         private State state;
         private boolean visible = true;
-        private final Set<ColumnActionListener<V>> listeners = new HashSet<>();
 
         public ColumnView(final ColumnDefinition<V> column) {
             super();
@@ -1493,70 +1529,6 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         }
     }
 
-    private static class HideScrollBarAddon extends PAddOnComposite<PComplexPanel> {
-
-        HideScrollBarAddon(final PComplexPanel root) {
-            super(root);
-        }
-    }
-
-    private static class CellManager<V> {
-
-        private final PrimaryCell<V> primary;
-        private final ExtendedCell<V> extended;
-        private boolean extendedMode;
-
-        public CellManager(final PrimaryCell<V> primary) {
-            this.primary = primary;
-            this.extended = primary.genExtended().orElse(null);
-        }
-
-        public PComplexPanel getTableCell() {
-            return (PComplexPanel) primary.asWidget().getParent();
-        }
-
-        public void setTableCell(final PComplexPanel td) {
-            td.add(primary.asPendingWidget());
-            td.add(primary);
-            if (extended != null) td.add(extended);
-        }
-
-        public void setVisibility(final boolean columnVisible) {
-            primary.asPendingWidget().setVisible(!columnVisible);
-            primary.asWidget().setVisible(columnVisible && !extendedMode);
-            if (extended != null) extended.asWidget().setVisible(columnVisible && extendedMode);
-
-            final PComplexPanel td = getTableCell();
-            if (!columnVisible) {
-                td.setAttribute(PENDING_ATTRIBUTE);
-                td.removeAttribute(EXTENDED_ATTRIBUTE);
-            } else {
-                td.removeAttribute(PENDING_ATTRIBUTE);
-                if (extendedMode) td.setAttribute(EXTENDED_ATTRIBUTE);
-                else td.removeAttribute(EXTENDED_ATTRIBUTE);
-            }
-        }
-
-        public <T extends PrimaryCellController<V> & ExtendedCellController<V>> void setController(final T controller) {
-            primary.setController(controller);
-            if (extended != null) extended.setController(controller);
-        }
-
-        public void select() {
-            primary.select();
-            if (extended != null) extended.select();
-        }
-
-        public void unselect() {
-            primary.unselect();
-            if (extended != null) extended.unselect();
-        }
-
-        public Cell<V, ?> getCell() {
-            return extendedMode && extended != null ? extended : primary;
-        }
-    }
-
     private class Addon extends PAddOnComposite<PComplexPanel> {
 
         Addon() {
@@ -1571,7 +1543,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
                     onColumnVisibilityChanged(json.getJsonArray(ADDON_COLUMN_ID), json.getJsonArray(ADDON_COLUMN_VISIBILITY));
                 } else if (json.containsKey(ADDON_COLUMN_WIDTH)) {
                     onColumnResized(json.getInt(ADDON_COLUMN_ID), //
-                        json.getInt(ADDON_COLUMN_WIDTH));
+                            json.getInt(ADDON_COLUMN_WIDTH));
                 } else if (json.containsKey(ADDON_COLUMN_TO)) {
                     onColumnMoved(json.getInt(ADDON_COLUMN_ID), json.getInt(ADDON_COLUMN_TO));
                 }

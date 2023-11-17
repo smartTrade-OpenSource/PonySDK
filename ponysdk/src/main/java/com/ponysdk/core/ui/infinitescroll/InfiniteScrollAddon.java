@@ -23,24 +23,15 @@
 
 package com.ponysdk.core.ui.infinitescroll;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.ponysdk.core.ui.basic.*;
+import jakarta.json.JsonObject;
 
-import javax.json.JsonObject;
-
-import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.IsPWidget;
-import com.ponysdk.core.ui.basic.PAddOnComposite;
-import com.ponysdk.core.ui.basic.PFlowPanel;
-import com.ponysdk.core.ui.basic.PPanel;
+import java.util.*;
 
 /**
- * @author mzoughagh
  * @param <D> Data
  * @param <W> Widget
+ * @author mzoughagh
  */
 public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite<PPanel> {
 
@@ -60,32 +51,28 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
 
     //UI
     private final PFlowPanel container;
+    private final List<W> rows = new ArrayList<>();
+    private final Set<InfiniteScrollAddonListener> listeners = new HashSet<>();
+    private final InfiniteScrollProvider<D, W> dataProvider;
     private W currentIndexWidget;
     private int startIndex = 0;
     private int currentIndex = startIndex;
-
-    private final List<W> rows = new ArrayList<>();
-    private final Set<InfiniteScrollAddonListener> listeners = new HashSet<>();
-
     // used for drawing
     private int beginIndex = 0;
     private int maxVisibleItems = 10;
-
-    private final InfiniteScrollProvider<D, W> dataProvider;
     private int fullSize;
     private boolean forceDrawNextTime;
 
     /**
      * Creates an infiniteScrollAddon with the specified dataProvier
      *
-     * @param dataProvider
-     *            infiniteScrollAddon's dataProvier
+     * @param dataProvider infiniteScrollAddon's dataProvier
      */
     public InfiniteScrollAddon(final InfiniteScrollProvider<D, W> dataProvider) {
         super(Element.newPFlowPanel());
         this.dataProvider = dataProvider;
         dataProvider.addHandler(() -> {
-        	forceDrawNextTime = true;
+            forceDrawNextTime = true;
             this.refresh();
         });
 
@@ -123,16 +110,16 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
         this.maxVisibleItems = maxVisibleItems;
     }
 
+    public boolean isVisible() {
+        return widget.isVisible();
+    }
+
     public void setVisible(final boolean visible) {
         if (visible) {
             widget.setVisible(true);
         } else {
             widget.setVisible(false);
         }
-    }
-
-    public boolean isVisible() {
-        return widget.isVisible();
     }
 
     public void setStyleProperty(final String name, final String value) {
@@ -145,6 +132,21 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
 
     public int getFullSize() {
         return fullSize;
+    }
+
+    private void setFullSize(final int fullSize) {
+        if (this.fullSize != fullSize) {
+            final boolean forceDraw = forceDrawNextTime || this.fullSize == 0 || this.fullSize < maxVisibleItems;
+            forceDrawNextTime = false;
+            this.fullSize = fullSize;
+            if (forceDraw) {
+                this.beginIndex = 0;
+                draw();
+            }
+            callTerminalMethod(FUNCTION_SET_SIZE, fullSize);
+        } else {
+            draw();
+        }
     }
 
     public void setStartIndex(final int startIndex) {
@@ -180,21 +182,6 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
 
     public void removeListener(final InfiniteScrollAddonListener listener) {
         this.listeners.remove(listener);
-    }
-
-    private void setFullSize(final int fullSize) {
-        if (this.fullSize != fullSize) {
-            final boolean forceDraw = forceDrawNextTime || this.fullSize == 0 || this.fullSize < maxVisibleItems;
-            forceDrawNextTime = false;
-            this.fullSize = fullSize;
-            if (forceDraw) {
-                this.beginIndex = 0;
-                draw();
-            }
-            callTerminalMethod(FUNCTION_SET_SIZE, fullSize);
-        } else {
-            draw();
-        }
     }
 
     private void addWidgetToContainer(final int index, final W widget) {

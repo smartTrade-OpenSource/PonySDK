@@ -23,18 +23,14 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
-
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.writer.ModelWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 /**
  * An item that can be contained within a {@link PTree}. Each tree item is assigned a unique DOM id
@@ -43,14 +39,12 @@ import org.slf4j.LoggerFactory;
 public class PTreeItem extends PObject implements Iterable<PTreeItem> {
 
     private static final Logger log = LoggerFactory.getLogger(PTreeItem.class);
-
+    protected boolean openState;
     private PTree tree;
     private PTreeItem parent;
     private List<PTreeItem> children;
-
     private boolean isRoot;
     private String text;
-    protected boolean openState;
     private PWidget widget;
 
     protected PTreeItem() {
@@ -119,14 +113,18 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
         this.tree = tree;
     }
 
+    public boolean isSelected() {
+        return this.equals(tree.getSelectedItem());
+    }
+
     public void setSelected(final boolean newSelected) {
         final boolean selected = isSelected();
         if (!selected && newSelected) tree.setSelectedItem(this);
         else if (selected && !newSelected) tree.setSelectedItem(null);
     }
 
-    public boolean isSelected() {
-        return this.equals(tree.getSelectedItem());
+    public boolean getState() {
+        return openState;
     }
 
     public void setState(final boolean openState) {
@@ -134,10 +132,6 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
         this.openState = openState;
         if (openState) saveUpdate(ServerToClientModel.OPEN, openState);
         else saveUpdate(ServerToClientModel.CLOSE, openState);
-    }
-
-    public boolean getState() {
-        return openState;
     }
 
     public PTreeItem add(final int beforeIndex, final PTreeItem item) {

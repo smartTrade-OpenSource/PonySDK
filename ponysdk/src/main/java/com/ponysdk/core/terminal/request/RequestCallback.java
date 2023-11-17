@@ -23,7 +23,8 @@
 
 package com.ponysdk.core.terminal.request;
 
-import elemental.html.Uint8Array;
+
+import elemental2.core.Uint8Array;
 
 @FunctionalInterface
 public interface RequestCallback {

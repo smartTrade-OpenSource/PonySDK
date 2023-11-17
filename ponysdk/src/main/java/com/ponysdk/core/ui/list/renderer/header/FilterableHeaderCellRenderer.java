@@ -35,7 +35,7 @@ public class FilterableHeaderCellRenderer extends ComplexHeaderCellRenderer {
     }
 
     public FilterableHeaderCellRenderer(final String caption, final FormField formField, final String key,
-            final FilterListener filterListener) {
+                                        final FilterListener filterListener) {
         super(caption, formField, key, filterListener);
     }
 

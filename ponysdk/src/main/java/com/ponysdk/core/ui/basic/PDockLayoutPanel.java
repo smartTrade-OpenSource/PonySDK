@@ -23,14 +23,14 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.time.Duration;
-
 import com.ponysdk.core.model.PDirection;
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.writer.ModelWriter;
+
+import java.time.Duration;
 
 /**
  * A panel that lays its child widgets out "docked" at its outer edges, and allows its last widget to take up the
@@ -128,7 +128,7 @@ public class PDockLayoutPanel extends PComplexPanel implements PAnimatedLayout {
 
         child.attach(window, frame);
         child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.DIRECTION, direction.getValue()),
-            new ServerBinaryModel(ServerToClientModel.SIZE, size));
+                new ServerBinaryModel(ServerToClientModel.SIZE, size));
     }
 
     @Override

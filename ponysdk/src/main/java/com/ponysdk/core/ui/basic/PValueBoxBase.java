@@ -29,8 +29,8 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.ui.basic.event.PPasteEvent;
 import com.ponysdk.core.ui.basic.event.PPasteEvent.PPasteHandler;
 import com.ponysdk.core.writer.ModelWriter;
+import jakarta.json.JsonObject;
 
-import javax.json.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -39,10 +39,8 @@ import java.util.stream.Collectors;
 public abstract class PValueBoxBase extends PFocusWidget {
 
     protected static final String EMPTY = "";
-
-    private List<PPasteHandler> pasteHandlers;
-
     protected String text = EMPTY;
+    private List<PPasteHandler> pasteHandlers;
 
     protected PValueBoxBase() {
         this(EMPTY);

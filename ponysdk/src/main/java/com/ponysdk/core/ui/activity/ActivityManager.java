@@ -23,14 +23,13 @@
 
 package com.ponysdk.core.ui.activity;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.concurrent.UIContext;
 import com.ponysdk.core.ui.basic.PAcceptsOneWidget;
 import com.ponysdk.core.ui.eventbus.EventBus;
 import com.ponysdk.core.ui.place.PlaceChangeEvent;
 import com.ponysdk.core.ui.place.PlaceChangeHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Manages {@link Activity} objects that should be kicked off in response to

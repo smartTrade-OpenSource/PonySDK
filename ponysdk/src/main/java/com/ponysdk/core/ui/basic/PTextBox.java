@@ -23,9 +23,9 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Objects;
-
 import com.ponysdk.core.model.ServerToClientModel;
+
+import java.util.Objects;
 
 /**
  * A standard single-line text box.
@@ -61,8 +61,7 @@ public class PTextBox extends PTextBoxBase {
     /**
      * Sets the maximum allowable length of the text box.
      *
-     * @param length
-     *            the maximum length, in characters
+     * @param length the maximum length, in characters
      */
     public void setMaxLength(final int length) {
         if (Objects.equals(this.maxLength, length)) return;
@@ -82,8 +81,7 @@ public class PTextBox extends PTextBoxBase {
     /**
      * Sets the number of visible characters in the text box.
      *
-     * @param length
-     *            the number of visible characters
+     * @param length the number of visible characters
      */
     public void setVisibleLength(final int length) {
         if (Objects.equals(this.visibleLength, length)) return;
@@ -100,12 +98,9 @@ public class PTextBox extends PTextBoxBase {
      * mask. <br>
      * Example: ({{000}}) {{000}}.{{0000}}
      *
-     * @param pattern
-     *            {{[0A]+}}
-     * @param showMask
-     *            true to display the mask when input is empty
-     * @param freeSymbol
-     *            replacement char when there is no input yet
+     * @param pattern    {{[0A]+}}
+     * @param showMask   true to display the mask when input is empty
+     * @param freeSymbol replacement char when there is no input yet
      */
     public void applyMask(final String pattern, final boolean showMask, final String freeSymbol) {
         saveUpdate(writer -> {
@@ -119,8 +114,7 @@ public class PTextBox extends PTextBoxBase {
      * Sets a filter to the textbox. Value sets to the textbox will be filtered. <br>
      * Example: ([a-zA-Z0-9])
      *
-     * @param regExp
-     *            the regular expression to use as filter.
+     * @param regExp the regular expression to use as filter.
      */
     public void setFilter(final String regExp) {
         saveUpdate(ServerToClientModel.REGEX_FILTER, regExp);

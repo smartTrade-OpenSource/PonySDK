@@ -23,9 +23,9 @@
 
 package com.ponysdk.core.ui.list;
 
-import java.util.List;
-
 import com.ponysdk.core.server.service.query.Criterion;
+
+import java.util.List;
 
 @FunctionalInterface
 public interface HasCriteria {

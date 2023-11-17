@@ -20,18 +20,7 @@
 
 package com.ponysdk.core.ui.datagrid2.view;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.function.BiPredicate;
-import java.util.function.Supplier;
-
-import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.PButton;
-import com.ponysdk.core.ui.basic.PCheckBox;
-import com.ponysdk.core.ui.basic.PComplexPanel;
-import com.ponysdk.core.ui.basic.PTextBox;
-import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
@@ -42,6 +31,12 @@ import com.ponysdk.core.ui.datagrid2.column.ColumnController;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition.State;
 import com.ponysdk.core.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.function.BiPredicate;
+import java.util.function.Supplier;
 
 /**
  * @author mbagdouri
@@ -216,6 +211,11 @@ public class ColumnVisibilitySelectorDataGridView<K, V> extends WidgetDecoratorD
         return c1.getId().compareTo(c2.getId());
     }
 
+    @Override
+    public PWidget getDecoratorWidget() {
+        return layout;
+    }
+
     private static class ColumnHandler<V> implements ColumnActionListener<V>, PValueChangeHandler<Boolean> {
 
         private final ColumnDefinition<V> column;
@@ -278,11 +278,6 @@ public class ColumnVisibilitySelectorDataGridView<K, V> extends WidgetDecoratorD
         @Override
         public void onMoved() {
         }
-    }
-
-    @Override
-    public PWidget getDecoratorWidget() {
-        return layout;
     }
 
 }

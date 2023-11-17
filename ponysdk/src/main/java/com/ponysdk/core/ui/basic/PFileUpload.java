@@ -27,14 +27,14 @@ import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.concurrent.UIContext;
 import com.ponysdk.core.ui.basic.event.HasPChangeHandlers;
 import com.ponysdk.core.ui.basic.event.PChangeEvent;
 import com.ponysdk.core.ui.basic.event.PChangeHandler;
 import com.ponysdk.core.ui.basic.event.PSubmitCompleteHandler;
 import com.ponysdk.core.ui.eventbus.StreamHandler;
+import jakarta.json.JsonObject;
 
-import javax.json.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;

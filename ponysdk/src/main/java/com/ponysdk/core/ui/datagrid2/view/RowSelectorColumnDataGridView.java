@@ -201,13 +201,13 @@ public class RowSelectorColumnDataGridView<K, V> extends DecoratorDataGridView<K
         }
 
         @Override
-        public void setController(final ColumnController<V> columnController) {
-            this.columnController = columnController;
+        public ColumnController<V> getController() {
+            return columnController;
         }
 
         @Override
-        public ColumnController<V> getController() {
-            return columnController;
+        public void setController(final ColumnController<V> columnController) {
+            this.columnController = columnController;
         }
 
         @Override
@@ -277,6 +277,20 @@ public class RowSelectorColumnDataGridView<K, V> extends DecoratorDataGridView<K
             refreshHeader();
         }
 
+        @Override
+        public IsPWidget getDraggableHeaderElement() {
+            return null;
+        }
+
+        @Override
+        public void onMoved() {
+        }
+
+        @Override
+        public String getGroup() {
+            return null;
+        }
+
         protected class RowSelectorColumnCell implements PrimaryCell<V> {
 
             private final PCheckBox checkBox = Element.newPCheckBox();
@@ -312,20 +326,6 @@ public class RowSelectorColumnDataGridView<K, V> extends DecoratorDataGridView<K
             public PWidget asPendingWidget() {
                 return pending;
             }
-        }
-
-        @Override
-        public IsPWidget getDraggableHeaderElement() {
-            return null;
-        }
-
-        @Override
-        public void onMoved() {
-        }
-
-        @Override
-        public String getGroup() {
-            return null;
         }
     }
 }

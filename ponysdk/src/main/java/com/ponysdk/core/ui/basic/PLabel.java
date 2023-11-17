@@ -27,7 +27,6 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.ui.basic.event.*;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
-import com.ponysdk.core.util.Incubation;
 import com.ponysdk.core.writer.ModelWriter;
 
 import java.util.Objects;
@@ -89,7 +88,6 @@ public class PLabel extends PWidget {
     /**
      * Link an HTML attribute (like "data-title") directly to the value.
      */
-    @Incubation(since = "2.8.11")
     public void setAttributeLinkedToValue(final String attributeLinkedToValue) {
         if (Objects.equals(this.attributeLinkedToValue, attributeLinkedToValue)) return;
         this.attributeLinkedToValue = attributeLinkedToValue;

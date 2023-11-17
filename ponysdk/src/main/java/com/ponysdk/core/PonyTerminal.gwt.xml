@@ -1,22 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module rename-to='ponyterminal'>
-	<inherits name='com.google.gwt.user.User' />
-	<inherits name="com.google.gwt.http.HTTP" />
-	<inherits name="elemental.Elemental" />
-	<inherits name="elemental2.dom.Dom" />
+    <inherits name='com.google.gwt.user.User'/>
+    <inherits name="com.google.gwt.http.HTTP"/>
+    <inherits name="elemental2.dom.Dom"/>
 
-	<entry-point class='com.ponysdk.core.terminal.CommunicationEntryPoint' />
-	<source path='terminal' />
-	<source path='model' />
+    <entry-point class='com.ponysdk.core.terminal.CommunicationEntryPoint'/>
+    <source path='terminal'/>
+    <source path='model'/>
 
-	<inherits name="com.google.gwt.logging.Logging" />
-	<set-property name="gwt.logging.logLevel" value="INFO" />
-	<set-property name="gwt.logging.enabled" value="TRUE" />
-	<set-property name="gwt.logging.consoleHandler" value="ENABLED" />
+    <inherits name="com.google.gwt.logging.Logging"/>
+    <set-property name="gwt.logging.logLevel" value="INFO"/>
+    <set-property name="gwt.logging.enabled" value="TRUE"/>
+    <set-property name="gwt.logging.consoleHandler" value="ENABLED"/>
 
-    <inherits name="com.google.gwt.core.StackTrace" />
-    <set-property name="compiler.stackMode" value="strip" />
+    <inherits name="com.google.gwt.core.StackTrace"/>
+    <set-property name="compiler.stackMode" value="strip"/>
 
-<!-- 	<script src="ponysdk.js" /> -->
+    <!-- 	<script src="ponysdk.js" /> -->
 
 </module>

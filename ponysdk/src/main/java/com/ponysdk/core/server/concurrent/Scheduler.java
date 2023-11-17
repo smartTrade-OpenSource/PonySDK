@@ -1,108 +1,73 @@
 package com.ponysdk.core.server.concurrent;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import java.time.Duration;
+import java.util.concurrent.*;
 
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.Executors;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
+public class Scheduler {
+    private static final Scheduler INSTANCE = new Scheduler();
 
-/**
- * An executor that provides context isolation and priorities of tasks within a
- * context.<br>
- * Each task is attached to a {@link SchedulingContext}, destroying the context
- * will cancel all task attached to it. The implementation guarantees fairness
- * among several context (unless a real-time task is submitted), context
- * isolation (two task of the same context cannot be processed concurrently),
- * FIFO guarantee between task of same priority within a context
- *
- * @author amaire
- *
- */
-public final class Scheduler {
+    private final ExecutorService executor;
+    private final ScheduledExecutorService scheduledExecutor;
 
-	private final ScheduledExecutorService executor;
-	private final ConcurrentLinkedQueue<SchedulingContextImpl> realtimeContexts = new ConcurrentLinkedQueue<>();
+    private Scheduler() {
+        this.executor = Executors.newVirtualThreadPerTaskExecutor();
+        this.scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
+    }
 
-	public Scheduler(final int poolSize) {
-		executor = Executors.newScheduledThreadPool(poolSize);
-	}
+    /**
+     * Submit a task to the scheduler.
+     *
+     * @param task the task to execute
+     */
+    public static void execute(Runnable task) {
+        INSTANCE.executor.submit(task);
+    }
 
-	public Scheduler(final int poolSize, final ThreadFactory factory) {
-		executor = Executors.newScheduledThreadPool(poolSize, factory);
-	}
+    /**
+     * Schedule a task to be executed after a delay.
+     *
+     * @param delay the delay before the task is executed
+     * @param task  the task to execute
+     * @return a handle to the scheduled task
+     */
+    public static ScheduledTaskHandler executeLater(Duration delay, Runnable task) {
+        if (delay.isNegative()) {
+            throw new IllegalArgumentException("Delay must be positive");
+        }
+        Future<?> future = INSTANCE.scheduledExecutor.schedule(() -> execute(task), delay.toMillis(), TimeUnit.MILLISECONDS);
+        return new ScheduledTaskHandler(future);
+    }
 
-	/**
-	 * Create a new {@link SchedulingContext} that can be used to submit new tasks
-	 */
-	public SchedulingContext createContext(final String name) {
-		return new SchedulingContextImpl(name, this);
-	}
+    /**
+     * Schedule a periodic task with the lowest priority. The task will only be executed
+     * if there are no other tasks to execute.
+     *
+     * @param period the period between executions of the task
+     * @param task   the periodic task to execute
+     * @return a handle to the scheduled task
+     */
+    public static ScheduledTaskHandler schedule(Duration period, Runnable task) {
+        if (period.isNegative() || period.isZero()) {
+            throw new IllegalArgumentException("Period must be positive");
+        }
+        Future<?> future = INSTANCE.scheduledExecutor.scheduleAtFixedRate(() -> execute(task), period.toMillis(), period.toMillis(), TimeUnit.MILLISECONDS);
+        return new ScheduledTaskHandler(future);
+    }
 
-	/**
-	 * Shutdown the scheduler, trying to cancel all pending tasks as fast as
-	 * possible.<br>
-	 */
-	public void shutdown() {
-		for (final Runnable r : executor.shutdownNow()) {
-			if (r instanceof SchedulingContext) {
-				((SchedulingContext) r).destroy();
-			}
-		}
+    public static class ScheduledTaskHandler {
+        private final Future<?> future;
 
-		realtimeContexts.clear();
-	}
+        public ScheduledTaskHandler(Future<?> future) {
+            this.future = future;
+        }
 
-	/**
-	 * Wait for the Scheduler to shutdown properly up to the specify delay
-	 * 
-	 * @param timeoutMillis the maximum delay to wait (in millisecond)
-	 * @return true if the Scheduler is terminated, false otherwise
-	 */
-	public boolean awaitTermination(final long timeoutMillis) throws InterruptedException {
-		return executor.awaitTermination(timeoutMillis, TimeUnit.MILLISECONDS);
-	}
-
-	////////////////////////////////////////
-
-	boolean isShutdown() {
-		return executor.isShutdown();
-	}
-
-	ScheduledFuture<?> executeLater(final long delayMillis, final SchedulingContextImpl context, final Runnable task) {
-		try {
-			return executor.schedule(task, delayMillis, MILLISECONDS);
-		} catch (final RejectedExecutionException e) {
-			context.destroy();
-			throw e;
-		}
-	}
-
-	ScheduledFuture<?> schedulePeriodicTask(final long periodMillis, final SchedulingContextImpl context,
-			final Runnable task) {
-		try {
-			return executor.scheduleWithFixedDelay(task, periodMillis, periodMillis, MILLISECONDS);
-		} catch (final RejectedExecutionException e) {
-			context.destroy();
-			throw e;
-		}
-	}
-
-	void executeContext(final SchedulingContextImpl context, final boolean realtime) {
-		try {
-			executor.execute(context);
-			if (realtime)
-				realtimeContexts.offer(context);
-		} catch (final RejectedExecutionException e) {
-			context.destroy();
-		}
-	}
-
-	SchedulingContextImpl pollRealtimeContext() {
-		return realtimeContexts.poll();
-	}
-
+        /**
+         * Cancel the scheduled task.
+         *
+         * @return true if the task was cancelled successfully, false otherwise
+         */
+        public boolean cancel() {
+            return future.cancel(false);
+        }
+    }
 }

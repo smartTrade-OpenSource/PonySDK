@@ -26,8 +26,8 @@ package com.ponysdk.core.ui.basic;
 import com.ponysdk.core.model.*;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
+import jakarta.json.JsonObject;
 
-import javax.json.JsonObject;
 import java.util.*;
 
 /**
@@ -42,8 +42,8 @@ import java.util.*;
  */
 public class PRichTextArea extends PFocusWidget implements HasPValueChangeHandlers<String> {
 
-    private List<PValueChangeHandler<String>> handlers;
     private final Formatter formatter = new Formatter();
+    private List<PValueChangeHandler<String>> handlers;
     private String text;
     private String html;
 

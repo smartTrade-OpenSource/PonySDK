@@ -26,13 +26,28 @@ package com.ponysdk.core.terminal.ui;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
-
-import elemental.dom.Document;
-import elemental.html.Window;
+import elemental2.dom.Document;
+import elemental2.dom.Window;
 
 public abstract class PTAbstractWindow extends AbstractPTObject {
 
     protected Window window;
+
+    public static native void setTitle(String title, Window window) /*-{
+                                                                          window.document.title = title;
+                                                                          }-*/;
+
+    public static native boolean isIntersectionObserverAPI(Window window) /*-{
+                                                                                 return window.IntersectionObserver !== undefined;
+                                                                                 }-*/;
+
+    public static native boolean isPageVisibilityAPI(Document document) /*-{
+                                                                               return document.hidden !== undefined;
+                                                                               }-*/;
+
+    public static native boolean isDocumentVisible(final Document document) /*-{
+                                                                                   return !document.hidden;
+                                                                                   }-*/;
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
@@ -41,14 +56,14 @@ public abstract class PTAbstractWindow extends AbstractPTObject {
             window.print();
             return true;
         } else if (ServerToClientModel.RELOAD == model) {
-            window.getLocation().reload();
+            window.location.reload();
             return true;
         } else if (ServerToClientModel.WINDOW_LOCATION_REPLACE == model) {
-            window.getLocation().replace(binaryModel.getStringValue());
+            window.location.replace(binaryModel.getStringValue());
             return true;
         } else if (ServerToClientModel.RESIZE_BY_X == model) {
-            final float x = (float) binaryModel.getDoubleValue();
-            final float y = (float) buffer.readBinaryModel().getDoubleValue();
+            final int x = binaryModel.getIntValue();
+            final int y = buffer.readBinaryModel().getIntValue();
             window.resizeBy(x, y);
             return true;
         } else if (ServerToClientModel.RESIZE_TO_WIDTH == model) {
@@ -57,13 +72,13 @@ public abstract class PTAbstractWindow extends AbstractPTObject {
             window.resizeTo(width, height);
             return true;
         } else if (ServerToClientModel.MOVE_BY_X == model) {
-            final float x = (float) binaryModel.getDoubleValue();
-            final float y = (float) buffer.readBinaryModel().getDoubleValue();
+            final int x = binaryModel.getIntValue();
+            final int y = buffer.readBinaryModel().getIntValue();
             window.moveBy(x, y);
             return true;
         } else if (ServerToClientModel.MOVE_TO_X == model) {
-            final float x = (float) binaryModel.getDoubleValue();
-            final float y = (float) buffer.readBinaryModel().getDoubleValue();
+            final int x = binaryModel.getIntValue();
+            final int y = buffer.readBinaryModel().getIntValue();
             window.moveTo(x, y);
             return true;
         } else if (ServerToClientModel.FOCUS == model) {
@@ -77,21 +92,5 @@ public abstract class PTAbstractWindow extends AbstractPTObject {
             return super.update(buffer, binaryModel);
         }
     }
-
-    public static final native void setTitle(String title, Window window) /*-{
-                                                                          window.document.title = title;
-                                                                          }-*/;
-
-    public static final native boolean isIntersectionObserverAPI(Window window) /*-{
-                                                                                 return window.IntersectionObserver !== undefined;
-                                                                                 }-*/;
-
-    public static final native boolean isPageVisibilityAPI(Document document) /*-{
-                                                                               return document.hidden !== undefined;
-                                                                               }-*/;
-
-    public static final native boolean isDocumentVisible(final Document document) /*-{
-                                                                                   return !document.hidden;
-                                                                                   }-*/;
 
 }

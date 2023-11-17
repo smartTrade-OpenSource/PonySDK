@@ -33,10 +33,8 @@ import com.ponysdk.core.ui.place.PlaceChangeRequest;
 public class PlaceChangeCellRenderer implements CellRenderer<String, PWidget> {
 
     private static final String DASH = "-";
-
-    protected String nullDisplay = DASH;
-
     private final Place place;
+    protected String nullDisplay = DASH;
 
     public PlaceChangeCellRenderer(final Place place) {
         this.place = place;

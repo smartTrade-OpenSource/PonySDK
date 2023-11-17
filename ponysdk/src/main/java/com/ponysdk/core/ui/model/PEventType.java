@@ -67,7 +67,7 @@ public enum PEventType {
     GESTUREEVENTS(0x1000000 | 0x2000000 | 0x4000000);
 
     private static final Map<Integer, PEventType> eventsByCode = Arrays.stream(PEventType.values())
-        .collect(Collectors.toMap(PEventType::getCode, Function.identity()));
+            .collect(Collectors.toMap(PEventType::getCode, Function.identity()));
 
     private int code;
 

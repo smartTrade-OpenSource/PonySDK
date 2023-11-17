@@ -34,12 +34,12 @@ public enum PHorizontalAlignment {
     PHorizontalAlignment() {
     }
 
-    public final byte getValue() {
-        return (byte) ordinal();
-    }
-
     public static PHorizontalAlignment fromRawValue(final int rawValue) {
         return VALUES[rawValue];
+    }
+
+    public final byte getValue() {
+        return (byte) ordinal();
     }
 
 }

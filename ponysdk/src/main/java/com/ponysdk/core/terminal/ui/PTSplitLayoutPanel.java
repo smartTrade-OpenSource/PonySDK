@@ -112,15 +112,14 @@ public class PTSplitLayoutPanel extends PTDockLayoutPanel<MySplitLayoutPanel> {
 
         public class SendResizeCommand implements RepeatingCommand {
 
-            private int objectId = -1;
             private final UIBuilder uiBuilder;
+            boolean cancelled = false;
+            private int objectId = -1;
 
             public SendResizeCommand(final int objectId, final UIBuilder uiBuilder) {
                 this.objectId = objectId;
                 this.uiBuilder = uiBuilder;
             }
-
-            boolean cancelled = false;
 
             @Override
             public boolean execute() {

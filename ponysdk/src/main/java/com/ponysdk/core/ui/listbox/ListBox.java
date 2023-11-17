@@ -23,31 +23,7 @@
 
 package com.ponysdk.core.ui.listbox;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.BiPredicate;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.IntConsumer;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.core.ui.basic.IsPWidget;
-import com.ponysdk.core.ui.basic.PButton;
-import com.ponysdk.core.ui.basic.PCheckBox;
-import com.ponysdk.core.ui.basic.PPanel;
-import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.core.ui.basic.PWidget.TabindexMode;
 import com.ponysdk.core.ui.dropdown.DropDownContainer;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
@@ -56,6 +32,12 @@ import com.ponysdk.core.ui.infinitescroll.InfiniteScrollProvider;
 import com.ponysdk.core.ui.listbox.ListBox.ListBoxItem;
 import com.ponysdk.core.ui.listbox.ListBox.ListBoxItem.ListBoxItemType;
 import com.ponysdk.core.ui.model.PKeyCodes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.function.*;
+import java.util.stream.Collectors;
 
 public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxConfiguration> {
 
@@ -70,11 +52,15 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     private static final String STYLE_LISTBOX_ITEM_SELECTED = "dd-listbox-item-selected";
     private static final String STYLE_LISTBOX_ITEM_LAST_SELECTED = "dd-listbox-item-last-selected";
     private static final String STYLE_LISTBOX_ITEM_GROUP = "dd-listbox-item-group";
-
+    protected final List<ListBoxItem<D>> items;
+    protected final ListBoxDataProvider<D> dataProvider;
+    protected final List<ListBoxItem<D>> visibleItems;
+    protected final Map<String, GroupListBoxItem<D>> groupItems;
+    protected final List<ListBoxItem<D>> selectedDataItems;
+    private final Comparator<ListBoxItem<D>> selectionComparator = (i1, i2) -> (i2.isSelected() ? 1 : 0) - (i1.isSelected() ? 1 : 0);
     private ListBoxFilterWidget filterWidget;
     private PButton clearMultiButton;
     private InfiniteScrollAddon<ListBoxItem<D>, ListBoxItemWidget> itemContainer;
-
     private Comparator<ListBoxItem<D>> groupComparator;
     private Comparator<D> dataComparator;
     private final Comparator<ListBoxItem<D>> comparator = (i1, i2) -> {
@@ -104,8 +90,6 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         }
         return i1.label.compareToIgnoreCase(i2.label);
     };
-    private final Comparator<ListBoxItem<D>> selectionComparator = (i1, i2) -> (i2.isSelected() ? 1 : 0) - (i1.isSelected() ? 1 : 0);
-
     private ListBoxItem<D> lastSelectedItem;
     private boolean shiftPressed;
     private HandlerRegistration upDownKeyHandler;
@@ -114,12 +98,6 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     private Supplier<ListBoxItemRenderer<D>> itemRendererSupplier = () -> new LabelListBoxItemRenderer<>();
     private Supplier<ListBoxFilterWidget> filterWidgetSupplier = () -> new TextListBoxFilterWidget();
     private BiPredicate<ListBoxItem<D>, String> filterPredicate = (item, filter) -> item.getLabel().toLowerCase().contains(filter);
-
-    protected final List<ListBoxItem<D>> items;
-    protected final ListBoxDataProvider<D> dataProvider;
-    protected final List<ListBoxItem<D>> visibleItems;
-    protected final Map<String, GroupListBoxItem<D>> groupItems;
-    protected final List<ListBoxItem<D>> selectedDataItems;
 
     public ListBox(final ListBoxConfiguration configuration) {
         this(configuration, List.of());
@@ -153,13 +131,15 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
 
     @Override
     public List<ListBoxItem<D>> getValue() {
-        if (configuration.isEventOnlyEnabled()) throw new UnsupportedOperationException("Not available in event only mode");
+        if (configuration.isEventOnlyEnabled())
+            throw new UnsupportedOperationException("Not available in event only mode");
         return getSelectedItems();
     }
 
     @Override
     public void setValue(final List<ListBoxItem<D>> value) {
-        if (configuration.isEventOnlyEnabled()) throw new UnsupportedOperationException("Not available in event only mode");
+        if (configuration.isEventOnlyEnabled())
+            throw new UnsupportedOperationException("Not available in event only mode");
         if (value == null) {
             clearSelection();
             updateTitle(List.of());
@@ -171,6 +151,10 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
 
     public Comparator<ListBoxItem<D>> getComparator() {
         return comparator;
+    }
+
+    public void setComparator(final Comparator<D> dataComparator) {
+        this.dataComparator = dataComparator;
     }
 
     public void addItem(final ListBoxItem<D> item) {
@@ -228,7 +212,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         final GroupListBoxItem<D> groupItem = groupItems.get(groupName);
         if (groupItem != null) {
             final ListBoxItem<D> removedItem = groupItem.getGroupItems().stream().filter(i -> i.getLabel().equals(itemLabel))
-                .findFirst().orElse(null);
+                    .findFirst().orElse(null);
             if (removedItem != null) {
                 groupItem.getGroupItems().remove(removedItem);
                 this.items.remove(removedItem);
@@ -280,7 +264,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         final GroupListBoxItem<D> groupItem = groupItems.get(groupName);
         if (groupItem != null) {
             final ListBoxItem<D> item = groupItem.getGroupItems().stream().filter(i -> i.getLabel().equals(oldLabel)).findFirst()
-                .orElse(null);
+                    .orElse(null);
             if (item != null) {
                 item.setLabel(newLabel);
                 if (isInitialized()) {
@@ -328,14 +312,35 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         return items.stream().filter(ListBoxItem::isSelected).findFirst().orElse(null);
     }
 
+    private void setSelectedItem(final ListBoxItem<D> selectedItem) {
+        clearSelection();
+        final ListBoxItem<D> item = this.items.stream().filter(selectedItem::equals).findFirst().orElse(null);
+        if (item != null) {
+            item.setSelected(true);
+            setClearTitleButtonVisible(true);
+        } else {
+            setClearTitleButtonVisible(false);
+        }
+        updateTitle(List.of(selectedItem));
+        updateVisibleItems();
+    }
+
     public List<ListBoxItem<D>> getSelectedItems() {
         if (dataProvider != null) return new ArrayList<>(selectedDataItems);
         return items.stream().filter(ListBoxItem::isSelected).collect(Collectors.toList());
     }
 
+    private void setSelectedItems(final List<ListBoxItem<D>> selectedItems) {
+        this.items.forEach(i -> i.setSelected(selectedItems.contains(i)));
+        updateTitle(selectedItems);
+        updateVisibleItems();
+    }
+
     public void setSelected(final D selectedData) {
-        if (configuration.isMultiSelectionEnabled()) throw new IllegalArgumentException("Use setSelected(Collection) method instead");
-        if (configuration.isEventOnlyEnabled()) throw new UnsupportedOperationException("Not available in event only mode");
+        if (configuration.isMultiSelectionEnabled())
+            throw new IllegalArgumentException("Use setSelected(Collection) method instead");
+        if (configuration.isEventOnlyEnabled())
+            throw new UnsupportedOperationException("Not available in event only mode");
 
         if (dataProvider == null) {
             if (selectedData == null) {
@@ -359,8 +364,10 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     }
 
     public void setMultiSelected(final Collection<D> selectedData) {
-        if (!configuration.isMultiSelectionEnabled()) throw new IllegalArgumentException("Use setSelected(D) method instead");
-        if (configuration.isEventOnlyEnabled()) throw new UnsupportedOperationException("Not available in event only mode");
+        if (!configuration.isMultiSelectionEnabled())
+            throw new IllegalArgumentException("Use setSelected(D) method instead");
+        if (configuration.isEventOnlyEnabled())
+            throw new UnsupportedOperationException("Not available in event only mode");
         if (dataProvider == null) {
             if (selectedData == null || selectedData.isEmpty()) {
                 clearSelection();
@@ -398,7 +405,8 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     public void addToSelection(final D selectedData) {
         if (selectedData == null) return;
         if (dataProvider != null) throw new IllegalArgumentException("Only available without a ListBoxDataProvider");
-        if (configuration.isEventOnlyEnabled()) throw new UnsupportedOperationException("Not available in event only mode");
+        if (configuration.isEventOnlyEnabled())
+            throw new UnsupportedOperationException("Not available in event only mode");
 
         if (!configuration.isMultiSelectionEnabled()) setSelected(selectedData);
         final List<ListBoxItem<D>> selectedItems = getSelectedItems();
@@ -416,8 +424,10 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     public void removeFromSelection(final D unselectedData) {
         if (unselectedData == null) return;
         if (dataProvider != null) throw new IllegalArgumentException("Only available without a ListBoxDataProvider");
-        if (!configuration.isMultiSelectionEnabled()) throw new IllegalArgumentException("Only available in multi selection mode");
-        if (configuration.isEventOnlyEnabled()) throw new UnsupportedOperationException("Not available in event only mode");
+        if (!configuration.isMultiSelectionEnabled())
+            throw new IllegalArgumentException("Only available in multi selection mode");
+        if (configuration.isEventOnlyEnabled())
+            throw new UnsupportedOperationException("Not available in event only mode");
 
         final List<ListBoxItem<D>> selectedItems = getSelectedItems();
         final Iterator<ListBoxItem<D>> iterator = selectedItems.iterator();
@@ -442,8 +452,10 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
 
     public void setSelectedId(final Object id) {
         if (dataProvider == null) throw new IllegalArgumentException("Only available with a ListBoxDataProvider");
-        if (configuration.isMultiSelectionEnabled()) throw new IllegalArgumentException("Use setSelectedIds(...) method instead");
-        if (configuration.isEventOnlyEnabled()) throw new UnsupportedOperationException("Not available in event only mode");
+        if (configuration.isMultiSelectionEnabled())
+            throw new IllegalArgumentException("Use setSelectedIds(...) method instead");
+        if (configuration.isEventOnlyEnabled())
+            throw new UnsupportedOperationException("Not available in event only mode");
 
         clearSelection();
         if (id != null) selectedDataItems.addAll(dataProvider.getDataByIds(List.of(id)));
@@ -453,8 +465,10 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
 
     public void setSelectedIds(final Collection<Object> ids) {
         if (dataProvider == null) throw new IllegalArgumentException("Only available with a ListBoxDataProvider");
-        if (!configuration.isMultiSelectionEnabled()) throw new IllegalArgumentException("Use setSelectedId(...) method instead");
-        if (configuration.isEventOnlyEnabled()) throw new UnsupportedOperationException("Not available in event only mode");
+        if (!configuration.isMultiSelectionEnabled())
+            throw new IllegalArgumentException("Use setSelectedId(...) method instead");
+        if (configuration.isEventOnlyEnabled())
+            throw new UnsupportedOperationException("Not available in event only mode");
 
         clearSelection();
         if (ids != null && !ids.isEmpty()) {
@@ -504,10 +518,6 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         });
     }
 
-    public void setComparator(final Comparator<D> dataComparator) {
-        this.dataComparator = dataComparator;
-    }
-
     public void setGroupComparator(final Comparator<ListBoxItem<D>> groupComparator) {
         this.groupComparator = groupComparator;
     }
@@ -534,9 +544,9 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     public void setFilterPredicate(final BiPredicate<ListBoxItem<D>, String> filterPredicate) {
         this.filterPredicate = filterPredicate;
     }
-    
+
     public List<ListBoxItem<D>> getItems() {
-    	return Collections.unmodifiableList(items);
+        return Collections.unmodifiableList(items);
     }
 
     @Override
@@ -575,8 +585,8 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
                         keyCode != PKeyCodes.UP.getCode() && //
                         keyCode != PKeyCodes.RIGHT.getCode() && //
                         keyCode != PKeyCodes.DOWN.getCode()) {
-                            updateVisibleItems();
-                        }
+                    updateVisibleItems();
+                }
             });
             panel.add(filterWidget);
             defaultContainer.add(panel);
@@ -746,8 +756,8 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
                 }
             } else if (PKeyCodes.ESCAPE.getCode() == keyCode || //
                     configuration.isMultilevelEnabled() && PKeyCodes.LEFT.getCode() == keyCode) {
-                        close();
-                    }
+                close();
+            }
             forceIndex = true;
             itemContainer.showIndex(index);
         });
@@ -822,7 +832,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
                     }
                 } else {
                     this.visibleItems
-                        .addAll(this.items.stream().filter(item -> filterPredicate.test(item, filter)).collect(Collectors.toList()));
+                            .addAll(this.items.stream().filter(item -> filterPredicate.test(item, filter)).collect(Collectors.toList()));
                 }
             } else {
                 this.visibleItems.addAll(items);
@@ -875,25 +885,6 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         }
     }
 
-    private void setSelectedItem(final ListBoxItem<D> selectedItem) {
-        clearSelection();
-        final ListBoxItem<D> item = this.items.stream().filter(selectedItem::equals).findFirst().orElse(null);
-        if (item != null) {
-            item.setSelected(true);
-            setClearTitleButtonVisible(true);
-        } else {
-            setClearTitleButtonVisible(false);
-        }
-        updateTitle(List.of(selectedItem));
-        updateVisibleItems();
-    }
-
-    private void setSelectedItems(final List<ListBoxItem<D>> selectedItems) {
-        this.items.forEach(i -> i.setSelected(selectedItems.contains(i)));
-        updateTitle(selectedItems);
-        updateVisibleItems();
-    }
-
     private boolean isSelectionAllowed(Collection<?> selectedItems) {
         if (selectedItems == null) selectedItems = getSelectedItems();
         final Integer selectionLimit = configuration.getSelectionLimit();
@@ -937,8 +928,8 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
 
     public static class ListBoxItem<D> {
 
-        private String label;
         private final D data;
+        private String label;
         private boolean selected;
         private boolean enabled = true;
         private String groupName;
@@ -947,6 +938,26 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
             this.label = label;
             this.data = data;
             this.selected = selected;
+        }
+
+        public static ListBoxItem<String> of(final String data) {
+            return of(data, data, false);
+        }
+
+        public static ListBoxItem<String> of(final String data, final boolean selected) {
+            return of(data, data, selected);
+        }
+
+        public static <D> ListBoxItem<D> of(final String label, final D data) {
+            return of(label, data, false);
+        }
+
+        public static <D> ListBoxItem<D> of(final String label, final D data, final boolean selected) {
+            return new ListBoxItem<>(label, data, selected);
+        }
+
+        public static <D> List<ListBoxItem<D>> of(final List<D> data, final Function<D, String> labelMapper) {
+            return data.stream().map(t -> ListBox.ListBoxItem.of(labelMapper.apply(t), t)).collect(Collectors.toList());
         }
 
         public String getLabel() {
@@ -1018,26 +1029,6 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
             return "ListBoxItem [label=" + label + ", data=" + data + ", selected=" + selected + "]";
         }
 
-        public static ListBoxItem<String> of(final String data) {
-            return of(data, data, false);
-        }
-
-        public static ListBoxItem<String> of(final String data, final boolean selected) {
-            return of(data, data, selected);
-        }
-
-        public static <D> ListBoxItem<D> of(final String label, final D data) {
-            return of(label, data, false);
-        }
-
-        public static <D> ListBoxItem<D> of(final String label, final D data, final boolean selected) {
-            return new ListBoxItem<>(label, data, selected);
-        }
-
-        public static <D> List<ListBoxItem<D>> of(final List<D> data, final Function<D, String> labelMapper) {
-            return data.stream().map(t -> ListBox.ListBoxItem.of(labelMapper.apply(t), t)).collect(Collectors.toList());
-        }
-
         public enum ListBoxItemType {
             ITEM,
             GROUP;
@@ -1053,6 +1044,10 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
             this.groupItems = new ArrayList<>(groupItems);
             setGroupName(groupName);
             this.groupItems.parallelStream().forEach(i -> i.setGroupName(groupName));
+        }
+
+        public static <D> GroupListBoxItem<D> of(final String groupName, final Collection<ListBoxItem<D>> groupItems) {
+            return new GroupListBoxItem<>(groupName, groupItems);
         }
 
         public List<ListBoxItem<D>> getGroupItems() {
@@ -1073,18 +1068,13 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         public String toString() {
             return "GroupListBoxItem [groupName=" + getGroupName() + "]";
         }
-
-        public static <D> GroupListBoxItem<D> of(final String groupName, final Collection<ListBoxItem<D>> groupItems) {
-            return new GroupListBoxItem<>(groupName, groupItems);
-        }
     }
 
     public class ListBoxItemWidget implements IsPWidget {
 
         private final PPanel panel;
-        private PCheckBox checkBox;
         private final ListBoxItemRenderer<D> itemRenderer;
-
+        private PCheckBox checkBox;
         private boolean built;
         private ListBoxItem<D> item;
 

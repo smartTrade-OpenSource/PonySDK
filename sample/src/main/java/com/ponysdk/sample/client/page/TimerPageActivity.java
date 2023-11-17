@@ -38,12 +38,11 @@ import com.ponysdk.core.ui.basic.PVerticalPanel;
 
 public class TimerPageActivity extends SamplePageActivity {
 
+    private final PTextBox textBox = Element.newPTextBox("1000");
+    private final PVerticalPanel panel = Element.newPVerticalPanel();
     protected long time1 = 0;
     protected long time2 = 0;
     protected AtomicLong time3 = new AtomicLong();
-
-    private final PTextBox textBox = Element.newPTextBox("1000");
-    private final PVerticalPanel panel = Element.newPVerticalPanel();
     private UIRunnable scheduleAtFixedRate;
     private PLabel label;
     private UIRunnable scheduleAtFixedDelay;
@@ -76,7 +75,7 @@ public class TimerPageActivity extends SamplePageActivity {
         panel.add(dateLabel);
         final PButton fixedDelayButton = Element.newPButton("Start");
         fixedDelayButton.addClickHandler(event -> PScheduler.scheduleAtFixedRate(
-            () -> dateLabel.setText(dateFormat.format(Calendar.getInstance().getTime())), Duration.ofMillis(1000)));
+                () -> dateLabel.setText(dateFormat.format(Calendar.getInstance().getTime())), Duration.ofMillis(1000)));
         panel.add(fixedDelayButton);
 
         // Client side only

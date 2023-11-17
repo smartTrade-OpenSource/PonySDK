@@ -23,24 +23,17 @@
 
 package com.ponysdk.core.terminal.model;
 
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONBoolean;
-import com.google.gwt.json.client.JSONException;
-import com.google.gwt.json.client.JSONNumber;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONString;
-import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.json.client.*;
 import com.ponysdk.core.model.ArrayValueModel;
 import com.ponysdk.core.model.BooleanModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.ValueTypeModel;
-
-import elemental.client.Browser;
-import elemental.html.ArrayBuffer;
-import elemental.html.ArrayBufferView;
-import elemental.html.DataView;
-import elemental.html.Uint8Array;
-import elemental.html.Window;
+import elemental2.core.ArrayBufferView;
+import elemental2.core.DataView;
+import elemental2.core.TypedArray;
+import elemental2.core.Uint8Array;
+import elemental2.dom.DomGlobal;
+import elemental2.dom.Window;
 
 public class ReaderBuffer {
 
@@ -66,16 +59,36 @@ public class ReaderBuffer {
         this.currentBinaryModel = new BinaryModel();
     }
 
+    // WORKAROUND : No setElements on Uint8Array but Elemental need it, create a passthrough
+    private static native void createSetElementsMethodOnUint8Array() /*-{
+                                                                           Uint8Array.prototype.setElements = function(array, offset) { this.set(array, offset) };
+                                                                           }-*/;
+
+    private static native String decode(ArrayBufferView buffer, int position, int size) /*-{
+                                                                                                    return $wnd.decode(buffer, position, size);
+                                                                                                    }-*/;
+
+    private static native String fromCharCode(TypedArray buffer) /*-{
+                                                                       return String.fromCharCode.apply(null, buffer);
+                                                                       }-*/;
+
+    /**
+     * Get the model key size
+     */
+    private static int getModelKeySize() {
+        return ValueTypeModel.BYTE_SIZE;
+    }
+
     public void init(final Uint8Array buffer) {
         if (this.buffer != null && position < size) {
             if (this.window == null) {
-                this.window = Browser.getWindow();
+                this.window = DomGlobal.window;
                 createSetElementsMethodOnUint8Array();
             }
-            final int remaningBufferSize = this.size - this.position;
-            final Uint8Array mergedBuffer = window.newUint8Array(remaningBufferSize + buffer.getByteLength());
-            mergedBuffer.setElements(this.position == 0 ? this.buffer : this.buffer.subarray(this.position), 0);
-            mergedBuffer.setElements(buffer, remaningBufferSize);
+            final int remainingBufferSize = this.size - this.position;
+            final Uint8Array mergedBuffer = new Uint8Array(remainingBufferSize + buffer.byteLength);
+            mergedBuffer.set(this.position == 0 ? this.buffer : this.buffer.subarray(this.position), 0);
+            mergedBuffer.set(buffer, remainingBufferSize);
 
             this.buffer = mergedBuffer;
         } else {
@@ -83,29 +96,9 @@ public class ReaderBuffer {
         }
 
         this.position = 0;
-        this.size = this.buffer.getByteLength();
-        this.dataView = newDataView(this.buffer.getBuffer(), this.buffer.getByteOffset(), this.size);
+        this.size = this.buffer.byteLength;
+        this.dataView = new DataView(this.buffer.buffer);
     }
-
-    // WORKAROUND : No setElements on Uint8Array but Elemental need it, create a passthrough
-    private static final native void createSetElementsMethodOnUint8Array() /*-{
-                                                                           Uint8Array.prototype.setElements = function(array, offset) { this.set(array, offset) };
-                                                                           }-*/;
-
-    private static final native String decode(ArrayBufferView buffer, int position, int size) /*-{
-                                                                                                    return $wnd.decode(buffer, position, size);
-                                                                                                    }-*/;
-
-    private static final native String fromCharCode(Uint8Array buffer) /*-{
-                                                                       return String.fromCharCode.apply(null, buffer);
-                                                                       }-*/;
-
-    private static final native DataView newDataView(ArrayBuffer buffer, int byteOffset,
-                                                     int length) /*-{ return new DataView(buffer, byteOffset, length); }-*/;
-
-    private static final native int getUint8(DataView dataView, int position) /*-{ return dataView.getUint8(position); }-*/;
-
-    private static final native int getInt8(DataView dataView, int position) /*-{ return dataView.getInt8(position); }-*/;
 
     public int getPosition() {
         return position;
@@ -173,17 +166,17 @@ public class ReaderBuffer {
 
     private boolean getBoolean() {
         checkRemainingBytes(ValueTypeModel.BOOLEAN_SIZE);
-        return buffer.intAt(position++) == BooleanModel.TRUE.ordinal();
+        return buffer.at(position++) == BooleanModel.TRUE.ordinal();
     }
 
     private int getByte() {
         checkRemainingBytes(ValueTypeModel.BYTE_SIZE);
-        return getInt8(dataView, position++);
+        return dataView.getInt8(position++);
     }
 
     private int getUnsignedByte() {
         checkRemainingBytes(ValueTypeModel.BYTE_SIZE);
-        return getUint8(dataView, position++);
+        return dataView.getUint8(position++);
     }
 
     private int getShort() {
@@ -207,13 +200,6 @@ public class ReaderBuffer {
         return result;
     }
 
-    private long getUnsignedInt() {
-        checkRemainingBytes(ValueTypeModel.INTEGER_SIZE);
-        final int result = dataView.getUint32(position);
-        position += ValueTypeModel.INTEGER_SIZE;
-        return result;
-    }
-
     private long getLong() {
         checkRemainingBytes(ValueTypeModel.LONG_SIZE);
         final long result = ((long) dataView.getInt32(position, LITTLE_INDIAN) << 32)
@@ -222,9 +208,9 @@ public class ReaderBuffer {
         return result;
     }
 
-    private float getFloat() {
+    private double getFloat() {
         checkRemainingBytes(ValueTypeModel.FLOAT_SIZE);
-        final float value = dataView.getFloat32(position, LITTLE_INDIAN);
+        final double value = dataView.getFloat32(position, LITTLE_INDIAN);
         position += ValueTypeModel.FLOAT_SIZE;
         return value;
     }
@@ -326,14 +312,6 @@ public class ReaderBuffer {
         return ascii ? decodeStringAscii(msgSize) : decodeStringUTF8(msgSize);
     }
 
-    private String getStringAscii(final int size) {
-        if (size != 0) {
-            return decodeStringAscii(size);
-        } else {
-            return null;
-        }
-    }
-
     private String getString(final boolean ascii, final int size) {
         if (size != 0) {
             return size < 100_000 && ascii ? decodeStringAscii(size) : decodeStringUTF8(size);
@@ -371,8 +349,7 @@ public class ReaderBuffer {
     /**
      * Go directly to the next block
      *
-     * @param dryRun
-     *            If true, not really shift
+     * @param dryRun If true, not really shift
      * @return Start position of the next block
      */
     public int shiftNextBlock(final boolean dryRun) {
@@ -403,10 +380,10 @@ public class ReaderBuffer {
 
         final ValueTypeModel typeModel = key.getTypeModel();
 
+        if (ValueTypeModel.NULL == typeModel) return key;
+
         if (ValueTypeModel.STRING == typeModel) {
             shiftString();
-        } else if (ValueTypeModel.NULL == typeModel) {
-            // Nothing to do
         } else if (ValueTypeModel.UINT31 == typeModel) {
             shiftUint31();
         } else if (ValueTypeModel.INTEGER == typeModel) {
@@ -484,16 +461,9 @@ public class ReaderBuffer {
     }
 
     /**
-     * Get the model key size
-     */
-    private static final int getModelKeySize() {
-        return ValueTypeModel.BYTE_SIZE;
-    }
-
-    /**
      * Slice the array [startPosition, endPosition[
      */
-    public Uint8Array slice(final int startPosition, final int endPosition) {
+    public TypedArray slice(final int startPosition, final int endPosition) {
         position = endPosition;
         return buffer.subarray(startPosition, endPosition);
     }

@@ -25,7 +25,7 @@ package com.ponysdk.core.ui.basic;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.concurrent.UIContext;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
@@ -137,6 +137,11 @@ public class PImage extends PWidget {
         return addDomHandler(handler, PClickEvent.TYPE);
     }
 
+    @Override
+    public String dumpDOM() {
+        return "<img pid=\"" + ID + "\" url=\"" + url + "\">" + "</img>";
+    }
+
     public static final class ClassPathURL {
 
         private final URL url;
@@ -169,10 +174,5 @@ public class PImage extends PWidget {
         public String toString() {
             return "ClassPathURL [url=" + url + "]";
         }
-    }
-
-    @Override
-    public String dumpDOM() {
-        return "<img pid=\"" + ID + "\" url=\"" + url + "\">" + "</img>";
     }
 }

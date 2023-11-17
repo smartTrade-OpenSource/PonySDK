@@ -23,12 +23,12 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.util.Objects;
-
 import com.ponysdk.core.model.PHorizontalAlignment;
 import com.ponysdk.core.model.PVerticalAlignment;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.writer.ModelWriter;
+
+import java.util.Objects;
 
 /**
  * A panel whose child widgets are contained within the cells of a table. Each cell's size may be set independently.

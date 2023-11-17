@@ -61,14 +61,56 @@ import com.ponysdk.sample.client.event.UserLoggedOutEvent;
 import com.ponysdk.sample.client.event.UserLoggedOutHandler;
 import com.sun.management.HotSpotDiagnosticMXBean;
 
+interface TestAction {
+
+    void execute(int id);
+}
+
 public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler {
 
     private static final Logger log = LoggerFactory.getLogger(UISampleTestPerformance.class);
-    private PLabel mainLabel;
+    private final Map<Character, DefaultColumnDefinition<MyRow>> colDefs = new HashMap<>();
     int a = 0;
+    private PLabel mainLabel;
     private int rowCounter = 0;
     private int actionCounter = 0;
-    private final Map<Character, DefaultColumnDefinition<MyRow>> colDefs = new HashMap<>();
+
+    private static MyRow createMyRow(final int index) {
+        return new MyRow(index);
+    }
+
+    public static void cleanMemory(final boolean cleanWithHeapDump, final boolean deleteHeapDump) {
+        boolean heapDumped = false;
+        if (cleanWithHeapDump) {
+            try {
+                final MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+                final HotSpotDiagnosticMXBean mbean = ManagementFactory.newPlatformMXBeanProxy(server,
+                        "com.sun.management:type=HotSpotDiagnostic", HotSpotDiagnosticMXBean.class);
+                final String fileName = "memory_cleaner_" + System.currentTimeMillis() + "_live.hprof";
+                try {
+                    mbean.dumpHeap(fileName, true);
+                    log.info("The MemoryCleaner heap dump '{}' has been successfully generated", fileName);
+                    heapDumped = true;
+
+                    if (deleteHeapDump) {
+                        try {
+                            Files.delete(Paths.get(fileName));
+                            log.info("The hprof '{}' was successfully deleted", fileName);
+                        } catch (final IOException e) {
+                            log.error("Could not delete the generated hprof " + fileName, e);
+                        }
+                    }
+                } catch (IOException | RuntimeException e) {
+                    log.error("Cannot dump heap (MemoryCleaner) through HotspotDiagnostic MBean", e);
+                }
+            } catch (final IOException | RuntimeException e) {
+                log.error("Cannot find HotspotDiagnostic MBean for the MemoryCleaner heap dump", e);
+            }
+        }
+
+        // If heap dump failed, at least try to call an explicit GC
+        if (!heapDumped) System.gc();
+    }
 
     @Override
     public void start(final UIContext uiContext) {
@@ -89,11 +131,11 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
         final DefaultDataGridView<Integer, MyRow> simpleGridView = new DefaultDataGridView<>();
         simpleGridView.setRefreshOnColumnVisibilityChanged(true);
         final ColumnVisibilitySelectorDataGridView<Integer, MyRow> columnVisibilitySelectorDataGridView = new ColumnVisibilitySelectorDataGridView<>(
-            simpleGridView);
+                simpleGridView);
         final RowSelectorColumnDataGridView<Integer, MyRow> rowSelectorColumnDataGridView = new RowSelectorColumnDataGridView<>(
-            columnVisibilitySelectorDataGridView);
+                columnVisibilitySelectorDataGridView);
         final ConfigSelectorDataGridView<Integer, MyRow> configSelectorDataGridView = new ConfigSelectorDataGridView<>(
-            rowSelectorColumnDataGridView, "DEFAULT");
+                rowSelectorColumnDataGridView, "DEFAULT");
 
         final DataGridView<Integer, MyRow> gridView = configSelectorDataGridView;
         gridView.setAdapter(new DataGridAdapter<Integer, MyRow>() {
@@ -356,14 +398,11 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
      * It is destined to be called when the wanted action will dure all the test. The objectif is
      * not to measure the performance of an action alone but to compare it with another optimal case.
      *
-     * @param nbOfActionPerIteration
-     *            Define how many actions you need to perform, ex: how many updates if you want to update your rows.
-     *            The maximum logical number is your rowCount in this case
-     * @param nbOfIterations
-     *            Define how many iterations you want to perform, ex: how many times you want to update each row.
-     *            The greater this value the longer the test
-     * @param testAction
-     *            Lambda expression that defines what you will execute on a single row
+     * @param nbOfActionPerIteration Define how many actions you need to perform, ex: how many updates if you want to update your rows.
+     *                               The maximum logical number is your rowCount in this case
+     * @param nbOfIterations         Define how many iterations you want to perform, ex: how many times you want to update each row.
+     *                               The greater this value the longer the test
+     * @param testAction             Lambda expression that defines what you will execute on a single row
      */
     private void testPerformanceBench(final int nbOfActionPerIteration, final int nbOfIterations, final TestAction testAction) {
 
@@ -397,11 +436,25 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
         thread.start();
     }
 
+    private void createReconnectingPanel() {
+        final PSimplePanel reconnectionPanel = Element.newPSimplePanel();
+        reconnectionPanel.setAttribute("id", "reconnection");
+        final PSimplePanel reconnectingPanel = Element.newPSimplePanel();
+        reconnectingPanel.setAttribute("id", "reconnecting");
+        reconnectionPanel.setWidget(reconnectingPanel);
+        PWindow.getMain().add(reconnectionPanel);
+    }
+
+    @Override
+    public void onUserLoggedOut(final UserLoggedOutEvent event) {
+        UIContext.get().close();
+    }
+
     private static class MyRow {
 
         private final int id;
-        private Map<String, String> map;
         private final String format;
+        private Map<String, String> map;
 
         public MyRow(final int id) {
             super();
@@ -452,60 +505,4 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
         }
 
     }
-
-    private static MyRow createMyRow(final int index) {
-        return new MyRow(index);
-    }
-
-    private void createReconnectingPanel() {
-        final PSimplePanel reconnectionPanel = Element.newPSimplePanel();
-        reconnectionPanel.setAttribute("id", "reconnection");
-        final PSimplePanel reconnectingPanel = Element.newPSimplePanel();
-        reconnectingPanel.setAttribute("id", "reconnecting");
-        reconnectionPanel.setWidget(reconnectingPanel);
-        PWindow.getMain().add(reconnectionPanel);
-    }
-
-    @Override
-    public void onUserLoggedOut(final UserLoggedOutEvent event) {
-        UIContext.get().close();
-    }
-
-    public static void cleanMemory(final boolean cleanWithHeapDump, final boolean deleteHeapDump) {
-        boolean heapDumped = false;
-        if (cleanWithHeapDump) {
-            try {
-                final MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-                final HotSpotDiagnosticMXBean mbean = ManagementFactory.newPlatformMXBeanProxy(server,
-                    "com.sun.management:type=HotSpotDiagnostic", HotSpotDiagnosticMXBean.class);
-                final String fileName = "memory_cleaner_" + System.currentTimeMillis() + "_live.hprof";
-                try {
-                    mbean.dumpHeap(fileName, true);
-                    log.info("The MemoryCleaner heap dump '{}' has been successfully generated", fileName);
-                    heapDumped = true;
-
-                    if (deleteHeapDump) {
-                        try {
-                            Files.delete(Paths.get(fileName));
-                            log.info("The hprof '{}' was successfully deleted", fileName);
-                        } catch (final IOException e) {
-                            log.error("Could not delete the generated hprof " + fileName, e);
-                        }
-                    }
-                } catch (IOException | RuntimeException e) {
-                    log.error("Cannot dump heap (MemoryCleaner) through HotspotDiagnostic MBean", e);
-                }
-            } catch (final IOException | RuntimeException e) {
-                log.error("Cannot find HotspotDiagnostic MBean for the MemoryCleaner heap dump", e);
-            }
-        }
-
-        // If heap dump failed, at least try to call an explicit GC
-        if (!heapDumped) System.gc();
-    }
-}
-
-interface TestAction {
-
-    void execute(int id);
 }
