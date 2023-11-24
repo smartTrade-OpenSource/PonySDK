@@ -390,15 +390,19 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
     @Override
     public void refresh() {
         hideErrorMessage();
-        onUpdateRows(0, controller.getRowCount());
+        updateInterval(0, this.controller.getRowCount());
         draw();
+    }
+
+    private void updateInterval(final int from, final int to) {
+        if (from > to) return;
+        this.from = Math.min(this.from, from);
+        this.to = Math.max(this.to, to);
     }
 
     @Override
     public void onUpdateRows(final int from, final int to) {
-        if (from > to) return;
-        this.from = Math.min(this.from, from);
-        this.to = Math.max(this.to, to);
+        updateInterval(from, to);
 
         try {
             for (int i = from; i < to && i < rows.size(); i++) {
