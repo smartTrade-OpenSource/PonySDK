@@ -63,6 +63,14 @@ public abstract class AbstractInputFormField<V> extends FormField<V> {
 
     public boolean removeValueChangeHandler(final PValueChangeHandler<V> handler) {
         return handlers != null && handlers.remove(handler);
+    }    
+    
+    public String getPlaceHolder() {
+    	return input.getPlaceholder();
+    }
+    
+    public void setPlaceHolder(String value) {
+    	input.setPlaceholder(value);
     }
 
     @Override
