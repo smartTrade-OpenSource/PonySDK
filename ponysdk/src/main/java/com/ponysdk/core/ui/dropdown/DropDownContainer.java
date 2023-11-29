@@ -210,8 +210,8 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
         widget.blur();
     }
 
-    public void isVisible() {
-        widget.isVisible();
+    public boolean isVisible() {
+        return widget.isVisible();
     }
 
     public void setVisible(final boolean visible) {
@@ -286,6 +286,10 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
 
     public void addContainerStyleName(final String styleName) {
         container.addStyleName(styleName);
+    }
+
+    public void removeContainerStyleName(final String styleName) {
+        container.removeStyleName(styleName);
     }
 
     public void setCustomContainer(final IsPWidget customContainer) {
@@ -424,6 +428,9 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
     }
 
     protected void onBlur() {
+        if (!isOpen()) {
+            return;
+        }
         if (isOpen() && isContainerFocusable()) {
             focusContainer();
         } else if (!configuration.isMultilevelEnabled()) {

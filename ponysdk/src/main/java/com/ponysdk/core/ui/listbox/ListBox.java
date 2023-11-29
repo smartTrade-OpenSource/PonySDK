@@ -767,7 +767,9 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
 
     @Override
     protected void focusContainer() {
-        filterWidget.focus();
+        if (isContainerFocusable()) {
+            filterWidget.focus();
+        }
     }
 
     protected InfiniteScrollAddon<ListBoxItem<D>, ListBox<D>.ListBoxItemWidget> buildInfiniteScrollAddon() {
