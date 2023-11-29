@@ -116,11 +116,12 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
                 focused = true;
                 onFocus();
             }, PFocusEvent.TYPE);
-            widget.addDomHandler((PBlurHandler) event -> {
-                focused = false;
-                onBlur();
-            }, PBlurEvent.TYPE);
-
+            if (configuration.isMultilevelEnabled()) {
+                widget.addDomHandler((PBlurHandler) event -> {
+                    focused = false;
+                    onBlur();
+                }, PBlurEvent.TYPE);
+            }
             widget.addKeyUpHandler(e -> {
                 if (focused && e.getKeyCode() == PKeyCodes.ENTER.getCode()) {
                     setContainerVisible(!container.isVisible());
@@ -460,6 +461,7 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
             afterContainerClose();
             final PCloseEvent event = new PCloseEvent(this);
             closeHandlers.forEach(l -> l.onClose(event));
+            focus();
         }
     }
 
