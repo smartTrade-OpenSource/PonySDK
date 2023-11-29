@@ -995,6 +995,9 @@ _UTF8 = undefined;
             deltaItems = Math.round(deltaItems / 2);
 
             let visibleItems = Math.ceil(height / averageItemSize * 2 / 5) * 5;
+            if(!isFinite(visibleItems)) {
+                visibleItems = 1;
+            }
             this.beginIndex = Math.max(0, this.beginIndex - deltaItems);
             this.beginIndex = Math.min(this.size - visibleItems, this.beginIndex);
 
