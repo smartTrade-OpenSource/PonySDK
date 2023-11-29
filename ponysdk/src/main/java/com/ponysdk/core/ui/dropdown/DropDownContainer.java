@@ -76,6 +76,7 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
     private IsPWidget customContainer;
 
     private boolean initialized;
+    private boolean stopKeys;
 
     protected final C configuration;
 
@@ -123,7 +124,7 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
                 }, PBlurEvent.TYPE);
             }
             widget.addKeyUpHandler(e -> {
-                if (focused && e.getKeyCode() == PKeyCodes.ENTER.getCode()) {
+                if (!stopKeys && focused && e.getKeyCode() == PKeyCodes.ENTER.getCode()) {
                     setContainerVisible(!container.isVisible());
                 } else if (e.getKeyCode() == PKeyCodes.ESCAPE.getCode()) {
                     close();
@@ -249,6 +250,10 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
 
     public boolean isEnabled() {
         return !widget.hasStyleName(STYLE_CONTAINER_DISABLED);
+    }
+
+    public void setStopKeys(final boolean stopKeys) {
+        this.stopKeys = stopKeys;
     }
 
     public void setEnabled(final boolean enabled) {

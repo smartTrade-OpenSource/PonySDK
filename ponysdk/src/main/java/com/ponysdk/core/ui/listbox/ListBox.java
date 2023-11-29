@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.ui.listbox;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -42,6 +43,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ponysdk.core.server.concurrent.PScheduler;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PButton;
@@ -732,10 +734,12 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
                     updateWithNextIndex();
                 }
             } else if (PKeyCodes.ENTER.getCode() == keyCode) {
+                setStopKeys(true);
                 final ListBoxItemWidget listBoxItemWidget = itemContainer.getCurrentItemIndex();
                 if (listBoxItemWidget != null) {
                     listBoxItemWidget.select();
                 }
+                PScheduler.schedule(() -> setStopKeys(false), Duration.ofMillis(200));
             } else if (configuration.isMultilevelEnabled() && PKeyCodes.RIGHT.getCode() == keyCode) {
                 final ListBoxItemWidget listBoxItemWidget = itemContainer.getCurrentItemIndex();
                 if (listBoxItemWidget != null) {
