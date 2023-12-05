@@ -39,8 +39,10 @@ import com.ponysdk.core.ui.basic.PPanel;
 
 /**
  * @author mzoughagh
- * @param <D> Data
- * @param <W> Widget
+ * @param <D>
+ *            Data
+ * @param <W>
+ *            Widget
  */
 public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite<PPanel> {
 
@@ -58,11 +60,10 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
     private static final String STYLE_IS_VIEWPORT = "is-viewport";
     private static final String STYLE_IS_ITEM_INDEX = "is-item-index";
 
-    //UI
+    // UI
     private final PFlowPanel container;
     private W currentIndexWidget;
-    private int startIndex = 0;
-    private int currentIndex = startIndex;
+    private int currentIndex = 0;
 
     private final List<W> rows = new ArrayList<>();
     private final Set<InfiniteScrollAddonListener> listeners = new HashSet<>();
@@ -85,7 +86,7 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
         super(Element.newPFlowPanel());
         this.dataProvider = dataProvider;
         dataProvider.addHandler(() -> {
-        	forceDrawNextTime = true;
+            forceDrawNextTime = true;
             this.refresh();
         });
 
@@ -96,7 +97,7 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
         widget.add(container);
 
         // HANDLER
-        this.setTerminalHandler((event) -> {
+        this.setTerminalHandler(event -> {
             final JsonObject jsonObj = event.getData();
             this.beginIndex = jsonObj.getInt(KEY_BEGIN_INDEX);
             this.maxVisibleItems = jsonObj.getInt(KEY_MAX_VISIBLE_ITEM);
@@ -106,17 +107,14 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
     }
 
     /**
-     * Redrawing the items after modifying parameters
-     * like beginIndex and maxvisibleItem or length dataProvider's list
+     * Redrawing the items after modifying parameters like beginIndex and maxvisibleItem or length dataProvider's list
      */
     public void refresh() {
         dataProvider.getFullSize(this::setFullSize);
     }
 
-    public void setScrollTop() {
+    public void scrollToTop() {
         callTerminalMethod(FUNCTION_SET_SCROLL_TOP);
-        currentIndex = startIndex;
-        updateCurrentIndexWidget();
     }
 
     public void setMaxItemVisible(final int maxVisibleItems) {
@@ -124,11 +122,7 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
     }
 
     public void setVisible(final boolean visible) {
-        if (visible) {
-            widget.setVisible(true);
-        } else {
-            widget.setVisible(false);
-        }
+        widget.setVisible(visible);
     }
 
     public boolean isVisible() {
@@ -147,16 +141,11 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
         return fullSize;
     }
 
-    public void setStartIndex(final int startIndex) {
-        this.startIndex = startIndex;
-    }
-
     public void showIndex(final int index) {
-        if (index >= 0 && index < fullSize) {
-            callTerminalMethod(FUNCTION_SHOW_INDEX, index);
-            currentIndex = index;
-            updateCurrentIndexWidget();
-        }
+        if (index < 0 || index >= fullSize) return;
+        callTerminalMethod(FUNCTION_SHOW_INDEX, index);
+        currentIndex = index;
+        updateCurrentIndexWidget();
     }
 
     public W getCurrentItemIndex() {
@@ -197,22 +186,18 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
         }
     }
 
-    private void addWidgetToContainer(final int index, final W widget) {
-        container.insert(widget.asWidget(), index);
-        widget.asWidget().addStyleName(STYLE_IS_ITEM);
+    private void addWidgetToContainer(final int index, final W widgetToAdd) {
+        container.insert(widgetToAdd.asWidget(), index);
+        widgetToAdd.asWidget().addStyleName(STYLE_IS_ITEM);
     }
 
-    private void removeWidgetFromContainer(final W widget) {
-        container.remove(widget.asWidget());
-        widget.asWidget().onDestroy();
+    private void removeWidgetFromContainer(final W widgetToRemove) {
+        container.remove(widgetToRemove.asWidget());
+        widgetToRemove.asWidget().onDestroy();
     }
 
     /**
-     * Adding widgets to our DOM by taking into consideration
-     * the number of widget (maxVisibleItem) and the beginning
-     * index (beginIndex).
-     * After adding, it updates existing widgets and removes
-     * unused widgets.
+     * Adding widgets to our DOM by taking into consideration the number of widget (maxVisibleItem) and the beginning index (beginIndex). After adding, it updates existing widgets and removes unused widgets.
      */
     private void draw() {
         final int size = Math.min(maxVisibleItems, fullSize - beginIndex);
@@ -224,20 +209,22 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
         }
     }
 
-    private void draw(final List<D> data) {
+    private void draw(final List<D> dataToDraw) {
         try {
             final int size = Math.min(maxVisibleItems, fullSize - beginIndex);
 
-            if (data.size() != size) {
-                throw new IllegalStateException("Data size doesn't match expected :" + size + ". Actual : " + data.size());
+            if (dataToDraw.size() != size) {
+                throw new IllegalStateException("Data size doesn't match expected :" + size + ". Actual : " + dataToDraw.size());
             }
+
+            callTerminalMethod("beforeDraw");
 
             int fullDataIndex = beginIndex;
             int index = 0;
-            //update existing widget
-            while (index < Math.min(data.size(), rows.size())) {
+            // update existing widget
+            while (index < Math.min(dataToDraw.size(), rows.size())) {
                 final W currentWidget = rows.get(index);
-                final W newWidget = dataProvider.handleUI(fullDataIndex, data.get(index), currentWidget);
+                final W newWidget = dataProvider.handleUI(fullDataIndex, dataToDraw.get(index), currentWidget);
                 if (currentWidget != newWidget) {
                     removeWidgetFromContainer(currentWidget);
                     rows.set(index, newWidget);
@@ -248,13 +235,13 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
             }
 
             if (currentIndexWidget == null) {
-                currentIndex = startIndex;
+                currentIndex = 0;
             }
             updateCurrentIndexWidget();
 
             // create missing widget
-            while (rows.size() < data.size()) {
-                final W newWidget = dataProvider.handleUI(fullDataIndex, data.get(index), null);
+            while (rows.size() < dataToDraw.size()) {
+                final W newWidget = dataProvider.handleUI(fullDataIndex, dataToDraw.get(index), null);
                 rows.add(newWidget);
                 addWidgetToContainer(index, newWidget);
                 index++;
@@ -262,7 +249,7 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
             }
 
             // delete unused widget
-            while (data.size() < rows.size()) {
+            while (dataToDraw.size() < rows.size()) {
                 removeWidgetFromContainer(rows.remove(index));
             }
             callTerminalMethod(FUNCTION_ON_DRAW);
@@ -277,7 +264,7 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
             currentIndexWidget = null;
         }
         if (rows.isEmpty()) return;
-        int index = Math.max(startIndex, currentIndex - this.beginIndex);
+        int index = Math.max(0, currentIndex - this.beginIndex);
         index = Math.min(index, rows.size() - 1);
         final W w = rows.get(index);
         if (w != null) {
