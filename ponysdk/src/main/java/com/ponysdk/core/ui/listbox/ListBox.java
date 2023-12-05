@@ -230,8 +230,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         if (!configuration.isGroupEnabled()) throw new IllegalCallerException("Group mode must be enabled");
         final GroupListBoxItem<D> groupItem = groupItems.get(groupName);
         if (groupItem != null) {
-            final ListBoxItem<D> removedItem = groupItem.getGroupItems().stream().filter(i -> i.getLabel().equals(itemLabel))
-                .findFirst().orElse(null);
+            final ListBoxItem<D> removedItem = groupItem.getGroupItems().stream().filter(i -> i.getLabel().equals(itemLabel)).findFirst().orElse(null);
             if (removedItem != null) {
                 groupItem.getGroupItems().remove(removedItem);
                 this.items.remove(removedItem);
@@ -282,8 +281,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         if (!configuration.isGroupEnabled()) throw new IllegalCallerException("Group mode must be enabled");
         final GroupListBoxItem<D> groupItem = groupItems.get(groupName);
         if (groupItem != null) {
-            final ListBoxItem<D> item = groupItem.getGroupItems().stream().filter(i -> i.getLabel().equals(oldLabel)).findFirst()
-                .orElse(null);
+            final ListBoxItem<D> item = groupItem.getGroupItems().stream().filter(i -> i.getLabel().equals(oldLabel)).findFirst().orElse(null);
             if (item != null) {
                 item.setLabel(newLabel);
                 if (isInitialized()) {
@@ -304,8 +302,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     }
 
     /**
-     * Returns the selected data in single selection mode and the first selected
-     * data in multi selection mode.
+     * Returns the selected data in single selection mode and the first selected data in multi selection mode.
      *
      * @return the selected data or null if no selection
      */
@@ -315,14 +312,13 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     }
 
     public List<D> getSelectedDataList() {
-        if (dataProvider != null) return selectedDataItems.isEmpty() ? List.of()
-                : selectedDataItems.stream().map(ListBoxItem::getData).collect(Collectors.toList());
+        if (dataProvider != null)
+            return selectedDataItems.isEmpty() ? List.of() : selectedDataItems.stream().map(ListBoxItem::getData).collect(Collectors.toList());
         return items.stream().filter(ListBoxItem::isSelected).map(ListBoxItem::getData).collect(Collectors.toList());
     }
 
     /**
-     * Returns the selected item in single selection mode and the first selected
-     * item in multi selection mode.
+     * Returns the selected item in single selection mode and the first selected item in multi selection mode.
      *
      * @return the selected item or null if no selection
      */
@@ -523,7 +519,9 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     }
 
     public void refresh() {
-        if (isOpen()) itemContainer.refresh();
+        if (isOpen()) {
+            itemContainer.refresh();
+        }
     }
 
     public void setItemRendererSupplier(final Supplier<ListBoxItemRenderer<D>> itemRendererSupplier) {
@@ -566,7 +564,6 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
                 if (keyCode == PKeyCodes.SHIFT.getCode()) {
                     shiftPressed = false;
                 } else if (keyCode != PKeyCodes.TAB.getCode() && //
-                        keyCode != PKeyCodes.TAB.getCode() && //
                         keyCode != PKeyCodes.CTRL.getCode() && //
                         keyCode != PKeyCodes.ALT.getCode() && //
                         keyCode != PKeyCodes.PAGE_UP.getCode() && //
@@ -578,8 +575,8 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
                         keyCode != PKeyCodes.UP.getCode() && //
                         keyCode != PKeyCodes.RIGHT.getCode() && //
                         keyCode != PKeyCodes.DOWN.getCode()) {
-                            updateVisibleItems();
-                        }
+                    updateVisibleItems();
+                }
             });
             panel.add(filterWidget);
             defaultContainer.add(panel);
@@ -600,17 +597,16 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         defaultContainer.add(itemContainer);
         itemContainer.addListener(beginIndex -> {
             if (!forceIndex) {
-                index = beginIndex;
-                if (index == 0) {
+                final ListBox<D>.ListBoxItemWidget currentItemIndex = itemContainer.getCurrentItemIndex();
+                if (currentItemIndex == null || !visibleItems.contains(currentItemIndex.item)) {
                     initIndex();
-                    itemContainer.showIndex(index);
+                    if (index < visibleItems.size()) itemContainer.showIndex(index);
                 }
             }
             forceIndex = false;
         });
         if (configuration.isGroupEnabled()) {
             initIndex();
-            itemContainer.setStartIndex(index);
         }
         updateTitle(getSelectedItems());
 
@@ -645,8 +641,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
             }
         }
         if (selectedItems.isEmpty()) {
-            if ((configuration.isMultiSelectionEnabled() || configuration.isSelectionDisplayed())
-                    && !configuration.isTitlePlaceHolder()) {
+            if ((configuration.isMultiSelectionEnabled() || configuration.isSelectionDisplayed()) && !configuration.isTitlePlaceHolder()) {
                 if (text.length() > 0) {
                     text.append(STRING_SPACE);
                     text.append(configuration.getTitleSeparator());
@@ -669,8 +664,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
                 }
                 title = selectedItems.stream().map(ListBoxItem::getLabel).collect(Collectors.joining(", "));
                 final Integer displaySelectionLimit = configuration.getDisplaySelectionLimit();
-                if (configuration.isMultiSelectionEnabled() && displaySelectionLimit != null
-                        && selectedItems.size() > displaySelectionLimit) {
+                if (configuration.isMultiSelectionEnabled() && displaySelectionLimit != null && selectedItems.size() > displaySelectionLimit) {
                     text.append(selectedItems.size() + STRING_SPACE + configuration.getDisplaySelectionLabel());
                 } else {
                     text.append(title);
@@ -686,18 +680,17 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
 
     @Override
     protected void beforeContainerVisible() {
-        initIndex();
-        itemContainer.showIndex(index);
-        if (filterWidget != null) {
-            filterWidget.setFilter(null);
-        }
+        if (filterWidget != null) filterWidget.setFilter(null);
         sort();
         updateVisibleItems();
     }
 
     @Override
     protected void afterContainerVisible() {
-        itemContainer.setScrollTop();
+        initIndex();
+        itemContainer.showIndex(index);
+        itemContainer.scrollToTop();
+
         if (filterWidget != null) filterWidget.focus();
         if (clearMultiButton != null) clearMultiButton.setEnabled(!getSelectedItems().isEmpty());
         addUpDownKeyHandler();
@@ -717,40 +710,44 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     void addUpDownKeyHandler() {
         if (upDownKeyHandler != null) upDownKeyHandler.removeHandler();
         upDownKeyHandler = super.addUppDownKeyHandler(!configuration.isSearchEnabled(), e -> {
-            final int keyCode = e.getKeyCode();
-            if (PKeyCodes.UP.getCode() == keyCode) {
-                if (index > 0) {
+            final int previousFocusedIndex = index;
+
+            switch (PKeyCodes.fromInt(e.getKeyCode())) {
+                case UP:
                     updateWithPreviousIndex();
-                }
-                if (index <= 0 && configuration.isGroupEnabled()) {
-                    final int previous = index;
-                    updateWithPreviousIndex();
-                    if (previous != index) {
-                        itemContainer.showIndex(previous);
-                    }
-                }
-            } else if (PKeyCodes.DOWN.getCode() == keyCode) {
-                if (index < itemContainer.getFullSize() - 1) {
+                    break;
+                case DOWN:
                     updateWithNextIndex();
-                }
-            } else if (PKeyCodes.ENTER.getCode() == keyCode) {
-                setStopKeys(true);
-                final ListBoxItemWidget listBoxItemWidget = itemContainer.getCurrentItemIndex();
-                if (listBoxItemWidget != null) {
-                    listBoxItemWidget.select();
-                }
-                PScheduler.schedule(() -> setStopKeys(false), Duration.ofMillis(200));
-            } else if (configuration.isMultilevelEnabled() && PKeyCodes.RIGHT.getCode() == keyCode) {
-                final ListBoxItemWidget listBoxItemWidget = itemContainer.getCurrentItemIndex();
-                if (listBoxItemWidget != null) {
-                    listBoxItemWidget.openNested();
-                }
-            } else if (PKeyCodes.ESCAPE.getCode() == keyCode || //
-                    configuration.isMultilevelEnabled() && PKeyCodes.LEFT.getCode() == keyCode) {
-                        close();
+                    break;
+                case RIGHT:
+                    if (configuration.isMultilevelEnabled()) {
+                        final ListBoxItemWidget listBoxItemWidget = itemContainer.getCurrentItemIndex();
+                        if (listBoxItemWidget != null) listBoxItemWidget.openNested();
                     }
-            forceIndex = true;
-            itemContainer.showIndex(index);
+                    break;
+                case LEFT:
+                    if (configuration.isMultilevelEnabled()) break;
+                    //$FALL-THROUGH$ : same behavior than enter in multiLevel
+                case ESCAPE:
+                    close();
+                    return;
+                case ENTER:
+                    setStopKeys(true);
+                    final ListBoxItemWidget listBoxItemWidget = itemContainer.getCurrentItemIndex();
+                    if (listBoxItemWidget != null) listBoxItemWidget.select();
+                    PScheduler.schedule(() -> setStopKeys(false), Duration.ofMillis(200));
+                    return;
+                default:
+                    return;
+            }
+            if (index != previousFocusedIndex) {
+                forceIndex = true;
+                if (configuration.isGroupEnabled() && index > 0) {
+                    itemContainer.showIndex(index - 1);
+                }
+                itemContainer.showIndex(index);
+            }
+
         });
     }
 
@@ -824,13 +821,13 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
                         }
                     }
                 } else {
-                    this.visibleItems
-                        .addAll(this.items.stream().filter(item -> filterPredicate.test(item, filter)).collect(Collectors.toList()));
+                    this.visibleItems.addAll(this.items.stream().filter(item -> filterPredicate.test(item, filter)).collect(Collectors.toList()));
                 }
             } else {
                 this.visibleItems.addAll(items);
             }
         }
+
         refresh();
     }
 
@@ -924,8 +921,8 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     private void updateWithPreviousIndex() {
         if (index < 0) {
             initIndex();
-        } else if (index >= visibleItems.size()) {
-            index = visibleItems.size() - 1;
+        } else if (index >= itemContainer.getFullSize()) {
+            index = itemContainer.getFullSize() - 1;
             updateWithPreviousIndex();
             return;
         }
@@ -944,12 +941,12 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
                 return;
             }
             updateWithNextIndex();
-        } else if (index >= visibleItems.size()) {
-            index = visibleItems.size() - 1;
-            updateWithPreviousIndex();
+        } else if (index >= itemContainer.getFullSize()) {
+            index = itemContainer.getFullSize() - 1;
+            updateWithNextIndex();
             return;
         }
-        for (int i = index + 1; i < visibleItems.size(); i++) {
+        for (int i = index + 1; i < itemContainer.getFullSize(); i++) {
             if (isIndexable(i)) {
                 index = i;
                 break;
@@ -967,9 +964,10 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         }
     }
 
-    private boolean isIndexable(final int index) {
+    private boolean isIndexable(final int indexToTest) {
+        if (dataProvider != null) return true;
         try {
-            final ListBoxItem<D> listBoxItem = visibleItems.get(index);
+            final ListBoxItem<D> listBoxItem = visibleItems.get(indexToTest);
             return !(listBoxItem instanceof GroupListBoxItem) && listBoxItem.enabled;
         } catch (final Exception e) {
             return false;
@@ -997,7 +995,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         private boolean enabled = true;
         private String groupName;
 
-        private ListBoxItem(final String label, final D data, final boolean selected) {
+        ListBoxItem(final String label, final D data, final boolean selected) {
             this.label = label;
             this.data = data;
             this.selected = selected;
@@ -1093,8 +1091,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         }
 
         public enum ListBoxItemType {
-            ITEM,
-            GROUP;
+            ITEM, GROUP;
         }
     }
 
@@ -1131,6 +1128,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         public static <D> GroupListBoxItem<D> of(final String groupName, final Collection<ListBoxItem<D>> groupItems) {
             return new GroupListBoxItem<>(groupName, groupItems);
         }
+
     }
 
     public class ListBoxItemWidget implements IsPWidget {
@@ -1217,6 +1215,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         public void getData(final int beginIndex, final int maxSize, final Consumer<List<ListBoxItem<D>>> callback) {
             if (dataProvider != null) {
                 items.clear();
+                visibleItems.clear();
                 items.addAll(dataProvider.getData(beginIndex, maxSize, getFilter()));
                 visibleItems.addAll(items);
                 callback.accept(items);
@@ -1232,7 +1231,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         }
 
         @Override
-        public ListBoxItemWidget handleUI(final int index, final ListBoxItem<D> item, ListBoxItemWidget widget) {
+        public ListBoxItemWidget handleUI(final int indexOfItem, final ListBoxItem<D> item, ListBoxItemWidget widget) {
             if (widget == null) widget = new ListBoxItemWidget();
             widget.setItem(item);
             return widget;

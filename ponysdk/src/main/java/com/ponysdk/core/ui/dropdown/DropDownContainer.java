@@ -421,7 +421,7 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
         // Nothing to do by default
     }
 
-    protected HandlerRegistration addUppDownKeyHandler(final boolean forceFocus, final PKeyDownEvent.Handler handler) {
+    protected HandlerRegistration addKeyDownHandler(final boolean forceFocus, final PKeyDownEvent.Handler handler) {
         if (forceFocus) {
             container.asWidget().setTabindex(TabindexMode.TABULABLE);
             container.asWidget().focus();

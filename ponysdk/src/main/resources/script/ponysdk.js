@@ -883,31 +883,36 @@ _UTF8 = undefined;
     AbstractAddon.defineAddon("com.ponysdk.core.ui.infinitescroll.InfiniteScrollAddon", {
 
         initDom: function () {
-            window.test = this;
-            this.jqelement.css("overflow-y", "auto");
-            this.jqelement.css("overflow-x", "hidden");
-            this.container = this.jqelement.find(".is-container");
-            this.container.css("width", "100%");
+            this.element.style.overflowY = "auto";
+            this.element.style.overflowX = "hidden";
+            this.container = this.element.children[0]
+            this.container.style.width = "100%";
             this.size = 0; // Size of the data
             this.beginIndex = 0; // Start of the viewport for the server
             this.previousBeginIndex = 0;
             this.previousVisibleItems = 0;
+            this.marginTopPx = 0;
+            this.marginBottomPx = 0;
+
+
             this.jqelement.scroll(e => {
+                if(!e) return; // ignore own scroll set
                 // Avoid multiple call
                 if (this.timeout) window.clearTimeout(this.timeout);
                 this.timeout = window.setTimeout(() => this.updateView(), 40);
             });
-            this.updateViewport();
-        },
-        updateViewport: function () {
-            var timeout;
-            const o = new ResizeObserver(e => {
+
+            this.observer = new ResizeObserver(e => {
                 window.requestAnimationFrame(() => {
-                    if (timeout) clearTimeout(timeout);
-                    timeout = setTimeout(this.updateView(), 150);
+                    if (this.resizeTimeout) clearTimeout(this.resizeTimeout);
+                    this.resizeTimeout = setTimeout(this.updateView(), 150);
                 });
             });
-            o.observe(this.element);
+            this.observer.observe(this.element);
+        },
+
+        destroy: function() {
+            if(this.observer) this.observer.disconnect();
         },
 
         getTopPosition(element) {
@@ -915,9 +920,8 @@ _UTF8 = undefined;
             return $element.position().top - this.jqelement.position().top;
         },
         setScrollTop: function () {
-            this.jqelement.scrollTop(0);
+            this.element.scrollTo(0,0);
         },
-
         getBottomPosition(element) {
             let $element = $(element);
             return this.getTopPosition(element) + $element.outerHeight(true) - $element.height() + $element[0].scrollHeight;
@@ -929,17 +933,17 @@ _UTF8 = undefined;
         },
 
         updateView: function (changeFullSize) {
-            let children = this.container.children();
+            const children = this.container.children;
 
             if (children.length === 0) {
-                this.container.css("margin-top", 0 + "px");
-                this.container.css("margin-bottom", 0 + "px");
+                this.container.style.marginTop = "0px";
+                this.container.style.marginBottom = "0px";
                 this.beginIndex = 0;
                 return;
             }
 
-            let topPosition = this.getTopPosition(children.first());
-            let bottomPosition = this.getBottomPosition(children.last());
+            let topPosition = this.getTopPosition(children[0]);
+            let bottomPosition = this.getBottomPosition(children[children.length - 1]);
             let itemsSize = Math.abs(bottomPosition - topPosition);
             let height = this.jqelement.height();
 
@@ -949,7 +953,7 @@ _UTF8 = undefined;
                 if (!changeFullSize) return;
                 let averageItemSize = itemsSize / children.length;
                 let marginBottomPx = Math.max(0, (this.size - this.beginIndex - children.length) * averageItemSize);
-                this.container.css("margin-bottom", marginBottomPx + "px");
+                this.container.style.marginBottom = marginBottomPx + "px";
             }
 
             let scrollBottom = topPosition > 0;
@@ -957,11 +961,11 @@ _UTF8 = undefined;
             let deltaItems = 0
 
             if (scrollBottom && topPosition > height || !scrollBottom && bottomPosition < 0) {
-                let scrollPosition = this.jqelement.scrollTop();
+                let scrollPosition = this.element.scrollTop;
                 this.beginIndex = Math.round(scrollPosition / averageItemSize - children.length / 4);
                 this.forcePosition = null;
             } else if (scrollBottom) {
-                let child = children.first();
+                let child = children[0];
                 let topPosition = this.getTopPosition(child);
                 this.forcePosition = {
                     index: this.beginIndex,
@@ -969,21 +973,21 @@ _UTF8 = undefined;
                 }
                 for (let i = children.length - 1; i >= 0; i--) {
                     deltaItems++;
-                    let child = children.get(i);
+                    let child = children[i];
                     let topPosition = this.getTopPosition(child);
                     if (topPosition <= height) {
                         break;
                     }
                 }
             } else {
-                let child = children.last();
+                let child = children[children.length - 1];
                 let topPosition = this.getTopPosition(child);
                 this.forcePosition = {
                     index: this.beginIndex + children.length - 1,
                     topPosition: topPosition,
                 }
                 for (let i = 0; i < children.length; i++) {
-                    let child = children.get(i);
+                    let child = children[i];
                     deltaItems--;
                     let bottomPosition = this.getBottomPosition(child);
                     if (bottomPosition >= 0) {
@@ -1016,56 +1020,75 @@ _UTF8 = undefined;
             if (!changeFullSize && this.previousBeginIndex == this.beginIndex && this.previousVisibleItems == visibleItems) return;
             this.previousBeginIndex = this.beginIndex;
             this.previousVisibleItems = visibleItems;
+
             this.sendDataToServer({
                 beginIndex: this.beginIndex,
-                maxVisibleItem: visibleItems
+                maxVisibleItem: Math.max(10, visibleItems)
             });
         },
 
+        beforeDraw: function () {
+            this.clonedContainer = this.container.cloneNode(true);
+            this.element.appendChild(this.clonedContainer);
+            this.container.style.display = "none";
+        },
+
         onDraw: function () {
-            if (this.marginTopPx != null) {
-                this.container.css("margin-top", this.marginTopPx + "px");
-                this.container.css("margin-bottom", this.marginBottomPx + "px");
+            this.container.style.marginTop = this.marginTopPx + "px";
+            this.container.style.marginBottom = this.marginBottomPx + "px";
+
+            if (this.clonedContainer) {
+                this.clonedContainer.remove();
+                this.clonedContainer = null;
+                this.element.children[0].style.display = "";
             }
+
             if (this.forcePosition) {
-                let child = this.container.children().get(this.forcePosition.index - this.beginIndex);
+                let child = this.container.children[this.forcePosition.index - this.beginIndex];
                 if (child) {
                     let topPosition = this.getTopPosition(child);
                     this.jqelement.scrollTop(this.jqelement.scrollTop() + topPosition - this.forcePosition.topPosition);
                 }
                 this.forcePosition = null;
             }
-            window.setTimeout(() => {
-                this.timeout = null;
-                this.updateView();
-            }, 50);
+
+            if (this.showIndexOnNextDraw) {
+                this.showIndex(this.showIndexOnNextDraw);
+            }
+
+            this.updateView();
         },
 
         showIndex: function (index) {
-            let children = this.container.children();
-            if (index < this.beginIndex || index >= this.beginIndex + children.length) {
-                this.beginIndex = index;
-                this.updateView(true);
-            } else {
-                var child = children[index - this.beginIndex];
-                if (child) {
-                    var jqeTop = this.jqelement.offset().top;
-                    var jqc = $(child);
-                    var jqcTop = jqc.offset().top - jqeTop;
-                    var jqeScroll = this.jqelement.scrollTop();
-                    if (jqcTop < 0) {
-                        this.jqelement.scrollTop(jqeScroll - jqc.height());
-                    } else {
-                        var jqcBot = jqcTop + jqc.height();
-                        var jqeBot = jqeScroll + this.jqelement.height();
-                        if (jqcBot + jqeScroll >= jqeBot - 2) {
-                            this.jqelement.scrollTop(jqeScroll + jqc.height());
-                        }
-                    }
-                }
-            }
-        }
+            if (index >= this.size || index < 0) throw new Error('index ' + index + ' out of bound : [0, ' + this.size + ']');
 
+            if (index - this.beginIndex < 0 || index - this.beginIndex >= this.container.children.length) {
+                const beginIndex = this.beginIndex;
+
+                //element not in the view
+                this.scrollToIndex(index);
+                this.updateView();
+                //a draw is call, the force position is set for the drawing callback
+                let containerRect = this.container.getBoundingClientRect();
+
+                let itemSize = containerRect.height / this.container.children.length;
+                this.forcePosition =  {
+                    index: index,
+                    topPosition: index <= beginIndex ? 0 : this.element.getBoundingClientRect().height - itemSize
+                }
+            } else {
+                this.container.children[index - this.beginIndex].scrollIntoView({ behavior: "instant", block: "nearest", inline: "nearest" });
+            }
+        },
+
+        getScrollPosition: function (index) {
+            return index * this.container.getBoundingClientRect().height / this.container.children.length;
+        },
+
+        scrollToIndex: function (index) {
+            if (index >= this.size || index < 0) throw new Error('index ' + index + ' out of bound : [0, ' + this.size + ']');
+            this.element.scrollTo(0, this.getScrollPosition(index));
+        }
     });
 
 })();

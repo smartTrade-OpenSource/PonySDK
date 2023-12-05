@@ -29,8 +29,9 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
         </property>
         <property name="style">
             <map>
-                <entry key="ponysdk" value="css/ponysdk.css" />
-                <entry key="sample" value="sample" />
+                <entry key="ponysdk" value="style/ponysdk.css" />
+                <entry key="sample" value="css/sample.css" />
+                <entry key="samplePony" value="css/ponysdk.css" />
             </map>
         </property>
     </bean>
