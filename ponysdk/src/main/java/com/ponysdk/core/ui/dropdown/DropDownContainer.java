@@ -297,6 +297,10 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
     public void removeContainerStyleName(final String styleName) {
         container.removeStyleName(styleName);
     }
+    
+    public DropDownContainerAddon getContainer() {
+    	return container;
+    }
 
     public void setCustomContainer(final IsPWidget customContainer) {
         if (initialized) throw new IllegalArgumentException("Must be set before asWidget call");
