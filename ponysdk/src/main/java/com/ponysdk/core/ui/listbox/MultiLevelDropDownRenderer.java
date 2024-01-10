@@ -1,9 +1,11 @@
 
 package com.ponysdk.core.ui.listbox;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.function.BiFunction;
 
+import com.ponysdk.core.server.concurrent.PScheduler;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PSimplePanel;
@@ -88,6 +90,8 @@ public class MultiLevelDropDownRenderer<D> implements ListBoxItemRenderer<MultiL
         if (parent != null) {
             parent.closeAll();
         } else {
+            parentContainer.setStopKeys(true);
+            PScheduler.schedule(() -> parentContainer.setStopKeys(false), Duration.ofMillis(200));
             parentContainer.close();
         }
     }
