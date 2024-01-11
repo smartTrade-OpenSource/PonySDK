@@ -1177,8 +1177,10 @@ _UTF8 = undefined;
                     if (x > rect.left && x < rect.right &&
                         y > rect.top && y < rect.bottom ||
                         x > parentRect.left && x < parentRect.right &&
-                        y > parentRect.top && y < parentRect.bottom) {
+                        y > parentRect.top && y < parentRect.bottom &&
+                        !that.multiLevel) {
                         // Inside element or parent, nothing to do
+                        // If it's a multilevel structure, we only target the element to determine whether another level from the same parent is opening.
                     } else {
                         that.sendDataToServer({
                             'windowEvent': 'click'
