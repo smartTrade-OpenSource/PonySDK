@@ -1,7 +1,7 @@
 
 package com.ponysdk.core.ui.listbox;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.function.BiFunction;
 
 import com.ponysdk.core.ui.basic.Element;
@@ -27,7 +27,6 @@ public class MultiLevelDropDownRenderer<D> implements ListBoxItemRenderer<MultiL
     private MultiLevelDropDownRenderer<D> parent;
     private Runnable r;
     private ListBoxItem<MultiLevelDropDownNode<D>> item;
-    
 
     public MultiLevelDropDownRenderer(final ListBox<MultiLevelDropDownNode<D>> parentContainer) {
         this(parentContainer, null);
@@ -91,13 +90,15 @@ public class MultiLevelDropDownRenderer<D> implements ListBoxItemRenderer<MultiL
             parentContainer.close();
         }
     }
-    
-    
-    private BiFunction<ListBox<MultiLevelDropDownNode<D>>, MultiLevelDropDownRenderer<D>, MultiLevelDropDownRenderer<D>> nestedListBoxRenderer = (list, parent) -> new MultiLevelDropDownRenderer<>(list, parent);
-    
-    public MultiLevelDropDownRenderer<D> setNestedListBoxRenderer(BiFunction<ListBox<MultiLevelDropDownNode<D>>, MultiLevelDropDownRenderer<D>, MultiLevelDropDownRenderer<D>> renderer){
-    	this.nestedListBoxRenderer = renderer;
-    	return this;
+
+    private BiFunction<ListBox<MultiLevelDropDownNode<D>>, MultiLevelDropDownRenderer<D>, MultiLevelDropDownRenderer<D>> nestedListBoxRenderer = (list,
+                                                                                                                                                  parent) -> new MultiLevelDropDownRenderer<>(
+                                                                                                                                                      list,
+                                                                                                                                                      parent);
+
+    public MultiLevelDropDownRenderer<D> setNestedListBoxRenderer(final BiFunction<ListBox<MultiLevelDropDownNode<D>>, MultiLevelDropDownRenderer<D>, MultiLevelDropDownRenderer<D>> renderer) {
+        this.nestedListBoxRenderer = renderer;
+        return this;
     }
 
     private void buildNestedListBox(final ListBoxItem<MultiLevelDropDownNode<D>> item) {
@@ -114,11 +115,10 @@ public class MultiLevelDropDownRenderer<D> implements ListBoxItemRenderer<MultiL
         parentContainer.defineAsMultiLevelParent(nestedListBox);
         nestedListBox.addOpenHandler(e -> parentContainer.removeUpDownKeyHandler());
         nestedListBox.addCloseHandler(e -> parentContainer.addUpDownKeyHandler());
-        
 
         nestedListBox.setItemRendererSupplier(() -> nestedListBoxRenderer.apply(nestedListBox, this));
 
-        for (final PValueChangeHandler<List<ListBoxItem<MultiLevelDropDownNode<D>>>> handler : parentContainer
+        for (final PValueChangeHandler<Collection<ListBoxItem<MultiLevelDropDownNode<D>>>> handler : parentContainer
             .getValueChangeHandlers()) {
             nestedListBox.addValueChangeHandler(handler);
         }
