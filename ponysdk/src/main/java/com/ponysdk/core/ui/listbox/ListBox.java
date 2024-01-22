@@ -230,7 +230,8 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         if (!configuration.isGroupEnabled()) throw new IllegalCallerException("Group mode must be enabled");
         final GroupListBoxItem<D> groupItem = groupItems.get(groupName);
         if (groupItem != null) {
-            final ListBoxItem<D> removedItem = groupItem.getGroupItems().stream().filter(i -> i.getLabel().equals(itemLabel)).findFirst().orElse(null);
+            final ListBoxItem<D> removedItem = groupItem.getGroupItems().stream().filter(i -> i.getLabel().equals(itemLabel))
+                .findFirst().orElse(null);
             if (removedItem != null) {
                 groupItem.getGroupItems().remove(removedItem);
                 this.items.remove(removedItem);
@@ -281,7 +282,8 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         if (!configuration.isGroupEnabled()) throw new IllegalCallerException("Group mode must be enabled");
         final GroupListBoxItem<D> groupItem = groupItems.get(groupName);
         if (groupItem != null) {
-            final ListBoxItem<D> item = groupItem.getGroupItems().stream().filter(i -> i.getLabel().equals(oldLabel)).findFirst().orElse(null);
+            final ListBoxItem<D> item = groupItem.getGroupItems().stream().filter(i -> i.getLabel().equals(oldLabel)).findFirst()
+                .orElse(null);
             if (item != null) {
                 item.setLabel(newLabel);
                 if (isInitialized()) {
@@ -312,8 +314,8 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     }
 
     public List<D> getSelectedDataList() {
-        if (dataProvider != null)
-            return selectedDataItems.isEmpty() ? List.of() : selectedDataItems.stream().map(ListBoxItem::getData).collect(Collectors.toList());
+        if (dataProvider != null) return selectedDataItems.isEmpty() ? List.of()
+                : selectedDataItems.stream().map(ListBoxItem::getData).collect(Collectors.toList());
         return items.stream().filter(ListBoxItem::isSelected).map(ListBoxItem::getData).collect(Collectors.toList());
     }
 
@@ -575,8 +577,8 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
                         keyCode != PKeyCodes.UP.getCode() && //
                         keyCode != PKeyCodes.RIGHT.getCode() && //
                         keyCode != PKeyCodes.DOWN.getCode()) {
-                    updateVisibleItems();
-                }
+                            updateVisibleItems();
+                        }
             });
             panel.add(filterWidget);
             defaultContainer.add(panel);
@@ -641,7 +643,8 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
             }
         }
         if (selectedItems.isEmpty()) {
-            if ((configuration.isMultiSelectionEnabled() || configuration.isSelectionDisplayed()) && !configuration.isTitlePlaceHolder()) {
+            if ((configuration.isMultiSelectionEnabled() || configuration.isSelectionDisplayed())
+                    && !configuration.isTitlePlaceHolder()) {
                 if (text.length() > 0) {
                     text.append(STRING_SPACE);
                     text.append(configuration.getTitleSeparator());
@@ -664,7 +667,8 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
                 }
                 title = selectedItems.stream().map(ListBoxItem::getLabel).collect(Collectors.joining(", "));
                 final Integer displaySelectionLimit = configuration.getDisplaySelectionLimit();
-                if (configuration.isMultiSelectionEnabled() && displaySelectionLimit != null && selectedItems.size() > displaySelectionLimit) {
+                if (configuration.isMultiSelectionEnabled() && displaySelectionLimit != null
+                        && selectedItems.size() > displaySelectionLimit) {
                     text.append(selectedItems.size() + STRING_SPACE + configuration.getDisplaySelectionLabel());
                 } else {
                     text.append(title);
@@ -821,7 +825,8 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
                         }
                     }
                 } else {
-                    this.visibleItems.addAll(this.items.stream().filter(item -> filterPredicate.test(item, filter)).collect(Collectors.toList()));
+                    this.visibleItems
+                        .addAll(this.items.stream().filter(item -> filterPredicate.test(item, filter)).collect(Collectors.toList()));
                 }
             } else {
                 this.visibleItems.addAll(items);
@@ -1086,12 +1091,13 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
             return new ListBoxItem<>(label, data, selected);
         }
 
-        public static <D> List<ListBoxItem<D>> of(final List<D> data, final Function<D, String> labelMapper) {
+        public static <D> Collection<ListBoxItem<D>> of(final Collection<D> data, final Function<D, String> labelMapper) {
             return data.stream().map(t -> ListBox.ListBoxItem.of(labelMapper.apply(t), t)).collect(Collectors.toList());
         }
 
         public enum ListBoxItemType {
-            ITEM, GROUP;
+            ITEM,
+            GROUP;
         }
     }
 
