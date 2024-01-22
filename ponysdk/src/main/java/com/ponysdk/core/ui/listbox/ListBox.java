@@ -59,7 +59,7 @@ import com.ponysdk.core.ui.listbox.ListBox.ListBoxItem;
 import com.ponysdk.core.ui.listbox.ListBox.ListBoxItem.ListBoxItemType;
 import com.ponysdk.core.ui.model.PKeyCodes;
 
-public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxConfiguration> {
+public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, ListBoxConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(ListBox.class);
 
@@ -154,13 +154,13 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     }
 
     @Override
-    public List<ListBoxItem<D>> getValue() {
+    public Collection<ListBoxItem<D>> getValue() {
         if (configuration.isEventOnlyEnabled()) throw new UnsupportedOperationException("Not available in event only mode");
         return getSelectedItems();
     }
 
     @Override
-    public void setValue(final List<ListBoxItem<D>> value) {
+    public void setValue(final Collection<ListBoxItem<D>> value) {
         if (configuration.isEventOnlyEnabled()) throw new UnsupportedOperationException("Not available in event only mode");
         if (value == null) {
             clearSelection();
@@ -313,7 +313,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         return items.stream().filter(ListBoxItem::isSelected).map(ListBoxItem::getData).findFirst().orElse(null);
     }
 
-    public List<D> getSelectedDataList() {
+    public Collection<D> getSelectedDataList() {
         if (dataProvider != null) return selectedDataItems.isEmpty() ? List.of()
                 : selectedDataItems.stream().map(ListBoxItem::getData).collect(Collectors.toList());
         return items.stream().filter(ListBoxItem::isSelected).map(ListBoxItem::getData).collect(Collectors.toList());
@@ -329,7 +329,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         return items.stream().filter(ListBoxItem::isSelected).findFirst().orElse(null);
     }
 
-    public List<ListBoxItem<D>> getSelectedItems() {
+    public Collection<ListBoxItem<D>> getSelectedItems() {
         if (dataProvider != null) return new ArrayList<>(selectedDataItems);
         return items.stream().filter(ListBoxItem::isSelected).collect(Collectors.toList());
     }
@@ -402,7 +402,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         if (configuration.isEventOnlyEnabled()) throw new UnsupportedOperationException("Not available in event only mode");
 
         if (!configuration.isMultiSelectionEnabled()) setSelected(selectedData);
-        final List<ListBoxItem<D>> selectedItems = getSelectedItems();
+        final Collection<ListBoxItem<D>> selectedItems = getSelectedItems();
         for (final ListBoxItem<D> item : this.items) {
             if (item.getData() != null && item.getData().equals(selectedData)) {
                 selectedItems.add(item);
@@ -420,7 +420,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         if (!configuration.isMultiSelectionEnabled()) throw new IllegalArgumentException("Only available in multi selection mode");
         if (configuration.isEventOnlyEnabled()) throw new UnsupportedOperationException("Not available in event only mode");
 
-        final List<ListBoxItem<D>> selectedItems = getSelectedItems();
+        final Collection<ListBoxItem<D>> selectedItems = getSelectedItems();
         final Iterator<ListBoxItem<D>> iterator = selectedItems.iterator();
         while (iterator.hasNext()) {
             final ListBoxItem<D> listBoxItem = iterator.next();
@@ -626,7 +626,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     }
 
     @Override
-    protected void updateTitle(final List<ListBoxItem<D>> selectedItems) {
+    protected void updateTitle(final Collection<ListBoxItem<D>> selectedItems) {
         if (!isInitialized()) return;
         final StringBuilder text = new StringBuilder();
         String title = "";
@@ -761,7 +761,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
     }
 
     @Override
-    protected boolean isValueEmpty(final List<ListBoxItem<D>> value) {
+    protected boolean isValueEmpty(final Collection<ListBoxItem<D>> value) {
         return value.isEmpty();
     }
 
@@ -871,7 +871,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         if (configuration.isSortingEnabled() && dataProvider == null) {
             items.sort(comparator);
             if (configuration.isMultiSelectionEnabled() && configuration.isSelectionSortingEnabled()) {
-                final List<ListBoxItem<D>> selectedItems = getSelectedItems();
+                final List<ListBoxItem<D>> selectedItems = new ArrayList<>(getSelectedItems());
                 if (!selectedItems.isEmpty()) {
                     items.sort(selectionComparator);
                     lastSelectedItem = selectedItems.get(selectedItems.size() - 1);
@@ -893,7 +893,7 @@ public class ListBox<D> extends DropDownContainer<List<ListBoxItem<D>>, ListBoxC
         updateVisibleItems();
     }
 
-    private void setSelectedItems(final List<ListBoxItem<D>> selectedItems) {
+    private void setSelectedItems(final Collection<ListBoxItem<D>> selectedItems) {
         this.items.forEach(i -> i.setSelected(selectedItems.contains(i)));
         updateTitle(selectedItems);
         updateVisibleItems();
