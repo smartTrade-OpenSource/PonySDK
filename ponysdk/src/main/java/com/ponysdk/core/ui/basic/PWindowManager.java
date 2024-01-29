@@ -23,7 +23,7 @@
 
 package com.ponysdk.core.ui.basic;
 
-import com.ponysdk.core.server.concurrent.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -42,7 +42,7 @@ public class PWindowManager {
     }
 
     public static PWindowManager get() {
-        final UIContext uiContext = UIContext.get();
+        final UIContextImpl uiContext = UIContextImpl.get();
         PWindowManager windowManager = uiContext.getAttribute(ROOT);
         if (windowManager == null) {
             windowManager = new PWindowManager();

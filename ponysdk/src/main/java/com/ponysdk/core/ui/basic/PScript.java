@@ -26,7 +26,7 @@ package com.ponysdk.core.ui.basic;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.concurrent.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 import jakarta.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +52,7 @@ public class PScript extends PObject {
 
     private static PScript get(final PWindow window) {
         if (window != null) {
-            final UIContext uiContext = UIContext.get();
+            final UIContextImpl uiContext = UIContextImpl.get();
             final String key = SCRIPT_KEY + window.getID();
             final PScript script = uiContext.getAttribute(SCRIPT_KEY + window.getID());
             if (script == null) {
@@ -95,7 +95,7 @@ public class PScript extends PObject {
     public void onDestroy() {
         super.onDestroy();
         try {
-            UIContext.get().removeAttribute(key);
+            UIContextImpl.get().removeAttribute(key);
         } catch (Exception e) {
             log.error("An error occurred while trying to process the destroy event", e);
         }

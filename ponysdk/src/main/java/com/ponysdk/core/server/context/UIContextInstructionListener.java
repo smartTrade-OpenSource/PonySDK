@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 PonySDK
+ * Copyright (c) 2017 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
  *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
@@ -21,10 +21,15 @@
  * the License.
  */
 
-package com.ponysdk.core.server.concurrent;
+package com.ponysdk.core.server.context;
 
-@FunctionalInterface
-public interface DataListener {
 
-    void onData(Object data);
+public interface UIContextInstructionListener {
+
+    void onMessageReceived(UIContext uiContext, String message);
+
+    void onMessageProcessed(UIContext uiContext, String message);
+
+    void onMessageUnprocessed(UIContext uiContext, String message);
+
 }

@@ -23,9 +23,9 @@
 
 package com.ponysdk.core.ui.list.dataprovider;
 
-import com.ponysdk.core.server.service.query.Query;
-import com.ponysdk.core.server.service.query.Query.QueryMode;
-import com.ponysdk.core.server.service.query.SortingType;
+import com.ponysdk.core.server.query.Query;
+import com.ponysdk.core.server.query.Query.QueryMode;
+import com.ponysdk.core.server.query.SortingType;
 import com.ponysdk.core.ui.list.*;
 import com.ponysdk.core.ui.list.paging.Pager;
 import com.ponysdk.core.ui.list.paging.PagerListener;

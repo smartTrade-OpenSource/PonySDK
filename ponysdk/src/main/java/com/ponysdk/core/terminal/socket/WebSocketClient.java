@@ -38,8 +38,8 @@ public class WebSocketClient {
     private static final Logger log = Logger.getLogger(WebSocketClient.class.getName());
 
     private final String url;
-    private WebSocket webSocket;
     private final UIBuilder uiBuilder;
+    private WebSocket webSocket;
     private long lastMessageTime = -1;
 
     public WebSocketClient(final String url, final UIBuilder uiBuilder) {

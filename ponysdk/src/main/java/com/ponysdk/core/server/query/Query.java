@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.core.server.service.query;
+package com.ponysdk.core.server.query;
 
 import java.util.ArrayList;
 import java.util.List;

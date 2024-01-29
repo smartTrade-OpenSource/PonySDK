@@ -24,7 +24,7 @@
 package com.ponysdk.core.ui.basic;
 
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.concurrent.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -56,7 +56,7 @@ public class PRootLayoutPanel extends PLayoutPanel {
     }
 
     private static Map<String, PRootLayoutPanel> ensureChilds(final PWindow window) {
-        final UIContext session = UIContext.get();
+        final UIContextImpl session = UIContextImpl.get();
 
         final String key = KEY + window.getID();
 

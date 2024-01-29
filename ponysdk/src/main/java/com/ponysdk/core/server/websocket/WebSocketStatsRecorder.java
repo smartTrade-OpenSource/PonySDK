@@ -24,7 +24,7 @@
 package com.ponysdk.core.server.websocket;
 
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.concurrent.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,10 +52,10 @@ class WebSocketStatsRecorder {
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private final Consumer<WebSocketStats> listener;
     private final BiFunction<ServerToClientModel, Object, String> groupBy;
+    private final ReentrantLock lock = new ReentrantLock();
     private volatile Collection<AtomicReferenceArray<Map<Object, VolatileRecord>>> allStats;
     private volatile LocalDateTime startTime;
     private WebSocketStats summary;
-    private final ReentrantLock lock = new ReentrantLock();
 
     public WebSocketStatsRecorder(final Consumer<WebSocketStats> listener,
                                   final BiFunction<ServerToClientModel, Object, String> groupBy) {
@@ -94,7 +94,7 @@ class WebSocketStatsRecorder {
     }
 
     private AtomicReferenceArray<Map<Object, VolatileRecord>> getLocalStats() {
-        final UIContext context = UIContext.get();
+        final UIContextImpl context = UIContextImpl.get();
         AtomicReferenceArray<Map<Object, VolatileRecord>> stats = context.getAttribute(KEY);
         if (stats == null) {
             stats = new AtomicReferenceArray<>(MODELS.length + 1);
@@ -146,7 +146,7 @@ class WebSocketStatsRecorder {
                 log.info("Recording stopped, Statistics Summary: {}", summary);
                 return summary;
             } finally {
-                UIContext.getRegisteredContexts().forEach(c -> c.removeAttribute(KEY));
+                UIContextImpl.getRegisteredContexts().forEach(c -> c.removeAttribute(KEY));
             }
         } finally {
             lock.unlock();

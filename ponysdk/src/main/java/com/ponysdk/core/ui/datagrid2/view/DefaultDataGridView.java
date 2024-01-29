@@ -24,8 +24,7 @@
 package com.ponysdk.core.ui.datagrid2.view;
 
 import com.ponysdk.core.server.concurrent.Scheduler;
-import com.ponysdk.core.server.concurrent.UIContext;
-import com.ponysdk.core.ui.datagrid2.datasource.PResultSet;
+import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
@@ -51,6 +50,7 @@ import com.ponysdk.core.ui.datagrid2.data.LiveDataView;
 import com.ponysdk.core.ui.datagrid2.data.RowAction;
 import com.ponysdk.core.ui.datagrid2.datasource.DataGridSource;
 import com.ponysdk.core.ui.datagrid2.datasource.DefaultCacheDataSource;
+import com.ponysdk.core.ui.datagrid2.datasource.PResultSet;
 import com.ponysdk.core.util.Pair;
 import com.ponysdk.core.util.SetUtils;
 import jakarta.json.JsonArray;
@@ -663,7 +663,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             delayedDrawRunnable = null;
             draw();
         } else {
-            delayedDrawRunnable = UIContext.get().schedule(Duration.ofMillis(pollingDelayMillis), this::draw);
+            delayedDrawRunnable = UIContextImpl.get().schedule(Duration.ofMillis(pollingDelayMillis), this::draw);
         }
     }
 
@@ -914,7 +914,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         errorMsgDiv.add(div);
         loadingDataDiv.setVisible(false);
         // must be sent immediately
-        UIContext.get().flush();
+        UIContextImpl.get().flush();
     }
 
     @Override

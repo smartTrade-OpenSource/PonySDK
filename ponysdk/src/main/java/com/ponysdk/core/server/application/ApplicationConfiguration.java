@@ -41,19 +41,16 @@ public class ApplicationConfiguration {
     private String applicationName;
     private String applicationDescription;
     private String applicationContextName = "sample";
-    private long heartBeatPeriod = 5000;// ms
+    private int heartBeatPeriod = 5000;// ms
+    private int maxIdleTime = 1000000;//ms
     private TimeUnit heartBeatPeriodTimeUnit = TimeUnit.MILLISECONDS;
     private boolean enableClientToServerHeartBeat = true;
-
-    private int sessionTimeout = 15; // minutes
 
     private Set<String> meta;
     private Map<String, String> style;
     private Set<String> javascript;
 
     private Class<? extends EntryPoint> entryPointClass;
-
-    private String clientConfigFile;
 
     private boolean debugMode;
 
@@ -88,7 +85,7 @@ public class ApplicationConfiguration {
         this.applicationContextName = applicationContextName;
     }
 
-    public void setHeartBeatPeriod(final long heartBeatPeriod, final TimeUnit heartBeatPeriodTimeUnit) {
+    public void setHeartBeatPeriod(final int heartBeatPeriod, final TimeUnit heartBeatPeriodTimeUnit) {
         this.heartBeatPeriod = heartBeatPeriod;
         this.heartBeatPeriodTimeUnit = heartBeatPeriodTimeUnit;
     }
@@ -97,20 +94,21 @@ public class ApplicationConfiguration {
         return heartBeatPeriod;
     }
 
-    public void setHeartBeatPeriod(final long heartBeatPeriod) {
+    public void setHeartBeatPeriod(final int heartBeatPeriod) {
         setHeartBeatPeriod(heartBeatPeriod, TimeUnit.MILLISECONDS);
+    }
+
+    public long getMaxIdleTime() {
+        return maxIdleTime;
+    }
+
+    //TODO nciaravola TimeUnit Or Not ? vs heartbeat
+    public void setMaxIdleTime(final int maxIdleTime) {
+        this.maxIdleTime = maxIdleTime;
     }
 
     public TimeUnit getHeartBeatPeriodTimeUnit() {
         return heartBeatPeriodTimeUnit;
-    }
-
-    public int getSessionTimeout() {
-        return sessionTimeout;
-    }
-
-    public void setSessionTimeout(final int sessionTimeout) {
-        this.sessionTimeout = sessionTimeout;
     }
 
     public Set<String> getJavascript() {
@@ -145,14 +143,6 @@ public class ApplicationConfiguration {
         this.entryPointClass = entryPointClass;
     }
 
-    public String getClientConfigFile() {
-        return clientConfigFile;
-    }
-
-    public void setClientConfigFile(final String clientConfigFile) {
-        this.clientConfigFile = clientConfigFile;
-    }
-
     public boolean isDebugMode() {
         return debugMode;
     }
@@ -169,17 +159,17 @@ public class ApplicationConfiguration {
         this.tabindexOnlyFormField = tabindexOnlyFormField;
     }
 
-    @Override
-    public String toString() {
-        return "ApplicationManagerOption [heartBeatPeriod=" + heartBeatPeriod + " " + heartBeatPeriodTimeUnit + "]";
-    }
-
     public boolean isEnableClientToServerHeartBeat() {
         return enableClientToServerHeartBeat;
     }
 
     public void setEnableClientToServerHeartBeat(final boolean enableClientToServerHeartBeat) {
         this.enableClientToServerHeartBeat = enableClientToServerHeartBeat;
+    }
+
+    @Override
+    public String toString() {
+        return "ApplicationManagerOption [heartBeatPeriod=" + heartBeatPeriod + " " + heartBeatPeriodTimeUnit + "]";
     }
 
 }

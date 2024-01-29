@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.core.server.service.query;
+package com.ponysdk.core.server.query;
 
 import java.io.Serializable;
 import java.time.Duration;

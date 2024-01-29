@@ -21,10 +21,10 @@
  * the License.
  */
 
-package com.ponysdk.core.server.context;
+package com.ponysdk.core.util;
 
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.concurrent.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.ui.basic.PObject;
 import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.basic.PWindowManager;
@@ -71,7 +71,7 @@ public class PObjectCache {
 
             final PWindow window = windowID == PWindow.getMain().getID() ? PWindow.getMain() : PWindowManager.getWindow(windowID);
             if (window != null) {
-                final ModelWriter writer = UIContext.get().getWriter();
+                final ModelWriter writer = UIContextImpl.get().getWriter();
                 writer.beginObject(window);
                 if (frameID != -1) writer.write(ServerToClientModel.FRAME_ID, frameID);
                 writer.write(ServerToClientModel.TYPE_GC, objectID);

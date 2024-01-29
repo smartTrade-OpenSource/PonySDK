@@ -141,15 +141,16 @@ Now you can go on http://localhost:8081/sample/ or https://localhost:8081/sample
 
 ## Version 3
 
-- [DONE] JAVA 21
+- [DONE] JAVA 21 (Toolchain)
+- [DONE] Upgrade gradle latest
 - [DONE] JAKARTA migration
-- [DONE] JSInteropt 2
+- [DONE] elemental2
 - [DONE] Upgrade GWT
 - [DONE] Kotlin
 - [DONE] Clean Deprecated
 - [DONE] New Threading Model
 - [DONE] Remove Synchronized
-- [DONE] Remove ThreadLocal (except UIContext, just a set ref ?)
+- [WIP] Remove ThreadLocal (except UIContext, just a set ref ?) , scopped value
 - [DONE] REMOVE HTTP Session (Socket only)
 - [DONE] JETTY 11
 - [DONE] TLSv1.3
@@ -157,8 +158,9 @@ Now you can go on http://localhost:8081/sample/ or https://localhost:8081/sample
 - [WIP] Virtual Thread
 - [WIP] Remove Deprecated Code
 - [TBD] Local Storage
-- [TBD] Dictionary
+- [TBD] Dictionary (style, String recurrent , auto ou pas ?)
 - [TBD] Push Binary instructions
-- [TBD] Session Like Provider ?
-- 
+- [TBD] Addon / Binary model ?
+- [TBD] Application Like Provider ?
+- [TBD] Template
 

@@ -38,7 +38,7 @@ import java.util.Map;
 
 public class PTSuggestBox extends PTWidget<SuggestBox> {
 
-    private static Map<Integer,SuggestOracle> oracleByID;
+    private static Map<Integer, SuggestOracle> oracleByID;
 
     private PTTextBox ptTextBox;
     private SuggestOracle oracle;

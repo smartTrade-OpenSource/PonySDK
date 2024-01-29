@@ -21,16 +21,28 @@
  * the License.
  */
 
-package com.ponysdk.impl.java.server;
+package com.ponysdk.core.server.application;
 
-import com.ponysdk.core.server.application.ApplicationManager;
+import com.ponysdk.core.server.context.UIContext;
+import com.ponysdk.core.server.context.UIContextFactory;
+import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.ui.main.EntryPoint;
 
 public class JavaApplicationManager extends ApplicationManager {
+    private final UIContextFactory uiContextFactory;
+
+    public JavaApplicationManager() {
+        uiContextFactory = new UIContextFactory() {
+            @Override
+            public UIContext create() {
+                return new UIContextImpl(this);
+            }
+        };
+    }
 
     @Override
-    public void start() {
-        // Nothing to do
+    public UIContextFactory getUIContextFactory() {
+        return uiContextFactory;
     }
 
     @Override
@@ -39,7 +51,7 @@ public class JavaApplicationManager extends ApplicationManager {
         try {
             return entryPointClassName.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
-            throw new IllegalArgumentException(e);
+            throw new RuntimeException(e);
         }
     }
 

@@ -24,7 +24,7 @@
 package com.ponysdk.core.ui.basic;
 
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.concurrent.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 import com.ponysdk.core.writer.ModelWriter;
@@ -75,7 +75,7 @@ public class PHistory {
         if (Objects.equals(this.token, token)) return;
         this.token = token;
 
-        final ModelWriter writer = UIContext.get().getWriter();
+        final ModelWriter writer = UIContextImpl.get().getWriter();
         writer.beginObject(PWindow.getMain());
         writer.write(ServerToClientModel.TYPE_HISTORY, token);
         //TODO nciaravola pas besoin de boolean if false

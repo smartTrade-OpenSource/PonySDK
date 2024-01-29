@@ -26,7 +26,6 @@ package com.ponysdk.core.server.servlet;
 import com.ponysdk.core.server.application.ApplicationManager;
 import com.ponysdk.core.server.websocket.PonyPerMessageDeflateExtension;
 import com.ponysdk.core.server.websocket.WebSocket;
-import com.ponysdk.core.server.websocket.WebsocketMonitor;
 import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeRequest;
 import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeResponse;
@@ -40,35 +39,21 @@ import java.time.Duration;
 public class WebSocketServlet extends JettyWebSocketServlet {
 
     private final ApplicationManager applicationManager;
-    private int maxIdleTime = 1000000;
-    private WebsocketMonitor monitor;
 
     public WebSocketServlet(final ApplicationManager applicationManager) {
         this.applicationManager = applicationManager;
     }
 
-    protected WebSocket createWebsocket(JettyServerUpgradeRequest request, JettyServerUpgradeResponse response) {
-        final WebSocket webSocket = new WebSocket();
-        webSocket.setRequest(request);
-        webSocket.setApplicationManager(applicationManager);
-        webSocket.setMonitor(monitor);
-        return webSocket;
-    }
-
-    public void setMaxIdleTime(final int maxIdleTime) {
-        this.maxIdleTime = maxIdleTime;
-    }
-
-    public void setWebsocketMonitor(final WebsocketMonitor monitor) {
-        this.monitor = monitor;
-    }
-
     @Override
     protected void configure(JettyWebSocketServletFactory factory) {
-        factory.setIdleTimeout(Duration.ofMillis(maxIdleTime));
+        factory.setIdleTimeout(Duration.ofMillis(applicationManager.getConfiguration().getMaxIdleTime()));
         factory.setCreator(this::createWebsocket);
         ServletContextHandler context = ServletContextHandler.getServletContextHandler(getServletContext());
         WebSocketComponents components = WebSocketServerComponents.getWebSocketComponents(context);
         components.getExtensionRegistry().register("permessage-deflate", PonyPerMessageDeflateExtension.class);
+    }
+
+    private WebSocket createWebsocket(JettyServerUpgradeRequest request, JettyServerUpgradeResponse response) {
+        return new WebSocket(applicationManager, request);
     }
 }

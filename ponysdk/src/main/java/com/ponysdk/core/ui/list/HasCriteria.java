@@ -23,7 +23,7 @@
 
 package com.ponysdk.core.ui.list;
 
-import com.ponysdk.core.server.service.query.Criterion;
+import com.ponysdk.core.server.query.Criterion;
 
 import java.util.List;
 

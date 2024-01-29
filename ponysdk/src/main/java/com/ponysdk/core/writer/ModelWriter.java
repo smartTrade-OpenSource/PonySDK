@@ -24,7 +24,7 @@
 package com.ponysdk.core.writer;
 
 import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.concurrent.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.server.websocket.WebsocketEncoder;
 import com.ponysdk.core.ui.basic.PWindow;
 
@@ -57,13 +57,13 @@ public class ModelWriter {
      * @param value The type can be primitives, String or Object[]
      */
     public void write(final ServerToClientModel model, final Object value) {
-        if (UIContext.get().isAlive()) {
+        if (UIContextImpl.get().isAlive()) {
             encoder.encode(model, value);
         }
     }
 
     public void endObject() {
-        if (UIContext.get().isAlive()) {
+        if (UIContextImpl.get().isAlive()) {
             encoder.endObject();
         }
     }

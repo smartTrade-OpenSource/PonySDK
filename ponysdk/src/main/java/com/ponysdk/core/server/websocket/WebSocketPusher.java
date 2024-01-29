@@ -51,12 +51,11 @@ public class WebSocketPusher extends AutoFlushedBuffer implements Callback {
     private static final int MAX_UNSIGNED_BYTE_VALUE = Byte.MAX_VALUE * 2 + 1;
     private static final int MAX_UNSIGNED_SHORT_VALUE = Short.MAX_VALUE * 2 + 1;
     private static final int MODEL_KEY_SIZE = 1;
+    private static final ReentrantLock lock = new ReentrantLock();
     private static WebSocketStatsRecorder statsRecorder;
     private final Session session;
     private int metaBytes;
-
     private WebSocket.Listener listener;
-    private static final ReentrantLock lock = new ReentrantLock();
 
     public WebSocketPusher(final Session session, final int bufferSize, final int maxChunkSize, final long timeoutMillis) {
         super(bufferSize, true, maxChunkSize, 0.25f, timeoutMillis);

@@ -23,7 +23,7 @@
 
 package com.ponysdk.core.ui.datagrid2.controller;
 
-import com.ponysdk.core.server.concurrent.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.cell.Cell;
 import com.ponysdk.core.ui.datagrid2.column.Column;
@@ -364,7 +364,7 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
                                         final Consumer<Pair<DataSrcResult, Throwable>> consumer) {
         viewSnapshot = new DataGridSnapshot(threadSnapshot);
         final long currentProcessID = count.get();
-        UIContext.get().execute(() -> {
+        UIContextImpl.get().execute(() -> {
             try {
                 if (viewSnapshot.equals(threadSnapshot) && lastProcessedID <= currentProcessID) {
                     final DataSrcResult result = new DataSrcResult(dataSource.getRows(dataSrcRowIndex, dataSize), dataSrcRowIndex,

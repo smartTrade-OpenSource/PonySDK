@@ -21,15 +21,15 @@
  * the License.
  */
 
-package com.ponysdk.core.server.concurrent;
+package com.ponysdk.core.server.context;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.ApplicationManager;
-import com.ponysdk.core.server.context.CommunicationSanityChecker;
-import com.ponysdk.core.server.context.PObjectCache;
+import com.ponysdk.core.server.concurrent.Scheduler;
+import com.ponysdk.core.server.websocket.PonyPerMessageDeflateExtension;
 import com.ponysdk.core.server.websocket.WebSocket;
 import com.ponysdk.core.ui.basic.PCookies;
 import com.ponysdk.core.ui.basic.PHistory;
@@ -38,21 +38,22 @@ import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.eventbus.StreamHandler;
 import com.ponysdk.core.ui.statistic.TerminalDataReceiver;
 import com.ponysdk.core.useragent.UserAgent;
+import com.ponysdk.core.util.PObjectCache;
 import com.ponysdk.core.writer.ModelWriter;
-import jakarta.json.JsonNumber;
-import jakarta.json.JsonObject;
-import jakarta.json.JsonString;
-import jakarta.json.JsonValue;
+import jakarta.json.*;
 import jakarta.json.spi.JsonProvider;
-import jakarta.servlet.http.HttpSession;
 import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeRequest;
+import org.eclipse.jetty.util.component.Container;
+import org.eclipse.jetty.websocket.core.Extension;
+import org.eclipse.jetty.websocket.core.ExtensionStack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.time.Duration;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -62,51 +63,44 @@ import java.util.concurrent.locks.ReentrantLock;
  * store information about that user.
  * </p>
  */
-public class UIContext {
-    private static final Logger log = LoggerFactory.getLogger(UIContext.class);
-
-    private static final ThreadLocal<UIContext> currentContext = new ThreadLocal<>();
+public class UIContextImpl implements UIContext {
+    public final static ScopedValue<UIContextImpl> currentContext = ScopedValue.newInstance();
+    private static final Logger log = LoggerFactory.getLogger(UIContextImpl.class);
+    private static final Logger loggerIn = LoggerFactory.getLogger("WebSocket-IN");
+    private static final Logger loggerOut = LoggerFactory.getLogger("WebSocket-OUT");
     private static final AtomicInteger uiContextCount = new AtomicInteger();
     private static final String DEFAULT_PROVIDER = "org.glassfish.json.JsonProviderImpl";
     private static final int INITIAL_STREAM_MAP_CAPACITY = 2;
+    private static final String MSG_RECEIVED = "Message received from terminal : UIContext #{} on {} : {}";
 
-    private static final Map<Integer, UIContext> contexts = new ConcurrentHashMap<>();
-    private static final List<UIContextCreationListener> uiContextCreationListeners = new CopyOnWriteArrayList<>();
-
-    private final int ID;
-
+    private final int ID = uiContextCount.incrementAndGet();
     private final ReentrantLock lock = new ReentrantLock();
     private final Map<String, Object> attributes = new HashMap<>();
-
     private final PObjectCache pObjectCache = new PObjectCache();
     private final PHistory history = new PHistory();
     private final com.ponysdk.core.ui.eventbus.EventBus rootEventBus = new com.ponysdk.core.ui.eventbus.EventBus();
-    private final com.ponysdk.core.ui.eventbus2.EventBus newEventBus = new com.ponysdk.core.ui.eventbus2.EventBus();
+    private final com.ponysdk.core.ui.eventbus2.EventBus eventBus = new com.ponysdk.core.ui.eventbus2.EventBus();
     private final PCookies cookies = new PCookies();
-    private final Set<DataListener> listeners = ConcurrentHashMap.newKeySet();
     private final Latency roundtripLatency = new Latency(10);
     private final Latency networkLatency = new Latency(10);
     private final Latency terminalLatency = new Latency(10);
-    private final ApplicationConfiguration configuration;
-    private final WebSocket socket;
-    private final JettyServerUpgradeRequest request;
+    private final ApplicationManager applicationManager;
     private final JsonProvider jsonProvider;
     private final ModelWriter modelWriter;
+    private final List<UIContextDestroyListener> uiContextDestroyListeners = new ArrayList<>();
     private int objectCounter = 1;
     private Map<Integer, StreamHandler> streamListenerByID;
     private int streamRequestCounter = 0;
     private TerminalDataReceiver terminalDataReceiver;
-    private boolean alive = true;
     private long lastReceivedTime = System.currentTimeMillis();
-    private final List<UIContextDestroyListener> uiContextDestroyListeners = new ArrayList<>();
     private CommunicationSanityChecker communicationSanityChecker;
+    private WebSocket.Listener listener;
+    private UIContextInstructionListener monitor;
+    private long lastSentPing;
 
-    public UIContext(final WebSocket socket, final ApplicationManager applicationManager, final JettyServerUpgradeRequest request) {
-        this.ID = uiContextCount.incrementAndGet();
-        this.socket = socket;
-        this.configuration = applicationManager.getConfiguration();
-        this.request = request;
-        this.modelWriter = new ModelWriter(socket);
+    public UIContextImpl(final ApplicationManager applicationManager) {
+        this.applicationManager = applicationManager;
+        this.modelWriter = new ModelWriter(this);
 
         JsonProvider provider;
         try {
@@ -118,46 +112,75 @@ public class UIContext {
         jsonProvider = provider;
     }
 
-    public void start() {
-        communicationSanityChecker = new CommunicationSanityChecker(this);
-        registerUIContext();
-    }
-
-    public static UIContext get() {
+    public static UIContextImpl get() {
         return currentContext.get();
     }
 
-    /**
-     * Removed the current UIContext
-     */
-    public static void remove() {
-        currentContext.remove();
+    public int getID() {
+        return ID;
     }
 
-    public static Collection<UIContext> getRegisteredContexts() {
-        return contexts.values();
+    @Override
+    public void start() {
+        communicationSanityChecker = new CommunicationSanityChecker(this);
+        communicationSanityChecker.start();
     }
 
-    public static UIContext get(int ID) {
-        return contexts.get(ID);
+    @Override
+    public void stop() {
+        communicationSanityChecker.stop();
+
+
+        //TODO
+
+        if (session.isOpen()) return;
+        try {
+            log.info("Closing websocket programmatically for UIContext #{}", ID);
+            session.close();
+        } finally {
+            onClosed();
+        }
     }
 
-    /**
-     * Sets the current UIContext
-     *
-     * @param uiContext the UIContext
-     */
-    public static void setCurrent(final UIContext uiContext) {
-        currentContext.set(uiContext);
+    @Override
+    public void processInstruction(final String message) {
+        if (this.listener != null) listener.onIncomingText(message);
+        try {
+            onMessageReceived();
+            if (monitor != null) monitor.onMessageReceived(this, message);
+
+            final JsonObject jsonObject;
+            try (final JsonReader reader = jsonProvider.createReader(new StringReader(message))) {
+                jsonObject = reader.readObject();
+            }
+
+            if (jsonObject.containsKey(ClientToServerModel.HEARTBEAT_REQUEST.toStringValue())) {
+                sendHeartbeat();
+            } else if (jsonObject.containsKey(ClientToServerModel.TERMINAL_LATENCY.toStringValue())) {
+                processRoundTripLatency(jsonObject);
+            } else if (jsonObject.containsKey(ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue())) {
+                processInstructions(jsonObject);
+            } else if (jsonObject.containsKey(ClientToServerModel.ERROR_MSG.toStringValue())) {
+                processTerminalLog(jsonObject, ClientToServerModel.ERROR_MSG);
+            } else if (jsonObject.containsKey(ClientToServerModel.WARN_MSG.toStringValue())) {
+                processTerminalLog(jsonObject, ClientToServerModel.WARN_MSG);
+            } else if (jsonObject.containsKey(ClientToServerModel.INFO_MSG.toStringValue())) {
+                processTerminalLog(jsonObject, ClientToServerModel.INFO_MSG);
+            } else {
+                log.error("Unknown message from terminal #{} : {}", ID, message);
+            }
+
+            if (monitor != null) monitor.onMessageProcessed(this, message);
+        } catch (final Throwable e) {
+            log.error("Cannot process message from terminal  #{} : {}", ID, message, e);
+        } finally {
+            if (monitor != null) monitor.onMessageUnprocessed(this, message);
+        }
     }
 
-
-    public static void registerCreationListener(UIContextCreationListener listener) {
-        uiContextCreationListeners.add(listener);
-    }
-
-    public static void unregisterCreationListener(UIContextCreationListener listener) {
-        uiContextCreationListeners.remove(listener);
+    @Override
+    public com.ponysdk.core.ui.eventbus2.EventBus getEventBus() {
+        return eventBus;
     }
 
     public void registerDestroyListener(UIContextDestroyListener listener) {
@@ -177,138 +200,42 @@ public class UIContext {
         return rootEventBus;
     }
 
-    /**
-     * Gets the default {@link com.ponysdk.core.ui.eventbus2.EventBus}
-     *
-     * @return the new event bus
-     */
-    public com.ponysdk.core.ui.eventbus2.EventBus getNewEventBus() {
-        return newEventBus;
-    }
-
-    /**
-     * Gets the ID of the UIContext
-     *
-     * @return the ID
-     */
-    public int getID() {
-        return ID;
-    }
-
-    /**
-     * Adds a {@link DataListener} to the UIContext
-     *
-     * @param listener the data listener
-     * @return {@code true} if this set did not already contain the specified element
-     */
-    public boolean addDataListener(final DataListener listener) {
-        return listeners.add(listener);
-    }
-
-    /**
-     * Removes the {@link DataListener} from UIContext
-     *
-     * @param listener the data listener
-     * @return {@code true} if this set contained the specified element
-     */
-    public boolean removeDataListener(final DataListener listener) {
-        return listeners.remove(listener);
-    }
-
-    /**
-     * Submit a task to the scheduler.
-     *
-     * @param task the task to execute
-     */
-    public void execute(final Runnable task) {
-        if (!isAlive()) return;
+    @Override
+    public void executeAsync(final Runnable task) {
+        if (isAlive()) return;
         Scheduler.execute(() -> exec(task));
     }
 
-    /**
-     * Submit a real-time task to the scheduler. Real-time tasks will be executed
-     * before standard tasks.
-     *
-     * @param task the real-time task to execute
-     */
-    public void forceExecute(Runnable task) {
-        if (!isAlive()) return;
-        Scheduler.execute(() -> exec(task));
-    }
-
-    /**
-     * Schedule a task to be executed after a delay.
-     *
-     * @param delay the delay before the task is executed
-     * @param task  the task to execute
-     * @return a handle to the scheduled task
-     */
-    public Scheduler.ScheduledTaskHandler executeLater(Duration delay, Runnable task) {
-        if (!isAlive()) return null;
+    @Override
+    public Scheduler.ScheduledTaskHandler executeLaterAsync(Duration delay, Runnable task) {
+        if (isAlive()) return null;
         return Scheduler.executeLater(delay, () -> exec(task));
     }
 
-    /**
-     * Schedule a periodic task with the lowest priority. The task will only be executed
-     * if there are no other tasks to execute.
-     *
-     * @param period the period between executions of the task
-     * @param task   the periodic task to execute
-     * @return a handle to the scheduled task
-     */
-    public Scheduler.ScheduledTaskHandler schedule(Duration period, Runnable task) {
-        if (!isAlive()) return null;
+    @Override
+    public Scheduler.ScheduledTaskHandler scheduleAsync(Duration period, Runnable task) {
+        if (isAlive()) return null;
         return Scheduler.schedule(period, () -> exec(task));
     }
 
     private void exec(Runnable runnable) {
-        if (UIContext.get() != this) {
-            acquire();
-            try {
-                runnable.run();
-                flush();
-            } catch (final Throwable e) {
-                log.error("Cannot process client instruction", e);
-            } finally {
-                release();
-            }
+        if (currentContext.isBound()) {
+            exec0(runnable);
         } else {
+            ScopedValue.runWhere(currentContext, this, () -> exec0(runnable));
+        }
+    }
+
+    //TODO nciaravola more tests
+    private void exec0(Runnable runnable) {
+        lock.lock();
+        try {
             runnable.run();
-        }
-    }
-
-    /**
-     * Stimulates all {@link DataListener} with a list of object
-     *
-     * @param data list of object
-     */
-    public void pushToClient(final List<Object> data) {
-        if (isAlive() && data != null && !listeners.isEmpty()) {
-            execute(() -> {
-                try {
-                    listeners.forEach(listener -> data.forEach(listener::onData));
-                } catch (final Throwable e) {
-                    log.error("Cannot send data", e);
-                }
-            });
-        }
-    }
-
-
-    /**
-     * Stimulates all {@link DataListener} with an object
-     *
-     * @param data the object
-     */
-    public void pushToClient(final Object data) {
-        if (isAlive() && data != null && !listeners.isEmpty()) {
-            execute(() -> {
-                try {
-                    listeners.forEach(listener -> listener.onData(data));
-                } catch (final Throwable e) {
-                    log.error("Cannot send data", e);
-                }
-            });
+            flush();
+        } catch (final Throwable e) {
+            log.error("Cannot process client instruction", e);
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -344,8 +271,7 @@ public class UIContext {
                     log.error("unknown reference from the browser. Unable to execute instruction: {}", jsonObject);
 
                     if (jsonObject.containsKey(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())) {
-                        final int parentObjectID = jsonObject.getJsonNumber(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())
-                                .intValue();
+                        final int parentObjectID = jsonObject.getJsonNumber(ClientToServerModel.PARENT_OBJECT_ID.toStringValue()).intValue();
                         final PObject gcObject = getObject(parentObjectID);
                         if (log.isWarnEnabled()) log.warn(String.valueOf(gcObject));
                     }
@@ -367,22 +293,6 @@ public class UIContext {
      */
     public void setTerminalDataReceiver(final TerminalDataReceiver terminalDataReceiver) {
         this.terminalDataReceiver = terminalDataReceiver;
-    }
-
-    /**
-     * Locks the current UIContext
-     */
-    public void acquire() {
-        lock.lock();
-        currentContext.set(this);
-    }
-
-    /**
-     * Unlock the current UIContext
-     */
-    public void release() {
-        UIContext.remove();
-        lock.unlock();
     }
 
     /**
@@ -485,22 +395,6 @@ public class UIContext {
     }
 
     /**
-     * Closes the current UIContext
-     */
-    public void close() {
-        socket.beginObject();
-        socket.encode(ServerToClientModel.DESTROY_CONTEXT, null);
-        socket.endObject();
-    }
-
-    /**
-     * force flush instructions to the server
-     */
-    public void flush() {
-        if (isAlive()) socket.flush();
-    }
-
-    /**
      * Binds an object to this session, using the name specified. If an object of the same name is already bound to the
      * session, the object is replaced.
      * <p>
@@ -536,54 +430,7 @@ public class UIContext {
         return (T) attributes.get(name);
     }
 
-    /**
-     * Destroys the current UIContext when the {@link com.ponysdk.core.server.websocket.WebSocket} is closed
-     * <p>
-     * This method locks the UIContext
-     */
-    public void onDestroy() {
-        //we used to avoid calling socket.close() there, but sometimes jetty does not close the WS
-        //when there is an exception in a listener => always call close since it is a no-op on a closed WS
-        destroy();
-    }
-
-    /**
-     * Destroys the UIContext
-     * <p>
-     * This method locks the UIContext
-     */
-    public void destroy() {
-        if (!isAlive()) return;
-        acquire();
-        try {
-            doDestroy();
-            socket.close();
-        } finally {
-            release();
-        }
-    }
-
-    /**
-     * Disconnects and destroys the UIContext
-     * <p>
-     * This method locks the UIContext
-     */
-    public void disconnect() {
-        if (!isAlive()) return;
-        acquire();
-        try {
-            doDestroy();
-            socket.disconnect();
-        } finally {
-            release();
-        }
-    }
-
-    /**
-     * Destroys effectively the UIContext
-     */
-    private void doDestroy() {
-        alive = false;
+    void onClosed() {
         unregisterUIContext();
     }
 
@@ -593,14 +440,7 @@ public class UIContext {
      * This method locks the UIContext
      */
     public void sendRoundTrip() {
-        acquire();
-        try {
-            socket.sendRoundTrip();
-        } catch (final Throwable e) {
-            log.error("Cannot send server round trip to UIContext #" + getID(), e);
-        } finally {
-            release();
-        }
+        socket.sendRoundTrip();
     }
 
     /**
@@ -665,10 +505,6 @@ public class UIContext {
         return UserAgent.parseUserAgentString(request.getHeader("User-Agent"));
     }
 
-    public HttpSession getSession() {
-        return (HttpSession) request.getSession();
-    }
-
     public void setWebSocketListener(final WebSocket.Listener listener) {
         socket.setListener(listener);
     }
@@ -689,7 +525,7 @@ public class UIContext {
     public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        final UIContext uiContext = (UIContext) o;
+        final UIContextImpl uiContext = (UIContextImpl) o;
         return ID == uiContext.ID;
     }
 
@@ -757,6 +593,169 @@ public class UIContext {
         return terminalLatency.getValue();
     }
 
+    private void unregisterUIContext() {
+        contexts.remove(getID());
+        for (UIContextDestroyListener listener : uiContextDestroyListeners) {
+            try {
+                listener.onUIContextDestroyed(this);
+            } catch (Exception e) {
+                log.error("Exception while notifying the removal of UIContext#" + getID(), e);
+            }
+        }
+        uiContextDestroyListeners.clear();
+        communicationSanityChecker.stop();
+    }
+
+    private void processRoundTripLatency(final JsonObject jsonObject) {
+        final long roundTripLatency = TimeUnit.MILLISECONDS.convert(System.nanoTime() - lastSentPing, TimeUnit.NANOSECONDS);
+        log.trace("RoundTrip measurement : {} ms from terminal #{}", roundTripLatency, ID);
+        addRoundtripLatencyValue(roundTripLatency);
+
+        final long terminalLatency = jsonObject.getJsonNumber(ClientToServerModel.TERMINAL_LATENCY.toStringValue()).longValue();
+        log.trace("Terminal measurement : {} ms from terminal #{}", terminalLatency, ID);
+        addTerminalLatencyValue(terminalLatency);
+
+        final long networkLatency = roundTripLatency - terminalLatency;
+        log.trace("Network measurement : {} ms from terminal #{}", networkLatency, ID);
+        addNetworkLatencyValue(networkLatency);
+    }
+
+    private void processInstructions(final JsonObject jsonObject) {
+        final String applicationInstructions = ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue();
+        loggerIn.trace("UIContext #{} : {}", ID, jsonObject);
+        execute(() -> {
+            final JsonArray appInstructions = jsonObject.getJsonArray(applicationInstructions);
+            for (int i = 0; i < appInstructions.size(); i++) {
+                fireClientData(appInstructions.getJsonObject(i));
+            }
+        });
+    }
+
+    private void processTerminalLog(final JsonObject json, final ClientToServerModel level) {
+        final String message = json.getJsonString(level.toStringValue()).getString();
+        String objectInformation = "";
+
+        if (json.containsKey(ClientToServerModel.OBJECT_ID.toStringValue())) {
+            final PObject object = getObject(json.getJsonNumber(ClientToServerModel.OBJECT_ID.toStringValue()).intValue());
+            objectInformation = object == null ? "NA" : object.toString();
+        }
+
+        switch (level) {
+            case INFO_MSG:
+                if (log.isInfoEnabled()) log.info(MSG_RECEIVED, ID, objectInformation, message);
+                break;
+            case WARN_MSG:
+                if (log.isWarnEnabled()) log.warn(MSG_RECEIVED, ID, objectInformation, message);
+                break;
+            case ERROR_MSG:
+                if (log.isErrorEnabled()) log.error(MSG_RECEIVED, ID, objectInformation, message);
+                break;
+            default:
+                log.error("Unknown log level during terminal log processing : {}", level);
+        }
+    }
+
+    /**
+     * Send round trip to the client
+     */
+    public void sendRoundTrip() {
+        if (isAlive() && isSessionOpen()) {
+            lastSentPing = System.nanoTime();
+            beginObject();
+            encode(ServerToClientModel.ROUNDTRIP_LATENCY, null);
+            endObject();
+            flush0();
+        }
+    }
+
+    private void sendHeartbeat() {
+        if (!isAlive() || !isSessionOpen()) return;
+        beginObject();
+        encode(ServerToClientModel.HEARTBEAT, null);
+        endObject();
+        flush0();
+    }
+
+    public void flush() {
+        if (!session.isOpen()) return;
+        try {
+            websocketPusher.flush();
+        } catch (final IOException e) {
+            log.error("Can't write on the websocket for UIContext #{}, so we destroy the application", ID, e);
+            close();
+        }
+    }
+
+    @Override
+    public void beginObject() {
+        // Nothing to do
+    }
+
+    @Override
+    public void endObject() {
+        encode(ServerToClientModel.END, null);
+    }
+
+    @Override
+    public void encode(final ServerToClientModel model, final Object value) {
+        try {
+            if (loggerOut.isTraceEnabled())
+                loggerOut.trace("UIContext #{} : {} {}", ID, model, value);
+            websocketPusher.encode(model, value);
+            if (listener != null) listener.onOutgoingPonyFrame(model, value);
+        } catch (final IOException e) {
+            log.error("Cannot encode on the websocket for the UIContext #{}, UIContext will be close", ID, e);
+            close();
+        }
+    }
+
+    public void setMonitor(final UIContextInstructionListener monitor) {
+        this.monitor = monitor;
+    }
+
+    public void setListener(final WebSocket.Listener listener) {
+        this.listener = listener;
+        this.websocketPusher.setWebSocketListener(listener);
+        if (!(session instanceof Container)) {
+            log.warn("Unrecognized session type {} for {}", session == null ? null : session.getClass(), uiContext);
+            return;
+        }
+        final ExtensionStack extensionStack = ((Container) session).getBean(ExtensionStack.class);
+        if (extensionStack == null) {
+            log.warn("No Extension Stack for {}", uiContext);
+            return;
+        }
+
+        PonyPerMessageDeflateExtension ponyExtension = null;
+
+        for (Extension extension : extensionStack.getExtensions()) {
+            if (extension.getClass().equals(PonyPerMessageDeflateExtension.class)) {
+                ponyExtension = (PonyPerMessageDeflateExtension) extension;
+                break;
+            }
+        }
+
+        if (ponyExtension == null) {
+            log.warn("Missing PonyPerMessageDeflateExtension from Extension Stack for {}", uiContext);
+            return;
+        }
+        ponyExtension.setWebSocketListener(listener);
+    }
+
+    public interface Listener {
+
+        void onOutgoingPonyFrame(ServerToClientModel model, Object value);
+
+        void onOutgoingPonyFramesBytes(int bytes);
+
+        void onOutgoingWebSocketFrame(int headerLength, int payloadLength);
+
+        void onIncomingText(String text);
+
+        void onIncomingWebSocketFrame(int headerLength, int payloadLength);
+
+    }
+
     private static final class Latency {
 
         private final long[] values;
@@ -776,30 +775,4 @@ public class UIContext {
             return Arrays.stream(values).average().orElse(0);
         }
     }
-
-    private void registerUIContext() {
-        contexts.put(getID(), this);
-
-        for (UIContextCreationListener listener : uiContextCreationListeners) {
-            try {
-                listener.onUIContextCreated(this);
-            } catch (Exception e) {
-                log.error("Exception while notifying the creation of UIContext#" + getID(), e);
-            }
-        }
-    }
-
-    private void unregisterUIContext() {
-        contexts.remove(getID());
-        for (UIContextDestroyListener listener : uiContextDestroyListeners) {
-            try {
-                listener.onUIContextDestroyed(this);
-            } catch (Exception e) {
-                log.error("Exception while notifying the removal of UIContext#" + getID(), e);
-            }
-        }
-        uiContextDestroyListeners.clear();
-        communicationSanityChecker.stop();
-    }
-
 }

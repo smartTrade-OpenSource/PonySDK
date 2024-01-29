@@ -24,7 +24,7 @@
 package com.ponysdk.core.server.servlet;
 
 import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.server.concurrent.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.ui.eventbus.StreamHandler;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -41,7 +41,7 @@ public class StreamServiceServlet extends HttpServlet {
     private void process(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             final int uiContextID = Integer.parseInt(req.getParameter(ClientToServerModel.UI_CONTEXT_ID.toStringValue()));
-            final UIContext uiContext = UIContext.get(uiContextID);
+            final UIContextImpl uiContext = UIContextImpl.get(uiContextID);
             final StreamHandler streamHandler = uiContext.removeStreamListener(Integer.parseInt(req.getParameter(ClientToServerModel.STREAM_REQUEST_ID.toStringValue())));
             streamHandler.onStream(req, resp, uiContext);
         } catch (final Exception e) {

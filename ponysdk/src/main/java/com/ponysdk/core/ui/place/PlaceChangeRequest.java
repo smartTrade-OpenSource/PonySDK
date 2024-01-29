@@ -23,12 +23,12 @@
 
 package com.ponysdk.core.ui.place;
 
-import com.ponysdk.core.server.concurrent.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 
 public class PlaceChangeRequest {
 
     public static void fire(final Object source, final Place newPlace) {
-        UIContext.get().getRootEventBus().fireEvent(new PlaceChangeEvent(source, newPlace));
+        UIContextImpl.get().getRootEventBus().fireEvent(new PlaceChangeEvent(source, newPlace));
     }
 
 }

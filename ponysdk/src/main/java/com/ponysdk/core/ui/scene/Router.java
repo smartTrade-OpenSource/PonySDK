@@ -1,6 +1,6 @@
 package com.ponysdk.core.ui.scene;
 
-import com.ponysdk.core.server.concurrent.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.ui.basic.PSimplePanel;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
@@ -27,7 +27,7 @@ public class Router implements PValueChangeHandler<String> {
 
     public Router(String name) {
         this.name = name;
-        UIContext.get().getHistory().addValueChangeHandler(this);
+        UIContextImpl.get().getHistory().addValueChangeHandler(this);
     }
 
     public void push(Scene scene) {
@@ -39,7 +39,7 @@ public class Router implements PValueChangeHandler<String> {
         if (!scenes.containsKey(sceneID)) {
             log.warn("scene {} not found in the router {}", sceneID, name);
         } else {
-            UIContext.get().getHistory().newItem(sceneID, true);
+            UIContextImpl.get().getHistory().newItem(sceneID, true);
         }
     }
 

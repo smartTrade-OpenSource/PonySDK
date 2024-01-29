@@ -23,8 +23,8 @@
 
 package com.ponysdk.core.ui.list.renderer.header;
 
-import com.ponysdk.core.server.service.query.Criterion;
-import com.ponysdk.core.server.service.query.SortingType;
+import com.ponysdk.core.server.query.Criterion;
+import com.ponysdk.core.server.query.SortingType;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PLabel;

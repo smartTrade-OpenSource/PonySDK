@@ -20,7 +20,6 @@
 
 package com.ponysdk.core.ui.datagrid2.view;
 
-import com.ponysdk.core.ui.datagrid2.datasource.PResultSet;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.column.ColumnActionListener;
@@ -30,6 +29,7 @@ import com.ponysdk.core.ui.datagrid2.controller.DataGridController;
 import com.ponysdk.core.ui.datagrid2.data.DataGridFilter;
 import com.ponysdk.core.ui.datagrid2.data.RowAction;
 import com.ponysdk.core.ui.datagrid2.datasource.DataGridSource;
+import com.ponysdk.core.ui.datagrid2.datasource.PResultSet;
 
 import java.util.Collection;
 import java.util.Comparator;

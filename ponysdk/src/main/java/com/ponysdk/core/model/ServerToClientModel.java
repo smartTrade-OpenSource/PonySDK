@@ -30,7 +30,6 @@ public enum ServerToClientModel {
     HEARTBEAT_PERIOD(ValueTypeModel.INTEGER),
 
     CREATE_CONTEXT(ValueTypeModel.UINT31),
-    DESTROY_CONTEXT(ValueTypeModel.NULL),
     END(ValueTypeModel.NULL),
     OPTION_FORMFIELD_TABULATION(ValueTypeModel.BOOLEAN),
 

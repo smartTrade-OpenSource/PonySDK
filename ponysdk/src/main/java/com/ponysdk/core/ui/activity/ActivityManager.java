@@ -23,7 +23,7 @@
 
 package com.ponysdk.core.ui.activity;
 
-import com.ponysdk.core.server.concurrent.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.ui.basic.PAcceptsOneWidget;
 import com.ponysdk.core.ui.eventbus.EventBus;
 import com.ponysdk.core.ui.place.PlaceChangeEvent;
@@ -50,7 +50,7 @@ public class ActivityManager implements PlaceChangeHandler {
     public ActivityManager(final ActivityMapper mapper) {
         this.mapper = mapper;
 
-        UIContext.get().getRootEventBus().addHandler(PlaceChangeEvent.TYPE, this);
+        UIContextImpl.get().getRootEventBus().addHandler(PlaceChangeEvent.TYPE, this);
     }
 
     public ActivityManager(final ActivityMapper mapper, final EventBus eventBus) {

@@ -23,7 +23,7 @@
 
 package com.ponysdk.core.ui.activity;
 
-import com.ponysdk.core.server.concurrent.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PAcceptsOneWidget;
 import com.ponysdk.core.ui.eventbus.BroadcastEventHandler;
@@ -54,7 +54,7 @@ public abstract class AbstractActivity<T extends IsPWidget> implements Activity 
         this.world.setWidget(view2);
 
         // Force flush to show the Loading information
-        UIContext.get().flush();
+        UIContextImpl.get().flush();
 
         if (firstStart) {
             buildView();
@@ -87,23 +87,23 @@ public abstract class AbstractActivity<T extends IsPWidget> implements Activity 
     }
 
     public HandlerRegistration addHandler(final Event.Type type, final EventHandler handler) {
-        return UIContext.get().getRootEventBus().addHandler(type, handler);
+        return UIContextImpl.get().getRootEventBus().addHandler(type, handler);
     }
 
     public void removeHandler(final Event.Type type, final EventHandler handler) {
-        UIContext.get().getRootEventBus().removeHandler(type, handler);
+        UIContextImpl.get().getRootEventBus().removeHandler(type, handler);
     }
 
     public void fireEvent(final Event<? extends EventHandler> event) {
-        UIContext.get().getRootEventBus().fireEvent(event);
+        UIContextImpl.get().getRootEventBus().fireEvent(event);
     }
 
     public void addHandler(final BroadcastEventHandler handler) {
-        UIContext.get().getRootEventBus().addHandler(handler);
+        UIContextImpl.get().getRootEventBus().addHandler(handler);
     }
 
     public void removeHandler(final BroadcastEventHandler handler) {
-        UIContext.get().getRootEventBus().removeHandler(handler);
+        UIContextImpl.get().getRootEventBus().removeHandler(handler);
     }
 
 }

@@ -23,7 +23,7 @@
 
 package com.ponysdk.core.ui.eventbus;
 
-import com.ponysdk.core.server.concurrent.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -31,5 +31,5 @@ import jakarta.servlet.http.HttpServletResponse;
 @FunctionalInterface
 public interface StreamHandler {
 
-    void onStream(HttpServletRequest request, HttpServletResponse response, UIContext uiContext);
+    void onStream(HttpServletRequest request, HttpServletResponse response, UIContextImpl uiContext);
 }

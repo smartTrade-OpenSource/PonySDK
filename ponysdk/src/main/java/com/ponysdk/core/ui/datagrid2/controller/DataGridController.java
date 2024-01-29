@@ -23,13 +23,13 @@
 
 package com.ponysdk.core.ui.datagrid2.controller;
 
-import com.ponysdk.core.ui.datagrid2.datasource.PResultSet;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.cell.Cell;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfig;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfigBuilder;
 import com.ponysdk.core.ui.datagrid2.data.DataGridFilter;
+import com.ponysdk.core.ui.datagrid2.datasource.PResultSet;
 import com.ponysdk.core.ui.datagrid2.view.DataGridSnapshot;
 import com.ponysdk.core.ui.datagrid2.view.DataGridView;
 import com.ponysdk.core.util.Pair;

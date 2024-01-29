@@ -23,7 +23,7 @@
 
 package com.ponysdk.core.ui.datagrid2.view;
 
-import com.ponysdk.core.server.concurrent.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PTextBox;
@@ -70,7 +70,7 @@ public class ColumnFilterFooterDataGridView<K, V> extends DecoratorDataGridView<
         if (disabledFooter == null) return;
         disabledFooter.setEnabled(true);
         disabledFooter.focus();
-        UIContext.get().flush();
+        UIContextImpl.get().flush();
         disabledFooter = null;
     }
 
@@ -210,7 +210,7 @@ public class ColumnFilterFooterDataGridView<K, V> extends DecoratorDataGridView<
 
         private void onValueChange(final PValueChangeEvent<String> event) {
             footer.setEnabled(false);
-            UIContext.get().flush();
+            UIContextImpl.get().flush();
             disabledFooter = footer;
             filter(event.getData());
         }

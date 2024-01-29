@@ -23,7 +23,7 @@
 
 package com.ponysdk.core.ui.rich;
 
-import com.ponysdk.core.server.concurrent.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PClickHandler;
@@ -156,7 +156,7 @@ public class PNotificationManager {
     }
 
     private static void addAutoCloseTimer(final PPopupPanel popupPanel, final int delayBeforeClosing) {
-        UIContext.get().executeLater(Duration.ofMillis(delayBeforeClosing), popupPanel::close);
+        UIContextImpl.get().executeLater(Duration.ofMillis(delayBeforeClosing), popupPanel::close);
     }
 
     public enum Notification {

@@ -24,7 +24,7 @@
 package com.ponysdk.core.ui.basic;
 
 import com.ponysdk.core.model.*;
-import com.ponysdk.core.server.concurrent.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.ui.basic.event.*;
 import com.ponysdk.core.ui.basic.event.PVisibilityEvent.PVisibilityHandler;
 import com.ponysdk.core.ui.eventbus.*;
@@ -112,7 +112,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public void ensureDebugId(final String debugID) {
-        if (UIContext.get().getConfiguration().isDebugMode()) {
+        if (UIContextImpl.get().getConfiguration().isDebugMode()) {
             if (Objects.equals(this.debugID, debugID)) return;
             this.debugID = debugID;
             if (initialized) saveUpdate(writer -> writer.write(ServerToClientModel.ENSURE_DEBUG_ID, debugID));
@@ -430,7 +430,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
                     final PDropEvent dropEvent = new PDropEvent(this);
                     final String dragSrc = ClientToServerModel.DRAG_SRC.toStringValue();
                     if (instruction.containsKey(dragSrc)) {
-                        final PWidget source = (PWidget) UIContext.get().getObject(instruction.getJsonNumber(dragSrc).intValue());
+                        final PWidget source = (PWidget) UIContextImpl.get().getObject(instruction.getJsonNumber(dragSrc).intValue());
                         dropEvent.setDragSource(source);
                     }
                     fireEvent(dropEvent);
@@ -519,7 +519,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     public void fireEvent(final Event<? extends EventHandler> event) {
         if (eventSource == null) return;
-        UIContext.get().getRootEventBus().fireEventFromSource(event, eventSource);
+        UIContextImpl.get().getRootEventBus().fireEventFromSource(event, eventSource);
     }
 
     public void removeFromParent() {

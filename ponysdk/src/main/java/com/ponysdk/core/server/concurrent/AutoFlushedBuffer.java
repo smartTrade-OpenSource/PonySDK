@@ -61,6 +61,7 @@ public abstract class AutoFlushedBuffer implements Closeable {
     // If 0, there is no pending flush so producer thread is guaranteed to have a stable view of consumerIndex and is allow to write it
     // otherwise consumer thread is expected to flush until that index and CAS flushIndex to 0
     private final AtomicLong flushIndex = new AtomicLong(0L);
+    private final ReentrantLock lock = new ReentrantLock();
     // used to indicate that there is no data between the index and the end of the buffer and that part should be ignored by the flushing logic.
     // Set by producer thread and reset by flushing thread.
     // to avoid dirty read, the producer thread can assume it is 0 if consumerIndex is in the same buffer iteration. It can also be safely read after reading flushIndex == 0
@@ -76,7 +77,6 @@ public abstract class AutoFlushedBuffer implements Closeable {
     private volatile Exception asyncException = null;
     private volatile boolean closed = false;
     private volatile Thread waiterThread = null;
-    private final ReentrantLock lock = new ReentrantLock();
 
     /**
      * Default constructor : 64kB direct buffer with a 4kB flush size, a 25% free space threshold

@@ -26,7 +26,7 @@ package com.ponysdk.core.ui.basic;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.concurrent.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.writer.ModelWriter;
 import jakarta.json.JsonObject;
 
@@ -36,7 +36,7 @@ import jakarta.json.JsonObject;
  * are accessed via {@link PWindow#getPRootPanel(String)} .
  * <p>
  * Most applications will add widgets to the default root panel in their
- * {@link com.ponysdk.core.ui.main.EntryPoint#start(UIContext)} methods.
+ * {@link com.ponysdk.core.ui.main.EntryPoint#start(UIContextImpl)} methods.
  * </p>
  */
 public class PRootPanel extends PAbsolutePanel {

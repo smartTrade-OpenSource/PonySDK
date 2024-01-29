@@ -26,7 +26,7 @@ package com.ponysdk.core.ui.basic;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.concurrent.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.ui.basic.event.PSelectionEvent;
 import com.ponysdk.core.ui.basic.event.PSelectionHandler;
 import jakarta.json.JsonObject;
@@ -167,18 +167,18 @@ public class PTree extends PWidget implements Iterable<PTreeItem> {
         if (!isVisible()) return;
         if (instruction.containsKey(ClientToServerModel.HANDLER_SELECTION.toStringValue())) {
             final int widgetId = instruction.getJsonNumber(ClientToServerModel.HANDLER_SELECTION.toStringValue()).intValue();
-            selectedItem = (PTreeItem) UIContext.get().getObject(widgetId);
+            selectedItem = (PTreeItem) UIContextImpl.get().getObject(widgetId);
             if (selectionHandlers != null) {
                 final PSelectionEvent<PTreeItem> selectionEvent = new PSelectionEvent<>(this, selectedItem);
                 selectionHandlers.forEach(handler -> handler.onSelection(selectionEvent));
             }
         } else if (instruction.containsKey(ClientToServerModel.HANDLER_OPEN.toStringValue())) {
             final int widgetId = instruction.getJsonNumber(ClientToServerModel.HANDLER_OPEN.toStringValue()).intValue();
-            final PTreeItem item = (PTreeItem) UIContext.get().getObject(widgetId);
+            final PTreeItem item = (PTreeItem) UIContextImpl.get().getObject(widgetId);
             item.openState = true;
         } else if (instruction.containsKey(ClientToServerModel.HANDLER_CLOSE.toStringValue())) {
             final int widgetId = instruction.getJsonNumber(ClientToServerModel.HANDLER_CLOSE.toStringValue()).intValue();
-            final PTreeItem item = (PTreeItem) UIContext.get().getObject(widgetId);
+            final PTreeItem item = (PTreeItem) UIContextImpl.get().getObject(widgetId);
             item.openState = false;
         } else {
             super.onClientData(instruction);

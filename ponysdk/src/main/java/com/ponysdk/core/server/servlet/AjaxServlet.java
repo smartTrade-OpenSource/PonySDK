@@ -24,7 +24,7 @@
 package com.ponysdk.core.server.servlet;
 
 import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.server.concurrent.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.ui.basic.PObject;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -52,7 +52,7 @@ public class AjaxServlet extends HttpServlet {
     private void process(final HttpServletRequest req, final HttpServletResponse resp) {
         try {
             final int uiContextID = parseInt(req.getHeader(ClientToServerModel.UI_CONTEXT_ID.name()));
-            final UIContext uiContext = UIContext.get(uiContextID);
+            final UIContextImpl uiContext = UIContextImpl.get(uiContextID);
 
             if (uiContext == null) {
                 throw new IllegalStateException("UI Context #" + uiContextID + " not found");
@@ -66,7 +66,7 @@ public class AjaxServlet extends HttpServlet {
         }
     }
 
-    private void handleAjaxRequest(UIContext uiContext, int objectID, HttpServletRequest req, HttpServletResponse resp) {
+    private void handleAjaxRequest(UIContextImpl uiContext, int objectID, HttpServletRequest req, HttpServletResponse resp) {
         try {
             final PObject pObject = uiContext.getObject(objectID);
             if (pObject == null) {

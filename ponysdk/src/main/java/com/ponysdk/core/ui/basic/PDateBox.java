@@ -26,7 +26,7 @@ package com.ponysdk.core.ui.basic;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.core.server.concurrent.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.ui.basic.event.*;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 import com.ponysdk.core.writer.ModelWriter;
@@ -82,7 +82,7 @@ public class PDateBox extends PWidget implements Focusable, HasPValue<Date>, PVa
     }
 
     protected PDateBox(final PDatePicker picker, final SimpleDateFormat dateFormat, final boolean keepDayTimeNeeded) {
-        if (UIContext.get().getConfiguration().isTabindexOnlyFormField())
+        if (UIContextImpl.get().getConfiguration().isTabindexOnlyFormField())
             tabindex = TabindexMode.FOCUSABLE.getTabIndex();
         this.datePicker = picker;
         this.dateFormat = dateFormat;

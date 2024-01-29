@@ -23,8 +23,8 @@
 
 package com.ponysdk.core.ui.list.renderer.header;
 
-import com.ponysdk.core.server.service.query.Criterion;
-import com.ponysdk.core.server.service.query.SortingType;
+import com.ponysdk.core.server.query.Criterion;
+import com.ponysdk.core.server.query.SortingType;
 import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
 import com.ponysdk.core.ui.basic.event.PKeyUpHandler;

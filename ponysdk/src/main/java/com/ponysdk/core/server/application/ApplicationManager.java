@@ -23,29 +23,53 @@
 
 package com.ponysdk.core.server.application;
 
-import com.ponysdk.core.server.concurrent.Scheduler;
-import com.ponysdk.core.server.concurrent.UIContext;
+import com.ponysdk.core.server.context.UIContext;
+import com.ponysdk.core.server.context.UIContextFactory;
+import com.ponysdk.core.server.context.UIContextInstructionListener;
+import com.ponysdk.core.server.context.UIContextLifeCycle;
 import com.ponysdk.core.ui.main.EntryPoint;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public abstract class ApplicationManager {
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+public abstract class ApplicationManager implements UIContextLifeCycle {
+
+    private static final Logger log = LoggerFactory.getLogger(ApplicationManager.class);
+
+    private final Map<Integer, UIContext> contextsById = new ConcurrentHashMap<>();
 
     protected ApplicationConfiguration configuration;
 
     public final void startUIContext(final UIContext uiContext) {
-        uiContext.start();
-        uiContext.execute(() -> {
-            final EntryPoint entryPoint = initializeEntryPoint();
-            final String historyToken = uiContext.getHistoryToken();
+        try {
+            uiContext.addUIContextLifeCycle(this);
+            uiContext.start();
+            uiContext.execute(() -> {
+                final EntryPoint entryPoint = initializeEntryPoint();
+                final String historyToken = uiContext.getHistoryToken();
 
-            if (historyToken != null && !historyToken.isEmpty()) {
-                uiContext.getHistory().newItem(historyToken, false);
-            }
-
-            entryPoint.start(uiContext);
-        });
+                if (historyToken != null && !historyToken.isEmpty()) {
+                    uiContext.getHistory().newItem(historyToken, false);
+                }
+                entryPoint.start(uiContext);
+            });
+        } catch (Exception e) {
+            log.error("Cannot start UIContext #{}", uiContext.getID(), e);
+            unregisterUIContext(uiContext);
+        }
     }
 
-    protected abstract EntryPoint initializeEntryPoint();
+    private void unregisterUIContext(UIContext uiContext) {
+        contextsById.remove(uiContext.getID());
+    }
+
+    private void registerUIContext(UIContext uiContext) {
+        contextsById.put(uiContext.getID(), uiContext);
+    }
 
     public ApplicationConfiguration getConfiguration() {
         return configuration;
@@ -55,6 +79,21 @@ public abstract class ApplicationManager {
         this.configuration = configuration;
     }
 
-    public abstract void start();
+    protected abstract EntryPoint initializeEntryPoint();
 
+    public abstract UIContextFactory getUIContextFactory();
+
+    public UIContextInstructionListener getUIContextInstructionListener() {
+        return null;
+    }
+
+    @Override
+    public void onUIContextStarted(UIContext uiContext) {
+        registerUIContext(uiContext);
+    }
+
+    @Override
+    public void onUIContextStopped(UIContext uiContext) {
+        unregisterUIContext(uiContext);
+    }
 }

@@ -23,7 +23,7 @@
 
 package com.ponysdk.core.ui.dropdown;
 
-import com.ponysdk.core.server.concurrent.UIContext;
+import com.ponysdk.core.server.context.UIContextImpl;
 import com.ponysdk.core.ui.basic.*;
 import com.ponysdk.core.ui.basic.event.PDomEvent.Type;
 import com.ponysdk.core.ui.eventbus.EventHandler;
@@ -102,7 +102,7 @@ public class DropDownContainerAddon extends PAddOnComposite<PPanel> {
     }
 
     private static JsonObject createJsonObject(final int parentId, final boolean stickLeft, final boolean multiLevel) {
-        final JsonObjectBuilder builder = UIContext.get().getJsonProvider().createObjectBuilder();
+        final JsonObjectBuilder builder = UIContextImpl.get().getJsonProvider().createObjectBuilder();
         builder.add(PARENT_ID, parentId);
         builder.add(STICK_LEFT, stickLeft);
         builder.add(MULTILEVEL, multiLevel);

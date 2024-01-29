@@ -32,7 +32,7 @@
         </property>
     </bean>
 
-    <bean name="ponySDKServer" class="com.ponysdk.impl.main.PonySDKServer" init-method="start">
+    <bean name="ponySDKServer" class="com.ponysdk.core.main.PonySDKServer" init-method="start">
         <property name="port" value="80"/>
         <property name="host" value="0.0.0.0"/>
         <property name="applicationManager" ref="applicationManager"/>

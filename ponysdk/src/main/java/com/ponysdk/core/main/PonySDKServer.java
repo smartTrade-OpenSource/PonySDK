@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.impl.main;
+package com.ponysdk.core.main;
 
 import com.ponysdk.core.model.MappingPath;
 import com.ponysdk.core.server.application.ApplicationConfiguration;
@@ -68,7 +68,7 @@ public class PonySDKServer {
     private String sslTrustStorePassphrase;
     private String sslTrustStoreType = "JKS";
     private boolean needClientAuth = false;
-    private String[] enabledProtocols = new String[]{"TLSv1.2","TLSv1.3"};
+    private String[] enabledProtocols = new String[]{"TLSv1.2", "TLSv1.3"};
     private String enabledCipherSuites;
 
     public PonySDKServer() {
@@ -83,17 +83,15 @@ public class PonySDKServer {
         ServletContextHandler contextHandler = createWebApp();
 
         final GzipHandler gzip = new GzipHandler();
-        //gzip.setMinGzipSize(0);
-        //gzip.addIncludedMimeTypes("application/json");
+        gzip.addIncludedMimeTypes("application/json");//TODO nciaravola why ?
         gzip.setHandler(contextHandler);
         final ContextHandlerCollection handlers = new ContextHandlerCollection();
         handlers.setHandlers(gzip, contextHandler);
         server.setHandler(handlers);
 
         JettyWebSocketServletContainerInitializer.configure(contextHandler, null);
-        applicationManager.start();
-        server.start();
 
+        server.start();
         log.info("Webserver started on: {}:{}", InetAddress.getLocalHost().getHostAddress(), port);
     }
 

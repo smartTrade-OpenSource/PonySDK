@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 2017 PonySDK
+ * Copyright (c) 2011 PonySDK
  *  Owners:
  *  Luciano Broussal  <luciano.broussal AT gmail.com>
- *  Mathieu Barbier   <mathieu.barbier AT gmail.com>
- *  Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
+ *	Mathieu Barbier   <mathieu.barbier AT gmail.com>
+ *	Nicolas Ciaravola <nicolas.ciaravola.pro AT gmail.com>
  *
  *  WebSite:
  *  http://code.google.com/p/pony-sdk/
@@ -21,14 +21,29 @@
  * the License.
  */
 
-package com.ponysdk.core.server.websocket;
+package com.ponysdk.core.server.query;
 
-public interface WebsocketMonitor {
+public enum ComparatorType {
 
-    void onMessageReceived(WebSocket webSocket, String message);
+    EQ("="),
+    NE("!="),
+    GT(">"),
+    LT("<"),
+    LE("<="),
+    GE(">="),
+    IN("IN"),
+    LIKE("LIKE"),
+    IS_NULL("IS NULL"),
+    IS_NOT_NULL("IS NOT NULL");
 
-    void onMessageProcessed(WebSocket webSocket, String message);
+    private String name;
 
-    void onMessageUnprocessed(WebSocket webSocket, String message);
+    ComparatorType(final String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
 
 }

@@ -23,7 +23,7 @@
 
 package com.ponysdk.core.ui.list;
 
-import com.ponysdk.core.server.service.query.SortingType;
+import com.ponysdk.core.server.query.SortingType;
 
 @FunctionalInterface
 public interface Sortable {

@@ -14,6 +14,10 @@ java {
     }
 }
 
+tasks.withType<JavaCompile> {
+    options.compilerArgs.add("--enable-preview")
+}
+
 group = "com.ponysdk"
 version = "3.0.0"
 
@@ -46,6 +50,7 @@ tasks.register<JavaExec>("gwtc") {
     mainClass.set("com.google.gwt.dev.Compiler")
     workingDir = File(gwtOutputDirName)
     maxHeapSize = "512M"
+
 
     inputs.dir("src/main/java/com/ponysdk/core/terminal")
     outputs.dir("$gwtOutputDirName/gwt/ponyterminal")

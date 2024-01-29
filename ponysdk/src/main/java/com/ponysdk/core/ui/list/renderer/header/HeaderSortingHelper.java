@@ -23,7 +23,7 @@
 
 package com.ponysdk.core.ui.list.renderer.header;
 
-import com.ponysdk.core.server.service.query.SortingType;
+import com.ponysdk.core.server.query.SortingType;
 
 public class HeaderSortingHelper {
 
