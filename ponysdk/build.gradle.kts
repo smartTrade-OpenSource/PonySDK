@@ -37,10 +37,19 @@ dependencies {
     implementation("org.eclipse.jetty.ee10:jetty-ee10-servlet:12.0.3")
     implementation("jakarta.json:jakarta.json-api:2.1.2")
 
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.1")
+    testImplementation("org.mockito:mockito-core:5.10.0")
+
+    //testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
     add("gwtdev", "org.gwtproject:gwt-user:2.10.0")
     add("gwtdev", "org.gwtproject:gwt-dev:2.10.0")
     add("gwtdev", "com.google.elemental2:elemental2-core:1.2.1")
     add("gwtdev", "com.google.elemental2:elemental2-dom:1.2.1")
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }
 
 val gwtOutputDirName = "${layout.buildDirectory.get().asFile}/gwt"
