@@ -29,6 +29,7 @@ import com.ponysdk.core.ui.model.ServerBinaryModel;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Abstract base class for panels that can contain multiple child widgets.
@@ -157,23 +158,4 @@ public abstract class PComplexPanel extends PPanel {
         if (widget == this) throw new IllegalStateException("Cannot insert widget to itself");
     }
 
-    @Override
-    public String dumpDOM() {
-        String DOM = "<div pid=\"" + ID + "\"";
-
-        for (Map.Entry<String, String> entry : getAttributes()) {
-            DOM += " " + entry.getKey();
-            if (entry.getValue() != null && !entry.getValue().isEmpty()) {
-                DOM += " = " + entry.getValue();
-            }
-        }
-
-        DOM += ">";
-
-        for (PWidget child : children) {
-            DOM += child.dumpDOM();
-        }
-        DOM += "</div>";
-        return DOM;
-    }
 }

@@ -24,6 +24,7 @@
 package com.ponysdk.core.ui.basic;
 
 import java.util.Iterator;
+import java.util.stream.Collectors;
 
 import com.ponysdk.core.ui.basic.event.HasPWidgets;
 import org.slf4j.Logger;
@@ -90,6 +91,26 @@ public abstract class PPanel extends PWidget implements HasPWidgets {
         } catch (Exception e) {
             log.error("An error occurred while trying to process the destroy event", e);
         }
+    }
+    private String dumpChildDOM() {
+        String DOM = "";
+        for (PWidget w : this) {
+            DOM += w.dumpDOM();
+        }
+        return DOM;
+    }
+
+    @Override
+    public final String dumpDOM() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("<div");
+        builder.append(" pid=\"" + ID + "\"");
+        if (!isVisible()) builder.append(" hidden");
+        builder.append(" class=\"" + getStyleNames().collect(Collectors.joining(" ")) + "\"");
+        builder.append(">");
+        builder.append(dumpChildDOM());
+        builder.append("</div>");
+        return builder.toString();
     }
 
 }

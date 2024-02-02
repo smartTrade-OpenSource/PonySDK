@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 /**
  * Base class for panels that contain only one widget.
@@ -135,8 +136,4 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
         };
     }
 
-    @Override
-    public String dumpDOM() {
-        return "<div pid=\"" + ID + "\">" + widget.dumpDOM() + "</div>";
-    }
 }
