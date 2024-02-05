@@ -147,6 +147,7 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
                 clearTitleButton = Element.newPButton();
                 clearTitleButton.addStyleName(STYLE_CONTAINER_CLEAR);
                 clearTitleButton.setTitle(configuration.getClearLabel());
+                clearTitleButton.setTabindex(TabindexMode.FOCUSABLE);
                 clearTitleButton.addClickHandler(e -> {
                     if (isEnabled()) {
                         setValue(null);
@@ -297,9 +298,9 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
     public void removeContainerStyleName(final String styleName) {
         container.removeStyleName(styleName);
     }
-    
+
     public DropDownContainerAddon getContainer() {
-    	return container;
+        return container;
     }
 
     public void setCustomContainer(final IsPWidget customContainer) {
