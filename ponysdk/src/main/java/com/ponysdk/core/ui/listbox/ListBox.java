@@ -310,7 +310,7 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
      */
     public D getSelectedData() {
         if (dataProvider != null) return selectedDataItems.isEmpty() ? null : selectedDataItems.get(0).getData();
-        return items.stream().filter(ListBoxItem::isSelected).map(ListBoxItem::getData).findFirst().orElse(null);
+        return items.stream().filter(i -> i.isSelected() && i.getData() != null).map(ListBoxItem::getData).findFirst().orElse(null);
     }
 
     public Collection<D> getSelectedDataList() {
