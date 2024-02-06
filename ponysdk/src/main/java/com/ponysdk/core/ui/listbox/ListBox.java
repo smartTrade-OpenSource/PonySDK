@@ -507,10 +507,12 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
 
     public void setComparator(final Comparator<D> dataComparator) {
         this.dataComparator = dataComparator;
+        sort();
     }
 
     public void setGroupComparator(final Comparator<ListBoxItem<D>> groupComparator) {
         this.groupComparator = groupComparator;
+        sort();
     }
 
     public int getSize() {
