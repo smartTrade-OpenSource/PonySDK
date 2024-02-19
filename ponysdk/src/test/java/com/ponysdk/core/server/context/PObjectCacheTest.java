@@ -23,7 +23,7 @@
 
 package com.ponysdk.core.server.context;
 
-import com.ponysdk.test.PSuite;
+import com.ponysdk.framework.PSuite;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PObject;
 import org.junit.Before;

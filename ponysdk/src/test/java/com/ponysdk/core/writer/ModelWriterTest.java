@@ -27,7 +27,7 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.websocket.WebsocketEncoder;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PWindow;
-import com.ponysdk.test.PSuite;
+import com.ponysdk.framework.PSuite;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;

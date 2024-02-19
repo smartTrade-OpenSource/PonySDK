@@ -28,7 +28,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import com.ponysdk.test.PSuite;
+import com.ponysdk.framework.PSuite;
 
 public class EventBusTest extends PSuite {
 

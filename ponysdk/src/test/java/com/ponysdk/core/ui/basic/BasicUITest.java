@@ -26,7 +26,9 @@ package com.ponysdk.core.ui.basic;
 import com.ponysdk.core.model.PCheckBoxState;
 import com.ponysdk.core.ui.basic.event.*;
 import com.ponysdk.core.ui.model.PKeyCodes;
+import com.ponysdk.framework.PSuite;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -55,7 +57,7 @@ public class BasicUITest extends PSuite {
         }
 
         listBox.setSelectedIndex(itemCount - 1);
-        Assert.assertEquals("Item" + (itemCount - 1), listBox.getItem(itemCount - 1));
+        assertEquals("Item" + (itemCount - 1), listBox.getItem(itemCount - 1));
 
         //Assert.assertNull(listBox.getSelectedValue()); //TODO nciaravola behaviour ?
     }
@@ -81,7 +83,7 @@ public class BasicUITest extends PSuite {
         final PCheckBox checkBox = Element.newPCheckBox();
         assertEquals(PCheckBoxState.UNCHECKED, checkBox.getState());
         checkBox.setState(PCheckBoxState.CHECKED);
-        Assert.assertEquals(PCheckBoxState.CHECKED, checkBox.getState());
+        assertEquals(PCheckBoxState.CHECKED, checkBox.getState());
     }
 
     @Test

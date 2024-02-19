@@ -24,7 +24,7 @@
 package com.ponysdk.core.ui.scene;
 
 import com.ponysdk.core.ui.basic.Element;
-import com.ponysdk.test.PSuite;
+import com.ponysdk.framework.PSuite;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.PWindow;
 import org.junit.Test;

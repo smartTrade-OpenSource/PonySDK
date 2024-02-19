@@ -24,7 +24,7 @@
 package com.ponysdk.core.ui.basic;
 
 import com.ponysdk.core.model.WidgetType;
-import com.ponysdk.test.PSuite;
+import com.ponysdk.framework.PSuite;
 import org.junit.Test;
 
 import static org.junit.Assert.*;

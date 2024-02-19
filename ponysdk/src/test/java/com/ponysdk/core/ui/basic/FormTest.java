@@ -23,7 +23,7 @@
 
 package com.ponysdk.core.ui.basic;
 
-import com.ponysdk.test.PSuite;
+import com.ponysdk.framework.PSuite;
 import org.junit.Assert;
 import org.junit.Test;
 

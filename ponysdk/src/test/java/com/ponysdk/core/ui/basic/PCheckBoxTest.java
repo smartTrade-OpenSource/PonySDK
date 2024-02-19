@@ -26,8 +26,8 @@ package com.ponysdk.core.ui.basic;
 import com.ponysdk.core.model.PCheckBoxState;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
-import com.ponysdk.test.PEmulator;
-import com.ponysdk.test.PSuite;
+import com.ponysdk.framework.PEmulator;
+import com.ponysdk.framework.PSuite;
 import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;

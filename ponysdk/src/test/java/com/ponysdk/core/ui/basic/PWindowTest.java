@@ -23,7 +23,7 @@
 
 package com.ponysdk.core.ui.basic;
 
-import com.ponysdk.test.PSuite;
+import com.ponysdk.framework.PSuite;
 import com.ponysdk.core.ui.basic.event.PCloseHandler;
 import com.ponysdk.core.ui.basic.event.POpenHandler;
 import org.junit.Test;

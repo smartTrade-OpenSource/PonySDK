@@ -24,7 +24,7 @@
 package com.ponysdk.core.ui.form2;
 
 import com.ponysdk.core.ui.form2.api.ValidationResult;
-import com.ponysdk.test.PSuite;
+import com.ponysdk.framework.PSuite;
 import org.junit.Assert;
 import org.junit.Test;
 

@@ -24,7 +24,7 @@
 package com.ponysdk.core.ui.scene;
 
 import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.test.PSuite;
+import com.ponysdk.framework.PSuite;
 import com.ponysdk.core.ui.basic.*;
 import org.junit.Test;
 
