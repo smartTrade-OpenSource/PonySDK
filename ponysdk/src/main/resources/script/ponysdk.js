@@ -1007,7 +1007,7 @@ _UTF8 = undefined;
 
             // Widget is not visible due to items size
             if (this.beginIndex == -Infinity || visibleItems == Infinity) return;
-            if (this.beginIndex < 0) {
+            if (this.beginIndex < 0 || Number.isNaN(this.beginIndex)) {
                 this.beginIndex = 0;
             }
 
