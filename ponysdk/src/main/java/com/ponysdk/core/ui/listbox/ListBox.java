@@ -221,7 +221,7 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
             } else if (removedItem.isSelected()) {
                 setSelected(null);
             }
-            if (itemContainer != null && isOpen()) itemContainer.refresh();
+            refresh();
         }, () -> log.warn("Item to remove not found {}", itemLabel));
     }
 
@@ -239,7 +239,7 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
                 if (removedItem.isSelected()) {
                     setSelected(null);
                 }
-                if (itemContainer != null && isOpen()) itemContainer.refresh();
+                refresh();
             }
         }
     }
@@ -260,7 +260,7 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
             if (removeSelection) {
                 setSelected(null);
             }
-            if (itemContainer != null && isOpen()) itemContainer.refresh();
+            refresh();
         }
     }
 
@@ -300,7 +300,7 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
         this.groupItems.clear();
         this.selectedDataItems.clear();
         updateTitle(List.of());
-        if (itemContainer != null && isOpen()) itemContainer.refresh();
+        refresh();
     }
 
     /**
@@ -523,8 +523,10 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
     }
 
     public void refresh() {
-        if (isOpen()) {
+        if (itemContainer != null && isOpen()) {
             itemContainer.refresh();
+            initIndex();
+            if (index < visibleItems.size()) itemContainer.showIndex(index);
         }
     }
 
@@ -542,6 +544,10 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
 
     public List<ListBoxItem<D>> getItems() {
         return Collections.unmodifiableList(items);
+    }
+
+    public InfiniteScrollAddon<ListBoxItem<D>, ListBoxItemWidget> getItemContainer() {
+        return itemContainer;
     }
 
     @Override
@@ -593,7 +599,7 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
             clearMultiButton.addClickHandler(e -> {
                 clearSelection();
                 onSelectionChange();
-                itemContainer.refresh();
+                refresh();
             });
             defaultContainer.add(clearMultiButton);
         }
@@ -834,7 +840,6 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
                 this.visibleItems.addAll(items);
             }
         }
-
         refresh();
     }
 
@@ -920,7 +925,7 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
                 close();
                 break;
             case FALSE:
-                if (!configuration.isMultiSelectionEnabled()) itemContainer.refresh();
+                if (!configuration.isMultiSelectionEnabled()) refresh();
                 break;
         }
     }
