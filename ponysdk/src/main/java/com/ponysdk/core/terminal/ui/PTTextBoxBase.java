@@ -58,6 +58,9 @@ public abstract class PTTextBoxBase<T extends TextBoxBase> extends PTValueBoxBas
             uiObject.getElement().setAttribute("placeholder", binaryModel.getStringValue());
             return true;
         } else {
+            if (ServerToClientModel.TEXT == model) {
+                this.lastValue = binaryModel.getStringValue();
+            }
             return super.update(buffer, binaryModel);
         }
     }
