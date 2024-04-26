@@ -952,7 +952,11 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
             if (isIndexable(index)) {
                 return;
             }
-            updateWithNextIndex();
+            if (itemContainer.getFullSize() > 0) {
+                updateWithNextIndex();
+            } else {
+                return;
+            }
         } else if (index >= itemContainer.getFullSize()) {
             index = itemContainer.getFullSize() - 1;
             updateWithNextIndex();
