@@ -123,11 +123,13 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
                     onBlur();
                 }, PBlurEvent.TYPE);
             }
-            widget.addKeyUpHandler(e -> {
+            widget.addKeyDownHandler(e -> {
                 if (!stopKeys && focused && e.getKeyCode() == PKeyCodes.ENTER.getCode()) {
                     setContainerVisible(!container.isVisible());
                 } else if (e.getKeyCode() == PKeyCodes.ESCAPE.getCode()) {
                     close();
+                } else {
+                    onContainerKeyDown(e.getKeyCode());
                 }
             });
             mainButton = Element.newPButton(configuration.getTitle());
@@ -151,7 +153,7 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
                 clearTitleButton.addClickHandler(e -> {
                     if (isEnabled()) {
                         setValue(null);
-                        clearSelectionListeners.forEach(l -> l.onClearTitleClicked());
+                        clearSelectionListeners.forEach(DropDownContainerListener::onClearTitleClicked);
                         onValueChange();
                     }
                 });
@@ -423,6 +425,10 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
     }
 
     protected void focusContainer() {
+        // Nothing to do by default
+    }
+
+    protected void onContainerKeyDown(final int keyCode) {
         // Nothing to do by default
     }
 

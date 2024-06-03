@@ -113,8 +113,8 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
     private HandlerRegistration upDownKeyHandler;
     private int index;
     private boolean forceIndex;
-    private Supplier<ListBoxItemRenderer<D>> itemRendererSupplier = () -> new LabelListBoxItemRenderer<>();
-    private Supplier<ListBoxFilterWidget> filterWidgetSupplier = () -> new TextListBoxFilterWidget();
+    private Supplier<ListBoxItemRenderer<D>> itemRendererSupplier = LabelListBoxItemRenderer::new;
+    private Supplier<ListBoxFilterWidget> filterWidgetSupplier = TextListBoxFilterWidget::new;
     private BiPredicate<ListBoxItem<D>, String> filterPredicate = (item, filter) -> item.getLabel().toLowerCase().contains(filter);
 
     protected final List<ListBoxItem<D>> items;
@@ -607,7 +607,7 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
         defaultContainer.add(itemContainer);
         itemContainer.addListener(beginIndex -> {
             if (!forceIndex) {
-                final ListBox<D>.ListBoxItemWidget currentItemIndex = itemContainer.getCurrentItemIndex();
+                final ListBoxItemWidget currentItemIndex = itemContainer.getCurrentItemIndex();
                 if (currentItemIndex == null || !visibleItems.contains(currentItemIndex.item)) {
                     initIndex();
                     if (index < visibleItems.size()) itemContainer.showIndex(index);
@@ -677,7 +677,7 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
                 final Integer displaySelectionLimit = configuration.getDisplaySelectionLimit();
                 if (configuration.isMultiSelectionEnabled() && displaySelectionLimit != null
                         && selectedItems.size() > displaySelectionLimit) {
-                    text.append(selectedItems.size() + STRING_SPACE + configuration.getDisplaySelectionLabel());
+                    text.append(selectedItems.size()).append(STRING_SPACE).append(configuration.getDisplaySelectionLabel());
                 } else {
                     text.append(title);
                 }
@@ -785,7 +785,7 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
         }
     }
 
-    protected InfiniteScrollAddon<ListBoxItem<D>, ListBox<D>.ListBoxItemWidget> buildInfiniteScrollAddon() {
+    protected InfiniteScrollAddon<ListBoxItem<D>, ListBoxItemWidget> buildInfiniteScrollAddon() {
         return new InfiniteScrollAddon<>(new ListBoxInfiniteScrollProvider());
     }
 
@@ -845,6 +845,19 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
 
     protected String getFilter() {
         return filterWidget != null ? filterWidget.getFilter() : null;
+    }
+
+    @Override
+    protected void onContainerKeyDown(final int keyCode) {
+        if (filterWidget != null && isFocused() && (keyCode >= 48 && keyCode <= 57 || keyCode >= 65 && keyCode <= 90
+                || keyCode >= 96 && keyCode <= 111 || keyCode >= 160 && keyCode <= 176 || keyCode >= 186 && keyCode <= 222)) {
+            open();
+            try {
+                filterWidget.setFilter(String.valueOf((char) keyCode));
+            } catch (final Exception e) {
+                log.debug("Unknown keyCode {}", keyCode);
+            }
+        }
     }
 
     private Collection<ListBoxItem<D>> initializeGroupItems(final Collection<? extends ListBoxItem<D>> groupItems) {
@@ -1077,7 +1090,7 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
             } else if (!groupName.equals(other.groupName)) return false;
             if (label == null) {
                 if (other.label != null) return false;
-            } else if (!label.equals(other.label)) return false;
+            } else return label.equals(other.label);
             return true;
         }
 
@@ -1103,7 +1116,7 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
         }
 
         public static <D> Collection<ListBoxItem<D>> of(final Collection<D> data, final Function<D, String> labelMapper) {
-            return data.stream().map(t -> ListBox.ListBoxItem.of(labelMapper.apply(t), t)).collect(Collectors.toList());
+            return data.stream().map(t -> ListBoxItem.of(labelMapper.apply(t), t)).collect(Collectors.toList());
         }
 
         public enum ListBoxItemType {
@@ -1194,7 +1207,7 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
             }
             blur();
             if (itemRenderer instanceof MultiLevelDropDownRenderer) {
-                ((MultiLevelDropDownRenderer) itemRenderer).closeAll();
+                ((MultiLevelDropDownRenderer<?>) itemRenderer).closeAll();
             } else {
                 applyCloseOnClickMode();
             }
@@ -1202,7 +1215,7 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
 
         void openNested() {
             if (itemRenderer instanceof MultiLevelDropDownRenderer) {
-                ((MultiLevelDropDownRenderer) itemRenderer).openNested();
+                ((MultiLevelDropDownRenderer<?>) itemRenderer).openNested();
             }
         }
 
