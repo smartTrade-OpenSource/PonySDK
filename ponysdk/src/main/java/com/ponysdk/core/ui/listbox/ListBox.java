@@ -58,6 +58,7 @@ import com.ponysdk.core.ui.infinitescroll.InfiniteScrollProvider;
 import com.ponysdk.core.ui.listbox.ListBox.ListBoxItem;
 import com.ponysdk.core.ui.listbox.ListBox.ListBoxItem.ListBoxItemType;
 import com.ponysdk.core.ui.model.PKeyCodes;
+import com.ponysdk.core.util.KeyCodeUtil;
 
 public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, ListBoxConfiguration> {
 
@@ -849,13 +850,13 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
 
     @Override
     protected void onContainerKeyDown(final int keyCode) {
-        if (filterWidget != null && isFocused() && (keyCode >= 48 && keyCode <= 57 || keyCode >= 65 && keyCode <= 90
-                || keyCode >= 96 && keyCode <= 111 || keyCode >= 160 && keyCode <= 176 || keyCode >= 186 && keyCode <= 222)) {
-            open();
-            try {
-                filterWidget.setFilter(String.valueOf((char) keyCode));
-            } catch (final Exception e) {
-                log.debug("Unknown keyCode {}", keyCode);
+        {
+            if (filterWidget != null) {
+                final String value = KeyCodeUtil.getString(keyCode);
+                if (value != null) {
+                    open();
+                    filterWidget.setFilter(value);
+                }
             }
         }
     }
