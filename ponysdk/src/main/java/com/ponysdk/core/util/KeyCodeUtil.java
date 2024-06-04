@@ -1,4 +1,5 @@
-package com.ponysdk.core.ui.listbox;
+
+package com.ponysdk.core.util;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -56,7 +57,7 @@ public class KeyCodeUtil {
         KEY_CODES.put(105, "9");
     }
 
-    public static String getString(int jsKeyCode) {
+    public static String getString(final int jsKeyCode) {
         return KEY_CODES.get(jsKeyCode);
     }
 }
