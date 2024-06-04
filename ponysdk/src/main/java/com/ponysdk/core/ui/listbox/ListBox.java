@@ -850,13 +850,11 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
 
     @Override
     protected void onContainerKeyDown(final int keyCode) {
-        {
-            if (filterWidget != null) {
-                final String value = KeyCodeUtil.getString(keyCode);
-                if (value != null) {
-                    open();
-                    filterWidget.setFilter(value);
-                }
+        if (filterWidget != null) {
+            final String value = KeyCodeUtil.getString(keyCode);
+            if (value != null) {
+                open();
+                filterWidget.setFilter(value);
             }
         }
     }
