@@ -23,15 +23,17 @@
 
 package com.ponysdk.core.server.websocket;
 
-import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.model.ValueTypeModel;
-import com.ponysdk.core.server.application.ApplicationConfiguration;
-import com.ponysdk.core.server.application.ApplicationManager;
-import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.server.context.CommunicationSanityChecker;
-import com.ponysdk.core.server.stm.TxnContext;
-import com.ponysdk.core.ui.basic.PObject;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import javax.json.JsonArray;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
 import org.eclipse.jetty.util.component.Container;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
@@ -41,16 +43,14 @@ import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
+import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.application.ApplicationConfiguration;
+import com.ponysdk.core.server.application.ApplicationManager;
+import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.context.CommunicationSanityChecker;
+import com.ponysdk.core.server.stm.TxnContext;
+import com.ponysdk.core.ui.basic.PObject;
 
 public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
@@ -252,10 +252,15 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
     private void sendHeartbeat() {
         if (!isAlive() || !isSessionOpen()) return;
-        beginObject();
-        encode(ServerToClientModel.HEARTBEAT, null);
-        endObject();
-        flush0();
+        uiContext.acquire();
+        try {
+            beginObject();
+            encode(ServerToClientModel.HEARTBEAT, null);
+            endObject();
+            flush0();
+        } finally {
+            uiContext.release();
+        }
     }
 
     public void flush() {
@@ -311,6 +316,17 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
     @Override
     public void encode(final ServerToClientModel model, final Object value) {
+        if (UIContext.get() == null) {
+            log.warn("encode in websocket without current ui context acquired", new Exception());
+            uiContext.acquire();
+            try {
+                encode(model, value);
+            } finally {
+                uiContext.release();
+            }
+            return;
+        }
+
         try {
             if (loggerOut.isTraceEnabled())
                 loggerOut.trace("UIContext #{} : {} {}", this.uiContext.getID(), model, value);
