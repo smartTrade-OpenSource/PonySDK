@@ -23,28 +23,69 @@
 
 package com.ponysdk.core.ui.basic;
 
-import com.ponysdk.core.model.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.json.JsonArray;
+import javax.json.JsonNumber;
+import javax.json.JsonObject;
+import javax.json.JsonValue;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.DomHandlerConverter;
+import com.ponysdk.core.model.DomHandlerType;
+import com.ponysdk.core.model.HandlerModel;
+import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.ui.basic.event.*;
+import com.ponysdk.core.ui.basic.event.HasPWidgets;
+import com.ponysdk.core.ui.basic.event.PBlurEvent;
+import com.ponysdk.core.ui.basic.event.PClickEvent;
+import com.ponysdk.core.ui.basic.event.PContextMenuEvent;
+import com.ponysdk.core.ui.basic.event.PDomEvent;
 import com.ponysdk.core.ui.basic.event.PDomEvent.Type;
+import com.ponysdk.core.ui.basic.event.PDoubleClickEvent;
+import com.ponysdk.core.ui.basic.event.PDragEndEvent;
+import com.ponysdk.core.ui.basic.event.PDragEnterEvent;
+import com.ponysdk.core.ui.basic.event.PDragLeaveEvent;
+import com.ponysdk.core.ui.basic.event.PDragOverEvent;
+import com.ponysdk.core.ui.basic.event.PDragStartEvent;
+import com.ponysdk.core.ui.basic.event.PDropEvent;
+import com.ponysdk.core.ui.basic.event.PFocusEvent;
+import com.ponysdk.core.ui.basic.event.PKeyDownEvent;
+import com.ponysdk.core.ui.basic.event.PKeyEvent;
+import com.ponysdk.core.ui.basic.event.PKeyPressEvent;
+import com.ponysdk.core.ui.basic.event.PKeyPressHandler;
+import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
+import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
+import com.ponysdk.core.ui.basic.event.PMouseDownEvent;
+import com.ponysdk.core.ui.basic.event.PMouseEvent;
+import com.ponysdk.core.ui.basic.event.PMouseOutEvent;
+import com.ponysdk.core.ui.basic.event.PMouseOverEvent;
+import com.ponysdk.core.ui.basic.event.PMouseUpEvent;
+import com.ponysdk.core.ui.basic.event.PMouseWhellEvent;
+import com.ponysdk.core.ui.basic.event.PVisibilityEvent;
 import com.ponysdk.core.ui.basic.event.PVisibilityEvent.PVisibilityHandler;
-import com.ponysdk.core.ui.eventbus.*;
+import com.ponysdk.core.ui.eventbus.Event;
+import com.ponysdk.core.ui.eventbus.EventHandler;
+import com.ponysdk.core.ui.eventbus.EventSource;
+import com.ponysdk.core.ui.eventbus.HandlerRegistration;
+import com.ponysdk.core.ui.eventbus.TinyEventSource;
 import com.ponysdk.core.ui.model.PEventType;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.util.SetPool;
 import com.ponysdk.core.util.SetUtils;
 import com.ponysdk.core.writer.ModelWriter;
 import com.ponysdk.core.writer.ModelWriterCallback;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.json.JsonArray;
-import javax.json.JsonNumber;
-import javax.json.JsonObject;
-import javax.json.JsonValue;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * The base class for the majority of user-interface objects. Widget adds
@@ -217,8 +258,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public void removeStyleProperty(final String name) {
-        if (safeStyleProperties().remove(name) != null)
-            saveUpdate(writer -> writer.write(ServerToClientModel.REMOVE_STYLE_KEY, name));
+        if (safeStyleProperties().remove(name) != null) saveUpdate(writer -> writer.write(ServerToClientModel.REMOVE_STYLE_KEY, name));
     }
 
     public void forceDomId() {
@@ -475,7 +515,11 @@ public abstract class PWidget extends PObject implements IsPWidget {
             shown = instruction.getBoolean(ClientToServerModel.HANDLER_WIDGET_VISIBILITY.toStringValue());
             if (visibilityHandlers != null) {
                 final PVisibilityEvent visibilityEvent = new PVisibilityEvent(this, shown);
-                visibilityHandlers.forEach(handler -> handler.onVisibility(visibilityEvent));
+                visibilityHandlers.forEach(handler -> {
+                    if (handler != null) {
+                        handler.onVisibility(visibilityEvent);
+                    }
+                });
             }
         } else {
             super.onClientData(instruction);
@@ -573,10 +617,10 @@ public abstract class PWidget extends PObject implements IsPWidget {
         }
     }
 
-    private void doDestroy(PAddOn addon) {
+    private void doDestroy(final PAddOn addon) {
         try {
             addon.onDestroy();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("An error occurred while trying to process the destroy event", e);
         }
     }
