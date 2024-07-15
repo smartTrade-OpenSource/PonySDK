@@ -44,6 +44,7 @@ import com.ponysdk.core.ui.basic.event.POpenEvent;
 import com.ponysdk.core.ui.basic.event.POpenHandler;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
+import com.ponysdk.core.ui.basic.event.PVisibilityEvent.PVisibilityHandler;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 import com.ponysdk.core.ui.model.PEventType;
 import com.ponysdk.core.ui.model.PKeyCodes;
@@ -117,6 +118,11 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
                 focused = true;
                 onFocus();
             }, PFocusEvent.TYPE);
+            widget.addVisibilityHandler((PVisibilityHandler) event -> {
+                if (!Boolean.TRUE.equals(event.getData())) {
+                    close();
+                }
+            });
             if (configuration.isMultilevelEnabled()) {
                 widget.addDomHandler((PBlurHandler) event -> {
                     focused = false;
