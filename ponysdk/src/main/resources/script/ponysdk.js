@@ -945,6 +945,9 @@ _UTF8 = undefined;
             let topPosition = this.getTopPosition(children[0]);
             let bottomPosition = this.getBottomPosition(children[children.length - 1]);
             let itemsSize = Math.abs(bottomPosition - topPosition);
+            if(itemsSize == 0) {
+                return;
+            }
             let height = this.jqelement.height();
 
             //rounding issue
