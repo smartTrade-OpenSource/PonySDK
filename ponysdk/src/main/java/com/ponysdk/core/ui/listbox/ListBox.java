@@ -40,7 +40,6 @@ import java.util.function.IntConsumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.server.concurrent.PScheduler;
@@ -349,6 +348,7 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
             for (final ListBoxItem<D> item : this.items) {
                 if (item.getData() != null && item.getData().equals(selectedData)) {
                     setSelectedItem(item);
+                    break;
                 }
             }
         } else {
@@ -739,7 +739,7 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
                     }
                     break;
                 case LEFT:
-                    if (configuration.isMultilevelEnabled()) break;
+                    if (!configuration.isMultilevelEnabled()) break;
                     //$FALL-THROUGH$ : same behavior than enter in multiLevel
                 case ESCAPE:
                     close();
