@@ -136,6 +136,7 @@ public class UIContextImpl implements UIContext {
     public void start() {
         communicationSanityChecker = new CommunicationSanityChecker(this);
         communicationSanityChecker.start();
+        scheduler.forceExecute(() -> currentContext.set(this));
         scheduler.start();
     }
 
