@@ -23,12 +23,30 @@
 
 package com.ponysdk.core.server.context;
 
+import java.io.IOException;
+import java.io.StringReader;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
+
+import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeRequest;
+import org.eclipse.jetty.util.component.Container;
+import org.eclipse.jetty.websocket.core.Extension;
+import org.eclipse.jetty.websocket.core.ExtensionStack;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.ApplicationManager;
-import com.ponysdk.core.server.concurrent.Scheduler;
 import com.ponysdk.core.server.websocket.PonyPerMessageDeflateExtension;
 import com.ponysdk.core.server.websocket.WebSocket;
 import com.ponysdk.core.ui.basic.PCookies;
@@ -40,22 +58,14 @@ import com.ponysdk.core.ui.statistic.TerminalDataReceiver;
 import com.ponysdk.core.useragent.UserAgent;
 import com.ponysdk.core.util.PObjectCache;
 import com.ponysdk.core.writer.ModelWriter;
-import jakarta.json.*;
-import jakarta.json.spi.JsonProvider;
-import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeRequest;
-import org.eclipse.jetty.util.component.Container;
-import org.eclipse.jetty.websocket.core.Extension;
-import org.eclipse.jetty.websocket.core.ExtensionStack;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.time.Duration;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.ReentrantLock;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonNumber;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
+import jakarta.json.JsonString;
+import jakarta.json.JsonValue;
+import jakarta.json.spi.JsonProvider;
 
 /**
  * <p>
@@ -64,7 +74,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * </p>
  */
 public class UIContextImpl implements UIContext {
-    public final static ScopedValue<UIContextImpl> currentContext = ScopedValue.newInstance();
+    private static final ThreadLocal<UIContextImpl> currentContext = new ThreadLocal<>();
     private static final Logger log = LoggerFactory.getLogger(UIContextImpl.class);
     private static final Logger loggerIn = LoggerFactory.getLogger("WebSocket-IN");
     private static final Logger loggerOut = LoggerFactory.getLogger("WebSocket-OUT");
@@ -97,9 +107,11 @@ public class UIContextImpl implements UIContext {
     private WebSocket.Listener listener;
     private UIContextInstructionListener monitor;
     private long lastSentPing;
+    private final UIContextScheduler scheduler;
 
     public UIContextImpl(final ApplicationManager applicationManager) {
         this.applicationManager = applicationManager;
+        this.scheduler = new UIContextScheduler(this);
         this.modelWriter = new ModelWriter(this);
 
         JsonProvider provider;
@@ -124,12 +136,13 @@ public class UIContextImpl implements UIContext {
     public void start() {
         communicationSanityChecker = new CommunicationSanityChecker(this);
         communicationSanityChecker.start();
+        scheduler.start();
     }
 
     @Override
     public void stop() {
         communicationSanityChecker.stop();
-
+        scheduler.stop();
 
         //TODO
 
@@ -203,40 +216,38 @@ public class UIContextImpl implements UIContext {
     @Override
     public void executeAsync(final Runnable task) {
         if (isAlive()) return;
-        Scheduler.execute(() -> exec(task));
+        scheduler.execute(() -> exec(task));
+    }
+    
+    @Override
+    public void forceExecuteAsync(final Runnable task) {
+        if (isAlive()) return;
+        scheduler.forceExecute(() -> exec(task));
+    }
+
+
+    @Override
+    public ScheduledTaskHandler executeLaterAsync(Duration delay, Runnable task) {
+        if (isAlive()) return null;
+        return scheduler.executeLater(delay.toNanos(), () -> exec(task));
     }
 
     @Override
-    public Scheduler.ScheduledTaskHandler executeLaterAsync(Duration delay, Runnable task) {
+    public ScheduledTaskHandler scheduleAsync(Duration period, Runnable task) {
         if (isAlive()) return null;
-        return Scheduler.executeLater(delay, () -> exec(task));
+        return scheduler.schedule(period.toNanos(), () -> exec(task));
     }
-
-    @Override
-    public Scheduler.ScheduledTaskHandler scheduleAsync(Duration period, Runnable task) {
-        if (isAlive()) return null;
-        return Scheduler.schedule(period, () -> exec(task));
-    }
-
+    
     private void exec(Runnable runnable) {
-        if (currentContext.isBound()) {
-            exec0(runnable);
-        } else {
-            ScopedValue.runWhere(currentContext, this, () -> exec0(runnable));
-        }
-    }
-
-    //TODO nciaravola more tests
-    private void exec0(Runnable runnable) {
-        lock.lock();
-        try {
-            runnable.run();
-            flush();
-        } catch (final Throwable e) {
-            log.error("Cannot process client instruction", e);
-        } finally {
-            lock.unlock();
-        }
+    	lock.lock();
+		try {
+		    runnable.run();
+		    flush();
+		} catch (final Throwable e) {
+		    log.error("Cannot process client instruction", e);
+		} finally {
+		    lock.unlock();
+		}
     }
 
     /**
