@@ -744,12 +744,14 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
                     //$FALL-THROUGH$ : same behavior than enter in multiLevel
                 case ESCAPE:
                     close();
+                    focus();
                     return;
                 case ENTER:
                     setStopKeys(true);
                     final ListBoxItemWidget listBoxItemWidget = itemContainer.getCurrentItemIndex();
                     if (listBoxItemWidget != null) listBoxItemWidget.select();
                     PScheduler.schedule(() -> setStopKeys(false), Duration.ofMillis(200));
+                    if (!isOpen()) focus();
                     return;
                 default:
                     return;
