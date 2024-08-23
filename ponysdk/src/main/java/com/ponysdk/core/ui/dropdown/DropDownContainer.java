@@ -132,8 +132,14 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
             widget.addKeyDownHandler(e -> {
                 if (!stopKeys && focused && e.getKeyCode() == PKeyCodes.ENTER.getCode()) {
                     setContainerVisible(!container.isVisible());
+                    if (!isOpen()) {
+                        focus();
+                    }
                 } else if (e.getKeyCode() == PKeyCodes.ESCAPE.getCode()) {
                     close();
+                    if (!isOpen()) {
+                        focus();
+                    }
                 } else {
                     onContainerKeyDown(e.getKeyCode());
                 }
@@ -483,7 +489,6 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
             afterContainerClose();
             final PCloseEvent event = new PCloseEvent(this);
             closeHandlers.forEach(l -> l.onClose(event));
-            focus();
         }
     }
 
