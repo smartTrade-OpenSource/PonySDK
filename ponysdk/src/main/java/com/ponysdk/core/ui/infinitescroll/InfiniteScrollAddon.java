@@ -197,7 +197,8 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
     }
 
     /**
-     * Adding widgets to our DOM by taking into consideration the number of widget (maxVisibleItem) and the beginning index (beginIndex). After adding, it updates existing widgets and removes unused widgets.
+     * Adding widgets to our DOM by taking into consideration the number of widget (maxVisibleItem) and the beginning
+     * index (beginIndex). After adding, it updates existing widgets and removes unused widgets.
      */
     private void draw() {
         final int size = Math.min(maxVisibleItems, fullSize - beginIndex);
@@ -211,8 +212,7 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
 
     private void draw(final List<D> dataToDraw) {
         try {
-            final int size = Math.min(maxVisibleItems, fullSize - beginIndex);
-
+            final int size = Math.max(Math.min(maxVisibleItems, fullSize - beginIndex), 0);
             if (dataToDraw.size() != size) {
                 throw new IllegalStateException("Data size doesn't match expected :" + size + ". Actual : " + dataToDraw.size());
             }
