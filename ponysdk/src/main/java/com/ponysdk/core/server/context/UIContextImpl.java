@@ -35,6 +35,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.ponysdk.core.server.websocket.WebSocketPusher;
 import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeRequest;
 import org.eclipse.jetty.util.component.Container;
 import org.eclipse.jetty.websocket.core.Extension;
@@ -84,7 +85,6 @@ public class UIContextImpl implements UIContext {
     private static final String MSG_RECEIVED = "Message received from terminal : UIContext #{} on {} : {}";
 
     private final int ID = uiContextCount.incrementAndGet();
-    private final ReentrantLock lock = new ReentrantLock();
     private final Map<String, Object> attributes = new HashMap<>();
     private final PObjectCache pObjectCache = new PObjectCache();
     private final PHistory history = new PHistory();
@@ -94,7 +94,6 @@ public class UIContextImpl implements UIContext {
     private final Latency roundtripLatency = new Latency(10);
     private final Latency networkLatency = new Latency(10);
     private final Latency terminalLatency = new Latency(10);
-    private final ApplicationManager applicationManager;
     private final JsonProvider jsonProvider;
     private final ModelWriter modelWriter;
     private final List<UIContextDestroyListener> uiContextDestroyListeners = new ArrayList<>();
@@ -108,9 +107,9 @@ public class UIContextImpl implements UIContext {
     private UIContextInstructionListener monitor;
     private long lastSentPing;
     private final UIContextScheduler scheduler;
+    private WebSocketPusher websocketPusher;
 
     public UIContextImpl(final ApplicationManager applicationManager) {
-        this.applicationManager = applicationManager;
         this.scheduler = new UIContextScheduler(this);
         this.modelWriter = new ModelWriter(this);
 
@@ -138,6 +137,7 @@ public class UIContextImpl implements UIContext {
         communicationSanityChecker.start();
         scheduler.forceExecute(() -> currentContext.set(this));
         scheduler.start();
+        websocketPusher = new WebSocketPusher();
     }
 
     @Override
@@ -219,7 +219,7 @@ public class UIContextImpl implements UIContext {
         if (isAlive()) return;
         scheduler.execute(() -> exec(task));
     }
-    
+
     @Override
     public void forceExecuteAsync(final Runnable task) {
         if (isAlive()) return;
@@ -238,17 +238,14 @@ public class UIContextImpl implements UIContext {
         if (isAlive()) return null;
         return scheduler.schedule(period.toNanos(), () -> exec(task));
     }
-    
+
     private void exec(Runnable runnable) {
-    	lock.lock();
-		try {
-		    runnable.run();
-		    flush();
-		} catch (final Throwable e) {
-		    log.error("Cannot process client instruction", e);
-		} finally {
-		    lock.unlock();
-		}
+        try {
+            runnable.run();
+            flush();
+        } catch (final Throwable e) {
+            log.error("Cannot process client instruction", e);
+        }
     }
 
     /**
@@ -461,6 +458,7 @@ public class UIContextImpl implements UIContext {
      * @return the alive state
      */
     public boolean isAlive() {
+        //TODO use the state of the Scheduler ?
         return alive;
     }
 
