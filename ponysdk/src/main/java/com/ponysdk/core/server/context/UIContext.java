@@ -1,6 +1,5 @@
 package com.ponysdk.core.server.context;
 
-import com.ponysdk.core.server.concurrent.Scheduler;
 import com.ponysdk.core.ui.eventbus2.EventBus;
 
 import java.time.Duration;
@@ -57,6 +56,13 @@ public interface UIContext {
      * @param task The task to be executed.
      */
     void executeAsync(final Runnable task);
+    
+    /**
+     * Executes a task asynchronously with highest priority.
+     *
+     * @param task The task to be executed.
+     */
+    void forceExecuteAsync(final Runnable task);
 
     /**
      * Executes a task asynchronously after a specified delay.
@@ -65,7 +71,7 @@ public interface UIContext {
      * @param task  The task to be executed.
      * @return A handler for the scheduled task.
      */
-    Scheduler.ScheduledTaskHandler executeLaterAsync(Duration delay, Runnable task);
+    ScheduledTaskHandler executeLaterAsync(Duration delay, Runnable task);
 
     /**
      * Schedules a task to be executed asynchronously at fixed intervals.
@@ -74,5 +80,5 @@ public interface UIContext {
      * @param task   The task to be executed.
      * @return A handler for the scheduled task.
      */
-    Scheduler.ScheduledTaskHandler scheduleAsync(Duration period, Runnable task);
+    ScheduledTaskHandler scheduleAsync(Duration period, Runnable task);
 }

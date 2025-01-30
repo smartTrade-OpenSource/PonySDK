@@ -27,7 +27,7 @@ import com.ponysdk.core.model.ArrayValueModel;
 import com.ponysdk.core.model.BooleanModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.ValueTypeModel;
-import com.ponysdk.core.server.concurrent.AutoFlushedBuffer;
+import com.ponysdk.core.server.context.AutoFlushedBuffer;
 import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
 import org.slf4j.Logger;

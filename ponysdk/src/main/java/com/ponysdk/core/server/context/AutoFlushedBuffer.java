@@ -21,7 +21,7 @@
  * the License.
  */
 
-package com.ponysdk.core.server.concurrent;
+package com.ponysdk.core.server.context;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -30,7 +30,6 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.LockSupport;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * A buffer that can be asynchronously flushed to another destination in a lock-free manner.<br>
@@ -49,31 +48,54 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public abstract class AutoFlushedBuffer implements Closeable {
 
+    /**
+     * The implementation of the flushing logic. Flushing should be done asynchronously and is
+     * supposed to call the callback methods
+     * {@link AutoFlushedBuffer#onFlushCompletion() onFlushCompletion} or
+     * {@link AutoFlushedBuffer#onFlushFailure(Exception) onFlushFailed} afterwards.
+     *
+     * @param bufferToFlush a ready to read {@link ByteBuffer} that contains the data to flush.
+     */
+    protected abstract void doFlush(ByteBuffer bufferToFlush);
+
+    /**
+     * Release resources associated to the flushing mechanism. Will be called at most once.
+     *
+     * @throws IOException
+     */
+    protected abstract void closeFlusher() throws IOException;
+
     // the ringbuffer that holds data
     // invariant : the range [position, limit[ is always available for write, it cannot contains pending data
     private final ByteBuffer writeBuffer;
+
     private final int bufferSize;
     private final int maxChunkSize;
     private final ByteBuffer flushBuffer; // read-only view of write buffer used by the flushing logic. Invariant: flushBuffer.remaining() <= maxChunkSize
+
     private final long freeSpaceThreshold;
     private final long timeoutNanos; //0 means immediate failure if buffer is full, use Long.MAX_VALUE to implement infinite wait.
+
     // producer / consumer synchronization point to initiate new flush and stop flushing
     // If 0, there is no pending flush so producer thread is guaranteed to have a stable view of consumerIndex and is allow to write it
     // otherwise consumer thread is expected to flush until that index and CAS flushIndex to 0
     private final AtomicLong flushIndex = new AtomicLong(0L);
-    private final ReentrantLock lock = new ReentrantLock();
+
     // used to indicate that there is no data between the index and the end of the buffer and that part should be ignored by the flushing logic.
     // Set by producer thread and reset by flushing thread.
     // to avoid dirty read, the producer thread can assume it is 0 if consumerIndex is in the same buffer iteration. It can also be safely read after reading flushIndex == 0
     // the flushing thread can assume it is 0 if flushIndex is in the same buffer iteration (even if it is not 0, the value won't be needed to handle the flush)
     // it can be safely read by the flushing thread after observing that flushIndex is in the next buffer iteration.
     private long paddingIndex = 0;
+
     ////// flusher thread owned field
     private volatile long consumerIndex = 0; //invariant : flushIndex.get() == 0 || consumerIndex <= flushIndex.get()
+
     ////// producer thread owned fields.
     // invariants: producerIndex >= consumerIndex >= consumerIndexCache, producerIndex <= max(consumerIndex, flushIndex) + maxChunkSize
     private long producerIndex = 0L; //no need to use volatile since we expect a single producer thread, and flushing thread don't need it;
     private long consumerIndexCache = 0L; //cached value to avoid volatile read of consumerIndex
+
     private volatile Exception asyncException = null;
     private volatile boolean closed = false;
     private volatile Thread waiterThread = null;
@@ -118,23 +140,6 @@ public abstract class AutoFlushedBuffer implements Closeable {
         freeSpaceThreshold = (long) (urgentMessageReservedRatio * bufferSize);
         timeoutNanos = TimeUnit.MILLISECONDS.toNanos(timeoutMillis);
     }
-
-    /**
-     * The implementation of the flushing logic. Flushing should be done asynchronously and is
-     * supposed to call the callback methods
-     * {@link AutoFlushedBuffer#onFlushCompletion() onFlushCompletion} or
-     * {@link AutoFlushedBuffer#onFlushFailure(Exception) onFlushFailed} afterwards.
-     *
-     * @param bufferToFlush a ready to read {@link ByteBuffer} that contains the data to flush.
-     */
-    protected abstract void doFlush(ByteBuffer bufferToFlush);
-
-    /**
-     * Release resources associated to the flushing mechanism. Will be called at most once.
-     *
-     * @throws IOException
-     */
-    protected abstract void closeFlusher() throws IOException;
 
     /**
      * Writes a {@code byte} in the buffer. This method may block up to the configured timeout
@@ -340,16 +345,12 @@ public abstract class AutoFlushedBuffer implements Closeable {
      * already closed.
      */
     @Override
-    public final void close() throws IOException {
-        lock.lock();
-        try {
-            if (!closed) {
-                closed = true;
-                LockSupport.unpark(waiterThread);
-                closeFlusher();
-            }
-        } finally {
-            lock.unlock();
+    public synchronized final void close() throws IOException {
+        //FIXME: wait for flush on close ? or javadoc data may be lost
+        if (!closed) {
+            closed = true;
+            LockSupport.unpark(waiterThread);
+            closeFlusher();
         }
     }
 
@@ -370,11 +371,11 @@ public abstract class AutoFlushedBuffer implements Closeable {
      * @see AutoFlushedBuffer#doFlush(ByteBuffer)
      */
     protected final void onFlushCompletion() {
-        //if (flushBuffer.hasRemaining()) {
-        //bug in the underlying flush system such as a bad handling of interruptions
-        //    onFlushFailure(new IOException("flush completed without exception, but flushBuffer still have remaining data"));
-        //    return;
-        //}
+        if (flushBuffer.hasRemaining()) {
+            //bug in the underlying flush system such as a bad handling of interruptions
+            onFlushFailure(new IOException("flush completed without exception, but flushBuffer still have remaining data"));
+            return;
+        }
 
         final int sizeMask = bufferSize - 1;
         final long currentConsumerIndex = consumerIndex;
