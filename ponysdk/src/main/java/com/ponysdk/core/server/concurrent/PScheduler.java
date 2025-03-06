@@ -25,9 +25,12 @@ package com.ponysdk.core.server.concurrent;
 
 import java.time.Duration;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
@@ -63,7 +66,7 @@ public class PScheduler {
     }
 
     private final ScheduledThreadPoolExecutor executor;
-    private final Map<UIContext, Set<UIRunnable>> runnablesByUIContexts = new ConcurrentHashMap<>();
+    private final Map<UIContext, Queue<UIRunnable>> runnablesByUIContexts = new ConcurrentHashMap<>();
 
     private PScheduler(final ScheduledThreadPoolExecutor executor) {
         this.executor = executor;
@@ -150,13 +153,13 @@ public class PScheduler {
     }
 
     private void destroy(final UIContext uiContext) {
-        final Set<UIRunnable> uiRunnables = runnablesByUIContexts.remove(uiContext);
+        final Queue<UIRunnable> uiRunnables = runnablesByUIContexts.remove(uiContext);
         if (uiRunnables != null) uiRunnables.forEach(UIRunnable::onCancel);
         executor.purge();
     }
 
     private void purge(final UIRunnable uiRunnable) {
-        final Set<UIRunnable> uiRunnables = runnablesByUIContexts.get(uiRunnable.getUIContext());
+        final Queue<UIRunnable> uiRunnables = runnablesByUIContexts.get(uiRunnable.getUIContext());
         if (uiRunnables != null) uiRunnables.remove(uiRunnable);
     }
 
@@ -164,7 +167,7 @@ public class PScheduler {
         runnablesByUIContexts.compute(runnable.uiContext, (uiContext, runnables) -> {
             if(uiContext.isAlive()) {
                 if (runnables == null) {
-                    runnables = Collections.newSetFromMap(new ConcurrentHashMap<>());
+                	runnables =  new ConcurrentLinkedQueue<>();
                     uiContext.addContextDestroyListener(this::destroy);
                 }
                 runnables.add(runnable);
