@@ -56,7 +56,7 @@ public abstract class PSuggestOracle extends PObject {
      * input data format, the <code>Suggestion</code> interface would be implemented in such a way
      * that the display string and replacement string would be identical.
      * </p>
-     * <h3>Associating Data Transfer Objects (DTOs) with Suggestion Objects</h3> Some applications
+     * <h2>Associating Data Transfer Objects (DTOs) with Suggestion Objects</h2> Some applications
      * retrieve suggestions from a server, and may want to send back a DTO with each suggestion. In
      * the previous example, a DTO returned with the suggestion may provide additional contact
      * information about the selected employee, and this information could be used to fill out other

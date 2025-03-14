@@ -49,7 +49,7 @@ import com.ponysdk.core.util.SetUtils;
  * This widget will <em>only</em> work in standards mode, which requires that the HTML page in which it is run have an
  * explicit &lt;!DOCTYPE&gt; declaration.
  * </p>
- * <h3>CSS Style Rules</h3>
+ * <h2>CSS Style Rules</h2>
  * <ul class='css'>
  * <li>.gwt-SplitLayoutPanel { the panel itself }</li>
  * <li>.gwt-SplitLayoutPanel .gwt-SplitLayoutPanel-HDragger { horizontal dragger

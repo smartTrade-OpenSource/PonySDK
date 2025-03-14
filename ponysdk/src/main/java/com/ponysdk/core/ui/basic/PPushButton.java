@@ -29,7 +29,7 @@ import com.ponysdk.core.writer.ModelWriter;
 
 /**
  * A normal push button with custom styling.
- * <h3>CSS Style Rules</h3>
+ * <h2>CSS Style Rules</h2>
  * <ul class="css">
  * <li>.gwt-PushButton-up/down/up-hovering/down-hovering/up-disabled/down-
  * disabled {.html-face}</li>

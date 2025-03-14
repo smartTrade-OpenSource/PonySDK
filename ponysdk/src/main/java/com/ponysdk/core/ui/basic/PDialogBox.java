@@ -34,7 +34,7 @@ import com.ponysdk.core.model.WidgetType;
  * calls to {@link #setWidth(String)} and {@link #setHeight(String)} will set the width and height
  * of the
  * dialog box itself, even if a widget has not been added as yet.
- * <h3>CSS Style Rules</h3>
+ * <h2>CSS Style Rules</h2>
  * <ul>
  * <li>.gwt-DialogBox { the outside of the dialog }</li>
  * <li>.gwt-DialogBox .Caption { the caption }</li>

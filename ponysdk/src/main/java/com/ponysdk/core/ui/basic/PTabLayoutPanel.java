@@ -45,7 +45,7 @@ import java.util.Objects;
  * This widget will <em>only</em> work in standards mode, which requires that the HTML page in which it is run have an
  * explicit DOCTYPE declaration.
  * </p>
- * <h3>CSS Style Rules</h3>
+ * <h2>CSS Style Rules</h2>
  * <dl>
  * <dt>.gwt-TabLayoutPanel
  * <dd>the panel itself

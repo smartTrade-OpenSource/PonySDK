@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 /**
  * A widget that presents a list of choices to the user, either as a list box or
  * as a drop-down list.
- * <h3>CSS Style Rules</h3>
+ * <h2>CSS Style Rules</h2>
  * <ul class='css'>
  * <li>.gwt-ListBox { }</li>
  * </ul>

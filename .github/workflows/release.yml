@@ -12,12 +12,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@master
-      - name: Set up JDK 1.9
-        uses: actions/setup-java@v2
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
         with:
-          java-version: '9.0.4'
-          distribution: 'adopt-openj9'
-      - name: Build, check and publish
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Build, test and publish
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew -PBUILD_RELEASE publish
+        run: ./gradlew test -PBUILD_RELEASE publish

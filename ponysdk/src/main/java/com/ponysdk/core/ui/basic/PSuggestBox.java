@@ -66,7 +66,7 @@ import java.util.Objects;
  * widget, the value is submitted to the <code>PMultiWordSuggestOracle</code>.
  * </p>
  *
- * <h3>CSS Style Rules</h3>
+ * <h2>CSS Style Rules</h2>
  * <dl>
  * <dt>.gwt-SuggestBox</dt>
  * <dd>the suggest box itself</dd>

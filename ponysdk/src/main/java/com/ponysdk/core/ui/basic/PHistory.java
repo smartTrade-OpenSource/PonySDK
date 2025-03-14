@@ -41,7 +41,7 @@ import com.ponysdk.core.writer.ModelWriter;
  * In order to receive notification of user-directed changes to the current history item, implement the
  * {@link PValueChangeHandler} interface and attach it via {@link #addValueChangeHandler(PValueChangeHandler)}.
  * </p>
- * <h3>URL Encoding</h3> Any valid characters may be used in the history token and will survive round-trips through
+ * <h2>URL Encoding</h2> Any valid characters may be used in the history token and will survive round-trips through
  * {@link #newItem(String)} to {@link #getToken()}/{@link PValueChangeHandler#onValueChange(PValueChangeEvent)} , but
  * most will be encoded in the user-visible URL.
  * The following US-ASCII characters are not encoded on any currently supported browser (but may be in the future due to

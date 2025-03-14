@@ -60,7 +60,7 @@ import com.ponysdk.core.writer.ModelWriter;
  * . It has a default style name of "gwt-PopupPanelGlass", which can be changed using
  * {@link #setGlassStyleName(String)}.
  * </p>
- * <h3>CSS Style Rules</h3>
+ * <h2>CSS Style Rules</h2>
  * <dl>
  * <dt>.gwt-PopupPanel</dt>
  * <dd>the outside of the popup</dd>

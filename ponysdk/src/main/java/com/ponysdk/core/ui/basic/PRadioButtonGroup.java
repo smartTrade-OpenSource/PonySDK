@@ -36,7 +36,7 @@ import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
  * {@link com.ponysdk.core.ui.basic.event.PValueChangeEvent}s when the button becomes checked. Note,
  * however, that browser limitations prevent PValueChangeEvents from being sent when the radio
  * button is cleared as a side effect of another in the group being clicked.
- * <h3>CSS Style Rules</h3>
+ * <h2>CSS Style Rules</h2>
  * <dl>
  * <dt>.gwt-RadioButton</dt>
  * <dd>the outer element</dd>

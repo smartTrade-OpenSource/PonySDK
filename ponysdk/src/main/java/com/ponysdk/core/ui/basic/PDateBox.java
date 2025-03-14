@@ -40,7 +40,7 @@ import java.util.*;
 
 /**
  * A text box that shows a {@link PDatePicker} when the user focuses on it.
- * <h3>CSS Style Rules</h3>
+ * <h2>CSS Style Rules</h2>
  * <dl>
  * <dt>.gwt-DateBox</dt>
  * <dd>default style name</dd>

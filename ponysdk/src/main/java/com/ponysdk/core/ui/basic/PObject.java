@@ -164,7 +164,7 @@ public abstract class PObject {
     /**
      * Bind to a Terminal function, useful to link the objectID and the widget
      * reference
-     * <h2>Example :</h2>
+     * <h4>Example :</h4>
      *
      * <pre>
      * --- Java ---

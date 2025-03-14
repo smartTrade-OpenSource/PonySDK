@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 /**
  * A standard check box widget.
  * This class also serves as a base class for {@link PRadioButton}.
- * <h3>CSS Style Rules</h3>
+ * <h2>CSS Style Rules</h2>
  * <dl>
  * <dt>.gwt-CheckBox</dt>
  * <dd>the outer element</dd>
