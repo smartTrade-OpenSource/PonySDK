@@ -97,9 +97,15 @@ public class PonyWebElement implements WebElement {
         sendApplicationInstruction(ClientToServerModel.DOM_HANDLER_TYPE, DomHandlerType.FOCUS.getValue());
     }
 
-    public void sendKeyAction(PKeyCodes key){
+    public void sendKeyDown(PKeyCodes key) {
         this.ponySDKWebDriver.sendApplicationInstruction(Json.createObjectBuilder().add(ClientToServerModel.OBJECT_ID.toStringValue(), objectID)
                 .add(ClientToServerModel.DOM_HANDLER_TYPE.toStringValue(), DomHandlerType.KEY_DOWN.getValue())
+                .add(ClientToServerModel.VALUE_KEY.toStringValue(), key.getCode()).build());
+    }
+
+    public void sendKeyUp(PKeyCodes key) {
+        this.ponySDKWebDriver.sendApplicationInstruction(Json.createObjectBuilder().add(ClientToServerModel.OBJECT_ID.toStringValue(), objectID)
+                .add(ClientToServerModel.DOM_HANDLER_TYPE.toStringValue(), DomHandlerType.KEY_UP.getValue())
                 .add(ClientToServerModel.VALUE_KEY.toStringValue(), key.getCode()).build());
     }
 
