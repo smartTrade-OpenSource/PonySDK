@@ -40,7 +40,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-// FIXME Need to manipulate LocalDate instead of Date to avoid timezone issues
 public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChangeHandler<Date> {
 
     private static final Logger log = LoggerFactory.getLogger(PDatePicker.class);
@@ -57,6 +56,7 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
     private int day = -1;
 
     protected PDatePicker() {
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
     @Override
@@ -119,8 +119,6 @@ public class PDatePicker extends PWidget implements HasPValue<Date>, PValueChang
                 final String start = jsonObject.getString(ClientToServerModel.START_DATE.toStringValue());
                 final String end = jsonObject.getString(ClientToServerModel.END_DATE.toStringValue());
                 try {
-                    // FIXME Need to be removed (but need to upgrade the Pony version and break commpatibility)
-                    // final PShowRangeEvent<String> event = new PShowRangeEvent<>(this, start, end);
                     final PShowRangeEvent<Date> event = new PShowRangeEvent<>(this, dateFormat.parse(start), dateFormat.parse(end));
                     for (final PShowRangeHandler<Date> handler : showRangeHandlers) {
                         handler.onShowRange(event);
