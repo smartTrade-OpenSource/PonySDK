@@ -5,6 +5,7 @@ on:
     branches:
       - 'master'
       - 'v2.8.x'
+      - 'v2.8.99.x'
 
 jobs:
   build:
