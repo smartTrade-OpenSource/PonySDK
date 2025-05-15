@@ -1,6 +1,6 @@
-[![codecov](https://codecov.io/gh/Nciaravola/PonySDK/branch/master/graph/badge.svg)](https://codecov.io/gh/Nciaravola/PonySDK)
-[![Actions Status](https://github.com/Nciaravola/PonySDK/workflows/CI/badge.svg)](https://github.com/Nciaravola/PonySDK/actions)
-![.github/workflows/release.yml](https://github.com/Nciaravola/PonySDK/workflows/.github/workflows/release.yml/badge.svg?branch=master)
+[![codecov](https://codecov.io/gh/smartTrade-OpenSource/PonySDK/branch/master/graph/badge.svg)](https://codecov.io/gh/Nciaravola/PonySDK)
+[![Actions Status](https://github.com/smartTrade-OpenSource/PonySDK/workflows/CI/badge.svg)](https://github.com/Nciaravola/PonySDK/actions)
+![.github/workflows/release.yml](https://github.com/smartTrade-OpenSource/PonySDK/workflows/.github/workflows/release.yml/badge.svg?branch=master)
 
 # PonySDK
 PonySDK is an open source project and application that uses open source tools built on the Java platform to help you develop Web applications quickly and efficiently
@@ -40,9 +40,9 @@ So, with PonySDK, you will be able to write standard Java code for creating your
 ## Installation
 
 ```
-Git version : https://github.com/Nciaravola/PonySDK.git
-Latest version : https://github.com/Nciaravola/PonySDK/archive/master.zip
-Released version : https://github.com/Nciaravola/PonySDK/releases
+Git version : https://github.com/smartTrade-OpenSource/PonySDK.git
+Latest version : https://github.com/smartTrade-OpenSource/PonySDK/archive/master.zip
+Released version : https://github.com/smartTrade-OpenSource/PonySDK/releases
 ```
 
 ## Pony Driver
