@@ -49,7 +49,7 @@ task runCodeServer(type: JavaExec) {
             '-src', '../ponysdk/src/main/java',
             '-generateJsInteropExports', '-noincremental',
             '-style', 'DETAILED',
-            'com.ponysdk.core.PonyTerminalDebug'
+            'com.ponysdk.core.PonyTerminal'
     ]
     jvmArgs = ['-server', '-Xmx1024m']
 }
