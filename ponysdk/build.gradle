@@ -5,7 +5,7 @@ ext {
     resourcesCoreTest = "src/test/resources"
     gwtOutputDirName = buildDir.name + "/gwt"
     jsinteropVersion = '1.0.2'
-    glassfishVersion = '1.1.4'
+    glassfishVersion = '1.1.6'
     javaxValidationVersion = '2.0.1.Final'
     seleniumVersion = '3.14.0'
     junitVersion = '4.12'
@@ -18,7 +18,7 @@ ext {
     javaxServletVersion = '4.0.1'
     slf4jVersion = '2.0.0-alpha1'
     log4jVersion = '2.10.0'
-    jsonVersion = '1.1.4'
+    jsonVersion = '1.1.6'
 }
 
 def versionSuffix = project.hasProperty('BUILD_RELEASE') ? "" : "-SNAPSHOT"
@@ -96,8 +96,8 @@ dependencies {
             'org.springframework:spring-context:' + springVersion,
             'org.slf4j:slf4j-api:' + slf4jVersion,
             'javax.servlet:javax.servlet-api:' + javaxServletVersion,
-            'javax.json:javax.json-api:' + jsonVersion,
-            'org.glassfish:javax.json:' + glassfishVersion,
+            'jakarta.json:jakarta.json-api:' + jsonVersion,
+            'org.glassfish:jakarta.json:' + glassfishVersion,
             'org.seleniumhq.selenium:selenium-api:' + seleniumVersion,
             'org.glassfish.tyrus:tyrus-client:' + tyrusVersion,
             'org.glassfish.tyrus.ext:tyrus-extension-deflate:' + tyrusVersion,

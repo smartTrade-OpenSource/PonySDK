@@ -1,6 +1,6 @@
 ext {
     java2htmlVersion = '5.0'
-    commonsBeanutilsVersion = '1.9.3'
+    commonsBeanutilsVersion = '1.11.0'
     commonsIoVersion = '2.6'
     commonsFileuploadVersion = '1.3.3'
     gwtVersion = '2.8.2'
@@ -9,14 +9,14 @@ ext {
     javaxServletVersion = '4.0.1'
     slf4jVersion = '1.8.0-alpha2'
     log4jVersion = '2.10.0'
-    jsonVersion = '1.1.4'
+    jsonVersion = '1.1.6'
 }
 
 dependencies {
     implementation(
             project(path: ':ponysdk', configuration: 'default'),
             'org.springframework:spring-context:' + springVersion,
-            'javax.json:javax.json-api:' + jsonVersion,
+            'jakarta.json:jakarta.json-api:' + jsonVersion,
             'javax.servlet:javax.servlet-api:' + javaxServletVersion,
             'org.slf4j:slf4j-api:' + slf4jVersion,
             'de.java2html:java2html:' + java2htmlVersion,

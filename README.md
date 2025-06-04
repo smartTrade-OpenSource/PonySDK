@@ -59,7 +59,7 @@ compile 'org.seleniumhq.selenium:selenium-api:3.14.0'
 compile 'org.seleniumhq.selenium:selenium-java:3.14.0'
 compile 'javax.websocket:javax.websocket-client-api:1.1'
 
-runtime 'javax.json:javax.json-api:1.1.4'
+runtime 'jakarta.json:jakarta.json-api:1.1.6'
 runtime 'org.slf4j:slf4j-api:1.7.25'
 runtime 'org.glassfish.tyrus:tyrus-client:1.15'
 runtime 'org.glassfish.tyrus:tyrus-container-grizzly-client:1.15'
