@@ -1256,6 +1256,7 @@ _UTF8 = undefined;
 
         updatePosition: function () {
             if (!this.parentElement) this.parentElement = document.getElementById(this.parentId);
+            this.element.style.top = '0px';
             var offsets = this.parentElement.getBoundingClientRect();
             this.element.style.width = offsets.width + 'px';
             // Down or top display
@@ -1263,23 +1264,23 @@ _UTF8 = undefined;
             var windowScrollTop = $(window).scrollTop();
             if (windowBot < this.element.offsetHeight && offsets.top > this.element.offsetHeight) {
                 // The element takes its place above the parent
+                this.element.setAttribute('vertical-position', 'top');
                 let computedTop = offsets.top - this.element.offsetHeight + windowScrollTop;
                 if (this.dropRight) {
                     // Each nested dropdown in the multilevel will be aligned with its parent's bottom border
                     computedTop += offsets.height;
                 }
                 this.element.style.top = computedTop + 'px';
-                this.element.setAttribute('vertical-position', 'top');
                 this.element.style.height = this.element.offsetHeight + 'px';
             } else {
                 // The element takes its place below the parent
+                this.element.setAttribute('vertical-position', 'down');
                 let computedTop = offsets.top + offsets.height + windowScrollTop;
                 if (this.dropRight) {
                     // Each nested dropdown in the multilevel will be aligned with its parent's top border
                     computedTop -= offsets.height;
                 }
                 this.element.style.top = computedTop + 'px';
-                this.element.setAttribute('vertical-position', 'down');
                 this.element.style.height = 'auto';
             }
             // Right or left display
