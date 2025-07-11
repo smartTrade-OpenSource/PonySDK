@@ -29,12 +29,12 @@ import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.ui.basic.event.*;
 import com.ponysdk.core.writer.ModelWriter;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 import java.util.*;
 
 /**
  * A widget that consists of a header and a content panel that discloses the content when a user clicks on the header.
- * <h3>CSS Style Rules</h3>
+ * <h2>CSS Style Rules</h2>
  * <dl class="css">
  * <dt>.gwt-DisclosurePanel
  * <dd>the panel's primary style

@@ -23,11 +23,12 @@
 
 package com.ponysdk.core.server.websocket;
 
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
-import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
+import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServlet;
+import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeRequest;
+import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeResponse;
+import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServletFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +37,9 @@ import com.ponysdk.core.server.application.ApplicationManager;
 import com.ponysdk.core.server.servlet.SessionManager;
 import com.ponysdk.core.server.stm.TxnContext;
 
-public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSocketServlet {
+import java.time.Duration;
+
+public class WebSocketServlet extends JettyWebSocketServlet {
 
     private static final Logger log = LoggerFactory.getLogger(WebSocketServlet.class);
 
@@ -50,13 +53,12 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
     }
 
     @Override
-    public void configure(final WebSocketServletFactory factory) {
-        factory.getPolicy().setIdleTimeout(maxIdleTime);
-        factory.getExtensionFactory().register(PonyPerMessageDeflateExtension.NAME, PonyPerMessageDeflateExtension.class);
+    public void configure(final JettyWebSocketServletFactory factory) {
+        factory.setIdleTimeout(Duration.ofMillis(maxIdleTime));
         factory.setCreator(this::createWebsocket);
     }
 
-    protected WebSocket createWebsocket(final ServletUpgradeRequest request, final ServletUpgradeResponse response) {
+    protected WebSocket createWebsocket(final JettyServerUpgradeRequest request, final JettyServerUpgradeResponse response) {
         final WebSocket webSocket = new WebSocket();
         webSocket.setRequest(request);
         webSocket.setApplicationManager(applicationManager);
@@ -72,10 +74,10 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         return webSocket;
     }
 
-    protected void configureWithSession(final ServletUpgradeRequest request, final TxnContext context) {
+    protected void configureWithSession(final JettyServerUpgradeRequest request, final TxnContext context) {
         // Force session creation if there is no session
         request.getHttpServletRequest().getSession(true);
-        final HttpSession httpSession = request.getSession();
+        final HttpSession httpSession = (HttpSession) request.getSession();
         if (httpSession != null) {
             final String applicationId = httpSession.getId();
 

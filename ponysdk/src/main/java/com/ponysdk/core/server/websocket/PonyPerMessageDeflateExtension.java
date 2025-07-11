@@ -25,11 +25,9 @@ package com.ponysdk.core.server.websocket;
 
 import java.nio.ByteBuffer;
 
-import org.eclipse.jetty.websocket.api.BatchMode;
-import org.eclipse.jetty.websocket.api.WriteCallback;
-import org.eclipse.jetty.websocket.api.extensions.Frame;
-import org.eclipse.jetty.websocket.common.Generator;
-import org.eclipse.jetty.websocket.common.extensions.compress.PerMessageDeflateExtension;
+import org.eclipse.jetty.util.Callback;
+import org.eclipse.jetty.websocket.core.Frame;
+import org.eclipse.jetty.websocket.core.internal.PerMessageDeflateExtension;
 
 public class PonyPerMessageDeflateExtension extends PerMessageDeflateExtension {
 
@@ -41,21 +39,21 @@ public class PonyPerMessageDeflateExtension extends PerMessageDeflateExtension {
     }
 
     @Override
-    public void incomingFrame(final Frame frame) {
+    public void onFrame(Frame frame, Callback callback) {
         if (webSocketListener != null)
             webSocketListener.onIncomingWebSocketFrame(getFrameHeaderLength(frame), frame.getPayloadLength());
-        super.incomingFrame(frame);
+        super.onFrame(frame, callback);
     }
 
     @Override
-    protected void nextOutgoingFrame(final Frame frame, final WriteCallback callback, final BatchMode batchMode) {
+    public void sendFrame(Frame frame, Callback callback, boolean batch) {
         if (webSocketListener != null)
             webSocketListener.onOutgoingWebSocketFrame(getFrameHeaderLength(frame), frame.getPayloadLength());
-        super.nextOutgoingFrame(frame, callback, batchMode);
+        super.sendFrame(frame, callback, batch);
     }
 
     /**
-     * Inspired by {@link Generator#generateHeaderBytes(Frame, ByteBuffer)}
+     * Inspired by Jetty's 9 {@link Generator#generateHeaderBytes(Frame, ByteBuffer)}
      *
      * <pre>
      *    0                   1                   2                   3

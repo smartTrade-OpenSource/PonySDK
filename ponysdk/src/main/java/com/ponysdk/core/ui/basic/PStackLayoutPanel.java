@@ -49,7 +49,7 @@ import java.util.Objects;
  * the HTML page in which it is run have an explicit &lt;!DOCTYPE&gt;
  * declaration.
  * </p>
- * <h3>CSS Style Rules</h3>
+ * <h2>CSS Style Rules</h2>
  * <dl>
  * <dt>.gwt-StackLayoutPanel
  * <dd>the panel itself

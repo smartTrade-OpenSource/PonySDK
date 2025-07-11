@@ -30,7 +30,7 @@ import com.ponysdk.core.model.WidgetType;
 
 /**
  * A text box that allows multiple lines of text to be entered.
- * <h3>CSS Style Rules</h3>
+ * <h2>CSS Style Rules</h2>
  * <ul class='css'>
  * <li>.gwt-TextArea { primary style }</li>
  * <li>.gwt-TextArea-readonly { dependent style set

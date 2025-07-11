@@ -28,8 +28,8 @@ import com.ponysdk.core.model.BooleanModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.ValueTypeModel;
 import com.ponysdk.core.server.concurrent.AutoFlushedBuffer;
+import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.WriteCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +43,7 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback {
+public class WebSocketPusher extends AutoFlushedBuffer implements Callback {
 
     private static final Logger log = LoggerFactory.getLogger(WebSocketPusher.class);
 
@@ -66,7 +66,7 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
     @Override
     protected void doFlush(final ByteBuffer bufferToFlush) {
         final int bytes = bufferToFlush.remaining();
-        session.getRemote().sendBytes(bufferToFlush, this);
+        session.sendBinary(bufferToFlush, this);
         if (listener != null) listener.onOutgoingPonyFramesBytes(bytes);
     }
 
@@ -76,7 +76,7 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
     }
 
     @Override
-    public void writeFailed(final Throwable t) {
+    public void fail(final Throwable t) {
         if (t instanceof Exception) {
             onFlushFailure((Exception) t);
         } else {
@@ -87,7 +87,7 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
     }
 
     @Override
-    public void writeSuccess() {
+    public void succeed() {
         onFlushCompletion();
     }
 

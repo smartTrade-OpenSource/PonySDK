@@ -39,17 +39,16 @@ import com.ponysdk.core.ui.eventbus.*;
 import com.ponysdk.core.ui.statistic.TerminalDataReceiver;
 import com.ponysdk.core.useragent.UserAgent;
 import com.ponysdk.core.writer.ModelWriter;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
+import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.json.JsonNumber;
-import javax.json.JsonObject;
-import javax.json.JsonString;
-import javax.json.JsonValue;
-import javax.json.JsonValue.ValueType;
-import javax.json.spi.JsonProvider;
-import javax.servlet.http.HttpSession;
+import jakarta.json.JsonNumber;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonString;
+import jakarta.json.JsonValue;
+import jakarta.json.JsonValue.ValueType;
+import jakarta.json.spi.JsonProvider;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -72,7 +71,7 @@ public class UIContext {
     private static final Logger log = LoggerFactory.getLogger(UIContext.class);
     private static final ThreadLocal<UIContext> currentContext = new ThreadLocal<>();
     private static final AtomicInteger uiContextCount = new AtomicInteger();
-    private static final String DEFAULT_PROVIDER = "org.glassfish.json.JsonProviderImpl";
+    private static final String DEFAULT_PROVIDER = "org.eclipse.parsson.JsonProviderImpl";
 
     private final int ID;
 
@@ -106,7 +105,7 @@ public class UIContext {
 
     private final ApplicationConfiguration configuration;
     private final WebSocket socket;
-    private final ServletUpgradeRequest request;
+    private final JettyServerUpgradeRequest request;
 
     private long lastReceivedTime = System.currentTimeMillis();
 
@@ -115,7 +114,7 @@ public class UIContext {
     private final ModelWriter modelWriter;
 
     public UIContext(final WebSocket socket, final TxnContext context, final ApplicationConfiguration configuration,
-                     final ServletUpgradeRequest request) {
+                     final JettyServerUpgradeRequest request) {
         this.ID = uiContextCount.incrementAndGet();
         this.socket = socket;
         this.configuration = configuration;
@@ -675,7 +674,7 @@ public class UIContext {
         return UserAgent.parseUserAgentString(request.getHeader("User-Agent"));
     }
 
-    public HttpSession getSession() {
+    public Object getSession() {
         return request.getSession();
     }
 
@@ -712,7 +711,7 @@ public class UIContext {
         return jsonProvider;
     }
 
-    public ServletUpgradeRequest getRequest() {
+    public JettyServerUpgradeRequest getRequest() {
         return request;
     }
 

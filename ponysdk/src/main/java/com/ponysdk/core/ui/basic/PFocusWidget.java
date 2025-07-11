@@ -25,7 +25,7 @@ package com.ponysdk.core.ui.basic;
 
 import java.util.Objects;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.UIContext;

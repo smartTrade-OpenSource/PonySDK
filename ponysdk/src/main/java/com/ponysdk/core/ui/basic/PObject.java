@@ -23,17 +23,6 @@
 
 package com.ponysdk.core.ui.basic;
 
-import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.Set;
-
-import javax.json.JsonObject;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -44,6 +33,16 @@ import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.util.SetUtils;
 import com.ponysdk.core.writer.ModelWriter;
 import com.ponysdk.core.writer.ModelWriterCallback;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonObject;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Set;
 
 /**
  * The superclass for all PonySDK objects.

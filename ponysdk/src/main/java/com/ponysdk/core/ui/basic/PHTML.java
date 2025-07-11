@@ -37,7 +37,7 @@ import com.ponysdk.core.writer.ModelWriter;
  * appropriate, as it disallows the use of HTML, which can lead to potential security issues if not
  * used properly.
  * </p>
- * <h3>CSS Style Rules</h3>
+ * <h2>CSS Style Rules</h2>
  * <ul class='css'>
  * <li>.gwt-HTML { }</li>
  * </ul>

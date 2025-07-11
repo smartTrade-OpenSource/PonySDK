@@ -27,7 +27,7 @@ import com.ponysdk.core.server.servlet.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;

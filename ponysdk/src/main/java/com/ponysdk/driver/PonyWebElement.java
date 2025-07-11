@@ -29,8 +29,8 @@ import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.ui.model.PKeyCodes;
 import org.openqa.selenium.*;
 
-import javax.json.Json;
-import javax.json.JsonValue;
+import jakarta.json.Json;
+import jakarta.json.JsonValue;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Collection;

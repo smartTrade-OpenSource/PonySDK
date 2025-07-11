@@ -27,7 +27,7 @@ import com.ponysdk.core.model.WidgetType;
 
 /**
  * A standard button widget.
- * <h3>CSS Style Rules</h3>
+ * <h2>CSS Style Rules</h2>
  * <dl>
  * <dt>.gwt-Button</dt>
  * <dd>the outer element</dd>

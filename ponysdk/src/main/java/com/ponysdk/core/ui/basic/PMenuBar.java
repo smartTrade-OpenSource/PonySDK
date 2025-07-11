@@ -38,7 +38,7 @@ import java.util.Objects;
 /**
  * A standard menu bar widget. A menu bar can contain any number of menu items,
  * each of which can either fire a {@link Runnable} or open a cascaded menu bar.
- * <h3>CSS Style Rules</h3>
+ * <h2>CSS Style Rules</h2>
  * <dl>
  * <dt>.gwt-MenuBar</dt>
  * <dd>the menu bar itself</dd>

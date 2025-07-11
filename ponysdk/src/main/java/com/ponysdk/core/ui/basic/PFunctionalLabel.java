@@ -35,7 +35,7 @@ import com.ponysdk.core.writer.ModelWriter;
  * A PLabel that contains a text, <i>not</i> interpreted as HTML, that can be either forced using
  * <code>setText(String)</code> or calculated using a <code>PFunction</code> and an array of arguments. This widget
  * uses a &lt;div&gt; element, causing it to be displayed with block layout.
- * <h3>CSS Style Rules</h3>
+ * <h2>CSS Style Rules</h2>
  * <ul class='css'>
  * <li>.gwt-Label { }</li>
  * </ul>

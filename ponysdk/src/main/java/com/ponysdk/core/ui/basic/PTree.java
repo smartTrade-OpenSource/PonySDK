@@ -30,13 +30,13 @@ import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.event.PSelectionEvent;
 import com.ponysdk.core.ui.basic.event.PSelectionHandler;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 import java.util.*;
 
 /**
  * A standard hierarchical tree widget. The tree contains a hierarchy of
  * {@link PTreeItem TreeItems} that the user can open, close, and select.
- * <h3>CSS Style Rules</h3>
+ * <h2>CSS Style Rules</h2>
  * <dl>
  * <dt>.gwt-Tree</dt>
  * <dd>the tree itself</dd>
