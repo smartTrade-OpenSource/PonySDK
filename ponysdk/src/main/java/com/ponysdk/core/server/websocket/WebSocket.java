@@ -31,14 +31,12 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
 import org.eclipse.jetty.util.component.Container;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
 import org.eclipse.jetty.websocket.api.WebSocketListener;
 import org.eclipse.jetty.websocket.common.extensions.ExtensionStack;
+import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,8 +49,19 @@ import com.ponysdk.core.server.context.CommunicationSanityChecker;
 import com.ponysdk.core.server.context.RequestContext;
 import com.ponysdk.core.server.stm.TxnContext;
 import com.ponysdk.core.ui.basic.PObject;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
+import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeRequest;
+import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.StatusCode;
+import org.eclipse.jetty.websocket.core.Extension;
+import org.eclipse.jetty.websocket.core.ExtensionStack;
+import org.eclipse.jetty.websocket.core.WebSocketCoreSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class WebSocket implements WebSocketListener, WebsocketEncoder {
+public class WebSocket implements Session.Listener, WebsocketEncoder {
 
     private static final String MSG_RECEIVED = "Message received from terminal : UIContext #{} on {} : {}";
     private static final Logger log = LoggerFactory.getLogger(WebSocket.class);
@@ -75,7 +84,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     }
 
     @Override
-    public void onWebSocketConnect(final Session session) {
+    public void onWebSocketOpen(final Session session) {
         try {
             if (!session.isOpen()) throw new IllegalStateException("Session already closed");
             this.session = session;
@@ -230,14 +239,6 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     }
 
     /**
-     * Receive from the terminal
-     */
-    @Override
-    public void onWebSocketBinary(final byte[] payload, final int offset, final int len) {
-        // Can't receive binary data from terminal (GWT limitation)
-    }
-
-    /**
      * Send round trip to the client
      */
     public void sendRoundTrip() {
@@ -288,11 +289,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         if (isSessionOpen()) {
             final UIContext context = this.uiContext;
             log.info("Disconnecting websocket programmatically for UIContext #{}", context == null ? null : context.getID());
-            try {
-                session.disconnect();
-            } catch (final IOException e) {
-                log.error("Unable to disconnect session for UIContext #{}", context == null ? null : context.getID(), e);
-            }
+            session.disconnect();
         }
     }
 
@@ -406,21 +403,31 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     public void setListener(final Listener listener) {
         this.listener = listener;
         this.websocketPusher.setWebSocketListener(listener);
-        if (!(session instanceof Container)) {
+
+        if (!(session instanceof WebSocketCoreSession)) {
             log.warn("Unrecognized session type {} for {}", session == null ? null : session.getClass(), uiContext);
             return;
         }
-        final ExtensionStack extensionStack = ((Container) session).getBean(ExtensionStack.class);
+
+        final ExtensionStack extensionStack = ((WebSocketCoreSession) session).getExtensionStack();
         if (extensionStack == null) {
             log.warn("No Extension Stack for {}", uiContext);
             return;
         }
-        final PonyPerMessageDeflateExtension extension = extensionStack.getBean(PonyPerMessageDeflateExtension.class);
-        if (extension == null) {
-            log.warn("Missing PonyPerMessageDeflateExtension from Extension Stack for {}", uiContext);
-            return;
+
+        boolean extensionFound = false;
+        for (final Extension ext : extensionStack.getExtensions()) {
+            if (ext instanceof PonyPerMessageDeflateExtension) {
+                final PonyPerMessageDeflateExtension ponyExtension = (PonyPerMessageDeflateExtension) ext;
+                ponyExtension.setWebSocketListener(listener);
+                extensionFound = true;
+                break;
+            }
         }
-        extension.setWebSocketListener(listener);
+
+        if (!extensionFound) {
+            log.warn("Missing PonyPerMessageDeflateExtension from Extension Stack for {}", uiContext);
+        }
     }
 
     public interface Listener {

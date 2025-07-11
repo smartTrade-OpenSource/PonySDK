@@ -33,13 +33,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.json.JsonNumber;
-import javax.json.JsonObject;
-import javax.json.JsonString;
-import javax.json.JsonValue;
-import javax.json.JsonValue.ValueType;
-import javax.json.spi.JsonProvider;
-import javax.servlet.http.HttpSession;
+import jakarta.json.JsonNumber;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonString;
+import jakarta.json.JsonValue;
+import jakarta.json.JsonValue.ValueType;
+import jakarta.json.spi.JsonProvider;
+import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,6 +61,7 @@ import com.ponysdk.core.ui.statistic.TerminalDataReceiver;
 import com.ponysdk.core.useragent.UserAgent;
 import com.ponysdk.core.writer.ModelWriter;
 
+
 /**
  * <p>
  * Provides a way to identify a user across more than one page request or visit to a Web site and to
@@ -78,7 +79,7 @@ public class UIContext {
     private static final Logger log = LoggerFactory.getLogger(UIContext.class);
     private static final ThreadLocal<UIContext> currentContext = new ThreadLocal<>();
     private static final AtomicInteger uiContextCount = new AtomicInteger();
-    private static final String DEFAULT_PROVIDER = "org.glassfish.json.JsonProviderImpl";
+    private static final String DEFAULT_PROVIDER = "org.eclipse.parsson.JsonProviderImpl";
 
     private final int ID;
 

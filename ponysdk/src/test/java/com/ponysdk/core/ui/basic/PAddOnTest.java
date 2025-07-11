@@ -26,8 +26,8 @@ package com.ponysdk.core.ui.basic;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import javax.json.Json;
-import javax.json.JsonObject;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
 
 import com.ponysdk.test.PSuite;
 import org.junit.Test;

@@ -28,11 +28,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonValue;
-import javax.json.spi.JsonProvider;
-import javax.servlet.http.HttpSession;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.JsonValue;
+import jakarta.json.spi.JsonProvider;
+
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
 import org.junit.Before;
@@ -90,7 +90,7 @@ public class WebSocketTest {
 
         session = Mockito.mock(Session.class);
         Mockito.when(session.isOpen()).thenReturn(true);
-        webSocket.onWebSocketConnect(session);
+        webSocket.onWebSocketOpen(session);
 
         final ArgumentCaptor<UIContext> uiContextCaptor = ArgumentCaptor.forClass(UIContext.class);
         Mockito.verify(applicationManager, Mockito.times(1)).startApplication(uiContextCaptor.capture());
@@ -146,7 +146,7 @@ public class WebSocketTest {
     }
 
     /**
-     * Test method for {@link com.ponysdk.core.server.websocket.WebSocket#onWebSocketConnect(Session)}
+     * Test method for {@link com.ponysdk.core.server.websocket.WebSocket#onWebSocketOpen(Session)}
      */
     @Test
     public void testOnWebSocketConnect() {
@@ -231,15 +231,6 @@ public class WebSocketTest {
         assertTrue(uiContext.isAlive());
         webSocket.onWebSocketClose(StatusCode.NORMAL, "Close");
         assertFalse(uiContext.isAlive());
-    }
-
-    /**
-     * Test method for {@link com.ponysdk.core.server.websocket.WebSocket#onWebSocketBinary(byte[], int, int)}.
-     */
-    @Test
-    public void testOnWebSocketBinary() {
-        // Not implemented yet
-        webSocket.onWebSocketBinary(null, 0, 0);
     }
 
     /**
