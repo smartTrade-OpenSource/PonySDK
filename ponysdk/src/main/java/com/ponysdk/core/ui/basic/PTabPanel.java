@@ -37,7 +37,7 @@ import com.ponysdk.core.model.WidgetType;
  * This widget will <em>only</em> work in quirks mode. If your application is in Standards Mode, use
  * {@link PTabLayoutPanel} instead.
  * </p>
- * <h3>CSS Style Rules</h3>
+ * <h2>CSS Style Rules</h2>
  * <ul class='css'>
  * <li>.gwt-TabPanel { the tab panel itself }</li>
  * <li>.gwt-TabPanelBottom { the bottom

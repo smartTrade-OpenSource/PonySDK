@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 
 /**
  * A widget that represents a simple &lt;a&gt; element.
- * <h3>CSS Style Rules</h3>
+ * <h2>CSS Style Rules</h2>
  * <ul class='css'>
  * <li>.gwt-Anchor { }</li>
  * </ul>

@@ -25,7 +25,7 @@ package com.ponysdk.driver;
 
 import java.util.List;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 public interface PonyMessageListener {
 

@@ -5,25 +5,25 @@ ext {
     resourcesCoreTest = "src/test/resources"
     gwtOutputDirName = buildDir.name + "/gwt"
     jsinteropVersion = '1.0.2'
-    glassfishVersion = '1.1.4'
-    javaxValidationVersion = '2.0.1.Final'
+    parssonVersion = '1.1.7'
+    jakartaValidationVersion = '3.0.2'
     seleniumVersion = '3.14.0'
     junitVersion = '4.12'
-    tyrusVersion = '1.15'
+    tyrusVersion = '2.1.5'
     mockitoVersion = '2.24.0'
     gwtVersion = '2.9.0'
     elemental2Version = '1.1.0'
-    jettyVersion = '9.4.43.v20210629'
-    springVersion = '5.1.3.RELEASE'
-    javaxServletVersion = '4.0.1'
+    jettyVersion = '12.0.22'
+    springVersion = '6.2.7'
+    jakartaServletVersion = '6.0.0'
     slf4jVersion = '2.0.0-alpha1'
     log4jVersion = '2.10.0'
-    jsonVersion = '1.1.4'
+    jsonVersion = '2.1.3'
 }
 
 def versionSuffix = project.hasProperty('BUILD_RELEASE') ? "" : "-SNAPSHOT"
 group = 'com.ponysdk'
-version = '2.8.105' +  versionSuffix
+version = '2.8.105-SNAPSHOT' //+  versionSuffix
 
 publishing {
     publications {
@@ -47,10 +47,10 @@ publishing {
 
 jacocoTestReport {
     reports {
-        xml.enabled true
-        xml.destination file("${buildDir}/reports/jacoco/report.xml")
-        html.enabled false
-        csv.enabled false
+        xml.required = true
+        xml.outputLocation = layout.buildDirectory.file("/reports/jacoco/report.xml")
+        html.required = false
+        csv.required = false
     }
 }
 
@@ -72,32 +72,31 @@ dependencies {
     )
 
     implementation(
-            'javax.validation:validation-api:' + javaxValidationVersion,
+            'jakarta.validation:jakarta.validation-api:' + jakartaValidationVersion,
             'com.google.jsinterop:jsinterop:' + jsinteropVersion,
             'com.google.jsinterop:jsinterop-annotations:' + jsinteropVersion,
             'org.eclipse.jetty:jetty-server:' + jettyVersion,
-            'org.eclipse.jetty:jetty-servlet:' + jettyVersion,
-            'org.eclipse.jetty:jetty-webapp:' + jettyVersion,
-            'org.eclipse.jetty:jetty-servlets:' + jettyVersion,
+            'org.eclipse.jetty.ee10:jetty-ee10-servlet:' + jettyVersion,
+            'org.eclipse.jetty.ee10:jetty-ee10-webapp:' + jettyVersion,
+            'org.eclipse.jetty.ee10:jetty-ee10-servlets:' + jettyVersion,
             'org.eclipse.jetty:jetty-client:' + jettyVersion,
             'org.eclipse.jetty:jetty-io:' + jettyVersion,
             'org.eclipse.jetty:jetty-util:' + jettyVersion,
             'org.eclipse.jetty:jetty-http:' + jettyVersion,
             'org.eclipse.jetty:jetty-security:' + jettyVersion,
-            'org.eclipse.jetty:jetty-continuation:' + jettyVersion,
-            'org.eclipse.jetty.websocket:websocket-api:' + jettyVersion,
-            'org.eclipse.jetty.websocket:websocket-common:' + jettyVersion,
-            'org.eclipse.jetty.websocket:websocket-server:' + jettyVersion,
-            'org.eclipse.jetty.websocket:websocket-servlet:' + jettyVersion,
-            'org.eclipse.jetty.websocket:javax-websocket-server-impl:' + jettyVersion,
+            'org.eclipse.jetty.websocket:jetty-websocket-jetty-api:' + jettyVersion,
+            'org.eclipse.jetty.websocket:jetty-websocket-jetty-common:' + jettyVersion,
+            'org.eclipse.jetty.ee10.websocket:jetty-ee10-websocket-jetty-server:' + jettyVersion,
+            'org.eclipse.jetty.ee10.websocket:jetty-ee10-websocket-servlet:' + jettyVersion,
+            'org.eclipse.jetty.ee10.websocket:jetty-ee10-websocket-jakarta-server:' + jettyVersion,
             'org.springframework:spring-core:' + springVersion,
             'org.springframework:spring-web:' + springVersion,
             'org.springframework:spring-beans:' + springVersion,
             'org.springframework:spring-context:' + springVersion,
             'org.slf4j:slf4j-api:' + slf4jVersion,
-            'javax.servlet:javax.servlet-api:' + javaxServletVersion,
-            'javax.json:javax.json-api:' + jsonVersion,
-            'org.glassfish:javax.json:' + glassfishVersion,
+            'jakarta.servlet:jakarta.servlet-api:' + jakartaServletVersion,
+            'jakarta.json:jakarta.json-api:' + jsonVersion,
+            'org.eclipse.parsson:parsson:' + parssonVersion,
             'org.seleniumhq.selenium:selenium-api:' + seleniumVersion,
             'org.glassfish.tyrus:tyrus-client:' + tyrusVersion,
             'org.glassfish.tyrus.ext:tyrus-extension-deflate:' + tyrusVersion,
@@ -107,7 +106,7 @@ dependencies {
 
     testImplementation(
             'org.seleniumhq.selenium:selenium-java:' + seleniumVersion,
-            'javax.websocket:javax.websocket-client-api:1.1',
+            'jakarta.websocket:jakarta.websocket-client-api:2.1.1',
             'org.jsoup:jsoup:1.14.3',
             'org.junit.jupiter:junit-jupiter-api:5.8.1',
             'org.junit.jupiter:junit-jupiter-engine:5.8.1',

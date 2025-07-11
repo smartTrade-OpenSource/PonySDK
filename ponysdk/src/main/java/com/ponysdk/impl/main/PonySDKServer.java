@@ -26,6 +26,9 @@ package com.ponysdk.impl.main;
 import java.net.InetAddress;
 import java.net.URL;
 
+import com.ponysdk.core.server.websocket.PonyPerMessageDeflateExtension;
+import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServerContainer;
+import org.eclipse.jetty.ee10.websocket.server.config.JettyWebSocketServletContainerInitializer;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
@@ -33,9 +36,11 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
+import org.eclipse.jetty.websocket.core.WebSocketComponents;
+import org.eclipse.jetty.websocket.core.server.WebSocketServerComponents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -156,11 +161,7 @@ public class PonySDKServer {
     }
 
     protected ErrorHandler createErrorHandler() {
-        final ErrorHandler errorHandler = new ErrorHandler();
-        errorHandler.setShowMessageInTitle(false);
-        errorHandler.setShowServlet(false);
-        errorHandler.setShowStacks(false);
-        return errorHandler;
+        return new ErrorHandler();
     }
 
     protected ServletContextHandler createWebApp() {
@@ -172,6 +173,11 @@ public class PonySDKServer {
         context.setErrorHandler(createErrorHandler());
         context.getSessionHandler().getSessionCookieConfig().setSecure(true);
         context.getSessionHandler().getSessionCookieConfig().setHttpOnly(true);
+
+        JettyWebSocketServletContainerInitializer.configure(context, ((servletContext, container) -> {
+            final WebSocketComponents components = WebSocketServerComponents.getWebSocketComponents(context);
+            components.getExtensionRegistry().register(PonyPerMessageDeflateExtension.NAME, PonyPerMessageDeflateExtension.class);
+        }));
 
         context.addServlet(new ServletHolder(createBootstrapServlet()), MAPPING_BOOTSTRAP);
         context.addServlet(new ServletHolder(createStreamServiceServlet()), MAPPING_STREAM);

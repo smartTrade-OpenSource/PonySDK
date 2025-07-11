@@ -23,7 +23,7 @@
 
 package com.ponysdk.core.ui.basic.event;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 import com.ponysdk.core.ui.eventbus.Event;
 import com.ponysdk.core.ui.eventbus.EventHandler;

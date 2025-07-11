@@ -56,7 +56,7 @@ import java.util.Objects;
  * attributes added by the user (including style attributes, style names, and style modifiers),
  * except for eventbus listeners, will be lost.
  * </p>
- * <h3>CSS Style Rules</h3>
+ * <h2>CSS Style Rules</h2>
  * <dl>
  * <dt>.gwt-Image</dt>
  * <dd>The outer element</dd>

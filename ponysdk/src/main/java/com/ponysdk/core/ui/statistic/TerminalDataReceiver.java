@@ -23,7 +23,7 @@
 
 package com.ponysdk.core.ui.statistic;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 import com.ponysdk.core.ui.basic.PObject;
 

@@ -30,14 +30,14 @@ import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 import java.util.*;
 import java.util.stream.Collectors;
 
 /**
  * A standard check box widget.
  * This class also serves as a base class for {@link PRadioButton}.
- * <h3>CSS Style Rules</h3>
+ * <h2>CSS Style Rules</h2>
  * <dl>
  * <dt>.gwt-CheckBox</dt>
  * <dd>the outer element</dd>

@@ -48,7 +48,7 @@ import com.ponysdk.core.model.WidgetType;
  * which does
  * not support them normally.
  * </p>
- * <h3>Setting the Size:</h3>
+ * <h2>Setting the Size:</h2>
  * <p>
  * If you set the width or height of the {@link PDecoratorPanel}, you need to set the height and
  * width of the
@@ -64,7 +64,7 @@ import com.ponysdk.core.model.WidgetType;
  * }
  * </pre>
  *
- * <h3>CSS Style Rules</h3>
+ * <h2>CSS Style Rules</h2>
  * <ul class='css'>
  * <li>.gwt-DecoratorPanel { the panel }</li>
  * <li>.gwt-DecoratorPanel .top { the top row }</li>

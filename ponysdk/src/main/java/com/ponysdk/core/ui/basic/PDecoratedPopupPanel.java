@@ -30,7 +30,7 @@ import com.ponysdk.core.model.WidgetType;
  * A {@link PPopupPanel} that wraps its content in a 3x3 grid, which allows users to add rounded
  * corners.
  * </p>
- * <h3>Setting the Size:</h3>
+ * <h2>Setting the Size:</h2>
  * <p>
  * If you set the width or height of the {@link PDecoratedPopupPanel}, you need to set the height
  * and width of the middleCenter cell to 100% so that the middleCenter cell takes up all of the
@@ -46,7 +46,7 @@ import com.ponysdk.core.model.WidgetType;
  * }
  * </pre>
  *
- * <h3>CSS Style Rules</h3>
+ * <h2>CSS Style Rules</h2>
  * <ul class='css'>
  * <li>.gwt-DecoratedPopupPanel { the outside of the popup }</li>
  * <li>.gwt-DecoratedPopupPanel .popupContent { the wrapper around the content }</li>
