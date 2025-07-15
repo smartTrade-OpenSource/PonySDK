@@ -23,7 +23,7 @@ ext {
 
 def versionSuffix = project.hasProperty('BUILD_RELEASE') ? "" : "-SNAPSHOT"
 group = 'com.ponysdk'
-version = '2.8.105-SNAPSHOT' //+  versionSuffix
+version = '2.8.105-GF-SNAPSHOT' //+  versionSuffix
 
 publishing {
     publications {
@@ -181,6 +181,7 @@ task gwtc(type: JavaExec) {
 }
 
 test {
+    dependsOn(gwtc)
     classpath = files(resourcesCoreTest, gwtOutputDirName) + classpath
     afterSuite { desc, result ->
         if (!desc.parent) {
