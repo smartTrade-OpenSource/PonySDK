@@ -181,6 +181,7 @@ task gwtc(type: JavaExec) {
 }
 
 test {
+    dependsOn("gwtc")
     classpath = files(resourcesCoreTest, gwtOutputDirName) + classpath
     afterSuite { desc, result ->
         if (!desc.parent) {
