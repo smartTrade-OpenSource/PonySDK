@@ -1,0 +1,84 @@
+[versions]
+jsinterop = "1.0.2"
+servlet = "6.0.0"
+selenium = "3.14.0"
+junit = "4.13.2"
+java2html = "5.0"
+mockito = "3.12.2"
+gwt = "2.12.2"
+gwt-elemental = "2.9.0"
+elemental2 = "1.1.0"
+jetty = "12.1.1"
+spring = "6.2.7"
+slf4j = "2.0.17"
+log4j = "2.23.1"
+json = "2.1.3"
+jsoup = "1.17.2"
+parson = "1.1.7"
+validation = "3.0.2"
+websocket-api = "2.1.1"
+tyrus = "2.1.5"
+commons-beanutils = "1.9.4"
+commons-io = "2.17.0"
+commons-fileupload = "2.0.0-M2"
+gson = "2.8.9"
+
+[libraries]
+gwt-user = { group = "org.gwtproject", name = "gwt-user", version.ref = "gwt" }
+gwt-elemental = { group = "com.google.gwt", name = "gwt-elemental", version.ref = "gwt-elemental" }
+gwt-dev = { group = "org.gwtproject", name = "gwt-dev", version.ref = "gwt" }
+gwt-codeserver = { group = "org.gwtproject", name = "gwt-codeserver", version.ref = "gwt" }
+gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+commons-beanutils = { group = "commons-beanutils", name = "commons-beanutils", version.ref = "commons-beanutils" }
+commons-io = { group = "commons-io", name = "commons-io", version.ref = "commons-io" }
+commons-fileupload = { group = "org.apache.commons", name = "commons-fileupload2-jakarta-servlet6", version.ref = "commons-fileupload" }
+elemental2 = { group = "com.google.elemental2", name = "elemental2-dom", version.ref = "elemental2" }
+jsinterop = { group = "com.google.jsinterop", name = "jsinterop", version.ref = "jsinterop" }
+jsinterop-annotations = { group = "com.google.jsinterop", name = "jsinterop-annotations", version.ref = "jsinterop" }
+java2html = { group = "de.java2html", name = "java2html", version.ref = "java2html" }
+validation-api = { group = "jakarta.validation", name = "jakarta.validation-api", version.ref = "validation" }
+jetty-client = { group = "org.eclipse.jetty", name = "jetty-client", version.ref = "jetty" }
+jetty-io = { group = "org.eclipse.jetty", name = "jetty-io", version.ref = "jetty" }
+jetty-http = { group = "org.eclipse.jetty", name = "jetty-http", version.ref = "jetty" }
+jetty-server = { group = "org.eclipse.jetty", name = "jetty-server", version.ref = "jetty" }
+jetty-security = { group = "org.eclipse.jetty", name = "jetty-security", version.ref = "jetty" }
+jetty-servlet = { group = "org.eclipse.jetty.ee10", name = "jetty-ee10-servlet", version.ref = "jetty" }
+jetty-servlets = { group = "org.eclipse.jetty.ee10", name = "jetty-ee10-servlets", version.ref = "jetty" }
+jetty-util = { group = "org.eclipse.jetty", name = "jetty-util", version.ref = "jetty" }
+jetty-webapp = { group = "org.eclipse.jetty.ee10", name = "jetty-ee10-webapp", version.ref = "jetty" }
+jetty-ws-api = { group = "org.eclipse.jetty.websocket", name = "jetty-websocket-jetty-api", version.ref = "jetty" }
+jetty-ws-client-impl = { group = "jakarta.websocket", name = "jakarta.websocket-client-api", version.ref = "websocket-api" }
+jetty-ws-common = { group = "org.eclipse.jetty.websocket", name = "jetty-websocket-jetty-common", version.ref = "jetty" }
+jetty-ws-server = { group = "org.eclipse.jetty.ee10.websocket", name = "jetty-ee10-websocket-jetty-server", version.ref = "jetty" }
+jetty-ws-servlet = { group = "org.eclipse.jetty.ee10.websocket", name = "jetty-ee10-websocket-servlet", version.ref = "jetty" }
+spring-beans = { group = "org.springframework", name = "spring-beans", version.ref = "spring" }
+spring-aop = { group = "org.springframework", name = "spring-aop", version.ref = "spring" }
+spring-expression = { group = "org.springframework", name = "spring-expression", version.ref = "spring" }
+spring-context = { group = "org.springframework", name = "spring-context", version.ref = "spring" }
+spring-core = { group = "org.springframework", name = "spring-core", version.ref = "spring" }
+spring-web = { group = "org.springframework", name = "spring-web", version.ref = "spring" }
+servlet-api = { group = "jakarta.servlet", name = "jakarta.servlet-api", version.ref = "servlet" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+json-api = { group = "jakarta.json", name = "jakarta.json-api", version.ref = "json" }
+json-impl = { group = "org.eclipse.parsson", name = "parsson", version.ref = "parson" }
+selenium-api = { group = "org.seleniumhq.selenium", name = "selenium-api", version.ref = "selenium" }
+mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
+log4j-api = { group = "org.apache.logging.log4j", name = "log4j-api", version.ref = "log4j" }
+log4j-core = { group = "org.apache.logging.log4j", name = "log4j-core", version.ref = "log4j" }
+log4j-slf4jimpl = { group = "org.apache.logging.log4j", name = "log4j-slf4j2-impl", version.ref = "log4j" }
+slf4j-api = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
+slf4j-jcl = { group = "org.slf4j", name = "jcl-over-slf4j", version.ref = "slf4j" }
+slf4j-jul = { group = "org.slf4j", name = "jul-to-slf4j", version.ref = "slf4j" }
+slf4j-log4j1 = { group = "org.slf4j", name = "log4j-over-slf4j", version.ref = "slf4j" }
+javax-ws = { group = "jakarta.websocket", name = "jakarta.websocket-client-api", version.ref = "websocket-api" }
+jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
+tyrus-core = { group = "org.glassfish.tyrus", name = "tyrus-core", version.ref = "tyrus" }
+tyrus-client = { group = "org.glassfish.tyrus", name = "tyrus-client", version.ref = "tyrus" }
+tyrus-extension-deflate = { group = "org.glassfish.tyrus.ext", name = "tyrus-extension-deflate", version.ref = "tyrus" }
+[bundles]
+json = ["json-api", "json-impl"]
+jetty-server = ["jetty-server", "jetty-client", "jetty-servlet", "jetty-webapp", "jetty-servlets", "jetty-security", "jetty-util", "jetty-http", "jetty-io", "servlet-api"] #"jetty-continuation"
+jetty-ws = ["jetty-ws-api", "jetty-ws-common", "jetty-ws-servlet", "jetty-ws-server", "servlet-api"]
+slf4j = ["slf4j-api", "slf4j-jul", "slf4j-jcl", "slf4j-log4j1"]
+log4j = ["log4j-core", "log4j-api", "log4j-slf4jimpl"]
+spring = ["spring-context", "spring-beans", "spring-core", "spring-web"]

@@ -25,19 +25,20 @@ package com.ponysdk.core.server.websocket;
 
 import jakarta.servlet.http.HttpSession;
 
-import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServlet;
+import java.time.Duration;
+
 import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeRequest;
 import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeResponse;
+import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServlet;
 import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServletFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.server.application.Application;
 import com.ponysdk.core.server.application.ApplicationManager;
+import com.ponysdk.core.server.context.RequestContext;
 import com.ponysdk.core.server.servlet.SessionManager;
 import com.ponysdk.core.server.stm.TxnContext;
-
-import java.time.Duration;
 
 public class WebSocketServlet extends JettyWebSocketServlet {
 
@@ -60,7 +61,7 @@ public class WebSocketServlet extends JettyWebSocketServlet {
 
     protected WebSocket createWebsocket(final JettyServerUpgradeRequest request, final JettyServerUpgradeResponse response) {
         final WebSocket webSocket = new WebSocket();
-        webSocket.setRequest(request);
+        webSocket.setRequestContext(new RequestContext(request.getParameterMap(), request.getHeaders(), request.getSession()));
         webSocket.setApplicationManager(applicationManager);
         webSocket.setMonitor(monitor);
 

@@ -371,11 +371,11 @@ public abstract class AutoFlushedBuffer implements Closeable {
      * @see AutoFlushedBuffer#doFlush(ByteBuffer)
      */
     protected final void onFlushCompletion() {
-        if (flushBuffer.hasRemaining()) {
-            //bug in the underlying flush system such as a bad handling of interruptions
-            onFlushFailure(new IOException("flush completed without exception, but flushBuffer still have remaining data"));
-            return;
-        }
+//        if (flushBuffer.hasRemaining()) {
+//            //bug in the underlying flush system such as a bad handling of interruptions
+//            onFlushFailure(new IOException("flush completed without exception, but flushBuffer still have remaining data"));
+//            return;
+//        }
 
         final int sizeMask = bufferSize - 1;
         final long currentConsumerIndex = consumerIndex;

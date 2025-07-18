@@ -23,22 +23,18 @@
 
 package com.ponysdk.core.server.websocket;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonObjectBuilder;
 import jakarta.json.JsonValue;
 import jakarta.json.spi.JsonProvider;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
-import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeRequest;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -49,8 +45,13 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.ApplicationManager;
 import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.context.RequestContext;
 import com.ponysdk.core.server.stm.TxnContext;
 import com.ponysdk.core.util.Pair;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class WebSocketTest {
 
@@ -77,8 +78,8 @@ public class WebSocketTest {
 
         encodedValues.clear();
 
-        final JettyServerUpgradeRequest request = Mockito.mock(JettyServerUpgradeRequest.class);
-        webSocket.setRequest(request);
+        final RequestContext request = new RequestContext(new HashMap<>(), new HashMap<>(), null);
+        webSocket.setRequestContext(request);
         webSocket.setContext(Mockito.mock(TxnContext.class));
 
         final ApplicationManager applicationManager = Mockito.mock(ApplicationManager.class);
@@ -95,7 +96,7 @@ public class WebSocketTest {
         Mockito.verify(applicationManager, Mockito.times(1)).startApplication(uiContextCaptor.capture());
         uiContext = uiContextCaptor.getValue();
 
-        assertEquals(request, webSocket.getRequest());
+        assertEquals(request, webSocket.getRequestContext());
     }
 
     /**

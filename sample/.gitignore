@@ -6,3 +6,5 @@ src-generated
 /log/
 /launcher/
 /.project
+*.log
+*.log.*

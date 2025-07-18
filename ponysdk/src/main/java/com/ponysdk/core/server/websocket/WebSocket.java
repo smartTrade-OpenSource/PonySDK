@@ -23,25 +23,9 @@
 
 package com.ponysdk.core.server.websocket;
 
-import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.application.ApplicationConfiguration;
-import com.ponysdk.core.server.application.ApplicationManager;
-import com.ponysdk.core.server.application.UIContext;
-import com.ponysdk.core.server.context.CommunicationSanityChecker;
-import com.ponysdk.core.server.stm.TxnContext;
-import com.ponysdk.core.ui.basic.PObject;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonReader;
-import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeRequest;
-import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.StatusCode;
-import org.eclipse.jetty.websocket.core.Extension;
-import org.eclipse.jetty.websocket.core.ExtensionStack;
-import org.eclipse.jetty.websocket.core.WebSocketCoreSession;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -51,6 +35,24 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.StatusCode;
+import org.eclipse.jetty.websocket.core.Extension;
+import org.eclipse.jetty.websocket.core.ExtensionStack;
+import org.eclipse.jetty.websocket.core.WebSocketCoreSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.application.ApplicationConfiguration;
+import com.ponysdk.core.server.application.ApplicationManager;
+import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.context.CommunicationSanityChecker;
+import com.ponysdk.core.server.context.RequestContext;
+import com.ponysdk.core.server.stm.TxnContext;
+import com.ponysdk.core.ui.basic.PObject;
+
 public class WebSocket implements Session.Listener, WebsocketEncoder {
 
     private static final String MSG_RECEIVED = "Message received from terminal : UIContext #{} on {} : {}";
@@ -58,7 +60,7 @@ public class WebSocket implements Session.Listener, WebsocketEncoder {
     private static final Logger loggerIn = LoggerFactory.getLogger("WebSocket-IN");
     private static final Logger loggerOut = LoggerFactory.getLogger("WebSocket-OUT");
 
-    private JettyServerUpgradeRequest request;
+    private RequestContext requestContext;
     private WebsocketMonitor monitor;
     private WebSocketPusher websocketPusher;
     private ApplicationManager applicationManager;
@@ -83,7 +85,7 @@ public class WebSocket implements Session.Listener, WebsocketEncoder {
             // Don't set max chunk size > 8K because when using Jetty Websocket compression, the chunks are limited to 8K
 
             this.websocketPusher = new WebSocketPusher(session, 1 << 20, 1 << 12, TimeUnit.SECONDS.toMillis(60));
-            uiContext = new UIContext(this, context, applicationManager.getConfiguration(), request);
+            uiContext = new UIContext(this, context, applicationManager.getConfiguration(), requestContext);
             log.info("Creating a new {}", uiContext);
 
             final CommunicationSanityChecker communicationSanityChecker = new CommunicationSanityChecker(uiContext);
@@ -370,12 +372,12 @@ public class WebSocket implements Session.Listener, WebsocketEncoder {
 
     }
 
-    public JettyServerUpgradeRequest getRequest() {
-        return request;
+    public RequestContext getRequestContext() {
+        return requestContext;
     }
 
-    public void setRequest(final JettyServerUpgradeRequest request) {
-        this.request = request;
+    public void setRequestContext(final RequestContext request) {
+        this.requestContext = request;
     }
 
     public void setApplicationManager(final ApplicationManager applicationManager) {

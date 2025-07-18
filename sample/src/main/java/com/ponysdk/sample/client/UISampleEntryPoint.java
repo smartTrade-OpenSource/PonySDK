@@ -23,10 +23,67 @@
 
 package com.ponysdk.sample.client;
 
+import jakarta.servlet.http.HttpServletResponse;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.apache.commons.fileupload2.core.DiskFileItem;
+import org.apache.commons.fileupload2.core.DiskFileItemFactory;
+import org.apache.commons.fileupload2.core.FileItem;
+import org.apache.commons.fileupload2.core.FileItemFactory;
+import org.apache.commons.fileupload2.jakarta.servlet6.JakartaServletFileUpload;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.PScheduler;
-import com.ponysdk.core.ui.basic.*;
+import com.ponysdk.core.ui.basic.Element;
+import com.ponysdk.core.ui.basic.IsPWidget;
+import com.ponysdk.core.ui.basic.PAbsolutePanel;
+import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PComplexPanel;
+import com.ponysdk.core.ui.basic.PCookies;
+import com.ponysdk.core.ui.basic.PDateBox;
+import com.ponysdk.core.ui.basic.PDatePicker;
+import com.ponysdk.core.ui.basic.PDockLayoutPanel;
+import com.ponysdk.core.ui.basic.PElement;
+import com.ponysdk.core.ui.basic.PFileUpload;
+import com.ponysdk.core.ui.basic.PFlowPanel;
+import com.ponysdk.core.ui.basic.PFrame;
+import com.ponysdk.core.ui.basic.PFunctionalLabel;
+import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PListBox;
+import com.ponysdk.core.ui.basic.PMenuBar;
+import com.ponysdk.core.ui.basic.PRichTextArea;
+import com.ponysdk.core.ui.basic.PScript;
+import com.ponysdk.core.ui.basic.PScrollPanel;
+import com.ponysdk.core.ui.basic.PSimplePanel;
+import com.ponysdk.core.ui.basic.PStackLayoutPanel;
+import com.ponysdk.core.ui.basic.PTabLayoutPanel;
+import com.ponysdk.core.ui.basic.PTextBox;
+import com.ponysdk.core.ui.basic.PTree;
+import com.ponysdk.core.ui.basic.PTreeItem;
+import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
 import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
 import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
@@ -35,8 +92,13 @@ import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.column.DefaultColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.controller.DataGridController;
 import com.ponysdk.core.ui.datagrid2.data.RowAction;
-import com.ponysdk.core.ui.datagrid2.view.*;
+import com.ponysdk.core.ui.datagrid2.view.ColumnFilterFooterDataGridView;
+import com.ponysdk.core.ui.datagrid2.view.ColumnVisibilitySelectorDataGridView;
+import com.ponysdk.core.ui.datagrid2.view.ConfigSelectorDataGridView;
+import com.ponysdk.core.ui.datagrid2.view.DataGridView;
 import com.ponysdk.core.ui.datagrid2.view.DataGridView.DecodeException;
+import com.ponysdk.core.ui.datagrid2.view.DefaultDataGridView;
+import com.ponysdk.core.ui.datagrid2.view.RowSelectorColumnDataGridView;
 import com.ponysdk.core.ui.eventbus2.EventBus.EventHandler;
 import com.ponysdk.core.ui.form2.impl.formfield.ColorInputFormField;
 import com.ponysdk.core.ui.form2.impl.formfield.NumberInputFormField;
@@ -61,23 +123,6 @@ import com.ponysdk.core.ui.scene.Scene;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
 import com.ponysdk.sample.client.event.UserLoggedOutHandler;
 import com.ponysdk.sample.client.page.addon.LoggerAddOn;
-import jakarta.servlet.http.HttpServletResponse;
-import org.apache.commons.fileupload2.core.DiskFileItem;
-import org.apache.commons.fileupload2.core.DiskFileItemFactory;
-import org.apache.commons.fileupload2.core.FileItem;
-import org.apache.commons.fileupload2.core.FileItemFactory;
-import org.apache.commons.fileupload2.jakarta.servlet6.JakartaServletFileUpload;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.*;
-import java.text.SimpleDateFormat;
-import java.time.Duration;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
@@ -99,7 +144,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         button.addClickHandler(e -> PWindow.getMain().add(input));
         PWindow.getMain().add(button);
 
-        final PLabel url = Element.newPLabel(String.valueOf(UIContext.get().getRequest().getParameterMap().get("toto")));
+        final PLabel url = Element.newPLabel(String.valueOf(UIContext.get().getRequest().parameterMap().get("toto")));
         PWindow.getMain().add(url);
 
         final StringTextBoxFormField formField = new StringTextBoxFormField("String Formfield");

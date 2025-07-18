@@ -26,8 +26,8 @@ package com.ponysdk.impl.main;
 import java.net.InetAddress;
 import java.net.URL;
 
-import com.ponysdk.core.server.websocket.PonyPerMessageDeflateExtension;
-import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServerContainer;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.ee10.websocket.server.config.JettyWebSocketServletContainerInitializer;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpConfiguration;
@@ -36,8 +36,6 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
-import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.websocket.core.WebSocketComponents;
 import org.eclipse.jetty.websocket.core.server.WebSocketServerComponents;
@@ -50,6 +48,7 @@ import com.ponysdk.core.server.application.ApplicationManager;
 import com.ponysdk.core.server.servlet.AjaxServlet;
 import com.ponysdk.core.server.servlet.BootstrapServlet;
 import com.ponysdk.core.server.servlet.StreamServiceServlet;
+import com.ponysdk.core.server.websocket.PonyPerMessageDeflateExtension;
 import com.ponysdk.core.server.websocket.WebSocketServlet;
 
 public class PonySDKServer {
