@@ -35,6 +35,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import com.ponysdk.core.ui.datagrid2.data.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,11 +50,6 @@ import com.ponysdk.core.ui.datagrid2.config.DataGridConfig.ColumnSort;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfig.GeneralSort;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfig.Sort;
 import com.ponysdk.core.ui.datagrid2.config.DataGridConfigBuilder;
-import com.ponysdk.core.ui.datagrid2.data.AbstractFilter;
-import com.ponysdk.core.ui.datagrid2.data.DataGridFilter;
-import com.ponysdk.core.ui.datagrid2.data.DefaultRow;
-import com.ponysdk.core.ui.datagrid2.data.Interval;
-import com.ponysdk.core.ui.datagrid2.data.LiveDataView;
 import com.ponysdk.core.ui.datagrid2.datasource.DataGridSource;
 import com.ponysdk.core.ui.datagrid2.view.DataGridSnapshot;
 import com.ponysdk.core.util.MappedList;
@@ -90,6 +86,7 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     public DefaultDataGridController(final DataGridSource<K, V> dataSource) {
         this.dataSource = dataSource;
         dataSource.setRenderingHelpersCache(renderingHelpersCache);
+        dataSource.setFilterController(new FilterController<>());
     }
 
     @Override
