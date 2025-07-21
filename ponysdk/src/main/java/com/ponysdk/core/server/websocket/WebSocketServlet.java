@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.server.websocket;
 
+import com.ponysdk.core.server.context.RequestContext;
 import jakarta.servlet.http.HttpSession;
 
 import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServlet;
@@ -60,7 +61,9 @@ public class WebSocketServlet extends JettyWebSocketServlet {
 
     protected WebSocket createWebsocket(final JettyServerUpgradeRequest request, final JettyServerUpgradeResponse response) {
         final WebSocket webSocket = new WebSocket();
-        webSocket.setRequest(request);
+        webSocket.setRequestContext(new RequestContext(
+                request.getParameterMap(), request.getHeaders(), request.getSession())
+        );
         webSocket.setApplicationManager(applicationManager);
         webSocket.setMonitor(monitor);
 

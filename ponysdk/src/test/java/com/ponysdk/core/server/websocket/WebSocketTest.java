@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import com.ponysdk.core.server.context.RequestContext;
 import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonObjectBuilder;
 import jakarta.json.JsonValue;
@@ -38,7 +39,6 @@ import jakarta.json.spi.JsonProvider;
 
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
-import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeRequest;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -77,8 +77,8 @@ public class WebSocketTest {
 
         encodedValues.clear();
 
-        final JettyServerUpgradeRequest request = Mockito.mock(JettyServerUpgradeRequest.class);
-        webSocket.setRequest(request);
+        final RequestContext request = Mockito.mock(RequestContext.class);
+        webSocket.setRequestContext(request);
         webSocket.setContext(Mockito.mock(TxnContext.class));
 
         final ApplicationManager applicationManager = Mockito.mock(ApplicationManager.class);
@@ -95,7 +95,7 @@ public class WebSocketTest {
         Mockito.verify(applicationManager, Mockito.times(1)).startApplication(uiContextCaptor.capture());
         uiContext = uiContextCaptor.getValue();
 
-        assertEquals(request, webSocket.getRequest());
+        assertEquals(request, webSocket.getRequestContext());
     }
 
     /**

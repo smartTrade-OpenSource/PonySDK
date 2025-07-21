@@ -28,6 +28,7 @@ import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.AlreadyDestroyedApplication;
 import com.ponysdk.core.server.context.PObjectCache;
+import com.ponysdk.core.server.context.RequestContext;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.server.stm.TxnContext;
 import com.ponysdk.core.server.websocket.WebSocket;
@@ -39,7 +40,6 @@ import com.ponysdk.core.ui.eventbus.*;
 import com.ponysdk.core.ui.statistic.TerminalDataReceiver;
 import com.ponysdk.core.useragent.UserAgent;
 import com.ponysdk.core.writer.ModelWriter;
-import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -105,7 +105,7 @@ public class UIContext {
 
     private final ApplicationConfiguration configuration;
     private final WebSocket socket;
-    private final JettyServerUpgradeRequest request;
+    private final RequestContext requestContext;
 
     private long lastReceivedTime = System.currentTimeMillis();
 
@@ -114,11 +114,11 @@ public class UIContext {
     private final ModelWriter modelWriter;
 
     public UIContext(final WebSocket socket, final TxnContext context, final ApplicationConfiguration configuration,
-                     final JettyServerUpgradeRequest request) {
+                     final RequestContext requestContext) {
         this.ID = uiContextCount.incrementAndGet();
         this.socket = socket;
         this.configuration = configuration;
-        this.request = request;
+        this.requestContext = requestContext;
         this.context = context;
         this.modelWriter = context.getWriter();
 
@@ -640,7 +640,7 @@ public class UIContext {
     }
 
     public String getHistoryToken() {
-        final List<String> historyTokens = this.request.getParameterMap().get(ClientToServerModel.TYPE_HISTORY.toStringValue());
+        final List<String> historyTokens = this.requestContext.getParameterMap().get(ClientToServerModel.TYPE_HISTORY.toStringValue());
         return historyTokens != null && !historyTokens.isEmpty() ? historyTokens.get(0) : null;
     }
 
@@ -671,11 +671,11 @@ public class UIContext {
     }
 
     public UserAgent getUserAgent() {
-        return UserAgent.parseUserAgentString(request.getHeader("User-Agent"));
+        return UserAgent.parseUserAgentString(requestContext.getHeaders().get("User-Agent").get(0));
     }
 
     public Object getSession() {
-        return request.getSession();
+        return requestContext.getSession();
     }
 
     public <T> T getApplicationAttribute(final String name) {
@@ -711,8 +711,8 @@ public class UIContext {
         return jsonProvider;
     }
 
-    public JettyServerUpgradeRequest getRequest() {
-        return request;
+    public RequestContext getRequestContext() {
+        return requestContext;
     }
 
     @Override

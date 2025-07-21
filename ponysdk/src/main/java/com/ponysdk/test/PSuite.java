@@ -23,7 +23,7 @@
 
 package com.ponysdk.test;
 
-import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeRequest;
+import com.ponysdk.core.server.context.RequestContext;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.mockito.Mockito;
@@ -42,7 +42,7 @@ public class PSuite {
     @BeforeClass
     public static void beforeClass() {
         final WebSocket socket = Mockito.mock(WebSocket.class);
-        final JettyServerUpgradeRequest request = Mockito.mock(JettyServerUpgradeRequest.class);
+        final RequestContext request = Mockito.mock(RequestContext.class);
 
         final TxnContext context = Mockito.spy(new TxnContext(socket));
         ModelWriter modelWriter = new ModelWriterForTest();

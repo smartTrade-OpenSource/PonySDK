@@ -42,7 +42,7 @@ public class Main {
         configuration.setApplicationContextName(System.getProperty(ApplicationConfiguration.APPLICATION_CONTEXT_NAME, ""));
         configuration.setSessionTimeout(1000);
         configuration.setEntryPointClass((Class<? extends EntryPoint>) Class
-            .forName(System.getProperty(ApplicationConfiguration.POINTCLASS, "com.ponysdk.impl.main.BasicEntryPoint")));
+            .forName(System.getProperty(ApplicationConfiguration.POINTCLASS, "com.ponysdk.impl.java.BasicEntryPoint")));
 
         final String styles = System.getProperty(ApplicationConfiguration.STYLESHEETS);
         if (styles != null && !styles.isEmpty()) {
