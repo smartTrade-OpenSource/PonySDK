@@ -80,7 +80,7 @@ public class UIContext {
     private final Map<String, Object> attributes = new HashMap<>();
 
     private final PObjectCache pObjectCache = new PObjectCache();
-    private int objectCounter = 1;
+    private final IdGenerator idGenerator = new IdGenerator();
 
     private Map<Integer, StreamHandler> streamListenerByID;
     private int streamRequestCounter = 0;
@@ -355,7 +355,7 @@ public class UIContext {
      * @return the new ID
      */
     public int nextID() {
-        return objectCounter++;
+        return idGenerator.nextID();
     }
 
     /**
