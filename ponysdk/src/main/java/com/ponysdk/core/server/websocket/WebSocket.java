@@ -39,7 +39,6 @@ import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
 import org.eclipse.jetty.websocket.api.WebSocketListener;
 import org.eclipse.jetty.websocket.common.extensions.ExtensionStack;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +48,7 @@ import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.ApplicationManager;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.context.CommunicationSanityChecker;
+import com.ponysdk.core.server.context.RequestContext;
 import com.ponysdk.core.server.stm.TxnContext;
 import com.ponysdk.core.ui.basic.PObject;
 
@@ -59,7 +59,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     private static final Logger loggerIn = LoggerFactory.getLogger("WebSocket-IN");
     private static final Logger loggerOut = LoggerFactory.getLogger("WebSocket-OUT");
 
-    private ServletUpgradeRequest request;
+    private RequestContext request;
     private WebsocketMonitor monitor;
     private WebSocketPusher websocketPusher;
     private ApplicationManager applicationManager;
@@ -383,11 +383,11 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
 
     }
 
-    public ServletUpgradeRequest getRequest() {
+    public RequestContext getRequest() {
         return request;
     }
 
-    public void setRequest(final ServletUpgradeRequest request) {
+    public void setRequest(RequestContext request) {
         this.request = request;
     }
 

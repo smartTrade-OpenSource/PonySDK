@@ -8,7 +8,7 @@ val resourcesCoreTest = "src/test/resources"
 val gwtOutputDirName = "${layout.buildDirectory.get()}/gwt"
 
 group = "com.ponysdk"
-version = "2.9.0${if (project.hasProperty("BUILD_RELEASE")) "" else "-SNAPSHOT"}"
+version = "3.0.0${if (project.hasProperty("BUILD_RELEASE")) "" else "-SNAPSHOT"}"
 
 publishing {
     publications {

@@ -23,7 +23,9 @@
 
 package com.ponysdk.test;
 
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
+import java.util.HashMap;
+
+import javax.servlet.http.HttpSession;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.mockito.Mockito;
@@ -31,6 +33,7 @@ import org.mockito.Mockito;
 import com.ponysdk.core.server.application.Application;
 import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.context.RequestContext;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.server.stm.TxnContext;
 import com.ponysdk.core.server.websocket.WebSocket;
@@ -42,7 +45,7 @@ public class PSuite {
     @BeforeClass
     public static void beforeClass() {
         final WebSocket socket = Mockito.mock(WebSocket.class);
-        final ServletUpgradeRequest request = Mockito.mock(ServletUpgradeRequest.class);
+        final RequestContext request = new RequestContext(new HashMap<>(), new HashMap<>(), Mockito.mock(HttpSession.class));
 
         final TxnContext context = Mockito.spy(new TxnContext(socket));
         ModelWriter modelWriter = new ModelWriterForTest();

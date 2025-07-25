@@ -35,9 +35,7 @@ tasks.register<JavaExec>("runCodeServer") {
 tasks.register<JavaExec>("runSampleSpring") {
     group = ApplicationPlugin.APPLICATION_GROUP
 
-    classpath = project(":ponysdk").configurations.getByName("gwtDev")
-    classpath += sourceSets["main"].runtimeClasspath
-    classpath += project(":ponysdk").configurations.getByName("gwt")
+    classpath = sourceSets["main"].runtimeClasspath
     classpath += project(":ponysdk").sourceSets["main"].java.sourceDirectories
     classpath += files(layout.buildDirectory.dir("gwt/gwt").get())
     classpath += files(layout.buildDirectory.dir("resources"))

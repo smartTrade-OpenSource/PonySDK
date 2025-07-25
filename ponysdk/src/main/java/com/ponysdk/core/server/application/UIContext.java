@@ -23,25 +23,15 @@
 
 package com.ponysdk.core.server.application;
 
-import com.ponysdk.core.model.ClientToServerModel;
-import com.ponysdk.core.model.HandlerModel;
-import com.ponysdk.core.model.ServerToClientModel;
-import com.ponysdk.core.server.AlreadyDestroyedApplication;
-import com.ponysdk.core.server.context.PObjectCache;
-import com.ponysdk.core.server.stm.Txn;
-import com.ponysdk.core.server.stm.TxnContext;
-import com.ponysdk.core.server.websocket.WebSocket;
-import com.ponysdk.core.ui.basic.PCookies;
-import com.ponysdk.core.ui.basic.PHistory;
-import com.ponysdk.core.ui.basic.PObject;
-import com.ponysdk.core.ui.basic.PWindow;
-import com.ponysdk.core.ui.eventbus.*;
-import com.ponysdk.core.ui.statistic.TerminalDataReceiver;
-import com.ponysdk.core.useragent.UserAgent;
-import com.ponysdk.core.writer.ModelWriter;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.json.JsonNumber;
 import javax.json.JsonObject;
@@ -50,10 +40,26 @@ import javax.json.JsonValue;
 import javax.json.JsonValue.ValueType;
 import javax.json.spi.JsonProvider;
 import javax.servlet.http.HttpSession;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.ReentrantLock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.HandlerModel;
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.AlreadyDestroyedApplication;
+import com.ponysdk.core.server.context.PObjectCache;
+import com.ponysdk.core.server.context.RequestContext;
+import com.ponysdk.core.server.stm.Txn;
+import com.ponysdk.core.server.stm.TxnContext;
+import com.ponysdk.core.server.websocket.WebSocket;
+import com.ponysdk.core.ui.basic.PCookies;
+import com.ponysdk.core.ui.basic.PHistory;
+import com.ponysdk.core.ui.basic.PObject;
+import com.ponysdk.core.ui.basic.PWindow;
+import com.ponysdk.core.ui.eventbus.StreamHandler;
+import com.ponysdk.core.ui.statistic.TerminalDataReceiver;
+import com.ponysdk.core.useragent.UserAgent;
+import com.ponysdk.core.writer.ModelWriter;
 
 /**
  * <p>
@@ -106,7 +112,7 @@ public class UIContext {
 
     private final ApplicationConfiguration configuration;
     private final WebSocket socket;
-    private final ServletUpgradeRequest request;
+    private final RequestContext request;
 
     private long lastReceivedTime = System.currentTimeMillis();
 
@@ -115,7 +121,7 @@ public class UIContext {
     private final ModelWriter modelWriter;
 
     public UIContext(final WebSocket socket, final TxnContext context, final ApplicationConfiguration configuration,
-                     final ServletUpgradeRequest request) {
+                     final RequestContext request) {
         this.ID = uiContextCount.incrementAndGet();
         this.socket = socket;
         this.configuration = configuration;
@@ -641,7 +647,7 @@ public class UIContext {
     }
 
     public String getHistoryToken() {
-        final List<String> historyTokens = this.request.getParameterMap().get(ClientToServerModel.TYPE_HISTORY.toStringValue());
+        final List<String> historyTokens = this.request.parameterMap().get(ClientToServerModel.TYPE_HISTORY.toStringValue());
         return historyTokens != null && !historyTokens.isEmpty() ? historyTokens.get(0) : null;
     }
 
@@ -672,11 +678,16 @@ public class UIContext {
     }
 
     public UserAgent getUserAgent() {
-        return UserAgent.parseUserAgentString(request.getHeader("User-Agent"));
+        List<String> strings = request.headers().get("User-Agent");
+        if (strings == null || strings.isEmpty())
+            throw new IllegalStateException("User-Agent header not found in request.");
+        if (strings.size() != 1)
+            throw new IllegalStateException("Multiple User-Agent headers found in request: " + strings);
+        return UserAgent.parseUserAgentString(strings.get(0));
     }
 
     public HttpSession getSession() {
-        return request.getSession();
+        return request.session();
     }
 
     public <T> T getApplicationAttribute(final String name) {
@@ -712,7 +723,7 @@ public class UIContext {
         return jsonProvider;
     }
 
-    public ServletUpgradeRequest getRequest() {
+    public RequestContext getRequest() {
         return request;
     }
 

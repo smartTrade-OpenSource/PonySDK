@@ -23,8 +23,9 @@
 
 package com.ponysdk.core.server.websocket;
 
-import javax.servlet.http.HttpSession;
+import java.io.Serial;
 
+import javax.servlet.http.HttpSession;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
@@ -33,6 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.server.application.Application;
 import com.ponysdk.core.server.application.ApplicationManager;
+import com.ponysdk.core.server.context.RequestContext;
 import com.ponysdk.core.server.servlet.SessionManager;
 import com.ponysdk.core.server.stm.TxnContext;
 
@@ -40,6 +42,7 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
     private static final Logger log = LoggerFactory.getLogger(WebSocketServlet.class);
 
+    @Serial
     private static final long serialVersionUID = 1L;
     private int maxIdleTime = 1000000;
     private final ApplicationManager applicationManager;
@@ -58,7 +61,8 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
 
     protected WebSocket createWebsocket(final ServletUpgradeRequest request, final ServletUpgradeResponse response) {
         final WebSocket webSocket = new WebSocket();
-        webSocket.setRequest(request);
+        webSocket.setRequest(new RequestContext(request.getParameterMap(), request.getHeaders(), request.getSession())
+        );
         webSocket.setApplicationManager(applicationManager);
         webSocket.setMonitor(monitor);
 
