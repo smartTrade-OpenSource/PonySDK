@@ -20,6 +20,7 @@ dependencies {
 
 tasks.register<JavaExec>("runCodeServer") {
     classpath += project(":ponysdk").configurations.getByName("gwtDev")
+    classpath += project(":ponysdk").configurations.getByName("gwt")
     classpath += project(":ponysdk").sourceSets["main"].java.sourceDirectories
     classpath += sourceSets["main"].java.sourceDirectories
     mainClass.set("com.google.gwt.dev.codeserver.CodeServer")
@@ -27,7 +28,7 @@ tasks.register<JavaExec>("runCodeServer") {
         "-src", "../ponysdk/src/main/java",
         "-generateJsInteropExports", "-noincremental",
         "-style", "DETAILED",
-        "com.ponysdk.core.PonyTerminalDebug"
+        "com.ponysdk.core.PonyTerminal"
     )
     jvmArgs("-server", "-Xmx1024m")
 }
@@ -42,8 +43,8 @@ tasks.register<JavaExec>("runSampleSpring") {
     classpath += files(layout.buildDirectory.dir("resources/main"))
     mainClass.set("com.ponysdk.impl.spring.MainSpring")
     jvmArgs(
-        "-Xmx8g",
-        "-Xms8g",
+        "-Xmx1g",
+        "-Xms1g",
         "-XX:-DisableExplicitGC",
         "-Xlog:safepoint=info,gc*=info,gc+age=trace:file=run_sample_spring_gc.log:time,uptime,level,tags:filesize=10M,filecount=100",
         "-Dlog4j.configurationFile=etc/log4j2.xml",
