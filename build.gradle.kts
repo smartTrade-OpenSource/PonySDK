@@ -3,6 +3,10 @@ plugins {
     id("maven-publish")
 }
 
+tasks.wrapper {
+    distributionType = Wrapper.DistributionType.ALL
+}
+
 subprojects {
     apply(plugin = "java")
 
