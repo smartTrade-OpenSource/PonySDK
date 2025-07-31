@@ -50,6 +50,7 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
     private static final String FUNCTION_SET_SIZE = "setSize";
     private static final String FUNCTION_SET_SCROLL_TOP = "setScrollTop";
     private static final String FUNCTION_SHOW_INDEX = "showIndex";
+    private static final String FUNCTION_PREPARE_UPDATE = "prepareUpdate";
 
     private static final String KEY_BEGIN_INDEX = "beginIndex";
     private static final String KEY_MAX_VISIBLE_ITEM = "maxVisibleItem";
@@ -111,6 +112,18 @@ public class InfiniteScrollAddon<D, W extends IsPWidget> extends PAddOnComposite
      */
     public void refresh() {
         dataProvider.getFullSize(this::setFullSize);
+    }
+
+    /**
+     * Refreshes the grid content without triggering scroll correction.
+     * This method should be used for programmatic updates (add, remove, update, sort...)
+     * to prevent unwanted scrolling, preserving the user's current view position.
+     */
+    public void refreshWithoutScrollCorrection() {
+        // Tell the client-side addon to save its current scroll position before we send new data.
+        callTerminalMethod(FUNCTION_PREPARE_UPDATE);
+        // Proceed with the standard refresh mechanism.
+        refresh();
     }
 
     public void scrollToTop() {

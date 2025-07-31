@@ -893,6 +893,7 @@ _UTF8 = undefined;
             this.previousVisibleItems = 0;
             this.marginTopPx = 0;
             this.marginBottomPx = 0;
+            this.preservedScrollTop = null;
 
 
             this.jqelement.scroll(e => {
@@ -1036,6 +1037,14 @@ _UTF8 = undefined;
             this.container.style.display = "none";
         },
 
+        /**
+         * Called from the server before a programmatic refresh.
+         * It stores the current scroll position so it can be restored after the DOM updates.
+         */
+        prepareUpdate: function() {
+            this.preservedScrollTop = this.jqelement.scrollTop();
+        },
+
         onDraw: function () {
             this.container.style.marginTop = this.marginTopPx + "px";
             this.container.style.marginBottom = this.marginBottomPx + "px";
@@ -1046,12 +1055,35 @@ _UTF8 = undefined;
                 this.element.children[0].style.display = "";
             }
 
-            if (this.forcePosition) {
+            /*
+             * This block finalizes the scroll position after new items have been rendered.
+             * It handles two distinct scenarios: programmatic updates and user-initiated scrolls.
+             */
+
+            // Case 1: The update was triggered programmatically (e.g., from a filter, sort, or data change).
+            // In this scenario, the goal is to keep the viewport static and not jump unexpectedly.
+            if (this.preservedScrollTop != null) {
+                // Restore the scroll position to the exact pixel value it had before the update began.
+                this.jqelement.scrollTop(this.preservedScrollTop);
+
+                // Clear the preserved state so it doesn't interfere with the next operation.
+                this.preservedScrollTop = null;
+
+            // Case 2: The update was triggered by the user scrolling into a non-rendered area.
+            // The goal here is to maintain a smooth scrolling motion without visual "jumps".
+            } else if (this.forcePosition) {
+                // An "anchor" element and its position were saved before the re-render.
+                // We find that same anchor element in the new set of rendered children.
                 let child = this.container.children[this.forcePosition.index - this.beginIndex];
                 if (child) {
+                    // Get the new position of the anchor element.
                     let topPosition = this.getTopPosition(child);
+                    // Adjust the scrollbar by the difference between the anchor's new and old positions.
+                    // This makes the content appear to flow seamlessly from the user's perspective.
                     this.jqelement.scrollTop(this.jqelement.scrollTop() + topPosition - this.forcePosition.topPosition);
                 }
+
+                // Clear the anchor data after the correction has been applied.
                 this.forcePosition = null;
             }
 
