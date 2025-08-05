@@ -23,23 +23,6 @@
 
 package com.ponysdk.core.server.websocket;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
-import org.eclipse.jetty.util.component.Container;
-import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.StatusCode;
-import org.eclipse.jetty.websocket.api.WebSocketListener;
-import org.eclipse.jetty.websocket.common.extensions.ExtensionStack;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.ApplicationConfiguration;
@@ -59,6 +42,14 @@ import org.eclipse.jetty.websocket.core.ExtensionStack;
 import org.eclipse.jetty.websocket.core.WebSocketCoreSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class WebSocket implements Session.Listener, WebsocketEncoder {
 

@@ -33,6 +33,7 @@ import jakarta.json.JsonObjectBuilder;
 import jakarta.json.JsonValue;
 import jakarta.json.spi.JsonProvider;
 
+import jakarta.servlet.http.HttpSession;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
 import org.junit.Before;

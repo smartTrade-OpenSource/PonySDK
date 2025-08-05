@@ -25,7 +25,7 @@ package com.ponysdk.test;
 
 import java.util.HashMap;
 
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.mockito.Mockito;

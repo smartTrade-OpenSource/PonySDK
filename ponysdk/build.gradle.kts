@@ -56,7 +56,7 @@ dependencies {
     implementation(libs.bundles.jetty.server)
     implementation(libs.bundles.jetty.ws)
     implementation(libs.validation.api)
-    implementation(libs.javax.ws)
+    implementation(libs.jakarta.ws)
     implementation(libs.jsinterop)
     implementation(libs.jsinterop.annotations)
     implementation(libs.bundles.spring)

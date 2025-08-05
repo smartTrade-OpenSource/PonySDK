@@ -50,8 +50,6 @@ tasks.register<JavaExec>("runSampleSpring") {
         "-Dlog4j.configurationFile=etc/log4j2.xml",
         "-agentlib:jdwp=transport=dt_socket,server=y,address=8888,suspend=n",
         "-Xmn7500M",
-        "-XX:+UseCMSInitiatingOccupancyOnly",
-        "-XX:CMSInitiatingOccupancyFraction=80"
     )
     //jvmArgs = ["-server", "-Xmx512m", "-Dlog4j.configurationFile=etc/log4j2.xml", "-agentlib:jdwp=transport=dt_socket,server=y,address=8888,suspend=n"]
 }
