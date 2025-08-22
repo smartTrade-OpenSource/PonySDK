@@ -23,6 +23,17 @@
 
 package com.ponysdk.core.ui.basic;
 
+import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Set;
+
+import javax.json.JsonObject;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -33,16 +44,6 @@ import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.util.SetUtils;
 import com.ponysdk.core.writer.ModelWriter;
 import com.ponysdk.core.writer.ModelWriterCallback;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.json.JsonObject;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.Set;
 
 /**
  * The superclass for all PonySDK objects.
@@ -389,17 +390,13 @@ public abstract class PObject {
     }
 
     @Override
-    public int hashCode() {
-        return ID;
+    public final int hashCode() {
+        return super.hashCode();
     }
 
     @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
-        final PObject other = (PObject) obj;
-        return ID == other.ID;
+    public final boolean equals(Object obj) {
+        return this == obj;
     }
 
     @Override
