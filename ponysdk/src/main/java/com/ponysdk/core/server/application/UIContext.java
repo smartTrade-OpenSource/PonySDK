@@ -58,7 +58,6 @@ import com.ponysdk.core.ui.basic.PObject;
 import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.eventbus.StreamHandler;
 import com.ponysdk.core.ui.statistic.TerminalDataReceiver;
-import com.ponysdk.core.useragent.UserAgent;
 import com.ponysdk.core.writer.ModelWriter;
 
 /**
@@ -647,7 +646,7 @@ public class UIContext {
     }
 
     public String getHistoryToken() {
-        final List<String> historyTokens = this.requestContext.parameterMap().get(ClientToServerModel.TYPE_HISTORY.toStringValue());
+        final List<String> historyTokens = this.requestContext.getParameters().get(ClientToServerModel.TYPE_HISTORY.toStringValue());
         return historyTokens != null && !historyTokens.isEmpty() ? historyTokens.get(0) : null;
     }
 
@@ -675,14 +674,6 @@ public class UIContext {
 
     public long getLastReceivedTime() {
         return lastReceivedTime;
-    }
-
-    public List<UserAgent> getUserAgent() {
-        return requestContext.headers().get("User-Agent").stream().map(UserAgent::parseUserAgentString).toList();
-    }
-
-    public Object getSession() {
-        return requestContext.session();
     }
 
     public <T> T getApplicationAttribute(final String name) {

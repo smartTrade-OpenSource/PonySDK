@@ -61,7 +61,7 @@ public class WebSocketServlet extends JettyWebSocketServlet {
 
     protected WebSocket createWebsocket(final JettyServerUpgradeRequest request, final JettyServerUpgradeResponse response) {
         final WebSocket webSocket = new WebSocket();
-        webSocket.setRequestContext(new RequestContext(request.getParameterMap(), request.getHeaders(), request.getSession()));
+        webSocket.setRequestContext(new RequestContext(request));
         webSocket.setApplicationManager(applicationManager);
         webSocket.setMonitor(monitor);
 

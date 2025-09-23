@@ -144,7 +144,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         button.addClickHandler(e -> PWindow.getMain().add(input));
         PWindow.getMain().add(button);
 
-        final PLabel url = Element.newPLabel(String.valueOf(UIContext.get().getRequest().parameterMap().get("toto")));
+        final PLabel url = Element.newPLabel(String.valueOf(UIContext.get().getRequest().getParameters().get("toto")));
         PWindow.getMain().add(url);
 
         final StringTextBoxFormField formField = new StringTextBoxFormField("String Formfield");

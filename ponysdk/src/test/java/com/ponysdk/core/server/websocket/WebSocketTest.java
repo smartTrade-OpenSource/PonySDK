@@ -29,7 +29,6 @@ import jakarta.json.JsonValue;
 import jakarta.json.spi.JsonProvider;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -78,7 +77,7 @@ public class WebSocketTest {
 
         encodedValues.clear();
 
-        final RequestContext request = new RequestContext(new HashMap<>(), new HashMap<>(), null);
+        final RequestContext request = Mockito.mock(RequestContext.class);
         webSocket.setRequestContext(request);
         webSocket.setContext(Mockito.mock(TxnContext.class));
 

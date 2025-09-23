@@ -23,8 +23,6 @@
 
 package com.ponysdk.test;
 
-import java.util.HashMap;
-
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.mockito.Mockito;
@@ -44,7 +42,7 @@ public class PSuite {
     @BeforeClass
     public static void beforeClass() {
         final WebSocket socket = Mockito.mock(WebSocket.class);
-        final RequestContext request = new RequestContext(new HashMap<>(), new HashMap<>(), socket);
+        final RequestContext request = Mockito.mock(RequestContext.class);
         socket.setRequestContext(request);
         final TxnContext context = Mockito.spy(new TxnContext(socket));
         ModelWriter modelWriter = new ModelWriterForTest();
