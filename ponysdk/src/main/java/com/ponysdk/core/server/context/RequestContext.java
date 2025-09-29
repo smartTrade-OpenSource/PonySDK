@@ -15,6 +15,9 @@ public class RequestContext {
     private final Object session;
     private final UserAgent userAgent;
     private final List<HttpCookie> cookies;
+    private final boolean secure;
+    private final String remoteAddr;
+    private final String host;
 
     public RequestContext(JettyServerUpgradeRequest request) {
         parameters = Collections.unmodifiableMap(request.getParameterMap());
@@ -22,6 +25,9 @@ public class RequestContext {
         session = request.getSession();
         userAgent = request.getHeaders().get("User-Agent").stream().map(UserAgent::parseUserAgentString).findFirst().orElse(null);
         cookies = Collections.unmodifiableList(request.getCookies());
+        secure = request.isSecure();
+        remoteAddr = request.getHttpServletRequest().getRemoteAddr();
+        host = request.getHost();
     }
 
     public Map<String, List<String>> getParameters() {
@@ -42,5 +48,17 @@ public class RequestContext {
 
     public List<HttpCookie> getCookies() {
         return cookies;
+    }
+
+    public boolean isSecure() {
+        return secure;
+    }
+
+    public String getRemoteAddr() {
+        return remoteAddr;
+    }
+
+    public String getHost() {
+        return host;
     }
 }
