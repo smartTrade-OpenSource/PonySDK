@@ -1064,7 +1064,7 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
             return groupName;
         }
 
-        void setGroupName(final String groupName) {
+        public void setGroupName(final String groupName) {
             this.groupName = groupName;
         }
 
