@@ -24,6 +24,7 @@
 package com.ponysdk.core.ui.basic;
 
 import java.text.SimpleDateFormat;
+import java.util.List;
 
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.ui.formatter.TextFunction;
@@ -323,6 +324,11 @@ public class DefaultElementFactory implements ElementFactory {
     @Override
     public PRadioButtonGroup newPRadioButtonGroup(final String name) {
         return new PRadioButtonGroup(name);
+    }
+
+    @Override
+    public PRadioButtonGroupValue newPRadioButtonGroupValue(List<PRadioButton> radioButtons) {
+        return new PRadioButtonGroupValue(radioButtons);
     }
 
     @Override
