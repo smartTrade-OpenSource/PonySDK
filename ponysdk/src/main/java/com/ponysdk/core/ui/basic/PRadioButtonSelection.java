@@ -40,7 +40,6 @@ import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
  * is selected by default if no selection was made</li>
  * <li>Value change events from user interactions are ignored until initialization completes</li>
  * </ul>
- * </p>
  */
 public class PRadioButtonSelection implements HasPValue<PRadioButton> {
 
