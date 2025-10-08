@@ -24,6 +24,7 @@
 package com.ponysdk.core.ui.basic;
 
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.ui.formatter.TextFunction;
@@ -316,6 +317,10 @@ public class Element {
 
     public static final PRadioButtonGroup newPRadioButtonGroup(final String name) {
         return f.newPRadioButtonGroup(name);
+    }
+
+    public static final PRadioButtonSelection newPRadioButtonSelection(final Collection<PRadioButton> radioButtons) {
+        return f.newPRadioButtonSelection(radioButtons);
     }
 
     public static final PRichTextArea newPRichTextArea() {

@@ -57,23 +57,26 @@ public class PRadioButton extends PCheckBox {
 
     @Override
     public void setState(final PCheckBoxState state) {
-        this.setState(state, true);
+        this.setState(state, true, true);
     }
 
     protected void setState(final PCheckBoxState state, final boolean propagate) {
-        if (PCheckBoxState.INDETERMINATE != state) {
-            if (Objects.equals(this.state, state)) return;
-            if (propagate) {
-                super.setState(state);
-                if (handlers != null) {
-                    final PValueChangeEvent<Boolean> event = new PValueChangeEvent<>(this, getValue());
-                    handlers.forEach(handler -> handler.onValueChange(event));
-                }
-            } else {
-                this.state = state;
-            }
-        } else {
+        setState(state, propagate, propagate);
+    }
+
+    protected void setState(final PCheckBoxState state, final boolean sendStateToTerminal, boolean callListener) {
+        if (PCheckBoxState.INDETERMINATE == state)
             throw new IllegalArgumentException("State of a RadioButton can't be indeterminate");
+        if (Objects.equals(this.state, state)) return;
+
+        if (sendStateToTerminal) super.setState(state);
+        else this.state = state;
+
+        if (callListener) {
+            if (handlers != null) {
+                final PValueChangeEvent<Boolean> event = new PValueChangeEvent<>(this, getValue());
+                handlers.forEach(handler -> handler.onValueChange(event));
+            }
         }
     }
 
