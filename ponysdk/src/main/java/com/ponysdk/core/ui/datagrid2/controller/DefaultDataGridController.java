@@ -273,7 +273,7 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     public void renderCell(final ColumnDefinition<V> colDef, final Cell<V, ?> cell, final V data) {
         checkAdapter();
         final Column<V> column = getColumn(colDef);
-        cell.render(data, getRenderingHelper(data, column));
+        cell.render(data, d -> getRenderingHelper(d, column));
     }
 
     @Override
