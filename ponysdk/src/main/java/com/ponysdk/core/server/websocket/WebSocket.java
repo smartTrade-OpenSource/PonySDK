@@ -81,9 +81,9 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
             this.session = session;
 
             // 1K for max chunk size and 1M for total buffer size
-            // Don't set max chunk size > 8K because when using Jetty Websocket compression, the chunks are limited to 8K
+            // Don't set max chunk size > 8K because when using Jetty Web when using Jetty Websocket compression, the chunks are limited to 8Ksocket compression, the chunks are limited to 8K
 
-            this.websocketPusher = new WebSocketPusher(session, 1 << 20, 1 << 12, TimeUnit.SECONDS.toMillis(60));
+            this.websocketPusher = new WebSocketPusher(session, 1 << 20, 1 << 13, TimeUnit.SECONDS.toMillis(60));
             uiContext = new UIContext(this, context, applicationManager.getConfiguration(), request);
             log.info("Creating a new {}", uiContext);
 
