@@ -201,31 +201,32 @@ public class PonySDK implements UncaughtExceptionHandler {
         this.tabindexOnlyFormField = tabindexOnlyFormField;
     }
 
+    long lastHeartBeatSent = -1;
+
     public void setHeartBeatPeriod(final int heartBeatInseconds) {
         if (heartBeatInseconds == 0) return;
-        final int heartBeatInMilli = heartBeatInseconds * 1000;
+        final int heartBeatPeriodInMilli = heartBeatInseconds * 1000;
         Scheduler.get().scheduleFixedDelay(() -> {
             final long now = System.currentTimeMillis();
             final long lastMessageTime = socketClient.getLastMessageTime();
-            if (lastMessageTime != lastHeartBeatFail) {
-                if (now - lastMessageTime > heartBeatInMilli) {
-                    lastHeartBeatFail = lastMessageTime;
-                    final PTInstruction requestData = new PTInstruction();
-                    requestData.put(ClientToServerModel.HEARTBEAT_REQUEST);
-                    socketClient.send(requestData.toString());
-                }
-            } else {
-                if (now - lastMessageTime > heartBeatInMilli) {
-                    socketClient.close(1000, "server did not respond");
-                    reconnectionChecker.detectConnectionFailure();
-                    //stop the scheduling
-                    return false;
-                } else {
-                    lastHeartBeatFail = 0L;
-                }
+
+            //heartbeat failure detection
+            if (now - lastMessageTime > heartBeatPeriodInMilli) {
+                socketClient.close(1000, "no data received since " + (now - lastMessageTime) + " ms");
+                reconnectionChecker.detectConnectionFailure();
+                //stop the scheduling
+                return false;
             }
+
+            if (lastHeartBeatSent < now - 1000) {
+                final PTInstruction requestData = new PTInstruction();
+                requestData.put(ClientToServerModel.HEARTBEAT_REQUEST);
+                socketClient.send(requestData.toString());
+                lastHeartBeatSent = now;
+            }
+
             return true;
-        }, heartBeatInMilli);
+        }, 500);
     }
 
 }

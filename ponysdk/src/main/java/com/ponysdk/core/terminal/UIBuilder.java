@@ -104,7 +104,7 @@ public class UIBuilder {
 
             if (ServerToClientModel.ROUNDTRIP_LATENCY == model) {
                 final PTInstruction requestData = new PTInstruction();
-                requestData.put(ClientToServerModel.TERMINAL_LATENCY, System.currentTimeMillis() - lastReceivedMessage);
+                requestData.put(ClientToServerModel.TERMINAL_LATENCY, readerBuffer.readBinaryModel().getLongValue());
                 requestBuilder.send(requestData);
                 readerBuffer.readBinaryModel(); // Read ServerToClientModel.END element
             } else if (ServerToClientModel.CREATE_CONTEXT == model) {
