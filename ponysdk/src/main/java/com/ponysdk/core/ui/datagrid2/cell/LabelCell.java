@@ -25,6 +25,7 @@ package com.ponysdk.core.ui.datagrid2.cell;
 
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.ponysdk.core.ui.basic.Element;
@@ -64,8 +65,8 @@ public class LabelCell<V> implements PrimaryCell<V> {
     }
 
     @Override
-    public void render(final V data, final Object renderingHelper) {
-        label.setText(renderingHelper.toString());
+    public void render(final V data, final Function<V, ?> renderingHelper) {
+        label.setText(renderingHelper.apply(data).toString());
     }
 
     @Override
