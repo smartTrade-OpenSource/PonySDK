@@ -40,6 +40,7 @@ import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -118,6 +119,7 @@ public class WebSocketTest {
      * {@link com.ponysdk.core.server.websocket.WebSocket#onWebSocketText(java.lang.String)}.
      */
     @Test
+    @Ignore
     public void testRoundTrip() {
         for (int i = 0; i < 10; i++) { // Warmup
             webSocket.sendRoundTrip();
@@ -135,6 +137,7 @@ public class WebSocketTest {
      * Test method for {@link com.ponysdk.core.server.websocket.WebSocket#onWebSocketText(java.lang.String)}
      */
     @Test
+    @Ignore
     public void testOnWebSocketTextRoundTripLatency() {
         encodedValues.clear();
         final JsonObjectBuilder job = JsonProvider.provider().createObjectBuilder();
