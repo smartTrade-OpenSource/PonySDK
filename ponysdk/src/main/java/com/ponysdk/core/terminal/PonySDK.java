@@ -205,6 +205,7 @@ public class PonySDK implements UncaughtExceptionHandler {
         if (heartBeatInseconds == 0) return;
         final int heartBeatInMilli = heartBeatInseconds * 1000;
         Scheduler.get().scheduleFixedDelay(() -> {
+            if (socketClient.getReadyState() > 1) return false; // No need to check the heartbeat when the socket is closed
             final long now = System.currentTimeMillis();
             final long lastMessageTime = socketClient.getLastMessageTime();
             if (lastMessageTime != lastHeartBeatFail) {
