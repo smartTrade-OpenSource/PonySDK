@@ -129,7 +129,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
     private final UnpinnedTable unpinnedTable;
     private Addon addon;
     private final List<Row> rows = new ArrayList<>();
-    private final DataGridController<K, V> controller;
+    private final DefaultDataGridController<K, V> controller;
     private DataGridAdapter<K, V> adapter;
     private long pollingDelayMillis;
     private UIRunnable delayedDrawRunnable;
@@ -1040,7 +1040,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
     public void setForceExtended(final boolean forceExtended) {
         this.forceExtended = forceExtended;
     }
-
+    
     public class Row {
 
         private final int relativeIndex;
@@ -1522,13 +1522,21 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         public void setTableCell(final PComplexPanel td) {
             td.add(primary.asPendingWidget());
             td.add(primary);
-            if (extended != null) td.add(extended);
+            td.add(primary.asErrorWidget());
+            if (extended != null) {
+            	td.add(extended);
+            	td.add(extended.asErrorWidget());
+            }
         }
 
         public void setVisibility(final boolean columnVisible) {
+        	primary.asErrorWidget().setVisible(false);
             primary.asPendingWidget().setVisible(!columnVisible);
             primary.asWidget().setVisible(columnVisible && !extendedMode);
-            if (extended != null) extended.asWidget().setVisible(columnVisible && extendedMode);
+            if (extended != null) {
+            	extended.asErrorWidget().setVisible(false);
+            	extended.asWidget().setVisible(columnVisible && extendedMode);
+            }
 
             final PComplexPanel td = getTableCell();
             if (!columnVisible) {
