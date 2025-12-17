@@ -69,8 +69,6 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     private UIContext uiContext;
     private Listener listener;
 
-    private long lastSentPing;
-
     public WebSocket() {
     }
 
@@ -149,8 +147,8 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
                     jsonObject = reader.readObject();
                 }
 
-                if (jsonObject.containsKey(ClientToServerModel.HEARTBEAT_REQUEST.toStringValue())) {
-                    sendHeartbeat();
+                if (jsonObject.containsKey(ClientToServerModel.HEARTBEAT_CLIENT.toStringValue())) {
+                    //do nothing
                 } else if (jsonObject.containsKey(ClientToServerModel.TERMINAL_LATENCY.toStringValue())) {
                     processRoundtripLatency(jsonObject);
                 } else if (jsonObject.containsKey(ClientToServerModel.APPLICATION_INSTRUCTIONS.toStringValue())) {
@@ -178,17 +176,12 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     }
 
     private void processRoundtripLatency(final JsonObject jsonObject) {
+        final long lastSentPing = jsonObject.getJsonNumber(ClientToServerModel.TERMINAL_LATENCY.toStringValue()).longValue();
+
         final long roundtripLatency = TimeUnit.MILLISECONDS.convert(System.nanoTime() - lastSentPing, TimeUnit.NANOSECONDS);
         log.trace("Roundtrip measurement : {} ms from terminal #{}", roundtripLatency, uiContext.getID());
         uiContext.addRoundtripLatencyValue(roundtripLatency);
-
-        final long terminalLatency = jsonObject.getJsonNumber(ClientToServerModel.TERMINAL_LATENCY.toStringValue()).longValue();
-        log.trace("Terminal measurement : {} ms from terminal #{}", terminalLatency, uiContext.getID());
-        uiContext.addTerminalLatencyValue(terminalLatency);
-
-        final long networkLatency = roundtripLatency - terminalLatency;
-        log.trace("Network measurement : {} ms from terminal #{}", networkLatency, uiContext.getID());
-        uiContext.addNetworkLatencyValue(networkLatency);
+        uiContext.addNetworkLatencyValue(roundtripLatency);
     }
 
     private void processInstructions(final JsonObject jsonObject) {
@@ -242,24 +235,10 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
      */
     public void sendRoundTrip() {
         if (isAlive() && isSessionOpen()) {
-            lastSentPing = System.nanoTime();
             beginObject();
-            encode(ServerToClientModel.ROUNDTRIP_LATENCY, null);
+            encode(ServerToClientModel.ROUNDTRIP_LATENCY, System.nanoTime());
             endObject();
             flush0();
-        }
-    }
-
-    private void sendHeartbeat() {
-        if (!isAlive() || !isSessionOpen()) return;
-        uiContext.acquire();
-        try {
-            beginObject();
-            encode(ServerToClientModel.HEARTBEAT, null);
-            endObject();
-            flush0();
-        } finally {
-            uiContext.release();
         }
     }
 
