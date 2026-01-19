@@ -229,7 +229,7 @@ public class BootstrapServlet extends HttpServlet {
     protected String addScript(final HttpServletRequest request) {
         final StringBuilder sb = new StringBuilder();
 
-        String ponyTerminalJsFileName = "ponyterminal/ponyterminal.nocache.js";
+        String ponyTerminalJsFileName = "ponyterminal2/ponyterminal2.nocache.js";
 
         sb.append(String.format(SCRIPT_PATTERN, rootPath + ponyTerminalJsFileName)).append(NEW_LINE);
         sb.append(String.format(SCRIPT_PATTERN, rootPath + "script/ponysdk.js")).append(NEW_LINE);
