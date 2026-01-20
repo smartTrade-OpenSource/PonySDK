@@ -27,6 +27,7 @@ import java.util.Objects;
 
 import javax.json.JsonObject;
 
+import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.event.PBlurEvent;
@@ -138,7 +139,7 @@ public abstract class PFocusWidget extends PWidget implements Focusable {
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (isVisible() && isEnabled()) super.onClientData(instruction);
+        if (canNotify(instruction)) super.onClientData(instruction);
     }
 
     @Override
@@ -151,4 +152,7 @@ public abstract class PFocusWidget extends PWidget implements Focusable {
         if (isVisible() && isEnabled()) super.blur();
     }
 
+    protected boolean canNotify(final JsonObject instruction) {
+        return isVisible() && (isEnabled() || instruction.containsKey(ClientToServerModel.HANDLER_WIDGET_VISIBILITY.toStringValue()));
+    }
 }
