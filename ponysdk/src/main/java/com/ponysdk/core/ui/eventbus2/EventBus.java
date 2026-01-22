@@ -24,6 +24,7 @@
 package com.ponysdk.core.ui.eventbus2;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -96,8 +97,12 @@ public class EventBus {
     public void post(final Object event) {
         if (event == null) return;
         final Set<EventHandler<?>> handlers = handlersByType.get(event.getClass());
-        if (handlers != null) handlers.forEach(handler -> handler.accept(event));
-        else log.debug("No subscribed handlers for {}", event.getClass());
+        if (handlers != null) {
+            Set<EventHandler<?>> handlersCopy = new HashSet<>(handlers);
+            handlersCopy.forEach(handler -> handler.accept(event));
+        } else {
+            log.debug("No subscribed handlers for {}", event.getClass());
+        }
     }
 
     public <T> void setInitialValueByType(Class<T> type, Supplier<T> supplier) {
