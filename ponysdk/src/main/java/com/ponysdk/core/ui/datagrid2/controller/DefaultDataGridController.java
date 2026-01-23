@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
@@ -72,7 +73,7 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     private final Map<ColumnDefinition<V>, Column<V>> columns = new HashMap<>();
     private final RenderingHelperSupplier renderingHelperSupplier1 = new RenderingHelperSupplier();
     private final RenderingHelperSupplier renderingHelperSupplier2 = new RenderingHelperSupplier();
-    private final AtomicLong count = new AtomicLong();
+    private final AtomicLong count = new AtomicLong(0);
     private int columnCounter = 0;
     private DataGridControllerListener<V> listener;
     private DataGridAdapter<K, V> adapter;
@@ -85,7 +86,7 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     private int to = 0;
     private final DataGridSource<K, V> dataSource;
     private DataGridSnapshot viewSnapshot;
-    private long lastProcessedID;
+    private final AtomicLong lastProcessedID = new AtomicLong(0);
 
     public DefaultDataGridController(final DataGridSource<K, V> dataSource) {
         this.dataSource = dataSource;
@@ -376,20 +377,51 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     public void prepareLiveDataOnScreen(final int dataSrcRowIndex, final int dataSize, final DataGridSnapshot threadSnapshot,
                                         final Consumer<Pair<DataSrcResult, Throwable>> consumer) {
         viewSnapshot = new DataGridSnapshot(threadSnapshot);
-        final long currentProcessID = count.get();
-        PScheduler.schedule(() -> {
-            try {
-                if (viewSnapshot.equals(threadSnapshot) && lastProcessedID <= currentProcessID) {
-                    final DataSrcResult result = new DataSrcResult(dataSource.getRows(dataSrcRowIndex, dataSize), dataSrcRowIndex,
-                        threadSnapshot.start);
-                    lastProcessedID = count.incrementAndGet();
-                    consumer.accept(new Pair<>(result, null));
+        if (dataSource.shouldBeCalledAsynchronously()) {
+            CompletableFuture<DataGetterFromSrc> completableFuture = CompletableFuture.supplyAsync(new DataGetterFromSrc(
+                    () -> dataSource.getRows(dataSrcRowIndex, dataSize), threadSnapshot, dataSrcRowIndex, threadSnapshot.start));
+
+            completableFuture = completableFuture.thenApply(dataResponse -> {
+                if (dataResponse.id < lastProcessedID.get()) {
+                    dataResponse.id = -1;
+                } else {
+                    lastProcessedID.set(dataResponse.id);
                 }
-            } catch (final Exception e) {
-                log.error("Cannot display data", e);
-                consumer.accept(new Pair<>(null, e));
-            }
-        });
+                return dataResponse;
+            });
+
+            completableFuture.whenComplete((response, ex) -> {
+                if (ex != null) {
+                    log.error("Cannot display data", ex);
+                    consumer.accept(new Pair<>(null, ex));
+                } else {
+                    if (viewSnapshot.equals(response.threadSnapshot) && response.id >= 0) {
+                        final DataSrcResult result = new DataSrcResult(response.liveDataView, response.firstRowIndex, response.start);
+                        consumer.accept(new Pair<>(result, null));
+                    }
+                }
+            });
+        } else {
+            final long currentProcessID = count.incrementAndGet();
+            lastProcessedID.set(currentProcessID);
+            PScheduler.schedule(() -> {
+                try {
+                    if (currentProcessID < lastProcessedID.get()) {
+                        return;
+                    }
+                    if (viewSnapshot.equals(threadSnapshot)) {
+                        final DataSrcResult result = new DataSrcResult(dataSource.getRows(dataSrcRowIndex, dataSize), dataSrcRowIndex,
+                                threadSnapshot.start);
+                        if (currentProcessID == lastProcessedID.get()) {
+                            consumer.accept(new Pair<>(result, null));
+                        }
+                    }
+                } catch (final Exception e) {
+                    log.error("Cannot display data", e);
+                    consumer.accept(new Pair<>(null, e));
+                }
+            });
+        }
     }
 
     @Override
@@ -698,6 +730,30 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
         @Override
         public boolean isActive() {
             return active;
+        }
+    }
+
+    private class DataGetterFromSrc implements Supplier<DataGetterFromSrc> {
+
+        public long id = count.incrementAndGet();
+        public LiveDataView<V> liveDataView;
+        public int firstRowIndex;
+        public int start;
+        DataGridSnapshot threadSnapshot;
+        Supplier<LiveDataView<V>> dataSupplier;
+
+        DataGetterFromSrc(final Supplier<LiveDataView<V>> inner, final DataGridSnapshot threadSnapshot, final int firstRowIndex,
+                          final int start) {
+            this.dataSupplier = inner;
+            this.threadSnapshot = threadSnapshot;
+            this.firstRowIndex = firstRowIndex;
+            this.start = start;
+        }
+
+        @Override
+        public DataGetterFromSrc get() {
+            liveDataView = dataSupplier.get();
+            return this;
         }
     }
 }
