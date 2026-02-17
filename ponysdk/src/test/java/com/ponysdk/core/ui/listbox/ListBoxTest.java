@@ -908,6 +908,20 @@ public class ListBoxTest extends PSuite {
     }
 
     @Test
+    public void theSearchIsNotFocusedOnOpenWhenAutoFocusIsDisabled() {
+        final TextListBoxFilterWidget filter = new TextListBoxFilterWidget();
+        final ListBoxConfiguration configuration = new ListBoxConfiguration();
+        configuration.setAutoFocusSearchEnabled(false);
+        final ListBox<String> box = new ListBox<>(configuration, items("pear", "apple"));
+        box.setFilterWidgetSupplier(() -> filter);
+        attach(box);
+
+        box.open();
+
+        assertTrue(writer.values(filter.asWidget(), ServerToClientModel.FOCUS).isEmpty());
+    }
+
+    @Test
     public void filterWidgetNarrowsVisibleItems() {
         final TextListBoxFilterWidget filter = new TextListBoxFilterWidget();
         final ListBox<String> box = new ListBox<>(new ListBoxConfiguration().setPlaceholder("Search"), items("pear", "apple", "fig"));
