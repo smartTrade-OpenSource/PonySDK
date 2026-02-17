@@ -23,20 +23,24 @@
 
 package com.ponysdk.core.ui.datagrid2.datasource;
 
-import com.ponysdk.core.server.service.query.PResultSet;
-import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
-import com.ponysdk.core.ui.datagrid2.column.Column;
-import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
-import com.ponysdk.core.ui.datagrid2.controller.DefaultDataGridController;
-import com.ponysdk.core.ui.datagrid2.controller.DefaultDataGridController.RenderingHelpersCache;
-import com.ponysdk.core.ui.datagrid2.data.*;
-
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+
+import com.ponysdk.core.server.service.query.PResultSet;
+import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
+import com.ponysdk.core.ui.datagrid2.column.Column;
+import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
+import com.ponysdk.core.ui.datagrid2.controller.DefaultDataGridController;
+import com.ponysdk.core.ui.datagrid2.controller.DefaultDataGridController.RenderingHelpersCache;
+import com.ponysdk.core.ui.datagrid2.data.AbstractFilter;
+import com.ponysdk.core.ui.datagrid2.data.DefaultRow;
+import com.ponysdk.core.ui.datagrid2.data.FilterController;
+import com.ponysdk.core.ui.datagrid2.data.Interval;
+import com.ponysdk.core.ui.datagrid2.data.LiveDataView;
 
 public interface DataGridSource<K, V> {
 
@@ -204,4 +208,13 @@ public interface DataGridSource<K, V> {
      * Set a FilterGroupProvider
      */
     void setFilterController(final FilterController<V> filterProvider);
+
+    /**
+     * Determine if the DataGridSource should be called in an asynchronous manner (because it may take time to get the rows)
+     *
+     * @return true if it should be called asynchrnously, false otherwise
+     */
+    default boolean shouldBeCalledAsynchronously() {
+        return false;
+    }
 }

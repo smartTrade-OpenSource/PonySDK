@@ -123,25 +123,24 @@ public class WebSocketTest {
             webSocket.sendRoundTrip();
 
             final JsonObjectBuilder job = JsonProvider.provider().createObjectBuilder();
-            job.add(ClientToServerModel.TERMINAL_LATENCY.toStringValue(), 1); // 1 ms of terminal latency
+            job.add(ClientToServerModel.TERMINAL_LATENCY.toStringValue(), System.nanoTime() - 10000000); // 10 ms of latency time in nano
             webSocket.onWebSocketText(job.build().toString());
         }
 
-        assertEquals(1, uiContext.getTerminalLatency(), 0.01);
-        assertEquals(uiContext.getRoundtripLatency(), uiContext.getTerminalLatency() + uiContext.getNetworkLatency(), 0.01);
+        assertEquals(10, uiContext.getNetworkLatency(), 1);
     }
 
     /**
      * Test method for {@link com.ponysdk.core.server.websocket.WebSocket#onWebSocketText(java.lang.String)}
      */
     @Test
-    public void testOnWebSocketTextRoundTripLatency() {
+    public void testOnWebSocketHeartBeatClient() {
         encodedValues.clear();
         final JsonObjectBuilder job = JsonProvider.provider().createObjectBuilder();
-        job.add(ClientToServerModel.HEARTBEAT_REQUEST.toStringValue(), JsonValue.NULL);
+        job.add(ClientToServerModel.HEARTBEAT_CLIENT.toStringValue(), JsonValue.NULL);
         webSocket.onWebSocketText(job.build().toString());
-        assertEquals(encodedValues,
-            List.of(new Pair<>(ServerToClientModel.HEARTBEAT, null), new Pair<>(ServerToClientModel.END, null)));
+        assertEquals(encodedValues, List.of()); //we don't send anything, the client notify the server he is alive
+        assertEquals(System.currentTimeMillis(), uiContext.getLastReceivedTime(), 5); //we updated the lastReceivedTime used on heartbeat
     }
 
     /**

@@ -922,13 +922,17 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
     }
 
     private boolean isSelectionAllowed(Collection<?> selectedItems) {
+        boolean addNewItemInList = (selectedItems != null);
         if (selectedItems == null) selectedItems = getSelectedItems();
         final Integer selectionLimit = configuration.getSelectionLimit();
-        if (configuration.isMultiSelectionEnabled() && selectionLimit != null && selectedItems.size() >= selectionLimit) {
-            log.debug("Selection limit reached ({})", selectionLimit);
-            return false;
+        if (addNewItemInList) {
+            return !(configuration.isMultiSelectionEnabled() && selectionLimit != null && selectedItems.size() > selectionLimit);
+        } else {
+            if (configuration.isMultiSelectionEnabled() && selectionLimit != null && selectedItems.size() >= selectionLimit) {
+                log.debug("Selection limit reached ({})", selectionLimit);
+                return false;
+            } else return true;
         }
-        return true;
     }
 
     private void applyCloseOnClickMode() {
@@ -1064,7 +1068,7 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
             return groupName;
         }
 
-        void setGroupName(final String groupName) {
+        public void setGroupName(final String groupName) {
             this.groupName = groupName;
         }
 
