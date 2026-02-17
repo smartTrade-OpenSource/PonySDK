@@ -28,6 +28,7 @@ import com.ponysdk.core.ui.dropdown.DefaultDropDownContainerConfiguration;
 public final class ListBoxConfiguration extends DefaultDropDownContainerConfiguration {
 
     private boolean searchEnabled = true;
+    private boolean autoFocusSearchEnabled = true;
     private String noMatchesLabel; // TODO missing
     private boolean multiSelectionEnabled;
     private boolean sortingEnabled = true;
@@ -192,5 +193,13 @@ public final class ListBoxConfiguration extends DefaultDropDownContainerConfigur
     public ListBoxConfiguration disableClearTitleButton() {
         super.disableClearTitleButton();
         return this;
+    }
+
+    public boolean isAutoFocusSearchEnabled() {
+        return autoFocusSearchEnabled;
+    }
+
+    public void setAutoFocusSearchEnabled(boolean autoFocusSearchEnabled) {
+        this.autoFocusSearchEnabled = autoFocusSearchEnabled;
     }
 }
