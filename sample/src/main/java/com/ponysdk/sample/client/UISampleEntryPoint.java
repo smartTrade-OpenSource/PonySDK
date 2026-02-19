@@ -121,6 +121,7 @@ import com.ponysdk.core.ui.scene.Scene;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
 import com.ponysdk.sample.client.event.UserLoggedOutHandler;
 import com.ponysdk.sample.client.page.addon.LoggerAddOn;
+import com.ponysdk.sample.client.page.component.CounterComponent;
 
 public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
@@ -134,6 +135,9 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     @Override
     public void start(final UIContext uiContext) {
+        // Test PComponent - en premier pour être visible
+        testPComponent();
+
         final PElement input = Element.newInput();
         input.setAttribute("type", "checkbox");
         input.evalTerminalScript("element.checked = true");
@@ -338,6 +342,109 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         PWindow.getMain().add(layout);
 
         router.go("scene2");
+    }
+
+    /**
+     * Test the new PComponent system with a CounterComponent.
+     */
+    private void testPComponent() {
+        log.info("Testing PComponent system...");
+
+        final PFlowPanel panel = Element.newPFlowPanel();
+        panel.setStyleProperty("border", "2px solid #3498db");
+        panel.setStyleProperty("padding", "20px");
+        panel.setStyleProperty("margin", "10px");
+        panel.setStyleProperty("borderRadius", "8px");
+
+        final PLabel title = Element.newPLabel("PComponent Test - Counter");
+        title.setStyleProperty("fontWeight", "bold");
+        title.setStyleProperty("fontSize", "18px");
+        title.setStyleProperty("marginBottom", "10px");
+        panel.add(title);
+
+        // Create the PComponent counter
+        final CounterComponent counter = new CounterComponent("Server Counter", 0, "#e74c3c");
+        
+        // Display current value (updated from server)
+        final PLabel valueLabel = Element.newPLabel("Value: 0");
+        valueLabel.setStyleProperty("fontSize", "24px");
+        valueLabel.setStyleProperty("margin", "10px 0");
+        panel.add(valueLabel);
+
+        // Buttons to control from server side
+        final PFlowPanel buttonPanel = Element.newPFlowPanel();
+        
+        final PButton incrementBtn = Element.newPButton("+ Increment (Server)");
+        incrementBtn.setStyleProperty("margin", "5px");
+        incrementBtn.setStyleProperty("padding", "10px 20px");
+        incrementBtn.addClickHandler(e -> {
+            counter.increment();
+            valueLabel.setText("Value: " + counter.getCount());
+        });
+        buttonPanel.add(incrementBtn);
+
+        final PButton decrementBtn = Element.newPButton("- Decrement (Server)");
+        decrementBtn.setStyleProperty("margin", "5px");
+        decrementBtn.setStyleProperty("padding", "10px 20px");
+        decrementBtn.addClickHandler(e -> {
+            counter.decrement();
+            valueLabel.setText("Value: " + counter.getCount());
+        });
+        buttonPanel.add(decrementBtn);
+
+        final PButton resetBtn = Element.newPButton("Reset to 0");
+        resetBtn.setStyleProperty("margin", "5px");
+        resetBtn.setStyleProperty("padding", "10px 20px");
+        resetBtn.addClickHandler(e -> {
+            counter.setCount(0);
+            valueLabel.setText("Value: 0");
+        });
+        buttonPanel.add(resetBtn);
+
+        panel.add(buttonPanel);
+
+        // Auto-increment test
+        final PButton autoBtn = Element.newPButton("Auto +10 (test rapid updates)");
+        autoBtn.setStyleProperty("margin", "10px 5px");
+        autoBtn.setStyleProperty("padding", "10px 20px");
+        final AtomicInteger autoCounter = new AtomicInteger(0);
+        autoBtn.addClickHandler(e -> {
+            autoCounter.set(0);
+            counter.setCount(0);
+            valueLabel.setText("Value: 0");
+            scheduleAutoIncrement(counter, valueLabel, autoCounter, 10);
+        });
+        panel.add(autoBtn);
+
+        // Attach the component to the window
+        counter.attach(PWindow.getMain());
+
+        // Info label
+        final PLabel infoLabel = Element.newPLabel("Note: The CounterComponent sends JSON Patch diffs to the client terminal.");
+        infoLabel.setStyleProperty("fontSize", "12px");
+        infoLabel.setStyleProperty("color", "#7f8c8d");
+        infoLabel.setStyleProperty("marginTop", "15px");
+        panel.add(infoLabel);
+
+        PWindow.getMain().add(panel);
+        
+        log.info("PComponent test added to UI");
+    }
+
+    /**
+     * Helper method for auto-increment with proper termination.
+     */
+    private void scheduleAutoIncrement(final CounterComponent counter, final PLabel valueLabel, 
+                                        final AtomicInteger remaining, final int target) {
+        if (remaining.get() >= target) {
+            return;
+        }
+        PScheduler.schedule(() -> {
+            counter.increment();
+            valueLabel.setText("Value: " + counter.getCount());
+            remaining.incrementAndGet();
+            scheduleAutoIncrement(counter, valueLabel, remaining, target);
+        }, Duration.ofMillis(100));
     }
 
     private static class MyRow {

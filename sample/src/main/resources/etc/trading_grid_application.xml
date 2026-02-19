@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" 
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+       xmlns:p="http://www.springframework.org/schema/p" 
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd">
+
+    <bean name="applicationManager" class="com.ponysdk.impl.spring.server.SpringApplicationManager">
+        <property name="configuration" ref="configuration" />
+    </bean>
+
+    <bean name="configuration" class="com.ponysdk.core.server.application.ApplicationConfiguration">
+        <property name="applicationID" value="trading-grid-demo" />
+        <property name="applicationName" value="Trading Grid Demo" />
+        <property name="applicationDescription" value="PonySDK + React AG Grid Demo" />
+        <property name="applicationContextName" value="sample" />
+        <property name="debugMode" value="true" />
+        <property name="clientConfigFile" value="etc/client_application.xml" />
+        <property name="sessionTimeout" value="20" />
+        <property name="entryPointClass" value="com.ponysdk.sample.client.TradingGridEntryPoint" />
+        <property name="javascript">
+            <list>
+                <!-- React and ReactDOM from CDN -->
+                <value>https://unpkg.com/react@18/umd/react.production.min.js</value>
+                <value>https://unpkg.com/react-dom@18/umd/react-dom.production.min.js</value>
+                <!-- AG Grid from CDN -->
+                <value>https://cdn.jsdelivr.net/npm/ag-grid-community@31/dist/ag-grid-community.min.js</value>
+                <value>https://cdn.jsdelivr.net/npm/ag-grid-react@31/dist/ag-grid-react.min.js</value>
+                <!-- ComponentTerminal -->
+                <value>script/component-terminal.js</value>
+                <!-- Component Bridge -->
+                <value>script/component-bridge.js</value>
+                <!-- Trading Grid Component -->
+                <value>script/trading-grid-register.js</value>
+            </list>
+        </property>
+        <property name="style">
+            <map>
+                <entry key="ponysdk" value="style/ponysdk.css" />
+                <entry key="ag-grid" value="https://cdn.jsdelivr.net/npm/ag-grid-community@31/styles/ag-grid.css" />
+                <entry key="ag-theme-alpine" value="https://cdn.jsdelivr.net/npm/ag-grid-community@31/styles/ag-theme-alpine.css" />
+            </map>
+        </property>
+    </bean>
+
+    <bean name="ponySDKServer" class="com.ponysdk.impl.main.PonySDKServer" init-method="start">
+        <property name="port" value="8080"/>
+        <property name="host" value="0.0.0.0"/>
+        <property name="applicationManager" ref="applicationManager"/>
+    </bean>
+
+</beans>

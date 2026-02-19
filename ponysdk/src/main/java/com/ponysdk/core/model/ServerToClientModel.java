@@ -257,7 +257,16 @@ public enum ServerToClientModel {
     DISCLOSURE_PANEL_CLOSE_IMG(ValueTypeModel.INTEGER),
     SUGGESTIONS(ValueTypeModel.STRING),
     DEFAULT_SUGGESTIONS(ValueTypeModel.STRING),
-    TEXTBOX_ID(ValueTypeModel.INTEGER);
+    TEXTBOX_ID(ValueTypeModel.INTEGER),
+
+    // PComponent protocol extensions (Requirements 10.1)
+    PCOMPONENT_CREATE(ValueTypeModel.NULL),
+    PCOMPONENT_UPDATE(ValueTypeModel.NULL),
+    PCOMPONENT_PROPS_FULL(ValueTypeModel.STRING),
+    PCOMPONENT_PROPS_PATCH(ValueTypeModel.STRING),
+    PCOMPONENT_PROPS_BINARY(ValueTypeModel.ARRAY),
+    PCOMPONENT_FRAMEWORK(ValueTypeModel.BYTE),
+    PCOMPONENT_SIGNATURE(ValueTypeModel.STRING);
 
     public static final int MAX_VALUE = Short.MAX_VALUE;
     private static final ServerToClientModel[] VALUES = ServerToClientModel.values();

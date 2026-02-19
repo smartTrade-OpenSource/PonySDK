@@ -19,9 +19,23 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
         <property name="debugMode" value="true" />
         <property name="clientConfigFile" value="etc/client_application.xml" />
         <property name="sessionTimeout" value="20" />
-        <property name="entryPointClass" value="com.ponysdk.sample.client.UISampleEntryPoint" />
+        <property name="entryPointClass" value="com.ponysdk.sample.client.TradingGridEntryPoint" />
         <property name="javascript">
             <list>
+                <!-- React and ReactDOM from CDN -->
+                <value>https://unpkg.com/react@18/umd/react.production.min.js</value>
+                <value>https://unpkg.com/react-dom@18/umd/react-dom.production.min.js</value>
+                <!-- AG Grid from CDN -->
+                <value>https://cdn.jsdelivr.net/npm/ag-grid-community@31/dist/ag-grid-community.min.js</value>
+                <!-- AG Grid React wrapper (custom) -->
+                <value>script/ag-grid-react-wrapper.js</value>
+                <!-- ComponentTerminal -->
+                <value>script/component-terminal.js?v=2</value>
+                <!-- Component Bridge -->
+                <value>script/component-bridge.js?v=2</value>
+                <!-- Trading Grid Component -->
+                <value>script/trading-grid-register.js</value>
+                <!-- Original scripts -->
                 <value>script/jquery-3.0.0.min.js</value>
                 <value>script/sample.js</value>
                 <value>http://benalman.com/code/projects/jquery-throttle-debounce/jquery.ba-throttle-debounce.js</value>
@@ -32,12 +46,14 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
                 <entry key="ponysdk" value="style/ponysdk.css" />
                 <entry key="sample" value="css/sample.css" />
                 <entry key="samplePony" value="css/ponysdk.css" />
+                <entry key="ag-grid" value="https://cdn.jsdelivr.net/npm/ag-grid-community@31/styles/ag-grid.css" />
+                <entry key="ag-theme-alpine" value="https://cdn.jsdelivr.net/npm/ag-grid-community@31/styles/ag-theme-alpine.css" />
             </map>
         </property>
     </bean>
 
     <bean name="ponySDKServer" class="com.ponysdk.impl.main.PonySDKServer" init-method="start">
-        <property name="port" value="80"/>
+        <property name="port" value="8080"/>
         <property name="host" value="0.0.0.0"/>
         <property name="applicationManager" ref="applicationManager"/>
 

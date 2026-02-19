@@ -89,7 +89,11 @@ public enum ClientToServerModel {
     HANDLER_PASTE("S"),
     HANDLER_WIDGET_VISIBILITY("T"),
     HANDLER_DOCUMENT_VISIBILITY("U"),
-    HANDLER_DESTROY("V");
+    HANDLER_DESTROY("V"),
+
+    PCOMPONENT_EVENT("w"),
+    PCOMPONENT_EVENT_TYPE("x"),
+    PCOMPONENT_EVENT_PAYLOAD("y");
 
     private final String key;
 

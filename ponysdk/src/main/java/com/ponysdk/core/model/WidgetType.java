@@ -82,7 +82,8 @@ public enum WidgetType {
     SUGGESTBOX,
     MULTIWORD_SUGGEST_ORACLE,
     FUNCTION,
-    FUNCTIONAL_LABEL;
+    FUNCTIONAL_LABEL,
+    COMPONENT;
 
     private static final WidgetType[] VALUES = WidgetType.values();
 

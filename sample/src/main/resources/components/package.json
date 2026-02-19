@@ -1,0 +1,21 @@
+{
+    "name": "ponysdk-sample-components",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "build": "npm run build:register",
+        "build:register": "esbuild trading-grid/register.ts --bundle --outfile=../script/trading-grid-register.js --format=iife --external:react --external:react-dom --external:ag-grid-community --external:ag-grid-react"
+    },
+    "dependencies": {
+        "ag-grid-community": "^31.0.0",
+        "ag-grid-react": "^31.0.0",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0"
+    },
+    "devDependencies": {
+        "@types/react": "^18.2.0",
+        "@types/react-dom": "^18.2.0",
+        "esbuild": "^0.20.0",
+        "typescript": "^5.3.3"
+    }
+}

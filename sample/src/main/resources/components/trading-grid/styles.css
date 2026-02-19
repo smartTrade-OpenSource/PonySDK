@@ -1,0 +1,27 @@
+.grid-title {
+    padding: 10px;
+    color: #e94560;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.grid-stats {
+    padding: 10px;
+    color: #888;
+    font-size: 14px;
+}
+
+.price-up {
+    color: #00c853;
+}
+
+.price-down {
+    color: #ff5252;
+}
+
+.ag-theme-alpine-dark {
+    --ag-background-color: #1a1a2e;
+    --ag-header-background-color: #16213e;
+    --ag-odd-row-background-color: #1f1f3a;
+    --ag-row-hover-color: #2a2a4a;
+}

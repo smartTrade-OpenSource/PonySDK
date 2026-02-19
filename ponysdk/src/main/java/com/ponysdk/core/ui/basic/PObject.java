@@ -70,7 +70,7 @@ public abstract class PObject {
     protected int saveKey = ServerToClientModel.MAX_VALUE; // Has to be higher than all ordinal of ServerToClientModel
     private AjaxHandler ajaxHandler;
 
-    PObject() {
+    protected PObject() {
     }
 
 

@@ -47,10 +47,10 @@ publishing {
 
 jacocoTestReport {
     reports {
-        xml.enabled true
-        xml.destination file("${buildDir}/reports/jacoco/report.xml")
-        html.enabled false
-        csv.enabled false
+        xml.required = true
+        xml.outputLocation = file("${buildDir}/reports/jacoco/report.xml")
+        html.required = false
+        csv.required = false
     }
 }
 
@@ -112,7 +112,8 @@ dependencies {
             'org.junit.jupiter:junit-jupiter-api:5.8.1',
             'org.junit.jupiter:junit-jupiter-engine:5.8.1',
             'org.junit.platform:junit-platform-engine:1.8.1',
-            'org.junit.platform:junit-platform-launcher:1.8.1'
+            'org.junit.platform:junit-platform-launcher:1.8.1',
+            'net.jqwik:jqwik:1.8.2'
     )
 
     testRuntimeOnly(
@@ -182,6 +183,8 @@ task gwtc(type: JavaExec) {
 }
 
 test {
+    useJUnitPlatform()
+    dependsOn gwtc
     classpath = files(resourcesCoreTest, gwtOutputDirName) + classpath
     afterSuite { desc, result ->
         if (!desc.parent) {

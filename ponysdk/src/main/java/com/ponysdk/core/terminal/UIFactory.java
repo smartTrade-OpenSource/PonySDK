@@ -32,6 +32,7 @@ import com.ponysdk.core.terminal.ui.PTAddOnComposite;
 import com.ponysdk.core.terminal.ui.PTAnchor;
 import com.ponysdk.core.terminal.ui.PTBrowser;
 import com.ponysdk.core.terminal.ui.PTButton;
+import com.ponysdk.core.terminal.ui.PTComponent;
 import com.ponysdk.core.terminal.ui.PTCheckBox;
 import com.ponysdk.core.terminal.ui.PTDateBox;
 import com.ponysdk.core.terminal.ui.PTDatePicker;
@@ -147,6 +148,7 @@ class UIFactory {
         else if (WidgetType.FUNCTIONAL_LABEL == widgetType) return new PTFunctionalLabel();
         else if (WidgetType.FUNCTION == widgetType) return new PTFunction();
         else if (WidgetType.MULTIWORD_SUGGEST_ORACLE == widgetType) return new PTMultiWordSuggestOracle();
+        else if (WidgetType.COMPONENT == widgetType) return new PTComponent();
         else log.severe("UIFactory: Client implementation not found, type : " + widgetType);
 
         return null;

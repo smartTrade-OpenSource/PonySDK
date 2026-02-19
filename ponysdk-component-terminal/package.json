@@ -1,0 +1,67 @@
+{
+    "name": "ponysdk-component-terminal",
+    "version": "1.0.0",
+    "description": "TypeScript-based component terminal for PonySDK PComponent system",
+    "type": "module",
+    "main": "dist/index.js",
+    "module": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "exports": {
+        ".": {
+            "import": "./dist/index.js",
+            "types": "./dist/index.d.ts"
+        }
+    },
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "npm run build:lib && npm run build:browser",
+        "build:lib": "tsc",
+        "build:browser": "esbuild src/index.ts --bundle --outfile=dist/component-terminal.browser.js --format=iife --global-name=ComponentTerminal",
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "clean": "rm -rf dist"
+    },
+    "keywords": [
+        "ponysdk",
+        "pcomponent",
+        "terminal",
+        "react",
+        "vue",
+        "svelte",
+        "web-components"
+    ],
+    "author": "",
+    "license": "Apache-2.0",
+    "dependencies": {
+        "fast-json-patch": "^3.1.1"
+    },
+    "devDependencies": {
+        "esbuild": "^0.20.0",
+        "fast-check": "^3.15.0",
+        "jsdom": "^28.0.0",
+        "typescript": "^5.3.3",
+        "vitest": "^1.2.0"
+    },
+    "peerDependencies": {
+        "react": ">=18.0.0",
+        "react-dom": ">=18.0.0",
+        "svelte": ">=4.0.0",
+        "vue": ">=3.0.0"
+    },
+    "peerDependenciesMeta": {
+        "react": {
+            "optional": true
+        },
+        "react-dom": {
+            "optional": true
+        },
+        "vue": {
+            "optional": true
+        },
+        "svelte": {
+            "optional": true
+        }
+    }
+}

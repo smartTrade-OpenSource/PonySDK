@@ -1,5 +1,21 @@
-.gradle/
-/.idea/
-/.project
-/.settings/
+/.*/
 /ponysdk/out/
+/var/
+node_modules/
+
+# Logs
+*.log
+*.log.*
+
+# Windows artifacts
+nul
+
+# Data/cache
+/data/
+
+# Build artifacts
+ponysdk-component-terminal/dist/bundle.js
+ponysdk-component-terminal/dist/styles.css
+
+# Lockfiles (Bun)
+bun.lock

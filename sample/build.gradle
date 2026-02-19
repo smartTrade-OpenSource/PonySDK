@@ -54,7 +54,35 @@ task runCodeServer(type: JavaExec) {
     jvmArgs = ['-server', '-Xmx1024m']
 }
 
+task copyComponentTerminal(type: Copy) {
+    from '../ponysdk-component-terminal/dist/component-terminal.browser.js'
+    into 'build/resources/main/script'
+    rename { 'component-terminal.js' }
+    inputs.file('../ponysdk-component-terminal/dist/component-terminal.browser.js')
+    outputs.file('build/resources/main/script/component-terminal.js')
+}
+
+task copyComponentBridge(type: Copy) {
+    from 'src/main/resources/script/component-bridge.js'
+    into 'build/resources/main/script'
+    inputs.file('src/main/resources/script/component-bridge.js')
+    outputs.file('build/resources/main/script/component-bridge.js')
+}
+
+task copyAgGridWrapper(type: Copy) {
+    from 'src/main/resources/components/ag-grid-react-wrapper.js'
+    into 'build/resources/main/script'
+    inputs.file('src/main/resources/components/ag-grid-react-wrapper.js')
+    outputs.file('build/resources/main/script/ag-grid-react-wrapper.js')
+}
+
+processResources {
+    outputs.upToDateWhen { false }
+    finalizedBy copyComponentTerminal, copyComponentBridge, copyAgGridWrapper
+}
+
 task runSampleSpring(type: JavaExec) {
+    dependsOn processResources, copyComponentTerminal, copyComponentBridge, copyAgGridWrapper
     classpath = sourceSets.main.runtimeClasspath
     classpath += files(buildDir.getAbsolutePath() + '/gwt/gwt')
     classpath += files(buildDir.getAbsolutePath() + '/resources')
