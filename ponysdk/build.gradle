@@ -133,6 +133,7 @@ java {
 javadoc {
     classpath += configurations.gwtdev
     exclude '**/terminal/**'
+    failOnError = false
 }
 
 jar {

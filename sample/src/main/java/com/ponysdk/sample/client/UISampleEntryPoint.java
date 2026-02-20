@@ -25,12 +25,12 @@ package com.ponysdk.sample.client;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -42,7 +42,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
@@ -318,7 +317,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
         POptionPane.showConfirmDialog(PWindow.getMain(), null, "BBB");
 
-        // uiContext.getHistory().newItem("", false);
+        // uiContext.getHistory().setHash("", false);
     }
 
     private void testScene() {
@@ -860,7 +859,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         return panel;
     }
 
-    private void readFileItem(final FileItem item) throws IOException, FileNotFoundException {
+    private void readFileItem(final FileItem item) throws IOException {
         // Store the uploaded file on the server (don't forget to remove)
         final String fileName = FilenameUtils.getName(item.getName());
         final InputStream fileContent = item.getInputStream();
@@ -869,13 +868,14 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         uploadedFile.deleteOnExit();
 
         // Read directly the input stream
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(item.getInputStream(), "UTF-8"));
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(item.getInputStream(),
+                StandardCharsets.UTF_8));
         final StringBuilder value = new StringBuilder();
         final char[] buffer = new char[1024];
         for (int length = 0; (length = reader.read(buffer)) > 0;) {
             value.append(buffer, 0, length);
         }
-        System.out.println(value.toString());
+        System.out.println(value);
     }
 
     private void testPerf() {
@@ -972,15 +972,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         UIContext.get().getNewEventBus().post(new PClickEvent(this));
     }
 
-    private static final class Data {
+    private record Data(Integer key, String value) {
 
-        protected Integer key;
-        protected String value;
-
-        public Data(final Integer key, final String value) {
-            this.key = key;
-            this.value = value;
-        }
     }
 
     private RefreshableDataGrid<Integer, Data> createGrid() {

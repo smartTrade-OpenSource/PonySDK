@@ -23,6 +23,12 @@
 
 package com.ponysdk.core.terminal;
 
+import elemental2.dom.DomGlobal;
+import elemental2.dom.XMLHttpRequest;
+import jsinterop.annotations.JsType;
+
+import java.util.logging.Logger;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -31,7 +37,6 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
-import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.MappingPath;
@@ -39,13 +44,9 @@ import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.request.FrameRequestBuilder;
 import com.ponysdk.core.terminal.request.WindowRequestBuilder;
 import com.ponysdk.core.terminal.socket.WebSocketClient;
+import com.ponysdk.core.terminal.ui.PTHistory;
 import com.ponysdk.core.terminal.ui.PTObject;
 import com.ponysdk.core.terminal.ui.PTWindowManager;
-import elemental2.dom.DomGlobal;
-import elemental2.dom.XMLHttpRequest;
-import jsinterop.annotations.JsType;
-
-import java.util.logging.Logger;
 
 @JsType
 public class PonySDK implements UncaughtExceptionHandler {
@@ -61,7 +62,7 @@ public class PonySDK implements UncaughtExceptionHandler {
 
     private boolean tabindexOnlyFormField;
 
-    private long lastHeartBeatFail = 0L;
+    private final long lastHeartBeatFail = 0L;
     private ReconnectionChecker reconnectionChecker;
 
     private PonySDK() {
@@ -98,7 +99,7 @@ public class PonySDK implements UncaughtExceptionHandler {
         final String pathName = DomGlobal.window.location.pathname;
         final String search = DomGlobal.window.location.search.replace('?', '&');
         final String wsMappingPath = MappingPath.WEBSOCKET + "?"
-                + ClientToServerModel.TYPE_HISTORY.toStringValue() + "=" + History.getToken();
+                + ClientToServerModel.TYPE_HISTORY.toStringValue() + "=" + PTHistory.getHash();
 
         String newUrl = protocol + "//" + server + pathName + wsMappingPath + search;
 

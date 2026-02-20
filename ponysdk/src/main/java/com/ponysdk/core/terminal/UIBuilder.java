@@ -23,11 +23,21 @@
 
 package com.ponysdk.core.terminal;
 
+import elemental.html.Uint8Array;
+import elemental.util.Collections;
+import elemental.util.MapFromIntTo;
+import elemental.util.MapFromStringTo;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
-import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
@@ -39,17 +49,13 @@ import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 import com.ponysdk.core.terminal.request.RequestBuilder;
-import com.ponysdk.core.terminal.ui.*;
-import elemental.html.Uint8Array;
-import elemental.util.Collections;
-import elemental.util.MapFromIntTo;
-import elemental.util.MapFromStringTo;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.ponysdk.core.terminal.ui.PTCookies;
+import com.ponysdk.core.terminal.ui.PTFrame;
+import com.ponysdk.core.terminal.ui.PTHistory;
+import com.ponysdk.core.terminal.ui.PTObject;
+import com.ponysdk.core.terminal.ui.PTStreamResource;
+import com.ponysdk.core.terminal.ui.PTWindow;
+import com.ponysdk.core.terminal.ui.PTWindowManager;
 
 public class UIBuilder {
 
@@ -336,15 +342,9 @@ public class UIBuilder {
     }
 
     private void processHistory(final ReaderBuffer buffer, final String token) {
-        final String oldToken = History.getToken();
-
         // ServerToClientModel.HISTORY_FIRE_EVENTS
         final boolean fireEvents = buffer.readBinaryModel().getBooleanValue();
-        if (oldToken != null && oldToken.equals(token)) {
-            if (fireEvents) History.fireCurrentHistoryState();
-        } else {
-            History.newItem(token, fireEvents);
-        }
+        PTHistory.setHash(token, fireEvents);
 
         buffer.readBinaryModel(); // Read ServerToClientModel.END element
     }
@@ -395,7 +395,7 @@ public class UIBuilder {
         jsonArray.set(0, instruction);
         requestData.put(ClientToServerModel.APPLICATION_INSTRUCTIONS, jsonArray);
 
-        if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Data to send " + requestData.toString());
+        if (log.isLoggable(Level.FINE)) log.log(Level.FINE, "Data to send " + requestData);
 
         requestBuilder.send(requestData);
     }

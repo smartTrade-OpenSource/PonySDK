@@ -199,7 +199,7 @@ public class BasicEntryPoint implements EntryPoint {
         //
         // System.err.println("Time to flush : " + (stop - start));
 
-        // uiContext.getHistory().newItem("", false);
+        // uiContext.getHistory().setHash("", false);
     }
 
 }
