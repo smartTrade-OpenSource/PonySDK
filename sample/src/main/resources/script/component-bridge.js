@@ -1,289 +1,383 @@
 /**
- * Bridge between PonySDK protocol and ComponentTerminal.
- * Registers React components similar to AbstractAddon.defineAddon pattern.
- * 
- * This script must be loaded AFTER component-terminal.js bundle.
+ * PonySDK Component Bridge
+ * Handles component lifecycle and communication between server and client frameworks.
+ * Supports: React, Vue, Svelte, Web Components, and Template-based components.
  */
 
-// Global ComponentTerminal instance
-var componentTerminal = null;
+(function() {
+    'use strict';
 
-// Queue for components registered before PonySDK loads
-var pendingRegistrations = [];
+    // Component instances by objectId
+    const components = {};
+    
+    // Factory registrations by signature
+    const factories = {
+        react: {},
+        vue: {},
+        svelte: {},
+        webcomponent: {},
+        template: {}
+    };
+    
+    // PonySDK reference
+    let pony = null;
 
-// Map to store container elements by objectId
-var containers = {};
-
-// Map to store factory functions by signature
-var factoryFunctions = {};
-
-/**
- * Decode binary event buffer from EventBridge.
- * Format: [EventCount(4), Event1, Event2, ...]
- * Event: [ObjectId(4), EventTypeLen(2), EventType(N), PayloadLen(4), Payload(N)]
- */
-function decodeEventBuffer(buffer) {
-    var view = new DataView(buffer);
-    var offset = 0;
-    var decoder = new TextDecoder();
-
-    // Read event count
-    var eventCount = view.getUint32(offset, false);
-    offset += 4;
-
-    var events = [];
-
-    for (var i = 0; i < eventCount; i++) {
-        // Read object ID
-        var objectId = view.getUint32(offset, false);
-        offset += 4;
-
-        // Read event type
-        var eventTypeLen = view.getUint16(offset, false);
-        offset += 2;
-        var eventTypeBytes = new Uint8Array(buffer, offset, eventTypeLen);
-        var eventType = decoder.decode(eventTypeBytes);
-        offset += eventTypeLen;
-
-        // Read payload
-        var payloadLen = view.getUint32(offset, false);
-        offset += 4;
-        var payloadBytes = new Uint8Array(buffer, offset, payloadLen);
-        var payloadStr = decoder.decode(payloadBytes);
-        var payload = JSON.parse(payloadStr);
-        offset += payloadLen;
-
-        events.push({
-            objectId: objectId,
-            eventType: eventType,
-            payload: payload
-        });
-    }
-
-    return events;
-}
-
-/**
- * Register a React component factory with ComponentTerminal.
- * Can be called before or after PonySDK loads.
- * 
- * @param {string} signature - Component signature (e.g., "trading-grid")
- * @param {Function} factoryFn - Factory function (container) => ComponentFactory
- */
-function registerReactComponent(signature, factoryFn) {
-    console.log("Registering React component:", signature);
-
-    // Store the factory function for later use
-    factoryFunctions[signature] = factoryFn;
-
-    if (componentTerminal) {
-        // Don't register with ComponentTerminal yet - we'll create the factory
-        // when we have a container in handleCreate
-    } else {
-        pendingRegistrations.push({ signature: signature, factory: factoryFn });
-    }
-}
-
-/**
- * Initialize ComponentTerminal when PonySDK loads.
- * Called automatically via document.onPonyLoaded.
- */
-function initComponentTerminal(pony) {
-    console.log("Initializing ComponentTerminal");
-
-    try {
-        // Check if ComponentTerminal is available
-        if (typeof ComponentTerminal === 'undefined') {
-            console.error("ComponentTerminal not found - ensure component-terminal.js is loaded");
-            return;
-        }
-
-        // ComponentTerminal is a module object, get the actual constructor
-        var ComponentTerminalClass = ComponentTerminal.ComponentTerminal;
-        if (!ComponentTerminalClass) {
-            console.error("ComponentTerminal.ComponentTerminal not found");
-            return;
-        }
-
-        // Create a mock WebSocket interface for ComponentTerminal
-        var mockWebSocket = {
-            send: function (data) {
-                // EventBridge sends ArrayBuffer, but PonySDK expects JSON
-                // Decode the binary format and convert to JSON
-                if (data instanceof ArrayBuffer) {
-                    console.log('[component-bridge] Received ArrayBuffer, decoding...');
-                    var events = decodeEventBuffer(data);
-                    console.log('[component-bridge] Decoded events:', events);
-                    // Send each event separately to PonySDK
-                    for (var i = 0; i < events.length; i++) {
-                        var event = events[i];
-                        // Create JSON object with eventType and payload
-                        var jsonEvent = {
-                            eventType: event.eventType,
-                            payload: event.payload
-                        };
-                        console.log('[component-bridge] Sending to server - objectId:', event.objectId, 'event:', jsonEvent);
-                        if (pony && pony.sendDataToServer) {
-                            pony.sendDataToServer(event.objectId, jsonEvent);
-                        }
-                    }
-                } else if (pony && pony.sendDataToServer) {
-                    pony.sendDataToServer(data);
-                } else {
-                    console.warn("Cannot send component event - pony.sendDataToServer not available");
-                }
-            }
-        };
-
-        // Create ComponentTerminal instance
-        componentTerminal = new ComponentTerminalClass(mockWebSocket);
-    } catch (error) {
-        console.error("Error initializing ComponentTerminal:", error, error.message, error.stack);
-        throw error;
-    }
-
-    // Register all pending components
-    for (var i = 0; i < pendingRegistrations.length; i++) {
-        var reg = pendingRegistrations[i];
-        factoryFunctions[reg.signature] = reg.factory;
-    }
-    pendingRegistrations = [];
-
-    // Expose ComponentTerminal API for PTComponent (GWT) to call
-    if (!window.PonySDK) {
-        window.PonySDK = {};
-    }
-
-    window.PonySDK.ComponentTerminal = {
-        /**
-         * Handle component creation from PTComponent.
-         */
-        handleCreate: function (objectId, framework, signature, propsJson) {
-            console.log("ComponentTerminal.handleCreate:", objectId, framework, signature);
-
-            // Create container element
-            var container = document.createElement('div');
-            container.id = 'pcomponent-' + objectId;
-            container.style.width = '100%';
-            container.style.height = '600px'; // Fixed height for now
-            container.style.position = 'relative';
-
-            // Store container BEFORE creating the component
-            containers[objectId] = container;
-
-            // Append container to body BEFORE creating the component
-            // This ensures the container is in the DOM when React tries to mount
-            document.body.appendChild(container);
-
-            // Get the factory function and create a factory instance with the container
-            var factoryFn = factoryFunctions[signature];
-            if (!factoryFn) {
-                console.error("No factory function registered for signature:", signature);
-                return;
-            }
-
-            // Call the factory function with the container to get the ComponentFactory
-            var factory = factoryFn(container);
-
-            // Register the factory instance with ComponentTerminal
-            componentTerminal.registerFactory(signature + '-' + objectId, factory);
-
-            // Parse props
-            var props = JSON.parse(propsJson);
-
-            // Map framework byte to string
-            var frameworkMap = ['react', 'vue', 'svelte', 'webcomponent'];
-            var frameworkType = frameworkMap[framework] || 'react';
-
-            // Create component message with unique signature
-            var message = {
-                objectId: objectId,
-                type: 'create',
-                framework: frameworkType,
-                signature: signature + '-' + objectId,
-                props: props
-            };
-
-            componentTerminal.handleMessage(message);
-        },
-
-        /**
-         * Handle JSON Patch update from PTComponent.
-         */
-        handlePatch: function (objectId, patchJson) {
-            var patches = JSON.parse(patchJson);
-            var message = {
-                objectId: objectId,
-                type: 'update',
-                patches: patches
-            };
-
-            componentTerminal.handleMessage(message);
-        },
-
-        /**
-         * Handle full props update from PTComponent.
-         */
-        handleProps: function (objectId, propsJson) {
-            var props = JSON.parse(propsJson);
-            var message = {
-                objectId: objectId,
-                type: 'update',
-                props: props
-            };
-
-            componentTerminal.handleMessage(message);
-        },
-
-        /**
-         * Handle binary update from PTComponent.
-         */
-        handleBinary: function (objectId, binaryData) {
-            var message = {
-                objectId: objectId,
-                type: 'update',
-                binaryData: binaryData
-            };
-
-            componentTerminal.handleMessage(message);
-        },
-
-        /**
-         * Handle component destruction from PTComponent.
-         */
-        handleDestroy: function (objectId) {
-            var message = {
-                objectId: objectId,
-                type: 'destroy'
-            };
-
-            componentTerminal.handleMessage(message);
-
-            // Remove container
-            var container = containers[objectId];
-            if (container && container.parentNode) {
-                container.parentNode.removeChild(container);
-            }
-            delete containers[objectId];
-        }
+    // ========================================
+    // Registration Functions (called by component files)
+    // ========================================
+    
+    window.registerReactComponent = function(signature, factory) {
+        console.log('[PComponent] Registering React component:', signature);
+        factories.react[signature] = factory;
     };
 
-    console.log("ComponentTerminal initialized");
-}
+    window.registerVueComponent = function(signature, factory) {
+        console.log('[PComponent] Registering Vue component:', signature);
+        factories.vue[signature] = factory;
+    };
 
-// Auto-initialize when PonySDK loads
-if (typeof document !== 'undefined') {
-    if (!document.onPonyLoadedListeners) {
-        document.onPonyLoadedListeners = [];
+    window.registerSvelteComponent = function(signature, factory) {
+        console.log('[PComponent] Registering Svelte component:', signature);
+        factories.svelte[signature] = factory;
+    };
+
+    window.registerWebComponent = function(signature, factory) {
+        console.log('[PComponent] Registering Web Component:', signature);
+        factories.webcomponent[signature] = factory;
+    };
+
+    window.registerTemplateComponent = function(signature, config) {
+        console.log('[PComponent] Registering Template component:', signature);
+        factories.template[signature] = config;
+    };
+
+    // ========================================
+    // Event Communication
+    // ========================================
+    
+    function sendEvent(objectId, eventType, payload) {
+        console.log('[PComponent] Sending event:', objectId, eventType, payload);
+        if (pony && pony.sendDataToServer) {
+            pony.sendDataToServer(objectId, { eventType: eventType, payload: payload || {} });
+        } else {
+            console.error('[PComponent] Cannot send event: pony not available');
+        }
     }
-    document.onPonyLoadedListeners.push(initComponentTerminal);
-}
 
-// Export for module systems
-if (typeof module !== 'undefined' && module.hasOwnProperty('exports')) {
-    module.exports.registerReactComponent = registerReactComponent;
-    module.exports.initComponentTerminal = initComponentTerminal;
-} else if (typeof window !== 'undefined') {
-    window.registerReactComponent = registerReactComponent;
-    window.initComponentTerminal = initComponentTerminal;
-}
+    function createEventCallback(objectId) {
+        return function(eventType, payload) {
+            sendEvent(objectId, eventType, payload);
+        };
+    }
+
+    // ========================================
+    // Framework Renderers
+    // ========================================
+    
+    // Framework type constants (must match FrameworkType.java)
+    const FRAMEWORK = {
+        REACT: 0,
+        VUE: 1,
+        SVELTE: 2,
+        WEB_COMPONENT: 3,
+        TEMPLATE: 4
+    };
+
+    function renderReact(objectId, container, signature, props) {
+        const factory = factories.react[signature];
+        if (!factory) {
+            console.error('[PComponent] React factory not found:', signature);
+            return null;
+        }
+        
+        const factoryResult = factory(container);
+        const component = factoryResult.getReactComponent();
+        
+        component.setEventCallback(createEventCallback(objectId));
+        component.updateProps(props);
+        component.mount();
+        
+        return {
+            update: (newProps) => component.updateProps(newProps),
+            destroy: () => component.unmount()
+        };
+    }
+
+    function renderVue(objectId, container, signature, props) {
+        const factory = factories.vue[signature];
+        if (!factory) {
+            console.error('[PComponent] Vue factory not found:', signature);
+            return null;
+        }
+        
+        const factoryResult = factory(container);
+        const component = factoryResult.getVueComponent();
+        
+        component.setEventCallback(createEventCallback(objectId));
+        component.updateProps(props);
+        component.mount();
+        
+        return {
+            update: (newProps) => component.updateProps(newProps),
+            destroy: () => component.unmount()
+        };
+    }
+
+    function renderSvelte(objectId, container, signature, props) {
+        const factory = factories.svelte[signature];
+        if (!factory) {
+            console.error('[PComponent] Svelte factory not found:', signature);
+            return null;
+        }
+        
+        const factoryResult = factory(container);
+        const component = factoryResult.getSvelteComponent();
+        
+        component.setEventCallback(createEventCallback(objectId));
+        component.mount();
+        component.updateProps(props);
+        
+        return {
+            update: (newProps) => component.updateProps(newProps),
+            destroy: () => component.unmount()
+        };
+    }
+
+    function renderWebComponent(objectId, container, signature, props) {
+        const factory = factories.webcomponent[signature];
+        if (!factory) {
+            console.error('[PComponent] WebComponent factory not found:', signature);
+            return null;
+        }
+        
+        const factoryResult = factory(container);
+        const component = factoryResult.getWebComponent();
+        
+        component.setEventCallback(createEventCallback(objectId));
+        component.mount();
+        component.updateProps(props);
+        
+        return {
+            update: (newProps) => component.updateProps(newProps),
+            destroy: () => component.unmount()
+        };
+    }
+
+    function renderTemplate(objectId, container, signature, props) {
+        const config = factories.template[signature];
+        if (!config) {
+            console.error('[PComponent] Template config not found:', signature);
+            return null;
+        }
+        
+        // Use renderer if available
+        if (config.renderer) {
+            const renderer = new config.renderer(container);
+            renderer.eventCallback = createEventCallback(objectId);
+            renderer.props = { ...renderer.props, ...props }; // Set props before mount
+            renderer.mount();
+            
+            return {
+                update: (newProps) => renderer.setProps(newProps),
+                destroy: () => renderer.unmount()
+            };
+        }
+        
+        // Fallback to simple template rendering
+        const eventCallback = createEventCallback(objectId);
+        let currentProps = { ...props };
+        
+        function render() {
+            let html = config.template;
+            for (const key in currentProps) {
+                html = html.replace(new RegExp('\\{\\{' + key + '\\}\\}', 'g'), currentProps[key]);
+            }
+            container.innerHTML = html;
+            
+            // Bind events
+            container.querySelectorAll('[data-event]').forEach(el => {
+                el.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    eventCallback(el.getAttribute('data-event'), {});
+                });
+            });
+        }
+        
+        render();
+        
+        return {
+            update: (newProps) => { currentProps = { ...currentProps, ...newProps }; render(); },
+            destroy: () => { container.innerHTML = ''; }
+        };
+    }
+
+    // ========================================
+    // Component Terminal Interface
+    // ========================================
+    
+    function createShowcase() {
+        let showcase = document.getElementById('pcomponent-showcase');
+        if (!showcase) {
+            showcase = document.createElement('div');
+            showcase.id = 'pcomponent-showcase';
+            showcase.style.cssText = `
+                display: flex;
+                flex-wrap: wrap;
+                gap: 20px;
+                padding: 20px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border-radius: 16px;
+                margin: 20px;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            `;
+            
+            // Add title
+            const title = document.createElement('div');
+            title.style.cssText = `
+                width: 100%;
+                text-align: center;
+                color: white;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                margin-bottom: 10px;
+            `;
+            title.innerHTML = `
+                <h2 style="margin: 0 0 5px 0; font-size: 24px;">🚀 PonySDK PComponent Demo</h2>
+                <p style="margin: 0; opacity: 0.9; font-size: 14px;">Same props, different frameworks - all powered by PonySDK</p>
+            `;
+            showcase.appendChild(title);
+            
+            document.body.insertBefore(showcase, document.body.firstChild);
+        }
+        return showcase;
+    }
+
+    function init(ponyInstance) {
+        console.log('[PComponent] Initializing Component Bridge');
+        pony = ponyInstance;
+        
+        // Expose ComponentTerminal to GWT
+        window.PonySDK = window.PonySDK || {};
+        window.PonySDK.ComponentTerminal = {
+            
+            handleCreate: function(objectId, framework, signature, propsJson) {
+                console.log('[PComponent] Creating component:', objectId, 'framework:', framework, 'signature:', signature);
+                
+                // Create container
+                const container = document.createElement('div');
+                container.id = 'pcomponent-' + objectId;
+                container.style.cssText = 'display: inline-block; vertical-align: top;';
+                
+                // Add to showcase
+                const showcase = createShowcase();
+                showcase.appendChild(container);
+                
+                // Parse props
+                const props = JSON.parse(propsJson);
+                
+                // Render based on framework type
+                let instance = null;
+                switch (framework) {
+                    case FRAMEWORK.REACT:
+                        instance = renderReact(objectId, container, signature, props);
+                        break;
+                    case FRAMEWORK.VUE:
+                        instance = renderVue(objectId, container, signature, props);
+                        break;
+                    case FRAMEWORK.SVELTE:
+                        instance = renderSvelte(objectId, container, signature, props);
+                        break;
+                    case FRAMEWORK.WEB_COMPONENT:
+                        instance = renderWebComponent(objectId, container, signature, props);
+                        break;
+                    case FRAMEWORK.TEMPLATE:
+                        instance = renderTemplate(objectId, container, signature, props);
+                        break;
+                    default:
+                        console.error('[PComponent] Unknown framework type:', framework);
+                }
+                
+                if (instance) {
+                    components[objectId] = {
+                        container: container,
+                        instance: instance,
+                        props: props,
+                        framework: framework
+                    };
+                    console.log('[PComponent] Component created successfully:', objectId);
+                }
+            },
+            
+            handlePatch: function(objectId, patchJson) {
+                console.log('[PComponent] Applying patch:', objectId, patchJson);
+                
+                const comp = components[objectId];
+                if (!comp) {
+                    console.error('[PComponent] Component not found:', objectId);
+                    return;
+                }
+                
+                // Apply JSON Patch
+                const patches = JSON.parse(patchJson);
+                patches.forEach(function(patch) {
+                    if (patch.op === 'replace') {
+                        const key = patch.path.substring(1); // Remove leading /
+                        comp.props[key] = patch.value;
+                        console.log('[PComponent] Patch applied:', key, '=', patch.value);
+                    } else if (patch.op === 'add') {
+                        const key = patch.path.substring(1);
+                        comp.props[key] = patch.value;
+                    } else if (patch.op === 'remove') {
+                        const key = patch.path.substring(1);
+                        delete comp.props[key];
+                    }
+                });
+                
+                // Update component
+                comp.instance.update(comp.props);
+                console.log('[PComponent] Component updated:', objectId, comp.props);
+            },
+            
+            handleProps: function(objectId, propsJson) {
+                console.log('[PComponent] Full props update:', objectId);
+                
+                const comp = components[objectId];
+                if (!comp) {
+                    console.error('[PComponent] Component not found:', objectId);
+                    return;
+                }
+                
+                comp.props = JSON.parse(propsJson);
+                comp.instance.update(comp.props);
+            },
+            
+            handleBinary: function(objectId, arrayBuffer) {
+                console.log('[PComponent] Binary update:', objectId, arrayBuffer.byteLength, 'bytes');
+                // Binary updates not yet implemented in demo
+            },
+            
+            handleDestroy: function(objectId) {
+                console.log('[PComponent] Destroying component:', objectId);
+                
+                const comp = components[objectId];
+                if (!comp) return;
+                
+                if (comp.instance && comp.instance.destroy) {
+                    comp.instance.destroy();
+                }
+                
+                if (comp.container && comp.container.parentNode) {
+                    comp.container.parentNode.removeChild(comp.container);
+                }
+                
+                delete components[objectId];
+            }
+        };
+        
+        console.log('[PComponent] Component Bridge ready');
+    }
+
+    // Register initialization callback
+    document.onPonyLoadedListeners = document.onPonyLoadedListeners || [];
+    document.onPonyLoadedListeners.push(init);
+
+})();

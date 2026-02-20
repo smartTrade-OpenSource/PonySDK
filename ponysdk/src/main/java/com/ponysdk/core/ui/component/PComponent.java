@@ -308,6 +308,13 @@ public abstract class PComponent<TProps extends Record> extends PObject {
     private void sendPropsUpdate() {
         if (destroy || !initialized) return;
 
+        // Check UIContext
+        final UIContext uiContext = UIContext.get();
+        if (uiContext == null || !uiContext.isAlive()) {
+            log.warn("PComponent {} - sendPropsUpdate skipped: UIContext not available", getID());
+            return;
+        }
+
         // Compute diff (Requirements 1.3, 1.4)
         final Optional<JsonArray> patchOpt = differ.computeDiff(previousProps, currentProps);
 
@@ -318,14 +325,13 @@ public abstract class PComponent<TProps extends Record> extends PObject {
         }
 
         final JsonArray patch = patchOpt.get();
+        log.debug("PComponent {} sending props patch: {}", getID(), patch);
 
         // Send the update
         saveUpdate(writer -> {
             writer.write(ServerToClientModel.PCOMPONENT_UPDATE);
             writer.write(ServerToClientModel.PCOMPONENT_PROPS_PATCH, patch.toString());
         });
-
-        log.debug("PComponent {} sent props patch: {}", getID(), patch);
     }
 
     /**
@@ -529,13 +535,32 @@ public abstract class PComponent<TProps extends Record> extends PObject {
     public void onClientData(final JsonObject event) {
         if (destroy) return;
 
+        // Extract the actual event data - it may be wrapped in NATIVE (key "4")
+        JsonObject eventData = event;
+        final String nativeKey = "4"; // ClientToServerModel.NATIVE.toStringValue()
+        if (event.containsKey(nativeKey)) {
+            final javax.json.JsonValue nativeValue = event.get(nativeKey);
+            
+            if (nativeValue.getValueType() == javax.json.JsonValue.ValueType.OBJECT) {
+                eventData = (JsonObject) nativeValue;
+            } else if (nativeValue.getValueType() == javax.json.JsonValue.ValueType.STRING) {
+                // If it's a string, try to parse it as JSON
+                final String nativeStr = ((javax.json.JsonString) nativeValue).getString();
+                try (final javax.json.JsonReader reader = javax.json.Json.createReader(new java.io.StringReader(nativeStr))) {
+                    eventData = reader.readObject();
+                } catch (final Exception e) {
+                    log.error("PComponent {} failed to parse NATIVE string: {}", getID(), e.getMessage());
+                }
+            }
+        }
+
         // Check for component events
-        if (event.containsKey("eventType") && eventHandlers != null) {
-            final String eventType = event.getString("eventType");
+        if (eventData != null && eventData.containsKey("eventType") && eventHandlers != null) {
+            final String eventType = eventData.getString("eventType");
             final Consumer<JsonObject> handler = eventHandlers.get(eventType);
             if (handler != null) {
-                final JsonObject payload = event.containsKey("payload")
-                        ? event.getJsonObject("payload")
+                final JsonObject payload = eventData.containsKey("payload")
+                        ? eventData.getJsonObject("payload")
                         : null;
                 try {
                     handler.accept(payload);

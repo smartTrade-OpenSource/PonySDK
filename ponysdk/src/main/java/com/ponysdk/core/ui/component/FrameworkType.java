@@ -56,7 +56,13 @@ public enum FrameworkType {
      * Web Components adapter.
      * Uses custom elements with property setter updates.
      */
-    WEB_COMPONENT;
+    WEB_COMPONENT,
+
+    /**
+     * Template-based adapter.
+     * Uses HTML templates with Shadow DOM for rendering.
+     */
+    TEMPLATE;
 
     private static final FrameworkType[] VALUES = FrameworkType.values();
 

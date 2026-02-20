@@ -68,6 +68,7 @@ import com.ponysdk.core.ui.basic.PFileUpload;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PFrame;
 import com.ponysdk.core.ui.basic.PFunctionalLabel;
+import com.ponysdk.core.ui.basic.PHTML;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PListBox;
 import com.ponysdk.core.ui.basic.PMenuBar;
@@ -122,6 +123,10 @@ import com.ponysdk.sample.client.event.UserLoggedOutEvent;
 import com.ponysdk.sample.client.event.UserLoggedOutHandler;
 import com.ponysdk.sample.client.page.addon.LoggerAddOn;
 import com.ponysdk.sample.client.page.component.CounterComponent;
+import com.ponysdk.sample.client.page.component.SvelteCounterComponent;
+import com.ponysdk.sample.client.page.component.TemplateCounterComponent;
+import com.ponysdk.sample.client.page.component.VueCounterComponent;
+import com.ponysdk.sample.client.page.component.WebCounterComponent;
 
 public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
@@ -345,106 +350,174 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     }
 
     /**
-     * Test the new PComponent system with a CounterComponent.
+     * Test the new PComponent system with all component types.
+     * Creates a showcase panel demonstrating React, Vue, Svelte, WebComponent, and Template components.
      */
     private void testPComponent() {
-        log.info("Testing PComponent system...");
+        log.info("Testing PComponent system with all framework types...");
 
-        final PFlowPanel panel = Element.newPFlowPanel();
-        panel.setStyleProperty("border", "2px solid #3498db");
-        panel.setStyleProperty("padding", "20px");
-        panel.setStyleProperty("margin", "10px");
-        panel.setStyleProperty("borderRadius", "8px");
+        // Create main demo panel
+        final PFlowPanel demoPanel = Element.newPFlowPanel();
+        demoPanel.addStyleName("pcomponent-demo-panel");
+        demoPanel.setStyleProperty("background", "white");
+        demoPanel.setStyleProperty("borderRadius", "12px");
+        demoPanel.setStyleProperty("padding", "24px");
+        demoPanel.setStyleProperty("margin", "20px");
+        demoPanel.setStyleProperty("boxShadow", "0 4px 20px rgba(0,0,0,0.1)");
 
-        final PLabel title = Element.newPLabel("PComponent Test - Counter");
-        title.setStyleProperty("fontWeight", "bold");
-        title.setStyleProperty("fontSize", "18px");
-        title.setStyleProperty("marginBottom", "10px");
-        panel.add(title);
+        // Title
+        final PHTML title = Element.newPHTML("<h2 style='margin:0 0 8px 0; color:#2c3e50; font-size:24px;'>🚀 PComponent Demo - All Framework Types</h2>");
+        demoPanel.add(title);
 
-        // Create the PComponent counter
-        final CounterComponent counter = new CounterComponent("Server Counter", 0, "#e74c3c");
-        
-        // Display current value (updated from server)
-        final PLabel valueLabel = Element.newPLabel("Value: 0");
-        valueLabel.setStyleProperty("fontSize", "24px");
-        valueLabel.setStyleProperty("margin", "10px 0");
-        panel.add(valueLabel);
+        // Subtitle
+        final PHTML subtitle = Element.newPHTML(
+            "<p style='color:#7f8c8d; margin-bottom:20px; font-size:14px;'>" +
+            "Each counter below uses the same props (label, count, color) but different rendering frameworks. " +
+            "The server sends JSON props via WebSocket, and each framework renders the UI on the client.</p>"
+        );
+        demoPanel.add(subtitle);
 
-        // Buttons to control from server side
+        // Create all component types
+        final CounterComponent reactCounter = new CounterComponent("React", 0, "#61dafb");
+        final VueCounterComponent vueCounter = new VueCounterComponent("Vue", 0, "#42b883");
+        final SvelteCounterComponent svelteCounter = new SvelteCounterComponent("Svelte", 0, "#ff3e00");
+        final WebCounterComponent webCounter = new WebCounterComponent("WebComp", 0, "#f7df1e");
+        final TemplateCounterComponent templateCounter = new TemplateCounterComponent("Template", 0, "#9b59b6");
+
+        // Control buttons panel
         final PFlowPanel buttonPanel = Element.newPFlowPanel();
+        buttonPanel.addStyleName("button-panel");
+        buttonPanel.setStyleProperty("marginBottom", "20px");
+        buttonPanel.setStyleProperty("display", "flex");
+        buttonPanel.setStyleProperty("gap", "10px");
+        buttonPanel.setStyleProperty("flexWrap", "wrap");
         
-        final PButton incrementBtn = Element.newPButton("+ Increment (Server)");
-        incrementBtn.setStyleProperty("margin", "5px");
-        incrementBtn.setStyleProperty("padding", "10px 20px");
-        incrementBtn.addClickHandler(e -> {
-            counter.increment();
-            valueLabel.setText("Value: " + counter.getCount());
+        final PButton incrementAll = Element.newPButton("➕ Increment All");
+        incrementAll.addStyleName("btn-increment");
+        incrementAll.setStyleProperty("padding", "12px 24px");
+        incrementAll.setStyleProperty("background", "linear-gradient(135deg, #2ecc71, #27ae60)");
+        incrementAll.setStyleProperty("color", "white");
+        incrementAll.setStyleProperty("border", "none");
+        incrementAll.setStyleProperty("borderRadius", "8px");
+        incrementAll.setStyleProperty("fontSize", "14px");
+        incrementAll.setStyleProperty("fontWeight", "600");
+        incrementAll.setStyleProperty("cursor", "pointer");
+        incrementAll.addClickHandler(e -> {
+            reactCounter.increment();
+            vueCounter.increment();
+            svelteCounter.increment();
+            webCounter.increment();
+            templateCounter.increment();
         });
-        buttonPanel.add(incrementBtn);
+        buttonPanel.add(incrementAll);
 
-        final PButton decrementBtn = Element.newPButton("- Decrement (Server)");
-        decrementBtn.setStyleProperty("margin", "5px");
-        decrementBtn.setStyleProperty("padding", "10px 20px");
-        decrementBtn.addClickHandler(e -> {
-            counter.decrement();
-            valueLabel.setText("Value: " + counter.getCount());
+        final PButton decrementAll = Element.newPButton("➖ Decrement All");
+        decrementAll.addStyleName("btn-decrement");
+        decrementAll.setStyleProperty("padding", "12px 24px");
+        decrementAll.setStyleProperty("background", "linear-gradient(135deg, #e74c3c, #c0392b)");
+        decrementAll.setStyleProperty("color", "white");
+        decrementAll.setStyleProperty("border", "none");
+        decrementAll.setStyleProperty("borderRadius", "8px");
+        decrementAll.setStyleProperty("fontSize", "14px");
+        decrementAll.setStyleProperty("fontWeight", "600");
+        decrementAll.setStyleProperty("cursor", "pointer");
+        decrementAll.addClickHandler(e -> {
+            reactCounter.decrement();
+            vueCounter.decrement();
+            svelteCounter.decrement();
+            webCounter.decrement();
+            templateCounter.decrement();
         });
-        buttonPanel.add(decrementBtn);
+        buttonPanel.add(decrementAll);
 
-        final PButton resetBtn = Element.newPButton("Reset to 0");
-        resetBtn.setStyleProperty("margin", "5px");
-        resetBtn.setStyleProperty("padding", "10px 20px");
-        resetBtn.addClickHandler(e -> {
-            counter.setCount(0);
-            valueLabel.setText("Value: 0");
+        final PButton randomColors = Element.newPButton("🎨 Random Colors");
+        randomColors.addStyleName("btn-colors");
+        randomColors.setStyleProperty("padding", "12px 24px");
+        randomColors.setStyleProperty("background", "linear-gradient(135deg, #9b59b6, #8e44ad)");
+        randomColors.setStyleProperty("color", "white");
+        randomColors.setStyleProperty("border", "none");
+        randomColors.setStyleProperty("borderRadius", "8px");
+        randomColors.setStyleProperty("fontSize", "14px");
+        randomColors.setStyleProperty("fontWeight", "600");
+        randomColors.setStyleProperty("cursor", "pointer");
+        randomColors.addClickHandler(e -> {
+            reactCounter.setColor(getRandomColor());
+            vueCounter.setColor(getRandomColor());
+            svelteCounter.setColor(getRandomColor());
+            webCounter.setColor(getRandomColor());
+            templateCounter.setColor(getRandomColor());
         });
-        buttonPanel.add(resetBtn);
+        buttonPanel.add(randomColors);
 
-        panel.add(buttonPanel);
-
-        // Auto-increment test
-        final PButton autoBtn = Element.newPButton("Auto +10 (test rapid updates)");
-        autoBtn.setStyleProperty("margin", "10px 5px");
-        autoBtn.setStyleProperty("padding", "10px 20px");
-        final AtomicInteger autoCounter = new AtomicInteger(0);
-        autoBtn.addClickHandler(e -> {
-            autoCounter.set(0);
-            counter.setCount(0);
-            valueLabel.setText("Value: 0");
-            scheduleAutoIncrement(counter, valueLabel, autoCounter, 10);
+        final PButton resetAll = Element.newPButton("🔄 Reset All");
+        resetAll.setStyleProperty("padding", "12px 24px");
+        resetAll.setStyleProperty("background", "linear-gradient(135deg, #3498db, #2980b9)");
+        resetAll.setStyleProperty("color", "white");
+        resetAll.setStyleProperty("border", "none");
+        resetAll.setStyleProperty("borderRadius", "8px");
+        resetAll.setStyleProperty("fontSize", "14px");
+        resetAll.setStyleProperty("fontWeight", "600");
+        resetAll.setStyleProperty("cursor", "pointer");
+        resetAll.addClickHandler(e -> {
+            reactCounter.setCount(0);
+            vueCounter.reset();
+            svelteCounter.reset();
+            webCounter.reset();
+            templateCounter.reset();
         });
-        panel.add(autoBtn);
+        buttonPanel.add(resetAll);
 
-        // Attach the component to the window
-        counter.attach(PWindow.getMain());
+        demoPanel.add(buttonPanel);
 
-        // Info label
-        final PLabel infoLabel = Element.newPLabel("Note: The CounterComponent sends JSON Patch diffs to the client terminal.");
-        infoLabel.setStyleProperty("fontSize", "12px");
-        infoLabel.setStyleProperty("color", "#7f8c8d");
-        infoLabel.setStyleProperty("marginTop", "15px");
-        panel.add(infoLabel);
+        // Framework info table
+        final PHTML frameworkInfo = Element.newPHTML(
+            "<div style='background:#f8f9fa; border-radius:8px; padding:15px; margin-bottom:20px;'>" +
+            "<table style='width:100%; text-align:center; border-collapse:collapse;'>" +
+            "<tr style='border-bottom:1px solid #dee2e6;'>" +
+            "<th style='padding:10px; color:#61dafb;'>⚛️ React</th>" +
+            "<th style='padding:10px; color:#42b883;'>💚 Vue</th>" +
+            "<th style='padding:10px; color:#ff3e00;'>🔥 Svelte</th>" +
+            "<th style='padding:10px; color:#f7df1e;'>🌐 WebComponent</th>" +
+            "<th style='padding:10px; color:#9b59b6;'>📄 Template</th>" +
+            "</tr>" +
+            "<tr>" +
+            "<td style='padding:8px; font-size:12px; color:#6c757d;'>PReactComponent</td>" +
+            "<td style='padding:8px; font-size:12px; color:#6c757d;'>PVueComponent</td>" +
+            "<td style='padding:8px; font-size:12px; color:#6c757d;'>PSvelteComponent</td>" +
+            "<td style='padding:8px; font-size:12px; color:#6c757d;'>PWebComponent</td>" +
+            "<td style='padding:8px; font-size:12px; color:#6c757d;'>PTemplateComponent</td>" +
+            "</tr>" +
+            "</table>" +
+            "</div>"
+        );
+        demoPanel.add(frameworkInfo);
 
-        PWindow.getMain().add(panel);
+        // Add demo panel to window first
+        PWindow.getMain().add(demoPanel);
+
+        // Attach all components to the window (they will appear in the showcase panel created by component-bridge.js)
+        reactCounter.attach(PWindow.getMain());
+        vueCounter.attach(PWindow.getMain());
+        svelteCounter.attach(PWindow.getMain());
+        webCounter.attach(PWindow.getMain());
+        templateCounter.attach(PWindow.getMain());
+
+        // Info footer
+        final PHTML infoFooter = Element.newPHTML(
+            "<div style='font-size:12px; color:#95a5a6; margin-top:20px; padding-top:15px; border-top:1px solid #ecf0f1;'>" +
+            "💡 <strong>How it works:</strong> Each component uses JSON Patch for efficient updates via WebSocket. " +
+            "The server maintains the props state and sends only the differences to the client. " +
+            "Click the buttons above to see real-time updates across all frameworks!" +
+            "</div>"
+        );
+        demoPanel.add(infoFooter);
         
-        log.info("PComponent test added to UI");
+        log.info("All PComponent types added to UI");
     }
 
-    /**
-     * Helper method for auto-increment with proper termination.
-     */
-    private void scheduleAutoIncrement(final CounterComponent counter, final PLabel valueLabel, 
-                                        final AtomicInteger remaining, final int target) {
-        if (remaining.get() >= target) {
-            return;
-        }
-        PScheduler.schedule(() -> {
-            counter.increment();
-            valueLabel.setText("Value: " + counter.getCount());
-            remaining.incrementAndGet();
-            scheduleAutoIncrement(counter, valueLabel, remaining, target);
-        }, Duration.ofMillis(100));
+    private String getRandomColor() {
+        final String[] colors = {"#61dafb", "#42b883", "#ff3e00", "#f7df1e", "#9b59b6", "#3498db", "#2ecc71", "#e74c3c"};
+        return colors[(int) (Math.random() * colors.length)];
     }
 
     private static class MyRow {
