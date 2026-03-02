@@ -28,12 +28,18 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.By.*;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.internal.*;
 
 import java.util.*;
 import java.util.function.Predicate;
 
-class PonySearchContext implements FindsById, FindsByName, FindsByClassName, FindsByCssSelector, FindsByTagName, SearchContext {
+/**
+ * Selenium 4 compatible SearchContext implementation.
+ * <p>
+ * In Selenium 4, the FindsById/FindsByName/etc. interfaces were removed.
+ * All lookups now go through {@link #findElement(By)} and {@link #findElements(By)}.
+ * </p>
+ */
+class PonySearchContext implements SearchContext {
 
     private static final ThreadLocal<MultipleElementsConsumer> multipleElementsConsumers = ThreadLocal
             .withInitial(MultipleElementsConsumer::new);
@@ -80,55 +86,49 @@ class PonySearchContext implements FindsById, FindsByName, FindsByClassName, Fin
         this.diveable = diveable;
     }
 
-    @Override
+    // ── Public find methods (Selenium 4 compatible) ──────────────────────
+
     public WebElement findElementById(final String using) {
         return findElement(FindBy.ID, using);
     }
 
-    @Override
     public List<WebElement> findElementsById(final String using) {
         throw new UnsupportedOperationException();
     }
 
-    @Override
     public WebElement findElementByName(final String using) {
         return findElement(FindBy.NAME, using);
     }
 
-    @Override
     public List<WebElement> findElementsByName(final String using) {
         return (List<WebElement>) (Object) findElements(FindBy.NAME, using);
     }
 
-    @Override
     public WebElement findElementByClassName(final String using) {
         return findElement(FindBy.CLASS_NAME, using);
     }
 
-    @Override
     public List<WebElement> findElementsByClassName(final String using) {
         return (List<WebElement>) (Object) findElements(FindBy.CLASS_NAME, using);
     }
 
-    @Override
     public WebElement findElementByCssSelector(final String using) {
         return findElement(FindBy.CSS_SELECTOR, using);
     }
 
-    @Override
     public List<WebElement> findElementsByCssSelector(final String using) {
         return (List<WebElement>) (Object) findElements(FindBy.CSS_SELECTOR, using);
     }
 
-    @Override
     public WebElement findElementByTagName(final String using) {
         return findElement(FindBy.TAG_NAME, using);
     }
 
-    @Override
     public List<WebElement> findElementsByTagName(final String using) {
         return (List<WebElement>) (Object) findElements(FindBy.TAG_NAME, using);
     }
+
+    // ── Internal find logic ──────────────────────────────────────────────
 
     private PonyWebElement findElement(final FindBy findBy, String using) {
         using = using.trim();
@@ -154,20 +154,11 @@ class PonySearchContext implements FindsById, FindsByName, FindsByClassName, Fin
 
     private void findElements(final FindBy findBy, final String using, final Predicate<PonyWebElement> consumer) {
         switch (findBy) {
-            case CLASS_NAME:
-                findElementsByClassName(Arrays.asList(using.split(" ")), diveable, consumer);
-                break;
-            case NAME:
-                findElementsByAttribute("name", using, diveable, consumer);
-                break;
-            case ID:
-                findElementsByAttribute("id", using, diveable, consumer);
-                break;
-            case CSS_SELECTOR:
-                findElementsByCssSelector(using, 0, diveable, consumer);
-                break;
-            case TAG_NAME:
-                findElementsByTagName(WidgetType.valueOf(using), using, diveable, consumer);
+            case CLASS_NAME -> findElementsByClassName(Arrays.asList(using.split(" ")), diveable, consumer);
+            case NAME -> findElementsByAttribute("name", using, diveable, consumer);
+            case ID -> findElementsByAttribute("id", using, diveable, consumer);
+            case CSS_SELECTOR -> findElementsByCssSelector(using, 0, diveable, consumer);
+            case TAG_NAME -> findElementsByTagName(WidgetType.valueOf(using), using, diveable, consumer);
         }
     }
 
@@ -264,15 +255,12 @@ class PonySearchContext implements FindsById, FindsByName, FindsByClassName, Fin
     }
 
     private boolean findElementByCssSelector(final String using, final int usingIndex, final Predicate<PonyWebElement> consumer) {
-        switch (using.charAt(usingIndex)) {
-            case ' ':
-                return findElementsByCssSelector(using, usingIndex + 1, true, consumer);
-            case '>':
-                return findElementsByCssSelector(using, usingIndex + 1, false, consumer);
-            default:
-                throw new IllegalArgumentException(
-                        "Invalid css selector '" + using + "' at " + usingIndex + ", character ' ' or '>' is expected");
-        }
+        return switch (using.charAt(usingIndex)) {
+            case ' ' -> findElementsByCssSelector(using, usingIndex + 1, true, consumer);
+            case '>' -> findElementsByCssSelector(using, usingIndex + 1, false, consumer);
+            default -> throw new IllegalArgumentException(
+                    "Invalid css selector '" + using + "' at " + usingIndex + ", character ' ' or '>' is expected");
+        };
     }
 
     private static int wordEnd(final String str, final int wordStart) {
@@ -283,22 +271,19 @@ class PonySearchContext implements FindsById, FindsByName, FindsByClassName, Fin
         return str.length();
     }
 
+    // ── Selenium SearchContext interface ──────────────────────────────────
+
     @Override
     public List<WebElement> findElements(final By by) {
-        if (by instanceof ById) {
-            final ById byId = (ById) by;
+        if (by instanceof ById byId) {
             return byId.findElements(this);
-        } else if (by instanceof ByName) {
-            final ByName byName = (ByName) by;
+        } else if (by instanceof ByName byName) {
             return byName.findElements(this);
-        } else if (by instanceof ByClassName) {
-            final ByClassName byClassName = (ByClassName) by;
+        } else if (by instanceof ByClassName byClassName) {
             return byClassName.findElements(this);
-        } else if (by instanceof ByCssSelector) {
-            final ByCssSelector byCssSelector = (ByCssSelector) by;
+        } else if (by instanceof ByCssSelector byCssSelector) {
             return byCssSelector.findElements(this);
-        } else if (by instanceof ByTagName) {
-            final ByTagName byTagName = (ByTagName) by;
+        } else if (by instanceof ByTagName byTagName) {
             return byTagName.findElements(this);
         } else {
             throw new IllegalArgumentException(by.getClass().getSimpleName() + " is not supported");
@@ -307,20 +292,15 @@ class PonySearchContext implements FindsById, FindsByName, FindsByClassName, Fin
 
     @Override
     public WebElement findElement(final By by) {
-        if (by instanceof ById) {
-            final ById byId = (ById) by;
+        if (by instanceof ById byId) {
             return byId.findElement(this);
-        } else if (by instanceof ByName) {
-            final ByName byName = (ByName) by;
+        } else if (by instanceof ByName byName) {
             return byName.findElement(this);
-        } else if (by instanceof ByClassName) {
-            final ByClassName byClassName = (ByClassName) by;
+        } else if (by instanceof ByClassName byClassName) {
             return byClassName.findElement(this);
-        } else if (by instanceof ByCssSelector) {
-            final ByCssSelector byCssSelector = (ByCssSelector) by;
+        } else if (by instanceof ByCssSelector byCssSelector) {
             return byCssSelector.findElement(this);
-        } else if (by instanceof ByTagName) {
-            final ByTagName byTagName = (ByTagName) by;
+        } else if (by instanceof ByTagName byTagName) {
             return byTagName.findElement(this);
         } else {
             throw new IllegalArgumentException(by.getClass().getSimpleName() + " is not supported");

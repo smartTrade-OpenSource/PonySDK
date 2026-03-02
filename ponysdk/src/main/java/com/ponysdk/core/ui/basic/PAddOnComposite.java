@@ -1,6 +1,6 @@
 package com.ponysdk.core.ui.basic;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;

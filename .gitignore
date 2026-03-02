@@ -1,5 +1,26 @@
+# Gradle
 .gradle/
-/.idea/
-/.project
-/.settings/
-/ponysdk/out/
+build/
+**/build/
+
+# IDE - Eclipse
+.project
+.classpath
+.settings/
+*.launch
+
+# IDE - IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# IDE - VS Code
+.vscode/
+
+# OS
+.DS_Store
+
+# PonySDK
+ponysdk/out/

@@ -40,10 +40,7 @@ import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 import com.ponysdk.core.terminal.request.RequestBuilder;
 import com.ponysdk.core.terminal.ui.*;
-import elemental.html.Uint8Array;
-import elemental.util.Collections;
-import elemental.util.MapFromIntTo;
-import elemental.util.MapFromStringTo;
+import elemental2.core.Uint8Array;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -56,10 +53,10 @@ public class UIBuilder {
     private static final Logger log = Logger.getLogger(UIBuilder.class.getName());
 
     private final UIFactory uiFactory = new UIFactory();
-    private final MapFromIntTo<PTObject> objectByID = Collections.mapFromIntTo();
+    private final Map<Integer, PTObject> objectByID = new HashMap<>();
     private final Map<UIObject, Integer> objectIDByWidget = new HashMap<>();
-    private final MapFromIntTo<UIObject> widgetIDByObjectID = Collections.mapFromIntTo();
-    private final MapFromStringTo<JavascriptAddOnFactory> javascriptAddOnFactories = Collections.mapFromStringTo();
+    private final Map<Integer, UIObject> widgetIDByObjectID = new HashMap<>();
+    private final Map<String, JavascriptAddOnFactory> javascriptAddOnFactories = new HashMap<>();
 
     private final ReaderBuffer readerBuffer = new ReaderBuffer();
 
@@ -98,7 +95,6 @@ public class UIBuilder {
             final int nextBlockPosition = readerBuffer.shiftNextBlock(true);
             if (nextBlockPosition == ReaderBuffer.NOT_FULL_BUFFER_POSITION) return;
 
-            // Detect if the message is not for the main terminal but for a specific window
             final BinaryModel binaryModel = readerBuffer.readBinaryModel();
             final ServerToClientModel model = binaryModel.getModel();
 
@@ -109,9 +105,12 @@ public class UIBuilder {
                 readerBuffer.readBinaryModel(); // Read ServerToClientModel.END element
             } else if (ServerToClientModel.CREATE_CONTEXT == model) {
                 PonySDK.get().setContextId(binaryModel.getIntValue());
-                // Read ServerToClientModel.OPTION_FORMFIELD_TABULATION element
                 PonySDK.get().setTabindexOnlyFormField(readerBuffer.readBinaryModel().getBooleanValue());
                 PonySDK.get().setHeartBeatPeriod(readerBuffer.readBinaryModel().getIntValue());
+                readerBuffer.readBinaryModel(); // Read ServerToClientModel.END element
+            } else if (ServerToClientModel.RECONNECT_CONTEXT == model) {
+                // Transparent reconnection succeeded — server resumed our UIContext
+                PonySDK.get().onReconnected();
                 readerBuffer.readBinaryModel(); // Read ServerToClientModel.END element
             } else if (ServerToClientModel.DESTROY_CONTEXT == model) {
                 destroy();
@@ -143,7 +142,6 @@ public class UIBuilder {
                         final int startPosition = readerBuffer.getPosition();
                         int endPosition = nextBlockPosition;
 
-                        // Concat multiple messages for the same window
                         readerBuffer.setPosition(endPosition);
                         while (readerBuffer.hasEnoughKeyBytes()) {
                             final int nextBlockPosition1 = readerBuffer.shiftNextBlock(true);
@@ -176,7 +174,6 @@ public class UIBuilder {
         readerBuffer.init(buffer);
 
         while (readerBuffer.hasEnoughKeyBytes()) {
-            // Detect if the message is not for the window but for a specific frame
             final BinaryModel binaryModel = readerBuffer.readBinaryModel();
 
             if (ServerToClientModel.FRAME_ID == binaryModel.getModel()) {
@@ -192,7 +189,6 @@ public class UIBuilder {
 
     public void updateFrameTerminal(final Uint8Array buffer) {
         readerBuffer.init(buffer);
-
         update(readerBuffer.readBinaryModel(), readerBuffer);
     }
 
@@ -227,14 +223,12 @@ public class UIBuilder {
     }
 
     private void processCreate(final ReaderBuffer buffer, final int objectID) {
-        // ServerToClientModel.WIDGET_TYPE
         final WidgetType widgetType = WidgetType.fromRawValue(buffer.readBinaryModel().getIntValue());
 
         final PTObject ptObject = uiFactory.newUIObject(widgetType);
         if (ptObject != null) {
             ptObject.create(buffer, objectID, this);
             objectByID.put(objectID, ptObject);
-
             processUpdate(buffer, objectID);
         } else {
             log.warning("Cannot create PObject #" + objectID + " with widget type : " + widgetType);
@@ -245,7 +239,6 @@ public class UIBuilder {
     private void processAdd(final ReaderBuffer buffer, final int objectID) {
         final PTObject ptObject = getPTObject(objectID);
         if (ptObject != null) {
-            // ServerToClientModel.PARENT_OBJECT_ID
             final int parentId = buffer.readBinaryModel().getIntValue();
             final PTObject parentObject = getPTObject(parentId);
             if (parentObject != null) {
@@ -306,7 +299,6 @@ public class UIBuilder {
     }
 
     private void processAddHandler(final ReaderBuffer buffer, final int objectID) {
-        // ServerToClientModel.HANDLER_TYPE
         final HandlerModel handlerModel = HandlerModel.fromRawValue(buffer.readBinaryModel().getIntValue());
 
         if (HandlerModel.HANDLER_STREAM_REQUEST == handlerModel) {
@@ -327,7 +319,6 @@ public class UIBuilder {
     private void processRemoveHandler(final ReaderBuffer buffer, final int objectID) {
         final PTObject ptObject = getPTObject(objectID);
         if (ptObject != null) {
-            // ServerToClientModel.HANDLER_TYPE
             final HandlerModel handlerModel = HandlerModel.fromRawValue(buffer.readBinaryModel().getIntValue());
             ptObject.removeHandler(buffer, handlerModel);
             buffer.readBinaryModel(); // Read ServerToClientModel.END element
@@ -340,7 +331,6 @@ public class UIBuilder {
     private void processHistory(final ReaderBuffer buffer, final String token) {
         final String oldToken = History.getToken();
 
-        // ServerToClientModel.HISTORY_FIRE_EVENTS
         final boolean fireEvents = buffer.readBinaryModel().getBooleanValue();
         if (oldToken != null && oldToken.equals(token)) {
             if (fireEvents) History.fireCurrentHistoryState();
@@ -373,8 +363,12 @@ public class UIBuilder {
 
     private void destroy() {
         PTWindowManager.closeAll();
-        ReconnectionChecker.reloadWindow();
+        doReload();
     }
+
+    private static native void doReload() /*-{
+        $wnd.document.doReload();
+    }-*/;
 
     public void sendDataToServer(final Widget widget, final PTInstruction instruction) {
         if (log.isLoggable(Level.FINE)) {

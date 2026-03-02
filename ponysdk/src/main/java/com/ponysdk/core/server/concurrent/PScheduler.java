@@ -24,13 +24,11 @@
 package com.ponysdk.core.server.concurrent;
 
 import java.time.Duration;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -47,18 +45,7 @@ public class PScheduler {
 
     static {
         final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(Runtime.getRuntime().availableProcessors(),
-            new ThreadFactory() {
-
-                private int i = 0;
-
-                @Override
-                public Thread newThread(final Runnable r) {
-                    final Thread t = new Thread(r);
-                    t.setName(PScheduler.class.getName() + "-" + i++);
-                    t.setDaemon(true);
-                    return t;
-                }
-            });
+            Thread.ofVirtual().name("PScheduler-", 0).factory());
         INSTANCE = new PScheduler(executor);
     }
 
@@ -162,14 +149,14 @@ public class PScheduler {
 
     private void registerTask(final UIRunnable runnable) {
         runnablesByUIContexts.compute(runnable.uiContext, (uiContext, runnables) -> {
-            if(uiContext.isAlive()) {
+            if (uiContext.isAlive()) {
                 if (runnables == null) {
-                    runnables = Collections.newSetFromMap(new ConcurrentHashMap<>());
+                    runnables = ConcurrentHashMap.newKeySet();
                     uiContext.addContextDestroyListener(this::destroy);
                 }
                 runnables.add(runnable);
                 return runnables;
-            }else {
+            } else {
                 return null;
             }
         });

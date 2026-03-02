@@ -38,8 +38,8 @@ public class EventBus {
 
     private static final Logger log = LoggerFactory.getLogger(EventBus.class);
 
-    private final Map<Class<?>, Set<EventHandler<?>>> handlersByType = new HashMap<>();
-    private final Map<Class<?>, Supplier<?>> initialValueByType = new HashMap<>();
+    private Map<Class<?>, Set<EventHandler<?>>> handlersByType;
+    private Map<Class<?>, Supplier<?>> initialValueByType;
 
     public static final class EventHandler<T> implements Consumer<Object> {
 
@@ -65,9 +65,11 @@ public class EventBus {
         final EventHandler<T> handler = register(type);
         handler.subscribe(function);
 
-        final Supplier<?> supplier = initialValueByType.get(type);
-        if (supplier != null) {
-            handler.accept(supplier.get());
+        if (initialValueByType != null) {
+            final Supplier<?> supplier = initialValueByType.get(type);
+            if (supplier != null) {
+                handler.accept(supplier.get());
+            }
         }
 
         return handler;
@@ -75,13 +77,14 @@ public class EventBus {
 
     private <T> EventHandler<T> register(final Class<T> type) {
         final EventHandler<T> handler = new EventHandler<>(type);
+        if (handlersByType == null) handlersByType = new HashMap<>(4);
         final Set<EventHandler<?>> handlers = handlersByType.computeIfAbsent(type, t -> SetUtils.newArraySet(4));
         handlers.add(handler);
         return handler;
     }
 
     public boolean unsubscribe(final EventHandler<?> handler) {
-        if (handler == null) return false;
+        if (handler == null || handlersByType == null) return false;
         final Set<EventHandler<?>> handlers = handlersByType.get(handler.type);
         if (handlers != null) {
             final boolean remove = handlers.remove(handler);
@@ -94,7 +97,7 @@ public class EventBus {
     }
 
     public void post(final Object event) {
-        if (event == null) return;
+        if (event == null || handlersByType == null) return;
         final Set<EventHandler<?>> handlers = handlersByType.get(event.getClass());
         if (handlers != null) handlers.forEach(handler -> handler.accept(event));
         else log.debug("No subscribed handlers for {}", event.getClass());
@@ -102,6 +105,7 @@ public class EventBus {
 
     public <T> void setInitialValueByType(Class<T> type, Supplier<T> supplier) {
         if (supplier == null) throw new IllegalArgumentException();
+        if (initialValueByType == null) initialValueByType = new HashMap<>(4);
         initialValueByType.put(type, supplier);
     }
 }

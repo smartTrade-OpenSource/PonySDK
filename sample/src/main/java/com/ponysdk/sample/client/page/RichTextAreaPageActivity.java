@@ -23,6 +23,9 @@
 
 package com.ponysdk.sample.client.page;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PFlowPanel;
@@ -33,6 +36,8 @@ import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PWidget;
 
 public class RichTextAreaPageActivity extends SamplePageActivity {
+
+    private static final Logger log = LoggerFactory.getLogger(RichTextAreaPageActivity.class);
 
     public RichTextAreaPageActivity() {
         super("RichText Area", "Text Input");
@@ -46,7 +51,7 @@ public class RichTextAreaPageActivity extends SamplePageActivity {
         final PRichTextArea richTextArea = Element.newPRichTextArea();
         final PRichTextToolbar richTextToolbar = Element.newPRichTextToolbar(richTextArea);
 
-        richTextArea.addValueChangeHandler(event -> System.err.println(richTextArea.getHTML()));
+        richTextArea.addValueChangeHandler(event -> log.debug("RichText HTML: {}", richTextArea.getHTML()));
 
         final PFlowPanel flow = Element.newPFlowPanel();
         flow.add(Element.newPLabel("Edit rich content"));

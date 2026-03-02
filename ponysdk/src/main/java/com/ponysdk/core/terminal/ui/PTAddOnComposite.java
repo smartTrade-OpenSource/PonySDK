@@ -37,8 +37,6 @@ import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
-import elemental.json.JsonObject;
-
 public class PTAddOnComposite extends PTAddOn {
 
     private static final Logger log = Logger.getLogger(PTAddOnComposite.class.getName());
@@ -55,7 +53,7 @@ public class PTAddOnComposite extends PTAddOn {
         final String signature = buffer.readBinaryModel().getStringValue();
         final JavascriptAddOnFactory factory = getFactory(uiBuilder, signature);
 
-        final JsonObject arguments;
+        final JavaScriptObject arguments;
         BinaryModel binaryModel = buffer.readBinaryModel();
         if (ServerToClientModel.PADDON_CREATION == binaryModel.getModel()) {
             arguments = binaryModel.getJsonObject();
@@ -82,7 +80,7 @@ public class PTAddOnComposite extends PTAddOn {
         });
 
         try {
-            addOn = factory.newAddOn(objectId, (JavaScriptObject) arguments, String.valueOf(widgetID), widget.getElement());
+            addOn = factory.newAddOn(objectId, arguments, String.valueOf(widgetID), widget.getElement());
             addOn.onInit();
             if (widget.isAttached()) addOn.onAttached();
             initialized = true;

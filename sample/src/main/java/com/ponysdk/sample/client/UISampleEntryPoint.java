@@ -41,16 +41,17 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.fileupload2.core.DiskFileItemFactory;
+import org.apache.commons.fileupload2.core.FileItem;
+import org.apache.commons.fileupload2.jakarta.servlet6.JakartaServletFileUpload;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.PUnit;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.PScheduler;
@@ -80,6 +81,7 @@ import com.ponysdk.core.ui.basic.PTabLayoutPanel;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PTree;
 import com.ponysdk.core.ui.basic.PTreeItem;
+import com.ponysdk.core.ui.basic.PWebComponent;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
@@ -111,8 +113,6 @@ import com.ponysdk.core.ui.list.renderer.cell.CellRenderer;
 import com.ponysdk.core.ui.list.valueprovider.IdentityValueProvider;
 import com.ponysdk.core.ui.main.EntryPoint;
 import com.ponysdk.core.ui.model.PKeyCodes;
-import com.ponysdk.core.ui.rich.PConfirmDialog;
-import com.ponysdk.core.ui.rich.POptionPane;
 import com.ponysdk.core.ui.rich.PToolbar;
 import com.ponysdk.core.ui.rich.PTwinListBox;
 import com.ponysdk.core.ui.scene.AbstractScene;
@@ -127,8 +127,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     private static final Logger log = LoggerFactory.getLogger(UISampleEntryPoint.class);
 
     private PLabel mainLabel;
-
-    // HighChartsStackedColumnAddOn highChartsStackedColumnAddOn;
     int a = 0;
     private static int counter;
 
@@ -142,7 +140,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         button.addClickHandler(e -> PWindow.getMain().add(input));
         PWindow.getMain().add(button);
 
-        final PLabel url = Element.newPLabel(String.valueOf(UIContext.get().getRequest().getParameterMap().get("toto")));
+        final PLabel url = Element.newPLabel(String.valueOf(UIContext.get().getParameterMap().get("toto")));
         PWindow.getMain().add(url);
 
         final StringTextBoxFormField formField = new StringTextBoxFormField("String Formfield");
@@ -163,50 +161,24 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         };
         PWindow.getMain().add(colorInputFormField);
 
-        uiContext.setTerminalDataReceiver((object, instruction) -> System.err.println(object + " : " + instruction));
-
-        //createReconnectingPanel();
+        uiContext.setTerminalDataReceiver((object, instruction) -> log.debug("{} : {}", object, instruction));
 
         mainLabel = Element.newPLabel("Can be dd by anybody : ₲ῳ₸");
         mainLabel.setAttributeLinkedToValue("data-title");
         mainLabel.setTitle("String ASCII");
 
-        //PWindow.getMain().add(mainLabel);
-        //testVisibilityHandler(PWindow.getMain());
-        //testPerf();
-        //testScene();
-        //if (true) return;
-        //createNewGridSystem();
-        //testPAddon();
-        //createWindow().open();
-        //downloadFile();
-        //createNewEvent();
-        //testUIDelegator();
-        //testNewGrid();
-        //createFunctionalLabel();
-        //PWindow.getMain().add(createGrid());
-        //       testPAddon();
+        testWebComponent();
 
-        // Test of the new data grid
-        //
-        //
         testSimpleDataGridView();
 
         testVisibilityHandler(PWindow.getMain());
-
-        //PScript.execute(PWindow.getMain(), "alert('coucou Main');");
 
         final PWindow window = createWindow();
         window.open();
 
         PWindow.getMain().add(Element.newA());
 
-        // PWindow.getMain().add(new PHistory());
-        // PWindow.getMain().add(new PNotificationManager());
-        // PWindow.getMain().add(new PSuggestBox());
-
         PWindow.getMain().add(createBlock(createAbsolutePanel()));
-        // PWindow.getMain().add(createPAddOn().asWidget());
         PWindow.getMain().add(Element.newPAnchor());
         PWindow.getMain().add(Element.newPAnchor("Anchor"));
         PWindow.getMain().add(Element.newPAnchor("Anchor 1", "anchor2"));
@@ -221,7 +193,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         PWindow.getMain().add(Element.newPDateBox(Element.newPDatePicker(), new SimpleDateFormat("yyyy/MM/dd")));
 
         final PDateBox dateBox = Element.newPDateBox(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss:SSS"), true);
-        dateBox.addValueChangeHandler(event -> System.err.println(event.getData()));
+        dateBox.addValueChangeHandler(event -> log.debug("DateBox value: {}", event.getData()));
         PWindow.getMain().add(dateBox);
 
         PWindow.getMain().add(Element.newPDatePicker());
@@ -242,7 +214,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         PWindow.getMain().add(Element.newPGrid());
         PWindow.getMain().add(Element.newPGrid(2, 3));
         PWindow.getMain().add(Element.newPHeaderPanel());
-        // PWindow.getMain().add(new PHistory());
         PWindow.getMain().add(Element.newPHorizontalPanel());
         PWindow.getMain().add(Element.newPHTML());
         PWindow.getMain().add(Element.newPHTML("Html"));
@@ -255,7 +226,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         PWindow.getMain().add(createListBox());
         PWindow.getMain().add(Element.newPMenuBar());
         PWindow.getMain().add(createMenu());
-        // PWindow.getMain().add(new PNotificationManager());
         PWindow.getMain().add(Element.newPPasswordTextBox());
         PWindow.getMain().add(Element.newPPasswordTextBox("Password"));
 
@@ -274,7 +244,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         PWindow.getMain().add(Element.newPSimplePanel());
         PWindow.getMain().add(Element.newPSplitLayoutPanel());
         PWindow.getMain().add(createStackLayoutPanel());
-        // PWindow.getMain().add(new PSuggestBox());
         PWindow.getMain().add(createTabLayoutPanel());
         PWindow.getMain().add(Element.newPTabPanel());
         PWindow.getMain().add(Element.newPTextArea());
@@ -283,33 +252,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         PWindow.getMain().add(createTree());
         PWindow.getMain().add(new PTwinListBox<>());
         PWindow.getMain().add(Element.newPVerticalPanel());
-
-        if (true) return;
-
-        mainLabel = Element.newPLabel("Label2");
-        mainLabel.addClickHandler(event -> System.out.println("bbbbb"));
-        PWindow.getMain().add(mainLabel);
-
-        try {
-            window.add(mainLabel);
-        } catch (final Exception e) {
-        }
-
-        PWindow.getMain().add(Element.newPLabel("Label3"));
-
-        final PLabel label = Element.newPLabel("Label4");
-
-        try {
-            window.add(label);
-            PWindow.getMain().add(label);
-        } catch (final Exception e) {
-        }
-
-        PConfirmDialog.show(PWindow.getMain(), "AAA", Element.newPLabel("AA"));
-
-        POptionPane.showConfirmDialog(PWindow.getMain(), null, "BBB");
-
-        // uiContext.getHistory().newItem("", false);
     }
 
     private void testScene() {
@@ -618,10 +560,10 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
         subPanel.getWindow().addVisibilityHandler(event -> {
             if (event.getData()) {
-                System.err.println("Force refresh, because window became visible");
+                log.debug("Force refresh, because window became visible");
                 updateLabel(label, String.valueOf(a));
             } else {
-                System.err.println("Window became not visible");
+                log.debug("Window became not visible");
             }
         });
 
@@ -630,7 +572,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         subPanel.addVisibilityHandler(event -> {
             liveVisibility.setText("Live Visibility : " + event.getData());
             if (event.getData()) {
-                System.err.println("Force refresh, because panel became visible");
+                log.debug("Force refresh, because panel became visible");
                 updateLabel(label, String.valueOf(a));
             }
         });
@@ -640,13 +582,13 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     }
 
     private static void updateLabel(final PLabel label, final String text) {
-        System.out.println("Update label " + text);
+        log.debug("Update label {}", text);
         label.setText("Increment : " + text);
     }
 
     private void createFunctionalLabel() {
         final TextFunction textFunction = new TextFunction(args -> {
-            System.out.println(args[0] + " " + args[1]);
+            log.debug("{} {}", args[0], args[1]);
             return (String) args[0];
         }, "console.log(args[0] + \" \" + args[1]); return args[0];");
         final PFunctionalLabel newPFunctionalLabel = Element.newPFunctionalLabel(textFunction);
@@ -661,12 +603,12 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         panel.add(fileUpload);
         fileUpload.addChangeHandler(event -> {
             final PFileUpload pFileUpload = (PFileUpload) event.getSource();
-            System.out.println("File name : " + pFileUpload.getFileName());
-            System.out.println("File size : " + pFileUpload.getFileSize() + " bytes");
+            log.debug("File name: {}", pFileUpload.getFileName());
+            log.debug("File size: {} bytes", pFileUpload.getFileSize());
         });
         fileUpload.addStreamHandler((request, response, context) -> {
             try {
-                final List<FileItem> items = new ServletFileUpload(new DiskFileItemFactory()).parseRequest(request);
+                final List<FileItem> items = new JakartaServletFileUpload(DiskFileItemFactory.builder().get()).parseRequest(request);
                 for (final FileItem item : items) {
                     if (!item.isFormField()) readFileItem(item);
                 }
@@ -695,7 +637,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         for (int length = 0; (length = reader.read(buffer)) > 0;) {
             value.append(buffer, 0, length);
         }
-        System.out.println(value.toString());
+        log.debug("File content: {}", value);
     }
 
     private void testPerf() {
@@ -762,6 +704,110 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         PWindow.getMain().add(downloadImageButton);
     }
 
+    private void testWebComponent() {
+        final PLabel sectionTitle = Element.newPLabel("=== Web Component Test ===");
+        sectionTitle.setStyleProperty("font-weight", "bold");
+        sectionTitle.setStyleProperty("font-size", "18px");
+        sectionTitle.setStyleProperty("margin", "20px 0 10px 0");
+        PWindow.getMain().add(sectionTitle);
+
+        final PLabel statusLabel = Element.newPLabel("Status: waiting for events...");
+        statusLabel.setStyleProperty("color", "#666");
+        statusLabel.setStyleProperty("font-style", "italic");
+
+        // ---- 1. my-counter (no shadow DOM, no slots) ----
+        final PWebComponent counter = new PWebComponent("my-counter");
+        counter.attr("label", "Clicks");
+        counter.property("count").set(0);
+        counter.onEvent("count-changed", event -> {
+            final String detail = event.containsKey(ClientToServerModel.WC_EVENT_DETAIL.toStringValue())
+                ? event.getString(ClientToServerModel.WC_EVENT_DETAIL.toStringValue())
+                : "{}";
+            statusLabel.setText("count-changed: " + detail);
+        });
+
+        // ---- 2. my-dashboard (slots: toolbar / content / footer) ----
+        final PWebComponent dashboard = new PWebComponent("my-dashboard");
+        dashboard.attr("title", "PonySdk Dashboard");
+
+        // Toolbar slot
+        final PButton refreshBtn = Element.newPButton("⟳ Refresh");
+        refreshBtn.setStyleProperty("padding", "4px 10px");
+        final PButton exportBtn = Element.newPButton("↓ Export");
+        exportBtn.setStyleProperty("padding", "4px 10px");
+        final PLabel toolbarLabel = Element.newPLabel("Server-side toolbar");
+        toolbarLabel.setStyleProperty("font-size", "12px");
+        toolbarLabel.setStyleProperty("color", "#888");
+        dashboard.slot("toolbar").add(refreshBtn, exportBtn, toolbarLabel);
+
+        // Content slot — a PFlowPanel with real PonySdk widgets
+        final PFlowPanel contentPanel = Element.newPFlowPanel();
+        final PLabel contentLabel = Element.newPLabel("This PLabel lives inside the 'content' slot of my-dashboard.");
+        contentLabel.setStyleProperty("color", "#2c7be5");
+        contentLabel.setStyleProperty("font-weight", "bold");
+        final PTextBox searchBox = Element.newPTextBox();
+        searchBox.setPlaceholder("Search (PTextBox inside WC)...");
+        searchBox.setStyleProperty("width", "250px");
+        searchBox.setStyleProperty("padding", "4px 8px");
+        contentPanel.add(contentLabel, searchBox);
+        dashboard.slot("content").add(contentPanel);
+
+        // Footer slot — status label updated by server events
+        dashboard.slot("footer").add(statusLabel);
+
+        // Dynamic controls
+        refreshBtn.addClickHandler(e -> {
+            statusLabel.setText("Refreshed at " + new java.util.Date());
+            dashboard.attr("theme", "light");
+        });
+        exportBtn.addClickHandler(e -> {
+            statusLabel.setText("Export triggered!");
+            dashboard.attr("theme", "dark");
+        });
+
+        // ---- 3. my-card with slot "actions" ----
+        final PWebComponent card = new PWebComponent("my-card");
+        card.attr("title", "PonySdk Card");
+        card.property("content").set("\"Card body text set from server via property API.\"");
+
+        final PButton likeBtn = Element.newPButton("♥ Like");
+        likeBtn.setStyleProperty("padding", "4px 12px");
+        final PButton shareBtn = Element.newPButton("↗ Share");
+        shareBtn.setStyleProperty("padding", "4px 12px");
+        card.slot("actions").add(likeBtn, shareBtn);
+
+        likeBtn.addClickHandler(e -> statusLabel.setText("Liked!"));
+        shareBtn.addClickHandler(e -> statusLabel.setText("Shared!"));
+
+        // ---- 4. Counter controls ----
+        final PButton resetBtn = Element.newPButton("Reset counter");
+        resetBtn.addClickHandler(e -> {
+            counter.call("reset");
+            statusLabel.setText("reset() called on my-counter");
+        });
+        final PButton setCountBtn = Element.newPButton("Set count = 42");
+        setCountBtn.addClickHandler(e -> {
+            counter.property("count").set(42);
+            statusLabel.setText("count set to 42 via property API");
+        });
+
+        final PFlowPanel controls = Element.newPFlowPanel();
+        controls.setStyleProperty("display", "flex");
+        controls.setStyleProperty("gap", "8px");
+        controls.setStyleProperty("margin", "10px 0");
+        controls.add(resetBtn, setCountBtn);
+
+        // ---- Layout ----
+        final PFlowPanel wcPanel = Element.newPFlowPanel();
+        wcPanel.setStyleProperty("padding", "12px");
+        wcPanel.setStyleProperty("border", "1px solid #ccc");
+        wcPanel.setStyleProperty("border-radius", "8px");
+        wcPanel.setStyleProperty("margin", "10px 0");
+        wcPanel.add(counter, controls, dashboard, card);
+
+        PWindow.getMain().add(wcPanel);
+    }
+
     private void testPAddon() {
         final LoggerAddOn addon = createPAddOn();
         addon.attach(PWindow.getMain());
@@ -785,7 +831,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     private void createNewEvent() {
         final EventHandler<PClickEvent> handler = UIContext.get().getNewEventBus().subscribe(PClickEvent.class,
-            event -> System.err.println("B " + event));
+            event -> log.debug("Event: {}", event));
         UIContext.get().getNewEventBus().post(new PClickEvent(this));
         UIContext.get().getNewEventBus().post(new PClickEvent(this));
         UIContext.get().getNewEventBus().unsubscribe(handler);
@@ -879,9 +925,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     private PWindow createWindow() {
         final PWindow w = Element.newPWindow("Window 1", "resizable=yes,location=0,status=0,scrollbars=0");
 
-        // PScript.execute(w, "alert('coucou Window1');");
-        PScript.execute(w, "console.log('coucou Window1');");
-
         final PFlowPanel windowContainer = Element.newPFlowPanel();
         w.add(windowContainer);
 
@@ -893,7 +936,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         windowContainer.add(button);
         button.addClickHandler(event -> {
             mainLabel.setText("Touched by God : " + child.getWindow());
-            PScript.execute(PWindow.getMain(), "alert('coucou');");
             child.setText("Clicked Window 1");
         });
         windowContainer.add(button);
@@ -962,7 +1004,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PMenuBar pMenuBar = Element.newPMenuBar(true);
         pMenuBar.addItem(Element.newPMenuItem("Menu 1", Element.newPMenuBar()));
         pMenuBar.addItem(Element.newPMenuItem("Menu 2", true, Element.newPMenuBar()));
-        pMenuBar.addItem(Element.newPMenuItem("Menu 3", () -> System.err.println("Menu click")));
+        pMenuBar.addItem(Element.newPMenuItem("Menu 3", () -> log.debug("Menu click")));
         pMenuBar.addSeparator();
         return pMenuBar;
     }
@@ -1010,8 +1052,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
         final PDatePicker datePicker = Element.newPDatePicker();
         final Date a = new Date();
-        System.err.println(new Date(a.getYear(), a.getMonth(), 26));
-        System.err.println(new Date());
 
         datePicker.setTransientEnabledOnDates(false, List.of(new Date(), new Date(a.getYear(), a.getMonth(), 26)));
         datePicker.addStyleToDates("toto", List.of(new Date()));
@@ -1047,7 +1087,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             }
         });
 
-        labelPAddOn.setTerminalHandler(event -> System.err.println(event.toString()));
+        labelPAddOn.setTerminalHandler(event -> log.debug("AddOn event: {}", event));
 
         return labelPAddOn;
     }
@@ -1101,167 +1141,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PButton pButton = Element.newPButton("Button 1");
         pButton.addClickHandler(handler -> pButton.setText("Button 1 clicked"));
         return pButton;
-    }
-
-    class Pojo {
-
-        public String security;
-        public String classe;
-        public Double bid;
-        public Double offer;
-        public Double spread;
-        public String coucou;
-        public String coucou1;
-        public String coucou2;
-        public String coucou3;
-        public String coucou4;
-        public String coucou5;
-        public String coucou6;
-        public String coucou7;
-        public String coucou8;
-        public String coucou9;
-        public String coucou10;
-
-        /**
-         * @return the security
-         */
-        public String getSecurity() {
-            return security;
-        }
-
-        /**
-         * @param security the security to set
-         */
-        public void setSecurity(final String security) {
-            this.security = security;
-        }
-
-        /**
-         * @return the classe
-         */
-        public String getClasse() {
-            return classe;
-        }
-
-        /**
-         * @param classe the classe to set
-         */
-        public void setClasse(final String classe) {
-            this.classe = classe;
-        }
-
-        /**
-         * @return the bid
-         */
-        public Double getBid() {
-            return bid;
-        }
-
-        /**
-         * @param bid the bid to set
-         */
-        public void setBid(final Double bid) {
-            this.bid = bid;
-        }
-
-        /**
-         * @return the offer
-         */
-        public Double getOffer() {
-            return offer;
-        }
-
-        /**
-         * @param offer the offer to set
-         */
-        public void setOffer(final Double offer) {
-            this.offer = offer;
-        }
-
-        /**
-         * @return the spread
-         */
-        public Double getSpread() {
-            return spread;
-        }
-
-        /**
-         * @param spread the spread to set
-         */
-        public void setSpread(final Double spread) {
-            this.spread = spread;
-        }
-
-        /**
-         * @return the coucou
-         */
-        public String getCoucou() {
-            return coucou;
-        }
-
-        /**
-         * @param coucou the coucou to set
-         */
-        public void setCoucou(final String coucou) {
-            this.coucou = coucou;
-        }
-
-        /**
-         * @return the coucou1
-         */
-        public String getCoucou1() {
-            return coucou1;
-        }
-
-        /**
-         * @param coucou1 the coucou1 to set
-         */
-        public void setCoucou1(final String coucou1) {
-            this.coucou1 = coucou1;
-        }
-
-        /**
-         * @return the coucou2
-         */
-        public String getCoucou2() {
-            return coucou2;
-        }
-
-        /**
-         * @param coucou2 the coucou2 to set
-         */
-        public void setCoucou2(final String coucou2) {
-            this.coucou2 = coucou2;
-        }
-
-        /**
-         * @return the coucou3
-         */
-        public String getCoucou3() {
-            return coucou3;
-        }
-
-        /**
-         * @param coucou3 the coucou3 to set
-         */
-        public void setCoucou3(final String coucou3) {
-            this.coucou3 = coucou3;
-        }
-
-        /**
-         * @return the coucou4
-         */
-        public String getCoucou4() {
-            return coucou4;
-        }
-
-        /**
-         * @param coucou4 the coucou4 to set
-         */
-        public void setCoucou4(final String coucou4) {
-            this.coucou4 = coucou4;
-        }
-
     }
 
 }

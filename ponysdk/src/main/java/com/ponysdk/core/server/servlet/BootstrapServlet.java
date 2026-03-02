@@ -27,9 +27,9 @@ import com.ponysdk.core.server.application.ApplicationConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -233,6 +233,19 @@ public class BootstrapServlet extends HttpServlet {
 
         sb.append(String.format(SCRIPT_PATTERN, rootPath + ponyTerminalJsFileName)).append(NEW_LINE);
         sb.append(String.format(SCRIPT_PATTERN, rootPath + "script/ponysdk.js")).append(NEW_LINE);
+
+        // Inject shared WC stylesheets as an inline script so they are registered
+        // before application scripts define their web components.
+        final Set<String> wcSheets = configuration.getWcSharedSheets();
+        if (wcSheets != null && !wcSheets.isEmpty()) {
+            sb.append("<script type=\"text/javascript\">").append(NEW_LINE);
+            sb.append("document.onPonyLoaded(function() {").append(NEW_LINE);
+            for (final String sheet : wcSheets) {
+                sb.append("  pony.wc.registerSharedSheet('").append(sheet).append("');").append(NEW_LINE);
+            }
+            sb.append("});").append(NEW_LINE);
+            sb.append("</script>").append(NEW_LINE);
+        }
 
         final Set<String> scripts = configuration.getJavascript();
         if (scripts != null && !scripts.isEmpty()) {

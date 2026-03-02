@@ -105,7 +105,6 @@ public class PonySDK implements UncaughtExceptionHandler {
         reconnectionChecker = new ReconnectionChecker();
         socketClient = new WebSocketClient(newUrl, uiBuilder, reconnectionChecker);
     }
-
     private void startChildContext() {
         final String windowId = Window.Location.getParameter(ClientToServerModel.WINDOW_ID.toStringValue());
         final String frameId = Window.Location.getParameter(ClientToServerModel.FRAME_ID.toStringValue());
@@ -227,6 +226,43 @@ public class PonySDK implements UncaughtExceptionHandler {
 
             return true;
         }, 500);
+    }
+
+    /**
+     * Called by UIBuilder when the server sends RECONNECT_CONTEXT — transparent reconnection succeeded.
+     * Notifies the JS layer via {@code window.onPonyReconnected()} if defined.
+     */
+    public void onReconnected() {
+        log.info("Transparent WebSocket reconnection succeeded for context #" + contextId);
+        notifyReconnected();
+    }
+
+    private static native void notifyReconnected() /*-{
+        if ($wnd.onPonyReconnected && typeof $wnd.onPonyReconnected === 'function') {
+            $wnd.onPonyReconnected();
+        }
+    }-*/;
+
+    /**
+     * Builds a WebSocket reconnect URL that carries the current uiContextId.
+     * Used by ReconnectionChecker when transparent reconnection mode is active.
+     */
+    public String buildReconnectUrl() {
+        final String protocol = DomGlobal.window.location.protocol.replace("http", "ws");
+        final String server = DomGlobal.window.location.host;
+        final String pathName = DomGlobal.window.location.pathname;
+        final String search = DomGlobal.window.location.search.replace('?', '&');
+        return protocol + "//" + server + pathName + MappingPath.WEBSOCKET + "?"
+                + ClientToServerModel.TYPE_HISTORY.toStringValue() + "=" + History.getToken()
+                + "&" + ClientToServerModel.RECONNECT_UI_CONTEXT_ID.toStringValue() + "=" + contextId
+                + search;
+    }
+
+    /**
+     * Reconnects the WebSocket to the given URL — used for transparent reconnection.
+     */
+    public void reconnectSocket(final String url) {
+        socketClient = new WebSocketClient(url, uiBuilder, reconnectionChecker);
     }
 
 }

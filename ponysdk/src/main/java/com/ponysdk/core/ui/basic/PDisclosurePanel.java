@@ -29,7 +29,7 @@ import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.ui.basic.event.*;
 import com.ponysdk.core.writer.ModelWriter;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 import java.util.*;
 
 /**

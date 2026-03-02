@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.ponysdk.core.server.application.Application;
@@ -68,11 +67,19 @@ public class SessionManager {
     }
 
     public UIContext getUIContext(final int id) {
-        return applications.values().stream().map(app -> app.getUIContext(id)).filter(Objects::nonNull).findFirst().orElse(null);
+        for (final Application app : applications.values()) {
+            final UIContext ctx = app.getUIContext(id);
+            if (ctx != null) return ctx;
+        }
+        return null;
     }
 
     public int countUIContexts() {
-        return applications.values().stream().mapToInt(Application::countUIContexts).sum();
+        int count = 0;
+        for (final Application app : applications.values()) {
+            count += app.countUIContexts();
+        }
+        return count;
     }
 
 }

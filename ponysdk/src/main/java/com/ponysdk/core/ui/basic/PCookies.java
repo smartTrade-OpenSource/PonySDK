@@ -28,8 +28,8 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.writer.ModelWriter;
 
-import javax.json.JsonArray;
-import javax.json.JsonObject;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;

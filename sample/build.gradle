@@ -2,49 +2,54 @@ ext {
     java2htmlVersion = '5.0'
     commonsBeanutilsVersion = '1.9.3'
     commonsIoVersion = '2.6'
-    commonsFileuploadVersion = '1.3.3'
+    commonsFileupload2Version = '2.0.0-M2'
     gwtVersion = '2.8.2'
-    jettyVersion = '9.4.14.v20181114'
-    springVersion = '5.1.3.RELEASE'
-    javaxServletVersion = '4.0.1'
-    slf4jVersion = '1.8.0-alpha2'
-    log4jVersion = '2.10.0'
-    jsonVersion = '1.1.4'
+    jettyVersion = '12.0.16'
+    springVersion = '6.2.6'
+    jakartaServletVersion = '6.0.0'
+    jakartaJsonVersion = '2.0.2'
+    parssonVersion = '1.1.7'
+    slf4jVersion = '2.0.16'
+    log4jVersion = '2.24.3'
 }
 
 dependencies {
     implementation(
             project(path: ':ponysdk', configuration: 'default'),
             'org.springframework:spring-context:' + springVersion,
-            'javax.json:javax.json-api:' + jsonVersion,
-            'javax.servlet:javax.servlet-api:' + javaxServletVersion,
+            'jakarta.json:jakarta.json-api:' + jakartaJsonVersion,
+            'jakarta.servlet:jakarta.servlet-api:' + jakartaServletVersion,
             'org.slf4j:slf4j-api:' + slf4jVersion,
             'de.java2html:java2html:' + java2htmlVersion,
-            'org.eclipse.jetty.websocket:websocket-client:' + jettyVersion,
+            'org.eclipse.jetty.websocket:jetty-websocket-jetty-client:' + jettyVersion,
             'commons-beanutils:commons-beanutils:' + commonsBeanutilsVersion,
             'commons-io:commons-io:' + commonsIoVersion,
-            'commons-fileupload:commons-fileupload:' + commonsFileuploadVersion,
+            'org.apache.commons:commons-fileupload2-jakarta-servlet6:' + commonsFileupload2Version,
             'com.google.code.gson:gson:2.8.8'
     )
 
     runtimeOnly(
+            'org.eclipse.parsson:parsson:' + parssonVersion,
             'com.google.gwt:gwt-codeserver:' + gwtVersion,
             'de.java2html:java2html:' + java2htmlVersion,
             'org.springframework:spring-aop:' + springVersion,
             'org.springframework:spring-expression:' + springVersion,
             'org.slf4j:jcl-over-slf4j:' + slf4jVersion,
-            'org.slf4j:log4j-over-slf4j:' + slf4jVersion,
             'org.slf4j:jul-to-slf4j:' + slf4jVersion,
             'org.apache.logging.log4j:log4j-api:' + log4jVersion,
             'org.apache.logging.log4j:log4j-core:' + log4jVersion,
-            'org.apache.logging.log4j:log4j-slf4j-impl:' + log4jVersion,
+            'org.apache.logging.log4j:log4j-slf4j2-impl:' + log4jVersion,
     )
 }
 
+def buildDirPath = layout.buildDirectory.get().asFile.absolutePath
+
 task runCodeServer(type: JavaExec) {
-    classpath = project(':ponysdk').configurations.gwtdev
-    classpath += sourceSets.main.runtimeClasspath
-    main = 'com.google.gwt.dev.codeserver.CodeServer'
+    classpath = files()
+    doFirst {
+        classpath = project(':ponysdk').configurations.gwtdev + sourceSets.main.runtimeClasspath
+    }
+    mainClass = 'com.google.gwt.dev.codeserver.CodeServer'
     args = [
             '-src', '../ponysdk/src/main/java',
             '-generateJsInteropExports', '-noincremental',
@@ -56,20 +61,24 @@ task runCodeServer(type: JavaExec) {
 
 task runSampleSpring(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
-    classpath += files(buildDir.getAbsolutePath() + '/gwt/gwt')
-    classpath += files(buildDir.getAbsolutePath() + '/resources')
-    classpath += files(buildDir.getAbsolutePath() + '/resources/main')
-    main = 'com.ponysdk.impl.spring.MainSpring'
-    //jvmArgs = ['-server', '-Xmx512m', '-Dlog4j.configurationFile=etc/log4j2.xml', '-agentlib:jdwp=transport=dt_socket,server=y,address=8888,suspend=n']
-    jvmArgs = ['-Xmx8g', '-Xms8g', '-XX:-DisableExplicitGC', '-Xlog:safepoint=info,gc*=info,gc+age=trace:file=run_sample_spring_gc.log:time,uptime,level,tags:filesize=10M,filecount=100', '-Dlog4j.configurationFile=etc/log4j2.xml', '-agentlib:jdwp=transport=dt_socket,server=y,address=8888,suspend=n', '-XX:+UseConcMarkSweepGC', '-Xmn7500M', '-XX:+UseCMSInitiatingOccupancyOnly', '-XX:CMSInitiatingOccupancyFraction=80']
+    classpath += files(buildDirPath + '/gwt/gwt')
+    classpath += files(buildDirPath + '/resources')
+    classpath += files(buildDirPath + '/resources/main')
+    mainClass = 'com.ponysdk.impl.spring.MainSpring'
+    jvmArgs = [
+        '-Xmx2g', '-Xms2g',
+        '-XX:+UseZGC', '-XX:+ZGenerational',
+        '-XX:SoftMaxHeapSize=1536m',
+        '-Dlog4j.configurationFile=etc/log4j2.xml'
+    ]
 }
 
 task runSampleTrading(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
-    classpath += files(buildDir.getAbsolutePath() + '/gwt/debug/gwt')
-    classpath += files(buildDir.getAbsolutePath() + '/gwt/prod/gwt')
-    classpath += files(buildDir.getAbsolutePath() + '/resources/etc')
-    main = 'com.ponysdk.impl.java.Main'
+    classpath += files(buildDirPath + '/gwt/debug/gwt')
+    classpath += files(buildDirPath + '/gwt/prod/gwt')
+    classpath += files(buildDirPath + '/resources/etc')
+    mainClass = 'com.ponysdk.impl.java.Main'
     jvmArgs = ['-server', '-Xmx512m', '-Dponysdk.application.id=trading', '-Dponysdk.application.name="Trading sample"', '-Dponysdk.application.description="Trading Sample"',
                '-Dponysdk.application.context.name=trading', '-Dponysdk.entry.point.class=com.ponysdk.sample.client.TradingSampleEntryPoint',
                '-Dponysdk.application.javascripts=script/ponysdk.js;script/widget.js;script/sample.js;script/less.js', '-Dponysdk.application.stylesheets=css/sample.less;css/ponysdk.less']

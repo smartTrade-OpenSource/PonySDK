@@ -26,8 +26,8 @@ package com.ponysdk.core.ui.dropdown;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
 
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.Element;

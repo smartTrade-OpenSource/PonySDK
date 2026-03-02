@@ -3,7 +3,7 @@ package com.ponysdk.core.ui.basic;
 import java.util.Map;
 import java.util.logging.Level;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;

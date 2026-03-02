@@ -23,7 +23,7 @@
 
 package com.ponysdk.core.terminal.ui;
 
-import elemental.html.Uint8Array;
+import elemental2.core.Uint8Array;
 
 public interface PostMessageHandler {
 

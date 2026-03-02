@@ -31,6 +31,7 @@ import com.ponysdk.core.ui.basic.event.PVisibilityEvent.PVisibilityHandler;
 import com.ponysdk.core.ui.eventbus.*;
 import com.ponysdk.core.ui.model.PEventType;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
+import com.ponysdk.core.util.CompactStringMap;
 import com.ponysdk.core.util.SetPool;
 import com.ponysdk.core.util.SetUtils;
 import com.ponysdk.core.writer.ModelWriter;
@@ -38,10 +39,10 @@ import com.ponysdk.core.writer.ModelWriterCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.json.JsonArray;
-import javax.json.JsonNumber;
-import javax.json.JsonObject;
-import javax.json.JsonValue;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonNumber;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonValue;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -60,14 +61,22 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     private static final String HUNDRED_PERCENT = "100%";
 
+    // Cached JSON keys to avoid repeated toStringValue() calls
+    private static final String DOM_HANDLER_TYPE_KEY = ClientToServerModel.DOM_HANDLER_TYPE.toStringValue();
+    private static final String VALUE_KEY_KEY = ClientToServerModel.VALUE_KEY.toStringValue();
+    private static final String DRAG_SRC_KEY = ClientToServerModel.DRAG_SRC.toStringValue();
+    private static final String EVENT_INFO_KEY = ClientToServerModel.EVENT_INFO.toStringValue();
+    private static final String WIDGET_POSITION_KEY = ClientToServerModel.WIDGET_POSITION.toStringValue();
+    private static final String HANDLER_WIDGET_VISIBILITY_KEY = ClientToServerModel.HANDLER_WIDGET_VISIBILITY.toStringValue();
+
     boolean visible = true;
     private IsPWidget parent;
     private SetPool<String>.ImmutableSet styleNames = styleNamesSetPool.emptyImmutableSet();
     private SetPool<PEventType>.ImmutableSet preventEvents = preventOrStopEventsSetPool.emptyImmutableSet();
     private SetPool<PEventType>.ImmutableSet stopEvents = preventOrStopEventsSetPool.emptyImmutableSet();
-    private Map<String, String> styleProperties;
-    private Map<String, String> elementProperties;
-    private Map<String, String> elementAttributes;
+    private CompactStringMap styleProperties;
+    private CompactStringMap elementProperties;
+    private CompactStringMap elementAttributes;
     private String title;
     private String width;
     private String height;
@@ -107,6 +116,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
     @Override
     protected void enrichForUpdate(final ModelWriter writer) {
         super.enrichForUpdate(writer);
+        if (!visible) writer.write(ServerToClientModel.WIDGET_VISIBLE, false);
+        if (this.styleName != null) writer.write(ServerToClientModel.STYLE_NAME, this.styleName);
         if (!styleNames.isEmpty()) {
             writer.write(ServerToClientModel.ADD_STYLE_NAME, styleNames.stream().collect(Collectors.joining(" ")));
         }
@@ -114,24 +125,42 @@ public abstract class PWidget extends PObject implements IsPWidget {
         if (this.height != null) writer.write(ServerToClientModel.WIDGET_HEIGHT, this.height);
         if (this.width != null) writer.write(ServerToClientModel.WIDGET_WIDTH, this.width);
         if (this.debugID != null) writer.write(ServerToClientModel.ENSURE_DEBUG_ID, this.debugID);
+        if (styleProperties != null) {
+            for (final var entry : styleProperties.entrySet()) {
+                writer.write(ServerToClientModel.PUT_STYLE_KEY, entry.getKey());
+                writer.write(ServerToClientModel.STYLE_VALUE, entry.getValue());
+            }
+        }
+        if (elementAttributes != null) {
+            for (final var entry : elementAttributes.entrySet()) {
+                writer.write(ServerToClientModel.PUT_ATTRIBUTE_KEY, entry.getKey());
+                writer.write(ServerToClientModel.ATTRIBUTE_VALUE, entry.getValue());
+            }
+        }
+        if (elementProperties != null) {
+            for (final var entry : elementProperties.entrySet()) {
+                writer.write(ServerToClientModel.PUT_PROPERTY_KEY, entry.getKey());
+                writer.write(ServerToClientModel.PROPERTY_VALUE, entry.getValue());
+            }
+        }
     }
 
     static PWidget asWidgetOrNull(final IsPWidget w) {
         return w == null ? null : w.asWidget();
     }
 
-    private Map<String, String> safeStyleProperties() {
-        if (styleProperties == null) styleProperties = new HashMap<>(8);
+    private CompactStringMap safeStyleProperties() {
+        if (styleProperties == null) styleProperties = new CompactStringMap();
         return styleProperties;
     }
 
-    private Map<String, String> safeElementProperties() {
-        if (elementProperties == null) elementProperties = new HashMap<>(8);
+    private CompactStringMap safeElementProperties() {
+        if (elementProperties == null) elementProperties = new CompactStringMap();
         return elementProperties;
     }
 
-    private Map<String, String> safeElementAttributes() {
-        if (elementAttributes == null) elementAttributes = new HashMap<>(8);
+    private CompactStringMap safeElementAttributes() {
+        if (elementAttributes == null) elementAttributes = new CompactStringMap();
         return elementAttributes;
     }
 
@@ -271,7 +300,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public Set<Map.Entry<String, String>> getAttributes() {
-        return elementAttributes == null ? Collections.emptySet() : Collections.unmodifiableSet(elementAttributes.entrySet());
+        return elementAttributes == null ? Collections.emptySet() : elementAttributes.entrySet();
     }
 
     public void preventEvent(final PEventType e) {
@@ -379,7 +408,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     private HandlerRegistration addDomHandler(final EventHandler handler, final PDomEvent.Type type,
                                               final ServerBinaryModel binaryModel) {
         if (destroy) return null;
-        if (eventSource == null) eventSource = new TinyEventSource();
+        if (eventSource == null) eventSource = new CompactEventSource();
         final HandlerRegistration handlerRegistration = eventSource.addHandler(type, handler);
 
         final SetPool<Type>.ImmutableSet pool = oneTimeHandlerCreation.getAdd(type);
@@ -399,80 +428,39 @@ public abstract class PWidget extends PObject implements IsPWidget {
     @Override
     public void onClientData(final JsonObject instruction) {
         if (!isVisible()) return;
-        final String domHandlerType = ClientToServerModel.DOM_HANDLER_TYPE.toStringValue();
-        if (instruction.containsKey(domHandlerType)) {
-            final DomHandlerType domHandler = DomHandlerType.fromRawValue((byte) instruction.getInt(domHandlerType));
+        if (instruction.containsKey(DOM_HANDLER_TYPE_KEY)) {
+            final DomHandlerType domHandler = DomHandlerType.fromRawValue((byte) instruction.getInt(DOM_HANDLER_TYPE_KEY));
             switch (domHandler) {
-                case KEY_PRESS:
-                    fireKeyEvent(new PKeyPressEvent(this, instruction.getInt(ClientToServerModel.VALUE_KEY.toStringValue())));
-                    break;
-                case KEY_UP:
-                    fireKeyEvent(new PKeyUpEvent(this, instruction.getInt(ClientToServerModel.VALUE_KEY.toStringValue())));
-                    break;
-                case KEY_DOWN:
-                    fireKeyEvent(new PKeyDownEvent(this, instruction.getInt(ClientToServerModel.VALUE_KEY.toStringValue())));
-                    break;
-                case CLICK:
-                    fireMouseEvent(instruction, new PClickEvent(this));
-                    break;
-                case DOUBLE_CLICK:
-                    fireMouseEvent(instruction, new PDoubleClickEvent(this));
-                    break;
-                case MOUSE_OVER:
-                    fireMouseEvent(instruction, new PMouseOverEvent(this));
-                    break;
-                case MOUSE_OUT:
-                    fireMouseEvent(instruction, new PMouseOutEvent(this));
-                    break;
-                case MOUSE_DOWN:
-                    fireMouseEvent(instruction, new PMouseDownEvent(this));
-                    break;
-                case MOUSE_UP:
-                    fireMouseEvent(instruction, new PMouseUpEvent(this));
-                    break;
-                case MOUSE_WHELL:
-                    fireMouseWheelEvent(instruction, new PMouseWhellEvent.Event(this));
-                    break;
-                case FOCUS:
-                    fireEvent(new PFocusEvent(this));
-                    break;
-                case BLUR:
-                    fireEvent(new PBlurEvent(this));
-                    break;
-                case DRAG_START:
-                    fireEvent(new PDragStartEvent(this));
-                    break;
-                case DRAG_END:
-                    fireEvent(new PDragEndEvent(this));
-                    break;
-                case DRAG_ENTER:
-                    fireEvent(new PDragEnterEvent(this));
-                    break;
-                case DRAG_LEAVE:
-                    fireEvent(new PDragLeaveEvent(this));
-                    break;
-                case DRAG_OVER:
-                    fireEvent(new PDragOverEvent(this));
-                    break;
-                case DROP:
+                case KEY_PRESS -> fireKeyEvent(new PKeyPressEvent(this, instruction.getInt(VALUE_KEY_KEY)));
+                case KEY_UP -> fireKeyEvent(new PKeyUpEvent(this, instruction.getInt(VALUE_KEY_KEY)));
+                case KEY_DOWN -> fireKeyEvent(new PKeyDownEvent(this, instruction.getInt(VALUE_KEY_KEY)));
+                case CLICK -> fireMouseEvent(instruction, new PClickEvent(this));
+                case DOUBLE_CLICK -> fireMouseEvent(instruction, new PDoubleClickEvent(this));
+                case MOUSE_OVER -> fireMouseEvent(instruction, new PMouseOverEvent(this));
+                case MOUSE_OUT -> fireMouseEvent(instruction, new PMouseOutEvent(this));
+                case MOUSE_DOWN -> fireMouseEvent(instruction, new PMouseDownEvent(this));
+                case MOUSE_UP -> fireMouseEvent(instruction, new PMouseUpEvent(this));
+                case MOUSE_WHELL -> fireMouseWheelEvent(instruction, new PMouseWhellEvent.Event(this));
+                case FOCUS -> fireEvent(new PFocusEvent(this));
+                case BLUR -> fireEvent(new PBlurEvent(this));
+                case DRAG_START -> fireEvent(new PDragStartEvent(this));
+                case DRAG_END -> fireEvent(new PDragEndEvent(this));
+                case DRAG_ENTER -> fireEvent(new PDragEnterEvent(this));
+                case DRAG_LEAVE -> fireEvent(new PDragLeaveEvent(this));
+                case DRAG_OVER -> fireEvent(new PDragOverEvent(this));
+                case DROP -> {
                     final PDropEvent dropEvent = new PDropEvent(this);
-                    final String dragSrc = ClientToServerModel.DRAG_SRC.toStringValue();
-                    if (instruction.containsKey(dragSrc)) {
-                        final PWidget source = (PWidget) UIContext.get().getObject(instruction.getJsonNumber(dragSrc).intValue());
+                    if (instruction.containsKey(DRAG_SRC_KEY)) {
+                        final PWidget source = (PWidget) UIContext.get().getObject(instruction.getJsonNumber(DRAG_SRC_KEY).intValue());
                         dropEvent.setDragSource(source);
                     }
                     fireEvent(dropEvent);
-                    break;
-                case CONTEXT_MENU:
-                    fireEvent(new PContextMenuEvent(this));
-                    break;
-                case CHANGE_HANDLER:
-                default:
-                    log.error("Dom Handler not implemented: {}", domHandler);
-                    break;
+                }
+                case CONTEXT_MENU -> fireEvent(new PContextMenuEvent(this));
+                default -> log.error("Dom Handler not implemented: {}", domHandler);
             }
-        } else if (instruction.containsKey(ClientToServerModel.HANDLER_WIDGET_VISIBILITY.toStringValue())) {
-            shown = instruction.getBoolean(ClientToServerModel.HANDLER_WIDGET_VISIBILITY.toStringValue());
+        } else if (instruction.containsKey(HANDLER_WIDGET_VISIBILITY_KEY)) {
+            shown = instruction.getBoolean(HANDLER_WIDGET_VISIBILITY_KEY);
             if (visibilityHandlers != null) {
                 final PVisibilityEvent visibilityEvent = new PVisibilityEvent(this, shown);
                 visibilityHandlers.forEach(handler -> handler.onVisibility(visibilityEvent));
@@ -491,9 +479,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public void fireMouseEvent(final JsonObject instruction, final PMouseEvent<? extends EventHandler> event) {
-        final String eventInfoKey = ClientToServerModel.EVENT_INFO.toStringValue();
-        if (instruction.containsKey(eventInfoKey)) {
-            final JsonArray eventInfo = instruction.getJsonArray(eventInfoKey);
+        if (instruction.containsKey(EVENT_INFO_KEY)) {
+            final JsonArray eventInfo = instruction.getJsonArray(EVENT_INFO_KEY);
 
             event.setX(((JsonNumber) eventInfo.get(0)).intValue());
             event.setY(((JsonNumber) eventInfo.get(1)).intValue());
@@ -506,9 +493,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
             event.setMetaKeyDown(JsonValue.TRUE.equals(eventInfo.get(8)));
         }
 
-        final String widgetPositionKey = ClientToServerModel.WIDGET_POSITION.toStringValue();
-        if (instruction.containsKey(widgetPositionKey)) {
-            final JsonArray widgetInfo = instruction.getJsonArray(widgetPositionKey);
+        if (instruction.containsKey(WIDGET_POSITION_KEY)) {
+            final JsonArray widgetInfo = instruction.getJsonArray(WIDGET_POSITION_KEY);
 
             event.setSourceAbsoluteLeft(((JsonNumber) widgetInfo.get(0)).intValue());
             event.setSourceAbsoluteTop(((JsonNumber) widgetInfo.get(1)).intValue());
@@ -520,9 +506,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     private void fireMouseWheelEvent(final JsonObject instruction, final PMouseWhellEvent.Event event) {
-        final String eventInfoKey = ClientToServerModel.EVENT_INFO.toStringValue();
-        if (instruction.containsKey(eventInfoKey)) {
-            final JsonArray eventInfo = instruction.getJsonArray(eventInfoKey);
+        if (instruction.containsKey(EVENT_INFO_KEY)) {
+            final JsonArray eventInfo = instruction.getJsonArray(EVENT_INFO_KEY);
 
             event.setX(((JsonNumber) eventInfo.get(0)).intValue());
             event.setY(((JsonNumber) eventInfo.get(1)).intValue());
@@ -532,9 +517,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
             event.setDeltaY(((JsonNumber) eventInfo.get(5)).intValue());
         }
 
-        final String widgetPositionKey = ClientToServerModel.WIDGET_POSITION.toStringValue();
-        if (instruction.containsKey(widgetPositionKey)) {
-            final JsonArray widgetInfo = instruction.getJsonArray(widgetPositionKey);
+        if (instruction.containsKey(WIDGET_POSITION_KEY)) {
+            final JsonArray widgetInfo = instruction.getJsonArray(WIDGET_POSITION_KEY);
 
             event.setSourceAbsoluteLeft(((JsonNumber) widgetInfo.get(0)).intValue());
             event.setSourceAbsoluteTop(((JsonNumber) widgetInfo.get(1)).intValue());
@@ -615,7 +599,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     public void addVisibilityHandler(final PVisibilityHandler visibilityHandler) {
         if (visibilityHandlers == null) {
-            visibilityHandlers = new ArrayList<>();
+            visibilityHandlers = new ArrayList<>(1);
             saveAddHandler(HandlerModel.HANDLER_VISIBILITY);
         }
         visibilityHandlers.add(visibilityHandler);

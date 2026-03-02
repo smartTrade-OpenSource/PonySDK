@@ -43,8 +43,7 @@ public class PonyServiceRegistry {
         getGeneralizations(service.getClass(), classes);
 
         classes.stream().filter(PonyService.class::isAssignableFrom).forEach(clazz -> {
-            if (!registeredServices.containsKey(clazz)) {
-                registeredServices.put(clazz, service);
+            if (registeredServices.putIfAbsent(clazz, service) == null) {
                 log.info("Service registered #{}", clazz);
             } else {
                 throw new IllegalArgumentException("Already registered service #" + clazz);

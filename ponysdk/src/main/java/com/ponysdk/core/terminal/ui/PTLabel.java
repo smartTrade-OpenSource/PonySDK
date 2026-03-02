@@ -29,6 +29,8 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
+import jsinterop.base.Js;
+
 public class PTLabel<T extends Label> extends PTWidget<T> {
 
     private String attributeLinkedToValue;
@@ -60,8 +62,8 @@ public class PTLabel<T extends Label> extends PTWidget<T> {
         }
     }
 
-    protected static final native void setText(Element element, String text) /*-{
-                                                                             element.textContent = text;
-                                                                             }-*/;
+    protected static void setText(final Element element, final String text) {
+        Js.asPropertyMap(element).set("textContent", text);
+    }
 
 }

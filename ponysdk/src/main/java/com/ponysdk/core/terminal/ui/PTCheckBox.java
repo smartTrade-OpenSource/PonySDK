@@ -33,6 +33,8 @@ import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
+import jsinterop.base.Js;
+
 public class PTCheckBox<T extends CheckBox> extends PTButtonBase<T> {
 
     private Element inputElement;
@@ -102,8 +104,8 @@ public class PTCheckBox<T extends CheckBox> extends PTButtonBase<T> {
      * @param indeterminate
      *            True if indeterminate, false if not
      */
-    public static native void setIndeterminate(Element checkbox, boolean indeterminate) /*-{
-                                                                                        checkbox.indeterminate = indeterminate;
-                                                                                        }-*/;
+    public static void setIndeterminate(final Element checkbox, final boolean indeterminate) {
+        Js.asPropertyMap(checkbox).set("indeterminate", indeterminate);
+    }
 
 }

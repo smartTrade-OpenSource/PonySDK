@@ -27,7 +27,7 @@ import com.ponysdk.core.model.*;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 import java.util.*;
 
 /**

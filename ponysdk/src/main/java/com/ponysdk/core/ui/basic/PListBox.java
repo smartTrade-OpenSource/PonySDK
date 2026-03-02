@@ -31,7 +31,7 @@ import com.ponysdk.core.ui.basic.event.HasPChangeHandlers;
 import com.ponysdk.core.ui.basic.event.PChangeEvent;
 import com.ponysdk.core.ui.basic.event.PChangeHandler;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 import java.util.*;
 import java.util.stream.Collectors;
 

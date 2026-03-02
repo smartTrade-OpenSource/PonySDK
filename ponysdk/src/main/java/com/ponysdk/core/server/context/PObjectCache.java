@@ -23,27 +23,34 @@
 
 package com.ponysdk.core.server.context;
 
-import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.server.util.IntObjectHashMap;
 import com.ponysdk.core.ui.basic.PObject;
 import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.basic.PWindowManager;
 import com.ponysdk.core.writer.ModelWriter;
 
+/**
+ * Cache for PObjects indexed by their int ID.
+ * <p>
+ * Uses {@link IntObjectHashMap} instead of {@code HashMap<Integer, ...>}
+ * to avoid Integer boxing overhead (~48 bytes saved per entry).
+ * All access is within the UIContext lock (single-threaded).
+ * <p>
+ * Object IDs may be sequential or random.
+ */
 public class PObjectCache {
 
     private static final Logger log = LoggerFactory.getLogger(PObjectCache.class);
 
-    private final Map<Integer, PObjectWeakReference> referenceByObjectID = new ConcurrentHashMap<>();
+    private final IntObjectHashMap<PObjectWeakReference> referenceByObjectID = new IntObjectHashMap<>();
     private final ReferenceQueue<PObject> queue = new ReferenceQueue<>();
 
     public PObject add(final PObject pObject) {
@@ -56,15 +63,19 @@ public class PObjectCache {
 
     public PObject get(final int objectID) {
         expungeStaleEntries();
-        final Reference<PObject> value = referenceByObjectID.get(objectID);
-        return value != null ? value.get() : null;
+        final PObjectWeakReference ref = referenceByObjectID.get(objectID);
+        return ref != null ? ref.get() : null;
     }
 
     private void expungeStaleEntries() {
         PObjectWeakReference reference;
         while ((reference = (PObjectWeakReference) queue.poll()) != null) {
             final int objectID = reference.getObjectID();
-            referenceByObjectID.remove(objectID);
+            // Only remove if the slot still points to this exact reference
+            final PObjectWeakReference current = referenceByObjectID.get(objectID);
+            if (current == reference) {
+                referenceByObjectID.remove(objectID);
+            }
 
             final int windowID = reference.getWindowID();
             final int frameID = reference.getFrameID();
@@ -105,7 +116,5 @@ public class PObjectCache {
         public int getFrameID() {
             return frameID;
         }
-
     }
-
 }

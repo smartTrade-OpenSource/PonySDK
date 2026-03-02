@@ -31,10 +31,11 @@ import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.handler.ErrorHandler;
+import org.eclipse.jetty.ee10.servlet.ErrorHandler;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.websocket.server.config.JettyWebSocketServletContainerInitializer;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -172,6 +173,8 @@ public class PonySDKServer {
         context.setErrorHandler(createErrorHandler());
         context.getSessionHandler().getSessionCookieConfig().setSecure(true);
         context.getSessionHandler().getSessionCookieConfig().setHttpOnly(true);
+
+        JettyWebSocketServletContainerInitializer.configure(context, null);
 
         context.addServlet(new ServletHolder(createBootstrapServlet()), MAPPING_BOOTSTRAP);
         context.addServlet(new ServletHolder(createStreamServiceServlet()), MAPPING_STREAM);
