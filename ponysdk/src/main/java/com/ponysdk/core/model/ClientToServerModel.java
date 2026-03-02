@@ -89,7 +89,14 @@ public enum ClientToServerModel {
     HANDLER_PASTE("S"),
     HANDLER_WIDGET_VISIBILITY("T"),
     HANDLER_DOCUMENT_VISIBILITY("U"),
-    HANDLER_DESTROY("V");
+    HANDLER_DESTROY("V"),
+
+    // Web Component events
+    WC_EVENT_NAME("W"),
+    WC_EVENT_DETAIL("X"),
+
+    // Transparent WebSocket reconnection (opt-in)
+    RECONNECT_UI_CONTEXT_ID("Y");  // sent by client on reconnect attempt: carries the uiContextId to resume
 
     private final String key;
 

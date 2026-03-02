@@ -23,6 +23,7 @@
 
 package com.ponysdk.core.server.application;
 
+import com.ponysdk.core.server.metrics.PonySDKMetrics;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.HandlerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -30,6 +31,7 @@ import com.ponysdk.core.server.AlreadyDestroyedApplication;
 import com.ponysdk.core.server.context.PObjectCache;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.server.stm.TxnContext;
+import com.ponysdk.core.server.websocket.RecordingEncoder;
 import com.ponysdk.core.server.websocket.WebSocket;
 import com.ponysdk.core.ui.basic.PCookies;
 import com.ponysdk.core.ui.basic.PHistory;
@@ -39,19 +41,19 @@ import com.ponysdk.core.ui.eventbus.*;
 import com.ponysdk.core.ui.statistic.TerminalDataReceiver;
 import com.ponysdk.core.useragent.UserAgent;
 import com.ponysdk.core.writer.ModelWriter;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
+import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.json.JsonNumber;
-import javax.json.JsonObject;
-import javax.json.JsonString;
-import javax.json.JsonValue;
-import javax.json.JsonValue.ValueType;
-import javax.json.spi.JsonProvider;
-import javax.servlet.http.HttpSession;
+import jakarta.json.JsonNumber;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonString;
+import jakarta.json.JsonValue;
+import jakarta.json.JsonValue.ValueType;
+import jakarta.json.spi.JsonProvider;
+import jakarta.servlet.http.HttpSession;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -72,12 +74,29 @@ public class UIContext {
     private static final Logger log = LoggerFactory.getLogger(UIContext.class);
     private static final ThreadLocal<UIContext> currentContext = new ThreadLocal<>();
     private static final AtomicInteger uiContextCount = new AtomicInteger();
-    private static final String DEFAULT_PROVIDER = "org.glassfish.json.JsonProviderImpl";
+    private static final String DEFAULT_PROVIDER = "org.eclipse.parsson.JsonProviderImpl";
+
+    /** Shared JsonProvider instance — Parsson is thread-safe, no need to create one per session. */
+    private static final JsonProvider SHARED_JSON_PROVIDER;
+    static {
+        JsonProvider p;
+        try {
+            p = (JsonProvider) Class.forName(DEFAULT_PROVIDER).getDeclaredConstructor().newInstance();
+        } catch (final Throwable t) {
+            p = JsonProvider.provider();
+        }
+        SHARED_JSON_PROVIDER = p;
+    }
+
+    // Cached JSON keys to avoid repeated toStringValue() calls
+    private static final String KEY_TYPE_HISTORY = ClientToServerModel.TYPE_HISTORY.toStringValue();
+    private static final String KEY_OBJECT_ID = ClientToServerModel.OBJECT_ID.toStringValue();
+    private static final String KEY_PARENT_OBJECT_ID = ClientToServerModel.PARENT_OBJECT_ID.toStringValue();
 
     private final int ID;
 
     private final ReentrantLock lock = new ReentrantLock();
-    private final Map<String, Object> attributes = new HashMap<>();
+    private Map<String, Object> attributes;
 
     private final PObjectCache pObjectCache = new PObjectCache();
     private int objectCounter = 1;
@@ -91,31 +110,50 @@ public class UIContext {
 
     private final PCookies cookies = new PCookies();
 
-    private final Set<ContextDestroyListener> destroyListeners = new HashSet<>();
+    private Set<ContextDestroyListener> destroyListeners;
     @Deprecated(forRemoval = true, since = "v2.8.0")
     private final TxnContext context;
-    private final Set<DataListener> listeners = ConcurrentHashMap.newKeySet();
+    private final Set<DataListener> listeners = new CopyOnWriteArraySet<>();
 
     private TerminalDataReceiver terminalDataReceiver;
 
     private boolean alive = true;
+    private volatile boolean suspended = false;  // volatile: read by timeout thread + resume
 
-    private final Latency roundtripLatency = new Latency(10);
-    private final Latency networkLatency = new Latency(10);
-    private final Latency terminalLatency = new Latency(10);
+    /** Records all protocol operations during suspension for replay on reconnection. */
+    private RecordingEncoder recordingEncoder;
+
+    private Latency roundtripLatency;
+    private Latency networkLatency;
+    private Latency terminalLatency;
 
     private final ApplicationConfiguration configuration;
-    private final WebSocket socket;
-    private final ServletUpgradeRequest request;
+    private WebSocket socket;
+    private final JettyServerUpgradeRequest request;
+
+    // Cached from request at construction time — the underlying Jetty request
+    // is recycled after the WebSocket upgrade completes, so we must snapshot
+    // any data we need before that happens.
+    private final Map<String, List<String>> cachedParameterMap;
+    private final String cachedUserAgent;
+    private final HttpSession cachedHttpSession;
 
     private long lastReceivedTime = System.currentTimeMillis();
 
-    private final JsonProvider jsonProvider;
-
     private final ModelWriter modelWriter;
 
+    private final StringDictionary stringDictionary;
+
+    /** Optional OTel metrics — null if not configured. */
+    private PonySDKMetrics metrics;
+
     public UIContext(final WebSocket socket, final TxnContext context, final ApplicationConfiguration configuration,
-                     final ServletUpgradeRequest request) {
+                     final JettyServerUpgradeRequest request) {
+        this(socket, context, configuration, request, null);
+    }
+
+    public UIContext(final WebSocket socket, final TxnContext context, final ApplicationConfiguration configuration,
+                     final JettyServerUpgradeRequest request, final SharedDictionaryProvider sharedDictionaryProvider) {
         this.ID = uiContextCount.incrementAndGet();
         this.socket = socket;
         this.configuration = configuration;
@@ -123,14 +161,23 @@ public class UIContext {
         this.context = context;
         this.modelWriter = context.getWriter();
 
-        JsonProvider provider;
-        try {
-            provider = (JsonProvider) Class.forName(DEFAULT_PROVIDER).getDeclaredConstructor().newInstance();
-        } catch (final Throwable t) {
-            provider = JsonProvider.provider();
-        }
+        // Use pre-cached request data from WebSocket (snapshotted during HTTP upgrade,
+        // before Jetty 12 recycles the underlying request)
+        this.cachedParameterMap = socket != null ? socket.getCachedParameterMap() : Map.of();
+        this.cachedUserAgent = socket != null ? socket.getCachedUserAgent() : null;
+        this.cachedHttpSession = socket != null ? socket.getCachedHttpSession() : null;
 
-        jsonProvider = provider;
+        // Initialize StringDictionary based on configuration
+        if (configuration.isStringDictionaryEnabled()) {
+            this.stringDictionary = new StringDictionary(
+                configuration.getStringDictionaryMaxSize(),
+                configuration.getStringDictionaryMinLength()
+            );
+            // Pre-seed from shared provider (learned from previous sessions)
+            this.stringDictionary.initFromSharedProvider(sharedDictionaryProvider);
+        } else {
+            this.stringDictionary = null;
+        }
     }
 
     /**
@@ -213,19 +260,23 @@ public class UIContext {
      */
     public boolean execute(final Runnable runnable) {
         if (!isAlive()) return false;
-        if (log.isDebugEnabled()) log.debug("Pushing to #{}", this);
         if (UIContext.get() != this) {
+            final long lockStart = (metrics != null) ? System.currentTimeMillis() : 0;
             acquire();
+            final long runStart = System.currentTimeMillis();
+            if (metrics != null) metrics.recordLockWait(runStart - lockStart);
             try {
                 final Txn txn = Txn.get();
                 txn.begin(context);
                 try {
                     runnable.run();
                     txn.commit();
+                    if (metrics != null) metrics.recordExecute(System.currentTimeMillis() - runStart);
                     return true;
                 } catch (final Throwable e) {
-                    log.error("Cannot process client instruction", e);
+                    log.error("Cannot process client instruction for UIContext #{}", ID, e);
                     txn.rollback();
+                    if (metrics != null) metrics.recordExecute(System.currentTimeMillis() - runStart);
                     return false;
                 }
             } finally {
@@ -283,20 +334,19 @@ public class UIContext {
      * @param jsonObject the JSON instructions
      */
     public void fireClientData(final JsonObject jsonObject) {
-        if (jsonObject.containsKey(ClientToServerModel.TYPE_HISTORY.toStringValue())) {
-            history.fireHistoryChanged(jsonObject.getString(ClientToServerModel.TYPE_HISTORY.toStringValue()));
+        if (jsonObject.containsKey(KEY_TYPE_HISTORY)) {
+            history.fireHistoryChanged(jsonObject.getString(KEY_TYPE_HISTORY));
         } else {
-            final JsonValue jsonValue = jsonObject.get(ClientToServerModel.OBJECT_ID.toStringValue());
-            int objectID;
-            final ValueType valueType = jsonValue.getValueType();
-            if (ValueType.NUMBER == valueType) {
-                objectID = ((JsonNumber) jsonValue).intValue();
-            } else if (ValueType.STRING == valueType) {
-                objectID = Integer.parseInt(((JsonString) jsonValue).getString());
-            } else {
-                log.error("unknown reference from the browser. Unable to execute instruction: {}", jsonObject);
-                return;
-            }
+            final JsonValue jsonValue = jsonObject.get(KEY_OBJECT_ID);
+            final int objectID = switch (jsonValue.getValueType()) {
+                case NUMBER -> ((JsonNumber) jsonValue).intValue();
+                case STRING -> Integer.parseInt(((JsonString) jsonValue).getString());
+                default -> {
+                    log.error("unknown reference from the browser. Unable to execute instruction: {}", jsonObject);
+                    yield -1;
+                }
+            };
+            if (objectID == -1) return;
 
             //Cookies
             if (objectID == 0) {
@@ -307,8 +357,8 @@ public class UIContext {
                 if (object == null) {
                     log.error("unknown reference from the browser. Unable to execute instruction: {}", jsonObject);
 
-                    if (jsonObject.containsKey(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())) {
-                        final int parentObjectID = jsonObject.getJsonNumber(ClientToServerModel.PARENT_OBJECT_ID.toStringValue())
+                    if (jsonObject.containsKey(KEY_PARENT_OBJECT_ID)) {
+                        final int parentObjectID = jsonObject.getJsonNumber(KEY_PARENT_OBJECT_ID)
                                 .intValue();
                         final PObject gcObject = getObject(parentObjectID);
                         if (log.isWarnEnabled()) log.warn(String.valueOf(gcObject));
@@ -475,7 +525,10 @@ public class UIContext {
      */
     public void setAttribute(final String name, final Object value) {
         if (value == null) removeAttribute(name);
-        else attributes.put(name, value);
+        else {
+            if (attributes == null) attributes = new HashMap<>(4);
+            attributes.put(name, value);
+        }
     }
 
     /**
@@ -486,7 +539,7 @@ public class UIContext {
      * @param name the name of the object to remove from this session
      */
     public Object removeAttribute(final String name) {
-        return attributes.remove(name);
+        return attributes != null ? attributes.remove(name) : null;
     }
 
     /**
@@ -497,7 +550,7 @@ public class UIContext {
      * @return the object with the specified name
      */
     public <T> T getAttribute(final String name) {
-        return (T) attributes.get(name);
+        return attributes != null ? (T) attributes.get(name) : null;
     }
 
     /**
@@ -562,39 +615,75 @@ public class UIContext {
     }
 
     /**
-     * Destroys effectively the UIContext
+     * Destroys effectively the UIContext.
+     * <p>
+     * Cleanup order:
+     * <ol>
+     *   <li>Sets {@code alive=false} and {@code suspended=false}</li>
+     *   <li>Clears the {@link RecordingEncoder} and resets {@link ModelWriter} to the raw socket</li>
+     *   <li>Flushes {@link StringDictionary} frequency data to the shared provider</li>
+     *   <li>Fires all {@link ContextDestroyListener}s (set is nulled before iteration)</li>
+     * </ol>
+     * Must be called under the UIContext lock.
      */
     private void doDestroy() {
         alive = false;
-        destroyListeners.forEach(listener -> {
-            try {
-                listener.onBeforeDestroy(this);
-            } catch (final AlreadyDestroyedApplication e) {
-                if (log.isDebugEnabled()) log.debug("Exception while destroying UIContext #" + getID(), e);
-            } catch (final Exception e) {
-                log.error("Exception while destroying UIContext #" + getID(), e);
-            }
-        });
+        suspended = false;
+
+        // Clear and release the recording encoder to avoid retaining buffered entries
+        final RecordingEncoder rec = recordingEncoder;
+        recordingEncoder = null;
+        if (rec != null) {
+            rec.clear();
+            // Reset ModelWriter encoder so it no longer references the recorder
+            context.getWriter().setEncoder(socket);
+        }
+
+        // Flush string dictionary frequency data to shared provider
+        if (stringDictionary != null) {
+            stringDictionary.flushToSharedProvider();
+        }
+
+        if (destroyListeners != null) {
+            final Set<ContextDestroyListener> toNotify = destroyListeners;
+            destroyListeners = null; // release the set early to avoid retaining listeners
+            toNotify.forEach(listener -> {
+                try {
+                    listener.onBeforeDestroy(this);
+                } catch (final AlreadyDestroyedApplication e) {
+                    if (log.isDebugEnabled()) log.debug("Exception while destroying UIContext #" + getID(), e);
+                } catch (final Exception e) {
+                    log.error("Exception while destroying UIContext #" + getID(), e);
+                }
+            });
+        }
     }
 
     /**
-     * Adds a {@link ContextDestroyListener} that will be stimulated when the UIContext is destroyed
+     * Adds a {@link ContextDestroyListener} that will be notified when the UIContext is destroyed.
+     * No-op if the UIContext is already destroyed.
      *
      * @param listener the context destroy listener
-     * @since {@link #destroy()}
+     * @see #destroy()
      */
     public void addContextDestroyListener(final ContextDestroyListener listener) {
-        destroyListeners.add(listener);
+        final Set<ContextDestroyListener> dl = destroyListeners;
+        if (dl == null) {
+            if (!alive) return; // already destroyed — ignore silently
+            destroyListeners = new HashSet<>(4);
+        }
+        if (destroyListeners != null) destroyListeners.add(listener);
     }
 
     /**
-     * Removes a {@link ContextDestroyListener}
+     * Removes a {@link ContextDestroyListener}.
      *
      * @param listener the context destroy listener
-     * @since {@link #destroy()}
+     * @see #destroy()
      */
     public void removeContextDestroyListener(final ContextDestroyListener listener) {
-        destroyListeners.remove(listener);
+        final Set<ContextDestroyListener> dl = destroyListeners;
+        if (dl != null) dl.remove(listener);
     }
 
     /**
@@ -641,7 +730,7 @@ public class UIContext {
     }
 
     public String getHistoryToken() {
-        final List<String> historyTokens = this.request.getParameterMap().get(ClientToServerModel.TYPE_HISTORY.toStringValue());
+        final List<String> historyTokens = this.cachedParameterMap.get(ClientToServerModel.TYPE_HISTORY.toStringValue());
         return historyTokens != null && !historyTokens.isEmpty() ? historyTokens.get(0) : null;
     }
 
@@ -672,11 +761,11 @@ public class UIContext {
     }
 
     public UserAgent getUserAgent() {
-        return UserAgent.parseUserAgentString(request.getHeader("User-Agent"));
+        return UserAgent.parseUserAgentString(cachedUserAgent);
     }
 
     public HttpSession getSession() {
-        return request.getSession();
+        return cachedHttpSession;
     }
 
     public <T> T getApplicationAttribute(final String name) {
@@ -704,16 +793,143 @@ public class UIContext {
         return context.getApplication();
     }
 
+    public void setMetrics(final PonySDKMetrics metrics) {
+        this.metrics = metrics;
+    }
+
+    public PonySDKMetrics getMetrics() {
+        return metrics;
+    }
+
+    /**
+     * Suspends this UIContext on WebSocket disconnect, keeping all widget state intact.
+     * Called only when transparent reconnection is enabled.
+     * <p>
+     * During suspension, {@link #execute(Runnable)} still runs runnables (mutating PObject state)
+     * but writes go to a {@link RecordingEncoder} — buffered, not sent over the wire.
+     * On {@link #resume(WebSocket)}, the buffer is compacted (consecutive updates merged,
+     * create+remove cancelled) and replayed on the new WebSocket in a single flush.
+     *
+     * @param timeoutMs how long to wait for reconnection before destroying (ms)
+     */
+    public void suspend(final long timeoutMs) {
+        suspended = true;
+        final int maxEntries = configuration.getMaxRecordingEntries();
+        recordingEncoder = new RecordingEncoder(maxEntries, (count, max) -> {
+            log.error("UIContext #{} recording buffer overflow ({} > {}) — destroying session",
+                    ID, count, max);
+            // Schedule destroy outside the encode call to avoid re-entrancy.
+            // Don't touch 'suspended' here — destroy() → doDestroy() handles all state cleanup.
+            Thread.ofVirtual().start(this::destroy);
+        });
+        // Swap to RecordingEncoder — all protocol writes are buffered
+        context.getWriter().setEncoder(recordingEncoder);
+        log.info("UIContext #{} suspended, waiting for reconnection (timeout={}ms)", ID, timeoutMs);
+        Thread.ofVirtual().start(() -> {
+            try {
+                Thread.sleep(timeoutMs);
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+            if (suspended) {
+                log.warn("UIContext #{} reconnection timeout — destroying", ID);
+                destroy();
+            }
+        });
+    }
+
+    /**
+     * Resumes a suspended UIContext with a new WebSocket.
+     * Compacts the recorded buffer (merges updates, cancels create+remove pairs),
+     * replays it on the new socket, then signals the client with {@code RECONNECT_CONTEXT}.
+     */
+    public void resume(final WebSocket newSocket) {
+        if (!suspended) throw new IllegalStateException("UIContext #" + ID + " is not suspended");
+        if (!alive) throw new IllegalStateException("UIContext #" + ID + " is already destroyed");
+        suspended = false;
+
+        final RecordingEncoder recorder = this.recordingEncoder;
+        this.recordingEncoder = null;
+
+        // If the recorder overflowed, the UIContext is already being destroyed — abort
+        if (recorder == null || recorder.isOverflowed()) {
+            log.warn("UIContext #{} resume aborted — recorder overflowed or null", ID);
+            return;
+        }
+
+        // Compact: merge consecutive updates, cancel create+remove pairs
+        final int beforeSize = recorder.size();
+        recorder.compact();
+        log.info("UIContext #{} resumed — replaying {} entries (compacted from {})",
+                ID, recorder.size(), beforeSize);
+
+        // Swap back to real encoder and socket for flush path
+        context.getWriter().setEncoder(newSocket);
+        context.setSocket(newSocket);
+        this.socket = newSocket;
+
+        // Reset last received time so CommunicationSanityChecker doesn't immediately kill us
+        onMessageReceived();
+
+        acquire();
+        try {
+            final Txn txn = Txn.get();
+            txn.begin(context);
+            try {
+                // Replay all buffered operations in order
+                recorder.replayTo(newSocket);
+
+                // Signal the client that reconnection succeeded
+                final ModelWriter writer = getWriter();
+                writer.beginObject(PWindow.getMain());
+                writer.write(ServerToClientModel.RECONNECT_CONTEXT, ID);
+                writer.endObject();
+
+                txn.commit();
+            } catch (final Throwable e) {
+                log.error("Error during UIContext #{} resume replay", ID, e);
+                txn.rollback();
+            } finally {
+                // Release recorder entries now that replay is done
+                recorder.clear();
+            }
+        } finally {
+            release();
+        }
+    }
+
+    public boolean isSuspended() {
+        return suspended;
+    }
+
     public ModelWriter getWriter() {
         return modelWriter;
     }
 
     public JsonProvider getJsonProvider() {
-        return jsonProvider;
+        return SHARED_JSON_PROVIDER;
     }
 
-    public ServletUpgradeRequest getRequest() {
+    public JettyServerUpgradeRequest getRequest() {
         return request;
+    }
+
+    /**
+     * Returns the cached parameter map from the original upgrade request.
+     * Safe to call after WebSocket upgrade (unlike getRequest().getParameterMap()).
+     */
+    public Map<String, List<String>> getParameterMap() {
+        return cachedParameterMap;
+    }
+
+    /**
+     * Gets the StringDictionary for protocol optimization.
+     *
+     * @return The StringDictionary, or null if disabled
+     */
+    public StringDictionary getStringDictionary() {
+        return stringDictionary;
     }
 
     @Override
@@ -740,6 +956,7 @@ public class UIContext {
      * @param value the value
      */
     public void addRoundtripLatencyValue(final long value) {
+        if (roundtripLatency == null) roundtripLatency = new Latency(10);
         roundtripLatency.add(value);
     }
 
@@ -749,7 +966,7 @@ public class UIContext {
      * @return the lantency
      */
     public double getRoundtripLatency() {
-        return roundtripLatency.getValue();
+        return roundtripLatency != null ? roundtripLatency.getValue() : 0;
     }
 
     /**
@@ -758,6 +975,7 @@ public class UIContext {
      * @param value the value
      */
     public void addNetworkLatencyValue(final long value) {
+        if (networkLatency == null) networkLatency = new Latency(10);
         networkLatency.add(value);
     }
 
@@ -767,7 +985,7 @@ public class UIContext {
      * @return the lantency
      */
     public double getNetworkLatency() {
-        return networkLatency.getValue();
+        return networkLatency != null ? networkLatency.getValue() : 0;
     }
 
     /**
@@ -776,6 +994,7 @@ public class UIContext {
      * @param value the ping value
      */
     public void addTerminalLatencyValue(final long value) {
+        if (terminalLatency == null) terminalLatency = new Latency(10);
         terminalLatency.add(value);
     }
 
@@ -785,26 +1004,28 @@ public class UIContext {
      * @return the lantency
      */
     public double getTerminalLatency() {
-        return terminalLatency.getValue();
+        return terminalLatency != null ? terminalLatency.getValue() : 0;
     }
 
     private static final class Latency {
 
         private int index = 0;
+        private long sum = 0;
         private final long[] values;
 
         private Latency(final int size) {
             values = new long[size];
-            Arrays.fill(values, 0);
         }
 
         public void add(final long value) {
-            values[index++] = value;
-            if (index >= values.length) index = 0;
+            sum -= values[index];
+            values[index] = value;
+            sum += value;
+            if (++index >= values.length) index = 0;
         }
 
         public double getValue() {
-            return Arrays.stream(values).average().orElse(0);
+            return (double) sum / values.length;
         }
     }
 

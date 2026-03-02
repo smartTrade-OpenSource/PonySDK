@@ -258,7 +258,35 @@ public enum ServerToClientModel {
     DISCLOSURE_PANEL_CLOSE_IMG(ValueTypeModel.INTEGER),
     SUGGESTIONS(ValueTypeModel.STRING),
     DEFAULT_SUGGESTIONS(ValueTypeModel.STRING),
-    TEXTBOX_ID(ValueTypeModel.INTEGER);
+    TEXTBOX_ID(ValueTypeModel.INTEGER),
+
+    // String Dictionary Protocol - for bandwidth optimization
+    DICTIONARY_STRING_ADD(ValueTypeModel.STRING),
+
+    // Web Component Protocol
+    WC_TAG_NAME(ValueTypeModel.STRING),
+    /** @deprecated Shadow DOM is managed by the web component itself, not by PonySDK. Kept for protocol stability. */
+    @Deprecated
+    WC_SHADOW_MODE(ValueTypeModel.BYTE),
+    /** @deprecated Shadow DOM is managed by the web component itself, not by PonySDK. Kept for protocol stability. */
+    @Deprecated
+    WC_USE_SHARED_SKIN(ValueTypeModel.BOOLEAN),
+    WC_SET_PROPERTY(ValueTypeModel.STRING),        // property name (followed by WC_PROPERTY_VALUE)
+    WC_PROPERTY_VALUE(ValueTypeModel.STRING),      // property value (JSON-encoded for complex types)
+    WC_REMOVE_PROPERTY(ValueTypeModel.STRING),     // property name to remove
+    WC_SET_ATTRIBUTE(ValueTypeModel.STRING),       // attribute name (followed by WC_ATTRIBUTE_VALUE)
+    WC_ATTRIBUTE_VALUE(ValueTypeModel.STRING),     // attribute value
+    WC_REMOVE_ATTRIBUTE(ValueTypeModel.STRING),    // attribute name to remove
+    WC_LISTEN_EVENT(ValueTypeModel.STRING),        // custom event name to listen for
+    WC_UNLISTEN_EVENT(ValueTypeModel.STRING),      // custom event name to stop listening
+    WC_CALL_METHOD(ValueTypeModel.STRING),         // method name to call on the WC element
+    WC_METHOD_ARGS(ValueTypeModel.ARRAY),          // arguments for the method call
+    WC_PATCH_PROPERTY(ValueTypeModel.STRING),      // property name for JSON patch (followed by WC_PROPERTY_VALUE with patch JSON)
+    WC_SET_PROPERTY_TYPED(ValueTypeModel.STRING),  // property name for typed value (followed by WC_PROPERTY_TYPE + WC_PROPERTY_VALUE)
+    WC_SLOT_NAME(ValueTypeModel.STRING),           // slot name for targeted child insertion inside a Web Component
+
+    // Transparent WebSocket reconnection (opt-in)
+    RECONNECT_CONTEXT(ValueTypeModel.UINT31);      // sent to client on reconnect: carries the uiContextId to resume
 
     public static final int MAX_VALUE = Short.MAX_VALUE;
     private static final ServerToClientModel[] VALUES = ServerToClientModel.values();

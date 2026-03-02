@@ -28,11 +28,13 @@ import java.util.logging.Logger;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 
-import elemental.client.Browser;
-import elemental.dom.Document;
-import elemental.dom.Element;
-import elemental.html.Window;
-import elemental.xml.XMLHttpRequest;
+import elemental2.dom.DomGlobal;
+import elemental2.dom.Document;
+import elemental2.dom.Element;
+import elemental2.dom.HTMLElement;
+import elemental2.dom.XMLHttpRequest;
+
+import jsinterop.base.Js;
 
 public class ReconnectionChecker {
 
@@ -43,27 +45,27 @@ public class ReconnectionChecker {
 
     private static final Logger log = Logger.getLogger(ReconnectionChecker.class.getName());
 
-    private final Window window;
-
     private final XMLHttpRequest reconnectionRequest;
 
     private boolean errorDetected;
 
     public ReconnectionChecker() {
-        window = Browser.getWindow();
+        reconnectionRequest = new XMLHttpRequest();
+        setOnReadyStateChange(reconnectionRequest);
+    }
 
-        reconnectionRequest = window.newXMLHttpRequest();
-        reconnectionRequest.setOnreadystatechange(evt -> {
-            if (reconnectionRequest.getReadyState() == XMLHttpRequest.DONE //
-                    && reconnectionRequest.getStatus() == HTTP_STATUS_CODE_OK) {
+    private void setOnReadyStateChange(final XMLHttpRequest request) {
+        request.addEventListener("readystatechange", evt -> {
+            if (request.readyState == XMLHttpRequest.DONE
+                    && request.status == HTTP_STATUS_CODE_OK) {
                 errorDetected = false;
                 reloadWindow();
-                return;
+            } else {
+                Scheduler.get().scheduleFixedDelay(() -> {
+                    retryConnection();
+                    return false;
+                }, RETRY_PERIOD);
             }
-            Scheduler.get().scheduleFixedDelay(() -> {
-                retryConnection();
-                return false;
-            }, RETRY_PERIOD);
         });
     }
 
@@ -77,12 +79,12 @@ public class ReconnectionChecker {
         if (isSpecificReconnectionInformation()) {
             showSpecificReconnectionInformation();
         } else {
-            final Document document = Browser.getDocument();
+            final Document document = DomGlobal.document;
             final Element reconnectionElement = document.getElementById("reconnection");
-            reconnectionElement.getStyle().setDisplay("block");
+            setStyleDisplay(reconnectionElement, "block");
 
             final Element reconnectingElement = document.getElementById("reconnecting");
-            reconnectingElement.setInnerHTML("Connection to server lost<br>Reconnecting ...");
+            setInnerHTML(reconnectingElement, "Connection to server lost<br>Reconnecting ...");
         }
 
         Scheduler.get().scheduleFixedDelay(() -> {
@@ -91,9 +93,42 @@ public class ReconnectionChecker {
         }, RETRY_PERIOD);
     }
 
-    public static final native void reloadWindow() /*-{
-                                                   $wnd.document.doReload();
-                                                   }-*/;
+    /**
+     * Called when the server confirms the application is reachable again.
+     * If transparent reconnection mode is active (window.ponyReconnectMode === true),
+     * reconnects the WebSocket carrying the current uiContextId instead of reloading.
+     * Otherwise falls back to page reload, unless {@code window.onPonyReconnected} is defined.
+     */
+    public void reloadWindow() {
+        if (isTransparentReconnectMode()) {
+            reconnectWebSocket();
+        } else if (hasOnPonyReconnected()) {
+            callOnPonyReconnected();
+        } else {
+            doReload();
+        }
+    }
+
+    private static native boolean isTransparentReconnectMode() /*-{
+        return $wnd.ponyReconnectMode === true;
+    }-*/;
+
+    private static native void reconnectWebSocket() /*-{
+        var url = @com.ponysdk.core.terminal.PonySDK::get()().@com.ponysdk.core.terminal.PonySDK::buildReconnectUrl()();
+        @com.ponysdk.core.terminal.PonySDK::get()().@com.ponysdk.core.terminal.PonySDK::reconnectSocket(Ljava/lang/String;)(url);
+    }-*/;
+
+    private static native boolean hasOnPonyReconnected() /*-{
+        return $wnd.onPonyReconnected && typeof $wnd.onPonyReconnected === 'function';
+    }-*/;
+
+    private static native void callOnPonyReconnected() /*-{
+        $wnd.onPonyReconnected();
+    }-*/;
+
+    private static native void doReload() /*-{
+        $wnd.document.doReload();
+    }-*/;
 
     private final native void notifyConnectionLostListeners() /*-{
                                                               for(var i = 0 ; i < $wnd.document.onConnectionLostListeners.length ; i++) {
@@ -120,9 +155,17 @@ public class ReconnectionChecker {
         reconnectionRequest.send();
     }
 
-    private static final native void setHTTPRequestTimeout(XMLHttpRequest xmlHTTPRequest, int timeout) /*-{
-                                                                                                       xmlHTTPRequest.timeout = timeout;
-                                                                                                       }-*/;
+    private static final void setHTTPRequestTimeout(final XMLHttpRequest xmlHTTPRequest, final int timeout) {
+        Js.asPropertyMap(xmlHTTPRequest).set("timeout", timeout);
+    }
+
+    private static void setStyleDisplay(final Element element, final String display) {
+        if (element != null) ((HTMLElement) element).style.display = display;
+    }
+
+    private static void setInnerHTML(final Element element, final String html) {
+        if (element != null) element.innerHTML = html;
+    }
 
     private static final String getPingUrl() {
         return GWT.getHostPageBaseURL() + "?ping=" + System.currentTimeMillis();
