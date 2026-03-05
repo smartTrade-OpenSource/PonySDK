@@ -1,0 +1,9 @@
+{
+    "schemaVersion": "1.0.0",
+    "modules": [
+        {
+            "declarations": [
+                {
+                    "kind": "class",
+                    "tagName": "test-component"
+                    // Missing closing brace

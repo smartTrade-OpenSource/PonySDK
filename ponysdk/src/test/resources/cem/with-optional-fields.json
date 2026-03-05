@@ -1,0 +1,17 @@
+{
+    "schemaVersion": "1.0.0",
+    "modules": [
+        {
+            "kind": "javascript-module",
+            "path": "components/minimal/minimal.js",
+            "declarations": [
+                {
+                    "kind": "class",
+                    "name": "MinimalComponent",
+                    "tagName": "test-minimal",
+                    "summary": "A minimal component with optional fields omitted."
+                }
+            ]
+        }
+    ]
+}

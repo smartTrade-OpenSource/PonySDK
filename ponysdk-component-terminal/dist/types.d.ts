@@ -11,7 +11,21 @@ export type FrameworkType = 'react' | 'vue' | 'svelte' | 'webcomponent';
 /**
  * Message types for component lifecycle.
  */
-export type ComponentMessageType = 'create' | 'update' | 'destroy';
+export type ComponentMessageType = 'create' | 'update' | 'destroy' | 'slot' | 'serverErrors';
+/**
+ * Slot operation received from server for Web Component slot composition.
+ * Requirements: 7.2, 7.3, 7.4 - Slot add/remove operations
+ */
+export interface SlotOperation {
+    /** Operation type */
+    type: 'slot';
+    /** Slot name, null for default slot */
+    slotName: string | null;
+    /** Object ID of the child component to add/remove */
+    childObjectId: number;
+    /** Operation to perform */
+    operation: 'add' | 'remove';
+}
 /**
  * Component message received from server.
  */
@@ -30,6 +44,10 @@ export interface ComponentMessage {
     patches?: Operation[];
     /** Binary data (for high-frequency updates) */
     binaryData?: ArrayBuffer;
+    /** Slot operation (for slot composition) */
+    slotOperation?: SlotOperation;
+    /** Server validation errors (for form validation) */
+    serverErrors?: Record<string, string[]>;
 }
 /**
  * Event dispatched from client component to server.

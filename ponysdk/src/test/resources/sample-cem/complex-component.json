@@ -1,0 +1,123 @@
+{
+    "schemaVersion": "1.0.0",
+    "readme": "",
+    "modules": [
+        {
+            "kind": "javascript-module",
+            "path": "components/dialog/dialog.js",
+            "declarations": [
+                {
+                    "kind": "class",
+                    "description": "A dialog component with various features.",
+                    "name": "Dialog",
+                    "tagName": "test-dialog",
+                    "customElement": true,
+                    "members": [
+                        {
+                            "kind": "field",
+                            "name": "open",
+                            "type": {
+                                "text": "boolean"
+                            },
+                            "description": "Whether the dialog is open",
+                            "default": "false"
+                        },
+                        {
+                            "kind": "field",
+                            "name": "label",
+                            "type": {
+                                "text": "string"
+                            },
+                            "description": "The dialog's label"
+                        },
+                        {
+                            "kind": "field",
+                            "name": "size",
+                            "type": {
+                                "text": "'small' | 'medium' | 'large'"
+                            },
+                            "description": "The dialog size",
+                            "default": "'medium'"
+                        },
+                        {
+                            "kind": "method",
+                            "name": "show",
+                            "return": {
+                                "type": {
+                                    "text": "void"
+                                }
+                            },
+                            "description": "Shows the dialog"
+                        },
+                        {
+                            "kind": "method",
+                            "name": "hide",
+                            "return": {
+                                "type": {
+                                    "text": "void"
+                                }
+                            },
+                            "description": "Hides the dialog"
+                        }
+                    ],
+                    "events": [
+                        {
+                            "name": "test-show",
+                            "type": {
+                                "text": "CustomEvent"
+                            },
+                            "description": "Emitted when the dialog is shown"
+                        },
+                        {
+                            "name": "test-hide",
+                            "type": {
+                                "text": "CustomEvent"
+                            },
+                            "description": "Emitted when the dialog is hidden"
+                        },
+                        {
+                            "name": "test-request-close",
+                            "type": {
+                                "text": "CustomEvent<{source: 'close-button' | 'overlay'}>"
+                            },
+                            "description": "Emitted when the user requests to close the dialog"
+                        }
+                    ],
+                    "slots": [
+                        {
+                            "name": "",
+                            "description": "The dialog's main content"
+                        },
+                        {
+                            "name": "header",
+                            "description": "The dialog's header"
+                        },
+                        {
+                            "name": "footer",
+                            "description": "The dialog's footer"
+                        }
+                    ],
+                    "cssProperties": [
+                        {
+                            "name": "--dialog-width",
+                            "description": "The width of the dialog"
+                        },
+                        {
+                            "name": "--dialog-background",
+                            "description": "The background color of the dialog"
+                        }
+                    ]
+                }
+            ],
+            "exports": [
+                {
+                    "kind": "custom-element-definition",
+                    "name": "test-dialog",
+                    "declaration": {
+                        "name": "Dialog"
+                    }
+                }
+            ]
+        }
+    ]
+}

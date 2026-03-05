@@ -440,7 +440,19 @@ public class PropsDiffer<TProps extends Record> {
                 if (targetType == String.class) {
                     return str;
                 } else if (targetType.isEnum()) {
-                    return Enum.valueOf((Class<Enum>) targetType, str);
+                    // Try exact constant name first, then match by toString() value
+                    // This supports enums that override toString() (e.g., Variant, Size)
+                    try {
+                        return Enum.valueOf((Class<Enum>) targetType, str);
+                    } catch (final IllegalArgumentException e) {
+                        for (final Object constant : targetType.getEnumConstants()) {
+                            if (constant.toString().equals(str)) {
+                                return constant;
+                            }
+                        }
+                        throw new IllegalArgumentException(
+                            "No enum constant in " + targetType.getName() + " matching: " + str);
+                    }
                 }
                 return str;
             }

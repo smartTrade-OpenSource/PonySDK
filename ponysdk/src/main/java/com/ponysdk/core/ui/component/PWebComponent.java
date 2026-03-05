@@ -23,6 +23,14 @@
 
 package com.ponysdk.core.ui.component;
 
+import java.util.Collections;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ponysdk.core.model.ServerToClientModel;
+
 /**
  * Abstract base class for Web Component-based PComponents.
  * <p>
@@ -31,52 +39,100 @@ package com.ponysdk.core.ui.component;
  * Web Components client-side adapter, which uses custom elements and shadow DOM
  * for encapsulated rendering.
  * </p>
- *
- * <h2>Usage Example</h2>
- * <pre>{@code
- * public record CardProps(String title, String content) {}
- *
- * public class CardComponent extends PWebComponent<CardProps> {
- *
- *     public CardComponent() {
- *         super(new CardProps("Default Title", "Default content"));
- *     }
- *
- *     @Override
- *     protected Class<CardProps> getPropsClass() {
- *         return CardProps.class;
- *     }
- *
- *     @Override
- *     protected String getComponentSignature() {
- *         return "card-component";
- *     }
- *
- *     public void updateTitle(String newTitle) {
- *         CardProps current = getCurrentProps();
- *         setProps(new CardProps(newTitle, current.content()));
- *     }
- * }
- * }</pre>
+ * <p>
+ * This class implements {@link SlotSupport} to allow child component composition
+ * via named slots, following the Web Components slot specification.
+ * </p>
  *
  * @param <TProps> the props type, must be a Java Record
  * @see PComponent
+ * @see SlotSupport
  * @see FrameworkType#WEB_COMPONENT
  */
-public abstract class PWebComponent<TProps extends Record> extends PComponent<TProps> {
+public abstract class PWebComponent<TProps extends Record> extends PComponent<TProps> implements SlotSupport {
+
+    private static final Logger log = LoggerFactory.getLogger(PWebComponent.class);
+
+    private final Set<String> declaredSlots;
 
     /**
-     * Creates a new PWebComponent with the specified initial props.
-     * <p>
-     * The component is automatically configured to use the Web Component framework type,
-     * which will be included in the creation message sent to the client terminal.
-     * </p>
+     * Creates a new PWebComponent with the specified initial props and no declared slots.
      *
      * @param initialProps the initial props state, must not be null
-     * @throws NullPointerException if initialProps is null
      */
     protected PWebComponent(final TProps initialProps) {
-        super(initialProps, FrameworkType.WEB_COMPONENT);
+        this(initialProps, Collections.emptySet());
     }
 
+    /**
+     * Creates a new PWebComponent with the specified initial props and declared slots.
+     *
+     * @param initialProps  the initial props state, must not be null
+     * @param declaredSlots the set of slot names declared by this component
+     */
+    protected PWebComponent(final TProps initialProps, final Set<String> declaredSlots) {
+        super(initialProps, FrameworkType.WEB_COMPONENT);
+        this.declaredSlots = declaredSlots != null ? Collections.unmodifiableSet(declaredSlots) : Collections.emptySet();
+    }
+
+    @Override
+    public void addToSlot(final String slotName, final PComponent<?> child) {
+        if (slotName == null) {
+            addToDefaultSlot(child);
+            return;
+        }
+        if (!declaredSlots.contains(slotName)) {
+            log.warn("PWebComponent {} - slot '{}' is not declared. Declared slots: {}. Operation ignored.",
+                getComponentSignature(), slotName, declaredSlots);
+            return;
+        }
+        sendSlotOperation(slotName, child, "add");
+    }
+
+    @Override
+    public void addToDefaultSlot(final PComponent<?> child) {
+        sendSlotOperation(null, child, "add");
+    }
+
+    @Override
+    public void removeFromSlot(final String slotName, final PComponent<?> child) {
+        if (slotName == null) {
+            sendSlotOperation(null, child, "remove");
+            return;
+        }
+        if (!declaredSlots.contains(slotName)) {
+            log.warn("PWebComponent {} - slot '{}' is not declared. Declared slots: {}. Operation ignored.",
+                getComponentSignature(), slotName, declaredSlots);
+            return;
+        }
+        sendSlotOperation(slotName, child, "remove");
+    }
+
+    @Override
+    public Set<String> getDeclaredSlots() {
+        return declaredSlots;
+    }
+
+    /**
+     * Sends a slot operation message to the client.
+     * <p>
+     * Message format: {@code {"type":"slot","slotName":"prefix","childObjectId":43,"operation":"add"}}
+     * </p>
+     */
+    private void sendSlotOperation(final String slotName, final PComponent<?> child, final String operation) {
+        final StringBuilder json = new StringBuilder(64);
+        json.append("{\"type\":\"slot\",\"slotName\":");
+        if (slotName != null) {
+            json.append('"').append(slotName).append('"');
+        } else {
+            json.append("null");
+        }
+        json.append(",\"childObjectId\":").append(child.getID());
+        json.append(",\"operation\":\"").append(operation).append("\"}");
+
+        saveUpdate(writer -> {
+            writer.write(ServerToClientModel.PCOMPONENT_UPDATE);
+            writer.write(ServerToClientModel.PCOMPONENT_SLOT_OPERATION, json.toString());
+        });
+    }
 }

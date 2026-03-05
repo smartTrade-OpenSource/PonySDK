@@ -71,6 +71,8 @@ dependencies {
             'com.google.gwt:gwt-dev:' + gwtVersion
     )
 
+    compileOnly gradleApi()
+
     implementation(
             'javax.validation:validation-api:' + javaxValidationVersion,
             'com.google.jsinterop:jsinterop:' + jsinteropVersion,
@@ -113,7 +115,9 @@ dependencies {
             'org.junit.jupiter:junit-jupiter-engine:5.8.1',
             'org.junit.platform:junit-platform-engine:1.8.1',
             'org.junit.platform:junit-platform-launcher:1.8.1',
-            'net.jqwik:jqwik:1.8.2'
+            'net.jqwik:jqwik:1.8.2',
+            'org.assertj:assertj-core:3.24.2',
+            gradleTestKit()
     )
 
     testRuntimeOnly(
@@ -128,6 +132,14 @@ dependencies {
 java {
     withJavadocJar()
     withSourcesJar()
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir "${buildDir}/generated/sources/wa/java"
+        }
+    }
 }
 
 javadoc {
@@ -168,7 +180,14 @@ task gwtc(type: JavaExec) {
     description = "GWT compile to JavaScript (production mode)"
     main = 'com.google.gwt.dev.Compiler'
     workingDir = new File(gwtOutputDirName)
-    classpath { [sourceSets.main.java.srcDirs, configurations.gwtdev, configurations.gwt] }
+    classpath { 
+        [
+            sourceSets.main.java.srcDirs,
+            sourceSets.main.output,
+            configurations.gwtdev, 
+            configurations.gwt
+        ] 
+    }
     maxHeapSize = '512M'
     args = [
             '-war',
@@ -183,6 +202,64 @@ task gwtc(type: JavaExec) {
     ]
 }
 
+// --- Web Awesome Code Generator task ---
+ext {
+    waManifestPath = project.findProperty('waManifestPath') ?: 'src/main/data/custom-elements.json'
+    waJavaOutputDir = "${buildDir}/generated/sources/wa/java"
+    waTsOutputDir = "${buildDir}/generated/sources/wa/ts"
+    waJsRegistryPath = "${projectDir}/../sample/src/main/resources/script/web-awesome-registry.js"
+}
+
+configurations {
+    codegen
+}
+
+dependencies {
+    codegen(
+        'jakarta.json:jakarta.json-api:' + jsonVersion,
+        'org.glassfish:jakarta.json:' + glassfishVersion,
+        'org.slf4j:slf4j-api:' + slf4jVersion,
+        'org.slf4j:slf4j-simple:' + slf4jVersion
+    )
+}
+
+task generateWebAwesomeWrappers {
+    description = 'Generates Java wrappers, props records, TypeScript interfaces, and JavaScript registry from the Web Awesome custom-elements.json manifest.'
+    group = 'code generation'
+
+    def manifestFile = file(waManifestPath)
+    def javaOutDir = file(waJavaOutputDir)
+    def tsOutDir = file(waTsOutputDir)
+    def jsRegistryFile = file(waJsRegistryPath)
+
+    inputs.file(manifestFile).optional()
+    outputs.dir javaOutDir
+    outputs.dir tsOutDir
+    outputs.file jsRegistryFile
+
+    onlyIf { manifestFile.exists() }
+
+    doLast {
+        javaexec {
+            mainClass = 'com.ponysdk.core.ui.wa.codegen.WebAwesomeCodeGenerator'
+            classpath = files(sourceSets.main.output.classesDirs) + configurations.codegen
+            args = [
+                manifestFile.absolutePath,
+                javaOutDir.absolutePath,
+                tsOutDir.absolutePath,
+                jsRegistryFile.absolutePath
+            ]
+        }
+    }
+}
+
+generateWebAwesomeWrappers.dependsOn compileJava
+
+// Ensure generated sources are compiled before jar and test
+jar.dependsOn generateWebAwesomeWrappers
+test.dependsOn generateWebAwesomeWrappers
+compileTestJava.dependsOn generateWebAwesomeWrappers
+
 test {
     useJUnitPlatform()
     dependsOn gwtc
@@ -195,6 +272,6 @@ test {
 }
 
 check.dependsOn jacocoTestReport
-gwtc.dependsOn classes
+gwtc.dependsOn classes, generateWebAwesomeWrappers
 jar.dependsOn gwtc
 publish.dependsOn check

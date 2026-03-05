@@ -38,24 +38,70 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.PFrame;
-import com.ponysdk.core.ui.basic.PObject;
+import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.writer.ModelWriter;
 
 /**
  * Abstract base class for typed server-side components with props diffing.
  * <p>
- * PComponent provides a modern, type-safe component system for PonySDK that supports:
- * <ul>
- *   <li>Generic props types constrained to Java Records for type safety</li>
- *   <li>Automatic JSON Patch diffing for efficient network transmission</li>
- *   <li>Configurable throttling for update frequency control</li>
- *   <li>Priority-based update ordering</li>
- *   <li>Framework-agnostic design supporting React, Vue, Svelte, and Web Components</li>
- * </ul>
+ * PComponent extends {@link PWidget}, making it a first-class widget that can be directly
+ * added to any {@link com.ponysdk.core.ui.basic.HasPWidgets} container without requiring
+ * wrapper objects. This provides seamless integration with the PonySDK widget system while
+ * maintaining framework-specific rendering capabilities.
  * </p>
  *
- * <h2>Usage Example</h2>
+ * <h2>Inheritance Hierarchy</h2>
+ * <pre>
+ * PObject
+ *   └── PWidget (implements IsPWidget)
+ *         └── PComponent (this class)
+ * </pre>
+ *
+ * <h2>Core Features</h2>
+ * <ul>
+ *   <li><b>Direct Container Compatibility:</b> Can be added directly to any HasPWidgets container</li>
+ *   <li><b>Type-Safe Props:</b> Generic props types constrained to Java Records</li>
+ *   <li><b>Efficient Updates:</b> Automatic JSON Patch diffing for minimal network transmission</li>
+ *   <li><b>Widget Functionality:</b> Inherits all standard PWidget methods (visibility, styling, events)</li>
+ *   <li><b>Framework Agnostic:</b> Supports React, Vue, Svelte, and Web Components</li>
+ *   <li><b>Performance Control:</b> Configurable throttling and priority-based updates</li>
+ * </ul>
+ *
+ * <h2>Inherited PWidget Methods</h2>
+ * <p>
+ * As a PWidget subclass, PComponent inherits all standard widget functionality:
+ * </p>
+ * <ul>
+ *   <li><b>Visibility:</b> {@code setVisible(boolean)}, {@code isVisible()}</li>
+ *   <li><b>Styling:</b> {@code addStyleName(String)}, {@code removeStyleName(String)}, {@code setStyleName(String)}</li>
+ *   <li><b>Dimensions:</b> {@code setWidth(String)}, {@code setHeight(String)}</li>
+ *   <li><b>DOM Events:</b> {@code addDomHandler(...)}, {@code addClickHandler(...)}, etc.</li>
+ *   <li><b>Parent/Child:</b> {@code setParent(IsPWidget)}, {@code getParent()}, {@code removeFromParent()}</li>
+ *   <li><b>Lifecycle:</b> {@code attach(PWindow)}, {@code onDestroy()}</li>
+ *   <li><b>Debug:</b> {@code ensureDebugId(String)}, {@code dumpDOM()}</li>
+ * </ul>
+ * <p>
+ * These widget methods control the container element in the browser, while component props
+ * control the framework-specific rendering inside the container. Both systems work independently.
+ * </p>
+ *
+ * <h2>Lifecycle Coordination</h2>
+ * <p>
+ * PComponent coordinates PWidget lifecycle with component-specific lifecycle:
+ * </p>
+ * <ol>
+ *   <li><b>Creation:</b> Component instance created, initial props set</li>
+ *   <li><b>Attachment:</b> {@code attach()} calls {@code super.attach()} to initialize PWidget state,
+ *       then sends initial props to client</li>
+ *   <li><b>Updates:</b> Props updates via {@code setProps()} work independently of widget state changes</li>
+ *   <li><b>Destruction:</b> {@code onDestroy()} cleans up component resources, then calls
+ *       {@code super.onDestroy()} to clean up PWidget resources</li>
+ * </ol>
+ *
+ * <h2>Usage Examples</h2>
+ *
+ * <h3>Basic Component Definition</h3>
  * <pre>{@code
  * public record MyProps(String title, int count, boolean enabled) {}
  *
@@ -81,13 +127,117 @@ import com.ponysdk.core.writer.ModelWriter;
  * }
  * }</pre>
  *
+ * <h3>Direct Container Usage</h3>
+ * <pre>{@code
+ * // Create component
+ * MyComponent component = new MyComponent();
+ *
+ * // Add directly to any container - no wrapper needed!
+ * PVerticalPanel panel = new PVerticalPanel();
+ * panel.add(component);  // Works because PComponent extends PWidget
+ *
+ * // Use inherited PWidget methods
+ * component.setVisible(false);           // Hide the component
+ * component.addStyleName("highlight");   // Add CSS class
+ * component.setWidth("300px");           // Set width
+ *
+ * // Update component props independently
+ * component.incrementCount();            // Props update works regardless of visibility
+ * }</pre>
+ *
+ * <h3>Combining Widget State and Props</h3>
+ * <pre>{@code
+ * // Create and configure component
+ * MyComponent component = new MyComponent();
+ *
+ * // Configure widget appearance (affects container element)
+ * component.addStyleName("card");
+ * component.setWidth("400px");
+ * component.setHeight("300px");
+ *
+ * // Configure component data (affects framework rendering)
+ * component.setProps(new MyProps("Dashboard", 42, true));
+ *
+ * // Add to container
+ * PSimplePanel container = new PSimplePanel();
+ * container.setWidget(component);
+ *
+ * // Both systems work independently:
+ * component.setVisible(false);  // Hides container (component stays mounted)
+ * component.incrementCount();   // Props update works even when hidden
+ * }</pre>
+ *
+ * <h3>Event Handling</h3>
+ * <pre>{@code
+ * MyComponent component = new MyComponent();
+ *
+ * // DOM events (inherited from PWidget) - handled on container element
+ * component.addClickHandler(event -> {
+ *     System.out.println("Container clicked");
+ * });
+ *
+ * // Framework events (PComponent-specific) - handled by framework component
+ * component.onEvent("buttonClick", payload -> {
+ *     String buttonId = payload.getString("buttonId");
+ *     System.out.println("Button clicked: " + buttonId);
+ * });
+ *
+ * // Both event systems work independently and don't interfere
+ * }</pre>
+ *
+ * <h3>Parent-Child Relationships</h3>
+ * <pre>{@code
+ * MyComponent component = new MyComponent();
+ *
+ * // Add to first container
+ * PFlowPanel panel1 = new PFlowPanel();
+ * panel1.add(component);
+ * assert component.getParent() == panel1;
+ *
+ * // Move to second container (automatically removed from first)
+ * PVerticalPanel panel2 = new PVerticalPanel();
+ * panel2.add(component);
+ * assert component.getParent() == panel2;
+ * assert !panel1.iterator().hasNext();  // No longer in panel1
+ *
+ * // Remove from parent
+ * component.removeFromParent();
+ * assert component.getParent() == null;
+ * }</pre>
+ *
+ * <h2>Container Element Rendering</h2>
+ * <p>
+ * In the browser, PComponent creates a container DOM element where the framework component
+ * mounts. PWidget properties (styles, visibility, dimensions) are applied to this container,
+ * while the framework component (React/Vue/Svelte) renders inside it:
+ * </p>
+ * <pre>
+ * &lt;div class="pony-component-container highlight" style="width: 400px; height: 300px;"&gt;
+ *   &lt;!-- React/Vue/Svelte component renders here --&gt;
+ * &lt;/div&gt;
+ * </pre>
+ *
+ * <h2>Props vs Widget State Independence</h2>
+ * <p>
+ * Props updates and widget state changes work independently:
+ * </p>
+ * <ul>
+ *   <li>Calling {@code setProps()} does NOT affect visibility, styles, or dimensions</li>
+ *   <li>Calling {@code setVisible()}, {@code addStyleName()}, etc. does NOT affect props</li>
+ *   <li>Props updates work even when component is hidden ({@code setVisible(false)})</li>
+ *   <li>Framework component stays mounted when hidden, just not visible</li>
+ * </ul>
+ *
  * @param <TProps> the props type, must be a Java Record
+ * @see PWidget
+ * @see com.ponysdk.core.ui.basic.IsPWidget
+ * @see com.ponysdk.core.ui.basic.HasPWidgets
  * @see FrameworkType
  * @see UpdatePriority
  * @see ThrottleConfig
  * @see PropsDiffer
  */
-public abstract class PComponent<TProps extends Record> extends PObject {
+public abstract class PComponent<TProps extends Record> extends PWidget {
 
     private static final Logger log = LoggerFactory.getLogger(PComponent.class);
 
@@ -615,6 +765,49 @@ public abstract class PComponent<TProps extends Record> extends PObject {
      */
     protected PropsDiffer<TProps> getDiffer() {
         return differ;
+    }
+
+    /**
+     * Returns a debug representation of the component's DOM structure.
+     * <p>
+     * This method provides a string representation of the component's container
+     * element and framework component information for debugging and inspection.
+     * </p>
+     *
+     * @return a string representation of the component's DOM structure
+     */
+    @Override
+    public String dumpDOM() {
+        final StringBuilder dom = new StringBuilder();
+        dom.append("<div");
+        dom.append(" pid=\"").append(ID).append("\"");
+        dom.append(" class=\"pony-component-container\"");
+        dom.append(" framework=\"").append(frameworkType).append("\"");
+        dom.append(" signature=\"").append(getComponentSignature()).append("\"");
+        
+        // Include visibility state
+        if (!isVisible()) {
+            dom.append(" hidden");
+        }
+        
+        // Include style names if any
+        final String styleNames = getStyleName();
+        if (styleNames != null && !styleNames.isEmpty()) {
+            dom.append(" styles=\"").append(styleNames).append("\"");
+        }
+        
+        dom.append(">");
+        
+        // Include framework component info
+        dom.append("<component");
+        dom.append(" type=\"").append(frameworkType).append("\"");
+        dom.append(" signature=\"").append(getComponentSignature()).append("\"");
+        dom.append(" props=\"").append(currentProps != null ? currentProps.toString() : "null").append("\"");
+        dom.append(" />");
+        
+        dom.append("</div>");
+        
+        return dom.toString();
     }
 
     @Override

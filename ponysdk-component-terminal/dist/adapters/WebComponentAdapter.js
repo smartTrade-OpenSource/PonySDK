@@ -6,6 +6,9 @@
  */
 import { applyPatch } from 'fast-json-patch';
 import { BaseFrameworkAdapter } from './FrameworkAdapter.js';
+import { EventForwarder } from '../events/EventForwarder.js';
+import { OverlayController } from '../overlay/OverlayController.js';
+import { getWebAwesomeLoader } from '../WebAwesomeRegistry.js';
 /**
  * Adapter for mounting and updating Web Components (Custom Elements).
  * Uses standard Custom Elements API with property setters.
@@ -15,6 +18,8 @@ export class WebComponentAdapter extends BaseFrameworkAdapter {
         super(eventBridge, objectId);
         this.element = null;
         this.mounted = false;
+        this.eventForwarder = null;
+        this.overlayController = null;
         this.tagName = factory.getTagName?.() ?? 'unknown-component';
         this.props = initialProps;
         this.container = factory.getContainer();
@@ -23,14 +28,69 @@ export class WebComponentAdapter extends BaseFrameworkAdapter {
         if (this.mounted) {
             return; // Idempotent - already mounted
         }
+        // For Web Awesome components (wa-*), ensure they're defined before mounting
+        if (this.tagName.startsWith('wa-')) {
+            const loader = getWebAwesomeLoader();
+            // Check if component is ready
+            if (!loader.isReady(this.tagName)) {
+                // Show placeholder while loading
+                const placeholder = loader.showPlaceholder(this.container);
+                // Wait for component to be defined, then mount
+                loader.ensureDefined(this.tagName)
+                    .then(() => {
+                    loader.removePlaceholder(placeholder);
+                    this.performMount();
+                })
+                    .catch((err) => {
+                    console.error(`Failed to load Web Awesome component ${this.tagName}:`, err);
+                    loader.removePlaceholder(placeholder);
+                    // Show error placeholder
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'wa-load-error';
+                    errorDiv.textContent = `Failed to load ${this.tagName}`;
+                    errorDiv.style.color = 'red';
+                    errorDiv.style.padding = '1rem';
+                    errorDiv.style.border = '1px solid red';
+                    this.container.appendChild(errorDiv);
+                });
+                return;
+            }
+        }
+        // Component is ready or not a Web Awesome component - mount immediately
+        this.performMount();
+    }
+    performMount() {
         this.element = document.createElement(this.tagName);
         this.applyPropsToElement();
         this.container.appendChild(this.element);
         this.mounted = true;
+        // Attach event forwarding for all interactive components
+        this.eventForwarder = new EventForwarder(this.element, this.eventBridge, this.objectId);
+        this.eventForwarder.attach();
+        // Attach overlay controller for wa-dialog and wa-drawer
+        if (OverlayController.isOverlayElement(this.element)) {
+            this.overlayController = new OverlayController(this.element);
+            this.overlayController.attach();
+            // Sync initial open state from props
+            const propsObj = this.props;
+            if (typeof propsObj['open'] === 'boolean') {
+                this.overlayController.syncOpen(propsObj['open']);
+            }
+        }
     }
     unmount() {
         if (!this.mounted) {
             return; // Safe to call on unmounted component
+        }
+        // Detach event forwarder
+        if (this.eventForwarder) {
+            this.eventForwarder.detach();
+            this.eventForwarder = null;
+        }
+        // Detach overlay controller
+        if (this.overlayController) {
+            this.overlayController.detach();
+            this.overlayController = null;
         }
         if (this.element && this.element.parentNode) {
             this.element.parentNode.removeChild(this.element);
@@ -61,6 +121,44 @@ export class WebComponentAdapter extends BaseFrameworkAdapter {
     isMounted() {
         return this.mounted;
     }
+    /**
+     * Get the underlying DOM element.
+     * Returns null if the component is not mounted.
+     */
+    getElement() {
+        return this.element;
+    }
+    /**
+     * Handle a slot operation (add or remove a child element).
+     * Requirements: 7.2 - Insert child into the corresponding Web Component slot
+     * Requirements: 7.3 - Remove child from the slot DOM
+     * Requirements: 7.4 - Default slot (null slotName) mounts without slot attribute
+     *
+     * @param slotOp - The slot operation descriptor
+     * @param childElement - The child DOM element to add or remove
+     */
+    handleSlotOperation(slotOp, childElement) {
+        if (!this.mounted || !this.element) {
+            console.warn('Cannot handle slot operation on unmounted component:', this.objectId);
+            return;
+        }
+        if (slotOp.operation === 'add') {
+            // Set slot attribute for named slots, remove it for default slot
+            if (slotOp.slotName !== null) {
+                childElement.setAttribute('slot', slotOp.slotName);
+            }
+            else {
+                childElement.removeAttribute('slot');
+            }
+            this.element.appendChild(childElement);
+        }
+        else if (slotOp.operation === 'remove') {
+            // Detach the child element if it's a child of this element
+            if (childElement.parentNode === this.element) {
+                this.element.removeChild(childElement);
+            }
+        }
+    }
     applyPropsToElement() {
         if (!this.element || this.props === null || this.props === undefined) {
             return;
@@ -69,6 +167,10 @@ export class WebComponentAdapter extends BaseFrameworkAdapter {
         const propsObj = this.props;
         for (const [key, value] of Object.entries(propsObj)) {
             this.element[key] = value;
+        }
+        // Sync overlay open state if this is an overlay component
+        if (this.overlayController && typeof propsObj['open'] === 'boolean') {
+            this.overlayController.syncOpen(propsObj['open']);
         }
     }
     decodeBinary(_data) {

@@ -167,15 +167,16 @@ public class FrameworkComponentPropertyTest {
                 FrameworkType.REACT,
                 FrameworkType.VUE,
                 FrameworkType.SVELTE,
-                FrameworkType.WEB_COMPONENT
+                FrameworkType.WEB_COMPONENT,
+                FrameworkType.TEMPLATE
         ));
 
         assertTrue(expectedTypes.contains(frameworkType),
                 "FrameworkType should be one of the expected types: " + frameworkType);
 
         // Also verify the total count
-        assertEquals(4, FrameworkType.values().length,
-                "There should be exactly 4 framework types");
+        assertEquals(5, FrameworkType.values().length,
+                "There should be exactly 5 framework types");
     }
 
     /**

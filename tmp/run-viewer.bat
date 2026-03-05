@@ -1,0 +1,6 @@
+@echo off
+echo Compiling...
+call gradlew :ponysdk:compileJava -q
+
+echo Running viewer...
+powershell -Command "$jars = @(Get-ChildItem -Recurse -Filter '*.jar' $env:USERPROFILE\.gradle\caches\modules-2\files-2.1\jakarta.json,$env:USERPROFILE\.gradle\caches\modules-2\files-2.1\org.glassfish,$env:USERPROFILE\.gradle\caches\modules-2\files-2.1\org.slf4j\slf4j-api | Select-Object -ExpandProperty FullName); java -cp \"ponysdk/build/classes/java/main;$($jars -join ';')\" com.ponysdk.core.ui.codegen.GeneratorEntryPoint ponysdk/src/main/data/custom-elements.json"

@@ -1,0 +1,24 @@
+{
+    "libraries": [
+        {
+            "name": "shoelace",
+            "cemPath": "node_modules/@shoelace-style/shoelace/dist/custom-elements.json",
+            "javaPackage": "com.ponysdk.core.ui.shoelace"
+        }
+    ],
+    "output": {
+        "javaOutputDir": "build/generated/sources/webcomponents/java",
+        "typescriptOutputDir": "build/generated/sources/webcomponents/ts",
+        "generateReports": true
+    },
+    "typeMappings": {
+        "customMappings": {}
+    },
+    "filters": {
+        "includePatterns": [
+            "sl-*"
+        ],
+        "excludePatterns": [],
+        "skipComponents": []
+    }
+}

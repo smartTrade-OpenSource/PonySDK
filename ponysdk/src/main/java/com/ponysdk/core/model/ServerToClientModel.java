@@ -266,7 +266,10 @@ public enum ServerToClientModel {
     PCOMPONENT_PROPS_PATCH(ValueTypeModel.STRING),
     PCOMPONENT_PROPS_BINARY(ValueTypeModel.ARRAY),
     PCOMPONENT_FRAMEWORK(ValueTypeModel.BYTE),
-    PCOMPONENT_SIGNATURE(ValueTypeModel.STRING);
+    PCOMPONENT_SIGNATURE(ValueTypeModel.STRING),
+
+    // Slot operations (Requirements 7.1, 7.2, 7.3)
+    PCOMPONENT_SLOT_OPERATION(ValueTypeModel.STRING);
 
     public static final int MAX_VALUE = Short.MAX_VALUE;
     private static final ServerToClientModel[] VALUES = ServerToClientModel.values();

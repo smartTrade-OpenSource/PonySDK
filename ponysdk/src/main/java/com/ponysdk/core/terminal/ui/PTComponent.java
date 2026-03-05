@@ -26,7 +26,10 @@ package com.ponysdk.core.terminal.ui;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
@@ -44,10 +47,15 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
  * conflicts, allowing progressive migration from PAddOn to PComponent
  * (Requirements 13.1, 13.2).
  * </p>
+ * <p>
+ * Requirements 5.1: Creates a container DOM element for PComponent widgets.
+ * The container element receives PWidget properties (styles, visibility) and
+ * hosts the framework component (React/Vue/Svelte) inside it.
+ * </p>
  *
  * @see com.ponysdk.core.ui.component.PComponent
  */
-public class PTComponent extends AbstractPTObject {
+public class PTComponent extends PTWidget<SimplePanel> {
 
     private static final Logger log = Logger.getLogger(PTComponent.class.getName());
 
@@ -71,9 +79,31 @@ public class PTComponent extends AbstractPTObject {
      */
     private boolean destroyed = false;
 
+    /**
+     * Creates the container UI object for the component.
+     * Requirements 5.1: Creates a div element as container with ID and CSS class.
+     */
+    @Override
+    protected SimplePanel createUIObject() {
+        final SimplePanel container = new SimplePanel();
+        return container;
+    }
+
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
         super.create(buffer, objectId, uiBuilder);
+        
+        // Set container ID: pony-${widgetId}
+        final Element containerElement = uiObject.getElement();
+        containerElement.setId("pony-" + objectId);
+        
+        // Add CSS class: pony-component-container
+        containerElement.addClassName("pony-component-container");
+        
+        // Register container element with ComponentBridge
+        // Requirements 6.1, 6.2: Container element receives PWidget properties
+        registerContainerElement(objectId, containerElement);
+        
         doCreate(buffer, objectId);
     }
 
@@ -210,6 +240,17 @@ public class PTComponent extends AbstractPTObject {
     // ========================================================================
     // Native JavaScript methods for TypeScript ComponentTerminal integration
     // ========================================================================
+
+    /**
+     * Registers the container element with the ComponentBridge.
+     * Requirements 6.1, 6.2: Container element is provided to ComponentTerminal
+     * so that PWidget properties (styles, visibility, dimensions) are applied to it.
+     */
+    private native void registerContainerElement(int objectId, Element container) /*-{
+        if ($wnd.PonySDK && $wnd.PonySDK.ComponentBridge) {
+            $wnd.PonySDK.ComponentBridge.registerContainer(objectId, container);
+        }
+    }-*/;
 
     /**
      * Notifies the TypeScript ComponentTerminal of a new component creation.

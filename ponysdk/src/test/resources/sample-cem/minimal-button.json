@@ -1,0 +1,63 @@
+{
+    "schemaVersion": "1.0.0",
+    "readme": "",
+    "modules": [
+        {
+            "kind": "javascript-module",
+            "path": "components/button/button.js",
+            "declarations": [
+                {
+                    "kind": "class",
+                    "description": "A simple button component.",
+                    "name": "Button",
+                    "tagName": "test-button",
+                    "customElement": true,
+                    "members": [
+                        {
+                            "kind": "field",
+                            "name": "label",
+                            "type": {
+                                "text": "string"
+                            },
+                            "description": "The button label",
+                            "default": "\"Click me\""
+                        },
+                        {
+                            "kind": "field",
+                            "name": "disabled",
+                            "type": {
+                                "text": "boolean"
+                            },
+                            "description": "Whether the button is disabled",
+                            "default": "false"
+                        }
+                    ],
+                    "events": [
+                        {
+                            "name": "test-click",
+                            "type": {
+                                "text": "CustomEvent"
+                            },
+                            "description": "Emitted when the button is clicked"
+                        }
+                    ],
+                    "slots": [
+                        {
+                            "name": "",
+                            "description": "The button's content"
+                        }
+                    ]
+                }
+            ],
+            "exports": [
+                {
+                    "kind": "custom-element-definition",
+                    "name": "test-button",
+                    "declaration": {
+                        "name": "Button"
+                    }
+                }
+            ]
+        }
+    ]
+}

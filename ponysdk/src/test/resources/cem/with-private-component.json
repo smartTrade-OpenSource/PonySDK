@@ -1,0 +1,25 @@
+{
+    "schemaVersion": "1.0.0",
+    "modules": [
+        {
+            "kind": "javascript-module",
+            "path": "components/test/test.js",
+            "declarations": [
+                {
+                    "kind": "class",
+                    "name": "PublicComponent",
+                    "tagName": "test-public",
+                    "summary": "A public component.",
+                    "privacy": "public"
+                },
+                {
+                    "kind": "class",
+                    "name": "PrivateComponent",
+                    "tagName": "test-private",
+                    "summary": "A private component that should be filtered out.",
+                    "privacy": "private"
+                }
+            ]
+        }
+    ]
+}

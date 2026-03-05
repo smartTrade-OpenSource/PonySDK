@@ -10,6 +10,7 @@
  */
 import { ComponentRegistry } from './ComponentRegistry.js';
 import { EventBridge } from './EventBridge.js';
+import { FormHandler } from './form/FormHandler.js';
 import type { ComponentMessage, ComponentFactory } from './types.js';
 /**
  * Component terminal for handling PComponent lifecycle messages.
@@ -18,6 +19,7 @@ import type { ComponentMessage, ComponentFactory } from './types.js';
 export declare class ComponentTerminal {
     private registry;
     private eventBridge;
+    private formHandlers;
     constructor(websocket: WebSocket);
     /**
      * Register a component factory for a given signature.
@@ -38,8 +40,22 @@ export declare class ComponentTerminal {
      * Get the component registry.
      */
     getRegistry(): ComponentRegistry;
+    /**
+     * Get the FormHandler for a given form objectId, if one exists.
+     */
+    getFormHandler(objectId: number): FormHandler | undefined;
     private handleCreate;
     private handleUpdate;
     private handleDestroy;
+    /**
+     * Handle server validation errors for a form component.
+     * Requirements: 9.3 - Display server validation errors on matching input components
+     */
+    private handleServerErrors;
+    /**
+     * Handle a slot operation message.
+     * Requirements: 7.2, 7.3, 7.4 - Slot add/remove with named and default slots
+     */
+    private handleSlot;
 }
 //# sourceMappingURL=ComponentTerminal.d.ts.map

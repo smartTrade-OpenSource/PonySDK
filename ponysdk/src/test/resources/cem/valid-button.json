@@ -1,0 +1,88 @@
+{
+    "schemaVersion": "1.0.0",
+    "readme": "",
+    "modules": [
+        {
+            "kind": "javascript-module",
+            "path": "components/button/button.js",
+            "declarations": [
+                {
+                    "kind": "class",
+                    "name": "Button",
+                    "tagName": "wa-button",
+                    "summary": "Buttons represent actions that are available to the user.",
+                    "description": "Buttons are used to trigger actions.",
+                    "status": "stable",
+                    "members": [
+                        {
+                            "kind": "field",
+                            "name": "variant",
+                            "type": {
+                                "text": "string"
+                            },
+                            "default": "\"neutral\"",
+                            "description": "The button's theme variant.",
+                            "privacy": "public"
+                        },
+                        {
+                            "kind": "field",
+                            "name": "size",
+                            "type": {
+                                "text": "string"
+                            },
+                            "default": "\"medium\"",
+                            "description": "The button's size.",
+                            "privacy": "public"
+                        },
+                        {
+                            "kind": "field",
+                            "name": "disabled",
+                            "type": {
+                                "text": "boolean"
+                            },
+                            "default": "false",
+                            "description": "Whether the button is disabled.",
+                            "privacy": "public"
+                        },
+                        {
+                            "kind": "method",
+                            "name": "focus",
+                            "description": "Sets focus on the button.",
+                            "privacy": "public",
+                            "return": {
+                                "type": {
+                                    "text": "void"
+                                }
+                            }
+                        }
+                    ],
+                    "events": [
+                        {
+                            "name": "wa-click",
+                            "description": "Emitted when the button is clicked.",
+                            "type": {
+                                "text": "CustomEvent"
+                            }
+                        }
+                    ],
+                    "slots": [
+                        {
+                            "name": "prefix",
+                            "description": "Content to place before the button text."
+                        },
+                        {
+                            "name": "",
+                            "description": "The button's label."
+                        }
+                    ],
+                    "cssProperties": [
+                        {
+                            "name": "--button-background",
+                            "description": "The button's background color."
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

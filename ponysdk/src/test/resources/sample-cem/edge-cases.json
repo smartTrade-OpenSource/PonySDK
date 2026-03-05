@@ -1,0 +1,133 @@
+{
+    "schemaVersion": "1.0.0",
+    "readme": "",
+    "modules": [
+        {
+            "kind": "javascript-module",
+            "path": "components/edge-cases/edge-cases.js",
+            "declarations": [
+                {
+                    "kind": "class",
+                    "description": "Component with no properties",
+                    "name": "NoProps",
+                    "tagName": "test-no-props",
+                    "customElement": true,
+                    "members": [],
+                    "events": [],
+                    "slots": []
+                },
+                {
+                    "kind": "class",
+                    "description": "Component with no events",
+                    "name": "NoEvents",
+                    "tagName": "test-no-events",
+                    "customElement": true,
+                    "members": [
+                        {
+                            "kind": "field",
+                            "name": "value",
+                            "type": {
+                                "text": "string"
+                            },
+                            "description": "A value"
+                        }
+                    ],
+                    "events": [],
+                    "slots": []
+                },
+                {
+                    "kind": "class",
+                    "description": "Component with no slots",
+                    "name": "NoSlots",
+                    "tagName": "test-no-slots",
+                    "customElement": true,
+                    "members": [
+                        {
+                            "kind": "field",
+                            "name": "value",
+                            "type": {
+                                "text": "string"
+                            },
+                            "description": "A value"
+                        }
+                    ],
+                    "events": [
+                        {
+                            "name": "test-change",
+                            "type": {
+                                "text": "CustomEvent"
+                            },
+                            "description": "Emitted when value changes"
+                        }
+                    ],
+                    "slots": []
+                },
+                {
+                    "kind": "class",
+                    "description": "Component with array and optional types",
+                    "name": "ComplexTypes",
+                    "tagName": "test-complex-types",
+                    "customElement": true,
+                    "members": [
+                        {
+                            "kind": "field",
+                            "name": "items",
+                            "type": {
+                                "text": "string[]"
+                            },
+                            "description": "Array of items"
+                        },
+                        {
+                            "kind": "field",
+                            "name": "optionalValue",
+                            "type": {
+                                "text": "number | undefined"
+                            },
+                            "description": "Optional number value"
+                        },
+                        {
+                            "kind": "field",
+                            "name": "unionType",
+                            "type": {
+                                "text": "string | number"
+                            },
+                            "description": "Union type property"
+                        }
+                    ],
+                    "events": [],
+                    "slots": []
+                }
+            ],
+            "exports": [
+                {
+                    "kind": "custom-element-definition",
+                    "name": "test-no-props",
+                    "declaration": {
+                        "name": "NoProps"
+                    }
+                },
+                {
+                    "kind": "custom-element-definition",
+                    "name": "test-no-events",
+                    "declaration": {
+                        "name": "NoEvents"
+                    }
+                },
+                {
+                    "kind": "custom-element-definition",
+                    "name": "test-no-slots",
+                    "declaration": {
+                        "name": "NoSlots"
+                    }
+                },
+                {
+                    "kind": "custom-element-definition",
+                    "name": "test-complex-types",
+                    "declaration": {
+                        "name": "ComplexTypes"
+                    }
+                }
+            ]
+        }
+    ]
+}

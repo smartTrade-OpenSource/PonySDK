@@ -1,0 +1,32 @@
+{
+    "libraries": [
+        {
+            "name": "webawesome",
+            "cemPath": "node_modules/@webawesome/components/dist/custom-elements.json",
+            "javaPackage": "com.ponysdk.core.ui.webawesome"
+        }
+    ],
+    "output": {
+        "javaOutputDir": "build/generated/sources/webcomponents/java",
+        "typescriptOutputDir": "build/generated/sources/webcomponents/ts",
+        "generateReports": true
+    },
+    "typeMappings": {
+        "customMappings": {
+            "HTMLElement": {
+                "javaType": "com.ponysdk.core.ui.basic.IsPWidget",
+                "typescriptType": "HTMLElement"
+            }
+        }
+    },
+    "filters": {
+        "includePatterns": [
+            "wa-*"
+        ],
+        "excludePatterns": [
+            "*-internal",
+            "*-deprecated"
+        ],
+        "skipComponents": []
+    }
+}
