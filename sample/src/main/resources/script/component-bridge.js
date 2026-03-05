@@ -216,8 +216,30 @@
     // ========================================
 
     function createShowcase() {
-        // Return null - components will be added directly to their containers
-        return null;
+        // Create showcase if it doesn't exist
+        let showcase = document.getElementById('pcomponent-showcase');
+        if (!showcase) {
+            showcase = document.createElement('div');
+            showcase.id = 'pcomponent-showcase';
+            showcase.style.cssText =
+                'display: flex; flex-wrap: wrap; gap: 20px; padding: 20px;' +
+                'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);' +
+                'border-radius: 16px; margin: 20px;' +
+                'box-shadow: 0 10px 40px rgba(0,0,0,0.2);';
+
+            const header = document.createElement('div');
+            header.style.cssText =
+                'width: 100%; text-align: center; color: white;' +
+                'font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;' +
+                'margin-bottom: 10px;';
+            header.innerHTML =
+                '<h2 style="margin: 0 0 5px 0; font-size: 24px;">🚀 PonySDK PComponent Demo</h2>' +
+                '<p style="margin: 0; font-size: 14px; opacity: 0.9;">Same props, different frameworks - all powered by PonySDK</p>';
+
+            showcase.appendChild(header);
+            document.body.appendChild(showcase);
+        }
+        return showcase;
     }
 
     function init(ponyInstance) {
@@ -236,10 +258,9 @@
                 container.id = 'pcomponent-' + objectId;
                 container.style.cssText = 'display: inline-block; vertical-align: top;';
 
-                // Add to showcase
-                // Don't add to showcase - component will be added to its container by PonySDK
-                // const showcase = createShowcase();
-                // if (showcase) showcase.appendChild(container);
+                // Add to showcase (will be moved by playground if needed)
+                const showcase = createShowcase();
+                if (showcase) showcase.appendChild(container);
 
                 // Parse props
                 const props = JSON.parse(propsJson);

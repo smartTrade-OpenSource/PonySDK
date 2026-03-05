@@ -150,32 +150,24 @@ public class PropertyPanel extends PVerticalPanel {
         // Clear previous content
         previewContainer.clear();
 
-        // For PWebComponent, we need to create a div container and let the component render itself
-        final com.ponysdk.core.ui.basic.PElement container = com.ponysdk.core.ui.basic.Element.newDiv();
-        container.setAttribute("id", "preview-container-" + component.getID());
-        container.addStyleName("web-component-preview");
-        
-        // Add the container to the preview
-        previewContainer.setWidget(container);
-        
-        // Attach the component - it will render itself via JavaScript
+        // Attach the component - it will be created in the showcase
         component.attach(com.ponysdk.core.ui.basic.PWindow.getMain());
         
-        // Use JavaScript to move the component into our container
+        // Flush to ensure component is created on client side
+        com.ponysdk.core.server.stm.Txn.get().flush();
+        
+        // Use JavaScript to hide showcase and move component to preview
         final String script = String.format(
             "(function() {" +
-            "  setTimeout(function() {" +
-            "    var component = document.getElementById('pcomponent-%d');" +
-            "    var container = document.getElementById('preview-container-%d');" +
-            "    if (component && container) {" +
-            "      container.appendChild(component);" +
-            "      console.log('Component moved to preview container');" +
-            "    } else {" +
-            "      console.error('Component or container not found', component, container);" +
-            "    }" +
-            "  }, 200);" +
+            "  var showcase = document.getElementById('pcomponent-showcase');" +
+            "  if (showcase) showcase.style.display = 'none';" +
+            "  var component = document.getElementById('pcomponent-%d');" +
+            "  var preview = document.querySelector('.component-preview');" +
+            "  if (component && preview) {" +
+            "    preview.appendChild(component);" +
+            "    console.log('[Playground] Component moved');" +
+            "  }" +
             "})()",
-            component.getID(),
             component.getID()
         );
         
