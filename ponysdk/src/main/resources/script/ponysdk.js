@@ -531,6 +531,7 @@ _UTF8 = undefined;
             this.scrollRatio = 0;
             this.viewHeight = 0;
             this.subBodyWidth = 0;
+            this.subBody.style.visibility = "hidden";
             this.resizeChecker = setInterval(this.checkHeight.bind(this), 250);
 
             this.unpinnedFooter.addEventListener("scroll", function (event) {
@@ -659,9 +660,9 @@ _UTF8 = undefined;
                 return;
             }
             this.showLoading(true);
-            if (this.rowHeight == 0) {
+            if (this.rowHeight <= 0) {
                 this.updateRowHeight(0); // Initialize rowHeight...
-                if (this.rowHeight == 0) return;
+                if (this.rowHeight <= 0) return;
                 else { // We need to change the height of all already existing rows
                     for (var i = 1; i < this.relRowCount; i++) {
                         this.updateRowHeight(i);
@@ -673,6 +674,7 @@ _UTF8 = undefined;
             this.sendDataToServer({
                 rc: c
             });
+            this.subBody.style.visibility = "visible";
         },
 
         checkPosition: function (event) {
