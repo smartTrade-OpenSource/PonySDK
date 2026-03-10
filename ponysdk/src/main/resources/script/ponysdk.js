@@ -531,7 +531,10 @@ _UTF8 = undefined;
             this.scrollRatio = 0;
             this.viewHeight = 0;
             this.subBodyWidth = 0;
+
+            // Hide content before row height calculation to avoid glitch
             this.subBody.style.visibility = "hidden";
+
             this.resizeChecker = setInterval(this.checkHeight.bind(this), 250);
 
             this.unpinnedFooter.addEventListener("scroll", function (event) {
@@ -674,6 +677,7 @@ _UTF8 = undefined;
             this.sendDataToServer({
                 rc: c
             });
+            // Display su body content as the rows have the now the correct height
             this.subBody.style.visibility = "visible";
         },
 
