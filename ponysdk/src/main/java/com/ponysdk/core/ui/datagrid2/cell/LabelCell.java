@@ -38,6 +38,7 @@ public class LabelCell<V> implements PrimaryCell<V> {
 
     private final PLabel label = Element.newPLabel();
     private final PLabel pendingLabel = Element.newPLabel("...");
+    private final PLabel errorLabel = Element.newPLabel("ERROR");
     private PrimaryCellController<V> cellController;
     private Supplier<ExtendedCell<V>> instantiator;
 
@@ -61,6 +62,11 @@ public class LabelCell<V> implements PrimaryCell<V> {
     @Override
     public PWidget asPendingWidget() {
         return pendingLabel;
+    }
+    
+    @Override
+    public PWidget asErrorWidget() {
+    	return errorLabel;
     }
 
     @Override
