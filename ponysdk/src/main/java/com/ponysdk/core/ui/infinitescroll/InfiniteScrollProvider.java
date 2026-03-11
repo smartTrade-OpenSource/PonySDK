@@ -75,4 +75,30 @@ public interface InfiniteScrollProvider<D, W> {
      */
     void addHandler(Runnable handler);
 
+    /**
+     * Called by the InfiniteScrollAddon immediately after a widget instance
+     * has been physically attached to the DOM container.
+     * This is the ideal place to perform post-attachment logic, such as
+     * registering the widget with a Drag and Drop manager or attaching other
+     * specific UI handlers.
+     *
+     * @param widget The widget instance that was attached.
+     */
+    default void onWidgetAttached(final W widget) {
+        // Users can override this method if needed.
+    }
+
+    /**
+     * Called by the InfiniteScrollAddon just before a widget instance
+     * is physically detached from the DOM container and destroyed.
+     * This is the ideal place to perform cleanup logic, such as
+     * unregistering the widget from a Drag and Drop manager to prevent
+     * memory leaks.
+     *
+     * @param widget The widget instance that will be detached.
+     */
+    default void onWidgetDetached(final W widget) {
+        // Users can override this method if needed.
+    }
+
 }

@@ -705,7 +705,7 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
         itemContainer.showIndex(index);
         itemContainer.scrollToTop();
 
-        if (filterWidget != null) filterWidget.focus();
+        if (filterWidget != null && configuration.isAutoFocusSearchEnabled()) filterWidget.focus();
         if (clearMultiButton != null) clearMultiButton.setEnabled(!getSelectedItems().isEmpty());
         addUpDownKeyHandler();
     }
