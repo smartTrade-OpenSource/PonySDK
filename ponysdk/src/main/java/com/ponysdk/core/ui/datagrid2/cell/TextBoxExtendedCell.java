@@ -24,6 +24,7 @@
 package com.ponysdk.core.ui.datagrid2.cell;
 
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PTextBox;
@@ -81,6 +82,6 @@ public class TextBoxExtendedCell<V> implements ExtendedCell<V> {
     }
 
 	@Override
-	public void render(V data, Object renderingHelper) {
+	public void render(V data, Function<V, ?> renderingHelper) {
 	}
 }

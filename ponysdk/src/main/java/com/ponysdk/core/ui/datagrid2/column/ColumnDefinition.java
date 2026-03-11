@@ -83,7 +83,7 @@ public interface ColumnDefinition<V> extends ColumnActionListener<V> {
      * Returns an intermediate object that will be cached in order to be used
      * when rendering {@code data} in a {@link Cell}.
      * The returned object will be handed to
-     * {@link Cell#render(Object, Object)}.
+     * {@link Cell#render(Object, java.util.function.Function)}.
      * It can also be retrieved via a {@link Supplier} either in
      * {@link ColumnDefinition#compare(Object, Supplier, Object, Supplier)} to
      * be used for sorting purposes, or inside the {@code BiPredicate} argument
