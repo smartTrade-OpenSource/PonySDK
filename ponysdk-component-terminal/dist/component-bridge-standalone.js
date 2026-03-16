@@ -93,8 +93,54 @@
         },
 
         handlePatch(objectId, patchJson) {
-            console.log('handlePatch called for component #' + objectId);
-            // Not implemented yet - would need fast-json-patch library
+            const container = containerRegistry.get(objectId);
+            if (!container) {
+                console.warn('handlePatch: Container not registered for component #' + objectId);
+                return;
+            }
+
+            const element = container.firstElementChild;
+            if (!element) {
+                console.warn('handlePatch: No element found in container for component #' + objectId);
+                return;
+            }
+
+            try {
+                const patches = JSON.parse(patchJson);
+                // Apply each patch operation
+                for (const patch of patches) {
+                    if (patch.op === 'replace' || patch.op === 'add') {
+                        // Extract property name from path (e.g., "/loading" -> "loading")
+                        const propName = patch.path.substring(1); // Remove leading "/"
+                        const value = patch.value;
+                        
+                        if (typeof value === 'boolean') {
+                            if (value) {
+                                element.setAttribute(propName, '');
+                            } else {
+                                element.removeAttribute(propName);
+                            }
+                        } else if (value === null || value === undefined) {
+                            element.removeAttribute(propName);
+                        } else if (typeof value === 'string') {
+                            if (value !== '') {
+                                element.setAttribute(propName, value);
+                            } else {
+                                element.removeAttribute(propName);
+                            }
+                        } else if (typeof value === 'number') {
+                            element.setAttribute(propName, String(value));
+                        } else {
+                            element[propName] = value;
+                        }
+                    } else if (patch.op === 'remove') {
+                        const propName = patch.path.substring(1);
+                        element.removeAttribute(propName);
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to apply patch for component #' + objectId, error);
+            }
         },
 
         handleProps(objectId, propsJson) {
