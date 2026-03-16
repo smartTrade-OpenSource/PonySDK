@@ -94,12 +94,52 @@
 
         handlePatch(objectId, patchJson) {
             console.log('handlePatch called for component #' + objectId);
-            // Not implemented yet
+            // Not implemented yet - would need fast-json-patch library
         },
 
         handleProps(objectId, propsJson) {
-            console.log('handleProps called for component #' + objectId);
-            // Not implemented yet
+            const container = containerRegistry.get(objectId);
+            if (!container) {
+                console.warn('handleProps: Container not registered for component #' + objectId);
+                return;
+            }
+
+            const element = container.firstElementChild;
+            if (!element) {
+                console.warn('handleProps: No element found in container for component #' + objectId);
+                return;
+            }
+
+            try {
+                const props = JSON.parse(propsJson);
+                // Apply props with proper type handling
+                for (const [key, value] of Object.entries(props)) {
+                    if (typeof value === 'boolean') {
+                        // Boolean attributes: presence = true, absence = false
+                        if (value) {
+                            element.setAttribute(key, '');
+                        } else {
+                            element.removeAttribute(key);
+                        }
+                    } else if (value === null || value === undefined) {
+                        element.removeAttribute(key);
+                    } else if (typeof value === 'string') {
+                        // Only set non-empty strings as attributes
+                        if (value !== '') {
+                            element.setAttribute(key, value);
+                        } else {
+                            element.removeAttribute(key);
+                        }
+                    } else if (typeof value === 'number') {
+                        element.setAttribute(key, String(value));
+                    } else {
+                        // Complex values (objects, arrays) as JS properties
+                        element[key] = value;
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to parse props JSON for component #' + objectId, error);
+            }
         },
 
         handleBinary(objectId, binaryData) {
