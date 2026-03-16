@@ -61,7 +61,7 @@ public class PropertyBinderTest extends PSuite {
         final PTextBox textBox = Element.newPTextBox();
         final PLabel label = Element.newPLabel("setTitle");
         final PLabel errorLabel = Element.newPLabel();
-        final PropertyControl control = new PropertyControl(label, textBox, errorLabel, signature);
+        final PropertyControl control = new PropertyControl(label, textBox, errorLabel, signature, "String", PropertyCategory.CONTENT);
         
         propertyBinder.bindControls(List.of(control), testComponent);
         
@@ -78,7 +78,7 @@ public class PropertyBinderTest extends PSuite {
         final PCheckBox checkBox = Element.newPCheckBox();
         final PLabel label = Element.newPLabel("setEnabled");
         final PLabel errorLabel = Element.newPLabel();
-        final PropertyControl control = new PropertyControl(label, checkBox, errorLabel, signature);
+        final PropertyControl control = new PropertyControl(label, checkBox, errorLabel, signature, "boolean", PropertyCategory.BEHAVIOR);
         
         propertyBinder.bindControls(List.of(control), testComponent);
         
@@ -98,7 +98,7 @@ public class PropertyBinderTest extends PSuite {
         
         final PLabel label = Element.newPLabel("setStatus");
         final PLabel errorLabel = Element.newPLabel();
-        final PropertyControl control = new PropertyControl(label, listBox, errorLabel, signature);
+        final PropertyControl control = new PropertyControl(label, listBox, errorLabel, signature, "TestStatus", PropertyCategory.APPEARANCE);
         
         propertyBinder.bindControls(List.of(control), testComponent);
         
@@ -122,10 +122,10 @@ public class PropertyBinderTest extends PSuite {
         final PCheckBox checkBox = Element.newPCheckBox();
         
         final PropertyControl control1 = new PropertyControl(
-            Element.newPLabel("setTitle"), textBox, Element.newPLabel(), signature1
+            Element.newPLabel("setTitle"), textBox, Element.newPLabel(), signature1, "String", PropertyCategory.CONTENT
         );
         final PropertyControl control2 = new PropertyControl(
-            Element.newPLabel("setEnabled"), checkBox, Element.newPLabel(), signature2
+            Element.newPLabel("setEnabled"), checkBox, Element.newPLabel(), signature2, "boolean", PropertyCategory.BEHAVIOR
         );
         
         propertyBinder.bindControls(List.of(control1, control2), testComponent);
@@ -145,7 +145,7 @@ public class PropertyBinderTest extends PSuite {
         final PLabel unsupportedControl = Element.newPLabel("unsupported");
         final PLabel label = Element.newPLabel("setTitle");
         final PLabel errorLabel = Element.newPLabel();
-        final PropertyControl control = new PropertyControl(label, unsupportedControl, errorLabel, signature);
+        final PropertyControl control = new PropertyControl(label, unsupportedControl, errorLabel, signature, "String", PropertyCategory.CONTENT);
         
         // Should not throw exception
         propertyBinder.bindControls(List.of(control), testComponent);
@@ -166,7 +166,9 @@ public class PropertyBinderTest extends PSuite {
             Element.newPLabel("setTitle"),
             Element.newPTextBox(),
             Element.newPLabel(),
-            signature
+            signature,
+            "String",
+            PropertyCategory.CONTENT
         );
         
         propertyBinder.bindControls(List.of(control), null);

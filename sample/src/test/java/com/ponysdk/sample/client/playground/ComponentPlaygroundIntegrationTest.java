@@ -89,7 +89,7 @@ public class ComponentPlaygroundIntegrationTest extends PSuite {
         final PTextBox textBox = Element.newPTextBox();
         final PLabel label = Element.newPLabel("setTitle");
         final PLabel errorLabel = Element.newPLabel();
-        final PropertyControl control = new PropertyControl(label, textBox, errorLabel, signature);
+        final PropertyControl control = new PropertyControl(label, textBox, errorLabel, signature, "String", PropertyCategory.CONTENT);
         
         // When: Control is bound to component
         final PropertyBinder binder = new PropertyBinder();
@@ -171,7 +171,7 @@ public class ComponentPlaygroundIntegrationTest extends PSuite {
         final PTextBox textBox = Element.newPTextBox();
         final PLabel label = Element.newPLabel(methodName);
         final PLabel errorLabel = Element.newPLabel();
-        final PropertyControl control = new PropertyControl(label, textBox, errorLabel, signature);
+        final PropertyControl control = new PropertyControl(label, textBox, errorLabel, signature, "unknown", PropertyCategory.OTHER);
         
         final PropertyBinder binder = new PropertyBinder();
         binder.bindControls(List.of(control), component);
@@ -203,7 +203,7 @@ public class ComponentPlaygroundIntegrationTest extends PSuite {
         final PTextBox textBox = Element.newPTextBox();
         final PLabel label = Element.newPLabel("setTitle");
         final PLabel errorLabel = Element.newPLabel();
-        final PropertyControl control = new PropertyControl(label, textBox, errorLabel, signature);
+        final PropertyControl control = new PropertyControl(label, textBox, errorLabel, signature, "String", PropertyCategory.CONTENT);
         
         final PropertyBinder binder = new PropertyBinder();
         binder.bindControls(List.of(control), component);

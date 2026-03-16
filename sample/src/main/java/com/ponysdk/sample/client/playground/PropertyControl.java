@@ -29,25 +29,31 @@ import com.ponysdk.core.ui.basic.PWidget;
 /**
  * Represents a form control with its metadata.
  * <p>
- * Immutable value object combining a label, input control, error label, and
- * the method signature it represents.
+ * Immutable value object combining a label, input control, error label,
+ * the method signature it represents, a type hint and a category.
  * </p>
  *
  * @param label      the label displaying the method name, must not be null
  * @param control    the input control widget, must not be null
  * @param errorLabel the label for displaying errors, must not be null
  * @param method     the method signature this control represents, must not be null
+ * @param typeHint   the human-readable type hint, must not be null
+ * @param category   the property category for grouping, must not be null
  */
 public record PropertyControl(
     PLabel label,
     PWidget control,
     PLabel errorLabel,
-    MethodSignature method
+    MethodSignature method,
+    String typeHint,
+    PropertyCategory category
 ) {
     public PropertyControl {
         if (label == null) throw new IllegalArgumentException("label must not be null");
         if (control == null) throw new IllegalArgumentException("control must not be null");
         if (errorLabel == null) throw new IllegalArgumentException("errorLabel must not be null");
         if (method == null) throw new IllegalArgumentException("method must not be null");
+        if (typeHint == null) throw new IllegalArgumentException("typeHint must not be null");
+        if (category == null) throw new IllegalArgumentException("category must not be null");
     }
 }

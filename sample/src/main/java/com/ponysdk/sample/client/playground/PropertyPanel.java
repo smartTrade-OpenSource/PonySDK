@@ -23,6 +23,8 @@
 
 package com.ponysdk.sample.client.playground;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import com.ponysdk.core.ui.basic.Element;
@@ -142,12 +144,6 @@ public class PropertyPanel extends PVerticalPanel {
      * @param component the component to preview, must not be null
      * @throws IllegalArgumentException if component is null
      */
-    /**
-     * Sets the component instance to display in the preview container.
-     *
-     * @param component the component to preview, must not be null
-     * @throws IllegalArgumentException if component is null
-     */
     public void setPreviewComponent(final PComponent<?> component) {
         if (component == null) {
             throw new IllegalArgumentException("component must not be null");
@@ -160,8 +156,6 @@ public class PropertyPanel extends PVerticalPanel {
         // PComponent extends PWidget, so it can be added like any other widget
         previewContainer.setWidget(component);
     }
-
-
 
     /**
      * Adds slot controls to the slots area.
@@ -245,15 +239,23 @@ public class PropertyPanel extends PVerticalPanel {
         // Clear existing controls
         formContainer.clear();
 
-        // Add section header if there are controls
-        if (!controls.isEmpty()) {
-            final PLabel propsHeader = Element.newPLabel("Properties");
-            propsHeader.addStyleName("section-header");
-            formContainer.add(propsHeader);
+        if (controls.isEmpty()) {
+            return;
         }
 
-        // Add each property control as a row
-        for (final PropertyControl control : controls) {
+        // Sort by category ordinal
+        final List<PropertyControl> sorted = new ArrayList<>(controls);
+        sorted.sort(Comparator.comparingInt(c -> c.category().ordinal()));
+
+        // Group by category with section headers
+        PropertyCategory currentCategory = null;
+        for (final PropertyControl control : sorted) {
+            if (control.category() != currentCategory) {
+                currentCategory = control.category();
+                final PLabel categoryHeader = Element.newPLabel(currentCategory.getDisplayName());
+                categoryHeader.addStyleName("category-header");
+                formContainer.add(categoryHeader);
+            }
             final PVerticalPanel controlRow = createControlRow(control);
             formContainer.add(controlRow);
         }
@@ -277,17 +279,20 @@ public class PropertyPanel extends PVerticalPanel {
         row.setWidth("100%");
         row.addStyleName("control-row");
 
-        // Create horizontal panel for label and control
+        // Create horizontal panel for label, type hint and control
         final PHorizontalPanel inputRow = Element.newPHorizontalPanel();
         inputRow.setWidth("100%");
         inputRow.addStyleName("input-row");
 
-        // Add label (fixed width for alignment)
-        control.label().setWidth("150px");
+        // Add label (CSS handles width via flexbox)
         inputRow.add(control.label());
 
-        // Add control (flexible width)
-        control.control().setWidth("100%");
+        // Add type hint label
+        final PLabel typeHintLabel = Element.newPLabel(control.typeHint());
+        typeHintLabel.addStyleName("type-hint");
+        inputRow.add(typeHintLabel);
+
+        // Add control (flexible width via CSS)
         inputRow.add(control.control());
         inputRow.setCellWidth(control.control(), "100%");
 

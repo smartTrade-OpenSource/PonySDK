@@ -87,7 +87,7 @@ public class FormGeneratorTest extends PSuite {
         final PropertyControl control = controls.get(0);
         
         assertNotNull(control.label());
-        assertEquals("setTitle", control.label().getText());
+        assertEquals("Title", control.label().getText());
     }
 
     @Test
@@ -176,8 +176,8 @@ public class FormGeneratorTest extends PSuite {
         
         assertNotNull(controls);
         assertEquals(2, controls.size());
-        assertEquals("setTitle", controls.get(0).label().getText());
-        assertEquals("setEnabled", controls.get(1).label().getText());
+        assertEquals("Title", controls.get(0).label().getText());
+        assertEquals("Enabled", controls.get(1).label().getText());
     }
 
     @Test

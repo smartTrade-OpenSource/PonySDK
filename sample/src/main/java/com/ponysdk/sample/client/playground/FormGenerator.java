@@ -149,7 +149,7 @@ public class FormGenerator {
      * @return a PropertyControl instance
      */
     private PropertyControl createPropertyControl(final MethodSignature methodSignature) {
-        // Create label showing method name
+        // Create formatted label
         final PLabel label = createMethodLabel(methodSignature.methodName());
 
         // Create the input control based on the first parameter type
@@ -158,7 +158,20 @@ public class FormGenerator {
         // Create error label (initially hidden)
         final PLabel errorLabel = createErrorLabel();
 
-        return new PropertyControl(label, control, errorLabel, methodSignature);
+        // Resolve type hint and category from first parameter
+        final List<ParameterInfo> parameters = methodSignature.parameters();
+        final String typeHint;
+        final PropertyCategory category;
+        if (!parameters.isEmpty()) {
+            final ParameterInfo firstParam = parameters.get(0);
+            typeHint = TypeHintResolver.resolve(firstParam);
+            category = PropertyCategory.fromParameterInfo(firstParam);
+        } else {
+            typeHint = "unknown";
+            category = PropertyCategory.OTHER;
+        }
+
+        return new PropertyControl(label, control, errorLabel, methodSignature, typeHint, category);
     }
 
     /**
@@ -168,8 +181,7 @@ public class FormGenerator {
      * @return a PLabel instance with the method name
      */
     private PLabel createMethodLabel(final String methodName) {
-        final PLabel label = Element.newPLabel(methodName);
-        // Apply consistent styling
+        final PLabel label = Element.newPLabel(LabelFormatter.format(methodName));
         label.addStyleName("property-label");
         return label;
     }
