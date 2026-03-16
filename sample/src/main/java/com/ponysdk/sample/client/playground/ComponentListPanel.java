@@ -24,38 +24,56 @@
 package com.ponysdk.sample.client.playground;
 
 import com.ponysdk.core.ui.basic.Element;
+import com.ponysdk.core.ui.basic.PFlowPanel;
+import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PListBox;
 import com.ponysdk.core.ui.basic.PSimplePanel;
 import com.ponysdk.core.ui.basic.event.PChangeEvent;
 import com.ponysdk.core.ui.basic.event.PChangeHandler;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * Left panel containing the component selection list.
+ * Left panel containing the component selection list with search functionality.
  * <p>
  * Displays all discovered Web Awesome components in a list box with:
  * <ul>
+ *   <li>Search textbox for filtering components</li>
+ *   <li>Real-time filtering as user types</li>
+ *   <li>Result count display</li>
+ *   <li>Empty state when no matches found</li>
+ *   <li>Selection preservation during filtering</li>
  *   <li>Alphabetically sorted component names</li>
- *   <li>Visible border separating from property panel</li>
- *   <li>Selection event handling</li>
  * </ul>
- * </p>
- * <p>
- * Requirements: 2.1, 2.2, 8.2
  * </p>
  */
 public class ComponentListPanel extends PSimplePanel {
 
+    private final PFlowPanel containerPanel;
     private final PListBox listBox;
+    private SearchPanel searchPanel;
+    private PLabel emptyStateLabel;
     private Consumer<String> selectionHandler;
+
+    // Search-related state
+    private List<String> allComponents;
+    private List<String> filteredComponents;
+    private String currentQuery;
+    private Debouncer searchDebouncer;
+    private String selectedBeforeFilter;
 
     /**
      * Creates a new ComponentListPanel.
      */
     public ComponentListPanel() {
+        this.containerPanel = Element.newPFlowPanel();
         this.listBox = Element.newPListBox();
+        this.allComponents = new ArrayList<>();
+        this.filteredComponents = new ArrayList<>();
+        this.currentQuery = "";
+
         initializePanel();
     }
 
@@ -63,13 +81,11 @@ public class ComponentListPanel extends PSimplePanel {
      * Initializes the panel structure and styling.
      */
     private void initializePanel() {
-        // Set up the list box
         listBox.setWidth("100%");
         listBox.setHeight("100%");
-        listBox.setVisibleItemCount(20); // Show multiple items at once
+        listBox.setVisibleItemCount(20);
         listBox.addStyleName("component-list");
 
-        // Add change handler for selection events
         listBox.addChangeHandler(new PChangeHandler() {
             @Override
             public void onChange(final PChangeEvent event) {
@@ -77,20 +93,127 @@ public class ComponentListPanel extends PSimplePanel {
             }
         });
 
-        // Add list box to panel
-        setWidget(listBox);
+        emptyStateLabel = Element.newPLabel("");
+        emptyStateLabel.addStyleName("empty-state-message");
+        emptyStateLabel.setAttribute("aria-live", "polite");
+        emptyStateLabel.setVisible(false);
 
-        // Apply panel styling with visible border
+        containerPanel.add(listBox);
+        containerPanel.add(emptyStateLabel);
+
+        setWidget(containerPanel);
+
         addStyleName("component-list-panel");
         setWidth("100%");
         setHeight("100%");
     }
 
     /**
+     * Initializes the search panel. Called when component names are first set.
+     */
+    private void initializeSearchPanel() {
+        if (searchPanel != null) {
+            return;
+        }
+
+        searchPanel = new SearchPanel();
+        searchPanel.setSearchHandler(this::handleSearchChange);
+        searchDebouncer = new Debouncer(50);
+
+        containerPanel.insert(searchPanel, 0);
+    }
+
+    /**
+     * Handles search text changes with debouncing.
+     *
+     * @param query the search query
+     */
+    private void handleSearchChange(final String query) {
+        searchDebouncer.debounce(() -> applyFilter(query));
+    }
+
+    /**
+     * Applies the filter to the component list.
+     *
+     * @param query the search query
+     */
+    private void applyFilter(final String query) {
+        currentQuery = query;
+        filteredComponents = ComponentFilter.filter(allComponents, query);
+
+        preserveSelection();
+        updateListDisplay();
+        updateResultCount();
+        updateEmptyState();
+    }
+
+    /**
+     * Updates the list box to display filtered components.
+     */
+    private void updateListDisplay() {
+        listBox.clear();
+
+        for (final String componentName : filteredComponents) {
+            listBox.addItem(componentName);
+        }
+
+        // Restore selection if component is still visible
+        if (selectedBeforeFilter != null && filteredComponents.contains(selectedBeforeFilter)) {
+            final int index = filteredComponents.indexOf(selectedBeforeFilter);
+            if (index >= 0) {
+                listBox.setSelectedIndex(index);
+            }
+        }
+    }
+
+    /**
+     * Updates the result count display.
+     */
+    private void updateResultCount() {
+        if (searchPanel != null) {
+            searchPanel.setResultCount(filteredComponents.size(), allComponents.size());
+        }
+    }
+
+    /**
+     * Updates the empty state message visibility.
+     */
+    private void updateEmptyState() {
+        final boolean isEmpty = filteredComponents.isEmpty();
+
+        if (isEmpty) {
+            final String message = "No components found"
+                + (currentQuery != null && !currentQuery.trim().isEmpty()
+                    ? " for '" + currentQuery + "'"
+                    : "");
+            emptyStateLabel.setText(message);
+            emptyStateLabel.setVisible(true);
+            listBox.setVisible(false);
+        } else {
+            emptyStateLabel.setVisible(false);
+            listBox.setVisible(true);
+        }
+    }
+
+    /**
+     * Preserves the current selection if it matches the filter.
+     * Clears the selection if the current selection doesn't match.
+     */
+    private void preserveSelection() {
+        final String currentSelection = getSelectedComponent();
+
+        if (currentSelection != null) {
+            if (!ComponentFilter.matches(currentSelection, currentQuery)) {
+                listBox.setSelectedIndex(-1);
+                if (selectionHandler != null) {
+                    selectionHandler.accept(null);
+                }
+            }
+        }
+    }
+
+    /**
      * Populates the list box with component names.
-     * <p>
-     * The component names should already be sorted alphabetically by the caller.
-     * </p>
      *
      * @param componentNames the list of component names to display, must not be null
      * @throws IllegalArgumentException if componentNames is null
@@ -100,13 +223,15 @@ public class ComponentListPanel extends PSimplePanel {
             throw new IllegalArgumentException("componentNames must not be null");
         }
 
-        // Clear existing items
-        listBox.clear();
+        allComponents = new ArrayList<>(componentNames);
+        filteredComponents = new ArrayList<>(componentNames);
+        currentQuery = "";
 
-        // Add all component names
-        for (final String componentName : componentNames) {
-            listBox.addItem(componentName);
-        }
+        initializeSearchPanel();
+
+        updateListDisplay();
+        updateResultCount();
+        updateEmptyState();
     }
 
     /**
@@ -123,10 +248,14 @@ public class ComponentListPanel extends PSimplePanel {
      */
     private void handleSelectionChange() {
         final int selectedIndex = listBox.getSelectedIndex();
-        
-        if (selectedIndex >= 0 && selectionHandler != null) {
+
+        if (selectedIndex >= 0) {
             final String selectedComponent = listBox.getSelectedItem();
-            selectionHandler.accept(selectedComponent);
+            selectedBeforeFilter = selectedComponent;
+
+            if (selectionHandler != null) {
+                selectionHandler.accept(selectedComponent);
+            }
         }
     }
 
@@ -145,13 +274,12 @@ public class ComponentListPanel extends PSimplePanel {
      */
     public void clear() {
         listBox.clear();
+        allComponents.clear();
+        filteredComponents.clear();
     }
 
     /**
      * Displays an error message in the component list.
-     * <p>
-     * Used when component discovery fails.
-     * </p>
      *
      * @param errorMessage the error message to display, must not be null
      * @throws IllegalArgumentException if errorMessage is null
@@ -163,5 +291,27 @@ public class ComponentListPanel extends PSimplePanel {
 
         listBox.clear();
         listBox.addItem("Error: " + errorMessage);
+
+        if (searchPanel != null) {
+            searchPanel.setVisible(false);
+        }
+    }
+
+    /**
+     * Gets the search panel for testing purposes.
+     *
+     * @return the search panel, or null if not initialized
+     */
+    SearchPanel getSearchPanel() {
+        return searchPanel;
+    }
+
+    /**
+     * Gets the empty state label for testing purposes.
+     *
+     * @return the empty state label
+     */
+    PLabel getEmptyStateLabel() {
+        return emptyStateLabel;
     }
 }

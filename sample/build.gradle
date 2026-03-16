@@ -45,6 +45,7 @@ dependencies {
             'org.junit.jupiter:junit-jupiter-engine:5.8.1',
             'org.junit.platform:junit-platform-engine:1.8.1',
             'org.junit.platform:junit-platform-launcher:1.8.1',
+            'org.junit.vintage:junit-vintage-engine:5.8.1',
             'net.jqwik:jqwik:1.8.2',
             'org.assertj:assertj-core:3.24.2'
     )
@@ -72,9 +73,10 @@ task copyComponentTerminal(type: Copy) {
 }
 
 task copyComponentBridge(type: Copy) {
-    from 'src/main/resources/script/component-bridge.js'
+    from '../ponysdk-component-terminal/dist/component-bridge-standalone.js'
     into 'build/resources/main/script'
-    inputs.file('src/main/resources/script/component-bridge.js')
+    rename { 'component-bridge.js' }
+    inputs.file('../ponysdk-component-terminal/dist/component-bridge-standalone.js')
     outputs.file('build/resources/main/script/component-bridge.js')
 }
 
@@ -91,13 +93,16 @@ processResources {
     finalizedBy copyComponentTerminal, copyComponentBridge, copyAgGridWrapper
 }
 
+jar {
+    dependsOn copyComponentTerminal, copyComponentBridge, copyAgGridWrapper
+}
+
 compileTestJava {
     dependsOn copyComponentTerminal, copyComponentBridge, copyAgGridWrapper
 }
 
 test {
     useJUnitPlatform()
-    useJUnit()
 }
 
 task runSampleSpring(type: JavaExec) {
