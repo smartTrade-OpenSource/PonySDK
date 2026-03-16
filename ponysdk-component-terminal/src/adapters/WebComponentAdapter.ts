@@ -191,10 +191,24 @@ export class WebComponentAdapter<TProps> extends BaseFrameworkAdapter<TProps> {
             return;
         }
 
-        // Apply props as properties on the custom element
+        // Apply props to the custom element with proper type handling
         const propsObj = this.props as Record<string, unknown>;
         for (const [key, value] of Object.entries(propsObj)) {
-            (this.element as unknown as Record<string, unknown>)[key] = value;
+            if (typeof value === 'boolean') {
+                // Boolean attributes: presence = true, absence = false
+                if (value) {
+                    this.element.setAttribute(key, '');
+                } else {
+                    this.element.removeAttribute(key);
+                }
+            } else if (value === null || value === undefined) {
+                this.element.removeAttribute(key);
+            } else if (typeof value === 'string' || typeof value === 'number') {
+                this.element.setAttribute(key, String(value));
+            } else {
+                // Complex values (objects, arrays) as JS properties
+                (this.element as unknown as Record<string, unknown>)[key] = value;
+            }
         }
 
         // Sync overlay open state if this is an overlay component

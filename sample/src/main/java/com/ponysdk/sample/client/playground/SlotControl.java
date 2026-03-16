@@ -76,15 +76,10 @@ public class SlotControl {
      * @param component the component to bind to
      */
     public void bindTo(final PWebComponent<?> component) {
-        System.out.println("[SlotControl] Binding slot '" + slotName + "' to component");
-        
         // Update on value change (blur or Enter key)
         textBox.addValueChangeHandler(event -> {
-            System.out.println("[SlotControl] ValueChangeHandler triggered for slot '" + slotName + "'");
             final String text = textBox.getValue();
-            System.out.println("[SlotControl] Text value: '" + text + "'");
             final boolean success = updateSlotContent(component, text);
-            System.out.println("[SlotControl] updateSlotContent result: " + success);
             if (success) {
                 clearError();
             }
@@ -92,17 +87,12 @@ public class SlotControl {
         
         // Also update on key up for real-time feedback
         textBox.addKeyUpHandler(event -> {
-            System.out.println("[SlotControl] KeyUpHandler triggered for slot '" + slotName + "'");
             final String text = textBox.getValue();
-            System.out.println("[SlotControl] Text value: '" + text + "'");
             final boolean success = updateSlotContent(component, text);
-            System.out.println("[SlotControl] updateSlotContent result: " + success);
             if (success) {
                 clearError();
             }
         });
-        
-        System.out.println("[SlotControl] Handlers registered for slot '" + slotName + "'");
     }
 
     /**
@@ -117,25 +107,20 @@ public class SlotControl {
      * @return true if the operation succeeded, false if validation failed
      */
     boolean updateSlotContent(final PWebComponent<?> component, final String text) {
-        System.out.println("[SlotControl] updateSlotContent called for slot '" + slotName + "' with text: '" + text + "'");
-        
         // Validate text length
         if (text != null && text.length() > 10000) {
-            System.out.println("[SlotControl] Text too long: " + text.length() + " characters");
             showError("Text exceeds maximum length of 10000 characters");
             return false;
         }
 
         // Validate slot exists (for named slots)
         if (!slotName.isEmpty() && !component.getDeclaredSlots().contains(slotName)) {
-            System.out.println("[SlotControl] Slot '" + slotName + "' does not exist on component");
             showError("Slot '" + slotName + "' does not exist on this component");
             return false;
         }
 
         // Remove existing content if present
         if (currentTextComponent != null) {
-            System.out.println("[SlotControl] Removing existing text component");
             try {
                 if (slotName.isEmpty()) {
                     component.removeFromSlot(null, currentTextComponent);
@@ -143,7 +128,6 @@ public class SlotControl {
                     component.removeFromSlot(slotName, currentTextComponent);
                 }
             } catch (final Exception e) {
-                System.out.println("[SlotControl] Failed to remove old content: " + e.getMessage());
                 showError("Failed to remove old content: " + e.getMessage());
                 return false;
             }
@@ -152,29 +136,20 @@ public class SlotControl {
 
         // Add new content if text is non-empty
         if (text != null && !text.trim().isEmpty()) {
-            System.out.println("[SlotControl] Creating new PTextComponent with text: '" + text + "'");
             try {
                 currentTextComponent = new PTextComponent(text);
                 if (slotName.isEmpty()) {
-                    System.out.println("[SlotControl] Adding to default slot");
                     component.addToDefaultSlot(currentTextComponent);
                 } else {
-                    System.out.println("[SlotControl] Adding to named slot: " + slotName);
                     component.addToSlot(slotName, currentTextComponent);
                 }
-                System.out.println("[SlotControl] Successfully added text component");
             } catch (final Exception e) {
-                System.out.println("[SlotControl] Failed to add content: " + e.getMessage());
-                e.printStackTrace();
                 showError("Failed to add content: " + e.getMessage());
                 currentTextComponent = null;
                 return false;
             }
-        } else {
-            System.out.println("[SlotControl] Text is empty, not adding content");
         }
         
-        System.out.println("[SlotControl] updateSlotContent completed successfully");
         return true;
     }
 

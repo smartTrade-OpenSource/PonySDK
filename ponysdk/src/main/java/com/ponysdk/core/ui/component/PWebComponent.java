@@ -144,14 +144,10 @@ public abstract class PWebComponent<TProps extends Record> extends PComponent<TP
             }
             json.append("\"}");
 
-            System.out.println("[PWebComponent] Sending text slot operation: " + json.toString());
-
             saveUpdate(writer -> {
                 writer.write(ServerToClientModel.PCOMPONENT_UPDATE);
                 writer.write(ServerToClientModel.PCOMPONENT_SLOT_OPERATION, json.toString());
             });
-            
-            System.out.println("[PWebComponent] Text slot operation sent");
             return;
         }
         
@@ -166,13 +162,9 @@ public abstract class PWebComponent<TProps extends Record> extends PComponent<TP
         json.append(",\"childObjectId\":").append(child.getID());
         json.append(",\"operation\":\"").append(operation).append("\"}");
 
-        System.out.println("[PWebComponent] Sending slot operation: " + json.toString());
-
         saveUpdate(writer -> {
             writer.write(ServerToClientModel.PCOMPONENT_UPDATE);
             writer.write(ServerToClientModel.PCOMPONENT_SLOT_OPERATION, json.toString());
         });
-        
-        System.out.println("[PWebComponent] Slot operation sent");
     }
 }
