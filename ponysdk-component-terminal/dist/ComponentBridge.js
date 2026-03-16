@@ -83,6 +83,18 @@ const bridgeAPI = {
         let props;
         try {
             props = JSON.parse(propsJson);
+            // DEBUG: Log props to see what types we're getting
+            const p = props;
+            console.log('DEBUG handleCreate props:', {
+                objectId,
+                signature,
+                loading: p?.['loading'],
+                loadingType: typeof p?.['loading'],
+                disabled: p?.['disabled'],
+                disabledType: typeof p?.['disabled'],
+                pill: p?.['pill'],
+                pillType: typeof p?.['pill']
+            });
         }
         catch (error) {
             console.error('Failed to parse props JSON for component #' + objectId, error);

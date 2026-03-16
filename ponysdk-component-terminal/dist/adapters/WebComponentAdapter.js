@@ -163,10 +163,28 @@ export class WebComponentAdapter extends BaseFrameworkAdapter {
         if (!this.element || this.props === null || this.props === undefined) {
             return;
         }
-        // Apply props as properties on the custom element
+        // Apply props to the custom element with proper type handling
         const propsObj = this.props;
         for (const [key, value] of Object.entries(propsObj)) {
-            this.element[key] = value;
+            if (typeof value === 'boolean') {
+                // Boolean attributes: presence = true, absence = false
+                if (value) {
+                    this.element.setAttribute(key, '');
+                }
+                else {
+                    this.element.removeAttribute(key);
+                }
+            }
+            else if (value === null || value === undefined) {
+                this.element.removeAttribute(key);
+            }
+            else if (typeof value === 'string' || typeof value === 'number') {
+                this.element.setAttribute(key, String(value));
+            }
+            else {
+                // Complex values (objects, arrays) as JS properties
+                this.element[key] = value;
+            }
         }
         // Sync overlay open state if this is an overlay component
         if (this.overlayController && typeof propsObj['open'] === 'boolean') {

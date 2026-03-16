@@ -1387,7 +1387,19 @@ var ComponentTerminal = (() => {
       }
       const propsObj = this.props;
       for (const [key, value] of Object.entries(propsObj)) {
-        this.element[key] = value;
+        if (typeof value === "boolean") {
+          if (value) {
+            this.element.setAttribute(key, "");
+          } else {
+            this.element.removeAttribute(key);
+          }
+        } else if (value === null || value === void 0) {
+          this.element.removeAttribute(key);
+        } else if (typeof value === "string" || typeof value === "number") {
+          this.element.setAttribute(key, String(value));
+        } else {
+          this.element[key] = value;
+        }
       }
       if (this.overlayController && typeof propsObj["open"] === "boolean") {
         this.overlayController.syncOpen(propsObj["open"]);
@@ -1935,6 +1947,17 @@ var ComponentTerminal = (() => {
       let props;
       try {
         props = JSON.parse(propsJson);
+        const p = props;
+        console.log("DEBUG handleCreate props:", {
+          objectId,
+          signature,
+          loading: p?.["loading"],
+          loadingType: typeof p?.["loading"],
+          disabled: p?.["disabled"],
+          disabledType: typeof p?.["disabled"],
+          pill: p?.["pill"],
+          pillType: typeof p?.["pill"]
+        });
       } catch (error) {
         console.error("Failed to parse props JSON for component #" + objectId, error);
         return;

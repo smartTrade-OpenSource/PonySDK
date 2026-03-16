@@ -56,10 +56,27 @@
                 if (propsJson) {
                     try {
                         const props = JSON.parse(propsJson);
-                        // Apply props as attributes/properties
+                        // Apply props as attributes/properties with proper type handling
                         for (const [key, value] of Object.entries(props)) {
-                            if (value !== null && value !== undefined) {
+                            if (typeof value === 'boolean') {
+                                // Boolean attributes: presence = true, absence = false
+                                if (value) {
+                                    element.setAttribute(key, '');
+                                } else {
+                                    element.removeAttribute(key);
+                                }
+                            } else if (value === null || value === undefined) {
+                                element.removeAttribute(key);
+                            } else if (typeof value === 'string') {
+                                // Only set non-empty strings as attributes
+                                if (value !== '') {
+                                    element.setAttribute(key, value);
+                                }
+                            } else if (typeof value === 'number') {
                                 element.setAttribute(key, String(value));
+                            } else {
+                                // Complex values (objects, arrays) as JS properties
+                                element[key] = value;
                             }
                         }
                     } catch (error) {
