@@ -84,7 +84,7 @@ export class FormHandler {
             const fieldName = this.getFieldName(input);
             const fieldErrors = errors[fieldName];
 
-            if (fieldErrors && fieldErrors.length > 0) {
+            if (fieldErrors && fieldErrors.length > 0 && fieldErrors[0]) {
                 this.setCustomValidity(input, fieldErrors[0]);
             } else {
                 this.setCustomValidity(input, '');
@@ -170,7 +170,7 @@ export class FormHandler {
      */
     private getFieldName(input: HTMLElement): string {
         return input.getAttribute('name')
-            || (input as unknown as Record<string, unknown>).label as string
+            || (input as unknown as Record<string, unknown>)['label'] as string
             || input.tagName.toLowerCase();
     }
 

@@ -61,7 +61,7 @@ export class FormHandler {
         for (const input of inputs) {
             const fieldName = this.getFieldName(input);
             const fieldErrors = errors[fieldName];
-            if (fieldErrors && fieldErrors.length > 0) {
+            if (fieldErrors && fieldErrors.length > 0 && fieldErrors[0]) {
                 this.setCustomValidity(input, fieldErrors[0]);
             }
             else {
@@ -131,7 +131,7 @@ export class FormHandler {
      */
     getFieldName(input) {
         return input.getAttribute('name')
-            || input.label
+            || input['label']
             || input.tagName.toLowerCase();
     }
     /**

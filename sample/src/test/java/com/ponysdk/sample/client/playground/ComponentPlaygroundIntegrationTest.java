@@ -59,7 +59,8 @@ public class ComponentPlaygroundIntegrationTest extends PSuite {
             mockScanner,
             new DefaultMethodIntrospector(),
             new FormGenerator(),
-            new PropertyBinder()
+            new PropertyBinder(),
+            new ComponentMetadataLoader()
         );
     }
 

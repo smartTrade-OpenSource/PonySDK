@@ -195,6 +195,14 @@ public class PTComponent extends PTWidget<SimplePanel> {
                 }
                 notifyComponentBinary(getObjectID(), binaryArray);
                 return true;
+            } else if (ServerToClientModel.PCOMPONENT_SLOT_OPERATION == propsType) {
+                // Slot operation (add/remove child component)
+                final String slotOperation = propsModel.getStringValue();
+                if (log.isLoggable(Level.FINE)) {
+                    log.fine("PTComponent #" + getObjectID() + " received slot operation: " + slotOperation);
+                }
+                notifyComponentSlotOperation(getObjectID(), slotOperation);
+                return true;
             } else {
                 log.warning("PTComponent #" + getObjectID() + " unexpected props type: " + propsType);
                 buffer.rewind(propsModel);
@@ -286,6 +294,15 @@ public class PTComponent extends PTWidget<SimplePanel> {
     private native void notifyComponentProps(int objectId, String props) /*-{
         if ($wnd.PonySDK && $wnd.PonySDK.ComponentTerminal) {
             $wnd.PonySDK.ComponentTerminal.handleProps(objectId, props);
+        }
+    }-*/;
+
+    /**
+     * Notifies the TypeScript ComponentTerminal of a slot operation.
+     */
+    private native void notifyComponentSlotOperation(int objectId, String slotOperation) /*-{
+        if ($wnd.PonySDK && $wnd.PonySDK.ComponentTerminal) {
+            $wnd.PonySDK.ComponentTerminal.handleSlotOperation(objectId, slotOperation);
         }
     }-*/;
 

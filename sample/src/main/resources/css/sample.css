@@ -109,13 +109,15 @@
 }
 
 .component-preview {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    /* Changed from purple gradient to white background for better contrast */
+    background: #ffffff;
     border-radius: 12px;
     padding: 48px;
     margin: 20px;
     min-height: 250px;
+    /* Added visible border to clearly delimit the preview area */
+    border: 2px solid rgba(102, 126, 234, 0.3);
     box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
-    border: none;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -130,7 +132,8 @@
     right: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    /* Subtle gradient overlay for visual interest without compromising contrast */
+    background: radial-gradient(circle, rgba(102, 126, 234, 0.05) 0%, transparent 70%);
     animation: pulse 4s ease-in-out infinite;
 }
 

@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.stm.Txn;
+import com.ponysdk.core.ui.basic.PScript;
 import com.ponysdk.core.ui.basic.PWindow;
 import com.ponysdk.core.ui.main.EntryPoint;
 import com.ponysdk.sample.client.playground.ComponentPlayground;
@@ -46,9 +47,27 @@ public class ComponentPlaygroundEntryPoint implements EntryPoint {
     @Override
     public void start(final UIContext uiContext) {
         log.info("=== Component Playground EntryPoint ===");
+        
+        // Load Web Awesome from CDN
+        final String loadWebAwesome = 
+            "(function() {" +
+            "  if (!customElements.get('wa-button')) {" +
+            "    const link = document.createElement('link');" +
+            "    link.rel = 'stylesheet';" +
+            "    link.href = 'https://cdn.jsdelivr.net/npm/@awesome.me/webawesome@latest/dist-cdn/styles/themes/default.css';" +
+            "    document.head.appendChild(link);" +
+            "    const script = document.createElement('script');" +
+            "    script.type = 'module';" +
+            "    script.src = 'https://cdn.jsdelivr.net/npm/@awesome.me/webawesome@latest/dist-cdn/webawesome.loader.js';" +
+            "    document.head.appendChild(script);" +
+            "    console.log('Web Awesome loaded from CDN');" +
+            "  }" +
+            "})();";
+        PScript.execute(PWindow.getMain(), loadWebAwesome);
+        
         Txn.get().flush();
 
-    // Wait a bit for the registry to load, then create the playground
+        // Wait a bit for the registry to load, then create the playground
         log.info("Creating Component Playground...");
 
         final ComponentPlayground playground = new ComponentPlayground();

@@ -142,6 +142,12 @@ public class PropertyPanel extends PVerticalPanel {
      * @param component the component to preview, must not be null
      * @throws IllegalArgumentException if component is null
      */
+    /**
+     * Sets the component instance to display in the preview container.
+     *
+     * @param component the component to preview, must not be null
+     * @throws IllegalArgumentException if component is null
+     */
     public void setPreviewComponent(final PComponent<?> component) {
         if (component == null) {
             throw new IllegalArgumentException("component must not be null");
@@ -150,29 +156,12 @@ public class PropertyPanel extends PVerticalPanel {
         // Clear previous content
         previewContainer.clear();
 
-        // Attach the component - it will be created in the showcase
-        component.attach(com.ponysdk.core.ui.basic.PWindow.getMain());
-        
-        // Flush to ensure component is created on client side
-        com.ponysdk.core.server.stm.Txn.get().flush();
-        
-        // Use JavaScript to hide showcase and move component to preview
-        final String script = String.format(
-            "(function() {" +
-            "  var showcase = document.getElementById('pcomponent-showcase');" +
-            "  if (showcase) showcase.style.display = 'none';" +
-            "  var component = document.getElementById('pcomponent-%d');" +
-            "  var preview = document.querySelector('.component-preview');" +
-            "  if (component && preview) {" +
-            "    preview.appendChild(component);" +
-            "    console.log('[Playground] Component moved');" +
-            "  }" +
-            "})()",
-            component.getID()
-        );
-        
-        com.ponysdk.core.ui.basic.PScript.execute(com.ponysdk.core.ui.basic.PWindow.getMain(), script);
+        // Add the component directly to the preview container
+        // PComponent extends PWidget, so it can be added like any other widget
+        previewContainer.setWidget(component);
     }
+
+
 
     /**
      * Adds slot controls to the slots area.

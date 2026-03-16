@@ -113,7 +113,10 @@ export class DataTableRenderer {
         }
         else {
             for (let i = 0; i < this.props.data.length; i++) {
-                this.tbodyElement.appendChild(this.createRow(this.props.data[i], i));
+                const rowData = this.props.data[i];
+                if (rowData) {
+                    this.tbodyElement.appendChild(this.createRow(rowData, i));
+                }
             }
         }
         this.tableElement.appendChild(this.tbodyElement);
@@ -123,7 +126,10 @@ export class DataTableRenderer {
             return;
         this.tbodyElement.innerHTML = '';
         for (let i = range.start; i < range.end && i < this.props.data.length; i++) {
-            this.tbodyElement.appendChild(this.createRow(this.props.data[i], i));
+            const rowData = this.props.data[i];
+            if (rowData) {
+                this.tbodyElement.appendChild(this.createRow(rowData, i));
+            }
         }
     }
     createRow(rowData, index) {

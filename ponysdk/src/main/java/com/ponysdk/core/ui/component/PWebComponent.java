@@ -116,10 +116,46 @@ public abstract class PWebComponent<TProps extends Record> extends PComponent<TP
     /**
      * Sends a slot operation message to the client.
      * <p>
-     * Message format: {@code {"type":"slot","slotName":"prefix","childObjectId":43,"operation":"add"}}
+     * For PTextComponent children, sends the text content directly.
+     * For other components, sends the child object ID.
+     * </p>
+     * <p>
+     * Message format for text: {@code {"type":"text","slotName":"prefix","content":"Hello"}}
+     * Message format for component: {@code {"type":"slot","slotName":"prefix","childObjectId":43,"operation":"add"}}
      * </p>
      */
     private void sendSlotOperation(final String slotName, final PComponent<?> child, final String operation) {
+        // Special handling for PTextComponent - send text content directly
+        if (child instanceof PTextComponent) {
+            final PTextComponent textComponent = (PTextComponent) child;
+            final String text = textComponent.getText();
+            
+            final StringBuilder json = new StringBuilder(64);
+            json.append("{\"type\":\"text\",\"slotName\":");
+            if (slotName != null) {
+                json.append('"').append(slotName).append('"');
+            } else {
+                json.append("\"default\"");
+            }
+            json.append(",\"content\":\"");
+            // Escape quotes in text
+            if (text != null) {
+                json.append(text.replace("\"", "\\\""));
+            }
+            json.append("\"}");
+
+            System.out.println("[PWebComponent] Sending text slot operation: " + json.toString());
+
+            saveUpdate(writer -> {
+                writer.write(ServerToClientModel.PCOMPONENT_UPDATE);
+                writer.write(ServerToClientModel.PCOMPONENT_SLOT_OPERATION, json.toString());
+            });
+            
+            System.out.println("[PWebComponent] Text slot operation sent");
+            return;
+        }
+        
+        // Standard component slot operation
         final StringBuilder json = new StringBuilder(64);
         json.append("{\"type\":\"slot\",\"slotName\":");
         if (slotName != null) {
@@ -130,9 +166,13 @@ public abstract class PWebComponent<TProps extends Record> extends PComponent<TP
         json.append(",\"childObjectId\":").append(child.getID());
         json.append(",\"operation\":\"").append(operation).append("\"}");
 
+        System.out.println("[PWebComponent] Sending slot operation: " + json.toString());
+
         saveUpdate(writer -> {
             writer.write(ServerToClientModel.PCOMPONENT_UPDATE);
             writer.write(ServerToClientModel.PCOMPONENT_SLOT_OPERATION, json.toString());
         });
+        
+        System.out.println("[PWebComponent] Slot operation sent");
     }
 }

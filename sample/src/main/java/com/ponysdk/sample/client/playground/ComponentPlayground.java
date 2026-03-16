@@ -333,7 +333,7 @@ public class ComponentPlayground extends PSimplePanel {
     /**
      * Extracts the tag name from a component name.
      * <p>
-     * Converts "WAButton" to "wa-button".
+     * Converts "WAButton" or "Button" to "wa-button".
      * </p>
      */
     private String extractTagName(final String componentName) {
@@ -341,7 +341,8 @@ public class ComponentPlayground extends PSimplePanel {
             final String withoutPrefix = componentName.substring(2);
             return "wa-" + camelToKebab(withoutPrefix);
         }
-        return camelToKebab(componentName);
+        // Component names without "WA" prefix (e.g., "Badge") should still generate "wa-badge"
+        return "wa-" + camelToKebab(componentName);
     }
 
     /**

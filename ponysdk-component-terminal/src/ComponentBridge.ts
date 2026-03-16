@@ -19,6 +19,7 @@ interface ComponentBridgeAPI {
     handlePatch(objectId: number, patch: string): void;
     handleProps(objectId: number, props: string): void;
     handleBinary(objectId: number, binaryData: ArrayBuffer): void;
+    handleSlotOperation(objectId: number, slotOperationJson: string): void;
     handleDestroy(objectId: number): void;
 }
 
@@ -181,6 +182,27 @@ const bridgeAPI: ComponentBridgeAPI = {
             objectId,
             type: 'update',
             binaryData
+        });
+    },
+
+    handleSlotOperation(objectId: number, slotOperationJson: string): void {
+        if (!terminal) {
+            console.warn('ComponentTerminal not initialized for component #' + objectId);
+            return;
+        }
+
+        let slotOperation: unknown;
+        try {
+            slotOperation = JSON.parse(slotOperationJson);
+        } catch (error) {
+            console.error('Failed to parse slot operation JSON for component #' + objectId, error);
+            return;
+        }
+
+        terminal.handleMessage({
+            objectId,
+            type: 'slot',
+            slotOperation: slotOperation as any
         });
     },
 

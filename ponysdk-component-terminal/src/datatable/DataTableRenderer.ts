@@ -169,7 +169,10 @@ export class DataTableRenderer {
             this.renderRowRange(range);
         } else {
             for (let i = 0; i < this.props.data.length; i++) {
-                this.tbodyElement.appendChild(this.createRow(this.props.data[i], i));
+                const rowData = this.props.data[i];
+                if (rowData) {
+                    this.tbodyElement.appendChild(this.createRow(rowData, i));
+                }
             }
         }
 
@@ -181,7 +184,10 @@ export class DataTableRenderer {
         this.tbodyElement.innerHTML = '';
 
         for (let i = range.start; i < range.end && i < this.props.data.length; i++) {
-            this.tbodyElement.appendChild(this.createRow(this.props.data[i], i));
+            const rowData = this.props.data[i];
+            if (rowData) {
+                this.tbodyElement.appendChild(this.createRow(rowData, i));
+            }
         }
     }
 

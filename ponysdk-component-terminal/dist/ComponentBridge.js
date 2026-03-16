@@ -152,6 +152,25 @@ const bridgeAPI = {
             binaryData
         });
     },
+    handleSlotOperation(objectId, slotOperationJson) {
+        if (!terminal) {
+            console.warn('ComponentTerminal not initialized for component #' + objectId);
+            return;
+        }
+        let slotOperation;
+        try {
+            slotOperation = JSON.parse(slotOperationJson);
+        }
+        catch (error) {
+            console.error('Failed to parse slot operation JSON for component #' + objectId, error);
+            return;
+        }
+        terminal.handleMessage({
+            objectId,
+            type: 'slot',
+            slotOperation: slotOperation
+        });
+    },
     handleDestroy(objectId) {
         if (!terminal) {
             return;

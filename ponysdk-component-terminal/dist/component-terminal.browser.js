@@ -21,13 +21,31 @@ var ComponentTerminal = (() => {
   // src/index.ts
   var src_exports = {};
   __export(src_exports, {
+    BreakpointListener: () => BreakpointListener,
     ComponentRegistry: () => ComponentRegistry,
     ComponentTerminal: () => ComponentTerminal,
+    DataTableRenderer: () => DataTableRenderer,
     EventBridge: () => EventBridge,
+    EventForwarder: () => EventForwarder,
+    FormHandler: () => FormHandler,
+    OverlayController: () => OverlayController,
     ReactAdapter: () => ReactAdapter,
+    ResponsiveGridRenderer: () => ResponsiveGridRenderer,
     SvelteAdapter: () => SvelteAdapter,
+    ToastQueue: () => ToastQueue,
+    VirtualScroller: () => VirtualScroller,
     VueAdapter: () => VueAdapter,
-    WebComponentAdapter: () => WebComponentAdapter
+    WebAwesomeLoader: () => WebAwesomeLoader,
+    WebComponentAdapter: () => WebComponentAdapter,
+    ensureWebAwesomeComponentDefined: () => ensureWebAwesomeComponentDefined,
+    getContainer: () => getContainer,
+    getTerminal: () => getTerminal,
+    getWebAwesomeComponentList: () => getWebAwesomeComponentList,
+    getWebAwesomeLoader: () => getWebAwesomeLoader,
+    initializeTerminal: () => initializeTerminal,
+    isWebAwesomeComponentReady: () => isWebAwesomeComponentReady,
+    registerContainer: () => registerContainer,
+    registerWebAwesomeComponents: () => registerWebAwesomeComponents
   });
 
   // node_modules/fast-json-patch/module/core.mjs
@@ -880,12 +898,367 @@ var ComponentTerminal = (() => {
     }
   };
 
+  // src/events/EventForwarder.ts
+  var CHECKED_TAGS = /* @__PURE__ */ new Set(["wa-checkbox", "wa-switch"]);
+  var WA_EVENTS = [
+    "wa-change",
+    "wa-input",
+    "wa-select",
+    "wa-close",
+    "wa-request-close",
+    "wa-focus",
+    "wa-blur",
+    "wa-show",
+    "wa-hide",
+    "wa-after-show",
+    "wa-after-hide"
+  ];
+  function extractPayload(eventType, event, element) {
+    const tag = element.tagName.toLowerCase();
+    const el = element;
+    switch (eventType) {
+      case "wa-change":
+        if (CHECKED_TAGS.has(tag)) {
+          return { checked: el.checked ?? false };
+        }
+        return { value: el.value ?? "" };
+      case "wa-input":
+        return { value: el.value ?? "" };
+      case "wa-select":
+        return { value: el.value ?? "" };
+      case "wa-request-close": {
+        const detail = event.detail;
+        const source = typeof detail?.source === "string" ? detail.source : "unknown";
+        return { source };
+      }
+      case "wa-close":
+      case "wa-focus":
+      case "wa-blur":
+      case "wa-show":
+      case "wa-hide":
+      case "wa-after-show":
+      case "wa-after-hide":
+        return {};
+      default:
+        return {};
+    }
+  }
+  var EventForwarder = class {
+    constructor(element, eventBridge, objectId) {
+      this.listeners = /* @__PURE__ */ new Map();
+      this.attached = false;
+      this.element = element;
+      this.eventBridge = eventBridge;
+      this.objectId = objectId;
+    }
+    /**
+     * Attach event listeners for all supported wa-* events.
+     * Safe to call multiple times — only attaches once.
+     */
+    attach() {
+      if (this.attached) {
+        return;
+      }
+      for (const eventType of WA_EVENTS) {
+        const listener = (event) => {
+          const payload = extractPayload(eventType, event, this.element);
+          this.eventBridge.dispatch(this.objectId, eventType, payload);
+        };
+        this.listeners.set(eventType, listener);
+        this.element.addEventListener(eventType, listener);
+      }
+      this.attached = true;
+    }
+    /**
+     * Detach all event listeners. Safe to call multiple times.
+     */
+    detach() {
+      if (!this.attached) {
+        return;
+      }
+      for (const [eventType, listener] of this.listeners) {
+        this.element.removeEventListener(eventType, listener);
+      }
+      this.listeners.clear();
+      this.attached = false;
+    }
+    /**
+     * Whether listeners are currently attached.
+     */
+    isAttached() {
+      return this.attached;
+    }
+  };
+
+  // src/overlay/OverlayController.ts
+  var OVERLAY_TAGS = /* @__PURE__ */ new Set(["wa-dialog", "wa-drawer"]);
+  var OverlayController = class {
+    constructor(element) {
+      this.attached = false;
+      this.lastOpen = null;
+      this.element = element;
+    }
+    /**
+     * Attach the controller. Reads the current `open` state from the element.
+     * Safe to call multiple times — only attaches once.
+     */
+    attach() {
+      if (this.attached) {
+        return;
+      }
+      this.lastOpen = this.isElementOpen();
+      this.attached = true;
+    }
+    /**
+     * Detach the controller and reset internal state.
+     * Safe to call multiple times.
+     */
+    detach() {
+      if (!this.attached) {
+        return;
+      }
+      this.lastOpen = null;
+      this.attached = false;
+    }
+    /**
+     * Whether the controller is currently attached.
+     */
+    isAttached() {
+      return this.attached;
+    }
+    /**
+     * Sync the open state from server props to the native element.
+     *
+     * When `open` changes to `true`, calls `element.show()` to trigger
+     * the native Web Awesome open animation with blocking overlay.
+     * When `open` changes to `false`, calls `element.hide()` to trigger
+     * the native close animation.
+     *
+     * If the element doesn't have show/hide methods, falls back to
+     * setting the `open` property directly.
+     *
+     * @param open - The desired open state from server props
+     */
+    syncOpen(open) {
+      if (!this.attached) {
+        return;
+      }
+      if (this.lastOpen === open) {
+        return;
+      }
+      this.lastOpen = open;
+      const el = this.element;
+      if (open) {
+        if (typeof el.show === "function") {
+          el.show();
+        } else {
+          el.open = true;
+        }
+      } else {
+        if (typeof el.hide === "function") {
+          el.hide();
+        } else {
+          el.open = false;
+        }
+      }
+    }
+    /**
+     * Check if this element is an overlay-type component (wa-dialog or wa-drawer).
+     */
+    static isOverlayElement(element) {
+      return OVERLAY_TAGS.has(element.tagName.toLowerCase());
+    }
+    // ========== Internal ==========
+    isElementOpen() {
+      const el = this.element;
+      return el.open === true;
+    }
+  };
+
+  // src/WebAwesomeLoader.ts
+  var DEFAULT_TIMEOUT_MS = 1e4;
+  var PLACEHOLDER_CLASS = "wa-loading-placeholder";
+  var WebAwesomeLoader = class {
+    constructor(timeoutMs = DEFAULT_TIMEOUT_MS) {
+      /** Per-tagName promises so we only wait once per element type. */
+      this.pending = /* @__PURE__ */ new Map();
+      this.timeoutMs = timeoutMs;
+    }
+    /**
+     * Returns `true` if the given tag name is already registered in the
+     * custom elements registry.
+     */
+    isReady(tagName) {
+      return customElements.get(tagName) !== void 0;
+    }
+    /**
+     * Waits until the custom element for `tagName` is defined.
+     *
+     * - If the element is already registered, resolves immediately.
+     * - Otherwise waits via `customElements.whenDefined()` with a timeout.
+     * - Rejects with an `Error` if the timeout expires.
+     * - Deduplicates concurrent calls for the same tag name.
+     */
+    async ensureDefined(tagName) {
+      if (this.isReady(tagName)) {
+        return;
+      }
+      const existing = this.pending.get(tagName);
+      if (existing) {
+        return existing;
+      }
+      const promise = this.waitForDefinition(tagName);
+      this.pending.set(tagName, promise);
+      try {
+        await promise;
+      } finally {
+        this.pending.delete(tagName);
+      }
+    }
+    /**
+     * Shows a lightweight placeholder element inside `container` while the
+     * custom element is loading. The placeholder is automatically removed
+     * once the element is defined (or on timeout).
+     *
+     * Returns the placeholder element so callers can customise it further.
+     */
+    showPlaceholder(container) {
+      const placeholder = document.createElement("div");
+      placeholder.className = PLACEHOLDER_CLASS;
+      placeholder.setAttribute("role", "status");
+      placeholder.setAttribute("aria-label", "Loading component\u2026");
+      placeholder.textContent = "";
+      container.appendChild(placeholder);
+      return placeholder;
+    }
+    /**
+     * Removes a previously-added placeholder from its parent.
+     */
+    removePlaceholder(placeholder) {
+      if (placeholder.parentNode) {
+        placeholder.parentNode.removeChild(placeholder);
+      }
+    }
+    // -----------------------------------------------------------------------
+    // Private helpers
+    // -----------------------------------------------------------------------
+    waitForDefinition(tagName) {
+      return new Promise((resolve, reject) => {
+        const timer = setTimeout(() => {
+          reject(
+            new Error(
+              `Timeout: custom element "${tagName}" was not defined within ${this.timeoutMs}ms`
+            )
+          );
+        }, this.timeoutMs);
+        customElements.whenDefined(tagName).then(() => {
+          clearTimeout(timer);
+          resolve();
+        }).catch((err) => {
+          clearTimeout(timer);
+          reject(err);
+        });
+      });
+    }
+  };
+
+  // src/WebAwesomeRegistry.ts
+  var WA_COMPONENTS = [
+    "wa-icon",
+    "wa-checkbox",
+    "wa-spinner",
+    "wa-tree-item",
+    "wa-carousel-item",
+    "wa-button",
+    "wa-animated-image",
+    "wa-animation",
+    "wa-avatar",
+    "wa-badge",
+    "wa-breadcrumb-item",
+    "wa-breadcrumb",
+    "wa-button-group",
+    "wa-callout",
+    "wa-card",
+    "wa-carousel",
+    "wa-input",
+    "wa-popup",
+    "wa-color-picker",
+    "wa-comparison",
+    "wa-tooltip",
+    "wa-copy-button",
+    "wa-details",
+    "wa-dialog",
+    "wa-divider",
+    "wa-drawer",
+    "wa-dropdown-item",
+    "wa-dropdown",
+    "wa-format-bytes",
+    "wa-format-date",
+    "wa-format-number",
+    "wa-include",
+    "wa-intersection-observer",
+    "wa-mutation-observer",
+    "wa-tag",
+    "wa-select",
+    "wa-option",
+    "wa-popover",
+    "wa-progress-bar",
+    "wa-progress-ring",
+    "wa-qr-code",
+    "wa-radio",
+    "wa-radio-group",
+    "wa-rating",
+    "wa-relative-time",
+    "wa-resize-observer",
+    "wa-scroller",
+    "wa-skeleton",
+    "wa-slider",
+    "wa-split-panel",
+    "wa-switch",
+    "wa-tab",
+    "wa-tab-panel",
+    "wa-tab-group",
+    "wa-textarea",
+    "wa-tree",
+    "wa-zoomable-frame",
+    "wa-number-input"
+  ];
+  var waLoader = new WebAwesomeLoader();
+  function createWaFactory(tagName, container) {
+    return {
+      getTagName: () => tagName,
+      getContainer: () => container
+    };
+  }
+  function registerWebAwesomeComponents(terminal2, container) {
+    console.log("[WebAwesome] Registering", WA_COMPONENTS.length, "component factories");
+    for (const tagName of WA_COMPONENTS) {
+      const factory = createWaFactory(tagName, container);
+      terminal2.registerFactory(tagName, factory);
+    }
+    console.log("[WebAwesome] Registration complete");
+  }
+  async function ensureWebAwesomeComponentDefined(tagName) {
+    return waLoader.ensureDefined(tagName);
+  }
+  function isWebAwesomeComponentReady(tagName) {
+    return waLoader.isReady(tagName);
+  }
+  function getWebAwesomeComponentList() {
+    return WA_COMPONENTS;
+  }
+  function getWebAwesomeLoader() {
+    return waLoader;
+  }
+
   // src/adapters/WebComponentAdapter.ts
   var WebComponentAdapter = class extends BaseFrameworkAdapter {
     constructor(factory, initialProps, eventBridge, objectId) {
       super(eventBridge, objectId);
       this.element = null;
       this.mounted = false;
+      this.eventForwarder = null;
+      this.overlayController = null;
       this.tagName = factory.getTagName?.() ?? "unknown-component";
       this.props = initialProps;
       this.container = factory.getContainer();
@@ -894,14 +1267,56 @@ var ComponentTerminal = (() => {
       if (this.mounted) {
         return;
       }
+      if (this.tagName.startsWith("wa-")) {
+        const loader = getWebAwesomeLoader();
+        if (!loader.isReady(this.tagName)) {
+          const placeholder = loader.showPlaceholder(this.container);
+          loader.ensureDefined(this.tagName).then(() => {
+            loader.removePlaceholder(placeholder);
+            this.performMount();
+          }).catch((err) => {
+            console.error(`Failed to load Web Awesome component ${this.tagName}:`, err);
+            loader.removePlaceholder(placeholder);
+            const errorDiv = document.createElement("div");
+            errorDiv.className = "wa-load-error";
+            errorDiv.textContent = `Failed to load ${this.tagName}`;
+            errorDiv.style.color = "red";
+            errorDiv.style.padding = "1rem";
+            errorDiv.style.border = "1px solid red";
+            this.container.appendChild(errorDiv);
+          });
+          return;
+        }
+      }
+      this.performMount();
+    }
+    performMount() {
       this.element = document.createElement(this.tagName);
       this.applyPropsToElement();
       this.container.appendChild(this.element);
       this.mounted = true;
+      this.eventForwarder = new EventForwarder(this.element, this.eventBridge, this.objectId);
+      this.eventForwarder.attach();
+      if (OverlayController.isOverlayElement(this.element)) {
+        this.overlayController = new OverlayController(this.element);
+        this.overlayController.attach();
+        const propsObj = this.props;
+        if (typeof propsObj["open"] === "boolean") {
+          this.overlayController.syncOpen(propsObj["open"]);
+        }
+      }
     }
     unmount() {
       if (!this.mounted) {
         return;
+      }
+      if (this.eventForwarder) {
+        this.eventForwarder.detach();
+        this.eventForwarder = null;
+      }
+      if (this.overlayController) {
+        this.overlayController.detach();
+        this.overlayController = null;
       }
       if (this.element && this.element.parentNode) {
         this.element.parentNode.removeChild(this.element);
@@ -932,6 +1347,40 @@ var ComponentTerminal = (() => {
     isMounted() {
       return this.mounted;
     }
+    /**
+     * Get the underlying DOM element.
+     * Returns null if the component is not mounted.
+     */
+    getElement() {
+      return this.element;
+    }
+    /**
+     * Handle a slot operation (add or remove a child element).
+     * Requirements: 7.2 - Insert child into the corresponding Web Component slot
+     * Requirements: 7.3 - Remove child from the slot DOM
+     * Requirements: 7.4 - Default slot (null slotName) mounts without slot attribute
+     *
+     * @param slotOp - The slot operation descriptor
+     * @param childElement - The child DOM element to add or remove
+     */
+    handleSlotOperation(slotOp, childElement) {
+      if (!this.mounted || !this.element) {
+        console.warn("Cannot handle slot operation on unmounted component:", this.objectId);
+        return;
+      }
+      if (slotOp.operation === "add") {
+        if (slotOp.slotName !== null) {
+          childElement.setAttribute("slot", slotOp.slotName);
+        } else {
+          childElement.removeAttribute("slot");
+        }
+        this.element.appendChild(childElement);
+      } else if (slotOp.operation === "remove") {
+        if (childElement.parentNode === this.element) {
+          this.element.removeChild(childElement);
+        }
+      }
+    }
     applyPropsToElement() {
       if (!this.element || this.props === null || this.props === void 0) {
         return;
@@ -939,6 +1388,9 @@ var ComponentTerminal = (() => {
       const propsObj = this.props;
       for (const [key, value] of Object.entries(propsObj)) {
         this.element[key] = value;
+      }
+      if (this.overlayController && typeof propsObj["open"] === "boolean") {
+        this.overlayController.syncOpen(propsObj["open"]);
       }
     }
     decodeBinary(_data) {
@@ -1118,9 +1570,170 @@ var ComponentTerminal = (() => {
     }
   };
 
+  // src/form/FormHandler.ts
+  var FormHandler = class {
+    constructor(formElement, eventBridge, objectId) {
+      this.submitListener = null;
+      this.formElement = formElement;
+      this.eventBridge = eventBridge;
+      this.objectId = objectId;
+    }
+    /**
+     * Attach the submit listener to the form element.
+     */
+    attach() {
+      this.submitListener = (e) => {
+        e.preventDefault();
+        this.handleSubmit();
+      };
+      this.formElement.addEventListener("submit", this.submitListener);
+    }
+    /**
+     * Detach the submit listener from the form element.
+     */
+    detach() {
+      if (this.submitListener) {
+        this.formElement.removeEventListener("submit", this.submitListener);
+        this.submitListener = null;
+      }
+    }
+    /**
+     * Programmatically trigger form submission (e.g., from a button click handler).
+     */
+    submit() {
+      this.handleSubmit();
+    }
+    /**
+     * Apply server-side validation errors to matching child input components.
+     * Sets customValidity on each matching wa-* element and calls reportValidity.
+     * Clears errors on fields not present in the error map.
+     *
+     * @param errors - Map of field name to error messages from the server
+     */
+    applyServerErrors(errors) {
+      const inputs = this.getInputElements();
+      for (const input of inputs) {
+        const fieldName = this.getFieldName(input);
+        const fieldErrors = errors[fieldName];
+        if (fieldErrors && fieldErrors.length > 0 && fieldErrors[0]) {
+          this.setCustomValidity(input, fieldErrors[0]);
+        } else {
+          this.setCustomValidity(input, "");
+        }
+      }
+    }
+    /**
+     * Clear all validation errors on child input elements.
+     */
+    clearErrors() {
+      const inputs = this.getInputElements();
+      for (const input of inputs) {
+        this.setCustomValidity(input, "");
+      }
+    }
+    // ========== Internal ==========
+    handleSubmit() {
+      const inputs = this.getInputElements();
+      let allValid = true;
+      for (const input of inputs) {
+        const valid = this.validateInput(input);
+        if (!valid) {
+          allValid = false;
+        }
+      }
+      if (allValid) {
+        const values = this.collectValues(inputs);
+        const payload = { values };
+        this.eventBridge.dispatch(this.objectId, "submit", payload);
+      }
+    }
+    /**
+     * Validate a single input element using native checkValidity/reportValidity.
+     * Returns true if valid.
+     */
+    validateInput(input) {
+      const el = input;
+      if (typeof el.reportValidity === "function") {
+        return el.reportValidity();
+      }
+      if (typeof el.checkValidity === "function") {
+        return el.checkValidity();
+      }
+      return true;
+    }
+    /**
+     * Set custom validity message on a wa-* input element.
+     */
+    setCustomValidity(input, message) {
+      const el = input;
+      if (typeof el.setCustomValidity === "function") {
+        el.setCustomValidity(message);
+        if (message && typeof el.reportValidity === "function") {
+          el.reportValidity();
+        }
+      }
+    }
+    /**
+     * Get the field name for an input element.
+     * Uses the 'name' attribute, falls back to 'label' property, then tag name.
+     */
+    getFieldName(input) {
+      return input.getAttribute("name") || input["label"] || input.tagName.toLowerCase();
+    }
+    /**
+     * Get the field value from an input element.
+     */
+    getFieldValue(input) {
+      const el = input;
+      if (input.tagName.toLowerCase() === "wa-checkbox" || input.tagName.toLowerCase() === "wa-switch") {
+        return el.checked ?? false;
+      }
+      return el.value ?? "";
+    }
+    /**
+     * Collect values from all input elements into a name→value map.
+     */
+    collectValues(inputs) {
+      const values = {};
+      for (const input of inputs) {
+        const name = this.getFieldName(input);
+        values[name] = this.getFieldValue(input);
+      }
+      return values;
+    }
+    /**
+     * Find all child wa-* input elements within the form.
+     * Matches elements whose tag name starts with 'wa-' and that have a value property
+     * or are known input-type components.
+     */
+    getInputElements() {
+      const allChildren = this.formElement.querySelectorAll("*");
+      const inputs = [];
+      const inputTags = /* @__PURE__ */ new Set([
+        "wa-input",
+        "wa-textarea",
+        "wa-select",
+        "wa-checkbox",
+        "wa-radio-group",
+        "wa-switch",
+        "wa-range",
+        "wa-color-picker",
+        "wa-rating"
+      ]);
+      for (const child of allChildren) {
+        const tagName = child.tagName.toLowerCase();
+        if (inputTags.has(tagName)) {
+          inputs.push(child);
+        }
+      }
+      return inputs;
+    }
+  };
+
   // src/ComponentTerminal.ts
   var ComponentTerminal = class {
     constructor(websocket) {
+      this.formHandlers = /* @__PURE__ */ new Map();
       this.eventBridge = new EventBridge(websocket);
       this.registry = new ComponentRegistry(this.eventBridge);
     }
@@ -1147,6 +1760,12 @@ var ComponentTerminal = (() => {
         case "destroy":
           this.handleDestroy(message);
           break;
+        case "slot":
+          this.handleSlot(message);
+          break;
+        case "serverErrors":
+          this.handleServerErrors(message);
+          break;
       }
     }
     /**
@@ -1161,6 +1780,12 @@ var ComponentTerminal = (() => {
     getRegistry() {
       return this.registry;
     }
+    /**
+     * Get the FormHandler for a given form objectId, if one exists.
+     */
+    getFormHandler(objectId) {
+      return this.formHandlers.get(objectId);
+    }
     handleCreate(message) {
       if (!message.framework || !message.signature) {
         console.warn("Invalid create message: missing framework or signature", message);
@@ -1174,6 +1799,14 @@ var ComponentTerminal = (() => {
           message.props
         );
         adapter.mount();
+        if (message.signature === "wa-form" && adapter instanceof WebComponentAdapter) {
+          const element = adapter.getElement();
+          if (element) {
+            const handler = new FormHandler(element, this.eventBridge, message.objectId);
+            handler.attach();
+            this.formHandlers.set(message.objectId, handler);
+          }
+        }
       } catch (error) {
         console.error("Failed to create component:", error);
       }
@@ -1197,10 +1830,773 @@ var ComponentTerminal = (() => {
       }
     }
     handleDestroy(message) {
+      const formHandler = this.formHandlers.get(message.objectId);
+      if (formHandler) {
+        formHandler.detach();
+        this.formHandlers.delete(message.objectId);
+      }
       const adapter = this.registry.get(message.objectId);
       if (adapter) {
         adapter.unmount();
         this.registry.remove(message.objectId);
+      }
+    }
+    /**
+     * Handle server validation errors for a form component.
+     * Requirements: 9.3 - Display server validation errors on matching input components
+     */
+    handleServerErrors(message) {
+      const errors = message.serverErrors;
+      if (!errors) {
+        console.warn("serverErrors message missing errors:", message.objectId);
+        return;
+      }
+      const formHandler = this.formHandlers.get(message.objectId);
+      if (!formHandler) {
+        console.warn("serverErrors for unknown form:", message.objectId);
+        return;
+      }
+      formHandler.applyServerErrors(errors);
+    }
+    /**
+     * Handle a slot operation message.
+     * Requirements: 7.2, 7.3, 7.4 - Slot add/remove with named and default slots
+     */
+    handleSlot(message) {
+      const slotOp = message.slotOperation;
+      if (!slotOp) {
+        console.warn("Slot message missing slotOperation:", message.objectId);
+        return;
+      }
+      const parentAdapter = this.registry.get(message.objectId);
+      if (!parentAdapter) {
+        console.warn("Slot operation for unknown parent component:", message.objectId);
+        return;
+      }
+      if (!(parentAdapter instanceof WebComponentAdapter)) {
+        console.warn("Slot operations are only supported on WebComponentAdapter:", message.objectId);
+        return;
+      }
+      const childAdapter = this.registry.get(slotOp.childObjectId);
+      if (!childAdapter) {
+        console.warn("Slot operation references unknown child component:", slotOp.childObjectId);
+        return;
+      }
+      if (!(childAdapter instanceof WebComponentAdapter)) {
+        console.warn("Slot child must be a WebComponentAdapter:", slotOp.childObjectId);
+        return;
+      }
+      const childElement = childAdapter.getElement();
+      if (!childElement) {
+        console.warn("Slot child element is not mounted:", slotOp.childObjectId);
+        return;
+      }
+      parentAdapter.handleSlotOperation(slotOp, childElement);
+    }
+  };
+
+  // src/ComponentBridge.ts
+  var containerRegistry = /* @__PURE__ */ new Map();
+  var terminal = null;
+  function registerContainer(objectId, container) {
+    containerRegistry.set(objectId, container);
+  }
+  function getContainer(objectId) {
+    return containerRegistry.get(objectId);
+  }
+  function initializeTerminal(websocket) {
+    terminal = new ComponentTerminal(websocket);
+  }
+  function getTerminal() {
+    return terminal;
+  }
+  var FRAMEWORK_MAP = {
+    0: "react",
+    1: "vue",
+    2: "svelte",
+    3: "webcomponent"
+  };
+  var bridgeAPI = {
+    handleCreate(objectId, framework, signature, propsJson) {
+      if (!terminal) {
+        console.warn("ComponentTerminal not initialized for component #" + objectId);
+        return;
+      }
+      const container = containerRegistry.get(objectId);
+      if (!container) {
+        console.error("Container not registered for component #" + objectId);
+        return;
+      }
+      const frameworkType = FRAMEWORK_MAP[framework];
+      if (!frameworkType) {
+        console.error("Unknown framework type: " + framework);
+        return;
+      }
+      let props;
+      try {
+        props = JSON.parse(propsJson);
+      } catch (error) {
+        console.error("Failed to parse props JSON for component #" + objectId, error);
+        return;
+      }
+      const factorySignature = `${objectId}-${signature}`;
+      terminal.registerFactory(factorySignature, {
+        getContainer: () => container,
+        getTagName: () => signature
+      });
+      terminal.handleMessage({
+        objectId,
+        type: "create",
+        framework: frameworkType,
+        signature: factorySignature,
+        props
+      });
+    },
+    handlePatch(objectId, patchJson) {
+      if (!terminal) {
+        console.warn("ComponentTerminal not initialized for component #" + objectId);
+        return;
+      }
+      let patches;
+      try {
+        patches = JSON.parse(patchJson);
+      } catch (error) {
+        console.error("Failed to parse patch JSON for component #" + objectId, error);
+        return;
+      }
+      terminal.handleMessage({
+        objectId,
+        type: "update",
+        patches
+      });
+    },
+    handleProps(objectId, propsJson) {
+      if (!terminal) {
+        console.warn("ComponentTerminal not initialized for component #" + objectId);
+        return;
+      }
+      let props;
+      try {
+        props = JSON.parse(propsJson);
+      } catch (error) {
+        console.error("Failed to parse props JSON for component #" + objectId, error);
+        return;
+      }
+      terminal.handleMessage({
+        objectId,
+        type: "update",
+        props
+      });
+    },
+    handleBinary(objectId, binaryData) {
+      if (!terminal) {
+        console.warn("ComponentTerminal not initialized for component #" + objectId);
+        return;
+      }
+      terminal.handleMessage({
+        objectId,
+        type: "update",
+        binaryData
+      });
+    },
+    handleSlotOperation(objectId, slotOperationJson) {
+      if (!terminal) {
+        console.warn("ComponentTerminal not initialized for component #" + objectId);
+        return;
+      }
+      let slotOperation;
+      try {
+        slotOperation = JSON.parse(slotOperationJson);
+      } catch (error) {
+        console.error("Failed to parse slot operation JSON for component #" + objectId, error);
+        return;
+      }
+      terminal.handleMessage({
+        objectId,
+        type: "slot",
+        slotOperation
+      });
+    },
+    handleDestroy(objectId) {
+      if (!terminal) {
+        return;
+      }
+      terminal.handleMessage({
+        objectId,
+        type: "destroy"
+      });
+      containerRegistry.delete(objectId);
+    }
+  };
+  if (typeof window !== "undefined") {
+    window.PonySDK = window.PonySDK || {};
+    window.PonySDK.ComponentTerminal = bridgeAPI;
+    window.PonySDK.ComponentBridge = {
+      registerContainer,
+      initializeTerminal
+    };
+  }
+
+  // src/layout/BreakpointListener.ts
+  var BreakpointListener = class {
+    constructor(eventBridge, objectId) {
+      this.eventBridge = eventBridge;
+      this.objectId = objectId;
+      this.mobileQuery = window.matchMedia("(max-width: 599px)");
+      this.tabletQuery = window.matchMedia("(min-width: 600px) and (max-width: 1023px)");
+      this.desktopQuery = window.matchMedia("(min-width: 1024px)");
+      this.currentBreakpoint = this.detectCurrentBreakpoint();
+      this.mobileHandler = (e) => {
+        if (e.matches)
+          this.onBreakpointChange("mobile");
+      };
+      this.tabletHandler = (e) => {
+        if (e.matches)
+          this.onBreakpointChange("tablet");
+      };
+      this.desktopHandler = (e) => {
+        if (e.matches)
+          this.onBreakpointChange("desktop");
+      };
+      this.setupMediaQueries();
+    }
+    /**
+     * Returns the currently active breakpoint.
+     */
+    getCurrentBreakpoint() {
+      return this.currentBreakpoint;
+    }
+    /**
+     * Removes all media query listeners. Call when disposing.
+     */
+    destroy() {
+      this.mobileQuery.removeEventListener("change", this.mobileHandler);
+      this.tabletQuery.removeEventListener("change", this.tabletHandler);
+      this.desktopQuery.removeEventListener("change", this.desktopHandler);
+    }
+    setupMediaQueries() {
+      this.mobileQuery.addEventListener("change", this.mobileHandler);
+      this.tabletQuery.addEventListener("change", this.tabletHandler);
+      this.desktopQuery.addEventListener("change", this.desktopHandler);
+    }
+    detectCurrentBreakpoint() {
+      if (this.mobileQuery.matches)
+        return "mobile";
+      if (this.tabletQuery.matches)
+        return "tablet";
+      return "desktop";
+    }
+    onBreakpointChange(newBreakpoint) {
+      if (newBreakpoint === this.currentBreakpoint)
+        return;
+      this.currentBreakpoint = newBreakpoint;
+      this.eventBridge.dispatch(this.objectId, "breakpoint-change", {
+        breakpoint: newBreakpoint
+      });
+    }
+  };
+
+  // src/layout/ResponsiveGridRenderer.ts
+  var ResponsiveGridRenderer = class {
+    /**
+     * Generate a complete CSS string for a responsive grid identified by `gridId`.
+     *
+     * The output includes:
+     * - A base grid rule using the default columns/gap
+     * - A `@media` rule for each breakpoint overriding columns/gap
+     * - Conditional display `@media` rules for hideOnMobile/hideOnTablet/hideOnDesktop
+     */
+    generateCSS(gridId, props) {
+      const selector = `[data-grid-id="${gridId}"]`;
+      const parts = [];
+      parts.push(
+        `${selector} {
+  display: grid;
+  grid-template-columns: repeat(${props.columns}, 1fr);
+  gap: ${props.gap};
+}`
+      );
+      const sorted = Object.entries(props.breakpoints).sort(([, a], [, b]) => a.minWidth - b.minWidth);
+      for (const [, config] of sorted) {
+        parts.push(this.generateBreakpointMediaQuery(selector, config));
+      }
+      parts.push(...this.generateConditionalDisplayCSS(selector, props));
+      return parts.join("\n\n");
+    }
+    /**
+     * Generate a single `@media` block for a breakpoint configuration.
+     */
+    generateBreakpointMediaQuery(selector, config) {
+      return `@media (min-width: ${config.minWidth}px) {
+  ${selector} {
+    grid-template-columns: repeat(${config.columns}, 1fr);
+    gap: ${config.gap};
+  }
+}`;
+    }
+    /**
+     * Generate media queries that hide the grid at matching breakpoints.
+     */
+    generateConditionalDisplayCSS(selector, props) {
+      const rules = [];
+      if (props.hideOnMobile) {
+        rules.push(
+          `@media (max-width: 599px) {
+  ${selector} {
+    display: none;
+  }
+}`
+        );
+      }
+      if (props.hideOnTablet) {
+        rules.push(
+          `@media (min-width: 600px) and (max-width: 1023px) {
+  ${selector} {
+    display: none;
+  }
+}`
+        );
+      }
+      if (props.hideOnDesktop) {
+        rules.push(
+          `@media (min-width: 1024px) {
+  ${selector} {
+    display: none;
+  }
+}`
+        );
+      }
+      return rules;
+    }
+  };
+
+  // src/datatable/VirtualScroller.ts
+  var VirtualScroller = class {
+    /**
+     * @param container - Scrollable container element
+     * @param rowHeight - Fixed height per row in pixels
+     * @param totalRows - Total number of rows in the dataset
+     * @param bufferRows - Number of extra rows to render above/below the viewport
+     */
+    constructor(container, rowHeight, totalRows, bufferRows = 5) {
+      this.scrollHandler = null;
+      this.onRangeChange = null;
+      this.container = container;
+      this.rowHeight = rowHeight;
+      this.totalRows = totalRows;
+      this.bufferRows = bufferRows;
+      this.spacerTop = document.createElement("div");
+      this.spacerTop.style.width = "100%";
+      this.spacerBottom = document.createElement("div");
+      this.spacerBottom.style.width = "100%";
+    }
+    /**
+     * Register a callback invoked whenever the visible range changes.
+     */
+    onVisibleRangeChange(callback) {
+      this.onRangeChange = callback;
+    }
+    /**
+     * Attach scroll listener and insert spacer elements into the container.
+     */
+    attach() {
+      this.scrollHandler = () => this.handleScroll();
+      this.container.addEventListener("scroll", this.scrollHandler);
+      this.handleScroll();
+    }
+    /**
+     * Detach scroll listener.
+     */
+    detach() {
+      if (this.scrollHandler) {
+        this.container.removeEventListener("scroll", this.scrollHandler);
+        this.scrollHandler = null;
+      }
+    }
+    /**
+     * Update the total row count (e.g. after data changes) and recalculate.
+     */
+    setTotalRows(totalRows) {
+      this.totalRows = totalRows;
+      this.handleScroll();
+    }
+    /**
+     * Calculate the currently visible range based on scroll position.
+     */
+    calculateVisibleRange() {
+      const scrollTop = this.container.scrollTop;
+      const viewportHeight = this.container.clientHeight;
+      const firstVisible = Math.floor(scrollTop / this.rowHeight);
+      const visibleCount = Math.ceil(viewportHeight / this.rowHeight);
+      const start = Math.max(0, firstVisible - this.bufferRows);
+      const end = Math.min(this.totalRows, firstVisible + visibleCount + this.bufferRows);
+      return {
+        start,
+        end,
+        offsetTop: start * this.rowHeight
+      };
+    }
+    /**
+     * Get the total scrollable height for all rows.
+     */
+    getTotalHeight() {
+      return this.totalRows * this.rowHeight;
+    }
+    /**
+     * Get the top spacer element (place before visible rows).
+     */
+    getSpacerTop() {
+      return this.spacerTop;
+    }
+    /**
+     * Get the bottom spacer element (place after visible rows).
+     */
+    getSpacerBottom() {
+      return this.spacerBottom;
+    }
+    /**
+     * Update spacer heights based on the current visible range.
+     */
+    updateSpacers(range) {
+      this.spacerTop.style.height = `${range.offsetTop}px`;
+      const bottomHeight = (this.totalRows - range.end) * this.rowHeight;
+      this.spacerBottom.style.height = `${Math.max(0, bottomHeight)}px`;
+    }
+    handleScroll() {
+      const range = this.calculateVisibleRange();
+      this.updateSpacers(range);
+      if (this.onRangeChange) {
+        this.onRangeChange(range);
+      }
+    }
+  };
+
+  // src/datatable/DataTableRenderer.ts
+  var VIRTUAL_SCROLL_THRESHOLD = 100;
+  var DEFAULT_ROW_HEIGHT = 40;
+  var DataTableRenderer = class {
+    constructor(container, eventBridge, objectId, props) {
+      this.tableElement = null;
+      this.theadElement = null;
+      this.tbodyElement = null;
+      this.paginationElement = null;
+      this.scrollContainer = null;
+      this.virtualScroller = null;
+      this.container = container;
+      this.eventBridge = eventBridge;
+      this.objectId = objectId;
+      this.props = props;
+      this.selectedRows = new Set(props.selectedRows ?? []);
+    }
+    /**
+     * Build and mount the full table into the container.
+     */
+    render() {
+      this.container.innerHTML = "";
+      this.tableElement = document.createElement("table");
+      this.tableElement.setAttribute("role", "grid");
+      this.renderHeader();
+      this.renderBody();
+      if (this.useVirtualScroll()) {
+        this.setupVirtualScroll();
+      } else {
+        this.container.appendChild(this.tableElement);
+      }
+      this.renderPagination();
+    }
+    /**
+     * Update props and re-render affected parts.
+     */
+    update(props) {
+      this.props = props;
+      this.selectedRows = new Set(props.selectedRows ?? []);
+      if (this.virtualScroller) {
+        this.virtualScroller.setTotalRows(props.data.length);
+      }
+      this.render();
+    }
+    /**
+     * Clean up listeners and virtual scroller.
+     */
+    destroy() {
+      if (this.virtualScroller) {
+        this.virtualScroller.detach();
+        this.virtualScroller = null;
+      }
+      this.container.innerHTML = "";
+    }
+    // ========== Header ==========
+    renderHeader() {
+      this.theadElement = document.createElement("thead");
+      const headerRow = document.createElement("tr");
+      for (const col of this.props.columns) {
+        const th = document.createElement("th");
+        th.setAttribute("data-field", col.field);
+        th.textContent = col.header;
+        if (col.sortable) {
+          th.style.cursor = "pointer";
+          th.appendChild(this.createSortIndicator(col.field));
+          th.addEventListener("click", () => this.handleSortClick(col.field));
+        }
+        if (col.width !== void 0) {
+          th.style.width = `${col.width}px`;
+        }
+        headerRow.appendChild(th);
+      }
+      this.theadElement.appendChild(headerRow);
+      this.tableElement.appendChild(this.theadElement);
+    }
+    createSortIndicator(field) {
+      const span = document.createElement("span");
+      span.classList.add("sort-indicator");
+      if (this.props.sortField === field) {
+        span.textContent = this.props.sortDirection === "asc" ? " \u25B2" : " \u25BC";
+      } else {
+        span.textContent = "";
+      }
+      return span;
+    }
+    // ========== Body ==========
+    renderBody() {
+      this.tbodyElement = document.createElement("tbody");
+      if (this.useVirtualScroll()) {
+        const range = this.virtualScroller ? this.virtualScroller.calculateVisibleRange() : { start: 0, end: Math.min(this.props.data.length, VIRTUAL_SCROLL_THRESHOLD), offsetTop: 0 };
+        this.renderRowRange(range);
+      } else {
+        for (let i = 0; i < this.props.data.length; i++) {
+          const rowData = this.props.data[i];
+          if (rowData) {
+            this.tbodyElement.appendChild(this.createRow(rowData, i));
+          }
+        }
+      }
+      this.tableElement.appendChild(this.tbodyElement);
+    }
+    renderRowRange(range) {
+      if (!this.tbodyElement)
+        return;
+      this.tbodyElement.innerHTML = "";
+      for (let i = range.start; i < range.end && i < this.props.data.length; i++) {
+        const rowData = this.props.data[i];
+        if (rowData) {
+          this.tbodyElement.appendChild(this.createRow(rowData, i));
+        }
+      }
+    }
+    createRow(rowData, index) {
+      const tr = document.createElement("tr");
+      const rowId = this.getRowId(rowData, index);
+      tr.setAttribute("data-row-id", rowId);
+      if (this.selectedRows.has(rowId)) {
+        tr.classList.add("selected");
+      }
+      tr.addEventListener("click", () => this.handleRowClick(rowId));
+      for (const col of this.props.columns) {
+        const td = document.createElement("td");
+        const value = rowData[col.field];
+        td.textContent = value != null ? String(value) : "";
+        tr.appendChild(td);
+      }
+      return tr;
+    }
+    getRowId(rowData, index) {
+      if (rowData["id"] != null) {
+        return String(rowData["id"]);
+      }
+      return String(index);
+    }
+    // ========== Virtual Scroll ==========
+    useVirtualScroll() {
+      return this.props.virtualScroll && this.props.data.length > VIRTUAL_SCROLL_THRESHOLD;
+    }
+    setupVirtualScroll() {
+      this.scrollContainer = document.createElement("div");
+      this.scrollContainer.style.overflow = "auto";
+      this.scrollContainer.style.position = "relative";
+      this.scrollContainer.style.maxHeight = "400px";
+      this.virtualScroller = new VirtualScroller(
+        this.scrollContainer,
+        DEFAULT_ROW_HEIGHT,
+        this.props.data.length
+      );
+      this.virtualScroller.onVisibleRangeChange((range) => {
+        this.renderRowRange(range);
+        this.virtualScroller.updateSpacers(range);
+      });
+      this.scrollContainer.appendChild(this.virtualScroller.getSpacerTop());
+      this.scrollContainer.appendChild(this.tableElement);
+      this.scrollContainer.appendChild(this.virtualScroller.getSpacerBottom());
+      this.container.appendChild(this.scrollContainer);
+      this.virtualScroller.attach();
+    }
+    // ========== Pagination ==========
+    renderPagination() {
+      if (this.paginationElement) {
+        this.paginationElement.remove();
+      }
+      this.paginationElement = document.createElement("div");
+      this.paginationElement.classList.add("datatable-pagination");
+      const totalPages = Math.max(1, Math.ceil(this.props.totalRows / this.props.pageSize));
+      const currentPage = this.props.page;
+      const prevBtn = document.createElement("button");
+      prevBtn.textContent = "Previous";
+      prevBtn.disabled = currentPage <= 0;
+      prevBtn.addEventListener("click", () => this.handlePageChange(currentPage - 1));
+      const pageInfo = document.createElement("span");
+      pageInfo.classList.add("page-info");
+      pageInfo.textContent = `Page ${currentPage + 1} of ${totalPages}`;
+      const nextBtn = document.createElement("button");
+      nextBtn.textContent = "Next";
+      nextBtn.disabled = currentPage >= totalPages - 1;
+      nextBtn.addEventListener("click", () => this.handlePageChange(currentPage + 1));
+      this.paginationElement.appendChild(prevBtn);
+      this.paginationElement.appendChild(pageInfo);
+      this.paginationElement.appendChild(nextBtn);
+      this.container.appendChild(this.paginationElement);
+    }
+    // ========== Event Handlers ==========
+    handleSortClick(field) {
+      const nextDirection = this.getNextSortDirection(field);
+      this.eventBridge.dispatch(this.objectId, "wa-sort", {
+        field,
+        direction: nextDirection
+      });
+    }
+    handlePageChange(page) {
+      this.eventBridge.dispatch(this.objectId, "wa-page-change", { page });
+    }
+    handleRowClick(rowId) {
+      if (this.selectedRows.has(rowId)) {
+        this.selectedRows.delete(rowId);
+      } else {
+        this.selectedRows.add(rowId);
+      }
+      this.eventBridge.dispatch(this.objectId, "wa-selection-change", {
+        selectedRows: Array.from(this.selectedRows)
+      });
+      this.updateRowSelection(rowId);
+    }
+    updateRowSelection(rowId) {
+      if (!this.tbodyElement)
+        return;
+      const row = this.tbodyElement.querySelector(`tr[data-row-id="${rowId}"]`);
+      if (row) {
+        row.classList.toggle("selected", this.selectedRows.has(rowId));
+      }
+    }
+    /**
+     * Cycle sort direction: none → asc → desc → none
+     */
+    getNextSortDirection(field) {
+      if (this.props.sortField !== field)
+        return "asc";
+      switch (this.props.sortDirection) {
+        case "asc":
+          return "desc";
+        case "desc":
+          return "";
+        default:
+          return "asc";
+      }
+    }
+  };
+
+  // src/toast/ToastQueue.ts
+  var ToastQueue = class {
+    constructor(container) {
+      this.queue = [];
+      this.activeToast = null;
+      this.autoCloseTimer = null;
+      this.closeListener = null;
+      this.container = container ?? document.body;
+    }
+    /**
+     * Add a toast to the queue. If no toast is currently showing,
+     * it displays immediately.
+     */
+    enqueue(toast) {
+      this.queue.push(toast);
+      if (!this.activeToast) {
+        this.showNext();
+      }
+    }
+    /**
+     * Remove all pending and active toasts.
+     */
+    clear() {
+      this.queue = [];
+      this.dismissActive();
+    }
+    /**
+     * Number of toasts waiting in the queue (not including the active toast).
+     */
+    getQueueLength() {
+      return this.queue.length;
+    }
+    /**
+     * Whether a toast is currently being displayed.
+     */
+    get isShowing() {
+      return this.activeToast !== null;
+    }
+    // ========== Internal ==========
+    showNext() {
+      if (this.queue.length === 0) {
+        return;
+      }
+      const toast = this.queue.shift();
+      const el = this.createAlertElement(toast);
+      this.activeToast = el;
+      this.container.appendChild(el);
+      this.closeListener = () => this.onToastClosed();
+      el.addEventListener("wa-after-hide", this.closeListener);
+      if (toast.duration && toast.duration > 0) {
+        this.autoCloseTimer = setTimeout(() => {
+          this.dismissActive();
+          this.showNext();
+        }, toast.duration);
+      }
+    }
+    createAlertElement(toast) {
+      const el = document.createElement("wa-alert");
+      if (toast.variant) {
+        el.setAttribute("variant", toast.variant);
+      }
+      if (toast.icon) {
+        el.setAttribute("icon", toast.icon);
+      }
+      if (toast.closable) {
+        el.setAttribute("closable", "");
+      }
+      el.setAttribute("open", "");
+      el.textContent = toast.message;
+      return el;
+    }
+    onToastClosed() {
+      this.clearTimer();
+      this.removeActiveElement();
+      this.showNext();
+    }
+    dismissActive() {
+      this.clearTimer();
+      this.removeActiveElement();
+    }
+    clearTimer() {
+      if (this.autoCloseTimer !== null) {
+        clearTimeout(this.autoCloseTimer);
+        this.autoCloseTimer = null;
+      }
+    }
+    removeActiveElement() {
+      if (this.activeToast) {
+        if (this.closeListener) {
+          this.activeToast.removeEventListener("wa-after-hide", this.closeListener);
+          this.closeListener = null;
+        }
+        if (this.activeToast.parentNode) {
+          this.activeToast.parentNode.removeChild(this.activeToast);
+        }
+        this.activeToast = null;
       }
     }
   };
