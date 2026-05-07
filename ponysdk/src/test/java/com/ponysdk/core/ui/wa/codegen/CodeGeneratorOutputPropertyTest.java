@@ -315,7 +315,7 @@ public class CodeGeneratorOutputPropertyTest {
             Arbitraries.strings().ofMaxLength(20),
             Arbitraries.of(true, false)
         ).as((name, type, desc, def, reflects) ->
-            new PropertyDef(name, type, TypeMapper.mapToJavaType(type), desc, def, reflects));
+            PropertyDef.simple(name, type, TypeMapper.mapToJavaType(type), desc, def, reflects));
     }
 
     private Arbitrary<EventDef> eventDefs() {

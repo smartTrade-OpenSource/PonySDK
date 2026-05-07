@@ -82,8 +82,7 @@ public class ComponentListPanel extends PSimplePanel {
      */
     private void initializePanel() {
         listBox.setWidth("100%");
-        listBox.setHeight("100%");
-        listBox.setVisibleItemCount(20);
+        listBox.setVisibleItemCount(30);
         listBox.addStyleName("component-list");
 
         listBox.addChangeHandler(new PChangeHandler() {

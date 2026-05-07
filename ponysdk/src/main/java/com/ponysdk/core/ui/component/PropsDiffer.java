@@ -304,6 +304,9 @@ public class PropsDiffer<TProps extends Record> {
             builder.add(name, mapToJsonObject((Map<?, ?>) value));
         } else if (value.getClass().isArray()) {
             builder.add(name, arrayToJsonArray(value));
+        } else if (value.getClass().isEnum()) {
+            // For enums, use getValue() if available (generated enums), otherwise name()
+            builder.add(name, getEnumValue(value));
         } else {
             // Fallback to string representation
             builder.add(name, value.toString());
@@ -330,6 +333,24 @@ public class PropsDiffer<TProps extends Record> {
             addValueToBuilder(builder, String.valueOf(entry.getKey()), entry.getValue());
         }
         return builder.build();
+    }
+
+    /**
+     * Gets the string value for an enum constant.
+     * If the enum has a getValue() method (generated enums), uses that.
+     * Otherwise falls back to name().
+     */
+    private String getEnumValue(final Object enumConstant) {
+        try {
+            final java.lang.reflect.Method getValueMethod = enumConstant.getClass().getMethod("getValue");
+            return (String) getValueMethod.invoke(enumConstant);
+        } catch (final NoSuchMethodException e) {
+            // No getValue method, use name()
+            return ((Enum<?>) enumConstant).name();
+        } catch (final Exception e) {
+            // Fallback to name() on any error
+            return ((Enum<?>) enumConstant).name();
+        }
     }
 
     /**
@@ -379,6 +400,9 @@ public class PropsDiffer<TProps extends Record> {
             builder.add(collectionToJsonArray((Collection<?>) value));
         } else if (value instanceof Map<?, ?>) {
             builder.add(mapToJsonObject((Map<?, ?>) value));
+        } else if (value.getClass().isEnum()) {
+            // For enums, use getValue() if available (generated enums), otherwise name()
+            builder.add(getEnumValue(value));
         } else {
             builder.add(value.toString());
         }

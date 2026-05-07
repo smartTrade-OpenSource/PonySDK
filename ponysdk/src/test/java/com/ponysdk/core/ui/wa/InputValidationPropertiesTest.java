@@ -60,7 +60,7 @@ public class InputValidationPropertiesTest {
     void enrichment_addsValidationPropsToInputComponent() {
         final ComponentDefinition bare = new ComponentDefinition(
             "wa-input", "WaInput", "Input component", "",
-            List.of(new PropertyDef("value", "string", "String", "The value", null, false)),
+            List.of(PropertyDef.simple("value", "string", "String", "The value", null, false)),
             Collections.emptyList(), Collections.emptyList(),
             Collections.emptyList(), Collections.emptyList(), "stable"
         );
@@ -91,9 +91,9 @@ public class InputValidationPropertiesTest {
     @Test
     void enrichment_preservesExistingValidationProps() {
         final List<PropertyDef> existing = new ArrayList<>();
-        existing.add(new PropertyDef("value", "string", "String", "The value", null, false));
-        existing.add(new PropertyDef("disabled", "boolean", "boolean", "Whether disabled", "false", true));
-        existing.add(new PropertyDef("required", "boolean", "boolean", "Whether required", "false", true));
+        existing.add(PropertyDef.simple("value", "string", "String", "The value", null, false));
+        existing.add(PropertyDef.simple("disabled", "boolean", "boolean", "Whether disabled", "false", true));
+        existing.add(PropertyDef.simple("required", "boolean", "boolean", "Whether required", "false", true));
 
         final ComponentDefinition bare = new ComponentDefinition(
             "wa-textarea", "WaTextarea", "Textarea component", "",
@@ -140,7 +140,7 @@ public class InputValidationPropertiesTest {
     void enrichment_doesNotModifyNonInputComponents() {
         final ComponentDefinition button = new ComponentDefinition(
             "wa-button", "WaButton", "Button component", "",
-            List.of(new PropertyDef("disabled", "boolean", "boolean", "Whether disabled", "false", true)),
+            List.of(PropertyDef.simple("disabled", "boolean", "boolean", "Whether disabled", "false", true)),
             Collections.emptyList(), Collections.emptyList(),
             Collections.emptyList(), Collections.emptyList(), "stable"
         );

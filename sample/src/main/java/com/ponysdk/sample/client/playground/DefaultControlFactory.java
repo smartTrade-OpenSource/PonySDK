@@ -23,12 +23,16 @@
 
 package com.ponysdk.sample.client.playground;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PCheckBox;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PListBox;
 import com.ponysdk.core.ui.basic.PRadioButton;
+import com.ponysdk.core.ui.basic.PRadioButtonSelection;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PWidget;
 
@@ -126,16 +130,16 @@ public class DefaultControlFactory implements ControlFactory {
      */
     private PTextBox createNumericTextBox() {
         final PTextBox textBox = Element.newPTextBox();
-        // Apply numeric filter to only allow digits and optional minus sign
-        textBox.setFilter("[-0-9]");
+        // Apply numeric filter to allow digits, minus sign, and decimal point
+        textBox.setFilter("[-0-9.]");
         return textBox;
     }
 
     /**
-     * Creates a radio button group for enum parameters.
+     * Creates a radio button group for enum parameters using PRadioButtonSelection.
      *
      * @param parameterInfo the parameter information containing the enum type
-     * @return a PFlowPanel containing radio buttons for each enum value
+     * @return a PFlowPanel containing radio buttons for each enum value, with PRadioButtonSelection attached
      */
     private PWidget createEnumListBox(final ParameterInfo parameterInfo) {
         final Class<?> enumType = parameterInfo.type();
@@ -144,46 +148,64 @@ public class DefaultControlFactory implements ControlFactory {
             return createUnsupportedLabel(parameterInfo);
         }
         
-        final PFlowPanel radioGroup = Element.newPFlowPanel();
-        radioGroup.addStyleName("enum-radio-group");
+        final PFlowPanel radioGroupPanel = Element.newPFlowPanel();
+        radioGroupPanel.addStyleName("enum-radio-group");
         
         final Object[] enumConstants = enumType.getEnumConstants();
-        final String groupName = "enum_" + System.identityHashCode(parameterInfo);
+        final List<PRadioButton> radioButtons = new ArrayList<>();
         
-        for (int i = 0; i < enumConstants.length; i++) {
-            final Object enumConstant = enumConstants[i];
-            final PRadioButton radioButton = Element.newPRadioButton(groupName);
-            radioButton.setText(enumConstant.toString());
+        for (final Object enumConstant : enumConstants) {
+            final PRadioButton radioButton = Element.newPRadioButton();
+            // Use getValue() if available (for generated enums), otherwise toString()
+            final String displayValue = getEnumDisplayValue(enumConstant);
+            radioButton.setText(displayValue);
             radioButton.setData(enumConstant);
             radioButton.addStyleName("enum-radio-option");
-            
-            // Select first option by default
-            if (i == 0) {
-                radioButton.setValue(true);
-            }
-            
-            radioGroup.add(radioButton);
+            radioButtons.add(radioButton);
+            radioGroupPanel.add(radioButton);
         }
         
-        return radioGroup;
+        // Create PRadioButtonSelection to manage the group - it handles exclusive selection
+        final PRadioButtonSelection selection = Element.newPRadioButtonSelection(radioButtons);
+        // Store the selection object on the panel for later access in PropertyBinder
+        radioGroupPanel.setData(selection);
+        
+        return radioGroupPanel;
     }
 
     /**
      * Creates a control for Optional parameters.
-     * This creates a PCheckBox to enable/disable the optional value,
-     * combined with an appropriate control for the wrapped type.
-     * <p>
-     * Note: For now, this returns just a PCheckBox. The full implementation
-     * with combined controls will be added in the FormGenerator.
-     * </p>
+     * Uses the wrapped type to determine the appropriate control:
+     * String → PTextBox, boolean → PCheckBox, numeric → numeric PTextBox, enum → radio group.
+     * An empty value means Optional.empty().
      *
      * @param parameterInfo the parameter information containing the Optional type
-     * @return a PCheckBox for enabling/disabling the optional value
+     * @return a control appropriate for the wrapped type
      */
     private PWidget createOptionalControl(final ParameterInfo parameterInfo) {
-        // For Optional parameters, we return a checkbox
-        // The FormGenerator will handle creating the combined control structure
-        return Element.newPCheckBox();
+        final Class<?> wrappedType = parameterInfo.optionalWrappedType();
+        if (wrappedType == null || Object.class.equals(wrappedType)) {
+            return createTextBox(); // fallback to text box
+        }
+
+        // Create a control based on the wrapped type
+        final ParameterInfo unwrapped = new ParameterInfo(
+            parameterInfo.name(), wrappedType, false, null
+        );
+        final ParameterAnalyzer.ControlType controlType = parameterAnalyzer.determineControlType(unwrapped);
+
+        switch (controlType) {
+            case TEXT_BOX:
+                return createTextBox();
+            case CHECK_BOX:
+                return createCheckBox();
+            case NUMERIC_TEXT_BOX:
+                return createNumericTextBox();
+            case LIST_BOX:
+                return createEnumListBox(unwrapped);
+            default:
+                return createTextBox();
+        }
     }
 
     /**
@@ -196,5 +218,23 @@ public class DefaultControlFactory implements ControlFactory {
         final String typeName = parameterInfo.type().getSimpleName();
         final PLabel label = Element.newPLabel("Type not supported: " + typeName);
         return label;
+    }
+
+    /**
+     * Gets the display value for an enum constant.
+     * If the enum has a getValue() method (generated enums), uses that.
+     * Otherwise falls back to toString().
+     *
+     * @param enumConstant the enum constant
+     * @return the display value (lowercase for generated enums)
+     */
+    private String getEnumDisplayValue(final Object enumConstant) {
+        try {
+            final java.lang.reflect.Method getValueMethod = enumConstant.getClass().getMethod("getValue");
+            return (String) getValueMethod.invoke(enumConstant);
+        } catch (final Exception e) {
+            // Fallback to toString() for standard enums
+            return enumConstant.toString();
+        }
     }
 }

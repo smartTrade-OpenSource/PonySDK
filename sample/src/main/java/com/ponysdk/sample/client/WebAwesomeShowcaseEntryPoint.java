@@ -41,6 +41,9 @@ import com.ponysdk.core.ui.main.EntryPoint;
 import com.ponysdk.core.ui.wa.*;
 import com.ponysdk.core.ui.wa.datatable.ColumnDef;
 import com.ponysdk.core.ui.wa.datatable.PDataTable;
+import com.ponysdk.core.ui.wa.enums.ButtonGroupOrientation;
+import com.ponysdk.core.ui.wa.enums.ButtonVariant;
+import com.ponysdk.core.ui.wa.enums.CheckboxSize;
 import com.ponysdk.core.ui.wa.form.PForm;
 import com.ponysdk.core.ui.wa.layout.PContainer;
 import com.ponysdk.core.ui.wa.layout.PResponsiveGrid;
@@ -210,7 +213,7 @@ public class WebAwesomeShowcaseEntryPoint implements EntryPoint {
 
     private WADivider setupDivider() {
         final WADivider divider = new WADivider();
-        divider.setOrientation("horizontal");
+        divider.setOrientation(ButtonGroupOrientation.HORIZONTAL);
         log.info("Divider: orientation={}", divider.getCurrentProps().orientation());
         return divider;
     }
@@ -218,7 +221,7 @@ public class WebAwesomeShowcaseEntryPoint implements EntryPoint {
     private WASplitPanel setupSplitPanel() {
         final WASplitPanel splitPanel = new WASplitPanel();
         splitPanel.setPosition(30);
-        splitPanel.setOrientation("horizontal");
+        splitPanel.setOrientation(ButtonGroupOrientation.HORIZONTAL);
         splitPanel.setDisabled(false);
         log.info("SplitPanel: position={}, orientation={}, disabled={}", splitPanel.getCurrentProps().position(), splitPanel.getCurrentProps().orientation(), splitPanel.getCurrentProps().disabled());
         return splitPanel;
@@ -245,8 +248,8 @@ public class WebAwesomeShowcaseEntryPoint implements EntryPoint {
 
         // Form inputs
         final WAButton button = new WAButton();
-        button.setVariant("primary");
-        button.setSize("medium");
+        button.setVariant(ButtonVariant.BRAND);
+        button.setSize(CheckboxSize.MEDIUM);
         button.attach(PWindow.getMain());
         log.info("Created wa-button");
 
@@ -323,12 +326,12 @@ public class WebAwesomeShowcaseEntryPoint implements EntryPoint {
 
         // Display components
         final WABadge badge = new WABadge();
-        badge.setVariant("primary");
+        badge.setVariant(ButtonVariant.BRAND);
         badge.attach(PWindow.getMain());
         log.info("Created wa-badge");
 
         final WATag tag = new WATag();
-        tag.setVariant("primary");
+        tag.setVariant(ButtonVariant.BRAND);
         tag.attach(PWindow.getMain());
         log.info("Created wa-tag");
 

@@ -53,7 +53,7 @@ public class DisplayVariantPropertiesTest {
     void enrichment_addsVariantToDisplayComponent() {
         final ComponentDefinition bare = new ComponentDefinition(
             "wa-alert", "WaAlert", "Alert component", "",
-            List.of(new PropertyDef("open", "boolean", "boolean", "Whether the alert is open", "false", true)),
+            List.of(PropertyDef.simple("open", "boolean", "boolean", "Whether the alert is open", "false", true)),
             Collections.emptyList(), Collections.emptyList(),
             Collections.emptyList(), Collections.emptyList(), "stable"
         );
@@ -73,8 +73,8 @@ public class DisplayVariantPropertiesTest {
     @Test
     void enrichment_preservesExistingVariantProp() {
         final List<PropertyDef> existing = new ArrayList<>();
-        existing.add(new PropertyDef("open", "boolean", "boolean", "Whether open", "false", true));
-        existing.add(new PropertyDef("variant", "string", "String", "Visual variant", "\"primary\"", false));
+        existing.add(PropertyDef.simple("open", "boolean", "boolean", "Whether open", "false", true));
+        existing.add(PropertyDef.simple("variant", "string", "String", "Visual variant", "\"primary\"", false));
 
         final ComponentDefinition bare = new ComponentDefinition(
             "wa-badge", "WaBadge", "Badge component", "",
@@ -94,7 +94,7 @@ public class DisplayVariantPropertiesTest {
     void enrichment_doesNotModifyNonDisplayComponents() {
         final ComponentDefinition button = new ComponentDefinition(
             "wa-button", "WaButton", "Button component", "",
-            List.of(new PropertyDef("disabled", "boolean", "boolean", "Whether disabled", "false", true)),
+            List.of(PropertyDef.simple("disabled", "boolean", "boolean", "Whether disabled", "false", true)),
             Collections.emptyList(), Collections.emptyList(),
             Collections.emptyList(), Collections.emptyList(), "stable"
         );

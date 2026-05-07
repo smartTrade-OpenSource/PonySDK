@@ -24,6 +24,7 @@
 package com.ponysdk.sample.client.playground;
 
 import com.ponysdk.core.ui.basic.Element;
+import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.component.PTextComponent;
@@ -43,7 +44,12 @@ public class SlotControl {
     private final PLabel label;
     private final PTextBox textBox;
     private final PLabel errorLabel;
+    private final PLabel widgetIndicator;
+    private final PButton widgetButton;
     private PTextComponent currentTextComponent;
+    private PWebComponent<?> currentWidgetComponent;
+    private SlotContentType contentType;
+    private String widgetTypeName;
 
     /**
      * Creates a new SlotControl.
@@ -68,6 +74,17 @@ public class SlotControl {
         this.errorLabel = Element.newPLabel();
         this.errorLabel.addStyleName("error-label");
         this.errorLabel.setVisible(false);
+
+        // Create widget button
+        this.widgetButton = Element.newPButton("Widget");
+        this.widgetButton.addStyleName("widget-button");
+
+        // Create widget indicator
+        this.widgetIndicator = Element.newPLabel();
+        this.widgetIndicator.addStyleName("widget-indicator");
+
+        // Initialize content type
+        this.contentType = SlotContentType.NONE;
     }
 
     /**
@@ -119,7 +136,24 @@ public class SlotControl {
             return false;
         }
 
-        // Remove existing content if present
+        // Remove existing widget if present (Req 5.5)
+        if (currentWidgetComponent != null) {
+            try {
+                if (slotName.isEmpty()) {
+                    component.removeFromSlot(null, currentWidgetComponent);
+                } else {
+                    component.removeFromSlot(slotName, currentWidgetComponent);
+                }
+            } catch (final Exception e) {
+                showError("Failed to remove widget: " + e.getMessage());
+                return false;
+            }
+            currentWidgetComponent = null;
+            widgetTypeName = null;
+            widgetIndicator.setText("");
+        }
+
+        // Remove existing text content if present
         if (currentTextComponent != null) {
             try {
                 if (slotName.isEmpty()) {
@@ -143,11 +177,14 @@ public class SlotControl {
                 } else {
                     component.addToSlot(slotName, currentTextComponent);
                 }
+                contentType = SlotContentType.TEXT;
             } catch (final Exception e) {
                 showError("Failed to add content: " + e.getMessage());
                 currentTextComponent = null;
                 return false;
             }
+        } else {
+            contentType = SlotContentType.NONE;
         }
         
         return true;
@@ -168,6 +205,104 @@ public class SlotControl {
         errorLabel.setVisible(false);
     }
 
+    /**
+     * Inserts a widget into this slot, replacing any existing content (text or widget).
+     *
+     * @param parentComponent the parent component that owns this slot
+     * @param widget          the widget to insert
+     * @param widgetTypeName  the widget type tag name (e.g. "wa-icon")
+     */
+    public void insertWidget(final PWebComponent<?> parentComponent, final PWebComponent<?> widget, final String widgetTypeName) {
+        // Remove existing text content if present
+        if (currentTextComponent != null) {
+            try {
+                if (slotName.isEmpty()) {
+                    parentComponent.removeFromSlot(null, currentTextComponent);
+                } else {
+                    parentComponent.removeFromSlot(slotName, currentTextComponent);
+                }
+            } catch (final Exception e) {
+                showError("Failed to remove text content: " + e.getMessage());
+                return;
+            }
+            currentTextComponent = null;
+            textBox.setValue("");
+        }
+
+        // Remove existing widget if present
+        if (currentWidgetComponent != null) {
+            try {
+                if (slotName.isEmpty()) {
+                    parentComponent.removeFromSlot(null, currentWidgetComponent);
+                } else {
+                    parentComponent.removeFromSlot(slotName, currentWidgetComponent);
+                }
+            } catch (final Exception e) {
+                showError("Failed to remove existing widget: " + e.getMessage());
+                return;
+            }
+            currentWidgetComponent = null;
+        }
+
+        // Insert the new widget
+        try {
+            if (slotName.isEmpty()) {
+                parentComponent.addToDefaultSlot(widget);
+            } else {
+                parentComponent.addToSlot(slotName, widget);
+            }
+            currentWidgetComponent = widget;
+            this.widgetTypeName = widgetTypeName;
+            contentType = SlotContentType.WIDGET;
+            widgetIndicator.setText(widgetTypeName);
+            clearError();
+        } catch (final Exception e) {
+            showError("Failed to insert widget: " + e.getMessage());
+            currentWidgetComponent = null;
+        }
+    }
+
+    /**
+     * Clears all content (text and widget) from this slot.
+     *
+     * @param parentComponent the parent component that owns this slot
+     */
+    public void clearContent(final PWebComponent<?> parentComponent) {
+        // Remove widget if present
+        if (currentWidgetComponent != null) {
+            try {
+                if (slotName.isEmpty()) {
+                    parentComponent.removeFromSlot(null, currentWidgetComponent);
+                } else {
+                    parentComponent.removeFromSlot(slotName, currentWidgetComponent);
+                }
+            } catch (final Exception e) {
+                // Best-effort cleanup, log and continue
+            }
+            currentWidgetComponent = null;
+            widgetTypeName = null;
+        }
+
+        // Remove text if present
+        if (currentTextComponent != null) {
+            try {
+                if (slotName.isEmpty()) {
+                    parentComponent.removeFromSlot(null, currentTextComponent);
+                } else {
+                    parentComponent.removeFromSlot(slotName, currentTextComponent);
+                }
+            } catch (final Exception e) {
+                // Best-effort cleanup, log and continue
+            }
+            currentTextComponent = null;
+        }
+
+        contentType = SlotContentType.NONE;
+        widgetIndicator.setText("");
+        textBox.setValue("");
+        clearError();
+    }
+
     public PLabel getLabel() {
         return label;
     }
@@ -182,5 +317,17 @@ public class SlotControl {
 
     public String getSlotName() {
         return slotName;
+    }
+
+    public PButton getWidgetButton() {
+        return widgetButton;
+    }
+
+    public PLabel getWidgetIndicator() {
+        return widgetIndicator;
+    }
+
+    public SlotContentType getContentType() {
+        return contentType;
     }
 }

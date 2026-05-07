@@ -1,3 +1,13 @@
+/* Reset body margin */
+html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
+    background: #f8f9fa !important;
+}
+
 .unmatch {
     background: red !important;
     border-color: red !important;
@@ -102,22 +112,56 @@
 
 /* Component Playground Styles */
 .property-panel {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
+    height: 100% !important;
+    max-height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
     background: #f8f9fa;
+    overflow: hidden !important;
+}
+
+/* Force the property panel's inner tbody to use flexbox */
+.property-panel > tbody {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+}
+
+.property-panel > tbody > tr {
+    display: contents !important;
+}
+
+.property-panel > tbody > tr > td {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+}
+
+/* Preview container - fixed height, no shrink */
+.property-panel > tbody > tr:first-child > td {
+    flex-shrink: 0 !important;
+}
+
+/* Form scroll area - must flex and scroll */
+.property-panel > tbody > tr:nth-child(2) > td {
+    flex: 1 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
 }
 
 .component-preview {
-    /* Changed from purple gradient to white background for better contrast */
+    flex-shrink: 0 !important;
+    z-index: 10;
     background: #ffffff;
-    border-radius: 12px;
-    padding: 48px;
-    margin: 20px;
-    min-height: 250px;
-    /* Added visible border to clearly delimit the preview area */
-    border: 2px solid rgba(102, 126, 234, 0.3);
-    box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+    border-radius: 10px;
+    padding: 32px 24px 24px 24px;
+    margin: 12px 16px;
+    min-height: 100px;
+    max-height: 160px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -125,16 +169,32 @@
     overflow: hidden;
 }
 
+/* Preview label - positioned at top center using transform */
 .component-preview::before {
+    content: 'PREVIEW';
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    font-weight: 600;
+    color: #a0aec0;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+/* Subtle background effect */
+.component-preview::after {
     content: '';
     position: absolute;
     top: -50%;
     right: -50%;
     width: 200%;
     height: 200%;
-    /* Subtle gradient overlay for visual interest without compromising contrast */
-    background: radial-gradient(circle, rgba(102, 126, 234, 0.05) 0%, transparent 70%);
-    animation: pulse 4s ease-in-out infinite;
+    background: radial-gradient(circle, rgba(102, 126, 234, 0.03) 0%, transparent 70%);
+    pointer-events: none;
 }
 
 @keyframes pulse {
@@ -155,123 +215,266 @@
     width: 100%;
 }
 
+/* Form scroll panel - THIS is the scrollable area for props */
 .form-scroll-panel {
-    flex: 1;
-    overflow-y: auto;
+    flex: 1 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    min-height: 0 !important; /* Critical for flex scroll */
+}
+
+/* Scrollbar styling for form scroll panel */
+.form-scroll-panel::-webkit-scrollbar {
+    width: 10px;
+}
+
+.form-scroll-panel::-webkit-scrollbar-track {
+    background: #e2e8f0;
+    border-radius: 5px;
+}
+
+.form-scroll-panel::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 5px;
+}
+
+.form-scroll-panel::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #5a6fd6 0%, #6a4190 100%);
 }
 
 .form-container,
 .slots-container {
-    padding: 16px;
+    padding: 0 16px 16px 16px;
+}
+
+.form-container {
+    margin: 12px 16px;
+    background: white;
+    border-radius: 10px;
+    padding: 12px 16px;
+    border: 1px solid #e2e8f0;
+}
+
+/* Control row - GWT generates nested table structure */
+.control-row {
+    background: #fafbfc;
+    padding: 4px 8px;
+    margin-bottom: 2px;
+    border-radius: 4px;
+    border: 1px solid #e2e8f0;
+    width: 100%;
+    table-layout: fixed;
+}
+
+.control-row:hover {
+    border-color: #667eea;
+    background: #f0f4ff;
+}
+
+/* Target the outer table cell that wraps input-row */
+.control-row > tbody > tr > td {
+    padding: 0 !important;
+    width: 100%;
+}
+
+/* Inner input-row table - MUST use fixed layout */
+.control-row .input-row {
+    width: 100% !important;
+    table-layout: fixed !important;
+}
+
+.control-row .input-row > tbody > tr > td {
+    vertical-align: middle !important;
+    padding: 1px 2px !important;
+}
+
+/* First column: property label - fixed width */
+.control-row .input-row > tbody > tr > td:first-child {
+    width: 100px !important;
+    min-width: 100px !important;
+    max-width: 100px !important;
+}
+
+/* Second column: type hint - fixed width */
+.control-row .input-row > tbody > tr > td:nth-child(2) {
+    width: 70px !important;
+    min-width: 70px !important;
+    max-width: 70px !important;
+}
+
+/* Third column: control - takes remaining space */
+.control-row .input-row > tbody > tr > td:nth-child(3) {
+    width: auto !important;
 }
 
 .section-header {
-    font-size: 14px;
+    font-size: 10px;
     font-weight: 700;
     color: #667eea;
-    margin: 20px 0 16px 0;
-    padding: 12px 16px;
+    margin: 10px 0 8px 0;
+    padding: 4px 8px;
     background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
-    border-radius: 8px;
-    border-left: 4px solid #667eea;
+    border-radius: 4px;
+    border-left: 3px solid #667eea;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.section-header::before {
-    content: '⚙️';
-    font-size: 18px;
-}
-
-.slots-container {
-    background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
-    border-radius: 12px;
-    margin: 0 20px 20px 20px;
-    padding: 20px;
-    border: none;
-    box-shadow: 0 4px 15px rgba(253, 203, 110, 0.3);
-}
-
-.slots-container .section-header {
-    background: rgba(255, 255, 255, 0.5);
-    border-left-color: #fdcb6e;
-}
-
-.slots-container .section-header::before {
-    content: '📝';
-}
-
-.slot-row,
-.control-row {
-    margin-bottom: 12px;
-    background: white;
-    padding: 16px;
-    border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    transition: all 0.2s ease;
-    border: 1px solid transparent;
-}
-
-.slot-row:hover,
-.control-row:hover {
-    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.15);
-    border-color: #667eea;
-    transform: translateY(-2px);
-}
-
-.input-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.property-label,
-.slot-label {
-    font-weight: 600;
-    color: #2d3748;
-    font-size: 13px;
-    min-width: 120px;
-    max-width: 200px;
-    flex-shrink: 0;
+    letter-spacing: 0.8px;
     display: flex;
     align-items: center;
     gap: 6px;
 }
 
+.section-header::before {
+    content: '⚙️';
+    font-size: 12px;
+}
+
+.slots-container {
+    background: white;
+    border-radius: 10px;
+    margin: 12px 16px;
+    padding: 12px 16px;
+    border: 1px solid #e2e8f0;
+}
+
+.slots-container .section-header {
+    background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+    border-left-color: #667eea;
+    color: #667eea;
+    margin: 0 0 10px 0;
+    font-size: 10px;
+    padding: 4px 8px;
+}
+
+.slots-container .section-header::before {
+    content: '📝';
+    font-size: 12px;
+}
+
+/* Slot row - GWT generates nested table structure */
+.slots-container .slot-row {
+    background: #fafbfc;
+    border: 1px solid #e2e8f0;
+    padding: 6px 10px;
+    margin-bottom: 4px;
+    border-radius: 6px;
+    width: 100%;
+    table-layout: fixed;
+}
+
+.slots-container .slot-row:last-of-type {
+    margin-bottom: 0;
+}
+
+.slots-container .slot-row:hover {
+    border-color: #667eea;
+    background: #f0f4ff;
+}
+
+/* Target the outer table cell that wraps input-row */
+.slots-container .slot-row > tbody > tr > td {
+    padding: 0 !important;
+    width: 100%;
+}
+
+/* Inner input-row table for slots - MUST use fixed layout */
+.slots-container .slot-row .input-row {
+    width: 100% !important;
+    table-layout: fixed !important;
+}
+
+.slots-container .slot-row .input-row > tbody > tr > td {
+    vertical-align: middle !important;
+    padding: 2px 4px !important;
+}
+
+/* First column: slot label - fixed width */
+.slots-container .slot-row .input-row > tbody > tr > td:first-child {
+    width: 120px !important;
+    min-width: 120px !important;
+    max-width: 120px !important;
+}
+
+/* Second column: textbox - takes remaining space */
+.slots-container .slot-row .input-row > tbody > tr > td:nth-child(2) {
+    width: auto !important;
+}
+
+.slots-container .slot-label {
+    font-weight: 600;
+    color: #4a5568;
+    font-size: 12px;
+}
+
+/* Slot textbox must fill its cell */
+.slots-container .slot-textbox {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 8px 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    font-size: 12px;
+    background: #fafbfc;
+}
+
+.slots-container .slot-textbox::placeholder {
+    color: #a0aec0;
+    font-size: 11px;
+}
+
+.slots-container .slot-textbox:focus {
+    outline: none;
+    border-color: #667eea;
+    background: white;
+}
+
+/* Generic row styling - hover effects */
+.slot-row:hover,
+.control-row:hover {
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.12);
+}
+
+/* Property and slot labels */
+.property-label {
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .property-label::before {
     content: '•';
     color: #667eea;
-    font-size: 20px;
+    font-size: 12px;
     line-height: 1;
 }
 
-.property-control,
-.slot-textbox {
-    flex: 1;
-    padding: 10px 14px;
-    border: 2px solid #e2e8f0;
-    border-radius: 8px;
-    font-size: 14px;
-    transition: all 0.2s ease;
-    background: #f7fafc;
+/* Property control inputs */
+.property-control {
+    padding: 4px 6px;
+    border: 1px solid #e2e8f0;
+    border-radius: 3px;
+    font-size: 11px;
+    transition: all 0.15s ease;
+    background: white;
+    width: 100% !important;
+    box-sizing: border-box !important;
 }
 
-.property-control:hover,
-.slot-textbox:hover {
+.property-control:hover {
     border-color: #cbd5e0;
     background: white;
 }
 
-.property-control:focus,
-.slot-textbox:focus {
+.property-control:focus {
     outline: none;
     border-color: #667eea;
     background: white;
-    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-    transform: translateY(-1px);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .error-label {
@@ -337,15 +540,162 @@ input[type="checkbox"] {
     background: #a0aec0;
 }
 
-/* Component List Panel */
+/* Component List Panel - LEFT SIDE with independent scroll */
 .component-list-panel {
-    background: linear-gradient(180deg, #1a202c 0%, #2d3748 100%);
+    background: #2d3748 !important;
     color: white;
-    height: 100%;
+    height: 100% !important;
+    max-height: 100% !important;
+    display: flex;
+    flex-direction: column;
     box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden !important;
 }
 
-.component-list-panel .gwt-Label {
+/* Target the intermediate FlowPanel div - MUST fill all space */
+.component-list-panel > div {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    background: #2d3748 !important;
+}
+
+/* Search panel */
+.search-panel {
+    flex-shrink: 0;
+}
+
+.search-box-container {
+    position: relative;
+}
+
+.search-box-container input {
+    width: 100%;
+    padding: 12px 16px;
+    border: none;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    background: rgba(0,0,0,0.2);
+    color: white;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.search-box-container input::placeholder {
+    color: rgba(255,255,255,0.5);
+}
+
+.search-box-container input:focus {
+    outline: none;
+    background: rgba(0,0,0,0.3);
+    border-bottom-color: #667eea;
+}
+
+.search-clear-button {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.5);
+    cursor: pointer;
+    font-size: 18px;
+    padding: 4px 8px;
+}
+
+.search-clear-button:hover {
+    color: white;
+}
+
+/* Result count */
+.search-result-count {
+    padding: 8px 16px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.7);
+    background: rgba(102, 126, 234, 0.3);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    flex-shrink: 0;
+}
+
+/* Component list box - CRITICAL: must fill remaining space */
+.component-list {
+    flex: 1 !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    background: #2d3748 !important;
+    border: none !important;
+    color: white;
+    overflow-y: auto !important;
+    display: block !important;
+}
+
+/* Custom scrollbar for component list */
+.component-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.component-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.component-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+}
+
+.component-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* Override the size attribute limitation */
+.component-list-panel select[size] {
+    height: 100% !important;
+    max-height: none !important;
+}
+
+.component-list-panel select,
+.component-list-panel .gwt-ListBox {
+    background: #2d3748 !important;
+    border: none !important;
+    color: white;
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+}
+
+.component-list-panel select option,
+.component-list-panel .gwt-ListBox option {
+    padding: 10px 16px;
+    background: #2d3748;
+    color: white;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+}
+
+.component-list-panel select option:hover,
+.component-list-panel .gwt-ListBox option:hover {
+    background: rgba(102, 126, 234, 0.3);
+}
+
+.component-list-panel select option:checked,
+.component-list-panel .gwt-ListBox option:checked {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-left-color: white;
+}
+
+/* Empty state */
+.empty-state-message {
+    padding: 20px;
+    text-align: center;
+    color: rgba(255,255,255,0.6);
+    font-style: italic;
+}
+
+.component-list-panel .gwt-Label:not(.search-result-count):not(.empty-state-message) {
     padding: 14px 20px;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -355,7 +705,7 @@ input[type="checkbox"] {
     position: relative;
 }
 
-.component-list-panel .gwt-Label::before {
+.component-list-panel .gwt-Label:not(.search-result-count):not(.empty-state-message)::before {
     content: '▸';
     position: absolute;
     left: 6px;
@@ -363,56 +713,56 @@ input[type="checkbox"] {
     transition: all 0.2s ease;
 }
 
-.component-list-panel .gwt-Label:hover {
+.component-list-panel .gwt-Label:not(.search-result-count):not(.empty-state-message):hover {
     background: rgba(102, 126, 234, 0.2);
     border-left-color: #667eea;
     padding-left: 28px;
 }
 
-.component-list-panel .gwt-Label:hover::before {
+.component-list-panel .gwt-Label:not(.search-result-count):not(.empty-state-message):hover::before {
     opacity: 1;
 }
 
-/* Radio button groups for enums */
+/* Radio button groups for enums - compact style */
 .enum-radio-group {
     display: flex;
-    gap: 12px;
+    gap: 4px;
     flex-wrap: wrap;
 }
 
 .enum-radio-option {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
+    gap: 4px;
+    padding: 3px 8px;
     background: #f7fafc;
-    border: 2px solid #e2e8f0;
-    border-radius: 20px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.15s ease;
 }
 
 .enum-radio-option:hover {
     background: #edf2f7;
-    border-color: #cbd5e0;
-    transform: translateY(-1px);
+    border-color: #667eea;
 }
 
 .enum-radio-option input[type="radio"] {
-    width: 18px;
-    height: 18px;
+    width: 12px;
+    height: 12px;
     cursor: pointer;
     accent-color: #667eea;
+    margin: 0;
 }
 
-.enum-radio-option input[type="radio"]:checked+label {
+.enum-radio-option input[type="radio"]:checked + label {
     font-weight: 600;
     color: #667eea;
 }
 
 .enum-radio-option label {
     cursor: pointer;
-    font-size: 13px;
+    font-size: 11px;
     color: #4a5568;
     font-weight: 500;
     user-select: none;
@@ -473,60 +823,177 @@ input[type="checkbox"] {
 }
 
 
-/* Playground Layout */
+/* Playground Layout - FIXED HEIGHT for scroll containment */
 .playground-layout {
     background: #f8f9fa;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* Force the main layout table structure to use flexbox */
+.playground-layout > tbody {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+}
+
+.playground-layout > tbody > tr {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+}
+
+.playground-layout > tbody > tr > td {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+}
+
+/* Main container inside layout */
+.playground-layout > tbody > tr > td > table {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+}
+
+.playground-layout > tbody > tr > td > table > tbody {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+}
+
+.playground-layout > tbody > tr > td > table > tbody > tr:first-child {
+    flex-shrink: 0 !important;
+}
+
+.playground-layout > tbody > tr > td > table > tbody > tr:last-child {
+    display: flex !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+}
+
+.playground-layout > tbody > tr > td > table > tbody > tr:last-child > td {
+    display: flex !important;
+    flex: 1 !important;
+    min-height: 0 !important;
 }
 
 .playground-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 24px 32px;
-    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
-    border-bottom: 4px solid rgba(255, 255, 255, 0.2);
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #a855f7 100%);
+    padding: 14px 32px;
+    box-shadow: 0 4px 24px rgba(79, 70, 229, 0.4);
+    border-bottom: none;
+    flex-shrink: 0 !important;
+    /* Force full width */
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100vw !important;
+    z-index: 1000 !important;
+    box-sizing: border-box !important;
 }
 
 .playground-title {
-    font-size: 28px;
-    font-weight: 800;
+    font-size: 20px;
+    font-weight: 700;
     color: white;
     margin: 0;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    letter-spacing: -0.3px;
 }
 
 .playground-subtitle {
-    font-size: 14px;
-    color: rgba(255, 255, 255, 0.9);
-    margin-top: 4px;
-    font-weight: 500;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.85);
+    margin-top: 2px;
+    font-weight: 400;
+    letter-spacing: 0.2px;
 }
 
+/* Content area - the split panel */
 .playground-content {
-    height: calc(100vh - 100px);
+    flex: 1 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    display: flex !important;
+}
+
+/* Account for fixed header on BOTH content cells */
+.playground-content > tbody > tr > td:first-child,
+.playground-content > tbody > tr > td:last-child {
+    padding-top: 80px !important;
+    box-sizing: border-box !important;
+}
+
+.playground-content > tbody {
+    display: flex !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+    width: 100% !important;
+}
+
+.playground-content > tbody > tr {
+    display: flex !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+    width: 100% !important;
+}
+
+/* Left panel cell - component list */
+.playground-content > tbody > tr > td:first-child {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    width: 25% !important;
+    flex-shrink: 0 !important;
+}
+
+/* Right panel cell - property panel */
+.playground-content > tbody > tr > td:last-child {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
 }
 
 
 /* Type hint label */
 .type-hint {
-    font-size: 11px;
-    color: #718096;
-    margin-left: 4px;
+    font-size: 9px;
+    color: #a0aec0;
+    width: 55px;
+    min-width: 55px;
     flex-shrink: 0;
     font-style: italic;
     white-space: nowrap;
+    text-align: right;
+    text-transform: lowercase;
 }
 
 /* Category header */
 .category-header {
-    font-size: 12px;
+    font-size: 10px;
     font-weight: 700;
     color: #667eea;
-    margin: 16px 0 8px 0;
-    padding: 8px 12px;
+    margin: 10px 0 4px 0;
+    padding: 4px 8px;
     background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
-    border-radius: 6px;
+    border-radius: 4px;
     border-left: 3px solid #667eea;
     text-transform: uppercase;
-    letter-spacing: 0.8px;
+    letter-spacing: 0.6px;
 }
 
 /* Responsive: stack label above control on narrow panels */
@@ -542,4 +1009,277 @@ input[type="checkbox"] {
         max-width: unset;
         width: 100%;
     }
+}
+
+
+/* ===== Widget Slots Editor Styles ===== */
+
+/* Widget button - compact button in slot row */
+.widget-button {
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #667eea;
+    background: #f0f4ff;
+    border: 1px solid #667eea;
+    border-radius: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+}
+
+.widget-button:hover {
+    background: #667eea;
+    color: white;
+}
+
+/* Widget indicator - label showing widget type name */
+.widget-indicator {
+    font-size: 10px;
+    font-weight: 600;
+    color: #764ba2;
+    background: #f3e8ff;
+    padding: 2px 8px;
+    border-radius: 10px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* ============================================================
+   Widget Editor Dialog
+   GWT PDialogBox structure:
+     div.widget-editor-dialog > div > table
+       tr.dialogTop > td.dialogTopCenter > .Caption
+       tr.dialogMiddle > td.dialogMiddleCenter > .dialogContent > table (content)
+       tr.dialogBottom
+   ============================================================ */
+
+/* Outer wrapper — reset GWT defaults */
+.widget-editor-dialog {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 12px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+    min-width: 420px;
+    max-width: 520px;
+    overflow: hidden;
+}
+
+/* Kill GWT table spacing */
+.widget-editor-dialog table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+/* Hide the decorative corner/edge cells GWT adds */
+.widget-editor-dialog .dialogTopLeft,
+.widget-editor-dialog .dialogTopRight,
+.widget-editor-dialog .dialogMiddleLeft,
+.widget-editor-dialog .dialogMiddleRight,
+.widget-editor-dialog .dialogBottomLeft,
+.widget-editor-dialog .dialogBottomCenter,
+.widget-editor-dialog .dialogBottomRight,
+.widget-editor-dialog .dialogBottom {
+    display: none !important;
+}
+
+/* Caption bar */
+.widget-editor-dialog .Caption {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 12px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    border-radius: 12px 12px 0 0;
+}
+
+/* Content cell */
+.widget-editor-dialog .dialogMiddleCenter {
+    background: white;
+    border-radius: 0 0 12px 12px;
+}
+
+.widget-editor-dialog .dialogContent {
+    width: 100% !important;
+}
+
+/* The inner content table that holds selector, form, error, buttons */
+.widget-editor-dialog .dialogContent > table {
+    width: 100% !important;
+}
+
+.widget-editor-dialog .dialogContent > table > tbody > tr > td {
+    padding: 0 18px;
+}
+
+/* First row = widget selector — add top padding */
+.widget-editor-dialog .dialogContent > table > tbody > tr:first-child > td {
+    padding-top: 16px;
+}
+
+/* Last row = buttons — add bottom padding */
+.widget-editor-dialog .dialogContent > table > tbody > tr:last-child > td {
+    padding-bottom: 16px;
+    padding-top: 8px;
+}
+
+/* Widget selector dropdown */
+.widget-selector {
+    width: 100% !important;
+    padding: 9px 12px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: inherit;
+    background: #f8fafc;
+    color: #2d3748;
+    margin-bottom: 4px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%234a5568' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+}
+
+.widget-selector:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+    background-color: white;
+}
+
+.widget-selector:hover {
+    border-color: #cbd5e0;
+}
+
+/* Props form container — scrollable area for property controls */
+/* GWT renders PVerticalPanel as <table>, so we must force block display for scroll to work */
+.props-form-container {
+    display: block !important;
+    max-height: 340px;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding: 4px 0 !important;
+}
+
+/* Scrollbar for props form */
+.props-form-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.props-form-container::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+
+.props-form-container::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 3px;
+}
+
+.props-form-container::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0;
+}
+
+/* Remove bullet points that leak from property-label into dialog */
+.widget-editor-dialog .gwt-Label::before,
+.widget-editor-dialog .property-label::before {
+    content: none !important;
+}
+
+/* Style property labels inside dialog */
+.props-form-container .gwt-Label {
+    font-size: 12px;
+    color: #4a5568;
+    min-width: 100px;
+    padding-right: 8px;
+}
+
+/* Style property inputs inside dialog */
+.props-form-container .gwt-TextBox,
+.props-form-container .gwt-ListBox,
+.props-form-container .gwt-CheckBox input {
+    font-size: 12px;
+    padding: 5px 8px;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    width: 100%;
+}
+
+.props-form-container .gwt-TextBox:focus,
+.props-form-container .gwt-ListBox:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+}
+
+/* Error label in dialog */
+.widget-editor-dialog .error-label {
+    color: #e53e3e;
+    font-size: 12px;
+    padding: 6px 0;
+    font-weight: 500;
+}
+
+/* Button row — use flexbox on the inner table */
+.widget-editor-dialog .dialogContent > table > tbody > tr:last-child table {
+    width: 100% !important;
+}
+
+.widget-editor-dialog .dialogContent > table > tbody > tr:last-child table td {
+    padding: 0 4px 0 0;
+}
+
+/* Insert button — primary action */
+.insert-button {
+    padding: 9px 24px;
+    font-size: 12px;
+    font-weight: 600;
+    color: white;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    letter-spacing: 0.3px;
+}
+
+.insert-button:hover {
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+    transform: translateY(-1px);
+}
+
+.insert-button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+/* Cancel button — secondary action */
+.cancel-button {
+    padding: 9px 24px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #4a5568;
+    background: #f7fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.cancel-button:hover {
+    background: #edf2f7;
+    border-color: #cbd5e0;
+}
+
+/* Glass overlay backdrop for modal dialog */
+.gwt-PopupPanelGlass {
+    background: rgba(0, 0, 0, 0.4) !important;
+    backdrop-filter: blur(2px);
 }

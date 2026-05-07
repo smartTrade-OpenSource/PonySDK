@@ -70,6 +70,7 @@ public class ComponentPlayground extends PSimplePanel {
 
     // Current state
     private PWebComponent<?> currentComponent;
+    private List<SlotControl> currentSlotControls = new ArrayList<>();
 
     /**
      * Creates a new ComponentPlayground with default subsystems.
@@ -233,6 +234,8 @@ public class ComponentPlayground extends PSimplePanel {
             // Load slot metadata and create slot controls
             final String tagName = extractTagName(componentName);
             final List<SlotControl> slotControls = createSlotControls(tagName);
+            currentSlotControls = new ArrayList<>(slotControls);
+            propertyPanel.setSlotContext(registry, introspector, currentComponent);
             propertyPanel.setSlotControls(slotControls);
             
             // Bind slot controls to component
@@ -271,7 +274,15 @@ public class ComponentPlayground extends PSimplePanel {
      * </p>
      */
     private void clearPreviousComponent() {
+        // Clean up inserted widgets from all slot controls before discarding the component
+        if (currentComponent != null) {
+            for (final SlotControl slotControl : currentSlotControls) {
+                slotControl.clearContent(currentComponent);
+            }
+        }
+        currentSlotControls.clear();
         currentComponent = null;
+        propertyPanel.setSlotContext(null, null, null);
         propertyPanel.clear();
     }
 

@@ -29,10 +29,13 @@ package com.ponysdk.core.ui.wa.codegen;
  *
  * @param name         the property name (e.g. {@code "value"}, {@code "disabled"})
  * @param type         the JavaScript type from the manifest (e.g. {@code "string"}, {@code "boolean"})
- * @param javaType     the mapped Java type (e.g. {@code "String"}, {@code "boolean"})
+ * @param javaType     the mapped Java type (e.g. {@code "String"}, {@code "boolean"}, or enum name like {@code "ButtonVariant"})
  * @param description  human-readable description of the property
  * @param defaultValue the default value as a string, or {@code null} if none
  * @param reflects     whether the property reflects as an HTML attribute
+ * @param isEnum       {@code true} if the property type is a generated enum from union literal types
+ * @param enumName     the name of the enum if {@code isEnum} is true (e.g. {@code "ButtonVariant"}), {@code null} otherwise
+ * @param enumImport   the full import path if {@code isEnum} is true (e.g. {@code "com.ponysdk.core.ui.wa.enums.ButtonVariant"}), {@code null} otherwise
  */
 public record PropertyDef(
     String name,
@@ -40,5 +43,29 @@ public record PropertyDef(
     String javaType,
     String description,
     String defaultValue,
-    boolean reflects
-) {}
+    boolean reflects,
+    boolean isEnum,
+    String enumName,
+    String enumImport
+) {
+    /**
+     * Creates a simple PropertyDef without enum metadata.
+     * <p>
+     * This factory method provides backward compatibility for existing code
+     * that doesn't use enum fields.
+     * </p>
+     *
+     * @param name         the property name
+     * @param type         the JavaScript type from the manifest
+     * @param javaType     the mapped Java type
+     * @param description  human-readable description of the property
+     * @param defaultValue the default value as a string, or {@code null} if none
+     * @param reflects     whether the property reflects as an HTML attribute
+     * @return a new PropertyDef with enum fields set to defaults (isEnum=false, enumName=null, enumImport=null)
+     */
+    public static PropertyDef simple(String name, String type, String javaType, 
+                                     String description, String defaultValue, boolean reflects) {
+        return new PropertyDef(name, type, javaType, description, defaultValue, reflects, 
+                               false, null, null);
+    }
+}

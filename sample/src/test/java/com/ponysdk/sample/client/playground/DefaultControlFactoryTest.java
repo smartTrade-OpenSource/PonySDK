@@ -31,8 +31,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.ponysdk.core.ui.basic.PCheckBox;
+import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PLabel;
-import com.ponysdk.core.ui.basic.PListBox;
+import com.ponysdk.core.ui.basic.PRadioButton;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.test.PSuite;
@@ -95,13 +96,13 @@ public class DefaultControlFactoryTest extends PSuite {
     }
 
     @Test
-    public void testCreateControl_forEnum_shouldReturnPListBox() {
+    public void testCreateControl_forEnum_shouldReturnPFlowPanel() {
         final ParameterInfo param = new ParameterInfo("test", TestEnum.class, false, null);
         
         final PWidget control = factory.createControl(param);
         
         assertNotNull(control);
-        assertTrue(control instanceof PListBox);
+        assertTrue(control instanceof PFlowPanel);
     }
 
     @Test
@@ -109,12 +110,18 @@ public class DefaultControlFactoryTest extends PSuite {
         final ParameterInfo param = new ParameterInfo("test", TestEnum.class, false, null);
         
         final PWidget control = factory.createControl(param);
-        final PListBox listBox = (PListBox) control;
+        final PFlowPanel radioGroup = (PFlowPanel) control;
         
-        assertEquals(3, listBox.getItemCount());
-        assertEquals("VALUE1", listBox.getItem(0));
-        assertEquals("VALUE2", listBox.getItem(1));
-        assertEquals("VALUE3", listBox.getItem(2));
+        assertEquals(3, radioGroup.getWidgetCount());
+        
+        // Verify each radio button has the correct enum value
+        final PRadioButton radio1 = (PRadioButton) radioGroup.getWidget(0);
+        final PRadioButton radio2 = (PRadioButton) radioGroup.getWidget(1);
+        final PRadioButton radio3 = (PRadioButton) radioGroup.getWidget(2);
+        
+        assertEquals("VALUE1", radio1.getText());
+        assertEquals("VALUE2", radio2.getText());
+        assertEquals("VALUE3", radio3.getText());
     }
 
     @Test

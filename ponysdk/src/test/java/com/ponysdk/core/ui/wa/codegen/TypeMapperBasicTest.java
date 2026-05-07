@@ -25,6 +25,8 @@ package com.ponysdk.core.ui.wa.codegen;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -272,5 +274,362 @@ class TypeMapperBasicTest {
         assertTrue(result.recordDefinition().contains("public record GeneratedRecord"));
         assertTrue(result.recordDefinition().contains("double x"));
         assertTrue(result.recordDefinition().contains("double y"));
+    }
+
+    // ========== Task 1.4: extractLiteralValues() method ==========
+
+    @Test
+    void extractLiteralValues_simpleUnionLiteral() {
+        List<String> result = TypeMapper.extractLiteralValues("'small' | 'medium' | 'large'");
+        assertEquals(List.of("small", "medium", "large"), result);
+    }
+
+    @Test
+    void extractLiteralValues_twoValues() {
+        List<String> result = TypeMapper.extractLiteralValues("'on' | 'off'");
+        assertEquals(List.of("on", "off"), result);
+    }
+
+    @Test
+    void extractLiteralValues_withWhitespaceVariations() {
+        List<String> result = TypeMapper.extractLiteralValues("'a'|'b'|'c'");
+        assertEquals(List.of("a", "b", "c"), result);
+    }
+
+    @Test
+    void extractLiteralValues_withExtraWhitespace() {
+        List<String> result = TypeMapper.extractLiteralValues("  'small'  |  'medium'  |  'large'  ");
+        assertEquals(List.of("small", "medium", "large"), result);
+    }
+
+    @Test
+    void extractLiteralValues_optionalUnionLiteral_filtersUndefined() {
+        List<String> result = TypeMapper.extractLiteralValues("'a' | 'b' | undefined");
+        assertEquals(List.of("a", "b"), result);
+    }
+
+    @Test
+    void extractLiteralValues_optionalUnionLiteral_singleValue() {
+        List<String> result = TypeMapper.extractLiteralValues("'only' | undefined");
+        assertEquals(List.of("only"), result);
+    }
+
+    @Test
+    void extractLiteralValues_nullInput() {
+        List<String> result = TypeMapper.extractLiteralValues(null);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void extractLiteralValues_emptyInput() {
+        List<String> result = TypeMapper.extractLiteralValues("");
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void extractLiteralValues_blankInput() {
+        List<String> result = TypeMapper.extractLiteralValues("   ");
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void extractLiteralValues_nonUnionLiteralType() {
+        List<String> result = TypeMapper.extractLiteralValues("string");
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void extractLiteralValues_complexUnion() {
+        // Complex unions (not pure union literals) should return empty list
+        List<String> result = TypeMapper.extractLiteralValues("string | number");
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void extractLiteralValues_withHyphenatedValues() {
+        List<String> result = TypeMapper.extractLiteralValues("'beat-fade' | 'flip-both' | 'spin-pulse'");
+        assertEquals(List.of("beat-fade", "flip-both", "spin-pulse"), result);
+    }
+
+    // ========== Task 2.1: generateEnumName() method ==========
+
+    @Test
+    void generateEnumName_simpleComponentAndProperty() {
+        String result = TypeMapper.generateEnumName("wa-button", "variant");
+        assertEquals("ButtonVariant", result);
+    }
+
+    @Test
+    void generateEnumName_iconSize() {
+        String result = TypeMapper.generateEnumName("wa-icon", "size");
+        assertEquals("IconSize", result);
+    }
+
+    @Test
+    void generateEnumName_multiPartComponentName() {
+        String result = TypeMapper.generateEnumName("wa-progress-bar", "appearance");
+        assertEquals("ProgressBarAppearance", result);
+    }
+
+    @Test
+    void generateEnumName_multiPartPropertyName() {
+        String result = TypeMapper.generateEnumName("wa-button", "loading-state");
+        assertEquals("ButtonLoadingState", result);
+    }
+
+    @Test
+    void generateEnumName_bothMultiPart() {
+        String result = TypeMapper.generateEnumName("wa-date-picker", "display-mode");
+        assertEquals("DatePickerDisplayMode", result);
+    }
+
+    @Test
+    void generateEnumName_withoutWaPrefix() {
+        // Should still work even without wa- prefix
+        String result = TypeMapper.generateEnumName("button", "variant");
+        assertEquals("ButtonVariant", result);
+    }
+
+    @Test
+    void generateEnumName_caseInsensitiveWaPrefix() {
+        // wa- prefix stripping should be case-insensitive
+        String result = TypeMapper.generateEnumName("WA-button", "variant");
+        assertEquals("ButtonVariant", result);
+    }
+
+    @Test
+    void generateEnumName_withWhitespace() {
+        String result = TypeMapper.generateEnumName("  wa-button  ", "  variant  ");
+        assertEquals("ButtonVariant", result);
+    }
+
+    @Test
+    void generateEnumName_nullComponentName_throwsException() {
+        assertThrows(IllegalArgumentException.class, () -> 
+            TypeMapper.generateEnumName(null, "variant"));
+    }
+
+    @Test
+    void generateEnumName_emptyComponentName_throwsException() {
+        assertThrows(IllegalArgumentException.class, () -> 
+            TypeMapper.generateEnumName("", "variant"));
+    }
+
+    @Test
+    void generateEnumName_blankComponentName_throwsException() {
+        assertThrows(IllegalArgumentException.class, () -> 
+            TypeMapper.generateEnumName("   ", "variant"));
+    }
+
+    @Test
+    void generateEnumName_nullPropertyName_throwsException() {
+        assertThrows(IllegalArgumentException.class, () -> 
+            TypeMapper.generateEnumName("wa-button", null));
+    }
+
+    @Test
+    void generateEnumName_emptyPropertyName_throwsException() {
+        assertThrows(IllegalArgumentException.class, () -> 
+            TypeMapper.generateEnumName("wa-button", ""));
+    }
+
+    @Test
+    void generateEnumName_blankPropertyName_throwsException() {
+        assertThrows(IllegalArgumentException.class, () -> 
+            TypeMapper.generateEnumName("wa-button", "   "));
+    }
+
+    @Test
+    void generateEnumName_preservesCasingAfterHyphen() {
+        // Each part after hyphen should be capitalized, rest lowercased
+        String result = TypeMapper.generateEnumName("wa-BUTTON", "VARIANT");
+        assertEquals("ButtonVariant", result);
+    }
+
+    @Test
+    void generateEnumName_singleCharacterParts() {
+        String result = TypeMapper.generateEnumName("wa-a-b-c", "x-y");
+        assertEquals("ABCXY", result);
+    }
+
+    @Test
+    void generateEnumName_consecutiveHyphens() {
+        // Consecutive hyphens result in empty parts which are skipped
+        String result = TypeMapper.generateEnumName("wa-button--extra", "variant");
+        assertEquals("ButtonExtraVariant", result);
+    }
+
+    // ========== Task 5.1: mapToJavaWithContext() method ==========
+
+    @Test
+    void mapToJavaWithContext_unionLiteral_generatesEnumMapping() {
+        // Clear enum cache to ensure fresh generation
+        TypeMapper.clearEnumCache();
+        
+        TypeMapping result = TypeMapper.mapToJavaWithContext(
+            "'neutral' | 'brand' | 'success'",
+            "wa-button",
+            "variant"
+        );
+        
+        assertEquals("ButtonVariant", result.javaType());
+        assertTrue(result.needsRecordGeneration());
+        assertTrue(result.needsImport());
+        assertEquals("com.ponysdk.core.ui.wa.enums", result.importPackage());
+        assertNotNull(result.recordDefinition());
+        assertTrue(result.recordDefinition().contains("package com.ponysdk.core.ui.wa.enums;"));
+        assertTrue(result.recordDefinition().contains("public enum ButtonVariant"));
+        assertTrue(result.recordDefinition().contains("NEUTRAL(\"neutral\")"));
+        assertTrue(result.recordDefinition().contains("BRAND(\"brand\")"));
+        assertTrue(result.recordDefinition().contains("SUCCESS(\"success\")"));
+    }
+
+    @Test
+    void mapToJavaWithContext_optionalUnionLiteral_generatesEnumMapping() {
+        TypeMapper.clearEnumCache();
+        
+        TypeMapping result = TypeMapper.mapToJavaWithContext(
+            "'small' | 'medium' | 'large' | undefined",
+            "wa-icon",
+            "size"
+        );
+        
+        assertEquals("IconSize", result.javaType());
+        assertTrue(result.needsRecordGeneration());
+        assertTrue(result.needsImport());
+        assertEquals("com.ponysdk.core.ui.wa.enums", result.importPackage());
+        assertNotNull(result.recordDefinition());
+        // Should not include undefined as an enum constant
+        assertFalse(result.recordDefinition().contains("UNDEFINED"));
+        assertTrue(result.recordDefinition().contains("SMALL(\"small\")"));
+        assertTrue(result.recordDefinition().contains("MEDIUM(\"medium\")"));
+        assertTrue(result.recordDefinition().contains("LARGE(\"large\")"));
+    }
+
+    @Test
+    void mapToJavaWithContext_nonUnionLiteral_delegatesToMapToJava() {
+        TypeMapping result = TypeMapper.mapToJavaWithContext(
+            "string",
+            "wa-button",
+            "label"
+        );
+        
+        assertEquals("String", result.javaType());
+        assertFalse(result.needsRecordGeneration());
+        assertFalse(result.needsImport());
+    }
+
+    @Test
+    void mapToJavaWithContext_optionalString_delegatesToMapToJava() {
+        TypeMapping result = TypeMapper.mapToJavaWithContext(
+            "string | undefined",
+            "wa-button",
+            "label"
+        );
+        
+        assertEquals("Optional<String>", result.javaType());
+        assertTrue(result.needsImport());
+        assertEquals("java.util", result.importPackage());
+        assertFalse(result.needsRecordGeneration());
+    }
+
+    @Test
+    void mapToJavaWithContext_number_delegatesToMapToJava() {
+        TypeMapping result = TypeMapper.mapToJavaWithContext(
+            "number",
+            "wa-slider",
+            "value"
+        );
+        
+        assertEquals("double", result.javaType());
+        assertFalse(result.needsImport());
+        assertFalse(result.needsRecordGeneration());
+    }
+
+    @Test
+    void mapToJavaWithContext_enumSourceContainsFromValueMethod() {
+        TypeMapper.clearEnumCache();
+        
+        TypeMapping result = TypeMapper.mapToJavaWithContext(
+            "'a' | 'b'",
+            "wa-test",
+            "prop"
+        );
+        
+        String enumSource = result.recordDefinition();
+        assertTrue(enumSource.contains("public static TestProp fromValue(String value)"));
+        assertTrue(enumSource.contains("throw new IllegalArgumentException"));
+        assertTrue(enumSource.contains("Unknown TestProp value"));
+    }
+
+    @Test
+    void mapToJavaWithContext_enumSourceContainsGetValueMethod() {
+        TypeMapper.clearEnumCache();
+        
+        TypeMapping result = TypeMapper.mapToJavaWithContext(
+            "'x' | 'y'",
+            "wa-coord",
+            "axis"
+        );
+        
+        String enumSource = result.recordDefinition();
+        assertTrue(enumSource.contains("public String getValue()"));
+        assertTrue(enumSource.contains("return value;"));
+    }
+
+    @Test
+    void mapToJavaWithContext_enumSourceContainsPrivateValueField() {
+        TypeMapper.clearEnumCache();
+        
+        TypeMapping result = TypeMapper.mapToJavaWithContext(
+            "'red' | 'green' | 'blue'",
+            "wa-color",
+            "primary"
+        );
+        
+        String enumSource = result.recordDefinition();
+        assertTrue(enumSource.contains("private final String value;"));
+    }
+
+    @Test
+    void mapToJavaWithContext_enumSourceContainsPrivateConstructor() {
+        TypeMapper.clearEnumCache();
+        
+        TypeMapping result = TypeMapper.mapToJavaWithContext(
+            "'on' | 'off'",
+            "wa-switch",
+            "state"
+        );
+        
+        String enumSource = result.recordDefinition();
+        assertTrue(enumSource.contains("SwitchState(String value)"));
+    }
+
+    @Test
+    void mapToJavaWithContext_hyphenatedLiterals_convertedToUpperSnakeCase() {
+        TypeMapper.clearEnumCache();
+        
+        TypeMapping result = TypeMapper.mapToJavaWithContext(
+            "'beat-fade' | 'flip-both' | 'spin-pulse'",
+            "wa-icon",
+            "animation"
+        );
+        
+        String enumSource = result.recordDefinition();
+        assertTrue(enumSource.contains("BEAT_FADE(\"beat-fade\")"));
+        assertTrue(enumSource.contains("FLIP_BOTH(\"flip-both\")"));
+        assertTrue(enumSource.contains("SPIN_PULSE(\"spin-pulse\")"));
+    }
+
+    @Test
+    void mapToJavaWithContext_complexUnion_delegatesToMapToJava() {
+        TypeMapping result = TypeMapper.mapToJavaWithContext(
+            "string | number",
+            "wa-input",
+            "value"
+        );
+        
+        assertEquals("Object", result.javaType());
+        assertTrue(result.isFallback());
     }
 }

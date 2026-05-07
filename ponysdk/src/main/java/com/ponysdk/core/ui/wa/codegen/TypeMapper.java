@@ -23,7 +23,9 @@
 
 package com.ponysdk.core.ui.wa.codegen;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
@@ -58,8 +60,16 @@ public final class TypeMapper {
     /**
      * Pattern matching union literal types such as {@code 'primary' | 'success' | 'neutral'}.
      * Each alternative is a single-quoted string, separated by {@code |}.
+     * Requires at least 2 literal values.
      */
     private static final Pattern UNION_LITERAL_PATTERN = Pattern.compile("^'[^']+'(\\s*\\|\\s*'[^']+')+$");
+
+    /**
+     * Pattern matching optional union literal types such as {@code 'small' | 'medium' | 'large' | undefined}.
+     * Each alternative is a single-quoted string, separated by {@code |}, with {@code undefined} at the end.
+     * Requires at least 1 literal value before the {@code undefined}.
+     */
+    private static final Pattern OPTIONAL_UNION_LITERAL_PATTERN = Pattern.compile("^'[^']+'(\\s*\\|\\s*'[^']+')*\\s*\\|\\s*undefined$");
 
     /**
      * Pattern matching object types such as {@code { x: number, y: number }}.
@@ -103,6 +113,19 @@ public final class TypeMapper {
      * Thread-safe for concurrent access.
      */
     private static final Map<Pattern, CustomTypeMapping> PATTERN_MAPPINGS = new ConcurrentHashMap<>();
+
+    /**
+     * Cache of generated enums to avoid duplicate generation.
+     * <p>
+     * Key: signature of the enum (sorted literal values joined by "|", e.g., "brand|danger|neutral|success|warning")
+     * Value: the enum name that was generated for those values
+     * </p>
+     * <p>
+     * This ensures that if two properties have the same set of literal values (regardless of order),
+     * they share the same enum.
+     * </p>
+     */
+    private static final Map<String, String> ENUM_CACHE = new ConcurrentHashMap<>();
 
     /**
      * Represents a custom type mapping with both Java and TypeScript types.
@@ -221,6 +244,316 @@ public final class TypeMapper {
     }
 
     /**
+     * Detects if a CEM type is a pure union literal type.
+     * <p>
+     * A pure union literal type consists of two or more single-quoted string literals
+     * separated by {@code |}, such as {@code 'small' | 'medium' | 'large'}.
+     * </p>
+     * <p>
+     * This method ensures mutual exclusivity with {@link #isOptionalUnionLiteralType(String)}:
+     * a type cannot be both a pure union literal and an optional union literal.
+     * </p>
+     *
+     * @param cemType the CEM type string to check
+     * @return {@code true} if the type is a pure union literal type, {@code false} otherwise
+     *         (including for null or empty input)
+     */
+    public static boolean isUnionLiteralType(final String cemType) {
+        if (cemType == null || cemType.isBlank()) {
+            return false;
+        }
+        final String trimmed = cemType.trim();
+        // Ensure mutual exclusivity: pure union literals must NOT match optional pattern
+        return UNION_LITERAL_PATTERN.matcher(trimmed).matches() 
+            && !OPTIONAL_UNION_LITERAL_PATTERN.matcher(trimmed).matches();
+    }
+
+    /**
+     * Detects if a CEM type is an optional union literal type.
+     * <p>
+     * An optional union literal type consists of one or more single-quoted string literals
+     * separated by {@code |}, followed by {@code | undefined}, such as
+     * {@code 'small' | 'medium' | 'large' | undefined}.
+     * </p>
+     * <p>
+     * This method ensures mutual exclusivity with {@link #isUnionLiteralType(String)}:
+     * a type cannot be both a pure union literal and an optional union literal.
+     * </p>
+     *
+     * @param cemType the CEM type string to check
+     * @return {@code true} if the type is an optional union literal type, {@code false} otherwise
+     *         (including for null or empty input)
+     */
+    public static boolean isOptionalUnionLiteralType(final String cemType) {
+        if (cemType == null || cemType.isBlank()) {
+            return false;
+        }
+        final String trimmed = cemType.trim();
+        return OPTIONAL_UNION_LITERAL_PATTERN.matcher(trimmed).matches();
+    }
+
+    /**
+     * Extracts the literal values from a union literal type string.
+     * <p>
+     * For example: {@code 'small' | 'medium' | 'large'} returns {@code ["small", "medium", "large"]}.
+     * </p>
+     * <p>
+     * This method handles whitespace variations around the {@code |} separator and filters out
+     * {@code undefined} from the result.
+     * </p>
+     *
+     * @param cemType the union literal type string (e.g., {@code "'small' | 'medium' | 'large'"})
+     * @return a list of literal values without quotes, or an empty list for null/empty input
+     *         or non-union-literal types
+     */
+    public static List<String> extractLiteralValues(final String cemType) {
+        if (cemType == null || cemType.isBlank()) {
+            return List.of();
+        }
+        
+        final String trimmed = cemType.trim();
+        
+        // Only process union literal types (pure or optional)
+        if (!isUnionLiteralType(trimmed) && !isOptionalUnionLiteralType(trimmed)) {
+            return List.of();
+        }
+        
+        // Split by | with optional whitespace
+        final String[] parts = trimmed.split("\\s*\\|\\s*");
+        final List<String> values = new ArrayList<>();
+        
+        for (final String part : parts) {
+            final String trimmedPart = part.trim();
+            
+            // Skip undefined
+            if ("undefined".equals(trimmedPart)) {
+                continue;
+            }
+            
+            // Remove surrounding single quotes and add to list
+            if (trimmedPart.startsWith("'") && trimmedPart.endsWith("'") && trimmedPart.length() >= 2) {
+                values.add(trimmedPart.substring(1, trimmedPart.length() - 1));
+            }
+        }
+        
+        return values;
+    }
+
+    /**
+     * Generates an enum name based on the component name and property name.
+     * <p>
+     * The enum name is derived by:
+     * <ol>
+     *   <li>Stripping the "wa-" prefix from the component name (if present)</li>
+     *   <li>Converting the component name from kebab-case to PascalCase</li>
+     *   <li>Converting the property name from kebab-case to PascalCase</li>
+     *   <li>Concatenating both parts</li>
+     * </ol>
+     * </p>
+     * <p>
+     * Examples:
+     * <ul>
+     *   <li>{@code ("wa-button", "variant")} → {@code "ButtonVariant"}</li>
+     *   <li>{@code ("wa-icon", "size")} → {@code "IconSize"}</li>
+     *   <li>{@code ("wa-progress-bar", "appearance")} → {@code "ProgressBarAppearance"}</li>
+     * </ul>
+     * </p>
+     *
+     * @param componentName the component name (e.g., "wa-button")
+     * @param propertyName the property name (e.g., "variant")
+     * @return the generated enum name in PascalCase (e.g., "ButtonVariant")
+     * @throws IllegalArgumentException if componentName or propertyName is null or empty
+     */
+    public static String generateEnumName(final String componentName, final String propertyName) {
+        if (componentName == null || componentName.isBlank()) {
+            throw new IllegalArgumentException("Component name cannot be null or blank");
+        }
+        if (propertyName == null || propertyName.isBlank()) {
+            throw new IllegalArgumentException("Property name cannot be null or blank");
+        }
+        
+        // Strip "wa-" prefix from component name (case-insensitive)
+        String strippedComponentName = componentName.trim();
+        if (strippedComponentName.toLowerCase().startsWith("wa-")) {
+            strippedComponentName = strippedComponentName.substring(3);
+        }
+        
+        // Convert both parts to PascalCase and concatenate
+        final String componentPart = kebabToPascalCase(strippedComponentName);
+        final String propertyPart = kebabToPascalCase(propertyName.trim());
+        
+        return componentPart + propertyPart;
+    }
+
+    /**
+     * Converts a literal value to a valid Java enum constant name in UPPER_SNAKE_CASE.
+     * <p>
+     * The conversion follows these rules:
+     * <ol>
+     *   <li>Convert all characters to uppercase</li>
+     *   <li>Replace all non-alphanumeric characters with underscores</li>
+     *   <li>Collapse consecutive underscores into a single underscore</li>
+     *   <li>Remove leading and trailing underscores (unless needed for validity)</li>
+     *   <li>If the result starts with a digit, prefix with underscore</li>
+     *   <li>If the result is empty, return "_EMPTY_"</li>
+     * </ol>
+     * </p>
+     * <p>
+     * Examples:
+     * <ul>
+     *   <li>{@code "neutral"} → {@code "NEUTRAL"}</li>
+     *   <li>{@code "beat-fade"} → {@code "BEAT_FADE"}</li>
+     *   <li>{@code "flip-both"} → {@code "FLIP_BOTH"}</li>
+     *   <li>{@code "spin-pulse"} → {@code "SPIN_PULSE"}</li>
+     *   <li>{@code "100%"} → {@code "_100_"}</li>
+     *   <li>{@code "2xl"} → {@code "_2XL"}</li>
+     *   <li>{@code "--special--"} → {@code "SPECIAL"}</li>
+     *   <li>{@code ""} → {@code "_EMPTY_"}</li>
+     * </ul>
+     * </p>
+     *
+     * @param literal the literal value to convert (e.g., "beat-fade")
+     * @return the UPPER_SNAKE_CASE constant name (e.g., "BEAT_FADE")
+     * @throws IllegalArgumentException if literal is null
+     */
+    public static String literalToEnumConstant(final String literal) {
+        if (literal == null) {
+            throw new IllegalArgumentException("Literal cannot be null");
+        }
+        
+        // Handle empty string
+        if (literal.isEmpty()) {
+            return "_EMPTY_";
+        }
+        
+        // Convert to uppercase and replace non-alphanumeric with underscores
+        final StringBuilder result = new StringBuilder();
+        for (int i = 0; i < literal.length(); i++) {
+            final char c = literal.charAt(i);
+            if (Character.isLetterOrDigit(c)) {
+                result.append(Character.toUpperCase(c));
+            } else {
+                result.append('_');
+            }
+        }
+        
+        // Collapse consecutive underscores
+        String collapsed = result.toString().replaceAll("_+", "_");
+        
+        // Remove leading underscores (we'll add back if needed for digit prefix)
+        while (collapsed.startsWith("_") && collapsed.length() > 1) {
+            collapsed = collapsed.substring(1);
+        }
+        
+        // Remove trailing underscores
+        while (collapsed.endsWith("_") && collapsed.length() > 1) {
+            collapsed = collapsed.substring(0, collapsed.length() - 1);
+        }
+        
+        // Handle case where result is just underscores or empty after trimming
+        if (collapsed.isEmpty() || collapsed.equals("_")) {
+            return "_EMPTY_";
+        }
+        
+        // If starts with digit, prefix with underscore
+        if (Character.isDigit(collapsed.charAt(0))) {
+            collapsed = "_" + collapsed;
+        }
+        
+        return collapsed;
+    }
+
+    /**
+     * Gets an existing enum name from the cache or creates a new one.
+     * <p>
+     * This method ensures that if two properties have the same set of literal values
+     * (regardless of order), they share the same enum. The cache key is computed by
+     * sorting the literal values and joining them with "|".
+     * </p>
+     * <p>
+     * Example:
+     * <ul>
+     *   <li>First call with ("wa-button", "variant", ["brand", "neutral", "success"]) → generates "ButtonVariant"</li>
+     *   <li>Second call with ("wa-icon", "type", ["neutral", "success", "brand"]) → returns "ButtonVariant" (same values)</li>
+     *   <li>Third call with ("wa-badge", "variant", ["info", "warning"]) → generates "BadgeVariant" (different values)</li>
+     * </ul>
+     * </p>
+     *
+     * @param componentName the component name (e.g., "wa-button")
+     * @param propertyName the property name (e.g., "variant")
+     * @param literals the list of literal values (e.g., ["brand", "neutral", "success"])
+     * @return the enum name (either from cache or newly generated)
+     * @throws IllegalArgumentException if any parameter is null or empty
+     */
+    public static String getOrCreateEnumName(final String componentName, final String propertyName, final List<String> literals) {
+        if (componentName == null || componentName.isBlank()) {
+            throw new IllegalArgumentException("Component name cannot be null or blank");
+        }
+        if (propertyName == null || propertyName.isBlank()) {
+            throw new IllegalArgumentException("Property name cannot be null or blank");
+        }
+        if (literals == null || literals.isEmpty()) {
+            throw new IllegalArgumentException("Literals list cannot be null or empty");
+        }
+
+        // Create cache key by sorting values and joining with "|"
+        final String cacheKey = literals.stream()
+            .sorted()
+            .reduce((a, b) -> a + "|" + b)
+            .orElse("");
+
+        // Check cache first, generate new name if not found
+        return ENUM_CACHE.computeIfAbsent(cacheKey, key -> generateEnumName(componentName, propertyName));
+    }
+
+    /**
+     * Clears the enum cache.
+     * <p>
+     * This method is primarily intended for testing to ensure a clean state
+     * between test cases.
+     * </p>
+     */
+    public static void clearEnumCache() {
+        ENUM_CACHE.clear();
+        log.debug("Cleared enum cache");
+    }
+
+    /**
+     * Converts a kebab-case string to PascalCase.
+     * <p>
+     * Examples:
+     * <ul>
+     *   <li>{@code "button"} → {@code "Button"}</li>
+     *   <li>{@code "progress-bar"} → {@code "ProgressBar"}</li>
+     *   <li>{@code "my-long-name"} → {@code "MyLongName"}</li>
+     * </ul>
+     * </p>
+     *
+     * @param kebabCase the kebab-case string to convert
+     * @return the PascalCase string
+     */
+    private static String kebabToPascalCase(final String kebabCase) {
+        if (kebabCase == null || kebabCase.isEmpty()) {
+            return "";
+        }
+        
+        final StringBuilder result = new StringBuilder();
+        final String[] parts = kebabCase.split("-");
+        
+        for (final String part : parts) {
+            if (!part.isEmpty()) {
+                // Capitalize first letter, lowercase the rest
+                result.append(Character.toUpperCase(part.charAt(0)));
+                if (part.length() > 1) {
+                    result.append(part.substring(1).toLowerCase());
+                }
+            }
+        }
+        
+        return result.toString();
+    }
+
+    /**
      * Checks if a string appears to be a regex pattern.
      * <p>
      * This is a heuristic check that looks for common regex metacharacters.
@@ -257,6 +590,73 @@ public final class TypeMapper {
             case "char" -> "Character";
             default -> javaType;
         };
+    }
+
+    /**
+     * Maps a CEM type to Java with context for enum generation.
+     * <p>
+     * This method extends {@link #mapToJava(String)} by accepting component and property context,
+     * enabling automatic enum generation for union literal types.
+     * </p>
+     * <p>
+     * For union literal types (pure or optional), this method:
+     * <ol>
+     *   <li>Extracts the literal values from the type</li>
+     *   <li>Gets or creates an enum name using the component and property context</li>
+     *   <li>Generates the complete enum source code</li>
+     *   <li>Returns a TypeMapping with enum metadata</li>
+     * </ol>
+     * </p>
+     * <p>
+     * For non-union-literal types, this method delegates to {@link #mapToJava(String)}.
+     * </p>
+     * <p>
+     * Example:
+     * <pre>
+     * TypeMapping mapping = TypeMapper.mapToJavaWithContext(
+     *     "'neutral' | 'brand' | 'success'",
+     *     "wa-button",
+     *     "variant"
+     * );
+     * // mapping.javaType() == "ButtonVariant"
+     * // mapping.needsRecordGeneration() == true
+     * // mapping.recordDefinition() contains the enum source
+     * // mapping.needsImport() == true
+     * // mapping.importPackage() == "com.ponysdk.core.ui.wa.enums"
+     * </pre>
+     * </p>
+     *
+     * @param cemType the CEM type string (e.g., {@code "'neutral' | 'brand' | 'success'"})
+     * @param componentName the component name (e.g., {@code "wa-button"})
+     * @param propertyName the property name (e.g., {@code "variant"})
+     * @return TypeMapping with enum metadata if union literal, otherwise delegates to mapToJava()
+     */
+    public static TypeMapping mapToJavaWithContext(final String cemType, final String componentName, final String propertyName) {
+        // Check if it's a union literal type (pure or optional)
+        if (isUnionLiteralType(cemType) || isOptionalUnionLiteralType(cemType)) {
+            // Extract literal values
+            final List<String> literals = extractLiteralValues(cemType);
+            
+            if (literals.isEmpty()) {
+                // Fallback if extraction fails
+                log.warn("Failed to extract literals from union type '{}' — falling back to String", cemType);
+                return TypeMapping.simple("String");
+            }
+            
+            // Get or create enum name (uses cache to avoid duplicates)
+            final String enumName = getOrCreateEnumName(componentName, propertyName, literals);
+            
+            // Generate enum source code
+            final String packageName = "com.ponysdk.core.ui.wa.enums";
+            final String enumSource = generateEnumSource(enumName, literals, packageName);
+            
+            // Return TypeMapping with enum metadata
+            // needsRecordGeneration=true, recordDefinition=enumSource, needsImport=true, importPackage=packageName
+            return new TypeMapping(enumName, true, packageName, true, enumSource);
+        }
+        
+        // Not a union literal type, delegate to existing mapToJava()
+        return mapToJava(cemType);
     }
 
     /**
@@ -446,6 +846,162 @@ public final class TypeMapper {
     private static TypeMapping handleComplexUnion(final String cemType) {
         log.warn("Complex union type '{}' cannot be cleanly mapped — falling back to Object with TODO", cemType);
         return TypeMapping.fallbackWithTodo(cemType, "Complex union");
+    }
+
+    /**
+     * Generates complete Java enum source code for a union literal type.
+     * <p>
+     * The generated enum includes:
+     * <ul>
+     *   <li>Package declaration</li>
+     *   <li>Javadoc with @generated annotation</li>
+     *   <li>Enum constants with their original string values</li>
+     *   <li>Private {@code value} field storing the original string</li>
+     *   <li>Private constructor accepting the value</li>
+     *   <li>Public {@code getValue()} method returning the original string</li>
+     *   <li>Public static {@code fromValue(String)} method for parsing with error handling</li>
+     * </ul>
+     * </p>
+     * <p>
+     * Example output for {@code generateEnumSource("ButtonVariant", List.of("neutral", "brand", "success"), "com.ponysdk.core.ui.wa.enums")}:
+     * <pre>
+     * package com.ponysdk.core.ui.wa.enums;
+     *
+     * /**
+     *  * Enum for ButtonVariant values.
+     *  * @generated from custom-elements.json
+     *  *&#47;
+     * public enum ButtonVariant {
+     *     NEUTRAL("neutral"),
+     *     BRAND("brand"),
+     *     SUCCESS("success");
+     *
+     *     private final String value;
+     *
+     *     ButtonVariant(String value) {
+     *         this.value = value;
+     *     }
+     *
+     *     public String getValue() {
+     *         return value;
+     *     }
+     *
+     *     public static ButtonVariant fromValue(String value) {
+     *         for (ButtonVariant v : values()) {
+     *             if (v.value.equals(value)) {
+     *                 return v;
+     *             }
+     *         }
+     *         throw new IllegalArgumentException(
+     *             "Unknown ButtonVariant value: " + value +
+     *             ". Valid values are: neutral, brand, success");
+     *     }
+     * }
+     * </pre>
+     * </p>
+     *
+     * @param enumName the name of the enum (e.g., "ButtonVariant")
+     * @param literals the list of literal values (e.g., ["neutral", "brand", "success"])
+     * @param packageName the package name (e.g., "com.ponysdk.core.ui.wa.enums")
+     * @return the complete Java source code for the enum
+     * @throws IllegalArgumentException if enumName, literals, or packageName is null or empty
+     */
+    public static String generateEnumSource(final String enumName, final List<String> literals, final String packageName) {
+        if (enumName == null || enumName.isBlank()) {
+            throw new IllegalArgumentException("Enum name cannot be null or blank");
+        }
+        if (literals == null || literals.isEmpty()) {
+            throw new IllegalArgumentException("Literals list cannot be null or empty");
+        }
+        if (packageName == null || packageName.isBlank()) {
+            throw new IllegalArgumentException("Package name cannot be null or blank");
+        }
+
+        final StringBuilder sb = new StringBuilder();
+
+        // Package declaration
+        sb.append("package ").append(packageName).append(";\n\n");
+
+        // Javadoc
+        sb.append("/**\n");
+        sb.append(" * Enum for ").append(enumName).append(" values.\n");
+        sb.append(" * @generated from custom-elements.json\n");
+        sb.append(" */\n");
+
+        // Enum declaration
+        sb.append("public enum ").append(enumName).append(" {\n");
+
+        // Enum constants
+        for (int i = 0; i < literals.size(); i++) {
+            final String literal = literals.get(i);
+            final String constant = literalToEnumConstant(literal);
+            sb.append("    ").append(constant).append("(\"").append(escapeJavaString(literal)).append("\")");
+            if (i < literals.size() - 1) {
+                sb.append(",\n");
+            } else {
+                sb.append(";\n");
+            }
+        }
+
+        sb.append("\n");
+
+        // Private value field
+        sb.append("    private final String value;\n\n");
+
+        // Constructor
+        sb.append("    ").append(enumName).append("(String value) {\n");
+        sb.append("        this.value = value;\n");
+        sb.append("    }\n\n");
+
+        // getValue() method
+        sb.append("    public String getValue() {\n");
+        sb.append("        return value;\n");
+        sb.append("    }\n\n");
+
+        // fromValue() method with error handling
+        sb.append("    public static ").append(enumName).append(" fromValue(String value) {\n");
+        sb.append("        for (").append(enumName).append(" v : values()) {\n");
+        sb.append("            if (v.value.equals(value)) {\n");
+        sb.append("                return v;\n");
+        sb.append("            }\n");
+        sb.append("        }\n");
+        sb.append("        throw new IllegalArgumentException(\n");
+        sb.append("            \"Unknown ").append(enumName).append(" value: \" + value +\n");
+        sb.append("            \". Valid values are: ").append(String.join(", ", literals)).append("\");\n");
+        sb.append("    }\n");
+
+        // Close enum
+        sb.append("}\n");
+
+        return sb.toString();
+    }
+
+    /**
+     * Escapes special characters in a string for use in Java string literals.
+     * <p>
+     * Handles backslashes, double quotes, and common escape sequences.
+     * </p>
+     *
+     * @param str the string to escape
+     * @return the escaped string safe for use in Java source code
+     */
+    private static String escapeJavaString(final String str) {
+        if (str == null) {
+            return "";
+        }
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < str.length(); i++) {
+            final char c = str.charAt(i);
+            switch (c) {
+                case '\\' -> sb.append("\\\\");
+                case '"' -> sb.append("\\\"");
+                case '\n' -> sb.append("\\n");
+                case '\r' -> sb.append("\\r");
+                case '\t' -> sb.append("\\t");
+                default -> sb.append(c);
+            }
+        }
+        return sb.toString();
     }
 
     /**

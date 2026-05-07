@@ -33,9 +33,12 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -106,10 +109,50 @@ public class WebAwesomeCodeGenerator {
     private final Path javaOutputDir;
     private final Path tsOutputDir;
 
+    /**
+     * Cache of enums to generate, avoiding duplicates.
+     * Key: enum name, Value: enum source code
+     */
+    private final Map<String, String> enumsToGenerate = new LinkedHashMap<>();
+
     public WebAwesomeCodeGenerator(final Path manifestPath, final Path javaOutputDir, final Path tsOutputDir) {
         this.manifestPath = manifestPath;
         this.javaOutputDir = javaOutputDir;
         this.tsOutputDir = tsOutputDir;
+    }
+
+    /**
+     * Collects an enum for generation if not already collected.
+     *
+     * @param enumName the enum name
+     * @param enumSource the enum source code
+     */
+    public void collectEnum(final String enumName, final String enumSource) {
+        enumsToGenerate.putIfAbsent(enumName, enumSource);
+    }
+
+    /**
+     * Returns the collected enums to generate.
+     *
+     * @return unmodifiable map of enum name to source code
+     */
+    public Map<String, String> getEnumsToGenerate() {
+        return Collections.unmodifiableMap(enumsToGenerate);
+    }
+
+    /**
+     * Generates a Java enum file.
+     *
+     * @param enumName the enum name (e.g., "ButtonVariant")
+     * @param enumSource the complete enum source code
+     * @param outputDir the output directory for Java files
+     * @throws IOException if the file cannot be written
+     */
+    public void generateEnumFile(final String enumName, final String enumSource, final Path outputDir) throws IOException {
+        final Path enumsPackageDir = outputDir.resolve("com/ponysdk/core/ui/wa/enums");
+        Files.createDirectories(enumsPackageDir);
+        final Path enumFile = enumsPackageDir.resolve(enumName + ".java");
+        Files.writeString(enumFile, enumSource, StandardCharsets.UTF_8);
     }
 
     /**
@@ -171,7 +214,7 @@ public class WebAwesomeCodeGenerator {
         final String jsDoc = getStringOrDefault(decl, "description", "");
         final String status = getStringOrDefault(decl, "status", "stable");
 
-        final List<PropertyDef> properties = parseProperties(decl.getJsonArray("members"));
+        final List<PropertyDef> properties = parseProperties(decl.getJsonArray("members"), tagName);
         final List<EventDef> events = parseEvents(decl.getJsonArray("events"));
         final List<SlotDef> slots = parseSlots(decl.getJsonArray("slots"));
         final List<CssPartDef> cssParts = parseCssParts(decl.getJsonArray("cssParts"));
@@ -303,7 +346,7 @@ public class WebAwesomeCodeGenerator {
             if (!existingNames.contains(propName)) {
                 final String jsType = entry.getValue();
                 final String javaType = TypeMapper.mapToJavaType(jsType);
-                enrichedProps.add(new PropertyDef(
+                enrichedProps.add(PropertyDef.simple(
                     propName, jsType, javaType,
                     "Validation property for form-associated components", null, false
                 ));
@@ -318,7 +361,7 @@ public class WebAwesomeCodeGenerator {
                 if (!existingNames.contains(propName)) {
                     final String jsType = entry.getValue();
                     final String javaType = TypeMapper.mapToJavaType(jsType);
-                    enrichedProps.add(new PropertyDef(
+                    enrichedProps.add(PropertyDef.simple(
                         propName, jsType, javaType,
                         "Validation property for input components", null, false
                     ));
@@ -359,7 +402,7 @@ public class WebAwesomeCodeGenerator {
         // Only add variant if the component seems to be a display/visual component
         // (has no form association and has visual-related properties or events)
         final List<PropertyDef> enrichedProps = new ArrayList<>(def.properties());
-        enrichedProps.add(new PropertyDef(
+        enrichedProps.add(PropertyDef.simple(
             "variant", "string", "String",
             "The variant determines the visual style of the component",
             null, false
@@ -406,7 +449,7 @@ public class WebAwesomeCodeGenerator {
             if (!existingNames.contains(propName)) {
                 final String jsType = entry.getValue();
                 final String javaType = TypeMapper.mapToJavaType(jsType);
-                enrichedProps.add(new PropertyDef(
+                enrichedProps.add(PropertyDef.simple(
                     propName, jsType, javaType,
                     "ARIA accessibility property", null, false
                 ));
@@ -416,7 +459,7 @@ public class WebAwesomeCodeGenerator {
 
         // Add ariaExpanded for expandable components (detected dynamically)
         if (isExpandableComponent(def) && !existingNames.contains("ariaExpanded")) {
-            enrichedProps.add(new PropertyDef(
+            enrichedProps.add(PropertyDef.simple(
                 "ariaExpanded", "boolean", "boolean",
                 "ARIA expanded state for expandable components", null, false
             ));
@@ -434,7 +477,7 @@ public class WebAwesomeCodeGenerator {
         );
     }
 
-    private List<PropertyDef> parseProperties(final JsonArray members) {
+    private List<PropertyDef> parseProperties(final JsonArray members, final String tagName) {
         if (members == null) return Collections.emptyList();
 
         final List<PropertyDef> properties = new ArrayList<>();
@@ -453,12 +496,25 @@ public class WebAwesomeCodeGenerator {
             }
 
             final String jsType = extractTypeText(member);
-            final String javaType = TypeMapper.mapToJavaType(jsType);
+            final TypeMapping mapping = TypeMapper.mapToJavaWithContext(jsType, tagName, name);
+            final String javaType = mapping.javaType();
             final String description = getStringOrDefault(member, "description", "");
             final String defaultValue = getString(member, "default");
             final boolean reflects = member.getBoolean("reflects", false);
 
-            properties.add(new PropertyDef(name, jsType, javaType, description, defaultValue, reflects));
+            // Check if this is an enum type that needs generation
+            final boolean isEnum = mapping.needsRecordGeneration() && mapping.recordDefinition() != null 
+                && mapping.recordDefinition().contains("public enum");
+            final String enumName = isEnum ? mapping.javaType() : null;
+            final String enumImport = isEnum ? mapping.importPackage() + "." + mapping.javaType() : null;
+
+            // Collect enum for generation if needed
+            if (isEnum && mapping.recordDefinition() != null) {
+                collectEnum(mapping.javaType(), mapping.recordDefinition());
+            }
+
+            properties.add(new PropertyDef(name, jsType, javaType, description, defaultValue, reflects, 
+                                           isEnum, enumName, enumImport));
         }
         return properties;
     }
@@ -574,6 +630,13 @@ public class WebAwesomeCodeGenerator {
         final boolean needsOptionalImport = props.stream().anyMatch(p -> p.javaType().contains("Optional"));
         final boolean needsListImport = props.stream().anyMatch(p -> p.javaType().contains("List"));
 
+        // Collect enum imports
+        final Set<String> enumImports = props.stream()
+            .filter(PropertyDef::isEnum)
+            .map(PropertyDef::enumImport)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toCollection(TreeSet::new));
+
         final StringBuilder sb = new StringBuilder();
 
         // Package declaration
@@ -587,6 +650,14 @@ public class WebAwesomeCodeGenerator {
             sb.append("import java.util.Optional;\n");
         }
         if (needsListImport || needsOptionalImport) {
+            sb.append('\n');
+        }
+
+        // Enum imports
+        for (final String enumImport : enumImports) {
+            sb.append("import ").append(enumImport).append(";\n");
+        }
+        if (!enumImports.isEmpty()) {
             sb.append('\n');
         }
 
@@ -614,7 +685,25 @@ public class WebAwesomeCodeGenerator {
         sb.append("        return new ").append(recordName).append("(\n");
         for (int i = 0; i < props.size(); i++) {
             final PropertyDef p = props.get(i);
-            sb.append("            ").append(defaultValueForType(p.javaType()));
+            final String defaultValue;
+            if (p.isEnum()) {
+                // For enums, use the manifest default value converted to enum constant, or null
+                if (p.defaultValue() != null && !p.defaultValue().isEmpty()) {
+                    // Remove quotes from manifest default (e.g., "'neutral'" -> "neutral")
+                    String manifestDefault = p.defaultValue().replace("'", "").replace("\"", "").trim();
+                    String enumConstant = TypeMapper.literalToEnumConstant(manifestDefault);
+                    defaultValue = p.enumName() + "." + enumConstant;
+                    // Add comment indicating original manifest default
+                    sb.append("            ").append(defaultValue);
+                    sb.append(" /* manifest default: ").append(p.defaultValue()).append(" */");
+                } else {
+                    defaultValue = "null";
+                    sb.append("            ").append(defaultValue);
+                }
+            } else {
+                defaultValue = defaultValueForType(p.javaType());
+                sb.append("            ").append(defaultValue);
+            }
             if (i < props.size() - 1) {
                 sb.append(',');
             }
@@ -743,6 +832,9 @@ public class WebAwesomeCodeGenerator {
                 if (javaType.startsWith("Optional")) {
                     yield "Optional.empty()";
                 }
+                if (javaType.startsWith("List")) {
+                    yield "List.of()";
+                }
                 yield "null";
             }
         };
@@ -789,6 +881,13 @@ public class WebAwesomeCodeGenerator {
         final boolean needsOptionalImport = props.stream().anyMatch(p -> p.javaType().contains("Optional"));
         final boolean needsListImport = props.stream().anyMatch(p -> p.javaType().contains("List"));
 
+        // Collect enum imports
+        final Set<String> enumImports = props.stream()
+            .filter(PropertyDef::isEnum)
+            .map(PropertyDef::enumImport)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toCollection(TreeSet::new));
+
         final StringBuilder sb = new StringBuilder();
 
         // Package declaration
@@ -805,6 +904,11 @@ public class WebAwesomeCodeGenerator {
         }
         if (needsOptionalImport) {
             sb.append("import java.util.Optional;\n");
+        }
+
+        // Enum imports
+        for (final String enumImport : enumImports) {
+            sb.append("import ").append(enumImport).append(";\n");
         }
         sb.append('\n');
 
@@ -1225,6 +1329,15 @@ public class WebAwesomeCodeGenerator {
 
             final String indexSource = generator.generateComponentIndex(defs);
             Files.writeString(wrapperPackageDir.resolve("ComponentIndex.java"), indexSource, StandardCharsets.UTF_8);
+
+            // Generate enum files
+            final Path enumsPackageDir = javaOutputDir.resolve("com/ponysdk/core/ui/wa/enums");
+            Files.createDirectories(enumsPackageDir);
+            for (final Map.Entry<String, String> entry : generator.getEnumsToGenerate().entrySet()) {
+                final String enumFileName = entry.getKey() + ".java";
+                Files.writeString(enumsPackageDir.resolve(enumFileName), entry.getValue(), StandardCharsets.UTF_8);
+            }
+            LOG.info("Generated " + generator.getEnumsToGenerate().size() + " enum files.");
 
             // Generate JavaScript registry if output path is provided
             if (jsRegistryOutputPath != null) {

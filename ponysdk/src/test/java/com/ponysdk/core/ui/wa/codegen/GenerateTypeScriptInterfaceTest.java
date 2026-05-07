@@ -197,6 +197,6 @@ class GenerateTypeScriptInterfaceTest {
     }
 
     private static PropertyDef prop(final String name, final String javaType) {
-        return new PropertyDef(name, "string", javaType, "", null, false);
+        return PropertyDef.simple(name, "string", javaType, "", null, false);
     }
 }

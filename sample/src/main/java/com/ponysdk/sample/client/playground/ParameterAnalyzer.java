@@ -140,14 +140,16 @@ public class ParameterAnalyzer {
     }
 
     /**
-     * Checks if a class type is numeric (int or long).
+     * Checks if a class type is numeric (int, long, double, float).
      *
      * @param type the class type to check
-     * @return true if the type is int or long (primitive or wrapper)
+     * @return true if the type is int, long, double or float (primitive or wrapper)
      */
     private boolean isNumericType(final Class<?> type) {
         return int.class.equals(type) || Integer.class.equals(type) ||
-               long.class.equals(type) || Long.class.equals(type);
+               long.class.equals(type) || Long.class.equals(type) ||
+               double.class.equals(type) || Double.class.equals(type) ||
+               float.class.equals(type) || Float.class.equals(type);
     }
 
     /**

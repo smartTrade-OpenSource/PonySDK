@@ -47,11 +47,25 @@ public final class TypeHintResolver {
             throw new IllegalArgumentException("parameterInfo must not be null");
         }
 
+        // For Optional parameters, resolve based on the wrapped type
+        if (parameterInfo.isOptional()) {
+            final Class<?> wrappedType = parameterInfo.optionalWrappedType();
+            if (wrappedType != null && wrappedType != Object.class) {
+                final ParameterInfo unwrapped = new ParameterInfo(
+                    parameterInfo.name(), wrappedType, false, null
+                );
+                return resolve(unwrapped) + "?";
+            }
+            return "optional";
+        }
+
         final Class<?> type = parameterInfo.type();
 
-        if (type == String.class) return "String";
+        if (type == String.class) return "string";
         if (type == boolean.class || type == Boolean.class) return "boolean";
         if (type == int.class || type == Integer.class || type == long.class || type == Long.class) return "number";
+        if (type == double.class || type == Double.class) return "number";
+        if (type == float.class || type == Float.class) return "number";
         if (type.isEnum()) return type.getSimpleName();
 
         return "unknown";

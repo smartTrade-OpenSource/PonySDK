@@ -103,6 +103,11 @@ public class FormGenerator {
                 continue;
             }
             
+            // Skip internal/technical properties
+            if (isHiddenProperty(methodSignature)) {
+                continue;
+            }
+            
             final PropertyControl control = createPropertyControl(methodSignature);
             controls.add(control);
         }
@@ -124,7 +129,15 @@ public class FormGenerator {
         }
         
         final ParameterInfo firstParameter = parameters.get(0);
-        final Class<?> type = firstParameter.type();
+        Class<?> type = firstParameter.type();
+
+        // For Optional parameters, check the wrapped type instead
+        if (firstParameter.isOptional()) {
+            type = firstParameter.optionalWrappedType();
+            if (type == null) {
+                return true;
+            }
+        }
         
         // Check if it's a supported type
         if (type == String.class || 
@@ -134,12 +147,62 @@ public class FormGenerator {
             type == Integer.class ||
             type == long.class || 
             type == Long.class ||
+            type == double.class ||
+            type == Double.class ||
+            type == float.class ||
+            type == Float.class ||
             type.isEnum()) {
             return false;
         }
         
         // Everything else is unsupported
         return true;
+    }
+    
+    /**
+     * Internal/technical property names that should be hidden from the UI.
+     * These are Web Component internals not useful for end-user testing.
+     */
+    private static final java.util.Set<String> HIDDEN_PROPERTIES = java.util.Set.of(
+        "shadowRootOptions",
+        "hasSlotController", 
+        "slotController",
+        "elementInternals",
+        "formControlController",
+        "hasFormControlController",
+        "validationTarget",
+        "validationMessage",
+        "validity",
+        "willValidate",
+        "formAssociated",
+        "shadowRoot",
+        "internals",
+        "renderRoot",
+        "updateComplete",
+        "isUpdatePending",
+        "hasUpdated",
+        "localizeController",
+        "localize"
+    );
+    
+    /**
+     * Checks if a method should be hidden from the UI.
+     * 
+     * @param methodSignature the method signature to check
+     * @return true if the method should be hidden, false otherwise
+     */
+    private boolean isHiddenProperty(final MethodSignature methodSignature) {
+        final String methodName = methodSignature.methodName();
+        
+        // Remove "set" prefix to get property name
+        String propertyName = methodName;
+        if (methodName.startsWith("set") && methodName.length() > 3) {
+            propertyName = methodName.substring(3);
+            // Convert first char to lowercase
+            propertyName = Character.toLowerCase(propertyName.charAt(0)) + propertyName.substring(1);
+        }
+        
+        return HIDDEN_PROPERTIES.contains(propertyName);
     }
 
     /**

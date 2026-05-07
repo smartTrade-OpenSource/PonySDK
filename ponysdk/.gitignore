@@ -6,3 +6,9 @@ bin
 /ponysdk.iml
 .project
 /.settings
+
+# Test databases
+.jqwik-database
+
+# Compiled classes
+*.class

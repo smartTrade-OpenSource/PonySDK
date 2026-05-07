@@ -344,6 +344,6 @@ class GeneratePropsRecordTest {
     }
 
     private static PropertyDef prop(final String name, final String jsType, final String javaType) {
-        return new PropertyDef(name, jsType, javaType, "", null, false);
+        return PropertyDef.simple(name, jsType, javaType, "", null, false);
     }
 }

@@ -99,6 +99,16 @@ public class DefaultTypeConverter implements TypeConverter {
                 return (T) convertToLong(value);
             }
 
+            // Double conversion
+            if (targetType == Double.class || targetType == double.class) {
+                return (T) convertToDouble(value);
+            }
+
+            // Float conversion
+            if (targetType == Float.class || targetType == float.class) {
+                return (T) convertToFloat(value);
+            }
+
             // Enum conversion
             if (targetType.isEnum()) {
                 return (T) convertToEnum(value, (Class<? extends Enum>) targetType);
@@ -174,17 +184,63 @@ public class DefaultTypeConverter implements TypeConverter {
     }
 
     /**
+     * Converts a string to Double.
+     */
+    private Double convertToDouble(final String value) throws ConversionException {
+        try {
+            return Double.parseDouble(value.trim());
+        } catch (final NumberFormatException e) {
+            throw new ConversionException("Invalid double value: expected numeric string, got '" + value + "'", e);
+        }
+    }
+
+    /**
+     * Converts a string to Float.
+     */
+    private Float convertToFloat(final String value) throws ConversionException {
+        try {
+            return Float.parseFloat(value.trim());
+        } catch (final NumberFormatException e) {
+            throw new ConversionException("Invalid float value: expected numeric string, got '" + value + "'", e);
+        }
+    }
+
+    /**
      * Converts a string to an enum constant.
      * <p>
-     * Finds the enum constant by name (case-sensitive).
+     * First tries to use fromValue() method if available (for generated enums with lowercase values).
+     * Falls back to Enum.valueOf() for standard enums.
      * </p>
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     private <E extends Enum<E>> E convertToEnum(final String value, final Class<? extends Enum> enumType) throws ConversionException {
+        final String trimmedValue = value.trim();
+        
+        // First try fromValue() method (for generated enums)
         try {
-            return (E) Enum.valueOf(enumType, value.trim());
+            final java.lang.reflect.Method fromValueMethod = enumType.getMethod("fromValue", String.class);
+            return (E) fromValueMethod.invoke(null, trimmedValue);
+        } catch (final NoSuchMethodException e) {
+            // No fromValue method, fall back to Enum.valueOf
+        } catch (final java.lang.reflect.InvocationTargetException e) {
+            // fromValue threw an exception (invalid value)
+            final Throwable cause = e.getCause();
+            throw new ConversionException("Invalid enum value: '" + trimmedValue + "' is not a valid value of " + enumType.getSimpleName(), cause);
+        } catch (final Exception e) {
+            // Other reflection error, fall back to Enum.valueOf
+            LOGGER.log(Level.FINE, "Could not use fromValue method, falling back to valueOf", e);
+        }
+        
+        // Fall back to Enum.valueOf (case-sensitive, expects uppercase)
+        try {
+            return (E) Enum.valueOf(enumType, trimmedValue);
         } catch (final IllegalArgumentException e) {
-            throw new ConversionException("Invalid enum value: '" + value + "' is not a valid constant of " + enumType.getSimpleName(), e);
+            // Try uppercase as last resort
+            try {
+                return (E) Enum.valueOf(enumType, trimmedValue.toUpperCase());
+            } catch (final IllegalArgumentException e2) {
+                throw new ConversionException("Invalid enum value: '" + trimmedValue + "' is not a valid constant of " + enumType.getSimpleName(), e);
+            }
         }
     }
 }

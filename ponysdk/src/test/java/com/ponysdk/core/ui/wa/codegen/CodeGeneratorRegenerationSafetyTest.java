@@ -256,6 +256,6 @@ class CodeGeneratorRegenerationSafetyTest {
     }
 
     private static PropertyDef prop(final String name, final String javaType) {
-        return new PropertyDef(name, name, javaType, "", "", false);
+        return PropertyDef.simple(name, name, javaType, "", "", false);
     }
 }

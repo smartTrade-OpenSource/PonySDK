@@ -34,6 +34,7 @@ import com.ponysdk.core.ui.basic.PScrollPanel;
 import com.ponysdk.core.ui.basic.PSimplePanel;
 import com.ponysdk.core.ui.basic.PVerticalPanel;
 import com.ponysdk.core.ui.component.PComponent;
+import com.ponysdk.core.ui.component.PWebComponent;
 
 /**
  * Right panel containing component preview and property controls.
@@ -57,6 +58,11 @@ public class PropertyPanel extends PVerticalPanel {
     private final PScrollPanel formScrollPanel;
     private final PVerticalPanel formContainer;
     private final PVerticalPanel slotsContainer;
+
+    // Slot context for widget editor dialog
+    private ComponentRegistry registry;
+    private MethodIntrospector introspector;
+    private PWebComponent<?> parentComponent;
 
     /**
      * Creates a new PropertyPanel.
@@ -158,6 +164,22 @@ public class PropertyPanel extends PVerticalPanel {
     }
 
     /**
+     * Sets the context needed for widget editor dialog integration.
+     * Must be called before {@link #setSlotControls(List)} when widget insertion is desired.
+     *
+     * @param registry        the component registry for resolving widget classes
+     * @param introspector    the method introspector for discovering setter methods
+     * @param parentComponent the parent component that owns the slots
+     */
+    public void setSlotContext(final ComponentRegistry registry,
+                               final MethodIntrospector introspector,
+                               final PWebComponent<?> parentComponent) {
+        this.registry = registry;
+        this.introspector = introspector;
+        this.parentComponent = parentComponent;
+    }
+
+    /**
      * Adds slot controls to the slots area.
      *
      * @param slotControls the list of slot controls to display, must not be null
@@ -192,13 +214,14 @@ public class PropertyPanel extends PVerticalPanel {
 
     /**
      * Creates a vertical row for a slot control.
+     * Layout: [Label 150px] [TextBox flex] [WidgetButton] [WidgetIndicator]
      */
     private PVerticalPanel createSlotRow(final SlotControl slotControl) {
         final PVerticalPanel row = Element.newPVerticalPanel();
         row.setWidth("100%");
         row.addStyleName("slot-row");
 
-        // Create horizontal panel for label and textbox
+        // Create horizontal panel for label, textbox, widget button and indicator
         final PHorizontalPanel inputRow = Element.newPHorizontalPanel();
         inputRow.setWidth("100%");
         inputRow.addStyleName("input-row");
@@ -211,6 +234,33 @@ public class PropertyPanel extends PVerticalPanel {
         slotControl.getTextBox().setWidth("100%");
         inputRow.add(slotControl.getTextBox());
         inputRow.setCellWidth(slotControl.getTextBox(), "100%");
+
+        // Add widget button (Req 5.1)
+        inputRow.add(slotControl.getWidgetButton());
+
+        // Wire widget button click handler to open WidgetEditorDialog (Req 5.1, 5.2, 5.3)
+        slotControl.getWidgetButton().addClickHandler(event -> {
+            if (registry == null || introspector == null || parentComponent == null) {
+                return;
+            }
+            final String slotDisplayName = slotControl.getSlotName().isEmpty()
+                    ? "(default)" : slotControl.getSlotName();
+            final WidgetEditorDialog dialog = new WidgetEditorDialog(
+                    slotDisplayName,
+                    InsertableWidgetRegistry.WIDGET_NAMES,
+                    registry,
+                    introspector,
+                    widget -> slotControl.insertWidget(parentComponent, widget,
+                            WidgetEditorDialog.extractTagName(widget.getClass().getSimpleName()))
+            );
+            // PonySDK requires popups to be added to the PWindow for client-side rendering
+            // Must add to window BEFORE showing, so the client-side widget exists when center() is called
+            slotControl.getWidgetButton().getWindow().add(dialog);
+            dialog.showCentered();
+        });
+
+        // Add widget indicator (Req 5.2, 5.3)
+        inputRow.add(slotControl.getWidgetIndicator());
 
         // Add input row to main row
         row.add(inputRow);

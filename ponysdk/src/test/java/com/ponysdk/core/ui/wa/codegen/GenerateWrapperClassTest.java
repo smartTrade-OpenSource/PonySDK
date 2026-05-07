@@ -334,6 +334,6 @@ class GenerateWrapperClassTest {
     }
 
     private static PropertyDef prop(final String name, final String javaType) {
-        return new PropertyDef(name, name.equals("boolean") ? "boolean" : "string", javaType, "", null, false);
+        return PropertyDef.simple(name, name.equals("boolean") ? "boolean" : "string", javaType, "", null, false);
     }
 }

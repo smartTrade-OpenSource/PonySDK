@@ -60,7 +60,7 @@ public class Main {
 
         final PonySDKServer ponySDKServer = new PonySDKServer();
         ponySDKServer.setApplicationManager(applicationManager);
-        ponySDKServer.setPort(8081);
+        ponySDKServer.setPort(9090);
         ponySDKServer.setHost("0.0.0.0");
         ponySDKServer.setUseSSL(false);
         ponySDKServer.start();

@@ -28,6 +28,7 @@ import com.ponysdk.core.ui.basic.PCheckBox;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PListBox;
 import com.ponysdk.core.ui.basic.PRadioButton;
+import com.ponysdk.core.ui.basic.PRadioButtonSelection;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PWidget;
 
@@ -188,18 +189,38 @@ public class PropertyBinder {
      * @param propertyControl the property control containing metadata
      * @param componentInstance the component instance
      */
+    /**
+     * Binds a radio button group (PFlowPanel containing PRadioButtons with PRadioButtonSelection) to a component method.
+     *
+     * @param radioGroup the flow panel containing radio buttons
+     * @param propertyControl the property control containing metadata
+     * @param componentInstance the component instance
+     */
     private void bindRadioGroup(final PFlowPanel radioGroup, final PropertyControl propertyControl, final Object componentInstance) {
-        // Iterate through all radio buttons in the group
-        for (int i = 0; i < radioGroup.getWidgetCount(); i++) {
-            final PWidget widget = radioGroup.getWidget(i);
-            if (widget instanceof PRadioButton) {
-                final PRadioButton radioButton = (PRadioButton) widget;
-                radioButton.addValueChangeHandler(event -> {
-                    if (Boolean.TRUE.equals(event.getData())) {
-                        final String value = radioButton.getText();
-                        handleValueChange(value, propertyControl, componentInstance);
-                    }
-                });
+        // Get the PRadioButtonSelection stored on the panel
+        final Object selectionObj = radioGroup.getData();
+        if (selectionObj instanceof PRadioButtonSelection) {
+            final PRadioButtonSelection selection = (PRadioButtonSelection) selectionObj;
+            selection.addValueChangeHandler(event -> {
+                final PRadioButton selectedButton = event.getData();
+                if (selectedButton != null) {
+                    final String value = selectedButton.getText();
+                    handleValueChange(value, propertyControl, componentInstance);
+                }
+            });
+        } else {
+            // Fallback: iterate through radio buttons directly (legacy behavior)
+            for (int i = 0; i < radioGroup.getWidgetCount(); i++) {
+                final PWidget widget = radioGroup.getWidget(i);
+                if (widget instanceof PRadioButton) {
+                    final PRadioButton radioButton = (PRadioButton) widget;
+                    radioButton.addValueChangeHandler(event -> {
+                        if (Boolean.TRUE.equals(event.getData())) {
+                            final String value = radioButton.getText();
+                            handleValueChange(value, propertyControl, componentInstance);
+                        }
+                    });
+                }
             }
         }
     }

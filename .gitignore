@@ -13,6 +13,18 @@ nul
 # Data/cache
 /data/
 
+# Temporary files
+/tmp/
+
+# Badge/image artifacts
+*.png
+
+# Compiled classes
+*.class
+
+# Test databases
+.jqwik-database
+
 # Build artifacts
 ponysdk-component-terminal/dist/bundle.js
 ponysdk-component-terminal/dist/styles.css
