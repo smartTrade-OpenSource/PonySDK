@@ -1,1 +1,1 @@
-include 'ponysdk','sample'
+include 'ponysdk','ponysdk-testkit','sample'
