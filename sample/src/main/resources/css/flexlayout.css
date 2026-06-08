@@ -1,0 +1,244 @@
+/* ================================================================
+   FlexLayout — CSS Themes
+   Apply a theme class to the .fl-layout container element:
+     (none)              → dark (default)
+     .fl-theme-light     → light
+     .fl-theme-gray      → gray
+     .fl-theme-rounded   → dark rounded tabs
+     .fl-theme-underline → minimal underline-only tabs
+   ================================================================ */
+
+/* ── Variables (dark default) ────────────────────────────────────── */
+:root {
+  --fl-bg:           #1e1e2e;
+  --fl-panel:        #181825;
+  --fl-strip:        #11111b;
+  --fl-border:       #313244;
+  --fl-accent:       #89b4fa;
+  --fl-accent2:      #cba6f7;
+  --fl-text:         #cdd6f4;
+  --fl-text-dim:     #6c7086;
+  --fl-tab-hover:    #313244;
+  --fl-tab-active-bg:#1e1e2e;
+  --fl-tab-active-ind:#89b4fa;
+  --fl-close-hover:  #f38ba8;
+  --fl-sp:           #11111b;
+  --fl-sp-hover:     #89b4fa;
+  --fl-drop-fill:    rgba(137,180,250,.20);
+  --fl-drop-border:  #89b4fa;
+  --fl-strip-h:      30px;
+  --fl-sp-size:      5px;
+  --fl-radius:       4px;
+  --fl-tab-radius:   3px;
+  --fl-font:         system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --fl-font-sz:      12px;
+}
+
+/* ── Light theme ─────────────────────────────────────────────────── */
+.fl-theme-light {
+  --fl-bg:           #f0f0f0;
+  --fl-panel:        #ffffff;
+  --fl-strip:        #e8e8e8;
+  --fl-border:       #d0d0d0;
+  --fl-accent:       #0078d4;
+  --fl-accent2:      #8764b8;
+  --fl-text:         #1a1a1a;
+  --fl-text-dim:     #767676;
+  --fl-tab-hover:    #e0e0e0;
+  --fl-tab-active-bg:#ffffff;
+  --fl-tab-active-ind:#0078d4;
+  --fl-close-hover:  #c42b1c;
+  --fl-sp:           #d0d0d0;
+  --fl-sp-hover:     #0078d4;
+  --fl-drop-fill:    rgba(0,120,212,.12);
+  --fl-drop-border:  #0078d4;
+}
+
+/* ── Gray theme ──────────────────────────────────────────────────── */
+.fl-theme-gray {
+  --fl-bg:           #2b2b2b;
+  --fl-panel:        #252525;
+  --fl-strip:        #1e1e1e;
+  --fl-border:       #3a3a3a;
+  --fl-accent:       #75beff;
+  --fl-accent2:      #c399d4;
+  --fl-text:         #d4d4d4;
+  --fl-text-dim:     #808080;
+  --fl-tab-hover:    #3a3a3a;
+  --fl-tab-active-bg:#2b2b2b;
+  --fl-tab-active-ind:#75beff;
+  --fl-close-hover:  #f14c4c;
+  --fl-sp:           #1e1e1e;
+  --fl-sp-hover:     #75beff;
+  --fl-drop-fill:    rgba(117,190,255,.18);
+  --fl-drop-border:  #75beff;
+}
+
+/* ── Rounded theme (dark + rounded tabs) ─────────────────────────── */
+.fl-theme-rounded {
+  --fl-bg:           #1e1e2e;
+  --fl-panel:        #181825;
+  --fl-strip:        #11111b;
+  --fl-border:       #313244;
+  --fl-accent:       #89b4fa;
+  --fl-text:         #cdd6f4;
+  --fl-text-dim:     #6c7086;
+  --fl-tab-hover:    #313244;
+  --fl-tab-active-bg:#2a2a3e;
+  --fl-tab-active-ind:#89b4fa;
+  --fl-close-hover:  #f38ba8;
+  --fl-sp:           #11111b;
+  --fl-sp-hover:     #89b4fa;
+  --fl-drop-fill:    rgba(137,180,250,.20);
+  --fl-drop-border:  #89b4fa;
+  --fl-tab-radius:   8px;
+}
+.fl-theme-rounded .fl-tab { margin: 4px 2px 0; border-radius: var(--fl-tab-radius) var(--fl-tab-radius) 0 0 !important; }
+.fl-theme-rounded .fl-tab.fl-tab-active { background: var(--fl-tab-active-bg) !important; }
+
+/* ── Underline theme ─────────────────────────────────────────────── */
+.fl-theme-underline {
+  --fl-bg:           #1e1e2e;
+  --fl-panel:        #1e1e2e;
+  --fl-strip:        #1e1e2e;
+  --fl-border:       #313244;
+  --fl-accent:       #89b4fa;
+  --fl-text:         #cdd6f4;
+  --fl-text-dim:     #585b70;
+  --fl-tab-hover:    transparent;
+  --fl-tab-active-bg:transparent;
+  --fl-tab-active-ind:#89b4fa;
+  --fl-sp:           #313244;
+  --fl-sp-hover:     #89b4fa;
+  --fl-drop-fill:    rgba(137,180,250,.15);
+  --fl-drop-border:  #89b4fa;
+}
+.fl-theme-underline .fl-tab { border-right: none !important; }
+.fl-theme-underline .fl-tab:hover { background: none !important; color: var(--fl-text) !important; }
+
+/* ── Reset ───────────────────────────────────────────────────────── */
+.fl-layout *, .fl-layout *::before, .fl-layout *::after {
+  box-sizing: border-box; margin: 0; padding: 0;
+}
+.fl-layout button { font-family: inherit; cursor: pointer; }
+
+/* ── Container ───────────────────────────────────────────────────── */
+.fl-layout {
+  display: flex; width: 100%; height: 100%; overflow: hidden;
+  background: var(--fl-bg); color: var(--fl-text);
+  font-family: var(--fl-font); font-size: var(--fl-font-sz);
+  position: relative;
+}
+
+/* ── Row ─────────────────────────────────────────────────────────── */
+.fl-row {
+  display: flex; flex: 1 1 0px; overflow: hidden; min-width: 0; min-height: 0;
+}
+.fl-row.fl-row    { flex-direction: row; }
+.fl-row.fl-column { flex-direction: column; }
+
+/* ── Splitters ───────────────────────────────────────────────────── */
+.fl-splitter {
+  flex: 0 0 var(--fl-sp-size); background: var(--fl-sp); position: relative; z-index: 10;
+  transition: background .12s;
+}
+.fl-sp-h { cursor: col-resize; }
+.fl-sp-v { cursor: row-resize; }
+.fl-splitter:hover, .fl-splitter.fl-sp-active { background: var(--fl-sp-hover); }
+.fl-splitter::after { content:''; position:absolute; inset:0; }
+.fl-sp-h::after { left:-3px; right:-3px; }
+.fl-sp-v::after { top:-3px; bottom:-3px; }
+
+/* ── TabSet ──────────────────────────────────────────────────────── */
+.fl-tabset {
+  display: flex; flex-direction: column;
+  flex: 1 1 0px; min-width: 0; min-height: 0; overflow: hidden;
+  background: var(--fl-panel); border: 1px solid var(--fl-border);
+}
+.fl-layout.fl-has-maximized .fl-tabset:not(.fl-maximized) { visibility: hidden; }
+.fl-tabset.fl-maximized {
+  position: absolute !important; inset: 0 !important; z-index: 100; visibility: visible !important;
+}
+
+/* ── Tab strip ───────────────────────────────────────────────────── */
+.fl-strip {
+  display: flex; align-items: stretch;
+  height: var(--fl-strip-h); min-height: var(--fl-strip-h);
+  background: var(--fl-strip); border-bottom: 1px solid var(--fl-border);
+  overflow: hidden; user-select: none; flex-shrink: 0;
+}
+.fl-tabs {
+  display: flex; flex: 1 1 0; overflow-x: auto; overflow-y: hidden;
+  scrollbar-width: none;
+}
+.fl-tabs::-webkit-scrollbar { display: none; }
+
+/* ── Tab button ──────────────────────────────────────────────────── */
+.fl-tab {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 0 10px; cursor: pointer; white-space: nowrap;
+  border-right: 1px solid var(--fl-border);
+  color: var(--fl-text-dim);
+  transition: color .12s, background .12s;
+  position: relative; min-width: 60px; max-width: 180px;
+}
+.fl-tab:hover { background: var(--fl-tab-hover); color: var(--fl-text); }
+.fl-tab.fl-tab-active {
+  background: var(--fl-tab-active-bg); color: var(--fl-text); border-bottom: none;
+}
+.fl-tab.fl-tab-active::after {
+  content:''; position:absolute; bottom:0; left:0; right:0;
+  height:2px; background: var(--fl-tab-active-ind);
+}
+.fl-tab-icon { font-size: 11px; flex-shrink: 0; line-height: 1; }
+.fl-tab-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; font-size: var(--fl-font-sz); }
+
+/* Close ×  */
+.fl-tab-x {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 15px; height: 15px; background: none; border: none; border-radius: 3px;
+  color: var(--fl-text-dim); font-size: 13px; line-height: 1; padding: 0; flex-shrink: 0;
+  opacity: 0; transition: opacity .12s, background .12s, color .12s;
+}
+.fl-tab:hover .fl-tab-x,
+.fl-tab.fl-tab-active .fl-tab-x { opacity: .5; }
+.fl-tab-x:hover { background: var(--fl-close-hover) !important; color: #fff !important; opacity: 1 !important; }
+
+/* ── Toolbar ─────────────────────────────────────────────────────── */
+.fl-toolbar { display: flex; align-items: center; padding: 0 4px; gap: 2px; flex-shrink: 0; }
+.fl-tbtn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; background: none;
+  border: 1px solid transparent; border-radius: var(--fl-radius);
+  color: var(--fl-text-dim); padding: 3px;
+  transition: background .12s, color .12s, border-color .12s;
+}
+.fl-tbtn:hover { background: var(--fl-tab-hover); border-color: var(--fl-border); color: var(--fl-text); }
+.fl-tbtn svg { width: 100%; height: 100%; display: block; }
+
+/* ── Content ─────────────────────────────────────────────────────── */
+.fl-content { flex: 1 1 0; position: relative; overflow: hidden; min-height: 0; }
+.fl-tab-content {
+  display: flex; flex-direction: column; position: absolute; inset: 0;
+  overflow: hidden; background: var(--fl-panel);
+}
+
+/* ── Drag ghost ──────────────────────────────────────────────────── */
+.fl-drag-ghost {
+  opacity: .9; box-shadow: 0 6px 20px rgba(0,0,0,.5);
+  background: var(--fl-tab-active-bg) !important;
+  border: 1px solid var(--fl-accent); color: var(--fl-text) !important;
+  cursor: grabbing !important;
+}
+
+/* ── Drop indicator ──────────────────────────────────────────────── */
+.fl-drop-ind {
+  background: var(--fl-drop-fill); border: 2px solid var(--fl-drop-border);
+  border-radius: var(--fl-radius); pointer-events: none;
+}
+
+/* ── Scrollbars ──────────────────────────────────────────────────── */
+.fl-tab-content::-webkit-scrollbar { width: 5px; height: 5px; }
+.fl-tab-content::-webkit-scrollbar-track { background: transparent; }
+.fl-tab-content::-webkit-scrollbar-thumb { background: var(--fl-border); border-radius: 3px; }
+.fl-tab-content::-webkit-scrollbar-thumb:hover { background: var(--fl-text-dim); }

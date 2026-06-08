@@ -6,3 +6,11 @@ src-generated
 /log/
 /launcher/
 /.project
+
+node_modules/
+*.png
+debug-*.js
+test-popup.js
+test-results/
+package.json
+package-lock.json
