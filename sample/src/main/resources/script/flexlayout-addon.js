@@ -297,20 +297,15 @@
 
     toggleBorder: function (side) {
       if (!this._model) return;
-      var borders = this._model.getBorders();
-      // For laterals, check if we need to handle levels (e.g. "left-top", "left-bottom")
-      var isLevel = side.indexOf('-') >= 0;
-      var existing = borders.filter(function(b) { return b.side === side; });
-      if (existing.length > 0) {
-        // Remove
-        for (var i = borders.length - 1; i >= 0; i--) {
-          if (borders[i].side === side) borders.splice(i, 1);
-        }
+      var border = this._model.getBorder(side);
+      if (border) {
+        // Toggle visibility without destroying content
+        border._hidden = !border._hidden;
       } else {
-        // Add
-        var size = side.indexOf('bottom') >= 0 && !isLevel ? 180 : 220;
+        // First activation: create border
+        var size = side.indexOf('bottom') >= 0 && side.indexOf('-') < 0 ? 180 : 220;
         var bn = new FlexLayout.BorderNode({ side: side, size: size, selected: -1 });
-        borders.push(bn);
+        this._model.getBorders().push(bn);
       }
       this._model.emit('change', this._model);
     },

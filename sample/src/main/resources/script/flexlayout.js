@@ -115,19 +115,22 @@
   class BorderNode extends Node {
     constructor(cfg) {
       super(NT.BORDER, cfg.id);
-      this.side = cfg.side || 'left'; // 'left','right','bottom'
+      this.side = cfg.side || 'left';
       this.size = cfg.size != null ? cfg.size : 200;
-      this._selected = cfg.selected != null ? cfg.selected : -1; // -1 = closed
-      this.tabStyle = cfg.tabStyle || 'auto'; // 'auto','icon','label','iconLabel'
+      this._selected = cfg.selected != null ? cfg.selected : -1;
+      this.tabStyle = cfg.tabStyle || 'auto';
+      this._hidden = cfg.hidden || false;
     }
     getSelected()     { return this._selected; }
     setSelected(i)    { this._selected = i; }
     getSelectedNode() { return this._selected >= 0 ? (this.children[this._selected] || null) : null; }
     isOpen()          { return this._selected >= 0 && this.children.length > 0; }
     toJson() {
-      return { type: NT.BORDER, id: this.id, side: this.side, size: this.size,
+      const j = { type: NT.BORDER, id: this.id, side: this.side, size: this.size,
                selected: this._selected, tabStyle: this.tabStyle,
                children: this.children.map(c => c.toJson()) };
+      if (this._hidden) j.hidden = true;
+      return j;
     }
   }
 
@@ -490,9 +493,9 @@
       const root = this.model.getRoot(); if (!root) return;
 
       const borders = this.model.getBorders();
-      const leftBorders = borders.filter(b => b.side === 'left' || b.side === 'left-top' || b.side === 'left-bottom');
-      const rightBorders = borders.filter(b => b.side === 'right' || b.side === 'right-top' || b.side === 'right-bottom');
-      const bottomBorder = borders.find(b => b.side === 'bottom');
+      const leftBorders = borders.filter(b => !b._hidden && (b.side === 'left' || b.side === 'left-top' || b.side === 'left-bottom'));
+      const rightBorders = borders.filter(b => !b._hidden && (b.side === 'right' || b.side === 'right-top' || b.side === 'right-bottom'));
+      const bottomBorder = borders.find(b => !b._hidden && b.side === 'bottom');
 
       // Calculate insets from open sidebars
       const leftOpen = leftBorders.find(b => b.isOpen());
