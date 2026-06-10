@@ -53,11 +53,15 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
     private java.util.function.BiFunction<String, String, PWidget> widgetFactory;
 
     public FlexLayoutAddon() {
-        this(null, null);
+        this(null, null, null);
     }
 
     public FlexLayoutAddon(final String modelJson, final String theme) {
-        super(Element.newPFlowPanel(), buildArgs(modelJson, theme));
+        this(modelJson, theme, null);
+    }
+
+    public FlexLayoutAddon(final String modelJson, final String theme, final String bordersJson) {
+        super(Element.newPFlowPanel(), buildArgs(modelJson, theme, bordersJson));
         setTerminalHandler(event -> handleClientEvent(event.getData()));
     }
 
@@ -104,6 +108,72 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
         // Close PWindow if tab was popped out
         final PopOutInfo info = popOutTabs.remove(tabId);
         if (info != null && info.pWindow != null) info.pWindow.close();
+    }
+
+    // ─── Sidebar / Border Management ─────────────────────────────
+
+    /**
+     * Add a tab to a sidebar (border panel).
+     * @param side "left", "right", or "bottom"
+     */
+    public void addBorderTab(final String side, final String tabId, final String tabName, final PWidget content) {
+        addBorderTab(side, tabId, tabName, content, -1, null);
+    }
+
+    public void addBorderTab(final String side, final String tabId, final String tabName, final PWidget content, final int index) {
+        addBorderTab(side, tabId, tabName, content, index, null);
+    }
+
+    public void addBorderTab(final String side, final String tabId, final String tabName, final PWidget content, final int index, final String icon) {
+        widget.add(content);
+        tabWidgets.put(tabId, content);
+        callTerminalMethod("addBorderTab", side, tabId, tabName, String.valueOf(content.getID()), index >= 0 ? index : null, icon);
+    }
+
+    /**
+     * Remove a tab from a sidebar.
+     */
+    public void removeBorderTab(final String side, final String tabId) {
+        callTerminalMethod("removeBorderTab", side, tabId);
+        final PWidget removed = tabWidgets.remove(tabId);
+        tabComponents.remove(tabId);
+        if (removed != null) removed.removeFromParent();
+    }
+
+    /**
+     * Toggle-select a border tab (opens/closes the sidebar panel).
+     */
+    public void selectBorderTab(final String side, final String tabId) {
+        callTerminalMethod("selectBorderTab", side, tabId);
+    }
+
+    /**
+     * Move a tab from the main layout into a sidebar.
+     */
+    public void moveToBorder(final String tabId, final String side) {
+        callTerminalMethod("moveToBorder", tabId, side);
+    }
+
+    /**
+     * Move a tab from a sidebar back into the main layout.
+     */
+    public void moveFromBorder(final String side, final String tabId, final String tabsetId) {
+        callTerminalMethod("moveFromBorder", side, tabId, tabsetId);
+    }
+
+    /**
+     * Toggle visibility of a sidebar (add/remove border).
+     */
+    public void toggleBorder(final String side) {
+        callTerminalMethod("toggleBorder", side);
+    }
+
+    /**
+     * Set the tab display style for a sidebar.
+     * @param tabStyle "auto" (icon if available, else label), "icon", "label", or "iconLabel"
+     */
+    public void setBorderTabStyle(final String side, final String tabStyle) {
+        callTerminalMethod("setBorderTabStyle", side, tabStyle);
     }
 
     // ─── Model Persistence ───────────────────────────────────────
@@ -330,13 +400,16 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
 
     // ─── Internals ───────────────────────────────────────────────
 
-    private static JsonObject buildArgs(final String modelJson, final String theme) {
+    private static JsonObject buildArgs(final String modelJson, final String theme, final String bordersJson) {
         final JsonObjectBuilder builder = Json.createObjectBuilder();
         if (modelJson != null) {
             builder.add("model", Json.createReader(new StringReader(modelJson)).readObject());
         }
         if (theme != null) {
             builder.add("theme", theme);
+        }
+        if (bordersJson != null) {
+            builder.add("borders", Json.createReader(new StringReader(bordersJson)).readArray());
         }
         return builder.build();
     }

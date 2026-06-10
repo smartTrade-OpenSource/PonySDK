@@ -459,6 +459,168 @@ test.describe('FlexLayout PonySDK Integration', () => {
     // Value should be preserved after round-trip
     await expect(page.locator('.interactive-input')).toHaveValue('hello world', { timeout: 5000 });
   });
+
+  // ─── Sidebar / Border Tests ────────────────────────────────────
+
+  test('toggle border adds and removes sidebar', async ({ page }) => {
+    await expect(page.locator('.fl-sidebar')).toHaveCount(3); // left, right, bottom (grouped)
+    // Toggle left off
+    await page.click('button:has-text("Left")');
+    await page.waitForTimeout(300);
+    await expect(page.locator('.fl-sidebar-left')).toHaveCount(0);
+    // Toggle left back on
+    await page.click('button:has-text("Left")');
+    await page.waitForTimeout(300);
+    await expect(page.locator('.fl-sidebar-left')).toHaveCount(1);
+  });
+
+  test('sidebar tab click opens panel', async ({ page }) => {
+    // Close all first by clicking the active tabs
+    const activeTabs = page.locator('.fl-sidebar-left .fl-sidebar-tab-active');
+    const count = await activeTabs.count();
+    for (let i = 0; i < count; i++) { await activeTabs.nth(0).click(); await page.waitForTimeout(150); }
+    // Now open one
+    const tab = page.locator('.fl-sidebar-left .fl-sidebar-tab').first();
+    await tab.click();
+    await page.waitForTimeout(200);
+    await expect(page.locator('.fl-sidebar-left .fl-sidebar-header')).toBeVisible();
+  });
+
+  test('sidebar tab re-click closes panel', async ({ page }) => {
+    // Close all first
+    const activeTabs = page.locator('.fl-sidebar-left .fl-sidebar-tab-active');
+    const count = await activeTabs.count();
+    for (let i = 0; i < count; i++) { await activeTabs.nth(0).click(); await page.waitForTimeout(150); }
+    // Open
+    const tab = page.locator('.fl-sidebar-left .fl-sidebar-tab').first();
+    await tab.click();
+    await page.waitForTimeout(200);
+    const widthOpen = await page.locator('.fl-sidebar-left .fl-sidebar-panel').evaluate(el => el.offsetWidth);
+    expect(widthOpen).toBeGreaterThan(50);
+    // Close
+    await tab.click();
+    await page.waitForTimeout(200);
+    const widthClosed = await page.locator('.fl-sidebar-left .fl-sidebar-panel').evaluate(el => el.offsetWidth);
+    expect(widthClosed).toBe(0);
+  });
+
+  test('two zones: first open takes full height', async ({ page }) => {
+    // Close all left tabs first
+    const activeTabs = page.locator('.fl-sidebar-left .fl-sidebar-tab-active');
+    const count = await activeTabs.count();
+    for (let i = 0; i < count; i++) { await activeTabs.nth(0).click(); await page.waitForTimeout(150); }
+    // Open only top
+    const topTab = page.locator('.fl-sidebar-left .fl-sidebar-section').first().locator('.fl-sidebar-tab').first();
+    await topTab.click();
+    await page.waitForTimeout(200);
+    // Only 1 pane visible
+    await expect(page.locator('.fl-sidebar-left .fl-sidebar-pane')).toHaveCount(1);
+    const pane = page.locator('.fl-sidebar-left .fl-sidebar-pane').first();
+    const panel = page.locator('.fl-sidebar-left .fl-sidebar-panel');
+    const paneBox = await pane.boundingBox();
+    const panelBox = await panel.boundingBox();
+    expect(paneBox.height).toBeGreaterThan(panelBox.height * 0.8);
+  });
+
+  test('two zones: second open splits panel', async ({ page }) => {
+    // Close all left tabs first
+    const activeTabs = page.locator('.fl-sidebar-left .fl-sidebar-tab-active');
+    const count = await activeTabs.count();
+    for (let i = 0; i < count; i++) { await activeTabs.nth(0).click(); await page.waitForTimeout(150); }
+    // Open top
+    const topTab = page.locator('.fl-sidebar-left .fl-sidebar-section').first().locator('.fl-sidebar-tab').first();
+    await topTab.click();
+    await page.waitForTimeout(200);
+    // Open bottom
+    const bottomTab = page.locator('.fl-sidebar-left .fl-sidebar-section').nth(1).locator('.fl-sidebar-tab').first();
+    await bottomTab.click();
+    await page.waitForTimeout(200);
+    // 2 panes visible (split)
+    await expect(page.locator('.fl-sidebar-left .fl-sidebar-pane')).toHaveCount(2);
+  });
+
+  test('two zones: close top leaves bottom full height', async ({ page }) => {
+    // Close all left tabs first
+    const activeTabs = page.locator('.fl-sidebar-left .fl-sidebar-tab-active');
+    const count = await activeTabs.count();
+    for (let i = 0; i < count; i++) { await activeTabs.nth(0).click(); await page.waitForTimeout(150); }
+    // Open both
+    const topTab = page.locator('.fl-sidebar-left .fl-sidebar-section').first().locator('.fl-sidebar-tab').first();
+    const bottomTab = page.locator('.fl-sidebar-left .fl-sidebar-section').nth(1).locator('.fl-sidebar-tab').first();
+    await topTab.click();
+    await page.waitForTimeout(200);
+    await bottomTab.click();
+    await page.waitForTimeout(200);
+    await expect(page.locator('.fl-sidebar-left .fl-sidebar-pane')).toHaveCount(2);
+    // Close top
+    await topTab.click();
+    await page.waitForTimeout(200);
+    // Only bottom pane remains, full height
+    await expect(page.locator('.fl-sidebar-left .fl-sidebar-pane')).toHaveCount(1);
+    const pane = page.locator('.fl-sidebar-left .fl-sidebar-pane').first();
+    const panel = page.locator('.fl-sidebar-left .fl-sidebar-panel');
+    const paneBox = await pane.boundingBox();
+    const panelBox = await panel.boundingBox();
+    expect(paneBox.height).toBeGreaterThan(panelBox.height * 0.8);
+  });
+
+  test('sidebar panel header shows tab name', async ({ page }) => {
+    // The demo starts with panels open; check a header has text
+    const header = page.locator('.fl-sidebar-left .fl-sidebar-header span').first();
+    await expect(header).toBeVisible();
+    const text = await header.textContent();
+    expect(text.length).toBeGreaterThan(0);
+  });
+
+  test('sidebar icon-only mode shows icon without label', async ({ page }) => {
+    // Left-top uses auto (icon only when icon present)
+    const tab = page.locator('.fl-sidebar-left .fl-sidebar-section').first().locator('.fl-sidebar-tab').first();
+    await expect(tab.locator('.fl-sidebar-tab-icon')).toBeVisible();
+    await expect(tab.locator('.fl-sidebar-tab-label')).toHaveCount(0);
+  });
+
+  test('sidebar label mode shows label without icon', async ({ page }) => {
+    // Right-top uses label mode
+    const rightTopSection = page.locator('.fl-sidebar-right .fl-sidebar-section').first();
+    const tab = rightTopSection.locator('.fl-sidebar-tab').first();
+    await expect(tab.locator('.fl-sidebar-tab-label')).toBeVisible();
+    await expect(tab.locator('.fl-sidebar-tab-icon')).toHaveCount(0);
+  });
+
+  test('sidebar iconLabel mode shows both', async ({ page }) => {
+    // Right-bottom uses iconLabel mode
+    const rightBottomSection = page.locator('.fl-sidebar-right .fl-sidebar-section').nth(1);
+    const tab = rightBottomSection.locator('.fl-sidebar-tab').first();
+    await expect(tab.locator('.fl-sidebar-tab-icon')).toBeVisible();
+    await expect(tab.locator('.fl-sidebar-tab-label')).toBeVisible();
+  });
+
+  test('bottom sidebar toggles independently', async ({ page }) => {
+    await expect(page.locator('.fl-sidebar-bottom')).toHaveCount(1);
+    await page.click('button:has-text("Bottom")');
+    await page.waitForTimeout(300);
+    await expect(page.locator('.fl-sidebar-bottom')).toHaveCount(0);
+    await page.click('button:has-text("Bottom")');
+    await page.waitForTimeout(300);
+    await expect(page.locator('.fl-sidebar-bottom')).toHaveCount(1);
+  });
+
+  test('sidebar resize changes panel width', async ({ page }) => {
+    // Ensure left panel is open
+    const panel = page.locator('.fl-sidebar-left .fl-sidebar-panel');
+    const before = await panel.evaluate(el => el.offsetWidth);
+    expect(before).toBeGreaterThan(50); // already open from demo init
+    // Drag resize handle rightward
+    const handle = page.locator('.fl-sidebar-left .fl-sidebar-resize');
+    const hBox = await handle.boundingBox();
+    await page.mouse.move(hBox.x + 2, hBox.y + hBox.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(hBox.x + 82, hBox.y + hBox.height / 2, { steps: 5 });
+    await page.mouse.up();
+    await page.waitForTimeout(300);
+    const after = await panel.evaluate(el => el.offsetWidth);
+    expect(after).toBeGreaterThan(before);
+  });
 });
 
 async function dragToEdge(page, srcSelector, tabsetIdx, edge) {

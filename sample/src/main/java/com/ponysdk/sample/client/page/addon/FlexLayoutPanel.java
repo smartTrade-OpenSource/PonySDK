@@ -30,11 +30,15 @@ public class FlexLayoutPanel implements IsPWidget {
     private Function<String, PWidget> widgetFactory;
 
     public FlexLayoutPanel() {
-        this(null, null);
+        this(null, null, null);
     }
 
     public FlexLayoutPanel(final String modelJson, final String theme) {
-        this.addon = new FlexLayoutAddon(modelJson, theme);
+        this(modelJson, theme, null);
+    }
+
+    public FlexLayoutPanel(final String modelJson, final String theme, final String bordersJson) {
+        this.addon = new FlexLayoutAddon(modelJson, theme, bordersJson);
     }
 
     @Override
@@ -72,6 +76,54 @@ public class FlexLayoutPanel implements IsPWidget {
      */
     public void removeTab(final String tabId) {
         addon.removeTab(tabId);
+    }
+
+    // ─── Sidebar / Border Management ─────────────────────────────
+
+    /**
+     * Add a tab to a sidebar. Returns the generated tab ID.
+     * @param side "left", "right", or "bottom"
+     */
+    public String addBorderTab(final String side, final String tabName, final PWidget content) {
+        return addBorderTab(side, tabName, content, null);
+    }
+
+    /**
+     * Add a tab to a sidebar with an icon. Returns the generated tab ID.
+     * @param icon emoji or character displayed in the strip (null for label only)
+     */
+    public String addBorderTab(final String side, final String tabName, final PWidget content, final String icon) {
+        final String tabId = "tab_" + tabCounter.incrementAndGet();
+        addon.addBorderTab(side, tabId, tabName, content, -1, icon);
+        return tabId;
+    }
+
+    /**
+     * Remove a tab from a sidebar.
+     */
+    public void removeBorderTab(final String side, final String tabId) {
+        addon.removeBorderTab(side, tabId);
+    }
+
+    /**
+     * Toggle-select a border tab (opens/closes the sidebar panel).
+     */
+    public void selectBorderTab(final String side, final String tabId) {
+        addon.selectBorderTab(side, tabId);
+    }
+
+    /**
+     * Move a tab from the main layout into a sidebar.
+     */
+    public void moveToBorder(final String tabId, final String side) {
+        addon.moveToBorder(tabId, side);
+    }
+
+    /**
+     * Move a tab from a sidebar back into the main layout.
+     */
+    public void moveFromBorder(final String side, final String tabId) {
+        addon.moveFromBorder(side, tabId, null);
     }
 
     // ─── Pop-out / Pop-in ────────────────────────────────────────

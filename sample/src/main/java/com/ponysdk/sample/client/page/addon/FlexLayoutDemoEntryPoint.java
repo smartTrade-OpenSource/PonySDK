@@ -92,6 +92,28 @@ public class FlexLayoutDemoEntryPoint implements EntryPoint {
 
         final FlexLayoutPanel flexLayout = new FlexLayoutPanel(initialModel, null);
 
+        // Toggle sidebar visibility buttons
+        final PButton toggleLeft = Element.newPButton("\u258C Left");
+        styleSidebarButton(toggleLeft);
+        toggleLeft.addClickHandler(e -> {
+            flexLayout.getAddon().toggleBorder("left-top");
+            flexLayout.getAddon().toggleBorder("left-bottom");
+        });
+        toolbar.add(toggleLeft);
+
+        final PButton toggleRight = Element.newPButton("Right \u2590");
+        styleSidebarButton(toggleRight);
+        toggleRight.addClickHandler(e -> {
+            flexLayout.getAddon().toggleBorder("right-top");
+            flexLayout.getAddon().toggleBorder("right-bottom");
+        });
+        toolbar.add(toggleRight);
+
+        final PButton toggleBottom = Element.newPButton("\u2581 Bottom");
+        styleSidebarButton(toggleBottom);
+        toggleBottom.addClickHandler(e -> flexLayout.getAddon().toggleBorder("bottom"));
+        toolbar.add(toggleBottom);
+
         // Shared state for interactive widgets (simulates persistence)
         final java.util.Map<String, int[]> counterStates = new java.util.concurrent.ConcurrentHashMap<>();
         final java.util.Map<String, String> inputStates = new java.util.concurrent.ConcurrentHashMap<>();
@@ -185,6 +207,72 @@ public class FlexLayoutDemoEntryPoint implements EntryPoint {
         // On tab close
         flexLayout.setOnTabClosed(tabId -> System.out.println("Tab closed: " + tabId));
 
+        // ─── Sidebar demo: pre-populate all 5 zones ─────────────────
+        // Activate all borders
+        flexLayout.getAddon().toggleBorder("left-top");
+        flexLayout.getAddon().toggleBorder("left-bottom");
+        flexLayout.getAddon().toggleBorder("right-top");
+        flexLayout.getAddon().toggleBorder("right-bottom");
+        flexLayout.getAddon().toggleBorder("bottom");
+
+        // Left-top: icon only
+        final PLabel explorer = Element.newPLabel("Project files will appear here.");
+        explorer.setStyleProperty("padding", "12px");
+        explorer.setStyleProperty("color", "#a6e3a1");
+        flexLayout.addBorderTab("left-top", "Explorer", explorer, "\uD83D\uDCC1");
+
+        final PLabel search = Element.newPLabel("Search across your project.");
+        search.setStyleProperty("padding", "12px");
+        search.setStyleProperty("color", "#89b4fa");
+        flexLayout.addBorderTab("left-top", "Search", search, "\uD83D\uDD0D");
+
+        // Left-bottom: icon only
+        final PLabel git = Element.newPLabel("Git branches and commits.");
+        git.setStyleProperty("padding", "12px");
+        git.setStyleProperty("color", "#f9e2af");
+        flexLayout.addBorderTab("left-bottom", "Source Control", git, "\u2387");
+
+        final PLabel extensions = Element.newPLabel("Manage extensions.");
+        extensions.setStyleProperty("padding", "12px");
+        extensions.setStyleProperty("color", "#cba6f7");
+        flexLayout.addBorderTab("left-bottom", "Extensions", extensions, "\u2B29");
+
+        // Right-top: label only
+        flexLayout.getAddon().setBorderTabStyle("right-top", "label");
+        final PLabel props = Element.newPLabel("Widget properties and settings.");
+        props.setStyleProperty("padding", "12px");
+        props.setStyleProperty("color", "#fab387");
+        flexLayout.addBorderTab("right-top", "Properties", props);
+
+        final PLabel outline = Element.newPLabel("Document outline / structure.");
+        outline.setStyleProperty("padding", "12px");
+        outline.setStyleProperty("color", "#94e2d5");
+        flexLayout.addBorderTab("right-top", "Outline", outline);
+
+        // Right-bottom: icon + label
+        flexLayout.getAddon().setBorderTabStyle("right-bottom", "iconLabel");
+        final PLabel notifications = Element.newPLabel("Recent notifications.");
+        notifications.setStyleProperty("padding", "12px");
+        notifications.setStyleProperty("color", "#f38ba8");
+        flexLayout.addBorderTab("right-bottom", "Notifications", notifications, "\uD83D\uDD14");
+
+        // Bottom: label (default)
+        final PLabel terminal = Element.newPLabel("$ Terminal output here...");
+        terminal.setStyleProperty("padding", "12px");
+        terminal.setStyleProperty("color", "#a6e3a1");
+        terminal.setStyleProperty("font-family", "monospace");
+        flexLayout.addBorderTab("bottom", "Terminal", terminal);
+
+        final PLabel problems = Element.newPLabel("0 errors, 2 warnings");
+        problems.setStyleProperty("padding", "12px");
+        problems.setStyleProperty("color", "#f9e2af");
+        flexLayout.addBorderTab("bottom", "Problems", problems);
+
+        final PLabel output = Element.newPLabel("Build output logs.");
+        output.setStyleProperty("padding", "12px");
+        output.setStyleProperty("color", "#bac2de");
+        flexLayout.addBorderTab("bottom", "Output", output);
+
         final PWidget layoutContainer = flexLayout.asWidget();
         layoutContainer.setStyleProperty("flex", "1");
         layoutContainer.setStyleProperty("min-height", "0");
@@ -203,5 +291,15 @@ public class FlexLayoutDemoEntryPoint implements EntryPoint {
         label.setStyleProperty("font-size", "12px");
         label.setStyleProperty("cursor", "grab");
         label.setStyleProperty("white-space", "nowrap");
+    }
+
+    private static void styleSidebarButton(final PButton btn) {
+        btn.setStyleProperty("background", "#313244");
+        btn.setStyleProperty("border", "1px solid #cba6f7");
+        btn.setStyleProperty("color", "#cba6f7");
+        btn.setStyleProperty("border-radius", "4px");
+        btn.setStyleProperty("padding", "3px 10px");
+        btn.setStyleProperty("cursor", "pointer");
+        btn.setStyleProperty("font-size", "12px");
     }
 }

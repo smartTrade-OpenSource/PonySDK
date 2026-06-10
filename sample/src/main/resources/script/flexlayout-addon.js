@@ -39,6 +39,7 @@
 
       var config = this.options || {};
       var modelJson = config.model || { type: 'row', children: [{ type: 'tabset', weight: 100, children: [] }] };
+      var borders = config.borders || null;
       var theme = config.theme || '';
 
       this._layoutContainer = document.createElement('div');
@@ -46,7 +47,9 @@
       el.appendChild(this._layoutContainer);
 
       this._factory = this._createFactory();
-      this._model = FlexLayout.Model.fromJson({ layout: modelJson });
+      var modelDef = { layout: modelJson };
+      if (borders) modelDef.borders = borders;
+      this._model = FlexLayout.Model.fromJson(modelDef);
       this._layout = this._createLayout();
 
       if (theme) this._layoutContainer.classList.add(theme);
@@ -125,12 +128,13 @@
     },
 
     _handleAction: function (action) {
-      if (action.type === 'CLOSE_TAB') {
-        var widgetId = this._tabWidgetMap[action.tabId] || null;
-        delete this._tabWidgetMap[action.tabId];
-        this.sendDataToServer({ type: 'tabClosed', tabId: action.tabId, widgetId: widgetId });
+      if (action.type === 'CLOSE_TAB' || action.type === 'CLOSE_BORDER_TAB') {
+        var tabId = action.tabId;
+        var widgetId = this._tabWidgetMap[tabId] || null;
+        delete this._tabWidgetMap[tabId];
+        this.sendDataToServer({ type: 'tabClosed', tabId: tabId, widgetId: widgetId });
       }
-      if ((action.type === 'ADD_TAB' || action.type === 'ADD_TAB_SPLIT') &&
+      if ((action.type === 'ADD_TAB' || action.type === 'ADD_TAB_SPLIT' || action.type === 'ADD_BORDER_TAB') &&
           action.tab && action.tab.component && action.tab.component !== 'pwidget') {
         this.sendDataToServer({ type: 'externalDrop', tabId: action.tab.id, component: action.tab.component, tabName: action.tab.name, config: action.tab.config ? JSON.stringify(action.tab.config) : null });
       }
@@ -160,6 +164,18 @@
           break;
         case 'RENAME_TAB':
           msg.t = action.tabId; msg.n = action.name; break;
+        case 'SELECT_BORDER_TAB':
+          msg.s = action.side; msg.t = action.tabId; break;
+        case 'CLOSE_BORDER_TAB':
+          msg.s = action.side; msg.t = action.tabId; break;
+        case 'ADD_BORDER_TAB':
+          msg.s = action.side; if (action.tab) { msg.t = action.tab.id; msg.n = action.tab.name; msg.c = action.tab.component; } break;
+        case 'MOVE_TO_BORDER':
+          msg.t = action.tabId; msg.s = action.side; break;
+        case 'MOVE_FROM_BORDER':
+          msg.s = action.side; msg.t = action.tabId; msg.to = action.toId; msg.l = action.location; break;
+        case 'RESIZE_BORDER':
+          msg.s = action.side; msg.sz = action.size; break;
       }
       return msg;
     },
@@ -244,6 +260,70 @@
       this._model.doAction({ type: 'CLOSE_TAB', tabId: tabId });
     },
 
+    // ─── Sidebar API ────────────────────────────────────────────
+
+    addBorderTab: function (side, tabId, tabName, widgetId, index, icon) {
+      if (!this._model) return;
+      this._tabWidgetMap[tabId] = widgetId;
+      var tabDef = { id: tabId, name: tabName, component: 'pwidget', config: { widgetId: widgetId } };
+      if (icon) tabDef.icon = icon;
+      this._model.doAction({
+        type: 'ADD_BORDER_TAB', side: side, select: true,
+        index: index != null ? index : undefined,
+        tab: tabDef
+      });
+    },
+
+    removeBorderTab: function (side, tabId) {
+      if (!this._model) return;
+      delete this._tabWidgetMap[tabId];
+      this._model.doAction({ type: 'CLOSE_BORDER_TAB', side: side, tabId: tabId });
+    },
+
+    selectBorderTab: function (side, tabId) {
+      if (!this._model) return;
+      this._model.doAction({ type: 'SELECT_BORDER_TAB', side: side, tabId: tabId });
+    },
+
+    moveToBorder: function (tabId, side) {
+      if (!this._model) return;
+      this._model.doAction({ type: 'MOVE_TO_BORDER', tabId: tabId, side: side });
+    },
+
+    moveFromBorder: function (side, tabId, toTabsetId) {
+      if (!this._model) return;
+      this._model.doAction({ type: 'MOVE_FROM_BORDER', side: side, tabId: tabId, toId: toTabsetId || null, location: 'center' });
+    },
+
+    toggleBorder: function (side) {
+      if (!this._model) return;
+      var borders = this._model.getBorders();
+      // For laterals, check if we need to handle levels (e.g. "left-top", "left-bottom")
+      var isLevel = side.indexOf('-') >= 0;
+      var existing = borders.filter(function(b) { return b.side === side; });
+      if (existing.length > 0) {
+        // Remove
+        for (var i = borders.length - 1; i >= 0; i--) {
+          if (borders[i].side === side) borders.splice(i, 1);
+        }
+      } else {
+        // Add
+        var size = side.indexOf('bottom') >= 0 && !isLevel ? 180 : 220;
+        var bn = new FlexLayout.BorderNode({ side: side, size: size, selected: -1 });
+        borders.push(bn);
+      }
+      this._model.emit('change', this._model);
+    },
+
+    setBorderTabStyle: function (side, tabStyle) {
+      if (!this._model) return;
+      var border = this._model.getBorder(side);
+      if (border) {
+        border.tabStyle = tabStyle;
+        this._model.emit('change', this._model);
+      }
+    },
+
     setTheme: function (theme) {
       if (!this._layoutContainer) return;
       this._layoutContainer.className = this._layoutContainer.className.replace(/fl-theme-\S+/g, '').trim();
@@ -260,6 +340,19 @@
       // Rehydrate: notify server of all tabs that need widget creation (single batch message)
       var tabs = [];
       this._collectRehydrateTabs(this._model.getRoot(), tabs);
+      // Also scan borders
+      var borders = this._model.getBorders ? this._model.getBorders() : [];
+      for (var b = 0; b < borders.length; b++) {
+        var border = borders[b];
+        for (var c = 0; c < border.children.length; c++) {
+          var child = border.children[c];
+          var comp = child.getComponent ? child.getComponent() : null;
+          if (comp && comp !== '' && comp !== 'pwidget') {
+            var cfg = child.getConfig ? child.getConfig() : null;
+            tabs.push({ tabId: child.getId(), component: comp, tabName: child.getName(), config: cfg ? JSON.stringify(cfg) : null });
+          }
+        }
+      }
       if (tabs.length > 0) this.sendDataToServer({ type: 'rehydrate', tabs: JSON.stringify(tabs) });
     },
 

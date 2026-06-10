@@ -5,8 +5,9 @@
 (function (global, document) {
   'use strict';
 
-  const NT = Object.freeze({ ROW: 'row', TABSET: 'tabset', TAB: 'tab' });
+  const NT = Object.freeze({ ROW: 'row', TABSET: 'tabset', TAB: 'tab', BORDER: 'border' });
   const DL = Object.freeze({ TOP: 'top', LEFT: 'left', RIGHT: 'right', BOTTOM: 'bottom', CENTER: 'center' });
+  const BORDER_SIDES = ['left', 'right', 'bottom'];
   const EDGE = 0.22;
 
   let _uid = 0;
@@ -110,13 +111,40 @@
     }
   }
 
+  // ── BorderNode ──────────────────────────────────────────────────────
+  class BorderNode extends Node {
+    constructor(cfg) {
+      super(NT.BORDER, cfg.id);
+      this.side = cfg.side || 'left'; // 'left','right','bottom'
+      this.size = cfg.size != null ? cfg.size : 200;
+      this._selected = cfg.selected != null ? cfg.selected : -1; // -1 = closed
+      this.tabStyle = cfg.tabStyle || 'auto'; // 'auto','icon','label','iconLabel'
+    }
+    getSelected()     { return this._selected; }
+    setSelected(i)    { this._selected = i; }
+    getSelectedNode() { return this._selected >= 0 ? (this.children[this._selected] || null) : null; }
+    isOpen()          { return this._selected >= 0 && this.children.length > 0; }
+    toJson() {
+      return { type: NT.BORDER, id: this.id, side: this.side, size: this.size,
+               selected: this._selected, tabStyle: this.tabStyle,
+               children: this.children.map(c => c.toJson()) };
+    }
+  }
+
   // ── Model ─────────────────────────────────────────────────────────
   class Model extends Emitter {
-    constructor() { super(); this._root = null; this._maximized = null; }
+    constructor() { super(); this._root = null; this._maximized = null; this._borders = []; }
 
     static fromJson(json) {
       const m = new Model();
       m._root = Model._parse(json.layout || json, 'row');
+      if (json.borders) {
+        m._borders = json.borders.map(b => {
+          const bn = new BorderNode(b);
+          (b.children || []).forEach(c => bn.addChild(new TabNode(c)));
+          return bn;
+        });
+      }
       return m;
     }
     static _parse(cfg, forcedDir) {
@@ -135,8 +163,18 @@
     }
 
     getRoot()      { return this._root; }
+    getBorders()   { return this._borders; }
+    getBorder(side){ return this._borders.find(b => b.side === side) || null; }
     getMaximized() { return this._maximized; }
     doAction(action) { this._apply(action); this.emit('change', this); }
+
+    // Find by id across root AND borders
+    findById(id) {
+      const r = this._root.findById(id);
+      if (r) return r;
+      for (const b of this._borders) { const f = b.findById(id); if (f) return f; }
+      return null;
+    }
 
     _apply(action) {
       switch (action.type) {
@@ -146,9 +184,13 @@
           if (i >= 0) ts.setSelected(i); break;
         }
         case 'CLOSE_TAB': {
-          const tab = this._root.findById(action.tabId); if (!tab) return;
-          const ts = tab.getParent(); const i = ts.removeChild(tab);
-          ts.setSelected(Math.min(i, ts.children.length - 1));
+          const tab = this.findById(action.tabId); if (!tab) return;
+          const ts = tab.getParent(); if (!ts) return;
+          const i = ts.removeChild(tab);
+          if (ts.type === NT.TABSET) ts.setSelected(Math.min(i, ts.children.length - 1));
+          if (ts.type === NT.BORDER) {
+            if (ts.getSelected() >= ts.children.length) ts.setSelected(ts.children.length - 1);
+          }
           this._cleanup(this._root); break;
         }
         case 'MAXIMIZE_TOGGLE': {
@@ -159,11 +201,19 @@
         }
         case 'MOVE_TAB': {
           const { tabId, toId, location } = action;
-          const tab = this._root.findById(tabId); if (!tab) return;
+          const tab = this.findById(tabId); if (!tab) return;
           const from = tab.getParent(); const oldI = from.removeChild(tab);
-          const dest = this._root.findById(toId);
+          if (from.type === NT.TABSET) from.setSelected(Math.min(oldI, from.children.length - 1));
+          if (from.type === NT.BORDER) {
+            if (from.getSelected() >= from.children.length) from.setSelected(from.children.length - 1);
+          }
+          const dest = this.findById(toId);
           if (!dest) { from.addChild(tab, oldI); return; }
-          if (location === DL.CENTER && dest.type === NT.TABSET) {
+          if (dest.type === NT.BORDER) {
+            // Dropping into a border
+            let at = action.insertIndex != null ? action.insertIndex : dest.children.length;
+            dest.addChild(tab, at); dest.setSelected(dest.children.indexOf(tab));
+          } else if (location === DL.CENTER && dest.type === NT.TABSET) {
             let at = action.insertIndex != null ? action.insertIndex : dest.children.length;
             // insertIndex was computed including the dragged tab; if it sat before
             // the target slot in the SAME tabset, removing it shifts everything left by one
@@ -171,7 +221,6 @@
             at = Math.max(0, Math.min(at, dest.children.length));
             dest.addChild(tab, at); dest.setSelected(dest.children.indexOf(tab));
           } else { this._split(tab, dest, location); }
-          from.setSelected(Math.min(oldI, from.children.length - 1));
           this._cleanup(this._root); break;
         }
         case 'REORDER_TAB': {
@@ -200,6 +249,69 @@
         case 'RENAME_TAB': {
           const tab = this._root.findById(action.tabId); if (!tab) return;
           tab.setName(action.name); break;
+        }
+        case 'SELECT_BORDER_TAB': {
+          const border = this.getBorder(action.side); if (!border) return;
+          const i = border.children.findIndex(t => t.id === action.tabId);
+          // Toggle: clicking already-selected tab closes the panel
+          border.setSelected(i >= 0 && border.getSelected() === i ? -1 : i);
+          break;
+        }
+        case 'CLOSE_BORDER_TAB': {
+          const border = this.getBorder(action.side); if (!border) return;
+          const tab = border.findById(action.tabId); if (!tab) return;
+          const i = border.removeChild(tab);
+          if (border.getSelected() >= border.children.length)
+            border.setSelected(border.children.length - 1);
+          break;
+        }
+        case 'ADD_BORDER_TAB': {
+          const border = this.getBorder(action.side); if (!border) return;
+          const tab = new TabNode(action.tab);
+          const idx = action.index != null ? action.index : border.children.length;
+          border.addChild(tab, idx);
+          if (action.select !== false) border.setSelected(border.children.indexOf(tab));
+          break;
+        }
+        case 'MOVE_TO_BORDER': {
+          // Move a tab from layout into a border
+          const tab = this.findById(action.tabId); if (!tab) return;
+          const from = tab.getParent(); if (!from) return;
+          const oldI = from.removeChild(tab);
+          if (from.type === NT.TABSET) from.setSelected(Math.min(oldI, from.children.length - 1));
+          if (from.type === NT.BORDER) {
+            if (from.getSelected() >= from.children.length) from.setSelected(from.children.length - 1);
+          }
+          const border = this.getBorder(action.side); if (!border) { from.addChild(tab, oldI); return; }
+          const idx = action.index != null ? action.index : border.children.length;
+          border.addChild(tab, idx);
+          border.setSelected(border.children.indexOf(tab));
+          this._cleanup(this._root);
+          break;
+        }
+        case 'MOVE_FROM_BORDER': {
+          // Move a tab from a border into the layout
+          const border = this.getBorder(action.side); if (!border) return;
+          const tab = border.findById(action.tabId); if (!tab) return;
+          border.removeChild(tab);
+          if (border.getSelected() >= border.children.length) border.setSelected(border.children.length - 1);
+          const dest = this._root.findById(action.toId);
+          if (dest && action.location === DL.CENTER) {
+            const at = action.insertIndex != null ? action.insertIndex : dest.children.length;
+            dest.addChild(tab, at); dest.setSelected(dest.children.indexOf(tab));
+          } else if (dest) {
+            this._split(tab, dest, action.location);
+          } else {
+            const ts = this._firstTabSet(this._root);
+            if (ts) { ts.addChild(tab); ts.setSelected(ts.children.indexOf(tab)); }
+          }
+          this._cleanup(this._root);
+          break;
+        }
+        case 'RESIZE_BORDER': {
+          const border = this.getBorder(action.side); if (!border) return;
+          border.size = Math.max(50, action.size);
+          break;
         }
       }
     }
@@ -266,7 +378,11 @@
       return null;
     }
 
-    toJson() { return { layout: this._root ? this._root.toJson() : null }; }
+    toJson() {
+      const json = { layout: this._root ? this._root.toJson() : null };
+      if (this._borders.length > 0) json.borders = this._borders.map(b => b.toJson());
+      return json;
+    }
   }
 
   // ── Actions ───────────────────────────────────────────────────────
@@ -279,6 +395,12 @@
     addTab:        (tabsetId, tab, index, select) => ({ type: 'ADD_TAB',        tabsetId, tab, index, select }),
     addTabSplit:   (tab, toId, location)          => ({ type: 'ADD_TAB_SPLIT',  tab, toId, location }),
     renameTab:     (tabId, name)                  => ({ type: 'RENAME_TAB',     tabId, name }),
+    selectBorderTab: (side, tabId)                => ({ type: 'SELECT_BORDER_TAB', side, tabId }),
+    closeBorderTab:  (side, tabId)                => ({ type: 'CLOSE_BORDER_TAB', side, tabId }),
+    addBorderTab:    (side, tab, index, select)   => ({ type: 'ADD_BORDER_TAB', side, tab, index, select }),
+    moveToBorder:    (tabId, side, index)         => ({ type: 'MOVE_TO_BORDER', tabId, side, index }),
+    moveFromBorder:  (side, tabId, toId, location, insertIndex) => ({ type: 'MOVE_FROM_BORDER', side, tabId, toId, location, insertIndex }),
+    resizeBorder:    (side, size)                 => ({ type: 'RESIZE_BORDER', side, size }),
   };
 
   // ── Layout ────────────────────────────────────────────────────────
@@ -360,12 +482,44 @@
       // Purge orphaned content elements
       const live = new Set();
       this._collectTabIds(this.model.getRoot(), live);
+      for (const b of this.model.getBorders()) b.children.forEach(t => live.add(t.id));
       for (const [id] of this._contentEls) { if (!live.has(id)) this._contentEls.delete(id); }
 
       this._nodeEls.clear();
       this.container.innerHTML = '';
       const root = this.model.getRoot(); if (!root) return;
-      this.container.appendChild(this._renderNode(root));
+
+      const borders = this.model.getBorders();
+      const leftBorders = borders.filter(b => b.side === 'left' || b.side === 'left-top' || b.side === 'left-bottom');
+      const rightBorders = borders.filter(b => b.side === 'right' || b.side === 'right-top' || b.side === 'right-bottom');
+      const bottomBorder = borders.find(b => b.side === 'bottom');
+
+      // Calculate insets from open sidebars
+      const leftOpen = leftBorders.find(b => b.isOpen());
+      const rightOpen = rightBorders.find(b => b.isOpen());
+      const leftSize = leftOpen ? Math.max(...leftBorders.map(b => b.size)) : 0;
+      const rightSize = rightOpen ? Math.max(...rightBorders.map(b => b.size)) : 0;
+      const bottomSize = bottomBorder && bottomBorder.isOpen() ? bottomBorder.size : 0;
+      // Strip widths (fixed)
+      const stripW = 30;
+      const hasLeft = leftBorders.length > 0;
+      const hasRight = rightBorders.length > 0;
+      const hasBottom = !!bottomBorder;
+
+      // Render main layout row with padding for sidebars
+      const rowEl = this._renderNode(root);
+      rowEl.style.position = 'absolute';
+      rowEl.style.top = '0';
+      rowEl.style.bottom = hasBottom ? stripW + bottomSize + 'px' : '0';
+      rowEl.style.left = hasLeft ? stripW + leftSize + 'px' : '0';
+      rowEl.style.right = hasRight ? stripW + rightSize + 'px' : '0';
+      rowEl.style.flex = '';
+      this.container.appendChild(rowEl);
+
+      // Render border panels as absolutely positioned siblings
+      if (hasLeft) this.container.appendChild(this._renderBorderGroup(leftBorders, 'left'));
+      if (hasRight) this.container.appendChild(this._renderBorderGroup(rightBorders, 'right'));
+      if (bottomBorder) this.container.appendChild(this._renderBorder(bottomBorder));
 
       const max = this.model.getMaximized();
       if (max) {
@@ -384,7 +538,348 @@
     _collectTabIds(node, set) {
       if (!node) return;
       if (node.type === NT.TAB) { set.add(node.id); return; }
+      if (node.type === NT.BORDER) { node.children.forEach(c => set.add(c.id)); return; }
       node.children.forEach(c => this._collectTabIds(c, set));
+    }
+
+    _renderBorderGroup(borders, baseSide) {
+      if (borders.length === 1) return this._renderBorder(borders[0]);
+      // Multiple borders on same side: shared strip, split panel when both open
+      const stripW = 30;
+      const hasBottom = !!this.model.getBorder('bottom');
+      const openBorders = borders.filter(b => b.isOpen());
+      const maxSize = Math.max(...borders.map(b => b.size), 200);
+      const size = openBorders.length > 0 ? maxSize : 0;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = `fl-sidebar fl-sidebar-${baseSide}`;
+      if (baseSide === 'left') {
+        wrapper.style.cssText = `position:absolute;top:0;left:0;bottom:${hasBottom ? stripW : 0}px;display:flex;flex-direction:row;z-index:2;`;
+      } else {
+        wrapper.style.cssText = `position:absolute;top:0;right:0;bottom:${hasBottom ? stripW : 0}px;display:flex;flex-direction:row;z-index:2;`;
+      }
+
+      // Strip column with sections
+      const strip = document.createElement('div');
+      strip.className = `fl-sidebar-strip fl-sidebar-strip-${baseSide}`;
+      strip.style.cssText = `display:flex;flex-direction:column;width:${stripW}px;overflow:hidden;flex-shrink:0;background:var(--fl-strip,#11111b);border-${baseSide === 'left' ? 'right' : 'left'}:1px solid var(--fl-border,#313244);`;
+
+      borders.forEach((border, bIdx) => {
+        const section = document.createElement('div');
+        section.className = 'fl-sidebar-section';
+        section.style.cssText = `flex:1;display:flex;flex-direction:column;overflow:auto;${bIdx > 0 ? 'border-top:1px solid var(--fl-border,#313244);' : ''}`;
+        section.dataset.flBorder = border.side;
+        this._nodeEls.set(border.id, section);
+        border.children.forEach((tab, i) => section.appendChild(this._mkBorderTabBtn(tab, border, i)));
+        strip.appendChild(section);
+      });
+
+      // Panel area
+      const panel = document.createElement('div');
+      panel.className = 'fl-sidebar-panel';
+      panel.style.cssText = `width:${size}px;overflow:hidden;transition:width 150ms ease;background:var(--fl-panel,#181825);display:flex;flex-direction:column;`;
+
+      if (openBorders.length > 0) {
+        openBorders.forEach((ob, oIdx) => {
+          const selTab = ob.getSelectedNode();
+          if (!selTab) return;
+          const pane = document.createElement('div');
+          pane.className = 'fl-sidebar-pane';
+          pane.style.cssText = `flex:1;display:flex;flex-direction:column;overflow:hidden;${oIdx > 0 ? 'border-top:1px solid var(--fl-border,#313244);' : ''}`;
+          // Header
+          const header = document.createElement('div');
+          header.className = 'fl-sidebar-header';
+          header.innerHTML = `<span>${selTab.getName()}</span>`;
+          pane.appendChild(header);
+          // Content
+          const c = this._getOrMakeContent(selTab);
+          c.style.display = 'flex';
+          const ph = document.createElement('div');
+          ph.dataset.flPh = selTab.id;
+          ph.style.cssText = 'flex:1;overflow:auto;';
+          pane.appendChild(ph);
+          panel.appendChild(pane);
+        });
+        // Resize handle
+        const handle = document.createElement('div');
+        handle.className = `fl-sidebar-resize fl-sidebar-resize-${baseSide}`;
+        handle.style.touchAction = 'none';
+        handle.addEventListener('pointerdown', e => {
+          if (e.button !== 0) return;
+          e.preventDefault();
+          try { handle.setPointerCapture(e.pointerId); } catch(err) {}
+          const startX = e.clientX, startSize = size;
+          const onMove = me => {
+            const dir = baseSide === 'right' ? -1 : 1;
+            panel.style.width = Math.max(50, startSize + (me.clientX - startX) * dir) + 'px';
+          };
+          const onUp = () => {
+            handle.removeEventListener('pointermove', onMove);
+            handle.removeEventListener('pointerup', onUp);
+            try { handle.releasePointerCapture(e.pointerId); } catch(err) {}
+            const finalSize = panel.offsetWidth;
+            openBorders.forEach(ob => this._act(Actions.resizeBorder(ob.side, finalSize)));
+          };
+          handle.addEventListener('pointermove', onMove);
+          handle.addEventListener('pointerup', onUp);
+        });
+        panel.appendChild(handle);
+      }
+
+      if (baseSide === 'right') { wrapper.appendChild(panel); wrapper.appendChild(strip); }
+      else { wrapper.appendChild(strip); wrapper.appendChild(panel); }
+      return wrapper;
+    }
+
+    _mkBorderTabBtn(tab, border, i) {
+      const side = border.side;
+      const btn = document.createElement('div');
+      btn.className = `fl-sidebar-tab${i === border.getSelected() ? ' fl-sidebar-tab-active' : ''}`;
+      btn.dataset.flBorderTab = tab.id;
+      btn.dataset.flBorderSide = side;
+      // Icon and/or label
+      const icon = tab.getIcon();
+      const ts = border.tabStyle;
+      const showIcon = icon && ts !== 'label';
+      const showLabel = ts === 'label' || ts === 'iconLabel' || (!icon && ts !== 'icon') || (!icon && ts === 'auto');
+      if (showIcon) {
+        const ic = document.createElement('span');
+        ic.className = 'fl-sidebar-tab-icon';
+        ic.textContent = icon;
+        btn.appendChild(ic);
+      }
+      if (showLabel) {
+        const lbl = document.createElement('span');
+        lbl.className = 'fl-sidebar-tab-label';
+        lbl.textContent = tab.getName();
+        btn.appendChild(lbl);
+      }
+      btn.title = tab.getName();
+      if (tab.isEnableClose()) {
+        const x = document.createElement('button');
+        x.type = 'button'; x.className = 'fl-sidebar-tab-x'; x.innerHTML = '×';
+        x.addEventListener('click', ev => {
+          ev.stopPropagation();
+          this._act(Actions.closeBorderTab(side, tab.id));
+        });
+        btn.appendChild(x);
+      }
+      btn.style.touchAction = 'none';
+      btn.addEventListener('pointerdown', ev => {
+        if (ev.button !== 0 || ev.target.closest('.fl-sidebar-tab-x')) return;
+        ev.preventDefault();
+        const startX = ev.clientX, startY = ev.clientY;
+        let dragging = false;
+        const onMove = me => {
+          if (!dragging && (Math.abs(me.clientX - startX) > 4 || Math.abs(me.clientY - startY) > 4)) {
+            dragging = true;
+            btn.releasePointerCapture(ev.pointerId);
+            btn.removeEventListener('pointermove', onMove);
+            btn.removeEventListener('pointerup', onUp);
+            this._startBorderTabDrag(ev, tab, border, btn, me);
+          }
+        };
+        const onUp = () => {
+          btn.removeEventListener('pointermove', onMove);
+          btn.removeEventListener('pointerup', onUp);
+          try { btn.releasePointerCapture(ev.pointerId); } catch(e) {}
+          if (!dragging) {
+            this._act(Actions.selectBorderTab(side, tab.id));
+          }
+        };
+        try { btn.setPointerCapture(ev.pointerId); } catch(e) {}
+        btn.addEventListener('pointermove', onMove);
+        btn.addEventListener('pointerup', onUp);
+      });
+      return btn;
+    }
+
+    _renderBorder(border) {
+      const side = border.side;
+      const isV = side === 'left' || side === 'right';
+      const isOpen = border.isOpen();
+      const size = border.size;
+      const stripW = 30;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = `fl-sidebar fl-sidebar-${side}${isOpen ? ' fl-sidebar-open' : ''}`;
+      wrapper.dataset.flBorder = side;
+      this._nodeEls.set(border.id, wrapper);
+
+      // Position absolutely
+      if (side === 'left') {
+        wrapper.style.cssText = `position:absolute;top:0;left:0;bottom:${this.model.getBorder('bottom') ? stripW : 0}px;display:flex;flex-direction:row;z-index:2;`;
+      } else if (side === 'right') {
+        wrapper.style.cssText = `position:absolute;top:0;right:0;bottom:${this.model.getBorder('bottom') ? stripW : 0}px;display:flex;flex-direction:row;z-index:2;`;
+      } else {
+        wrapper.style.cssText = `position:absolute;bottom:0;left:${this.model.getBorder('left') ? stripW : 0}px;right:${this.model.getBorder('right') ? stripW : 0}px;display:flex;flex-direction:column;z-index:2;`;
+      }
+
+      // Tab strip
+      const strip = document.createElement('div');
+      strip.className = `fl-sidebar-strip fl-sidebar-strip-${side}`;
+      if (isV) {
+        strip.style.cssText = `display:flex;flex-direction:column;width:${stripW}px;overflow:auto;flex-shrink:0;background:var(--fl-strip,#11111b);border-${side === 'left' ? 'right' : 'left'}:1px solid var(--fl-border,#313244);`;
+      } else {
+        strip.style.cssText = `display:flex;flex-direction:row;height:${stripW}px;overflow:auto;flex-shrink:0;background:var(--fl-strip,#11111b);border-top:1px solid var(--fl-border,#313244);`;
+      }
+
+      border.children.forEach((tab, i) => {
+        const btn = document.createElement('div');
+        btn.className = `fl-sidebar-tab${i === border.getSelected() ? ' fl-sidebar-tab-active' : ''}`;
+        btn.dataset.flBorderTab = tab.id;
+        btn.dataset.flBorderSide = side;
+        // Icon and/or label based on border.tabStyle
+        // 'auto': icon only if available, else label
+        // 'icon': icon only (fallback to label if no icon)
+        // 'label': label only
+        // 'iconLabel': both
+        const icon = tab.getIcon();
+        const ts = border.tabStyle;
+        const showIcon = icon && ts !== 'label';
+        const showLabel = ts === 'label' || ts === 'iconLabel' || (!icon && ts !== 'icon') || (!icon && ts === 'auto');
+        if (showIcon) {
+          const ic = document.createElement('span');
+          ic.className = 'fl-sidebar-tab-icon';
+          ic.textContent = icon;
+          btn.appendChild(ic);
+        }
+        if (showLabel) {
+          const lbl = document.createElement('span');
+          lbl.className = 'fl-sidebar-tab-label';
+          lbl.textContent = tab.getName();
+          btn.appendChild(lbl);
+        }
+        btn.title = tab.getName();
+        if (tab.isEnableClose()) {
+          const x = document.createElement('button');
+          x.type = 'button'; x.className = 'fl-sidebar-tab-x'; x.innerHTML = '×';
+          x.addEventListener('click', ev => {
+            ev.stopPropagation();
+            this._act(Actions.closeBorderTab(side, tab.id));
+          });
+          btn.appendChild(x);
+        }
+        btn.style.touchAction = 'none';
+        btn.addEventListener('pointerdown', ev => {
+          if (ev.button !== 0 || ev.target.closest('.fl-sidebar-tab-x')) return;
+          ev.preventDefault();
+          const startX = ev.clientX, startY = ev.clientY;
+          let dragging = false;
+          const onMove = me => {
+            if (!dragging && (Math.abs(me.clientX - startX) > 4 || Math.abs(me.clientY - startY) > 4)) {
+              dragging = true;
+              btn.releasePointerCapture(ev.pointerId);
+              btn.removeEventListener('pointermove', onMove);
+              btn.removeEventListener('pointerup', onUp);
+              this._startBorderTabDrag(ev, tab, border, btn, me);
+            }
+          };
+          const onUp = () => {
+            btn.removeEventListener('pointermove', onMove);
+            btn.removeEventListener('pointerup', onUp);
+            try { btn.releasePointerCapture(ev.pointerId); } catch(e) {}
+            if (!dragging) this._act(Actions.selectBorderTab(side, tab.id));
+          };
+          try { btn.setPointerCapture(ev.pointerId); } catch(e) {}
+          btn.addEventListener('pointermove', onMove);
+          btn.addEventListener('pointerup', onUp);
+        });
+        strip.appendChild(btn);
+      });
+
+      // Content panel
+      const panel = document.createElement('div');
+      panel.className = 'fl-sidebar-panel';
+      if (isV) {
+        panel.style.cssText = `width:${isOpen ? size : 0}px;overflow:hidden;transition:width 150ms ease;background:var(--fl-panel,#181825);`;
+      } else {
+        panel.style.cssText = `height:${isOpen ? size : 0}px;overflow:hidden;transition:height 150ms ease;background:var(--fl-panel,#181825);`;
+      }
+
+      if (isOpen) {
+        const selTab = border.getSelectedNode();
+        if (selTab) {
+          // Panel header with tab name
+          const header = document.createElement('div');
+          header.className = 'fl-sidebar-header';
+          const htxt = document.createElement('span');
+          htxt.textContent = selTab.getName();
+          header.appendChild(htxt);
+          panel.appendChild(header);
+
+          const c = this._getOrMakeContent(selTab);
+          c.style.display = 'flex';
+          const ph = document.createElement('div');
+          ph.dataset.flPh = selTab.id;
+          panel.appendChild(ph);
+        }
+        // Resize handle
+        const handle = document.createElement('div');
+        handle.className = `fl-sidebar-resize fl-sidebar-resize-${side}`;
+        handle.style.touchAction = 'none';
+        handle.addEventListener('pointerdown', e => {
+          if (e.button !== 0) return;
+          e.preventDefault();
+          try { handle.setPointerCapture(e.pointerId); } catch(err) {}
+          const startPos = isV ? e.clientX : e.clientY;
+          const startSize = size;
+          const onMove = me => {
+            const delta = isV ? (me.clientX - startPos) : (me.clientY - startPos);
+            const dir = side === 'right' ? -1 : side === 'bottom' ? -1 : 1;
+            const newSize = Math.max(50, startSize + delta * dir);
+            if (isV) panel.style.width = newSize + 'px';
+            else panel.style.height = newSize + 'px';
+          };
+          const onUp = () => {
+            handle.removeEventListener('pointermove', onMove);
+            handle.removeEventListener('pointerup', onUp);
+            try { handle.releasePointerCapture(e.pointerId); } catch(err) {}
+            const finalSize = isV ? panel.offsetWidth : panel.offsetHeight;
+            this._act(Actions.resizeBorder(side, finalSize));
+          };
+          handle.addEventListener('pointermove', onMove);
+          handle.addEventListener('pointerup', onUp);
+        });
+        panel.appendChild(handle);
+      }
+
+      // Order: strip first, then panel (for left/bottom); panel then strip (for right)
+      if (side === 'right') {
+        wrapper.appendChild(panel);
+        wrapper.appendChild(strip);
+      } else if (side === 'bottom') {
+        wrapper.appendChild(panel);
+        wrapper.appendChild(strip);
+      } else {
+        wrapper.appendChild(strip);
+        wrapper.appendChild(panel);
+      }
+
+      return wrapper;
+    }
+
+    _startBorderTabDrag(origEv, tab, border, btnEl, moveEv) {
+      // Initiate a standard drag from a border tab
+      const rect = btnEl.getBoundingClientRect();
+      const ghost = document.createElement('div');
+      ghost.className = 'fl-tab fl-drag-ghost';
+      ghost.innerHTML = `<span class="fl-tab-label">${tab.getName()}</span>`;
+      ghost.style.cssText = `position:fixed;left:${rect.left}px;top:${rect.top}px;min-width:${rect.width}px;pointer-events:none;z-index:9997;white-space:nowrap;`;
+      document.body.appendChild(ghost);
+      this._ghost = ghost;
+      document.body.style.cursor = 'grabbing';
+
+      const offX = origEv.clientX - rect.left, offY = origEv.clientY - rect.top;
+      this._drag = {
+        tab, tabset: border, idx: border.children.indexOf(tab),
+        isNew: false, isStarted: true, isBorder: true, borderSide: border.side,
+        drop: null, x0: origEv.clientX, y0: origEv.clientY, rect,
+        offX, offY, captureEl: document.documentElement, pointerId: origEv.pointerId
+      };
+      document.documentElement.addEventListener('pointermove', this._pmDrag);
+      document.documentElement.addEventListener('pointerup', this._puDrag);
+      try { document.documentElement.setPointerCapture(origEv.pointerId); } catch(e) {}
     }
 
     _renderNode(node) {
@@ -615,9 +1110,24 @@
       ind.style.cssText = `display:block;position:fixed;left:${L}px;top:${T}px;width:${W}px;height:${H}px;z-index:9998;`;
     }
 
-    // Rect-based hit detection. Priority: tab strip (insertion bar) > edges (split) > center.
+    // Rect-based hit detection. Priority: border strip > tab strip (insertion bar) > edges (split) > center.
     _findHit(x, y) {
       const d = this._drag;
+
+      // Check border tab strips first
+      for (const border of this.model.getBorders()) {
+        // Try individual sidebar strip
+        const stripEl = this.container.querySelector(`[data-fl-border="${border.side}"] .fl-sidebar-strip`);
+        // Or section inside a grouped strip
+        const sectionEl = this.container.querySelector(`.fl-sidebar-section[data-fl-border="${border.side}"]`);
+        const checkEl = sectionEl || stripEl;
+        if (!checkEl) continue;
+        const sr = checkEl.getBoundingClientRect();
+        if (x >= sr.left && x <= sr.right && y >= sr.top && y <= sr.bottom) {
+          return { tabsetId: border.id, location: 'border', borderSide: border.side, insertIndex: border.children.length };
+        }
+      }
+
       let best = null, bestArea = Infinity;
       this.container.querySelectorAll('[data-fl-tabset]').forEach(tsEl => {
         const rect = tsEl.getBoundingClientRect();
@@ -675,7 +1185,29 @@
       }
       if (!drop) return; // dragged but released over no valid target
 
-      const { tabsetId, location, insertIndex } = drop;
+      const { tabsetId, location, insertIndex, borderSide } = drop;
+
+      // Dropping into a border
+      if (location === 'border' && borderSide) {
+        if (d.isNew) {
+          this._act(Actions.addBorderTab(borderSide, d.tabDef, insertIndex));
+        } else if (d.isBorder) {
+          // Already in a border — reorder or move between borders
+          this._act(Actions.moveToBorder(d.tab.id, borderSide, insertIndex));
+        } else {
+          this._act(Actions.moveToBorder(d.tab.id, borderSide, insertIndex));
+        }
+        return;
+      }
+
+      // Dragging FROM a border INTO the layout
+      if (d.isBorder && !borderSide) {
+        if (location === 'insert')       this._act(Actions.moveFromBorder(d.borderSide, d.tab.id, tabsetId, DL.CENTER, insertIndex));
+        else if (location === DL.CENTER) this._act(Actions.moveFromBorder(d.borderSide, d.tab.id, tabsetId, DL.CENTER));
+        else                             this._act(Actions.moveFromBorder(d.borderSide, d.tab.id, tabsetId, location));
+        return;
+      }
+
       if (d.isNew) {
         if (location === 'insert')        this._act(Actions.addTab(tabsetId, d.tabDef, insertIndex));
         else if (location === DL.CENTER)  this._act(Actions.addTab(tabsetId, d.tabDef));
@@ -740,7 +1272,7 @@
   const SVG_MAX     = `<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="10" height="10" rx="1"/></svg>`;
   const SVG_RESTORE = `<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="1" width="8" height="8" rx="1"/><path d="M1 4v7h7"/></svg>`;
 
-  const FlexLayout = { Model, Layout, Actions, NodeType: NT, DropLocation: DL };
+  const FlexLayout = { Model, Layout, Actions, NodeType: NT, DropLocation: DL, BorderNode, BORDER_SIDES };
   if (typeof module !== 'undefined' && module.exports) module.exports = FlexLayout;
   else global.FlexLayout = FlexLayout;
 
