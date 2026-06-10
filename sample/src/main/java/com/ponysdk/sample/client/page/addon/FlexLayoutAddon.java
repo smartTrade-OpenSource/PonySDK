@@ -176,6 +176,19 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
         callTerminalMethod("setBorderTabStyle", side, tabStyle);
     }
 
+    /**
+     * Check if a sidebar is currently visible (not hidden).
+     * This is a client-side query — use with action notifications for real-time state.
+     */
+    public void isBorderVisible(final String side, final Consumer<Boolean> callback) {
+        // Query via model snapshot
+        getModel(model -> {
+            final boolean visible = model != null && model.contains("\"side\":\"" + side + "\"")
+                && !model.contains("\"side\":\"" + side + "\",\"hidden\":true");
+            callback.accept(visible);
+        });
+    }
+
     // ─── Model Persistence ───────────────────────────────────────
 
     /**

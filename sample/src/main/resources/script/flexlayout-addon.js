@@ -176,6 +176,8 @@
           msg.s = action.side; msg.t = action.tabId; msg.to = action.toId; msg.l = action.location; break;
         case 'RESIZE_BORDER':
           msg.s = action.side; msg.sz = action.size; break;
+        case 'TOGGLE_BORDER':
+          msg.s = action.side; break;
       }
       return msg;
     },
@@ -297,17 +299,7 @@
 
     toggleBorder: function (side) {
       if (!this._model) return;
-      var border = this._model.getBorder(side);
-      if (border) {
-        // Toggle visibility without destroying content
-        border._hidden = !border._hidden;
-      } else {
-        // First activation: create border
-        var size = side.indexOf('bottom') >= 0 && side.indexOf('-') < 0 ? 180 : 220;
-        var bn = new FlexLayout.BorderNode({ side: side, size: size, selected: -1 });
-        this._model.getBorders().push(bn);
-      }
-      this._model.emit('change', this._model);
+      this._model.doAction({ type: 'TOGGLE_BORDER', side: side });
     },
 
     setBorderTabStyle: function (side, tabStyle) {

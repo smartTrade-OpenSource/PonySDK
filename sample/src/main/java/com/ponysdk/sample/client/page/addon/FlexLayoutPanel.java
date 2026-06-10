@@ -126,6 +126,13 @@ public class FlexLayoutPanel implements IsPWidget {
         addon.moveFromBorder(side, tabId, null);
     }
 
+    /**
+     * Toggle visibility of a sidebar.
+     */
+    public void toggleBorder(final String side) {
+        addon.toggleBorder(side);
+    }
+
     // ─── Pop-out / Pop-in ────────────────────────────────────────
 
     /**

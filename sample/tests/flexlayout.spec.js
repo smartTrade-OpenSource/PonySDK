@@ -81,8 +81,12 @@ test.describe('FlexLayout PonySDK Integration', () => {
   test('no JS errors', async ({ page }) => {
     const errors = [];
     page.on('pageerror', err => errors.push(err.message));
+    // Wait for layout to be fully stable (sidebars rendered)
+    await page.waitForTimeout(500);
     await page.click('button:has-text("+ Add Tab")');
+    await page.waitForTimeout(300);
     await dragFromToolbar(page, '.fl-drag-src-textbox');
+    await page.waitForTimeout(300);
     expect(errors).toHaveLength(0);
   });
 
@@ -620,6 +624,40 @@ test.describe('FlexLayout PonySDK Integration', () => {
     await page.waitForTimeout(300);
     const after = await panel.evaluate(el => el.offsetWidth);
     expect(after).toBeGreaterThan(before);
+  });
+
+  test('drag tab from layout to sidebar strip', async ({ page }) => {
+    const tabsBefore = await page.locator('.fl-sidebar-left .fl-sidebar-tab').count();
+    // Drag the "Info" tab to the left sidebar strip
+    const tab = page.locator('.fl-tab:has-text("Info")');
+    const tabBox = await tab.boundingBox();
+    const strip = page.locator('.fl-sidebar-left .fl-sidebar-strip');
+    const stripBox = await strip.boundingBox();
+    await page.mouse.move(tabBox.x + tabBox.width / 2, tabBox.y + tabBox.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(tabBox.x + 10, tabBox.y + 10, { steps: 2 });
+    await page.mouse.move(stripBox.x + stripBox.width / 2, stripBox.y + stripBox.height / 2, { steps: 8 });
+    await page.mouse.up();
+    await page.waitForTimeout(500);
+    const tabsAfter = await page.locator('.fl-sidebar-left .fl-sidebar-tab').count();
+    expect(tabsAfter).toBeGreaterThan(tabsBefore);
+  });
+
+  test('drag tab from sidebar to layout', async ({ page }) => {
+    const layoutTabsBefore = await page.locator('.fl-tab').count();
+    // Close all left panels first, then drag a sidebar tab to layout
+    const sidebarTab = page.locator('.fl-sidebar-left .fl-sidebar-tab').first();
+    const sidebarTabBox = await sidebarTab.boundingBox();
+    const target = page.locator('.fl-tabset').first();
+    const targetBox = await target.boundingBox();
+    await page.mouse.move(sidebarTabBox.x + sidebarTabBox.width / 2, sidebarTabBox.y + sidebarTabBox.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(sidebarTabBox.x + 20, sidebarTabBox.y + 20, { steps: 2 });
+    await page.mouse.move(targetBox.x + targetBox.width / 2, targetBox.y + 30, { steps: 8 });
+    await page.mouse.up();
+    await page.waitForTimeout(500);
+    const layoutTabsAfter = await page.locator('.fl-tab').count();
+    expect(layoutTabsAfter).toBeGreaterThan(layoutTabsBefore);
   });
 });
 

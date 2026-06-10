@@ -283,6 +283,12 @@
   font-size: 11px; font-weight: 600; color: var(--fl-accent);
   background: var(--fl-strip,#11111b); border-bottom: 1px solid var(--fl-border,#313244);
 }
+.fl-sidebar-header span { flex: 1; }
+.fl-sidebar-header-x {
+  background: none; border: none; color: var(--fl-text-dim); font-size: 14px;
+  cursor: pointer; padding: 0 4px; line-height: 1; border-radius: 3px;
+}
+.fl-sidebar-header-x:hover { color: var(--fl-close-hover); background: rgba(243,139,168,.1); }
 
 .fl-sidebar-tab-x {
   font-size: 12px; line-height: 1; background: none; border: none; color: inherit;
@@ -305,3 +311,9 @@
 .fl-sidebar-resize-bottom { left: 0; top: 0; width: 100%; height: 4px; cursor: row-resize; }
 
 .fl-sidebar-section { min-height: 30px; }
+
+.fl-sidebar-splitter {
+  height: 5px; flex-shrink: 0; cursor: row-resize;
+  background: var(--fl-border,#313244);
+}
+.fl-sidebar-splitter:hover { background: var(--fl-sp-hover,#89b4fa); }

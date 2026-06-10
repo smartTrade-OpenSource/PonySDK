@@ -169,7 +169,7 @@
     getBorders()   { return this._borders; }
     getBorder(side){ return this._borders.find(b => b.side === side) || null; }
     getMaximized() { return this._maximized; }
-    doAction(action) { this._apply(action); this.emit('change', this); }
+    doAction(action) { this._apply(action); this.emit('change', this, action); }
 
     // Find by id across root AND borders
     findById(id) {
@@ -316,6 +316,17 @@
           border.size = Math.max(50, action.size);
           break;
         }
+        case 'TOGGLE_BORDER': {
+          const border = this.getBorder(action.side);
+          if (border) {
+            border._hidden = !border._hidden;
+          } else {
+            const size = action.size || (action.side === 'bottom' ? 180 : 220);
+            const bn = new BorderNode({ side: action.side, size, selected: -1 });
+            this._borders.push(bn);
+          }
+          break;
+        }
       }
     }
 
@@ -404,6 +415,7 @@
     moveToBorder:    (tabId, side, index)         => ({ type: 'MOVE_TO_BORDER', tabId, side, index }),
     moveFromBorder:  (side, tabId, toId, location, insertIndex) => ({ type: 'MOVE_FROM_BORDER', side, tabId, toId, location, insertIndex }),
     resizeBorder:    (side, size)                 => ({ type: 'RESIZE_BORDER', side, size }),
+    toggleBorder:    (side)                       => ({ type: 'TOGGLE_BORDER', side }),
   };
 
   // ── Layout ────────────────────────────────────────────────────────
@@ -431,7 +443,13 @@
       this._pmRes  = this._onResMove.bind(this);
       this._puRes  = this._onResUp.bind(this);
 
-      this.model.on('change', () => this._render());
+      this.model.on('change', (m, action) => {
+        if (action && action.type === 'SELECT_BORDER_TAB') {
+          this._updateBorderSelection(action.side);
+        } else {
+          this._render();
+        }
+      });
       this.container.classList.add('fl-layout');
       this._render();
     }
@@ -578,56 +596,7 @@
       });
 
       // Panel area
-      const panel = document.createElement('div');
-      panel.className = 'fl-sidebar-panel';
-      panel.style.cssText = `width:${size}px;overflow:hidden;transition:width 150ms ease;background:var(--fl-panel,#181825);display:flex;flex-direction:column;`;
-
-      if (openBorders.length > 0) {
-        openBorders.forEach((ob, oIdx) => {
-          const selTab = ob.getSelectedNode();
-          if (!selTab) return;
-          const pane = document.createElement('div');
-          pane.className = 'fl-sidebar-pane';
-          pane.style.cssText = `flex:1;display:flex;flex-direction:column;overflow:hidden;${oIdx > 0 ? 'border-top:1px solid var(--fl-border,#313244);' : ''}`;
-          // Header
-          const header = document.createElement('div');
-          header.className = 'fl-sidebar-header';
-          header.innerHTML = `<span>${selTab.getName()}</span>`;
-          pane.appendChild(header);
-          // Content
-          const c = this._getOrMakeContent(selTab);
-          c.style.display = 'flex';
-          const ph = document.createElement('div');
-          ph.dataset.flPh = selTab.id;
-          ph.style.cssText = 'flex:1;overflow:auto;';
-          pane.appendChild(ph);
-          panel.appendChild(pane);
-        });
-        // Resize handle
-        const handle = document.createElement('div');
-        handle.className = `fl-sidebar-resize fl-sidebar-resize-${baseSide}`;
-        handle.style.touchAction = 'none';
-        handle.addEventListener('pointerdown', e => {
-          if (e.button !== 0) return;
-          e.preventDefault();
-          try { handle.setPointerCapture(e.pointerId); } catch(err) {}
-          const startX = e.clientX, startSize = size;
-          const onMove = me => {
-            const dir = baseSide === 'right' ? -1 : 1;
-            panel.style.width = Math.max(50, startSize + (me.clientX - startX) * dir) + 'px';
-          };
-          const onUp = () => {
-            handle.removeEventListener('pointermove', onMove);
-            handle.removeEventListener('pointerup', onUp);
-            try { handle.releasePointerCapture(e.pointerId); } catch(err) {}
-            const finalSize = panel.offsetWidth;
-            openBorders.forEach(ob => this._act(Actions.resizeBorder(ob.side, finalSize)));
-          };
-          handle.addEventListener('pointermove', onMove);
-          handle.addEventListener('pointerup', onUp);
-        });
-        panel.appendChild(handle);
-      }
+      const panel = this._mkBorderPanel(openBorders, baseSide, true, size);
 
       if (baseSide === 'right') { wrapper.appendChild(panel); wrapper.appendChild(strip); }
       else { wrapper.appendChild(strip); wrapper.appendChild(panel); }
@@ -726,97 +695,84 @@
       } else {
         strip.style.cssText = `display:flex;flex-direction:row;height:${stripW}px;overflow:auto;flex-shrink:0;background:var(--fl-strip,#11111b);border-top:1px solid var(--fl-border,#313244);`;
       }
-
-      border.children.forEach((tab, i) => {
-        const btn = document.createElement('div');
-        btn.className = `fl-sidebar-tab${i === border.getSelected() ? ' fl-sidebar-tab-active' : ''}`;
-        btn.dataset.flBorderTab = tab.id;
-        btn.dataset.flBorderSide = side;
-        // Icon and/or label based on border.tabStyle
-        // 'auto': icon only if available, else label
-        // 'icon': icon only (fallback to label if no icon)
-        // 'label': label only
-        // 'iconLabel': both
-        const icon = tab.getIcon();
-        const ts = border.tabStyle;
-        const showIcon = icon && ts !== 'label';
-        const showLabel = ts === 'label' || ts === 'iconLabel' || (!icon && ts !== 'icon') || (!icon && ts === 'auto');
-        if (showIcon) {
-          const ic = document.createElement('span');
-          ic.className = 'fl-sidebar-tab-icon';
-          ic.textContent = icon;
-          btn.appendChild(ic);
-        }
-        if (showLabel) {
-          const lbl = document.createElement('span');
-          lbl.className = 'fl-sidebar-tab-label';
-          lbl.textContent = tab.getName();
-          btn.appendChild(lbl);
-        }
-        btn.title = tab.getName();
-        if (tab.isEnableClose()) {
-          const x = document.createElement('button');
-          x.type = 'button'; x.className = 'fl-sidebar-tab-x'; x.innerHTML = '×';
-          x.addEventListener('click', ev => {
-            ev.stopPropagation();
-            this._act(Actions.closeBorderTab(side, tab.id));
-          });
-          btn.appendChild(x);
-        }
-        btn.style.touchAction = 'none';
-        btn.addEventListener('pointerdown', ev => {
-          if (ev.button !== 0 || ev.target.closest('.fl-sidebar-tab-x')) return;
-          ev.preventDefault();
-          const startX = ev.clientX, startY = ev.clientY;
-          let dragging = false;
-          const onMove = me => {
-            if (!dragging && (Math.abs(me.clientX - startX) > 4 || Math.abs(me.clientY - startY) > 4)) {
-              dragging = true;
-              btn.releasePointerCapture(ev.pointerId);
-              btn.removeEventListener('pointermove', onMove);
-              btn.removeEventListener('pointerup', onUp);
-              this._startBorderTabDrag(ev, tab, border, btn, me);
-            }
-          };
-          const onUp = () => {
-            btn.removeEventListener('pointermove', onMove);
-            btn.removeEventListener('pointerup', onUp);
-            try { btn.releasePointerCapture(ev.pointerId); } catch(e) {}
-            if (!dragging) this._act(Actions.selectBorderTab(side, tab.id));
-          };
-          try { btn.setPointerCapture(ev.pointerId); } catch(e) {}
-          btn.addEventListener('pointermove', onMove);
-          btn.addEventListener('pointerup', onUp);
-        });
-        strip.appendChild(btn);
-      });
+      border.children.forEach((tab, i) => strip.appendChild(this._mkBorderTabBtn(tab, border, i)));
 
       // Content panel
+      const panel = this._mkBorderPanel([border].filter(b => b.isOpen()), side, isV, size);
+
+      if (side === 'right' || side === 'bottom') { wrapper.appendChild(panel); wrapper.appendChild(strip); }
+      else { wrapper.appendChild(strip); wrapper.appendChild(panel); }
+      return wrapper;
+    }
+
+    _mkBorderPanel(openBorders, side, isV, size) {
       const panel = document.createElement('div');
       panel.className = 'fl-sidebar-panel';
+      const hasOpen = openBorders.length > 0;
       if (isV) {
-        panel.style.cssText = `width:${isOpen ? size : 0}px;overflow:hidden;transition:width 150ms ease;background:var(--fl-panel,#181825);`;
+        panel.style.cssText = `width:${hasOpen ? size : 0}px;overflow:hidden;transition:width 150ms ease;background:var(--fl-panel,#181825);display:flex;flex-direction:column;`;
       } else {
-        panel.style.cssText = `height:${isOpen ? size : 0}px;overflow:hidden;transition:height 150ms ease;background:var(--fl-panel,#181825);`;
+        panel.style.cssText = `height:${hasOpen ? size : 0}px;overflow:hidden;transition:height 150ms ease;background:var(--fl-panel,#181825);display:flex;flex-direction:column;`;
       }
-
-      if (isOpen) {
-        const selTab = border.getSelectedNode();
-        if (selTab) {
-          // Panel header with tab name
+      if (hasOpen) {
+        openBorders.forEach((ob, oIdx) => {
+          const selTab = ob.getSelectedNode();
+          if (!selTab) return;
+          const pane = document.createElement('div');
+          pane.className = 'fl-sidebar-pane';
+          pane.style.cssText = `flex:1;display:flex;flex-direction:column;overflow:hidden;${oIdx > 0 ? 'border-top:1px solid var(--fl-border,#313244);' : ''}`;
+          // Header
           const header = document.createElement('div');
           header.className = 'fl-sidebar-header';
           const htxt = document.createElement('span');
           htxt.textContent = selTab.getName();
           header.appendChild(htxt);
-          panel.appendChild(header);
-
+          const closeBtn = document.createElement('button');
+          closeBtn.type = 'button'; closeBtn.className = 'fl-sidebar-header-x'; closeBtn.innerHTML = '×';
+          closeBtn.addEventListener('click', () => this._act(Actions.selectBorderTab(ob.side, selTab.id)));
+          header.appendChild(closeBtn);
+          pane.appendChild(header);
+          // Content
           const c = this._getOrMakeContent(selTab);
           c.style.display = 'flex';
           const ph = document.createElement('div');
           ph.dataset.flPh = selTab.id;
-          panel.appendChild(ph);
-        }
+          ph.style.cssText = 'flex:1;overflow:auto;';
+          pane.appendChild(ph);
+          // Add splitter between panes
+          if (oIdx < openBorders.length - 1) {
+            const splitter = document.createElement('div');
+            splitter.className = 'fl-sidebar-splitter';
+            splitter.style.touchAction = 'none';
+            splitter.addEventListener('pointerdown', ev => {
+              if (ev.button !== 0) return;
+              ev.preventDefault();
+              try { splitter.setPointerCapture(ev.pointerId); } catch(e) {}
+              const prevPane = pane;
+              const nextPane = panel.querySelectorAll('.fl-sidebar-pane')[oIdx + 1];
+              if (!nextPane) return;
+              const startY = ev.clientY;
+              const startH1 = prevPane.offsetHeight, startH2 = nextPane.offsetHeight;
+              const move = me => {
+                const dy = me.clientY - startY;
+                const h1 = Math.max(40, startH1 + dy), h2 = Math.max(40, startH2 - dy);
+                prevPane.style.flex = `${h1} 0 0px`;
+                nextPane.style.flex = `${h2} 0 0px`;
+              };
+              const up = () => {
+                splitter.removeEventListener('pointermove', move);
+                splitter.removeEventListener('pointerup', up);
+                try { splitter.releasePointerCapture(ev.pointerId); } catch(e) {}
+              };
+              splitter.addEventListener('pointermove', move);
+              splitter.addEventListener('pointerup', up);
+            });
+            panel.appendChild(pane);
+            panel.appendChild(splitter);
+          } else {
+            panel.appendChild(pane);
+          }
+        });
         // Resize handle
         const handle = document.createElement('div');
         handle.className = `fl-sidebar-resize fl-sidebar-resize-${side}`;
@@ -839,27 +795,56 @@
             handle.removeEventListener('pointerup', onUp);
             try { handle.releasePointerCapture(e.pointerId); } catch(err) {}
             const finalSize = isV ? panel.offsetWidth : panel.offsetHeight;
-            this._act(Actions.resizeBorder(side, finalSize));
+            openBorders.forEach(ob => this._act(Actions.resizeBorder(ob.side, finalSize)));
           };
           handle.addEventListener('pointermove', onMove);
           handle.addEventListener('pointerup', onUp);
         });
         panel.appendChild(handle);
       }
+      return panel;
+    }
 
-      // Order: strip first, then panel (for left/bottom); panel then strip (for right)
-      if (side === 'right') {
-        wrapper.appendChild(panel);
-        wrapper.appendChild(strip);
-      } else if (side === 'bottom') {
-        wrapper.appendChild(panel);
-        wrapper.appendChild(strip);
-      } else {
-        wrapper.appendChild(strip);
-        wrapper.appendChild(panel);
+    _updateBorderSelection(side) {
+      // Partial re-render: only update the affected sidebar + main layout insets
+      const baseSide = side.split('-')[0];
+      const sidebarEl = this.container.querySelector(`.fl-sidebar-${baseSide}`);
+      if (!sidebarEl) { this._render(); return; }
+      // Replace the sidebar entirely (cheaper than full layout re-render)
+      const borders = this.model.getBorders();
+      const sideBorders = borders.filter(b => !b._hidden && (b.side === baseSide || b.side.startsWith(baseSide + '-')));
+      const bottomBorder = borders.find(b => !b._hidden && b.side === 'bottom');
+      let newSidebar;
+      if (sideBorders.length > 1) {
+        newSidebar = this._renderBorderGroup(sideBorders, baseSide);
+      } else if (sideBorders.length === 1) {
+        newSidebar = this._renderBorder(sideBorders[0]);
       }
-
-      return wrapper;
+      if (newSidebar) {
+        sidebarEl.replaceWith(newSidebar);
+      } else {
+        sidebarEl.remove();
+      }
+      // Update main layout insets
+      const leftBorders = borders.filter(b => !b._hidden && (b.side === 'left' || b.side.startsWith('left-')));
+      const rightBorders = borders.filter(b => !b._hidden && (b.side === 'right' || b.side.startsWith('right-')));
+      const leftOpen = leftBorders.find(b => b.isOpen());
+      const rightOpen = rightBorders.find(b => b.isOpen());
+      const stripW = 30;
+      const leftSize = leftOpen ? Math.max(...leftBorders.map(b => b.size)) : 0;
+      const rightSize = rightOpen ? Math.max(...rightBorders.map(b => b.size)) : 0;
+      const bottomSize = bottomBorder && bottomBorder.isOpen() ? bottomBorder.size : 0;
+      const rowEl = this.container.querySelector('.fl-row');
+      if (rowEl) {
+        rowEl.style.left = leftBorders.length > 0 ? (stripW + leftSize) + 'px' : '0';
+        rowEl.style.right = rightBorders.length > 0 ? (stripW + rightSize) + 'px' : '0';
+        rowEl.style.bottom = bottomBorder ? (stripW + bottomSize) + 'px' : '0';
+      }
+      // Replace placeholders with content elements
+      this.container.querySelectorAll('[data-fl-ph]').forEach(ph => {
+        const c = this._contentEls.get(ph.dataset.flPh);
+        if (c) ph.replaceWith(c);
+      });
     }
 
     _startBorderTabDrag(origEv, tab, border, btnEl, moveEv) {
@@ -1117,18 +1102,22 @@
     _findHit(x, y) {
       const d = this._drag;
 
-      // Check border tab strips first
+      // Check border tab strips first (enlarged drop zone during drag)
       for (const border of this.model.getBorders()) {
-        // Try individual sidebar strip
+        if (border._hidden) continue;
         const stripEl = this.container.querySelector(`[data-fl-border="${border.side}"] .fl-sidebar-strip`);
-        // Or section inside a grouped strip
         const sectionEl = this.container.querySelector(`.fl-sidebar-section[data-fl-border="${border.side}"]`);
         const checkEl = sectionEl || stripEl;
         if (!checkEl) continue;
         const sr = checkEl.getBoundingClientRect();
-        if (x >= sr.left && x <= sr.right && y >= sr.top && y <= sr.bottom) {
-          return { tabsetId: border.id, location: 'border', borderSide: border.side, insertIndex: border.children.length };
-        }
+        // Expand hit area by 15px toward layout center for easier drops
+        const expand = 15;
+        const baseSide = border.side.split('-')[0];
+        let hit = false;
+        if (baseSide === 'left') hit = x >= sr.left && x <= sr.right + expand && y >= sr.top && y <= sr.bottom;
+        else if (baseSide === 'right') hit = x >= sr.left - expand && x <= sr.right && y >= sr.top && y <= sr.bottom;
+        else hit = x >= sr.left && x <= sr.right && y >= sr.top - expand && y <= sr.bottom;
+        if (hit) return { tabsetId: border.id, location: 'border', borderSide: border.side, insertIndex: border.children.length };
       }
 
       let best = null, bestArea = Infinity;
