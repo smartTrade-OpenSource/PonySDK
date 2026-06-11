@@ -78,6 +78,26 @@ public class FlexLayoutDemoEntryPoint implements EntryPoint {
         addBtn.setStyleProperty("font-size", "12px");
         toolbar.add(addBtn);
 
+        // Theme selector
+        final com.ponysdk.core.ui.basic.PListBox themeSelector = Element.newPListBox();
+        themeSelector.addItem("Default (Catppuccin)", "");
+        themeSelector.addItem("Light", "fl-theme-light");
+        themeSelector.addItem("Gray (VS Code)", "fl-theme-gray");
+        themeSelector.addItem("Nord", "fl-theme-nord");
+        themeSelector.addItem("Solarized Dark", "fl-theme-solarized");
+        themeSelector.addItem("GitHub Dark", "fl-theme-github");
+        themeSelector.addItem("Monokai", "fl-theme-monokai");
+        themeSelector.addItem("Corporate Light", "fl-theme-corporate");
+        themeSelector.addItem("Rounded", "fl-theme-rounded");
+        themeSelector.addItem("Underline", "fl-theme-underline");
+        themeSelector.setStyleProperty("background", "#313244");
+        themeSelector.setStyleProperty("border", "1px solid #89b4fa");
+        themeSelector.setStyleProperty("color", "#89b4fa");
+        themeSelector.setStyleProperty("border-radius", "4px");
+        themeSelector.setStyleProperty("padding", "2px 8px");
+        themeSelector.setStyleProperty("font-size", "12px");
+        toolbar.add(themeSelector);
+
         root.add(toolbar);
 
         // FlexLayout panel
@@ -113,6 +133,9 @@ public class FlexLayoutDemoEntryPoint implements EntryPoint {
         styleSidebarButton(toggleBottom);
         toggleBottom.addClickHandler(e -> flexLayout.getAddon().toggleBorder("bottom"));
         toolbar.add(toggleBottom);
+
+        // Theme selector handler
+        themeSelector.addChangeHandler(event -> flexLayout.setTheme((String) themeSelector.getSelectedValue()));
 
         // Shared state for interactive widgets (simulates persistence)
         final java.util.Map<String, int[]> counterStates = new java.util.concurrent.ConcurrentHashMap<>();

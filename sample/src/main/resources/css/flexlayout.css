@@ -128,6 +128,116 @@
 .fl-theme-underline .fl-tab { border-right: none !important; }
 .fl-theme-underline .fl-tab:hover { background: none !important; color: var(--fl-text) !important; }
 
+/* ── Nord theme (cool blue-gray) ─────────────────────────────────── */
+.fl-theme-nord {
+  --fl-bg:           #2e3440;
+  --fl-panel:        #3b4252;
+  --fl-strip:        #2e3440;
+  --fl-border:       #4c566a;
+  --fl-accent:       #88c0d0;
+  --fl-accent2:      #b48ead;
+  --fl-text:         #eceff4;
+  --fl-text-dim:     #7b88a1;
+  --fl-tab-hover:    #434c5e;
+  --fl-tab-active-bg:#3b4252;
+  --fl-tab-active-ind:#88c0d0;
+  --fl-close-hover:  #bf616a;
+  --fl-sp:           #2e3440;
+  --fl-sp-hover:     #88c0d0;
+  --fl-drop-fill:    rgba(136,192,208,.18);
+  --fl-drop-border:  #88c0d0;
+  --fl-sidebar-active-glow: rgba(136,192,208,.15);
+  --fl-sidebar-close-bg: rgba(191,97,106,.1);
+}
+
+/* ── Solarized Dark theme ────────────────────────────────────────── */
+.fl-theme-solarized {
+  --fl-bg:           #002b36;
+  --fl-panel:        #073642;
+  --fl-strip:        #002b36;
+  --fl-border:       #586e75;
+  --fl-accent:       #268bd2;
+  --fl-accent2:      #d33682;
+  --fl-text:         #93a1a1;
+  --fl-text-dim:     #657b83;
+  --fl-tab-hover:    #073642;
+  --fl-tab-active-bg:#073642;
+  --fl-tab-active-ind:#268bd2;
+  --fl-close-hover:  #dc322f;
+  --fl-sp:           #002b36;
+  --fl-sp-hover:     #268bd2;
+  --fl-drop-fill:    rgba(38,139,210,.18);
+  --fl-drop-border:  #268bd2;
+  --fl-sidebar-active-glow: rgba(38,139,210,.15);
+  --fl-sidebar-close-bg: rgba(220,50,47,.1);
+}
+
+/* ── GitHub Dark theme ───────────────────────────────────────────── */
+.fl-theme-github {
+  --fl-bg:           #0d1117;
+  --fl-panel:        #161b22;
+  --fl-strip:        #010409;
+  --fl-border:       #30363d;
+  --fl-accent:       #58a6ff;
+  --fl-accent2:      #bc8cff;
+  --fl-text:         #c9d1d9;
+  --fl-text-dim:     #8b949e;
+  --fl-tab-hover:    #21262d;
+  --fl-tab-active-bg:#161b22;
+  --fl-tab-active-ind:#58a6ff;
+  --fl-close-hover:  #f85149;
+  --fl-sp:           #010409;
+  --fl-sp-hover:     #58a6ff;
+  --fl-drop-fill:    rgba(88,166,255,.15);
+  --fl-drop-border:  #58a6ff;
+  --fl-sidebar-active-glow: rgba(88,166,255,.12);
+  --fl-sidebar-close-bg: rgba(248,81,73,.1);
+}
+
+/* ── Monokai theme (warm) ────────────────────────────────────────── */
+.fl-theme-monokai {
+  --fl-bg:           #272822;
+  --fl-panel:        #1e1f1c;
+  --fl-strip:        #1e1f1c;
+  --fl-border:       #3e3d32;
+  --fl-accent:       #a6e22e;
+  --fl-accent2:      #ae81ff;
+  --fl-text:         #f8f8f2;
+  --fl-text-dim:     #75715e;
+  --fl-tab-hover:    #3e3d32;
+  --fl-tab-active-bg:#272822;
+  --fl-tab-active-ind:#a6e22e;
+  --fl-close-hover:  #f92672;
+  --fl-sp:           #1e1f1c;
+  --fl-sp-hover:     #a6e22e;
+  --fl-drop-fill:    rgba(166,226,46,.15);
+  --fl-drop-border:  #a6e22e;
+  --fl-sidebar-active-glow: rgba(166,226,46,.12);
+  --fl-sidebar-close-bg: rgba(249,38,114,.1);
+}
+
+/* ── Corporate Light theme ───────────────────────────────────────── */
+.fl-theme-corporate {
+  --fl-bg:           #fafbfc;
+  --fl-panel:        #ffffff;
+  --fl-strip:        #f3f4f6;
+  --fl-border:       #e1e4e8;
+  --fl-accent:       #2563eb;
+  --fl-accent2:      #7c3aed;
+  --fl-text:         #1f2937;
+  --fl-text-dim:     #6b7280;
+  --fl-tab-hover:    #e5e7eb;
+  --fl-tab-active-bg:#ffffff;
+  --fl-tab-active-ind:#2563eb;
+  --fl-close-hover:  #dc2626;
+  --fl-sp:           #e1e4e8;
+  --fl-sp-hover:     #2563eb;
+  --fl-drop-fill:    rgba(37,99,235,.1);
+  --fl-drop-border:  #2563eb;
+  --fl-sidebar-active-glow: rgba(37,99,235,.08);
+  --fl-sidebar-close-bg: rgba(220,38,38,.06);
+}
+
 /* ── Reset ───────────────────────────────────────────────────────── */
 .fl-layout *, .fl-layout *::before, .fl-layout *::after {
   box-sizing: border-box; margin: 0; padding: 0;
