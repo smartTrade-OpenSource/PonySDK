@@ -436,6 +436,7 @@
       this._resize         = null;
       this._ghost          = null;
       this._dropInd        = this._mkDropInd();
+      this._stripW         = null; // cached strip width
 
       // Bound pointer handlers — attached to the captured element during a gesture
       this._pmDrag = this._onDragMove.bind(this);
@@ -493,6 +494,14 @@
       return first ? first.id : null;
     }
 
+    _getStripW() {
+      if (this._stripW == null) {
+        const v = getComputedStyle(this.container).getPropertyValue('--fl-sidebar-strip-w');
+        this._stripW = parseInt(v) || 30;
+      }
+      return this._stripW;
+    }
+
     _act(action) {
       if (this.onAction && this.onAction(action) === false) return;
       this.model.doAction(action);
@@ -522,7 +531,7 @@
       const rightSize = rightOpen ? Math.max(...rightBorders.map(b => b.size)) : 0;
       const bottomSize = bottomBorder && bottomBorder.isOpen() ? bottomBorder.size : 0;
       // Strip widths (fixed)
-      const stripW = 30;
+      const stripW = this._getStripW();
       const hasLeft = leftBorders.length > 0;
       const hasRight = rightBorders.length > 0;
       const hasBottom = !!bottomBorder;
@@ -566,7 +575,7 @@
     _renderBorderGroup(borders, baseSide) {
       if (borders.length === 1) return this._renderBorder(borders[0]);
       // Multiple borders on same side: shared strip, split panel when both open
-      const stripW = 30;
+      const stripW = this._getStripW();
       const bottomBorder = this.model.getBorders().find(b => !b._hidden && b.side === 'bottom');
       const bottomInset = bottomBorder ? stripW : 0;
       const openBorders = borders.filter(b => b.isOpen());
@@ -584,12 +593,12 @@
       // Strip column with sections
       const strip = document.createElement('div');
       strip.className = `fl-sidebar-strip fl-sidebar-strip-${baseSide}`;
-      strip.style.cssText = `display:flex;flex-direction:column;width:${stripW}px;overflow:hidden;flex-shrink:0;background:var(--fl-strip,#11111b);border-${baseSide === 'left' ? 'right' : 'left'}:1px solid var(--fl-border,#313244);`;
+      strip.style.cssText = `display:flex;flex-direction:column;width:${stripW}px;overflow:hidden;flex-shrink:0;background:var(--fl-strip);border-${baseSide === 'left' ? 'right' : 'left'}:1px solid var(--fl-border);`;
 
       borders.forEach((border, bIdx) => {
         const section = document.createElement('div');
         section.className = 'fl-sidebar-section';
-        section.style.cssText = `flex:1;display:flex;flex-direction:column;overflow:auto;${bIdx > 0 ? 'border-top:1px solid var(--fl-border,#313244);' : ''}`;
+        section.style.cssText = `flex:1;display:flex;flex-direction:column;overflow:auto;${bIdx > 0 ? 'border-top:1px solid var(--fl-border);' : ''}`;
         section.dataset.flBorder = border.side;
         this._nodeEls.set(border.id, section);
         border.children.forEach((tab, i) => section.appendChild(this._mkBorderTabBtn(tab, border, i)));
@@ -672,7 +681,7 @@
       const isV = side === 'left' || side === 'right';
       const isOpen = border.isOpen();
       const size = border.size;
-      const stripW = 30;
+      const stripW = this._getStripW();
 
       const wrapper = document.createElement('div');
       wrapper.className = `fl-sidebar fl-sidebar-${side}${isOpen ? ' fl-sidebar-open' : ''}`;
@@ -703,9 +712,9 @@
       const strip = document.createElement('div');
       strip.className = `fl-sidebar-strip fl-sidebar-strip-${side}`;
       if (isV) {
-        strip.style.cssText = `display:flex;flex-direction:column;width:${stripW}px;overflow:auto;flex-shrink:0;background:var(--fl-strip,#11111b);border-${side === 'left' ? 'right' : 'left'}:1px solid var(--fl-border,#313244);`;
+        strip.style.cssText = `display:flex;flex-direction:column;width:${stripW}px;overflow:auto;flex-shrink:0;background:var(--fl-strip);border-${side === 'left' ? 'right' : 'left'}:1px solid var(--fl-border);`;
       } else {
-        strip.style.cssText = `display:flex;flex-direction:row;height:${stripW}px;overflow:auto;flex-shrink:0;background:var(--fl-strip,#11111b);border-top:1px solid var(--fl-border,#313244);`;
+        strip.style.cssText = `display:flex;flex-direction:row;height:${stripW}px;overflow:auto;flex-shrink:0;background:var(--fl-strip);border-top:1px solid var(--fl-border);`;
       }
       border.children.forEach((tab, i) => strip.appendChild(this._mkBorderTabBtn(tab, border, i)));
 
@@ -722,9 +731,9 @@
       panel.className = 'fl-sidebar-panel';
       const hasOpen = openBorders.length > 0;
       if (isV) {
-        panel.style.cssText = `width:${hasOpen ? size : 0}px;overflow:hidden;transition:width 150ms ease;background:var(--fl-panel,#181825);display:flex;flex-direction:column;`;
+        panel.style.cssText = `width:${hasOpen ? size : 0}px;overflow:hidden;transition:width 150ms ease;background:var(--fl-panel);display:flex;flex-direction:column;`;
       } else {
-        panel.style.cssText = `height:${hasOpen ? size : 0}px;overflow:hidden;transition:height 150ms ease;background:var(--fl-panel,#181825);display:flex;flex-direction:column;`;
+        panel.style.cssText = `height:${hasOpen ? size : 0}px;overflow:hidden;transition:height 150ms ease;background:var(--fl-panel);display:flex;flex-direction:column;`;
       }
       if (hasOpen) {
         openBorders.forEach((ob, oIdx) => {
@@ -732,7 +741,7 @@
           if (!selTab) return;
           const pane = document.createElement('div');
           pane.className = 'fl-sidebar-pane';
-          pane.style.cssText = `flex:1;display:flex;flex-direction:column;overflow:hidden;${oIdx > 0 ? 'border-top:1px solid var(--fl-border,#313244);' : ''}`;
+          pane.style.cssText = `flex:1;display:flex;flex-direction:column;overflow:hidden;${oIdx > 0 ? 'border-top:1px solid var(--fl-border);' : ''}`;
           // Header
           const header = document.createElement('div');
           header.className = 'fl-sidebar-header';
@@ -798,7 +807,7 @@
           const startPos = isV ? e.clientX : e.clientY;
           const startSize = size;
           const rowEl = this.container.querySelector('.fl-row');
-          const stripW = 30;
+          const stripW = this._getStripW();
           const baseSide = side.split('-')[0];
           // Disable transition during drag to prevent desync
           panel.style.transition = 'none';
@@ -888,7 +897,7 @@
       const rightBorders = borders.filter(b => !b._hidden && (b.side === 'right' || b.side.startsWith('right-')));
       const leftOpen = leftBorders.find(b => b.isOpen());
       const rightOpen = rightBorders.find(b => b.isOpen());
-      const stripW = 30;
+      const stripW = this._getStripW();
       const leftSize = leftOpen ? Math.max(...leftBorders.map(b => b.size)) : 0;
       const rightSize = rightOpen ? Math.max(...rightBorders.map(b => b.size)) : 0;
       const bottomSize = bottomBorder && bottomBorder.isOpen() ? bottomBorder.size : 0;
