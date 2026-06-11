@@ -13,7 +13,7 @@ It runs a Jetty 12 WebSocket server on the backend and uses GWT on the frontend.
 
 | Component | Version |
 |-----------|---------|
-| Java (server) | 21 (virtual threads) |
+| Java (server) | 25 (LTS, virtual threads) |
 | Java (terminal / GWT) | 17 |
 | Jetty | 12.0.x (EE10 / Jakarta EE) |
 | GWT | 2.13.0 |

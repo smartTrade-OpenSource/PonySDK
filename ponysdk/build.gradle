@@ -8,11 +8,10 @@ ext {
     seleniumVersion = '4.27.0'
     junitVersion = '4.13.2'
     tyrusVersion = '2.2.0'
-    mockitoVersion = '5.15.2'
+    mockitoVersion = '5.18.0'
     gwtVersion = '2.13.0'
     elemental2Version = '1.2.1'
     jettyVersion = '12.0.18'
-    springVersion = '6.2.9'
     slf4jVersion = '2.0.17'
     log4jVersion = '2.24.3'
     jakartaServletVersion = '6.0.0'
@@ -90,10 +89,6 @@ dependencies {
             'org.eclipse.jetty:jetty-security:' + jettyVersion,
             'org.eclipse.jetty.websocket:jetty-websocket-jetty-api:' + jettyVersion,
             'org.eclipse.jetty.ee10.websocket:jetty-ee10-websocket-jetty-server:' + jettyVersion,
-            'org.springframework:spring-core:' + springVersion,
-            'org.springframework:spring-web:' + springVersion,
-            'org.springframework:spring-beans:' + springVersion,
-            'org.springframework:spring-context:' + springVersion,
             'org.slf4j:slf4j-api:' + slf4jVersion,
             'jakarta.servlet:jakarta.servlet-api:' + jakartaServletVersion,
             'jakarta.json:jakarta.json-api:' + jakartaJsonVersion,
@@ -140,11 +135,6 @@ jar {
     exclude('*.devmode.js')
     exclude('*compilation-mappings.txt')
 
-    // Resolve values at configuration time via providers (config-cache compatible)
-    def gitRevision = providers.exec {
-        commandLine 'git', 'rev-parse', 'HEAD'
-    }.standardOutput.asText.map { it.trim() }
-
     def builtBy = providers.systemProperty('user.name')
     def javaVersion = providers.systemProperty('java.version')
     def javaVendor = providers.systemProperty('java.vendor')
@@ -158,7 +148,6 @@ jar {
         attributes(
                 'Built-By': builtBy,
                 'Build-Timestamp': new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
-                'Build-Revision': gitRevision,
                 'Created-By': "Gradle ${gradleVer}",
                 'Build-Jdk': javaVersion.map { v -> "${v} (${javaVendor.get()} ${javaVmVersion.get()})" },
                 'Build-OS': osName.map { n -> "${n} ${osArch.get()} ${osVersion.get()}" },
@@ -175,6 +164,9 @@ task gwtc(type: JavaExec) {
     workingDir = new File(gwtOutputDirName)
     classpath { [sourceSets.main.java.srcDirs, configurations.gwtdev, configurations.gwt] }
     maxHeapSize = '512M'
+    javaLauncher = javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
     args = [
             '-war',
             'gwt',
@@ -199,4 +191,6 @@ test {
 check.dependsOn jacocoTestReport
 gwtc.dependsOn classes
 jar.dependsOn gwtc
+// test classpath includes the GWT output dir (gwtOutputDirName), so it must run after gwtc
+test.dependsOn gwtc
 publish.dependsOn check
