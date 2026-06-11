@@ -66,6 +66,32 @@ public class SessionManager {
         listeners.add(listener);
     }
 
+    /**
+     * Returns the {@link UIContext} with the given id <strong>only if</strong> it belongs to the
+     * application identified by {@code applicationId} (i.e. the caller's HTTP session).
+     * <p>
+     * This is the safe lookup to use from HTTP endpoints: it prevents a client from reaching a
+     * UIContext owned by another session by guessing its (sequential) id — an IDOR.
+     *
+     * @param applicationId the caller's application id (its HTTP session id)
+     * @param id            the UIContext id
+     * @return the UIContext, or {@code null} if no such context exists in that application
+     */
+    public UIContext getUIContext(final String applicationId, final int id) {
+        if (applicationId == null) return null;
+        final Application app = applications.get(applicationId);
+        return app != null ? app.getUIContext(id) : null;
+    }
+
+    /**
+     * Returns the UIContext with the given id, searching across <strong>all</strong> sessions.
+     *
+     * @deprecated This performs a global lookup and does <strong>not</strong> verify that the
+     *             caller owns the context, which exposes an IDOR (cross-session access) when the
+     *             id is attacker-controlled. Prefer {@link #getUIContext(String, int)} scoped to
+     *             the caller's HTTP session.
+     */
+    @Deprecated(forRemoval = true)
     public UIContext getUIContext(final int id) {
         for (final Application app : applications.values()) {
             final UIContext ctx = app.getUIContext(id);
