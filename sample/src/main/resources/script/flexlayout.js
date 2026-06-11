@@ -789,17 +789,29 @@
           try { handle.setPointerCapture(e.pointerId); } catch(err) {}
           const startPos = isV ? e.clientX : e.clientY;
           const startSize = size;
+          const rowEl = this.container.querySelector('.fl-row');
+          const stripW = 30;
+          const baseSide = side.split('-')[0];
+          // Disable transition during drag to prevent desync
+          panel.style.transition = 'none';
           const onMove = me => {
             const delta = isV ? (me.clientX - startPos) : (me.clientY - startPos);
             const dir = side === 'right' ? -1 : side === 'bottom' ? -1 : 1;
             const newSize = Math.max(50, startSize + delta * dir);
             if (isV) panel.style.width = newSize + 'px';
             else panel.style.height = newSize + 'px';
+            // Update layout inset in real-time
+            if (rowEl) {
+              if (baseSide === 'left') rowEl.style.left = (stripW + newSize) + 'px';
+              else if (baseSide === 'right') rowEl.style.right = (stripW + newSize) + 'px';
+              else rowEl.style.bottom = (stripW + newSize) + 'px';
+            }
           };
           const onUp = () => {
             handle.removeEventListener('pointermove', onMove);
             handle.removeEventListener('pointerup', onUp);
             try { handle.releasePointerCapture(e.pointerId); } catch(err) {}
+            panel.style.transition = '';
             const finalSize = isV ? panel.offsetWidth : panel.offsetHeight;
             openBorders.forEach(ob => this._act(Actions.resizeBorder(ob.side, finalSize)));
           };

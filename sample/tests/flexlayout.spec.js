@@ -626,6 +626,48 @@ test.describe('FlexLayout PonySDK Integration', () => {
     expect(after).toBeGreaterThan(before);
   });
 
+  test('sidebar resize: layout does not overlap panel (left)', async ({ page }) => {
+    const handle = page.locator('.fl-sidebar-left .fl-sidebar-resize');
+    const hBox = await handle.boundingBox();
+    // Shrink left panel
+    await page.mouse.move(hBox.x + 2, hBox.y + hBox.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(hBox.x - 60, hBox.y + hBox.height / 2, { steps: 5 });
+    // Check DURING drag (mouse still down)
+    const panelRight = await page.locator('.fl-sidebar-left .fl-sidebar-panel').evaluate(el => {
+      const r = el.getBoundingClientRect(); return r.right;
+    });
+    const rowLeft = await page.locator('.fl-row').first().evaluate(el => {
+      const r = el.getBoundingClientRect(); return r.left;
+    });
+    await page.mouse.up();
+    // Layout left edge should be >= panel right edge (no overlap)
+    expect(rowLeft).toBeGreaterThanOrEqual(panelRight - 1);
+  });
+
+  test('sidebar resize: layout does not overlap panel (bottom)', async ({ page }) => {
+    // Open bottom panel
+    const bottomTab = page.locator('.fl-sidebar-bottom .fl-sidebar-tab').first();
+    await bottomTab.click();
+    await page.waitForTimeout(300);
+    const handle = page.locator('.fl-sidebar-bottom .fl-sidebar-resize');
+    const hBox = await handle.boundingBox();
+    // Shrink bottom panel
+    await page.mouse.move(hBox.x + hBox.width / 2, hBox.y + 2);
+    await page.mouse.down();
+    await page.mouse.move(hBox.x + hBox.width / 2, hBox.y + 40, { steps: 5 });
+    // Check DURING drag
+    const panelTop = await page.locator('.fl-sidebar-bottom .fl-sidebar-panel').evaluate(el => {
+      const r = el.getBoundingClientRect(); return r.top;
+    });
+    const rowBottom = await page.locator('.fl-row').first().evaluate(el => {
+      const r = el.getBoundingClientRect(); return r.bottom;
+    });
+    await page.mouse.up();
+    // Layout bottom edge should be <= panel top edge
+    expect(rowBottom).toBeLessThanOrEqual(panelTop + 1);
+  });
+
   test('drag tab from layout to sidebar strip', async ({ page }) => {
     const tabsBefore = await page.locator('.fl-sidebar-left .fl-sidebar-tab').count();
     // Drag the "Info" tab to the left sidebar strip
