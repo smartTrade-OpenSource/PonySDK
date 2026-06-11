@@ -75,7 +75,12 @@ public class WebSocketServlet extends JettyWebSocketServlet {
         final TxnContext context = new TxnContext(webSocket);
         webSocket.setContext(context);
 
-        // Transparent reconnection: if client sends a uiContextId, try to resume
+        // Transparent reconnection: the client may request resuming a suspended UIContext by id.
+        // The resume is authorized strictly by the caller's HTTP session (see
+        // WebSocket.onWebSocketOpen -> Application.getUIContext), so the id alone grants nothing.
+        // It travels as a query parameter because browsers cannot set custom headers on the
+        // WebSocket handshake; moving it off the URL would require a transport change
+        // (subprotocol or post-open handshake) on the GWT terminal.
         final String reconnectIdParam = request.getHttpServletRequest()
                 .getParameter(ClientToServerModel.RECONNECT_UI_CONTEXT_ID.toStringValue());
         if (reconnectIdParam != null && applicationManager.getConfiguration().getReconnectionTimeoutMs() > 0) {
@@ -83,7 +88,8 @@ public class WebSocketServlet extends JettyWebSocketServlet {
                 final int uiContextId = Integer.parseInt(reconnectIdParam);
                 webSocket.setReconnectContextId(uiContextId);
             } catch (final NumberFormatException e) {
-                log.warn("Invalid reconnect uiContextId: {}", reconnectIdParam);
+                // Do not echo the raw client-supplied value into the logs (log-injection vector).
+                log.warn("Ignoring malformed reconnect uiContextId parameter");
             }
         }
 

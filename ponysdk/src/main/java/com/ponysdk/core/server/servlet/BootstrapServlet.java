@@ -103,11 +103,38 @@ public class BootstrapServlet extends HttpServlet {
 
     protected String getPath(final HttpServletRequest request) {
         final String contextPath = request.getContextPath();
-        return request.getRequestURI().replaceFirst(contextPath, "");
+        final String uri = request.getRequestURI();
+        // Strip the context path as a literal prefix — NOT as a regex (the previous
+        // replaceFirst treated contextPath as a regex and could strip the wrong span).
+        if (contextPath != null && !contextPath.isEmpty() && uri.startsWith(contextPath)) {
+            return uri.substring(contextPath.length());
+        }
+        return uri;
+    }
+
+    /**
+     * Validates that a requested resource path cannot escape the web root / classpath.
+     * Rejects absolute traversal ({@code ..} segments), backslashes and NUL bytes.
+     * Returns {@code false} for unsafe paths, which callers must turn into a 404.
+     */
+    protected static boolean isSafeResourcePath(final String path) {
+        if (path == null || path.isEmpty()) return false;
+        if (path.indexOf('\\') >= 0 || path.indexOf('\0') >= 0) return false;
+        for (final String segment : path.split("/")) {
+            if ("..".equals(segment)) return false;
+        }
+        return true;
     }
 
     protected void handleRequest(final HttpServletRequest request, final HttpServletResponse response, final String path)
             throws IOException {
+        // Reject path traversal before touching the servlet context / classpath.
+        if (!isSafeResourcePath(path)) {
+            log.warn("Rejected unsafe resource path");
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+
         // Force session creation if there is no session
         // TODO Verify if needed
         request.getSession();
