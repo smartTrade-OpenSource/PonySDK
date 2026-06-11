@@ -1,22 +1,21 @@
 ext {
     java2htmlVersion = '5.0'
-    commonsBeanutilsVersion = '1.9.3'
-    commonsIoVersion = '2.6'
-    commonsFileupload2Version = '2.0.0-M2'
-    gwtVersion = '2.8.2'
-    jettyVersion = '12.0.16'
-    springVersion = '6.2.6'
+    commonsBeanutilsVersion = '1.11.0'
+    commonsIoVersion = '2.18.0'
+    commonsFileupload2Version = '2.0.0-M2' // no GA released yet — milestone API, do not bump blindly
+    gwtVersion = '2.12.2' // gwt-codeserver (dev-only); 2.13 folds CodeServer into gwt-dev
+    jettyVersion = '12.0.18'
+    springVersion = '6.2.8'
     jakartaServletVersion = '6.0.0'
     jakartaJsonVersion = '2.0.2'
     parssonVersion = '1.1.7'
-    slf4jVersion = '2.0.16'
+    slf4jVersion = '2.0.17'
     log4jVersion = '2.24.3'
 }
 
 dependencies {
     implementation(
             project(path: ':ponysdk', configuration: 'default'),
-            'org.springframework:spring-context:' + springVersion,
             'jakarta.json:jakarta.json-api:' + jakartaJsonVersion,
             'jakarta.servlet:jakarta.servlet-api:' + jakartaServletVersion,
             'org.slf4j:slf4j-api:' + slf4jVersion,
@@ -25,13 +24,17 @@ dependencies {
             'commons-beanutils:commons-beanutils:' + commonsBeanutilsVersion,
             'commons-io:commons-io:' + commonsIoVersion,
             'org.apache.commons:commons-fileupload2-jakarta-servlet6:' + commonsFileupload2Version,
-            'com.google.code.gson:gson:2.8.8'
+            'com.google.code.gson:gson:2.11.0'
     )
+
+    // Spring kept for the runSampleSpring task — uses ponysdk-spring module
+    implementation project(path: ':ponysdk-spring', configuration: 'default')
 
     runtimeOnly(
             'org.eclipse.parsson:parsson:' + parssonVersion,
-            'com.google.gwt:gwt-codeserver:' + gwtVersion,
+            'org.gwtproject:gwt-codeserver:' + gwtVersion,
             'de.java2html:java2html:' + java2htmlVersion,
+            'org.springframework:spring-context:' + springVersion,
             'org.springframework:spring-aop:' + springVersion,
             'org.springframework:spring-expression:' + springVersion,
             'org.slf4j:jcl-over-slf4j:' + slf4jVersion,
@@ -57,6 +60,18 @@ task runCodeServer(type: JavaExec) {
             'com.ponysdk.core.PonyTerminalDebug'
     ]
     jvmArgs = ['-server', '-Xmx1024m']
+}
+
+task runShowcase(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    classpath += files(buildDirPath + '/gwt/gwt')
+    classpath += files(buildDirPath + '/resources/main')
+    mainClass = 'com.ponysdk.impl.java.ShowcaseMain'
+    jvmArgs = [
+        '-Xmx1g',
+        '-XX:+UseZGC', '-XX:+ZGenerational',
+        '-Dlog4j.configurationFile=etc/log4j2.xml'
+    ]
 }
 
 task runSampleSpring(type: JavaExec) {
