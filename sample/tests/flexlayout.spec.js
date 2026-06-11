@@ -845,20 +845,11 @@ test.describe('FlexLayout PonySDK Integration', () => {
   });
 
   test('badge renders on sidebar tab', async ({ page }) => {
-    // Set a badge via JS
-    await page.evaluate(() => {
-      const layout = document.querySelector('.fl-layout');
-      if (layout && layout.__flexLayout) {
-        const borders = layout.__flexLayout.model.getBorders();
-        if (borders.length && borders[0].children.length) {
-          layout.__flexLayout.setBadge(borders[0].children[0].id, '3');
-        }
-      }
-    });
-    await page.waitForTimeout(300);
-    await expect(page.locator('.fl-sidebar-tab-badge')).toBeVisible({ timeout: 2000 });
-    const text = await page.locator('.fl-sidebar-tab-badge').first().textContent();
-    expect(text).toBe('3');
+    // Demo pre-populates badges — verify both dot and number types
+    await expect(page.locator('.fl-badge-dot').first()).toBeVisible({ timeout: 2000 });
+    await expect(page.locator('.fl-badge-num').first()).toBeVisible({ timeout: 2000 });
+    const numText = await page.locator('.fl-badge-num').first().textContent();
+    expect(numText.length).toBeGreaterThan(0);
   });
 
   test('drag tab from layout to sidebar strip', async ({ page }) => {

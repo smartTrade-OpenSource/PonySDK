@@ -248,7 +248,7 @@ public class FlexLayoutDemoEntryPoint implements EntryPoint {
         final PLabel search = Element.newPLabel("Search across your project.");
         search.setStyleProperty("padding", "12px");
         search.setStyleProperty("color", "#89b4fa");
-        flexLayout.addBorderTab("left-top", "Search", search, "\uD83D\uDD0D");
+        final String searchTabId = flexLayout.addBorderTab("left-top", "Search", search, "\uD83D\uDD0D");
 
         // Left-bottom: icon only
         final PLabel git = Element.newPLabel("Git branches and commits.");
@@ -259,7 +259,7 @@ public class FlexLayoutDemoEntryPoint implements EntryPoint {
         final PLabel extensions = Element.newPLabel("Manage extensions.");
         extensions.setStyleProperty("padding", "12px");
         extensions.setStyleProperty("color", "#cba6f7");
-        flexLayout.addBorderTab("left-bottom", "Extensions", extensions, "\u2B29");
+        final String extTabId = flexLayout.addBorderTab("left-bottom", "Extensions", extensions, "\u2B29");
 
         // Right-top: label only
         flexLayout.getAddon().setBorderTabStyle("right-top", "label");
@@ -271,14 +271,14 @@ public class FlexLayoutDemoEntryPoint implements EntryPoint {
         final PLabel outline = Element.newPLabel("Document outline / structure.");
         outline.setStyleProperty("padding", "12px");
         outline.setStyleProperty("color", "#94e2d5");
-        flexLayout.addBorderTab("right-top", "Outline", outline);
+        final String outlineTabId = flexLayout.addBorderTab("right-top", "Outline", outline);
 
         // Right-bottom: icon + label
         flexLayout.getAddon().setBorderTabStyle("right-bottom", "iconLabel");
         final PLabel notifications = Element.newPLabel("Recent notifications.");
         notifications.setStyleProperty("padding", "12px");
         notifications.setStyleProperty("color", "#f38ba8");
-        flexLayout.addBorderTab("right-bottom", "Notifications", notifications, "\uD83D\uDD14");
+        final String notifTabId = flexLayout.addBorderTab("right-bottom", "Notifications", notifications, "\uD83D\uDD14");
 
         // Bottom: label (default)
         final PLabel terminal = Element.newPLabel("$ Terminal output here...");
@@ -290,12 +290,19 @@ public class FlexLayoutDemoEntryPoint implements EntryPoint {
         final PLabel problems = Element.newPLabel("0 errors, 2 warnings");
         problems.setStyleProperty("padding", "12px");
         problems.setStyleProperty("color", "#f9e2af");
-        flexLayout.addBorderTab("bottom", "Problems", problems);
+        final String problemsTabId = flexLayout.addBorderTab("bottom", "Problems", problems);
 
         final PLabel output = Element.newPLabel("Build output logs.");
         output.setStyleProperty("padding", "12px");
         output.setStyleProperty("color", "#bac2de");
         flexLayout.addBorderTab("bottom", "Output", output);
+
+        // Badges demo: simulate notifications on non-active tabs
+        flexLayout.getAddon().setBadge(searchTabId, "", "#00e676");       // green glowing dot
+        flexLayout.getAddon().setBadge(extTabId, "2", "#cba6f7");        // purple "2" bubble
+        flexLayout.getAddon().setBadge(notifTabId, "5", "#ff6d00");      // orange "5" bubble
+        flexLayout.getAddon().setBadge(outlineTabId, "", null);          // default red dot
+        flexLayout.getAddon().setBadge(problemsTabId, "12", "#f38ba8");  // pink "12" bubble
 
         final PWidget layoutContainer = flexLayout.asWidget();
         layoutContainer.setStyleProperty("flex", "1");
