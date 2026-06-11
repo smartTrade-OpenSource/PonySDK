@@ -799,12 +799,16 @@
           const baseSide = side.split('-')[0];
           // Disable transition during drag to prevent desync
           panel.style.transition = 'none';
+          const SNAP_THRESHOLD = 80;
           const onMove = me => {
             const delta = isV ? (me.clientX - startPos) : (me.clientY - startPos);
             const dir = side === 'right' ? -1 : side === 'bottom' ? -1 : 1;
-            const newSize = Math.max(50, startSize + delta * dir);
+            const rawSize = startSize + delta * dir;
+            const newSize = Math.max(20, rawSize);
             if (isV) panel.style.width = newSize + 'px';
             else panel.style.height = newSize + 'px';
+            // Visual hint: fade when below threshold
+            panel.style.opacity = rawSize < SNAP_THRESHOLD ? '0.4' : '';
             // Update layout inset in real-time
             if (rowEl) {
               if (baseSide === 'left') rowEl.style.left = (stripW + newSize) + 'px';
@@ -825,12 +829,18 @@
             handle.removeEventListener('pointerup', onUp);
             try { handle.releasePointerCapture(e.pointerId); } catch(err) {}
             panel.style.transition = '';
+            panel.style.opacity = '';
             const finalSize = isV ? panel.offsetWidth : panel.offsetHeight;
-            // Update all borders on this side to same size (avoid max() mismatch)
-            const allSideBorders = this.model.getBorders().filter(b => b.side === baseSide || b.side.startsWith(baseSide + '-'));
-            allSideBorders.forEach(b => { b.size = Math.max(50, finalSize); });
-            this.model.emit('change', this.model);
-            if (this.onModelChange) this.onModelChange(this.model);
+            if (finalSize < SNAP_THRESHOLD) {
+              // Snap to close: minimize all open borders on this side
+              openBorders.forEach(ob => this._act(Actions.selectBorderTab(ob.side, ob.getSelectedNode().id)));
+            } else {
+              // Normal resize: persist new size
+              const allSideBorders = this.model.getBorders().filter(b => b.side === baseSide || b.side.startsWith(baseSide + '-'));
+              allSideBorders.forEach(b => { b.size = Math.max(50, finalSize); });
+              this.model.emit('change', this.model);
+              if (this.onModelChange) this.onModelChange(this.model);
+            }
           };
           handle.addEventListener('pointermove', onMove);
           handle.addEventListener('pointerup', onUp);
