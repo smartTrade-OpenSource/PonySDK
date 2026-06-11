@@ -567,7 +567,7 @@
       if (borders.length === 1) return this._renderBorder(borders[0]);
       // Multiple borders on same side: shared strip, split panel when both open
       const stripW = 30;
-      const hasBottom = !!this.model.getBorder('bottom');
+      const hasBottom = this.model.getBorders().some(b => !b._hidden && b.side === 'bottom');
       const openBorders = borders.filter(b => b.isOpen());
       const maxSize = Math.max(...borders.map(b => b.size), 200);
       const size = openBorders.length > 0 ? maxSize : 0;
@@ -680,11 +680,15 @@
 
       // Position absolutely
       if (side === 'left') {
-        wrapper.style.cssText = `position:absolute;top:0;left:0;bottom:${this.model.getBorder('bottom') ? stripW : 0}px;display:flex;flex-direction:row;z-index:2;`;
+        const hasBot = this.model.getBorders().some(b => !b._hidden && b.side === 'bottom');
+        wrapper.style.cssText = `position:absolute;top:0;left:0;bottom:${hasBot ? stripW : 0}px;display:flex;flex-direction:row;z-index:2;`;
       } else if (side === 'right') {
-        wrapper.style.cssText = `position:absolute;top:0;right:0;bottom:${this.model.getBorder('bottom') ? stripW : 0}px;display:flex;flex-direction:row;z-index:2;`;
+        const hasBot = this.model.getBorders().some(b => !b._hidden && b.side === 'bottom');
+        wrapper.style.cssText = `position:absolute;top:0;right:0;bottom:${hasBot ? stripW : 0}px;display:flex;flex-direction:row;z-index:2;`;
       } else {
-        wrapper.style.cssText = `position:absolute;bottom:0;left:${this.model.getBorder('left') ? stripW : 0}px;right:${this.model.getBorder('right') ? stripW : 0}px;display:flex;flex-direction:column;z-index:2;`;
+        const hasL = this.model.getBorders().some(b => !b._hidden && (b.side === 'left' || b.side.startsWith('left-')));
+        const hasR = this.model.getBorders().some(b => !b._hidden && (b.side === 'right' || b.side.startsWith('right-')));
+        wrapper.style.cssText = `position:absolute;bottom:0;left:${hasL ? stripW : 0}px;right:${hasR ? stripW : 0}px;display:flex;flex-direction:column;z-index:2;`;
       }
 
       // Tab strip
@@ -762,10 +766,12 @@
               const up = () => {
                 splitter.removeEventListener('pointermove', move);
                 splitter.removeEventListener('pointerup', up);
+                splitter.removeEventListener('pointercancel', up);
                 try { splitter.releasePointerCapture(ev.pointerId); } catch(e) {}
               };
               splitter.addEventListener('pointermove', move);
               splitter.addEventListener('pointerup', up);
+              splitter.addEventListener('pointercancel', up);
             });
             panel.appendChild(pane);
             panel.appendChild(splitter);
