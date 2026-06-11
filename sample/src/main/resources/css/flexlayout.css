@@ -460,6 +460,15 @@
 
 .fl-sidebar-section { min-height: var(--fl-sidebar-strip-w); }
 
+.fl-sidebar-collapse {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; padding: 6px 0; margin-top: auto;
+  background: none; border: none; border-top: 1px solid var(--fl-border);
+  color: var(--fl-text-dim); font-size: 10px; cursor: pointer;
+  transition: color .12s, background .12s;
+}
+.fl-sidebar-collapse:hover { color: var(--fl-text); background: var(--fl-tab-hover); }
+
 .fl-sidebar-splitter {
   height: var(--fl-sidebar-splitter-h); flex-shrink: 0; cursor: row-resize;
   background: var(--fl-border);

@@ -726,6 +726,17 @@
         strip.appendChild(section);
       });
 
+      // Collapse button: hide entire lateral (both groups)
+      const collapseBtn = document.createElement('button');
+      collapseBtn.type = 'button';
+      collapseBtn.className = 'fl-sidebar-collapse';
+      collapseBtn.title = 'Hide sidebar';
+      collapseBtn.innerHTML = baseSide === 'left' ? '&#x25C0;' : '&#x25B6;';
+      collapseBtn.addEventListener('click', () => {
+        borders.forEach(b => this._act(Actions.toggleBorder(b.side)));
+      });
+      strip.appendChild(collapseBtn);
+
       // Panel area
       const panel = this._mkBorderPanel(openBorders, baseSide, true, size);
 
