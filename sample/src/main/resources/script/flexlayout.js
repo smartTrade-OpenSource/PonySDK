@@ -567,7 +567,8 @@
       if (borders.length === 1) return this._renderBorder(borders[0]);
       // Multiple borders on same side: shared strip, split panel when both open
       const stripW = 30;
-      const hasBottom = this.model.getBorders().some(b => !b._hidden && b.side === 'bottom');
+      const bottomBorder = this.model.getBorders().find(b => !b._hidden && b.side === 'bottom');
+      const bottomInset = bottomBorder ? stripW + (bottomBorder.isOpen() ? bottomBorder.size : 0) : 0;
       const openBorders = borders.filter(b => b.isOpen());
       const maxSize = Math.max(...borders.map(b => b.size));
       const size = openBorders.length > 0 ? maxSize : 0;
@@ -575,9 +576,9 @@
       const wrapper = document.createElement('div');
       wrapper.className = `fl-sidebar fl-sidebar-${baseSide}`;
       if (baseSide === 'left') {
-        wrapper.style.cssText = `position:absolute;top:0;left:0;bottom:${hasBottom ? stripW : 0}px;display:flex;flex-direction:row;z-index:2;`;
+        wrapper.style.cssText = `position:absolute;top:0;left:0;bottom:${bottomInset}px;display:flex;flex-direction:row;z-index:2;`;
       } else {
-        wrapper.style.cssText = `position:absolute;top:0;right:0;bottom:${hasBottom ? stripW : 0}px;display:flex;flex-direction:row;z-index:2;`;
+        wrapper.style.cssText = `position:absolute;top:0;right:0;bottom:${bottomInset}px;display:flex;flex-direction:row;z-index:2;`;
       }
 
       // Strip column with sections
@@ -680,11 +681,13 @@
 
       // Position absolutely
       if (side === 'left') {
-        const hasBot = this.model.getBorders().some(b => !b._hidden && b.side === 'bottom');
-        wrapper.style.cssText = `position:absolute;top:0;left:0;bottom:${hasBot ? stripW : 0}px;display:flex;flex-direction:row;z-index:2;`;
+        const bb = this.model.getBorders().find(b => !b._hidden && b.side === 'bottom');
+        const botInset = bb ? stripW + (bb.isOpen() ? bb.size : 0) : 0;
+        wrapper.style.cssText = `position:absolute;top:0;left:0;bottom:${botInset}px;display:flex;flex-direction:row;z-index:2;`;
       } else if (side === 'right') {
-        const hasBot = this.model.getBorders().some(b => !b._hidden && b.side === 'bottom');
-        wrapper.style.cssText = `position:absolute;top:0;right:0;bottom:${hasBot ? stripW : 0}px;display:flex;flex-direction:row;z-index:2;`;
+        const bb = this.model.getBorders().find(b => !b._hidden && b.side === 'bottom');
+        const botInset = bb ? stripW + (bb.isOpen() ? bb.size : 0) : 0;
+        wrapper.style.cssText = `position:absolute;top:0;right:0;bottom:${botInset}px;display:flex;flex-direction:row;z-index:2;`;
       } else {
         const borders = this.model.getBorders();
         const leftBorders = borders.filter(b => !b._hidden && (b.side === 'left' || b.side.startsWith('left-')));
@@ -807,8 +810,16 @@
             const newSize = Math.max(20, rawSize);
             if (isV) panel.style.width = newSize + 'px';
             else panel.style.height = newSize + 'px';
-            // Visual hint: fade when below threshold
-            panel.style.opacity = rawSize < SNAP_THRESHOLD ? '0.4' : '';
+            // Visual hint: fade + outline when below threshold
+            if (rawSize < SNAP_THRESHOLD) {
+              panel.style.opacity = '0.3';
+              panel.style.outline = '2px dashed var(--fl-close-hover, #f38ba8)';
+              panel.style.outlineOffset = '-2px';
+            } else {
+              panel.style.opacity = '';
+              panel.style.outline = '';
+              panel.style.outlineOffset = '';
+            }
             // Update layout inset in real-time
             if (rowEl) {
               if (baseSide === 'left') rowEl.style.left = (stripW + newSize) + 'px';
@@ -830,6 +841,8 @@
             try { handle.releasePointerCapture(e.pointerId); } catch(err) {}
             panel.style.transition = '';
             panel.style.opacity = '';
+            panel.style.outline = '';
+            panel.style.outlineOffset = '';
             const finalSize = isV ? panel.offsetWidth : panel.offsetHeight;
             if (finalSize < SNAP_THRESHOLD) {
               // Snap to close: minimize all open borders on this side

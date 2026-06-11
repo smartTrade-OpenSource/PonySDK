@@ -713,6 +713,29 @@ test.describe('FlexLayout PonySDK Integration', () => {
     expect(bottomLeft).toBeGreaterThanOrEqual(leftPanelRight - 1);
   });
 
+  test('lateral does not overlap bottom after snap-close and reopen', async ({ page }) => {
+    // Open bottom panel
+    const bottomTab = page.locator('.fl-sidebar-bottom .fl-sidebar-tab').first();
+    await bottomTab.click();
+    await page.waitForTimeout(300);
+    // Snap-close left panel by shrinking below threshold
+    const handle = page.locator('.fl-sidebar-left .fl-sidebar-resize');
+    const hBox = await handle.boundingBox();
+    await page.mouse.move(hBox.x + 2, hBox.y + hBox.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(hBox.x - 200, hBox.y + hBox.height / 2, { steps: 5 });
+    await page.mouse.up();
+    await page.waitForTimeout(500);
+    // Reopen left panel
+    const leftTab = page.locator('.fl-sidebar-left .fl-sidebar-tab').first();
+    await leftTab.click();
+    await page.waitForTimeout(500);
+    // Left sidebar bottom should not exceed bottom sidebar top
+    const leftBottom = await page.locator('.fl-sidebar-left').evaluate(el => el.getBoundingClientRect().bottom);
+    const bottomTop = await page.locator('.fl-sidebar-bottom').evaluate(el => el.getBoundingClientRect().top);
+    expect(leftBottom).toBeLessThanOrEqual(bottomTop + 1);
+  });
+
   test('drag tab from layout to sidebar strip', async ({ page }) => {
     const tabsBefore = await page.locator('.fl-sidebar-left .fl-sidebar-tab').count();
     // Drag the "Info" tab to the left sidebar strip
