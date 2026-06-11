@@ -389,7 +389,16 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
     }
 
     public void setBadge(final String tabId, final String badge) {
-        callTerminalMethod("setBadge", tabId, badge);
+        callTerminalMethod("setBadge", tabId, badge, null);
+    }
+
+    /**
+     * Set a badge on a sidebar tab.
+     * @param badge text content ("3", "99+") or empty string for a colored dot. Null to clear.
+     * @param color CSS color for the badge (e.g. "#ff0000", "limegreen"). Null for default.
+     */
+    public void setBadge(final String tabId, final String badge, final String color) {
+        callTerminalMethod("setBadge", tabId, badge, color);
     }
 
     public void enableUndoRedo(final boolean enabled) {

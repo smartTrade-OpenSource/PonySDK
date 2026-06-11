@@ -531,9 +531,9 @@
     setContextMenuEnabled(v) { this._contextMenuEnabled = !!v; }
     setUndoEnabled(v) { this._undoEnabled = !!v; }
 
-    setBadge(tabId, badge) {
+    setBadge(tabId, badge, color) {
       const tab = this.model.findById(tabId);
-      if (tab) { tab.badge = badge || null; this._render(); }
+      if (tab) { tab.badge = badge; tab.badgeColor = color || null; this._render(); }
     }
 
     setBorderMinSize(side, min) {
@@ -763,10 +763,12 @@
       }
       btn.title = tab.getName();
       // Feature 8: Badge
-      if (tab.badge) {
+      if (tab.badge != null) {
         const bdg = document.createElement('span');
-        bdg.className = 'fl-sidebar-tab-badge';
-        bdg.textContent = tab.badge;
+        const isNum = tab.badge && tab.badge.length > 0;
+        bdg.className = isNum ? 'fl-sidebar-tab-badge fl-badge-num' : 'fl-sidebar-tab-badge fl-badge-dot';
+        if (isNum) bdg.textContent = tab.badge;
+        if (tab.badgeColor) bdg.style.background = tab.badgeColor;
         btn.appendChild(bdg);
       }
       if (tab.isEnableClose()) {

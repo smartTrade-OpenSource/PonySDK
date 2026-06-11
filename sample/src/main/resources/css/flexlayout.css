@@ -476,9 +476,20 @@
 
 /* Feature 8: Badge on sidebar tab */
 .fl-sidebar-tab-badge {
-  position: absolute; top: 2px; right: 2px;
+  position: absolute; top: 3px; right: 3px;
+}
+.fl-badge-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--fl-badge-color, #f38ba8);
+  box-shadow: 0 0 6px var(--fl-badge-color, #f38ba8), 0 0 12px var(--fl-badge-color, #f38ba8);
+  display: block;
+}
+.fl-badge-num {
   min-width: 14px; height: 14px; line-height: 14px;
-  background: #f38ba8; color: #fff; font-size: 9px; font-weight: 700;
+  background: var(--fl-badge-color, #f38ba8); color: #fff;
+  font-size: 9px; font-weight: 700;
   border-radius: 7px; text-align: center; padding: 0 3px;
+  display: block;
+}
 }
 .fl-sidebar-tab { position: relative; }

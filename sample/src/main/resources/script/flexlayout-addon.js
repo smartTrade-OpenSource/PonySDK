@@ -698,9 +698,9 @@
       this._layout.setBorderMaxSize(side, maxSize);
     },
 
-    setBadge: function (tabId, badge) {
+    setBadge: function (tabId, badge, color) {
       if (!this._layout) return;
-      this._layout.setBadge(tabId, badge);
+      this._layout.setBadge(tabId, badge, color);
     },
 
     enableUndoRedo: function (enabled) {
