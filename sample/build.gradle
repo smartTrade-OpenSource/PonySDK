@@ -2,7 +2,7 @@ ext {
     java2htmlVersion = '5.0'
     commonsBeanutilsVersion = '1.11.0'
     commonsIoVersion = '2.18.0'
-    commonsFileupload2Version = '2.0.0-M2' // no GA released yet — milestone API, do not bump blindly
+    commonsFileupload2Version = '2.0.0-M5' // latest milestone (no GA yet); verified to compile with the sample
     gwtVersion = '2.12.2' // gwt-codeserver (dev-only); 2.13 folds CodeServer into gwt-dev
     jettyVersion = '12.0.18'
     springVersion = '6.2.8'
