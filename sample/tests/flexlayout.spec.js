@@ -702,18 +702,18 @@ test.describe('FlexLayout PonySDK Integration', () => {
     expect(rowRight).toBeLessThanOrEqual(panelLeft + 1);
   });
 
-  test('bottom sidebar does not overlap lateral strips', async ({ page }) => {
+  test('bottom sidebar is pushed by lateral panels', async ({ page }) => {
     // Open bottom panel
     const bottomTab = page.locator('.fl-sidebar-bottom .fl-sidebar-tab').first();
     await bottomTab.click();
     await page.waitForTimeout(300);
-    // Bottom sidebar left edge starts after left strip
-    const leftStripRight = await page.locator('.fl-sidebar-left .fl-sidebar-strip').evaluate(el => el.getBoundingClientRect().right);
+    // Bottom sidebar left edge starts after left panel (not just strip)
+    const leftPanelRight = await page.locator('.fl-sidebar-left .fl-sidebar-panel').evaluate(el => el.getBoundingClientRect().right);
     const bottomLeft = await page.locator('.fl-sidebar-bottom').evaluate(el => el.getBoundingClientRect().left);
-    expect(bottomLeft).toBeGreaterThanOrEqual(leftStripRight - 1);
+    expect(bottomLeft).toBeGreaterThanOrEqual(leftPanelRight - 1);
   });
 
-  test('lateral does not overlap bottom after snap-close and reopen', async ({ page }) => {
+  test('lateral pushes bottom after snap-close and reopen', async ({ page }) => {
     // Open bottom panel
     const bottomTab = page.locator('.fl-sidebar-bottom .fl-sidebar-tab').first();
     await bottomTab.click();
@@ -730,10 +730,10 @@ test.describe('FlexLayout PonySDK Integration', () => {
     const leftTab = page.locator('.fl-sidebar-left .fl-sidebar-tab').first();
     await leftTab.click();
     await page.waitForTimeout(500);
-    // Left sidebar should extend down to the bottom strip (30px from bottom)
-    const leftBottom = await page.locator('.fl-sidebar-left').evaluate(el => el.getBoundingClientRect().bottom);
-    const stripTop = await page.locator('.fl-sidebar-bottom .fl-sidebar-strip').evaluate(el => el.getBoundingClientRect().top);
-    expect(leftBottom).toBeGreaterThanOrEqual(stripTop - 1);
+    // Bottom should be pushed: its left >= left panel right
+    const leftPanelRight = await page.locator('.fl-sidebar-left .fl-sidebar-panel').evaluate(el => el.getBoundingClientRect().right);
+    const bottomLeft = await page.locator('.fl-sidebar-bottom').evaluate(el => el.getBoundingClientRect().left);
+    expect(bottomLeft).toBeGreaterThanOrEqual(leftPanelRight - 1);
   });
 
   test('drag tab from layout to sidebar strip', async ({ page }) => {

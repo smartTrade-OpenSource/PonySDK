@@ -690,9 +690,13 @@
         wrapper.style.cssText = `position:absolute;top:0;right:0;bottom:${botInset}px;display:flex;flex-direction:row;z-index:2;`;
       } else {
         const borders = this.model.getBorders();
-        const hasL = borders.some(b => !b._hidden && (b.side === 'left' || b.side.startsWith('left-')));
-        const hasR = borders.some(b => !b._hidden && (b.side === 'right' || b.side.startsWith('right-')));
-        wrapper.style.cssText = `position:absolute;bottom:0;left:${hasL ? stripW : 0}px;right:${hasR ? stripW : 0}px;display:flex;flex-direction:column;z-index:1;`;
+        const leftBorders = borders.filter(b => !b._hidden && (b.side === 'left' || b.side.startsWith('left-')));
+        const rightBorders = borders.filter(b => !b._hidden && (b.side === 'right' || b.side.startsWith('right-')));
+        const leftOpen = leftBorders.find(b => b.isOpen());
+        const rightOpen = rightBorders.find(b => b.isOpen());
+        const lInset = leftBorders.length > 0 ? stripW + (leftOpen ? Math.max(...leftBorders.map(b => b.size)) : 0) : 0;
+        const rInset = rightBorders.length > 0 ? stripW + (rightOpen ? Math.max(...rightBorders.map(b => b.size)) : 0) : 0;
+        wrapper.style.cssText = `position:absolute;bottom:0;left:${lInset}px;right:${rInset}px;display:flex;flex-direction:column;z-index:2;`;
       }
 
       // Tab strip
@@ -822,6 +826,14 @@
               else if (baseSide === 'right') rowEl.style.right = (stripW + newSize) + 'px';
               else rowEl.style.bottom = (stripW + newSize) + 'px';
             }
+            // Update bottom sidebar position when lateral resizes
+            if (baseSide === 'left' || baseSide === 'right') {
+              const bottomEl = this.container.querySelector('.fl-sidebar-bottom');
+              if (bottomEl) {
+                if (baseSide === 'left') bottomEl.style.left = (stripW + newSize) + 'px';
+                else bottomEl.style.right = (stripW + newSize) + 'px';
+              }
+            }
           };
           const onUp = () => {
             handle.removeEventListener('pointermove', onMove);
@@ -885,6 +897,14 @@
         rowEl.style.left = leftBorders.length > 0 ? (stripW + leftSize) + 'px' : '0';
         rowEl.style.right = rightBorders.length > 0 ? (stripW + rightSize) + 'px' : '0';
         rowEl.style.bottom = bottomBorder ? (stripW + bottomSize) + 'px' : '0';
+      }
+      // Update bottom sidebar position (pushed by laterals)
+      if (baseSide !== 'bottom') {
+        const bottomEl = this.container.querySelector('.fl-sidebar-bottom');
+        if (bottomEl) {
+          bottomEl.style.left = (leftBorders.length > 0 ? stripW + leftSize : 0) + 'px';
+          bottomEl.style.right = (rightBorders.length > 0 ? stripW + rightSize : 0) + 'px';
+        }
       }
       // Replace placeholders with content elements
       this.container.querySelectorAll('[data-fl-ph]').forEach(ph => {
