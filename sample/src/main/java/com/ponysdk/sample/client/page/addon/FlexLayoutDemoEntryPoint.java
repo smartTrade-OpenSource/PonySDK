@@ -88,6 +88,7 @@ public class FlexLayoutDemoEntryPoint implements EntryPoint {
         themeSelector.addItem("GitHub Dark", "fl-theme-github");
         themeSelector.addItem("Monokai", "fl-theme-monokai");
         themeSelector.addItem("Corporate Light", "fl-theme-corporate");
+        themeSelector.addItem("Deep Orange", "fl-theme-deep-orange");
         themeSelector.addItem("Rounded", "fl-theme-rounded");
         themeSelector.addItem("Underline", "fl-theme-underline");
         themeSelector.setStyleProperty("background", "#313244");

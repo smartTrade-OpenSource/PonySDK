@@ -238,6 +238,28 @@
   --fl-sidebar-close-bg: rgba(220,38,38,.06);
 }
 
+/* ── Deep Orange theme (black + orange) ───────────────────────────── */
+.fl-theme-deep-orange {
+  --fl-bg:           #0a0a0a;
+  --fl-panel:        #111111;
+  --fl-strip:        #080808;
+  --fl-border:       #2a2a2a;
+  --fl-accent:       #ff6d00;
+  --fl-accent2:      #ffab00;
+  --fl-text:         #e0e0e0;
+  --fl-text-dim:     #666666;
+  --fl-tab-hover:    #1a1a1a;
+  --fl-tab-active-bg:#111111;
+  --fl-tab-active-ind:#ff6d00;
+  --fl-close-hover:  #ff1744;
+  --fl-sp:           #080808;
+  --fl-sp-hover:     #ff6d00;
+  --fl-drop-fill:    rgba(255,109,0,.15);
+  --fl-drop-border:  #ff6d00;
+  --fl-sidebar-active-glow: rgba(255,109,0,.15);
+  --fl-sidebar-close-bg: rgba(255,23,68,.1);
+}
+
 /* ── Reset ───────────────────────────────────────────────────────── */
 .fl-layout *, .fl-layout *::before, .fl-layout *::after {
   box-sizing: border-box; margin: 0; padding: 0;
