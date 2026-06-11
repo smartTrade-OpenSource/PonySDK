@@ -69,6 +69,11 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
     /** Shared buffer pool for all WebSocket sessions. 32KB buffers, max 128 pooled. */
     private static final ByteBufferPool BUFFER_POOL = new ByteBufferPool(1 << 15, 128);
 
+    /** Max time to wait, on reconnect, for the old context to enter the suspended state (race window). */
+    private static final long RECONNECT_SUSPEND_WAIT_MS = 500;
+    /** Poll interval while waiting for the suspended state. */
+    private static final long RECONNECT_SUSPEND_POLL_MS = 20;
+
     private JettyServerUpgradeRequest request;
     private Map<String, List<String>> cachedParameterMap;
     private String cachedUserAgent;
@@ -107,9 +112,10 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
                 // server-side (common on fast local networks). Wait up to 500ms for the context
                 // to enter suspended state before falling back to creating a new one.
                 if (suspended != null && suspended.isAlive() && !suspended.isSuspended()) {
-                    final long deadline = System.currentTimeMillis() + 500;
-                    while (!suspended.isSuspended() && System.currentTimeMillis() < deadline) {
-                        try { Thread.sleep(20); } catch (final InterruptedException ie) { Thread.currentThread().interrupt(); break; }
+                    final long deadline = System.currentTimeMillis() + RECONNECT_SUSPEND_WAIT_MS;
+                    // Wait for the suspend to land, but stop early if the context dies meanwhile.
+                    while (suspended.isAlive() && !suspended.isSuspended() && System.currentTimeMillis() < deadline) {
+                        try { Thread.sleep(RECONNECT_SUSPEND_POLL_MS); } catch (final InterruptedException ie) { Thread.currentThread().interrupt(); break; }
                     }
                     suspended = application.getUIContext(reconnectContextId); // re-fetch after wait
                 }
