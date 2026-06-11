@@ -378,6 +378,48 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
         return tabWidgets;
     }
 
+    // ─── Feature Toggles ─────────────────────────────────────────
+
+    public void setBorderMinSize(final String side, final int minSize) {
+        callTerminalMethod("setBorderMinSize", side, minSize);
+    }
+
+    public void setBorderMaxSize(final String side, final int maxSize) {
+        callTerminalMethod("setBorderMaxSize", side, maxSize);
+    }
+
+    public void setBadge(final String tabId, final String badge) {
+        callTerminalMethod("setBadge", tabId, badge);
+    }
+
+    public void enableUndoRedo(final boolean enabled) {
+        callTerminalMethod("enableUndoRedo", enabled);
+    }
+
+    public void enableKeyboardShortcuts(final boolean enabled) {
+        callTerminalMethod("enableKeyboardShortcuts", enabled);
+    }
+
+    public void enableTouchGestures(final boolean enabled) {
+        callTerminalMethod("enableTouchGestures", enabled);
+    }
+
+    public void enableContextMenu(final boolean enabled) {
+        callTerminalMethod("enableContextMenu", enabled);
+    }
+
+    public void undo() {
+        callTerminalMethod("undo");
+    }
+
+    public void redo() {
+        callTerminalMethod("redo");
+    }
+
+    public void enableAutoSave(final boolean enabled) {
+        callTerminalMethod("enableAutoSave", enabled);
+    }
+
     // ─── Lifecycle ───────────────────────────────────────────────
 
     @Override

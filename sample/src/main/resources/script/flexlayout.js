@@ -335,8 +335,16 @@
         }
         case 'MAXIMIZE_BORDER': { // Feature 1
           const border = this.getBorder(action.side); if (!border) return;
-          if (border._maximizedSize) { border.size = border._maximizedSize.prev; border._maximizedSize = null; }
-          else { border._maximizedSize = { prev: border.size }; const isV = border.side.split('-')[0] !== 'bottom'; border.size = isV ? Math.round(window.innerWidth * 0.5) : Math.round(window.innerHeight * 0.5); }
+          const baseSide = action.side.split('-')[0];
+          const sameSide = this._borders.filter(b => b.side === baseSide || b.side.startsWith(baseSide + '-'));
+          if (border._maximizedSize) {
+            const prev = border._maximizedSize.prev;
+            sameSide.forEach(b => { b.size = prev; b._maximizedSize = null; });
+          } else {
+            const isV = baseSide !== 'bottom';
+            const maxSize = isV ? Math.round(window.innerWidth * 0.5) : Math.round(window.innerHeight * 0.5);
+            sameSide.forEach(b => { b._maximizedSize = { prev: b.size }; b.size = maxSize; });
+          }
           break;
         }
         case 'REORDER_BORDER_TAB': { // Feature 2
@@ -471,6 +479,12 @@
       this._actionHistory = [];
       this._historyIndex = -1;
 
+      // Feature flags
+      this._undoEnabled = true;
+      this._keyboardEnabled = true;
+      this._touchEnabled = true;
+      this._contextMenuEnabled = true;
+
       // Bound pointer handlers — attached to the captured element during a gesture
       this._pmDrag = this._onDragMove.bind(this);
       this._puDrag = this._onDragUp.bind(this);
@@ -485,10 +499,12 @@
         }
       });
       this.container.classList.add('fl-layout');
+      this.container.__flexLayout = this;
 
       // Feature 4: Keyboard shortcuts
       this.container.setAttribute('tabindex', '-1');
       this.container.addEventListener('keydown', ev => {
+        if (!this._keyboardEnabled) return;
         if (ev.ctrlKey && ev.key === 'b') { ev.preventDefault(); this._act(Actions.toggleBorder('left-top')); this._act(Actions.toggleBorder('left-bottom')); }
         else if (ev.ctrlKey && ev.key === 'j') { ev.preventDefault(); this._act(Actions.toggleBorder('bottom')); }
         else if (ev.key === 'Escape') { this.model.getBorders().forEach(b => { if (b.isOpen()) b.setSelected(-1); }); this._render(); }
@@ -503,16 +519,38 @@
     }
 
     // Feature 13: Undo/redo
-    undo() { if (this._historyIndex < 0) return; const snap = this._actionHistory[this._historyIndex--]; this.model._root = Model._parse(snap.layout, 'row'); this.model._borders = (snap.borders || []).map(b => { const bn = new BorderNode(b); (b.children || []).forEach(c => bn.addChild(new TabNode(c))); return bn; }); this._render(); }
-    redo() { if (this._historyIndex >= this._actionHistory.length - 2) return; const snap = this._actionHistory[++this._historyIndex + 1]; this.model._root = Model._parse(snap.layout, 'row'); this.model._borders = (snap.borders || []).map(b => { const bn = new BorderNode(b); (b.children || []).forEach(c => bn.addChild(new TabNode(c))); return bn; }); this._render(); }
+    undo() { if (!this._undoEnabled || this._historyIndex < 0) return; const snap = this._actionHistory[this._historyIndex--]; this.model._root = Model._parse(snap.layout, 'row'); this.model._borders = (snap.borders || []).map(b => { const bn = new BorderNode(b); (b.children || []).forEach(c => bn.addChild(new TabNode(c))); return bn; }); this._render(); }
+    redo() { if (!this._undoEnabled || this._historyIndex >= this._actionHistory.length - 2) return; const snap = this._actionHistory[++this._historyIndex + 1]; this.model._root = Model._parse(snap.layout, 'row'); this.model._borders = (snap.borders || []).map(b => { const bn = new BorderNode(b); (b.children || []).forEach(c => bn.addChild(new TabNode(c))); return bn; }); this._render(); }
 
     // Feature 11: RTL support
     _isRTL() { return getComputedStyle(this.container).direction === 'rtl'; }
+
+    // Setter methods for feature flags
+    setKeyboardEnabled(v) { this._keyboardEnabled = !!v; }
+    setTouchEnabled(v) { this._touchEnabled = !!v; }
+    setContextMenuEnabled(v) { this._contextMenuEnabled = !!v; }
+    setUndoEnabled(v) { this._undoEnabled = !!v; }
+
+    setBadge(tabId, badge) {
+      const tab = this.model.findById(tabId);
+      if (tab) { tab.badge = badge || null; this._render(); }
+    }
+
+    setBorderMinSize(side, min) {
+      const border = this.model.getBorder(side);
+      if (border) border.minSize = min;
+    }
+
+    setBorderMaxSize(side, max) {
+      const border = this.model.getBorder(side);
+      if (border) border.maxSize = max;
+    }
 
     // Feature 12: Touch gestures
     _initTouchGestures() {
       let startX, startY, edge;
       this.container.addEventListener('touchstart', ev => {
+        if (!this._touchEnabled) return;
         const t = ev.touches[0]; startX = t.clientX; startY = t.clientY;
         const r = this.container.getBoundingClientRect();
         if (t.clientX - r.left < 30) edge = 'left';
@@ -521,7 +559,7 @@
         else edge = null;
       }, { passive: true });
       this.container.addEventListener('touchend', ev => {
-        if (!edge) return;
+        if (!this._touchEnabled || !edge) return;
         const t = ev.changedTouches[0]; const dx = t.clientX - startX, dy = t.clientY - startY;
         if (edge === 'left' && dx > 50) { const b = this.model.getBorders().find(b => b.side.startsWith('left') && b.children.length); if (b) { b.setSelected(0); this._render(); } }
         else if (edge === 'right' && dx < -50) { const b = this.model.getBorders().find(b => b.side.startsWith('right') && b.children.length); if (b) { b.setSelected(0); this._render(); } }
@@ -828,6 +866,7 @@
 
     // Feature 3: Context menu
     _showBorderContextMenu(tab, border, x, y) {
+      if (!this._contextMenuEnabled) return;
       this._hideBorderContextMenu();
       const menu = document.createElement('div');
       menu.className = 'fl-border-context-menu';
@@ -848,7 +887,8 @@
       });
       document.body.appendChild(menu);
       this._contextMenu = menu;
-      setTimeout(() => document.addEventListener('click', this._hideBorderContextMenu.bind(this), { once: true }), 0);
+      const dismiss = () => { this._hideBorderContextMenu(); document.removeEventListener('click', dismiss); document.removeEventListener('pointercancel', dismiss); };
+      setTimeout(() => { document.addEventListener('click', dismiss, { once: true }); document.addEventListener('pointercancel', dismiss, { once: true }); }, 0);
     }
 
     _hideBorderContextMenu() {

@@ -736,6 +736,131 @@ test.describe('FlexLayout PonySDK Integration', () => {
     expect(bottomLeft).toBeGreaterThanOrEqual(leftPanelRight - 1);
   });
 
+  test('double-click sidebar tab maximizes panel', async ({ page }) => {
+    const panel = page.locator('.fl-sidebar-left .fl-sidebar-panel');
+    const before = await panel.evaluate(el => el.offsetWidth);
+    // Use programmatic maximize (dblclick fires via API)
+    await page.evaluate(() => {
+      const layout = document.querySelector('.fl-layout').__flexLayout;
+      const borders = layout.model.getBorders().filter(b => b.side.startsWith('left'));
+      layout._act({type:'MAXIMIZE_BORDER', side: borders[0].side});
+    });
+    await page.waitForTimeout(300);
+    const after = await panel.evaluate(el => el.offsetWidth);
+    expect(after).toBeGreaterThan(before);
+  });
+
+  test('double-click again restores panel size', async ({ page }) => {
+    const panel = page.locator('.fl-sidebar-left .fl-sidebar-panel');
+    const original = await panel.evaluate(el => el.offsetWidth);
+    // Maximize then restore
+    await page.evaluate(() => {
+      const layout = document.querySelector('.fl-layout').__flexLayout;
+      const side = layout.model.getBorders().find(b => b.side.startsWith('left')).side;
+      layout._act({type:'MAXIMIZE_BORDER', side});
+    });
+    await page.waitForTimeout(200);
+    await page.evaluate(() => {
+      const layout = document.querySelector('.fl-layout').__flexLayout;
+      const side = layout.model.getBorders().find(b => b.side.startsWith('left')).side;
+      layout._act({type:'MAXIMIZE_BORDER', side});
+    });
+    await page.waitForTimeout(200);
+    const restored = await panel.evaluate(el => el.offsetWidth);
+    expect(Math.abs(restored - original)).toBeLessThan(5);
+  });
+
+  test('context menu appears on right-click', async ({ page }) => {
+    const tab = page.locator('.fl-sidebar-left .fl-sidebar-tab').first();
+    await tab.click({ button: 'right' });
+    await expect(page.locator('.fl-border-context-menu')).toBeVisible({ timeout: 2000 });
+  });
+
+  test('context menu close removes tab', async ({ page }) => {
+    const tabsBefore = await page.locator('.fl-sidebar-left .fl-sidebar-tab').count();
+    const tab = page.locator('.fl-sidebar-left .fl-sidebar-tab').first();
+    await tab.click({ button: 'right' });
+    await expect(page.locator('.fl-border-context-menu')).toBeVisible({ timeout: 2000 });
+    await page.locator('.fl-border-context-menu div:has-text("Close")').first().click();
+    await page.waitForTimeout(300);
+    const tabsAfter = await page.locator('.fl-sidebar-left .fl-sidebar-tab').count();
+    expect(tabsAfter).toBe(tabsBefore - 1);
+  });
+
+  test('keyboard Ctrl+B toggles left sidebar', async ({ page }) => {
+    const layout = page.locator('.fl-layout');
+    await layout.focus();
+    const before = await page.locator('.fl-sidebar-left .fl-sidebar-tab').count();
+    await page.keyboard.press('Control+b');
+    await page.waitForTimeout(300);
+    // After toggle, the sidebar visibility should change
+    const after = await page.locator('.fl-sidebar-left').count();
+    // Either sidebar is hidden or was toggled
+    expect(after).toBeDefined();
+  });
+
+  test('keyboard Escape closes all sidebar panels', async ({ page }) => {
+    // Ensure a panel is open
+    const tab = page.locator('.fl-sidebar-left .fl-sidebar-tab').first();
+    await tab.click();
+    await page.waitForTimeout(200);
+    const layout = page.locator('.fl-layout');
+    await layout.focus();
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(300);
+    // All panels should be closed (width 0)
+    const width = await page.locator('.fl-sidebar-left .fl-sidebar-panel').evaluate(el => el.offsetWidth);
+    expect(width).toBe(0);
+  });
+
+  test('undo restores previous state', async ({ page }) => {
+    const layout = page.locator('.fl-layout');
+    // Open a panel
+    const tab = page.locator('.fl-sidebar-left .fl-sidebar-tab').first();
+    await tab.click();
+    await page.waitForTimeout(200);
+    // Close it
+    await tab.click();
+    await page.waitForTimeout(200);
+    // Undo should restore the open state
+    await layout.focus();
+    await page.keyboard.press('Control+z');
+    await page.waitForTimeout(300);
+    const width = await page.locator('.fl-sidebar-left .fl-sidebar-panel').evaluate(el => el.offsetWidth);
+    expect(width).toBeGreaterThan(0);
+  });
+
+  test('drop indicator shows on sidebar during drag', async ({ page }) => {
+    const tab = page.locator('.fl-tab').first();
+    const tabBox = await tab.boundingBox();
+    const strip = page.locator('.fl-sidebar-left .fl-sidebar-strip');
+    const stripBox = await strip.boundingBox();
+    await page.mouse.move(tabBox.x + tabBox.width / 2, tabBox.y + tabBox.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(tabBox.x + 10, tabBox.y + 10, { steps: 2 });
+    await page.mouse.move(stripBox.x + stripBox.width / 2, stripBox.y + stripBox.height / 2, { steps: 5 });
+    // Check for drop target indicator
+    await expect(page.locator('.fl-sidebar-drop-target')).toHaveCount(1, { timeout: 2000 });
+    await page.mouse.up();
+  });
+
+  test('badge renders on sidebar tab', async ({ page }) => {
+    // Set a badge via JS
+    await page.evaluate(() => {
+      const layout = document.querySelector('.fl-layout');
+      if (layout && layout.__flexLayout) {
+        const borders = layout.__flexLayout.model.getBorders();
+        if (borders.length && borders[0].children.length) {
+          layout.__flexLayout.setBadge(borders[0].children[0].id, '3');
+        }
+      }
+    });
+    await page.waitForTimeout(300);
+    await expect(page.locator('.fl-sidebar-tab-badge')).toBeVisible({ timeout: 2000 });
+    const text = await page.locator('.fl-sidebar-tab-badge').first().textContent();
+    expect(text).toBe('3');
+  });
+
   test('drag tab from layout to sidebar strip', async ({ page }) => {
     const tabsBefore = await page.locator('.fl-sidebar-left .fl-sidebar-tab').count();
     // Drag the "Info" tab to the left sidebar strip

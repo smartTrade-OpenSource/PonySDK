@@ -688,6 +688,51 @@
       });
     },
 
+    setBorderMinSize: function (side, minSize) {
+      if (!this._layout) return;
+      this._layout.setBorderMinSize(side, minSize);
+    },
+
+    setBorderMaxSize: function (side, maxSize) {
+      if (!this._layout) return;
+      this._layout.setBorderMaxSize(side, maxSize);
+    },
+
+    setBadge: function (tabId, badge) {
+      if (!this._layout) return;
+      this._layout.setBadge(tabId, badge);
+    },
+
+    enableUndoRedo: function (enabled) {
+      if (!this._layout) return;
+      this._layout.setUndoEnabled(!!enabled);
+    },
+
+    enableKeyboardShortcuts: function (enabled) {
+      if (!this._layout) return;
+      this._layout.setKeyboardEnabled(!!enabled);
+    },
+
+    enableTouchGestures: function (enabled) {
+      if (!this._layout) return;
+      this._layout.setTouchEnabled(!!enabled);
+    },
+
+    enableContextMenu: function (enabled) {
+      if (!this._layout) return;
+      this._layout.setContextMenuEnabled(!!enabled);
+    },
+
+    undo: function () {
+      if (!this._layout) return;
+      this._layout.undo();
+    },
+
+    redo: function () {
+      if (!this._layout) return;
+      this._layout.redo();
+    },
+
     destroy: function () {
       if (this._pendingTimeouts) { this._pendingTimeouts.forEach(clearTimeout); this._pendingTimeouts = []; }
       if (this._layout) { this._layout.destroy(); this._layout = null; }
