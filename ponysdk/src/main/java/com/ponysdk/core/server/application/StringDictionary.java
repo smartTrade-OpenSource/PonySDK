@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A bidirectional mapping between strings and numeric IDs for protocol optimization.
@@ -49,6 +51,8 @@ import java.util.TreeMap;
  * </p>
  */
 public class StringDictionary {
+
+    private static final Logger log = LoggerFactory.getLogger(StringDictionary.class);
 
     /**
      * Sentinel value returned when a string cannot be interned.
@@ -75,13 +79,12 @@ public class StringDictionary {
     private final List<String> idToString;
 
     // Per-ID usage count (dense array, indexed by ID) — lazily grown
-    private long[] usageCount;
+    private int[] usageCount;
 
     // Snapshot of usageCount at last flush — lazily grown to match usageCount
-    private long[] lastFlushedCount;
+    private int[] lastFlushedCount;
 
-    // Frequency index: count -> set of IDs with that count. Enables O(log F) eviction
-    // where F is the number of distinct frequency values (typically small).
+    // Frequency index: count -> set of IDs with that count. Enables O(log F) eviction.
     private final TreeMap<Long, Set<Integer>> countToIds;
 
     // Number of pre-seeded entries (IDs 0..preSeedCount-1 are known by client at startup)
@@ -94,37 +97,38 @@ public class StringDictionary {
     // Pre-seeded entries must be sent as ADD on first use since the client doesn't know them yet
     private final BitSet sentToClient;
 
+    /**
+     * Max evictions allowed per flush cycle — configurable via constructor.
+     */
+    private final int maxEvictionsPerFlush;
+
+    /** Evictions performed in the current flush cycle — reset by {@link #resetEvictionBudget()}. */
+    private int evictionsThisFlush = 0;
+
     // Optional shared provider for frequency reporting
     private SharedDictionaryProvider sharedProvider;
 
-    /**
-     * Creates a new StringDictionary with default limits.
-     */
     public StringDictionary() {
-        this(DEFAULT_MAX_SIZE, DEFAULT_MIN_STRING_LENGTH);
+        this(DEFAULT_MAX_SIZE, DEFAULT_MIN_STRING_LENGTH, 32);
     }
 
-    /**
-     * Creates a new StringDictionary with specified limits.
-     *
-     * @param maxSize         Maximum number of entries (must be positive)
-     * @param minStringLength Minimum string length to intern (must be non-negative)
-     */
     public StringDictionary(final int maxSize, final int minStringLength) {
-        if (maxSize <= 0) {
-            throw new IllegalArgumentException("maxSize must be positive: " + maxSize);
-        }
-        if (minStringLength < 0) {
-            throw new IllegalArgumentException("minStringLength must be non-negative: " + minStringLength);
-        }
+        this(maxSize, minStringLength, 32);
+    }
+
+    public StringDictionary(final int maxSize, final int minStringLength, final int maxEvictionsPerFlush) {
+        if (maxSize <= 0) throw new IllegalArgumentException("maxSize must be positive: " + maxSize);
+        if (minStringLength < 0) throw new IllegalArgumentException("minStringLength must be non-negative: " + minStringLength);
+        if (maxEvictionsPerFlush < 0) throw new IllegalArgumentException("maxEvictionsPerFlush must be non-negative: " + maxEvictionsPerFlush);
         this.maxSize = maxSize;
         this.minStringLength = minStringLength;
+        this.maxEvictionsPerFlush = maxEvictionsPerFlush;
         this.stringToId = new HashMap<>();
         this.idToString = new ArrayList<>();
         // Start small — arrays grow on demand up to maxSize
         final int initialArraySize = Math.min(64, maxSize);
-        this.usageCount = new long[initialArraySize];
-        this.lastFlushedCount = new long[initialArraySize];
+        this.usageCount = new int[initialArraySize];
+        this.lastFlushedCount = new int[initialArraySize];
         this.countToIds = new TreeMap<>();
         this.freeIds = new ArrayList<>();
         this.sentToClient = new BitSet();
@@ -164,7 +168,7 @@ public class StringDictionary {
                 stringToId.put(s, id);
                 idToString.add(s);
                 ensureArrayCapacity(id);
-                usageCount[id] = 0L;
+                usageCount[id] = 0;
             }
         }
         this.preSeedCount = idToString.size();
@@ -214,7 +218,7 @@ public class StringDictionary {
             idToString.add(value);
         }
         ensureArrayCapacity(newId);
-        usageCount[newId] = 0L;
+        usageCount[newId] = 0;
         trackUsage(value, newId);
         return newId;
     }
@@ -286,31 +290,41 @@ public class StringDictionary {
             idToString.add(value);
         }
         ensureArrayCapacity(newId);
-        usageCount[newId] = 0L;
+        usageCount[newId] = 0;
         sentToClient.set(newId);
         trackUsage(value, newId);
         return InternResult.ofNew(newId);
     }
 
     /**
-     * Allocates an ID for a new entry. If the dictionary is full, evicts the
-     * least-frequently-used non-pre-seeded entry and returns its ID.
+     * Allocates an ID for a new entry.
+     * - Uses the free list first (previously evicted IDs).
+     * - Grows the dictionary if below maxSize.
+     * - If full, evicts the LFU entry — but only if the per-flush eviction budget
+     *   ({@link #MAX_EVICTIONS_PER_FLUSH}) has not been exhausted. This prevents a burst
+     *   of DICTIONARY_ADD frames (e.g. 1960/tick from a grid) from saturating the socket buffer.
+     *   Strings that exceed the budget are simply sent inline (not interned).
      *
-     * @return an available ID, or NOT_INTERNED if eviction is not possible
+     * @return an available ID, or NOT_INTERNED if the dictionary is full and budget exhausted
      */
     private int allocateId() {
-        // Try free list first (previously evicted IDs)
         if (!freeIds.isEmpty()) {
             return freeIds.remove(freeIds.size() - 1);
         }
-
-        // Room to grow
         if (idToString.size() < maxSize) {
             return idToString.size();
         }
+        // Full — evict only if budget allows
+        if (evictionsThisFlush >= maxEvictionsPerFlush) {
+            return NOT_INTERNED;
+        }
+        final int evicted = evictLFU();
+        if (evicted != NOT_INTERNED) evictionsThisFlush++;
+        return evicted;
+    }
 
-        // Dictionary full — evict LFU entry (skip pre-seeded)
-        return evictLFU();
+    public void resetEvictionBudget() {
+        evictionsThisFlush = 0;
     }
 
     /**
@@ -319,60 +333,54 @@ public class StringDictionary {
      * @return the evicted ID, or NOT_INTERNED if no evictable entry exists
      */
     private int evictLFU() {
-        // O(log F) eviction using the frequency index (F = number of distinct counts)
-        while (!countToIds.isEmpty()) {
-            final Map.Entry<Long, Set<Integer>> entry = countToIds.firstEntry();
+        // Iterate frequency buckets from least- to most-frequently used (TreeMap order).
+        // Pre-seeded entries are never evicted; a bucket that contains only pre-seeded ids is
+        // skipped by advancing to the next bucket. Using the entrySet iterator (rather than
+        // repeatedly re-reading firstEntry) guards against an infinite loop when the lowest
+        // bucket holds only pre-seeded ids, and removes emptied buckets without a CME.
+        final var bucketIt = countToIds.entrySet().iterator();
+        while (bucketIt.hasNext()) {
+            final Map.Entry<Long, Set<Integer>> entry = bucketIt.next();
             final Set<Integer> ids = entry.getValue();
             final var it = ids.iterator();
             while (it.hasNext()) {
                 final int id = it.next();
-                // Skip pre-seeded entries
                 if (id < preSeedCount) continue;
                 final String s = idToString.get(id);
-                if (s == null) {
-                    // Stale entry — remove and continue
-                    it.remove();
-                    continue;
-                }
-                // Found a valid evictable entry
+                if (s == null) { it.remove(); continue; }
                 it.remove();
-                if (ids.isEmpty()) countToIds.remove(entry.getKey());
-                // Evict
+                if (ids.isEmpty()) bucketIt.remove();
                 stringToId.remove(s);
                 idToString.set(id, null);
-                usageCount[id] = 0L;
-                lastFlushedCount[id] = 0L;
+                usageCount[id] = 0;
+                lastFlushedCount[id] = 0;
                 sentToClient.clear(id);
                 return id;
             }
-            // All IDs in this bucket were pre-seeded or stale — remove bucket and try next
-            if (ids.isEmpty()) countToIds.remove(entry.getKey());
+            if (ids.isEmpty()) bucketIt.remove();
         }
         return NOT_INTERNED;
     }
 
     private void trackUsage(final String value, final int id) {
         if (id >= 0 && id < idToString.size() && idToString.get(id) != null) {
-            final long oldCount = usageCount[id];
-            final long newCount = oldCount + 1;
+            final int oldCount = usageCount[id];
+            final int newCount = oldCount == Integer.MAX_VALUE ? oldCount : oldCount + 1;
             usageCount[id] = newCount;
-            // Update frequency index: move id from oldCount bucket to newCount bucket
-            if (oldCount > 0) {
-                removeFromFrequencyIndex(id, oldCount);
-            }
+            if (oldCount > 0) removeFromFrequencyIndex(id, oldCount);
             addToFrequencyIndex(id, newCount);
         }
     }
 
-    private void addToFrequencyIndex(final int id, final long count) {
-        countToIds.computeIfAbsent(count, k -> new LinkedHashSet<>()).add(id);
+    private void addToFrequencyIndex(final int id, final int count) {
+        countToIds.computeIfAbsent((long) count, k -> new LinkedHashSet<>()).add(id);
     }
 
-    private void removeFromFrequencyIndex(final int id, final long count) {
-        final Set<Integer> ids = countToIds.get(count);
+    private void removeFromFrequencyIndex(final int id, final int count) {
+        final Set<Integer> ids = countToIds.get((long) count);
         if (ids != null) {
             ids.remove(id);
-            if (ids.isEmpty()) countToIds.remove(count);
+            if (ids.isEmpty()) countToIds.remove((long) count);
         }
     }
 
@@ -439,7 +447,7 @@ public class StringDictionary {
         for (int i = 0; i < size; i++) {
             final String s = idToString.get(i);
             if (s == null) continue;
-            final long delta = usageCount[i] - lastFlushedCount[i];
+            final long delta = (long) usageCount[i] - lastFlushedCount[i];
             if (delta > 0) {
                 deltas.put(s, delta);
                 lastFlushedCount[i] = usageCount[i];
@@ -460,7 +468,7 @@ public class StringDictionary {
         for (int i = 0; i < size; i++) {
             final String s = idToString.get(i);
             if (s != null && usageCount[i] > 0) {
-                freq.put(s, usageCount[i]);
+                freq.put(s, (long) usageCount[i]);
             }
         }
         return java.util.Collections.unmodifiableMap(freq);
