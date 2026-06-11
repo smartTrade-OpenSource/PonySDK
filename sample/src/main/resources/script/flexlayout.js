@@ -826,7 +826,11 @@
             try { handle.releasePointerCapture(e.pointerId); } catch(err) {}
             panel.style.transition = '';
             const finalSize = isV ? panel.offsetWidth : panel.offsetHeight;
-            openBorders.forEach(ob => this._act(Actions.resizeBorder(ob.side, finalSize)));
+            // Update all borders on this side to same size (avoid max() mismatch)
+            const allSideBorders = this.model.getBorders().filter(b => b.side === baseSide || b.side.startsWith(baseSide + '-'));
+            allSideBorders.forEach(b => { b.size = Math.max(50, finalSize); });
+            this.model.emit('change', this.model);
+            if (this.onModelChange) this.onModelChange(this.model);
           };
           handle.addEventListener('pointermove', onMove);
           handle.addEventListener('pointerup', onUp);

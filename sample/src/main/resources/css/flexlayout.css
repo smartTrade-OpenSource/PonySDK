@@ -305,7 +305,9 @@
 
 .fl-sidebar-resize {
   position: absolute; z-index: 1;
+  transition: background .15s;
 }
+.fl-sidebar-resize:hover { background: var(--fl-sp-hover, #89b4fa); }
 .fl-sidebar-resize-left { top: 0; right: 0; width: 4px; height: 100%; cursor: col-resize; }
 .fl-sidebar-resize-right { top: 0; left: 0; width: 4px; height: 100%; cursor: col-resize; }
 .fl-sidebar-resize-bottom { left: 0; top: 0; width: 100%; height: 4px; cursor: row-resize; }
