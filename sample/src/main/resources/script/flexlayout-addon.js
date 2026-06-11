@@ -30,6 +30,7 @@
       this._enablePopOut = true;
       this._tabWidgetMap = {};
       this._pendingTimeouts = [];
+      this._autoSaveEnabled = false; // Feature 14
     },
 
     initDom: function () {
@@ -86,6 +87,13 @@
         }
       }, 250);
 
+      // Feature 14: Auto-save debounced (2s inactivity)
+      this._debouncedAutoSave = debounce(function (model) {
+        if (self._autoSaveEnabled) {
+          self.sendDataToServer({ type: 'autoSave', model: JSON.stringify(model.toJson()) });
+        }
+      }, 2000);
+
       return new FlexLayout.Layout({
         model: this._model,
         container: this._layoutContainer,
@@ -120,6 +128,7 @@
         },
         onModelChange: function (model) {
           self._debouncedModelChange(model);
+          self._debouncedAutoSave(model); // Feature 14
         },
         onAction: function (action) {
           return self._handleAction(action);
@@ -365,6 +374,10 @@
 
     enableActionNotification: function (enabled) {
       this._notifyActions = !!enabled;
+    },
+
+    enableAutoSave: function (enabled) {
+      this._autoSaveEnabled = !!enabled;
     },
 
     setModelChangeDebounce: function (delayMs) {

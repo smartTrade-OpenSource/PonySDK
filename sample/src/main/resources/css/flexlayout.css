@@ -465,3 +465,20 @@
   background: var(--fl-border);
 }
 .fl-sidebar-splitter:hover { background: var(--fl-sp-hover); }
+
+/* Feature 6: Tab overflow indicator */
+.fl-sidebar-strip-overflow { overflow: auto; scrollbar-width: thin; }
+.fl-sidebar-strip-overflow::-webkit-scrollbar { width: 3px; height: 3px; }
+.fl-sidebar-strip-overflow::-webkit-scrollbar-thumb { background: var(--fl-border); border-radius: 2px; }
+
+/* Feature 7: Drop target highlight on sidebar */
+.fl-sidebar-drop-target { background: var(--fl-drop-fill) !important; outline: 2px solid var(--fl-drop-border); outline-offset: -2px; }
+
+/* Feature 8: Badge on sidebar tab */
+.fl-sidebar-tab-badge {
+  position: absolute; top: 2px; right: 2px;
+  min-width: 14px; height: 14px; line-height: 14px;
+  background: #f38ba8; color: #fff; font-size: 9px; font-weight: 700;
+  border-radius: 7px; text-align: center; padding: 0 3px;
+}
+.fl-sidebar-tab { position: relative; }

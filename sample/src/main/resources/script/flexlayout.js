@@ -62,6 +62,7 @@
       this.enableClose = cfg.enableClose !== false;
       this.enableDrag  = cfg.enableDrag  !== false;
       this._weight     = cfg.weight || 100;
+      this.badge       = cfg.badge       || null; // Feature 8
     }
     getName()       { return this.name; }
     setName(n)      { this.name = n; }
@@ -71,9 +72,11 @@
     isEnableClose() { return this.enableClose; }
     isEnableDrag()  { return this.enableDrag; }
     toJson() {
-      return { type: NT.TAB, id: this.id, name: this.name, component: this.component,
+      const j = { type: NT.TAB, id: this.id, name: this.name, component: this.component,
                config: this.config, icon: this.icon, enableClose: this.enableClose,
                enableDrag: this.enableDrag, weight: this._weight };
+      if (this.badge) j.badge = this.badge;
+      return j;
     }
   }
 
@@ -120,6 +123,9 @@
       this._selected = cfg.selected != null ? cfg.selected : -1;
       this.tabStyle = cfg.tabStyle || 'auto';
       this._hidden = cfg.hidden || false;
+      this.minSize = cfg.minSize || 50;       // Feature 5
+      this.maxSize = cfg.maxSize || Infinity;  // Feature 5
+      this._maximizedSize = null;              // Feature 1
     }
     getSelected()     { return this._selected; }
     setSelected(i)    { this._selected = i; }
@@ -327,6 +333,26 @@
           }
           break;
         }
+        case 'MAXIMIZE_BORDER': { // Feature 1
+          const border = this.getBorder(action.side); if (!border) return;
+          if (border._maximizedSize) { border.size = border._maximizedSize.prev; border._maximizedSize = null; }
+          else { border._maximizedSize = { prev: border.size }; const isV = border.side.split('-')[0] !== 'bottom'; border.size = isV ? Math.round(window.innerWidth * 0.5) : Math.round(window.innerHeight * 0.5); }
+          break;
+        }
+        case 'REORDER_BORDER_TAB': { // Feature 2
+          const border = this.getBorder(action.side); if (!border) return;
+          const tab = border.findById(action.tabId); if (!tab) return;
+          const oldI = border.removeChild(tab);
+          const newI = clamp(action.toIndex, 0, border.children.length);
+          border.addChild(tab, newI);
+          if (border.getSelected() === oldI) border.setSelected(newI);
+          break;
+        }
+        case 'SET_BADGE': { // Feature 8
+          const tab = this.findById(action.tabId); if (!tab) return;
+          tab.badge = action.badge;
+          break;
+        }
       }
     }
 
@@ -416,6 +442,9 @@
     moveFromBorder:  (side, tabId, toId, location, insertIndex) => ({ type: 'MOVE_FROM_BORDER', side, tabId, toId, location, insertIndex }),
     resizeBorder:    (side, size)                 => ({ type: 'RESIZE_BORDER', side, size }),
     toggleBorder:    (side)                       => ({ type: 'TOGGLE_BORDER', side }),
+    maximizeBorder:  (side)                       => ({ type: 'MAXIMIZE_BORDER', side }),
+    reorderBorderTab:(side, tabId, toIndex)       => ({ type: 'REORDER_BORDER_TAB', side, tabId, toIndex }),
+    setBadge:        (tabId, badge)               => ({ type: 'SET_BADGE', tabId, badge }),
   };
 
   // ── Layout ────────────────────────────────────────────────────────
@@ -438,6 +467,10 @@
       this._dropInd        = this._mkDropInd();
       this._stripW         = null; // cached strip width
 
+      // Feature 13: Undo/redo
+      this._actionHistory = [];
+      this._historyIndex = -1;
+
       // Bound pointer handlers — attached to the captured element during a gesture
       this._pmDrag = this._onDragMove.bind(this);
       this._puDrag = this._onDragUp.bind(this);
@@ -452,7 +485,48 @@
         }
       });
       this.container.classList.add('fl-layout');
+
+      // Feature 4: Keyboard shortcuts
+      this.container.setAttribute('tabindex', '-1');
+      this.container.addEventListener('keydown', ev => {
+        if (ev.ctrlKey && ev.key === 'b') { ev.preventDefault(); this._act(Actions.toggleBorder('left-top')); this._act(Actions.toggleBorder('left-bottom')); }
+        else if (ev.ctrlKey && ev.key === 'j') { ev.preventDefault(); this._act(Actions.toggleBorder('bottom')); }
+        else if (ev.key === 'Escape') { this.model.getBorders().forEach(b => { if (b.isOpen()) b.setSelected(-1); }); this._render(); }
+        else if (ev.ctrlKey && ev.key === 'z') { ev.preventDefault(); this.undo(); }
+        else if (ev.ctrlKey && ev.key === 'y') { ev.preventDefault(); this.redo(); }
+      });
+
+      // Feature 12: Touch gestures
+      this._initTouchGestures();
+
       this._render();
+    }
+
+    // Feature 13: Undo/redo
+    undo() { if (this._historyIndex < 0) return; const snap = this._actionHistory[this._historyIndex--]; this.model._root = Model._parse(snap.layout, 'row'); this.model._borders = (snap.borders || []).map(b => { const bn = new BorderNode(b); (b.children || []).forEach(c => bn.addChild(new TabNode(c))); return bn; }); this._render(); }
+    redo() { if (this._historyIndex >= this._actionHistory.length - 2) return; const snap = this._actionHistory[++this._historyIndex + 1]; this.model._root = Model._parse(snap.layout, 'row'); this.model._borders = (snap.borders || []).map(b => { const bn = new BorderNode(b); (b.children || []).forEach(c => bn.addChild(new TabNode(c))); return bn; }); this._render(); }
+
+    // Feature 11: RTL support
+    _isRTL() { return getComputedStyle(this.container).direction === 'rtl'; }
+
+    // Feature 12: Touch gestures
+    _initTouchGestures() {
+      let startX, startY, edge;
+      this.container.addEventListener('touchstart', ev => {
+        const t = ev.touches[0]; startX = t.clientX; startY = t.clientY;
+        const r = this.container.getBoundingClientRect();
+        if (t.clientX - r.left < 30) edge = 'left';
+        else if (r.right - t.clientX < 30) edge = 'right';
+        else if (r.bottom - t.clientY < 30) edge = 'bottom';
+        else edge = null;
+      }, { passive: true });
+      this.container.addEventListener('touchend', ev => {
+        if (!edge) return;
+        const t = ev.changedTouches[0]; const dx = t.clientX - startX, dy = t.clientY - startY;
+        if (edge === 'left' && dx > 50) { const b = this.model.getBorders().find(b => b.side.startsWith('left') && b.children.length); if (b) { b.setSelected(0); this._render(); } }
+        else if (edge === 'right' && dx < -50) { const b = this.model.getBorders().find(b => b.side.startsWith('right') && b.children.length); if (b) { b.setSelected(0); this._render(); } }
+        else if (edge === 'bottom' && dy < -50) { const b = this.model.getBorder('bottom'); if (b && b.children.length) { b.setSelected(0); this._render(); } }
+      }, { passive: true });
     }
 
     // ── Public API ───────────────────────────────────────────────────
@@ -504,6 +578,11 @@
 
     _act(action) {
       if (this.onAction && this.onAction(action) === false) return;
+      // Feature 13: save snapshot before action
+      this._actionHistory.splice(this._historyIndex + 1);
+      this._actionHistory.push(this.model.toJson());
+      this._historyIndex = this._actionHistory.length - 1;
+      if (this._actionHistory.length > 50) { this._actionHistory.shift(); this._historyIndex--; }
       this.model.doAction(action);
       if (this.onModelChange) this.onModelChange(this.model);
     }
@@ -541,8 +620,10 @@
       rowEl.style.position = 'absolute';
       rowEl.style.top = '0';
       rowEl.style.bottom = hasBottom ? stripW + bottomSize + 'px' : '0';
-      rowEl.style.left = hasLeft ? stripW + leftSize + 'px' : '0';
-      rowEl.style.right = hasRight ? stripW + rightSize + 'px' : '0';
+      // Feature 11: RTL swap
+      const rtl = this._isRTL();
+      rowEl.style.left = (rtl ? hasRight : hasLeft) ? stripW + (rtl ? rightSize : leftSize) + 'px' : '0';
+      rowEl.style.right = (rtl ? hasLeft : hasRight) ? stripW + (rtl ? leftSize : rightSize) + 'px' : '0';
       rowEl.style.flex = '';
       this.container.appendChild(rowEl);
 
@@ -598,10 +679,12 @@
       borders.forEach((border, bIdx) => {
         const section = document.createElement('div');
         section.className = 'fl-sidebar-section';
+        section.setAttribute('role', 'tablist'); // Feature 10
         section.style.cssText = `flex:1;display:flex;flex-direction:column;overflow:auto;${bIdx > 0 ? 'border-top:1px solid var(--fl-border);' : ''}`;
         section.dataset.flBorder = border.side;
         this._nodeEls.set(border.id, section);
         border.children.forEach((tab, i) => section.appendChild(this._mkBorderTabBtn(tab, border, i)));
+        if (border.children.length > 10) section.classList.add('fl-sidebar-strip-overflow'); // Feature 6
         strip.appendChild(section);
       });
 
@@ -619,6 +702,10 @@
       btn.className = `fl-sidebar-tab${i === border.getSelected() ? ' fl-sidebar-tab-active' : ''}`;
       btn.dataset.flBorderTab = tab.id;
       btn.dataset.flBorderSide = side;
+      // Feature 10: Accessibility
+      btn.setAttribute('role', 'tab');
+      btn.setAttribute('aria-selected', String(i === border.getSelected()));
+      btn.setAttribute('tabindex', i === border.getSelected() ? '0' : '-1');
       // Icon and/or label
       const icon = tab.getIcon();
       const ts = border.tabStyle;
@@ -637,6 +724,13 @@
         btn.appendChild(lbl);
       }
       btn.title = tab.getName();
+      // Feature 8: Badge
+      if (tab.badge) {
+        const bdg = document.createElement('span');
+        bdg.className = 'fl-sidebar-tab-badge';
+        bdg.textContent = tab.badge;
+        btn.appendChild(bdg);
+      }
       if (tab.isEnableClose()) {
         const x = document.createElement('button');
         x.type = 'button'; x.className = 'fl-sidebar-tab-x'; x.innerHTML = '×';
@@ -646,15 +740,43 @@
         });
         btn.appendChild(x);
       }
+      // Feature 1: Double-click maximize
+      btn.addEventListener('dblclick', ev => {
+        ev.preventDefault();
+        this._act(Actions.maximizeBorder(side));
+      });
+      // Feature 3: Context menu
+      btn.addEventListener('contextmenu', ev => {
+        ev.preventDefault();
+        this._showBorderContextMenu(tab, border, ev.clientX, ev.clientY);
+      });
+      // Feature 10: Arrow key navigation
+      btn.addEventListener('keydown', ev => {
+        if (ev.key === 'ArrowDown' || ev.key === 'ArrowRight') { ev.preventDefault(); const next = btn.nextElementSibling; if (next) { next.focus(); } }
+        else if (ev.key === 'ArrowUp' || ev.key === 'ArrowLeft') { ev.preventDefault(); const prev = btn.previousElementSibling; if (prev) { prev.focus(); } }
+        else if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); this._act(Actions.selectBorderTab(side, tab.id)); }
+      });
       btn.style.touchAction = 'none';
       btn.addEventListener('pointerdown', ev => {
         if (ev.button !== 0 || ev.target.closest('.fl-sidebar-tab-x')) return;
         ev.preventDefault();
         const startX = ev.clientX, startY = ev.clientY;
         let dragging = false;
+        const isVertical = side === 'left' || side === 'right' || side.startsWith('left-') || side.startsWith('right-');
         const onMove = me => {
           if (!dragging && (Math.abs(me.clientX - startX) > 4 || Math.abs(me.clientY - startY) > 4)) {
             dragging = true;
+            // Feature 2: Check if drag stays within strip (reorder) vs breaks out (full drag)
+            const stripDelta = isVertical ? Math.abs(me.clientX - startX) : Math.abs(me.clientY - startY);
+            const mainDelta = isVertical ? Math.abs(me.clientY - startY) : Math.abs(me.clientX - startX);
+            if (mainDelta > stripDelta * 2) {
+              // Reorder within strip
+              this._startBorderTabReorder(ev, tab, border, btn, me, isVertical);
+              btn.removeEventListener('pointermove', onMove);
+              btn.removeEventListener('pointerup', onUp);
+              try { btn.releasePointerCapture(ev.pointerId); } catch(e) {}
+              return;
+            }
             btn.releasePointerCapture(ev.pointerId);
             btn.removeEventListener('pointermove', onMove);
             btn.removeEventListener('pointerup', onUp);
@@ -674,6 +796,63 @@
         btn.addEventListener('pointerup', onUp);
       });
       return btn;
+    }
+
+    // Feature 2: Reorder tabs within border strip
+    _startBorderTabReorder(origEv, tab, border, btnEl, moveEv, isVertical) {
+      const side = border.side;
+      const strip = btnEl.parentElement;
+      const btns = Array.from(strip.querySelectorAll('[data-fl-border-tab]'));
+      const startIdx = btns.indexOf(btnEl);
+      btnEl.style.opacity = '0.5';
+      const onMove = me => {
+        const pos = isVertical ? me.clientY : me.clientX;
+        let newIdx = startIdx;
+        for (let j = 0; j < btns.length; j++) {
+          const r = btns[j].getBoundingClientRect();
+          const mid = isVertical ? r.top + r.height / 2 : r.left + r.width / 2;
+          if (pos > mid) newIdx = j;
+        }
+        if (newIdx !== startIdx) {
+          this._act(Actions.reorderBorderTab(side, tab.id, newIdx));
+        }
+      };
+      const onUp = () => {
+        document.removeEventListener('pointermove', onMove);
+        document.removeEventListener('pointerup', onUp);
+        btnEl.style.opacity = '';
+      };
+      document.addEventListener('pointermove', onMove);
+      document.addEventListener('pointerup', onUp);
+    }
+
+    // Feature 3: Context menu
+    _showBorderContextMenu(tab, border, x, y) {
+      this._hideBorderContextMenu();
+      const menu = document.createElement('div');
+      menu.className = 'fl-border-context-menu';
+      menu.style.cssText = `position:fixed;left:${x}px;top:${y}px;z-index:9999;background:var(--fl-panel,#181825);border:1px solid var(--fl-border,#313244);border-radius:4px;padding:4px 0;box-shadow:0 4px 12px rgba(0,0,0,.4);font-size:12px;`;
+      const items = [
+        { label: 'Close', action: () => this._act(Actions.closeBorderTab(border.side, tab.id)) },
+        { label: 'Close Others', action: () => { border.children.filter(t => t.id !== tab.id).forEach(t => this._act(Actions.closeBorderTab(border.side, t.id))); } },
+        { label: 'Move to Center', action: () => this._act(Actions.moveFromBorder(border.side, tab.id, null, 'center')) }
+      ];
+      items.forEach(item => {
+        const el = document.createElement('div');
+        el.textContent = item.label;
+        el.style.cssText = 'padding:4px 12px;cursor:pointer;color:var(--fl-text,#cdd6f4);';
+        el.addEventListener('mouseenter', () => el.style.background = 'var(--fl-tab-hover,#313244)');
+        el.addEventListener('mouseleave', () => el.style.background = '');
+        el.addEventListener('click', () => { item.action(); this._hideBorderContextMenu(); });
+        menu.appendChild(el);
+      });
+      document.body.appendChild(menu);
+      this._contextMenu = menu;
+      setTimeout(() => document.addEventListener('click', this._hideBorderContextMenu.bind(this), { once: true }), 0);
+    }
+
+    _hideBorderContextMenu() {
+      if (this._contextMenu) { this._contextMenu.remove(); this._contextMenu = null; }
     }
 
     _renderBorder(border) {
@@ -711,12 +890,14 @@
       // Tab strip
       const strip = document.createElement('div');
       strip.className = `fl-sidebar-strip fl-sidebar-strip-${side}`;
+      strip.setAttribute('role', 'tablist'); // Feature 10
       if (isV) {
         strip.style.cssText = `display:flex;flex-direction:column;width:${stripW}px;overflow:auto;flex-shrink:0;background:var(--fl-strip);border-${side === 'left' ? 'right' : 'left'}:1px solid var(--fl-border);`;
       } else {
         strip.style.cssText = `display:flex;flex-direction:row;height:${stripW}px;overflow:auto;flex-shrink:0;background:var(--fl-strip);border-top:1px solid var(--fl-border);`;
       }
       border.children.forEach((tab, i) => strip.appendChild(this._mkBorderTabBtn(tab, border, i)));
+      if (border.children.length > 10) strip.classList.add('fl-sidebar-strip-overflow'); // Feature 6
 
       // Content panel
       const panel = this._mkBorderPanel([border].filter(b => b.isOpen()), side, isV, size);
@@ -729,6 +910,7 @@
     _mkBorderPanel(openBorders, side, isV, size) {
       const panel = document.createElement('div');
       panel.className = 'fl-sidebar-panel';
+      panel.setAttribute('role', 'tabpanel'); // Feature 10
       const hasOpen = openBorders.length > 0;
       if (isV) {
         panel.style.cssText = `width:${hasOpen ? size : 0}px;overflow:hidden;transition:width 150ms ease;background:var(--fl-panel);display:flex;flex-direction:column;`;
@@ -816,7 +998,7 @@
             const delta = isV ? (me.clientX - startPos) : (me.clientY - startPos);
             const dir = side === 'right' ? -1 : side === 'bottom' ? -1 : 1;
             const rawSize = startSize + delta * dir;
-            const newSize = Math.max(20, rawSize);
+            const newSize = clamp(rawSize, openBorders[0] && openBorders[0].minSize || 50, openBorders[0] && openBorders[0].maxSize || Infinity); // Feature 5
             if (isV) panel.style.width = newSize + 'px';
             else panel.style.height = newSize + 'px';
             // Visual hint: fade + outline when below threshold
@@ -1151,9 +1333,19 @@
 
     _updateDrop(ev) {
       const d = this._drag; const ind = this._dropInd;
+      // Feature 7: Remove previous drop target highlight
+      this.container.querySelectorAll('.fl-sidebar-drop-target').forEach(el => el.classList.remove('fl-sidebar-drop-target'));
       const hit = this._findHit(ev.clientX, ev.clientY);
       if (!hit) { ind.style.display = 'none'; d.drop = null; return; }
       d.drop = hit;
+
+      // Feature 7: Highlight sidebar strip on border drop
+      if (hit.location === 'border' && hit.borderSide) {
+        const stripEl = this.container.querySelector(`[data-fl-border="${hit.borderSide}"]`) || this.container.querySelector(`.fl-sidebar-section[data-fl-border="${hit.borderSide}"]`);
+        if (stripEl) stripEl.classList.add('fl-sidebar-drop-target');
+        ind.style.display = 'none';
+        return;
+      }
 
       // Insertion bar (reorder / insert into a tab strip)
       if (hit.location === 'insert') {
@@ -1297,6 +1489,8 @@
       }
       if (this._ghost) { this._ghost.remove(); this._ghost = null; }
       this._dropInd.style.display = 'none';
+      // Feature 7: Remove drop target highlights
+      this.container.querySelectorAll('.fl-sidebar-drop-target').forEach(el => el.classList.remove('fl-sidebar-drop-target'));
       document.body.style.cursor = '';
     }
 
