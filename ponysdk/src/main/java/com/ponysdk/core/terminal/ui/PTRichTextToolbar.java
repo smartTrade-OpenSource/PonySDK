@@ -27,7 +27,11 @@ import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 import com.ponysdk.core.terminal.ui.widget.richtexttoolbar.RichTextToolbar;
 
+import java.util.logging.Logger;
+
 public class PTRichTextToolbar extends PTWidget<RichTextToolbar> {
+
+    private static final Logger log = Logger.getLogger(PTRichTextToolbar.class.getName());
 
     private PTRichTextArea richTextArea;
 
@@ -35,12 +39,16 @@ public class PTRichTextToolbar extends PTWidget<RichTextToolbar> {
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiService) {
         // ServerToClientModel.WIDGET_ID
         richTextArea = (PTRichTextArea) uiService.getPTObject(buffer.readBinaryModel().getIntValue());
-
+        if (richTextArea == null) {
+            log.warning("PTRichTextToolbar #" + objectId + ": linked PTRichTextArea not found, skipping creation");
+            return;
+        }
         super.create(buffer, objectId, uiService);
     }
 
     @Override
     protected RichTextToolbar createUIObject() {
+        if (richTextArea == null) return null;
         return new RichTextToolbar(richTextArea.uiObject);
     }
 

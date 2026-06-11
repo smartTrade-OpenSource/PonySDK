@@ -55,6 +55,7 @@ import jakarta.servlet.http.HttpSession;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -138,7 +139,8 @@ public class UIContext {
     private final String cachedUserAgent;
     private final HttpSession cachedHttpSession;
 
-    private long lastReceivedTime = System.currentTimeMillis();
+    private final AtomicLong lastReceivedTime = new AtomicLong(System.currentTimeMillis());
+    private final AtomicLong lastSentTime = new AtomicLong(System.currentTimeMillis());
 
     private final ModelWriter modelWriter;
 
@@ -171,7 +173,8 @@ public class UIContext {
         if (configuration.isStringDictionaryEnabled()) {
             this.stringDictionary = new StringDictionary(
                 configuration.getStringDictionaryMaxSize(),
-                configuration.getStringDictionaryMinLength()
+                configuration.getStringDictionaryMinLength(),
+                configuration.getStringDictionaryMaxEvictionsPerFlush()
             );
             // Pre-seed from shared provider (learned from previous sessions)
             this.stringDictionary.initFromSharedProvider(sharedDictionaryProvider);
@@ -646,8 +649,8 @@ public class UIContext {
 
         if (destroyListeners != null) {
             final Set<ContextDestroyListener> toNotify = destroyListeners;
-            destroyListeners = null; // release the set early to avoid retaining listeners
-            toNotify.forEach(listener -> {
+            destroyListeners = null;
+            for (final ContextDestroyListener listener : toNotify) {
                 try {
                     listener.onBeforeDestroy(this);
                 } catch (final AlreadyDestroyedApplication e) {
@@ -655,7 +658,7 @@ public class UIContext {
                 } catch (final Exception e) {
                     log.error("Exception while destroying UIContext #" + getID(), e);
                 }
-            });
+            }
         }
     }
 
@@ -753,11 +756,19 @@ public class UIContext {
     }
 
     public void onMessageReceived() {
-        lastReceivedTime = System.currentTimeMillis();
+        lastReceivedTime.set(System.currentTimeMillis());
     }
 
     public long getLastReceivedTime() {
-        return lastReceivedTime;
+        return lastReceivedTime.get();
+    }
+
+    public void onMessageSent() {
+        lastSentTime.set(System.currentTimeMillis());
+    }
+
+    public long getLastSentTime() {
+        return lastSentTime.get();
     }
 
     public UserAgent getUserAgent() {
@@ -816,10 +827,8 @@ public class UIContext {
         suspended = true;
         final int maxEntries = configuration.getMaxRecordingEntries();
         recordingEncoder = new RecordingEncoder(maxEntries, (count, max) -> {
-            log.error("UIContext #{} recording buffer overflow ({} > {}) — destroying session",
+            log.warn("UIContext #{} recording buffer overflow ({}/{}) — destroying session to prevent unbounded memory growth",
                     ID, count, max);
-            // Schedule destroy outside the encode call to avoid re-entrancy.
-            // Don't touch 'suspended' here — destroy() → doDestroy() handles all state cleanup.
             Thread.ofVirtual().start(this::destroy);
         });
         // Swap to RecordingEncoder — all protocol writes are buffered

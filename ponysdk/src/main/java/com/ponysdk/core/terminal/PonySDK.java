@@ -201,16 +201,32 @@ public class PonySDK implements UncaughtExceptionHandler {
     }
 
     long lastHeartBeatSent = -1;
+    long lastSchedulerRun = -1;
 
     public void setHeartBeatPeriod(final int heartBeatInseconds) {
         if (heartBeatInseconds == 0) return;
         final int heartBeatPeriodInMilli = heartBeatInseconds * 1000;
+        // Client timeout = 2x server period to absorb scheduling jitter and network latency.
+        // The server sends a heartbeat every heartBeatPeriod ms — if we timeout at exactly
+        // the same value, a 1ms delay causes a spurious disconnect.
+        final int clientTimeoutInMilli = heartBeatPeriodInMilli * 2;
         Scheduler.get().scheduleFixedDelay(() -> {
             final long now = System.currentTimeMillis();
             final long lastMessageTime = socketClient.getLastMessageTime();
 
+            // Detect JS thread starvation: if the scheduler couldn't run for longer
+            // than expected, the JS event loop was busy (e.g. processing a large batch).
+            // In that case, skip the heartbeat check — we were not idle, we were working.
+            final boolean wasStarved = lastSchedulerRun > 0 && (now - lastSchedulerRun > heartBeatPeriodInMilli);
+            lastSchedulerRun = now;
+
+            if (wasStarved) {
+                // JS was busy processing data, not a real timeout — skip this check
+                return true;
+            }
+
             //heartbeat failure detection
-            if (now - lastMessageTime > heartBeatPeriodInMilli) {
+            if (now - lastMessageTime > clientTimeoutInMilli) {
                 socketClient.close(1000, "no data received since " + (now - lastMessageTime) + " ms");
                 reconnectionChecker.detectConnectionFailure();
                 //stop the scheduling
@@ -263,6 +279,11 @@ public class PonySDK implements UncaughtExceptionHandler {
      */
     public void reconnectSocket(final String url) {
         socketClient = new WebSocketClient(url, uiBuilder, reconnectionChecker);
+    }
+
+    @SuppressWarnings("unusable-by-js")
+    public ReconnectionChecker getReconnectionChecker() {
+        return reconnectionChecker;
     }
 
 }

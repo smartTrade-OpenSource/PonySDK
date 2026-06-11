@@ -48,6 +48,9 @@ public class ReconnectionChecker {
     private final XMLHttpRequest reconnectionRequest;
 
     private boolean errorDetected;
+    // True while a WS reconnect attempt is in flight — prevents re-triggering the loop
+    // if the new socket fires onclose(1006) before the server confirms success.
+    private boolean reconnecting;
 
     public ReconnectionChecker() {
         reconnectionRequest = new XMLHttpRequest();
@@ -56,11 +59,11 @@ public class ReconnectionChecker {
 
     private void setOnReadyStateChange(final XMLHttpRequest request) {
         request.addEventListener("readystatechange", evt -> {
-            if (request.readyState == XMLHttpRequest.DONE
-                    && request.status == HTTP_STATUS_CODE_OK) {
-                errorDetected = false;
+            if (request.readyState != XMLHttpRequest.DONE) return; // ignore intermediate states
+            if (request.status == HTTP_STATUS_CODE_OK) {
                 reloadWindow();
             } else {
+                // Server unreachable — retry after delay
                 Scheduler.get().scheduleFixedDelay(() -> {
                     retryConnection();
                     return false;
@@ -69,8 +72,42 @@ public class ReconnectionChecker {
         });
     }
 
+    /**
+     * Called by UIBuilder when RECONNECT_CONTEXT is received — the transparent
+     * reconnection succeeded. Clears the reconnecting flag so future failures
+     * are handled normally again.
+     */
+    public void onReconnectSuccess() {
+        reconnecting = false;
+        errorDetected = false;
+    }
+
+    public boolean isReconnecting() {
+        return reconnecting;
+    }
+
+    /**
+     * Called by WebSocketClient on every abnormal close (code != 1000).
+     * - If we're not yet reconnecting: first failure → start the ping/retry cycle.
+     * - If we're already reconnecting: the WS reconnect attempt itself failed →
+     *   clear the reconnecting flag and schedule a new ping retry after RETRY_PERIOD.
+     */
+    public void onWebSocketClosed() {
+        if (reconnecting) {
+            // Reconnect attempt failed — reset and retry the ping cycle after a delay
+            reconnecting = false;
+            log.severe("WebSocket reconnect attempt failed — will retry");
+            Scheduler.get().scheduleFixedDelay(() -> {
+                retryConnection();
+                return false;
+            }, RETRY_PERIOD);
+        } else {
+            detectConnectionFailure();
+        }
+    }
+
     public void detectConnectionFailure() {
-        if (errorDetected) return;
+        if (errorDetected || reconnecting) return;
         errorDetected = true;
 
         log.severe("Failure detected");
@@ -100,7 +137,9 @@ public class ReconnectionChecker {
      * Otherwise falls back to page reload, unless {@code window.onPonyReconnected} is defined.
      */
     public void reloadWindow() {
+        errorDetected = false;
         if (isTransparentReconnectMode()) {
+            reconnecting = true;
             reconnectWebSocket();
         } else if (hasOnPonyReconnected()) {
             callOnPonyReconnected();

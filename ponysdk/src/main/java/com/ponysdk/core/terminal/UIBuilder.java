@@ -86,6 +86,20 @@ public class UIBuilder {
         }
     }
 
+    private static native void consoleTime(String label) /*-{
+        $wnd.console.time(label);
+    }-*/;
+
+    private static native void consoleTimeEnd(String label) /*-{
+        $wnd.console.timeEnd(label);
+    }-*/;
+
+    private static native void consoleWarn(String msg) /*-{
+        $wnd.console.warn(msg);
+    }-*/;
+
+    private int _msgCount = 0;
+
     public void updateMainTerminal(final Uint8Array buffer) {
         lastReceivedMessage = System.currentTimeMillis();
 
@@ -104,12 +118,20 @@ public class UIBuilder {
                 requestBuilder.send(requestData);
                 readerBuffer.readBinaryModel(); // Read ServerToClientModel.END element
             } else if (ServerToClientModel.CREATE_CONTEXT == model) {
-                PonySDK.get().setContextId(binaryModel.getIntValue());
-                PonySDK.get().setTabindexOnlyFormField(readerBuffer.readBinaryModel().getBooleanValue());
-                PonySDK.get().setHeartBeatPeriod(readerBuffer.readBinaryModel().getIntValue());
+                final int newContextId = binaryModel.getIntValue();
+                final boolean tabindex = readerBuffer.readBinaryModel().getBooleanValue();
+                final int heartbeat = readerBuffer.readBinaryModel().getIntValue();
                 readerBuffer.readBinaryModel(); // Read ServerToClientModel.END element
+                // During a transparent reconnect attempt, the server may create orphan contexts
+                // (race condition). Ignore their CREATE_CONTEXT — keep the original contextId.
+                if (!PonySDK.get().getReconnectionChecker().isReconnecting()) {
+                    PonySDK.get().setContextId(newContextId);
+                    PonySDK.get().setTabindexOnlyFormField(tabindex);
+                    PonySDK.get().setHeartBeatPeriod(heartbeat);
+                }
             } else if (ServerToClientModel.RECONNECT_CONTEXT == model) {
                 // Transparent reconnection succeeded — server resumed our UIContext
+                PonySDK.get().getReconnectionChecker().onReconnectSuccess();
                 PonySDK.get().onReconnected();
                 readerBuffer.readBinaryModel(); // Read ServerToClientModel.END element
             } else if (ServerToClientModel.DESTROY_CONTEXT == model) {
@@ -167,6 +189,14 @@ public class UIBuilder {
                     }
                 }
             }
+        }
+
+        // If processing this batch took too long, proactively send a heartbeat
+        final long batchMs = System.currentTimeMillis() - lastReceivedMessage;
+        if (batchMs > 1000) {
+            final PTInstruction heartbeat = new PTInstruction();
+            heartbeat.put(ClientToServerModel.HEARTBEAT_REQUEST);
+            requestBuilder.send(heartbeat);
         }
     }
 

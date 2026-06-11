@@ -65,6 +65,7 @@ public class ApplicationConfiguration {
     private boolean stringDictionaryEnabled = true;
     private int stringDictionaryMaxSize = 4096;
     private int stringDictionaryMinLength = 4;
+    private int stringDictionaryMaxEvictionsPerFlush = 32;
     private boolean stringDictionaryPersistenceEnabled = true;
     private String stringDictionaryPersistPath = "data";
     private int stringDictionaryPreSeedSize = 512;
@@ -293,6 +294,45 @@ public class ApplicationConfiguration {
         return "ApplicationManagerOption [heartBeatPeriod=" + heartBeatPeriod + " " + heartBeatPeriodTimeUnit + "]";
     }
 
+    // ── Fluent Builder ────────────────────────────────────────────────────
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+        private final ApplicationConfiguration config = new ApplicationConfiguration();
+
+        public Builder applicationID(final String v)               { config.setApplicationID(v); return this; }
+        public Builder applicationName(final String v)             { config.setApplicationName(v); return this; }
+        public Builder applicationDescription(final String v)      { config.setApplicationDescription(v); return this; }
+        public Builder applicationContextName(final String v)      { config.setApplicationContextName(v); return this; }
+        public Builder entryPointClass(final Class<? extends EntryPoint> v) { config.setEntryPointClass(v); return this; }
+        public Builder sessionTimeout(final int v)                 { config.setSessionTimeout(v); return this; }
+        public Builder heartBeatPeriod(final long v, final TimeUnit u) { config.setHeartBeatPeriod(v, u); return this; }
+        public Builder enableClientToServerHeartBeat(final boolean v) { config.setEnableClientToServerHeartBeat(v); return this; }
+        public Builder reconnectionTimeoutMs(final long v)         { config.setReconnectionTimeoutMs(v); return this; }
+        public Builder maxRecordingEntries(final int v)            { config.setMaxRecordingEntries(v); return this; }
+        public Builder reconnectionListener(final ReconnectionListener v) { config.setReconnectionListener(v); return this; }
+        public Builder javascript(final Set<String> v)             { config.setJavascript(v); return this; }
+        public Builder style(final Map<String, String> v)          { config.setStyle(v); return this; }
+        public Builder meta(final Set<String> v)                   { config.setMeta(v); return this; }
+        public Builder wcSharedSheets(final Set<String> v)         { config.setWcSharedSheets(v); return this; }
+        public Builder debugMode(final boolean v)                  { config.setDebugMode(v); return this; }
+        public Builder tabindexOnlyFormField(final boolean v)      { config.setTabindexOnlyFormField(v); return this; }
+        public Builder stringDictionaryEnabled(final boolean v)    { config.setStringDictionaryEnabled(v); return this; }
+        public Builder stringDictionaryMaxSize(final int v)        { config.setStringDictionaryMaxSize(v); return this; }
+        public Builder stringDictionaryMinLength(final int v)      { config.setStringDictionaryMinLength(v); return this; }
+        public Builder stringDictionaryMaxEvictionsPerFlush(final int v) { config.setStringDictionaryMaxEvictionsPerFlush(v); return this; }
+        public Builder stringDictionaryPersistenceEnabled(final boolean v) { config.setStringDictionaryPersistenceEnabled(v); return this; }
+        public Builder stringDictionaryPersistPath(final String v) { config.setStringDictionaryPersistPath(v); return this; }
+        public Builder stringDictionaryPreSeedSize(final int v)    { config.setStringDictionaryPreSeedSize(v); return this; }
+
+        public ApplicationConfiguration build() {
+            return config;
+        }
+    }
+
     public boolean isEnableClientToServerHeartBeat() {
         return enableClientToServerHeartBeat;
     }
@@ -354,6 +394,14 @@ public class ApplicationConfiguration {
      */
     public void setStringDictionaryMinLength(final int stringDictionaryMinLength) {
         this.stringDictionaryMinLength = stringDictionaryMinLength;
+    }
+
+    public int getStringDictionaryMaxEvictionsPerFlush() {
+        return stringDictionaryMaxEvictionsPerFlush;
+    }
+
+    public void setStringDictionaryMaxEvictionsPerFlush(final int stringDictionaryMaxEvictionsPerFlush) {
+        this.stringDictionaryMaxEvictionsPerFlush = stringDictionaryMaxEvictionsPerFlush;
     }
 
     /**

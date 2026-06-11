@@ -59,10 +59,10 @@ public class WebSocketClient {
             if (event instanceof CloseEvent closeEvent) {
                 final int statusCode = closeEvent.code;
                 if (log.isLoggable(Level.INFO)) log.info("WebSocket disconnected : " + statusCode);
-                if (statusCode != 1000) reconnectionChecker.detectConnectionFailure();
+                if (statusCode != 1000) reconnectionChecker.onWebSocketClosed();
             } else {
                 log.severe("WebSocket disconnected : " + event);
-                reconnectionChecker.detectConnectionFailure();
+                reconnectionChecker.onWebSocketClosed();
             }
         };
 
@@ -79,6 +79,11 @@ public class WebSocketClient {
                     uiBuilder.updateMainTerminal(new Uint8Array(buffer, 0, getByteLength(buffer)));
                 } catch (final Exception e) {
                     log.log(Level.SEVERE, "Error while processing the " + buffer, e);
+                } finally {
+                    // Update after processing too — if the batch took a long time,
+                    // the heartbeat scheduler may fire between onmessage calls and
+                    // see a stale lastMessageTime. This proves we're alive, not a slow consumer.
+                    lastMessageTime = System.currentTimeMillis();
                 }
             }
         };

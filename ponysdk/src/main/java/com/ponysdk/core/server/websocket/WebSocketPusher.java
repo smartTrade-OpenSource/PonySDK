@@ -354,7 +354,11 @@ public class WebSocketPusher implements Closeable {
         checkState();
         if (writeBuffer == null || writeBuffer.position() == 0) return;
 
+        final long waitStart = System.currentTimeMillis();
         awaitPreviousSend();
+
+        // Reset eviction budget for next write cycle
+        if (stringDictionary != null) stringDictionary.resetEvictionBudget();
 
         // Hand off the writeBuffer to Jetty for sending
         writeBuffer.flip();

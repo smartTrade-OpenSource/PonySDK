@@ -49,7 +49,7 @@ public class CommunicationSanityChecker {
     private long heartBeatPeriod;
     private ScheduledFuture<?> sanityChecker;
     private CommunicationState currentState;
-    private long suspectTime = -1;
+    private volatile long suspectTime = -1;
 
     private static enum CommunicationState {
         OK,
@@ -100,8 +100,9 @@ public class CommunicationSanityChecker {
     }
 
     private boolean isCommunicationSuspectedToBeNonFunctional(final long now) {
-        // No message have been received or sent during the HeartbeatPeriod
-        return now - uiContext.getLastReceivedTime() >= heartBeatPeriod;
+        // Communication is alive if we recently received OR sent data — both directions count
+        final long lastActivity = Math.max(uiContext.getLastReceivedTime(), uiContext.getLastSentTime());
+        return now - lastActivity >= heartBeatPeriod;
     }
 
     private void checkCommunicationState() {

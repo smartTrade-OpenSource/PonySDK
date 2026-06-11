@@ -229,6 +229,11 @@ public class BootstrapServlet extends HttpServlet {
     protected String addScript(final HttpServletRequest request) {
         final StringBuilder sb = new StringBuilder();
 
+        // Enable transparent WebSocket reconnection on the client side when the server supports it
+        if (configuration != null && configuration.getReconnectionTimeoutMs() > 0) {
+            sb.append("<script type=\"text/javascript\">window.ponyReconnectMode = true;</script>").append(NEW_LINE);
+        }
+
         String ponyTerminalJsFileName = "ponyterminal/ponyterminal.nocache.js";
 
         sb.append(String.format(SCRIPT_PATTERN, rootPath + ponyTerminalJsFileName)).append(NEW_LINE);

@@ -102,7 +102,17 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
             // Transparent reconnection: resume a suspended UIContext instead of creating a new one
             if (reconnectContextId >= 0) {
                 final Application application = context.getApplication();
-                final UIContext suspended = application != null ? application.getUIContext(reconnectContextId) : null;
+                UIContext suspended = application != null ? application.getUIContext(reconnectContextId) : null;
+                // Race condition: client reconnects before onWebSocketClose has been processed
+                // server-side (common on fast local networks). Wait up to 500ms for the context
+                // to enter suspended state before falling back to creating a new one.
+                if (suspended != null && suspended.isAlive() && !suspended.isSuspended()) {
+                    final long deadline = System.currentTimeMillis() + 500;
+                    while (!suspended.isSuspended() && System.currentTimeMillis() < deadline) {
+                        try { Thread.sleep(20); } catch (final InterruptedException ie) { Thread.currentThread().interrupt(); break; }
+                    }
+                    suspended = application.getUIContext(reconnectContextId); // re-fetch after wait
+                }
                 if (suspended != null && suspended.isSuspended()) {
                     this.uiContext = suspended;
                     if (suspended.getStringDictionary() != null) {
@@ -127,6 +137,7 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
             final CommunicationSanityChecker communicationSanityChecker = new CommunicationSanityChecker(uiContext);
             context.registerUIContext(uiContext);
 
+            boolean initFlushOk = false;
             uiContext.acquire();
             try {
                 beginObject();
@@ -142,17 +153,31 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
                 encode(ServerToClientModel.HEARTBEAT_PERIOD, heartBeatPeriod);
                 endObject();
                 if (isAlive()) flush0();
+                initFlushOk = true;
             } catch (final Throwable e) {
-                log.error("Cannot send server heart beat to client", e);
+                // Socket already closed before we could send CREATE_CONTEXT — destroy the orphan
+                // immediately so it never enters suspended state and triggers a reconnect loop.
+                log.warn("Cannot send CREATE_CONTEXT to UIContext #{} (socket already closed) — destroying orphan", uiContext.getID(), e);
+                uiContext.destroy();
             } finally {
                 uiContext.release();
             }
+
+            if (!initFlushOk) return;
 
             applicationManager.startApplication(uiContext);
             if (metrics != null) {
                 metrics.onContextCreated();
                 uiContext.setMetrics(metrics);
                 uiContext.addContextDestroyListener(metrics.contextDestroyListener());
+                // Wire bytes-sent tracking via the pusher listener
+                websocketPusher.setWebSocketListener(new WebSocket.Listener() {
+                    @Override public void onOutgoingPonyFrame(final ServerToClientModel model, final Object value) {}
+                    @Override public void onOutgoingPonyFramesBytes(final int bytes) { metrics.recordBytesSent(bytes); }
+                    @Override public void onOutgoingWebSocketFrame(final int headerLength, final int payloadLength) {}
+                    @Override public void onIncomingText(final String text) {}
+                    @Override public void onIncomingWebSocketFrame(final int headerLength, final int payloadLength) {}
+                });
             }
             communicationSanityChecker.start();
         } catch (final Exception e) {
@@ -315,6 +340,7 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
     void flush0() {
         try {
             websocketPusher.flush();
+            if (uiContext != null) uiContext.onMessageSent();
         } catch (final IOException e) {
             log.error("Can't write on the websocket for #{}, so we destroy the application", uiContext.getID(), e);
             uiContext.onDestroy();
