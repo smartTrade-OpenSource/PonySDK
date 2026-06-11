@@ -668,6 +668,51 @@ test.describe('FlexLayout PonySDK Integration', () => {
     expect(rowBottom).toBeLessThanOrEqual(panelTop + 1);
   });
 
+  test('sidebar resize: center aligned after release (left)', async ({ page }) => {
+    const handle = page.locator('.fl-sidebar-left .fl-sidebar-resize');
+    const hBox = await handle.boundingBox();
+    // Shrink then release
+    await page.mouse.move(hBox.x + 2, hBox.y + hBox.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(hBox.x - 50, hBox.y + hBox.height / 2, { steps: 5 });
+    await page.mouse.up();
+    await page.waitForTimeout(400);
+    // After release, layout should still not overlap
+    const panelRight = await page.locator('.fl-sidebar-left .fl-sidebar-panel').evaluate(el => el.getBoundingClientRect().right);
+    const rowLeft = await page.locator('.fl-row').first().evaluate(el => el.getBoundingClientRect().left);
+    expect(rowLeft).toBeGreaterThanOrEqual(panelRight - 1);
+  });
+
+  test('sidebar resize: center aligned after release (right)', async ({ page }) => {
+    // Open right panel
+    const rightTab = page.locator('.fl-sidebar-right .fl-sidebar-tab').first();
+    await rightTab.click();
+    await page.waitForTimeout(300);
+    const handle = page.locator('.fl-sidebar-right .fl-sidebar-resize');
+    const hBox = await handle.boundingBox();
+    // Shrink then release
+    await page.mouse.move(hBox.x + 2, hBox.y + hBox.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(hBox.x + 60, hBox.y + hBox.height / 2, { steps: 5 });
+    await page.mouse.up();
+    await page.waitForTimeout(400);
+    // After release, layout right should not exceed panel left
+    const panelLeft = await page.locator('.fl-sidebar-right .fl-sidebar-panel').evaluate(el => el.getBoundingClientRect().left);
+    const rowRight = await page.locator('.fl-row').first().evaluate(el => el.getBoundingClientRect().right);
+    expect(rowRight).toBeLessThanOrEqual(panelLeft + 1);
+  });
+
+  test('bottom sidebar does not overlap lateral panels', async ({ page }) => {
+    // Open bottom panel
+    const bottomTab = page.locator('.fl-sidebar-bottom .fl-sidebar-tab').first();
+    await bottomTab.click();
+    await page.waitForTimeout(300);
+    // Check bottom sidebar starts after left panel
+    const leftPanelRight = await page.locator('.fl-sidebar-left .fl-sidebar-panel').evaluate(el => el.getBoundingClientRect().right);
+    const bottomLeft = await page.locator('.fl-sidebar-bottom').evaluate(el => el.getBoundingClientRect().left);
+    expect(bottomLeft).toBeGreaterThanOrEqual(leftPanelRight - 1);
+  });
+
   test('drag tab from layout to sidebar strip', async ({ page }) => {
     const tabsBefore = await page.locator('.fl-sidebar-left .fl-sidebar-tab').count();
     // Drag the "Info" tab to the left sidebar strip

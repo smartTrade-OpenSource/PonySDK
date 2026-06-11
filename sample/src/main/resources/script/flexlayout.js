@@ -569,7 +569,7 @@
       const stripW = 30;
       const hasBottom = this.model.getBorders().some(b => !b._hidden && b.side === 'bottom');
       const openBorders = borders.filter(b => b.isOpen());
-      const maxSize = Math.max(...borders.map(b => b.size), 200);
+      const maxSize = Math.max(...borders.map(b => b.size));
       const size = openBorders.length > 0 ? maxSize : 0;
 
       const wrapper = document.createElement('div');
