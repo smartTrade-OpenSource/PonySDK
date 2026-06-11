@@ -485,20 +485,20 @@
 
 /* Feature 8: Badge on sidebar tab */
 .fl-sidebar-tab-badge {
-  position: absolute; top: 3px; right: 3px;
+  display: inline-block; vertical-align: super; margin-left: 3px;
+  transition: opacity .2s, transform .2s;
 }
 .fl-badge-dot {
-  width: 8px; height: 8px; border-radius: 50%;
+  width: 7px; height: 7px; border-radius: 50%;
   background: var(--fl-badge-color, #f38ba8);
-  box-shadow: 0 0 6px var(--fl-badge-color, #f38ba8), 0 0 12px var(--fl-badge-color, #f38ba8);
-  display: block;
+  box-shadow: 0 0 4px var(--fl-badge-color, #f38ba8);
+  display: inline-block; vertical-align: middle;
 }
 .fl-badge-num {
-  min-width: 14px; height: 14px; line-height: 14px;
+  min-width: 12px; height: 12px; line-height: 12px;
   background: var(--fl-badge-color, #f38ba8); color: #fff;
-  font-size: 9px; font-weight: 700;
-  border-radius: 7px; text-align: center; padding: 0 3px;
-  display: block;
+  font-size: 8px; font-weight: 700;
+  border-radius: 6px; text-align: center; padding: 0 3px;
+  display: inline-block;
 }
 }
-.fl-sidebar-tab { position: relative; }

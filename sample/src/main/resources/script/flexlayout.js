@@ -264,6 +264,8 @@
           const i = border.children.findIndex(t => t.id === action.tabId);
           // Toggle: clicking already-selected tab closes the panel
           border.setSelected(i >= 0 && border.getSelected() === i ? -1 : i);
+          // Clear badge on selection (mark as read)
+          if (i >= 0) { border.children[i].badge = null; border.children[i].badgeColor = null; }
           break;
         }
         case 'CLOSE_BORDER_TAB': {
