@@ -568,7 +568,7 @@
       // Multiple borders on same side: shared strip, split panel when both open
       const stripW = 30;
       const bottomBorder = this.model.getBorders().find(b => !b._hidden && b.side === 'bottom');
-      const bottomInset = bottomBorder ? stripW + (bottomBorder.isOpen() ? bottomBorder.size : 0) : 0;
+      const bottomInset = bottomBorder ? stripW : 0;
       const openBorders = borders.filter(b => b.isOpen());
       const maxSize = Math.max(...borders.map(b => b.size));
       const size = openBorders.length > 0 ? maxSize : 0;
@@ -682,21 +682,17 @@
       // Position absolutely
       if (side === 'left') {
         const bb = this.model.getBorders().find(b => !b._hidden && b.side === 'bottom');
-        const botInset = bb ? stripW + (bb.isOpen() ? bb.size : 0) : 0;
+        const botInset = bb ? stripW : 0;
         wrapper.style.cssText = `position:absolute;top:0;left:0;bottom:${botInset}px;display:flex;flex-direction:row;z-index:2;`;
       } else if (side === 'right') {
         const bb = this.model.getBorders().find(b => !b._hidden && b.side === 'bottom');
-        const botInset = bb ? stripW + (bb.isOpen() ? bb.size : 0) : 0;
+        const botInset = bb ? stripW : 0;
         wrapper.style.cssText = `position:absolute;top:0;right:0;bottom:${botInset}px;display:flex;flex-direction:row;z-index:2;`;
       } else {
         const borders = this.model.getBorders();
-        const leftBorders = borders.filter(b => !b._hidden && (b.side === 'left' || b.side.startsWith('left-')));
-        const rightBorders = borders.filter(b => !b._hidden && (b.side === 'right' || b.side.startsWith('right-')));
-        const leftOpen = leftBorders.find(b => b.isOpen());
-        const rightOpen = rightBorders.find(b => b.isOpen());
-        const lInset = leftBorders.length > 0 ? stripW + (leftOpen ? Math.max(...leftBorders.map(b => b.size)) : 0) : 0;
-        const rInset = rightBorders.length > 0 ? stripW + (rightOpen ? Math.max(...rightBorders.map(b => b.size)) : 0) : 0;
-        wrapper.style.cssText = `position:absolute;bottom:0;left:${lInset}px;right:${rInset}px;display:flex;flex-direction:column;z-index:2;`;
+        const hasL = borders.some(b => !b._hidden && (b.side === 'left' || b.side.startsWith('left-')));
+        const hasR = borders.some(b => !b._hidden && (b.side === 'right' || b.side.startsWith('right-')));
+        wrapper.style.cssText = `position:absolute;bottom:0;left:${hasL ? stripW : 0}px;right:${hasR ? stripW : 0}px;display:flex;flex-direction:column;z-index:1;`;
       }
 
       // Tab strip
@@ -825,14 +821,6 @@
               if (baseSide === 'left') rowEl.style.left = (stripW + newSize) + 'px';
               else if (baseSide === 'right') rowEl.style.right = (stripW + newSize) + 'px';
               else rowEl.style.bottom = (stripW + newSize) + 'px';
-            }
-            // Update bottom sidebar position when lateral resizes
-            if (baseSide === 'left' || baseSide === 'right') {
-              const bottomEl = this.container.querySelector('.fl-sidebar-bottom');
-              if (bottomEl) {
-                if (baseSide === 'left') bottomEl.style.left = (stripW + newSize) + 'px';
-                else bottomEl.style.right = (stripW + newSize) + 'px';
-              }
             }
           };
           const onUp = () => {
