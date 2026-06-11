@@ -686,9 +686,14 @@
         const hasBot = this.model.getBorders().some(b => !b._hidden && b.side === 'bottom');
         wrapper.style.cssText = `position:absolute;top:0;right:0;bottom:${hasBot ? stripW : 0}px;display:flex;flex-direction:row;z-index:2;`;
       } else {
-        const hasL = this.model.getBorders().some(b => !b._hidden && (b.side === 'left' || b.side.startsWith('left-')));
-        const hasR = this.model.getBorders().some(b => !b._hidden && (b.side === 'right' || b.side.startsWith('right-')));
-        wrapper.style.cssText = `position:absolute;bottom:0;left:${hasL ? stripW : 0}px;right:${hasR ? stripW : 0}px;display:flex;flex-direction:column;z-index:2;`;
+        const borders = this.model.getBorders();
+        const leftBorders = borders.filter(b => !b._hidden && (b.side === 'left' || b.side.startsWith('left-')));
+        const rightBorders = borders.filter(b => !b._hidden && (b.side === 'right' || b.side.startsWith('right-')));
+        const leftOpen = leftBorders.find(b => b.isOpen());
+        const rightOpen = rightBorders.find(b => b.isOpen());
+        const lInset = leftBorders.length > 0 ? stripW + (leftOpen ? Math.max(...leftBorders.map(b => b.size)) : 0) : 0;
+        const rInset = rightBorders.length > 0 ? stripW + (rightOpen ? Math.max(...rightBorders.map(b => b.size)) : 0) : 0;
+        wrapper.style.cssText = `position:absolute;bottom:0;left:${lInset}px;right:${rInset}px;display:flex;flex-direction:column;z-index:2;`;
       }
 
       // Tab strip
@@ -805,6 +810,14 @@
               if (baseSide === 'left') rowEl.style.left = (stripW + newSize) + 'px';
               else if (baseSide === 'right') rowEl.style.right = (stripW + newSize) + 'px';
               else rowEl.style.bottom = (stripW + newSize) + 'px';
+            }
+            // Update bottom sidebar position when lateral resizes
+            if (baseSide === 'left' || baseSide === 'right') {
+              const bottomEl = this.container.querySelector('.fl-sidebar-bottom');
+              if (bottomEl) {
+                if (baseSide === 'left') bottomEl.style.left = (stripW + newSize) + 'px';
+                else bottomEl.style.right = (stripW + newSize) + 'px';
+              }
             }
           };
           const onUp = () => {
