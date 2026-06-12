@@ -508,6 +508,16 @@
           // Fast path: only update tab active states + content visibility
           const ts = this.model.getRoot().findById(action.tabsetId);
           if (ts) this._selectTabFast(ts, ts.getSelected());
+        } else if (action && action.type === 'MAXIMIZE_TOGGLE') {
+          // Fast path: toggle maximized class without full rebuild
+          const max = this.model.getMaximized();
+          if (max) {
+            this.container.classList.add('fl-has-maximized');
+            const el = this._nodeEls.get(max.id); if (el) el.classList.add('fl-maximized');
+          } else {
+            this.container.classList.remove('fl-has-maximized');
+            this.container.querySelectorAll('.fl-maximized').forEach(e => e.classList.remove('fl-maximized'));
+          }
         } else {
           this._render();
         }
@@ -732,6 +742,7 @@
       for (const [id] of this._contentEls) { if (!live.has(id)) this._contentEls.delete(id); }
 
       this._nodeEls.clear();
+      this._phList = []; // Track placeholders during build
       const frag = document.createDocumentFragment();
       const root = this.model.getRoot(); if (!root) { this.container.replaceChildren(); return; }
 
@@ -780,10 +791,11 @@
         this.container.classList.remove('fl-has-maximized');
       }
 
-      this.container.querySelectorAll('[data-fl-ph]').forEach(ph => {
+      for (let i = 0; i < this._phList.length; i++) {
+        const ph = this._phList[i];
         const c = this._contentEls.get(ph.dataset.flPh);
         if (c) ph.replaceWith(c);
-      });
+      }
     }
 
     _collectTabIds(node, set) {
@@ -1111,6 +1123,7 @@
           const ph = document.createElement('div');
           ph.dataset.flPh = selTab.id;
           ph.style.cssText = 'flex:1;overflow:auto;';
+          if (this._phList) this._phList.push(ph);
           pane.appendChild(ph);
           // Add splitter between panes
           if (oIdx < openBorders.length - 1) {
@@ -1402,6 +1415,7 @@
         c.style.display = i === node.getSelected() ? 'flex' : 'none';
         const ph = document.createElement('div');
         ph.dataset.flPh = tab.id;
+        this._phList.push(ph);
         area.appendChild(ph);
       });
       el.appendChild(area);
