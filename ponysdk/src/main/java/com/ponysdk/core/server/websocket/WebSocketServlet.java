@@ -72,7 +72,8 @@ public class WebSocketServlet extends JettyWebSocketServlet {
 
         // #5 permessage-deflate is negotiated and enabled by default in Jetty 12; PonySDK's binary
         // protocol + string dictionary already compress heavily, so deflate is the final wire layer.
-        // Jetty 12 does not expose the deflate compression level through this factory API.
+        // The compression *level* is not exposed by this factory API, but it can be turned off per
+        // connection via config.wsPermessageDeflateEnabled (see createWebsocket).
         factory.setCreator(this::createWebsocket);
     }
 
@@ -96,6 +97,13 @@ public class WebSocketServlet extends JettyWebSocketServlet {
                 response.setStatusCode(HttpServletResponse.SC_FORBIDDEN);
                 return null;
             }
+        }
+
+        // Optionally disable permessage-deflate (frame compression) for this connection. Useful for
+        // CPU/latency-sensitive deployments, and required by clients that cannot decode compressed
+        // frames (e.g. the headless Pony driver).
+        if (config != null && !config.isWsPermessageDeflateEnabled()) {
+            response.setExtensions(java.util.List.of());
         }
 
         final WebSocket webSocket = new WebSocket();

@@ -81,6 +81,8 @@ public class ApplicationConfiguration {
     private long wsIdleTimeoutMs = 1_000_000;
     /** Max time to await a previous (slow-consumer) send before disconnecting, in milliseconds. */
     private long wsSendTimeoutMs = 60_000;
+    /** When false, permessage-deflate is disabled on the WebSocket upgrade (no frame compression). */
+    private boolean wsPermessageDeflateEnabled = true;
 
     public ApplicationConfiguration() {
         applicationID = System.getProperty(APPLICATION_ID);
@@ -345,6 +347,7 @@ public class ApplicationConfiguration {
         public Builder wsMaxInboundMessageSize(final int v)        { config.setWsMaxInboundMessageSize(v); return this; }
         public Builder wsIdleTimeoutMs(final long v)               { config.setWsIdleTimeoutMs(v); return this; }
         public Builder wsSendTimeoutMs(final long v)               { config.setWsSendTimeoutMs(v); return this; }
+        public Builder wsPermessageDeflateEnabled(final boolean v) { config.setWsPermessageDeflateEnabled(v); return this; }
 
         public ApplicationConfiguration build() {
             return config;
@@ -523,6 +526,19 @@ public class ApplicationConfiguration {
 
     public void setWsSendTimeoutMs(final long wsSendTimeoutMs) {
         this.wsSendTimeoutMs = wsSendTimeoutMs;
+    }
+
+    public boolean isWsPermessageDeflateEnabled() {
+        return wsPermessageDeflateEnabled;
+    }
+
+    /**
+     * Enables/disables permessage-deflate frame compression on the WebSocket upgrade.
+     * Disabling trades bandwidth for lower CPU/latency (useful for high-throughput/real-time apps)
+     * and is also required by non-browser clients that cannot decode compressed frames.
+     */
+    public void setWsPermessageDeflateEnabled(final boolean wsPermessageDeflateEnabled) {
+        this.wsPermessageDeflateEnabled = wsPermessageDeflateEnabled;
     }
 
 }

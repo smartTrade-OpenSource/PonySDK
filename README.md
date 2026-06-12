@@ -114,6 +114,7 @@ config.setWsAllowedOrigins(Set.of("https://app.example.com")); // optional extra
 config.setWsMaxInboundMessageSize(1 << 20); // max client→server text message in bytes (default 1 MB)
 config.setWsIdleTimeoutMs(1_000_000);       // close after this much inactivity (ms)
 config.setWsSendTimeoutMs(60_000);          // disconnect a slow consumer after this (ms)
+config.setWsPermessageDeflateEnabled(true); // frame compression (default on); disable for low-CPU/latency
 ```
 
 **CSWSH:** a WebSocket upgrade is *not* subject to the same-origin policy, yet the browser still
