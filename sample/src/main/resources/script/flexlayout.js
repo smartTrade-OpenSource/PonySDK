@@ -446,6 +446,7 @@
       this.onAction      = opts.onAction       || null;
       this.onModelChange = opts.onModelChange  || null;
       this.onTabClose    = opts.onTabClose     || null;
+      this.onUndoRedo    = opts.onUndoRedo     || null;
 
       this._nodeEls        = new Map();
       this._contentEls     = new Map();
@@ -500,8 +501,8 @@
     }
 
     // Feature 13: Undo/redo
-    undo() { if (!this._undoEnabled || this._historyIndex < 0) return; const snap = this._actionHistory[this._historyIndex--]; this.model._root = Model._parse(snap.layout, 'row'); this.model._borders = (snap.borders || []).map(b => { const bn = new BorderNode(b); (b.children || []).forEach(c => bn.addChild(new TabNode(c))); return bn; }); this._render(); }
-    redo() { if (!this._undoEnabled || this._historyIndex >= this._actionHistory.length - 2) return; this._historyIndex++; const snap = this._actionHistory[this._historyIndex + 1]; this.model._root = Model._parse(snap.layout, 'row'); this.model._borders = (snap.borders || []).map(b => { const bn = new BorderNode(b); (b.children || []).forEach(c => bn.addChild(new TabNode(c))); return bn; }); this._render(); }
+    undo() { if (!this._undoEnabled || this._historyIndex < 0) return; const snap = this._actionHistory[this._historyIndex--]; this.model._root = Model._parse(snap.layout, 'row'); this.model._borders = (snap.borders || []).map(b => { const bn = new BorderNode(b); (b.children || []).forEach(c => bn.addChild(new TabNode(c))); return bn; }); this._render(); if (this.onUndoRedo) this.onUndoRedo(); }
+    redo() { if (!this._undoEnabled || this._historyIndex >= this._actionHistory.length - 2) return; this._historyIndex++; const snap = this._actionHistory[this._historyIndex + 1]; this.model._root = Model._parse(snap.layout, 'row'); this.model._borders = (snap.borders || []).map(b => { const bn = new BorderNode(b); (b.children || []).forEach(c => bn.addChild(new TabNode(c))); return bn; }); this._render(); if (this.onUndoRedo) this.onUndoRedo(); }
 
     // Feature 11: RTL support
     _isRTL() { return this.container.isConnected && getComputedStyle(this.container).direction === 'rtl'; }

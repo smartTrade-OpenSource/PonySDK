@@ -132,6 +132,9 @@
         },
         onAction: function (action) {
           return self._handleAction(action);
+        },
+        onUndoRedo: function () {
+          self._rehydrateAfterUndoRedo();
         }
       });
     },
@@ -715,11 +718,37 @@
     undo: function () {
       if (!this._layout) return;
       this._layout.undo();
+      this._rehydrateAfterUndoRedo();
     },
 
     redo: function () {
       if (!this._layout) return;
       this._layout.redo();
+      this._rehydrateAfterUndoRedo();
+    },
+
+    _rehydrateAfterUndoRedo: function () {
+      // After undo/redo, check for tabs that need widget recreation
+      var tabs = [];
+      this._collectRehydrateTabs(this._model.getRoot(), tabs);
+      var borders = this._model.getBorders ? this._model.getBorders() : [];
+      for (var b = 0; b < borders.length; b++) {
+        var border = borders[b];
+        for (var c = 0; c < border.children.length; c++) {
+          var child = border.children[c];
+          var comp = child.getComponent ? child.getComponent() : null;
+          if (comp && comp !== '' && comp !== 'pwidget') {
+            var cfg = child.getConfig ? child.getConfig() : null;
+            tabs.push({ tabId: child.getId(), component: comp, tabName: child.getName(), config: cfg ? JSON.stringify(cfg) : null });
+          }
+        }
+      }
+      // Only rehydrate tabs that don't already have a widget
+      var missing = [];
+      for (var i = 0; i < tabs.length; i++) {
+        if (!this._tabWidgetMap[tabs[i].tabId]) missing.push(tabs[i]);
+      }
+      if (missing.length > 0) this.sendDataToServer({ type: 'rehydrate', tabs: JSON.stringify(missing) });
     },
 
     reorderBorderTab: function (side, tabId, newIndex) {
