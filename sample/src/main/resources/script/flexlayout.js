@@ -797,6 +797,7 @@
       // Feature 1: Double-click maximize
       btn.addEventListener('dblclick', ev => {
         ev.preventDefault();
+        if (btn._clickTimer) { clearTimeout(btn._clickTimer); btn._clickTimer = null; }
         this._act(Actions.maximizeBorder(side));
       });
       // Feature 3: Context menu
@@ -842,7 +843,11 @@
           btn.removeEventListener('pointerup', onUp);
           try { btn.releasePointerCapture(ev.pointerId); } catch(e) {}
           if (!dragging) {
-            this._act(Actions.selectBorderTab(side, tab.id));
+            // Delay select to allow dblclick to cancel it
+            btn._clickTimer = setTimeout(() => {
+              btn._clickTimer = null;
+              this._act(Actions.selectBorderTab(side, tab.id));
+            }, 200);
           }
         };
         try { btn.setPointerCapture(ev.pointerId); } catch(e) {}
