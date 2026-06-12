@@ -4910,8 +4910,11 @@ public class UIContextReconnectionTest {
             uiContext.release();
         }
 
-        assertEquals("Encoder size should not grow after overflow",
-                sizeAtOverflow, encoder.size());
+        // After overflow the encoder must not accept new entries. It may, however, be cleared
+        // concurrently by the async overflow->destroy handler — so assert it does not GROW
+        // (the actual invariant) rather than strict equality, which was a timing assumption.
+        assertTrue("Encoder size should not grow after overflow",
+                encoder.size() <= sizeAtOverflow);
 
         // Clean up — wait for destroy thread
         try { Thread.sleep(300); } catch (final InterruptedException ignored) {}
