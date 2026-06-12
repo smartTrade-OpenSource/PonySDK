@@ -102,7 +102,13 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
             if (!session.isOpen()) throw new IllegalStateException("Session already closed");
             this.session = session;
 
-            this.websocketPusher = new WebSocketPusher(session, 1 << 15, TimeUnit.SECONDS.toMillis(60), BUFFER_POOL);
+            // #4 Slow-consumer backpressure: the pusher keeps a single send in flight and waits
+            // up to this timeout for the previous send before disconnecting a stuck client.
+            final ApplicationConfiguration cfg = applicationManager != null ? applicationManager.getConfiguration() : null;
+            final long sendTimeoutMs = cfg != null && cfg.getWsSendTimeoutMs() > 0
+                    ? cfg.getWsSendTimeoutMs()
+                    : TimeUnit.SECONDS.toMillis(60);
+            this.websocketPusher = new WebSocketPusher(session, 1 << 15, sendTimeoutMs, BUFFER_POOL);
 
             // Transparent reconnection: resume a suspended UIContext instead of creating a new one
             if (reconnectContextId >= 0) {

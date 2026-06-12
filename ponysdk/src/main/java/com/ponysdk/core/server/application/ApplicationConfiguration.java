@@ -70,6 +70,18 @@ public class ApplicationConfiguration {
     private String stringDictionaryPersistPath = "data";
     private int stringDictionaryPreSeedSize = 512;
 
+    // ── WebSocket transport hardening ─────────────────────────────────────
+    /** When true, the WebSocket upgrade validates the Origin header (anti-CSWSH). */
+    private boolean wsOriginCheckEnabled = true;
+    /** Explicit allow-list of accepted Origins. When empty, only same-origin is accepted. */
+    private Set<String> wsAllowedOrigins;
+    /** Upper bound on inbound (client -> server) text messages, in bytes. Guards against memory abuse. */
+    private int wsMaxInboundMessageSize = 1 << 20; // 1 MB
+    /** WebSocket idle timeout in milliseconds (no traffic either way before close). */
+    private long wsIdleTimeoutMs = 1_000_000;
+    /** Max time to await a previous (slow-consumer) send before disconnecting, in milliseconds. */
+    private long wsSendTimeoutMs = 60_000;
+
     public ApplicationConfiguration() {
         applicationID = System.getProperty(APPLICATION_ID);
         applicationName = System.getProperty(APPLICATION_NAME);
@@ -328,6 +340,12 @@ public class ApplicationConfiguration {
         public Builder stringDictionaryPersistPath(final String v) { config.setStringDictionaryPersistPath(v); return this; }
         public Builder stringDictionaryPreSeedSize(final int v)    { config.setStringDictionaryPreSeedSize(v); return this; }
 
+        public Builder wsOriginCheckEnabled(final boolean v)       { config.setWsOriginCheckEnabled(v); return this; }
+        public Builder wsAllowedOrigins(final Set<String> v)       { config.setWsAllowedOrigins(v); return this; }
+        public Builder wsMaxInboundMessageSize(final int v)        { config.setWsMaxInboundMessageSize(v); return this; }
+        public Builder wsIdleTimeoutMs(final long v)               { config.setWsIdleTimeoutMs(v); return this; }
+        public Builder wsSendTimeoutMs(final long v)               { config.setWsSendTimeoutMs(v); return this; }
+
         public ApplicationConfiguration build() {
             return config;
         }
@@ -458,6 +476,53 @@ public class ApplicationConfiguration {
      */
     public void setStringDictionaryPreSeedSize(final int stringDictionaryPreSeedSize) {
         this.stringDictionaryPreSeedSize = stringDictionaryPreSeedSize;
+    }
+
+    // ── WebSocket transport hardening accessors ───────────────────────────
+
+    public boolean isWsOriginCheckEnabled() {
+        return wsOriginCheckEnabled;
+    }
+
+    public void setWsOriginCheckEnabled(final boolean wsOriginCheckEnabled) {
+        this.wsOriginCheckEnabled = wsOriginCheckEnabled;
+    }
+
+    public Set<String> getWsAllowedOrigins() {
+        return wsAllowedOrigins;
+    }
+
+    /**
+     * Sets the allow-list of accepted WebSocket Origins (e.g. {@code "https://app.example.com"}).
+     * When null/empty, the upgrade only accepts same-origin requests (Origin authority == Host).
+     * Requests without an Origin header (non-browser clients) are always allowed.
+     */
+    public void setWsAllowedOrigins(final Set<String> wsAllowedOrigins) {
+        this.wsAllowedOrigins = wsAllowedOrigins;
+    }
+
+    public int getWsMaxInboundMessageSize() {
+        return wsMaxInboundMessageSize;
+    }
+
+    public void setWsMaxInboundMessageSize(final int wsMaxInboundMessageSize) {
+        this.wsMaxInboundMessageSize = wsMaxInboundMessageSize;
+    }
+
+    public long getWsIdleTimeoutMs() {
+        return wsIdleTimeoutMs;
+    }
+
+    public void setWsIdleTimeoutMs(final long wsIdleTimeoutMs) {
+        this.wsIdleTimeoutMs = wsIdleTimeoutMs;
+    }
+
+    public long getWsSendTimeoutMs() {
+        return wsSendTimeoutMs;
+    }
+
+    public void setWsSendTimeoutMs(final long wsSendTimeoutMs) {
+        this.wsSendTimeoutMs = wsSendTimeoutMs;
     }
 
 }

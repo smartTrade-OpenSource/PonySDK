@@ -27,7 +27,9 @@ import com.ponysdk.core.server.metrics.PonySDKMetrics;
 import com.ponysdk.core.model.ClientToServerModel;
 
 import java.time.Duration;
+import java.util.Set;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeRequest;
@@ -38,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ponysdk.core.server.application.Application;
+import com.ponysdk.core.server.application.ApplicationConfiguration;
 import com.ponysdk.core.server.application.ApplicationManager;
 import com.ponysdk.core.server.servlet.SessionManager;
 import com.ponysdk.core.server.stm.TxnContext;
@@ -57,12 +60,44 @@ public class WebSocketServlet extends JettyWebSocketServlet {
 
     @Override
     protected void configure(final JettyWebSocketServletFactory factory) {
-        factory.setIdleTimeout(Duration.ofMillis(maxIdleTime));
-        // permessage-deflate is enabled by default in Jetty 12, no need to register manually
+        final ApplicationConfiguration config = applicationManager.getConfiguration();
+
+        // #3 Idle timeout — configurable (falls back to the legacy field if unset).
+        final long idleMs = config != null && config.getWsIdleTimeoutMs() > 0 ? config.getWsIdleTimeoutMs() : maxIdleTime;
+        factory.setIdleTimeout(Duration.ofMillis(idleMs));
+
+        // #2 Bound inbound (client -> server) text messages to guard against memory abuse.
+        final int maxInbound = config != null ? config.getWsMaxInboundMessageSize() : 0;
+        if (maxInbound > 0) factory.setMaxTextMessageSize(maxInbound);
+
+        // #5 permessage-deflate is negotiated and enabled by default in Jetty 12; PonySDK's binary
+        // protocol + string dictionary already compress heavily, so deflate is the final wire layer.
+        // Jetty 12 does not expose the deflate compression level through this factory API.
         factory.setCreator(this::createWebsocket);
     }
 
     protected WebSocket createWebsocket(final JettyServerUpgradeRequest request, final JettyServerUpgradeResponse response) {
+        // #1 Anti-CSWSH: WebSocket upgrades are NOT subject to the same-origin policy, and the
+        // browser attaches the session cookie regardless of the calling page's origin. Validate
+        // the Origin before creating anything; reject cross-origin upgrades with a 403.
+        final ApplicationConfiguration config = applicationManager.getConfiguration();
+        if (config != null && config.isWsOriginCheckEnabled()) {
+            final String origin = request.getHeader("Origin");
+            // Prefer X-Forwarded-Host (set by reverse proxies to the host the browser used);
+            // browsers cannot set this header on a WS handshake, so it is safe for this check.
+            String host = request.getHeader("X-Forwarded-Host");
+            if (host == null || host.isEmpty()) host = request.getHeader("Host");
+            else {
+                final int comma = host.indexOf(',');
+                if (comma >= 0) host = host.substring(0, comma).trim();
+            }
+            if (!isOriginAllowed(origin, host, config.getWsAllowedOrigins())) {
+                log.warn("Rejected WebSocket upgrade from a disallowed Origin");
+                response.setStatusCode(HttpServletResponse.SC_FORBIDDEN);
+                return null;
+            }
+        }
+
         final WebSocket webSocket = new WebSocket();
         webSocket.setRequest(request);
         webSocket.setApplicationManager(applicationManager);
@@ -117,6 +152,30 @@ public class WebSocketServlet extends JettyWebSocketServlet {
             log.error("No HTTP session found");
             throw new IllegalStateException("No HTTP session found");
         }
+    }
+
+    /**
+     * CSWSH guard. Returns {@code true} if the upgrade Origin is acceptable:
+     * <ul>
+     *   <li>no/empty Origin header (non-browser client — no ambient cookies to abuse) → allowed;</li>
+     *   <li>Origin explicitly present in {@code allowedOrigins} → allowed;</li>
+     *   <li>otherwise same-origin only: the Origin authority (host[:port]) must equal {@code host}.</li>
+     * </ul>
+     */
+    static boolean isOriginAllowed(final String origin, final String host, final Set<String> allowedOrigins) {
+        if (origin == null || origin.isEmpty()) return true;
+        if (allowedOrigins != null && allowedOrigins.contains(origin)) return true;
+        final String authority = originAuthority(origin);
+        return authority != null && host != null && authority.equalsIgnoreCase(host);
+    }
+
+    /** Extracts {@code host[:port]} from an Origin such as {@code "https://app.example.com:8443"}. */
+    private static String originAuthority(final String origin) {
+        final int scheme = origin.indexOf("://");
+        if (scheme < 0) return null;
+        final String rest = origin.substring(scheme + 3);
+        final int slash = rest.indexOf('/');
+        return slash >= 0 ? rest.substring(0, slash) : rest;
     }
 
     public void setMaxIdleTime(final int maxIdleTime) {
