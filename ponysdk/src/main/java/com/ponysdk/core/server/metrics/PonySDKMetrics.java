@@ -225,6 +225,29 @@ public final class PonySDKMetrics {
         messagesInCounter.add(1, appAttributes());
     }
 
+    /**
+     * Computes the UTF-8 encoded byte length of a string without allocating a byte[].
+     * Used for the bytes-received metric (a String's char count is not its wire size).
+     */
+    static int utf8Length(final String s) {
+        if (s == null) return 0;
+        int bytes = 0;
+        for (int i = 0; i < s.length(); i++) {
+            final char c = s.charAt(i);
+            if (c <= 0x7F) {
+                bytes += 1;
+            } else if (c <= 0x7FF) {
+                bytes += 2;
+            } else if (Character.isHighSurrogate(c)) {
+                bytes += 4; // surrogate pair → 4 UTF-8 bytes
+                i++;        // skip the trailing low surrogate
+            } else {
+                bytes += 3;
+            }
+        }
+        return bytes;
+    }
+
     // -------------------------------------------------------------------------
     // Convenience adapters — plug directly into existing PonySDK hooks
     // -------------------------------------------------------------------------
@@ -237,7 +260,7 @@ public final class PonySDKMetrics {
         return new WebsocketMonitor() {
             @Override
             public void onMessageReceived(final WebSocket webSocket, final String message) {
-                recordBytesReceived(message.length());
+                recordBytesReceived(utf8Length(message));
             }
 
             @Override
