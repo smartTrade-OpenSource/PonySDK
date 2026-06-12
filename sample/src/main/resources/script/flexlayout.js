@@ -522,7 +522,7 @@
 
     // Feature 13: Undo/redo
     undo() { if (!this._undoEnabled || this._historyIndex < 0) return; const snap = this._actionHistory[this._historyIndex--]; this.model._root = Model._parse(snap.layout, 'row'); this.model._borders = (snap.borders || []).map(b => { const bn = new BorderNode(b); (b.children || []).forEach(c => bn.addChild(new TabNode(c))); return bn; }); this._render(); }
-    redo() { if (!this._undoEnabled || this._historyIndex >= this._actionHistory.length - 2) return; const snap = this._actionHistory[++this._historyIndex + 1]; this.model._root = Model._parse(snap.layout, 'row'); this.model._borders = (snap.borders || []).map(b => { const bn = new BorderNode(b); (b.children || []).forEach(c => bn.addChild(new TabNode(c))); return bn; }); this._render(); }
+    redo() { if (!this._undoEnabled || this._historyIndex >= this._actionHistory.length - 2) return; this._historyIndex++; const snap = this._actionHistory[this._historyIndex + 1]; this.model._root = Model._parse(snap.layout, 'row'); this.model._borders = (snap.borders || []).map(b => { const bn = new BorderNode(b); (b.children || []).forEach(c => bn.addChild(new TabNode(c))); return bn; }); this._render(); }
 
     // Feature 11: RTL support
     _isRTL() { return this.container.isConnected && getComputedStyle(this.container).direction === 'rtl'; }
@@ -868,18 +868,19 @@
       const side = border.side;
       const strip = btnEl.parentElement;
       const btns = Array.from(strip.querySelectorAll('[data-fl-border-tab]'));
-      const startIdx = btns.indexOf(btnEl);
+      let currentIdx = btns.indexOf(btnEl);
       btnEl.style.opacity = '0.5';
       const onMove = me => {
         const pos = isVertical ? me.clientY : me.clientX;
-        let newIdx = startIdx;
+        let newIdx = 0;
         for (let j = 0; j < btns.length; j++) {
           const r = btns[j].getBoundingClientRect();
           const mid = isVertical ? r.top + r.height / 2 : r.left + r.width / 2;
           if (pos > mid) newIdx = j;
         }
-        if (newIdx !== startIdx) {
+        if (newIdx !== currentIdx) {
           this._act(Actions.reorderBorderTab(side, tab.id, newIdx));
+          currentIdx = newIdx;
         }
       };
       const onUp = () => {
@@ -915,7 +916,7 @@
       document.body.appendChild(menu);
       this._contextMenu = menu;
       const dismiss = () => { this._hideBorderContextMenu(); document.removeEventListener('click', dismiss); document.removeEventListener('pointercancel', dismiss); };
-      setTimeout(() => { document.addEventListener('click', dismiss, { once: true }); document.addEventListener('pointercancel', dismiss, { once: true }); }, 0);
+      setTimeout(() => { document.addEventListener('click', dismiss); document.addEventListener('pointercancel', dismiss); }, 0);
     }
 
     _hideBorderContextMenu() {
@@ -1180,7 +1181,10 @@
       const rect = btnEl.getBoundingClientRect();
       const ghost = document.createElement('div');
       ghost.className = 'fl-tab fl-drag-ghost';
-      ghost.innerHTML = `<span class="fl-tab-label">${tab.getName()}</span>`;
+      const ghostLabel = document.createElement('span');
+      ghostLabel.className = 'fl-tab-label';
+      ghostLabel.textContent = tab.getName();
+      ghost.appendChild(ghostLabel);
       ghost.style.cssText = `position:fixed;left:${rect.left}px;top:${rect.top}px;min-width:${rect.width}px;pointer-events:none;z-index:9997;white-space:nowrap;`;
       document.body.appendChild(ghost);
       this._ghost = ghost;
@@ -1390,8 +1394,15 @@
         d.offY = d.y0 - d.rect.top;
         const ghost = document.createElement('div');
         ghost.className = 'fl-tab fl-drag-ghost';
-        if (!d.isNew && d.tab.getIcon()) ghost.innerHTML = `<span class="fl-tab-icon">${d.tab.getIcon()}</span>`;
-        ghost.innerHTML += `<span class="fl-tab-label">${d.isNew ? (d.tabDef.name||'New') : d.tab.getName()}</span>`;
+        if (!d.isNew && d.tab.getIcon()) {
+          const ic = document.createElement('span');
+          ic.className = 'fl-tab-icon'; ic.textContent = d.tab.getIcon();
+          ghost.appendChild(ic);
+        }
+        const lbl = document.createElement('span');
+        lbl.className = 'fl-tab-label';
+        lbl.textContent = d.isNew ? (d.tabDef.name||'New') : d.tab.getName();
+        ghost.appendChild(lbl);
         ghost.style.cssText = `position:fixed;left:${d.rect.left}px;top:${d.rect.top}px;`
           + `min-width:${d.rect.width}px;pointer-events:none;z-index:9997;white-space:nowrap;`;
         document.body.appendChild(ghost);
@@ -1600,7 +1611,8 @@
       r.sp.removeEventListener('pointerup',     this._puRes);
       r.sp.removeEventListener('pointercancel', this._puRes);
       try { r.sp.releasePointerCapture(r.pointerId); } catch (e) {}
-      document.body.style.cursor = document.body.style.userSelect = '';
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
       this.model.emit('change', this.model);
     }
   }

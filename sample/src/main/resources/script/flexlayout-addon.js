@@ -247,7 +247,7 @@
     attachWidget: function (tabId, widgetId) {
       var self = this;
       this._tabWidgetMap[tabId] = widgetId;
-      var tabNode = this._model.getRoot().findById(tabId);
+      var tabNode = this._model.findById(tabId);
       if (tabNode) tabNode.config = { widgetId: widgetId };
       setTimeout(function () {
         var host = self._layoutContainer.querySelector('.fl-pony-widget-host[data-tab-id="' + CSS.escape(tabId) + '"]');

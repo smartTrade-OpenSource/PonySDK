@@ -628,7 +628,7 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
             final JsonObject tab = tabs.getJsonObject(i);
             final String tabId = tab.getString("tabId", null);
             final String component = tab.getString("component", null);
-            final String config = tab.isNull("config") ? null : tab.getString("config", null);
+            final String config = tab.containsKey("config") && !tab.isNull("config") ? tab.getString("config", null) : null;
             if (tabId != null && component != null) {
                 onExternalDrop.onDrop(tabId, component, config);
             }
