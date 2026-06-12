@@ -63,6 +63,8 @@
       this.enableDrag  = cfg.enableDrag  !== false;
       this._weight     = cfg.weight || 100;
       this.badge       = cfg.badge       || null; // Feature 8
+      this.group       = cfg.group       || null;
+      this.groupColor  = cfg.groupColor  || null;
     }
     getName()       { return this.name; }
     setName(n)      { this.name = n; }
@@ -76,6 +78,7 @@
                config: this.config, icon: this.icon, enableClose: this.enableClose,
                enableDrag: this.enableDrag, weight: this._weight };
       if (this.badge) j.badge = this.badge;
+      if (this.group) { j.group = this.group; j.groupColor = this.groupColor; }
       return j;
     }
   }
@@ -144,8 +147,9 @@
   class Model extends Emitter {
     constructor() { super(); this._root = null; this._maximized = null; this._borders = []; }
 
-    static fromJson(json) {
+    static fromJson(json, migrateFn) {
       const m = new Model();
+      m.version = json.version || null;
       m._root = Model._parse(json.layout || json, 'row');
       if (json.borders) {
         m._borders = json.borders.map(b => {
@@ -154,7 +158,23 @@
           return bn;
         });
       }
+      if (migrateFn) m._migrateAll(migrateFn);
       return m;
+    }
+
+    _migrateAll(fn) {
+      const migrate = (node) => {
+        if (node.type === NT.TAB) {
+          const result = fn(node);
+          if (result === null) { const p = node.getParent(); if (p) p.removeChild(node); return; }
+          if (typeof result === 'string') node.component = result;
+          return;
+        }
+        [...(node.children || [])].forEach(c => migrate(c));
+      };
+      migrate(this._root);
+      this._borders.forEach(b => [...b.children].forEach(c => migrate(c)));
+      this._cleanup(this._root);
     }
     static _parse(cfg, forcedDir) {
       const type = cfg.type || NT.ROW;
@@ -363,6 +383,12 @@
           tab.badge = action.badge;
           break;
         }
+        case 'SET_TAB_GROUP': {
+          const tab = this.findById(action.tabId); if (!tab) return;
+          tab.group = action.group || null;
+          tab.groupColor = action.groupColor || null;
+          break;
+        }
       }
     }
 
@@ -409,6 +435,7 @@
 
     toJson() {
       const json = { layout: this._root ? this._root.toJson() : null };
+      if (this.version) json.version = this.version;
       if (this._borders.length > 0) json.borders = this._borders.map(b => b.toJson());
       return json;
     }
@@ -434,6 +461,7 @@
     maximizeBorder:  (side, maxSize)              => ({ type: 'MAXIMIZE_BORDER', side, maxSize }),
     reorderBorderTab:(side, tabId, toIndex)       => ({ type: 'REORDER_BORDER_TAB', side, tabId, toIndex }),
     setBadge:        (tabId, badge)               => ({ type: 'SET_BADGE', tabId, badge }),
+    setTabGroup:     (tabId, group, groupColor)   => ({ type: 'SET_TAB_GROUP', tabId, group, groupColor }),
   };
 
   // ── Layout ────────────────────────────────────────────────────────
@@ -490,6 +518,7 @@
         closeAll:    { key: 'Escape' },
         undo:        { ctrl: true, key: 'z' },
         redo:        { ctrl: true, key: 'y' },
+        commandPalette: { ctrl: true, key: 'p' },
       };
       this.container.setAttribute('tabindex', '-1');
       this.container.addEventListener('keydown', ev => {
@@ -511,6 +540,7 @@
         else if (match(this._keymap.closeAll)) { ev.preventDefault(); this.model.getBorders().forEach(b => { if (b.isOpen()) b.setSelected(-1); }); this._render(); }
         else if (match(this._keymap.undo)) { ev.preventDefault(); this.undo(); }
         else if (match(this._keymap.redo)) { ev.preventDefault(); this.redo(); }
+        else if (match(this._keymap.commandPalette)) { ev.preventDefault(); this._showCommandPalette(); }
       });
 
       // Feature 12: Touch gestures
@@ -591,6 +621,125 @@
       sourceEl.addEventListener('pointermove',   this._pmDrag);
       sourceEl.addEventListener('pointerup',     this._puDrag);
       sourceEl.addEventListener('pointercancel', this._puDrag);
+    }
+
+    // ── Collaboration: apply remote action without triggering onAction ───
+    applyRemote(action) {
+      this.model.doAction(action);
+      if (this.onModelChange) this.onModelChange(this.model);
+    }
+
+    // ── Partial render: CLOSE_TAB ───
+    _partialCloseTab(action) {
+      const tabEl = this.container.querySelector(`[data-fl-tab="${action.tabId}"]`);
+      if (!tabEl) { this._render(); return; }
+      const tsEl = tabEl.closest('[data-fl-tabset]');
+      tabEl.remove();
+      const contentEl = this._contentEls.get(action.tabId);
+      if (contentEl) { contentEl.remove(); this._contentEls.delete(action.tabId); }
+      // Update selection
+      if (tsEl) {
+        const tsNode = this.model.getRoot().findById(tsEl.dataset.flTabset);
+        if (tsNode) {
+          tsEl.querySelectorAll('.fl-tabs .fl-tab').forEach((b, i) => b.classList.toggle('fl-tab-active', i === tsNode.getSelected()));
+          tsNode.children.forEach((t, i) => { const c = this._contentEls.get(t.id); if (c) c.style.display = i === tsNode.getSelected() ? 'flex' : 'none'; });
+        } else { this._render(); }
+      }
+    }
+
+    // ── Partial render: ADD_TAB ───
+    _partialAddTab(action) {
+      const tsEl = this.container.querySelector(`[data-fl-tabset="${action.tabsetId}"]`);
+      const tsNode = this.model.getRoot().findById(action.tabsetId);
+      if (!tsEl || !tsNode) { this._render(); return; }
+      const tabsEl = tsEl.querySelector('.fl-tabs');
+      const areaEl = tsEl.querySelector('.fl-content');
+      if (!tabsEl || !areaEl) { this._render(); return; }
+      const tab = tsNode.children[tsNode.children.length - 1];
+      if (!tab) { this._render(); return; }
+      tabsEl.appendChild(this._mkTabBtn(tab, tsNode, tsNode.children.length - 1));
+      const c = this._getOrMakeContent(tab);
+      areaEl.appendChild(c);
+      this._selectTabFast(tsNode, tsNode.getSelected());
+    }
+
+    // ── Partial render: MOVE_TAB to center ───
+    _partialMoveTab(action) {
+      // Remove from source DOM
+      const oldTabEl = this.container.querySelector(`[data-fl-tab="${action.tabId}"]`);
+      if (oldTabEl) oldTabEl.remove();
+      const oldContent = this._contentEls.get(action.tabId);
+      if (oldContent) oldContent.remove();
+      // Add to target
+      const dest = this.model.getRoot().findById(action.toId);
+      const tsEl = this.container.querySelector(`[data-fl-tabset="${action.toId}"]`);
+      if (!dest || !tsEl) { this._render(); return; }
+      const tabsEl = tsEl.querySelector('.fl-tabs');
+      const areaEl = tsEl.querySelector('.fl-content');
+      if (!tabsEl || !areaEl) { this._render(); return; }
+      const tab = dest.children.find(t => t.id === action.tabId);
+      if (!tab) { this._render(); return; }
+      const idx = dest.children.indexOf(tab);
+      tabsEl.appendChild(this._mkTabBtn(tab, dest, idx));
+      const c = this._getOrMakeContent(tab);
+      areaEl.appendChild(c);
+      this._selectTabFast(dest, dest.getSelected());
+    }
+
+    // ── Command Palette ───
+    _showCommandPalette(customItems) {
+      if (this._palette) { this._palette.remove(); this._palette = null; return; }
+      const palette = document.createElement('div');
+      palette.className = 'fl-command-palette';
+      const input = document.createElement('input');
+      input.type = 'text'; input.placeholder = 'Search tabs...';
+      palette.appendChild(input);
+      const list = document.createElement('div');
+      list.className = 'fl-command-palette-list';
+      palette.appendChild(list);
+
+      const allTabs = [];
+      const collectTabs = (node) => {
+        if (node.type === NT.TAB) { allTabs.push({ id: node.id, name: node.getName(), border: false }); return; }
+        (node.children || []).forEach(c => collectTabs(c));
+      };
+      collectTabs(this.model.getRoot());
+      this.model.getBorders().forEach(b => b.children.forEach(t => allTabs.push({ id: t.id, name: t.getName(), border: true, side: b.side })));
+      if (customItems) customItems.forEach(n => allTabs.push({ id: null, name: n, custom: true }));
+
+      const renderList = (filter) => {
+        list.innerHTML = '';
+        const f = (filter || '').toLowerCase();
+        allTabs.filter(t => !f || t.name.toLowerCase().includes(f)).forEach(t => {
+          const item = document.createElement('div');
+          item.className = 'fl-command-palette-item';
+          item.textContent = t.name;
+          item.addEventListener('click', () => { this._navigateToTab(t); palette.remove(); this._palette = null; });
+          list.appendChild(item);
+        });
+      };
+      renderList('');
+      input.addEventListener('input', () => renderList(input.value));
+      input.addEventListener('keydown', ev => {
+        if (ev.key === 'Escape') { palette.remove(); this._palette = null; }
+        else if (ev.key === 'Enter') {
+          const first = list.firstElementChild;
+          if (first) first.click();
+        }
+      });
+
+      this.container.appendChild(palette);
+      this._palette = palette;
+      input.focus();
+    }
+
+    _navigateToTab(t) {
+      if (t.border && t.side) {
+        this._act(Actions.selectBorderTab(t.side, t.id));
+      } else if (t.id) {
+        const tab = this.model.findById(t.id);
+        if (tab) { const ts = tab.getParent(); if (ts && ts.type === NT.TABSET) this._act(Actions.selectTab(ts.id, t.id)); }
+      }
     }
 
     destroy() {
@@ -1124,6 +1273,11 @@
       const baseSide = side.split('-')[0];
       const sidebarEl = this.container.querySelector(`.fl-sidebar-${baseSide}`);
       if (!sidebarEl) { this._render(); return; }
+
+      // Feature 5: Smooth animation — animate panel size before replacing content
+      const oldPanel = sidebarEl.querySelector('.fl-sidebar-panel');
+      const isV = baseSide !== 'bottom';
+
       // Replace the sidebar entirely (cheaper than full layout re-render)
       const borders = this.model.getBorders();
       const sideBorders = borders.filter(b => !b._hidden && (b.side === baseSide || b.side.startsWith(baseSide + '-')));
@@ -1135,7 +1289,17 @@
         newSidebar = this._renderBorder(sideBorders[0]);
       }
       if (newSidebar) {
-        sidebarEl.replaceWith(newSidebar);
+        // Animate: set transition on new panel
+        const newPanel = newSidebar.querySelector('.fl-sidebar-panel');
+        if (oldPanel && newPanel) {
+          const oldSize = isV ? oldPanel.offsetWidth : oldPanel.offsetHeight;
+          if (isV) { newPanel.style.width = oldSize + 'px'; }
+          else { newPanel.style.height = oldSize + 'px'; }
+          sidebarEl.replaceWith(newSidebar);
+          requestAnimationFrame(() => { newPanel.style.transition = (isV ? 'width' : 'height') + ' 150ms ease'; newPanel.style[isV ? 'width' : 'height'] = ''; });
+        } else {
+          sidebarEl.replaceWith(newSidebar);
+        }
       } else {
         sidebarEl.remove();
       }
@@ -1249,7 +1413,14 @@
       // ── tab strip ──
       const strip = document.createElement('div'); strip.className = 'fl-strip';
       const tabs  = document.createElement('div'); tabs.className  = 'fl-tabs';
-      node.children.forEach((tab, i) => tabs.appendChild(this._mkTabBtn(tab, node, i)));
+      node.children.forEach((tab, i) => {
+        const btn = this._mkTabBtn(tab, node, i);
+        if (tab.group && tab.groupColor) {
+          btn.style.borderBottom = `2px solid ${tab.groupColor}`;
+          btn.dataset.flGroup = tab.group;
+        }
+        tabs.appendChild(btn);
+      });
       strip.appendChild(tabs);
 
       // ── toolbar ──
@@ -1304,6 +1475,14 @@
       const btn = document.createElement('div');
       btn.className = `fl-tab${idx === tabset.getSelected() ? ' fl-tab-active' : ''}`;
       btn.dataset.flTab = tab.id;
+
+      // Pinned tab indicator
+      if (!tab.isEnableClose() && !tab.isEnableDrag()) {
+        btn.classList.add('fl-tab-pinned');
+        const pin = document.createElement('span');
+        pin.className = 'fl-tab-pin-icon'; pin.textContent = '\uD83D\uDCCC';
+        btn.appendChild(pin);
+      }
 
       if (tab.getIcon()) {
         const ic = document.createElement('span');
@@ -1396,6 +1575,27 @@
         lbl.className = 'fl-tab-label';
         lbl.textContent = d.isNew ? (d.tabDef.name||'New') : d.tab.getName();
         ghost.appendChild(lbl);
+        // Drag preview: thumbnail of tab content
+        if (!d.isNew && d.tab) {
+          const contentEl = this._contentEls.get(d.tab.id);
+          if (contentEl && contentEl.offsetWidth > 0) {
+            try {
+              const thumb = contentEl.cloneNode(true);
+              thumb.style.cssText = 'width:150px;height:100px;overflow:hidden;transform:scale(1);pointer-events:none;opacity:0.7;border:1px solid var(--fl-border);margin-top:2px;border-radius:3px;';
+              const sw = 150 / contentEl.offsetWidth;
+              const sh = 100 / contentEl.offsetHeight;
+              const s = Math.min(sw, sh);
+              thumb.style.transform = `scale(${s})`;
+              thumb.style.transformOrigin = 'top left';
+              thumb.style.width = contentEl.offsetWidth + 'px';
+              thumb.style.height = contentEl.offsetHeight + 'px';
+              const wrapper = document.createElement('div');
+              wrapper.style.cssText = 'width:150px;height:100px;overflow:hidden;';
+              wrapper.appendChild(thumb);
+              ghost.appendChild(wrapper);
+            } catch(e) {}
+          }
+        }
         ghost.style.cssText = `position:fixed;left:${d.rect.left}px;top:${d.rect.top}px;`
           + `min-width:${d.rect.width}px;pointer-events:none;z-index:9997;white-space:nowrap;`;
         document.body.appendChild(ghost);

@@ -44,8 +44,13 @@
       var theme = config.theme || '';
 
       this._layoutContainer = document.createElement('div');
-      this._layoutContainer.style.cssText = 'width:100%;height:100%;position:absolute;inset:0;';
+      this._layoutContainer.style.cssText = 'width:100%;position:absolute;top:0;left:0;right:0;bottom:20px;';
       el.appendChild(this._layoutContainer);
+
+      // Feature 10: Status Bar
+      this._statusBar = document.createElement('div');
+      this._statusBar.className = 'fl-status-bar';
+      el.appendChild(this._statusBar);
 
       this._factory = this._createFactory();
       var modelDef = { layout: modelJson };
@@ -153,6 +158,10 @@
       // Lightweight action notification (much smaller than full model)
       if (this._notifyActions) {
         this.sendDataToServer(this._serializeAction(action));
+      }
+      // Feature 4: Broadcast for collaboration
+      if (this._onActionBroadcast) {
+        this._onActionBroadcast(action);
       }
       return true;
     },
@@ -318,12 +327,12 @@
       if (theme) this._layoutContainer.classList.add(theme);
     },
 
-    loadModel: function (modelJsonInput) {
+    loadModel: function (modelJsonInput, migrateFn) {
       if (!this._layout) return;
       this._layout.destroy();
       this._tabWidgetMap = {};
       this._popOuts = {};
-      this._model = FlexLayout.Model.fromJson(parseJson(modelJsonInput));
+      this._model = FlexLayout.Model.fromJson(parseJson(modelJsonInput), migrateFn || null);
       this._layout = this._createLayout();
       // Rehydrate: notify server of all tabs that need widget creation (single batch message)
       var tabs = [];
@@ -764,6 +773,88 @@
       var w = this._layoutContainer.offsetWidth;
       var maxSize = w > 0 ? Math.round(w * 0.5) : 400;
       this._layout._act({ type: 'MAXIMIZE_BORDER', side: side, maxSize: maxSize });
+    },
+
+    // ─── Feature 1: Model Migration API ─────────────────────────
+    loadModelWithMigration: function (modelJsonInput, migrateFn) {
+      if (!this._layout) return;
+      this._layout.destroy();
+      this._tabWidgetMap = {};
+      this._popOuts = {};
+      this._model = FlexLayout.Model.fromJson(parseJson(modelJsonInput), migrateFn);
+      this._layout = this._createLayout();
+      var tabs = [];
+      this._collectRehydrateTabs(this._model.getRoot(), tabs);
+      var borders = this._model.getBorders ? this._model.getBorders() : [];
+      for (var b = 0; b < borders.length; b++) {
+        var border = borders[b];
+        for (var c = 0; c < border.children.length; c++) {
+          var child = border.children[c];
+          var comp = child.getComponent ? child.getComponent() : null;
+          if (comp && comp !== '' && comp !== 'pwidget') {
+            var cfg = child.getConfig ? child.getConfig() : null;
+            tabs.push({ tabId: child.getId(), component: comp, tabName: child.getName(), config: cfg ? JSON.stringify(cfg) : null });
+          }
+        }
+      }
+      if (tabs.length > 0) this.sendDataToServer({ type: 'rehydrate', tabs: JSON.stringify(tabs) });
+    },
+
+    // ─── Feature 3: Sidebar Pop-out ─────────────────────────────
+    popOutBorder: function (side) {
+      if (!this._model) return;
+      var border = this._model.getBorder(side);
+      if (!border || !border.isOpen()) return;
+      var selTab = border.getSelectedNode();
+      if (!selTab) return;
+      var rect = this._layoutContainer.getBoundingClientRect();
+      this.popOut(selTab.getId(), selTab.getName(), Math.round(rect.left + 50), Math.round(rect.top + 50), border.size || 400, 300, 'float');
+    },
+
+    // ─── Feature 4: Collaboration API ───────────────────────────
+    applyRemoteAction: function (actionJson) {
+      if (!this._layout || !this._model) return;
+      var action = parseJson(actionJson);
+      this._layout.applyRemote(action);
+    },
+
+    // ─── Feature 7: Command Palette ─────────────────────────────
+    showCommandPalette: function () {
+      if (!this._layout) return;
+      this._layout._showCommandPalette(this._commandPaletteItems || null);
+    },
+
+    setCommandPaletteItems: function (items) {
+      this._commandPaletteItems = parseJson(items);
+    },
+
+    // ─── Feature 9: Tab Groups ──────────────────────────────────
+    setTabGroup: function (tabId, groupName, color) {
+      if (!this._model) return;
+      this._model.doAction({ type: 'SET_TAB_GROUP', tabId: tabId, group: groupName, groupColor: color });
+    },
+
+    // ─── Feature 10: Status Bar ─────────────────────────────────
+    setStatusBar: function (widgetId) {
+      if (!this._statusBar) return;
+      var self = this;
+      this._statusBar.innerHTML = '';
+      setTimeout(function () { self._moveWidgetToHost(widgetId, self._statusBar); }, 50);
+    },
+
+    // ─── Feature 11: Notification/Toast ─────────────────────────
+    showNotification: function (message, type, duration) {
+      var toast = document.createElement('div');
+      toast.className = 'fl-toast fl-toast-' + (type || 'info');
+      toast.textContent = message;
+      if (!this._toastContainer) {
+        this._toastContainer = document.createElement('div');
+        this._toastContainer.className = 'fl-toast-container';
+        this.element.appendChild(this._toastContainer);
+      }
+      this._toastContainer.appendChild(toast);
+      var dur = duration || 3000;
+      setTimeout(function () { toast.classList.add('fl-toast-hide'); setTimeout(function () { toast.remove(); }, 300); }, dur);
     },
 
     destroy: function () {

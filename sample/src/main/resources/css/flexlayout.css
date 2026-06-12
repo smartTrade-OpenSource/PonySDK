@@ -523,3 +523,50 @@
   display: inline-block;
 }
 
+
+/* ── Feature 7: Command Palette ─────────────────────────────────── */
+.fl-command-palette {
+  position: absolute; top: 40px; left: 50%; transform: translateX(-50%);
+  z-index: 10001; width: 320px; max-height: 300px;
+  background: var(--fl-panel); border: 1px solid var(--fl-border);
+  border-radius: var(--fl-radius); box-shadow: 0 8px 24px rgba(0,0,0,.5);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.fl-command-palette input {
+  width: 100%; padding: 8px 12px; border: none; border-bottom: 1px solid var(--fl-border);
+  background: var(--fl-strip); color: var(--fl-text); font-size: var(--fl-font-sz);
+  outline: none;
+}
+.fl-command-palette-list { overflow-y: auto; max-height: 240px; }
+.fl-command-palette-item {
+  padding: 6px 12px; cursor: pointer; color: var(--fl-text); font-size: var(--fl-font-sz);
+}
+.fl-command-palette-item:hover { background: var(--fl-tab-hover); }
+
+/* ── Feature 8: Pinned Tabs ─────────────────────────────────────── */
+.fl-tab-pinned { opacity: 0.8; }
+.fl-tab-pin-icon { font-size: 10px; margin-right: 2px; }
+
+/* ── Feature 10: Status Bar ─────────────────────────────────────── */
+.fl-status-bar {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 20px;
+  background: var(--fl-strip); border-top: 1px solid var(--fl-border);
+  display: flex; align-items: center; padding: 0 8px;
+  font-size: 11px; color: var(--fl-text-dim); overflow: hidden;
+}
+
+/* ── Feature 11: Notification/Toast ─────────────────────────────── */
+.fl-toast-container {
+  position: absolute; top: 8px; right: 8px; z-index: 10002;
+  display: flex; flex-direction: column; gap: 4px; pointer-events: none;
+}
+.fl-toast {
+  padding: 8px 14px; border-radius: var(--fl-radius); font-size: var(--fl-font-sz);
+  color: #fff; pointer-events: auto; opacity: 1; transition: opacity .3s;
+  box-shadow: 0 4px 12px rgba(0,0,0,.4);
+}
+.fl-toast-hide { opacity: 0; }
+.fl-toast-info    { background: var(--fl-accent); }
+.fl-toast-success { background: #a6e3a1; color: #1e1e2e; }
+.fl-toast-warning { background: #f9e2af; color: #1e1e2e; }
+.fl-toast-error   { background: #f38ba8; }

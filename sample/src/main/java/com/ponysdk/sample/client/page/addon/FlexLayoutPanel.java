@@ -1,5 +1,6 @@
 package com.ponysdk.sample.client.page.addon;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -285,6 +286,67 @@ public class FlexLayoutPanel implements IsPWidget {
      */
     public void setTheme(final String theme) {
         addon.setTheme(theme);
+    }
+
+    // ─── Feature 1: Model Migration ─────────────────────────────
+
+    public void loadModel(final String modelJson, final String version) {
+        addon.loadModel(modelJson, version);
+    }
+
+    public void setMigrationHandler(final BiFunction<String, String, String> handler) {
+        addon.setMigrationHandler(handler);
+    }
+
+    // ─── Feature 3: Sidebar Pop-out ─────────────────────────────
+
+    public void popOutBorder(final String side) {
+        addon.popOutBorder(side);
+    }
+
+    // ─── Feature 4: Collaboration ───────────────────────────────
+
+    public void applyRemoteAction(final String actionJson) {
+        addon.applyRemoteAction(actionJson);
+    }
+
+    public void setOnActionBroadcast(final Consumer<JsonObject> handler) {
+        addon.setOnActionBroadcast(handler);
+    }
+
+    // ─── Feature 7: Command Palette ─────────────────────────────
+
+    public void showCommandPalette() {
+        addon.showCommandPalette();
+    }
+
+    public void setCommandPaletteItems(final List<String> items) {
+        addon.setCommandPaletteItems(items);
+    }
+
+    // ─── Feature 8: Pinned Tabs ─────────────────────────────────
+
+    public String addPinnedTab(final String tabName, final PWidget content) {
+        addon.addPinnedTab(tabName, content);
+        return "pin_" + System.identityHashCode(content);
+    }
+
+    // ─── Feature 9: Tab Groups ──────────────────────────────────
+
+    public void setTabGroup(final String tabId, final String groupName, final String color) {
+        addon.setTabGroup(tabId, groupName, color);
+    }
+
+    // ─── Feature 10: Status Bar ─────────────────────────────────
+
+    public void setStatusBarWidget(final PWidget w) {
+        addon.setStatusBarWidget(w);
+    }
+
+    // ─── Feature 11: Notifications ──────────────────────────────
+
+    public void showNotification(final String message, final String type, final int durationMs) {
+        addon.showNotification(message, type, durationMs);
     }
 
     // ─── Internal ────────────────────────────────────────────────

@@ -2,7 +2,9 @@ package com.ponysdk.sample.client.page.addon;
 
 import java.io.StringReader;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 import javax.json.Json;
@@ -51,6 +53,9 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
     private Consumer<String> popOutStateCallback;
     private final Map<String, String> tabComponents = new HashMap<>();
     private java.util.function.BiFunction<String, String, PWidget> widgetFactory;
+    private String modelVersion;
+    private BiFunction<String, String, String> migrationHandler;
+    private Consumer<JsonObject> onActionBroadcast;
 
     public FlexLayoutAddon() {
         this(null, null, null);
@@ -453,6 +458,101 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
         callTerminalMethod("maximizeBorder", side);
     }
 
+    // ─── Feature 1: Model Migration API ─────────────────────────
+
+    /**
+     * Load a model with a version tag. Migration handler is called during rehydration.
+     */
+    public void loadModel(final String modelJson, final String version) {
+        this.modelVersion = version;
+        loadModel(modelJson);
+    }
+
+    /**
+     * Set migration handler: BiFunction(component, version) -> newComponent (or null to remove).
+     */
+    public void setMigrationHandler(final BiFunction<String, String, String> handler) {
+        this.migrationHandler = handler;
+    }
+
+    public String getModelVersion() {
+        return modelVersion;
+    }
+
+    // ─── Feature 3: Sidebar Pop-out ─────────────────────────────
+
+    /**
+     * Pop out the currently selected border tab into a floating div.
+     */
+    public void popOutBorder(final String side) {
+        callTerminalMethod("popOutBorder", side);
+    }
+
+    // ─── Feature 4: Collaboration API ───────────────────────────
+
+    /**
+     * Apply a remote action without triggering onAction echo.
+     */
+    public void applyRemoteAction(final String actionJson) {
+        callTerminalMethod("applyRemoteAction", actionJson);
+    }
+
+    /**
+     * Set callback to receive all local actions for broadcasting to peers.
+     */
+    public void setOnActionBroadcast(final Consumer<JsonObject> handler) {
+        this.onActionBroadcast = handler;
+        setActionNotificationEnabled(true);
+    }
+
+    // ─── Feature 7: Command Palette ─────────────────────────────
+
+    public void showCommandPalette() {
+        callTerminalMethod("showCommandPalette");
+    }
+
+    public void setCommandPaletteItems(final List<String> items) {
+        final javax.json.JsonArrayBuilder arr = Json.createArrayBuilder();
+        for (final String item : items) arr.add(item);
+        callTerminalMethod("setCommandPaletteItems", arr.build().toString());
+    }
+
+    // ─── Feature 8: Pinned Tabs ─────────────────────────────────
+
+    /**
+     * Add a pinned tab (no close, no drag).
+     */
+    public void addPinnedTab(final String tabName, final PWidget content) {
+        addPinnedTab(tabName, content, null);
+    }
+
+    public void addPinnedTab(final String tabName, final PWidget content, final String tabsetId) {
+        final String tabId = "pin_" + System.identityHashCode(content);
+        widget.add(content);
+        tabWidgets.put(tabId, content);
+        // Use addTab with enableClose=false, enableDrag=false encoded in the tab def on client
+        callTerminalMethod("addTab", tabId, tabName, String.valueOf(content.getID()), tabsetId);
+    }
+
+    // ─── Feature 9: Tab Groups ──────────────────────────────────
+
+    public void setTabGroup(final String tabId, final String groupName, final String color) {
+        callTerminalMethod("setTabGroup", tabId, groupName, color);
+    }
+
+    // ─── Feature 10: Status Bar ─────────────────────────────────
+
+    public void setStatusBarWidget(final PWidget w) {
+        widget.add(w);
+        callTerminalMethod("setStatusBar", String.valueOf(w.getID()));
+    }
+
+    // ─── Feature 11: Notification/Toast ─────────────────────────
+
+    public void showNotification(final String message, final String type, final int durationMs) {
+        callTerminalMethod("showNotification", message, type, durationMs);
+    }
+
     // ─── Lifecycle ───────────────────────────────────────────────
 
     @Override
@@ -572,6 +672,7 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
 
     private void handleActionEvent(final JsonObject data) {
         if (onAction != null) onAction.accept(data);
+        if (onActionBroadcast != null) onActionBroadcast.accept(data);
     }
 
     private void handlePopOut(final JsonObject data) {
@@ -651,11 +752,15 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
         for (int i = 0; i < tabs.size(); i++) {
             final JsonObject tab = tabs.getJsonObject(i);
             final String tabId = tab.getString("tabId", null);
-            final String component = tab.getString("component", null);
+            String component = tab.getString("component", null);
             final String config = tab.containsKey("config") && !tab.isNull("config") ? tab.getString("config", null) : null;
-            if (tabId != null && component != null) {
-                onExternalDrop.onDrop(tabId, component, config);
+            if (tabId == null || component == null) continue;
+            // Feature 1: Migration handler
+            if (migrationHandler != null && modelVersion != null) {
+                component = migrationHandler.apply(component, modelVersion);
+                if (component == null) continue; // tab removed by migration
             }
+            onExternalDrop.onDrop(tabId, component, config);
         }
     }
 }
