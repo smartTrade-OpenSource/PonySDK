@@ -1052,15 +1052,11 @@
             const newSize = clamp(rawSize, openBorders[0] && openBorders[0].minSize || 50, openBorders[0] && openBorders[0].maxSize || Infinity); // Feature 5
             if (isV) panel.style.width = newSize + 'px';
             else panel.style.height = newSize + 'px';
-            // Visual hint: fade + outline when below threshold
+            // Visual hint: fade when below threshold
             if (rawSize < SNAP_THRESHOLD) {
               panel.style.opacity = '0.3';
-              panel.style.outline = '2px dashed var(--fl-close-hover, #f38ba8)';
-              panel.style.outlineOffset = '-2px';
             } else {
               panel.style.opacity = '';
-              panel.style.outline = '';
-              panel.style.outlineOffset = '';
             }
             // Update layout inset in real-time
             if (rowEl) {
@@ -1083,8 +1079,6 @@
             try { handle.releasePointerCapture(e.pointerId); } catch(err) {}
             panel.style.transition = '';
             panel.style.opacity = '';
-            panel.style.outline = '';
-            panel.style.outlineOffset = '';
             const finalSize = isV ? panel.offsetWidth : panel.offsetHeight;
             if (finalSize < SNAP_THRESHOLD) {
               // Snap to close: minimize all open borders on this side
