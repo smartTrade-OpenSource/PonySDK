@@ -852,6 +852,85 @@ test.describe('FlexLayout PonySDK Integration', () => {
     expect(numText.length).toBeGreaterThan(0);
   });
 
+  test('collapse button hides lateral sidebar', async ({ page }) => {
+    await expect(page.locator('.fl-sidebar-left')).toBeVisible();
+    await page.locator('.fl-sidebar-left .fl-sidebar-collapse').click();
+    await page.waitForTimeout(400);
+    await expect(page.locator('.fl-sidebar-left')).toHaveCount(0);
+  });
+
+  test('badge clears when clicking inside panel content', async ({ page }) => {
+    // Set badge on the currently active/open tab via JS (simulates notification arriving while panel is open)
+    await page.evaluate(() => {
+      const layout = document.querySelector('.fl-layout').__flexLayout;
+      const borders = layout.model.getBorders().filter(b => b.isOpen());
+      if (borders.length) {
+        const tab = borders[0].getSelectedNode();
+        if (tab) layout.setBadge(tab.id, '!', '#ff0000');
+      }
+    });
+    await page.waitForTimeout(300);
+    await expect(page.locator('.fl-sidebar-tab-badge').first()).toBeVisible({ timeout: 2000 });
+    // Click inside the panel content
+    await page.locator('.fl-sidebar-pane').first().click();
+    await page.waitForTimeout(500);
+    // Badge should be cleared
+    const count = await page.locator('.fl-sidebar-tab-badge').count();
+    expect(count).toBeLessThan(5); // At least one was cleared (demo has 5 initially, one just removed)
+  });
+
+  test('snap-to-close shows visual feedback', async ({ page }) => {
+    // Ensure left panel is open
+    const panel = page.locator('.fl-sidebar-left .fl-sidebar-panel');
+    await expect(panel).toBeVisible();
+    const handle = page.locator('.fl-sidebar-left .fl-sidebar-resize');
+    const hBox = await handle.boundingBox();
+    // Drag handle far left (below snap threshold)
+    await page.mouse.move(hBox.x + 2, hBox.y + hBox.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(hBox.x - 200, hBox.y + hBox.height / 2, { steps: 5 });
+    // During drag below threshold, panel should show visual feedback (opacity or outline)
+    const opacity = await panel.evaluate(el => getComputedStyle(el).opacity);
+    expect(parseFloat(opacity)).toBeLessThan(1);
+    await page.mouse.up();
+  });
+
+  test('keyboard Ctrl+Z undoes last action', async ({ page }) => {
+    // Close all left panels first
+    const activeTabs = page.locator('.fl-sidebar-left .fl-sidebar-tab-active');
+    const count = await activeTabs.count();
+    for (let i = 0; i < count; i++) { await activeTabs.nth(0).click(); await page.waitForTimeout(150); }
+    await page.waitForTimeout(200);
+    const widthClosed = await page.locator('.fl-sidebar-left .fl-sidebar-panel').evaluate(el => el.offsetWidth);
+    expect(widthClosed).toBe(0);
+    // Undo via Ctrl+Z — should reopen the last closed panel
+    await page.locator('.fl-layout').focus();
+    await page.keyboard.press('Control+z');
+    await page.waitForTimeout(400);
+    const widthAfterUndo = await page.locator('.fl-sidebar-left .fl-sidebar-panel').evaluate(el => el.offsetWidth);
+    expect(widthAfterUndo).toBeGreaterThan(0);
+  });
+
+  test('tab overflow strip is scrollable', async ({ page }) => {
+    // The strip with >10 tabs gets fl-sidebar-strip-overflow class
+    // Inject many tabs via JS to trigger overflow
+    await page.evaluate(() => {
+      const layout = document.querySelector('.fl-layout').__flexLayout;
+      const borders = layout.model.getBorders().filter(b => b.side.startsWith('left'));
+      if (borders.length === 0) return;
+      const side = borders[0].side;
+      for (let i = 0; i < 12; i++) {
+        layout._act({ type: 'ADD_BORDER_TAB', side, select: false, tab: { name: 'T' + i, component: 'test' } });
+      }
+    });
+    await page.waitForTimeout(300);
+    // Check that overflow class is applied and element is scrollable
+    const hasOverflow = await page.locator('.fl-sidebar-strip-overflow').count();
+    expect(hasOverflow).toBeGreaterThan(0);
+    const scrollable = await page.locator('.fl-sidebar-strip-overflow').first().evaluate(el => el.scrollHeight > el.clientHeight);
+    expect(scrollable).toBe(true);
+  });
+
   test('drag tab from layout to sidebar strip', async ({ page }) => {
     const tabsBefore = await page.locator('.fl-sidebar-left .fl-sidebar-tab').count();
     // Drag the "Info" tab to the left sidebar strip

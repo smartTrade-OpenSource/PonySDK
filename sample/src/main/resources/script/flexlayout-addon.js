@@ -737,7 +737,16 @@
       if (this._pendingTimeouts) { this._pendingTimeouts.forEach(clearTimeout); this._pendingTimeouts = []; }
       if (this._layout) { this._layout.destroy(); this._layout = null; }
       // Close all popout windows
-      if (this._popOuts) { for (var id in this._popOuts) { this._popOuts[id].win.remove(); } this._popOuts = {}; }
+      if (this._popOuts) {
+        for (var id in this._popOuts) {
+          var info = this._popOuts[id];
+          if (info.win) info.win.remove();
+          if (info.popup && !info.popup.closed) info.popup.close();
+        }
+        this._popOuts = {};
+      }
+      this._debouncedModelChange = function () {};
+      this._debouncedAutoSave = function () {};
       this._model = null;
       this._tabWidgetMap = {};
     }

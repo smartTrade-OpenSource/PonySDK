@@ -525,7 +525,7 @@
     redo() { if (!this._undoEnabled || this._historyIndex >= this._actionHistory.length - 2) return; const snap = this._actionHistory[++this._historyIndex + 1]; this.model._root = Model._parse(snap.layout, 'row'); this.model._borders = (snap.borders || []).map(b => { const bn = new BorderNode(b); (b.children || []).forEach(c => bn.addChild(new TabNode(c))); return bn; }); this._render(); }
 
     // Feature 11: RTL support
-    _isRTL() { return getComputedStyle(this.container).direction === 'rtl'; }
+    _isRTL() { return this.container.isConnected && getComputedStyle(this.container).direction === 'rtl'; }
 
     // Setter methods for feature flags
     setKeyboardEnabled(v) { this._keyboardEnabled = !!v; }
@@ -595,6 +595,7 @@
 
     destroy() {
       this._endDragCleanup();
+      this._hideBorderContextMenu();
       if (this._dropInd.parentNode) this._dropInd.remove();
       this.container.classList.remove('fl-layout');
       this.container.innerHTML = '';
@@ -646,8 +647,8 @@
       // Calculate insets from open sidebars
       const leftOpen = leftBorders.find(b => b.isOpen());
       const rightOpen = rightBorders.find(b => b.isOpen());
-      const leftSize = leftOpen ? Math.max(...leftBorders.map(b => b.size)) : 0;
-      const rightSize = rightOpen ? Math.max(...rightBorders.map(b => b.size)) : 0;
+      const leftSize = leftOpen && leftBorders.length > 0 ? Math.max(...leftBorders.map(b => b.size)) : 0;
+      const rightSize = rightOpen && rightBorders.length > 0 ? Math.max(...rightBorders.map(b => b.size)) : 0;
       const bottomSize = bottomBorder && bottomBorder.isOpen() ? bottomBorder.size : 0;
       // Strip widths (fixed)
       const stripW = this._getStripW();
@@ -700,7 +701,7 @@
       const bottomBorder = this.model.getBorders().find(b => !b._hidden && b.side === 'bottom');
       const bottomInset = bottomBorder ? stripW : 0;
       const openBorders = borders.filter(b => b.isOpen());
-      const maxSize = Math.max(...borders.map(b => b.size));
+      const maxSize = borders.length > 0 ? Math.max(...borders.map(b => b.size)) : 0;
       const size = openBorders.length > 0 ? maxSize : 0;
 
       const wrapper = document.createElement('div');
@@ -937,8 +938,8 @@
         const rightBorders = borders.filter(b => !b._hidden && (b.side === 'right' || b.side.startsWith('right-')));
         const leftOpen = leftBorders.find(b => b.isOpen());
         const rightOpen = rightBorders.find(b => b.isOpen());
-        const lInset = leftBorders.length > 0 ? stripW + (leftOpen ? Math.max(...leftBorders.map(b => b.size)) : 0) : 0;
-        const rInset = rightBorders.length > 0 ? stripW + (rightOpen ? Math.max(...rightBorders.map(b => b.size)) : 0) : 0;
+        const lInset = leftBorders.length > 0 ? stripW + (leftOpen ? Math.max(0, ...leftBorders.map(b => b.size)) : 0) : 0;
+        const rInset = rightBorders.length > 0 ? stripW + (rightOpen ? Math.max(0, ...rightBorders.map(b => b.size)) : 0) : 0;
         wrapper.style.cssText = `position:absolute;bottom:0;left:${lInset}px;right:${rInset}px;display:flex;flex-direction:column;z-index:2;`;
       }
 
@@ -1139,8 +1140,8 @@
       const leftOpen = leftBorders.find(b => b.isOpen());
       const rightOpen = rightBorders.find(b => b.isOpen());
       const stripW = this._getStripW();
-      const leftSize = leftOpen ? Math.max(...leftBorders.map(b => b.size)) : 0;
-      const rightSize = rightOpen ? Math.max(...rightBorders.map(b => b.size)) : 0;
+      const leftSize = leftOpen && leftBorders.length > 0 ? Math.max(...leftBorders.map(b => b.size)) : 0;
+      const rightSize = rightOpen && rightBorders.length > 0 ? Math.max(...rightBorders.map(b => b.size)) : 0;
       const bottomSize = bottomBorder && bottomBorder.isOpen() ? bottomBorder.size : 0;
       const rowEl = this.container.querySelector('.fl-row');
       if (rowEl) {
