@@ -931,6 +931,41 @@ test.describe('FlexLayout PonySDK Integration', () => {
     expect(scrollable).toBe(true);
   });
 
+  test('single click on sidebar tab is instant (no delay)', async ({ page }) => {
+    // Close all left tabs first
+    const active = page.locator('.fl-sidebar-left .fl-sidebar-tab-active');
+    const cnt = await active.count();
+    for (let i = 0; i < cnt; i++) { await active.nth(0).click(); await page.waitForTimeout(50); }
+    await page.waitForTimeout(100);
+    // Single click should open panel within 100ms
+    const tab = page.locator('.fl-sidebar-left .fl-sidebar-tab').first();
+    await tab.click();
+    await page.waitForTimeout(100);
+    const width = await page.locator('.fl-sidebar-left .fl-sidebar-panel').evaluate(el => el.offsetWidth);
+    expect(width).toBeGreaterThan(0);
+  });
+
+  test('real double-click maximizes sidebar panel', async ({ page }) => {
+    const panel = page.locator('.fl-sidebar-left .fl-sidebar-panel');
+    const before = await panel.evaluate(el => el.offsetWidth);
+    const tab = page.locator('.fl-sidebar-left .fl-sidebar-tab').first();
+    await tab.dblclick();
+    await page.waitForTimeout(400);
+    const after = await panel.evaluate(el => el.offsetWidth);
+    expect(after).toBeGreaterThan(before);
+  });
+
+  test('lateral badge is positioned top-right with horizontal text', async ({ page }) => {
+    const badge = page.locator('.fl-sidebar-strip-left .fl-sidebar-tab-badge,.fl-sidebar-strip-right .fl-sidebar-tab-badge').first();
+    await expect(badge).toBeVisible({ timeout: 2000 });
+    const style = await badge.evaluate(el => {
+      const cs = getComputedStyle(el);
+      return { position: cs.position, writingMode: cs.writingMode };
+    });
+    expect(style.position).toBe('absolute');
+    expect(style.writingMode).toBe('horizontal-tb');
+  });
+
   test('drag tab from layout to sidebar strip', async ({ page }) => {
     const tabsBefore = await page.locator('.fl-sidebar-left .fl-sidebar-tab').count();
     // Drag the "Info" tab to the left sidebar strip
