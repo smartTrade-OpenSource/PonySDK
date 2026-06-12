@@ -795,17 +795,7 @@
         btn.appendChild(x);
       }
       // Feature 1: Double-click maximize
-      btn.addEventListener('dblclick', ev => {
-        ev.preventDefault();
-        if (btn._clickTimer) { clearTimeout(btn._clickTimer); btn._clickTimer = null; }
-        // Undo the two toggles from the double-click's two pointerups
-        const border2 = this.model.getBorder(side);
-        if (border2) {
-          const idx = border2.children.findIndex(t2 => t2.id === tab.id);
-          if (idx >= 0 && border2.getSelected() !== idx) border2.setSelected(idx);
-        }
-        this._act(Actions.maximizeBorder(side));
-      });
+      btn.addEventListener('dblclick', ev => { ev.preventDefault(); });
       // Feature 3: Context menu
       btn.addEventListener('contextmenu', ev => {
         ev.preventDefault();
@@ -849,7 +839,21 @@
           btn.removeEventListener('pointerup', onUp);
           try { btn.releasePointerCapture(ev.pointerId); } catch(e) {}
           if (!dragging) {
-            this._act(Actions.selectBorderTab(side, tab.id));
+            const now = Date.now();
+            const lastClick = this._lastBorderClick || {};
+            if (lastClick.tabId === tab.id && now - lastClick.time < 350) {
+              // Double-click detected: ensure tab is open then maximize
+              this._lastBorderClick = {};
+              const b = this.model.getBorder(side);
+              if (b) {
+                const idx = b.children.findIndex(t2 => t2.id === tab.id);
+                if (idx >= 0) b.setSelected(idx);
+              }
+              this._act(Actions.maximizeBorder(side));
+            } else {
+              this._lastBorderClick = { tabId: tab.id, time: now };
+              this._act(Actions.selectBorderTab(side, tab.id));
+            }
           }
         };
         try { btn.setPointerCapture(ev.pointerId); } catch(e) {}
