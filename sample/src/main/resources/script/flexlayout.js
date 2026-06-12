@@ -252,7 +252,7 @@
           // Create new tabset with a new tab, then split it into target
           const dest = this._root.findById(action.toId); if (!dest) return;
           const tab  = new TabNode(action.tab);
-          this._splitWithTab(tab, dest, action.location);
+          this._split(tab, dest, action.location);
           this._cleanup(this._root); break;
         }
         case 'RENAME_TAB': {
@@ -344,7 +344,7 @@
             sameSide.forEach(b => { b.size = prev; b._maximizedSize = null; });
           } else {
             const isV = baseSide !== 'bottom';
-            const maxSize = isV ? Math.round(window.innerWidth * 0.5) : Math.round(window.innerHeight * 0.5);
+            const maxSize = action.maxSize || (isV ? Math.round((typeof window !== 'undefined' ? window.innerWidth : 800) * 0.5) : Math.round((typeof window !== 'undefined' ? window.innerHeight : 600) * 0.5));
             sameSide.forEach(b => { b._maximizedSize = { prev: b.size }; b.size = maxSize; });
           }
           break;
@@ -367,27 +367,6 @@
     }
 
     _split(tab, target, location) {
-      const parent = target.getParent(); if (!parent) return;
-      const isH    = location === DL.LEFT || location === DL.RIGHT;
-      const before = location === DL.LEFT || location === DL.TOP;
-      const w = target.getWeight(); const half = w / 2;
-      const newTs = new TabSetNode({ weight: half, enableMaximize: true, enableDrop: true });
-      newTs.addChild(tab); newTs.setSelected(0); target.setWeight(half);
-      const sameDir = (isH && parent.direction === 'row') || (!isH && parent.direction === 'column');
-      if (sameDir) {
-        const idx = parent.children.indexOf(target);
-        parent.addChild(newTs, before ? idx : idx + 1);
-      } else {
-        const idx = parent.children.indexOf(target);
-        parent.removeChild(target);
-        const wrap = new RowNode({ direction: isH ? 'row' : 'column', weight: w });
-        if (before) { wrap.addChild(newTs); wrap.addChild(target); }
-        else        { wrap.addChild(target); wrap.addChild(newTs); }
-        parent.addChild(wrap, idx);
-      }
-    }
-
-    _splitWithTab(tab, target, location) {
       const parent = target.getParent(); if (!parent) return;
       const isH    = location === DL.LEFT || location === DL.RIGHT;
       const before = location === DL.LEFT || location === DL.TOP;
@@ -452,7 +431,7 @@
     moveFromBorder:  (side, tabId, toId, location, insertIndex) => ({ type: 'MOVE_FROM_BORDER', side, tabId, toId, location, insertIndex }),
     resizeBorder:    (side, size)                 => ({ type: 'RESIZE_BORDER', side, size }),
     toggleBorder:    (side)                       => ({ type: 'TOGGLE_BORDER', side }),
-    maximizeBorder:  (side)                       => ({ type: 'MAXIMIZE_BORDER', side }),
+    maximizeBorder:  (side, maxSize)              => ({ type: 'MAXIMIZE_BORDER', side, maxSize }),
     reorderBorderTab:(side, tabId, toIndex)       => ({ type: 'REORDER_BORDER_TAB', side, tabId, toIndex }),
     setBadge:        (tabId, badge)               => ({ type: 'SET_BADGE', tabId, badge }),
   };
@@ -849,7 +828,7 @@
                 const idx = b.children.findIndex(t2 => t2.id === tab.id);
                 if (idx >= 0) b.setSelected(idx);
               }
-              this._act(Actions.maximizeBorder(side));
+              this._act(Actions.maximizeBorder(side, Math.round(this.container.offsetWidth * 0.5)));
             } else {
               this._lastBorderClick = { tabId: tab.id, time: now };
               this._act(Actions.selectBorderTab(side, tab.id));

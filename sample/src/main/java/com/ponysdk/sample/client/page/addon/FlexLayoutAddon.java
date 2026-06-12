@@ -429,6 +429,20 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
         callTerminalMethod("enableAutoSave", enabled);
     }
 
+    /**
+     * Reorder a tab within its sidebar border.
+     */
+    public void reorderBorderTab(final String side, final String tabId, final int newIndex) {
+        callTerminalMethod("reorderBorderTab", side, tabId, newIndex);
+    }
+
+    /**
+     * Toggle maximize a sidebar panel (50% container width/height).
+     */
+    public void maximizeBorder(final String side) {
+        callTerminalMethod("maximizeBorder", side);
+    }
+
     // ─── Lifecycle ───────────────────────────────────────────────
 
     @Override

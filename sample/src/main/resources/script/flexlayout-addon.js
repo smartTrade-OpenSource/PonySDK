@@ -220,18 +220,7 @@
       }
     },
 
-    _findEmptyHost: function () {
-      var hosts = this._layoutContainer.querySelectorAll('.fl-pony-widget-host');
-      for (var i = 0; i < hosts.length; i++) {
-        // Empty or only has a placeholder span (not a real widget)
-        if (hosts[i].children.length === 0) return hosts[i];
-        if (hosts[i].children.length === 1 && hosts[i].children[0].tagName === 'SPAN') {
-          hosts[i].innerHTML = '';
-          return hosts[i];
-        }
-      }
-      return null;
-    },
+
 
     // ─── Server API ─────────────────────────────────────────────
 
@@ -731,6 +720,17 @@
     redo: function () {
       if (!this._layout) return;
       this._layout.redo();
+    },
+
+    reorderBorderTab: function (side, tabId, newIndex) {
+      if (!this._model) return;
+      this._model.doAction({ type: 'REORDER_BORDER_TAB', side: side, tabId: tabId, toIndex: newIndex });
+    },
+
+    maximizeBorder: function (side) {
+      if (!this._layout) return;
+      var maxSize = Math.round(this._layoutContainer.offsetWidth * 0.5);
+      this._layout._act({ type: 'MAXIMIZE_BORDER', side: side, maxSize: maxSize });
     },
 
     destroy: function () {
