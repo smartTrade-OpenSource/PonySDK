@@ -848,7 +848,7 @@
                 const idx = b.children.findIndex(t2 => t2.id === tab.id);
                 if (idx >= 0) b.setSelected(idx);
               }
-              this._act(Actions.maximizeBorder(side, Math.round(this.container.offsetWidth * 0.5)));
+              this._act(Actions.maximizeBorder(side, Math.round((this.container.offsetWidth || 800) * 0.5)));
             } else {
               this._lastBorderClick = { tabId: tab.id, time: now };
               this._act(Actions.selectBorderTab(side, tab.id));

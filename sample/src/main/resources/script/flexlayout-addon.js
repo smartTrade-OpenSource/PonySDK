@@ -723,13 +723,11 @@
     undo: function () {
       if (!this._layout) return;
       this._layout.undo();
-      this._rehydrateAfterUndoRedo();
     },
 
     redo: function () {
       if (!this._layout) return;
       this._layout.redo();
-      this._rehydrateAfterUndoRedo();
     },
 
     _rehydrateAfterUndoRedo: function () {
@@ -763,7 +761,8 @@
 
     maximizeBorder: function (side) {
       if (!this._layout) return;
-      var maxSize = Math.round(this._layoutContainer.offsetWidth * 0.5);
+      var w = this._layoutContainer.offsetWidth;
+      var maxSize = w > 0 ? Math.round(w * 0.5) : 400;
       this._layout._act({ type: 'MAXIMIZE_BORDER', side: side, maxSize: maxSize });
     },
 
