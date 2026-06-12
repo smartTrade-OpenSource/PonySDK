@@ -502,6 +502,13 @@
   display: inline-block; vertical-align: super; margin-left: 3px;
   transition: opacity .2s, transform .2s;
 }
+.fl-sidebar-strip-left .fl-sidebar-tab-badge,
+.fl-sidebar-strip-right .fl-sidebar-tab-badge {
+  position: absolute; top: 2px; right: 2px; margin: 0;
+  writing-mode: horizontal-tb;
+}
+.fl-sidebar-strip-left .fl-sidebar-tab,
+.fl-sidebar-strip-right .fl-sidebar-tab { position: relative; }
 .fl-badge-dot {
   width: 7px; height: 7px; border-radius: 50%;
   background: var(--fl-badge-dot);

@@ -798,6 +798,12 @@
       btn.addEventListener('dblclick', ev => {
         ev.preventDefault();
         if (btn._clickTimer) { clearTimeout(btn._clickTimer); btn._clickTimer = null; }
+        // Undo the two toggles from the double-click's two pointerups
+        const border2 = this.model.getBorder(side);
+        if (border2) {
+          const idx = border2.children.findIndex(t2 => t2.id === tab.id);
+          if (idx >= 0 && border2.getSelected() !== idx) border2.setSelected(idx);
+        }
         this._act(Actions.maximizeBorder(side));
       });
       // Feature 3: Context menu
@@ -843,11 +849,7 @@
           btn.removeEventListener('pointerup', onUp);
           try { btn.releasePointerCapture(ev.pointerId); } catch(e) {}
           if (!dragging) {
-            // Delay select to allow dblclick to cancel it
-            btn._clickTimer = setTimeout(() => {
-              btn._clickTimer = null;
-              this._act(Actions.selectBorderTab(side, tab.id));
-            }, 200);
+            this._act(Actions.selectBorderTab(side, tab.id));
           }
         };
         try { btn.setPointerCapture(ev.pointerId); } catch(e) {}
