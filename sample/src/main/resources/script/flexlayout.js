@@ -1330,6 +1330,10 @@
 
       btn.draggable = false;
       btn.style.touchAction = 'none';
+      btn.addEventListener('dblclick', ev => {
+        ev.preventDefault();
+        if (tabset.enableMaximize) this._act(Actions.maximizeToggle(tabset.id));
+      });
       btn.addEventListener('pointerdown', ev => {
         if (ev.button !== 0 || ev.target.closest('.fl-tab-x')) return;
         ev.preventDefault();

@@ -498,12 +498,12 @@ test.describe('FlexLayout PonySDK Integration', () => {
     // Open
     const tab = page.locator('.fl-sidebar-left .fl-sidebar-tab').first();
     await tab.click();
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(400);
     const widthOpen = await page.locator('.fl-sidebar-left .fl-sidebar-panel').evaluate(el => el.offsetWidth);
     expect(widthOpen).toBeGreaterThan(50);
-    // Close
+    // Close (wait >350ms to avoid double-click detection)
     await tab.click();
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(400);
     const widthClosed = await page.locator('.fl-sidebar-left .fl-sidebar-panel').evaluate(el => el.offsetWidth);
     expect(widthClosed).toBe(0);
   });
