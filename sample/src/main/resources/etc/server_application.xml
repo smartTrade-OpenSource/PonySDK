@@ -22,7 +22,7 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
         <property name="entryPointClass" value="com.ponysdk.sample.client.UISampleEntryPoint" />
         <property name="javascript">
             <list>
-                <value>script/jquery-3.0.0.min.js</value>
+                <value>script/jquery-3.7.1.min.js</value>
                 <value>script/webcomponents.js</value>
                 <value>script/sample.js</value>
                 <value>http://benalman.com/code/projects/jquery-throttle-debounce/jquery.ba-throttle-debounce.js</value>

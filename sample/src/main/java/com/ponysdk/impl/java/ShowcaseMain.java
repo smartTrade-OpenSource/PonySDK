@@ -26,7 +26,7 @@ public class ShowcaseMain {
         configuration.setEntryPointClass(UISampleEntryPoint.class);
 
         configuration.setJavascript(java.util.Set.of(
-            "script/jquery-3.0.0.min.js",
+            "script/jquery-3.7.1.min.js",
             "script/webcomponents.js",
             "script/sample.js"
         ));
