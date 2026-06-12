@@ -494,13 +494,14 @@
       this.container.setAttribute('tabindex', '-1');
       this.container.addEventListener('keydown', ev => {
         if (!this._keyboardEnabled) return;
+        const mod = ev.ctrlKey || ev.metaKey; // Ctrl on Win/Linux, Cmd on Mac
         const match = (binding) => {
           if (!binding) return false;
-          if (binding.ctrl && !ev.ctrlKey) return false;
+          if (binding.ctrl && !mod) return false;
+          if (!binding.ctrl && mod) return false;
           if (binding.shift && !ev.shiftKey) return false;
-          if (binding.alt && !ev.altKey) return false;
-          if (!binding.ctrl && ev.ctrlKey) return false;
           if (!binding.shift && ev.shiftKey) return false;
+          if (binding.alt && !ev.altKey) return false;
           if (!binding.alt && ev.altKey) return false;
           return ev.key.toLowerCase() === binding.key.toLowerCase();
         };
@@ -794,7 +795,6 @@
         btn.appendChild(x);
       }
       // Feature 1: Double-click maximize
-      btn.addEventListener('dblclick', ev => { ev.preventDefault(); });
       // Feature 3: Context menu
       btn.addEventListener('contextmenu', ev => {
         ev.preventDefault();
