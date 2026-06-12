@@ -1,14 +1,14 @@
-/* ================================================================
-   FlexLayout — CSS Themes
+﻿/* ================================================================
+   FlexLayout â€” CSS Themes
    Apply a theme class to the .fl-layout container element:
-     (none)              → dark (default)
-     .fl-theme-light     → light
-     .fl-theme-gray      → gray
-     .fl-theme-rounded   → dark rounded tabs
-     .fl-theme-underline → minimal underline-only tabs
+     (none)              â†’ dark (default)
+     .fl-theme-light     â†’ light
+     .fl-theme-gray      â†’ gray
+     .fl-theme-rounded   â†’ dark rounded tabs
+     .fl-theme-underline â†’ minimal underline-only tabs
    ================================================================ */
 
-/* ── Variables (dark default) ────────────────────────────────────── */
+/* â”€â”€ Variables (dark default) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 :root {
   --fl-bg:           #1e1e2e;
   --fl-panel:        #181825;
@@ -44,9 +44,12 @@
   --fl-sidebar-close-bg:   rgba(243,139,168,.1);
   --fl-sidebar-resize-w:   4px;
   --fl-sidebar-splitter-h: 5px;
+  --fl-badge-dot:          #f38ba8;
+  --fl-badge-bg:           #f38ba8;
+  --fl-badge-text:         #fff;
 }
 
-/* ── Light theme ─────────────────────────────────────────────────── */
+/* â”€â”€ Light theme â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .fl-theme-light {
   --fl-bg:           #f0f0f0;
   --fl-panel:        #ffffff;
@@ -64,9 +67,10 @@
   --fl-sp-hover:     #0078d4;
   --fl-drop-fill:    rgba(0,120,212,.12);
   --fl-drop-border:  #0078d4;
-}
 
-/* ── Gray theme ──────────────────────────────────────────────────── */
+  --fl-badge-dot: #c42b1c; --fl-badge-bg: #c42b1c; --fl-badge-text: #fff;}
+
+/* â”€â”€ Gray theme â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .fl-theme-gray {
   --fl-bg:           #2b2b2b;
   --fl-panel:        #252525;
@@ -84,9 +88,10 @@
   --fl-sp-hover:     #75beff;
   --fl-drop-fill:    rgba(117,190,255,.18);
   --fl-drop-border:  #75beff;
-}
 
-/* ── Rounded theme (dark + rounded tabs) ─────────────────────────── */
+  --fl-badge-dot: #f14c4c; --fl-badge-bg: #f14c4c; --fl-badge-text: #fff;}
+
+/* â”€â”€ Rounded theme (dark + rounded tabs) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .fl-theme-rounded {
   --fl-bg:           #1e1e2e;
   --fl-panel:        #181825;
@@ -108,7 +113,7 @@
 .fl-theme-rounded .fl-tab { margin: 4px 2px 0; border-radius: var(--fl-tab-radius) var(--fl-tab-radius) 0 0 !important; }
 .fl-theme-rounded .fl-tab.fl-tab-active { background: var(--fl-tab-active-bg) !important; }
 
-/* ── Underline theme ─────────────────────────────────────────────── */
+/* â”€â”€ Underline theme â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .fl-theme-underline {
   --fl-bg:           #1e1e2e;
   --fl-panel:        #1e1e2e;
@@ -128,7 +133,7 @@
 .fl-theme-underline .fl-tab { border-right: none !important; }
 .fl-theme-underline .fl-tab:hover { background: none !important; color: var(--fl-text) !important; }
 
-/* ── Nord theme (cool blue-gray) ─────────────────────────────────── */
+/* â”€â”€ Nord theme (cool blue-gray) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .fl-theme-nord {
   --fl-bg:           #2e3440;
   --fl-panel:        #3b4252;
@@ -148,9 +153,10 @@
   --fl-drop-border:  #88c0d0;
   --fl-sidebar-active-glow: rgba(136,192,208,.15);
   --fl-sidebar-close-bg: rgba(191,97,106,.1);
-}
 
-/* ── Solarized Dark theme ────────────────────────────────────────── */
+  --fl-badge-dot: #bf616a; --fl-badge-bg: #bf616a; --fl-badge-text: #eceff4;}
+
+/* â”€â”€ Solarized Dark theme â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .fl-theme-solarized {
   --fl-bg:           #002b36;
   --fl-panel:        #073642;
@@ -170,9 +176,10 @@
   --fl-drop-border:  #268bd2;
   --fl-sidebar-active-glow: rgba(38,139,210,.15);
   --fl-sidebar-close-bg: rgba(220,50,47,.1);
-}
 
-/* ── GitHub Dark theme ───────────────────────────────────────────── */
+  --fl-badge-dot: #dc322f; --fl-badge-bg: #dc322f; --fl-badge-text: #fdf6e3;}
+
+/* â”€â”€ GitHub Dark theme â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .fl-theme-github {
   --fl-bg:           #0d1117;
   --fl-panel:        #161b22;
@@ -192,9 +199,10 @@
   --fl-drop-border:  #58a6ff;
   --fl-sidebar-active-glow: rgba(88,166,255,.12);
   --fl-sidebar-close-bg: rgba(248,81,73,.1);
-}
 
-/* ── Monokai theme (warm) ────────────────────────────────────────── */
+  --fl-badge-dot: #f85149; --fl-badge-bg: #f85149; --fl-badge-text: #fff;}
+
+/* â”€â”€ Monokai theme (warm) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .fl-theme-monokai {
   --fl-bg:           #272822;
   --fl-panel:        #1e1f1c;
@@ -214,9 +222,10 @@
   --fl-drop-border:  #a6e22e;
   --fl-sidebar-active-glow: rgba(166,226,46,.12);
   --fl-sidebar-close-bg: rgba(249,38,114,.1);
-}
 
-/* ── Corporate Light theme ───────────────────────────────────────── */
+  --fl-badge-dot: #f92672; --fl-badge-bg: #f92672; --fl-badge-text: #f8f8f2;}
+
+/* â”€â”€ Corporate Light theme â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .fl-theme-corporate {
   --fl-bg:           #fafbfc;
   --fl-panel:        #ffffff;
@@ -236,9 +245,10 @@
   --fl-drop-border:  #2563eb;
   --fl-sidebar-active-glow: rgba(37,99,235,.08);
   --fl-sidebar-close-bg: rgba(220,38,38,.06);
-}
 
-/* ── Deep Orange theme (black + orange) ───────────────────────────── */
+  --fl-badge-dot: #dc2626; --fl-badge-bg: #dc2626; --fl-badge-text: #fff;}
+
+/* â”€â”€ Deep Orange theme (black + orange) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .fl-theme-deep-orange {
   --fl-bg:           #0a0a0a;
   --fl-panel:        #111111;
@@ -258,15 +268,16 @@
   --fl-drop-border:  #ff6d00;
   --fl-sidebar-active-glow: rgba(255,109,0,.15);
   --fl-sidebar-close-bg: rgba(255,23,68,.1);
-}
 
-/* ── Reset ───────────────────────────────────────────────────────── */
+  --fl-badge-dot: #ff1744; --fl-badge-bg: #ff6d00; --fl-badge-text: #fff;}
+
+/* â”€â”€ Reset â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .fl-layout *, .fl-layout *::before, .fl-layout *::after {
   box-sizing: border-box; margin: 0; padding: 0;
 }
 .fl-layout button { font-family: inherit; cursor: pointer; }
 
-/* ── Container ───────────────────────────────────────────────────── */
+/* â”€â”€ Container â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .fl-layout {
   display: flex; width: 100%; height: 100%; overflow: hidden;
   background: var(--fl-bg); color: var(--fl-text);
@@ -274,14 +285,14 @@
   position: relative;
 }
 
-/* ── Row ─────────────────────────────────────────────────────────── */
+/* â”€â”€ Row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .fl-row {
   display: flex; flex: 1 1 0px; overflow: hidden; min-width: 0; min-height: 0;
 }
 .fl-row.fl-row    { flex-direction: row; }
 .fl-row.fl-column { flex-direction: column; }
 
-/* ── Splitters ───────────────────────────────────────────────────── */
+/* â”€â”€ Splitters â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .fl-splitter {
   flex: 0 0 var(--fl-sp-size); background: var(--fl-sp); position: relative; z-index: 10;
   transition: background .12s;
@@ -293,7 +304,7 @@
 .fl-sp-h::after { left:-3px; right:-3px; }
 .fl-sp-v::after { top:-3px; bottom:-3px; }
 
-/* ── TabSet ──────────────────────────────────────────────────────── */
+/* â”€â”€ TabSet â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .fl-tabset {
   display: flex; flex-direction: column;
   flex: 1 1 0px; min-width: 0; min-height: 0; overflow: hidden;
@@ -304,7 +315,7 @@
   position: absolute !important; inset: 0 !important; z-index: 100; visibility: visible !important;
 }
 
-/* ── Tab strip ───────────────────────────────────────────────────── */
+/* â”€â”€ Tab strip â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .fl-strip {
   display: flex; align-items: stretch;
   height: var(--fl-strip-h); min-height: var(--fl-strip-h);
@@ -317,7 +328,7 @@
 }
 .fl-tabs::-webkit-scrollbar { display: none; }
 
-/* ── Tab button ──────────────────────────────────────────────────── */
+/* â”€â”€ Tab button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .fl-tab {
   display: inline-flex; align-items: center; gap: 4px;
   padding: 0 10px; cursor: pointer; white-space: nowrap;
@@ -337,7 +348,7 @@
 .fl-tab-icon { font-size: 11px; flex-shrink: 0; line-height: 1; }
 .fl-tab-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; font-size: var(--fl-font-sz); }
 
-/* Close ×  */
+/* Close Ã—  */
 .fl-tab-x {
   display: inline-flex; align-items: center; justify-content: center;
   width: 15px; height: 15px; background: none; border: none; border-radius: 3px;
@@ -348,7 +359,7 @@
 .fl-tab.fl-tab-active .fl-tab-x { opacity: .5; }
 .fl-tab-x:hover { background: var(--fl-close-hover) !important; color: #fff !important; opacity: 1 !important; }
 
-/* ── Toolbar ─────────────────────────────────────────────────────── */
+/* â”€â”€ Toolbar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .fl-toolbar { display: flex; align-items: center; padding: 0 4px; gap: 2px; flex-shrink: 0; }
 .fl-tbtn {
   display: inline-flex; align-items: center; justify-content: center;
@@ -360,14 +371,14 @@
 .fl-tbtn:hover { background: var(--fl-tab-hover); border-color: var(--fl-border); color: var(--fl-text); }
 .fl-tbtn svg { width: 100%; height: 100%; display: block; }
 
-/* ── Content ─────────────────────────────────────────────────────── */
+/* â”€â”€ Content â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .fl-content { flex: 1 1 0; position: relative; overflow: hidden; min-height: 0; }
 .fl-tab-content {
   display: flex; flex-direction: column; position: absolute; inset: 0;
   overflow: hidden; background: var(--fl-panel);
 }
 
-/* ── Drag ghost ──────────────────────────────────────────────────── */
+/* â”€â”€ Drag ghost â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .fl-drag-ghost {
   opacity: .9; box-shadow: 0 6px 20px rgba(0,0,0,.5);
   background: var(--fl-tab-active-bg) !important;
@@ -375,20 +386,20 @@
   cursor: grabbing !important;
 }
 
-/* ── Drop indicator ──────────────────────────────────────────────── */
+/* â”€â”€ Drop indicator â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .fl-drop-ind {
   background: var(--fl-drop-fill); border: 2px solid var(--fl-drop-border);
   border-radius: var(--fl-radius); pointer-events: none;
 }
 
-/* ── Scrollbars ──────────────────────────────────────────────────── */
+/* â”€â”€ Scrollbars â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .fl-tab-content::-webkit-scrollbar { width: 5px; height: 5px; }
 .fl-tab-content::-webkit-scrollbar-track { background: transparent; }
 .fl-tab-content::-webkit-scrollbar-thumb { background: var(--fl-border); border-radius: 3px; }
 .fl-tab-content::-webkit-scrollbar-thumb:hover { background: var(--fl-text-dim); }
 
 
-/* ── Sidebar / Border panels ─────────────────────────────────────── */
+/* â”€â”€ Sidebar / Border panels â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .fl-sidebar { background: var(--fl-strip); }
 .fl-sidebar-strip {
   background: var(--fl-strip); border-color: var(--fl-border); gap: 1px; padding: 2px;
@@ -490,15 +501,16 @@
 }
 .fl-badge-dot {
   width: 7px; height: 7px; border-radius: 50%;
-  background: var(--fl-badge-color, #f38ba8);
-  box-shadow: 0 0 4px var(--fl-badge-color, #f38ba8);
+  background: var(--fl-badge-dot);
+  box-shadow: 0 0 4px var(--fl-badge-dot);
   display: inline-block; vertical-align: middle;
 }
 .fl-badge-num {
   min-width: 12px; height: 12px; line-height: 12px;
-  background: var(--fl-badge-color, #f38ba8); color: #fff;
+  background: var(--fl-badge-bg); color: var(--fl-badge-text);
   font-size: 8px; font-weight: 700;
   border-radius: 6px; text-align: center; padding: 0 3px;
   display: inline-block;
 }
 }
+

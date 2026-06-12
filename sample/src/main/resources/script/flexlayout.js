@@ -979,6 +979,10 @@
           const pane = document.createElement('div');
           pane.className = 'fl-sidebar-pane';
           pane.style.cssText = `flex:1;display:flex;flex-direction:column;overflow:hidden;${oIdx > 0 ? 'border-top:1px solid var(--fl-border);' : ''}`;
+          // Clear badge on any click inside the pane (mark as read)
+          pane.addEventListener('pointerdown', () => {
+            if (selTab.badge != null) { selTab.badge = null; selTab.badgeColor = null; this._render(); }
+          }, { once: true });
           // Header
           const header = document.createElement('div');
           header.className = 'fl-sidebar-header';
