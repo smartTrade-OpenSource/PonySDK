@@ -275,36 +275,37 @@ class PonySearchContext implements SearchContext {
 
     @Override
     public List<WebElement> findElements(final By by) {
-        if (by instanceof ById byId) {
-            return byId.findElements(this);
-        } else if (by instanceof ByName byName) {
-            return byName.findElements(this);
-        } else if (by instanceof ByClassName byClassName) {
-            return byClassName.findElements(this);
-        } else if (by instanceof ByCssSelector byCssSelector) {
-            return byCssSelector.findElements(this);
-        } else if (by instanceof ByTagName byTagName) {
-            return byTagName.findElements(this);
-        } else {
-            throw new IllegalArgumentException(by.getClass().getSimpleName() + " is not supported");
-        }
+        return (List<WebElement>) (Object) findElements(toFindBy(by), usingOf(by));
     }
 
     @Override
     public WebElement findElement(final By by) {
-        if (by instanceof ById byId) {
-            return byId.findElement(this);
-        } else if (by instanceof ByName byName) {
-            return byName.findElement(this);
-        } else if (by instanceof ByClassName byClassName) {
-            return byClassName.findElement(this);
-        } else if (by instanceof ByCssSelector byCssSelector) {
-            return byCssSelector.findElement(this);
-        } else if (by instanceof ByTagName byTagName) {
-            return byTagName.findElement(this);
-        } else {
-            throw new IllegalArgumentException(by.getClass().getSimpleName() + " is not supported");
-        }
+        return findElement(toFindBy(by), usingOf(by));
+    }
+
+    /**
+     * Maps a Selenium {@link By} to our internal {@link FindBy}. We must NOT delegate to
+     * {@code by.findElement(this)} / {@code by.findElements(this)}: under Selenium 4 those bounce
+     * straight back into this {@link SearchContext}, causing infinite recursion (StackOverflowError).
+     */
+    private static FindBy toFindBy(final By by) {
+        if (by instanceof ById) return FindBy.ID;
+        if (by instanceof ByName) return FindBy.NAME;
+        if (by instanceof ByClassName) return FindBy.CLASS_NAME;
+        if (by instanceof ByCssSelector) return FindBy.CSS_SELECTOR;
+        if (by instanceof ByTagName) return FindBy.TAG_NAME;
+        throw new IllegalArgumentException(by.getClass().getSimpleName() + " is not supported");
+    }
+
+    /**
+     * Extracts the lookup value from a {@link By} via its stable {@code toString()} form
+     * ("By.tagName: BUTTON" → "BUTTON"). Selenium 4 removed the FindsByXxx interfaces and
+     * normalises remote parameters, so {@code toString()} is the reliable source of the value.
+     */
+    private static String usingOf(final By by) {
+        final String s = by.toString();
+        final int sep = s.indexOf(": ");
+        return sep < 0 ? s : s.substring(sep + 2);
     }
 
 }
