@@ -629,63 +629,6 @@
       if (this.onModelChange) this.onModelChange(this.model);
     }
 
-    // ── Partial render: CLOSE_TAB ───
-    _partialCloseTab(action) {
-      const tabEl = this.container.querySelector(`[data-fl-tab="${action.tabId}"]`);
-      if (!tabEl) { this._render(); return; }
-      const tsEl = tabEl.closest('[data-fl-tabset]');
-      tabEl.remove();
-      const contentEl = this._contentEls.get(action.tabId);
-      if (contentEl) { contentEl.remove(); this._contentEls.delete(action.tabId); }
-      // Update selection
-      if (tsEl) {
-        const tsNode = this.model.getRoot().findById(tsEl.dataset.flTabset);
-        if (tsNode) {
-          tsEl.querySelectorAll('.fl-tabs .fl-tab').forEach((b, i) => b.classList.toggle('fl-tab-active', i === tsNode.getSelected()));
-          tsNode.children.forEach((t, i) => { const c = this._contentEls.get(t.id); if (c) c.style.display = i === tsNode.getSelected() ? 'flex' : 'none'; });
-        } else { this._render(); }
-      }
-    }
-
-    // ── Partial render: ADD_TAB ───
-    _partialAddTab(action) {
-      const tsEl = this.container.querySelector(`[data-fl-tabset="${action.tabsetId}"]`);
-      const tsNode = this.model.getRoot().findById(action.tabsetId);
-      if (!tsEl || !tsNode) { this._render(); return; }
-      const tabsEl = tsEl.querySelector('.fl-tabs');
-      const areaEl = tsEl.querySelector('.fl-content');
-      if (!tabsEl || !areaEl) { this._render(); return; }
-      const tab = tsNode.children[tsNode.children.length - 1];
-      if (!tab) { this._render(); return; }
-      tabsEl.appendChild(this._mkTabBtn(tab, tsNode, tsNode.children.length - 1));
-      const c = this._getOrMakeContent(tab);
-      areaEl.appendChild(c);
-      this._selectTabFast(tsNode, tsNode.getSelected());
-    }
-
-    // ── Partial render: MOVE_TAB to center ───
-    _partialMoveTab(action) {
-      // Remove from source DOM
-      const oldTabEl = this.container.querySelector(`[data-fl-tab="${action.tabId}"]`);
-      if (oldTabEl) oldTabEl.remove();
-      const oldContent = this._contentEls.get(action.tabId);
-      if (oldContent) oldContent.remove();
-      // Add to target
-      const dest = this.model.getRoot().findById(action.toId);
-      const tsEl = this.container.querySelector(`[data-fl-tabset="${action.toId}"]`);
-      if (!dest || !tsEl) { this._render(); return; }
-      const tabsEl = tsEl.querySelector('.fl-tabs');
-      const areaEl = tsEl.querySelector('.fl-content');
-      if (!tabsEl || !areaEl) { this._render(); return; }
-      const tab = dest.children.find(t => t.id === action.tabId);
-      if (!tab) { this._render(); return; }
-      const idx = dest.children.indexOf(tab);
-      tabsEl.appendChild(this._mkTabBtn(tab, dest, idx));
-      const c = this._getOrMakeContent(tab);
-      areaEl.appendChild(c);
-      this._selectTabFast(dest, dest.getSelected());
-    }
-
     // ── Command Palette ───
     _showCommandPalette(customItems) {
       if (this._palette) { this._palette.remove(); this._palette = null; return; }
@@ -1416,7 +1359,8 @@
       node.children.forEach((tab, i) => {
         const btn = this._mkTabBtn(tab, node, i);
         if (tab.group && tab.groupColor) {
-          btn.style.borderBottom = `2px solid ${tab.groupColor}`;
+          const safeColor = tab.groupColor.replace(/[^a-zA-Z0-9#(),.\s%-]/g, '');
+          btn.style.borderBottom = `2px solid ${safeColor}`;
           btn.dataset.flGroup = tab.group;
         }
         tabs.appendChild(btn);

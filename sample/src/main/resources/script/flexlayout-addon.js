@@ -245,6 +245,15 @@
       });
     },
 
+    addPinnedTab: function (tabId, tabName, widgetId, tabsetId) {
+      if (!this._model) return;
+      this._tabWidgetMap[tabId] = widgetId;
+      this._model.doAction({
+        type: 'ADD_TAB', tabsetId: tabsetId || null, select: true,
+        tab: { id: tabId, name: tabName, component: 'pwidget', config: { widgetId: widgetId }, enableClose: false, enableDrag: false }
+      });
+    },
+
     attachWidget: function (tabId, widgetId) {
       var self = this;
       this._tabWidgetMap[tabId] = widgetId;
@@ -451,7 +460,7 @@
       if (!this._popOuts) this._popOuts = {};
       var popMode = mode || 'float'; // 'float' or 'window'
 
-      var tabNode = this._model.getRoot().findById(tabId);
+      var tabNode = this._model.findById(tabId);
       if (!tabNode) return;
       var tabsetNode = tabNode.getParent();
       var tabsetId = tabsetNode ? tabsetNode.getId() : null;
@@ -612,6 +621,17 @@
     _restoreTab: function (tabId, info) {
       var targetTabset = info.tabsetId;
       var tabDef = { id: tabId, name: info.title || 'Tab', component: 'pwidget', config: { widgetId: info.widgetId } };
+
+      // If popped out from a border, restore there
+      if (info.borderSide) {
+        var border = this._model.getBorder(info.borderSide);
+        if (border) {
+          this._model.doAction({ type: 'ADD_BORDER_TAB', side: info.borderSide, tab: tabDef, index: info.tabIdx, select: true });
+          this._tabWidgetMap[tabId] = info.widgetId;
+          this.sendDataToServer({ type: 'popIn', tabId: tabId });
+          return;
+        }
+      }
 
       if (targetTabset && this._model.getRoot().findById(targetTabset)) {
         // Original tabset still exists — just add back
@@ -807,8 +827,23 @@
       if (!border || !border.isOpen()) return;
       var selTab = border.getSelectedNode();
       if (!selTab) return;
+      var tabId = selTab.getId();
+      var self = this;
+      if (!this._popOuts) this._popOuts = {};
+
+      var widgetId = this._tabWidgetMap[tabId];
+      var widgetEl = this._extractWidgetEl(tabId);
+      if (widgetEl && widgetEl.parentNode) widgetEl.parentNode.removeChild(widgetEl);
+
+      var tabIdx = border.getChildren().indexOf(selTab);
+      this._model.doAction({ type: 'CLOSE_BORDER_TAB', side: side, tabId: tabId });
+
       var rect = this._layoutContainer.getBoundingClientRect();
-      this.popOut(selTab.getId(), selTab.getName(), Math.round(rect.left + 50), Math.round(rect.top + 50), border.size || 400, 300, 'float');
+      var info = { widgetEl: widgetEl, widgetId: widgetId, tabsetId: null, tabIdx: tabIdx, title: selTab.getName(), mode: 'float',
+                   siblingId: null, tabsetWeight: 50, tabsetIdx: 0, parentDirection: 'row', borderSide: side };
+      this._popOutToFloat(tabId, info, Math.round(rect.left + 50), Math.round(rect.top + 50), border.size || 400, 300);
+      this._popOuts[tabId] = info;
+      this.sendDataToServer({ type: 'popOut', tabId: tabId, tabsetId: null, tabIdx: tabIdx, mode: 'float', title: selTab.getName(), w: border.size || 400, h: 300 });
     },
 
     // ─── Feature 4: Collaboration API ───────────────────────────
@@ -844,6 +879,7 @@
 
     // ─── Feature 11: Notification/Toast ─────────────────────────
     showNotification: function (message, type, duration) {
+      var self = this;
       var toast = document.createElement('div');
       toast.className = 'fl-toast fl-toast-' + (type || 'info');
       toast.textContent = message;
@@ -854,7 +890,8 @@
       }
       this._toastContainer.appendChild(toast);
       var dur = duration || 3000;
-      setTimeout(function () { toast.classList.add('fl-toast-hide'); setTimeout(function () { toast.remove(); }, 300); }, dur);
+      var t1 = setTimeout(function () { toast.classList.add('fl-toast-hide'); var t2 = setTimeout(function () { toast.remove(); }, 300); self._pendingTimeouts.push(t2); }, dur);
+      this._pendingTimeouts.push(t1);
     },
 
     destroy: function () {

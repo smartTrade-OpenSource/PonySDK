@@ -340,6 +340,7 @@ public class FlexLayoutPanel implements IsPWidget {
     // ─── Feature 10: Status Bar ─────────────────────────────────
 
     public void setStatusBarWidget(final PWidget w) {
+        if (w == null) return;
         addon.setStatusBarWidget(w);
     }
 

@@ -530,8 +530,7 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
         final String tabId = "pin_" + System.identityHashCode(content);
         widget.add(content);
         tabWidgets.put(tabId, content);
-        // Use addTab with enableClose=false, enableDrag=false encoded in the tab def on client
-        callTerminalMethod("addTab", tabId, tabName, String.valueOf(content.getID()), tabsetId);
+        callTerminalMethod("addPinnedTab", tabId, tabName, String.valueOf(content.getID()), tabsetId);
     }
 
     // ─── Feature 9: Tab Groups ──────────────────────────────────
@@ -543,6 +542,7 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
     // ─── Feature 10: Status Bar ─────────────────────────────────
 
     public void setStatusBarWidget(final PWidget w) {
+        if (w == null) return;
         widget.add(w);
         callTerminalMethod("setStatusBar", String.valueOf(w.getID()));
     }
