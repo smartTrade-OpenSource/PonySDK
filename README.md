@@ -1,5 +1,5 @@
-[![codecov](https://codecov.io/gh/PonySDK-Organization/PonySDK/branch/master/graph/badge.svg)](https://codecov.io/gh/PonySDK-Organization/PonySDK)
-[![CI](https://github.com/PonySDK-Organization/PonySDK/actions/workflows/ci.yml/badge.svg)](https://github.com/PonySDK-Organization/PonySDK/actions)
+[![codecov](https://codecov.io/gh/smartTrade-OpenSource/PonySDK/branch/master/graph/badge.svg)](https://codecov.io/gh/smartTrade-OpenSource/PonySDK)
+[![CI](https://github.com/smartTrade-OpenSource/PonySDK/actions/workflows/ci.yml/badge.svg)](https://github.com/smartTrade-OpenSource/PonySDK/actions)
 
 # PonySDK
 
@@ -44,7 +44,7 @@ It runs a Jetty 12 WebSocket server on the backend and uses GWT on the frontend.
 **UI**
 - Web Component integration (`PWebComponent`) with `PropertyHandle` API (on-heap, off-heap, stateless modes)
 - `PAddOn` for integrating any JavaScript library
-- Virtual threads (Java 21) for scalable concurrent `UIContext`s
+- Virtual threads (Java 25) for scalable concurrent `UIContext`s
 - JsInterop / elemental2 terminal — no legacy `gwt-elemental`
 
 ---
@@ -52,7 +52,7 @@ It runs a Jetty 12 WebSocket server on the backend and uses GWT on the frontend.
 ## Quick Start
 
 ```sh
-git clone https://github.com/PonySDK-Organization/PonySDK.git
+git clone https://github.com/smartTrade-OpenSource/PonySDK.git
 cd PonySDK
 ./gradlew :sample:runSampleSpring --no-configuration-cache
 ```
@@ -97,6 +97,31 @@ window.onPonyReconnected = function() {
     // custom reconnection acknowledgement
 };
 ```
+
+---
+
+## WebSocket Security & Limits
+
+The WebSocket transport is hardened and tunable via `ApplicationConfiguration`:
+
+```java
+// Cross-Site WebSocket Hijacking (CSWSH) protection — enabled by default.
+// Same-origin is accepted automatically (honouring X-Forwarded-Host behind a proxy);
+// requests without an Origin header (non-browser clients) are allowed.
+config.setWsOriginCheckEnabled(true);                       // default: true
+config.setWsAllowedOrigins(Set.of("https://app.example.com")); // optional extra trusted origins
+
+config.setWsMaxInboundMessageSize(1 << 20); // max client→server text message in bytes (default 1 MB)
+config.setWsIdleTimeoutMs(1_000_000);       // close after this much inactivity (ms)
+config.setWsSendTimeoutMs(60_000);          // disconnect a slow consumer after this (ms)
+```
+
+**CSWSH:** a WebSocket upgrade is *not* subject to the same-origin policy, yet the browser still
+attaches the session cookie. With the Origin check on, cross-origin upgrades are rejected with `403`,
+so a malicious page cannot drive a logged-in user's session.
+
+**Backpressure:** the server keeps a single send in flight per connection; if a slow client does not
+drain within `wsSendTimeoutMs`, the connection is closed — memory stays bounded, no unbounded buffering.
 
 ---
 
@@ -164,4 +189,4 @@ runtimeOnly 'org.glassfish.tyrus:tyrus-container-grizzly-client:2.2.0'
 ## Documentation
 
 - [ARCHITECTURE.md](ARCHITECTURE.md) — deep dive into the protocol, reconnection engine, threading model, OTel metrics, and design patterns
-- [Wiki](https://github.com/PonySDK-Organization/PonySDK/wiki) — FAQ
+- [Wiki](https://github.com/smartTrade-OpenSource/PonySDK/wiki) — FAQ
