@@ -78,6 +78,22 @@ test.describe('FlexLayout PonySDK Integration', () => {
     await expect(page.locator('.fl-maximized')).toHaveCount(0, { timeout: 2000 });
   });
 
+  test('double-click layout tab maximizes tabset', async ({ page }) => {
+    const tab = page.locator('.fl-tab').first();
+    await tab.dblclick();
+    await expect(page.locator('.fl-maximized')).toBeVisible({ timeout: 2000 });
+  });
+
+  test('double-click layout tab again restores tabset', async ({ page }) => {
+    const tab = page.locator('.fl-tab').first();
+    await tab.dblclick();
+    await expect(page.locator('.fl-maximized')).toBeVisible({ timeout: 2000 });
+    // Wait to avoid triple-click
+    await page.waitForTimeout(400);
+    await page.locator('.fl-maximized .fl-tab').first().dblclick();
+    await expect(page.locator('.fl-maximized')).toHaveCount(0, { timeout: 2000 });
+  });
+
   test('no JS errors', async ({ page }) => {
     const errors = [];
     page.on('pageerror', err => errors.push(err.message));
