@@ -57,7 +57,8 @@ import java.util.function.Function;
  * previous Callback has completed.
  * <p>
  * Optimizations:
- * - Double-buffering: two direct ByteBuffers are swapped on flush (zero-copy)
+ * - Pooled buffers: the write buffer is borrowed from a {@link ByteBufferPool} and handed off to
+ *   Jetty on flush; the SendSync callback returns it to the pool (no per-flush copy)
  * - Reusable byte[] for string encoding (avoids per-string allocation)
  * - Factored string encoding logic (putStringBytes) shared by all string paths
  */
@@ -81,9 +82,9 @@ public class WebSocketPusher implements Closeable {
     private final int maxChunkSize;
     private final ByteBufferPool bufferPool;
 
-    // ── Pooled double-buffering ──
-    // writeBuffer: borrowed from pool on first write, returned on close
-    // sendBuffer: held during async send, returned to pool by SendSync callback
+    // ── Pooled buffering ──
+    // writeBuffer: borrowed from the pool on first write, handed off to Jetty on flush
+    // (returned to the pool by the SendSync callback), or released on close.
     private ByteBuffer writeBuffer;
 
     // ── Reusable byte[] for string UTF-8 encoding ──
@@ -231,20 +232,26 @@ public class WebSocketPusher implements Closeable {
      * Returns the number of bytes written.
      */
     private int encodeStringToBuffer(final String value) {
-        // Fast path for ASCII strings: direct byte copy, no encoder overhead
         final int len = value.length();
-        if (isLikelyAscii(value, len)) {
-            if (len > stringEncodeBuffer.length) {
-                stringEncodeBuffer = new byte[Math.max(len, stringEncodeBuffer.length * 2)];
-            }
-            for (int i = 0; i < len; i++) {
-                stringEncodeBuffer[i] = (byte) value.charAt(i);
-            }
+
+        // Fast path for ASCII: copy each char in a single pass, bailing to the UTF-8 path on the
+        // first non-ASCII char. A sampling heuristic is unsafe here — a missed non-ASCII char would
+        // be silently truncated by the (byte) cast and corrupt the value on the wire.
+        if (len > stringEncodeBuffer.length) {
+            stringEncodeBuffer = new byte[Math.max(len, stringEncodeBuffer.length * 2)];
+        }
+        int i = 0;
+        for (; i < len; i++) {
+            final char c = value.charAt(i);
+            if (c > 127) break; // non-ASCII → fall back to the UTF-8 encoder below
+            stringEncodeBuffer[i] = (byte) c;
+        }
+        if (i == len) {
             lastEncodedAscii = true;
             return len;
         }
 
-        // Non-ASCII: use CharsetEncoder to encode directly into stringEncodeBuffer
+        // Non-ASCII: use the reusable CharsetEncoder to encode the whole string into stringEncodeBuffer
         final int maxBytes = (int) (len * utf8Encoder.maxBytesPerChar()) + 1;
         if (maxBytes > stringEncodeBuffer.length) {
             stringEncodeBuffer = new byte[Math.max(maxBytes, stringEncodeBuffer.length * 2)];
@@ -253,7 +260,7 @@ public class WebSocketPusher implements Closeable {
         final CharBuffer in = CharBuffer.wrap(value);
         final ByteBuffer out = ByteBuffer.wrap(stringEncodeBuffer);
         utf8Encoder.reset();
-        CoderResult result = utf8Encoder.encode(in, out, true);
+        final CoderResult result = utf8Encoder.encode(in, out, true);
         if (result.isOverflow()) {
             // Shouldn't happen given our sizing, but handle gracefully
             stringEncodeBuffer = new byte[maxBytes * 2];
@@ -268,25 +275,6 @@ public class WebSocketPusher implements Closeable {
         utf8Encoder.flush(out);
         lastEncodedAscii = (out.position() == len);
         return out.position();
-    }
-
-    /**
-     * Quick check: if string length matches a reasonable ASCII assumption.
-     * Scans first few chars to confirm — avoids full scan for long strings.
-     */
-    private static boolean isLikelyAscii(final String value, final int len) {
-        // Check first 16 chars (or all if shorter) — covers 99%+ of ASCII strings
-        final int check = Math.min(len, 16);
-        for (int i = 0; i < check; i++) {
-            if (value.charAt(i) > 127) return false;
-        }
-        // For short strings, we've checked everything
-        if (len <= 16) return true;
-        // For longer strings, spot-check a few more positions
-        for (int i = check; i < len; i += 32) {
-            if (value.charAt(i) > 127) return false;
-        }
-        return true;
     }
 
     // ── Factored string writing ──────────────────────────────────────────
@@ -354,7 +342,6 @@ public class WebSocketPusher implements Closeable {
         checkState();
         if (writeBuffer == null || writeBuffer.position() == 0) return;
 
-        final long waitStart = System.currentTimeMillis();
         awaitPreviousSend();
 
         // Reset eviction budget for next write cycle
@@ -644,10 +631,6 @@ public class WebSocketPusher implements Closeable {
 
     public final void putUnsignedShort(final int intValue) throws IOException {
         putShort((short) (intValue & 0xFFFF));
-    }
-
-    public final void putUnsignedInteger(final long longValue) throws IOException {
-        putInt((int) (longValue & 0xFFFFFF));
     }
 
     // ── Stats recording ──────────────────────────────────────────────────
