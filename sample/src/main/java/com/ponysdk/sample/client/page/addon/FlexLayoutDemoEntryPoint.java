@@ -207,6 +207,16 @@ public class FlexLayoutDemoEntryPoint implements EntryPoint {
                     i.setStyleProperty("padding", "16px");
                     i.setStyleProperty("color", "#bac2de");
                     return i;
+                case "filetree":
+                    return createFileTree(flexLayout);
+                case "doc":
+                    return createDocPanel();
+                case "java-file": case "xml-file": case "css-file": case "html-file": case "md-file": case "folder":
+                    final String fileName = config != null ? config : component;
+                    final PLabel fileLabel = Element.newPLabel("Content of " + component.replace("-", " "));
+                    fileLabel.setStyleProperty("padding", "16px");
+                    fileLabel.setStyleProperty("color", "var(--fl-text, #cdd6f4)");
+                    return fileLabel;
                 default:
                     final PLabel d = Element.newPLabel("Unknown: " + component);
                     d.setStyleProperty("padding", "12px");
@@ -240,10 +250,8 @@ public class FlexLayoutDemoEntryPoint implements EntryPoint {
         flexLayout.getAddon().toggleBorder("bottom");
 
         // Left-top: icon only
-        final PLabel explorer = Element.newPLabel("Project files will appear here.");
-        explorer.setStyleProperty("padding", "12px");
-        explorer.setStyleProperty("color", "#a6e3a1");
-        flexLayout.addBorderTab("left-top", "Explorer", explorer, "\uD83D\uDCC1");
+        final PWidget explorerTree = createFileTree(flexLayout);
+        flexLayout.addBorderTab("left-top", "Explorer", explorerTree, "\uD83D\uDCC1");
 
         final PLabel search = Element.newPLabel("Search across your project.");
         search.setStyleProperty("padding", "12px");
@@ -304,6 +312,9 @@ public class FlexLayoutDemoEntryPoint implements EntryPoint {
         flexLayout.getAddon().setBadge(outlineTabId, "", null);          // default red dot
         flexLayout.getAddon().setBadge(problemsTabId, "12", "#f38ba8");  // pink "12" bubble
 
+        // API documentation in bottom sidebar
+        flexLayout.addBorderTab("bottom", "API Doc", createDocPanel());
+
         final PWidget layoutContainer = flexLayout.asWidget();
         layoutContainer.setStyleProperty("flex", "1");
         layoutContainer.setStyleProperty("min-height", "0");
@@ -332,5 +343,81 @@ public class FlexLayoutDemoEntryPoint implements EntryPoint {
         btn.setStyleProperty("padding", "3px 10px");
         btn.setStyleProperty("cursor", "pointer");
         btn.setStyleProperty("font-size", "12px");
+    }
+
+    private static PWidget createFileTree(final FlexLayoutPanel flexLayout) {
+        final PFlowPanel tree = Element.newPFlowPanel();
+        tree.setStyleProperty("padding", "8px");
+        tree.setStyleProperty("display", "flex");
+        tree.setStyleProperty("flex-direction", "column");
+        tree.setStyleProperty("gap", "2px");
+        tree.setStyleProperty("font-size", "12px");
+
+        final String[][] files = {
+            {"\uD83D\uDCC4", "App.java", "java-file"},
+            {"\uD83D\uDCC4", "Config.xml", "xml-file"},
+            {"\uD83D\uDCC4", "Style.css", "css-file"},
+            {"\uD83D\uDCC4", "index.html", "html-file"},
+            {"\uD83D\uDCC1", "components/", "folder"},
+            {"\uD83D\uDCC4", "README.md", "md-file"},
+        };
+
+        for (final String[] file : files) {
+            final PLabel item = Element.newPLabel(file[0] + " " + file[1]);
+            item.addStyleName("fl-tree-item");
+            item.addStyleName("fl-drag-tree-" + file[2]);
+            item.setStyleProperty("padding", "4px 8px");
+            item.setStyleProperty("border-radius", "3px");
+            item.setStyleProperty("cursor", "grab");
+            item.setStyleProperty("color", "var(--fl-text, #cdd6f4)");
+            item.setStyleProperty("white-space", "nowrap");
+            tree.add(item);
+            // Register as drag source → creates a tab with file name
+            flexLayout.registerDragSourceByClass("fl-drag-tree-" + file[2], file[1], file[2]);
+        }
+        return tree;
+    }
+
+    private static PWidget createDocPanel() {
+        final PFlowPanel doc = Element.newPFlowPanel();
+        doc.setStyleProperty("padding", "20px");
+        doc.setStyleProperty("overflow", "auto");
+        doc.setStyleProperty("color", "var(--fl-text, #cdd6f4)");
+        doc.setStyleProperty("font-size", "13px");
+        doc.setStyleProperty("line-height", "1.6");
+
+        final String[] sections = {
+            "<h2 style='color:var(--fl-accent);margin:0 0 12px'>FlexLayout API</h2>",
+            "<h3 style='color:var(--fl-accent2,#cba6f7);margin:12px 0 6px'>Sidebar Management</h3>",
+            "<code>toggleBorder(side)</code> — show/hide a sidebar (left-top, left-bottom, right-top, right-bottom, bottom)<br>",
+            "<code>addBorderTab(side, name, widget, icon)</code> — add a tab to a sidebar<br>",
+            "<code>removeBorderTab(side, tabId)</code> — remove a tab<br>",
+            "<code>selectBorderTab(side, tabId)</code> — open/close a panel<br>",
+            "<code>setBorderTabStyle(side, style)</code> — auto, icon, label, iconLabel<br>",
+            "<h3 style='color:var(--fl-accent2,#cba6f7);margin:12px 0 6px'>Badges</h3>",
+            "<code>setBadge(tabId, text, color)</code> — set badge ('' for dot, '3' for number, null to clear)<br>",
+            "Badge auto-clears when tab or panel content is clicked.<br>",
+            "<h3 style='color:var(--fl-accent2,#cba6f7);margin:12px 0 6px'>Resize and Constraints</h3>",
+            "<code>setBorderMinSize(side, px)</code> — minimum panel size<br>",
+            "<code>setBorderMaxSize(side, px)</code> — maximum panel size<br>",
+            "Drag below 80px snaps the panel closed.<br>",
+            "<h3 style='color:var(--fl-accent2,#cba6f7);margin:12px 0 6px'>Features</h3>",
+            "<code>enableKeyboardShortcuts(bool)</code> — Ctrl+B left, Ctrl+J bottom, Esc close<br>",
+            "<code>enableTouchGestures(bool)</code> — swipe from edge to open<br>",
+            "<code>enableContextMenu(bool)</code> — right-click menu on tabs<br>",
+            "<code>enableUndoRedo(bool)</code> — Ctrl+Z / Ctrl+Y<br>",
+            "<code>enableAutoSave(bool)</code> — auto-save after 2s inactivity<br>",
+            "<h3 style='color:var(--fl-accent2,#cba6f7);margin:12px 0 6px'>Theming</h3>",
+            "<code>setTheme(className)</code> — fl-theme-light, nord, solarized, github, monokai, corporate, deep-orange<br>",
+            "All colors via CSS variables (--fl-*). Override in your app's CSS.<br>",
+            "<h3 style='color:var(--fl-accent2,#cba6f7);margin:12px 0 6px'>Drag and Drop</h3>",
+            "<code>registerDragSource(widget, tabName, component)</code> — make a widget draggable into the layout<br>",
+            "<code>registerDragSourceByClass(css, tabName, component)</code> — same via CSS class<br>",
+            "Drag tabs between sidebar strips and layout tabsets freely.<br>",
+        };
+
+        final com.ponysdk.core.ui.basic.PHTML html = Element.newPHTML(String.join("", sections));
+        doc.add(html);
+        return doc;
     }
 }

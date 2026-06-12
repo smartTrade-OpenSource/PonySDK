@@ -480,6 +480,9 @@
 }
 .fl-sidebar-collapse:hover { color: var(--fl-text); background: var(--fl-tab-hover); }
 
+/* ── Tree items (drag sources in sidebar) ─────────────────────────── */
+.fl-tree-item:hover { background: var(--fl-tab-hover); }
+
 .fl-sidebar-splitter {
   height: var(--fl-sidebar-splitter-h); flex-shrink: 0; cursor: row-resize;
   background: var(--fl-border);
