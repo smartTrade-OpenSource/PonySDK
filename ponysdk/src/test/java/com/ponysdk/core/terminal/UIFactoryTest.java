@@ -34,6 +34,7 @@ import com.ponysdk.core.terminal.ui.PTAddOn;
 import com.ponysdk.core.terminal.ui.PTAddOnComposite;
 import com.ponysdk.core.terminal.ui.PTAnchor;
 import com.ponysdk.core.terminal.ui.PTBrowser;
+import com.ponysdk.core.terminal.ui.PTWebComponent;
 import com.ponysdk.core.terminal.ui.PTButton;
 import com.ponysdk.core.terminal.ui.PTCheckBox;
 import com.ponysdk.core.terminal.ui.PTDateBox;
@@ -118,6 +119,14 @@ public class UIFactoryTest {
     public void testNewPTButton() {
         final PTObject widget = uiFactory.newUIObject(WidgetType.BUTTON);
         assertTrue(widget instanceof PTButton);
+    }
+
+    @Test
+    public void testNewPTWebComponent() {
+        // Terminal-side wiring: the factory must map WEB_COMPONENT to its handler.
+        // (PTWebComponent's DOM/JSNI behaviour is exercised by browser integration tests, not here.)
+        final PTObject widget = uiFactory.newUIObject(WidgetType.WEB_COMPONENT);
+        assertTrue(widget instanceof PTWebComponent);
     }
 
     @Test
