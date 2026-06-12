@@ -190,4 +190,5 @@ runtimeOnly 'org.glassfish.tyrus:tyrus-container-grizzly-client:2.2.0'
 ## Documentation
 
 - [ARCHITECTURE.md](ARCHITECTURE.md) — deep dive into the protocol, reconnection engine, threading model, OTel metrics, and design patterns
+- [CONCEPTS_CLES.md](CONCEPTS_CLES.md) — conceptual primer (French): Application, UIContext, PObject, the protocol, EventBus, transactions
 - [Wiki](https://github.com/smartTrade-OpenSource/PonySDK/wiki) — FAQ

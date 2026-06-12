@@ -1,5 +1,11 @@
 # Concepts Clés - PonySDK
 
+> **Primer conceptuel (FR).** Ce document introduit les concepts fondamentaux de PonySDK pour
+> faciliter l'onboarding. Les extraits de code sont **illustratifs** (pseudo-API simplifiée à but
+> pédagogique) : pour les signatures exactes et à jour, ainsi que les fonctionnalités V3 (Web
+> Components, dictionnaire de strings, reconnexion transparente, métriques OpenTelemetry,
+> durcissement sécurité), voir [ARCHITECTURE.md](ARCHITECTURE.md) et le [README](README.md).
+
 ## 1. Application
 
 ### Définition
@@ -398,7 +404,7 @@ application.pushToClients(notification);
 PonySDKWebDriver driver = new PonySDKWebDriver();
 driver.get("ws://localhost:8081/sample/ws");
 
-WebDriverWait wait = new WebDriverWait(driver, 10L);
+WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
 // Sélection par classe CSS
 wait.until(d -> d.findElement(By.className("login-button")));
