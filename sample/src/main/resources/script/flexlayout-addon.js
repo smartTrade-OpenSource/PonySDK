@@ -705,6 +705,11 @@
       this._layout.setKeyboardEnabled(!!enabled);
     },
 
+    setKeymap: function (keymapJson) {
+      if (!this._layout) return;
+      this._layout.setKeymap(parseJson(keymapJson));
+    },
+
     enableTouchGestures: function (enabled) {
       if (!this._layout) return;
       this._layout.setTouchEnabled(!!enabled);

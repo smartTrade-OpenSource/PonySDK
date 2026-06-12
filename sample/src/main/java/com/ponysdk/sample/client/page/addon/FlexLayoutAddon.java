@@ -409,6 +409,16 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
         callTerminalMethod("enableKeyboardShortcuts", enabled);
     }
 
+    /**
+     * Configure keyboard shortcuts. Pass a JSON map of action to key binding.
+     * Actions: toggleLeft, toggleRight, toggleBottom, closeAll, undo, redo
+     * Binding: {"ctrl":true,"key":"b"} or {"shift":true,"alt":true,"key":"p"} or null to disable
+     * Example: {"toggleLeft":{"ctrl":true,"shift":true,"key":"b"},"redo":null}
+     */
+    public void setKeymap(final String keymapJson) {
+        callTerminalMethod("setKeymap", keymapJson);
+    }
+
     public void enableTouchGestures(final boolean enabled) {
         callTerminalMethod("enableTouchGestures", enabled);
     }

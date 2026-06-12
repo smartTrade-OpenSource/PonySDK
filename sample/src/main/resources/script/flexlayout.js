@@ -483,15 +483,33 @@
       this.container.classList.add('fl-layout');
       this.container.__flexLayout = this;
 
-      // Feature 4: Keyboard shortcuts
+      // Feature 4: Keyboard shortcuts (configurable)
+      this._keymap = {
+        toggleLeft:  { ctrl: true, key: 'b' },
+        toggleBottom:{ ctrl: true, key: 'j' },
+        closeAll:    { key: 'Escape' },
+        undo:        { ctrl: true, key: 'z' },
+        redo:        { ctrl: true, key: 'y' },
+      };
       this.container.setAttribute('tabindex', '-1');
       this.container.addEventListener('keydown', ev => {
         if (!this._keyboardEnabled) return;
-        if (ev.ctrlKey && ev.key === 'b') { ev.preventDefault(); this._act(Actions.toggleBorder('left-top')); this._act(Actions.toggleBorder('left-bottom')); }
-        else if (ev.ctrlKey && ev.key === 'j') { ev.preventDefault(); this._act(Actions.toggleBorder('bottom')); }
-        else if (ev.key === 'Escape') { this.model.getBorders().forEach(b => { if (b.isOpen()) b.setSelected(-1); }); this._render(); }
-        else if (ev.ctrlKey && ev.key === 'z') { ev.preventDefault(); this.undo(); }
-        else if (ev.ctrlKey && ev.key === 'y') { ev.preventDefault(); this.redo(); }
+        const match = (binding) => {
+          if (!binding) return false;
+          if (binding.ctrl && !ev.ctrlKey) return false;
+          if (binding.shift && !ev.shiftKey) return false;
+          if (binding.alt && !ev.altKey) return false;
+          if (!binding.ctrl && ev.ctrlKey) return false;
+          if (!binding.shift && ev.shiftKey) return false;
+          if (!binding.alt && ev.altKey) return false;
+          return ev.key.toLowerCase() === binding.key.toLowerCase();
+        };
+        if (match(this._keymap.toggleLeft)) { ev.preventDefault(); this._act(Actions.toggleBorder('left-top')); this._act(Actions.toggleBorder('left-bottom')); }
+        else if (match(this._keymap.toggleRight)) { ev.preventDefault(); this._act(Actions.toggleBorder('right-top')); this._act(Actions.toggleBorder('right-bottom')); }
+        else if (match(this._keymap.toggleBottom)) { ev.preventDefault(); this._act(Actions.toggleBorder('bottom')); }
+        else if (match(this._keymap.closeAll)) { ev.preventDefault(); this.model.getBorders().forEach(b => { if (b.isOpen()) b.setSelected(-1); }); this._render(); }
+        else if (match(this._keymap.undo)) { ev.preventDefault(); this.undo(); }
+        else if (match(this._keymap.redo)) { ev.preventDefault(); this.redo(); }
       });
 
       // Feature 12: Touch gestures
@@ -509,6 +527,7 @@
 
     // Setter methods for feature flags
     setKeyboardEnabled(v) { this._keyboardEnabled = !!v; }
+    setKeymap(map) { Object.assign(this._keymap, map); }
     setTouchEnabled(v) { this._touchEnabled = !!v; }
     setContextMenuEnabled(v) { this._contextMenuEnabled = !!v; }
     setUndoEnabled(v) { this._undoEnabled = !!v; }
