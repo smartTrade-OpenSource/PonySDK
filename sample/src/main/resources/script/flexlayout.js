@@ -504,6 +504,10 @@
       this.model.on('change', (m, action) => {
         if (action && action.type === 'SELECT_BORDER_TAB') {
           this._updateBorderSelection(action.side);
+        } else if (action && action.type === 'SELECT_TAB') {
+          // Fast path: only update tab active states + content visibility
+          const ts = this.model.getRoot().findById(action.tabsetId);
+          if (ts) this._selectTabFast(ts, ts.getSelected());
         } else {
           this._render();
         }
@@ -728,8 +732,8 @@
       for (const [id] of this._contentEls) { if (!live.has(id)) this._contentEls.delete(id); }
 
       this._nodeEls.clear();
-      this.container.innerHTML = '';
-      const root = this.model.getRoot(); if (!root) return;
+      const frag = document.createDocumentFragment();
+      const root = this.model.getRoot(); if (!root) { this.container.replaceChildren(); return; }
 
       const borders = this.model.getBorders();
       const leftBorders = borders.filter(b => !b._hidden && (b.side === 'left' || b.side === 'left-top' || b.side === 'left-bottom'));
@@ -758,12 +762,15 @@
       rowEl.style.left = (rtl ? hasRight : hasLeft) ? stripW + (rtl ? rightSize : leftSize) + 'px' : '0';
       rowEl.style.right = (rtl ? hasLeft : hasRight) ? stripW + (rtl ? leftSize : rightSize) + 'px' : '0';
       rowEl.style.flex = '';
-      this.container.appendChild(rowEl);
+      frag.appendChild(rowEl);
 
       // Render border panels as absolutely positioned siblings
-      if (hasLeft) this.container.appendChild(this._renderBorderGroup(leftBorders, 'left'));
-      if (hasRight) this.container.appendChild(this._renderBorderGroup(rightBorders, 'right'));
-      if (bottomBorder) this.container.appendChild(this._renderBorder(bottomBorder));
+      if (hasLeft) frag.appendChild(this._renderBorderGroup(leftBorders, 'left'));
+      if (hasRight) frag.appendChild(this._renderBorderGroup(rightBorders, 'right'));
+      if (bottomBorder) frag.appendChild(this._renderBorder(bottomBorder));
+
+      // Single DOM mutation: replace all children at once
+      this.container.replaceChildren(frag);
 
       const max = this.model.getMaximized();
       if (max) {
