@@ -94,7 +94,11 @@ public final class OffHeapJsonStore {
                 // Confirm with actual byte comparison (rare false positive path)
                 if (bytesEqual(existing, bytes)) return oldHash; // no change sentinel
             }
-            // Mark old space as wasted
+            // Drop the stale entry from the index *now*, before ensureCapacity. Its bytes are dead
+            // (counted in wastedBytes); leaving it in the index would let a compaction triggered by
+            // ensureCapacity copy it, while the buffer is sized as if it were already reclaimed —
+            // under-allocating by its length and overflowing on the write below.
+            index.remove(key);
             wastedBytes += existing.length;
         } else {
             oldHash = 0;

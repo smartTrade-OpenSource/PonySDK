@@ -176,4 +176,25 @@ public class OffHeapJsonStoreTest {
         assertEquals(4096, store.offHeapBytes());
         assertTrue(store.onHeapOverheadEstimate() >= 0);
     }
+
+    @Test
+    public void overwritingLargeValueDuringGrowDoesNotOverflow() {
+        // Regression: overwriting a large value (larger than the grow cushion) with one big enough
+        // to force a grow used to under-allocate the new buffer. The stale entry was still copied by
+        // the compaction inside ensureCapacity, while the new capacity was computed as if that entry
+        // were already reclaimed (its bytes were added to wastedBytes) — so the write below
+        // overflowed (BufferOverflowException). This is exactly the "update a large off-heap
+        // dataset" path that off-heap storage is meant for.
+        final OffHeapJsonStore store = new OffHeapJsonStore(32 * 1024); // 32 KB
+
+        final String oldValue = "a".repeat(6_000);   // > 4 KB cushion and <= cap/4 (so no in-place compact)
+        store.put("dataset", oldValue);
+        assertEquals(oldValue, store.readValue("dataset"));
+
+        final String newValue = "b".repeat(62_000);  // large enough to force a grow
+        store.put("dataset", newValue);               // must not throw BufferOverflowException
+
+        assertEquals(newValue, store.readValue("dataset"));
+        assertEquals(1, store.size());
+    }
 }
