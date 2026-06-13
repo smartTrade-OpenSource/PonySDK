@@ -351,7 +351,13 @@ public class PonySDKWebDriver implements WebDriver {
     }
 
     private Object getArray(final ByteBuffer b) {
-        final Object[] array = new Object[readUnsignedByte(b)];
+        int size = readUnsignedByte(b);
+        // 255 is the escape: a uint31 length (2 or 4 bytes) follows — mirrors WebSocketPusher / ReaderBuffer
+        if (size == ArrayValueModel.LENGTH_UINT31_ESCAPE) {
+            length += Short.BYTES;
+            size = getUint31(b);
+        }
+        final Object[] array = new Object[size];
         length += array.length; //elements types
         for (int i = 0; i < array.length; i++) {
             final ArrayValueModel model = readArrayValueModel(b);
