@@ -484,6 +484,7 @@
       this._ghost          = null;
       this._dropInd        = this._mkDropInd();
       this._stripW         = null; // cached strip width
+      this._resizeQueued   = false; // guard against infinite resize loops
 
       // Feature 13: Undo/redo
       this._actionHistory = [];
@@ -796,8 +797,8 @@
         const c = this._contentEls.get(ph.dataset.flPh);
         if (c) ph.replaceWith(c);
       }
-      // Notify virtualized widgets of layout change
-      requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
+      // Notify virtualized widgets of layout change (guarded to prevent infinite loops)
+      this._notifyResize();
     }
 
     _collectTabIds(node, set) {
@@ -805,6 +806,16 @@
       if (node.type === NT.TAB) { set.add(node.id); return; }
       if (node.type === NT.BORDER) { node.children.forEach(c => set.add(c.id)); return; }
       node.children.forEach(c => this._collectTabIds(c, set));
+    }
+
+    // Guarded resize notification — prevents infinite loops when listeners trigger model changes
+    _notifyResize() {
+      if (this._resizeQueued) return;
+      this._resizeQueued = true;
+      requestAnimationFrame(() => {
+        this._resizeQueued = false;
+        window.dispatchEvent(new Event('resize'));
+      });
     }
 
     _renderBorderGroup(borders, baseSide) {
@@ -1235,6 +1246,7 @@
 
     _updateBorderSelection(side) {
       // Partial re-render: only update the affected sidebar + main layout insets
+      this._phList = []; // Reset so _mkBorderPanel doesn't push to stale array
       const baseSide = side.split('-')[0];
       const sidebarEl = this.container.querySelector(`.fl-sidebar-${baseSide}`);
       if (!sidebarEl) { this._render(); return; }
@@ -1297,7 +1309,7 @@
         if (c) ph.replaceWith(c);
       });
       // Notify virtualized widgets that sidebar content is now visible
-      requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
+      this._notifyResize();
     }
 
     _startBorderTabDrag(origEv, tab, border, btnEl, moveEv) {
@@ -1449,7 +1461,7 @@
         }
       });
       // Notify virtualized widgets (grids) that container is now visible
-      requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
+      this._notifyResize();
     }
 
     _mkTabBtn(tab, tabset, idx) {
