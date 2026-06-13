@@ -457,13 +457,18 @@ public class WebSocketPusher implements Closeable {
 
     private void write(final ServerToClientModel model, final Object[] value) throws IOException {
         putModelKey(model);
-        if (value.length > MAX_UNSIGNED_BYTE_VALUE) {
-            throw new IllegalArgumentException("Array is too big (" + value.length + " > " + MAX_UNSIGNED_BYTE_VALUE
-                    + "), use a Json Object instead : " + Arrays.toString(value).substring(0, 100) + "...");
+        // Length: 0..254 in a single byte; 255 is an escape meaning a uint31 length (2 or 4 bytes)
+        // follows. This lifts the old 255-element cap while keeping small arrays at one length byte.
+        final int lengthBytes;
+        if (value.length < ArrayValueModel.LENGTH_UINT31_ESCAPE) {
+            putUnsignedByte((short) value.length);
+            lengthBytes = 1;
+        } else {
+            putUnsignedByte((short) ArrayValueModel.LENGTH_UINT31_ESCAPE);
+            lengthBytes = 1 + putUint31(value.length);
         }
-        metaBytes = MODEL_KEY_SIZE + 1;
+        metaBytes = MODEL_KEY_SIZE + lengthBytes;
         int dataBytes = 0;
-        putUnsignedByte((short) value.length);
         for (final Object o : value) {
             dataBytes += putArrayElement(o);
         }

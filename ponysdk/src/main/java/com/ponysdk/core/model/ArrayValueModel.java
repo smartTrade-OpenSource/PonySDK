@@ -55,6 +55,13 @@ public enum ArrayValueModel {
     private static final int STRING_DICTIONARY_REF_MIN_SIZE = 2; // UINT31: 2 bytes for IDs 0-32767
     private static final int STRING_DICTIONARY_ADD_MIN_SIZE = 2; // UINT31: 2 bytes for IDs 0-32767 + string follows
 
+    /**
+     * Array length encoding: a length of 0..254 is written as a single unsigned byte; the value 255
+     * is an escape meaning a UINT31 length (2 or 4 bytes) follows. This lets a binary array exceed
+     * 255 elements while keeping small arrays at a single length byte.
+     */
+    public static final int LENGTH_UINT31_ESCAPE = 0xFF;
+
     private final int minSize;
     private final boolean dynamicSize;
 

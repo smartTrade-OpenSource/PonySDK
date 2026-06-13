@@ -58,6 +58,9 @@ public class PTAddOn extends AbstractPTObject {
         final BinaryModel binaryModel = buffer.readBinaryModel();
         if (ServerToClientModel.PADDON_CREATION == binaryModel.getModel()) {
             arguments = binaryModel.getJsonObject();
+        } else if (ServerToClientModel.PADDON_CREATION_ARGS == binaryModel.getModel()) {
+            // pure-binary typed creation args → delivered to the factory as a JS array
+            arguments = binaryModel.getArrayValue().getJavaScriptObject();
         } else {
             arguments = null;
             buffer.rewind(binaryModel);

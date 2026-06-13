@@ -117,4 +117,50 @@ public class WebSocketPusherTest {
     public void emptyStringRoundTrips() throws Exception {
         assertTrue(assertRoundTrips(""));
     }
+
+    // ── Binary array length encoding (lifts the old 255-element cap via a uint31 escape) ──
+
+    /** Encodes an ARRAY-typed model and returns the raw bytes sent on the wire. */
+    private static byte[] encodeArrayAndCapture(final Object[] array) throws Exception {
+        final byte[][] captured = new byte[1][];
+        final org.eclipse.jetty.websocket.api.Session session = Mockito.mock(org.eclipse.jetty.websocket.api.Session.class);
+        Mockito.when(session.isOpen()).thenReturn(true);
+        Mockito.doAnswer(inv -> {
+            final java.nio.ByteBuffer buf = inv.getArgument(0);
+            final org.eclipse.jetty.websocket.api.Callback cb = inv.getArgument(1);
+            final byte[] bytes = new byte[buf.remaining()];
+            buf.duplicate().get(bytes);
+            captured[0] = bytes;
+            cb.succeed();
+            return null;
+        }).when(session).sendBinary(Mockito.any(java.nio.ByteBuffer.class),
+                Mockito.any(org.eclipse.jetty.websocket.api.Callback.class));
+
+        final ByteBufferPool pool = new ByteBufferPool(1 << 16, 4);
+        final WebSocketPusher p = new WebSocketPusher(session, 1 << 15, 1_000, pool);
+        p.encode(com.ponysdk.core.model.ServerToClientModel.PADDON_ARGUMENTS, array);
+        p.flush();
+        return captured[0];
+    }
+
+    @Test
+    public void smallArrayLengthIsASingleByte() throws Exception {
+        final byte[] bytes = encodeArrayAndCapture(new Object[] { 1, 2, 3 });
+        assertEquals(com.ponysdk.core.model.ServerToClientModel.PADDON_ARGUMENTS.getValue() & 0xFF, bytes[0] & 0xFF);
+        assertEquals("length < 255 stays a single byte", 3, bytes[1] & 0xFF);
+    }
+
+    @Test
+    public void largeArrayLengthUsesUint31Escape() throws Exception {
+        final Object[] array = new Object[300]; // > 255 — used to throw; now uses the uint31 escape
+        for (int i = 0; i < array.length; i++) array[i] = i;
+        final byte[] bytes = encodeArrayAndCapture(array);
+
+        assertEquals(com.ponysdk.core.model.ServerToClientModel.PADDON_ARGUMENTS.getValue() & 0xFF, bytes[0] & 0xFF);
+        assertEquals("escape byte signals a uint31 length follows",
+                com.ponysdk.core.model.ArrayValueModel.LENGTH_UINT31_ESCAPE, bytes[1] & 0xFF);
+        // 300 <= Short.MAX → 2-byte big-endian, high bit clear (positive uint31)
+        final int uint31 = (bytes[2] & 0xFF) << 8 | (bytes[3] & 0xFF);
+        assertEquals(300, uint31);
+    }
 }

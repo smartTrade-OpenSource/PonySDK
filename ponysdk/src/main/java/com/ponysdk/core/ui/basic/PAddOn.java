@@ -19,12 +19,25 @@ public abstract class PAddOn extends PObject {
         (byte) 8);
 
     private JsonObject args;
+    private Object[] creationArgs;
 
     protected PAddOn() {
     }
 
     protected PAddOn(final JsonObject args) {
         this.args = args;
+    }
+
+    /**
+     * Creates an addon whose creation arguments are sent as a <strong>pure binary</strong> typed
+     * array ({@code int}/{@code long}/{@code double}/{@code boolean}/{@link String}/...), instead of
+     * the JSON {@link #PAddOn(JsonObject)} form. The terminal factory receives the arguments as a JS
+     * array. More compact, and avoids JSON parse/serialize on both ends.
+     *
+     * @param creationArgs the typed binary arguments (primitives, String or JsonValue)
+     */
+    protected PAddOn(final Object... creationArgs) {
+        this.creationArgs = creationArgs;
     }
 
     public boolean attach(final PWindow window) {
@@ -51,7 +64,11 @@ public abstract class PAddOn extends PObject {
     protected void enrichForCreation(final ModelWriter writer) {
         super.enrichForCreation(writer);
         writer.write(ServerToClientModel.FACTORY, getSignature());
-        if (args != null) {
+        if (creationArgs != null) {
+            // pure-binary typed creation arguments (no JSON)
+            writer.write(ServerToClientModel.PADDON_CREATION_ARGS, creationArgs);
+            creationArgs = null;
+        } else if (args != null) {
             writer.write(ServerToClientModel.PADDON_CREATION, args.toString());
             args = null;
         }

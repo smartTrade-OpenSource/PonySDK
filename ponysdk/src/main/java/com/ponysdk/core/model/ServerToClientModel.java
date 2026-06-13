@@ -286,7 +286,10 @@ public enum ServerToClientModel {
     WC_SLOT_NAME(ValueTypeModel.STRING),           // slot name for targeted child insertion inside a Web Component
 
     // Transparent WebSocket reconnection (opt-in)
-    RECONNECT_CONTEXT(ValueTypeModel.UINT31);      // sent to client on reconnect: carries the uiContextId to resume
+    RECONNECT_CONTEXT(ValueTypeModel.UINT31),      // sent to client on reconnect: carries the uiContextId to resume
+
+    // Typed binary creation arguments for PAddOn — a pure-binary alternative to the JSON PADDON_CREATION
+    PADDON_CREATION_ARGS(ValueTypeModel.ARRAY);
 
     public static final int MAX_VALUE = Short.MAX_VALUE;
     private static final ServerToClientModel[] VALUES = ServerToClientModel.values();

@@ -359,7 +359,9 @@ public class ReaderBuffer {
 
     private JSONArray readArrayModelValue() {
         modelSize += ValueTypeModel.BYTE_SIZE;
-        final int arraySize = getUnsignedByte();
+        int arraySize = getUnsignedByte();
+        // 255 is the escape: a uint31 length follows (getUint31 advances position and tracks modelSize)
+        if (arraySize == ArrayValueModel.LENGTH_UINT31_ESCAPE) arraySize = getUint31();
         final JSONArray array = new JSONArray();
         modelSize += arraySize;
         for (int i = 0; i < arraySize; i++) {
@@ -545,6 +547,13 @@ public class ReaderBuffer {
         if (value < 0) position += Short.BYTES;
     }
 
+    /** Reads a UINT31 value (advancing position) without tracking modelSize — used by the shift path. */
+    private int readUint31Value() {
+        int value = getShort();
+        if (value < 0) value = value << 16 | getUnsignedShort();
+        return value & 0x7F_FF_FF_FF;
+    }
+
     private void shiftString() {
         int messageSize = getUnsignedByte();
 
@@ -573,7 +582,8 @@ public class ReaderBuffer {
     }
 
     private void shiftArray() {
-        final int arrayLength = getUnsignedByte();
+        int arrayLength = getUnsignedByte();
+        if (arrayLength == ArrayValueModel.LENGTH_UINT31_ESCAPE) arrayLength = readUint31Value();
         for (int i = 0; i < arrayLength; i++) {
             final ArrayValueModel arrayValueModel = ArrayValueModel.fromRawValue(getByte());
             if (arrayValueModel == ArrayValueModel.STRING_DICTIONARY_REF) {
