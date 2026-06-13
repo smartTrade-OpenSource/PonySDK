@@ -122,25 +122,25 @@ public class WebSocketPusherTest {
 
     /** Encodes an ARRAY-typed model and returns the raw bytes sent on the wire. */
     private static byte[] encodeArrayAndCapture(final Object[] array) throws Exception {
-        final byte[][] captured = new byte[1][];
+        final java.io.ByteArrayOutputStream stream = new java.io.ByteArrayOutputStream();
         final org.eclipse.jetty.websocket.api.Session session = Mockito.mock(org.eclipse.jetty.websocket.api.Session.class);
         Mockito.when(session.isOpen()).thenReturn(true);
         Mockito.doAnswer(inv -> {
             final java.nio.ByteBuffer buf = inv.getArgument(0);
             final org.eclipse.jetty.websocket.api.Callback cb = inv.getArgument(1);
-            final byte[] bytes = new byte[buf.remaining()];
-            buf.duplicate().get(bytes);
-            captured[0] = bytes;
+            final byte[] chunk = new byte[buf.remaining()];
+            buf.duplicate().get(chunk);
+            stream.writeBytes(chunk); // accumulate, in case the pusher flushes in several chunks
             cb.succeed();
             return null;
         }).when(session).sendBinary(Mockito.any(java.nio.ByteBuffer.class),
                 Mockito.any(org.eclipse.jetty.websocket.api.Callback.class));
 
-        final ByteBufferPool pool = new ByteBufferPool(1 << 16, 4);
-        final WebSocketPusher p = new WebSocketPusher(session, 1 << 15, 1_000, pool);
+        final ByteBufferPool pool = new ByteBufferPool(1 << 20, 4);
+        final WebSocketPusher p = new WebSocketPusher(session, 1 << 19, 1_000, pool);
         p.encode(com.ponysdk.core.model.ServerToClientModel.PADDON_ARGUMENTS, array);
         p.flush();
-        return captured[0];
+        return stream.toByteArray();
     }
 
     @Test
@@ -162,5 +162,43 @@ public class WebSocketPusherTest {
         // 300 <= Short.MAX → 2-byte big-endian, high bit clear (positive uint31)
         final int uint31 = (bytes[2] & 0xFF) << 8 | (bytes[3] & 0xFF);
         assertEquals(300, uint31);
+    }
+
+    @Test
+    public void binaryArrayLengthRoundTripsAcrossBoundaries() throws Exception {
+        // Encode with the real server pusher, then decode with the same length+element logic the
+        // terminal (ReaderBuffer) uses — across the escape (254/255/256) and the uint31 short→int
+        // (32767/32768) boundaries. Proves the wire format is self-consistent end to end.
+        for (final int size : new int[] { 0, 1, 254, 255, 256, 32767, 32768, 33000 }) {
+            final Object[] array = new Object[size];
+            for (int i = 0; i < size; i++) array[i] = i % 100; // small ints → BYTE-encoded elements
+            final int[] decoded = decodeSmallIntArray(encodeArrayAndCapture(array));
+            assertEquals("size " + size, size, decoded.length);
+            for (int i = 0; i < size; i++) assertEquals("size " + size + " idx " + i, i % 100, decoded[i]);
+        }
+    }
+
+    /** Decoder mirroring {@code ReaderBuffer}: [modelKey][length][BYTE-encoded int elements...]. */
+    private static int[] decodeSmallIntArray(final byte[] bytes) {
+        int pos = 1; // skip the 1-byte model key
+        int len = bytes[pos++] & 0xFF;
+        if (len == com.ponysdk.core.model.ArrayValueModel.LENGTH_UINT31_ESCAPE) {
+            final short s = (short) ((bytes[pos++] & 0xFF) << 8 | (bytes[pos++] & 0xFF));
+            if (s >= 0) {
+                len = s;
+            } else {
+                final int lo = (bytes[pos++] & 0xFF) << 8 | (bytes[pos++] & 0xFF);
+                len = (s << 16 | lo) & 0x7F_FF_FF_FF;
+            }
+        }
+        final int[] result = new int[len];
+        final int byteTag = com.ponysdk.core.model.ArrayValueModel.BYTE.getValue() & 0xFF;
+        for (int i = 0; i < len; i++) {
+            final int tag = bytes[pos++] & 0xFF;
+            if (tag != byteTag) throw new IllegalStateException("expected BYTE tag, got " + tag);
+            result[i] = bytes[pos++]; // signed byte payload
+        }
+        if (pos != bytes.length) throw new IllegalStateException("trailing bytes: pos=" + pos + " total=" + bytes.length);
+        return result;
     }
 }
