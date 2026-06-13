@@ -376,6 +376,7 @@
 .fl-tab-content {
   display: flex; flex-direction: column; position: absolute; inset: 0;
   overflow: hidden; background: var(--fl-panel);
+  contain: layout style paint;
 }
 
 /* â”€â”€ Drag ghost â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
