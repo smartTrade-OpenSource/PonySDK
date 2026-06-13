@@ -1411,12 +1411,14 @@
       // ── content ──
       const area = document.createElement('div'); area.className = 'fl-content';
       node.children.forEach((tab, i) => {
-        const c = this._getOrMakeContent(tab);
-        c.style.display = i === node.getSelected() ? 'flex' : 'none';
-        const ph = document.createElement('div');
-        ph.dataset.flPh = tab.id;
-        this._phList.push(ph);
-        area.appendChild(ph);
+        if (i === node.getSelected()) {
+          const c = this._getOrMakeContent(tab);
+          c.style.display = 'flex';
+          const ph = document.createElement('div');
+          ph.dataset.flPh = tab.id;
+          this._phList.push(ph);
+          area.appendChild(ph);
+        }
       });
       el.appendChild(area);
       return el;
@@ -1430,9 +1432,17 @@
       if (!tsEl) return;
       tsEl.querySelectorAll('.fl-tabs .fl-tab').forEach((b, i) =>
         b.classList.toggle('fl-tab-active', i === tabIdx));
+      const area = tsEl.querySelector('.fl-content');
       tsNode.children.forEach((t, i) => {
         const c = this._contentEls.get(t.id);
-        if (c) c.style.display = i === tabIdx ? 'flex' : 'none';
+        if (i === tabIdx) {
+          // Lazy: create content on first select
+          const content = c || this._getOrMakeContent(t);
+          content.style.display = 'flex';
+          if (!content.parentNode || content.parentNode !== area) area.appendChild(content);
+        } else if (c) {
+          c.style.display = 'none';
+        }
       });
     }
 
