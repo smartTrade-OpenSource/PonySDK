@@ -121,6 +121,7 @@ import com.ponysdk.core.ui.scene.Router;
 import com.ponysdk.core.ui.scene.Scene;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
 import com.ponysdk.sample.client.event.UserLoggedOutHandler;
+import com.ponysdk.sample.client.page.addon.BinaryArgsAddOn;
 import com.ponysdk.sample.client.page.addon.LoggerAddOn;
 
 public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
@@ -207,7 +208,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final String[][] tabs = {
             {"⌨", "Inputs"}, {"⊞", "Layouts"}, {"◈", "Data"},
             {"⊟", "DataGrid"}, {"◉", "Web Comp."}, {"⋯", "Misc"},
-            {"⚡", "Perf"}, {"</>", "Code"}
+            {"⚡", "Perf"}, {"</>", "Code"}, {"≡", "Binary"}
         };
 
         // Active tab schedulers — cancelled on tab leave, list cleared and refilled on re-entry
@@ -296,8 +297,36 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             case 4 -> buildWebCompTab(schedulers);
             case 5 -> buildMiscTab(schedulers);
             case 6 -> buildPerfTab(uiContext, schedulers);
-            default -> buildCodeTab();
+            case 7 -> buildCodeTab();
+            default -> buildBinaryAddonTab();
         };
+    }
+
+    private PFlowPanel buildBinaryAddonTab() {
+        final PFlowPanel panel = Element.newPFlowPanel();
+        final PElement box = Element.newDiv();
+        box.setAttribute("style", "padding:32px;max-width:920px");
+
+        final PElement title = Element.newDiv();
+        title.setAttribute("style", "font-size:20px;font-weight:800;margin-bottom:6px;color:var(--text,#f0f4ff)");
+        title.setInnerText("Binary PAddOn protocol");
+
+        final PElement sub = Element.newDiv();
+        sub.setAttribute("style", "color:var(--text2,#8892a4);margin-bottom:20px;line-height:1.6");
+        sub.setInnerText("Typed primitives (int, boolean, double, String, long) are delivered to a JavaScript addon "
+            + "in pure binary \u2014 both as creation arguments and as a method-call array. Binary arrays are no "
+            + "longer capped at 255 elements (uint31 length).");
+
+        final BinaryArgsAddOn addon = new BinaryArgsAddOn(42, true, 3.14, "h\u00e9llo", 9_000_000_000L);
+        addon.asWidget().setAttribute("style",
+            "display:block;background:var(--surface2,#131929);border:1px solid var(--border,#1e2d45);"
+                + "border-radius:10px;padding:18px;min-height:90px");
+
+        box.add(title, sub, addon.asWidget());
+        panel.add(box);
+
+        addon.pushValues(1000);
+        return panel;
     }
 
     private static String buildGlobalStyles() {

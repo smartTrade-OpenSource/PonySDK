@@ -1354,6 +1354,8 @@ function MyChartAddon(id, element, args) {
 }
 ```
 
+**Typed arguments travel in pure binary.** `callTerminalMethod(name, args...)` encodes `int`/`long`/`double`/`boolean`/`String`/`JsonValue` as a typed binary array — no JSON serialization on either side. Creation arguments can do the same via the `PAddOn(Object...)` (and `PAddOnComposite(widget, Object...)`) constructor; the terminal factory then receives a JS array instead of a parsed JSON object. Binary arrays carry a **uint31 length**, so they are no longer capped at 255 elements — suitable for large typed payloads. The JSON forms (`PAddOn(JsonObject)`) remain available and unchanged for backward compatibility.
+
 ### 11.3 EventBus Communication
 
 Decouple components:

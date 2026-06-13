@@ -58,6 +58,10 @@ public class PTAddOnComposite extends PTAddOn {
         if (ServerToClientModel.PADDON_CREATION == binaryModel.getModel()) {
             arguments = binaryModel.getJsonObject();
             binaryModel = buffer.readBinaryModel();
+        } else if (ServerToClientModel.PADDON_CREATION_ARGS == binaryModel.getModel()) {
+            // pure-binary typed creation args → delivered to the factory as a JS array
+            arguments = binaryModel.getArrayValue().getJavaScriptObject();
+            binaryModel = buffer.readBinaryModel();
         } else {
             arguments = null;
         }

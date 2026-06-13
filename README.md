@@ -30,6 +30,7 @@ It runs a Jetty 12 WebSocket server on the backend and uses GWT on the frontend.
 - Binary WebSocket protocol between server and browser
 - String Dictionary: up to 83% bandwidth reduction on repeated strings, shared across sessions
 - 5-level incremental encoding: equality check → dictionary → merge-patch → binary → WebSocket deflate
+- Typed binary arrays: `PAddOn` creation args and method calls carry int/long/double/boolean/String in pure binary, with a uint31 length (no 255-element cap)
 
 **Connectivity**
 - Transparent WebSocket reconnection (opt-in): UIContext survives network drops, state replayed on reconnect
@@ -43,7 +44,7 @@ It runs a Jetty 12 WebSocket server on the backend and uses GWT on the frontend.
 
 **UI**
 - Web Component integration (`PWebComponent`) with `PropertyHandle` API (on-heap, off-heap, stateless modes)
-- `PAddOn` for integrating any JavaScript library
+- `PAddOn` for integrating any JavaScript library — typed creation args and method calls sent in pure binary (no JSON) via `PAddOn(Object...)`
 - Virtual threads (Java 25) for scalable concurrent `UIContext`s
 - JsInterop / elemental2 terminal — no legacy `gwt-elemental`
 

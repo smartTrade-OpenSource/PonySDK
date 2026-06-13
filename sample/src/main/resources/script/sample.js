@@ -127,4 +127,42 @@
     }
 
   });
+
+  AbstractAddon.defineAddon("com.ponysdk.sample.client.page.addon.BinaryArgsAddOn", {
+
+    init: function () {
+      // Creation args arrive as a pure-binary typed JS array (no JSON)
+      var c = this.options || [];
+      window.__createLen = c.length;
+      this._createHtml =
+          '<div><b>Creation args (pure binary, no JSON):</b> ['
+        + Array.prototype.map.call(c, function (x) { return JSON.stringify(x); }).join(', ') + ']</div>'
+        + '<div><b>JS types received:</b> '
+        + Array.prototype.map.call(c, function (x) { return typeof x; }).join(', ') + '</div>';
+      this._render();
+    },
+
+    values: function () {
+      var arr = Array.prototype.slice.call(arguments);
+      var sum = 0;
+      for (var i = 0; i < arr.length; i++) sum += arr[i];
+      window.__bigLen = arr.length;
+      window.__bigSum = sum;
+      this._valuesHtml =
+          '<div style="margin-top:12px"><b>Method call &mdash; typed binary array of '
+        + arr.length + ' values</b> (the old protocol capped binary arrays at 255):</div>'
+        + '<div>first=' + arr[0] + ', last=' + arr[arr.length - 1] + ', sum=' + sum
+        + ', allNumbers=' + arr.every(function (x) { return typeof x === "number"; }) + '</div>';
+      this._render();
+    },
+
+    _render: function () {
+      if (this.element) {
+        this.element.innerHTML =
+            '<div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;line-height:1.7;font-size:13px;color:#f0f4ff">'
+          + (this._createHtml || '') + (this._valuesHtml || '') + '</div>';
+      }
+    }
+
+  });
 })();
