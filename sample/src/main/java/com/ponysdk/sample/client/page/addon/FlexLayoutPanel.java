@@ -350,6 +350,34 @@ public class FlexLayoutPanel implements IsPWidget {
         addon.showNotification(message, type, durationMs);
     }
 
+    // ─── Feature: onTabSelect callback ──────────────────────────
+
+    public void setOnTabSelected(final Consumer<String> handler) {
+        addon.setOnTabSelected(handler);
+    }
+
+    // ─── Feature: Max tabs per tabset ───────────────────────────
+
+    public void setMaxTabs(final String tabsetId, final int max) {
+        addon.setMaxTabs(tabsetId, max);
+    }
+
+    // ─── Feature: Layout lock ───────────────────────────────────
+
+    public void setLocked(final boolean locked) {
+        addon.setLocked(locked);
+    }
+
+    // ─── Feature: Tab metadata ──────────────────────────────────
+
+    public void setTabConfig(final String tabId, final String configJson) {
+        addon.setTabConfig(tabId, configJson);
+    }
+
+    public void getTabConfig(final String tabId, final Consumer<String> callback) {
+        addon.getTabConfig(tabId, callback);
+    }
+
     // ─── Internal ────────────────────────────────────────────────
 
     public FlexLayoutAddon getAddon() {

@@ -92,6 +92,7 @@
       this.name           = cfg.name           || '';
       this.enableMaximize = cfg.enableMaximize !== false;
       this.enableDrop     = cfg.enableDrop     !== false;
+      this.maxChildren    = cfg.maxChildren    != null ? cfg.maxChildren : null;
     }
     getSelected()     { return this._selected; }
     setSelected(i)    { const n = this.children.length; this._selected = n === 0 ? 0 : clamp(i, 0, n - 1); }
@@ -243,6 +244,7 @@
             let at = action.insertIndex != null ? action.insertIndex : dest.children.length;
             dest.addChild(tab, at); dest.setSelected(dest.children.indexOf(tab));
           } else if (location === DL.CENTER && dest.type === NT.TABSET) {
+            if (dest.maxChildren != null && dest !== from && dest.children.length >= dest.maxChildren) { from.addChild(tab, oldI); return; }
             let at = action.insertIndex != null ? action.insertIndex : dest.children.length;
             // insertIndex was computed including the dragged tab; if it sat before
             // the target slot in the SAME tabset, removing it shifts everything left by one
@@ -263,6 +265,7 @@
         case 'ADD_TAB': {
           const ts = action.tabsetId ? this._root.findById(action.tabsetId) : this._firstTabSet(this._root);
           if (!ts) return;
+          if (ts.maxChildren != null && ts.children.length >= ts.maxChildren) return;
           const tab = new TabNode(action.tab);
           const idx = action.index != null ? action.index : ts.children.length;
           ts.addChild(tab, idx);
@@ -494,6 +497,7 @@
       this._keyboardEnabled = true;
       this._touchEnabled = true;
       this._contextMenuEnabled = true;
+      this._locked = false;
 
       // P1: ResizeObserver on container — debounced window resize dispatch
       this._resizeTimer = 0;
@@ -541,6 +545,8 @@
         undo:        { ctrl: true, key: 'z' },
         redo:        { ctrl: true, key: 'y' },
         commandPalette: { ctrl: true, key: 'p' },
+        closeActiveTab: { ctrl: true, key: 'w' },
+        renameTab:   { key: 'F2' },
       };
       this.container.setAttribute('tabindex', '-1');
       this.container.addEventListener('keydown', ev => {
@@ -563,6 +569,21 @@
         else if (match(this._keymap.undo)) { ev.preventDefault(); this.undo(); }
         else if (match(this._keymap.redo)) { ev.preventDefault(); this.redo(); }
         else if (match(this._keymap.commandPalette)) { ev.preventDefault(); this._showCommandPalette(); }
+        else if (match(this._keymap.closeActiveTab)) {
+          ev.preventDefault();
+          const tsId = this._getActiveId();
+          const ts = tsId ? this.model.getRoot().findById(tsId) : null;
+          if (ts) { const sel = ts.getSelectedNode(); if (sel && sel.isEnableClose()) this._act(Actions.closeTab(sel.id)); }
+        }
+        else if (match(this._keymap.renameTab)) {
+          ev.preventDefault();
+          const tsId2 = this._getActiveId();
+          const ts2 = tsId2 ? this.model.getRoot().findById(tsId2) : null;
+          if (ts2) {
+            const sel2 = ts2.getSelectedNode();
+            if (sel2) { const lblEl = this.container.querySelector(`[data-fl-tab="${sel2.id}"] .fl-tab-label`); if (lblEl) this._startTabRename(lblEl, sel2); }
+          }
+        }
       });
 
       // Feature 12: Touch gestures
@@ -584,6 +605,10 @@
     setTouchEnabled(v) { this._touchEnabled = !!v; }
     setContextMenuEnabled(v) { this._contextMenuEnabled = !!v; }
     setUndoEnabled(v) { this._undoEnabled = !!v; }
+    setLocked(v) {
+      this._locked = !!v;
+      this.container.classList.toggle('fl-layout-locked', this._locked);
+    }
 
     setBadge(tabId, badge, color) {
       const tab = this.model.findById(tabId);
@@ -598,6 +623,11 @@
     setBorderMaxSize(side, max) {
       const border = this.model.getBorder(side);
       if (border) border.maxSize = max;
+    }
+
+    setMaxChildren(tabsetId, max) {
+      const ts = this.model.getRoot().findById(tabsetId);
+      if (ts && ts.type === NT.TABSET) ts.maxChildren = max;
     }
 
     // Feature 12: Touch gestures
@@ -930,7 +960,7 @@
       });
       btn.style.touchAction = 'none';
       btn.addEventListener('pointerdown', ev => {
-        if (ev.button !== 0 || ev.target.closest('.fl-sidebar-tab-x')) return;
+        if (ev.button !== 0 || ev.target.closest('.fl-sidebar-tab-x') || this._locked) return;
         ev.preventDefault();
         const startX = ev.clientX, startY = ev.clientY;
         let dragging = false;
@@ -1015,7 +1045,7 @@
 
     // Feature 3: Context menu
     _showBorderContextMenu(tab, border, x, y) {
-      if (!this._contextMenuEnabled) return;
+      if (!this._contextMenuEnabled || this._locked) return;
       this._hideBorderContextMenu();
       const menu = document.createElement('div');
       menu.className = 'fl-border-context-menu';
@@ -1363,7 +1393,7 @@
       sp.className = `fl-splitter ${isH ? 'fl-sp-h' : 'fl-sp-v'}`;
       sp.style.touchAction = 'none';
       sp.addEventListener('pointerdown', e => {
-        if (e.button !== 0) return;
+        if (e.button !== 0 || this._locked) return;
         e.preventDefault();
         const A = row.children[afterIdx], B = row.children[afterIdx + 1];
         try { sp.setPointerCapture(e.pointerId); } catch (err) {}
@@ -1423,6 +1453,12 @@
 
       // ── content ──
       const area = document.createElement('div'); area.className = 'fl-content';
+      if (node.children.length === 0) {
+        const ph = document.createElement('div');
+        ph.className = 'fl-empty-tabset';
+        ph.textContent = 'Drop here';
+        area.appendChild(ph);
+      }
       node.children.forEach((tab, i) => {
         if (i === node.getSelected()) {
           const c = this._getOrMakeContent(tab);
@@ -1464,6 +1500,7 @@
       const btn = document.createElement('div');
       btn.className = `fl-tab${idx === tabset.getSelected() ? ' fl-tab-active' : ''}`;
       btn.dataset.flTab = tab.id;
+      btn.title = tab.getName();
 
       // Pinned tab indicator
       if (!tab.isEnableClose() && !tab.isEnableDrag()) {
@@ -1493,15 +1530,38 @@
         btn.appendChild(x);
       }
 
+      // Middle-click close
+      btn.addEventListener('auxclick', ev => {
+        if (ev.button === 1 && tab.isEnableClose()) {
+          ev.preventDefault();
+          this._act(Actions.closeTab(tab.id));
+        }
+      });
+
       btn.draggable = false;
       btn.style.touchAction = 'none';
+
+      // Slow double-click rename tracking
+      let _lastClickTime = 0;
       btn.addEventListener('dblclick', ev => {
         ev.preventDefault();
         if (tabset.enableMaximize) this._act(Actions.maximizeToggle(tabset.id));
       });
       btn.addEventListener('pointerdown', ev => {
         if (ev.button !== 0 || ev.target.closest('.fl-tab-x')) return;
+        if (this._locked) return;
         ev.preventDefault();
+
+        // Slow double-click rename detection
+        const now = Date.now();
+        const gap = now - _lastClickTime;
+        if (gap >= 500 && gap <= 1000 && idx === tabset.getSelected()) {
+          _lastClickTime = 0;
+          this._startTabRename(lbl, tab);
+          return;
+        }
+        _lastClickTime = now;
+
         // Fast select: no DOM wipe, no capture break
         this._selectTabFast(tabset, idx);
         if (!tab.isEnableDrag()) return;
@@ -1518,6 +1578,24 @@
       });
 
       return btn;
+    }
+
+    _startTabRename(lbl, tab) {
+      lbl.contentEditable = 'true';
+      lbl.focus();
+      const sel = window.getSelection();
+      sel.selectAllChildren(lbl);
+      const commit = () => {
+        lbl.contentEditable = 'false';
+        const newName = lbl.textContent.trim() || tab.getName();
+        if (newName !== tab.getName()) this._act(Actions.renameTab(tab.id, newName));
+        else lbl.textContent = tab.getName();
+      };
+      lbl.addEventListener('blur', commit, { once: true });
+      lbl.addEventListener('keydown', ev => {
+        if (ev.key === 'Enter') { ev.preventDefault(); lbl.blur(); }
+        else if (ev.key === 'Escape') { lbl.textContent = tab.getName(); lbl.blur(); }
+      });
     }
 
     _getOrMakeContent(tab) {
@@ -1603,6 +1681,7 @@
       const d = this._drag; const ind = this._dropInd;
       // Feature 7: Remove previous drop target highlight
       this.container.querySelectorAll('.fl-sidebar-drop-target').forEach(el => el.classList.remove('fl-sidebar-drop-target'));
+      this.container.querySelectorAll('.fl-drop-zone-active').forEach(el => el.classList.remove('fl-drop-zone-active'));
       const hit = this._findHit(ev.clientX, ev.clientY);
       if (!hit) { ind.style.display = 'none'; d.drop = null; return; }
       d.drop = hit;
@@ -1617,6 +1696,8 @@
 
       // Insertion bar (reorder / insert into a tab strip)
       if (hit.location === 'insert') {
+        const tsEl2 = this.container.querySelector(`[data-fl-tabset="${hit.tabsetId}"]`);
+        if (tsEl2) tsEl2.classList.add('fl-drop-zone-active');
         const b = hit.bar;
         ind.style.cssText = `display:block;position:fixed;left:${b.x - 1.5}px;top:${b.top}px;`
           + `width:3px;height:${b.height}px;border:none;border-radius:2px;`
@@ -1625,6 +1706,8 @@
       }
       // Edge split / center zone
       const R = hit.rect;
+      const tsEl3 = this.container.querySelector(`[data-fl-tabset="${hit.tabsetId}"]`);
+      if (tsEl3) tsEl3.classList.add('fl-drop-zone-active');
       let L = R.left, T = R.top, W = R.width, H = R.height;
       if (hit.location === DL.LEFT)         { W *= 0.5; }
       else if (hit.location === DL.RIGHT)   { L += W*0.5; W *= 0.5; }
@@ -1759,6 +1842,7 @@
       this._dropInd.style.display = 'none';
       // Feature 7: Remove drop target highlights
       this.container.querySelectorAll('.fl-sidebar-drop-target').forEach(el => el.classList.remove('fl-sidebar-drop-target'));
+      this.container.querySelectorAll('.fl-drop-zone-active').forEach(el => el.classList.remove('fl-drop-zone-active'));
       document.body.style.cursor = '';
     }
 

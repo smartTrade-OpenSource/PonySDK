@@ -577,3 +577,24 @@
 .fl-toast-success { background: #a6e3a1; color: #1e1e2e; }
 .fl-toast-warning { background: #f9e2af; color: #1e1e2e; }
 .fl-toast-error   { background: #f38ba8; }
+
+/* ── Feature: Drop zone active (pulsing border) ─────────────────── */
+.fl-drop-zone-active {
+  animation: fl-drop-pulse 0.8s ease-in-out infinite alternate;
+}
+@keyframes fl-drop-pulse {
+  from { border-color: var(--fl-drop-border); box-shadow: 0 0 4px var(--fl-drop-border); }
+  to   { border-color: var(--fl-accent2, var(--fl-drop-border)); box-shadow: 0 0 12px var(--fl-drop-border); }
+}
+
+/* ── Feature: Empty tabset placeholder ───────────────────────────── */
+.fl-empty-tabset {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; height: 100%;
+  color: var(--fl-text-dim); font-size: 13px; opacity: 0.6;
+}
+
+/* ── Feature: Layout lock (read-only mode) ───────────────────────── */
+.fl-layout-locked .fl-tab-x { display: none; }
+.fl-layout-locked .fl-sidebar-tab-x { display: none; }
+.fl-layout-locked .fl-splitter { pointer-events: none; }

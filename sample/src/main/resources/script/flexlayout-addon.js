@@ -155,6 +155,10 @@
           action.tab && action.tab.component && action.tab.component !== 'pwidget') {
         this.sendDataToServer({ type: 'externalDrop', tabId: action.tab.id, component: action.tab.component, tabName: action.tab.name, config: action.tab.config ? JSON.stringify(action.tab.config) : null });
       }
+      // Feature 8: onTabSelect callback
+      if (action.type === 'SELECT_TAB') {
+        this.sendDataToServer({ type: 'tabSelected', tabId: action.tabId, tabsetId: action.tabsetId });
+      }
       // Lightweight action notification (much smaller than full model)
       if (this._notifyActions) {
         this.sendDataToServer(this._serializeAction(action));
@@ -867,6 +871,30 @@
     setTabGroup: function (tabId, groupName, color) {
       if (!this._model) return;
       this._model.doAction({ type: 'SET_TAB_GROUP', tabId: tabId, group: groupName, groupColor: color });
+    },
+
+    // ─── New Features: maxTabs, locked, tabConfig ────────────────
+    setMaxTabs: function (tabsetId, max) {
+      if (!this._layout) return;
+      this._layout.setMaxChildren(tabsetId, max > 0 ? max : null);
+    },
+
+    setLocked: function (locked) {
+      if (!this._layout) return;
+      this._layout.setLocked(!!locked);
+    },
+
+    setTabConfig: function (tabId, configJson) {
+      if (!this._model) return;
+      var tab = this._model.findById(tabId);
+      if (tab) tab.config = parseJson(configJson);
+    },
+
+    getTabConfig: function (tabId) {
+      if (!this._model) return;
+      var tab = this._model.findById(tabId);
+      var cfg = tab ? JSON.stringify(tab.config || {}) : '{}';
+      this.sendDataToServer({ type: 'tabConfig', tabId: tabId, config: cfg });
     },
 
     // ─── Feature 10: Status Bar ─────────────────────────────────

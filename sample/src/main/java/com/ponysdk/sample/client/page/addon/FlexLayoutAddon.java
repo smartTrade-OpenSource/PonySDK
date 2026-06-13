@@ -40,6 +40,8 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
     private static final String EVT_POP_IN = "popIn";
     private static final String EVT_POP_OUT_STATE = "popOutState";
     private static final String EVT_REHYDRATE = "rehydrate";
+    private static final String EVT_TAB_SELECTED = "tabSelected";
+    private static final String EVT_TAB_CONFIG = "tabConfig";
 
     private final Map<String, PWidget> tabWidgets = new HashMap<>();
     private final Map<String, PopOutInfo> popOutTabs = new HashMap<>();
@@ -56,6 +58,8 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
     private String modelVersion;
     private BiFunction<String, String, String> migrationHandler;
     private Consumer<JsonObject> onActionBroadcast;
+    private Consumer<String> onTabSelected;
+    private Consumer<String> tabConfigCallback;
 
     public FlexLayoutAddon() {
         this(null, null, null);
@@ -553,6 +557,35 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
         callTerminalMethod("showNotification", message, type, durationMs);
     }
 
+    // ─── Feature: onTabSelect callback ──────────────────────────
+
+    public void setOnTabSelected(final Consumer<String> handler) {
+        this.onTabSelected = handler;
+    }
+
+    // ─── Feature: Max tabs per tabset ───────────────────────────
+
+    public void setMaxTabs(final String tabsetId, final int max) {
+        callTerminalMethod("setMaxTabs", tabsetId, max);
+    }
+
+    // ─── Feature: Layout lock ───────────────────────────────────
+
+    public void setLocked(final boolean locked) {
+        callTerminalMethod("setLocked", locked);
+    }
+
+    // ─── Feature: Tab metadata ──────────────────────────────────
+
+    public void setTabConfig(final String tabId, final String configJson) {
+        callTerminalMethod("setTabConfig", tabId, configJson);
+    }
+
+    public void getTabConfig(final String tabId, final Consumer<String> callback) {
+        this.tabConfigCallback = callback;
+        callTerminalMethod("getTabConfig", tabId);
+    }
+
     // ─── Lifecycle ───────────────────────────────────────────────
 
     @Override
@@ -631,6 +664,12 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
                 break;
             case EVT_REHYDRATE:
                 handleRehydrate(data);
+                break;
+            case EVT_TAB_SELECTED:
+                handleTabSelected(data);
+                break;
+            case EVT_TAB_CONFIG:
+                handleTabConfig(data);
                 break;
             default:
                 break;
@@ -761,6 +800,19 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
                 if (component == null) continue; // tab removed by migration
             }
             onExternalDrop.onDrop(tabId, component, config);
+        }
+    }
+
+    private void handleTabSelected(final JsonObject data) {
+        final String tabId = data.getString("tabId", null);
+        if (onTabSelected != null && tabId != null) onTabSelected.accept(tabId);
+    }
+
+    private void handleTabConfig(final JsonObject data) {
+        final String config = data.getString("config", null);
+        if (tabConfigCallback != null && config != null) {
+            tabConfigCallback.accept(config);
+            tabConfigCallback = null;
         }
     }
 }
