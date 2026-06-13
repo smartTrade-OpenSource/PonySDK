@@ -181,6 +181,10 @@ task gwtc(type: JavaExec) {
 
 test {
     classpath = files(resourcesCoreTest, gwtOutputDirName) + classpath
+    // Forward opt-in browser-test properties to the forked test JVM (see driver/BinaryAddonBrowserIT)
+    ['ponysdk.browserTest', 'ponysdk.browserUrl', 'ponysdk.chromeBinary', 'webdriver.chrome.driver'].each { k ->
+        if (System.getProperty(k) != null) systemProperty k, System.getProperty(k)
+    }
     afterSuite { desc, result ->
         if (!desc.parent) {
             println "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
