@@ -83,9 +83,16 @@ public class ClientBinaryReader {
 
     /**
      * Reads the next field key.
+     *
+     * @throws IllegalStateException if the ordinal does not map to a known {@link ClientToServerModel}
+     *                               (untrusted input must not index the array out of bounds)
      */
     public ClientToServerModel readKey() {
         final int ordinal = buffer.get() & 0xFF;
+        if (ordinal >= MODELS.length) {
+            throw new IllegalStateException("Invalid ClientToServerModel ordinal: " + ordinal
+                    + " (valid range 0.." + (MODELS.length - 1) + ")");
+        }
         return MODELS[ordinal];
     }
 
@@ -121,7 +128,7 @@ public class ClientBinaryReader {
      * Reads a string value (after tag has been read).
      */
     public String readString() {
-        final int len = buffer.getInt();
+        final int len = readLength();
         final byte[] bytes = new byte[len];
         buffer.get(bytes);
         return new String(bytes, StandardCharsets.UTF_8);
@@ -129,6 +136,8 @@ public class ClientBinaryReader {
 
     /**
      * Skips the value payload based on the tag.
+     *
+     * @throws IllegalStateException on an unknown tag (which would otherwise desync the parser)
      */
     public void skipValue(final int tag) {
         switch (tag) {
@@ -137,10 +146,30 @@ public class ClientBinaryReader {
             case TAG_INT -> buffer.getInt();
             case TAG_DOUBLE -> buffer.getDouble();
             case TAG_STRING -> {
-                final int len = buffer.getInt();
+                final int len = readLength(); // advances past the 4-byte prefix first
                 buffer.position(buffer.position() + len);
             }
+            default -> throw new IllegalStateException("Unknown value type tag: " + tag);
         }
+    }
+
+    /**
+     * Reads a length prefix from the (untrusted) stream and validates it. A length must be
+     * non-negative and must not exceed the bytes actually remaining in the buffer — otherwise a
+     * malicious or buggy client could claim a huge length and trigger an unbounded allocation
+     * ({@code new byte[len]}) or a negative array size, i.e. an OutOfMemoryError / crash (DoS).
+     *
+     * @throws IllegalStateException if the prefix is truncated or the length is out of bounds
+     */
+    private int readLength() {
+        if (buffer.remaining() < Integer.BYTES) {
+            throw new IllegalStateException("Truncated length prefix");
+        }
+        final int len = buffer.getInt();
+        if (len < 0 || len > buffer.remaining()) {
+            throw new IllegalStateException("Invalid length: " + len + " (bytes remaining: " + buffer.remaining() + ")");
+        }
+        return len;
     }
 
     // Convenience: tag constants for external use
