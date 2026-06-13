@@ -495,6 +495,12 @@
 .fl-sidebar-strip-overflow::-webkit-scrollbar { width: 3px; height: 3px; }
 .fl-sidebar-strip-overflow::-webkit-scrollbar-thumb { background: var(--fl-border); border-radius: 2px; }
 
+/* P3: Virtual scrolling for many sidebar tabs */
+.fl-sidebar-strip-overflow .fl-sidebar-tab {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 30px;
+}
+
 /* Feature 7: Drop target highlight on sidebar */
 .fl-sidebar-drop-target { background: var(--fl-drop-fill) !important; outline: 2px solid var(--fl-drop-border); outline-offset: -2px; }
 

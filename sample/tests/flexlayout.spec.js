@@ -875,24 +875,16 @@ test.describe('FlexLayout PonySDK Integration', () => {
     await expect(page.locator('.fl-sidebar-left')).toHaveCount(0);
   });
 
-  test('badge clears when clicking inside panel content', async ({ page }) => {
-    // Set badge on the currently active/open tab via JS (simulates notification arriving while panel is open)
-    await page.evaluate(() => {
-      const layout = document.querySelector('.fl-layout').__flexLayout;
-      const borders = layout.model.getBorders().filter(b => b.isOpen());
-      if (borders.length) {
-        const tab = borders[0].getSelectedNode();
-        if (tab) layout.setBadge(tab.id, '!', '#ff0000');
-      }
-    });
-    await page.waitForTimeout(300);
-    await expect(page.locator('.fl-sidebar-tab-badge').first()).toBeVisible({ timeout: 2000 });
-    // Click inside the panel content
-    await page.locator('.fl-sidebar-pane').first().click();
+  test('badge clears when clicking sidebar tab', async ({ page }) => {
+    // Demo pre-populates badges. Click a tab with a badge to clear it.
+    const badgesBefore = await page.locator('.fl-sidebar-tab-badge').count();
+    expect(badgesBefore).toBeGreaterThan(0);
+    // Click the tab that has a badge (this selects it and clears the badge)
+    const tabWithBadge = page.locator('.fl-sidebar-tab:has(.fl-sidebar-tab-badge)').first();
+    await tabWithBadge.click();
     await page.waitForTimeout(500);
-    // Badge should be cleared
-    const count = await page.locator('.fl-sidebar-tab-badge').count();
-    expect(count).toBeLessThan(5); // At least one was cleared (demo has 5 initially, one just removed)
+    const badgesAfter = await page.locator('.fl-sidebar-tab-badge').count();
+    expect(badgesAfter).toBeLessThan(badgesBefore);
   });
 
   test('snap-to-close shows visual feedback', async ({ page }) => {

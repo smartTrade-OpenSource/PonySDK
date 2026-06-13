@@ -484,7 +484,6 @@
       this._ghost          = null;
       this._dropInd        = this._mkDropInd();
       this._stripW         = null; // cached strip width
-      this._resizeQueued   = false; // guard against infinite resize loops
 
       // Feature 13: Undo/redo
       this._actionHistory = [];
@@ -495,6 +494,14 @@
       this._keyboardEnabled = true;
       this._touchEnabled = true;
       this._contextMenuEnabled = true;
+
+      // P1: ResizeObserver on container — debounced window resize dispatch
+      this._resizeTimer = 0;
+      this._resizeObserver = new ResizeObserver(() => {
+        clearTimeout(this._resizeTimer);
+        this._resizeTimer = setTimeout(() => window.dispatchEvent(new Event('resize')), 200);
+      });
+      this._resizeObserver.observe(this.container);
 
       // Bound pointer handlers — attached to the captured element during a gesture
       this._pmDrag = this._onDragMove.bind(this);
@@ -701,6 +708,7 @@
     }
 
     destroy() {
+      this._resizeObserver.disconnect();
       this._endDragCleanup();
       this._hideBorderContextMenu();
       if (this._dropInd.parentNode) this._dropInd.remove();
@@ -797,8 +805,6 @@
         const c = this._contentEls.get(ph.dataset.flPh);
         if (c) ph.replaceWith(c);
       }
-      // Notify virtualized widgets of layout change (guarded to prevent infinite loops)
-      this._notifyResize();
     }
 
     _collectTabIds(node, set) {
@@ -808,15 +814,7 @@
       node.children.forEach(c => this._collectTabIds(c, set));
     }
 
-    // Guarded resize notification — prevents infinite loops when listeners trigger model changes
-    _notifyResize() {
-      if (this._resizeQueued) return;
-      this._resizeQueued = true;
-      requestAnimationFrame(() => {
-        this._resizeQueued = false;
-        window.dispatchEvent(new Event('resize'));
-      });
-    }
+
 
     _renderBorderGroup(borders, baseSide) {
       if (borders.length === 1) return this._renderBorder(borders[0]);
@@ -1309,7 +1307,6 @@
         if (c) ph.replaceWith(c);
       });
       // Notify virtualized widgets that sidebar content is now visible
-      this._notifyResize();
     }
 
     _startBorderTabDrag(origEv, tab, border, btnEl, moveEv) {
@@ -1461,7 +1458,6 @@
         }
       });
       // Notify virtualized widgets (grids) that container is now visible
-      this._notifyResize();
     }
 
     _mkTabBtn(tab, tabset, idx) {
