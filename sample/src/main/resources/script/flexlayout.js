@@ -796,6 +796,8 @@
         const c = this._contentEls.get(ph.dataset.flPh);
         if (c) ph.replaceWith(c);
       }
+      // Notify virtualized widgets of layout change
+      requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
     }
 
     _collectTabIds(node, set) {
@@ -1294,6 +1296,8 @@
         const c = this._contentEls.get(ph.dataset.flPh);
         if (c) ph.replaceWith(c);
       });
+      // Notify virtualized widgets that sidebar content is now visible
+      requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
     }
 
     _startBorderTabDrag(origEv, tab, border, btnEl, moveEv) {
@@ -1444,6 +1448,8 @@
           c.style.display = 'none';
         }
       });
+      // Notify virtualized widgets (grids) that container is now visible
+      requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
     }
 
     _mkTabBtn(tab, tabset, idx) {
