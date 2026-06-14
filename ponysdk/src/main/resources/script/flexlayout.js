@@ -1175,8 +1175,10 @@
       const hasOpen = openBorders.length > 0;
       if (isV) {
         panel.style.cssText = `width:${hasOpen ? size : 0}px;overflow:hidden;transition:width 150ms ease;background:var(--fl-panel);display:flex;flex-direction:column;`;
+        panel.dataset.targetW = hasOpen ? size : 0;
       } else {
         panel.style.cssText = `height:${hasOpen ? size : 0}px;overflow:hidden;transition:height 150ms ease;background:var(--fl-panel);display:flex;flex-direction:column;`;
+        panel.dataset.targetH = hasOpen ? size : 0;
       }
       if (hasOpen) {
         openBorders.forEach((ob, oIdx) => {
@@ -1343,7 +1345,11 @@
           if (isV) { newPanel.style.width = oldSize + 'px'; }
           else { newPanel.style.height = oldSize + 'px'; }
           sidebarEl.replaceWith(newSidebar);
-          requestAnimationFrame(() => { newPanel.style.transition = (isV ? 'width' : 'height') + ' 150ms ease'; newPanel.style[isV ? 'width' : 'height'] = ''; });
+          // Animate to target size (read from the intended inline style set by _mkBorderPanel)
+          const targetSize = isV ? newPanel.dataset.targetW : newPanel.dataset.targetH;
+          if (targetSize && targetSize !== String(oldSize)) {
+            requestAnimationFrame(() => { newPanel.style.transition = (isV ? 'width' : 'height') + ' 150ms ease'; if (isV) newPanel.style.width = targetSize + 'px'; else newPanel.style.height = targetSize + 'px'; });
+          }
         } else {
           sidebarEl.replaceWith(newSidebar);
         }
