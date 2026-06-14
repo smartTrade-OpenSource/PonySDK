@@ -333,7 +333,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         // Controls — PonySDK widgets; every click handler runs server-side
         final PFlowPanel controls = Element.newPFlowPanel();
         controls.setAttribute("style", "display:flex;gap:28px;flex-wrap:wrap;align-items:flex-end;margin-bottom:18px;"
-            + "background:linear-gradient(160deg,#131929,#0e1322);border:1px solid #1e2d45;border-radius:14px;padding:16px 20px");
+            + "background:rgba(255,255,255,.018);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:16px 20px");
 
         final PButton toggle = Element.newPButton("⏸  Pause");
         styleBinaryCtrl(toggle, true);
@@ -426,12 +426,12 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     }
 
     private static void styleBinaryCtrl(final PButton button, final boolean active) {
-        // .gwt-Button already gives the purple theme (with !important); signal selection via opacity + ring,
-        // which the base rule does not set, so no !important war is needed.
+        // Monochrome button theme: mark the selected control with the accent via outline (box-shadow is
+        // forced to none by the theme) + full opacity; dim the rest. Colour = meaning (selection), not decoration.
         button.setAttribute("style", "margin-right:8px;font-variant-numeric:tabular-nums;transition:opacity .15s;"
             + (active
-                ? "opacity:1;box-shadow:0 0 0 2px rgba(255,255,255,.7),0 4px 14px rgba(124,111,255,.55);"
-                : "opacity:.4;"));
+                ? "opacity:1;outline:1px solid var(--accent2,#43e8b0);outline-offset:-1px;"
+                : "opacity:.45;"));
     }
 
     private static String buildGlobalStyles() {
@@ -588,39 +588,38 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             "` ; document.head.appendChild(s);";
     }
 
-    /** Appended on top of {@link #buildGlobalStyles()} — a modern visual layer (animated aurora + glows). */
+    /** Appended on top of {@link #buildGlobalStyles()} — a restrained, modern (Geist/Linear) layer. */
     private static String buildModernTheme() {
         return "var s=document.createElement('style');s.textContent=`"
-            // Aurora mesh behind the (transparent) content area
-            + "body{background:radial-gradient(55% 45% at 12% -8%,rgba(124,111,255,.20),transparent 60%),"
-            +   "radial-gradient(50% 45% at 90% -5%,rgba(67,232,176,.13),transparent 60%),"
-            +   "radial-gradient(60% 55% at 50% 118%,rgba(124,111,255,.12),transparent 60%),#070a12 !important;"
-            +   "background-attachment:fixed !important;}"
-            + "body::after{content:'';position:fixed;inset:-20%;z-index:-1;pointer-events:none;"
-            +   "background:radial-gradient(34% 34% at 28% 26%,rgba(124,111,255,.12),transparent 60%),"
-            +   "radial-gradient(30% 30% at 78% 62%,rgba(67,232,176,.10),transparent 60%);"
-            +   "filter:blur(46px);animation:pony-aurora 24s ease-in-out infinite alternate;}"
-            + "@keyframes pony-aurora{0%{transform:translate3d(-3%,-2%,0) scale(1)}100%{transform:translate3d(4%,3%,0) scale(1.18)}}"
-            // Header lift
-            + ".pony-header{box-shadow:0 1px 0 var(--border),0 12px 44px rgba(124,111,255,.14) !important;}"
-            // Sidebar: flat, clean nav items (override the global purple .gwt-Button) — only the active one stands out
-            + ".pony-tab{background:transparent !important;color:#9aa6bd !important;box-shadow:none !important;"
-            +   "border:1px solid transparent !important;font-weight:600 !important;"
-            +   "transition:background .16s,color .16s,transform .16s !important;}"
-            + ".pony-tab:hover{background:rgba(124,111,255,.10) !important;color:#fff !important;transform:translateX(2px);}"
-            + ".pony-tab-active{background:linear-gradient(135deg,rgba(124,111,255,.26),rgba(67,232,176,.07)) !important;"
-            +   "color:#fff !important;border-color:rgba(124,111,255,.28) !important;"
-            +   "box-shadow:inset 3px 0 0 var(--accent2,#43e8b0) !important;transform:none !important;}"
-            // Action buttons: keep the purple theme but only a subtle press feedback (no heavy glow)
-            + ".gwt-Button:active{opacity:.85 !important;transform:translateY(1px) !important;}"
-            // Page titles: gradient text
-            + ".pony-page-title{background:linear-gradient(90deg,#ffffff,var(--accent2,#43e8b0));"
-            +   "-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;letter-spacing:-.4px;}"
-            // Content rows: glassmorphism + hover lift, so the aurora shows through (every tab benefits)
-            + ".pony-row{background:linear-gradient(160deg,rgba(22,29,49,.5),rgba(14,19,34,.5));"
-            +   "backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);border:1px solid rgba(124,111,255,.12);"
-            +   "transition:border-color .2s,transform .2s,box-shadow .2s;}"
-            + ".pony-row:hover{border-color:rgba(124,111,255,.38);transform:translateY(-1px);box-shadow:0 10px 30px rgba(0,0,0,.4);}"
+            // Blueprint grid background (Vercel/Geist): subtle, technical, no decoration
+            + "body{background-color:#08090c !important;"
+            +   "background-image:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),"
+            +   "linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px) !important;"
+            +   "background-size:32px 32px !important;background-position:-1px -1px !important;background-attachment:fixed !important;}"
+            // Header: hairline divider, no glow
+            + ".pony-header{box-shadow:none !important;border-bottom:1px solid rgba(255,255,255,.07) !important;}"
+            // Titles: clean near-white, tight tracking (no gradient text)
+            + ".pony-page-title{color:#fafafa !important;-webkit-text-fill-color:#fafafa !important;"
+            +   "letter-spacing:-.02em !important;font-weight:700 !important;}"
+            + ".pony-page-desc{color:#8b8b94 !important;}"
+            // Content rows: flat, neutral, hairline border — readable in grayscale
+            + ".pony-row{background:rgba(255,255,255,.018) !important;border:1px solid rgba(255,255,255,.06) !important;"
+            +   "backdrop-filter:none !important;-webkit-backdrop-filter:none !important;"
+            +   "transition:background .15s,border-color .15s !important;}"
+            + ".pony-row:hover{background:rgba(255,255,255,.032) !important;border-color:rgba(255,255,255,.13) !important;"
+            +   "transform:none !important;box-shadow:none !important;}"
+            // Buttons: clean monochrome (colour is reserved for meaning, not every button)
+            + ".gwt-Button{background:#16171b !important;border:1px solid rgba(255,255,255,.12) !important;"
+            +   "color:#fafafa !important;box-shadow:none !important;font-weight:500 !important;letter-spacing:0 !important;}"
+            + ".gwt-Button:hover{background:#1c1d22 !important;border-color:rgba(255,255,255,.22) !important;"
+            +   "opacity:1 !important;transform:none !important;}"
+            + ".gwt-Button:active{background:#0f1013 !important;transform:none !important;}"
+            // Sidebar (after .gwt-Button so nav items win): flat, a single accent on the active item
+            + ".pony-tab{background:transparent !important;color:#8b8b94 !important;box-shadow:none !important;"
+            +   "border:1px solid transparent !important;font-weight:500 !important;transition:background .14s,color .14s !important;}"
+            + ".pony-tab:hover{background:rgba(255,255,255,.05) !important;color:#fafafa !important;transform:none !important;}"
+            + ".pony-tab-active{background:rgba(255,255,255,.07) !important;color:#fafafa !important;"
+            +   "border-color:transparent !important;box-shadow:inset 2px 0 0 var(--accent2,#43e8b0) !important;}"
             + "`;document.head.appendChild(s);";
     }
 

@@ -222,31 +222,27 @@
       if (!this.element) return;
       this.element.innerHTML = ''
         + '<style>'
-        + '.ba-cards{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:16px}'
+        + '.ba-cards{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:16px}'
         + '@media(max-width:860px){.ba-cards{grid-template-columns:repeat(3,1fr)}}'
-        + '.ba-card{position:relative;overflow:hidden;background:linear-gradient(160deg,#161d31,#0e1322);'
-        +   'border:1px solid var(--border,#1e2d45);border-radius:14px;padding:14px 16px;transition:transform .2s,border-color .2s}'
-        + '.ba-card:hover{transform:translateY(-2px);border-color:var(--accent,#7c6fff)}'
-        + '.ba-card::before{content:"";position:absolute;left:0;top:0;width:100%;height:2px;'
-        +   'background:linear-gradient(90deg,var(--accent2,#43e8b0),var(--accent,#7c6fff));opacity:.65}'
-        + '.ba-v{font-size:23px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;'
-        +   'background:linear-gradient(90deg,var(--accent2,#43e8b0),#9fe9ff);-webkit-background-clip:text;background-clip:text;'
-        +   '-webkit-text-fill-color:transparent;color:transparent}'
-        + '.ba-l{font-size:9.5px;color:#5a6b85;text-transform:uppercase;letter-spacing:.9px;margin-top:7px}'
-        + '.ba-chart{background:linear-gradient(180deg,#0e1322,#0a0e1a);border:1px solid var(--border,#1e2d45);'
-        +   'border-radius:16px;padding:14px 16px;box-shadow:inset 0 1px 0 rgba(255,255,255,.03)}'
+        + '.ba-card{background:rgba(255,255,255,.018);border:1px solid rgba(255,255,255,.07);'
+        +   'border-radius:12px;padding:13px 15px;transition:border-color .15s}'
+        + '.ba-card:hover{border-color:rgba(255,255,255,.14)}'
+        + '.ba-v{font-size:22px;font-weight:700;line-height:1;color:#fafafa;font-variant-numeric:tabular-nums;'
+        +   'font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:-.01em}'
+        + '.ba-l{font-size:9.5px;color:#6b6b76;text-transform:uppercase;letter-spacing:.8px;margin-top:8px}'
+        + '.ba-chart{background:#0a0b0e;border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:14px 16px}'
         + '.ba-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}'
-        + '.ba-live{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;letter-spacing:1px;'
-        +   'text-transform:uppercase;color:var(--accent2,#43e8b0)}'
-        + '.ba-dot{width:8px;height:8px;border-radius:50%;background:var(--accent2,#43e8b0);'
-        +   'box-shadow:0 0 8px var(--accent2,#43e8b0);animation:ba-pulse 1.4s infinite}'
-        + '@keyframes ba-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}'
-        + '.ba-legend{display:flex;gap:16px;flex-wrap:wrap}'
-        + '.ba-leg{display:flex;align-items:center;gap:6px;font-size:11px;color:#8892a4}'
-        + '.ba-leg i{width:12px;height:3px;border-radius:2px;display:inline-block}'
-        + '.ba-canvas{width:100%;height:250px;display:block;border-radius:10px}'
-        + '.ba-cfg{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:#8892a4;margin-top:12px;line-height:1.5}'
-        + '.ba-cfg b{color:var(--accent,#7c6fff)}'
+        + '.ba-live{display:flex;align-items:center;gap:7px;font-size:10.5px;font-weight:600;letter-spacing:1px;'
+        +   'text-transform:uppercase;color:#8b8b94}'
+        + '.ba-dot{width:7px;height:7px;border-radius:50%;background:var(--accent2,#43e8b0);'
+        +   'box-shadow:0 0 6px var(--accent2,#43e8b0);animation:ba-pulse 1.6s infinite}'
+        + '@keyframes ba-pulse{0%,100%{opacity:1}50%{opacity:.35}}'
+        + '.ba-legend{display:flex;gap:14px;flex-wrap:wrap}'
+        + '.ba-leg{display:flex;align-items:center;gap:6px;font-size:11px;color:#8b8b94}'
+        + '.ba-leg i{width:10px;height:2px;border-radius:2px;display:inline-block}'
+        + '.ba-canvas{width:100%;height:250px;display:block;border-radius:8px}'
+        + '.ba-cfg{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;color:#6b6b76;margin-top:12px;line-height:1.5}'
+        + '.ba-cfg b{color:#8b8b94;font-weight:600}'
         + '</style>'
         + '<div class="ba-cards">'
         + this._card('ba-points', '—', 'Values / frame')
@@ -294,10 +290,8 @@
       var c = this._canvas;
       if (!c || !c.getContext) return;
       var ctx = c.getContext('2d'), w = c.width, h = c.height, s, i, arr;
-      var bg = ctx.createLinearGradient(0, 0, 0, h);
-      bg.addColorStop(0, '#0c1120'); bg.addColorStop(1, '#080b14');
-      ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
-      ctx.strokeStyle = 'rgba(124,111,255,0.06)'; ctx.lineWidth = 1;
+      ctx.fillStyle = '#0a0b0e'; ctx.fillRect(0, 0, w, h);
+      ctx.strokeStyle = 'rgba(255,255,255,0.04)'; ctx.lineWidth = 1;
       for (var gx = 47; gx < w; gx += 47) { ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, h); ctx.stroke(); }
       for (var gy = 50; gy < h; gy += 50) { ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(w, gy); ctx.stroke(); }
       var min = Infinity, max = -Infinity;
@@ -308,7 +302,7 @@
       if (!isFinite(min) || min === max) { min = 0; max = 1; }
       var range = max - min, pad = 16;
       var yOf = function (v) { return h - ((v - min) / range) * (h - 2 * pad) - pad; };
-      ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+      ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.lineWidth = this._lineWidth;
       for (s = 0; s < seriesArr.length; s++) {
         arr = seriesArr[s];
         var nn = arr.length;
@@ -321,13 +315,9 @@
         for (i = step; i < nn; i += step) ctx.lineTo((i / (nn - 1)) * w, yOf(arr[i]));
         var lastY = yOf(arr[nn - 1]);
         ctx.lineTo(w, lastY);
-        // cheap neon glow: a wide faint underlay + a crisp line (no expensive shadowBlur)
-        ctx.strokeStyle = col;
-        ctx.globalAlpha = 0.16; ctx.lineWidth = this._lineWidth + 6; ctx.stroke();
-        ctx.globalAlpha = 1; ctx.lineWidth = this._lineWidth; ctx.stroke();
-        // leading-edge live marker (the latest value)
-        ctx.beginPath(); ctx.arc(w - 1, lastY, 5.5, 0, 6.283); ctx.globalAlpha = 0.22; ctx.fillStyle = col; ctx.fill();
-        ctx.globalAlpha = 1; ctx.beginPath(); ctx.arc(w - 1, lastY, 2.6, 0, 6.283); ctx.fillStyle = col; ctx.fill();
+        ctx.strokeStyle = col; ctx.stroke();
+        // small leading-edge marker (the latest value)
+        ctx.beginPath(); ctx.arc(w - 1, lastY, 2.6, 0, 6.283); ctx.fillStyle = col; ctx.fill();
       }
     }
 
