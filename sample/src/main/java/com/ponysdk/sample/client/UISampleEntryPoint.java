@@ -309,19 +309,77 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
         final PElement title = Element.newDiv();
         title.setAttribute("style", "font-size:20px;font-weight:800;margin-bottom:6px;color:var(--text,#f0f4ff)");
-        title.setInnerText("Binary PAddOn protocol — live");
+        title.setInnerText("Binary PAddOn protocol — live signals console");
 
         final PElement sub = Element.newDiv();
-        sub.setAttribute("style", "color:var(--text2,#8892a4);margin-bottom:20px;line-height:1.6;max-width:800px");
-        sub.setInnerText("A JavaScript addon configured with typed binary creation args, then fed a continuous "
-            + "stream of typed double arrays in pure binary (uint31 length, no 255 cap, no JSON). The live metrics "
-            + "show the streaming throughput and how much smaller each binary frame is than the equivalent JSON.");
+        sub.setAttribute("style", "color:var(--text2,#8892a4);margin-bottom:18px;line-height:1.6;max-width:840px");
+        sub.setInnerText("Server-driven end to end: the controls below are PonySDK widgets whose handlers run in Java; "
+            + "the server computes the signals and streams them as typed double arrays in pure binary, and the browser "
+            + "only renders. Push series and resolution up to stream tens of thousands of typed values per frame "
+            + "(uint31 length, no 255 cap, no JSON).");
 
         // The chart is configured entirely through pure-binary typed creation args:
         // color (String), maxPoints (int), lineWidth (double), fill (boolean), seed (long)
         final BinaryArgsAddOn addon = new BinaryArgsAddOn("#43e8b0", 1024, 2.0, true, 1_234_567_890_123L);
         addon.asWidget().setAttribute("style", "display:block;margin-top:4px");
-        box.add(title, sub, addon.asWidget());
+
+        // Stream state owned by the server
+        final boolean[] playing = { true };
+        final int[] nSeries = { 2 };
+        final int[] mPoints = { 1024 };
+        final double[] phase = { 0 };
+
+        // Controls — PonySDK widgets; every click handler runs server-side
+        final PFlowPanel controls = Element.newPFlowPanel();
+        controls.setAttribute("style", "display:flex;gap:26px;flex-wrap:wrap;align-items:flex-end;margin-bottom:18px");
+
+        final PButton toggle = Element.newPButton("⏸  Pause");
+        styleBinaryCtrl(toggle, true);
+        toggle.addClickHandler(e -> {
+            playing[0] = !playing[0];
+            toggle.setText(playing[0] ? "⏸  Pause" : "▶  Resume");
+            styleBinaryCtrl(toggle, playing[0]);
+        });
+        final PFlowPanel toggleRow = Element.newPFlowPanel();
+        toggleRow.setAttribute("style", "display:flex");
+        toggleRow.add(toggle);
+        controls.add(binaryCtrlGroup("Stream", toggleRow));
+
+        final PButton[] sBtns = new PButton[4];
+        final PFlowPanel seriesRow = Element.newPFlowPanel();
+        seriesRow.setAttribute("style", "display:flex");
+        for (int k = 1; k <= sBtns.length; k++) {
+            final int val = k;
+            final PButton b = Element.newPButton(String.valueOf(k));
+            styleBinaryCtrl(b, k == nSeries[0]);
+            b.addClickHandler(e -> {
+                nSeries[0] = val;
+                for (int j = 0; j < sBtns.length; j++) styleBinaryCtrl(sBtns[j], j + 1 == val);
+            });
+            sBtns[k - 1] = b;
+            seriesRow.add(b);
+        }
+        controls.add(binaryCtrlGroup("Series", seriesRow));
+
+        final int[] resVals = { 256, 1024, 4096 };
+        final PButton[] rBtns = new PButton[resVals.length];
+        final PFlowPanel resRow = Element.newPFlowPanel();
+        resRow.setAttribute("style", "display:flex");
+        for (int k = 0; k < resVals.length; k++) {
+            final int idx = k;
+            final int val = resVals[k];
+            final PButton b = Element.newPButton(String.valueOf(val));
+            styleBinaryCtrl(b, val == mPoints[0]);
+            b.addClickHandler(e -> {
+                mPoints[0] = val;
+                for (int j = 0; j < rBtns.length; j++) styleBinaryCtrl(rBtns[j], j == idx);
+            });
+            rBtns[k] = b;
+            resRow.add(b);
+        }
+        controls.add(binaryCtrlGroup("Points / series", resRow));
+
+        box.add(title, sub, controls, addon.asWidget());
         panel.add(box);
 
         // Deterministic verification frame (kept stable for the browser IT): 1000 ints, 0..999
@@ -329,20 +387,49 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         for (int i = 0; i < ramp.length; i++) ramp[i] = i;
         addon.verify(ramp);
 
-        // Live stream: 1024 typed doubles forming an animated multi-harmonic waveform (~8 fps)
-        final double[] phase = { 0 };
+        // Live multi-series stream — one structured typed binary payload per frame: [n, m, n*m doubles]
         schedulers.add(PScheduler.scheduleAtFixedRate(() -> {
-            final Object[] series = new Object[1024];
-            for (int i = 0; i < series.length; i++) {
-                final double t = (double) i / series.length;
-                series[i] = Math.sin(t * Math.PI * 6 + phase[0]) * (0.6 + 0.4 * Math.sin(t * Math.PI * 2 + phase[0] * 0.5))
-                    + 0.08 * Math.sin(t * Math.PI * 40 + phase[0] * 3);
+            if (!playing[0]) return;
+            final int n = nSeries[0];
+            final int m = mPoints[0];
+            final Object[] frame = new Object[2 + n * m];
+            frame[0] = n;
+            frame[1] = m;
+            for (int s = 0; s < n; s++) {
+                final double off = s * 0.7;
+                final int base = 2 + s * m;
+                for (int i = 0; i < m; i++) {
+                    final double t = (double) i / m;
+                    frame[base + i] = Math.sin(t * Math.PI * (6 + s * 2) + phase[0] + off)
+                        * (0.6 + 0.4 * Math.sin(t * Math.PI * 2 + phase[0] * 0.5))
+                        + 0.06 * Math.sin(t * Math.PI * 40 + phase[0] * 3);
+                }
             }
             phase[0] += 0.15;
-            addon.stream(series);
+            addon.stream(frame);
         }, Duration.ofMillis(120)));
 
         return panel;
+    }
+
+    private static PFlowPanel binaryCtrlGroup(final String label, final PFlowPanel content) {
+        final PFlowPanel group = Element.newPFlowPanel();
+        final PElement caption = Element.newDiv();
+        caption.setAttribute("style",
+            "font-size:10px;color:#5a6b85;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px");
+        caption.setInnerText(label);
+        group.add(caption);
+        group.add(content);
+        return group;
+    }
+
+    private static void styleBinaryCtrl(final PButton button, final boolean active) {
+        // .gwt-Button already gives the purple theme (with !important); signal selection via opacity + ring,
+        // which the base rule does not set, so no !important war is needed.
+        button.setAttribute("style", "margin-right:8px;font-variant-numeric:tabular-nums;transition:opacity .15s;"
+            + (active
+                ? "opacity:1;box-shadow:0 0 0 2px rgba(255,255,255,.7),0 4px 14px rgba(124,111,255,.55);"
+                : "opacity:.4;"));
     }
 
     private static String buildGlobalStyles() {
