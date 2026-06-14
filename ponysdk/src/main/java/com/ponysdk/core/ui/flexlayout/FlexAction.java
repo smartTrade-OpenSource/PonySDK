@@ -1,4 +1,4 @@
-package com.ponysdk.sample.client.page.addon.flexlayout;
+package com.ponysdk.core.ui.flexlayout;
 
 /**
  * Enum of all user-triggered actions in FlexLayout that can be bound to keyboard shortcuts.

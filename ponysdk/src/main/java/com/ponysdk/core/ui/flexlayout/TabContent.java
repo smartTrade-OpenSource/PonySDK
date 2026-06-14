@@ -1,4 +1,4 @@
-package com.ponysdk.sample.client.page.addon;
+package com.ponysdk.core.ui.flexlayout;
 
 import com.ponysdk.core.ui.basic.IsPWidget;
 

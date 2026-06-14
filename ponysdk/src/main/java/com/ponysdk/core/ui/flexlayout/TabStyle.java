@@ -1,4 +1,4 @@
-package com.ponysdk.sample.client.page.addon.flexlayout;
+package com.ponysdk.core.ui.flexlayout;
 
 /**
  * Enum controlling how tabs are displayed in a border strip (icon, label, or both).

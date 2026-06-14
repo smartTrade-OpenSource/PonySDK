@@ -8,6 +8,16 @@ import java.io.StringReader;
 
 import org.junit.Test;
 
+import com.ponysdk.core.ui.flexlayout.FlexAction;
+import com.ponysdk.core.ui.flexlayout.FlexBorder;
+import com.ponysdk.core.ui.flexlayout.FlexKeymap;
+import com.ponysdk.core.ui.flexlayout.FlexLayoutModel;
+import com.ponysdk.core.ui.flexlayout.FlexTab;
+import com.ponysdk.core.ui.flexlayout.FlexTabset;
+import com.ponysdk.core.ui.flexlayout.FlexTheme;
+import com.ponysdk.core.ui.flexlayout.KeyBinding;
+import com.ponysdk.core.ui.flexlayout.TabStyle;
+
 public class FlexLayoutModelTest {
 
     private JsonObject parse(String json) {

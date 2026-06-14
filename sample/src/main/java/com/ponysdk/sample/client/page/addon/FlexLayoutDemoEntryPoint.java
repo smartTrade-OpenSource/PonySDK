@@ -8,6 +8,7 @@ import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.PWindow;
+import com.ponysdk.core.ui.flexlayout.FlexLayoutPanel;
 import com.ponysdk.core.ui.main.EntryPoint;
 
 /**

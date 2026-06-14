@@ -1,4 +1,4 @@
-package com.ponysdk.sample.client.page.addon.flexlayout;
+package com.ponysdk.core.ui.flexlayout;
 
 import java.util.Map;
 

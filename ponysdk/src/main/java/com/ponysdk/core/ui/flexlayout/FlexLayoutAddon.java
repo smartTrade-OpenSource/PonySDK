@@ -1,4 +1,4 @@
-package com.ponysdk.sample.client.page.addon;
+package com.ponysdk.core.ui.flexlayout;
 
 import java.io.StringReader;
 import java.util.HashMap;
@@ -84,25 +84,16 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
 
     // ─── Tab Management ──────────────────────────────────────────
 
-    /**
-     * Add a tab hosting a PWidget in the first available tabset.
-     */
     public void addTab(final String tabId, final String tabName, final PWidget content) {
         addTab(tabId, tabName, content, null);
     }
 
-    /**
-     * Add a tab hosting a PWidget in a specific tabset.
-     */
     public void addTab(final String tabId, final String tabName, final PWidget content, final String tabsetId) {
         widget.add(content);
         tabWidgets.put(tabId, content);
         callTerminalMethod("addTab", tabId, tabName, String.valueOf(content.getID()), tabsetId);
     }
 
-    /**
-     * Attach a widget to an existing tab (created by external drag).
-     */
     public void attachWidgetToTab(final String tabId, final PWidget content) {
         attachWidgetToTab(tabId, content, null);
     }
@@ -114,25 +105,17 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
         callTerminalMethod("attachWidget", tabId, String.valueOf(content.getID()));
     }
 
-    /**
-     * Remove a tab by ID.
-     */
     public void removeTab(final String tabId) {
         callTerminalMethod("removeTab", tabId);
         final PWidget removed = tabWidgets.remove(tabId);
         tabComponents.remove(tabId);
         if (removed != null) removed.removeFromParent();
-        // Close PWindow if tab was popped out
         final PopOutInfo info = popOutTabs.remove(tabId);
         if (info != null && info.pWindow != null) info.pWindow.close();
     }
 
     // ─── Sidebar / Border Management ─────────────────────────────
 
-    /**
-     * Add a tab to a sidebar (border panel).
-     * @param side "left", "right", or "bottom"
-     */
     public void addBorderTab(final String side, final String tabId, final String tabName, final PWidget content) {
         addBorderTab(side, tabId, tabName, content, -1, null);
     }
@@ -147,9 +130,6 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
         callTerminalMethod("addBorderTab", side, tabId, tabName, String.valueOf(content.getID()), index >= 0 ? index : null, icon);
     }
 
-    /**
-     * Remove a tab from a sidebar.
-     */
     public void removeBorderTab(final String side, final String tabId) {
         callTerminalMethod("removeBorderTab", side, tabId);
         final PWidget removed = tabWidgets.remove(tabId);
@@ -157,48 +137,27 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
         if (removed != null) removed.removeFromParent();
     }
 
-    /**
-     * Toggle-select a border tab (opens/closes the sidebar panel).
-     */
     public void selectBorderTab(final String side, final String tabId) {
         callTerminalMethod("selectBorderTab", side, tabId);
     }
 
-    /**
-     * Move a tab from the main layout into a sidebar.
-     */
     public void moveToBorder(final String tabId, final String side) {
         callTerminalMethod("moveToBorder", tabId, side);
     }
 
-    /**
-     * Move a tab from a sidebar back into the main layout.
-     */
     public void moveFromBorder(final String side, final String tabId, final String tabsetId) {
         callTerminalMethod("moveFromBorder", side, tabId, tabsetId);
     }
 
-    /**
-     * Toggle visibility of a sidebar (add/remove border).
-     */
     public void toggleBorder(final String side) {
         callTerminalMethod("toggleBorder", side);
     }
 
-    /**
-     * Set the tab display style for a sidebar.
-     * @param tabStyle "auto" (icon if available, else label), "icon", "label", or "iconLabel"
-     */
     public void setBorderTabStyle(final String side, final String tabStyle) {
         callTerminalMethod("setBorderTabStyle", side, tabStyle);
     }
 
-    /**
-     * Check if a sidebar is currently visible (not hidden).
-     * This is a client-side query — use with action notifications for real-time state.
-     */
     public void isBorderVisible(final String side, final Consumer<Boolean> callback) {
-        // Query via model snapshot
         getModel(model -> {
             final boolean visible = model != null && model.contains("\"side\":\"" + side + "\"")
                 && !model.contains("\"side\":\"" + side + "\",\"hidden\":true");
@@ -208,30 +167,19 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
 
     // ─── Model Persistence ───────────────────────────────────────
 
-    /**
-     * Load a complete model JSON, replacing the current layout.
-     * Destroys all existing tabs, widgets, and pop-out windows.
-     */
     public void loadModel(final String modelJson) {
-        // Close all pop-out windows
         for (final PopOutInfo info : popOutTabs.values()) {
             if (info.pWindow != null) info.pWindow.close();
         }
         popOutTabs.clear();
-        // Remove all widgets
         for (final PWidget w : tabWidgets.values()) {
             w.removeFromParent();
         }
         tabWidgets.clear();
         tabComponents.clear();
-        // Load new model on client
         callTerminalMethod("loadModel", modelJson);
     }
 
-    /**
-     * Request the current layout model JSON from the client.
-     * The callback is invoked once with the serialized JSON.
-     */
     public void getModel(final Consumer<String> callback) {
         this.modelSnapshotCallback = callback;
         callTerminalMethod("getModel");
@@ -239,66 +187,30 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
 
     // ─── Change Notifications ────────────────────────────────────
 
-    /**
-     * Enable/disable model change notifications (sends full model JSON — heavy).
-     */
     public void setModelChangeEnabled(final boolean enabled) {
         callTerminalMethod("enableModelChangeNotification", enabled);
     }
 
-    /**
-     * Enable/disable lightweight action notifications (sends only the action performed — ~80 bytes).
-     * Much more efficient than full model change for real-time tracking.
-     * Use with {@link #setOnAction(Consumer)}.
-     */
     public void setActionNotificationEnabled(final boolean enabled) {
         callTerminalMethod("enableActionNotification", enabled);
     }
 
-    /**
-     * Listener for lightweight action events. Each action contains:
-     * <ul>
-     *   <li>"a" — action type (SELECT_TAB, CLOSE_TAB, MOVE_TAB, MAXIMIZE_TOGGLE, ADD_TAB, etc.)</li>
-     *   <li>"t" — tab ID</li>
-     *   <li>"ts" — tabset ID</li>
-     *   <li>"to" — target ID (for MOVE_TAB)</li>
-     *   <li>"l" — location (top, left, right, bottom, center)</li>
-     *   <li>"n" — name (for RENAME_TAB / ADD_TAB)</li>
-     *   <li>"i" — insert index</li>
-     * </ul>
-     * ~60x smaller than full model change notifications.
-     * Requires {@link #setActionNotificationEnabled(boolean)} true.
-     */
     public void setOnAction(final Consumer<JsonObject> handler) {
         this.onAction = handler;
     }
 
-    /**
-     * Set the debounce delay (in ms) for model change notifications.
-     * Default is 250ms. Set to 0 for immediate (every change).
-     * Higher values reduce WebSocket traffic during continuous resize operations.
-     */
     public void setModelChangeDebounce(final int delayMs) {
         callTerminalMethod("setModelChangeDebounce", delayMs);
     }
 
-    /**
-     * Listener called on every layout change (requires {@link #setModelChangeEnabled(boolean)} true).
-     */
     public void setOnModelChange(final Consumer<String> handler) {
         this.onModelChange = handler;
     }
 
-    /**
-     * Listener called when a tab is closed by the user.
-     */
     public void setOnTabClosed(final Consumer<String> handler) {
         this.onTabClosed = handler;
     }
 
-    /**
-     * Listener called when an external drag creates a new tab.
-     */
     public void setOnExternalDrop(final ExternalDropHandler handler) {
         this.onExternalDrop = handler;
     }
@@ -310,54 +222,33 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
 
     // ─── Appearance ──────────────────────────────────────────────
 
-    /**
-     * Set the theme class (e.g. "fl-theme-light", "fl-theme-gray").
-     */
     public void setTheme(final String theme) {
         callTerminalMethod("setTheme", theme);
     }
 
     // ─── Pop-out / Pop-in ────────────────────────────────────────
 
-    /**
-     * Pop a tab out into a floating window (mode "float") or a browser window (mode "window").
-     */
     public void popOut(final String tabId, final String title, final int x, final int y, final int w, final int h, final String mode) {
         callTerminalMethod("popOut", tabId, title, x, y, w, h, mode);
     }
 
-    /**
-     * Pop a tab out as a floating div (default mode).
-     */
     public void popOut(final String tabId, final String title, final int x, final int y, final int w, final int h) {
         popOut(tabId, title, x, y, w, h, "float");
     }
 
-    /**
-     * Pop a tab out into a separate browser window.
-     */
     public void popOutToWindow(final String tabId, final String title, final int x, final int y, final int w, final int h) {
         popOut(tabId, title, x, y, w, h, "window");
     }
 
-    /**
-     * Pop a floating window back into the layout as a tab.
-     */
     public void popIn(final String tabId) {
         callTerminalMethod("popIn", tabId);
     }
 
-    /**
-     * Request current pop-out state (positions, sizes). Callback receives JSON.
-     */
     public void getPopOutState(final Consumer<String> callback) {
         this.popOutStateCallback = callback;
         callTerminalMethod("getPopOutState");
     }
 
-    /**
-     * Whether a tab is currently popped out.
-     */
     public boolean isPopOut(final String tabId) {
         return popOutTabs.containsKey(tabId);
     }
@@ -371,16 +262,10 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
 
     // ─── Drag Source Registration ────────────────────────────────
 
-    /**
-     * Register a PWidget as a drag source by its ID.
-     */
     public void registerDragSource(final PWidget source, final String tabDefJson) {
         callTerminalMethod("registerDragSource", String.valueOf(source.getID()), tabDefJson);
     }
 
-    /**
-     * Register all elements matching a CSS class as drag sources.
-     */
     public void registerDragSourceByClass(final String cssClass, final String tabDefJson) {
         callTerminalMethod("registerDragSourceByClass", cssClass, tabDefJson);
     }
@@ -409,11 +294,6 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
         callTerminalMethod("setBadge", tabId, badge, null);
     }
 
-    /**
-     * Set a badge on a sidebar tab.
-     * @param badge text content ("3", "99+") or empty string for a colored dot. Null to clear.
-     * @param color CSS color for the badge (e.g. "#ff0000", "limegreen"). Null for default.
-     */
     public void setBadge(final String tabId, final String badge, final String color) {
         callTerminalMethod("setBadge", tabId, badge, color);
     }
@@ -426,12 +306,6 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
         callTerminalMethod("enableKeyboardShortcuts", enabled);
     }
 
-    /**
-     * Configure keyboard shortcuts. Pass a JSON map of action to key binding.
-     * Actions: toggleLeft, toggleRight, toggleBottom, closeAll, undo, redo
-     * Binding: {"ctrl":true,"key":"b"} or {"shift":true,"alt":true,"key":"p"} or null to disable
-     * Example: {"toggleLeft":{"ctrl":true,"shift":true,"key":"b"},"redo":null}
-     */
     public void setKeymap(final String keymapJson) {
         callTerminalMethod("setKeymap", keymapJson);
     }
@@ -456,33 +330,21 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
         callTerminalMethod("enableAutoSave", enabled);
     }
 
-    /**
-     * Reorder a tab within its sidebar border.
-     */
     public void reorderBorderTab(final String side, final String tabId, final int newIndex) {
         callTerminalMethod("reorderBorderTab", side, tabId, newIndex);
     }
 
-    /**
-     * Toggle maximize a sidebar panel (50% container width/height).
-     */
     public void maximizeBorder(final String side) {
         callTerminalMethod("maximizeBorder", side);
     }
 
     // ─── Feature 1: Model Migration API ─────────────────────────
 
-    /**
-     * Load a model with a version tag. Migration handler is called during rehydration.
-     */
     public void loadModel(final String modelJson, final String version) {
         this.modelVersion = version;
         loadModel(modelJson);
     }
 
-    /**
-     * Set migration handler: BiFunction(component, version) -> newComponent (or null to remove).
-     */
     public void setMigrationHandler(final BiFunction<String, String, String> handler) {
         this.migrationHandler = handler;
     }
@@ -493,25 +355,16 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
 
     // ─── Feature 3: Sidebar Pop-out ─────────────────────────────
 
-    /**
-     * Pop out the currently selected border tab into a floating div.
-     */
     public void popOutBorder(final String side) {
         callTerminalMethod("popOutBorder", side);
     }
 
     // ─── Feature 4: Collaboration API ───────────────────────────
 
-    /**
-     * Apply a remote action without triggering onAction echo.
-     */
     public void applyRemoteAction(final String actionJson) {
         callTerminalMethod("applyRemoteAction", actionJson);
     }
 
-    /**
-     * Set callback to receive all local actions for broadcasting to peers.
-     */
     public void setOnActionBroadcast(final Consumer<JsonObject> handler) {
         this.onActionBroadcast = handler;
         setActionNotificationEnabled(true);
@@ -531,9 +384,6 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
 
     // ─── Feature 8: Pinned Tabs ─────────────────────────────────
 
-    /**
-     * Add a pinned tab (no close, no drag).
-     */
     public void addPinnedTab(final String tabName, final PWidget content) {
         addPinnedTab(tabName, content, null);
     }
@@ -596,7 +446,7 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
 
     // ─── Hook 1: Blocked actions/tabs ─────────────────────────────
 
-    public void setBlockedActions(final com.ponysdk.sample.client.page.addon.flexlayout.FlexAction... actions) {
+    public void setBlockedActions(final FlexAction... actions) {
         final String[] keys = new String[actions.length];
         for (int i = 0; i < actions.length; i++) keys[i] = actions[i].getKey();
         setBlockedActions(keys);
@@ -668,8 +518,6 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
             this.tabId = tabId; this.tabsetId = tabsetId; this.tabIdx = tabIdx; this.mode = mode; this.title = title;
         }
     }
-
-    // ─── Internals ───────────────────────────────────────────────
 
     private static JsonObject buildArgs(final String modelJson, final String theme, final String bordersJson) {
         final JsonObjectBuilder builder = Json.createObjectBuilder();
@@ -817,7 +665,6 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
         if (tabId == null) return;
         final PopOutInfo info = popOutTabs.remove(tabId);
         if (info == null) return;
-        // Window mode pop-in is handled server-side (PWindow.close triggers popInFromWindow)
         final PWidget w = tabWidgets.get(tabId);
         if (w instanceof TabContent) ((TabContent) w).onPopIn();
         if (onPopIn != null) onPopIn.accept(tabId);
@@ -856,10 +703,9 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
             String component = tab.getString("component", null);
             final String config = tab.containsKey("config") && !tab.isNull("config") ? tab.getString("config", null) : null;
             if (tabId == null || component == null) continue;
-            // Feature 1: Migration handler
             if (migrationHandler != null && modelVersion != null) {
                 component = migrationHandler.apply(component, modelVersion);
-                if (component == null) continue; // tab removed by migration
+                if (component == null) continue;
             }
             onExternalDrop.onDrop(tabId, component, config);
         }

@@ -1,4 +1,4 @@
-package com.ponysdk.sample.client.page.addon.flexlayout;
+package com.ponysdk.core.ui.flexlayout;
 
 /**
  * Enum of available FlexLayout visual themes, each mapping to a CSS class.
