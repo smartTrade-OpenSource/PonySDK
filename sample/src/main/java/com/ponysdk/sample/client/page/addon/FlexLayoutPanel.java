@@ -380,6 +380,38 @@ public class FlexLayoutPanel implements IsPWidget {
 
     // ─── Internal ────────────────────────────────────────────────
 
+    // ─── Hook 1: Blocked actions/tabs ───────────────────────────
+
+    public void setBlockedActions(final String... actions) {
+        addon.setBlockedActions(actions);
+    }
+
+    public void setBlockedTabs(final String... tabIds) {
+        addon.setBlockedTabs(tabIds);
+    }
+
+    // ─── Hook 2: getOpenTabs / getLayoutSummary ─────────────────
+
+    public void getOpenTabs(final Consumer<String> callback) {
+        addon.getOpenTabs(callback);
+    }
+
+    public void getLayoutSummary(final Consumer<String> callback) {
+        addon.getLayoutSummary(callback);
+    }
+
+    // ─── Hook 3: Tab visibility ─────────────────────────────────
+
+    public void setOnTabVisible(final Consumer<String> handler) {
+        addon.setOnTabVisible(handler);
+    }
+
+    public void setOnTabHidden(final Consumer<String> handler) {
+        addon.setOnTabHidden(handler);
+    }
+
+    // ─── Internal (private) ──────────────────────────────────────
+
     public FlexLayoutAddon getAddon() {
         return addon;
     }

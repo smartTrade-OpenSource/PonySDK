@@ -762,7 +762,49 @@
       return this._stripW;
     }
 
+    // Hook 1: onBeforeAction — if set and returns false, block the action
+    onBeforeAction = null;
+
+    // Hook 2: getOpenTabs / getBorderTabs / getLayoutSummary
+    getOpenTabs() {
+      const tabs = [];
+      const collect = (node) => {
+        if (node.type === NT.TABSET) {
+          const sel = node.getSelectedNode();
+          node.children.forEach(t => tabs.push({ id: t.id, name: t.getName(), tabsetId: node.id, selected: t === sel, component: t.getComponent(), config: t.getConfig() }));
+          return;
+        }
+        if (node.children) node.children.forEach(c => collect(c));
+      };
+      collect(this.model.getRoot());
+      return tabs;
+    }
+
+    getBorderTabs() {
+      const tabs = [];
+      this.model.getBorders().forEach(b => {
+        const sel = b.getSelectedNode();
+        b.children.forEach(t => tabs.push({ id: t.id, name: t.getName(), side: b.side, selected: t === sel, component: t.getComponent(), config: t.getConfig() }));
+      });
+      return tabs;
+    }
+
+    getLayoutSummary() {
+      const tabsets = [];
+      const collect = (node) => {
+        if (node.type === NT.TABSET) {
+          tabsets.push({ id: node.id, tabs: node.children.map(t => ({ id: t.id, name: t.getName(), selected: t === node.getSelectedNode() })) });
+          return;
+        }
+        if (node.children) node.children.forEach(c => collect(c));
+      };
+      collect(this.model.getRoot());
+      const borders = this.model.getBorders().map(b => ({ side: b.side, open: b.isOpen(), tabs: b.children.map(t => ({ id: t.id, name: t.getName(), selected: t === b.getSelectedNode() })) }));
+      return { tabsets, borders };
+    }
+
     _act(action) {
+      if (this.onBeforeAction && this.onBeforeAction(action) === false) return;
       if (this.onAction && this.onAction(action) === false) return;
       // Feature 13: save snapshot before action
       this._actionHistory.splice(this._historyIndex + 1);
@@ -1485,15 +1527,15 @@
       tsNode.children.forEach((t, i) => {
         const c = this._contentEls.get(t.id);
         if (i === tabIdx) {
-          // Lazy: create content on first select
           const content = c || this._getOrMakeContent(t);
           content.style.display = 'flex';
           if (!content.parentNode || content.parentNode !== area) area.appendChild(content);
+          try { content.dispatchEvent(new CustomEvent('fl:visible', { bubbles: false })); } catch(e) {}
         } else if (c) {
           c.style.display = 'none';
+          try { c.dispatchEvent(new CustomEvent('fl:hidden', { bubbles: false })); } catch(e) {}
         }
       });
-      // Notify virtualized widgets (grids) that container is now visible
     }
 
     _mkTabBtn(tab, tabset, idx) {

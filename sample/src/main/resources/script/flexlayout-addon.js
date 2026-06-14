@@ -85,6 +85,10 @@
 
     _createLayout: function () {
       var self = this;
+      // Blocklists for onBeforeAction hook
+      this._blockedActions = [];
+      this._blockedTabs = [];
+
       // Debounce full model sync (only if explicitly requested via enableModelChangeNotification)
       this._debouncedModelChange = debounce(function (model) {
         if (self._notifyModelChange) {
@@ -99,7 +103,7 @@
         }
       }, 2000);
 
-      return new FlexLayout.Layout({
+      var layout = new FlexLayout.Layout({
         model: this._model,
         container: this._layoutContainer,
         factory: this._factory,
@@ -142,6 +146,15 @@
           self._rehydrateAfterUndoRedo();
         }
       });
+
+      // Hook 1: onBeforeAction with blocklist
+      layout.onBeforeAction = function (action) {
+        if (self._blockedActions.indexOf(action.type) >= 0) return false;
+        if (self._blockedTabs.length > 0 && action.tabId && self._blockedTabs.indexOf(action.tabId) >= 0) return false;
+        return undefined; // allow
+      };
+
+      return layout;
     },
 
     _handleAction: function (action) {
@@ -155,9 +168,38 @@
           action.tab && action.tab.component && action.tab.component !== 'pwidget') {
         this.sendDataToServer({ type: 'externalDrop', tabId: action.tab.id, component: action.tab.component, tabName: action.tab.name, config: action.tab.config ? JSON.stringify(action.tab.config) : null });
       }
-      // Feature 8: onTabSelect callback
+      // Hook 3: tabVisible / tabHidden for SELECT_TAB
       if (action.type === 'SELECT_TAB') {
         this.sendDataToServer({ type: 'tabSelected', tabId: action.tabId, tabsetId: action.tabsetId });
+        // Find previously visible tab in this tabset
+        var ts = this._model.getRoot().findById(action.tabsetId);
+        if (ts) {
+          var prevSel = ts.getSelectedNode();
+          if (prevSel && prevSel.getId() !== action.tabId) {
+            this.sendDataToServer({ type: 'tabHidden', tabId: prevSel.getId() });
+          }
+        }
+        this.sendDataToServer({ type: 'tabVisible', tabId: action.tabId });
+      }
+      // Hook 3: tabVisible / tabHidden for SELECT_BORDER_TAB
+      if (action.type === 'SELECT_BORDER_TAB') {
+        var border = this._model.getBorder(action.side);
+        if (border) {
+          var prevBorderSel = border.getSelectedNode();
+          var idx = border.children.findIndex ? -1 : -1;
+          for (var bi = 0; bi < border.children.length; bi++) {
+            if (border.children[bi].id === action.tabId) { idx = bi; break; }
+          }
+          var isToggleOff = (idx >= 0 && border.getSelected() === idx);
+          if (isToggleOff) {
+            this.sendDataToServer({ type: 'tabHidden', tabId: action.tabId });
+          } else {
+            if (prevBorderSel && prevBorderSel.getId() !== action.tabId) {
+              this.sendDataToServer({ type: 'tabHidden', tabId: prevBorderSel.getId() });
+            }
+            this.sendDataToServer({ type: 'tabVisible', tabId: action.tabId });
+          }
+        }
       }
       // Lightweight action notification (much smaller than full model)
       if (this._notifyActions) {
@@ -920,6 +962,26 @@
       var dur = duration || 3000;
       var t1 = setTimeout(function () { toast.classList.add('fl-toast-hide'); var t2 = setTimeout(function () { toast.remove(); }, 300); self._pendingTimeouts.push(t2); }, dur);
       this._pendingTimeouts.push(t1);
+    },
+
+    // ─── Hook 1: Blocked actions/tabs ─────────────────────────────
+    setBlockedActions: function (actionsJson) {
+      this._blockedActions = parseJson(actionsJson) || [];
+    },
+
+    setBlockedTabs: function (tabIdsJson) {
+      this._blockedTabs = parseJson(tabIdsJson) || [];
+    },
+
+    // ─── Hook 2: getOpenTabs / getLayoutSummary ─────────────────
+    getOpenTabs: function () {
+      if (!this._layout) return;
+      this.sendDataToServer({ type: 'openTabs', data: JSON.stringify(this._layout.getOpenTabs()) });
+    },
+
+    getLayoutSummary: function () {
+      if (!this._layout) return;
+      this.sendDataToServer({ type: 'layoutSummary', data: JSON.stringify(this._layout.getLayoutSummary()) });
     },
 
     destroy: function () {

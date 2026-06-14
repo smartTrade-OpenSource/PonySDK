@@ -42,6 +42,10 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
     private static final String EVT_REHYDRATE = "rehydrate";
     private static final String EVT_TAB_SELECTED = "tabSelected";
     private static final String EVT_TAB_CONFIG = "tabConfig";
+    private static final String EVT_OPEN_TABS = "openTabs";
+    private static final String EVT_LAYOUT_SUMMARY = "layoutSummary";
+    private static final String EVT_TAB_VISIBLE = "tabVisible";
+    private static final String EVT_TAB_HIDDEN = "tabHidden";
 
     private final Map<String, PWidget> tabWidgets = new HashMap<>();
     private final Map<String, PopOutInfo> popOutTabs = new HashMap<>();
@@ -60,6 +64,10 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
     private Consumer<JsonObject> onActionBroadcast;
     private Consumer<String> onTabSelected;
     private Consumer<String> tabConfigCallback;
+    private Consumer<String> openTabsCallback;
+    private Consumer<String> layoutSummaryCallback;
+    private Consumer<String> onTabVisible;
+    private Consumer<String> onTabHidden;
 
     public FlexLayoutAddon() {
         this(null, null, null);
@@ -586,6 +594,42 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
         callTerminalMethod("getTabConfig", tabId);
     }
 
+    // ─── Hook 1: Blocked actions/tabs ─────────────────────────────
+
+    public void setBlockedActions(final String... actions) {
+        final javax.json.JsonArrayBuilder arr = Json.createArrayBuilder();
+        for (final String a : actions) arr.add(a);
+        callTerminalMethod("setBlockedActions", arr.build().toString());
+    }
+
+    public void setBlockedTabs(final String... tabIds) {
+        final javax.json.JsonArrayBuilder arr = Json.createArrayBuilder();
+        for (final String id : tabIds) arr.add(id);
+        callTerminalMethod("setBlockedTabs", arr.build().toString());
+    }
+
+    // ─── Hook 2: getOpenTabs / getLayoutSummary ─────────────────
+
+    public void getOpenTabs(final Consumer<String> callback) {
+        this.openTabsCallback = callback;
+        callTerminalMethod("getOpenTabs");
+    }
+
+    public void getLayoutSummary(final Consumer<String> callback) {
+        this.layoutSummaryCallback = callback;
+        callTerminalMethod("getLayoutSummary");
+    }
+
+    // ─── Hook 3: Tab visibility ─────────────────────────────────
+
+    public void setOnTabVisible(final Consumer<String> handler) {
+        this.onTabVisible = handler;
+    }
+
+    public void setOnTabHidden(final Consumer<String> handler) {
+        this.onTabHidden = handler;
+    }
+
     // ─── Lifecycle ───────────────────────────────────────────────
 
     @Override
@@ -670,6 +714,18 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
                 break;
             case EVT_TAB_CONFIG:
                 handleTabConfig(data);
+                break;
+            case EVT_OPEN_TABS:
+                handleOpenTabs(data);
+                break;
+            case EVT_LAYOUT_SUMMARY:
+                handleLayoutSummaryEvt(data);
+                break;
+            case EVT_TAB_VISIBLE:
+                handleTabVisible(data);
+                break;
+            case EVT_TAB_HIDDEN:
+                handleTabHidden(data);
                 break;
             default:
                 break;
@@ -814,5 +870,31 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
             tabConfigCallback.accept(config);
             tabConfigCallback = null;
         }
+    }
+
+    private void handleOpenTabs(final JsonObject data) {
+        final String d = data.getString("data", null);
+        if (openTabsCallback != null && d != null) {
+            openTabsCallback.accept(d);
+            openTabsCallback = null;
+        }
+    }
+
+    private void handleLayoutSummaryEvt(final JsonObject data) {
+        final String d = data.getString("data", null);
+        if (layoutSummaryCallback != null && d != null) {
+            layoutSummaryCallback.accept(d);
+            layoutSummaryCallback = null;
+        }
+    }
+
+    private void handleTabVisible(final JsonObject data) {
+        final String tabId = data.getString("tabId", null);
+        if (onTabVisible != null && tabId != null) onTabVisible.accept(tabId);
+    }
+
+    private void handleTabHidden(final JsonObject data) {
+        final String tabId = data.getString("tabId", null);
+        if (onTabHidden != null && tabId != null) onTabHidden.accept(tabId);
     }
 }
