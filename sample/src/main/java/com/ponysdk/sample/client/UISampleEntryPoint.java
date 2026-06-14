@@ -138,6 +138,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
         // Inject global styles
         PScript.execute(PWindow.getMain(), buildGlobalStyles());
+        PScript.execute(PWindow.getMain(), buildModernTheme());
 
         // Header
         final PFlowPanel header = Element.newPFlowPanel();
@@ -585,6 +586,39 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             ".highlight-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;}" +
             ".highlight-desc{font-size:12px;color:var(--text2);line-height:1.6;}" +
             "` ; document.head.appendChild(s);";
+    }
+
+    /** Appended on top of {@link #buildGlobalStyles()} — a modern visual layer (animated aurora + glows). */
+    private static String buildModernTheme() {
+        return "var s=document.createElement('style');s.textContent=`"
+            // Aurora mesh behind the (transparent) content area
+            + "body{background:radial-gradient(55% 45% at 12% -8%,rgba(124,111,255,.20),transparent 60%),"
+            +   "radial-gradient(50% 45% at 90% -5%,rgba(67,232,176,.13),transparent 60%),"
+            +   "radial-gradient(60% 55% at 50% 118%,rgba(124,111,255,.12),transparent 60%),#070a12 !important;"
+            +   "background-attachment:fixed !important;}"
+            + "body::after{content:'';position:fixed;inset:-20%;z-index:-1;pointer-events:none;"
+            +   "background:radial-gradient(34% 34% at 28% 26%,rgba(124,111,255,.12),transparent 60%),"
+            +   "radial-gradient(30% 30% at 78% 62%,rgba(67,232,176,.10),transparent 60%);"
+            +   "filter:blur(46px);animation:pony-aurora 24s ease-in-out infinite alternate;}"
+            + "@keyframes pony-aurora{0%{transform:translate3d(-3%,-2%,0) scale(1)}100%{transform:translate3d(4%,3%,0) scale(1.18)}}"
+            // Header lift
+            + ".pony-header{box-shadow:0 1px 0 var(--border),0 12px 44px rgba(124,111,255,.14) !important;}"
+            // Sidebar micro-interactions + a premium active state
+            + ".pony-tab{transition:transform .18s cubic-bezier(.4,0,.2,1),background .18s !important;}"
+            + ".pony-tab:hover{transform:translateX(3px);}"
+            + ".pony-tab-active{box-shadow:inset 3px 0 0 var(--accent2,#43e8b0),0 0 22px rgba(124,111,255,.22) !important;}"
+            // Buttons: depth + press feedback
+            + ".gwt-Button{box-shadow:0 3px 14px rgba(124,111,255,.30) !important;letter-spacing:.3px;}"
+            + ".gwt-Button:active{opacity:.82 !important;transform:translateY(0) !important;}"
+            // Page titles: gradient text
+            + ".pony-page-title{background:linear-gradient(90deg,#ffffff,var(--accent2,#43e8b0));"
+            +   "-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;letter-spacing:-.4px;}"
+            // Content rows: glassmorphism + hover lift, so the aurora shows through (every tab benefits)
+            + ".pony-row{background:linear-gradient(160deg,rgba(22,29,49,.5),rgba(14,19,34,.5));"
+            +   "backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);border:1px solid rgba(124,111,255,.12);"
+            +   "transition:border-color .2s,transform .2s,box-shadow .2s;}"
+            + ".pony-row:hover{border-color:rgba(124,111,255,.38);transform:translateY(-1px);box-shadow:0 10px 30px rgba(0,0,0,.4);}"
+            + "`;document.head.appendChild(s);";
     }
 
     // ── Tab: Inputs ──────────────────────────────────────────────────────────
