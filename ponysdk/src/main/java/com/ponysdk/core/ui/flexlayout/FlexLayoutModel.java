@@ -16,7 +16,7 @@ import javax.json.JsonObjectBuilder;
  *     .tabset(FlexTabset.create().tab(FlexTab.create("Side")));
  * }</pre>
  */
-public class FlexLayoutModel {
+public final class FlexLayoutModel {
     private final List<FlexTabset> tabsets = new ArrayList<>();
     private final String direction;
 
@@ -32,7 +32,7 @@ public class FlexLayoutModel {
 
     /** Serializes this layout model to a JSON string. */
 
-    public String toJson() {
+    String toJson() {
         final JsonObjectBuilder b = Json.createObjectBuilder().add("type", direction);
         final JsonArrayBuilder arr = Json.createArrayBuilder();
         for (final FlexTabset ts : tabsets) {

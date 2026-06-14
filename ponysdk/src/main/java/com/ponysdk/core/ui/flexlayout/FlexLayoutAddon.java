@@ -18,6 +18,8 @@ import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.PWindow;
 
 /**
+ * For internal use. Use {@link FlexLayoutPanel} instead.
+ * <p>
  * PAddOnComposite wrapping the FlexLayout JS library.
  * <p>
  * Provides a dockable panel layout with:

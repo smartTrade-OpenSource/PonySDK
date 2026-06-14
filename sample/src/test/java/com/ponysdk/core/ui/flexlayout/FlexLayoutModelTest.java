@@ -1,4 +1,4 @@
-package com.ponysdk.sample.client.page.addon.flexlayout;
+package com.ponysdk.core.ui.flexlayout;
 
 import static org.junit.Assert.*;
 
@@ -7,16 +7,6 @@ import javax.json.JsonObject;
 import java.io.StringReader;
 
 import org.junit.Test;
-
-import com.ponysdk.core.ui.flexlayout.FlexAction;
-import com.ponysdk.core.ui.flexlayout.FlexBorder;
-import com.ponysdk.core.ui.flexlayout.FlexKeymap;
-import com.ponysdk.core.ui.flexlayout.FlexLayoutModel;
-import com.ponysdk.core.ui.flexlayout.FlexTab;
-import com.ponysdk.core.ui.flexlayout.FlexTabset;
-import com.ponysdk.core.ui.flexlayout.FlexTheme;
-import com.ponysdk.core.ui.flexlayout.KeyBinding;
-import com.ponysdk.core.ui.flexlayout.TabStyle;
 
 public class FlexLayoutModelTest {
 

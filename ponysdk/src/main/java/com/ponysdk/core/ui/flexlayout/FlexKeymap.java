@@ -15,8 +15,10 @@ import javax.json.JsonObjectBuilder;
  *     .unbind(FlexAction.REDO);
  * }</pre>
  */
-public class FlexKeymap {
+public final class FlexKeymap {
     private final Map<String, KeyBinding> bindings = new LinkedHashMap<>();
+
+    private FlexKeymap() {}
 
     /** Creates a keymap pre-configured with default bindings for all standard actions. */
     public static FlexKeymap defaults() {
@@ -45,7 +47,7 @@ public class FlexKeymap {
     }
 
     /** Serializes this keymap to a JSON object string. */
-    public String toJson() {
+    String toJson() {
         final JsonObjectBuilder b = Json.createObjectBuilder();
         for (final Map.Entry<String, KeyBinding> e : bindings.entrySet()) {
             if (e.getValue() == null) {

@@ -14,7 +14,7 @@ import javax.json.JsonObjectBuilder;
  * FlexTabset ts = FlexTabset.create().weight(60).tab(FlexTab.create("Editor")).maxChildren(10);
  * }</pre>
  */
-public class FlexTabset {
+public final class FlexTabset {
     private int weight = 100;
     private final List<FlexTab> tabs = new ArrayList<>();
     private int maxChildren = -1;
@@ -33,7 +33,7 @@ public class FlexTabset {
 
     /** Serializes this tabset to a JSON string for the FlexLayout model. */
 
-    public String toJson() {
+    String toJson() {
         final JsonObjectBuilder b = Json.createObjectBuilder()
             .add("type", "tabset")
             .add("weight", weight);

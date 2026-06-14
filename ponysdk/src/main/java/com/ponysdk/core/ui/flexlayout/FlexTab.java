@@ -12,7 +12,7 @@ import javax.json.JsonObjectBuilder;
  * FlexTab tab = FlexTab.create("Editor").component("code-editor").icon("fa-code").pinned();
  * }</pre>
  */
-public class FlexTab {
+public final class FlexTab {
     private final String name;
     private String component;
     private String icon;
@@ -51,7 +51,7 @@ public class FlexTab {
     public boolean isEnableDrag() { return enableDrag; }
 
     /** Serializes this tab to a JSON string for the FlexLayout model. */
-    public String toJson() {
+    String toJson() {
         final JsonObjectBuilder b = Json.createObjectBuilder().add("name", name);
         if (component != null) b.add("component", component);
         b.add("enableClose", enableClose);

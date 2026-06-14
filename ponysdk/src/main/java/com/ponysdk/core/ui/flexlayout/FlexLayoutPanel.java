@@ -24,7 +24,7 @@ import com.ponysdk.core.ui.basic.PWidget;
  * container.add(layout.asWidget());
  * </pre>
  */
-public class FlexLayoutPanel implements IsPWidget {
+public final class FlexLayoutPanel implements IsPWidget {
 
     private final FlexLayoutAddon addon;
     private final AtomicInteger tabCounter = new AtomicInteger(0);

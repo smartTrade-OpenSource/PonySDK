@@ -10,7 +10,7 @@ import javax.json.JsonObjectBuilder;
  * FlexBorder border = FlexBorder.left().size(250).tabStyle(TabStyle.ICON);
  * }</pre>
  */
-public class FlexBorder {
+public final class FlexBorder {
     private final String side;
     private int size = 220;
     private TabStyle tabStyle = TabStyle.AUTO;
@@ -44,7 +44,7 @@ public class FlexBorder {
 
     /** Serializes this border to a JSON string for the FlexLayout model. */
 
-    public String toJson() {
+    String toJson() {
         final JsonObjectBuilder b = Json.createObjectBuilder()
             .add("type", "border")
             .add("location", side)

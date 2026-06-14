@@ -10,7 +10,7 @@ import javax.json.JsonObjectBuilder;
  * KeyBinding binding = KeyBinding.ctrlShift("p"); // Ctrl+Shift+P
  * }</pre>
  */
-public class KeyBinding {
+public final class KeyBinding {
     private boolean ctrl;
     private boolean shift;
     private boolean alt;
@@ -87,7 +87,7 @@ public class KeyBinding {
     }
 
     /** Serializes this key binding to a JSON object string. */
-    public String toJson() {
+    String toJson() {
         final JsonObjectBuilder b = Json.createObjectBuilder();
         if (ctrl) b.add("ctrl", true);
         if (shift) b.add("shift", true);

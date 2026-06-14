@@ -16,7 +16,7 @@ import javax.json.JsonObject;
  * tabs.forEach(t -&gt; System.out.println(t.getName()));
  * }</pre>
  */
-public class FlexTabInfo {
+public final class FlexTabInfo {
     private final String id;
     private final String name;
     private final String component;
