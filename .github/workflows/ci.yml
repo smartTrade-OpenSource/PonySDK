@@ -48,6 +48,7 @@ jobs:
       - name: Start sample server
         run: |
           ./gradlew :sample:processResources :sample:runSampleSpring --no-daemon &
+          echo $! > server.pid
           echo "Waiting for server..."
           for i in $(seq 1 60); do
             if curl -s http://localhost:8081/sample/ > /dev/null 2>&1; then
@@ -62,6 +63,10 @@ jobs:
         env:
           BASE_URL: 'http://localhost:8081/sample/'
         run: npx playwright test tests/flexlayout.spec.js --retries=2 --ignore-snapshots
+
+      - name: Stop server
+        if: always()
+        run: kill $(cat server.pid) 2>/dev/null || true
 
       - name: Upload test results
         if: failure()
