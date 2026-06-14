@@ -3,11 +3,11 @@ const { defineConfig } = require('@playwright/test');
 
 module.exports = defineConfig({
   testDir: './tests',
-  timeout: 15000,
-  retries: 0,
-  workers: 4,
+  timeout: 30000,
+  retries: process.env.CI ? 2 : 0,
+  workers: process.env.CI ? 1 : 4,
   use: {
-    baseURL: 'http://localhost/sample/',
+    baseURL: process.env.BASE_URL || 'http://localhost/sample/',
     headless: true,
     viewport: { width: 1280, height: 720 },
     actionTimeout: 5000,

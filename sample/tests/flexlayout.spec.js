@@ -1,7 +1,7 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 
-const BASE_URL = 'http://localhost/sample/';
+const BASE_URL = process.env.BASE_URL || 'http://localhost/sample/';
 
 test.describe('FlexLayout PonySDK Integration', () => {
 
