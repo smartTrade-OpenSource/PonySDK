@@ -24,6 +24,48 @@ public class KeyBinding {
         return kb;
     }
 
+    public static KeyBinding ctrlAlt(final String key) {
+        final KeyBinding kb = new KeyBinding(key);
+        kb.ctrl = true;
+        kb.alt = true;
+        return kb;
+    }
+
+    public static KeyBinding ctrlShiftAlt(final String key) {
+        final KeyBinding kb = new KeyBinding(key);
+        kb.ctrl = true;
+        kb.shift = true;
+        kb.alt = true;
+        return kb;
+    }
+
+    public static KeyBinding alt(final String key) {
+        final KeyBinding kb = new KeyBinding(key);
+        kb.alt = true;
+        return kb;
+    }
+
+    public static KeyBinding shift(final String key) {
+        final KeyBinding kb = new KeyBinding(key);
+        kb.shift = true;
+        return kb;
+    }
+
+    public static KeyBinding shiftAlt(final String key) {
+        final KeyBinding kb = new KeyBinding(key);
+        kb.shift = true;
+        kb.alt = true;
+        return kb;
+    }
+
+    public static KeyBinding of(final boolean ctrl, final boolean shift, final boolean alt, final String key) {
+        final KeyBinding kb = new KeyBinding(key);
+        kb.ctrl = ctrl;
+        kb.shift = shift;
+        kb.alt = alt;
+        return kb;
+    }
+
     public static KeyBinding key(final String key) {
         return new KeyBinding(key);
     }
