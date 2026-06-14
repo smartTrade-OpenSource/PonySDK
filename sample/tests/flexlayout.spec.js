@@ -1203,3 +1203,52 @@ test.describe('FlexLayout Performance', () => {
   });
 
 });
+
+test.describe('FlexLayout Visual Snapshots', () => {
+
+  test.beforeEach(async ({ page }) => {
+    await page.goto(process.env.BASE_URL || 'http://localhost/sample/', { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('.fl-layout', { timeout: 8000 });
+    await page.waitForTimeout(500); // let sidebars render
+  });
+
+  test('snapshot: initial layout with sidebars', async ({ page }) => {
+    await expect(page).toHaveScreenshot('layout-initial.png', { maxDiffPixelRatio: 0.01 });
+  });
+
+  test('snapshot: sidebar open', async ({ page }) => {
+    // Ensure left panel is open (demo default)
+    await expect(page.locator('.fl-sidebar-left .fl-sidebar-panel')).toBeVisible();
+    await expect(page).toHaveScreenshot('layout-sidebar-open.png', { maxDiffPixelRatio: 0.01 });
+  });
+
+  test('snapshot: tab maximized', async ({ page }) => {
+    await page.locator('.fl-tbtn-max').first().click();
+    await expect(page.locator('.fl-maximized')).toBeVisible({ timeout: 2000 });
+    await expect(page).toHaveScreenshot('layout-maximized.png', { maxDiffPixelRatio: 0.01 });
+  });
+
+  test('snapshot: theme nord', async ({ page }) => {
+    await page.evaluate(() => {
+      document.querySelector('.fl-layout').__flexLayout.container.className = 'fl-layout fl-theme-nord';
+    });
+    await page.waitForTimeout(100);
+    await expect(page).toHaveScreenshot('layout-theme-nord.png', { maxDiffPixelRatio: 0.01 });
+  });
+
+  test('snapshot: theme corporate light', async ({ page }) => {
+    await page.evaluate(() => {
+      document.querySelector('.fl-layout').__flexLayout.container.className = 'fl-layout fl-theme-corporate';
+    });
+    await page.waitForTimeout(100);
+    await expect(page).toHaveScreenshot('layout-theme-corporate.png', { maxDiffPixelRatio: 0.01 });
+  });
+
+  test('snapshot: theme deep orange', async ({ page }) => {
+    await page.evaluate(() => {
+      document.querySelector('.fl-layout').__flexLayout.container.className = 'fl-layout fl-theme-deep-orange';
+    });
+    await page.waitForTimeout(100);
+    await expect(page).toHaveScreenshot('layout-theme-deep-orange.png', { maxDiffPixelRatio: 0.01 });
+  });
+});

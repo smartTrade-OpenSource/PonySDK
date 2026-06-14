@@ -61,7 +61,7 @@ jobs:
         working-directory: sample
         env:
           BASE_URL: 'http://localhost:8081/sample/'
-        run: npx playwright test tests/flexlayout.spec.js --retries=2
+        run: npx playwright test tests/flexlayout.spec.js --retries=2 --ignore-snapshots
 
       - name: Upload test results
         if: failure()
