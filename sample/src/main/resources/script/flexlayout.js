@@ -550,7 +550,7 @@
       };
       this.container.setAttribute('tabindex', '-1');
       this.container.addEventListener('keydown', ev => {
-        if (!this._keyboardEnabled) return;
+        if (!this._keyboardEnabled || this._locked) return;
         const mod = ev.ctrlKey || ev.metaKey; // Ctrl on Win/Linux, Cmd on Mac
         const match = (binding) => {
           if (!binding) return false;
@@ -1524,6 +1524,7 @@
         x.type = 'button'; x.className = 'fl-tab-x'; x.innerHTML = '×'; x.title = 'Close';
         x.addEventListener('click', ev => {
           ev.stopPropagation();
+          if (this._locked) return;
           if (this.onTabClose && this.onTabClose(tab) === false) return;
           this._act(Actions.closeTab(tab.id));
         });
@@ -1532,7 +1533,7 @@
 
       // Middle-click close
       btn.addEventListener('auxclick', ev => {
-        if (ev.button === 1 && tab.isEnableClose()) {
+        if (ev.button === 1 && !this._locked && tab.isEnableClose()) {
           ev.preventDefault();
           this._act(Actions.closeTab(tab.id));
         }
@@ -1581,17 +1582,23 @@
     }
 
     _startTabRename(lbl, tab) {
-      lbl.contentEditable = 'true';
+      if (this._locked) return;
+      lbl.contentEditable = 'plaintext-only';
       lbl.focus();
       const sel = window.getSelection();
       sel.selectAllChildren(lbl);
       const commit = () => {
         lbl.contentEditable = 'false';
-        const newName = lbl.textContent.trim() || tab.getName();
+        const newName = lbl.textContent.trim().slice(0, 200) || tab.getName();
         if (newName !== tab.getName()) this._act(Actions.renameTab(tab.id, newName));
         else lbl.textContent = tab.getName();
       };
       lbl.addEventListener('blur', commit, { once: true });
+      lbl.addEventListener('paste', ev => {
+        ev.preventDefault();
+        const text = (ev.clipboardData || window.clipboardData).getData('text/plain').slice(0, 200);
+        document.execCommand('insertText', false, text);
+      });
       lbl.addEventListener('keydown', ev => {
         if (ev.key === 'Enter') { ev.preventDefault(); lbl.blur(); }
         else if (ev.key === 'Escape') { lbl.textContent = tab.getName(); lbl.blur(); }

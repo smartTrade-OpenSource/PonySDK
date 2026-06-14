@@ -974,6 +974,131 @@ test.describe('FlexLayout PonySDK Integration', () => {
     expect(style.writingMode).toBe('horizontal-tb');
   });
 
+  test('middle-click closes tab', async ({ page }) => {
+    await page.click('button:has-text("+ Add Tab")');
+    await expect(page.locator('.fl-tab')).toHaveCount(3, { timeout: 2000 });
+    const tab = page.locator('.fl-tab').last();
+    await tab.click({ button: 'middle' });
+    await expect(page.locator('.fl-tab')).toHaveCount(2, { timeout: 2000 });
+  });
+
+  test('tab shows tooltip with full name', async ({ page }) => {
+    const tab = page.locator('.fl-tab').first();
+    const title = await tab.getAttribute('title');
+    const label = await tab.locator('.fl-tab-label').textContent();
+    expect(title).toBe(label);
+  });
+
+  test('layout lock prevents tab close', async ({ page }) => {
+    await page.click('button:has-text("+ Add Tab")');
+    await page.waitForTimeout(300);
+    const countBefore = await page.locator('.fl-tab').count();
+    // Lock layout
+    await page.evaluate(() => {
+      document.querySelector('.fl-layout').__flexLayout.setLocked(true);
+    });
+    await page.waitForTimeout(200);
+    // Close button should be hidden
+    const closeVisible = await page.locator('.fl-tab-x').first().isVisible();
+    expect(closeVisible).toBe(false);
+    // Verify tab count unchanged
+    const countAfter = await page.locator('.fl-tab').count();
+    expect(countAfter).toBe(countBefore);
+    // Unlock
+    await page.evaluate(() => {
+      document.querySelector('.fl-layout').__flexLayout.setLocked(false);
+    });
+  });
+
+  test('layout lock prevents drag', async ({ page }) => {
+    await page.evaluate(() => {
+      document.querySelector('.fl-layout').__flexLayout.setLocked(true);
+    });
+    const tab = page.locator('.fl-tab').first();
+    const tabBox = await tab.boundingBox();
+    const target = page.locator('.fl-tabset').last();
+    const tgtBox = await target.boundingBox();
+    await page.mouse.move(tabBox.x + tabBox.width / 2, tabBox.y + tabBox.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(tgtBox.x + tgtBox.width / 2, tgtBox.y + tgtBox.height / 2, { steps: 8 });
+    await page.mouse.up();
+    // No ghost should have appeared; tab stays in original tabset
+    await expect(page.locator('.fl-drag-ghost')).toHaveCount(0);
+    await page.evaluate(() => {
+      document.querySelector('.fl-layout').__flexLayout.setLocked(false);
+    });
+  });
+
+  test('empty tabset shows placeholder after closing all tabs', async ({ page }) => {
+    // Add a tab to the second tabset, then close it to see the placeholder briefly
+    // But _cleanup removes empty tabsets, so we test via DOM injection
+    await page.evaluate(() => {
+      const layout = document.querySelector('.fl-layout').__flexLayout;
+      const root = layout.model.getRoot();
+      // Add 2nd tab to first tabset so closing one still shows tabset
+      layout._act({ type: 'ADD_TAB', tabsetId: null, tab: { name: 'Extra', component: 'x' } });
+    });
+    await page.waitForTimeout(200);
+    // Verify content area exists with text when empty programmatically
+    const hasPlaceholder = await page.evaluate(() => {
+      const el = document.querySelector('.fl-empty-tabset');
+      return el ? el.textContent : null;
+    });
+    // The placeholder only shows on tabsets with 0 children before cleanup
+    // Test the rendered output after a full model load with an empty tabset
+    await page.evaluate(() => {
+      const layout = document.querySelector('.fl-layout').__flexLayout;
+      const model = layout.model;
+      const newModel = {layout:{type:'row',children:[
+        {type:'tabset',weight:50,children:[{type:'tab',name:'Keep',component:'test'}]},
+        {type:'tabset',weight:50,children:[]}
+      ]}};
+      // Replace model directly
+      model._root = FlexLayout.Model._parse(newModel.layout, 'row');
+      model.emit('change', model);
+    });
+    await page.waitForTimeout(300);
+    await expect(page.locator('.fl-empty-tabset')).toBeVisible();
+  });
+
+  test('tab rename via F2 key', async ({ page }) => {
+    const layout = page.locator('.fl-layout');
+    await page.locator('.fl-tab').first().click();
+    await layout.focus();
+    await page.keyboard.press('F2');
+    await page.waitForTimeout(200);
+    const lbl = page.locator('.fl-tab-active .fl-tab-label').first();
+    const editable = await lbl.getAttribute('contenteditable');
+    expect(editable).toBeTruthy();
+    await page.keyboard.type('Renamed');
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(200);
+    await expect(lbl).toHaveText('Renamed');
+  });
+
+  test('Ctrl+W closes active tab', async ({ page }) => {
+    await page.click('button:has-text("+ Add Tab")');
+    await expect(page.locator('.fl-tab')).toHaveCount(3, { timeout: 2000 });
+    const layout = page.locator('.fl-layout');
+    await page.locator('.fl-tab').last().click();
+    await layout.focus();
+    await page.keyboard.press('Control+w');
+    await expect(page.locator('.fl-tab')).toHaveCount(2, { timeout: 2000 });
+  });
+
+  test('drop zone highlights during drag', async ({ page }) => {
+    const tab = page.locator('.fl-tab').first();
+    const tabBox = await tab.boundingBox();
+    const target = page.locator('.fl-tabset').last();
+    const tgtBox = await target.boundingBox();
+    await page.mouse.move(tabBox.x + tabBox.width / 2, tabBox.y + tabBox.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(tabBox.x + 10, tabBox.y + 10, { steps: 2 });
+    await page.mouse.move(tgtBox.x + tgtBox.width / 2, tgtBox.y + tgtBox.height / 2, { steps: 5 });
+    await expect(page.locator('.fl-drop-zone-active')).toHaveCount(1, { timeout: 2000 });
+    await page.mouse.up();
+  });
+
   test('drag tab from layout to sidebar strip', async ({ page }) => {
     const tabsBefore = await page.locator('.fl-sidebar-left .fl-sidebar-tab').count();
     // Drag the "Info" tab to the left sidebar strip
