@@ -38,10 +38,13 @@ public class BinaryArgsAddOn extends PAddOnComposite<PElement> {
         super(Element.newDiv(), creationArgs);
     }
 
-    /** Sends {@code count} typed values to the terminal as a single pure-binary array. */
-    public void pushValues(final int count) {
-        final Object[] values = new Object[count];
-        for (int i = 0; i < count; i++) values[i] = i;
-        callTerminalMethod("values", values);
+    /** Sends a deterministic verification frame (a typed binary array) to the terminal. */
+    public void verify(final Object[] values) {
+        callTerminalMethod("verify", values);
+    }
+
+    /** Streams one frame of typed binary values (an animated waveform) to the terminal. */
+    public void stream(final Object[] values) {
+        callTerminalMethod("stream", values);
     }
 }

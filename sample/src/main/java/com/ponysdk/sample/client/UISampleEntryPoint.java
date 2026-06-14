@@ -298,34 +298,50 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             case 5 -> buildMiscTab(schedulers);
             case 6 -> buildPerfTab(uiContext, schedulers);
             case 7 -> buildCodeTab();
-            default -> buildBinaryAddonTab();
+            default -> buildBinaryAddonTab(schedulers);
         };
     }
 
-    private PFlowPanel buildBinaryAddonTab() {
+    private PFlowPanel buildBinaryAddonTab(final List<PScheduler.UIRunnable> schedulers) {
         final PFlowPanel panel = Element.newPFlowPanel();
         final PElement box = Element.newDiv();
-        box.setAttribute("style", "padding:32px;max-width:920px");
+        box.setAttribute("style", "padding:28px 32px;max-width:1040px");
 
         final PElement title = Element.newDiv();
         title.setAttribute("style", "font-size:20px;font-weight:800;margin-bottom:6px;color:var(--text,#f0f4ff)");
-        title.setInnerText("Binary PAddOn protocol");
+        title.setInnerText("Binary PAddOn protocol — live");
 
         final PElement sub = Element.newDiv();
-        sub.setAttribute("style", "color:var(--text2,#8892a4);margin-bottom:20px;line-height:1.6");
-        sub.setInnerText("Typed primitives (int, boolean, double, String, long) are delivered to a JavaScript addon "
-            + "in pure binary \u2014 both as creation arguments and as a method-call array. Binary arrays are no "
-            + "longer capped at 255 elements (uint31 length).");
+        sub.setAttribute("style", "color:var(--text2,#8892a4);margin-bottom:20px;line-height:1.6;max-width:800px");
+        sub.setInnerText("A JavaScript addon configured with typed binary creation args, then fed a continuous "
+            + "stream of typed double arrays in pure binary (uint31 length, no 255 cap, no JSON). The live metrics "
+            + "show the streaming throughput and how much smaller each binary frame is than the equivalent JSON.");
 
-        final BinaryArgsAddOn addon = new BinaryArgsAddOn(42, true, 3.14, "h\u00e9llo", 9_000_000_000L);
-        addon.asWidget().setAttribute("style",
-            "display:block;background:var(--surface2,#131929);border:1px solid var(--border,#1e2d45);"
-                + "border-radius:10px;padding:18px;min-height:90px");
-
+        // The chart is configured entirely through pure-binary typed creation args:
+        // color (String), maxPoints (int), lineWidth (double), fill (boolean), seed (long)
+        final BinaryArgsAddOn addon = new BinaryArgsAddOn("#43e8b0", 1024, 2.0, true, 1_234_567_890_123L);
+        addon.asWidget().setAttribute("style", "display:block;margin-top:4px");
         box.add(title, sub, addon.asWidget());
         panel.add(box);
 
-        addon.pushValues(1000);
+        // Deterministic verification frame (kept stable for the browser IT): 1000 ints, 0..999
+        final Object[] ramp = new Object[1000];
+        for (int i = 0; i < ramp.length; i++) ramp[i] = i;
+        addon.verify(ramp);
+
+        // Live stream: 1024 typed doubles forming an animated multi-harmonic waveform (~8 fps)
+        final double[] phase = { 0 };
+        schedulers.add(PScheduler.scheduleAtFixedRate(() -> {
+            final Object[] series = new Object[1024];
+            for (int i = 0; i < series.length; i++) {
+                final double t = (double) i / series.length;
+                series[i] = Math.sin(t * Math.PI * 6 + phase[0]) * (0.6 + 0.4 * Math.sin(t * Math.PI * 2 + phase[0] * 0.5))
+                    + 0.08 * Math.sin(t * Math.PI * 40 + phase[0] * 3);
+            }
+            phase[0] += 0.15;
+            addon.stream(series);
+        }, Duration.ofMillis(120)));
+
         return panel;
     }
 
