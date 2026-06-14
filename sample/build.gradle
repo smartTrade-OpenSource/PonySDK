@@ -67,6 +67,15 @@ task runSampleSpring(type: JavaExec) {
     jvmArgs = ['-Xmx2g', '-Dlog4j.configurationFile=etc/log4j2.xml']
 }
 
+task runFlexLayoutDemo(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    classpath += files(layout.buildDirectory.get().asFile.path + '/gwt/gwt')
+    classpath += files(layout.buildDirectory.get().asFile.path + '/resources')
+    classpath += files(layout.buildDirectory.get().asFile.path + '/resources/main')
+    mainClass = 'com.ponysdk.impl.spring.MainSpring'
+    jvmArgs = ['-Xmx2g', '-Dlog4j.configurationFile=etc/log4j2.xml', '-Dspring.profiles.active=flexlayout']
+}
+
 task runSampleTrading(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     classpath += files(layout.buildDirectory.get().asFile.path + '/gwt/debug/gwt')

@@ -47,7 +47,7 @@ jobs:
 
       - name: Start sample server
         run: |
-          ./gradlew :sample:processResources :sample:runSampleSpring --no-daemon &
+          ./gradlew :sample:processResources :sample:runFlexLayoutDemo --no-daemon &
           echo $! > server.pid
           echo "Waiting for server..."
           for i in $(seq 1 60); do

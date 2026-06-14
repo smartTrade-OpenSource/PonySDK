@@ -7,6 +7,14 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 
 	<context:annotation-config />
 
-	<bean name="entryPoint" class="com.ponysdk.sample.client.page.addon.FlexLayoutDemoEntryPoint" />
+	<!-- Default: original PonySDK sample -->
+	<beans profile="default">
+		<bean name="entryPoint" class="com.ponysdk.sample.client.UISampleEntryPoint" />
+	</beans>
+
+	<!-- FlexLayout demo (for E2E tests) -->
+	<beans profile="flexlayout">
+		<bean name="entryPoint" class="com.ponysdk.sample.client.page.addon.FlexLayoutDemoEntryPoint" />
+	</beans>
 
 </beans>
