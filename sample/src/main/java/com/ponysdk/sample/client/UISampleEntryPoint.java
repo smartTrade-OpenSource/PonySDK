@@ -320,7 +320,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
         // The chart is configured entirely through pure-binary typed creation args:
         // color (String), maxPoints (int), lineWidth (double), fill (boolean), seed (long)
-        final BinaryArgsAddOn addon = new BinaryArgsAddOn("#43e8b0", 1024, 2.0, true, 1_234_567_890_123L);
+        final BinaryArgsAddOn addon = new BinaryArgsAddOn("#43e8b0", 1024, 2.0, false, 1_234_567_890_123L);
         addon.asWidget().setAttribute("style", "display:block;margin-top:4px");
 
         // Stream state owned by the server
@@ -331,7 +331,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
         // Controls — PonySDK widgets; every click handler runs server-side
         final PFlowPanel controls = Element.newPFlowPanel();
-        controls.setAttribute("style", "display:flex;gap:26px;flex-wrap:wrap;align-items:flex-end;margin-bottom:18px");
+        controls.setAttribute("style", "display:flex;gap:28px;flex-wrap:wrap;align-items:flex-end;margin-bottom:18px;"
+            + "background:linear-gradient(160deg,#131929,#0e1322);border:1px solid #1e2d45;border-radius:14px;padding:16px 20px");
 
         final PButton toggle = Element.newPButton("⏸  Pause");
         styleBinaryCtrl(toggle, true);

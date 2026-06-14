@@ -161,6 +161,7 @@
       window.__bigLen = arr.length; // 1000
       window.__bigSum = sum;        // 499500
       this._pending = [arr];
+      this._syncLegend(1);
     },
 
     // Live streaming frame. Structured typed binary payload: [n(int), m(int), n*m doubles].
@@ -183,7 +184,20 @@
       window.__liveFrames = this._frames;
       window.__livePoints = total;
       this._pending = series;
+      this._syncLegend(n);
       this._metrics();
+    },
+
+    _syncLegend: function (n) {
+      if (n === this._lastN) return;
+      this._lastN = n;
+      var el = document.getElementById('ba-legend');
+      if (!el) return;
+      var html = '';
+      for (var i = 0; i < n; i++) {
+        html += '<span class="ba-leg"><i style="background:' + this._palette[i % this._palette.length] + '"></i>series ' + (i + 1) + '</span>';
+      }
+      el.innerHTML = html;
     },
 
     _startRender: function () {
@@ -208,26 +222,52 @@
       if (!this.element) return;
       this.element.innerHTML = ''
         + '<style>'
-        + '.ba-cards{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px}'
-        + '.ba-card{flex:1;min-width:120px;background:#131929;border:1px solid #1e2d45;border-radius:12px;padding:12px 14px}'
-        + '.ba-v{font-size:22px;font-weight:800;color:#43e8b0;line-height:1;font-variant-numeric:tabular-nums}'
-        + '.ba-l{font-size:10px;color:#5a6b85;text-transform:uppercase;letter-spacing:.8px;margin-top:6px}'
-        + '.ba-canvas{width:100%;height:260px;display:block;background:#0b0f1a;border:1px solid #1e2d45;border-radius:12px}'
-        + '.ba-cfg{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:#8892a4;margin-top:10px}'
-        + '.ba-cfg b{color:#7c6fff}'
+        + '.ba-cards{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:16px}'
+        + '@media(max-width:860px){.ba-cards{grid-template-columns:repeat(3,1fr)}}'
+        + '.ba-card{position:relative;overflow:hidden;background:linear-gradient(160deg,#161d31,#0e1322);'
+        +   'border:1px solid var(--border,#1e2d45);border-radius:14px;padding:14px 16px;transition:transform .2s,border-color .2s}'
+        + '.ba-card:hover{transform:translateY(-2px);border-color:var(--accent,#7c6fff)}'
+        + '.ba-card::before{content:"";position:absolute;left:0;top:0;width:100%;height:2px;'
+        +   'background:linear-gradient(90deg,var(--accent2,#43e8b0),var(--accent,#7c6fff));opacity:.65}'
+        + '.ba-v{font-size:23px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;'
+        +   'background:linear-gradient(90deg,var(--accent2,#43e8b0),#9fe9ff);-webkit-background-clip:text;background-clip:text;'
+        +   '-webkit-text-fill-color:transparent;color:transparent}'
+        + '.ba-l{font-size:9.5px;color:#5a6b85;text-transform:uppercase;letter-spacing:.9px;margin-top:7px}'
+        + '.ba-chart{background:linear-gradient(180deg,#0e1322,#0a0e1a);border:1px solid var(--border,#1e2d45);'
+        +   'border-radius:16px;padding:14px 16px;box-shadow:inset 0 1px 0 rgba(255,255,255,.03)}'
+        + '.ba-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}'
+        + '.ba-live{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;letter-spacing:1px;'
+        +   'text-transform:uppercase;color:var(--accent2,#43e8b0)}'
+        + '.ba-dot{width:8px;height:8px;border-radius:50%;background:var(--accent2,#43e8b0);'
+        +   'box-shadow:0 0 8px var(--accent2,#43e8b0);animation:ba-pulse 1.4s infinite}'
+        + '@keyframes ba-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}'
+        + '.ba-legend{display:flex;gap:16px;flex-wrap:wrap}'
+        + '.ba-leg{display:flex;align-items:center;gap:6px;font-size:11px;color:#8892a4}'
+        + '.ba-leg i{width:12px;height:3px;border-radius:2px;display:inline-block}'
+        + '.ba-canvas{width:100%;height:250px;display:block;border-radius:10px}'
+        + '.ba-cfg{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:#8892a4;margin-top:12px;line-height:1.5}'
+        + '.ba-cfg b{color:var(--accent,#7c6fff)}'
         + '</style>'
         + '<div class="ba-cards">'
-        + '<div class="ba-card"><div class="ba-v" id="ba-points">—</div><div class="ba-l">Values / frame</div></div>'
-        + '<div class="ba-card"><div class="ba-v" id="ba-fps">—</div><div class="ba-l">Frames / sec</div></div>'
-        + '<div class="ba-card"><div class="ba-v" id="ba-rate">—</div><div class="ba-l">Typed values / sec</div></div>'
-        + '<div class="ba-card"><div class="ba-v" id="ba-bin">—</div><div class="ba-l">Binary KB / frame</div></div>'
-        + '<div class="ba-card"><div class="ba-v" id="ba-save">—</div><div class="ba-l">Smaller than JSON</div></div>'
-        + '<div class="ba-card"><div class="ba-v" id="ba-total">0</div><div class="ba-l">Total streamed</div></div>'
+        + this._card('ba-points', '—', 'Values / frame')
+        + this._card('ba-fps', '—', 'Frames / sec')
+        + this._card('ba-rate', '—', 'Typed values / sec')
+        + this._card('ba-bin', '—', 'Binary KB / frame')
+        + this._card('ba-save', '—', 'Smaller than JSON')
+        + this._card('ba-total', '0', 'Total streamed')
         + '</div>'
-        + '<canvas class="ba-canvas" id="ba-canvas" width="940" height="260"></canvas>'
+        + '<div class="ba-chart">'
+        +   '<div class="ba-head"><div class="ba-live"><span class="ba-dot"></span>Live binary stream</div>'
+        +   '<div class="ba-legend" id="ba-legend"></div></div>'
+        +   '<canvas class="ba-canvas" id="ba-canvas" width="940" height="250"></canvas>'
+        + '</div>'
         + '<div class="ba-cfg"><b>chart config (pure binary):</b> ' + this._cfg
-        + ' — server streams every point; the chart downsamples to the canvas width for display.</div>';
+        + ' &mdash; server streams every point; the chart downsamples to the canvas width for display.</div>';
       this._canvas = this.element.querySelector('#ba-canvas');
+    },
+
+    _card: function (id, val, label) {
+      return '<div class="ba-card"><div class="ba-v" id="' + id + '">' + val + '</div><div class="ba-l">' + label + '</div></div>';
     },
 
     _metrics: function () {
@@ -254,17 +294,21 @@
       var c = this._canvas;
       if (!c || !c.getContext) return;
       var ctx = c.getContext('2d'), w = c.width, h = c.height, s, i, arr;
-      ctx.clearRect(0, 0, w, h);
-      ctx.strokeStyle = 'rgba(124,111,255,0.07)'; ctx.lineWidth = 1;
-      for (var gx = 0; gx <= w; gx += 47) { ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, h); ctx.stroke(); }
-      for (var gy = 0; gy <= h; gy += 52) { ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(w, gy); ctx.stroke(); }
+      var bg = ctx.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, '#0c1120'); bg.addColorStop(1, '#080b14');
+      ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+      ctx.strokeStyle = 'rgba(124,111,255,0.06)'; ctx.lineWidth = 1;
+      for (var gx = 47; gx < w; gx += 47) { ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, h); ctx.stroke(); }
+      for (var gy = 50; gy < h; gy += 50) { ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(w, gy); ctx.stroke(); }
       var min = Infinity, max = -Infinity;
       for (s = 0; s < seriesArr.length; s++) {
         arr = seriesArr[s];
         for (i = 0; i < arr.length; i++) { if (arr[i] < min) min = arr[i]; if (arr[i] > max) max = arr[i]; }
       }
       if (!isFinite(min) || min === max) { min = 0; max = 1; }
-      var range = max - min;
+      var range = max - min, pad = 16;
+      var yOf = function (v) { return h - ((v - min) / range) * (h - 2 * pad) - pad; };
+      ctx.lineJoin = 'round'; ctx.lineCap = 'round';
       for (s = 0; s < seriesArr.length; s++) {
         arr = seriesArr[s];
         var nn = arr.length;
@@ -273,18 +317,17 @@
         var step = Math.max(1, Math.floor(nn / w));
         var col = this._palette[s % this._palette.length];
         ctx.beginPath();
-        ctx.moveTo(0, h - ((arr[0] - min) / range) * (h - 24) - 12);
-        for (i = step; i < nn; i += step) {
-          ctx.lineTo((i / (nn - 1)) * w, h - ((arr[i] - min) / range) * (h - 24) - 12);
-        }
-        ctx.lineTo(w, h - ((arr[nn - 1] - min) / range) * (h - 24) - 12);
-        ctx.strokeStyle = col; ctx.lineWidth = this._lineWidth; ctx.lineJoin = 'round'; ctx.stroke();
-        if (this._fill && s === 0) {
-          ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.closePath();
-          var g = ctx.createLinearGradient(0, 0, 0, h);
-          g.addColorStop(0, col + '2e'); g.addColorStop(1, col + '00');
-          ctx.fillStyle = g; ctx.fill();
-        }
+        ctx.moveTo(0, yOf(arr[0]));
+        for (i = step; i < nn; i += step) ctx.lineTo((i / (nn - 1)) * w, yOf(arr[i]));
+        var lastY = yOf(arr[nn - 1]);
+        ctx.lineTo(w, lastY);
+        // cheap neon glow: a wide faint underlay + a crisp line (no expensive shadowBlur)
+        ctx.strokeStyle = col;
+        ctx.globalAlpha = 0.16; ctx.lineWidth = this._lineWidth + 6; ctx.stroke();
+        ctx.globalAlpha = 1; ctx.lineWidth = this._lineWidth; ctx.stroke();
+        // leading-edge live marker (the latest value)
+        ctx.beginPath(); ctx.arc(w - 1, lastY, 5.5, 0, 6.283); ctx.globalAlpha = 0.22; ctx.fillStyle = col; ctx.fill();
+        ctx.globalAlpha = 1; ctx.beginPath(); ctx.arc(w - 1, lastY, 2.6, 0, 6.283); ctx.fillStyle = col; ctx.fill();
       }
     }
 
