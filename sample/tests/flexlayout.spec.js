@@ -1161,3 +1161,45 @@ async function dragFromToolbar(page, srcSelector) {
   await page.mouse.move(tgtBox.x + tgtBox.width / 2, tgtBox.y + tgtBox.height / 2, { steps: 8 });
   await page.mouse.up();
 }
+
+test.describe('FlexLayout Performance', () => {
+
+  test.beforeEach(async ({ page }) => {
+    await page.goto(BASE_URL, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('.fl-layout', { timeout: 8000 });
+  });
+
+  test('memory: no leak after 50 tab open/close cycles', async ({ page }) => {
+    const initialNodes = await page.evaluate(() => document.querySelectorAll('*').length);
+    for (let i = 0; i < 50; i++) {
+      await page.click('button:has-text("+ Add Tab")');
+      await page.waitForTimeout(50);
+      const lastTab = page.locator('.fl-tab').last();
+      await lastTab.hover();
+      await lastTab.locator('.fl-tab-x').click();
+      await page.waitForTimeout(50);
+    }
+    // Force GC if available
+    await page.evaluate(() => { if (window.gc) window.gc(); });
+    await page.waitForTimeout(500);
+    const finalNodes = await page.evaluate(() => document.querySelectorAll('*').length);
+    // Allow 10% growth tolerance for browser internals
+    expect(finalNodes).toBeLessThan(initialNodes * 1.1);
+  });
+
+  test('load: handles 50 simultaneous tabs', async ({ page }) => {
+    for (let i = 0; i < 50; i++) {
+      await page.click('button:has-text("+ Add Tab")');
+    }
+    await page.waitForTimeout(1000);
+    const tabCount = await page.locator('.fl-tab').count();
+    expect(tabCount).toBeGreaterThanOrEqual(52); // 2 initial + 50 added
+    // Verify layout is still responsive: click a tab
+    const start = Date.now();
+    await page.locator('.fl-tab').first().click();
+    await expect(page.locator('.fl-tab').first()).toHaveClass(/fl-tab-active/, { timeout: 2000 });
+    const elapsed = Date.now() - start;
+    expect(elapsed).toBeLessThan(2000);
+  });
+
+});

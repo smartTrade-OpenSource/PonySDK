@@ -5,6 +5,13 @@ import java.util.Map;
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 
+/**
+ * Builder for a tab entry in a FlexLayout tabset.
+ *
+ * <pre>{@code
+ * FlexTab tab = FlexTab.create("Editor").component("code-editor").icon("fa-code").pinned();
+ * }</pre>
+ */
 public class FlexTab {
     private final String name;
     private String component;
@@ -15,12 +22,17 @@ public class FlexTab {
 
     private FlexTab(final String name) { this.name = name; }
 
+    /** Creates a new tab builder with the given display name. */
     public static FlexTab create(final String name) { return new FlexTab(name); }
 
+    /** Sets the component type rendered in this tab's content area. */
     public FlexTab component(final String component) { this.component = component; return this; }
+    /** Sets the icon CSS class for the tab header. */
     public FlexTab icon(final String icon) { this.icon = icon; return this; }
+    /** Makes the tab non-closable and non-draggable. */
     public FlexTab pinned() { this.enableClose = false; this.enableDrag = false; return this; }
 
+    /** Attaches arbitrary configuration data passed to the component. */
     public FlexTab config(final Map<String, Object> cfg) {
         final JsonObjectBuilder b = Json.createObjectBuilder();
         for (final Map.Entry<String, Object> e : cfg.entrySet()) {
@@ -38,6 +50,7 @@ public class FlexTab {
     public boolean isEnableClose() { return enableClose; }
     public boolean isEnableDrag() { return enableDrag; }
 
+    /** Serializes this tab to a JSON string for the FlexLayout model. */
     public String toJson() {
         final JsonObjectBuilder b = Json.createObjectBuilder().add("name", name);
         if (component != null) b.add("component", component);

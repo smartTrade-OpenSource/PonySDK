@@ -1,5 +1,12 @@
 package com.ponysdk.sample.client.page.addon.flexlayout;
 
+/**
+ * Enum controlling how tabs are displayed in a border strip (icon, label, or both).
+ *
+ * <pre>{@code
+ * FlexBorder.left().tabStyle(TabStyle.ICON_LABEL);
+ * }</pre>
+ */
 public enum TabStyle {
     AUTO("auto"), ICON("icon"), LABEL("label"), ICON_LABEL("iconLabel");
 
@@ -7,5 +14,6 @@ public enum TabStyle {
 
     TabStyle(final String value) { this.value = value; }
 
+    /** Returns the string value used in JSON serialization. */
     public String getValue() { return value; }
 }

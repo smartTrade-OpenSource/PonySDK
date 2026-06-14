@@ -13,6 +13,9 @@ ext {
 }
 
 dependencies {
+    testImplementation 'junit:junit:4.12'
+    testRuntimeOnly 'org.glassfish:jakarta.json:1.1.6'
+
     implementation(
             project(path: ':ponysdk', configuration: 'default'),
             'org.springframework:spring-context:' + springVersion,
