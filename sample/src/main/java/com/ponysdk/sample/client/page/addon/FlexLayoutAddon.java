@@ -596,6 +596,12 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
 
     // ─── Hook 1: Blocked actions/tabs ─────────────────────────────
 
+    public void setBlockedActions(final com.ponysdk.sample.client.page.addon.flexlayout.FlexAction... actions) {
+        final String[] keys = new String[actions.length];
+        for (int i = 0; i < actions.length; i++) keys[i] = actions[i].getKey();
+        setBlockedActions(keys);
+    }
+
     public void setBlockedActions(final String... actions) {
         final javax.json.JsonArrayBuilder arr = Json.createArrayBuilder();
         for (final String a : actions) arr.add(a);

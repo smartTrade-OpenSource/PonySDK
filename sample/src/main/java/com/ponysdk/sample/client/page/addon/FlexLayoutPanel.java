@@ -11,6 +11,13 @@ import javax.json.JsonObject;
 
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.sample.client.page.addon.flexlayout.FlexAction;
+import com.ponysdk.sample.client.page.addon.flexlayout.FlexBorder;
+import com.ponysdk.sample.client.page.addon.flexlayout.FlexKeymap;
+import com.ponysdk.sample.client.page.addon.flexlayout.FlexLayoutModel;
+import com.ponysdk.sample.client.page.addon.flexlayout.FlexTab;
+import com.ponysdk.sample.client.page.addon.flexlayout.FlexTabInfo;
+import com.ponysdk.sample.client.page.addon.flexlayout.FlexTheme;
 
 /**
  * High-level facade for FlexLayout integration in PonySDK.
@@ -30,14 +37,27 @@ public class FlexLayoutPanel implements IsPWidget {
     private final AtomicInteger tabCounter = new AtomicInteger(0);
     private Function<String, PWidget> widgetFactory;
 
-    public FlexLayoutPanel() {
-        this(null, null, null);
+    // ─── Typed constructors ──────────────────────────────────────
+
+    public FlexLayoutPanel(final FlexLayoutModel model, final FlexTheme theme, final FlexBorder... borders) {
+        final String modelJson = model != null ? model.toJson() : null;
+        final String themeStr = theme != null ? theme.getCssClass() : null;
+        final String bordersJson = borders.length > 0 ? buildBordersJson(borders) : null;
+        this.addon = new FlexLayoutAddon(modelJson, themeStr, bordersJson);
     }
 
+    // ─── Backward-compatible constructors (deprecated) ───────────
+
+    public FlexLayoutPanel() {
+        this(null, null, (String) null);
+    }
+
+    @Deprecated
     public FlexLayoutPanel(final String modelJson, final String theme) {
         this(modelJson, theme, null);
     }
 
+    @Deprecated
     public FlexLayoutPanel(final String modelJson, final String theme, final String bordersJson) {
         this.addon = new FlexLayoutAddon(modelJson, theme, bordersJson);
     }
@@ -54,6 +74,13 @@ public class FlexLayoutPanel implements IsPWidget {
      */
     public String addTab(final String tabName, final PWidget content) {
         return addTab(tabName, content, null);
+    }
+
+    /**
+     * Add a tab using a typed FlexTab descriptor.
+     */
+    public String addTab(final FlexTab tab, final PWidget content) {
+        return addTab(tab.getName(), content, null);
     }
 
     /**
@@ -96,6 +123,15 @@ public class FlexLayoutPanel implements IsPWidget {
     public String addBorderTab(final String side, final String tabName, final PWidget content, final String icon) {
         final String tabId = "tab_" + tabCounter.incrementAndGet();
         addon.addBorderTab(side, tabId, tabName, content, -1, icon);
+        return tabId;
+    }
+
+    /**
+     * Add a tab to a typed border with a FlexTab descriptor.
+     */
+    public String addBorderTab(final FlexBorder border, final FlexTab tab, final PWidget content) {
+        final String tabId = "tab_" + tabCounter.incrementAndGet();
+        addon.addBorderTab(border.getSide(), tabId, tab.getName(), content, -1, tab.getIcon());
         return tabId;
     }
 
@@ -282,10 +318,78 @@ public class FlexLayoutPanel implements IsPWidget {
     // ─── Appearance ──────────────────────────────────────────────
 
     /**
+     * Set the FlexLayout theme using typed enum.
+     */
+    public void setTheme(final FlexTheme theme) {
+        addon.setTheme(theme.getCssClass());
+    }
+
+    /**
      * Set the FlexLayout theme (e.g. "fl-theme-light", "fl-theme-gray", "fl-theme-rounded").
      */
     public void setTheme(final String theme) {
         addon.setTheme(theme);
+    }
+
+    // ─── Typed Keymap API ────────────────────────────────────────
+
+    /**
+     * Configure keyboard shortcuts using typed keymap.
+     */
+    public void setKeymap(final FlexKeymap keymap) {
+        addon.setKeymap(keymap.toJson());
+    }
+
+    /**
+     * @deprecated Use {@link #setKeymap(FlexKeymap)} instead.
+     */
+    @Deprecated
+    public void setKeymap(final String keymapJson) {
+        addon.setKeymap(keymapJson);
+    }
+
+    // ─── Typed getOpenTabs ───────────────────────────────────────
+
+    /**
+     * Get open tabs as typed objects.
+     */
+    public void getOpenTabs(final Consumer<List<FlexTabInfo>> callback) {
+        addon.getOpenTabs(json -> callback.accept(FlexTabInfo.fromJson(json)));
+    }
+
+    /**
+     * @deprecated Use {@link #getOpenTabs(Consumer)} instead.
+     */
+    @Deprecated
+    public void getOpenTabsRaw(final Consumer<String> callback) {
+        addon.getOpenTabs(callback);
+    }
+
+    public void getLayoutSummary(final Consumer<String> callback) {
+        addon.getLayoutSummary(callback);
+    }
+
+    // ─── Typed Blocked Actions ───────────────────────────────────
+
+    /**
+     * Block specific actions using typed enum.
+     */
+    public void setBlockedActions(final FlexAction... actions) {
+        final String[] keys = new String[actions.length];
+        for (int i = 0; i < actions.length; i++) keys[i] = actions[i].getKey();
+        addon.setBlockedActions(keys);
+    }
+
+    /**
+     * @deprecated Use {@link #setBlockedActions(FlexAction...)} instead.
+     */
+    @Deprecated
+    public void setBlockedActions(final String... actions) {
+        addon.setBlockedActions(actions);
+    }
+
+    public void setBlockedTabs(final String... tabIds) {
+        addon.setBlockedTabs(tabIds);
     }
 
     // ─── Feature 1: Model Migration ─────────────────────────────
@@ -378,28 +482,6 @@ public class FlexLayoutPanel implements IsPWidget {
         addon.getTabConfig(tabId, callback);
     }
 
-    // ─── Internal ────────────────────────────────────────────────
-
-    // ─── Hook 1: Blocked actions/tabs ───────────────────────────
-
-    public void setBlockedActions(final String... actions) {
-        addon.setBlockedActions(actions);
-    }
-
-    public void setBlockedTabs(final String... tabIds) {
-        addon.setBlockedTabs(tabIds);
-    }
-
-    // ─── Hook 2: getOpenTabs / getLayoutSummary ─────────────────
-
-    public void getOpenTabs(final Consumer<String> callback) {
-        addon.getOpenTabs(callback);
-    }
-
-    public void getLayoutSummary(final Consumer<String> callback) {
-        addon.getLayoutSummary(callback);
-    }
-
     // ─── Hook 3: Tab visibility ─────────────────────────────────
 
     public void setOnTabVisible(final Consumer<String> handler) {
@@ -423,5 +505,13 @@ public class FlexLayoutPanel implements IsPWidget {
             .add("enableClose", true);
         if (configJson != null) b.add("config", Json.createReader(new java.io.StringReader(configJson)).readObject());
         return b.build().toString();
+    }
+
+    private static String buildBordersJson(final FlexBorder[] borders) {
+        final javax.json.JsonArrayBuilder arr = Json.createArrayBuilder();
+        for (final FlexBorder border : borders) {
+            arr.add(Json.createReader(new java.io.StringReader(border.toJson())).readObject());
+        }
+        return arr.build().toString();
     }
 }
