@@ -603,13 +603,16 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             + "@keyframes pony-aurora{0%{transform:translate3d(-3%,-2%,0) scale(1)}100%{transform:translate3d(4%,3%,0) scale(1.18)}}"
             // Header lift
             + ".pony-header{box-shadow:0 1px 0 var(--border),0 12px 44px rgba(124,111,255,.14) !important;}"
-            // Sidebar micro-interactions + a premium active state
-            + ".pony-tab{transition:transform .18s cubic-bezier(.4,0,.2,1),background .18s !important;}"
-            + ".pony-tab:hover{transform:translateX(3px);}"
-            + ".pony-tab-active{box-shadow:inset 3px 0 0 var(--accent2,#43e8b0),0 0 22px rgba(124,111,255,.22) !important;}"
-            // Buttons: depth + press feedback
-            + ".gwt-Button{box-shadow:0 3px 14px rgba(124,111,255,.30) !important;letter-spacing:.3px;}"
-            + ".gwt-Button:active{opacity:.82 !important;transform:translateY(0) !important;}"
+            // Sidebar: flat, clean nav items (override the global purple .gwt-Button) — only the active one stands out
+            + ".pony-tab{background:transparent !important;color:#9aa6bd !important;box-shadow:none !important;"
+            +   "border:1px solid transparent !important;font-weight:600 !important;"
+            +   "transition:background .16s,color .16s,transform .16s !important;}"
+            + ".pony-tab:hover{background:rgba(124,111,255,.10) !important;color:#fff !important;transform:translateX(2px);}"
+            + ".pony-tab-active{background:linear-gradient(135deg,rgba(124,111,255,.26),rgba(67,232,176,.07)) !important;"
+            +   "color:#fff !important;border-color:rgba(124,111,255,.28) !important;"
+            +   "box-shadow:inset 3px 0 0 var(--accent2,#43e8b0) !important;transform:none !important;}"
+            // Action buttons: keep the purple theme but only a subtle press feedback (no heavy glow)
+            + ".gwt-Button:active{opacity:.85 !important;transform:translateY(1px) !important;}"
             // Page titles: gradient text
             + ".pony-page-title{background:linear-gradient(90deg,#ffffff,var(--accent2,#43e8b0));"
             +   "-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;letter-spacing:-.4px;}"
