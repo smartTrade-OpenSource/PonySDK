@@ -9,7 +9,7 @@ import com.ponysdk.core.server.websocket.RecordingEncoder;
 import com.ponysdk.core.server.websocket.WebSocket;
 import com.ponysdk.core.server.websocket.WebsocketEncoder;
 import com.ponysdk.core.writer.ModelWriter;
-import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeRequest;
+import org.eclipse.jetty.ee11.websocket.server.JettyServerUpgradeRequest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

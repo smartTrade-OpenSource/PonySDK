@@ -31,11 +31,12 @@ import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.ee10.servlet.ErrorHandler;
-import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
-import org.eclipse.jetty.ee10.websocket.server.config.JettyWebSocketServletContainerInitializer;
-import org.eclipse.jetty.server.handler.gzip.GzipHandler;
+import org.eclipse.jetty.ee11.servlet.ErrorHandler;
+import org.eclipse.jetty.ee11.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee11.servlet.ServletHolder;
+import org.eclipse.jetty.ee11.websocket.server.config.JettyWebSocketServletContainerInitializer;
+import org.eclipse.jetty.compression.server.CompressionHandler;
+import org.eclipse.jetty.compression.gzip.GzipCompression;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -147,9 +148,10 @@ public class PonySDKServer {
     }
 
     protected Handler createMainHandler() {
-        final GzipHandler gzip = new GzipHandler();
-        gzip.setHandler(addHandlers());
-        return gzip;
+        final CompressionHandler compression = new CompressionHandler();
+        compression.putCompression(new GzipCompression());
+        compression.setHandler(addHandlers());
+        return compression;
     }
 
     protected Handler addHandlers() {
@@ -159,7 +161,6 @@ public class PonySDKServer {
     protected ErrorHandler createErrorHandler() {
         final ErrorHandler errorHandler = new ErrorHandler();
         errorHandler.setShowMessageInTitle(false);
-        errorHandler.setShowServlet(false);
         errorHandler.setShowStacks(false);
         return errorHandler;
     }

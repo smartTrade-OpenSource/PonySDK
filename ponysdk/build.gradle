@@ -11,11 +11,11 @@ ext {
     mockitoVersion = '5.23.0'
     gwtVersion = '2.13.0'
     elemental2Version = '1.3.2'
-    jettyVersion = '12.0.36'
+    jettyVersion = '12.1.10'
     slf4jVersion = '2.0.18'
     log4jVersion = '2.26.0'
-    jakartaServletVersion = '6.0.0'
-    jakartaJsonVersion = '2.0.2'
+    jakartaServletVersion = '6.1.0'
+    jakartaJsonVersion = '2.1.3'
     parssonVersion = '1.1.9'
     jakartaValidationVersion = '3.1.1'
     otelVersion = '1.63.0'
@@ -79,16 +79,18 @@ dependencies {
             'com.google.jsinterop:jsinterop:' + jsinteropVersion,
             'com.google.jsinterop:jsinterop-annotations:' + jsinteropVersion,
             'org.eclipse.jetty:jetty-server:' + jettyVersion,
-            'org.eclipse.jetty.ee10:jetty-ee10-servlet:' + jettyVersion,
-            'org.eclipse.jetty.ee10:jetty-ee10-webapp:' + jettyVersion,
-            'org.eclipse.jetty.ee10:jetty-ee10-servlets:' + jettyVersion,
+            'org.eclipse.jetty.ee11:jetty-ee11-servlet:' + jettyVersion,
+            'org.eclipse.jetty.ee11:jetty-ee11-webapp:' + jettyVersion,
+            'org.eclipse.jetty.ee11:jetty-ee11-servlets:' + jettyVersion,
             'org.eclipse.jetty:jetty-client:' + jettyVersion,
             'org.eclipse.jetty:jetty-io:' + jettyVersion,
             'org.eclipse.jetty:jetty-util:' + jettyVersion,
             'org.eclipse.jetty:jetty-http:' + jettyVersion,
             'org.eclipse.jetty:jetty-security:' + jettyVersion,
             'org.eclipse.jetty.websocket:jetty-websocket-jetty-api:' + jettyVersion,
-            'org.eclipse.jetty.ee10.websocket:jetty-ee10-websocket-jetty-server:' + jettyVersion,
+            'org.eclipse.jetty.ee11.websocket:jetty-ee11-websocket-jetty-server:' + jettyVersion,
+            'org.eclipse.jetty.compression:jetty-compression-server:' + jettyVersion,
+            'org.eclipse.jetty.compression:jetty-compression-gzip:' + jettyVersion,
             'org.slf4j:slf4j-api:' + slf4jVersion,
             'jakarta.servlet:jakarta.servlet-api:' + jakartaServletVersion,
             'jakarta.json:jakarta.json-api:' + jakartaJsonVersion,

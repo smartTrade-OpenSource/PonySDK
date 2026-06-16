@@ -33,7 +33,7 @@ import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.context.CommunicationSanityChecker;
 import com.ponysdk.core.server.stm.TxnContext;
 import com.ponysdk.core.ui.basic.PObject;
-import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeRequest;
+import org.eclipse.jetty.ee11.websocket.server.JettyServerUpgradeRequest;
 import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
@@ -212,28 +212,32 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
     }
 
     @Override
-    public void onWebSocketClose(final int statusCode, final String reason) {
-        if (uiContext == null) {
-            log.info("WebSocket closed before UIContext initialization: {}, reason: {}",
-                    NiceStatusCode.getMessage(statusCode), Objects.requireNonNullElse(reason, ""));
-            return;
-        }
-        if (log.isInfoEnabled())
-            log.info("WebSocket closed on UIContext #{} : {}, reason : {}", uiContext.getID(),
-                    NiceStatusCode.getMessage(statusCode), Objects.requireNonNullElse(reason, ""));
-        final ApplicationConfiguration config = applicationManager.getConfiguration();
-        if (config.getReconnectionListener() != null) {
-            try {
-                config.getReconnectionListener().onConnectionLost(uiContext);
-            } catch (final Throwable e) {
-                log.error("ReconnectionListener threw an exception for UIContext #{}", uiContext.getID(), e);
+    public void onWebSocketClose(final int statusCode, final String reason, final Callback callback) {
+        try {
+            if (uiContext == null) {
+                log.info("WebSocket closed before UIContext initialization: {}, reason: {}",
+                        NiceStatusCode.getMessage(statusCode), Objects.requireNonNullElse(reason, ""));
+                return;
             }
-        }
-        if (config.getReconnectionTimeoutMs() > 0) {
-            // Transparent reconnection enabled — suspend instead of destroy
-            uiContext.suspend(config.getReconnectionTimeoutMs());
-        } else {
-            uiContext.onDestroy();
+            if (log.isInfoEnabled())
+                log.info("WebSocket closed on UIContext #{} : {}, reason : {}", uiContext.getID(),
+                        NiceStatusCode.getMessage(statusCode), Objects.requireNonNullElse(reason, ""));
+            final ApplicationConfiguration config = applicationManager.getConfiguration();
+            if (config.getReconnectionListener() != null) {
+                try {
+                    config.getReconnectionListener().onConnectionLost(uiContext);
+                } catch (final Throwable e) {
+                    log.error("ReconnectionListener threw an exception for UIContext #{}", uiContext.getID(), e);
+                }
+            }
+            if (config.getReconnectionTimeoutMs() > 0) {
+                // Transparent reconnection enabled — suspend instead of destroy
+                uiContext.suspend(config.getReconnectionTimeoutMs());
+            } else {
+                uiContext.onDestroy();
+            }
+        } finally {
+            callback.succeed();
         }
     }
 

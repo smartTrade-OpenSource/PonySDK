@@ -3,9 +3,9 @@ plugins {
 }
 
 ext {
-    springVersion = '6.2.19'
+    springVersion = '7.0.8'
     slf4jVersion = '2.0.18'
-    jakartaServletVersion = '6.0.0'
+    jakartaServletVersion = '6.1.0'
 }
 
 def versionSuffix = project.hasProperty('BUILD_RELEASE') ? "" : "-SNAPSHOT"

@@ -39,7 +39,7 @@ import jakarta.json.JsonObjectBuilder;
 import jakarta.json.JsonValue;
 import jakarta.json.spi.JsonProvider;
 
-import org.eclipse.jetty.ee10.websocket.server.JettyServerUpgradeRequest;
+import org.eclipse.jetty.ee11.websocket.server.JettyServerUpgradeRequest;
 import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
@@ -242,7 +242,7 @@ public class WebSocketTest {
     @Test
     public void testOnWebSocketClose() {
         assertTrue(uiContext.isAlive());
-        webSocket.onWebSocketClose(StatusCode.NORMAL, "Close");
+        webSocket.onWebSocketClose(StatusCode.NORMAL, "Close", Callback.NOOP);
         assertFalse(uiContext.isAlive());
     }
 
@@ -276,7 +276,7 @@ public class WebSocketTest {
         assertTrue(uiContext.isAlive());
         assertFalse(uiContext.isSuspended());
 
-        webSocket.onWebSocketClose(StatusCode.NORMAL, "Close");
+        webSocket.onWebSocketClose(StatusCode.NORMAL, "Close", Callback.NOOP);
 
         assertFalse("Default mode: UIContext should be destroyed on close", uiContext.isAlive());
         assertFalse("Default mode: UIContext should NOT be suspended", uiContext.isSuspended());
@@ -349,7 +349,7 @@ public class WebSocketTest {
         assertTrue(setup.uiContext().isAlive());
         assertFalse(setup.uiContext().isSuspended());
 
-        setup.webSocket().onWebSocketClose(StatusCode.NORMAL, "Close");
+        setup.webSocket().onWebSocketClose(StatusCode.NORMAL, "Close", Callback.NOOP);
 
         assertTrue("Reconnection mode: UIContext should still be alive", setup.uiContext().isAlive());
         assertTrue("Reconnection mode: UIContext should be suspended", setup.uiContext().isSuspended());
@@ -364,7 +364,7 @@ public class WebSocketTest {
         final ReconnectionSetup setup = createReconnectionWebSocket();
 
         // Close → suspend
-        setup.webSocket().onWebSocketClose(StatusCode.NORMAL, "Close");
+        setup.webSocket().onWebSocketClose(StatusCode.NORMAL, "Close", Callback.NOOP);
         assertTrue(setup.uiContext().isSuspended());
 
         // Error on old socket — should NOT destroy
@@ -416,7 +416,7 @@ public class WebSocketTest {
         final UIContext ctx = captor.getValue();
 
         // Close → suspend with 200ms timeout
-        ws.onWebSocketClose(StatusCode.NORMAL, "Close");
+        ws.onWebSocketClose(StatusCode.NORMAL, "Close", Callback.NOOP);
         assertTrue(ctx.isAlive());
         assertTrue(ctx.isSuspended());
 
@@ -443,7 +443,7 @@ public class WebSocketTest {
             throw new RuntimeException("Listener blew up");
         });
 
-        setup.webSocket().onWebSocketClose(StatusCode.NORMAL, "Close");
+        setup.webSocket().onWebSocketClose(StatusCode.NORMAL, "Close", Callback.NOOP);
 
         // Despite the listener exception, UIContext should be suspended
         assertTrue("UIContext should still be alive", setup.uiContext().isAlive());
@@ -458,7 +458,7 @@ public class WebSocketTest {
     public void testReconnectionMode_AbnormalCloseStillSuspends() throws Exception {
         final ReconnectionSetup setup = createReconnectionWebSocket();
 
-        setup.webSocket().onWebSocketClose(StatusCode.ABNORMAL, "Abnormal disconnect");
+        setup.webSocket().onWebSocketClose(StatusCode.ABNORMAL, "Abnormal disconnect", Callback.NOOP);
 
         assertTrue("UIContext should be alive after abnormal close", setup.uiContext().isAlive());
         assertTrue("UIContext should be suspended after abnormal close", setup.uiContext().isSuspended());
@@ -473,11 +473,11 @@ public class WebSocketTest {
     public void testReconnectionMode_DoubleCloseDoesNotCrash() throws Exception {
         final ReconnectionSetup setup = createReconnectionWebSocket();
 
-        setup.webSocket().onWebSocketClose(StatusCode.NORMAL, "First close");
+        setup.webSocket().onWebSocketClose(StatusCode.NORMAL, "First close", Callback.NOOP);
         assertTrue(setup.uiContext().isSuspended());
 
         // Second close — should not crash
-        setup.webSocket().onWebSocketClose(StatusCode.NORMAL, "Second close");
+        setup.webSocket().onWebSocketClose(StatusCode.NORMAL, "Second close", Callback.NOOP);
         assertTrue(setup.uiContext().isAlive());
         assertTrue(setup.uiContext().isSuspended());
     }
@@ -664,7 +664,7 @@ public class WebSocketTest {
         final ReconnectionSetup setup = createReconnectionWebSocket();
 
         // Suspend
-        setup.webSocket().onWebSocketClose(StatusCode.NORMAL, "Close");
+        setup.webSocket().onWebSocketClose(StatusCode.NORMAL, "Close", Callback.NOOP);
         assertTrue(setup.uiContext().isSuspended());
 
         // execute() with a runnable that throws
@@ -685,7 +685,7 @@ public class WebSocketTest {
     public void testReconnectionMode_MultipleErrorsOnSuspendedIgnored() throws Exception {
         final ReconnectionSetup setup = createReconnectionWebSocket();
 
-        setup.webSocket().onWebSocketClose(StatusCode.NORMAL, "Close");
+        setup.webSocket().onWebSocketClose(StatusCode.NORMAL, "Close", Callback.NOOP);
         assertTrue(setup.uiContext().isSuspended());
 
         // Fire multiple errors — all should be ignored
@@ -716,7 +716,7 @@ public class WebSocketTest {
             wasSuspendedDuringCallback.set(ctx.isSuspended());
         });
 
-        setup.webSocket().onWebSocketClose(StatusCode.NORMAL, "Close");
+        setup.webSocket().onWebSocketClose(StatusCode.NORMAL, "Close", Callback.NOOP);
 
         assertSame("Listener should receive the correct UIContext",
                 setup.uiContext(), capturedCtx.get());
@@ -783,7 +783,7 @@ public class WebSocketTest {
     public void testDefaultMode_CloseFollowedByError() {
         assertTrue(uiContext.isAlive());
 
-        webSocket.onWebSocketClose(StatusCode.NORMAL, "Close");
+        webSocket.onWebSocketClose(StatusCode.NORMAL, "Close", Callback.NOOP);
         assertFalse(uiContext.isAlive());
 
         // Error after close — UIContext is dead, isSuspended() is false
@@ -807,7 +807,7 @@ public class WebSocketTest {
         assertFalse(uiContext.isAlive());
 
         // Close after error — UIContext already dead
-        webSocket.onWebSocketClose(StatusCode.NORMAL, "Close");
+        webSocket.onWebSocketClose(StatusCode.NORMAL, "Close", Callback.NOOP);
 
         // No crash
         assertFalse(uiContext.isAlive());
@@ -907,7 +907,7 @@ public class WebSocketTest {
     public void testOnWebSocketCloseNullReason() {
         assertTrue(uiContext.isAlive());
 
-        webSocket.onWebSocketClose(StatusCode.NORMAL, null);
+        webSocket.onWebSocketClose(StatusCode.NORMAL, null, Callback.NOOP);
 
         assertFalse(uiContext.isAlive());
     }
@@ -923,7 +923,7 @@ public class WebSocketTest {
         // Ensure no listener is set (default)
         assertNull(setup.appManager().getConfiguration().getReconnectionListener());
 
-        setup.webSocket().onWebSocketClose(StatusCode.NORMAL, "Close");
+        setup.webSocket().onWebSocketClose(StatusCode.NORMAL, "Close", Callback.NOOP);
 
         // Should suspend without NPE
         assertTrue(setup.uiContext().isAlive());
@@ -994,7 +994,7 @@ public class WebSocketTest {
     @Test
     public void testClose_UIContextDestroyedAndDeadAfterClose() {
         assertTrue(uiContext.isAlive());
-        webSocket.onWebSocketClose(StatusCode.NORMAL, "Close");
+        webSocket.onWebSocketClose(StatusCode.NORMAL, "Close", Callback.NOOP);
         assertFalse("UIContext should be dead after close", uiContext.isAlive());
         assertFalse("UIContext should not be suspended", uiContext.isSuspended());
     }
@@ -1011,7 +1011,7 @@ public class WebSocketTest {
         assertTrue(setup.uiContext().isAlive());
 
         // Close triggers suspend
-        setup.webSocket().onWebSocketClose(StatusCode.NORMAL, "disconnect");
+        setup.webSocket().onWebSocketClose(StatusCode.NORMAL, "disconnect", Callback.NOOP);
         assertTrue(setup.uiContext().isSuspended());
         assertTrue(setup.uiContext().isAlive());
 
@@ -1073,7 +1073,7 @@ public class WebSocketTest {
         final UIContext ctx = captor.getValue();
 
         // Close → suspend
-        ws.onWebSocketClose(StatusCode.NORMAL, "disconnect");
+        ws.onWebSocketClose(StatusCode.NORMAL, "disconnect", Callback.NOOP);
         assertTrue(ctx.isSuspended());
 
         // Wait for timeout to destroy
@@ -1097,7 +1097,7 @@ public class WebSocketTest {
         final ReconnectionSetup setup = createReconnectionWebSocket();
 
         // Close → suspend
-        setup.webSocket().onWebSocketClose(StatusCode.NORMAL, "disconnect");
+        setup.webSocket().onWebSocketClose(StatusCode.NORMAL, "disconnect", Callback.NOOP);
         assertTrue(setup.uiContext().isSuspended());
 
         // Clean up

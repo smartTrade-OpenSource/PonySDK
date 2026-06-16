@@ -15,12 +15,12 @@ It runs a Jetty 12 WebSocket server on the backend and uses GWT on the frontend.
 |-----------|---------|
 | Java (server) | 25 (LTS, virtual threads) |
 | Java (terminal / GWT) | 17 |
-| Jetty | 12.0.x (EE10 / Jakarta EE) |
+| Jetty | 12.1.x (EE11 / Jakarta EE) |
 | GWT | 2.13.0 |
-| elemental2 | 1.2.1 |
-| Spring | 6.x |
+| elemental2 | 1.3.2 |
+| Spring | 7.x |
 | Selenium | 4.x |
-| Gradle | 8.x |
+| Gradle | 9.x |
 
 ---
 

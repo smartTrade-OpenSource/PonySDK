@@ -261,7 +261,7 @@ When you call `button.setText("Hello")` in Java, PonySDK sends an instruction to
 │  └────────────────────────────────────────────────────────────┘  │
 │                              │                                   │
 │  ┌────────────────────────────────────────────────────────────┐  │
-│  │  Jetty 12 (EE10)                                           │  │
+│  │  Jetty 12 (EE11)                                           │  │
 │  │                                                            │  │
 │  │  WebSocket │ HTTP │ Static Resources │ permessage-deflate  │  │
 │  └────────────────────────────────────────────────────────────┘  │
@@ -1939,7 +1939,7 @@ com.ponysdk.core
 │   │   └── StringDictionary.java  # Protocol optimization
 │   ├── stm/            # Transactions
 │   │   └── Txn.java
-│   ├── websocket/      # Transport (Jetty 12.0.18 native API)
+│   ├── websocket/      # Transport (Jetty 12.1 native API)
 │   │   ├── WebSocket.java         # Session.Listener.AutoDemanding + request caching
 │   │   ├── WebSocketPusher.java   # ByteBuffer accumulator + async sendBinary
 │   │   ├── WebsocketEncoder.java
@@ -2038,21 +2038,21 @@ public class MyEntryPoint implements EntryPoint {
 
 | Component | Version |
 |-----------|---------|
-| Java (server) | 21 (virtual threads) |
+| Java (server) | 25 (virtual threads) |
 | Java (GWT terminal) | 17 (`-sourceLevel 17`) |
-| Jetty | 12.0.18 (EE10) |
-| Spring | 6.2.9 |
-| Servlet API | jakarta.servlet 6.0.0 |
-| JSON-P | jakarta.json 2.0.2 + Eclipse Parsson 1.1.7 |
+| Jetty | 12.1.10 (EE11) |
+| Spring | 7.0.8 |
+| Servlet API | jakarta.servlet 6.1.0 |
+| JSON-P | jakarta.json 2.1.3 + Eclipse Parsson 1.1.9 |
 | WebSocket | Jetty native API (`Session.Listener.AutoDemanding`) |
 | GWT | 2.13.0 (`org.gwtproject`, sourceLevel 17) |
-| elemental2 | 1.2.1 (dom, core, webstorage) |
-| Selenium | 4.27.0 |
-| Tyrus | 2.2.0 |
-| SLF4J | 2.0.17 |
-| Mockito | 5.15.2 |
-| JUnit | 4.13.2 / Jupiter 5.11.4 |
-| Gradle | 8.14.4 |
+| elemental2 | 1.3.2 (dom, core, webstorage) |
+| Selenium | 4.44.0 |
+| Tyrus | 2.2.2 |
+| SLF4J | 2.0.18 |
+| Mockito | 5.23.0 |
+| JUnit | 4.13.2 / Jupiter 5.14.4 |
+| Gradle | 9.5.1 |
 
 ### 14.2 HTTP Request Recycling After WebSocket Upgrade
 
