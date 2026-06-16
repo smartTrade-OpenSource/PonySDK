@@ -60,6 +60,7 @@ import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.basic.PAbsolutePanel;
 import com.ponysdk.core.ui.basic.PButton;
+import com.ponysdk.core.ui.basic.PCheckBox;
 import com.ponysdk.core.ui.basic.PComplexPanel;
 import com.ponysdk.core.ui.basic.PCookies;
 import com.ponysdk.core.ui.basic.PDateBox;
@@ -73,6 +74,8 @@ import com.ponysdk.core.ui.basic.PFunctionalLabel;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PListBox;
 import com.ponysdk.core.ui.basic.PMenuBar;
+import com.ponysdk.core.ui.basic.PRadioButton;
+import com.ponysdk.core.ui.basic.PRadioButtonGroup;
 import com.ponysdk.core.ui.basic.PRichTextArea;
 import com.ponysdk.core.ui.basic.PScript;
 import com.ponysdk.core.ui.basic.PScrollPanel;
@@ -620,6 +623,32 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             + ".pony-tab:hover{background:rgba(255,255,255,.05) !important;color:#fafafa !important;transform:none !important;}"
             + ".pony-tab-active{background:rgba(255,255,255,.07) !important;color:#fafafa !important;"
             +   "border-color:transparent !important;box-shadow:inset 2px 0 0 var(--accent2,#43e8b0) !important;}"
+            // Interactive example cards: a live widget + the exact Java behind it (Preview / Code)
+            + ".pony-ex{background:rgba(255,255,255,.02) !important;border:1px solid rgba(255,255,255,.08);"
+            +   "border-radius:12px;margin:12px 0;overflow:hidden;}"
+            + ".pony-ex-head{display:flex;align-items:center;gap:14px;padding:13px 16px;"
+            +   "border-bottom:1px solid rgba(255,255,255,.06);}"
+            + ".pony-ex-titlewrap{display:flex;flex-direction:column;gap:3px;min-width:0;}"
+            + ".pony-ex-title{font-family:ui-monospace,'JetBrains Mono','SFMono-Regular',monospace;"
+            +   "font-size:13px;font-weight:600;color:#fafafa;letter-spacing:-.01em;}"
+            + ".pony-ex-desc{font-size:12px;color:#8b8b94;line-height:1.5;}"
+            + ".pony-ex-seg{margin-left:auto;display:inline-flex;flex-shrink:0;background:rgba(255,255,255,.04);"
+            +   "border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:2px;gap:2px;}"
+            + ".pony-ex-seg .gwt-Button{background:transparent !important;border:1px solid transparent !important;"
+            +   "color:#8b8b94 !important;padding:4px 13px !important;border-radius:6px !important;"
+            +   "font-size:11px !important;font-weight:600 !important;letter-spacing:0 !important;}"
+            + ".pony-ex-seg .gwt-Button:hover{background:rgba(255,255,255,.06) !important;color:#fafafa !important;}"
+            + ".pony-ex-seg-on{background:rgba(255,255,255,.1) !important;color:#fafafa !important;"
+            +   "box-shadow:inset 0 0 0 1px rgba(255,255,255,.08) !important;}"
+            + ".pony-ex-body{padding:20px 18px;}"
+            + ".pony-ex-preview{display:flex;flex-direction:column;gap:14px;align-items:flex-start;}"
+            + ".pony-ex-echo{font-family:ui-monospace,'JetBrains Mono',monospace;font-size:12px;"
+            +   "color:var(--accent2,#43e8b0);background:rgba(67,232,176,.07);border:1px solid rgba(67,232,176,.2);"
+            +   "border-radius:7px;padding:7px 12px;letter-spacing:.01em;transition:color .15s,background .15s,border-color .15s;}"
+            + ".pony-ex-echo-idle{color:#7b7b85 !important;background:rgba(255,255,255,.03) !important;"
+            +   "border-color:rgba(255,255,255,.08) !important;}"
+            + ".pony-ex-code{background:#0a0b0e;border-top:1px solid rgba(255,255,255,.06);}"
+            + ".pony-ex-code .code-body{padding:18px 20px;}"
             + "`;document.head.appendChild(s);";
     }
 
@@ -627,18 +656,59 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     private PFlowPanel buildInputsTab(final List<PScheduler.UIRunnable> schedulers) {
         final PFlowPanel p = section();
-        pageTitle(p, "Input Widgets", "All form controls rendered server-side, zero client-side state.");
+        pageTitle(p, "Input Widgets",
+            "Each control below is live. Interact with it and watch what the server receives — then flip to Code to see the exact Java behind it. No JavaScript, anywhere.");
 
-        p.add(sectionTitle("Text inputs"));
-        p.add(labeled("TextBox (Enter = alert)", createPTextBox()));
+        p.add(sectionTitle("Interactive — try it, then read the code"));
+
+        // 1) TextBox — the value is read by a server-side handler
+        final PTextBox tb = Element.newPTextBox();
+        final PElement tbEcho = echoIdle("server: waiting for input… (type, then press Enter)");
+        tb.addValueChangeHandler(e -> echoSet(tbEcho, "server received → \"" + e.getData() + "\""));
+        p.add(exampleCard("PTextBox",
+            "A text field whose value is read by a Java handler the moment it changes (Enter or blur).",
+            previewWithEcho(tb, tbEcho), snippet_exTextBox()));
+
+        // 2) Button — every click is a server-side lambda
+        final PButton btn = Element.newPButton("Click me");
+        final int[] clicks = { 0 };
+        final PElement btnEcho = echoIdle("server: not clicked yet");
+        btn.addClickHandler(e -> echoSet(btnEcho, "server handled click #" + (++clicks[0]) + " (pure Java lambda)"));
+        p.add(exampleCard("PButton",
+            "Every click invokes a Java lambda on the JVM. Only a tiny binary delta crosses the wire.",
+            previewWithEcho(btn, btnEcho), snippet_exButton()));
+
+        // 3) CheckBox — state lives on the server
+        final PCheckBox cb = Element.newPCheckBox("Enable feature");
+        final PElement cbEcho = echoIdle("server: checked = false");
+        cb.addValueChangeHandler(e -> echoSet(cbEcho, "server: checked = " + e.getData()));
+        p.add(exampleCard("PCheckBox",
+            "The checked state lives on the server. The handler fires the instant the box toggles.",
+            previewWithEcho(cb, cbEcho), snippet_exCheckBox()));
+
+        // 4) RadioButton group — mutually-exclusive selection
+        final PFlowPanel radios = Element.newPFlowPanel();
+        radios.setStyleProperty("display", "flex");
+        radios.setStyleProperty("gap", "16px");
+        final PRadioButtonGroup group = Element.newPRadioButtonGroup("size");
+        final PElement rbEcho = echoIdle("server: no selection");
+        for (final String opt : List.of("Small", "Medium", "Large")) {
+            final PRadioButton rb = Element.newPRadioButton(opt);
+            group.addRadioButton(rb);
+            rb.addValueChangeHandler(e -> {
+                if (Boolean.TRUE.equals(e.getData())) echoSet(rbEcho, "server: selected = " + opt);
+            });
+            radios.add(rb);
+        }
+        p.add(exampleCard("PRadioButton (group)",
+            "Grouped radios share a name; selecting one clears the others and the server learns the choice.",
+            previewWithEcho(radios, rbEcho), snippet_exRadio()));
+
+        // ── The long tail, kept compact for completeness ───────────────────────
+        p.add(sectionTitle("More input widgets"));
         p.add(labeled("TextArea", Element.newPTextArea()));
         p.add(labeled("Password", Element.newPPasswordTextBox("Password")));
         p.add(labeled("RichText editor", buildRichText()));
-
-        p.add(sectionTitle("Buttons & Checks"));
-        p.add(labeled("Button", createButton()));
-        p.add(labeled("CheckBox", Element.newPCheckBox("Checkbox")));
-        p.add(labeled("RadioButton (group)", buildRadioGroup()));
         p.add(labeled("PushButton", Element.newPPushButton(Element.newPImage())));
 
         p.add(sectionTitle("Date & Time"));
@@ -1072,6 +1142,125 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             ln("") +
             ln(cm("Typical savings: 80–95% vs REST APIs")) +
             ln(cm("10 000-row DataGrid refresh: ~2 KB vs ~800 KB JSON"));
+    }
+
+    // ── Interactive example cards (a live widget + the exact Java behind it) ───
+
+    /** A card pairing a live, interactive widget with the Java source that built it (Preview / Code). */
+    private static PFlowPanel exampleCard(final String title, final String desc,
+                                          final PWidget preview, final String codeHtml) {
+        final PFlowPanel card = Element.newPFlowPanel();
+        card.addStyleName("pony-ex");
+
+        final PFlowPanel head = Element.newPFlowPanel();
+        head.addStyleName("pony-ex-head");
+        final PFlowPanel titleWrap = Element.newPFlowPanel();
+        titleWrap.addStyleName("pony-ex-titlewrap");
+        final PElement t = Element.newDiv(); t.addStyleName("pony-ex-title"); t.setInnerText(title);
+        final PElement d = Element.newDiv(); d.addStyleName("pony-ex-desc"); d.setInnerText(desc);
+        titleWrap.add(t, d);
+
+        final PFlowPanel seg = Element.newPFlowPanel();
+        seg.addStyleName("pony-ex-seg");
+        final PButton bPreview = Element.newPButton("Preview");
+        final PButton bCode = Element.newPButton("Code");
+        bPreview.addStyleName("pony-ex-seg-on");
+        seg.add(bPreview, bCode);
+        head.add(titleWrap, seg);
+
+        final PFlowPanel previewBody = Element.newPFlowPanel();
+        previewBody.addStyleName("pony-ex-body");
+        previewBody.addStyleName("pony-ex-preview");
+        previewBody.add(preview);
+
+        final PFlowPanel codeBody = Element.newPFlowPanel();
+        codeBody.addStyleName("pony-ex-code");
+        final PElement body = Element.newDiv();
+        body.addStyleName("code-body");
+        body.setInnerHTML(codeHtml);
+        codeBody.add(body);
+        codeBody.setVisible(false);
+
+        // The toggle itself runs on the server (setVisible → binary delta) — the value prop, demoed by the demo.
+        bPreview.addClickHandler(e -> {
+            previewBody.setVisible(true);
+            codeBody.setVisible(false);
+            bPreview.addStyleName("pony-ex-seg-on");
+            bCode.removeStyleName("pony-ex-seg-on");
+        });
+        bCode.addClickHandler(e -> {
+            previewBody.setVisible(false);
+            codeBody.setVisible(true);
+            bCode.addStyleName("pony-ex-seg-on");
+            bPreview.removeStyleName("pony-ex-seg-on");
+        });
+
+        card.add(head, previewBody, codeBody);
+        return card;
+    }
+
+    /** A live "server received…" readout — proves each interaction is handled in Java, server-side. */
+    private static PElement echoIdle(final String text) {
+        final PElement e = Element.newDiv();
+        e.addStyleName("pony-ex-echo");
+        e.addStyleName("pony-ex-echo-idle");
+        e.setInnerText(text);
+        return e;
+    }
+
+    private static void echoSet(final PElement echo, final String text) {
+        echo.removeStyleName("pony-ex-echo-idle");
+        echo.setInnerText(text);
+    }
+
+    /** Stacks a live control above its server-echo readout. */
+    private static PFlowPanel previewWithEcho(final PWidget control, final PElement echo) {
+        final PFlowPanel wrap = Element.newPFlowPanel();
+        wrap.setStyleProperty("display", "flex");
+        wrap.setStyleProperty("flex-direction", "column");
+        wrap.setStyleProperty("gap", "14px");
+        wrap.setStyleProperty("align-items", "flex-start");
+        wrap.add(control);
+        wrap.add(echo);
+        return wrap;
+    }
+
+    private static String nu(final String s) { return "<span class='code-num'>" + s + "</span>"; }
+
+    private static String snippet_exTextBox() {
+        return ln(ty("PTextBox") + " box = " + ty("Element") + "." + mt("newPTextBox") + "();") +
+            ln(cm("fires when the value changes (Enter / blur)")) +
+            ln("box." + mt("addValueChangeHandler") + "(e ->") +
+            ln("    echo." + mt("setText") + "(" + st("server received → ") + " + e." + mt("getData") + "()));") +
+            ln(ty("PWindow") + "." + mt("getMain") + "()." + mt("add") + "(box);");
+    }
+
+    private static String snippet_exButton() {
+        return ln(ty("PButton") + " btn = " + ty("Element") + "." + mt("newPButton") + "(" + st("Click me") + ");") +
+            ln(ty("int") + "[] clicks = {" + nu("0") + "};") +
+            ln(cm("every click is a Java lambda — runs on the JVM")) +
+            ln("btn." + mt("addClickHandler") + "(e ->") +
+            ln("    echo." + mt("setText") + "(" + st("handled click #") + " + (++clicks[" + nu("0") + "])));");
+    }
+
+    private static String snippet_exCheckBox() {
+        return ln(ty("PCheckBox") + " cb = " + ty("Element") + "." + mt("newPCheckBox") + "(" + st("Enable feature") + ");") +
+            ln(cm("state lives on the server, not in the browser")) +
+            ln("cb." + mt("addValueChangeHandler") + "(e ->") +
+            ln("    echo." + mt("setText") + "(" + st("checked = ") + " + e." + mt("getData") + "()));");
+    }
+
+    private static String snippet_exRadio() {
+        return ln(ty("PRadioButtonGroup") + " group = " + ty("Element") + "." + mt("newPRadioButtonGroup") + "(" + st("size") + ");") +
+            ln(kw("for") + " (" + ty("String") + " opt : " + ty("List") + "." + mt("of") + "(" + st("Small") + ", " + st("Medium") + ", " + st("Large") + ")) {") +
+            ln("  " + ty("PRadioButton") + " rb = " + ty("Element") + "." + mt("newPRadioButton") + "(opt);") +
+            ln("  group." + mt("addRadioButton") + "(rb);  " + cm("mutual exclusion")) +
+            ln("  rb." + mt("addValueChangeHandler") + "(e -> {") +
+            ln("    " + kw("if") + " (" + ty("Boolean") + ".TRUE." + mt("equals") + "(e." + mt("getData") + "()))") +
+            ln("      echo." + mt("setText") + "(" + st("selected = ") + " + opt);") +
+            ln("  });") +
+            ln("  row." + mt("add") + "(rb);") +
+            ln("}");
     }
 
     // ── Tab: Misc ────────────────────────────────────────────────────────────
