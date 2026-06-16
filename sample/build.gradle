@@ -69,7 +69,7 @@ task runShowcase(type: JavaExec) {
     mainClass = 'com.ponysdk.impl.java.ShowcaseMain'
     jvmArgs = [
         '-Xmx1g',
-        '-XX:+UseZGC', '-XX:+ZGenerational',
+        '-XX:+UseZGC',
         '-Dlog4j.configurationFile=etc/log4j2.xml'
     ]
 }
@@ -82,7 +82,7 @@ task runSampleSpring(type: JavaExec) {
     mainClass = 'com.ponysdk.impl.spring.MainSpring'
     jvmArgs = [
         '-Xmx2g', '-Xms2g',
-        '-XX:+UseZGC', '-XX:+ZGenerational',
+        '-XX:+UseZGC',
         '-XX:SoftMaxHeapSize=1536m',
         '-Dlog4j.configurationFile=etc/log4j2.xml'
     ]
