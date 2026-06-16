@@ -28,19 +28,26 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import org.eclipse.jetty.compression.brotli.BrotliCompression;
 import org.eclipse.jetty.compression.gzip.GzipCompression;
+import org.eclipse.jetty.compression.server.CompressionConfig;
 import org.eclipse.jetty.compression.server.CompressionHandler;
 import org.eclipse.jetty.ee11.servlet.ErrorHandler;
 import org.eclipse.jetty.server.Handler;
+import org.junit.Assume;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import com.aayushatharva.brotli4j.Brotli4jLoader;
 
 /**
  * Non-regression tests for the Jakarta EE11 / Jetty 12.1 migration of {@link PonySDKServer}.
  *
  * <ul>
  * <li>the main handler must be a Jetty 12.1 {@link CompressionHandler} (the EE10 {@code GzipHandler}
- * is deprecated for removal), it must register gzip and wrap the application handler;</li>
+ * is deprecated for removal); it registers gzip (and Brotli when its native lib is available),
+ * wraps the application handler, and applies a default {@link CompressionConfig} that compresses
+ * text but skips already-compressed content;</li>
  * <li>the error handler must keep hiding stack traces and the message-in-title
  * ({@code setShowServlet} was removed in EE11, the rest must stay).</li>
  * </ul>
@@ -67,7 +74,7 @@ public class PonySDKServerTest {
     }
 
     @Test
-    public void testCreateMainHandler_usesGzipCompressionHandlerWrappingApp() {
+    public void testCreateMainHandler_usesCompressionHandlerWrappingAppWithDefaults() {
         final TestServer server = new TestServer();
 
         final Handler handler = server.mainHandler();
@@ -76,9 +83,29 @@ public class PonySDKServerTest {
         final CompressionHandler compression = (CompressionHandler) handler;
         assertSame("compression handler must wrap the application handler", server.appHandler, compression.getHandler());
 
-        // removeCompression returns the registered Compression (non-null) → proves gzip was registered
-        final String gzipName = new GzipCompression().getName();
-        assertNotNull("gzip compression must be registered on the handler", compression.removeCompression(gzipName));
+        // An explicit default config must be set (not the empty "compress everything" config):
+        // text is compressed, already-compressed content is skipped.
+        final CompressionConfig config = compression.getConfiguration("/");
+        assertNotNull("a compression config must be set for '/'", config);
+        assertTrue("text/html must be compressed", config.isCompressMimeTypeSupported("text/html"));
+        assertFalse("already-compressed image/png must NOT be re-compressed",
+                config.isCompressMimeTypeSupported("image/png"));
+
+        // removeCompression returns the registered Compression (non-null) → proves gzip was registered.
+        // CompressionHandler keys by the HTTP content-coding token (getEncodingName()).
+        assertNotNull("gzip compression must be registered on the handler",
+                compression.removeCompression(new GzipCompression().getEncodingName()));
+    }
+
+    @Test
+    public void testCreateMainHandler_registersBrotliWhenNativeAvailable() {
+        // Brotli is a progressive enhancement gated on the native lib: only assert it where loadable.
+        Assume.assumeTrue("Brotli native library not available on this platform", Brotli4jLoader.isAvailable());
+
+        final CompressionHandler compression = (CompressionHandler) new TestServer().mainHandler();
+
+        assertNotNull("Brotli must be registered when its native library is available",
+                compression.removeCompression(new BrotliCompression().getEncodingName()));
     }
 
     @Test

@@ -19,6 +19,8 @@ ext {
     parssonVersion = '1.1.9'
     jakartaValidationVersion = '3.1.1'
     otelVersion = '1.63.0'
+    // brotli4j native version brought transitively by jetty-compression-brotli (keep in sync)
+    brotli4jVersion = '1.23.0'
 }
 
 def versionSuffix = project.hasProperty('BUILD_RELEASE') ? "" : "-SNAPSHOT"
@@ -133,6 +135,7 @@ dependencies {
             'org.eclipse.jetty.ee11.websocket:jetty-ee11-websocket-jetty-server:' + jettyVersion,
             'org.eclipse.jetty.compression:jetty-compression-server:' + jettyVersion,
             'org.eclipse.jetty.compression:jetty-compression-gzip:' + jettyVersion,
+            'org.eclipse.jetty.compression:jetty-compression-brotli:' + jettyVersion,
             'org.slf4j:slf4j-api:' + slf4jVersion,
             'jakarta.servlet:jakarta.servlet-api:' + jakartaServletVersion,
             'jakarta.json:jakarta.json-api:' + jakartaJsonVersion,
@@ -152,6 +155,16 @@ dependencies {
             'org.junit.jupiter:junit-jupiter-engine:5.14.4',
             'org.junit.platform:junit-platform-engine:1.14.4',
             'org.junit.platform:junit-platform-launcher:1.14.4'
+    )
+
+    // Brotli native libraries (brotli4j) for the common server + dev platforms.
+    // Optional at runtime: PonySDKServer registers Brotli only when the native is loadable
+    // (Brotli4jLoader.isAvailable()), otherwise it degrades gracefully to gzip.
+    runtimeOnly(
+            'com.aayushatharva.brotli4j:native-linux-x86_64:' + brotli4jVersion,
+            'com.aayushatharva.brotli4j:native-linux-aarch64:' + brotli4jVersion,
+            'com.aayushatharva.brotli4j:native-osx-aarch64:' + brotli4jVersion,
+            'com.aayushatharva.brotli4j:native-osx-x86_64:' + brotli4jVersion
     )
 
     testRuntimeOnly(

@@ -36,7 +36,10 @@ import org.eclipse.jetty.ee11.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee11.servlet.ServletHolder;
 import org.eclipse.jetty.ee11.websocket.server.config.JettyWebSocketServletContainerInitializer;
 import org.eclipse.jetty.compression.server.CompressionHandler;
+import org.eclipse.jetty.compression.server.CompressionConfig;
 import org.eclipse.jetty.compression.gzip.GzipCompression;
+import org.eclipse.jetty.compression.brotli.BrotliCompression;
+import com.aayushatharva.brotli4j.Brotli4jLoader;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -150,8 +153,30 @@ public class PonySDKServer {
     protected Handler createMainHandler() {
         final CompressionHandler compression = new CompressionHandler();
         compression.putCompression(new GzipCompression());
+        addBrotliIfAvailable(compression);
+        // Compress text assets (HTML, the GWT JS bundle, JSON) but skip already-compressed
+        // content (images, fonts, archives) — restores the sensible GzipHandler defaults
+        // instead of wasting CPU re-compressing incompressible payloads.
+        compression.putConfiguration("/", CompressionConfig.builder().defaults().build());
         compression.setHandler(addHandlers());
         return compression;
+    }
+
+    /**
+     * Registers Brotli HTTP compression, but only when its native library can be loaded on the
+     * current platform. Brotli compresses text assets (notably the GWT JavaScript bundle served on
+     * first load) noticeably better than gzip; the browser negotiates {@code br} vs {@code gzip}
+     * via {@code Accept-Encoding}. When the native is unavailable the server degrades gracefully to
+     * gzip only — startup is never broken by a missing native.
+     */
+    protected void addBrotliIfAvailable(final CompressionHandler compression) {
+        try {
+            Brotli4jLoader.ensureAvailability();
+            compression.putCompression(new BrotliCompression());
+            log.info("Brotli HTTP compression enabled");
+        } catch (final Throwable t) {
+            log.info("Brotli native library unavailable; using gzip only ({})", t.toString());
+        }
     }
 
     protected Handler addHandlers() {
