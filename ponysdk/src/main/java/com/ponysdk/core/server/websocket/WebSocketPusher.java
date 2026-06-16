@@ -127,6 +127,10 @@ public class WebSocketPusher implements Closeable {
         if (writeBuffer.position() >= maxChunkSize && writeBuffer.remaining() >= needed) {
             flush();
         }
+        // flush() hands the buffer off to Jetty and nulls it — re-acquire before using it again.
+        if (writeBuffer == null) {
+            writeBuffer = bufferPool.acquire();
+        }
         if (writeBuffer.remaining() < needed) {
             // Try flushing first to free the buffer
             if (writeBuffer.position() > 0) {

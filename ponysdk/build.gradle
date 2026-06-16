@@ -106,7 +106,7 @@ jacocoTestCoverageVerification {
         rule {
             element = 'PACKAGE'
             includes = ['com.ponysdk.core.server.websocket']
-            limit { counter = 'LINE'; value = 'COVEREDRATIO'; minimum = 0.60 }
+            limit { counter = 'LINE'; value = 'COVEREDRATIO'; minimum = 0.72 }
         }
         rule {
             element = 'PACKAGE'

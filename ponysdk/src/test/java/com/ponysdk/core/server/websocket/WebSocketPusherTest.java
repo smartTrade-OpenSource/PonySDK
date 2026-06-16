@@ -25,17 +25,27 @@ package com.ponysdk.core.server.websocket;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
+import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import com.ponysdk.core.model.BooleanModel;
+import com.ponysdk.core.model.ServerToClientModel;
+import com.ponysdk.core.server.application.StringDictionary;
 
 /**
  * Regression tests for {@link WebSocketPusher} string encoding.
@@ -200,5 +210,171 @@ public class WebSocketPusherTest {
         }
         if (pos != bytes.length) throw new IllegalStateException("trailing bytes: pos=" + pos + " total=" + bytes.length);
         return result;
+    }
+
+    // ── Capture harness for scalar / dictionary / lifecycle paths ──
+
+    /** A pusher whose session accumulates everything sent and (optionally) fails the send callback. */
+    private static final class Capture {
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        int sendCount;
+        final Session session;
+        final WebSocketPusher pusher;
+
+        Capture(final int maxChunk, final boolean failSend) {
+            session = Mockito.mock(Session.class);
+            Mockito.when(session.isOpen()).thenReturn(true);
+            Mockito.doAnswer(inv -> {
+                final ByteBuffer buf = inv.getArgument(0);
+                final Callback cb = inv.getArgument(1);
+                final byte[] chunk = new byte[buf.remaining()];
+                buf.duplicate().get(chunk);
+                out.writeBytes(chunk);
+                sendCount++;
+                if (failSend) cb.fail(new RuntimeException("send failed"));
+                else cb.succeed();
+                return null;
+            }).when(session).sendBinary(Mockito.any(ByteBuffer.class), Mockito.any(Callback.class));
+            pusher = new WebSocketPusher(session, maxChunk, 1_000, new ByteBufferPool(1 << 20, 4));
+        }
+
+        byte[] bytes() {
+            return out.toByteArray();
+        }
+    }
+
+    private static byte[] encodeAndFlush(final ServerToClientModel model, final Object value) throws IOException {
+        final Capture c = new Capture(1 << 19, false);
+        c.pusher.encode(model, value);
+        c.pusher.flush();
+        return c.bytes();
+    }
+
+    private static int key(final ServerToClientModel model) {
+        return model.getValue() & 0xFF;
+    }
+
+    @Test
+    public void encodesIntegerAsModelKeyPlusFourBigEndianBytes() throws Exception {
+        final byte[] b = encodeAndFlush(ServerToClientModel.HEARTBEAT_PERIOD, 0x01020304);
+        assertEquals(key(ServerToClientModel.HEARTBEAT_PERIOD), b[0] & 0xFF);
+        assertEquals(0x01, b[1] & 0xFF);
+        assertEquals(0x02, b[2] & 0xFF);
+        assertEquals(0x03, b[3] & 0xFF);
+        assertEquals(0x04, b[4] & 0xFF);
+        assertEquals(5, b.length);
+    }
+
+    @Test
+    public void encodesLongAsEightBytes() throws Exception {
+        final byte[] b = encodeAndFlush(ServerToClientModel.ROUNDTRIP_LATENCY, 0x0102030405060708L);
+        assertEquals(9, b.length); // 1 model key + 8
+        long v = 0;
+        for (int i = 1; i < 9; i++) v = v << 8 | (b[i] & 0xFF);
+        assertEquals(0x0102030405060708L, v);
+    }
+
+    @Test
+    public void encodesBooleanUsingBooleanModelValues() throws Exception {
+        final byte[] t = encodeAndFlush(ServerToClientModel.OPTION_FORMFIELD_TABULATION, true);
+        assertEquals(BooleanModel.TRUE.getValue() & 0xFF, t[1] & 0xFF);
+        final byte[] f = encodeAndFlush(ServerToClientModel.OPTION_FORMFIELD_TABULATION, false);
+        assertEquals(BooleanModel.FALSE.getValue() & 0xFF, f[1] & 0xFF);
+    }
+
+    @Test
+    public void encodesByteAndDoubleAndNull() throws Exception {
+        final byte[] bb = encodeAndFlush(ServerToClientModel.VALUE_CHECKBOX, (byte) 7);
+        assertEquals(7, bb[1]);
+        assertEquals(2, bb.length);
+
+        final byte[] db = encodeAndFlush(ServerToClientModel.LEFT, 1.5d);
+        assertEquals(9, db.length);
+
+        final byte[] nb = encodeAndFlush(ServerToClientModel.HEARTBEAT, null);
+        assertEquals("NULL-typed model writes only the model key", 1, nb.length);
+    }
+
+    @Test
+    public void encodesUint31AsShortWhenSmallAndIntWithHighBitWhenLarge() throws Exception {
+        final byte[] small = encodeAndFlush(ServerToClientModel.CREATE_CONTEXT, 5);
+        assertEquals("small uint31 -> 2 bytes", 3, small.length);
+        assertEquals(5, (small[1] & 0xFF) << 8 | (small[2] & 0xFF));
+
+        final byte[] large = encodeAndFlush(ServerToClientModel.CREATE_CONTEXT, 100_000);
+        assertEquals("large uint31 -> 4 bytes", 5, large.length);
+        final int raw = (large[1] & 0xFF) << 24 | (large[2] & 0xFF) << 16 | (large[3] & 0xFF) << 8 | (large[4] & 0xFF);
+        assertTrue("high bit set signals an int-width uint31", (raw & 0x80000000) != 0);
+        assertEquals(100_000, raw & 0x7FFFFFFF);
+    }
+
+    @Test
+    public void encodesShortAsciiStringAsLengthPrefixedBytes() throws Exception {
+        final byte[] b = encodeAndFlush(ServerToClientModel.TYPE_HISTORY, "hello");
+        assertEquals(key(ServerToClientModel.TYPE_HISTORY), b[0] & 0xFF);
+        assertEquals("short ASCII -> single length byte", 5, b[1] & 0xFF);
+        assertEquals("hello", new String(b, 2, 5, StandardCharsets.US_ASCII));
+    }
+
+    @Test
+    public void encodesArrayWithAllElementTypesWithoutError() throws Exception {
+        final Capture c = new Capture(1 << 19, false);
+        final Object[] mixed = { null, 1, "stringValue", (byte) 2, (short) 3, true, false, 4L, 5.0d, 6.0f,
+            new Object() {
+                @Override
+                public String toString() {
+                    return "custom";
+                }
+            } };
+        c.pusher.encode(ServerToClientModel.PADDON_ARGUMENTS, mixed);
+        c.pusher.flush();
+        assertTrue(c.sendCount >= 1);
+        assertEquals(mixed.length, c.bytes()[1] & 0xFF); // length byte
+    }
+
+    @Test
+    public void stringDictionaryAddsThenReferencesRepeatedValues() throws Exception {
+        final Capture c = new Capture(1 << 19, false);
+        c.pusher.setStringDictionary(new StringDictionary());
+        assertNotNull(c.pusher.getStringDictionary());
+
+        c.pusher.encode(ServerToClientModel.TYPE_HISTORY, "repeated-value"); // dictionary ADD
+        c.pusher.encode(ServerToClientModel.TYPE_HISTORY, "repeated-value"); // dictionary REF
+        c.pusher.encode(ServerToClientModel.TYPE_HISTORY, "ab"); // shorter than min-profitable -> inline
+        c.pusher.flush();
+
+        assertTrue(c.sendCount >= 1);
+        assertTrue(c.bytes().length > 0);
+    }
+
+    @Test
+    public void smallMaxChunkSizeProducesMultipleSends() throws Exception {
+        final Capture c = new Capture(8, false); // flush proactively after ~8 bytes
+        for (int i = 0; i < 6; i++) {
+            c.pusher.encode(ServerToClientModel.ROUNDTRIP_LATENCY, (long) i); // 1 + 8 bytes each
+        }
+        c.pusher.flush();
+        assertTrue("a small maxChunkSize must split the output across several sends", c.sendCount >= 2);
+    }
+
+    @Test
+    public void closeClosesOpenSessionAndRejectsFurtherWrites() throws Exception {
+        final Capture c = new Capture(1 << 19, false);
+        c.pusher.encode(ServerToClientModel.HEARTBEAT_PERIOD, 1);
+        c.pusher.close();
+
+        assertTrue(c.pusher.isClosed());
+        Mockito.verify(c.session).close(Mockito.anyInt(), Mockito.anyString(), Mockito.any(Callback.class));
+        assertThrows(IOException.class, () -> c.pusher.encode(ServerToClientModel.HEARTBEAT_PERIOD, 2));
+    }
+
+    @Test
+    public void asyncSendFailureSurfacesOnNextOperation() throws Exception {
+        final Capture c = new Capture(1 << 19, true); // the send callback fails
+        c.pusher.encode(ServerToClientModel.HEARTBEAT_PERIOD, 1);
+        c.pusher.flush(); // triggers sendBinary -> callback.fail(...) -> asyncError set
+
+        assertThrows("a failed async send must surface on the next write",
+            IOException.class, () -> c.pusher.encode(ServerToClientModel.HEARTBEAT_PERIOD, 2));
     }
 }
