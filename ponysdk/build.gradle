@@ -185,11 +185,16 @@ test {
     ['ponysdk.browserTest', 'ponysdk.browserUrl', 'ponysdk.chromeBinary', 'webdriver.chrome.driver'].each { k ->
         if (System.getProperty(k) != null) systemProperty k, System.getProperty(k)
     }
-    afterSuite { desc, result ->
-        if (!desc.parent) {
-            println "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
+    addTestListener(new TestListener() {
+        @Override void beforeSuite(TestDescriptor descriptor) {}
+        @Override void beforeTest(TestDescriptor descriptor) {}
+        @Override void afterTest(TestDescriptor descriptor, TestResult result) {}
+        @Override void afterSuite(TestDescriptor descriptor, TestResult result) {
+            if (descriptor.parent == null) {
+                println "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
+            }
         }
-    }
+    })
 }
 
 check.dependsOn jacocoTestReport
