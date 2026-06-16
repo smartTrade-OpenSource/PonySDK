@@ -1,16 +1,16 @@
 ext {
     java2htmlVersion = '5.0'
     commonsBeanutilsVersion = '1.11.0'
-    commonsIoVersion = '2.18.0'
+    commonsIoVersion = '2.22.0'
     commonsFileupload2Version = '2.0.0-M5' // latest milestone (no GA yet); verified to compile with the sample
-    gwtVersion = '2.12.2' // gwt-codeserver (dev-only); 2.13 folds CodeServer into gwt-dev
-    jettyVersion = '12.0.18'
-    springVersion = '6.2.8'
+    gwtVersion = '2.13.0' // gwt-codeserver (dev-only), aligned with the ponysdk gwt-dev version
+    jettyVersion = '12.0.36'
+    springVersion = '6.2.19'
     jakartaServletVersion = '6.0.0'
     jakartaJsonVersion = '2.0.2'
-    parssonVersion = '1.1.7'
-    slf4jVersion = '2.0.17'
-    log4jVersion = '2.24.3'
+    parssonVersion = '1.1.9'
+    slf4jVersion = '2.0.18'
+    log4jVersion = '2.26.0'
 }
 
 dependencies {
@@ -24,7 +24,7 @@ dependencies {
             'commons-beanutils:commons-beanutils:' + commonsBeanutilsVersion,
             'commons-io:commons-io:' + commonsIoVersion,
             'org.apache.commons:commons-fileupload2-jakarta-servlet6:' + commonsFileupload2Version,
-            'com.google.code.gson:gson:2.11.0'
+            'com.google.code.gson:gson:2.14.0'
     )
 
     // Spring kept for the runSampleSpring task — uses ponysdk-spring module
