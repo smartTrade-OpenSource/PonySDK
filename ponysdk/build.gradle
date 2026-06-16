@@ -116,7 +116,7 @@ jacocoTestCoverageVerification {
         rule {
             element = 'PACKAGE'
             includes = ['com.ponysdk.core.server.concurrent']
-            limit { counter = 'LINE'; value = 'COVEREDRATIO'; minimum = 0.50 }
+            limit { counter = 'LINE'; value = 'COVEREDRATIO'; minimum = 0.65 }
         }
     }
 }
