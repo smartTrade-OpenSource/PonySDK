@@ -45,12 +45,54 @@ publishing {
     }
 }
 
+// Code excluded from coverage metrics & gate (not unit-testable / not product logic):
+//  - GWT terminal: transpiled to JavaScript, runs in the browser — not executable by JVM unit tests
+//  - test harness shipped in main (com.ponysdk.test.*): test-support code, not product logic
+def coverageExclusions = [
+        'com/ponysdk/core/terminal/**',
+        'com/ponysdk/test/**',
+]
+
 jacocoTestReport {
     reports {
         xml.required = true
         xml.outputLocation = layout.buildDirectory.file("reports/jacoco/report.xml")
         html.required = false
         csv.required = false
+    }
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: coverageExclusions)
+        }))
+    }
+}
+
+// Progressive coverage gate. Thresholds sit just below the current verified ratios so the build
+// passes today; raise them incrementally as coverage improves (ratchet — never lower them).
+jacocoTestCoverageVerification {
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: coverageExclusions)
+        }))
+    }
+    violationRules {
+        rule {
+            limit {
+                counter = 'INSTRUCTION'
+                value = 'COVEREDRATIO'
+                minimum = 0.30
+            }
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.28
+            }
+            limit {
+                counter = 'BRANCH'
+                value = 'COVEREDRATIO'
+                minimum = 0.20
+            }
+        }
     }
 }
 
@@ -199,7 +241,7 @@ test {
     })
 }
 
-check.dependsOn jacocoTestReport
+check.dependsOn jacocoTestReport, jacocoTestCoverageVerification
 gwtc.dependsOn classes
 jar.dependsOn gwtc
 // test classpath includes the GWT output dir (gwtOutputDirName), so it must run after gwtc
