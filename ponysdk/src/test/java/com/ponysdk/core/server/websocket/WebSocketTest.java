@@ -482,6 +482,98 @@ public class WebSocketTest {
         assertTrue(setup.uiContext().isSuspended());
     }
 
+    // ---- Jetty 12.1: onWebSocketClose(int, String, Callback) — Callback completion contract ----
+    // Non-regression for the EE11 / Jetty 12.1 migration: the 3-arg close handler must ALWAYS
+    // complete the supplied Jetty Callback (try/finally), on every code path, exactly once.
+
+    /**
+     * Default mode: the normal close→destroy path must complete the Callback exactly once
+     * and never fail it.
+     */
+    @Test
+    public void testOnWebSocketClose_completesCallbackOnDestroyPath() {
+        final Callback callback = Mockito.mock(Callback.class);
+
+        webSocket.onWebSocketClose(StatusCode.NORMAL, "Close", callback);
+
+        Mockito.verify(callback, Mockito.times(1)).succeed();
+        Mockito.verify(callback, Mockito.never()).fail(Mockito.any());
+        assertFalse("Default mode should destroy the UIContext", uiContext.isAlive());
+    }
+
+    /**
+     * Early-return path: a close arriving before the UIContext is initialized must not throw
+     * and must still complete the Callback.
+     */
+    @Test
+    public void testOnWebSocketClose_beforeUIContextInit_stillCompletesCallback() {
+        final WebSocket bare = new WebSocket() {
+            @Override
+            void flush0() {}
+
+            @Override
+            public void encode(final ServerToClientModel model, final Object value) {}
+        };
+        final Callback callback = Mockito.mock(Callback.class);
+
+        // uiContext is null here (onWebSocketOpen never called): must be a safe no-op that still completes the callback
+        bare.onWebSocketClose(StatusCode.NORMAL, "Close", callback);
+
+        Mockito.verify(callback, Mockito.times(1)).succeed();
+        Mockito.verify(callback, Mockito.never()).fail(Mockito.any());
+    }
+
+    /**
+     * Reconnection mode: the close→suspend path must complete the Callback once and keep the
+     * UIContext alive (suspended, not destroyed).
+     */
+    @Test
+    public void testOnWebSocketClose_reconnectionMode_completesCallbackAndSuspends() throws Exception {
+        final ReconnectionSetup setup = createReconnectionWebSocket();
+        final Callback callback = Mockito.mock(Callback.class);
+
+        setup.webSocket().onWebSocketClose(StatusCode.NORMAL, "Close", callback);
+
+        Mockito.verify(callback, Mockito.times(1)).succeed();
+        assertTrue("Reconnection mode keeps the UIContext alive", setup.uiContext().isAlive());
+        assertTrue("Reconnection mode suspends the UIContext", setup.uiContext().isSuspended());
+    }
+
+    /**
+     * try/finally guarantee: a ReconnectionListener throwing during close must not prevent the
+     * Callback from being completed, nor the suspension from happening.
+     */
+    @Test
+    public void testOnWebSocketClose_listenerThrows_stillCompletesCallback() throws Exception {
+        final ReconnectionSetup setup = createReconnectionWebSocket();
+        setup.appManager().getConfiguration().setReconnectionListener(ctx -> {
+            throw new RuntimeException("Listener blew up");
+        });
+        final Callback callback = Mockito.mock(Callback.class);
+
+        setup.webSocket().onWebSocketClose(StatusCode.NORMAL, "Close", callback);
+
+        Mockito.verify(callback, Mockito.times(1)).succeed();
+        assertTrue("Suspension must still happen despite the listener exception", setup.uiContext().isSuspended());
+    }
+
+    /**
+     * Each close completes its own Callback: a second close on an already-suspended context
+     * must still complete the second Callback.
+     */
+    @Test
+    public void testOnWebSocketClose_doubleClose_completesEachCallback() throws Exception {
+        final ReconnectionSetup setup = createReconnectionWebSocket();
+
+        final Callback first = Mockito.mock(Callback.class);
+        setup.webSocket().onWebSocketClose(StatusCode.NORMAL, "First close", first);
+        Mockito.verify(first, Mockito.times(1)).succeed();
+
+        final Callback second = Mockito.mock(Callback.class);
+        setup.webSocket().onWebSocketClose(StatusCode.NORMAL, "Second close", second);
+        Mockito.verify(second, Mockito.times(1)).succeed();
+    }
+
     /**
      * onWebSocketError on a non-suspended UIContext in reconnection mode — should destroy.
      * The isSuspended() guard only protects suspended contexts.
