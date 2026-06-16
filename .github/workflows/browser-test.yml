@@ -28,7 +28,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: GWT compile + sample build
-        run: ./gradlew :ponysdk:gwtc :sample:classes :sample:processResources --no-configuration-cache --stacktrace
+        run: ./gradlew :ponysdk:gwtc :sample:classes :sample:processResources --stacktrace
 
       - name: Stage the GWT terminal for the showcase
         run: |
@@ -37,7 +37,7 @@ jobs:
 
       - name: Start the showcase server (background)
         run: |
-          nohup ./gradlew :sample:runShowcase --no-configuration-cache > showcase.log 2>&1 &
+          nohup ./gradlew :sample:runShowcase > showcase.log 2>&1 &
           for i in $(seq 1 120); do
             curl -sf http://localhost:8081/sample/ >/dev/null 2>&1 && { echo "server up after ${i}s"; break; }
             sleep 1
@@ -48,7 +48,7 @@ jobs:
           ./gradlew :ponysdk:test
           --tests "com.ponysdk.driver.BinaryAddonBrowserIT"
           -Dponysdk.browserTest=true
-          --no-configuration-cache --stacktrace
+          --stacktrace
 
       - name: Showcase server log
         if: always()

@@ -78,6 +78,7 @@ jacocoTestCoverageVerification {
         }))
     }
     violationRules {
+        // Whole-module floor (over the testable code; terminal + test harness are excluded above).
         rule {
             limit {
                 counter = 'INSTRUCTION'
@@ -94,6 +95,28 @@ jacocoTestCoverageVerification {
                 value = 'COVEREDRATIO'
                 minimum = 0.20
             }
+        }
+        // Per-package ratchets on the critical server packages: pin current line coverage so it
+        // cannot silently regress. Raise these minimums as coverage improves (never lower them).
+        rule {
+            element = 'PACKAGE'
+            includes = ['com.ponysdk.core.server.application']
+            limit { counter = 'LINE'; value = 'COVEREDRATIO'; minimum = 0.75 }
+        }
+        rule {
+            element = 'PACKAGE'
+            includes = ['com.ponysdk.core.server.websocket']
+            limit { counter = 'LINE'; value = 'COVEREDRATIO'; minimum = 0.37 }
+        }
+        rule {
+            element = 'PACKAGE'
+            includes = ['com.ponysdk.core.server.servlet']
+            limit { counter = 'LINE'; value = 'COVEREDRATIO'; minimum = 0.33 }
+        }
+        rule {
+            element = 'PACKAGE'
+            includes = ['com.ponysdk.core.server.concurrent']
+            limit { counter = 'LINE'; value = 'COVEREDRATIO'; minimum = 0.15 }
         }
     }
 }

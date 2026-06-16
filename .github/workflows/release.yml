@@ -25,4 +25,4 @@ jobs:
       - name: Build, test and publish release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew -PBUILD_RELEASE build publish --no-configuration-cache
+        run: ./gradlew -PBUILD_RELEASE build publish

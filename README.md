@@ -55,7 +55,7 @@ It runs a Jetty 12 WebSocket server on the backend and uses GWT on the frontend.
 ```sh
 git clone https://github.com/smartTrade-OpenSource/PonySDK.git
 cd PonySDK
-./gradlew :sample:runSampleSpring --no-configuration-cache
+./gradlew :sample:runSampleSpring
 ```
 
 Then open [http://localhost:8081/sample/](http://localhost:8081/sample/)
