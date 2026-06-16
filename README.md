@@ -127,6 +127,29 @@ drain within `wsSendTimeoutMs`, the connection is closed — memory stays bounde
 
 ---
 
+## HTTP Compression
+
+Static HTTP assets (bootstrap HTML, the GWT JavaScript bundle, AJAX responses) are compressed by a
+Jetty `CompressionHandler`. **gzip** is always enabled; **Brotli** is enabled automatically when its
+native library is available on the platform — the browser negotiates `br` vs `gzip` via the
+`Accept-Encoding` header. Already-compressed content (images, fonts, archives) is skipped.
+
+Brotli relies on a native library (`brotli4j`). Since JDK 24 ([JEP 472](https://openjdk.org/jeps/472))
+the JVM warns on native access and will eventually block it unless explicitly granted, so run your
+server with:
+
+```sh
+java --enable-native-access=ALL-UNNAMED -jar your-app.jar
+```
+
+If the native library is unavailable (or the flag denied), the server degrades gracefully to gzip
+only — startup is never broken.
+
+> This applies to **HTTP asset delivery** only. The real-time WebSocket protocol uses
+> permessage-deflate, configured separately via `wsPermessageDeflateEnabled`.
+
+---
+
 ## OpenTelemetry Metrics
 
 ```java

@@ -238,6 +238,9 @@ task gwtc(type: JavaExec) {
 
 test {
     classpath = files(resourcesCoreTest, gwtOutputDirName) + classpath
+    // Brotli compression tests load a native lib (brotli4j); JDK 24+ (JEP 472) warns on native access
+    // now and will block it later unless explicitly granted.
+    jvmArgs '--enable-native-access=ALL-UNNAMED'
     // Forward opt-in browser-test properties to the forked test JVM (see driver/BinaryAddonBrowserIT)
     ['ponysdk.browserTest', 'ponysdk.browserUrl', 'ponysdk.chromeBinary', 'webdriver.chrome.driver'].each { k ->
         if (System.getProperty(k) != null) systemProperty k, System.getProperty(k)

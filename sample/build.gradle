@@ -70,6 +70,9 @@ task runShowcase(type: JavaExec) {
     jvmArgs = [
         '-Xmx1g',
         '-XX:+UseZGC',
+        // Brotli HTTP compression loads a native lib (brotli4j); JDK 24+ (JEP 472) warns on native
+        // access now and will block it later unless explicitly granted.
+        '--enable-native-access=ALL-UNNAMED',
         '-Dlog4j.configurationFile=etc/log4j2.xml'
     ]
 }
@@ -84,6 +87,9 @@ task runSampleSpring(type: JavaExec) {
         '-Xmx2g', '-Xms2g',
         '-XX:+UseZGC',
         '-XX:SoftMaxHeapSize=1536m',
+        // Brotli HTTP compression loads a native lib (brotli4j); JDK 24+ (JEP 472) warns on native
+        // access now and will block it later unless explicitly granted.
+        '--enable-native-access=ALL-UNNAMED',
         '-Dlog4j.configurationFile=etc/log4j2.xml'
     ]
 }
@@ -94,7 +100,7 @@ task runSampleTrading(type: JavaExec) {
     classpath += files(buildDirPath + '/gwt/prod/gwt')
     classpath += files(buildDirPath + '/resources/etc')
     mainClass = 'com.ponysdk.impl.java.Main'
-    jvmArgs = ['-server', '-Xmx512m', '-Dponysdk.application.id=trading', '-Dponysdk.application.name="Trading sample"', '-Dponysdk.application.description="Trading Sample"',
+    jvmArgs = ['-server', '-Xmx512m', '--enable-native-access=ALL-UNNAMED', '-Dponysdk.application.id=trading', '-Dponysdk.application.name="Trading sample"', '-Dponysdk.application.description="Trading Sample"',
                '-Dponysdk.application.context.name=trading', '-Dponysdk.entry.point.class=com.ponysdk.sample.client.TradingSampleEntryPoint',
                '-Dponysdk.application.javascripts=script/ponysdk.js;script/widget.js;script/sample.js;script/less.js', '-Dponysdk.application.stylesheets=css/sample.less;css/ponysdk.less']
 }
