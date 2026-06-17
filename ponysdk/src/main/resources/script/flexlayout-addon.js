@@ -388,6 +388,13 @@
             info.win.className = info.win.className.replace(/fl-theme-\S+/g, '').trim();
             if (theme) info.win.classList.add(theme);
           }
+          if (info.popup && !info.popup.closed) {
+            try {
+              var body = info.popup.document.body;
+              body.className = body.className.replace(/fl-theme-\S+/g, '').trim();
+              if (theme) body.classList.add(theme);
+            } catch (e) { /* cross-origin */ }
+          }
         }
       }
     },
@@ -558,10 +565,13 @@
     },
 
     _extractWidgetEl: function (tabId) {
-      // Get the full tab content element from the Layout's content cache
+      // Get the widget host from inside the Layout's content cache (not the wrapper itself)
       if (this._layout && this._layout._contentEls) {
         var contentEl = this._layout._contentEls.get(tabId);
-        if (contentEl) return contentEl;
+        if (contentEl) {
+          var host = contentEl.querySelector('.fl-pony-widget-host');
+          if (host) return host;
+        }
       }
       // Fallback: search by tab ID
       var host = this._layoutContainer.querySelector('.fl-pony-widget-host[data-tab-id="' + CSS.escape(tabId) + '"]');
