@@ -419,8 +419,9 @@
     _cleanup(node) {
       if (!node || node.type !== NT.ROW) return;
       [...node.children].forEach(c => this._cleanup(c));
+      // Remove empty tabsets, but always keep at least one in the entire tree
       [...node.children].filter(c => c.type === NT.TABSET && c.children.length === 0)
-        .forEach(c => node.removeChild(c));
+        .forEach(c => { if (this._countTabsets(this._root) > 1) node.removeChild(c); });
       if (node.children.length === 1 && node.parent) {
         const [child] = node.children; const par = node.parent;
         const idx = par.children.indexOf(node);
@@ -428,6 +429,12 @@
         if (par.type === NT.ROW) this._cleanup(par); return;
       }
       if (node.children.length === 0 && node.parent) node.parent.removeChild(node);
+    }
+
+    _countTabsets(node) {
+      if (!node) return 0;
+      if (node.type === NT.TABSET) return 1;
+      return node.children.reduce((sum, c) => sum + this._countTabsets(c), 0);
     }
 
     _firstTabSet(node) {
