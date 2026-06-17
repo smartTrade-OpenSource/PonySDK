@@ -9,7 +9,6 @@ import java.util.function.Consumer;
 
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
-import jakarta.json.JsonObjectBuilder;
 
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PAddOnComposite;
@@ -80,7 +79,13 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
     }
 
     public FlexLayoutAddon(final String modelJson, final String theme, final String bordersJson) {
-        super(Element.newPFlowPanel(), buildArgs(modelJson, theme, bordersJson));
+        // v3 binary protocol: the creation arguments travel as a pure-binary typed array
+        // [model, theme, borders] (ServerToClientModel.PADDON_CREATION_ARGS) instead of the legacy
+        // JSON object form. This avoids the server-side parse+re-serialize of the model in
+        // buildArgs(), drops the JSON object wrapper/escaping on the wire, and lets the terminal
+        // receive the args directly as a JS array. The model/borders strings (which are inherently
+        // JSON documents) are forwarded verbatim and parsed once, client-side.
+        super(Element.newPFlowPanel(), modelJson, theme, bordersJson);
         setTerminalHandler(event -> handleClientEvent(event.getData()));
     }
 
@@ -519,20 +524,6 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
         PopOutInfo(String tabId, String tabsetId, int tabIdx, String mode, String title) {
             this.tabId = tabId; this.tabsetId = tabsetId; this.tabIdx = tabIdx; this.mode = mode; this.title = title;
         }
-    }
-
-    private static JsonObject buildArgs(final String modelJson, final String theme, final String bordersJson) {
-        final JsonObjectBuilder builder = Json.createObjectBuilder();
-        if (modelJson != null) {
-            builder.add("model", Json.createReader(new StringReader(modelJson)).readObject());
-        }
-        if (theme != null) {
-            builder.add("theme", theme);
-        }
-        if (bordersJson != null) {
-            builder.add("borders", Json.createReader(new StringReader(bordersJson)).readArray());
-        }
-        return builder.build();
     }
 
     private void handleClientEvent(final JsonObject data) {

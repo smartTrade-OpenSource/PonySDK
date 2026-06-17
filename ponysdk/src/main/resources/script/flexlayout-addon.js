@@ -38,10 +38,18 @@
       var el = this.element;
       el.style.cssText = 'width:100%;height:100%;overflow:hidden;position:relative;';
 
-      var config = this.options || {};
-      var modelJson = config.model || { type: 'row', children: [{ type: 'tabset', weight: 100, children: [] }] };
-      var borders = config.borders || null;
-      var theme = config.theme || '';
+      // v3 binary protocol: creation args arrive as a JS array [model, theme, borders]
+      // (ServerToClientModel.PADDON_CREATION_ARGS). The legacy JSON form delivered a
+      // { model, theme, borders } object. Support both; parseJson tolerates already-parsed values.
+      var opts = this.options || {};
+      var rawModel, rawBorders, theme;
+      if (Object.prototype.toString.call(opts) === '[object Array]') {
+        rawModel = opts[0]; theme = opts[1] || ''; rawBorders = opts[2];
+      } else {
+        rawModel = opts.model; theme = opts.theme || ''; rawBorders = opts.borders;
+      }
+      var modelJson = parseJson(rawModel) || { type: 'row', children: [{ type: 'tabset', weight: 100, children: [] }] };
+      var borders = parseJson(rawBorders) || null;
 
       this._layoutContainer = document.createElement('div');
       this._layoutContainer.style.cssText = 'width:100%;position:absolute;top:0;left:0;right:0;bottom:20px;';
