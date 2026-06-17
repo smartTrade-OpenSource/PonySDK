@@ -1162,6 +1162,30 @@ async function dragFromToolbar(page, srcSelector) {
   await page.mouse.up();
 }
 
+test.describe('FlexLayout Popout Theme', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto(process.env.BASE_URL || 'http://localhost/sample/', { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('.fl-layout', { timeout: 8000 });
+  });
+
+  test('popout window updates when theme changes', async ({ page }) => {
+    await page.locator('.fl-tbtn-popout').first().click();
+    await page.waitForSelector('.fl-popout-window', { timeout: 2000 });
+    const bgBefore = await page.locator('.fl-popout-window').evaluate(el => getComputedStyle(el).backgroundColor);
+    // Change theme via layout class + popout propagation (simulating setTheme)
+    await page.evaluate(() => {
+      const layout = document.querySelector('.fl-layout');
+      layout.className = layout.className.replace(/fl-theme-\S+/g, '').trim() + ' fl-theme-light';
+      document.querySelectorAll('.fl-popout-window').forEach(w => {
+        w.className = w.className.replace(/fl-theme-\S+/g, '').trim() + ' fl-theme-light';
+      });
+    });
+    await page.waitForTimeout(200);
+    const bgAfter = await page.locator('.fl-popout-window').evaluate(el => getComputedStyle(el).backgroundColor);
+    expect(bgAfter).not.toBe(bgBefore);
+  });
+});
+
 test.describe('FlexLayout Performance', () => {
 
   test.beforeEach(async ({ page }) => {

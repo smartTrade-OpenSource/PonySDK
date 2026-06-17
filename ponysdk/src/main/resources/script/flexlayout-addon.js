@@ -380,6 +380,16 @@
       if (!this._layoutContainer) return;
       this._layoutContainer.className = this._layoutContainer.className.replace(/fl-theme-\S+/g, '').trim();
       if (theme) this._layoutContainer.classList.add(theme);
+      // Propagate theme to popout windows (they live outside .fl-layout)
+      if (this._popOuts) {
+        for (var id in this._popOuts) {
+          var info = this._popOuts[id];
+          if (info.win) {
+            info.win.className = info.win.className.replace(/fl-theme-\S+/g, '').trim();
+            if (theme) info.win.classList.add(theme);
+          }
+        }
+      }
     },
 
     loadModel: function (modelJsonInput, migrateFn) {
@@ -564,6 +574,9 @@
       var self = this;
       var win = document.createElement('div');
       win.className = 'fl-popout-window';
+      // Inherit current theme from layout container
+      var themeMatch = this._layoutContainer.className.match(/fl-theme-\S+/);
+      if (themeMatch) win.classList.add(themeMatch[0]);
       win.dataset.tabId = tabId;
       win.style.cssText = 'position:fixed;z-index:10000;background:var(--fl-panel,#181825);border:1px solid var(--fl-border,#313244);border-radius:6px;box-shadow:0 8px 32px rgba(0,0,0,.5);display:flex;flex-direction:column;overflow:hidden;'
         + 'left:' + (x || 100) + 'px;top:' + (y || 100) + 'px;width:' + (w || 400) + 'px;height:' + (h || 300) + 'px;';
