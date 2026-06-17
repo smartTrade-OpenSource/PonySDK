@@ -108,7 +108,7 @@
         container: this._layoutContainer,
         factory: this._factory,
         tabSetButtons: function (tsNode) {
-          if (!self._enablePopOut) return null;
+          if (!self._enablePopOut || tsNode.children.length === 0) return null;
           var btn = document.createElement('button');
           btn.type = 'button';
           btn.className = 'fl-tbtn fl-tbtn-popout';
@@ -558,11 +558,15 @@
     },
 
     _extractWidgetEl: function (tabId) {
-      var widgetId = this._tabWidgetMap[tabId];
-      // Find host by tab ID (most reliable)
+      // Get the full tab content element from the Layout's content cache
+      if (this._layout && this._layout._contentEls) {
+        var contentEl = this._layout._contentEls.get(tabId);
+        if (contentEl) return contentEl;
+      }
+      // Fallback: search by tab ID
       var host = this._layoutContainer.querySelector('.fl-pony-widget-host[data-tab-id="' + CSS.escape(tabId) + '"]');
       if (host) return host;
-      // Fallback by widget ID
+      var widgetId = this._tabWidgetMap[tabId];
       if (widgetId) {
         host = this._layoutContainer.querySelector('.fl-pony-widget-host[data-widget-id="' + CSS.escape(String(widgetId)) + '"]');
         if (host) return host;
