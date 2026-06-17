@@ -23,6 +23,9 @@
 
 package com.ponysdk.core.terminal.ui;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestOracle;
 import com.ponysdk.core.model.ClientToServerModel;
@@ -33,11 +36,9 @@ import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
-import elemental.js.util.JsMapFromIntTo;
-
 public class PTSuggestBox extends PTWidget<SuggestBox> {
 
-    private static JsMapFromIntTo<SuggestOracle> oracleByID;
+    private static Map<Integer, SuggestOracle> oracleByID;
 
     private PTTextBox ptTextBox;
     private SuggestOracle oracle;
@@ -103,7 +104,7 @@ public class PTSuggestBox extends PTWidget<SuggestBox> {
     }
 
     public static void put(final int objectID, final SuggestOracle oracle) {
-        if (oracleByID == null) oracleByID = JsMapFromIntTo.create();
+        if (oracleByID == null) oracleByID = new HashMap<>();
         oracleByID.put(objectID, oracle);
     }
 

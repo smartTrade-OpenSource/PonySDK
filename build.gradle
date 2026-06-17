@@ -1,10 +1,23 @@
 subprojects {
     apply plugin: 'java'
     apply plugin: 'maven-publish'
-    sourceCompatibility = JavaVersion.VERSION_1_9
-    targetCompatibility = JavaVersion.VERSION_1_9
+
+    // Server/build target: latest Java LTS (25). The GWT terminal is transpiled
+    // separately at -sourceLevel 17 (see :ponysdk gwtc task) — GWT's limit, unrelated
+    // to the JVM that runs the build.
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(25)
+        }
+    }
 
     repositories {
         mavenCentral()
+    }
+
+    // JDK 25's javadoc doclint is far stricter (rejects HTML heading jumps, etc.).
+    // We still publish a javadoc jar, but doclint must not fail the build.
+    tasks.withType(Javadoc).configureEach {
+        options.addStringOption('Xdoclint:none', '-quiet')
     }
 }

@@ -25,9 +25,10 @@ package com.ponysdk.core.server.servlet;
 
 import java.io.IOException;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
@@ -44,7 +45,7 @@ public class AjaxServletTest {
 
     /**
      * Test method for
-     * {@link com.ponysdk.core.server.servlet.AjaxServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)}.
+     * {@link com.ponysdk.core.server.servlet.AjaxServlet#doGet(jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse)}.
      */
     @Test
     public void testDoGet() throws ServletException, IOException {
@@ -54,6 +55,11 @@ public class AjaxServletTest {
         final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
         Mockito.when(request.getHeader(ClientToServerModel.UI_CONTEXT_ID.name())).thenReturn(String.valueOf(uiContextID));
         Mockito.when(request.getHeader(ClientToServerModel.OBJECT_ID.name())).thenReturn(String.valueOf(pObjectID));
+
+        // The caller's HTTP session owns the application (keyed by session id)
+        final HttpSession session = Mockito.mock(HttpSession.class);
+        Mockito.when(session.getId()).thenReturn("0");
+        Mockito.when(request.getSession(false)).thenReturn(session);
 
         final Application application = new Application("0", null, null);
         final UIContext uiContext = Mockito.mock(UIContext.class);
@@ -71,13 +77,16 @@ public class AjaxServletTest {
         UIContext.setCurrent(uiContext);
         ajaxServlet.doGet(request, response);
 
+        // The request owned by this session reaches its own object
+        Mockito.verify(pObject, Mockito.times(1)).handleAjaxRequest(request, response);
+
         SessionManager.get().unregisterApplication(application);
         UIContext.setCurrent(null);
     }
 
     /**
      * Test method for
-     * {@link com.ponysdk.core.server.servlet.AjaxServlet#doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)}.
+     * {@link com.ponysdk.core.server.servlet.AjaxServlet#doPost(jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse)}.
      */
     @Test
     public void testDoPost() throws ServletException, IOException {
@@ -88,11 +97,49 @@ public class AjaxServletTest {
         Mockito.when(request.getHeader(ClientToServerModel.UI_CONTEXT_ID.name())).thenReturn(String.valueOf(uiContextID));
         Mockito.when(request.getHeader(ClientToServerModel.OBJECT_ID.name())).thenReturn(String.valueOf(pObjectID));
 
+        // No HTTP session on the request → no context can be resolved → denied
         final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
         ajaxServlet.doPost(request, response);
 
-        Mockito.verify(response, Mockito.times(1)).sendError(ArgumentMatchers.eq(HttpServletResponse.SC_INTERNAL_SERVER_ERROR),
+        Mockito.verify(response, Mockito.times(1)).sendError(ArgumentMatchers.eq(HttpServletResponse.SC_NOT_FOUND),
             ArgumentMatchers.anyString());
+    }
+
+    /**
+     * Non-regression (IDOR): a request from one HTTP session must not reach a UIContext owned by
+     * another session, even if it guesses the (sequential) context id.
+     */
+    @Test
+    public void testCrossSessionAccessIsDenied() throws ServletException, IOException {
+        final int victimContextID = 1;
+        final int pObjectID = 2;
+
+        // Victim's context lives in the victim's application (session "victim")
+        final Application victim = new Application("victim", null, null);
+        final UIContext victimContext = Mockito.mock(UIContext.class);
+        Mockito.when(victimContext.getID()).thenReturn(victimContextID);
+        Mockito.when(victimContext.isAlive()).thenReturn(true);
+        victim.registerUIContext(victimContext);
+        SessionManager.get().registerApplication(victim);
+
+        // Attacker: different HTTP session, guesses the victim's context id
+        final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        Mockito.when(request.getHeader(ClientToServerModel.UI_CONTEXT_ID.name())).thenReturn(String.valueOf(victimContextID));
+        Mockito.when(request.getHeader(ClientToServerModel.OBJECT_ID.name())).thenReturn(String.valueOf(pObjectID));
+        final HttpSession attackerSession = Mockito.mock(HttpSession.class);
+        Mockito.when(attackerSession.getId()).thenReturn("attacker");
+        Mockito.when(request.getSession(false)).thenReturn(attackerSession);
+
+        final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        ajaxServlet.doGet(request, response);
+
+        // The attacker never touches the victim's context, and gets a generic 404
+        Mockito.verify(victimContext, Mockito.never()).execute(ArgumentMatchers.any(Runnable.class));
+        Mockito.verify(victimContext, Mockito.never()).getObject(ArgumentMatchers.anyInt());
+        Mockito.verify(response, Mockito.times(1)).sendError(ArgumentMatchers.eq(HttpServletResponse.SC_NOT_FOUND),
+            ArgumentMatchers.anyString());
+
+        SessionManager.get().unregisterApplication(victim);
     }
 
 }

@@ -13,9 +13,11 @@
     <Loggers>
         <Logger name="com.ponysdk.core.server.websocket" level="INFO" additivity="false">
             <AppenderRef ref="STDOUT"/>
+            <AppenderRef ref="STDERR"/>
         </Logger>
         <Logger name="com.ponysdk" level="INFO" additivity="false">
             <AppenderRef ref="STDOUT"/>
+            <AppenderRef ref="STDERR"/>
         </Logger>
         <Root level="INFO">
             <AppenderRef ref="STDOUT"/>

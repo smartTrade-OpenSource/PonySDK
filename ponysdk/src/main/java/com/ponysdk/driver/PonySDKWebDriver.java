@@ -30,12 +30,12 @@ import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
-import javax.websocket.CloseReason;
-import javax.websocket.MessageHandler;
-import javax.websocket.Session;
+import jakarta.json.Json;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObject;
+import jakarta.websocket.CloseReason;
+import jakarta.websocket.MessageHandler;
+import jakarta.websocket.Session;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -351,7 +351,13 @@ public class PonySDKWebDriver implements WebDriver {
     }
 
     private Object getArray(final ByteBuffer b) {
-        final Object[] array = new Object[readUnsignedByte(b)];
+        int size = readUnsignedByte(b);
+        // 255 is the escape: a uint31 length (2 or 4 bytes) follows — mirrors WebSocketPusher / ReaderBuffer
+        if (size == ArrayValueModel.LENGTH_UINT31_ESCAPE) {
+            length += Short.BYTES;
+            size = getUint31(b);
+        }
+        final Object[] array = new Object[size];
         length += array.length; //elements types
         for (int i = 0; i < array.length; i++) {
             final ArrayValueModel model = readArrayValueModel(b);

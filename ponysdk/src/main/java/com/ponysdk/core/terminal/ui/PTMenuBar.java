@@ -52,8 +52,7 @@ public class PTMenuBar extends PTWidget<MenuBar> {
 
     @Override
     public void add(final ReaderBuffer buffer, final PTObject ptObject) {
-        if (ptObject instanceof PTMenuItem) {
-            final PTMenuItem menuItem = (PTMenuItem) ptObject;
+        if (ptObject instanceof PTMenuItem menuItem) {
             final BinaryModel binaryModel = buffer.readBinaryModel();
             if (ServerToClientModel.BEFORE_INDEX == binaryModel.getModel()) {
                 uiObject.insertItem(menuItem.uiObject, binaryModel.getIntValue());
@@ -75,8 +74,7 @@ public class PTMenuBar extends PTWidget<MenuBar> {
 
     @Override
     public void remove(final ReaderBuffer buffer, final PTObject ptObject) {
-        if (ptObject instanceof PTMenuItem) {
-            final PTMenuItem menuItem = (PTMenuItem) ptObject;
+        if (ptObject instanceof PTMenuItem menuItem) {
             uiObject.removeItem(menuItem.uiObject);
         } else {
             final PTMenuItemSeparator menuItem = (PTMenuItemSeparator) ptObject;

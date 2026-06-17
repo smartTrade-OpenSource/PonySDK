@@ -1,1 +1,6 @@
-include 'ponysdk','sample'
+plugins {
+    // Auto-provisions the JDK declared by the Java toolchain (see build.gradle)
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}
+
+include 'ponysdk','ponysdk-spring','sample'

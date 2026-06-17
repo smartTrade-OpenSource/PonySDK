@@ -23,12 +23,10 @@
 
 package com.ponysdk.core.terminal.model;
 
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.json.client.JSONArray;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.ValueTypeModel;
-
-import elemental.json.Json;
-import elemental.json.JsonObject;
 
 public class BinaryModel {
 
@@ -114,9 +112,16 @@ public class BinaryModel {
         return stringValue;
     }
 
-    public JsonObject getJsonObject() {
-        return Json.parse(stringValue);
+    /**
+     * Parses the string value as a JSON object and returns it as a JavaScriptObject.
+     */
+    public JavaScriptObject getJsonObject() {
+        return parseJson(stringValue);
     }
+
+    private static native JavaScriptObject parseJson(String json) /*-{
+        return JSON.parse(json);
+    }-*/;
 
     public JSONArray getArrayValue() {
         return arrayValue;
@@ -141,6 +146,7 @@ public class BinaryModel {
         else if (ValueTypeModel.STRING == typeModel) return model + " => " + stringValue;
         else if (ValueTypeModel.FLOAT == typeModel) return model + " => " + floatValue;
         else if (ValueTypeModel.ARRAY == typeModel) return model + " => " + arrayValue;
+        else if (ValueTypeModel.UINT31 == typeModel) return model + " => " + intValue;
         else throw new IllegalArgumentException("No model type configured : " + typeModel);
     }
 

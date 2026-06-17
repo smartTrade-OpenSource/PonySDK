@@ -27,10 +27,6 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
-import javax.json.JsonObject;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +40,18 @@ import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.util.SetUtils;
 import com.ponysdk.core.writer.ModelWriter;
 import com.ponysdk.core.writer.ModelWriterCallback;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import jakarta.json.JsonObject;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Set;
+
+import com.ponysdk.core.util.CompactIntRunnableMap;
 
 /**
  * The superclass for all PonySDK objects.
@@ -59,7 +67,7 @@ public abstract class PObject {
     protected Set<DestroyListener> destroyListeners;
     protected Object data;
 
-    protected LinkedHashMap<Integer, Runnable> stackedInstructions;
+    protected CompactIntRunnableMap stackedInstructions;
     private String nativeBindingFunction;
 
     private PTerminalEvent.Handler terminalHandler;
@@ -122,7 +130,7 @@ public abstract class PObject {
         init0();
 
         if (stackedInstructions != null) {
-            stackedInstructions.values().forEach(Runnable::run);
+            stackedInstructions.runAll();
             stackedInstructions = null;
         }
 
@@ -221,8 +229,8 @@ public abstract class PObject {
         }
     }
 
-    protected LinkedHashMap<Integer, Runnable> safeStackedInstructions() {
-        if (stackedInstructions == null) stackedInstructions = new LinkedHashMap<>(8);
+    protected CompactIntRunnableMap safeStackedInstructions() {
+        if (stackedInstructions == null) stackedInstructions = new CompactIntRunnableMap(4);
         return stackedInstructions;
     }
 

@@ -25,11 +25,12 @@ package com.ponysdk.core.ui.basic;
 
 import java.util.Objects;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.application.UIContext;
+import com.ponysdk.core.writer.ModelWriter;
 import com.ponysdk.core.ui.basic.event.PBlurEvent;
 import com.ponysdk.core.ui.basic.event.PBlurHandler;
 import com.ponysdk.core.ui.basic.event.PClickEvent;
@@ -52,6 +53,12 @@ public abstract class PFocusWidget extends PWidget implements Focusable {
 
     protected PFocusWidget() {
         if (UIContext.get().getConfiguration().isTabindexOnlyFormField()) tabindex = TabindexMode.FOCUSABLE.getTabIndex();
+    }
+
+    @Override
+    protected void enrichForUpdate(final ModelWriter writer) {
+        super.enrichForUpdate(writer);
+        if (!enabled) writer.write(ServerToClientModel.ENABLED, false);
     }
 
     public void showLoadingOnRequest(final boolean showLoadingOnRequest) {

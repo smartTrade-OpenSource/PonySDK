@@ -25,9 +25,10 @@ package com.ponysdk.core.server.servlet;
 
 import java.io.IOException;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
@@ -45,7 +46,7 @@ public class StreamServiceServletTest {
 
     /**
      * Test method for
-     * {@link com.ponysdk.core.server.servlet.StreamServiceServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)}.
+     * {@link com.ponysdk.core.server.servlet.StreamServiceServlet#doGet(jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse)}.
      */
     @Test
     public void testDoGet() throws ServletException, IOException {
@@ -56,6 +57,11 @@ public class StreamServiceServletTest {
         Mockito.when(request.getParameter(ClientToServerModel.UI_CONTEXT_ID.toStringValue())).thenReturn(String.valueOf(uiContextID));
         Mockito.when(request.getParameter(ClientToServerModel.STREAM_REQUEST_ID.toStringValue()))
             .thenReturn(String.valueOf(streamRequestID));
+
+        // The caller's HTTP session owns the application (keyed by session id)
+        final HttpSession session = Mockito.mock(HttpSession.class);
+        Mockito.when(session.getId()).thenReturn("0");
+        Mockito.when(request.getSession(false)).thenReturn(session);
 
         final Application application = new Application("0", null, null);
         final UIContext uiContext = Mockito.mock(UIContext.class);
@@ -78,7 +84,7 @@ public class StreamServiceServletTest {
 
     /**
      * Test method for
-     * {@link com.ponysdk.core.server.servlet.StreamServiceServlet#doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)}.
+     * {@link com.ponysdk.core.server.servlet.StreamServiceServlet#doPost(jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse)}.
      */
     @Test
     public void testDoPost() throws ServletException, IOException {
@@ -87,6 +93,10 @@ public class StreamServiceServletTest {
         final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
         Mockito.when(request.getParameter(ClientToServerModel.UI_CONTEXT_ID.toStringValue())).thenReturn(String.valueOf(uiContextID));
         Mockito.when(request.getParameter(ClientToServerModel.STREAM_REQUEST_ID.toStringValue())).thenReturn("2");
+
+        final HttpSession session = Mockito.mock(HttpSession.class);
+        Mockito.when(session.getId()).thenReturn("0");
+        Mockito.when(request.getSession(false)).thenReturn(session);
 
         final Application application = new Application("0", null, null);
         final UIContext uiContext = Mockito.mock(UIContext.class);
@@ -97,10 +107,45 @@ public class StreamServiceServletTest {
         final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
         streamServiceServlet.doPost(request, response);
 
+        // Valid session but no stream handler registered → internal error
         Mockito.verify(response, Mockito.times(1)).sendError(ArgumentMatchers.eq(HttpServletResponse.SC_INTERNAL_SERVER_ERROR),
             ArgumentMatchers.any());
 
         SessionManager.get().unregisterApplication(application);
+    }
+
+    /**
+     * Non-regression (IDOR): a stream request from one HTTP session must not reach a UIContext
+     * owned by another session, even if it guesses the (sequential) context id.
+     */
+    @Test
+    public void testCrossSessionAccessIsDenied() throws ServletException, IOException {
+        final int victimContextID = 1;
+
+        final Application victim = new Application("victim", null, null);
+        final UIContext victimContext = Mockito.mock(UIContext.class);
+        Mockito.when(victimContext.getID()).thenReturn(victimContextID);
+        victim.registerUIContext(victimContext);
+        SessionManager.get().registerApplication(victim);
+
+        // Attacker: different HTTP session, guesses the victim's context id
+        final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        Mockito.when(request.getParameter(ClientToServerModel.UI_CONTEXT_ID.toStringValue()))
+            .thenReturn(String.valueOf(victimContextID));
+        Mockito.when(request.getParameter(ClientToServerModel.STREAM_REQUEST_ID.toStringValue())).thenReturn("2");
+        final HttpSession attackerSession = Mockito.mock(HttpSession.class);
+        Mockito.when(attackerSession.getId()).thenReturn("attacker");
+        Mockito.when(request.getSession(false)).thenReturn(attackerSession);
+
+        final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        streamServiceServlet.doGet(request, response);
+
+        // The attacker never removes a listener from the victim's context, and gets a generic 404
+        Mockito.verify(victimContext, Mockito.never()).removeStreamListener(ArgumentMatchers.anyInt());
+        Mockito.verify(response, Mockito.times(1)).sendError(ArgumentMatchers.eq(HttpServletResponse.SC_NOT_FOUND),
+            ArgumentMatchers.anyString());
+
+        SessionManager.get().unregisterApplication(victim);
     }
 
 }

@@ -72,7 +72,7 @@ public class UISampleTestPerformance implements EntryPoint, UserLoggedOutHandler
 
     @Override
     public void start(final UIContext uiContext) {
-        uiContext.setTerminalDataReceiver((object, instruction) -> System.err.println(object + " : " + instruction));
+        uiContext.setTerminalDataReceiver((object, instruction) -> log.debug("{} : {}", object, instruction));
 
         createReconnectingPanel();
 

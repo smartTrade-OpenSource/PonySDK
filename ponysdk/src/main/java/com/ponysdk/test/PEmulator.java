@@ -6,8 +6,8 @@ import com.ponysdk.core.model.DomHandlerType;
 import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.ui.basic.PObject;
 
-import javax.json.Json;
-import javax.json.JsonObject;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
 
 public class PEmulator {
 

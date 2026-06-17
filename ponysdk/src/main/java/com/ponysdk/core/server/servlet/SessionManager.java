@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.ponysdk.core.server.application.Application;
@@ -67,12 +66,46 @@ public class SessionManager {
         listeners.add(listener);
     }
 
+    /**
+     * Returns the {@link UIContext} with the given id <strong>only if</strong> it belongs to the
+     * application identified by {@code applicationId} (i.e. the caller's HTTP session).
+     * <p>
+     * This is the safe lookup to use from HTTP endpoints: it prevents a client from reaching a
+     * UIContext owned by another session by guessing its (sequential) id — an IDOR.
+     *
+     * @param applicationId the caller's application id (its HTTP session id)
+     * @param id            the UIContext id
+     * @return the UIContext, or {@code null} if no such context exists in that application
+     */
+    public UIContext getUIContext(final String applicationId, final int id) {
+        if (applicationId == null) return null;
+        final Application app = applications.get(applicationId);
+        return app != null ? app.getUIContext(id) : null;
+    }
+
+    /**
+     * Returns the UIContext with the given id, searching across <strong>all</strong> sessions.
+     *
+     * @deprecated This performs a global lookup and does <strong>not</strong> verify that the
+     *             caller owns the context, which exposes an IDOR (cross-session access) when the
+     *             id is attacker-controlled. Prefer {@link #getUIContext(String, int)} scoped to
+     *             the caller's HTTP session.
+     */
+    @Deprecated(forRemoval = true)
     public UIContext getUIContext(final int id) {
-        return applications.values().stream().map(app -> app.getUIContext(id)).filter(Objects::nonNull).findFirst().orElse(null);
+        for (final Application app : applications.values()) {
+            final UIContext ctx = app.getUIContext(id);
+            if (ctx != null) return ctx;
+        }
+        return null;
     }
 
     public int countUIContexts() {
-        return applications.values().stream().mapToInt(Application::countUIContexts).sum();
+        int count = 0;
+        for (final Application app : applications.values()) {
+            count += app.countUIContexts();
+        }
+        return count;
     }
 
 }

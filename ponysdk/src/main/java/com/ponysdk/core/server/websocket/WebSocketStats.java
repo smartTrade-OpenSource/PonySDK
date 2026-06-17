@@ -215,23 +215,23 @@ public class WebSocketStats {
     private static void encodeValue(final DataOutputStream outputStream, final Object v) throws IOException {
         if (v == null) {
             outputStream.writeByte(NULL_VALUE);
-        } else if (v instanceof Boolean) {
-            outputStream.write(v.equals(Boolean.TRUE) ? TRUE_VALUE : FALSE_VALUE);
-        } else if (v instanceof Byte) {
+        } else if (v instanceof Boolean b) {
+            outputStream.write(b ? TRUE_VALUE : FALSE_VALUE);
+        } else if (v instanceof Byte b) {
             outputStream.write(BYTE_VALUE);
-            outputStream.writeByte((byte) v);
-        } else if (v instanceof Short) {
+            outputStream.writeByte(b);
+        } else if (v instanceof Short s) {
             outputStream.write(SHORT_VALUE);
-            outputStream.writeShort((short) v);
-        } else if (v instanceof Integer) {
+            outputStream.writeShort(s);
+        } else if (v instanceof Integer i) {
             outputStream.write(INT_VALUE);
-            outputStream.writeInt((int) v);
-        } else if (v instanceof Float) {
+            outputStream.writeInt(i);
+        } else if (v instanceof Float f) {
             outputStream.write(FLOAT_VALUE);
-            outputStream.writeFloat((float) v);
-        } else if (v instanceof Double) {
+            outputStream.writeFloat(f);
+        } else if (v instanceof Double d) {
             outputStream.write(DOUBLE_VALUE);
-            outputStream.writeDouble((double) v);
+            outputStream.writeDouble(d);
         } else {
             outputStream.write(STRING_VALUE);
             writeUTF(outputStream, v.toString());

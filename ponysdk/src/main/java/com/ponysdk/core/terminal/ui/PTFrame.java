@@ -36,7 +36,7 @@ import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
-import elemental.html.Uint8Array;
+import elemental2.core.Uint8Array;
 
 public class PTFrame extends PTWidget<HTMLPanel> implements PostMessageHandler {
 
@@ -96,7 +96,7 @@ public class PTFrame extends PTWidget<HTMLPanel> implements PostMessageHandler {
     }
 
     public native void postMessage(Element element, final Uint8Array buffer) /*-{
-                                                                             element.contentWindow.postMessage(buffer, '*');
-                                                                             }-*/;
+        element.contentWindow.postMessage(buffer, '*');
+    }-*/;
 
 }

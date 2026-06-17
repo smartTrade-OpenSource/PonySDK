@@ -1,5 +1,40 @@
+# Gradle
 .gradle/
-/.idea/
-/.project
-/.settings/
-/ponysdk/out/
+build/
+**/build/
+
+# IDE - Eclipse
+.project
+.classpath
+.settings/
+*.launch
+
+# IDE - IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# IDE - VS Code
+.vscode/
+
+# OS
+.DS_Store
+
+# PonySDK
+ponysdk/out/
+
+# Compiled class files outside build dirs
+*.class
+
+# IDE workspace files
+*.code-workspace
+
+# ID-generator analysis artifacts (scratch — removed from repo)
+/TestIdGenerator.*
+/run_id_analysis.sh
+/quick_test.sh
+/visualize_id_stats.py
+/id_statistics_analysis.png
+*.csv

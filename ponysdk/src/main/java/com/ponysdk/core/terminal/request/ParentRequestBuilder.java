@@ -25,21 +25,24 @@ package com.ponysdk.core.terminal.request;
 
 import com.google.gwt.json.client.JSONValue;
 
-import elemental.client.Browser;
-import elemental.events.MessageEvent;
-import elemental.html.Uint8Array;
+import elemental2.core.Uint8Array;
 
 public abstract class ParentRequestBuilder implements RequestBuilder {
 
     public ParentRequestBuilder(final String id, final RequestCallback callback) {
         // From Main terminal to the matching window terminal
-        Browser.getWindow().setOnmessage(event -> {
-            final Object data = ((MessageEvent) event).getData();
-            if (data instanceof Uint8Array) callback.onDataReceived((Uint8Array) data);
-        });
-
+        setOnMessage(callback);
         setReady(id);
     }
+
+    private static native void setOnMessage(RequestCallback callback) /*-{
+        $wnd.onmessage = function(event) {
+            var data = event.data;
+            if (data instanceof Uint8Array) {
+                callback.@com.ponysdk.core.terminal.request.RequestCallback::onDataReceived(Lelemental2/core/Uint8Array;)(data);
+            }
+        };
+    }-*/;
 
     /**
      * To Main terminal

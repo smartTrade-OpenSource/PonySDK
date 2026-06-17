@@ -37,7 +37,7 @@ import com.ponysdk.core.writer.ModelWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 import java.util.*;
 
 public class PWindow extends PObject {
@@ -55,7 +55,7 @@ public class PWindow extends PObject {
     private boolean relative = false;
     private final Location location;
 
-    private Map<String, PRootPanel> panelByZone = new HashMap<>(8);
+    private Map<String, PRootPanel> panelByZone = new HashMap<>(4);
 
     private Map<TextFunction, PFunction> functions;
 
@@ -96,7 +96,7 @@ public class PWindow extends PObject {
         if (initialized) return;
 
         if (stackedInstructions != null) {
-            stackedInstructions.values().forEach(Runnable::run);
+            stackedInstructions.runAll();
             stackedInstructions = null;
         }
 
@@ -606,12 +606,12 @@ public class PWindow extends PObject {
     }
 
     protected String dumpDOM() {
-        String DOM = "<body>";
-        for (PRootPanel panel : panelByZone.values()) {
-            DOM += panel.dumpDOM();
+        final StringBuilder sb = new StringBuilder("<body>");
+        for (final PRootPanel panel : panelByZone.values()) {
+            sb.append(panel.dumpDOM());
         }
-        DOM += "</body>";
-        return DOM;
+        sb.append("</body>");
+        return sb.toString();
     }
 
 }

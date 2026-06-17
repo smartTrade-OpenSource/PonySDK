@@ -32,7 +32,7 @@ import com.ponysdk.core.ui.basic.PWindow;
 
 public class ModelWriter {
 
-    private final WebsocketEncoder encoder;
+    private WebsocketEncoder encoder;
 
     private WeakReference<PWindow> currentWindow;
 
@@ -40,10 +40,19 @@ public class ModelWriter {
         this.encoder = encoder;
     }
 
+    /**
+     * Swaps the underlying encoder — used during transparent WebSocket reconnection
+     * to reattach a live UIContext to a new WebSocket session.
+     */
+    public void setEncoder(final WebsocketEncoder encoder) {
+        this.encoder = encoder;
+        this.currentWindow = null; // force WINDOW_ID re-emission on next write
+    }
+
     public void beginObject(final PWindow window) {
         encoder.beginObject();
 
-        if (currentWindow == null || !window.equals(currentWindow.get())) {
+        if (currentWindow == null || currentWindow.get() != window) {
             currentWindow = new WeakReference<>(window);
             encoder.encode(ServerToClientModel.WINDOW_ID, window.getID());
         }
@@ -57,13 +66,15 @@ public class ModelWriter {
      * @param value The type can be primitives, String or Object[]
      */
     public void write(final ServerToClientModel model, final Object value) {
-        if (UIContext.get().isAlive()) {
+        final UIContext ctx = UIContext.get();
+        if (ctx != null && ctx.isAlive()) {
             encoder.encode(model, value);
         }
     }
 
     public void endObject() {
-        if (UIContext.get().isAlive()) {
+        final UIContext ctx = UIContext.get();
+        if (ctx != null && ctx.isAlive()) {
             encoder.endObject();
         }
     }

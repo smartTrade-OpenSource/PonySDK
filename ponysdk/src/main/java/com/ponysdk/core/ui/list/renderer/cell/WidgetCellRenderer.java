@@ -23,7 +23,7 @@
 
 package com.ponysdk.core.ui.list.renderer.cell;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PWidget;

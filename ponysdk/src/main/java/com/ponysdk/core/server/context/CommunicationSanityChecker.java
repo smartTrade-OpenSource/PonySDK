@@ -23,9 +23,8 @@
 
 package com.ponysdk.core.server.context;
 
-import java.util.concurrent.RunnableScheduledFuture;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -43,25 +42,14 @@ public class CommunicationSanityChecker {
     private static final int MAX_THREAD_CHECKER = Integer.parseInt(
         System.getProperty("communication.sanity.checker.thread.count", String.valueOf(Runtime.getRuntime().availableProcessors())));
     protected static final ScheduledThreadPoolExecutor sanityCheckerTimer = new ScheduledThreadPoolExecutor(MAX_THREAD_CHECKER,
-        new ThreadFactory() {
-
-            private int i = 0;
-
-            @Override
-            public Thread newThread(final Runnable r) {
-                final Thread t = new Thread(r);
-                t.setName(CommunicationSanityChecker.class.getName() + "-" + i++);
-                t.setDaemon(true);
-                return t;
-            }
-        });
+        Thread.ofVirtual().name("SanityChecker-", 0).factory());
 
     protected final AtomicBoolean started = new AtomicBoolean(false);
     private final UIContext uiContext;
     private long heartBeatPeriod;
-    private RunnableScheduledFuture<?> sanityChecker;
+    private ScheduledFuture<?> sanityChecker;
     private CommunicationState currentState;
-    private long suspectTime = -1;
+    private volatile long suspectTime = -1;
 
     private static enum CommunicationState {
         OK,
@@ -83,7 +71,7 @@ public class CommunicationSanityChecker {
     public void start() {
         if (!isStarted() && heartBeatPeriod > 0) {
             currentState = CommunicationState.OK;
-            sanityChecker = (RunnableScheduledFuture<?>) sanityCheckerTimer.scheduleWithFixedDelay(() -> {
+            sanityChecker = sanityCheckerTimer.scheduleWithFixedDelay(() -> {
                 try {
                     checkCommunicationState();
                 } catch (final Throwable e) {
@@ -99,7 +87,7 @@ public class CommunicationSanityChecker {
         if (isStarted()) {
             if (sanityChecker != null) {
                 sanityChecker.cancel(false);
-                sanityCheckerTimer.remove(sanityChecker);
+                sanityCheckerTimer.purge();
                 sanityChecker = null;
             }
             started.set(false);
@@ -112,14 +100,18 @@ public class CommunicationSanityChecker {
     }
 
     private boolean isCommunicationSuspectedToBeNonFunctional(final long now) {
-        // No message have been received or sent during the HeartbeatPeriod
-        return now - uiContext.getLastReceivedTime() >= heartBeatPeriod;
+        // Communication is alive if we recently received OR sent data — both directions count
+        final long lastActivity = Math.max(uiContext.getLastReceivedTime(), uiContext.getLastSentTime());
+        return now - lastActivity >= heartBeatPeriod;
     }
 
     private void checkCommunicationState() {
+        // Skip sanity checks while UIContext is suspended (waiting for WS reconnection)
+        if (uiContext.isSuspended()) return;
+
         final long now = System.currentTimeMillis();
         switch (currentState) {
-            case OK:
+            case OK -> {
                 if (isCommunicationSuspectedToBeNonFunctional(now)) {
                     suspectTime = now;
                     currentState = CommunicationState.SUSPECT;
@@ -127,12 +119,10 @@ public class CommunicationSanityChecker {
                         "No message have been received on UIContext #{}, communication suspected to be non functional, sending heartbeat...",
                         uiContext.getID());
                 }
-                break;
-            case SUSPECT:
+            }
+            case SUSPECT -> {
                 if (uiContext.getLastReceivedTime() < suspectTime) {
                     if (now - suspectTime >= heartBeatPeriod) {
-                        // No message have been received since we suspected the
-                        // communication to be non functional
                         log.info(
                             "No message have been received on UIContext #{} since we suspected the communication to be non functional, context will be destroyed",
                             uiContext.getID());
@@ -144,10 +134,8 @@ public class CommunicationSanityChecker {
                     currentState = CommunicationState.OK;
                     suspectTime = -1;
                 }
-                break;
-            case KO:
-            default:
-                break;
+            }
+            case KO -> { /* nothing to do */ }
         }
 
         uiContext.sendRoundTrip();

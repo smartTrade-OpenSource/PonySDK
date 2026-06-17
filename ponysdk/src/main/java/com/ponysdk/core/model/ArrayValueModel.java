@@ -40,12 +40,27 @@ public enum ArrayValueModel {
 
     STRING_UTF8_UINT8_LENGTH(ArrayValueModel.STRING_UINT8_LENGTH_MIN_SIZE, true),
     STRING_UTF8_UINT16_LENGTH(ArrayValueModel.STRING_UINT16_LENGTH_SIZE, true),
-    STRING_UTF8_UINT32_LENGTH(ArrayValueModel.STRING_UINT32_LENGTH_MIN_SIZE, true);
+    STRING_UTF8_UINT32_LENGTH(ArrayValueModel.STRING_UINT32_LENGTH_MIN_SIZE, true),
+
+    // String Dictionary Protocol - reference to interned string by ID (UINT31: 2 or 4 bytes)
+    STRING_DICTIONARY_REF(ArrayValueModel.STRING_DICTIONARY_REF_MIN_SIZE, true),
+
+    // String Dictionary Protocol - inline add: UINT31 id + raw string (client stores and returns the string)
+    STRING_DICTIONARY_ADD(ArrayValueModel.STRING_DICTIONARY_ADD_MIN_SIZE, true);
 
     private static final int BOOLEAN_SIZE = 0;
     private static final int STRING_UINT8_LENGTH_MIN_SIZE = 1;
     private static final int STRING_UINT16_LENGTH_SIZE = 2;
     private static final int STRING_UINT32_LENGTH_MIN_SIZE = 4;
+    private static final int STRING_DICTIONARY_REF_MIN_SIZE = 2; // UINT31: 2 bytes for IDs 0-32767
+    private static final int STRING_DICTIONARY_ADD_MIN_SIZE = 2; // UINT31: 2 bytes for IDs 0-32767 + string follows
+
+    /**
+     * Array length encoding: a length of 0..254 is written as a single unsigned byte; the value 255
+     * is an escape meaning a UINT31 length (2 or 4 bytes) follows. This lets a binary array exceed
+     * 255 elements while keeping small arrays at a single length byte.
+     */
+    public static final int LENGTH_UINT31_ESCAPE = 0xFF;
 
     private final int minSize;
     private final boolean dynamicSize;

@@ -24,13 +24,11 @@
 package com.ponysdk.core.server.concurrent;
 
 import java.time.Duration;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -47,18 +45,7 @@ public class PScheduler {
 
     static {
         final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(Runtime.getRuntime().availableProcessors(),
-            new ThreadFactory() {
-
-                private int i = 0;
-
-                @Override
-                public Thread newThread(final Runnable r) {
-                    final Thread t = new Thread(r);
-                    t.setName(PScheduler.class.getName() + "-" + i++);
-                    t.setDaemon(true);
-                    return t;
-                }
-            });
+            Thread.ofVirtual().name("PScheduler-", 0).factory());
         INSTANCE = new PScheduler(executor);
     }
 
@@ -113,26 +100,28 @@ public class PScheduler {
 
     private UIRunnable schedule0(final UIContext context, final Runnable runnable, final Duration duration) {
         final UIRunnable uiRunnable = new UIRunnable(context, this, runnable, false);
-        uiRunnable.setFuture(executor.schedule(uiRunnable, duration.toMillis(), TimeUnit.MILLISECONDS));
+        // Register BEFORE scheduling: an Executor guarantees that actions prior to a task's
+        // submission happen-before the task runs, so run()'s purge() always observes the registered
+        // task. Otherwise a 0-delay task can purge() before registerTask() adds it, leaking the
+        // finished one-shot runnable into the per-UIContext set until the context is destroyed.
         registerTask(uiRunnable);
+        uiRunnable.setFuture(executor.schedule(uiRunnable, duration.toMillis(), TimeUnit.MILLISECONDS));
         return uiRunnable;
     }
 
     private UIRunnable scheduleAtFixedRate0(final UIContext context, final Runnable runnable, final Duration delay,
                                             final Duration period) {
         final UIRunnable uiRunnable = new UIRunnable(context, this, runnable, true);
+        registerTask(uiRunnable); // register before scheduling — see schedule0
         uiRunnable.setFuture(executor.scheduleAtFixedRate(uiRunnable, delay.toMillis(), period.toMillis(), TimeUnit.MILLISECONDS));
-        registerTask(uiRunnable);
         return uiRunnable;
     }
 
     private UIRunnable scheduleWithFixedDelay0(final UIContext context, final Runnable runnable, final long delayMillis,
                                                final long periodMillis) {
         final UIRunnable uiRunnable = new UIRunnable(context, this, runnable, true);
-        final ScheduledFuture<?> future = executor.scheduleWithFixedDelay(uiRunnable, delayMillis, periodMillis,
-            TimeUnit.MILLISECONDS);
-        uiRunnable.setFuture(future);
-        registerTask(uiRunnable);
+        registerTask(uiRunnable); // register before scheduling — see schedule0
+        uiRunnable.setFuture(executor.scheduleWithFixedDelay(uiRunnable, delayMillis, periodMillis, TimeUnit.MILLISECONDS));
 
         return uiRunnable;
     }
@@ -162,14 +151,14 @@ public class PScheduler {
 
     private void registerTask(final UIRunnable runnable) {
         runnablesByUIContexts.compute(runnable.uiContext, (uiContext, runnables) -> {
-            if(uiContext.isAlive()) {
+            if (uiContext.isAlive()) {
                 if (runnables == null) {
-                    runnables = Collections.newSetFromMap(new ConcurrentHashMap<>());
+                    runnables = ConcurrentHashMap.newKeySet();
                     uiContext.addContextDestroyListener(this::destroy);
                 }
                 runnables.add(runnable);
                 return runnables;
-            }else {
+            } else {
                 return null;
             }
         });
@@ -181,8 +170,8 @@ public class PScheduler {
         private final UIContext uiContext;
         private final boolean repeated;
         private final PScheduler scheduler;
-        private boolean cancelled;
-        private ScheduledFuture<?> future;
+        private volatile boolean cancelled;
+        private volatile ScheduledFuture<?> future;
 
         UIRunnable(final UIContext context, final PScheduler scheduler, final Runnable runnable, final boolean repeated) {
             this.uiContext = context;
@@ -215,11 +204,15 @@ public class PScheduler {
 
         public void onCancel() {
             this.cancelled = true;
-            this.future.cancel(false);
+            final ScheduledFuture<?> f = this.future;
+            // future may not be set yet if a cancel races the scheduling call (0-delay tasks)
+            if (f != null) f.cancel(false);
         }
 
         void setFuture(final ScheduledFuture<?> future) {
             this.future = future;
+            // a cancel may have arrived before the future was set — honour it now
+            if (cancelled) future.cancel(false);
         }
 
         public UIContext getUIContext() {

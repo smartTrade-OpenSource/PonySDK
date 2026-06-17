@@ -23,8 +23,8 @@
 
 package com.ponysdk.driver;
 
-import javax.websocket.CloseReason;
-import javax.websocket.Session;
+import jakarta.websocket.CloseReason;
+import jakarta.websocket.Session;
 
 public interface PonySessionListener {
     public void onOpen(final Session session);

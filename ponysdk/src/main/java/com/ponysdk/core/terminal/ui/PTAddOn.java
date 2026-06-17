@@ -35,8 +35,6 @@ import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
-import elemental.json.JsonObject;
-
 public class PTAddOn extends AbstractPTObject {
 
     private static final Logger log = Logger.getLogger(PTAddOn.class.getName());
@@ -56,17 +54,20 @@ public class PTAddOn extends AbstractPTObject {
         final String signature = buffer.readBinaryModel().getStringValue();
         final JavascriptAddOnFactory factory = getFactory(uiBuilder, signature);
 
-        final JsonObject arguments;
+        final JavaScriptObject arguments;
         final BinaryModel binaryModel = buffer.readBinaryModel();
         if (ServerToClientModel.PADDON_CREATION == binaryModel.getModel()) {
             arguments = binaryModel.getJsonObject();
+        } else if (ServerToClientModel.PADDON_CREATION_ARGS == binaryModel.getModel()) {
+            // pure-binary typed creation args → delivered to the factory as a JS array
+            arguments = binaryModel.getArrayValue().getJavaScriptObject();
         } else {
             arguments = null;
             buffer.rewind(binaryModel);
         }
 
         try {
-            addOn = factory.newAddOn(objectId, (JavaScriptObject) arguments, null, null);
+            addOn = factory.newAddOn(objectId, arguments, null, null);
             addOn.onInit();
         } catch (final JavaScriptException e) {
             log.log(Level.SEVERE, "PTAddOn #" + getObjectID() + " (" + signature + ") " + e.getMessage(), e);

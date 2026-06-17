@@ -56,6 +56,12 @@ public enum ValueTypeModel {
     public static final short STRING_ASCII_UINT16 = 251;
     public static final short STRING_ASCII_UINT32 = 252;
 
+    // String Dictionary Protocol - reference to interned string by ID
+    public static final short STRING_DICTIONARY_REF = 249;
+
+    // String Dictionary Protocol - inline add: UINT31 id + raw string (client stores and returns the string)
+    public static final short STRING_DICTIONARY_ADD = 248;
+
     private static final ValueTypeModel[] VALUES = ValueTypeModel.values();
 
     private final int size;

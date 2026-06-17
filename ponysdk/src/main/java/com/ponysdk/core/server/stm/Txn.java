@@ -23,7 +23,6 @@
 
 package com.ponysdk.core.server.stm;
 
-import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -31,7 +30,7 @@ public class Txn {
 
     private static final ThreadLocal<Txn> transactions = new ThreadLocal<>();
 
-    private final Set<TxnListener> txnListeners = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private final Set<TxnListener> txnListeners = ConcurrentHashMap.newKeySet();
 
     private TxnContext txnContext;
 
@@ -50,8 +49,7 @@ public class Txn {
     }
 
     public void commit() {
-        final Txn txn = transactions.get();
-        if (txn.txnContext == null) throw new RuntimeException("Call begin() before commit() a transaction.");
+        if (txnContext == null) throw new RuntimeException("Call begin() before commit() a transaction.");
         fireBeforeFlush();
         flush();
         fireAfterFlush();
@@ -59,8 +57,7 @@ public class Txn {
     }
 
     public void rollback() {
-        final Txn txn = transactions.get();
-        if (txn.txnContext == null) throw new RuntimeException("Call begin() before rollback() a transaction.");
+        if (txnContext == null) throw new RuntimeException("Call begin() before rollback() a transaction.");
         fireBeforeRollback();
         transactions.remove();
     }
