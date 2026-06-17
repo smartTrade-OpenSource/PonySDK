@@ -26,6 +26,8 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
                     <value>script/jquery-3.7.1.min.js</value>
                     <value>script/webcomponents.js</value>
                     <value>script/sample.js</value>
+                    <value>script/flexlayout.js</value>
+                    <value>script/flexlayout-addon.js</value>
                 </list>
             </property>
             <property name="style">
@@ -33,6 +35,8 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
                     <entry key="ponysdk" value="style/ponysdk.css" />
                     <entry key="sample" value="css/sample.css" />
                     <entry key="samplePony" value="css/ponysdk.css" />
+                    <entry key="flexlayout" value="css/flexlayout.css" />
+                    <entry key="flexdemo" value="css/flexlayout-demo.css" />
                 </map>
             </property>
         </bean>

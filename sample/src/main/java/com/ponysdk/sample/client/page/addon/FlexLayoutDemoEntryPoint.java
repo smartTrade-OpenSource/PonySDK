@@ -19,12 +19,26 @@ public class FlexLayoutDemoEntryPoint implements EntryPoint {
 
     @Override
     public void start(final UIContext uiContext) {
-        // Main wrapper: full viewport
+        PWindow.getMain().add(buildDemo(true));
+    }
+
+    /**
+     * Builds the FlexLayout demo content as a self-contained widget, so it can be shown both as the
+     * standalone demo entry point and embedded inside another page (e.g. the widget showcase's
+     * "FlexLayout" tab).
+     *
+     * @param fullViewport {@code true} → the root fills the browser viewport (100vw/100vh) for the
+     *                     standalone demo; {@code false} → the root fills its parent (100%/100%) so
+     *                     it can be embedded inside a sized container.
+     * @return the demo root panel
+     */
+    public static PFlowPanel buildDemo(final boolean fullViewport) {
+        // Main wrapper
         final PFlowPanel root = Element.newPFlowPanel();
         root.setStyleProperty("display", "flex");
         root.setStyleProperty("flex-direction", "column");
-        root.setStyleProperty("width", "100vw");
-        root.setStyleProperty("height", "100vh");
+        root.setStyleProperty("width", fullViewport ? "100vw" : "100%");
+        root.setStyleProperty("height", fullViewport ? "100vh" : "100%");
         root.setStyleProperty("overflow", "hidden");
 
         // Toolbar with drag sources
@@ -322,7 +336,7 @@ public class FlexLayoutDemoEntryPoint implements EntryPoint {
         layoutContainer.setStyleProperty("position", "relative");
         root.add(layoutContainer);
 
-        PWindow.getMain().add(root);
+        return root;
     }
 
     private static void styleDragSource(final PLabel label) {

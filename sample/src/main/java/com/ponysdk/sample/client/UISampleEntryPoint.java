@@ -125,6 +125,7 @@ import com.ponysdk.core.ui.scene.Scene;
 import com.ponysdk.sample.client.event.UserLoggedOutEvent;
 import com.ponysdk.sample.client.event.UserLoggedOutHandler;
 import com.ponysdk.sample.client.page.addon.BinaryArgsAddOn;
+import com.ponysdk.sample.client.page.addon.FlexLayoutDemoEntryPoint;
 import com.ponysdk.sample.client.page.addon.LoggerAddOn;
 
 public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
@@ -212,7 +213,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final String[][] tabs = {
             {"⌨", "Inputs"}, {"⊞", "Layouts"}, {"◈", "Data"},
             {"⊟", "DataGrid"}, {"◉", "Web Comp."}, {"⋯", "Misc"},
-            {"⚡", "Perf"}, {"</>", "Code"}, {"≡", "Binary"}
+            {"⚡", "Perf"}, {"</>", "Code"}, {"≡", "Binary"}, {"▦", "FlexLayout"}
         };
 
         // Active tab schedulers — cancelled on tab leave, list cleared and refilled on re-entry
@@ -279,7 +280,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         navFooter.addStyleName("pony-nav-footer");
         final PElement version = Element.newDiv();
         version.addStyleName("pony-version");
-        version.setInnerText("PonySDK v2.8 · Java " + System.getProperty("java.version").split("\\.")[0]);
+        version.setInnerText("PonySDK v3.0 · Java " + System.getProperty("java.version").split("\\.")[0]);
         navFooter.add(version);
         nav.add(navFooter);
 
@@ -302,7 +303,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             case 5 -> buildMiscTab(schedulers);
             case 6 -> buildPerfTab(uiContext, schedulers);
             case 7 -> buildCodeTab();
-            default -> buildBinaryAddonTab(schedulers);
+            case 8 -> buildBinaryAddonTab(schedulers);
+            default -> buildFlexLayoutTab();
         };
     }
 
@@ -1298,6 +1300,25 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     private static PFlowPanel section() {
         return Element.newPFlowPanel();
+    }
+
+    private PFlowPanel buildFlexLayoutTab() {
+        final PFlowPanel p = Element.newPFlowPanel();
+        pageTitle(p, "FlexLayout",
+            "Dockable panel layout add-on — drag tabs, split views, collapsible sidebars, themes. "
+                + "Its creation arguments travel over the v3 pure-binary protocol (no JSON).");
+        // The FlexLayout panel positions its content absolutely, so it needs a parent with a
+        // definite height; the showcase content area scrolls, so we give it a fixed-height box.
+        final PFlowPanel box = Element.newPFlowPanel();
+        box.setStyleProperty("height", "78vh");
+        box.setStyleProperty("min-height", "480px");
+        box.setStyleProperty("margin-top", "16px");
+        box.setStyleProperty("border", "1px solid var(--border)");
+        box.setStyleProperty("border-radius", "10px");
+        box.setStyleProperty("overflow", "hidden");
+        box.add(FlexLayoutDemoEntryPoint.buildDemo(false));
+        p.add(box);
+        return p;
     }
 
     private static void pageTitle(final PFlowPanel p, final String title, final String desc) {
