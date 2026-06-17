@@ -31,8 +31,7 @@ jobs:
     if: >-
       github.event_name == 'push' &&
       (github.ref == 'refs/heads/master' ||
-       github.ref == 'refs/heads/v2.8.x' ||
-       github.ref == 'refs/heads/v2.8.99.x')
+       github.ref == 'refs/heads/v3.x')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code

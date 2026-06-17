@@ -190,7 +190,7 @@ wait.until(d -> d.findElement(By.tagName("BUTTON"))).click();
 ### Dependencies
 
 ```gradle
-implementation 'com.ponysdk:ponysdk:2.8.99.x'
+implementation 'com.ponysdk:ponysdk:3.0.0'
 implementation 'org.seleniumhq.selenium:selenium-api:4.x'
 implementation 'jakarta.websocket:jakarta.websocket-client-api:2.2.0'
 

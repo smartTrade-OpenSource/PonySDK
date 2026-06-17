@@ -70,7 +70,7 @@ PonySDK is a **Java-only web framework** that lets you build rich web applicatio
 **Gradle:**
 ```groovy
 dependencies {
-    implementation 'com.ponysdk:ponysdk:2.8.+'
+    implementation 'com.ponysdk:ponysdk:3.0.+'
 }
 ```
 
