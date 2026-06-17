@@ -341,14 +341,6 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
         }
     }
 
-    private void sendHeartbeat() {
-        if (!isAlive() || !isSessionOpen()) return;
-        beginObject();
-        encode(ServerToClientModel.HEARTBEAT, null);
-        endObject();
-        flush0();
-    }
-
     public void flush() {
         if (isAlive() && isSessionOpen()) flush0();
     }
@@ -399,6 +391,17 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
 
     @Override
     public void encode(final ServerToClientModel model, final Object value) {
+        if (UIContext.get() == null) {
+            log.warn("encode in websocket without current ui context acquired", new Exception());
+            uiContext.acquire();
+            try {
+                encode(model, value);
+            } finally {
+                uiContext.release();
+            }
+            return;
+        }
+
         try {
             if (loggerOut.isTraceEnabled())
                 loggerOut.trace("UIContext #{} : {} {}", this.uiContext.getID(), model, value);

@@ -190,7 +190,7 @@ public class PonySDKWebDriver implements WebDriver {
         onMessageSwitch.put(ServerToClientModel.ROUNDTRIP_LATENCY, (message, frame) -> {
             if (handleImplicitCommunication) {
                 final JsonObject json = Json.createObjectBuilder() //
-                    .add(ClientToServerModel.TERMINAL_LATENCY.toStringValue(), 0) //
+                    .add(ClientToServerModel.TERMINAL_LATENCY.toStringValue(), (long) frame.getValue()) //
                     .build();
                 sendMessage(json);
             }

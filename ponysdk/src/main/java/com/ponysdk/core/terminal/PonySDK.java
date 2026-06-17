@@ -211,6 +211,7 @@ public class PonySDK implements UncaughtExceptionHandler {
         // the same value, a 1ms delay causes a spurious disconnect.
         final int clientTimeoutInMilli = heartBeatPeriodInMilli * 2;
         Scheduler.get().scheduleFixedDelay(() -> {
+            if (socketClient.getReadyState() > 1) return false; // No need to check the heartbeat when the socket is closed
             final long now = System.currentTimeMillis();
             final long lastMessageTime = socketClient.getLastMessageTime();
 

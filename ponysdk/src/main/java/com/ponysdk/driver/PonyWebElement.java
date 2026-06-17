@@ -23,6 +23,12 @@
 
 package com.ponysdk.driver;
 
+import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.DomHandlerType;
+import com.ponysdk.core.model.WidgetType;
+import com.ponysdk.core.ui.model.PKeyCodes;
+import org.openqa.selenium.*;
+
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Collection;
@@ -92,8 +98,28 @@ public class PonyWebElement implements WebElement {
         sendApplicationInstruction(ClientToServerModel.DOM_HANDLER_TYPE, DomHandlerType.CLICK.getValue());
     }
 
+    public void mouseOver(){
+        sendApplicationInstruction(ClientToServerModel.DOM_HANDLER_TYPE, DomHandlerType.MOUSE_OVER.getValue());
+    }
+
     public void doubleClick() {
         sendApplicationInstruction(ClientToServerModel.DOM_HANDLER_TYPE, DomHandlerType.DOUBLE_CLICK.getValue());
+    }
+
+    public void focus(){
+        sendApplicationInstruction(ClientToServerModel.DOM_HANDLER_TYPE, DomHandlerType.FOCUS.getValue());
+    }
+
+    public void sendKeyDown(PKeyCodes key) {
+        this.ponySDKWebDriver.sendApplicationInstruction(Json.createObjectBuilder().add(ClientToServerModel.OBJECT_ID.toStringValue(), objectID)
+                .add(ClientToServerModel.DOM_HANDLER_TYPE.toStringValue(), DomHandlerType.KEY_DOWN.getValue())
+                .add(ClientToServerModel.VALUE_KEY.toStringValue(), key.getCode()).build());
+    }
+
+    public void sendKeyUp(PKeyCodes key) {
+        this.ponySDKWebDriver.sendApplicationInstruction(Json.createObjectBuilder().add(ClientToServerModel.OBJECT_ID.toStringValue(), objectID)
+                .add(ClientToServerModel.DOM_HANDLER_TYPE.toStringValue(), DomHandlerType.KEY_UP.getValue())
+                .add(ClientToServerModel.VALUE_KEY.toStringValue(), key.getCode()).build());
     }
 
     @Override
@@ -103,32 +129,32 @@ public class PonyWebElement implements WebElement {
 
     public void sendApplicationInstruction(final ClientToServerModel model, final JsonValue value) {
         this.ponySDKWebDriver.sendApplicationInstruction(Json.createObjectBuilder() //
-            .add(ClientToServerModel.OBJECT_ID.toStringValue(), objectID).add(model.toStringValue(), value).build());
+                .add(ClientToServerModel.OBJECT_ID.toStringValue(), objectID).add(model.toStringValue(), value).build());
     }
 
     public void sendApplicationInstruction(final ClientToServerModel model, final int value) {
         this.ponySDKWebDriver.sendApplicationInstruction(Json.createObjectBuilder() //
-            .add(ClientToServerModel.OBJECT_ID.toStringValue(), objectID).add(model.toStringValue(), value).build());
+                .add(ClientToServerModel.OBJECT_ID.toStringValue(), objectID).add(model.toStringValue(), value).build());
     }
 
     public void sendApplicationInstruction(final ClientToServerModel model, final long value) {
         this.ponySDKWebDriver.sendApplicationInstruction(Json.createObjectBuilder() //
-            .add(ClientToServerModel.OBJECT_ID.toStringValue(), objectID).add(model.toStringValue(), value).build());
+                .add(ClientToServerModel.OBJECT_ID.toStringValue(), objectID).add(model.toStringValue(), value).build());
     }
 
     public void sendApplicationInstruction(final ClientToServerModel model, final double value) {
         this.ponySDKWebDriver.sendApplicationInstruction(Json.createObjectBuilder() //
-            .add(ClientToServerModel.OBJECT_ID.toStringValue(), objectID).add(model.toStringValue(), value).build());
+                .add(ClientToServerModel.OBJECT_ID.toStringValue(), objectID).add(model.toStringValue(), value).build());
     }
 
     public void sendApplicationInstruction(final ClientToServerModel model, final boolean value) {
         this.ponySDKWebDriver.sendApplicationInstruction(Json.createObjectBuilder() //
-            .add(ClientToServerModel.OBJECT_ID.toStringValue(), objectID).add(model.toStringValue(), value).build());
+                .add(ClientToServerModel.OBJECT_ID.toStringValue(), objectID).add(model.toStringValue(), value).build());
     }
 
     public void sendApplicationInstruction(final ClientToServerModel model, final String value) {
         this.ponySDKWebDriver.sendApplicationInstruction(Json.createObjectBuilder() //
-            .add(ClientToServerModel.OBJECT_ID.toStringValue(), objectID).add(model.toStringValue(), value).build());
+                .add(ClientToServerModel.OBJECT_ID.toStringValue(), objectID).add(model.toStringValue(), value).build());
     }
 
     @Override
@@ -244,6 +270,10 @@ public class PonyWebElement implements WebElement {
 
     public int getObjectID() {
         return objectID;
+    }
+
+    public void setDisplayed(boolean displayed) {
+        this.displayed = displayed;
     }
 
     public WidgetType getWidgetType() {

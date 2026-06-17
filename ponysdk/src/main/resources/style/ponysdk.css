@@ -86,6 +86,7 @@
 
 .dd-container-addon {
   position: absolute;
+  top: 0;
   display: flex;
   min-width: fit-content;
   border-radius: 0 0 4px 4px;

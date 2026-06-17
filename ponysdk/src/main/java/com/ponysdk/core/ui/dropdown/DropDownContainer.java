@@ -44,6 +44,7 @@ import com.ponysdk.core.ui.basic.event.POpenEvent;
 import com.ponysdk.core.ui.basic.event.POpenHandler;
 import com.ponysdk.core.ui.basic.event.PValueChangeEvent;
 import com.ponysdk.core.ui.basic.event.PValueChangeHandler;
+import com.ponysdk.core.ui.basic.event.PVisibilityEvent.PVisibilityHandler;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
 import com.ponysdk.core.ui.model.PEventType;
 import com.ponysdk.core.ui.model.PKeyCodes;
@@ -117,17 +118,30 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
                 focused = true;
                 onFocus();
             }, PFocusEvent.TYPE);
+            widget.addVisibilityHandler((PVisibilityHandler) event -> {
+                if (!Boolean.TRUE.equals(event.getData())) {
+                    close();
+                }
+            });
             if (configuration.isMultilevelEnabled()) {
                 widget.addDomHandler((PBlurHandler) event -> {
                     focused = false;
                     onBlur();
                 }, PBlurEvent.TYPE);
             }
-            widget.addKeyUpHandler(e -> {
+            widget.addKeyDownHandler(e -> {
                 if (!stopKeys && focused && e.getKeyCode() == PKeyCodes.ENTER.getCode()) {
                     setContainerVisible(!container.isVisible());
+                    if (!isOpen()) {
+                        focus();
+                    }
                 } else if (e.getKeyCode() == PKeyCodes.ESCAPE.getCode()) {
                     close();
+                    if (!isOpen()) {
+                        focus();
+                    }
+                } else {
+                    onContainerKeyDown(e.getKeyCode());
                 }
             });
             mainButton = Element.newPButton(configuration.getTitle());
@@ -151,7 +165,7 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
                 clearTitleButton.addClickHandler(e -> {
                     if (isEnabled()) {
                         setValue(null);
-                        clearSelectionListeners.forEach(l -> l.onClearTitleClicked());
+                        clearSelectionListeners.forEach(DropDownContainerListener::onClearTitleClicked);
                         onValueChange();
                     }
                 });
@@ -426,6 +440,10 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
         // Nothing to do by default
     }
 
+    protected void onContainerKeyDown(final int keyCode) {
+        // Nothing to do by default
+    }
+
     protected HandlerRegistration addKeyDownHandler(final boolean forceFocus, final PKeyDownEvent.Handler handler) {
         if (forceFocus) {
             container.asWidget().setTabindex(TabindexMode.TABULABLE);
@@ -471,7 +489,6 @@ public abstract class DropDownContainer<V, C extends DropDownContainerConfigurat
             afterContainerClose();
             final PCloseEvent event = new PCloseEvent(this);
             closeHandlers.forEach(l -> l.onClose(event));
-            focus();
         }
     }
 

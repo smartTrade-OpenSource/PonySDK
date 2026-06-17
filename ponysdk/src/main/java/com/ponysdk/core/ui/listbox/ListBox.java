@@ -58,6 +58,7 @@ import com.ponysdk.core.ui.infinitescroll.InfiniteScrollProvider;
 import com.ponysdk.core.ui.listbox.ListBox.ListBoxItem;
 import com.ponysdk.core.ui.listbox.ListBox.ListBoxItem.ListBoxItemType;
 import com.ponysdk.core.ui.model.PKeyCodes;
+import com.ponysdk.core.util.KeyCodeUtil;
 
 public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, ListBoxConfiguration> {
 
@@ -113,8 +114,8 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
     private HandlerRegistration upDownKeyHandler;
     private int index;
     private boolean forceIndex;
-    private Supplier<ListBoxItemRenderer<D>> itemRendererSupplier = () -> new LabelListBoxItemRenderer<>();
-    private Supplier<ListBoxFilterWidget> filterWidgetSupplier = () -> new TextListBoxFilterWidget();
+    private Supplier<ListBoxItemRenderer<D>> itemRendererSupplier = LabelListBoxItemRenderer::new;
+    private Supplier<ListBoxFilterWidget> filterWidgetSupplier = TextListBoxFilterWidget::new;
     private BiPredicate<ListBoxItem<D>, String> filterPredicate = (item, filter) -> item.getLabel().toLowerCase().contains(filter);
 
     protected final List<ListBoxItem<D>> items;
@@ -348,6 +349,7 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
             for (final ListBoxItem<D> item : this.items) {
                 if (item.getData() != null && item.getData().equals(selectedData)) {
                     setSelectedItem(item);
+                    break;
                 }
             }
         } else {
@@ -607,7 +609,7 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
         defaultContainer.add(itemContainer);
         itemContainer.addListener(beginIndex -> {
             if (!forceIndex) {
-                final ListBox<D>.ListBoxItemWidget currentItemIndex = itemContainer.getCurrentItemIndex();
+                final ListBoxItemWidget currentItemIndex = itemContainer.getCurrentItemIndex();
                 if (currentItemIndex == null || !visibleItems.contains(currentItemIndex.item)) {
                     initIndex();
                     if (index < visibleItems.size()) itemContainer.showIndex(index);
@@ -677,7 +679,7 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
                 final Integer displaySelectionLimit = configuration.getDisplaySelectionLimit();
                 if (configuration.isMultiSelectionEnabled() && displaySelectionLimit != null
                         && selectedItems.size() > displaySelectionLimit) {
-                    text.append(selectedItems.size() + STRING_SPACE + configuration.getDisplaySelectionLabel());
+                    text.append(selectedItems.size()).append(STRING_SPACE).append(configuration.getDisplaySelectionLabel());
                 } else {
                     text.append(title);
                 }
@@ -738,16 +740,18 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
                     }
                     break;
                 case LEFT:
-                    if (configuration.isMultilevelEnabled()) break;
+                    if (!configuration.isMultilevelEnabled()) break;
                     //$FALL-THROUGH$ : same behavior than enter in multiLevel
                 case ESCAPE:
                     close();
+                    focus();
                     return;
                 case ENTER:
                     setStopKeys(true);
                     final ListBoxItemWidget listBoxItemWidget = itemContainer.getCurrentItemIndex();
                     if (listBoxItemWidget != null) listBoxItemWidget.select();
                     PScheduler.schedule(() -> setStopKeys(false), Duration.ofMillis(200));
+                    if (!isOpen()) focus();
                     return;
                 default:
                     return;
@@ -785,7 +789,7 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
         }
     }
 
-    protected InfiniteScrollAddon<ListBoxItem<D>, ListBox<D>.ListBoxItemWidget> buildInfiniteScrollAddon() {
+    protected InfiniteScrollAddon<ListBoxItem<D>, ListBoxItemWidget> buildInfiniteScrollAddon() {
         return new InfiniteScrollAddon<>(new ListBoxInfiniteScrollProvider());
     }
 
@@ -845,6 +849,17 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
 
     protected String getFilter() {
         return filterWidget != null ? filterWidget.getFilter() : null;
+    }
+
+    @Override
+    protected void onContainerKeyDown(final int keyCode) {
+        if (filterWidget != null) {
+            final String value = KeyCodeUtil.getString(keyCode);
+            if (value != null) {
+                open();
+                filterWidget.setFilter(value);
+            }
+        }
     }
 
     private Collection<ListBoxItem<D>> initializeGroupItems(final Collection<? extends ListBoxItem<D>> groupItems) {
@@ -907,13 +922,17 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
     }
 
     private boolean isSelectionAllowed(Collection<?> selectedItems) {
+        boolean addNewItemInList = (selectedItems != null);
         if (selectedItems == null) selectedItems = getSelectedItems();
         final Integer selectionLimit = configuration.getSelectionLimit();
-        if (configuration.isMultiSelectionEnabled() && selectionLimit != null && selectedItems.size() >= selectionLimit) {
-            log.debug("Selection limit reached ({})", selectionLimit);
-            return false;
+        if (addNewItemInList) {
+            return !(configuration.isMultiSelectionEnabled() && selectionLimit != null && selectedItems.size() > selectionLimit);
+        } else {
+            if (configuration.isMultiSelectionEnabled() && selectionLimit != null && selectedItems.size() >= selectionLimit) {
+                log.debug("Selection limit reached ({})", selectionLimit);
+                return false;
+            } else return true;
         }
-        return true;
     }
 
     private void applyCloseOnClickMode() {
@@ -1049,7 +1068,7 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
             return groupName;
         }
 
-        void setGroupName(final String groupName) {
+        public void setGroupName(final String groupName) {
             this.groupName = groupName;
         }
 
@@ -1077,7 +1096,7 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
             } else if (!groupName.equals(other.groupName)) return false;
             if (label == null) {
                 if (other.label != null) return false;
-            } else if (!label.equals(other.label)) return false;
+            } else return label.equals(other.label);
             return true;
         }
 
@@ -1103,7 +1122,7 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
         }
 
         public static <D> Collection<ListBoxItem<D>> of(final Collection<D> data, final Function<D, String> labelMapper) {
-            return data.stream().map(t -> ListBox.ListBoxItem.of(labelMapper.apply(t), t)).collect(Collectors.toList());
+            return data.stream().map(t -> ListBoxItem.of(labelMapper.apply(t), t)).collect(Collectors.toList());
         }
 
         public enum ListBoxItemType {
@@ -1194,7 +1213,7 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
             }
             blur();
             if (itemRenderer instanceof MultiLevelDropDownRenderer) {
-                ((MultiLevelDropDownRenderer) itemRenderer).closeAll();
+                ((MultiLevelDropDownRenderer<?>) itemRenderer).closeAll();
             } else {
                 applyCloseOnClickMode();
             }
@@ -1202,7 +1221,7 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
 
         void openNested() {
             if (itemRenderer instanceof MultiLevelDropDownRenderer) {
-                ((MultiLevelDropDownRenderer) itemRenderer).openNested();
+                ((MultiLevelDropDownRenderer<?>) itemRenderer).openNested();
             }
         }
 

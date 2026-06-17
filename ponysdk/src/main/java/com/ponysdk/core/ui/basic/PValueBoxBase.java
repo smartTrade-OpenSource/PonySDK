@@ -117,7 +117,7 @@ public abstract class PValueBoxBase extends PFocusWidget {
 
     @Override
     public void onClientData(final JsonObject instruction) {
-        if (!isVisible() || !isEnabled()) return;
+        if (!canNotify(instruction)) return;
         if (instruction.containsKey(ClientToServerModel.HANDLER_PASTE.toStringValue())) {
             if (pasteHandlers != null) {
                 final String data = instruction.getString(ClientToServerModel.HANDLER_PASTE.toStringValue());

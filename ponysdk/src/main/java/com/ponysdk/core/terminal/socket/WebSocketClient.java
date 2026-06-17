@@ -119,4 +119,8 @@ public class WebSocketClient {
         return buf.byteLength;
     }
 
+    /**
+     <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/readyState">See ready state codes</a>
+     */
+    public int getReadyState() { return (int) webSocket.readyState; }
 }

@@ -137,8 +137,6 @@ public class UIBuilder {
             } else if (ServerToClientModel.DESTROY_CONTEXT == model) {
                 destroy();
                 readerBuffer.readBinaryModel(); // Read ServerToClientModel.END element
-            } else if (ServerToClientModel.HEARTBEAT == model) {
-                readerBuffer.readBinaryModel(); // Read ServerToClientModel.END element
             } else {
                 final int oldCurrentWindowId = currentWindowId;
                 if (ServerToClientModel.WINDOW_ID == model) currentWindowId = binaryModel.getIntValue();
