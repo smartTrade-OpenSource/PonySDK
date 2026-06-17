@@ -1460,7 +1460,7 @@ OpenTelemetry otel = OpenTelemetrySdk.builder()
         .setResource(Resource.getDefault().merge(
             Resource.create(Attributes.of(
                 ResourceAttributes.SERVICE_NAME, "ponysdk-trading",
-                ResourceAttributes.SERVICE_VERSION, "2.8.x"
+                ResourceAttributes.SERVICE_VERSION, "3.0.x"
             ))))
         .registerMetricReader(PeriodicMetricReader.builder(
             OtlpGrpcMetricExporter.builder()
