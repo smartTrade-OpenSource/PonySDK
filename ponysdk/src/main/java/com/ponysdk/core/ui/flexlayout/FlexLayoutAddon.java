@@ -635,8 +635,27 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
         popOutTabs.put(tabId, info);
 
         if ("window".equals(mode) && widgetFactory != null) {
-            // Note: window mode is handled entirely client-side (JS popup).
-            // No PWindow needed. The JS popup has its own pop-in button.
+            final String component = tabComponents.get(tabId);
+            if (component != null) {
+                final String title = data.getString("title", tabId);
+                final int width = data.getInt("w", 500);
+                final int height = data.getInt("h", 400);
+                final PWindow pWindow = Element.newPWindow("fl_popout_" + tabId,
+                    "resizable=yes,scrollbars=yes,height=" + height + ",width=" + width);
+                info.pWindow = pWindow;
+                pWindow.addOpenHandler(event -> {
+                    final com.ponysdk.core.ui.basic.PButton popInBtn = Element.newPButton("\u23CE Pop back in");
+                    popInBtn.setStyleProperty("margin", "6px");
+                    popInBtn.setStyleProperty("padding", "4px 12px");
+                    popInBtn.setStyleProperty("cursor", "pointer");
+                    popInBtn.addClickHandler(e -> pWindow.close());
+                    pWindow.add(popInBtn);
+                    final PWidget newWidget = widgetFactory.apply(component, tabId);
+                    if (newWidget != null) pWindow.add(newWidget);
+                });
+                pWindow.addCloseHandler(event -> popInFromWindow(tabId));
+                pWindow.open();
+            }
         }
 
         if (w instanceof TabContent) ((TabContent) w).onPopOut();

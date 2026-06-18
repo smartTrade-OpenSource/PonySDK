@@ -555,7 +555,8 @@
                    siblingId: siblingId, tabsetWeight: tabsetWeight, tabsetIdx: tabsetIdx, parentDirection: parentDirection };
 
       if (popMode === 'window') {
-        this._popOutToWindow(tabId, info, x, y, w, h);
+        // Window mode: handled server-side via PWindow. No JS popup needed.
+        this._popOuts[tabId] = info;
       } else {
         this._popOutToFloat(tabId, info, x, y, w, h);
       }
