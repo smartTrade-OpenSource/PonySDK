@@ -388,13 +388,6 @@
             info.win.className = info.win.className.replace(/fl-theme-\S+/g, '').trim();
             if (theme) info.win.classList.add(theme);
           }
-          if (info.popup && !info.popup.closed) {
-            try {
-              var body = info.popup.document.body;
-              body.className = body.className.replace(/fl-theme-\S+/g, '').trim();
-              if (theme) body.classList.add(theme);
-            } catch (e) { /* cross-origin */ }
-          }
         }
       }
     },
@@ -622,56 +615,14 @@
       info.win = win;
     },
 
-    _popOutToWindow: function (tabId, info, x, y, w, h) {
-      var self = this;
-      var popup = window.open('about:blank', 'fl_popout_' + tabId,
-        'popup=yes,width=' + (w || 500) + ',height=' + (h || 400) + ',left=' + (x || 100) + ',top=' + (y || 100)
-        + ',menubar=no,toolbar=no,location=no,status=no,resizable=yes,scrollbars=yes');
-      if (!popup) { this._popOutToFloat(tabId, info, x, y, w, h); return; }
-
-      var styles = document.querySelectorAll('link[rel="stylesheet"], style');
-      popup.document.title = info.title || 'Tab';
-      styles.forEach(function (s) { popup.document.head.appendChild(s.cloneNode(true)); });
-      popup.document.body.style.cssText = 'margin:0;padding:0;background:#181825;overflow:hidden;width:100%;height:100%;display:flex;flex-direction:column;font-family:system-ui,sans-serif;';
-
-      var toolbar = popup.document.createElement('div');
-      toolbar.style.cssText = 'display:flex;align-items:center;padding:4px 8px;background:#11111b;border-bottom:1px solid #313244;flex-shrink:0;';
-      var titleSpan2 = popup.document.createElement('span');
-      titleSpan2.style.cssText = 'flex:1;font-size:12px;color:#cdd6f4';
-      titleSpan2.textContent = info.title || 'Tab';
-      toolbar.appendChild(titleSpan2);
-      var btn = popup.document.createElement('button');
-      btn.textContent = '\u23CE Pop back in';
-      btn.style.cssText = 'background:#313244;border:1px solid #89b4fa;color:#89b4fa;border-radius:4px;padding:3px 10px;cursor:pointer;font-size:12px;';
-      btn.addEventListener('click', function () { self.popIn(tabId); });
-      toolbar.appendChild(btn);
-      popup.document.body.appendChild(toolbar);
-
-      var content = popup.document.createElement('div');
-      content.style.cssText = 'flex:1;overflow:auto;';
-      if (info.widgetEl) content.appendChild(info.widgetEl);
-      popup.document.body.appendChild(content);
-
-      popup.addEventListener('beforeunload', function () {
-        try { if (popup.location.origin !== window.location.origin) return; } catch(e) { return; }
-        if (self._popOuts && self._popOuts[tabId]) {
-          if (info.widgetEl && info.widgetEl.parentNode) self.element.appendChild(info.widgetEl);
-          self._doPopIn(tabId);
-        }
-      });
-      info.popup = popup;
-    },
-
     popIn: function (tabId) {
       if (!this._popOuts || !this._popOuts[tabId]) return;
       var info = this._popOuts[tabId];
 
-      if (info.mode === 'window' && info.popup) {
-        if (info.widgetEl && info.widgetEl.parentNode) this.element.appendChild(info.widgetEl);
+      if (info.mode === 'window') {
+        // Window mode: PWindow is managed server-side. Just notify server to close it.
         delete this._popOuts[tabId];
-        this._restoreTab(tabId, info);
-        // Close popup AFTER restoring (clicking pop-in from inside the popup would kill execution)
-        if (!info.popup.closed) info.popup.close();
+        this.sendDataToServer({ type: 'popIn', tabId: tabId });
       } else if (info.win) {
         // Float mode
         var content = info.win.querySelector('div:last-child');
@@ -683,13 +634,6 @@
         delete this._popOuts[tabId];
         this._restoreTab(tabId, info);
       }
-    },
-
-    _doPopIn: function (tabId) {
-      if (!this._popOuts || !this._popOuts[tabId]) return;
-      var info = this._popOuts[tabId];
-      delete this._popOuts[tabId];
-      this._restoreTab(tabId, info);
     },
 
     _restoreTab: function (tabId, info) {
@@ -1020,7 +964,6 @@
         for (var id in this._popOuts) {
           var info = this._popOuts[id];
           if (info.win) info.win.remove();
-          if (info.popup && !info.popup.closed) info.popup.close();
         }
         this._popOuts = {};
       }
