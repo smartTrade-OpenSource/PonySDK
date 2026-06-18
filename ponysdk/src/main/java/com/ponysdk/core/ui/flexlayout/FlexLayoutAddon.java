@@ -435,6 +435,52 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
         callTerminalMethod("setLocked", locked);
     }
 
+    /**
+     * Configure tabset toolbar buttons appearance and visibility.
+     * Each button (popoutFloat, popoutWindow) can be configured with:
+     * visible (boolean), icon (String/HTML), title (String), className (String), style (String).
+     * Set visible=false to hide a button (action still available programmatically).
+     */
+    public void configureButtons(final String configJson) {
+        callTerminalMethod("configureButtons", configJson);
+    }
+
+    /**
+     * Hide or show the float pop-out button.
+     */
+    public void setPopoutFloatVisible(final boolean visible) {
+        callTerminalMethod("configureButtons", "{\"popoutFloat\":{\"visible\":" + visible + "}}");
+    }
+
+    /**
+     * Hide or show the window pop-out button.
+     */
+    public void setPopoutWindowVisible(final boolean visible) {
+        callTerminalMethod("configureButtons", "{\"popoutWindow\":{\"visible\":" + visible + "}}");
+    }
+
+    /**
+     * Programmatically pop-out the active tab as a float overlay.
+     * Use this to trigger the action from an external button (e.g. Electron titlebar).
+     */
+    public void popOutActiveFloat() {
+        callTerminalMethod("popOutActiveFloat");
+    }
+
+    /**
+     * Programmatically pop-out the active tab as a new window (PWindow).
+     */
+    public void popOutActiveWindow() {
+        callTerminalMethod("popOutActiveWindow");
+    }
+
+    /**
+     * Programmatically toggle maximize on the active tabset.
+     */
+    public void maximizeActiveTabset() {
+        callTerminalMethod("maximizeActiveTabset");
+    }
+
     // ─── Feature: Tab metadata ──────────────────────────────────
 
     public void setTabConfig(final String tabId, final String configJson) {

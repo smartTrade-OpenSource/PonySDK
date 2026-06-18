@@ -31,6 +31,10 @@
       this._tabWidgetMap = {};
       this._pendingTimeouts = [];
       this._autoSaveEnabled = false; // Feature 14
+      this._buttonConfig = {
+        popoutFloat:  { visible: true, icon: '⧉', title: 'Pop out (overlay)', className: 'fl-tbtn fl-tbtn-popout', style: 'font-size:11px;' },
+        popoutWindow: { visible: true, icon: '↗', title: 'Pop out (new window)', className: 'fl-tbtn fl-tbtn-popout-win', style: 'font-size:12px;' }
+      };
     },
 
     initDom: function () {
@@ -108,32 +112,40 @@
         container: this._layoutContainer,
         factory: this._factory,
         tabSetButtons: function (tsNode) {
-          if (!self._enablePopOut || tsNode.children.length === 0) return null;
-          var btn = document.createElement('button');
-          btn.type = 'button';
-          btn.className = 'fl-tbtn fl-tbtn-popout';
-          btn.title = 'Pop out (overlay)';
-          btn.innerHTML = '⧉';
-          btn.style.cssText = 'font-size:11px;';
-          btn.addEventListener('click', function () {
-            var selNode = tsNode.getSelectedNode();
-            if (!selNode) return;
-            var rect = self._getTabContentRect(tsNode);
-            self.popOut(selNode.getId(), selNode.getName(), rect.x, rect.y, rect.w, rect.h, 'float');
-          });
-          var btn2 = document.createElement('button');
-          btn2.type = 'button';
-          btn2.className = 'fl-tbtn fl-tbtn-popout-win';
-          btn2.title = 'Pop out (new window)';
-          btn2.innerHTML = '↗';
-          btn2.style.cssText = 'font-size:12px;';
-          btn2.addEventListener('click', function () {
-            var selNode = tsNode.getSelectedNode();
-            if (!selNode) return;
-            var rect = self._getTabContentRect(tsNode);
-            self.popOut(selNode.getId(), selNode.getName(), rect.x, rect.y, rect.w, rect.h, 'window');
-          });
-          return [btn, btn2];
+          if (tsNode.children.length === 0) return null;
+          var btns = [];
+          var cfg = self._buttonConfig;
+          if (cfg.popoutFloat && cfg.popoutFloat.visible) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = cfg.popoutFloat.className || 'fl-tbtn fl-tbtn-popout';
+            btn.title = cfg.popoutFloat.title || 'Pop out (overlay)';
+            btn.innerHTML = cfg.popoutFloat.icon || '⧉';
+            if (cfg.popoutFloat.style) btn.style.cssText = cfg.popoutFloat.style;
+            btn.addEventListener('click', function () {
+              var selNode = tsNode.getSelectedNode();
+              if (!selNode) return;
+              var rect = self._getTabContentRect(tsNode);
+              self.popOut(selNode.getId(), selNode.getName(), rect.x, rect.y, rect.w, rect.h, 'float');
+            });
+            btns.push(btn);
+          }
+          if (cfg.popoutWindow && cfg.popoutWindow.visible) {
+            var btn2 = document.createElement('button');
+            btn2.type = 'button';
+            btn2.className = cfg.popoutWindow.className || 'fl-tbtn fl-tbtn-popout-win';
+            btn2.title = cfg.popoutWindow.title || 'Pop out (new window)';
+            btn2.innerHTML = cfg.popoutWindow.icon || '↗';
+            if (cfg.popoutWindow.style) btn2.style.cssText = cfg.popoutWindow.style;
+            btn2.addEventListener('click', function () {
+              var selNode = tsNode.getSelectedNode();
+              if (!selNode) return;
+              var rect = self._getTabContentRect(tsNode);
+              self.popOut(selNode.getId(), selNode.getName(), rect.x, rect.y, rect.w, rect.h, 'window');
+            });
+            btns.push(btn2);
+          }
+          return btns.length > 0 ? btns : null;
         },
         onModelChange: function (model) {
           self._debouncedModelChange(model);
@@ -896,6 +908,43 @@
     setLocked: function (locked) {
       if (!this._layout) return;
       this._layout.setLocked(!!locked);
+    },
+
+    configureButtons: function (configJson) {
+      var cfg = parseJson(configJson);
+      if (cfg.popoutFloat !== undefined) Object.assign(this._buttonConfig.popoutFloat, cfg.popoutFloat);
+      if (cfg.popoutWindow !== undefined) Object.assign(this._buttonConfig.popoutWindow, cfg.popoutWindow);
+      // Re-render to apply new button config
+      if (this._model) this._model.emit('change', this._model);
+    },
+
+    // Programmatic actions for external UI (Electron native buttons, etc.)
+    popOutActiveFloat: function () {
+      if (!this._layout || !this._model) return;
+      var tsId = this._layout.getActiveTabSetId();
+      var ts = tsId ? this._model.getRoot().findById(tsId) : null;
+      if (!ts) return;
+      var sel = ts.getSelectedNode();
+      if (!sel) return;
+      var rect = this._getTabContentRect(ts);
+      this.popOut(sel.getId(), sel.getName(), rect.x, rect.y, rect.w, rect.h, 'float');
+    },
+
+    popOutActiveWindow: function () {
+      if (!this._layout || !this._model) return;
+      var tsId = this._layout.getActiveTabSetId();
+      var ts = tsId ? this._model.getRoot().findById(tsId) : null;
+      if (!ts) return;
+      var sel = ts.getSelectedNode();
+      if (!sel) return;
+      var rect = this._getTabContentRect(ts);
+      this.popOut(sel.getId(), sel.getName(), rect.x, rect.y, rect.w, rect.h, 'window');
+    },
+
+    maximizeActiveTabset: function () {
+      if (!this._layout) return;
+      var tsId = this._layout.getActiveTabSetId();
+      if (tsId) this._layout._act({ type: 'MAXIMIZE_TOGGLE', tabsetId: tsId });
     },
 
     setTabConfig: function (tabId, configJson) {
