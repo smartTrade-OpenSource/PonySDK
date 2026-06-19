@@ -56,6 +56,60 @@ test.describe('FlexLayout PonySDK Integration', () => {
     await expect(page.locator('.fl-tab:has-text("Button")')).toBeVisible({ timeout: 2000 });
   });
 
+  // ─── configureButtons / programmatic actions ────────────────────
+
+  test('configureButtons hides popout float button', async ({ page }) => {
+    const before = await page.locator('.fl-tbtn-popout').count();
+    expect(before).toBeGreaterThan(0);
+    await page.evaluate(() => {
+      document.querySelector('.fl-layout').parentElement.__ponyAddon.configureButtons({popoutFloat:{visible:false}});
+    });
+    await page.waitForTimeout(500);
+    const after = await page.locator('.fl-tbtn-popout').count();
+    expect(after).toBeLessThan(before);
+  });
+
+  test('configureButtons changes button icon', async ({ page }) => {
+    await page.evaluate(() => {
+      document.querySelector('.fl-layout').parentElement.__ponyAddon.configureButtons({popoutFloat:{icon:'<span class="custom-icon">X</span>'}});
+    });
+    await page.waitForTimeout(500);
+    const html = await page.locator('.fl-tbtn-popout').first().innerHTML();
+    expect(html).toContain('custom-icon');
+  });
+
+  test('popOutActiveFloat works programmatically', async ({ page }) => {
+    await page.locator('.fl-tab').first().click();
+    await page.waitForTimeout(200);
+    await page.evaluate(() => {
+      document.querySelector('.fl-layout').parentElement.__ponyAddon.popOutActiveFloat();
+    });
+    await expect(page.locator('.fl-popout-window')).toBeVisible({ timeout: 3000 });
+  });
+
+  test('maximizeActiveTabset works programmatically', async ({ page }) => {
+    await page.locator('.fl-tab').first().click();
+    await page.waitForTimeout(200);
+    await page.evaluate(() => {
+      document.querySelector('.fl-layout').parentElement.__ponyAddon.maximizeActiveTabset();
+    });
+    await expect(page.locator('.fl-maximized')).toBeVisible({ timeout: 2000 });
+  });
+
+  test('hidden buttons still allow programmatic action', async ({ page }) => {
+    await page.evaluate(() => {
+      document.querySelector('.fl-layout').parentElement.__ponyAddon.configureButtons({popoutFloat:{visible:false}, popoutWindow:{visible:false}});
+    });
+    await page.waitForTimeout(300);
+    await expect(page.locator('.fl-tbtn-popout')).toHaveCount(0);
+    await page.locator('.fl-tab').first().click();
+    await page.waitForTimeout(200);
+    await page.evaluate(() => {
+      document.querySelector('.fl-layout').parentElement.__ponyAddon.popOutActiveFloat();
+    });
+    await expect(page.locator('.fl-popout-window')).toBeVisible({ timeout: 3000 });
+  });
+
   test('drag tab between tabsets', async ({ page }) => {
     await page.click('button:has-text("+ Add Tab")');
     await expect(page.locator('.fl-tab')).toHaveCount(3, { timeout: 2000 });

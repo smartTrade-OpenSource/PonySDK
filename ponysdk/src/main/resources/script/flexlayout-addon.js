@@ -27,7 +27,6 @@
       this._factory = null;
       this._notifyModelChange = false;
       this._notifyActions = false;
-      this._enablePopOut = true;
       this._tabWidgetMap = {};
       this._pendingTimeouts = [];
       this._autoSaveEnabled = false; // Feature 14
@@ -41,6 +40,7 @@
       var self = this;
       var el = this.element;
       el.style.cssText = 'width:100%;height:100%;overflow:hidden;position:relative;';
+      el.__ponyAddon = this;
 
       var config = this.options || {};
       var modelJson = config.model || { type: 'row', children: [{ type: 'tabset', weight: 100, children: [] }] };
@@ -912,8 +912,9 @@
 
     configureButtons: function (configJson) {
       var cfg = parseJson(configJson);
-      if (cfg.popoutFloat !== undefined) Object.assign(this._buttonConfig.popoutFloat, cfg.popoutFloat);
-      if (cfg.popoutWindow !== undefined) Object.assign(this._buttonConfig.popoutWindow, cfg.popoutWindow);
+      if (!cfg || typeof cfg !== 'object') return;
+      if (cfg.popoutFloat !== undefined && typeof cfg.popoutFloat === 'object') Object.assign(this._buttonConfig.popoutFloat, cfg.popoutFloat);
+      if (cfg.popoutWindow !== undefined && typeof cfg.popoutWindow === 'object') Object.assign(this._buttonConfig.popoutWindow, cfg.popoutWindow);
       // Re-render to apply new button config
       if (this._model) this._model.emit('change', this._model);
     },
@@ -921,9 +922,10 @@
     // Programmatic actions for external UI (Electron native buttons, etc.)
     popOutActiveFloat: function () {
       if (!this._layout || !this._model) return;
+      if (this._layout._locked) return;
       var tsId = this._layout.getActiveTabSetId();
       var ts = tsId ? this._model.getRoot().findById(tsId) : null;
-      if (!ts) return;
+      if (!ts || ts.children.length === 0) return;
       var sel = ts.getSelectedNode();
       if (!sel) return;
       var rect = this._getTabContentRect(ts);
@@ -932,9 +934,10 @@
 
     popOutActiveWindow: function () {
       if (!this._layout || !this._model) return;
+      if (this._layout._locked) return;
       var tsId = this._layout.getActiveTabSetId();
       var ts = tsId ? this._model.getRoot().findById(tsId) : null;
-      if (!ts) return;
+      if (!ts || ts.children.length === 0) return;
       var sel = ts.getSelectedNode();
       if (!sel) return;
       var rect = this._getTabContentRect(ts);
