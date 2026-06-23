@@ -119,7 +119,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
     @Override
     public void onWebSocketError(final Throwable throwable) {
         log.error("WebSocket Error on UIContext #{}", uiContext.getID(), throwable);
-        uiContext.onDestroy();
+        uiContext.onDestroy(StatusCode.SERVER_ERROR);
     }
 
     @Override
@@ -127,7 +127,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
         if (log.isInfoEnabled())
             log.info("WebSocket closed on UIContext #{} : {}, reason : {}", uiContext.getID(),
                     NiceStatusCode.getMessage(statusCode), Objects.requireNonNullElse(reason, ""));
-        uiContext.onDestroy();
+        uiContext.onDestroy(statusCode);
     }
 
     /**
@@ -251,7 +251,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
             websocketPusher.flush();
         } catch (final IOException e) {
             log.error("Can't write on the websocket for #{}, so we destroy the application", uiContext.getID(), e);
-            uiContext.onDestroy();
+            uiContext.onDestroy(StatusCode.SERVER_ERROR);
         }
     }
 
@@ -313,7 +313,7 @@ public class WebSocket implements WebSocketListener, WebsocketEncoder {
             if (listener != null) listener.onOutgoingPonyFrame(model, value);
         } catch (final IOException e) {
             log.error("Can't write on the websocket for UIContext #{}, so we destroy the application", uiContext.getID(), e);
-            uiContext.destroy();
+            uiContext.onDestroy(StatusCode.SERVER_ERROR);
         }
     }
 
