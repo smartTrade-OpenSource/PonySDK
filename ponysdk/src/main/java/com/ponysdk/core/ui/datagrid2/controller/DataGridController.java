@@ -70,6 +70,10 @@ public interface DataGridController<K, V> {
 
     void unselect(K k);
 
+    void selectKeys(Collection<K> keys);
+
+    void unselectKeys(Collection<K> keys);
+
     void selectAllLiveData();
 
     void unselectAllData();

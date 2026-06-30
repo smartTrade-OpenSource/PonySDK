@@ -146,6 +146,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
 
     private boolean shouldDraw = true;
     private boolean refreshOnColumnVisibilityChanged = true;
+    private Row lastClickedRow;
     private boolean drawOnResume;
     private boolean forceExtended;
 
@@ -301,9 +302,12 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             for (int i = this.rows.size(); i < relRowCount; i++) {
                 rows.add(new Row(i));
             }
-        } else do {
-            rows.get(rows.size() - 1).destroy();
-        } while (rows.size() > relRowCount);
+        } else {
+            lastClickedRow = null;
+            do {
+                rows.get(rows.size() - 1).destroy();
+            } while (rows.size() > relRowCount);
+        }
         refresh();
         addon.checkPosition();
     }
@@ -1080,10 +1084,30 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             }
             row.addDomHandler((PClickHandler) event -> {
                 if (key == null || !controller.isSelectable(key)) return;
-                if (controller.isSelected(key)) {
-                    unselect();
+                if (event.isShiftKeyDown() && lastClickedRow != null && lastClickedRow.key != null) {
+                    final int from = Math.min(lastClickedRow.relativeIndex, relativeIndex);
+                    final int to = Math.min(Math.max(lastClickedRow.relativeIndex, relativeIndex), rows.size() - 1);
+                    final List<K> keys = new ArrayList<>();
+                    for (int i = from; i <= to; i++) {
+                        final Row r = rows.get(i);
+                        if (r.key != null && controller.isSelectable(r.key)) {
+                            keys.add(r.key);
+                        }
+                    }
+                    if (!keys.isEmpty()) {
+                        if (controller.isSelected(key)) {
+                            controller.unselectKeys(keys);
+                        } else {
+                            controller.selectKeys(keys);
+                        }
+                    }
                 } else {
-                    select();
+                    if (controller.isSelected(key)) {
+                        unselect();
+                    } else {
+                        select();
+                    }
+                    lastClickedRow = this;
                 }
             }, PClickEvent.TYPE);
             adapter.onCreateRow(row);
