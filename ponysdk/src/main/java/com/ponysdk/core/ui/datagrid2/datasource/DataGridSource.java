@@ -180,9 +180,47 @@ public interface DataGridSource<K, V> {
     Interval select(final K k);
 
     /**
+     * Selects multiple rows in a single batch operation, returning a single merged interval
+     * for efficient re-rendering. Implementations may override for optimized batch behavior.
+     *
+     * @param keys the keys to select
+     * @return the merged interval covering all affected rows, or {@code null} if no key
+     *         was actually selected (e.g. keys not present in the data source or already selected)
+     */
+    default Interval selectKeys(final Collection<K> keys) {
+        Interval result = null;
+        for (final K k : keys) {
+            final Interval interval = select(k);
+            if (interval != null) {
+                result = result == null ? interval : new Interval(Math.min(result.from, interval.from), Math.max(result.to, interval.to));
+            }
+        }
+        return result;
+    }
+
+    /**
      * Unselects a row
      */
     Interval unselect(final K k);
+
+    /**
+     * Unselects multiple rows in a single batch operation, returning a single merged interval
+     * for efficient re-rendering. Implementations may override for optimized batch behavior.
+     *
+     * @param keys the keys to unselect
+     * @return the merged interval covering all affected rows, or {@code null} if no key
+     *         was actually unselected (e.g. keys not present or not currently selected)
+     */
+    default Interval unselectKeys(final Collection<K> keys) {
+        Interval result = null;
+        for (final K k : keys) {
+            final Interval interval = unselect(k);
+            if (interval != null) {
+                result = result == null ? interval : new Interval(Math.min(result.from, interval.from), Math.max(result.to, interval.to));
+            }
+        }
+        return result;
+    }
 
     /**
      * Selects all rows in the dataGrid
