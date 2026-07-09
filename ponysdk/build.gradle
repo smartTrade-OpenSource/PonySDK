@@ -3,7 +3,7 @@ plugins {
 }
 ext {
     resourcesCoreTest = "src/test/resources"
-    gwtOutputDirName = buildDir.name + "/gwt"
+    gwtOutputDirName = layout.buildDirectory.get().asFile.path + "/gwt"
     jsinteropVersion = '1.0.2'
     glassfishVersion = '1.1.6'
     javaxValidationVersion = '2.0.1.Final'
@@ -47,10 +47,10 @@ publishing {
 
 jacocoTestReport {
     reports {
-        xml.enabled true
-        xml.destination file("${buildDir}/reports/jacoco/report.xml")
-        html.enabled false
-        csv.enabled false
+        xml.required = true
+        xml.outputLocation = file("${layout.buildDirectory.get().asFile}/reports/jacoco/report.xml")
+        html.required = false
+        csv.required = false
     }
 }
 
@@ -164,7 +164,7 @@ task gwtc(type: JavaExec) {
     inputs.dir('src/main/java/com/ponysdk/core/terminal')
     outputs.dir(gwtOutputDirName + '/gwt/ponyterminal')
     description = "GWT compile to JavaScript (production mode)"
-    main = 'com.google.gwt.dev.Compiler'
+    mainClass = 'com.google.gwt.dev.Compiler'
     workingDir = new File(gwtOutputDirName)
     classpath { [sourceSets.main.java.srcDirs, configurations.gwtdev, configurations.gwt] }
     maxHeapSize = '512M'
@@ -182,7 +182,7 @@ task gwtc(type: JavaExec) {
 }
 
 test {
-    classpath = files(resourcesCoreTest, gwtOutputDirName) + classpath
+    classpath = files(resourcesCoreTest, layout.buildDirectory.get().asFile.path + "/gwt") + classpath
     afterSuite { desc, result ->
         if (!desc.parent) {
             println "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
