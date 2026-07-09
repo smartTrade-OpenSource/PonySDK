@@ -281,6 +281,7 @@ public class RowSelectorColumnDataGridView<K, V> extends DecoratorDataGridView<K
 
             private final PCheckBox checkBox = Element.newPCheckBox();
             private final PWidget pending = Element.newSpan();
+            private final PWidget error = Element.newSpan();
 
             @Override
             public PWidget asWidget() {
@@ -311,6 +312,11 @@ public class RowSelectorColumnDataGridView<K, V> extends DecoratorDataGridView<K
             @Override
             public PWidget asPendingWidget() {
                 return pending;
+            }
+            
+            @Override
+            public PWidget asErrorWidget() {
+            	return error;
             }
         }
 

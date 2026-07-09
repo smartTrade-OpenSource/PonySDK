@@ -115,4 +115,9 @@ public class DecoratorDataGridAdapter<K, V> implements DataGridAdapter<K, V> {
     public boolean isSelectionEnabled() {
         return adapter.isSelectionEnabled();
     }
+
+	@Override
+	public boolean isCellFaultTolerant() {
+		return adapter.isCellFaultTolerant();
+	}
 }

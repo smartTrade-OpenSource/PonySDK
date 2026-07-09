@@ -47,6 +47,11 @@ public class DecoratorCell<V, DELEGATE extends PrimaryCell<V>> implements Primar
     public PWidget asPendingWidget() {
         return cell.asPendingWidget();
     }
+    
+    @Override
+    public PWidget asErrorWidget() {
+    	return cell.asErrorWidget();
+    }
 
     @Override
     public Optional<ExtendedCell<V>> genExtended() {

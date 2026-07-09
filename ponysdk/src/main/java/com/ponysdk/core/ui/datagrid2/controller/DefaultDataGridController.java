@@ -274,9 +274,18 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     public void renderCell(final ColumnDefinition<V> colDef, final Cell<V, ?> cell, final V data) {
         checkAdapter();
         final Column<V> column = getColumn(colDef);
-        cell.render(data, getRenderingHelper(data, column));
+        if(!adapter.isCellFaultTolerant()) cell.render(data, getRenderingHelper(data, column));
+        else {
+	        try {
+	        	cell.render(data, getRenderingHelper(data, column));
+	        } catch (Exception e) {
+	        	cell.asWidget().setVisible(false);
+	        	cell.asErrorWidget().setVisible(true);
+	        	log.error("Fail to render {}", data, e);
+	        }
+        }
     }
-
+    
     @Override
     public void addSort(final ColumnDefinition<V> colDef, final boolean asc) {
         checkAdapter();
@@ -475,7 +484,7 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
         resetLiveData();
     }
 
-    @Override
+	@Override
     public void enrichConfigBuilder(final DataGridConfigBuilder<V> builder) {
         checkAdapter();
         for (final Map.Entry<Object, Comparator<DefaultRow<V>>> entry : dataSource.getSortsEntry()) {

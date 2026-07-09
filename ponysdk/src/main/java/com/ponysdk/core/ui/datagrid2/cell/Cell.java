@@ -24,6 +24,7 @@
 package com.ponysdk.core.ui.datagrid2.cell;
 
 import com.ponysdk.core.ui.basic.IsPWidget;
+import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 
 /**
@@ -44,6 +45,14 @@ public interface Cell<V, C extends CellController<V>> extends IsPWidget {
      * @param cellController
      */
     void setController(C cellController);
+    
+    /**
+     * Must always return the same instance and cannot be {@code null} or the
+     * same as the main widget.
+     * 
+     * @return a widget that will replace the main widget when an exception occurs during rendering
+     */
+    PWidget asErrorWidget();
 
     /**
      * Renders the value in the main widget.
