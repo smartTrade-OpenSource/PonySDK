@@ -24,6 +24,7 @@
 package com.ponysdk.core.ui.datagrid2.cell;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 import com.ponysdk.core.ui.basic.PWidget;
 
@@ -54,7 +55,7 @@ public class DecoratorCell<V, DELEGATE extends PrimaryCell<V>> implements Primar
     }
 
     @Override
-    public void render(final V data, final Object renderingHelper) {
+    public void render(final V data, final Function<V, ?> renderingHelper) {
         cell.render(data, renderingHelper);
     }
 
