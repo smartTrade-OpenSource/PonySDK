@@ -73,6 +73,7 @@ public class PonySDKServer {
     private boolean needClientAuth = false;
     private String[] enabledProtocols = new String[] { "TLSv1.2" };
     private String enabledCipherSuites;
+    private int requestHeaderSize = -1; // -1 = use Jetty default (8192)
 
     public PonySDKServer() {
         server = new Server();
@@ -142,6 +143,9 @@ public class PonySDKServer {
         final HttpConfiguration httpConfiguration = new HttpConfiguration();
         httpConfiguration.setSendServerVersion(false);
         httpConfiguration.setSendDateHeader(false);
+        if (requestHeaderSize > 0) {
+            httpConfiguration.setRequestHeaderSize(requestHeaderSize);
+        }
         return httpConfiguration;
     }
 
@@ -256,6 +260,10 @@ public class PonySDKServer {
 
     public void setEnabledCipherSuites(final String enabledCipherSuites) {
         this.enabledCipherSuites = enabledCipherSuites;
+    }
+
+    public void setRequestHeaderSize(final int requestHeaderSize) {
+        this.requestHeaderSize = requestHeaderSize;
     }
 
     public void setApplicationManager(final ApplicationManager applicationManager) {
