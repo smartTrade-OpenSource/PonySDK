@@ -60,7 +60,7 @@ public class SessionManager {
 
     public void unregisterApplication(final Application application) {
         applications.remove(application.getId());
-        listeners.forEach(listener -> listener.onApplicationDestroyed(application));
+        listeners.forEach(listener -> listener.onApplicationDestroyed(application, application.getLastCloseStatusCode()));
     }
 
     public void addApplicationListener(final ApplicationListener listener) {

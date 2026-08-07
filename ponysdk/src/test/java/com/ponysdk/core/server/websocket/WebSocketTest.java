@@ -229,6 +229,23 @@ public class WebSocketTest {
         assertTrue(uiContext.isAlive());
         webSocket.onWebSocketClose(StatusCode.NORMAL, "Close");
         assertFalse(uiContext.isAlive());
+        assertEquals(StatusCode.NORMAL, uiContext.getCloseStatusCode());
+    }
+
+    @Test
+    public void testOnWebSocketCloseStatusCodePropagated() {
+        assertTrue(uiContext.isAlive());
+        webSocket.onWebSocketClose(StatusCode.SHUTDOWN, "Shutdown");
+        assertFalse(uiContext.isAlive());
+        assertEquals(StatusCode.SHUTDOWN, uiContext.getCloseStatusCode());
+    }
+
+    @Test
+    public void testOnWebSocketErrorStatusCode() {
+        assertTrue(uiContext.isAlive());
+        webSocket.onWebSocketError(new Exception("Unit test"));
+        assertFalse(uiContext.isAlive());
+        assertEquals(StatusCode.SERVER_ERROR, uiContext.getCloseStatusCode());
     }
 
     /**

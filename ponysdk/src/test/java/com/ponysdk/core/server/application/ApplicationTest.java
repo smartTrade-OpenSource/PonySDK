@@ -29,6 +29,7 @@ import static org.junit.Assert.assertTrue;
 
 import javax.servlet.http.HttpSession;
 
+import org.eclipse.jetty.websocket.api.StatusCode;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -136,6 +137,23 @@ public class ApplicationTest {
         final String value = "B";
         application.setAttribute(name, value);
         assertEquals(value, application.getAttribute(name));
+    }
+
+    @Test
+    public void testLastCloseStatusCodeOnDeregister() {
+        final UIContext uiContext = Mockito.mock(UIContext.class);
+        Mockito.when(uiContext.getID()).thenReturn(1);
+        Mockito.when(uiContext.getCloseStatusCode()).thenReturn(StatusCode.SHUTDOWN);
+        application.registerUIContext(uiContext);
+
+        application.deregisterUIContext(1);
+
+        assertEquals(StatusCode.SHUTDOWN, application.getLastCloseStatusCode());
+    }
+
+    @Test
+    public void testLastCloseStatusCodeDefaultValue() {
+        assertEquals(StatusCode.NO_CODE, application.getLastCloseStatusCode());
     }
 
 }

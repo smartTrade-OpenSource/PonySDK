@@ -31,6 +31,7 @@ import com.ponysdk.core.server.context.PObjectCache;
 import com.ponysdk.core.server.stm.Txn;
 import com.ponysdk.core.server.stm.TxnContext;
 import com.ponysdk.core.server.websocket.WebSocket;
+import org.eclipse.jetty.websocket.api.StatusCode;
 import com.ponysdk.core.ui.basic.PCookies;
 import com.ponysdk.core.ui.basic.PHistory;
 import com.ponysdk.core.ui.basic.PObject;
@@ -99,6 +100,7 @@ public class UIContext {
     private TerminalDataReceiver terminalDataReceiver;
 
     private boolean alive = true;
+    private int closeStatusCode = StatusCode.NO_CODE;
 
     private final Latency roundtripLatency = new Latency(10);
     private final Latency networkLatency = new Latency(10);
@@ -505,9 +507,10 @@ public class UIContext {
      * <p>
      * This method locks the UIContext
      */
-    public void onDestroy() {
+    public void onDestroy(final int statusCode) {
         //we used to avoid calling socket.close() there, but sometimes jetty does not close the WS
         //when there is an exception in a listener => always call close since it is a no-op on a closed WS
+        this.closeStatusCode = statusCode;
         destroy();
     }
 
@@ -553,6 +556,7 @@ public class UIContext {
         if (!isAlive()) return;
         acquire();
         try {
+            this.closeStatusCode = StatusCode.NORMAL;
             doDestroy();
             context.deregisterUIContext(ID);
             socket.disconnect();
@@ -620,6 +624,10 @@ public class UIContext {
      */
     public boolean isAlive() {
         return alive;
+    }
+
+    public int getCloseStatusCode() {
+        return closeStatusCode;
     }
 
     /**

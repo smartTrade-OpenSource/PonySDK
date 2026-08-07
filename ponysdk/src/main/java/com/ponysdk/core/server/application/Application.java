@@ -24,6 +24,7 @@
 package com.ponysdk.core.server.application;
 
 import com.ponysdk.core.server.servlet.SessionManager;
+import org.eclipse.jetty.websocket.api.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,6 +51,8 @@ public class Application {
 
     private final String id;
 
+    private int lastCloseStatusCode = StatusCode.NO_CODE;
+
     public Application(final String id, final HttpSession session, final ApplicationConfiguration configuration) {
         this.id = id;
         this.session = session;
@@ -61,13 +64,17 @@ public class Application {
     }
 
     public void deregisterUIContext(final int uiContextID) {
-        if (uiContexts.remove(uiContextID) != null && uiContexts.isEmpty()) {
-            try {
-                session.invalidate();
-            } catch (final IllegalStateException e) {
-                log.warn("Issue when unregistering UIContext #{} : Session {} already invalidated", uiContextID, session.getId());
+        final UIContext removed = uiContexts.remove(uiContextID);
+        if (removed != null) {
+            lastCloseStatusCode = removed.getCloseStatusCode();
+            if (uiContexts.isEmpty()) {
+                try {
+                    session.invalidate();
+                } catch (final IllegalStateException e) {
+                    log.warn("Issue when unregistering UIContext #{} : Session {} already invalidated", uiContextID, session.getId());
+                }
+                SessionManager.get().unregisterApplication(this);
             }
-            SessionManager.get().unregisterApplication(this);
         }
     }
 
@@ -126,6 +133,10 @@ public class Application {
 
     public String getId() {
         return id;
+    }
+
+    public int getLastCloseStatusCode() {
+        return lastCloseStatusCode;
     }
 
     public int countUIContexts() {
