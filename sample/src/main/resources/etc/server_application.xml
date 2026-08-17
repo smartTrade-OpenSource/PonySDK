@@ -67,7 +67,7 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
             </property>
             <property name="style">
                 <map>
-                    <entry key="flexlayout" value="css/flexlayout.css" />
+                    <entry key="flexlayout" value="style/flexlayout.css" />
                     <entry key="flexdemo" value="css/flexlayout-demo.css" />
                 </map>
             </property>
@@ -77,7 +77,7 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
             <property name="port" value="8081"/>
             <property name="host" value="0.0.0.0"/>
             <property name="applicationManager" ref="applicationManager"/>
-            <property name="sslPort" value="8083" />
+            <property name="sslPort" value="8483" />
             <property name="sslKeyStoreFile" value="keystore"/>
             <property name="sslKeyStorePassphrase" value="strade"/>
             <property name="useSSL" value="true"/>

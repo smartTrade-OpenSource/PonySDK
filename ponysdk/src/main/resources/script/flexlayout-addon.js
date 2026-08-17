@@ -63,6 +63,9 @@
       this._layout = this._createLayout();
 
       if (theme) this._layoutContainer.classList.add(theme);
+
+      // The initial model can already declare component-based tabs; they need their widgets too.
+      this._requestRehydrate();
     },
 
     _createFactory: function () {
@@ -198,7 +201,7 @@
         var border = this._model.getBorder(action.side);
         if (border) {
           var prevBorderSel = border.getSelectedNode();
-          var idx = border.children.findIndex ? -1 : -1;
+          var idx = -1;
           for (var bi = 0; bi < border.children.length; bi++) {
             if (border.children[bi].id === action.tabId) { idx = bi; break; }
           }
@@ -243,6 +246,10 @@
           break;
         case 'RENAME_TAB':
           msg.t = action.tabId; msg.n = action.name; break;
+        case 'REORDER_TAB':
+          msg.t = action.tabId; msg.to = action.toTabId; break;
+        case 'SET_BADGE':
+          msg.t = action.tabId; msg.b = action.badge; break;
         case 'SELECT_BORDER_TAB':
           msg.s = action.side; msg.t = action.tabId; break;
         case 'CLOSE_BORDER_TAB':
@@ -255,8 +262,12 @@
           msg.s = action.side; msg.t = action.tabId; msg.to = action.toId; msg.l = action.location; break;
         case 'RESIZE_BORDER':
           msg.s = action.side; msg.sz = action.size; break;
-        case 'TOGGLE_BORDER':
+        case 'TOGGLE_BORDER': case 'MAXIMIZE_BORDER':
           msg.s = action.side; break;
+        case 'REORDER_BORDER_TAB':
+          msg.s = action.side; msg.t = action.tabId; msg.i = action.toIndex; break;
+        case 'SET_TAB_GROUP':
+          msg.t = action.tabId; msg.g = action.group; break;
       }
       return msg;
     },
@@ -264,25 +275,26 @@
     _moveWidgetToHost: function (widgetId, hostEl) {
       var self = this;
       var wid = String(widgetId);
-      var children = this.element.children;
 
-      // Strategy 1: match by data-objectid (if GWT sets it)
-      for (var i = 0; i < children.length; i++) {
-        var child = children[i];
-        if (child === this._layoutContainer) continue;
-        if (child.dataset && child.dataset.objectid === wid) {
-          hostEl.appendChild(child);
-          return;
+      // The server forces every content widget's DOM id to its PonySDK object id (see
+      // FlexLayoutAddon#addContent). Resolve strictly by that id: picking a child by position
+      // hands tabs each other's content, and can steal the status bar.
+      // A popped-out widget lives outside the addon element, hence the document-wide fallback.
+      var el = this.element.querySelector('[id="' + wid + '"]') || document.getElementById(wid);
+      if (el) {
+        if (el === hostEl || el.contains(hostEl)) return;
+        var previousHost = el.parentNode;
+        hostEl.appendChild(el);
+        // Popping a tab back in re-parents its whole host; drop the wrapper left behind empty.
+        if (previousHost && previousHost !== hostEl && previousHost.parentNode
+            && previousHost.classList && previousHost.classList.contains('fl-pony-widget-host')
+            && !previousHost.firstElementChild) {
+          previousHost.parentNode.removeChild(previousHost);
         }
-      }
-      // Strategy 2: last non-layout child (widget was just appended by PonySDK)
-      for (var i = children.length - 1; i >= 0; i--) {
-        var child = children[i];
-        if (child === this._layoutContainer) continue;
-        hostEl.appendChild(child);
         return;
       }
-      // Retry with backoff
+
+      // Not attached yet — retry with backoff rather than guess.
       if (!hostEl._retryCount) hostEl._retryCount = 0;
       if (++hostEl._retryCount <= 20) {
         var tid = setTimeout(function () { self._moveWidgetToHost(widgetId, hostEl); }, 100);
@@ -296,6 +308,7 @@
 
     addTab: function (tabId, tabName, widgetId, tabsetId) {
       if (!this._model) return;
+      if (this._popOuts) delete this._popOuts[tabId]; // the server re-added it, it is no longer out
       this._tabWidgetMap[tabId] = widgetId;
       this._model.doAction({
         type: 'ADD_TAB', tabsetId: tabsetId || null, select: true,
@@ -320,7 +333,8 @@
       setTimeout(function () {
         var host = self._layoutContainer.querySelector('.fl-pony-widget-host[data-tab-id="' + CSS.escape(tabId) + '"]');
         if (host) {
-          host.innerHTML = '';
+          // Clear the placeholder, but never wipe the widget if a re-render already mounted it here.
+          if (!host.querySelector('[id="' + String(widgetId) + '"]')) host.innerHTML = '';
           host.dataset.widgetId = widgetId;
           self._moveWidgetToHost(widgetId, host);
         }
@@ -408,26 +422,43 @@
       if (!this._layout) return;
       this._layout.destroy();
       this._tabWidgetMap = {};
-      this._popOuts = {};
+      this._closeFloatPopOuts();
       this._model = FlexLayout.Model.fromJson(parseJson(modelJsonInput), migrateFn || null);
       this._layout = this._createLayout();
-      // Rehydrate: notify server of all tabs that need widget creation (single batch message)
-      var tabs = [];
-      this._collectRehydrateTabs(this._model.getRoot(), tabs);
-      // Also scan borders
-      var borders = this._model.getBorders ? this._model.getBorders() : [];
-      for (var b = 0; b < borders.length; b++) {
-        var border = borders[b];
-        for (var c = 0; c < border.children.length; c++) {
-          var child = border.children[c];
-          var comp = child.getComponent ? child.getComponent() : null;
-          if (comp && comp !== '' && comp !== 'pwidget') {
-            var cfg = child.getConfig ? child.getConfig() : null;
-            tabs.push({ tabId: child.getId(), component: comp, tabName: child.getName(), config: cfg ? JSON.stringify(cfg) : null });
-          }
+      this._requestRehydrate();
+    },
+
+    // Discards every float pop-out. Just resetting _popOuts would leave the panels on screen with
+    // a dead pop-in button and no way to close them. Window pop-outs are closed server-side.
+    _closeFloatPopOuts: function () {
+      if (this._popOuts) {
+        for (var id in this._popOuts) {
+          if (this._popOuts[id].win) this._popOuts[id].win.remove();
+          this._discardParked(this._popOuts[id].widgetEl);
         }
       }
-      if (tabs.length > 0) this.sendDataToServer({ type: 'rehydrate', tabs: JSON.stringify(tabs) });
+      this._popOuts = {};
+    },
+
+    /**
+     * Asks the server, in a single batch, to build the widgets of every component-based tab that
+     * has none yet. Applies to the initial model as well as a loaded or undo/redo-restored one:
+     * without it, those tabs keep the factory placeholder forever.
+     */
+    _requestRehydrate: function () {
+      if (!this._model) return;
+      var tabs = [];
+      this._collectRehydrateTabs(this._model.getRoot(), tabs);
+      var borders = this._model.getBorders ? this._model.getBorders() : [];
+      for (var b = 0; b < borders.length; b++) {
+        var children = borders[b].children;
+        for (var c = 0; c < children.length; c++) this._collectRehydrateTabs(children[c], tabs);
+      }
+      var missing = [];
+      for (var i = 0; i < tabs.length; i++) {
+        if (!this._tabWidgetMap[tabs[i].tabId]) missing.push(tabs[i]);
+      }
+      if (missing.length > 0) this.sendDataToServer({ type: 'rehydrate', tabs: JSON.stringify(missing) });
     },
 
     _collectRehydrateTabs: function (node, out) {
@@ -488,10 +519,9 @@
       var tabDef = parseJson(tabDefJson);
       var retries = 0;
       (function tryAttach() {
-        var el = document.getElementById(String(sourceWidgetId))
-              || document.querySelector('[data-objectid="' + sourceWidgetId + '"]');
+        var el = document.getElementById(String(sourceWidgetId));
         if (!el) { if (++retries < 30) { var tid = setTimeout(tryAttach, 100); self._pendingTimeouts.push(tid); } return; }
-        self._bindDragSource(el, tabDef);
+        if (!el.dataset.flDragBound) self._bindDragSource(el, tabDef);
       })();
     },
 
@@ -550,24 +580,41 @@
       var widgetId = this._tabWidgetMap[tabId];
       var widgetEl = this._extractWidgetEl(tabId);
 
-      // Detach from layout DOM BEFORE close (re-render would destroy it)
-      if (widgetEl && widgetEl.parentNode) widgetEl.parentNode.removeChild(widgetEl);
+      // Take it out of the layout BEFORE closing the tab (a re-render would destroy it), but keep
+      // it in the document: a rejected pop-out or a pop-in must still resolve it by id.
+      this._park(widgetEl);
 
       // Remove tab from model
       this._model.doAction({ type: 'CLOSE_TAB', tabId: tabId });
 
       var info = { widgetEl: widgetEl, widgetId: widgetId, tabsetId: tabsetId, tabIdx: tabIdx, title: title, mode: popMode,
-                   siblingId: siblingId, tabsetWeight: tabsetWeight, tabsetIdx: tabsetIdx, parentDirection: parentDirection };
-
-      if (popMode === 'window') {
-        // Window mode: handled server-side via PWindow. No JS popup needed.
-        this._popOuts[tabId] = info;
-      } else {
-        this._popOutToFloat(tabId, info, x, y, w, h);
-      }
+                   siblingId: siblingId, tabsetWeight: tabsetWeight, tabsetIdx: tabsetIdx, parentDirection: parentDirection,
+                   // Keep the tab's identity: restoring it as a bare 'pwidget' would make it
+                   // unrehydratable once the layout is saved and reloaded.
+                   component: tabNode.getComponent ? tabNode.getComponent() : null,
+                   config: tabNode.getConfig ? tabNode.getConfig() : null };
 
       this._popOuts[tabId] = info;
+      // Window mode: the PWindow is opened server-side, which builds its own widget instance
+      // (PonySDK cannot move a widget across windows). It answers restorePopOut if it cannot.
+      if (popMode !== 'window') this._popOutToFloat(tabId, info, x, y, w, h);
+
       this.sendDataToServer({ type: 'popOut', tabId: tabId, tabsetId: tabsetId, tabIdx: tabIdx, mode: popMode, title: title, w: w || 500, h: h || 400 });
+    },
+
+    // Holds a widget host outside the layout but inside the document, hidden.
+    _park: function (hostEl) {
+      if (!hostEl) return;
+      hostEl.style.display = 'none';
+      this.element.appendChild(hostEl);
+    },
+
+    // Drops a parked host once it is empty. _moveWidgetToHost prunes the wrapper it empties itself,
+    // but a window pop-out is emptied by the server releasing its widget, so nothing else would.
+    _discardParked: function (hostEl) {
+      if (hostEl && hostEl.parentNode === this.element && !hostEl.firstElementChild) {
+        this.element.removeChild(hostEl);
+      }
     },
 
     _extractWidgetEl: function (tabId) {
@@ -618,7 +665,10 @@
 
       var content = document.createElement('div');
       content.style.cssText = 'flex:1;overflow:auto;position:relative;';
-      if (info.widgetEl) content.appendChild(info.widgetEl);
+      if (info.widgetEl) {
+        info.widgetEl.style.display = ''; // undo _park
+        content.appendChild(info.widgetEl);
+      }
       win.appendChild(content);
 
       this._makeDraggable(win, titleBar);
@@ -632,15 +682,16 @@
       var info = this._popOuts[tabId];
 
       if (info.mode === 'window') {
-        // Window mode: PWindow is managed server-side. Just notify server to close it.
-        delete this._popOuts[tabId];
+        // The PWindow owns its widget. Ask the server to close it: its close handler rebuilds a
+        // widget and answers restorePopOut. Dropping the entry here would orphan the window.
         this.sendDataToServer({ type: 'popIn', tabId: tabId });
       } else if (info.win) {
-        // Float mode
-        var content = info.win.querySelector('div:last-child');
-        if (content && content.firstChild) {
-          info.widgetEl = content.firstChild;
-          this.element.appendChild(info.widgetEl);
+        // Float mode: rescue the host out of the popup before removing it, or the element leaves
+        // the document and can no longer be resolved by id.
+        var host = info.win.querySelector('.fl-pony-widget-host');
+        if (host) {
+          this._park(host);
+          info.widgetEl = host;
         }
         info.win.remove();
         delete this._popOuts[tabId];
@@ -648,9 +699,25 @@
       }
     },
 
-    _restoreTab: function (tabId, info) {
+    /**
+     * Puts a popped-out tab back where it came from. Called by the server when a window pop-out is
+     * rejected (nothing to rebuild) or when its PWindow closed, in which case widgetId is the id of
+     * the freshly built widget.
+     */
+    restorePopOut: function (tabId, widgetId) {
+      if (!this._popOuts || !this._popOuts[tabId]) return;
+      var info = this._popOuts[tabId];
+      if (info.win) { info.win.remove(); delete info.win; }
+      delete this._popOuts[tabId];
+      if (widgetId != null && widgetId !== '') info.widgetId = widgetId;
+      this._discardParked(info.widgetEl);
+      this._restoreTab(tabId, info, true); // the server initiated it, no popIn echo
+    },
+
+    _restoreTab: function (tabId, info, silent) {
       var targetTabset = info.tabsetId;
-      var tabDef = { id: tabId, name: info.title || 'Tab', component: 'pwidget', config: { widgetId: info.widgetId } };
+      var tabDef = { id: tabId, name: info.title || 'Tab', component: info.component || 'pwidget',
+                     config: Object.assign({}, info.config || {}, { widgetId: info.widgetId }) };
 
       // If popped out from a border, restore there
       if (info.borderSide) {
@@ -658,7 +725,7 @@
         if (border) {
           this._model.doAction({ type: 'ADD_BORDER_TAB', side: info.borderSide, tab: tabDef, index: info.tabIdx, select: true });
           this._tabWidgetMap[tabId] = info.widgetId;
-          this.sendDataToServer({ type: 'popIn', tabId: tabId });
+          if (!silent) this.sendDataToServer({ type: 'popIn', tabId: tabId });
           return;
         }
       }
@@ -681,7 +748,7 @@
         this._model.doAction({ type: 'ADD_TAB', tabsetId: null, tab: tabDef, select: true });
       }
       this._tabWidgetMap[tabId] = info.widgetId;
-      this.sendDataToServer({ type: 'popIn', tabId: tabId });
+      if (!silent) this.sendDataToServer({ type: 'popIn', tabId: tabId });
     },
 
     getPopOutState: function () {
@@ -700,11 +767,13 @@
       this.sendDataToServer({ type: 'popOutState', state: JSON.stringify(state) });
     },
 
+    // Viewport coordinates: the only consumer is the float pop-out, which is position:fixed.
+    // Window mode ignores x/y entirely (the PWindow feature string carries width/height only).
     _getTabContentRect: function (tsNode) {
       var el = this._layoutContainer.querySelector('[data-fl-tabset="' + tsNode.getId() + '"] .fl-content');
       if (el) {
         var r = el.getBoundingClientRect();
-        return { x: Math.round(r.left + window.screenX), y: Math.round(r.top + window.screenY), w: Math.round(r.width), h: Math.round(r.height) };
+        return { x: Math.round(r.left), y: Math.round(r.top), w: Math.round(r.width), h: Math.round(r.height) };
       }
       return { x: 150, y: 150, w: 500, h: 350 };
     },
@@ -790,27 +859,8 @@
     },
 
     _rehydrateAfterUndoRedo: function () {
-      // After undo/redo, check for tabs that need widget recreation
-      var tabs = [];
-      this._collectRehydrateTabs(this._model.getRoot(), tabs);
-      var borders = this._model.getBorders ? this._model.getBorders() : [];
-      for (var b = 0; b < borders.length; b++) {
-        var border = borders[b];
-        for (var c = 0; c < border.children.length; c++) {
-          var child = border.children[c];
-          var comp = child.getComponent ? child.getComponent() : null;
-          if (comp && comp !== '' && comp !== 'pwidget') {
-            var cfg = child.getConfig ? child.getConfig() : null;
-            tabs.push({ tabId: child.getId(), component: comp, tabName: child.getName(), config: cfg ? JSON.stringify(cfg) : null });
-          }
-        }
-      }
-      // Only rehydrate tabs that don't already have a widget
-      var missing = [];
-      for (var i = 0; i < tabs.length; i++) {
-        if (!this._tabWidgetMap[tabs[i].tabId]) missing.push(tabs[i]);
-      }
-      if (missing.length > 0) this.sendDataToServer({ type: 'rehydrate', tabs: JSON.stringify(missing) });
+      // After undo/redo, rebuild the widgets of the tabs the restored model brought back
+      this._requestRehydrate();
     },
 
     reorderBorderTab: function (side, tabId, newIndex) {
@@ -830,24 +880,10 @@
       if (!this._layout) return;
       this._layout.destroy();
       this._tabWidgetMap = {};
-      this._popOuts = {};
+      this._closeFloatPopOuts();
       this._model = FlexLayout.Model.fromJson(parseJson(modelJsonInput), migrateFn);
       this._layout = this._createLayout();
-      var tabs = [];
-      this._collectRehydrateTabs(this._model.getRoot(), tabs);
-      var borders = this._model.getBorders ? this._model.getBorders() : [];
-      for (var b = 0; b < borders.length; b++) {
-        var border = borders[b];
-        for (var c = 0; c < border.children.length; c++) {
-          var child = border.children[c];
-          var comp = child.getComponent ? child.getComponent() : null;
-          if (comp && comp !== '' && comp !== 'pwidget') {
-            var cfg = child.getConfig ? child.getConfig() : null;
-            tabs.push({ tabId: child.getId(), component: comp, tabName: child.getName(), config: cfg ? JSON.stringify(cfg) : null });
-          }
-        }
-      }
-      if (tabs.length > 0) this.sendDataToServer({ type: 'rehydrate', tabs: JSON.stringify(tabs) });
+      this._requestRehydrate();
     },
 
     // ─── Feature 3: Sidebar Pop-out ─────────────────────────────
@@ -863,14 +899,17 @@
 
       var widgetId = this._tabWidgetMap[tabId];
       var widgetEl = this._extractWidgetEl(tabId);
-      if (widgetEl && widgetEl.parentNode) widgetEl.parentNode.removeChild(widgetEl);
+      this._park(widgetEl);
 
       var tabIdx = border.getChildren().indexOf(selTab);
+      var component = selTab.getComponent ? selTab.getComponent() : null;
+      var config = selTab.getConfig ? selTab.getConfig() : null;
       this._model.doAction({ type: 'CLOSE_BORDER_TAB', side: side, tabId: tabId });
 
       var rect = this._layoutContainer.getBoundingClientRect();
       var info = { widgetEl: widgetEl, widgetId: widgetId, tabsetId: null, tabIdx: tabIdx, title: selTab.getName(), mode: 'float',
-                   siblingId: null, tabsetWeight: 50, tabsetIdx: 0, parentDirection: 'row', borderSide: side };
+                   siblingId: null, tabsetWeight: 50, tabsetIdx: 0, parentDirection: 'row', borderSide: side,
+                   component: component, config: config };
       this._popOutToFloat(tabId, info, Math.round(rect.left + 50), Math.round(rect.top + 50), border.size || 400, 300);
       this._popOuts[tabId] = info;
       this.sendDataToServer({ type: 'popOut', tabId: tabId, tabsetId: null, tabIdx: tabIdx, mode: 'float', title: selTab.getName(), w: border.size || 400, h: 300 });
@@ -967,7 +1006,14 @@
     setStatusBar: function (widgetId) {
       if (!this._statusBar) return;
       var self = this;
-      this._statusBar.innerHTML = '';
+      // Park whatever was there rather than wiping it: emptying the bar would take the previous
+      // widget's element out of the document while the server still holds the PWidget.
+      while (this._statusBar.firstChild) {
+        var previous = this._statusBar.firstChild;
+        if (previous.nodeType === 1) this._park(previous);
+        else this._statusBar.removeChild(previous);
+      }
+      this._statusBar._retryCount = 0; // long-lived host, don't inherit a previous attempt's budget
       setTimeout(function () { self._moveWidgetToHost(widgetId, self._statusBar); }, 50);
     },
 
@@ -1011,14 +1057,7 @@
     destroy: function () {
       if (this._pendingTimeouts) { this._pendingTimeouts.forEach(clearTimeout); this._pendingTimeouts = []; }
       if (this._layout) { this._layout.destroy(); this._layout = null; }
-      // Close all popout windows
-      if (this._popOuts) {
-        for (var id in this._popOuts) {
-          var info = this._popOuts[id];
-          if (info.win) info.win.remove();
-        }
-        this._popOuts = {};
-      }
+      this._closeFloatPopOuts();
       this._debouncedModelChange = function () {};
       this._debouncedAutoSave = function () {};
       this._model = null;
