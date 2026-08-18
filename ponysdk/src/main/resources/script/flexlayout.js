@@ -1125,22 +1125,26 @@
 
     _renderBorder(border) {
       const side = border.side;
-      const isV = side === 'left' || side === 'right';
+      // Split sidebars ('right-top', 'left-bottom', ...) share the geometry of their base side.
+      const baseSide = (side === 'left'  || side.startsWith('left-'))  ? 'left'
+                     : (side === 'right' || side.startsWith('right-')) ? 'right'
+                     : 'bottom';
+      const isV = baseSide !== 'bottom';
       const isOpen = border.isOpen();
       const size = border.size;
       const stripW = this._getStripW();
 
       const wrapper = document.createElement('div');
-      wrapper.className = `fl-sidebar fl-sidebar-${side}${isOpen ? ' fl-sidebar-open' : ''}`;
+      wrapper.className = `fl-sidebar fl-sidebar-${baseSide}${isOpen ? ' fl-sidebar-open' : ''}`;
       wrapper.dataset.flBorder = side;
       this._nodeEls.set(border.id, wrapper);
 
       // Position absolutely
-      if (side === 'left') {
+      if (baseSide === 'left') {
         const bb = this.model.getBorders().find(b => !b._hidden && b.side === 'bottom');
         const botInset = bb ? stripW : 0;
         wrapper.style.cssText = `position:absolute;top:0;left:0;bottom:${botInset}px;display:flex;flex-direction:row;z-index:2;`;
-      } else if (side === 'right') {
+      } else if (baseSide === 'right') {
         const bb = this.model.getBorders().find(b => !b._hidden && b.side === 'bottom');
         const botInset = bb ? stripW : 0;
         wrapper.style.cssText = `position:absolute;top:0;right:0;bottom:${botInset}px;display:flex;flex-direction:row;z-index:2;`;
@@ -1157,10 +1161,10 @@
 
       // Tab strip
       const strip = document.createElement('div');
-      strip.className = `fl-sidebar-strip fl-sidebar-strip-${side}`;
+      strip.className = `fl-sidebar-strip fl-sidebar-strip-${baseSide}`;
       strip.setAttribute('role', 'tablist'); // Feature 10
       if (isV) {
-        strip.style.cssText = `display:flex;flex-direction:column;width:${stripW}px;overflow:auto;flex-shrink:0;background:var(--fl-strip);border-${side === 'left' ? 'right' : 'left'}:1px solid var(--fl-border);`;
+        strip.style.cssText = `display:flex;flex-direction:column;width:${stripW}px;overflow:auto;flex-shrink:0;background:var(--fl-strip);border-${baseSide === 'left' ? 'right' : 'left'}:1px solid var(--fl-border);`;
       } else {
         strip.style.cssText = `display:flex;flex-direction:row;height:${stripW}px;overflow:auto;flex-shrink:0;background:var(--fl-strip);border-top:1px solid var(--fl-border);`;
       }
@@ -1168,9 +1172,9 @@
       if (border.children.length > 10) strip.classList.add('fl-sidebar-strip-overflow'); // Feature 6
 
       // Content panel
-      const panel = this._mkBorderPanel([border].filter(b => b.isOpen()), side, isV, size);
+      const panel = this._mkBorderPanel([border].filter(b => b.isOpen()), baseSide, isV, size);
 
-      if (side === 'right' || side === 'bottom') { wrapper.appendChild(panel); wrapper.appendChild(strip); }
+      if (baseSide === 'right' || baseSide === 'bottom') { wrapper.appendChild(panel); wrapper.appendChild(strip); }
       else { wrapper.appendChild(strip); wrapper.appendChild(panel); }
       return wrapper;
     }
