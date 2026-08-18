@@ -22,8 +22,10 @@ ext {
 }
 
 def versionSuffix = project.hasProperty('BUILD_RELEASE') ? "" : "-SNAPSHOT"
+// Optional local qualifier, e.g. -PVERSION_QUALIFIER=LD -> 2.8.118-LD-SNAPSHOT
+def versionQualifier = project.hasProperty('VERSION_QUALIFIER') ? "-${project.property('VERSION_QUALIFIER')}" : ""
 group = 'com.ponysdk'
-version = '2.8.118' + versionSuffix
+version = '2.8.118' + versionQualifier + versionSuffix
 
 publishing {
     publications {
@@ -132,6 +134,8 @@ java {
 javadoc {
     classpath += configurations.gwtdev
     exclude '**/terminal/**'
+    options.addStringOption('Xdoclint:none', '-quiet')
+    failOnError = false
 }
 
 // Both are resolved when the manifest is written, not at configuration time: running git eagerly
@@ -151,6 +155,12 @@ jar {
     }
     exclude('*.devmode.js')
     exclude('*compilation-mappings.txt')
+
+    // Also expose the js/css as a webjar so servlet containers can serve them straight from the jar
+    with(copySpec {
+        from("src/main/resources/script").into("META-INF/resources/webjars/ponysdk/${project.version}/")
+        from("src/main/resources/style").into("META-INF/resources/webjars/ponysdk/${project.version}")
+    })
 
     manifest {
         attributes(
