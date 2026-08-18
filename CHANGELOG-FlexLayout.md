@@ -132,5 +132,5 @@ Initial release of the FlexLayout component for PonySDK.
 - Test artifacts on failure
 
 ### Bundle Size
-- `flexlayout.js`: ~94 KB (raw), ~72 KB (minified)
+- `flexlayout.js`: ~94 KB
 - `flexlayout.css`: ~33 KB

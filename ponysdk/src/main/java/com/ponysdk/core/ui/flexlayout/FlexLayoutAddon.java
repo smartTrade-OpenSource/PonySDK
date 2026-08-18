@@ -69,6 +69,7 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
     private Consumer<String> layoutSummaryCallback;
     private Consumer<String> onTabVisible;
     private Consumer<String> onTabHidden;
+    private String currentTheme;
 
     public FlexLayoutAddon() {
         this(null, null, null);
@@ -86,8 +87,29 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
         // receive the args directly as a JS array. The model/borders strings (which are inherently
         // JSON documents) are forwarded verbatim and parsed once, client-side.
         super(Element.newPFlowPanel(), modelJson, theme, bordersJson);
+        this.currentTheme = theme;
         setTerminalHandler(event -> handleClientEvent(event.getData()));
     }
+
+    /**
+     * Adds a content widget to the addon panel and forces its DOM id to the PonySDK object id.
+     * <p>
+     * The terminal locates a tab's content element by that id (see {@code _moveWidgetToHost} in
+     * flexlayout-addon.js). Without {@link PWidget#forceDomId()} the element carries no identifier at
+     * all and the terminal cannot tell one content widget from another.
+     */
+    private void addContent(final PWidget content) {
+        widget.add(content);
+        content.forceDomId();
+        // Until the terminal moves it into its tab host, the widget is a plain child of the layout
+        // panel and would render loose on top of the layout. Tabs that are not currently rendered
+        // (an inactive tab in a tabset) have no host at all, so the marker stays and keeps them
+        // hidden. flexlayout-addon.js clears it in _moveWidgetToHost once the widget is parked.
+        content.addStyleName(UNPARKED_STYLE);
+    }
+
+    /** Marks a content widget that the terminal has not parked in a tab host yet. */
+    private static final String UNPARKED_STYLE = "fl-pony-unparked";
 
     // ─── Tab Management ──────────────────────────────────────────
 
@@ -96,7 +118,7 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
     }
 
     public void addTab(final String tabId, final String tabName, final PWidget content, final String tabsetId) {
-        widget.add(content);
+        addContent(content);
         tabWidgets.put(tabId, content);
         callTerminalMethod("addTab", tabId, tabName, String.valueOf(content.getID()), tabsetId);
     }
@@ -106,7 +128,7 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
     }
 
     public void attachWidgetToTab(final String tabId, final PWidget content, final String component) {
-        widget.add(content);
+        addContent(content);
         tabWidgets.put(tabId, content);
         if (component != null) tabComponents.put(tabId, component);
         callTerminalMethod("attachWidget", tabId, String.valueOf(content.getID()));
@@ -132,7 +154,7 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
     }
 
     public void addBorderTab(final String side, final String tabId, final String tabName, final PWidget content, final int index, final String icon) {
-        widget.add(content);
+        addContent(content);
         tabWidgets.put(tabId, content);
         callTerminalMethod("addBorderTab", side, tabId, tabName, String.valueOf(content.getID()), index >= 0 ? index : null, icon);
     }
@@ -230,7 +252,16 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
     // ─── Appearance ──────────────────────────────────────────────
 
     public void setTheme(final String theme) {
+        final String previous = currentTheme;
+        currentTheme = theme;
         callTerminalMethod("setTheme", theme);
+        // A window pop-out lives in its own document, where the layout container carrying the theme
+        // class does not exist. Restyle its wrapper so it does not stay on the previous palette.
+        for (final PopOutInfo info : popOutTabs.values()) {
+            if (info.themeWrapper == null) continue;
+            if (previous != null && !previous.isEmpty()) info.themeWrapper.removeStyleName(previous);
+            if (theme != null && !theme.isEmpty()) info.themeWrapper.addStyleName(theme);
+        }
     }
 
     // ─── Pop-out / Pop-in ────────────────────────────────────────
@@ -248,6 +279,13 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
     }
 
     public void popIn(final String tabId) {
+        final PopOutInfo info = popOutTabs.get(tabId);
+        // A window pop-out comes back by closing its PWindow: the close handler rebuilds the widget
+        // and restores the tab. Routing it through the client would orphan the window.
+        if (info != null && info.pWindow != null) {
+            info.pWindow.close();
+            return;
+        }
         callTerminalMethod("popIn", tabId);
     }
 
@@ -270,6 +308,7 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
     // ─── Drag Source Registration ────────────────────────────────
 
     public void registerDragSource(final PWidget source, final String tabDefJson) {
+        source.forceDomId();
         callTerminalMethod("registerDragSource", String.valueOf(source.getID()), tabDefJson);
     }
 
@@ -397,7 +436,7 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
 
     public void addPinnedTab(final String tabName, final PWidget content, final String tabsetId) {
         final String tabId = "pin_" + System.identityHashCode(content);
-        widget.add(content);
+        addContent(content);
         tabWidgets.put(tabId, content);
         callTerminalMethod("addPinnedTab", tabId, tabName, String.valueOf(content.getID()), tabsetId);
     }
@@ -412,7 +451,7 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
 
     public void setStatusBarWidget(final PWidget w) {
         if (w == null) return;
-        widget.add(w);
+        addContent(w);
         callTerminalMethod("setStatusBar", String.valueOf(w.getID()));
     }
 
@@ -438,6 +477,52 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
 
     public void setLocked(final boolean locked) {
         callTerminalMethod("setLocked", locked);
+    }
+
+    /**
+     * Configure tabset toolbar buttons appearance and visibility.
+     * Each button (popoutFloat, popoutWindow) can be configured with:
+     * visible (boolean), icon (String/HTML), title (String), className (String), style (String).
+     * Set visible=false to hide a button (action still available programmatically).
+     */
+    public void configureButtons(final String configJson) {
+        callTerminalMethod("configureButtons", configJson);
+    }
+
+    /**
+     * Hide or show the float pop-out button.
+     */
+    public void setPopoutFloatVisible(final boolean visible) {
+        callTerminalMethod("configureButtons", "{\"popoutFloat\":{\"visible\":" + visible + "}}");
+    }
+
+    /**
+     * Hide or show the window pop-out button.
+     */
+    public void setPopoutWindowVisible(final boolean visible) {
+        callTerminalMethod("configureButtons", "{\"popoutWindow\":{\"visible\":" + visible + "}}");
+    }
+
+    /**
+     * Programmatically pop-out the active tab as a float overlay.
+     * Use this to trigger the action from an external button (e.g. Electron titlebar).
+     */
+    public void popOutActiveFloat() {
+        callTerminalMethod("popOutActiveFloat");
+    }
+
+    /**
+     * Programmatically pop-out the active tab as a new window (PWindow).
+     */
+    public void popOutActiveWindow() {
+        callTerminalMethod("popOutActiveWindow");
+    }
+
+    /**
+     * Programmatically toggle maximize on the active tabset.
+     */
+    public void maximizeActiveTabset() {
+        callTerminalMethod("maximizeActiveTabset");
     }
 
     // ─── Feature: Tab metadata ──────────────────────────────────
@@ -521,6 +606,7 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
         final String mode;
         final String title;
         PWindow pWindow;
+        PFlowPanel themeWrapper;
         PopOutInfo(String tabId, String tabsetId, int tabIdx, String mode, String title) {
             this.tabId = tabId; this.tabsetId = tabsetId; this.tabIdx = tabIdx; this.mode = mode; this.title = title;
         }
@@ -621,43 +707,80 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
         final String tabId = data.getString("tabId", null);
         if (tabId == null) return;
         final String mode = data.getString("mode", "float");
+
+        if ("window".equals(mode) && !canRebuildWidget(tabId)) {
+            // A PWindow gets its own widget instance because PonySDK cannot hand a widget from one
+            // window to another; without a component and a factory there is nothing to build. The
+            // client has already emptied the tab, so undo that instead of losing it.
+            callTerminalMethod("restorePopOut", tabId, null);
+            return;
+        }
+
         final PWidget w = tabWidgets.get(tabId);
         final PopOutInfo info = new PopOutInfo(tabId, data.getString("tabsetId", null), data.getInt("tabIdx", 0), mode, data.getString("title", tabId));
         popOutTabs.put(tabId, info);
 
-        if ("window".equals(mode) && widgetFactory != null) {
-            final String component = tabComponents.get(tabId);
-            if (component != null) {
-                final String title = data.getString("title", tabId);
-                final int width = data.getInt("w", 500);
-                final int height = data.getInt("h", 400);
-                final PWindow pWindow = Element.newPWindow(title,
-                    "resizable=yes,scrollbars=yes,height=" + height + ",width=" + width);
-                info.pWindow = pWindow;
-                pWindow.addOpenHandler(event -> {
-                    final com.ponysdk.core.ui.basic.PButton popInBtn = Element.newPButton("\u23CE Pop back in");
-                    popInBtn.setStyleProperty("margin", "6px");
-                    popInBtn.setStyleProperty("padding", "4px 12px");
-                    popInBtn.setStyleProperty("cursor", "pointer");
-                    popInBtn.addClickHandler(e -> pWindow.close());
-                    pWindow.add(popInBtn);
-                    final PWidget newWidget = widgetFactory.apply(component, tabId);
-                    if (newWidget != null) pWindow.add(newWidget);
-                });
-                pWindow.addCloseHandler(event -> popInFromWindow(tabId));
-                pWindow.open();
-            }
-        }
-
+        // Before opening the window: in window mode the widget is about to be released, so this is
+        // the last chance for the application to flush its state.
         if (w instanceof TabContent) ((TabContent) w).onPopOut();
+
+        if ("window".equals(mode)) openPopOutWindow(tabId, info, data);
+
         if (onPopOut != null) onPopOut.accept(tabId);
+    }
+
+    private boolean canRebuildWidget(final String tabId) {
+        return widgetFactory != null && tabComponents.get(tabId) != null;
+    }
+
+    private void openPopOutWindow(final String tabId, final PopOutInfo info, final JsonObject data) {
+        final String component = tabComponents.get(tabId);
+        final int width = data.getInt("w", 500);
+        final int height = data.getInt("h", 400);
+        final PWindow pWindow = Element.newPWindow("fl_popout_" + tabId,
+            "resizable=yes,scrollbars=yes,height=" + height + ",width=" + width);
+        info.pWindow = pWindow;
+        pWindow.addOpenHandler(event -> {
+            final com.ponysdk.core.ui.basic.PButton popInBtn = Element.newPButton("\u23CE Pop back in");
+            popInBtn.setStyleProperty("margin", "6px");
+            popInBtn.setStyleProperty("padding", "4px 12px");
+            popInBtn.setStyleProperty("cursor", "pointer");
+            popInBtn.addClickHandler(e -> pWindow.close());
+            pWindow.add(popInBtn);
+            final PWidget newWidget = widgetFactory.apply(component, tabId);
+            if (newWidget != null) {
+                // Carry the theme on a wrapper: the class normally sits on the layout container,
+                // which only exists in the main window.
+                final PFlowPanel themed = Element.newPFlowPanel();
+                themed.setStyleProperty("width", "100%");
+                if (currentTheme != null && !currentTheme.isEmpty()) themed.addStyleName(currentTheme);
+                themed.add(newWidget);
+                info.themeWrapper = themed;
+                pWindow.add(themed);
+            }
+        });
+        pWindow.addCloseHandler(event -> popInFromWindow(tabId));
+        pWindow.open();
+
+        // The tab's widget belongs to the main window and the PWindow builds its own, so this one is
+        // now dead weight: released here, it would otherwise stay parented to the addon panel with a
+        // detached element and leak on every pop-out.
+        final PWidget orphan = tabWidgets.remove(tabId);
+        if (orphan != null) orphan.removeFromParent();
     }
 
     private void handlePopIn(final JsonObject data) {
         final String tabId = data.getString("tabId", null);
         if (tabId == null) return;
-        final PopOutInfo info = popOutTabs.remove(tabId);
+        final PopOutInfo info = popOutTabs.get(tabId);
         if (info == null) return;
+        if (info.pWindow != null) {
+            // Closing the window runs popInFromWindow, which rebuilds the widget and restores the
+            // tab. Handling it here instead would drop the tab and leave the window open.
+            info.pWindow.close();
+            return;
+        }
+        popOutTabs.remove(tabId);
         final PWidget w = tabWidgets.get(tabId);
         if (w instanceof TabContent) ((TabContent) w).onPopIn();
         if (onPopIn != null) onPopIn.accept(tabId);
@@ -667,14 +790,18 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
         final PopOutInfo info = popOutTabs.remove(tabId);
         if (info == null) return;
         final String component = tabComponents.get(tabId);
-        if (widgetFactory != null && component != null) {
-            final PWidget newWidget = widgetFactory.apply(component, tabId);
-            if (newWidget != null) {
-                widget.add(newWidget);
-                tabWidgets.put(tabId, newWidget);
-                callTerminalMethod("addTab", tabId, info.title, String.valueOf(newWidget.getID()), info.tabsetId);
-            }
+        final PWidget newWidget = canRebuildWidget(tabId) ? widgetFactory.apply(component, tabId) : null;
+        if (newWidget != null) {
+            addContent(newWidget);
+            tabWidgets.put(tabId, newWidget);
         }
+        // Always restore the tab, even with no widget: an empty tab beats a silently lost one.
+        // restorePopOut rather than addTab, because it puts the tab back at its original index with
+        // its component and config, which addTab would flatten to a plain 'pwidget'.
+        callTerminalMethod("restorePopOut", tabId, newWidget != null ? String.valueOf(newWidget.getID()) : null);
+        // No TabContent#onPopIn here: this is a brand new instance that never received onPopOut, and
+        // pairing the two hooks on the same widget is what makes them usable. The onPopIn consumer
+        // below is the tab-level channel and does fire.
         if (onPopIn != null) onPopIn.accept(tabId);
     }
 

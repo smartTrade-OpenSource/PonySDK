@@ -19,6 +19,9 @@ out/
 # IDE - VS Code
 .vscode/
 
+# Node (sample Playwright suite)
+node_modules/
+
 # OS
 .DS_Store
 

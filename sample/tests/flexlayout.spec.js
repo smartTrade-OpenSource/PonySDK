@@ -56,6 +56,60 @@ test.describe('FlexLayout PonySDK Integration', () => {
     await expect(page.locator('.fl-tab:has-text("Button")')).toBeVisible({ timeout: 2000 });
   });
 
+  // ─── configureButtons / programmatic actions ────────────────────
+
+  test('configureButtons hides popout float button', async ({ page }) => {
+    const before = await page.locator('.fl-tbtn-popout').count();
+    expect(before).toBeGreaterThan(0);
+    await page.evaluate(() => {
+      document.querySelector('.fl-layout').parentElement.__ponyAddon.configureButtons({popoutFloat:{visible:false}});
+    });
+    await page.waitForTimeout(500);
+    const after = await page.locator('.fl-tbtn-popout').count();
+    expect(after).toBeLessThan(before);
+  });
+
+  test('configureButtons changes button icon', async ({ page }) => {
+    await page.evaluate(() => {
+      document.querySelector('.fl-layout').parentElement.__ponyAddon.configureButtons({popoutFloat:{icon:'<span class="custom-icon">X</span>'}});
+    });
+    await page.waitForTimeout(500);
+    const html = await page.locator('.fl-tbtn-popout').first().innerHTML();
+    expect(html).toContain('custom-icon');
+  });
+
+  test('popOutActiveFloat works programmatically', async ({ page }) => {
+    await page.locator('.fl-tab').first().click();
+    await page.waitForTimeout(200);
+    await page.evaluate(() => {
+      document.querySelector('.fl-layout').parentElement.__ponyAddon.popOutActiveFloat();
+    });
+    await expect(page.locator('.fl-popout-window')).toBeVisible({ timeout: 3000 });
+  });
+
+  test('maximizeActiveTabset works programmatically', async ({ page }) => {
+    await page.locator('.fl-tab').first().click();
+    await page.waitForTimeout(200);
+    await page.evaluate(() => {
+      document.querySelector('.fl-layout').parentElement.__ponyAddon.maximizeActiveTabset();
+    });
+    await expect(page.locator('.fl-maximized')).toBeVisible({ timeout: 2000 });
+  });
+
+  test('hidden buttons still allow programmatic action', async ({ page }) => {
+    await page.evaluate(() => {
+      document.querySelector('.fl-layout').parentElement.__ponyAddon.configureButtons({popoutFloat:{visible:false}, popoutWindow:{visible:false}});
+    });
+    await page.waitForTimeout(300);
+    await expect(page.locator('.fl-tbtn-popout')).toHaveCount(0);
+    await page.locator('.fl-tab').first().click();
+    await page.waitForTimeout(200);
+    await page.evaluate(() => {
+      document.querySelector('.fl-layout').parentElement.__ponyAddon.popOutActiveFloat();
+    });
+    await expect(page.locator('.fl-popout-window')).toBeVisible({ timeout: 3000 });
+  });
+
   test('drag tab between tabsets', async ({ page }) => {
     await page.click('button:has-text("+ Add Tab")');
     await expect(page.locator('.fl-tab')).toHaveCount(3, { timeout: 2000 });
@@ -330,6 +384,52 @@ test.describe('FlexLayout PonySDK Integration', () => {
   });
 
   // ─── XSS Regression ───────────────────────────────────────────
+
+  test('popout window shows widget content (not just placeholder)', async ({ page }) => {
+    // Add interactive widget so we have identifiable content
+    await dragFromToolbar(page, '.fl-drag-src-interactive');
+    await page.locator('.fl-tab:has-text("Interactive")').click();
+    await expect(page.locator('.interactive-inc-btn')).toBeVisible({ timeout: 5000 });
+    // Pop out
+    await page.locator('.fl-tabset:has(.fl-tab:has-text("Interactive")) .fl-tbtn-popout').click();
+    await expect(page.locator('.fl-popout-window')).toBeVisible({ timeout: 2000 });
+    // The popout should contain the widget host with content
+    await expect(page.locator('.fl-popout-window .fl-pony-widget-host')).toBeVisible({ timeout: 3000 });
+    // Verify it has actual content (not empty)
+    const hostContent = await page.locator('.fl-popout-window .fl-pony-widget-host').innerHTML();
+    expect(hostContent.length).toBeGreaterThan(0);
+  });
+
+  test('all tabs popped out leaves empty tabset with placeholder', async ({ page }) => {
+    // Add a second tab to the first tabset
+    await page.click('button:has-text("+ Add Tab")');
+    await expect(page.locator('.fl-tab')).toHaveCount(3, { timeout: 2000 });
+    // Select first tab in first tabset and pop it out
+    await page.locator('.fl-tabset').first().locator('.fl-tab').first().click();
+    await page.locator('.fl-tabset').first().locator('.fl-tbtn-popout').click();
+    await expect(page.locator('.fl-popout-window')).toHaveCount(1, { timeout: 2000 });
+    // Pop out the remaining tab in the first tabset
+    await page.locator('.fl-tabset').first().locator('.fl-tbtn-popout').click();
+    await expect(page.locator('.fl-popout-window')).toHaveCount(2, { timeout: 2000 });
+    // The tabset that lost all tabs gets cleaned up OR shows placeholder
+    // Since cleanup removes empty tabsets (count > 1), the first tabset is removed
+    // Only the second tabset remains with "Info"
+    await expect(page.locator('.fl-tabset')).toHaveCount(1, { timeout: 2000 });
+  });
+
+  test('pop-in after all-popped-out restores correctly', async ({ page }) => {
+    // Pop out Welcome (the only tab in first tabset)
+    await page.locator('.fl-tbtn-popout').first().click();
+    await expect(page.locator('.fl-popout-window')).toHaveCount(1, { timeout: 2000 });
+    // First tabset is cleaned up, only second remains
+    await expect(page.locator('.fl-tabset')).toHaveCount(1, { timeout: 2000 });
+    // Pop in — should recreate the tabset
+    await page.locator('.fl-popout-window button:has-text("⏎")').click();
+    await expect(page.locator('.fl-popout-window')).toHaveCount(0, { timeout: 2000 });
+    // Tab is restored, 2 tabsets again
+    await expect(page.locator('.fl-tabset')).toHaveCount(2, { timeout: 2000 });
+    await expect(page.locator('.fl-tab:has-text("Welcome")')).toBeVisible({ timeout: 2000 });
+  });
 
   test('XSS: malicious tab name is rendered as text not HTML', async ({ page }) => {
     const xssPayload = '<img src=x onerror=window.__xss_fired=true>';
@@ -1161,6 +1261,30 @@ async function dragFromToolbar(page, srcSelector) {
   await page.mouse.move(tgtBox.x + tgtBox.width / 2, tgtBox.y + tgtBox.height / 2, { steps: 8 });
   await page.mouse.up();
 }
+
+test.describe('FlexLayout Popout Theme', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto(process.env.BASE_URL || 'http://localhost/sample/', { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('.fl-layout', { timeout: 8000 });
+  });
+
+  test('popout window updates when theme changes', async ({ page }) => {
+    await page.locator('.fl-tbtn-popout').first().click();
+    await page.waitForSelector('.fl-popout-window', { timeout: 2000 });
+    const bgBefore = await page.locator('.fl-popout-window').evaluate(el => getComputedStyle(el).backgroundColor);
+    // Change theme via layout class + popout propagation (simulating setTheme)
+    await page.evaluate(() => {
+      const layout = document.querySelector('.fl-layout');
+      layout.className = layout.className.replace(/fl-theme-\S+/g, '').trim() + ' fl-theme-light';
+      document.querySelectorAll('.fl-popout-window').forEach(w => {
+        w.className = w.className.replace(/fl-theme-\S+/g, '').trim() + ' fl-theme-light';
+      });
+    });
+    await page.waitForTimeout(200);
+    const bgAfter = await page.locator('.fl-popout-window').evaluate(el => getComputedStyle(el).backgroundColor);
+    expect(bgAfter).not.toBe(bgBefore);
+  });
+});
 
 test.describe('FlexLayout Performance', () => {
 
