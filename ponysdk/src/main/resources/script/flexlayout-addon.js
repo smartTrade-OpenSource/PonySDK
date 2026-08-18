@@ -285,6 +285,8 @@
         if (el === hostEl || el.contains(hostEl)) return;
         var previousHost = el.parentNode;
         hostEl.appendChild(el);
+        // Parked: drop the marker the server sets in FlexLayoutAddon#addContent.
+        el.classList.remove('fl-pony-unparked');
         // Popping a tab back in re-parents its whole host; drop the wrapper left behind empty.
         if (previousHost && previousHost !== hostEl && previousHost.parentNode
             && previousHost.classList && previousHost.classList.contains('fl-pony-widget-host')

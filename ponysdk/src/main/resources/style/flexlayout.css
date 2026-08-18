@@ -402,6 +402,10 @@
 
 /* â”€â”€ Sidebar / Border panels â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .fl-sidebar { background: var(--fl-strip); }
+
+/* Content widget not yet parked in a tab host (see FlexLayoutAddon#addContent). Inactive tabs
+   have no host, so this keeps their widget out of the way instead of floating over the layout. */
+.fl-pony-unparked { display: none !important; }
 .fl-sidebar-strip {
   background: var(--fl-strip); border-color: var(--fl-border); gap: 1px; padding: 2px;
 }

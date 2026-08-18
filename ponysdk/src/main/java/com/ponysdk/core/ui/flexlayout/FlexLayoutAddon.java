@@ -96,7 +96,15 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
     private void addContent(final PWidget content) {
         widget.add(content);
         content.forceDomId();
+        // Until the terminal moves it into its tab host, the widget is a plain child of the layout
+        // panel and would render loose on top of the layout. Tabs that are not currently rendered
+        // (an inactive tab in a tabset) have no host at all, so the marker stays and keeps them
+        // hidden. flexlayout-addon.js clears it in _moveWidgetToHost once the widget is parked.
+        content.addStyleName(UNPARKED_STYLE);
     }
+
+    /** Marks a content widget that the terminal has not parked in a tab host yet. */
+    private static final String UNPARKED_STYLE = "fl-pony-unparked";
 
     // ─── Tab Management ──────────────────────────────────────────
 
