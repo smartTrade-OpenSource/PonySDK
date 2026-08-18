@@ -391,4 +391,65 @@ public class DefaultCacheDataSourceSelectionTest {
             return true;
         }
     }
+
+    // --- selectRange simulation: first click then shift-click ---
+
+    @Test
+    public void testSelectRangeSimulation_firstClickThenShiftClick() {
+        // Simulates: user clicks "b" (anchor), then Shift+clicks "d"
+        // Expected: range "b", "c", "d" selected
+        dataSource.select("b");
+        Assert.assertEquals(1, dataSource.getlLiveSelectedDataCount());
+
+        final Interval rangeInterval = dataSource.selectKeys(List.of("b", "c", "d"));
+
+        Assert.assertNotNull(rangeInterval);
+        Assert.assertFalse(dataSource.isSelected("a"));
+        Assert.assertTrue(dataSource.isSelected("b"));
+        Assert.assertTrue(dataSource.isSelected("c"));
+        Assert.assertTrue(dataSource.isSelected("d"));
+        Assert.assertFalse(dataSource.isSelected("e"));
+        Assert.assertEquals(3, dataSource.getlLiveSelectedDataCount());
+    }
+
+    @Test
+    public void testSelectRangeSimulation_unselectRange() {
+        // Simulates: range a-c selected, user Shift+clicks "b" to unselect range b-c
+        dataSource.selectKeys(List.of("a", "b", "c"));
+
+        // Shift+click on "b" while "a" (anchor) was already selected — unselect b-c range
+        final Interval interval = dataSource.unselectKeys(List.of("b", "c"));
+
+        Assert.assertNotNull(interval);
+        Assert.assertTrue(dataSource.isSelected("a"));
+        Assert.assertFalse(dataSource.isSelected("b"));
+        Assert.assertFalse(dataSource.isSelected("c"));
+        Assert.assertEquals(1, dataSource.getlLiveSelectedDataCount());
+    }
+
+    @Test
+    public void testSelectRangeSimulation_reverseRange() {
+        // Simulates: user clicks "d" (anchor), then Shift+clicks "b" (upward range)
+        dataSource.select("d");
+        final Interval rangeInterval = dataSource.selectKeys(List.of("b", "c", "d"));
+
+        Assert.assertNotNull(rangeInterval);
+        Assert.assertFalse(dataSource.isSelected("a"));
+        Assert.assertTrue(dataSource.isSelected("b"));
+        Assert.assertTrue(dataSource.isSelected("c"));
+        Assert.assertTrue(dataSource.isSelected("d"));
+        Assert.assertFalse(dataSource.isSelected("e"));
+    }
+
+    @Test
+    public void testSelectRangeSimulation_extendExistingRange() {
+        // First range: b-c, then extend to b-e
+        dataSource.selectKeys(List.of("b", "c"));
+        Assert.assertEquals(2, dataSource.getlLiveSelectedDataCount());
+
+        dataSource.selectKeys(List.of("b", "c", "d", "e"));
+        Assert.assertEquals(4, dataSource.getlLiveSelectedDataCount());
+        Assert.assertTrue(dataSource.isSelected("b"));
+        Assert.assertTrue(dataSource.isSelected("e"));
+    }
 }
