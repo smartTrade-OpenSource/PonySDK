@@ -1098,7 +1098,10 @@
       this._hideBorderContextMenu();
       const menu = document.createElement('div');
       menu.className = 'fl-border-context-menu';
-      menu.style.cssText = `position:fixed;left:${x}px;top:${y}px;z-index:9999;background:var(--fl-panel,#181825);border:1px solid var(--fl-border,#313244);border-radius:4px;padding:4px 0;box-shadow:0 4px 12px rgba(0,0,0,.4);font-size:12px;`;
+      this.getSkinClasses().forEach(c => menu.classList.add(c));
+      // Only the position is inline: everything else lives in .fl-border-context-menu so a
+      // skin can restyle it (inline declarations beat any stylesheet).
+      menu.style.cssText = `left:${x}px;top:${y}px;`;
       const items = [
         { label: 'Close', action: () => this._act(Actions.closeBorderTab(border.side, tab.id)) },
         { label: 'Close Others', action: () => { border.children.filter(t => t.id !== tab.id).forEach(t => this._act(Actions.closeBorderTab(border.side, t.id))); } },
@@ -1107,9 +1110,7 @@
       items.forEach(item => {
         const el = document.createElement('div');
         el.textContent = item.label;
-        el.style.cssText = 'padding:4px 12px;cursor:pointer;color:var(--fl-text,#cdd6f4);';
-        el.addEventListener('mouseenter', () => el.style.background = 'var(--fl-tab-hover,#313244)');
-        el.addEventListener('mouseleave', () => el.style.background = '');
+        el.className = 'fl-context-item'; // hover handled by CSS, not an inline background
         el.addEventListener('click', () => { item.action(); this._hideBorderContextMenu(); });
         menu.appendChild(el);
       });
@@ -1459,6 +1460,17 @@
      * happens to be over, so it flickered on every move and on every re-render.
      * Every resize handle — pane splitter, sidebar edge, sidebar zone splitter — goes through this.
      */
+    /**
+     * The classes on the container that carry the skin: everything except our own structural and
+     * transient state classes. Overlays are re-parented to <body>, outside the container, so they
+     * do not inherit the theme through the cascade and must be tagged explicitly.
+     */
+    getSkinClasses() {
+      const structural = new Set(['fl-layout', 'fl-resizing', 'fl-resizing-col', 'fl-resizing-row',
+                                  'fl-has-maximized', 'fl-layout-locked']);
+      return [...this.container.classList].filter(c => !structural.has(c));
+    }
+
     _beginResize(handleEl, isH) {
       this.container.classList.add('fl-resizing', isH ? 'fl-resizing-col' : 'fl-resizing-row');
       if (handleEl) handleEl.classList.add('fl-sp-active');
@@ -1791,9 +1803,8 @@
         const tsEl2 = this.container.querySelector(`[data-fl-tabset="${hit.tabsetId}"]`);
         if (tsEl2) tsEl2.classList.add('fl-drop-zone-active');
         const b = hit.bar;
-        ind.style.cssText = `display:block;position:fixed;left:${b.x - 1.5}px;top:${b.top}px;`
-          + `width:3px;height:${b.height}px;border:none;border-radius:2px;`
-          + `background:var(--fl-drop-border,#89b4fa);box-shadow:0 0 5px var(--fl-drop-border,#89b4fa);z-index:9998;`;
+        ind.classList.add('fl-drop-bar');
+        ind.style.cssText = `display:block;left:${b.x - 1.5}px;top:${b.top}px;height:${b.height}px;`;
         return;
       }
       // Edge split / center zone
@@ -1805,7 +1816,8 @@
       else if (hit.location === DL.RIGHT)   { L += W*0.5; W *= 0.5; }
       else if (hit.location === DL.TOP)     { H *= 0.5; }
       else if (hit.location === DL.BOTTOM)  { T += H*0.5; H *= 0.5; }
-      ind.style.cssText = `display:block;position:fixed;left:${L}px;top:${T}px;width:${W}px;height:${H}px;z-index:9998;`;
+      ind.classList.remove('fl-drop-bar');
+      ind.style.cssText = `display:block;left:${L}px;top:${T}px;width:${W}px;height:${H}px;`;
     }
 
     // Rect-based hit detection. Priority: border strip > tab strip (insertion bar) > edges (split) > center.

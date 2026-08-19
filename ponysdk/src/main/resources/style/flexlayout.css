@@ -52,6 +52,22 @@
   --fl-badge-dot:          #f38ba8;
   --fl-badge-bg:           #f38ba8;
   --fl-badge-text:         #fff;
+
+  /* Overlays: drop feedback, context menu, pop-out windows, placeholders */
+  --fl-z-drop:             9998;
+  --fl-z-menu:             9999;
+  --fl-z-popout:           10000;
+  --fl-drop-bar-w:         3px;
+  --fl-drop-bar-radius:    2px;
+  --fl-menu-bg:            var(--fl-panel);
+  --fl-menu-pad:           4px 0;
+  --fl-menu-item-pad:      4px 12px;
+  --fl-menu-shadow:        0 4px 12px rgba(0,0,0,.4);
+  --fl-popout-shadow:      0 8px 32px rgba(0,0,0,.5);
+  --fl-popout-radius:      6px;
+  --fl-popout-title-pad:   4px 8px;
+  --fl-placeholder-pad:    8px;
+  --fl-popout-grip-sz:     12px;
 }
 
 /* â”€â”€ Light theme â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
@@ -406,9 +422,25 @@
 
 /* â”€â”€ Drop indicator â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .fl-drop-ind {
+  position: fixed; z-index: var(--fl-z-drop);
   background: var(--fl-drop-fill); border: 2px solid var(--fl-drop-border);
   border-radius: var(--fl-radius); pointer-events: none;
 }
+/* Insertion bar between two tabs — same element, different look. */
+.fl-drop-ind.fl-drop-bar {
+  width: var(--fl-drop-bar-w); background: var(--fl-drop-border); border: none;
+  border-radius: var(--fl-drop-bar-radius); box-shadow: 0 0 5px var(--fl-drop-border);
+}
+
+/* ── Context menu (border tab) ─────────────────────────────────────── */
+.fl-border-context-menu {
+  position: fixed; z-index: var(--fl-z-menu);
+  background: var(--fl-menu-bg); border: 1px solid var(--fl-border);
+  border-radius: var(--fl-radius); padding: var(--fl-menu-pad);
+  box-shadow: var(--fl-menu-shadow); font-size: var(--fl-font-sz); color: var(--fl-text);
+}
+.fl-context-item { padding: var(--fl-menu-item-pad); cursor: pointer; color: var(--fl-text); }
+.fl-context-item:hover { background: var(--fl-tab-hover); }
 
 /* â”€â”€ Scrollbars â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .fl-tab-content::-webkit-scrollbar { width: 5px; height: 5px; }
@@ -653,3 +685,38 @@
 /* Content must not react while a handle is being dragged (text selection, hover states,
    iframes swallowing the pointer). */
 .fl-layout.fl-resizing .fl-tab-content, .fl-layout.fl-resizing iframe { pointer-events: none; }
+
+/* ── Float pop-out window ─────────────────────────────────────────────────────────
+   Everything here used to be inline in flexlayout-addon.js, which made the whole
+   component impossible to restyle from a skin. */
+.fl-popout-window {
+  position: fixed; z-index: var(--fl-z-popout);
+  display: flex; flex-direction: column; overflow: hidden;
+  background: var(--fl-panel); border: 1px solid var(--fl-border);
+  border-radius: var(--fl-popout-radius); box-shadow: var(--fl-popout-shadow);
+  font-family: var(--fl-font); font-size: var(--fl-font-sz); color: var(--fl-text);
+}
+.fl-popout-titlebar {
+  display: flex; align-items: center; flex-shrink: 0;
+  padding: var(--fl-popout-title-pad);
+  background: var(--fl-strip); border-bottom: 1px solid var(--fl-border);
+  cursor: move; user-select: none;
+}
+.fl-popout-title { flex: 1; font-size: var(--fl-font-sz); color: var(--fl-text); }
+.fl-popout-popin {
+  background: none; border: 1px solid var(--fl-border); color: var(--fl-text);
+  border-radius: var(--fl-tab-radius); cursor: pointer;
+  font-size: var(--fl-font-sz); padding: 2px 6px;
+}
+.fl-popout-popin:hover { background: var(--fl-tab-hover); }
+.fl-popout-content { flex: 1; overflow: auto; position: relative; }
+.fl-popout-grip {
+  position: absolute; bottom: 0; right: 0;
+  width: var(--fl-popout-grip-sz); height: var(--fl-popout-grip-sz); cursor: nwse-resize;
+}
+
+/* Name of a tab whose widget the server has not built yet. */
+.fl-tab-placeholder {
+  display: block; padding: var(--fl-placeholder-pad);
+  color: var(--fl-text-dim); font-size: var(--fl-font-sz);
+}

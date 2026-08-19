@@ -1,0 +1,106 @@
+/*
+ * FlexLayout skin template
+ * ────────────────────────
+ * Every visual decision FlexLayout makes is a CSS custom property. Copy this file,
+ * give the selector your own theme name, and set only what you care about: anything
+ * left out falls back to the default shown in the comment.
+ *
+ * Apply the theme by passing the class name to the Java API:
+ *
+ *     new FlexLayoutPanel(model, "my-skin");   // or panel.setTheme("my-skin")
+ *
+ * The class lands on the layout container, so tokens set here cascade to the whole
+ * layout. Overlays that have to live in <body> (float pop-out windows, the border tab
+ * context menu) do not inherit through the cascade, so FlexLayout copies the skin
+ * classes onto them when it creates them — nothing to do on your side.
+ *
+ * ── Mapping a SASS design system onto it ──────────────────────────────────────────
+ * SASS variables are compile-time, custom properties are runtime; emit the latter
+ * from the former and both worlds meet in one place:
+ *
+ *     @import 'palette';          // $blue700, $grey900, ...
+ *
+ *     .my-skin {
+ *       --fl-bg:           #{$grey900};
+ *       --fl-panel:        #{$grey800};
+ *       --fl-text:         #{$grey100};
+ *       --fl-tab-active-ind: #{$blue500};
+ *       --fl-font:         #{$formFont};
+ *     }
+ *
+ * Keep the #{} interpolation: without it SASS emits the literal variable name.
+ *
+ * Tokens marked [skin] are the ones the built-in themes override — start with those
+ * for a recognisable look. The rest are geometry and rarely need touching.
+ */
+
+.my-skin {
+
+  /* ── Surfaces and text ───────────────────────────────────────────────────────── */
+  /* --fl-bg                 : #1e1e2e; [skin] */
+  /* --fl-panel              : #181825; [skin] */
+  /* --fl-strip              : #11111b; [skin] */
+  /* --fl-border             : #313244; [skin] */
+  /* --fl-text               : #cdd6f4; [skin] */
+  /* --fl-text-dim           : #6c7086; [skin] */
+  /* --fl-accent             : #89b4fa; [skin] */
+  /* --fl-accent2            : #cba6f7; [skin] */
+
+  /* ── Tabs ────────────────────────────────────────────────────────────────────── */
+  /* --fl-tab-hover          : #313244; [skin] */
+  /* --fl-tab-active-bg      : #1e1e2e; [skin] */
+  /* --fl-tab-active-ind     : #89b4fa; [skin] */
+  /* --fl-close-hover        : #f38ba8; [skin] */
+  /* --fl-strip-h            : 30px; */
+  /* --fl-tab-radius         : 3px; [skin] */
+
+  /* ── Resize handles ──────────────────────────────────────────────────────────── */
+  /* --fl-sp                 : #11111b; [skin] */
+  /* --fl-sp-hover           : #89b4fa; [skin] */
+  /* --fl-sp-size            : 5px; */
+  /* --fl-sp-grab            : 3px; */
+  /* --fl-sp-grip            : var(--fl-text-dim); */
+  /* --fl-sp-grip-len        : 22px; */
+  /* --fl-sidebar-resize-w   : var(--fl-sp-size); */
+  /* --fl-sidebar-splitter-h : var(--fl-sp-size); */
+
+  /* ── Drag and drop ───────────────────────────────────────────────────────────── */
+  /* --fl-drop-fill          : rgba(137,180,250,.20); [skin] */
+  /* --fl-drop-border        : #89b4fa; [skin] */
+  /* --fl-drop-bar-w         : 3px; */
+  /* --fl-drop-bar-radius    : 2px; */
+
+  /* ── Sidebars ────────────────────────────────────────────────────────────────── */
+  /* --fl-sidebar-strip-w    : 30px; */
+  /* --fl-sidebar-tab-pad    : 6px 10px; */
+  /* --fl-sidebar-tab-pad-v  : 10px 6px; */
+  /* --fl-sidebar-tab-sz     : 11px; */
+  /* --fl-sidebar-icon-sz    : 14px; */
+  /* --fl-sidebar-header-sz  : 11px; */
+  /* --fl-sidebar-active-glow: rgba(137,180,250,.15); [skin] */
+  /* --fl-sidebar-close-bg   : rgba(243,139,168,.1); [skin] */
+
+  /* ── Badges ──────────────────────────────────────────────────────────────────── */
+  /* --fl-badge-dot          : #f38ba8; [skin] */
+  /* --fl-badge-bg           : #f38ba8; [skin] */
+  /* --fl-badge-text         : #fff; [skin] */
+
+  /* ── Overlays: menu, pop-out, placeholder ────────────────────────────────────── */
+  /* --fl-menu-bg            : var(--fl-panel); */
+  /* --fl-menu-pad           : 4px 0; */
+  /* --fl-menu-item-pad      : 4px 12px; */
+  /* --fl-menu-shadow        : 0 4px 12px rgba(0,0,0,.4); */
+  /* --fl-popout-shadow      : 0 8px 32px rgba(0,0,0,.5); */
+  /* --fl-popout-radius      : 6px; */
+  /* --fl-popout-title-pad   : 4px 8px; */
+  /* --fl-popout-grip-sz     : 12px; */
+  /* --fl-placeholder-pad    : 8px; */
+  /* --fl-z-drop             : 9998; */
+  /* --fl-z-menu             : 9999; */
+  /* --fl-z-popout           : 10000; */
+
+  /* ── Typography and shape ────────────────────────────────────────────────────── */
+  /* --fl-font               : system-ui, -apple-system, 'Segoe UI', sans-serif; */
+  /* --fl-font-sz            : 12px; */
+  /* --fl-radius             : 4px; */
+}

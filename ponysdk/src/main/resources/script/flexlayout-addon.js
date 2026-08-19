@@ -90,7 +90,7 @@
         } else {
           host.innerHTML = '';
         var placeholder = document.createElement('span');
-        placeholder.style.cssText = 'color:var(--fl-text-dim,#6c7086);font-size:12px;padding:8px;display:block;';
+        placeholder.className = 'fl-tab-placeholder';
         placeholder.textContent = tabNode.getName();
         host.appendChild(placeholder);
         }
@@ -651,30 +651,31 @@
       var self = this;
       var win = document.createElement('div');
       win.className = 'fl-popout-window';
-      // Inherit current theme from layout container
-      var themeMatch = this._layoutContainer.className.match(/fl-theme-\S+/);
-      if (themeMatch) win.classList.add(themeMatch[0]);
+      // The window lives in <body>, outside the layout container, so it inherits nothing from the
+      // cascade: carry the skin classes over or it falls back to the default palette.
+      if (this._layout && this._layout.getSkinClasses) {
+        this._layout.getSkinClasses().forEach(function (c) { win.classList.add(c); });
+      }
       win.dataset.tabId = tabId;
-      win.style.cssText = 'position:fixed;z-index:10000;background:var(--fl-panel,#181825);border:1px solid var(--fl-border,#313244);border-radius:6px;box-shadow:0 8px 32px rgba(0,0,0,.5);display:flex;flex-direction:column;overflow:hidden;'
-        + 'left:' + (x || 100) + 'px;top:' + (y || 100) + 'px;width:' + (w || 400) + 'px;height:' + (h || 300) + 'px;';
+      // Geometry only: the looks live in .fl-popout-window so a skin can reach them.
+      win.style.cssText = 'left:' + (x || 100) + 'px;top:' + (y || 100) + 'px;width:' + (w || 400) + 'px;height:' + (h || 300) + 'px;';
 
       var titleBar = document.createElement('div');
       titleBar.className = 'fl-popout-titlebar';
-      titleBar.style.cssText = 'display:flex;align-items:center;padding:4px 8px;background:var(--fl-strip,#11111b);border-bottom:1px solid var(--fl-border,#313244);cursor:move;user-select:none;flex-shrink:0;';
       var titleSpan = document.createElement('span');
-      titleSpan.style.cssText = 'flex:1;font-size:12px;color:var(--fl-text,#cdd6f4)';
+      titleSpan.className = 'fl-popout-title';
       titleSpan.textContent = info.title || 'Tab';
       titleBar.appendChild(titleSpan);
 
       var popInBtn = document.createElement('button');
       popInBtn.type = 'button'; popInBtn.textContent = '⏎'; popInBtn.title = 'Pop back in';
-      popInBtn.style.cssText = 'background:none;border:1px solid var(--fl-border,#313244);color:var(--fl-text,#cdd6f4);border-radius:3px;cursor:pointer;font-size:12px;padding:2px 6px;';
+      popInBtn.className = 'fl-popout-popin';
       popInBtn.addEventListener('click', function () { self.popIn(tabId); });
       titleBar.appendChild(popInBtn);
       win.appendChild(titleBar);
 
       var content = document.createElement('div');
-      content.style.cssText = 'flex:1;overflow:auto;position:relative;';
+      content.className = 'fl-popout-content';
       if (info.widgetEl) {
         info.widgetEl.style.display = ''; // undo _park
         content.appendChild(info.widgetEl);
@@ -805,7 +806,7 @@
 
     _makeResizable: function (win) {
       var grip = document.createElement('div');
-      grip.style.cssText = 'position:absolute;bottom:0;right:0;width:12px;height:12px;cursor:nwse-resize;';
+      grip.className = 'fl-popout-grip';
       win.appendChild(grip);
       grip.addEventListener('pointerdown', function (e) {
         e.preventDefault(); e.stopPropagation();
