@@ -1230,6 +1230,7 @@
               if (ev.button !== 0) return;
               ev.preventDefault();
               try { splitter.setPointerCapture(ev.pointerId); } catch(e) {}
+              this._beginResize(splitter, false);
               const prevPane = pane;
               const nextPane = panel.querySelectorAll('.fl-sidebar-pane')[oIdx + 1];
               if (!nextPane) return;
@@ -1246,6 +1247,7 @@
                 splitter.removeEventListener('pointerup', up);
                 splitter.removeEventListener('pointercancel', up);
                 try { splitter.releasePointerCapture(ev.pointerId); } catch(e) {}
+                this._endResize(splitter);
               };
               splitter.addEventListener('pointermove', move);
               splitter.addEventListener('pointerup', up);
@@ -1265,6 +1267,7 @@
           if (e.button !== 0) return;
           e.preventDefault();
           try { handle.setPointerCapture(e.pointerId); } catch(err) {}
+          this._beginResize(handle, isV);
           const startPos = isV ? e.clientX : e.clientY;
           const startSize = size;
           const rowEl = this.container.querySelector('.fl-row');
@@ -1304,7 +1307,9 @@
           const onUp = () => {
             handle.removeEventListener('pointermove', onMove);
             handle.removeEventListener('pointerup', onUp);
+            handle.removeEventListener('pointercancel', onUp);
             try { handle.releasePointerCapture(e.pointerId); } catch(err) {}
+            this._endResize(handle);
             panel.style.transition = '';
             panel.style.opacity = '';
             const finalSize = isV ? panel.offsetWidth : panel.offsetHeight;
@@ -1315,12 +1320,14 @@
               // Normal resize: persist new size
               const allSideBorders = this.model.getBorders().filter(b => b.side === baseSide || b.side.startsWith(baseSide + '-'));
               allSideBorders.forEach(b => { b.size = Math.max(50, finalSize); });
-              this.model.emit('change', this.model);
+              // The panel and the layout insets were updated inline as the pointer moved, so the
+              // rendered state already matches the model: emitting 'change' would only rebuild it.
               if (this.onModelChange) this.onModelChange(this.model);
             }
           };
           handle.addEventListener('pointermove', onMove);
           handle.addEventListener('pointerup', onUp);
+          handle.addEventListener('pointercancel', onUp);
         });
         panel.appendChild(handle);
       }
@@ -1446,6 +1453,27 @@
       return el;
     }
 
+    /**
+     * Pins the resize cursor on the whole layout for the duration of a drag and freezes the
+     * content underneath. Without it the cursor is recomputed from whatever element the pointer
+     * happens to be over, so it flickered on every move and on every re-render.
+     * Every resize handle — pane splitter, sidebar edge, sidebar zone splitter — goes through this.
+     */
+    _beginResize(handleEl, isH) {
+      this.container.classList.add('fl-resizing', isH ? 'fl-resizing-col' : 'fl-resizing-row');
+      if (handleEl) handleEl.classList.add('fl-sp-active');
+      // Belt for pointer excursions outside the container while captured.
+      document.body.style.cursor = isH ? 'col-resize' : 'row-resize';
+      document.body.style.userSelect = 'none';
+    }
+
+    _endResize(handleEl) {
+      this.container.classList.remove('fl-resizing', 'fl-resizing-col', 'fl-resizing-row');
+      if (handleEl) handleEl.classList.remove('fl-sp-active');
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    }
+
     _mkSplitter(row, afterIdx) {
       const sp = document.createElement('div');
       const isH = row.direction === 'row';
@@ -1459,9 +1487,7 @@
         this._resize = { A, B, isH, sp, row, x0: e.clientX, y0: e.clientY,
                          wa: A.getWeight(), wb: B.getWeight(),
                          rowEl: this._nodeEls.get(row.id), pointerId: e.pointerId };
-        sp.classList.add('fl-sp-active');
-        document.body.style.cursor     = isH ? 'col-resize' : 'row-resize';
-        document.body.style.userSelect = 'none';
+        this._beginResize(sp, isH);
         sp.addEventListener('pointermove',   this._pmRes);
         sp.addEventListener('pointerup',     this._puRes);
         sp.addEventListener('pointercancel', this._puRes);
@@ -1938,14 +1964,15 @@
       const r = this._resize;
       if (!r) return;
       this._resize = null;
-      r.sp.classList.remove('fl-sp-active');
       r.sp.removeEventListener('pointermove',   this._pmRes);
       r.sp.removeEventListener('pointerup',     this._puRes);
       r.sp.removeEventListener('pointercancel', this._puRes);
       try { r.sp.releasePointerCapture(r.pointerId); } catch (e) {}
-      document.body.style.cursor = '';
-      document.body.style.userSelect = '';
-      this.model.emit('change', this.model);
+      this._endResize(r.sp);
+      // The weights are already on the model and the flex styles already applied, so emitting
+      // 'change' here would only tear the whole layout down and rebuild it identically —
+      // destroying every tab content, hence every hosted widget, to commit two numbers.
+      if (this.onModelChange) this.onModelChange(this.model);
     }
   }
 

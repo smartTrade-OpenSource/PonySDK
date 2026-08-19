@@ -27,7 +27,12 @@
   --fl-drop-fill:    rgba(137,180,250,.20);
   --fl-drop-border:  #89b4fa;
   --fl-strip-h:      30px;
+  /* Resize handles. One thickness and one grab area for every splitter; the two sidebar
+     tokens below derive from it, so overriding --fl-sp-size retunes all of them at once. */
   --fl-sp-size:      5px;
+  --fl-sp-grab:      3px;   /* invisible hit area added on each side of a handle */
+  --fl-sp-grip:      var(--fl-text-dim);
+  --fl-sp-grip-len:  22px;  /* 0 removes the grip marks */
   --fl-radius:       4px;
   --fl-tab-radius:   3px;
   --fl-font:         system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -42,8 +47,8 @@
   --fl-sidebar-header-sz:  11px;
   --fl-sidebar-active-glow: rgba(137,180,250,.15);
   --fl-sidebar-close-bg:   rgba(243,139,168,.1);
-  --fl-sidebar-resize-w:   4px;
-  --fl-sidebar-splitter-h: 5px;
+  --fl-sidebar-resize-w:   var(--fl-sp-size);
+  --fl-sidebar-splitter-h: var(--fl-sp-size);
   --fl-badge-dot:          #f38ba8;
   --fl-badge-bg:           #f38ba8;
   --fl-badge-text:         #fff;
@@ -300,9 +305,21 @@
 .fl-sp-h { cursor: col-resize; }
 .fl-sp-v { cursor: row-resize; }
 .fl-splitter:hover, .fl-splitter.fl-sp-active { background: var(--fl-sp-hover); }
+
+/* Grab area, wider than the bar is drawn, so the handle stays easy to catch however
+   thin --fl-sp-size makes it. */
 .fl-splitter::after { content:''; position:absolute; inset:0; }
-.fl-sp-h::after { left:-3px; right:-3px; }
-.fl-sp-v::after { top:-3px; bottom:-3px; }
+.fl-sp-h::after { left: calc(-1 * var(--fl-sp-grab)); right: calc(-1 * var(--fl-sp-grab)); }
+.fl-sp-v::after { top:  calc(-1 * var(--fl-sp-grab)); bottom: calc(-1 * var(--fl-sp-grab)); }
+
+/* Grip marks: without them a splitter reads as a plain border and users do not try to drag it. */
+.fl-splitter::before {
+  content:''; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  background: var(--fl-sp-grip); border-radius:1px; opacity:.55; transition:opacity .12s;
+}
+.fl-sp-h::before { width:1px; height: var(--fl-sp-grip-len); }
+.fl-sp-v::before { width: var(--fl-sp-grip-len); height:1px; }
+.fl-splitter:hover::before, .fl-splitter.fl-sp-active::before { opacity:0; }
 
 /* â”€â”€ TabSet â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .fl-tabset {
@@ -469,7 +486,13 @@
   position: absolute; z-index: 1;
   transition: background .15s;
 }
-.fl-sidebar-resize:hover { background: var(--fl-sp-hover); }
+.fl-sidebar-resize:hover, .fl-sidebar-resize.fl-sp-active { background: var(--fl-sp-hover); }
+/* Same grab area as .fl-splitter, so every handle in the layout catches the same way. */
+.fl-sidebar-resize::after { content:''; position:absolute; inset:0; }
+.fl-sidebar-resize-left::after, .fl-sidebar-resize-right::after {
+  left: calc(-1 * var(--fl-sp-grab)); right: calc(-1 * var(--fl-sp-grab));
+}
+.fl-sidebar-resize-bottom::after { top: calc(-1 * var(--fl-sp-grab)); bottom: calc(-1 * var(--fl-sp-grab)); }
 .fl-sidebar-resize-left { top: 0; right: 0; width: var(--fl-sidebar-resize-w); height: 100%; cursor: col-resize; }
 .fl-sidebar-resize-right { top: 0; left: 0; width: var(--fl-sidebar-resize-w); height: 100%; cursor: col-resize; }
 .fl-sidebar-resize-bottom { left: 0; top: 0; width: 100%; height: var(--fl-sidebar-resize-w); cursor: row-resize; }
@@ -490,9 +513,23 @@
 
 .fl-sidebar-splitter {
   height: var(--fl-sidebar-splitter-h); flex-shrink: 0; cursor: row-resize;
-  background: var(--fl-border);
+  background: var(--fl-border); position: relative;
 }
-.fl-sidebar-splitter:hover { background: var(--fl-sp-hover); }
+.fl-sidebar-splitter:hover, .fl-sidebar-splitter.fl-sp-active { background: var(--fl-sp-hover); }
+.fl-sidebar-splitter::after {
+  content:''; position:absolute; inset:0;
+  top: calc(-1 * var(--fl-sp-grab)); bottom: calc(-1 * var(--fl-sp-grab));
+}
+.fl-sidebar-splitter::before {
+  content:''; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  width: var(--fl-sp-grip-len); height:1px;
+  background: var(--fl-sp-grip); border-radius:1px; opacity:.55; transition:opacity .12s;
+}
+.fl-sidebar-splitter:hover::before, .fl-sidebar-splitter.fl-sp-active::before { opacity:0; }
+
+/* Zone separation: two stacked sidebar zones shared one flat surface with nothing between
+   their icon groups, so the boundary was invisible. */
+.fl-sidebar-section + .fl-sidebar-section { border-top: 1px solid var(--fl-border); }
 
 /* Feature 6: Tab overflow indicator */
 .fl-sidebar-strip-overflow { overflow: auto; scrollbar-width: thin; }
@@ -602,3 +639,17 @@
 .fl-layout-locked .fl-tab-x { display: none; }
 .fl-layout-locked .fl-sidebar-tab-x { display: none; }
 .fl-layout-locked .fl-splitter { pointer-events: none; }
+
+
+/* ── Resize in progress ───────────────────────────────────────────────────────────
+   The cursor is computed from whatever element sits under the pointer, so during a
+   drag it flipped between the handle's resize cursor and the content's default one on
+   every move — and a re-render under the pointer reset it too. Pinning the cursor on
+   the whole layout for the duration removes both. */
+.fl-layout.fl-resizing * { cursor: inherit !important; }
+.fl-layout.fl-resizing-col { cursor: col-resize; }
+.fl-layout.fl-resizing-row { cursor: row-resize; }
+.fl-layout.fl-resizing { user-select: none; }
+/* Content must not react while a handle is being dragged (text selection, hover states,
+   iframes swallowing the pointer). */
+.fl-layout.fl-resizing .fl-tab-content, .fl-layout.fl-resizing iframe { pointer-events: none; }
