@@ -3,7 +3,7 @@ plugins {
 }
 ext {
     resourcesCoreTest = "src/test/resources"
-    gwtOutputDirName = buildDir.name + "/gwt"
+    gwtOutputDirName = layout.buildDirectory.get().asFile.path + "/gwt"
     jsinteropVersion = '1.0.2'
     glassfishVersion = '1.1.6'
     javaxValidationVersion = '2.0.1.Final'
@@ -47,10 +47,10 @@ publishing {
 
 jacocoTestReport {
     reports {
-        xml.enabled true
-        xml.destination file("${buildDir}/reports/jacoco/report.xml")
-        html.enabled false
-        csv.enabled false
+        xml.required = true
+        xml.outputLocation = file("${layout.buildDirectory.get().asFile}/reports/jacoco/report.xml")
+        html.required = false
+        csv.required = false
     }
 }
 
@@ -132,6 +132,19 @@ java {
 javadoc {
     classpath += configurations.gwtdev
     exclude '**/terminal/**'
+    options.addStringOption('Xdoclint:none', '-quiet')
+    failOnError = false
+}
+
+// Both are resolved when the manifest is written, not at configuration time: running git eagerly
+// is rejected by the configuration cache, and an eager timestamp would be frozen into its entry.
+def gitRevision = providers.exec {
+    commandLine 'git', 'rev-parse', 'HEAD'
+    ignoreExitValue = true // keep the build usable outside a git checkout (source archive, export)
+}.standardOutput.asText.map { it.trim() ?: 'unknown' }
+
+def buildTimestamp = providers.provider {
+    new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date())
 }
 
 jar {
@@ -141,22 +154,22 @@ jar {
     exclude('*.devmode.js')
     exclude('*compilation-mappings.txt')
 
-    manifest {
-        def cmd = "git rev-parse HEAD"
-        def proc = cmd.execute()
-        ext.revision = proc.text.trim()
+    // Also expose the js/css as a webjar so servlet containers can serve them straight from the jar
+    with(copySpec {
+        from("src/main/resources/script").into("META-INF/resources/webjars/ponysdk/${project.version}/")
+        from("src/main/resources/style").into("META-INF/resources/webjars/ponysdk/${project.version}")
+    })
 
-        manifest {
-            attributes(
-                    'Built-By': System.properties['user.name'],
-                    'Build-Timestamp': new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
-                    'Build-Revision': revision,
-                    'Created-By': "Gradle ${gradle.gradleVersion}",
-                    'Build-Jdk': "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
-                    'Build-OS': "${System.properties['os.name']} ${System.properties['os.arch']} ${System.properties['os.version']}",
-                    'License-Title': "Apache License 2.0"
-            )
-        }
+    manifest {
+        attributes(
+                'Built-By': System.properties['user.name'],
+                'Build-Timestamp': buildTimestamp,
+                'Build-Revision': gitRevision,
+                'Created-By': "Gradle ${gradle.gradleVersion}",
+                'Build-Jdk': "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
+                'Build-OS': "${System.properties['os.name']} ${System.properties['os.arch']} ${System.properties['os.version']}",
+                'License-Title': "Apache License 2.0"
+        )
     }
 }
 
@@ -164,7 +177,7 @@ task gwtc(type: JavaExec) {
     inputs.dir('src/main/java/com/ponysdk/core/terminal')
     outputs.dir(gwtOutputDirName + '/gwt/ponyterminal')
     description = "GWT compile to JavaScript (production mode)"
-    main = 'com.google.gwt.dev.Compiler'
+    mainClass = 'com.google.gwt.dev.Compiler'
     workingDir = new File(gwtOutputDirName)
     classpath { [sourceSets.main.java.srcDirs, configurations.gwtdev, configurations.gwt] }
     maxHeapSize = '512M'
@@ -182,7 +195,7 @@ task gwtc(type: JavaExec) {
 }
 
 test {
-    classpath = files(resourcesCoreTest, gwtOutputDirName) + classpath
+    classpath = files(resourcesCoreTest, layout.buildDirectory.get().asFile.path + "/gwt") + classpath
     afterSuite { desc, result ->
         if (!desc.parent) {
             println "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"

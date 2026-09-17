@@ -1,5 +1,7 @@
 .gradle/
+build/
 /.idea/
 /.project
 /.settings/
-/ponysdk/out/
+/ponysdk/out/build/
+node_modules/

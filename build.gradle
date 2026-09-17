@@ -4,6 +4,18 @@ subprojects {
     sourceCompatibility = JavaVersion.VERSION_1_9
     targetCompatibility = JavaVersion.VERSION_1_9
 
+    // Sources are UTF-8 and some hold non-ASCII text. Without pinning the charset javac falls
+    // back to the platform default, so the very same source compiles to different string
+    // literals on a Windows workstation and on the Linux CI runner.
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+    }
+
+    tasks.withType(Javadoc).configureEach {
+        options.encoding = 'UTF-8'
+        options.charSet = 'UTF-8'
+    }
+
     repositories {
         mavenCentral()
     }
