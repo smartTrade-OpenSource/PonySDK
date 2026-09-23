@@ -46,7 +46,10 @@ public class PScheduler {
     private static final PScheduler INSTANCE;
 
     static {
-        final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(Runtime.getRuntime().availableProcessors(),
+        final int poolSize = Math.max(1, Integer.parseInt(
+            System.getProperty("pscheduler.thread.count",
+                String.valueOf(Runtime.getRuntime().availableProcessors()))));
+        final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(poolSize,
             new ThreadFactory() {
 
                 private int i = 0;
