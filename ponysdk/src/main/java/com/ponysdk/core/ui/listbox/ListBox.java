@@ -177,7 +177,6 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
     }
 
     public void addItem(final ListBoxItem<D> item) {
-        if (dataProvider != null) throw new IllegalCallerException("Not supported in DataProvider mode");
         if (configuration.isGroupEnabled() && ListBoxItemType.GROUP.equals(item.getType())) {
             addGroup(items, (GroupListBoxItem<D>) item);
         } else {
@@ -187,7 +186,6 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
     }
 
     public void addItems(final Collection<ListBoxItem<D>> newItems) {
-        if (dataProvider != null) throw new IllegalCallerException("Not supported in DataProvider mode");
         if (configuration.isGroupEnabled()) {
             for (final ListBoxItem<D> item : newItems) {
                 if (ListBoxItemType.GROUP.equals(item.getType())) {
@@ -202,7 +200,6 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
     }
 
     public void addItemInGroup(final String groupName, final ListBoxItem<D> item) {
-        if (dataProvider != null) throw new IllegalCallerException("Not supported in DataProvider mode");
         if (!configuration.isGroupEnabled()) throw new IllegalCallerException("Group mode must be enabled");
         final GroupListBoxItem<D> groupItem = groupItems.get(groupName);
         if (groupItem != null) {
@@ -213,7 +210,6 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
     }
 
     public void removeItem(final String itemLabel) {
-        if (dataProvider != null) throw new IllegalCallerException("Not supported in DataProvider mode");
         this.items.stream().filter(i -> i.label.equals(itemLabel)).findFirst().ifPresentOrElse(removedItem -> {
             this.items.remove(removedItem);
             this.visibleItems.remove(removedItem);
@@ -227,7 +223,6 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
     }
 
     public void removeItemFromGroup(final String groupName, final String itemLabel) {
-        if (dataProvider != null) throw new IllegalCallerException("Not supported in DataProvider mode");
         if (!configuration.isGroupEnabled()) throw new IllegalCallerException("Group mode must be enabled");
         final GroupListBoxItem<D> groupItem = groupItems.get(groupName);
         if (groupItem != null) {
@@ -246,7 +241,6 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
     }
 
     public void removeGroup(final String groupName) {
-        if (dataProvider != null) throw new IllegalCallerException("Not supported in DataProvider mode");
         if (!configuration.isGroupEnabled()) throw new IllegalCallerException("Group mode must be enabled");
         final GroupListBoxItem<D> groupItem = groupItems.remove(groupName);
         if (groupItem != null) {
@@ -266,7 +260,6 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
     }
 
     public void renameItem(final String oldLabel, final String newLabel) {
-        if (dataProvider != null) throw new IllegalCallerException("Not supported in DataProvider mode");
         if (configuration.isGroupEnabled()) throw new IllegalCallerException("Group mode must not be enabled");
         final ListBoxItem<D> item = this.items.stream().filter(i -> i.getLabel().equals(oldLabel)).findFirst().orElse(null);
         if (item != null) {
@@ -279,7 +272,6 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
     }
 
     public void renameItemInGroup(final String groupName, final String oldLabel, final String newLabel) {
-        if (dataProvider != null) throw new IllegalCallerException("Not supported in DataProvider mode");
         if (!configuration.isGroupEnabled()) throw new IllegalCallerException("Group mode must be enabled");
         final GroupListBoxItem<D> groupItem = groupItems.get(groupName);
         if (groupItem != null) {
@@ -400,7 +392,6 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
 
     public void addToSelection(final D selectedData) {
         if (selectedData == null) return;
-        if (dataProvider != null) throw new IllegalArgumentException("Only available without a ListBoxDataProvider");
         if (configuration.isEventOnlyEnabled()) throw new UnsupportedOperationException("Not available in event only mode");
 
         if (!configuration.isMultiSelectionEnabled()) setSelected(selectedData);
@@ -418,7 +409,6 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
 
     public void removeFromSelection(final D unselectedData) {
         if (unselectedData == null) return;
-        if (dataProvider != null) throw new IllegalArgumentException("Only available without a ListBoxDataProvider");
         if (!configuration.isMultiSelectionEnabled()) throw new IllegalArgumentException("Only available in multi selection mode");
         if (configuration.isEventOnlyEnabled()) throw new UnsupportedOperationException("Not available in event only mode");
 
@@ -435,7 +425,6 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
     }
 
     public void replaceItems(final Collection<? extends ListBoxItem<D>> items) {
-        if (dataProvider != null) throw new IllegalArgumentException("Only available without a ListBoxDataProvider");
         clearSelection();
         this.items.clear();
         this.items.addAll(items);
@@ -500,7 +489,6 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
 
     public void setDataEnabled(final D value, final boolean enabled) {
         Objects.requireNonNull(value);
-        if (dataProvider != null) throw new UnsupportedOperationException("Only available with a ListBoxDataProvider");
         this.items.stream().filter(item -> item.getData().equals(value)).findFirst().ifPresent(item -> {
             item.setEnabled(enabled);
             refresh();
@@ -1000,7 +988,6 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
     }
 
     private boolean isIndexable(final int indexToTest) {
-        if (dataProvider != null) return true;
         try {
             final ListBoxItem<D> listBoxItem = visibleItems.get(indexToTest);
             return !(listBoxItem instanceof GroupListBoxItem) && listBoxItem.enabled;
