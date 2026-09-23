@@ -26,6 +26,7 @@ package com.ponysdk.core.ui.datagrid2.adapter;
 import java.util.List;
 
 import com.ponysdk.core.ui.basic.IsPWidget;
+import com.ponysdk.core.ui.datagrid2.cell.Cell;
 import com.ponysdk.core.ui.datagrid2.column.ColumnController;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.view.DataGridView;
@@ -130,4 +131,19 @@ public interface DataGridAdapter<K, V> {
      *         {@code false} if the blotter cannot select new value
      */
     boolean isSelectionEnabled();
+    
+    /**
+     * Enables a cell-level fault tolerance mechanism which:
+	 * <ol>
+	 * <li>Catch any exception on cell rendering, preventing it from propagating and crashing the
+	 * entire datagrid or table.</li>
+	 * <li>Log the exception for debugging purposes.</li>
+	 * <li>Render {@link Cell#asErrorWidget()} instead of the main cell widget.</li>
+	 * </ol>
+	 * This ensures that a bug in a single cell's logic does not impact the
+	 * stability and usability of the rest of the application.
+	 * 
+     * @return {@code true} if cell-level fault tolerance is enable; {@code false} otherwise
+     */
+    boolean isCellFaultTolerant();
 }

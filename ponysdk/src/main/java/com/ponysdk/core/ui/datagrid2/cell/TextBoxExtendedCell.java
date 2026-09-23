@@ -26,6 +26,7 @@ package com.ponysdk.core.ui.datagrid2.cell;
 import java.util.function.BiConsumer;
 
 import com.ponysdk.core.ui.basic.Element;
+import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.model.PEventType;
@@ -37,6 +38,7 @@ import com.ponysdk.core.ui.model.PKeyCodes;
 public class TextBoxExtendedCell<V> implements ExtendedCell<V> {
 
     private final PTextBox textBox = Element.newPTextBox();
+    private final PLabel errorLabel = Element.newPLabel("ERROR");
     private ExtendedCellController<V> extendedCellController;
 
     public TextBoxExtendedCell(final String text, final BiConsumer<V, String> columnEditFn, final int width) {
@@ -65,6 +67,11 @@ public class TextBoxExtendedCell<V> implements ExtendedCell<V> {
     @Override
     public PWidget asWidget() {
         return textBox;
+    }
+    
+    @Override
+    public PWidget asErrorWidget() {
+    	return errorLabel;
     }
 
     @Override
