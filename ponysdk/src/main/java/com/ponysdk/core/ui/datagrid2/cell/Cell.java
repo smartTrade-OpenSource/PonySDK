@@ -23,6 +23,8 @@
 
 package com.ponysdk.core.ui.datagrid2.cell;
 
+import java.util.function.Function;
+
 import com.ponysdk.core.ui.basic.IsPWidget;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 
@@ -54,7 +56,7 @@ public interface Cell<V, C extends CellController<V>> extends IsPWidget {
      *            the intermediate object supplied in
      *            {@link ColumnDefinition#getRenderingHelper(Object)}
      */
-    void render(V data, Object renderingHelper);
+    void render(V data, Function<V, ?> renderingHelper);
 
     /**
      * Called when the row that this cell belongs to is selected
