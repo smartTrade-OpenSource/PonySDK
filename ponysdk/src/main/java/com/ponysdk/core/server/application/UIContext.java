@@ -40,7 +40,7 @@ import com.ponysdk.core.ui.eventbus.*;
 import com.ponysdk.core.ui.statistic.TerminalDataReceiver;
 import com.ponysdk.core.useragent.UserAgent;
 import com.ponysdk.core.writer.ModelWriter;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
+import org.eclipse.jetty.ee11.websocket.server.JettyServerUpgradeRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +50,7 @@ import javax.json.JsonString;
 import javax.json.JsonValue;
 import javax.json.JsonValue.ValueType;
 import javax.json.spi.JsonProvider;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -108,7 +108,7 @@ public class UIContext {
 
     private final ApplicationConfiguration configuration;
     private final WebSocket socket;
-    private final ServletUpgradeRequest request;
+    private final JettyServerUpgradeRequest request;
 
     private long lastReceivedTime = System.currentTimeMillis();
 
@@ -116,14 +116,23 @@ public class UIContext {
 
     private final ModelWriter modelWriter;
 
+    // Snapshot of the upgrade-request data, captured during the handshake (see
+    // WebSocketServlet#createWebsocket) BEFORE Jetty 12 recycles the underlying servlet request.
+    // Reading the live JettyServerUpgradeRequest lazily post-upgrade throws NPE / returns stale data,
+    // so parameter map, User-Agent and session are all served from this immutable snapshot.
+    private final com.ponysdk.core.server.websocket.UpgradeRequestData upgradeRequestData;
+
     public UIContext(final WebSocket socket, final TxnContext context, final ApplicationConfiguration configuration,
-                     final ServletUpgradeRequest request) {
+                     final JettyServerUpgradeRequest request,
+                     final com.ponysdk.core.server.websocket.UpgradeRequestData upgradeRequestData) {
         this.ID = uiContextCount.incrementAndGet();
         this.socket = socket;
         this.configuration = configuration;
         this.request = request;
         this.context = context;
         this.modelWriter = context.getWriter();
+        this.upgradeRequestData = upgradeRequestData != null ? upgradeRequestData
+                : new com.ponysdk.core.server.websocket.UpgradeRequestData(null, null, null);
 
         JsonProvider provider;
         try {
@@ -649,8 +658,20 @@ public class UIContext {
     }
 
     public String getHistoryToken() {
-        final List<String> historyTokens = this.request.getParameterMap().get(ClientToServerModel.TYPE_HISTORY.toStringValue());
-        return historyTokens != null && !historyTokens.isEmpty() ? historyTokens.get(0) : null;
+        final List<String> tokens = upgradeRequestData.getParameterMap()
+                .get(ClientToServerModel.TYPE_HISTORY.toStringValue());
+        return tokens != null && !tokens.isEmpty() ? tokens.get(0) : null;
+    }
+
+    /**
+     * The query parameters of the WebSocket upgrade request, captured at handshake time (safe to read
+     * at any point in the session). Prefer this over {@code getRequest().getParameterMap()}, which
+     * throws under Jetty 12 because the underlying servlet request is recycled after the upgrade.
+     *
+     * @return the parameter map (never null)
+     */
+    public Map<String, List<String>> getParameterMap() {
+        return upgradeRequestData.getParameterMap();
     }
 
     /**
@@ -680,11 +701,11 @@ public class UIContext {
     }
 
     public UserAgent getUserAgent() {
-        return UserAgent.parseUserAgentString(request.getHeader("User-Agent"));
+        return UserAgent.parseUserAgentString(upgradeRequestData.getUserAgent());
     }
 
     public HttpSession getSession() {
-        return request.getSession();
+        return upgradeRequestData.getSession();
     }
 
     public <T> T getApplicationAttribute(final String name) {
@@ -720,8 +741,79 @@ public class UIContext {
         return jsonProvider;
     }
 
-    public ServletUpgradeRequest getRequest() {
+    /**
+     * @deprecated Returns the raw Jetty upgrade request, whose servlet-request-backed accessors
+     *             ({@code getHeader}, {@code getHeaders}, {@code getCookies}, {@code getHost},
+     *             {@code isSecure}, {@code getParameterMap}, ...) throw {@link NullPointerException}
+     *             once the WebSocket upgrade completes, because Jetty 12 recycles the underlying
+     *             servlet request. Use the snapshot-backed accessors instead:
+     *             {@link #getHeader(String)}, {@link #getHeaders()}, {@link #getRequestCookies()},
+     *             {@link #getHost()}, {@link #isSecure()}, {@link #getRemoteSocketAddress()},
+     *             {@link #getParameterMap()}, {@link #getUserAgent()}, {@link #getSession()}.
+     */
+    @Deprecated(forRemoval = true)
+    public JettyServerUpgradeRequest getRequest() {
         return request;
+    }
+
+    /**
+     * The value of the given upgrade-request header (case-insensitive), captured at handshake time and
+     * safe to read at any point in the session. Prefer this over {@code getRequest().getHeader(name)},
+     * which throws under Jetty 12 because the underlying servlet request is recycled after the upgrade.
+     *
+     * @return the first header value, or null if absent
+     */
+    public String getHeader(final String name) {
+        return upgradeRequestData.getHeader(name);
+    }
+
+    /**
+     * The upgrade-request headers (keyed case-insensitively), captured at handshake time. Prefer this
+     * over {@code getRequest().getHeaders()}, which throws under Jetty 12.
+     *
+     * @return the header map (never null)
+     */
+    public Map<String, List<String>> getHeaders() {
+        return upgradeRequestData.getHeaders();
+    }
+
+    /**
+     * The cookies of the WebSocket upgrade request, captured at handshake time. Prefer this over
+     * {@code getRequest().getCookies()}, which throws under Jetty 12. Note this is distinct from
+     * {@link #getCookies()}, which returns the PonySDK {@link PCookies}.
+     *
+     * @return the upgrade-request cookies (never null)
+     */
+    public List<java.net.HttpCookie> getRequestCookies() {
+        return upgradeRequestData.getCookies();
+    }
+
+    /**
+     * The Host of the WebSocket upgrade request, captured at handshake time. Prefer this over
+     * {@code getRequest().getHost()}, which throws under Jetty 12.
+     *
+     * @return the host, or null
+     */
+    public String getHost() {
+        return upgradeRequestData.getHost();
+    }
+
+    /**
+     * Whether the WebSocket upgrade request was received over a secure (TLS) transport, captured at
+     * handshake time. Prefer this over {@code getRequest().isSecure()}, which throws under Jetty 12.
+     */
+    public boolean isSecure() {
+        return upgradeRequestData.isSecure();
+    }
+
+    /**
+     * The remote socket address of the connection, captured at handshake time. Prefer this over
+     * {@code getRequest().getRemoteSocketAddress()}.
+     *
+     * @return the remote socket address, or null
+     */
+    public java.net.SocketAddress getRemoteSocketAddress() {
+        return upgradeRequestData.getRemoteSocketAddress();
     }
 
     @Override

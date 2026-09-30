@@ -1,8 +1,8 @@
 subprojects {
     apply plugin: 'java'
     apply plugin: 'maven-publish'
-    sourceCompatibility = JavaVersion.VERSION_1_9
-    targetCompatibility = JavaVersion.VERSION_1_9
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 
     // Sources are UTF-8 and some hold non-ASCII text. Without pinning the charset javac falls
     // back to the platform default, so the very same source compiles to different string

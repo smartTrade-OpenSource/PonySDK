@@ -23,7 +23,7 @@
 
 package com.ponysdk.test;
 
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
+import org.eclipse.jetty.ee11.websocket.server.JettyServerUpgradeRequest;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.mockito.Mockito;
@@ -42,7 +42,7 @@ public class PSuite {
     @BeforeClass
     public static void beforeClass() {
         final WebSocket socket = Mockito.mock(WebSocket.class);
-        final ServletUpgradeRequest request = Mockito.mock(ServletUpgradeRequest.class);
+        final JettyServerUpgradeRequest request = Mockito.mock(JettyServerUpgradeRequest.class);
 
         final TxnContext context = Mockito.spy(new TxnContext(socket));
         ModelWriter modelWriter = new ModelWriterForTest();
@@ -53,7 +53,8 @@ public class PSuite {
         final ApplicationConfiguration configuration = Mockito.mock(ApplicationConfiguration.class);
 
         Txn.get().begin(context);
-        final UIContext uiContext = Mockito.spy(new UIContext(socket, context, configuration, request));
+        final UIContext uiContext = Mockito.spy(new UIContext(socket, context, configuration, request,
+                new com.ponysdk.core.server.websocket.UpgradeRequestData(null, null, null)));
         Mockito.when(uiContext.getWriter()).thenReturn(modelWriter);
         UIContext.setCurrent(uiContext);
     }

@@ -41,11 +41,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.fileupload2.core.DiskFileItem;
+import org.apache.commons.fileupload2.core.DiskFileItemFactory;
+import org.apache.commons.fileupload2.core.FileItem;
+import org.apache.commons.fileupload2.jakarta.servlet6.JakartaServletFileUpload;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -142,7 +143,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         button.addClickHandler(e -> PWindow.getMain().add(input));
         PWindow.getMain().add(button);
 
-        final PLabel url = Element.newPLabel(String.valueOf(UIContext.get().getRequest().getParameterMap().get("toto")));
+        final PLabel url = Element.newPLabel(String.valueOf(UIContext.get().getParameterMap().get("toto")));
         PWindow.getMain().add(url);
 
         final StringTextBoxFormField formField = new StringTextBoxFormField("String Formfield");
@@ -666,8 +667,11 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         });
         fileUpload.addStreamHandler((request, response, context) -> {
             try {
-                final List<FileItem> items = new ServletFileUpload(new DiskFileItemFactory()).parseRequest(request);
-                for (final FileItem item : items) {
+                final DiskFileItemFactory factory = DiskFileItemFactory.builder().get();
+                final JakartaServletFileUpload<DiskFileItem, DiskFileItemFactory> upload = new JakartaServletFileUpload<>(
+                        factory);
+                final List<DiskFileItem> items = upload.parseRequest(request);
+                for (final FileItem<?> item : items) {
                     if (!item.isFormField()) readFileItem(item);
                 }
             } catch (final Exception e) {
@@ -680,7 +684,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         return panel;
     }
 
-    private void readFileItem(final FileItem item) throws IOException, FileNotFoundException {
+    private void readFileItem(final FileItem<?> item) throws IOException, FileNotFoundException {
         // Store the uploaded file on the server (don't forget to remove)
         final String fileName = FilenameUtils.getName(item.getName());
         final InputStream fileContent = item.getInputStream();

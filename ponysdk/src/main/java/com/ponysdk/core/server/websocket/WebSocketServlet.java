@@ -23,11 +23,14 @@
 
 package com.ponysdk.core.server.websocket;
 
-import javax.servlet.http.HttpSession;
+import java.time.Duration;
 
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
-import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
+import jakarta.servlet.http.HttpSession;
+
+import org.eclipse.jetty.ee11.websocket.server.JettyServerUpgradeRequest;
+import org.eclipse.jetty.ee11.websocket.server.JettyServerUpgradeResponse;
+import org.eclipse.jetty.ee11.websocket.server.JettyWebSocketServlet;
+import org.eclipse.jetty.ee11.websocket.server.JettyWebSocketServletFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +39,7 @@ import com.ponysdk.core.server.application.ApplicationManager;
 import com.ponysdk.core.server.servlet.SessionManager;
 import com.ponysdk.core.server.stm.TxnContext;
 
-public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSocketServlet {
+public class WebSocketServlet extends JettyWebSocketServlet {
 
     private static final Logger log = LoggerFactory.getLogger(WebSocketServlet.class);
 
@@ -50,15 +53,22 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
     }
 
     @Override
-    public void configure(final WebSocketServletFactory factory) {
-        factory.getPolicy().setIdleTimeout(maxIdleTime);
-        factory.getExtensionFactory().register(PonyPerMessageDeflateExtension.NAME, PonyPerMessageDeflateExtension.class);
-        factory.setCreator(this::createWebsocket);
+    protected void configure(final JettyWebSocketServletFactory factory) {
+        factory.setIdleTimeout(Duration.ofMillis(maxIdleTime));
+        // Jetty 12 negotiates the standard "permessage-deflate" extension automatically. The Jetty 9
+        // custom PonyPerMessageDeflateExtension is gone (Jetty 12 moved the deflate extension into
+        // non-public websocket.core.internal). The per-WebSocket-frame byte accounting it fed is
+        // reimplemented from the WebSocketConnection wire counters instead (see WebSocket#setListener).
+        factory.setCreator((request, response) -> createWebsocket(request, response));
     }
 
-    protected WebSocket createWebsocket(final ServletUpgradeRequest request, final ServletUpgradeResponse response) {
+    protected WebSocket createWebsocket(final JettyServerUpgradeRequest request, final JettyServerUpgradeResponse response) {
         final WebSocket webSocket = new WebSocket();
         webSocket.setRequest(request);
+        // Capture request-derived data NOW, while the upgrade request is still live. Jetty 12 recycles
+        // the underlying servlet request once the upgrade completes, so any later read (parameter map,
+        // headers, session) throws NPE or returns another request's data. UIContext serves this snapshot.
+        webSocket.setUpgradeRequestData(captureUpgradeData(request));
         webSocket.setApplicationManager(applicationManager);
         webSocket.setMonitor(monitor);
 
@@ -72,10 +82,68 @@ public class WebSocketServlet extends org.eclipse.jetty.websocket.servlet.WebSoc
         return webSocket;
     }
 
-    protected void configureWithSession(final ServletUpgradeRequest request, final TxnContext context) {
+    private static UpgradeRequestData captureUpgradeData(final JettyServerUpgradeRequest request) {
+        java.util.Map<String, java.util.List<String>> parameterMap = null;
+        java.util.Map<String, java.util.List<String>> headers = null;
+        java.util.List<java.net.HttpCookie> cookies = null;
+        String host = null;
+        boolean secure = false;
+        java.net.SocketAddress remoteSocketAddress = null;
+        String userAgent = null;
+        jakarta.servlet.http.HttpSession session = null;
+        try {
+            parameterMap = request.getParameterMap();
+        } catch (final Throwable t) {
+            log.warn("Cannot read parameter map from upgrade request", t);
+        }
+        try {
+            headers = request.getHeaders();
+        } catch (final Throwable t) {
+            log.warn("Cannot read headers from upgrade request", t);
+        }
+        try {
+            cookies = request.getCookies();
+        } catch (final Throwable t) {
+            log.warn("Cannot read cookies from upgrade request", t);
+        }
+        try {
+            host = request.getHost();
+        } catch (final Throwable t) {
+            log.warn("Cannot read host from upgrade request", t);
+        }
+        try {
+            secure = request.isSecure();
+        } catch (final Throwable t) {
+            log.warn("Cannot read secure flag from upgrade request", t);
+        }
+        try {
+            remoteSocketAddress = request.getRemoteSocketAddress();
+        } catch (final Throwable t) {
+            log.warn("Cannot read remote socket address from upgrade request", t);
+        }
+        try {
+            userAgent = request.getHeader("User-Agent");
+        } catch (final Throwable t) {
+            log.warn("Cannot read User-Agent from upgrade request", t);
+        }
+        try {
+            // Force session creation BEFORE snapshotting: JettyServerUpgradeRequest.getSession() behaves
+            // like getSession(false) and returns null when no HTTP session pre-exists. configureWithSession
+            // (called later, only when a SessionCookieConfig is present) also forces creation, but the
+            // snapshot must hold the real session for the whole WS lifetime, so create it here too.
+            request.getHttpServletRequest().getSession(true);
+            session = (jakarta.servlet.http.HttpSession) request.getSession();
+        } catch (final Throwable t) {
+            log.warn("Cannot read session from upgrade request", t);
+        }
+        return new UpgradeRequestData(parameterMap, headers, cookies, host, secure, remoteSocketAddress,
+                userAgent, session);
+    }
+
+    protected void configureWithSession(final JettyServerUpgradeRequest request, final TxnContext context) {
         // Force session creation if there is no session
         request.getHttpServletRequest().getSession(true);
-        final HttpSession httpSession = request.getSession();
+        final HttpSession httpSession = (HttpSession) request.getSession();
         if (httpSession != null) {
             final String applicationId = httpSession.getId();
 
