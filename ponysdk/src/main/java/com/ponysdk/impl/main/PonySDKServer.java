@@ -33,8 +33,9 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.ee11.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee11.servlet.ServletHolder;
+import org.eclipse.jetty.ee11.websocket.server.config.JettyWebSocketServletContainerInitializer;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -158,7 +159,6 @@ public class PonySDKServer {
     protected ErrorHandler createErrorHandler() {
         final ErrorHandler errorHandler = new ErrorHandler();
         errorHandler.setShowMessageInTitle(false);
-        errorHandler.setShowServlet(false);
         errorHandler.setShowStacks(false);
         return errorHandler;
     }
@@ -172,6 +172,9 @@ public class PonySDKServer {
         context.setErrorHandler(createErrorHandler());
         context.getSessionHandler().getSessionCookieConfig().setSecure(true);
         context.getSessionHandler().getSessionCookieConfig().setHttpOnly(true);
+
+        // Jetty 12: enable the Jetty-native WebSocket server so JettyWebSocketServlet can upgrade.
+        JettyWebSocketServletContainerInitializer.configure(context, null);
 
         context.addServlet(new ServletHolder(createBootstrapServlet()), MAPPING_BOOTSTRAP);
         context.addServlet(new ServletHolder(createStreamServiceServlet()), MAPPING_STREAM);

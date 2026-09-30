@@ -28,8 +28,8 @@ import com.ponysdk.core.model.BooleanModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.ValueTypeModel;
 import com.ponysdk.core.server.concurrent.AutoFlushedBuffer;
+import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.WriteCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +43,7 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback {
+public class WebSocketPusher extends AutoFlushedBuffer implements Callback {
 
     private static final Logger log = LoggerFactory.getLogger(WebSocketPusher.class);
 
@@ -58,16 +58,53 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
 
     private WebSocket.Listener listener;
 
+    // Jetty 12 connection exposing true post-compression wire byte counters. Set from WebSocket at open.
+    private org.eclipse.jetty.websocket.core.WebSocketConnection connection;
+    // volatile: written on the flush thread (doFlush) and re-based on the app thread (rebaseWireBytes).
+    private volatile long lastBytesOut;
+
     public WebSocketPusher(final Session session, final int bufferSize, final int maxChunkSize, final long timeoutMillis) {
         super(bufferSize, true, maxChunkSize, 0.25f, timeoutMillis);
         this.session = session;
     }
 
+    void setConnection(final org.eclipse.jetty.websocket.core.WebSocketConnection connection) {
+        this.connection = connection;
+    }
+
     @Override
     protected void doFlush(final ByteBuffer bufferToFlush) {
         final int bytes = bufferToFlush.remaining();
-        session.getRemote().sendBytes(bufferToFlush, this);
-        if (listener != null) listener.onOutgoingPonyFramesBytes(bytes);
+        session.sendBinary(bufferToFlush, this);
+        if (listener != null) {
+            listener.onOutgoingPonyFramesBytes(bytes);
+            // OUTGOING on-the-wire (post-compression) byte accounting, feeding onOutgoingWebSocketFrame.
+            // Read as a delta from the Jetty WebSocketConnection.getBytesOut() counter, which reflects the
+            // compressed bytes + framing actually written. Replaces the removed PonyPerMessageDeflateExtension.
+            // (This uses the Jetty WebSocketConnection type, resolved+guarded in WebSocket#resolveConnection;
+            // it degrades to no wire accounting if that type ever changes.) Header reported as 0; the delta
+            // (framing + compressed payload) is the payload. Per-sample values are approximate because
+            // sendBinary is async, but window totals are exact.
+            sampleOutgoingWireBytes();
+        }
+    }
+
+    private void sampleOutgoingWireBytes() {
+        if (connection == null) return;
+        long delta = connection.getBytesOut() - lastBytesOut;
+        lastBytesOut += delta;
+        // Split into int-sized chunks so the int-typed callback cannot overflow on long sessions.
+        while (delta > 0) {
+            final int chunk = (int) Math.min(delta, Integer.MAX_VALUE);
+            listener.onOutgoingWebSocketFrame(0, chunk);
+            delta -= chunk;
+        }
+    }
+
+    /** Re-baseline the outgoing wire counter to the connection's current total (called when a listener
+     *  is set, so the first sample reports only post-listener traffic, not the whole session). */
+    void rebaseWireBytes() {
+        if (connection != null) lastBytesOut = connection.getBytesOut();
     }
 
     @Override
@@ -76,7 +113,7 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
     }
 
     @Override
-    public void writeFailed(final Throwable t) {
+    public void fail(final Throwable t) {
         if (t instanceof Exception) {
             onFlushFailure((Exception) t);
         } else {
@@ -87,7 +124,7 @@ public class WebSocketPusher extends AutoFlushedBuffer implements WriteCallback 
     }
 
     @Override
-    public void writeSuccess() {
+    public void succeed() {
         onFlushCompletion();
     }
 
