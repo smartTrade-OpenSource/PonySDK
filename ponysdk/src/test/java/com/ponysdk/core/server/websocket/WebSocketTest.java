@@ -36,9 +36,9 @@ import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
 import javax.json.spi.JsonProvider;
 
+import org.eclipse.jetty.ee11.websocket.server.JettyServerUpgradeRequest;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.StatusCode;
-import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -77,7 +77,7 @@ public class WebSocketTest {
 
         encodedValues.clear();
 
-        final ServletUpgradeRequest request = Mockito.mock(ServletUpgradeRequest.class);
+        final JettyServerUpgradeRequest request = Mockito.mock(JettyServerUpgradeRequest.class);
         webSocket.setRequest(request);
         webSocket.setContext(Mockito.mock(TxnContext.class));
 
@@ -89,7 +89,7 @@ public class WebSocketTest {
 
         session = Mockito.mock(Session.class);
         Mockito.when(session.isOpen()).thenReturn(true);
-        webSocket.onWebSocketConnect(session);
+        webSocket.onWebSocketOpen(session);
 
         final ArgumentCaptor<UIContext> uiContextCaptor = ArgumentCaptor.forClass(UIContext.class);
         Mockito.verify(applicationManager, Mockito.times(1)).startApplication(uiContextCaptor.capture());
@@ -254,7 +254,7 @@ public class WebSocketTest {
     @Test
     public void testOnWebSocketBinary() {
         // Not implemented yet
-        webSocket.onWebSocketBinary(null, 0, 0);
+        webSocket.onWebSocketBinary(null, org.eclipse.jetty.websocket.api.Callback.NOOP);
     }
 
     /**
@@ -263,7 +263,8 @@ public class WebSocketTest {
     @Test
     public void testClose() {
         webSocket.close();
-        Mockito.verify(session, Mockito.times(1)).close();
+        Mockito.verify(session, Mockito.times(1)).close(Mockito.eq(StatusCode.NORMAL), Mockito.isNull(),
+                Mockito.any(org.eclipse.jetty.websocket.api.Callback.class));
     }
 
 }
