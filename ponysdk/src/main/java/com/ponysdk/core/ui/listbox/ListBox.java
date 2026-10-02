@@ -70,6 +70,8 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
     private static final String STYLE_LISTBOX_CONTAINER = "dd-listbox-container";
     private static final String STYLE_LISTBOX_FILTER = "dd-listbox-filter";
     private static final String STYLE_LISTBOX_CLEAR_MULTI = "dd-listbox-clear-multi";
+    private static final String STYLE_LISTBOX_BULK = "dd-listbox-bulk";
+    private static final String STYLE_LISTBOX_SELECT_ALL = "dd-listbox-select-all";
     private static final String STYLE_LISTBOX_ITEM_SELECTED = "dd-listbox-item-selected";
     private static final String STYLE_LISTBOX_ITEM_LAST_SELECTED = "dd-listbox-item-last-selected";
     private static final String STYLE_LISTBOX_ITEM_GROUP = "dd-listbox-item-group";
@@ -136,6 +138,7 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
         if (configuration.isMultiSelectionEnabled() && configuration.isEventOnlyEnabled()) {
             throw new IllegalStateException("Multi selection cannot be activated in event only mode");
         }
+        checkBulkSelection(configuration);
 
         this.groupItems = new HashMap<>();
         if (configuration.isGroupEnabled()) this.items = new ArrayList<>(initializeGroupItems(items));
@@ -147,11 +150,22 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
 
     public ListBox(final ListBoxConfiguration configuration, final ListBoxDataProvider<D> dataProvider) {
         super(configuration);
+        checkBulkSelection(configuration);
         this.groupItems = new HashMap<>();
         this.items = new ArrayList<>();
         this.visibleItems = new ArrayList<>();
         this.dataProvider = dataProvider;
         this.selectedDataItems = new ArrayList<>();
+    }
+
+    private static void checkBulkSelection(final ListBoxConfiguration configuration) {
+        if (!configuration.isBulkSelectionEnabled()) return;
+        if (!configuration.isMultiSelectionEnabled()) {
+            throw new IllegalStateException("Bulk selection requires the multi selection mode.");
+        }
+        if (configuration.getSelectionLimit() != null) {
+            throw new IllegalStateException("Bulk selection cannot be combined with a selection limit.");
+        }
     }
 
     @Override
@@ -595,7 +609,19 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
         } else {
             disableSpaceWhenOpened();
         }
-        if (configuration.isMultiSelectionEnabled() && configuration.getClearLabel() != null) {
+        if (configuration.isMultiSelectionEnabled() && configuration.isBulkSelectionEnabled()) {
+            final PPanel bulkPanel = Element.newPFlowPanel();
+            bulkPanel.addStyleName(STYLE_LISTBOX_BULK);
+            final PButton selectAllButton = Element.newPButton(configuration.getSelectAllLabel());
+            selectAllButton.addStyleName(STYLE_LISTBOX_SELECT_ALL);
+            selectAllButton.addClickHandler(e -> selectAllFiltered());
+            clearMultiButton = Element.newPButton(configuration.getUnselectAllLabel());
+            clearMultiButton.addStyleName(STYLE_LISTBOX_CLEAR_MULTI);
+            clearMultiButton.addClickHandler(e -> unselectAllFiltered());
+            bulkPanel.add(selectAllButton);
+            bulkPanel.add(clearMultiButton);
+            defaultContainer.add(bulkPanel);
+        } else if (configuration.isMultiSelectionEnabled() && configuration.getClearLabel() != null) {
             clearMultiButton = Element.newPButton(configuration.getClearLabel());
             clearMultiButton.addStyleName(STYLE_LISTBOX_CLEAR_MULTI);
             clearMultiButton.addClickHandler(e -> {
@@ -876,6 +902,59 @@ public class ListBox<D> extends DropDownContainer<Collection<ListBoxItem<D>>, Li
         newItems.add(groupItem);
         newItems.addAll(groupItem.getGroupItems());
         this.groupItems.put(groupItem.getGroupName(), groupItem);
+    }
+
+    /**
+     * Selects the items matching the current filter, or every item when no filter is typed. The other selected items are kept.
+     */
+    protected void selectAllFiltered() {
+        setFilteredSelected(true);
+    }
+
+    /**
+     * Unselects the items matching the current filter, or every item when no filter is typed. The other selected items are kept.
+     */
+    protected void unselectAllFiltered() {
+        setFilteredSelected(false);
+    }
+
+    private void setFilteredSelected(final boolean selected) {
+        final List<ListBoxItem<D>> filteredItems = getFilteredItems();
+        if (dataProvider != null) {
+            if (selected) {
+                for (final ListBoxItem<D> item : filteredItems) {
+                    if (!selectedDataItems.contains(item)) selectedDataItems.add(item);
+                }
+            } else {
+                selectedDataItems.removeAll(filteredItems);
+            }
+        }
+        filteredItems.forEach(item -> item.setSelected(selected));
+
+        final Collection<ListBoxItem<D>> selectedItems = getSelectedItems();
+        setClearTitleButtonVisible(!selectedItems.isEmpty());
+        if (clearMultiButton != null) clearMultiButton.setEnabled(!selectedItems.isEmpty());
+        updateTitle(selectedItems);
+        refreshKeepingScroll();
+        onValueChange();
+    }
+
+    /**
+     * Redraws the items like {@link #refresh()} does, but leaves the scroll position and the keyboard index where they are.
+     */
+    private void refreshKeepingScroll() {
+        if (itemContainer != null && isOpen()) itemContainer.refreshWithoutScrollCorrection();
+    }
+
+    private List<ListBoxItem<D>> getFilteredItems() {
+        final String filter = getFilter();
+        if (dataProvider != null) {
+            final int size = dataProvider.getFullDataSize(filter);
+            return size > 0 ? dataProvider.getData(0, size, filter) : List.of();
+        }
+        final String lowerCaseFilter = filter != null ? filter.toLowerCase() : "";
+        return items.stream().filter(item -> item.enabled && (lowerCaseFilter.isEmpty() || filterPredicate.test(item, lowerCaseFilter)))
+            .collect(Collectors.toList());
     }
 
     private void clearSelection() {
