@@ -61,4 +61,23 @@ public class ListBoxConfigurationTest {
         assertFalse(configuration.isSearchEnabled());
         assertEquals(3, configuration.getSelectionLimit());
     }
+
+    @Test
+    public void bulkSelection_isDisabledByDefault() {
+        final ListBoxConfiguration configuration = new ListBoxConfiguration().enableMultiSelection();
+
+        assertEquals(false, configuration.isBulkSelectionEnabled());
+        assertNull(configuration.getSelectAllLabel());
+        assertNull(configuration.getUnselectAllLabel());
+    }
+
+    @Test
+    public void bulkSelection_keepsTheLabels() {
+        final ListBoxConfiguration configuration = new ListBoxConfiguration().enableMultiSelection().enableMultiSelectionBulk("Select all",
+            "Unselect all");
+
+        assertEquals(true, configuration.isBulkSelectionEnabled());
+        assertEquals("Select all", configuration.getSelectAllLabel());
+        assertEquals("Unselect all", configuration.getUnselectAllLabel());
+    }
 }

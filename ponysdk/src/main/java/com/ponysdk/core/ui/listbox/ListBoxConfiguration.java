@@ -36,6 +36,9 @@ public final class ListBoxConfiguration extends DefaultDropDownContainerConfigur
     private Integer displaySelectionLimit;
     private String displaySelectionLabel;
     private boolean groupEnabled;
+    private boolean bulkSelectionEnabled;
+    private String selectAllLabel;
+    private String unselectAllLabel;
 
     public String getNoMatchesLabel() {
         return noMatchesLabel;
@@ -106,6 +109,25 @@ public final class ListBoxConfiguration extends DefaultDropDownContainerConfigur
 
     public ListBoxConfiguration setDisplaySelectionLabel(final String displaySelectionLabel) {
         this.displaySelectionLabel = displaySelectionLabel;
+        return this;
+    }
+
+    public boolean isBulkSelectionEnabled() {
+        return bulkSelectionEnabled;
+    }
+
+    public String getSelectAllLabel() {
+        return selectAllLabel;
+    }
+
+    public String getUnselectAllLabel() {
+        return unselectAllLabel;
+    }
+
+    public ListBoxConfiguration enableMultiSelectionBulk(final String selectAllLabel, final String unselectAllLabel) {
+        this.bulkSelectionEnabled = true;
+        this.selectAllLabel = selectAllLabel;
+        this.unselectAllLabel = unselectAllLabel;
         return this;
     }
 
