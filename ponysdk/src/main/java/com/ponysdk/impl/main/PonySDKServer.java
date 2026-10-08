@@ -23,15 +23,24 @@
 
 package com.ponysdk.impl.main;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URL;
+import java.util.Collections;
+import java.util.Map;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ErrorHandler;
+import org.eclipse.jetty.server.handler.HandlerWrapper;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -73,6 +82,7 @@ public class PonySDKServer {
     private boolean needClientAuth = false;
     private String[] enabledProtocols = new String[] { "TLSv1.2" };
     private String enabledCipherSuites;
+    private Map<String, String> responseHeaders = Collections.emptyMap();
 
     public PonySDKServer() {
         server = new Server();
@@ -148,7 +158,19 @@ public class PonySDKServer {
     protected Handler createMainHandler() {
         final GzipHandler gzip = new GzipHandler();
         gzip.setHandler(addHandlers());
-        return gzip;
+        if (responseHeaders.isEmpty()) return gzip;
+
+        final HandlerWrapper headers = new HandlerWrapper() {
+
+            @Override
+            public void handle(final String target, final Request baseRequest, final HttpServletRequest request,
+                    final HttpServletResponse response) throws IOException, ServletException {
+                responseHeaders.forEach(response::setHeader);
+                super.handle(target, baseRequest, request, response);
+            }
+        };
+        headers.setHandler(gzip);
+        return headers;
     }
 
     protected Handler addHandlers() {
@@ -256,6 +278,13 @@ public class PonySDKServer {
 
     public void setEnabledCipherSuites(final String enabledCipherSuites) {
         this.enabledCipherSuites = enabledCipherSuites;
+    }
+
+    /**
+     * Headers added to every HTTP response (for instance a Content-Security-Policy). None by default.
+     */
+    public void setResponseHeaders(final Map<String, String> responseHeaders) {
+        this.responseHeaders = responseHeaders == null ? Collections.emptyMap() : responseHeaders;
     }
 
     public void setApplicationManager(final ApplicationManager applicationManager) {

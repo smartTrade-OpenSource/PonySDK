@@ -191,8 +191,18 @@ public abstract class PObject {
         saveUpdate(writer -> writer.write(ServerToClientModel.BIND, functionName));
     }
 
-    public void evalTerminalScript(final String script) {
-        saveUpdate(writer -> writer.write(ServerToClientModel.EVAL, script));
+    /**
+     * Calls a named global function defined by the application in its own static script.
+     * The function is called with the widget's element as first argument, followed by the given args.
+     *
+     * @param functionName the name of a function available on the terminal's window
+     * @param args         the optional arguments passed after the element
+     */
+    public void callTerminalFunction(final String functionName, final Object... args) {
+        saveUpdate(writer -> {
+            writer.write(ServerToClientModel.CALL_FUNCTION, functionName);
+            if (args != null && args.length > 0) writer.write(ServerToClientModel.FUNCTION_ARGS, args);
+        });
     }
 
     public void sendToNative(final JsonObject data) {

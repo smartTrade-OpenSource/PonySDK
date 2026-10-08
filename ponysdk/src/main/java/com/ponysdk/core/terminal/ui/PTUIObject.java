@@ -23,6 +23,9 @@
 
 package com.ponysdk.core.terminal.ui;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.UIObject;
@@ -33,6 +36,8 @@ import com.ponysdk.core.terminal.model.ReaderBuffer;
 import elemental.json.JsonObject;
 
 public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
+
+    private static final Logger log = Logger.getLogger(PTUIObject.class.getName());
 
     private static final String PID_KEY = "pid";
 
@@ -119,9 +124,17 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
         } else if (ServerToClientModel.ENSURE_DEBUG_ID == model) {
             uiObject.getElement().setAttribute(PID_KEY, binaryModel.getStringValue());
             return true;
-        } else if (ServerToClientModel.EVAL == model) {
-            final String script = binaryModel.getStringValue();
-            eval(uiObject.getElement(), script);
+        } else if (ServerToClientModel.CALL_FUNCTION == model) {
+            final String functionName = binaryModel.getStringValue();
+            JavaScriptObject args = null;
+            final BinaryModel argsModel = buffer.readBinaryModel();
+            if (ServerToClientModel.FUNCTION_ARGS == argsModel.getModel()) args = argsModel.getArrayValue().getJavaScriptObject();
+            else buffer.rewind(argsModel);
+            try {
+                callFunction(functionName, uiObject.getElement(), args);
+            } catch (final Throwable t) {
+                log.log(Level.SEVERE, "Cannot call terminal function " + functionName, t);
+            }
             return true;
         } else {
             return super.update(buffer, binaryModel);
@@ -138,9 +151,11 @@ public abstract class PTUIObject<T extends UIObject> extends AbstractPTObject {
     }
 
 
-    private static native void eval(Element element, String scriptlet) /*-{
-                                                                          return (new Function('element', 'return ' + scriptlet))(element);
-                                                                                   }-*/;
+    private static native void callFunction(String functionName, Element element, JavaScriptObject args) /*-{
+                                                                                                         var f = $wnd[functionName];
+                                                                                                         if (typeof f !== 'function') throw new Error('No terminal function named ' + functionName);
+                                                                                                         f.apply($wnd, [element].concat(args || []));
+                                                                                                         }-*/;
 
     private native Object bind(String functionName, int objectID, Element element) /*-{
                                                                                    var self = this;

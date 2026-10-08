@@ -211,7 +211,7 @@ public enum ServerToClientModel {
     ROOT_ID(ValueTypeModel.STRING),
     WINDOW_ID(ValueTypeModel.UINT31),
     FRAME_ID(ValueTypeModel.UINT31),
-    EVAL(ValueTypeModel.STRING),
+    CALL_FUNCTION(ValueTypeModel.STRING),
     VISIBLE_LINES(ValueTypeModel.INTEGER),
     CHARACTER_WIDTH(ValueTypeModel.INTEGER),
     HORIZONTAL_SCROLL_POSITION(ValueTypeModel.INTEGER),

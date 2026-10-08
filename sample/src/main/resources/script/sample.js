@@ -128,3 +128,27 @@
 
   });
 })();
+
+// Terminal functions: global functions called by name from the server
+// (PScript.call, PObject.callTerminalFunction, TextFunction.named).
+
+function cspSampleEcho(value) {
+  return 'echo:' + value;
+}
+
+function sampleCheck(element) {
+  element.checked = true;
+}
+
+function sampleJoin(args) {
+  return args[0] + '-' + args[1];
+}
+
+function sampleLogFirst(args) {
+  console.log(args[0] + " " + args[1]);
+  return args[0];
+}
+
+function sampleLog(message) {
+  console.log(message);
+}

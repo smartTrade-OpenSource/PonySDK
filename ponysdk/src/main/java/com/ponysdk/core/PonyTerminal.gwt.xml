@@ -17,6 +17,11 @@
     <inherits name="com.google.gwt.core.StackTrace" />
     <set-property name="compiler.stackMode" value="strip" />
 
+	<!-- Load the compiled code with <script src> instead of injecting it as inline script, so the
+	     terminal runs under a Content-Security-Policy without 'unsafe-inline' or 'unsafe-eval'
+	     (docs/decisions/0001-strict-content-security-policy.md). -->
+	<set-configuration-property name="installCode" value="false" />
+
 <!-- 	<script src="ponysdk.js" /> -->
 
 </module>

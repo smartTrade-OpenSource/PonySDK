@@ -247,16 +247,10 @@ public class BootstrapServlet extends HttpServlet {
     protected String addToBody(final HttpServletRequest request) {
         final StringBuilder sb = new StringBuilder();
 
-        sb.append(addHistoryIFrame(request));
         sb.append(addLoading(request));
         sb.append(addNoScript(request));
 
         return sb.toString();
-    }
-
-    protected String addHistoryIFrame(final HttpServletRequest request) {
-        return "<iframe src=\"javascript:''\" id=\"__gwt_historyFrame\" tabIndex='-1' style=\"position:absolute;width:0;height:0;border:0\"></iframe>"
-                + NEW_LINE;
     }
 
     protected String addLoading(final HttpServletRequest request) {

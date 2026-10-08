@@ -26,6 +26,7 @@ package com.ponysdk.core.terminal.ui;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.user.client.Timer;
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;
@@ -37,24 +38,27 @@ public class PTScript extends AbstractPTObject {
 
     private static final Logger log = Logger.getLogger(PTScript.class.getName());
 
-    public static native void eval(String script) /*-{
-                                                     $wnd.eval(script);
-                                                     }-*/;
-
-    public static native Object evalWithCallback(String script) /*-{
-                                                                var r = $wnd.eval(script);
-                                                                if (typeof r=="object") return null; // JSON.stringify(r);
-                                                                else return r;
-                                                                }-*/;
+    public static native Object callFunction(String name, JavaScriptObject args) /*-{
+                                                                                 var f = $wnd[name];
+                                                                                 if (typeof f !== 'function') throw new Error('No terminal function named ' + name);
+                                                                                 var r = f.apply($wnd, args || []);
+                                                                                 if (typeof r=="object") return null; // JSON.stringify(r);
+                                                                                 else return r;
+                                                                                 }-*/;
 
     @Override
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         final ServerToClientModel model = binaryModel.getModel();
-        if (ServerToClientModel.EVAL == model) {
+        if (ServerToClientModel.CALL_FUNCTION == model) {
             long commandID = -1;
             long delayMillis = -1;
 
             final String script = binaryModel.getStringValue();
+
+            JavaScriptObject args = null;
+            final BinaryModel argsModel = buffer.readBinaryModel();
+            if (ServerToClientModel.FUNCTION_ARGS == argsModel.getModel()) args = argsModel.getArrayValue().getJavaScriptObject();
+            else buffer.rewind(argsModel);
 
             final BinaryModel commandIdModel = buffer.readBinaryModel();
 
@@ -65,8 +69,8 @@ public class PTScript extends AbstractPTObject {
             if (ServerToClientModel.FIXDELAY == delayModel.getModel()) delayMillis = delayModel.getLongValue();
             else buffer.rewind(delayModel);
 
-            if (commandID == -1) eval(script, delayMillis);
-            else evalWithCallback(script, commandID, delayMillis);
+            if (commandID == -1) call(script, args, delayMillis);
+            else callWithCallback(script, args, commandID, delayMillis);
 
             return true;
         } else {
@@ -74,10 +78,10 @@ public class PTScript extends AbstractPTObject {
         }
     }
 
-    private static void eval(final String script, final long delayMillis) {
+    private static void call(final String script, final JavaScriptObject args, final long delayMillis) {
         if (delayMillis == -1) {
             try {
-                eval(script);
+                callFunction(script, args);
             } catch (final Throwable t) {
                 log.log(Level.SEVERE, "PTScript exception for " + script, t);
             }
@@ -87,7 +91,7 @@ public class PTScript extends AbstractPTObject {
                 @Override
                 public void run() {
                     try {
-                        eval(script);
+                        callFunction(script, args);
                     } catch (final Throwable t) {
                         log.log(Level.SEVERE, "PTScript exception for " + script, t);
                     }
@@ -96,10 +100,10 @@ public class PTScript extends AbstractPTObject {
         }
     }
 
-    private void evalWithCallback(final String script, final long commandID, final long delayMillis) {
+    private void callWithCallback(final String script, final JavaScriptObject args, final long commandID, final long delayMillis) {
         if (delayMillis == -1) {
             try {
-                sendResult(commandID, evalWithCallback(script));
+                sendResult(commandID, callFunction(script, args));
             } catch (final Throwable t) {
                 log.log(Level.SEVERE, "PTScript exception for " + script, t);
                 sendError(commandID, t);
@@ -110,7 +114,7 @@ public class PTScript extends AbstractPTObject {
                 @Override
                 public void run() {
                     try {
-                        sendResult(commandID, evalWithCallback(script));
+                        sendResult(commandID, callFunction(script, args));
                     } catch (final Throwable t) {
                         log.log(Level.SEVERE, "PTScript exception for " + script, t);
                         sendError(commandID, t);
