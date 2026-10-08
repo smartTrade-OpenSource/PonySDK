@@ -36,7 +36,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This class allows to execute native Java-script code.
+ * This class allows to call named Java-script functions defined by the application.
  */
 public class PScript extends PObject {
 
@@ -86,20 +86,29 @@ public class PScript extends PObject {
 
     }
 
-    public static void execute(final PWindow window, final String js) {
-        execute(window, js, null, null);
+    /**
+     * Calls a named global function defined by the application in its own static script.
+     *
+     * @param window       the window whose terminal calls the function
+     * @param functionName the name of a function available on the terminal's window
+     * @param args         the arguments passed to the function
+     */
+    public static void call(final PWindow window, final String functionName, final Object... args) {
+        call(window, functionName, args, null, null);
     }
 
-    public static void execute(final PWindow window, final String js, final ExecutionCallback callback) {
-        execute(window, js, callback, null);
-    }
-
-    public static void execute(final PWindow window, final String js, final Duration period) {
-        execute(window, js, null, period);
-    }
-
-    public static void execute(final PWindow window, final String js, final ExecutionCallback callback, final Duration period) {
-        get(window).executeScript(js, callback, period);
+    /**
+     * Calls a named global function defined by the application in its own static script.
+     *
+     * @param window       the window whose terminal calls the function
+     * @param functionName the name of a function available on the terminal's window
+     * @param args         the arguments passed to the function, may be null
+     * @param callback     receives the returned value or the error, may be null
+     * @param period       if not null, the call is delayed by this duration, may be null
+     */
+    public static void call(final PWindow window, final String functionName, final Object[] args, final ExecutionCallback callback,
+                            final Duration period) {
+        get(window).callFunction(functionName, args, callback, period);
     }
 
     @Override
@@ -107,9 +116,10 @@ public class PScript extends PObject {
         return WidgetType.SCRIPT;
     }
 
-    private void executeScript(final String js, final ExecutionCallback callback, final Duration period) {
+    private void callFunction(final String functionName, final Object[] args, final ExecutionCallback callback, final Duration period) {
         saveUpdate(writer -> {
-            writer.write(ServerToClientModel.EVAL, js);
+            writer.write(ServerToClientModel.CALL_FUNCTION, functionName);
+            if (args != null && args.length > 0) writer.write(ServerToClientModel.FUNCTION_ARGS, args);
             if (callback != null) {
                 if (callbacksByID == null) callbacksByID = new HashMap<>(4);
                 callbacksByID.put(++executionID, callback);

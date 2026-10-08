@@ -5,6 +5,10 @@ const { defineConfig } = require('@playwright/test');
 // The FlexLayout demo runs under the `flexlayout` Spring profile, which listens on 8081.
 const baseURL = process.env.BASE_URL || 'http://localhost:8081/sample/';
 
+// The CSP demo runs under the `csp` Spring profile, which listens on 8085 and sends a strict
+// Content-Security-Policy header.
+const cspBaseURL = 'http://localhost:8085/sample/';
+
 // The wrapper lives at the repository root, one level above this file. The path is built
 // absolute on purpose: cmd.exe does not resolve a bare `gradlew.bat` from the working
 // directory, so a relative command works on Linux and fails on Windows.
@@ -22,19 +26,40 @@ module.exports = defineConfig({
     viewport: { width: 1280, height: 720 },
     actionTimeout: 5000,
   },
+  // One project per demo server, each running only its own spec.
   projects: [
-    { name: 'chromium', use: { browserName: 'chromium' } },
+    {
+      name: 'flexlayout',
+      testMatch: /flexlayout\.spec\.js/,
+      use: { browserName: 'chromium', baseURL },
+    },
+    {
+      name: 'csp',
+      testMatch: /csp\.spec\.js/,
+      use: { browserName: 'chromium', baseURL: cspBaseURL },
+    },
   ],
-  // Playwright owns the demo server: it waits for the port to answer, surfaces the server
-  // output when startup fails, and tears the process down afterwards. Declaring it here
-  // means a local run and CI start the server the same way, from a single definition.
-  webServer: {
-    command: `"${gradlew}" :sample:processResources :sample:runFlexLayoutDemo --no-daemon`,
-    cwd: repoRoot,
-    url: baseURL,
-    timeout: 180000,
-    reuseExistingServer: !process.env.CI,
-    stdout: 'pipe',
-    stderr: 'pipe',
-  },
+  // Playwright owns the demo servers: it waits for the port to answer, surfaces the server
+  // output when startup fails, and tears the process down afterwards. Declaring them here
+  // means a local run and CI start the servers the same way, from a single definition.
+  webServer: [
+    {
+      command: `"${gradlew}" :sample:processResources :sample:runFlexLayoutDemo --no-daemon`,
+      cwd: repoRoot,
+      url: baseURL,
+      timeout: 180000,
+      reuseExistingServer: !process.env.CI,
+      stdout: 'pipe',
+      stderr: 'pipe',
+    },
+    {
+      command: `"${gradlew}" :sample:processResources :sample:runCspDemo --no-daemon`,
+      cwd: repoRoot,
+      url: cspBaseURL,
+      timeout: 180000,
+      reuseExistingServer: !process.env.CI,
+      stdout: 'pipe',
+      stderr: 'pipe',
+    },
+  ],
 });

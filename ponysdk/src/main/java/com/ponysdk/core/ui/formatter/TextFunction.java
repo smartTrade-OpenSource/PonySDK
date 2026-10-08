@@ -27,32 +27,39 @@ import java.util.function.Function;
 
 /**
  * An immutable function that takes an array as argument and returns a String.
- * It wraps a Java {@link Function} and its JS equivalent.
+ * It wraps a Java {@link Function} and the name of its JS equivalent, a global function defined by
+ * the application in its own static script.
  * It can be used to create a PFunction in a PWindow
  */
 public class TextFunction {
 
     private final Function<Object[], String> javaFunction;
-    private final String jsFunction;
+    private final String jsFunctionName;
+
+    private TextFunction(final Function<Object[], String> javaFunction, final String jsFunctionName) {
+        super();
+        this.javaFunction = javaFunction;
+        this.jsFunctionName = jsFunctionName;
+    }
 
     /**
      * Sample :
      * <ul>
-     * <li><pre>javaFunction : args -&#62; { System.out.println(args[0] + " " + args[1]); return (String) args[0]; }</pre></li>
-     * <li>jsFunction : console.log(args[0] + \" \" + args[1]); return args[0]</li>
+     * <li><pre>javaFunction : args -&#62; args[0] + " " + args[1]</pre></li>
+     * <li>jsFunctionName : joinArgs, defined in an application script as
+     * <pre>function joinArgs(args) { return args[0] + ' ' + args[1]; }</pre></li>
      * </ul>
      *
-     * @param javaFunction The java function.
-     * @param jsFunction   The js function.
+     * @param javaFunction   The java function.
+     * @param jsFunctionName The name of the global js function, which receives the args array and returns a string.
+     * @return the text function
      */
-    public TextFunction(final Function<Object[], String> javaFunction, final String jsFunction) {
-        super();
-        this.javaFunction = javaFunction;
-        this.jsFunction = jsFunction;
+    public static TextFunction named(final Function<Object[], String> javaFunction, final String jsFunctionName) {
+        return new TextFunction(javaFunction, jsFunctionName);
     }
 
-    public String getJsFunction() {
-        return jsFunction;
+    public String getJsFunctionName() {
+        return jsFunctionName;
     }
 
     public Function<Object[], String> getJavaFunction() {
@@ -61,7 +68,7 @@ public class TextFunction {
 
     @Override
     public String toString() {
-        return "function(args){ " + jsFunction + " }]";
+        return "function " + jsFunctionName + "(args)";
     }
 
 }

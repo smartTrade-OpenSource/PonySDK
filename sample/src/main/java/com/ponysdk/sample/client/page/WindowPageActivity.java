@@ -136,7 +136,7 @@ public class WindowPageActivity extends SamplePageActivity implements PCloseHand
                 }
             });
             final PButton execJs = Element.newPButton("Exec javascript");
-            execJs.addClickHandler(event -> PScript.execute(PWindow.getMain(), "alert('from the popup');"));
+            execJs.addClickHandler(event -> PScript.call(PWindow.getMain(), "alert", "from the popup"));
             flow.add(addMessage);
             flow.add(clearMessage);
             flow.add(execJs);

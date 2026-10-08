@@ -56,7 +56,7 @@ jobs:
       # enabling, otherwise the suite fails for reasons unrelated to the change.
       - name: E2E Tests (Playwright)
         working-directory: sample
-        run: npx playwright test tests/flexlayout.spec.js --ignore-snapshots
+        run: npx playwright test --ignore-snapshots
 
       - name: Upload test results
         if: failure()

@@ -23,22 +23,30 @@
 
 package com.ponysdk.core.terminal.ui;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
 public class PTFunction extends AbstractPTObject {
+
+    private static final Logger log = Logger.getLogger(PTFunction.class.getName());
 
     private JsTextFunction function;
 
     @Override
     public void create(final ReaderBuffer buffer, final int objectId, final UIBuilder uiBuilder) {
         super.create(buffer, objectId, uiBuilder);
-        function = eval(buffer.readBinaryModel().getStringValue());
+        final String name = buffer.readBinaryModel().getStringValue();
+        function = lookup(name);
+        if (function == null) log.log(Level.SEVERE, "No terminal function named " + name);
     }
 
-    public static native JsTextFunction eval(String code) /*-{
-                                                          return new Function('args',code);
-                                                          }-*/;
+    public static native JsTextFunction lookup(String name) /*-{
+                                                            var f = $wnd[name];
+                                                            return typeof f === 'function' ? f : null;
+                                                            }-*/;
 
     public JsTextFunction getFunction() {
         return function;

@@ -137,7 +137,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     public void start(final UIContext uiContext) {
         final PElement input = Element.newInput();
         input.setAttribute("type", "checkbox");
-        input.evalTerminalScript("element.checked = true");
+        input.callTerminalFunction("sampleCheck");
 
         final PButton button = Element.newPButton("add");
         button.addClickHandler(e -> PWindow.getMain().add(input));
@@ -646,10 +646,10 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     }
 
     private void createFunctionalLabel() {
-        final TextFunction textFunction = new TextFunction(args -> {
+        final TextFunction textFunction = TextFunction.named(args -> {
             System.out.println(args[0] + " " + args[1]);
             return (String) args[0];
-        }, "console.log(args[0] + \" \" + args[1]); return args[0];");
+        }, "sampleLogFirst");
         final PFunctionalLabel newPFunctionalLabel = Element.newPFunctionalLabel(textFunction);
         PWindow.getMain().add(newPFunctionalLabel);
         newPFunctionalLabel.setArgs("A", "B");
@@ -884,7 +884,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PWindow w = Element.newPWindow("Window 1", "resizable=yes,location=0,status=0,scrollbars=0");
 
         // PScript.execute(w, "alert('coucou Window1');");
-        PScript.execute(w, "console.log('coucou Window1');");
+        PScript.call(w, "sampleLog", "coucou Window1");
 
         final PFlowPanel windowContainer = Element.newPFlowPanel();
         w.add(windowContainer);
@@ -897,7 +897,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         windowContainer.add(button);
         button.addClickHandler(event -> {
             mainLabel.setText("Touched by God : " + child.getWindow());
-            PScript.execute(PWindow.getMain(), "alert('coucou');");
+            PScript.call(PWindow.getMain(), "alert", "coucou");
             child.setText("Clicked Window 1");
         });
         windowContainer.add(button);
@@ -1063,7 +1063,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
             @Override
             public void onKeyUp(final PKeyUpEvent keyUpEvent) {
-                PScript.execute(PWindow.getMain(), "alert('" + keyUpEvent + "');");
+                PScript.call(PWindow.getMain(), "alert", String.valueOf(keyUpEvent));
             }
 
             @Override

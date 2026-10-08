@@ -25,14 +25,19 @@ package com.ponysdk.impl.main;
 
 import java.net.InetAddress;
 import java.net.URL;
+import java.util.Collections;
+import java.util.Map;
 
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
+import org.eclipse.jetty.util.Callback;
 import org.eclipse.jetty.ee11.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee11.servlet.ServletHolder;
 import org.eclipse.jetty.ee11.websocket.server.config.JettyWebSocketServletContainerInitializer;
@@ -74,6 +79,7 @@ public class PonySDKServer {
     private boolean needClientAuth = false;
     private String[] enabledProtocols = new String[] { "TLSv1.2" };
     private String enabledCipherSuites;
+    private Map<String, String> responseHeaders = Collections.emptyMap();
 
     public PonySDKServer() {
         server = new Server();
@@ -149,7 +155,16 @@ public class PonySDKServer {
     protected Handler createMainHandler() {
         final GzipHandler gzip = new GzipHandler();
         gzip.setHandler(addHandlers());
-        return gzip;
+        if (responseHeaders.isEmpty()) return gzip;
+
+        return new Handler.Wrapper(gzip) {
+
+            @Override
+            public boolean handle(final Request request, final Response response, final Callback callback) throws Exception {
+                responseHeaders.forEach(response.getHeaders()::put);
+                return super.handle(request, response, callback);
+            }
+        };
     }
 
     protected Handler addHandlers() {
@@ -259,6 +274,13 @@ public class PonySDKServer {
 
     public void setEnabledCipherSuites(final String enabledCipherSuites) {
         this.enabledCipherSuites = enabledCipherSuites;
+    }
+
+    /**
+     * Headers added to every HTTP response (for instance a Content-Security-Policy). None by default.
+     */
+    public void setResponseHeaders(final Map<String, String> responseHeaders) {
+        this.responseHeaders = responseHeaders == null ? Collections.emptyMap() : responseHeaders;
     }
 
     public void setApplicationManager(final ApplicationManager applicationManager) {

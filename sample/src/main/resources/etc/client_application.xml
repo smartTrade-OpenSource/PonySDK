@@ -17,4 +17,9 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
 		<bean name="entryPoint" class="com.ponysdk.sample.client.page.addon.FlexLayoutDemoEntryPoint" />
 	</beans>
 
+	<!-- Strict Content Security Policy demo (for E2E tests) -->
+	<beans profile="csp">
+		<bean name="entryPoint" class="com.ponysdk.sample.client.page.csp.CspSampleEntryPoint" />
+	</beans>
+
 </beans>
