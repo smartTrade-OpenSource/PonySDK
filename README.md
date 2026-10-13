@@ -54,16 +54,16 @@ The driver can be found in the same jar as PonySDK, and can only be used to conn
 ### Dependencies
 
 ```gradle
-compile 'com.ponysdk:ponysdk:2.8.12'
-compile 'org.seleniumhq.selenium:selenium-api:3.14.0'
-compile 'org.seleniumhq.selenium:selenium-java:3.14.0'
-compile 'javax.websocket:javax.websocket-client-api:1.1'
+implementation 'com.ponysdk:ponysdk:2.9.0'
+implementation 'org.seleniumhq.selenium:selenium-api:3.14.0'
+implementation 'org.seleniumhq.selenium:selenium-java:3.14.0'
+implementation 'jakarta.websocket:jakarta.websocket-client-api:2.2.0'
 
-runtime 'jakarta.json:jakarta.json-api:1.1.6'
-runtime 'org.slf4j:slf4j-api:1.7.25'
-runtime 'org.glassfish.tyrus:tyrus-client:1.15'
-runtime 'org.glassfish.tyrus:tyrus-container-grizzly-client:1.15'
-runtime 'org.glassfish.tyrus.ext:tyrus-extension-deflate:1.15'
+runtimeOnly 'jakarta.json:jakarta.json-api:1.1.6'
+runtimeOnly 'org.slf4j:slf4j-api:2.0.16'
+runtimeOnly 'org.glassfish.tyrus:tyrus-client:2.2.2'
+runtimeOnly 'org.glassfish.tyrus:tyrus-container-grizzly-client:2.2.2'
+runtimeOnly 'org.glassfish.tyrus.ext:tyrus-extension-deflate:2.2.2'
 ```
 
 ### Usage

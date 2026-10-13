@@ -131,8 +131,13 @@ public class UIContext {
         this.request = request;
         this.context = context;
         this.modelWriter = context.getWriter();
-        this.upgradeRequestData = upgradeRequestData != null ? upgradeRequestData
-                : new com.ponysdk.core.server.websocket.UpgradeRequestData(null, null, null);
+        if (upgradeRequestData == null) {
+            log.warn("No upgrade request data for UIContext #{}: parameters, headers and cookies read as empty,"
+                    + " session, host and remote address as null", ID);
+            this.upgradeRequestData = new com.ponysdk.core.server.websocket.UpgradeRequestData(null, null, null);
+        } else {
+            this.upgradeRequestData = upgradeRequestData;
+        }
 
         JsonProvider provider;
         try {

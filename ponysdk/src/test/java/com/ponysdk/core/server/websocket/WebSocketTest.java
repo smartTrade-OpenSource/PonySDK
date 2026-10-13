@@ -28,6 +28,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -79,6 +80,8 @@ public class WebSocketTest {
 
         final JettyServerUpgradeRequest request = Mockito.mock(JettyServerUpgradeRequest.class);
         webSocket.setRequest(request);
+        webSocket.setUpgradeRequestData(new UpgradeRequestData(Collections.emptyMap(), Collections.emptyMap(),
+                Collections.emptyList(), null, false, null, null, null));
         webSocket.setContext(Mockito.mock(TxnContext.class));
 
         final ApplicationManager applicationManager = Mockito.mock(ApplicationManager.class);
