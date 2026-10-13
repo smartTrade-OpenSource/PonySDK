@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: ['master', 'v2.8.x']
+    branches: ['master', 'v2.8.x', 'v2.9.x']
   pull_request:
     branches: ['master']
 
@@ -32,7 +32,7 @@ jobs:
         run: ./gradlew :sample:compileJava --no-daemon
 
       - name: Unit Tests (JUnit)
-        run: ./gradlew :sample:test --no-daemon
+        run: ./gradlew :ponysdk:test :sample:test --no-daemon
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
