@@ -253,6 +253,19 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
                 uiContext.onMessageReceived();
                 if (monitor != null) monitor.onMessageReceived(WebSocket.this, message);
 
+                // Fast path for the two periodic control messages (heartbeat {"v":0}, latency
+                // {"h":<nanos>}): no JSON parser / object tree per message for every session.
+                final long latency = parseLatencyMessage(message);
+                if (latency != NOT_A_LATENCY_MESSAGE) {
+                    processRoundtripLatency(latency);
+                    if (monitor != null) monitor.onMessageProcessed(this, message);
+                    return;
+                }
+                if (HEARTBEAT_MESSAGE.equals(message)) {
+                    if (monitor != null) monitor.onMessageProcessed(this, message);
+                    return;
+                }
+
                 final JsonObject jsonObject;
                 try (final JsonReader reader = uiContext.getJsonProvider().createReader(new StringReader(message))) {
                     jsonObject = reader.readObject();
@@ -286,9 +299,34 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
         }
     }
 
-    private void processRoundtripLatency(final JsonObject jsonObject) {
-        final long lastSentPing = jsonObject.getJsonNumber(KEY_LATENCY).longValue();
+    private static final String HEARTBEAT_MESSAGE = "{\"" + ClientToServerModel.HEARTBEAT_REQUEST.toStringValue() + "\":0}";
+    private static final String LATENCY_PREFIX = "{\"" + ClientToServerModel.TERMINAL_LATENCY.toStringValue() + "\":";
+    static final long NOT_A_LATENCY_MESSAGE = Long.MIN_VALUE;
 
+    /** Parses exactly {@code {"h":<integer>}}; anything else (spaces, other keys...) returns NOT_A_LATENCY_MESSAGE. */
+    static long parseLatencyMessage(final String message) {
+        final int end = message.length() - 1;
+        if (end <= LATENCY_PREFIX.length() || message.charAt(end) != '}' || !message.startsWith(LATENCY_PREFIX)) {
+            return NOT_A_LATENCY_MESSAGE;
+        }
+        int i = LATENCY_PREFIX.length();
+        final boolean negative = message.charAt(i) == '-';
+        if (negative) i++;
+        if (i == end || end - i > 18) return NOT_A_LATENCY_MESSAGE; // empty or may overflow: use the parser
+        long value = 0;
+        for (; i < end; i++) {
+            final char c = message.charAt(i);
+            if (c < '0' || c > '9') return NOT_A_LATENCY_MESSAGE;
+            value = value * 10 + (c - '0');
+        }
+        return negative ? -value : value;
+    }
+
+    private void processRoundtripLatency(final JsonObject jsonObject) {
+        processRoundtripLatency(jsonObject.getJsonNumber(KEY_LATENCY).longValue());
+    }
+
+    private void processRoundtripLatency(final long lastSentPing) {
         final long roundtripLatency = TimeUnit.MILLISECONDS.convert(System.nanoTime() - lastSentPing, TimeUnit.NANOSECONDS);
         log.trace("Roundtrip measurement : {} ms from terminal #{}", roundtripLatency, uiContext.getID());
         uiContext.addRoundtripLatencyValue(roundtripLatency);
