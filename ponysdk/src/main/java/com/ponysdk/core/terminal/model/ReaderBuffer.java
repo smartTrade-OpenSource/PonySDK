@@ -465,9 +465,10 @@ public class ReaderBuffer {
     /**
      * ASCII strings up to this length are built with {@code String.fromCharCode.apply}; longer ones
      * go through {@code TextDecoder} (UTF-8 decoding of pure-ASCII bytes yields the same string).
-     * fromCharCode costs ~2.7 ns per byte versus a flat ~45 ns TextDecoder call, so the crossover is
-     * around 16 bytes (V8): at 512 bytes TextDecoder is ~19x faster, at 4 KB ~55x. It also keeps
-     * long strings away from the engine's limit on the number of apply() arguments.
+     * Measured in-page (fromCharCode / TextDecoder, ns): at 16 bytes Chrome 36/49, Firefox 88/88,
+     * WebKit 110/63; at 64 bytes 109/58, 128/93, 315/80; at 4 KB 6800/430, 4150/1300, 15300/1400.
+     * 16 is the compromise: Chrome only breaks even around 24-32 bytes, WebKit already wins at 16.
+     * Long strings also stay away from the engine's apply() argument limit (Chrome: ~125k).
      */
     private static final int ASCII_FROM_CHAR_CODE_MAX_LENGTH = 16;
 

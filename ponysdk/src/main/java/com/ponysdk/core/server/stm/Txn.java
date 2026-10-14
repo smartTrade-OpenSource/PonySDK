@@ -30,7 +30,11 @@ public class Txn {
 
     private static final ThreadLocal<Txn> transactions = new ThreadLocal<>();
 
-    private final Set<TxnListener> txnListeners = ConcurrentHashMap.newKeySet();
+    // Lazily created: a Txn lives for a single execute() (commit/rollback drop it from the
+    // ThreadLocal, and PScheduler tasks run on fresh virtual threads), so an eager set was allocated
+    // on every transaction although almost none register a listener. Concurrent set kept so a
+    // listener may register another one while listeners are being fired.
+    private Set<TxnListener> txnListeners;
 
     private TxnContext txnContext;
 
@@ -67,19 +71,20 @@ public class Txn {
     }
 
     public void addTxnListener(final TxnListener txnListener) {
+        if (txnListeners == null) txnListeners = ConcurrentHashMap.newKeySet();
         this.txnListeners.add(txnListener);
     }
 
     private void fireBeforeFlush() {
-        txnListeners.forEach(listener -> listener.beforeFlush(txnContext));
+        if (txnListeners != null) txnListeners.forEach(listener -> listener.beforeFlush(txnContext));
     }
 
     private void fireAfterFlush() {
-        txnListeners.forEach(listener -> listener.afterFlush(txnContext));
+        if (txnListeners != null) txnListeners.forEach(listener -> listener.afterFlush(txnContext));
     }
 
     private void fireBeforeRollback() {
-        txnListeners.forEach(TxnListener::beforeRollback);
+        if (txnListeners != null) txnListeners.forEach(TxnListener::beforeRollback);
     }
 
 }
