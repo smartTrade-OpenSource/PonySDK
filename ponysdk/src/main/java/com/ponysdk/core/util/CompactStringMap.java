@@ -41,7 +41,8 @@ public final class CompactStringMap {
     private int size;
 
     public CompactStringMap() {
-        this.data = new String[4]; // room for 2 entries initially
+        // room for 1 entry: most widgets carry a single attribute / style property (doubles on demand)
+        this.data = new String[2];
         this.size = 0;
     }
 
