@@ -30,6 +30,7 @@ import com.ponysdk.core.util.CompactStringMap;
 import com.ponysdk.core.util.OffHeapJsonStore;
 import com.ponysdk.core.writer.ModelWriter;
 import jakarta.json.*;
+import jakarta.json.spi.JsonProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -189,7 +190,7 @@ public class PWebComponent extends PComplexPanel {
                 case OFF_HEAP -> removed = offHeapValues != null && offHeapValues.remove(name);
                 case STATELESS -> removed = false;
             }
-            if (removed) {
+            if (removed && !notCreatedYet()) {
                 saveUpdate(writer -> writer.write(ServerToClientModel.WC_REMOVE_PROPERTY, name));
             }
         }
@@ -225,6 +226,16 @@ public class PWebComponent extends PComplexPanel {
 
     // ---- Internal property write methods ----
 
+    /**
+     * True until the CREATE has been written. Cached state (on/off-heap properties, attributes, event
+     * subscriptions) is then only recorded: {@link #enrichForUpdate} sends its final value with the
+     * CREATE. Stacking the update as well would send it twice (and every intermediate value).
+     * Stateless properties and method calls are not cached, so they still go through saveUpdate.
+     */
+    private boolean notCreatedYet() {
+        return !isInitialized();
+    }
+
     private void sendFull(final String name, final String value) {
         saveUpdate(writer -> {
             writer.write(ServerToClientModel.WC_SET_PROPERTY, name);
@@ -235,42 +246,34 @@ public class PWebComponent extends PComplexPanel {
     private void setOnHeap(final String name, final String value, final boolean patchEnabled) {
         if (onHeapValues == null) onHeapValues = new CompactStringMap();
         final String previous = onHeapValues.put(name, value);
-        if (Objects.equals(previous, value)) return;
+        if (Objects.equals(previous, value) || notCreatedYet()) return;
 
-        if (patchEnabled && previous != null) {
-            final String patch = computeJsonPatch(previous, value);
-            if (patch != null) {
-                saveUpdate(writer -> {
-                    writer.write(ServerToClientModel.WC_PATCH_PROPERTY, name);
-                    writer.write(ServerToClientModel.WC_PROPERTY_VALUE, patch);
-                });
-                return;
-            }
+        if (patchEnabled && previous != null && value != null) {
+            sendPatchOrFull(name, value, previous);
+        } else {
+            sendFull(name, value);
         }
-        sendFull(name, value);
     }
 
     private void setOffHeap(final String name, final String value, final boolean patchEnabled) {
         if (offHeapValues == null) offHeapValues = new OffHeapJsonStore();
 
         if (offHeapValues.hasSameValue(name, value)) return;
+        if (notCreatedYet()) {
+            offHeapValues.put(name, value);
+            return;
+        }
 
         String previous = null;
         if (patchEnabled) previous = offHeapValues.readValue(name);
 
         offHeapValues.put(name, value);
 
-        if (patchEnabled && previous != null) {
-            final String patch = computeJsonPatch(previous, value);
-            if (patch != null) {
-                saveUpdate(writer -> {
-                    writer.write(ServerToClientModel.WC_PATCH_PROPERTY, name);
-                    writer.write(ServerToClientModel.WC_PROPERTY_VALUE, patch);
-                });
-                return;
-            }
+        if (patchEnabled && previous != null && value != null) {
+            sendPatchOrFull(name, value, previous);
+        } else {
+            sendFull(name, value);
         }
-        sendFull(name, value);
     }
 
     // ======== Slot API — targeted child insertion ========
@@ -309,7 +312,10 @@ public class PWebComponent extends PComplexPanel {
                 if (children == null) children = new PWidgetCollection(this);
                 children.add(child);
                 adopt(child);
-                if (isInitialized()) child.attach(window, frame);
+                // A SlotPanel has no CREATE of its own, so it is never "initialized": its window is set
+                // when the slot is attached (which attaches the children present at that time). Testing
+                // isInitialized() here dropped every child added once the web component was live.
+                if (window != null) child.attach(window, frame);
                 // Inject WC_SLOT_NAME alongside the standard TYPE_ADD
                 child.saveAdd(child.getID(), PWebComponent.this.getID(),
                     new com.ponysdk.core.ui.model.ServerBinaryModel(ServerToClientModel.WC_SLOT_NAME, slotName));
@@ -419,21 +425,38 @@ public class PWebComponent extends PComplexPanel {
 
     // ======== JSON merge-patch (RFC 7396) ========
 
+    /**
+     * Cached provider: the static {@code Json.createXxx()} helpers resolve the provider through a
+     * ServiceLoader lookup on every call, which dominated the cost of small patches.
+     */
+    private static final JsonProvider JSON = JsonProvider.provider();
+
+    /**
+     * Computes a shallow RFC 7396 merge-patch turning {@code oldJson} into {@code newJson}.
+     *
+     * @return the patch, or {@code null} when a patch cannot represent the change and the caller must
+     *         send the full value: either side is not a JSON object, nothing changed, or the new value
+     *         holds an explicit {@code null} (in a merge-patch, null means "delete the key", so the
+     *         client would drop it instead of setting it to null)
+     */
     static String computeJsonPatch(final String oldJson, final String newJson) {
+        // Cheap guard first: scalar / array properties are common and not mergeable — don't pay a
+        // parse (and an exception) to find that out.
+        if (!looksLikeJsonObject(oldJson) || !looksLikeJsonObject(newJson)) return null;
         try {
             final JsonObject oldObj = parseJson(oldJson);
             final JsonObject newObj = parseJson(newJson);
             if (oldObj == null || newObj == null) return null;
 
-            final JsonObjectBuilder patch = Json.createObjectBuilder();
+            final JsonObjectBuilder patch = JSON.createObjectBuilder();
             boolean hasDiff = false;
 
             // Keys in new but changed or added
-            for (final String key : newObj.keySet()) {
-                final JsonValue newVal = newObj.get(key);
-                final JsonValue oldVal = oldObj.get(key);
-                if (!newVal.equals(oldVal)) {
-                    patch.add(key, newVal);
+            for (final Map.Entry<String, JsonValue> e : newObj.entrySet()) {
+                final JsonValue newVal = e.getValue();
+                if (!newVal.equals(oldObj.get(e.getKey()))) {
+                    if (newVal.getValueType() == JsonValue.ValueType.NULL) return null; // see javadoc
+                    patch.add(e.getKey(), newVal);
                     hasDiff = true;
                 }
             }
@@ -452,11 +475,35 @@ public class PWebComponent extends PComplexPanel {
         }
     }
 
+    /** True if the first non-whitespace char is '{' (a necessary condition for a JSON object). */
+    private static boolean looksLikeJsonObject(final String json) {
+        if (json == null) return false;
+        for (int i = 0, n = json.length(); i < n; i++) {
+            final char c = json.charAt(i);
+            if (c == '{') return true;
+            if (c != ' ' && c != '\t' && c != '\n' && c != '\r') return false;
+        }
+        return false;
+    }
+
     private static JsonObject parseJson(final String json) {
-        try (final JsonReader reader = Json.createReader(new StringReader(json))) {
+        try (final JsonReader reader = JSON.createReader(new StringReader(json))) {
             return reader.readObject();
         } catch (final Exception e) {
             return null;
+        }
+    }
+
+    /** Sends the patch when it is smaller than the full value, the full value otherwise. */
+    private void sendPatchOrFull(final String name, final String value, final String previous) {
+        final String patch = computeJsonPatch(previous, value);
+        if (patch != null && patch.length() < value.length()) {
+            saveUpdate(writer -> {
+                writer.write(ServerToClientModel.WC_PATCH_PROPERTY, name);
+                writer.write(ServerToClientModel.WC_PROPERTY_VALUE, patch);
+            });
+        } else {
+            sendFull(name, value);
         }
     }
 
@@ -468,6 +515,7 @@ public class PWebComponent extends PComplexPanel {
     public void attr(final String name, final String value) {
         if (wcAttributes == null) wcAttributes = new CompactStringMap();
         wcAttributes.put(name, value);
+        if (notCreatedYet()) return;
         saveUpdate(writer -> {
             writer.write(ServerToClientModel.WC_SET_ATTRIBUTE, name);
             writer.write(ServerToClientModel.WC_ATTRIBUTE_VALUE, value);
@@ -479,6 +527,7 @@ public class PWebComponent extends PComplexPanel {
      */
     public void removeAttr(final String name) {
         if (wcAttributes != null) wcAttributes.remove(name);
+        if (notCreatedYet()) return;
         saveUpdate(writer -> writer.write(ServerToClientModel.WC_REMOVE_ATTRIBUTE, name));
     }
 
@@ -502,7 +551,7 @@ public class PWebComponent extends PComplexPanel {
         final List<Consumer<JsonObject>> listeners = wcEventListeners.computeIfAbsent(eventName, k -> new ArrayList<>());
         final boolean firstListener = listeners.isEmpty();
         listeners.add(listener);
-        if (firstListener) {
+        if (firstListener && !notCreatedYet()) {
             saveUpdate(writer -> writer.write(ServerToClientModel.WC_LISTEN_EVENT, eventName));
         }
     }
@@ -517,7 +566,7 @@ public class PWebComponent extends PComplexPanel {
             listeners.remove(listener);
             if (listeners.isEmpty()) {
                 wcEventListeners.remove(eventName);
-                saveUpdate(writer -> writer.write(ServerToClientModel.WC_UNLISTEN_EVENT, eventName));
+                if (!notCreatedYet()) saveUpdate(writer -> writer.write(ServerToClientModel.WC_UNLISTEN_EVENT, eventName));
             }
         }
     }
@@ -527,7 +576,7 @@ public class PWebComponent extends PComplexPanel {
      */
     public void removeAllEventListeners(final String eventName) {
         if (wcEventListeners == null) return;
-        if (wcEventListeners.remove(eventName) != null) {
+        if (wcEventListeners.remove(eventName) != null && !notCreatedYet()) {
             saveUpdate(writer -> writer.write(ServerToClientModel.WC_UNLISTEN_EVENT, eventName));
         }
     }

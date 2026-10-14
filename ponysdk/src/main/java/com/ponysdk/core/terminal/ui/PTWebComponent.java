@@ -190,24 +190,31 @@ public class PTWebComponent extends PTComplexPanel<PTWebComponent.WCHTMLPanel> {
     /**
      * Applies a JSON merge-patch (RFC 7396) to an existing JS property.
      * For each key in the patch: null means delete, otherwise set the new value.
-     * This avoids replacing the entire object — only changed fields are touched.
+     * <p>
+     * The patch is applied to a shallow copy and the copy is assigned: mutating the current object
+     * in place and re-assigning the same reference is invisible to components that detect changes by
+     * identity (Lit's default {@code hasChanged} is {@code !==}), so they would never re-render.
      */
     private static native void patchJsProperty(Element el, String name, String patchJson) /*-{
         var patch = JSON.parse(patchJson);
         var current = el[name];
-        if (typeof current !== 'object' || current === null) {
-            current = {};
+        var hasOwn = Object.prototype.hasOwnProperty;
+        var next = {};
+        if (typeof current === 'object' && current !== null && !Array.isArray(current)) {
+            for (var k in current) {
+                if (hasOwn.call(current, k)) next[k] = current[k];
+            }
         }
         for (var key in patch) {
-            if (patch.hasOwnProperty(key)) {
+            if (hasOwn.call(patch, key)) {
                 if (patch[key] === null) {
-                    delete current[key];
+                    delete next[key];
                 } else {
-                    current[key] = patch[key];
+                    next[key] = patch[key];
                 }
             }
         }
-        el[name] = current;
+        el[name] = next;
     }-*/;
 
     private static native void removeJsProperty(Element el, String name) /*-{
