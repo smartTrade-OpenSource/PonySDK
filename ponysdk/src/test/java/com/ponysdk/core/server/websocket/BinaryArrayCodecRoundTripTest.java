@@ -167,6 +167,25 @@ public class BinaryArrayCodecRoundTripTest {
         }
     }
 
+    @Test
+    public void asciiStringsAroundTheDictionaryTagValuesRoundTrip() throws Exception {
+        // Regression: inline ASCII lengths 248 / 249 were written as the length byte itself, which is
+        // also STRING_DICTIONARY_ADD / _REF: the client read them as a dictionary entry.
+        for (final int length : new int[] { 246, 247, 248, 249, 250, 251 }) {
+            final String value = "x".repeat(length);
+            for (final boolean withDictionary : new boolean[] { false, true }) {
+                final byte[] wire = encode(withDictionary ? new com.ponysdk.core.server.application.StringDictionary() : null, p -> {
+                    p.encode(ServerToClientModel.TYPE_UPDATE, 7);
+                    p.encode(ServerToClientModel.TEXT, value);
+                    p.encode(ServerToClientModel.END, null);
+                });
+                final List<List<PonyFrame>> messages = decodeAll(wire);
+                assertEquals("length " + length + " dict=" + withDictionary, 1, messages.size());
+                assertEquals("length " + length + " dict=" + withDictionary, value, valueOf(messages.get(0), ServerToClientModel.TEXT));
+            }
+        }
+    }
+
     private static Object valueOf(final List<PonyFrame> message, final ServerToClientModel model) {
         for (final PonyFrame frame : message) if (frame.getModel() == model) return frame.getValue();
         throw new AssertionError(model + " not decoded in " + message);

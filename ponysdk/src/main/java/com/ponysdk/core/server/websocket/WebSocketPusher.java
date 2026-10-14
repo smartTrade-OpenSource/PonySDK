@@ -66,6 +66,8 @@ public class WebSocketPusher implements Closeable {
     private static final int MAX_UNSIGNED_SHORT_VALUE = Short.MAX_VALUE * 2 + 1;
     private static final int MODEL_KEY_SIZE = 1;
     private static final int MIN_PROFITABLE_STRING_LENGTH = 4;
+    /** First ASCII length that needs an explicit tag: below it, the length byte itself is the tag. */
+    private static final int MIN_TAGGED_ASCII_LENGTH = ValueTypeModel.STRING_DICTIONARY_ADD;
 
     /** Initial size of the reusable string encoding buffer. */
     private static final int INITIAL_STRING_BUFFER_SIZE = 256;
@@ -318,7 +320,9 @@ public class WebSocketPusher implements Closeable {
     private int putStringBytes(final String value, final int byteLength) throws IOException {
         final boolean ascii = lastEncodedAscii;
         if (ascii) {
-            if (byteLength <= ValueTypeModel.STRING_ASCII_UINT8) {
+            // The 1-byte length form must stay below the dictionary tags (248 ADD, 249 REF): lengths
+            // 248-250 used to be read back as a dictionary entry and corrupted the stream.
+            if (byteLength < MIN_TAGGED_ASCII_LENGTH) {
                 putUnsignedByte((short) byteLength);
             } else if (byteLength <= MAX_UNSIGNED_SHORT_VALUE) {
                 putUnsignedByte(ValueTypeModel.STRING_ASCII_UINT16);
@@ -348,7 +352,7 @@ public class WebSocketPusher implements Closeable {
      */
     private static int stringMetaBytes(final boolean ascii, final int byteLength) {
         if (ascii) {
-            if (byteLength <= ValueTypeModel.STRING_ASCII_UINT8) return 1;
+            if (byteLength < MIN_TAGGED_ASCII_LENGTH) return 1;
             else if (byteLength <= MAX_UNSIGNED_SHORT_VALUE) return 3;
             else return 5;
         } else {
