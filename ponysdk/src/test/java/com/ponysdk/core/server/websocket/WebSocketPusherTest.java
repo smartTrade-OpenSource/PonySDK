@@ -377,4 +377,159 @@ public class WebSocketPusherTest {
         assertThrows("a failed async send must surface on the next write",
             IOException.class, () -> c.pusher.encode(ServerToClientModel.HEARTBEAT_PERIOD, 2));
     }
+
+    // ── Zero-allocation UTF-8 encoder ──
+
+    @Test
+    public void utf8EncoderMatchesJdkOnRandomText() {
+        // Random BMP + supplementary chars, including unpaired surrogates: must be byte-identical to
+        // String.getBytes(UTF_8), which also substitutes '?' for malformed input.
+        final java.util.Random random = new java.util.Random(42);
+        final byte[] out = new byte[4 * 64];
+        for (int iteration = 0; iteration < 20_000; iteration++) {
+            final StringBuilder sb = new StringBuilder();
+            final int len = random.nextInt(64);
+            for (int i = 0; i < len; i++) {
+                switch (random.nextInt(5)) {
+                    case 0 -> sb.append((char) random.nextInt(0x80));                 // ASCII
+                    case 1 -> sb.append((char) (0x80 + random.nextInt(0x780)));       // 2 bytes
+                    case 2 -> sb.append((char) (0x800 + random.nextInt(0xF800)));     // 3 bytes, incl. surrogate range
+                    case 3 -> sb.appendCodePoint(0x10000 + random.nextInt(0x100000)); // surrogate pair
+                    default -> sb.append((char) (0xD800 + random.nextInt(0x800)));    // lone surrogate
+                }
+            }
+            final String s = sb.toString();
+            final int end = WebSocketPusher.encodeUtf8(s, 0, s.length(), out, 0);
+            final byte[] expected = s.getBytes(StandardCharsets.UTF_8);
+            assertEquals("length for " + s, expected.length, end);
+            assertTrue("bytes for " + s, Arrays.equals(expected, Arrays.copyOf(out, end)));
+        }
+    }
+
+    @Test
+    public void loneSurrogateIsReplacedNotTruncated() throws Exception {
+        // Regression: the CharsetEncoder stopped at the malformed char and its result was ignored,
+        // so everything after a lone surrogate was silently dropped from the wire.
+        final String value = "before\uD800after";
+        final int byteLength = (int) encode.invoke(pusher, value);
+        final byte[] encoded = Arrays.copyOf((byte[]) bufferField.get(pusher), byteLength);
+        assertEquals("before?after", new String(encoded, StandardCharsets.UTF_8));
+        assertFalse((boolean) asciiField.get(pusher));
+    }
+
+    @Test
+    public void highSurrogateAtEndOfStringIsReplaced() throws Exception {
+        final String value = "x\u00e9\uD83D"; // truncated emoji: high surrogate with no low
+        final int byteLength = (int) encode.invoke(pusher, value);
+        final byte[] encoded = Arrays.copyOf((byte[]) bufferField.get(pusher), byteLength);
+        assertTrue(Arrays.equals(value.getBytes(StandardCharsets.UTF_8), encoded));
+    }
+
+    @Test
+    public void longNonAsciiStringGrowsTheReusableBuffer() throws Exception {
+        // > INITIAL_STRING_BUFFER_SIZE, all 3-byte chars: the buffer must grow to the worst case
+        final String value = "\u20ac".repeat(1_000);
+        assertFalse(assertRoundTrips(value));
+    }
+
+    // ── Raw byte writes ──
+
+    @Test
+    public void putBytesOnAFreshPusherDoesNotNpe() throws Exception {
+        // Regression: put(byte[]) read writeBuffer.capacity() before the lazy acquire
+        final Capture c = new Capture(1 << 19, false);
+        c.pusher.put(new byte[] { 1, 2, 3 });
+        c.pusher.flush();
+        assertTrue(Arrays.equals(new byte[] { 1, 2, 3 }, c.bytes()));
+
+        // ...and right after a flush, when writeBuffer is null again
+        c.pusher.put(new byte[] { 4 });
+        c.pusher.flush();
+        assertTrue(Arrays.equals(new byte[] { 1, 2, 3, 4 }, c.bytes()));
+    }
+
+    @Test
+    public void putBytesLargerThanAPoolBufferIsChunkedLosslessly() throws Exception {
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        final Session session = Mockito.mock(Session.class);
+        Mockito.when(session.isOpen()).thenReturn(true);
+        Mockito.doAnswer(inv -> {
+            final ByteBuffer buf = inv.getArgument(0);
+            final byte[] chunk = new byte[buf.remaining()];
+            buf.duplicate().get(chunk);
+            out.writeBytes(chunk);
+            ((Callback) inv.getArgument(1)).succeed();
+            return null;
+        }).when(session).sendBinary(Mockito.any(ByteBuffer.class), Mockito.any(Callback.class));
+        final WebSocketPusher p = new WebSocketPusher(session, 1 << 15, 1_000, new ByteBufferPool(1024, 4));
+
+        final byte[] payload = new byte[10_000];
+        new java.util.Random(7).nextBytes(payload);
+        p.put(payload);
+        p.flush();
+
+        assertTrue(Arrays.equals(payload, out.toByteArray()));
+    }
+
+    // ── Dictionary wire format ──
+
+    @Test
+    public void dictionaryAddThenRefWireFormat() throws Exception {
+        final Capture c = new Capture(1 << 19, false);
+        c.pusher.setStringDictionary(new StringDictionary());
+        c.pusher.encode(ServerToClientModel.TYPE_HISTORY, "repeated-value");
+        c.pusher.encode(ServerToClientModel.TYPE_HISTORY, "repeated-value");
+        c.pusher.flush();
+
+        final byte[] b = c.bytes();
+        final int k = key(ServerToClientModel.TYPE_HISTORY);
+        int i = 0;
+        // ADD: key, ADD marker, uint31 id (short), ascii length, bytes
+        assertEquals(k, b[i++] & 0xFF);
+        assertEquals(com.ponysdk.core.model.ValueTypeModel.STRING_DICTIONARY_ADD, b[i++] & 0xFF);
+        assertEquals(0, ((b[i++] & 0xFF) << 8) | (b[i++] & 0xFF));
+        assertEquals("repeated-value".length(), b[i++] & 0xFF);
+        assertEquals("repeated-value", new String(b, i, 14, StandardCharsets.US_ASCII));
+        i += 14;
+        // REF: key, REF marker, uint31 id (short) — no string bytes
+        assertEquals(k, b[i++] & 0xFF);
+        assertEquals(com.ponysdk.core.model.ValueTypeModel.STRING_DICTIONARY_REF, b[i++] & 0xFF);
+        assertEquals(0, ((b[i++] & 0xFF) << 8) | (b[i++] & 0xFF));
+        assertEquals("nothing else on the wire", b.length, i);
+    }
+
+    @Test
+    public void dictionaryReAnnouncesAfterClientSyncReset() throws Exception {
+        final Capture c = new Capture(1 << 19, false);
+        final StringDictionary dict = new StringDictionary();
+        c.pusher.setStringDictionary(dict);
+        c.pusher.encode(ServerToClientModel.TYPE_HISTORY, "repeated-value"); // ADD
+        c.pusher.flush();
+        final int afterFirst = c.bytes().length;
+
+        dict.resetClientSync(); // e.g. transparent reconnection
+        c.pusher.encode(ServerToClientModel.TYPE_HISTORY, "repeated-value"); // ADD again, not REF
+        c.pusher.flush();
+
+        final byte[] b = c.bytes();
+        assertEquals("same frame size: re-sent in full", afterFirst * 2, b.length);
+        assertEquals(com.ponysdk.core.model.ValueTypeModel.STRING_DICTIONARY_ADD, b[afterFirst + 1] & 0xFF);
+    }
+
+    @Test
+    public void encodesEveryValueTypeWithStatsRecordingOff() throws Exception {
+        assertFalse(WebSocketPusher.isRecordingStats());
+        // Every value type goes through a guarded record() site
+        final Capture c = new Capture(1 << 19, false);
+        c.pusher.setStringDictionary(new StringDictionary());
+        c.pusher.encode(ServerToClientModel.END, null);
+        c.pusher.encode(ServerToClientModel.TYPE_UPDATE, 12);
+        c.pusher.encode(ServerToClientModel.HEARTBEAT_PERIOD, 1);
+        c.pusher.encode(ServerToClientModel.ROUNDTRIP_LATENCY, 1L);
+        c.pusher.encode(ServerToClientModel.TYPE_HISTORY, "repeated-value");
+        c.pusher.encode(ServerToClientModel.TYPE_HISTORY, "repeated-value");
+        c.pusher.encode(ServerToClientModel.PADDON_ARGUMENTS, new Object[] { 1, "x" });
+        c.pusher.flush();
+        assertTrue(c.bytes().length > 0);
+    }
 }

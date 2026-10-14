@@ -2769,6 +2769,44 @@ public class UIContextReconnectionTest {
     }
 
     /**
+     * DICTIONARY_ADD frames in flight when the socket dropped may never have reached the client.
+     * After resume, every entry must be re-announced (ADD) before being referenced (REF), otherwise
+     * the terminal fails with "Unknown dictionary ID".
+     */
+    @Test
+    public void testResumeForcesDictionaryReAnnouncement() {
+        config.setStringDictionaryEnabled(true);
+        final UIContext ctx = new UIContext(oldSocket, txnContext, config,
+                Mockito.mock(JettyServerUpgradeRequest.class));
+        final com.ponysdk.core.server.application.StringDictionary dict = ctx.getStringDictionary();
+        assertNotNull("dictionary enabled", dict);
+
+        final long first = dict.internOrGet("market-data-cell");
+        assertTrue("known by the client before the drop",
+                com.ponysdk.core.server.application.StringDictionary.InternResult.isExisting(dict.internOrGet("market-data-cell")));
+
+        ctx.suspend(30_000);
+        ctx.acquire();
+        try {
+            final com.ponysdk.core.ui.basic.PWindow mockWindow = Mockito.mock(com.ponysdk.core.ui.basic.PWindow.class);
+            Mockito.when(mockWindow.getID()).thenReturn(0);
+            ctx.setAttribute("com.ponysdk.core.ui.basic.PWindow", mockWindow);
+        } finally {
+            ctx.release();
+        }
+        ctx.resume(Mockito.mock(WebSocket.class));
+
+        assertSame("same dictionary instance", dict, ctx.getStringDictionary());
+        final long afterResume = dict.internOrGet("market-data-cell");
+        assertFalse("first use after resume must be a DICTIONARY_ADD",
+                com.ponysdk.core.server.application.StringDictionary.InternResult.isExisting(afterResume));
+        assertEquals("same id is reused",
+                com.ponysdk.core.server.application.StringDictionary.InternResult.id(first),
+                com.ponysdk.core.server.application.StringDictionary.InternResult.id(afterResume));
+        ctx.destroy();
+    }
+
+    /**
      * execute() after destroy should return false and not run the runnable,
      * even if the UIContext was previously suspended.
      * This is a regression test for the case where suspended=true but alive=false.

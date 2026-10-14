@@ -200,4 +200,115 @@ public class StringDictionaryTest {
         assertEquals(Long.valueOf(2L), deltas.get("one"));
         assertEquals(Long.valueOf(1L), deltas.get("two"));
     }
+
+    // ---- LFU scan (int-array, rotating cursor) ----
+
+    @Test(timeout = 5_000)
+    public void evictionPicksTheColdestEntryWhateverItsPosition() {
+        final StringDictionary dict = new StringDictionary(4, 1, 32);
+        // ids a=0 b=1 c=2 d=3; counts a=3, b=3, c=2 (coldest, in the middle), d=3
+        for (final String s : new String[] { "a", "b", "c", "d" }) dict.internOrGet(s);
+        for (final String s : new String[] { "a", "b", "d" }) {
+            dict.internOrGet(s);
+            dict.internOrGet(s);
+        }
+        dict.internOrGet("c");
+
+        // getString has no side effect (getId/intern would bump the usage count)
+        final int cId = 2;
+        assertEquals("c", dict.getString(cId));
+        final long e = dict.internOrGet("e");
+
+        assertEquals("the coldest entry's id is recycled", cId, InternResult.id(e));
+        assertEquals(StringDictionary.NOT_INTERNED, dict.getId("c"));
+        for (final String s : new String[] { "a", "b", "d" }) {
+            assertNotEquals(s + " survives", StringDictionary.NOT_INTERNED, dict.getId(s));
+        }
+    }
+
+    @Test(timeout = 5_000)
+    public void evictionRotatesAmongEquallyColdEntries() {
+        // All entries used once: successive evictions must not keep recycling the same id
+        final StringDictionary dict = new StringDictionary(3, 1, 32);
+        dict.internOrGet("a");
+        dict.internOrGet("b");
+        dict.internOrGet("c");
+
+        final int first = InternResult.id(dict.internOrGet("x"));
+        // "x" now has count 1 too; bump it so the next scan must move past it
+        dict.internOrGet("x");
+        final int second = InternResult.id(dict.internOrGet("y"));
+
+        assertNotEquals("the cursor advances after an eviction", first, second);
+        assertEquals("x", dict.getString(first));
+        assertEquals("y", dict.getString(second));
+        assertEquals(3, dict.size());
+    }
+
+    @Test(timeout = 5_000)
+    public void evictionSkipsPreSeededEntriesButEvictsRegularOnes() {
+        final SharedDictionaryProvider provider = Mockito.mock(SharedDictionaryProvider.class);
+        Mockito.when(provider.getPreSeedStrings()).thenReturn(List.of("seed0", "seed1"));
+        final StringDictionary dict = new StringDictionary(3, 1, 32);
+        dict.initFromSharedProvider(provider);
+
+        final int regular = InternResult.id(dict.internOrGet("regular"));
+        // Pre-seeded entries are never used here (count 0, colder than "regular") yet must not be evicted
+        final int next = InternResult.id(dict.internOrGet("next"));
+
+        assertEquals("only the regular entry is evictable", regular, next);
+        assertEquals(0, dict.intern("seed0"));
+        assertEquals(1, dict.intern("seed1"));
+    }
+
+    @Test(timeout = 10_000)
+    public void sustainedChurnKeepsMappingsConsistent() {
+        // Full dictionary + steady stream of new strings: the forward and reverse maps must stay in sync
+        final StringDictionary dict = new StringDictionary(64, 1, 1_000_000);
+        for (int i = 0; i < 10_000; i++) {
+            final String s = "v" + (i % 200);
+            final long r = dict.internOrGet(s);
+            final int id = InternResult.id(r);
+            assertNotEquals(StringDictionary.NOT_INTERNED, id);
+            assertEquals(s, dict.getString(id));
+            assertTrue(dict.size() <= 64);
+        }
+        assertEquals(64, dict.size());
+    }
+
+    // ---- client sync reset (transparent reconnection) ----
+
+    @Test
+    public void resetClientSyncForcesReAnnouncementWithSameIds() {
+        final StringDictionary dict = new StringDictionary();
+        final long first = dict.internOrGet("payload");
+        assertTrue(InternResult.isExisting(dict.internOrGet("payload")));
+        assertEquals(InternResult.id(first), dict.getId("payload"));
+
+        dict.resetClientSync();
+
+        // getId (short-string path) must not hand out a ref the client may not know
+        assertEquals(StringDictionary.NOT_INTERNED, dict.getId("payload"));
+        // next use is a DICTIONARY_ADD again, with the same id
+        final long again = dict.internOrGet("payload");
+        assertFalse("must be re-announced", InternResult.isExisting(again));
+        assertEquals(InternResult.id(first), InternResult.id(again));
+        // ...and only once
+        assertTrue(InternResult.isExisting(dict.internOrGet("payload")));
+        assertEquals(1, dict.size());
+    }
+
+    @Test
+    public void resetClientSyncKeepsUsageCounts() {
+        final SharedDictionaryProvider provider = Mockito.mock(SharedDictionaryProvider.class);
+        Mockito.when(provider.getPreSeedStrings()).thenReturn(List.of());
+        final StringDictionary dict = new StringDictionary(16, 1, 32);
+        dict.initFromSharedProvider(provider);
+        dict.internOrGet("hot");
+        dict.internOrGet("hot");
+
+        dict.resetClientSync();
+
+        assertEquals(Long.valueOf(2L), dict.getSessionFrequency().get("hot"));
+    }
 }
