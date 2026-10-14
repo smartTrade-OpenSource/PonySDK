@@ -342,6 +342,26 @@ public class UpdateCoalescingTest {
     }
 
     @Test
+    public void eachTransactionStartsFromAnEmptyBufferAndManyPropertiesChain() {
+        final PLabel l = label("0");
+        for (int t = 0; t < 3; t++) {
+            final int tx = t;
+            wire.clear();
+            ctx.execute(() -> {
+                for (int k = 0; k < 6; k++) l.setStyleProperty("p" + k, "v" + tx);
+                l.setText("a" + tx);
+                l.setStyleProperty("p2", "w" + tx); // overwrite inside a 7-slot chain
+                l.setText("b" + tx);
+            });
+            assertEquals("tx " + t, 1, wire.blocks.size());
+            assertEquals(1, wire.count("TEXT="));
+            assertEquals(1, wire.count("TEXT=b" + t));
+            assertEquals(6, wire.count("PUT_STYLE_KEY="));
+            assertEquals(1, wire.count("STYLE_VALUE=w" + t));
+        }
+    }
+
+    @Test
     public void disabledCoalescingWritesEveryUpdate() {
         start(false);
         final PLabel l = label("0");
