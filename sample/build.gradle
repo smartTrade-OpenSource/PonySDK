@@ -3,19 +3,19 @@ ext {
     commonsBeanutilsVersion = '1.11.0'
     commonsIoVersion = '2.22.0'
     commonsFileupload2Version = '2.0.0-M5' // latest milestone (no GA yet); verified to compile with the sample
-    gwtVersion = '2.13.0' // gwt-codeserver (dev-only), aligned with the ponysdk gwt-dev version
-    jettyVersion = '12.1.10'
-    springVersion = '7.0.8'
+    gwtVersion = '2.13.1' // gwt-codeserver (dev-only), aligned with the ponysdk gwt-dev version
+    jettyVersion = '12.1.14'
+    springVersion = '7.0.9'
     jakartaServletVersion = '6.1.0'
     jakartaJsonVersion = '2.1.3'
     parssonVersion = '1.1.9'
-    slf4jVersion = '2.0.18'
-    log4jVersion = '2.26.0'
+    slf4jVersion = '2.0.20'
+    log4jVersion = '2.26.1'
 }
 
 dependencies {
-    testImplementation 'junit:junit:4.12'
-    testRuntimeOnly 'org.glassfish:jakarta.json:1.1.6'
+    testImplementation 'junit:junit:4.13.2'
+    testRuntimeOnly 'org.eclipse.parsson:parsson:' + parssonVersion // jakarta.json 2.x impl (was javax-era glassfish 1.1.6)
 
     implementation(
             project(path: ':ponysdk', configuration: 'default'),

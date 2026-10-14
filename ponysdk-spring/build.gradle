@@ -3,8 +3,8 @@ plugins {
 }
 
 ext {
-    springVersion = '7.0.8'
-    slf4jVersion = '2.0.18'
+    springVersion = '7.0.9'
+    slf4jVersion = '2.0.20'
     jakartaServletVersion = '6.1.0'
 }
 
