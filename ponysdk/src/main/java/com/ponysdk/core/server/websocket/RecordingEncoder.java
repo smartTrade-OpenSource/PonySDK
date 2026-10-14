@@ -208,39 +208,48 @@ public final class RecordingEncoder implements WebsocketEncoder {
     private final class Block {
         final int start; // index of first entry in the block
         final int end;   // index of END entry (inclusive)
+        // Classified once: compact() asks for type/objectId several times per block, and each
+        // lookup used to rescan the block's entries.
+        private final BlockType type;
+        private final int objectId;
 
         Block(final int start, final int end) {
             this.start = start;
             this.end = end;
+            BlockType t = BlockType.OTHER;
+            int id = -1;
+            for (int k = start; k < end; k++) {
+                final BlockType bt = typeOf(entries.get(k).model());
+                if (bt != null) {
+                    t = bt;
+                    final Object v = entries.get(k).value();
+                    id = v instanceof Integer ? (int) v : -1;
+                    break;
+                }
+            }
+            this.type = t;
+            this.objectId = id;
         }
 
         BlockType type() {
-            for (int k = start; k < end; k++) {
-                final ServerToClientModel m = entries.get(k).model();
-                if (m == ServerToClientModel.TYPE_CREATE) return BlockType.CREATE;
-                if (m == ServerToClientModel.TYPE_UPDATE) return BlockType.UPDATE;
-                if (m == ServerToClientModel.TYPE_ADD) return BlockType.ADD;
-                if (m == ServerToClientModel.TYPE_REMOVE) return BlockType.REMOVE;
-                if (m == ServerToClientModel.TYPE_GC) return BlockType.GC;
-                if (m == ServerToClientModel.TYPE_ADD_HANDLER) return BlockType.ADD_HANDLER;
-                if (m == ServerToClientModel.TYPE_REMOVE_HANDLER) return BlockType.REMOVE_HANDLER;
-            }
-            return BlockType.OTHER;
+            return type;
         }
 
         int objectId() {
-            for (int k = start; k < end; k++) {
-                final ServerToClientModel m = entries.get(k).model();
-                if (m == ServerToClientModel.TYPE_CREATE || m == ServerToClientModel.TYPE_UPDATE
-                        || m == ServerToClientModel.TYPE_ADD || m == ServerToClientModel.TYPE_REMOVE
-                        || m == ServerToClientModel.TYPE_GC || m == ServerToClientModel.TYPE_ADD_HANDLER
-                        || m == ServerToClientModel.TYPE_REMOVE_HANDLER) {
-                    final Object v = entries.get(k).value();
-                    return v instanceof Integer ? (int) v : -1;
-                }
-            }
-            return -1;
+            return objectId;
         }
+    }
+
+    /** The block type a structural model key denotes, or null for a property / routing key. */
+    private static BlockType typeOf(final ServerToClientModel m) {
+        if (m == ServerToClientModel.TYPE_CREATE) return BlockType.CREATE;
+        if (m == ServerToClientModel.TYPE_UPDATE) return BlockType.UPDATE;
+        if (m == ServerToClientModel.TYPE_ADD) return BlockType.ADD;
+        if (m == ServerToClientModel.TYPE_REMOVE) return BlockType.REMOVE;
+        if (m == ServerToClientModel.TYPE_GC) return BlockType.GC;
+        if (m == ServerToClientModel.TYPE_ADD_HANDLER) return BlockType.ADD_HANDLER;
+        if (m == ServerToClientModel.TYPE_REMOVE_HANDLER) return BlockType.REMOVE_HANDLER;
+        return null;
     }
 
     private void copyBlock(final Block b, final List<Entry> target) {

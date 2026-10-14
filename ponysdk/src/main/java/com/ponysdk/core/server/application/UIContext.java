@@ -264,22 +264,24 @@ public class UIContext {
     public boolean execute(final Runnable runnable) {
         if (!isAlive()) return false;
         if (UIContext.get() != this) {
-            final long lockStart = (metrics != null) ? System.currentTimeMillis() : 0;
+            // Clock reads only when metrics are wired — execute() runs for every client event/push
+            final PonySDKMetrics m = metrics;
+            final long lockStart = m != null ? System.currentTimeMillis() : 0;
             acquire();
-            final long runStart = System.currentTimeMillis();
-            if (metrics != null) metrics.recordLockWait(runStart - lockStart);
+            final long runStart = m != null ? System.currentTimeMillis() : 0;
+            if (m != null) m.recordLockWait(runStart - lockStart);
             try {
                 final Txn txn = Txn.get();
                 txn.begin(context);
                 try {
                     runnable.run();
                     txn.commit();
-                    if (metrics != null) metrics.recordExecute(System.currentTimeMillis() - runStart);
+                    if (m != null) m.recordExecute(System.currentTimeMillis() - runStart);
                     return true;
                 } catch (final Throwable e) {
                     log.error("Cannot process client instruction for UIContext #{}", ID, e);
                     txn.rollback();
-                    if (metrics != null) metrics.recordExecute(System.currentTimeMillis() - runStart);
+                    if (m != null) m.recordExecute(System.currentTimeMillis() - runStart);
                     return false;
                 }
             } finally {

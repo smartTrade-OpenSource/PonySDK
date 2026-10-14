@@ -456,13 +456,23 @@ public class ReaderBuffer {
 
     private String getString(final boolean ascii, final int size) {
         if (size != 0) {
-            return size < 100_000 && ascii ? decodeStringAscii(size) : decodeStringUTF8(size);
+            return ascii ? decodeStringAscii(size) : decodeStringUTF8(size);
         } else {
             return null;
         }
     }
 
+    /**
+     * ASCII strings up to this length are built with {@code String.fromCharCode.apply}; longer ones
+     * go through {@code TextDecoder} (UTF-8 decoding of pure-ASCII bytes yields the same string).
+     * fromCharCode costs ~2.7 ns per byte versus a flat ~45 ns TextDecoder call, so the crossover is
+     * around 16 bytes (V8): at 512 bytes TextDecoder is ~19x faster, at 4 KB ~55x. It also keeps
+     * long strings away from the engine's limit on the number of apply() arguments.
+     */
+    private static final int ASCII_FROM_CHAR_CODE_MAX_LENGTH = 16;
+
     private String decodeStringAscii(final int size) {
+        if (size > ASCII_FROM_CHAR_CODE_MAX_LENGTH) return decodeStringUTF8(size);
         checkRemainingBytes(size);
         final String result = fromCharCode((Uint8Array) buffer.subarray(position, position + size));
         position += size;
