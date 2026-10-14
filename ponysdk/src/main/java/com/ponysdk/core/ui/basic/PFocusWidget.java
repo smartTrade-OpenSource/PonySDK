@@ -85,7 +85,7 @@ public abstract class PFocusWidget extends PWidget implements Focusable {
     public void setEnabled(final boolean enabled) {
         if (Objects.equals(this.enabled, enabled)) return;
         this.enabled = enabled;
-        saveUpdate(ServerToClientModel.ENABLED, enabled);
+        if (initialized) saveUpdate(ServerToClientModel.ENABLED, enabled); // replayed by enrichForUpdate otherwise
     }
 
     public boolean isShowLoadingOnRequest() {

@@ -119,27 +119,41 @@ public abstract class PWidget extends PObject implements IsPWidget {
     boolean visible = true;
     private IsPWidget parent;
     private SetPool<String>.ImmutableSet styleNames = styleNamesSetPool.emptyImmutableSet();
-    private SetPool<PEventType>.ImmutableSet preventEvents = preventOrStopEventsSetPool.emptyImmutableSet();
-    private SetPool<PEventType>.ImmutableSet stopEvents = preventOrStopEventsSetPool.emptyImmutableSet();
     private CompactStringMap styleProperties;
-    private CompactStringMap elementProperties;
     private CompactStringMap elementAttributes;
     private String title;
     private String width;
     private String height;
     private String styleName;
-    private String debugID;
     private boolean focused;
     protected int tabindex = -Integer.MAX_VALUE;
-    private List<PVisibilityHandler> visibilityHandlers;
     private EventSource eventSource;
 
-    private Set<PAddOn> addons;
 
     // WORKAROUND Remove handler only server side
     private SetPool<PDomEvent.Type>.ImmutableSet oneTimeHandlerCreation = oneTimeHandlerCreationSetPool.emptyImmutableSet();
 
     private boolean shown;
+
+    /**
+     * Rarely used state, allocated on first use (prevented/stopped events, element properties, debug
+     * id, visibility handlers, addons): six reference slots that every widget paid for.
+     */
+    private static final class Extras {
+        private SetPool<PEventType>.ImmutableSet preventEvents = preventOrStopEventsSetPool.emptyImmutableSet();
+        private SetPool<PEventType>.ImmutableSet stopEvents = preventOrStopEventsSetPool.emptyImmutableSet();
+        private CompactStringMap elementProperties;
+        private String debugID;
+        private List<PVisibilityHandler> visibilityHandlers;
+        private Set<PAddOn> addons;
+    }
+
+    private Extras wx;
+
+    private Extras wx() {
+        if (wx == null) wx = new Extras();
+        return wx;
+    }
 
     public enum TabindexMode {
 
@@ -171,7 +185,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
         if (this.title != null) writer.write(ServerToClientModel.WIDGET_TITLE, this.title);
         if (this.height != null) writer.write(ServerToClientModel.WIDGET_HEIGHT, this.height);
         if (this.width != null) writer.write(ServerToClientModel.WIDGET_WIDTH, this.width);
-        if (this.debugID != null) writer.write(ServerToClientModel.ENSURE_DEBUG_ID, this.debugID);
+        if (wx != null && wx.debugID != null) writer.write(ServerToClientModel.ENSURE_DEBUG_ID, wx.debugID);
         if (styleProperties != null) {
             for (final var entry : styleProperties.entrySet()) {
                 writer.write(ServerToClientModel.PUT_STYLE_KEY, entry.getKey());
@@ -184,8 +198,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
                 writer.write(ServerToClientModel.ATTRIBUTE_VALUE, entry.getValue());
             }
         }
-        if (elementProperties != null) {
-            for (final var entry : elementProperties.entrySet()) {
+        if (wx != null && wx.elementProperties != null) {
+            for (final var entry : wx.elementProperties.entrySet()) {
                 writer.write(ServerToClientModel.PUT_PROPERTY_KEY, entry.getKey());
                 writer.write(ServerToClientModel.PROPERTY_VALUE, entry.getValue());
             }
@@ -202,8 +216,9 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     private CompactStringMap safeElementProperties() {
-        if (elementProperties == null) elementProperties = new CompactStringMap();
-        return elementProperties;
+        final Extras x = wx();
+        if (x.elementProperties == null) x.elementProperties = new CompactStringMap();
+        return x.elementProperties;
     }
 
     private CompactStringMap safeElementAttributes() {
@@ -213,8 +228,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     public void ensureDebugId(final String debugID) {
         if (UIContext.get().getConfiguration().isDebugMode()) {
-            if (Objects.equals(this.debugID, debugID)) return;
-            this.debugID = debugID;
+            if (Objects.equals(getDebugID(), debugID)) return;
+            wx().debugID = debugID;
             if (initialized) saveUpdate(writer -> writer.write(ServerToClientModel.ENSURE_DEBUG_ID, debugID));
         }
     }
@@ -236,7 +251,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     public void setVisible(final boolean visible) {
         if (Objects.equals(this.visible, visible)) return;
         this.visible = visible;
-        saveUpdate(ServerToClientModel.WIDGET_VISIBLE, visible);
+        if (initialized) saveUpdate(ServerToClientModel.WIDGET_VISIBLE, visible);
     }
 
     public String getWidth() {
@@ -272,7 +287,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public String getDebugID() {
-        return debugID;
+        return wx != null ? wx.debugID : null;
     }
 
     public IsPWidget getParent() {
@@ -284,16 +299,13 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public void setStyleProperty(final String name, final String value) {
-        if (!Objects.equals(safeStyleProperties().put(name, value), value)) {
-            saveUpdate(writer -> {
-                writer.write(ServerToClientModel.PUT_STYLE_KEY, name);
-                writer.write(ServerToClientModel.STYLE_VALUE, value);
-            });
+        if (!Objects.equals(safeStyleProperties().put(name, value), value) && initialized) {
+            saveUpdate(ServerToClientModel.PUT_STYLE_KEY, name, ServerToClientModel.STYLE_VALUE, value);
         }
     }
 
     public void removeStyleProperty(final String name) {
-        if (safeStyleProperties().remove(name) != null) saveUpdate(writer -> writer.write(ServerToClientModel.REMOVE_STYLE_KEY, name));
+        if (safeStyleProperties().remove(name) != null && initialized) saveUpdate(writer -> writer.write(ServerToClientModel.REMOVE_STYLE_KEY, name));
     }
 
     public void forceDomId() {
@@ -304,11 +316,8 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public void setProperty(final String name, final String value) {
-        if (!Objects.equals(safeElementProperties().put(name, value), value)) {
-            saveUpdate(writer -> {
-                writer.write(ServerToClientModel.PUT_PROPERTY_KEY, name);
-                writer.write(ServerToClientModel.PROPERTY_VALUE, value);
-            });
+        if (!Objects.equals(safeElementProperties().put(name, value), value) && initialized) {
+            saveUpdate(ServerToClientModel.PUT_PROPERTY_KEY, name, ServerToClientModel.PROPERTY_VALUE, value);
         }
     }
 
@@ -320,21 +329,20 @@ public abstract class PWidget extends PObject implements IsPWidget {
         if (name == null) return;
 
         if (Objects.equals(safeElementAttributes().put(name, value), value)) return;
+        // Before the CREATE the cached value is replayed by enrichForUpdate: stacking it as well sent it twice
+        if (!initialized) return;
 
-        saveUpdate(writer -> {
-            writer.write(ServerToClientModel.PUT_ATTRIBUTE_KEY, name);
-            writer.write(ServerToClientModel.ATTRIBUTE_VALUE, value);
-        });
+        saveUpdate(ServerToClientModel.PUT_ATTRIBUTE_KEY, name, ServerToClientModel.ATTRIBUTE_VALUE, value);
     }
 
     public void removeAttribute(final String name) {
-        if (safeElementAttributes().remove(name) != null) {
+        if (safeElementAttributes().remove(name) != null && initialized) {
             saveUpdate(writer -> writer.write(ServerToClientModel.REMOVE_ATTRIBUTE_KEY, name));
         }
     }
 
     public String getProperty(final String key) {
-        return elementProperties != null ? elementProperties.get(key) : null;
+        return wx != null && wx.elementProperties != null ? wx.elementProperties.get(key) : null;
     }
 
     public boolean hasAttribute(final String key) {
@@ -350,17 +358,19 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public void preventEvent(final PEventType e) {
-        final SetPool<PEventType>.ImmutableSet pool = preventEvents.getAdd(e);
-        if (pool != preventEvents) {
-            preventEvents = pool;
+        final Extras x = wx();
+        final SetPool<PEventType>.ImmutableSet pool = x.preventEvents.getAdd(e);
+        if (pool != x.preventEvents) {
+            x.preventEvents = pool;
             saveUpdate(writer -> writer.write(ServerToClientModel.PREVENT_EVENT, e.getCode()));
         }
     }
 
     public void stopEvent(final PEventType e) {
-        final SetPool<PEventType>.ImmutableSet pool = stopEvents.getAdd(e);
-        if (pool != stopEvents) {
-            stopEvents = pool;
+        final Extras x = wx();
+        final SetPool<PEventType>.ImmutableSet pool = x.stopEvents.getAdd(e);
+        if (pool != x.stopEvents) {
+            x.stopEvents = pool;
             saveUpdate(writer -> writer.write(ServerToClientModel.STOP_EVENT, e.getCode()));
         }
     }
@@ -507,6 +517,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
             }
         } else if (instruction.containsKey(HANDLER_WIDGET_VISIBILITY_KEY)) {
             shown = instruction.getBoolean(HANDLER_WIDGET_VISIBILITY_KEY);
+            final List<PVisibilityHandler> visibilityHandlers = wx != null ? wx.visibilityHandlers : null;
             if (visibilityHandlers != null) {
                 final PVisibilityEvent visibilityEvent = new PVisibilityEvent(this, shown);
                 visibilityHandlers.forEach(handler -> {
@@ -590,20 +601,21 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     void bindAddon(final PAddOn addon) {
-        if (this.addons == null) this.addons = SetUtils.newArraySet(4);
-        this.addons.add(addon);
+        final Extras x = wx();
+        if (x.addons == null) x.addons = SetUtils.newArraySet(4);
+        x.addons.add(addon);
     }
 
     public Set<PAddOn> getAddons() {
-        return addons;
+        return wx != null ? wx.addons : null;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
 
-        if (addons != null) {
-            addons.forEach(this::doDestroy);
+        if (wx != null && wx.addons != null) {
+            wx.addons.forEach(this::doDestroy);
         }
     }
 
@@ -648,14 +660,16 @@ public abstract class PWidget extends PObject implements IsPWidget {
     }
 
     public void addVisibilityHandler(final PVisibilityHandler visibilityHandler) {
-        if (visibilityHandlers == null) {
-            visibilityHandlers = new ArrayList<>(1);
+        final Extras x = wx();
+        if (x.visibilityHandlers == null) {
+            x.visibilityHandlers = new ArrayList<>(1);
             saveAddHandler(HandlerModel.HANDLER_VISIBILITY);
         }
-        visibilityHandlers.add(visibilityHandler);
+        x.visibilityHandlers.add(visibilityHandler);
     }
 
     public void removeVisibilityHandler(final PVisibilityHandler visibilityHandler) {
+        final List<PVisibilityHandler> visibilityHandlers = wx != null ? wx.visibilityHandlers : null;
         if (visibilityHandlers != null) {
             visibilityHandlers.remove(visibilityHandler);
             if (visibilityHandlers.isEmpty()) saveRemoveHandler(HandlerModel.HANDLER_VISIBILITY);
