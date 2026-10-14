@@ -73,6 +73,35 @@ public class PonySDKServerTest {
         }
     }
 
+    private static org.eclipse.jetty.ee11.servlet.ServletContextHandler webApp(final PonySDKServer server) {
+        final com.ponysdk.core.server.application.ApplicationConfiguration configuration =
+                new com.ponysdk.core.server.application.ApplicationConfiguration();
+        configuration.setApplicationContextName("app");
+        final com.ponysdk.core.server.application.ApplicationManager manager =
+                Mockito.mock(com.ponysdk.core.server.application.ApplicationManager.class);
+        Mockito.when(manager.getConfiguration()).thenReturn(configuration);
+        server.setApplicationManager(manager);
+        return server.createWebApp();
+    }
+
+    @Test
+    public void testSessionCookieIsSecureAndHttpOnlyByDefault() {
+        final PonySDKServer server = new PonySDKServer();
+        assertTrue(server.isSessionCookieSecure());
+        final var cookie = webApp(server).getSessionHandler().getSessionCookieConfig();
+        assertTrue("Secure by default (also behind a TLS-terminating proxy)", cookie.isSecure());
+        assertTrue(cookie.isHttpOnly());
+    }
+
+    @Test
+    public void testSessionCookieSecureCanBeDisabledForPlainHttpDevelopment() {
+        final PonySDKServer server = new PonySDKServer();
+        server.setSessionCookieSecure(false);
+        final var cookie = webApp(server).getSessionHandler().getSessionCookieConfig();
+        assertFalse(cookie.isSecure());
+        assertTrue("HttpOnly is kept", cookie.isHttpOnly());
+    }
+
     @Test
     public void testCreateMainHandler_usesCompressionHandlerWrappingAppWithDefaults() {
         final TestServer server = new TestServer();

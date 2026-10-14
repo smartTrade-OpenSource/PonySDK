@@ -112,7 +112,7 @@ public class PonySDKWebDriver implements WebDriver {
         this.messageListener = messageListener == null ? INDIFFERENT_MSG_LISTENER : messageListener;
         this.bandwithListener = bandwithListener == null ? INDIFFERENT_BANDWITH_LISTENER : bandwithListener;
         sessionListener = sessionListener == null ? INDIFFERENT_SESSION_LISTENER : sessionListener;
-        this.client = new WebsocketClient(messageHandler, bandwithListener, sessionListener);
+        this.client = new WebsocketClient(messageHandler, this.bandwithListener, sessionListener); // field: never null (the parameter may be)
         onMessageSwitch.put(ServerToClientModel.CREATE_CONTEXT, (message, frame) -> {
             log.info("UI Context created with ID {}", contextId = (int) frame.value);
             if (handleImplicitCommunication) sendCookies();

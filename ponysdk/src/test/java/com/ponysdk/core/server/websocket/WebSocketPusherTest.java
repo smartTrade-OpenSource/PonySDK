@@ -532,4 +532,33 @@ public class WebSocketPusherTest {
         c.pusher.flush();
         assertTrue(c.bytes().length > 0);
     }
+
+    @Test
+    public void statsRecordingSurvivesNullValues() throws Exception {
+        // Regression: the recorder keyed a ConcurrentHashMap by value, and END (null) threw an NPE out of
+        // encode(): with recording on, every session died on its first message.
+        final com.ponysdk.core.server.application.UIContext ctx = Mockito.mock(com.ponysdk.core.server.application.UIContext.class);
+        final java.util.Map<String, Object> attributes = new java.util.HashMap<>();
+        Mockito.doAnswer(inv -> attributes.get((String) inv.getArgument(0))).when(ctx).getAttribute(Mockito.anyString());
+        Mockito.doAnswer(inv -> attributes.put(inv.getArgument(0), inv.getArgument(1))).when(ctx).setAttribute(Mockito.anyString(), Mockito.any());
+        com.ponysdk.core.server.application.UIContext.setCurrent(ctx);
+        final java.util.concurrent.atomic.AtomicReference<WebSocketStats> result = new java.util.concurrent.atomic.AtomicReference<>();
+        try {
+            assertTrue(WebSocketPusher.startRecordingStats(1, java.util.concurrent.TimeUnit.MINUTES, result::set, null));
+            final Capture c = new Capture(1 << 19, false);
+            c.pusher.encode(ServerToClientModel.TYPE_UPDATE, 3);
+            c.pusher.encode(ServerToClientModel.TEXT, null);
+            c.pusher.encode(ServerToClientModel.END, null);
+            c.pusher.encode(ServerToClientModel.END, null);
+            c.pusher.flush();
+            assertTrue(c.bytes().length > 0);
+        } finally {
+            WebSocketPusher.stopRecordingStats();
+            com.ponysdk.core.server.application.UIContext.remove();
+        }
+        assertNotNull(result.get());
+        final WebSocketStats.Bandwidth end = result.get().getBandwidthPerServerToClientModel().get(ServerToClientModel.END);
+        assertNotNull("END recorded", end);
+        assertTrue(result.get().getStats().get(ServerToClientModel.END).containsKey(null));
+    }
 }

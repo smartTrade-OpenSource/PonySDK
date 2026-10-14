@@ -62,6 +62,7 @@ public class ShowcaseMain {
         server.setPort(8081);
         server.setHost("0.0.0.0");
         server.setUseSSL(false);
+        server.setSessionCookieSecure(false); // plain-http dev server (see PonySDKServer)
         server.start();
     }
 }

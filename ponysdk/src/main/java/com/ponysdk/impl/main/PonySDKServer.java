@@ -76,6 +76,13 @@ public class PonySDKServer {
     private String sslTrustStorePassphrase;
     private String sslTrustStoreType = "JKS";
     private boolean needClientAuth = false;
+    /**
+     * Secure flag of the session cookie. On by default, including when this server speaks plain http
+     * behind a TLS-terminating proxy. Turn it off only for plain-http development: WebKit/Safari never
+     * sends a Secure cookie over http, so every request would start a new HTTP session (and transparent
+     * reconnection could never find the suspended UIContext).
+     */
+    private boolean sessionCookieSecure = true;
     private String[] enabledProtocols = new String[] { "TLSv1.2" };
     private String enabledCipherSuites;
 
@@ -197,7 +204,7 @@ public class PonySDKServer {
         final ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/" + configuration.getApplicationContextName());
         context.setErrorHandler(createErrorHandler());
-        context.getSessionHandler().getSessionCookieConfig().setSecure(true);
+        context.getSessionHandler().getSessionCookieConfig().setSecure(sessionCookieSecure);
         context.getSessionHandler().getSessionCookieConfig().setHttpOnly(true);
 
         JettyWebSocketServletContainerInitializer.configure(context, null);
@@ -241,6 +248,14 @@ public class PonySDKServer {
 
     public void setUseSSL(final boolean useSSL) {
         this.useSSL = useSSL;
+    }
+
+    public void setSessionCookieSecure(final boolean sessionCookieSecure) {
+        this.sessionCookieSecure = sessionCookieSecure;
+    }
+
+    public boolean isSessionCookieSecure() {
+        return sessionCookieSecure;
     }
 
     public boolean isUseSSL() {

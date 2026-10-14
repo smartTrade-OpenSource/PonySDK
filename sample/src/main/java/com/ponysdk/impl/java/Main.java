@@ -63,6 +63,7 @@ public class Main {
         ponySDKServer.setPort(8081);
         ponySDKServer.setHost("0.0.0.0");
         ponySDKServer.setUseSSL(false);
+        ponySDKServer.setSessionCookieSecure(false); // plain-http dev server (see PonySDKServer)
         ponySDKServer.start();
     }
 

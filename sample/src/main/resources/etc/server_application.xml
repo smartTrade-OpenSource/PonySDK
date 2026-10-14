@@ -46,6 +46,7 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
             <property name="host" value="0.0.0.0"/>
             <property name="applicationManager" ref="applicationManager"/>
             <property name="useSSL" value="false"/>
+            <property name="sessionCookieSecure" value="false"/>
         </bean>
     </beans>
 
@@ -85,6 +86,7 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
             <property name="host" value="0.0.0.0"/>
             <property name="applicationManager" ref="applicationManager"/>
             <property name="useSSL" value="false"/>
+            <property name="sessionCookieSecure" value="false"/>
         </bean>
     </beans>
 
