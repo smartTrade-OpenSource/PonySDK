@@ -883,6 +883,10 @@ public class UIContext {
 
         acquire();
         try {
+            // DICTIONARY_ADD frames still in flight when the old socket dropped never reached the
+            // client: re-announce every entry on its next use instead of sending dangling refs.
+            if (stringDictionary != null) stringDictionary.resetClientSync();
+
             final Txn txn = Txn.get();
             txn.begin(context);
             try {

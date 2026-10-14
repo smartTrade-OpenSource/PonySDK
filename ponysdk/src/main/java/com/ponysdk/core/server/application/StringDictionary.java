@@ -26,11 +26,8 @@ package com.ponysdk.core.server.application;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,8 +81,9 @@ public class StringDictionary {
     // Snapshot of usageCount at last flush — lazily grown to match usageCount
     private int[] lastFlushedCount;
 
-    // Frequency index: count -> set of IDs with that count. Enables O(log F) eviction.
-    private final TreeMap<Long, Set<Integer>> countToIds;
+    // Rotating start position of the LFU scan: spreads evictions across equally-cold entries
+    // instead of always recycling the lowest id.
+    private int evictionCursor;
 
     // Number of pre-seeded entries (IDs 0..preSeedCount-1 are known by client at startup)
     private int preSeedCount;
@@ -129,7 +127,6 @@ public class StringDictionary {
         final int initialArraySize = Math.min(64, maxSize);
         this.usageCount = new int[initialArraySize];
         this.lastFlushedCount = new int[initialArraySize];
-        this.countToIds = new TreeMap<>();
         this.freeIds = new ArrayList<>();
         this.sentToClient = new BitSet();
         this.preSeedCount = 0;
@@ -202,7 +199,7 @@ public class StringDictionary {
 
         final Integer existingId = stringToId.get(value);
         if (existingId != null) {
-            trackUsage(value, existingId);
+            trackUsage(existingId);
             return existingId;
         }
 
@@ -219,7 +216,7 @@ public class StringDictionary {
         }
         ensureArrayCapacity(newId);
         usageCount[newId] = 0;
-        trackUsage(value, newId);
+        trackUsage(newId);
         return newId;
     }
 
@@ -269,7 +266,7 @@ public class StringDictionary {
 
         final Integer existingId = stringToId.get(value);
         if (existingId != null) {
-            trackUsage(value, existingId);
+            trackUsage(existingId);
             // If this ID was never sent to the client, treat it as new (needs DICTIONARY_ADD)
             if (!sentToClient.get(existingId)) {
                 sentToClient.set(existingId);
@@ -292,7 +289,7 @@ public class StringDictionary {
         ensureArrayCapacity(newId);
         usageCount[newId] = 0;
         sentToClient.set(newId);
-        trackUsage(value, newId);
+        trackUsage(newId);
         return InternResult.ofNew(newId);
     }
 
@@ -301,7 +298,7 @@ public class StringDictionary {
      * - Uses the free list first (previously evicted IDs).
      * - Grows the dictionary if below maxSize.
      * - If full, evicts the LFU entry — but only if the per-flush eviction budget
-     *   ({@link #MAX_EVICTIONS_PER_FLUSH}) has not been exhausted. This prevents a burst
+     *   ({@code maxEvictionsPerFlush}) has not been exhausted. This prevents a burst
      *   of DICTIONARY_ADD frames (e.g. 1960/tick from a grid) from saturating the socket buffer.
      *   Strings that exceed the budget are simply sent inline (not interned).
      *
@@ -328,60 +325,62 @@ public class StringDictionary {
     }
 
     /**
+     * Forgets which entries the client knows about, so every id is re-announced with a
+     * DICTIONARY_ADD on its next use. Server-side mappings and usage counts are kept.
+     * <p>
+     * Call this when the client-side cache can no longer be trusted, typically on transparent
+     * reconnection: DICTIONARY_ADD frames still in flight when the old socket dropped never reached
+     * the client, and a later reference to such an id would fail with "Unknown dictionary ID".
+     * Re-announcing reuses the same ids, so a client that did receive them just overwrites the slot.
+     */
+    public void resetClientSync() {
+        sentToClient.clear();
+    }
+
+    /**
      * Finds and evicts the least-frequently-used non-pre-seeded entry.
+     * <p>
+     * Linear scan over the dense {@code usageCount} array: O(maxSize) per eviction, but evictions are
+     * capped per flush cycle and only happen once the dictionary is full, whereas the previous sorted
+     * frequency index charged a TreeMap + boxed-set update on <em>every</em> dictionary hit. The scan
+     * starts at a rotating cursor (fair among equally-cold entries) and stops early on an entry used
+     * at most once, which is the minimum for a live entry.
      *
      * @return the evicted ID, or NOT_INTERNED if no evictable entry exists
      */
     private int evictLFU() {
-        // Iterate frequency buckets from least- to most-frequently used (TreeMap order).
-        // Pre-seeded entries are never evicted; a bucket that contains only pre-seeded ids is
-        // skipped by advancing to the next bucket. Using the entrySet iterator (rather than
-        // repeatedly re-reading firstEntry) guards against an infinite loop when the lowest
-        // bucket holds only pre-seeded ids, and removes emptied buckets without a CME.
-        final var bucketIt = countToIds.entrySet().iterator();
-        while (bucketIt.hasNext()) {
-            final Map.Entry<Long, Set<Integer>> entry = bucketIt.next();
-            final Set<Integer> ids = entry.getValue();
-            final var it = ids.iterator();
-            while (it.hasNext()) {
-                final int id = it.next();
-                if (id < preSeedCount) continue;
-                final String s = idToString.get(id);
-                if (s == null) { it.remove(); continue; }
-                it.remove();
-                if (ids.isEmpty()) bucketIt.remove();
-                stringToId.remove(s);
-                idToString.set(id, null);
-                usageCount[id] = 0;
-                lastFlushedCount[id] = 0;
-                sentToClient.clear(id);
-                return id;
+        final int size = idToString.size();
+        final int candidates = size - preSeedCount;
+        if (candidates <= 0) return NOT_INTERNED; // only pre-seeded entries — never evicted
+
+        int victim = NOT_INTERNED;
+        int victimCount = Integer.MAX_VALUE;
+        int idx = evictionCursor >= preSeedCount && evictionCursor < size ? evictionCursor : preSeedCount;
+        for (int n = 0; n < candidates; n++) {
+            if (idToString.get(idx) != null) {
+                final int count = usageCount[idx];
+                if (count < victimCount) {
+                    victim = idx;
+                    victimCount = count;
+                    if (count <= 1) break; // can't do better than a single use
+                }
             }
-            if (ids.isEmpty()) bucketIt.remove();
+            if (++idx == size) idx = preSeedCount;
         }
-        return NOT_INTERNED;
+        if (victim == NOT_INTERNED) return NOT_INTERNED;
+
+        evictionCursor = victim + 1;
+        stringToId.remove(idToString.get(victim));
+        idToString.set(victim, null);
+        usageCount[victim] = 0;
+        lastFlushedCount[victim] = 0;
+        sentToClient.clear(victim);
+        return victim;
     }
 
-    private void trackUsage(final String value, final int id) {
-        if (id >= 0 && id < idToString.size() && idToString.get(id) != null) {
-            final int oldCount = usageCount[id];
-            final int newCount = oldCount == Integer.MAX_VALUE ? oldCount : oldCount + 1;
-            usageCount[id] = newCount;
-            if (oldCount > 0) removeFromFrequencyIndex(id, oldCount);
-            addToFrequencyIndex(id, newCount);
-        }
-    }
-
-    private void addToFrequencyIndex(final int id, final int count) {
-        countToIds.computeIfAbsent((long) count, k -> new LinkedHashSet<>()).add(id);
-    }
-
-    private void removeFromFrequencyIndex(final int id, final int count) {
-        final Set<Integer> ids = countToIds.get((long) count);
-        if (ids != null) {
-            ids.remove(id);
-            if (ids.isEmpty()) countToIds.remove((long) count);
-        }
+    private void trackUsage(final int id) {
+        // Saturating increment — a plain int write, no allocation on the hot path
+        if (usageCount[id] != Integer.MAX_VALUE) usageCount[id]++;
     }
 
     /**
@@ -394,7 +393,7 @@ public class StringDictionary {
         }
         final Integer id = stringToId.get(value);
         if (id != null && sentToClient.get(id)) {
-            trackUsage(value, id);
+            trackUsage(id);
             return id;
         }
         return NOT_INTERNED;

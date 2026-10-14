@@ -37,10 +37,6 @@ import org.slf4j.LoggerFactory;
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.charset.CharsetEncoder;
-import java.nio.charset.CoderResult;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
@@ -89,7 +85,6 @@ public class WebSocketPusher implements Closeable {
 
     // ── Reusable byte[] for string UTF-8 encoding ──
     private byte[] stringEncodeBuffer = new byte[INITIAL_STRING_BUFFER_SIZE];
-    private final CharsetEncoder utf8Encoder = StandardCharsets.UTF_8.newEncoder();
     /** Set by {@link #encodeStringToBuffer} — true if the last encoded string was pure ASCII. */
     private boolean lastEncodedAscii;
 
@@ -219,7 +214,9 @@ public class WebSocketPusher implements Closeable {
 
     public final void put(final byte[] bytes, int offset, int length) throws IOException {
         while (length > 0) {
-            ensureCapacity(Math.min(length, writeBuffer.capacity()));
+            // Pool capacity, not writeBuffer.capacity(): writeBuffer is null before the first write
+            // and right after a flush (it is acquired lazily by ensureCapacity).
+            ensureCapacity(Math.min(length, bufferPool.bufferCapacity()));
             final int chunk = Math.min(length, writeBuffer.remaining());
             writeBuffer.put(bytes, offset, chunk);
             offset += chunk;
@@ -255,30 +252,50 @@ public class WebSocketPusher implements Closeable {
             return len;
         }
 
-        // Non-ASCII: use the reusable CharsetEncoder to encode the whole string into stringEncodeBuffer
-        final int maxBytes = (int) (len * utf8Encoder.maxBytesPerChar()) + 1;
+        // Non-ASCII: encode the remainder by hand, continuing after the ASCII prefix already copied.
+        // Worst case is 3 bytes per UTF-16 char (a surrogate pair is 2 chars -> 4 bytes).
+        final int maxBytes = i + (len - i) * 3;
         if (maxBytes > stringEncodeBuffer.length) {
-            stringEncodeBuffer = new byte[Math.max(maxBytes, stringEncodeBuffer.length * 2)];
+            stringEncodeBuffer = Arrays.copyOf(stringEncodeBuffer, Math.max(maxBytes, stringEncodeBuffer.length * 2));
         }
+        lastEncodedAscii = false;
+        return encodeUtf8(value, i, len, stringEncodeBuffer, i);
+    }
 
-        final CharBuffer in = CharBuffer.wrap(value);
-        final ByteBuffer out = ByteBuffer.wrap(stringEncodeBuffer);
-        utf8Encoder.reset();
-        final CoderResult result = utf8Encoder.encode(in, out, true);
-        if (result.isOverflow()) {
-            // Shouldn't happen given our sizing, but handle gracefully
-            stringEncodeBuffer = new byte[maxBytes * 2];
-            final ByteBuffer out2 = ByteBuffer.wrap(stringEncodeBuffer);
-            in.rewind();
-            utf8Encoder.reset();
-            utf8Encoder.encode(in, out2, true);
-            utf8Encoder.flush(out2);
-            lastEncodedAscii = false;
-            return out2.position();
+    /**
+     * Zero-allocation UTF-8 encoding of {@code value[from, to)} into {@code out} at {@code pos}.
+     * Unpaired surrogates are replaced by {@code '?'}, like {@link String#getBytes}: a CharsetEncoder
+     * reports them as malformed and stops, which silently truncated the value on the wire.
+     *
+     * @return the position after the last byte written
+     */
+    static int encodeUtf8(final String value, final int from, final int to, final byte[] out, int pos) {
+        for (int i = from; i < to; i++) {
+            final char c = value.charAt(i);
+            if (c < 0x80) {
+                out[pos++] = (byte) c;
+            } else if (c < 0x800) {
+                out[pos++] = (byte) (0xC0 | c >> 6);
+                out[pos++] = (byte) (0x80 | c & 0x3F);
+            } else if (Character.isSurrogate(c)) {
+                final char low;
+                if (Character.isHighSurrogate(c) && i + 1 < to && Character.isLowSurrogate(low = value.charAt(i + 1))) {
+                    final int cp = Character.toCodePoint(c, low);
+                    out[pos++] = (byte) (0xF0 | cp >> 18);
+                    out[pos++] = (byte) (0x80 | cp >> 12 & 0x3F);
+                    out[pos++] = (byte) (0x80 | cp >> 6 & 0x3F);
+                    out[pos++] = (byte) (0x80 | cp & 0x3F);
+                    i++;
+                } else {
+                    out[pos++] = '?';
+                }
+            } else {
+                out[pos++] = (byte) (0xE0 | c >> 12);
+                out[pos++] = (byte) (0x80 | c >> 6 & 0x3F);
+                out[pos++] = (byte) (0x80 | c & 0x3F);
+            }
         }
-        utf8Encoder.flush(out);
-        lastEncodedAscii = (out.position() == len);
-        return out.position();
+        return pos;
     }
 
     // ── Factored string writing ──────────────────────────────────────────
@@ -416,7 +433,7 @@ public class WebSocketPusher implements Closeable {
 
     private void write(final ServerToClientModel model) throws IOException {
         putModelKey(model);
-        record(model, null, MODEL_KEY_SIZE, 0);
+        if (statsRecorder != null) record(model, null, MODEL_KEY_SIZE, 0);
     }
 
     private void write(final ServerToClientModel model, final boolean value) throws IOException {
@@ -426,37 +443,37 @@ public class WebSocketPusher implements Closeable {
     private void write(final ServerToClientModel model, final byte value) throws IOException {
         putModelKey(model);
         put(value);
-        record(model, value, MODEL_KEY_SIZE, Byte.BYTES);
+        if (statsRecorder != null) record(model, value, MODEL_KEY_SIZE, Byte.BYTES);
     }
 
     private void write(final ServerToClientModel model, final short value) throws IOException {
         putModelKey(model);
         putShort(value);
-        record(model, value, MODEL_KEY_SIZE, Short.BYTES);
+        if (statsRecorder != null) record(model, value, MODEL_KEY_SIZE, Short.BYTES);
     }
 
     private void write(final ServerToClientModel model, final int value) throws IOException {
         putModelKey(model);
         putInt(value);
-        record(model, value, MODEL_KEY_SIZE, Integer.BYTES);
+        if (statsRecorder != null) record(model, value, MODEL_KEY_SIZE, Integer.BYTES);
     }
 
     private void write(final ServerToClientModel model, final long longValue) throws IOException {
         putModelKey(model);
         putLong(longValue);
-        record(model, longValue, MODEL_KEY_SIZE, Long.BYTES);
+        if (statsRecorder != null) record(model, longValue, MODEL_KEY_SIZE, Long.BYTES);
     }
 
     private void write(final ServerToClientModel model, final double doubleValue) throws IOException {
         putModelKey(model);
         putDouble(doubleValue);
-        record(model, doubleValue, MODEL_KEY_SIZE, Double.BYTES);
+        if (statsRecorder != null) record(model, doubleValue, MODEL_KEY_SIZE, Double.BYTES);
     }
 
     private void write(final ServerToClientModel model, final float floatValue) throws IOException {
         putModelKey(model);
         putFloat(floatValue);
-        record(model, floatValue, MODEL_KEY_SIZE, Float.BYTES);
+        if (statsRecorder != null) record(model, floatValue, MODEL_KEY_SIZE, Float.BYTES);
     }
 
     private void write(final ServerToClientModel model, final Object[] value) throws IOException {
@@ -476,13 +493,13 @@ public class WebSocketPusher implements Closeable {
         for (final Object o : value) {
             dataBytes += putArrayElement(o);
         }
-        record(model, value, metaBytes, dataBytes, Arrays::toString);
+        if (statsRecorder != null) record(model, value, metaBytes, dataBytes, Arrays::toString);
     }
 
     private void writeUint31(final ServerToClientModel model, final int value) throws IOException {
         putModelKey(model);
         final int bytes = putUint31(value);
-        record(model, value, MODEL_KEY_SIZE, bytes);
+        if (statsRecorder != null) record(model, value, MODEL_KEY_SIZE, bytes);
     }
 
     private int putUint31(final int value) throws IOException {
@@ -627,7 +644,7 @@ public class WebSocketPusher implements Closeable {
             metaBytes += 1;
             dataBytes = 0;
         }
-        record(model, value, metaBytes, dataBytes);
+        if (statsRecorder != null) record(model, value, metaBytes, dataBytes);
     }
 
     private void putModelKey(final ServerToClientModel model) throws IOException {
@@ -643,6 +660,9 @@ public class WebSocketPusher implements Closeable {
     }
 
     // ── Stats recording ──────────────────────────────────────────────────
+    // Every write site guards with "statsRecorder != null" before calling record(): the arguments
+    // (boxed primitives, "ref:" + id) would otherwise be built on every write even though stats
+    // recording is off in production.
 
     public static synchronized boolean startRecordingStats(final long timeout, final TimeUnit unit,
                                                            final Consumer<WebSocketStats> listener,
@@ -696,7 +716,7 @@ public class WebSocketPusher implements Closeable {
         putModelKey(model);
         putUnsignedByte(ValueTypeModel.STRING_DICTIONARY_REF);
         final int idBytes = putUint31(id);
-        record(model, "ref:" + id, MODEL_KEY_SIZE + 1, idBytes);
+        if (statsRecorder != null) record(model, "ref:" + id, MODEL_KEY_SIZE + 1, idBytes);
     }
 
     private void writeStringOrRef(final ServerToClientModel model, final String value) throws IOException {
@@ -739,7 +759,7 @@ public class WebSocketPusher implements Closeable {
         final int idBytes = putUint31(id);
         final int byteLength = encodeStringToBuffer(value);
         putStringBytes(value, byteLength);
-        record(model, value, MODEL_KEY_SIZE + 1 + idBytes, byteLength);
+        if (statsRecorder != null) record(model, value, MODEL_KEY_SIZE + 1 + idBytes, byteLength);
     }
 
     private int putArrayStringElementOrRef(final String s) throws IOException {
