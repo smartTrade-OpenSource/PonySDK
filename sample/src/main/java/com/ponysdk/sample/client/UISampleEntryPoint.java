@@ -1541,8 +1541,42 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         setCountBtn.addClickHandler(e -> { counter.property("count").set(42); statusLabel.setText("count set to 42"); });
         counterControls.add(resetBtn, setCountBtn);
 
+        // my-stats — object property updated through JSON merge-patch (only changed keys travel)
+        final PWebComponent stats = new PWebComponent("my-stats");
+        final int[] trades = { 0 };
+        final String statsTemplate = "{\"desk\":\"FX Spot EUR/USD\",\"trader\":\"demo-trader\",\"trades\":%d%s}";
+        stats.property("stats").set(String.format(statsTemplate, 0, ",\"note\":\"initial snapshot\""));
+        final PFlowPanel statsControls = Element.newPFlowPanel();
+        statsControls.setStyleProperty("display", "flex");
+        statsControls.setStyleProperty("gap", "8px");
+        statsControls.setStyleProperty("margin", "8px 0");
+        final PButton tradeBtn = Element.newPButton("Patch: +1 trade");
+        tradeBtn.addClickHandler(e -> {
+            trades[0]++;
+            stats.property("stats").set(String.format(statsTemplate, trades[0], ",\"note\":\"initial snapshot\""));
+            statusLabel.setText("stats patched: trades=" + trades[0]);
+        });
+        final PButton dropNoteBtn = Element.newPButton("Patch: drop note");
+        dropNoteBtn.addClickHandler(e -> {
+            stats.property("stats").set(String.format(statsTemplate, trades[0], ""));
+            statusLabel.setText("stats patched: note removed");
+        });
+        statsControls.add(tradeBtn, dropNoteBtn);
+
+        // Slot children added after the component is live
+        final int[] toolbarItems = { 0 };
+        final PButton addToolbarItemBtn = Element.newPButton("Add toolbar item");
+        addToolbarItemBtn.addClickHandler(e -> {
+            final PLabel item = Element.newPLabel("Item " + ++toolbarItems[0]);
+            item.addStyleName("dyn-toolbar-item");
+            dashboard.slot("toolbar").add(item);
+        });
+        counterControls.add(addToolbarItemBtn);
+
         container.add(labeled("my-counter", counter));
         container.add(counterControls);
+        container.add(labeled("my-stats", stats));
+        container.add(statsControls);
         container.add(labeled("my-dashboard", dashboard));
         container.add(labeled("my-card", card));
     }

@@ -13,6 +13,7 @@ module.exports = defineConfig({
     actionTimeout: 5000,
   },
   projects: [
-    { name: 'chromium', use: { browserName: 'chromium' } },
+    // PW_CHANNEL=chrome runs against the locally installed Google Chrome instead of the bundled build
+    { name: 'chromium', use: { browserName: 'chromium', ...(process.env.PW_CHANNEL ? { channel: process.env.PW_CHANNEL } : {}) } },
   ],
 });

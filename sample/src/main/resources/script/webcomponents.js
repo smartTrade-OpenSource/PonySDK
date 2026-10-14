@@ -67,6 +67,41 @@ class MyCounter extends HTMLElement {
 customElements.define('my-counter', MyCounter);
 
 // ============================================================
+// <my-stats> — Object property updated through JSON merge-patch.
+// Change detection is by identity, like Lit's default hasChanged (!==): the server-side
+// patch must assign a NEW object, otherwise this component never re-renders.
+// Properties: stats (Object). Exposes renderCount for tests.
+// ============================================================
+class MyStats extends HTMLElement {
+    constructor() {
+        super();
+        this._stats = {};
+        this.renderCount = 0;
+    }
+
+    connectedCallback() { this._render(); }
+
+    set stats(val) {
+        if (val === this._stats) return; // identity check — same reference means "unchanged"
+        this._stats = val || {};
+        if (this.isConnected) this._render();
+    }
+    get stats() { return this._stats; }
+
+    _render() {
+        this.renderCount++;
+        var html = '<div style="display:flex;gap:8px;flex-wrap:wrap;font-family:sans-serif;">';
+        var keys = Object.keys(this._stats).sort();
+        for (var i = 0; i < keys.length; i++) {
+            html += '<span class="stat" data-key="' + keys[i] + '" style="padding:6px 10px;border:1px solid #ccc;' +
+                'border-radius:6px;"><b>' + keys[i] + '</b>: ' + this._stats[keys[i]] + '</span>';
+        }
+        this.innerHTML = html + '</div>';
+    }
+}
+customElements.define('my-stats', MyStats);
+
+// ============================================================
 // Components below extend PonyElement to inherit shared DS styles.
 // They MUST be registered inside onPonyLoaded so pony.wc is available.
 // ============================================================
