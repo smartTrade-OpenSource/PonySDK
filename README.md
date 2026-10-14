@@ -116,6 +116,15 @@ config.setWsMaxInboundMessageSize(1 << 20); // max client→server text message 
 config.setWsIdleTimeoutMs(1_000_000);       // close after this much inactivity (ms)
 config.setWsSendTimeoutMs(60_000);          // disconnect a slow consumer after this (ms)
 config.setWsPermessageDeflateEnabled(true); // frame compression (default on); disable for low-CPU/latency
+config.setWsDeflateLevel(3);                // zlib level, embedded server (default 3: cheaper than Jetty's 6, as compact here)
+config.setWsInputBufferSize(1024);          // Jetty buffer per incoming message (default 1 KB; upstream is small JSON)
+config.setUpdateCoalescingEnabled(true);    // send only the last value of a property per transaction (default on)
+```
+
+```java
+// Embedded server: the session cookie is Secure by default (also right behind a TLS proxy).
+// Plain-http development only: Safari never sends a Secure cookie over http.
+server.setSessionCookieSecure(false);
 ```
 
 **CSWSH:** a WebSocket upgrade is *not* subject to the same-origin policy, yet the browser still
