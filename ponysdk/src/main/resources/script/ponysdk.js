@@ -92,6 +92,18 @@ function onPonySDKModuleLoaded() {
 if (typeof module !== 'undefined' && module.hasOwnProperty('exports')) module.exports.onPonySDKModuleLoaded = onPonySDKModuleLoaded;
 else window['onPonySDKModuleLoaded'] = onPonySDKModuleLoaded;
 
+// Trailing-edge debounce, same contract as jQuery throttle-debounce's $.debounce(delay, fn): fn runs
+// once, `delay` ms after the last call. Built in so the DataGrid does not depend on a jQuery plugin
+// that is not shipped (the grid crashed with "$.debounce is not a function").
+function ponyDebounce(delay, fn) {
+    var timer = null;
+    return function () {
+        var self = this, args = arguments;
+        if (timer !== null) clearTimeout(timer);
+        timer = setTimeout(function () { timer = null; fn.apply(self, args); }, delay);
+    };
+}
+
 // Decode ArrayBuffer from server
 var textDecoder = null;
 if ('TextDecoder' in window) textDecoder = new TextDecoder('utf-8');
@@ -616,7 +628,7 @@ _UTF8 = undefined;
                     that.unpinnedFooter.scrollLeft = scrollLeft;
             });
             this.unpinnedHeader.scrollLeft = 0;
-            this.body.addEventListener("scroll", $.debounce(100, this.checkPosition.bind(this)));
+            this.body.addEventListener("scroll", ponyDebounce(100, this.checkPosition.bind(this)));
 
             window.onresize = function (e) {
                 that.refreshVerticalMargins();

@@ -454,7 +454,8 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
             if (nsc != null) {
                 return nsc.toString();
             }
-            log.error("No matching status code found for {}", statusCode);
+            // 3000-4999 are registered / application-defined close codes (RFC 6455 §7.4.2): legitimate
+            if (statusCode < 3000 || statusCode > 4999) log.warn("No matching status code found for {}", statusCode);
             return String.valueOf(statusCode);
         }
 
