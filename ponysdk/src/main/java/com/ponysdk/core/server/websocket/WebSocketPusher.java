@@ -112,6 +112,14 @@ public class WebSocketPusher implements Closeable {
     // ── Buffer write primitives ──────────────────────────────────────────
 
     private void ensureCapacity(final int needed) throws IOException {
+        // Hot path: room in the current buffer and no proactive chunk flush due. Closed / async-error
+        // state is checked once per encode() / flush() instead of on every primitive put.
+        final ByteBuffer b = writeBuffer;
+        if (b != null && b.remaining() >= needed && b.position() < maxChunkSize) return;
+        ensureCapacitySlow(needed);
+    }
+
+    private void ensureCapacitySlow(final int needed) throws IOException {
         checkState();
         // Lazy acquire: borrow a buffer from the pool on first write
         if (writeBuffer == null) {
@@ -415,6 +423,7 @@ public class WebSocketPusher implements Closeable {
      * @param value The type can be primitives, String or Object[]
      */
     void encode(final ServerToClientModel model, final Object value) throws IOException {
+        checkState();
         switch (model.getTypeModel()) {
             case NULL -> write(model);
             case BOOLEAN -> write(model, (boolean) value);
@@ -428,6 +437,16 @@ public class WebSocketPusher implements Closeable {
             case STRING -> writeStringOrRef(model, (String) value);
             case ARRAY -> write(model, (Object[]) value);
             default -> log.error("Unknown model type : {}", model.getTypeModel());
+        }
+    }
+
+    /** Primitive int variant of {@link #encode}: no boxing for ids and other int values. */
+    void encodeInt(final ServerToClientModel model, final int value) throws IOException {
+        checkState();
+        switch (model.getTypeModel()) {
+            case UINT31 -> writeUint31(model, value);
+            case INTEGER -> write(model, value);
+            default -> encode(model, (Object) value); // same conversions/errors as the boxed path
         }
     }
 

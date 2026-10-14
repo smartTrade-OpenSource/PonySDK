@@ -31,6 +31,14 @@ public interface WebsocketEncoder {
 
     void encode(final ServerToClientModel model, final Object value);
 
+    /**
+     * Primitive variant for int values (object ids, indexes...): avoids boxing on the write path.
+     * The default boxes and delegates, so encoders that store values (e.g. RecordingEncoder) are unchanged.
+     */
+    default void encodeInt(final ServerToClientModel model, final int value) {
+        encode(model, (Object) value);
+    }
+
     void endObject();
 
 }

@@ -161,6 +161,7 @@ public class UIContext {
         this.configuration = configuration;
         this.request = request;
         this.context = context;
+        if (context != null && context.getWriter() != null) context.getWriter().bindTo(this);
         this.modelWriter = context.getWriter();
 
         // Use pre-cached request data from WebSocket (snapshotted during HTTP upgrade,
@@ -391,6 +392,11 @@ public class UIContext {
     /**
      * Locks the current UIContext
      */
+    /** True if the calling thread holds this context's lock (cheaper than a {@link #get()} ThreadLocal lookup). */
+    public boolean isHeldByCurrentThread() {
+        return lock.isHeldByCurrentThread();
+    }
+
     public void acquire() {
         lock.lock();
         currentContext.set(this);

@@ -391,7 +391,8 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
 
     @Override
     public void encode(final ServerToClientModel model, final Object value) {
-        if (UIContext.get() == null) {
+        final UIContext owner = this.uiContext;
+        if ((owner == null || !owner.isHeldByCurrentThread()) && UIContext.get() == null) {
             log.warn("encode in websocket without current ui context acquired", new Exception());
             uiContext.acquire();
             try {
@@ -407,6 +408,21 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
                 loggerOut.trace("UIContext #{} : {} {}", this.uiContext.getID(), model, value);
             websocketPusher.encode(model, value);
             if (listener != null) listener.onOutgoingPonyFrame(model, value);
+        } catch (final IOException e) {
+            log.error("Can't write on the websocket for UIContext #{}, so we destroy the application", uiContext.getID(), e);
+            uiContext.destroy();
+        }
+    }
+
+    @Override
+    public void encodeInt(final ServerToClientModel model, final int value) {
+        final UIContext owner = this.uiContext;
+        if (owner == null || !owner.isHeldByCurrentThread() || listener != null || loggerOut.isTraceEnabled()) {
+            encode(model, (Object) value); // rare paths (no context / monitoring): keep the generic behaviour
+            return;
+        }
+        try {
+            websocketPusher.encodeInt(model, value);
         } catch (final IOException e) {
             log.error("Can't write on the websocket for UIContext #{}, so we destroy the application", uiContext.getID(), e);
             uiContext.destroy();

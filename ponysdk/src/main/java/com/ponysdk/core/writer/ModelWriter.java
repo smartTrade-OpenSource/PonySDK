@@ -36,6 +36,25 @@ public class ModelWriter {
 
     private WeakReference<PWindow> currentWindow;
 
+    /** The UIContext this writer belongs to (set by the UIContext constructor). */
+    private UIContext owner;
+
+    public void bindTo(final UIContext owner) {
+        this.owner = owner;
+    }
+
+    /**
+     * Writes are only performed for a live context. Fast path: the owner's lock is held by this thread
+     * (the normal case, under execute()/acquire()), which avoids a ThreadLocal lookup on every field;
+     * otherwise falls back to the current-thread context, exactly as before.
+     */
+    private boolean canWrite() {
+        final UIContext o = owner;
+        if (o != null && o.isHeldByCurrentThread()) return o.isAlive();
+        final UIContext ctx = UIContext.get();
+        return ctx != null && ctx.isAlive();
+    }
+
     public ModelWriter(final WebsocketEncoder encoder) {
         this.encoder = encoder;
     }
@@ -54,7 +73,7 @@ public class ModelWriter {
 
         if (currentWindow == null || currentWindow.get() != window) {
             currentWindow = new WeakReference<>(window);
-            encoder.encode(ServerToClientModel.WINDOW_ID, window.getID());
+            encoder.encodeInt(ServerToClientModel.WINDOW_ID, window.getID());
         }
     }
 
@@ -66,15 +85,20 @@ public class ModelWriter {
      * @param value The type can be primitives, String or Object[]
      */
     public void write(final ServerToClientModel model, final Object value) {
-        final UIContext ctx = UIContext.get();
-        if (ctx != null && ctx.isAlive()) {
+        if (canWrite()) {
             encoder.encode(model, value);
         }
     }
 
+    /** Primitive variant of {@link #write(ServerToClientModel, Object)} for int values (no boxing). */
+    public void writeInt(final ServerToClientModel model, final int value) {
+        if (canWrite()) {
+            encoder.encodeInt(model, value);
+        }
+    }
+
     public void endObject() {
-        final UIContext ctx = UIContext.get();
-        if (ctx != null && ctx.isAlive()) {
+        if (canWrite()) {
             encoder.endObject();
         }
     }

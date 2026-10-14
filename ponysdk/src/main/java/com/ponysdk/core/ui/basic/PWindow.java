@@ -64,6 +64,18 @@ public class PWindow extends PObject {
     private List<PVisibilityHandler> visibilityHandlers;
     private boolean shown = true;
 
+    /**
+     * The context this window was created in. Lets the window's widgets reach their writer without a
+     * UIContext.get() ThreadLocal lookup per update (it was ~10% of the CPU of a busy push loop).
+     */
+    private final UIContext ownerContext = UIContext.get();
+
+    /** Writer of the owning context, or null if unknown (then callers fall back to UIContext.get()). */
+    final ModelWriter contextWriter() {
+        final UIContext c = ownerContext;
+        return c != null ? c.getWriter() : null;
+    }
+
     PWindow() {
         this.location = new Location(this);
         this.window = this;
