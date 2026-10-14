@@ -84,6 +84,34 @@ public class PonySDKServerTest {
         return server.createWebApp();
     }
 
+    private static int deflateLevelOf(final Object pool) throws Exception {
+        final java.lang.reflect.Field f = org.eclipse.jetty.util.compression.DeflaterPool.class.getDeclaredField("compressionLevel");
+        f.setAccessible(true);
+        return f.getInt(pool);
+    }
+
+    @Test
+    public void testWebSocketDeflaterPoolUsesTheConfiguredLevel() throws Exception {
+        final Object pool = webApp(new PonySDKServer()).getAttribute(PonySDKServer.WEBSOCKET_DEFLATER_POOL_ATTRIBUTE);
+        assertTrue(pool instanceof org.eclipse.jetty.util.compression.DeflaterPool);
+        org.junit.Assert.assertEquals("default level", 3, deflateLevelOf(pool));
+    }
+
+    @Test
+    public void testJettyDefaultDeflaterWhenLevelIsMinusOne() {
+        final PonySDKServer server = new PonySDKServer();
+        final com.ponysdk.core.server.application.ApplicationConfiguration configuration =
+                new com.ponysdk.core.server.application.ApplicationConfiguration();
+        configuration.setApplicationContextName("app");
+        configuration.setWsDeflateLevel(-1);
+        final com.ponysdk.core.server.application.ApplicationManager manager =
+                Mockito.mock(com.ponysdk.core.server.application.ApplicationManager.class);
+        Mockito.when(manager.getConfiguration()).thenReturn(configuration);
+        server.setApplicationManager(manager);
+        org.junit.Assert.assertNull(server.createWebApp().getAttribute(PonySDKServer.WEBSOCKET_DEFLATER_POOL_ATTRIBUTE));
+        org.junit.Assert.assertThrows(IllegalArgumentException.class, () -> configuration.setWsDeflateLevel(10));
+    }
+
     @Test
     public void testSessionCookieIsSecureAndHttpOnlyByDefault() {
         final PonySDKServer server = new PonySDKServer();

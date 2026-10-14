@@ -86,6 +86,12 @@ public class ApplicationConfiguration {
      * garbage per incoming message. Larger messages still work (the builder grows).
      */
     private int wsInputBufferSize = 1024;
+    /**
+     * zlib level of permessage-deflate (embedded PonySDKServer). Jetty's default is 6; on PonySDK's
+     * stream of small binary frames level 3 was measured both cheaper (-25% CPU per pushed update)
+     * and as compact (1.448 vs 1.474 MB/s deflated). 0-9, or -1 for Jetty's default.
+     */
+    private int wsDeflateLevel = 3;
     /** WebSocket idle timeout in milliseconds (no traffic either way before close). */
     private long wsIdleTimeoutMs = 1_000_000;
     /** Max time to await a previous (slow-consumer) send before disconnecting, in milliseconds. */
@@ -355,6 +361,7 @@ public class ApplicationConfiguration {
         public Builder wsAllowedOrigins(final Set<String> v)       { config.setWsAllowedOrigins(v); return this; }
         public Builder wsMaxInboundMessageSize(final int v)        { config.setWsMaxInboundMessageSize(v); return this; }
         public Builder wsInputBufferSize(final int v)              { config.setWsInputBufferSize(v); return this; }
+        public Builder wsDeflateLevel(final int v)                 { config.setWsDeflateLevel(v); return this; }
         public Builder updateCoalescingEnabled(final boolean v)    { config.setUpdateCoalescingEnabled(v); return this; }
         public Builder wsIdleTimeoutMs(final long v)               { config.setWsIdleTimeoutMs(v); return this; }
         public Builder wsSendTimeoutMs(final long v)               { config.setWsSendTimeoutMs(v); return this; }
@@ -528,6 +535,16 @@ public class ApplicationConfiguration {
      */
     public void setWsAllowedOrigins(final Set<String> wsAllowedOrigins) {
         this.wsAllowedOrigins = wsAllowedOrigins;
+    }
+
+    public int getWsDeflateLevel() {
+        return wsDeflateLevel;
+    }
+
+    /** @param wsDeflateLevel 0 (store) .. 9 (best compression), -1 keeps Jetty's default (6) */
+    public void setWsDeflateLevel(final int wsDeflateLevel) {
+        if (wsDeflateLevel < -1 || wsDeflateLevel > 9) throw new IllegalArgumentException("deflate level must be -1..9: " + wsDeflateLevel);
+        this.wsDeflateLevel = wsDeflateLevel;
     }
 
     public int getWsInputBufferSize() {

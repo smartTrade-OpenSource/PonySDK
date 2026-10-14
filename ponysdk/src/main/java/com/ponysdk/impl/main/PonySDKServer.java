@@ -23,6 +23,8 @@
 
 package com.ponysdk.impl.main;
 
+import org.eclipse.jetty.util.compression.CompressionPool;
+import org.eclipse.jetty.util.compression.DeflaterPool;
 import java.net.InetAddress;
 import java.net.URL;
 
@@ -83,6 +85,9 @@ public class PonySDKServer {
      * reconnection could never find the suspended UIContext).
      */
     private boolean sessionCookieSecure = true;
+
+    /** Servlet-context attribute Jetty reads its WebSocket DeflaterPool from (WebSocketServerComponents). */
+    static final String WEBSOCKET_DEFLATER_POOL_ATTRIBUTE = "jetty.websocket.deflater";
     private String[] enabledProtocols = new String[] { "TLSv1.2" };
     private String enabledCipherSuites;
 
@@ -207,6 +212,12 @@ public class PonySDKServer {
         context.getSessionHandler().getSessionCookieConfig().setSecure(sessionCookieSecure);
         context.getSessionHandler().getSessionCookieConfig().setHttpOnly(true);
 
+        // permessage-deflate level: Jetty picks its DeflaterPool from this context attribute.
+        final int deflateLevel = configuration.getWsDeflateLevel();
+        if (deflateLevel >= 0 && deflateLevel <= 9) {
+            context.setAttribute(WEBSOCKET_DEFLATER_POOL_ATTRIBUTE,
+                new DeflaterPool(CompressionPool.DEFAULT_CAPACITY, deflateLevel, true));
+        }
         JettyWebSocketServletContainerInitializer.configure(context, null);
 
         context.addServlet(new ServletHolder(createBootstrapServlet()), MAPPING_BOOTSTRAP);
