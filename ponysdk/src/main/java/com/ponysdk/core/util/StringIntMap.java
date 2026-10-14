@@ -43,6 +43,11 @@ public final class StringIntMap {
 
     private String[] keys;
     private int[] values;
+    /**
+     * Mixed hash of each slot's key. Probes compare it first, so a lookup only dereferences the key
+     * String (object header + byte[] in other cache lines) of a slot whose hash already matches.
+     */
+    private int[] hashes;
     private int size;
     private int mask;
     private int resizeAt;
@@ -65,6 +70,7 @@ public final class StringIntMap {
     private void allocate(final int capacity) {
         keys = new String[capacity];
         values = new int[capacity];
+        hashes = new int[capacity];
         mask = capacity - 1;
         resizeAt = capacity >> 1;
     }
@@ -86,10 +92,12 @@ public final class StringIntMap {
     /** @return the value, or {@link #MISSING} */
     public int get(final String key) {
         final String[] k = keys;
-        int i = mix(key.hashCode()) & mask;
+        final int[] hs = hashes;
+        final int h = mix(key.hashCode());
+        int i = h & mask;
         String cur;
         while ((cur = k[i]) != null) {
-            if (cur == key || cur.equals(key)) return values[i];
+            if (hs[i] == h && (cur == key || cur.equals(key))) return values[i];
             i = (i + 1) & mask;
         }
         return MISSING;
@@ -106,10 +114,11 @@ public final class StringIntMap {
      */
     public int put(final String key, final int value) {
         if (key == null) throw new NullPointerException("key");
-        int i = mix(key.hashCode()) & mask;
+        final int h = mix(key.hashCode());
+        int i = h & mask;
         String cur;
         while ((cur = keys[i]) != null) {
-            if (cur == key || cur.equals(key)) {
+            if (hashes[i] == h && (cur == key || cur.equals(key))) {
                 final int old = values[i];
                 values[i] = value;
                 return old;
@@ -118,16 +127,18 @@ public final class StringIntMap {
         }
         keys[i] = key;
         values[i] = value;
+        hashes[i] = h;
         if (++size > resizeAt) rehash(keys.length << 1);
         return MISSING;
     }
 
     /** @return the removed value, or {@link #MISSING} */
     public int remove(final String key) {
-        int i = mix(key.hashCode()) & mask;
+        final int h = mix(key.hashCode());
+        int i = h & mask;
         String cur;
         while ((cur = keys[i]) != null) {
-            if (cur == key || cur.equals(key)) {
+            if (hashes[i] == h && (cur == key || cur.equals(key))) {
                 final int old = values[i];
                 shiftBack(i);
                 size--;
@@ -145,36 +156,41 @@ public final class StringIntMap {
             i = (i + 1) & mask;
             final String k = keys[i];
             if (k == null) break;
-            final int home = mix(k.hashCode()) & mask;
+            final int home = hashes[i] & mask;
             // entry at i may move to the hole if its home is not in (hole, i] (cyclically)
             final boolean between = hole <= i ? (hole < home && home <= i) : (hole < home || home <= i);
             if (!between) {
                 keys[hole] = k;
                 values[hole] = values[i];
+                hashes[hole] = hashes[i];
                 hole = i;
             }
         }
         keys[hole] = null;
         values[hole] = 0;
+        hashes[hole] = 0;
     }
 
     private void rehash(final int newCapacity) {
         final String[] oldKeys = keys;
         final int[] oldValues = values;
+        final int[] oldHashes = hashes;
         allocate(newCapacity);
         for (int j = 0; j < oldKeys.length; j++) {
             final String k = oldKeys[j];
             if (k == null) continue;
-            int i = mix(k.hashCode()) & mask;
+            int i = oldHashes[j] & mask;
             while (keys[i] != null) i = (i + 1) & mask;
             keys[i] = k;
             values[i] = oldValues[j];
+            hashes[i] = oldHashes[j];
         }
     }
 
     public void clear() {
         Arrays.fill(keys, null);
         Arrays.fill(values, 0);
+        Arrays.fill(hashes, 0);
         size = 0;
     }
 }

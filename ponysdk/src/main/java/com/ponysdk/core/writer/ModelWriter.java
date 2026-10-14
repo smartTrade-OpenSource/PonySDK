@@ -108,7 +108,9 @@ public class ModelWriter {
         if (p == null || p.isEmpty() || draining) return;
         draining = true;
         try {
-            p.drainTo(this);
+            // Liveness / lock ownership checked once for the whole drain instead of once per field
+            if (canWrite()) p.drainTo(this);
+            else p.discard();
         } finally {
             draining = false;
         }
@@ -171,6 +173,19 @@ public class ModelWriter {
         if (canWrite()) {
             encoder.encode(model, value);
         }
+    }
+
+    /** Drain-internal writes: the caller already checked {@link #canWrite()} for the whole drain. */
+    void writeUnchecked(final ServerToClientModel model, final Object value) {
+        encoder.encode(model, value);
+    }
+
+    void writeIntUnchecked(final ServerToClientModel model, final int value) {
+        encoder.encodeInt(model, value);
+    }
+
+    void endObjectUnchecked() {
+        encoder.endObject();
     }
 
     /** Primitive variant of {@link #write(ServerToClientModel, Object)} for int values (no boxing). */

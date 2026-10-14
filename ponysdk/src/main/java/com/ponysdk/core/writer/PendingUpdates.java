@@ -153,7 +153,7 @@ final class PendingUpdates {
                     writeRunMarker(writer, openId, target.getID());
                     runLength++;
                 } else {
-                    if (open != null) writer.endObject();
+                    if (open != null) writer.endObjectUnchecked();
                     if (!target.beginCoalescedUpdate(writer)) {
                         open = null;
                         continue;
@@ -165,32 +165,88 @@ final class PendingUpdates {
                 openId = target.getID();
             }
             if (k[s] == null) {
-                writer.write(km[s], v[s]);
+                writer.writeUnchecked(km[s], v[s]);
             } else {
-                writer.write(km[s], k[s]);
-                writer.write(vm[s], v[s]);
+                writer.writeUnchecked(km[s], k[s]);
+                writer.writeUnchecked(vm[s], v[s]);
             }
         }
-        if (open != null) writer.endObject();
+        if (open != null) writer.endObjectUnchecked();
         // release references for GC (arrays are reused)
         Arrays.fill(t, 0, n, null);
         Arrays.fill(k, 0, n, null);
         Arrays.fill(v, 0, n, null);
     }
 
+    /** Pre-boxed delta bytes (Byte.valueOf would box-cache them too, this just skips the call). */
+    private static final Byte[] DELTA_BYTES = new Byte[256];
+    static {
+        for (int i = 0; i < 256; i++) DELTA_BYTES[i] = (byte) i;
+    }
+
+    /** Drops everything pending (context no longer writable). */
+    void discard() {
+        final int n = count;
+        reset(n);
+        Arrays.fill(targets, 0, n, null);
+        Arrays.fill(keys, 0, n, null);
+        Arrays.fill(values, 0, n, null);
+    }
+
     /** Next object of a run: +1, a small forward delta, or an absolute id. */
     static void writeRunMarker(final ModelWriter writer, final int previousId, final int id) {
         final int delta = id - previousId;
-        if (delta == 1) writer.write(ServerToClientModel.UPDATE_NEXT, null);
-        else if (delta >= 2 && delta <= 257) writer.write(ServerToClientModel.UPDATE_NEXT_DELTA, (byte) (delta - 2));
-        else writer.writeInt(ServerToClientModel.UPDATE_NEXT_ID, id);
+        if (delta == 1) writer.writeUnchecked(ServerToClientModel.UPDATE_NEXT, null);
+        else if (delta >= 2 && delta <= 257) writer.writeUnchecked(ServerToClientModel.UPDATE_NEXT_DELTA, DELTA_BYTES[delta - 2]);
+        else writer.writeIntUnchecked(ServerToClientModel.UPDATE_NEXT_ID, id);
     }
 
     /**
      * Live slots ordered by (update group, object id, slot), or null to keep the slot order (more than
      * 255 groups or 16M slots: never in practice). Groups are numbered by first appearance.
      */
-    private static int[] sortedOrder(final UpdateTarget[] t, final int n) {
+    /** Reused counting-sort buckets (single-group fast path). */
+    private int[] buckets = new int[256];
+
+    private int[] sortedOrder(final UpdateTarget[] t, final int n) {
+        final int[] fast = countingOrder(t, n);
+        return fast != null ? fast : comparisonOrder(t, n);
+    }
+
+    /**
+     * Fast path: all live slots in one update group and object ids within a small range (ids of a
+     * session are dense). Stable counting sort by id - O(n + range), no comparisons - keeps the slot
+     * order of each object. Returns null when it does not apply.
+     */
+    private int[] countingOrder(final UpdateTarget[] t, final int n) {
+        Object group = null;
+        int live = 0, min = Integer.MAX_VALUE, max = Integer.MIN_VALUE;
+        for (int s = 0; s < n; s++) {
+            final UpdateTarget target = t[s];
+            if (target == null) continue;
+            final Object g = target.updateGroup();
+            if (live == 0) group = g;
+            else if (g != group) return null;
+            final int id = target.getID();
+            if (id < min) min = id;
+            if (id > max) max = id;
+            live++;
+        }
+        if (live == 0) return new int[0];
+        final long range = (long) max - min + 1;
+        if (range > Math.max(4096, 8L * live)) return null;
+        final int r = (int) range;
+        if (buckets.length < r + 1) buckets = new int[Math.max(r + 1, buckets.length * 2)];
+        final int[] b = buckets;
+        Arrays.fill(b, 0, r + 1, 0);
+        for (int s = 0; s < n; s++) if (t[s] != null) b[t[s].getID() - min + 1]++;
+        for (int i = 1; i <= r; i++) b[i] += b[i - 1];
+        final int[] order = new int[live];
+        for (int s = 0; s < n; s++) if (t[s] != null) order[b[t[s].getID() - min]++] = s;
+        return order;
+    }
+
+    private static int[] comparisonOrder(final UpdateTarget[] t, final int n) {
         if (n >= 1 << 24) return null;
         Object[] groups = new Object[4];
         int groupCount = 0;
@@ -201,7 +257,9 @@ final class PendingUpdates {
             if (target == null) continue;
             final Object group = target.updateGroup();
             int g = 0;
-            while (g < groupCount && groups[g] != group) g++;
+            if (groupCount == 0 || groups[0] != group) { // fast path: almost always one window
+                while (g < groupCount && groups[g] != group) g++;
+            }
             if (g == groupCount) {
                 if (groupCount == 255) return null;
                 if (groupCount == groups.length) groups = Arrays.copyOf(groups, groupCount * 2);
