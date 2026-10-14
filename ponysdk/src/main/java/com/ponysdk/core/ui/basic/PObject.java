@@ -297,6 +297,17 @@ public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
         return writer != null ? writer : UIContext.get().getWriter();
     }
 
+    /** {@link com.ponysdk.core.writer.UpdateTarget}: updates of one run share the window / frame header. */
+    @Override
+    public Object updateGroup() {
+        return frame != null ? frame : window;
+    }
+
+    @Override
+    public boolean isUpdatable() {
+        return initialized && !destroy;
+    }
+
     /** {@link com.ponysdk.core.writer.UpdateTarget}: opens the update block of a coalesced update. */
     @Override
     public boolean beginCoalescedUpdate(final ModelWriter writer) {

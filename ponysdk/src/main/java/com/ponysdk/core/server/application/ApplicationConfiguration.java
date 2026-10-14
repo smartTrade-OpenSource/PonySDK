@@ -92,6 +92,11 @@ public class ApplicationConfiguration {
      * and as compact (1.448 vs 1.474 MB/s deflated). 0-9, or -1 for Jetty's default.
      */
     private int wsDeflateLevel = 3;
+    /**
+     * Highest binary protocol version the server uses (see ProtocolVersion). Each connection uses
+     * min(this, version announced by the terminal); 1 forces the original format for everyone.
+     */
+    private int maxProtocolVersion = com.ponysdk.core.model.ProtocolVersion.CURRENT;
     /** WebSocket idle timeout in milliseconds (no traffic either way before close). */
     private long wsIdleTimeoutMs = 1_000_000;
     /** Max time to await a previous (slow-consumer) send before disconnecting, in milliseconds. */
@@ -362,6 +367,7 @@ public class ApplicationConfiguration {
         public Builder wsMaxInboundMessageSize(final int v)        { config.setWsMaxInboundMessageSize(v); return this; }
         public Builder wsInputBufferSize(final int v)              { config.setWsInputBufferSize(v); return this; }
         public Builder wsDeflateLevel(final int v)                 { config.setWsDeflateLevel(v); return this; }
+        public Builder maxProtocolVersion(final int v)             { config.setMaxProtocolVersion(v); return this; }
         public Builder updateCoalescingEnabled(final boolean v)    { config.setUpdateCoalescingEnabled(v); return this; }
         public Builder wsIdleTimeoutMs(final long v)               { config.setWsIdleTimeoutMs(v); return this; }
         public Builder wsSendTimeoutMs(final long v)               { config.setWsSendTimeoutMs(v); return this; }
@@ -535,6 +541,17 @@ public class ApplicationConfiguration {
      */
     public void setWsAllowedOrigins(final Set<String> wsAllowedOrigins) {
         this.wsAllowedOrigins = wsAllowedOrigins;
+    }
+
+    public int getMaxProtocolVersion() {
+        return maxProtocolVersion;
+    }
+
+    /** @param maxProtocolVersion 1..ProtocolVersion.CURRENT (1 = original format, e.g. as a kill switch) */
+    public void setMaxProtocolVersion(final int maxProtocolVersion) {
+        if (maxProtocolVersion < com.ponysdk.core.model.ProtocolVersion.V1 || maxProtocolVersion > com.ponysdk.core.model.ProtocolVersion.CURRENT)
+            throw new IllegalArgumentException("protocol version must be 1.." + com.ponysdk.core.model.ProtocolVersion.CURRENT + ": " + maxProtocolVersion);
+        this.maxProtocolVersion = maxProtocolVersion;
     }
 
     public int getWsDeflateLevel() {

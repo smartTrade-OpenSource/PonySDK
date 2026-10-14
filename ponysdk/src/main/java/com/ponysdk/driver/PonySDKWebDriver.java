@@ -233,7 +233,7 @@ public class PonySDKWebDriver implements WebDriver {
     @Override
     public void get(final String url) {
         try {
-            client.connect(new URI(url));
+            client.connect(new URI(withProtocolVersion(url)));
             this.url = url;
         } catch (final Exception e) {
             throw new PonyIOException("Unable to connect to " + url, e);
@@ -557,7 +557,63 @@ public class PonySDKWebDriver implements WebDriver {
         }
     }
 
+    /** Binary protocol version announced at handshake (default: the latest; 1 = original format). */
+    private int protocolVersion = com.ponysdk.core.model.ProtocolVersion.CURRENT;
+
+    public void setProtocolVersion(final int protocolVersion) {
+        this.protocolVersion = protocolVersion;
+    }
+
+    public int getProtocolVersion() {
+        return protocolVersion;
+    }
+
+    private String withProtocolVersion(final String url) {
+        final String key = ClientToServerModel.PROTOCOL_VERSION.toStringValue();
+        if (url.contains("?" + key + "=") || url.contains("&" + key + "=")) return url;
+        return url + (url.indexOf('?') >= 0 ? "&" : "?") + key + "=" + protocolVersion;
+    }
+
+    /**
+     * An update run (protocol 2) carries several objects in one block, chained by UPDATE_NEXT markers.
+     * It is split into one message per object - each with the block's WINDOW_ID / FRAME_ID header and a
+     * TYPE_UPDATE frame - so element tracking and message listeners see the same shape as version 1.
+     */
     private void onMessage(final List<PonyFrame> message) {
+        int updateIndex = -1;
+        boolean run = false;
+        for (int i = 0; i < message.size(); i++) {
+            final ServerToClientModel m = message.get(i).getModel();
+            if (m == ServerToClientModel.TYPE_UPDATE && updateIndex < 0) updateIndex = i;
+            else if (m == ServerToClientModel.UPDATE_NEXT || m == ServerToClientModel.UPDATE_NEXT_DELTA
+                    || m == ServerToClientModel.UPDATE_NEXT_ID) run = true;
+        }
+        if (!run || updateIndex < 0) {
+            dispatch(message);
+            return;
+        }
+        final List<PonyFrame> header = message.subList(0, updateIndex);
+        int id = ((Number) message.get(updateIndex).getValue()).intValue();
+        List<PonyFrame> current = new ArrayList<>(header);
+        current.add(message.get(updateIndex));
+        for (int i = updateIndex + 1; i < message.size(); i++) {
+            final PonyFrame frame = message.get(i);
+            final ServerToClientModel m = frame.getModel();
+            if (m == ServerToClientModel.UPDATE_NEXT) id += 1;
+            else if (m == ServerToClientModel.UPDATE_NEXT_DELTA) id += 2 + (((Number) frame.getValue()).intValue() & 0xFF);
+            else if (m == ServerToClientModel.UPDATE_NEXT_ID) id = ((Number) frame.getValue()).intValue();
+            else {
+                current.add(frame);
+                continue;
+            }
+            dispatch(current);
+            current = new ArrayList<>(header);
+            current.add(new PonyFrame(ServerToClientModel.TYPE_UPDATE, id));
+        }
+        dispatch(current);
+    }
+
+    private void dispatch(final List<PonyFrame> message) {
         loggerIn.trace("{}", message);
         for (final PonyFrame frame : message) {
             onMessageSwitch.getOrDefault(frame.getModel(), DO_NOTHING_WITH_FRAME).accept(message, frame);

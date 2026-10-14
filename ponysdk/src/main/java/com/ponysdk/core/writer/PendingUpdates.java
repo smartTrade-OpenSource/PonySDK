@@ -117,9 +117,16 @@ final class PendingUpdates {
         }
     }
 
+    /** Upper bound of objects per update run: keeps blocks small, so the terminal processes them incrementally. */
+    static final int MAX_RUN = 512;
+
     /**
-     * Writes every pending update in order, merging consecutive updates of the same object into a
-     * single update block, then empties the buffer.
+     * Writes every pending update, then empties the buffer.
+     * <p>
+     * Version 1 terminals: in write order, consecutive updates of one object share a block.<br>
+     * Update-run terminals: sorted by object (stable per object, so properties of one object keep their
+     * order) and written as runs - one block whose objects are chained by UPDATE_NEXT markers. Reordering
+     * across objects is safe: every deferred update is a plain assignment of one object's property.
      */
     void drainTo(final ModelWriter writer) {
         // Detach first: writing may re-enter the writer (beginObject drains), which must see it empty.
@@ -130,14 +137,32 @@ final class PendingUpdates {
         final ServerToClientModel[] vm = valueModels;
         final Object[] v = values;
         reset(n);
+        final boolean runs = writer.supportsUpdateRuns();
+        final int[] order = runs ? sortedOrder(t, n) : null;
+        final int m = order != null ? order.length : n;
         UpdateTarget open = null;
-        for (int s = 0; s < n; s++) {
+        Object openGroup = null;
+        int openId = -1;
+        int runLength = 0;
+        for (int i = 0; i < m; i++) {
+            final int s = order != null ? order[i] : i;
             final UpdateTarget target = t[s];
-            if (target == null) continue;
+            if (target == null || !target.isUpdatable()) continue; // overwritten or destroyed meanwhile
             if (target != open) {
-                if (open != null) writer.endObject();
-                open = target.beginCoalescedUpdate(writer) ? target : null;
-                if (open == null) continue; // destroyed meanwhile
+                if (runs && open != null && runLength < MAX_RUN && target.updateGroup() == openGroup) {
+                    writeRunMarker(writer, openId, target.getID());
+                    runLength++;
+                } else {
+                    if (open != null) writer.endObject();
+                    if (!target.beginCoalescedUpdate(writer)) {
+                        open = null;
+                        continue;
+                    }
+                    openGroup = target.updateGroup();
+                    runLength = 1;
+                }
+                open = target;
+                openId = target.getID();
             }
             if (k[s] == null) {
                 writer.write(km[s], v[s]);
@@ -151,6 +176,44 @@ final class PendingUpdates {
         Arrays.fill(t, 0, n, null);
         Arrays.fill(k, 0, n, null);
         Arrays.fill(v, 0, n, null);
+    }
+
+    /** Next object of a run: +1, a small forward delta, or an absolute id. */
+    static void writeRunMarker(final ModelWriter writer, final int previousId, final int id) {
+        final int delta = id - previousId;
+        if (delta == 1) writer.write(ServerToClientModel.UPDATE_NEXT, null);
+        else if (delta >= 2 && delta <= 257) writer.write(ServerToClientModel.UPDATE_NEXT_DELTA, (byte) (delta - 2));
+        else writer.writeInt(ServerToClientModel.UPDATE_NEXT_ID, id);
+    }
+
+    /**
+     * Live slots ordered by (update group, object id, slot), or null to keep the slot order (more than
+     * 255 groups or 16M slots: never in practice). Groups are numbered by first appearance.
+     */
+    private static int[] sortedOrder(final UpdateTarget[] t, final int n) {
+        if (n >= 1 << 24) return null;
+        Object[] groups = new Object[4];
+        int groupCount = 0;
+        long[] sortKeys = new long[n];
+        int live = 0;
+        for (int s = 0; s < n; s++) {
+            final UpdateTarget target = t[s];
+            if (target == null) continue;
+            final Object group = target.updateGroup();
+            int g = 0;
+            while (g < groupCount && groups[g] != group) g++;
+            if (g == groupCount) {
+                if (groupCount == 255) return null;
+                if (groupCount == groups.length) groups = Arrays.copyOf(groups, groupCount * 2);
+                groups[groupCount++] = group;
+            }
+            sortKeys[live++] = (long) g << 55 | (long) target.getID() << 24 | s;
+        }
+        if (live < n) sortKeys = Arrays.copyOf(sortKeys, live);
+        Arrays.sort(sortKeys);
+        final int[] order = new int[live];
+        for (int i = 0; i < live; i++) order[i] = (int) (sortKeys[i] & 0xFF_FFFF);
+        return order;
     }
 
     private void reset(final int usedSlots) {

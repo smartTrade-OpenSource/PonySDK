@@ -96,7 +96,10 @@ public enum ClientToServerModel {
     WC_EVENT_DETAIL("X"),
 
     // Transparent WebSocket reconnection (opt-in)
-    RECONNECT_UI_CONTEXT_ID("Y");  // sent by client on reconnect attempt: carries the uiContextId to resume
+    RECONNECT_UI_CONTEXT_ID("Y"),  // sent by client on reconnect attempt: carries the uiContextId to resume
+
+    // WebSocket handshake parameter: highest protocol version the terminal understands (see ProtocolVersion)
+    PROTOCOL_VERSION("w");
 
     private final String key;
 

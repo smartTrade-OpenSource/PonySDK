@@ -31,6 +31,10 @@ It runs a Jetty 12 WebSocket server on the backend and uses GWT on the frontend.
 - String Dictionary: up to 83% bandwidth reduction on repeated strings, shared across sessions
 - 5-level incremental encoding: equality check → dictionary → merge-patch → binary → WebSocket deflate
 - Typed binary arrays: `PAddOn` creation args and method calls carry int/long/double/boolean/String in pure binary, with a uint31 length (no 255-element cap)
+- Update coalescing + update runs: only the last value of a property per transaction is sent, and protocol v2 chains
+  the updates of a flush into sorted runs (`UPDATE_NEXT` +1 / byte delta / absolute id instead of END + new block)
+- Protocol version negotiated per connection (`w` handshake parameter): old terminals keep the v1 format, new
+  terminals decode both; `ApplicationConfiguration.setMaxProtocolVersion(1)` forces v1 for everyone
 
 **Connectivity**
 - Transparent WebSocket reconnection (opt-in): UIContext survives network drops, state replayed on reconnect
@@ -119,6 +123,7 @@ config.setWsPermessageDeflateEnabled(true); // frame compression (default on); d
 config.setWsDeflateLevel(3);                // zlib level, embedded server (default 3: cheaper than Jetty's 6, as compact here)
 config.setWsInputBufferSize(1024);          // Jetty buffer per incoming message (default 1 KB; upstream is small JSON)
 config.setUpdateCoalescingEnabled(true);    // send only the last value of a property per transaction (default on)
+config.setMaxProtocolVersion(2);            // highest binary protocol used (default: latest); 1 = original format
 ```
 
 ```java

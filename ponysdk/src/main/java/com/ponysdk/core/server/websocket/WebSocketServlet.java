@@ -129,6 +129,9 @@ public class WebSocketServlet extends JettyWebSocketServlet {
         // It travels as a query parameter because browsers cannot set custom headers on the
         // WebSocket handshake; moving it off the URL would require a transport change
         // (subprotocol or post-open handshake) on the GWT terminal.
+        webSocket.setProtocolVersion(negotiateProtocolVersion(
+                request.getHttpServletRequest().getParameter(ClientToServerModel.PROTOCOL_VERSION.toStringValue()), config));
+
         final String reconnectIdParam = request.getHttpServletRequest()
                 .getParameter(ClientToServerModel.RECONNECT_UI_CONTEXT_ID.toStringValue());
         if (reconnectIdParam != null && applicationManager.getConfiguration().getReconnectionTimeoutMs() > 0) {
@@ -165,6 +168,23 @@ public class WebSocketServlet extends JettyWebSocketServlet {
             log.error("No HTTP session found");
             throw new IllegalStateException("No HTTP session found");
         }
+    }
+
+    /**
+     * min(version announced by the terminal, configured maximum); version 1 when the parameter is absent
+     * (terminals older than the negotiation) or malformed.
+     */
+    static int negotiateProtocolVersion(final String announced, final ApplicationConfiguration config) {
+        int version = com.ponysdk.core.model.ProtocolVersion.V1;
+        if (announced != null) {
+            try {
+                version = Math.max(com.ponysdk.core.model.ProtocolVersion.V1, Integer.parseInt(announced));
+            } catch (final NumberFormatException e) {
+                version = com.ponysdk.core.model.ProtocolVersion.V1;
+            }
+        }
+        final int max = config != null ? config.getMaxProtocolVersion() : com.ponysdk.core.model.ProtocolVersion.CURRENT;
+        return Math.min(version, Math.min(max, com.ponysdk.core.model.ProtocolVersion.CURRENT));
     }
 
     /**

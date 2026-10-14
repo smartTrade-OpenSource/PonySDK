@@ -61,6 +61,8 @@ public class UpdateCoalescingTest {
     private static final class Wire implements WebsocketEncoder {
         final List<List<String>> blocks = new ArrayList<>();
         List<String> open;
+        int version = com.ponysdk.core.model.ProtocolVersion.V1;
+        @Override public int protocolVersion() { return version; }
         @Override public void beginObject() {}
         @Override public void encode(final ServerToClientModel model, final Object value) {
             if (open == null) { open = new ArrayList<>(); blocks.add(open); }
@@ -76,7 +78,12 @@ public class UpdateCoalescingTest {
     private PFlowPanel root;
 
     private void start(final boolean coalescing) {
+        start(coalescing, com.ponysdk.core.model.ProtocolVersion.V1);
+    }
+
+    private void start(final boolean coalescing, final int protocolVersion) {
         wire = new Wire();
+        wire.version = protocolVersion;
         final WebSocket socket = Mockito.mock(WebSocket.class);
         Mockito.when(socket.getCachedParameterMap()).thenReturn(Map.of());
         Mockito.when(socket.getCachedUserAgent()).thenReturn("test");
@@ -240,6 +247,98 @@ public class UpdateCoalescingTest {
         });
         assertEquals("one update per cell", cells.length, wire.blocks.size());
         for (final List<String> block : wire.blocks) assertTrue(block.get(1), block.get(1).startsWith("TEXT=v19-"));
+    }
+
+    // ---- update runs (protocol 2) ----
+
+    private PLabel[] labels(final int n) {
+        final PLabel[] cells = new PLabel[n];
+        ctx.execute(() -> { for (int i = 0; i < n; i++) { cells[i] = Element.newPLabel("-"); root.add(cells[i]); } });
+        wire.clear();
+        return cells;
+    }
+
+    @Test
+    public void protocol2WritesOneSortedRunWithRelativeMarkers() {
+        start(true, com.ponysdk.core.model.ProtocolVersion.UPDATE_RUNS);
+        final PLabel[] c = labels(400);
+        final int base = c[0].getID();
+        ctx.execute(() -> {
+            c[300].setText("far");          // written first, sorted last: absolute id marker
+            c[3].setText("d");
+            c[1].setText("b");
+            c[1].setStyleProperty("color", "red");
+            c[2].setText("c");              // id+1 -> UPDATE_NEXT
+            c[0].setText("a");
+        });
+        assertEquals(1, wire.blocks.size());
+        assertEquals(List.of("TYPE_UPDATE=" + base, "TEXT=a",
+                "UPDATE_NEXT=null", "TEXT=b", "PUT_STYLE_KEY=color", "STYLE_VALUE=red",
+                "UPDATE_NEXT=null", "TEXT=c",
+                "UPDATE_NEXT=null", "TEXT=d",
+                "UPDATE_NEXT_ID=" + c[300].getID(), "TEXT=far"), wire.blocks.get(0));
+    }
+
+    @Test
+    public void protocol2UsesAByteDeltaForSmallGaps() {
+        start(true, com.ponysdk.core.model.ProtocolVersion.UPDATE_RUNS);
+        final PLabel[] c = labels(300);
+        ctx.execute(() -> {
+            c[0].setText("x");
+            c[5].setText("y");    // gap 5 -> delta byte 3
+            c[262].setText("z");  // gap 257 -> delta byte 255 (largest)
+            c[263 + 1].setText("w"); // gap 2 -> delta byte 0
+        });
+        assertEquals(List.of("TYPE_UPDATE=" + c[0].getID(), "TEXT=x", "UPDATE_NEXT_DELTA=3", "TEXT=y",
+                "UPDATE_NEXT_DELTA=-1", "TEXT=z", "UPDATE_NEXT_DELTA=0", "TEXT=w"), wire.blocks.get(0));
+    }
+
+    @Test
+    public void protocol2KeepsThePropertyOrderOfOneObject() {
+        start(true, com.ponysdk.core.model.ProtocolVersion.UPDATE_RUNS);
+        final com.ponysdk.core.ui.basic.PHTML[] h = new com.ponysdk.core.ui.basic.PHTML[2];
+        ctx.execute(() -> { h[0] = Element.newPHTML("x"); h[1] = Element.newPHTML("y"); root.add(h[0]); root.add(h[1]); });
+        wire.clear();
+        ctx.execute(() -> {
+            h[1].setHTML("<b>1</b>");
+            h[0].setText("plain");
+            h[1].setText("plain");
+            h[1].setHTML("<i>2</i>"); // last for h[1]
+        });
+        final List<String> block = wire.blocks.get(0);
+        assertEquals("HTML=<i>2</i>", block.get(block.size() - 1));
+        assertTrue(block.indexOf("TEXT=plain") < block.lastIndexOf("TEXT=plain"));
+    }
+
+    @Test
+    public void protocol2SkipsDestroyedObjectsInsideARun() {
+        start(true, com.ponysdk.core.model.ProtocolVersion.UPDATE_RUNS);
+        final PLabel[] c = labels(3);
+        ctx.execute(() -> {
+            c[0].setText("a");
+            c[1].setText("lost");
+            c[2].setText("c");
+            c[1].onDestroy();
+        });
+        assertEquals(List.of(List.of("TYPE_UPDATE=" + c[0].getID(), "TEXT=a", "UPDATE_NEXT_DELTA=0", "TEXT=c")), wire.blocks);
+    }
+
+    @Test
+    public void protocol2SplitsRunsAtTheMaximumLength() {
+        start(true, com.ponysdk.core.model.ProtocolVersion.UPDATE_RUNS);
+        final PLabel[] c = labels(PendingUpdates.MAX_RUN + 10);
+        ctx.execute(() -> { for (final PLabel l : c) l.setText("v"); });
+        assertEquals(2, wire.blocks.size());
+        assertEquals(PendingUpdates.MAX_RUN, wire.blocks.get(0).stream().filter(e -> e.startsWith("TEXT=")).count());
+        assertEquals("TYPE_UPDATE=" + c[PendingUpdates.MAX_RUN].getID(), wire.blocks.get(1).get(0));
+    }
+
+    @Test
+    public void protocol1NeverWritesRunMarkers() {
+        final PLabel[] c = labels(5);
+        ctx.execute(() -> { for (final PLabel l : c) l.setText("v"); });
+        assertEquals(5, wire.blocks.size());
+        assertEquals(0, wire.count("UPDATE_NEXT"));
     }
 
     @Test

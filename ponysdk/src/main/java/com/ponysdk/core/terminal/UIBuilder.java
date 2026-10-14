@@ -283,28 +283,41 @@ public class UIBuilder {
         }
     }
 
-    private void processUpdate(final ReaderBuffer buffer, final int objectID) {
-        final PTObject ptObject = getPTObject(objectID);
-        if (ptObject != null) {
-            BinaryModel binaryModel;
-            do {
-                binaryModel = buffer.readBinaryModel();
-                if (ServerToClientModel.END.getValue() != binaryModel.getModel().getValue()) {
-                    final boolean result = ptObject.update(buffer, binaryModel);
-                    if (!result) {
-                        log.warning("Update " + ptObject.getClass().getSimpleName() + " #" + objectID + " with key : " + binaryModel
-                                + " doesn't exist");
-                        buffer.shiftNextBlock(false);
-                        break;
-                    }
-                } else {
-                    break;
-                }
-            } while (buffer.hasEnoughKeyBytes());
-        } else {
-            log.warning("Update on a null PTObject #" + objectID + ", so we will consume all the buffer of this object");
-            buffer.shiftNextBlock(false);
+    /**
+     * Applies an update block. Since protocol version 2 a block may be an update run: UPDATE_NEXT (+1),
+     * UPDATE_NEXT_DELTA (+2 + byte) or UPDATE_NEXT_ID (absolute) switch to the next object.
+     * Properties of an unknown object are skipped up to the next object of the run.
+     */
+    private void processUpdate(final ReaderBuffer buffer, final int firstObjectID) {
+        int objectID = firstObjectID;
+        PTObject ptObject = lookupUpdatedObject(objectID);
+        while (buffer.hasEnoughKeyBytes()) {
+            final BinaryModel binaryModel = buffer.readBinaryModel();
+            final ServerToClientModel model = binaryModel.getModel();
+            if (ServerToClientModel.END == model) {
+                return;
+            } else if (ServerToClientModel.UPDATE_NEXT == model) {
+                objectID += 1;
+                ptObject = lookupUpdatedObject(objectID);
+            } else if (ServerToClientModel.UPDATE_NEXT_DELTA == model) {
+                objectID += 2 + (binaryModel.getIntValue() & 0xFF);
+                ptObject = lookupUpdatedObject(objectID);
+            } else if (ServerToClientModel.UPDATE_NEXT_ID == model) {
+                objectID = binaryModel.getIntValue();
+                ptObject = lookupUpdatedObject(objectID);
+            } else if (ptObject != null && !ptObject.update(buffer, binaryModel)) {
+                log.warning("Update " + ptObject.getClass().getSimpleName() + " #" + objectID + " with key : " + binaryModel
+                        + " doesn't exist");
+                buffer.shiftNextBlock(false);
+                return;
+            }
         }
+    }
+
+    private PTObject lookupUpdatedObject(final int objectID) {
+        final PTObject ptObject = getPTObject(objectID);
+        if (ptObject == null) log.warning("Update on a null PTObject #" + objectID + ", its properties are skipped");
+        return ptObject;
     }
 
     private void processRemove(final ReaderBuffer buffer, final int objectID) {

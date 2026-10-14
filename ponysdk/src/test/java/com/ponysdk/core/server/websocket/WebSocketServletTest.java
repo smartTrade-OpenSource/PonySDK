@@ -27,6 +27,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
@@ -223,5 +224,18 @@ public class WebSocketServletTest {
         final JettyWebSocketServletFactory factory2 = mock(JettyWebSocketServletFactory.class);
         g.servlet.configure(factory2);
         org.mockito.Mockito.verify(factory2, org.mockito.Mockito.never()).setInputBufferSize(org.mockito.ArgumentMatchers.anyInt());
+    }
+
+    @Test
+    public void protocolVersionIsNegotiatedDownToWhatBothSidesSupport() {
+        final com.ponysdk.core.server.application.ApplicationConfiguration config =
+                new com.ponysdk.core.server.application.ApplicationConfiguration();
+        assertEquals("old terminal: no parameter", 1, WebSocketServlet.negotiateProtocolVersion(null, config));
+        assertEquals(1, WebSocketServlet.negotiateProtocolVersion("garbage", config));
+        assertEquals(1, WebSocketServlet.negotiateProtocolVersion("-3", config));
+        assertEquals(2, WebSocketServlet.negotiateProtocolVersion("2", config));
+        assertEquals("newer terminal", com.ponysdk.core.model.ProtocolVersion.CURRENT, WebSocketServlet.negotiateProtocolVersion("99", config));
+        config.setMaxProtocolVersion(1);
+        assertEquals("server kill switch", 1, WebSocketServlet.negotiateProtocolVersion("2", config));
     }
 }

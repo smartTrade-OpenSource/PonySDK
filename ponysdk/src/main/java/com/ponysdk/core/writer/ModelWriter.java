@@ -114,6 +114,12 @@ public class ModelWriter {
         }
     }
 
+    /** True if the terminal decodes update runs (ProtocolVersion.UPDATE_RUNS) and they are not disabled. */
+    boolean supportsUpdateRuns() {
+        final WebsocketEncoder e = encoder;
+        return e != null && e.protocolVersion() >= com.ponysdk.core.model.ProtocolVersion.UPDATE_RUNS;
+    }
+
     /** Number of updates currently deferred (diagnostics / tests). */
     public int pendingUpdateCount() {
         return pending == null ? 0 : pending.size();

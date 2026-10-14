@@ -33,6 +33,15 @@ public interface UpdateTarget {
     int getID();
 
     /**
+     * Window / frame routing of this object's updates. Objects of one update run must share it: the run
+     * is written in a single block, whose WINDOW_ID / FRAME_ID header applies to all of them.
+     */
+    Object updateGroup();
+
+    /** False once destroyed: its pending updates are dropped. */
+    boolean isUpdatable();
+
+    /**
      * Opens an update block for this object on {@code writer} (window, frame, TYPE_UPDATE id).
      *
      * @return false if the object has been destroyed meanwhile (nothing written)

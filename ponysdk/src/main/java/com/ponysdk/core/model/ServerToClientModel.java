@@ -289,7 +289,13 @@ public enum ServerToClientModel {
     RECONNECT_CONTEXT(ValueTypeModel.UINT31),      // sent to client on reconnect: carries the uiContextId to resume
 
     // Typed binary creation arguments for PAddOn — a pure-binary alternative to the JSON PADDON_CREATION
-    PADDON_CREATION_ARGS(ValueTypeModel.ARRAY);
+    PADDON_CREATION_ARGS(ValueTypeModel.ARRAY),
+
+    // Update runs (protocol >= ProtocolVersion.UPDATE_RUNS, only sent to clients announcing it): inside
+    // an update block, switch to the next object instead of closing the block and opening a new one.
+    UPDATE_NEXT(ValueTypeModel.NULL),        // next object = previous id + 1
+    UPDATE_NEXT_DELTA(ValueTypeModel.BYTE),  // next object = previous id + 2 + (value & 0xFF)
+    UPDATE_NEXT_ID(ValueTypeModel.UINT31);   // next object = absolute id
 
     public static final int MAX_VALUE = Short.MAX_VALUE;
     private static final ServerToClientModel[] VALUES = ServerToClientModel.values();

@@ -88,6 +88,17 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
     private UIContext uiContext;
     private Listener listener;
     private int reconnectContextId = -1; // -1 = normal connect, ≥0 = reconnect attempt
+    /** Protocol version announced by the terminal at handshake (capped by the configuration). */
+    private int protocolVersion = com.ponysdk.core.model.ProtocolVersion.V1;
+
+    public void setProtocolVersion(final int protocolVersion) {
+        this.protocolVersion = protocolVersion;
+    }
+
+    @Override
+    public int protocolVersion() {
+        return protocolVersion;
+    }
 
     public void setReconnectContextId(final int id) {
         this.reconnectContextId = id;
