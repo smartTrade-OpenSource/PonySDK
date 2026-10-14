@@ -1282,7 +1282,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         p.add(new PToolbar());
 
         p.add(sectionTitle("Frame (self)"));
-        final PFrame frame = Element.newPFrame("http://localhost:8081/sample/");
+        final PFrame frame = Element.newPFrame("./"); // relative: same origin whatever host/port serves the showcase
         frame.setHeight("200px");
         frame.setWidth("400px");
         p.add(frame);
@@ -1995,7 +1995,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             windowContainer.add(Element.newPCheckBox("Checkbox"));
         }, Duration.ofSeconds(1), Duration.ofSeconds(10));
 
-        final PFrame frame = Element.newPFrame("http://localhost:8081/sample/");
+        final PFrame frame = Element.newPFrame("./"); // relative: same origin whatever host/port serves the showcase
         frame.add(Element.newPLabel("Inside the frame"));
         w.add(frame);
 

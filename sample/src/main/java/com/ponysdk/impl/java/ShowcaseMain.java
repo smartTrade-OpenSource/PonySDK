@@ -25,17 +25,23 @@ public class ShowcaseMain {
         configuration.setReconnectionTimeoutMs(10_000); // 10s transparent reconnect window
         configuration.setEntryPointClass(UISampleEntryPoint.class);
 
-        configuration.setJavascript(java.util.Set.of(
+        // Linked collections: load order matters (jQuery before the scripts using it) and Set.of /
+        // Map.of have no defined iteration order. Kept in sync with etc/server_application.xml.
+        configuration.setJavascript(new java.util.LinkedHashSet<>(java.util.List.of(
             "script/jquery-3.7.1.min.js",
             "script/webcomponents.js",
-            "script/sample.js"
-        ));
+            "script/sample.js",
+            "script/flexlayout.js",
+            "script/flexlayout-addon.js"
+        )));
 
-        configuration.setStyle(java.util.Map.of(
-            "ponysdk", "style/ponysdk.css",
-            "sample",  "css/sample.css",
-            "samplePony", "css/ponysdk.css"
-        ));
+        final java.util.Map<String, String> styles = new java.util.LinkedHashMap<>();
+        styles.put("ponysdk", "style/ponysdk.css");
+        styles.put("sample", "css/sample.css");
+        styles.put("samplePony", "css/ponysdk.css");
+        styles.put("flexlayout", "style/flexlayout.css");
+        styles.put("flexdemo", "css/flexlayout-demo.css");
+        configuration.setStyle(styles);
 
         // Create metrics — tracks sessions, bytes, latency
         final PonySDKMetrics metrics = new PonySDKMetrics("showcase");
