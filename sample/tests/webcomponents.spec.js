@@ -99,7 +99,12 @@ test.describe('Web Components', () => {
     expect(errors).toEqual([]);
   });
 
-  test('transparent reconnection: dictionary entries lost in flight are re-announced', async ({ page }) => {
+  test('transparent reconnection: dictionary entries lost in flight are re-announced', async ({ page, browserName }) => {
+    // PonySDKServer always marks the session cookie Secure. Chrome and Firefox still send it to
+    // http://localhost / [::1]; WebKit (Safari) never sends a Secure cookie over plain http, so each
+    // socket lands in a new HTTP session and there is no suspended context to resume. Works over https.
+    test.skip(browserName === 'webkit' && BASE_URL.startsWith('http:'),
+        'WebKit drops the Secure session cookie over plain http — run against https');
     const errors = trackErrors(page);
     const sockets = [];
     let dropToClient = false;
