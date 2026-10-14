@@ -28,6 +28,7 @@ import java.util.BitSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.ponysdk.core.util.StringIntMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +71,8 @@ public class StringDictionary {
     private final int minStringLength;
 
     // String -> ID mapping for O(1) lookup
-    private final Map<String, Integer> stringToId;
+    // String -> ID (open addressing: no Node / boxed Integer per entry)
+    private final StringIntMap stringToId;
 
     // ID -> String mapping for reverse lookup
     private final List<String> idToString;
@@ -88,8 +90,6 @@ public class StringDictionary {
     // Number of pre-seeded entries (IDs 0..preSeedCount-1 are known by client at startup)
     private int preSeedCount;
 
-    // Free list of evicted IDs available for reuse
-    private final List<Integer> freeIds;
 
     // Tracks which IDs have been sent to the client (via DICTIONARY_ADD)
     // Pre-seeded entries must be sent as ADD on first use since the client doesn't know them yet
@@ -121,13 +121,12 @@ public class StringDictionary {
         this.maxSize = maxSize;
         this.minStringLength = minStringLength;
         this.maxEvictionsPerFlush = maxEvictionsPerFlush;
-        this.stringToId = new HashMap<>();
+        this.stringToId = new StringIntMap();
         this.idToString = new ArrayList<>();
         // Start small — arrays grow on demand up to maxSize
         final int initialArraySize = Math.min(64, maxSize);
         this.usageCount = new int[initialArraySize];
         this.lastFlushedCount = new int[initialArraySize];
-        this.freeIds = new ArrayList<>();
         this.sentToClient = new BitSet();
         this.preSeedCount = 0;
     }
@@ -197,8 +196,8 @@ public class StringDictionary {
             return NOT_INTERNED;
         }
 
-        final Integer existingId = stringToId.get(value);
-        if (existingId != null) {
+        final int existingId = stringToId.get(value);
+        if (existingId != StringIntMap.MISSING) {
             trackUsage(existingId);
             return existingId;
         }
@@ -264,8 +263,8 @@ public class StringDictionary {
             return InternResult.NOT_FOUND;
         }
 
-        final Integer existingId = stringToId.get(value);
-        if (existingId != null) {
+        final int existingId = stringToId.get(value);
+        if (existingId != StringIntMap.MISSING) {
             trackUsage(existingId);
             // If this ID was never sent to the client, treat it as new (needs DICTIONARY_ADD)
             if (!sentToClient.get(existingId)) {
@@ -305,9 +304,6 @@ public class StringDictionary {
      * @return an available ID, or NOT_INTERNED if the dictionary is full and budget exhausted
      */
     private int allocateId() {
-        if (!freeIds.isEmpty()) {
-            return freeIds.remove(freeIds.size() - 1);
-        }
         if (idToString.size() < maxSize) {
             return idToString.size();
         }
@@ -391,8 +387,8 @@ public class StringDictionary {
         if (value == null) {
             return NOT_INTERNED;
         }
-        final Integer id = stringToId.get(value);
-        if (id != null && sentToClient.get(id)) {
+        final int id = stringToId.get(value);
+        if (id != StringIntMap.MISSING && sentToClient.get(id)) {
             trackUsage(id);
             return id;
         }
@@ -424,7 +420,7 @@ public class StringDictionary {
      * Checks if the dictionary has reached its maximum size with no free slots.
      */
     public boolean isFull() {
-        return idToString.size() >= maxSize && freeIds.isEmpty();
+        return idToString.size() >= maxSize;
     }
 
     public int getMaxSize() {
