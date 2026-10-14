@@ -209,4 +209,19 @@ public class WebSocketServletTest {
         verify(factory).setMaxTextMessageSize(1024);
         verify(factory).setCreator(any());
     }
+
+    @Test
+    public void configure_appliesTheInputBufferSizeOnlyWhenPositive() {
+        final Fixture f = new Fixture();
+        when(f.config.getWsInputBufferSize()).thenReturn(1024);
+        final JettyWebSocketServletFactory factory = mock(JettyWebSocketServletFactory.class);
+        f.servlet.configure(factory);
+        verify(factory).setInputBufferSize(1024);
+
+        final Fixture g = new Fixture();
+        when(g.config.getWsInputBufferSize()).thenReturn(0);
+        final JettyWebSocketServletFactory factory2 = mock(JettyWebSocketServletFactory.class);
+        g.servlet.configure(factory2);
+        org.mockito.Mockito.verify(factory2, org.mockito.Mockito.never()).setInputBufferSize(org.mockito.ArgumentMatchers.anyInt());
+    }
 }

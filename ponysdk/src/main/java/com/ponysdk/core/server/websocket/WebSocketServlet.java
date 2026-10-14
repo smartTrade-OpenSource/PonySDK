@@ -70,6 +70,11 @@ public class WebSocketServlet extends JettyWebSocketServlet {
         final int maxInbound = config != null ? config.getWsMaxInboundMessageSize() : 0;
         if (maxInbound > 0) factory.setMaxTextMessageSize(maxInbound);
 
+        // Jetty allocates a text builder of inputBufferSize for every incoming message: keep it small
+        // for PonySDK's small upstream messages (see ApplicationConfiguration#setWsInputBufferSize).
+        final int inputBuffer = config != null ? config.getWsInputBufferSize() : 0;
+        if (inputBuffer > 0) factory.setInputBufferSize(inputBuffer);
+
         // #5 permessage-deflate is negotiated and enabled by default in Jetty 12; PonySDK's binary
         // protocol + string dictionary already compress heavily, so deflate is the final wire layer.
         // The compression *level* is not exposed by this factory API, but it can be turned off per
