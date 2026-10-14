@@ -46,6 +46,7 @@ public class TxnContext implements TxnListener {
     }
 
     void flush() {
+        modelWriter.drainPendingUpdates();
         socket.flush();
     }
 

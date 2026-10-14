@@ -56,28 +56,44 @@ import com.ponysdk.core.util.CompactIntRunnableMap;
 /**
  * The superclass for all PonySDK objects.
  */
-public abstract class PObject {
+public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
 
     private static final Logger log = LoggerFactory.getLogger(PObject.class);
 
     protected final int ID = UIContext.get().nextID();
     protected PWindow window;
     protected PFrame frame;
-    protected Set<InitializeListener> initializeListeners;
-    protected Set<DestroyListener> destroyListeners;
-    protected Object data;
 
     /**
      * Rarely used state, allocated on first use: every widget paid one reference slot per field
      * (native binding, terminal handler, ajax handler) although almost none use them.
      */
     private static final class Extras {
+        private Set<InitializeListener> initializeListeners;
+        private Set<DestroyListener> destroyListeners;
+        private Object data;
+        /** PLabel only: kept here so that every other widget does not pay for it. */
+        private String attributeLinkedToValue;
         private String nativeBindingFunction;
         private PTerminalEvent.Handler terminalHandler;
         private AjaxHandler ajaxHandler;
     }
 
     private Extras extras;
+
+    /** Notifies the initialize listeners (end of the CREATE). */
+    void fireInitializeListeners() {
+        final Set<InitializeListener> listeners = extras != null ? extras.initializeListeners : null;
+        if (listeners != null) listeners.forEach(listener -> listener.onInitialize(this));
+    }
+
+    String getAttributeLinkedToValue0() {
+        return extras != null ? extras.attributeLinkedToValue : null;
+    }
+
+    void setAttributeLinkedToValue0(final String value) {
+        if (value != null || extras != null) extras().attributeLinkedToValue = value;
+    }
 
     private Extras extras() {
         if (extras == null) extras = new Extras();
@@ -149,7 +165,7 @@ public abstract class PObject {
 
         initialized = true;
 
-        if (initializeListeners != null) initializeListeners.forEach(listener -> listener.onInitialize(this));
+        fireInitializeListeners();
     }
 
     /**
@@ -254,8 +270,11 @@ public abstract class PObject {
 
     protected void saveUpdate(final ServerToClientModel serverToClientModel, final Object value) {
         if (destroy) return;
-        // Hot path (every setter of a live widget): write directly, no capturing lambda per update
-        if (initialized) writeUpdate(serverToClientModel, value);
+        // Hot path (every setter of a live widget): coalesced when the model allows it, otherwise
+        // written directly - no capturing lambda per update either way
+        if (initialized) {
+            if (!writer().deferUpdate(this, serverToClientModel, value)) writeUpdate(serverToClientModel, value);
+        }
         else safeStackedInstructions().put(serverToClientModel.getValue(), () -> writeUpdate(serverToClientModel, value));
     }
 
@@ -263,7 +282,11 @@ public abstract class PObject {
     protected void saveUpdate(final ServerToClientModel key1, final Object value1,
                               final ServerToClientModel key2, final Object value2) {
         if (destroy) return;
-        if (initialized) writeUpdate(key1, value1, key2, value2);
+        if (initialized) {
+            if (!(value1 instanceof String key && writer().deferUpdate(this, key1, key, key2, value2))) {
+                writeUpdate(key1, value1, key2, value2);
+            }
+        }
         else safeStackedInstructions().put(saveKey++, () -> writeUpdate(key1, value1, key2, value2));
     }
 
@@ -272,6 +295,16 @@ public abstract class PObject {
         final PWindow w = window;
         final ModelWriter writer = w != null ? w.contextWriter() : null;
         return writer != null ? writer : UIContext.get().getWriter();
+    }
+
+    /** {@link com.ponysdk.core.writer.UpdateTarget}: opens the update block of a coalesced update. */
+    @Override
+    public boolean beginCoalescedUpdate(final ModelWriter writer) {
+        if (destroy) return false;
+        writer.beginObject(window);
+        if (frame != null) writer.writeInt(ServerToClientModel.FRAME_ID, frame.getID());
+        writer.writeInt(ServerToClientModel.TYPE_UPDATE, ID);
+        return true;
     }
 
     private ModelWriter beginUpdate() {
@@ -409,23 +442,28 @@ public abstract class PObject {
     }
 
     public void addInitializeListener(final InitializeListener listener) {
-        if (this.initializeListeners == null) initializeListeners = SetUtils.newArraySet(4);
-        this.initializeListeners.add(listener);
+        final Extras x = extras();
+        if (x.initializeListeners == null) x.initializeListeners = SetUtils.newArraySet(4);
+        x.initializeListeners.add(listener);
     }
 
     public void addDestroyListener(final DestroyListener listener) {
-        if (this.destroyListeners == null) destroyListeners = SetUtils.newArraySet(4);
-        this.destroyListeners.add(listener);
+        final Extras x = extras();
+        if (x.destroyListeners == null) x.destroyListeners = SetUtils.newArraySet(4);
+        x.destroyListeners.add(listener);
     }
 
     public void onDestroy() {
         destroy = true;
         if (extras != null) extras.terminalHandler = null;
-        initializeListeners = null;
+        final Set<DestroyListener> destroyListeners = extras != null ? extras.destroyListeners : null;
+        if (extras != null) {
+            extras.initializeListeners = null;
+            extras.destroyListeners = null;
+        }
         if (destroyListeners != null) {
             destroyListeners.forEach(this::doDestroy);
         }
-        destroyListeners = null;
         window = null;
     }
 
@@ -438,11 +476,11 @@ public abstract class PObject {
     }
 
     public void setData(final Object data) {
-        this.data = data;
+        if (data != null || extras != null) extras().data = data;
     }
 
     public Object getData() {
-        return data;
+        return extras != null ? extras.data : null;
     }
 
     public boolean isInitialized() {

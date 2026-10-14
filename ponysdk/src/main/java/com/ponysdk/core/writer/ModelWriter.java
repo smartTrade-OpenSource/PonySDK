@@ -43,6 +43,82 @@ public class ModelWriter {
         this.owner = owner;
     }
 
+    // ---- Coalesced ("last value wins") property updates ----
+
+    /**
+     * Models whose update is a pure assignment: setting the property again before the flush makes the
+     * previous value irrelevant (the browser applies a whole frame before painting anyway).
+     * Anything with side effects (method calls, eval, addon calls, add/remove...) is never deferred.
+     */
+    private static final boolean[] COALESCIBLE = new boolean[ServerToClientModel.values().length];
+    static {
+        for (final ServerToClientModel m : new ServerToClientModel[] { ServerToClientModel.TEXT, ServerToClientModel.HTML,
+                ServerToClientModel.WIDGET_TITLE, ServerToClientModel.WIDGET_WIDTH, ServerToClientModel.WIDGET_HEIGHT,
+                ServerToClientModel.PUT_STYLE_KEY, ServerToClientModel.PUT_ATTRIBUTE_KEY, ServerToClientModel.PUT_PROPERTY_KEY }) {
+            COALESCIBLE[m.ordinal()] = true;
+        }
+    }
+
+    private boolean coalescing;
+    private PendingUpdates pending;
+    private boolean draining;
+
+    /** Enables update coalescing (see {@link #deferUpdate}). Off by default; turned on by the UIContext. */
+    public void setCoalescing(final boolean coalescing) {
+        if (!coalescing) drainPendingUpdates();
+        this.coalescing = coalescing;
+    }
+
+    public boolean isCoalescing() {
+        return coalescing;
+    }
+
+    /**
+     * Defers a single-property update of a live object until the next block or flush. Setting the same
+     * property of the same object again replaces the pending value; consecutive deferred updates of one
+     * object share a single update block on the wire.
+     * <p>
+     * Ordering is preserved: any other write (structural change, method call, non-deferrable update,
+     * even of another object) first writes everything pending.
+     *
+     * @return false if the update was not deferred and must be written immediately by the caller
+     */
+    public boolean deferUpdate(final UpdateTarget target, final ServerToClientModel model, final Object value) {
+        if (!coalescing || !COALESCIBLE[model.ordinal()] || draining || !canWrite()) return false;
+        pending().put(target, model, null, null, value);
+        return true;
+    }
+
+    /** Keyed variant (style / attribute / property name + value): coalesced per object and key. */
+    public boolean deferUpdate(final UpdateTarget target, final ServerToClientModel keyModel, final String key,
+                               final ServerToClientModel valueModel, final Object value) {
+        if (!coalescing || !COALESCIBLE[keyModel.ordinal()] || key == null || draining || !canWrite()) return false;
+        pending().put(target, keyModel, key, valueModel, value);
+        return true;
+    }
+
+    private PendingUpdates pending() {
+        if (pending == null) pending = new PendingUpdates();
+        return pending;
+    }
+
+    /** Writes every deferred update now. Called before any other block and before each flush. */
+    public void drainPendingUpdates() {
+        final PendingUpdates p = pending;
+        if (p == null || p.isEmpty() || draining) return;
+        draining = true;
+        try {
+            p.drainTo(this);
+        } finally {
+            draining = false;
+        }
+    }
+
+    /** Number of updates currently deferred (diagnostics / tests). */
+    public int pendingUpdateCount() {
+        return pending == null ? 0 : pending.size();
+    }
+
     /**
      * Writes are only performed for a live context. Fast path: the owner's lock is held by this thread
      * (the normal case, under execute()/acquire()), which avoids a ThreadLocal lookup on every field;
@@ -69,6 +145,7 @@ public class ModelWriter {
     }
 
     public void beginObject(final PWindow window) {
+        if (pending != null && !draining && !pending.isEmpty()) drainPendingUpdates(); // keep write order
         encoder.beginObject();
 
         if (currentWindow == null || currentWindow.get() != window) {

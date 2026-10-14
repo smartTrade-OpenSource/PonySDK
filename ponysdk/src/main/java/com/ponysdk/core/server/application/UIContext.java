@@ -161,7 +161,10 @@ public class UIContext {
         this.configuration = configuration;
         this.request = request;
         this.context = context;
-        if (context != null && context.getWriter() != null) context.getWriter().bindTo(this);
+        if (context != null && context.getWriter() != null) {
+            context.getWriter().bindTo(this);
+            context.getWriter().setCoalescing(configuration != null && configuration.isUpdateCoalescingEnabled());
+        }
         this.modelWriter = context.getWriter();
 
         // Use pre-cached request data from WebSocket (snapshotted during HTTP upgrade,
@@ -522,7 +525,10 @@ public class UIContext {
      * force flush instructions to the server
      */
     public void flush() {
-        if(isAlive()) socket.flush();
+        if (isAlive()) {
+            context.getWriter().drainPendingUpdates();
+            socket.flush();
+        }
     }
 
     /**

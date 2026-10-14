@@ -63,6 +63,8 @@ public class ApplicationConfiguration {
 
     // String Dictionary configuration for protocol optimization
     private boolean stringDictionaryEnabled = true;
+    /** See {@link #setUpdateCoalescingEnabled(boolean)}. */
+    private boolean updateCoalescingEnabled = true;
     private int stringDictionaryMaxSize = 4096;
     private int stringDictionaryMinLength = 4;
     private int stringDictionaryMaxEvictionsPerFlush = 32;
@@ -77,6 +79,13 @@ public class ApplicationConfiguration {
     private Set<String> wsAllowedOrigins;
     /** Upper bound on inbound (client -> server) text messages, in bytes. Guards against memory abuse. */
     private int wsMaxInboundMessageSize = 1 << 20; // 1 MB
+    /**
+     * Jetty input buffer size for client -> server WebSocket messages. Jetty sizes the text builder of
+     * every incoming message with it (default 4 KB, re-allocated per message), while PonySDK's
+     * upstream traffic is small JSON (heartbeats, latency replies, events): 1 KB avoids ~5 KB of
+     * garbage per incoming message. Larger messages still work (the builder grows).
+     */
+    private int wsInputBufferSize = 1024;
     /** WebSocket idle timeout in milliseconds (no traffic either way before close). */
     private long wsIdleTimeoutMs = 1_000_000;
     /** Max time to await a previous (slow-consumer) send before disconnecting, in milliseconds. */
@@ -345,6 +354,8 @@ public class ApplicationConfiguration {
         public Builder wsOriginCheckEnabled(final boolean v)       { config.setWsOriginCheckEnabled(v); return this; }
         public Builder wsAllowedOrigins(final Set<String> v)       { config.setWsAllowedOrigins(v); return this; }
         public Builder wsMaxInboundMessageSize(final int v)        { config.setWsMaxInboundMessageSize(v); return this; }
+        public Builder wsInputBufferSize(final int v)              { config.setWsInputBufferSize(v); return this; }
+        public Builder updateCoalescingEnabled(final boolean v)    { config.setUpdateCoalescingEnabled(v); return this; }
         public Builder wsIdleTimeoutMs(final long v)               { config.setWsIdleTimeoutMs(v); return this; }
         public Builder wsSendTimeoutMs(final long v)               { config.setWsSendTimeoutMs(v); return this; }
         public Builder wsPermessageDeflateEnabled(final boolean v) { config.setWsPermessageDeflateEnabled(v); return this; }
@@ -385,6 +396,21 @@ public class ApplicationConfiguration {
      *
      * @return the maximum size (default: 65535)
      */
+    public boolean isUpdateCoalescingEnabled() {
+        return updateCoalescingEnabled;
+    }
+
+    /**
+     * Coalesces "last value wins" property updates (text, html, title, size, style / attribute /
+     * property values) made within one transaction: only the final value of each property is sent,
+     * and consecutive updates of one widget share one update block. Intermediate values were never
+     * painted by the browser, so this only matters to client code reacting to each intermediate DOM
+     * change (e.g. a MutationObserver or a custom element's attributeChangedCallback). Default: on.
+     */
+    public void setUpdateCoalescingEnabled(final boolean updateCoalescingEnabled) {
+        this.updateCoalescingEnabled = updateCoalescingEnabled;
+    }
+
     public int getStringDictionaryMaxSize() {
         return stringDictionaryMaxSize;
     }
@@ -502,6 +528,15 @@ public class ApplicationConfiguration {
      */
     public void setWsAllowedOrigins(final Set<String> wsAllowedOrigins) {
         this.wsAllowedOrigins = wsAllowedOrigins;
+    }
+
+    public int getWsInputBufferSize() {
+        return wsInputBufferSize;
+    }
+
+    /** @param wsInputBufferSize bytes, &lt;= 0 keeps Jetty's default (4 KB) */
+    public void setWsInputBufferSize(final int wsInputBufferSize) {
+        this.wsInputBufferSize = wsInputBufferSize;
     }
 
     public int getWsMaxInboundMessageSize() {
