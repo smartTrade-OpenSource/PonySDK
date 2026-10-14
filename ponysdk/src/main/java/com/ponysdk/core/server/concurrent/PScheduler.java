@@ -44,8 +44,12 @@ public class PScheduler {
     private static final PScheduler INSTANCE;
 
     static {
+        // Platform workers: a ScheduledThreadPoolExecutor has a fixed number of long-lived workers, so
+        // virtual threads add no concurrency here, only cost - every park/unpark of a worker (queue
+        // wait, send backpressure) became a continuation yield (StackChunk allocation + ForkJoin
+        // resubmission). Daemon, so the scheduler never keeps the JVM alive.
         final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(Runtime.getRuntime().availableProcessors(),
-            Thread.ofVirtual().name("PScheduler-", 0).factory());
+            Thread.ofPlatform().name("PScheduler-", 0).daemon(true).factory());
         INSTANCE = new PScheduler(executor);
     }
 
