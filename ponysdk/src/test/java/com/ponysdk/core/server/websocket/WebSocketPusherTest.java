@@ -561,4 +561,42 @@ public class WebSocketPusherTest {
         assertNotNull("END recorded", end);
         assertTrue(result.get().getStats().get(ServerToClientModel.END).containsKey(null));
     }
+
+    @Test
+    public void longStringsUseTheJdkEncoderAndStayLossless() throws Exception {
+        final int n = WebSocketPusher.JDK_ENCODER_MIN_LENGTH;
+        // ASCII, exactly at / above the threshold
+        assertTrue(assertRoundTrips("a".repeat(n)));
+        assertTrue(assertRoundTrips("{\"k\":1}".repeat(500)));
+        // non-ASCII anywhere, incl. surrogate pairs
+        assertFalse(assertRoundTrips("x".repeat(n) + "\u00e9"));
+        assertFalse(assertRoundTrips("\u20ac" + "y".repeat(n * 3) + "\uD83D\uDE00"));
+        // unpaired surrogate -> '?' like the short-string path (then it is plain ASCII)
+        final String lone = "z".repeat(n) + "\uD800" + "z";
+        final int byteLength = (int) encode.invoke(pusher, lone);
+        final byte[] encoded = Arrays.copyOf((byte[]) bufferField.get(pusher), byteLength);
+        assertEquals("z".repeat(n) + "?z", new String(encoded, StandardCharsets.UTF_8));
+        assertTrue((boolean) asciiField.get(pusher));
+    }
+
+    @Test
+    public void shortAndLongPathsProduceIdenticalBytes() {
+        final java.util.Random random = new java.util.Random(7);
+        final byte[] out = new byte[4 * 600];
+        for (int it = 0; it < 2_000; it++) {
+            final StringBuilder sb = new StringBuilder();
+            final int len = WebSocketPusher.JDK_ENCODER_MIN_LENGTH + random.nextInt(400);
+            for (int i = 0; i < len; i++) {
+                switch (random.nextInt(6)) {
+                    case 0 -> sb.append((char) (0x80 + random.nextInt(0x780)));
+                    case 1 -> sb.appendCodePoint(0x10000 + random.nextInt(0x100000));
+                    case 2 -> sb.append((char) (0xD800 + random.nextInt(0x800)));
+                    default -> sb.append((char) random.nextInt(0x80));
+                }
+            }
+            final String v = sb.toString();
+            final int end = WebSocketPusher.encodeUtf8(v, 0, v.length(), out, 0);
+            assertTrue(Arrays.equals(Arrays.copyOf(out, end), v.getBytes(StandardCharsets.UTF_8)));
+        }
+    }
 }
