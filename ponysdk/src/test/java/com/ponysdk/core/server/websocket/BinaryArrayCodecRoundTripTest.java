@@ -71,6 +71,19 @@ public class BinaryArrayCodecRoundTripTest {
 
     /** Encodes {@code [PADDON_ARGUMENTS array][END]} with the real server pusher; returns the wire bytes. */
     private static byte[] encodeArrayMessage(final Object[] array) throws IOException {
+        return encode(null, p -> {
+            p.encode(ServerToClientModel.PADDON_ARGUMENTS, array);
+            p.encode(ServerToClientModel.END, null);
+        });
+    }
+
+    private interface Writes {
+        void write(WebSocketPusher pusher) throws IOException;
+    }
+
+    /** Runs {@code writes} on a real pusher (optionally with a string dictionary); returns the wire bytes. */
+    private static byte[] encode(final com.ponysdk.core.server.application.StringDictionary dictionary,
+                                 final Writes writes) throws IOException {
         final ByteArrayOutputStream stream = new ByteArrayOutputStream();
         final Session session = Mockito.mock(Session.class);
         Mockito.when(session.isOpen()).thenReturn(true);
@@ -86,14 +99,24 @@ public class BinaryArrayCodecRoundTripTest {
 
         final ByteBufferPool pool = new ByteBufferPool(1 << 20, 4);
         final WebSocketPusher pusher = new WebSocketPusher(session, 1 << 19, 1_000, pool);
-        pusher.encode(ServerToClientModel.PADDON_ARGUMENTS, array);
-        pusher.encode(ServerToClientModel.END, null);
+        if (dictionary != null) pusher.setStringDictionary(dictionary);
+        writes.write(pusher);
         pusher.flush();
         return stream.toByteArray();
     }
 
     /** Feeds the wire bytes to the real Pony Driver decoder; returns the decoded PADDON_ARGUMENTS array. */
     private static Object[] decodeWithDriver(final byte[] wire) throws Exception {
+        for (final List<PonyFrame> message : decodeAll(wire)) {
+            for (final PonyFrame frame : message) {
+                if (frame.getModel() == ServerToClientModel.PADDON_ARGUMENTS) return (Object[]) frame.getValue();
+            }
+        }
+        throw new AssertionError("PADDON_ARGUMENTS frame was not decoded");
+    }
+
+    /** Feeds the wire bytes to the real Pony Driver decoder; returns every decoded message. */
+    private static List<List<PonyFrame>> decodeAll(final byte[] wire) throws Exception {
         final List<List<PonyFrame>> received = new ArrayList<>();
         final PonyMessageListener listener = new PonyMessageListener() {
             @Override
@@ -111,12 +134,41 @@ public class BinaryArrayCodecRoundTripTest {
         final Method onMessage = PonySDKWebDriver.class.getDeclaredMethod("onMessage", ByteBuffer.class);
         onMessage.setAccessible(true);
         onMessage.invoke(driver, ByteBuffer.wrap(wire));
+        return received;
+    }
 
-        for (final List<PonyFrame> message : received) {
-            for (final PonyFrame frame : message) {
-                if (frame.getModel() == ServerToClientModel.PADDON_ARGUMENTS) return (Object[]) frame.getValue();
+    @Test
+    public void dictionaryEncodedStringsRoundTripThroughPonyDriver() throws Exception {
+        // ADD then REF for model values and array elements, ASCII and UTF-8, short ids and a long
+        // (uint31 4-byte) id. The dictionary is on by default, so the driver must decode all of it.
+        final com.ponysdk.core.server.application.StringDictionary dictionary =
+                new com.ponysdk.core.server.application.StringDictionary(70_000, 4, 70_000);
+        for (int i = 0; i < 40_000; i++) dictionary.internOrGet("filler-" + i); // push next ids past 32767
+        final byte[] wire = encode(dictionary, p -> {
+            for (int round = 0; round < 2; round++) { // round 0: ADD, round 1: REF
+                p.encode(ServerToClientModel.TYPE_UPDATE, 7);
+                p.encode(ServerToClientModel.TEXT, "repeated-ascii");
+                p.encode(ServerToClientModel.WIDGET_TITLE, "\u00e9t\u00e9 \u20ac caf\u00e9");
+                p.encode(ServerToClientModel.PADDON_ARGUMENTS, new Object[] { "array-string", 1, "array-\u00e9l\u00e9ment", null });
+                p.encode(ServerToClientModel.END, null);
             }
+        });
+
+        final List<List<PonyFrame>> messages = decodeAll(wire);
+        assertEquals(2, messages.size());
+        for (final List<PonyFrame> message : messages) {
+            assertEquals("repeated-ascii", valueOf(message, ServerToClientModel.TEXT));
+            assertEquals("\u00e9t\u00e9 \u20ac caf\u00e9", valueOf(message, ServerToClientModel.WIDGET_TITLE));
+            final Object[] array = (Object[]) valueOf(message, ServerToClientModel.PADDON_ARGUMENTS);
+            assertEquals("array-string", array[0]);
+            assertEquals(1, ((Number) array[1]).intValue());
+            assertEquals("array-\u00e9l\u00e9ment", array[2]);
+            assertEquals(null, array[3]);
         }
-        throw new AssertionError("PADDON_ARGUMENTS frame was not decoded");
+    }
+
+    private static Object valueOf(final List<PonyFrame> message, final ServerToClientModel model) {
+        for (final PonyFrame frame : message) if (frame.getModel() == model) return frame.getValue();
+        throw new AssertionError(model + " not decoded in " + message);
     }
 }

@@ -83,6 +83,24 @@ public class PonySDKWebDriver implements WebDriver {
     private ByteBuffer buffer = ByteBuffer.allocate(4096);
     private int length = 0;
 
+    /**
+     * Client side of the String Dictionary (DICTIONARY_ADD defines an id, DICTIONARY_REF reuses it),
+     * mirroring the terminal's ReaderBuffer. The dictionary is on by default server-side, so without
+     * this the driver failed on the first interned string.
+     */
+    private String[] dictionary = new String[256];
+
+    private void dictionaryPut(final int id, final String value) {
+        if (id >= dictionary.length) dictionary = Arrays.copyOf(dictionary, Math.max(id + 1, dictionary.length * 2));
+        dictionary[id] = value;
+    }
+
+    private String dictionaryGet(final int id) {
+        final String value = id >= 0 && id < dictionary.length ? dictionary[id] : null;
+        if (value == null) throw new PonyIOException("Unknown dictionary ID: " + id);
+        return value;
+    }
+
     public PonySDKWebDriver() {
         this(null, null, null, true);
     }
@@ -309,7 +327,24 @@ public class PonySDKWebDriver implements WebDriver {
     }
 
     private String getString(final ByteBuffer b) {
-        int stringLength = readUnsignedByte(b);
+        final int tag = readUnsignedByte(b);
+        if (tag == ValueTypeModel.STRING_DICTIONARY_REF) {
+            length += Short.BYTES;
+            return dictionaryGet(getUint31(b));
+        }
+        if (tag == ValueTypeModel.STRING_DICTIONARY_ADD) {
+            length += Short.BYTES;
+            final int id = getUint31(b);
+            length += 1; // inner string tag
+            final String value = getInlineString(b, readUnsignedByte(b));
+            dictionaryPut(id, value);
+            return value;
+        }
+        return getInlineString(b, tag);
+    }
+
+    private String getInlineString(final ByteBuffer b, final int tag) {
+        int stringLength = tag;
         boolean ascii = true;
         if (stringLength > ValueTypeModel.STRING_ASCII_UINT8) {
             switch (stringLength) {
@@ -404,6 +439,15 @@ public class PonySDKWebDriver implements WebDriver {
                 return getString(b, StandardCharsets.UTF_8, PonySDKWebDriver::readUnsignedShort);
             case STRING_UTF8_UINT32_LENGTH:
                 return getString(b, StandardCharsets.UTF_8, ByteBuffer::getInt);
+            case STRING_DICTIONARY_REF:
+                return dictionaryGet(getUint31(b)); // min size (2) already counted above
+            case STRING_DICTIONARY_ADD: {
+                final int id = getUint31(b);
+                length += 1; // inner element tag
+                final Object value = readArrayElementValue(b, readArrayValueModel(b));
+                dictionaryPut(id, (String) value);
+                return value;
+            }
             default:
                 throw new IllegalArgumentException("ArrayValueModel " + model + " is not supported");
         }
