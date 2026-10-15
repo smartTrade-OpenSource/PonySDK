@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -83,6 +84,10 @@ import com.ponysdk.core.ui.basic.PSplitLayoutPanel;
 import com.ponysdk.core.ui.basic.PDisclosurePanel;
 import com.ponysdk.core.ui.basic.PDialogBox;
 import com.ponysdk.core.ui.basic.PFocusPanel;
+import com.ponysdk.core.ui.basic.PHTML;
+import com.ponysdk.core.ui.basic.PAnchor;
+import com.ponysdk.core.ui.basic.PTextArea;
+import com.ponysdk.core.ui.basic.PFlexTable;
 import com.ponysdk.core.ui.basic.PRichTextArea;
 import com.ponysdk.core.ui.basic.PScript;
 import com.ponysdk.core.ui.basic.PScrollPanel;
@@ -221,7 +226,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             {"◎", "Overview"},
             {"⌨", "Inputs"}, {"⊞", "Layouts"}, {"◈", "Data"},
             {"⊟", "DataGrid"}, {"◉", "Web Components"}, {"⋯", "Misc"},
-            {"⚡", "Performance"}, {"≡", "Binary protocol"}, {"</>", "Code"}, {"▦", "FlexLayout"}
+            {"⚡", "Performance"}, {"⚖", "Component costs"}, {"≡", "Binary protocol"}, {"</>", "Code"},
+            {"▦", "FlexLayout"}
         };
         final String[] groupLabels = {"Start", "Widgets", "Under the hood"};
         final int[] groupStarts = {0, 1, 7};
@@ -296,8 +302,9 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             case 5 -> buildWebCompTab(schedulers);
             case 6 -> buildMiscTab(schedulers);
             case 7 -> buildPerfTab(uiContext, schedulers);
-            case 8 -> buildBinaryAddonTab(schedulers);
-            case 9 -> buildCodeTab();
+            case 8 -> buildCostsTab();
+            case 9 -> buildBinaryAddonTab(schedulers);
+            case 10 -> buildCodeTab();
             default -> buildFlexLayoutTab();
         };
     }
@@ -746,6 +753,13 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             + ".selected-row{background:rgba(67,232,176,.14) !important;}"
             + ".misc-toolbar{gap:6px;padding:6px;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:#111216;margin-bottom:10px;}"
             + ".misc-toolbar td{padding:0 3px;}"
+            + ".cost-table{min-width:min(980px,100%);}"
+            + ".cost-table td{white-space:nowrap;}"
+            + ".cost-table td:first-child .gwt-Label{color:#fafafa;font-weight:600;}"
+            + ".cost-table td .ov-bar{width:120px;}"
+            + ".cost-fill{background:linear-gradient(90deg,#43e8b0,#7c6fff) !important;}"
+            + ".cost-row{display:flex;align-items:center;gap:14px;margin-bottom:12px;}"
+            + ".cost-body .perf-card{padding:14px 10px !important;}"
             + ".data-tree{padding:8px;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:#0a0b0e;max-width:420px;}"
             + ".data-tree .gwt-TreeItem{background:transparent !important;color:#d4d4d8 !important;border:0 !important;"
             +   "outline:none !important;padding:4px 8px !important;border-radius:6px;text-align:left !important;font-size:13px;}"
@@ -769,6 +783,185 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             + ".gwt-DatePicker .datePickerDayIsValue{background-color:var(--accent2,#43e8b0) !important;color:#08090c !important;}"
             + ".gwt-DatePicker .datePickerDayIsFiller{color:#3f3f46 !important;}"
             + "`;document.head.appendChild(s);";
+    }
+
+    // ── Tab: Component costs ─────────────────────────────────────────────────
+
+    /** What to measure for one component: how to build an instance and a typical update (receives the index). */
+    private record CostSpec(String name, Supplier<PWidget> factory, java.util.function.BiConsumer<PWidget, Integer> update,
+                            String updateLabel) {}
+
+    private static List<CostSpec> costSpecs() {
+        final List<CostSpec> l = new ArrayList<>();
+        l.add(new CostSpec("PLabel", () -> Element.newPLabel("EUR/USD 1.08512"),
+            (w, i) -> ((PLabel) w).setText("EUR/USD 1." + (8500 + i)), "setText"));
+        l.add(new CostSpec("PHTML", () -> Element.newPHTML("<b>Trade</b> confirmed"),
+            (w, i) -> ((PHTML) w).setHTML("<b>Trade</b> #" + i), "setHTML"));
+        l.add(new CostSpec("PButton", () -> Element.newPButton("Buy"),
+            (w, i) -> ((PButton) w).setText("Sell " + i), "setText"));
+        l.add(new CostSpec("PAnchor", () -> Element.newPAnchor("Docs", "https://github.com/smartTrade-OpenSource/PonySDK"),
+            (w, i) -> ((PAnchor) w).setText("Docs " + i), "setText"));
+        l.add(new CostSpec("PImage", () -> Element.newPImage("images/pony.png"),
+            (w, i) -> w.setStyleProperty("opacity", i % 2 == 0 ? "0.5" : "0.8"), "style"));
+        l.add(new CostSpec("PTextBox", () -> Element.newPTextBox(),
+            (w, i) -> ((PTextBox) w).setText("value " + i), "setText"));
+        l.add(new CostSpec("PPasswordTextBox", () -> Element.newPPasswordTextBox(),
+            (w, i) -> ((PTextBox) w).setText("secret" + i), "setText"));
+        l.add(new CostSpec("PTextArea", () -> Element.newPTextArea(),
+            (w, i) -> ((PTextArea) w).setText("Line one\nline " + i), "setText"));
+        l.add(new CostSpec("PCheckBox", () -> Element.newPCheckBox("Enable"),
+            (w, i) -> ((PCheckBox) w).setValue(Boolean.TRUE), "setValue"));
+        l.add(new CostSpec("PRadioButton", () -> Element.newPRadioButton("Option"),
+            (w, i) -> ((PRadioButton) w).setValue(Boolean.TRUE), "setValue"));
+        l.add(new CostSpec("PListBox (5 items)", () -> {
+            final PListBox lb = Element.newPListBox();
+            for (final String it : new String[] { "Spot", "Forward", "Swap", "NDF", "Option" }) lb.addItem(it);
+            return lb;
+        }, (w, i) -> ((PListBox) w).setSelectedIndex(i % 5, true), "select"));
+        l.add(new CostSpec("PDateBox", () -> Element.newPDateBox(new SimpleDateFormat("dd/MM/yyyy")),
+            (w, i) -> ((PDateBox) w).setValue(new Date(1_700_000_000_000L + i * 86_400_000L)), "setValue"));
+        l.add(new CostSpec("PFlowPanel + 3 labels", () -> {
+            final PFlowPanel fp = Element.newPFlowPanel();
+            fp.add(Element.newPLabel("Bid"), Element.newPLabel("Ask"), Element.newPLabel("Spread"));
+            return fp;
+        }, (w, i) -> w.setStyleProperty("color", i % 2 == 0 ? "#43e8b0" : "#f87171"), "style"));
+        l.add(new CostSpec("PFlexTable 3×3", () -> {
+            final PFlexTable t = Element.newPFlexTable();
+            for (int r = 0; r < 3; r++) for (int c = 0; c < 3; c++) t.setWidget(r, c, Element.newPLabel(r + ":" + c));
+            return t;
+        }, (w, i) -> w.setStyleProperty("opacity", i % 2 == 0 ? "0.9" : "1"), "style"));
+        l.add(new CostSpec("PTree (3 items)", () -> {
+            final PTree t = Element.newPTree();
+            final PTreeItem f = t.add("Desk");
+            f.add("EUR/USD");
+            f.add("GBP/USD");
+            return t;
+        }, (w, i) -> w.setStyleProperty("opacity", i % 2 == 0 ? "0.9" : "1"), "style"));
+        l.add(new CostSpec("PWebComponent <my-counter>", () -> {
+            final PWebComponent wc = new PWebComponent("my-counter");
+            wc.attr("label", "Clicks");
+            wc.property("count").set(0);
+            return wc;
+        }, (w, i) -> ((PWebComponent) w).property("count").set(i), "property"));
+        return l;
+    }
+
+    private static CostSpec costSpec(final String name) {
+        return costSpecs().stream().filter(c -> c.name().equals(name)).findFirst().orElseThrow();
+    }
+
+    private PFlowPanel buildCostsTab() {
+        final PFlowPanel p = section();
+        pageTitle(p, "Component costs",
+            "What each component really costs, measured live in this session: memory kept on the server per "
+                + "instance, and bytes per instance to create it and to update it.");
+
+        final PFlowPanel controls = Element.newPFlowPanel();
+        controls.addStyleName("ov-controls");
+        final PButton run = Element.newPButton("▶ Measure every component");
+        styleBinaryCtrl(run, true);
+        final PLabel status = Element.newPLabel("Each measurement creates " + CostMeter.SAMPLE
+            + " instances in a hidden container, updates them once, then removes them.");
+        status.addStyleName("lay-hint");
+        controls.add(run, status);
+        p.add(controls);
+
+        final com.ponysdk.core.ui.basic.PFlexTable table = Element.newPFlexTable();
+        table.addStyleName("data-table");
+        table.addStyleName("cost-table");
+        final String[] heads = { "Component", "Server memory", "", "Create · protocol", "Create · wire",
+                                 "Update", "Update · protocol", "Update · wire" };
+        for (int c = 0; c < heads.length; c++) table.setWidget(0, c, Element.newPLabel(heads[c]));
+        final List<CostSpec> specs = costSpecs();
+        for (int r = 0; r < specs.size(); r++) {
+            table.setWidget(r + 1, 0, Element.newPLabel(specs.get(r).name()));
+            for (int c = 1; c < heads.length; c++) table.setWidget(r + 1, c, Element.newPLabel(c == 5 ? specs.get(r).updateLabel() : "—"));
+        }
+        p.add(table);
+        p.add(el("ov-note", "Memory: object graph of one instance, shared objects (session, window, style pools, "
+            + "interned strings) excluded. Protocol: exact bytes produced by the binary protocol, per instance. Wire: "
+            + "bytes on the socket after permessage-deflate, per instance; " + CostMeter.SAMPLE + " similar instances "
+            + "compress very well, so this is the cost when a screen repeats a component (grids, lists)."));
+
+        final long[] maxMemory = { 1 };
+        final java.util.function.IntConsumer[] next = new java.util.function.IntConsumer[1];
+        next[0] = idx -> {
+            if (idx >= specs.size()) {
+                status.setText("Done: " + specs.size() + " components measured.");
+                run.setEnabled(true);
+                return;
+            }
+            final CostSpec spec = specs.get(idx);
+            status.setText("Measuring " + spec.name() + "…");
+            final int[] counter = { 0 };
+            CostMeter.measure(spec.name(), spec.factory(), w -> spec.update().accept(w, counter[0]++), spec.updateLabel(), cost -> {
+                maxMemory[0] = Math.max(maxMemory[0], cost.memory());
+                final int row = idx + 1;
+                table.setWidget(row, 1, Element.newPLabel(cost.memory() + " B"));
+                final PElement bar = Element.newDiv();
+                bar.addStyleName("ov-bar");
+                final PElement fill = Element.newDiv();
+                fill.addStyleName("ov-bar-fill");
+                fill.addStyleName("cost-fill");
+                fill.setAttribute("style", "width:" + Math.max(3, cost.memory() * 100 / 2048) + "%");
+                bar.add(fill);
+                table.setWidget(row, 2, bar);
+                table.setWidget(row, 3, Element.newPLabel(bytes(cost.createProtocol())));
+                table.setWidget(row, 4, Element.newPLabel(bytes(cost.createWire())));
+                table.setWidget(row, 6, Element.newPLabel(bytes(cost.updateProtocol())));
+                table.setWidget(row, 7, Element.newPLabel(bytes(cost.updateWire())));
+                next[0].accept(idx + 1);
+            });
+        };
+        run.addClickHandler(e -> {
+            run.setEnabled(false);
+            next[0].accept(0);
+        });
+        return p;
+    }
+
+    private static String bytes(final double v) {
+        if (v < 0) return "n/a";
+        return v < 10 ? String.format(java.util.Locale.ROOT, "%.1f B", v) : String.format(java.util.Locale.ROOT, "%.0f B", v);
+    }
+
+    /** "Cost" view of an example card: measures the component on demand. */
+    private static PFlowPanel costBody(final CostSpec spec) {
+        final PFlowPanel body = Element.newPFlowPanel();
+        body.addStyleName("pony-ex-body");
+        body.addStyleName("cost-body");
+        final PElement mem = el("perf-value", "—");
+        final PElement create = el("perf-value", "—");
+        final PElement upd = el("perf-value", "—");
+        final PFlowPanel grid = Element.newPFlowPanel();
+        grid.addStyleName("perf-grid");
+        grid.addStyleName("ov-live");
+        final PElement createUnit = el("perf-unit", "BYTES ON THE WIRE");
+        final PElement updUnit = el("perf-unit", "BYTES ON THE WIRE");
+        grid.add(perfCard(mem, el("perf-unit", "BYTES / INSTANCE"), el("perf-label", "Server memory")));
+        grid.add(perfCard(create, createUnit, el("perf-label", "Create")));
+        grid.add(perfCard(upd, updUnit, el("perf-label", "Update · " + spec.updateLabel())));
+        final PButton measure = Element.newPButton("Measure");
+        styleBinaryCtrl(measure, true);
+        final PLabel hint = Element.newPLabel("Creates " + CostMeter.SAMPLE + " instances in this session, updates them once, then removes them.");
+        hint.addStyleName("lay-hint");
+        measure.addClickHandler(e -> {
+            measure.setEnabled(false);
+            final int[] counter = { 0 };
+            CostMeter.measure(spec.name(), spec.factory(), w -> spec.update().accept(w, counter[0]++), spec.updateLabel(), cost -> {
+                mem.setInnerText(String.valueOf(cost.memory()));
+                create.setInnerText(bytes(cost.createWire()).replace(" B", ""));
+                createUnit.setInnerText("B ON THE WIRE · " + bytes(cost.createProtocol()) + " BEFORE DEFLATE");
+                upd.setInnerText(bytes(cost.updateWire()).replace(" B", ""));
+                updUnit.setInnerText("B ON THE WIRE · " + bytes(cost.updateProtocol()) + " BEFORE DEFLATE");
+                measure.setEnabled(true);
+            });
+        });
+        final PFlowPanel row = Element.newPFlowPanel();
+        row.addStyleName("cost-row");
+        row.add(measure, hint);
+        body.add(row, grid);
+        return body;
     }
 
     // ── Tab: Overview ────────────────────────────────────────────────────────
@@ -996,7 +1189,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         tb.addValueChangeHandler(e -> echoSet(tbEcho, "server received → \"" + e.getData() + "\""));
         p.add(exampleCard("PTextBox",
             "A text field whose value is read by a Java handler the moment it changes (Enter or blur).",
-            previewWithEcho(tb, tbEcho), snippet_exTextBox()));
+            previewWithEcho(tb, tbEcho), snippet_exTextBox(), costSpec("PTextBox")));
 
         // 2) Button — every click is a server-side lambda
         final PButton btn = Element.newPButton("Click me");
@@ -1005,7 +1198,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         btn.addClickHandler(e -> echoSet(btnEcho, "server handled click #" + (++clicks[0]) + " (pure Java lambda)"));
         p.add(exampleCard("PButton",
             "Every click invokes a Java lambda on the JVM. Only a tiny binary delta crosses the wire.",
-            previewWithEcho(btn, btnEcho), snippet_exButton()));
+            previewWithEcho(btn, btnEcho), snippet_exButton(), costSpec("PButton")));
 
         // 3) CheckBox — state lives on the server
         final PCheckBox cb = Element.newPCheckBox("Enable feature");
@@ -1013,7 +1206,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         cb.addValueChangeHandler(e -> echoSet(cbEcho, "server: checked = " + e.getData()));
         p.add(exampleCard("PCheckBox",
             "The checked state lives on the server. The handler fires the instant the box toggles.",
-            previewWithEcho(cb, cbEcho), snippet_exCheckBox()));
+            previewWithEcho(cb, cbEcho), snippet_exCheckBox(), costSpec("PCheckBox")));
 
         // 4) RadioButton group — mutually-exclusive selection
         final PFlowPanel radios = Element.newPFlowPanel();
@@ -1031,7 +1224,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         }
         p.add(exampleCard("PRadioButton (group)",
             "Grouped radios share a name; selecting one clears the others and the server learns the choice.",
-            previewWithEcho(radios, rbEcho), snippet_exRadio()));
+            previewWithEcho(radios, rbEcho), snippet_exRadio(), costSpec("PRadioButton")));
 
         // ── The long tail, kept compact for completeness ───────────────────────
         p.add(sectionTitle("More input widgets"));
@@ -1587,6 +1780,11 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     /** A card pairing a live, interactive widget with the Java source that built it (Preview / Code). */
     private static PFlowPanel exampleCard(final String title, final String desc,
                                           final PWidget preview, final String codeHtml) {
+        return exampleCard(title, desc, preview, codeHtml, null);
+    }
+
+    private static PFlowPanel exampleCard(final String title, final String desc,
+                                          final PWidget preview, final String codeHtml, final CostSpec cost) {
         final PFlowPanel card = Element.newPFlowPanel();
         card.addStyleName("pony-ex");
 
@@ -1604,6 +1802,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PButton bCode = Element.newPButton("Code");
         bPreview.addStyleName("pony-ex-seg-on");
         seg.add(bPreview, bCode);
+        final PButton bCost = cost != null ? Element.newPButton("Cost") : null;
+        if (bCost != null) seg.add(bCost);
         head.add(titleWrap, seg);
 
         final PFlowPanel previewBody = Element.newPFlowPanel();
@@ -1618,22 +1818,27 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         body.setInnerHTML(codeHtml);
         codeBody.add(body);
         codeBody.setVisible(false);
+        final PFlowPanel costBody = cost != null ? costBody(cost) : null;
+        if (costBody != null) costBody.setVisible(false);
 
         // The toggle itself runs on the server (setVisible → binary delta) — the value prop, demoed by the demo.
-        bPreview.addClickHandler(e -> {
-            previewBody.setVisible(true);
-            codeBody.setVisible(false);
-            bPreview.addStyleName("pony-ex-seg-on");
-            bCode.removeStyleName("pony-ex-seg-on");
-        });
-        bCode.addClickHandler(e -> {
-            previewBody.setVisible(false);
-            codeBody.setVisible(true);
-            bCode.addStyleName("pony-ex-seg-on");
-            bPreview.removeStyleName("pony-ex-seg-on");
-        });
+        final PWidget[] bodies = { previewBody, codeBody, costBody };
+        final PButton[] buttons = { bPreview, bCode, bCost };
+        for (int i = 0; i < buttons.length; i++) {
+            if (buttons[i] == null) continue;
+            final int sel = i;
+            buttons[i].addClickHandler(e -> {
+                for (int j = 0; j < buttons.length; j++) {
+                    if (buttons[j] == null) continue;
+                    bodies[j].setVisible(j == sel);
+                    if (j == sel) buttons[j].addStyleName("pony-ex-seg-on");
+                    else buttons[j].removeStyleName("pony-ex-seg-on");
+                }
+            });
+        }
 
         card.add(head, previewBody, codeBody);
+        if (costBody != null) card.add(costBody);
         return card;
     }
 
