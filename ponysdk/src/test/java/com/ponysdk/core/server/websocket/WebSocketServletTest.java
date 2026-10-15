@@ -182,20 +182,9 @@ public class WebSocketServletTest {
         assertNotNull(f.servlet.createWebsocket(f.request, f.response));
     }
 
-    @Test
-    public void createWebsocket_registersAnApplicationForTheHttpSession() {
-        final Fixture f = new Fixture();
-        when(f.servletContext.getSessionCookieConfig()).thenReturn(mock(SessionCookieConfig.class));
-
-        try {
-            assertNotNull(f.servlet.createWebsocket(f.request, f.response));
-            assertNotNull("an Application must be registered for the session",
-                SessionManager.get().getApplication(f.sessionId));
-        } finally {
-            final var app = SessionManager.get().getApplication(f.sessionId);
-            if (app != null) SessionManager.get().unregisterApplication(app);
-        }
-    }
+    // Session creation and Application registration are covered against a real Jetty 12 handshake (with and
+    // without a SessionHandler) by WebSocketServletHandshakeTest: the gate is the context's SessionHandler,
+    // which a mocked ServletContext cannot provide.
 
     @Test
     public void configure_setsIdleTimeoutMaxInboundSizeAndCreator() {

@@ -551,6 +551,18 @@ public class DefaultDataGridController<K, V> implements DataGridController<K, V>
     }
 
     @Override
+    public void selectKeys(final Collection<K> keys) {
+        final Interval interval = dataSource.selectKeys(keys);
+        if (interval != null) updateRows(interval.from, interval.to);
+    }
+
+    @Override
+    public void unselectKeys(final Collection<K> keys) {
+        final Interval interval = dataSource.unselectKeys(keys);
+        if (interval != null) updateRows(interval.from, interval.to);
+    }
+
+    @Override
     public void selectAllLiveData() {
         dataSource.selectAllLiveData();
     }

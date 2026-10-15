@@ -155,6 +155,16 @@ public abstract class SpyDataGridController<K, V> implements DataGridController<
     }
 
     @Override
+    public void selectKeys(final Collection<K> keys) {
+        controller.selectKeys(keys);
+    }
+
+    @Override
+    public void unselectKeys(final Collection<K> keys) {
+        controller.unselectKeys(keys);
+    }
+
+    @Override
     public void selectAllLiveData() {
         controller.selectAllLiveData();
     }

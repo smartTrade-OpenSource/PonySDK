@@ -1754,7 +1754,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         return panel;
     }
 
-    private void readFileItem(final FileItem item) throws IOException, FileNotFoundException {
+    private void readFileItem(final FileItem<?> item) throws IOException, FileNotFoundException {
         // Store the uploaded file on the server (don't forget to remove)
         final String fileName = FilenameUtils.getName(item.getName());
         final InputStream fileContent = item.getInputStream();

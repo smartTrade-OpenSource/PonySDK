@@ -53,7 +53,8 @@ public class PSuite {
         final ApplicationConfiguration configuration = Mockito.mock(ApplicationConfiguration.class);
 
         Txn.get().begin(context);
-        final UIContext uiContext = Mockito.spy(new UIContext(socket, context, configuration, request));
+        final UIContext uiContext = Mockito.spy(new UIContext(socket, context, configuration, request,
+                new com.ponysdk.core.server.websocket.UpgradeRequestData(null, null, null)));
         Mockito.when(uiContext.getWriter()).thenReturn(modelWriter);
         UIContext.setCurrent(uiContext);
     }

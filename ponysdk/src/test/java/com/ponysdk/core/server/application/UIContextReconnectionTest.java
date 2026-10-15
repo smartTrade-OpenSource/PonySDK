@@ -67,10 +67,8 @@ public class UIContextReconnectionTest {
         config.setStringDictionaryEnabled(false);
 
         oldSocket = Mockito.mock(WebSocket.class);
-        Mockito.when(oldSocket.getCachedParameterMap()).thenReturn(Map.of());
-        Mockito.when(oldSocket.getCachedUserAgent()).thenReturn("test");
-        Mockito.when(oldSocket.getCachedHttpSession()).thenReturn(
-                Mockito.mock(jakarta.servlet.http.HttpSession.class));
+        Mockito.when(oldSocket.getUpgradeRequestData()).thenReturn(
+                new com.ponysdk.core.server.websocket.UpgradeRequestData(Map.of(), "test", Mockito.mock(jakarta.servlet.http.HttpSession.class)));
 
         txnContext = new TxnContext(oldSocket);
         // Replace the ModelWriter's encoder with our spy so we can track writes
@@ -1953,10 +1951,8 @@ public class UIContextReconnectionTest {
             localConfig.setStringDictionaryEnabled(false);
 
             final WebSocket localOldSocket = Mockito.mock(WebSocket.class);
-            Mockito.when(localOldSocket.getCachedParameterMap()).thenReturn(Map.of());
-            Mockito.when(localOldSocket.getCachedUserAgent()).thenReturn("test");
-            Mockito.when(localOldSocket.getCachedHttpSession()).thenReturn(
-                    Mockito.mock(jakarta.servlet.http.HttpSession.class));
+            Mockito.when(localOldSocket.getUpgradeRequestData()).thenReturn(
+                    new com.ponysdk.core.server.websocket.UpgradeRequestData(Map.of(), "test", Mockito.mock(jakarta.servlet.http.HttpSession.class)));
 
             final TxnContext localTxn = new TxnContext(localOldSocket);
             localTxn.getWriter().setEncoder(localSpy);
@@ -3008,10 +3004,8 @@ public class UIContextReconnectionTest {
         dictConfig.setStringDictionaryMinLength(3);
 
         final WebSocket dictSocket = Mockito.mock(WebSocket.class);
-        Mockito.when(dictSocket.getCachedParameterMap()).thenReturn(Map.of());
-        Mockito.when(dictSocket.getCachedUserAgent()).thenReturn("test");
-        Mockito.when(dictSocket.getCachedHttpSession()).thenReturn(
-                Mockito.mock(jakarta.servlet.http.HttpSession.class));
+        Mockito.when(dictSocket.getUpgradeRequestData()).thenReturn(
+                new com.ponysdk.core.server.websocket.UpgradeRequestData(Map.of(), "test", Mockito.mock(jakarta.servlet.http.HttpSession.class)));
 
         final TxnContext dictTxn = new TxnContext(dictSocket);
         final JettyServerUpgradeRequest dictReq = Mockito.mock(JettyServerUpgradeRequest.class);
@@ -3345,10 +3339,8 @@ public class UIContextReconnectionTest {
 
         // Two different UIContexts have different IDs (AtomicInteger counter)
         final WebSocket otherSocket = Mockito.mock(WebSocket.class);
-        Mockito.when(otherSocket.getCachedParameterMap()).thenReturn(Map.of());
-        Mockito.when(otherSocket.getCachedUserAgent()).thenReturn("test");
-        Mockito.when(otherSocket.getCachedHttpSession()).thenReturn(
-                Mockito.mock(jakarta.servlet.http.HttpSession.class));
+        Mockito.when(otherSocket.getUpgradeRequestData()).thenReturn(
+                new com.ponysdk.core.server.websocket.UpgradeRequestData(Map.of(), "test", Mockito.mock(jakarta.servlet.http.HttpSession.class)));
         final TxnContext otherTxn = new TxnContext(otherSocket);
         final UIContext other = new UIContext(otherSocket, otherTxn, config,
                 Mockito.mock(JettyServerUpgradeRequest.class));
@@ -3598,10 +3590,8 @@ public class UIContextReconnectionTest {
         localConfig.setStringDictionaryEnabled(false);
 
         final WebSocket localSocket = Mockito.mock(WebSocket.class);
-        Mockito.when(localSocket.getCachedParameterMap()).thenReturn(Map.of());
-        Mockito.when(localSocket.getCachedUserAgent()).thenReturn("test");
-        Mockito.when(localSocket.getCachedHttpSession()).thenReturn(
-                Mockito.mock(jakarta.servlet.http.HttpSession.class));
+        Mockito.when(localSocket.getUpgradeRequestData()).thenReturn(
+                new com.ponysdk.core.server.websocket.UpgradeRequestData(Map.of(), "test", Mockito.mock(jakarta.servlet.http.HttpSession.class)));
 
         final TxnContext localTxn = new TxnContext(localSocket);
         localTxn.getWriter().setEncoder(new SpyEncoder());
@@ -3758,10 +3748,8 @@ public class UIContextReconnectionTest {
             localConfig.setStringDictionaryEnabled(false);
 
             final WebSocket sock = Mockito.mock(WebSocket.class);
-            Mockito.when(sock.getCachedParameterMap()).thenReturn(Map.of());
-            Mockito.when(sock.getCachedUserAgent()).thenReturn("test");
-            Mockito.when(sock.getCachedHttpSession()).thenReturn(
-                    Mockito.mock(jakarta.servlet.http.HttpSession.class));
+            Mockito.when(sock.getUpgradeRequestData()).thenReturn(
+                    new com.ponysdk.core.server.websocket.UpgradeRequestData(Map.of(), "test", Mockito.mock(jakarta.servlet.http.HttpSession.class)));
 
             final TxnContext localTxn = new TxnContext(sock);
             localTxn.getWriter().setEncoder(new SpyEncoder());
@@ -3940,10 +3928,8 @@ public class UIContextReconnectionTest {
         localConfig.setStringDictionaryEnabled(false);
 
         final WebSocket localSocket = Mockito.mock(WebSocket.class);
-        Mockito.when(localSocket.getCachedParameterMap()).thenReturn(Map.of());
-        Mockito.when(localSocket.getCachedUserAgent()).thenReturn("test");
-        Mockito.when(localSocket.getCachedHttpSession()).thenReturn(
-                Mockito.mock(jakarta.servlet.http.HttpSession.class));
+        Mockito.when(localSocket.getUpgradeRequestData()).thenReturn(
+                new com.ponysdk.core.server.websocket.UpgradeRequestData(Map.of(), "test", Mockito.mock(jakarta.servlet.http.HttpSession.class)));
 
         final TxnContext localTxn = new TxnContext(localSocket);
         localTxn.getWriter().setEncoder(new SpyEncoder());
@@ -4134,10 +4120,8 @@ public class UIContextReconnectionTest {
 
         // Create a second UIContext
         final WebSocket sock2 = Mockito.mock(WebSocket.class);
-        Mockito.when(sock2.getCachedParameterMap()).thenReturn(Map.of());
-        Mockito.when(sock2.getCachedUserAgent()).thenReturn("test2");
-        Mockito.when(sock2.getCachedHttpSession()).thenReturn(
-                Mockito.mock(jakarta.servlet.http.HttpSession.class));
+        Mockito.when(sock2.getUpgradeRequestData()).thenReturn(
+                new com.ponysdk.core.server.websocket.UpgradeRequestData(Map.of(), "test2", Mockito.mock(jakarta.servlet.http.HttpSession.class)));
         final TxnContext txn2 = new TxnContext(sock2);
         txn2.getWriter().setEncoder(new SpyEncoder());
         txn2.setApplication(app);
@@ -4305,10 +4289,8 @@ public class UIContextReconnectionTest {
         localConfig.setStringDictionaryEnabled(false);
 
         final WebSocket localSocket = Mockito.mock(WebSocket.class);
-        Mockito.when(localSocket.getCachedParameterMap()).thenReturn(Map.of());
-        Mockito.when(localSocket.getCachedUserAgent()).thenReturn("test");
-        Mockito.when(localSocket.getCachedHttpSession()).thenReturn(
-                Mockito.mock(jakarta.servlet.http.HttpSession.class));
+        Mockito.when(localSocket.getUpgradeRequestData()).thenReturn(
+                new com.ponysdk.core.server.websocket.UpgradeRequestData(Map.of(), "test", Mockito.mock(jakarta.servlet.http.HttpSession.class)));
 
         final TxnContext localTxn = new TxnContext(localSocket);
         localTxn.getWriter().setEncoder(new SpyEncoder());
@@ -4557,10 +4539,8 @@ public class UIContextReconnectionTest {
         localConfig.setStringDictionaryEnabled(false);
 
         final WebSocket localSocket = Mockito.mock(WebSocket.class);
-        Mockito.when(localSocket.getCachedParameterMap()).thenReturn(Map.of());
-        Mockito.when(localSocket.getCachedUserAgent()).thenReturn("test");
-        Mockito.when(localSocket.getCachedHttpSession()).thenReturn(
-                Mockito.mock(jakarta.servlet.http.HttpSession.class));
+        Mockito.when(localSocket.getUpgradeRequestData()).thenReturn(
+                new com.ponysdk.core.server.websocket.UpgradeRequestData(Map.of(), "test", Mockito.mock(jakarta.servlet.http.HttpSession.class)));
 
         final TxnContext localTxn = new TxnContext(localSocket);
         localTxn.getWriter().setEncoder(new SpyEncoder());
@@ -4870,10 +4850,8 @@ public class UIContextReconnectionTest {
         localConfig.setStringDictionaryEnabled(false);
 
         final WebSocket localSocket = Mockito.mock(WebSocket.class);
-        Mockito.when(localSocket.getCachedParameterMap()).thenReturn(Map.of());
-        Mockito.when(localSocket.getCachedUserAgent()).thenReturn("test");
-        Mockito.when(localSocket.getCachedHttpSession()).thenReturn(
-                Mockito.mock(jakarta.servlet.http.HttpSession.class));
+        Mockito.when(localSocket.getUpgradeRequestData()).thenReturn(
+                new com.ponysdk.core.server.websocket.UpgradeRequestData(Map.of(), "test", Mockito.mock(jakarta.servlet.http.HttpSession.class)));
 
         final TxnContext localTxn = new TxnContext(localSocket);
         localTxn.getWriter().setEncoder(new SpyEncoder());
@@ -5002,10 +4980,8 @@ public class UIContextReconnectionTest {
 
         // Create a second UIContext
         final WebSocket sock2 = Mockito.mock(WebSocket.class);
-        Mockito.when(sock2.getCachedParameterMap()).thenReturn(Map.of());
-        Mockito.when(sock2.getCachedUserAgent()).thenReturn("test2");
-        Mockito.when(sock2.getCachedHttpSession()).thenReturn(
-                Mockito.mock(jakarta.servlet.http.HttpSession.class));
+        Mockito.when(sock2.getUpgradeRequestData()).thenReturn(
+                new com.ponysdk.core.server.websocket.UpgradeRequestData(Map.of(), "test2", Mockito.mock(jakarta.servlet.http.HttpSession.class)));
         final TxnContext txn2 = new TxnContext(sock2);
         txn2.getWriter().setEncoder(new SpyEncoder());
         final UIContext ctx2 = new UIContext(sock2, txn2, config,

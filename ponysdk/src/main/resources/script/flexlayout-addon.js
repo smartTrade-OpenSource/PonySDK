@@ -30,6 +30,8 @@
       this._tabWidgetMap = {};
       this._pendingTimeouts = [];
       this._autoSaveEnabled = false; // Feature 14
+      this._iconMode = 'text';       // 'text' or 'attribute'
+      this._iconAttribute = 'ui-icon';
       this._buttonConfig = {
         popoutFloat:  { visible: true, icon: '⧉', title: 'Pop out (overlay)', className: 'fl-tbtn fl-tbtn-popout', style: 'font-size:11px;' },
         popoutWindow: { visible: true, icon: '↗', title: 'Pop out (new window)', className: 'fl-tbtn fl-tbtn-popout-win', style: 'font-size:12px;' }
@@ -316,22 +318,26 @@
 
     // ─── Server API ─────────────────────────────────────────────
 
-    addTab: function (tabId, tabName, widgetId, tabsetId) {
+    addTab: function (tabId, tabName, widgetId, tabsetId, icon) {
       if (!this._model) return;
       if (this._popOuts) delete this._popOuts[tabId]; // the server re-added it, it is no longer out
       this._tabWidgetMap[tabId] = widgetId;
+      var tabDef = { id: tabId, name: tabName, component: 'pwidget', config: { widgetId: widgetId } };
+      if (icon) tabDef.icon = icon;
       this._model.doAction({
         type: 'ADD_TAB', tabsetId: tabsetId || null, select: true,
-        tab: { id: tabId, name: tabName, component: 'pwidget', config: { widgetId: widgetId } }
+        tab: tabDef
       });
     },
 
-    addPinnedTab: function (tabId, tabName, widgetId, tabsetId) {
+    addPinnedTab: function (tabId, tabName, widgetId, tabsetId, icon) {
       if (!this._model) return;
       this._tabWidgetMap[tabId] = widgetId;
+      var tabDef = { id: tabId, name: tabName, component: 'pwidget', config: { widgetId: widgetId }, enableClose: false, enableDrag: false };
+      if (icon) tabDef.icon = icon;
       this._model.doAction({
         type: 'ADD_TAB', tabsetId: tabsetId || null, select: true,
-        tab: { id: tabId, name: tabName, component: 'pwidget', config: { widgetId: widgetId }, enableClose: false, enableDrag: false }
+        tab: tabDef
       });
     },
 
@@ -425,6 +431,20 @@
             if (theme) info.win.classList.add(theme);
           }
         }
+      }
+    },
+
+    /**
+     * Configures how icons are rendered in tabs and sidebars.
+     * @param mode 'text' (default) or 'attribute'
+     * @param attributeName HTML attribute name for 'attribute' mode (default: 'ui-icon')
+     */
+    setIconMode: function (mode, attributeName) {
+      this._iconMode = mode || 'text';
+      this._iconAttribute = attributeName || 'ui-icon';
+      // Propagate to the layout instance for sidebar/tab rendering
+      if (this._layout) {
+        this._layout.setIconMode(this._iconMode, this._iconAttribute);
       }
     },
 

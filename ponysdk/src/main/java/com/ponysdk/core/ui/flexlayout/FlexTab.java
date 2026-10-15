@@ -54,6 +54,7 @@ public final class FlexTab {
     String toJson() {
         final JsonObjectBuilder b = Json.createObjectBuilder().add("name", name);
         if (component != null) b.add("component", component);
+        if (icon != null) b.add("icon", icon);
         b.add("enableClose", enableClose);
         b.add("enableDrag", enableDrag);
         if (config != null) b.add("config", Json.createReader(new java.io.StringReader(config)).readObject());

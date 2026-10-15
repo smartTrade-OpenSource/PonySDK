@@ -107,7 +107,8 @@ public class SessionManagerTest {
 
         manager.unregisterApplication(application);
         registered.remove(application);
-        verify(listener).onApplicationDestroyed(application);
+        // the status-code overload is the one SessionManager calls (its default delegates to the 1-arg one)
+        verify(listener).onApplicationDestroyed(org.mockito.ArgumentMatchers.eq(application), org.mockito.ArgumentMatchers.anyInt());
     }
 
     @Test

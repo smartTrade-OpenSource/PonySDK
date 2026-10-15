@@ -32,6 +32,11 @@ import java.util.Set;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
+import java.time.Duration;
+
+import jakarta.servlet.http.HttpSession;
+
+import org.eclipse.jetty.ee11.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee11.websocket.server.JettyServerUpgradeRequest;
 import org.eclipse.jetty.ee11.websocket.server.JettyServerUpgradeResponse;
 import org.eclipse.jetty.ee11.websocket.server.JettyWebSocketServlet;
@@ -113,6 +118,11 @@ public class WebSocketServlet extends JettyWebSocketServlet {
 
         final WebSocket webSocket = new WebSocket();
         webSocket.setRequest(request);
+        // Capture request-derived data NOW, while the upgrade request is still live. Jetty 12 recycles
+        // the underlying servlet request once the upgrade completes, so any later read (parameter map,
+        // headers, session) throws NPE or returns another request's data. UIContext serves this snapshot.
+        final UpgradeRequestData upgradeRequestData = captureUpgradeData(request);
+        webSocket.setUpgradeRequestData(upgradeRequestData);
         webSocket.setApplicationManager(applicationManager);
         webSocket.setMonitor(monitor);
         webSocket.setMetrics(metrics);
@@ -144,17 +154,97 @@ public class WebSocketServlet extends JettyWebSocketServlet {
             }
         }
 
-        if (request.getHttpServletRequest().getServletContext().getSessionCookieConfig() != null) {
-            configureWithSession(request, context);
+        if (hasSessionHandler(request)) {
+            // The Application is keyed on the session of the snapshot, the one UIContext.getSession() serves. Asking the
+            // request again could create another one if the first was invalidated in between (a page reload closing the
+            // previous socket). Only an override of captureUpgradeData that did not create it falls back to the request.
+            final HttpSession session = upgradeRequestData.getSession() != null ? upgradeRequestData.getSession()
+                    : (HttpSession) request.getSession();
+            configureWithSession(session, context);
         }
 
         return webSocket;
     }
 
-    protected void configureWithSession(final JettyServerUpgradeRequest request, final TxnContext context) {
-        // Force session creation if there is no session
-        request.getHttpServletRequest().getSession(true);
-        final HttpSession httpSession = request.getHttpServletRequest().getSession();
+    /**
+     * Snapshots everything the application reads from the upgrade request while it is still live, and creates the
+     * HTTP session that the snapshot holds when the servlet context has a SessionHandler. Protected so that a subclass
+     * can adjust the snapshot: an override should start from {@code super.captureUpgradeData(request)}, the step that
+     * creates the session.
+     * <p>
+     * Do not throw to reject a client: Jetty answers a generic 500 ("Could not create WebSocket endpoint") without
+     * logging the cause, and the session created here is left behind. {@link UpgradeRequestData} has a fixed set of
+     * fields and nothing carries other handshake data per connection (the Application, hence the TxnContext
+     * attributes, is shared by every tab of the HTTP session): a server that needs another field must add it to
+     * {@link UpgradeRequestData}.
+     */
+    protected UpgradeRequestData captureUpgradeData(final JettyServerUpgradeRequest request) {
+        java.util.Map<String, java.util.List<String>> parameterMap = null;
+        java.util.Map<String, java.util.List<String>> headers = null;
+        java.util.List<java.net.HttpCookie> cookies = null;
+        String host = null;
+        boolean secure = false;
+        java.net.SocketAddress remoteSocketAddress = null;
+        String userAgent = null;
+        HttpSession session = null;
+        try {
+            parameterMap = request.getParameterMap();
+        } catch (final Throwable t) {
+            log.warn("Cannot read parameter map from upgrade request", t);
+        }
+        try {
+            headers = request.getHeaders();
+        } catch (final Throwable t) {
+            log.warn("Cannot read headers from upgrade request", t);
+        }
+        try {
+            cookies = request.getCookies();
+        } catch (final Throwable t) {
+            log.warn("Cannot read cookies from upgrade request", t);
+        }
+        try {
+            host = request.getHost();
+        } catch (final Throwable t) {
+            log.warn("Cannot read host from upgrade request", t);
+        }
+        try {
+            secure = request.isSecure();
+        } catch (final Throwable t) {
+            log.warn("Cannot read secure flag from upgrade request", t);
+        }
+        try {
+            remoteSocketAddress = request.getRemoteSocketAddress();
+        } catch (final Throwable t) {
+            log.warn("Cannot read remote socket address from upgrade request", t);
+        }
+        try {
+            userAgent = request.getHeader("User-Agent");
+        } catch (final Throwable t) {
+            log.warn("Cannot read User-Agent from upgrade request", t);
+        }
+        try {
+            // Create the session here, so that the snapshot holds it for the whole WebSocket lifetime and
+            // createWebsocket keys the Application on it. Asked for explicitly with getSession(true) instead
+            // of through JettyServerUpgradeRequest.getSession(), whose create-or-not behaviour is Jetty's
+            // (12.1.13 delegates to HttpServletRequest.getSession(), which creates). A context without a
+            // SessionHandler has no session to create: getSession(true) would only throw "No SessionManager".
+            if (hasSessionHandler(request)) {
+                session = request.getHttpServletRequest().getSession(true);
+            }
+        } catch (final Throwable t) {
+            log.warn("Cannot read session from upgrade request", t);
+        }
+        return new UpgradeRequestData(parameterMap, headers, cookies, host, secure, remoteSocketAddress,
+                userAgent, session);
+    }
+
+    private static boolean hasSessionHandler(final JettyServerUpgradeRequest request) {
+        final ServletContextHandler contextHandler = ServletContextHandler
+            .getServletContextHandler(request.getHttpServletRequest().getServletContext());
+        return contextHandler != null && contextHandler.getSessionHandler() != null;
+    }
+
+    protected void configureWithSession(final HttpSession httpSession, final TxnContext context) {
         if (httpSession != null) {
             final String applicationId = httpSession.getId();
 

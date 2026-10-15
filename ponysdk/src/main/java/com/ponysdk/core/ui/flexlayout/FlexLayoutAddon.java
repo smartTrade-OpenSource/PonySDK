@@ -114,13 +114,38 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
     // ─── Tab Management ──────────────────────────────────────────
 
     public void addTab(final String tabId, final String tabName, final PWidget content) {
-        addTab(tabId, tabName, content, null);
+        addTab(tabId, tabName, content, null, null);
     }
 
     public void addTab(final String tabId, final String tabName, final PWidget content, final String tabsetId) {
+        addTab(tabId, tabName, content, tabsetId, null);
+    }
+
+    public void addTab(final String tabId, final String tabName, final PWidget content, final String tabsetId, final String icon) {
         addContent(content);
         tabWidgets.put(tabId, content);
-        callTerminalMethod("addTab", tabId, tabName, String.valueOf(content.getID()), tabsetId);
+        callTerminalMethod("addTab", tabId, tabName, String.valueOf(content.getID()), tabsetId, icon);
+    }
+
+    /**
+     * Adds a tab using a widget that describes itself via {@link FlexLayoutAware}.
+     *
+     * @param tabId unique tab identifier
+     * @param content the widget to display, providing its own title and icon
+     */
+    public <T extends PWidget & FlexLayoutAware> void addTab(final String tabId, final T content) {
+        addTab(tabId, content, null);
+    }
+
+    /**
+     * Adds a tab using a widget that describes itself via {@link FlexLayoutAware}.
+     *
+     * @param tabId unique tab identifier
+     * @param content the widget to display, providing its own title and icon
+     * @param tabsetId target tabset, or null for the active/default tabset
+     */
+    public <T extends PWidget & FlexLayoutAware> void addTab(final String tabId, final T content, final String tabsetId) {
+        addTab(tabId, content.getFlexTitle(), content, tabsetId, content.getFlexIcon());
     }
 
     public void attachWidgetToTab(final String tabId, final PWidget content) {
@@ -157,6 +182,29 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
         addContent(content);
         tabWidgets.put(tabId, content);
         callTerminalMethod("addBorderTab", side, tabId, tabName, String.valueOf(content.getID()), index >= 0 ? index : null, icon);
+    }
+
+    /**
+     * Adds a border/sidebar tab using a widget that describes itself via {@link FlexLayoutAware}.
+     *
+     * @param side the border side ("left", "right", "bottom")
+     * @param tabId unique tab identifier
+     * @param content the widget to display, providing its own title and icon
+     */
+    public <T extends PWidget & FlexLayoutAware> void addBorderTab(final String side, final String tabId, final T content) {
+        addBorderTab(side, tabId, content, -1);
+    }
+
+    /**
+     * Adds a border/sidebar tab using a widget that describes itself via {@link FlexLayoutAware}.
+     *
+     * @param side the border side ("left", "right", "bottom")
+     * @param tabId unique tab identifier
+     * @param content the widget to display, providing its own title and icon
+     * @param index position in the sidebar, or -1 to append
+     */
+    public <T extends PWidget & FlexLayoutAware> void addBorderTab(final String side, final String tabId, final T content, final int index) {
+        addBorderTab(side, tabId, content.getFlexTitle(), content, index, content.getFlexIcon());
     }
 
     public void removeBorderTab(final String side, final String tabId) {
@@ -576,6 +624,35 @@ public class FlexLayoutAddon extends PAddOnComposite<PFlowPanel> {
 
     public void setOnTabHidden(final Consumer<String> handler) {
         this.onTabHidden = handler;
+    }
+
+    // ─── Icon rendering mode ─────────────────────────────────────
+
+    /**
+     * Configures how icons are rendered in tabs and sidebars.
+     * <p>
+     * Two modes are supported:
+     * <ul>
+     *   <li>{@code "text"} (default): the icon value is inserted as text content</li>
+     *   <li>{@code "attribute"}: the icon value is set as an HTML attribute, allowing
+     *       CSS-based icon fonts (e.g. Design System with {@code ui-icon} attribute)</li>
+     * </ul>
+     *
+     * @param mode "text" or "attribute"
+     * @param attributeName the HTML attribute name to use in "attribute" mode (default: "ui-icon")
+     */
+    public void setIconMode(final String mode, final String attributeName) {
+        callTerminalMethod("setIconMode", mode, attributeName);
+    }
+
+    /**
+     * Configures icon rendering to use an HTML attribute.
+     * <p>
+     * Shorthand for {@code setIconMode("attribute", "ui-icon")} - compatible with
+     * the smartTrade Design System.
+     */
+    public void setIconModeAttribute() {
+        setIconMode("attribute", "ui-icon");
     }
 
     // ─── Lifecycle ───────────────────────────────────────────────

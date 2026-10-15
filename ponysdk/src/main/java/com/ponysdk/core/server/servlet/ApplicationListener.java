@@ -8,4 +8,8 @@ public interface ApplicationListener {
     void onApplicationCreated(Application application);
 
     void onApplicationDestroyed(Application application);
+
+    default void onApplicationDestroyed(Application application, int statusCode) {
+        onApplicationDestroyed(application);
+    }
 }

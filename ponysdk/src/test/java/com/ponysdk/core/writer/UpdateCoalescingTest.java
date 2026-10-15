@@ -85,9 +85,8 @@ public class UpdateCoalescingTest {
         wire = new Wire();
         wire.version = protocolVersion;
         final WebSocket socket = Mockito.mock(WebSocket.class);
-        Mockito.when(socket.getCachedParameterMap()).thenReturn(Map.of());
-        Mockito.when(socket.getCachedUserAgent()).thenReturn("test");
-        Mockito.when(socket.getCachedHttpSession()).thenReturn(Mockito.mock(jakarta.servlet.http.HttpSession.class));
+        Mockito.when(socket.getUpgradeRequestData()).thenReturn(
+                new com.ponysdk.core.server.websocket.UpgradeRequestData(Map.of(), "test", Mockito.mock(jakarta.servlet.http.HttpSession.class)));
         final TxnContext txn = new TxnContext(socket);
         txn.getWriter().setEncoder(wire);
         final ApplicationConfiguration config = new ApplicationConfiguration();

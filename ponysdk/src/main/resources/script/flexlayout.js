@@ -495,6 +495,10 @@
       this._dropInd        = this._mkDropInd();
       this._stripW         = null; // cached strip width
 
+      // Icon rendering mode: 'text' (default) or 'attribute'
+      this._iconMode = 'text';
+      this._iconAttribute = 'ui-icon';
+
       // Feature 13: Undo/redo
       this._actionHistory = [];
       this._historyIndex = -1;
@@ -612,6 +616,16 @@
     setTouchEnabled(v) { this._touchEnabled = !!v; }
     setContextMenuEnabled(v) { this._contextMenuEnabled = !!v; }
     setUndoEnabled(v) { this._undoEnabled = !!v; }
+    /**
+     * Configures how icons are rendered in tabs and sidebars.
+     * @param mode 'text' (default) or 'attribute'
+     * @param attributeName HTML attribute name for 'attribute' mode (default: 'ui-icon')
+     */
+    setIconMode(mode, attributeName) {
+      this._iconMode = mode || 'text';
+      this._iconAttribute = attributeName || 'ui-icon';
+      this._render(); // Re-render to apply new icon mode
+    }
     setLocked(v) {
       this._locked = !!v;
       this.container.classList.toggle('fl-layout-locked', this._locked);
@@ -620,6 +634,19 @@
     setBadge(tabId, badge, color) {
       const tab = this.model.findById(tabId);
       if (tab) { tab.badge = badge; tab.badgeColor = color || null; this._render(); }
+    }
+
+    /**
+     * Renders an icon into a container element based on the current icon mode.
+     * @param iconKey the icon key/name
+     * @param container the DOM element to render into
+     */
+    _renderIcon(iconKey, container) {
+      if (this._iconMode === 'attribute') {
+        container.setAttribute(this._iconAttribute, iconKey);
+      } else {
+        container.textContent = iconKey;
+      }
     }
 
     setBorderMinSize(side, min) {
@@ -967,7 +994,7 @@
       if (showIcon) {
         const ic = document.createElement('span');
         ic.className = 'fl-sidebar-tab-icon';
-        ic.textContent = icon;
+        this._renderIcon(icon, ic);
         btn.appendChild(ic);
       }
       if (showLabel) {
@@ -1609,7 +1636,7 @@
 
       if (tab.getIcon()) {
         const ic = document.createElement('span');
-        ic.className = 'fl-tab-icon'; ic.textContent = tab.getIcon();
+        ic.className = 'fl-tab-icon'; this._renderIcon(tab.getIcon(), ic);
         btn.appendChild(ic);
       }
       const lbl = document.createElement('span');
@@ -1739,7 +1766,7 @@
         ghost.className = 'fl-tab fl-drag-ghost';
         if (!d.isNew && d.tab.getIcon()) {
           const ic = document.createElement('span');
-          ic.className = 'fl-tab-icon'; ic.textContent = d.tab.getIcon();
+          ic.className = 'fl-tab-icon'; this._renderIcon(d.tab.getIcon(), ic);
           ghost.appendChild(ic);
         }
         const lbl = document.createElement('span');

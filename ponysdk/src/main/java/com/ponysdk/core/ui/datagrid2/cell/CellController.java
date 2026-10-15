@@ -37,4 +37,10 @@ public interface CellController<V> {
      * Unselects the row that this cell belongs to
      */
     void unselectRow();
+
+    /**
+     * Performs a range selection (Quick Selection) from the last clicked row to this row,
+     * replicating the Shift+Click behavior available on the row itself.
+     */
+    void selectRange();
 }

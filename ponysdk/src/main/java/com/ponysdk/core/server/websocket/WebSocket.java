@@ -43,11 +43,9 @@ import org.slf4j.LoggerFactory;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonReader;
-import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.ByteBuffer;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -75,9 +73,9 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
     private static final long RECONNECT_SUSPEND_POLL_MS = 20;
 
     private JettyServerUpgradeRequest request;
-    private Map<String, List<String>> cachedParameterMap;
-    private String cachedUserAgent;
-    private HttpSession cachedHttpSession;
+    // Snapshot of the upgrade request, captured by WebSocketServlet#captureUpgradeData while the request
+    // is still live (Jetty 12 recycles it after the upgrade). UIContext serves its accessors from it.
+    private UpgradeRequestData upgradeRequestData;
     private WebsocketMonitor monitor;
     private WebSocketPusher websocketPusher;
     private ApplicationManager applicationManager;
@@ -104,6 +102,14 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
         this.reconnectContextId = id;
     }
 
+    // Jetty 12 WebSocket connection, resolved at open, exposing true post-compression wire byte
+    // counters (getBytesIn/getBytesOut). Used to feed onIncoming/OutgoingWebSocketFrame with real
+    // on-the-wire byte deltas — replacing the removed PonyPerMessageDeflateExtension. Null if the
+    // Jetty session type ever changes (guarded, degrades to no wire-byte accounting).
+    // volatile: written at open / on setListener (app thread), read on the I/O flush/inbound threads.
+    private volatile org.eclipse.jetty.websocket.core.WebSocketConnection connection;
+    private volatile long lastBytesIn;
+
     public WebSocket() {
     }
 
@@ -112,6 +118,7 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
         try {
             if (!session.isOpen()) throw new IllegalStateException("Session already closed");
             this.session = session;
+            this.connection = resolveConnection(session);
 
             // #4 Slow-consumer backpressure: the pusher keeps a single send in flight and waits
             // up to this timeout for the previous send before disconnecting a stuck client.
@@ -120,6 +127,7 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
                     ? cfg.getWsSendTimeoutMs()
                     : TimeUnit.SECONDS.toMillis(60);
             this.websocketPusher = new WebSocketPusher(session, 1 << 15, sendTimeoutMs, BUFFER_POOL);
+            this.websocketPusher.setConnection(connection);
 
             // Transparent reconnection: resume a suspended UIContext instead of creating a new one
             if (reconnectContextId >= 0) {
@@ -149,7 +157,7 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
                 }
             }
 
-            uiContext = new UIContext(this, context, applicationManager.getConfiguration(), request,
+            uiContext = new UIContext(this, context, applicationManager.getConfiguration(), request, upgradeRequestData,
                     applicationManager.getSharedDictionaryProvider());
             log.info("Creating a new {}", uiContext);
 
@@ -218,7 +226,7 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
         // During suspension, the old WebSocket may still fire errors (e.g. broken pipe).
         // Do NOT destroy the UIContext — it is waiting for a new WebSocket to resume.
         if (!uiContext.isSuspended()) {
-            uiContext.onDestroy();
+            uiContext.onDestroy(StatusCode.SERVER_ERROR);
         }
     }
 
@@ -245,7 +253,7 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
                 // Transparent reconnection enabled — suspend instead of destroy
                 uiContext.suspend(config.getReconnectionTimeoutMs());
             } else {
-                uiContext.onDestroy();
+                uiContext.onDestroy(statusCode);
             }
         } finally {
             callback.succeed();
@@ -258,7 +266,10 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
 
     @Override
     public void onWebSocketText(final String message) {
-        if (this.listener != null) listener.onIncomingText(message);
+        if (this.listener != null) {
+            listener.onIncomingText(message);
+            sampleIncomingWireBytes();
+        }
         if (isAlive()) {
             try {
                 uiContext.onMessageReceived();
@@ -376,6 +387,53 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
     public void onWebSocketBinary(final ByteBuffer payload, final Callback callback) {
         callback.succeed();
         // Can't receive binary data from terminal (GWT limitation)
+        callback.succeed();
+    }
+
+    /**
+     * Resolve the Jetty 12 {@link org.eclipse.jetty.websocket.core.WebSocketConnection} from the API
+     * session, to read true post-compression wire byte counters. Returns null (safe: no wire-byte
+     * accounting) if the session/core types differ from the expected Jetty implementation.
+     */
+    private static org.eclipse.jetty.websocket.core.WebSocketConnection resolveConnection(final Session session) {
+        try {
+            final org.eclipse.jetty.websocket.core.CoreSession core =
+                    ((org.eclipse.jetty.websocket.common.WebSocketSession) session).getCoreSession();
+            return ((org.eclipse.jetty.websocket.core.WebSocketCoreSession) core).getConnection();
+        } catch (final Throwable t) {
+            log.warn("Cannot resolve WebSocketConnection for wire-byte accounting; incoming/outgoing "
+                    + "WebSocket-frame byte metrics will be unavailable", t);
+            return null;
+        }
+    }
+
+    /**
+     * Report the INCOMING on-the-wire (post-compression) byte delta since the last sample to
+     * {@link Listener#onIncomingWebSocketFrame}. Replaces the removed PonyPerMessageDeflateExtension
+     * incoming hook. Sampled on each inbound text message; totals over any window are exact, though a
+     * burst between samples is attributed as a single increment.
+     */
+    private void sampleIncomingWireBytes() {
+        if (connection == null) return;
+        final long total = connection.getBytesIn();
+        final long delta = total - lastBytesIn;
+        lastBytesIn = total;
+        reportWireBytes(delta, true);
+    }
+
+    /**
+     * Report a wire-byte delta to the listener, splitting it into Integer.MAX_VALUE-sized chunks so the
+     * int-typed onIncoming/OutgoingWebSocketFrame callbacks cannot overflow on long-lived connections.
+     */
+    private void reportWireBytes(long delta, final boolean incoming) {
+        final Listener l = this.listener;
+        if (l == null) return;
+        while (delta > 0) {
+            final int chunk = (int) Math.min(delta, Integer.MAX_VALUE);
+            if (incoming) l.onIncomingWebSocketFrame(0, chunk);
+            else l.onOutgoingWebSocketFrame(0, chunk);
+            delta -= chunk;
+        }
     }
 
     /**
@@ -428,7 +486,7 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
             if (uiContext != null) uiContext.onMessageSent();
         } catch (final IOException e) {
             log.error("Can't write on the websocket for #{}, so we destroy the application", uiContext.getID(), e);
-            uiContext.onDestroy();
+            uiContext.onDestroy(StatusCode.SERVER_ERROR);
         }
     }
 
@@ -487,7 +545,7 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
             if (listener != null) listener.onOutgoingPonyFrame(model, value);
         } catch (final IOException e) {
             log.error("Can't write on the websocket for UIContext #{}, so we destroy the application", uiContext.getID(), e);
-            uiContext.destroy();
+            uiContext.onDestroy(StatusCode.SERVER_ERROR);
         }
     }
 
@@ -565,23 +623,15 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
 
     public void setRequest(final JettyServerUpgradeRequest request) {
         this.request = request;
-        // Snapshot request data NOW — Jetty 12 recycles the underlying HTTP request
-        // after the WebSocket upgrade, so these will be unavailable in onWebSocketOpen.
-        this.cachedParameterMap = request.getParameterMap();
-        this.cachedUserAgent = request.getHeader("User-Agent");
-        this.cachedHttpSession = request.getHttpServletRequest().getSession();
     }
 
-    public Map<String, List<String>> getCachedParameterMap() {
-        return cachedParameterMap;
+    public void setUpgradeRequestData(final UpgradeRequestData upgradeRequestData) {
+        this.upgradeRequestData = upgradeRequestData;
     }
 
-    public String getCachedUserAgent() {
-        return cachedUserAgent;
-    }
-
-    public HttpSession getCachedHttpSession() {
-        return cachedHttpSession;
+    /** The handshake snapshot (null until set by the servlet). */
+    public UpgradeRequestData getUpgradeRequestData() {
+        return upgradeRequestData;
     }
 
     public void setApplicationManager(final ApplicationManager applicationManager) {
@@ -603,8 +653,22 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
     public void setListener(final Listener listener) {
         this.listener = listener;
         this.websocketPusher.setWebSocketListener(listener);
-        // Frame-level compression monitoring disabled — PonyPerMessageDeflateExtension removed in Jetty 12 migration
-        // permessage-deflate is handled natively by Jetty 12
+        // Wire-level WebSocket byte accounting (onIncoming/OutgoingWebSocketFrame) reports TRUE
+        // post-compression on-the-wire bytes, read from the Jetty 12 WebSocketConnection counters
+        // (getBytesIn/getBytesOut) as deltas — replacing the removed PonyPerMessageDeflateExtension.
+        // It DOES depend on Jetty classes (WebSocketSession / WebSocketCoreSession / WebSocketConnection)
+        // via resolveConnection(); those casts are guarded and degrade to no wire-byte accounting (a WARN)
+        // if a future Jetty release changes the types — the app is otherwise unaffected. INCOMING is
+        // sampled per inbound text message (sampleIncomingWireBytes); OUTGOING per flush
+        // (WebSocketPusher#doFlush). Both counters are re-baselined to the connection's current totals
+        // here, so the first sample reports only traffic AFTER the listener is set (not the whole session).
+        // Values are wire deltas (framing + compressed payload) reported as (header=0, payload=delta);
+        // window totals are exact. The Pony-frame accounting (onOutgoingPonyFramesBytes /
+        // onOutgoingPonyFrame) remains the uncompressed application-level view and is unaffected.
+        if (connection != null) {
+            lastBytesIn = connection.getBytesIn();
+            websocketPusher.rebaseWireBytes();
+        }
     }
 
     public interface Listener {

@@ -411,7 +411,10 @@ public class WebSocketPusher implements Closeable {
         sendSync.reset(toSend);
         session.sendBinary(toSend, sendSync);
 
-        if (listener != null) listener.onOutgoingPonyFramesBytes(bytes);
+        if (listener != null) {
+            listener.onOutgoingPonyFramesBytes(bytes);
+            sampleOutgoingWireBytes();
+        }
     }
 
     private void awaitPreviousSend() throws IOException {
@@ -739,6 +742,38 @@ public class WebSocketPusher implements Closeable {
     private static <T> void record(final ServerToClientModel model, final T value, final int metaBytes, final int dataBytes) {
         final WebSocketStatsRecorder recorder = statsRecorder;
         if (recorder != null) recorder.record(model, value, metaBytes, dataBytes);
+    }
+
+    // Jetty 12 connection exposing true post-compression wire byte counters (set by WebSocket at open).
+    private org.eclipse.jetty.websocket.core.WebSocketConnection connection;
+    // volatile: written on the flush path and re-based on the app thread (rebaseWireBytes)
+    private volatile long lastBytesOut;
+
+    void setConnection(final org.eclipse.jetty.websocket.core.WebSocketConnection connection) {
+        this.connection = connection;
+    }
+
+    /**
+     * OUTGOING on-the-wire (post-compression) bytes, as a delta of the Jetty connection counter, reported to
+     * {@link WebSocket.Listener#onOutgoingWebSocketFrame}. Per-sample values are approximate (sendBinary is
+     * async), window totals are exact.
+     */
+    private void sampleOutgoingWireBytes() {
+        final org.eclipse.jetty.websocket.core.WebSocketConnection c = connection;
+        if (c == null) return;
+        long delta = c.getBytesOut() - lastBytesOut;
+        lastBytesOut += delta;
+        while (delta > 0) { // int-typed callback: split, never overflow on long sessions
+            final int chunk = (int) Math.min(delta, Integer.MAX_VALUE);
+            listener.onOutgoingWebSocketFrame(0, chunk);
+            delta -= chunk;
+        }
+    }
+
+    /** Re-baselines the outgoing wire counter, so the first sample covers only traffic after the listener is set. */
+    void rebaseWireBytes() {
+        final org.eclipse.jetty.websocket.core.WebSocketConnection c = connection;
+        if (c != null) lastBytesOut = c.getBytesOut();
     }
 
     void setWebSocketListener(final WebSocket.Listener listener) {
