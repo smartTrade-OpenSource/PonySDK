@@ -19,7 +19,7 @@ function trackErrors(page) {
 
 async function openWebComponentsTab(page) {
   await page.goto(BASE_URL, { waitUntil: 'domcontentloaded' });
-  await page.locator('.pony-tab', { hasText: 'Web Comp.' }).click();
+  await page.locator('.pony-tab', { hasText: 'Web Components' }).click();
   await expect(page.locator('my-counter')).toBeVisible({ timeout: 10000 });
 }
 

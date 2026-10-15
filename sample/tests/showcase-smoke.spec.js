@@ -35,6 +35,6 @@ test('every showcase tab renders without client errors', async ({ page }) => {
   }
 
   // Strings longer than the fromCharCode threshold (TextDecoder path) reach the DOM intact
-  await page.locator('.pony-tab', { hasText: 'Web Comp.' }).click();
+  await page.locator('.pony-tab', { hasText: 'Web Components' }).click();
   await expect(page.locator('my-card')).toContainText('Card body text set from server via property API.');
 });

@@ -76,6 +76,13 @@ import com.ponysdk.core.ui.basic.PListBox;
 import com.ponysdk.core.ui.basic.PMenuBar;
 import com.ponysdk.core.ui.basic.PRadioButton;
 import com.ponysdk.core.ui.basic.PRadioButtonGroup;
+import com.ponysdk.core.ui.basic.PPushButton;
+import com.ponysdk.core.ui.basic.PHorizontalPanel;
+import com.ponysdk.core.ui.basic.PVerticalPanel;
+import com.ponysdk.core.ui.basic.PSplitLayoutPanel;
+import com.ponysdk.core.ui.basic.PDisclosurePanel;
+import com.ponysdk.core.ui.basic.PDialogBox;
+import com.ponysdk.core.ui.basic.PFocusPanel;
 import com.ponysdk.core.ui.basic.PRichTextArea;
 import com.ponysdk.core.ui.basic.PScript;
 import com.ponysdk.core.ui.basic.PScrollPanel;
@@ -209,20 +216,22 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PSimplePanel content = Element.newPSimplePanel();
         content.addStyleName("pony-content");
 
-        // Build all tabs eagerly (some need to be attached to window)
+        // Sidebar entries, by group: { icon, label }
         final String[][] tabs = {
+            {"◎", "Overview"},
             {"⌨", "Inputs"}, {"⊞", "Layouts"}, {"◈", "Data"},
-            {"⊟", "DataGrid"}, {"◉", "Web Comp."}, {"⋯", "Misc"},
-            {"⚡", "Perf"}, {"</>", "Code"}, {"≡", "Binary"}, {"▦", "FlexLayout"}
+            {"⊟", "DataGrid"}, {"◉", "Web Components"}, {"⋯", "Misc"},
+            {"⚡", "Performance"}, {"≡", "Binary protocol"}, {"</>", "Code"}, {"▦", "FlexLayout"}
         };
+        final String[] groupLabels = {"Start", "Widgets", "Under the hood"};
+        final int[] groupStarts = {0, 1, 7};
 
         // Active tab schedulers — cancelled on tab leave, list cleared and refilled on re-entry
         @SuppressWarnings("unchecked")
         final List<PScheduler.UIRunnable>[] tabSchedulers = new List[tabs.length];
         for (int i = 0; i < tabs.length; i++) tabSchedulers[i] = new ArrayList<>();
 
-        // Only build the first tab eagerly — others are built lazily on first activation
-        // This avoids starting schedulers for tabs that are never visited
+        // Only the first tab is built eagerly: the others are built (and their schedulers started) on activation
         final PFlowPanel[] tabPanels = new PFlowPanel[tabs.length];
         tabPanels[0] = buildTabWithSchedulers(0, uiContext, tabSchedulers[0]);
 
@@ -230,10 +239,15 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PButton[] tabButtons = new PButton[tabCount];
         final int[] activeTab = { 0 };
 
-        // Group labels
-        final PElement grp1 = Element.newDiv(); grp1.addStyleName("pony-nav-group"); grp1.setInnerText("Widgets");
-        nav.add(grp1);
-        for (int i = 0; i < 6; i++) {
+        int group = 0;
+        for (int i = 0; i < tabCount; i++) {
+            if (group < groupStarts.length && groupStarts[group] == i) {
+                final PElement grp = Element.newDiv();
+                grp.addStyleName("pony-nav-group");
+                grp.setInnerText(groupLabels[group]);
+                nav.add(grp);
+                group++;
+            }
             final int idx = i;
             final PButton tab = Element.newPButton(tabs[i][0] + "  " + tabs[i][1]);
             tab.addStyleName("pony-tab");
@@ -241,28 +255,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             tabButtons[i] = tab;
             tab.addClickHandler(e -> {
                 if (activeTab[0] == idx) return;
-                // Cancel schedulers of the tab we're leaving
-                tabSchedulers[activeTab[0]].forEach(PScheduler.UIRunnable::cancel);
-                tabSchedulers[activeTab[0]].clear();
-                // Rebuild the new tab fresh (restarts its schedulers)
-                tabSchedulers[idx].clear();
-                tabPanels[idx] = buildTabWithSchedulers(idx, uiContext, tabSchedulers[idx]);
-                content.setWidget(tabPanels[idx]);
-                tabButtons[activeTab[0]].removeStyleName("pony-tab-active");
-                tabButtons[idx].addStyleName("pony-tab-active");
-                activeTab[0] = idx;
-            });
-            nav.add(tab);
-        }
-        final PElement grp2 = Element.newDiv(); grp2.addStyleName("pony-nav-group"); grp2.setInnerText("Developer");
-        nav.add(grp2);
-        for (int i = 6; i < tabCount; i++) {
-            final int idx = i;
-            final PButton tab = Element.newPButton(tabs[i][0] + "  " + tabs[i][1]);
-            tab.addStyleName("pony-tab");
-            tabButtons[i] = tab;
-            tab.addClickHandler(e -> {
-                if (activeTab[0] == idx) return;
+                // Cancel the schedulers of the tab we leave, rebuild the new one fresh (restarts its schedulers)
                 tabSchedulers[activeTab[0]].forEach(PScheduler.UIRunnable::cancel);
                 tabSchedulers[activeTab[0]].clear();
                 tabSchedulers[idx].clear();
@@ -295,15 +288,16 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     @SuppressWarnings("unchecked")
     private PFlowPanel buildTabWithSchedulers(final int idx, final UIContext uiContext, final List<PScheduler.UIRunnable> schedulers) {
         return switch (idx) {
-            case 0 -> buildInputsTab(schedulers);
-            case 1 -> buildLayoutsTab(schedulers);
-            case 2 -> buildDataTab(schedulers);
-            case 3 -> buildDataGridTab(schedulers);
-            case 4 -> buildWebCompTab(schedulers);
-            case 5 -> buildMiscTab(schedulers);
-            case 6 -> buildPerfTab(uiContext, schedulers);
-            case 7 -> buildCodeTab();
+            case 0 -> buildOverviewTab(uiContext, schedulers);
+            case 1 -> buildInputsTab(schedulers);
+            case 2 -> buildLayoutsTab(schedulers);
+            case 3 -> buildDataTab(schedulers);
+            case 4 -> buildDataGridTab(schedulers);
+            case 5 -> buildWebCompTab(schedulers);
+            case 6 -> buildMiscTab(schedulers);
+            case 7 -> buildPerfTab(uiContext, schedulers);
             case 8 -> buildBinaryAddonTab(schedulers);
+            case 9 -> buildCodeTab();
             default -> buildFlexLayoutTab();
         };
     }
@@ -311,7 +305,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     private PFlowPanel buildBinaryAddonTab(final List<PScheduler.UIRunnable> schedulers) {
         final PFlowPanel panel = Element.newPFlowPanel();
         final PElement box = Element.newDiv();
-        box.setAttribute("style", "padding:28px 32px;max-width:1040px");
+        box.setAttribute("style", "max-width:1040px");
 
         final PElement title = Element.newDiv();
         title.setAttribute("style", "font-size:20px;font-weight:800;margin-bottom:6px;color:var(--text,#f0f4ff)");
@@ -651,7 +645,340 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             +   "border-color:rgba(255,255,255,.08) !important;}"
             + ".pony-ex-code{background:#0a0b0e;border-top:1px solid rgba(255,255,255,.06);}"
             + ".pony-ex-code .code-body{padding:18px 20px;}"
+            // Overview: hero, measured comparison, live ticker
+            + ".ov-hero{padding:28px 0 8px;max-width:860px;}"
+            + ".ov-eyebrow{font-size:11px;font-weight:700;letter-spacing:.18em;color:var(--accent2,#43e8b0);margin-bottom:12px;}"
+            + ".ov-h1{font-size:34px;line-height:1.15;font-weight:750;letter-spacing:-.03em;color:#fafafa;margin-bottom:14px;}"
+            + ".ov-lead{font-size:15px;line-height:1.65;color:#a1a1aa;max-width:720px;}"
+            + ".ov-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px;}"
+            + ".ov-chip{font-size:12px;color:#d4d4d8;padding:5px 11px;border-radius:999px;"
+            +   "border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);}"
+            + ".ov-kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;margin:6px 0 10px;}"
+            + ".ov-kpi{padding:18px 18px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.08);"
+            +   "background:linear-gradient(180deg,rgba(67,232,176,.06),rgba(255,255,255,.015) 55%);}"
+            + ".ov-kpi-gain{font-size:30px;font-weight:750;letter-spacing:-.03em;color:var(--accent2,#43e8b0);"
+            +   "font-variant-numeric:tabular-nums;}"
+            + ".ov-kpi-metric{font-size:13px;font-weight:600;color:#fafafa;margin:2px 0 14px;}"
+            + ".ov-kpi-hint{font-size:11px;color:#71717a;margin-top:10px;}"
+            + ".ov-cmp{display:grid;grid-template-columns:34px 1fr 78px;align-items:center;gap:10px;margin:6px 0;"
+            +   "font-size:12px;color:#8b8b94;font-variant-numeric:tabular-nums;}"
+            + ".ov-cmp-val{text-align:right;}"
+            + ".ov-bar{height:6px;border-radius:6px;background:rgba(255,255,255,.06);overflow:hidden;}"
+            + ".ov-bar-fill{height:100%;border-radius:6px;background:#52525b;}"
+            + ".ov-cmp-now{color:#fafafa;}"
+            + ".ov-cmp-now .ov-bar-fill{background:linear-gradient(90deg,#43e8b0,#7c6fff);}"
+            + ".ov-note{font-size:12px;color:#71717a;line-height:1.6;margin:8px 0 28px;max-width:860px;}"
+            + ".ov-controls{display:flex;flex-wrap:wrap;gap:28px;padding:14px 16px;margin:6px 0 12px;"
+            +   "border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(255,255,255,.02);}"
+            + ".ov-ticker{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:4px;"
+            +   "max-height:420px;overflow:auto;padding:10px;border:1px solid rgba(255,255,255,.08);border-radius:12px;"
+            +   "background:#0a0b0e;}"
+            + ".ov-cell{font-family:ui-monospace,'JetBrains Mono',monospace;font-size:11.5px;text-align:center;"
+            +   "padding:5px 0;border-radius:5px;background:rgba(255,255,255,.025);color:#a1a1aa;"
+            +   "font-variant-numeric:tabular-nums;transition:color .4s;}"
+            // Form controls: readable fields, accent-coloured checks
+            + ".gwt-TextBox,.gwt-PasswordTextBox,.gwt-TextArea,.gwt-ListBox,.gwt-DateBox{background:#111216 !important;"
+            +   "border:1px solid rgba(255,255,255,.16) !important;color:#fafafa !important;border-radius:7px !important;"
+            +   "padding:7px 10px !important;outline:none !important;}"
+            + ".gwt-TextBox:focus,.gwt-PasswordTextBox:focus,.gwt-TextArea:focus,.gwt-ListBox:focus{"
+            +   "border-color:var(--accent2,#43e8b0) !important;box-shadow:0 0 0 3px rgba(67,232,176,.15) !important;}"
+            + "input[type=checkbox],input[type=radio]{accent-color:var(--accent2,#43e8b0);margin-right:6px;}"
+            + ".pony-nav-group{margin-top:14px !important;}"
+            + ".ov-live{grid-template-columns:repeat(auto-fit,minmax(150px,1fr)) !important;}"
+            + ".lay-chip{display:inline-flex;align-items:center;justify-content:center;padding:8px 14px;margin:3px;"
+            +   "border-radius:8px;background:rgba(124,111,255,.10);border:1px solid rgba(124,111,255,.28);"
+            +   "color:#d4d4f8;font-size:12px;box-sizing:border-box;}"
+            + ".gwt-DockLayoutPanel .lay-chip,.gwt-SplitLayoutPanel .lay-chip,.gwt-TabLayoutPanel .lay-chip{"
+            +   "width:calc(100% - 6px);height:calc(100% - 6px);margin:3px;}"
+            + ".lay-frame{border:1px solid rgba(255,255,255,.12) !important;border-radius:10px;background:#0a0b0e;"
+            +   "overflow:hidden;}"
+            + ".lay-frame .gwt-Label{color:#a1a1aa;padding:2px 10px;}"
+            + ".lay-dialog{display:flex;flex-direction:column;gap:12px;padding:16px;color:#d4d4d8;}"
+            + ".gwt-DialogBox,.gwt-DecoratedPopupPanel{background:#111216 !important;border:1px solid rgba(255,255,255,.14) !important;"
+            +   "border-radius:12px !important;box-shadow:0 20px 60px rgba(0,0,0,.6) !important;}"
+            + ".gwt-DialogBox .Caption{color:#fafafa;font-weight:600;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.08);}"
+            + ".gwt-PopupPanelGlass{background:rgba(0,0,0,.55) !important;}"
+            + ".lay-vis{display:flex;flex-direction:column;gap:10px;align-items:flex-start;}"
+            + ".lay-hint{font-size:12px;color:#8b8b94;}"
+            + ".lay-vis-card{border-radius:10px;margin:10px;padding:12px;box-sizing:border-box;"
+            +   "background:linear-gradient(135deg,rgba(67,232,176,.18),rgba(124,111,255,.18));border:1px solid rgba(67,232,176,.35);}"
+            + ".lay-vis-card .gwt-Label{color:#fafafa;font-weight:600;}"
+            + ".gwt-DatePicker td,.gwt-DatePicker .datePickerDay{border:0 !important;}"
+            // Tab / stack / split / disclosure widgets on the dark surface
+            + ".gwt-TabLayoutPanelTabs{background:#111216 !important;border-bottom:1px solid rgba(255,255,255,.1);}"
+            + ".gwt-TabLayoutPanelTab{background:transparent !important;color:#8b8b94 !important;border:0 !important;"
+            +   "padding:7px 14px !important;margin:0 2px !important;border-radius:0 !important;cursor:pointer;}"
+            + ".gwt-TabLayoutPanelTab-selected{color:#fafafa !important;box-shadow:inset 0 -2px 0 var(--accent2,#43e8b0);}"
+            + ".gwt-TabLayoutPanelContent{border:0 !important;background:transparent !important;}"
+            + ".gwt-StackLayoutPanel .gwt-StackLayoutPanelHeader{background:#16171b !important;color:#d4d4d8 !important;"
+            +   "border-bottom:1px solid rgba(255,255,255,.08);padding:7px 12px;cursor:pointer;font-size:12px;font-weight:600;}"
+            + ".gwt-StackLayoutPanel .gwt-StackLayoutPanelHeader:hover{color:#fafafa !important;}"
+            + ".gwt-StackLayoutPanel .lay-chip{width:calc(100% - 6px);height:calc(100% - 6px);}"
+            + ".gwt-SplitLayoutPanel-HDragger,.gwt-SplitLayoutPanel-VDragger{background:rgba(255,255,255,.12) !important;}"
+            + ".gwt-SplitLayoutPanel-HDragger:hover{background:var(--accent2,#43e8b0) !important;}"
+            + ".gwt-DisclosurePanel .header,.gwt-DisclosurePanel .header a{color:#d4d4d8 !important;cursor:pointer;}"
+            + ".gwt-DisclosurePanel a.header,.gwt-DisclosurePanel a.header td{color:#d4d4d8 !important;opacity:1 !important;text-decoration:none;}"
+            + ".gwt-DisclosurePanel .content{padding:8px 0 0 18px;}"
+            + ".gwt-StackLayoutPanel .gwt-StackLayoutPanelContent,.gwt-StackLayoutPanel .gwt-StackLayoutPanelContent>div{"
+            +   "background:transparent !important;border:0 !important;}"
+            + ".gwt-TabLayoutPanel .gwt-TabLayoutPanelContent{border:0 !important;background:transparent !important;}"
+            + ".gwt-StackLayoutPanel .gwt-StackLayoutPanelHeader{border:0 !important;border-bottom:1px solid rgba(255,255,255,.08) !important;}"
+            + ".gwt-TabLayoutPanel,.gwt-TabLayoutPanel>div{border-color:rgba(255,255,255,.08) !important;}"
+            + ".gwt-TabLayoutPanel .gwt-TabLayoutPanelContentContainer,.gwt-TabLayoutPanel .gwt-TabLayoutPanelContent{border:0 !important;}"
+            + ".gwt-StackLayoutPanel .lay-chip,.gwt-TabLayoutPanel .lay-chip{background:rgba(124,111,255,.10) !important;color:#d4d4f8 !important;}"
+            // Tables (FlexTable / Grid / legacy RefreshableDataGrid)
+            + ".data-table{border-collapse:collapse;font-variant-numeric:tabular-nums;}"
+            + ".data-table table{border-collapse:collapse;width:100%;}"
+            + ".data-table td,.data-table th{padding:6px 12px;border-bottom:1px solid rgba(255,255,255,.06);color:#d4d4d8;font-size:12.5px;}"
+            + ".data-table tr:first-child td,.data-table th{color:#8b8b94;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.06em;}"
+            + "table.data-table{border:1px solid rgba(255,255,255,.1);border-radius:10px;background:#0a0b0e;}"
+            + ".data-th{color:#8b8b94 !important;}"
+            // DataGrid2
+            + ".dg-controls{display:flex;flex-wrap:wrap;align-items:flex-start;gap:8px;margin:8px 0 12px;}"
+            + ".dg-columns{padding:6px 10px;border:1px solid rgba(255,255,255,.12);border-radius:7px;background:#111216;}"
+            + ".dg-columns ul{columns:6;list-style:none;padding:6px 0 0;margin:0;}"
+            + ".dg-frame{border:1px solid rgba(255,255,255,.1);border-radius:10px;background:#0a0b0e;}"
+            + ".pony-grid{color:#d4d4d8;font-size:12.5px;font-variant-numeric:tabular-nums;}"
+            + ".dg-head,.pony-grid-header{background:#16171b !important;color:#fafafa;font-weight:600;}"
+            + ".pony-grid-row{border-bottom:1px solid rgba(255,255,255,.04);}"
+            + ".pony-grid-row:hover{background:rgba(255,255,255,.04) !important;}"
+            + ".unpair-row{background:rgba(255,255,255,.022) !important;}"
+            + ".selected-row{background:rgba(67,232,176,.14) !important;}"
+            + ".misc-toolbar{gap:6px;padding:6px;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:#111216;margin-bottom:10px;}"
+            + ".misc-toolbar td{padding:0 3px;}"
+            + ".data-tree{padding:8px;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:#0a0b0e;max-width:420px;}"
+            + ".data-tree .gwt-TreeItem{background:transparent !important;color:#d4d4d8 !important;border:0 !important;"
+            +   "outline:none !important;padding:4px 8px !important;border-radius:6px;text-align:left !important;font-size:13px;}"
+            + ".data-tree .gwt-TreeItem-selected{background:rgba(67,232,176,.14) !important;color:#fafafa !important;}"
+            + ".data-tree td,.data-tree tr,.data-tree table{background:transparent !important;border:0 !important;"
+            +   "outline:none !important;text-align:left !important;}"
+            + ".gwt-RichTextArea{background:#111216 !important;border:1px solid rgba(255,255,255,.16) !important;"
+            +   "border-radius:7px !important;min-height:140px;width:min(560px,100%);}"
+            + ".gwt-PushButton{display:inline-flex;align-items:center;padding:7px 14px;border-radius:7px;cursor:pointer;"
+            +   "background:#16171b;border:1px solid rgba(255,255,255,.12);color:#fafafa;font-size:13px;user-select:none;}"
+            + ".gwt-PushButton-down{background:#0f1013;border-color:var(--accent2,#43e8b0);}"
+            // Date picker: same dark surface as the rest of the page
+            + ".gwt-DatePicker{background:#111216 !important;border:1px solid rgba(255,255,255,.12) !important;"
+            +   "border-radius:10px !important;color:#d4d4d8 !important;padding:6px !important;}"
+            + ".gwt-DatePicker *{background-color:transparent !important;color:inherit;}"
+            + ".gwt-DatePicker .datePickerMonth{color:#fafafa !important;font-weight:600;}"
+            + ".gwt-DatePicker .datePickerWeekdayLabel{color:#71717a !important;}"
+            + ".gwt-DatePicker .datePickerDay{border-radius:5px;padding:4px 6px !important;cursor:pointer;}"
+            + ".gwt-DatePicker .datePickerDay:hover{background-color:rgba(255,255,255,.08) !important;}"
+            + ".gwt-DatePicker .datePickerDayIsToday{box-shadow:inset 0 0 0 1px rgba(67,232,176,.6);}"
+            + ".gwt-DatePicker .datePickerDayIsValue{background-color:var(--accent2,#43e8b0) !important;color:#08090c !important;}"
+            + ".gwt-DatePicker .datePickerDayIsFiller{color:#3f3f46 !important;}"
             + "`;document.head.appendChild(s);";
+    }
+
+    // ── Tab: Overview ────────────────────────────────────────────────────────
+
+    /** One measured row of the 2.10 vs 3.0 comparison. */
+    private record Measure(String metric, String gain, String before, String after, int afterPct, String hint) {}
+
+    private PFlowPanel buildOverviewTab(final UIContext uiContext, final List<PScheduler.UIRunnable> schedulers) {
+        final PFlowPanel p = section();
+
+        // Hero
+        final PFlowPanel hero = Element.newPFlowPanel();
+        hero.addStyleName("ov-hero");
+        hero.add(el("ov-eyebrow", "PONYSDK 3"));
+        hero.add(el("ov-h1", "Real-time web UIs, written only in Java."));
+        hero.add(el("ov-lead", "Every widget lives on the server. The browser is a thin renderer that receives "
+            + "compact binary instructions over one WebSocket: no REST layer, no JSON, no JavaScript to write."));
+        final PFlowPanel chips = Element.newPFlowPanel();
+        chips.addStyleName("ov-chips");
+        for (final String c : new String[] { "Binary WebSocket protocol", "Server-side state", "String dictionary",
+                                             "Update coalescing", "Transparent reconnection", "Web Components" }) {
+            chips.add(el("ov-chip", c));
+        }
+        hero.add(chips);
+        p.add(hero);
+
+        // Measured comparison
+        p.add(sectionTitle("Measured — PonySDK 3 against 2.10"));
+        final PFlowPanel kpis = Element.newPFlowPanel();
+        kpis.addStyleName("ov-kpis");
+        for (final Measure m : new Measure[] {
+            new Measure("CPU per UI update", "−40 %", "≈1 850 ns", "≈1 050 ns", 57, "Lower is better"),
+            new Measure("Bandwidth on the wire", "−58 %", "1.22 MB/s", "0.51 MB/s", 42, "Same updates, fewer bytes"),
+            new Measure("Allocation per update", "−50 %", "≈140 B", "72 B", 51, "Less GC work"),
+            new Measure("Process memory (RSS)", "−28 %", "≈1 060 MB", "≈750 MB", 71, "Leaner widgets & buffers") }) {
+            final PFlowPanel k = Element.newPFlowPanel();
+            k.addStyleName("ov-kpi");
+            k.add(el("ov-kpi-gain", m.gain()));
+            k.add(el("ov-kpi-metric", m.metric()));
+            k.add(compareRow("2.10", m.before(), 100, false));
+            k.add(compareRow("3.0", m.after(), m.afterPct(), true));
+            k.add(el("ov-kpi-hint", m.hint()));
+            kpis.add(k);
+        }
+        p.add(kpis);
+        p.add(el("ov-note", "Benchmark: 200 sessions, each a 200-cell price grid receiving 130 updates every 100 ms "
+            + "(260 000 updates/s), same JDK 25 and machine for both versions, bytes counted on the TCP stream."));
+
+        // Live metrics of this very session
+        p.add(sectionTitle("Live — this session, right now"));
+        final PFlowPanel live = Element.newPFlowPanel();
+        live.addStyleName("perf-grid");
+        live.addStyleName("ov-live");
+        final PElement wireVal = el("perf-value", "—");
+        final PElement rawVal = el("perf-value", "—");
+        final PElement ratioVal = el("perf-value", "—");
+        final PElement perUpdVal = el("perf-value", "—");
+        final PElement updVal = el("perf-value", "0");
+        final PElement latVal = el("perf-value", "—");
+        live.add(perfCard(el("perf-icon", "📡"), wireVal, el("perf-unit", "KB/s ON THE WIRE"), el("perf-label", "Downstream")));
+        live.add(perfCard(el("perf-icon", "🧬"), rawVal, el("perf-unit", "KB/s BEFORE DEFLATE"), el("perf-label", "Binary protocol")));
+        live.add(perfCard(el("perf-icon", "🗜"), ratioVal, el("perf-unit", "× SMALLER"), el("perf-label", "Compression")));
+        live.add(perfCard(el("perf-icon", "⚡"), updVal, el("perf-unit", "UPDATES / S"), el("perf-label", "Ticker load")));
+        live.add(perfCard(el("perf-icon", "🎯"), perUpdVal, el("perf-unit", "BYTES / UPDATE"), el("perf-label", "Wire cost")));
+        live.add(perfCard(el("perf-icon", "⏱"), latVal, el("perf-unit", "MS ROUNDTRIP"), el("perf-label",
+            "Latency · protocol v" + uiContext.getProtocolVersion())));
+        p.add(live);
+
+        // Stress ticker: the server updates random cells; the cards above show what it costs
+        p.add(sectionTitle("Stress it — a live price ticker driven from Java"));
+        final PFlowPanel controls = Element.newPFlowPanel();
+        controls.addStyleName("ov-controls");
+        final PFlowPanel grid = Element.newPFlowPanel();
+        grid.addStyleName("ov-ticker");
+
+        final java.util.Random rnd = new java.util.Random();
+        final List<PLabel> cells = new ArrayList<>();
+        final double[] prices = new double[1000];
+        final int[] cellCount = { 240 };
+        final int[] rate = { 20 };          // ticks per second
+        final boolean[] running = { true };
+        final long[] updates = { 0 };
+        final PScheduler.UIRunnable[] ticker = { null };
+
+        final Runnable rebuildCells = () -> {
+            grid.clear();
+            cells.clear();
+            for (int i = 0; i < cellCount[0]; i++) {
+                prices[i] = 1.05 + rnd.nextDouble() * 0.2;
+                final PLabel c = Element.newPLabel(String.format(java.util.Locale.ROOT, "%.5f", prices[i]));
+                c.addStyleName("ov-cell");
+                cells.add(c);
+                grid.add(c);
+            }
+        };
+        final boolean[] touched = new boolean[1000];
+        final Runnable tick = () -> {
+            final int n = Math.max(1, cells.size() / 4);   // a quarter of the cells move each tick
+            java.util.Arrays.fill(touched, false);
+            for (int k = 0; k < n; k++) {
+                final int i = rnd.nextInt(cells.size());
+                final double delta = (rnd.nextDouble() - 0.5) * 0.002;
+                prices[i] = Math.max(0.5, prices[i] + delta);
+                final PLabel c = cells.get(i);
+                c.setText(String.format(java.util.Locale.ROOT, "%.5f", prices[i]));
+                c.setStyleProperty("color", delta >= 0 ? "#43e8b0" : "#f87171");
+                if (!touched[i]) updates[0] += 2;           // text + colour; a cell hit twice in a tick is sent once
+                touched[i] = true;
+            }
+        };
+        final Runnable restartTicker = () -> {
+            if (ticker[0] != null) ticker[0].cancel();
+            ticker[0] = null;
+            if (!running[0]) return;
+            ticker[0] = PScheduler.scheduleAtFixedRate(tick, Duration.ofMillis(1000 / rate[0]));
+            schedulers.add(ticker[0]);
+        };
+
+        final PButton runBtn = Element.newPButton("❚❚ Pause");
+        runBtn.addClickHandler(e -> {
+            running[0] = !running[0];
+            runBtn.setText(running[0] ? "❚❚ Pause" : "▶ Run");
+            styleBinaryCtrl(runBtn, running[0]);
+            restartTicker.run();
+        });
+        styleBinaryCtrl(runBtn, true);
+        final PFlowPanel runRow = Element.newPFlowPanel();
+        runRow.add(runBtn);
+        controls.add(binaryCtrlGroup("Stream", runRow));
+
+        final int[] sizes = { 120, 240, 600, 1000 };
+        final PButton[] sizeBtns = new PButton[sizes.length];
+        final PFlowPanel sizeRow = Element.newPFlowPanel();
+        for (int i = 0; i < sizes.length; i++) {
+            final int v = sizes[i];
+            sizeBtns[i] = Element.newPButton(String.valueOf(v));
+            styleBinaryCtrl(sizeBtns[i], v == cellCount[0]);
+            sizeBtns[i].addClickHandler(e -> {
+                cellCount[0] = v;
+                for (int j = 0; j < sizes.length; j++) styleBinaryCtrl(sizeBtns[j], sizes[j] == v);
+                rebuildCells.run();
+            });
+            sizeRow.add(sizeBtns[i]);
+        }
+        controls.add(binaryCtrlGroup("Cells", sizeRow));
+
+        final int[] rates = { 5, 20, 50 };
+        final PButton[] rateBtns = new PButton[rates.length];
+        final PFlowPanel rateRow = Element.newPFlowPanel();
+        for (int i = 0; i < rates.length; i++) {
+            final int v = rates[i];
+            rateBtns[i] = Element.newPButton(v + " ticks/s");
+            styleBinaryCtrl(rateBtns[i], v == rate[0]);
+            rateBtns[i].addClickHandler(e -> {
+                rate[0] = v;
+                for (int j = 0; j < rates.length; j++) styleBinaryCtrl(rateBtns[j], rates[j] == v);
+                restartTicker.run();
+            });
+            rateRow.add(rateBtns[i]);
+        }
+        controls.add(binaryCtrlGroup("Rate", rateRow));
+
+        p.add(controls);
+        p.add(grid);
+        p.add(el("ov-note", "Each tick changes the text and colour of a quarter of the cells. Within one tick, "
+            + "repeated changes of a cell are coalesced, the updates are chained into runs, and repeated prices "
+            + "travel as 3-byte dictionary references before permessage-deflate."));
+
+        rebuildCells.run();
+        restartTicker.run();
+
+        // 1 s refresh of the live cards (deltas of the connection counters)
+        final long[] prev = { uiContext.getWireBytesSent(), uiContext.getProtocolBytesSent(), 0, System.nanoTime() };
+        schedulers.add(PScheduler.scheduleAtFixedRate(() -> {
+            final long wire = uiContext.getWireBytesSent();
+            final long raw = uiContext.getProtocolBytesSent();
+            final long now = System.nanoTime();
+            final double secs = Math.max(0.001, (now - prev[3]) / 1e9);
+            final long dWire = wire - prev[0], dRaw = raw - prev[1], dUpd = updates[0] - prev[2];
+            prev[0] = wire;
+            prev[1] = raw;
+            prev[2] = updates[0];
+            prev[3] = now;
+            if (wire >= 0) {
+                wireVal.setInnerText(String.format(java.util.Locale.ROOT, "%.1f", dWire / 1024.0 / secs));
+                ratioVal.setInnerText(dWire > 0 ? String.format(java.util.Locale.ROOT, "%.1f", (double) dRaw / dWire) : "—");
+                perUpdVal.setInnerText(dUpd > 0 ? String.format(java.util.Locale.ROOT, "%.1f", (double) dWire / dUpd) : "—");
+            }
+            rawVal.setInnerText(String.format(java.util.Locale.ROOT, "%.1f", dRaw / 1024.0 / secs));
+            updVal.setInnerText(String.format(java.util.Locale.ROOT, "%,d", Math.round(dUpd / secs)));
+            latVal.setInnerText(String.format(java.util.Locale.ROOT, "%.0f", uiContext.getRoundtripLatency()));
+        }, Duration.ofSeconds(1)));
+
+        return p;
+    }
+
+    private static PFlowPanel compareRow(final String version, final String value, final int pct, final boolean current) {
+        final PFlowPanel row = Element.newPFlowPanel();
+        row.addStyleName("ov-cmp");
+        if (current) row.addStyleName("ov-cmp-now");
+        row.add(el("ov-cmp-ver", version));
+        final PElement bar = Element.newDiv();
+        bar.addStyleName("ov-bar");
+        final PElement fill = Element.newDiv();
+        fill.addStyleName("ov-bar-fill");
+        fill.setAttribute("style", "width:" + pct + "%");
+        bar.add(fill);
+        row.add(bar);
+        row.add(el("ov-cmp-val", value));
+        return row;
     }
 
     // ── Tab: Inputs ──────────────────────────────────────────────────────────
@@ -711,7 +1038,9 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         p.add(labeled("TextArea", Element.newPTextArea()));
         p.add(labeled("Password", Element.newPPasswordTextBox("Password")));
         p.add(labeled("RichText editor", buildRichText()));
-        p.add(labeled("PushButton", Element.newPPushButton(Element.newPImage())));
+        final PPushButton push = Element.newPPushButton(Element.newPImage());
+        push.setText("Push me");
+        p.add(labeled("PushButton", push));
 
         p.add(sectionTitle("Date & Time"));
         p.add(labeled("DateBox dd/MM/yyyy", Element.newPDateBox(new SimpleDateFormat("dd/MM/yyyy"))));
@@ -739,31 +1068,101 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     private PFlowPanel buildLayoutsTab(final List<PScheduler.UIRunnable> schedulers) {
         final PFlowPanel p = section();
+        pageTitle(p, "Layouts", "Containers built and filled from Java. Every box below is a server-side panel.");
 
         p.add(sectionTitle("Panels"));
-        p.add(labeled("FlowPanel (nested)", createPFlowPanel()));
-        p.add(labeled("HorizontalPanel", Element.newPHorizontalPanel()));
-        p.add(labeled("VerticalPanel", Element.newPVerticalPanel()));
-        p.add(labeled("AbsolutePanel", createBlock(createAbsolutePanel())));
-        p.add(labeled("ScrollPanel", Element.newPScrollPanel()));
-        p.add(labeled("SimplePanel", Element.newPSimplePanel()));
-        p.add(labeled("FocusPanel", Element.newPFocusPanel()));
-        p.add(labeled("HeaderPanel", Element.newPHeaderPanel()));
-        p.add(labeled("DecoratorPanel", Element.newPDecoratorPanel()));
+        final PFlowPanel flow = Element.newPFlowPanel();
+        flow.add(chip("A"), chip("B"), chip("C"));
+        p.add(labeled("FlowPanel", flow));
+        final PHorizontalPanel h = Element.newPHorizontalPanel();
+        h.add(chip("Left"), chip("Middle"), chip("Right"));
+        p.add(labeled("HorizontalPanel", h));
+        final PVerticalPanel v = Element.newPVerticalPanel();
+        v.add(chip("Top"), chip("Middle"), chip("Bottom"));
+        p.add(labeled("VerticalPanel", v));
+        final PAbsolutePanel abs = Element.newPAbsolutePanel();
+        abs.setHeight("120px");
+        abs.setWidth("min(560px,100%)");
+        abs.addStyleName("lay-frame");
+        final String[][] spots = { { "x 20, y 16", "20px", "16px" }, { "x 210, y 60", "210px", "60px" }, { "x 400, y 28", "400px", "28px" } };
+        for (final String[] spot : spots) {
+            final PLabel c = chip(spot[0]);
+            c.setStyleProperty("position", "absolute");
+            c.setStyleProperty("left", spot[1]);
+            c.setStyleProperty("top", spot[2]);
+            abs.add(c);
+        }
+        p.add(labeled("AbsolutePanel", abs));
+        final PScrollPanel scroll = Element.newPScrollPanel();
+        scroll.setHeight("110px");
+        scroll.setWidth("320px");
+        scroll.addStyleName("lay-frame");
+        final PFlowPanel lines = Element.newPFlowPanel();
+        for (int i = 1; i <= 20; i++) lines.add(Element.newPLabel("Line " + i + " — scroll me"));
+        scroll.setWidget(lines);
+        p.add(labeled("ScrollPanel", scroll));
+        final PSimplePanel simple = Element.newPSimplePanel();
+        simple.setWidget(chip("Exactly one child"));
+        p.add(labeled("SimplePanel", simple));
+        final PFocusPanel focus = Element.newPFocusPanel();
+        final PLabel focusLbl = Element.newPLabel("Click me: the click is handled in Java");
+        focusLbl.addStyleName("lay-chip");
+        focus.setWidget(focusLbl);
+        final int[] clicks = { 0 };
+        focus.addClickHandler(e -> focusLbl.setText("Clicked " + ++clicks[0] + " time" + (clicks[0] > 1 ? "s" : "")));
+        p.add(labeled("FocusPanel", focus));
 
         p.add(sectionTitle("Layout panels"));
-        p.add(labeled("DockLayoutPanel", createDockLayoutPanel()));
-        p.add(labeled("LayoutPanel", Element.newPLayoutPanel()));
-        p.add(labeled("SimpleLayoutPanel", Element.newPSimpleLayoutPanel()));
-        p.add(labeled("SplitLayoutPanel", Element.newPSplitLayoutPanel()));
-        p.add(labeled("StackLayoutPanel", createStackLayoutPanel()));
-        p.add(labeled("TabLayoutPanel", createTabLayoutPanel()));
-        p.add(labeled("TabPanel", Element.newPTabPanel()));
+        final PDockLayoutPanel dock = Element.newPDockLayoutPanel(PUnit.PX);
+        dock.addNorth(chip("North"), 34);
+        dock.addSouth(chip("South"), 34);
+        dock.addWest(chip("West"), 90);
+        dock.add(chip("Center"));
+        p.add(labeled("DockLayoutPanel", sized(dock)));
+        final PSplitLayoutPanel split = Element.newPSplitLayoutPanel();
+        split.addWest(chip("Drag the splitter →"), 170);
+        split.add(chip("Center"));
+        p.add(labeled("SplitLayoutPanel", sized(split)));
+        final PStackLayoutPanel stack = Element.newPStackLayoutPanel(PUnit.PX);
+        stack.add(chip("Mail section"), "Mail", false, 32);
+        stack.add(chip("Contacts section"), "Contacts", false, 32);
+        stack.add(chip("Tasks section"), "Tasks", false, 32);
+        p.add(labeled("StackLayoutPanel", sized(stack)));
+        final PTabLayoutPanel tabs = Element.newPTabLayoutPanel();
+        tabs.add(chip("First tab content"), "First");
+        tabs.add(chip("Second tab content"), "Second");
+        tabs.add(chip("Third tab content"), "Third");
+        tabs.selectTab(0);
+        p.add(labeled("TabLayoutPanel", sized(tabs)));
 
-        p.add(sectionTitle("Disclosure / Dialog"));
-        p.add(labeled("DisclosurePanel", Element.newPDisclosurePanel("Click to expand")));
-        p.add(labeled("DialogBox", Element.newPDialogBox()));
-        p.add(labeled("DecoratedPopupPanel", Element.newPDecoratedPopupPanel(false)));
+        p.add(sectionTitle("Disclosure / popups"));
+        final PDisclosurePanel disclosure = Element.newPDisclosurePanel("Click to expand");
+        disclosure.setContent(chip("Hidden content, sent once and toggled client-side"));
+        p.add(labeled("DisclosurePanel", disclosure));
+        final PButton openDialog = Element.newPButton("Open dialog");
+        openDialog.addClickHandler(e -> {
+            final PDialogBox dialog = Element.newPDialogBox(true);
+            dialog.setCaption("A PDialogBox");
+            final PFlowPanel body = Element.newPFlowPanel();
+            body.addStyleName("lay-dialog");
+            body.add(Element.newPLabel("Created on the server when you clicked."));
+            final PButton close = Element.newPButton("Close");
+            close.addClickHandler(ev -> dialog.hide());
+            body.add(close);
+            dialog.setWidget(body);
+            dialog.setGlassEnabled(true);
+            PWindow.getMain().add(dialog); // created when attached to its window, then centred
+            dialog.center();
+        });
+        p.add(labeled("DialogBox", openDialog));
+        final PButton openPopup = Element.newPButton("Show popup");
+        openPopup.addClickHandler(e -> {
+            final com.ponysdk.core.ui.basic.PDecoratedPopupPanel popup = Element.newPDecoratedPopupPanel(true);
+            popup.setWidget(chip("Auto-hide popup: click anywhere to close"));
+            PWindow.getMain().add(popup);
+            popup.center();
+        });
+        p.add(labeled("DecoratedPopupPanel", openPopup));
 
         p.add(sectionTitle("Visibility handler"));
         testVisibilityHandler(p, schedulers);
@@ -771,22 +1170,60 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         return p;
     }
 
+    /** A small labelled box used to fill the layout demos. */
+    private static PLabel chip(final String text) {
+        final PLabel l = Element.newPLabel(text);
+        l.addStyleName("lay-chip");
+        return l;
+    }
+
+    /** Layout panels need a definite size: give them a framed 180 px box. */
+    private static PWidget sized(final PWidget w) {
+        w.setHeight("180px");
+        w.setWidth("min(560px,100%)");
+        w.addStyleName("lay-frame");
+        return w;
+    }
+
     // ── Tab: Data ────────────────────────────────────────────────────────────
 
     private PFlowPanel buildDataTab(final List<PScheduler.UIRunnable> schedulers) {
         final PFlowPanel p = section();
 
+        pageTitle(p, "Data", "Trees and tables whose content is pushed from the server.");
+
         p.add(sectionTitle("Tree"));
         p.add(createTree());
 
-        p.add(sectionTitle("Grid (legacy RefreshableDataGrid)"));
-        p.add(createGrid(schedulers));
+        p.add(sectionTitle("RefreshableDataGrid — 50 rows refreshed every 200 ms"));
+        final PScrollPanel gridFrame = Element.newPScrollPanel();
+        gridFrame.addStyleName("lay-frame");
+        gridFrame.addStyleName("data-table");
+        gridFrame.setHeight("280px");
+        gridFrame.setWidget(createGrid(schedulers));
+        p.add(gridFrame);
 
         p.add(sectionTitle("FlexTable"));
-        p.add(Element.newPFlexTable());
+        final com.ponysdk.core.ui.basic.PFlexTable flex = Element.newPFlexTable();
+        flex.addStyleName("data-table");
+        final String[][] fx = { { "Pair", "Bid", "Ask", "Spread" }, { "EUR/USD", "1.0851", "1.0853", "0.2" },
+                                { "GBP/USD", "1.2710", "1.2713", "0.3" }, { "USD/JPY", "149.21", "149.24", "0.3" } };
+        for (int row = 0; row < fx.length; row++) {
+            for (int col = 0; col < fx[row].length; col++) {
+                final PLabel cell = Element.newPLabel(fx[row][col]);
+                if (row == 0) cell.addStyleName("data-th");
+                flex.setWidget(row, col, cell);
+            }
+        }
+        p.add(flex);
 
-        p.add(sectionTitle("Grid 2x3"));
-        p.add(Element.newPGrid(2, 3));
+        p.add(sectionTitle("Grid 2×3"));
+        final com.ponysdk.core.ui.basic.PGrid grid2 = Element.newPGrid(2, 3);
+        grid2.addStyleName("data-table");
+        for (int row = 0; row < 2; row++) {
+            for (int col = 0; col < 3; col++) grid2.setWidget(row, col, chip("r" + row + " · c" + col));
+        }
+        p.add(grid2);
 
         return p;
     }
@@ -795,7 +1232,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     private PFlowPanel buildDataGridTab(final List<PScheduler.UIRunnable> schedulers) {
         final PFlowPanel p = section();
-        p.add(sectionTitle("DataGrid2 — 10 000 rows, 52 columns"));
+        pageTitle(p, "DataGrid", "52 columns, up to 10 000 rows. Sort, filter, resize, pin and select: the data and "
+            + "the logic stay on the server, only the visible window of rows is sent to the browser.");
         buildDataGridInto(p);
         return p;
     }
@@ -804,7 +1242,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     private PFlowPanel buildWebCompTab(final List<PScheduler.UIRunnable> schedulers) {
         final PFlowPanel p = section();
-        p.add(sectionTitle("Web Components"));
+        pageTitle(p, "Web Components", "Standard custom elements driven from Java: attributes, properties, events, "
+            + "slots and methods. Object properties travel as JSON merge-patches, only the changed keys.");
         buildWebComponentsInto(p);
         return p;
     }
@@ -891,9 +1330,9 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PFlowPanel rcvCard = perfCard(rcvIcon, rcvVal, rcvUnit, rcvLbl);
 
         final PElement netIcon = el("perf-icon", "🔌");
-        final PElement netVal = el("perf-value", "WS");
-        final PElement netUnit = el("perf-unit", "PROTOCOL");
-        final PElement netLbl = el("perf-label", "Transport");
+        final PElement netVal = el("perf-value", "v" + uiContext.getProtocolVersion());
+        final PElement netUnit = el("perf-unit", "BINARY PROTOCOL");
+        final PElement netLbl = el("perf-label", "WebSocket");
         final PFlowPanel netCard = perfCard(netIcon, netVal, netUnit, netLbl);
 
         netGrid.add(sessCard, latCard, sentCard, rcvCard, netCard);
@@ -931,8 +1370,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         // Highlight box
         p.add(highlightBox("🚀", "Zero polling overhead",
             "PonySDK uses a persistent WebSocket connection. No HTTP polling, no REST calls. " +
-            "Each UI update is a binary delta — typically 5–20 bytes. " +
-            "A 10 000-row DataGrid update costs less than a single REST request."));
+            "Each UI update is a binary delta of a few bytes, often under 3 bytes on the wire once the " +
+            "dictionary and permessage-deflate are warm: see Overview for a live measurement."));
 
         // Live refresh every second
         final long[] prevHeap = {0};
@@ -962,17 +1401,14 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             latBar2.setAttribute("style", "width:" + latPct + "%;height:4px;border-radius:4px;background:linear-gradient(90deg," + (latPct < 30 ? "#43e8b0,#7c6fff" : latPct < 70 ? "#f59e0b,#f87171" : "#f87171,#dc2626") + ");transition:width .8s;");
 
             final PonySDKMetrics metrics = uiContext.getMetrics();
-            if (metrics != null) {
-                sessVal.setInnerText(String.valueOf(metrics.getActiveContexts()));
-                final long curSent = metrics.getTotalBytesSent();
-                final long curRcv = metrics.getTotalBytesReceived();
-                final long deltaSentKb = (curSent - prevSent[0]) / 1024;
-                final long deltaRcvKb = (curRcv - prevRcv[0]) / 1024;
-                sentVal.setInnerText(String.valueOf(deltaSentKb));
-                rcvVal.setInnerText(String.valueOf(deltaRcvKb));
-                prevSent[0] = curSent;
-                prevRcv[0] = curRcv;
-            }
+            if (metrics != null) sessVal.setInnerText(String.valueOf(metrics.getActiveContexts()));
+            // per-connection wire counters (framing + compressed payload), sampled every second
+            final long curSent = uiContext.getWireBytesSent();
+            final long curRcv = uiContext.getWireBytesReceived();
+            if (curSent >= 0 && prevSent[0] > 0) sentVal.setInnerText(String.format(java.util.Locale.ROOT, "%.1f", (curSent - prevSent[0]) / 1024.0));
+            if (curRcv >= 0 && prevRcv[0] > 0) rcvVal.setInnerText(String.format(java.util.Locale.ROOT, "%.1f", (curRcv - prevRcv[0]) / 1024.0));
+            prevSent[0] = curSent;
+            prevRcv[0] = curRcv;
 
             // Dictionary stats
             final com.ponysdk.core.server.application.StringDictionary dict = uiContext.getStringDictionary();
@@ -1267,7 +1703,9 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     // ── Tab: Misc ────────────────────────────────────────────────────────────
 
-    private PFlowPanel buildMiscTab(final List<PScheduler.UIRunnable> schedulers) {        final PFlowPanel p = section();
+    private PFlowPanel buildMiscTab(final List<PScheduler.UIRunnable> schedulers) {
+        final PFlowPanel p = section();
+        pageTitle(p, "Misc", "HTML, scripts, frames and cookies, all handled from the server.");
 
         p.add(sectionTitle("HTML / Anchors"));
         p.add(labeled("HTML", Element.newPHTML("Hello <b>HTML</b>")));
@@ -1279,12 +1717,23 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         p.add(labeled("PScript", alertBtn));
 
         p.add(sectionTitle("Toolbar"));
-        p.add(new PToolbar());
+        final PToolbar toolbar = new PToolbar();
+        toolbar.addStyleName("misc-toolbar");
+        final PLabel toolbarEcho = Element.newPLabel("server: no action yet");
+        toolbarEcho.addStyleName("pony-ex-echo");
+        for (final String action : new String[] { "New", "Open", "Save", "Export" }) {
+            final PButton b = Element.newPButton(action);
+            b.addClickHandler(e -> toolbarEcho.setText("server: " + action + " clicked"));
+            toolbar.add(b);
+        }
+        p.add(toolbar);
+        p.add(toolbarEcho);
 
-        p.add(sectionTitle("Frame (self)"));
-        final PFrame frame = Element.newPFrame("./"); // relative: same origin whatever host/port serves the showcase
-        frame.setHeight("200px");
-        frame.setWidth("400px");
+        p.add(sectionTitle("Frame"));
+        final PFrame frame = Element.newPFrame("html/frame-demo.html"); // relative: same origin as the showcase
+        frame.setHeight("260px");
+        frame.setWidth("min(640px,100%)");
+        frame.addStyleName("lay-frame");
         p.add(frame);
 
         p.add(sectionTitle("Cookies"));
@@ -1401,15 +1850,15 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             @Override public Integer getKey(final MyRow v) { return v.id; }
             @Override public List<ColumnDefinition<MyRow>> getColumnDefinitions() { return columns; }
             @Override public int compareDefault(final MyRow v1, final MyRow v2) { return 0; }
-            @Override public void onCreateHeaderRow(final IsPWidget r) { r.asWidget().getParent().asWidget().setStyleProperty("background", "aliceblue"); }
-            @Override public void onCreateFooterRow(final IsPWidget r) { r.asWidget().getParent().asWidget().setStyleProperty("background", "aliceblue"); }
+            @Override public void onCreateHeaderRow(final IsPWidget r) { r.asWidget().getParent().asWidget().addStyleName("dg-head"); }
+            @Override public void onCreateFooterRow(final IsPWidget r) { r.asWidget().getParent().asWidget().addStyleName("dg-head"); }
             @Override public void onCreateRow(final IsPWidget r) {}
             @Override public boolean hasHeader() { return true; }
             @Override public boolean hasFooter() { return false; }
             @Override public IsPWidget createLoadingDataWidget() {
                 final PComplexPanel div = Element.newDiv();
                 div.setWidth("100%"); div.setHeight("100%");
-                div.setStyleProperty("background-color", "#FFFFFF7F");
+                div.setStyleProperty("background-color", "rgba(8,9,12,.55)");
                 return div;
             }
             @Override public void onCreateColumnResizer(final IsPWidget r) {}
@@ -1420,14 +1869,13 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final DataGridController<Integer, MyRow> controller = gridView.getController();
         gridView.asWidget().setHeight("500px");
         gridView.asWidget().setWidth("100%");
-        gridView.asWidget().setStyleProperty("resize", "both");
+        gridView.asWidget().setStyleProperty("resize", "vertical");
+        gridView.asWidget().addStyleName("dg-frame");
         gridView.asWidget().setStyleProperty("overflow", "hidden");
 
         // Controls row
         final PFlowPanel controls = Element.newPFlowPanel();
-        controls.setStyleProperty("display", "flex");
-        controls.setStyleProperty("gap", "8px");
-        controls.setStyleProperty("margin", "8px 0");
+        controls.addStyleName("dg-controls");
 
         final PTextBox pollingDelay = Element.newPTextBox();
         pollingDelay.setPlaceholder("Polling delay ms");
@@ -1439,8 +1887,12 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         clearSortsButton.addClickHandler(e -> gridView.clearSorts(false));
 
         controls.add(pollingDelay, changePollingDelay, clearSortsButton);
-        controls.add(columnVisibilitySelectorDataGridView.getDecoratorWidget());
         controls.add(configSelectorDataGridView.getDecoratorWidget());
+        // 52 column checkboxes: collapsed by default
+        final PDisclosurePanel columnsPicker = Element.newPDisclosurePanel("Columns…");
+        columnsPicker.addStyleName("dg-columns");
+        columnsPicker.setContent(columnVisibilitySelectorDataGridView.getDecoratorWidget());
+        controls.add(columnsPicker);
 
         container.add(controls);
         container.add(gridView);
@@ -1654,31 +2106,41 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     }
 
     private void testVisibilityHandler(final PComplexPanel container, final List<PScheduler.UIRunnable> schedulers) {
+        final PFlowPanel box = Element.newPFlowPanel();
+        box.addStyleName("lay-vis");
+        container.add(box);
+        final PLabel hint = Element.newPLabel("Scroll the frame: the server is told when the card leaves or "
+            + "enters the viewport, and only refreshes it while it is visible.");
+        hint.addStyleName("lay-hint");
+        box.add(hint);
         final PLabel liveVisibility = Element.newPLabel("Live Visibility : Unknown");
-        container.add(liveVisibility);
+        liveVisibility.addStyleName("pony-ex-echo");
+        box.add(liveVisibility);
 
         final PButton button = Element.newPButton("Check visibility");
-        container.add(button);
+        box.add(button);
 
         final PLabel visibilityLabel = Element.newPLabel("Visibility : Unknown");
-        container.add(visibilityLabel);
+        visibilityLabel.addStyleName("lay-hint");
+        box.add(visibilityLabel);
 
         final PScrollPanel frame = Element.newPScrollPanel();
         frame.setHeight("200px");
-        frame.setWidth("300px");
-        container.add(frame);
+        frame.setWidth("320px");
+        frame.addStyleName("lay-frame");
+        box.add(frame);
 
         final PFlowPanel panel = Element.newPFlowPanel();
         panel.setHeight("2000px");
         frame.add(panel);
 
         final PFlowPanel subPanel = Element.newPFlowPanel();
-        subPanel.setStyleProperty("backgroundColor", "red");
+        subPanel.addStyleName("lay-vis-card");
         subPanel.setHeight("125px");
-        subPanel.setWidth("200px");
+        subPanel.setWidth("260px");
         panel.add(subPanel);
 
-        final PLabel label = Element.newPLabel("Increment : " + a++);
+        final PLabel label = Element.newPLabel("Server counter: " + a++);
         subPanel.add(label);
 
         schedulers.add(PScheduler.scheduleAtFixedRate(() -> {
@@ -1715,7 +2177,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     private static void updateLabel(final PLabel label, final String text) {
         log.debug("Update label {}", text);
-        label.setText("Increment : " + text);
+        label.setText("Server counter: " + text);
     }
 
     private void createFunctionalLabel() {
@@ -1895,17 +2357,12 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
                 return Element.newPLabel(value.key + "");
             }
         });
-        columnDescriptor1.setHeaderCellRenderer(() -> Element.newPLabel("A"));
+        columnDescriptor1.setHeaderCellRenderer(() -> Element.newPLabel("Key"));
         columnDescriptor1.setValueProvider(new IdentityValueProvider<>());
         grid.addDataGridColumnDescriptor(columnDescriptor1);
-        grid.addDataGridColumnDescriptor(columnDescriptor1);
-        grid.addDataGridColumnDescriptor(columnDescriptor1);
-        grid.addDataGridColumnDescriptor(columnDescriptor1);
-        grid.addDataGridColumnDescriptor(columnDescriptor1);
-        grid.addDataGridColumnDescriptor(columnDescriptor1);
-        grid.addDataGridColumnDescriptor(columnDescriptor1);
 
-        for (int i = 0; i < 40; i++) {
+        for (int i = 0; i < 6; i++) {
+            final String header = "Value " + (i + 1);
 
             final DataGridColumnDescriptor<Data, Data> columnDescriptor3 = new DataGridColumnDescriptor<>();
             columnDescriptor3.setCellRenderer(new CellRenderer<UISampleEntryPoint.Data, PLabel>() {
@@ -1920,7 +2377,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
                     return Element.newPLabel(value.value);
                 }
             });
-            columnDescriptor3.setHeaderCellRenderer(() -> Element.newPLabel("B"));
+            columnDescriptor3.setHeaderCellRenderer(() -> Element.newPLabel(header));
             columnDescriptor3.setValueProvider(new IdentityValueProvider<>());
             grid.addDataGridColumnDescriptor(columnDescriptor3);
         }
@@ -2141,19 +2598,21 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     private static final PTree createTree() {
         final PTree tree = Element.newPTree();
 
-        final PTreeItem firstFolder = tree.add("First");
-        firstFolder.add("2");
-        firstFolder.add(0, Element.newPTreeItem("1"));
+        tree.addStyleName("data-tree");
+        final PTreeItem fx = tree.add("FX desk");
+        fx.add("EUR/USD");
+        fx.add(0, Element.newPTreeItem("GBP/USD"));   // inserted before
+        fx.add("USD/JPY");
+        fx.setState(true);
 
-        firstFolder.setState(true);
+        final PTreeItem rates = Element.newPTreeItem("Rates desk");
+        final PTreeItem bund = rates.add(Element.newPTreeItem());
+        bund.setText("Bund 10Y");                    // text set after creation
+        rates.add(Element.newPTreeItem(Element.newPLabel("UST 10Y (widget item)")));
+        tree.add(rates);
+        rates.setState(true);
 
-        final PTreeItem secondFolder = Element.newPTreeItem("Second");
-        final PTreeItem subItem = secondFolder.add(Element.newPTreeItem());
-        subItem.setText("3");
-        secondFolder.add(Element.newPTreeItem(Element.newPLabel("4")));
-        tree.add(secondFolder);
-
-        secondFolder.setSelected(true);
+        bund.setSelected(true);
 
         return tree;
     }
