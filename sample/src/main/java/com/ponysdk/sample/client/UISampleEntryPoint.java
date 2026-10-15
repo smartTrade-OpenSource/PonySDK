@@ -759,6 +759,29 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             + ".cost-table td .ov-bar{width:120px;}"
             + ".cost-fill{background:linear-gradient(90deg,#43e8b0,#7c6fff) !important;}"
             + ".cost-row{display:flex;align-items:center;gap:14px;margin-bottom:12px;}"
+            + ".row-cost{margin-left:auto;display:flex;align-items:center;gap:10px;padding-left:12px;flex-shrink:0;}"
+            // Pipeline
+            + ".pl-flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:0;margin:6px 0 16px;}"
+            + ".pl-step{position:relative;padding:10px 14px 10px 18px;margin-right:14px;border-radius:10px;"
+            +   "border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.025);min-width:96px;}"
+            + ".pl-step::after{content:'→';position:absolute;right:-13px;top:50%;transform:translateY(-50%);color:#52525b;}"
+            + ".pl-step:last-child::after{content:'';}"
+            + ".pl-step-name{font-size:12.5px;font-weight:600;color:#fafafa;}"
+            + ".pl-step-sub{font-size:11px;color:#71717a;margin-top:2px;font-family:ui-monospace,'JetBrains Mono',monospace;}"
+            + ".pl-funnel{display:flex;flex-direction:column;gap:12px;margin:4px 0 28px;padding:16px 18px;"
+            +   "border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(255,255,255,.015);}"
+            + ".pl-row-head{display:flex;align-items:baseline;gap:8px;margin-bottom:5px;}"
+            + ".pl-name{font-size:13px;font-weight:600;color:#fafafa;min-width:150px;}"
+            + ".pl-val{font-size:18px;font-weight:700;color:#fafafa;font-variant-numeric:tabular-nums;}"
+            + ".pl-unit{font-size:11px;color:#71717a;}"
+            + ".pl-gain{margin-left:auto;font-size:12px;font-weight:700;color:var(--accent2,#43e8b0);}"
+            + ".pl-bar{height:8px;border-radius:8px;background:rgba(255,255,255,.05);overflow:hidden;}"
+            + ".pl-bar-fill{height:100%;border-radius:8px;background:#7c6fff;transition:width .8s cubic-bezier(.4,0,.2,1);}"
+            + ".pl-row-bytes .pl-bar-fill{background:linear-gradient(90deg,#43e8b0,#7c6fff);}"
+            + ".pl-desc{font-size:11.5px;color:#71717a;margin-top:4px;}"
+            + ".row-cost-result{font-family:ui-monospace,'JetBrains Mono',monospace;font-size:11.5px;color:var(--accent2,#43e8b0);}"
+            + ".row-cost-btn{padding:4px 10px !important;font-size:11px !important;opacity:.75;}"
+            + ".row-cost-btn:hover{opacity:1;}"
             + ".cost-body .perf-card{padding:14px 10px !important;}"
             + ".data-tree{padding:8px;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:#0a0b0e;max-width:420px;}"
             + ".data-tree .gwt-TreeItem{background:transparent !important;color:#d4d4d8 !important;border:0 !important;"
@@ -789,7 +812,42 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     /** What to measure for one component: how to build an instance and a typical update (receives the index). */
     private record CostSpec(String name, Supplier<PWidget> factory, java.util.function.BiConsumer<PWidget, Integer> update,
-                            String updateLabel) {}
+                            String updateLabel, int sample, boolean async) {
+
+        CostSpec(final String name, final Supplier<PWidget> factory,
+                 final java.util.function.BiConsumer<PWidget, Integer> update, final String updateLabel) {
+            this(name, factory, update, updateLabel, CostMeter.SAMPLE, false);
+        }
+
+        void measure(final java.util.function.Consumer<CostMeter.Cost> done) {
+            final int[] counter = { 0 };
+            CostMeter.measure(name, factory, update == null ? null : w -> update.accept(w, counter[0]++), updateLabel,
+                sample, async, done);
+        }
+    }
+
+    /** Showcase row label → measured component (the "Cost" button of each row). */
+    private static final Map<String, String> ROW_COSTS = Map.ofEntries(
+        Map.entry("TextArea", "PTextArea"), Map.entry("Password", "PPasswordTextBox"),
+        Map.entry("RichText editor", "PRichTextArea"), Map.entry("PushButton", "PPushButton"),
+        Map.entry("DateBox dd/MM/yyyy", "PDateBox"), Map.entry("DateBox with picker", "PDateBox"),
+        Map.entry("DatePicker", "PDatePicker"), Map.entry("ListBox (multi)", "PListBox (5 items)"),
+        Map.entry("MenuBar", "PMenuBar (3 items)"), Map.entry("FileUpload", "PFileUpload"),
+        Map.entry("HTML", "PHTML"), Map.entry("Anchor", "PAnchor"),
+        Map.entry("FlowPanel", "PFlowPanel + 3 labels"), Map.entry("HorizontalPanel", "PHorizontalPanel + 3 labels"),
+        Map.entry("VerticalPanel", "PVerticalPanel + 3 labels"), Map.entry("AbsolutePanel", "PAbsolutePanel + 3 labels"),
+        Map.entry("ScrollPanel", "PScrollPanel + label"), Map.entry("SimplePanel", "PSimplePanel + label"),
+        Map.entry("FocusPanel", "PFocusPanel + label"), Map.entry("DockLayoutPanel", "PDockLayoutPanel (4 regions)"),
+        Map.entry("SplitLayoutPanel", "PSplitLayoutPanel (2 regions)"), Map.entry("StackLayoutPanel", "PStackLayoutPanel (3 sections)"),
+        Map.entry("TabLayoutPanel", "PTabLayoutPanel (3 tabs)"), Map.entry("DisclosurePanel", "PDisclosurePanel + label"),
+        Map.entry("my-counter", "PWebComponent <my-counter>"));
+
+    private static List<PWidget> threeLabels() {
+        return List.of(Element.newPLabel("Bid"), Element.newPLabel("Ask"), Element.newPLabel("Spread"));
+    }
+
+    private static final java.util.function.BiConsumer<PWidget, Integer> STYLE_UPDATE =
+        (w, i) -> w.setStyleProperty("color", i % 2 == 0 ? "#43e8b0" : "#f87171");
 
     private static List<CostSpec> costSpecs() {
         final List<CostSpec> l = new ArrayList<>();
@@ -843,7 +901,127 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             wc.property("count").set(0);
             return wc;
         }, (w, i) -> ((PWebComponent) w).property("count").set(i), "property"));
+        l.add(new CostSpec("PPushButton", () -> {
+            final PPushButton b = Element.newPPushButton(Element.newPImage());
+            b.setText("Push");
+            return b;
+        }, (w, i) -> ((PPushButton) w).setText("Push " + i), "setText"));
+        l.add(new CostSpec("PRichTextArea", () -> Element.newPRichTextArea(),
+            (w, i) -> ((PRichTextArea) w).setHTML("<b>note</b> " + i), "setHTML"));
+        l.add(new CostSpec("PDatePicker", () -> Element.newPDatePicker(), STYLE_UPDATE, "style"));
+        l.add(new CostSpec("PMenuBar (3 items)", () -> {
+            final PMenuBar m = Element.newPMenuBar(true);
+            m.addItem(Element.newPMenuItem("File"));
+            m.addItem(Element.newPMenuItem("Edit"));
+            m.addItem(Element.newPMenuItem("View"));
+            return m;
+        }, STYLE_UPDATE, "style"));
+        l.add(new CostSpec("PFileUpload", () -> Element.newPFileUpload(), STYLE_UPDATE, "style"));
+        l.add(new CostSpec("PHorizontalPanel + 3 labels", () -> {
+            final PHorizontalPanel h = Element.newPHorizontalPanel();
+            threeLabels().forEach(h::add);
+            return h;
+        }, STYLE_UPDATE, "style"));
+        l.add(new CostSpec("PVerticalPanel + 3 labels", () -> {
+            final PVerticalPanel v = Element.newPVerticalPanel();
+            threeLabels().forEach(v::add);
+            return v;
+        }, STYLE_UPDATE, "style"));
+        l.add(new CostSpec("PAbsolutePanel + 3 labels", () -> {
+            final PAbsolutePanel a = Element.newPAbsolutePanel();
+            threeLabels().forEach(a::add);
+            return a;
+        }, STYLE_UPDATE, "style"));
+        l.add(new CostSpec("PScrollPanel + label", () -> {
+            final PScrollPanel sp = Element.newPScrollPanel();
+            sp.setWidget(Element.newPLabel("Scrollable content"));
+            return sp;
+        }, STYLE_UPDATE, "style"));
+        l.add(new CostSpec("PSimplePanel + label", () -> {
+            final PSimplePanel sp = Element.newPSimplePanel();
+            sp.setWidget(Element.newPLabel("Only child"));
+            return sp;
+        }, STYLE_UPDATE, "style"));
+        l.add(new CostSpec("PFocusPanel + label", () -> {
+            final PFocusPanel fp = Element.newPFocusPanel();
+            fp.setWidget(Element.newPLabel("Focus me"));
+            fp.addClickHandler(e -> { });
+            return fp;
+        }, STYLE_UPDATE, "style"));
+        l.add(new CostSpec("PDockLayoutPanel (4 regions)", () -> {
+            final PDockLayoutPanel d = Element.newPDockLayoutPanel(PUnit.PX);
+            d.addNorth(Element.newPLabel("N"), 20);
+            d.addSouth(Element.newPLabel("S"), 20);
+            d.addWest(Element.newPLabel("W"), 40);
+            d.add(Element.newPLabel("C"));
+            return d;
+        }, STYLE_UPDATE, "style"));
+        l.add(new CostSpec("PSplitLayoutPanel (2 regions)", () -> {
+            final PSplitLayoutPanel sp = Element.newPSplitLayoutPanel();
+            sp.addWest(Element.newPLabel("W"), 80);
+            sp.add(Element.newPLabel("C"));
+            return sp;
+        }, STYLE_UPDATE, "style"));
+        l.add(new CostSpec("PStackLayoutPanel (3 sections)", () -> {
+            final PStackLayoutPanel st = Element.newPStackLayoutPanel(PUnit.PX);
+            for (final String h : new String[] { "Mail", "Contacts", "Tasks" }) st.add(Element.newPLabel(h), h, false, 24);
+            return st;
+        }, STYLE_UPDATE, "style"));
+        l.add(new CostSpec("PTabLayoutPanel (3 tabs)", () -> {
+            final PTabLayoutPanel t = Element.newPTabLayoutPanel();
+            for (final String h : new String[] { "One", "Two", "Three" }) t.add(Element.newPLabel(h), h);
+            return t;
+        }, (w, i) -> ((PTabLayoutPanel) w).selectTab(i % 3), "selectTab"));
+        l.add(new CostSpec("PDisclosurePanel + label", () -> {
+            final PDisclosurePanel dp = Element.newPDisclosurePanel("More");
+            dp.setContent(Element.newPLabel("Details"));
+            return dp;
+        }, (w, i) -> ((PDisclosurePanel) w).setOpen(true), "setOpen"));
+        // Heavy components: few instances, rendered off-screen, bytes counted over the settle window
+        l.add(new CostSpec("DataGrid2 (8 cols × 50 rows)", UISampleEntryPoint::smallDataGrid,
+            null, "—", 5, true));
+        l.add(new CostSpec("FlexLayout (3 tabs)", () -> {
+            final com.ponysdk.core.ui.flexlayout.FlexLayoutPanel f = new com.ponysdk.core.ui.flexlayout.FlexLayoutPanel();
+            for (final String t : new String[] { "Blotter", "Chart", "Orders" }) f.addTab(t, Element.newPLabel(t));
+            final PWidget w = f.asWidget();
+            w.setWidth("600px");
+            w.setHeight("300px");
+            return w;
+        }, null, "—", 5, true));
         return l;
+    }
+
+    /** A compact DataGrid2 (8 columns, 50 rows) for the cost table. */
+    private static PWidget smallDataGrid() {
+        final DefaultDataGridView<Integer, MyRow> view = new DefaultDataGridView<>();
+        final List<ColumnDefinition<MyRow>> columns = new ArrayList<>();
+        for (char c = 'a'; c <= 'h'; c++) {
+            final String key = String.valueOf(c);
+            columns.add(new DefaultColumnDefinition<>(key, v -> v.getValue(key), (v, val) -> v.putValue(key, val)));
+        }
+        view.setAdapter(new DataGridAdapter<>() {
+            @Override public void onUnselectRow(final IsPWidget r) { }
+            @Override public void onSelectRow(final IsPWidget r) { }
+            @Override public boolean isAscendingSortByInsertionOrder() { return false; }
+            @Override public Integer getKey(final MyRow v) { return v.id; }
+            @Override public List<ColumnDefinition<MyRow>> getColumnDefinitions() { return columns; }
+            @Override public int compareDefault(final MyRow v1, final MyRow v2) { return 0; }
+            @Override public void onCreateHeaderRow(final IsPWidget r) { }
+            @Override public void onCreateFooterRow(final IsPWidget r) { }
+            @Override public void onCreateRow(final IsPWidget r) { }
+            @Override public boolean hasHeader() { return true; }
+            @Override public boolean hasFooter() { return false; }
+            @Override public IsPWidget createLoadingDataWidget() { return Element.newDiv(); }
+            @Override public void onCreateColumnResizer(final IsPWidget r) { }
+            @Override public boolean isSelectionEnabled() { return false; }
+        });
+        view.asWidget().setHeight("400px");
+        view.asWidget().setWidth("900px");
+        final DataGridController<Integer, MyRow> controller = view.getController();
+        controller.setBound(false);
+        for (int i = 0; i < 50; i++) controller.setData(createMyRow(i));
+        controller.setBound(true);
+        return view.asWidget();
     }
 
     private static CostSpec costSpec(final String name) {
@@ -878,7 +1056,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             for (int c = 1; c < heads.length; c++) table.setWidget(r + 1, c, Element.newPLabel(c == 5 ? specs.get(r).updateLabel() : "—"));
         }
         p.add(table);
-        p.add(el("ov-note", "Memory: object graph of one instance, shared objects (session, window, style pools, "
+        p.add(el("ov-note", "Heavy components (DataGrid2, FlexLayout) are measured on 5 instances laid out off-screen, "
+            + "bytes counted until they finish rendering. Memory: object graph of one instance, shared objects (session, window, style pools, "
             + "interned strings) excluded. Protocol: exact bytes produced by the binary protocol, per instance. Wire: "
             + "bytes on the socket after permessage-deflate, per instance; " + CostMeter.SAMPLE + " similar instances "
             + "compress very well, so this is the cost when a screen repeats a component (grids, lists)."));
@@ -893,11 +1072,10 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             }
             final CostSpec spec = specs.get(idx);
             status.setText("Measuring " + spec.name() + "…");
-            final int[] counter = { 0 };
-            CostMeter.measure(spec.name(), spec.factory(), w -> spec.update().accept(w, counter[0]++), spec.updateLabel(), cost -> {
+            spec.measure(cost -> {
                 maxMemory[0] = Math.max(maxMemory[0], cost.memory());
                 final int row = idx + 1;
-                table.setWidget(row, 1, Element.newPLabel(cost.memory() + " B"));
+                table.setWidget(row, 1, Element.newPLabel(CostMeter.memory(cost.memory())));
                 final PElement bar = Element.newDiv();
                 bar.addStyleName("ov-bar");
                 final PElement fill = Element.newDiv();
@@ -938,7 +1116,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         grid.addStyleName("ov-live");
         final PElement createUnit = el("perf-unit", "BYTES ON THE WIRE");
         final PElement updUnit = el("perf-unit", "BYTES ON THE WIRE");
-        grid.add(perfCard(mem, el("perf-unit", "BYTES / INSTANCE"), el("perf-label", "Server memory")));
+        grid.add(perfCard(mem, el("perf-unit", "PER INSTANCE"), el("perf-label", "Server memory")));
         grid.add(perfCard(create, createUnit, el("perf-label", "Create")));
         grid.add(perfCard(upd, updUnit, el("perf-label", "Update · " + spec.updateLabel())));
         final PButton measure = Element.newPButton("Measure");
@@ -947,9 +1125,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         hint.addStyleName("lay-hint");
         measure.addClickHandler(e -> {
             measure.setEnabled(false);
-            final int[] counter = { 0 };
-            CostMeter.measure(spec.name(), spec.factory(), w -> spec.update().accept(w, counter[0]++), spec.updateLabel(), cost -> {
-                mem.setInnerText(String.valueOf(cost.memory()));
+            spec.measure(cost -> {
+                mem.setInnerText(CostMeter.memory(cost.memory()));
                 create.setInnerText(bytes(cost.createWire()).replace(" B", ""));
                 createUnit.setInnerText("B ON THE WIRE · " + bytes(cost.createProtocol()) + " BEFORE DEFLATE");
                 upd.setInnerText(bytes(cost.updateWire()).replace(" B", ""));
@@ -1030,6 +1207,53 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             "Latency · protocol v" + uiContext.getProtocolVersion())));
         p.add(live);
 
+        // Live pipeline: how a setter call becomes a few bytes on the wire
+        p.add(sectionTitle("How it gets so small — the update pipeline, live"));
+        final PFlowPanel flow = Element.newPFlowPanel();
+        flow.addStyleName("pl-flow");
+        for (final String[] step : new String[][] {
+            { "Java setter", "label.setText(…)" }, { "Coalescing", "last value wins" },
+            { "Update runs", "ids chained" }, { "Dictionary", "3-byte refs" },
+            { "Typed binary", "no JSON" }, { "Deflate", "zlib stream" }, { "WebSocket", "one frame / tick" },
+            { "Terminal", "GWT → DOM" } }) {
+            final PFlowPanel box = Element.newPFlowPanel();
+            box.addStyleName("pl-step");
+            box.add(el("pl-step-name", step[0]), el("pl-step-sub", step[1]));
+            flow.add(box);
+        }
+        p.add(flow);
+
+        final PFlowPanel funnel = Element.newPFlowPanel();
+        funnel.addStyleName("pl-funnel");
+        final String[][] stages = {
+            { "Setter calls", "calls / s", "The application calls setters freely, several times per cell and per tick." },
+            { "After coalescing", "updates / s", "Within one transaction only the last value of each property is kept." },
+            { "As JSON", "KB / s", "What the same updates would weigh as JSON messages ({\"id\":…,\"text\":…})." },
+            { "PonySDK binary", "KB / s", "Typed binary, chained update runs, dictionary references: exact protocol bytes." },
+            { "On the wire", "KB / s", "After permessage-deflate with context takeover: bytes on the socket." } };
+        final PElement[] stageVal = new PElement[stages.length];
+        final PElement[] stageFill = new PElement[stages.length];
+        final PElement[] stageGain = new PElement[stages.length];
+        for (int k = 0; k < stages.length; k++) {
+            final PFlowPanel row = Element.newPFlowPanel();
+            row.addStyleName("pl-row");
+            if (k >= 2) row.addStyleName("pl-row-bytes");
+            final PFlowPanel head = Element.newPFlowPanel();
+            head.addStyleName("pl-row-head");
+            stageVal[k] = el("pl-val", "—");
+            stageGain[k] = el("pl-gain", "");
+            head.add(el("pl-name", stages[k][0]), stageVal[k], el("pl-unit", stages[k][1]), stageGain[k]);
+            final PElement bar = Element.newDiv();
+            bar.addStyleName("pl-bar");
+            stageFill[k] = Element.newDiv();
+            stageFill[k].addStyleName("pl-bar-fill");
+            stageFill[k].setAttribute("style", "width:0%");
+            bar.add(stageFill[k]);
+            row.add(head, bar, el("pl-desc", stages[k][2]));
+            funnel.add(row);
+        }
+        p.add(funnel);
+
         // Stress ticker: the server updates random cells; the cards above show what it costs
         p.add(sectionTitle("Stress it — a live price ticker driven from Java"));
         final PFlowPanel controls = Element.newPFlowPanel();
@@ -1044,6 +1268,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final int[] rate = { 20 };          // ticks per second
         final boolean[] running = { true };
         final long[] updates = { 0 };
+        final long[] calls = { 0 };      // setter calls made by the application
+        final long[] jsonBytes = { 0 };  // what the same distinct updates would weigh as JSON messages
         final PScheduler.UIRunnable[] ticker = { null };
 
         final Runnable rebuildCells = () -> {
@@ -1066,9 +1292,17 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
                 final double delta = (rnd.nextDouble() - 0.5) * 0.002;
                 prices[i] = Math.max(0.5, prices[i] + delta);
                 final PLabel c = cells.get(i);
-                c.setText(String.format(java.util.Locale.ROOT, "%.5f", prices[i]));
-                c.setStyleProperty("color", delta >= 0 ? "#43e8b0" : "#f87171");
-                if (!touched[i]) updates[0] += 2;           // text + colour; a cell hit twice in a tick is sent once
+                final String text = String.format(java.util.Locale.ROOT, "%.5f", prices[i]);
+                final String color = delta >= 0 ? "#43e8b0" : "#f87171";
+                c.setText(text);
+                c.setStyleProperty("color", color);
+                calls[0] += 2;
+                if (!touched[i]) {
+                    updates[0] += 2;                        // text + colour; a cell hit twice in a tick is sent once
+                    // {"id":1234,"text":"1.08512"} and {"id":1234,"style":{"color":"#43e8b0"}}
+                    final int idLen = String.valueOf(c.getID()).length();
+                    jsonBytes[0] += 17 + idLen + text.length() + 28 + idLen + color.length();
+                }
                 touched[i] = true;
             }
         };
@@ -1134,7 +1368,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         restartTicker.run();
 
         // 1 s refresh of the live cards (deltas of the connection counters)
-        final long[] prev = { uiContext.getWireBytesSent(), uiContext.getProtocolBytesSent(), 0, System.nanoTime() };
+        final long[] prev = { uiContext.getWireBytesSent(), uiContext.getProtocolBytesSent(), 0, System.nanoTime(), 0, 0 };
         schedulers.add(PScheduler.scheduleAtFixedRate(() -> {
             final long wire = uiContext.getWireBytesSent();
             final long raw = uiContext.getProtocolBytesSent();
@@ -1145,6 +1379,21 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             prev[1] = raw;
             prev[2] = updates[0];
             prev[3] = now;
+            final long dCalls = calls[0] - prev[4], dJson = jsonBytes[0] - prev[5];
+            prev[4] = calls[0];
+            prev[5] = jsonBytes[0];
+            final double[] perSec = { dCalls / secs, dUpd / secs, dJson / 1024.0 / secs, dRaw / 1024.0 / secs,
+                                      wire >= 0 ? dWire / 1024.0 / secs : 0 };
+            for (int k = 0; k < perSec.length; k++) {
+                stageVal[k].setInnerText(k < 2 ? String.format(java.util.Locale.ROOT, "%,d", Math.round(perSec[k]))
+                    : String.format(java.util.Locale.ROOT, "%.1f", perSec[k]));
+                // counts are scaled on the calls, bytes on the JSON size
+                final double base = k < 2 ? perSec[0] : perSec[2];
+                final int pct = base > 0 ? (int) Math.max(1, Math.min(100, Math.round(perSec[k] * 100 / base))) : 0;
+                stageFill[k].setAttribute("style", "width:" + pct + "%");
+                if (k == 1 && perSec[0] > 0) stageGain[k].setInnerText("−" + Math.round(100 - perSec[1] * 100 / perSec[0]) + " %");
+                if (k >= 3 && perSec[2] > 0) stageGain[k].setInnerText("÷" + String.format(java.util.Locale.ROOT, "%.0f", perSec[2] / Math.max(0.001, perSec[k])) + " vs JSON");
+            }
             if (wire >= 0) {
                 wireVal.setInnerText(String.format(java.util.Locale.ROOT, "%.1f", dWire / 1024.0 / secs));
                 ratioVal.setInnerText(dWire > 0 ? String.format(java.util.Locale.ROOT, "%.1f", (double) dRaw / dWire) : "—");
@@ -1996,7 +2245,31 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         lbl.setInnerText(label);
         row.add(lbl);
         row.add(widget);
+        final String costName = ROW_COSTS.get(label);
+        if (costName != null) row.add(rowCost(costSpec(costName)));
         return row;
+    }
+
+    /** "Cost" button of a row: measures the component in place and shows memory / create / update on the wire. */
+    private static PFlowPanel rowCost(final CostSpec spec) {
+        final PFlowPanel box = Element.newPFlowPanel();
+        box.addStyleName("row-cost");
+        final PLabel result = Element.newPLabel("");
+        result.addStyleName("row-cost-result");
+        final PButton b = Element.newPButton("⚖ Cost");
+        b.addStyleName("row-cost-btn");
+        b.addClickHandler(e -> {
+            b.setEnabled(false);
+            result.setText("measuring…");
+            spec.measure(cost -> {
+                result.setText(CostMeter.memory(cost.memory()) + " memory · create " + bytes(cost.createWire())
+                    + (cost.updateWire() >= 0 ? " · " + cost.updateLabel() + " " + bytes(cost.updateWire()) : "")
+                    + " on the wire");
+                b.setEnabled(true);
+            });
+        });
+        box.add(result, b);
+        return box;
     }
 
     private static PFlowPanel labeled(final String label, final IsPWidget widget) {

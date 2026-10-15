@@ -69,50 +69,79 @@ final class CostMeter {
     }
 
     /**
-     * Runs one measurement; {@code done} is called on the UI thread with the result. Must be called inside a
-     * UIContext transaction (a click handler, a scheduled UIRunnable).
+     * Runs one measurement of {@link #SAMPLE} instances; {@code done} is called on the UI thread with the result.
+     * Must be called inside a UIContext transaction (a click handler, a scheduled UIRunnable).
      */
     static void measure(final String component, final Supplier<? extends PWidget> factory, final Consumer<PWidget> update,
                         final String updateLabel, final Consumer<Cost> done) {
+        measure(component, factory, update, updateLabel, SAMPLE, false, done);
+    }
+
+    /**
+     * @param sample number of instances
+     * @param async  for heavy components that render after creation (data grid rows, layout engines): the
+     *               container is laid out off-screen instead of {@code display:none}, and the protocol bytes are
+     *               counted over the whole settle window instead of the flush alone
+     */
+    static void measure(final String component, final Supplier<? extends PWidget> factory, final Consumer<PWidget> update,
+                        final String updateLabel, final int sample, final boolean async, final Consumer<Cost> done) {
         final UIContext ctx = UIContext.get();
+        final Duration settle = async ? Duration.ofMillis(900) : SETTLE;
         final PFlowPanel box = Element.newPFlowPanel();
-        box.setStyleProperty("display", "none");
+        if (async) {
+            box.setStyleProperty("position", "absolute");
+            box.setStyleProperty("left", "-20000px");
+            box.setStyleProperty("top", "0");
+            box.setStyleProperty("width", "1000px");
+            box.setStyleProperty("visibility", "hidden");
+        } else {
+            box.setStyleProperty("display", "none");
+        }
         PWindow.getMain().add(box);
         Txn.get().flush(); // isolate the container itself
 
-        final List<PWidget> widgets = new ArrayList<>(SAMPLE);
-        for (int i = 0; i < SAMPLE; i++) {
+        final List<PWidget> widgets = new ArrayList<>(sample);
+        for (int i = 0; i < sample; i++) {
             final PWidget w = factory.get();
             widgets.add(w);
             box.add(w);
         }
-        final long memory = retainedSize(widgets.get(SAMPLE / 2));
+        final long memory = retainedSize(widgets.get(sample / 2));
 
         final long p0 = ctx.getProtocolBytesSent();
         final long w0 = ctx.getWireBytesSent();
         Txn.get().flush();
-        final long createProtocol = ctx.getProtocolBytesSent() - p0;
+        final long createFlush = ctx.getProtocolBytesSent() - p0;
 
         PScheduler.schedule(() -> {
             final long w1 = ctx.getWireBytesSent();
             final long p1 = ctx.getProtocolBytesSent();
+            final long createProtocol = async ? p1 - p0 : createFlush;
             if (update != null) widgets.forEach(update);
             Txn.get().flush();
-            final long updateProtocol = ctx.getProtocolBytesSent() - p1;
+            final long updateFlush = ctx.getProtocolBytesSent() - p1;
             PScheduler.schedule(() -> {
                 final long w2 = ctx.getWireBytesSent();
+                final long updateProtocol = async ? ctx.getProtocolBytesSent() - p1 : updateFlush;
                 box.removeFromParent();
                 final boolean wire = w0 >= 0;
-                done.accept(new Cost(component, memory, (double) createProtocol / SAMPLE,
-                    wire ? (double) (w1 - w0) / SAMPLE : -1, update != null ? (double) updateProtocol / SAMPLE : -1,
-                    wire && update != null ? (double) (w2 - w1) / SAMPLE : -1, updateLabel));
-            }, SETTLE);
-        }, SETTLE);
+                done.accept(new Cost(component, memory, (double) createProtocol / sample,
+                    wire ? (double) (w1 - w0) / sample : -1, update != null ? (double) updateProtocol / sample : -1,
+                    wire && update != null ? (double) (w2 - w1) / sample : -1, updateLabel));
+            }, settle);
+        }, settle);
     }
 
     // ── Retained-size estimate ───────────────────────────────────────────
 
     /** Approximate retained size of one widget (64-bit JVM, compressed oops: 12 B header, 4 B refs). */
+    /** "80 B", "1.2 KB", "320 KB". */
+    static String memory(final long bytes) {
+        if (bytes < 1024) return bytes + " B";
+        if (bytes < 10 * 1024) return String.format(java.util.Locale.ROOT, "%.1f KB", bytes / 1024.0);
+        return Math.round(bytes / 1024.0) + " KB";
+    }
+
     static long retainedSize(final PWidget widget) {
         return new Walker(widget).size(widget);
     }
@@ -168,6 +197,7 @@ final class CostMeter {
          * holds without attaching them anywhere (e.g. the picker of a date box).
          */
         private boolean isOwnedChild(final PObject p) {
+            if (p instanceof com.ponysdk.core.ui.basic.PAddOn) return true; // add-ons are per widget
             if (!(p instanceof PWidget w)) return false;
             if (w.getParent() == null) return true;
             for (com.ponysdk.core.ui.basic.IsPWidget parent = w.getParent(); parent != null;
