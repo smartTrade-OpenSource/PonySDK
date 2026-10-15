@@ -409,6 +409,7 @@ public class WebSocketPusher implements Closeable {
         if (log.isDebugEnabled()) log.debug("Flushing {} bytes", bytes);
 
         sendSync.reset(toSend);
+        protocolBytesSent += bytes;
         session.sendBinary(toSend, sendSync);
 
         if (listener != null) {
@@ -751,6 +752,19 @@ public class WebSocketPusher implements Closeable {
 
     void setConnection(final org.eclipse.jetty.websocket.core.WebSocketConnection connection) {
         this.connection = connection;
+    }
+
+    // Protocol bytes handed to Jetty (before permessage-deflate). Written on the flush path, read for display.
+    private volatile long protocolBytesSent;
+
+    long getProtocolBytesSent() {
+        return protocolBytesSent;
+    }
+
+    /** Bytes written on the socket (framing + compressed payload), or -1 if the Jetty counter is unavailable. */
+    long getWireBytesSent() {
+        final org.eclipse.jetty.websocket.core.WebSocketConnection c = connection;
+        return c != null ? c.getBytesOut() : -1;
     }
 
     /**

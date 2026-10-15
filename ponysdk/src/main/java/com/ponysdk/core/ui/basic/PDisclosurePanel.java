@@ -94,6 +94,13 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, PAcceptsOn
         return WidgetType.DISCLOSURE_PANEL;
     }
 
+    /** Content set before this panel was attached is attached (hence created) with it, as in PPanel. */
+    @Override
+    void init0() {
+        super.init0();
+        if (content != null) content.attach(window, frame);
+    }
+
     public PWidget getContent() {
         return content;
     }

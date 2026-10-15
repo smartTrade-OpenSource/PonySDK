@@ -1090,6 +1090,33 @@ public class UIContext {
      *
      * @return the lantency
      */
+    /**
+     * Protocol bytes sent to the terminal on the current connection, before permessage-deflate (the size the
+     * binary protocol itself produces). Cheap: a counter of the flush path.
+     */
+    public long getProtocolBytesSent() {
+        final WebSocket s = socket;
+        return s != null ? s.getProtocolBytesSent() : 0;
+    }
+
+    /** Bytes sent on the wire on the current connection (framing + compressed payload), or -1 if unknown. */
+    public long getWireBytesSent() {
+        final WebSocket s = socket;
+        return s != null ? s.getWireBytesSent() : -1;
+    }
+
+    /** Bytes received on the wire on the current connection, or -1 if unknown. */
+    public long getWireBytesReceived() {
+        final WebSocket s = socket;
+        return s != null ? s.getWireBytesReceived() : -1;
+    }
+
+    /** Binary protocol version negotiated with the terminal (see {@link com.ponysdk.core.model.ProtocolVersion}). */
+    public int getProtocolVersion() {
+        final WebSocket s = socket;
+        return s != null ? s.protocolVersion() : com.ponysdk.core.model.ProtocolVersion.V1;
+    }
+
     public double getRoundtripLatency() {
         return roundtripLatency != null ? roundtripLatency.getValue() : 0;
     }

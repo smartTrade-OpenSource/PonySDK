@@ -629,6 +629,24 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
         this.upgradeRequestData = upgradeRequestData;
     }
 
+    /** Protocol bytes sent on this connection, before permessage-deflate. */
+    public long getProtocolBytesSent() {
+        final WebSocketPusher p = websocketPusher;
+        return p != null ? p.getProtocolBytesSent() : 0;
+    }
+
+    /** Bytes sent on the wire (framing + compressed payload), or -1 if unavailable. */
+    public long getWireBytesSent() {
+        final WebSocketPusher p = websocketPusher;
+        return p != null ? p.getWireBytesSent() : -1;
+    }
+
+    /** Bytes received on the wire, or -1 if unavailable. */
+    public long getWireBytesReceived() {
+        final org.eclipse.jetty.websocket.core.WebSocketConnection c = connection;
+        return c != null ? c.getBytesIn() : -1;
+    }
+
     /** The handshake snapshot (null until set by the servlet). */
     public UpgradeRequestData getUpgradeRequestData() {
         return upgradeRequestData;

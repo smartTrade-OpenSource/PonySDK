@@ -115,8 +115,10 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
         if (initialized) saveUpdate(ServerToClientModel.TEXT, text);
     }
 
+    /** Also sets it on the items below: a subtree built first and added to the tree afterwards knows its tree. */
     private void setTree(final PTree tree) {
         this.tree = tree;
+        if (children != null) children.forEach(child -> child.setTree(tree));
     }
 
     public void setSelected(final boolean newSelected) {
@@ -126,7 +128,7 @@ public class PTreeItem extends PObject implements Iterable<PTreeItem> {
     }
 
     public boolean isSelected() {
-        return this.equals(tree.getSelectedItem());
+        return tree != null && this.equals(tree.getSelectedItem());
     }
 
     public void setState(final boolean openState) {
