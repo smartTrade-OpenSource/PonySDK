@@ -31,6 +31,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertSame;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -310,5 +311,53 @@ public class StringDictionaryTest {
         dict.resetClientSync();
 
         assertEquals(Long.valueOf(2L), dict.getSessionFrequency().get("hot"));
+    }
+
+    @Test
+    public void secondUseAdmissionSendsTheFirstUseInline() {
+        final StringDictionary d = new StringDictionary(64, 4);
+        d.setAdmitOnSecondUse(true);
+        assertEquals(StringDictionary.InternResult.NOT_FOUND, d.internOrGet("unique tooltip"));
+        assertEquals("nothing retained for a single use", 0, d.size());
+        final long second = d.internOrGet("unique tooltip");
+        assertFalse(StringDictionary.InternResult.isExisting(second)); // DICTIONARY_ADD now
+        assertTrue(StringDictionary.InternResult.isExisting(d.internOrGet("unique tooltip")));
+        assertEquals(1, d.size());
+    }
+
+    @Test
+    public void admittedStringsShareOneInstanceAcrossSessions() {
+        final StringDictionary a = new StringDictionary(64, 4), b = new StringDictionary(64, 4);
+        a.setAdmitOnSecondUse(true);
+        b.setAdmitOnSecondUse(true);
+        for (final StringDictionary d : new StringDictionary[] { a, b }) {
+            d.internOrGet(new String("EUR/USD 1.10850"));
+            d.internOrGet(new String("EUR/USD 1.10850"));
+        }
+        final String sa = a.getString(StringDictionary.InternResult.id(a.internOrGet("EUR/USD 1.10850")));
+        final String sb = b.getString(StringDictionary.InternResult.id(b.internOrGet("EUR/USD 1.10850")));
+        assertEquals("EUR/USD 1.10850", sa);
+        assertSame(sa, sb);
+    }
+
+    @Test
+    public void firstUseAdmissionStaysTheDefaultOfTheClass() {
+        final StringDictionary d = new StringDictionary(64, 4);
+        assertFalse(d.isAdmitOnSecondUse());
+        assertFalse(StringDictionary.InternResult.isExisting(d.internOrGet("first time")));
+        assertEquals(1, d.size());
+    }
+
+    @Test
+    public void manyOneOffStringsStillLetRepeatedOnesIn() {
+        final StringDictionary d = new StringDictionary(4096, 4);
+        d.setAdmitOnSecondUse(true);
+        int admitted = 0;
+        for (int round = 0; round < 3; round++) {
+            for (int i = 0; i < 300; i++) d.internOrGet("one-off " + round + "-" + i);
+            for (int i = 0; i < 300; i++) d.internOrGet("price " + i);
+        }
+        for (int i = 0; i < 300; i++) if (d.getId("price " + i) != StringDictionary.NOT_INTERNED) admitted++;
+        assertTrue("repeated values admitted: " + admitted, admitted > 250);
     }
 }

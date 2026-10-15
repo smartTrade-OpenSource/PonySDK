@@ -2781,6 +2781,8 @@ public class UIContextReconnectionTest {
         final com.ponysdk.core.server.application.StringDictionary dict = ctx.getStringDictionary();
         assertNotNull("dictionary enabled", dict);
 
+        assertEquals("first use: sent inline (second-use admission)",
+                com.ponysdk.core.server.application.StringDictionary.InternResult.NOT_FOUND, dict.internOrGet("market-data-cell"));
         final long first = dict.internOrGet("market-data-cell");
         assertTrue("known by the client before the drop",
                 com.ponysdk.core.server.application.StringDictionary.InternResult.isExisting(dict.internOrGet("market-data-cell")));

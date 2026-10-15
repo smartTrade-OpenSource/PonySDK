@@ -16,7 +16,7 @@ It runs a Jetty 12 WebSocket server on the backend and uses GWT on the frontend.
 | Java (server) | 25 (LTS, virtual threads) |
 | Java (terminal / GWT) | 17 |
 | Jetty | 12.1.x (EE11 / Jakarta EE) |
-| GWT | 2.13.0 |
+| GWT | 2.13.1 |
 | elemental2 | 1.3.2 |
 | Spring | 7.x |
 | Selenium | 4.x |
@@ -123,6 +123,7 @@ config.setWsPermessageDeflateEnabled(true); // frame compression (default on); d
 config.setWsDeflateLevel(3);                // zlib level, embedded server (default 3: cheaper than Jetty's 6, as compact here)
 config.setWsInputBufferSize(1024);          // Jetty buffer per incoming message (default 1 KB; upstream is small JSON)
 config.setUpdateCoalescingEnabled(true);    // send only the last value of a property per transaction (default on)
+config.setStringDictionaryAdmitOnSecondUse(true); // dictionary entry on 2nd use: one-off strings stay inline (default on)
 config.setMaxProtocolVersion(2);            // highest binary protocol used (default: latest); 1 = original format
 ```
 

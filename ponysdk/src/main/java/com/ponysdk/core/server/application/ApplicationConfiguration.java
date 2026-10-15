@@ -74,6 +74,7 @@ public class ApplicationConfiguration {
      */
     private int stringDictionaryMinLength = 8;
     private int stringDictionaryMaxEvictionsPerFlush = 32;
+    private boolean stringDictionaryAdmitOnSecondUse = true;
     private boolean stringDictionaryPersistenceEnabled = true;
     private String stringDictionaryPersistPath = "data";
     private int stringDictionaryPreSeedSize = 512;
@@ -364,6 +365,7 @@ public class ApplicationConfiguration {
         public Builder stringDictionaryMaxSize(final int v)        { config.setStringDictionaryMaxSize(v); return this; }
         public Builder stringDictionaryMinLength(final int v)      { config.setStringDictionaryMinLength(v); return this; }
         public Builder stringDictionaryMaxEvictionsPerFlush(final int v) { config.setStringDictionaryMaxEvictionsPerFlush(v); return this; }
+        public Builder stringDictionaryAdmitOnSecondUse(final boolean v) { config.setStringDictionaryAdmitOnSecondUse(v); return this; }
         public Builder stringDictionaryPersistenceEnabled(final boolean v) { config.setStringDictionaryPersistenceEnabled(v); return this; }
         public Builder stringDictionaryPersistPath(final String v) { config.setStringDictionaryPersistPath(v); return this; }
         public Builder stringDictionaryPreSeedSize(final int v)    { config.setStringDictionaryPreSeedSize(v); return this; }
@@ -468,6 +470,19 @@ public class ApplicationConfiguration {
 
     public void setStringDictionaryMaxEvictionsPerFlush(final int stringDictionaryMaxEvictionsPerFlush) {
         this.stringDictionaryMaxEvictionsPerFlush = stringDictionaryMaxEvictionsPerFlush;
+    }
+
+    public boolean isStringDictionaryAdmitOnSecondUse() {
+        return stringDictionaryAdmitOnSecondUse;
+    }
+
+    /**
+     * When true (default), a string enters the per-session dictionary on its second use only: values
+     * written once are sent inline (no DICTIONARY_ADD, no slot, no retained String), and admitted
+     * strings share one instance across sessions. False = admit on first use (previous behaviour).
+     */
+    public void setStringDictionaryAdmitOnSecondUse(final boolean admitOnSecondUse) {
+        this.stringDictionaryAdmitOnSecondUse = admitOnSecondUse;
     }
 
     /**

@@ -106,6 +106,22 @@ public class StringDictionary {
     // Optional shared provider for frequency reporting
     private SharedDictionaryProvider sharedProvider;
 
+    /**
+     * Second-use admission: a string enters the dictionary only the second time it is written. A value
+     * seen once (unique tooltip, one-off label, rarely repeated price) is sent inline: its DICTIONARY_ADD
+     * would never be amortized, it would occupy a slot (and keep the String alive) for nothing, and
+     * its fresh id bytes defeat the deflater's matching. Off by default for direct users of this class;
+     * the UIContext enables it from {@link ApplicationConfiguration#isStringDictionaryAdmitOnSecondUse()}.
+     */
+    private boolean admitOnSecondUse;
+
+    /**
+     * Strings seen once, as hashes only (never references), in 2-way LRU buckets; overflow forgets the oldest.
+     * A false match (two strings with the same tag) only admits a string one use early. Lazy.
+     */
+    private int[] seenOnce;
+    private static final int SEEN_ONCE_SIZE = 1024; // power of two, 4 KB per session once used
+
     public StringDictionary() {
         this(DEFAULT_MAX_SIZE, DEFAULT_MIN_STRING_LENGTH, 32);
     }
@@ -219,6 +235,38 @@ public class StringDictionary {
         return newId;
     }
 
+    public void setAdmitOnSecondUse(final boolean admitOnSecondUse) {
+        this.admitOnSecondUse = admitOnSecondUse;
+    }
+
+    public boolean isAdmitOnSecondUse() {
+        return admitOnSecondUse;
+    }
+
+    /** True the second time a hash is presented (and forgets it); false the first time (and records it). */
+    private boolean seenBefore(final String value) {
+        int h = value.hashCode() * 0x9E3779B9;
+        h ^= h >>> 15;
+        final int tag = h | 1; // never 0 (= empty slot)
+        if (seenOnce == null) seenOnce = new int[SEEN_ONCE_SIZE];
+        // 2-way buckets with LRU replacement: [2k] newest, [2k+1] older. A burst of one-off values
+        // then evicts the oldest candidate of a bucket, not a repeated value just recorded.
+        final int[] f = seenOnce;
+        final int i = ((h >>> 22) & (SEEN_ONCE_SIZE / 2 - 1)) << 1;
+        if (f[i] == tag) {
+            f[i] = f[i + 1];
+            f[i + 1] = 0;
+            return true;
+        }
+        if (f[i + 1] == tag) {
+            f[i + 1] = 0;
+            return true;
+        }
+        f[i + 1] = f[i];
+        f[i] = tag;
+        return false;
+    }
+
     /**
      * Result holder for {@link #internOrGet(String)} to avoid double HashMap lookups.
      */
@@ -274,16 +322,21 @@ public class StringDictionary {
             return InternResult.ofExisting(existingId);
         }
 
+        if (admitOnSecondUse && !seenBefore(value)) return InternResult.NOT_FOUND;
+
         final int newId = allocateId();
         if (newId == NOT_INTERNED) {
             return InternResult.NOT_FOUND;
         }
 
-        stringToId.put(value, newId);
+        // Admitted strings repeat, across sessions too: keep one canonical instance (JVM string table,
+        // weakly held - released once no dictionary references it) instead of one copy per session.
+        final String canonical = admitOnSecondUse ? value.intern() : value;
+        stringToId.put(canonical, newId);
         if (newId < idToString.size()) {
-            idToString.set(newId, value);
+            idToString.set(newId, canonical);
         } else {
-            idToString.add(value);
+            idToString.add(canonical);
         }
         ensureArrayCapacity(newId);
         usageCount[newId] = 0;

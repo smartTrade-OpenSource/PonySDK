@@ -180,6 +180,7 @@ public class UIContext {
                 configuration.getStringDictionaryMinLength(),
                 configuration.getStringDictionaryMaxEvictionsPerFlush()
             );
+            this.stringDictionary.setAdmitOnSecondUse(configuration.isStringDictionaryAdmitOnSecondUse());
             // Pre-seed from shared provider (learned from previous sessions)
             this.stringDictionary.initFromSharedProvider(sharedDictionaryProvider);
         } else {
