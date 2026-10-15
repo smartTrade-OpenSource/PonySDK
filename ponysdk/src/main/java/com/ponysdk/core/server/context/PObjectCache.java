@@ -55,7 +55,7 @@ public class PObjectCache {
 
     public PObject add(final PObject pObject) {
         expungeStaleEntries();
-        final PObjectWeakReference weakReference = new PObjectWeakReference(pObject, queue);
+        final PObjectWeakReference weakReference = PObjectWeakReference.of(pObject, queue);
         referenceByObjectID.put(weakReference.getObjectID(), weakReference);
         if (log.isDebugEnabled()) log.debug("Registering object: {}", pObject);
         return pObject;
@@ -92,28 +92,56 @@ public class PObjectCache {
         }
     }
 
+    /** Weak reference of an object of the main window, outside any frame (the common case): 32 bytes. */
     private static class PObjectWeakReference extends WeakReference<PObject> {
 
         private final int objectID;
-        private final int windowID;
-        private final int frameID;
 
-        public PObjectWeakReference(final PObject pObject, final ReferenceQueue<? super PObject> queue) {
+        PObjectWeakReference(final PObject pObject, final ReferenceQueue<? super PObject> queue) {
             super(pObject, queue);
             objectID = pObject.getID();
-            windowID = pObject.getWindow() != null ? pObject.getWindow().getID() : -1;
-            frameID = pObject.getFrame() != null ? pObject.getFrame().getID() : -1;
         }
 
-        public int getObjectID() {
+        static PObjectWeakReference of(final PObject pObject, final ReferenceQueue<? super PObject> queue) {
+            final PWindow window = pObject.getWindow();
+            final int frameID = pObject.getFrame() != null ? pObject.getFrame().getID() : -1;
+            if (frameID == -1 && window != null && window.isMainWindow()) return new PObjectWeakReference(pObject, queue);
+            return new Located(pObject, queue, window != null ? window.getID() : -1, frameID);
+        }
+
+        int getObjectID() {
             return objectID;
         }
 
-        public int getWindowID() {
+        /** The main window's id (other windows use {@link Located}). */
+        int getWindowID() {
+            return PWindow.getMain().getID();
+        }
+
+        int getFrameID() {
+            return -1;
+        }
+    }
+
+    /** Object of another window or inside a frame: keeps both ids (40 bytes). */
+    private static final class Located extends PObjectWeakReference {
+
+        private final int windowID;
+        private final int frameID;
+
+        Located(final PObject pObject, final ReferenceQueue<? super PObject> queue, final int windowID, final int frameID) {
+            super(pObject, queue);
+            this.windowID = windowID;
+            this.frameID = frameID;
+        }
+
+        @Override
+        int getWindowID() {
             return windowID;
         }
 
-        public int getFrameID() {
+        @Override
+        int getFrameID() {
             return frameID;
         }
     }

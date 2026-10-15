@@ -55,6 +55,11 @@ final class PendingUpdates {
         return live == 0;
     }
 
+    /** Grown by a burst far beyond a normal transaction: not worth keeping in a pool. */
+    boolean isOversized() {
+        return targets.length > 4096;
+    }
+
     int size() {
         return live;
     }

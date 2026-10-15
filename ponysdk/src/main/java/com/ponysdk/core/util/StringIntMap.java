@@ -42,12 +42,14 @@ public final class StringIntMap {
     private static final int MIN_CAPACITY = 16;
 
     private String[] keys;
-    private int[] values;
     /**
-     * Mixed hash of each slot's key. Probes compare it first, so a lookup only dereferences the key
-     * String (object header + byte[] in other cache lines) of a slot whose hash already matches.
+     * Per slot: the value, plus (packed mode) the high bits of the key's mixed hash. Probes compare that
+     * tag first, so a lookup only dereferences the key String (object header + byte[] in other cache
+     * lines) of a slot whose hash already matches. Generic mode keeps full hashes in {@link #hashes}.
      */
-    private int[] hashes;
+    private int[] values;
+    private int[] hashes;          // generic mode only (null when packed)
+    private final int valueMask;   // packed mode: values are in [0, valueMask]; 0 = generic
     private int size;
     private int mask;
     private int resizeAt;
@@ -57,6 +59,19 @@ public final class StringIntMap {
     }
 
     public StringIntMap(final int expectedSize) {
+        this(expectedSize, -1);
+    }
+
+    /**
+     * @param maxValue if in [0, 2^24), every value stored must lie in [0, maxValue]: the hash tag then
+     *                 shares the value's int (one int per slot instead of two). Negative = any int value.
+     */
+    public StringIntMap(final int expectedSize, final int maxValue) {
+        if (maxValue >= 0 && maxValue < (1 << 24)) {
+            this.valueMask = (Integer.highestOneBit(Math.max(1, maxValue)) << 1) - 1;
+        } else {
+            this.valueMask = 0;
+        }
         allocate(tableSizeFor(expectedSize));
     }
 
@@ -70,7 +85,7 @@ public final class StringIntMap {
     private void allocate(final int capacity) {
         keys = new String[capacity];
         values = new int[capacity];
-        hashes = new int[capacity];
+        hashes = valueMask == 0 ? new int[capacity] : null;
         mask = capacity - 1;
         resizeAt = capacity >> 1;
     }
@@ -79,6 +94,28 @@ public final class StringIntMap {
         // spread the String hash so that low bits are usable as an index
         final int x = h * 0x9E3779B9;
         return x ^ (x >>> 16);
+    }
+
+    /** True if slot i may hold a key of mixed hash h (exact in generic mode, tag match when packed). */
+    private boolean hashMatches(final int i, final int h) {
+        final int vm = valueMask;
+        return vm == 0 ? hashes[i] == h : ((values[i] ^ h) & ~vm) == 0;
+    }
+
+    private int valueAt(final int i) {
+        final int vm = valueMask;
+        return vm == 0 ? values[i] : values[i] & vm;
+    }
+
+    private void store(final int i, final int h, final int value) {
+        final int vm = valueMask;
+        if (vm == 0) {
+            values[i] = value;
+            hashes[i] = h;
+        } else {
+            if (value < 0 || value > vm) throw new IllegalArgumentException("value out of range: " + value);
+            values[i] = (h & ~vm) | value;
+        }
     }
 
     public int size() {
@@ -92,12 +129,11 @@ public final class StringIntMap {
     /** @return the value, or {@link #MISSING} */
     public int get(final String key) {
         final String[] k = keys;
-        final int[] hs = hashes;
         final int h = mix(key.hashCode());
         int i = h & mask;
         String cur;
         while ((cur = k[i]) != null) {
-            if (hs[i] == h && (cur == key || cur.equals(key))) return values[i];
+            if (hashMatches(i, h) && (cur == key || cur.equals(key))) return valueAt(i);
             i = (i + 1) & mask;
         }
         return MISSING;
@@ -118,16 +154,15 @@ public final class StringIntMap {
         int i = h & mask;
         String cur;
         while ((cur = keys[i]) != null) {
-            if (hashes[i] == h && (cur == key || cur.equals(key))) {
-                final int old = values[i];
-                values[i] = value;
+            if (hashMatches(i, h) && (cur == key || cur.equals(key))) {
+                final int old = valueAt(i);
+                store(i, h, value);
                 return old;
             }
             i = (i + 1) & mask;
         }
+        store(i, h, value);
         keys[i] = key;
-        values[i] = value;
-        hashes[i] = h;
         if (++size > resizeAt) rehash(keys.length << 1);
         return MISSING;
     }
@@ -138,8 +173,8 @@ public final class StringIntMap {
         int i = h & mask;
         String cur;
         while ((cur = keys[i]) != null) {
-            if (hashes[i] == h && (cur == key || cur.equals(key))) {
-                final int old = values[i];
+            if (hashMatches(i, h) && (cur == key || cur.equals(key))) {
+                final int old = valueAt(i);
                 shiftBack(i);
                 size--;
                 return old;
@@ -149,6 +184,11 @@ public final class StringIntMap {
         return MISSING;
     }
 
+    /** Home slot of the key stored at i (String caches its hash: no rehashing of the characters). */
+    private int home(final int i) {
+        return (valueMask == 0 ? hashes[i] : mix(keys[i].hashCode())) & mask;
+    }
+
     /** Backward-shift deletion: moves later entries of the probe chain into the freed slot. */
     private void shiftBack(int hole) {
         int i = hole;
@@ -156,19 +196,19 @@ public final class StringIntMap {
             i = (i + 1) & mask;
             final String k = keys[i];
             if (k == null) break;
-            final int home = hashes[i] & mask;
+            final int home = home(i);
             // entry at i may move to the hole if its home is not in (hole, i] (cyclically)
             final boolean between = hole <= i ? (hole < home && home <= i) : (hole < home || home <= i);
             if (!between) {
                 keys[hole] = k;
                 values[hole] = values[i];
-                hashes[hole] = hashes[i];
+                if (hashes != null) hashes[hole] = hashes[i];
                 hole = i;
             }
         }
         keys[hole] = null;
         values[hole] = 0;
-        hashes[hole] = 0;
+        if (hashes != null) hashes[hole] = 0;
     }
 
     private void rehash(final int newCapacity) {
@@ -179,18 +219,19 @@ public final class StringIntMap {
         for (int j = 0; j < oldKeys.length; j++) {
             final String k = oldKeys[j];
             if (k == null) continue;
-            int i = oldHashes[j] & mask;
+            final int h = oldHashes != null ? oldHashes[j] : mix(k.hashCode());
+            int i = h & mask;
             while (keys[i] != null) i = (i + 1) & mask;
             keys[i] = k;
             values[i] = oldValues[j];
-            hashes[i] = oldHashes[j];
+            if (hashes != null) hashes[i] = h;
         }
     }
 
     public void clear() {
         Arrays.fill(keys, null);
         Arrays.fill(values, 0);
-        Arrays.fill(hashes, 0);
+        if (hashes != null) Arrays.fill(hashes, 0);
         size = 0;
     }
 }

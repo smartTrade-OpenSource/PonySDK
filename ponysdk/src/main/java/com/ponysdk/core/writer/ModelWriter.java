@@ -97,9 +97,32 @@ public class ModelWriter {
         return true;
     }
 
+    /**
+     * Pending buffers are borrowed, not owned: a session only holds one between its first deferred update
+     * and the drain (normally the same transaction, on the same thread), so the pool keeps about one buffer
+     * per worker thread instead of one per session (~8 KB each once warm).
+     */
+    private static final ThreadLocal<PendingUpdates> SPARE = new ThreadLocal<>();
+
     private PendingUpdates pending() {
-        if (pending == null) pending = new PendingUpdates();
-        return pending;
+        PendingUpdates p = pending;
+        if (p == null) {
+            p = SPARE.get();
+            if (p != null) SPARE.set(null);
+            else p = new PendingUpdates();
+            pending = p;
+        }
+        return p;
+    }
+
+    /** Gives the (empty) buffer back to the current thread's spare slot; an oversized one is left to the GC. */
+    private void releasePending() {
+        final PendingUpdates p = pending;
+        if (p == null || !p.isEmpty()) return;
+        // a virtual thread is short-lived: its ThreadLocal would never be reused, keep the buffer instead
+        if (Thread.currentThread().isVirtual()) return;
+        pending = null;
+        if (!p.isOversized() && SPARE.get() == null) SPARE.set(p);
     }
 
     /** Writes every deferred update now. Called before any other block and before each flush. */
@@ -113,6 +136,7 @@ public class ModelWriter {
             else p.discard();
         } finally {
             draining = false;
+            releasePending();
         }
     }
 

@@ -103,4 +103,37 @@ public class StringIntMapTest {
         assertEquals(0, m.size());
         assertEquals(StringIntMap.MISSING, m.get(ref.keySet().iterator().next()));
     }
+
+    @Test
+    public void packedModeMatchesAHashMapUnderChurn() {
+        final java.util.Random rnd = new java.util.Random(11);
+        for (final int maxValue : new int[] {0, 1, 255, 4095, (1 << 24) - 1}) {
+            final StringIntMap m = new StringIntMap(4, maxValue);
+            final java.util.Map<String, Integer> ref = new java.util.HashMap<>();
+            for (int op = 0; op < 20_000; op++) {
+                final String key = "k" + rnd.nextInt(300);
+                final int v = rnd.nextInt(maxValue + 1);
+                switch (rnd.nextInt(3)) {
+                    case 0 -> {
+                        final Integer old = ref.put(key, v);
+                        assertEquals(old == null ? StringIntMap.MISSING : old, m.put(key, v));
+                    }
+                    case 1 -> {
+                        final Integer old = ref.remove(key);
+                        assertEquals(old == null ? StringIntMap.MISSING : old, m.remove(key));
+                    }
+                    default -> {
+                        final Integer cur = ref.get(key);
+                        assertEquals(cur == null ? StringIntMap.MISSING : cur, m.get(key));
+                    }
+                }
+                assertEquals(ref.size(), m.size());
+            }
+        }
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void packedModeRejectsAValueAboveItsBound() {
+        new StringIntMap(4, 255).put("x", 1 << 20);
+    }
 }

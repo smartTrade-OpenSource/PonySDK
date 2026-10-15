@@ -119,8 +119,8 @@ public class StringDictionary {
      * Strings seen once, as hashes only (never references), in 2-way LRU buckets; overflow forgets the oldest.
      * A false match (two strings with the same tag) only admits a string one use early. Lazy.
      */
-    private int[] seenOnce;
-    private static final int SEEN_ONCE_SIZE = 1024; // power of two, 4 KB per session once used
+    private char[] seenOnce;
+    private static final int SEEN_ONCE_SIZE = 1024; // power of two, 2 KB per session once used
 
     public StringDictionary() {
         this(DEFAULT_MAX_SIZE, DEFAULT_MIN_STRING_LENGTH, 32);
@@ -137,12 +137,13 @@ public class StringDictionary {
         this.maxSize = maxSize;
         this.minStringLength = minStringLength;
         this.maxEvictionsPerFlush = maxEvictionsPerFlush;
-        this.stringToId = new StringIntMap();
+        // ids are in [0, maxSize): packed map, the hash tag shares the id's int
+        this.stringToId = new StringIntMap(16, maxSize - 1);
         this.idToString = new ArrayList<>();
         // Start small — arrays grow on demand up to maxSize
         final int initialArraySize = Math.min(64, maxSize);
         this.usageCount = new int[initialArraySize];
-        this.lastFlushedCount = new int[initialArraySize];
+        // lastFlushedCount: allocated by the first flushToSharedProvider (null = nothing flushed yet)
         this.sentToClient = new BitSet();
         this.preSeedCount = 0;
     }
@@ -155,7 +156,7 @@ public class StringDictionary {
         if (id < usageCount.length) return;
         final int newLen = Math.min(maxSize, Math.max(id + 1, usageCount.length * 2));
         usageCount = java.util.Arrays.copyOf(usageCount, newLen);
-        lastFlushedCount = java.util.Arrays.copyOf(lastFlushedCount, newLen);
+        if (lastFlushedCount != null) lastFlushedCount = java.util.Arrays.copyOf(lastFlushedCount, newLen);
     }
 
     /**
@@ -247,11 +248,12 @@ public class StringDictionary {
     private boolean seenBefore(final String value) {
         int h = value.hashCode() * 0x9E3779B9;
         h ^= h >>> 15;
-        final int tag = h | 1; // never 0 (= empty slot)
-        if (seenOnce == null) seenOnce = new int[SEEN_ONCE_SIZE];
+        // 16-bit tag from bits not used by the bucket index; never 0 (= empty slot)
+        final char tag = (char) (h | 1);
+        if (seenOnce == null) seenOnce = new char[SEEN_ONCE_SIZE];
         // 2-way buckets with LRU replacement: [2k] newest, [2k+1] older. A burst of one-off values
         // then evicts the oldest candidate of a bucket, not a repeated value just recorded.
-        final int[] f = seenOnce;
+        final char[] f = seenOnce;
         final int i = ((h >>> 22) & (SEEN_ONCE_SIZE / 2 - 1)) << 1;
         if (f[i] == tag) {
             f[i] = f[i + 1];
@@ -422,7 +424,7 @@ public class StringDictionary {
         stringToId.remove(idToString.get(victim));
         idToString.set(victim, null);
         usageCount[victim] = 0;
-        lastFlushedCount[victim] = 0;
+        if (lastFlushedCount != null) lastFlushedCount[victim] = 0;
         sentToClient.clear(victim);
         return victim;
     }
@@ -491,6 +493,10 @@ public class StringDictionary {
     public void flushToSharedProvider() {
         if (sharedProvider == null) return;
         final int size = Math.min(idToString.size(), usageCount.length);
+        if (lastFlushedCount == null || lastFlushedCount.length < usageCount.length) {
+            lastFlushedCount = lastFlushedCount == null ? new int[usageCount.length]
+                : java.util.Arrays.copyOf(lastFlushedCount, usageCount.length);
+        }
         final Map<String, Long> deltas = new HashMap<>();
         for (int i = 0; i < size; i++) {
             final String s = idToString.get(i);

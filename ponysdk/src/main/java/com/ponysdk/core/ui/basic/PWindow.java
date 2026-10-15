@@ -391,6 +391,11 @@ public class PWindow extends PObject {
         return ensureRootPanel(zoneID);
     }
 
+    /** True for the main window of a UIContext (no lookup: safe while that window is being created). */
+    public boolean isMainWindow() {
+        return this instanceof PMainWindow;
+    }
+
     public static boolean isMain(final PWindow window) {
         return getMain() == window;
     }
