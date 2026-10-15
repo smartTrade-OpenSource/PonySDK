@@ -40,7 +40,6 @@ public class ShowcaseMain {
         styles.put("sample", "css/sample.css");
         styles.put("samplePony", "css/ponysdk.css");
         styles.put("flexlayout", "style/flexlayout.css");
-        styles.put("flexdemo", "css/flexlayout-demo.css");
         configuration.setStyle(styles);
 
         // Create metrics — tracks sessions, bytes, latency

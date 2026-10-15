@@ -36,7 +36,6 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
                     <entry key="sample" value="css/sample.css" />
                     <entry key="samplePony" value="css/ponysdk.css" />
                     <entry key="flexlayout" value="style/flexlayout.css" />
-                    <entry key="flexdemo" value="css/flexlayout-demo.css" />
                 </map>
             </property>
         </bean>
