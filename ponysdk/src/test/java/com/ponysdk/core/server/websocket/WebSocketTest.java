@@ -967,6 +967,49 @@ public class WebSocketTest {
         webSocket.flush();
     }
 
+    private long roundTrips() {
+        return encodedValues.stream().filter(p -> p.getFirst() == ServerToClientModel.ROUNDTRIP_LATENCY).count();
+    }
+
+    @Test
+    public void roundTripOfAnIdleSessionIsSentAtOnce() {
+        uiContext.onMessageSent();
+        // pretend the last flush is old
+        try {
+            final java.lang.reflect.Field f = UIContext.class.getDeclaredField("lastSentTime");
+            f.setAccessible(true);
+            ((java.util.concurrent.atomic.AtomicLong) f.get(uiContext)).set(System.currentTimeMillis() - 10_000);
+        } catch (final ReflectiveOperationException e) {
+            throw new AssertionError(e);
+        }
+        encodedValues.clear();
+        webSocket.sendRoundTrip();
+        assertEquals(1, roundTrips());
+    }
+
+    @Test
+    public void roundTripOfAPushingSessionRidesTheNextFlush() {
+        uiContext.onMessageSent(); // just flushed: more data is coming
+        encodedValues.clear();
+        webSocket.sendRoundTrip();
+        assertEquals("deferred to the next data frame", 0, roundTrips());
+        webSocket.flush();
+        assertEquals(1, roundTrips());
+        webSocket.flush();
+        assertEquals("consumed once", 1, roundTrips());
+    }
+
+    @Test
+    public void unconsumedPiggybackFallsBackToAStandaloneProbe() {
+        uiContext.onMessageSent();
+        encodedValues.clear();
+        webSocket.sendRoundTrip(); // deferred, but no flush happens before the next check
+        webSocket.sendRoundTrip(); // next check: still pending -> standalone now
+        assertEquals(1, roundTrips());
+        webSocket.flush();
+        assertEquals("nothing left pending", 1, roundTrips());
+    }
+
     /**
      * sendRoundTrip() when session is closed — should be a no-op.
      */

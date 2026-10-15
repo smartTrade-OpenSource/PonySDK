@@ -381,17 +381,45 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
     /**
      * Send round trip to the client
      */
+    /**
+     * A session that flushed within this window is pushing: its next data flush is imminent, so the
+     * periodic roundtrip probe rides in that frame instead of costing a frame of its own (WS frame,
+     * deflate, syscall). An idle session gets the standalone probe as before.
+     */
+    static final long ROUNDTRIP_PIGGYBACK_WINDOW_MS = 250;
+
+    /** Set under the UIContext lock, consumed by the next flush() (also under the lock). */
+    private boolean roundTripRequested;
+
     public void sendRoundTrip() {
         if (isAlive() && isSessionOpen()) {
-            beginObject();
-            encode(ServerToClientModel.ROUNDTRIP_LATENCY, System.nanoTime());
-            endObject();
+            final UIContext context = uiContext;
+            if (context != null && !roundTripRequested
+                    && System.currentTimeMillis() - context.getLastSentTime() < ROUNDTRIP_PIGGYBACK_WINDOW_MS) {
+                roundTripRequested = true;
+                return;
+            }
+            roundTripRequested = false;
+            writeRoundTrip();
             flush0();
         }
     }
 
+    private void writeRoundTrip() {
+        beginObject();
+        // stamped when written, so the measured latency stays exact when piggybacked
+        encode(ServerToClientModel.ROUNDTRIP_LATENCY, System.nanoTime());
+        endObject();
+    }
+
     public void flush() {
-        if (isAlive() && isSessionOpen()) flush0();
+        if (isAlive() && isSessionOpen()) {
+            if (roundTripRequested) {
+                roundTripRequested = false;
+                writeRoundTrip();
+            }
+            flush0();
+        }
     }
 
     void flush0() {
