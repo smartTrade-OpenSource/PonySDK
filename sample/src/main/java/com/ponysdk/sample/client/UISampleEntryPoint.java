@@ -795,7 +795,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     // ── Tab: Overview ────────────────────────────────────────────────────────
 
     /** One measured row of the 2.10 vs 3.0 comparison. */
-    private record Measure(String metric, String gain, String before, String after, int afterPct, String hint) {}
+    private record Measure(String metric, String gain, String factor, String before, String after, int afterPct, String hint) {}
 
     private PFlowPanel buildOverviewTab(final UIContext uiContext, final List<PScheduler.UIRunnable> schedulers) {
         final PFlowPanel p = section();
@@ -855,17 +855,26 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
         // Measured comparison
         p.add(sectionTitle("Measured — PonySDK 3 against 2.10"));
+        final PFlowPanel legend = Element.newPFlowPanel();
+        legend.addStyleName("ov-legend");
+        legend.add(el("ov-legend-old", "2.10"), el("ov-legend-new", "3.0"), el("ov-legend-text",
+            "Same benchmark, same machine and JDK 25 for both versions. Lower is better on every metric."));
+        p.add(legend);
         final PFlowPanel kpis = Element.newPFlowPanel();
         kpis.addStyleName("ov-kpis");
         for (final Measure m : new Measure[] {
-            new Measure("CPU per UI update", "−40 %", "≈1 850 ns", "≈1 050 ns", 57, "Lower is better"),
-            new Measure("Bandwidth on the wire", "−58 %", "1.22 MB/s", "0.51 MB/s", 42, "Same updates, fewer bytes"),
-            new Measure("Allocation per update", "−50 %", "≈140 B", "72 B", 51, "Less GC work"),
-            new Measure("Process memory (RSS)", "−28 %", "≈1 060 MB", "≈750 MB", 71, "Leaner widgets & buffers") }) {
+            new Measure("CPU per UI update", "−40 %", "1.8× less", "1 850 ns", "1 050 ns", 57, "Server time to apply and encode one update"),
+            new Measure("Bandwidth on the wire", "−58 %", "2.4× less", "1.22 MB/s", "0.51 MB/s", 42, "Same updates, bytes on the TCP stream"),
+            new Measure("Allocation per update", "−50 %", "1.9× less", "140 B", "72 B", 51, "Garbage produced per update"),
+            new Measure("Process memory (RSS)", "−28 %", "1.4× less", "1 060 MB", "750 MB", 71, "Whole JVM, 200 live sessions"),
+            new Measure("Retained heap", "−14 %", "1.2× less", "37.4 MB", "32.3 MB", 86, "Live objects after a full GC, same benchmark") }) {
             final PFlowPanel k = Element.newPFlowPanel();
             k.addStyleName("ov-kpi");
-            k.add(el("ov-kpi-gain", m.gain()));
             k.add(el("ov-kpi-metric", m.metric()));
+            final PFlowPanel head = Element.newPFlowPanel();
+            head.addStyleName("ov-kpi-head");
+            head.add(el("ov-kpi-gain", m.gain()), el("ov-kpi-factor", m.factor()));
+            k.add(head);
             k.add(compareRow("2.10", m.before(), 100, false));
             k.add(compareRow("3.0", m.after(), m.afterPct(), true));
             k.add(el("ov-kpi-hint", m.hint()));
@@ -873,7 +882,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         }
         p.add(kpis);
         p.add(el("ov-note", "Benchmark: 200 sessions, each a 200-cell price grid receiving 130 updates every 100 ms "
-            + "(260 000 updates/s), same JDK 25 and machine for both versions, bytes counted on the TCP stream."));
+            + "(260 000 updates/s). Values rounded."));
 
         // Live metrics of this very session
         p.add(sectionTitle("Live — this session, right now"));
