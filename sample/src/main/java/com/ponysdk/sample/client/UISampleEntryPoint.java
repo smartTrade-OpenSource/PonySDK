@@ -148,6 +148,9 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     int a = 0;
     private static int counter;
 
+    /** Opens a page of the showcase (index in the sidebar), from anywhere in the showcase. */
+    private java.util.function.IntConsumer navigate = i -> { };
+
     @Override
     public void start(final UIContext uiContext) {
         uiContext.setTerminalDataReceiver((object, instruction) -> log.debug("{} : {}", object, instruction));
@@ -266,21 +269,23 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             tab.addStyleName("pony-tab");
             if (i == 0) tab.addStyleName("pony-tab-active");
             tabButtons[i] = tab;
-            tab.addClickHandler(e -> {
-                if (activeTab[0] == idx) return;
-                // Cancel the schedulers of the tab we leave, rebuild the new one fresh (restarts its schedulers)
-                tabSchedulers[activeTab[0]].forEach(PScheduler.UIRunnable::cancel);
-                tabSchedulers[activeTab[0]].clear();
-                tabSchedulers[idx].clear();
-                tabPanels[idx] = buildTabWithSchedulers(idx, uiContext, tabSchedulers[idx]);
-                content.setWidget(tabPanels[idx]);
-                tabButtons[activeTab[0]].removeStyleName("pony-tab-active");
-                tabButtons[idx].addStyleName("pony-tab-active");
-                activeTab[0] = idx;
-                showCrumb.accept(idx);
-            });
+            tab.addClickHandler(e -> navigate.accept(idx));
             nav.add(tab);
         }
+        navigate = idx -> {
+            if (activeTab[0] == idx) return;
+            // Cancel the schedulers of the tab we leave, rebuild the new one fresh (restarts its schedulers)
+            tabSchedulers[activeTab[0]].forEach(PScheduler.UIRunnable::cancel);
+            tabSchedulers[activeTab[0]].clear();
+            tabSchedulers[idx].clear();
+            tabPanels[idx] = buildTabWithSchedulers(idx, uiContext, tabSchedulers[idx]);
+            content.setWidget(tabPanels[idx]);
+            tabButtons[activeTab[0]].removeStyleName("pony-tab-active");
+            tabButtons[idx].addStyleName("pony-tab-active");
+            activeTab[0] = idx;
+            showCrumb.accept(idx);
+            PScript.execute(PWindow.getMain(), "window.scrollTo(0,0)");
+        };
 
         // Nav footer with version
         final PFlowPanel navFooter = Element.newPFlowPanel();
@@ -702,6 +707,11 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final long[] maxMemory = { 1 };
         final java.util.function.IntConsumer[] next = new java.util.function.IntConsumer[1];
         next[0] = idx -> {
+            // page left (replaced by another) or client gone (suspended): stop, nobody would see the results
+            if (p.getParent() == null || UIContext.get().isSuspended()) {
+                run.setEnabled(true);
+                return;
+            }
             if (idx >= specs.size()) {
                 status.setText("Done: " + specs.size() + " components measured.");
                 run.setEnabled(true);
@@ -732,6 +742,10 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             run.setEnabled(false);
             next[0].accept(0);
         });
+        // Measured as soon as the page opens: the table is the point of the page
+        run.setText("Measure again");
+        run.setEnabled(false);
+        PScheduler.schedule(() -> next[0].accept(0), Duration.ofMillis(300));
         return p;
     }
 
@@ -789,17 +803,54 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         // Hero
         final PFlowPanel hero = Element.newPFlowPanel();
         hero.addStyleName("ov-hero");
-        hero.add(el("ov-eyebrow", "PONYSDK 3"));
-        hero.add(el("ov-h1", "Real-time web UIs, written only in Java."));
-        hero.add(el("ov-lead", "Every widget lives on the server. The browser is a thin renderer that receives "
+        final PFlowPanel heroText = Element.newPFlowPanel();
+        heroText.addStyleName("ov-hero-text");
+        heroText.add(el("ov-eyebrow", "PonySDK 3 · open source · Apache 2.0"));
+        heroText.add(el("ov-h1", "Real-time web UIs, written only in Java."));
+        heroText.add(el("ov-lead", "Every widget lives on the server. The browser is a thin renderer that receives "
             + "compact binary instructions over one WebSocket: no REST layer, no JSON, no JavaScript to write."));
+        final PFlowPanel ctas = Element.newPFlowPanel();
+        ctas.addStyleName("ov-ctas");
+        final PButton tryIt = Element.newPButton("Try the widgets");
+        tryIt.addStyleName("primary");
+        tryIt.addClickHandler(e -> navigate.accept(1));
+        final PButton protocol = Element.newPButton("See the protocol");
+        protocol.addClickHandler(e -> navigate.accept(9));
+        final PButton costs = Element.newPButton("What a widget costs");
+        costs.addClickHandler(e -> navigate.accept(8));
+        ctas.add(tryIt, protocol, costs);
+        heroText.add(ctas);
+        hero.add(heroText);
+
+        // The whole application, next to the pitch: a live price, server-side
+        final PFlowPanel heroCode = Element.newPFlowPanel();
+        heroCode.addStyleName("code-snippet");
+        heroCode.addStyleName("ov-hero-code");
+        final PFlowPanel heroCodeHead = Element.newPFlowPanel();
+        heroCodeHead.addStyleName("code-header");
+        heroCodeHead.add(el("code-title", "LivePrice.java — the whole application"), el("code-lang", "JAVA"));
+        final PElement heroCodeBody = Element.newDiv();
+        heroCodeBody.addStyleName("code-body");
+        heroCodeBody.setInnerHTML(
+            ln(kw("public class") + " " + ty("LivePrice") + " " + kw("implements") + " " + ty("EntryPoint") + " {")
+                + ln("  " + kw("public void") + " " + mt("start") + "(" + ty("UIContext") + " ctx) {")
+                + ln("    " + ty("PLabel") + " price = " + ty("Element") + "." + mt("newPLabel") + "(" + st("1.08512") + ");")
+                + ln("    " + ty("PWindow") + "." + mt("getMain") + "()." + mt("add") + "(price);")
+                + ln("    " + ty("PScheduler") + "." + mt("scheduleAtFixedRate") + "(")
+                + ln("        () -> price." + mt("setText") + "(feed." + mt("last") + "()),")
+                + ln("        " + ty("Duration") + "." + mt("ofMillis") + "(50));")
+                + ln("    " + cm("each tick: ~4 bytes on the wire"))
+                + ln("  }")
+                + ln("}"));
+        heroCode.add(heroCodeHead, heroCodeBody);
+        hero.add(heroCode);
         final PFlowPanel chips = Element.newPFlowPanel();
         chips.addStyleName("ov-chips");
         for (final String c : new String[] { "Binary WebSocket protocol", "Server-side state", "String dictionary",
                                              "Update coalescing", "Transparent reconnection", "Web Components" }) {
             chips.add(el("ov-chip", c));
         }
-        hero.add(chips);
+        heroText.add(chips);
         p.add(hero);
 
         // Measured comparison
@@ -2053,8 +2104,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         // my-dashboard
         final PWebComponent dashboard = new PWebComponent("my-dashboard");
         dashboard.attr("title", "PonySdk Dashboard");
-        final PButton refreshBtn = Element.newPButton("⟳ Refresh");
-        final PButton exportBtn = Element.newPButton("↓ Export");
+        final PButton refreshBtn = Element.newPButton("Refresh");
+        final PButton exportBtn = Element.newPButton("Export");
         dashboard.slot("toolbar").add(refreshBtn, exportBtn);
         final PFlowPanel contentPanel = Element.newPFlowPanel();
         final PTextBox searchBox = Element.newPTextBox();
@@ -2069,8 +2120,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PWebComponent card = new PWebComponent("my-card");
         card.attr("title", "PonySdk Card");
         card.property("content").set("\"Card body text set from server via property API.\"");
-        final PButton likeBtn = Element.newPButton("♥ Like");
-        final PButton shareBtn = Element.newPButton("↗ Share");
+        final PButton likeBtn = Element.newPButton("Like");
+        final PButton shareBtn = Element.newPButton("Share");
         card.slot("actions").add(likeBtn, shareBtn);
         likeBtn.addClickHandler(e -> statusLabel.setText("Liked!"));
         shareBtn.addClickHandler(e -> statusLabel.setText("Shared!"));
@@ -2079,7 +2130,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PFlowPanel counterControls = Element.newPFlowPanel();
         counterControls.setStyleProperty("display", "flex");
         counterControls.setStyleProperty("gap", "8px");
-        counterControls.setStyleProperty("margin", "8px 0");
         final PButton resetBtn = Element.newPButton("Reset counter");
         resetBtn.addClickHandler(e -> { counter.call("reset"); statusLabel.setText("reset() called"); });
         final PButton setCountBtn = Element.newPButton("Set count = 42");
@@ -2094,7 +2144,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PFlowPanel statsControls = Element.newPFlowPanel();
         statsControls.setStyleProperty("display", "flex");
         statsControls.setStyleProperty("gap", "8px");
-        statsControls.setStyleProperty("margin", "8px 0");
         final PButton tradeBtn = Element.newPButton("Patch: +1 trade");
         tradeBtn.addClickHandler(e -> {
             trades[0]++;
@@ -2118,12 +2167,39 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         });
         counterControls.add(addToolbarItemBtn);
 
-        container.add(labeled("my-counter", counter));
-        container.add(counterControls);
-        container.add(labeled("my-stats", stats));
-        container.add(statsControls);
-        container.add(labeled("my-dashboard", dashboard));
-        container.add(labeled("my-card", card));
+        container.add(exampleCard("<my-counter>",
+            "An attribute and a property set from Java, a method call, and the element's own event handled on the server.",
+            stack(counter, counterControls),
+            ln(ty("PWebComponent") + " counter = " + kw("new") + " " + ty("PWebComponent") + "(" + st("my-counter") + ");")
+                + ln("counter." + mt("attr") + "(" + st("label") + ", " + st("Clicks") + ");")
+                + ln("counter." + mt("property") + "(" + st("count") + ")." + mt("set") + "(0);")
+                + ln("counter." + mt("onEvent") + "(" + st("count-changed") + ", e -> status." + mt("setText") + "(...));")
+                + ln("reset." + mt("addClickHandler") + "(e -> counter." + mt("call") + "(" + st("reset") + "));"),
+            costSpec("PWebComponent <my-counter>")));
+        container.add(exampleCard("<my-stats>",
+            "An object property: each change travels as a JSON merge-patch carrying only the keys that changed.",
+            stack(stats, statsControls),
+            ln(cm("only \"trades\" travels; a key set to null is removed on the element"))
+                + ln("stats." + mt("property") + "(" + st("stats") + ")." + mt("set") + "(json);")));
+        container.add(exampleCard("<my-dashboard>",
+            "Named slots filled with PonySDK widgets - buttons, a text box, a label - and children added while it is live.",
+            dashboard,
+            ln("dashboard." + mt("slot") + "(" + st("toolbar") + ")." + mt("add") + "(refresh, export);")
+                + ln("dashboard." + mt("slot") + "(" + st("content") + ")." + mt("add") + "(panel);")
+                + ln("dashboard." + mt("slot") + "(" + st("footer") + ")." + mt("add") + "(status);")));
+        container.add(exampleCard("<my-card>",
+            "A property set from the server and an actions slot whose buttons are handled in Java.",
+            card,
+            ln("card." + mt("property") + "(" + st("content") + ")." + mt("set") + "(" + st("Card body text...") + ");")
+                + ln("card." + mt("slot") + "(" + st("actions") + ")." + mt("add") + "(like, share);")));
+    }
+
+    /** Widgets stacked vertically (an example's preview). */
+    private static PFlowPanel stack(final PWidget... widgets) {
+        final PFlowPanel p = Element.newPFlowPanel();
+        p.addStyleName("pony-stack");
+        for (final PWidget w : widgets) p.add(w);
+        return p;
     }
 
     private void testScene() {

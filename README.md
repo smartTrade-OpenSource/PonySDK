@@ -7,6 +7,8 @@ PonySDK is an open source framework for building real-time web applications enti
 
 It runs a Jetty 12 WebSocket server on the backend and uses GWT on the frontend. Every UI interaction is handled server-side: the browser is a thin rendering layer that receives binary protocol instructions over WebSocket.
 
+![PonySDK showcase: overview page with measured gains, live session metrics and the update pipeline](docs/images/showcase-overview.png)
+
 ---
 
 ## Tech Stack
@@ -65,6 +67,10 @@ cd PonySDK
 ```
 
 Then open [http://localhost:8081/sample/](http://localhost:8081/sample/)
+
+The showcase (`./gradlew :sample:runShowcase`, same URL) is a tour of the framework: every widget live with the Java
+behind it, the measured cost of each component (server memory, bytes to create and update it), a live price ticker
+with its encoding pipeline, and the binary protocol streaming typed arrays.
 
 ---
 

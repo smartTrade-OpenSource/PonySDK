@@ -498,9 +498,21 @@ input[type=checkbox], input[type=radio] { accent-color: var(--accent); margin: 0
 
 /* ── Overview ────────────────────────────────────────────────────────────── */
 
-.ov-hero { padding: 12px 0 28px; margin-bottom: 8px; border-bottom: 1px solid var(--border); }
+.ov-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: 40px;
+    align-items: center;
+    padding: 12px 0 32px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+}
+.ov-hero-code { margin: 0; box-shadow: var(--shadow-lg); }
+.ov-hero-code .code-body { font-size: 12px; padding: 16px 18px; }
+.ov-ctas { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+.ov-ctas .gwt-Button { padding: 9px 16px; font-size: 14px; }
 .ov-eyebrow { font-size: 13px; font-weight: 600; color: var(--accent); margin-bottom: 10px; letter-spacing: 0; }
-.ov-h1 { font-size: 40px; line-height: 1.12; font-weight: 750; letter-spacing: -.035em; color: var(--text); margin: 0 0 14px; max-width: 820px; }
+.ov-h1 { font-size: 42px; line-height: 1.12; font-weight: 750; letter-spacing: -.035em; color: var(--text); margin: 0 0 14px; max-width: 820px; }
 .ov-lead { font-size: 17px; line-height: 1.65; color: var(--text-3); max-width: 760px; }
 .ov-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
 .ov-chip { font-size: 12.5px; font-weight: 500; color: var(--text-2); padding: 4px 11px; border-radius: 999px; background: var(--bg-muted); border: 1px solid var(--border); }
@@ -669,3 +681,47 @@ table.data-table, .cost-table {
 .pony-content .fl-theme-light .gwt-Label[style*="color"] { color: var(--text-2) !important; }
 .gwt-Tree table { width: auto !important; }
 .gwt-Tree td { padding: 0 2px; vertical-align: middle; }
+
+.pony-stack { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+.pony-stack > .gwt-FlowPanel, .pony-stack > div:not([class]) { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Rich text toolbar: GWT's raw push buttons */
+.gwt-RichTextToolbar .gwt-ToggleButton, .gwt-RichTextToolbar .gwt-PushButton {
+    display: inline-flex; padding: 3px; margin: 1px; border: 1px solid transparent !important;
+    border-radius: 6px; background: transparent !important; box-shadow: none; cursor: pointer;
+}
+.gwt-RichTextToolbar .gwt-ToggleButton:hover, .gwt-RichTextToolbar .gwt-PushButton:hover { background: #fff !important; border-color: var(--border) !important; }
+.gwt-RichTextToolbar .gwt-ToggleButton-down { background: var(--accent-soft) !important; border-color: var(--accent-line) !important; }
+.gwt-RichTextToolbar select { padding: 3px 6px; font-size: 12px; margin: 2px; box-shadow: none; }
+
+/* the selected day must stay readable over the GWT clean theme */
+.gwt-DatePicker .datePickerDayIsValue, .gwt-DatePicker .datePickerDayIsValueAndHighlighted { background: var(--accent) !important; color: #fff !important; }
+
+/* echo readouts hug their text */
+.pony-ex-echo { display: inline-block; max-width: 100%; }
+
+/* ── Narrow screens: the sidebar becomes a horizontal strip ─────────────── */
+@media (max-width: 960px) {
+    .pony-shell { flex-direction: column; }
+    .pony-nav {
+        position: sticky; top: 56px; z-index: 150; width: 100%; min-width: 0; height: auto;
+        flex-direction: row; align-items: center; gap: 4px; overflow-x: auto; overflow-y: hidden;
+        padding: 8px 12px; border-right: 0; border-bottom: 1px solid var(--border); white-space: nowrap;
+    }
+    .pony-nav-group, .pony-nav-footer { display: none; }
+    .pony-tab, .pony-tab.gwt-Button { width: auto; flex-shrink: 0; }
+    .pony-content { padding: 24px 20px 48px; }
+    .pony-crumb, .pony-divider, .pony-hstat:not(:first-child) { display: none; }
+    .pony-logo-wrap { min-width: 0; }
+    .ov-hero { grid-template-columns: 1fr; gap: 24px; }
+    .ov-h1 { font-size: 32px; }
+    .pony-row { flex-wrap: wrap; }
+    .pony-label { min-width: 0; width: 100%; }
+}
+.gwt-ListBox[multiple] { min-width: 150px; min-height: 96px; }
+.cost-table { width: 100%; min-width: 0; }
+.cost-table td { padding: 8px 10px; }
+.cost-table td .ov-bar { width: 72px; }
+.dg-frame .gwt-TextBox { width: calc(100% - 6px); padding: 4px 6px; font-size: 12px; box-shadow: none; border-color: var(--border); }
+.dg-frame input[type=checkbox] { margin: 0 4px; }
+.dg-controls select, .dg-controls .gwt-ListBox { padding: 7px 10px; }
