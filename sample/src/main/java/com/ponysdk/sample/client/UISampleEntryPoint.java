@@ -679,10 +679,12 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             +   "border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(255,255,255,.02);}"
             + ".ov-ticker{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:4px;"
             +   "max-height:420px;overflow:auto;padding:10px;border:1px solid rgba(255,255,255,.08);border-radius:12px;"
-            +   "background:#0a0b0e;}"
+            +   "background:#0a0b0e;contain:content;}"
+            // Thousands of updates per second: no colour transition (it kept every cell animating, -2/3 of the
+            // browser's time) and each cell contained, so a new price only re-lays out and repaints that cell
             + ".ov-cell{font-family:ui-monospace,'JetBrains Mono',monospace;font-size:11.5px;text-align:center;"
             +   "padding:5px 0;border-radius:5px;background:rgba(255,255,255,.025);color:#a1a1aa;"
-            +   "font-variant-numeric:tabular-nums;transition:color .4s;}"
+            +   "font-variant-numeric:tabular-nums;contain:content;}"
             // Form controls: readable fields, accent-coloured checks
             + ".gwt-TextBox,.gwt-PasswordTextBox,.gwt-TextArea,.gwt-ListBox,.gwt-DateBox{background:#111216 !important;"
             +   "border:1px solid rgba(255,255,255,.16) !important;color:#fafafa !important;border-radius:7px !important;"
