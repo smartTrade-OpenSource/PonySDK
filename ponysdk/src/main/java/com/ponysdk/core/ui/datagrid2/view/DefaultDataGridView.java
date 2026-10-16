@@ -1357,14 +1357,14 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         @Override
         public void setExtendedMode() {
             if (row.key == null) return;
-            cell.extendedMode = true;
+            cell.setExtendedMode(true);
             updateRowCell(row, cell, column, getController().isSelected(row.key));
         }
 
         @Override
         public void setPrimaryMode() {
             if (row.key == null) return;
-            cell.extendedMode = false;
+            cell.setExtendedMode(false);
             updateRowCell(row, cell, column, getController().isSelected(row.key));
         }
 
@@ -1522,8 +1522,16 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
             this.state = column.getDefaultState();
         }
 
+        /** Shared by the column's cells (each would otherwise keep its own copy of the same string). */
+        private String widthAsString;
+        private int widthOfString = -1;
+
         String getWidthAsString() {
-            return width + "px";
+            if (widthOfString != width) {
+                widthAsString = width + "px";
+                widthOfString = width;
+            }
+            return widthAsString;
         }
 
         void notifyStateChangedListeners() {
@@ -1555,12 +1563,31 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
     private static class CellManager<V> {
 
         private final PrimaryCell<V> primary;
-        private final ExtendedCell<V> extended;
+        /**
+         * Generated when the cell enters the extended mode (e.g. its editor, then showing the current value) and
+         * dropped when it leaves it: most cells are never edited, and an editor per cell is a widget per cell.
+         */
+        private ExtendedCell<V> extended;
         private boolean extendedMode;
+        private ExtendedCellController<V> controller;
 
         public CellManager(final PrimaryCell<V> primary) {
             this.primary = primary;
-            this.extended = primary.genExtended().orElse(null);
+        }
+
+        void setExtendedMode(final boolean extendedMode) {
+            this.extendedMode = extendedMode;
+            if (extendedMode && extended == null) {
+                extended = primary.genExtended().orElse(null);
+                if (extended == null) return;
+                if (controller != null) extended.setController(controller);
+                getTableCell().add(extended);
+            } else if (!extendedMode && extended != null) {
+                final PWidget widget = extended.asWidget();
+                extended = null;
+                widget.removeFromParent();
+                widget.onDestroy();
+            }
         }
 
         public PComplexPanel getTableCell() {
@@ -1570,7 +1597,6 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         public void setTableCell(final PComplexPanel td) {
             td.add(primary.asPendingWidget());
             td.add(primary);
-            if (extended != null) td.add(extended);
         }
 
         public void setVisibility(final boolean columnVisible) {
@@ -1590,6 +1616,7 @@ public final class DefaultDataGridView<K, V> implements DataGridView<K, V>, Data
         }
 
         public <T extends PrimaryCellController<V> & ExtendedCellController<V>> void setController(final T controller) {
+            this.controller = controller;
             primary.setController(controller);
             if (extended != null) extended.setController(controller);
         }
