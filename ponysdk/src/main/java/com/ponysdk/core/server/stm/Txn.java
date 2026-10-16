@@ -30,10 +30,9 @@ public class Txn {
 
     private static final ThreadLocal<Txn> transactions = new ThreadLocal<>();
 
-    // Lazily created: a Txn lives for a single execute() (commit/rollback drop it from the
-    // ThreadLocal, and PScheduler tasks run on fresh virtual threads), so an eager set was allocated
-    // on every transaction although almost none register a listener. Concurrent set kept so a
-    // listener may register another one while listeners are being fired.
+    // Lazily created: listeners live for a single transaction (commit/rollback drop them), so an
+    // eager set was allocated on every transaction although almost none register a listener.
+    // Concurrent set kept so a listener may register another one while listeners are being fired.
     private Set<TxnListener> txnListeners;
 
     private TxnContext txnContext;
@@ -57,13 +56,19 @@ public class Txn {
         fireBeforeFlush();
         flush();
         fireAfterFlush();
-        transactions.remove();
+        end();
     }
 
     public void rollback() {
         if (txnContext == null) throw new RuntimeException("Call begin() before rollback() a transaction.");
         fireBeforeRollback();
-        transactions.remove();
+        end();
+    }
+
+    /** Ends the transaction but keeps the instance as this thread's next one: no allocation per execute(). */
+    private void end() {
+        txnContext = null;
+        txnListeners = null;
     }
 
     public void flush() {

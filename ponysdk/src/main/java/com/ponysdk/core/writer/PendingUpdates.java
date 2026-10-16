@@ -144,7 +144,7 @@ final class PendingUpdates {
         reset(n);
         final boolean runs = writer.supportsUpdateRuns();
         final int[] order = runs ? sortedOrder(t, n) : null;
-        final int m = order != null ? order.length : n;
+        final int m = order != null ? orderLength : n;
         UpdateTarget open = null;
         Object openGroup = null;
         int openId = -1;
@@ -206,16 +206,23 @@ final class PendingUpdates {
         else writer.writeIntUnchecked(ServerToClientModel.UPDATE_NEXT_ID, id);
     }
 
-    /**
-     * Live slots ordered by (update group, object id, slot), or null to keep the slot order (more than
-     * 255 groups or 16M slots: never in practice). Groups are numbered by first appearance.
-     */
     /** Reused counting-sort buckets (single-group fast path). */
     private int[] buckets = new int[256];
+    /** Reused order of the fast path: its first {@link #orderLength} entries are valid. */
+    private int[] orderBuffer = new int[64];
+    private int orderLength;
 
+    /**
+     * Live slots ordered by (update group, object id, slot), the first {@link #orderLength} entries, or null
+     * to keep the slot order (more than 255 groups or 16M slots: never in practice). Groups are numbered by
+     * first appearance.
+     */
     private int[] sortedOrder(final UpdateTarget[] t, final int n) {
         final int[] fast = countingOrder(t, n);
-        return fast != null ? fast : comparisonOrder(t, n);
+        if (fast != null) return fast;
+        final int[] slow = comparisonOrder(t, n);
+        if (slow != null) orderLength = slow.length;
+        return slow;
     }
 
     /**
@@ -237,7 +244,8 @@ final class PendingUpdates {
             if (id > max) max = id;
             live++;
         }
-        if (live == 0) return new int[0];
+        orderLength = live;
+        if (live == 0) return orderBuffer;
         final long range = (long) max - min + 1;
         if (range > Math.max(4096, 8L * live)) return null;
         final int r = (int) range;
@@ -246,9 +254,10 @@ final class PendingUpdates {
         Arrays.fill(b, 0, r + 1, 0);
         for (int s = 0; s < n; s++) if (t[s] != null) b[t[s].getID() - min + 1]++;
         for (int i = 1; i <= r; i++) b[i] += b[i - 1];
-        final int[] order = new int[live];
-        for (int s = 0; s < n; s++) if (t[s] != null) order[b[t[s].getID() - min]++] = s;
-        return order;
+        if (orderBuffer.length < live) orderBuffer = new int[Math.max(live, orderBuffer.length * 2)];
+        final int[] o = orderBuffer;
+        for (int s = 0; s < n; s++) if (t[s] != null) o[b[t[s].getID() - min]++] = s;
+        return o;
     }
 
     private static int[] comparisonOrder(final UpdateTarget[] t, final int n) {

@@ -421,7 +421,7 @@ public class UIContext {
      * Unlock the current UIContext
      */
     public void release() {
-        UIContext.remove();
+        currentContext.set(null); // not remove(): the next acquire() on this thread would allocate a new entry
         lock.unlock();
     }
 

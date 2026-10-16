@@ -4332,8 +4332,8 @@ public class UIContextReconnectionTest {
     }
 
     /**
-     * Txn ThreadLocal: verify that after commit(), the ThreadLocal is cleaned up.
-     * If not, the Txn (and its TxnContext → Application → UIContext chain) leaks.
+     * Txn ThreadLocal: verify that after commit(), the thread's Txn no longer references the context.
+     * If it did, the TxnContext → Application → UIContext chain would leak through the ThreadLocal.
      */
     @Test
     public void testTxn_ThreadLocalCleanedAfterCommit() {
@@ -4349,9 +4349,9 @@ public class UIContextReconnectionTest {
             writer.endObject();
             txn.commit();
 
-            // After commit, Txn.get() should return a NEW Txn (the old one was removed)
-            final com.ponysdk.core.server.stm.Txn txn2 = com.ponysdk.core.server.stm.Txn.get();
-            assertNotSame("Txn ThreadLocal should be cleaned after commit", txn, txn2);
+            // The thread keeps its Txn for the next transaction, emptied: commit without begin() fails
+            assertThrows("Txn should drop its context after commit", RuntimeException.class,
+                () -> com.ponysdk.core.server.stm.Txn.get().commit());
         } finally {
             uiContext.release();
             UIContext.remove();
@@ -4359,7 +4359,7 @@ public class UIContextReconnectionTest {
     }
 
     /**
-     * Txn ThreadLocal: verify that after rollback(), the ThreadLocal is cleaned up.
+     * Txn ThreadLocal: verify that after rollback(), the thread's Txn no longer references the context.
      */
     @Test
     public void testTxn_ThreadLocalCleanedAfterRollback() {
@@ -4370,8 +4370,8 @@ public class UIContextReconnectionTest {
             txn.begin(txnContext);
             txn.rollback();
 
-            final com.ponysdk.core.server.stm.Txn txn2 = com.ponysdk.core.server.stm.Txn.get();
-            assertNotSame("Txn ThreadLocal should be cleaned after rollback", txn, txn2);
+            assertThrows("Txn should drop its context after rollback", RuntimeException.class,
+                () -> com.ponysdk.core.server.stm.Txn.get().rollback());
         } finally {
             uiContext.release();
             UIContext.remove();

@@ -88,6 +88,8 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
     private int reconnectContextId = -1; // -1 = normal connect, ≥0 = reconnect attempt
     /** Protocol version announced by the terminal at handshake (capped by the configuration). */
     private int protocolVersion = com.ponysdk.core.model.ProtocolVersion.V1;
+    /** loggerOut TRACE, read once per flush instead of once per field (a level changed at runtime applies next flush). */
+    private boolean traceOut = loggerOut.isTraceEnabled();
 
     public void setProtocolVersion(final int protocolVersion) {
         this.protocolVersion = protocolVersion;
@@ -481,6 +483,7 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
     }
 
     void flush0() {
+        traceOut = loggerOut.isTraceEnabled();
         try {
             websocketPusher.flush();
             if (uiContext != null) uiContext.onMessageSent();
@@ -539,7 +542,7 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
         }
 
         try {
-            if (loggerOut.isTraceEnabled())
+            if (traceOut)
                 loggerOut.trace("UIContext #{} : {} {}", this.uiContext.getID(), model, value);
             websocketPusher.encode(model, value);
             if (listener != null) listener.onOutgoingPonyFrame(model, value);
@@ -552,7 +555,7 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
     @Override
     public void encodeInt(final ServerToClientModel model, final int value) {
         final UIContext owner = this.uiContext;
-        if (owner == null || !owner.isHeldByCurrentThread() || listener != null || loggerOut.isTraceEnabled()) {
+        if (owner == null || !owner.isHeldByCurrentThread() || listener != null || traceOut) {
             encode(model, (Object) value); // rare paths (no context / monitoring): keep the generic behaviour
             return;
         }

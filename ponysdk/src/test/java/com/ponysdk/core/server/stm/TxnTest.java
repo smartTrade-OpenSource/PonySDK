@@ -24,7 +24,7 @@
 package com.ponysdk.core.server.stm;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertSame;
 
 import java.util.ArrayList;
@@ -44,7 +44,7 @@ public class TxnTest {
         txn.begin(context);
         txn.commit();
         Mockito.verify(context).flush();
-        assertNotSame("commit ends the transaction", txn, Txn.get());
+        assertThrows("commit ends the transaction", RuntimeException.class, () -> Txn.get().commit());
         Txn.get().begin(context);
         Txn.get().rollback(); // cleanup + rollback without listeners
     }
