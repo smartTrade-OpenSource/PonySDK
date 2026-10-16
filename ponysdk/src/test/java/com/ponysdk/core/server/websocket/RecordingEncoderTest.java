@@ -1277,7 +1277,7 @@ public class RecordingEncoderTest {
      * None should merge because they're not consecutive on the same objectID.
      */
     @Test
-    public void testCompactAlternatingUpdatesNoMerge() {
+    public void testCompactAlternatingUpdatesMergePerObject() {
         final RecordingEncoder rec = new RecordingEncoder();
         recordUpdateBlock(rec, 1, ServerToClientModel.HTML, "a1");
         recordUpdateBlock(rec, 2, ServerToClientModel.HTML, "b1");
@@ -1289,10 +1289,12 @@ public class RecordingEncoderTest {
         final CapturingEncoder cap = new CapturingEncoder();
         rec.replayTo(cap);
 
-        // All 4 update blocks should survive (non-consecutive per objectID)
+        // Pure property updates of different objects commute: one block per object, last value wins
         long updateCount = cap.captured.stream()
                 .filter(e -> e.model() == ServerToClientModel.TYPE_UPDATE).count();
-        assertEquals("Alternating updates should not merge", 4, updateCount);
+        assertEquals("one merged block per object", 2, updateCount);
+        assertEquals(List.of("a2", "b2"), cap.captured.stream()
+                .filter(e -> e.model() == ServerToClientModel.HTML).map(RecordingEncoder.Entry::value).toList());
     }
 
     /**
@@ -1882,5 +1884,90 @@ public class RecordingEncoderTest {
             rec.encode(ServerToClientModel.HTML, new byte[1024]);
         }
         assertEquals("Size should not grow after overflow", sizeAtOverflow, rec.size());
+    }
+
+    // ---- Keyed properties, additive writes, commands, on-the-fly compaction ----
+
+    private static void recordStyle(final RecordingEncoder rec, final int objectId, final String key, final String value) {
+        rec.encode(ServerToClientModel.WINDOW_ID, 0);
+        rec.encode(ServerToClientModel.TYPE_UPDATE, objectId);
+        rec.encode(ServerToClientModel.PUT_STYLE_KEY, key);
+        rec.encode(ServerToClientModel.STYLE_VALUE, value);
+        rec.endObject();
+    }
+
+    private static List<Object> values(final CapturingEncoder cap, final ServerToClientModel model) {
+        return cap.captured.stream().filter(e -> e.model() == model).map(RecordingEncoder.Entry::value).toList();
+    }
+
+    @Test
+    public void testCompactKeepsDistinctStyleKeys() {
+        final RecordingEncoder rec = new RecordingEncoder();
+        recordStyle(rec, 7, "color", "red");
+        recordStyle(rec, 7, "width", "10px");
+        recordStyle(rec, 7, "color", "green");
+        rec.compact();
+        final CapturingEncoder cap = new CapturingEncoder();
+        rec.replayTo(cap);
+        assertEquals(List.of("width", "color"), values(cap, ServerToClientModel.PUT_STYLE_KEY));
+        assertEquals(List.of("10px", "green"), values(cap, ServerToClientModel.STYLE_VALUE));
+    }
+
+    @Test
+    public void testCompactRemoveStyleKeyWinsOverEarlierPut() {
+        final RecordingEncoder rec = new RecordingEncoder();
+        recordStyle(rec, 7, "color", "red");
+        recordUpdateBlock(rec, 7, ServerToClientModel.REMOVE_STYLE_KEY, "color");
+        rec.compact();
+        final CapturingEncoder cap = new CapturingEncoder();
+        rec.replayTo(cap);
+        assertTrue(values(cap, ServerToClientModel.PUT_STYLE_KEY).isEmpty());
+        assertEquals(List.of("color"), values(cap, ServerToClientModel.REMOVE_STYLE_KEY));
+    }
+
+    @Test
+    public void testCompactKeepsEveryAddedAndRemovedStyleNameInOrder() {
+        final RecordingEncoder rec = new RecordingEncoder();
+        recordUpdateBlock(rec, 7, ServerToClientModel.ADD_STYLE_NAME, "a");
+        recordUpdateBlock(rec, 7, ServerToClientModel.ADD_STYLE_NAME, "b");
+        recordUpdateBlock(rec, 7, ServerToClientModel.REMOVE_STYLE_NAME, "a");
+        rec.compact();
+        final CapturingEncoder cap = new CapturingEncoder();
+        rec.replayTo(cap);
+        assertEquals(List.of("a", "b"), values(cap, ServerToClientModel.ADD_STYLE_NAME));
+        assertEquals(List.of("a"), values(cap, ServerToClientModel.REMOVE_STYLE_NAME));
+    }
+
+    @Test
+    public void testCompactDoesNotMoveUpdatesAcrossACommand() {
+        final RecordingEncoder rec = new RecordingEncoder();
+        recordUpdateBlock(rec, 1, ServerToClientModel.HTML, "before");
+        recordUpdateBlock(rec, 2, ServerToClientModel.ADD_STYLE_NAME, "x"); // not a plain setter: barrier
+        recordUpdateBlock(rec, 1, ServerToClientModel.HTML, "after");
+        rec.compact();
+        final CapturingEncoder cap = new CapturingEncoder();
+        rec.replayTo(cap);
+        assertEquals(List.of("before", "after"), values(cap, ServerToClientModel.HTML));
+    }
+
+    @Test
+    public void testPushingApplicationDoesNotOverflowWhileSuspended() {
+        final AtomicInteger overflows = new AtomicInteger();
+        final RecordingEncoder rec = new RecordingEncoder(10_000, (count, max) -> overflows.incrementAndGet());
+        // a ticker: 240 cells, text + colour, 1 000 ticks of 60 random cells
+        final java.util.Random rnd = new java.util.Random(3);
+        for (int tick = 0; tick < 1_000; tick++) {
+            for (int k = 0; k < 60; k++) {
+                final int cell = 100 + rnd.nextInt(240);
+                recordUpdateBlock(rec, cell, ServerToClientModel.TEXT, "1." + rnd.nextInt(99_999));
+                recordStyle(rec, cell, "color", rnd.nextBoolean() ? "green" : "red");
+            }
+        }
+        assertEquals("compacted on the way: the distinct state fits", 0, overflows.get());
+        assertFalse(rec.isOverflowed());
+        rec.compact();
+        final CapturingEncoder cap = new CapturingEncoder();
+        rec.replayTo(cap);
+        assertTrue("at most one block per cell", values(cap, ServerToClientModel.TYPE_UPDATE).size() <= 240);
     }
 }

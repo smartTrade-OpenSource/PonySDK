@@ -76,8 +76,18 @@ public final class RecordingEncoder implements WebsocketEncoder {
     public void endObject() {
         if (overflowed) return;
         entries.add(new Entry(ServerToClientModel.END, null));
+        // A pushing application keeps rewriting the same properties while the client is away: compact on the
+        // way (at a block boundary, so no partial block is touched) instead of overflowing on stale values.
+        // Amortized: at most once per maxEntries/4 new entries.
+        if (maxEntries > 0 && entries.size() > Math.max(maxEntries / 2, compactedSize + maxEntries / 4)) {
+            compact();
+            compactedSize = entries.size();
+        }
         checkOverflow();
     }
+
+    /** Size right after the last on-the-fly compaction. */
+    private int compactedSize;
 
     private void checkOverflow() {
         if (maxEntries > 0 && entries.size() > maxEntries && !overflowed) {
@@ -146,34 +156,22 @@ public final class RecordingEncoder implements WebsocketEncoder {
             }
         }
 
-        // Phase 3: merge consecutive UPDATE blocks on same objectID, eliminate cancelled
+        // Phase 3: merge each run of consecutive UPDATE blocks (last value per property), eliminate cancelled
         final List<Entry> compacted = new ArrayList<>(entries.size());
         int i = 0;
         while (i < blocks.size()) {
             final Block b = blocks.get(i);
-            final int objId = b.objectId();
-
-            // Eliminate cancelled objects
-            if (objId >= 0 && cancelledIds.contains(objId)) {
+            if (b.objectId() >= 0 && cancelledIds.contains(b.objectId())) {
                 i++;
                 continue;
             }
-
-            // Merge consecutive UPDATE blocks on same objectID
             if (b.type() == BlockType.UPDATE) {
                 int j = i + 1;
-                while (j < blocks.size() && blocks.get(j).type() == BlockType.UPDATE
-                        && blocks.get(j).objectId() == objId) {
-                    j++;
-                }
-                if (j > i + 1) {
-                    mergeUpdateBlocks(blocks, i, j, compacted);
-                    i = j;
-                    continue;
-                }
+                while (j < blocks.size() && blocks.get(j).type() == BlockType.UPDATE) j++;
+                mergeUpdateRun(blocks, i, j, cancelledIds, compacted);
+                i = j;
+                continue;
             }
-
-            // Copy block as-is
             copyBlock(b, compacted);
             i++;
         }
@@ -258,31 +256,118 @@ public final class RecordingEncoder implements WebsocketEncoder {
         }
     }
 
-    private void mergeUpdateBlocks(final List<Block> blocks, final int fromIdx, final int toIdx,
-                                   final List<Entry> target) {
-        final var merged = new java.util.LinkedHashMap<ServerToClientModel, Object>();
-        int objectId = -1;
-        Entry windowEntry = null;
-        Entry frameEntry = null;
+    /** Idempotent single-value setters: the last write of the model wins. */
+    private static final java.util.EnumSet<ServerToClientModel> SETTERS = java.util.EnumSet.of(
+        ServerToClientModel.TEXT, ServerToClientModel.HTML, ServerToClientModel.WIDGET_TITLE,
+        ServerToClientModel.WIDGET_WIDTH, ServerToClientModel.WIDGET_HEIGHT, ServerToClientModel.WIDGET_VISIBLE,
+        ServerToClientModel.ENABLED, ServerToClientModel.STYLE_NAME, ServerToClientModel.PLACEHOLDER,
+        ServerToClientModel.VALUE_CHECKBOX, ServerToClientModel.ENSURE_DEBUG_ID);
 
+    /** One property write of an update block: one entry, or a key entry + its value entry. */
+    private record Write(Object mergeKey, Entry first, Entry second) {
+        void emit(final List<Entry> target) {
+            target.add(first);
+            if (second != null) target.add(second);
+        }
+    }
+
+    /** The writes of one object accumulated over a run, in order (an overwritten property moves to the end). */
+    private static final class ObjectWrites {
+        Entry window;
+        Entry frame;
+        final int objectId;
+        final java.util.LinkedHashMap<Object, Write> writes = new java.util.LinkedHashMap<>();
+
+        ObjectWrites(final int objectId) {
+            this.objectId = objectId;
+        }
+
+        void put(final Write w) {
+            writes.remove(w.mergeKey()); // last value wins, in the position of the last write
+            writes.put(w.mergeKey(), w);
+        }
+
+        void emit(final List<Entry> target) {
+            if (window != null) target.add(window);
+            if (frame != null) target.add(frame);
+            target.add(new Entry(ServerToClientModel.TYPE_UPDATE, objectId));
+            writes.values().forEach(w -> w.emit(target));
+            target.add(new Entry(ServerToClientModel.END, null));
+        }
+    }
+
+    /**
+     * Merges a run of consecutive UPDATE blocks. Writes are keyed per property: setters by model, style /
+     * attribute / property puts and removes by their name, so different keys never overwrite each other;
+     * any other write (style names added or removed, commands, method calls) is kept, in order.
+     * <p>
+     * Blocks made only of keyed writes ("pure") of different objects commute: they are folded into one block
+     * per object. A block with any other write is a barrier: what was accumulated is written out first, so
+     * commands keep their position relative to the updates around them.
+     */
+    private void mergeUpdateRun(final List<Block> blocks, final int fromIdx, final int toIdx,
+                                final java.util.Set<Integer> cancelledIds, final List<Entry> target) {
+        final var pending = new java.util.LinkedHashMap<Integer, ObjectWrites>();
         for (int bi = fromIdx; bi < toIdx; bi++) {
             final Block b = blocks.get(bi);
+            final int objId = b.objectId();
+            if (objId >= 0 && cancelledIds.contains(objId)) continue;
+            Entry window = null, frame = null;
+            final List<Write> writes = new ArrayList<>();
+            boolean pure = true;
             for (int k = b.start; k < b.end; k++) {
                 final Entry e = entries.get(k);
                 final ServerToClientModel m = e.model();
-                if (m == ServerToClientModel.WINDOW_ID) { windowEntry = e; continue; }
-                if (m == ServerToClientModel.FRAME_ID) { frameEntry = e; continue; }
-                if (m == ServerToClientModel.TYPE_UPDATE) { objectId = (int) e.value(); continue; }
-                merged.put(m, e.value());
+                if (m == ServerToClientModel.WINDOW_ID) { window = e; continue; }
+                if (m == ServerToClientModel.FRAME_ID) { frame = e; continue; }
+                if (m == ServerToClientModel.TYPE_UPDATE) continue;
+                final Entry next = k + 1 < b.end ? entries.get(k + 1) : null;
+                if (m == ServerToClientModel.PUT_STYLE_KEY && isValue(next, ServerToClientModel.STYLE_VALUE)) {
+                    writes.add(new Write(List.of("style", e.value()), e, next));
+                    k++;
+                } else if (m == ServerToClientModel.PUT_ATTRIBUTE_KEY && isValue(next, ServerToClientModel.ATTRIBUTE_VALUE)) {
+                    writes.add(new Write(List.of("attribute", e.value()), e, next));
+                    k++;
+                } else if (m == ServerToClientModel.PUT_PROPERTY_KEY && isValue(next, ServerToClientModel.PROPERTY_VALUE)) {
+                    writes.add(new Write(List.of("property", e.value()), e, next));
+                    k++;
+                } else if (m == ServerToClientModel.REMOVE_STYLE_KEY) {
+                    writes.add(new Write(List.of("style", e.value()), e, null));
+                } else if (m == ServerToClientModel.REMOVE_ATTRIBUTE_KEY) {
+                    writes.add(new Write(List.of("attribute", e.value()), e, null));
+                } else if (SETTERS.contains(m)) {
+                    writes.add(new Write(m, e, null));
+                } else {
+                    writes.add(new Write(new Object(), e, null)); // unique: never merged, kept in order
+                    pure = false;
+                }
             }
+            if (objId < 0) { // no object: write out as is, keeping order
+                pending.values().forEach(o -> o.emit(target));
+                pending.clear();
+                copyBlock(b, target);
+                continue;
+            }
+            if (!pure) {
+                // a barrier: what came before is written out first, then this block, unchanged in its order
+                pending.values().forEach(o -> o.emit(target));
+                pending.clear();
+                final ObjectWrites own = new ObjectWrites(objId);
+                own.window = window;
+                own.frame = frame;
+                writes.forEach(w -> own.writes.put(w.mergeKey(), w));
+                own.emit(target);
+                continue;
+            }
+            final ObjectWrites acc = pending.computeIfAbsent(objId, ObjectWrites::new);
+            if (window != null) acc.window = window;
+            if (frame != null) acc.frame = frame;
+            writes.forEach(acc::put);
         }
+        pending.values().forEach(o -> o.emit(target));
+    }
 
-        if (windowEntry != null) target.add(windowEntry);
-        if (frameEntry != null) target.add(frameEntry);
-        if (objectId >= 0) target.add(new Entry(ServerToClientModel.TYPE_UPDATE, objectId));
-        for (final var entry : merged.entrySet()) {
-            target.add(new Entry(entry.getKey(), entry.getValue()));
-        }
-        target.add(new Entry(ServerToClientModel.END, null));
+    private static boolean isValue(final Entry next, final ServerToClientModel valueModel) {
+        return next != null && next.model() == valueModel;
     }
 }
