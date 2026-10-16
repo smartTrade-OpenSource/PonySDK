@@ -125,8 +125,57 @@ public class ModelWriter {
         if (!p.isOversized() && SPARE.get() == null) SPARE.set(p);
     }
 
-    /** Writes every deferred update now. Called before any other block and before each flush. */
+    // ---- Create in parent (ProtocolVersion.CREATE_IN_PARENT) ----
+
+    /** True while a create block is open: its END is held back until the next write. */
+    private boolean createOpen; // default false: also right for a writer created without its initializers (mocks)
+    private int openCreate;
+
+    /**
+     * Ends the create block of an object. Since protocol 3 the END is held back: if the next thing written is the
+     * plain add of that object ({@link #addToOpenCreate}), the add joins the create block.
+     */
+    public void endCreate(final int objectID) {
+        closeOpenCreate();
+        if (supportsCreateInParent() && canWrite()) {
+            openCreate = objectID;
+            createOpen = true;
+        } else {
+            endObject();
+        }
+    }
+
+    /**
+     * Adds an object to its parent inside its own create block, when that block is the last thing written.
+     *
+     * @return false if the add must be written as an add block
+     */
+    public boolean addToOpenCreate(final int objectID, final int parentObjectID) {
+        if (!createOpen || openCreate != objectID || !canWrite()) return false;
+        createOpen = false;
+        writeInt(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
+        endObject();
+        return true;
+    }
+
+    private void closeOpenCreate() {
+        if (createOpen) {
+            createOpen = false;
+            endObject();
+        }
+    }
+
+    boolean supportsCreateInParent() {
+        final WebsocketEncoder e = encoder;
+        return e != null && e.protocolVersion() >= com.ponysdk.core.model.ProtocolVersion.CREATE_IN_PARENT;
+    }
+
+    /**
+     * Writes everything held back - deferred updates, an open create block - now. Called before any other block,
+     * before each flush and before any write that bypasses this writer.
+     */
     public void drainPendingUpdates() {
+        closeOpenCreate();
         final PendingUpdates p = pending;
         if (p == null || p.isEmpty() || draining) return;
         draining = true;
@@ -172,11 +221,13 @@ public class ModelWriter {
      * to reattach a live UIContext to a new WebSocket session.
      */
     public void setEncoder(final WebsocketEncoder encoder) {
+        closeOpenCreate(); // the block belongs to the previous encoder's stream
         this.encoder = encoder;
         this.currentWindow = null; // force WINDOW_ID re-emission on next write
     }
 
     public void beginObject(final PWindow window) {
+        if (createOpen) closeOpenCreate();
         if (pending != null && !draining && !pending.isEmpty()) drainPendingUpdates(); // keep write order
         encoder.beginObject();
 

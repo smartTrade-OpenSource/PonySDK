@@ -152,7 +152,7 @@ public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
         writer.write(ServerToClientModel.WIDGET_TYPE, getWidgetType().getValue());
         enrichForCreation(writer);
         enrichForUpdate(writer);
-        writer.endObject();
+        writer.endCreate(ID); // protocol 3: an add written right after joins this block
 
         UIContext.get().registerObject(this);
 
@@ -260,7 +260,7 @@ public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
     }
 
     protected CompactIntRunnableMap safeStackedInstructions() {
-        if (stackedInstructions == null) stackedInstructions = new CompactIntRunnableMap(4);
+        if (stackedInstructions == null) stackedInstructions = new CompactIntRunnableMap(2); // usually the add + one
         return stackedInstructions;
     }
 
@@ -358,7 +358,21 @@ public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
     }
 
     protected void saveAdd(final int objectID, final int parentObjectID) {
-        saveAdd(objectID, parentObjectID, (ServerBinaryModel) null);
+        if (destroy) return;
+        // The common add (no extra model): one capture when deferred, none when written right away
+        if (initialized) writeAdd(objectID, parentObjectID);
+        else safeStackedInstructions().put(saveKey++, () -> writeAdd(objectID, parentObjectID));
+    }
+
+    private void writeAdd(final int objectID, final int parentObjectID) {
+        if (destroy) return;
+        final ModelWriter writer = writer();
+        if (writer.addToOpenCreate(objectID, parentObjectID)) return; // created in its parent
+        writer.beginObject(window);
+        if (frame != null) writer.writeInt(ServerToClientModel.FRAME_ID, frame.getID());
+        writer.writeInt(ServerToClientModel.TYPE_ADD, objectID);
+        writer.writeInt(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
+        writer.endObject();
     }
 
     protected void saveAdd(final int objectID, final int parentObjectID, final ServerBinaryModel... binaryModels) {

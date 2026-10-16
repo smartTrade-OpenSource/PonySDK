@@ -264,6 +264,13 @@ public class UIBuilder {
         }
     }
 
+    /** The add of a create block (protocol 3): exactly what an add block right after the create would do. */
+    private void addTo(final ReaderBuffer buffer, final PTObject ptObject, final int objectID, final int parentId) {
+        final PTObject parentObject = getPTObject(parentId);
+        if (ptObject != null && parentObject != null) parentObject.add(buffer, ptObject);
+        else log.warning("Cannot add PTObject #" + objectID + " to the garbaged or unknown parent #" + parentId);
+    }
+
     private void processAdd(final ReaderBuffer buffer, final int objectID) {
         final PTObject ptObject = getPTObject(objectID);
         if (ptObject != null) {
@@ -305,6 +312,9 @@ public class UIBuilder {
             } else if (ServerToClientModel.UPDATE_NEXT_ID == model) {
                 objectID = binaryModel.getIntValue();
                 ptObject = lookupUpdatedObject(objectID);
+            } else if (ServerToClientModel.PARENT_OBJECT_ID == model) {
+                // Protocol 3, last field of a create block: the new object is added to this parent
+                addTo(buffer, ptObject, objectID, binaryModel.getIntValue());
             } else if (ptObject != null && !ptObject.update(buffer, binaryModel)) {
                 log.warning("Update " + ptObject.getClass().getSimpleName() + " #" + objectID + " with key : " + binaryModel
                         + " doesn't exist");

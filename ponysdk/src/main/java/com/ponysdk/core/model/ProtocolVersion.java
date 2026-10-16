@@ -37,8 +37,15 @@ public final class ProtocolVersion {
     /** Update runs: {@link ServerToClientModel#UPDATE_NEXT} / {@code _DELTA} / {@code _ID} inside an update block. */
     public static final int UPDATE_RUNS = 2;
 
+    /**
+     * Create in parent: a create block may end with {@link ServerToClientModel#PARENT_OBJECT_ID}, which adds the
+     * new object to that parent ({@code [CREATE x ... PARENT p END]} instead of {@code [CREATE x ... END][ADD x
+     * PARENT p END]}). Sent when the add immediately follows the create: every leaf widget.
+     */
+    public static final int CREATE_IN_PARENT = 3;
+
     /** Highest version implemented by this terminal / server. */
-    public static final int CURRENT = UPDATE_RUNS;
+    public static final int CURRENT = CREATE_IN_PARENT;
 
     private ProtocolVersion() {
     }

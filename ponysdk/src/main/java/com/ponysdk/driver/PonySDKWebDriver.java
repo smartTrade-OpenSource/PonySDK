@@ -156,7 +156,14 @@ public class PonySDKWebDriver implements WebDriver {
             final Byte widget = (Byte) findValueForModel(message, ServerToClientModel.WIDGET_TYPE);
             if (widget == null) return;
             final int elementId = (int) frame.value;
-            elements.put(elementId, new PonyWebElement(this, elementId, WidgetType.fromRawValue(widget)));
+            final PonyWebElement element = new PonyWebElement(this, elementId, WidgetType.fromRawValue(widget));
+            elements.put(elementId, element);
+            // protocol 3: created directly in its parent
+            final Object parentId = findValueForModel(message, ServerToClientModel.PARENT_OBJECT_ID);
+            if (parentId != null) {
+                element.parent = elements.get(parentId);
+                if (element.parent != null) element.parent.children.add(element);
+            }
         });
         onMessageSwitch.put(ServerToClientModel.TYPE_GC, (message, frame) -> {
             elements.remove(frame.value);

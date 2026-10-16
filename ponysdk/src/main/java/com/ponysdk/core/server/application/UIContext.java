@@ -528,6 +528,7 @@ public class UIContext {
      * Closes the current UIContext
      */
     public void close() {
+        context.getWriter().drainPendingUpdates(); // a block held back by the writer comes first
         socket.beginObject();
         socket.encode(ServerToClientModel.DESTROY_CONTEXT, null);
         socket.endObject();
@@ -730,6 +731,7 @@ public class UIContext {
     public void sendRoundTrip() {
         acquire();
         try {
+            context.getWriter().drainPendingUpdates(); // never inside a block held back by the writer
             socket.sendRoundTrip();
         } catch (final Throwable e) {
             log.error("Cannot send server round trip to UIContext #" + getID(), e);
