@@ -32,10 +32,10 @@ import java.util.Set;
 
 public class EventSource {
 
-    private final Map<Event.Type, Set<EventHandler>> handlers;
+    // Created on the first handler: sources that never get one (or override the storage) pay nothing
+    private Map<Event.Type, Set<EventHandler>> handlers;
 
     public EventSource() {
-        this.handlers = newHandlersMap();
     }
 
     protected Set<EventHandler> newHandlersSet() {
@@ -49,17 +49,18 @@ public class EventSource {
     public HandlerRegistration addHandler(final Event.Type type, final EventHandler handler) {
         if (type == null) throw new NullPointerException("Cannot add a handler with a null type");
         if (handler == null) throw new NullPointerException("Cannot add a null handler");
+        if (handlers == null) handlers = newHandlersMap();
         handlers.computeIfAbsent(type, t -> newHandlersSet()).add(handler);
         return () -> removeHandler(type, handler);
     }
 
     public boolean removeHandler(final Event.Type type, final EventHandler handler) {
-        final Set<EventHandler> typeHandlers = handlers.get(type);
+        final Set<EventHandler> typeHandlers = handlers != null ? handlers.get(type) : null;
         if (typeHandlers == null) return false;
         return typeHandlers.remove(handler);
     }
 
     public Collection<EventHandler> getEventHandlers(final Event.Type eventType) {
-        return handlers.getOrDefault(eventType, Collections.emptySet());
+        return handlers != null ? handlers.getOrDefault(eventType, Collections.emptySet()) : Collections.emptySet();
     }
 }

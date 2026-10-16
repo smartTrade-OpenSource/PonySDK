@@ -75,7 +75,7 @@ import com.ponysdk.core.ui.eventbus.Event;
 import com.ponysdk.core.ui.eventbus.EventHandler;
 import com.ponysdk.core.ui.eventbus.EventSource;
 import com.ponysdk.core.ui.eventbus.HandlerRegistration;
-import com.ponysdk.core.ui.eventbus.TinyEventSource;
+import com.ponysdk.core.ui.eventbus.CompactEventSource;
 import com.ponysdk.core.ui.model.PEventType;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
 import com.ponysdk.core.util.StringPairs;
@@ -183,7 +183,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
         final Extras x0 = wx;
         if (x0 != null && x0.styleName != null) writer.write(ServerToClientModel.STYLE_NAME, x0.styleName);
         if (!styleNames.isEmpty()) {
-            writer.write(ServerToClientModel.ADD_STYLE_NAME, styleNames.stream().collect(Collectors.joining(" ")));
+            writer.write(ServerToClientModel.ADD_STYLE_NAME, styleNames.join());
         }
         if (this.title != null) writer.write(ServerToClientModel.WIDGET_TITLE, this.title);
         if (x0 != null && x0.height != null) writer.write(ServerToClientModel.WIDGET_HEIGHT, x0.height);
@@ -501,7 +501,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
     private HandlerRegistration addDomHandler(final EventHandler handler, final PDomEvent.Type type,
                                               final ServerBinaryModel binaryModel) {
         if (destroy) return null;
-        if (eventSource == null) eventSource = new TinyEventSource();
+        if (eventSource == null) eventSource = new CompactEventSource(); // 56 B for one handler (a HashMap: 160)
         final HandlerRegistration handlerRegistration = eventSource.addHandler(type, handler);
 
         final SetPool<Type>.ImmutableSet pool = oneTimeHandlerCreation.getAdd(type);

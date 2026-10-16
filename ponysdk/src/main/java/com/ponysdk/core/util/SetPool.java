@@ -183,6 +183,9 @@ public class SetPool<E> {
 
         private final Set<E> s;
         private final int hashCode;
+        // Pooled, so shared by every holder of this set: joined once, then the same String instance
+        // (hash cached) for all of them. A benign race: a String is safely published.
+        private String joined;
 
         private ImmutableSet(final Set<E> s, final int hashCode) {
             super();
@@ -374,6 +377,20 @@ public class SetPool<E> {
         @Override
         public int hashCode() {
             return hashCode;
+        }
+
+        /** The elements separated by a space (e.g. a CSS class list), computed once per pooled set. */
+        public String join() {
+            String j = joined;
+            if (j == null) {
+                final StringBuilder sb = new StringBuilder();
+                for (final E e : s) {
+                    if (!sb.isEmpty()) sb.append(' ');
+                    sb.append(e);
+                }
+                joined = j = sb.toString();
+            }
+            return j;
         }
 
         @Override

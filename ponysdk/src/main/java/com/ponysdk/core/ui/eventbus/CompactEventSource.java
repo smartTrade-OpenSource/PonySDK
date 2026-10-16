@@ -47,8 +47,7 @@ public class CompactEventSource extends EventSource {
     private int size; // number of (Type, Handler) pairs
 
     public CompactEventSource() {
-        // Don't call super() with map allocation — we override everything
-        super();
+        super(); // allocates nothing: the map of EventSource is created on demand, and never used here
     }
 
     @Override
@@ -56,8 +55,12 @@ public class CompactEventSource extends EventSource {
         if (type == null) throw new NullPointerException("Cannot add a handler with a null type");
         if (handler == null) throw new NullPointerException("Cannot add a null handler");
 
+        // Same contract as EventSource (a set per type): adding a registered handler again is a no-op
+        for (int i = 0; i < size * 2; i += 2) {
+            if (data[i + 1] == handler && data[i].equals(type)) return () -> removeHandler(type, handler);
+        }
         if (data == null) {
-            data = new Object[4]; // room for 2 pairs
+            data = new Object[2]; // one pair: the common case (a click handler)
         } else if (size * 2 >= data.length) {
             final Object[] newData = new Object[data.length * 2];
             System.arraycopy(data, 0, newData, 0, size * 2);
