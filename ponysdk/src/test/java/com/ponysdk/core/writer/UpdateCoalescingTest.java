@@ -409,4 +409,31 @@ public class UpdateCoalescingTest {
         assertEquals(1, wire.count("ADD_STYLE_NAME=second"));
         assertEquals("the earlier name is replaced", 0, wire.count("ADD_STYLE_NAME=extra"));
     }
+
+    @Test
+    public void smallTransactionsAfterABurstStillKeepOnlyTheLastValue() {
+        final PLabel[] c = labels(300);
+        // burst: grows the pooled buffer and its index far beyond the next transactions (sparse clears after)
+        ctx.execute(() -> {
+            for (final PLabel l : c) {
+                l.setText("burst");
+                for (int p = 0; p < 9; p++) l.setStyleProperty("p" + p, "v");
+            }
+        });
+        for (int round = 0; round < 50; round++) {
+            wire.clear();
+            final int r = round;
+            ctx.execute(() -> {
+                for (int i = 0; i < 5; i++) {
+                    final PLabel l = c[(r * 7 + i * 31) % c.length];
+                    l.setText("a" + r);
+                    l.setStyleProperty("p" + i, "x");
+                    l.setText("b" + r);
+                }
+            });
+            assertEquals("round " + r, 5, wire.count("TEXT="));
+            assertEquals("round " + r, 5, wire.count("TEXT=b" + r));
+            assertEquals("round " + r, 5, wire.count("PUT_STYLE_KEY="));
+        }
+    }
 }

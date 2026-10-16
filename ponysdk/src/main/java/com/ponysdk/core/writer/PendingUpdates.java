@@ -279,9 +279,24 @@ final class PendingUpdates {
         return order;
     }
 
+    /**
+     * Empties the index. It only grows (the buffer is pooled per thread), so after one burst a full clear
+     * would cost every later small drain tens of KB: a sparse drain clears just the entries of its live slots
+     * (each live slot owns exactly one entry, an overwrite repoints it). Called before the slots are released.
+     */
     private void reset(final int usedSlots) {
         count = 0;
         live = 0;
-        if (usedSlots > 0) Arrays.fill(index, 0);
+        if (usedSlots == 0) return;
+        if (usedSlots * 8 >= index.length) {
+            Arrays.fill(index, 0);
+            return;
+        }
+        for (int s = 0; s < usedSlots; s++) {
+            if (targets[s] == null) continue;
+            int h = hash(targets[s].getID(), keyModels[s], keys[s]) & indexMask;
+            while (index[h] != s + 1) h = (h + 1) & indexMask;
+            index[h] = 0;
+        }
     }
 }

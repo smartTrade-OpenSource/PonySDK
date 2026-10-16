@@ -376,6 +376,13 @@ public final class ProtocolBench {
             }
         }, 1_000, 2_000);
 
+        // The pending buffer is pooled per thread: one 3 000-update burst (op 0, warm-up included) leaves it grown
+        // for every later small transaction on this thread. Last on purpose, it would skew the scenarios after it.
+        run("tick: 1 cell after a burst", v, grid, (b, i) -> {
+            if (i == 0) for (final PLabel l : cells) for (int p = 0; p < 13; p++) l.setStyleProperty("p" + p, "v");
+            cells.get(i % 240).setText("1." + (10_000 + i % 90_000));
+        }, 20_000, 50_000);
+
         if ("heap".startsWith(only) || only.isEmpty()) heap(v);
     }
 }
