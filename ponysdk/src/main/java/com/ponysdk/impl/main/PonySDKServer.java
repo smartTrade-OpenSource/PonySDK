@@ -27,6 +27,7 @@ import org.eclipse.jetty.util.compression.CompressionPool;
 import org.eclipse.jetty.util.compression.DeflaterPool;
 import java.net.InetAddress;
 import java.net.URL;
+import java.util.List;
 
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpConfiguration;
@@ -169,7 +170,10 @@ public class PonySDKServer {
         // Compress text assets (HTML, the GWT JS bundle, JSON) but skip already-compressed
         // content (images, fonts, archives) — restores the sensible GzipHandler defaults
         // instead of wasting CPU re-compressing incompressible payloads.
-        compression.putConfiguration("/", CompressionConfig.builder().defaults().build());
+        // Browsers list gzip first ("gzip, deflate, br, zstd"): without a server preference Jetty would always
+        // pick gzip. Brotli is preferred when registered (about 20 % smaller on the terminal JS), gzip otherwise.
+        compression.putConfiguration("/", CompressionConfig.builder().defaults()
+            .compressPreferredEncodings(List.of("br", "gzip")).build());
         compression.setHandler(addHandlers());
         return compression;
     }

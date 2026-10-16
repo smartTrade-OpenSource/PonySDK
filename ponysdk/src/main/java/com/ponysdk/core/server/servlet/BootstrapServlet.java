@@ -32,10 +32,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.WritableByteChannel;
+import java.io.OutputStream;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -44,6 +42,10 @@ import java.util.Set;
 public class BootstrapServlet extends HttpServlet {
 
     private static final String INDEX_URL = "/index.html";
+    /** GWT names its compiled files after their content (*.cache.*): they never change under the same name. */
+    private static final String IMMUTABLE = "public, max-age=31536000, immutable";
+    /** Everything else may change under the same name: the browser revalidates (304 when unmodified). */
+    private static final String REVALIDATE = "no-cache";
     protected static final String NEW_LINE = "\n";
 
     protected static final String TITLE_PATTERN = "<title>%s</title>";
@@ -145,25 +147,15 @@ public class BootstrapServlet extends HttpServlet {
         response.setContentType(mimeType);
 
         if (inputStream != null) {
-            try (ReadableByteChannel inputChannel = Channels.newChannel(inputStream);
-                 WritableByteChannel outputChannel = Channels.newChannel(response.getOutputStream())) {
-                final ByteBuffer buffer = ByteBuffer.allocateDirect(16 * 1024);
-                while (inputChannel.read(buffer) != -1) {
-                    buffer.flip();
-                    outputChannel.write(buffer);
-                    response.getOutputStream().flush();
-                    buffer.compact();
-                }
-                buffer.flip();
-                while (buffer.hasRemaining()) {
-                    outputChannel.write(buffer);
-                }
+            response.setHeader("Cache-Control", path.contains(".cache.") ? IMMUTABLE : REVALIDATE);
+            try (inputStream; OutputStream out = response.getOutputStream()) {
+                inputStream.transferTo(out);
             }
         } else {
             if (path.equals(INDEX_URL)) {
-                try (final WritableByteChannel outputChannel = Channels.newChannel(response.getOutputStream())) {
-                    final ByteBuffer buffer = ByteBuffer.wrap(buildIndexHTML(request).getBytes(StandardCharsets.UTF_8));
-                    outputChannel.write(buffer);
+                response.setHeader("Cache-Control", REVALIDATE);
+                try (OutputStream out = response.getOutputStream()) {
+                    out.write(buildIndexHTML(request).getBytes(StandardCharsets.UTF_8));
                 }
             } else {
                 log.error("Failed to load resource: {}", request.getPathInfo());
@@ -173,18 +165,49 @@ public class BootstrapServlet extends HttpServlet {
     }
 
     public InputStream getInputStreamFromPath(final String path) {
-        // Try to load from context
-        InputStream inputStream = getServletContext().getResourceAsStream(path);
-
-        if (inputStream == null) {
-            // Try to load from jar
-            final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-            final String jarPath = path.substring(1);
-            inputStream = classLoader.getResourceAsStream(jarPath);
-            if (inputStream == null && childClassLoader != null)
-                inputStream = childClassLoader.getResourceAsStream(jarPath);
+        final URL url = getResourceURL(path);
+        if (url == null) return null;
+        try {
+            return url.openStream();
+        } catch (final IOException e) {
+            log.error("Cannot open resource {}", path, e);
+            return null;
         }
-        return inputStream;
+    }
+
+    /** The served file: from the servlet context first, then from the jars. Null when there is none. */
+    protected URL getResourceURL(final String path) {
+        try {
+            final URL url = getServletContext().getResource(path);
+            if (url != null) return url;
+        } catch (final java.net.MalformedURLException e) {
+            return null;
+        }
+        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        final String jarPath = path.substring(1);
+        final URL url = classLoader.getResource(jarPath);
+        return url != null || childClassLoader == null ? url : childClassLoader.getResource(jarPath);
+    }
+
+    /**
+     * Modification time of the requested file, for conditional GETs ({@link HttpServlet#service} answers 304
+     * to an up-to-date {@code If-Modified-Since}). -1 for the bootstrap page, generated per request.
+     */
+    @Override
+    protected long getLastModified(final HttpServletRequest request) {
+        final String path = getPath(request);
+        if (path == null || path.isEmpty() || path.equals("/") || path.equals(INDEX_URL) || !isSafeResourcePath(path)) {
+            return -1;
+        }
+        final URL url = getResourceURL(path);
+        if (url == null) return -1;
+        try {
+            final long time = url.openConnection().getLastModified();
+            // HTTP dates have a one-second precision: a file time in ms would never match If-Modified-Since
+            return time > 0 ? time / 1000 * 1000 : -1;
+        } catch (final IOException e) {
+            return -1;
+        }
     }
 
     protected String buildIndexHTML(final HttpServletRequest request) {

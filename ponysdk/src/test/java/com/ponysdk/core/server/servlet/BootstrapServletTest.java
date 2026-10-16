@@ -27,11 +27,18 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Map;
 import java.util.Set;
 
 import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.WriteListener;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -163,5 +170,77 @@ public class BootstrapServletTest {
 
         assertTrue(html.contains("src=\"ctx/ponyterminal/ponyterminal.nocache.js\""));
         assertTrue(html.contains("src=\"ctx/script/ponysdk.js\""));
+    }
+
+    // ---- HTTP caching of the served files ----
+
+    /** A servlet serving {@code file} at {@code path} from its servlet context. */
+    private static TestableBootstrapServlet servletServing(final String path, final File file) throws IOException {
+        final ServletContext ctx = Mockito.mock(ServletContext.class);
+        Mockito.when(ctx.getMimeType(Mockito.anyString())).thenReturn("text/javascript");
+        Mockito.when(ctx.getResource(path)).thenReturn(file.toURI().toURL());
+        return new TestableBootstrapServlet(ctx);
+    }
+
+    private static HttpServletResponse response(final ByteArrayOutputStream body) throws IOException {
+        final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        Mockito.when(response.getOutputStream()).thenReturn(new ServletOutputStream() {
+            @Override public boolean isReady() { return true; }
+            @Override public void setWriteListener(final WriteListener listener) {}
+            @Override public void write(final int b) { body.write(b); }
+        });
+        return response;
+    }
+
+    private static File tempFile(final String content) throws IOException {
+        final File f = File.createTempFile("pony", ".js");
+        f.deleteOnExit();
+        Files.writeString(f.toPath(), content);
+        return f;
+    }
+
+    @Test
+    public void contentHashedTerminalFilesAreCachedForAYear() throws IOException {
+        final String path = "/ponyterminal/18E9900BEF20543F36A9691E2645F505.cache.js";
+        final TestableBootstrapServlet servlet = servletServing(path, tempFile("terminal"));
+        final ByteArrayOutputStream body = new ByteArrayOutputStream();
+        final HttpServletResponse response = response(body);
+
+        servlet.handleRequest(request("", path), response, path);
+
+        Mockito.verify(response).setHeader("Cache-Control", "public, max-age=31536000, immutable");
+        assertEquals("terminal", body.toString());
+    }
+
+    @Test
+    public void otherFilesAreRevalidatedAgainstTheirModificationTime() throws IOException {
+        final String path = "/script/ponysdk.js";
+        final File file = tempFile("core");
+        assertTrue(file.setLastModified(1_760_000_000_789L)); // ms precision, as on most file systems
+        final TestableBootstrapServlet servlet = servletServing(path, file);
+        final ByteArrayOutputStream body = new ByteArrayOutputStream();
+        final HttpServletResponse response = response(body);
+        final HttpServletRequest request = request("", path);
+
+        servlet.handleRequest(request, response, path);
+
+        Mockito.verify(response).setHeader("Cache-Control", "no-cache");
+        assertEquals("core", body.toString());
+        // HttpServlet.service answers 304 when If-Modified-Since (one-second precision) is not older
+        assertEquals(1_760_000_000_000L, servlet.getLastModified(request));
+    }
+
+    @Test
+    public void theBootstrapPageIsNeverServedFromCache() throws IOException {
+        final ApplicationConfiguration config = Mockito.mock(ApplicationConfiguration.class);
+        Mockito.when(config.getApplicationName()).thenReturn("App");
+        final TestableBootstrapServlet servlet = servletWith(config);
+        final HttpServletResponse response = response(new ByteArrayOutputStream());
+        final HttpServletRequest request = request("", "/");
+
+        servlet.handleRequest(request, response, "/index.html");
+
+        Mockito.verify(response).setHeader("Cache-Control", "no-cache");
+        assertEquals("generated per request: no modification time", -1L, servlet.getLastModified(request));
     }
 }

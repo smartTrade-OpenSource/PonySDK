@@ -23,10 +23,13 @@
 
 package com.ponysdk.impl.main;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+
+import java.util.List;
 
 import org.eclipse.jetty.compression.brotli.BrotliCompression;
 import org.eclipse.jetty.compression.gzip.GzipCompression;
@@ -152,6 +155,9 @@ public class PonySDKServerTest {
         // CompressionHandler keys by the HTTP content-coding token (getEncodingName()).
         assertNotNull("gzip compression must be registered on the handler",
                 compression.removeCompression(new GzipCompression().getEncodingName()));
+        // Browsers list gzip first ("gzip, deflate, br, zstd"): without a server preference Jetty picks gzip
+        assertEquals("Brotli preferred when the browser accepts both", List.of("br", "gzip"),
+                config.getCompressPreferredEncodings());
     }
 
     @Test
