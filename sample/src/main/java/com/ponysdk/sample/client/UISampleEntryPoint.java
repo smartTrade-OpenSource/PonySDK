@@ -1384,17 +1384,27 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     private PFlowPanel buildPerfTab(final UIContext uiContext, final List<PScheduler.UIRunnable> schedulers) {
         final PFlowPanel p = section();
-        pageTitle(p, "Performance Monitor", "Live JVM & network metrics — updated every second.");
+        pageTitle(p, "Performance", "Live JVM and network metrics of this server and this session, sampled every "
+            + "second. The charts are plain PonySDK widgets: 60 bars whose heights are set from Java.");
         final Runtime rt = Runtime.getRuntime();
         final long maxMem = rt.maxMemory();
         final long startTime = System.currentTimeMillis();
 
-        p.add(sectionTitle("JVM Memory"));
+        p.add(sectionTitle("Last 60 seconds"));
+        final PFlowPanel charts = Element.newPFlowPanel();
+        charts.addStyleName("spark-grid");
+        final Sparkline heapChart = new Sparkline("Heap used", "MB", "%.0f");
+        final Sparkline wireChart = new Sparkline("Sent on the wire", "KB/s", "%.1f");
+        final Sparkline latChart = new Sparkline("Roundtrip latency", "ms", "%.0f");
+        charts.add(heapChart.card, wireChart.card, latChart.card);
+        p.add(charts);
+
+        p.add(sectionTitle("JVM"));
         final PFlowPanel heapGrid = Element.newPFlowPanel();
         heapGrid.addStyleName("perf-grid");
         final PElement heapVal = el("perf-value", "—");
         final PElement heapUnit = el("perf-unit", "MB used");
-        final PElement heapLbl = el("perf-label", "Heap Used");
+        final PElement heapLbl = el("perf-label", "Heap used");
         final PElement heapBarWrap = Element.newDiv(); heapBarWrap.addStyleName("perf-bar-wrap");
         final PElement heapBar = Element.newDiv(); heapBar.addStyleName("perf-bar"); heapBar.setAttribute("style", "width:0%");
         heapBarWrap.add(heapBar);
@@ -1402,11 +1412,11 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PFlowPanel heapCard = perfCard(heapVal, heapUnit, heapLbl, heapBarWrap, heapTrend);
         final PElement maxVal = el("perf-value", String.valueOf(maxMem / 1024 / 1024));
         final PElement maxUnit = el("perf-unit", "MB max");
-        final PElement maxLbl = el("perf-label", "Heap Max");
+        final PElement maxLbl = el("perf-label", "Heap max");
         final PFlowPanel maxCard = perfCard(maxVal, maxUnit, maxLbl);
         final PElement freeVal = el("perf-value", "—");
         final PElement freeUnit = el("perf-unit", "MB free");
-        final PElement freeLbl = el("perf-label", "Heap Free");
+        final PElement freeLbl = el("perf-label", "Heap free");
         final PFlowPanel freeCard = perfCard(freeVal, freeUnit, freeLbl);
         final PElement cpuVal = el("perf-value", String.valueOf(rt.availableProcessors()));
         final PElement cpuUnit = el("perf-unit", "cores");
@@ -1420,7 +1430,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         heapGrid.add(heapCard, maxCard, freeCard, cpuCard, uptimeCard);
         p.add(heapGrid);
 
-        p.add(sectionTitle("Network & Sessions"));
+        p.add(sectionTitle("Network and sessions"));
         final PFlowPanel netGrid = Element.newPFlowPanel();
         netGrid.addStyleName("perf-grid");
         final PElement sessVal = el("perf-value", "1");
@@ -1451,30 +1461,30 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         p.add(netGrid);
 
         // Dictionary section
-        p.add(sectionTitle("String Dictionary"));
+        p.add(sectionTitle("String dictionary"));
         final PFlowPanel dictGrid = Element.newPFlowPanel();
         dictGrid.addStyleName("perf-grid");
         final PElement dictSizeVal = el("perf-value", "—");
         final PElement dictSizeUnit = el("perf-unit", "entries");
-        final PElement dictSizeLbl = el("perf-label", "Dict Size");
+        final PElement dictSizeLbl = el("perf-label", "Entries");
         final PElement dictBarWrap = Element.newDiv(); dictBarWrap.addStyleName("perf-bar-wrap");
         final PElement dictBar = Element.newDiv(); dictBar.addStyleName("perf-bar"); dictBar.setAttribute("style", "width:0%");
         dictBarWrap.add(dictBar);
         final PFlowPanel dictSizeCard = perfCard(dictSizeVal, dictSizeUnit, dictSizeLbl, dictBarWrap);
         final PElement dictMaxVal = el("perf-value", "4096");
         final PElement dictMaxUnit = el("perf-unit", "max entries");
-        final PElement dictMaxLbl = el("perf-label", "Dict Capacity");
+        final PElement dictMaxLbl = el("perf-label", "Capacity");
         final PFlowPanel dictMaxCard = perfCard(dictMaxVal, dictMaxUnit, dictMaxLbl);
         final PElement dictHitVal = el("perf-value", "—");
         final PElement dictHitUnit = el("perf-unit", "% hit rate");
-        final PElement dictHitLbl = el("perf-label", "Dict Hit Rate");
+        final PElement dictHitLbl = el("perf-label", "Hit rate");
         final PFlowPanel dictHitCard = perfCard(dictHitVal, dictHitUnit, dictHitLbl);
 
         dictGrid.add(dictSizeCard, dictMaxCard, dictHitCard);
         p.add(dictGrid);
 
         // Highlight box
-        p.add(highlightBox("🚀", "Zero polling overhead",
+        p.add(highlightBox("", "Zero polling overhead",
             "PonySDK uses a persistent WebSocket connection. No HTTP polling, no REST calls. " +
             "Each UI update is a binary delta of a few bytes, often under 3 bytes on the wire once the " +
             "dictionary and permessage-deflate are warm: see Overview for a live measurement."));
@@ -1499,7 +1509,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
             final long upSec = (System.currentTimeMillis() - startTime) / 1000;
             uptimeVal.setInnerText(upSec < 60 ? String.valueOf(upSec) : (upSec / 60) + "m " + (upSec % 60) + "s");
-            uptimeUnit.setInnerText(upSec < 60 ? "SECONDS" : "UPTIME");
+            uptimeUnit.setInnerText(upSec < 60 ? "seconds" : "minutes, seconds");
 
             final double lat = uiContext.getRoundtripLatency();
             latVal.setInnerText(String.format("%.0f", lat));
@@ -1513,8 +1523,11 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             final long curRcv = uiContext.getWireBytesReceived();
             if (curSent >= 0 && prevSent[0] > 0) sentVal.setInnerText(String.format(java.util.Locale.ROOT, "%.1f", (curSent - prevSent[0]) / 1024.0));
             if (curRcv >= 0 && prevRcv[0] > 0) rcvVal.setInnerText(String.format(java.util.Locale.ROOT, "%.1f", (curRcv - prevRcv[0]) / 1024.0));
+            if (curSent >= 0 && prevSent[0] > 0) wireChart.push((curSent - prevSent[0]) / 1024.0);
             prevSent[0] = curSent;
             prevRcv[0] = curRcv;
+            heapChart.push(used);
+            latChart.push(lat);
 
             // Dictionary stats
             final com.ponysdk.core.server.application.StringDictionary dict = uiContext.getStringDictionary();
@@ -1537,6 +1550,57 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         }, Duration.ofSeconds(1)));
 
         return p;
+    }
+
+    /** A 60-sample bar chart: one div per sample, heights set from Java (coalesced style updates). */
+    private static final class Sparkline {
+        private static final int N = 60;
+        final PFlowPanel card = Element.newPFlowPanel();
+        private final PElement value = el("spark-value", "—");
+        private final PElement range = el("spark-range", "");
+        private final PElement[] bars = new PElement[N];
+        private final double[] samples = new double[N];
+        private final String unit;
+        private final String format;
+        private int count;
+
+        Sparkline(final String label, final String unit, final String format) {
+            this.unit = unit;
+            this.format = format;
+            card.addStyleName("spark-card");
+            final PFlowPanel head = Element.newPFlowPanel();
+            head.addStyleName("spark-head");
+            head.add(el("spark-label", label), value);
+            final PFlowPanel plot = Element.newPFlowPanel();
+            plot.addStyleName("spark-plot");
+            for (int i = 0; i < N; i++) {
+                bars[i] = el("spark-bar", "");
+                bars[i].setStyleProperty("height", "0%");
+                plot.add(bars[i]);
+            }
+            card.add(head, plot, range);
+        }
+
+        void push(final double v) {
+            System.arraycopy(samples, 1, samples, 0, N - 1);
+            samples[N - 1] = v;
+            count = Math.min(N, count + 1);
+            double max = 0, min = Double.MAX_VALUE, sum = 0;
+            for (int i = N - count; i < N; i++) {
+                max = Math.max(max, samples[i]);
+                min = Math.min(min, samples[i]);
+                sum += samples[i];
+            }
+            final double top = max > 0 ? max * 1.1 : 1;
+            for (int i = 0; i < N; i++) {
+                // whole percents: unchanged heights are not sent again
+                final int h = i < N - count ? 0 : (int) Math.max(2, Math.round(samples[i] * 100 / top));
+                bars[i].setStyleProperty("height", h + "%");
+            }
+            value.setInnerText(String.format(java.util.Locale.ROOT, format, v) + " " + unit);
+            range.setInnerText(String.format(java.util.Locale.ROOT, "min " + format + " · avg " + format + " · max " + format + " "
+                + unit, min, sum / count, max));
+        }
     }
 
     private static PElement el(final String cssClass, final String text) {

@@ -725,3 +725,14 @@ table.data-table, .cost-table {
 .dg-frame .gwt-TextBox { width: calc(100% - 6px); padding: 4px 6px; font-size: 12px; box-shadow: none; border-color: var(--border); }
 .dg-frame input[type=checkbox] { margin: 0 4px; }
 .dg-controls select, .dg-controls .gwt-ListBox { padding: 7px 10px; }
+
+/* Performance: 60-second charts */
+.spark-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+.spark-card { padding: 16px 18px 14px; background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow); }
+.spark-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
+.spark-label { font-size: 13px; font-weight: 500; color: var(--text-3); }
+.spark-value { font-size: 20px; font-weight: 650; color: var(--text); font-variant-numeric: tabular-nums; }
+.spark-plot { display: flex; align-items: flex-end; gap: 2px; height: 72px; padding-bottom: 1px; border-bottom: 1px solid var(--border); contain: strict; }
+.spark-bar { flex: 1; min-width: 2px; background: var(--accent-line); border-radius: 2px 2px 0 0; }
+.spark-bar:last-child { background: var(--accent); }
+.spark-range { font-size: 12px; color: var(--text-4); margin-top: 8px; font-variant-numeric: tabular-nums; }
