@@ -181,10 +181,11 @@ public abstract class PWidget extends PObject implements IsPWidget {
         super.enrichForUpdate(writer);
         if (!visible) writer.write(ServerToClientModel.WIDGET_VISIBLE, false);
         final Extras x0 = wx;
-        if (x0 != null && x0.styleName != null) writer.write(ServerToClientModel.STYLE_NAME, x0.styleName);
-        if (!styleNames.isEmpty()) {
-            writer.write(ServerToClientModel.ADD_STYLE_NAME, styleNames.join());
-        }
+        // STYLE_NAME replaces the element's default classes; the other names are added to it
+        final String styleName0 = x0 != null ? x0.styleName : null;
+        if (styleName0 != null) writer.write(ServerToClientModel.STYLE_NAME, styleName0);
+        final SetPool<String>.ImmutableSet others = styleName0 != null ? styleNames.getRemove(styleName0) : styleNames;
+        if (!others.isEmpty()) writer.write(ServerToClientModel.ADD_STYLE_NAME, others.join());
         if (this.title != null) writer.write(ServerToClientModel.WIDGET_TITLE, this.title);
         if (x0 != null && x0.height != null) writer.write(ServerToClientModel.WIDGET_HEIGHT, x0.height);
         if (x0 != null && x0.width != null) writer.write(ServerToClientModel.WIDGET_WIDTH, x0.width);
@@ -306,12 +307,18 @@ public abstract class PWidget extends PObject implements IsPWidget {
         return wx != null ? wx.styleName : null;
     }
 
+    /**
+     * Replaces all the style names of the widget by this one (an empty or null name removes them all), like
+     * {@code element.className = styleName}. Use {@link #addStyleName} / {@link #removeStyleName} to change one.
+     */
     public void setStyleName(final String styleName) {
-        if (Objects.equals(getStyleName(), styleName)) return;
-        if (styleName != null && !styleName.isEmpty() && doAddStyleName(styleName) && initialized) {
-            wx().styleName = styleName;
-            saveUpdate(ServerToClientModel.STYLE_NAME, styleName);
-        }
+        final String name = styleName != null ? styleName : "";
+        if (name.equals(getStyleName()) && styleNames.size() == (name.isEmpty() ? 0 : 1)) return;
+        // The whole class list is replaced: a name set before must not linger in the set (it did, and setting it
+        // again later was then silently dropped - the browser kept the previous class)
+        styleNames = name.isEmpty() ? styleNamesSetPool.emptyImmutableSet() : styleNamesSetPool.emptyImmutableSet().getAdd(name);
+        wx().styleName = name;
+        if (initialized) saveUpdate(ServerToClientModel.STYLE_NAME, name); // before: written by the create block
     }
 
     public String getDebugID() {

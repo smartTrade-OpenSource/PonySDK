@@ -371,4 +371,42 @@ public class UpdateCoalescingTest {
         });
         assertEquals(2, wire.blocks.size());
     }
+
+    @Test
+    public void setStyleNameReplacesTheClassListAndCanReturnToAPreviousName() {
+        final PLabel l = label("0");
+        for (final String name : new String[] {"up", "down", "up"}) {
+            ctx.execute(() -> l.setStyleName(name));
+            assertEquals(List.of(List.of("TYPE_UPDATE=" + l.getID(), "STYLE_NAME=" + name)), wire.blocks);
+            wire.clear();
+        }
+        assertTrue(l.hasStyleName("up"));
+        assertFalse("replaced, not accumulated", l.hasStyleName("down"));
+    }
+
+    @Test
+    public void onlyTheLastStyleNameOfATransactionIsSent() {
+        final PLabel l = label("0");
+        ctx.execute(() -> {
+            l.setStyleName("a");
+            l.setText("t");
+            l.setStyleName("b");
+        });
+        assertEquals(List.of(List.of("TYPE_UPDATE=" + l.getID(), "TEXT=t", "STYLE_NAME=b")), wire.blocks);
+    }
+
+    @Test
+    public void styleNameSetBeforeAttachIsSentOnceInTheCreateBlock() {
+        final PLabel[] l = new PLabel[1];
+        ctx.execute(() -> {
+            l[0] = Element.newPLabel("x");
+            l[0].addStyleName("extra");
+            l[0].setStyleName("main");
+            l[0].addStyleName("second");
+            root.add(l[0]);
+        });
+        assertEquals(1, wire.count("STYLE_NAME=main"));
+        assertEquals(1, wire.count("ADD_STYLE_NAME=second"));
+        assertEquals("the earlier name is replaced", 0, wire.count("ADD_STYLE_NAME=extra"));
+    }
 }

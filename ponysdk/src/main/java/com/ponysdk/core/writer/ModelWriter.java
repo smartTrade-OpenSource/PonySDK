@@ -54,6 +54,7 @@ public class ModelWriter {
     static {
         for (final ServerToClientModel m : new ServerToClientModel[] { ServerToClientModel.TEXT, ServerToClientModel.HTML,
                 ServerToClientModel.WIDGET_TITLE, ServerToClientModel.WIDGET_WIDTH, ServerToClientModel.WIDGET_HEIGHT,
+                ServerToClientModel.STYLE_NAME,
                 ServerToClientModel.PUT_STYLE_KEY, ServerToClientModel.PUT_ATTRIBUTE_KEY, ServerToClientModel.PUT_PROPERTY_KEY }) {
             COALESCIBLE[m.ordinal()] = true;
         }
