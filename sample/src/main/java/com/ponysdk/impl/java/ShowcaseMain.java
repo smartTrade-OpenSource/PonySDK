@@ -20,6 +20,11 @@ public class ShowcaseMain {
         configuration.setApplicationID("showcase");
         configuration.setApplicationName("PonySDK Showcase");
         configuration.setApplicationDescription("PonySDK widget showcase");
+        // Mobile: render at device width (the showcase stylesheet has a narrow layout); browser chrome colour
+        configuration.setMeta(new java.util.LinkedHashSet<>(java.util.List.of(
+            "name=\"viewport\" content=\"width=device-width, initial-scale=1\"",
+            "name=\"theme-color\" content=\"#ffffff\"",
+            "name=\"description\" content=\"PonySDK: real-time web UIs written only in Java\"")));
         configuration.setApplicationContextName("sample");
         configuration.setSessionTimeout(60);
         configuration.setReconnectionTimeoutMs(10_000); // 10s transparent reconnect window

@@ -156,6 +156,12 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         uiContext.setTerminalDataReceiver((object, instruction) -> log.debug("{} : {}", object, instruction));
 
         // Styles: css/showcase.css (declared in ShowcaseMain / server_application.xml)
+        // Favicon: the "P" monogram of the top bar, inline SVG (no extra request)
+        PScript.execute(PWindow.getMain(), "var l=document.createElement('link');l.rel='icon';l.type='image/svg+xml';"
+            + "l.href='data:image/svg+xml,'+encodeURIComponent('<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 32 32\">"
+            + "<rect width=\"32\" height=\"32\" rx=\"8\" fill=\"#0f172a\"/><text x=\"16\" y=\"22\" font-family=\"Arial\" "
+            + "font-size=\"17\" font-weight=\"700\" fill=\"#fff\" text-anchor=\"middle\">P</text></svg>');"
+            + "document.head.appendChild(l);");
 
         // Header
         final PFlowPanel header = Element.newPFlowPanel();

@@ -30,6 +30,12 @@ http://www.springframework.org/schema/task http://www.springframework.org/schema
                     <value>script/flexlayout-addon.js</value>
                 </list>
             </property>
+            <property name="meta">
+                <set>
+                    <value>name="viewport" content="width=device-width, initial-scale=1"</value>
+                    <value>name="theme-color" content="#ffffff"</value>
+                </set>
+            </property>
             <property name="style">
                 <map>
                     <entry key="ponysdk" value="style/ponysdk.css" />

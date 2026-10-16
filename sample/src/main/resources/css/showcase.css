@@ -72,6 +72,7 @@ a:hover { text-decoration: underline; }
 
 .pony-logo-wrap { display: flex; align-items: center; gap: 10px; min-width: 212px; }
 .pony-logo-icon {
+    flex-shrink: 0;
     width: 28px;
     height: 28px;
     border-radius: 7px;
@@ -736,6 +737,13 @@ div.selected-row { background-color: #e0e7ff !important; }
     .ov-hero { grid-template-columns: 1fr; gap: 24px; }
     .ov-h1 { font-size: 32px; }
     .pony-row { flex-wrap: wrap; }
+    .pony-header { padding: 0 14px; gap: 12px; }
+    .pony-logo-icon { flex-shrink: 0; }
+    .pony-subtitle { display: none; }
+    .pony-hstat { white-space: nowrap; }
+    .pony-ex-head { flex-wrap: wrap; }
+    .pony-ex-seg { margin-left: 0; }
+    .ov-hero-code .code-body { font-size: 11px; }
     .pony-label { min-width: 0; width: 100%; }
 }
 .gwt-ListBox[multiple] { min-width: 150px; min-height: 96px; }
@@ -756,3 +764,7 @@ div.selected-row { background-color: #e0e7ff !important; }
 .spark-bar { flex: 1; min-width: 2px; background: var(--accent-line); border-radius: 2px 2px 0 0; }
 .spark-bar:last-child { background: var(--accent); }
 .spark-range { font-size: 12px; color: var(--text-4); margin-top: 8px; font-variant-numeric: tabular-nums; }
+.gwt-DatePicker .datePickerPreviousButton, .gwt-DatePicker .datePickerNextButton, .gwt-DatePicker .html-face {
+    color: var(--text-3) !important; cursor: pointer; padding: 0 6px; border-radius: 6px;
+}
+.gwt-DatePicker .datePickerPreviousButton:hover, .gwt-DatePicker .datePickerNextButton:hover { color: var(--accent) !important; background: var(--bg-muted) !important; }
