@@ -2291,8 +2291,11 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     private static PWidget buildRichText() {
         final PFlowPanel p = Element.newPFlowPanel();
         final PRichTextArea rta = Element.newPRichTextArea();
-        p.add(Element.newPRichTextToolbar(rta));
+        // the toolbar links to the area: the area is created first, the toolbar is still shown above it
+        p.setStyleProperty("display", "flex");
+        p.setStyleProperty("flex-direction", "column-reverse");
         p.add(rta);
+        p.add(Element.newPRichTextToolbar(rta));
         return p;
     }
 

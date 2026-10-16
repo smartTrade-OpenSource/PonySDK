@@ -276,6 +276,18 @@ task gwtc(type: JavaExec) {
     ]
 }
 
+// Server write-path bench (protocol / wire bytes, CPU, allocations, heap): ./gradlew :ponysdk:bench [-Pbench.args=v1]
+tasks.register('bench', JavaExec) {
+    group = 'verification'
+    description = 'Runs the protocol bench (ProtocolBench) on the real write path'
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.ponysdk.core.server.websocket.ProtocolBench'
+    jvmArgs '-Xmx2g', '-XX:+UseParallelGC', '-Dorg.slf4j.simpleLogger.defaultLogLevel=warn'
+    if (project.hasProperty('bench.args')) args project.property('bench.args').toString().split(' ')
+    if (project.hasProperty('bench.jvm')) jvmArgs project.property('bench.jvm').toString().split(' ')
+    ['bench.stats', 'bench.debug', 'bench.histo'].each { k -> if (project.hasProperty(k)) systemProperty k, 'true' }
+}
+
 test {
     classpath = files(resourcesCoreTest, gwtOutputDirName) + classpath
     // Brotli compression tests load a native lib (brotli4j); JDK 24+ (JEP 472) warns on native access
