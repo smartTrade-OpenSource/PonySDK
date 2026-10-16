@@ -43,6 +43,7 @@ public class FlexLayoutDemoEntryPoint implements EntryPoint {
 
         // Toolbar with drag sources
         final PFlowPanel toolbar = Element.newPFlowPanel();
+        toolbar.addStyleName("fl-demo-toolbar"); // the embedding page may restyle it
         toolbar.setStyleProperty("display", "flex");
         toolbar.setStyleProperty("align-items", "center");
         toolbar.setStyleProperty("gap", "8px");
@@ -152,6 +153,10 @@ public class FlexLayoutDemoEntryPoint implements EntryPoint {
 
         // Theme selector handler
         themeSelector.addChangeHandler(event -> flexLayout.setTheme((String) themeSelector.getSelectedValue()));
+        if (!fullViewport) { // embedded in the (light) showcase: start with the light theme
+            flexLayout.setTheme("fl-theme-light");
+            themeSelector.setSelectedIndex(1);
+        }
 
         // Shared state for interactive widgets (simulates persistence)
         final java.util.Map<String, int[]> counterStates = new java.util.concurrent.ConcurrentHashMap<>();

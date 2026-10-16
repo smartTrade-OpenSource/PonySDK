@@ -152,9 +152,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     public void start(final UIContext uiContext) {
         uiContext.setTerminalDataReceiver((object, instruction) -> log.debug("{} : {}", object, instruction));
 
-        // Inject global styles
-        PScript.execute(PWindow.getMain(), buildGlobalStyles());
-        PScript.execute(PWindow.getMain(), buildModernTheme());
+        // Styles: css/showcase.css (declared in ShowcaseMain / server_application.xml)
 
         // Header
         final PFlowPanel header = Element.newPFlowPanel();
@@ -164,7 +162,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         logoWrap.addStyleName("pony-logo-wrap");
         final PElement logoIcon = Element.newDiv();
         logoIcon.addStyleName("pony-logo-icon");
-        logoIcon.setInnerText("🐴");
+        logoIcon.setInnerText("P");
         final PElement logoText = Element.newDiv();
         logoText.addStyleName("pony-logo-text");
         final PElement logoName = Element.newDiv();
@@ -172,21 +170,24 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         logoName.setInnerText("PonySDK");
         final PElement logoSub = Element.newDiv();
         logoSub.addStyleName("pony-subtitle");
-        logoSub.setInnerText("WIDGET SHOWCASE");
+        logoSub.setInnerText("Showcase");
         logoText.add(logoName, logoSub);
         logoWrap.add(logoIcon, logoText);
 
         final PElement divider = Element.newDiv();
         divider.addStyleName("pony-divider");
+        // Where we are: "Group / Page", updated by the navigation
+        final PElement crumb = Element.newDiv();
+        crumb.addStyleName("pony-crumb");
 
         // Header live stats
         final PFlowPanel hstats = Element.newPFlowPanel();
         hstats.addStyleName("pony-header-stats");
         final PElement latHVal = Element.newDiv(); latHVal.addStyleName("pony-hstat-val"); latHVal.setInnerText("—");
-        final PElement latHLbl = Element.newDiv(); latHLbl.addStyleName("pony-hstat-lbl"); latHLbl.setInnerText("Latency ms");
+        final PElement latHLbl = Element.newDiv(); latHLbl.addStyleName("pony-hstat-lbl"); latHLbl.setInnerText("Latency");
         final PFlowPanel latHCard = Element.newPFlowPanel(); latHCard.addStyleName("pony-hstat"); latHCard.add(latHVal, latHLbl);
         final PElement heapHVal = Element.newDiv(); heapHVal.addStyleName("pony-hstat-val"); heapHVal.setInnerText("—");
-        final PElement heapHLbl = Element.newDiv(); heapHLbl.addStyleName("pony-hstat-lbl"); heapHLbl.setInnerText("Heap MB");
+        final PElement heapHLbl = Element.newDiv(); heapHLbl.addStyleName("pony-hstat-lbl"); heapHLbl.setInnerText("Heap");
         final PFlowPanel heapHCard = Element.newPFlowPanel(); heapHCard.addStyleName("pony-hstat"); heapHCard.add(heapHVal, heapHLbl);
         final PElement sessHVal = Element.newDiv(); sessHVal.addStyleName("pony-hstat-val"); sessHVal.setInnerText("1");
         final PElement sessHLbl = Element.newDiv(); sessHLbl.addStyleName("pony-hstat-lbl"); sessHLbl.setInnerText("Sessions");
@@ -195,16 +196,16 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
         final PElement badge = Element.newDiv();
         badge.addStyleName("pony-badge");
-        badge.setInnerText("● LIVE");
+        badge.setInnerText("Live");
 
-        header.add(logoWrap, divider, hstats, badge);
+        header.add(logoWrap, divider, crumb, hstats, badge);
         PWindow.getMain().add(header);
 
         // Refresh header stats every second
         final Runtime rt0 = Runtime.getRuntime();
         PScheduler.scheduleAtFixedRate(() -> {
-            latHVal.setInnerText(String.format("%.0f", uiContext.getRoundtripLatency()));
-            heapHVal.setInnerText(String.valueOf((rt0.totalMemory() - rt0.freeMemory()) / 1024 / 1024));
+            latHVal.setInnerText(String.format("%.0f ms", uiContext.getRoundtripLatency()));
+            heapHVal.setInnerText((rt0.totalMemory() - rt0.freeMemory()) / 1024 / 1024 + " MB");
             final PonySDKMetrics m = uiContext.getMetrics();
             if (m != null) sessHVal.setInnerText(String.valueOf(m.getActiveContexts()));
         }, Duration.ofSeconds(1));
@@ -244,6 +245,12 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final int tabCount = tabs.length;
         final PButton[] tabButtons = new PButton[tabCount];
         final int[] activeTab = { 0 };
+        final java.util.function.IntConsumer showCrumb = k -> {
+            int g = 0;
+            while (g + 1 < groupStarts.length && groupStarts[g + 1] <= k) g++;
+            crumb.setInnerHTML(groupLabels[g] + " &nbsp;/&nbsp; <b>" + tabs[k][1] + "</b>");
+        };
+        showCrumb.accept(0);
 
         int group = 0;
         for (int i = 0; i < tabCount; i++) {
@@ -255,7 +262,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
                 group++;
             }
             final int idx = i;
-            final PButton tab = Element.newPButton(tabs[i][0] + "  " + tabs[i][1]);
+            final PButton tab = Element.newPButton(tabs[i][1]);
             tab.addStyleName("pony-tab");
             if (i == 0) tab.addStyleName("pony-tab-active");
             tabButtons[i] = tab;
@@ -270,6 +277,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
                 tabButtons[activeTab[0]].removeStyleName("pony-tab-active");
                 tabButtons[idx].addStyleName("pony-tab-active");
                 activeTab[0] = idx;
+                showCrumb.accept(idx);
             });
             nav.add(tab);
         }
@@ -279,7 +287,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         navFooter.addStyleName("pony-nav-footer");
         final PElement version = Element.newDiv();
         version.addStyleName("pony-version");
-        version.setInnerText("PonySDK v3.0 · Java " + System.getProperty("java.version").split("\\.")[0]);
+        version.setInnerText("PonySDK 3.0 · Java " + System.getProperty("java.version").split("\\.")[0]);
         navFooter.add(version);
         nav.add(navFooter);
 
@@ -315,11 +323,12 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         box.setAttribute("style", "max-width:1040px");
 
         final PElement title = Element.newDiv();
-        title.setAttribute("style", "font-size:20px;font-weight:800;margin-bottom:6px;color:var(--text,#f0f4ff)");
-        title.setInnerText("Binary PAddOn protocol — live signals console");
+        title.addStyleName("pony-page-title");
+        title.setInnerText("Binary protocol — live signal console");
 
         final PElement sub = Element.newDiv();
-        sub.setAttribute("style", "color:var(--text2,#8892a4);margin-bottom:18px;line-height:1.6;max-width:840px");
+        sub.addStyleName("pony-page-desc");
+        sub.setAttribute("style", "margin-bottom:24px");
         sub.setInnerText("Server-driven end to end: the controls below are PonySDK widgets whose handlers run in Java; "
             + "the server computes the signals and streams them as typed double arrays in pure binary, and the browser "
             + "only renders. Push series and resolution up to stream tens of thousands of typed values per frame "
@@ -327,7 +336,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
         // The chart is configured entirely through pure-binary typed creation args:
         // color (String), maxPoints (int), lineWidth (double), fill (boolean), seed (long)
-        final BinaryArgsAddOn addon = new BinaryArgsAddOn("#43e8b0", 1024, 2.0, false, 1_234_567_890_123L);
+        final BinaryArgsAddOn addon = new BinaryArgsAddOn("#4f46e5", 1024, 2.0, false, 1_234_567_890_123L);
         addon.asWidget().setAttribute("style", "display:block;margin-top:4px");
 
         // Stream state owned by the server
@@ -338,14 +347,14 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
         // Controls — PonySDK widgets; every click handler runs server-side
         final PFlowPanel controls = Element.newPFlowPanel();
-        controls.setAttribute("style", "display:flex;gap:28px;flex-wrap:wrap;align-items:flex-end;margin-bottom:18px;"
-            + "background:rgba(255,255,255,.018);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:16px 20px");
+        controls.addStyleName("ov-controls");
+        controls.setAttribute("style", "align-items:flex-end");
 
-        final PButton toggle = Element.newPButton("⏸  Pause");
+        final PButton toggle = Element.newPButton("Pause");
         styleBinaryCtrl(toggle, true);
         toggle.addClickHandler(e -> {
             playing[0] = !playing[0];
-            toggle.setText(playing[0] ? "⏸  Pause" : "▶  Resume");
+            toggle.setText(playing[0] ? "Pause" : "Resume");
             styleBinaryCtrl(toggle, playing[0]);
         });
         final PFlowPanel toggleRow = Element.newPFlowPanel();
@@ -423,8 +432,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     private static PFlowPanel binaryCtrlGroup(final String label, final PFlowPanel content) {
         final PFlowPanel group = Element.newPFlowPanel();
         final PElement caption = Element.newDiv();
-        caption.setAttribute("style",
-            "font-size:10px;color:#5a6b85;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px");
+        caption.setAttribute("style", "font-size:12px;font-weight:500;color:var(--text-3);margin-bottom:6px");
         caption.setInnerText(label);
         group.add(caption);
         group.add(content);
@@ -432,382 +440,9 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     }
 
     private static void styleBinaryCtrl(final PButton button, final boolean active) {
-        // Monochrome button theme: mark the selected control with the accent via outline (box-shadow is
-        // forced to none by the theme) + full opacity; dim the rest. Colour = meaning (selection), not decoration.
-        button.setAttribute("style", "margin-right:8px;font-variant-numeric:tabular-nums;transition:opacity .15s;"
-            + (active
-                ? "opacity:1;outline:1px solid var(--accent2,#43e8b0);outline-offset:-1px;"
-                : "opacity:.45;"));
-    }
-
-    private static String buildGlobalStyles() {
-        return "var s = document.createElement('style'); s.textContent = `" +
-            // Variables
-            ":root{" +
-            "--accent:#7c6fff;--accent2:#43e8b0;--accent3:#f59e0b;--danger:#f87171;" +
-            "--bg:#080b14;--surface:#0e1220;--surface2:#131929;--surface3:#1a2235;--surface4:#1f2a40;" +
-            "--text:#f0f4ff;--text2:#8892a4;--text3:#4a5568;" +
-            "--border:#1e2d45;--border2:#253550;" +
-            "--radius:10px;--radius2:16px;" +
-            "--shadow:0 4px 24px rgba(0,0,0,.5);--shadow2:0 8px 40px rgba(0,0,0,.6);" +
-            "--glow:0 0 20px rgba(124,111,255,.3);--glow2:0 0 30px rgba(67,232,176,.2);" +
-            "}" +
-            "*{box-sizing:border-box;margin:0;padding:0;}" +
-            "body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}" +
-
-            // Scrollbar
-            "::-webkit-scrollbar{width:5px;height:5px;}" +
-            "::-webkit-scrollbar-track{background:var(--surface);}" +
-            "::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}" +
-            "::-webkit-scrollbar-thumb:hover{background:var(--accent);}" +
-
-            // Header
-            ".pony-header{" +
-            "background:linear-gradient(135deg,rgba(14,18,32,.98) 0%,rgba(19,25,41,.98) 100%);" +
-            "padding:0 32px;height:64px;display:flex;align-items:center;gap:24px;" +
-            "border-bottom:1px solid var(--border);position:sticky;top:0;z-index:200;" +
-            "backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);" +
-            "box-shadow:0 1px 0 var(--border),0 4px 32px rgba(0,0,0,.4);}" +
-            ".pony-logo-wrap{display:flex;align-items:center;gap:12px;}" +
-            ".pony-logo-icon{font-size:28px;filter:drop-shadow(0 0 8px rgba(124,111,255,.6));}" +
-            ".pony-logo-text{display:flex;flex-direction:column;}" +
-            ".pony-logo{font-size:18px;font-weight:800;letter-spacing:-.5px;" +
-            "background:linear-gradient(90deg,#a78bfa,var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}" +
-            ".pony-subtitle{font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:1px;}" +
-            ".pony-divider{width:1px;height:32px;background:var(--border);}" +
-            ".pony-header-stats{display:flex;gap:24px;}" +
-            ".pony-hstat{display:flex;flex-direction:column;align-items:center;}" +
-            ".pony-hstat-val{font-size:15px;font-weight:700;color:var(--accent2);line-height:1;}" +
-            ".pony-hstat-lbl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-top:2px;}" +
-            ".pony-badge{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;" +
-            "font-size:9px;font-weight:800;padding:3px 10px;border-radius:20px;letter-spacing:1px;margin-left:auto;" +
-            "box-shadow:var(--glow);animation:pulse 2s infinite;}" +
-            "@keyframes pulse{0%,100%{box-shadow:0 0 8px rgba(124,111,255,.4);}50%{box-shadow:0 0 20px rgba(124,111,255,.8);}}" +
-
-            // Shell
-            ".pony-shell{display:flex;min-height:calc(100vh - 64px);}" +
-
-            // Sidebar
-            ".pony-nav{width:220px;min-width:220px;background:var(--surface);" +
-            "border-right:1px solid var(--border);padding:20px 12px;" +
-            "display:flex;flex-direction:column;gap:2px;" +
-            "position:sticky;top:64px;height:calc(100vh - 64px);overflow-y:auto;}" +
-            ".pony-nav-group{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;" +
-            "color:var(--text3);padding:16px 12px 6px;}" +
-            ".pony-tab{width:100%;text-align:left;padding:9px 12px;cursor:pointer;border-radius:8px;" +
-            "font-size:13px;font-weight:500;color:var(--text2);border:none;background:transparent;" +
-            "transition:all .15s ease;user-select:none;outline:none;display:flex;align-items:center;gap:10px;}" +
-            ".pony-tab:hover{background:rgba(124,111,255,.1);color:var(--text);transform:translateX(2px);}" +
-            ".pony-tab-active{background:linear-gradient(135deg,rgba(124,111,255,.2),rgba(67,232,176,.08));" +
-            "color:var(--text);font-weight:600;box-shadow:inset 0 0 0 1px rgba(124,111,255,.3);" +
-            "text-shadow:0 0 20px rgba(124,111,255,.5);}" +
-            ".pony-tab-icon{font-size:15px;width:22px;text-align:center;opacity:.8;}" +
-            ".pony-nav-footer{margin-top:auto;padding:16px 12px;border-top:1px solid var(--border);}" +
-            ".pony-version{font-size:10px;color:var(--text3);text-align:center;}" +
-
-            // Content
-            ".pony-content{flex:1;padding:32px 40px;overflow-y:auto;max-width:1200px;}" +
-
-            // Page title
-            ".pony-page-title{font-size:22px;font-weight:700;color:var(--text);margin-bottom:4px;}" +
-            ".pony-page-desc{font-size:13px;color:var(--text2);margin-bottom:28px;line-height:1.5;}" +
-
-            // Section title
-            ".pony-section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;" +
-            "color:var(--accent);margin:28px 0 10px;padding-bottom:8px;" +
-            "border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}" +
-            ".pony-section-title::before{content:'';display:inline-block;width:3px;height:11px;" +
-            "background:linear-gradient(var(--accent),var(--accent2));border-radius:2px;flex-shrink:0;}" +
-
-            // Widget rows
-            ".pony-row{display:flex;align-items:center;gap:16px;padding:11px 16px;margin:3px 0;" +
-            "background:var(--surface2);border-radius:var(--radius);border:1px solid var(--border);" +
-            "transition:all .15s;}" +
-            ".pony-row:hover{border-color:rgba(124,111,255,.35);background:var(--surface3);}" +
-            ".pony-label{min-width:230px;font-size:12px;color:var(--text2);font-weight:500;letter-spacing:.2px;}" +
-
-            // GWT overrides
-            ".gwt-Button{background:linear-gradient(135deg,var(--accent),#9b8fff)!important;color:#fff!important;border:none!important;" +
-            "padding:7px 18px!important;border-radius:7px!important;font-size:12px!important;font-weight:600!important;" +
-            "cursor:pointer!important;transition:all .15s!important;letter-spacing:.3px!important;}" +
-            ".gwt-Button:hover{opacity:.88!important;transform:translateY(-1px)!important;box-shadow:0 4px 12px rgba(124,111,255,.4)!important;}" +
-            ".gwt-TextBox,.gwt-TextArea,.gwt-PasswordTextBox{background:var(--surface3)!important;color:var(--text)!important;" +
-            "border:1px solid var(--border2)!important;border-radius:7px!important;padding:7px 11px!important;" +
-            "font-size:13px!important;outline:none!important;transition:border-color .15s!important;}" +
-            ".gwt-TextBox:focus,.gwt-TextArea:focus,.gwt-PasswordTextBox:focus{border-color:var(--accent)!important;box-shadow:0 0 0 3px rgba(124,111,255,.15)!important;}" +
-            ".gwt-CheckBox label,.gwt-RadioButton label{color:var(--text)!important;font-size:13px!important;}" +
-            ".gwt-ListBox{background:var(--surface3)!important;color:var(--text)!important;border:1px solid var(--border2)!important;border-radius:7px!important;padding:5px 9px!important;}" +
-            ".gwt-MenuBar{background:var(--surface3)!important;border:1px solid var(--border)!important;border-radius:7px!important;}" +
-            ".gwt-MenuBar .gwt-MenuItem{color:var(--text)!important;padding:6px 14px!important;font-size:13px!important;}" +
-            ".gwt-MenuBar .gwt-MenuItem-selected{background:var(--accent)!important;border-radius:5px!important;}" +
-
-            // Perf tab
-            ".perf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-bottom:24px;}" +
-            ".perf-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius2);" +
-            "padding:22px 18px;text-align:center;transition:all .2s;position:relative;overflow:hidden;}" +
-            ".perf-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;" +
-            "background:linear-gradient(90deg,var(--accent),var(--accent2));opacity:0;transition:opacity .2s;}" +
-            ".perf-card:hover{border-color:rgba(124,111,255,.4);transform:translateY(-2px);box-shadow:var(--glow);}" +
-            ".perf-card:hover::before{opacity:1;}" +
-            ".perf-icon{font-size:22px;margin-bottom:10px;opacity:.8;}" +
-            ".perf-value{font-size:30px;font-weight:800;line-height:1;" +
-            "background:linear-gradient(135deg,#a78bfa,var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}" +
-            ".perf-unit{font-size:10px;color:var(--text3);margin-top:3px;letter-spacing:.5px;}" +
-            ".perf-label{font-size:11px;color:var(--text2);margin-top:10px;font-weight:600;letter-spacing:.3px;}" +
-            ".perf-bar-wrap{background:var(--surface3);border-radius:4px;height:4px;margin-top:12px;overflow:hidden;}" +
-            ".perf-bar{height:4px;border-radius:4px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .8s cubic-bezier(.4,0,.2,1);}" +
-            ".perf-trend{font-size:10px;margin-top:6px;}" +
-            ".perf-up{color:var(--accent2);}" +
-            ".perf-down{color:var(--danger);}" +
-
-            // Sparkline canvas
-            ".perf-spark{width:100%;height:40px;margin-top:8px;opacity:.7;}" +
-
-            // Code tab
-            ".code-snippet{background:#0a0e1a;border:1px solid var(--border);border-radius:var(--radius2);margin:8px 0 20px;overflow:hidden;box-shadow:var(--shadow);}" +
-            ".code-header{background:var(--surface2);padding:10px 16px;font-size:11px;color:var(--text2);" +
-            "display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);}" +
-            ".code-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;}" +
-            ".code-title{flex:1;text-align:center;font-weight:600;letter-spacing:.3px;}" +
-            ".code-lang{background:rgba(124,111,255,.2);color:var(--accent);font-size:9px;font-weight:700;" +
-            "padding:2px 8px;border-radius:4px;letter-spacing:.5px;}" +
-            ".code-body{padding:20px 24px;font-family:'JetBrains Mono','Fira Code','Cascadia Code',monospace;" +
-            "font-size:12.5px;line-height:1.75;color:#cdd9e5;white-space:pre;overflow-x:auto;counter-reset:line;}" +
-            ".code-line{display:block;counter-increment:line;}" +
-            ".code-line::before{content:counter(line);display:inline-block;width:28px;color:var(--text3);" +
-            "font-size:10px;text-align:right;margin-right:20px;user-select:none;}" +
-            ".code-kw{color:#f47067;}" +
-            ".code-type{color:#6cb6ff;}" +
-            ".code-str{color:#96d0ff;}" +
-            ".code-comment{color:#636e7b;font-style:italic;}" +
-            ".code-method{color:#dcbdfb;}" +
-            ".code-num{color:#f69d50;}" +
-            ".code-ann{color:#6cb6ff;opacity:.7;}" +
-
-            // Highlight box
-            ".highlight-box{background:linear-gradient(135deg,rgba(124,111,255,.08),rgba(67,232,176,.05));" +
-            "border:1px solid rgba(124,111,255,.2);border-radius:var(--radius2);padding:20px 24px;margin:16px 0;" +
-            "display:flex;align-items:flex-start;gap:16px;}" +
-            ".highlight-icon{font-size:24px;flex-shrink:0;margin-top:2px;}" +
-            ".highlight-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;}" +
-            ".highlight-desc{font-size:12px;color:var(--text2);line-height:1.6;}" +
-            "` ; document.head.appendChild(s);";
-    }
-
-    /** Appended on top of {@link #buildGlobalStyles()} — a restrained, modern (Geist/Linear) layer. */
-    private static String buildModernTheme() {
-        return "var s=document.createElement('style');s.textContent=`"
-            // Blueprint grid background (Vercel/Geist): subtle, technical, no decoration
-            + "body{background-color:#08090c !important;"
-            +   "background-image:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),"
-            +   "linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px) !important;"
-            +   "background-size:32px 32px !important;background-position:-1px -1px !important;background-attachment:fixed !important;}"
-            // Header: hairline divider, no glow
-            + ".pony-header{box-shadow:none !important;border-bottom:1px solid rgba(255,255,255,.07) !important;}"
-            // Titles: clean near-white, tight tracking (no gradient text)
-            + ".pony-page-title{color:#fafafa !important;-webkit-text-fill-color:#fafafa !important;"
-            +   "letter-spacing:-.02em !important;font-weight:700 !important;}"
-            + ".pony-page-desc{color:#8b8b94 !important;}"
-            // Content rows: flat, neutral, hairline border — readable in grayscale
-            + ".pony-row{background:rgba(255,255,255,.018) !important;border:1px solid rgba(255,255,255,.06) !important;"
-            +   "backdrop-filter:none !important;-webkit-backdrop-filter:none !important;"
-            +   "transition:background .15s,border-color .15s !important;}"
-            + ".pony-row:hover{background:rgba(255,255,255,.032) !important;border-color:rgba(255,255,255,.13) !important;"
-            +   "transform:none !important;box-shadow:none !important;}"
-            // Buttons: clean monochrome (colour is reserved for meaning, not every button)
-            + ".gwt-Button{background:#16171b !important;border:1px solid rgba(255,255,255,.12) !important;"
-            +   "color:#fafafa !important;box-shadow:none !important;font-weight:500 !important;letter-spacing:0 !important;}"
-            + ".gwt-Button:hover{background:#1c1d22 !important;border-color:rgba(255,255,255,.22) !important;"
-            +   "opacity:1 !important;transform:none !important;}"
-            + ".gwt-Button:active{background:#0f1013 !important;transform:none !important;}"
-            // Sidebar (after .gwt-Button so nav items win): flat, a single accent on the active item
-            + ".pony-tab{background:transparent !important;color:#8b8b94 !important;box-shadow:none !important;"
-            +   "border:1px solid transparent !important;font-weight:500 !important;transition:background .14s,color .14s !important;}"
-            + ".pony-tab:hover{background:rgba(255,255,255,.05) !important;color:#fafafa !important;transform:none !important;}"
-            + ".pony-tab-active{background:rgba(255,255,255,.07) !important;color:#fafafa !important;"
-            +   "border-color:transparent !important;box-shadow:inset 2px 0 0 var(--accent2,#43e8b0) !important;}"
-            // Interactive example cards: a live widget + the exact Java behind it (Preview / Code)
-            + ".pony-ex{background:rgba(255,255,255,.02) !important;border:1px solid rgba(255,255,255,.08);"
-            +   "border-radius:12px;margin:12px 0;overflow:hidden;}"
-            + ".pony-ex-head{display:flex;align-items:center;gap:14px;padding:13px 16px;"
-            +   "border-bottom:1px solid rgba(255,255,255,.06);}"
-            + ".pony-ex-titlewrap{display:flex;flex-direction:column;gap:3px;min-width:0;}"
-            + ".pony-ex-title{font-family:ui-monospace,'JetBrains Mono','SFMono-Regular',monospace;"
-            +   "font-size:13px;font-weight:600;color:#fafafa;letter-spacing:-.01em;}"
-            + ".pony-ex-desc{font-size:12px;color:#8b8b94;line-height:1.5;}"
-            + ".pony-ex-seg{margin-left:auto;display:inline-flex;flex-shrink:0;background:rgba(255,255,255,.04);"
-            +   "border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:2px;gap:2px;}"
-            + ".pony-ex-seg .gwt-Button{background:transparent !important;border:1px solid transparent !important;"
-            +   "color:#8b8b94 !important;padding:4px 13px !important;border-radius:6px !important;"
-            +   "font-size:11px !important;font-weight:600 !important;letter-spacing:0 !important;}"
-            + ".pony-ex-seg .gwt-Button:hover{background:rgba(255,255,255,.06) !important;color:#fafafa !important;}"
-            + ".pony-ex-seg-on{background:rgba(255,255,255,.1) !important;color:#fafafa !important;"
-            +   "box-shadow:inset 0 0 0 1px rgba(255,255,255,.08) !important;}"
-            + ".pony-ex-body{padding:20px 18px;}"
-            + ".pony-ex-preview{display:flex;flex-direction:column;gap:14px;align-items:flex-start;}"
-            + ".pony-ex-echo{font-family:ui-monospace,'JetBrains Mono',monospace;font-size:12px;"
-            +   "color:var(--accent2,#43e8b0);background:rgba(67,232,176,.07);border:1px solid rgba(67,232,176,.2);"
-            +   "border-radius:7px;padding:7px 12px;letter-spacing:.01em;transition:color .15s,background .15s,border-color .15s;}"
-            + ".pony-ex-echo-idle{color:#7b7b85 !important;background:rgba(255,255,255,.03) !important;"
-            +   "border-color:rgba(255,255,255,.08) !important;}"
-            + ".pony-ex-code{background:#0a0b0e;border-top:1px solid rgba(255,255,255,.06);}"
-            + ".pony-ex-code .code-body{padding:18px 20px;}"
-            // Overview: hero, measured comparison, live ticker
-            + ".ov-hero{padding:28px 0 8px;max-width:860px;}"
-            + ".ov-eyebrow{font-size:11px;font-weight:700;letter-spacing:.18em;color:var(--accent2,#43e8b0);margin-bottom:12px;}"
-            + ".ov-h1{font-size:34px;line-height:1.15;font-weight:750;letter-spacing:-.03em;color:#fafafa;margin-bottom:14px;}"
-            + ".ov-lead{font-size:15px;line-height:1.65;color:#a1a1aa;max-width:720px;}"
-            + ".ov-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px;}"
-            + ".ov-chip{font-size:12px;color:#d4d4d8;padding:5px 11px;border-radius:999px;"
-            +   "border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);}"
-            + ".ov-kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;margin:6px 0 10px;}"
-            + ".ov-kpi{padding:18px 18px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.08);"
-            +   "background:linear-gradient(180deg,rgba(67,232,176,.06),rgba(255,255,255,.015) 55%);}"
-            + ".ov-kpi-gain{font-size:30px;font-weight:750;letter-spacing:-.03em;color:var(--accent2,#43e8b0);"
-            +   "font-variant-numeric:tabular-nums;}"
-            + ".ov-kpi-metric{font-size:13px;font-weight:600;color:#fafafa;margin:2px 0 14px;}"
-            + ".ov-kpi-hint{font-size:11px;color:#71717a;margin-top:10px;}"
-            + ".ov-cmp{display:grid;grid-template-columns:34px 1fr 78px;align-items:center;gap:10px;margin:6px 0;"
-            +   "font-size:12px;color:#8b8b94;font-variant-numeric:tabular-nums;}"
-            + ".ov-cmp-val{text-align:right;}"
-            + ".ov-bar{height:6px;border-radius:6px;background:rgba(255,255,255,.06);overflow:hidden;}"
-            + ".ov-bar-fill{height:100%;border-radius:6px;background:#52525b;}"
-            + ".ov-cmp-now{color:#fafafa;}"
-            + ".ov-cmp-now .ov-bar-fill{background:linear-gradient(90deg,#43e8b0,#7c6fff);}"
-            + ".ov-note{font-size:12px;color:#71717a;line-height:1.6;margin:8px 0 28px;max-width:860px;}"
-            + ".ov-controls{display:flex;flex-wrap:wrap;gap:28px;padding:14px 16px;margin:6px 0 12px;"
-            +   "border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(255,255,255,.02);}"
-            + ".ov-ticker{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:4px;"
-            +   "max-height:420px;overflow:auto;padding:10px;border:1px solid rgba(255,255,255,.08);border-radius:12px;"
-            +   "background:#0a0b0e;contain:content;}"
-            // Thousands of updates per second: no colour transition (it kept every cell animating, -2/3 of the
-            // browser's time) and each cell contained, so a new price only re-lays out and repaints that cell
-            + ".ov-cell{font-family:ui-monospace,'JetBrains Mono',monospace;font-size:11.5px;text-align:center;"
-            +   "padding:5px 0;border-radius:5px;background:rgba(255,255,255,.025);color:#a1a1aa;"
-            +   "font-variant-numeric:tabular-nums;contain:content;}"
-            // Form controls: readable fields, accent-coloured checks
-            + ".gwt-TextBox,.gwt-PasswordTextBox,.gwt-TextArea,.gwt-ListBox,.gwt-DateBox{background:#111216 !important;"
-            +   "border:1px solid rgba(255,255,255,.16) !important;color:#fafafa !important;border-radius:7px !important;"
-            +   "padding:7px 10px !important;outline:none !important;}"
-            + ".gwt-TextBox:focus,.gwt-PasswordTextBox:focus,.gwt-TextArea:focus,.gwt-ListBox:focus{"
-            +   "border-color:var(--accent2,#43e8b0) !important;box-shadow:0 0 0 3px rgba(67,232,176,.15) !important;}"
-            + "input[type=checkbox],input[type=radio]{accent-color:var(--accent2,#43e8b0);margin-right:6px;}"
-            + ".pony-nav-group{margin-top:14px !important;}"
-            + ".ov-live{grid-template-columns:repeat(auto-fit,minmax(150px,1fr)) !important;}"
-            + ".lay-chip{display:inline-flex;align-items:center;justify-content:center;padding:8px 14px;margin:3px;"
-            +   "border-radius:8px;background:rgba(124,111,255,.10);border:1px solid rgba(124,111,255,.28);"
-            +   "color:#d4d4f8;font-size:12px;box-sizing:border-box;}"
-            + ".gwt-DockLayoutPanel .lay-chip,.gwt-SplitLayoutPanel .lay-chip,.gwt-TabLayoutPanel .lay-chip{"
-            +   "width:calc(100% - 6px);height:calc(100% - 6px);margin:3px;}"
-            + ".lay-frame{border:1px solid rgba(255,255,255,.12) !important;border-radius:10px;background:#0a0b0e;"
-            +   "overflow:hidden;}"
-            + ".lay-frame .gwt-Label{color:#a1a1aa;padding:2px 10px;}"
-            + ".lay-dialog{display:flex;flex-direction:column;gap:12px;padding:16px;color:#d4d4d8;}"
-            + ".gwt-DialogBox,.gwt-DecoratedPopupPanel{background:#111216 !important;border:1px solid rgba(255,255,255,.14) !important;"
-            +   "border-radius:12px !important;box-shadow:0 20px 60px rgba(0,0,0,.6) !important;}"
-            + ".gwt-DialogBox .Caption{color:#fafafa;font-weight:600;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.08);}"
-            + ".gwt-PopupPanelGlass{background:rgba(0,0,0,.55) !important;}"
-            + ".lay-vis{display:flex;flex-direction:column;gap:10px;align-items:flex-start;}"
-            + ".lay-hint{font-size:12px;color:#8b8b94;}"
-            + ".lay-vis-card{border-radius:10px;margin:10px;padding:12px;box-sizing:border-box;"
-            +   "background:linear-gradient(135deg,rgba(67,232,176,.18),rgba(124,111,255,.18));border:1px solid rgba(67,232,176,.35);}"
-            + ".lay-vis-card .gwt-Label{color:#fafafa;font-weight:600;}"
-            + ".gwt-DatePicker td,.gwt-DatePicker .datePickerDay{border:0 !important;}"
-            // Tab / stack / split / disclosure widgets on the dark surface
-            + ".gwt-TabLayoutPanelTabs{background:#111216 !important;border-bottom:1px solid rgba(255,255,255,.1);}"
-            + ".gwt-TabLayoutPanelTab{background:transparent !important;color:#8b8b94 !important;border:0 !important;"
-            +   "padding:7px 14px !important;margin:0 2px !important;border-radius:0 !important;cursor:pointer;}"
-            + ".gwt-TabLayoutPanelTab-selected{color:#fafafa !important;box-shadow:inset 0 -2px 0 var(--accent2,#43e8b0);}"
-            + ".gwt-TabLayoutPanelContent{border:0 !important;background:transparent !important;}"
-            + ".gwt-StackLayoutPanel .gwt-StackLayoutPanelHeader{background:#16171b !important;color:#d4d4d8 !important;"
-            +   "border-bottom:1px solid rgba(255,255,255,.08);padding:7px 12px;cursor:pointer;font-size:12px;font-weight:600;}"
-            + ".gwt-StackLayoutPanel .gwt-StackLayoutPanelHeader:hover{color:#fafafa !important;}"
-            + ".gwt-StackLayoutPanel .lay-chip{width:calc(100% - 6px);height:calc(100% - 6px);}"
-            + ".gwt-SplitLayoutPanel-HDragger,.gwt-SplitLayoutPanel-VDragger{background:rgba(255,255,255,.12) !important;}"
-            + ".gwt-SplitLayoutPanel-HDragger:hover{background:var(--accent2,#43e8b0) !important;}"
-            + ".gwt-DisclosurePanel .header,.gwt-DisclosurePanel .header a{color:#d4d4d8 !important;cursor:pointer;}"
-            + ".gwt-DisclosurePanel a.header,.gwt-DisclosurePanel a.header td{color:#d4d4d8 !important;opacity:1 !important;text-decoration:none;}"
-            + ".gwt-DisclosurePanel .content{padding:8px 0 0 18px;}"
-            + ".gwt-StackLayoutPanel .gwt-StackLayoutPanelContent,.gwt-StackLayoutPanel .gwt-StackLayoutPanelContent>div{"
-            +   "background:transparent !important;border:0 !important;}"
-            + ".gwt-TabLayoutPanel .gwt-TabLayoutPanelContent{border:0 !important;background:transparent !important;}"
-            + ".gwt-StackLayoutPanel .gwt-StackLayoutPanelHeader{border:0 !important;border-bottom:1px solid rgba(255,255,255,.08) !important;}"
-            + ".gwt-TabLayoutPanel,.gwt-TabLayoutPanel>div{border-color:rgba(255,255,255,.08) !important;}"
-            + ".gwt-TabLayoutPanel .gwt-TabLayoutPanelContentContainer,.gwt-TabLayoutPanel .gwt-TabLayoutPanelContent{border:0 !important;}"
-            + ".gwt-StackLayoutPanel .lay-chip,.gwt-TabLayoutPanel .lay-chip{background:rgba(124,111,255,.10) !important;color:#d4d4f8 !important;}"
-            // Tables (FlexTable / Grid / legacy RefreshableDataGrid)
-            + ".data-table{border-collapse:collapse;font-variant-numeric:tabular-nums;}"
-            + ".data-table table{border-collapse:collapse;width:100%;}"
-            + ".data-table td,.data-table th{padding:6px 12px;border-bottom:1px solid rgba(255,255,255,.06);color:#d4d4d8;font-size:12.5px;}"
-            + ".data-table tr:first-child td,.data-table th{color:#8b8b94;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.06em;}"
-            + "table.data-table{border:1px solid rgba(255,255,255,.1);border-radius:10px;background:#0a0b0e;}"
-            + ".data-th{color:#8b8b94 !important;}"
-            // DataGrid2
-            + ".dg-controls{display:flex;flex-wrap:wrap;align-items:flex-start;gap:8px;margin:8px 0 12px;}"
-            + ".dg-columns{padding:6px 10px;border:1px solid rgba(255,255,255,.12);border-radius:7px;background:#111216;}"
-            + ".dg-columns ul{columns:6;list-style:none;padding:6px 0 0;margin:0;}"
-            + ".dg-frame{border:1px solid rgba(255,255,255,.1);border-radius:10px;background:#0a0b0e;}"
-            + ".pony-grid{color:#d4d4d8;font-size:12.5px;font-variant-numeric:tabular-nums;}"
-            + ".dg-head,.pony-grid-header{background:#16171b !important;color:#fafafa;font-weight:600;}"
-            + ".pony-grid-row{border-bottom:1px solid rgba(255,255,255,.04);}"
-            + ".pony-grid-row:hover{background:rgba(255,255,255,.04) !important;}"
-            + ".unpair-row{background:rgba(255,255,255,.022) !important;}"
-            + ".selected-row{background:rgba(67,232,176,.14) !important;}"
-            + ".misc-toolbar{gap:6px;padding:6px;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:#111216;margin-bottom:10px;}"
-            + ".misc-toolbar td{padding:0 3px;}"
-            + ".cost-table{min-width:min(980px,100%);}"
-            + ".cost-table td{white-space:nowrap;}"
-            + ".cost-table td:first-child .gwt-Label{color:#fafafa;font-weight:600;}"
-            + ".cost-table td .ov-bar{width:120px;}"
-            + ".cost-fill{background:linear-gradient(90deg,#43e8b0,#7c6fff) !important;}"
-            + ".cost-row{display:flex;align-items:center;gap:14px;margin-bottom:12px;}"
-            + ".row-cost{margin-left:auto;display:flex;align-items:center;gap:10px;padding-left:12px;flex-shrink:0;}"
-            // Pipeline
-            + ".pl-flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:0;margin:6px 0 16px;}"
-            + ".pl-step{position:relative;padding:10px 14px 10px 18px;margin-right:14px;border-radius:10px;"
-            +   "border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.025);min-width:96px;}"
-            + ".pl-step::after{content:'→';position:absolute;right:-13px;top:50%;transform:translateY(-50%);color:#52525b;}"
-            + ".pl-step:last-child::after{content:'';}"
-            + ".pl-step-name{font-size:12.5px;font-weight:600;color:#fafafa;}"
-            + ".pl-step-sub{font-size:11px;color:#71717a;margin-top:2px;font-family:ui-monospace,'JetBrains Mono',monospace;}"
-            + ".pl-funnel{display:flex;flex-direction:column;gap:12px;margin:4px 0 28px;padding:16px 18px;"
-            +   "border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(255,255,255,.015);}"
-            + ".pl-row-head{display:flex;align-items:baseline;gap:8px;margin-bottom:5px;}"
-            + ".pl-name{font-size:13px;font-weight:600;color:#fafafa;min-width:150px;}"
-            + ".pl-val{font-size:18px;font-weight:700;color:#fafafa;font-variant-numeric:tabular-nums;}"
-            + ".pl-unit{font-size:11px;color:#71717a;}"
-            + ".pl-gain{margin-left:auto;font-size:12px;font-weight:700;color:var(--accent2,#43e8b0);}"
-            + ".pl-bar{height:8px;border-radius:8px;background:rgba(255,255,255,.05);overflow:hidden;}"
-            + ".pl-bar-fill{height:100%;border-radius:8px;background:#7c6fff;transition:width .8s cubic-bezier(.4,0,.2,1);}"
-            + ".pl-row-bytes .pl-bar-fill{background:linear-gradient(90deg,#43e8b0,#7c6fff);}"
-            + ".pl-desc{font-size:11.5px;color:#71717a;margin-top:4px;}"
-            + ".row-cost-result{font-family:ui-monospace,'JetBrains Mono',monospace;font-size:11.5px;color:var(--accent2,#43e8b0);}"
-            + ".row-cost-btn{padding:4px 10px !important;font-size:11px !important;opacity:.75;}"
-            + ".row-cost-btn:hover{opacity:1;}"
-            + ".cost-body .perf-card{padding:14px 10px !important;}"
-            + ".data-tree{padding:8px;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:#0a0b0e;max-width:420px;}"
-            + ".data-tree .gwt-TreeItem{background:transparent !important;color:#d4d4d8 !important;border:0 !important;"
-            +   "outline:none !important;padding:4px 8px !important;border-radius:6px;text-align:left !important;font-size:13px;}"
-            + ".data-tree .gwt-TreeItem-selected{background:rgba(67,232,176,.14) !important;color:#fafafa !important;}"
-            + ".data-tree td,.data-tree tr,.data-tree table{background:transparent !important;border:0 !important;"
-            +   "outline:none !important;text-align:left !important;}"
-            + ".gwt-RichTextArea{background:#111216 !important;border:1px solid rgba(255,255,255,.16) !important;"
-            +   "border-radius:7px !important;min-height:140px;width:min(560px,100%);}"
-            + ".gwt-PushButton{display:inline-flex;align-items:center;padding:7px 14px;border-radius:7px;cursor:pointer;"
-            +   "background:#16171b;border:1px solid rgba(255,255,255,.12);color:#fafafa;font-size:13px;user-select:none;}"
-            + ".gwt-PushButton-down{background:#0f1013;border-color:var(--accent2,#43e8b0);}"
-            // Date picker: same dark surface as the rest of the page
-            + ".gwt-DatePicker{background:#111216 !important;border:1px solid rgba(255,255,255,.12) !important;"
-            +   "border-radius:10px !important;color:#d4d4d8 !important;padding:6px !important;}"
-            + ".gwt-DatePicker *{background-color:transparent !important;color:inherit;}"
-            + ".gwt-DatePicker .datePickerMonth{color:#fafafa !important;font-weight:600;}"
-            + ".gwt-DatePicker .datePickerWeekdayLabel{color:#71717a !important;}"
-            + ".gwt-DatePicker .datePickerDay{border-radius:5px;padding:4px 6px !important;cursor:pointer;}"
-            + ".gwt-DatePicker .datePickerDay:hover{background-color:rgba(255,255,255,.08) !important;}"
-            + ".gwt-DatePicker .datePickerDayIsToday{box-shadow:inset 0 0 0 1px rgba(67,232,176,.6);}"
-            + ".gwt-DatePicker .datePickerDayIsValue{background-color:var(--accent2,#43e8b0) !important;color:#08090c !important;}"
-            + ".gwt-DatePicker .datePickerDayIsFiller{color:#3f3f46 !important;}"
-            + "`;document.head.appendChild(s);";
+        // A segmented choice: the selected value is filled with the accent
+        button.setAttribute("style", "margin-right:6px;min-width:44px;font-variant-numeric:tabular-nums;"
+            + (active ? "background:var(--accent);border-color:var(--accent);color:#fff;" : ""));
     }
 
     // ── Tab: Component costs ─────────────────────────────────────────────────
@@ -1038,7 +673,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
         final PFlowPanel controls = Element.newPFlowPanel();
         controls.addStyleName("ov-controls");
-        final PButton run = Element.newPButton("▶ Measure every component");
+        final PButton run = Element.newPButton("Measure every component");
         styleBinaryCtrl(run, true);
         final PLabel status = Element.newPLabel("Each measurement creates " + CostMeter.SAMPLE
             + " instances in a hidden container, updates them once, then removes them.");
@@ -1116,9 +751,9 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PFlowPanel grid = Element.newPFlowPanel();
         grid.addStyleName("perf-grid");
         grid.addStyleName("ov-live");
-        final PElement createUnit = el("perf-unit", "BYTES ON THE WIRE");
-        final PElement updUnit = el("perf-unit", "BYTES ON THE WIRE");
-        grid.add(perfCard(mem, el("perf-unit", "PER INSTANCE"), el("perf-label", "Server memory")));
+        final PElement createUnit = el("perf-unit", "bytes on the wire");
+        final PElement updUnit = el("perf-unit", "bytes on the wire");
+        grid.add(perfCard(mem, el("perf-unit", "per instance"), el("perf-label", "Server memory")));
         grid.add(perfCard(create, createUnit, el("perf-label", "Create")));
         grid.add(perfCard(upd, updUnit, el("perf-label", "Update · " + spec.updateLabel())));
         final PButton measure = Element.newPButton("Measure");
@@ -1200,12 +835,12 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PElement perUpdVal = el("perf-value", "—");
         final PElement updVal = el("perf-value", "0");
         final PElement latVal = el("perf-value", "—");
-        live.add(perfCard(el("perf-icon", "📡"), wireVal, el("perf-unit", "KB/s ON THE WIRE"), el("perf-label", "Downstream")));
-        live.add(perfCard(el("perf-icon", "🧬"), rawVal, el("perf-unit", "KB/s BEFORE DEFLATE"), el("perf-label", "Binary protocol")));
-        live.add(perfCard(el("perf-icon", "🗜"), ratioVal, el("perf-unit", "× SMALLER"), el("perf-label", "Compression")));
-        live.add(perfCard(el("perf-icon", "⚡"), updVal, el("perf-unit", "UPDATES / S"), el("perf-label", "Ticker load")));
-        live.add(perfCard(el("perf-icon", "🎯"), perUpdVal, el("perf-unit", "BYTES / UPDATE"), el("perf-label", "Wire cost")));
-        live.add(perfCard(el("perf-icon", "⏱"), latVal, el("perf-unit", "MS ROUNDTRIP"), el("perf-label",
+        live.add(perfCard(wireVal, el("perf-unit", "KB/s on the wire"), el("perf-label", "Downstream")));
+        live.add(perfCard(rawVal, el("perf-unit", "KB/s before deflate"), el("perf-label", "Binary protocol")));
+        live.add(perfCard(ratioVal, el("perf-unit", "× smaller"), el("perf-label", "Compression")));
+        live.add(perfCard(updVal, el("perf-unit", "updates / s"), el("perf-label", "Ticker load")));
+        live.add(perfCard(perUpdVal, el("perf-unit", "bytes / update"), el("perf-label", "Wire cost")));
+        live.add(perfCard(latVal, el("perf-unit", "ms roundtrip"), el("perf-label",
             "Latency · protocol v" + uiContext.getProtocolVersion())));
         p.add(live);
 
@@ -1297,7 +932,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
                 prices[i] = Math.max(0.5, prices[i] + delta);
                 final PLabel c = cells.get(i);
                 final String text = String.format(java.util.Locale.ROOT, "%.5f", prices[i]);
-                final String color = delta >= 0 ? "#43e8b0" : "#f87171";
+                final String color = delta >= 0 ? "#047857" : "#b91c1c";
                 c.setText(text);
                 c.setStyleProperty("color", color);
                 calls[0] += 2;
@@ -1318,10 +953,10 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             schedulers.add(ticker[0]);
         };
 
-        final PButton runBtn = Element.newPButton("❚❚ Pause");
+        final PButton runBtn = Element.newPButton("Pause");
         runBtn.addClickHandler(e -> {
             running[0] = !running[0];
-            runBtn.setText(running[0] ? "❚❚ Pause" : "▶ Run");
+            runBtn.setText(running[0] ? "Pause" : "Run");
             styleBinaryCtrl(runBtn, running[0]);
             restartTicker.run();
         });
@@ -1706,40 +1341,30 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         p.add(sectionTitle("JVM Memory"));
         final PFlowPanel heapGrid = Element.newPFlowPanel();
         heapGrid.addStyleName("perf-grid");
-
-        final PElement heapIcon = el("perf-icon", "🧠");
         final PElement heapVal = el("perf-value", "—");
-        final PElement heapUnit = el("perf-unit", "MB USED");
+        final PElement heapUnit = el("perf-unit", "MB used");
         final PElement heapLbl = el("perf-label", "Heap Used");
         final PElement heapBarWrap = Element.newDiv(); heapBarWrap.addStyleName("perf-bar-wrap");
         final PElement heapBar = Element.newDiv(); heapBar.addStyleName("perf-bar"); heapBar.setAttribute("style", "width:0%");
         heapBarWrap.add(heapBar);
-        final PElement heapTrend = el("perf-trend perf-up", "");
-        final PFlowPanel heapCard = perfCard(heapIcon, heapVal, heapUnit, heapLbl, heapBarWrap, heapTrend);
-
-        final PElement maxIcon = el("perf-icon", "📦");
+        final PElement heapTrend = el("perf-trend", "");
+        final PFlowPanel heapCard = perfCard(heapVal, heapUnit, heapLbl, heapBarWrap, heapTrend);
         final PElement maxVal = el("perf-value", String.valueOf(maxMem / 1024 / 1024));
-        final PElement maxUnit = el("perf-unit", "MB MAX");
+        final PElement maxUnit = el("perf-unit", "MB max");
         final PElement maxLbl = el("perf-label", "Heap Max");
-        final PFlowPanel maxCard = perfCard(maxIcon, maxVal, maxUnit, maxLbl);
-
-        final PElement freeIcon = el("perf-icon", "💚");
+        final PFlowPanel maxCard = perfCard(maxVal, maxUnit, maxLbl);
         final PElement freeVal = el("perf-value", "—");
-        final PElement freeUnit = el("perf-unit", "MB FREE");
+        final PElement freeUnit = el("perf-unit", "MB free");
         final PElement freeLbl = el("perf-label", "Heap Free");
-        final PFlowPanel freeCard = perfCard(freeIcon, freeVal, freeUnit, freeLbl);
-
-        final PElement cpuIcon = el("perf-icon", "⚙️");
+        final PFlowPanel freeCard = perfCard(freeVal, freeUnit, freeLbl);
         final PElement cpuVal = el("perf-value", String.valueOf(rt.availableProcessors()));
-        final PElement cpuUnit = el("perf-unit", "CORES");
+        final PElement cpuUnit = el("perf-unit", "cores");
         final PElement cpuLbl = el("perf-label", "CPU");
-        final PFlowPanel cpuCard = perfCard(cpuIcon, cpuVal, cpuUnit, cpuLbl);
-
-        final PElement uptimeIcon = el("perf-icon", "⏱");
+        final PFlowPanel cpuCard = perfCard(cpuVal, cpuUnit, cpuLbl);
         final PElement uptimeVal = el("perf-value", "0");
-        final PElement uptimeUnit = el("perf-unit", "SECONDS");
+        final PElement uptimeUnit = el("perf-unit", "seconds");
         final PElement uptimeLbl = el("perf-label", "Uptime");
-        final PFlowPanel uptimeCard = perfCard(uptimeIcon, uptimeVal, uptimeUnit, uptimeLbl);
+        final PFlowPanel uptimeCard = perfCard(uptimeVal, uptimeUnit, uptimeLbl);
 
         heapGrid.add(heapCard, maxCard, freeCard, cpuCard, uptimeCard);
         p.add(heapGrid);
@@ -1747,39 +1372,29 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         p.add(sectionTitle("Network & Sessions"));
         final PFlowPanel netGrid = Element.newPFlowPanel();
         netGrid.addStyleName("perf-grid");
-
-        final PElement sessIcon = el("perf-icon", "👥");
         final PElement sessVal = el("perf-value", "1");
-        final PElement sessUnit = el("perf-unit", "ACTIVE");
+        final PElement sessUnit = el("perf-unit", "active");
         final PElement sessLbl = el("perf-label", "Sessions");
-        final PFlowPanel sessCard = perfCard(sessIcon, sessVal, sessUnit, sessLbl);
-
-        final PElement latIcon = el("perf-icon", "📡");
+        final PFlowPanel sessCard = perfCard(sessVal, sessUnit, sessLbl);
         final PElement latVal = el("perf-value", "—");
-        final PElement latUnit = el("perf-unit", "MS ROUNDTRIP");
+        final PElement latUnit = el("perf-unit", "ms roundtrip");
         final PElement latLbl = el("perf-label", "Latency");
         final PElement latBar2Wrap = Element.newDiv(); latBar2Wrap.addStyleName("perf-bar-wrap");
         final PElement latBar2 = Element.newDiv(); latBar2.addStyleName("perf-bar"); latBar2.setAttribute("style", "width:0%");
         latBar2Wrap.add(latBar2);
-        final PFlowPanel latCard = perfCard(latIcon, latVal, latUnit, latLbl, latBar2Wrap);
-
-        final PElement sentIcon = el("perf-icon", "📤");
+        final PFlowPanel latCard = perfCard(latVal, latUnit, latLbl, latBar2Wrap);
         final PElement sentVal = el("perf-value", "—");
         final PElement sentUnit = el("perf-unit", "KB/s · deflate");
         final PElement sentLbl = el("perf-label", "Sent (compressed)");
-        final PFlowPanel sentCard = perfCard(sentIcon, sentVal, sentUnit, sentLbl);
-
-        final PElement rcvIcon = el("perf-icon", "📥");
+        final PFlowPanel sentCard = perfCard(sentVal, sentUnit, sentLbl);
         final PElement rcvVal = el("perf-value", "—");
         final PElement rcvUnit = el("perf-unit", "KB/s");
         final PElement rcvLbl = el("perf-label", "Received");
-        final PFlowPanel rcvCard = perfCard(rcvIcon, rcvVal, rcvUnit, rcvLbl);
-
-        final PElement netIcon = el("perf-icon", "🔌");
+        final PFlowPanel rcvCard = perfCard(rcvVal, rcvUnit, rcvLbl);
         final PElement netVal = el("perf-value", "v" + uiContext.getProtocolVersion());
-        final PElement netUnit = el("perf-unit", "BINARY PROTOCOL");
+        final PElement netUnit = el("perf-unit", "binary protocol");
         final PElement netLbl = el("perf-label", "WebSocket");
-        final PFlowPanel netCard = perfCard(netIcon, netVal, netUnit, netLbl);
+        final PFlowPanel netCard = perfCard(netVal, netUnit, netLbl);
 
         netGrid.add(sessCard, latCard, sentCard, rcvCard, netCard);
         p.add(netGrid);
@@ -1788,27 +1403,21 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         p.add(sectionTitle("String Dictionary"));
         final PFlowPanel dictGrid = Element.newPFlowPanel();
         dictGrid.addStyleName("perf-grid");
-
-        final PElement dictSizeIcon = el("perf-icon", "📖");
         final PElement dictSizeVal = el("perf-value", "—");
-        final PElement dictSizeUnit = el("perf-unit", "ENTRIES");
+        final PElement dictSizeUnit = el("perf-unit", "entries");
         final PElement dictSizeLbl = el("perf-label", "Dict Size");
         final PElement dictBarWrap = Element.newDiv(); dictBarWrap.addStyleName("perf-bar-wrap");
         final PElement dictBar = Element.newDiv(); dictBar.addStyleName("perf-bar"); dictBar.setAttribute("style", "width:0%");
         dictBarWrap.add(dictBar);
-        final PFlowPanel dictSizeCard = perfCard(dictSizeIcon, dictSizeVal, dictSizeUnit, dictSizeLbl, dictBarWrap);
-
-        final PElement dictMaxIcon = el("perf-icon", "📦");
+        final PFlowPanel dictSizeCard = perfCard(dictSizeVal, dictSizeUnit, dictSizeLbl, dictBarWrap);
         final PElement dictMaxVal = el("perf-value", "4096");
-        final PElement dictMaxUnit = el("perf-unit", "MAX ENTRIES");
+        final PElement dictMaxUnit = el("perf-unit", "max entries");
         final PElement dictMaxLbl = el("perf-label", "Dict Capacity");
-        final PFlowPanel dictMaxCard = perfCard(dictMaxIcon, dictMaxVal, dictMaxUnit, dictMaxLbl);
-
-        final PElement dictHitIcon = el("perf-icon", "🎯");
+        final PFlowPanel dictMaxCard = perfCard(dictMaxVal, dictMaxUnit, dictMaxLbl);
         final PElement dictHitVal = el("perf-value", "—");
-        final PElement dictHitUnit = el("perf-unit", "% HIT RATE");
+        final PElement dictHitUnit = el("perf-unit", "% hit rate");
         final PElement dictHitLbl = el("perf-label", "Dict Hit Rate");
-        final PFlowPanel dictHitCard = perfCard(dictHitIcon, dictHitVal, dictHitUnit, dictHitLbl);
+        final PFlowPanel dictHitCard = perfCard(dictHitVal, dictHitUnit, dictHitLbl);
 
         dictGrid.add(dictSizeCard, dictMaxCard, dictHitCard);
         p.add(dictGrid);
@@ -1832,9 +1441,9 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             final int pct = (int) (used * 100 / Math.max(max, 1));
             heapVal.setInnerText(String.valueOf(used));
             freeVal.setInnerText(String.valueOf(free));
-            heapBar.setAttribute("style", "width:" + pct + "%;height:4px;border-radius:4px;background:linear-gradient(90deg,#7c6fff,#43e8b0);transition:width .8s cubic-bezier(.4,0,.2,1);");
-            heapTrend.setInnerText(used > prevHeap[0] ? "▲ " + (used - prevHeap[0]) + " MB" : used < prevHeap[0] ? "▼ " + (prevHeap[0] - used) + " MB" : "● stable");
-            heapTrend.setAttribute("class", used > prevHeap[0] ? "perf-trend perf-down" : "perf-trend perf-up");
+            heapBar.setAttribute("style", "width:" + pct + "%;height:4px;border-radius:4px;background:var(--accent);transition:width .8s cubic-bezier(.4,0,.2,1);");
+            heapTrend.setInnerText(used > prevHeap[0] ? "+" + (used - prevHeap[0]) + " MB" : used < prevHeap[0] ? "−" + (prevHeap[0] - used) + " MB" : "stable");
+            heapTrend.setAttribute("class", used > prevHeap[0] ? "perf-trend perf-down" : used < prevHeap[0] ? "perf-trend perf-up" : "perf-trend");
             prevHeap[0] = used;
 
             final long upSec = (System.currentTimeMillis() - startTime) / 1000;
@@ -1844,7 +1453,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             final double lat = uiContext.getRoundtripLatency();
             latVal.setInnerText(String.format("%.0f", lat));
             final int latPct = (int) Math.min(lat / 2, 100);
-            latBar2.setAttribute("style", "width:" + latPct + "%;height:4px;border-radius:4px;background:linear-gradient(90deg," + (latPct < 30 ? "#43e8b0,#7c6fff" : latPct < 70 ? "#f59e0b,#f87171" : "#f87171,#dc2626") + ");transition:width .8s;");
+            latBar2.setAttribute("style", "width:" + latPct + "%;background:" + (latPct < 30 ? "var(--accent)" : latPct < 70 ? "var(--warn)" : "var(--bad)") + " !important");
 
             final PonySDKMetrics metrics = uiContext.getMetrics();
             if (metrics != null) sessVal.setInnerText(String.valueOf(metrics.getActiveContexts()));
@@ -1864,7 +1473,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
                 dictSizeVal.setInnerText(String.valueOf(dictSize));
                 dictMaxVal.setInnerText(String.valueOf(dictMax));
                 final int dictPct = (int) (dictSize * 100L / Math.max(dictMax, 1));
-                dictBar.setAttribute("style", "width:" + dictPct + "%;height:4px;border-radius:4px;background:linear-gradient(90deg,#7c6fff,#43e8b0);transition:width .8s;");
+                dictBar.setAttribute("style", "width:" + dictPct + "%;height:4px;border-radius:4px;background:var(--accent);transition:width .8s;");
                 // Approximate hit rate from session frequency map
                 final java.util.Map<String, Long> freq = dict.getSessionFrequency();
                 long hits = 0, lookups = 0;
@@ -1896,12 +1505,11 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     private static PFlowPanel highlightBox(final String icon, final String title, final String desc) {
         final PFlowPanel box = Element.newPFlowPanel();
         box.addStyleName("highlight-box");
-        final PElement ico = Element.newDiv(); ico.addStyleName("highlight-icon"); ico.setInnerText(icon);
         final PFlowPanel txt = Element.newPFlowPanel();
         final PElement ttl = Element.newDiv(); ttl.addStyleName("highlight-title"); ttl.setInnerText(title);
         final PElement dsc = Element.newDiv(); dsc.addStyleName("highlight-desc"); dsc.setInnerText(desc);
         txt.add(ttl, dsc);
-        box.add(ico, txt);
+        box.add(txt);
         return box;
     }
 
@@ -1969,7 +1577,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             ln("    " + ty("PButton") + " btn = " + ty("Element") + "." + mt("newPButton") + "(" + st("Click me") + ");") +
             ln("") +
             ln("    " + cm("Click handler — pure Java lambda")) +
-            ln("    btn." + mt("addClickHandler") + "(e -> btn." + mt("setText") + "(" + st("Clicked! 🎉") + "));") +
+            ln("    btn." + mt("addClickHandler") + "(e -> btn." + mt("setText") + "(" + st("Clicked!") + "));") +
             ln("") +
             ln("    " + cm("Add to main window — delta sent over WebSocket")) +
             ln("    " + ty("PWindow") + "." + mt("getMain") + "()." + mt("add") + "(btn);") +
@@ -2260,7 +1868,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         box.addStyleName("row-cost");
         final PLabel result = Element.newPLabel("");
         result.addStyleName("row-cost-result");
-        final PButton b = Element.newPButton("⚖ Cost");
+        final PButton b = Element.newPButton("Cost");
         b.addStyleName("row-cost-btn");
         b.addClickHandler(e -> {
             b.setEnabled(false);
@@ -2343,7 +1951,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             @Override public IsPWidget createLoadingDataWidget() {
                 final PComplexPanel div = Element.newDiv();
                 div.setWidth("100%"); div.setHeight("100%");
-                div.setStyleProperty("background-color", "rgba(8,9,12,.55)");
+                div.setStyleProperty("background-color", "rgba(255,255,255,.7)");
                 return div;
             }
             @Override public void onCreateColumnResizer(final IsPWidget r) {}
@@ -2429,7 +2037,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
     private void buildWebComponentsInto(final PFlowPanel container) {
         final PLabel statusLabel = Element.newPLabel("Status: waiting for events...");
-        statusLabel.setStyleProperty("color", "#666");
+        statusLabel.setStyleProperty("color", "var(--text-3)");
         statusLabel.setStyleProperty("font-style", "italic");
 
         // my-counter

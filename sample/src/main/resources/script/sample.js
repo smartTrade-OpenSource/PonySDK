@@ -135,10 +135,10 @@
       window.__createLen = o.length; // deterministic proof for the browser IT (5 typed creation args)
       // The whole chart is configured from pure-binary typed creation args:
       // [color(String), maxPoints(int), lineWidth(double), fill(boolean), seed(long)]
-      this._color = (typeof o[0] === "string") ? o[0] : "#43e8b0";
+      this._color = (typeof o[0] === "string") ? o[0] : "#4f46e5";
       this._lineWidth = (typeof o[2] === "number") ? o[2] : 2;
       this._fill = !!o[3];
-      this._palette = [this._color, "#7c6fff", "#f59e0b", "#f87171"];
+      this._palette = [this._color, "#0ea5e9", "#f59e0b", "#e11d48"];
       this._frames = 0;
       this._winCount = 0;
       this._winStart = 0;
@@ -224,25 +224,24 @@
         + '<style>'
         + '.ba-cards{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:16px}'
         + '@media(max-width:860px){.ba-cards{grid-template-columns:repeat(3,1fr)}}'
-        + '.ba-card{background:rgba(255,255,255,.018);border:1px solid rgba(255,255,255,.07);'
-        +   'border-radius:12px;padding:13px 15px;transition:border-color .15s}'
-        + '.ba-card:hover{border-color:rgba(255,255,255,.14)}'
-        + '.ba-v{font-size:22px;font-weight:700;line-height:1;color:#fafafa;font-variant-numeric:tabular-nums;'
+        + '.ba-card{background:#fff;border:1px solid #e2e8f0;box-shadow:0 1px 2px rgba(15,23,42,.04);'
+        +   'border-radius:12px;padding:13px 15px}'
+        + '.ba-card:hover{border-color:#cbd5e1}'
+        + '.ba-v{font-size:22px;font-weight:700;line-height:1;color:#0f172a;font-variant-numeric:tabular-nums;'
         +   'font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:-.01em}'
-        + '.ba-l{font-size:9.5px;color:#6b6b76;text-transform:uppercase;letter-spacing:.8px;margin-top:8px}'
-        + '.ba-chart{background:#0a0b0e;border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:14px 16px}'
+        + '.ba-l{font-size:12px;color:#64748b;margin-top:6px}'
+        + '.ba-chart{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:14px 16px;box-shadow:0 1px 2px rgba(15,23,42,.04)}'
         + '.ba-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}'
-        + '.ba-live{display:flex;align-items:center;gap:7px;font-size:10.5px;font-weight:600;letter-spacing:1px;'
-        +   'text-transform:uppercase;color:#8b8b94}'
-        + '.ba-dot{width:7px;height:7px;border-radius:50%;background:var(--accent2,#43e8b0);'
-        +   'box-shadow:0 0 6px var(--accent2,#43e8b0);animation:ba-pulse 1.6s infinite}'
+        + '.ba-live{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:#0f172a}'
+        + '.ba-dot{width:7px;height:7px;border-radius:50%;background:#10b981;'
+        +   'box-shadow:0 0 0 3px rgba(16,185,129,.18);animation:ba-pulse 1.6s infinite}'
         + '@keyframes ba-pulse{0%,100%{opacity:1}50%{opacity:.35}}'
         + '.ba-legend{display:flex;gap:14px;flex-wrap:wrap}'
-        + '.ba-leg{display:flex;align-items:center;gap:6px;font-size:11px;color:#8b8b94}'
+        + '.ba-leg{display:flex;align-items:center;gap:6px;font-size:12px;color:#64748b}'
         + '.ba-leg i{width:10px;height:2px;border-radius:2px;display:inline-block}'
         + '.ba-canvas{width:100%;height:250px;display:block;border-radius:8px}'
-        + '.ba-cfg{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;color:#6b6b76;margin-top:12px;line-height:1.5}'
-        + '.ba-cfg b{color:#8b8b94;font-weight:600}'
+        + '.ba-cfg{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:#64748b;margin-top:12px;line-height:1.5}'
+        + '.ba-cfg b{color:#334155;font-weight:600}'
         + '</style>'
         + '<div class="ba-cards">'
         + this._card('ba-points', '—', 'Values / frame')
@@ -290,8 +289,8 @@
       var c = this._canvas;
       if (!c || !c.getContext) return;
       var ctx = c.getContext('2d'), w = c.width, h = c.height, s, i, arr;
-      ctx.fillStyle = '#0a0b0e'; ctx.fillRect(0, 0, w, h);
-      ctx.strokeStyle = 'rgba(255,255,255,0.04)'; ctx.lineWidth = 1;
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);
+      ctx.strokeStyle = '#f1f5f9'; ctx.lineWidth = 1;
       for (var gx = 47; gx < w; gx += 47) { ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, h); ctx.stroke(); }
       for (var gy = 50; gy < h; gy += 50) { ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(w, gy); ctx.stroke(); }
       var min = Infinity, max = -Infinity;
