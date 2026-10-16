@@ -84,7 +84,9 @@ public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
     /** Notifies the initialize listeners (end of the CREATE). */
     void fireInitializeListeners() {
         final Set<InitializeListener> listeners = extras != null ? extras.initializeListeners : null;
-        if (listeners != null) listeners.forEach(listener -> listener.onInitialize(this));
+        if (listeners == null) return;
+        extras.initializeListeners = null; // fired once: keeping them would retain what they capture
+        listeners.forEach(listener -> listener.onInitialize(this));
     }
 
     String getAttributeLinkedToValue0() {
@@ -467,6 +469,7 @@ public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
     }
 
     public void addInitializeListener(final InitializeListener listener) {
+        if (initialized) return; // already fired, it would never be called
         final Extras x = extras();
         if (x.initializeListeners == null) x.initializeListeners = SetUtils.newArraySet(4);
         x.initializeListeners.add(listener);
@@ -476,6 +479,10 @@ public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
         final Extras x = extras();
         if (x.destroyListeners == null) x.destroyListeners = SetUtils.newArraySet(4);
         x.destroyListeners.add(listener);
+    }
+
+    public void removeDestroyListener(final DestroyListener listener) {
+        if (extras != null && extras.destroyListeners != null) extras.destroyListeners.remove(listener);
     }
 
     public void onDestroy() {

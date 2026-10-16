@@ -20,6 +20,8 @@ public abstract class PAddOn extends PObject {
 
     private JsonObject args;
     private Object[] creationArgs;
+    /** Destroys this addon with its window; removed by {@link #destroy()} so the window does not keep it. */
+    private DestroyListener windowDestroyListener;
 
     protected PAddOn() {
     }
@@ -56,7 +58,10 @@ public abstract class PAddOn extends PObject {
     @Override
     public boolean attach(final PWindow window, final PFrame frame) {
         final boolean result = super.attach(window, frame);
-        if (result) window.addDestroyListener(event -> onDestroy());
+        if (result) {
+            windowDestroyListener = event -> onDestroy();
+            window.addDestroyListener(windowDestroyListener);
+        }
         return result;
     }
 
@@ -104,6 +109,8 @@ public abstract class PAddOn extends PObject {
 
     public void destroy() {
         saveUpdate(writer -> writer.write(ServerToClientModel.DESTROY));
+        if (windowDestroyListener != null && window != null) window.removeDestroyListener(windowDestroyListener);
+        windowDestroyListener = null;
     }
 
 }

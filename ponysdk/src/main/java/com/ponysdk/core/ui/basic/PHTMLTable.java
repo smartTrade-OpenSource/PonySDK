@@ -48,12 +48,6 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
     protected PHTMLTable() {
     }
 
-    @Override
-    void init0() {
-        super.init0();
-        cellByWidget.keySet().forEach(widget -> widget.attach(window, frame));
-    }
-
     public int getRowCount() {
         if (columnByRow.isEmpty()) return 0;
         else return columnByRow.lastKey().value + 1;
@@ -247,9 +241,12 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
         cellByColumn.put(column, widget);
     }
 
+    /** The widgets of the cells, row by row: a snapshot, iterating (attach, destroy) may remove cells. */
     @Override
     public Iterator<PWidget> iterator() {
-        return Collections.emptyIterator();
+        final List<PWidget> widgets = new ArrayList<>(cellByWidget.size());
+        columnByRow.values().forEach(cells -> widgets.addAll(cells.values()));
+        return Collections.unmodifiableList(widgets).iterator();
     }
 
     public PRowFormatter getRowFormatter() {
