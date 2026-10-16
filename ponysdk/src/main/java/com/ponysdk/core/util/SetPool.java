@@ -269,7 +269,29 @@ public class SetPool<E> {
          * <code>(this UNION {e})</code>, or {@code this} if {@code e} already belongs to it
          */
         public ImmutableSet getAdd(final E e) {
-            return SetPool.this.add(this, e);
+            return transition(true, e);
+        }
+
+        /** A transition from this set: add or remove one element, and the resulting pooled set. Immutable. */
+        private record Transition(boolean add, Object element, Object result) {}
+
+        // Direct-mapped memo of the last transitions (a ticker flips the same classes over and over): no pool
+        // lookup (thread-local scratch set, synchronized cache) for them. Racy by design: a Transition is
+        // immutable, a lost update only costs a pool lookup. The result is the pooled instance, kept alive by
+        // this memo, so the pool keeps answering the same instance for it.
+        private Transition[] transitions;
+
+        @SuppressWarnings("unchecked")
+        private ImmutableSet transition(final boolean add, final Object o) {
+            if (o == null) return add ? SetPool.this.add(this, null) : SetPool.this.remove(this, null);
+            final int slot = (o.hashCode() ^ (add ? 0 : 2)) & 3;
+            Transition[] memo = transitions;
+            final Transition t = memo != null ? memo[slot] : null;
+            if (t != null && t.add == add && t.element.equals(o)) return (ImmutableSet) t.result;
+            final ImmutableSet result = add ? SetPool.this.add(this, (E) o) : SetPool.this.remove(this, o);
+            if (memo == null) transitions = memo = new Transition[4];
+            memo[slot] = new Transition(add, o, result);
+            return result;
         }
 
         /**
@@ -286,7 +308,7 @@ public class SetPool<E> {
          * <code>(this MINUS {e})</code>, or {@code this} if {@code o} doesn't belong to it
          */
         public ImmutableSet getRemove(final Object o) {
-            return SetPool.this.remove(this, o);
+            return transition(false, o);
         }
 
         @Override

@@ -274,6 +274,11 @@ task gwtc(type: JavaExec) {
             'com.ponysdk.core.PonyTerminal',
             '-generateJsInteropExports'
     ]
+    // Readable JavaScript for browser profiling: ./gradlew :ponysdk:gwtc -Pgwt.style=PRETTY (default OBFUSCATED)
+    if (project.hasProperty('gwt.style')) {
+        args += ['-style', project.property('gwt.style').toString()]
+        outputs.upToDateWhen { false }
+    }
 }
 
 // Server write-path bench (protocol / wire bytes, CPU, allocations, heap): ./gradlew :ponysdk:bench [-Pbench.args=v1]
