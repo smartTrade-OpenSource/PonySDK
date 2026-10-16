@@ -1285,6 +1285,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         };
         final boolean[] touched = new boolean[1000];
         final Runnable tick = () -> {
+            // nobody is looking (background tab, minimised window): no work, no bytes
+            if (!PWindow.getMain().isShown()) return;
             final int n = Math.max(1, cells.size() / 4);   // a quarter of the cells move each tick
             java.util.Arrays.fill(touched, false);
             for (int k = 0; k < n; k++) {
