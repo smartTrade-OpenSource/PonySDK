@@ -673,9 +673,13 @@ table.data-table, .cost-table {
 .dg-head, .pony-grid-header { background: var(--bg-subtle) !important; color: var(--text); font-weight: 600; border-bottom: 1px solid var(--border); }
 .dg-head .gwt-Label, .pony-grid-header .gwt-Label { font-size: 12px; }
 .pony-grid-row { border-bottom: 1px solid var(--bg-muted); }
-.pony-grid-row:hover { background: var(--bg-subtle) !important; }
+/* hover: the addon marks both halves of the row (pinned + scrolling) with [pony-hovered]; the legacy sample
+   stylesheet painted it red */
+.pony-grid-row:hover, .pony-grid-row[pony-hovered], [pony-hovered] { background-color: var(--accent-soft) !important; }
+.pony-grid-row[linked-row] { background-color: var(--bg-muted) !important; }
+div.selected-row { background-color: #e0e7ff !important; }
 .unpair-row { background: #fcfdfe !important; }
-.selected-row { background: var(--accent-soft) !important; }
+
 .misc-toolbar { gap: 6px; padding: 6px; margin-bottom: 10px; background: var(--bg-subtle); border: 1px solid var(--border); border-radius: var(--radius); }
 .misc-toolbar td { padding: 0 3px; }
 .dg-col-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; padding: 2px 0; }
