@@ -213,6 +213,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         // Refresh header stats every second
         final Runtime rt0 = Runtime.getRuntime();
         PScheduler.scheduleAtFixedRate(() -> {
+            if (idle()) return;
             latHVal.setInnerText(String.format("%.0f ms", uiContext.getRoundtripLatency()));
             heapHVal.setInnerText((rt0.totalMemory() - rt0.freeMemory()) / 1024 / 1024 + " MB");
             final PonySDKMetrics m = uiContext.getMetrics();
@@ -284,8 +285,12 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             tabSchedulers[activeTab[0]].forEach(PScheduler.UIRunnable::cancel);
             tabSchedulers[activeTab[0]].clear();
             tabSchedulers[idx].clear();
+            final PFlowPanel left = tabPanels[activeTab[0]];
+            tabPanels[activeTab[0]] = null;
             tabPanels[idx] = buildTabWithSchedulers(idx, uiContext, tabSchedulers[idx]);
             content.setWidget(tabPanels[idx]);
+            // destroy what the left tab owns (e.g. the DataGrid's own polling task): it is rebuilt on return
+            left.onDestroy();
             tabButtons[activeTab[0]].removeStyleName("pony-tab-active");
             tabButtons[idx].addStyleName("pony-tab-active");
             activeTab[0] = idx;
@@ -417,7 +422,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
         // Live multi-series stream — one structured typed binary payload per frame: [n, m, n*m doubles]
         schedulers.add(PScheduler.scheduleAtFixedRate(() -> {
-            if (!playing[0]) return;
+            if (!playing[0] || idle()) return;
             final int n = nSeries[0];
             final int m = mPoints[0];
             final Object[] frame = new Object[2 + n * m];
@@ -988,8 +993,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         };
         final boolean[] touched = new boolean[1000];
         final Runnable tick = () -> {
-            // nobody is looking (background tab, minimised window): no work, no bytes
-            if (!PWindow.getMain().isShown()) return;
+            if (idle()) return;
             final int n = Math.max(1, cells.size() / 4);   // a quarter of the cells move each tick
             java.util.Arrays.fill(touched, false);
             for (int k = 0; k < n; k++) {
@@ -1075,6 +1079,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         // 1 s refresh of the live cards (deltas of the connection counters)
         final long[] prev = { uiContext.getWireBytesSent(), uiContext.getProtocolBytesSent(), 0, System.nanoTime(), 0, 0 };
         schedulers.add(PScheduler.scheduleAtFixedRate(() -> {
+            if (idle()) return;
             final long wire = uiContext.getWireBytesSent();
             final long raw = uiContext.getProtocolBytesSent();
             final long now = System.nanoTime();
@@ -1511,6 +1516,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final long[] totalDictLookups = {0};
         final long[] totalDictHits = {0};
         schedulers.add(PScheduler.scheduleAtFixedRate(() -> {
+            if (idle()) return;
             final long used = (rt.totalMemory() - rt.freeMemory()) / 1024 / 1024;
             final long free = rt.freeMemory() / 1024 / 1024;
             final long max = maxMem / 1024 / 1024;
@@ -1616,6 +1622,14 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             range.setInnerText(String.format(java.util.Locale.ROOT, "min " + format + " · avg " + format + " · max " + format + " "
                 + unit, min, sum / count, max));
         }
+    }
+
+    /**
+     * Nobody is looking (background tab, minimised window) or the connection is suspended (its writes would
+     * pile up in the reconnection buffer): periodic showcase work skips the tick, no work and no bytes.
+     */
+    private static boolean idle() {
+        return UIContext.get().isSuspended() || !PWindow.getMain().isShown();
     }
 
     private static PElement el(final String cssClass, final String text) {
@@ -2637,6 +2651,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
 
         final AtomicInteger i = new AtomicInteger();
         schedulers.add(PScheduler.scheduleWithFixedDelay(() -> {
+            if (idle()) return;
             for (int key = 1; key < 50; key++) {
                 grid.setData(key - 1, key, new Data(key, "" + i.incrementAndGet()));
             }

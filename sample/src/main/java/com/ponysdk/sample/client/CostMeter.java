@@ -124,6 +124,7 @@ final class CostMeter {
                 final long w2 = ctx.getWireBytesSent();
                 final long updateProtocol = async ? ctx.getProtocolBytesSent() - p1 : updateFlush;
                 box.removeFromParent();
+                box.onDestroy();
                 final boolean wire = w0 >= 0;
                 done.accept(new Cost(component, memory, (double) createProtocol / sample,
                     wire ? (double) (w1 - w0) / sample : -1, update != null ? (double) updateProtocol / sample : -1,
