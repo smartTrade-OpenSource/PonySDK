@@ -27,6 +27,10 @@ final class LiveHeap {
     private static volatile long sampledAt;
     private static volatile long bytes;
 
+    /** The samples of the last minute, oldest first (one per second while a session shows the figure). */
+    private static final long[] history = new long[60];
+    private static int historySize;
+
     private LiveHeap() {
     }
 
@@ -36,8 +40,20 @@ final class LiveHeap {
         if (sampledAt == 0 || now - sampledAt > 1_000_000_000L) {
             bytes = sample();
             sampledAt = now;
+            record(bytes);
         }
         return bytes;
+    }
+
+    /** The last minute of samples, oldest first: a chart opened now starts filled. */
+    static synchronized long[] lastMinute() {
+        return java.util.Arrays.copyOfRange(history, history.length - historySize, history.length);
+    }
+
+    private static synchronized void record(final long value) {
+        System.arraycopy(history, 1, history, 0, history.length - 1);
+        history[history.length - 1] = value;
+        historySize = Math.min(history.length, historySize + 1);
     }
 
     private static long sample() {

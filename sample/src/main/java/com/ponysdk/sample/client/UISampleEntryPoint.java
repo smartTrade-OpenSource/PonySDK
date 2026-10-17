@@ -228,19 +228,24 @@ public class UISampleEntryPoint implements EntryPoint {
         final List<PScheduler.UIRunnable>[] tabSchedulers = new List[tabs.length];
         for (int i = 0; i < tabs.length; i++) tabSchedulers[i] = new ArrayList<>();
 
-        // Only the first tab is built eagerly: the others are built (and their schedulers started) on activation
+        // Deep links: each tab has its URL token (#component-costs); a reload or a shared link opens that tab
+        final String[] slugs = new String[tabs.length];
+        for (int i = 0; i < tabs.length; i++) slugs[i] = tabs[i][1].toLowerCase(java.util.Locale.ROOT).replace(' ', '-');
+        final int first = Math.max(0, java.util.Arrays.asList(slugs).indexOf(uiContext.getHistory().getToken()));
+
+        // Only the opened tab is built eagerly: the others are built (and their schedulers started) on activation
         final PFlowPanel[] tabPanels = new PFlowPanel[tabs.length];
-        tabPanels[0] = buildTabWithSchedulers(0, uiContext, tabSchedulers[0]);
+        tabPanels[first] = buildTabWithSchedulers(first, uiContext, tabSchedulers[first]);
 
         final int tabCount = tabs.length;
         final PButton[] tabButtons = new PButton[tabCount];
-        final int[] activeTab = { 0 };
+        final int[] activeTab = { first };
         final java.util.function.IntConsumer showCrumb = k -> {
             int g = 0;
             while (g + 1 < groupStarts.length && groupStarts[g + 1] <= k) g++;
             crumb.setInnerHTML(groupLabels[g] + " &nbsp;/&nbsp; <b>" + tabs[k][1] + "</b>");
         };
-        showCrumb.accept(0);
+        showCrumb.accept(first);
 
         int group = 0;
         for (int i = 0; i < tabCount; i++) {
@@ -254,7 +259,7 @@ public class UISampleEntryPoint implements EntryPoint {
             final int idx = i;
             final PButton tab = Element.newPButton(tabs[i][1]);
             tab.addStyleName("pony-tab");
-            if (i == 0) tab.addStyleName("pony-tab-active");
+            if (i == first) tab.addStyleName("pony-tab-active");
             tabButtons[i] = tab;
             tab.addClickHandler(e -> navigate.accept(idx));
             nav.add(tab);
@@ -275,8 +280,14 @@ public class UISampleEntryPoint implements EntryPoint {
             tabButtons[idx].addStyleName("pony-tab-active");
             activeTab[0] = idx;
             showCrumb.accept(idx);
+            uiContext.getHistory().newItem(slugs[idx], false);
             PScript.execute(PWindow.getMain(), "window.scrollTo(0,0)");
         };
+        // back / forward buttons of the browser
+        uiContext.getHistory().addValueChangeHandler(e -> {
+            final int idx = java.util.Arrays.asList(slugs).indexOf(e.getData());
+            navigate.accept(idx >= 0 ? idx : 0);
+        });
 
         // Nav footer with version
         final PFlowPanel navFooter = Element.newPFlowPanel();
@@ -287,8 +298,8 @@ public class UISampleEntryPoint implements EntryPoint {
         navFooter.add(version);
         nav.add(navFooter);
 
-        // Show first tab
-        content.setWidget(tabPanels[0]);
+        // Show the opened tab
+        content.setWidget(tabPanels[first]);
 
         shell.add(nav);
         shell.add(content);
@@ -1149,7 +1160,7 @@ public class UISampleEntryPoint implements EntryPoint {
 
     private PFlowPanel buildInputsTab(final List<PScheduler.UIRunnable> schedulers) {
         final PFlowPanel p = section();
-        pageTitle(p, "Input Widgets",
+        pageTitle(p, "Inputs",
             "Each control below is live. Interact with it and watch what the server receives — then flip to Code to see the exact Java behind it. No JavaScript, anywhere.");
 
         p.add(sectionTitle("Interactive — try it, then read the code"));
@@ -1426,6 +1437,7 @@ public class UISampleEntryPoint implements EntryPoint {
         final PFlowPanel charts = Element.newPFlowPanel();
         charts.addStyleName("spark-grid");
         final Sparkline heapChart = new Sparkline("Live heap", "MB", "%.0f");
+        heapChart.fill(java.util.Arrays.stream(LiveHeap.lastMinute()).mapToDouble(b -> b / 1024 / 1024).toArray());
         final Sparkline wireChart = new Sparkline("Sent on the wire", "KB/s", "%.1f");
         final Sparkline latChart = new Sparkline("Roundtrip latency", "ms", "%.0f");
         charts.add(heapChart.card, wireChart.card, latChart.card);
@@ -1608,6 +1620,19 @@ public class UISampleEntryPoint implements EntryPoint {
             System.arraycopy(samples, 1, samples, 0, N - 1);
             samples[N - 1] = v;
             count = Math.min(N, count + 1);
+            render(v);
+        }
+
+        /** Starts with values already known, oldest first: drawn once. */
+        void fill(final double[] values) {
+            final int n = Math.min(N, values.length);
+            if (n == 0) return;
+            System.arraycopy(values, values.length - n, samples, N - n, n);
+            count = n;
+            render(values[values.length - 1]);
+        }
+
+        private void render(final double v) {
             double max = 0, min = Double.MAX_VALUE, sum = 0;
             for (int i = N - count; i < N; i++) {
                 max = Math.max(max, samples[i]);
@@ -1663,7 +1688,7 @@ public class UISampleEntryPoint implements EntryPoint {
 
     private static PFlowPanel buildCodeTab() {
         final PFlowPanel p = section();
-        pageTitle(p, "How It Works", "PonySDK lets you build rich UIs in pure Java — no JavaScript, no REST, no serialization.");
+        pageTitle(p, "Code", "PonySDK lets you build rich UIs in pure Java — no JavaScript, no REST, no serialization.");
 
         p.add(highlightBox("💡", "Server-side rendering, client-side performance",
             "Your entire UI logic runs on the JVM. PonySDK sends only binary deltas over WebSocket — " +
@@ -2188,7 +2213,7 @@ public class UISampleEntryPoint implements EntryPoint {
 
         // my-dashboard
         final PWebComponent dashboard = new PWebComponent("my-dashboard");
-        dashboard.attr("title", "PonySdk Dashboard");
+        dashboard.attr("title", "PonySDK Dashboard");
         final PButton refreshBtn = Element.newPButton("Refresh");
         final PButton exportBtn = Element.newPButton("Export");
         dashboard.slot("toolbar").add(refreshBtn, exportBtn);
@@ -2203,7 +2228,7 @@ public class UISampleEntryPoint implements EntryPoint {
 
         // my-card
         final PWebComponent card = new PWebComponent("my-card");
-        card.attr("title", "PonySdk Card");
+        card.attr("title", "PonySDK Card");
         card.property("content").set("\"Card body text set from server via property API.\"");
         final PButton likeBtn = Element.newPButton("Like");
         final PButton shareBtn = Element.newPButton("Share");
@@ -2512,7 +2537,7 @@ public class UISampleEntryPoint implements EntryPoint {
         final AtomicInteger i = new AtomicInteger();
         schedulers.add(PScheduler.scheduleWithFixedDelay(() -> {
             if (idle()) return;
-            for (int key = 1; key < 50; key++) {
+            for (int key = 1; key <= 50; key++) {
                 grid.setData(key - 1, key, new Data(key, "" + i.incrementAndGet()));
             }
         }, Duration.ofMillis(500), Duration.ofMillis(200)));

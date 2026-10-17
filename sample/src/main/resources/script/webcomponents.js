@@ -49,11 +49,11 @@ class MyCounter extends HTMLElement {
     _render() {
         this.innerHTML =
             '<div style="display:inline-flex;align-items:center;gap:10px;padding:12px 16px;' +
-            'border:2px solid #4a90d9;border-radius:8px;background:#f0f6ff;font-family:sans-serif;">' +
+            'border:2px solid var(--accent, #4a90d9);border-radius:8px;background:var(--accent-soft, #f0f6ff);font-family:inherit;">' +
                 '<span style="font-weight:600;color:#555;">' + this._label + ':</span>' +
-                '<span style="font-size:28px;font-weight:bold;color:#4a90d9;min-width:50px;text-align:center;">' +
+                '<span style="font-size:28px;font-weight:bold;color:var(--accent, #4a90d9);min-width:50px;text-align:center;">' +
                     this._count + '</span>' +
-                '<button style="padding:6px 14px;border:none;border-radius:4px;background:#4a90d9;' +
+                '<button style="padding:6px 14px;border:none;border-radius:4px;background:var(--accent, #4a90d9);' +
                 'color:#fff;cursor:pointer;font-size:16px;font-weight:bold;">+1</button>' +
             '</div>';
         var self = this;
@@ -90,7 +90,7 @@ class MyStats extends HTMLElement {
 
     _render() {
         this.renderCount++;
-        var html = '<div style="display:flex;gap:8px;flex-wrap:wrap;font-family:sans-serif;">';
+        var html = '<div style="display:flex;gap:8px;flex-wrap:wrap;font-family:inherit;">';
         var keys = Object.keys(this._stats).sort();
         for (var i = 0; i < keys.length; i++) {
             html += '<span class="stat" data-key="' + keys[i] + '" style="padding:6px 10px;border:1px solid #ccc;' +
@@ -132,7 +132,7 @@ document.onPonyLoaded(function () {
             var bg       = isDark ? '#1e1e2e' : '#f8f9fa';
             var fg       = isDark ? '#cdd6f4' : '#333';
             var border   = isDark ? '#45475a' : '#dee2e6';
-            var headerBg = isDark ? '#181825' : '#4a90d9';
+            var headerBg = isDark ? '#181825' : 'var(--accent, #4a90d9)';
             var toolbarBg= isDark ? '#313244' : '#e9ecef';
             var contentBg= isDark ? '#1e1e2e' : '#ffffff';
             var footerBg = isDark ? '#181825' : '#f1f3f5';
@@ -141,7 +141,7 @@ document.onPonyLoaded(function () {
                 '<style>' +
                 '  :host { display:block; }' +
                 '  .wrapper { border:1px solid ' + border + ';border-radius:10px;overflow:hidden;' +
-                '    background:' + bg + ';color:' + fg + ';font-family:sans-serif;box-shadow:0 2px 12px rgba(0,0,0,0.12); }' +
+                '    background:' + bg + ';color:' + fg + ';font-family:inherit;box-shadow:0 2px 12px rgba(0,0,0,0.12); }' +
                 '  .header { padding:12px 18px;background:' + headerBg + ';color:#fff;' +
                 '    font-size:16px;font-weight:bold;display:flex;align-items:center;gap:8px; }' +
                 '  .toolbar { padding:8px 12px;background:' + toolbarBg + ';border-bottom:1px solid ' + border + ';' +
@@ -190,13 +190,13 @@ document.onPonyLoaded(function () {
             var fg      = isDark ? '#e0e0e0' : '#333';
             var border  = isDark ? '#555'    : '#ddd';
             var headerBg= isDark ? '#3a3a3a' : '#f7f7f7';
-            var accent  = isDark ? '#6ab0ff' : '#4a90d9';
+            var accent  = isDark ? '#6ab0ff' : 'var(--accent, #4a90d9)';
 
             this.shadowRoot.innerHTML =
                 '<style>' +
                 '  :host { display:block; }' +
                 '  .wrapper { border:2px solid ' + border + ';border-radius:10px;overflow:hidden;' +
-                '    background:' + bg + ';color:' + fg + ';font-family:sans-serif;box-shadow:0 2px 8px rgba(0,0,0,0.1); }' +
+                '    background:' + bg + ';color:' + fg + ';font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,0.1); }' +
                 '  .header { padding:12px 16px;background:' + headerBg + ';border-bottom:2px solid ' + border + ';' +
                 '    font-weight:bold;font-size:16px;color:' + accent + '; }' +
                 '  .body { padding:16px; }' +
