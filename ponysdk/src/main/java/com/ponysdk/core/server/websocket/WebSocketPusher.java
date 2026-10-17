@@ -88,6 +88,11 @@ public class WebSocketPusher implements Closeable {
 
     // ── Reusable byte[] for string UTF-8 encoding ──
     private byte[] stringEncodeBuffer = new byte[INITIAL_STRING_BUFFER_SIZE];
+    /**
+     * Bytes of the last encoded string: {@link #stringEncodeBuffer} for short strings, the JDK's own array for long
+     * ones (written from it, not copied into the buffer, which therefore stays sized by short strings).
+     */
+    private byte[] encodedBytes;
     /** Set by {@link #encodeStringToBuffer} — true if the last encoded string was pure ASCII. */
     private boolean lastEncodedAscii;
 
@@ -238,38 +243,32 @@ public class WebSocketPusher implements Closeable {
     // ── Reusable string encoding ─────────────────────────────────────────
 
     /**
-     * Encodes a string to UTF-8 into the reusable buffer, growing it if needed.
-     * Uses a reusable CharsetEncoder to avoid the intermediate byte[] allocation
-     * that String.getBytes(UTF_8) would create on every call.
-     * Returns the number of bytes written.
-     */
-    /**
      * From this length on, String.getBytes(UTF_8) (JDK intrinsic, vectorized copy of a Latin-1 string)
      * beats the per-char loop despite its allocation: measured equal at 64 chars, 1.7x faster at 200,
      * 3.5x at 1000+ for ASCII (JSON, HTML), equal for accented text.
      */
     static final int JDK_ENCODER_MIN_LENGTH = 128;
 
+    /** Encodes a string to UTF-8 into {@link #encodedBytes} and returns its byte length. */
     private int encodeStringToBuffer(final String value) {
         final int len = value.length();
 
         if (len >= JDK_ENCODER_MIN_LENGTH) {
             final byte[] utf8 = value.getBytes(StandardCharsets.UTF_8);
-            if (utf8.length > stringEncodeBuffer.length) {
-                stringEncodeBuffer = new byte[Math.max(utf8.length, stringEncodeBuffer.length * 2)];
-            }
-            System.arraycopy(utf8, 0, stringEncodeBuffer, 0, utf8.length);
+            encodedBytes = utf8;
             // UTF-8 length == char count only if every char is ASCII (an unpaired surrogate becomes
             // '?', a valid ASCII byte, exactly like encodeUtf8 below)
             lastEncodedAscii = utf8.length == len;
             return utf8.length;
         }
 
+        encodedBytes = stringEncodeBuffer;
         // Fast path for ASCII: copy each char in a single pass, bailing to the UTF-8 path on the
         // first non-ASCII char. A sampling heuristic is unsafe here — a missed non-ASCII char would
         // be silently truncated by the (byte) cast and corrupt the value on the wire.
         if (len > stringEncodeBuffer.length) {
             stringEncodeBuffer = new byte[Math.max(len, stringEncodeBuffer.length * 2)];
+            encodedBytes = stringEncodeBuffer;
         }
         int i = 0;
         for (; i < len; i++) {
@@ -287,6 +286,7 @@ public class WebSocketPusher implements Closeable {
         final int maxBytes = i + (len - i) * 3;
         if (maxBytes > stringEncodeBuffer.length) {
             stringEncodeBuffer = Arrays.copyOf(stringEncodeBuffer, Math.max(maxBytes, stringEncodeBuffer.length * 2));
+            encodedBytes = stringEncodeBuffer;
         }
         lastEncodedAscii = false;
         return encodeUtf8(value, i, len, stringEncodeBuffer, i);
@@ -363,7 +363,7 @@ public class WebSocketPusher implements Closeable {
                 putInt(byteLength);
             }
         }
-        put(stringEncodeBuffer, 0, byteLength);
+        put(encodedBytes, 0, byteLength);
         return byteLength;
     }
 
@@ -673,7 +673,7 @@ public class WebSocketPusher implements Closeable {
             metaBytes += 4;
         }
 
-        put(stringEncodeBuffer, 0, byteLength);
+        put(encodedBytes, 0, byteLength);
         return byteLength;
     }
 
@@ -907,7 +907,7 @@ public class WebSocketPusher implements Closeable {
             metaBytes += 4;
         }
 
-        put(stringEncodeBuffer, 0, byteLength);
+        put(encodedBytes, 0, byteLength);
         return byteLength;
     }
 

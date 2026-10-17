@@ -74,7 +74,7 @@ public class WebSocketPusherTest {
 
         encode = WebSocketPusher.class.getDeclaredMethod("encodeStringToBuffer", String.class);
         encode.setAccessible(true);
-        bufferField = WebSocketPusher.class.getDeclaredField("stringEncodeBuffer");
+        bufferField = WebSocketPusher.class.getDeclaredField("encodedBytes");
         bufferField.setAccessible(true);
         asciiField = WebSocketPusher.class.getDeclaredField("lastEncodedAscii");
         asciiField.setAccessible(true);
@@ -577,6 +577,17 @@ public class WebSocketPusherTest {
         final byte[] encoded = Arrays.copyOf((byte[]) bufferField.get(pusher), byteLength);
         assertEquals("z".repeat(n) + "?z", new String(encoded, StandardCharsets.UTF_8));
         assertTrue((boolean) asciiField.get(pusher));
+    }
+
+    @Test
+    public void aLongStringDoesNotGrowTheSessionBuffer() throws Exception {
+        final Field scratch = WebSocketPusher.class.getDeclaredField("stringEncodeBuffer");
+        scratch.setAccessible(true);
+        final int before = ((byte[]) scratch.get(pusher)).length;
+
+        assertTrue(assertRoundTrips("{\"k\":1}".repeat(20_000))); // 140 KB, written from its own byte[]
+
+        assertEquals("kept per session: sized by short strings only", before, ((byte[]) scratch.get(pusher)).length);
     }
 
     @Test
