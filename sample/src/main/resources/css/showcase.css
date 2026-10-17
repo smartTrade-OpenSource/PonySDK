@@ -675,7 +675,7 @@ table.data-table, .cost-table {
 /* ── DataGrid ────────────────────────────────────────────────────────────── */
 
 .dg-controls { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 8px; margin: 0 0 12px; }
-.dg-columns { padding: 6px 10px; background: #fff; border: 1px solid var(--border-strong); border-radius: 8px; }
+.dg-columns { padding: 2px 10px; background: #fff; border: 1px solid var(--border-strong); border-radius: 8px; }
 .dg-columns ul { columns: 6; list-style: none; padding: 6px 0 0; margin: 0; }
 .dg-frame { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow); overflow: hidden; }
 .pony-grid { color: var(--text-2); font-size: 13px; font-variant-numeric: tabular-nums; background: #fff; }
@@ -691,9 +691,12 @@ div.selected-row { background-color: #e0e7ff; }
 
 .misc-toolbar { gap: 6px; padding: 6px; margin-bottom: 10px; background: var(--bg-subtle); border: 1px solid var(--border); border-radius: var(--radius); }
 .misc-toolbar td { padding: 0 3px; }
-.dg-col-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; padding: 2px 0; }
-.dg-col-name { flex-basis: 100%; font-weight: 600; color: var(--text); cursor: pointer; }
-.dg-col-action { font-size: 11px; font-weight: 500; color: var(--text-3); cursor: pointer; }
+.dg-col-head { display: flex; align-items: baseline; gap: 8px; padding: 2px 14px 2px 0; box-sizing: border-box; }
+.dg-col-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; font-weight: 600; color: var(--text); cursor: pointer; }
+/* pin / hide appear on the hovered column only: a one-line header instead of a second line of links everywhere */
+.dg-col-action { font-size: 11px; font-weight: 500; color: var(--text-3); cursor: pointer; opacity: 0; transition: opacity .12s; }
+.dg-col-head:hover .dg-col-action, .dg-col-head:focus-within .dg-col-action { opacity: 1; }
+@media (hover: none) { .dg-col-action { opacity: 1; } }
 .dg-col-action:hover { color: var(--accent); }
 
 /* FlexLayout demo embedded in the showcase: light toolbar */
@@ -784,3 +787,7 @@ div.selected-row { background-color: #e0e7ff; }
 .anat-table td:last-child { white-space: normal; }
 .anat-hex { font-family: var(--mono); color: var(--accent-strong); }
 .code-counter { font-family: var(--mono); font-size: 22px; font-weight: 600; color: var(--text); }
+/* FlexLayout demo toolbar: one line per control, aligned */
+.pony-content .fl-demo-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.pony-content .fl-demo-toolbar > .gwt-Label, .pony-content .fl-demo-toolbar > .gwt-Button { white-space: nowrap; }
+.pony-content .fl-demo-toolbar > .gwt-Button, .pony-content .fl-demo-toolbar > .gwt-ListBox { height: 30px; padding-top: 0; padding-bottom: 0; }
