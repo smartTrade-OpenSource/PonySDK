@@ -167,8 +167,10 @@ public class PonySDKServerTest {
 
         final CompressionHandler compression = (CompressionHandler) new TestServer().mainHandler();
 
-        assertNotNull("Brotli must be registered when its native library is available",
-                compression.removeCompression(new BrotliCompression().getEncodingName()));
+        final BrotliCompression brotli = (BrotliCompression) compression.removeCompression(new BrotliCompression().getEncodingName());
+        assertNotNull("Brotli must be registered when its native library is available", brotli);
+        assertEquals("a level that compresses each response in milliseconds, not hundreds",
+                PonySDKServer.BROTLI_LEVEL, brotli.getDefaultEncoderConfig().getCompressionLevel());
     }
 
     @Test

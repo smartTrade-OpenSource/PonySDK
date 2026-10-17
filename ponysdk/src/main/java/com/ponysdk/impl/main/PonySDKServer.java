@@ -42,6 +42,7 @@ import org.eclipse.jetty.compression.server.CompressionHandler;
 import org.eclipse.jetty.compression.server.CompressionConfig;
 import org.eclipse.jetty.compression.gzip.GzipCompression;
 import org.eclipse.jetty.compression.brotli.BrotliCompression;
+import org.eclipse.jetty.compression.brotli.BrotliEncoderConfig;
 import com.aayushatharva.brotli4j.Brotli4jLoader;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.slf4j.Logger;
@@ -185,10 +186,18 @@ public class PonySDKServer {
      * via {@code Accept-Encoding}. When the native is unavailable the server degrades gracefully to
      * gzip only — startup is never broken by a missing native.
      */
+    static final int BROTLI_LEVEL = 5;
+
     protected void addBrotliIfAvailable(final CompressionHandler compression) {
         try {
             Brotli4jLoader.ensureAvailability();
-            compression.putCompression(new BrotliCompression());
+            final BrotliCompression brotli = new BrotliCompression();
+            // Compressed per response: level 11 (the default) took 344 ms on the 382 KB terminal for 98 KB,
+            // level 5 takes 5 ms for 111 KB - smaller and faster than gzip (8 ms, 122 KB).
+            final BrotliEncoderConfig level = new BrotliEncoderConfig();
+            level.setCompressionLevel(BROTLI_LEVEL);
+            brotli.setDefaultEncoderConfig(level);
+            compression.putCompression(brotli);
             log.info("Brotli HTTP compression enabled");
         } catch (final Throwable t) {
             log.info("Brotli native library unavailable; using gzip only ({})", t.toString());
