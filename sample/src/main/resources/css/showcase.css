@@ -775,3 +775,11 @@ div.selected-row { background-color: #e0e7ff; }
     color: var(--text-3) !important; cursor: pointer; padding: 0 6px; border-radius: 6px;
 }
 .gwt-DatePicker .datePickerPreviousButton:hover, .gwt-DatePicker .datePickerNextButton:hover { color: var(--accent) !important; background: var(--bg-muted) !important; }
+
+/* Binary protocol: anatomy of an update */
+.anat { margin-top: 36px; max-width: 1040px; }
+.anat-controls { display: flex; align-items: center; gap: 16px; margin: 14px 0; }
+.anat-price { font-family: var(--mono); font-size: 22px; font-weight: 600; color: var(--text); }
+.anat-table td { white-space: nowrap; }
+.anat-table td:last-child { white-space: normal; }
+.anat-hex { font-family: var(--mono); color: var(--accent-strong); }

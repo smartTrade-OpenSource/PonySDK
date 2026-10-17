@@ -444,9 +444,12 @@ public class WebSocketPusher implements Closeable {
     // ── Protocol encoding ────────────────────────────────────────────────
 
     /**
+     * Writes one protocol field, the model key then its typed value, into the current buffer: what every update is
+     * made of. Public for tools that show the encoding (the showcase's frame anatomy).
+     *
      * @param value The type can be primitives, String or Object[]
      */
-    void encode(final ServerToClientModel model, final Object value) throws IOException {
+    public void encode(final ServerToClientModel model, final Object value) throws IOException {
         checkState();
         switch (model.getTypeModel()) {
             case NULL -> write(model);

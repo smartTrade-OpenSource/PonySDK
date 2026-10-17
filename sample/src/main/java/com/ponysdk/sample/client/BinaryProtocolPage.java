@@ -28,11 +28,14 @@ import static com.ponysdk.sample.client.Costs.*;
 
 import java.time.Duration;
 import java.util.List;
+import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.server.concurrent.PScheduler;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PElement;
+import com.ponysdk.core.ui.basic.PFlexTable;
 import com.ponysdk.core.ui.basic.PFlowPanel;
+import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.sample.client.page.addon.BinaryArgsAddOn;
 
 /** Binary protocol: typed arrays streamed in pure binary. */
@@ -150,6 +153,71 @@ final class BinaryProtocolPage {
             addon.stream(frame);
         }, Duration.ofMillis(120)));
 
+        panel.add(anatomy());
         return panel;
+    }
+
+    /** A real label.setText(...), then the bytes that carry it, field by field, from the framework's own encoder. */
+    private static PFlowPanel anatomy() {
+        final PFlowPanel box = Element.newPFlowPanel();
+        box.addStyleName("anat");
+        box.add(sectionTitle("Anatomy of an update"));
+        box.add(el("lay-hint", "label.setText(…) on the server and the bytes that carry it to the browser: each field is a model "
+            + "key followed by its typed value, encoded here by the framework's own encoder. In a tick of many cells, update "
+            + "runs, the string dictionary and deflate bring it down to about 5 bytes per cell on the wire."));
+
+        final PLabel price = Element.newPLabel("1.08512");
+        price.addStyleName("anat-price");
+        final PButton send = Element.newPButton("Send an update");
+        styleBinaryCtrl(send, true);
+        final PFlowPanel controls = Element.newPFlowPanel();
+        controls.addStyleName("anat-controls");
+        controls.add(price, send);
+        box.add(controls);
+
+        final PFlexTable table = Element.newPFlexTable();
+        table.addStyleName("data-table");
+        table.addStyleName("anat-table");
+        final PFlowPanel scroll = Element.newPFlowPanel();
+        scroll.addStyleName("table-scroll");
+        scroll.add(table);
+        box.add(scroll);
+        final PElement total = el("ov-note", "");
+        box.add(total);
+
+        final Runnable show = () -> {
+            final List<FrameAnatomy.Field> fields = FrameAnatomy.encode(List.of(
+                new FrameAnatomy.Field(ServerToClientModel.TYPE_UPDATE, price.getID(), null),
+                new FrameAnatomy.Field(ServerToClientModel.TEXT, price.getText(), null),
+                new FrameAnatomy.Field(ServerToClientModel.END, null, null)));
+            table.clear();
+            final String[] heads = { "Bytes", "Field", "Value", "Meaning" };
+            for (int c = 0; c < heads.length; c++) table.setWidget(0, c, Element.newPLabel(heads[c]));
+            int bytes = 0;
+            for (int r = 0; r < fields.size(); r++) {
+                final FrameAnatomy.Field f = fields.get(r);
+                bytes += f.bytes().length;
+                final PLabel hex = Element.newPLabel(FrameAnatomy.hex(f.bytes()));
+                hex.addStyleName("anat-hex");
+                table.setWidget(r + 1, 0, hex);
+                table.setWidget(r + 1, 1, Element.newPLabel(f.model().name()));
+                table.setWidget(r + 1, 2, Element.newPLabel(f.value() == null ? "" : String.valueOf(f.value())));
+                table.setWidget(r + 1, 3, Element.newPLabel(switch (f.model()) {
+                    case TYPE_UPDATE -> "update of object #" + f.value() + ": its key, then its id in " + (f.bytes().length - 1) + " bytes";
+                    case TEXT -> "the new text: its key, its length, then the " + price.getText().length() + " ASCII characters";
+                    case END -> "end of the block";
+                    default -> "";
+                }));
+            }
+            final int json = ("{\"id\":" + price.getID() + ",\"text\":\"" + price.getText() + "\"}").length();
+            total.setInnerText(bytes + " bytes for this update. As a JSON message ({\"id\":…,\"text\":…}): " + json + " bytes.");
+        };
+        final java.util.Random random = new java.util.Random();
+        send.addClickHandler(e -> {
+            price.setText(String.format(java.util.Locale.ROOT, "1.%05d", 5_000 + random.nextInt(25_000)));
+            show.run();
+        });
+        show.run();
+        return box;
     }
 }
