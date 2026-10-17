@@ -196,7 +196,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PElement latHLbl = Element.newDiv(); latHLbl.addStyleName("pony-hstat-lbl"); latHLbl.setInnerText("Latency");
         final PFlowPanel latHCard = Element.newPFlowPanel(); latHCard.addStyleName("pony-hstat"); latHCard.add(latHVal, latHLbl);
         final PElement heapHVal = Element.newDiv(); heapHVal.addStyleName("pony-hstat-val"); heapHVal.setInnerText("—");
-        final PElement heapHLbl = Element.newDiv(); heapHLbl.addStyleName("pony-hstat-lbl"); heapHLbl.setInnerText("Heap");
+        final PElement heapHLbl = Element.newDiv(); heapHLbl.addStyleName("pony-hstat-lbl"); heapHLbl.setInnerText("Live heap");
         final PFlowPanel heapHCard = Element.newPFlowPanel(); heapHCard.addStyleName("pony-hstat"); heapHCard.add(heapHVal, heapHLbl);
         final PElement sessHVal = Element.newDiv(); sessHVal.addStyleName("pony-hstat-val"); sessHVal.setInnerText("1");
         final PElement sessHLbl = Element.newDiv(); sessHLbl.addStyleName("pony-hstat-lbl"); sessHLbl.setInnerText("Sessions");
@@ -211,11 +211,10 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         PWindow.getMain().add(header);
 
         // Refresh header stats every second
-        final Runtime rt0 = Runtime.getRuntime();
         PScheduler.scheduleAtFixedRate(() -> {
             if (idle()) return;
             latHVal.setInnerText(String.format("%.0f ms", uiContext.getRoundtripLatency()));
-            heapHVal.setInnerText((rt0.totalMemory() - rt0.freeMemory()) / 1024 / 1024 + " MB");
+            heapHVal.setInnerText(LiveHeap.bytes() / 1024 / 1024 + " MB");
             final PonySDKMetrics m = uiContext.getMetrics();
             if (m != null) sessHVal.setInnerText(String.valueOf(m.getActiveContexts()));
         }, Duration.ofSeconds(1));
@@ -1413,7 +1412,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         p.add(sectionTitle("Last 60 seconds"));
         final PFlowPanel charts = Element.newPFlowPanel();
         charts.addStyleName("spark-grid");
-        final Sparkline heapChart = new Sparkline("Heap used", "MB", "%.0f");
+        final Sparkline heapChart = new Sparkline("Live heap", "MB", "%.0f");
         final Sparkline wireChart = new Sparkline("Sent on the wire", "KB/s", "%.1f");
         final Sparkline latChart = new Sparkline("Roundtrip latency", "ms", "%.0f");
         charts.add(heapChart.card, wireChart.card, latChart.card);
@@ -1423,8 +1422,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PFlowPanel heapGrid = Element.newPFlowPanel();
         heapGrid.addStyleName("perf-grid");
         final PElement heapVal = el("perf-value", "—");
-        final PElement heapUnit = el("perf-unit", "MB used");
-        final PElement heapLbl = el("perf-label", "Heap used");
+        final PElement heapUnit = el("perf-unit", "MB after the last GC");
+        final PElement heapLbl = el("perf-label", "Live heap");
         final PElement heapBarWrap = Element.newDiv(); heapBarWrap.addStyleName("perf-bar-wrap");
         final PElement heapBar = Element.newDiv(); heapBar.addStyleName("perf-bar"); heapBar.setAttribute("style", "width:0%");
         heapBarWrap.add(heapBar);
@@ -1434,10 +1433,10 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PElement maxUnit = el("perf-unit", "MB max");
         final PElement maxLbl = el("perf-label", "Heap max");
         final PFlowPanel maxCard = perfCard(maxVal, maxUnit, maxLbl);
-        final PElement freeVal = el("perf-value", "—");
-        final PElement freeUnit = el("perf-unit", "MB free");
-        final PElement freeLbl = el("perf-label", "Heap free");
-        final PFlowPanel freeCard = perfCard(freeVal, freeUnit, freeLbl);
+        final PElement committedVal = el("perf-value", "—");
+        final PElement committedUnit = el("perf-unit", "MB reserved by the JVM");
+        final PElement committedLbl = el("perf-label", "Heap committed");
+        final PFlowPanel committedCard = perfCard(committedVal, committedUnit, committedLbl);
         final PElement cpuVal = el("perf-value", String.valueOf(rt.availableProcessors()));
         final PElement cpuUnit = el("perf-unit", "cores");
         final PElement cpuLbl = el("perf-label", "CPU");
@@ -1447,7 +1446,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final PElement uptimeLbl = el("perf-label", "Uptime");
         final PFlowPanel uptimeCard = perfCard(uptimeVal, uptimeUnit, uptimeLbl);
 
-        heapGrid.add(heapCard, maxCard, freeCard, cpuCard, uptimeCard);
+        heapGrid.add(heapCard, maxCard, committedCard, cpuCard, uptimeCard);
         p.add(heapGrid);
 
         p.add(sectionTitle("Network and sessions"));
@@ -1517,12 +1516,11 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final long[] totalDictHits = {0};
         schedulers.add(PScheduler.scheduleAtFixedRate(() -> {
             if (idle()) return;
-            final long used = (rt.totalMemory() - rt.freeMemory()) / 1024 / 1024;
-            final long free = rt.freeMemory() / 1024 / 1024;
+            final long used = LiveHeap.bytes() / 1024 / 1024;
             final long max = maxMem / 1024 / 1024;
             final int pct = (int) (used * 100 / Math.max(max, 1));
             heapVal.setInnerText(String.valueOf(used));
-            freeVal.setInnerText(String.valueOf(free));
+            committedVal.setInnerText(String.valueOf(rt.totalMemory() / 1024 / 1024));
             heapBar.setAttribute("style", "width:" + pct + "%;height:4px;border-radius:4px;background:var(--accent);transition:width .8s cubic-bezier(.4,0,.2,1);");
             heapTrend.setInnerText(used > prevHeap[0] ? "+" + (used - prevHeap[0]) + " MB" : used < prevHeap[0] ? "−" + (prevHeap[0] - used) + " MB" : "stable");
             heapTrend.setAttribute("class", used > prevHeap[0] ? "perf-trend perf-down" : used < prevHeap[0] ? "perf-trend perf-up" : "perf-trend");
