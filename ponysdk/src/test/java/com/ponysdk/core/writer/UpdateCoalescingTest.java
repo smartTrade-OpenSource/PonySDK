@@ -411,6 +411,53 @@ public class UpdateCoalescingTest {
     }
 
     @Test
+    public void classTogglesAndTextOfManyCellsShareOneUpdateRun() {
+        start(true, com.ponysdk.core.model.ProtocolVersion.UPDATE_RUNS);
+        final PLabel[] c = labels(4);
+        ctx.execute(() -> {
+            for (final PLabel l : c) {
+                l.setText("1.2");
+                l.removeStyleName("down");
+                l.addStyleName("up");
+            }
+        });
+        assertEquals("one block: class changes no longer cut the run", 1, wire.blocks.size());
+        assertEquals(4, wire.count("ADD_STYLE_NAME=up"));
+        assertEquals("never added: nothing to remove", 0, wire.count("REMOVE_STYLE_NAME=down"));
+    }
+
+    @Test
+    public void theLastClassChangeOfATransactionWins() {
+        final PLabel l = label("0");
+        ctx.execute(() -> {
+            l.addStyleName("x");
+            l.removeStyleName("x");
+            l.addStyleName("x");
+        });
+        assertEquals(List.of(List.of("TYPE_UPDATE=" + l.getID(), "REMOVE_STYLE_NAME=x", "ADD_STYLE_NAME=x")), wire.blocks);
+        assertTrue(l.hasStyleName("x"));
+    }
+
+    @Test
+    public void visibilityStylePropertyAndAttributeRemovalsAreCoalesced() {
+        final PLabel l = label("0");
+        ctx.execute(() -> {
+            l.setStyleProperty("color", "red");
+            l.setAttribute("data-k", "v");
+        });
+        wire.clear();
+        ctx.execute(() -> {
+            l.setVisible(false);
+            l.setText("t");
+            l.setVisible(true);
+            l.removeStyleProperty("color");
+            l.removeAttribute("data-k");
+        });
+        assertEquals(List.of(List.of("TYPE_UPDATE=" + l.getID(), "TEXT=t", "WIDGET_VISIBLE=true",
+            "REMOVE_STYLE_KEY=color", "REMOVE_ATTRIBUTE_KEY=data-k")), wire.blocks);
+    }
+
+    @Test
     public void smallTransactionsAfterABurstStillKeepOnlyTheLastValue() {
         final PLabel[] c = labels(300);
         // burst: grows the pooled buffer and its index far beyond the next transactions (sparse clears after)

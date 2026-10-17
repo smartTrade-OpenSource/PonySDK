@@ -48,13 +48,17 @@ public class ModelWriter {
     /**
      * Models whose update is a pure assignment: setting the property again before the flush makes the
      * previous value irrelevant (the browser applies a whole frame before painting anyway).
-     * Anything with side effects (method calls, eval, addon calls, add/remove...) is never deferred.
+     * A class added / removed and a style / attribute removed are keyed by their name (the last change of a
+     * name wins, in order with the other updates of the object). Anything with side effects (method calls,
+     * eval, addon calls, children added / removed...) is never deferred.
      */
     private static final boolean[] COALESCIBLE = new boolean[ServerToClientModel.values().length];
     static {
         for (final ServerToClientModel m : new ServerToClientModel[] { ServerToClientModel.TEXT, ServerToClientModel.HTML,
                 ServerToClientModel.WIDGET_TITLE, ServerToClientModel.WIDGET_WIDTH, ServerToClientModel.WIDGET_HEIGHT,
-                ServerToClientModel.STYLE_NAME,
+                ServerToClientModel.WIDGET_VISIBLE, ServerToClientModel.STYLE_NAME,
+                ServerToClientModel.ADD_STYLE_NAME, ServerToClientModel.REMOVE_STYLE_NAME,
+                ServerToClientModel.REMOVE_STYLE_KEY, ServerToClientModel.REMOVE_ATTRIBUTE_KEY,
                 ServerToClientModel.PUT_STYLE_KEY, ServerToClientModel.PUT_ATTRIBUTE_KEY, ServerToClientModel.PUT_PROPERTY_KEY }) {
             COALESCIBLE[m.ordinal()] = true;
         }
@@ -95,6 +99,13 @@ public class ModelWriter {
                                final ServerToClientModel valueModel, final Object value) {
         if (!coalescing || !COALESCIBLE[keyModel.ordinal()] || key == null || draining || !canWrite()) return false;
         pending().put(target, keyModel, key, valueModel, value);
+        return true;
+    }
+
+    /** Keyed variant without value (a class added / removed, a style or attribute removed): coalesced per object and key. */
+    public boolean deferUpdate(final UpdateTarget target, final ServerToClientModel keyModel, final String key) {
+        if (!coalescing || !COALESCIBLE[keyModel.ordinal()] || key == null || draining || !canWrite()) return false;
+        pending().put(target, keyModel, key, null, null);
         return true;
     }
 

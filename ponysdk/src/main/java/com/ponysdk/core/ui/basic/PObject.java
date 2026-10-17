@@ -291,6 +291,15 @@ public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
         else safeStackedInstructions().put(serverToClientModel.getValue(), () -> writeUpdate(serverToClientModel, value));
     }
 
+    /** Keyed update without value (a class added / removed, a style or attribute removed): coalesced per name. */
+    protected void saveKeyedUpdate(final ServerToClientModel keyModel, final String key) {
+        if (destroy) return;
+        if (initialized) {
+            if (!writer().deferUpdate(this, keyModel, key)) writeUpdate(keyModel, key);
+        }
+        else safeStackedInstructions().append(() -> writeUpdate(keyModel, key));
+    }
+
     /** Two-field update ({@code key1=value1, key2=value2}), e.g. a style or attribute name + value. */
     protected void saveUpdate(final ServerToClientModel key1, final Object value1,
                               final ServerToClientModel key2, final Object value2) {

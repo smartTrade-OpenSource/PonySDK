@@ -348,6 +348,16 @@ public final class ProtocolBench {
             }
         }, 3_000, 5_000);
 
+        run("tick: 60 cells, text+class toggle", v, grid, (b, i) -> {
+            for (int k = 0; k < 60; k++) {
+                final PLabel l = cells.get(rnd.nextInt(cells.size()));
+                final boolean up = rnd.nextBoolean();
+                l.setText("1." + (10_000 + rnd.nextInt(90_000)));
+                l.removeStyleName(up ? "down" : "up");
+                l.addStyleName(up ? "up" : "down");
+            }
+        }, 3_000, 5_000);
+
         run("tick: 60 cells, text+style colour", v, grid, (b, i) -> {
             for (int k = 0; k < 60; k++) {
                 final PLabel l = cells.get(rnd.nextInt(cells.size()));

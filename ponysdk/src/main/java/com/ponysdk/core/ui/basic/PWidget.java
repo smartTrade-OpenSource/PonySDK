@@ -344,7 +344,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
         if (i < 0) return;
         final String old = styleProperties[i + 1];
         styleProperties = StringPairs.removeAt(styleProperties, i);
-        if (old != null && initialized) saveUpdate(writer -> writer.write(ServerToClientModel.REMOVE_STYLE_KEY, name));
+        if (old != null && initialized) saveKeyedUpdate(ServerToClientModel.REMOVE_STYLE_KEY, name);
     }
 
     public void forceDomId() {
@@ -380,7 +380,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
         final String old = elementAttributes[i + 1];
         elementAttributes = StringPairs.removeAt(elementAttributes, i);
         if (old != null && initialized) {
-            saveUpdate(writer -> writer.write(ServerToClientModel.REMOVE_ATTRIBUTE_KEY, name));
+            saveKeyedUpdate(ServerToClientModel.REMOVE_ATTRIBUTE_KEY, name);
         }
     }
 
@@ -427,7 +427,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     public void addStyleName(final String styleName) {
         if (styleName != null && !styleName.isEmpty() && doAddStyleName(styleName) && initialized) {
-            saveUpdate(writer -> writer.write(ServerToClientModel.ADD_STYLE_NAME, styleName));
+            saveKeyedUpdate(ServerToClientModel.ADD_STYLE_NAME, styleName);
         }
     }
 
@@ -440,7 +440,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
 
     public void removeStyleName(final String styleName) {
         if (styleName != null && !styleName.isEmpty() && doRemoveStyleName(styleName) && initialized) {
-            saveUpdate(writer -> writer.write(ServerToClientModel.REMOVE_STYLE_NAME, styleName));
+            saveKeyedUpdate(ServerToClientModel.REMOVE_STYLE_NAME, styleName);
         }
     }
 

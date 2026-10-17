@@ -173,7 +173,7 @@ final class PendingUpdates {
                 writer.writeUnchecked(km[s], v[s]);
             } else {
                 writer.writeUnchecked(km[s], k[s]);
-                writer.writeUnchecked(vm[s], v[s]);
+                if (vm[s] != null) writer.writeUnchecked(vm[s], v[s]); // keyed updates without value: a class added...
             }
         }
         if (open != null) writer.endObjectUnchecked();
