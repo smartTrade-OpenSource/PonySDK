@@ -747,6 +747,8 @@ public class UISampleEntryPoint implements EntryPoint {
             }
             status.setText("Measuring " + spec.name() + "…");
             spec.measure(cost -> {
+                // page left meanwhile: another page's traffic (a stream) may have run during the window, keep nothing
+                if (p.getParent() == null) return;
                 measured[0]++;
                 MEASURED.put(spec.name(), cost);
                 show.accept(idx + 1, cost);
