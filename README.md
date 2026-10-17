@@ -63,12 +63,12 @@ It runs a Jetty 12 WebSocket server on the backend and uses GWT on the frontend.
 ```sh
 git clone https://github.com/smartTrade-OpenSource/PonySDK.git
 cd PonySDK
-./gradlew :sample:runSampleSpring
+./gradlew :sample:runShowcase
 ```
 
 Then open [http://localhost:8081/sample/](http://localhost:8081/sample/)
 
-The showcase (`./gradlew :sample:runShowcase`, same URL) is a tour of the framework: every widget live with the Java
+The showcase is a tour of the framework: every widget live with the Java
 behind it, the measured cost of each component (server memory, bytes to create and update it), a live price ticker
 with its encoding pipeline, and the binary protocol streaming typed arrays.
 

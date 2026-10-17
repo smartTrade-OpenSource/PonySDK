@@ -31,7 +31,7 @@ public class ShowcaseMain {
         configuration.setEntryPointClass(UISampleEntryPoint.class);
 
         // Linked collections: load order matters (jQuery before the scripts using it) and Set.of /
-        // Map.of have no defined iteration order. Kept in sync with etc/server_application.xml.
+        // Map.of have no defined iteration order.
         configuration.setJavascript(new java.util.LinkedHashSet<>(java.util.List.of(
             "script/jquery-3.7.1.min.js",
             "script/webcomponents.js",

@@ -30,7 +30,7 @@ dependencies {
             'com.google.code.gson:gson:2.14.0'
     )
 
-    // Spring kept for the runSampleSpring task — uses ponysdk-spring module
+    // Spring kept for the runFlexLayoutDemo task (FlexLayout E2E suite) — uses ponysdk-spring module
     implementation project(path: ':ponysdk-spring', configuration: 'default')
 
     runtimeOnly(
@@ -73,23 +73,6 @@ task runShowcase(type: JavaExec) {
     jvmArgs = [
         '-Xmx1g',
         '-XX:+UseZGC',
-        // Brotli HTTP compression loads a native lib (brotli4j); JDK 24+ (JEP 472) warns on native
-        // access now and will block it later unless explicitly granted.
-        '--enable-native-access=ALL-UNNAMED',
-        '-Dlog4j.configurationFile=etc/log4j2.xml'
-    ]
-}
-
-task runSampleSpring(type: JavaExec) {
-    classpath = sourceSets.main.runtimeClasspath
-    classpath += files(buildDirPath + '/gwt/gwt')
-    classpath += files(buildDirPath + '/resources')
-    classpath += files(buildDirPath + '/resources/main')
-    mainClass = 'com.ponysdk.impl.spring.MainSpring'
-    jvmArgs = [
-        '-Xmx2g', '-Xms2g',
-        '-XX:+UseZGC',
-        '-XX:SoftMaxHeapSize=1536m',
         // Brotli HTTP compression loads a native lib (brotli4j); JDK 24+ (JEP 472) warns on native
         // access now and will block it later unless explicitly granted.
         '--enable-native-access=ALL-UNNAMED',
