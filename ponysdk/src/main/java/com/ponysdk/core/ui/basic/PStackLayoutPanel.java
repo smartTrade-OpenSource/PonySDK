@@ -94,7 +94,7 @@ public class PStackLayoutPanel extends PWidget implements HasPWidgets, PAnimated
     @Override
     void init0() {
         super.init0();
-        children.forEach(widget -> widget.attach(window, frame));
+        children.forEach(widget -> widget.attach(window, getFrame()));
     }
 
     public void add(final PWidget child, final String header, final boolean asHtml, final double headerSize) {
@@ -102,7 +102,7 @@ public class PStackLayoutPanel extends PWidget implements HasPWidgets, PAnimated
         children.add(child);
         adopt(child);
 
-        child.attach(window, frame);
+        child.attach(window, getFrame());
         child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.HTML, header),
                 new ServerBinaryModel(ServerToClientModel.SIZE, headerSize));
     }

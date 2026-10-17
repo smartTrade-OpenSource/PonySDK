@@ -64,7 +64,7 @@ public class PTree extends PWidget implements Iterable<PTreeItem> {
     @Override
     void init0() {
         super.init0();
-        root.attach(window, frame);
+        root.attach(window, getFrame());
     }
 
     @Override

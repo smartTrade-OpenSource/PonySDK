@@ -519,7 +519,7 @@ public abstract class PWidget extends PObject implements IsPWidget {
                 if (binaryModel != null) writer.write(binaryModel.getKey(), binaryModel.getValue());
             };
             if (initialized) writeAddHandler(callback);
-            else safeStackedInstructions().put(saveKey++, () -> writeAddHandler(callback));
+            else safeStackedInstructions().append(() -> writeAddHandler(callback));
         }
 
         return handlerRegistration;

@@ -62,7 +62,6 @@ public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
 
     protected final int ID = UIContext.get().nextID();
     protected PWindow window;
-    protected PFrame frame;
 
     /**
      * Rarely used state, allocated on first use: every widget paid one reference slot per field
@@ -77,6 +76,8 @@ public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
         private String nativeBindingFunction;
         private PTerminalEvent.Handler terminalHandler;
         private AjaxHandler ajaxHandler;
+        /** The frame the object lives in, when not directly in its window (rare: iframes). */
+        private PFrame frame;
     }
 
     private Extras extras;
@@ -107,8 +108,6 @@ public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
     protected boolean initialized = false;
     protected boolean destroy = false;
 
-    protected int saveKey = ServerToClientModel.MAX_VALUE; // Has to be higher than all ordinal of ServerToClientModel
-
     PObject() {
     }
 
@@ -121,7 +120,7 @@ public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
     protected abstract WidgetType getWidgetType();
 
     protected boolean attach(final PWindow window, final PFrame frame) {
-        this.frame = frame;
+        setFrame(frame);
 
         if (this.window == null && window != null) {
             this.window = window;
@@ -138,18 +137,19 @@ public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
     void init() {
         if (initialized) return;
         if (isParentInitialized()) applyInit();
-        else if (frame != null && !frame.isInitialized()) frame.addInitializeListener(event -> applyInit());
+        else if (getFrame() != null && !getFrame().isInitialized()) getFrame().addInitializeListener(event -> applyInit());
         else window.addOpenHandler(window -> applyInit());
     }
 
     public boolean isParentInitialized() {
+        final PFrame frame = getFrame();
         return window.isOpened() && (frame == null || frame.isInitialized());
     }
 
     protected void applyInit() {
         final ModelWriter writer = writer();
         writer.beginObject(window);
-        if (frame != null) writer.writeInt(ServerToClientModel.FRAME_ID, frame.getID());
+        writeFrameId(writer);
         writer.writeInt(ServerToClientModel.TYPE_CREATE, ID);
         writer.write(ServerToClientModel.WIDGET_TYPE, getWidgetType().getValue());
         enrichForCreation(writer);
@@ -194,7 +194,16 @@ public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
     }
 
     public PFrame getFrame() {
-        return frame;
+        return extras != null ? extras.frame : null;
+    }
+
+    protected void setFrame(final PFrame frame) {
+        if (frame != null || extras != null) extras().frame = frame;
+    }
+
+    private void writeFrameId(final ModelWriter writer) {
+        final PFrame frame = getFrame();
+        if (frame != null) writer.writeInt(ServerToClientModel.FRAME_ID, frame.getID());
     }
 
     public final int getID() {
@@ -267,7 +276,9 @@ public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
     }
 
     protected void saveUpdate(final ModelWriterCallback callback) {
-        saveUpdate(saveKey++, callback);
+        if (destroy) return;
+        if (initialized) writeUpdate(callback);
+        else safeStackedInstructions().append(() -> writeUpdate(callback));
     }
 
     protected void saveUpdate(final ServerToClientModel serverToClientModel, final Object value) {
@@ -289,7 +300,7 @@ public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
                 writeUpdate(key1, value1, key2, value2);
             }
         }
-        else safeStackedInstructions().put(saveKey++, () -> writeUpdate(key1, value1, key2, value2));
+        else safeStackedInstructions().append(() -> writeUpdate(key1, value1, key2, value2));
     }
 
     /** The writer of this object's context, resolved through its window when possible (no ThreadLocal). */
@@ -302,6 +313,7 @@ public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
     /** {@link com.ponysdk.core.writer.UpdateTarget}: updates of one run share the window / frame header. */
     @Override
     public Object updateGroup() {
+        final PFrame frame = getFrame();
         return frame != null ? frame : window;
     }
 
@@ -315,7 +327,7 @@ public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
     public boolean beginCoalescedUpdate(final ModelWriter writer) {
         if (destroy) return false;
         writer.beginObject(window);
-        if (frame != null) writer.writeInt(ServerToClientModel.FRAME_ID, frame.getID());
+        writeFrameId(writer);
         writer.writeInt(ServerToClientModel.TYPE_UPDATE, ID);
         return true;
     }
@@ -323,7 +335,7 @@ public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
     private ModelWriter beginUpdate() {
         final ModelWriter writer = writer();
         writer.beginObject(window);
-        if (frame != null) writer.writeInt(ServerToClientModel.FRAME_ID, frame.getID());
+        writeFrameId(writer);
         writer.writeInt(ServerToClientModel.TYPE_UPDATE, ID);
         return writer;
     }
@@ -344,13 +356,6 @@ public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
         writer.endObject();
     }
 
-    private void saveUpdate(final int atomicKey, final ModelWriterCallback callback) {
-        if (destroy) return;
-
-        if (initialized) writeUpdate(callback);
-        else safeStackedInstructions().put(atomicKey, () -> writeUpdate(callback));
-    }
-
     void writeUpdate(final ModelWriterCallback callback) {
         if (destroy) return;
 
@@ -363,7 +368,7 @@ public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
         if (destroy) return;
         // The common add (no extra model): one capture when deferred, none when written right away
         if (initialized) writeAdd(objectID, parentObjectID);
-        else safeStackedInstructions().put(saveKey++, () -> writeAdd(objectID, parentObjectID));
+        else safeStackedInstructions().append(() -> writeAdd(objectID, parentObjectID));
     }
 
     private void writeAdd(final int objectID, final int parentObjectID) {
@@ -371,7 +376,7 @@ public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
         final ModelWriter writer = writer();
         if (writer.addToOpenCreate(objectID, parentObjectID)) return; // created in its parent
         writer.beginObject(window);
-        if (frame != null) writer.writeInt(ServerToClientModel.FRAME_ID, frame.getID());
+        writeFrameId(writer);
         writer.writeInt(ServerToClientModel.TYPE_ADD, objectID);
         writer.writeInt(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
         writer.endObject();
@@ -390,7 +395,7 @@ public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
             }
         };
         if (initialized) writeAdd(callback);
-        else safeStackedInstructions().put(saveKey++, () -> writeAdd(callback));
+        else safeStackedInstructions().append(() -> writeAdd(callback));
     }
 
     private void writeAdd(final ModelWriterCallback callback) {
@@ -398,7 +403,7 @@ public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
 
         final ModelWriter writer = writer();
         writer.beginObject(window);
-        if (frame != null) writer.writeInt(ServerToClientModel.FRAME_ID, frame.getID());
+        writeFrameId(writer);
 
         callback.doWrite(writer);
         writer.endObject();
@@ -409,7 +414,7 @@ public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
 
         final ModelWriterCallback callback = writer -> writer.write(ServerToClientModel.HANDLER_TYPE, type.getValue());
         if (initialized) writeAddHandler(callback);
-        else safeStackedInstructions().put(saveKey++, () -> writeAddHandler(callback));
+        else safeStackedInstructions().append(() -> writeAddHandler(callback));
     }
 
     void writeAddHandler(final ModelWriterCallback callback) {
@@ -417,7 +422,7 @@ public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
 
         final ModelWriter writer = writer();
         writer.beginObject(window);
-        if (frame != null) writer.writeInt(ServerToClientModel.FRAME_ID, frame.getID());
+        writeFrameId(writer);
         writer.writeInt(ServerToClientModel.TYPE_ADD_HANDLER, ID);
 
         callback.doWrite(writer);
@@ -432,7 +437,7 @@ public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
             writer.write(ServerToClientModel.HANDLER_TYPE, type.getValue());
         };
         if (initialized) writeRemoveHandler(callback);
-        else safeStackedInstructions().put(saveKey++, () -> writeRemoveHandler(callback));
+        else safeStackedInstructions().append(() -> writeRemoveHandler(callback));
     }
 
     private void writeRemoveHandler(final ModelWriterCallback callback) {
@@ -440,7 +445,7 @@ public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
 
         final ModelWriter writer = writer();
         writer.beginObject(window);
-        if (frame != null) writer.writeInt(ServerToClientModel.FRAME_ID, frame.getID());
+        writeFrameId(writer);
 
         callback.doWrite(writer);
         writer.endObject();
@@ -454,7 +459,7 @@ public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
             writer.writeInt(ServerToClientModel.PARENT_OBJECT_ID, parentObjectID);
         };
         if (initialized) writeRemove(callback);
-        else safeStackedInstructions().put(saveKey++, () -> writeRemove(callback));
+        else safeStackedInstructions().append(() -> writeRemove(callback));
     }
 
     private void writeRemove(final ModelWriterCallback callback) {
@@ -462,7 +467,7 @@ public abstract class PObject implements com.ponysdk.core.writer.UpdateTarget {
 
         final ModelWriter writer = writer();
         writer.beginObject(window);
-        if (frame != null) writer.writeInt(ServerToClientModel.FRAME_ID, frame.getID());
+        writeFrameId(writer);
 
         callback.doWrite(writer);
         writer.endObject();

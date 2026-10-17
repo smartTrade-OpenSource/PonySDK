@@ -203,7 +203,7 @@ public abstract class PHTMLTable<T extends PCellFormatter> extends PPanel {
             adopt(widget);
 
             // Physical attach.
-            widget.attach(window, frame);
+            widget.attach(window, getFrame());
             widget.saveAdd(widget.getID(), ID, new ServerBinaryModel(ServerToClientModel.ROW, row),
                     new ServerBinaryModel(ServerToClientModel.COLUMN, column));
 

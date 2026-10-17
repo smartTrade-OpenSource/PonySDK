@@ -42,7 +42,7 @@ public abstract class PAddOnComposite<T extends PWidget> extends PAddOn implemen
 
     @Override
     public boolean attach(final PWindow window, final PFrame frame) {
-        this.frame = frame;
+        setFrame(frame);
 
         if (this.window == null && window != null) {
             this.window = window;

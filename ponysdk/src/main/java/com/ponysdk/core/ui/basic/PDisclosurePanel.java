@@ -98,7 +98,7 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, PAcceptsOn
     @Override
     void init0() {
         super.init0();
-        if (content != null) content.attach(window, frame);
+        if (content != null) content.attach(window, getFrame());
     }
 
     public PWidget getContent() {
@@ -125,7 +125,7 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, PAcceptsOn
         content = w;
 
         // Physical attach.
-        w.attach(window, frame);
+        w.attach(window, getFrame());
         w.saveAdd(w.getID(), getID());
     }
 

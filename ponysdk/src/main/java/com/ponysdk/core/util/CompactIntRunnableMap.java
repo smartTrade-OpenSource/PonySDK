@@ -72,6 +72,14 @@ public final class CompactIntRunnableMap {
         size++;
     }
 
+    /** Key of {@link #append}ed values: never a model ordinal, so {@link #put} never replaces them. */
+    private static final int NO_KEY = -1;
+
+    /** Adds a value that no later {@link #put} replaces (one-off instructions: adds, handlers, callbacks). */
+    public void append(final Runnable value) {
+        put(NO_KEY - size, value); // distinct negative keys: never equal to a model ordinal nor to each other
+    }
+
     /**
      * Executes all values in insertion order.
      */

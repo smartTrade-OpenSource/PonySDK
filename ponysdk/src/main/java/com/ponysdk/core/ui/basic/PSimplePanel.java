@@ -100,7 +100,7 @@ public class PSimplePanel extends PPanel implements PAcceptsOneWidget {
 
         adopt(w);
 
-        if (isInitialized()) w.attach(window, frame);
+        if (isInitialized()) w.attach(window, getFrame());
         w.saveAdd(w.getID(), ID);
     }
 

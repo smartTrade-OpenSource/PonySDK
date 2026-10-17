@@ -315,7 +315,7 @@ public class PWebComponent extends PComplexPanel {
                 // A SlotPanel has no CREATE of its own, so it is never "initialized": its window is set
                 // when the slot is attached (which attaches the children present at that time). Testing
                 // isInitialized() here dropped every child added once the web component was live.
-                if (window != null) child.attach(window, frame);
+                if (window != null) child.attach(window, getFrame());
                 // Inject WC_SLOT_NAME alongside the standard TYPE_ADD
                 child.saveAdd(child.getID(), PWebComponent.this.getID(),
                     new com.ponysdk.core.ui.model.ServerBinaryModel(ServerToClientModel.WC_SLOT_NAME, slotName));
@@ -326,7 +326,7 @@ public class PWebComponent extends PComplexPanel {
 
         @Override
         protected boolean attach(final PWindow window, final PFrame frame) {
-            this.frame = frame;
+            setFrame(frame);
             if (this.window == null && window != null) {
                 this.window = window;
                 // Don't call init() — SlotPanel has no own CREATE message
@@ -358,7 +358,7 @@ public class PWebComponent extends PComplexPanel {
         return slots.computeIfAbsent(slotName, name -> {
             final SlotPanel sp = new SlotPanel(name);
             // Propagate window/frame if already attached
-            if (window != null) sp.attach(window, frame);
+            if (window != null) sp.attach(window, getFrame());
             return sp;
         });
     }
@@ -377,7 +377,7 @@ public class PWebComponent extends PComplexPanel {
         // Propagate attach to all declared slots so their children get initialized
         if (slots != null) {
             for (final SlotPanel sp : slots.values()) {
-                sp.attach(window, frame);
+                sp.attach(window, getFrame());
             }
         }
     }
