@@ -272,7 +272,8 @@ task gwtc(type: JavaExec) {
             '-sourceLevel',
             '17',
             'com.ponysdk.core.PonyTerminal',
-            '-generateJsInteropExports'
+            '-generateJsInteropExports',
+            '-XnoclassMetadata' // see PonyTerminal.gwt.xml: smaller output, class names gone from client diagnostics
     ]
     // Readable JavaScript for browser profiling: ./gradlew :ponysdk:gwtc -Pgwt.style=PRETTY (default OBFUSCATED)
     if (project.hasProperty('gwt.style')) {

@@ -17,6 +17,13 @@
     <inherits name="com.google.gwt.core.StackTrace" />
     <set-property name="compiler.stackMode" value="strip" />
 
+    <!-- Smaller, faster output (with -XnoclassMetadata in the gwtc task: -9.7 % raw, -8.5 % gzip). The cost is in
+         client diagnostics: class names read Class$S..., a wrong cast or index fails later as a TypeError, enum
+         names are obfuscated except ClientToServerModel, whose name() becomes HTTP header names (PonySDK.java). -->
+    <set-configuration-property name="compiler.enum.obfuscate.names" value="true" />
+    <set-configuration-property name="compiler.enum.obfuscate.names.blacklist" value="com.ponysdk.core.model.ClientToServerModel" />
+    <set-property name="jre.checks.checkLevel" value="MINIMAL" />
+
 <!-- 	<script src="ponysdk.js" /> -->
 
 </module>
