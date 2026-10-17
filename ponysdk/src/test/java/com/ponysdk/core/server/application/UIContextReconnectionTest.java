@@ -657,7 +657,7 @@ public class UIContextReconnectionTest {
     public void testExecuteReturnsFalseWhenDead() {
         uiContext.suspend(200);
         // Wait for timeout to kill it
-        try { Thread.sleep(500); } catch (InterruptedException ignored) {}
+        awaitDead(uiContext);
 
         assertFalse(uiContext.isAlive());
         boolean result = uiContext.execute(() -> fail("Should not run"));
@@ -672,9 +672,22 @@ public class UIContextReconnectionTest {
         uiContext.suspend(0); // 0ms timeout = immediate
         assertTrue(uiContext.isSuspended()); // might still be suspended briefly
 
-        Thread.sleep(200); // give the virtual thread time to fire
+        awaitDead(uiContext); // the destroy runs on a virtual thread: give it time on a loaded machine
 
         assertFalse("Zero timeout should destroy UIContext", uiContext.isAlive());
+    }
+
+    /** Waits until the context is destroyed (a timer thread does it), at most 5 s: a fixed sleep is flaky on CI. */
+    private static void awaitDead(final UIContext context) {
+        final long deadline = System.currentTimeMillis() + 5_000;
+        while (context.isAlive() && System.currentTimeMillis() < deadline) {
+            try {
+                Thread.sleep(10);
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return;
+            }
+        }
     }
 
     /**
