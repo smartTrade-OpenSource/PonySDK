@@ -151,7 +151,7 @@ a:hover { text-decoration: underline; }
     font-weight: 600;
     letter-spacing: .06em;
     text-transform: uppercase;
-    color: var(--text-4);
+    color: var(--text-3);
     padding: 18px 10px 6px;
 }
 .pony-nav-group:first-child { padding-top: 4px; }
@@ -181,7 +181,7 @@ a:hover { text-decoration: underline; }
 }
 
 .pony-nav-footer { margin-top: auto; padding: 14px 10px 4px; border-top: 1px solid var(--border); }
-.pony-version { font-size: 12px; color: var(--text-4); }
+.pony-version { font-size: 12px; color: var(--text-3); }
 
 .pony-content { flex: 1; min-width: 0; padding: 36px 48px 64px; max-width: 1240px; }
 
@@ -218,6 +218,7 @@ a:hover { text-decoration: underline; }
 /* consecutive rows form one bordered group: rounded at both ends of the group */
 .pony-row {
     display: flex;
+    flex-wrap: wrap; /* a widget wider than the row (rich text toolbar) moves the rest to the next line */
     align-items: center;
     gap: 20px;
     padding: 14px 18px;
@@ -230,6 +231,9 @@ a:hover { text-decoration: underline; }
 .pony-row:not(:has(+ .pony-row)) { border-bottom-left-radius: var(--radius); border-bottom-right-radius: var(--radius); margin-bottom: 10px; }
 .pony-row:hover { background: var(--bg-subtle); }
 .pony-label { min-width: 220px; font-size: 13px; font-weight: 600; color: var(--text); }
+.pony-row > * { max-width: 100%; }
+.pony-row > :not(.pony-label):not(.row-cost) { overflow-x: auto; position: relative; } /* relative: also clips GWT's absolute focus inputs */
+.pony-row > table { display: block; } /* a table only scrolls as a block (its rows keep their table layout) */
 
 .row-cost { margin-left: auto; display: flex; align-items: center; gap: 10px; padding-left: 12px; flex-shrink: 0; }
 .row-cost-result { font-family: var(--mono); font-size: 12px; color: var(--text-2); }
@@ -274,7 +278,7 @@ a:hover { text-decoration: underline; }
 }
 .gwt-Button:hover, .gwt-PushButton:hover { background: var(--bg-subtle); border-color: #94a3b8; }
 .gwt-Button:active, .gwt-PushButton-down { background: var(--bg-muted); box-shadow: none; }
-.gwt-Button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.gwt-Button:focus-visible, .gwt-PushButton:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .gwt-Button[disabled] { opacity: .5; cursor: default; }
 .gwt-Button.primary, .gwt-Button.ov-primary {
     background: var(--accent);
@@ -295,7 +299,8 @@ a:hover { text-decoration: underline; }
     box-shadow: var(--shadow);
     transition: border-color .12s, box-shadow .12s;
 }
-.gwt-TextBox:focus, .gwt-PasswordTextBox:focus, .gwt-TextArea:focus, .gwt-ListBox:focus, .gwt-DateBox:focus {
+.gwt-TextBox:focus, .gwt-PasswordTextBox:focus, .gwt-TextArea:focus, .gwt-ListBox:focus, .gwt-DateBox:focus,
+.gwt-SuggestBox:focus, select:focus {
     border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(79, 70, 229, .15);
 }
@@ -374,7 +379,7 @@ input[type=checkbox], input[type=radio] { accent-color: var(--accent); margin: 0
 .gwt-DatePicker { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); padding: 6px; color: var(--text-2); }
 .gwt-DatePicker td, .gwt-DatePicker .datePickerDay { border: 0; }
 .gwt-DatePicker .datePickerMonthSelector, .gwt-DatePicker .datePickerMonth { background: none; color: var(--text); font-weight: 600; }
-.gwt-DatePicker .datePickerWeekdayLabel, .gwt-DatePicker .datePickerWeekendLabel { background: none; color: var(--text-4); font-size: 12px; }
+.gwt-DatePicker .datePickerWeekdayLabel, .gwt-DatePicker .datePickerWeekendLabel { background: none; color: var(--text-3); font-size: 12px; }
 .gwt-DatePicker .datePickerDay { background: none; border-radius: 6px; padding: 4px 7px; cursor: pointer; }
 .gwt-DatePicker .datePickerDay:hover, .gwt-DatePicker .datePickerDayIsHighlighted { background: var(--bg-muted); }
 .gwt-DatePicker .datePickerDayIsToday { box-shadow: inset 0 0 0 1px var(--accent-line); }
@@ -473,7 +478,8 @@ input[type=checkbox], input[type=radio] { accent-color: var(--accent); margin: 0
 
 /* ── Metric cards ────────────────────────────────────────────────────────── */
 
-.perf-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; margin: 0 0 8px; }
+.perf-grid { display: flex; flex-wrap: wrap; gap: 12px; margin: 0 0 8px; }
+.perf-grid > * { flex: 1 1 190px; } /* the last row stretches: no empty slot */
 .perf-card {
     display: flex;
     flex-direction: column;
@@ -487,14 +493,14 @@ input[type=checkbox], input[type=radio] { accent-color: var(--accent); margin: 0
 .perf-icon { display: none; }
 .perf-label { order: -2; font-size: 13px; font-weight: 500; color: var(--text-3); margin-bottom: 8px; }
 .perf-value { font-size: 26px; font-weight: 650; line-height: 1.1; letter-spacing: -.02em; color: var(--text); font-variant-numeric: tabular-nums; }
-.perf-unit { font-size: 12px; color: var(--text-4); margin-top: 4px; text-transform: none; letter-spacing: 0; }
+.perf-unit { font-size: 12px; color: var(--text-3); margin-top: 4px; text-transform: none; letter-spacing: 0; }
 .perf-bar-wrap { height: 4px; margin-top: 14px; border-radius: 4px; background: var(--bg-muted); overflow: hidden; }
 .perf-bar { height: 4px; border-radius: 4px; background: var(--accent) !important; transition: width .6s ease; }
 .perf-trend { font-size: 12px; margin-top: 8px; color: var(--text-3); }
 .perf-up { color: var(--good); }
 .perf-down { color: var(--warn); }
 .perf-spark { width: 100%; height: 40px; margin-top: 8px; }
-.ov-live { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+.ov-live > * { flex-basis: 160px; }
 .cost-body .perf-card { padding: 12px 14px; }
 
 /* ── Overview ────────────────────────────────────────────────────────────── */
@@ -522,9 +528,10 @@ input[type=checkbox], input[type=radio] { accent-color: var(--accent); margin: 0
 .ov-legend-old, .ov-legend-new { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: var(--text-2); }
 .ov-legend-old::before, .ov-legend-new::before { content: ""; width: 14px; height: 6px; border-radius: 3px; background: var(--border-strong); }
 .ov-legend-new::before { background: var(--accent); }
-.ov-legend-text { color: var(--text-4); }
+.ov-legend-text { color: var(--text-3); }
 
-.ov-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 0 0 6px; }
+.ov-kpis { display: flex; flex-wrap: wrap; gap: 12px; margin: 0 0 6px; }
+.ov-kpis > * { flex: 1 1 200px; } /* 5 cards on 3 columns: 3 + 2 wider ones, no empty slot */
 .ov-kpi {
     display: flex; flex-direction: column;
     padding: 16px 16px 14px;
@@ -537,15 +544,15 @@ input[type=checkbox], input[type=radio] { accent-color: var(--accent); margin: 0
     font-size: 11.5px; font-weight: 600; color: var(--good);
     background: var(--good-soft); border: 1px solid #a7f3d0; border-radius: 999px; padding: 1px 8px; white-space: nowrap;
 }
-.ov-kpi-hint { font-size: 12px; color: var(--text-4); margin-top: auto; padding-top: 12px; line-height: 1.45; }
-.ov-cmp { display: grid; grid-template-columns: 30px 1fr auto; align-items: center; gap: 8px; margin: 4px 0; font-size: 12px; color: var(--text-4); font-variant-numeric: tabular-nums; }
+.ov-kpi-hint { font-size: 12px; color: var(--text-3); margin-top: auto; padding-top: 12px; line-height: 1.45; }
+.ov-cmp { display: grid; grid-template-columns: 30px 1fr auto; align-items: center; gap: 8px; margin: 4px 0; font-size: 12px; color: var(--text-3); font-variant-numeric: tabular-nums; }
 .ov-cmp-val { text-align: right; font-family: var(--mono); font-size: 11.5px; white-space: nowrap; }
 .ov-bar { height: 6px; border-radius: 6px; background: var(--bg-muted); overflow: hidden; }
 .ov-bar-fill { height: 100%; border-radius: 6px; background: var(--border-strong); }
 .ov-cmp-now { color: var(--text); font-weight: 600; }
 .ov-cmp-now .ov-cmp-val { color: var(--text); }
 .ov-cmp-now .ov-bar-fill { background: var(--accent); }
-.ov-note { font-size: 12.5px; color: var(--text-4); line-height: 1.6; margin: 10px 0 0; max-width: 860px; }
+.ov-note { font-size: 12.5px; color: var(--text-3); line-height: 1.6; margin: 10px 0 0; max-width: 860px; }
 
 .ov-controls {
     display: flex;
@@ -597,7 +604,7 @@ input[type=checkbox], input[type=radio] { accent-color: var(--accent); margin: 0
 .pl-row-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; }
 .pl-name { min-width: 160px; font-size: 13px; font-weight: 600; color: var(--text); }
 .pl-val { font-size: 17px; font-weight: 650; color: var(--text); font-variant-numeric: tabular-nums; }
-.pl-unit { font-size: 12px; color: var(--text-4); }
+.pl-unit { font-size: 12px; color: var(--text-3); }
 .pl-gain { margin-left: auto; font-size: 12.5px; font-weight: 600; color: var(--good); }
 .pl-bar { height: 8px; border-radius: 8px; background: var(--bg-muted); overflow: hidden; }
 .pl-bar-fill { height: 100%; border-radius: 8px; background: var(--accent-line); transition: width .6s ease; }
@@ -657,6 +664,7 @@ table.data-table, .cost-table {
 .data-th { font-size: 11.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--text-3); }
 .data-table tbody tr:hover td { background: var(--bg-subtle); }
 .lay-frame.data-table table { width: 100%; border-collapse: collapse; }
+.table-scroll { max-width: 100%; overflow-x: auto; padding-bottom: 4px; }
 .cost-table { min-width: min(980px, 100%); }
 .cost-table td { white-space: nowrap; }
 .cost-table td:first-child .gwt-Label { color: var(--text); font-weight: 600; }
@@ -685,7 +693,7 @@ div.selected-row { background-color: #e0e7ff !important; }
 .misc-toolbar td { padding: 0 3px; }
 .dg-col-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; padding: 2px 0; }
 .dg-col-name { flex-basis: 100%; font-weight: 600; color: var(--text); cursor: pointer; }
-.dg-col-action { font-size: 11px; font-weight: 500; color: var(--text-4); cursor: pointer; }
+.dg-col-action { font-size: 11px; font-weight: 500; color: var(--text-3); cursor: pointer; }
 .dg-col-action:hover { color: var(--accent); }
 
 /* FlexLayout demo embedded in the showcase: light toolbar */
@@ -736,7 +744,6 @@ div.selected-row { background-color: #e0e7ff !important; }
     .pony-logo-wrap { min-width: 0; }
     .ov-hero { grid-template-columns: 1fr; gap: 24px; }
     .ov-h1 { font-size: 32px; }
-    .pony-row { flex-wrap: wrap; }
     .pony-header { padding: 0 14px; gap: 12px; }
     .pony-logo-icon { flex-shrink: 0; }
     .pony-subtitle { display: none; }
@@ -763,7 +770,7 @@ div.selected-row { background-color: #e0e7ff !important; }
 .spark-plot { display: flex; align-items: flex-end; gap: 2px; height: 72px; padding-bottom: 1px; border-bottom: 1px solid var(--border); contain: strict; }
 .spark-bar { flex: 1; min-width: 2px; background: var(--accent-line); border-radius: 2px 2px 0 0; }
 .spark-bar:last-child { background: var(--accent); }
-.spark-range { font-size: 12px; color: var(--text-4); margin-top: 8px; font-variant-numeric: tabular-nums; }
+.spark-range { font-size: 12px; color: var(--text-3); margin-top: 8px; font-variant-numeric: tabular-nums; }
 .gwt-DatePicker .datePickerPreviousButton, .gwt-DatePicker .datePickerNextButton, .gwt-DatePicker .html-face {
     color: var(--text-3) !important; cursor: pointer; padding: 0 6px; border-radius: 6px;
 }

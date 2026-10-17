@@ -718,7 +718,11 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             table.setWidget(r + 1, 0, Element.newPLabel(specs.get(r).name()));
             for (int c = 1; c < heads.length; c++) table.setWidget(r + 1, c, Element.newPLabel(c == 5 ? specs.get(r).updateLabel() : "—"));
         }
-        p.add(table);
+        // 8 columns: the table scrolls on its own instead of widening the page
+        final PFlowPanel tableScroll = Element.newPFlowPanel();
+        tableScroll.addStyleName("table-scroll");
+        tableScroll.add(table);
+        p.add(tableScroll);
         p.add(el("ov-note", "Heavy components (DataGrid2, FlexLayout) are measured on 5 instances laid out off-screen, "
             + "bytes counted until they finish rendering. Memory: object graph of one instance, shared objects (session, window, style pools, "
             + "interned strings) excluded. Protocol: exact bytes produced by the binary protocol, per instance. Wire: "
@@ -875,7 +879,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
                 + ln("    " + ty("PScheduler") + "." + mt("scheduleAtFixedRate") + "(")
                 + ln("        () -> price." + mt("setText") + "(feed." + mt("last") + "()),")
                 + ln("        " + ty("Duration") + "." + mt("ofMillis") + "(50));")
-                + ln("    " + cm("each tick: ~4 bytes on the wire"))
+                + ln("    " + cm("each tick: about 10 bytes on the wire"))
                 + ln("  }")
                 + ln("}"));
         heroCode.add(heroCodeHead, heroCodeBody);
@@ -1531,8 +1535,8 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         // Highlight box
         p.add(highlightBox("", "Zero polling overhead",
             "PonySDK uses a persistent WebSocket connection. No HTTP polling, no REST calls. " +
-            "Each UI update is a binary delta of a few bytes, often under 3 bytes on the wire once the " +
-            "dictionary and permessage-deflate are warm: see Overview for a live measurement."));
+            "Each UI update is a binary delta of a few bytes: about 10 bytes on the wire for a lone update, about 5 " +
+            "per cell when a grid updates many cells at once: see Overview for a live measurement."));
 
         // Live refresh every second
         final long[] prevHeap = {0};
@@ -1746,7 +1750,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
     }
 
     private static String snippet_liveCounter() {
-        return ln(cm("Server pushes updates every 100ms — ~5 bytes per frame")) +
+        return ln(cm("Server pushes updates every 100ms — about 10 bytes per update")) +
             ln(ty("PLabel") + " label = " + ty("Element") + "." + mt("newPLabel") + "(" + st("0") + ");") +
             ln(ty("PWindow") + "." + mt("getMain") + "()." + mt("add") + "(label);") +
             ln("") +
