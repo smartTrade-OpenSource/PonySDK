@@ -1,8 +1,8 @@
 /*
  * PonySDK showcase - light, product-documentation style theme.
  * One accent colour (indigo), neutral slate greys, hairline borders, numbers in tabular figures.
- * Loaded after the GWT "clean" theme (css/ponysdk.css): same specificity wins by order, !important is only used
- * where a GWT widget sets the property itself.
+ * Loaded last, after the framework's style/ponysdk.css and style/flexlayout.css: !important is only used where a
+ * widget or the Java code sets the property inline.
  */
 
 :root {
@@ -365,8 +365,8 @@ input[type=checkbox], input[type=radio] { accent-color: var(--accent); margin: 0
 .gwt-StackLayoutPanel .gwt-StackLayoutPanelHeader-hovering { background: var(--bg-muted); }
 .gwt-StackLayoutPanel .gwt-StackLayoutPanelContent { border: 0; background: #fff; }
 
-.gwt-SplitLayoutPanel-HDragger, .gwt-SplitLayoutPanel-VDragger { background: var(--border) !important; }
-.gwt-SplitLayoutPanel-HDragger:hover, .gwt-SplitLayoutPanel-VDragger:hover { background: var(--accent) !important; }
+.gwt-SplitLayoutPanel-HDragger, .gwt-SplitLayoutPanel-VDragger { background: var(--border); }
+.gwt-SplitLayoutPanel-HDragger:hover, .gwt-SplitLayoutPanel-VDragger:hover { background: var(--accent); }
 
 .gwt-DisclosurePanel .header, .gwt-DisclosurePanel a.header, .gwt-DisclosurePanel a.header td {
     color: var(--text);
@@ -684,10 +684,10 @@ table.data-table, .cost-table {
 .pony-grid-row { border-bottom: 1px solid var(--bg-muted); }
 /* hover: the addon marks both halves of the row (pinned + scrolling) with [pony-hovered]; the legacy sample
    stylesheet painted it red */
-.pony-grid-row:hover, .pony-grid-row[pony-hovered], [pony-hovered] { background-color: var(--accent-soft) !important; }
+.pony-grid-row:hover, .pony-grid-row[pony-hovered], [pony-hovered] { background-color: var(--accent-soft); }
 .pony-grid-row[linked-row] { background-color: var(--bg-muted) !important; }
-div.selected-row { background-color: #e0e7ff !important; }
-.unpair-row { background: #fcfdfe !important; }
+div.selected-row { background-color: #e0e7ff; }
+.unpair-row { background: #fcfdfe; }
 
 .misc-toolbar { gap: 6px; padding: 6px; margin-bottom: 10px; background: var(--bg-subtle); border: 1px solid var(--border); border-radius: var(--radius); }
 .misc-toolbar td { padding: 0 3px; }
@@ -708,7 +708,7 @@ div.selected-row { background-color: #e0e7ff !important; }
 }
 /* the demo's panel texts carry pastel colours made for its dark default theme */
 .pony-content .fl-theme-light .gwt-Label[style*="color"] { color: var(--text-2) !important; }
-.gwt-Tree table { width: auto !important; }
+.gwt-Tree table { width: auto; }
 .gwt-Tree td { padding: 0 2px; vertical-align: middle; }
 
 .pony-stack { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
@@ -724,7 +724,7 @@ div.selected-row { background-color: #e0e7ff !important; }
 .gwt-RichTextToolbar select { padding: 3px 6px; font-size: 12px; margin: 2px; box-shadow: none; }
 
 /* the selected day must stay readable over the GWT clean theme */
-.gwt-DatePicker .datePickerDayIsValue, .gwt-DatePicker .datePickerDayIsValueAndHighlighted { background: var(--accent) !important; color: #fff !important; }
+.gwt-DatePicker .datePickerDayIsValue, .gwt-DatePicker .datePickerDayIsValueAndHighlighted { background: var(--accent); color: #fff; }
 
 /* echo readouts hug their text */
 .pony-ex-echo { display: inline-block; max-width: 100%; }
