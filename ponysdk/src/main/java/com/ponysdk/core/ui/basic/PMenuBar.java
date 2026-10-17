@@ -117,7 +117,7 @@ public class PMenuBar extends PWidget implements Iterable<PMenuSubElement> {
     @Override
     void init0() {
         super.init0();
-        forEach(item -> item.attach(window, frame));
+        forEach(item -> item.attach(window, getFrame()));
     }
 
     @Override
@@ -162,14 +162,14 @@ public class PMenuBar extends PWidget implements Iterable<PMenuSubElement> {
     public <T extends PMenuSubElement> T addElement(final T elt) {
         items.add(elt);
         elt.saveAdd(elt.getID(), ID);
-        elt.attach(window, frame);
+        elt.attach(window, getFrame());
         return elt;
     }
 
     public <T extends PMenuSubElement> T insertElement(final T elt, final int beforeIndex) throws IndexOutOfBoundsException {
         items.add(beforeIndex, elt);
         elt.saveAdd(elt.getID(), ID, new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex));
-        elt.attach(window, frame);
+        elt.attach(window, getFrame());
         return elt;
     }
 

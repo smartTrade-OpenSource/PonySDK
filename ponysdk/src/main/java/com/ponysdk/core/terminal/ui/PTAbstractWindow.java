@@ -27,8 +27,10 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
-import elemental.dom.Document;
-import elemental.html.Window;
+import elemental2.dom.Document;
+import elemental2.dom.Window;
+
+import jsinterop.base.Js;
 
 public abstract class PTAbstractWindow extends AbstractPTObject {
 
@@ -41,14 +43,14 @@ public abstract class PTAbstractWindow extends AbstractPTObject {
             window.print();
             return true;
         } else if (ServerToClientModel.RELOAD == model) {
-            window.getLocation().reload();
+            window.location.reload();
             return true;
         } else if (ServerToClientModel.WINDOW_LOCATION_REPLACE == model) {
-            window.getLocation().replace(binaryModel.getStringValue());
+            window.location.replace(binaryModel.getStringValue());
             return true;
         } else if (ServerToClientModel.RESIZE_BY_X == model) {
-            final float x = (float) binaryModel.getDoubleValue();
-            final float y = (float) buffer.readBinaryModel().getDoubleValue();
+            final int x = (int) binaryModel.getDoubleValue();
+            final int y = (int) buffer.readBinaryModel().getDoubleValue();
             window.resizeBy(x, y);
             return true;
         } else if (ServerToClientModel.RESIZE_TO_WIDTH == model) {
@@ -57,13 +59,13 @@ public abstract class PTAbstractWindow extends AbstractPTObject {
             window.resizeTo(width, height);
             return true;
         } else if (ServerToClientModel.MOVE_BY_X == model) {
-            final float x = (float) binaryModel.getDoubleValue();
-            final float y = (float) buffer.readBinaryModel().getDoubleValue();
+            final int x = (int) binaryModel.getDoubleValue();
+            final int y = (int) buffer.readBinaryModel().getDoubleValue();
             window.moveBy(x, y);
             return true;
         } else if (ServerToClientModel.MOVE_TO_X == model) {
-            final float x = (float) binaryModel.getDoubleValue();
-            final float y = (float) buffer.readBinaryModel().getDoubleValue();
+            final int x = (int) binaryModel.getDoubleValue();
+            final int y = (int) buffer.readBinaryModel().getDoubleValue();
             window.moveTo(x, y);
             return true;
         } else if (ServerToClientModel.FOCUS == model) {
@@ -78,20 +80,21 @@ public abstract class PTAbstractWindow extends AbstractPTObject {
         }
     }
 
-    public static final native void setTitle(String title, Window window) /*-{
-                                                                          window.document.title = title;
-                                                                          }-*/;
+    public static void setTitle(final String title, final Window window) {
+        final Object doc = Js.asPropertyMap(window).get("document");
+        Js.asPropertyMap(doc).set("title", title);
+    }
 
-    public static final native boolean isIntersectionObserverAPI(Window window) /*-{
-                                                                                 return window.IntersectionObserver !== undefined;
-                                                                                 }-*/;
+    public static boolean isIntersectionObserverAPI(final Window window) {
+        return Js.asPropertyMap(window).has("IntersectionObserver");
+    }
 
-    public static final native boolean isPageVisibilityAPI(Document document) /*-{
-                                                                               return document.hidden !== undefined;
-                                                                               }-*/;
+    public static boolean isPageVisibilityAPI(final Document document) {
+        return Js.asPropertyMap(document).has("hidden");
+    }
 
-    public static final native boolean isDocumentVisible(final Document document) /*-{
-                                                                                   return !document.hidden;
-                                                                                   }-*/;
+    public static boolean isDocumentVisible(final Document document) {
+        return !Js.isTruthy(Js.asPropertyMap(document).get("hidden"));
+    }
 
 }

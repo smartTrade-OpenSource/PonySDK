@@ -23,7 +23,7 @@
 
 package com.ponysdk.core.ui.basic;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 import com.ponysdk.core.model.ClientToServerModel;
 import com.ponysdk.core.model.ServerToClientModel;

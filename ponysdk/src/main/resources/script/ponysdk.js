@@ -16,10 +16,64 @@ document.doReload = function () {
     document.location.reload();
 };
 
+// ---- pony.wc — Web Component utilities ----
+// Exposed as pony.wc once pony is initialized.
+//
+// pony.wc.registerSharedSheet(href)
+//   Registers a CSS stylesheet URL to be injected into every shadow root that calls
+//   pony.wc.initShadow(this). Call before your components are connected.
+//   If never called, nothing is injected — fully opt-in.
+//
+// pony.wc.initShadow(element)
+//   Call at the top of connectedCallback() to attach a shadow root (open mode) and
+//   inject all registered shared sheets. Safe to call multiple times — idempotent.
+//   Returns the shadowRoot.
+//
+// pony.wc.PonyElement
+//   Convenience base class. Calls initShadow + _render() in connectedCallback.
+//   IMPORTANT: subclasses must NOT define a constructor (or only call super() with
+//   no other logic), because GWT creates custom elements via document.createElement()
+//   which invokes the constructor — any work done there will crash.
+//   Put all initialisation in connectedCallback() or _render() instead.
+var PonyWC = (function () {
+    var _sheets = [];
+
+    function initShadow(el) {
+        if (!el.shadowRoot) {
+            el.attachShadow({ mode: 'open' });
+            for (var i = 0; i < _sheets.length; i++) {
+                var link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = _sheets[i];
+                el.shadowRoot.appendChild(link);
+            }
+        }
+        return el.shadowRoot;
+    }
+
+    // PonyElement — optional base class.
+    // Subclasses get shadow DOM + shared sheets for free in connectedCallback.
+    // Do NOT put logic in the constructor — use connectedCallback / _render instead.
+    class PonyElement extends HTMLElement {
+        connectedCallback() {
+            initShadow(this);
+            if (typeof this._render === 'function') this._render();
+        }
+    }
+
+    return {
+        registerSharedSheet: function (href) { _sheets.push(href); },
+        initShadow: initShadow,
+        PonyElement: PonyElement
+    };
+}());
+
 function onPonySDKModuleLoaded() {
     console.log("onPonySDKModuleLoaded");
 
     pony = com.ponysdk.core.terminal.PonySDK.get();
+    pony.wc = PonyWC;
+
     if (typeof module !== 'undefined' && module.hasOwnProperty('exports')) module.exports.pony = pony;
     else window['pony'] = pony;
 
@@ -37,6 +91,18 @@ function onPonySDKModuleLoaded() {
 }
 if (typeof module !== 'undefined' && module.hasOwnProperty('exports')) module.exports.onPonySDKModuleLoaded = onPonySDKModuleLoaded;
 else window['onPonySDKModuleLoaded'] = onPonySDKModuleLoaded;
+
+// Trailing-edge debounce, same contract as jQuery throttle-debounce's $.debounce(delay, fn): fn runs
+// once, `delay` ms after the last call. Built in so the DataGrid does not depend on a jQuery plugin
+// that is not shipped (the grid crashed with "$.debounce is not a function").
+function ponyDebounce(delay, fn) {
+    var timer = null;
+    return function () {
+        var self = this, args = arguments;
+        if (timer !== null) clearTimeout(timer);
+        timer = setTimeout(function () { timer = null; fn.apply(self, args); }, delay);
+    };
+}
 
 // Decode ArrayBuffer from server
 var textDecoder = null;
@@ -562,7 +628,7 @@ _UTF8 = undefined;
                     that.unpinnedFooter.scrollLeft = scrollLeft;
             });
             this.unpinnedHeader.scrollLeft = 0;
-            this.body.addEventListener("scroll", $.debounce(100, this.checkPosition.bind(this)));
+            this.body.addEventListener("scroll", ponyDebounce(100, this.checkPosition.bind(this)));
 
             window.onresize = function (e) {
                 that.refreshVerticalMargins();

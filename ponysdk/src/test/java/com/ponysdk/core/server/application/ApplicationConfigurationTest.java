@@ -24,7 +24,9 @@
 package com.ponysdk.core.server.application;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Map;
 import java.util.Set;
@@ -43,6 +45,32 @@ public class ApplicationConfigurationTest {
     public void setUp() {
         config = new ApplicationConfiguration();
         assertNotNull(config.toString());
+    }
+
+    /**
+     * Pins the WebSocket hardening defaults — notably the secure-by-default Origin check — and
+     * verifies the setters round-trip.
+     */
+    @Test
+    public void testWebSocketConfigDefaultsAndSetters() {
+        // Secure / safe defaults
+        assertTrue("Origin check (anti-CSWSH) must be on by default", config.isWsOriginCheckEnabled());
+        assertTrue("permessage-deflate on by default", config.isWsPermessageDeflateEnabled());
+        assertEquals(1 << 20, config.getWsMaxInboundMessageSize());
+        assertEquals(1_000_000L, config.getWsIdleTimeoutMs());
+        assertEquals(60_000L, config.getWsSendTimeoutMs());
+
+        // Setters round-trip
+        config.setWsOriginCheckEnabled(false);
+        assertFalse(config.isWsOriginCheckEnabled());
+        config.setWsPermessageDeflateEnabled(false);
+        assertFalse(config.isWsPermessageDeflateEnabled());
+        config.setWsAllowedOrigins(Set.of("https://app.example.com"));
+        assertTrue(config.getWsAllowedOrigins().contains("https://app.example.com"));
+        config.setWsMaxInboundMessageSize(4096);
+        assertEquals(4096, config.getWsMaxInboundMessageSize());
+        config.setWsSendTimeoutMs(5_000);
+        assertEquals(5_000L, config.getWsSendTimeoutMs());
     }
 
     /**

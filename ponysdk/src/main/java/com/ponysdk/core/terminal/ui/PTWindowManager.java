@@ -23,14 +23,15 @@
 
 package com.ponysdk.core.terminal.ui;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.Scheduler;
-
-import elemental.util.ArrayOf;
-import elemental.util.Collections;
-import elemental.util.MapFromIntTo;
 
 public class PTWindowManager {
 
@@ -41,7 +42,7 @@ public class PTWindowManager {
     private static final PTWindowManager instance = new PTWindowManager();
 
     private int mainWindowId;
-    private final MapFromIntTo<PTWindow> windows = Collections.mapFromIntTo();
+    private final Map<Integer, PTWindow> windows = new HashMap<>();
 
     private PTWindowManager() {
         checkWindowsAlive();
@@ -55,7 +56,7 @@ public class PTWindowManager {
         return get().mainWindowId;
     }
 
-    public static ArrayOf<PTWindow> getWindows() {
+    public static Collection<PTWindow> getWindows() {
         return get().windows.values();
     }
 
@@ -64,9 +65,9 @@ public class PTWindowManager {
     }
 
     public static void closeAll() {
-        final ArrayOf<PTWindow> windows = get().windows.values();
-        for (int i = windows.length() - 1; i >= 0; i--) {
-            final PTWindow window = windows.get(i);
+        final List<PTWindow> windowList = new ArrayList<>(get().windows.values());
+        for (int i = windowList.size() - 1; i >= 0; i--) {
+            final PTWindow window = windowList.get(i);
             if (window != null) {
                 try {
                     window.close(true);
@@ -93,9 +94,9 @@ public class PTWindowManager {
     private void checkWindowsAlive() {
         Scheduler.get().scheduleFixedDelay(() -> {
             try {
-                final ArrayOf<PTWindow> windows = get().windows.values();
-                for (int i = windows.length() - 1; i >= 0; i--) {
-                    final PTWindow window = windows.get(i);
+                final List<PTWindow> windowList = new ArrayList<>(get().windows.values());
+                for (int i = windowList.size() - 1; i >= 0; i--) {
+                    final PTWindow window = windowList.get(i);
                     if (window != null && window.isClosed()) window.onClose();
                 }
             } catch (final Throwable t) {

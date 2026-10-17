@@ -37,7 +37,7 @@ import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 import com.ponysdk.core.terminal.ui.w3c.api.IntersectionObserver;
-import elemental.client.Browser;
+import elemental2.dom.DomGlobal;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -90,7 +90,7 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
     }
 
     private final IntersectionObserver createIntersectionObserver() {
-        if (PTAbstractWindow.isIntersectionObserverAPI(Browser.getWindow())) {
+        if (PTAbstractWindow.isIntersectionObserverAPI(DomGlobal.window)) {
             return new IntersectionObserver((entries, observer) -> {
                 if (entries == null || entries.length == 0) return;
                 sendWidgetVisibility(entries[0].isIsIntersecting());
@@ -110,7 +110,6 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
     public void removeHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {
         if (handlerModel.isDomHandler()) {
             // TODO Remove HANDLER_DOM
-            // removeDomHandler(DomHandlerConverter.convert(handlerModel));
         } else if (HandlerModel.HANDLER_VISIBILITY == handlerModel) {
             if (intersectionObserver != null) intersectionObserver.unobserve(uiObject.getElement());
         } else {
@@ -166,8 +165,6 @@ public abstract class PTWidget<T extends Widget> extends PTUIObject<T> implement
             uiObject.addBitlessDomHandler(event -> triggerDomEvent(domHandlerType, event), DragLeaveEvent.getType());
         } else if (DomHandlerType.DROP == domHandlerType) {
             uiObject.addBitlessDomHandler(event -> {
-                // required by GWT api
-                // triggerDomEvent(addHandler.getObjectID(), domHandlerType);
             }, DragOverEvent.getType());
 
             uiObject.addBitlessDomHandler(event -> {

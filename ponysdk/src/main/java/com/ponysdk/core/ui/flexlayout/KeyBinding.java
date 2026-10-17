@@ -1,7 +1,7 @@
 package com.ponysdk.core.ui.flexlayout;
 
-import javax.json.Json;
-import javax.json.JsonObjectBuilder;
+import jakarta.json.Json;
+import jakarta.json.JsonObjectBuilder;
 
 /**
  * Represents a keyboard shortcut with modifier keys (Ctrl, Shift, Alt) and a key character.

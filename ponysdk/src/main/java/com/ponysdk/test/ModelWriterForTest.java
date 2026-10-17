@@ -34,6 +34,11 @@ public class ModelWriterForTest extends ModelWriter {
     }
 
     @Override
+    public void writeInt(final ServerToClientModel model, final int value) {
+        write(model, (Object) value); // single interception point for test writers
+    }
+
+    @Override
     public void write(ServerToClientModel model, Object value) {
         if (model == ServerToClientModel.TYPE_CREATE || model == ServerToClientModel.TYPE_UPDATE) {
             lastObjectID = (int) value;

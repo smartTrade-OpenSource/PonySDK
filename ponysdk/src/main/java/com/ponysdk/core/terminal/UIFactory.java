@@ -83,6 +83,7 @@ import com.ponysdk.core.terminal.ui.PTTextBox;
 import com.ponysdk.core.terminal.ui.PTTree;
 import com.ponysdk.core.terminal.ui.PTTreeItem;
 import com.ponysdk.core.terminal.ui.PTVerticalPanel;
+import com.ponysdk.core.terminal.ui.PTWebComponent;
 import com.ponysdk.core.terminal.ui.PTWindow;
 
 class UIFactory {
@@ -147,6 +148,7 @@ class UIFactory {
         else if (WidgetType.FUNCTIONAL_LABEL == widgetType) return new PTFunctionalLabel();
         else if (WidgetType.FUNCTION == widgetType) return new PTFunction();
         else if (WidgetType.MULTIWORD_SUGGEST_ORACLE == widgetType) return new PTMultiWordSuggestOracle();
+        else if (WidgetType.WEB_COMPONENT == widgetType) return new PTWebComponent();
         else log.severe("UIFactory: Client implementation not found, type : " + widgetType);
 
         return null;

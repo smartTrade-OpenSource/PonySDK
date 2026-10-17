@@ -272,8 +272,12 @@ final class SchedulingContextImpl implements Runnable, SchedulingContext {
 	}
 
 	private void cancelScheduledTasks() {
-		final Iterator<ScheduledFuture<?>> it = scheduledTasks.iterator();
-		synchronized (it) {
+		// Collections.synchronizedSet requires holding the SET's monitor for the whole iteration
+		// (and even to obtain the iterator). Locking the iterator object gives no mutual exclusion
+		// against a concurrent scheduledTasks.add() in toHandler() / a racing destroy(), which would
+		// otherwise throw ConcurrentModificationException.
+		synchronized (scheduledTasks) {
+			final Iterator<ScheduledFuture<?>> it = scheduledTasks.iterator();
 			while (it.hasNext()) {
 				it.next().cancel(false);
 				it.remove();

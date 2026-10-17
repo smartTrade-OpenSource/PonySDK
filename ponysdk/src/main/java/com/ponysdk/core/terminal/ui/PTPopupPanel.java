@@ -89,9 +89,13 @@ public class PTPopupPanel<T extends PopupPanel> extends PTSimplePanel<T>
         } else if (ServerToClientModel.CENTER == model) {
             uiObject.show();
             uiObject.center();
+            // A popup is created hidden (WIDGET_VISIBLE false) when it is attached before being shown:
+            // show() and center() do not undo that, setVisible does.
+            uiObject.setVisible(true);
             return true;
         } else if (ServerToClientModel.OPEN == model) {
             uiObject.show();
+            uiObject.setVisible(true);
             return true;
         } else if (ServerToClientModel.POPUP_POSITION_AND_SHOW == model) {
             uiObject.setVisible(true);

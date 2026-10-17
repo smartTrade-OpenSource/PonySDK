@@ -3,8 +3,8 @@ package com.ponysdk.core.ui.flexlayout;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import javax.json.Json;
-import javax.json.JsonObjectBuilder;
+import jakarta.json.Json;
+import jakarta.json.JsonObjectBuilder;
 
 /**
  * Keyboard shortcut map for FlexLayout actions, supporting bind and unbind.

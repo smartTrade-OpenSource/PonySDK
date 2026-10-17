@@ -55,16 +55,17 @@ import com.ponysdk.core.writer.ModelWriter;
  */
 public class PHistory {
 
-    private final List<PValueChangeHandler<String>> handlers = new CopyOnWriteArrayList<>();
+    private List<PValueChangeHandler<String>> handlers;
 
     private String token;
 
     public void addValueChangeHandler(final PValueChangeHandler<String> handler) {
+        if (handlers == null) handlers = new CopyOnWriteArrayList<>();
         handlers.add(handler);
     }
 
     public void removeValueChangeHandler(final PValueChangeHandler<String> handler) {
-        handlers.remove(handler);
+        if (handlers != null) handlers.remove(handler);
     }
 
     public void newItem(final String token) {
@@ -85,9 +86,11 @@ public class PHistory {
 
     public void fireHistoryChanged(final String token) {
         this.token = token;
-        final PValueChangeEvent<String> event = new PValueChangeEvent<>(this, token);
-        for (final PValueChangeHandler<String> handler : handlers) {
-            handler.onValueChange(event);
+        if (handlers != null) {
+            final PValueChangeEvent<String> event = new PValueChangeEvent<>(this, token);
+            for (final PValueChangeHandler<String> handler : handlers) {
+                handler.onValueChange(event);
+            }
         }
     }
 

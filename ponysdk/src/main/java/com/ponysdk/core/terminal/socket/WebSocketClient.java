@@ -30,67 +30,112 @@ import com.ponysdk.core.terminal.ReconnectionChecker;
 import com.ponysdk.core.terminal.UIBuilder;
 import com.ponysdk.core.terminal.request.WebSocketRequestBuilder;
 
-import elemental.client.Browser;
-import elemental.events.CloseEvent;
-import elemental.events.MessageEvent;
-import elemental.html.ArrayBuffer;
-import elemental.html.WebSocket;
-import elemental.html.Window;
+import elemental2.core.ArrayBuffer;
+import elemental2.core.JsArray;
+import elemental2.core.Uint8Array;
+import elemental2.dom.CloseEvent;
+import elemental2.dom.DomGlobal;
+import elemental2.dom.Event;
+import elemental2.dom.MessageEvent;
+import elemental2.dom.WebSocket;
+import jsinterop.base.Js;
+import jsinterop.base.JsPropertyMap;
 
 public class WebSocketClient {
 
     private static final Logger log = Logger.getLogger(WebSocketClient.class.getName());
 
-    private final Window window;
     private final WebSocket webSocket;
 
     private long lastMessageTime = -1;
 
+    /** Set by the bootstrap page (BootstrapServlet): the socket it opened while this script was downloading. */
+    private static final String EARLY_SOCKET = "ponyEarlySocket";
+
+    private final UIBuilder uiBuilder;
+    private final ReconnectionChecker reconnectionChecker;
+
     public WebSocketClient(final String url, final UIBuilder uiBuilder, final ReconnectionChecker reconnectionChecker) {
-        this.window = Browser.getWindow();
-        this.webSocket = window.newWebSocket(url);
-        this.webSocket.setBinaryType("arraybuffer");
-
-        webSocket.setOnopen(event -> {
-            uiBuilder.init(new WebSocketRequestBuilder(WebSocketClient.this));
-            if (log.isLoggable(Level.INFO)) log.info("WebSocket connected");
-            lastMessageTime = System.currentTimeMillis();
-        });
-
-        webSocket.setOnclose(event -> {
-            if (event instanceof CloseEvent) {
-                final CloseEvent closeEvent = (CloseEvent) event;
-                final int statusCode = closeEvent.getCode();
-                if (log.isLoggable(Level.INFO)) log.info("WebSocket disconnected : " + statusCode);
-                // If it's a not normal disconnection
-                if (statusCode != 1000) reconnectionChecker.detectConnectionFailure();
-            } else {
-                log.severe("WebSocket disconnected : " + event);
-                reconnectionChecker.detectConnectionFailure();
-            }
-        });
-
-        webSocket.setOnerror(event -> {
-            log.severe("WebSocket error : " + event);
-        });
-        webSocket.setOnmessage(event -> {
-            lastMessageTime = System.currentTimeMillis();
-
-            final Object data = ((MessageEvent) event).getData();
-            if (data instanceof ArrayBuffer) {
-                final ArrayBuffer buffer = (ArrayBuffer) data; //TODO nciaravola avoid cast ?
-                try {
-                    uiBuilder.updateMainTerminal(window.newUint8Array(buffer, 0, buffer.getByteLength()));
-                } catch (final Exception e) {
-                    log.log(Level.SEVERE, "Error while processing the " + buffer, e);
-                }
-            }
-        });
+        this(new WebSocket(url), uiBuilder, reconnectionChecker);
     }
 
-    public void send(final String message) {
+    private WebSocketClient(final WebSocket webSocket, final UIBuilder uiBuilder, final ReconnectionChecker reconnectionChecker) {
+        this.webSocket = webSocket;
+        this.uiBuilder = uiBuilder;
+        this.reconnectionChecker = reconnectionChecker;
+        this.webSocket.binaryType = "arraybuffer";
+        webSocket.onopen = event -> onOpen();
+        webSocket.onclose = this::onClose;
+        webSocket.onerror = event -> log.severe("WebSocket error : " + event);
+        webSocket.onmessage = event -> onMessage(((MessageEvent) event).data);
+    }
 
+    /**
+     * First connection of the main window: adopts the socket the page opened while this script was downloading (the
+     * server built the page meanwhile) and replays what it received; without one (a custom page), connects to url.
+     * Handlers are set, then the past events replayed, in the same task: no event can slip in between.
+     */
+    public static WebSocketClient connect(final String url, final UIBuilder uiBuilder, final ReconnectionChecker reconnectionChecker) {
+        final JsPropertyMap<Object> window = Js.asPropertyMap(DomGlobal.window);
+        final Object early = window.get(EARLY_SOCKET);
+        if (early == null) return new WebSocketClient(url, uiBuilder, reconnectionChecker);
+        window.delete(EARLY_SOCKET);
+        final JsPropertyMap<Object> state = Js.asPropertyMap(early);
+        final WebSocketClient client = new WebSocketClient(Js.<WebSocket> cast(state.get("socket")), uiBuilder, reconnectionChecker);
+        if (Js.isTruthy(state.get("opened"))) client.onOpen();
+        final JsArray<Object> messages = Js.cast(state.get("messages"));
+        for (int i = 0; i < messages.length; i++) client.onMessage(messages.getAt(i));
+        final Object closed = state.get("closeEvent");
+        if (closed != null) client.onClose(Js.cast(closed));
+        if (log.isLoggable(Level.INFO)) log.info("WebSocket opened by the page, " + messages.length + " messages replayed");
+        return client;
+    }
+
+    private void onOpen() {
+        uiBuilder.init(new WebSocketRequestBuilder(WebSocketClient.this));
+        if (log.isLoggable(Level.INFO)) log.info("WebSocket connected");
+        lastMessageTime = System.currentTimeMillis();
+    }
+
+    private void onClose(final Event event) {
+        if (event instanceof CloseEvent closeEvent) {
+            final int statusCode = closeEvent.code;
+            if (log.isLoggable(Level.INFO)) log.info("WebSocket disconnected : " + statusCode);
+            if (statusCode != 1000) reconnectionChecker.onWebSocketClosed();
+        } else {
+            log.severe("WebSocket disconnected : " + event);
+            reconnectionChecker.onWebSocketClosed();
+        }
+    }
+
+    private void onMessage(final Object data) {
+        lastMessageTime = System.currentTimeMillis();
+        if (data instanceof ArrayBuffer buffer) {
+            try {
+                uiBuilder.updateMainTerminal(new Uint8Array(buffer, 0, getByteLength(buffer)));
+            } catch (final Exception e) {
+                log.log(Level.SEVERE, "Error while processing the " + buffer, e);
+            } finally {
+                // Update after processing too — if the batch took a long time,
+                // the heartbeat scheduler may fire between onmessage calls and
+                // see a stale lastMessageTime. This proves we're alive, not a slow consumer.
+                lastMessageTime = System.currentTimeMillis();
+            }
+        }
+    }
+
+    /**
+     * Sends a text message (legacy JSON path, kept for backward compatibility).
+     */
+    public void send(final String message) {
         webSocket.send(message);
+    }
+
+    /**
+     * Sends a binary message (new compact binary protocol).
+     */
+    public void sendBinary(final ArrayBuffer buffer) {
+        webSocket.send(buffer);
     }
 
     public void close() {
@@ -101,15 +146,16 @@ public class WebSocketClient {
         webSocket.close(code, reason);
     }
 
-    /**
-     * @return the lastMessageTime
-     */
     public long getLastMessageTime() {
         return lastMessageTime;
+    }
+
+    private static int getByteLength(final ArrayBuffer buf) {
+        return buf.byteLength;
     }
 
     /**
      <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/readyState">See ready state codes</a>
      */
-    public int getReadyState() { return webSocket.getReadyState(); }
+    public int getReadyState() { return (int) webSocket.readyState; }
 }

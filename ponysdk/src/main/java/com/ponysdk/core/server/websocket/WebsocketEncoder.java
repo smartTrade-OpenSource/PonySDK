@@ -31,6 +31,22 @@ public interface WebsocketEncoder {
 
     void encode(final ServerToClientModel model, final Object value);
 
+    /**
+     * Primitive variant for int values (object ids, indexes...): avoids boxing on the write path.
+     * The default boxes and delegates, so encoders that store values (e.g. RecordingEncoder) are unchanged.
+     */
+    default void encodeInt(final ServerToClientModel model, final int value) {
+        encode(model, (Object) value);
+    }
+
     void endObject();
+
+    /**
+     * Binary protocol version understood by the receiving terminal (see ProtocolVersion). Encoders that
+     * store or re-parse the stream (RecordingEncoder) keep the default: the version 1 block structure.
+     */
+    default int protocolVersion() {
+        return com.ponysdk.core.model.ProtocolVersion.V1;
+    }
 
 }

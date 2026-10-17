@@ -218,6 +218,7 @@ public abstract class AbstractDataSource<K, V> implements DataGridSource<K, V> {
 	}
 
 	protected boolean accept(final DefaultRow<V> row) {
+		if (filterController == null) return true;
 		for (Collection<AbstractFilter<V>> groupFilters : filterController.getFilterGroups()) {
 			if (!accept(row, groupFilters))
 				return false;

@@ -33,6 +33,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 
 public class AjaxServlet extends HttpServlet {
@@ -60,7 +61,11 @@ public class AjaxServlet extends HttpServlet {
     private void process(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         try {
             final int uiContextID = Integer.parseInt(req.getHeader(ClientToServerModel.UI_CONTEXT_ID.name()));
-            final UIContext uiContext = SessionManager.get().getUIContext(uiContextID);
+            // Resolve the UIContext within the caller's HTTP session only — never globally.
+            // A global lookup would let a client reach another session's context by guessing its id (IDOR).
+            final HttpSession session = req.getSession(false);
+            final UIContext uiContext = session == null ? null
+                    : SessionManager.get().getUIContext(session.getId(), uiContextID);
             if (uiContext != null) {
                 final int objectID = Integer.parseInt(req.getHeader(ClientToServerModel.OBJECT_ID.name()));
                 uiContext.execute(() -> {
@@ -77,8 +82,10 @@ public class AjaxServlet extends HttpServlet {
                     }
                 });
             } else {
-                log.warn("Can't found UI Context #{}, already destroyed ?", uiContextID);
-                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "UI Context #" + uiContextID + " not found");
+                // Same response whether the context is missing or owned by another session,
+                // so the endpoint does not leak the existence of other sessions' contexts.
+                log.warn("UI Context #{} not found for the calling session", uiContextID);
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "UI Context #" + uiContextID + " not found");
             }
         } catch (final Exception e) {
             log.error("Cannot stream request", e);

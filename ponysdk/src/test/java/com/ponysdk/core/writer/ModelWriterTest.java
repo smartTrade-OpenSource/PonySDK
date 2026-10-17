@@ -62,7 +62,7 @@ public class ModelWriterTest extends PSuite {
         modelWriter.beginObject(window2);
 
         Mockito.verify(websocketEncoder, Mockito.times(3)).beginObject();
-        Mockito.verify(websocketEncoder, Mockito.times(2)).encode(ArgumentMatchers.eq(ServerToClientModel.WINDOW_ID), ArgumentMatchers.any());
+        Mockito.verify(websocketEncoder, Mockito.times(2)).encodeInt(ArgumentMatchers.eq(ServerToClientModel.WINDOW_ID), ArgumentMatchers.anyInt());
         assertEquals(window2, modelWriter.getCurrentWindow());
     }
 

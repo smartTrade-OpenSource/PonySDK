@@ -2,11 +2,15 @@ package com.ponysdk.core.ui.datagrid2.view;
 
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.IsPWidget;
+import com.ponysdk.core.ui.basic.PComplexPanel;
 import com.ponysdk.core.ui.basic.PLabel;
+import com.ponysdk.core.ui.basic.PTextBox;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.cell.CellController;
 import com.ponysdk.core.ui.datagrid2.cell.ExtendedCell;
+import com.ponysdk.core.ui.datagrid2.cell.ExtendedCellController;
+import com.ponysdk.core.ui.datagrid2.cell.LabelCell;
 import com.ponysdk.core.ui.datagrid2.cell.PrimaryCell;
 import com.ponysdk.core.ui.datagrid2.cell.PrimaryCellController;
 import com.ponysdk.core.ui.datagrid2.column.ColumnController;
@@ -326,6 +330,47 @@ public class DefaultDataGridViewTest extends PSuite {
     }
 
     // -------------------------------------------------------------------------
+    // Extended mode (cell editor)
+    // -------------------------------------------------------------------------
+
+    /** The editor is created when its cell is edited, with the value shown at that moment. */
+    @Test
+    public void editorIsCreatedOnEditWithTheCurrentValue() throws Exception {
+        final LabelColumnDefinition col = new LabelColumnDefinition();
+        final DefaultDataGridView<String, String> v = newView(col);
+        setDataOn(v, col, "a", "b");
+        Assert.assertNull("no editor before editing", editorOf(col.cells.get(1)));
+
+        col.controllers.get(1).setExtendedMode();
+
+        final PTextBox editor = editorOf(col.cells.get(1));
+        Assert.assertNotNull("editor shown once editing", editor);
+        Assert.assertEquals("b", editor.getText());
+    }
+
+    /** Leaving the extended mode drops the editor: only cells being edited hold one. */
+    @Test
+    public void editorIsDroppedWhenEditingEnds() throws Exception {
+        final LabelColumnDefinition col = new LabelColumnDefinition();
+        final DefaultDataGridView<String, String> v = newView(col);
+        setDataOn(v, col, "a", "b");
+        col.controllers.get(0).setExtendedMode();
+        Assert.assertNotNull(editorOf(col.cells.get(0)));
+
+        ((ExtendedCellController<String>) col.controllers.get(0)).setPrimaryMode();
+
+        Assert.assertNull(editorOf(col.cells.get(0)));
+        Assert.assertTrue("the label is shown again", col.cells.get(0).asWidget().isVisible());
+    }
+
+    /** The PTextBox the editor added to the cell, if any. */
+    private static PTextBox editorOf(final LabelCell<String> cell) {
+        final PComplexPanel td = (PComplexPanel) cell.asWidget().getParent();
+        for (final PWidget w : td) if (w instanceof PTextBox t) return t;
+        return null;
+    }
+
+    // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
 
@@ -549,6 +594,28 @@ public class DefaultDataGridViewTest extends PSuite {
         @Override
         public void onMoved() {
             // nothing to do
+        }
+    }
+
+    /** A column of the framework's {@link LabelCell}s (double-click to edit), capturing cells and controllers. */
+    static class LabelColumnDefinition extends CapturingColumnDefinition {
+
+        final List<LabelCell<String>> cells = new ArrayList<>();
+        final List<PrimaryCellController<String>> controllers = new ArrayList<>();
+
+        @Override
+        public PrimaryCell<String> createCell() {
+            final int index = cells.size();
+            controllers.add(null);
+            final LabelCell<String> cell = new LabelCell<>((value, text) -> {}, 100) {
+                @Override
+                public void setController(final PrimaryCellController<String> controller) {
+                    super.setController(controller);
+                    controllers.set(index, controller);
+                }
+            };
+            cells.add(cell);
+            return cell;
         }
     }
 

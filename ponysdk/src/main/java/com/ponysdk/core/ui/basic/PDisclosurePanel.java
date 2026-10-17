@@ -29,7 +29,7 @@ import com.ponysdk.core.model.WidgetType;
 import com.ponysdk.core.ui.basic.event.*;
 import com.ponysdk.core.writer.ModelWriter;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 import java.util.*;
 
 /**
@@ -94,6 +94,13 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, PAcceptsOn
         return WidgetType.DISCLOSURE_PANEL;
     }
 
+    /** Content set before this panel was attached is attached (hence created) with it, as in PPanel. */
+    @Override
+    void init0() {
+        super.init0();
+        if (content != null) content.attach(window, getFrame());
+    }
+
     public PWidget getContent() {
         return content;
     }
@@ -118,7 +125,7 @@ public class PDisclosurePanel extends PWidget implements HasPWidgets, PAcceptsOn
         content = w;
 
         // Physical attach.
-        w.attach(window, frame);
+        w.attach(window, getFrame());
         w.saveAdd(w.getID(), getID());
     }
 

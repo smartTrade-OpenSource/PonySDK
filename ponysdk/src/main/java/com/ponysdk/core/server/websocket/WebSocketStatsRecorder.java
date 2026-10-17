@@ -58,6 +58,9 @@ class WebSocketStatsRecorder {
     private final Consumer<WebSocketStats> listener;
     private final BiFunction<ServerToClientModel, Object, String> groupBy;
 
+    /** Stands for a null value in the concurrent per-session maps (mapped back to null when aggregating). */
+    private static final Object NULL_KEY = new Object();
+
     public WebSocketStatsRecorder(final Consumer<WebSocketStats> listener,
             final BiFunction<ServerToClientModel, Object, String> groupBy) {
         super();
@@ -77,6 +80,9 @@ class WebSocketStatsRecorder {
         final Map<Object, VolatileRecord> modelRecords = getModelRecords(model, localStats);
         Object v = valueConverter == null ? value : valueConverter.apply(value);
         if (groupBy != null) v = new Pair<>(v, groupBy.apply(model, value));
+        // ConcurrentHashMap rejects null keys, and null values are common (END closes every message):
+        // without the sentinel the first END threw an NPE out of the encoder and killed the session.
+        if (v == null) v = NULL_KEY;
         modelRecords.computeIfAbsent(v, vv -> new VolatileRecord(metaBytes, dataBytes)).count++;
     }
 
@@ -164,7 +170,7 @@ class WebSocketStatsRecorder {
                 final Map<Object, VolatileRecord> records = s.get(i);
                 if (records != null) {
                     for (final Map.Entry<Object, VolatileRecord> recordEntry : records.entrySet()) {
-                        final Object value = recordEntry.getKey();
+                        final Object value = recordEntry.getKey() == NULL_KEY ? null : recordEntry.getKey();
                         final VolatileRecord record = recordEntry.getValue();
                         aggStats.computeIfAbsent(model, m -> new HashMap<>()).computeIfAbsent(value,
                             o -> new MutableRecord(record.getMetaBytes(), record.getDataBytes())).count += record.count;

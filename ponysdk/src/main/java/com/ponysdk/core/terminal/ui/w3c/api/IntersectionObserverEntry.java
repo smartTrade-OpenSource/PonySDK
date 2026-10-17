@@ -25,7 +25,6 @@ package com.ponysdk.core.terminal.ui.w3c.api;
 
 import com.google.gwt.dom.client.Element;
 
-import elemental.js.html.JsClientRect;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
@@ -35,69 +34,28 @@ import jsinterop.annotations.JsType;
  * target element and its root container at a specific moment of transition.
  *
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry">MDN</a>
- * @see <a href=
- *      "https://github.com/gwt-jelement/gwt-jelement/blob/master/src/main/java/gwt/jelement/dom/IntersectionObserverEntry.java">Source</a>
  */
 @JsType(namespace = JsPackage.GLOBAL, isNative = true)
 public class IntersectionObserverEntry {
 
-    /**
-     * A DOMHighResTimeStamp indicating the time at which the intersection was recorded, relative to the
-     * IntersectionObserver's time origin.
-     *
-     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry/time">MDN</a>
-     */
     @JsProperty
     public native double getTime();
 
-    /**
-     * Returns a DOMRectReadOnly for the intersection observer's root.
-     *
-     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry/rootBounds">MDN</a>
-     */
     @JsProperty
-    public native JsClientRect getRootBounds();
+    public native DOMRect getRootBounds();
 
-    /**
-     * Returns the bounds rectangle of the target element as a DOMRectReadOnly.
-     *
-     * @see <a href=
-     *      "https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry/boundingClientRect">MDN</a>
-     */
     @JsProperty
-    public native JsClientRect getBoundingClientRect();
+    public native DOMRect getBoundingClientRect();
 
-    /**
-     * Returns a DOMRectReadOnly representing the target's visible area.
-     *
-     * @see <a href=
-     *      "https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry/intersectionRect">MDN</a>
-     */
     @JsProperty
-    public native JsClientRect getIntersectionRect();
+    public native DOMRect getIntersectionRect();
 
-    /**
-     * A Boolean value which is true if the target element intersects with the intersection observer's root.
-     *
-     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry/isIntersecting">MDN</a>
-     */
     @JsProperty
     public native boolean isIsIntersecting();
 
-    /**
-     * Returns the ratio of the intersectionRect to the boundingClientRect.
-     *
-     * @see <a href=
-     *      "https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry/intersectionRatio">MDN</a>
-     */
     @JsProperty
     public native double getIntersectionRatio();
 
-    /**
-     * The {@link Element} whose intersection with the root changed.
-     *
-     * @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry/target">MDN</a>
-     */
     @JsProperty
     public native Element getTarget();
 

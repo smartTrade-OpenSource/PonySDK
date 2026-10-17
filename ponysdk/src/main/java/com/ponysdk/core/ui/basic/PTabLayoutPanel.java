@@ -32,7 +32,7 @@ import com.ponysdk.core.ui.basic.event.PSelectionEvent;
 import com.ponysdk.core.ui.basic.event.PSelectionHandler;
 import com.ponysdk.core.ui.model.ServerBinaryModel;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -103,8 +103,8 @@ public class PTabLayoutPanel extends PComplexPanel implements PSelectionHandler<
             children.insert(child, beforeIndex);
 
             adopt(child);
-            tabWidget.attach(window, frame);
-            child.attach(window, frame);
+            tabWidget.attach(window, getFrame());
+            child.attach(window, getFrame());
             child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.TAB_WIDGET, tabWidget.getID()),
                     new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex));
         } else {
@@ -121,7 +121,7 @@ public class PTabLayoutPanel extends PComplexPanel implements PSelectionHandler<
             children.insert(child, beforeIndex);
 
             adopt(child);
-            child.attach(window, frame);
+            child.attach(window, getFrame());
             child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.TAB_TEXT, tabText),
                     new ServerBinaryModel(ServerToClientModel.BEFORE_INDEX, beforeIndex));
         } else {

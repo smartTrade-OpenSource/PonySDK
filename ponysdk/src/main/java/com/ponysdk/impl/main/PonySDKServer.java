@@ -23,19 +23,27 @@
 
 package com.ponysdk.impl.main;
 
+import org.eclipse.jetty.util.compression.CompressionPool;
+import org.eclipse.jetty.util.compression.DeflaterPool;
 import java.net.InetAddress;
 import java.net.URL;
+import java.util.List;
 
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.handler.ErrorHandler;
-import org.eclipse.jetty.server.handler.gzip.GzipHandler;
+import org.eclipse.jetty.ee11.servlet.ErrorHandler;
 import org.eclipse.jetty.ee11.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee11.servlet.ServletHolder;
 import org.eclipse.jetty.ee11.websocket.server.config.JettyWebSocketServletContainerInitializer;
+import org.eclipse.jetty.compression.server.CompressionHandler;
+import org.eclipse.jetty.compression.server.CompressionConfig;
+import org.eclipse.jetty.compression.gzip.GzipCompression;
+import org.eclipse.jetty.compression.brotli.BrotliCompression;
+import org.eclipse.jetty.compression.brotli.BrotliEncoderConfig;
+import com.aayushatharva.brotli4j.Brotli4jLoader;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,6 +80,16 @@ public class PonySDKServer {
     private String sslTrustStorePassphrase;
     private String sslTrustStoreType = "JKS";
     private boolean needClientAuth = false;
+    /**
+     * Secure flag of the session cookie. On by default, including when this server speaks plain http
+     * behind a TLS-terminating proxy. Turn it off only for plain-http development: WebKit/Safari never
+     * sends a Secure cookie over http, so every request would start a new HTTP session (and transparent
+     * reconnection could never find the suspended UIContext).
+     */
+    private boolean sessionCookieSecure = true;
+
+    /** Servlet-context attribute Jetty reads its WebSocket DeflaterPool from (WebSocketServerComponents). */
+    static final String WEBSOCKET_DEFLATER_POOL_ATTRIBUTE = "jetty.websocket.deflater";
     private String[] enabledProtocols = new String[] { "TLSv1.2" };
     private String enabledCipherSuites;
 
@@ -147,9 +165,43 @@ public class PonySDKServer {
     }
 
     protected Handler createMainHandler() {
-        final GzipHandler gzip = new GzipHandler();
-        gzip.setHandler(addHandlers());
-        return gzip;
+        final CompressionHandler compression = new CompressionHandler();
+        compression.putCompression(new GzipCompression());
+        addBrotliIfAvailable(compression);
+        // Compress text assets (HTML, the GWT JS bundle, JSON) but skip already-compressed
+        // content (images, fonts, archives) — restores the sensible GzipHandler defaults
+        // instead of wasting CPU re-compressing incompressible payloads.
+        // Browsers list gzip first ("gzip, deflate, br, zstd"): without a server preference Jetty would always
+        // pick gzip. Brotli is preferred when registered (about 20 % smaller on the terminal JS), gzip otherwise.
+        compression.putConfiguration("/", CompressionConfig.builder().defaults()
+            .compressPreferredEncodings(List.of("br", "gzip")).build());
+        compression.setHandler(addHandlers());
+        return compression;
+    }
+
+    /**
+     * Registers Brotli HTTP compression, but only when its native library can be loaded on the
+     * current platform. Brotli compresses text assets (notably the GWT JavaScript bundle served on
+     * first load) noticeably better than gzip; the browser negotiates {@code br} vs {@code gzip}
+     * via {@code Accept-Encoding}. When the native is unavailable the server degrades gracefully to
+     * gzip only — startup is never broken by a missing native.
+     */
+    static final int BROTLI_LEVEL = 5;
+
+    protected void addBrotliIfAvailable(final CompressionHandler compression) {
+        try {
+            Brotli4jLoader.ensureAvailability();
+            final BrotliCompression brotli = new BrotliCompression();
+            // Compressed per response: level 11 (the default) took 344 ms on the 382 KB terminal for 98 KB,
+            // level 5 takes 5 ms for 111 KB - smaller and faster than gzip (8 ms, 122 KB).
+            final BrotliEncoderConfig level = new BrotliEncoderConfig();
+            level.setCompressionLevel(BROTLI_LEVEL);
+            brotli.setDefaultEncoderConfig(level);
+            compression.putCompression(brotli);
+            log.info("Brotli HTTP compression enabled");
+        } catch (final Throwable t) {
+            log.info("Brotli native library unavailable; using gzip only ({})", t.toString());
+        }
     }
 
     protected Handler addHandlers() {
@@ -170,10 +222,15 @@ public class PonySDKServer {
         final ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/" + configuration.getApplicationContextName());
         context.setErrorHandler(createErrorHandler());
-        context.getSessionHandler().getSessionCookieConfig().setSecure(true);
+        context.getSessionHandler().getSessionCookieConfig().setSecure(sessionCookieSecure);
         context.getSessionHandler().getSessionCookieConfig().setHttpOnly(true);
 
-        // Jetty 12: enable the Jetty-native WebSocket server so JettyWebSocketServlet can upgrade.
+        // permessage-deflate level: Jetty picks its DeflaterPool from this context attribute.
+        final int deflateLevel = configuration.getWsDeflateLevel();
+        if (deflateLevel >= 0 && deflateLevel <= 9) {
+            context.setAttribute(WEBSOCKET_DEFLATER_POOL_ATTRIBUTE,
+                new DeflaterPool(CompressionPool.DEFAULT_CAPACITY, deflateLevel, true));
+        }
         JettyWebSocketServletContainerInitializer.configure(context, null);
 
         context.addServlet(new ServletHolder(createBootstrapServlet()), MAPPING_BOOTSTRAP);
@@ -215,6 +272,14 @@ public class PonySDKServer {
 
     public void setUseSSL(final boolean useSSL) {
         this.useSSL = useSSL;
+    }
+
+    public void setSessionCookieSecure(final boolean sessionCookieSecure) {
+        this.sessionCookieSecure = sessionCookieSecure;
+    }
+
+    public boolean isSessionCookieSecure() {
+        return sessionCookieSecure;
     }
 
     public boolean isUseSSL() {

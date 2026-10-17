@@ -2,8 +2,8 @@ package com.ponysdk.core.ui.flexlayout;
 
 import static org.junit.Assert.*;
 
-import javax.json.Json;
-import javax.json.JsonObject;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
 import java.io.StringReader;
 
 import org.junit.Test;

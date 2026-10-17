@@ -35,18 +35,21 @@ import com.ponysdk.core.model.BooleanModel;
 import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.model.ValueTypeModel;
 
-import elemental.client.Browser;
-import elemental.html.ArrayBuffer;
-import elemental.html.ArrayBufferView;
-import elemental.html.DataView;
-import elemental.html.Uint8Array;
-import elemental.html.Window;
+import elemental2.core.ArrayBuffer;
+import elemental2.core.DataView;
+import elemental2.core.Uint8Array;
+
+import jsinterop.base.Js;
+import jsinterop.base.JsArrayLike;
 
 public class ReaderBuffer {
 
     public static final int NOT_FULL_BUFFER_POSITION = -1;
 
     private static final boolean LITTLE_INDIAN = false;
+
+    // Initial capacity for dictionary cache
+    private static final int DICTIONARY_INITIAL_CAPACITY = 1024;
 
     private final BinaryModel currentBinaryModel;
 
@@ -60,22 +63,64 @@ public class ReaderBuffer {
 
     private int size;
 
-    private Window window;
+    // String Dictionary cache for protocol optimization
+    private String[] dictionaryCache;
+    private int dictionaryCacheSize;
 
     public ReaderBuffer() {
         this.currentBinaryModel = new BinaryModel();
+        initDictionaryCache(DICTIONARY_INITIAL_CAPACITY);
+    }
+
+    public void initDictionaryCache(final int initialCapacity) {
+        this.dictionaryCache = new String[initialCapacity];
+        this.dictionaryCacheSize = 0;
+    }
+
+    public void clearDictionaryCache() {
+        if (dictionaryCache != null) {
+            for (int i = 0; i < dictionaryCacheSize; i++) {
+                dictionaryCache[i] = null;
+            }
+        }
+        dictionaryCacheSize = 0;
+    }
+
+    public void addToDictionary(final int id, final String value) {
+        ensureDictionaryCapacity(id + 1);
+        dictionaryCache[id] = value;
+        if (id >= dictionaryCacheSize) {
+            dictionaryCacheSize = id + 1;
+        }
+    }
+
+    public String getFromDictionary(final int id) {
+        if (id < 0 || id >= dictionaryCacheSize || dictionaryCache[id] == null) {
+            throw new IllegalStateException("Unknown dictionary ID: " + id);
+        }
+        return dictionaryCache[id];
+    }
+
+    private void ensureDictionaryCapacity(final int minCapacity) {
+        if (dictionaryCache.length < minCapacity) {
+            int newCapacity = dictionaryCache.length * 2;
+            if (newCapacity < minCapacity) {
+                newCapacity = minCapacity;
+            }
+            final String[] newCache = new String[newCapacity];
+            for (int i = 0; i < dictionaryCacheSize; i++) {
+                newCache[i] = dictionaryCache[i];
+            }
+            dictionaryCache = newCache;
+        }
     }
 
     public void init(final Uint8Array buffer) {
         if (this.buffer != null && position < size) {
-            if (this.window == null) {
-                this.window = Browser.getWindow();
-                createSetElementsMethodOnUint8Array();
-            }
             final int remaningBufferSize = this.size - this.position;
-            final Uint8Array mergedBuffer = window.newUint8Array(remaningBufferSize + buffer.getByteLength());
-            mergedBuffer.setElements(this.position == 0 ? this.buffer : this.buffer.subarray(this.position), 0);
-            mergedBuffer.setElements(buffer, remaningBufferSize);
+            final Uint8Array mergedBuffer = new Uint8Array(remaningBufferSize + buffer.byteLength);
+            mergedBuffer.set(this.position == 0 ? this.buffer : (Uint8Array) this.buffer.subarray(this.position), 0);
+            mergedBuffer.set(buffer, remaningBufferSize);
 
             this.buffer = mergedBuffer;
         } else {
@@ -83,29 +128,44 @@ public class ReaderBuffer {
         }
 
         this.position = 0;
-        this.size = this.buffer.getByteLength();
-        this.dataView = newDataView(this.buffer.getBuffer(), this.buffer.getByteOffset(), this.size);
+        this.size = this.buffer.byteLength;
+        this.dataView = new DataView(this.buffer.buffer, this.buffer.byteOffset, this.size);
     }
 
-    // WORKAROUND : No setElements on Uint8Array but Elemental need it, create a passthrough
-    private static final native void createSetElementsMethodOnUint8Array() /*-{
-                                                                           Uint8Array.prototype.setElements = function(array, offset) { this.set(array, offset) };
-                                                                           }-*/;
+    private static int intAt(final Uint8Array arr, final int index) {
+        return Js.<JsArrayLike<Double>>cast(arr).getAt(index).intValue();
+    }
 
-    private static final native String decode(ArrayBufferView buffer, int position, int size) /*-{
-                                                                                                    return $wnd.decode(buffer, position, size);
-                                                                                                    }-*/;
+    private static native String decode(Uint8Array buffer, int position, int size) /*-{
+        return $wnd.decode(buffer, position, size);
+    }-*/;
 
-    private static final native String fromCharCode(Uint8Array buffer) /*-{
-                                                                       return String.fromCharCode.apply(null, buffer);
-                                                                       }-*/;
-
-    private static final native DataView newDataView(ArrayBuffer buffer, int byteOffset,
-                                                     int length) /*-{ return new DataView(buffer, byteOffset, length); }-*/;
-
-    private static final native int getUint8(DataView dataView, int position) /*-{ return dataView.getUint8(position); }-*/;
-
-    private static final native int getInt8(DataView dataView, int position) /*-{ return dataView.getInt8(position); }-*/;
+    /**
+     * A short ASCII string from its bytes, passed as direct arguments: no subarray view per string, no apply().
+     * Measured on 6 to 16-byte strings against apply(subarray): Chrome 65-83 -> 11-20 ns, Firefox 122-159 -> 24-37 ns,
+     * WebKit 122-183 -> 24-37 ns.
+     */
+    private static native String fromCharCodes(Uint8Array b, int p, int n) /*-{
+        switch (n) {
+            case 1: return String.fromCharCode(b[p]);
+            case 2: return String.fromCharCode(b[p], b[p + 1]);
+            case 3: return String.fromCharCode(b[p], b[p + 1], b[p + 2]);
+            case 4: return String.fromCharCode(b[p], b[p + 1], b[p + 2], b[p + 3]);
+            case 5: return String.fromCharCode(b[p], b[p + 1], b[p + 2], b[p + 3], b[p + 4]);
+            case 6: return String.fromCharCode(b[p], b[p + 1], b[p + 2], b[p + 3], b[p + 4], b[p + 5]);
+            case 7: return String.fromCharCode(b[p], b[p + 1], b[p + 2], b[p + 3], b[p + 4], b[p + 5], b[p + 6]);
+            case 8: return String.fromCharCode(b[p], b[p + 1], b[p + 2], b[p + 3], b[p + 4], b[p + 5], b[p + 6], b[p + 7]);
+            case 9: return String.fromCharCode(b[p], b[p + 1], b[p + 2], b[p + 3], b[p + 4], b[p + 5], b[p + 6], b[p + 7], b[p + 8]);
+            case 10: return String.fromCharCode(b[p], b[p + 1], b[p + 2], b[p + 3], b[p + 4], b[p + 5], b[p + 6], b[p + 7], b[p + 8], b[p + 9]);
+            case 11: return String.fromCharCode(b[p], b[p + 1], b[p + 2], b[p + 3], b[p + 4], b[p + 5], b[p + 6], b[p + 7], b[p + 8], b[p + 9], b[p + 10]);
+            case 12: return String.fromCharCode(b[p], b[p + 1], b[p + 2], b[p + 3], b[p + 4], b[p + 5], b[p + 6], b[p + 7], b[p + 8], b[p + 9], b[p + 10], b[p + 11]);
+            case 13: return String.fromCharCode(b[p], b[p + 1], b[p + 2], b[p + 3], b[p + 4], b[p + 5], b[p + 6], b[p + 7], b[p + 8], b[p + 9], b[p + 10], b[p + 11], b[p + 12]);
+            case 14: return String.fromCharCode(b[p], b[p + 1], b[p + 2], b[p + 3], b[p + 4], b[p + 5], b[p + 6], b[p + 7], b[p + 8], b[p + 9], b[p + 10], b[p + 11], b[p + 12], b[p + 13]);
+            case 15: return String.fromCharCode(b[p], b[p + 1], b[p + 2], b[p + 3], b[p + 4], b[p + 5], b[p + 6], b[p + 7], b[p + 8], b[p + 9], b[p + 10], b[p + 11], b[p + 12], b[p + 13], b[p + 14]);
+            case 16: return String.fromCharCode(b[p], b[p + 1], b[p + 2], b[p + 3], b[p + 4], b[p + 5], b[p + 6], b[p + 7], b[p + 8], b[p + 9], b[p + 10], b[p + 11], b[p + 12], b[p + 13], b[p + 14], b[p + 15]);
+            default: return String.fromCharCode.apply(null, b.subarray(p, p + n));
+        }
+    }-*/;
 
     public int getPosition() {
         return position;
@@ -151,7 +211,6 @@ public class ReaderBuffer {
             modelSize += ValueTypeModel.FLOAT_SIZE;
             currentBinaryModel.init(key, getFloat(), modelSize);
         } else {
-            // Never have to happen
             throw new IllegalArgumentException("Unknown type model : " + typeModel);
         }
 
@@ -173,17 +232,17 @@ public class ReaderBuffer {
 
     private boolean getBoolean() {
         checkRemainingBytes(ValueTypeModel.BOOLEAN_SIZE);
-        return buffer.intAt(position++) == BooleanModel.TRUE.ordinal();
+        return intAt(buffer, position++) == BooleanModel.TRUE.ordinal();
     }
 
     private int getByte() {
         checkRemainingBytes(ValueTypeModel.BYTE_SIZE);
-        return getInt8(dataView, position++);
+        return dataView.getInt8(position++);
     }
 
     private int getUnsignedByte() {
         checkRemainingBytes(ValueTypeModel.BYTE_SIZE);
-        return getUint8(dataView, position++);
+        return dataView.getUint8(position++);
     }
 
     private int getShort() {
@@ -224,7 +283,7 @@ public class ReaderBuffer {
 
     private float getFloat() {
         checkRemainingBytes(ValueTypeModel.FLOAT_SIZE);
-        final float value = dataView.getFloat32(position, LITTLE_INDIAN);
+        final float value = (float) dataView.getFloat32(position, LITTLE_INDIAN);
         position += ValueTypeModel.FLOAT_SIZE;
         return value;
     }
@@ -239,6 +298,58 @@ public class ReaderBuffer {
     private String readStringModelValue() {
         modelSize += ValueTypeModel.BYTE_SIZE;
         int stringLength = getUnsignedByte();
+
+        // Check for dictionary reference
+        if (stringLength == ValueTypeModel.STRING_DICTIONARY_REF) {
+            int id = getShort();
+            modelSize += Short.BYTES;
+            if (id < 0) {
+                id = id << 16 | getUnsignedShort();
+                modelSize += Short.BYTES;
+                id = id & 0x7F_FF_FF_FF;
+            }
+            return getFromDictionary(id);
+        }
+
+        // Check for inline dictionary add
+        if (stringLength == ValueTypeModel.STRING_DICTIONARY_ADD) {
+            int id = getShort();
+            modelSize += Short.BYTES;
+            if (id < 0) {
+                id = id << 16 | getUnsignedShort();
+                modelSize += Short.BYTES;
+                id = id & 0x7F_FF_FF_FF;
+            }
+            modelSize += ValueTypeModel.BYTE_SIZE;
+            int rawLength = getUnsignedByte();
+            boolean ascii = true;
+            if (rawLength > ValueTypeModel.STRING_ASCII_UINT8) {
+                if (rawLength == ValueTypeModel.STRING_ASCII_UINT16) {
+                    modelSize += ValueTypeModel.SHORT_SIZE;
+                    rawLength = getUnsignedShort();
+                } else if (rawLength == ValueTypeModel.STRING_ASCII_UINT32) {
+                    modelSize += ValueTypeModel.INTEGER_SIZE;
+                    rawLength = getInt();
+                } else {
+                    ascii = false;
+                    if (rawLength == ValueTypeModel.STRING_UTF8_UINT8) {
+                        modelSize += ValueTypeModel.BYTE_SIZE;
+                        rawLength = getUnsignedByte();
+                    } else if (rawLength == ValueTypeModel.STRING_UTF8_UINT16) {
+                        modelSize += ValueTypeModel.SHORT_SIZE;
+                        rawLength = getUnsignedShort();
+                    } else {
+                        modelSize += ValueTypeModel.INTEGER_SIZE;
+                        rawLength = getInt();
+                    }
+                }
+            }
+            modelSize += rawLength;
+            final String value = getString(ascii, rawLength);
+            addToDictionary(id, value);
+            return value;
+        }
+
         boolean ascii = true;
         if (stringLength > ValueTypeModel.STRING_ASCII_UINT8) {
             if (stringLength == ValueTypeModel.STRING_ASCII_UINT16) {
@@ -266,10 +377,12 @@ public class ReaderBuffer {
     }
 
     private JSONArray readArrayModelValue() {
-        modelSize += ValueTypeModel.BYTE_SIZE; //array size
-        final int arraySize = getUnsignedByte();
+        modelSize += ValueTypeModel.BYTE_SIZE;
+        int arraySize = getUnsignedByte();
+        // 255 is the escape: a uint31 length follows (getUint31 advances position and tracks modelSize)
+        if (arraySize == ArrayValueModel.LENGTH_UINT31_ESCAPE) arraySize = getUint31();
         final JSONArray array = new JSONArray();
-        modelSize += arraySize; //array elements types
+        modelSize += arraySize;
         for (int i = 0; i < arraySize; i++) {
             final ArrayValueModel arrayValueModel = ArrayValueModel.fromRawValue(getByte());
             modelSize += arrayValueModel.getMinSize();
@@ -311,6 +424,40 @@ public class ReaderBuffer {
     }
 
     private String getDynamicSizeArrayElement(final ArrayValueModel arrayValueModel) {
+        if (arrayValueModel == ArrayValueModel.STRING_DICTIONARY_REF) {
+            int id = getShort();
+            modelSize += Short.BYTES;
+            if (id < 0) {
+                id = id << 16 | getUnsignedShort();
+                modelSize += Short.BYTES;
+                id = id & 0x7F_FF_FF_FF;
+            }
+            return getFromDictionary(id);
+        }
+
+        if (arrayValueModel == ArrayValueModel.STRING_DICTIONARY_ADD) {
+            int id = getShort();
+            modelSize += Short.BYTES;
+            if (id < 0) {
+                id = id << 16 | getUnsignedShort();
+                modelSize += Short.BYTES;
+                id = id & 0x7F_FF_FF_FF;
+            }
+            final ArrayValueModel innerModel = ArrayValueModel.fromRawValue(getByte());
+            modelSize++;
+            final int msgSize = getArrayElementDynamicSize(innerModel.getMinSize());
+            boolean ascii;
+            if (innerModel == ArrayValueModel.STRING_ASCII_UINT8_LENGTH
+                    || innerModel == ArrayValueModel.STRING_ASCII_UINT16_LENGTH) {
+                ascii = true;
+            } else {
+                ascii = false;
+            }
+            final String value = ascii ? decodeStringAscii(msgSize) : decodeStringUTF8(msgSize);
+            addToDictionary(id, value);
+            return value;
+        }
+
         final int msgSize = getArrayElementDynamicSize(arrayValueModel.getMinSize());
         boolean ascii;
         if (arrayValueModel == ArrayValueModel.STRING_ASCII_UINT8_LENGTH
@@ -326,25 +473,28 @@ public class ReaderBuffer {
         return ascii ? decodeStringAscii(msgSize) : decodeStringUTF8(msgSize);
     }
 
-    private String getStringAscii(final int size) {
-        if (size != 0) {
-            return decodeStringAscii(size);
-        } else {
-            return null;
-        }
-    }
-
     private String getString(final boolean ascii, final int size) {
         if (size != 0) {
-            return size < 100_000 && ascii ? decodeStringAscii(size) : decodeStringUTF8(size);
+            return ascii ? decodeStringAscii(size) : decodeStringUTF8(size);
         } else {
             return null;
         }
     }
 
+    /**
+     * ASCII strings up to this length are built with {@code String.fromCharCode}; longer ones
+     * go through {@code TextDecoder} (UTF-8 decoding of pure-ASCII bytes yields the same string).
+     * Measured in-page (fromCharCode / TextDecoder, ns): at 16 bytes Chrome 36/49, Firefox 88/88,
+     * WebKit 110/63; at 64 bytes 109/58, 128/93, 315/80; at 4 KB 6800/430, 4150/1300, 15300/1400.
+     * 16 is the compromise: Chrome only breaks even around 24-32 bytes, WebKit already wins at 16.
+     * Long strings also stay away from the engine's apply() argument limit (Chrome: ~125k).
+     */
+    private static final int ASCII_FROM_CHAR_CODE_MAX_LENGTH = 16;
+
     private String decodeStringAscii(final int size) {
+        if (size > ASCII_FROM_CHAR_CODE_MAX_LENGTH) return decodeStringUTF8(size);
         checkRemainingBytes(size);
-        final String result = fromCharCode(buffer.subarray(position, position + size));
+        final String result = fromCharCodes(buffer, position, size);
         position += size;
         return result;
     }
@@ -368,13 +518,6 @@ public class ReaderBuffer {
         return position + blockSize <= size;
     }
 
-    /**
-     * Go directly to the next block
-     *
-     * @param dryRun
-     *            If true, not really shift
-     * @return Start position of the next block
-     */
     public int shiftNextBlock(final boolean dryRun) {
         final int startPosition = position;
         int endPosition = NOT_FULL_BUFFER_POSITION;
@@ -386,13 +529,10 @@ public class ReaderBuffer {
                     break;
                 }
             } catch (final ArrayIndexOutOfBoundsException e) {
-                // No more enough bytes
                 break;
             }
         }
 
-        // No end found, it's a split message, so we rewind
-        // If it's a dry run, we rewind all the time
         if (endPosition == NOT_FULL_BUFFER_POSITION || dryRun) position = startPosition;
 
         return endPosition;
@@ -437,8 +577,28 @@ public class ReaderBuffer {
         if (value < 0) position += Short.BYTES;
     }
 
+    /** Reads a UINT31 value (advancing position) without tracking modelSize — used by the shift path. */
+    private int readUint31Value() {
+        int value = getShort();
+        if (value < 0) value = value << 16 | getUnsignedShort();
+        return value & 0x7F_FF_FF_FF;
+    }
+
     private void shiftString() {
         int messageSize = getUnsignedByte();
+
+        if (messageSize == ValueTypeModel.STRING_DICTIONARY_REF) {
+            final int value = getShort();
+            if (value < 0) position += Short.BYTES;
+            return;
+        }
+
+        if (messageSize == ValueTypeModel.STRING_DICTIONARY_ADD) {
+            final int value = getShort();
+            if (value < 0) position += Short.BYTES;
+            messageSize = getUnsignedByte();
+        }
+
         if (messageSize > ValueTypeModel.STRING_ASCII_UINT8) {
             if (messageSize == ValueTypeModel.STRING_UTF8_UINT8) {
                 messageSize = getUnsignedByte();
@@ -452,10 +612,20 @@ public class ReaderBuffer {
     }
 
     private void shiftArray() {
-        final int arrayLength = getUnsignedByte();
+        int arrayLength = getUnsignedByte();
+        if (arrayLength == ArrayValueModel.LENGTH_UINT31_ESCAPE) arrayLength = readUint31Value();
         for (int i = 0; i < arrayLength; i++) {
             final ArrayValueModel arrayValueModel = ArrayValueModel.fromRawValue(getByte());
-            if (arrayValueModel.isDynamicSize()) {
+            if (arrayValueModel == ArrayValueModel.STRING_DICTIONARY_REF) {
+                final int value = getShort();
+                if (value < 0) position += Short.BYTES;
+            } else if (arrayValueModel == ArrayValueModel.STRING_DICTIONARY_ADD) {
+                final int value = getShort();
+                if (value < 0) position += Short.BYTES;
+                final ArrayValueModel innerModel = ArrayValueModel.fromRawValue(getByte());
+                final int msgLength = getArrayElementDynamicSize(innerModel.getMinSize());
+                position += msgLength;
+            } else if (arrayValueModel.isDynamicSize()) {
                 final int msgLength = getArrayElementDynamicSize(arrayValueModel.getMinSize());
                 position += msgLength;
             } else {
@@ -476,26 +646,17 @@ public class ReaderBuffer {
         }
     }
 
-    /**
-     * Get the model key
-     */
     private ServerToClientModel getModelKey() {
         return ServerToClientModel.fromRawValue(getUnsignedByte());
     }
 
-    /**
-     * Get the model key size
-     */
     private static final int getModelKeySize() {
         return ValueTypeModel.BYTE_SIZE;
     }
 
-    /**
-     * Slice the array [startPosition, endPosition[
-     */
     public Uint8Array slice(final int startPosition, final int endPosition) {
         position = endPosition;
-        return buffer.subarray(startPosition, endPosition);
+        return (Uint8Array) buffer.subarray(startPosition, endPosition);
     }
 
     @Override

@@ -39,6 +39,9 @@ import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
+import jsinterop.base.Js;
+import jsinterop.base.JsPropertyMap;
+
 public class PTFileUpload extends PTWidget<FormPanel> {
 
     private FileUpload fileUpload;
@@ -119,9 +122,12 @@ public class PTFileUpload extends PTWidget<FormPanel> {
         }
     }
 
-    private native int getFileSize(final Element data) /*-{
-                                                       return data.files[0].size;
-                                                       }-*/;
+    private int getFileSize(final Element data) {
+        final JsPropertyMap<Object> map = Js.asPropertyMap(data);
+        final Object files = map.get("files");
+        final Object file = Js.asPropertyMap(Js.asArrayLike(files).getAt(0));
+        return Js.asPropertyMap(file).getAsAny("size").asInt();
+    }
 
     @Override
     public void removeHandler(final ReaderBuffer buffer, final HandlerModel handlerModel) {

@@ -23,6 +23,9 @@
 
 package com.ponysdk.core.server.servlet;
 
+import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.MappingPath;
+import com.ponysdk.core.model.ProtocolVersion;
 import com.ponysdk.core.server.application.ApplicationConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,10 +35,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.WritableByteChannel;
+import java.io.OutputStream;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -44,6 +45,10 @@ import java.util.Set;
 public class BootstrapServlet extends HttpServlet {
 
     private static final String INDEX_URL = "/index.html";
+    /** GWT names its compiled files after their content (*.cache.*): they never change under the same name. */
+    private static final String IMMUTABLE = "public, max-age=31536000, immutable";
+    /** Everything else may change under the same name: the browser revalidates (304 when unmodified). */
+    private static final String REVALIDATE = "no-cache";
     protected static final String NEW_LINE = "\n";
 
     protected static final String TITLE_PATTERN = "<title>%s</title>";
@@ -103,11 +108,38 @@ public class BootstrapServlet extends HttpServlet {
 
     protected String getPath(final HttpServletRequest request) {
         final String contextPath = request.getContextPath();
-        return request.getRequestURI().replaceFirst(contextPath, "");
+        final String uri = request.getRequestURI();
+        // Strip the context path as a literal prefix — NOT as a regex (the previous
+        // replaceFirst treated contextPath as a regex and could strip the wrong span).
+        if (contextPath != null && !contextPath.isEmpty() && uri.startsWith(contextPath)) {
+            return uri.substring(contextPath.length());
+        }
+        return uri;
+    }
+
+    /**
+     * Validates that a requested resource path cannot escape the web root / classpath.
+     * Rejects absolute traversal ({@code ..} segments), backslashes and NUL bytes.
+     * Returns {@code false} for unsafe paths, which callers must turn into a 404.
+     */
+    protected static boolean isSafeResourcePath(final String path) {
+        if (path == null || path.isEmpty()) return false;
+        if (path.indexOf('\\') >= 0 || path.indexOf('\0') >= 0) return false;
+        for (final String segment : path.split("/")) {
+            if ("..".equals(segment)) return false;
+        }
+        return true;
     }
 
     protected void handleRequest(final HttpServletRequest request, final HttpServletResponse response, final String path)
             throws IOException {
+        // Reject path traversal before touching the servlet context / classpath.
+        if (!isSafeResourcePath(path)) {
+            log.warn("Rejected unsafe resource path");
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+
         // Force session creation if there is no session
         // TODO Verify if needed
         request.getSession();
@@ -118,25 +150,15 @@ public class BootstrapServlet extends HttpServlet {
         response.setContentType(mimeType);
 
         if (inputStream != null) {
-            try (ReadableByteChannel inputChannel = Channels.newChannel(inputStream);
-                 WritableByteChannel outputChannel = Channels.newChannel(response.getOutputStream())) {
-                final ByteBuffer buffer = ByteBuffer.allocateDirect(16 * 1024);
-                while (inputChannel.read(buffer) != -1) {
-                    buffer.flip();
-                    outputChannel.write(buffer);
-                    response.getOutputStream().flush();
-                    buffer.compact();
-                }
-                buffer.flip();
-                while (buffer.hasRemaining()) {
-                    outputChannel.write(buffer);
-                }
+            response.setHeader("Cache-Control", path.contains(".cache.") ? IMMUTABLE : REVALIDATE);
+            try (inputStream; OutputStream out = response.getOutputStream()) {
+                inputStream.transferTo(out);
             }
         } else {
             if (path.equals(INDEX_URL)) {
-                try (final WritableByteChannel outputChannel = Channels.newChannel(response.getOutputStream())) {
-                    final ByteBuffer buffer = ByteBuffer.wrap(buildIndexHTML(request).getBytes(StandardCharsets.UTF_8));
-                    outputChannel.write(buffer);
+                response.setHeader("Cache-Control", REVALIDATE);
+                try (OutputStream out = response.getOutputStream()) {
+                    out.write(buildIndexHTML(request).getBytes(StandardCharsets.UTF_8));
                 }
             } else {
                 log.error("Failed to load resource: {}", request.getPathInfo());
@@ -146,18 +168,49 @@ public class BootstrapServlet extends HttpServlet {
     }
 
     public InputStream getInputStreamFromPath(final String path) {
-        // Try to load from context
-        InputStream inputStream = getServletContext().getResourceAsStream(path);
-
-        if (inputStream == null) {
-            // Try to load from jar
-            final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-            final String jarPath = path.substring(1);
-            inputStream = classLoader.getResourceAsStream(jarPath);
-            if (inputStream == null && childClassLoader != null)
-                inputStream = childClassLoader.getResourceAsStream(jarPath);
+        final URL url = getResourceURL(path);
+        if (url == null) return null;
+        try {
+            return url.openStream();
+        } catch (final IOException e) {
+            log.error("Cannot open resource {}", path, e);
+            return null;
         }
-        return inputStream;
+    }
+
+    /** The served file: from the servlet context first, then from the jars. Null when there is none. */
+    protected URL getResourceURL(final String path) {
+        try {
+            final URL url = getServletContext().getResource(path);
+            if (url != null) return url;
+        } catch (final java.net.MalformedURLException e) {
+            return null;
+        }
+        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        final String jarPath = path.substring(1);
+        final URL url = classLoader.getResource(jarPath);
+        return url != null || childClassLoader == null ? url : childClassLoader.getResource(jarPath);
+    }
+
+    /**
+     * Modification time of the requested file, for conditional GETs ({@link HttpServlet#service} answers 304
+     * to an up-to-date {@code If-Modified-Since}). -1 for the bootstrap page, generated per request.
+     */
+    @Override
+    protected long getLastModified(final HttpServletRequest request) {
+        final String path = getPath(request);
+        if (path == null || path.isEmpty() || path.equals("/") || path.equals(INDEX_URL) || !isSafeResourcePath(path)) {
+            return -1;
+        }
+        final URL url = getResourceURL(path);
+        if (url == null) return -1;
+        try {
+            final long time = url.openConnection().getLastModified();
+            // HTTP dates have a one-second precision: a file time in ms would never match If-Modified-Since
+            return time > 0 ? time / 1000 * 1000 : -1;
+        } catch (final IOException e) {
+            return -1;
+        }
     }
 
     protected String buildIndexHTML(final HttpServletRequest request) {
@@ -226,13 +279,51 @@ public class BootstrapServlet extends HttpServlet {
         return sb.toString();
     }
 
+    /**
+     * Opens the WebSocket while the terminal script downloads, so that the server builds the page meanwhile; the
+     * terminal adopts the socket and replays what it received (WebSocketClient.connect). Same URL as the terminal
+     * builds (History.getToken() is the decoded hash); main window only: a child window ("1" parameter) attaches to
+     * its parent's context instead.
+     */
+    static final String EARLY_SOCKET_SCRIPT = "<script type=\"text/javascript\">(function(){"
+            + "if(!window.WebSocket||new URLSearchParams(location.search).has('" + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "'))return;"
+            + "var l=location,t=decodeURI(l.hash.substring(1).replace(/%23/g,'#')),"
+            + "e={opened:false,messages:[],closeEvent:null};"
+            + "e.socket=new WebSocket(l.protocol.replace('http','ws')+'//'+l.host+l.pathname+'" + MappingPath.WEBSOCKET + "?"
+            + ClientToServerModel.TYPE_HISTORY.toStringValue() + "='+t+'&" + ClientToServerModel.PROTOCOL_VERSION.toStringValue()
+            + "=" + ProtocolVersion.CURRENT + "'+l.search.replace('?','&'));"
+            + "e.socket.binaryType='arraybuffer';"
+            + "e.socket.onopen=function(){e.opened=true;};"
+            + "e.socket.onmessage=function(m){e.messages.push(m.data);};"
+            + "e.socket.onclose=function(c){e.closeEvent=c;};"
+            + "window.ponyEarlySocket=e;})();</script>";
+
     protected String addScript(final HttpServletRequest request) {
         final StringBuilder sb = new StringBuilder();
+        sb.append(EARLY_SOCKET_SCRIPT).append(NEW_LINE);
+
+        // Enable transparent WebSocket reconnection on the client side when the server supports it
+        if (configuration != null && configuration.getReconnectionTimeoutMs() > 0) {
+            sb.append("<script type=\"text/javascript\">window.ponyReconnectMode = true;</script>").append(NEW_LINE);
+        }
 
         String ponyTerminalJsFileName = "ponyterminal/ponyterminal.nocache.js";
 
         sb.append(String.format(SCRIPT_PATTERN, rootPath + ponyTerminalJsFileName)).append(NEW_LINE);
         sb.append(String.format(SCRIPT_PATTERN, rootPath + "script/ponysdk.js")).append(NEW_LINE);
+
+        // Inject shared WC stylesheets as an inline script so they are registered
+        // before application scripts define their web components.
+        final Set<String> wcSheets = configuration.getWcSharedSheets();
+        if (wcSheets != null && !wcSheets.isEmpty()) {
+            sb.append("<script type=\"text/javascript\">").append(NEW_LINE);
+            sb.append("document.onPonyLoaded(function() {").append(NEW_LINE);
+            for (final String sheet : wcSheets) {
+                sb.append("  pony.wc.registerSharedSheet('").append(sheet).append("');").append(NEW_LINE);
+            }
+            sb.append("});").append(NEW_LINE);
+            sb.append("</script>").append(NEW_LINE);
+        }
 
         final Set<String> scripts = configuration.getJavascript();
         if (scripts != null && !scripts.isEmpty()) {

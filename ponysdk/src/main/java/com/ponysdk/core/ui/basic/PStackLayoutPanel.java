@@ -90,12 +90,19 @@ public class PStackLayoutPanel extends PWidget implements HasPWidgets, PAnimated
         return WidgetType.STACKLAYOUT_PANEL;
     }
 
+    /** Children added before this panel was attached are attached (hence created) with it, as in PPanel. */
+    @Override
+    void init0() {
+        super.init0();
+        children.forEach(widget -> widget.attach(window, getFrame()));
+    }
+
     public void add(final PWidget child, final String header, final boolean asHtml, final double headerSize) {
         child.removeFromParent();
         children.add(child);
         adopt(child);
 
-        child.attach(window, frame);
+        child.attach(window, getFrame());
         child.saveAdd(child.getID(), ID, new ServerBinaryModel(ServerToClientModel.HTML, header),
                 new ServerBinaryModel(ServerToClientModel.SIZE, headerSize));
     }

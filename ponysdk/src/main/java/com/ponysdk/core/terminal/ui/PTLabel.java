@@ -29,6 +29,7 @@ import com.ponysdk.core.model.ServerToClientModel;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
+
 public class PTLabel<T extends Label> extends PTWidget<T> {
 
     private String attributeLinkedToValue;
@@ -60,8 +61,21 @@ public class PTLabel<T extends Label> extends PTWidget<T> {
         }
     }
 
-    protected static final native void setText(Element element, String text) /*-{
-                                                                             element.textContent = text;
-                                                                             }-*/;
+    /**
+     * Sets the text. When the element already holds just one text node (a label being updated: a price, a
+     * counter), its data is changed in place - no node removed and created, the browser only re-shapes the text.
+     */
+    protected static void setText(final Element element, final String text) {
+        setTextNative(element, text);
+    }
+
+    private static native void setTextNative(Element element, String text) /*-{
+        var t = element.firstChild;
+        if (t !== null && t.nodeType === 3 && t.nextSibling === null && text) {
+            if (t.data !== text) t.data = text;
+        } else {
+            element.textContent = text;
+        }
+    }-*/;
 
 }

@@ -35,8 +35,10 @@ import com.ponysdk.core.terminal.instruction.PTInstruction;
 import com.ponysdk.core.terminal.model.BinaryModel;
 import com.ponysdk.core.terminal.model.ReaderBuffer;
 
-import elemental.client.Browser;
-import elemental.html.Uint8Array;
+import elemental2.core.Uint8Array;
+import elemental2.dom.DomGlobal;
+
+import jsinterop.base.Js;
 
 public class PTWindow extends PTAbstractWindow implements PostMessageHandler {
 
@@ -81,10 +83,10 @@ public class PTWindow extends PTAbstractWindow implements PostMessageHandler {
     public boolean update(final ReaderBuffer buffer, final BinaryModel binaryModel) {
         final ServerToClientModel model = binaryModel.getModel();
         if (ServerToClientModel.OPEN == model) {
-            window = Browser.getWindow().open(url, name, features);
+            window = DomGlobal.window.open(url, name, features);
             // Window can be null if browser doesn't allow popup
             if (window != null) {
-                window.setOnunload(event -> onClose());
+                setOnUnload(window);
             } else {
                 log.log(Level.WARNING, "Can't open PTWindow #" + objectID + ". Check the browser's settings");
 
@@ -104,12 +106,12 @@ public class PTWindow extends PTAbstractWindow implements PostMessageHandler {
     }
 
     public void close(final boolean forced) {
-        if (ready && window != null && !window.isClosed()) window.close();
+        if (ready && window != null && !isClosed()) window.close();
     }
 
     @Override
     public void postMessage(final Uint8Array buffer) {
-        if (ready && window.isClosed()) onClose();
+        if (ready && isClosed()) onClose();
 
         if (ready) window.postMessage(buffer, "*");
     }
@@ -144,7 +146,18 @@ public class PTWindow extends PTAbstractWindow implements PostMessageHandler {
     }
 
     public boolean isClosed() {
-        return window == null || window.isClosed();
+        return window == null || isWindowClosed(window);
+    }
+
+    private void setOnUnload(final elemental2.dom.Window w) {
+        w.onunload = event -> {
+            onClose();
+            return null;
+        };
+    }
+
+    private static boolean isWindowClosed(final elemental2.dom.Window w) {
+        return Js.isTruthy(Js.asPropertyMap(w).get("closed"));
     }
 
 }
