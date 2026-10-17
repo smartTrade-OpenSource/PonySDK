@@ -50,6 +50,8 @@ public class PScheduler {
         // resubmission). Daemon, so the scheduler never keeps the JVM alive.
         final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(Runtime.getRuntime().availableProcessors(),
             Thread.ofPlatform().name("PScheduler-", 0).daemon(true).factory());
+        // a cancelled task leaves the queue at once: no purge() (a copy and scan of every session's tasks)
+        executor.setRemoveOnCancelPolicy(true);
         INSTANCE = new PScheduler(executor);
     }
 
@@ -145,7 +147,6 @@ public class PScheduler {
     private void destroy(final UIContext uiContext) {
         final Set<UIRunnable> uiRunnables = runnablesByUIContexts.remove(uiContext);
         if (uiRunnables != null) uiRunnables.forEach(UIRunnable::onCancel);
-        executor.purge();
     }
 
     private void purge(final UIRunnable uiRunnable) {

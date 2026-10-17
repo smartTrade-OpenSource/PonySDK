@@ -23,11 +23,17 @@
 
 package com.ponysdk.core.server.concurrent;
 
+import static org.junit.Assert.assertEquals;
+
+import java.lang.reflect.Field;
+import java.time.Duration;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.PScheduler.UIRunnable;
 
 /**
@@ -60,5 +66,31 @@ public class PSchedulerTest {
 
         // It must be cancelled, otherwise a repeating task would keep running after a cancel.
         Mockito.verify(future).cancel(false);
+    }
+
+    /** Tasks waiting in the shared timer (all sessions). */
+    private static int timerQueueSize() throws ReflectiveOperationException {
+        final Field instance = PScheduler.class.getDeclaredField("INSTANCE");
+        instance.setAccessible(true);
+        final Field executor = PScheduler.class.getDeclaredField("executor");
+        executor.setAccessible(true);
+        return ((ScheduledThreadPoolExecutor) executor.get(instance.get(null))).getQueue().size();
+    }
+
+    /**
+     * A cancelled task leaves the shared timer at once: otherwise it waits there until its due time, and
+     * purging it means copying and scanning the whole queue (every session's tasks) on each session close.
+     */
+    @Test
+    public void aCancelledTaskLeavesTheTimerAtOnce() throws ReflectiveOperationException {
+        final UIContext context = Mockito.mock(UIContext.class);
+        Mockito.when(context.isAlive()).thenReturn(true);
+        final int before = timerQueueSize();
+
+        final UIRunnable task = PScheduler.schedule(context, () -> {}, Duration.ofHours(1));
+        assertEquals(before + 1, timerQueueSize());
+        task.cancel();
+
+        assertEquals(before, timerQueueSize());
     }
 }

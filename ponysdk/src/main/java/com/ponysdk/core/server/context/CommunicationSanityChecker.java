@@ -44,6 +44,11 @@ public class CommunicationSanityChecker {
     protected static final ScheduledThreadPoolExecutor sanityCheckerTimer = new ScheduledThreadPoolExecutor(MAX_THREAD_CHECKER,
         Thread.ofVirtual().name("SanityChecker-", 0).factory());
 
+    static {
+        // a stopped checker leaves the queue at once: no purge() (a copy and scan of every session's checker)
+        sanityCheckerTimer.setRemoveOnCancelPolicy(true);
+    }
+
     protected final AtomicBoolean started = new AtomicBoolean(false);
     private final UIContext uiContext;
     private long heartBeatPeriod;
@@ -87,7 +92,6 @@ public class CommunicationSanityChecker {
         if (isStarted()) {
             if (sanityChecker != null) {
                 sanityChecker.cancel(false);
-                sanityCheckerTimer.purge();
                 sanityChecker = null;
             }
             started.set(false);
