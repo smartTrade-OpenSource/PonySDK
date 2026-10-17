@@ -513,6 +513,22 @@ public class StringDictionary {
     }
 
     /**
+     * Share of this session's dictionary uses served as a reference, 0-100 (every use of an entry after its addition;
+     * a pre-seeded entry is never added). For a periodic display: unlike {@link #getSessionFrequency()}, no map.
+     */
+    public int getSessionHitRate() {
+        final int size = Math.min(idToString.size(), usageCount.length);
+        long uses = 0, references = 0;
+        for (int i = 0; i < size; i++) {
+            final int count = usageCount[i]; // every use, the one that added the entry included
+            if (count == 0 || idToString.get(i) == null) continue;
+            uses += count;
+            references += isPreSeeded(i) ? count : count - 1;
+        }
+        return uses > 0 ? (int) (references * 100 / uses) : 0;
+    }
+
+    /**
      * Returns the per-session frequency map (for diagnostics).
      * Computed on demand from usageCount — not maintained in a separate map.
      */

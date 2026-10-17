@@ -145,6 +145,18 @@ public class StringDictionaryTest {
     }
 
     @Test
+    public void hitRateCountsTheUsesServedAsAReference() {
+        final StringDictionary dict = new StringDictionary();
+        assertEquals(0, dict.getSessionHitRate());
+        dict.intern("alpha"); // added
+        dict.intern("alpha"); // reference
+        dict.intern("alpha"); // reference
+        dict.intern("beta1"); // added
+
+        assertEquals("2 references out of 4 uses", 50, dict.getSessionHitRate());
+    }
+
+    @Test
     public void preSeedingMarksEntriesAndResolvesThem() {
         final SharedDictionaryProvider provider = Mockito.mock(SharedDictionaryProvider.class);
         Mockito.when(provider.getPreSeedStrings()).thenReturn(List.of("alpha", "beta"));

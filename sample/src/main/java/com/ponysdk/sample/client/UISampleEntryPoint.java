@@ -676,14 +676,25 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         return view.asWidget();
     }
 
+    /** Built once, on first use: the specs are stateless (factories and update functions), shared by every session. */
+    private static final class CostSpecs {
+        static final List<CostSpec> ALL = costSpecs();
+    }
+
+    /**
+     * Last measurement of each component on this server. Memory and protocol bytes do not change between runs of a
+     * build: a visit shows them at once instead of re-creating 3 300 instances for 20 s, "Measure again" re-measures.
+     */
+    private static final Map<String, CostMeter.Cost> MEASURED = new ConcurrentHashMap<>();
+
     private static CostSpec costSpec(final String name) {
-        return costSpecs().stream().filter(c -> c.name().equals(name)).findFirst().orElseThrow();
+        return CostSpecs.ALL.stream().filter(c -> c.name().equals(name)).findFirst().orElseThrow();
     }
 
     private PFlowPanel buildCostsTab() {
         final PFlowPanel p = section();
         pageTitle(p, "Component costs",
-            "What each component really costs, measured live in this session: memory kept on the server per "
+            "What each component really costs, measured live on this server: memory kept on the server per "
                 + "instance, and bytes per instance to create it and to update it.");
 
         final PFlowPanel controls = Element.newPFlowPanel();
@@ -702,7 +713,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final String[] heads = { "Component", "Server memory", "", "Create · protocol", "Create · wire",
                                  "Update", "Update · protocol", "Update · wire" };
         for (int c = 0; c < heads.length; c++) table.setWidget(0, c, Element.newPLabel(heads[c]));
-        final List<CostSpec> specs = costSpecs();
+        final List<CostSpec> specs = CostSpecs.ALL;
         for (int r = 0; r < specs.size(); r++) {
             table.setWidget(r + 1, 0, Element.newPLabel(specs.get(r).name()));
             for (int c = 1; c < heads.length; c++) table.setWidget(r + 1, c, Element.newPLabel(c == 5 ? specs.get(r).updateLabel() : "—"));
@@ -714,7 +725,23 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             + "bytes on the socket after permessage-deflate, per instance; " + CostMeter.SAMPLE + " similar instances "
             + "compress very well, so this is the cost when a screen repeats a component (grids, lists)."));
 
-        final long[] maxMemory = { 1 };
+        final java.util.function.BiConsumer<Integer, CostMeter.Cost> show = (row, cost) -> {
+            table.setWidget(row, 1, Element.newPLabel(CostMeter.memory(cost.memory())));
+            final PElement bar = Element.newDiv();
+            bar.addStyleName("ov-bar");
+            final PElement fill = Element.newDiv();
+            fill.addStyleName("ov-bar-fill");
+            fill.addStyleName("cost-fill");
+            fill.setAttribute("style", "width:" + Math.max(3, cost.memory() * 100 / 2048) + "%");
+            bar.add(fill);
+            table.setWidget(row, 2, bar);
+            table.setWidget(row, 3, Element.newPLabel(bytes(cost.createProtocol())));
+            table.setWidget(row, 4, Element.newPLabel(bytes(cost.createWire())));
+            table.setWidget(row, 6, Element.newPLabel(bytes(cost.updateProtocol())));
+            table.setWidget(row, 7, Element.newPLabel(bytes(cost.updateWire())));
+        };
+        final boolean[] all = { false }; // "Measure again": every component, not only the ones never measured
+        final int[] measured = { 0 };
         final java.util.function.IntConsumer[] next = new java.util.function.IntConsumer[1];
         next[0] = idx -> {
             // page left (replaced by another) or client gone (suspended): stop, nobody would see the results
@@ -723,36 +750,35 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
                 return;
             }
             if (idx >= specs.size()) {
-                status.setText("Done: " + specs.size() + " components measured.");
+                status.setText(measured[0] > 0 ? "Done: " + measured[0] + " components measured."
+                    : "Last measured on this server. Measure again re-measures them in this session.");
                 run.setEnabled(true);
                 return;
             }
             final CostSpec spec = specs.get(idx);
+            if (!all[0] && MEASURED.containsKey(spec.name())) {
+                next[0].accept(idx + 1);
+                return;
+            }
             status.setText("Measuring " + spec.name() + "…");
             spec.measure(cost -> {
-                maxMemory[0] = Math.max(maxMemory[0], cost.memory());
-                final int row = idx + 1;
-                table.setWidget(row, 1, Element.newPLabel(CostMeter.memory(cost.memory())));
-                final PElement bar = Element.newDiv();
-                bar.addStyleName("ov-bar");
-                final PElement fill = Element.newDiv();
-                fill.addStyleName("ov-bar-fill");
-                fill.addStyleName("cost-fill");
-                fill.setAttribute("style", "width:" + Math.max(3, cost.memory() * 100 / 2048) + "%");
-                bar.add(fill);
-                table.setWidget(row, 2, bar);
-                table.setWidget(row, 3, Element.newPLabel(bytes(cost.createProtocol())));
-                table.setWidget(row, 4, Element.newPLabel(bytes(cost.createWire())));
-                table.setWidget(row, 6, Element.newPLabel(bytes(cost.updateProtocol())));
-                table.setWidget(row, 7, Element.newPLabel(bytes(cost.updateWire())));
+                measured[0]++;
+                MEASURED.put(spec.name(), cost);
+                show.accept(idx + 1, cost);
                 next[0].accept(idx + 1);
             });
         };
         run.addClickHandler(e -> {
             run.setEnabled(false);
+            all[0] = true;
+            measured[0] = 0;
             next[0].accept(0);
         });
-        // Measured as soon as the page opens: the table is the point of the page
+        // Results known on this server are shown at once; the missing ones are measured as soon as the page opens
+        for (int r = 0; r < specs.size(); r++) {
+            final CostMeter.Cost cost = MEASURED.get(specs.get(r).name());
+            if (cost != null) show.accept(r + 1, cost);
+        }
         run.setText("Measure again");
         run.setEnabled(false);
         PScheduler.schedule(() -> next[0].accept(0), Duration.ofMillis(300));
@@ -1512,8 +1538,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         final long[] prevHeap = {0};
         final long[] prevSent = {0};
         final long[] prevRcv = {0};
-        final long[] totalDictLookups = {0};
-        final long[] totalDictHits = {0};
         schedulers.add(PScheduler.scheduleAtFixedRate(() -> {
             if (idle()) return;
             final long used = LiveHeap.bytes() / 1024 / 1024;
@@ -1557,14 +1581,7 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
                 dictMaxVal.setInnerText(String.valueOf(dictMax));
                 final int dictPct = (int) (dictSize * 100L / Math.max(dictMax, 1));
                 dictBar.setAttribute("style", "width:" + dictPct + "%;height:4px;border-radius:4px;background:var(--accent);transition:width .8s;");
-                // Approximate hit rate from session frequency map
-                final java.util.Map<String, Long> freq = dict.getSessionFrequency();
-                long hits = 0, lookups = 0;
-                for (final long v : freq.values()) { lookups += v; if (v > 1) hits += v - 1; }
-                totalDictLookups[0] = lookups;
-                totalDictHits[0] = hits;
-                final int hitPct = lookups > 0 ? (int) (hits * 100 / lookups) : 0;
-                dictHitVal.setInnerText(String.valueOf(hitPct));
+                dictHitVal.setInnerText(String.valueOf(dict.getSessionHitRate()));
             }
         }, Duration.ofSeconds(1)));
 
