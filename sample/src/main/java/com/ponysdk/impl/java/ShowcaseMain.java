@@ -42,7 +42,6 @@ public class ShowcaseMain {
 
         final java.util.Map<String, String> styles = new java.util.LinkedHashMap<>();
         styles.put("ponysdk", "style/ponysdk.css");
-        styles.put("sample", "css/sample.css");
         styles.put("samplePony", "css/ponysdk.css");
         styles.put("flexlayout", "style/flexlayout.css");
         styles.put("showcase", "css/showcase.css"); // last: the showcase theme wins over the GWT defaults

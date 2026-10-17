@@ -30,7 +30,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -42,7 +41,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload2.core.DiskFileItemFactory;
 import org.apache.commons.fileupload2.core.FileItem;
@@ -71,7 +69,6 @@ import com.ponysdk.core.ui.basic.PElement;
 import com.ponysdk.core.ui.basic.PFileUpload;
 import com.ponysdk.core.ui.basic.PFlowPanel;
 import com.ponysdk.core.ui.basic.PFrame;
-import com.ponysdk.core.ui.basic.PFunctionalLabel;
 import com.ponysdk.core.ui.basic.PLabel;
 import com.ponysdk.core.ui.basic.PListBox;
 import com.ponysdk.core.ui.basic.PMenuBar;
@@ -100,9 +97,6 @@ import com.ponysdk.core.ui.basic.PTreeItem;
 import com.ponysdk.core.ui.basic.PWebComponent;
 import com.ponysdk.core.ui.basic.PWidget;
 import com.ponysdk.core.ui.basic.PWindow;
-import com.ponysdk.core.ui.basic.event.PClickEvent;
-import com.ponysdk.core.ui.basic.event.PKeyUpEvent;
-import com.ponysdk.core.ui.basic.event.PKeyUpHandler;
 import com.ponysdk.core.ui.datagrid2.adapter.DataGridAdapter;
 import com.ponysdk.core.ui.datagrid2.column.ColumnDefinition;
 import com.ponysdk.core.ui.datagrid2.column.DefaultColumnDefinition;
@@ -112,14 +106,10 @@ import com.ponysdk.core.ui.datagrid2.view.ColumnFilterFooterDataGridView;
 import com.ponysdk.core.ui.datagrid2.view.ColumnVisibilitySelectorDataGridView;
 import com.ponysdk.core.ui.datagrid2.view.ConfigSelectorDataGridView;
 import com.ponysdk.core.ui.datagrid2.view.DataGridView;
-import com.ponysdk.core.ui.datagrid2.view.DataGridView.DecodeException;
 import com.ponysdk.core.ui.datagrid2.view.DefaultDataGridView;
 import com.ponysdk.core.ui.datagrid2.view.RowSelectorColumnDataGridView;
-import com.ponysdk.core.ui.eventbus2.EventBus.EventHandler;
 import com.ponysdk.core.ui.form2.impl.formfield.ColorInputFormField;
-import com.ponysdk.core.ui.form2.impl.formfield.NumberInputFormField;
 import com.ponysdk.core.ui.form2.impl.formfield.StringTextBoxFormField;
-import com.ponysdk.core.ui.formatter.TextFunction;
 import com.ponysdk.core.ui.grid.AbstractGridWidget;
 import com.ponysdk.core.ui.grid.GridTableWidget;
 import com.ponysdk.core.ui.list.DataGridColumnDescriptor;
@@ -128,25 +118,16 @@ import com.ponysdk.core.ui.list.refreshable.RefreshableDataGrid;
 import com.ponysdk.core.ui.list.renderer.cell.CellRenderer;
 import com.ponysdk.core.ui.list.valueprovider.IdentityValueProvider;
 import com.ponysdk.core.ui.main.EntryPoint;
-import com.ponysdk.core.ui.model.PKeyCodes;
 import com.ponysdk.core.ui.rich.PToolbar;
 import com.ponysdk.core.ui.rich.PTwinListBox;
-import com.ponysdk.core.ui.scene.AbstractScene;
-import com.ponysdk.core.ui.scene.Router;
-import com.ponysdk.core.ui.scene.Scene;
-import com.ponysdk.sample.client.event.UserLoggedOutEvent;
-import com.ponysdk.sample.client.event.UserLoggedOutHandler;
 import com.ponysdk.sample.client.page.addon.BinaryArgsAddOn;
 import com.ponysdk.sample.client.page.addon.FlexLayoutDemoEntryPoint;
-import com.ponysdk.sample.client.page.addon.LoggerAddOn;
 
-public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
+public class UISampleEntryPoint implements EntryPoint {
 
     private static final Logger log = LoggerFactory.getLogger(UISampleEntryPoint.class);
 
-    private PLabel mainLabel;
     int a = 0;
-    private static int counter;
 
     /** Opens a page of the showcase (index in the sidebar), from anywhere in the showcase. */
     private java.util.function.IntConsumer navigate = i -> { };
@@ -2051,16 +2032,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         return labeled(label, widget.asWidget());
     }
 
-    private static PFlowPanel buildRadioGroup() {
-        final PFlowPanel p = Element.newPFlowPanel();
-        p.setStyleProperty("display", "flex");
-        p.setStyleProperty("gap", "8px");
-        p.add(Element.newPRadioButton("Option A"));
-        p.add(Element.newPRadioButton("Option B"));
-        p.add(Element.newPRadioButton("Option C"));
-        return p;
-    }
-
     private static PWidget buildRichText() {
         final PFlowPanel p = Element.newPFlowPanel();
         final PRichTextArea rta = Element.newPRichTextArea();
@@ -2314,34 +2285,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         return p;
     }
 
-    private void testScene() {
-        final Scene scene1 = new AbstractScene("scene1", "Scene 1", "scene1") {
-
-            @Override
-            public PWidget buildGUI() {
-                return Element.newPLabel("Scene1 Started");
-            }
-        };
-
-        final Scene scene2 = new AbstractScene("scene2", "Scene 2", "scene2") {
-
-            @Override
-            public PWidget buildGUI() {
-                return Element.newPLabel("Scene2 Started");
-            }
-        };
-
-        final PSimplePanel layout = Element.newPSimplePanel();
-        final Router router = new Router("sample");
-        router.setLayout(layout);
-        router.push(scene1);
-        router.push(scene2);
-
-        PWindow.getMain().add(layout);
-
-        router.go("scene2");
-    }
-
     private static class MyRow {
 
         private final int id;
@@ -2461,16 +2404,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         label.setText("Server counter: " + text);
     }
 
-    private void createFunctionalLabel() {
-        final TextFunction textFunction = new TextFunction(args -> {
-            log.debug("{} {}", args[0], args[1]);
-            return (String) args[0];
-        }, "console.log(args[0] + \" \" + args[1]); return args[0];");
-        final PFunctionalLabel newPFunctionalLabel = Element.newPFunctionalLabel(textFunction);
-        PWindow.getMain().add(newPFunctionalLabel);
-        newPFunctionalLabel.setArgs("A", "B");
-    }
-
     public PFlowPanel createPFileUpload() {
         final PFlowPanel panel = Element.newPFlowPanel();
         final PFileUpload fileUpload = Element.newPFileUpload();
@@ -2513,100 +2446,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
             value.append(buffer, 0, length);
         }
         log.debug("File content: {}", value);
-    }
-
-    private void testPerf() {
-        final PWindow w = Element.newPWindow("Window 1", "resizable=yes,location=0,status=0,scrollbars=0");
-        final List<PLabel> labels = new ArrayList<>(1000);
-
-        final PButton start = Element.newPButton("Start");
-        w.add(start);
-        start.addClickHandler(event -> scheduleUpdate(labels));
-
-        for (int i = 0; i < 1000; i++) {
-            final PLabel label = Element.newPLabel(counter + "-" + i);
-            labels.add(label);
-            w.add(label);
-        }
-
-        w.open();
-    }
-
-    private void scheduleUpdate(final List<PLabel> labels) {
-        PScheduler.schedule(() -> {
-            int i = 0;
-            counter++;
-            for (final PLabel label : labels) {
-                label.setText(counter + "-" + i);
-                i++;
-            }
-            if (counter < 20) scheduleUpdate(labels);
-            else counter = 0;
-        }, Duration.ofMillis(20));
-    }
-
-    private void createReconnectingPanel() {
-        final PSimplePanel reconnectionPanel = Element.newPSimplePanel();
-        reconnectionPanel.setAttribute("id", "reconnection");
-        final PSimplePanel reconnectingPanel = Element.newPSimplePanel();
-        reconnectingPanel.setAttribute("id", "reconnecting");
-        reconnectionPanel.setWidget(reconnectingPanel);
-        PWindow.getMain().add(reconnectionPanel);
-    }
-
-    private void downloadFile() {
-        final PButton downloadImageButton = Element.newPButton("Download Pony image");
-        downloadImageButton.addClickHandler(event -> UIContext.get().stackStreamRequest((request, response, uiContext1) -> {
-            response.reset();
-            response.setContentType("image/png");
-            response.setHeader("Content-Disposition", "attachment; filename=pony_image.png");
-
-            try {
-                final OutputStream output = response.getOutputStream();
-                final InputStream input = getClass().getClassLoader().getResourceAsStream("images/pony.png");
-
-                final byte[] buff = new byte[1024];
-                while (input.read(buff) != -1) {
-                    output.write(buff);
-                }
-
-                output.flush();
-                output.close();
-            } catch (final IOException e) {
-                e.printStackTrace();
-            }
-        }));
-        PWindow.getMain().add(downloadImageButton);
-    }
-
-    private void testPAddon() {
-        final LoggerAddOn addon = createPAddOn();
-        addon.attach(PWindow.getMain());
-
-        // final PElementAddOn elementAddOn = new PElementAddOn();
-        // elementAddOn.setInnerText("Coucou");
-        // flowPanel.add(elementAddOn);
-
-        // highChartsStackedColumnAddOn = new HighChartsStackedColumnAddOn();
-        // PWindow.getMain().add(highChartsStackedColumnAddOn);
-        // highChartsStackedColumnAddOn.setSeries("");
-
-        // final HighChartsStackedColumnAddOn h2 = new
-        // HighChartsStackedColumnAddOn();
-        // a.add(h2);
-        // h2.setSeries("");
-        // final PElementAddOn elementAddOn2 = new PElementAddOn();
-        // elementAddOn2.setInnerText("Coucou dans window");
-        // a.add(elementAddOn2);
-    }
-
-    private void createNewEvent() {
-        final EventHandler<PClickEvent> handler = UIContext.get().getNewEventBus().subscribe(PClickEvent.class,
-            event -> log.debug("Event: {}", event));
-        UIContext.get().getNewEventBus().post(new PClickEvent(this));
-        UIContext.get().getNewEventBus().post(new PClickEvent(this));
-        UIContext.get().getNewEventBus().unsubscribe(handler);
-        UIContext.get().getNewEventBus().post(new PClickEvent(this));
     }
 
     private static final class Data {
@@ -2679,79 +2518,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         return grid;
     }
 
-    private void testUIDelegator() {
-        final PLabel a = Element.newPLabel();
-        PWindow.getMain().add(a);
-        final AtomicInteger ai = new AtomicInteger();
-        PScheduler.scheduleAtFixedRate(() -> a.setText("a " + ai.incrementAndGet()), Duration.ofMillis(0), Duration.ofMillis(10));
-
-        final PLabel p = Element.newPLabel();
-        PWindow.getMain().add(p);
-    }
-
-    private PWindow createWindow() {
-        final PWindow w = Element.newPWindow("Window 1", "resizable=yes,location=0,status=0,scrollbars=0");
-
-        final PFlowPanel windowContainer = Element.newPFlowPanel();
-        w.add(windowContainer);
-
-        final PLabel child = Element.newPLabel("Window 1");
-        child.setText("Modified Window 1");
-        windowContainer.add(child);
-
-        final PButton button = Element.newPButton("Modified main label on main window");
-        windowContainer.add(button);
-        button.addClickHandler(event -> {
-            mainLabel.setText("Touched by God : " + child.getWindow());
-            child.setText("Clicked Window 1");
-        });
-        windowContainer.add(button);
-
-        final AtomicInteger i = new AtomicInteger();
-
-        final PButton button1 = Element.newPButton("Open linked window");
-        windowContainer.add(button1);
-        button1.addClickHandler(event -> {
-            final PWindow newPWindow = Element.newPWindow(w, "Sub Window 1 " + i.incrementAndGet(),
-                "resizable=yes,location=0,status=0,scrollbars=0");
-            newPWindow.add(Element.newPLabel("Sub window"));
-            newPWindow.open();
-        });
-
-        final PButton button2 = Element.newPButton("Open not linked window");
-        windowContainer.add(button2);
-        button2.addClickHandler(event -> {
-            final PWindow newPWindow = Element.newPWindow("Not Sub Window 1 " + i.incrementAndGet(),
-                "resizable=yes,location=0,status=0,scrollbars=0");
-            newPWindow.add(Element.newPLabel("Sub window"));
-            newPWindow.open();
-        });
-
-        PScheduler.scheduleAtFixedRate(() -> {
-            final PLabel label = Element.newPLabel();
-            label.setText("Window 1 " + i.incrementAndGet());
-            windowContainer.add(label);
-            windowContainer.add(Element.newPCheckBox("Checkbox"));
-        }, Duration.ofSeconds(1), Duration.ofSeconds(10));
-
-        final PFrame frame = Element.newPFrame("./"); // relative: same origin whatever host/port serves the showcase
-        frame.add(Element.newPLabel("Inside the frame"));
-        w.add(frame);
-
-        return w;
-    }
-
-    @Override
-    public void onUserLoggedOut(final UserLoggedOutEvent event) {
-        UIContext.get().close();
-    }
-
-    private static final PStackLayoutPanel createStackLayoutPanel() {
-        final PStackLayoutPanel child = Element.newPStackLayoutPanel(PUnit.CM);
-        child.add(Element.newPLabel("Text"), "Text", false, 1.0);
-        return child;
-    }
-
     private static final PListBox createListBox() {
         final PListBox pListBox = Element.newPListBox(true);
         pListBox.addItem("A");
@@ -2761,12 +2527,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         return pListBox;
     }
 
-    private static final PTabLayoutPanel createTabLayoutPanel() {
-        final PTabLayoutPanel child = Element.newPTabLayoutPanel();
-        child.add(Element.newPLabel("text"), "text");
-        return child;
-    }
-
     private static final PMenuBar createMenu() {
         final PMenuBar pMenuBar = Element.newPMenuBar(true);
         pMenuBar.addItem(Element.newPMenuItem("Menu 1", Element.newPMenuBar()));
@@ -2774,44 +2534,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         pMenuBar.addItem(Element.newPMenuItem("Menu 3", () -> log.debug("Menu click")));
         pMenuBar.addSeparator();
         return pMenuBar;
-    }
-
-    private static final PFlowPanel createPFlowPanel() {
-        final PFlowPanel panel1 = Element.newPFlowPanel();
-        panel1.setAttribute("id", "panel1");
-        final PFlowPanel panel2_1 = Element.newPFlowPanel();
-        panel2_1.setAttribute("id", "panel2_1");
-        final PFlowPanel panel3_1_1 = Element.newPFlowPanel();
-        panel3_1_1.setAttribute("id", "panel3_1_1");
-        final PFlowPanel panel3_1_2 = Element.newPFlowPanel();
-        panel3_1_2.setAttribute("id", "panel3_1_2");
-        final PFlowPanel panel2_2 = Element.newPFlowPanel();
-        panel2_2.setAttribute("id", "panel2_2");
-        final PFlowPanel panel3_2_1 = Element.newPFlowPanel();
-        panel3_2_1.setAttribute("id", "panel3_2_1");
-        final PFlowPanel panel3_2_2 = Element.newPFlowPanel();
-        panel3_2_2.setAttribute("id", "panel3_2_2");
-
-        panel1.add(panel2_1);
-        panel2_1.add(panel3_1_1);
-        panel2_1.add(panel3_1_2);
-        panel1.add(panel2_2);
-        panel2_2.add(panel3_2_1);
-        panel2_2.add(panel3_2_2);
-
-        return panel1;
-    }
-
-    private static final PWidget createBlock(final PWidget child) {
-        final PFlowPanel panel = Element.newPFlowPanel();
-        panel.add(child);
-        return panel;
-    }
-
-    private static final PDockLayoutPanel createDockLayoutPanel() {
-        final PDockLayoutPanel pDockLayoutPanel = Element.newPDockLayoutPanel(PUnit.CM);
-        pDockLayoutPanel.addNorth(Element.newPLabel("LabelDock"), 1.5);
-        return pDockLayoutPanel;
     }
 
     private static final PFlowPanel createDateBox() {
@@ -2837,46 +2559,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         return flowPanel;
     }
 
-    private static final LoggerAddOn createPAddOn() {
-        final LoggerAddOn labelPAddOn = new LoggerAddOn();
-        labelPAddOn.log("addon logger test");
-
-        labelPAddOn.setAjaxHandler((req, resp) -> {
-            final String header = req.getHeader("info");
-
-            if (header.equals("Get Data")) {
-                resp.setStatus(HttpServletResponse.SC_OK);
-                resp.setContentType("application/json");
-                resp.getWriter().print("{\"response\": \"" + header + "\"}");
-                resp.getWriter().flush();
-            } else {
-                resp.sendError(500);
-            }
-        });
-
-        labelPAddOn.setTerminalHandler(event -> log.debug("AddOn event: {}", event));
-
-        return labelPAddOn;
-    }
-
-    private static final PTextBox createPTextBox() {
-        final PTextBox pTextBox = Element.newPTextBox();
-
-        pTextBox.addKeyUpHandler(new PKeyUpHandler() {
-
-            @Override
-            public void onKeyUp(final PKeyUpEvent keyUpEvent) {
-                PScript.execute(PWindow.getMain(), "alert('" + keyUpEvent + "');");
-            }
-
-            @Override
-            public PKeyCodes[] getFilteredKeys() {
-                return new PKeyCodes[] { PKeyCodes.ENTER };
-            }
-        });
-        return pTextBox;
-    }
-
     private static final PTree createTree() {
         final PTree tree = Element.newPTree();
 
@@ -2897,19 +2579,6 @@ public class UISampleEntryPoint implements EntryPoint, UserLoggedOutHandler {
         bund.setSelected(true);
 
         return tree;
-    }
-
-    private static final PAbsolutePanel createAbsolutePanel() {
-        final PAbsolutePanel pAbsolutePanel = Element.newPAbsolutePanel();
-        pAbsolutePanel.add(Element.newDiv());
-        pAbsolutePanel.add(Element.newP());
-        return pAbsolutePanel;
-    }
-
-    private static final PButton createButton() {
-        final PButton pButton = Element.newPButton("Button 1");
-        pButton.addClickHandler(handler -> pButton.setText("Button 1 clicked"));
-        return pButton;
     }
 
 }
