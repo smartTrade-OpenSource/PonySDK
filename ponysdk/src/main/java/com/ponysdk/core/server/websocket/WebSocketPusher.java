@@ -38,9 +38,11 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.LockSupport;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -50,12 +52,13 @@ import java.util.function.Function;
  * asynchronously via Jetty 12 {@link Session#sendBinary(ByteBuffer, Callback)}.
  * <p>
  * Writes are single-threaded (the UIContext lock guarantees this).
- * Flushes are serialized: a new sendBinary is only issued once the
- * previous Callback has completed.
+ * Sends are serialized: one sendBinary at a time, in flush order. A flush made while the client is still reading
+ * the previous message does not wait for it: it joins a short per-session queue that the send callback drains
+ * (see {@link Sender}); only a client stuck beyond that queue makes the flushing thread wait, then times out.
  * <p>
  * Optimizations:
  * - Pooled buffers: the write buffer is borrowed from a {@link ByteBufferPool} and handed off to
- *   Jetty on flush; the SendSync callback returns it to the pool (no per-flush copy)
+ *   Jetty on flush; the Sender callback returns it to the pool (no per-flush copy)
  * - Reusable byte[] for string encoding (avoids per-string allocation)
  * - Factored string encoding logic (putStringBytes) shared by all string paths
  */
@@ -83,7 +86,7 @@ public class WebSocketPusher implements Closeable {
 
     // ── Pooled buffering ──
     // writeBuffer: borrowed from the pool on first write, handed off to Jetty on flush
-    // (returned to the pool by the SendSync callback), or released on close.
+    // (returned to the pool by the Sender callback), or released on close.
     private ByteBuffer writeBuffer;
 
     // ── Reusable byte[] for string UTF-8 encoding ──
@@ -99,8 +102,8 @@ public class WebSocketPusher implements Closeable {
     private volatile boolean closed;
     private volatile Throwable asyncError;
 
-    /** Reusable send synchronizer — avoids allocating a CountDownLatch + Callback per flush. */
-    private final SendSync sendSync = new SendSync();
+    /** Sends the flushed buffers in order, one at a time (a single reusable Callback). */
+    private final Sender sender = new Sender();
 
     private static volatile WebSocketStatsRecorder statsRecorder;
     private int metaBytes;
@@ -387,15 +390,13 @@ public class WebSocketPusher implements Closeable {
     /**
      * Flushes accumulated data to the WebSocket as a single binary message.
      * <p>
-     * The current writeBuffer is handed off to Jetty for async send.
-     * The SendSync callback returns it to the pool when Jetty is done.
+     * The current writeBuffer is handed off for an async send (or queued behind the one in flight).
+     * The Sender callback returns it to the pool when Jetty is done.
      * A new writeBuffer will be lazily acquired from the pool on next write.
      */
     public void flush() throws IOException {
         checkState();
         if (writeBuffer == null || writeBuffer.position() == 0) return;
-
-        awaitPreviousSend();
 
         // Reset eviction budget for next write cycle
         if (stringDictionary != null) stringDictionary.resetEvictionBudget();
@@ -408,22 +409,16 @@ public class WebSocketPusher implements Closeable {
         final int bytes = toSend.remaining();
         if (log.isDebugEnabled()) log.debug("Flushing {} bytes", bytes);
 
-        sendSync.reset(toSend);
         protocolBytesSent += bytes;
-        session.sendBinary(toSend, sendSync);
+        if (!sender.send(toSend)) {
+            close();
+            throw new IOException("Timeout waiting for previous WebSocket send to complete");
+        }
 
         if (listener != null) {
             listener.onOutgoingPonyFramesBytes(bytes);
             sampleOutgoingWireBytes();
         }
-    }
-
-    private void awaitPreviousSend() throws IOException {
-        if (!sendSync.awaitCompletion(timeoutMillis)) {
-            close();
-            throw new IOException("Timeout waiting for previous WebSocket send to complete");
-        }
-        checkState();
     }
 
     @Override
@@ -435,6 +430,7 @@ public class WebSocketPusher implements Closeable {
                 bufferPool.release(writeBuffer);
                 writeBuffer = null;
             }
+            sender.discard();
             if (session.isOpen()) {
                 session.close(StatusCode.NORMAL, "close", Callback.NOOP);
             }
@@ -911,79 +907,97 @@ public class WebSocketPusher implements Closeable {
         return byteLength;
     }
 
-    // ── Reusable send synchronizer ───────────────────────────────────────
+    // ── Sends ────────────────────────────────────────────────────────────
+
+    /** Flushed buffers waiting behind the one in flight, at most: a client stuck past them blocks the flush. */
+    static final int QUEUE_LIMIT = 4;
 
     /**
-     * Zero-allocation Callback + synchronization for async sendBinary.
-     * Reused across flushes instead of creating a new CountDownLatch + anonymous Callback each time.
-     * <p>
-     * Uses {@link LockSupport#park}/{@link LockSupport#unpark} for wait/notify
-     * with a volatile state flag. The waiting thread is captured on {@link #reset(ByteBuffer)}.
-     * <p>
-     * On completion (succeed or fail), returns the sent buffer to the pool.
+     * Sends flushed buffers one at a time, in order. A buffer flushed while a send is in flight waits in a short
+     * queue, appended to the last waiting buffer when it fits (so a burst of small flushes leaves as one message),
+     * and the completion callback sends the next one: the thread that writes to a slow client does not wait for it.
+     * The queue is bounded ({@link #QUEUE_LIMIT} pooled buffers): a client that stays stuck past it makes the flush
+     * wait, then time out, as when every flush waited for the previous send.
      */
-    private final class SendSync implements Callback {
+    private final class Sender implements Callback {
 
-        private static final int DONE = 1;
-        private static final int PENDING = 0;
+        private final ReentrantLock lock = new ReentrantLock();
+        private final Condition room = lock.newCondition();
+        private final ArrayDeque<ByteBuffer> queue = new ArrayDeque<>(QUEUE_LIMIT);
+        /** The buffer Jetty is sending (back to the pool on completion), null when idle. Guarded by lock. */
+        private ByteBuffer inFlight;
 
-        private volatile int state = DONE; // starts as "done" so first awaitCompletion is a no-op
-        private volatile Thread waiter;
-        /** The buffer being sent — returned to pool on completion. */
-        private volatile ByteBuffer sentBuffer;
-
-        /** Prepare for a new send. Must be called before passing to sendBinary. */
-        void reset(final ByteBuffer buffer) {
-            this.sentBuffer = buffer;
-            state = PENDING;
-            waiter = Thread.currentThread();
+        /** @return false if the queue stayed full for the send timeout */
+        boolean send(final ByteBuffer buffer) throws IOException {
+            lock.lock();
+            try {
+                if (inFlight != null) {
+                    final ByteBuffer last = queue.peekLast();
+                    if (last != null && last.capacity() - last.limit() >= buffer.remaining()) {
+                        final int end = last.limit();
+                        last.limit(last.capacity()).position(end);
+                        last.put(buffer).flip();
+                        bufferPool.release(buffer);
+                        return true;
+                    }
+                    long nanos = TimeUnit.MILLISECONDS.toNanos(timeoutMillis);
+                    while (inFlight != null && queue.size() >= QUEUE_LIMIT) {
+                        if (nanos <= 0) return false;
+                        nanos = room.awaitNanos(nanos);
+                    }
+                    if (inFlight != null) {
+                        queue.addLast(buffer);
+                        return true;
+                    }
+                }
+                inFlight = buffer;
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new IOException("Interrupted waiting for WebSocket send", e);
+            } finally {
+                lock.unlock();
+            }
+            session.sendBinary(buffer, this); // outside the lock: Jetty may complete it right here
+            return true;
         }
 
         @Override
         public void succeed() {
-            returnBuffer();
-            signal();
+            final ByteBuffer next;
+            lock.lock();
+            try {
+                bufferPool.release(inFlight);
+                next = inFlight = queue.pollFirst();
+                room.signalAll();
+            } finally {
+                lock.unlock();
+            }
+            if (next != null) session.sendBinary(next, this);
         }
 
         @Override
         public void fail(final Throwable t) {
             log.error("sendBinary failed", t);
             asyncError = t;
-            returnBuffer();
-            signal();
-        }
-
-        private void returnBuffer() {
-            final ByteBuffer buf = sentBuffer;
-            sentBuffer = null;
-            if (buf != null) {
-                bufferPool.release(buf);
+            lock.lock();
+            try {
+                bufferPool.release(inFlight);
+                inFlight = null;
+            } finally {
+                lock.unlock();
             }
+            discard(); // the next write surfaces the error and closes
         }
 
-        private void signal() {
-            state = DONE;
-            final Thread t = waiter;
-            if (t != null) LockSupport.unpark(t);
-        }
-
-        /**
-         * Blocks until the send completes or the timeout expires.
-         * @return true if completed, false if timed out
-         */
-        boolean awaitCompletion(final long timeoutMillis) throws IOException {
-            if (state == DONE) return true;
-            final long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeoutMillis);
-            while (state != DONE) {
-                final long remaining = deadline - System.nanoTime();
-                if (remaining <= 0) return false;
-                LockSupport.parkNanos(this, remaining);
-                if (Thread.interrupted()) {
-                    Thread.currentThread().interrupt();
-                    throw new IOException("Interrupted waiting for WebSocket send");
-                }
+        /** Drops what has not been sent yet (closed or failed connection). */
+        void discard() {
+            lock.lock();
+            try {
+                for (ByteBuffer b; (b = queue.pollFirst()) != null; ) bufferPool.release(b);
+                room.signalAll();
+            } finally {
+                lock.unlock();
             }
-            return true;
         }
     }
 }
