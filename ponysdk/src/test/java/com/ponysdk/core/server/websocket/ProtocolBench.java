@@ -274,6 +274,25 @@ public final class ProtocolBench {
         if (hc != null) printHistogramDiff("UIContext", hc, contexts.size());
         System.out.printf("%-34s %8.0f B per UIContext%n", "heap: empty UIContext", (double) (c1 - c0) / contexts.size());
         contexts.forEach(x -> x.ctx.destroy());
+
+        // A PFlexTable of labels (DataGrid v1, list views): table bookkeeping per cell, the label included
+        final Bench t = new Bench(protocolVersion, 64 << 20);
+        final int tableRows = 2_000, tableColumns = 10;
+        final com.ponysdk.core.ui.basic.PFlexTable[] table = new com.ponysdk.core.ui.basic.PFlexTable[1];
+        final long t0 = usedAfterGc();
+        t.ctx.execute(() -> {
+            table[0] = Element.newPFlexTable();
+            t.root.add(table[0]);
+            for (int r = 0; r < tableRows; r++) {
+                for (int c = 0; c < tableColumns; c++) table[0].setWidget(r, c, Element.newPLabel("1.0"));
+            }
+        });
+        t.capture.clear();
+        final long t1 = usedAfterGc();
+        System.out.printf("%-34s %8.0f B per cell (a label in a PFlexTable)%n", "heap: table cell",
+            (double) (t1 - t0) / (tableRows * tableColumns));
+        if (table[0].getRowCount() != tableRows) throw new AssertionError();
+        t.ctx.destroy();
     }
 
     private static void printHistogramDiff(final String unit, final Map<String, long[]> h0, final int count) {
