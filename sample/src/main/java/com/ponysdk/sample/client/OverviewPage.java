@@ -118,11 +118,11 @@ final class OverviewPage {
         final PFlowPanel kpis = Element.newPFlowPanel();
         kpis.addStyleName("ov-kpis");
         for (final Measure m : new Measure[] {
-            new Measure("CPU per UI update", "−40 %", "1.8× less", "1 850 ns", "1 050 ns", 57, "Server time to apply and encode one update"),
-            new Measure("Bandwidth on the wire", "−58 %", "2.4× less", "1.22 MB/s", "0.51 MB/s", 42, "Same updates, bytes on the TCP stream"),
-            new Measure("Allocation per update", "−50 %", "1.9× less", "140 B", "72 B", 51, "Garbage produced per update"),
-            new Measure("Process memory (RSS)", "−28 %", "1.4× less", "1 060 MB", "750 MB", 71, "Whole JVM, 200 live sessions"),
-            new Measure("Retained heap", "−14 %", "1.2× less", "37.4 MB", "32.3 MB", 86, "Live objects after a full GC, same benchmark") }) {
+            new Measure("CPU per UI update", "−37 %", "1.6× less", "2 280 ns", "1 440 ns", 63, "Server time to apply and encode one update"),
+            new Measure("Bandwidth on the wire", "−50 %", "2.0× less", "1.02 MB/s", "0.51 MB/s", 50, "Same updates, bytes on the TCP stream"),
+            new Measure("Allocation per update", "−83 %", "6.0× less", "42 B", "7 B", 17, "Garbage produced per update"),
+            new Measure("Process memory (RSS)", "−54 %", "2.2× less", "410 MB", "190 MB", 46, "Whole JVM, 200 live sessions"),
+            new Measure("Retained heap", "−18 %", "1.2× less", "26.3 MB", "21.7 MB", 82, "Live objects after a full GC, same benchmark") }) {
             final PFlowPanel k = Element.newPFlowPanel();
             k.addStyleName("ov-kpi");
             k.add(el("ov-kpi-metric", m.metric()));
@@ -137,7 +137,7 @@ final class OverviewPage {
         }
         p.add(kpis);
         p.add(el("ov-note", "Benchmark: 200 sessions, each a 200-cell price grid receiving 130 updates every 100 ms "
-            + "(260 000 updates/s). Values rounded."));
+            + "(260 000 updates/s). Mean of three runs per version, values rounded."));
 
         // Live metrics of this very session
         p.add(sectionTitle("Live — this session, right now"));
