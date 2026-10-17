@@ -172,6 +172,21 @@ public class BootstrapServletTest {
         assertTrue(html.contains("src=\"ctx/script/ponysdk.js\""));
     }
 
+    @Test
+    public void theBootstrapPageOpensTheWebSocketBeforeLoadingTheTerminal() {
+        final ApplicationConfiguration config = Mockito.mock(ApplicationConfiguration.class);
+        Mockito.when(config.getApplicationName()).thenReturn("App");
+        final String html = servletWith(config).buildIndexHTML(request("", "/index.html"));
+
+        final int socket = html.indexOf("window.ponyEarlySocket=");
+        final int terminal = html.indexOf("ponyterminal.nocache.js");
+        assertTrue("early socket script present", socket > 0);
+        assertTrue("before the terminal script", socket < terminal);
+        assertTrue("announces the protocol version the terminal speaks",
+            html.contains("&w=" + com.ponysdk.core.model.ProtocolVersion.CURRENT + "'"));
+        assertTrue("not in a child window", html.contains("has('1')"));
+    }
+
     // ---- HTTP caching of the served files ----
 
     /** A servlet serving {@code file} at {@code path} from its servlet context. */

@@ -23,6 +23,9 @@
 
 package com.ponysdk.core.server.servlet;
 
+import com.ponysdk.core.model.ClientToServerModel;
+import com.ponysdk.core.model.MappingPath;
+import com.ponysdk.core.model.ProtocolVersion;
 import com.ponysdk.core.server.application.ApplicationConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -276,8 +279,28 @@ public class BootstrapServlet extends HttpServlet {
         return sb.toString();
     }
 
+    /**
+     * Opens the WebSocket while the terminal script downloads, so that the server builds the page meanwhile; the
+     * terminal adopts the socket and replays what it received (WebSocketClient.connect). Same URL as the terminal
+     * builds (History.getToken() is the decoded hash); main window only: a child window ("1" parameter) attaches to
+     * its parent's context instead.
+     */
+    static final String EARLY_SOCKET_SCRIPT = "<script type=\"text/javascript\">(function(){"
+            + "if(!window.WebSocket||new URLSearchParams(location.search).has('" + ClientToServerModel.UI_CONTEXT_ID.toStringValue() + "'))return;"
+            + "var l=location,t=decodeURI(l.hash.substring(1).replace(/%23/g,'#')),"
+            + "e={opened:false,messages:[],closeEvent:null};"
+            + "e.socket=new WebSocket(l.protocol.replace('http','ws')+'//'+l.host+l.pathname+'" + MappingPath.WEBSOCKET + "?"
+            + ClientToServerModel.TYPE_HISTORY.toStringValue() + "='+t+'&" + ClientToServerModel.PROTOCOL_VERSION.toStringValue()
+            + "=" + ProtocolVersion.CURRENT + "'+l.search.replace('?','&'));"
+            + "e.socket.binaryType='arraybuffer';"
+            + "e.socket.onopen=function(){e.opened=true;};"
+            + "e.socket.onmessage=function(m){e.messages.push(m.data);};"
+            + "e.socket.onclose=function(c){e.closeEvent=c;};"
+            + "window.ponyEarlySocket=e;})();</script>";
+
     protected String addScript(final HttpServletRequest request) {
         final StringBuilder sb = new StringBuilder();
+        sb.append(EARLY_SOCKET_SCRIPT).append(NEW_LINE);
 
         // Enable transparent WebSocket reconnection on the client side when the server supports it
         if (configuration != null && configuration.getReconnectionTimeoutMs() > 0) {

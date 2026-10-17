@@ -105,7 +105,7 @@ public class PonySDK implements UncaughtExceptionHandler {
         String newUrl = protocol + "//" + server + pathName + wsMappingPath + search;
 
         reconnectionChecker = new ReconnectionChecker();
-        socketClient = new WebSocketClient(newUrl, uiBuilder, reconnectionChecker);
+        socketClient = WebSocketClient.connect(newUrl, uiBuilder, reconnectionChecker);
     }
     private void startChildContext() {
         final String windowId = Window.Location.getParameter(ClientToServerModel.WINDOW_ID.toStringValue());
