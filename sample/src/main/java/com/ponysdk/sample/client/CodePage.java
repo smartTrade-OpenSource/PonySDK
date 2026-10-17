@@ -27,17 +27,15 @@ import static com.ponysdk.sample.client.Ui.*;
 import static com.ponysdk.sample.client.Costs.*;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import com.ponysdk.core.server.application.UIContext;
 import com.ponysdk.core.server.concurrent.PScheduler;
 import com.ponysdk.core.ui.basic.Element;
 import com.ponysdk.core.ui.basic.PButton;
 import com.ponysdk.core.ui.basic.PFlowPanel;
+import com.ponysdk.core.ui.basic.PWidget;
+import com.ponysdk.core.ui.basic.PElement;
 import com.ponysdk.core.ui.basic.PLabel;
-import com.ponysdk.core.ui.basic.PWindow;
-import com.ponysdk.core.ui.datagrid2.controller.DataGridController;
-import com.ponysdk.core.ui.datagrid2.view.DefaultDataGridView;
-import com.ponysdk.core.ui.main.EntryPoint;
 
 /** Code: the Java behind a PonySDK screen. */
 final class CodePage {
@@ -47,31 +45,46 @@ final class CodePage {
 
     // ── Tab: Code ─────────────────────────────────────────────────────────────
 
-    static PFlowPanel build() {
+    /** Each card runs the code it shows: Preview is that code, live; Code is its source. */
+    static PFlowPanel build(final List<PScheduler.UIRunnable> schedulers) {
         final PFlowPanel p = section();
-        pageTitle(p, "Code", "PonySDK lets you build rich UIs in pure Java — no JavaScript, no REST, no serialization.");
+        pageTitle(p, "Code", "A PonySDK screen is plain Java on the server: widgets, handlers, pushes and data. Each card "
+            + "below runs the code it shows.");
 
-        p.add(highlightBox("💡", "Server-side rendering, client-side performance",
-            "Your entire UI logic runs on the JVM. PonySDK sends only binary deltas over WebSocket — " +
-            "typically 5–20 bytes per update. The browser renders natively, you code in Java."));
+        final PButton button = Element.newPButton("Click me");
+        final PElement buttonEcho = echoIdle("server: not clicked yet");
+        final AtomicInteger clicks = new AtomicInteger();
+        button.addClickHandler(e -> {
+            button.setText("Clicked!");
+            echoSet(buttonEcho, "server: handled click #" + clicks.incrementAndGet() + " in a Java lambda");
+        });
+        p.add(exampleCard("A button and its handler",
+            "The widget is a Java object on the server; the click handler is a Java lambda. Only the new text travels back.",
+            previewWithEcho(button, buttonEcho), snippet_helloWorld()));
 
-        p.add(sectionTitle("Hello World — server-side button"));
-        p.add(codeSnippet("EntryPoint.java", "JAVA", snippet_helloWorld()));
+        final PLabel counter = Element.newPLabel("0 updates");
+        counter.addStyleName("code-counter");
+        final AtomicInteger count = new AtomicInteger();
+        schedulers.add(PScheduler.scheduleAtFixedRate(() -> {
+            if (idle()) return;
+            counter.setText(count.incrementAndGet() + " updates");
+        }, Duration.ofMillis(100)));
+        p.add(exampleCard("Push from the server",
+            "A server task updates the label ten times a second: no polling, no request from the browser, about 10 bytes per update.",
+            counter, snippet_liveCounter()));
 
-        p.add(sectionTitle("Real-time push — server → browser"));
-        p.add(codeSnippet("LiveCounter.java", "JAVA", snippet_liveCounter()));
+        final PWidget grid = smallDataGrid();
+        grid.setWidth("100%");
+        grid.setHeight("320px");
+        p.add(exampleCard("A data grid whose data stays on the server",
+            "Columns and rows are defined in Java; the browser only receives the rows it shows. Scroll, sort and resize are "
+                + "handled on the server.",
+            grid, snippet_datagrid()));
 
-        p.add(sectionTitle("DataGrid — 10 000 rows, virtual rendering"));
-        p.add(codeSnippet("DataGridExample.java", "JAVA", snippet_datagrid()));
-
-        p.add(sectionTitle("What travels on the wire"));
-        p.add(highlightBox("📊", "Binary delta protocol with dictionary compression",
-            "First send of 'Hello': ~7 bytes + dict entry. " +
-            "Subsequent sends: 2 bytes (dict index). " +
-            "Result: 80–95% bandwidth reduction vs REST/JSON APIs. " +
-            "A full DataGrid refresh of 10 000 rows costs less than a single REST response."));
-        p.add(codeSnippet("protocol.txt", "BINARY", snippet_protocol()));
-
+        p.add(highlightBox("", "What travels on the wire",
+            "One label.setText(...) is 13 bytes on the wire protocol (26 as a JSON message); in a tick of many cells, update "
+                + "runs, the string dictionary and deflate bring it to about 5 bytes per cell. The Binary protocol page shows "
+                + "the bytes of an update, field by field."));
         return p;
     }
 
@@ -80,66 +93,35 @@ final class CodePage {
             ln("") +
             ln("  " + kw("@Override")) +
             ln("  " + kw("public void") + " " + mt("start") + "(" + ty("UIContext") + " ctx) {") +
-            ln("    " + cm("Create a button — runs on the server")) +
-            ln("    " + ty("PButton") + " btn = " + ty("Element") + "." + mt("newPButton") + "(" + st("Click me") + ");") +
-            ln("") +
-            ln("    " + cm("Click handler — pure Java lambda")) +
-            ln("    btn." + mt("addClickHandler") + "(e -> btn." + mt("setText") + "(" + st("Clicked!") + "));") +
-            ln("") +
-            ln("    " + cm("Add to main window — delta sent over WebSocket")) +
-            ln("    " + ty("PWindow") + "." + mt("getMain") + "()." + mt("add") + "(btn);") +
-            ln("    " + cm("No JS. No REST. No serialization. Just Java.")) +
+            ln("    " + ty("PButton") + " button = " + ty("Element") + "." + mt("newPButton") + "(" + st("Click me") + ");") +
+            ln("    " + cm("runs on the server, in a Java lambda")) +
+            ln("    button." + mt("addClickHandler") + "(e -> button." + mt("setText") + "(" + st("Clicked!") + "));") +
+            ln("    " + ty("PWindow") + "." + mt("getMain") + "()." + mt("add") + "(button);") +
             ln("  }") +
             ln("}");
     }
 
     static String snippet_liveCounter() {
-        return ln(cm("Server pushes updates every 100ms — about 10 bytes per update")) +
-            ln(ty("PLabel") + " label = " + ty("Element") + "." + mt("newPLabel") + "(" + st("0") + ");") +
-            ln(ty("PWindow") + "." + mt("getMain") + "()." + mt("add") + "(label);") +
-            ln("") +
+        return ln(ty("PLabel") + " counter = " + ty("Element") + "." + mt("newPLabel") + "(" + st("0 updates") + ");") +
             ln(ty("AtomicInteger") + " count = " + kw("new") + " " + ty("AtomicInteger") + "();") +
-            ln(ty("PScheduler") + "." + mt("scheduleAtFixedRate") + "(() -> {") +
-            ln("  " + cm("Only the changed text travels over WebSocket")) +
-            ln("  label." + mt("setText") + "(count." + mt("incrementAndGet") + "() + " + st(" updates") + ");") +
-            ln("}, " + ty("Duration") + "." + mt("ofMillis") + "(100));") +
             ln("") +
-            ln(cm("10 updates/sec × 5 bytes = 50 bytes/sec per session")) +
-            ln(cm("1000 concurrent users = 50 KB/s total — less than a single image"));
+            ln(cm("a server task: about 10 bytes on the wire per update")) +
+            ln(ty("PScheduler") + "." + mt("scheduleAtFixedRate") + "(() ->") +
+            ln("    counter." + mt("setText") + "(count." + mt("incrementAndGet") + "() + " + st(" updates") + "),") +
+            ln("    " + ty("Duration") + "." + mt("ofMillis") + "(" + nu("100") + "));");
     }
 
     static String snippet_datagrid() {
-        return ln(cm("10 000 rows × 52 columns — all server-side")) +
-            ln(ty("DefaultDataGridView") + "&lt;" + ty("Integer") + ", " + ty("Row") + "&gt; grid") +
-            ln("    = " + kw("new") + " " + ty("DefaultDataGridView") + "&lt;&gt;();") +
-            ln(ty("DataGridController") + "&lt;" + ty("Integer") + ", " + ty("Row") + "&gt; ctrl") +
-            ln("    = grid." + mt("getController") + "();") +
+        return ln(ty("List") + "&lt;" + ty("ColumnDefinition") + "&lt;" + ty("Row") + "&gt;&gt; columns = " + kw("new") + " " + ty("ArrayList") + "&lt;&gt;();") +
+            ln(kw("for") + " (" + kw("char") + " c = " + st("a").replace("\"", "'") + "; c &lt;= " + st("h").replace("\"", "'") + "; c++) {") +
+            ln("  " + ty("String") + " key = " + ty("String") + "." + mt("valueOf") + "(c);") +
+            ln("  columns." + mt("add") + "(" + kw("new") + " " + ty("DefaultColumnDefinition") + "&lt;&gt;(key, row -> row." + mt("getValue") + "(key),") +
+            ln("      (row, value) -> row." + mt("putValue") + "(key, value)));") +
+            ln("}") +
+            ln(ty("DefaultDataGridView") + "&lt;" + ty("Integer") + ", " + ty("Row") + "&gt; grid = " + kw("new") + " " + ty("DefaultDataGridView") + "&lt;&gt;();") +
+            ln("grid." + mt("setAdapter") + "(" + kw("new") + " " + ty("RowAdapter") + "(columns)); " + cm("row key, header...")) +
             ln("") +
-            ln(cm("Load 10k rows — only visible rows are rendered in browser")) +
-            ln(kw("for") + " (" + kw("int") + " i = 0; i &lt; 10_000; i++)") +
-            ln("  ctrl." + mt("setData") + "(" + mt("createRow") + "(i));") +
-            ln("") +
-            ln(cm("Server-side filter — zero data leaves the server")) +
-            ln("ctrl." + mt("setFilter") + "(MyFilter.class,") +
-            ln("  row -> row." + mt("getName") + "()." + mt("startsWith") + "(" + st("A") + "));") +
-            ln("") +
-            ln(cm("Server-side sort — no client memory used")) +
-            ln("ctrl." + mt("sort") + "(col, " + ty("SortOrder") + ".ASCENDING, " + kw("false") + ");");
-    }
-
-    static String snippet_protocol() {
-        return ln(cm("Traditional REST/JSON approach:")) +
-            ln(st("POST /api/widget/42  {\"text\": \"Hello\"}")) +
-            ln(st("→ ~200 bytes (HTTP headers + JSON body)")) +
-            ln("") +
-            ln(cm("PonySDK binary delta protocol:")) +
-            ln(st("[objectId=42][MODEL_TEXT=\"Hello\"]  → ~10 bytes, WebSocket frame")) +
-            ln("") +
-            ln(cm("String dictionary compression (learned across sessions):")) +
-            ln(st("1st send:  \"Hello\" → dict[42]   (stores mapping, 7 bytes)")) +
-            ln(st("Next:      dict[42]              → 2 bytes instead of 7")) +
-            ln("") +
-            ln(cm("Typical savings: 80–95% vs REST APIs")) +
-            ln(cm("10 000-row DataGrid refresh: ~2 KB vs ~800 KB JSON"));
+            ln(cm("the data stays on the server; the browser receives the rows it shows")) +
+            ln(kw("for") + " (" + kw("int") + " i = " + nu("0") + "; i &lt; " + nu("50") + "; i++) grid." + mt("getController") + "()." + mt("setData") + "(" + kw("new") + " " + ty("Row") + "(i));");
     }
 }

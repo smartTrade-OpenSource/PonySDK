@@ -239,7 +239,7 @@ public class UISampleEntryPoint implements EntryPoint {
             case 7 -> PerformancePage.build(uiContext, schedulers);
             case 8 -> CostsPage.build();
             case 9 -> BinaryProtocolPage.build(schedulers);
-            case 10 -> CodePage.build();
+            case 10 -> CodePage.build(schedulers);
             default -> FlexLayoutPage.build();
         };
     }

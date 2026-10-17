@@ -783,3 +783,4 @@ div.selected-row { background-color: #e0e7ff; }
 .anat-table td { white-space: nowrap; }
 .anat-table td:last-child { white-space: normal; }
 .anat-hex { font-family: var(--mono); color: var(--accent-strong); }
+.code-counter { font-family: var(--mono); font-size: 22px; font-weight: 600; color: var(--text); }
