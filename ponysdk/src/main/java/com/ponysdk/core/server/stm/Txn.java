@@ -47,6 +47,21 @@ public class Txn {
         return txn;
     }
 
+    /** True between {@link #begin} and commit / rollback. */
+    public boolean isActive() {
+        return txnContext != null;
+    }
+
+    /**
+     * Makes {@code txn} this thread's transaction and returns the previous one: a transaction on another context
+     * opened from inside an active one suspends it, then puts it back.
+     */
+    public static Txn replace(final Txn txn) {
+        final Txn previous = transactions.get();
+        transactions.set(txn);
+        return previous;
+    }
+
     public void begin(final TxnContext txnContext) {
         this.txnContext = txnContext;
     }

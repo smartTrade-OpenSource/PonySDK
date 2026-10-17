@@ -279,15 +279,18 @@ public class UIContext {
      */
     public boolean execute(final Runnable runnable) {
         if (!isAlive()) return false;
-        if (UIContext.get() != this) {
+        final UIContext outer = UIContext.get();
+        if (outer != this) {
             // Clock reads only when metrics are wired — execute() runs for every client event/push
             final PonySDKMetrics m = metrics;
             final long lockStart = m != null ? System.currentTimeMillis() : 0;
             acquire();
             final long runStart = m != null ? System.currentTimeMillis() : 0;
             if (m != null) m.recordLockWait(runStart - lockStart);
+            // Run from inside another context's transaction (e.g. a push from a handler): that one is suspended
+            Txn txn = Txn.get();
+            final Txn suspended = txn.isActive() ? Txn.replace(txn = new Txn()) : null;
             try {
-                final Txn txn = Txn.get();
                 txn.begin(context);
                 try {
                     runnable.run();
@@ -301,7 +304,9 @@ public class UIContext {
                     return false;
                 }
             } finally {
+                if (suspended != null) Txn.replace(suspended);
                 release();
+                if (outer != null) setCurrent(outer);
             }
         } else {
             runnable.run();
