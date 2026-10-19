@@ -244,6 +244,8 @@ public class ApplicationConfiguration {
      * <p>For client-side reconnection behaviour, use the JavaScript hooks:
      * <ul>
      *   <li>{@code document.onConnectionLost(callback)} — fired immediately on disconnect</li>
+     *   <li>a page element with id {@code reconnection} — shown while the connection is lost (its child with id
+     *   {@code reconnecting} receives the message), hidden once transparent reconnection succeeds</li>
      *   <li>{@code window.showReconnectionInformation()} — override to show custom UI</li>
      *   <li>{@code window.onPonyReconnected()} — override to replace the default page reload</li>
      * </ul>

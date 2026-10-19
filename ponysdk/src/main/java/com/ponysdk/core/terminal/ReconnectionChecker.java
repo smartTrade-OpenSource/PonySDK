@@ -80,6 +80,7 @@ public class ReconnectionChecker {
     public void onReconnectSuccess() {
         reconnecting = false;
         errorDetected = false;
+        setStyleDisplay(DomGlobal.document.getElementById("reconnection"), "none");
     }
 
     public boolean isReconnecting() {
