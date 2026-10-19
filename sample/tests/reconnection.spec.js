@@ -76,3 +76,39 @@ test('a short drop: a banner while the connection is lost, then the same context
   await clickMe.click();
   await expect(page.getByText('server handled click #2')).toBeVisible(); // same server state: resumed, not reloaded
 });
+
+test('the Reconnection page drives its frame session through SessionAdmin, up to the cap', async ({ page }) => {
+  test.setTimeout(60000);
+  await page.goto(BASE_URL + '#reconnection', { waitUntil: 'domcontentloaded' });
+  const state = page.locator('.rc-state');
+  const log = page.locator('.rc-log');
+  const button = name => page.getByRole('button', { name, exact: true });
+  const frame = page.frameLocator('.rc-frame');
+  await expect(log).toContainText('is up in the frame', { timeout: 15000 });
+  await expect(state).toHaveText('Connected');
+
+  // Connected: the rows reach the client
+  await button('Push 1 000 rows').click();
+  await expect(frame.locator('.rc-rows-head')).toContainText('1000 rows');
+
+  // Away: its reconnection refused, the server holds what the application writes
+  await button('Disconnect').click();
+  await expect(state).toHaveText('Client away · held');
+  await expect(frame.locator('#reconnecting')).toBeVisible();
+  await expect(page.locator('.rc-gauge-value').first()).toHaveText(/^[\d ]+ \/ 10 000$/);
+
+  // Back: the same session resumes
+  await button('Reconnect').click();
+  await expect(log).toContainText('Client back after', { timeout: 10000 });
+  await expect(state).toHaveText('Connected');
+  await expect(frame.locator('#reconnecting')).toBeHidden();
+
+  // Over the cap: destroyed, the frame reloads into a new session
+  await button('Disconnect').click();
+  await expect(state).toHaveText('Client away · held');
+  await button('Push 1 000 rows').click();
+  await button('Push 1 000 rows').click();
+  await expect(log).toContainText('went over the cap', { timeout: 10000 });
+  await expect(log).toContainText('New session', { timeout: 15000 });
+  await expect(state).toHaveText('Connected');
+});

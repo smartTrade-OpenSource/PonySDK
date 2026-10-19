@@ -56,6 +56,12 @@ public class UISampleEntryPoint implements EntryPoint {
     public void start(final UIContext uiContext) {
         uiContext.setTerminalDataReceiver((object, instruction) -> log.debug("{} : {}", object, instruction));
 
+        final String token = uiContext.getHistory().getToken();
+        if (token != null && token.startsWith(ReconnectionPage.CLIENT_TOKEN)) {
+            ReconnectionPage.buildClient(uiContext, token); // the session in the Reconnection page's frame
+            return;
+        }
+
         // Styles: css/showcase.css (declared in ShowcaseMain)
         // Favicon: the "P" monogram of the top bar, inline SVG (no extra request)
         PScript.execute(PWindow.getMain(), "var l=document.createElement('link');l.rel='icon';l.type='image/svg+xml';"
@@ -111,15 +117,7 @@ public class UISampleEntryPoint implements EntryPoint {
         header.add(logoWrap, divider, crumb, hstats, badge);
         PWindow.getMain().add(header);
 
-        // Shown by the terminal while the connection is lost (it writes the message into #reconnecting), hidden once
-        // the session resumes; the badge follows it (showcase.css)
-        final PFlowPanel reconnection = Element.newPFlowPanel();
-        reconnection.setAttribute("id", "reconnection");
-        final PElement reconnecting = Element.newDiv();
-        reconnecting.setAttribute("id", "reconnecting");
-        reconnecting.setAttribute("role", "status");
-        reconnection.add(reconnecting);
-        PWindow.getMain().add(reconnection);
+        PWindow.getMain().add(reconnectionNotice()); // the badge follows it (showcase.css)
 
         // Refresh header stats every second
         PScheduler.scheduleAtFixedRate(() -> {
@@ -147,7 +145,8 @@ public class UISampleEntryPoint implements EntryPoint {
             {"◎", "Overview"},
             {"⌨", "Inputs"}, {"⊞", "Layouts"}, {"◈", "Data"},
             {"⊟", "DataGrid"}, {"◉", "Web Components"}, {"⋯", "Misc"},
-            {"⚡", "Performance"}, {"⚖", "Component costs"}, {"≡", "Binary protocol"}, {"</>", "Code"},
+            {"⚡", "Performance"}, {"⚖", "Component costs"}, {"≡", "Binary protocol"}, {"⟲", "Reconnection"},
+            {"</>", "Code"},
             {"▦", "FlexLayout"}
         };
         final String[] groupLabels = {"Start", "Widgets", "Under the hood"};
@@ -249,7 +248,8 @@ public class UISampleEntryPoint implements EntryPoint {
             case 7 -> PerformancePage.build(uiContext, schedulers);
             case 8 -> CostsPage.build();
             case 9 -> BinaryProtocolPage.build(schedulers);
-            case 10 -> CodePage.build(schedulers);
+            case 10 -> ReconnectionPage.build(uiContext, schedulers);
+            case 11 -> CodePage.build(schedulers);
             default -> FlexLayoutPage.build();
         };
     }

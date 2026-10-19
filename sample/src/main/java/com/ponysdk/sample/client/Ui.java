@@ -89,6 +89,20 @@ final class Ui {
         return UIContext.get().isSuspended() || !PWindow.getMain().isShown();
     }
 
+    /**
+     * Shown by the terminal while the connection is lost (it writes the message into #reconnecting), hidden once the
+     * session resumes (showcase.css styles it).
+     */
+    static PFlowPanel reconnectionNotice() {
+        final PFlowPanel reconnection = Element.newPFlowPanel();
+        reconnection.setAttribute("id", "reconnection");
+        final PElement reconnecting = Element.newDiv();
+        reconnecting.setAttribute("id", "reconnecting");
+        reconnecting.setAttribute("role", "status");
+        reconnection.add(reconnecting);
+        return reconnection;
+    }
+
     static PElement el(final String cssClass, final String text) {
         final PElement e = Element.newDiv();
         for (final String c : cssClass.split(" ")) e.addStyleName(c);
