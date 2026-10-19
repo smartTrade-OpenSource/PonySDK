@@ -5,14 +5,22 @@ const { test, expect } = require('@playwright/test');
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:8081/sample/';
 
-/** Routes the showcase WebSocket through the test; cut() drops the current one with an abnormal close code. */
+/**
+ * Routes the showcase WebSocket through the test: cut() drops the current one with an abnormal close code, and
+ * while offline is set the new ones are refused the same way.
+ */
 async function routeSockets(page) {
   const sockets = [];
+  let offline = false;
   await page.routeWebSocket(/\/sample\/ws\b/, ws => {
+    if (offline) return ws.close({ code: 4000, reason: 'still offline' });
     ws.connectToServer();
     sockets.push(ws);
   });
-  return { cut: () => sockets[sockets.length - 1].close({ code: 4000, reason: 'simulated network drop' }) };
+  return {
+    cut: () => sockets[sockets.length - 1].close({ code: 4000, reason: 'simulated network drop' }),
+    set offline(value) { offline = value; },
+  };
 }
 
 /**
@@ -45,4 +53,26 @@ test('a context the server no longer has: the page reloads instead of stacking a
   await clickMe.click();
   await expect(page.getByText('server handled click #1')).toBeVisible();
   expect(new URL(page.url()).hash).toBe('#inputs');
+});
+
+test('a short drop: a banner while the connection is lost, then the same context resumes', async ({ page }) => {
+  const sockets = await routeSockets(page);
+  await page.goto(BASE_URL + '#inputs', { waitUntil: 'domcontentloaded' });
+  const clickMe = page.getByRole('button', { name: 'Click me' });
+  await expect(clickMe).toBeVisible({ timeout: 10000 });
+  await clickMe.click();
+  await expect(page.getByText('server handled click #1')).toBeVisible();
+
+  const banner = page.locator('#reconnecting');
+  sockets.offline = true;
+  await sockets.cut();
+  await expect(banner).toBeVisible();
+  await expect(banner).toContainText('Connection to server lost');
+  await expect(page.locator('.pony-badge')).toHaveCSS('color', 'rgb(180, 83, 9)'); // --warn
+
+  sockets.offline = false;
+  await expect(banner).toBeHidden({ timeout: 10000 });
+  await expect(page.locator('.pony-badge')).toHaveCSS('color', 'rgb(4, 120, 87)'); // --good
+  await clickMe.click();
+  await expect(page.getByText('server handled click #2')).toBeVisible(); // same server state: resumed, not reloaded
 });

@@ -111,6 +111,16 @@ public class UISampleEntryPoint implements EntryPoint {
         header.add(logoWrap, divider, crumb, hstats, badge);
         PWindow.getMain().add(header);
 
+        // Shown by the terminal while the connection is lost (it writes the message into #reconnecting), hidden once
+        // the session resumes; the badge follows it (showcase.css)
+        final PFlowPanel reconnection = Element.newPFlowPanel();
+        reconnection.setAttribute("id", "reconnection");
+        final PElement reconnecting = Element.newDiv();
+        reconnecting.setAttribute("id", "reconnecting");
+        reconnecting.setAttribute("role", "status");
+        reconnection.add(reconnecting);
+        PWindow.getMain().add(reconnection);
+
         // Refresh header stats every second
         PScheduler.scheduleAtFixedRate(() -> {
             if (idle()) return;
