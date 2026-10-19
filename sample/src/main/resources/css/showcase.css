@@ -127,31 +127,49 @@ a:hover { text-decoration: underline; }
     box-shadow: 0 0 0 3px rgba(16, 185, 129, .18);
 }
 
-/* Connection lost: the terminal shows #reconnection (display: block) and fills #reconnecting, then hides it once the
-   session resumes. The veil dims the page and takes the clicks; the top bar stays above it, its badge amber. */
+/* Connection lost: the terminal shows #reconnection (display: block) and writes "Connection to server lost<br>
+   Reconnecting ..." into #reconnecting, then hides it once the session resumes. The veil greys the page out and
+   takes the clicks; the top bar stays above it, its badge amber. */
 #reconnection {
     display: none;
     position: fixed;
     inset: 0;
     z-index: 1000;
-    background: rgba(248, 250, 252, .65);
+    background: rgba(15, 23, 42, .04);
+    backdrop-filter: grayscale(1);
     cursor: progress;
+    animation: reco-fade .2s ease-out;
 }
 #reconnecting {
     position: absolute;
-    top: 72px;
+    top: 76px;
     left: 50%;
     transform: translateX(-50%);
     width: max-content;
     max-width: calc(100% - 32px);
-    padding: 10px 18px;
-    border: 1px solid #fcd34d;
-    border-radius: var(--radius);
-    background: #fffbeb;
-    color: var(--warn);
-    font-weight: 600;
-    text-align: center;
+    padding: 12px 18px 12px 46px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--bg);
     box-shadow: var(--shadow-lg);
+    color: var(--text-3);
+    font-size: 13px;
+    line-height: 1.45;
+    animation: reco-in .25s ease-out;
+}
+#reconnecting::first-line { color: var(--text); font-weight: 600; }
+#reconnecting::before {
+    content: "";
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    width: 16px;
+    height: 16px;
+    margin-top: -8px;
+    border: 2px solid #fde68a;
+    border-top-color: #d97706;
+    border-radius: 50%;
+    animation: reco-spin .8s linear infinite;
 }
 body:has(#reconnection[style*="block"]) .pony-header { z-index: 1001; }
 body:has(#reconnection[style*="block"]) .pony-badge {
@@ -165,8 +183,22 @@ body:has(#reconnection[style*="block"]) .pony-badge::before {
     margin-right: 6px;
     background: #f59e0b;
     box-shadow: 0 0 0 3px rgba(245, 158, 11, .2);
+    animation: reco-pulse 1.2s ease-in-out infinite;
 }
 body:has(#reconnection[style*="block"]) .pony-badge::after { content: "Reconnecting"; font-size: 12px; }
+
+@media (max-width: 960px) {
+    #reconnecting { top: auto; bottom: 24px; } /* the tab bar sits under the top bar */
+}
+
+@keyframes reco-fade { from { opacity: 0; } }
+@keyframes reco-in { from { opacity: 0; transform: translate(-50%, -6px); } }
+@keyframes reco-spin { to { transform: rotate(360deg); } }
+@keyframes reco-pulse { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) {
+    #reconnection, #reconnecting, #reconnecting::before,
+    body:has(#reconnection[style*="block"]) .pony-badge::before { animation: none; }
+}
 
 /* ── Shell: sidebar + content ────────────────────────────────────────────── */
 
