@@ -67,6 +67,11 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
     /** Shared buffer pool for all WebSocket sessions. 32KB buffers, max 128 pooled. */
     private static final ByteBufferPool BUFFER_POOL = new ByteBufferPool(1 << 15, 128);
 
+    /** Close code of {@link #drop()}: abnormal, so the terminal reconnects and the context is suspended. */
+    public static final int CLOSE_DROPPED = 4000;
+    /** Close code of a reconnection refused while held (SessionAdmin): the terminal retries every 2 s. */
+    public static final int CLOSE_RECONNECTION_HELD = 4001;
+
     /** Max time to wait, on reconnect, for the old context to enter the suspended state (race window). */
     private static final long RECONNECT_SUSPEND_WAIT_MS = 500;
     /** Poll interval while waiting for the suspended state. */
@@ -135,6 +140,12 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
             if (reconnectContextId >= 0) {
                 final Application application = context.getApplication();
                 UIContext suspended = application != null ? application.getUIContext(reconnectContextId) : null;
+                if (suspended != null && suspended.isReconnectionHeld()) {
+                    // An administrator keeps this client away (SessionAdmin): refuse, the terminal retries
+                    log.info("Reconnection of UIContext #{} held — refused", reconnectContextId);
+                    session.close(CLOSE_RECONNECTION_HELD, "reconnection held", Callback.NOOP);
+                    return;
+                }
                 // Race condition: client reconnects before onWebSocketClose has been processed
                 // server-side (common on fast local networks). Wait up to 500ms for the context
                 // to enter suspended state before falling back to creating a new one.
@@ -498,6 +509,15 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
             final UIContext context = this.uiContext;
             log.info("Closing websocket programmatically for UIContext #{}", context == null ? null : context.getID());
             session.close(StatusCode.NORMAL, "close", Callback.NOOP);
+        }
+    }
+
+    /** Closes the socket as a network failure would (SessionAdmin.dropConnection). */
+    public void drop() {
+        if (isSessionOpen()) {
+            final UIContext context = this.uiContext;
+            log.info("Dropping websocket for UIContext #{}", context == null ? null : context.getID());
+            session.close(CLOSE_DROPPED, "dropped by an administrator", Callback.NOOP);
         }
     }
 

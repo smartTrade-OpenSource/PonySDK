@@ -69,6 +69,8 @@ public final class RecordingEncoder implements WebsocketEncoder {
     public void encode(final ServerToClientModel model, final Object value) {
         if (overflowed) return; // stop recording after overflow
         entries.add(new Entry(model, value));
+        written++;
+        held = entries.size();
         checkOverflow();
     }
 
@@ -76,6 +78,8 @@ public final class RecordingEncoder implements WebsocketEncoder {
     public void endObject() {
         if (overflowed) return;
         entries.add(new Entry(ServerToClientModel.END, null));
+        written++;
+        held = entries.size();
         // A pushing application keeps rewriting the same properties while the client is away: compact on the
         // way (at a block boundary, so no partial block is touched) instead of overflowing on stale values.
         // Amortized: at most once per maxEntries/4 new entries.
@@ -88,6 +92,20 @@ public final class RecordingEncoder implements WebsocketEncoder {
 
     /** Size right after the last on-the-fly compaction. */
     private int compactedSize;
+
+    // Monitoring (SessionAdmin), read from other threads; a single writer, the context's
+    private volatile long written;
+    private volatile int held;
+
+    /** Entries written since recording started, compacted ones included. Safe from any thread. */
+    public long getWrittenEntries() {
+        return written;
+    }
+
+    /** Entries held now, after the compactions so far. Safe from any thread. */
+    public int getHeldEntries() {
+        return held;
+    }
 
     private void checkOverflow() {
         if (maxEntries > 0 && entries.size() > maxEntries && !overflowed) {
@@ -178,6 +196,7 @@ public final class RecordingEncoder implements WebsocketEncoder {
 
         entries.clear();
         entries.addAll(compacted);
+        held = entries.size();
     }
 
     /**
@@ -196,6 +215,7 @@ public final class RecordingEncoder implements WebsocketEncoder {
     /** Clears all recorded entries and releases references. */
     public void clear() {
         entries.clear();
+        held = 0;
         ((ArrayList<Entry>) entries).trimToSize(); // release the backing array
     }
 

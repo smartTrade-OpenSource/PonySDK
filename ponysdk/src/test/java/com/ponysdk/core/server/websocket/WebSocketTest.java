@@ -765,6 +765,51 @@ public class WebSocketTest {
     }
 
     /**
+     * A reconnection held by an administrator (SessionAdmin) is refused: the new socket is closed with
+     * CLOSE_RECONNECTION_HELD, no context is created and the suspended one keeps waiting for its client.
+     */
+    @Test
+    public void testReconnectionMode_HeldReconnectionIsRefused() throws Exception {
+        final ReconnectionSetup setup = createReconnectionWebSocket();
+        final UIContext suspended = setup.uiContext();
+        setup.webSocket().onWebSocketClose(StatusCode.NORMAL, "Close", Callback.NOOP);
+        assertTrue(suspended.isSuspended());
+
+        final com.ponysdk.core.server.application.Application application =
+                new com.ponysdk.core.server.application.Application("held",
+                        Mockito.mock(jakarta.servlet.http.HttpSession.class), setup.appManager().getConfiguration());
+        application.registerUIContext(suspended);
+        com.ponysdk.core.server.servlet.SessionManager.get().registerApplication(application);
+        try {
+            com.ponysdk.core.server.application.SessionAdmin.of(suspended).holdReconnection(suspended.getID(), true);
+
+            final WebSocket ws2 = new WebSocket() {
+                @Override void flush0() {}
+                @Override public void encode(final ServerToClientModel model, final Object value) {}
+            };
+            final JettyServerUpgradeRequest request2 = Mockito.mock(JettyServerUpgradeRequest.class);
+            Mockito.when(request2.getParameterMap()).thenReturn(java.util.Map.of());
+            ws2.setRequest(request2);
+            final TxnContext txnContext2 = new TxnContext(ws2);
+            txnContext2.setApplication(application);
+            ws2.setContext(txnContext2);
+            ws2.setApplicationManager(setup.appManager());
+            ws2.setReconnectContextId(suspended.getID());
+            Mockito.clearInvocations(setup.appManager());
+
+            final Session sess2 = Mockito.mock(Session.class);
+            Mockito.when(sess2.isOpen()).thenReturn(true);
+            ws2.onWebSocketOpen(sess2);
+
+            Mockito.verify(sess2).close(Mockito.eq(WebSocket.CLOSE_RECONNECTION_HELD), Mockito.anyString(), Mockito.any());
+            Mockito.verify(setup.appManager(), Mockito.never()).startApplication(Mockito.any(UIContext.class));
+            assertTrue("still waiting for its client", suspended.isSuspended());
+        } finally {
+            com.ponysdk.core.server.servlet.SessionManager.get().unregisterApplication(application);
+        }
+    }
+
+    /**
      * execute() when the runnable throws during suspension — txn.rollback path.
      * The exception should be caught, execute() returns false, UIContext stays alive.
      */

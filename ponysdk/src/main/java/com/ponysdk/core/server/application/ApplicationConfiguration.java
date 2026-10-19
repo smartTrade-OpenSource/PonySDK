@@ -24,6 +24,7 @@
 package com.ponysdk.core.server.application;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -330,6 +331,21 @@ public class ApplicationConfiguration {
 
     public void setMaxRecordingEntries(final int maxRecordingEntries) {
         this.maxRecordingEntries = maxRecordingEntries;
+    }
+
+    /**
+     * Who may act on which session through {@link SessionAdmin} (ADR-0001). Default
+     * {@link SessionAccessPolicy#SAME_HTTP_SESSION}: a caller acts only on its own tabs and frames. An operator console
+     * acting on every user needs an explicit policy, typically a role read from the caller's session.
+     */
+    private SessionAccessPolicy sessionAccessPolicy = SessionAccessPolicy.SAME_HTTP_SESSION;
+
+    public SessionAccessPolicy getSessionAccessPolicy() {
+        return sessionAccessPolicy;
+    }
+
+    public void setSessionAccessPolicy(final SessionAccessPolicy sessionAccessPolicy) {
+        this.sessionAccessPolicy = Objects.requireNonNull(sessionAccessPolicy, "sessionAccessPolicy");
     }
 
     @Override

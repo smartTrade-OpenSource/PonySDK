@@ -122,17 +122,20 @@ public class UIContext {
     private boolean alive = true;
     private volatile boolean suspended = false;  // volatile: read by timeout thread + resume
     private volatile int suspension; // generation of the current suspension: a timer ends only its own
+    private volatile long suspendedAt; // read by SessionAdmin
+    private volatile long suspensionTimeoutMs;
+    private volatile boolean reconnectionHeld; // set by SessionAdmin, read by the reconnection path
     private int closeStatusCode = StatusCode.NO_CODE;
 
-    /** Records all protocol operations during suspension for replay on reconnection. */
-    private RecordingEncoder recordingEncoder;
+    /** Records all protocol operations during suspension for replay on reconnection (volatile: read by SessionAdmin). */
+    private volatile RecordingEncoder recordingEncoder;
 
     private Latency roundtripLatency;
     private Latency networkLatency;
     private Latency terminalLatency;
 
     private final ApplicationConfiguration configuration;
-    private WebSocket socket;
+    private volatile WebSocket socket; // replaced on resume, read by SessionAdmin
     private final JettyServerUpgradeRequest request;
 
     private final AtomicLong lastReceivedTime = new AtomicLong(System.currentTimeMillis());
@@ -882,6 +885,8 @@ public class UIContext {
      */
     public void suspend(final long timeoutMs) {
         final int generation = ++suspension; // single writer: the socket's close path
+        suspendedAt = System.currentTimeMillis();
+        suspensionTimeoutMs = timeoutMs;
         suspended = true;
         final int maxEntries = configuration.getMaxRecordingEntries();
         recordingEncoder = new RecordingEncoder(maxEntries, (count, max) -> {
@@ -972,6 +977,46 @@ public class UIContext {
 
     public boolean isSuspended() {
         return suspended;
+    }
+
+    /** True while an administrator keeps this context's client away ({@link SessionAdmin#holdReconnection}). */
+    public boolean isReconnectionHeld() {
+        return reconnectionHeld;
+    }
+
+    void setReconnectionHeld(final boolean held) {
+        reconnectionHeld = held;
+    }
+
+    /** {@link SessionAdmin#dropConnection}: closes the socket as a network failure would. */
+    void dropConnection() {
+        socket.drop();
+    }
+
+    /**
+     * {@link SessionAdmin#destroy}: tells a connected client to reload, then destroys. On a thread of its own, so that
+     * the caller never holds its lock while taking this one (ADR-0001).
+     */
+    void destroyByAdministrator() {
+        Thread.ofVirtual().start(() -> {
+            if (!suspended) execute(this::close);
+            destroy();
+        });
+    }
+
+    /** {@link SessionAdmin}'s read-only view of this context; safe from any thread. */
+    SessionInfo snapshot() {
+        final boolean isSuspended = suspended;
+        SessionInfo.Suspension info = null;
+        if (isSuspended) {
+            final RecordingEncoder recorder = recordingEncoder;
+            info = new SessionInfo.Suspension(suspendedAt, suspensionTimeoutMs,
+                recorder == null ? 0 : recorder.getWrittenEntries(), recorder == null ? 0 : recorder.getHeldEntries(),
+                configuration.getMaxRecordingEntries());
+        }
+        final SessionInfo.State state = !alive ? SessionInfo.State.DESTROYED
+                : isSuspended ? SessionInfo.State.SUSPENDED : SessionInfo.State.CONNECTED;
+        return new SessionInfo(ID, state, getRoundtripLatency(), reconnectionHeld, info);
     }
 
     public ModelWriter getWriter() {

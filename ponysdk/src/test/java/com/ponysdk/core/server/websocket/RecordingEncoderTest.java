@@ -73,6 +73,24 @@ public class RecordingEncoderTest {
 
     // ---- Basic record/replay ----
 
+    /** SessionAdmin's gauge: every entry written counts, held drops when compaction merges updates. */
+    @Test
+    public void testWrittenAndHeldCounters() {
+        final RecordingEncoder rec = new RecordingEncoder();
+        recordUpdateBlock(rec, 42, ServerToClientModel.HTML, "a");
+        recordUpdateBlock(rec, 42, ServerToClientModel.HTML, "b");
+        assertEquals(8, rec.getWrittenEntries());
+        assertEquals(8, rec.getHeldEntries());
+
+        rec.compact(); // the two updates of object 42 merge
+        assertEquals(8, rec.getWrittenEntries());
+        assertEquals(rec.size(), rec.getHeldEntries());
+        assertTrue(rec.getHeldEntries() < 8);
+
+        rec.clear();
+        assertEquals(0, rec.getHeldEntries());
+    }
+
     @Test
     public void testBasicRecordAndReplay() {
         final RecordingEncoder rec = new RecordingEncoder();

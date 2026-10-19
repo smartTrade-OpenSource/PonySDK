@@ -86,8 +86,10 @@ configuration.setSessionAccessPolicy(policy);
 
 ### 5. Audit
 
-Every action, allowed or refused, is logged on the `com.ponysdk.audit.SessionAdmin` logger with the caller id, the
-target id, the action and the outcome. Applications route that logger to their audit sink.
+Every `DROP`, `HOLD` and `DESTROY`, allowed (INFO) or refused (WARN), is logged on the `com.ponysdk.audit.SessionAdmin`
+logger with the caller id, the target id, the action and the outcome. So is a call naming a session the caller may not
+`VIEW` (WARN), which is how probing shows. Listing, which an admin screen polls, is not logged. Applications route
+that logger to their audit sink.
 
 ### 6. Threading
 
