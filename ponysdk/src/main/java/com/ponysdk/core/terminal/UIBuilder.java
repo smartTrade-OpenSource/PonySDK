@@ -122,13 +122,17 @@ public class UIBuilder {
                 final boolean tabindex = readerBuffer.readBinaryModel().getBooleanValue();
                 final int heartbeat = readerBuffer.readBinaryModel().getIntValue();
                 readerBuffer.readBinaryModel(); // Read ServerToClientModel.END element
-                // During a transparent reconnect attempt, the server may create orphan contexts
-                // (race condition). Ignore their CREATE_CONTEXT — keep the original contextId.
-                if (!PonySDK.get().getReconnectionChecker().isReconnecting()) {
-                    PonySDK.get().setContextId(newContextId);
-                    PonySDK.get().setTabindexOnlyFormField(tabindex);
-                    PonySDK.get().setHeartBeatPeriod(heartbeat);
+                if (PonySDK.get().getReconnectionChecker().isReconnecting()) {
+                    // The server could not resume our context (restarted, or the reconnection window is over) and
+                    // started a new one, whose UI follows on this socket: close it and reload, instead of
+                    // stacking that UI under the old one, which no longer has a server side.
+                    PonySDK.get().closeSocket("context lost, reloading");
+                    destroy();
+                    return;
                 }
+                PonySDK.get().setContextId(newContextId);
+                PonySDK.get().setTabindexOnlyFormField(tabindex);
+                PonySDK.get().setHeartBeatPeriod(heartbeat);
             } else if (ServerToClientModel.RECONNECT_CONTEXT == model) {
                 // Transparent reconnection succeeded — server resumed our UIContext
                 PonySDK.get().getReconnectionChecker().onReconnectSuccess();

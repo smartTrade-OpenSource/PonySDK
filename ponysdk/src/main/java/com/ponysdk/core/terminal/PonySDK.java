@@ -186,6 +186,11 @@ public class PonySDK implements UncaughtExceptionHandler {
         PTWindowManager.closeAll();
     }
 
+    /** Normal close: the socket delivers no further message and no reconnection starts. */
+    public void closeSocket(final String reason) {
+        socketClient.close(1000, reason);
+    }
+
     public int getContextId() {
         return contextId;
     }
