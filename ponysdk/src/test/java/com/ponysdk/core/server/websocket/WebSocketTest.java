@@ -592,18 +592,21 @@ public class WebSocketTest {
     }
 
     /**
-     * onWebSocketError on a non-suspended UIContext in reconnection mode — should destroy.
-     * The isSuspended() guard only protects suspended contexts.
+     * A connection lost without a close frame (EOF, reset: what a network failure looks like, and how Firefox ends a
+     * socket the server closed) fires onWebSocketError before onWebSocketClose. In reconnection mode the error must
+     * not destroy the context: the close that Jetty sends after it suspends the context for its client.
      */
     @Test
-    public void testReconnectionMode_ErrorOnNonSuspendedDestroys() throws Exception {
+    public void testReconnectionMode_ErrorBeforeCloseLeavesTheCloseToSuspend() throws Exception {
         final ReconnectionSetup setup = createReconnectionWebSocket();
 
-        // Error WITHOUT prior close (not suspended)
         assertFalse(setup.uiContext().isSuspended());
-        setup.webSocket().onWebSocketError(new Exception("unexpected error"));
+        setup.webSocket().onWebSocketError(new java.nio.channels.ClosedChannelException());
+        assertTrue("an error alone does not end the context", setup.uiContext().isAlive());
 
-        assertFalse("Non-suspended UIContext should be destroyed on error", setup.uiContext().isAlive());
+        setup.webSocket().onWebSocketClose(StatusCode.ABNORMAL, "Session Closed", Callback.NOOP);
+        assertTrue(setup.uiContext().isAlive());
+        assertTrue("suspended, waiting for its client", setup.uiContext().isSuspended());
     }
 
     // ---- Reconnection path in onWebSocketOpen: edge cases ----

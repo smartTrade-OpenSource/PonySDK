@@ -884,6 +884,7 @@ public class UIContext {
      * @param timeoutMs how long to wait for reconnection before destroying (ms)
      */
     public void suspend(final long timeoutMs) {
+        if (!alive) return; // no client can come back to a destroyed context
         final int generation = ++suspension; // single writer: the socket's close path
         suspendedAt = System.currentTimeMillis();
         suspensionTimeoutMs = timeoutMs;

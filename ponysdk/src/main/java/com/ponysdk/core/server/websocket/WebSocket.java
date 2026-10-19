@@ -236,11 +236,11 @@ public class WebSocket implements Session.Listener.AutoDemanding, WebsocketEncod
             return;
         }
         log.error("WebSocket Error on UIContext #{}", uiContext.getID(), throwable);
-        // During suspension, the old WebSocket may still fire errors (e.g. broken pipe).
-        // Do NOT destroy the UIContext — it is waiting for a new WebSocket to resume.
-        if (!uiContext.isSuspended()) {
-            uiContext.onDestroy(StatusCode.SERVER_ERROR);
-        }
+        // During suspension, the old WebSocket may still fire errors (e.g. broken pipe): the UIContext is waiting for
+        // a new WebSocket. With transparent reconnection, a connection lost without a close frame (EOF, reset) fires
+        // this before onWebSocketClose, which Jetty calls after every error: leave it to the close to suspend.
+        if (uiContext.isSuspended() || applicationManager.getConfiguration().getReconnectionTimeoutMs() > 0) return;
+        uiContext.onDestroy(StatusCode.SERVER_ERROR);
     }
 
     @Override

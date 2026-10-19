@@ -215,6 +215,14 @@ public class UIContextReconnectionTest {
         assertFalse("destroyed when its own window expires", uiContext.isAlive());
     }
 
+    /** A destroyed context is never suspended: no recorder, no timer for a client that cannot come back. */
+    @Test
+    public void testSuspendAfterDestroyDoesNothing() {
+        uiContext.destroy();
+        uiContext.suspend(5000);
+        assertFalse(uiContext.isSuspended());
+    }
+
     @Test
     public void testResumeBeforeTimeoutKeepsAlive() throws InterruptedException {
         uiContext.suspend(2000);
