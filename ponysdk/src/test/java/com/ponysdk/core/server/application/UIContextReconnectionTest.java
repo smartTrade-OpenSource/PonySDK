@@ -196,6 +196,25 @@ public class UIContextReconnectionTest {
         assertEquals(uiContext.getID(), sent.get(at).value());
     }
 
+    /**
+     * Suspended, resumed, suspended again within the first window: the first suspension's timer must not end the
+     * second one, which has its own window.
+     */
+    @Test
+    public void testEarlierSuspensionTimerDoesNotEndALaterSuspension() throws InterruptedException {
+        uiContext.suspend(1000);
+        Thread.sleep(400);
+        uiContext.resume(createMockNewSocket());
+        uiContext.suspend(1000); // its window ends at about 1 400 ms
+
+        Thread.sleep(800); // about 1 200 ms: the first timer fired 200 ms ago
+        assertTrue("a later suspension keeps its own window", uiContext.isAlive());
+        assertTrue(uiContext.isSuspended());
+
+        awaitDead(uiContext);
+        assertFalse("destroyed when its own window expires", uiContext.isAlive());
+    }
+
     @Test
     public void testResumeBeforeTimeoutKeepsAlive() throws InterruptedException {
         uiContext.suspend(2000);

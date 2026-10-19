@@ -121,6 +121,7 @@ public class UIContext {
 
     private boolean alive = true;
     private volatile boolean suspended = false;  // volatile: read by timeout thread + resume
+    private volatile int suspension; // generation of the current suspension: a timer ends only its own
     private int closeStatusCode = StatusCode.NO_CODE;
 
     /** Records all protocol operations during suspension for replay on reconnection. */
@@ -880,6 +881,7 @@ public class UIContext {
      * @param timeoutMs how long to wait for reconnection before destroying (ms)
      */
     public void suspend(final long timeoutMs) {
+        final int generation = ++suspension; // single writer: the socket's close path
         suspended = true;
         final int maxEntries = configuration.getMaxRecordingEntries();
         recordingEncoder = new RecordingEncoder(maxEntries, (count, max) -> {
@@ -897,7 +899,7 @@ public class UIContext {
                 Thread.currentThread().interrupt();
                 return;
             }
-            if (suspended) {
+            if (suspended && suspension == generation) {
                 log.warn("UIContext #{} reconnection timeout — destroying", ID);
                 destroy();
             }
