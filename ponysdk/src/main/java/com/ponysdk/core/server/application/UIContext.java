@@ -949,11 +949,11 @@ public class UIContext {
                 // Replay all buffered operations in order
                 recorder.replayTo(newSocket);
 
-                // Signal the client that reconnection succeeded
-                final ModelWriter writer = getWriter();
-                writer.beginObject(PWindow.getMain());
-                writer.write(ServerToClientModel.RECONNECT_CONTEXT, ID);
-                writer.endObject();
+                // Signal the client that reconnection succeeded, in a block of its own like CREATE_CONTEXT: the
+                // terminal reads it only as the first model of a block, and the writer would put a WINDOW_ID first
+                newSocket.beginObject();
+                newSocket.encode(ServerToClientModel.RECONNECT_CONTEXT, ID);
+                newSocket.endObject();
 
                 txn.commit();
             } catch (final Throwable e) {

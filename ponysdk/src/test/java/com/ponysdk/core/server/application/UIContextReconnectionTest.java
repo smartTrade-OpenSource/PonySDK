@@ -156,6 +156,46 @@ public class UIContextReconnectionTest {
         assertFalse(uiContext.isSuspended());
     }
 
+    /**
+     * The terminal reads RECONNECT_CONTEXT only as the first model of a block, like CREATE_CONTEXT. The new socket's
+     * writer re-emits WINDOW_ID on its first write: written through the writer, RECONNECT_CONTEXT came after it and
+     * the terminal skipped it as an unknown instruction (its reconnection never completed).
+     */
+    @Test
+    public void testResumeSendsReconnectContextFirstInItsBlock() {
+        uiContext.acquire();
+        try {
+            final com.ponysdk.core.ui.basic.PWindow mainWindow = Mockito.mock(com.ponysdk.core.ui.basic.PWindow.class);
+            Mockito.when(mainWindow.getID()).thenReturn(0);
+            uiContext.setAttribute("com.ponysdk.core.ui.basic.PWindow", mainWindow);
+        } finally {
+            uiContext.release();
+        }
+        uiContext.suspend(5000);
+
+        final SpyEncoder replayEncoder = new SpyEncoder();
+        final WebSocket newSocket = Mockito.mock(WebSocket.class);
+        Mockito.doAnswer(inv -> {
+            replayEncoder.encode(inv.getArgument(0), inv.getArgument(1));
+            return null;
+        }).when(newSocket).encode(Mockito.any(), Mockito.any());
+        Mockito.doAnswer(inv -> { // WINDOW_ID goes this way
+            replayEncoder.encode(inv.getArgument(0), inv.getArgument(1));
+            return null;
+        }).when(newSocket).encodeInt(Mockito.any(), Mockito.anyInt());
+        Mockito.doAnswer(inv -> {
+            replayEncoder.endObject();
+            return null;
+        }).when(newSocket).endObject();
+        uiContext.resume(newSocket);
+
+        final List<RecordingEncoder.Entry> sent = replayEncoder.entries;
+        final int at = sent.stream().map(RecordingEncoder.Entry::model).toList().indexOf(ServerToClientModel.RECONNECT_CONTEXT);
+        assertTrue("RECONNECT_CONTEXT sent: " + sent, at >= 0);
+        assertTrue("RECONNECT_CONTEXT opens its block: " + sent, at == 0 || sent.get(at - 1).model() == ServerToClientModel.END);
+        assertEquals(uiContext.getID(), sent.get(at).value());
+    }
+
     @Test
     public void testResumeBeforeTimeoutKeepsAlive() throws InterruptedException {
         uiContext.suspend(2000);
