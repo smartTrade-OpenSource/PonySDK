@@ -65,19 +65,18 @@ public class PTPopupPanel<T extends PopupPanel> extends PTSimplePanel<T>
         }
 
         super.create(buffer, objectId, uiBuilder);
-    }
 
-    @Override
-    protected T createUIObject() {
-        final PopupPanel popupPanel = new PopupPanel(autoHide);
-
-        popupPanel.addCloseHandler(event -> {
+        // Here rather than in createUIObject, which the decorated popup and the dialog box override
+        uiObject.addCloseHandler(event -> {
             final PTInstruction instruction = new PTInstruction(getObjectID());
             instruction.put(ClientToServerModel.HANDLER_CLOSE);
             uiBuilder.sendDataToServer(uiObject, instruction);
         });
+    }
 
-        return (T) popupPanel;
+    @Override
+    protected T createUIObject() {
+        return (T) new PopupPanel(autoHide);
     }
 
     @Override
